@@ -1,0 +1,4 @@
+config.local.yml
+/build
+/pkg
+/node_modules

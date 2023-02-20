@@ -1,0 +1,51 @@
+<html>
+
+<head>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap"
+    rel="stylesheet" />
+  <style>
+    body {
+      font-family: "Inter", sans-serif;
+      font-size: 13px;
+      color: black;
+    }
+    .link {
+      color: white !important;
+      cursor: pointer;
+      text-decoration: none;
+      text-decoration-line: none;
+      text-decoration-style: initial;
+      text-decoration-color: initial;
+      background: #0C4CF3;
+      padding: 0 25px;
+      height: 40px;
+      line-height: 40px;
+      border-radius: 30px;
+      display: inline-block;
+    }
+    .container {
+      width: 580px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <p>Hello,</p>
+    <p>
+      Welcome to Voltaserve! Please confirm your email address to get started.
+    </p>
+    <p>
+      <a class="link" href="{{webUrl}}/confirm-email/{{token}}">Confirm email</a>
+    </p>
+    <p>
+      Thanks,<br />
+      Voltaserve
+    </p>
+  </div>
+</body>
+
+</html>

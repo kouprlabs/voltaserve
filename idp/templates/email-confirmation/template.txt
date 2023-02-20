@@ -1,0 +1,1 @@
+Follow this link to confirm your Email: {{webUrl}}/confirm-email/{{token}}

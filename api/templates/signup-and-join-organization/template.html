@@ -1,0 +1,39 @@
+<html>
+  <head>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Work+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      .container {
+        font-family: "Work Sans", sans-serif;
+        font-size: 14px;
+        color: black;
+        width: 580px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      .link {
+        color: #0c4cf3 !important;
+      }
+      .link:visited {
+        color: #0c4cf3 !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <p>Hello,</p>
+      <p>
+        You have been invited by <b>{{.UserFullName}}</b> to join the
+        organization <b>{{.OrganizationName}}</b> in Voltaserve. Please follow
+        this link to sign up:
+      </p>
+      <p>
+        <a class="link" href="{{.WebUrl}}/sign-up">Sign up</a>
+      </p>
+    </div>
+  </body>
+</html>

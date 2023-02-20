@@ -1,0 +1,2 @@
+You have been invited by {{.UserFullName}} to join the organization {{.OrganizationName}}.
+Please follow this link to sign up: {{.WebUrl}}/sign-up

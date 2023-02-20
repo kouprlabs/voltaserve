@@ -1,0 +1,1 @@
+Follow this link to reset your password: {{webUrl}}/reset-password/{{token}}

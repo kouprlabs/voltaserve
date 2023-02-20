@@ -1,0 +1,52 @@
+# Voltaserve API
+
+## Getting Started
+
+Install [Golang](https://go.dev/doc/install).
+
+### For macOS
+
+Install [Homebrew](https://brew.sh).
+
+```sh
+brew install ocrmypdf
+brew install graphicsmagick
+brew install libreoffice
+brew install poppler
+```
+
+### For Ubuntu
+
+Run the follwing script:
+
+```sh
+./install-deps.sh
+```
+
+### Build and Run
+
+Run for development:
+
+```sh
+go run .
+```
+
+Build binary:
+
+```sh
+go build .
+```
+
+Build Docker image:
+
+```sh
+docker build -t voltaserve/api .
+```
+
+## Development
+
+For further details about development, please check this [document](./DEVELOPMENT.md).
+
+## Documentation
+
+[API Reference](https://voltaserve.com/api-docs/)

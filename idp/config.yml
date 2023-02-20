@@ -1,0 +1,21 @@
+url: http://localhost:7000
+databaseUrl: postgresql://voltaserve:voltaserve@localhost:5432/voltaserve
+webUrl: http://localhost:3000
+token:
+  jwtSigningKey: '3t02Axn$ozfsLnYxEZSAQkmuZnx'
+  audience: localhost
+  issuer: localhost
+  accessTokenLifetime: 86400
+  refreshTokenLifetime: 2592000
+corsOrigins:
+  - http://localhost:3000
+search:
+  url: http://localhost:7700
+smtp:
+  host: localhost
+  port: 25
+  secure: false
+  username:
+  password:
+  senderAddress: no-reply@localhost
+  senderName: 'Voltaserve (localhost)'

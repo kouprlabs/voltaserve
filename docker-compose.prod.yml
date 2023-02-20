@@ -1,0 +1,129 @@
+version: "3.7"
+
+volumes:
+  db:
+    name: voltaserve-db
+  s3:
+    name: voltaserve-s3
+  search:
+    name: voltaserve-search
+  redis:
+    name: voltaserve-redis
+  redisinsight:
+    name: voltaserve-redisinsight
+
+services:
+  db:
+    container_name: voltaserve-db
+    image: postgres:15.1
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: voltaserve
+      POSTGRES_PASSWORD: voltaserve
+    volumes:
+      - db:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+  s3:
+    container_name: voltaserve-s3
+    image: minio/minio:RELEASE.2023-01-25T00-19-54Z
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: voltaserve
+      MINIO_ROOT_PASSWORD: voltaserve
+      MINIO_REGION: us-east-1
+    volumes:
+      - s3:/data
+    command: server /data --console-address ":9001"
+  smtp:
+    container_name: voltaserve-smtp
+    image: bytemark/smtp
+    ports:
+      - "25:25"
+  search:
+    container_name: voltaserve-search
+    image: getmeili/meilisearch:v0.30
+    ports:
+      - "7700:7700"
+    volumes:
+      - search:/meili_data
+  redis:
+    container_name: voltaserve-redis
+    image: redis:7.0.8
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis:/data
+  adminer:
+    container_name: voltaserve-adminer
+    image: adminer:4.8.1
+    ports:
+      - 9090:8080
+  redisinsight:
+    container_name: voltaserve-redisinsight
+    image: redislabs/redisinsight:1.11.0
+    ports:
+      - "8001:8001"
+    volumes:
+      - redisinsight:/db
+  idp:
+    container_name: voltaserve-idp
+    image: voltaserve/idp
+    build:
+      context: ./idp
+    depends_on:
+      - db
+      - search
+      - s3
+    ports:
+      - "7000:7000"
+    environment:
+      - URL=http://localhost:7000
+      - WEB_URL=http://localhost:3000
+      - DATABASE_URL=postgresql://voltaserve:voltaserve@db:5432/voltaserve
+      - SEARCH_URL=http://search:7700
+      - S3_URL=http://s3:9000
+      - SMTP_HOST=smtp
+      - SMTP_PORT=25
+    restart: on-failure
+  api:
+    container_name: voltaserve-api
+    image: voltaserve/api
+    build:
+      context: ./api
+    depends_on:
+      - db
+      - redis
+      - s3
+      - search
+    ports:
+      - "5000:5000"
+    environment:
+      - URL=http://localhost:5000
+      - WEB_URL=http://localhost:3000
+      - DATABASE_URL=postgresql://voltaserve:voltaserve@db:5432/voltaserve
+      - S3_URL=s3:9000
+      - SEARCH_URL=http://search:7700
+      - REDIS_ADDR=redis:6379
+      - SMTP_HOST=smtp
+      - SMTP_PORT=25
+    restart: on-failure
+  ui:
+    container_name: voltaserve-ui
+    image: voltaserve/ui
+    build:
+      context: ./ui
+      args:
+        - API_URL=http://api:5000
+        - IDP_URL=http://idp:7000
+    ports:
+      - "5173:5173"
+    environment:
+      - API_URL=http://api:5000
+      - IDP_URL=http://idp:7000
+    depends_on:
+      - idp
+      - api
+    restart: on-failure

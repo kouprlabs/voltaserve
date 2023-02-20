@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/infra/*": ["infra/*"],
+      "@/account/*": ["account/*"],
+      "@/token/*": ["token/*"],
+      "@/user/*": ["user/*"]
+    },
+    "module": "commonjs",
+    "esModuleInterop": true,
+    "target": "es2021",
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "outDir": "build",
+    "experimentalDecorators": true
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "singleQuote": true,
+  "semi": false,
+  "quoteProps": "preserve",
+  "importOrder": [
+    "<THIRD_PARTY_MODULES>",
+    "^express$",
+    "^express-validator$",
+    "^multer$",
+    "^passport$",
+    "^jsonwebtoken$",
+    "^pg$",
+    "^minio$",
+    "^meilisearch$",
+    "^nodemailer$",
+    "^handlebars$",
+    "^js-yaml$",
+    "^uuid$",
+    "^hashids/(.*)$",
+    "^@/infra/(.*)$",
+    "^@/token/(.*)$",
+    "^@/user/(.*)$",
+    "^@/account/(.*)$",
+    "^[./]"
+  ],
+  "importOrderSeparation": false
+}

@@ -1,0 +1,11 @@
+.gitignore
+.gitattributes
+README.md
+Dockerfile
+.dockerignore
+node_modules
+npm-debug.log
+.next
+.prettierignore
+.prettierrc.json
+tsconfig.tsbuildinfo
