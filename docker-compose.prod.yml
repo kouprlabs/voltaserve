@@ -37,11 +37,6 @@ services:
     volumes:
       - s3:/data
     command: server /data --console-address ":9001"
-  smtp:
-    container_name: voltaserve-smtp
-    image: bytemark/smtp
-    ports:
-      - "25:25"
   search:
     container_name: voltaserve-search
     image: getmeili/meilisearch:v0.30
@@ -85,8 +80,13 @@ services:
       - DATABASE_URL=postgresql://voltaserve:voltaserve@db:5432/voltaserve
       - SEARCH_URL=http://search:7700
       - S3_URL=http://s3:9000
-      - SMTP_HOST=smtp
-      - SMTP_PORT=25
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT}
+      - SMTP_SECURE=${SMTP_SECURE}
+      - SMTP_USERNAME=${SMTP_USERNAME}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+      - SMTP_SENDER_ADDRESS=${SMTP_SENDER_ADDRESS}
+      - SMTP_SENDER_NAME=${SMTP_SENDER_NAME}
     restart: on-failure
   api:
     container_name: voltaserve-api
@@ -107,8 +107,13 @@ services:
       - S3_URL=s3:9000
       - SEARCH_URL=http://search:7700
       - REDIS_ADDR=redis:6379
-      - SMTP_HOST=smtp
-      - SMTP_PORT=25
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT}
+      - SMTP_SECURE=${SMTP_SECURE}
+      - SMTP_USERNAME=${SMTP_USERNAME}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+      - SMTP_SENDER_ADDRESS=${SMTP_SENDER_ADDRESS}
+      - SMTP_SENDER_NAME=${SMTP_SENDER_NAME}
     restart: on-failure
   ui:
     container_name: voltaserve-ui
@@ -119,7 +124,7 @@ services:
         - API_URL=http://api:5000
         - IDP_URL=http://idp:7000
     ports:
-      - "5173:5173"
+      - "3000:3000"
     environment:
       - API_URL=http://api:5000
       - IDP_URL=http://idp:7000

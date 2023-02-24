@@ -39,9 +39,9 @@ services:
     command: server /data --console-address ":9001"
   smtp:
     container_name: voltaserve-smtp
-    image: bytemark/smtp
+    image: sj26/mailcatcher:v0.8.2
     ports:
-      - "25:25"
+      - "1080:1080"
   search:
     container_name: voltaserve-search
     image: getmeili/meilisearch:v0.30
@@ -80,7 +80,7 @@ services:
       - SEARCH_URL=http://search:7700
       - S3_URL=http://s3:9000
       - SMTP_HOST=smtp
-      - SMTP_PORT=25
+      - SMTP_PORT=1025
     ports:
       - "7000:7000"
     volumes:
@@ -99,7 +99,7 @@ services:
       - API_URL=http://api:5000
       - IDP_URL=http://idp:7000
     ports:
-      - "5173:5173"
+      - "3000:3000"
     volumes:
       - ./ui:/app
       - /app/node_modules
@@ -119,7 +119,7 @@ services:
       - SEARCH_URL=http://search:7700
       - REDIS_ADDR=redis:6379
       - SMTP_HOST=smtp
-      - SMTP_PORT=25
+      - SMTP_PORT=1025
     ports:
       - "5000:5000"
     volumes:

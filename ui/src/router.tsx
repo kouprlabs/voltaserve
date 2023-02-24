@@ -139,11 +139,11 @@ const router = createBrowserRouter([
         element: <ForgotPasswordPage />,
       },
       {
-        path: '/reset-password',
+        path: '/reset-password/:token',
         element: <ResetPasswordPage />,
       },
       {
-        path: '/confirm-email',
+        path: '/confirm-email/:token',
         element: <ConfirmEmailPage />,
       },
     ],

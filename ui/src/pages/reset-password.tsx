@@ -23,7 +23,7 @@ import {
 import { Helmet } from 'react-helmet-async'
 import AccountAPI from '@/api/account'
 import Logo from '@/components/common/logo'
-import DrawerLayout from '@/components/layout/drawer'
+import FullLayout from '@/components/layout/full'
 import variables from '@/theme/variables'
 
 type FormValues = {
@@ -33,8 +33,6 @@ type FormValues = {
 
 const ResetPasswordPage = () => {
   const params = useParams()
-  const toast = useToast()
-  const [isFormDisabled, setFormDisabled] = useState(false)
   const token = params.token as string
   const formSchema = Yup.object().shape({
     newPassword: Yup.string()
@@ -47,6 +45,7 @@ const ResetPasswordPage = () => {
       .oneOf([Yup.ref('newPassword'), undefined], 'Passwords do not match')
       .required('Confirm your password'),
   })
+  const [isCompleted, setIsCompleted] = useState(false)
 
   const handleSubmit = useCallback(
     async (
@@ -58,21 +57,16 @@ const ResetPasswordPage = () => {
           newPassword,
           token: token,
         })
-        setFormDisabled(true)
-        toast({
-          title: 'Password updated successfully',
-          status: 'success',
-          isClosable: true,
-        })
+        setIsCompleted(true)
       } finally {
         setSubmitting(false)
       }
     },
-    [token, toast]
+    [token]
   )
 
   return (
-    <DrawerLayout>
+    <FullLayout>
       <>
         <Helmet>
           <title>Reset Password</title>
@@ -80,86 +74,96 @@ const ResetPasswordPage = () => {
         <VStack spacing="25px" w="100%">
           <Logo className="w-16" isGlossy={true} />
           <h1 className="font-display text-2xl font-medium">Reset Password</h1>
-          <Formik
-            initialValues={{
-              newPassword: '',
-              newPasswordConfirmation: '',
-            }}
-            validationSchema={formSchema}
-            validateOnBlur={false}
-            onSubmit={handleSubmit}
-          >
-            {({ errors, touched, isSubmitting }) => (
-              <Form className="w-full">
-                <VStack spacing={variables.spacing}>
-                  <Field name="newPassword">
-                    {({ field }: FieldAttributes<FieldProps>) => (
-                      <FormControl
-                        isInvalid={
-                          errors.newPassword && touched.newPassword
-                            ? true
-                            : false
-                        }
+          {isCompleted ? (
+            <Text align="center">
+              Password successfully changed.{' '}
+              <ChakraLink as={Link} to="/sign-in">
+                Sign in
+              </ChakraLink>
+            </Text>
+          ) : (
+            <>
+              <Formik
+                initialValues={{
+                  newPassword: '',
+                  newPasswordConfirmation: '',
+                }}
+                validationSchema={formSchema}
+                validateOnBlur={false}
+                onSubmit={handleSubmit}
+              >
+                {({ errors, touched, isSubmitting }) => (
+                  <Form className="w-full">
+                    <VStack spacing={variables.spacing}>
+                      <Field name="newPassword">
+                        {({ field }: FieldAttributes<FieldProps>) => (
+                          <FormControl
+                            isInvalid={
+                              errors.newPassword && touched.newPassword
+                                ? true
+                                : false
+                            }
+                          >
+                            <Input
+                              {...field}
+                              id="newPassword"
+                              placeholder="New password"
+                              type="password"
+                              disabled={isSubmitting}
+                            />
+                            <FormErrorMessage>
+                              {errors.newPassword}
+                            </FormErrorMessage>
+                          </FormControl>
+                        )}
+                      </Field>
+                      <Field name="newPasswordConfirmation">
+                        {({ field }: FieldAttributes<FieldProps>) => (
+                          <FormControl
+                            isInvalid={
+                              errors.newPasswordConfirmation &&
+                              touched.newPasswordConfirmation
+                                ? true
+                                : false
+                            }
+                          >
+                            <Input
+                              {...field}
+                              id="newPasswordConfirmation"
+                              placeholder="Confirm new password"
+                              type="password"
+                              disabled={isSubmitting}
+                            />
+                            <FormErrorMessage>
+                              {errors.newPasswordConfirmation}
+                            </FormErrorMessage>
+                          </FormControl>
+                        )}
+                      </Field>
+                      <Button
+                        variant="solid"
+                        colorScheme="blue"
+                        w="100%"
+                        type="submit"
+                        isLoading={isSubmitting}
                       >
-                        <Input
-                          {...field}
-                          id="newPassword"
-                          placeholder="New password"
-                          type="password"
-                          disabled={isSubmitting || isFormDisabled}
-                        />
-                        <FormErrorMessage>
-                          {errors.newPassword}
-                        </FormErrorMessage>
-                      </FormControl>
-                    )}
-                  </Field>
-                  <Field name="newPasswordConfirmation">
-                    {({ field }: FieldAttributes<FieldProps>) => (
-                      <FormControl
-                        isInvalid={
-                          errors.newPasswordConfirmation &&
-                          touched.newPasswordConfirmation
-                            ? true
-                            : false
-                        }
-                      >
-                        <Input
-                          {...field}
-                          id="newPasswordConfirmation"
-                          placeholder="Confirm new password"
-                          type="password"
-                          disabled={isSubmitting || isFormDisabled}
-                        />
-                        <FormErrorMessage>
-                          {errors.newPasswordConfirmation}
-                        </FormErrorMessage>
-                      </FormControl>
-                    )}
-                  </Field>
-                  <Button
-                    variant="solid"
-                    colorScheme="blue"
-                    w="100%"
-                    type="submit"
-                    isLoading={isSubmitting}
-                    disabled={isFormDisabled}
-                  >
-                    Reset password
-                  </Button>
-                </VStack>
-              </Form>
-            )}
-          </Formik>
-          <HStack spacing={variables.spacingXs}>
-            <Text>Password already reset?</Text>
-            <ChakraLink as={Link} to="/sign-in">
-              Sign in
-            </ChakraLink>
-          </HStack>
+                        Reset password
+                      </Button>
+                    </VStack>
+                  </Form>
+                )}
+              </Formik>
+              <HStack spacing={variables.spacingXs}>
+                <Text>Password already reset?</Text>
+                <ChakraLink as={Link} to="/sign-in">
+                  Sign in
+                </ChakraLink>
+              </HStack>
+            </>
+          )}
         </VStack>
       </>
-    </DrawerLayout>
+    </FullLayout>
   )
 }
 

@@ -86,13 +86,10 @@ const SignUpPage = () => {
               <h1 className="font-display text-2xl font-medium text-center">
                 Thanks! We just sent you a confirmation email
               </h1>
-              <Text>
+              <Text align="center">
                 Just open your inbox, find the email, and click on the
                 confirmation link.
               </Text>
-              <ChakraLink as={Link} to="/sign-in">
-                Sign in
-              </ChakraLink>
             </VStack>
           </VStack>
         )}

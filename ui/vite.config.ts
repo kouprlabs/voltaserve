@@ -8,6 +8,7 @@ export default ({ mode }) => {
   return defineConfig({
     plugins: [react(), tsconfigPaths(), svgr()],
     server: {
+      port: 3000,
       proxy: {
         '/proxy/api/v1': {
           target: process.env.API_URL,
