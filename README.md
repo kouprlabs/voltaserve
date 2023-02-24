@@ -48,11 +48,13 @@ Update the following environment variables in [docker-compose.prod.yml](./docker
 
 ```yaml
 idp:
-  - URL=http://localhost:7000
-  - WEB_URL=http://localhost:3000
+  environment:
+    - URL=http://localhost:7000
+    - WEB_URL=http://localhost:3000
 api:
-  - URL=http://localhost:5000
-  - WEB_URL=http://localhost:3000
+  environment:
+    - URL=http://localhost:5000
+    - WEB_URL=http://localhost:3000
 ```
 
 The port `5000` is used for the web API, `7000` for the identity provider, and `3000` for the web UI. You can change them to match your preference.
