@@ -77,7 +77,7 @@ Make sure all containers are up and running.
 
 _Note: here we assume that Voltaserve UI is accessible from `http://localhost:3000`, if not simply use the host and port that matches your configuration, if you have SSL then make sure you are using `https://`._
 
-1. Navigate to [http://localhost:3000](http://localhost:3000). _(This depends on your configuration, see the notes above)_
+1. Navigate to [http://localhost:3000](http://localhost:3000). _(This depends on your configuration)_
 
 2. Go to the [sign up page](http://localhost:3000/sign-up) and create an account.
 
