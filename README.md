@@ -35,29 +35,31 @@ Additional instructions:
 Add the following environment variables to the [.env](./.env) file, then change them accordingly to match your SMTP server:
 
 ```properties
-SMTP_HOST=localhost
-SMTP_PORT=25
+SMTP_HOST=my-smtp-host
+SMTP_PORT=587
 SMTP_SECURE=true
-SMTP_USERNAME=smtpuser
-SMTP_PASSWORD=change_me
-SMTP_SENDER_ADDRESS=no-reply@localhost
+SMTP_USERNAME=my-smtp-user
+SMTP_PASSWORD=my-smtp-password
+SMTP_SENDER_ADDRESS=no-reply@my-domain
 SMTP_SENDER_NAME='Voltaserve'
 ```
 
-Update the following environment variables in [docker-compose.prod.yml](./docker-compose.prod.yml) by replacing `localhost` with your domain name:
+Update the following environment variables in [docker-compose.prod.yml](./docker-compose.prod.yml) by replacing `my-domain` with your domain name:
 
 ```yaml
 idp:
   environment:
-    - URL=http://localhost:7000
-    - WEB_URL=http://localhost:3000
+    - URL=https://my-domain:7000
+    - WEB_URL=https://my-domain:3000
 api:
   environment:
-    - URL=http://localhost:5000
-    - WEB_URL=http://localhost:3000
+    - URL=https://my-domain:5000
+    - WEB_URL=https://my-domain:3000
 ```
 
-The port `5000` is used for the web API, `7000` for the identity provider, and `3000` for the web UI. You can change them to match your preference.
+The port `3000` is used for the web UI, `5000` for the web API, and `7000` for the identity provider.
+
+These ports need to be open and accessible from the outside, and they can be mapped to any other ports of your choice.
 
 Build Docker images:
 
@@ -73,9 +75,7 @@ docker-compose -f ./docker-compose.prod.yml up
 
 Make sure all containers are up and running.
 
-_Note: the ports `3000`, `5000` and `7000` need to be open and accessible from the outside, they can be mapped to any other ports of your choice._
-
-_Note: here we assume that Voltaserve UI is accessible from `http://localhost:3000`, If not simply use the host and port that matches your configuration._
+_Note: here we assume that Voltaserve UI is accessible from `http://localhost:3000`, if not simply use the host and port that matches your configuration, if you have SSL then make sure you are using `https://`._
 
 1. Navigate to [http://localhost:3000](http://localhost:3000). _(This depends on your configuration, see the notes above)_
 
