@@ -56,7 +56,7 @@ const SignInPage = () => {
           password,
           grant_type: 'password',
         })
-        saveAccessToken(token.access_token)
+        saveAccessToken(token)
         const { length: organizationCount } = await OrganizationAPI.getAll()
         if (organizationCount === 0) {
           const { id: organizationId } = await OrganizationAPI.create({
