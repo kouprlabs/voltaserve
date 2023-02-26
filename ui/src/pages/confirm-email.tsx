@@ -7,11 +7,11 @@ import {
   useToast,
   VStack,
 } from '@chakra-ui/react'
+import { variables } from '@koupr/ui'
 import { Helmet } from 'react-helmet-async'
 import AccountAPI from '@/api/account'
 import Logo from '@/components/common/logo'
 import FullLayout from '@/components/layout/full'
-import variables from '@/theme/variables'
 
 const ConfirmEmailPage = () => {
   const params = useParams()

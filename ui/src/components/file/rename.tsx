@@ -1,14 +1,5 @@
 import React, { useCallback } from 'react'
 import {
-  Field,
-  FieldAttributes,
-  FieldProps,
-  Form,
-  Formik,
-  FormikHelpers,
-} from 'formik'
-import * as Yup from 'yup'
-import {
   Button,
   FormControl,
   FormErrorMessage,
@@ -21,11 +12,20 @@ import {
   ModalHeader,
   ModalOverlay,
 } from '@chakra-ui/react'
+import { variables } from '@koupr/ui'
+import {
+  Field,
+  FieldAttributes,
+  FieldProps,
+  Form,
+  Formik,
+  FormikHelpers,
+} from 'formik'
+import * as Yup from 'yup'
 import FileAPI from '@/api/file'
 import { filesUpdated } from '@/store/entities/files'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { renameModalDidClose } from '@/store/ui/files'
-import variables from '@/theme/variables'
 
 type FormValues = {
   name: string

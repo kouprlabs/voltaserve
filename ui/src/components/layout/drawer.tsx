@@ -1,17 +1,12 @@
 import { ReactElement, useEffect } from 'react'
 import { Stack, useToast } from '@chakra-ui/react'
 import { Flex } from '@chakra-ui/react'
+import { Drawer, DrawerItem, variables } from '@koupr/ui'
+import { IconGroup, IconOrganization, IconWorkspace } from '@koupr/ui'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { errorCleared } from '@/store/ui/error'
-import Drawer from '@/components/common/drawer'
-import DrawerItem from '@/components/common/drawer-item'
-import {
-  IconGroup,
-  IconOrganization,
-  IconWorkspace,
-} from '@/components/common/icon'
+import Logo from '@/components/common/logo'
 import TopBar from '@/components/top-bar'
-import variables from '@/theme/variables'
 
 type DrawerLayoutProps = {
   children?: ReactElement
@@ -35,7 +30,7 @@ const DrawerLayout = ({ children }: DrawerLayoutProps) => {
 
   return (
     <Stack direction="row" spacing={0} h="100%">
-      <Drawer localStorageNamespace="main">
+      <Drawer localStorageNamespace="main" logo={<Logo className="w-4" />}>
         <DrawerItem
           href="/workspace"
           icon={<IconWorkspace fontSize="18px" />}

@@ -1,4 +1,4 @@
-import { ReactElement, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import {
   IconButton,
@@ -20,20 +20,20 @@ import {
   Avatar,
   Portal,
 } from '@chakra-ui/react'
+import {
+  variables,
+  IconDotsVertical,
+  IconExit,
+  IconUserPlus,
+  SectionSpinner,
+} from '@koupr/ui'
 import { Helmet } from 'react-helmet-async'
 import { swrConfig } from '@/api/options'
 import OrganizationAPI from '@/api/organization'
 import { geEditorPermission } from '@/api/permission'
 import { User } from '@/api/user'
-import {
-  IconDotsVertical,
-  IconExit,
-  IconUserPlus,
-} from '@/components/common/icon'
-import LoadingSpinner from '@/components/common/loading-spinner'
 import OrganizationInviteMembers from '@/components/organization/invite-members'
 import OrganizationRemoveMember from '@/components/organization/remove-member'
-import variables from '@/theme/variables'
 
 const OrganizationMembersPage = () => {
   const params = useParams()
@@ -65,7 +65,7 @@ const OrganizationMembersPage = () => {
   }
 
   if (!members || !org) {
-    return <LoadingSpinner />
+    return <SectionSpinner />
   }
 
   return (

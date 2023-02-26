@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Outlet, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { Heading, Stack, Tab, TabList, Tabs } from '@chakra-ui/react'
+import { variables } from '@koupr/ui'
 import { swrConfig } from '@/api/options'
 import WorkspaceAPI from '@/api/workspace'
-import variables from '@/theme/variables'
 
 const WorkspaceLayout = () => {
   const location = useLocation()

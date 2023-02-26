@@ -1,8 +1,8 @@
 import { useEffect } from 'react'
 import { Divider, Stack, Text } from '@chakra-ui/react'
+import { variables } from '@koupr/ui'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { uploadsDrawerClosed } from '@/store/ui/uploads-drawer'
-import variables from '@/theme/variables'
 import FileUploadItem from './item'
 import { queue } from './worker'
 

@@ -1,7 +1,7 @@
 import { Button, IconButton } from '@chakra-ui/react'
+import { variables } from '@koupr/ui'
+import { IconDownload } from '@koupr/ui'
 import { File } from '@/api/file'
-import { IconDownload } from '@/components/common/icon'
-import variables from '@/theme/variables'
 import downloadFile from '@/helpers/download-file'
 
 type DownloadButtonProps = {

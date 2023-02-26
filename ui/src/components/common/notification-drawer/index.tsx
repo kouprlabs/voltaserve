@@ -3,7 +3,7 @@ import {
   Box,
   Center,
   Divider,
-  Drawer,
+  Drawer as ChakraDrawer,
   DrawerBody,
   DrawerCloseButton,
   DrawerContent,
@@ -15,10 +15,10 @@ import {
   useDisclosure,
   Circle,
 } from '@chakra-ui/react'
+import { variables } from '@koupr/ui'
+import { IconNotification } from '@koupr/ui'
 import NotificationAPI from '@/api/notification'
 import { swrConfig } from '@/api/options'
-import { IconNotification } from '@/components/common/icon'
-import variables from '@/theme/variables'
 import NotificationItem from './notification-item'
 
 const NotificationDrawer = () => {
@@ -47,7 +47,7 @@ const NotificationDrawer = () => {
           )}
         </Center>
       </Box>
-      <Drawer
+      <ChakraDrawer
         isOpen={isOpen}
         placement="right"
         onClose={onClose}
@@ -72,7 +72,7 @@ const NotificationDrawer = () => {
             )}
           </DrawerBody>
         </DrawerContent>
-      </Drawer>
+      </ChakraDrawer>
     </>
   )
 }

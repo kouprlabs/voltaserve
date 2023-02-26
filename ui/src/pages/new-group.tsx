@@ -1,15 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { useSWRConfig } from 'swr'
-import {
-  Field,
-  FieldAttributes,
-  FieldProps,
-  Form,
-  Formik,
-  FormikHelpers,
-} from 'formik'
-import * as Yup from 'yup'
 import {
   Button,
   FormControl,
@@ -21,11 +11,21 @@ import {
   Select,
   Stack,
 } from '@chakra-ui/react'
+import { variables } from '@koupr/ui'
+import { useSWRConfig } from 'swr'
+import {
+  Field,
+  FieldAttributes,
+  FieldProps,
+  Form,
+  Formik,
+  FormikHelpers,
+} from 'formik'
+import * as Yup from 'yup'
 import { Helmet } from 'react-helmet-async'
 import GroupAPI from '@/api/group'
 import OrganizationAPI, { Organization } from '@/api/organization'
 import { geEditorPermission } from '@/api/permission'
-import variables from '@/theme/variables'
 
 type FormValues = {
   name: string

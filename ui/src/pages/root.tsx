@@ -10,7 +10,7 @@ const Root = () => {
     if (location.pathname === '/') {
       navigate('/workspace')
     }
-  }, [location.pathname])
+  }, [location.pathname, navigate])
 
   useEffect(() => {
     const element = document.querySelector("link[rel='icon']")

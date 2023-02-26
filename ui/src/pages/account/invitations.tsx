@@ -16,12 +16,11 @@ import {
   Tr,
   useToast,
 } from '@chakra-ui/react'
+import { IconDotsVertical, SectionSpinner } from '@koupr/ui'
 import { Helmet } from 'react-helmet-async'
 import InvitationAPI, { Invitation } from '@/api/invitation'
 import { swrConfig } from '@/api/options'
 import UserAPI from '@/api/user'
-import { IconDotsVertical } from '@/components/common/icon'
-import LoadingSpinner from '@/components/common/loading-spinner'
 
 const AccountInvitationsPage = () => {
   const toast = useToast()
@@ -62,7 +61,7 @@ const AccountInvitationsPage = () => {
     return null
   }
   if (!user || !invitations) {
-    return <LoadingSpinner />
+    return <SectionSpinner />
   }
 
   return (

@@ -1,15 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import {
-  Field,
-  FieldAttributes,
-  FieldProps,
-  Form,
-  Formik,
-  FormikHelpers,
-} from 'formik'
-import * as Yup from 'yup'
-import {
   Button,
   FormControl,
   FormErrorMessage,
@@ -22,11 +13,20 @@ import {
   ModalHeader,
   ModalOverlay,
 } from '@chakra-ui/react'
+import { variables } from '@koupr/ui'
+import {
+  Field,
+  FieldAttributes,
+  FieldProps,
+  Form,
+  Formik,
+  FormikHelpers,
+} from 'formik'
+import * as Yup from 'yup'
 import FileAPI from '@/api/file'
 import { filesAdded } from '@/store/entities/files'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { createModalDidClose } from '@/store/ui/files'
-import variables from '@/theme/variables'
 
 type FormValues = {
   name: string

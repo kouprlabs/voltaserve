@@ -1,6 +1,17 @@
 import { useCallback, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import {
+  Button,
+  FormControl,
+  FormErrorMessage,
+  HStack,
+  Input,
+  Link as ChakraLink,
+  Text,
+  VStack,
+} from '@chakra-ui/react'
+import { variables } from '@koupr/ui'
+import {
   Field,
   FieldAttributes,
   FieldProps,
@@ -9,22 +20,10 @@ import {
   FormikHelpers,
 } from 'formik'
 import * as Yup from 'yup'
-import {
-  Button,
-  FormControl,
-  FormErrorMessage,
-  HStack,
-  Input,
-  Link as ChakraLink,
-  Text,
-  useToast,
-  VStack,
-} from '@chakra-ui/react'
 import { Helmet } from 'react-helmet-async'
 import AccountAPI from '@/api/account'
 import Logo from '@/components/common/logo'
 import FullLayout from '@/components/layout/full'
-import variables from '@/theme/variables'
 
 type FormValues = {
   newPassword: string
@@ -38,7 +37,7 @@ const ResetPasswordPage = () => {
     newPassword: Yup.string()
       .required('Password is required')
       .matches(
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/,
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})/,
         'Must contain at least 8 characters, one Uppercase, one Lowercase, one number and one special character'
       ),
     newPasswordConfirmation: Yup.string()

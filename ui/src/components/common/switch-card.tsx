@@ -19,7 +19,7 @@ import {
   Switch,
   HStack,
 } from '@chakra-ui/react'
-import variables from '@/theme/variables'
+import { variables } from '@koupr/ui'
 
 type SwitchCardProps = {
   children?: ReactNode

@@ -8,8 +8,8 @@ import {
   useColorModeValue,
   VStack,
 } from '@chakra-ui/react'
-import { IconEdit } from '@/components/common/icon'
-import variables from '@/theme/variables'
+import { variables } from '@koupr/ui'
+import { IconEdit } from '@koupr/ui'
 
 type AccountImageUploadProps = {
   name: string

@@ -1,4 +1,3 @@
-import { useParams } from 'react-router-dom'
 import { errorToString } from '@/api/error'
 import FileAPI from '@/api/file'
 import store from '@/store/configure-store'

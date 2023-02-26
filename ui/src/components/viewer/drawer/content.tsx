@@ -1,11 +1,10 @@
 import { useContext } from 'react'
 import { Stack } from '@chakra-ui/react'
+import { DrawerContext, variables } from '@koupr/ui'
+import { IconInfoCircle } from '@koupr/ui'
 import { File } from '@/api/file'
-import { DrawerContext } from '@/components/common/drawer'
 import FileInfo from '@/components/common/file-info'
-import { IconInfoCircle } from '@/components/common/icon'
 import SwitchCard from '@/components/common/switch-card'
-import variables from '@/theme/variables'
 import DownloadButton from './download-button'
 import OpenNewTabButton from './open-new-tab-button'
 

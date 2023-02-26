@@ -3,7 +3,7 @@ import {
   Box,
   Center,
   Circle,
-  Drawer,
+  Drawer as ChakraDrawer,
   DrawerBody,
   DrawerCloseButton,
   DrawerContent,
@@ -14,10 +14,10 @@ import {
   useDisclosure,
   Button,
 } from '@chakra-ui/react'
+import { IconDeleteListItem, IconUpload } from '@koupr/ui'
 import { completedUploadsCleared } from '@/store/entities/uploads'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { uploadsDrawerClosed } from '@/store/ui/uploads-drawer'
-import { IconDeleteListItem, IconUpload } from '@/components/common/icon'
 import FileUploadList from '@/components/file/upload/list'
 
 const UploadDrawer = () => {
@@ -67,7 +67,7 @@ const UploadDrawer = () => {
           )}
         </Center>
       </Box>
-      <Drawer
+      <ChakraDrawer
         isOpen={isOpen}
         placement="right"
         onClose={() => {
@@ -95,7 +95,7 @@ const UploadDrawer = () => {
             )}
           </DrawerFooter>
         </DrawerContent>
-      </Drawer>
+      </ChakraDrawer>
     </>
   )
 }

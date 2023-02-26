@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Input, Select, Stack } from '@chakra-ui/react'
+import { variables } from '@koupr/ui'
 import { FieldAttributes, FieldProps } from 'formik'
-import variables from '@/theme/variables'
 import { Unit, getUnit, convertFromByte, normalizeToByte } from './unit'
 
 const StorageInput = ({ id, field, form }: FieldAttributes<FieldProps>) => {

@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import {
   Avatar,
@@ -15,12 +15,11 @@ import {
   Text,
   VStack,
 } from '@chakra-ui/react'
+import { variables, IconEdit } from '@koupr/ui'
 import NotificationAPI from '@/api/notification'
 import { swrConfig } from '@/api/options'
 import UserAPI from '@/api/user'
 import AccountEditPicture from '@/components/account/edit-picture'
-import { IconEdit } from '@/components/common/icon'
-import variables from '@/theme/variables'
 
 const AccountLayout = () => {
   const location = useLocation()

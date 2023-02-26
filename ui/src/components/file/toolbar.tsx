@@ -13,6 +13,20 @@ import {
   MenuList,
   Portal,
 } from '@chakra-ui/react'
+import { variables } from '@koupr/ui'
+import {
+  IconAdd,
+  IconCheckCircle,
+  IconCircle,
+  IconCopy,
+  IconDotsVertical,
+  IconDownload,
+  IconEdit,
+  IconMove,
+  IconShare,
+  IconTrash,
+  IconUpload,
+} from '@koupr/ui'
 import { ltEditorPermission, ltOwnerPermission } from '@/api/permission'
 import { uploadAdded, UploadDecorator } from '@/store/entities/uploads'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
@@ -26,20 +40,6 @@ import {
   sharingModalDidOpen,
 } from '@/store/ui/files'
 import { uploadsDrawerOpened } from '@/store/ui/uploads-drawer'
-import {
-  IconAdd,
-  IconCheckCircle,
-  IconCircle,
-  IconCopy,
-  IconDotsVertical,
-  IconDownload,
-  IconEdit,
-  IconMove,
-  IconShare,
-  IconTrash,
-  IconUpload,
-} from '@/components/common/icon'
-import variables from '@/theme/variables'
 import downloadFile from '@/helpers/download-file'
 import mapFileList from '@/helpers/map-file-list'
 

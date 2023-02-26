@@ -1,16 +1,20 @@
 import { useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { Box, Divider, HStack, IconButton, Stack, Text } from '@chakra-ui/react'
+import {
+  IconEdit,
+  IconTrash,
+  IconUserPlus,
+  SectionSpinner,
+  variables,
+} from '@koupr/ui'
 import { Helmet } from 'react-helmet-async'
 import GroupAPI from '@/api/group'
 import { swrConfig } from '@/api/options'
 import { geEditorPermission } from '@/api/permission'
-import { IconEdit, IconTrash, IconUserPlus } from '@/components/common/icon'
-import LoadingSpinner from '@/components/common/loading-spinner'
 import GroupAddMember from '@/components/group/add-member'
 import GroupDelete from '@/components/group/delete'
 import GroupEditName from '@/components/group/edit-name'
-import variables from '@/theme/variables'
 
 const Spacer = () => <Box flexGrow={1} />
 
@@ -32,7 +36,7 @@ const GroupSettingsPage = () => {
     return null
   }
   if (!group) {
-    return <LoadingSpinner />
+    return <SectionSpinner />
   }
 
   return (

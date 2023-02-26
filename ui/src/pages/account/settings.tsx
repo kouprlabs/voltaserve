@@ -11,6 +11,7 @@ import {
   Text,
   useColorMode,
 } from '@chakra-ui/react'
+import { variables, IconEdit, IconTrash, SectionSpinner } from '@koupr/ui'
 import { Helmet } from 'react-helmet-async'
 import { swrConfig } from '@/api/options'
 import StorageAPI from '@/api/storage'
@@ -19,9 +20,6 @@ import AccountChangePassword from '@/components/account/change-password'
 import AccountDelete from '@/components/account/delete'
 import AccountEditEmail from '@/components/account/edit-email'
 import AccountEditFullName from '@/components/account/edit-full-name'
-import { IconEdit, IconTrash } from '@/components/common/icon'
-import LoadingSpinner from '@/components/common/loading-spinner'
-import variables from '@/theme/variables'
 import prettyBytes from '@/helpers/pretty-bytes'
 
 const EditButton = (props: IconButtonProps) => (
@@ -47,7 +45,7 @@ const AccountSettingsPage = () => {
     return null
   }
   if (!user) {
-    return <LoadingSpinner />
+    return <SectionSpinner />
   }
 
   return (

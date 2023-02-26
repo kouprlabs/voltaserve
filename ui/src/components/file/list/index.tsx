@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useSearchParams } from 'react-router-dom'
-import { Wrap, WrapItem, Text, Center, Spinner } from '@chakra-ui/react'
+import { Wrap, WrapItem, Text, Center } from '@chakra-ui/react'
+import { Spinner, variables } from '@koupr/ui'
 import FileAPI, { FileList as FileListData } from '@/api/file'
 import { swrConfig } from '@/api/options'
 import { listUpdated, folderUpdated } from '@/store/entities/files'
@@ -10,7 +11,6 @@ import {
   rangeSelectKeyUpdated,
   selectionUpdated,
 } from '@/store/ui/files'
-import variables from '@/theme/variables'
 import { decodeQuery } from '@/helpers/query'
 import FileListItem, { ItemSize } from './item'
 
@@ -101,7 +101,7 @@ const FileList = () => {
   if (isLoading || !list) {
     return (
       <Center w="100%" h="300px" p={variables.spacing}>
-        <Spinner size="sm" thickness="4px" />
+        <Spinner />
       </Center>
     )
   }

@@ -1,15 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useSWRConfig } from 'swr'
-import {
-  Field,
-  FieldAttributes,
-  FieldProps,
-  Form,
-  Formik,
-  FormikHelpers,
-} from 'formik'
-import * as Yup from 'yup'
 import {
   Button,
   FormControl,
@@ -24,8 +14,18 @@ import {
   Select,
   Stack,
 } from '@chakra-ui/react'
+import { variables } from '@koupr/ui'
+import { useSWRConfig } from 'swr'
+import {
+  Field,
+  FieldAttributes,
+  FieldProps,
+  Form,
+  Formik,
+  FormikHelpers,
+} from 'formik'
+import * as Yup from 'yup'
 import GroupAPI, { Group } from '@/api/group'
-import variables from '@/theme/variables'
 import userToString from '@/helpers/user-to-string'
 
 type GroupAddMemberProps = {

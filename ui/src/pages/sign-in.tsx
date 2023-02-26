@@ -1,15 +1,6 @@
 import { useCallback } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {
-  Field,
-  FieldAttributes,
-  FieldProps,
-  Form,
-  Formik,
-  FormikHelpers,
-} from 'formik'
-import * as Yup from 'yup'
-import {
   Button,
   Container,
   FormControl,
@@ -20,6 +11,16 @@ import {
   Text,
   VStack,
 } from '@chakra-ui/react'
+import { variables } from '@koupr/ui'
+import {
+  Field,
+  FieldAttributes,
+  FieldProps,
+  Form,
+  Formik,
+  FormikHelpers,
+} from 'formik'
+import * as Yup from 'yup'
 import { Helmet } from 'react-helmet-async'
 import GroupAPI from '@/api/group'
 import OrganizationAPI from '@/api/organization'
@@ -28,7 +29,6 @@ import WorkspaceAPI from '@/api/workspace'
 import Logo from '@/components/common/logo'
 import FullLayout from '@/components/layout/full'
 import { saveAccessToken } from '@/infra/token'
-import variables from '@/theme/variables'
 import { gigabyteToByte } from '@/helpers/convert-storage'
 
 type FormValues = {

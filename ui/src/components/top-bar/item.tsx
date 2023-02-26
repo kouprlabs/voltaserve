@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Link as ChakraLink, useColorModeValue } from '@chakra-ui/react'
-import variables from '@/theme/variables'
+import { variables } from '@koupr/ui'
 
 type NavItemProps = {
   title: string

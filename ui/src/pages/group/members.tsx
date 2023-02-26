@@ -1,4 +1,4 @@
-import { ReactElement, useState } from 'react'
+import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import {
   HStack,
@@ -20,17 +20,15 @@ import {
   Avatar,
   Portal,
 } from '@chakra-ui/react'
+import { variables, IconExit, IconUserPlus, SectionSpinner } from '@koupr/ui'
 import { Helmet } from 'react-helmet-async'
 import { HiDotsVertical } from 'react-icons/hi'
 import GroupAPI from '@/api/group'
 import { swrConfig } from '@/api/options'
 import { geEditorPermission } from '@/api/permission'
 import { User } from '@/api/user'
-import { IconExit, IconUserPlus } from '@/components/common/icon'
-import LoadingSpinner from '@/components/common/loading-spinner'
 import GroupAddMember from '@/components/group/add-member'
 import GroupRemoveMember from '@/components/group/remove-member'
-import variables from '@/theme/variables'
 
 const GroupMembersPage = () => {
   const params = useParams()
@@ -54,7 +52,7 @@ const GroupMembersPage = () => {
   }
 
   if (!group || !members) {
-    return <LoadingSpinner />
+    return <SectionSpinner />
   }
 
   return (

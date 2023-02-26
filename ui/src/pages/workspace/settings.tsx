@@ -10,17 +10,15 @@ import {
   Stack,
   Text,
 } from '@chakra-ui/react'
+import { variables, IconEdit, IconTrash, SectionSpinner } from '@koupr/ui'
 import { Helmet } from 'react-helmet-async'
 import { swrConfig } from '@/api/options'
 import { geEditorPermission } from '@/api/permission'
 import StorageAPI from '@/api/storage'
 import WorkspaceAPI from '@/api/workspace'
-import { IconEdit, IconTrash } from '@/components/common/icon'
-import LoadingSpinner from '@/components/common/loading-spinner'
 import WorkspaceDelete from '@/components/workspace/delete'
 import WorkspaceEditName from '@/components/workspace/edit-name'
 import WorkspaceEditStorageCapacity from '@/components/workspace/edit-storage-capacity'
-import variables from '@/theme/variables'
 import prettyBytes from '@/helpers/pretty-bytes'
 
 const EditButton = (props: IconButtonProps) => (
@@ -52,7 +50,7 @@ const WorkspaceSettingsPage = () => {
   }
 
   if (!workspace) {
-    return <LoadingSpinner />
+    return <SectionSpinner />
   }
 
   return (

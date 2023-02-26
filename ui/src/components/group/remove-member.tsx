@@ -10,9 +10,9 @@ import {
   ModalOverlay,
   Text,
 } from '@chakra-ui/react'
+import { variables } from '@koupr/ui'
 import GroupAPI, { Group } from '@/api/group'
 import { User } from '@/api/user'
-import variables from '@/theme/variables'
 
 type GroupRemoveMemberProps = {
   group: Group

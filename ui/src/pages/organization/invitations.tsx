@@ -20,20 +20,20 @@ import {
   useToast,
   VStack,
 } from '@chakra-ui/react'
+import {
+  variables,
+  IconDotsVertical,
+  IconSend,
+  IconTrash,
+  IconUserPlus,
+  SectionSpinner,
+} from '@koupr/ui'
 import { Helmet } from 'react-helmet-async'
 import InvitationAPI, { Invitation, InvitationStatus } from '@/api/invitation'
 import { swrConfig } from '@/api/options'
 import OrganizationAPI from '@/api/organization'
 import { geEditorPermission } from '@/api/permission'
-import {
-  IconDotsVertical,
-  IconSend,
-  IconTrash,
-  IconUserPlus,
-} from '@/components/common/icon'
-import LoadingSpinner from '@/components/common/loading-spinner'
 import OrganizationInviteMembers from '@/components/organization/invite-members'
-import variables from '@/theme/variables'
 import prettyDate from '@/helpers/pretty-date'
 
 type StatusProps = {
@@ -91,7 +91,7 @@ const OrganizationInvitationsPage = () => {
   }
 
   if (!invitations || !org) {
-    return <LoadingSpinner />
+    return <SectionSpinner />
   }
 
   return (

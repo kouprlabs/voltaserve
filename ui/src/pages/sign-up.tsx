@@ -1,15 +1,6 @@
 import { useCallback, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
-  Field,
-  FieldAttributes,
-  FieldProps,
-  Form,
-  Formik,
-  FormikHelpers,
-} from 'formik'
-import * as Yup from 'yup'
-import {
   Button,
   FormControl,
   FormErrorMessage,
@@ -20,12 +11,21 @@ import {
   useToast,
   VStack,
 } from '@chakra-ui/react'
+import { variables } from '@koupr/ui'
+import {
+  Field,
+  FieldAttributes,
+  FieldProps,
+  Form,
+  Formik,
+  FormikHelpers,
+} from 'formik'
+import * as Yup from 'yup'
 import { Helmet } from 'react-helmet-async'
 import AccountAPI from '@/api/account'
 import { errorToString } from '@/api/error'
 import Logo from '@/components/common/logo'
 import FullLayout from '@/components/layout/full'
-import variables from '@/theme/variables'
 
 type FormValues = {
   fullName: string

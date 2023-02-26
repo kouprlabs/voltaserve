@@ -26,12 +26,13 @@ import {
   Badge,
   Center,
   Skeleton,
-  Spinner,
   HStack,
   Tag,
   Avatar,
   VStack,
 } from '@chakra-ui/react'
+import { Spinner, variables } from '@koupr/ui'
+import { IconAdd, IconCheck, IconTrash, IconUserPlus } from '@koupr/ui'
 import FileAPI, { GroupPermission, UserPermission } from '@/api/file'
 import { Group } from '@/api/group'
 import OrganizationAPI from '@/api/organization'
@@ -41,13 +42,6 @@ import WorkspaceAPI from '@/api/workspace'
 import { filesUpdated } from '@/store/entities/files'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { selectionUpdated, sharingModalDidClose } from '@/store/ui/files'
-import {
-  IconAdd,
-  IconCheck,
-  IconTrash,
-  IconUserPlus,
-} from '@/components/common/icon'
-import variables from '@/theme/variables'
 import userToString from '@/helpers/user-to-string'
 
 const FileSharing = () => {
@@ -323,7 +317,7 @@ const FileSharing = () => {
                   {isSingleFileMode && <hr />}
                   {!userPermissions && isSingleFileMode ? (
                     <Center>
-                      <Spinner size="sm" thickness="4px" />
+                      <Spinner />
                     </Center>
                   ) : null}
                   {userPermissions && userPermissions.length === 0 ? (
@@ -442,7 +436,7 @@ const FileSharing = () => {
                   {isSingleFileMode ? <hr /> : null}
                   {!groupPermissions && isSingleFileMode ? (
                     <Center>
-                      <Spinner size="sm" thickness="4px" />
+                      <Spinner />
                     </Center>
                   ) : null}
                   {groupPermissions && groupPermissions.length === 0 ? (

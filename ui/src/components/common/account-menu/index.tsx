@@ -11,9 +11,9 @@ import {
   Stack,
   Text,
 } from '@chakra-ui/react'
+import { variables } from '@koupr/ui'
 import { swrConfig } from '@/api/options'
 import UserAPI from '@/api/user'
-import variables from '@/theme/variables'
 import ActiveCircle from './active-circle'
 import AvatarButton from './avatar-button'
 import AvatarImage from './avatar-image'

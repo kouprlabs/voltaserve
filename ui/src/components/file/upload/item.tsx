@@ -12,18 +12,18 @@ import {
   Text,
 } from '@chakra-ui/react'
 import {
+  IconClose,
+  IconTime,
+  IconCheckCircleFill,
+  IconAlertCircleFill,
+  variables,
+} from '@koupr/ui'
+import {
   Upload,
   UploadDecorator,
   uploadRemoved,
 } from '@/store/entities/uploads'
 import { useAppDispatch } from '@/store/hook'
-import {
-  IconClose,
-  IconTime,
-  IconCheckCircleFill,
-  IconAlertCircleFill,
-} from '@/components/common/icon'
-import variables from '@/theme/variables'
 
 type ItemProps = {
   upload: Upload

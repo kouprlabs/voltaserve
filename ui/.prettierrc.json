@@ -8,6 +8,8 @@
     "^@react-dom/(.*)$",
     "^react-router-dom$",
     "^react-redux$",
+    "^@chakra-ui/(.*)$",
+    "^@koupr/ui$",
     "^swr$",
     "^formik$",
     "^yup$",
@@ -19,7 +21,7 @@
     "^@/theme/(.*)$",
     "^@/helpers/(.*)$",
     "^[./]",
-    "^@/styles/(.*)$"
+    "^(.*)\\.css$"
   ],
   "importOrderSeparation": false
 }

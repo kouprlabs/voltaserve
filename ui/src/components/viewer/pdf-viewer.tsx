@@ -13,7 +13,7 @@ const PdfViewer = ({ file }: PdfViewerProps) => {
   if (!file.preview) {
     return null
   }
-  return <iframe width="100%" height="100%" src={url} />
+  return <iframe width="100%" height="100%" src={url} title={file.name} />
 }
 
 export default PdfViewer

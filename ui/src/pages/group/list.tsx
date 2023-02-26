@@ -1,4 +1,4 @@
-import { Link, useParams, useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import {
   Center,
   Heading,
@@ -15,12 +15,11 @@ import {
   Text,
   Avatar,
 } from '@chakra-ui/react'
+import { SectionSpinner, variables } from '@koupr/ui'
 import { Helmet } from 'react-helmet-async'
 import GroupAPI, { Group } from '@/api/group'
 import { swrConfig } from '@/api/options'
-import LoadingSpinner from '@/components/common/loading-spinner'
 import { CreateGroupButton } from '@/components/top-bar/buttons'
-import variables from '@/theme/variables'
 import prettyDate from '@/helpers/pretty-date'
 import { decodeQuery } from '@/helpers/query'
 
@@ -45,7 +44,7 @@ const GroupListPage = () => {
             <Text>Failed to load groups.</Text>
           </Center>
         )}
-        {!groups && !error && <LoadingSpinner />}
+        {!groups && !error && <SectionSpinner />}
         {groups && groups.length === 0 && (
           <Center h="300px">
             <VStack spacing={variables.spacing}>

@@ -1,11 +1,11 @@
 import { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 import { Box, HStack } from '@chakra-ui/react'
+import { variables } from '@koupr/ui'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { activeNavChanged, NavType } from '@/store/ui/nav'
 import AccountMenu from '@/components/common/account-menu'
 import NotificationDrawer from '@/components/common/notification-drawer'
-import variables from '@/theme/variables'
 import {
   CreateGroupButton,
   CreateOrganizationButton,

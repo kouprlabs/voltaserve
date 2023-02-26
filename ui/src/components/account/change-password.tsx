@@ -1,14 +1,4 @@
 import React, { useCallback, useEffect, useState } from 'react'
-import { useSWRConfig } from 'swr'
-import {
-  Field,
-  FieldAttributes,
-  FieldProps,
-  Form,
-  Formik,
-  FormikHelpers,
-} from 'formik'
-import * as Yup from 'yup'
 import {
   Button,
   FormControl,
@@ -23,8 +13,18 @@ import {
   ModalOverlay,
   Stack,
 } from '@chakra-ui/react'
+import { variables } from '@koupr/ui'
+import { useSWRConfig } from 'swr'
+import {
+  Field,
+  FieldAttributes,
+  FieldProps,
+  Form,
+  Formik,
+  FormikHelpers,
+} from 'formik'
+import * as Yup from 'yup'
 import UserAPI, { User } from '@/api/user'
-import variables from '@/theme/variables'
 
 type AccountChangePasswordProps = {
   open: boolean

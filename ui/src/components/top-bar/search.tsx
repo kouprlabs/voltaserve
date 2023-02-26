@@ -16,7 +16,7 @@ import {
   InputLeftElement,
   InputRightElement,
 } from '@chakra-ui/react'
-import { IconClose, IconSearch } from '@/components/common/icon'
+import { IconClose, IconSearch } from '@koupr/ui'
 import { decodeQuery, encodeQuery } from '@/helpers/query'
 
 const Search = () => {

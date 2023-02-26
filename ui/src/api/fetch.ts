@@ -53,5 +53,4 @@ async function handleFailure(response: Response, redirect: boolean = true) {
       throw error
     }
   }
-  return response
 }

@@ -1,12 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import {
-  Box,
-  Center,
-  Spinner,
-  Stack,
-  useColorModeValue,
-} from '@chakra-ui/react'
+import { Box, Center, Stack, useColorModeValue } from '@chakra-ui/react'
+import { Spinner, variables } from '@koupr/ui'
 import { Helmet } from 'react-helmet-async'
 import FileAPI from '@/api/file'
 import { swrConfig } from '@/api/options'
@@ -23,7 +18,6 @@ import FilePath from '@/components/file/path'
 import FileRename from '@/components/file/rename'
 import FileSharing from '@/components/file/sharing'
 import FileToolbar from '@/components/file/toolbar'
-import variables from '@/theme/variables'
 import { percentageOf } from '@/helpers/percentage-of'
 
 let isLoadingMore = false
@@ -103,7 +97,7 @@ const WorkspaceFilesPage = () => {
           <FileList />
           {isSpinnerVisible && (
             <Center w="100%" mb={variables.spacing2Xl} justifyContent="center">
-              <Spinner size="sm" thickness="4px" />
+              <Spinner />
             </Center>
           )}
         </Box>

@@ -6,9 +6,9 @@ import {
   StatNumber,
   Text,
 } from '@chakra-ui/react'
+import { variables } from '@koupr/ui'
 import { File } from '@/api/file'
 import StorageAPI from '@/api/storage'
-import variables from '@/theme/variables'
 import prettyBytes from '@/helpers/pretty-bytes'
 
 type StorageUsageInfoProps = {

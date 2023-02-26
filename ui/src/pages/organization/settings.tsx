@@ -1,22 +1,22 @@
 import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { Box, Divider, HStack, IconButton, Stack, Text } from '@chakra-ui/react'
-import { Helmet } from 'react-helmet-async'
-import { swrConfig } from '@/api/options'
-import OrganizationAPI from '@/api/organization'
-import { geEditorPermission } from '@/api/permission'
 import {
+  variables,
   IconEdit,
   IconExit,
   IconTrash,
   IconUserPlus,
-} from '@/components/common/icon'
-import LoadingSpinner from '@/components/common/loading-spinner'
+  SectionSpinner,
+} from '@koupr/ui'
+import { Helmet } from 'react-helmet-async'
+import { swrConfig } from '@/api/options'
+import OrganizationAPI from '@/api/organization'
+import { geEditorPermission } from '@/api/permission'
 import OrganizationDelete from '@/components/organization/delete'
 import OrganizationEditName from '@/components/organization/edit-name'
 import OrganizationInviteMembers from '@/components/organization/invite-members'
 import OrganizationLeave from '@/components/organization/leave'
-import variables from '@/theme/variables'
 
 const Spacer = () => <Box flexGrow={1} />
 
@@ -37,7 +37,7 @@ const OrganizationSettingsPage = () => {
   }
 
   if (!org) {
-    return <LoadingSpinner />
+    return <SectionSpinner />
   }
 
   return (

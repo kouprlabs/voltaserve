@@ -18,6 +18,16 @@ import {
   Text,
   VStack,
 } from '@chakra-ui/react'
+import {
+  IconCopy,
+  IconDotsVerticalSm,
+  IconDownload,
+  IconEdit,
+  IconMove,
+  IconShare,
+  IconTrash,
+  variables,
+} from '@koupr/ui'
 import { File } from '@/api/file'
 import {
   ltEditorPermission,
@@ -36,16 +46,6 @@ import {
   selectionUpdated,
   sharingModalDidOpen,
 } from '@/store/ui/files'
-import {
-  IconCopy,
-  IconDotsVerticalSm,
-  IconDownload,
-  IconEdit,
-  IconMove,
-  IconShare,
-  IconTrash,
-} from '@/components/common/icon'
-import variables from '@/theme/variables'
 import downloadFile from '@/helpers/download-file'
 import relativeDate from '@/helpers/relative-date'
 import FileListItemIcon from './icon'

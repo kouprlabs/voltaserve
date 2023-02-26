@@ -1,14 +1,4 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
-import { useSWRConfig } from 'swr'
-import {
-  Field,
-  FieldAttributes,
-  FieldProps,
-  Form,
-  Formik,
-  FormikHelpers,
-} from 'formik'
-import * as Yup from 'yup'
 import {
   Button,
   FormControl,
@@ -22,12 +12,21 @@ import {
   ModalHeader,
   ModalOverlay,
 } from '@chakra-ui/react'
+import { SectionSpinner, variables } from '@koupr/ui'
+import { useSWRConfig } from 'swr'
+import {
+  Field,
+  FieldAttributes,
+  FieldProps,
+  Form,
+  Formik,
+  FormikHelpers,
+} from 'formik'
+import * as Yup from 'yup'
 import { swrConfig } from '@/api/options'
 import StorageAPI from '@/api/storage'
 import WorkspaceAPI, { Workspace } from '@/api/workspace'
-import LoadingSpinner from '@/components/common/loading-spinner'
 import StorageInput from '@/components/common/storage-input'
-import variables from '@/theme/variables'
 
 type WorkspaceEditStorageCapacityProps = {
   open: boolean
@@ -106,7 +105,7 @@ const WorkspaceEditStorageCapacity = ({
             <Form>
               <ModalBody>
                 {!storageUsage && !error ? (
-                  <LoadingSpinner height="100px" />
+                  <SectionSpinner height="100px" />
                 ) : null}
                 {storageUsage && !error ? (
                   <Field name="storageCapacity">

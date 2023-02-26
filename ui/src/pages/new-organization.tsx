@@ -1,5 +1,8 @@
 import { useCallback, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { Heading, HStack, Stack } from '@chakra-ui/react'
+import { Button, FormControl, FormErrorMessage, Input } from '@chakra-ui/react'
+import { variables } from '@koupr/ui'
 import { useSWRConfig } from 'swr'
 import {
   Field,
@@ -10,11 +13,8 @@ import {
   FormikHelpers,
 } from 'formik'
 import * as Yup from 'yup'
-import { Heading, HStack, Stack } from '@chakra-ui/react'
-import { Button, FormControl, FormErrorMessage, Input } from '@chakra-ui/react'
 import { Helmet } from 'react-helmet-async'
 import OrganizationAPI from '@/api/organization'
-import variables from '@/theme/variables'
 
 type FormValues = {
   name: string

@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Button } from '@chakra-ui/react'
-import { IconAdd } from '@/components/common/icon'
+import { IconAdd } from '@koupr/ui'
 
 export const CreateGroupButton = () => (
   <Button

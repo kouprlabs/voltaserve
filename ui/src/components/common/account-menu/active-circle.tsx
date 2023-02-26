@@ -1,8 +1,8 @@
 import { ReactNode } from 'react'
 import { Circle } from '@chakra-ui/react'
+import { variables } from '@koupr/ui'
 import { useAppSelector } from '@/store/hook'
 import { NavType } from '@/store/ui/nav'
-import variables from '@/theme/variables'
 
 type ActiveCircleProps = {
   children: ReactNode

@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react'
 import { Box, Skeleton, Image } from '@chakra-ui/react'
+import { variables } from '@koupr/ui'
 import { FaFileImage } from 'react-icons/fa'
 import { File } from '@/api/file'
-import variables from '@/theme/variables'
 import { ItemSize } from '..'
 import FileListItemSharedSign from './shared-sign'
 

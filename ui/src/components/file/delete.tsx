@@ -12,11 +12,11 @@ import {
   ModalOverlay,
   Text,
 } from '@chakra-ui/react'
+import { variables } from '@koupr/ui'
 import FileAPI from '@/api/file'
 import { filesRemoved } from '@/store/entities/files'
 import { useAppSelector } from '@/store/hook'
 import { deleteModalDidClose, selectionUpdated } from '@/store/ui/files'
-import variables from '@/theme/variables'
 
 const FileDelete = () => {
   const params = useParams()

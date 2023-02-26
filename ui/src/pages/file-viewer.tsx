@@ -1,16 +1,14 @@
 import { useCallback } from 'react'
 import { useParams } from 'react-router-dom'
-import { Button, Center, Heading, Spinner, Stack, Text } from '@chakra-ui/react'
+import { Button, Center, Heading, Stack, Text } from '@chakra-ui/react'
+import { variables, IconDownload, Drawer, Spinner } from '@koupr/ui'
 import { Helmet } from 'react-helmet-async'
 import FileAPI, { File } from '@/api/file'
-import Drawer from '@/components/common/drawer'
-import { IconDownload } from '@/components/common/icon'
 import AudioPlayer from '@/components/viewer/audio-player'
 import DrawerContent from '@/components/viewer/drawer/content'
 import ImageViewer from '@/components/viewer/image-viewer'
 import PdfViewer from '@/components/viewer/pdf-viewer'
 import VideoPlayer from '@/components/viewer/video-player'
-import variables from '@/theme/variables'
 import downloadFile from '@/helpers/download-file'
 import { isAudio, isImage, isPdf, isVideo } from '@/helpers/file-extension'
 
@@ -46,7 +44,7 @@ const FileViewerPage = () => {
   if (!file) {
     return (
       <Center height="100vh">
-        <Spinner size="sm" thickness="4px" />
+        <Spinner />
       </Center>
     )
   }

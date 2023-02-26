@@ -11,12 +11,12 @@ import {
   Text,
   useColorModeValue,
 } from '@chakra-ui/react'
+import { variables } from '@koupr/ui'
+import { IconChevronRight } from '@koupr/ui'
+import { SectionSpinner } from '@koupr/ui'
 import { FcFolder } from 'react-icons/fc'
 import FileAPI, { File, FileType } from '@/api/file'
 import WorkspaceAPI from '@/api/workspace'
-import { IconChevronRight } from '@/components/common/icon'
-import LoadingSpinner from '@/components/common/loading-spinner'
-import variables from '@/theme/variables'
 
 type BrowseProps = {
   onChange?: (id: string) => void
@@ -95,7 +95,7 @@ const FileBrowse = ({ onChange }: BrowseProps) => {
   }, [])
 
   if (isSpinnerVisible) {
-    return <LoadingSpinner />
+    return <SectionSpinner />
   }
 
   return (

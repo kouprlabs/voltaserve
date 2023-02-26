@@ -1,4 +1,4 @@
-import { Link, useParams, useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import {
   Heading,
   Link as ChakraLink,
@@ -15,12 +15,11 @@ import {
   VStack,
   Avatar,
 } from '@chakra-ui/react'
+import { SectionSpinner, variables } from '@koupr/ui'
 import { Helmet } from 'react-helmet-async'
 import { swrConfig } from '@/api/options'
 import WorkspaceAPI, { Workspace } from '@/api/workspace'
-import LoadingSpinner from '@/components/common/loading-spinner'
 import { CreateWorkspaceButton } from '@/components/top-bar/buttons'
-import variables from '@/theme/variables'
 import prettyDate from '@/helpers/pretty-date'
 import { decodeQuery } from '@/helpers/query'
 
@@ -45,7 +44,7 @@ const WorkspaceListPage = () => {
             <Text>Failed to load workspaces.</Text>
           </Center>
         )}
-        {!workspaces && !error && <LoadingSpinner />}
+        {!workspaces && !error && <SectionSpinner />}
         {workspaces && workspaces.length === 0 && !error ? (
           <Center h="300px">
             <VStack spacing={variables.spacing}>

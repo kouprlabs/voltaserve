@@ -1,4 +1,4 @@
-import { Link, useParams, useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import {
   Heading,
   Link as ChakraLink,
@@ -15,12 +15,11 @@ import {
   VStack,
   Avatar,
 } from '@chakra-ui/react'
+import { SectionSpinner, variables } from '@koupr/ui'
 import { Helmet } from 'react-helmet-async'
 import { swrConfig } from '@/api/options'
 import OrganizationAPI, { Organization } from '@/api/organization'
-import LoadingSpinner from '@/components/common/loading-spinner'
 import { CreateOrganizationButton } from '@/components/top-bar/buttons'
-import variables from '@/theme/variables'
 import prettyDate from '@/helpers/pretty-date'
 import { decodeQuery } from '@/helpers/query'
 
@@ -45,7 +44,7 @@ const OrganizationListPage = () => {
             <Text>Failed to load organizations.</Text>
           </Center>
         )}
-        {!orgs && !error && <LoadingSpinner />}
+        {!orgs && !error && <SectionSpinner />}
         {orgs && orgs.length === 0 && (
           <Center h="300px">
             <VStack spacing={variables.spacing}>

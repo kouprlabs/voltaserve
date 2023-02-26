@@ -1,8 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Center, Stack } from '@chakra-ui/react'
+import { SectionSpinner, variables } from '@koupr/ui'
 import { File } from '@/api/file'
-import LoadingSpinner from '@/components/common/loading-spinner'
-import variables from '@/theme/variables'
 
 type ImageViewerProps = {
   file: File
@@ -26,7 +25,7 @@ const ImageViewer = ({ file }: ImageViewerProps) => {
         overflow="scroll"
         position="relative"
       >
-        {isLoading && <LoadingSpinner />}
+        {isLoading && <SectionSpinner />}
         <img
           src={url}
           width={file.original.image.width}
