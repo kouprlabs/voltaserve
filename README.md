@@ -75,7 +75,7 @@ docker-compose -f ./docker-compose.prod.yml up
 
 Make sure all containers are up and running.
 
-_Note: here we assume that Voltaserve UI is accessible from `http://localhost:3000`, if not simply use the host and port that matches your configuration, if you have SSL then make sure you are using `https://`._
+_Note: here we assume that Voltaserve UI is accessible from `http://localhost:3000`, if not, simply use the host and port that matches your configuration, if you have SSL then make sure you are using `https://`._
 
 1. Navigate to [http://localhost:3000](http://localhost:3000). _(This depends on your configuration)_
 
