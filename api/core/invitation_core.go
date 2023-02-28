@@ -100,9 +100,9 @@ func (svc *InvitationService) Create(req InvitationCreateOptions, userId string)
 	/* Send emails */
 	for _, inv := range invitations {
 		variables := map[string]string{
-			"UserFullName":     user.GetFullName(),
-			"OrganizationName": org.GetName(),
-			"WebUrl":           svc.config.WebUrl,
+			"USER_FULL_NAME":    user.GetFullName(),
+			"ORGANIZATION_NAME": org.GetName(),
+			"UI_URL":            svc.config.UIURL,
 		}
 		_, err := svc.userRepo.FindByEmail(inv.GetEmail())
 		var templateName string
@@ -229,9 +229,9 @@ func (svc *InvitationService) Resend(id string, userId string) error {
 		return err
 	}
 	variables := map[string]string{
-		"UserFullName":     user.GetFullName(),
-		"OrganizationName": org.GetName(),
-		"WebUrl":           svc.config.WebUrl,
+		"USER_FULL_NAME":    user.GetFullName(),
+		"ORGANIZATION_NAME": org.GetName(),
+		"UI_URL":            svc.config.UIURL,
 	}
 	_, err = svc.userRepo.FindByEmail(invitation.GetEmail())
 	var templateName string

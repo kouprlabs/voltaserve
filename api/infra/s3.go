@@ -193,7 +193,7 @@ func (mgr *S3Manager) DisableBucketEncryption(bucketName string) error {
 }
 
 func (mgr *S3Manager) connect() error {
-	client, err := minio.New(mgr.config.Url, &minio.Options{
+	client, err := minio.New(mgr.config.URL, &minio.Options{
 		Creds:  credentials.NewStaticV4(mgr.config.AccessKey, mgr.config.SecretKey, ""),
 		Secure: mgr.config.Secure,
 	})

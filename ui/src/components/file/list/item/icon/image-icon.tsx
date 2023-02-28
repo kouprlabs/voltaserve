@@ -11,35 +11,33 @@ type FileListItemImageIconProps = {
   size: ItemSize
 }
 
-const invalidSizeError = 'Invalid item size'
-
 const FileListItemImageIcon = ({ file, size }: FileListItemImageIconProps) => {
   const width = useMemo<number>(() => {
     if (size === ItemSize.Normal) {
       return 130
-    }
-    if (size === ItemSize.Large) {
+    } else if (size === ItemSize.Large) {
       return 230
+    } else {
+      throw new Error(`Invalid item size: ${size}`)
     }
-    throw invalidSizeError
   }, [size])
   const height = useMemo(() => {
     if (size === ItemSize.Normal) {
       return 90
-    }
-    if (size === ItemSize.Large) {
+    } else if (size === ItemSize.Large) {
       return 190
+    } else {
+      throw new Error(`Invalid item size: ${size}`)
     }
-    throw invalidSizeError
   }, [size])
   const fontSize = useMemo(() => {
     if (size === ItemSize.Normal) {
       return 72
-    }
-    if (size === ItemSize.Large) {
+    } else if (size === ItemSize.Large) {
       return 150
+    } else {
+      throw new Error(`Invalid item size: ${size}`)
     }
-    throw invalidSizeError
   }, [size])
   const [isLoading, setIsLoading] = useState(true)
 

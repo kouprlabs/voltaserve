@@ -3,7 +3,7 @@ import { Request, Response, NextFunction } from 'express'
 export enum ErrorCode {
   InternalServerError = 'internal_server_error',
   RequestValidationError = 'request_validation_error',
-  UsernameTaken = 'username_taken',
+  UsernameUnavailable = 'username_unavailable',
   ResourceNotFound = 'resource_not_found',
   InvalidUsernameOrPassword = 'invalid_username_or_password',
   InvalidPassword = 'invalid_password',
@@ -17,7 +17,7 @@ export enum ErrorCode {
 const statusMap: { [key: string]: number } = {}
 statusMap[ErrorCode.InternalServerError] = 500
 statusMap[ErrorCode.RequestValidationError] = 400
-statusMap[ErrorCode.UsernameTaken] = 409
+statusMap[ErrorCode.UsernameUnavailable] = 409
 statusMap[ErrorCode.ResourceNotFound] = 404
 statusMap[ErrorCode.InvalidUsernameOrPassword] = 401
 statusMap[ErrorCode.InvalidPassword] = 401
@@ -28,11 +28,12 @@ statusMap[ErrorCode.UnsupportedGrantType] = 400
 statusMap[ErrorCode.PasswordValidationFailed] = 400
 
 const userMessageMap: { [key: string]: string } = {}
-userMessageMap[ErrorCode.UsernameTaken] = 'Email belongs to an existing user'
-userMessageMap[ErrorCode.EmailNotConfimed] = 'Email not confirmed'
-userMessageMap[ErrorCode.InvalidPassword] = 'Invalid password'
+userMessageMap[ErrorCode.UsernameUnavailable] =
+  'Email belongs to an existing user.'
+userMessageMap[ErrorCode.EmailNotConfimed] = 'Email not confirmed.'
+userMessageMap[ErrorCode.InvalidPassword] = 'Invalid password.'
 userMessageMap[ErrorCode.InvalidUsernameOrPassword] =
-  'Invalid username or password'
+  'Invalid username or password.'
 
 export type IdpError = {
   code: string

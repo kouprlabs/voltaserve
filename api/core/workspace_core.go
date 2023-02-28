@@ -23,7 +23,6 @@ type Workspace struct {
 	StorageCapacity int64        `json:"storageCapacity"`
 	Permission      string       `json:"permission"`
 	Organization    Organization `json:"organization"`
-	Bucket          string       `json:"bucket"`
 	CreateTime      string       `json:"createTime"`
 	UpdateTime      *string      `json:"updateTime,omitempty"`
 }

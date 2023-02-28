@@ -1,14 +1,10 @@
 import fs from 'fs/promises'
-import http from 'http'
 import os from 'os'
-import { URL } from 'url'
 import { NextFunction, Router, Response } from 'express'
 import { body, validationResult } from 'express-validator'
 import multer from 'multer'
 import passport from 'passport'
-import jwt from 'jsonwebtoken'
-import { getConfig } from '@/infra/config'
-import { ErrorCode, parseValidationError, newError } from '@/infra/error'
+import { parseValidationError } from '@/infra/error'
 import { PassportRequest } from '@/infra/passport-request'
 import {
   deleteUser,
@@ -22,7 +18,6 @@ import {
   UserUpdateFullNameOptions,
   UserUpdatePasswordOptions,
   deletePicture,
-  getByPicture,
 } from './service'
 
 const router = Router()

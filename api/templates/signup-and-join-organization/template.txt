@@ -1,2 +1,2 @@
-You have been invited by {{.UserFullName}} to join the organization {{.OrganizationName}}.
-Please follow this link to view your incoming invitations: {{.WebUrl}}/account/incoming-invitations
+You have been invited by {{.USER_FULL_NAME}} to join the organization {{.ORGANIZATION_NAME}}.
+Please follow this link to view your incoming invitations: {{.UI_URL}}/account/incoming-invitations

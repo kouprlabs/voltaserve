@@ -14,7 +14,7 @@ func GetDb() *gorm.DB {
 		return db
 	}
 	var err error
-	db, err = gorm.Open(postgres.Open(config.GetConfig().DatabaseUrl), &gorm.Config{})
+	db, err = gorm.Open(postgres.Open(config.GetConfig().DatabaseURL), &gorm.Config{})
 	if err != nil {
 		panic(err)
 	}

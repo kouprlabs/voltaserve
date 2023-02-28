@@ -1,9 +1,9 @@
 import { Client } from 'pg'
-import { getConfig } from './config'
+import { getConfig } from '../config/config'
 import { ErrorCode, newError } from './error'
 
 const client = new Client({
-  connectionString: getConfig().databaseUrl,
+  connectionString: getConfig().databaseURL,
 })
 
 client.connect().then(() => {

@@ -1,66 +1,66 @@
-version: "3.7"
+version: '3.8'
 
 volumes:
-  db:
-    name: voltaserve-db
-  s3:
-    name: voltaserve-s3
-  search:
-    name: voltaserve-search
+  postgres:
+    name: voltaserve-postgres
+  minio:
+    name: voltaserve-minio
+  meilisearch:
+    name: voltaserve-meilisearch
   redis:
     name: voltaserve-redis
   redisinsight:
     name: voltaserve-redisinsight
 
 services:
-  db:
-    container_name: voltaserve-db
+  postgres:
+    container_name: voltaserve-postgres
     image: postgres:15.1
     ports:
-      - "5432:5432"
+      - ${VOLTASERVE_POSTGRES_PORT}:5432
     environment:
       POSTGRES_USER: voltaserve
       POSTGRES_PASSWORD: voltaserve
     volumes:
-      - db:/var/lib/postgresql/data
-      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
-  s3:
-    container_name: voltaserve-s3
+      - postgres:/var/lib/postgresql/data
+      - ./infra/postgres/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+  adminer:
+    container_name: voltaserve-adminer
+    image: adminer:4.8.1
+    ports:
+      - ${VOLTASERVE_ADMINER_PORT}:8080
+  minio:
+    container_name: voltaserve-minio
     image: minio/minio:RELEASE.2023-01-25T00-19-54Z
     ports:
-      - "9000:9000"
-      - "9001:9001"
+      - ${VOLTASERVE_MINIO_PORT}:9000
+      - ${VOLTASERVE_MINIO_CONSOLE_PORT}:9001
     environment:
       MINIO_ROOT_USER: voltaserve
       MINIO_ROOT_PASSWORD: voltaserve
       MINIO_REGION: us-east-1
     volumes:
-      - s3:/data
-    command: server /data --console-address ":9001"
-  search:
-    container_name: voltaserve-search
+      - minio:/data
+    command: server /data --console-address ":${VOLTASERVE_MINIO_CONSOLE_PORT}"
+  meilisearch:
+    container_name: voltaserve-meilisearch
     image: getmeili/meilisearch:v0.30
     ports:
-      - "7700:7700"
+      - ${VOLTASERVE_MEILISEARCH_PORT}:7700
     volumes:
-      - search:/meili_data
+      - meilisearch:/meili_data
   redis:
     container_name: voltaserve-redis
     image: redis:7.0.8
     ports:
-      - "6379:6379"
+      - ${VOLTASERVE_REDIS_PORT}:6379
     volumes:
       - redis:/data
-  adminer:
-    container_name: voltaserve-adminer
-    image: adminer:4.8.1
-    ports:
-      - 9090:8080
   redisinsight:
     container_name: voltaserve-redisinsight
-    image: redislabs/redisinsight:1.11.0
+    image: redislabs/redisinsight:1.13.1
     ports:
-      - "8001:8001"
+      - ${VOLTASERVE_REDISINSIGHT_PORT}:8001
     volumes:
       - redisinsight:/db
   idp:
@@ -68,52 +68,51 @@ services:
     image: voltaserve/idp
     build:
       context: ./idp
-    depends_on:
-      - db
-      - search
-      - s3
     ports:
-      - "7000:7000"
+      - ${VOLTASERVE_IDP_PORT}:7000
     environment:
-      - URL=http://localhost:7000
-      - WEB_URL=http://localhost:3000
-      - DATABASE_URL=postgresql://voltaserve:voltaserve@db:5432/voltaserve
-      - SEARCH_URL=http://search:7700
-      - S3_URL=http://s3:9000
-      - SMTP_HOST=${SMTP_HOST}
-      - SMTP_PORT=${SMTP_PORT}
-      - SMTP_SECURE=${SMTP_SECURE}
-      - SMTP_USERNAME=${SMTP_USERNAME}
-      - SMTP_PASSWORD=${SMTP_PASSWORD}
-      - SMTP_SENDER_ADDRESS=${SMTP_SENDER_ADDRESS}
-      - SMTP_SENDER_NAME=${SMTP_SENDER_NAME}
+      - IDP_URL=http://${VOLTASERVE_HOSTNAME}:${VOLTASERVE_IDP_PORT}
+      - UI_URL=http://${VOLTASERVE_HOSTNAME}:${VOLTASERVE_UI_PORT}
+      - DATABASE_URL=postgresql://voltaserve:voltaserve@postgres:5432/voltaserve
+      - SEARCH_URL=http://meilisearch:7700
+      - SMTP_HOST=${VOLTASERVE_SMTP_HOST}
+      - SMTP_PORT=${VOLTASERVE_SMTP_PORT}
+      - SMTP_SECURE=${VOLTASERVE_SMTP_SECURE}
+      - SMTP_USERNAME=${VOLTASERVE_SMTP_USERNAME}
+      - SMTP_PASSWORD=${VOLTASERVE_SMTP_PASSWORD}
+      - SMTP_SENDER_ADDRESS=${VOLTASERVE_SMTP_SENDER_ADDRESS}
+      - SMTP_SENDER_NAME=${VOLTASERVE_SMTP_SENDER_NAME}
+    depends_on:
+      - postgres
+      - meilisearch
+      - minio
     restart: on-failure
   api:
     container_name: voltaserve-api
     image: voltaserve/api
     build:
       context: ./api
-    depends_on:
-      - db
-      - redis
-      - s3
-      - search
-    ports:
-      - "5000:5000"
     environment:
-      - URL=http://localhost:5000
-      - WEB_URL=http://localhost:3000
-      - DATABASE_URL=postgresql://voltaserve:voltaserve@db:5432/voltaserve
-      - S3_URL=s3:9000
-      - SEARCH_URL=http://search:7700
+      - API_URL=http://${VOLTASERVE_HOSTNAME}:${VOLTASERVE_API_PORT}
+      - UI_URL=http://${VOLTASERVE_HOSTNAME}:${VOLTASERVE_UI_PORT}
+      - DATABASE_URL=postgresql://voltaserve:voltaserve@postgres:5432/voltaserve
+      - S3_URL=minio:9000
+      - SEARCH_URL=http://meilisearch:7700
       - REDIS_ADDR=redis:6379
-      - SMTP_HOST=${SMTP_HOST}
-      - SMTP_PORT=${SMTP_PORT}
-      - SMTP_SECURE=${SMTP_SECURE}
-      - SMTP_USERNAME=${SMTP_USERNAME}
-      - SMTP_PASSWORD=${SMTP_PASSWORD}
-      - SMTP_SENDER_ADDRESS=${SMTP_SENDER_ADDRESS}
-      - SMTP_SENDER_NAME=${SMTP_SENDER_NAME}
+      - SMTP_HOST=${VOLTASERVE_SMTP_HOST}
+      - SMTP_PORT=${VOLTASERVE_SMTP_PORT}
+      - SMTP_SECURE=${VOLTASERVE_SMTP_SECURE}
+      - SMTP_USERNAME=${VOLTASERVE_SMTP_USERNAME}
+      - SMTP_PASSWORD=${VOLTASERVE_SMTP_PASSWORD}
+      - SMTP_SENDER_ADDRESS=${VOLTASERVE_SMTP_SENDER_ADDRESS}
+      - SMTP_SENDER_NAME=${VOLTASERVE_SMTP_SENDER_NAME}
+    ports:
+      - ${VOLTASERVE_API_PORT}:5000
+    depends_on:
+      - postgres
+      - redis
+      - minio
+      - meilisearch
     restart: on-failure
   ui:
     container_name: voltaserve-ui
@@ -121,13 +120,13 @@ services:
     build:
       context: ./ui
       args:
-        - API_URL=http://api:5000
-        - IDP_URL=http://idp:7000
+        - API_URL=http://api:${VOLTASERVE_API_PORT}
+        - IDP_URL=http://idp:${VOLTASERVE_IDP_PORT}
     ports:
-      - "3000:3000"
+      - ${VOLTASERVE_UI_PORT}:3000
     environment:
-      - API_URL=http://api:5000
-      - IDP_URL=http://idp:7000
+      - API_URL=http://api:${VOLTASERVE_API_PORT}
+      - IDP_URL=http://idp:${VOLTASERVE_IDP_PORT}
     depends_on:
       - idp
       - api

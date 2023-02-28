@@ -9,7 +9,7 @@ export default function relativeDate(date: Date) {
     TimeAgo.addDefaultLocale(en)
     timeAgo = new TimeAgo('en-US')
   }
-  var hoursDiff = Math.abs(new Date().getTime() - date.getTime()) / 3600000
+  const hoursDiff = Math.abs(new Date().getTime() - date.getTime()) / 3600000
   const isToday =
     new Date(date).setHours(0, 0, 0, 0) === new Date().setHours(0, 0, 0, 0)
   const isYesterday = new Date().getDate() - date.getDate() === 1

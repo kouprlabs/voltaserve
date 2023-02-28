@@ -67,9 +67,9 @@ func (mgr *RedisManager) connect() error {
 		return nil
 	}
 	client := redis.NewClient(&redis.Options{
-		Addr:     mgr.config.Addr,
+		Addr:     mgr.config.Address,
 		Password: mgr.config.Password,
-		DB:       mgr.config.Db,
+		DB:       mgr.config.DB,
 	})
 	mgr.client = client
 	return nil

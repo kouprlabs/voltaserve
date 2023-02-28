@@ -1,5 +1,5 @@
+import { getConfig } from 'config/config'
 import jwt from 'jsonwebtoken'
-import { getConfig } from '@/infra/config'
 import { UserRepo } from '@/infra/db'
 import { ErrorCode, newError } from '@/infra/error'
 import { newHyphenlessUuid } from '@/infra/id'
@@ -117,13 +117,13 @@ async function newToken(userId: string): Promise<Token> {
 }
 
 function newAccessTokenExpiry(): number {
-  let now = new Date()
+  const now = new Date()
   now.setSeconds(now.getSeconds() + getConfig().token.accessTokenLifetime)
   return Math.floor(now.getTime() / 1000)
 }
 
 function newRefreshTokenExpiry(): number {
-  let now = new Date()
+  const now = new Date()
   now.setSeconds(now.getSeconds() + getConfig().token.refreshTokenLifetime)
   return Math.floor(now.getTime() / 1000)
 }

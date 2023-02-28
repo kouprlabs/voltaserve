@@ -15,12 +15,19 @@ import (
 
 	jwtware "github.com/gofiber/jwt/v3"
 	log "github.com/sirupsen/logrus"
+
+	"github.com/joho/godotenv"
 )
 
 // @title    Voltaserve API
 // @version  1.0.0
 // @BasePath /v1
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		panic(err)
+	}
+
 	log.SetOutput(os.Stdout)
 	log.SetReportCaller(true)
 
@@ -28,13 +35,13 @@ func main() {
 
 	app := fiber.New(fiber.Config{
 		ErrorHandler: errorpkg.ErrorHandler,
-		BodyLimit:    int(helpers.MegabyteToByte(settings.Limits.MultipartBodyLengthLimitMb)),
+		BodyLimit:    int(helpers.MegabyteToByte(settings.Limits.MultipartBodyLengthLimitMB)),
 	})
 
 	v1 := app.Group("/v1")
 
 	app.Use(cors.New(cors.Config{
-		AllowOrigins: strings.Join(settings.Security.CorsOrigins, ","),
+		AllowOrigins: strings.Join(settings.Security.CORSOrigins, ","),
 	}))
 
 	f := v1.Group("files")
@@ -42,7 +49,7 @@ func main() {
 	fileDownloads.AppendRoutes(f)
 
 	app.Use(jwtware.New(jwtware.Config{
-		SigningKey: []byte(settings.Security.JwtSigningKey),
+		SigningKey: []byte(settings.Security.JWTSigningKey),
 	}))
 
 	files := router.NewFileRouter()
@@ -66,7 +73,7 @@ func main() {
 	groups := router.NewGroupRouter()
 	groups.AppendRoutes(v1.Group("groups"))
 
-	url, err := url.Parse(settings.Url)
+	url, err := url.Parse(settings.APIURL)
 	if err != nil {
 		panic(err)
 	}

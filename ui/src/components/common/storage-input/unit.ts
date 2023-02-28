@@ -35,7 +35,7 @@ export function convertFromByte(value: number, unit: Unit): number {
   if (unit === 'tb') {
     return byteToTerabyte(value)
   }
-  throw new Error(`Invalid unit ${unit}`)
+  throw new Error(`Invalid unit: ${unit}`)
 }
 
 export function normalizeToByte(value: number, unit: Unit) {
@@ -51,5 +51,5 @@ export function normalizeToByte(value: number, unit: Unit) {
   if (unit === 'tb') {
     return terabyteToByte(value)
   }
-  throw new Error(`Invalid unit ${unit}`)
+  throw new Error(`Invalid unit: ${unit}`)
 }

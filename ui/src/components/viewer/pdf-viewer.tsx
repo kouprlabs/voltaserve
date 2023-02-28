@@ -6,10 +6,13 @@ type PdfViewerProps = {
 }
 
 const PdfViewer = ({ file }: PdfViewerProps) => {
-  const url = useMemo(
-    () => `/proxy/api/v1/files/${file.id}/preview${file!.preview!.extension}`,
-    [file]
-  )
+  const url = useMemo(() => {
+    if (file.preview?.extension) {
+      return `/proxy/api/v1/files/${file.id}/preview${file.preview.extension}`
+    } else {
+      return ''
+    }
+  }, [file])
   if (!file.preview) {
     return null
   }

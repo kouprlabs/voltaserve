@@ -5,7 +5,8 @@
       "@/infra/*": ["infra/*"],
       "@/account/*": ["account/*"],
       "@/token/*": ["token/*"],
-      "@/user/*": ["user/*"]
+      "@/user/*": ["user/*"],
+      "@/config/*": ["config/*"]
     },
     "module": "commonjs",
     "esModuleInterop": true,

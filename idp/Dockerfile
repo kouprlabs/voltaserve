@@ -1,22 +1,11 @@
-FROM node:18-alpine as builder
-
-WORKDIR /build
-
-COPY . .
-
-RUN npm install
-RUN npm run pkg
-
-FROM node:18-alpine AS runner
+FROM node:18-alpine
 
 WORKDIR /app
 
-ENV NODE_ENV production
+COPY . .
 
-COPY --from=builder /build/pkg/voltaserve-idp-alpine ./voltaserve-idp
-COPY --from=builder /build/templates ./templates
-COPY --from=builder /build/config.yml ./config.yml
+RUN npm install --production
 
-ENTRYPOINT ["./voltaserve-idp"]
+ENTRYPOINT ["/bin/sh", "-c", "npm run start"]
 
 EXPOSE 7000

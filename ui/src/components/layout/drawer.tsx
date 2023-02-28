@@ -30,7 +30,11 @@ const DrawerLayout = ({ children }: DrawerLayoutProps) => {
 
   return (
     <Stack direction="row" spacing={0} h="100%">
-      <Drawer localStorageNamespace="main" logo={<Logo className="w-4" />}>
+      <Drawer
+        localStoragePrefix="voltaserve"
+        localStorageNamespace="main"
+        logo={<Logo className="w-4" />}
+      >
         <DrawerItem
           href="/workspace"
           icon={<IconWorkspace fontSize="18px" />}

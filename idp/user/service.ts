@@ -119,7 +119,7 @@ export async function deleteUser(id: string, options: UserDeleteOptions) {
 }
 
 export function mapEntity(entity: UserEntity): User {
-  let user = {
+  const user = {
     id: entity.id,
     email: entity.email,
     username: entity.username,

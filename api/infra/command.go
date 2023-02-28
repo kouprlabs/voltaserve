@@ -15,7 +15,7 @@ func NewCommand() *Command {
 }
 
 func (r *Command) Exec(name string, arg ...string) error {
-	timeout := time.Duration(r.config.Limits.ExternalCommandTimeoutSec) * time.Second
+	timeout := time.Duration(r.config.Limits.ExternalCommandTimeoutSeconds) * time.Second
 	cmd := exec.Command(name, arg...)
 	if err := cmd.Start(); err != nil {
 		return err
@@ -31,7 +31,7 @@ func (r *Command) Exec(name string, arg ...string) error {
 }
 
 func (r *Command) ReadOutput(name string, arg ...string) (string, error) {
-	timeout := time.Duration(r.config.Limits.ExternalCommandTimeoutSec) * time.Second
+	timeout := time.Duration(r.config.Limits.ExternalCommandTimeoutSeconds) * time.Second
 	cmd := exec.Command(name, arg...)
 	res, err := cmd.Output()
 	if err != nil {

@@ -1,1 +1,1 @@
-Follow this link to reset your password: {{webUrl}}/reset-password/{{token}}
+Follow this link to reset your password: {{UI_URL}}/reset-password/{{TOKEN}}

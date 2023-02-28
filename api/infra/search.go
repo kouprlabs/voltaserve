@@ -27,7 +27,7 @@ type SearchManager struct {
 func NewSearchManager() *SearchManager {
 	if searchClient == nil {
 		searchClient = meilisearch.NewClient(meilisearch.ClientConfig{
-			Host: config.GetConfig().Search.Url,
+			Host: config.GetConfig().Search.URL,
 		})
 		if _, err := searchClient.Index(FileSearchIndex).UpdateSettings(&meilisearch.Settings{
 			SearchableAttributes: []string{"name", "text"},

@@ -89,7 +89,7 @@ func (svc *StorageService) Store(opts StorageOptions, userId string) (*core.File
 	if err := svc.snapshotRepo.Save(snapshot); err != nil {
 		return nil, err
 	}
-	if stat.Size() >= int64(svc.config.Limits.FileProcessingMaxSizeMb*1000000) {
+	if stat.Size() >= int64(svc.config.Limits.FileProcessingMaxSizeMB*1000000) {
 		v, err := svc.fileMapper.MapFile(file, userId)
 		if err != nil {
 			return nil, err

@@ -11,10 +11,13 @@ type OpenNewTabButtonProps = {
 const LABEL = 'Open file'
 
 const OpenNewTabButton = ({ file, isCollapsed }: OpenNewTabButtonProps) => {
-  const url = useMemo(
-    () => `/proxy/api/v1/files/${file.id}/original${file!.original!.extension}`,
-    [file]
-  )
+  const url = useMemo(() => {
+    if (file.original?.extension) {
+      return `/proxy/api/v1/files/${file.id}/original${file.original.extension}`
+    } else {
+      return ''
+    }
+  }, [file])
   if (!file.original) {
     return null
   }

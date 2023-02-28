@@ -1,1 +1,1 @@
-Follow this link to confirm your Email: {{webUrl}}/confirm-email/{{token}}
+Follow this link to confirm your Email: {{UI_URL}}/confirm-email/{{TOKEN}}

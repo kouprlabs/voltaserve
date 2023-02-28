@@ -14,19 +14,15 @@ export async function clearAccessToken() {
 }
 
 export function getAccessToken() {
-  return typeof window !== 'undefined'
-    ? localStorage.getItem(LOCAL_STORAGE_KEY_ACESS_TOKEN)
-    : null
+  return localStorage.getItem(LOCAL_STORAGE_KEY_ACESS_TOKEN)
 }
 
 export function getAccessTokenOrRedirect(): string {
-  if (typeof window !== 'undefined') {
-    const accessToken = localStorage.getItem(LOCAL_STORAGE_KEY_ACESS_TOKEN)
-    if (accessToken) {
-      return accessToken
-    } else {
-      window.location.href = '/sign-in'
-    }
+  const accessToken = localStorage.getItem(LOCAL_STORAGE_KEY_ACESS_TOKEN)
+  if (accessToken) {
+    return accessToken
+  } else {
+    window.location.href = '/sign-in'
+    return ''
   }
-  return ''
 }

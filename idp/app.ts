@@ -1,19 +1,17 @@
+import '@/infra/env'
 import bodyParser from 'body-parser'
 import cors from 'cors'
-import dotenv from 'dotenv'
+import express from 'express'
 import logger from 'morgan'
+import passport from 'passport'
 import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt'
 import { URL } from 'url'
-import express from 'express'
-import passport from 'passport'
-import accountRouter from './account/router'
-import { getConfig } from './infra/config'
-import { UserRepo } from './infra/db'
-import { errorHandler } from './infra/error'
-import tokenRouter from './token/router'
-import userRouter from './user/router'
-
-dotenv.config()
+import accountRouter from '@/account/router'
+import { getConfig } from '@/config/config'
+import { UserRepo } from '@/infra/db'
+import { errorHandler } from '@/infra/error'
+import tokenRouter from '@/token/router'
+import userRouter from '@/user/router'
 
 const app = express()
 
@@ -49,7 +47,7 @@ app.use('/v1/token', tokenRouter)
 
 app.use(errorHandler)
 
-const port = new URL(getConfig().url).port
+const port = new URL(getConfig().idpURL).port
 
 app.listen(port, () => {
   console.log(`Listening on port ${port}`)

@@ -8,7 +8,6 @@ import {
   Input,
   Link as ChakraLink,
   Text,
-  useToast,
   VStack,
 } from '@chakra-ui/react'
 import { variables } from '@koupr/ui'
@@ -23,7 +22,6 @@ import {
 import * as Yup from 'yup'
 import { Helmet } from 'react-helmet-async'
 import AccountAPI from '@/api/account'
-import { errorToString } from '@/api/error'
 import Logo from '@/components/common/logo'
 import FullLayout from '@/components/layout/full'
 
@@ -35,7 +33,6 @@ type FormValues = {
 }
 
 const SignUpPage = () => {
-  const toast = useToast()
   const [isConfirmationVisible, setIsConfirmationVisible] = useState(false)
   const formSchema = Yup.object().shape({
     fullName: Yup.string().required('Name is required'),
@@ -60,17 +57,11 @@ const SignUpPage = () => {
           password,
         })
         setIsConfirmationVisible(true)
-      } catch (e) {
-        toast({
-          title: errorToString(e),
-          status: 'error',
-          isClosable: true,
-        })
       } finally {
         setSubmitting(false)
       }
     },
-    [toast]
+    []
   )
 
   return (
@@ -97,7 +88,7 @@ const SignUpPage = () => {
           <VStack spacing="25px" w="100%">
             <Logo className="w-16" isGlossy={true} />
             <h1 className="font-display text-2xl font-medium">
-              Sign Up To Voltaserve
+              Sign Up to Voltaserve
             </h1>
             <Formik
               initialValues={{

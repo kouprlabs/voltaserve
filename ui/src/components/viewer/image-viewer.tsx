@@ -9,10 +9,13 @@ type ImageViewerProps = {
 
 const ImageViewer = ({ file }: ImageViewerProps) => {
   const [isLoading, setIsLoading] = useState(true)
-  const url = useMemo(
-    () => `/proxy/api/v1/files/${file.id}/original${file!.original!.extension}`,
-    [file]
-  )
+  const url = useMemo(() => {
+    if (file.original?.extension) {
+      return `/proxy/api/v1/files/${file.id}/original${file.original.extension}`
+    } else {
+      return ''
+    }
+  }, [file])
   if (!file.original?.image) {
     return null
   }

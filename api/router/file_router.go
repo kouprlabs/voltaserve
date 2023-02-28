@@ -742,7 +742,7 @@ func (r *FileDownloadRouter) getUserId(accessToken string) (string, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
-		return []byte(config.GetConfig().Security.JwtSigningKey), nil
+		return []byte(config.GetConfig().Security.JWTSigningKey), nil
 	})
 	if err != nil {
 		return "", err

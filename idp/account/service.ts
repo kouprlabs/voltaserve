@@ -1,4 +1,4 @@
-import { getConfig } from '@/infra/config'
+import { getConfig } from 'config/config'
 import { newDateTime } from '@/infra/date-time'
 import { UserRepo } from '@/infra/db'
 import { ErrorCode, newError } from '@/infra/error'
@@ -32,7 +32,7 @@ export async function createUser(options: AccountCreateOptions): Promise<User> {
   const id = newHashId()
   const existingUser = await UserRepo.find('username', options.email)
   if (existingUser) {
-    throw newError({ code: ErrorCode.UsernameTaken })
+    throw newError({ code: ErrorCode.UsernameUnavailable })
   }
   try {
     const emailConfirmationToken = newHyphenlessUuid()
@@ -57,8 +57,8 @@ export async function createUser(options: AccountCreateOptions): Promise<User> {
       },
     ])
     await sendTemplateMail('email-confirmation', options.email, {
-      'webUrl': getConfig().webUrl,
-      'token': emailConfirmationToken,
+      'UI_URL': getConfig().uiURL,
+      'TOKEN': emailConfirmationToken,
     })
     return mapEntity(user)
   } catch (error) {
@@ -108,9 +108,9 @@ export async function sendResetPasswordEmail(
     return
   }
   try {
-    sendTemplateMail('reset-password', user.email, {
-      'webUrl': getConfig().webUrl,
-      'token': user.resetPasswordToken,
+    await sendTemplateMail('reset-password', user.email, {
+      'UI_URL': getConfig().uiURL,
+      'TOKEN': user.resetPasswordToken,
     })
   } catch (error) {
     const { id } = await UserRepo.find('email', options.email, true)

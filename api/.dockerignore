@@ -1,6 +1,6 @@
 README.md
+DEVELOPMENT.md
+Dockerfile
 .gitignore
 .gitattributes
 .vscode
-.dev.sh
-.dockerignore

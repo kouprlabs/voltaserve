@@ -74,12 +74,12 @@ const ResetPasswordPage = () => {
           <Logo className="w-16" isGlossy={true} />
           <h1 className="font-display text-2xl font-medium">Reset Password</h1>
           {isCompleted ? (
-            <Text align="center">
-              Password successfully changed.{' '}
+            <VStack spacing={variables.spacingXs}>
+              <Text align="center">Password successfully changed.</Text>
               <ChakraLink as={Link} to="/sign-in">
                 Sign in
               </ChakraLink>
-            </Text>
+            </VStack>
           ) : (
             <>
               <Formik

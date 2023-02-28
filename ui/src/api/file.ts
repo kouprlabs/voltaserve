@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import useSWR from 'swr'
-import settings from '@/infra/settings'
+import { getConfig } from '@/config/config'
 import { getAccessTokenOrRedirect } from '@/infra/token'
 import { apiFetch, apiFetcher } from './fetch'
 import { Group } from './group'
@@ -127,7 +127,7 @@ export default class FileAPI {
       params.append('parent_id', parentId)
     }
     return this.doUpload(
-      `${settings.apiUrl}/files?${params}`,
+      `${getConfig().apiURL}/files?${params}`,
       'POST',
       request,
       file,
@@ -142,7 +142,7 @@ export default class FileAPI {
     onProgress?: (value: number) => void
   ): Promise<File> {
     return this.doUpload(
-      `${settings.apiUrl}/files/${id}`,
+      `${getConfig().apiURL}/files/${id}`,
       'PATCH',
       request,
       file,

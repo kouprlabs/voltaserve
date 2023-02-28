@@ -55,7 +55,7 @@ const FileViewerPage = () => {
         <title>{file.name}</title>
       </Helmet>
       <Stack direction="row" spacing={0} h="100%">
-        <Drawer localStorageNamespace="viewer">
+        <Drawer localStoragePrefix="voltaserve" localStorageNamespace="viewer">
           <DrawerContent file={file} />
         </Drawer>
         <Stack height="100vh" spacing={0} flexGrow={1}>

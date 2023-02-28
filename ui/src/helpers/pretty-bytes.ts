@@ -5,15 +5,15 @@ export default function prettyBytes(value: number) {
       `Expected a finite number, got ${typeof value}: ${value}`
     )
   }
-  const neg = value < 0
-  if (neg) {
+  const isNegative = value < 0
+  if (isNegative) {
     value = -value
   }
   if (value < 1) {
-    return (neg ? '-' : '') + value + ' B'
+    return (isNegative ? '-' : '') + value + ' B'
   }
   const exponent = Math.min(Math.floor(Math.log10(value) / 3), UNITS.length - 1)
-  const numStr = Number((value / Math.pow(1000, exponent)).toPrecision(3))
+  const number = Number((value / Math.pow(1000, exponent)).toPrecision(3))
   const unit = UNITS[exponent]
-  return (neg ? '-' : '') + numStr + ' ' + unit
+  return (isNegative ? '-' : '') + number + ' ' + unit
 }

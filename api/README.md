@@ -4,7 +4,7 @@
 
 Install [Golang](https://go.dev/doc/install).
 
-### For macOS
+### Install Dependencies For macOS
 
 Install [Homebrew](https://brew.sh).
 
@@ -15,7 +15,7 @@ brew install libreoffice
 brew install poppler
 ```
 
-### For Ubuntu
+### Install Dependencies for Debian and Ubuntu
 
 Run the follwing script:
 

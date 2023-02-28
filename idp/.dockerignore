@@ -1,11 +1,11 @@
-.gitignore
-.gitattributes
 README.md
+DEVELOPMENT.md
 Dockerfile
-.dockerignore
 node_modules
 npm-debug.log
-.next
+tsconfig.tsbuildinfo
+.gitignore
+.gitattributes
 .prettierignore
 .prettierrc.json
-tsconfig.tsbuildinfo
+.vscode
