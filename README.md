@@ -39,7 +39,7 @@ VOLTASERVE_HOSTNAME="192.168.1.100"
 Or any custom hostname, like:
 
 ```properties
-VOLTASERVE_HOSTNAME="my-voltaserve"
+VOLTASERVE_HOSTNAME="my-hostname"
 ```
 
 #### I want to start developing and contributing, how can I start?
