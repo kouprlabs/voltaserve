@@ -4,14 +4,14 @@ import { variables } from '@koupr/ui'
 import { FaFileImage } from 'react-icons/fa'
 import { File } from '@/api/file'
 import { ItemSize } from '..'
-import FileListItemSharedSign from './shared-sign'
+import SharedSign from './shared-sign'
 
-type FileListItemImageIconProps = {
+type ImageIconProps = {
   file: File
   size: ItemSize
 }
 
-const FileListItemImageIcon = ({ file, size }: FileListItemImageIconProps) => {
+const ImageIcon = ({ file, size }: ImageIconProps) => {
   const width = useMemo<number>(() => {
     if (size === ItemSize.Normal) {
       return 130
@@ -65,7 +65,7 @@ const FileListItemImageIcon = ({ file, size }: FileListItemImageIconProps) => {
             borderRadius={variables.borderRadiusSm}
           />
         )}
-        {file.isShared && <FileListItemSharedSign bottom="-5px" right="-5px" />}
+        {file.isShared && <SharedSign bottom="-5px" right="-5px" />}
       </Box>
     )
   } else {
@@ -73,4 +73,4 @@ const FileListItemImageIcon = ({ file, size }: FileListItemImageIconProps) => {
   }
 }
 
-export default FileListItemImageIcon
+export default ImageIcon

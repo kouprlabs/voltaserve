@@ -48,7 +48,7 @@ import {
 } from '@/store/ui/files'
 import downloadFile from '@/helpers/download-file'
 import relativeDate from '@/helpers/relative-date'
-import FileListItemIcon from './icon'
+import Icon from './icon'
 import { performMultiSelect, performRangeSelect } from './perform-select'
 
 export enum ItemSize {
@@ -244,7 +244,7 @@ const FileListItem = ({ file, size }: FileListItemProps) => {
         onDoubleClick={handleDoubleDlick}
         onClick={handleSelectionClick}
       >
-        <FileListItemIcon file={file} size={size} />
+        <Icon file={file} size={size} />
       </Center>
       <Box w={width} title={file.name} px={variables.spacingXs}>
         {file.type === 'folder' && (

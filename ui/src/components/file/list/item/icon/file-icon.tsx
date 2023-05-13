@@ -18,15 +18,15 @@ import {
 import { File } from '@/api/file'
 import * as fileExtension from '@/helpers/file-extension'
 import { ItemSize } from '..'
-import FileListItemImageIcon from './image-icon'
-import FileListItemSharedSign from './shared-sign'
+import ImageIcon from './image-icon'
+import SharedSign from './shared-sign'
 
-type FileListItemFileIconProps = {
+type FileIconProps = {
   file: File
   size: ItemSize
 }
 
-const FileListItemFileIcon = ({ file, size }: FileListItemFileIconProps) => {
+const FileIcon = ({ file, size }: FileIconProps) => {
   const fontSize = useMemo(() => {
     if (size === 'normal') {
       return '72px'
@@ -176,15 +176,15 @@ const FileListItemFileIcon = ({ file, size }: FileListItemFileIconProps) => {
   }
 
   if (isImage) {
-    return <FileListItemImageIcon file={file} size={size} />
+    return <ImageIcon file={file} size={size} />
   } else {
     return (
       <Box position="relative">
         {renderIcon()}
-        {file.isShared && <FileListItemSharedSign bottom="-5px" right="0px" />}
+        {file.isShared && <SharedSign bottom="-5px" right="0px" />}
       </Box>
     )
   }
 }
 
-export default FileListItemFileIcon
+export default FileIcon
