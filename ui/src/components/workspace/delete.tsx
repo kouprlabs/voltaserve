@@ -28,7 +28,7 @@ import {
 import * as Yup from 'yup'
 import WorkspaceAPI, { Workspace } from '@/api/workspace'
 
-type WorkspaceDeleteProps = {
+type DeleteProps = {
   open: boolean
   workspace: Workspace
   onClose?: () => void
@@ -38,11 +38,7 @@ type FormValues = {
   name: string
 }
 
-const WorkspaceDelete = ({
-  open,
-  workspace,
-  onClose,
-}: WorkspaceDeleteProps) => {
+const Delete = ({ open, workspace, onClose }: DeleteProps) => {
   const navigate = useNavigate()
   const { mutate } = useSWRConfig()
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -133,4 +129,4 @@ const WorkspaceDelete = ({
   )
 }
 
-export default WorkspaceDelete
+export default Delete

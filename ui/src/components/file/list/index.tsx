@@ -12,9 +12,13 @@ import {
   selectionUpdated,
 } from '@/store/ui/files'
 import { decodeQuery } from '@/helpers/query'
-import FileListItem, { ItemSize } from './item'
+import Item from './item'
 
-const FileList = () => {
+type ListProps = {
+  scale: number
+}
+
+const List = ({ scale }: ListProps) => {
   const dispatch = useAppDispatch()
   const params = useParams()
   const workspaceId = params.id as string
@@ -121,7 +125,7 @@ const FileList = () => {
         >
           {list.data.map((f) => (
             <WrapItem key={f.id}>
-              <FileListItem file={f} size={ItemSize.Normal} />
+              <Item file={f} scale={scale} />
             </WrapItem>
           ))}
         </Wrap>
@@ -130,4 +134,4 @@ const FileList = () => {
   )
 }
 
-export default FileList
+export default List

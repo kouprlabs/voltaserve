@@ -51,35 +51,19 @@ import relativeDate from '@/helpers/relative-date'
 import Icon from './icon'
 import { performMultiSelect, performRangeSelect } from './perform-select'
 
-export enum ItemSize {
-  Normal = 'normal',
-  Large = 'large',
-}
-
-type FileListItemProps = {
+type ItemProps = {
   file: File
-  size: ItemSize
+  scale: number
 }
 
-const FileListItem = ({ file, size }: FileListItemProps) => {
+const WIDTH = 150
+const MIN_HEIGHT = 110
+
+const Item = ({ file, scale }: ItemProps) => {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
-  const width = useMemo(() => {
-    if (size === ItemSize.Normal) {
-      return '150px'
-    }
-    if (size === ItemSize.Large) {
-      return '250px'
-    }
-  }, [size])
-  const height = useMemo(() => {
-    if (size === ItemSize.Normal) {
-      return '110px'
-    }
-    if (size === ItemSize.Large) {
-      return '210px'
-    }
-  }, [size])
+  const width = useMemo(() => `${WIDTH * scale}px`, [scale])
+  const minHeight = useMemo(() => `${MIN_HEIGHT * scale}px`, [scale])
   const hoverColor = useColorModeValue('gray.100', 'gray.700')
   const activeColor = useColorModeValue('gray.200', 'gray.600')
   const [isCheckboxVisible, setIsCheckboxVisible] = useState(false)
@@ -240,11 +224,11 @@ const FileListItem = ({ file, size }: FileListItemProps) => {
       </Box>
       <Center
         w={width}
-        h={height}
+        minH={minHeight}
         onDoubleClick={handleDoubleDlick}
         onClick={handleSelectionClick}
       >
-        <Icon file={file} size={size} />
+        <Icon file={file} scale={scale} />
       </Center>
       <Box w={width} title={file.name} px={variables.spacingXs}>
         {file.type === 'folder' && (
@@ -252,7 +236,7 @@ const FileListItem = ({ file, size }: FileListItemProps) => {
             as={Link}
             to={`/workspace/${file.workspaceId}/file/${file.id}`}
             textAlign="center"
-            noOfLines={1}
+            noOfLines={3}
             textDecoration="none"
             _hover={{ textDecoration: 'underline' }}
           >
@@ -262,7 +246,7 @@ const FileListItem = ({ file, size }: FileListItemProps) => {
         {file.type === 'file' && (
           <ChakraLink
             textAlign="center"
-            noOfLines={1}
+            noOfLines={3}
             textDecoration="none"
             _hover={{ textDecoration: 'underline' }}
             onClick={() => window.open(`/file/${file.id}`, '_blank')?.focus()}
@@ -278,4 +262,4 @@ const FileListItem = ({ file, size }: FileListItemProps) => {
   )
 }
 
-export default FileListItem
+export default Item

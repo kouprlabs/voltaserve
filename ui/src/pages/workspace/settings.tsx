@@ -16,9 +16,9 @@ import { swrConfig } from '@/api/options'
 import { geEditorPermission } from '@/api/permission'
 import StorageAPI from '@/api/storage'
 import WorkspaceAPI from '@/api/workspace'
-import WorkspaceDelete from '@/components/workspace/delete'
-import WorkspaceEditName from '@/components/workspace/edit-name'
-import WorkspaceEditStorageCapacity from '@/components/workspace/edit-storage-capacity'
+import Delete from '@/components/workspace/delete'
+import EditName from '@/components/workspace/edit-name'
+import EditStorageCapacity from '@/components/workspace/edit-storage-capacity'
 import prettyBytes from '@/helpers/pretty-bytes'
 
 const EditButton = (props: IconButtonProps) => (
@@ -116,17 +116,17 @@ const WorkspaceSettingsPage = () => {
             onClick={() => setIsDeleteModalOpen(true)}
           />
         </HStack>
-        <WorkspaceEditName
+        <EditName
           open={isNameModalOpen}
           workspace={workspace}
           onClose={() => setIsNameModalOpen(false)}
         />
-        <WorkspaceEditStorageCapacity
+        <EditStorageCapacity
           open={isStorageCapacityModalOpen}
           workspace={workspace}
           onClose={() => setIsStorageCapacityModalOpen(false)}
         />
-        <WorkspaceDelete
+        <Delete
           open={isDeleteModalOpen}
           workspace={workspace}
           onClose={() => setIsDeleteModalOpen(false)}

@@ -38,6 +38,26 @@ func (p *ImageProcessor) Resize(inputPath string, width int, height int, outputP
 	return nil
 }
 
+func (p *ImageProcessor) Thumbnail(inputPath string, width int, height int, outputPath string) error {
+	var widthStr string
+	if width == 0 {
+		widthStr = ""
+	} else {
+		widthStr = strconv.FormatInt(int64(width), 10)
+	}
+	var heightStr string
+	if height == 0 {
+		heightStr = ""
+	} else {
+		heightStr = strconv.FormatInt(int64(height), 10)
+	}
+	size := widthStr + "x" + heightStr
+	if err := p.cmd.Exec("gm", "convert", "-thumbnail", size, inputPath, outputPath); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (p *ImageProcessor) Convert(inputPath string, outputPath string) error {
 	if err := p.cmd.Exec("gm", "convert", inputPath, outputPath); err != nil {
 		return err

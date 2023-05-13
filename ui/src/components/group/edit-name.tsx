@@ -25,7 +25,7 @@ import {
 import * as Yup from 'yup'
 import GroupAPI, { Group } from '@/api/group'
 
-type GroupEditNameProps = {
+type EditNameProps = {
   open: boolean
   group: Group
   onClose?: () => void
@@ -35,7 +35,7 @@ type FormValues = {
   name: string
 }
 
-const GroupEditName = ({ open, group, onClose }: GroupEditNameProps) => {
+const EditName = ({ open, group, onClose }: EditNameProps) => {
   const { mutate } = useSWRConfig()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const formSchema = Yup.object().shape({
@@ -127,4 +127,4 @@ const GroupEditName = ({ open, group, onClose }: GroupEditNameProps) => {
   )
 }
 
-export default GroupEditName
+export default EditName

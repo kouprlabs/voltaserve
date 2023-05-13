@@ -1,5 +1,12 @@
-import { useMemo } from 'react'
-import { Box } from '@chakra-ui/react'
+import { useMemo, useState } from 'react'
+import {
+  Box,
+  Image,
+  Skeleton,
+  useColorModeValue,
+  useToken,
+} from '@chakra-ui/react'
+import { variables } from '@koupr/ui'
 import {
   FaFilePdf,
   FaFileExcel,
@@ -17,24 +24,47 @@ import {
 } from 'react-icons/fa'
 import { File } from '@/api/file'
 import * as fileExtension from '@/helpers/file-extension'
-import { ItemSize } from '..'
 import ImageIcon from './image-icon'
 import SharedSign from './shared-sign'
 
 type FileIconProps = {
   file: File
-  size: ItemSize
+  scale: number
 }
 
-const FileIcon = ({ file, size }: FileIconProps) => {
-  const fontSize = useMemo(() => {
-    if (size === 'normal') {
-      return '72px'
+const WIDTH = 130
+const HEIGHT = 90
+const ICON_FONT_SIZE = 72
+
+const FileIcon = ({ file, scale }: FileIconProps) => {
+  const [isLoading, setIsLoading] = useState(true)
+  const isPortrait = useMemo(() => {
+    if (file.thumbnail) {
+      return file.thumbnail.height >= file.thumbnail.width
+    } else {
+      return false
     }
-    if (size === 'large') {
-      return '150px'
+  }, [file])
+  const isLandscape = useMemo(() => {
+    if (file.thumbnail) {
+      return file.thumbnail.width >= file.thumbnail.height
+    } else {
+      return false
     }
-  }, [size])
+  }, [file])
+  const width = useMemo(() => {
+    const value = isLandscape ? WIDTH : HEIGHT
+    return `${value * scale}px`
+  }, [scale, isLandscape])
+  const height = useMemo(() => {
+    const value = isPortrait ? WIDTH : HEIGHT
+    return `${value * scale}px`
+  }, [scale, isPortrait])
+  const iconFontSize = useMemo(() => {
+    return `${ICON_FONT_SIZE * scale}px`
+  }, [scale])
+  const borderColor = useColorModeValue('gray.300', 'gray.700')
+  const [borderColorDecoded] = useToken('colors', [borderColor])
   const isPdf = useMemo(
     () =>
       file.original?.extension && fileExtension.isPdf(file.original.extension),
@@ -128,62 +158,93 @@ const FileIcon = ({ file, size }: FileIconProps) => {
 
   const renderIcon = () => {
     if (isPdf) {
-      return <FaFilePdf fontSize={fontSize} />
+      return <FaFilePdf fontSize={iconFontSize} />
     }
     if (isText) {
-      return <FaFileAlt fontSize={fontSize} />
+      return <FaFileAlt fontSize={iconFontSize} />
     }
     if (isWord) {
-      return <FaFileWord fontSize={fontSize} />
+      return <FaFileWord fontSize={iconFontSize} />
     }
     if (isRichText) {
-      return <FaFileContract fontSize={fontSize} />
+      return <FaFileContract fontSize={iconFontSize} />
     }
     if (isDocument) {
-      return <FaFileWord fontSize={fontSize} />
+      return <FaFileWord fontSize={iconFontSize} />
     }
     if (isExcel) {
-      return <FaFileExcel fontSize={fontSize} />
+      return <FaFileExcel fontSize={iconFontSize} />
     }
     if (isSpreadsheet) {
-      return <FaFileExcel fontSize={fontSize} />
+      return <FaFileExcel fontSize={iconFontSize} />
     }
     if (isPowerPoint) {
-      return <FaFilePowerpoint fontSize={fontSize} />
+      return <FaFilePowerpoint fontSize={iconFontSize} />
     }
     if (isSlides) {
-      return <FaFilePowerpoint fontSize={fontSize} />
+      return <FaFilePowerpoint fontSize={iconFontSize} />
     }
     if (isArchive) {
-      return <FaFileArchive fontSize={fontSize} />
+      return <FaFileArchive fontSize={iconFontSize} />
     }
     if (isFont) {
-      return <FaFont fontSize={fontSize} />
+      return <FaFont fontSize={iconFontSize} />
     }
     if (isAudio) {
-      return <FaFileAudio fontSize={fontSize} />
+      return <FaFileAudio fontSize={iconFontSize} />
     }
     if (isVideo) {
-      return <FaFileVideo fontSize={fontSize} />
+      return <FaFileVideo fontSize={iconFontSize} />
     }
     if (isCode) {
-      return <FaFileCode fontSize={fontSize} />
+      return <FaFileCode fontSize={iconFontSize} />
     }
     if (isCSV) {
-      return <FaFileCsv fontSize={fontSize} />
+      return <FaFileCsv fontSize={iconFontSize} />
     }
-    return <FaFile fontSize={fontSize} />
+    return <FaFile fontSize={iconFontSize} />
   }
 
   if (isImage) {
-    return <ImageIcon file={file} size={size} />
+    return <ImageIcon file={file} scale={scale} />
   } else {
-    return (
-      <Box position="relative">
-        {renderIcon()}
-        {file.isShared && <SharedSign bottom="-5px" right="0px" />}
-      </Box>
-    )
+    if (file.thumbnail) {
+      return (
+        <Box position="relative" width={width} height={height}>
+          <Image
+            src={file.thumbnail?.base64}
+            width={isLoading ? 0 : width}
+            height={isLoading ? 0 : height}
+            style={{
+              objectFit: 'cover',
+              width: isLoading ? 0 : width,
+              height: isLoading ? 0 : height,
+              border: '1px solid',
+              borderColor: borderColorDecoded,
+              borderRadius: variables.borderRadiusSm,
+              visibility: isLoading ? 'hidden' : 'visible',
+            }}
+            alt={file.name}
+            onLoad={() => setIsLoading(false)}
+          />
+          {isLoading && (
+            <Skeleton
+              width={width}
+              height={height}
+              borderRadius={variables.borderRadiusSm}
+            />
+          )}
+          {file.isShared && <SharedSign bottom="-5px" right="-5px" />}
+        </Box>
+      )
+    } else {
+      return (
+        <Box position="relative">
+          {renderIcon()}
+          {file.isShared && <SharedSign bottom="-5px" right="0px" />}
+        </Box>
+      )
+    }
   }
 }
 

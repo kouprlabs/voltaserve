@@ -1,57 +1,68 @@
 import { useMemo, useState } from 'react'
-import { Box, Skeleton, Image } from '@chakra-ui/react'
+import {
+  Box,
+  Skeleton,
+  Image,
+  useColorModeValue,
+  useToken,
+} from '@chakra-ui/react'
 import { variables } from '@koupr/ui'
 import { FaFileImage } from 'react-icons/fa'
 import { File } from '@/api/file'
-import { ItemSize } from '..'
 import SharedSign from './shared-sign'
 
 type ImageIconProps = {
   file: File
-  size: ItemSize
+  scale: number
 }
 
-const ImageIcon = ({ file, size }: ImageIconProps) => {
-  const width = useMemo<number>(() => {
-    if (size === ItemSize.Normal) {
-      return 130
-    } else if (size === ItemSize.Large) {
-      return 230
-    } else {
-      throw new Error(`Invalid item size: ${size}`)
-    }
-  }, [size])
-  const height = useMemo(() => {
-    if (size === ItemSize.Normal) {
-      return 90
-    } else if (size === ItemSize.Large) {
-      return 190
-    } else {
-      throw new Error(`Invalid item size: ${size}`)
-    }
-  }, [size])
-  const fontSize = useMemo(() => {
-    if (size === ItemSize.Normal) {
-      return 72
-    } else if (size === ItemSize.Large) {
-      return 150
-    } else {
-      throw new Error(`Invalid item size: ${size}`)
-    }
-  }, [size])
-  const [isLoading, setIsLoading] = useState(true)
+const WIDTH = 130
+const HEIGHT = 90
+const ICON_FONT_SIZE = 72
 
-  if (file.snapshots[0]?.thumbnail) {
+const ImageIcon = ({ file, scale }: ImageIconProps) => {
+  const isPortrait = useMemo(() => {
+    if (file.thumbnail) {
+      return file.thumbnail.height >= file.thumbnail.width
+    } else {
+      return false
+    }
+  }, [file])
+  const isLandscape = useMemo(() => {
+    if (file.thumbnail) {
+      return file.thumbnail.width >= file.thumbnail.height
+    } else {
+      return false
+    }
+  }, [file])
+  const width = useMemo(() => {
+    const value = isLandscape ? WIDTH : HEIGHT
+    return `${value * scale}px`
+  }, [scale, isLandscape])
+  const height = useMemo(() => {
+    const value = isPortrait ? WIDTH : HEIGHT
+    return `${value * scale}px`
+  }, [scale, isPortrait])
+  const iconFontSize = useMemo(() => {
+    return `${ICON_FONT_SIZE * scale}px`
+  }, [scale])
+  const [isLoading, setIsLoading] = useState(true)
+  const borderColor = useColorModeValue('gray.300', 'gray.700')
+  const [borderColorDecoded] = useToken('colors', [borderColor])
+
+  if (file.thumbnail) {
     return (
       <Box position="relative" width={width} height={height}>
         <Image
-          src={file.snapshots[0]?.thumbnail}
+          src={file.thumbnail?.base64}
           width={isLoading ? 0 : width}
           height={isLoading ? 0 : height}
           style={{
             objectFit: 'cover',
             width: isLoading ? 0 : width,
             height: isLoading ? 0 : height,
+            border: '1px solid',
+            borderColor: borderColorDecoded,
             borderRadius: variables.borderRadiusSm,
             visibility: isLoading ? 'hidden' : 'visible',
           }}
@@ -69,7 +80,7 @@ const ImageIcon = ({ file, size }: ImageIconProps) => {
       </Box>
     )
   } else {
-    return <FaFileImage fontSize={fontSize} />
+    return <FaFileImage fontSize={iconFontSize} />
   }
 }
 

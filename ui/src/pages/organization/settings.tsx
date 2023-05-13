@@ -13,10 +13,10 @@ import { Helmet } from 'react-helmet-async'
 import { swrConfig } from '@/api/options'
 import OrganizationAPI from '@/api/organization'
 import { geEditorPermission } from '@/api/permission'
-import OrganizationDelete from '@/components/organization/delete'
-import OrganizationEditName from '@/components/organization/edit-name'
-import OrganizationInviteMembers from '@/components/organization/invite-members'
-import OrganizationLeave from '@/components/organization/leave'
+import Delete from '@/components/organization/delete'
+import EditName from '@/components/organization/edit-name'
+import InviteMembers from '@/components/organization/invite-members'
+import Leave from '@/components/organization/leave'
 
 const Spacer = () => <Box flexGrow={1} />
 
@@ -96,22 +96,22 @@ const OrganizationSettingsPage = () => {
             onClick={() => setIsDeleteModalOpen(true)}
           />
         </HStack>
-        <OrganizationEditName
+        <EditName
           open={isNameModalOpen}
           organization={org}
           onClose={() => setIsNameModalOpen(false)}
         />
-        <OrganizationInviteMembers
+        <InviteMembers
           open={isInviteMembersModalOpen}
           id={org.id}
           onClose={() => setIsInviteMembersModalOpen(false)}
         />
-        <OrganizationLeave
+        <Leave
           open={isLeaveModalOpen}
           id={org.id}
           onClose={() => setIsLeaveModalOpen(false)}
         />
-        <OrganizationDelete
+        <Delete
           open={isDeleteModalOpen}
           organization={org}
           onClose={() => setIsDeleteModalOpen(false)}

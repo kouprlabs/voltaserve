@@ -28,7 +28,7 @@ import * as Yup from 'yup'
 import GroupAPI, { Group } from '@/api/group'
 import userToString from '@/helpers/user-to-string'
 
-type GroupAddMemberProps = {
+type AddMemberProps = {
   open: boolean
   group: Group
   onClose?: () => void
@@ -38,7 +38,7 @@ type FormValues = {
   userId: string
 }
 
-const GroupAddMember = ({ group, open, onClose }: GroupAddMemberProps) => {
+const AddMember = ({ group, open, onClose }: AddMemberProps) => {
   const navigate = useNavigate()
   const { mutate } = useSWRConfig()
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -139,4 +139,4 @@ const GroupAddMember = ({ group, open, onClose }: GroupAddMemberProps) => {
   )
 }
 
-export default GroupAddMember
+export default AddMember

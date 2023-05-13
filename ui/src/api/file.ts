@@ -5,7 +5,7 @@ import { getAccessTokenOrRedirect } from '@/infra/token'
 import { apiFetch, apiFetcher } from './fetch'
 import { Group } from './group'
 import { PermissionType } from './permission'
-import { Download, Snapshot } from './snapshot'
+import { Download, Snapshot, Thumbnail } from './snapshot'
 import { User } from './user'
 
 export enum FileType {
@@ -22,6 +22,7 @@ export type File = {
   version: number
   original?: Download
   preview?: Download
+  thumbnail?: Thumbnail
   snapshots: Snapshot[]
   permission: PermissionType
   isShared: boolean

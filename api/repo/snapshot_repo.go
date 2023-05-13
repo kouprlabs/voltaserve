@@ -20,7 +20,7 @@ type SnapshotEntity struct {
 	Preview    datatypes.JSON `json:"preview,omitempty" gorm:"column:preview"`
 	Text       datatypes.JSON `json:"text,omitempty" gorm:"column:text"`
 	Ocr        datatypes.JSON `json:"ocr,omitempty" gorm:"column:ocr"`
-	Thumbnail  *string        `json:"thumbnail,omitempty" gorm:"column:thumbnail"`
+	Thumbnail  datatypes.JSON `json:"thumbnail,omitempty" gorm:"column:thumbnail"`
 	CreateTime string         `json:"createTime" gorm:"column:create_time"`
 	UpdateTime *string        `json:"updateTime,omitempty" gorm:"column:update_time"`
 }
@@ -96,8 +96,16 @@ func (s SnapshotEntity) GetOcr() *model.S3Object {
 	return &res
 }
 
-func (s SnapshotEntity) GetThumbnail() *string {
-	return s.Thumbnail
+func (s SnapshotEntity) GetThumbnail() *model.Thumbnail {
+	if s.Thumbnail.String() == "" {
+		return nil
+	}
+	var res = model.Thumbnail{}
+	if err := json.Unmarshal([]byte(s.Thumbnail.String()), &res); err != nil {
+		log.Fatal(err)
+		return nil
+	}
+	return &res
 }
 
 func (s *SnapshotEntity) SetOriginal(m *model.S3Object) {
@@ -144,8 +152,15 @@ func (s *SnapshotEntity) SetOcr(m *model.S3Object) {
 	}
 }
 
-func (s *SnapshotEntity) SetThumbnail(t *string) {
-	s.Thumbnail = t
+func (s *SnapshotEntity) SetThumbnail(m *model.Thumbnail) {
+	b, err := json.Marshal(m)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+	if err := s.Thumbnail.UnmarshalJSON(b); err != nil {
+		log.Fatal(err)
+	}
 }
 
 func (s SnapshotEntity) HasOriginal() bool {

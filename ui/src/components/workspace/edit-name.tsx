@@ -25,7 +25,7 @@ import {
 import * as Yup from 'yup'
 import WorkspaceAPI, { Workspace } from '@/api/workspace'
 
-type WorkspaceEditNameProps = {
+type EditNameProps = {
   open: boolean
   workspace: Workspace
   onClose?: () => void
@@ -35,11 +35,7 @@ type FormValues = {
   name: string
 }
 
-const WorkspaceEditName = ({
-  open,
-  workspace,
-  onClose,
-}: WorkspaceEditNameProps) => {
+const EditName = ({ open, workspace, onClose }: EditNameProps) => {
   const { mutate } = useSWRConfig()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const formSchema = Yup.object().shape({
@@ -130,4 +126,4 @@ const WorkspaceEditName = ({
   )
 }
 
-export default WorkspaceEditName
+export default EditName

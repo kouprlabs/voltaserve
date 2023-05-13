@@ -29,7 +29,7 @@ type ItemProps = {
   upload: Upload
 }
 
-const FileUploadItem = ({ upload: uploadProp }: ItemProps) => {
+const Item = ({ upload: uploadProp }: ItemProps) => {
   const dispatch = useAppDispatch()
   const upload = new UploadDecorator(uploadProp)
   return (
@@ -99,4 +99,4 @@ const FileUploadItem = ({ upload: uploadProp }: ItemProps) => {
   )
 }
 
-export default FileUploadItem
+export default Item

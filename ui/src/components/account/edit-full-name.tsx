@@ -25,7 +25,7 @@ import {
 import * as Yup from 'yup'
 import UserAPI, { User } from '@/api/user'
 
-type AccountEditFullNameProps = {
+type EditFullNameProps = {
   open: boolean
   user: User
   onClose?: () => void
@@ -35,11 +35,7 @@ type FormValues = {
   fullName: string
 }
 
-const AccountEditFullName = ({
-  open,
-  user,
-  onClose,
-}: AccountEditFullNameProps) => {
+const EditFullName = ({ open, user, onClose }: EditFullNameProps) => {
   const { mutate } = useSWRConfig()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const formSchema = Yup.object().shape({
@@ -132,4 +128,4 @@ const AccountEditFullName = ({
   )
 }
 
-export default AccountEditFullName
+export default EditFullName

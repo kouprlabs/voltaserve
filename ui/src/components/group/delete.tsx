@@ -27,7 +27,7 @@ import {
 import * as Yup from 'yup'
 import GroupAPI, { Group } from '@/api/group'
 
-type GroupDeleteProps = {
+type DeleteProps = {
   open: boolean
   group: Group
   onClose?: () => void
@@ -37,7 +37,7 @@ type FormValues = {
   name: string
 }
 
-const GroupDelete = ({ open, group, onClose }: GroupDeleteProps) => {
+const Delete = ({ open, group, onClose }: DeleteProps) => {
   const navigate = useNavigate()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const formSchema = Yup.object().shape({
@@ -125,4 +125,4 @@ const GroupDelete = ({ open, group, onClose }: GroupDeleteProps) => {
   )
 }
 
-export default GroupDelete
+export default Delete

@@ -28,7 +28,7 @@ import StorageAPI from '@/api/storage'
 import WorkspaceAPI, { Workspace } from '@/api/workspace'
 import StorageInput from '@/components/common/storage-input'
 
-type WorkspaceEditStorageCapacityProps = {
+type EditStorageCapacityProps = {
   open: boolean
   workspace: Workspace
   onClose?: () => void
@@ -38,11 +38,11 @@ type FormValues = {
   storageCapacity: number
 }
 
-const WorkspaceEditStorageCapacity = ({
+const EditStorageCapacity = ({
   open,
   workspace,
   onClose,
-}: WorkspaceEditStorageCapacityProps) => {
+}: EditStorageCapacityProps) => {
   const { mutate } = useSWRConfig()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const { data: storageUsage, error } = StorageAPI.useGetWorkspaceUsage(
@@ -156,4 +156,4 @@ const WorkspaceEditStorageCapacity = ({
   )
 }
 
-export default WorkspaceEditStorageCapacity
+export default EditStorageCapacity

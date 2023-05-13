@@ -3,10 +3,10 @@ import { Divider, Stack, Text } from '@chakra-ui/react'
 import { variables } from '@koupr/ui'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { uploadsDrawerClosed } from '@/store/ui/uploads-drawer'
-import FileUploadItem from './item'
+import Item from './item'
 import { queue } from './worker'
 
-const FileUploadList = () => {
+const List = () => {
   const items = useAppSelector((state) => state.entities.uploads.items)
   const dispatch = useAppDispatch()
 
@@ -33,7 +33,7 @@ const FileUploadList = () => {
     <Stack spacing={variables.spacing}>
       {items.map((u, i) => (
         <Stack key={u.id} spacing={variables.spacing}>
-          <FileUploadItem upload={u} />
+          <Item upload={u} />
           {i !== items.length - 1 && <Divider />}
         </Stack>
       ))}
@@ -41,4 +41,4 @@ const FileUploadList = () => {
   )
 }
 
-export default FileUploadList
+export default List

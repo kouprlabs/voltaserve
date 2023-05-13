@@ -7,7 +7,7 @@ type SnapshotModel interface {
 	GetPreview() *S3Object
 	GetText() *S3Object
 	GetOcr() *S3Object
-	GetThumbnail() *string
+	GetThumbnail() *Thumbnail
 	HasOriginal() bool
 	HasPreview() bool
 	HasText() bool
@@ -18,7 +18,7 @@ type SnapshotModel interface {
 	SetPreview(*S3Object)
 	SetText(*S3Object)
 	SetOcr(*S3Object)
-	SetThumbnail(*string)
+	SetThumbnail(*Thumbnail)
 }
 
 type S3Object struct {
@@ -31,4 +31,10 @@ type S3Object struct {
 type ImageProps struct {
 	Width  int `json:"width"`
 	Height int `json:"height"`
+}
+
+type Thumbnail struct {
+	Base64 string `json:"base64"`
+	Width  int    `json:"width"`
+	Height int    `json:"height"`
 }

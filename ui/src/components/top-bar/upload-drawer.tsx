@@ -18,7 +18,7 @@ import { IconDeleteListItem, IconUpload } from '@koupr/ui'
 import { completedUploadsCleared } from '@/store/entities/uploads'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { uploadsDrawerClosed } from '@/store/ui/uploads-drawer'
-import FileUploadList from '@/components/file/upload/list'
+import List from '@/components/file/upload/list'
 
 const UploadDrawer = () => {
   const dispatch = useAppDispatch()
@@ -81,7 +81,7 @@ const UploadDrawer = () => {
           <DrawerCloseButton />
           <DrawerHeader>Uploads</DrawerHeader>
           <DrawerBody>
-            <FileUploadList />
+            <List />
           </DrawerBody>
           <DrawerFooter>
             {hasCompleted && (

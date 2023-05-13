@@ -28,7 +28,7 @@ import {
 import * as Yup from 'yup'
 import OrganizationAPI, { Organization } from '@/api/organization'
 
-type OrganizationDeleteProps = {
+type DeleteProps = {
   open: boolean
   organization: Organization
   onClose?: () => void
@@ -38,11 +38,7 @@ type FormValues = {
   name: string
 }
 
-const OrganizationDelete = ({
-  open,
-  organization,
-  onClose,
-}: OrganizationDeleteProps) => {
+const Delete = ({ open, organization, onClose }: DeleteProps) => {
   const navigate = useNavigate()
   const { mutate } = useSWRConfig()
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -134,4 +130,4 @@ const OrganizationDelete = ({
   )
 }
 
-export default OrganizationDelete
+export default Delete

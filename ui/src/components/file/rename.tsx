@@ -31,7 +31,7 @@ type FormValues = {
   name: string
 }
 
-const FileRename = () => {
+const Rename = () => {
   const dispatch = useAppDispatch()
   const isModalOpen = useAppSelector(
     (state) => state.ui.files.isRenameModalOpen
@@ -126,4 +126,4 @@ const FileRename = () => {
   )
 }
 
-export default FileRename
+export default Rename

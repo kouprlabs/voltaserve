@@ -28,6 +28,7 @@ type File struct {
 	Version     *int64      `json:"version,omitempty"`
 	Original    *Download   `json:"original,omitempty"`
 	Preview     *Download   `json:"preview,omitempty"`
+	Thumbnail   *Thumbnail  `json:"thumbnail,omitempty"`
 	Snapshots   []*Snapshot `json:"snapshots,omitempty"`
 	Permission  string      `json:"permission"`
 	IsShared    bool        `json:"isShared"`
@@ -119,16 +120,22 @@ type FileRenameOptions struct {
 }
 
 type Snapshot struct {
-	Id        string    `json:"id"`
-	Version   int64     `json:"version"`
-	Original  *Download `json:"original,omitempty"`
-	Preview   *Download `json:"preview,omitempty"`
-	Thumbnail *string   `json:"thumbnail,omitempty"`
+	Id        string     `json:"id"`
+	Version   int64      `json:"version"`
+	Original  *Download  `json:"original,omitempty"`
+	Preview   *Download  `json:"preview,omitempty"`
+	Thumbnail *Thumbnail `json:"thumbnail,omitempty"`
 }
 
 type ImageProps struct {
 	Width  int `json:"width"`
 	Height int `json:"height"`
+}
+
+type Thumbnail struct {
+	Base64 string `json:"base64"`
+	Width  int    `json:"width"`
+	Height int    `json:"height"`
 }
 
 type Download struct {
@@ -1220,10 +1227,11 @@ func (mp *FileMapper) MapFile(m model.FileModel, userId string) (*File, error) {
 		UpdateTime:  m.GetUpdateTime(),
 	}
 	if len(snapshots) > 0 {
-		latest := mp.MapSnapshot(snapshots[len(snapshots)-1], m.GetId())
+		latest := mp.MapSnapshot(snapshots[len(snapshots)-1])
 		res.Version = &latest.Version
 		res.Original = latest.Original
 		res.Preview = latest.Preview
+		res.Thumbnail = latest.Thumbnail
 	}
 	res.Permission = ""
 	for _, p := range m.GetUserPermissions() {
@@ -1269,22 +1277,22 @@ func (mp *FileMapper) MapFiles(files []model.FileModel, userId string) ([]*File,
 	return res, nil
 }
 
-func (mp *FileMapper) MapSnapshot(m model.SnapshotModel, fileId string) *Snapshot {
+func (mp *FileMapper) MapSnapshot(m model.SnapshotModel) *Snapshot {
 	s := &Snapshot{
 		Id:      m.GetId(),
 		Version: m.GetVersion(),
 	}
 	if m.HasOriginal() {
-		s.Original = mp.MapOriginal(m.GetOriginal(), fileId)
+		s.Original = mp.MapOriginal(m.GetOriginal())
 	}
 	if m.HasPreview() {
-		s.Preview = mp.MapPreview(m.GetPreview(), fileId)
+		s.Preview = mp.MapPreview(m.GetPreview())
 	}
-	s.Thumbnail = m.GetThumbnail()
+	s.Thumbnail = mp.MapThumbnail(m.GetThumbnail())
 	return s
 }
 
-func (mp *FileMapper) MapOriginal(m *model.S3Object, fileId string) *Download {
+func (mp *FileMapper) MapOriginal(m *model.S3Object) *Download {
 	download := &Download{
 		Extension: filepath.Ext(m.Key),
 		Size:      m.Size,
@@ -1298,7 +1306,7 @@ func (mp *FileMapper) MapOriginal(m *model.S3Object, fileId string) *Download {
 	return download
 }
 
-func (mp *FileMapper) MapPreview(m *model.S3Object, fileId string) *Download {
+func (mp *FileMapper) MapPreview(m *model.S3Object) *Download {
 	download := &Download{
 		Extension: filepath.Ext(m.Key),
 		Size:      m.Size,
@@ -1312,14 +1320,22 @@ func (mp *FileMapper) MapPreview(m *model.S3Object, fileId string) *Download {
 	return download
 }
 
-func (mp *FileMapper) MapOcr(m *model.S3Object, fileId string) *Download {
+func (mp *FileMapper) MapOcr(m *model.S3Object) *Download {
 	return &Download{
 		Extension: filepath.Ext(m.Key),
 		Size:      m.Size,
 	}
 }
 
-func (mp *FileMapper) MapText(m *model.S3Object, fileId string) *Download {
+func (mp *FileMapper) MapThumbnail(m *model.Thumbnail) *Thumbnail {
+	return &Thumbnail{
+		Base64: m.Base64,
+		Width:  m.Width,
+		Height: m.Height,
+	}
+}
+
+func (mp *FileMapper) MapText(m *model.S3Object) *Download {
 	return &Download{
 		Extension: filepath.Ext(m.Key),
 		Size:      m.Size,
@@ -1329,7 +1345,7 @@ func (mp *FileMapper) MapText(m *model.S3Object, fileId string) *Download {
 func (mp *FileMapper) MapSnapshots(snapshots []model.SnapshotModel, fileId string) []*Snapshot {
 	res := make([]*Snapshot, 0)
 	for _, s := range snapshots {
-		res = append(res, mp.MapSnapshot(s, fileId))
+		res = append(res, mp.MapSnapshot(s))
 	}
 	return res
 }

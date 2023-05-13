@@ -63,10 +63,10 @@ func (svc *imageStorage) store(opts imageStorageOptions) error {
 		}
 		inputPath = newInputFile
 	}
-	if err := svc.updateImageProps(snapshot, inputPath); err != nil {
+	if err := svc.setImageProps(snapshot, inputPath); err != nil {
 		return err
 	}
-	if err := svc.updateThumbnail(snapshot, inputPath); err != nil {
+	if err := svc.setThumbnail(snapshot, inputPath); err != nil {
 		return err
 	}
 	if err := svc.metadataUpdater.update(snapshot, opts.FileId); err != nil {
@@ -94,7 +94,7 @@ func (svc *imageStorage) store(opts imageStorageOptions) error {
 	return nil
 }
 
-func (svc *imageStorage) updateImageProps(snapshot model.SnapshotModel, inputPath string) error {
+func (svc *imageStorage) setImageProps(snapshot model.SnapshotModel, inputPath string) error {
 	width, height, err := svc.imageProc.Measure(inputPath)
 	if err != nil {
 		return err
@@ -108,7 +108,7 @@ func (svc *imageStorage) updateImageProps(snapshot model.SnapshotModel, inputPat
 	return nil
 }
 
-func (svc *imageStorage) updateThumbnail(snapshot model.SnapshotModel, inputPath string) error {
+func (svc *imageStorage) setThumbnail(snapshot model.SnapshotModel, inputPath string) error {
 	width := snapshot.GetOriginal().Image.Width
 	height := snapshot.GetOriginal().Image.Height
 	if width > svc.config.Limits.ImagePreviewMaxWidth || height > svc.config.Limits.ImagePreviewMaxHeight {
@@ -126,7 +126,15 @@ func (svc *imageStorage) updateThumbnail(snapshot model.SnapshotModel, inputPath
 		if err != nil {
 			return err
 		}
-		snapshot.SetThumbnail(&b64)
+		thumbnailWidth, thumbnailHeight, err := svc.imageProc.Measure(outputPath)
+		if err != nil {
+			return err
+		}
+		snapshot.SetThumbnail(&model.Thumbnail{
+			Base64: b64,
+			Width:  thumbnailWidth,
+			Height: thumbnailHeight,
+		})
 		if _, err := os.Stat(outputPath); err == nil {
 			if err := os.Remove(outputPath); err != nil {
 				return err
@@ -137,7 +145,15 @@ func (svc *imageStorage) updateThumbnail(snapshot model.SnapshotModel, inputPath
 		if err != nil {
 			return err
 		}
-		snapshot.SetThumbnail(&b64)
+		thumbnailWidth, thumbnailHeight, err := svc.imageProc.Measure(inputPath)
+		if err != nil {
+			return err
+		}
+		snapshot.SetThumbnail(&model.Thumbnail{
+			Base64: b64,
+			Width:  thumbnailWidth,
+			Height: thumbnailHeight,
+		})
 	}
 	return nil
 }

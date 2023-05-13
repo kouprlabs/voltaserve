@@ -25,7 +25,7 @@ import {
 import * as Yup from 'yup'
 import UserAPI, { User } from '@/api/user'
 
-type AccountEditEmailProps = {
+type EditEmailProps = {
   open: boolean
   user: User
   onClose?: () => void
@@ -35,7 +35,7 @@ type FormValues = {
   email: string
 }
 
-const AccountEditEmail = ({ open, user, onClose }: AccountEditEmailProps) => {
+const EditEmail = ({ open, user, onClose }: EditEmailProps) => {
   const { mutate } = useSWRConfig()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const formSchema = Yup.object().shape({
@@ -129,4 +129,4 @@ const AccountEditEmail = ({ open, user, onClose }: AccountEditEmailProps) => {
   )
 }
 
-export default AccountEditEmail
+export default EditEmail

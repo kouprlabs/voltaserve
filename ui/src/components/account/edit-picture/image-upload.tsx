@@ -11,19 +11,19 @@ import {
 import { variables } from '@koupr/ui'
 import { IconEdit } from '@koupr/ui'
 
-type AccountImageUploadProps = {
+type ImageUploadProps = {
   name: string
   initialValue?: string
   disabled: boolean
   onChange: (event: any) => void
 }
 
-const AccountImageUpload = ({
+const ImageUpload = ({
   name,
   initialValue,
   onChange,
   disabled,
-}: AccountImageUploadProps) => {
+}: ImageUploadProps) => {
   const [src, setSrc] = useState<string>()
   const hiddenInput = useRef<HTMLInputElement>(null)
   const blueColor = useColorModeValue('blue.600', 'blue.200')
@@ -105,4 +105,4 @@ const AccountImageUpload = ({
   )
 }
 
-export default AccountImageUpload
+export default ImageUpload
