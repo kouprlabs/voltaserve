@@ -26,40 +26,19 @@ import { File } from '@/api/file'
 import * as fileExtension from '@/helpers/file-extension'
 import ImageIcon from './image-icon'
 import SharedSign from './shared-sign'
+import { getThumbnailHeight, getThumbnailWidth } from './thumbnail-size'
 
 type FileIconProps = {
   file: File
   scale: number
 }
 
-const WIDTH = 130
-const HEIGHT = 90
 const ICON_FONT_SIZE = 72
 
 const FileIcon = ({ file, scale }: FileIconProps) => {
   const [isLoading, setIsLoading] = useState(true)
-  const isPortrait = useMemo(() => {
-    if (file.thumbnail) {
-      return file.thumbnail.height >= file.thumbnail.width
-    } else {
-      return false
-    }
-  }, [file])
-  const isLandscape = useMemo(() => {
-    if (file.thumbnail) {
-      return file.thumbnail.width >= file.thumbnail.height
-    } else {
-      return false
-    }
-  }, [file])
-  const width = useMemo(() => {
-    const value = isLandscape ? WIDTH : HEIGHT
-    return `${value * scale}px`
-  }, [scale, isLandscape])
-  const height = useMemo(() => {
-    const value = isPortrait ? WIDTH : HEIGHT
-    return `${value * scale}px`
-  }, [scale, isPortrait])
+  const width = useMemo(() => getThumbnailWidth(file, scale), [scale, file])
+  const height = useMemo(() => getThumbnailHeight(file, scale), [scale, file])
   const iconFontSize = useMemo(() => {
     return `${ICON_FONT_SIZE * scale}px`
   }, [scale])
