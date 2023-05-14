@@ -13,6 +13,7 @@ import {
   FaFile,
   FaFont,
   FaFileContract,
+  FaFileImage,
 } from 'react-icons/fa'
 import { File } from '@/api/file'
 import * as fileExtension from '@/helpers/file-extension'
@@ -22,10 +23,16 @@ type FontIconProps = {
   scale: number
 }
 
-const ICON_FONT_SIZE = 72
+const SIZE = 72
 
 const FontIcon = ({ file, scale }: FontIconProps) => {
-  const size = useMemo(() => `${ICON_FONT_SIZE * scale}px`, [scale])
+  const size = useMemo(() => `${SIZE * scale}px`, [scale])
+  const isImage = useMemo(
+    () =>
+      file.original?.extension &&
+      fileExtension.isImage(file.original.extension),
+    [file.original]
+  )
   const isPdf = useMemo(
     () =>
       file.original?.extension && fileExtension.isPdf(file.original.extension),
@@ -113,6 +120,9 @@ const FontIcon = ({ file, scale }: FontIconProps) => {
 
   if (isPdf) {
     return <FaFilePdf fontSize={size} />
+  }
+  if (isImage) {
+    return <FaFileImage fontSize={size} />
   }
   if (isText) {
     return <FaFileAlt fontSize={size} />
