@@ -4,7 +4,7 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink } from '@chakra-ui/react'
 import FileAPI, { File } from '@/api/file'
 import WorkspaceAPI from '@/api/workspace'
 
-const FilePath = () => {
+const Path = () => {
   const params = useParams()
   const workspaceId = params.id as string
   const fileId = params.fileId as string
@@ -44,4 +44,4 @@ const FilePath = () => {
   )
 }
 
-export default FilePath
+export default Path

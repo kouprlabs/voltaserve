@@ -27,8 +27,8 @@ import GroupAPI from '@/api/group'
 import { swrConfig } from '@/api/options'
 import { geEditorPermission } from '@/api/permission'
 import { User } from '@/api/user'
-import GroupAddMember from '@/components/group/add-member'
-import GroupRemoveMember from '@/components/group/remove-member'
+import AddMember from '@/components/group/add-member'
+import RemoveMember from '@/components/group/remove-member'
 
 const GroupMembersPage = () => {
   const params = useParams()
@@ -111,7 +111,7 @@ const GroupMembersPage = () => {
             </Tbody>
           </Table>
           {userToRemove && (
-            <GroupRemoveMember
+            <RemoveMember
               isOpen={isRemoveMemberModalOpen}
               user={userToRemove}
               group={group}
@@ -141,7 +141,7 @@ const GroupMembersPage = () => {
               )}
             </VStack>
           </Center>
-          <GroupAddMember
+          <AddMember
             open={isAddMembersModalOpen}
             group={group}
             onClose={() => setIsAddMembersModalOpen(false)}

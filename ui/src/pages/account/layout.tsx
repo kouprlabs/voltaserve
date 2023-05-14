@@ -19,7 +19,7 @@ import { variables, IconEdit } from '@koupr/ui'
 import NotificationAPI from '@/api/notification'
 import { swrConfig } from '@/api/options'
 import UserAPI from '@/api/user'
-import AccountEditPicture from '@/components/account/edit-picture'
+import EditPicture from '@/components/account/edit-picture'
 
 const AccountLayout = () => {
   const location = useLocation()
@@ -107,7 +107,7 @@ const AccountLayout = () => {
         </Tabs>
         <Outlet />
       </Stack>
-      <AccountEditPicture
+      <EditPicture
         open={isImageModalOpen}
         user={user}
         onClose={() => setIsImageModalOpen(false)}

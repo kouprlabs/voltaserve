@@ -44,7 +44,7 @@ import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { selectionUpdated, sharingModalDidClose } from '@/store/ui/files'
 import userToString from '@/helpers/user-to-string'
 
-const FileSharing = () => {
+const Sharing = () => {
   const params = useParams()
   const dispatch = useAppDispatch()
   const { data: workspace } = WorkspaceAPI.useGetById(params.id as string)
@@ -502,4 +502,4 @@ const FormSkeleton = () => (
   </Stack>
 )
 
-export default FileSharing
+export default Sharing

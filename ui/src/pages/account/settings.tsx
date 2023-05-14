@@ -16,10 +16,10 @@ import { Helmet } from 'react-helmet-async'
 import { swrConfig } from '@/api/options'
 import StorageAPI from '@/api/storage'
 import UserAPI from '@/api/user'
-import AccountChangePassword from '@/components/account/change-password'
-import AccountDelete from '@/components/account/delete'
-import AccountEditEmail from '@/components/account/edit-email'
-import AccountEditFullName from '@/components/account/edit-full-name'
+import ChangePassword from '@/components/account/change-password'
+import Delete from '@/components/account/delete'
+import EditEmail from '@/components/account/edit-email'
+import EditFullName from '@/components/account/edit-full-name'
 import prettyBytes from '@/helpers/pretty-bytes'
 
 const EditButton = (props: IconButtonProps) => (
@@ -140,22 +140,22 @@ const AccountSettingsPage = () => {
             />
           </HStack>
         </Stack>
-        <AccountEditFullName
+        <EditFullName
           open={isFullNameModalOpen}
           user={user}
           onClose={() => setIsFullNameModalOpen(false)}
         />
-        <AccountEditEmail
+        <EditEmail
           open={isEmailModalOpen}
           user={user}
           onClose={() => setIsEmailModalOpen(false)}
         />
-        <AccountChangePassword
+        <ChangePassword
           open={isPasswordModalOpen}
           user={user}
           onClose={() => setIsPasswordModalOpen(false)}
         />
-        <AccountDelete
+        <Delete
           open={isDeleteModalOpen}
           onClose={() => setIsDeleteModalOpen(false)}
         />

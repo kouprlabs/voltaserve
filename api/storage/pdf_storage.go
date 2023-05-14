@@ -19,6 +19,7 @@ type pdfStorage struct {
 	metadataUpdater *storageMetadataUpdater
 	workspaceCache  *cache.WorkspaceCache
 	fileCache       *cache.FileCache
+	imageProc       *infra.ImageProcessor
 	config          config.Config
 }
 
@@ -37,6 +38,7 @@ func newPDFStorage() *pdfStorage {
 		metadataUpdater: newMetadataUpdater(),
 		workspaceCache:  cache.NewWorkspaceCache(),
 		fileCache:       cache.NewFileCache(),
+		imageProc:       infra.NewImageProcessor(),
 		config:          config.GetConfig(),
 	}
 }
@@ -48,6 +50,9 @@ func (svc *pdfStorage) store(opts pdfStorageOptions) error {
 	}
 	inputPath := filepath.FromSlash(os.TempDir() + helpers.NewId())
 	if err := svc.minio.GetFile(opts.S3Key, inputPath, opts.S3Bucket); err != nil {
+		return err
+	}
+	if err := svc.setThumbnail(snapshot, inputPath); err != nil {
 		return err
 	}
 	text, size, err := svc.extractText(inputPath)
@@ -67,6 +72,32 @@ func (svc *pdfStorage) store(opts pdfStorageOptions) error {
 	}
 	if _, err := os.Stat(inputPath); err == nil {
 		if err := os.Remove(inputPath); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (svc *pdfStorage) setThumbnail(snapshot model.SnapshotModel, inputPath string) error {
+	outputPath := filepath.FromSlash(os.TempDir() + "/" + helpers.NewId() + ".jpg")
+	if err := svc.imageProc.Thumbnail(inputPath, 0, svc.config.Limits.ImagePreviewMaxHeight, outputPath); err != nil {
+		return err
+	}
+	b64, err := infra.ImageToBase64(outputPath)
+	if err != nil {
+		return err
+	}
+	thumbnailWidth, thumbnailHeight, err := svc.imageProc.Measure(outputPath)
+	if err != nil {
+		return err
+	}
+	snapshot.SetThumbnail(&model.Thumbnail{
+		Base64: b64,
+		Width:  thumbnailWidth,
+		Height: thumbnailHeight,
+	})
+	if _, err := os.Stat(outputPath); err == nil {
+		if err := os.Remove(outputPath); err != nil {
 			return err
 		}
 	}

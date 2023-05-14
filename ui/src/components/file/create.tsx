@@ -32,7 +32,7 @@ type FormValues = {
   name: string
 }
 
-const FileCreate = () => {
+const Create = () => {
   const params = useParams()
   const workspaceId = params.id as string
   const fileId = params.fileId as string
@@ -139,4 +139,4 @@ const FileCreate = () => {
   )
 }
 
-export default FileCreate
+export default Create

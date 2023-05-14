@@ -24,9 +24,9 @@ import {
 } from 'formik'
 import * as Yup from 'yup'
 import UserAPI, { User } from '@/api/user'
-import AccountImageUpload from './image-upload'
+import ImageUpload from './image-upload'
 
-type AccountEditPictureProps = {
+type EditPictureProps = {
   open: boolean
   user: User
   onClose?: () => void
@@ -36,11 +36,7 @@ type FormValues = {
   picture: any
 }
 
-const AccountEditPicture = ({
-  open,
-  user,
-  onClose,
-}: AccountEditPictureProps) => {
+const EditPicture = ({ open, user, onClose }: EditPictureProps) => {
   const { mutate } = useSWRConfig()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [deletionInProgress, setDeletionInProgress] = useState(false)
@@ -123,7 +119,7 @@ const AccountEditPicture = ({
                           errors.picture && touched.picture ? true : false
                         }
                       >
-                        <AccountImageUpload
+                        <ImageUpload
                           {...field}
                           initialValue={user.picture}
                           disabled={isSubmitting}
@@ -176,4 +172,4 @@ const AccountEditPicture = ({
   )
 }
 
-export default AccountEditPicture
+export default EditPicture

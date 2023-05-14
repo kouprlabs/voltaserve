@@ -32,8 +32,8 @@ import { swrConfig } from '@/api/options'
 import OrganizationAPI from '@/api/organization'
 import { geEditorPermission } from '@/api/permission'
 import { User } from '@/api/user'
-import OrganizationInviteMembers from '@/components/organization/invite-members'
-import OrganizationRemoveMember from '@/components/organization/remove-member'
+import InviteMembers from '@/components/organization/invite-members'
+import RemoveMember from '@/components/organization/remove-member'
 
 const OrganizationMembersPage = () => {
   const params = useParams()
@@ -123,7 +123,7 @@ const OrganizationMembersPage = () => {
             </Tbody>
           </Table>
           {userToRemove && (
-            <OrganizationRemoveMember
+            <RemoveMember
               isOpen={isRemoveMemberModalOpen}
               user={userToRemove}
               organization={org}
@@ -150,7 +150,7 @@ const OrganizationMembersPage = () => {
               )}
             </VStack>
           </Center>
-          <OrganizationInviteMembers
+          <InviteMembers
             open={isInviteMembersModalOpen}
             id={org.id}
             onClose={() => setIsInviteMembersModalOpen(false)}

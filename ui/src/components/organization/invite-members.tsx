@@ -28,7 +28,7 @@ import {
 import * as Yup from 'yup'
 import InvitationAPI from '@/api/invitation'
 
-type OrganizationInviteMembersProps = {
+type InviteMembersProps = {
   open: boolean
   id: string
   onClose?: () => void
@@ -38,11 +38,7 @@ type FormValues = {
   emails: string
 }
 
-const OrganizationInviteMembers = ({
-  open,
-  id,
-  onClose,
-}: OrganizationInviteMembersProps) => {
+const InviteMembers = ({ open, id, onClose }: InviteMembersProps) => {
   const navigate = useNavigate()
   const { mutate } = useSWRConfig()
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -145,4 +141,4 @@ const OrganizationInviteMembers = ({
   )
 }
 
-export default OrganizationInviteMembers
+export default InviteMembers

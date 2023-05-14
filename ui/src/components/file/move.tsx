@@ -15,9 +15,9 @@ import FileAPI from '@/api/file'
 import { filesRemoved, filesUpdated } from '@/store/entities/files'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { moveModalDidClose, selectionUpdated } from '@/store/ui/files'
-import FileBrowse from './browse'
+import Browse from './browse'
 
-const FileMove = () => {
+const Move = () => {
   const params = useParams()
   const fileId = params.fileId as string
   const dispatch = useAppDispatch()
@@ -57,7 +57,7 @@ const FileMove = () => {
         <ModalHeader>Move {selection.length} Item(s) to…</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-          <FileBrowse onChange={(id) => setNewFileId(id)} />
+          <Browse onChange={(id) => setNewFileId(id)} />
         </ModalBody>
         <ModalFooter>
           <Button
@@ -85,4 +85,4 @@ const FileMove = () => {
   )
 }
 
-export default FileMove
+export default Move

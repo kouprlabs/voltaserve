@@ -27,7 +27,7 @@ import {
 import * as Yup from 'yup'
 import UserAPI from '@/api/user'
 
-type AccountDeleteProps = {
+type DeleteProps = {
   open: boolean
   onClose?: () => void
 }
@@ -36,7 +36,7 @@ type FormValues = {
   password: string
 }
 
-const AccountDelete = ({ open, onClose }: AccountDeleteProps) => {
+const Delete = ({ open, onClose }: DeleteProps) => {
   const navigate = useNavigate()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const formSchema = Yup.object().shape({
@@ -134,4 +134,4 @@ const AccountDelete = ({ open, onClose }: AccountDeleteProps) => {
   )
 }
 
-export default AccountDelete
+export default Delete

@@ -14,7 +14,7 @@ import { variables } from '@koupr/ui'
 import OrganizationAPI, { Organization } from '@/api/organization'
 import { User } from '@/api/user'
 
-type OrganizationRemoveMemberProps = {
+type RemoveMemberProps = {
   organization: Organization
   user: User
   isOpen: boolean
@@ -22,13 +22,13 @@ type OrganizationRemoveMemberProps = {
   onCompleted?: () => void
 }
 
-const OrganizationRemoveMember = ({
+const RemoveMember = ({
   organization,
   user,
   isOpen,
   onCompleted,
   onClose,
-}: OrganizationRemoveMemberProps) => {
+}: RemoveMemberProps) => {
   const [loading, setLoading] = useState(false)
 
   const handleRemoveMember = useCallback(async () => {
@@ -89,4 +89,4 @@ const OrganizationRemoveMember = ({
   )
 }
 
-export default OrganizationRemoveMember
+export default RemoveMember

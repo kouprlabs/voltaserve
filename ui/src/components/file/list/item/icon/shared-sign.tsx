@@ -1,19 +1,14 @@
 import { Circle } from '@chakra-ui/react'
 import { FiUsers } from 'react-icons/fi'
 
-type FileListItemSharedSignProps = {
+type SharedSignProps = {
   top?: string
   right?: string
   bottom?: string
   left?: string
 }
 
-const FileListItemSharedSign = ({
-  top,
-  right,
-  bottom,
-  left,
-}: FileListItemSharedSignProps) => (
+const SharedSign = ({ top, right, bottom, left }: SharedSignProps) => (
   <Circle
     position="absolute"
     top={top}
@@ -30,4 +25,4 @@ const FileListItemSharedSign = ({
   </Circle>
 )
 
-export default FileListItemSharedSign
+export default SharedSign
