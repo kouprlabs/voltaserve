@@ -15,9 +15,9 @@ import FileAPI from '@/api/file'
 import { listUpdated } from '@/store/entities/files'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { copyModalDidClose, selectionUpdated } from '@/store/ui/files'
-import FileBrowse from './browse'
+import Browse from './browse'
 
-const FileCopy = () => {
+const Copy = () => {
   const dispatch = useAppDispatch()
   const { fileId: fileIdQuery } = useParams()
   const isModalOpen = useAppSelector((state) => state.ui.files.isCopyModalOpen)
@@ -52,7 +52,7 @@ const FileCopy = () => {
         <ModalHeader>Copy {selection.length} Item(s) to…</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-          <FileBrowse onChange={(id) => setFileId(id)} />
+          <Browse onChange={(id) => setFileId(id)} />
         </ModalBody>
         <ModalFooter>
           <Button
@@ -79,4 +79,4 @@ const FileCopy = () => {
   )
 }
 
-export default FileCopy
+export default Copy

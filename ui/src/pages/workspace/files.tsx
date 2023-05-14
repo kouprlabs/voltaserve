@@ -9,15 +9,15 @@ import WorkspaceAPI from '@/api/workspace'
 import { currentUpdated, listPatched } from '@/store/entities/files'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { selectionUpdated } from '@/store/ui/files'
-import FileCopy from '@/components/file/copy'
-import FileCreate from '@/components/file/create'
-import FileDelete from '@/components/file/delete'
-import FileList from '@/components/file/list'
-import FileMove from '@/components/file/move'
-import FilePath from '@/components/file/path'
-import FileRename from '@/components/file/rename'
-import FileSharing from '@/components/file/sharing'
-import FileToolbar from '@/components/file/toolbar'
+import Copy from '@/components/file/copy'
+import Create from '@/components/file/create'
+import Delete from '@/components/file/delete'
+import List from '@/components/file/list'
+import Move from '@/components/file/move'
+import Path from '@/components/file/path'
+import Rename from '@/components/file/rename'
+import Sharing from '@/components/file/sharing'
+import Toolbar from '@/components/file/toolbar'
 import { percentageOf } from '@/helpers/percentage-of'
 
 let isLoadingMore = false
@@ -27,6 +27,7 @@ const WorkspaceFilesPage = () => {
   const fileId = params.fileId as string
   const dispatch = useAppDispatch()
   const list = useAppSelector((state) => state.entities.files.list)
+  const iconScale = useAppSelector((state) => state.ui.files.iconScale)
   const [isSpinnerVisible, setIsSpinnerVisible] = useState(false)
   const borderColor = useColorModeValue('gray.300', 'gray.600')
   const listContainer = useRef<HTMLDivElement>(null)
@@ -81,8 +82,8 @@ const WorkspaceFilesPage = () => {
         overflow="hidden"
         flexGrow={1}
       >
-        <FilePath />
-        <FileToolbar />
+        <Path />
+        <Toolbar />
         <Box
           ref={listContainer}
           overflowY="auto"
@@ -94,7 +95,7 @@ const WorkspaceFilesPage = () => {
           onScroll={handleScroll}
           onClick={() => dispatch(selectionUpdated([]))}
         >
-          <FileList />
+          <List scale={iconScale} />
           {isSpinnerVisible && (
             <Center w="100%" mb={variables.spacing2Xl} justifyContent="center">
               <Spinner />
@@ -102,12 +103,12 @@ const WorkspaceFilesPage = () => {
           )}
         </Box>
       </Stack>
-      <FileSharing />
-      <FileMove />
-      <FileCopy />
-      <FileCreate />
-      <FileDelete />
-      <FileRename />
+      <Sharing />
+      <Move />
+      <Copy />
+      <Create />
+      <Delete />
+      <Rename />
     </>
   )
 }

@@ -25,7 +25,7 @@ import {
 import * as Yup from 'yup'
 import OrganizationAPI, { Organization } from '@/api/organization'
 
-type OrganizationEditNameProps = {
+type EditNameProps = {
   open: boolean
   organization: Organization
   onClose?: () => void
@@ -35,11 +35,7 @@ type FormValues = {
   name: string
 }
 
-const OrganizationEditName = ({
-  open,
-  organization,
-  onClose,
-}: OrganizationEditNameProps) => {
+const EditName = ({ open, organization, onClose }: EditNameProps) => {
   const { mutate } = useSWRConfig()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const formSchema = Yup.object().shape({
@@ -130,4 +126,4 @@ const OrganizationEditName = ({
   )
 }
 
-export default OrganizationEditName
+export default EditName

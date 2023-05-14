@@ -33,7 +33,7 @@ import InvitationAPI, { Invitation, InvitationStatus } from '@/api/invitation'
 import { swrConfig } from '@/api/options'
 import OrganizationAPI from '@/api/organization'
 import { geEditorPermission } from '@/api/permission'
-import OrganizationInviteMembers from '@/components/organization/invite-members'
+import InviteMembers from '@/components/organization/invite-members'
 import prettyDate from '@/helpers/pretty-date'
 
 type StatusProps = {
@@ -116,7 +116,7 @@ const OrganizationInvitationsPage = () => {
               )}
             </VStack>
           </Center>
-          <OrganizationInviteMembers
+          <InviteMembers
             open={isInviteMembersModalOpen}
             id={org.id}
             onClose={() => setIsInviteMembersModalOpen(false)}

@@ -4,7 +4,7 @@ export type Snapshot = {
   preview?: Download
   ocr?: Download
   text?: Download
-  thumbnail?: string
+  thumbnail?: Thumbnail
 }
 
 export type Download = {
@@ -14,6 +14,12 @@ export type Download = {
 }
 
 export type ImageProps = {
+  width: number
+  height: number
+}
+
+export type Thumbnail = {
+  base64: string
   width: number
   height: number
 }

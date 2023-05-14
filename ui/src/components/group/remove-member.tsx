@@ -14,7 +14,7 @@ import { variables } from '@koupr/ui'
 import GroupAPI, { Group } from '@/api/group'
 import { User } from '@/api/user'
 
-type GroupRemoveMemberProps = {
+type RemoveMemberProps = {
   group: Group
   user: User
   isOpen: boolean
@@ -22,13 +22,13 @@ type GroupRemoveMemberProps = {
   onCompleted?: () => void
 }
 
-const GroupRemoveMember = ({
+const RemoveMember = ({
   group,
   user,
   isOpen,
   onCompleted,
   onClose,
-}: GroupRemoveMemberProps) => {
+}: RemoveMemberProps) => {
   const [loading, setLoading] = useState(false)
 
   const handleRemoveMember = useCallback(async () => {
@@ -89,4 +89,4 @@ const GroupRemoveMember = ({
   )
 }
 
-export default GroupRemoveMember
+export default RemoveMember

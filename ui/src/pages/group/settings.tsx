@@ -12,9 +12,9 @@ import { Helmet } from 'react-helmet-async'
 import GroupAPI from '@/api/group'
 import { swrConfig } from '@/api/options'
 import { geEditorPermission } from '@/api/permission'
-import GroupAddMember from '@/components/group/add-member'
-import GroupDelete from '@/components/group/delete'
-import GroupEditName from '@/components/group/edit-name'
+import AddMember from '@/components/group/add-member'
+import Delete from '@/components/group/delete'
+import EditName from '@/components/group/edit-name'
 
 const Spacer = () => <Box flexGrow={1} />
 
@@ -84,17 +84,17 @@ const GroupSettingsPage = () => {
             onClick={() => setDeleteModalOpen(true)}
           />
         </HStack>
-        <GroupEditName
+        <EditName
           open={isNameModalOpen}
           group={group}
           onClose={() => setIsNameModalOpen(false)}
         />
-        <GroupAddMember
+        <AddMember
           open={isAddMembersModalOpen}
           group={group}
           onClose={() => setIsAddMembersModalOpen(false)}
         />
-        <GroupDelete
+        <Delete
           open={deleteModalOpen}
           group={group}
           onClose={() => setDeleteModalOpen(false)}

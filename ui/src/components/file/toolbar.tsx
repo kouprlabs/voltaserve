@@ -1,4 +1,4 @@
-import { ChangeEvent, useCallback, useRef } from 'react'
+import { ChangeEvent, useCallback, useEffect, useRef } from 'react'
 import { useParams } from 'react-router-dom'
 import {
   Button,
@@ -12,6 +12,11 @@ import {
   MenuItem,
   MenuList,
   Portal,
+  Spacer,
+  Slider,
+  SliderTrack,
+  SliderFilledTrack,
+  SliderThumb,
 } from '@chakra-ui/react'
 import { variables } from '@koupr/ui'
 import {
@@ -34,6 +39,7 @@ import {
   copyModalDidOpen,
   createModalDidOpen,
   deleteModalDidOpen,
+  iconScaleUpdated,
   moveModalDidOpen,
   renameModalDidOpen,
   selectionUpdated,
@@ -43,7 +49,9 @@ import { uploadsDrawerOpened } from '@/store/ui/uploads-drawer'
 import downloadFile from '@/helpers/download-file'
 import mapFileList from '@/helpers/map-file-list'
 
-const FileToolbar = () => {
+const ICON_SCALE_LOCAL_STORAGE_KEY = 'voltaserve_file_icon_scale'
+
+const Toolbar = () => {
   const dispatch = useAppDispatch()
   const params = useParams()
   const workspaceId = params.id as string
@@ -60,6 +68,7 @@ const FileToolbar = () => {
   )
   const folder = useAppSelector((state) => state.entities.files.folder)
   const files = useAppSelector((state) => state.entities.files.list?.data)
+  const iconScale = useAppSelector((state) => state.ui.files.iconScale)
   const hasOwnerPermission = useAppSelector(
     (state) =>
       state.entities.files.list?.data.findIndex(
@@ -79,6 +88,13 @@ const FileToolbar = () => {
       ) === -1
   )
   const uploadHiddenInput = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    const iconScale = localStorage.getItem(ICON_SCALE_LOCAL_STORAGE_KEY)
+    if (iconScale) {
+      dispatch(iconScaleUpdated(JSON.parse(iconScale)))
+    }
+  }, [dispatch])
 
   const handleFileChange = useCallback(
     async (event: ChangeEvent<HTMLInputElement>) => {
@@ -103,6 +119,14 @@ const FileToolbar = () => {
       }
     },
     [workspaceId, fileId, dispatch]
+  )
+
+  const handleIconScaleChange = useCallback(
+    (value: number) => {
+      localStorage.setItem(ICON_SCALE_LOCAL_STORAGE_KEY, JSON.stringify(value))
+      dispatch(iconScaleUpdated(value))
+    },
+    [dispatch]
   )
 
   return (
@@ -234,6 +258,21 @@ const FileToolbar = () => {
             </Menu>
           </Box>
         </Stack>
+        <Spacer />
+        <Slider
+          w="200px"
+          value={iconScale}
+          min={1}
+          max={2.5}
+          step={0.25}
+          onChange={handleIconScaleChange}
+        >
+          <SliderTrack>
+            <Box position="relative" />
+            <SliderFilledTrack />
+          </SliderTrack>
+          <SliderThumb />
+        </Slider>
       </Stack>
       <input
         ref={uploadHiddenInput}
@@ -246,4 +285,4 @@ const FileToolbar = () => {
   )
 }
 
-export default FileToolbar
+export default Toolbar

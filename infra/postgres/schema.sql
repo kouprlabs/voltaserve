@@ -133,7 +133,7 @@ CREATE TABLE IF NOT EXISTS snapshot
   preview      jsonb,
   text         jsonb,
   ocr          jsonb,
-  thumbnail    text,
+  thumbnail    jsonb,
   create_time  text NOT NULL DEFAULT (to_json(now())#>>'{}'),
   update_time  text
 );

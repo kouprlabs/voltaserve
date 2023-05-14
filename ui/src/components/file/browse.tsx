@@ -22,7 +22,7 @@ type BrowseProps = {
   onChange?: (id: string) => void
 }
 
-const FileBrowse = ({ onChange }: BrowseProps) => {
+const Browse = ({ onChange }: BrowseProps) => {
   const params = useParams()
   const { data: workspace } = WorkspaceAPI.useGetById(params.id as string)
   const [folders, setFolders] = useState<File[]>([])
@@ -167,4 +167,4 @@ const FileBrowse = ({ onChange }: BrowseProps) => {
   )
 }
 
-export default FileBrowse
+export default Browse

@@ -18,7 +18,7 @@ import { filesRemoved } from '@/store/entities/files'
 import { useAppSelector } from '@/store/hook'
 import { deleteModalDidClose, selectionUpdated } from '@/store/ui/files'
 
-const FileDelete = () => {
+const Delete = () => {
   const params = useParams()
   const dispatch = useDispatch()
   const selection = useAppSelector((state) => state.ui.files.selection)
@@ -81,4 +81,4 @@ const FileDelete = () => {
   )
 }
 
-export default FileDelete
+export default Delete

@@ -14,13 +14,13 @@ import {
 import { variables } from '@koupr/ui'
 import OrganizationAPI from '@/api/organization'
 
-type OrganizationLeaveProps = {
+type LeaveProps = {
   open: boolean
   id: string
   onClose?: () => void
 }
 
-const OrganizationLeave = ({ open, id, onClose }: OrganizationLeaveProps) => {
+const Leave = ({ open, id, onClose }: LeaveProps) => {
   const navigate = useNavigate()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -76,4 +76,4 @@ const OrganizationLeave = ({ open, id, onClose }: OrganizationLeaveProps) => {
   )
 }
 
-export default OrganizationLeave
+export default Leave

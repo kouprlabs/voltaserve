@@ -10,6 +10,7 @@ export type FilesState = {
   isDeleteModalOpen: boolean
   isRenameModalOpen: boolean
   isShareModalOpen: boolean
+  iconScale: number
 }
 
 const initialState: FilesState = {
@@ -22,6 +23,7 @@ const initialState: FilesState = {
   isDeleteModalOpen: false,
   isRenameModalOpen: false,
   isShareModalOpen: false,
+  iconScale: 1,
 }
 
 const slice = createSlice({
@@ -79,6 +81,9 @@ const slice = createSlice({
     rangeSelectKeyUpdated: (state, action: PayloadAction<boolean>) => {
       state.isRangeSelectActive = action.payload
     },
+    iconScaleUpdated: (state, action: PayloadAction<number>) => {
+      state.iconScale = action.payload
+    },
   },
 })
 
@@ -100,6 +105,7 @@ export const {
   sharingModalDidClose,
   multiSelectKeyUpdated,
   rangeSelectKeyUpdated,
+  iconScaleUpdated,
 } = slice.actions
 
 export default slice.reducer

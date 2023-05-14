@@ -26,7 +26,7 @@ import {
 import * as Yup from 'yup'
 import UserAPI, { User } from '@/api/user'
 
-type AccountChangePasswordProps = {
+type ChangePasswordProps = {
   open: boolean
   user: User
   onClose?: () => void
@@ -37,10 +37,7 @@ type FormValues = {
   newPassword: string
 }
 
-const AccountChangePassword = ({
-  open,
-  onClose,
-}: AccountChangePasswordProps) => {
+const ChangePassword = ({ open, onClose }: ChangePasswordProps) => {
   const { mutate } = useSWRConfig()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const initialValues: FormValues = { currentPassword: '', newPassword: '' }
@@ -162,4 +159,4 @@ const AccountChangePassword = ({
   )
 }
 
-export default AccountChangePassword
+export default ChangePassword
