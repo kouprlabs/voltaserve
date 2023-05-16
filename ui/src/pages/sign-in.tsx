@@ -28,7 +28,7 @@ import TokenAPI from '@/api/token'
 import WorkspaceAPI from '@/api/workspace'
 import Logo from '@/components/common/logo'
 import FullLayout from '@/components/layout/full'
-import { saveAccessToken } from '@/infra/token'
+import { saveToken } from '@/infra/token'
 import { gigabyteToByte } from '@/helpers/convert-storage'
 
 type FormValues = {
@@ -56,7 +56,7 @@ const SignInPage = () => {
           password,
           grant_type: 'password',
         })
-        saveAccessToken(token)
+        saveToken(token)
         const { length: organizationCount } = await OrganizationAPI.getAll()
         if (organizationCount === 0) {
           const { id: organizationId } = await OrganizationAPI.create({
