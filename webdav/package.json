@@ -1,0 +1,20 @@
+{
+  "name": "voltaserve-webdav",
+  "version": "1.0.0",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "dev": "nodemon ./app.js"
+  },
+  "engines": {
+    "node": ">= 18.x"
+  },
+  "dependencies": {
+    "passport": "0.6.0",
+    "passport-http": "0.3.0",
+    "xml2js": "0.5.0"
+  },
+  "devDependencies": {
+    "nodemon": "2.0.22"
+  }
+}
