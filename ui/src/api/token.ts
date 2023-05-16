@@ -11,8 +11,8 @@ export type Token = {
 
 export type TokenExchangeOptions = {
   grant_type: TokenGrantType
-  username: string
-  password: string
+  username?: string
+  password?: string
   refresh_token?: string
   locale?: string
 }
@@ -21,16 +21,28 @@ export default class TokenAPI {
   static async exchange(options: TokenExchangeOptions): Promise<Token> {
     const formBody = []
     formBody.push(`grant_type=${options.grant_type}`)
-    formBody.push(`username=${encodeURIComponent(options.username)}`)
-    formBody.push(`password=${encodeURIComponent(options.password)}`)
-    if (options.refresh_token) {
-      formBody.push(`username=${encodeURIComponent(options.refresh_token)}`)
+    if (options.grant_type === 'password') {
+      if (options.username && options.password) {
+        formBody.push(`username=${encodeURIComponent(options.username)}`)
+        formBody.push(`password=${encodeURIComponent(options.password)}`)
+      } else {
+        throw new Error('Username or password missing!')
+      }
+    }
+    if (options.grant_type === 'refresh_token') {
+      if (options.refresh_token) {
+        formBody.push(
+          `refresh_token=${encodeURIComponent(options.refresh_token)}`
+        )
+      } else {
+        throw new Error('Refresh token missing!')
+      }
     }
     if (options.locale) {
       formBody.push(`&locale=${encodeURIComponent(options.locale)}`)
     }
     return idpFetch(
-      `/token`,
+      '/token',
       {
         method: 'POST',
         body: formBody.join('&'),
