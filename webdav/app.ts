@@ -334,12 +334,12 @@ function handlePropfind(req: IncomingMessage, res: ServerResponse) {
 function buildDirectoryPropfindResponse(
   directoryPath: string,
   url: string,
-  paths: string[]
+  items: string[]
 ) {
   return `
     <D:multistatus xmlns:D="DAV:">
       <D:response>
-        <D:href>${url}</D:href>
+        <D:href>${encodeURIComponent(url)}</D:href>
         <D:propstat>
           <D:prop>
             <D:resourcetype>
@@ -349,12 +349,12 @@ function buildDirectoryPropfindResponse(
           <D:status>HTTP/1.1 200 OK</D:status>
         </D:propstat>
       </D:response>
-      ${paths
-        .map((e) => {
-          const stat = fs.statSync(path.join(directoryPath, e))
+      ${items
+        .map((item) => {
+          const stat = fs.statSync(path.join(directoryPath, item))
           return `
             <D:response>
-              <D:href>${e}</D:href>
+              <D:href>${encodeURIComponent(item)}</D:href>
               <D:propstat>
                 <D:prop>
                   <D:resourcetype>${
@@ -374,7 +374,7 @@ function buildFilePropfindResponse(filePath: string) {
   return `
     <D:multistatus xmlns:D="DAV:">
       <D:response>
-        <D:href>${filePath}</D:href>
+        <D:href>${encodeURIComponent(filePath)}</D:href>
         <D:propstat>
           <D:prop>
             <D:resourcetype></D:resourcetype>
@@ -417,7 +417,7 @@ function handleProppatch(_: IncomingMessage, res: ServerResponse) {
 }
 
 function getFilePath(url: string) {
-  return path.join(__dirname, DATA_DIRECTORY, decodeURI(url))
+  return path.join(__dirname, DATA_DIRECTORY, decodeURIComponent(url))
 }
 
 function getDestinationPath(req: IncomingMessage) {
@@ -431,14 +431,17 @@ function getDestinationPath(req: IncomingMessage) {
     destinationHeader.startsWith('https://')
   ) {
     const url = new URL(destinationHeader)
-    return path.join(__dirname, DATA_DIRECTORY, url.pathname)
+    return path.join(
+      __dirname,
+      DATA_DIRECTORY,
+      decodeURIComponent(url.pathname)
+    )
   } else {
     /* Extract the path from the destination header */
     const startIndex =
       destinationHeader.indexOf(req.headers.host) + req.headers.host.length
     const value = destinationHeader.substring(startIndex)
-    const sanitizedPath = decodeURIComponent(value)
-    return path.join(__dirname, DATA_DIRECTORY, sanitizedPath)
+    return path.join(__dirname, DATA_DIRECTORY, decodeURIComponent(value))
   }
 }
 
