@@ -2,8 +2,7 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@/infra/*": ["infra/*"],
-      "@/config/*": ["config/*"]
+      "@/*": ["src/*"]
     },
     "module": "commonjs",
     "esModuleInterop": true,
