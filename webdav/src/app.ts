@@ -42,49 +42,49 @@ const server = createServer((req: IncomingMessage, res: ServerResponse) => {
         res.statusCode = 401
         res.setHeader('WWW-Authenticate', 'Basic realm="WebDAV Server"')
         res.end()
-        return
-      }
-      const method = req.method
-      switch (method) {
-        case 'OPTIONS':
-          handleOptions(req, res)
-          break
-        case 'GET':
-          handleGet(req, res)
-          break
-        case 'HEAD':
-          handleHead(req, res)
-          break
-        case 'PUT':
-          handlePut(req, res)
-          break
-        case 'DELETE':
-          handleDelete(req, res)
-          break
-        case 'MKCOL':
-          handleMkcol(req, res)
-          break
-        case 'COPY':
-          handleCopy(req, res)
-          break
-        case 'MOVE':
-          handleMove(req, res)
-          break
-        case 'PROPFIND':
-          handlePropfind(req, res)
-          break
-        case 'PROPPATCH':
-          handleProppatch(req, res)
-          break
-        default:
-          res.statusCode = 501
-          res.end()
+      } else {
+        const method = req.method
+        switch (method) {
+          case 'OPTIONS':
+            handleOptions(req, res)
+            break
+          case 'GET':
+            handleGet(req, res)
+            break
+          case 'HEAD':
+            handleHead(req, res)
+            break
+          case 'PUT':
+            handlePut(req, res)
+            break
+          case 'DELETE':
+            handleDelete(req, res)
+            break
+          case 'MKCOL':
+            handleMkcol(req, res)
+            break
+          case 'COPY':
+            handleCopy(req, res)
+            break
+          case 'MOVE':
+            handleMove(req, res)
+            break
+          case 'PROPFIND':
+            handlePropfind(req, res)
+            break
+          case 'PROPPATCH':
+            handleProppatch(req, res)
+            break
+          default:
+            res.statusCode = 501
+            res.end()
+        }
       }
     }
   )(req, res)
 })
 
-const port = 9988 || process.env.PORT
+const port = process.env.PORT || 9988
 server.listen(port, () => {
   console.log(`WebDAV server is listening on port ${port}`)
 })
