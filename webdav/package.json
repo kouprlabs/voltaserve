@@ -4,17 +4,36 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "dev": "nodemon ./app.js"
+    "start": "ts-node -r tsconfig-paths/register app.ts",
+    "dev": "nodemon --exec ts-node -r tsconfig-paths/register app.ts",
+    "pkg": "tsc --project ./ && pkg .",
+    "prettier": "prettier --write .",
+    "eslint": "eslint './**/*.ts'"
   },
   "engines": {
     "node": ">= 18.x"
   },
   "dependencies": {
+    "@types/node": "20.1.7",
+    "dotenv": "16.0.3",
     "passport": "0.6.0",
     "passport-http": "0.3.0",
+    "ts-node": "10.9.1",
+    "tsconfig-paths": "4.2.0",
+    "typescript": "5.0.4",
     "xml2js": "0.5.0"
   },
   "devDependencies": {
-    "nodemon": "2.0.22"
+    "@trivago/prettier-plugin-sort-imports": "4.1.1",
+    "@types/js-yaml": "4.0.5",
+    "@types/passport": "1.0.12",
+    "@types/passport-http": "0.3.9",
+    "@types/xml2js": "0.4.11",
+    "@typescript-eslint/eslint-plugin": "5.59.6",
+    "@typescript-eslint/parser": "5.59.6",
+    "eslint": "8.40.0",
+    "eslint-config-prettier": "8.8.0",
+    "nodemon": "2.0.22",
+    "prettier": "2.8.8"
   }
 }

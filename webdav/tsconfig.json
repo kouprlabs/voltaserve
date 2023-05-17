@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/infra/*": ["infra/*"],
+      "@/config/*": ["config/*"]
+    },
+    "module": "commonjs",
+    "esModuleInterop": true,
+    "target": "es2021",
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "outDir": "build",
+    "experimentalDecorators": true
+  }
+}

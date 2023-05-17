@@ -1,13 +1,18 @@
-const http = require('http')
-const fs = require('fs')
-const path = require('path')
-const { parseString } = require('xml2js')
-const passport = require('passport')
-const { BasicStrategy } = require('passport-http')
+import fs from 'fs'
+import { createServer, IncomingMessage, ServerResponse } from 'http'
+import passport from 'passport'
+import { BasicStrategy } from 'passport-http'
+import path from 'path'
 
 const DATA_DIRECTORY = 'data'
 
-const users = [{ id: 1, username: 'admin', password: 'admin' }]
+type User = {
+  id: number
+  username: string
+  password: string
+}
+
+const users: User[] = [{ id: 1, username: 'admin', password: 'admin' }]
 
 passport.use(
   new BasicStrategy((username, password, done) => {
@@ -22,51 +27,55 @@ passport.use(
   })
 )
 
-const server = http.createServer((req, res) => {
-  passport.authenticate('basic', { session: false }, (err, user) => {
-    if (err || !user) {
-      res.statusCode = 401
-      res.setHeader('WWW-Authenticate', 'Basic realm="WebDAV Server"')
-      res.end()
-      return
-    }
-    const method = req.method
-    switch (method) {
-      case 'OPTIONS':
-        handleOptions(req, res)
-        break
-      case 'GET':
-        handleGet(req, res)
-        break
-      case 'HEAD':
-        handleHead(req, res)
-        break
-      case 'PUT':
-        handlePut(req, res)
-        break
-      case 'DELETE':
-        handleDelete(req, res)
-        break
-      case 'MKCOL':
-        handleMkcol(req, res)
-        break
-      case 'COPY':
-        handleCopy(req, res)
-        break
-      case 'MOVE':
-        handleMove(req, res)
-        break
-      case 'PROPFIND':
-        handlePropfind(req, res)
-        break
-      case 'PROPPATCH':
-        handleProppatch(req, res)
-        break
-      default:
-        res.statusCode = 501
+const server = createServer((req: IncomingMessage, res: ServerResponse) => {
+  passport.authenticate(
+    'basic',
+    { session: false },
+    (err: Error, user: User) => {
+      if (err || !user) {
+        res.statusCode = 401
+        res.setHeader('WWW-Authenticate', 'Basic realm="WebDAV Server"')
         res.end()
+        return
+      }
+      const method = req.method
+      switch (method) {
+        case 'OPTIONS':
+          handleOptions(req, res)
+          break
+        case 'GET':
+          handleGet(req, res)
+          break
+        case 'HEAD':
+          handleHead(req, res)
+          break
+        case 'PUT':
+          handlePut(req, res)
+          break
+        case 'DELETE':
+          handleDelete(req, res)
+          break
+        case 'MKCOL':
+          handleMkcol(req, res)
+          break
+        case 'COPY':
+          handleCopy(req, res)
+          break
+        case 'MOVE':
+          handleMove(req, res)
+          break
+        case 'PROPFIND':
+          handlePropfind(req, res)
+          break
+        case 'PROPPATCH':
+          handleProppatch(req, res)
+          break
+        default:
+          res.statusCode = 501
+          res.end()
+      }
     }
-  })(req, res)
+  )(req, res)
 })
 
 /*
@@ -78,7 +87,7 @@ const server = http.createServer((req, res) => {
   - Set the Allow header to specify the supported methods, such as OPTIONS, GET, PUT, DELETE, etc.
   - Return the response.
  */
-function handleOptions(req, res) {
+function handleOptions(_: IncomingMessage, res: ServerResponse) {
   res.statusCode = 200
   res.setHeader(
     'Allow',
@@ -97,16 +106,12 @@ function handleOptions(req, res) {
   - Set the response status code to 200 if successful or an appropriate error code if the file is not found.
   - Return the response.
  */
-function handleGet(req, res) {
+function handleGet(req: IncomingMessage, res: ServerResponse) {
   const filePath = getFilePath(req.url)
   const fileStream = fs.createReadStream(filePath)
   fileStream.on('error', (error) => {
     console.error(error)
-    if (error.code === 'ENOENT') {
-      res.statusCode = 404
-    } else {
-      res.statusCode = 500
-    }
+    res.statusCode = 500
     res.end()
   })
   fileStream.pipe(res)
@@ -123,7 +128,7 @@ function handleGet(req, res) {
   - Set the Content-Length header with the file size.
   - Return the response.
 */
-function handleHead(req, res) {
+function handleHead(req: IncomingMessage, res: ServerResponse) {
   const filePath = getFilePath(req.url)
   fs.stat(filePath, (error, stats) => {
     if (error) {
@@ -154,7 +159,7 @@ function handleHead(req, res) {
   - Set the response status code to 201 if created or 204 if updated.
   - Return the response.
  */
-function handlePut(req, res) {
+function handlePut(req: IncomingMessage, res: ServerResponse) {
   const filePath = getFilePath(req.url)
   const fileStream = fs.createWriteStream(filePath)
   fileStream.on('error', (error) => {
@@ -182,7 +187,7 @@ function handlePut(req, res) {
   - Set the response status code to 204 if successful or an appropriate error code if the file is not found.
   - Return the response.
  */
-function handleDelete(req, res) {
+function handleDelete(req: IncomingMessage, res: ServerResponse) {
   const filePath = getFilePath(req.url)
   fs.rm(filePath, { recursive: true }, (error) => {
     if (error) {
@@ -209,7 +214,7 @@ function handleDelete(req, res) {
   - Set the response status code to 201 if created or an appropriate error code if the directory already exists or encountered an error.
   - Return the response.
  */
-function handleMkcol(req, res) {
+function handleMkcol(req: IncomingMessage, res: ServerResponse) {
   const filePath = getFilePath(req.url)
   fs.mkdir(filePath, (error) => {
     if (error) {
@@ -232,9 +237,9 @@ function handleMkcol(req, res) {
   - Set the response status code to 204 if successful or an appropriate error code if the source file is not found or encountered an error.
   - Return the response.
  */
-function handleCopy(req, res) {
+function handleCopy(req: IncomingMessage, res: ServerResponse) {
   const sourcePath = getFilePath(req.url)
-  const destinationPath = getDestinationPath(req.headers.destination)
+  const destinationPath = getDestinationPath(req)
   fs.copyFile(sourcePath, destinationPath, (error) => {
     if (error) {
       console.error(error)
@@ -260,9 +265,9 @@ function handleCopy(req, res) {
   - Set the response status code to 204 if successful or an appropriate error code if the source file is not found or encountered an error.
   - Return the response.
  */
-function handleMove(req, res) {
+function handleMove(req: IncomingMessage, res: ServerResponse) {
   const sourcePath = getFilePath(req.url)
-  const destinationPath = getDestinationPath(req.headers.destination)
+  const destinationPath = getDestinationPath(req)
   fs.rename(sourcePath, destinationPath, (error) => {
     if (error) {
       console.error(error)
@@ -290,7 +295,7 @@ function handleMove(req, res) {
   - Set the Content-Type header to indicate the XML format.
   - Return the response.
  */
-function handlePropfind(req, res) {
+function handlePropfind(req: IncomingMessage, res: ServerResponse) {
   const url = req.url
   const filePath = getFilePath(url)
   fs.stat(filePath, (error, stats) => {
@@ -326,7 +331,11 @@ function handlePropfind(req, res) {
   })
 }
 
-function buildDirectoryPropfindResponse(directoryPath, url, paths) {
+function buildDirectoryPropfindResponse(
+  directoryPath: string,
+  url: string,
+  paths: string[]
+) {
   return `
     <D:multistatus xmlns:D="DAV:">
       <D:response>
@@ -361,7 +370,7 @@ function buildDirectoryPropfindResponse(directoryPath, url, paths) {
     </D:multistatus>`
 }
 
-function buildFilePropfindResponse(filePath) {
+function buildFilePropfindResponse(filePath: string) {
   return `
     <D:multistatus xmlns:D="DAV:">
       <D:response>
@@ -402,68 +411,17 @@ function buildFilePropfindResponse(filePath) {
   Note that this implementation assumes a simplified example and may require further 
   customization based on your specific property format and requirements.
  */
-function handleProppatch(req, res) {
-  parseString(req.body, (error, result) => {
-    if (error) {
-      console.error(error)
-      res.statusCode = 400
-      res.end()
-    } else {
-      const properties = result.prop.patch[0].set[0]
-      /* Process the properties update */
-      const filePath = getFilePath(req.url)
-      fs.readFile(filePath, 'utf8', (error, data) => {
-        if (error) {
-          if (error.code === 'ENOENT') {
-            res.statusCode = 404
-          } else {
-            res.statusCode = 500
-          }
-          res.end()
-        } else {
-          const existingProperties = parseProperties(data)
-          const updatedProperties = Object.assign(
-            existingProperties,
-            properties
-          )
-          const updatedData = formatProperties(updatedProperties)
-          fs.writeFile(filePath, updatedData, 'utf8', (error) => {
-            if (error) {
-              res.statusCode = 500
-            } else {
-              res.statusCode = 204
-            }
-            res.end()
-          })
-        }
-      })
-    }
-  })
+function handleProppatch(_: IncomingMessage, res: ServerResponse) {
+  res.statusCode = 501
+  res.end()
 }
 
-function parseProperties(data) {
-  // Parse properties from the existing data
-  // Add your implementation here
-  // This is a dummy example assuming XML properties
-  const parsedProperties = {}
-  // TODO: Parse the XML properties from the existing data and populate `parsedProperties`
-  return parsedProperties
-}
-
-function formatProperties(properties) {
-  // Format properties for storage
-  // Add your implementation here
-  // This is a dummy example assuming XML properties
-  let formattedData = ''
-  // TODO: Format the properties into XML format and store in `formattedData`
-  return formattedData
-}
-
-function getFilePath(url) {
+function getFilePath(url: string) {
   return path.join(__dirname, DATA_DIRECTORY, decodeURI(url))
 }
 
-function getDestinationPath(destinationHeader) {
+function getDestinationPath(req: IncomingMessage) {
+  const destinationHeader = req.headers.destination as string
   if (!destinationHeader) {
     return null
   }
@@ -484,7 +442,7 @@ function getDestinationPath(destinationHeader) {
   }
 }
 
-const port = 9988
+const port = 9988 || process.env.PORT
 server.listen(port, () => {
   console.log(`WebDAV server is listening on port ${port}`)
 })
