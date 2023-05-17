@@ -1,7 +1,6 @@
 import { IncomingMessage } from 'http'
 import path from 'path'
-
-const DATA_DIRECTORY = process.env.DATA_DIRECTORY
+import { DATA_DIRECTORY } from '@/config/config'
 
 export function getFilePath(url: string) {
   return path.join(DATA_DIRECTORY, decodeURIComponent(url))

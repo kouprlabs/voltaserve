@@ -1,6 +1,8 @@
 import { createServer, IncomingMessage, ServerResponse } from 'http'
+import fetch from 'node-fetch'
 import passport from 'passport'
 import { BasicStrategy } from 'passport-http'
+import { IDP_URL, PORT } from '@/config/config'
 import handleCopy from '@/method/handle-copy'
 import handleDelete from '@/method/handle-delete'
 import handleGet from '@/method/handle-get'
@@ -12,24 +14,35 @@ import handlePropfind from '@/method/handle-propfind'
 import handleProppatch from '@/method/handle-proppatch'
 import handlePut from '@/method/handle-put'
 
-type User = {
-  id: number
-  username: string
-  password: string
+type Token = {
+  access_token: string
+  expires_in: number
+  token_type: string
+  refresh_token: string
 }
 
-const users: User[] = [{ id: 1, username: 'admin', password: 'admin' }]
+const tokens = new Map<string, Token>()
 
 passport.use(
-  new BasicStrategy((username, password, done) => {
-    const user = users.find((u) => u.username === username)
-    if (!user) {
-      return done(null, false)
+  new BasicStrategy(async (username, password, done) => {
+    const formBody = []
+    formBody.push('grant_type=password')
+    formBody.push(`username=${encodeURIComponent(username)}`)
+    formBody.push(`password=${encodeURIComponent(password)}`)
+    try {
+      const result = await fetch(`${IDP_URL}/v1/token`, {
+        method: 'POST',
+        body: formBody.join('&'),
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      })
+      const token = await result.json()
+      tokens.set(username, token)
+      return done(null, token)
+    } catch (err) {
+      return done(err, false)
     }
-    if (password !== user.password) {
-      return done(null, false)
-    }
-    return done(null, user)
   })
 )
 
@@ -37,12 +50,13 @@ const server = createServer((req: IncomingMessage, res: ServerResponse) => {
   passport.authenticate(
     'basic',
     { session: false },
-    (err: Error, user: User) => {
-      if (err || !user) {
+    (err: Error, token: Token) => {
+      if (err || !token) {
         res.statusCode = 401
         res.setHeader('WWW-Authenticate', 'Basic realm="WebDAV Server"')
         res.end()
       } else {
+        console.log(JSON.stringify(token))
         const method = req.method
         switch (method) {
           case 'OPTIONS':
@@ -84,7 +98,6 @@ const server = createServer((req: IncomingMessage, res: ServerResponse) => {
   )(req, res)
 })
 
-const port = process.env.PORT || 9988
-server.listen(port, () => {
-  console.log(`WebDAV server is listening on port ${port}`)
+server.listen(PORT, () => {
+  console.log(`WebDAV server is listening on port ${PORT}`)
 })
