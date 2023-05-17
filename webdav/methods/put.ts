@@ -1,6 +1,6 @@
 import fs from 'fs'
 import { IncomingMessage, ServerResponse } from 'http'
-import { getFilePath } from '@/helper/path'
+import { getFilePath } from '@/infra/path'
 
 /*
   This method creates or updates a resource with the provided content.

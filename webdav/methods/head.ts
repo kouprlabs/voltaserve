@@ -1,6 +1,6 @@
 import fs from 'fs'
 import { IncomingMessage, ServerResponse } from 'http'
-import { getFilePath } from '@/helper/path'
+import { getFilePath } from '@/infra/path'
 
 /*
   This method is similar to GET but only retrieves the metadata of a resource, without returning the actual content.

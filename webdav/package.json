@@ -4,8 +4,8 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "start": "ts-node -r tsconfig-paths/register src/server.ts",
-    "dev": "nodemon --exec ts-node -r tsconfig-paths/register src/server.ts",
+    "start": "ts-node -r tsconfig-paths/register server.ts",
+    "dev": "nodemon --exec ts-node -r tsconfig-paths/register server.ts",
     "prettier": "prettier --write .",
     "eslint": "eslint './**/*.ts'"
   },

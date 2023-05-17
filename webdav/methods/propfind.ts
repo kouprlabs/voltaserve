@@ -1,7 +1,7 @@
 import fs from 'fs'
 import { IncomingMessage, ServerResponse } from 'http'
 import path from 'path'
-import { getFilePath } from '@/helper/path'
+import { getFilePath } from '@/infra/path'
 
 /*
   This method retrieves properties and metadata of a resource.
