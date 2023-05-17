@@ -4,9 +4,8 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "start": "ts-node -r tsconfig-paths/register app.ts",
-    "dev": "nodemon --exec ts-node -r tsconfig-paths/register app.ts",
-    "pkg": "tsc --project ./ && pkg .",
+    "start": "ts-node -r tsconfig-paths/register src/app.ts",
+    "dev": "nodemon --exec ts-node -r tsconfig-paths/register src/app.ts",
     "prettier": "prettier --write .",
     "eslint": "eslint './**/*.ts'"
   },

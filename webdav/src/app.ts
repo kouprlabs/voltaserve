@@ -4,7 +4,8 @@ import passport from 'passport'
 import { BasicStrategy } from 'passport-http'
 import path from 'path'
 
-const DATA_DIRECTORY = 'data'
+const DATA_DIRECTORY =
+  path.join(__dirname, '..', 'data') || process.env.DATA_DIRECTORY
 
 type User = {
   id: number
@@ -417,7 +418,7 @@ function handleProppatch(_: IncomingMessage, res: ServerResponse) {
 }
 
 function getFilePath(url: string) {
-  return path.join(__dirname, DATA_DIRECTORY, decodeURIComponent(url))
+  return path.join(DATA_DIRECTORY, decodeURIComponent(url))
 }
 
 function getDestinationPath(req: IncomingMessage) {
@@ -431,17 +432,13 @@ function getDestinationPath(req: IncomingMessage) {
     destinationHeader.startsWith('https://')
   ) {
     const url = new URL(destinationHeader)
-    return path.join(
-      __dirname,
-      DATA_DIRECTORY,
-      decodeURIComponent(url.pathname)
-    )
+    return path.join(DATA_DIRECTORY, decodeURIComponent(url.pathname))
   } else {
     /* Extract the path from the destination header */
     const startIndex =
       destinationHeader.indexOf(req.headers.host) + req.headers.host.length
     const value = destinationHeader.substring(startIndex)
-    return path.join(__dirname, DATA_DIRECTORY, decodeURIComponent(value))
+    return path.join(DATA_DIRECTORY, decodeURIComponent(value))
   }
 }
 

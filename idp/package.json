@@ -6,7 +6,6 @@
   "scripts": {
     "start": "ts-node -r tsconfig-paths/register app.ts",
     "dev": "nodemon --exec ts-node -r tsconfig-paths/register app.ts",
-    "pkg": "tsc --project ./ && pkg .",
     "prettier": "prettier --write .",
     "swagger-autogen": "node ./swagger.js",
     "eslint": "eslint './**/*.ts'"
