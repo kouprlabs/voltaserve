@@ -5,7 +5,7 @@
   "quoteProps": "preserve",
   "importOrder": [
     "^react$",
-    "^@react-dom/(.*)$",
+    "^react-dom/(.*)$",
     "^react-router-dom$",
     "^react-redux$",
     "^@chakra-ui/(.*)$",
