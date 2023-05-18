@@ -20,7 +20,7 @@
     "^@/infra/(.*)$",
     "^@/theme/(.*)$",
     "^@/helpers/(.*)$",
-    "^[./]",
+    "^[./]$",
     "^(.*)\\.css$"
   ],
   "importOrderSeparation": false
