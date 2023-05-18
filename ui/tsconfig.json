@@ -2,15 +2,7 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@/components/*": ["src/components/*"],
-      "@/pages/*": ["src/pages/*"],
-      "@/infra/*": ["src/infra/*"],
-      "@/config/*": ["src/config/*"],
-      "@/api/*": ["src/api/*"],
-      "@/store/*": ["src/store/*"],
-      "@/styles/*": ["src/styles/*"],
-      "@/helpers/*": ["src/helpers/*"],
-      "@/theme/*": ["src/theme/*"]
+      "@/*": ["src/*"]
     },
     "target": "ESNext",
     "useDefineForClassFields": true,
