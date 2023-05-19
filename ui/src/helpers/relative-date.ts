@@ -4,7 +4,7 @@ import en from 'javascript-time-ago/locale/en'
 
 let timeAgo: TimeAgo
 
-export default function relativeDate(date: Date) {
+export default function relativeDate(date: Date): string {
   if (!timeAgo) {
     TimeAgo.addDefaultLocale(en)
     timeAgo = new TimeAgo('en-US')
