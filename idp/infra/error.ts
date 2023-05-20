@@ -74,7 +74,7 @@ export function errorHandler(
   if (error.code && Object.values(ErrorCode).includes(error.code)) {
     const e = error as IdpError
     if (e.error) {
-      console.error(e.error)
+      // TODO: Log e.error with morgan
     }
     res.status(e.status).json({
       code: e.code,
@@ -83,10 +83,8 @@ export function errorHandler(
       moreInfo: e.moreInfo,
     })
   } else {
-    console.error(error)
-    res.status(500).json({
-      code: ErrorCode.InternalServerError,
-    })
+    // TODO: Log error with morgan
+    res.status(500).json(newError({ code: ErrorCode.InternalServerError }))
   }
   next(error)
   return
