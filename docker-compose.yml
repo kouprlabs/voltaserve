@@ -90,7 +90,7 @@ services:
       - SMTP_SENDER_NAME=${VOLTASERVE_SMTP_SENDER_NAME}
     volumes:
       - ./idp:/app
-      - /idp/node_modules
+      - /app/node_modules
     depends_on:
       - postgres
       - meilisearch
