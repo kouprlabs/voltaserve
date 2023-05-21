@@ -38,13 +38,14 @@ func NewFileRouter() *FileRouter {
 func (r *FileRouter) AppendRoutes(g fiber.Router) {
 	g.Post("/", r.Upload)
 	g.Post("/create_folder", r.CreateFolder)
+	g.Get("/list", r.ListByPath)
 	g.Post("/search", r.Search)
 	g.Post("/batch_delete", r.BatchDelete)
 	g.Post("/batch_get", r.BatchGet)
 	g.Get("/:id", r.GetById)
 	g.Patch("/:id", r.Patch)
 	g.Delete("/:id", r.Delete)
-	g.Get("/:id/list", r.List)
+	g.Get("/:id/list", r.ListByID)
 	g.Get("/:id/get_item_count", r.GetItemCount)
 	g.Get("/:id/get_path", r.GetPath)
 	g.Post("/:id/move", r.Move)
@@ -259,11 +260,34 @@ func (r *FileRouter) GetById(c *fiber.Ctx) error {
 	return c.JSON(res[0])
 }
 
-// List godoc
-// @Summary     List
-// @Description List
+// ListByPath godoc
+// @Summary     ListByPath
+// @Description ListByPath
 // @Tags        Files
-// @Id          files_list
+// @Id          files_list_by_path
+// @Produce     json
+// @Param       path query    string true "Path"
+// @Success     200  {array}  core.File
+// @Failure     404  {object} errorpkg.ErrorResponse
+// @Failure     500  {object} errorpkg.ErrorResponse
+// @Router      /files/list [get]
+func (r *FileRouter) ListByPath(c *fiber.Ctx) error {
+	userId := GetUserId(c)
+	if c.Query("path") == "" {
+		return errorpkg.NewMissingQueryParamError("path")
+	}
+	res, err := r.fileSvc.ListByPath(c.Query("path"), userId)
+	if err != nil {
+		return err
+	}
+	return c.JSON(res)
+}
+
+// ListByID godoc
+// @Summary     ListByID
+// @Description ListByID
+// @Tags        Files
+// @Id          files_list_by_id
 // @Produce     json
 // @Param       id   path     string true  "Id"
 // @Param       page query    string true  "Page"
@@ -273,7 +297,7 @@ func (r *FileRouter) GetById(c *fiber.Ctx) error {
 // @Failure     404  {object} errorpkg.ErrorResponse
 // @Failure     500  {object} errorpkg.ErrorResponse
 // @Router      /files/{id}/list [get]
-func (r *FileRouter) List(c *fiber.Ctx) error {
+func (r *FileRouter) ListByID(c *fiber.Ctx) error {
 	if c.Query("page") == "" {
 		return errorpkg.NewMissingQueryParamError("page")
 	}
@@ -293,7 +317,7 @@ func (r *FileRouter) List(c *fiber.Ctx) error {
 	if err != nil {
 		size = 100
 	}
-	res, err := r.fileSvc.List(c.Params("id"), uint(page), uint(size), fileType, userId)
+	res, err := r.fileSvc.ListByID(c.Params("id"), uint(page), uint(size), fileType, userId)
 	if err != nil {
 		return err
 	}

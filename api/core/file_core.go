@@ -45,8 +45,8 @@ type FileList struct {
 }
 
 type FileSearchOptions struct {
-	Text             string  `json:"text,omitempty" validate:"required"`
-	WorkspaceId      string  `json:"workspaceId,omitempty" validate:"required"`
+	Text             string  `json:"text" validate:"required"`
+	WorkspaceId      string  `json:"workspaceId" validate:"required"`
 	ParentId         *string `json:"parentId,omitempty"`
 	Type             *string `json:"type,omitempty" validate:"omitempty,oneof=file folder"`
 	CreateTimeAfter  *int64  `json:"createTimeAfter,omitempty"`
@@ -388,7 +388,11 @@ func (svc *FileService) Find(ids []string, userId string) ([]*File, error) {
 	return res, nil
 }
 
-func (svc *FileService) List(id string, page uint, size uint, fileType string, userId string) (*FileList, error) {
+func (svc *FileService) ListByPath(path string, userId string) ([]*File, error) {
+	return []*File{}, nil
+}
+
+func (svc *FileService) ListByID(id string, page uint, size uint, fileType string, userId string) (*FileList, error) {
 	user, err := svc.userRepo.Find(userId)
 	if err != nil {
 		return nil, err
