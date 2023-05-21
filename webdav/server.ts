@@ -2,6 +2,7 @@ import { createServer, IncomingMessage, ServerResponse } from 'http'
 import fetch from 'node-fetch'
 import passport from 'passport'
 import { BasicStrategy } from 'passport-http'
+import { Token } from '@/api/token'
 import { IDP_URL, PORT } from '@/config/config'
 import handleCopy from '@/method/handle-copy'
 import handleDelete from '@/method/handle-delete'
@@ -13,13 +14,6 @@ import handleOptions from '@/method/handle-options'
 import handlePropfind from '@/method/handle-propfind'
 import handleProppatch from '@/method/handle-proppatch'
 import handlePut from '@/method/handle-put'
-
-type Token = {
-  access_token: string
-  expires_in: number
-  token_type: string
-  refresh_token: string
-}
 
 const tokens = new Map<string, Token>()
 
@@ -50,13 +44,12 @@ const server = createServer((req: IncomingMessage, res: ServerResponse) => {
   passport.authenticate(
     'basic',
     { session: false },
-    (err: Error, token: Token) => {
+    async (err: Error, token: Token) => {
       if (err || !token) {
         res.statusCode = 401
         res.setHeader('WWW-Authenticate', 'Basic realm="WebDAV Server"')
         res.end()
       } else {
-        console.log(JSON.stringify(token))
         const method = req.method
         switch (method) {
           case 'OPTIONS':
@@ -84,7 +77,7 @@ const server = createServer((req: IncomingMessage, res: ServerResponse) => {
             handleMove(req, res)
             break
           case 'PROPFIND':
-            handlePropfind(req, res)
+            await handlePropfind(req, res, token)
             break
           case 'PROPPATCH':
             handleProppatch(req, res)

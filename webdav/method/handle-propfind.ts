@@ -1,7 +1,7 @@
-import fs from 'fs'
 import { IncomingMessage, ServerResponse } from 'http'
-import path from 'path'
-import { getFilePath } from '@/infra/path'
+import { File, FileType } from '@/api/file'
+import { Token } from '@/api/token'
+import { API_URL } from '@/config/config'
 
 /*
   This method retrieves properties and metadata of a resource.
@@ -15,70 +15,47 @@ import { getFilePath } from '@/infra/path'
   - Set the Content-Type header to indicate the XML format.
   - Return the response.
  */
-function handlePropfind(req: IncomingMessage, res: ServerResponse) {
-  const url = req.url
-  const filePath = getFilePath(url)
-  fs.stat(filePath, (error, stats) => {
-    if (error) {
-      console.error(error)
-      if (error.code === 'ENOENT') {
-        res.statusCode = 404
-      } else {
-        res.statusCode = 500
-      }
-      res.end()
-      return
-    }
-    const isDirectory = stats.isDirectory()
-    if (isDirectory) {
-      fs.readdir(filePath, (error, files) => {
-        if (error) {
-          res.statusCode = 500
-          res.end()
-          return
-        }
-        const responseXml = buildDirectoryPropfindResponse(filePath, url, files)
-        res.statusCode = 207
-        res.setHeader('Content-Type', 'application/xml; charset=utf-8')
-        res.end(responseXml)
-      })
-    } else {
-      const responseXml = buildFilePropfindResponse(url)
-      res.statusCode = 207
-      res.setHeader('Content-Type', 'application/xml; charset=utf-8')
-      res.end(responseXml)
-    }
-  })
-}
-
-function buildDirectoryPropfindResponse(
-  directoryPath: string,
-  url: string,
-  items: string[]
+async function handlePropfind(
+  req: IncomingMessage,
+  res: ServerResponse,
+  token: Token
 ) {
-  return `
+  const url = req.url
+  const result = await fetch(`${API_URL}/v1/files/list?path=${url}`, {
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${token.access_token}`,
+    },
+  })
+  const files: File[] = await result.json()
+  if (files.length === 1 && files[0].type === FileType.File) {
+    const responseXml = `
     <D:multistatus xmlns:D="DAV:">
       <D:response>
-        <D:href>${encodeURIComponent(url)}</D:href>
+        <D:href>${encodeURIComponent(files[0].name)}</D:href>
         <D:propstat>
           <D:prop>
-            <D:resourcetype>
-              <D:collection/>
-            </D:resourcetype>
+            <D:resourcetype></D:resourcetype>
           </D:prop>
           <D:status>HTTP/1.1 200 OK</D:status>
         </D:propstat>
       </D:response>
-      ${items
+    </D:multistatus>`
+    res.statusCode = 207
+    res.setHeader('Content-Type', 'application/xml; charset=utf-8')
+    res.end(responseXml)
+  } else {
+    const responseXml = `
+    <D:multistatus xmlns:D="DAV:">
+      ${files
         .map((item) => {
-          const stat = fs.statSync(path.join(directoryPath, item))
           return `
             <D:response>
-              <D:href>${encodeURIComponent(item)}</D:href>
+              <D:href>${encodeURIComponent(item.name)}</D:href>
               <D:propstat>
                 <D:prop>
                   <D:resourcetype>${
-                    stat.isDirectory() ? '<D:collection/>' : ''
+                    item.type === FileType.Folder ? '<D:collection/>' : ''
                   }</D:resourcetype>
                 </D:prop>
                 <D:status>HTTP/1.1 200 OK</D:status>
@@ -88,21 +65,10 @@ function buildDirectoryPropfindResponse(
         })
         .join('')}
     </D:multistatus>`
-}
-
-function buildFilePropfindResponse(filePath: string) {
-  return `
-    <D:multistatus xmlns:D="DAV:">
-      <D:response>
-        <D:href>${encodeURIComponent(filePath)}</D:href>
-        <D:propstat>
-          <D:prop>
-            <D:resourcetype></D:resourcetype>
-          </D:prop>
-          <D:status>HTTP/1.1 200 OK</D:status>
-        </D:propstat>
-      </D:response>
-    </D:multistatus>`
+    res.statusCode = 207
+    res.setHeader('Content-Type', 'application/xml; charset=utf-8')
+    res.end(responseXml)
+  }
 }
 
 export default handlePropfind
