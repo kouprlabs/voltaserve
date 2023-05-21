@@ -135,7 +135,7 @@ func (repo *WorkspaceRepo) Insert(opts WorkspaceInsertOptions) (model.WorkspaceM
 	if db := repo.db.Save(&workspace); db.Error != nil {
 		return nil, db.Error
 	}
-	res, err := repo.find(id)
+	res, err := repo.findByID(id)
 	if err != nil {
 		return nil, err
 	}
@@ -145,7 +145,31 @@ func (repo *WorkspaceRepo) Insert(opts WorkspaceInsertOptions) (model.WorkspaceM
 	return res, nil
 }
 
-func (repo *WorkspaceRepo) find(id string) (*WorkspaceEntity, error) {
+func (repo *WorkspaceRepo) findByName(name string) (*WorkspaceEntity, error) {
+	var res = WorkspaceEntity{}
+	db := repo.db.Where("name = ?", name).First(&res)
+	if db.Error != nil {
+		if errors.Is(db.Error, gorm.ErrRecordNotFound) {
+			return nil, errorpkg.NewWorkspaceNotFoundError(db.Error)
+		} else {
+			return nil, errorpkg.NewInternalServerError(db.Error)
+		}
+	}
+	return &res, nil
+}
+
+func (repo *WorkspaceRepo) FindByName(name string) (model.WorkspaceModel, error) {
+	workspace, err := repo.findByName(name)
+	if err != nil {
+		return nil, err
+	}
+	if err := repo.populateModelFields([]*WorkspaceEntity{workspace}); err != nil {
+		return nil, err
+	}
+	return workspace, err
+}
+
+func (repo *WorkspaceRepo) findByID(id string) (*WorkspaceEntity, error) {
 	var res = WorkspaceEntity{}
 	db := repo.db.Where("id = ?", id).First(&res)
 	if db.Error != nil {
@@ -158,8 +182,8 @@ func (repo *WorkspaceRepo) find(id string) (*WorkspaceEntity, error) {
 	return &res, nil
 }
 
-func (repo *WorkspaceRepo) Find(id string) (model.WorkspaceModel, error) {
-	workspace, err := repo.find(id)
+func (repo *WorkspaceRepo) FindByID(id string) (model.WorkspaceModel, error) {
+	workspace, err := repo.findByID(id)
 	if err != nil {
 		return nil, err
 	}
@@ -170,7 +194,7 @@ func (repo *WorkspaceRepo) Find(id string) (model.WorkspaceModel, error) {
 }
 
 func (repo *WorkspaceRepo) UpdateName(id string, name string) (model.WorkspaceModel, error) {
-	workspace, err := repo.find(id)
+	workspace, err := repo.findByID(id)
 	if err != nil {
 		return &WorkspaceEntity{}, err
 	}
@@ -179,7 +203,7 @@ func (repo *WorkspaceRepo) UpdateName(id string, name string) (model.WorkspaceMo
 	if db.Error != nil {
 		return nil, db.Error
 	}
-	res, err := repo.Find(id)
+	res, err := repo.FindByID(id)
 	if err != nil {
 		return nil, err
 	}
@@ -187,7 +211,7 @@ func (repo *WorkspaceRepo) UpdateName(id string, name string) (model.WorkspaceMo
 }
 
 func (repo *WorkspaceRepo) UpdateStorageCapacity(id string, storageCapacity int64) (model.WorkspaceModel, error) {
-	workspace, err := repo.find(id)
+	workspace, err := repo.findByID(id)
 	if err != nil {
 		return &WorkspaceEntity{}, err
 	}
@@ -196,7 +220,7 @@ func (repo *WorkspaceRepo) UpdateStorageCapacity(id string, storageCapacity int6
 	if db.Error != nil {
 		return nil, db.Error
 	}
-	res, err := repo.Find(id)
+	res, err := repo.FindByID(id)
 	if err != nil {
 		return nil, err
 	}

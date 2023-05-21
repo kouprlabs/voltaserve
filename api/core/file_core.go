@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 	"voltaserve/cache"
 	"voltaserve/config"
@@ -389,7 +390,60 @@ func (svc *FileService) Find(ids []string, userId string) ([]*File, error) {
 }
 
 func (svc *FileService) ListByPath(path string, userId string) ([]*File, error) {
-	return []*File{}, nil
+	user, err := svc.userRepo.Find(userId)
+	if err != nil {
+		return nil, err
+	}
+	components := []string{}
+	for _, v := range strings.Split(path, "/") {
+		if v != "" {
+			components = append(components, v)
+		}
+	}
+	if len(components) == 0 || components[0] == "" {
+		return []*File{}, errorpkg.NewInvalidPathError(fmt.Errorf("invalid path '%s'", path))
+	}
+	workspace, err := svc.workspaceRepo.FindByName(components[0])
+	if err != nil {
+		return nil, err
+	}
+	currentID := workspace.GetRootId()
+	components = components[1:]
+	for _, component := range components {
+		ids, err := svc.fileRepo.GetChildrenIds(currentID)
+		if err != nil {
+			return nil, err
+		}
+		authorized, err := svc.getAuthorized(ids, user)
+		if err != nil {
+			return nil, err
+		}
+		var filtered []model.FileModel
+		for _, f := range authorized {
+			if f.GetType() == model.FileTypeFolder && f.GetName() == component {
+				filtered = append(filtered, f)
+			}
+		}
+		if len(filtered) > 0 {
+			folder := filtered[0]
+			currentID = folder.GetId()
+		} else {
+			return []*File{}, errorpkg.NewFileNotFoundError(fmt.Errorf("component not found '%s'", component))
+		}
+	}
+	ids, err := svc.fileRepo.GetChildrenIds(currentID)
+	if err != nil {
+		return nil, err
+	}
+	authorized, err := svc.getAuthorized(ids, user)
+	if err != nil {
+		return nil, err
+	}
+	result, err := svc.fileMapper.MapFiles(authorized, userId)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }
 
 func (svc *FileService) ListByID(id string, page uint, size uint, fileType string, userId string) (*FileList, error) {
@@ -490,7 +544,7 @@ func (svc *FileService) Search(req FileSearchOptions, page uint, size uint, user
 	if err != nil {
 		return nil, err
 	}
-	workspace, err := svc.workspaceRepo.Find(req.WorkspaceId)
+	workspace, err := svc.workspaceRepo.FindByID(req.WorkspaceId)
 	if err != nil {
 		return nil, err
 	}
@@ -997,7 +1051,7 @@ func (svc *FileService) GrantUserPermission(ids []string, assigneeId string, per
 		if _, err := svc.fileCache.Refresh(file.GetId()); err != nil {
 			return err
 		}
-		workspace, err := svc.workspaceRepo.Find(file.GetWorkspaceId())
+		workspace, err := svc.workspaceRepo.FindByID(file.GetWorkspaceId())
 		if err != nil {
 			return err
 		}
@@ -1078,7 +1132,7 @@ func (svc *FileService) GrantGroupPermission(ids []string, groupId string, permi
 		if _, err := svc.fileCache.Refresh(file.GetId()); err != nil {
 			return err
 		}
-		workspace, err := svc.workspaceRepo.Find(file.GetWorkspaceId())
+		workspace, err := svc.workspaceRepo.FindByID(file.GetWorkspaceId())
 		if err != nil {
 			return err
 		}
