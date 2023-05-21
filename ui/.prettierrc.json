@@ -5,7 +5,7 @@
   "quoteProps": "preserve",
   "importOrder": [
     "^react$",
-    "^@react-dom/(.*)$",
+    "^react-dom/(.*)$",
     "^react-router-dom$",
     "^react-redux$",
     "^@chakra-ui/(.*)$",
@@ -14,14 +14,8 @@
     "^formik$",
     "^yup$",
     "<THIRD_PARTY_MODULES>",
-    "^@/api/(.*)$",
-    "^@/store/(.*)$",
-    "^@/components/(.*)$",
-    "^@/infra/(.*)$",
-    "^@/theme/(.*)$",
-    "^@/helpers/(.*)$",
-    "^[./]",
-    "^(.*)\\.css$"
+    "^@/(.*)$",
+    "^[./](.*)$"
   ],
   "importOrderSeparation": false
 }
