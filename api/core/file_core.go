@@ -166,6 +166,7 @@ type FileService struct {
 	workspaceCache *cache.WorkspaceCache
 	workspaceRepo  *repo.WorkspaceRepo
 	workspaceGuard *guard.WorkspaceGuard
+	workspaceSvc   *WorkspaceService
 	snapshotRepo   *repo.SnapshotRepo
 	userRepo       *repo.UserRepo
 	userMapper     *userMapper
@@ -186,6 +187,7 @@ func NewFileService() *FileService {
 		workspaceGuard: guard.NewWorkspaceGuard(),
 		workspaceCache: cache.NewWorkspaceCache(),
 		workspaceRepo:  repo.NewWorkspaceRepo(),
+		workspaceSvc:   NewWorkspaceService(),
 		snapshotRepo:   repo.NewSnapshotRepo(),
 		userRepo:       repo.NewUserRepo(),
 		userMapper:     newUserMapper(),
@@ -393,6 +395,24 @@ func (svc *FileService) ListByPath(path string, userId string) ([]*File, error) 
 	user, err := svc.userRepo.Find(userId)
 	if err != nil {
 		return nil, err
+	}
+	if path == "/" {
+		workspaces, err := svc.workspaceSvc.FindAll(userId)
+		if err != nil {
+			return []*File{}, nil
+		}
+		result := []*File{}
+		for _, w := range workspaces {
+			result = append(result, &File{
+				Id:         w.RootId,
+				Name:       w.Name,
+				Type:       model.FileTypeFolder,
+				Permission: w.Permission,
+				CreateTime: w.CreateTime,
+				UpdateTime: w.UpdateTime,
+			})
+		}
+		return result, nil
 	}
 	components := []string{}
 	for _, v := range strings.Split(path, "/") {
