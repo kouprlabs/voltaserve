@@ -1288,7 +1288,9 @@ func (mp *FileMapper) MapSnapshot(m model.SnapshotModel) *Snapshot {
 	if m.HasPreview() {
 		s.Preview = mp.MapPreview(m.GetPreview())
 	}
-	s.Thumbnail = mp.MapThumbnail(m.GetThumbnail())
+	if m.HasThumbnail() {
+		s.Thumbnail = mp.MapThumbnail(m.GetThumbnail())
+	}
 	return s
 }
 

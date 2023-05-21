@@ -12,6 +12,7 @@ type SnapshotModel interface {
 	HasPreview() bool
 	HasText() bool
 	HasOcr() bool
+	HasThumbnail() bool
 	GetCreateTime() string
 	GetUpdateTime() *string
 	SetOriginal(*S3Object)

@@ -14,28 +14,28 @@ export enum ErrorCode {
   PasswordValidationFailed = 'password_validation_failed',
 }
 
-const statusMap: { [key: string]: number } = {}
-statusMap[ErrorCode.InternalServerError] = 500
-statusMap[ErrorCode.RequestValidationError] = 400
-statusMap[ErrorCode.UsernameUnavailable] = 409
-statusMap[ErrorCode.ResourceNotFound] = 404
-statusMap[ErrorCode.InvalidUsernameOrPassword] = 401
-statusMap[ErrorCode.InvalidPassword] = 401
-statusMap[ErrorCode.InvalidJwt] = 401
-statusMap[ErrorCode.EmailNotConfimed] = 401
-statusMap[ErrorCode.InvalidRequest] = 400
-statusMap[ErrorCode.UnsupportedGrantType] = 400
-statusMap[ErrorCode.PasswordValidationFailed] = 400
+const statuses: { [key: string]: number } = {
+  [ErrorCode.InternalServerError]: 500,
+  [ErrorCode.RequestValidationError]: 400,
+  [ErrorCode.UsernameUnavailable]: 409,
+  [ErrorCode.ResourceNotFound]: 404,
+  [ErrorCode.InvalidUsernameOrPassword]: 401,
+  [ErrorCode.InvalidPassword]: 401,
+  [ErrorCode.InvalidJwt]: 401,
+  [ErrorCode.EmailNotConfimed]: 401,
+  [ErrorCode.InvalidRequest]: 400,
+  [ErrorCode.UnsupportedGrantType]: 400,
+  [ErrorCode.PasswordValidationFailed]: 400,
+}
 
-const userMessageMap: { [key: string]: string } = {}
-userMessageMap[ErrorCode.UsernameUnavailable] =
-  'Email belongs to an existing user.'
-userMessageMap[ErrorCode.EmailNotConfimed] = 'Email not confirmed.'
-userMessageMap[ErrorCode.InvalidPassword] = 'Invalid password.'
-userMessageMap[ErrorCode.InvalidUsernameOrPassword] =
-  'Invalid username or password.'
+const userMessages: { [key: string]: string } = {
+  [ErrorCode.UsernameUnavailable]: 'Email belongs to an existing user.',
+  [ErrorCode.EmailNotConfimed]: 'Email not confirmed.',
+  [ErrorCode.InvalidPassword]: 'Invalid password.',
+  [ErrorCode.InvalidUsernameOrPassword]: 'Invalid username or password.',
+}
 
-export type IdpError = {
+export type ErrorData = {
   code: string
   status: number
   message: string
@@ -44,24 +44,41 @@ export type IdpError = {
   error?: any
 }
 
-export type NewErrorOptions = {
+export type ErrorResponse = {
+  code: string
+  message: string
+  userMessage: string
+  moreInfo: string
+}
+
+export type ErrorOptions = {
   code: ErrorCode
   message?: string
   userMessage?: string
   error?: any
 }
 
-export function newError(opts: NewErrorOptions): IdpError {
+export function newError(options: ErrorOptions): ErrorData {
+  const userMessage =
+    options.userMessage ||
+    userMessages[options.code] ||
+    'Oops! something went wrong'
   return {
-    code: opts.code,
-    status: statusMap[opts.code] || 500,
-    message: opts.message || 'Internal server error',
-    userMessage:
-      opts.userMessage ||
-      userMessageMap[opts.code] ||
-      'Oops! something went wrong',
-    moreInfo: `https://voltaserve.com/docs/idp/errors/${opts.code}`,
-    error: opts.error || undefined,
+    code: options.code,
+    status: statuses[options.code],
+    message: options.message || userMessage,
+    userMessage,
+    moreInfo: `https://voltaserve.com/docs/idp/errors/${options.code}`,
+    error: options.error,
+  }
+}
+
+export function newResponse(data: ErrorData): ErrorResponse {
+  return {
+    code: data.code,
+    message: data.message,
+    userMessage: data.userMessage,
+    moreInfo: data.moreInfo,
   }
 }
 
@@ -72,33 +89,27 @@ export function errorHandler(
   next: NextFunction
 ) {
   if (error.code && Object.values(ErrorCode).includes(error.code)) {
-    const e = error as IdpError
-    if (e.error) {
-      console.error(e.error)
+    const data = error as ErrorData
+    if (data.error) {
+      console.error(data.error)
     }
-    res.status(e.status).json({
-      code: e.code,
-      message: e.message,
-      userMessage: e.userMessage,
-      moreInfo: e.moreInfo,
-    })
+    res.status(data.status).json(newResponse(data))
   } else {
     console.error(error)
-    res.status(500).json({
-      code: ErrorCode.InternalServerError,
-    })
+    res
+      .status(500)
+      .json(newResponse(newError({ code: ErrorCode.InternalServerError })))
   }
   next(error)
   return
 }
 
-export function parseValidationError(result: any): IdpError {
-  const message = result.errors
-    ? result.errors
-        .map(
-          (e: any) => `${e.msg} for parameter '${e.param}' in ${e.location}.`
-        )
-        .join(' ')
-    : undefined
+export function parseValidationError(result: any): ErrorData {
+  let message: string
+  if (result.errors) {
+    message = result.errors
+      .map((e: any) => `${e.msg} for parameter '${e.param}' in ${e.location}.`)
+      .join(' ')
+  }
   return newError({ code: ErrorCode.RequestValidationError, message })
 }
