@@ -399,7 +399,7 @@ func (svc *FileService) ListByPath(path string, userId string) ([]*File, error) 
 	if path == "/" {
 		workspaces, err := svc.workspaceSvc.FindAll(userId)
 		if err != nil {
-			return []*File{}, nil
+			return nil, err
 		}
 		result := []*File{}
 		for _, w := range workspaces {
@@ -421,13 +421,14 @@ func (svc *FileService) ListByPath(path string, userId string) ([]*File, error) 
 		}
 	}
 	if len(components) == 0 || components[0] == "" {
-		return []*File{}, errorpkg.NewInvalidPathError(fmt.Errorf("invalid path '%s'", path))
+		return nil, errorpkg.NewInvalidPathError(fmt.Errorf("invalid path '%s'", path))
 	}
 	workspace, err := svc.workspaceRepo.FindByName(components[0])
 	if err != nil {
 		return nil, err
 	}
 	currentID := workspace.GetRootId()
+	currentType := model.FileTypeFolder
 	components = components[1:]
 	for _, component := range components {
 		ids, err := svc.fileRepo.GetChildrenIds(currentID)
@@ -440,30 +441,46 @@ func (svc *FileService) ListByPath(path string, userId string) ([]*File, error) 
 		}
 		var filtered []model.FileModel
 		for _, f := range authorized {
-			if f.GetType() == model.FileTypeFolder && f.GetName() == component {
+			if f.GetName() == component {
 				filtered = append(filtered, f)
 			}
 		}
 		if len(filtered) > 0 {
-			folder := filtered[0]
-			currentID = folder.GetId()
+			item := filtered[0]
+			currentID = item.GetId()
+			currentType = item.GetType()
+			if item.GetType() == model.FileTypeFolder {
+				continue
+			} else if item.GetType() == model.FileTypeFile {
+				break
+			}
 		} else {
-			return []*File{}, errorpkg.NewFileNotFoundError(fmt.Errorf("component not found '%s'", component))
+			return nil, errorpkg.NewFileNotFoundError(fmt.Errorf("component not found '%s'", component))
 		}
 	}
-	ids, err := svc.fileRepo.GetChildrenIds(currentID)
-	if err != nil {
-		return nil, err
+	if currentType == model.FileTypeFolder {
+		ids, err := svc.fileRepo.GetChildrenIds(currentID)
+		if err != nil {
+			return nil, err
+		}
+		authorized, err := svc.getAuthorized(ids, user)
+		if err != nil {
+			return nil, err
+		}
+		result, err := svc.fileMapper.MapFiles(authorized, userId)
+		if err != nil {
+			return nil, err
+		}
+		return result, nil
+	} else if currentType == model.FileTypeFile {
+		result, err := svc.Find([]string{currentID}, userId)
+		if err != nil {
+			return nil, err
+		}
+		return result, nil
+	} else {
+		return nil, errorpkg.NewInternalServerError(fmt.Errorf("invalid file type %s", currentType))
 	}
-	authorized, err := svc.getAuthorized(ids, user)
-	if err != nil {
-		return nil, err
-	}
-	result, err := svc.fileMapper.MapFiles(authorized, userId)
-	if err != nil {
-		return nil, err
-	}
-	return result, nil
 }
 
 func (svc *FileService) ListByID(id string, page uint, size uint, fileType string, userId string) (*FileList, error) {
