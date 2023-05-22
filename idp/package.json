@@ -4,12 +4,12 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "start": "ts-node -r tsconfig-paths/register app.ts",
-    "dev": "nodemon --exec ts-node -r tsconfig-paths/register app.ts",
+    "start": "ts-node -r tsconfig-paths/register src/app.ts",
+    "dev": "nodemon --exec ts-node -r tsconfig-paths/register src/app.ts",
     "pkg": "tsc --project ./ && tsc-alias && pkg .",
     "prettier": "prettier --write .",
     "swagger-autogen": "node ./swagger.js",
-    "eslint": "eslint './**/*.ts'"
+    "eslint": "eslint '.src/**/*.ts'"
   },
   "bin": "build/app.js",
   "pkg": {
@@ -44,7 +44,6 @@
     "passport": "0.6.0",
     "passport-jwt": "4.0.1",
     "pg": "8.11.0",
-    "tsconfig-paths": "4.2.0",
     "typescript": "5.0.4",
     "uuid": "9.0.0"
   },
@@ -71,6 +70,7 @@
     "prettier": "2.8.8",
     "swagger-autogen": "2.23.1",
     "ts-node": "10.9.1",
-    "tsc-alias": "1.8.6"
+    "tsc-alias": "1.8.6",
+    "tsconfig-paths": "4.2.0"
   }
 }

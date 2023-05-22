@@ -3,7 +3,7 @@ import Handlebars from 'handlebars'
 import yaml from 'js-yaml'
 import nodemailer from 'nodemailer'
 import path from 'path'
-import { getConfig } from '../config/config'
+import { getConfig } from '@/config/config'
 
 type MessageParams = {
   subject: string
