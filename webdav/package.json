@@ -6,8 +6,19 @@
   "scripts": {
     "start": "ts-node -r tsconfig-paths/register server.ts",
     "dev": "nodemon --exec ts-node -r tsconfig-paths/register server.ts",
+    "pkg": "tsc --project ./ && tsc-alias && pkg .",
     "prettier": "prettier --write .",
     "eslint": "eslint './**/*.ts'"
+  },
+  "bin": "build/server.js",
+  "pkg": {
+    "targets": [
+      "node18-linux-x64",
+      "node18-alpine-x64",
+      "node18-macos-x64",
+      "node18-win-x64"
+    ],
+    "outputPath": "pkg"
   },
   "engines": {
     "node": ">= 18.x"
@@ -16,9 +27,6 @@
     "dotenv": "16.0.3",
     "passport": "0.6.0",
     "passport-http": "0.3.0",
-    "ts-node": "10.9.1",
-    "tsconfig-paths": "4.2.0",
-    "typescript": "5.0.4",
     "uuid": "9.0.0",
     "xml2js": "0.5.0"
   },
@@ -35,6 +43,11 @@
     "eslint": "8.40.0",
     "eslint-config-prettier": "8.8.0",
     "nodemon": "2.0.22",
-    "prettier": "2.8.8"
+    "pkg": "5.8.1",
+    "prettier": "2.8.8",
+    "ts-node": "10.9.1",
+    "tsc-alias": "1.8.6",
+    "tsconfig-paths": "4.2.0",
+    "typescript": "5.0.4"
   }
 }

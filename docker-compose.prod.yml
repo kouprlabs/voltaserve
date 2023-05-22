@@ -131,3 +131,17 @@ services:
       - idp
       - api
     restart: on-failure
+  webdav:
+    container_name: voltaserve-webdav
+    image: voltaserve/webdav
+    build:
+      context: ./webdav
+    ports:
+      - ${VOLTASERVE_WEBDAV_PORT}:6000
+    environment:
+      - IDP_URL=http://${VOLTASERVE_HOSTNAME}:${VOLTASERVE_IDP_PORT}
+      - API_URL=http://${VOLTASERVE_HOSTNAME}:${VOLTASERVE_API_PORT}
+    depends_on:
+      - idp
+      - api
+    restart: on-failure

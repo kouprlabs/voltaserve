@@ -139,3 +139,19 @@ services:
     depends_on:
       - idp
       - api
+  webdav:
+    container_name: voltaserve-webdav
+    image: node:18-alpine
+    working_dir: /app
+    command: sh -c "npm i && npm run dev"
+    ports:
+      - ${VOLTASERVE_WEBDAV_PORT}:6000
+    environment:
+      - IDP_URL=http://${VOLTASERVE_HOSTNAME}:${VOLTASERVE_IDP_PORT}
+      - API_URL=http://${VOLTASERVE_HOSTNAME}:${VOLTASERVE_API_PORT}
+    volumes:
+      - ./webdav:/app
+      - /app/node_modules
+    depends_on:
+      - idp
+      - api
