@@ -388,10 +388,11 @@ func (r *FileRouter) Copy(c *fiber.Ctx) error {
 	if err := validator.New().Struct(req); err != nil {
 		return errorpkg.NewRequestBodyValidationError(err)
 	}
-	if err := r.fileSvc.Copy(c.Params("id"), req.Ids, userId); err != nil {
+	res, err := r.fileSvc.Copy(c.Params("id"), req.Ids, userId)
+	if err != nil {
 		return err
 	}
-	return c.SendStatus(http.StatusNoContent)
+	return c.JSON(res)
 }
 
 // Move godoc

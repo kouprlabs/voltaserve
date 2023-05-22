@@ -785,45 +785,46 @@ func (svc *FileService) GetPath(id string, userId string) ([]*File, error) {
 	return res, nil
 }
 
-func (svc *FileService) Copy(targetId string, sourceIds []string, userId string) error {
+func (svc *FileService) Copy(targetId string, sourceIds []string, userId string) ([]*File, error) {
 	user, err := svc.userRepo.Find(userId)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	target, err := svc.fileCache.Get(targetId)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	/* Do checks */
 	for _, sourceId := range sourceIds {
 		var source model.FileModel
 		if source, err = svc.fileCache.Get(sourceId); err != nil {
-			return err
+			return nil, err
 		}
 		if err = svc.fileGuard.Authorize(user, target, model.PermissionEditor); err != nil {
-			return err
+			return nil, err
 		}
 		if err = svc.fileGuard.Authorize(user, source, model.PermissionEditor); err != nil {
-			return err
+			return nil, err
 		}
 		if source.GetId() == target.GetId() {
-			return errorpkg.NewFileCannotBeCopiedIntoIselfError(source)
+			return nil, errorpkg.NewFileCannotBeCopiedIntoIselfError(source)
 		}
 		if target.GetType() != model.FileTypeFolder {
-			return errorpkg.NewFileIsNotAFolderError(target)
+			return nil, errorpkg.NewFileIsNotAFolderError(target)
 		}
 		if yes, _ := svc.fileRepo.IsGrandChildOf(target.GetId(), source.GetId()); yes {
-			return errorpkg.NewFileCannotBeCopiedIntoOwnSubtreeError(source)
+			return nil, errorpkg.NewFileCannotBeCopiedIntoOwnSubtreeError(source)
 		}
 	}
 
 	/* Do copying */
+	allClones := []model.FileModel{}
 	for _, sourceId := range sourceIds {
 		/* Get original tree */
 		var sourceTree []model.FileModel
 		if sourceTree, err = svc.fileRepo.FindTree(sourceId); err != nil {
-			return err
+			return nil, err
 		}
 
 		/* Clone source tree */
@@ -868,42 +869,49 @@ func (svc *FileService) Copy(targetId string, sourceIds []string, userId string)
 
 		/* Persist clones */
 		if err = svc.fileRepo.BulkInsert(clones, 100); err != nil {
-			return err
+			return nil, err
 		}
 
 		/* Persist permissions */
 		if err = svc.fileRepo.BulkInsertPermissions(permissions, 100); err != nil {
-			return err
+			return nil, err
 		}
 
 		/* Assign snapshots to clones */
 		for _, c := range clones {
 			if err := svc.fileRepo.AssignSnapshots(c.GetId(), originalIds[c.GetId()]); err != nil {
-				return err
+				return nil, err
 			}
 		}
 
 		/* Index clones for search */
 		if err := svc.fileSearch.Index(clones); err != nil {
-			return err
+			return nil, err
 		}
 
 		/* Create cache for clones */
 		for _, c := range clones {
 			if _, err := svc.fileCache.Refresh(c.GetId()); err != nil {
-				return err
+				return nil, err
 			}
 		}
+
+		allClones = append(allClones, clones...)
 	}
 
 	/* Refresh updateTime on target */
 	timeNow := time.Now().UTC().Format(time.RFC3339)
 	target.SetUpdateTime(&timeNow)
 	if err := svc.fileRepo.Save(target); err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	res, err := svc.fileMapper.MapFiles(allClones, userId)
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
 }
 
 func (svc *FileService) Move(targetId string, sourceIds []string, userId string) ([]string, error) {
