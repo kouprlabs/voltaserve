@@ -76,7 +76,7 @@ async function handlePut(
 
       const formData = new FormData()
       const blob = new Blob([await readFile(filePath)])
-      formData.set('file', blob, path.basename(req.url))
+      formData.set('file', blob, decodeURIComponent(path.basename(req.url)))
 
       try {
         await fetch(`${API_URL}/v1/files?${params}`, {
