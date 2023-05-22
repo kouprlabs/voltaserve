@@ -4,11 +4,11 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "start": "ts-node -r tsconfig-paths/register server.ts",
-    "dev": "nodemon --exec ts-node -r tsconfig-paths/register server.ts",
+    "start": "ts-node -r tsconfig-paths/register src/server.ts",
+    "dev": "nodemon --exec ts-node -r tsconfig-paths/register src/server.ts",
     "pkg": "tsc --project ./ && tsc-alias && pkg .",
     "prettier": "prettier --write .",
-    "eslint": "eslint './**/*.ts'"
+    "eslint": "eslint '.src/**/*.ts'"
   },
   "bin": "build/server.js",
   "pkg": {

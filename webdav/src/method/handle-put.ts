@@ -4,7 +4,6 @@ import { IncomingMessage, ServerResponse } from 'http'
 import os from 'os'
 import path from 'path'
 import { v4 as uuidv4 } from 'uuid'
-import { File } from '@/api/file'
 import { Token } from '@/api/token'
 import { API_URL } from '@/config/config'
 

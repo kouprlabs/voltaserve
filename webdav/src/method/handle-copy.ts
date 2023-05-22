@@ -1,9 +1,9 @@
 import { IncomingMessage, ServerResponse } from 'http'
 import path from 'path'
-import { File } from '@/api/file'
-import { Token } from '@/api/token'
 import { API_URL } from '@/config/config'
 import { getTargetPath } from '@/infra/path'
+import { File } from '@/api/file'
+import { Token } from '@/api/token'
 
 /*
   This method copies a resource from a source URL to a destination URL.
