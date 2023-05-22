@@ -69,7 +69,7 @@ func (r *WorkspaceRouter) Create(c *fiber.Ctx) error {
 // @Failure     500 {object} errorpkg.ErrorResponse
 // @Router      /workspaces/{id} [get]
 func (r *WorkspaceRouter) GetById(c *fiber.Ctx) error {
-	res, err := r.workspaceSvc.Find(c.Params("id"), GetUserId(c))
+	res, err := r.workspaceSvc.FindByID(c.Params("id"), GetUserId(c))
 	if err != nil {
 		return err
 	}

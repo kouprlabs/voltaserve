@@ -368,7 +368,7 @@ func (svc *FileService) DownloadPreviewBuffer(id string, userId string) (*bytes.
 	}
 }
 
-func (svc *FileService) Find(ids []string, userId string) ([]*File, error) {
+func (svc *FileService) FindByID(ids []string, userId string) ([]*File, error) {
 	user, err := svc.userRepo.Find(userId)
 	if err != nil {
 		return nil, err
@@ -391,6 +391,74 @@ func (svc *FileService) Find(ids []string, userId string) ([]*File, error) {
 	return res, nil
 }
 
+func (svc *FileService) FindByPath(path string, userId string) (*File, error) {
+	user, err := svc.userRepo.Find(userId)
+	if err != nil {
+		return nil, err
+	}
+	if path == "/" {
+		return nil, errorpkg.NewInvalidPathError(fmt.Errorf("invalid path '%s'", path))
+	}
+	components := []string{}
+	for _, v := range strings.Split(path, "/") {
+		if v != "" {
+			components = append(components, v)
+		}
+	}
+	if len(components) == 0 || components[0] == "" {
+		return nil, errorpkg.NewInvalidPathError(fmt.Errorf("invalid path '%s'", path))
+	}
+	workspace, err := svc.workspaceSvc.FindByName(components[0], userId)
+	if err != nil {
+		return nil, err
+	}
+	if len(components) == 1 {
+		return &File{
+			Id:          workspace.RootId,
+			WorkspaceId: workspace.Id,
+			Name:        workspace.Name,
+			Type:        model.FileTypeFolder,
+			Permission:  workspace.Permission,
+			CreateTime:  workspace.CreateTime,
+			UpdateTime:  workspace.UpdateTime,
+		}, nil
+	}
+	currentID := workspace.RootId
+	components = components[1:]
+	for _, component := range components {
+		ids, err := svc.fileRepo.GetChildrenIds(currentID)
+		if err != nil {
+			return nil, err
+		}
+		authorized, err := svc.getAuthorized(ids, user)
+		if err != nil {
+			return nil, err
+		}
+		var filtered []model.FileModel
+		for _, f := range authorized {
+			if f.GetName() == component {
+				filtered = append(filtered, f)
+			}
+		}
+		if len(filtered) > 0 {
+			item := filtered[0]
+			currentID = item.GetId()
+			if item.GetType() == model.FileTypeFolder {
+				continue
+			} else if item.GetType() == model.FileTypeFile {
+				break
+			}
+		} else {
+			return nil, errorpkg.NewFileNotFoundError(fmt.Errorf("component not found '%s'", component))
+		}
+	}
+	result, err := svc.FindByID([]string{currentID}, userId)
+	if err != nil {
+		return nil, err
+	}
+	return result[0], nil
+}
+
 func (svc *FileService) ListByPath(path string, userId string) ([]*File, error) {
 	user, err := svc.userRepo.Find(userId)
 	if err != nil {
@@ -404,12 +472,13 @@ func (svc *FileService) ListByPath(path string, userId string) ([]*File, error) 
 		result := []*File{}
 		for _, w := range workspaces {
 			result = append(result, &File{
-				Id:         w.RootId,
-				Name:       w.Name,
-				Type:       model.FileTypeFolder,
-				Permission: w.Permission,
-				CreateTime: w.CreateTime,
-				UpdateTime: w.UpdateTime,
+				Id:          w.RootId,
+				WorkspaceId: w.Id,
+				Name:        w.Name,
+				Type:        model.FileTypeFolder,
+				Permission:  w.Permission,
+				CreateTime:  w.CreateTime,
+				UpdateTime:  w.UpdateTime,
 			})
 		}
 		return result, nil
@@ -473,7 +542,7 @@ func (svc *FileService) ListByPath(path string, userId string) ([]*File, error) 
 		}
 		return result, nil
 	} else if currentType == model.FileTypeFile {
-		result, err := svc.Find([]string{currentID}, userId)
+		result, err := svc.FindByID([]string{currentID}, userId)
 		if err != nil {
 			return nil, err
 		}

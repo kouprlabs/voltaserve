@@ -1,5 +1,4 @@
-import fs from 'fs'
-import { IncomingMessage, ServerResponse, get } from 'http'
+import { IncomingMessage, ServerResponse } from 'http'
 import { File, FileType } from '@/api/file'
 import { Token } from '@/api/token'
 import { API_URL } from '@/config/config'

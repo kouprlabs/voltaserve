@@ -140,12 +140,31 @@ func (svc *WorkspaceService) Create(req CreateWorkspaceOptions, userId string) (
 	return res, nil
 }
 
-func (svc *WorkspaceService) Find(id string, userId string) (*Workspace, error) {
+func (svc *WorkspaceService) FindByID(id string, userId string) (*Workspace, error) {
 	user, err := svc.userRepo.Find(userId)
 	if err != nil {
 		return nil, err
 	}
 	workspace, err := svc.workspaceCache.Get(id)
+	if err != nil {
+		return nil, err
+	}
+	if err = svc.workspaceGuard.Authorize(user, workspace, model.PermissionViewer); err != nil {
+		return nil, err
+	}
+	res, err := svc.workspaceMapper.mapWorkspace(workspace, userId)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
+func (svc *WorkspaceService) FindByName(name string, userId string) (*Workspace, error) {
+	user, err := svc.userRepo.Find(userId)
+	if err != nil {
+		return nil, err
+	}
+	workspace, err := svc.workspaceRepo.FindByName(name)
 	if err != nil {
 		return nil, err
 	}

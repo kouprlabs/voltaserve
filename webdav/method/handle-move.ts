@@ -1,5 +1,6 @@
 import fs from 'fs'
 import { IncomingMessage, ServerResponse } from 'http'
+import { Token } from '@/api/token'
 import { getDestinationPath, getFilePath } from '@/infra/path'
 
 /*
@@ -12,7 +13,7 @@ import { getDestinationPath, getFilePath } from '@/infra/path'
   - Set the response status code to 204 if successful or an appropriate error code if the source file is not found or encountered an error.
   - Return the response.
  */
-function handleMove(req: IncomingMessage, res: ServerResponse) {
+function handleMove(req: IncomingMessage, res: ServerResponse, token: Token) {
   const sourcePath = getFilePath(req.url)
   const destinationPath = getDestinationPath(req)
   fs.rename(sourcePath, destinationPath, (error) => {

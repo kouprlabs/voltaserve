@@ -1,5 +1,6 @@
 import fs from 'fs'
 import { IncomingMessage, ServerResponse } from 'http'
+import { Token } from '@/api/token'
 import { getFilePath } from '@/infra/path'
 
 /*
@@ -12,7 +13,7 @@ import { getFilePath } from '@/infra/path'
   - Set the response status code to 201 if created or an appropriate error code if the directory already exists or encountered an error.
   - Return the response.
  */
-function handleMkcol(req: IncomingMessage, res: ServerResponse) {
+function handleMkcol(req: IncomingMessage, res: ServerResponse, token: Token) {
   const filePath = getFilePath(req.url)
   fs.mkdir(filePath, (error) => {
     if (error) {

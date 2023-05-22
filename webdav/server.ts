@@ -1,5 +1,4 @@
 import { createServer, IncomingMessage, ServerResponse } from 'http'
-import fetch from 'node-fetch'
 import passport from 'passport'
 import { BasicStrategy } from 'passport-http'
 import { Token } from '@/api/token'
@@ -62,19 +61,19 @@ const server = createServer((req: IncomingMessage, res: ServerResponse) => {
             await handleHead(req, res, token)
             break
           case 'PUT':
-            handlePut(req, res)
+            await handlePut(req, res, token)
             break
           case 'DELETE':
-            handleDelete(req, res)
+            handleDelete(req, res, token)
             break
           case 'MKCOL':
-            handleMkcol(req, res)
+            handleMkcol(req, res, token)
             break
           case 'COPY':
-            handleCopy(req, res)
+            handleCopy(req, res, token)
             break
           case 'MOVE':
-            handleMove(req, res)
+            handleMove(req, res, token)
             break
           case 'PROPFIND':
             await handlePropfind(req, res, token)
