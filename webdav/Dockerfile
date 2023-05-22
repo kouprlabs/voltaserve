@@ -1,11 +1,20 @@
-FROM node:18-alpine
+FROM node:18-alpine as builder
 
-WORKDIR /app
+WORKDIR /build
 
 COPY . .
 
-RUN npm install --production
+RUN npm install
+RUN npm run pkg
 
-ENTRYPOINT ["/bin/sh", "-c", "npm run start"]
+FROM node:18-alpine AS runner
+
+WORKDIR /app
+
+ENV NODE_ENV production
+
+COPY --from=builder /build/pkg/voltaserve-webdav-alpine ./voltaserve-webdav
+
+ENTRYPOINT ["./voltaserve-idp"]
 
 EXPOSE 6000
