@@ -1,4 +1,5 @@
 import { IncomingMessage, ServerResponse } from 'http'
+import path from 'path'
 import { File, FileType } from '@/api/file'
 import { Token } from '@/api/token'
 import { API_URL } from '@/config/config'
@@ -20,53 +21,80 @@ async function handlePropfind(
   res: ServerResponse,
   token: Token
 ) {
-  const result = await fetch(`${API_URL}/v1/files/list?path=${req.url}`, {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${token.access_token}`,
-    },
-  })
-  const files: File[] = await result.json()
-  if (files.length === 1 && files[0].type === FileType.File) {
-    const responseXml = `
-    <D:multistatus xmlns:D="DAV:">
-      <D:response>
-        <D:href>${encodeURIComponent(files[0].name)}</D:href>
-        <D:propstat>
-          <D:prop>
-            <D:resourcetype></D:resourcetype>
-          </D:prop>
-          <D:status>HTTP/1.1 200 OK</D:status>
-        </D:propstat>
-      </D:response>
-    </D:multistatus>`
-    res.statusCode = 207
-    res.setHeader('Content-Type', 'application/xml; charset=utf-8')
-    res.end(responseXml)
-  } else {
-    const responseXml = `
-    <D:multistatus xmlns:D="DAV:">
-      ${files
-        .map((item) => {
-          return `
-            <D:response>
-              <D:href>${encodeURIComponent(item.name)}</D:href>
-              <D:propstat>
-                <D:prop>
-                  <D:resourcetype>${
-                    item.type === FileType.Folder ? '<D:collection/>' : ''
-                  }</D:resourcetype>
-                </D:prop>
-                <D:status>HTTP/1.1 200 OK</D:status>
-              </D:propstat>
-            </D:response>
-          `
-        })
-        .join('')}
-    </D:multistatus>`
-    res.statusCode = 207
-    res.setHeader('Content-Type', 'application/xml; charset=utf-8')
-    res.end(responseXml)
+  try {
+    const result = await fetch(`${API_URL}/v1/files/get?path=${req.url}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token.access_token}`,
+        'Content-Type': 'application/json',
+      },
+    })
+    const file = await result.json()
+    if (file.type === FileType.File) {
+      const responseXml = `
+      <D:multistatus xmlns:D="DAV:">
+        <D:response>
+          <D:href>${encodeURIComponent(file.name)}</D:href>
+          <D:propstat>
+            <D:prop>
+              <D:resourcetype></D:resourcetype>
+            </D:prop>
+            <D:status>HTTP/1.1 200 OK</D:status>
+          </D:propstat>
+        </D:response>
+      </D:multistatus>`
+      res.statusCode = 207
+      res.setHeader('Content-Type', 'application/xml; charset=utf-8')
+      res.end(responseXml)
+    } else if (file.type === FileType.Folder) {
+      const result = await fetch(`${API_URL}/v1/files/list?path=${req.url}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token.access_token}`,
+          'Content-Type': 'application/json',
+        },
+      })
+      const files: File[] = await result.json()
+      const responseXml = `
+        <D:multistatus xmlns:D="DAV:">
+          <D:response>
+            <D:href>${req.url}</D:href>
+            <D:propstat>
+              <D:prop>
+                <D:resourcetype><D:collection/></D:resourcetype>
+              </D:prop>
+              <D:status>HTTP/1.1 200 OK</D:status>
+            </D:propstat>
+          </D:response>
+          ${files
+            .map((item) => {
+              return `
+                <D:response>
+                  <D:href>${path.join(
+                    req.url,
+                    encodeURIComponent(item.name)
+                  )}</D:href>
+                  <D:propstat>
+                    <D:prop>
+                      <D:resourcetype>${
+                        item.type === FileType.Folder ? '<D:collection/>' : ''
+                      }</D:resourcetype>
+                    </D:prop>
+                    <D:status>HTTP/1.1 200 OK</D:status>
+                  </D:propstat>
+                </D:response>
+              `
+            })
+            .join('')}
+        </D:multistatus>`
+      res.statusCode = 207
+      res.setHeader('Content-Type', 'application/xml; charset=utf-8')
+      res.end(responseXml)
+    }
+  } catch (err) {
+    console.error(err)
+    res.statusCode = 500
+    res.end()
   }
 }
 

@@ -9,7 +9,7 @@ import { IncomingMessage, ServerResponse } from 'http'
   - Set the Allow header to specify the supported methods, such as OPTIONS, GET, PUT, DELETE, etc.
   - Return the response.
  */
-function handleOptions(_: IncomingMessage, res: ServerResponse) {
+async function handleOptions(_: IncomingMessage, res: ServerResponse) {
   res.statusCode = 200
   res.setHeader(
     'Allow',

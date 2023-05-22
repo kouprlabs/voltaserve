@@ -13,7 +13,11 @@ import { getFilePath } from '@/infra/path'
   - Set the response status code to 204 if successful or an appropriate error code if the file is not found.
   - Return the response.
  */
-function handleDelete(req: IncomingMessage, res: ServerResponse, token: Token) {
+async function handleDelete(
+  req: IncomingMessage,
+  res: ServerResponse,
+  token: Token
+) {
   const filePath = getFilePath(req.url)
   fs.rm(filePath, { recursive: true }, (error) => {
     if (error) {

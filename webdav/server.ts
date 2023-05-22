@@ -52,7 +52,7 @@ const server = createServer((req: IncomingMessage, res: ServerResponse) => {
         const method = req.method
         switch (method) {
           case 'OPTIONS':
-            handleOptions(req, res)
+            await handleOptions(req, res)
             break
           case 'GET':
             await handleGet(req, res, token)
@@ -64,22 +64,22 @@ const server = createServer((req: IncomingMessage, res: ServerResponse) => {
             await handlePut(req, res, token)
             break
           case 'DELETE':
-            handleDelete(req, res, token)
+            await handleDelete(req, res, token)
             break
           case 'MKCOL':
-            handleMkcol(req, res, token)
+            await handleMkcol(req, res, token)
             break
           case 'COPY':
-            handleCopy(req, res, token)
+            await handleCopy(req, res, token)
             break
           case 'MOVE':
-            handleMove(req, res, token)
+            await handleMove(req, res, token)
             break
           case 'PROPFIND':
             await handlePropfind(req, res, token)
             break
           case 'PROPPATCH':
-            handleProppatch(req, res)
+            await handleProppatch(req, res)
             break
           default:
             res.statusCode = 501

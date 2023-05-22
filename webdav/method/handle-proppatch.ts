@@ -26,7 +26,7 @@ import { IncomingMessage, ServerResponse } from 'http'
   Note that this implementation assumes a simplified example and may require further 
   customization based on your specific property format and requirements.
  */
-function handleProppatch(_: IncomingMessage, res: ServerResponse) {
+async function handleProppatch(_: IncomingMessage, res: ServerResponse) {
   res.statusCode = 501
   res.end()
 }

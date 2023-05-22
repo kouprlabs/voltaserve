@@ -33,10 +33,11 @@ async function handlePut(
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token.access_token}`,
+          'Content-Type': 'application/json',
         },
       }
     )
-    directory = (await result.json()) as File
+    directory = await result.json()
 
     const filePath = path.join(os.tmpdir(), uuidv4())
     const ws = fs.createWriteStream(filePath)

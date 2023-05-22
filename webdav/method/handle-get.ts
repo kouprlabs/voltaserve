@@ -27,6 +27,7 @@ async function handleGet(
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token.access_token}`,
+        'Content-Type': 'application/json',
       },
     })
     const file: File = (await result.json())[0]
