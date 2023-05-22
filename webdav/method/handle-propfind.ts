@@ -29,20 +29,31 @@ async function handlePropfind(
         'Content-Type': 'application/json',
       },
     })
-    const file = await result.json()
+    const file: File = await result.json()
     if (file.type === FileType.File) {
       const responseXml = `
-      <D:multistatus xmlns:D="DAV:">
-        <D:response>
-          <D:href>${encodeURIComponent(file.name)}</D:href>
-          <D:propstat>
-            <D:prop>
-              <D:resourcetype></D:resourcetype>
-            </D:prop>
-            <D:status>HTTP/1.1 200 OK</D:status>
-          </D:propstat>
-        </D:response>
-      </D:multistatus>`
+        <D:multistatus xmlns:D="DAV:">
+          <D:response>
+            <D:href>${encodeURIComponent(file.name)}</D:href>
+            <D:propstat>
+              <D:prop>
+                <D:resourcetype></D:resourcetype>
+                ${
+                  file.original
+                    ? `<D:getcontentlength>${file.original.size}</D:getcontentlength>`
+                    : ''
+                }
+                <D:creationdate>${new Date(
+                  file.createTime
+                ).toUTCString()}</D:creationdate>
+                <D:getlastmodified>${new Date(
+                  file.updateTime
+                ).toUTCString()}</D:getlastmodified>
+              </D:prop>
+              <D:status>HTTP/1.1 200 OK</D:status>
+            </D:propstat>
+          </D:response>
+        </D:multistatus>`
       res.statusCode = 207
       res.setHeader('Content-Type', 'application/xml; charset=utf-8')
       res.end(responseXml)
@@ -62,6 +73,13 @@ async function handlePropfind(
             <D:propstat>
               <D:prop>
                 <D:resourcetype><D:collection/></D:resourcetype>
+                <D:getcontentlength>0</D:getcontentlength>
+                <D:getlastmodified>${new Date(
+                  file.updateTime
+                ).toUTCString()}</D:getlastmodified>
+                <D:creationdate>${new Date(
+                  file.createTime
+                ).toUTCString()}</D:creationdate>
               </D:prop>
               <D:status>HTTP/1.1 200 OK</D:status>
             </D:propstat>
@@ -79,6 +97,17 @@ async function handlePropfind(
                       <D:resourcetype>${
                         item.type === FileType.Folder ? '<D:collection/>' : ''
                       }</D:resourcetype>
+                      ${
+                        item.type === FileType.File && item.original
+                          ? `<D:getcontentlength>${item.original.size}</D:getcontentlength>`
+                          : ''
+                      }
+                      <D:getlastmodified>${new Date(
+                        item.updateTime
+                      ).toUTCString()}</D:getlastmodified>
+                      <D:creationdate>${new Date(
+                        item.createTime
+                      ).toUTCString()}</D:creationdate>
                     </D:prop>
                     <D:status>HTTP/1.1 200 OK</D:status>
                   </D:propstat>
