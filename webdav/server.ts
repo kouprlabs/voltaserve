@@ -56,10 +56,10 @@ const server = createServer((req: IncomingMessage, res: ServerResponse) => {
             handleOptions(req, res)
             break
           case 'GET':
-            handleGet(req, res)
+            await handleGet(req, res, token)
             break
           case 'HEAD':
-            handleHead(req, res)
+            await handleHead(req, res, token)
             break
           case 'PUT':
             handlePut(req, res)

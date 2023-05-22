@@ -710,7 +710,10 @@ func (r *FileDownloadRouter) AppendRoutes(g fiber.Router) {
 func (r *FileDownloadRouter) DownloadOriginal(c *fiber.Ctx) error {
 	accessToken := c.Cookies(r.accessTokenCookieName)
 	if accessToken == "" {
-		return errorpkg.NewFileNotFoundError(nil)
+		accessToken = c.Query("access_token")
+		if accessToken == "" {
+			return errorpkg.NewFileNotFoundError(nil)
+		}
 	}
 	userId, err := r.getUserId(accessToken)
 	if err != nil {
@@ -742,7 +745,10 @@ func (r *FileDownloadRouter) DownloadOriginal(c *fiber.Ctx) error {
 func (r *FileDownloadRouter) DownloadPreview(c *fiber.Ctx) error {
 	accessToken := c.Cookies(r.accessTokenCookieName)
 	if accessToken == "" {
-		return errorpkg.NewFileNotFoundError(nil)
+		accessToken = c.Query("access_token")
+		if accessToken == "" {
+			return errorpkg.NewFileNotFoundError(nil)
+		}
 	}
 	userId, err := r.getUserId(accessToken)
 	if err != nil {

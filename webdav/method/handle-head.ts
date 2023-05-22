@@ -1,5 +1,8 @@
 import fs from 'fs'
 import { IncomingMessage, ServerResponse } from 'http'
+import { File, FileType } from '@/api/file'
+import { Token } from '@/api/token'
+import { API_URL } from '@/config/config'
 import { getFilePath } from '@/infra/path'
 
 /*
@@ -13,23 +16,32 @@ import { getFilePath } from '@/infra/path'
   - Set the Content-Length header with the file size.
   - Return the response.
 */
-function handleHead(req: IncomingMessage, res: ServerResponse) {
-  const filePath = getFilePath(req.url)
-  fs.stat(filePath, (error, stats) => {
-    if (error) {
-      console.error(error)
-      if (error.code === 'ENOENT') {
-        res.statusCode = 404
-      } else {
-        res.statusCode = 500
-      }
+async function handleHead(
+  req: IncomingMessage,
+  res: ServerResponse,
+  token: Token
+) {
+  try {
+    const result = await fetch(`${API_URL}/v1/files/list?path=${req.url}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token.access_token}`,
+      },
+    })
+    const file: File = (await result.json())[0]
+    if (file.type === FileType.File) {
+      res.statusCode = 200
+      res.setHeader('Content-Length', file.original.size)
       res.end()
     } else {
       res.statusCode = 200
-      res.setHeader('Content-Length', stats.size)
       res.end()
     }
-  })
+  } catch (err) {
+    console.error(err)
+    res.statusCode = 500
+    res.end()
+  }
 }
 
 export default handleHead

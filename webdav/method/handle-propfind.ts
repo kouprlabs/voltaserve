@@ -1,4 +1,5 @@
-import { IncomingMessage, ServerResponse } from 'http'
+import fs from 'fs'
+import { IncomingMessage, ServerResponse, get } from 'http'
 import { File, FileType } from '@/api/file'
 import { Token } from '@/api/token'
 import { API_URL } from '@/config/config'
@@ -20,8 +21,7 @@ async function handlePropfind(
   res: ServerResponse,
   token: Token
 ) {
-  const url = req.url
-  const result = await fetch(`${API_URL}/v1/files/list?path=${url}`, {
+  const result = await fetch(`${API_URL}/v1/files/list?path=${req.url}`, {
     method: 'GET',
     headers: {
       'Authorization': `Bearer ${token.access_token}`,
