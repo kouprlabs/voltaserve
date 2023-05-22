@@ -25,7 +25,24 @@ async function handlePut(
   res: ServerResponse,
   token: Token
 ) {
-  let directory: File
+  try {
+    /* Delete existing file (simulate an overwrite) */
+    const result = await fetch(`${API_URL}/v1/files/get?path=${req.url}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token.access_token}`,
+        'Content-Type': 'application/json',
+      },
+    })
+    const file = await result.json()
+    await fetch(`${API_URL}/v1/files/${file.id}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token.access_token}`,
+        'Content-Type': 'application/json',
+      },
+    })
+  } catch (err) {}
   try {
     const result = await fetch(
       `${API_URL}/v1/files/get?path=${path.dirname(req.url)}`,
@@ -37,7 +54,7 @@ async function handlePut(
         },
       }
     )
-    directory = await result.json()
+    const directory = await result.json()
 
     const filePath = path.join(os.tmpdir(), uuidv4())
     const ws = fs.createWriteStream(filePath)
