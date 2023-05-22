@@ -20,8 +20,6 @@ async function handleCopy(
   res: ServerResponse,
   token: Token
 ) {
-  console.log('req.url', req.url)
-  console.log('req.destination', getTargetPath(req))
   try {
     const sourceResult = await fetch(
       `${API_URL}/v1/files/get?path=${req.url}`,

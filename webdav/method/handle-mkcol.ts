@@ -46,7 +46,6 @@ async function handleMkcol(
     })
     res.statusCode = 201
     res.end()
-    console.log(`handleMkcol: ${req.url} [OK]`)
   } catch (err) {
     console.error(err)
     res.statusCode = 500
