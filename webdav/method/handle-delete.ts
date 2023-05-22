@@ -1,7 +1,9 @@
 import fs from 'fs'
 import { IncomingMessage, ServerResponse } from 'http'
+import path from 'path'
+import { File } from '@/api/file'
 import { Token } from '@/api/token'
-import { getFilePath } from '@/infra/path'
+import { API_URL } from '@/config/config'
 
 /*
   This method deletes a resource identified by the URL.
@@ -18,20 +20,29 @@ async function handleDelete(
   res: ServerResponse,
   token: Token
 ) {
-  const filePath = getFilePath(req.url)
-  fs.rm(filePath, { recursive: true }, (error) => {
-    if (error) {
-      console.error(error)
-      if (error.code === 'ENOENT') {
-        res.statusCode = 404
-      } else {
-        res.statusCode = 500
-      }
-    } else {
-      res.statusCode = 204
-    }
+  try {
+    const result = await fetch(`${API_URL}/v1/files/get?path=${req.url}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token.access_token}`,
+        'Content-Type': 'application/json',
+      },
+    })
+    const file: File = await result.json()
+    await fetch(`${API_URL}/v1/files/${file.id}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token.access_token}`,
+        'Content-Type': 'application/json',
+      },
+    })
+    res.statusCode = 204
     res.end()
-  })
+  } catch (err) {
+    console.error(err)
+    res.statusCode = 500
+    res.end()
+  }
 }
 
 export default handleDelete
