@@ -15,6 +15,6 @@ ENV NODE_ENV production
 
 COPY --from=builder /build/pkg/voltaserve-webdav-alpine ./voltaserve-webdav
 
-ENTRYPOINT ["./voltaserve-idp"]
+ENTRYPOINT ["./voltaserve-webdav"]
 
 EXPOSE 6000

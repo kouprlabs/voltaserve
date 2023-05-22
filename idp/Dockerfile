@@ -14,6 +14,8 @@ WORKDIR /app
 ENV NODE_ENV production
 
 COPY --from=builder /build/pkg/voltaserve-idp-alpine ./voltaserve-idp
+COPY --from=builder /build/templates ./templates
+COPY --from=builder /build/.env ./.env
 
 ENTRYPOINT ["./voltaserve-idp"]
 
