@@ -3,7 +3,7 @@ import path from 'path'
 import { File } from '@/api/file'
 import { Token } from '@/api/token'
 import { API_URL } from '@/config/config'
-import { getDestinationPath } from '@/infra/path'
+import { getTargetPath } from '@/infra/path'
 
 /*
   This method copies a resource from a source URL to a destination URL.
@@ -21,7 +21,7 @@ async function handleCopy(
   token: Token
 ) {
   console.log('req.url', req.url)
-  console.log('req.destination', getDestinationPath(req))
+  console.log('req.destination', getTargetPath(req))
   try {
     const sourceResult = await fetch(
       `${API_URL}/v1/files/get?path=${req.url}`,
@@ -35,8 +35,8 @@ async function handleCopy(
     )
     const sourceFile: File = await sourceResult.json()
 
-    const destinationResult = await fetch(
-      `${API_URL}/v1/files/get?path=${path.dirname(getDestinationPath(req))}`,
+    const targetResult = await fetch(
+      `${API_URL}/v1/files/get?path=${path.dirname(getTargetPath(req))}`,
       {
         method: 'GET',
         headers: {
@@ -45,10 +45,16 @@ async function handleCopy(
         },
       }
     )
-    const destination: File = await destinationResult.json()
+    const targetFile: File = await targetResult.json()
+
+    if (sourceFile.workspaceId !== targetFile.workspaceId) {
+      res.statusCode = 400
+      res.end()
+      return
+    }
 
     const copyResponse = await fetch(
-      `${API_URL}/v1/files/${destination.id}/copy`,
+      `${API_URL}/v1/files/${targetFile.id}/copy`,
       {
         method: 'POST',
         headers: {
@@ -69,7 +75,7 @@ async function handleCopy(
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        name: path.basename(getDestinationPath(req)),
+        name: path.basename(getTargetPath(req)),
       }),
     })
 

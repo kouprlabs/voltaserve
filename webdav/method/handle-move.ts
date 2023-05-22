@@ -4,7 +4,7 @@ import path from 'path'
 import { File } from '@/api/file'
 import { Token } from '@/api/token'
 import { API_URL } from '@/config/config'
-import { getDestinationPath, getFilePath } from '@/infra/path'
+import { getTargetPath } from '@/infra/path'
 
 /*
   This method moves or renames a resource from a source URL to a destination URL.
@@ -34,8 +34,8 @@ async function handleMove(
     )
     const sourceFile: File = await sourceResult.json()
 
-    const destinationResult = await fetch(
-      `${API_URL}/v1/files/get?path=${path.dirname(getDestinationPath(req))}`,
+    const targetResult = await fetch(
+      `${API_URL}/v1/files/get?path=${path.dirname(getTargetPath(req))}`,
       {
         method: 'GET',
         headers: {
@@ -44,9 +44,15 @@ async function handleMove(
         },
       }
     )
-    const destination: File = await destinationResult.json()
+    const targetFile: File = await targetResult.json()
 
-    await fetch(`${API_URL}/v1/files/${destination.id}/move`, {
+    if (sourceFile.workspaceId !== targetFile.workspaceId) {
+      res.statusCode = 400
+      res.end()
+      return
+    }
+
+    await fetch(`${API_URL}/v1/files/${targetFile.id}/move`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token.access_token}`,

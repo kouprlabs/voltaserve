@@ -968,7 +968,7 @@ func (svc *FileService) Move(targetId string, sourceIds []string, userId string)
 		res = append(res, *source.GetParentId())
 
 		/* Move source into target */
-		if err := svc.fileRepo.MoveSourceIntoTarget(target.GetWorkspaceId(), target.GetId(), source.GetId()); err != nil {
+		if err := svc.fileRepo.MoveSourceIntoTarget(target.GetId(), source.GetId()); err != nil {
 			return []string{}, err
 		}
 

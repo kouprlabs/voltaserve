@@ -3,7 +3,6 @@ import { IncomingMessage, ServerResponse } from 'http'
 import { File, FileType } from '@/api/file'
 import { Token } from '@/api/token'
 import { API_URL } from '@/config/config'
-import { getFilePath } from '@/infra/path'
 
 /*
   This method is similar to GET but only retrieves the metadata of a resource, without returning the actual content.

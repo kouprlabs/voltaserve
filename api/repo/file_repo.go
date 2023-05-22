@@ -284,8 +284,8 @@ func (repo *FileRepo) AssignSnapshots(cloneId string, originalId string) error {
 	return nil
 }
 
-func (repo *FileRepo) MoveSourceIntoTarget(workspaceId string, targetId string, sourceId string) error {
-	if db := repo.db.Exec("UPDATE file SET workspace_id = ?, parent_id = ? WHERE id = ?", workspaceId, targetId, sourceId); db.Error != nil {
+func (repo *FileRepo) MoveSourceIntoTarget(targetId string, sourceId string) error {
+	if db := repo.db.Exec("UPDATE file SET parent_id = ? WHERE id = ?", targetId, sourceId); db.Error != nil {
 		return db.Error
 	}
 	return nil

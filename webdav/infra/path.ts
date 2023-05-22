@@ -1,12 +1,7 @@
 import { IncomingMessage } from 'http'
 import path from 'path'
-import { DATA_DIRECTORY } from '@/config/config'
 
-export function getFilePath(url: string) {
-  return path.join(DATA_DIRECTORY, decodeURIComponent(url))
-}
-
-export function getDestinationPath(req: IncomingMessage) {
+export function getTargetPath(req: IncomingMessage) {
   const destinationHeader = req.headers.destination as string
   if (!destinationHeader) {
     return null
