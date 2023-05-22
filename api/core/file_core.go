@@ -397,7 +397,15 @@ func (svc *FileService) FindByPath(path string, userId string) (*File, error) {
 		return nil, err
 	}
 	if path == "/" {
-		return nil, errorpkg.NewInvalidPathError(fmt.Errorf("invalid path '%s'", path))
+		return &File{
+			Id:          user.GetId(),
+			WorkspaceId: "",
+			Name:        "/",
+			Type:        model.FileTypeFolder,
+			Permission:  "owner",
+			CreateTime:  user.GetCreateTime(),
+			UpdateTime:  nil,
+		}, nil
 	}
 	components := []string{}
 	for _, v := range strings.Split(path, "/") {
@@ -960,7 +968,7 @@ func (svc *FileService) Move(targetId string, sourceIds []string, userId string)
 		res = append(res, *source.GetParentId())
 
 		/* Move source into target */
-		if err := svc.fileRepo.MoveSourceIntoTarget(target.GetId(), source.GetId()); err != nil {
+		if err := svc.fileRepo.MoveSourceIntoTarget(target.GetWorkspaceId(), target.GetId(), source.GetId()); err != nil {
 			return []string{}, err
 		}
 
