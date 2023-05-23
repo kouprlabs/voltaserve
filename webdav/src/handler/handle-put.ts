@@ -57,27 +57,26 @@ async function handlePut(
 
     const filePath = path.join(os.tmpdir(), uuidv4())
     const ws = fs.createWriteStream(filePath)
-    ws.on('error', (error) => {
-      console.error(error)
+    req.pipe(ws)
+    ws.on('error', (err) => {
+      console.error(err)
       res.statusCode = 500
       res.end()
     })
-    req.on('data', (chunk) => {
-      ws.write(chunk)
-    })
-    req.on('end', async () => {
-      ws.end()
-
-      const params = new URLSearchParams({
-        workspace_id: directory.workspaceId,
-      })
-      params.append('parent_id', directory.id)
-
-      const formData = new FormData()
-      const blob = new Blob([await readFile(filePath)])
-      formData.set('file', blob, decodeURIComponent(path.basename(req.url)))
-
+    ws.on('finish', async () => {
       try {
+        res.statusCode = 201
+        res.end()
+
+        const params = new URLSearchParams({
+          workspace_id: directory.workspaceId,
+        })
+        params.append('parent_id', directory.id)
+
+        const formData = new FormData()
+        const blob = new Blob([await readFile(filePath)])
+        formData.set('file', blob, decodeURIComponent(path.basename(req.url)))
+
         await fetch(`${API_URL}/v1/files?${params}`, {
           method: 'POST',
           headers: {
@@ -85,13 +84,13 @@ async function handlePut(
           },
           body: formData,
         })
-        res.statusCode = 201
       } catch (err) {
         console.error(err)
         res.statusCode = 500
+        res.end()
+      } finally {
+        fs.rmSync(filePath)
       }
-      fs.rmSync(filePath)
-      res.end()
     })
   } catch (err) {
     console.error(err)
