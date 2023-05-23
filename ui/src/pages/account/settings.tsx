@@ -55,7 +55,7 @@ const AccountSettingsPage = () => {
       </Helmet>
       <Stack direction="column" spacing={0}>
         <Stack direction="column" py={SECTION_SPACING}>
-          <Text fontWeight="bold">Storage usage</Text>
+          <Text fontWeight="bold">Storage Usage</Text>
           {storageUsageError && <Text>Failed to load storage usage.</Text>}
           {storageUsage && !storageUsageError && (
             <>
@@ -127,9 +127,9 @@ const AccountSettingsPage = () => {
         </Stack>
         <Divider />
         <Stack direction="column" py={SECTION_SPACING}>
-          <Text fontWeight="bold">Delete account</Text>
+          <Text fontWeight="bold">Advanced</Text>
           <HStack spacing={variables.spacing} h={ROW_HEIGHT}>
-            <Text>Delete permanently</Text>
+            <Text>Delete account</Text>
             <Spacer />
             <IconButton
               icon={<IconTrash />}

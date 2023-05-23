@@ -10,7 +10,7 @@ export const CreateGroupButton = () => (
     variant="solid"
     colorScheme="blue"
   >
-    New group
+    New Group
   </Button>
 )
 
@@ -22,7 +22,7 @@ export const CreateOrganizationButton = () => (
     variant="solid"
     colorScheme="blue"
   >
-    New organization
+    New Organization
   </Button>
 )
 
@@ -34,6 +34,6 @@ export const CreateWorkspaceButton = () => (
     variant="solid"
     colorScheme="blue"
   >
-    New workspace
+    New Workspace
   </Button>
 )

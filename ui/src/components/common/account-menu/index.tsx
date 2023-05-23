@@ -46,7 +46,7 @@ const AccountMenu = () => {
               Account
             </MenuItem>
             <MenuItem as={Link} to="/sign-out" color="red">
-              Sign out
+              Sign Out
             </MenuItem>
           </MenuList>
         </Portal>

@@ -28,8 +28,8 @@ import TokenAPI from '@/api/token'
 import WorkspaceAPI from '@/api/workspace'
 import Logo from '@/components/common/logo'
 import FullLayout from '@/components/layout/full'
-import { saveToken } from '@/infra/token'
 import { gigabyteToByte } from '@/helpers/convert-storage'
+import { saveToken } from '@/infra/token'
 
 type FormValues = {
   email: string
@@ -150,7 +150,7 @@ const SignInPage = () => {
                     type="submit"
                     isLoading={isSubmitting}
                   >
-                    Sign in
+                    Sign In
                   </Button>
                 </VStack>
               </Form>
@@ -160,13 +160,13 @@ const SignInPage = () => {
             <HStack spacing={variables.spacingXs}>
               <Text>{"Don't have an account yet?"}</Text>
               <ChakraLink as={Link} to="/sign-up">
-                Sign up
+                Sign Up
               </ChakraLink>
             </HStack>
             <HStack spacing={variables.spacingXs}>
               <Text>Cannot sign in?</Text>
               <ChakraLink as={Link} to="/forgot-password">
-                Reset password
+                Reset Password
               </ChakraLink>
             </HStack>
           </Container>

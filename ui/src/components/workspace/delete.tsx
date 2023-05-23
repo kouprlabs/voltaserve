@@ -118,7 +118,7 @@ const Delete = ({ open, workspace, onClose }: DeleteProps) => {
                   colorScheme="red"
                   isLoading={isSubmitting}
                 >
-                  Delete permanently
+                  Delete Permanently
                 </Button>
               </ModalFooter>
             </Form>

@@ -10,14 +10,14 @@ import ImageViewer from '@/components/viewer/image-viewer'
 import PdfViewer from '@/components/viewer/pdf-viewer'
 import VideoPlayer from '@/components/viewer/video-player'
 import downloadFile from '@/helpers/download-file'
-import { isAudio, isImage, isPdf, isVideo } from '@/helpers/file-extension'
+import { isAudio, isImage, isPDF, isVideo } from '@/helpers/file-extension'
 
 const FileViewerPage = () => {
   const params = useParams()
   const { data: file } = FileAPI.useGetById(params.id as string)
 
   const renderViewer = useCallback((file: File) => {
-    if (file.preview && isPdf(file.preview.extension)) {
+    if (file.preview && isPDF(file.preview.extension)) {
       return <PdfViewer file={file} />
     } else if (file.original && isImage(file.original.extension)) {
       return <ImageViewer file={file} />

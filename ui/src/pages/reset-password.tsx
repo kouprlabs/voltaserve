@@ -77,7 +77,7 @@ const ResetPasswordPage = () => {
             <VStack spacing={variables.spacingXs}>
               <Text align="center">Password successfully changed.</Text>
               <ChakraLink as={Link} to="/sign-in">
-                Sign in
+                Sign In
               </ChakraLink>
             </VStack>
           ) : (
@@ -146,7 +146,7 @@ const ResetPasswordPage = () => {
                         type="submit"
                         isLoading={isSubmitting}
                       >
-                        Reset password
+                        Reset Password
                       </Button>
                     </VStack>
                   </Form>
@@ -155,7 +155,7 @@ const ResetPasswordPage = () => {
               <HStack spacing={variables.spacingXs}>
                 <Text>Password already reset?</Text>
                 <ChakraLink as={Link} to="/sign-in">
-                  Sign in
+                  Sign In
                 </ChakraLink>
               </HStack>
             </>

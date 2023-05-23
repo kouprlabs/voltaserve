@@ -114,7 +114,7 @@ const Delete = ({ open, group, onClose }: DeleteProps) => {
                   disabled={isSubmitting}
                   isLoading={isSubmitting}
                 >
-                  Delete permanently
+                  Delete Permanently
                 </Button>
               </ModalFooter>
             </Form>
