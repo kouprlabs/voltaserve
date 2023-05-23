@@ -22,6 +22,9 @@ async function handleMove(
   token: Token
 ) {
   try {
+    const sourcePath = decodeURI(req.url)
+    const targetPath = getTargetPath(req)
+
     const sourceResult = await fetch(
       `${API_URL}/v1/files/get?path=${req.url}`,
       {
@@ -52,16 +55,33 @@ async function handleMove(
       return
     }
 
-    await fetch(`${API_URL}/v1/files/${targetFile.id}/move`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token.access_token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        ids: [sourceFile.id],
-      }),
-    })
+    if (
+      sourcePath.split('/').length === targetPath.split('/').length &&
+      path.dirname(sourcePath) === path.dirname(targetPath)
+    ) {
+      await fetch(`${API_URL}/v1/files/${sourceFile.id}/rename`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: path.basename(targetPath),
+        }),
+      })
+    } else {
+      await fetch(`${API_URL}/v1/files/${targetFile.id}/move`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ids: [sourceFile.id],
+        }),
+      })
+    }
+
     res.statusCode = 204
     res.end()
   } catch (err) {
