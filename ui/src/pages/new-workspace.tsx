@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import {
   Button,
   FormControl,
@@ -173,6 +173,9 @@ const NewWorkspacePage = () => {
                     isLoading={isSubmitting || isLoading}
                   >
                     Create
+                  </Button>
+                  <Button as={Link} to="/workspace" variant="solid">
+                    Cancel
                   </Button>
                 </HStack>
               </Stack>

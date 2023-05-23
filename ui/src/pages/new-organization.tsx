@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Heading, HStack, Stack } from '@chakra-ui/react'
 import { Button, FormControl, FormErrorMessage, Input } from '@chakra-ui/react'
 import { variables } from '@koupr/ui'
@@ -96,6 +96,9 @@ const NewOrganizationPage = () => {
                     isLoading={isSubmitting || isLoading}
                   >
                     Create
+                  </Button>
+                  <Button as={Link} to="/organization" variant="solid">
+                    Cancel
                   </Button>
                 </HStack>
               </Stack>
