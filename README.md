@@ -80,7 +80,7 @@ Wait a few minutes until all containers are up and running. You can check that b
 
 ### Connect with WebDAV
 
-Voltaserve supports [WebDAV](https://en.wikipedia.org/wiki/WebDAV), by default it's listening on the port 6000.
+Voltaserve supports [WebDAV](https://en.wikipedia.org/wiki/WebDAV), by default it's listening on the port `6000`.
 
 You can change the port by editing the `VOLTASERVE_WEBDAV_PORT` environment variable in [.env](./.env) file as follows:
 
