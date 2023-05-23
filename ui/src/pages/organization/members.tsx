@@ -145,7 +145,7 @@ const OrganizationMembersPage = () => {
                     setIsInviteMembersModalOpen(true)
                   }}
                 >
-                  Invite members
+                  Invite Members
                 </Button>
               )}
             </VStack>

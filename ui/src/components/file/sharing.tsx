@@ -39,10 +39,10 @@ import OrganizationAPI from '@/api/organization'
 import { geEditorPermission } from '@/api/permission'
 import UserAPI, { User } from '@/api/user'
 import WorkspaceAPI from '@/api/workspace'
+import userToString from '@/helpers/user-to-string'
 import { filesUpdated } from '@/store/entities/files'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { selectionUpdated, sharingModalDidClose } from '@/store/ui/files'
-import userToString from '@/helpers/user-to-string'
 
 const Sharing = () => {
   const params = useParams()
@@ -271,7 +271,7 @@ const Sharing = () => {
                             leftIcon={<IconUserPlus />}
                             to={`/organization/${workspace.organization.id}/member?invite=true`}
                           >
-                            Invite members
+                            Invite Members
                           </Button>
                         ) : null}
                       </VStack>
@@ -292,7 +292,7 @@ const Sharing = () => {
                         ))}
                       </Select>
                       <Select
-                        placeholder="Select permission"
+                        placeholder="Select Permission"
                         value={activeUserPermission}
                         isDisabled={isGrantLoading}
                         onChange={(e) =>
@@ -310,7 +310,7 @@ const Sharing = () => {
                         isDisabled={!activeUserId || !activeUserPermission}
                         onClick={() => handleGrantUserPermission()}
                       >
-                        Apply to user
+                        Apply to User
                       </Button>
                     </Stack>
                   ) : null}
@@ -380,7 +380,7 @@ const Sharing = () => {
                   {groups && groups.length > 0 ? (
                     <Stack direction="column" spacing={variables.spacing}>
                       <Select
-                        placeholder="Select group"
+                        placeholder="Select Group"
                         value={activeGroupId}
                         isDisabled={isGrantLoading}
                         onChange={(e) => setActiveGroupId(e.target.value)}
@@ -392,7 +392,7 @@ const Sharing = () => {
                         ))}
                       </Select>
                       <Select
-                        placeholder="Select permission"
+                        placeholder="Select Permission"
                         value={activeGroupPermission}
                         isDisabled={isGrantLoading}
                         onChange={(e) =>
@@ -410,7 +410,7 @@ const Sharing = () => {
                         isDisabled={!activeGroupId || !activeGroupPermission}
                         onClick={() => handleGrantGroupPermission()}
                       >
-                        Apply to group
+                        Apply to Group
                       </Button>
                     </Stack>
                   ) : null}
@@ -427,7 +427,7 @@ const Sharing = () => {
                             leftIcon={<IconAdd />}
                             to={`/new/group?org=${workspace.organization.id}`}
                           >
-                            New group
+                            New Group
                           </Button>
                         ) : null}
                       </VStack>

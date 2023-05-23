@@ -57,7 +57,7 @@ const ConfirmEmailPage = () => {
               <VStack spacing={variables.spacingXs}>
                 <Text>Click the link below to sign in.</Text>
                 <ChakraLink as={Link} to="/sign-in">
-                  Sign in
+                  Sign In
                 </ChakraLink>
               </VStack>
             </VStack>

@@ -159,7 +159,7 @@ const Browse = ({ onChange }: BrowseProps) => {
             onClick={() => handleLoadMore(fileId, page)}
             isLoading={loading}
           >
-            Load more
+            Load More
           </Button>
         </Center>
       ) : null}

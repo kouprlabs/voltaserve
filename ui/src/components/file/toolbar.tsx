@@ -33,6 +33,7 @@ import {
   IconUpload,
   IconRefresh,
 } from '@koupr/ui'
+import { BsSortDown } from 'react-icons/bs'
 import FileAPI, { FileList } from '@/api/file'
 import { ltEditorPermission, ltOwnerPermission } from '@/api/permission'
 import downloadFile from '@/helpers/download-file'
@@ -54,6 +55,7 @@ import {
 import { uploadsDrawerOpened } from '@/store/ui/uploads-drawer'
 
 const ICON_SCALE_LOCAL_STORAGE_KEY = 'voltaserve_file_icon_scale'
+const SPACING = variables.spacingXs
 
 const Toolbar = () => {
   const dispatch = useAppDispatch()
@@ -158,7 +160,7 @@ const Toolbar = () => {
 
   return (
     <>
-      <Stack direction="row" spacing={variables.spacingSm}>
+      <Stack direction="row" spacing={SPACING}>
         <ButtonGroup isAttached>
           <Button
             variant="solid"
@@ -167,7 +169,7 @@ const Toolbar = () => {
             isDisabled={!folder || ltEditorPermission(folder.permission)}
             onClick={() => uploadHiddenInput?.current?.click()}
           >
-            Upload file
+            Upload File
           </Button>
           <Button
             variant="outline"
@@ -176,10 +178,10 @@ const Toolbar = () => {
             isDisabled={!folder || ltEditorPermission(folder.permission)}
             onClick={() => dispatch(createModalDidOpen())}
           >
-            New folder
+            New Folder
           </Button>
         </ButtonGroup>
-        <Stack direction="row" spacing={variables.spacingSm}>
+        <Stack direction="row" spacing={SPACING}>
           {selectionCount > 0 && hasOwnerPermission && (
             <Button
               leftIcon={<IconShare />}
@@ -272,13 +274,13 @@ const Toolbar = () => {
                       }
                     }}
                   >
-                    Select all
+                    Select All
                   </MenuItem>
                   <MenuItem
                     icon={<IconCircle />}
                     onClick={() => dispatch(selectionUpdated([]))}
                   >
-                    Unselect all
+                    Unselect All
                   </MenuItem>
                 </MenuList>
               </Portal>
@@ -293,20 +295,49 @@ const Toolbar = () => {
           onClick={handleRefresh}
         />
         <Spacer />
-        <Slider
-          w="200px"
-          value={iconScale}
-          min={1}
-          max={2.5}
-          step={0.25}
-          onChange={handleIconScaleChange}
-        >
-          <SliderTrack>
-            <Box position="relative" />
-            <SliderFilledTrack />
-          </SliderTrack>
-          <SliderThumb />
-        </Slider>
+        <Stack direction="row" spacing={SPACING}>
+          <Slider
+            w="120px"
+            value={iconScale}
+            min={1}
+            max={2.5}
+            step={0.25}
+            onChange={handleIconScaleChange}
+          >
+            <SliderTrack>
+              <Box position="relative" />
+              <SliderFilledTrack />
+            </SliderTrack>
+            <SliderThumb />
+          </Slider>
+          <IconButton
+            icon={<BsSortDown />}
+            fontSize="16px"
+            variant="solid"
+            aria-label=""
+          />
+          <Box>
+            <Menu>
+              <MenuButton
+                as={IconButton}
+                icon={<IconDotsVertical />}
+                variant="solid"
+                aria-label=""
+              />
+              <Portal>
+                <MenuList zIndex="dropdown">
+                  <MenuItem icon={<IconCheckCircle />}>Sort By Name</MenuItem>
+                  <MenuItem icon={<IconCircle />}>
+                    Sort By Date Created
+                  </MenuItem>
+                  <MenuItem icon={<IconCircle />}>
+                    Sort By Date Modified
+                  </MenuItem>
+                </MenuList>
+              </Portal>
+            </Menu>
+          </Box>
+        </Stack>
       </Stack>
       <input
         ref={uploadHiddenInput}

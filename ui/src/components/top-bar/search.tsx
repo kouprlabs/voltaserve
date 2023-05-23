@@ -48,16 +48,16 @@ const Search = () => {
   )
   const placeholder = useMemo(() => {
     if (isWorkspaces) {
-      return `Search workspaces`
+      return `Search Workspaces`
     }
     if (isFiles) {
-      return `Search files`
+      return `Search Files`
     }
     if (isGroups) {
-      return `Search groups`
+      return `Search Groups`
     }
     if (isOrgs) {
-      return `Search organizations`
+      return `Search Organizations`
     }
   }, [isWorkspaces, isFiles, isGroups, isOrgs])
   const [text, setText] = useState(query || '')

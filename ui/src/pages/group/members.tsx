@@ -136,7 +136,7 @@ const GroupMembersPage = () => {
                     setIsAddMembersModalOpen(true)
                   }}
                 >
-                  Add members
+                  Add Members
                 </Button>
               )}
             </VStack>

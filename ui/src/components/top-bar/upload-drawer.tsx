@@ -15,10 +15,10 @@ import {
   Button,
 } from '@chakra-ui/react'
 import { IconDeleteListItem, IconUpload } from '@koupr/ui'
+import List from '@/components/file/upload/list'
 import { completedUploadsCleared } from '@/store/entities/uploads'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { uploadsDrawerClosed } from '@/store/ui/uploads-drawer'
-import List from '@/components/file/upload/list'
 
 const UploadDrawer = () => {
   const dispatch = useAppDispatch()
@@ -90,7 +90,7 @@ const UploadDrawer = () => {
                 leftIcon={<IconDeleteListItem size="22px" />}
                 onClick={handleClearCompleted}
               >
-                Clear completed
+                Clear Completed Items
               </Button>
             )}
           </DrawerFooter>
