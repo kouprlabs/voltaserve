@@ -8,10 +8,66 @@
 
 Install [Docker](https://docs.docker.com/get-docker) and [Docker Compose](https://docs.docker.com/compose/install).
 
-### Run for Experimentation, Testing and Development
+### Run for Production
+
+Update the `VOLTASERVE_HOSTNAME` environment variable in [.env](./.env) file to match your hostname (it can optionally be an IP address as well):
+
+```properties
+VOLTASERVE_HOSTNAME="my-hostname"
+```
+
+Update the following environment variables in [.env](./.env) file to match your SMTP server:
+
+```properties
+VOLTASERVE_SMTP_HOST="my-smtp-hostname"
+VOLTASERVE_SMTP_PORT=587
+VOLTASERVE_SMTP_SECURE=true
+VOLTASERVE_SMTP_USERNAME="my-smtp-user"
+VOLTASERVE_SMTP_PASSWORD="my-smtp-password"
+VOLTASERVE_SMTP_SENDER_ADDRESS="no-reply@my-domain"
+VOLTASERVE_SMTP_SENDER_NAME="Voltaserve"
+```
+
+The port `3000` is used for the UI, therefore it needs to be open and accessible from the outside. One way of doing it in Linux is by using `ufw`:
+
+```shell
+sudo ufw allow 3000
+```
+
+You can change the UI port to something else, other than `3000`, like `80` for example. This can be done by editing the `VOLTASERVE_UI_PORT` environment variable in [.env](./.env) file as follows:
+
+```properties
+VOLTASERVE_UI_PORT=80
+```
+
+Other ports can be changed as well by editing their respective environment variables in [.env](./.env) file.
+
+Build Docker images:
+
+```sh
+docker compose build
+```
+
+Then:
 
 ```sh
 docker compose up
+```
+
+Make sure all containers are up and running by checking their logs.
+
+_Note: here you should replace `my-hostname` and `3000` with the hostname and port that matches your configuration, if you have SSL then make sure you are using `https://`._
+
+1. Go to the **sign up page** [http://my-hostname:3000/sign-up](http://my-hostname:3000/sign-up) and create an account.
+
+2. Confirm your email.
+
+3. Finally, go to the **sign in page** [http://my-hostname:3000/sign-in](http://my-hostname:3000/sign-in) and login with your credentials.
+
+### Run for Experimentation, Testing and Development
+
+```sh
+docker compose -f ./docker-compose.dev.yml up
 ```
 
 Wait a few minutes until all containers are up and running. You can check that by looking at their logs.
@@ -55,62 +111,6 @@ Additional instructions:
 - [Voltaserve Identity Provider](idp/README.md)
 - [Voltaserve API](api/README.md)
 - [Voltaserve UI](ui/README.md)
-
-### Run for Production
-
-Update the `VOLTASERVE_HOSTNAME` environment variable in [.env](./.env) file to match your hostname (it can optionally be an IP address as well):
-
-```properties
-VOLTASERVE_HOSTNAME="my-hostname"
-```
-
-Update the following environment variables in [.env](./.env) file to match your SMTP server:
-
-```properties
-VOLTASERVE_SMTP_HOST="my-smtp-hostname"
-VOLTASERVE_SMTP_PORT=587
-VOLTASERVE_SMTP_SECURE=true
-VOLTASERVE_SMTP_USERNAME="my-smtp-user"
-VOLTASERVE_SMTP_PASSWORD="my-smtp-password"
-VOLTASERVE_SMTP_SENDER_ADDRESS="no-reply@my-domain"
-VOLTASERVE_SMTP_SENDER_NAME="Voltaserve"
-```
-
-The port `3000` is used for the UI, therefore it needs to be open and accessible from the outside. One way of doing it in Linux is by using `ufw`:
-
-```shell
-sudo ufw allow 3000
-```
-
-You can change the UI port to something else, other than `3000`, like `80` for example. This can be done by editing the `VOLTASERVE_UI_PORT` environment variable in [.env](./.env) file as follows:
-
-```properties
-VOLTASERVE_UI_PORT=80
-```
-
-Other ports can be changed as well by editing their respective environment variables in [.env](./.env) file.
-
-Build Docker images:
-
-```sh
-docker compose -f ./docker-compose.prod.yml build
-```
-
-Then:
-
-```sh
-docker compose -f ./docker-compose.prod.yml up
-```
-
-Make sure all containers are up and running by checking their logs.
-
-_Note: here you should replace `my-hostname` and `3000` with the hostname and port that matches your configuration, if you have SSL then make sure you are using `https://`._
-
-1. Go to the **sign up page** [http://my-hostname:3000/sign-up](http://my-hostname:3000/sign-up) and create an account.
-
-2. Confirm your email.
-
-3. Finally, go to the **sign in page** [http://my-hostname:3000/sign-in](http://my-hostname:3000/sign-in) and login with your credentials.
 
 ## Licensing
 

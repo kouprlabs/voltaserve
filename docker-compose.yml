@@ -62,18 +62,12 @@ services:
     ports:
       - ${VOLTASERVE_REDISINSIGHT_PORT}:8001
     volumes:
-      - redisinsight:/db  
-  mailcatcher:
-    container_name: voltaserve-mailcatcher
-    image: sj26/mailcatcher:v0.8.2
-    ports:
-      - ${VOLTASERVE_MAILCATCHER_WEB_PORT}:1080
-      - ${VOLTASERVE_MAILCATCHER_SMTP_PORT}:1025
+      - redisinsight:/db
   idp:
     container_name: voltaserve-idp
-    image: node:18-alpine
-    working_dir: /app
-    command: sh -c "npm i && npm run dev"
+    image: voltaserve/idp
+    build:
+      context: ./idp
     ports:
       - ${VOLTASERVE_IDP_PORT}:7000
     environment:
@@ -88,20 +82,16 @@ services:
       - SMTP_PASSWORD=${VOLTASERVE_SMTP_PASSWORD}
       - SMTP_SENDER_ADDRESS=${VOLTASERVE_SMTP_SENDER_ADDRESS}
       - SMTP_SENDER_NAME=${VOLTASERVE_SMTP_SENDER_NAME}
-    volumes:
-      - ./idp:/app
-      - /app/node_modules
     depends_on:
       - postgres
       - meilisearch
       - minio
+    restart: on-failure
   api:
     container_name: voltaserve-api
-    image: golang:1.19-bullseye
-    working_dir: /app
-    command: sh -c "./install-deps.sh && go run ."
-    ports:
-      - ${VOLTASERVE_API_PORT}:5000
+    image: voltaserve/api
+    build:
+      context: ./api
     environment:
       - API_URL=http://${VOLTASERVE_HOSTNAME}:${VOLTASERVE_API_PORT}
       - UI_URL=http://${VOLTASERVE_HOSTNAME}:${VOLTASERVE_UI_PORT}
@@ -116,42 +106,42 @@ services:
       - SMTP_PASSWORD=${VOLTASERVE_SMTP_PASSWORD}
       - SMTP_SENDER_ADDRESS=${VOLTASERVE_SMTP_SENDER_ADDRESS}
       - SMTP_SENDER_NAME=${VOLTASERVE_SMTP_SENDER_NAME}
-    volumes:
-      - ./api:/app
+    ports:
+      - ${VOLTASERVE_API_PORT}:5000
     depends_on:
       - postgres
       - redis
       - minio
       - meilisearch
+    restart: on-failure
   ui:
     container_name: voltaserve-ui
-    image: node:18-alpine
-    working_dir: /app
-    command: sh -c "npm i && npm run dev"
+    image: voltaserve/ui
+    build:
+      context: ./ui
+      args:
+        - API_URL=http://api:${VOLTASERVE_API_PORT}
+        - IDP_URL=http://idp:${VOLTASERVE_IDP_PORT}
     ports:
       - ${VOLTASERVE_UI_PORT}:3000
     environment:
       - API_URL=http://api:${VOLTASERVE_API_PORT}
       - IDP_URL=http://idp:${VOLTASERVE_IDP_PORT}
-    volumes:
-      - ./ui:/app
-      - /app/node_modules
     depends_on:
       - idp
       - api
+    restart: on-failure
   webdav:
     container_name: voltaserve-webdav
-    image: node:18-alpine
-    working_dir: /app
-    command: sh -c "npm i && npm run dev"
+    image: voltaserve/webdav
+    build:
+      context: ./webdav
     ports:
       - ${VOLTASERVE_WEBDAV_PORT}:6000
     environment:
-      - IDP_URL=http://${VOLTASERVE_HOSTNAME}:${VOLTASERVE_IDP_PORT}
-      - API_URL=http://${VOLTASERVE_HOSTNAME}:${VOLTASERVE_API_PORT}
-    volumes:
-      - ./webdav:/app
-      - /app/node_modules
+      - IDP_URL=http://idp:${VOLTASERVE_IDP_PORT}
+      - API_URL=http://api:${VOLTASERVE_API_PORT}
     depends_on:
       - idp
       - api
+    restart: on-failure
