@@ -1,0 +1,53 @@
+{
+  "name": "voltaserve-webdav",
+  "version": "1.0.0",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "start": "ts-node -r tsconfig-paths/register src/server.ts",
+    "dev": "nodemon --exec ts-node -r tsconfig-paths/register src/server.ts",
+    "pkg": "tsc --project ./ && tsc-alias && pkg .",
+    "prettier": "prettier --write .",
+    "eslint": "eslint '.src/**/*.ts'"
+  },
+  "bin": "build/server.js",
+  "pkg": {
+    "targets": [
+      "node18-linux-x64",
+      "node18-alpine-x64",
+      "node18-macos-x64",
+      "node18-win-x64"
+    ],
+    "outputPath": "pkg"
+  },
+  "engines": {
+    "node": ">= 18.x"
+  },
+  "dependencies": {
+    "dotenv": "16.0.3",
+    "passport": "0.6.0",
+    "passport-http": "0.3.0",
+    "uuid": "9.0.0",
+    "xml2js": "0.5.0"
+  },
+  "devDependencies": {
+    "@trivago/prettier-plugin-sort-imports": "4.1.1",
+    "@types/js-yaml": "4.0.5",
+    "@types/node": "20.1.7",
+    "@types/passport": "1.0.12",
+    "@types/passport-http": "0.3.9",
+    "@types/uuid": "9.0.1",
+    "@types/xml2js": "0.4.11",
+    "@typescript-eslint/eslint-plugin": "5.59.6",
+    "@typescript-eslint/parser": "5.59.6",
+    "eslint": "8.40.0",
+    "eslint-config-prettier": "8.8.0",
+    "nodemon": "2.0.22",
+    "pkg": "5.8.1",
+    "prettier": "2.8.8",
+    "ts-node": "10.9.1",
+    "tsc-alias": "1.8.6",
+    "tsconfig-paths": "4.2.0",
+    "typescript": "5.0.4"
+  }
+}

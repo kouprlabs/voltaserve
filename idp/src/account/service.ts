@@ -1,4 +1,4 @@
-import { getConfig } from 'config/config'
+import { getConfig } from '@/config/config'
 import { newDateTime } from '@/infra/date-time'
 import { UserRepo } from '@/infra/db'
 import { ErrorCode, newError } from '@/infra/error'

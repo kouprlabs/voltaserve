@@ -48,7 +48,7 @@ func (svc *pdfStorage) store(opts pdfStorageOptions) error {
 	if err != nil {
 		return err
 	}
-	inputPath := filepath.FromSlash(os.TempDir() + helpers.NewId())
+	inputPath := filepath.FromSlash(os.TempDir() + "/" + helpers.NewId())
 	if err := svc.minio.GetFile(opts.S3Key, inputPath, opts.S3Bucket); err != nil {
 		return err
 	}
@@ -128,7 +128,7 @@ func (svc *pdfStorage) storeInS3(snapshot model.SnapshotModel, opts pdfStorageOp
 }
 
 func (svc *pdfStorage) extractText(inputPath string) (string, int64, error) {
-	outputPath := filepath.FromSlash(os.TempDir() + helpers.NewId())
+	outputPath := filepath.FromSlash(os.TempDir() + "/" + helpers.NewId())
 	if err := svc.cmd.Exec("pdftotext", inputPath, outputPath); err != nil {
 		return "", 0, err
 	}

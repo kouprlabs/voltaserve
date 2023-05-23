@@ -23,6 +23,12 @@ Run the follwing script:
 ./install-deps.sh
 ```
 
+### Install Dependencies for Fedora
+
+```sh
+sudo dnf install ocrmypdf GraphicsMagick poppler-utils libreoffice tesseract
+```
+
 ### Build and Run
 
 Run for development:

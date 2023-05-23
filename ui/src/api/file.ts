@@ -189,20 +189,14 @@ export default class FileAPI {
   }
 
   static async createFolder(options: FileCreateFolderOptions): Promise<File> {
-    return apiFetch(
-      `/files/create_folder?${new URLSearchParams({
-        workspace_id: options.workspaceId,
-        parent_id: options.parentId,
-      })}`,
-      {
-        method: 'POST',
-        body: JSON.stringify(options),
-        headers: {
-          'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
-          'Content-Type': 'application/json',
-        },
-      }
-    ).then((result) => result.json())
+    return apiFetch('/files/create_folder', {
+      method: 'POST',
+      body: JSON.stringify(options),
+      headers: {
+        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
+        'Content-Type': 'application/json',
+      },
+    }).then((result) => result.json())
   }
 
   static async list(
