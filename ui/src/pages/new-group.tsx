@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import {
   Button,
   FormControl,
@@ -140,6 +140,9 @@ const NewGroupPage = () => {
                     isLoading={isSubmitting || isLoading}
                   >
                     Create
+                  </Button>
+                  <Button as={Link} to="/group" variant="solid">
+                    Cancel
                   </Button>
                 </HStack>
               </Stack>
