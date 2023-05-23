@@ -58,11 +58,11 @@ Make sure all containers are up and running by checking their logs.
 
 _Note: here you should replace `my-hostname` and `3000` with the hostname and port that matches your configuration, if you have SSL then make sure you are using `https://`._
 
-1. Go to the **sign up page** [http://my-hostname:3000/sign-up](http://my-hostname:3000/sign-up) and create an account.
+1. Go to the **sign up page** <http://my-hostname:3000/sign-up> and create an account.
 
 2. Confirm your email.
 
-3. Finally, go to the **sign in page** [http://my-hostname:3000/sign-in](http://my-hostname:3000/sign-in) and login with your credentials.
+3. Finally, go to the **sign in page** <http://my-hostname:3000/sign-in> and login with your credentials.
 
 ### Run for Experimentation, Testing and Development
 
@@ -72,17 +72,29 @@ docker compose -f ./docker-compose.dev.yml up
 
 Wait a few minutes until all containers are up and running. You can check that by looking at their logs.
 
-1. Go to the **sign up page** [http://localhost:3000/sign-up](http://localhost:3000/sign-up) and create an account.
+1. Go to the **sign up page** <http://localhost:3000/sign-up> and create an account.
 
-2. Open MailCatcher [http://localhost:11080](http://localhost:11080), select the received email and click the **confirm email** link.
+2. Open MailCatcher <http://localhost:11080>, select the received email and click the **confirm email** link.
 
-3. Finally, go to the **sign in page** [http://localhost:3000/sign-in](http://localhost:3000/sign-in) and login with your credentials.
+3. Finally, go to the **sign in page** <http://localhost:3000/sign-in> and login with your credentials.
 
-#### My containers have issues starting up, what should I do?
+### Connect with WebDAV
+
+Voltaserve supports [WebDAV](https://en.wikipedia.org/wiki/WebDAV), by default it's listening on the port 6000.
+
+You can change the port by editing the `VOLTASERVE_WEBDAV_PORT` environment variable in [.env](./.env) file as follows:
+
+```properties
+VOLTASERVE_WEBDAV_PORT=6000
+```
+
+## Troubleshooting
+
+**My containers have issues starting up, what should I do?**
 
 One reason might be that some ports are already allocated on your machine, in this case you can change the Voltaserve ports in [.env](./.env) file.
 
-#### I'm not happy with `localhost`, can I change it?
+**I'm not happy with `localhost`, can I change it?**
 
 You can achieve this by changing the `VOLTASERVE_HOSTNAME` environment variable in [.env](./.env) file.
 
@@ -98,7 +110,7 @@ Or any custom hostname, like:
 VOLTASERVE_HOSTNAME="my-hostname"
 ```
 
-#### I want to start developing and contributing, how can I start?
+**I want to start developing and contributing, how can I start?**
 
 The UI `votaserve-ui` and Identity Providers `voltaserve-idp` are running in development/watch mode, you can simply open this repo in your favorite editor, change some code and it will reload automatically to reflect your changes.
 
