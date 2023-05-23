@@ -1,5 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { File, FileList } from '@/api/file'
+import { sort } from '@/helpers/sort'
+import { SortDirection, SortType } from '@/models/sort'
 
 type FilesState = {
   current?: string
@@ -9,60 +11,9 @@ type FilesState = {
   sortDirection: SortDirection
 }
 
-export enum SortType {
-  ByName = 'by_name',
-  ByDateCreated = 'by_date_created',
-  ByDateModified = 'by_date_modified',
-}
-
-export enum SortDirection {
-  Ascending = 'ascending',
-  Descending = 'descending',
-}
-
 const initialState: FilesState = {
   sortType: SortType.ByDateCreated,
   sortDirection: SortDirection.Ascending,
-}
-
-function sort(data: File[], type: SortType, direction: SortDirection) {
-  const lt = direction === SortDirection.Ascending ? -1 : 1
-  const gt = direction === SortDirection.Ascending ? 1 : -1
-  if (type === SortType.ByName) {
-    data.sort((a, b) => {
-      if (a.name.toLowerCase() < b.name.toLowerCase()) {
-        return lt
-      }
-      if (a.name.toLowerCase() > b.name.toLowerCase()) {
-        return gt
-      }
-      return 0
-    })
-  } else if (type === SortType.ByDateCreated) {
-    data.sort((a, b) => {
-      const dateA = new Date(a.createTime)
-      const dateB = new Date(b.createTime)
-      if (dateA < dateB) {
-        return lt
-      }
-      if (dateA > dateB) {
-        return gt
-      }
-      return 0
-    })
-  } else if (type === SortType.ByDateModified) {
-    data.sort((a, b) => {
-      const dateA = new Date(a.updateTime || a.createTime)
-      const dateB = new Date(b.updateTime || b.createTime)
-      if (dateA < dateB) {
-        return lt
-      }
-      if (dateA > dateB) {
-        return gt
-      }
-      return 0
-    })
-  }
 }
 
 const slice = createSlice({
@@ -77,7 +28,11 @@ const slice = createSlice({
         state.list.data.push(...action.payload.files)
       }
       if (state.list) {
-        sort(state.list.data, state.sortType, state.sortDirection)
+        state.list.data = sort(
+          state.list.data,
+          state.sortType,
+          state.sortDirection
+        )
       }
     },
     filesRemoved: (
@@ -90,7 +45,11 @@ const slice = createSlice({
         )
       }
       if (state.list) {
-        sort(state.list.data, state.sortType, state.sortDirection)
+        state.list.data = sort(
+          state.list.data,
+          state.sortType,
+          state.sortDirection
+        )
       }
     },
     filesUpdated: (state, action: PayloadAction<File[]>) => {
@@ -104,13 +63,21 @@ const slice = createSlice({
         }
       })
       if (state.list) {
-        sort(state.list.data, state.sortType, state.sortDirection)
+        state.list.data = sort(
+          state.list.data,
+          state.sortType,
+          state.sortDirection
+        )
       }
     },
     listUpdated: (state, action: PayloadAction<FileList>) => {
       state.list = action.payload
       if (state.list) {
-        sort(state.list.data, state.sortType, state.sortDirection)
+        state.list.data = sort(
+          state.list.data,
+          state.sortType,
+          state.sortDirection
+        )
       }
     },
     listPatched: (state, action: PayloadAction<FileList>) => {
@@ -123,7 +90,11 @@ const slice = createSlice({
       state.list.totalElements = action.payload.totalElements
       state.list.totalPages = action.payload.totalPages
       if (state.list) {
-        sort(state.list.data, state.sortType, state.sortDirection)
+        state.list.data = sort(
+          state.list.data,
+          state.sortType,
+          state.sortDirection
+        )
       }
     },
     folderUpdated: (state, action: PayloadAction<File>) => {
@@ -135,13 +106,21 @@ const slice = createSlice({
     sortTypeUpdated: (state, action: PayloadAction<SortType>) => {
       state.sortType = action.payload
       if (state.list) {
-        sort(state.list.data, state.sortType, state.sortDirection)
+        state.list.data = sort(
+          state.list.data,
+          state.sortType,
+          state.sortDirection
+        )
       }
     },
     sortDirectionUpdated: (state, action: PayloadAction<SortDirection>) => {
       state.sortDirection = action.payload
       if (state.list) {
-        sort(state.list.data, state.sortType, state.sortDirection)
+        state.list.data = sort(
+          state.list.data,
+          state.sortType,
+          state.sortDirection
+        )
       }
     },
   },

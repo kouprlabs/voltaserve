@@ -39,11 +39,10 @@ import { ltEditorPermission, ltOwnerPermission } from '@/api/permission'
 import downloadFile from '@/helpers/download-file'
 import mapFileList from '@/helpers/map-file-list'
 import { decodeQuery } from '@/helpers/query'
+import { SortDirection, SortType } from '@/models/sort'
 import {
   listUpdated,
-  SortDirection,
   sortDirectionUpdated,
-  SortType,
   sortTypeUpdated,
 } from '@/store/entities/files'
 import { uploadAdded, UploadDecorator } from '@/store/entities/uploads'
@@ -391,6 +390,18 @@ const Toolbar = () => {
                       onClick={() => handleSortTypeChange(SortType.ByName)}
                     >
                       Sort By Name
+                    </MenuItem>
+                    <MenuItem
+                      icon={getSortTypeIcon(SortType.ByKind)}
+                      onClick={() => handleSortTypeChange(SortType.ByKind)}
+                    >
+                      Sort By Kind
+                    </MenuItem>
+                    <MenuItem
+                      icon={getSortTypeIcon(SortType.BySize)}
+                      onClick={() => handleSortTypeChange(SortType.BySize)}
+                    >
+                      Sort By Size
                     </MenuItem>
                     <MenuItem
                       icon={getSortTypeIcon(SortType.ByDateCreated)}
