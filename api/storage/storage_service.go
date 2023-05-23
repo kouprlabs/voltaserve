@@ -150,7 +150,7 @@ func (svc *StorageService) Store(opts StorageOptions, userId string) (*core.File
 }
 
 func (svc *StorageService) isPdf(extension string) bool {
-	return extension == ".pdf"
+	return strings.ToLower(extension) == ".pdf"
 }
 
 func (svc *StorageService) isOffice(extension string) bool {
