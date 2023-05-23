@@ -32,8 +32,10 @@ import {
   IconTrash,
   IconUpload,
   IconRefresh,
+  IconGridFill,
+  IconSortUp,
+  IconSortDown,
 } from '@koupr/ui'
-import { BsGridFill, BsSortDown, BsSortUp } from 'react-icons/bs'
 import FileAPI, { FileList } from '@/api/file'
 import { ltEditorPermission, ltOwnerPermission } from '@/api/permission'
 import downloadFile from '@/helpers/download-file'
@@ -207,9 +209,9 @@ const Toolbar = () => {
 
   const getSortDirectionIcon = useCallback(() => {
     if (sortDirection === SortDirection.Ascending) {
-      return <BsSortUp />
+      return <IconSortUp />
     } else if (sortDirection === SortDirection.Descending) {
-      return <BsSortDown />
+      return <IconSortDown />
     }
   }, [sortDirection])
 
@@ -364,7 +366,7 @@ const Toolbar = () => {
               <SliderFilledTrack />
             </SliderTrack>
             <SliderThumb boxSize={8}>
-              <Box color="gray" as={BsGridFill} fontSize="14px" />
+              <Box color="gray" as={IconGridFill} />
             </SliderThumb>
           </Slider>
           <Stack direction="row" spacing={SPACING}>
