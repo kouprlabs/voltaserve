@@ -100,7 +100,7 @@ func (svc *WorkspaceService) Create(req CreateWorkspaceOptions, userId string) (
 	if err := svc.workspaceRepo.GrantUserPermission(workspace.GetId(), userId, model.PermissionOwner); err != nil {
 		return nil, err
 	}
-	workspace, err = svc.workspaceRepo.Find(workspace.GetId())
+	workspace, err = svc.workspaceRepo.FindByID(workspace.GetId())
 	if err != nil {
 		return nil, err
 	}
@@ -118,7 +118,7 @@ func (svc *WorkspaceService) Create(req CreateWorkspaceOptions, userId string) (
 	if err = svc.workspaceRepo.UpdateRootId(workspace.GetId(), root.GetId()); err != nil {
 		return nil, err
 	}
-	if workspace, err = svc.workspaceRepo.Find(workspace.GetId()); err != nil {
+	if workspace, err = svc.workspaceRepo.FindByID(workspace.GetId()); err != nil {
 		return nil, err
 	}
 	if err = svc.workspaceSearch.Index([]model.WorkspaceModel{workspace}); err != nil {
@@ -140,12 +140,31 @@ func (svc *WorkspaceService) Create(req CreateWorkspaceOptions, userId string) (
 	return res, nil
 }
 
-func (svc *WorkspaceService) Find(id string, userId string) (*Workspace, error) {
+func (svc *WorkspaceService) FindByID(id string, userId string) (*Workspace, error) {
 	user, err := svc.userRepo.Find(userId)
 	if err != nil {
 		return nil, err
 	}
 	workspace, err := svc.workspaceCache.Get(id)
+	if err != nil {
+		return nil, err
+	}
+	if err = svc.workspaceGuard.Authorize(user, workspace, model.PermissionViewer); err != nil {
+		return nil, err
+	}
+	res, err := svc.workspaceMapper.mapWorkspace(workspace, userId)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
+func (svc *WorkspaceService) FindByName(name string, userId string) (*Workspace, error) {
+	user, err := svc.userRepo.Find(userId)
+	if err != nil {
+		return nil, err
+	}
+	workspace, err := svc.workspaceRepo.FindByName(name)
 	if err != nil {
 		return nil, err
 	}
@@ -283,7 +302,7 @@ func (svc *WorkspaceService) Delete(id string, userId string) error {
 	if err = svc.workspaceGuard.Authorize(user, workspace, model.PermissionOwner); err != nil {
 		return err
 	}
-	if workspace, err = svc.workspaceRepo.Find(id); err != nil {
+	if workspace, err = svc.workspaceRepo.FindByID(id); err != nil {
 		return err
 	}
 	if err = svc.workspaceRepo.Delete(id); err != nil {
@@ -302,7 +321,7 @@ func (svc *WorkspaceService) Delete(id string, userId string) error {
 }
 
 func (svc *WorkspaceService) HasEnoughSpaceForByteSize(id string, byteSize int64) (bool, error) {
-	workspace, err := svc.workspaceRepo.Find(id)
+	workspace, err := svc.workspaceRepo.FindByID(id)
 	if err != nil {
 		return false, err
 	}

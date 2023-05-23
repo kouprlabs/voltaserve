@@ -38,13 +38,15 @@ func NewFileRouter() *FileRouter {
 func (r *FileRouter) AppendRoutes(g fiber.Router) {
 	g.Post("/", r.Upload)
 	g.Post("/create_folder", r.CreateFolder)
+	g.Get("/list", r.ListByPath)
+	g.Get("/get", r.GetByPath)
 	g.Post("/search", r.Search)
 	g.Post("/batch_delete", r.BatchDelete)
 	g.Post("/batch_get", r.BatchGet)
 	g.Get("/:id", r.GetById)
 	g.Patch("/:id", r.Patch)
 	g.Delete("/:id", r.Delete)
-	g.Get("/:id/list", r.List)
+	g.Get("/:id/list", r.ListByID)
 	g.Get("/:id/get_item_count", r.GetItemCount)
 	g.Get("/:id/get_path", r.GetPath)
 	g.Post("/:id/move", r.Move)
@@ -81,7 +83,7 @@ func (r *FileRouter) Upload(c *fiber.Ctx) error {
 	}
 	parentId := c.Query("parent_id")
 	if parentId == "" {
-		workspace, err := r.workspaceSvc.Find(workspaceId, userId)
+		workspace, err := r.workspaceSvc.FindByID(workspaceId, userId)
 		if err != nil {
 			return err
 		}
@@ -134,7 +136,7 @@ func (r *FileRouter) Upload(c *fiber.Ctx) error {
 // @Router      /files/{id} [patch]
 func (r *FileRouter) Patch(c *fiber.Ctx) error {
 	userId := GetUserId(c)
-	files, err := r.fileSvc.Find([]string{c.Params("id")}, userId)
+	files, err := r.fileSvc.FindByID([]string{c.Params("id")}, userId)
 	if err != nil {
 		return err
 	}
@@ -185,7 +187,7 @@ func (r *FileRouter) CreateFolder(c *fiber.Ctx) error {
 	}
 	parentId := req.ParentId
 	if parentId == nil {
-		workspace, err := r.workspaceSvc.Find(req.WorkspaceId, userId)
+		workspace, err := r.workspaceSvc.FindByID(req.WorkspaceId, userId)
 		if err != nil {
 			return err
 		}
@@ -252,18 +254,64 @@ func (r *FileRouter) Search(c *fiber.Ctx) error {
 // @Router      /files/{id} [get]
 func (r *FileRouter) GetById(c *fiber.Ctx) error {
 	userId := GetUserId(c)
-	res, err := r.fileSvc.Find([]string{c.Params("id")}, userId)
+	res, err := r.fileSvc.FindByID([]string{c.Params("id")}, userId)
 	if err != nil {
 		return err
 	}
 	return c.JSON(res[0])
 }
 
-// List godoc
-// @Summary     List
-// @Description List
+// GetByPath godoc
+// @Summary     Get by Path
+// @Description Get by Path
 // @Tags        Files
-// @Id          files_list
+// @Id          files_get_by_path
+// @Produce     json
+// @Param       id  path     string true "Id"
+// @Success     200 {object} core.File
+// @Failure     404 {object} errorpkg.ErrorResponse
+// @Failure     500 {object} errorpkg.ErrorResponse
+// @Router      /files/get [get]
+func (r *FileRouter) GetByPath(c *fiber.Ctx) error {
+	userId := GetUserId(c)
+	if c.Query("path") == "" {
+		return errorpkg.NewMissingQueryParamError("path")
+	}
+	res, err := r.fileSvc.FindByPath(c.Query("path"), userId)
+	if err != nil {
+		return err
+	}
+	return c.JSON(res)
+}
+
+// ListByPath godoc
+// @Summary     ListByPath
+// @Description ListByPath
+// @Tags        Files
+// @Id          files_list_by_path
+// @Produce     json
+// @Param       path query    string true "Path"
+// @Success     200  {array}  core.File
+// @Failure     404  {object} errorpkg.ErrorResponse
+// @Failure     500  {object} errorpkg.ErrorResponse
+// @Router      /files/list [get]
+func (r *FileRouter) ListByPath(c *fiber.Ctx) error {
+	userId := GetUserId(c)
+	if c.Query("path") == "" {
+		return errorpkg.NewMissingQueryParamError("path")
+	}
+	res, err := r.fileSvc.ListByPath(c.Query("path"), userId)
+	if err != nil {
+		return err
+	}
+	return c.JSON(res)
+}
+
+// ListByID godoc
+// @Summary     ListByID
+// @Description ListByID
+// @Tags        Files
+// @Id          files_list_by_id
 // @Produce     json
 // @Param       id   path     string true  "Id"
 // @Param       page query    string true  "Page"
@@ -273,7 +321,7 @@ func (r *FileRouter) GetById(c *fiber.Ctx) error {
 // @Failure     404  {object} errorpkg.ErrorResponse
 // @Failure     500  {object} errorpkg.ErrorResponse
 // @Router      /files/{id}/list [get]
-func (r *FileRouter) List(c *fiber.Ctx) error {
+func (r *FileRouter) ListByID(c *fiber.Ctx) error {
 	if c.Query("page") == "" {
 		return errorpkg.NewMissingQueryParamError("page")
 	}
@@ -293,7 +341,7 @@ func (r *FileRouter) List(c *fiber.Ctx) error {
 	if err != nil {
 		size = 100
 	}
-	res, err := r.fileSvc.List(c.Params("id"), uint(page), uint(size), fileType, userId)
+	res, err := r.fileSvc.ListByID(c.Params("id"), uint(page), uint(size), fileType, userId)
 	if err != nil {
 		return err
 	}
@@ -340,10 +388,11 @@ func (r *FileRouter) Copy(c *fiber.Ctx) error {
 	if err := validator.New().Struct(req); err != nil {
 		return errorpkg.NewRequestBodyValidationError(err)
 	}
-	if err := r.fileSvc.Copy(c.Params("id"), req.Ids, userId); err != nil {
+	res, err := r.fileSvc.Copy(c.Params("id"), req.Ids, userId)
+	if err != nil {
 		return err
 	}
-	return c.SendStatus(http.StatusNoContent)
+	return c.JSON(res)
 }
 
 // Move godoc
@@ -438,7 +487,7 @@ func (r *FileRouter) BatchGet(c *fiber.Ctx) error {
 	if err := validator.New().Struct(req); err != nil {
 		return errorpkg.NewRequestBodyValidationError(err)
 	}
-	res, err := r.fileSvc.Find(req.Ids, userId)
+	res, err := r.fileSvc.FindByID(req.Ids, userId)
 	if err != nil {
 		return err
 	}
@@ -686,7 +735,10 @@ func (r *FileDownloadRouter) AppendRoutes(g fiber.Router) {
 func (r *FileDownloadRouter) DownloadOriginal(c *fiber.Ctx) error {
 	accessToken := c.Cookies(r.accessTokenCookieName)
 	if accessToken == "" {
-		return errorpkg.NewFileNotFoundError(nil)
+		accessToken = c.Query("access_token")
+		if accessToken == "" {
+			return errorpkg.NewFileNotFoundError(nil)
+		}
 	}
 	userId, err := r.getUserId(accessToken)
 	if err != nil {
@@ -718,7 +770,10 @@ func (r *FileDownloadRouter) DownloadOriginal(c *fiber.Ctx) error {
 func (r *FileDownloadRouter) DownloadPreview(c *fiber.Ctx) error {
 	accessToken := c.Cookies(r.accessTokenCookieName)
 	if accessToken == "" {
-		return errorpkg.NewFileNotFoundError(nil)
+		accessToken = c.Query("access_token")
+		if accessToken == "" {
+			return errorpkg.NewFileNotFoundError(nil)
+		}
 	}
 	userId, err := r.getUserId(accessToken)
 	if err != nil {

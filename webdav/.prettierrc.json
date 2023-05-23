@@ -1,0 +1,7 @@
+{
+  "singleQuote": true,
+  "semi": false,
+  "quoteProps": "preserve",
+  "importOrder": ["<THIRD_PARTY_MODULES>", "^@/(.*)$", "^[./]"],
+  "importOrderSeparation": false
+}

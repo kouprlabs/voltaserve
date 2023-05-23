@@ -1,5 +1,5 @@
 import { Client } from 'pg'
-import { getConfig } from '../config/config'
+import { getConfig } from '@/config/config'
 import { ErrorCode, newError } from './error'
 
 const client = new Client({

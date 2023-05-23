@@ -179,6 +179,10 @@ func (s SnapshotEntity) HasOcr() bool {
 	return s.Ocr != nil
 }
 
+func (s SnapshotEntity) HasThumbnail() bool {
+	return s.Thumbnail != nil
+}
+
 func (s SnapshotEntity) GetCreateTime() string {
 	return s.CreateTime
 }

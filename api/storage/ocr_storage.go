@@ -101,7 +101,7 @@ func (svc *ocrStorage) store(opts ocrOptions) error {
 }
 
 func (svc *ocrStorage) generatePDFA(inputPath string) (string, error) {
-	outputPath := filepath.FromSlash(os.TempDir() + helpers.NewId() + ".pdf")
+	outputPath := filepath.FromSlash(os.TempDir() + "/" + helpers.NewId() + ".pdf")
 	if err := svc.cmd.Exec("ocrmypdf", "--rotate-pages", "--clean", "--deskew", "--image-dpi=300", inputPath, outputPath); err != nil {
 		return "", err
 	}
@@ -146,7 +146,7 @@ func (svc *ocrStorage) saveAndForward(snapshot model.SnapshotModel, opts ocrOpti
 
 func (svc *ocrStorage) getSuitableInputPath(opts ocrOptions) (string, error) {
 	extension := filepath.Ext(opts.S3Key)
-	path := filepath.FromSlash(os.TempDir() + helpers.NewId() + extension)
+	path := filepath.FromSlash(os.TempDir() + "/" + helpers.NewId() + extension)
 	if err := svc.minio.GetFile(opts.S3Key, path, opts.S3Bucket); err != nil {
 		return "", err
 	}
@@ -154,7 +154,7 @@ func (svc *ocrStorage) getSuitableInputPath(opts ocrOptions) (string, error) {
 	// If an image, convert it to jpeg, because ocrmypdf supports jpeg only
 	if extension == ".jpg" || extension == ".jpeg" {
 		oldPath := path
-		path = filepath.FromSlash(os.TempDir() + helpers.NewId() + ".jpg")
+		path = filepath.FromSlash(os.TempDir() + "/" + helpers.NewId() + ".jpg")
 		if err := svc.cmd.Exec("gm", "convert", oldPath, path); err != nil {
 			return "", err
 		}

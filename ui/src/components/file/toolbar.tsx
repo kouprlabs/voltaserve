@@ -1,5 +1,5 @@
-import { ChangeEvent, useCallback, useEffect, useRef } from 'react'
-import { useParams } from 'react-router-dom'
+import { ChangeEvent, useCallback, useEffect, useRef, useState } from 'react'
+import { useParams, useSearchParams } from 'react-router-dom'
 import {
   Button,
   Stack,
@@ -18,8 +18,8 @@ import {
   SliderFilledTrack,
   SliderThumb,
 } from '@chakra-ui/react'
-import { variables } from '@koupr/ui'
 import {
+  variables,
   IconAdd,
   IconCheckCircle,
   IconCircle,
@@ -31,8 +31,14 @@ import {
   IconShare,
   IconTrash,
   IconUpload,
+  IconRefresh,
 } from '@koupr/ui'
+import FileAPI, { FileList } from '@/api/file'
 import { ltEditorPermission, ltOwnerPermission } from '@/api/permission'
+import downloadFile from '@/helpers/download-file'
+import mapFileList from '@/helpers/map-file-list'
+import { decodeQuery } from '@/helpers/query'
+import { listUpdated } from '@/store/entities/files'
 import { uploadAdded, UploadDecorator } from '@/store/entities/uploads'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import {
@@ -46,8 +52,6 @@ import {
   sharingModalDidOpen,
 } from '@/store/ui/files'
 import { uploadsDrawerOpened } from '@/store/ui/uploads-drawer'
-import downloadFile from '@/helpers/download-file'
-import mapFileList from '@/helpers/map-file-list'
 
 const ICON_SCALE_LOCAL_STORAGE_KEY = 'voltaserve_file_icon_scale'
 
@@ -56,6 +60,9 @@ const Toolbar = () => {
   const params = useParams()
   const workspaceId = params.id as string
   const fileId = params.fileId as string
+  const [searchParams] = useSearchParams()
+  const query = decodeQuery(searchParams.get('q') as string)
+  const [isRefreshing, setIsRefreshing] = useState(false)
   const selectionCount = useAppSelector(
     (state) => state.ui.files.selection.length
   )
@@ -128,6 +135,26 @@ const Toolbar = () => {
     },
     [dispatch]
   )
+
+  const handleRefresh = useCallback(async () => {
+    setIsRefreshing(true)
+    dispatch(selectionUpdated([]))
+    try {
+      let result: FileList
+      if (query) {
+        result = await FileAPI.search(
+          { text: query, parentId: fileId, workspaceId },
+          FileAPI.DEFAULT_PAGE_SIZE,
+          1
+        )
+      } else {
+        result = await FileAPI.list(fileId, FileAPI.DEFAULT_PAGE_SIZE, 1)
+      }
+      dispatch(listUpdated(result))
+    } finally {
+      setIsRefreshing(false)
+    }
+  }, [dispatch, fileId, workspaceId, query])
 
   return (
     <>
@@ -258,6 +285,13 @@ const Toolbar = () => {
             </Menu>
           </Box>
         </Stack>
+        <IconButton
+          icon={<IconRefresh />}
+          isLoading={isRefreshing}
+          variant="solid"
+          aria-label=""
+          onClick={handleRefresh}
+        />
         <Spacer />
         <Slider
           w="200px"

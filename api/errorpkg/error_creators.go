@@ -29,6 +29,16 @@ func NewFileNotFoundError(err error) *ErrorResponse {
 	)
 }
 
+func NewInvalidPathError(err error) *ErrorResponse {
+	return NewErrorResponse(
+		"invalid_path",
+		http.StatusBadRequest,
+		"Invalid path.",
+		MsgInvalidRequest,
+		err,
+	)
+}
+
 func NewWorkspaceNotFoundError(err error) *ErrorResponse {
 	return NewErrorResponse(
 		"workspace_not_found",

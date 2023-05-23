@@ -1,6 +1,6 @@
 import fs from 'fs/promises'
-import { ErrorCode, newError } from 'infra/error'
 import { UserEntity, UserRepo } from '@/infra/db'
+import { ErrorCode, newError } from '@/infra/error'
 import { hashPassword, verifyPassword } from '@/infra/password'
 import search, { USER_SEARCH_INDEX } from '@/infra/search'
 

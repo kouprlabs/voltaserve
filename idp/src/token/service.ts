@@ -1,5 +1,5 @@
-import { getConfig } from 'config/config'
 import jwt from 'jsonwebtoken'
+import { getConfig } from '@/config/config'
 import { UserRepo } from '@/infra/db'
 import { ErrorCode, newError } from '@/infra/error'
 import { newHyphenlessUuid } from '@/infra/id'
