@@ -35,7 +35,7 @@ const FontIcon = ({ file, scale }: FontIconProps) => {
   )
   const isPdf = useMemo(
     () =>
-      file.original?.extension && fileExtension.isPdf(file.original.extension),
+      file.original?.extension && fileExtension.isPDF(file.original.extension),
     [file.original]
   )
   const isText = useMemo(

@@ -109,7 +109,7 @@ const ForgotPasswordPage = () => {
                         type="submit"
                         isLoading={isSubmitting}
                       >
-                        Send pasword recovery instructions
+                        Send Password Recovery Instructions
                       </Button>
                     </VStack>
                   </Form>
@@ -118,7 +118,7 @@ const ForgotPasswordPage = () => {
               <HStack spacing={variables.spacingXs}>
                 <Text>Password recovered?</Text>
                 <ChakraLink as={Link} to="/sign-in">
-                  Sign in
+                  Sign In
                 </ChakraLink>
               </HStack>
             </>

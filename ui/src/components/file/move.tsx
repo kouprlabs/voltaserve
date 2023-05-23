@@ -77,7 +77,7 @@ const Move = () => {
             isLoading={loading}
             onClick={handleMove}
           >
-            Move here
+            Move Here
           </Button>
         </ModalFooter>
       </ModalContent>

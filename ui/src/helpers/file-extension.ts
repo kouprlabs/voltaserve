@@ -1,4 +1,4 @@
-export function isPdf(extension: string) {
+export function isPDF(extension: string) {
   return extension === '.pdf'
 }
 

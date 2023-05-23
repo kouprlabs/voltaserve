@@ -186,7 +186,7 @@ const SignUpPage = () => {
                       type="submit"
                       isLoading={isSubmitting}
                     >
-                      Sign up
+                      Sign Up
                     </Button>
                   </VStack>
                 </Form>
@@ -195,7 +195,7 @@ const SignUpPage = () => {
             <HStack spacing={variables.spacingXs}>
               <Text>Already a member?</Text>
               <ChakraLink as={Link} to="/sign-in">
-                Sign in
+                Sign In
               </ChakraLink>
             </HStack>
           </VStack>

@@ -71,7 +71,7 @@ const Copy = () => {
             isLoading={loading}
             onClick={handleMove}
           >
-            Copy here
+            Copy Here
           </Button>
         </ModalFooter>
       </ModalContent>

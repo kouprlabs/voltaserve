@@ -82,7 +82,7 @@ const AccountLayout = () => {
             type="submit"
             onClick={() => navigate('/sign-out')}
           >
-            Sign out
+            Sign Out
           </Button>
         </VStack>
       </VStack>
