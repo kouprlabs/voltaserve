@@ -33,7 +33,7 @@ import {
   IconUpload,
   IconRefresh,
 } from '@koupr/ui'
-import { BsSortDown } from 'react-icons/bs'
+import { BsGridFill, BsSortDown, BsSortUp } from 'react-icons/bs'
 import FileAPI, { FileList } from '@/api/file'
 import { ltEditorPermission, ltOwnerPermission } from '@/api/permission'
 import downloadFile from '@/helpers/download-file'
@@ -46,15 +46,21 @@ import {
   copyModalDidOpen,
   createModalDidOpen,
   deleteModalDidOpen,
+  SortType,
   iconScaleUpdated,
   moveModalDidOpen,
   renameModalDidOpen,
   selectionUpdated,
   sharingModalDidOpen,
+  sortTypeUpdated,
+  SortDirection,
+  sortDirectionUpdated,
 } from '@/store/ui/files'
 import { uploadsDrawerOpened } from '@/store/ui/uploads-drawer'
 
-const ICON_SCALE_LOCAL_STORAGE_KEY = 'voltaserve_file_icon_scale'
+const ICON_SCALE_KEY = 'voltaserve_file_icon_scale'
+const SORT_TYPE_KEY = 'voltaserve_file_sort_type'
+const SORT_DIRECTION_KEY = 'voltaserve_file_sort_direction'
 const SPACING = variables.spacingXs
 
 const Toolbar = () => {
@@ -78,6 +84,8 @@ const Toolbar = () => {
   const folder = useAppSelector((state) => state.entities.files.folder)
   const files = useAppSelector((state) => state.entities.files.list?.data)
   const iconScale = useAppSelector((state) => state.ui.files.iconScale)
+  const sortType = useAppSelector((state) => state.ui.files.sortType)
+  const sortDirection = useAppSelector((state) => state.ui.files.sortDirection)
   const hasOwnerPermission = useAppSelector(
     (state) =>
       state.entities.files.list?.data.findIndex(
@@ -99,9 +107,17 @@ const Toolbar = () => {
   const uploadHiddenInput = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    const iconScale = localStorage.getItem(ICON_SCALE_LOCAL_STORAGE_KEY)
+    const iconScale = localStorage.getItem(ICON_SCALE_KEY)
     if (iconScale) {
       dispatch(iconScaleUpdated(JSON.parse(iconScale)))
+    }
+    const sortType = localStorage.getItem(SORT_TYPE_KEY)
+    if (sortType) {
+      dispatch(sortTypeUpdated(sortType as SortType))
+    }
+    const sortDirection = localStorage.getItem(SORT_DIRECTION_KEY)
+    if (sortDirection) {
+      dispatch(sortDirectionUpdated(sortDirection as SortDirection))
     }
   }, [dispatch])
 
@@ -132,7 +148,7 @@ const Toolbar = () => {
 
   const handleIconScaleChange = useCallback(
     (value: number) => {
-      localStorage.setItem(ICON_SCALE_LOCAL_STORAGE_KEY, JSON.stringify(value))
+      localStorage.setItem(ICON_SCALE_KEY, JSON.stringify(value))
       dispatch(iconScaleUpdated(value))
     },
     [dispatch]
@@ -157,6 +173,42 @@ const Toolbar = () => {
       setIsRefreshing(false)
     }
   }, [dispatch, fileId, workspaceId, query])
+
+  const handleSortTypeChange = useCallback(
+    (value: SortType) => {
+      localStorage.setItem(SORT_TYPE_KEY, value.toString())
+      dispatch(sortTypeUpdated(value))
+    },
+    [dispatch]
+  )
+
+  const handleSortDirectionToggle = useCallback(() => {
+    const value: SortDirection =
+      sortDirection === SortDirection.Ascending
+        ? SortDirection.Descending
+        : SortDirection.Ascending
+    localStorage.setItem(SORT_DIRECTION_KEY, value.toString())
+    dispatch(sortDirectionUpdated(value))
+  }, [sortDirection, dispatch])
+
+  const getSortTypeIcon = useCallback(
+    (value: SortType) => {
+      if (value === sortType) {
+        return <IconCheckCircle />
+      } else {
+        return <IconCircle />
+      }
+    },
+    [sortType]
+  )
+
+  const getSortDirectionIcon = useCallback(() => {
+    if (sortDirection === SortDirection.Ascending) {
+      return <BsSortUp />
+    } else if (sortDirection === SortDirection.Descending) {
+      return <BsSortDown />
+    }
+  }, [sortDirection])
 
   return (
     <>
@@ -295,7 +347,7 @@ const Toolbar = () => {
           onClick={handleRefresh}
         />
         <Spacer />
-        <Stack direction="row" spacing={SPACING}>
+        <Stack direction="row" spacing={variables.spacingLg}>
           <Slider
             w="120px"
             value={iconScale}
@@ -308,35 +360,61 @@ const Toolbar = () => {
               <Box position="relative" />
               <SliderFilledTrack />
             </SliderTrack>
-            <SliderThumb />
+            <SliderThumb boxSize={8}>
+              <Box color="gray" as={BsGridFill} fontSize="14px" />
+            </SliderThumb>
           </Slider>
-          <IconButton
-            icon={<BsSortDown />}
-            fontSize="16px"
-            variant="solid"
-            aria-label=""
-          />
-          <Box>
-            <Menu>
-              <MenuButton
-                as={IconButton}
-                icon={<IconDotsVertical />}
-                variant="solid"
-                aria-label=""
-              />
-              <Portal>
-                <MenuList zIndex="dropdown">
-                  <MenuItem icon={<IconCheckCircle />}>Sort By Name</MenuItem>
-                  <MenuItem icon={<IconCircle />}>
-                    Sort By Date Created
-                  </MenuItem>
-                  <MenuItem icon={<IconCircle />}>
-                    Sort By Date Modified
-                  </MenuItem>
-                </MenuList>
-              </Portal>
-            </Menu>
-          </Box>
+          <Stack direction="row" spacing={SPACING}>
+            <IconButton
+              icon={getSortDirectionIcon()}
+              fontSize="16px"
+              variant="solid"
+              aria-label=""
+              onClick={handleSortDirectionToggle}
+            />
+            <Box>
+              <Menu>
+                <MenuButton
+                  as={IconButton}
+                  icon={<IconDotsVertical />}
+                  variant="solid"
+                  aria-label=""
+                />
+                <Portal>
+                  <MenuList zIndex="dropdown">
+                    <MenuItem
+                      icon={getSortTypeIcon(SortType.None)}
+                      onClick={() => handleSortTypeChange(SortType.None)}
+                    >
+                      None
+                    </MenuItem>
+                    <MenuItem
+                      icon={getSortTypeIcon(SortType.ByName)}
+                      onClick={() => handleSortTypeChange(SortType.ByName)}
+                    >
+                      Sort By Name
+                    </MenuItem>
+                    <MenuItem
+                      icon={getSortTypeIcon(SortType.ByDateCreated)}
+                      onClick={() =>
+                        handleSortTypeChange(SortType.ByDateCreated)
+                      }
+                    >
+                      Sort By Date Created
+                    </MenuItem>
+                    <MenuItem
+                      icon={getSortTypeIcon(SortType.ByDateModified)}
+                      onClick={() =>
+                        handleSortTypeChange(SortType.ByDateModified)
+                      }
+                    >
+                      Sort By Date Modified
+                    </MenuItem>
+                  </MenuList>
+                </Portal>
+              </Menu>
+            </Box>
+          </Stack>
         </Stack>
       </Stack>
       <input
