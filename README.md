@@ -126,9 +126,10 @@ In case, you can also follow the instructions below for more detailed developmen
 
 Additional instructions:
 
-- [Voltaserve Identity Provider](idp/README.md)
 - [Voltaserve API](api/README.md)
 - [Voltaserve UI](ui/README.md)
+- [Voltaserve Identity Provider](idp/README.md)
+- [Voltaserve WebDAV](webdav/README.md)
 
 ## Licensing
 
