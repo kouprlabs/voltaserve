@@ -82,10 +82,16 @@ Wait a few minutes until all containers are up and running. You can check that b
 
 Voltaserve supports [WebDAV](https://en.wikipedia.org/wiki/WebDAV), by default it's listening on the port `6000`.
 
-You can change the port by editing the `VOLTASERVE_WEBDAV_PORT` environment variable in [.env](./.env) file as follows:
+You can change it by editing the `VOLTASERVE_WEBDAV_PORT` environment variable in [.env](./.env) file as follows:
 
 ```properties
 VOLTASERVE_WEBDAV_PORT=6000
+```
+
+The port needs to be open and accessible from the outside. One way of doing it in Linux is by using `ufw`:
+
+```shell
+sudo ufw allow 6000
 ```
 
 ## Troubleshooting
