@@ -39,22 +39,24 @@ import { ltEditorPermission, ltOwnerPermission } from '@/api/permission'
 import downloadFile from '@/helpers/download-file'
 import mapFileList from '@/helpers/map-file-list'
 import { decodeQuery } from '@/helpers/query'
-import { listUpdated } from '@/store/entities/files'
+import {
+  listUpdated,
+  SortDirection,
+  sortDirectionUpdated,
+  SortType,
+  sortTypeUpdated,
+} from '@/store/entities/files'
 import { uploadAdded, UploadDecorator } from '@/store/entities/uploads'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import {
   copyModalDidOpen,
   createModalDidOpen,
   deleteModalDidOpen,
-  SortType,
   iconScaleUpdated,
   moveModalDidOpen,
   renameModalDidOpen,
   selectionUpdated,
   sharingModalDidOpen,
-  sortTypeUpdated,
-  SortDirection,
-  sortDirectionUpdated,
 } from '@/store/ui/files'
 import { uploadsDrawerOpened } from '@/store/ui/uploads-drawer'
 
@@ -84,8 +86,10 @@ const Toolbar = () => {
   const folder = useAppSelector((state) => state.entities.files.folder)
   const files = useAppSelector((state) => state.entities.files.list?.data)
   const iconScale = useAppSelector((state) => state.ui.files.iconScale)
-  const sortType = useAppSelector((state) => state.ui.files.sortType)
-  const sortDirection = useAppSelector((state) => state.ui.files.sortDirection)
+  const sortType = useAppSelector((state) => state.entities.files.sortType)
+  const sortDirection = useAppSelector(
+    (state) => state.entities.files.sortDirection
+  )
   const hasOwnerPermission = useAppSelector(
     (state) =>
       state.entities.files.list?.data.findIndex(
@@ -382,12 +386,6 @@ const Toolbar = () => {
                 />
                 <Portal>
                   <MenuList zIndex="dropdown">
-                    <MenuItem
-                      icon={getSortTypeIcon(SortType.None)}
-                      onClick={() => handleSortTypeChange(SortType.None)}
-                    >
-                      None
-                    </MenuItem>
                     <MenuItem
                       icon={getSortTypeIcon(SortType.ByName)}
                       onClick={() => handleSortTypeChange(SortType.ByName)}

@@ -11,20 +11,6 @@ export type FilesState = {
   isRenameModalOpen: boolean
   isShareModalOpen: boolean
   iconScale: number
-  sortType: SortType
-  sortDirection: SortDirection
-}
-
-export enum SortType {
-  None = 'none',
-  ByName = 'by_name',
-  ByDateCreated = 'by_date_created',
-  ByDateModified = 'by_date_modified',
-}
-
-export enum SortDirection {
-  Ascending = 'ascending',
-  Descending = 'descending',
 }
 
 const initialState: FilesState = {
@@ -38,8 +24,6 @@ const initialState: FilesState = {
   isRenameModalOpen: false,
   isShareModalOpen: false,
   iconScale: 1,
-  sortType: SortType.None,
-  sortDirection: SortDirection.Descending,
 }
 
 const slice = createSlice({
@@ -100,12 +84,6 @@ const slice = createSlice({
     iconScaleUpdated: (state, action: PayloadAction<number>) => {
       state.iconScale = action.payload
     },
-    sortTypeUpdated: (state, action: PayloadAction<SortType>) => {
-      state.sortType = action.payload
-    },
-    sortDirectionUpdated: (state, action: PayloadAction<SortDirection>) => {
-      state.sortDirection = action.payload
-    },
   },
 })
 
@@ -128,8 +106,6 @@ export const {
   multiSelectKeyUpdated,
   rangeSelectKeyUpdated,
   iconScaleUpdated,
-  sortTypeUpdated,
-  sortDirectionUpdated,
 } = slice.actions
 
 export default slice.reducer
