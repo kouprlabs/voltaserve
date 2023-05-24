@@ -7,8 +7,7 @@ import {
   useColorModeValue,
   useToken,
 } from '@chakra-ui/react'
-import { variables } from '@koupr/ui'
-import { BsPlayFill } from 'react-icons/bs'
+import { IconPlay, variables } from '@koupr/ui'
 import { File } from '@/api/file'
 import { getSizeWithAspectRatio } from '@/helpers/aspect-ratio'
 import * as fileExtension from '@/helpers/file-extension'
@@ -96,7 +95,7 @@ const Thumbnail = ({ file, scale }: ThumbnailProps) => {
           height={height}
           opacity={0.5}
         >
-          <BsPlayFill fontSize="40px" color="white" />
+          <IconPlay fontSize="40px" color="white" />
         </Center>
       )}
       {file.isShared && <SharedSign bottom="-5px" right="-5px" />}
