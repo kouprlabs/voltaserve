@@ -26,7 +26,7 @@ Run the follwing script:
 ### Install Dependencies for Fedora
 
 ```sh
-sudo dnf install ocrmypdf GraphicsMagick poppler-utils libreoffice tesseract
+sudo dnf install ocrmypdf GraphicsMagick poppler-utils libreoffice ffmpeg tesseract
 ```
 
 ### Build and Run

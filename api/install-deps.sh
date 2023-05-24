@@ -6,6 +6,7 @@ apt-get install -y ocrmypdf
 apt-get install -y graphicsmagick
 apt-get install -y poppler-utils
 apt-get install -y --no-install-recommends libreoffice
+apt-get install -y ffmpeg
 apt-get install -y tesseract-ocr-eng
 apt-get install -y tesseract-ocr-deu
 apt-get install -y tesseract-ocr-fra
