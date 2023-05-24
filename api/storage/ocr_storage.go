@@ -83,7 +83,7 @@ func (svc *ocrStorage) store(opts ocrOptions) error {
 			return err
 		}
 	} else {
-		if err := svc.saveAndForward(snapshot, opts, outputPath); err != nil {
+		if err := svc.sendToPDFStorage(snapshot, opts, outputPath); err != nil {
 			return err
 		}
 	}
@@ -108,7 +108,7 @@ func (svc *ocrStorage) generatePDFA(inputPath string) (string, error) {
 	return outputPath, nil
 }
 
-func (svc *ocrStorage) saveAndForward(snapshot model.SnapshotModel, opts ocrOptions, outputPath string) error {
+func (svc *ocrStorage) sendToPDFStorage(snapshot model.SnapshotModel, opts ocrOptions, outputPath string) error {
 	file, err := svc.fileCache.Get(opts.FileId)
 	if err != nil {
 		return err
