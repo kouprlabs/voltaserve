@@ -9,14 +9,14 @@ import (
 
 type OrganizationCache struct {
 	redis     *infra.RedisManager
-	orgRepo   *repo.OrganizationRepo
+	orgRepo   repo.CoreOrganizationRepo
 	keyPrefix string
 }
 
 func NewOrganizationCache() *OrganizationCache {
 	return &OrganizationCache{
 		redis:     infra.NewRedisManager(),
-		orgRepo:   repo.NewOrganizationRepo(),
+		orgRepo:   repo.NewPostgresOrganizationRepo(),
 		keyPrefix: "organization:",
 	}
 }

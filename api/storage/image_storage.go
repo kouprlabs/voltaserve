@@ -15,7 +15,7 @@ import (
 
 type imageStorage struct {
 	s3              *infra.S3Manager
-	snapshotRepo    *repo.SnapshotRepo
+	snapshotRepo    repo.CoreSnapshotRepo
 	fileSearch      *search.FileSearch
 	ocrStorage      *ocrStorage
 	cmd             *infra.Command
@@ -34,7 +34,7 @@ type imageStorageOptions struct {
 func newImageStorage() *imageStorage {
 	return &imageStorage{
 		s3:              infra.NewS3Manager(),
-		snapshotRepo:    repo.NewSnapshotRepo(),
+		snapshotRepo:    repo.NewPostgresSnapshotRepo(),
 		fileSearch:      search.NewFileSearch(),
 		ocrStorage:      newOcrStorage(),
 		cmd:             infra.NewCommand(),

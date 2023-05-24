@@ -10,14 +10,14 @@ import (
 type WorkspaceSearch struct {
 	index         string
 	search        *infra.SearchManager
-	workspaceRepo *repo.WorkspaceRepo
+	workspaceRepo repo.CoreWorkspaceRepo
 }
 
 func NewWorkspaceSearch() *WorkspaceSearch {
 	return &WorkspaceSearch{
 		index:         infra.WorkspaceSearchIndex,
 		search:        infra.NewSearchManager(),
-		workspaceRepo: repo.NewWorkspaceRepo(),
+		workspaceRepo: repo.NewPostgresWorkspaceRepo(),
 	}
 }
 
@@ -71,7 +71,7 @@ func (search *WorkspaceSearch) Query(query string) ([]model.WorkspaceModel, erro
 		if err != nil {
 			return nil, err
 		}
-		var workspace repo.WorkspaceEntity
+		var workspace repo.PostgresWorkspace
 		if err = json.Unmarshal(b, &workspace); err != nil {
 			return nil, err
 		}

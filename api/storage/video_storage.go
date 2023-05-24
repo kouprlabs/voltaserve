@@ -13,7 +13,7 @@ import (
 
 type videoStorage struct {
 	minio           *infra.S3Manager
-	snapshotRepo    *repo.SnapshotRepo
+	snapshotRepo    repo.CoreSnapshotRepo
 	cmd             *infra.Command
 	metadataUpdater *storageMetadataUpdater
 	workspaceCache  *cache.WorkspaceCache
@@ -33,7 +33,7 @@ type videoStorageOptions struct {
 func newVideoStorage() *videoStorage {
 	return &videoStorage{
 		minio:           infra.NewS3Manager(),
-		snapshotRepo:    repo.NewSnapshotRepo(),
+		snapshotRepo:    repo.NewPostgresSnapshotRepo(),
 		cmd:             infra.NewCommand(),
 		metadataUpdater: newMetadataUpdater(),
 		workspaceCache:  cache.NewWorkspaceCache(),

@@ -11,7 +11,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type GroupEntity struct {
+type PostgresGroup struct {
 	Id               string                   `json:"id"`
 	Name             string                   `json:"name"`
 	OrganizationId   string                   `json:"organizationId"`
@@ -22,34 +22,34 @@ type GroupEntity struct {
 	UpdateTime       *string                  `json:"updateTime"`
 }
 
-func (GroupEntity) TableName() string {
+func (PostgresGroup) TableName() string {
 	return "group"
 }
 
-func (g *GroupEntity) BeforeCreate(tx *gorm.DB) (err error) {
+func (g *PostgresGroup) BeforeCreate(tx *gorm.DB) (err error) {
 	g.CreateTime = time.Now().UTC().Format(time.RFC3339)
 	return nil
 }
 
-func (g *GroupEntity) BeforeSave(tx *gorm.DB) (err error) {
+func (g *PostgresGroup) BeforeSave(tx *gorm.DB) (err error) {
 	timeNow := time.Now().UTC().Format(time.RFC3339)
 	g.UpdateTime = &timeNow
 	return nil
 }
 
-func (g GroupEntity) GetId() string {
+func (g PostgresGroup) GetId() string {
 	return g.Id
 }
 
-func (g GroupEntity) GetName() string {
+func (g PostgresGroup) GetName() string {
 	return g.Name
 }
 
-func (g GroupEntity) GetOrganizationId() string {
+func (g PostgresGroup) GetOrganizationId() string {
 	return g.OrganizationId
 }
 
-func (g GroupEntity) GetUserPermissions() []model.UserPermissionModel {
+func (g PostgresGroup) GetUserPermissions() []model.UserPermissionModel {
 	var res []model.UserPermissionModel
 	for _, p := range g.UserPermissions {
 		res = append(res, p)
@@ -57,7 +57,7 @@ func (g GroupEntity) GetUserPermissions() []model.UserPermissionModel {
 	return res
 }
 
-func (g GroupEntity) GetGroupPermissions() []model.GroupPermissionModel {
+func (g PostgresGroup) GetGroupPermissions() []model.GroupPermissionModel {
 	var res []model.GroupPermissionModel
 	for _, p := range g.GroupPermissions {
 		res = append(res, p)
@@ -65,47 +65,40 @@ func (g GroupEntity) GetGroupPermissions() []model.GroupPermissionModel {
 	return res
 }
 
-func (g GroupEntity) GetUsers() []string {
+func (g PostgresGroup) GetUsers() []string {
 	return g.Members
 }
 
-func (g GroupEntity) GetCreateTime() string {
+func (g PostgresGroup) GetCreateTime() string {
 	return g.CreateTime
 }
 
-func (g GroupEntity) GetUpdateTime() *string {
+func (g PostgresGroup) GetUpdateTime() *string {
 	return g.UpdateTime
 }
 
-func (g *GroupEntity) SetName(name string) {
+func (g *PostgresGroup) SetName(name string) {
 	g.Name = name
 }
 
-func (g *GroupEntity) SetUpdateTime(updateTime *string) {
+func (g *PostgresGroup) SetUpdateTime(updateTime *string) {
 	g.UpdateTime = updateTime
 }
 
-type GroupRepo struct {
+type PostgresGroupRepo struct {
 	db             *gorm.DB
-	permissionRepo *PermissionRepo
+	permissionRepo *PostgresPermissionRepo
 }
 
-func NewGroupRepo() *GroupRepo {
-	return &GroupRepo{
+func NewPostgresGroupRepo() *PostgresGroupRepo {
+	return &PostgresGroupRepo{
 		db:             infra.GetDb(),
-		permissionRepo: NewPermissionRepo(),
+		permissionRepo: NewPostgresPermissionRepo(),
 	}
 }
 
-type GroupInsertOptions struct {
-	Id             string
-	Name           string
-	OrganizationId string
-	OwnerId        string
-}
-
-func (repo *GroupRepo) Insert(opts GroupInsertOptions) (model.GroupModel, error) {
-	group := GroupEntity{
+func (repo *PostgresGroupRepo) Insert(opts GroupInsertOptions) (model.GroupModel, error) {
+	group := PostgresGroup{
 		Id:             opts.Id,
 		Name:           opts.Name,
 		OrganizationId: opts.OrganizationId,
@@ -120,8 +113,8 @@ func (repo *GroupRepo) Insert(opts GroupInsertOptions) (model.GroupModel, error)
 	return res, nil
 }
 
-func (repo *GroupRepo) find(id string) (*GroupEntity, error) {
-	var res = GroupEntity{}
+func (repo *PostgresGroupRepo) find(id string) (*PostgresGroup, error) {
+	var res = PostgresGroup{}
 	db := repo.db.Where("id = ?", id).First(&res)
 	if db.Error != nil {
 		if errors.Is(db.Error, gorm.ErrRecordNotFound) {
@@ -133,18 +126,18 @@ func (repo *GroupRepo) find(id string) (*GroupEntity, error) {
 	return &res, nil
 }
 
-func (repo *GroupRepo) Find(id string) (model.GroupModel, error) {
+func (repo *PostgresGroupRepo) Find(id string) (model.GroupModel, error) {
 	group, err := repo.find(id)
 	if err != nil {
 		return nil, err
 	}
-	if err := repo.populateModelFields([]*GroupEntity{group}); err != nil {
+	if err := repo.populateModelFields([]*PostgresGroup{group}); err != nil {
 		return nil, err
 	}
 	return group, nil
 }
 
-func (repo *GroupRepo) GetIdsForFile(fileId string) ([]string, error) {
+func (repo *PostgresGroupRepo) GetIdsForFile(fileId string) ([]string, error) {
 	type Result struct {
 		Result string
 	}
@@ -162,7 +155,7 @@ func (repo *GroupRepo) GetIdsForFile(fileId string) ([]string, error) {
 	return res, nil
 }
 
-func (repo *GroupRepo) GetIdsForUser(userId string) ([]string, error) {
+func (repo *PostgresGroupRepo) GetIdsForUser(userId string) ([]string, error) {
 	type Result struct {
 		Result string
 	}
@@ -178,7 +171,7 @@ func (repo *GroupRepo) GetIdsForUser(userId string) ([]string, error) {
 	return res, nil
 }
 
-func (repo *GroupRepo) GetIdsForOrganization(id string) ([]string, error) {
+func (repo *PostgresGroupRepo) GetIdsForOrganization(id string) ([]string, error) {
 	type Result struct {
 		Result string
 	}
@@ -194,7 +187,7 @@ func (repo *GroupRepo) GetIdsForOrganization(id string) ([]string, error) {
 	return res, nil
 }
 
-func (repo *GroupRepo) Save(group model.GroupModel) error {
+func (repo *PostgresGroupRepo) Save(group model.GroupModel) error {
 	db := repo.db.Save(group)
 	if db.Error != nil {
 		return db.Error
@@ -202,7 +195,7 @@ func (repo *GroupRepo) Save(group model.GroupModel) error {
 	return nil
 }
 
-func (repo *GroupRepo) Delete(id string) error {
+func (repo *PostgresGroupRepo) Delete(id string) error {
 	db := repo.db.Exec(`DELETE FROM "group" WHERE id = ?`, id)
 	if db.Error != nil {
 		return db.Error
@@ -218,7 +211,7 @@ func (repo *GroupRepo) Delete(id string) error {
 	return nil
 }
 
-func (repo *GroupRepo) AddUser(id string, userId string) error {
+func (repo *PostgresGroupRepo) AddUser(id string, userId string) error {
 	db := repo.db.Exec("INSERT INTO group_user (group_id, user_id) VALUES (?, ?)", id, userId)
 	if db.Error != nil {
 		return db.Error
@@ -226,7 +219,7 @@ func (repo *GroupRepo) AddUser(id string, userId string) error {
 	return nil
 }
 
-func (repo *GroupRepo) RemoveMember(id string, userId string) error {
+func (repo *PostgresGroupRepo) RemoveMember(id string, userId string) error {
 	db := repo.db.Exec("DELETE FROM group_user WHERE group_id = ? AND user_id = ?", id, userId)
 	if db.Error != nil {
 		return db.Error
@@ -234,7 +227,7 @@ func (repo *GroupRepo) RemoveMember(id string, userId string) error {
 	return nil
 }
 
-func (repo *GroupRepo) GetIds() ([]string, error) {
+func (repo *PostgresGroupRepo) GetIDs() ([]string, error) {
 	type Result struct {
 		Result string
 	}
@@ -250,8 +243,8 @@ func (repo *GroupRepo) GetIds() ([]string, error) {
 	return res, nil
 }
 
-func (repo *GroupRepo) GetMembers(id string) ([]model.UserModel, error) {
-	var entities []*UserEntity
+func (repo *PostgresGroupRepo) GetMembers(id string) ([]model.UserModel, error) {
+	var entities []*PostgresUser
 	db := repo.db.
 		Raw(`SELECT DISTINCT u.* FROM "user" u INNER JOIN group_user gu ON u.id = gu.user_id WHERE gu.group_id = ?`, id).
 		Scan(&entities)
@@ -265,7 +258,7 @@ func (repo *GroupRepo) GetMembers(id string) ([]model.UserModel, error) {
 	return res, nil
 }
 
-func (repo *GroupRepo) GrantUserPermission(id string, userId string, permission string) error {
+func (repo *PostgresGroupRepo) GrantUserPermission(id string, userId string, permission string) error {
 	db := repo.db.Exec(
 		"INSERT INTO userpermission (id, user_id, resource_id, permission) "+
 			"VALUES (?, ?, ?, ?) ON CONFLICT (user_id, resource_id) DO UPDATE SET permission = ?",
@@ -276,7 +269,7 @@ func (repo *GroupRepo) GrantUserPermission(id string, userId string, permission 
 	return nil
 }
 
-func (repo *GroupRepo) RevokeUserPermission(id string, userId string) error {
+func (repo *PostgresGroupRepo) RevokeUserPermission(id string, userId string) error {
 	db := repo.db.Exec("DELETE FROM userpermission WHERE user_id = ? AND resource_id = ?", userId, id)
 	if db.Error != nil {
 		return db.Error
@@ -284,7 +277,7 @@ func (repo *GroupRepo) RevokeUserPermission(id string, userId string) error {
 	return nil
 }
 
-func (repo *GroupRepo) populateModelFields(groups []*GroupEntity) error {
+func (repo *PostgresGroupRepo) populateModelFields(groups []*PostgresGroup) error {
 	for _, g := range groups {
 		g.UserPermissions = make([]*model.UserPermission, 0)
 		userPermissions, err := repo.permissionRepo.GetUserPermissions(g.Id)

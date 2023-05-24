@@ -39,7 +39,7 @@ type ocrImageToDataResponse struct {
 
 type ocrStorage struct {
 	minio           *infra.S3Manager
-	snapshotRepo    *repo.SnapshotRepo
+	snapshotRepo    repo.CoreSnapshotRepo
 	pdfStorage      *pdfStorage
 	cmd             *infra.Command
 	metadataUpdater *storageMetadataUpdater
@@ -58,7 +58,7 @@ type ocrOptions struct {
 func newOcrStorage() *ocrStorage {
 	return &ocrStorage{
 		minio:           infra.NewS3Manager(),
-		snapshotRepo:    repo.NewSnapshotRepo(),
+		snapshotRepo:    repo.NewPostgresSnapshotRepo(),
 		pdfStorage:      newPDFStorage(),
 		cmd:             infra.NewCommand(),
 		metadataUpdater: newMetadataUpdater(),

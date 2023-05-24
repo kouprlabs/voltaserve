@@ -15,8 +15,8 @@ import (
 
 type StorageService struct {
 	s3             *infra.S3Manager
-	snapshotRepo   *repo.SnapshotRepo
-	fileRepo       *repo.FileRepo
+	snapshotRepo   repo.CoreSnapshotRepo
+	fileRepo       repo.CoreFileRepo
 	fileCache      *cache.FileCache
 	fileMapper     *core.FileMapper
 	ocrStorage     *ocrStorage
@@ -35,8 +35,8 @@ type StorageOptions struct {
 func NewStorageService() *StorageService {
 	return &StorageService{
 		s3:             infra.NewS3Manager(),
-		snapshotRepo:   repo.NewSnapshotRepo(),
-		fileRepo:       repo.NewFileRepo(),
+		snapshotRepo:   repo.NewPostgresSnapshotRepo(),
+		fileRepo:       repo.NewPostgresFileRepo(),
 		fileCache:      cache.NewFileCache(),
 		fileMapper:     core.NewFileMapper(),
 		ocrStorage:     newOcrStorage(),
@@ -65,7 +65,7 @@ func (svc *StorageService) Store(opts StorageOptions, userId string) (*core.File
 		return nil, err
 	}
 	snapshotId := helpers.NewId()
-	snapshot := &repo.SnapshotEntity{
+	snapshot := &repo.PostgresSnapshot{
 		Id:      snapshotId,
 		Version: latestVersion,
 	}

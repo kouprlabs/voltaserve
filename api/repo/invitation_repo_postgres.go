@@ -11,7 +11,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type InvitationEntity struct {
+type PostgresInvitation struct {
 	Id             string  `json:"id"`
 	OrganizationId string  `json:"organizationId"`
 	OwnerId        string  `json:"ownerId"`
@@ -21,79 +21,73 @@ type InvitationEntity struct {
 	UpdateTime     *string `json:"updateTime"`
 }
 
-func (InvitationEntity) TableName() string {
+func (PostgresInvitation) TableName() string {
 	return "invitation"
 }
 
-func (o *InvitationEntity) BeforeCreate(tx *gorm.DB) (err error) {
+func (o *PostgresInvitation) BeforeCreate(tx *gorm.DB) (err error) {
 	o.CreateTime = time.Now().UTC().Format(time.RFC3339)
 	return nil
 }
 
-func (o *InvitationEntity) BeforeSave(tx *gorm.DB) (err error) {
+func (o *PostgresInvitation) BeforeSave(tx *gorm.DB) (err error) {
 	timeNow := time.Now().UTC().Format(time.RFC3339)
 	o.UpdateTime = &timeNow
 	return nil
 }
 
-func (i InvitationEntity) GetId() string {
+func (i PostgresInvitation) GetId() string {
 	return i.Id
 }
 
-func (i InvitationEntity) GetOrganizationId() string {
+func (i PostgresInvitation) GetOrganizationId() string {
 	return i.OrganizationId
 }
 
-func (i InvitationEntity) GetOwnerId() string {
+func (i PostgresInvitation) GetOwnerId() string {
 	return i.OwnerId
 }
 
-func (i InvitationEntity) GetEmail() string {
+func (i PostgresInvitation) GetEmail() string {
 	return i.Email
 }
 
-func (i InvitationEntity) GetStatus() string {
+func (i PostgresInvitation) GetStatus() string {
 	return i.Status
 }
 
-func (i InvitationEntity) GetCreateTime() string {
+func (i PostgresInvitation) GetCreateTime() string {
 	return i.CreateTime
 }
 
-func (i InvitationEntity) GetUpdateTime() *string {
+func (i PostgresInvitation) GetUpdateTime() *string {
 	return i.UpdateTime
 }
 
-func (w *InvitationEntity) SetStatus(status string) {
+func (w *PostgresInvitation) SetStatus(status string) {
 	w.Status = status
 }
 
-func (w *InvitationEntity) SetUpdateTime(updateTime *string) {
+func (w *PostgresInvitation) SetUpdateTime(updateTime *string) {
 	w.UpdateTime = updateTime
 }
 
-type InvitationRepo struct {
+type PostgresInvitationRepo struct {
 	db       *gorm.DB
-	userRepo *UserRepo
+	userRepo *PostgresUserRepo
 }
 
-func NewInvitationRepo() *InvitationRepo {
-	return &InvitationRepo{
+func NewPostgresInvitationRepo() *PostgresInvitationRepo {
+	return &PostgresInvitationRepo{
 		db:       infra.GetDb(),
-		userRepo: NewUserRepo(),
+		userRepo: NewPostgresUserRepo(),
 	}
 }
 
-type InvitationInsertOptions struct {
-	UserId         string
-	OrganizationId string
-	Emails         []string
-}
-
-func (repo *InvitationRepo) Insert(opts InvitationInsertOptions) ([]model.InvitationModel, error) {
+func (repo *PostgresInvitationRepo) Insert(opts InvitationInsertOptions) ([]model.InvitationModel, error) {
 	var res []model.InvitationModel
 	for _, e := range opts.Emails {
-		invitation := InvitationEntity{
+		invitation := PostgresInvitation{
 			Id:             helpers.NewId(),
 			OrganizationId: opts.OrganizationId,
 			OwnerId:        opts.UserId,
@@ -112,8 +106,8 @@ func (repo *InvitationRepo) Insert(opts InvitationInsertOptions) ([]model.Invita
 	return res, nil
 }
 
-func (repo *InvitationRepo) Find(id string) (model.InvitationModel, error) {
-	var invitation = InvitationEntity{}
+func (repo *PostgresInvitationRepo) Find(id string) (model.InvitationModel, error) {
+	var invitation = PostgresInvitation{}
 	db := repo.db.Where("id = ?", id).First(&invitation)
 	if db.Error != nil {
 		if errors.Is(db.Error, gorm.ErrRecordNotFound) {
@@ -125,8 +119,8 @@ func (repo *InvitationRepo) Find(id string) (model.InvitationModel, error) {
 	return &invitation, nil
 }
 
-func (repo *InvitationRepo) GetIncoming(email string) ([]model.InvitationModel, error) {
-	var invitations []*InvitationEntity
+func (repo *PostgresInvitationRepo) GetIncoming(email string) ([]model.InvitationModel, error) {
+	var invitations []*PostgresInvitation
 	db := repo.db.
 		Raw("SELECT * FROM invitation WHERE email = ? and status = 'pending' ORDER BY create_time DESC", email).
 		Scan(&invitations)
@@ -140,8 +134,8 @@ func (repo *InvitationRepo) GetIncoming(email string) ([]model.InvitationModel, 
 	return res, nil
 }
 
-func (repo *InvitationRepo) GetOutgoing(organizationId string, userId string) ([]model.InvitationModel, error) {
-	var invitations []*InvitationEntity
+func (repo *PostgresInvitationRepo) GetOutgoing(organizationId string, userId string) ([]model.InvitationModel, error) {
+	var invitations []*PostgresInvitation
 	db := repo.db.
 		Raw("SELECT * FROM invitation WHERE organization_id = ? and owner_id = ? ORDER BY create_time DESC", organizationId, userId).
 		Scan(&invitations)
@@ -155,7 +149,7 @@ func (repo *InvitationRepo) GetOutgoing(organizationId string, userId string) ([
 	return res, nil
 }
 
-func (repo *InvitationRepo) Save(org model.InvitationModel) error {
+func (repo *PostgresInvitationRepo) Save(org model.InvitationModel) error {
 	db := repo.db.Save(org)
 	if db.Error != nil {
 		return db.Error
@@ -163,7 +157,7 @@ func (repo *InvitationRepo) Save(org model.InvitationModel) error {
 	return nil
 }
 
-func (repo *InvitationRepo) Delete(id string) error {
+func (repo *PostgresInvitationRepo) Delete(id string) error {
 	db := repo.db.Exec("DELETE FROM invitation WHERE id = ?", id)
 	if db.Error != nil {
 		return db.Error

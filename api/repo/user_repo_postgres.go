@@ -9,7 +9,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type UserEntity struct {
+type PostgresUser struct {
 	Id                     string  `json:"id"`
 	FullName               string  `json:"fullName"`
 	Username               string  `json:"username"`
@@ -25,54 +25,54 @@ type UserEntity struct {
 	UpdateTime             *string `json:"updateTime"`
 }
 
-func (UserEntity) TableName() string {
+func (PostgresUser) TableName() string {
 	return "user"
 }
 
-func (u UserEntity) GetId() string {
+func (u PostgresUser) GetId() string {
 	return u.Id
 }
 
-func (u UserEntity) GetFullName() string {
+func (u PostgresUser) GetFullName() string {
 	return u.FullName
 }
 
-func (u UserEntity) GetUsername() string {
+func (u PostgresUser) GetUsername() string {
 	return u.Username
 }
 
-func (u UserEntity) GetEmail() string {
+func (u PostgresUser) GetEmail() string {
 	return u.Email
 }
 
-func (u UserEntity) GetPicture() *string {
+func (u PostgresUser) GetPicture() *string {
 	return u.Picture
 }
 
-func (u UserEntity) GetIsEmailConfirmed() bool {
+func (u PostgresUser) GetIsEmailConfirmed() bool {
 	return u.IsEmailConfirmed
 }
 
-func (u UserEntity) GetCreateTime() string {
+func (u PostgresUser) GetCreateTime() string {
 	return u.CreateTime
 }
 
-func (u UserEntity) GetUpdateTime() *string {
+func (u PostgresUser) GetUpdateTime() *string {
 	return u.UpdateTime
 }
 
-type UserRepo struct {
+type PostgresUserRepo struct {
 	db *gorm.DB
 }
 
-func NewUserRepo() *UserRepo {
-	return &UserRepo{
+func NewPostgresUserRepo() *PostgresUserRepo {
+	return &PostgresUserRepo{
 		db: infra.GetDb(),
 	}
 }
 
-func (repo *UserRepo) Find(id string) (model.UserModel, error) {
-	var res = UserEntity{}
+func (repo *PostgresUserRepo) Find(id string) (model.UserModel, error) {
+	var res = PostgresUser{}
 	db := repo.db.Where("id = ?", id).First(&res)
 	if db.Error != nil {
 		if errors.Is(db.Error, gorm.ErrRecordNotFound) {
@@ -84,8 +84,8 @@ func (repo *UserRepo) Find(id string) (model.UserModel, error) {
 	return &res, nil
 }
 
-func (repo *UserRepo) FindByEmail(email string) (model.UserModel, error) {
-	var res = UserEntity{}
+func (repo *PostgresUserRepo) FindByEmail(email string) (model.UserModel, error) {
+	var res = PostgresUser{}
 	db := repo.db.Where("email = ?", email).First(&res)
 	if db.Error != nil {
 		return nil, db.Error
@@ -93,8 +93,8 @@ func (repo *UserRepo) FindByEmail(email string) (model.UserModel, error) {
 	return &res, nil
 }
 
-func (repo *UserRepo) FindAll() ([]model.UserModel, error) {
-	var entities []*UserEntity
+func (repo *PostgresUserRepo) FindAll() ([]model.UserModel, error) {
+	var entities []*PostgresUser
 	db := repo.db.Raw(`select * from "user" u`).Scan(&entities)
 	if db.Error != nil {
 		return nil, db.Error

@@ -14,7 +14,7 @@ import (
 
 type pdfStorage struct {
 	minio           *infra.S3Manager
-	snapshotRepo    *repo.SnapshotRepo
+	snapshotRepo    repo.CoreSnapshotRepo
 	cmd             *infra.Command
 	metadataUpdater *storageMetadataUpdater
 	workspaceCache  *cache.WorkspaceCache
@@ -33,7 +33,7 @@ type pdfStorageOptions struct {
 func newPDFStorage() *pdfStorage {
 	return &pdfStorage{
 		minio:           infra.NewS3Manager(),
-		snapshotRepo:    repo.NewSnapshotRepo(),
+		snapshotRepo:    repo.NewPostgresSnapshotRepo(),
 		cmd:             infra.NewCommand(),
 		metadataUpdater: newMetadataUpdater(),
 		workspaceCache:  cache.NewWorkspaceCache(),

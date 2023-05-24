@@ -47,16 +47,16 @@ type UpdateWorkspaceStorageCapacityOptions struct {
 }
 
 type WorkspaceService struct {
-	workspaceRepo   *repo.WorkspaceRepo
+	workspaceRepo   repo.CoreWorkspaceRepo
 	workspaceCache  *cache.WorkspaceCache
 	workspaceGuard  *guard.WorkspaceGuard
 	workspaceSearch *search.WorkspaceSearch
 	workspaceMapper *workspaceMapper
-	fileRepo        *repo.FileRepo
+	fileRepo        repo.CoreFileRepo
 	fileCache       *cache.FileCache
 	fileGuard       *guard.FileGuard
 	fileMapper      *FileMapper
-	userRepo        *repo.UserRepo
+	userRepo        repo.CoreUserRepo
 	imageProc       *infra.ImageProcessor
 	s3              *infra.S3Manager
 	config          config.Config
@@ -64,16 +64,16 @@ type WorkspaceService struct {
 
 func NewWorkspaceService() *WorkspaceService {
 	return &WorkspaceService{
-		workspaceRepo:   repo.NewWorkspaceRepo(),
+		workspaceRepo:   repo.NewPostgresWorkspaceRepo(),
 		workspaceCache:  cache.NewWorkspaceCache(),
 		workspaceSearch: search.NewWorkspaceSearch(),
 		workspaceGuard:  guard.NewWorkspaceGuard(),
 		workspaceMapper: newWorkspaceMapper(),
-		fileRepo:        repo.NewFileRepo(),
+		fileRepo:        repo.NewPostgresFileRepo(),
 		fileCache:       cache.NewFileCache(),
 		fileGuard:       guard.NewFileGuard(),
 		fileMapper:      NewFileMapper(),
-		userRepo:        repo.NewUserRepo(),
+		userRepo:        repo.NewPostgresUserRepo(),
 		imageProc:       infra.NewImageProcessor(),
 		s3:              infra.NewS3Manager(),
 		config:          config.GetConfig(),
@@ -115,7 +115,7 @@ func (svc *WorkspaceService) Create(req CreateWorkspaceOptions, userId string) (
 	if err := svc.fileRepo.GrantUserPermission(root.GetId(), userId, model.PermissionOwner); err != nil {
 		return nil, err
 	}
-	if err = svc.workspaceRepo.UpdateRootId(workspace.GetId(), root.GetId()); err != nil {
+	if err = svc.workspaceRepo.UpdateRootID(workspace.GetId(), root.GetId()); err != nil {
 		return nil, err
 	}
 	if workspace, err = svc.workspaceRepo.FindByID(workspace.GetId()); err != nil {

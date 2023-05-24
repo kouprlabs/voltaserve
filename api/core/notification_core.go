@@ -8,15 +8,15 @@ type Notification struct {
 }
 
 type NotificationService struct {
-	userRepo         *repo.UserRepo
-	invitationRepo   *repo.InvitationRepo
+	userRepo         repo.CoreUserRepo
+	invitationRepo   repo.CoreInvitationRepo
 	invitationMapper *invitationMapper
 }
 
 func NewNotificationService() *NotificationService {
 	return &NotificationService{
-		userRepo:         repo.NewUserRepo(),
-		invitationRepo:   repo.NewInvitationRepo(),
+		userRepo:         repo.NewPostgresUserRepo(),
+		invitationRepo:   repo.NewPostgresInvitationRepo(),
 		invitationMapper: newInvitationMapper(),
 	}
 }

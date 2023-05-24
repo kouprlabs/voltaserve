@@ -158,43 +158,43 @@ type GroupPermission struct {
 }
 
 type FileService struct {
-	fileRepo       *repo.FileRepo
+	fileRepo       repo.CoreFileRepo
 	fileSearch     *search.FileSearch
 	fileGuard      *guard.FileGuard
 	fileMapper     *FileMapper
 	fileCache      *cache.FileCache
 	workspaceCache *cache.WorkspaceCache
-	workspaceRepo  *repo.WorkspaceRepo
+	workspaceRepo  repo.CoreWorkspaceRepo
 	workspaceGuard *guard.WorkspaceGuard
 	workspaceSvc   *WorkspaceService
-	snapshotRepo   *repo.SnapshotRepo
-	userRepo       *repo.UserRepo
+	snapshotRepo   repo.CoreSnapshotRepo
+	userRepo       repo.CoreUserRepo
 	userMapper     *userMapper
 	groupCache     *cache.GroupCache
 	groupGuard     *guard.GroupGuard
 	groupMapper    *groupMapper
-	permissionRepo *repo.PermissionRepo
+	permissionRepo repo.CorePermissionRepo
 	s3             *infra.S3Manager
 }
 
 func NewFileService() *FileService {
 	return &FileService{
-		fileRepo:       repo.NewFileRepo(),
+		fileRepo:       repo.NewPostgresFileRepo(),
 		fileCache:      cache.NewFileCache(),
 		fileSearch:     search.NewFileSearch(),
 		fileGuard:      guard.NewFileGuard(),
 		fileMapper:     NewFileMapper(),
 		workspaceGuard: guard.NewWorkspaceGuard(),
 		workspaceCache: cache.NewWorkspaceCache(),
-		workspaceRepo:  repo.NewWorkspaceRepo(),
+		workspaceRepo:  repo.NewPostgresWorkspaceRepo(),
 		workspaceSvc:   NewWorkspaceService(),
-		snapshotRepo:   repo.NewSnapshotRepo(),
-		userRepo:       repo.NewUserRepo(),
+		snapshotRepo:   repo.NewPostgresSnapshotRepo(),
+		userRepo:       repo.NewPostgresUserRepo(),
 		userMapper:     newUserMapper(),
 		groupCache:     cache.NewGroupCache(),
 		groupGuard:     guard.NewGroupGuard(),
 		groupMapper:    newGroupMapper(),
-		permissionRepo: repo.NewPermissionRepo(),
+		permissionRepo: repo.NewPostgresPermissionRepo(),
 		s3:             infra.NewS3Manager(),
 	}
 }
@@ -434,7 +434,7 @@ func (svc *FileService) FindByPath(path string, userId string) (*File, error) {
 	currentID := workspace.RootId
 	components = components[1:]
 	for _, component := range components {
-		ids, err := svc.fileRepo.GetChildrenIds(currentID)
+		ids, err := svc.fileRepo.GetChildrenIDs(currentID)
 		if err != nil {
 			return nil, err
 		}
@@ -508,7 +508,7 @@ func (svc *FileService) ListByPath(path string, userId string) ([]*File, error) 
 	currentType := model.FileTypeFolder
 	components = components[1:]
 	for _, component := range components {
-		ids, err := svc.fileRepo.GetChildrenIds(currentID)
+		ids, err := svc.fileRepo.GetChildrenIDs(currentID)
 		if err != nil {
 			return nil, err
 		}
@@ -536,7 +536,7 @@ func (svc *FileService) ListByPath(path string, userId string) ([]*File, error) 
 		}
 	}
 	if currentType == model.FileTypeFolder {
-		ids, err := svc.fileRepo.GetChildrenIds(currentID)
+		ids, err := svc.fileRepo.GetChildrenIDs(currentID)
 		if err != nil {
 			return nil, err
 		}
@@ -578,7 +578,7 @@ func (svc *FileService) ListByID(id string, page uint, size uint, fileType strin
 	if size < 1 {
 		return nil, errorpkg.NewInvalidSizeParameterError()
 	}
-	ids, err := svc.fileRepo.GetChildrenIds(id)
+	ids, err := svc.fileRepo.GetChildrenIDs(id)
 	if err != nil {
 		return nil, err
 	}

@@ -49,20 +49,20 @@ type GroupRemoveMemberOptions struct {
 }
 
 type GroupService struct {
-	groupRepo      *repo.GroupRepo
+	groupRepo      repo.CoreGroupRepo
 	groupGuard     *guard.GroupGuard
 	groupSearch    *search.GroupSearch
 	groupMapper    *groupMapper
 	groupCache     *cache.GroupCache
-	userRepo       *repo.UserRepo
+	userRepo       repo.CoreUserRepo
 	userSearch     *search.UserSearch
 	userMapper     *userMapper
-	workspaceRepo  *repo.WorkspaceRepo
+	workspaceRepo  repo.CoreWorkspaceRepo
 	workspaceCache *cache.WorkspaceCache
-	fileRepo       *repo.FileRepo
+	fileRepo       repo.CoreFileRepo
 	fileCache      *cache.FileCache
 	fileGuard      *guard.FileGuard
-	orgRepo        *repo.OrganizationRepo
+	orgRepo        repo.CoreOrganizationRepo
 	orgCache       *cache.OrganizationCache
 	orgGuard       *guard.OrganizationGuard
 	imageProc      *infra.ImageProcessor
@@ -71,19 +71,19 @@ type GroupService struct {
 
 func NewGroupService() *GroupService {
 	return &GroupService{
-		groupRepo:      repo.NewGroupRepo(),
+		groupRepo:      repo.NewPostgresGroupRepo(),
 		groupGuard:     guard.NewGroupGuard(),
 		groupCache:     cache.NewGroupCache(),
 		groupSearch:    search.NewGroupSearch(),
 		groupMapper:    newGroupMapper(),
-		userRepo:       repo.NewUserRepo(),
+		userRepo:       repo.NewPostgresUserRepo(),
 		userSearch:     search.NewUserSearch(),
 		userMapper:     newUserMapper(),
-		workspaceRepo:  repo.NewWorkspaceRepo(),
+		workspaceRepo:  repo.NewPostgresWorkspaceRepo(),
 		workspaceCache: cache.NewWorkspaceCache(),
-		fileRepo:       repo.NewFileRepo(),
+		fileRepo:       repo.NewPostgresFileRepo(),
 		fileCache:      cache.NewFileCache(),
-		orgRepo:        repo.NewOrganizationRepo(),
+		orgRepo:        repo.NewPostgresOrganizationRepo(),
 		orgGuard:       guard.NewOrganizationGuard(),
 		orgCache:       cache.NewOrganizationCache(),
 		imageProc:      infra.NewImageProcessor(),
@@ -157,7 +157,7 @@ func (svc *GroupService) FindAll(userId string) ([]*Group, error) {
 	if err != nil {
 		return nil, err
 	}
-	ids, err := svc.groupRepo.GetIds()
+	ids, err := svc.groupRepo.GetIDs()
 	if err != nil {
 		return nil, err
 	}

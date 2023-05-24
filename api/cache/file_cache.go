@@ -9,13 +9,13 @@ import (
 
 type FileCache struct {
 	redis     *infra.RedisManager
-	fileRepo  *repo.FileRepo
+	fileRepo  repo.CoreFileRepo
 	keyPrefix string
 }
 
 func NewFileCache() *FileCache {
 	return &FileCache{
-		fileRepo:  repo.NewFileRepo(),
+		fileRepo:  repo.NewPostgresFileRepo(),
 		redis:     infra.NewRedisManager(),
 		keyPrefix: "file:",
 	}
@@ -38,7 +38,7 @@ func (c *FileCache) Get(id string) (model.FileModel, error) {
 	if err != nil {
 		return c.Refresh(id)
 	}
-	var file = repo.FileEntity{}
+	var file = repo.PostgresFile{}
 	if err = json.Unmarshal([]byte(value), &file); err != nil {
 		return nil, err
 	}

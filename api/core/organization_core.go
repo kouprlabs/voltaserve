@@ -46,15 +46,15 @@ type OrganizationRemoveMemberOptions struct {
 }
 
 type OrganizationService struct {
-	orgRepo      *repo.OrganizationRepo
+	orgRepo      repo.CoreOrganizationRepo
 	orgCache     *cache.OrganizationCache
 	orgGuard     *guard.OrganizationGuard
 	orgMapper    *organizationMapper
 	orgSearch    *search.OrganizationSearch
-	userRepo     *repo.UserRepo
+	userRepo     repo.CoreUserRepo
 	userSearch   *search.UserSearch
 	userMapper   *userMapper
-	groupRepo    *repo.GroupRepo
+	groupRepo    repo.CoreGroupRepo
 	groupService *GroupService
 	groupMapper  *groupMapper
 	imageProc    *infra.ImageProcessor
@@ -63,14 +63,14 @@ type OrganizationService struct {
 
 func NewOrganizationService() *OrganizationService {
 	return &OrganizationService{
-		orgRepo:      repo.NewOrganizationRepo(),
+		orgRepo:      repo.NewPostgresOrganizationRepo(),
 		orgCache:     cache.NewOrganizationCache(),
 		orgGuard:     guard.NewOrganizationGuard(),
 		orgSearch:    search.NewOrganizationSearch(),
 		orgMapper:    newOrganizationMapper(),
-		userRepo:     repo.NewUserRepo(),
+		userRepo:     repo.NewPostgresUserRepo(),
 		userSearch:   search.NewUserSearch(),
-		groupRepo:    repo.NewGroupRepo(),
+		groupRepo:    repo.NewPostgresGroupRepo(),
 		groupService: NewGroupService(),
 		groupMapper:  newGroupMapper(),
 		imageProc:    infra.NewImageProcessor(),
@@ -198,7 +198,7 @@ func (svc *OrganizationService) FindAll(userId string) ([]*Organization, error) 
 	if err != nil {
 		return nil, err
 	}
-	ids, err := svc.orgRepo.GetIds()
+	ids, err := svc.orgRepo.GetIDs()
 	if err != nil {
 		return nil, err
 	}

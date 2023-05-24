@@ -27,25 +27,25 @@ type InvitationCreateOptions struct {
 }
 
 type InvitationService struct {
-	orgRepo          *repo.OrganizationRepo
+	orgRepo          repo.CoreOrganizationRepo
 	orgMapper        *organizationMapper
-	invitationRepo   *repo.InvitationRepo
+	invitationRepo   repo.CoreInvitationRepo
 	invitationMapper *invitationMapper
 	orgCache         *cache.OrganizationCache
 	orgGuard         *guard.OrganizationGuard
-	userRepo         *repo.UserRepo
+	userRepo         repo.CoreUserRepo
 	mailTmpl         *infra.MailTemplate
 	config           config.Config
 }
 
 func NewInvitationService() *InvitationService {
 	return &InvitationService{
-		orgRepo:          repo.NewOrganizationRepo(),
+		orgRepo:          repo.NewPostgresOrganizationRepo(),
 		orgCache:         cache.NewOrganizationCache(),
 		orgGuard:         guard.NewOrganizationGuard(),
-		invitationRepo:   repo.NewInvitationRepo(),
+		invitationRepo:   repo.NewPostgresInvitationRepo(),
 		invitationMapper: newInvitationMapper(),
-		userRepo:         repo.NewUserRepo(),
+		userRepo:         repo.NewPostgresUserRepo(),
 		mailTmpl:         infra.NewMailTemplate(),
 		orgMapper:        newOrganizationMapper(),
 		config:           config.GetConfig(),
@@ -266,7 +266,7 @@ func (svc *InvitationService) Delete(id string, userId string) error {
 
 type invitationMapper struct {
 	orgCache   *cache.OrganizationCache
-	userRepo   *repo.UserRepo
+	userRepo   repo.CoreUserRepo
 	userMapper *userMapper
 	orgMapper  *organizationMapper
 }
@@ -274,7 +274,7 @@ type invitationMapper struct {
 func newInvitationMapper() *invitationMapper {
 	return &invitationMapper{
 		orgCache:   cache.NewOrganizationCache(),
-		userRepo:   repo.NewUserRepo(),
+		userRepo:   repo.NewPostgresUserRepo(),
 		userMapper: newUserMapper(),
 		orgMapper:  newOrganizationMapper(),
 	}

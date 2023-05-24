@@ -77,7 +77,7 @@ func (search *FileSearch) Query(query string) ([]model.FileModel, error) {
 		if err != nil {
 			return nil, err
 		}
-		var file repo.FileEntity
+		var file repo.PostgresFile
 		if err = json.Unmarshal(b, &file); err != nil {
 			return nil, err
 		}

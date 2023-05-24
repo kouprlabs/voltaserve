@@ -11,13 +11,13 @@ import (
 	"gorm.io/gorm"
 )
 
-type FileEntity struct {
+type PostgresFile struct {
 	Id               string                   `json:"id"`
 	WorkspaceId      string                   `json:"workspaceId"`
 	Name             string                   `json:"name"`
 	Type             string                   `json:"type"`
 	ParentId         *string                  `json:"parentId,omitempty"`
-	Snapshots        []*SnapshotEntity        `json:"snapshots,omitempty" gorm:"-"`
+	Snapshots        []*PostgresSnapshot      `json:"snapshots,omitempty" gorm:"-"`
 	UserPermissions  []*model.UserPermission  `json:"userPermissions" gorm:"-"`
 	GroupPermissions []*model.GroupPermission `json:"groupPermissions" gorm:"-"`
 	Text             *string                  `json:"text,omitempty" gorm:"-"`
@@ -25,42 +25,42 @@ type FileEntity struct {
 	UpdateTime       *string                  `json:"updateTime,omitempty"`
 }
 
-func (FileEntity) TableName() string {
+func (PostgresFile) TableName() string {
 	return "file"
 }
 
-func (i *FileEntity) BeforeCreate(tx *gorm.DB) (err error) {
+func (i *PostgresFile) BeforeCreate(tx *gorm.DB) (err error) {
 	i.CreateTime = time.Now().UTC().Format(time.RFC3339)
 	return nil
 }
 
-func (i *FileEntity) BeforeSave(tx *gorm.DB) (err error) {
+func (i *PostgresFile) BeforeSave(tx *gorm.DB) (err error) {
 	timeNow := time.Now().UTC().Format(time.RFC3339)
 	i.UpdateTime = &timeNow
 	return nil
 }
 
-func (i FileEntity) GetId() string {
+func (i PostgresFile) GetId() string {
 	return i.Id
 }
 
-func (i FileEntity) GetWorkspaceId() string {
+func (i PostgresFile) GetWorkspaceId() string {
 	return i.WorkspaceId
 }
 
-func (i FileEntity) GetName() string {
+func (i PostgresFile) GetName() string {
 	return i.Name
 }
 
-func (i FileEntity) GetType() string {
+func (i PostgresFile) GetType() string {
 	return i.Type
 }
 
-func (i FileEntity) GetParentId() *string {
+func (i PostgresFile) GetParentId() *string {
 	return i.ParentId
 }
 
-func (i FileEntity) GetSnapshots() []model.SnapshotModel {
+func (i PostgresFile) GetSnapshots() []model.SnapshotModel {
 	var res []model.SnapshotModel
 	for _, s := range i.Snapshots {
 		res = append(res, s)
@@ -68,7 +68,7 @@ func (i FileEntity) GetSnapshots() []model.SnapshotModel {
 	return res
 }
 
-func (i FileEntity) GetUserPermissions() []model.UserPermissionModel {
+func (i PostgresFile) GetUserPermissions() []model.UserPermissionModel {
 	var res []model.UserPermissionModel
 	for _, p := range i.UserPermissions {
 		res = append(res, p)
@@ -76,7 +76,7 @@ func (i FileEntity) GetUserPermissions() []model.UserPermissionModel {
 	return res
 }
 
-func (i FileEntity) GetGroupPermissions() []model.GroupPermissionModel {
+func (i PostgresFile) GetGroupPermissions() []model.GroupPermissionModel {
 	var res []model.GroupPermissionModel
 	for _, p := range i.GroupPermissions {
 		res = append(res, p)
@@ -84,78 +84,71 @@ func (i FileEntity) GetGroupPermissions() []model.GroupPermissionModel {
 	return res
 }
 
-func (i FileEntity) GetText() *string {
+func (i PostgresFile) GetText() *string {
 	return i.Text
 }
 
-func (i FileEntity) GetCreateTime() string {
+func (i PostgresFile) GetCreateTime() string {
 	return i.CreateTime
 }
 
-func (i FileEntity) GetUpdateTime() *string {
+func (i PostgresFile) GetUpdateTime() *string {
 	return i.UpdateTime
 }
 
-func (i *FileEntity) SetId(id string) {
+func (i *PostgresFile) SetId(id string) {
 	i.Id = id
 }
 
-func (i *FileEntity) SetParentId(parentId *string) {
+func (i *PostgresFile) SetParentId(parentId *string) {
 	i.ParentId = parentId
 }
 
-func (i *FileEntity) SetWorkspaceId(workspaceId string) {
+func (i *PostgresFile) SetWorkspaceId(workspaceId string) {
 	i.WorkspaceId = workspaceId
 }
 
-func (i *FileEntity) SetType(fileType string) {
+func (i *PostgresFile) SetType(fileType string) {
 	i.Type = fileType
 }
 
-func (i *FileEntity) SetName(name string) {
+func (i *PostgresFile) SetName(name string) {
 	i.Name = name
 }
 
-func (i *FileEntity) SetText(text *string) {
+func (i *PostgresFile) SetText(text *string) {
 	i.Text = text
 }
 
-func (i *FileEntity) SetCreateTime(createTime string) {
+func (i *PostgresFile) SetCreateTime(createTime string) {
 	i.CreateTime = createTime
 }
 
-func (i *FileEntity) SetUpdateTime(updateTime *string) {
+func (i *PostgresFile) SetUpdateTime(updateTime *string) {
 	i.UpdateTime = updateTime
 }
 
-type FileRepo struct {
+type PostgresFileRepo struct {
 	db             *gorm.DB
-	snapshotRepo   *SnapshotRepo
-	permissionRepo *PermissionRepo
+	snapshotRepo   *PostgresSnapshotRepo
+	permissionRepo *PostgresPermissionRepo
 }
 
-func NewFileRepo() *FileRepo {
-	return &FileRepo{
+func NewPostgresFileRepo() *PostgresFileRepo {
+	return &PostgresFileRepo{
 		db:             infra.GetDb(),
-		snapshotRepo:   NewSnapshotRepo(),
-		permissionRepo: NewPermissionRepo(),
+		snapshotRepo:   NewPostgresSnapshotRepo(),
+		permissionRepo: NewPostgresPermissionRepo(),
 	}
 }
 
-func (repo *FileRepo) New() model.FileModel {
-	return &FileEntity{}
+func (repo *PostgresFileRepo) New() model.FileModel {
+	return &PostgresFile{}
 }
 
-type FileInsertOptions struct {
-	Name        string
-	WorkspaceId string
-	ParentId    *string
-	Type        string
-}
-
-func (repo *FileRepo) Insert(opts FileInsertOptions) (model.FileModel, error) {
+func (repo *PostgresFileRepo) Insert(opts FileInsertOptions) (model.FileModel, error) {
 	id := helpers.NewId()
-	file := FileEntity{
+	file := PostgresFile{
 		Id:          id,
 		WorkspaceId: opts.WorkspaceId,
 		Name:        opts.Name,
@@ -169,25 +162,25 @@ func (repo *FileRepo) Insert(opts FileInsertOptions) (model.FileModel, error) {
 	if err != nil {
 		return nil, err
 	}
-	if err := repo.populateModelFields([]*FileEntity{res}); err != nil {
+	if err := repo.populateModelFields([]*PostgresFile{res}); err != nil {
 		return nil, err
 	}
 	return res, nil
 }
 
-func (repo *FileRepo) Find(id string) (model.FileModel, error) {
+func (repo *PostgresFileRepo) Find(id string) (model.FileModel, error) {
 	file, err := repo.find(id)
 	if err != nil {
 		return nil, err
 	}
-	if err := repo.populateModelFields([]*FileEntity{file}); err != nil {
+	if err := repo.populateModelFields([]*PostgresFile{file}); err != nil {
 		return nil, err
 	}
 	return file, nil
 }
 
-func (repo *FileRepo) find(id string) (*FileEntity, error) {
-	var res = FileEntity{}
+func (repo *PostgresFileRepo) find(id string) (*PostgresFile, error) {
+	var res = PostgresFile{}
 	db := repo.db.Raw("SELECT * FROM file WHERE id = ?", id).Scan(&res)
 	if db.Error != nil {
 		if errors.Is(db.Error, gorm.ErrRecordNotFound) {
@@ -202,8 +195,8 @@ func (repo *FileRepo) find(id string) (*FileEntity, error) {
 	return &res, nil
 }
 
-func (repo *FileRepo) FindChildren(id string) ([]model.FileModel, error) {
-	var entities []*FileEntity
+func (repo *PostgresFileRepo) FindChildren(id string) ([]model.FileModel, error) {
+	var entities []*PostgresFile
 	db := repo.db.Raw("SELECT * FROM file WHERE parent_id = ? ORDER BY create_time ASC", id).Scan(&entities)
 	if db.Error != nil {
 		return nil, db.Error
@@ -218,8 +211,8 @@ func (repo *FileRepo) FindChildren(id string) ([]model.FileModel, error) {
 	return res, nil
 }
 
-func (repo *FileRepo) FindPath(id string) ([]model.FileModel, error) {
-	var entities []*FileEntity
+func (repo *PostgresFileRepo) FindPath(id string) ([]model.FileModel, error) {
+	var entities []*PostgresFile
 	if db := repo.db.
 		Raw("WITH RECURSIVE rec (id, name, type, parent_id, workspace_id, create_time, update_time) AS "+
 			"(SELECT f.id, f.name, f.type, f.parent_id, f.workspace_id, f.create_time, f.update_time FROM file f WHERE f.id = ? "+
@@ -238,8 +231,8 @@ func (repo *FileRepo) FindPath(id string) ([]model.FileModel, error) {
 	return res, nil
 }
 
-func (repo *FileRepo) FindTree(id string) ([]model.FileModel, error) {
-	var entities []*FileEntity
+func (repo *PostgresFileRepo) FindTree(id string) ([]model.FileModel, error) {
+	var entities []*PostgresFile
 	db := repo.db.
 		Raw("WITH RECURSIVE rec (id, name, type, parent_id, workspace_id, create_time, update_time) AS "+
 			"(SELECT f.id, f.name, f.type, f.parent_id, f.workspace_id, f.create_time, f.update_time FROM file f WHERE f.id = ? "+
@@ -259,7 +252,7 @@ func (repo *FileRepo) FindTree(id string) ([]model.FileModel, error) {
 	return res, nil
 }
 
-func (repo *FileRepo) GetIdsByWorkspace(workspaceId string) ([]string, error) {
+func (repo *PostgresFileRepo) GetIdsByWorkspace(workspaceId string) ([]string, error) {
 	type IdResult struct {
 		Result string
 	}
@@ -275,7 +268,7 @@ func (repo *FileRepo) GetIdsByWorkspace(workspaceId string) ([]string, error) {
 	return res, nil
 }
 
-func (repo *FileRepo) AssignSnapshots(cloneId string, originalId string) error {
+func (repo *PostgresFileRepo) AssignSnapshots(cloneId string, originalId string) error {
 	if db := repo.db.Exec("INSERT INTO snapshot_file (snapshot_id, file_id) SELECT s.id, ? "+
 		"FROM snapshot s LEFT JOIN snapshot_file map ON s.id = map.snapshot_id "+
 		"WHERE map.file_id = ? ORDER BY s.version DESC LIMIT 1", cloneId, originalId); db.Error != nil {
@@ -284,24 +277,24 @@ func (repo *FileRepo) AssignSnapshots(cloneId string, originalId string) error {
 	return nil
 }
 
-func (repo *FileRepo) MoveSourceIntoTarget(targetId string, sourceId string) error {
+func (repo *PostgresFileRepo) MoveSourceIntoTarget(targetId string, sourceId string) error {
 	if db := repo.db.Exec("UPDATE file SET parent_id = ? WHERE id = ?", targetId, sourceId); db.Error != nil {
 		return db.Error
 	}
 	return nil
 }
 
-func (repo *FileRepo) Save(file model.FileModel) error {
+func (repo *PostgresFileRepo) Save(file model.FileModel) error {
 	if db := repo.db.Save(file); db.Error != nil {
 		return db.Error
 	}
 	return nil
 }
 
-func (repo *FileRepo) BulkInsert(values []model.FileModel, chunkSize int) error {
-	var entities []*FileEntity
+func (repo *PostgresFileRepo) BulkInsert(values []model.FileModel, chunkSize int) error {
+	var entities []*PostgresFile
 	for _, f := range values {
-		entities = append(entities, f.(*FileEntity))
+		entities = append(entities, f.(*PostgresFile))
 	}
 	if db := repo.db.CreateInBatches(entities, chunkSize); db.Error != nil {
 		return db.Error
@@ -309,14 +302,14 @@ func (repo *FileRepo) BulkInsert(values []model.FileModel, chunkSize int) error 
 	return nil
 }
 
-func (repo *FileRepo) BulkInsertPermissions(values []*UserPermission, chunkSize int) error {
+func (repo *PostgresFileRepo) BulkInsertPermissions(values []*UserPermission, chunkSize int) error {
 	if db := repo.db.CreateInBatches(values, chunkSize); db.Error != nil {
 		return db.Error
 	}
 	return nil
 }
 
-func (repo *FileRepo) Delete(id string) error {
+func (repo *PostgresFileRepo) Delete(id string) error {
 	db := repo.db.Exec("DELETE FROM file WHERE id = ?", id)
 	if db.Error != nil {
 		return db.Error
@@ -332,7 +325,7 @@ func (repo *FileRepo) Delete(id string) error {
 	return nil
 }
 
-func (repo *FileRepo) GetChildrenIds(id string) ([]string, error) {
+func (repo *PostgresFileRepo) GetChildrenIDs(id string) ([]string, error) {
 	type Result struct {
 		Result string
 	}
@@ -348,7 +341,7 @@ func (repo *FileRepo) GetChildrenIds(id string) ([]string, error) {
 	return res, nil
 }
 
-func (repo *FileRepo) GetItemCount(id string) (int64, error) {
+func (repo *PostgresFileRepo) GetItemCount(id string) (int64, error) {
 	type Result struct {
 		Result int64
 	}
@@ -365,7 +358,7 @@ func (repo *FileRepo) GetItemCount(id string) (int64, error) {
 	return res.Result - 1, nil
 }
 
-func (repo *FileRepo) IsGrandChildOf(id string, ancestorId string) (bool, error) {
+func (repo *PostgresFileRepo) IsGrandChildOf(id string, ancestorId string) (bool, error) {
 	type Result struct {
 		Result bool
 	}
@@ -381,7 +374,7 @@ func (repo *FileRepo) IsGrandChildOf(id string, ancestorId string) (bool, error)
 	return res.Result, nil
 }
 
-func (repo *FileRepo) GetSize(id string) (int64, error) {
+func (repo *PostgresFileRepo) GetSize(id string) (int64, error) {
 	type Result struct {
 		Result int64
 	}
@@ -399,7 +392,7 @@ func (repo *FileRepo) GetSize(id string) (int64, error) {
 	return res.Result, nil
 }
 
-func (repo *FileRepo) GrantUserPermission(id string, userId string, permission string) error {
+func (repo *PostgresFileRepo) GrantUserPermission(id string, userId string, permission string) error {
 	/* Grant permission to workspace */
 	db := repo.db.Exec("INSERT INTO userpermission (id, user_id, resource_id, permission) "+
 		"(SELECT ?, ?, w.id, 'viewer' FROM file f "+
@@ -441,7 +434,7 @@ func (repo *FileRepo) GrantUserPermission(id string, userId string, permission s
 	return nil
 }
 
-func (repo *FileRepo) RevokeUserPermission(id string, userId string) error {
+func (repo *PostgresFileRepo) RevokeUserPermission(id string, userId string) error {
 	tree, err := repo.FindTree(id)
 	if err != nil {
 		return err
@@ -455,7 +448,7 @@ func (repo *FileRepo) RevokeUserPermission(id string, userId string) error {
 	return nil
 }
 
-func (repo *FileRepo) GrantGroupPermission(id string, groupId string, permission string) error {
+func (repo *PostgresFileRepo) GrantGroupPermission(id string, groupId string, permission string) error {
 	/* Grant permission to workspace */
 	db := repo.db.Exec("INSERT INTO grouppermission (id, group_id, resource_id, permission) "+
 		"(SELECT ?, ?, w.id, 'viewer' FROM file f "+
@@ -497,7 +490,7 @@ func (repo *FileRepo) GrantGroupPermission(id string, groupId string, permission
 	return nil
 }
 
-func (repo *FileRepo) RevokeGroupPermission(id string, groupId string) error {
+func (repo *PostgresFileRepo) RevokeGroupPermission(id string, groupId string) error {
 	tree, err := repo.FindTree(id)
 	if err != nil {
 		return err
@@ -511,7 +504,7 @@ func (repo *FileRepo) RevokeGroupPermission(id string, groupId string) error {
 	return nil
 }
 
-func (repo *FileRepo) populateModelFields(entities []*FileEntity) error {
+func (repo *PostgresFileRepo) populateModelFields(entities []*PostgresFile) error {
 	for _, f := range entities {
 		f.UserPermissions = make([]*model.UserPermission, 0)
 		userPermissions, err := repo.permissionRepo.GetUserPermissions(f.Id)

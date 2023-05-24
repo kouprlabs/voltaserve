@@ -10,14 +10,14 @@ import (
 type OrganizationSearch struct {
 	index   string
 	search  *infra.SearchManager
-	orgRepo *repo.OrganizationRepo
+	orgRepo repo.CoreOrganizationRepo
 }
 
 func NewOrganizationSearch() *OrganizationSearch {
 	return &OrganizationSearch{
 		index:   infra.OrganizationSearchIndex,
 		search:  infra.NewSearchManager(),
-		orgRepo: repo.NewOrganizationRepo(),
+		orgRepo: repo.NewPostgresOrganizationRepo(),
 	}
 }
 

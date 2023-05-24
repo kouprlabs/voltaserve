@@ -9,14 +9,14 @@ import (
 
 type GroupCache struct {
 	redis     *infra.RedisManager
-	groupRepo *repo.GroupRepo
+	groupRepo repo.CoreGroupRepo
 	keyPrefix string
 }
 
 func NewGroupCache() *GroupCache {
 	return &GroupCache{
 		redis:     infra.NewRedisManager(),
-		groupRepo: repo.NewGroupRepo(),
+		groupRepo: repo.NewPostgresGroupRepo(),
 		keyPrefix: "group:",
 	}
 }
@@ -38,7 +38,7 @@ func (c *GroupCache) Get(id string) (model.GroupModel, error) {
 	if err != nil {
 		return c.Refresh(id)
 	}
-	var group = repo.GroupEntity{}
+	var group = repo.PostgresGroup{}
 	if err = json.Unmarshal([]byte(value), &group); err != nil {
 		return nil, err
 	}

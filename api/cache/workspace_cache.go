@@ -9,14 +9,14 @@ import (
 
 type WorkspaceCache struct {
 	redis         *infra.RedisManager
-	workspaceRepo *repo.WorkspaceRepo
+	workspaceRepo repo.CoreWorkspaceRepo
 	keyPrefix     string
 }
 
 func NewWorkspaceCache() *WorkspaceCache {
 	return &WorkspaceCache{
 		redis:         infra.NewRedisManager(),
-		workspaceRepo: repo.NewWorkspaceRepo(),
+		workspaceRepo: repo.NewPostgresWorkspaceRepo(),
 		keyPrefix:     "workspace:",
 	}
 }
@@ -38,7 +38,7 @@ func (c *WorkspaceCache) Get(id string) (model.WorkspaceModel, error) {
 	if err != nil {
 		return c.Refresh(id)
 	}
-	var workspace = repo.WorkspaceEntity{}
+	var workspace = repo.PostgresWorkspace{}
 	if err = json.Unmarshal([]byte(value), &workspace); err != nil {
 		return nil, err
 	}

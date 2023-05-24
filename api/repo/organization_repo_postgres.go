@@ -80,26 +80,21 @@ func (w *OrganizationEntity) SetUpdateTime(updateTime *string) {
 	w.UpdateTime = updateTime
 }
 
-type OrganizationRepo struct {
+type PostgresOrganizationRepo struct {
 	db             *gorm.DB
-	groupRepo      *GroupRepo
-	permissionRepo *PermissionRepo
+	groupRepo      *PostgresGroupRepo
+	permissionRepo *PostgresPermissionRepo
 }
 
-func NewOrganizationRepo() *OrganizationRepo {
-	return &OrganizationRepo{
+func NewPostgresOrganizationRepo() *PostgresOrganizationRepo {
+	return &PostgresOrganizationRepo{
 		db:             infra.GetDb(),
-		groupRepo:      NewGroupRepo(),
-		permissionRepo: NewPermissionRepo(),
+		groupRepo:      NewPostgresGroupRepo(),
+		permissionRepo: NewPostgresPermissionRepo(),
 	}
 }
 
-type OrganizationInsertOptions struct {
-	Id   string
-	Name string
-}
-
-func (repo *OrganizationRepo) Insert(opts OrganizationInsertOptions) (model.OrganizationModel, error) {
+func (repo *PostgresOrganizationRepo) Insert(opts OrganizationInsertOptions) (model.OrganizationModel, error) {
 	org := OrganizationEntity{
 		Id:   opts.Id,
 		Name: opts.Name,
@@ -114,7 +109,7 @@ func (repo *OrganizationRepo) Insert(opts OrganizationInsertOptions) (model.Orga
 	return res, nil
 }
 
-func (repo *OrganizationRepo) find(id string) (*OrganizationEntity, error) {
+func (repo *PostgresOrganizationRepo) find(id string) (*OrganizationEntity, error) {
 	var res = OrganizationEntity{}
 	db := repo.db.Where("id = ?", id).First(&res)
 	if db.Error != nil {
@@ -127,7 +122,7 @@ func (repo *OrganizationRepo) find(id string) (*OrganizationEntity, error) {
 	return &res, nil
 }
 
-func (repo *OrganizationRepo) Find(id string) (model.OrganizationModel, error) {
+func (repo *PostgresOrganizationRepo) Find(id string) (model.OrganizationModel, error) {
 	org, err := repo.find(id)
 	if err != nil {
 		return nil, err
@@ -138,7 +133,7 @@ func (repo *OrganizationRepo) Find(id string) (model.OrganizationModel, error) {
 	return org, nil
 }
 
-func (repo *OrganizationRepo) Save(org model.OrganizationModel) error {
+func (repo *PostgresOrganizationRepo) Save(org model.OrganizationModel) error {
 	db := repo.db.Save(org)
 	if db.Error != nil {
 		return db.Error
@@ -146,7 +141,7 @@ func (repo *OrganizationRepo) Save(org model.OrganizationModel) error {
 	return nil
 }
 
-func (repo *OrganizationRepo) Delete(id string) error {
+func (repo *PostgresOrganizationRepo) Delete(id string) error {
 	db := repo.db.Exec("DELETE FROM organization WHERE id = ?", id)
 	if db.Error != nil {
 		return db.Error
@@ -162,7 +157,7 @@ func (repo *OrganizationRepo) Delete(id string) error {
 	return nil
 }
 
-func (repo *OrganizationRepo) GetIds() ([]string, error) {
+func (repo *PostgresOrganizationRepo) GetIDs() ([]string, error) {
 	type Result struct {
 		Result string
 	}
@@ -178,7 +173,7 @@ func (repo *OrganizationRepo) GetIds() ([]string, error) {
 	return res, nil
 }
 
-func (repo *OrganizationRepo) AddUser(id string, userId string) error {
+func (repo *PostgresOrganizationRepo) AddUser(id string, userId string) error {
 	db := repo.db.Exec("INSERT INTO organization_user (organization_id, user_id) VALUES (?, ?)", id, userId)
 	if db.Error != nil {
 		return db.Error
@@ -186,7 +181,7 @@ func (repo *OrganizationRepo) AddUser(id string, userId string) error {
 	return nil
 }
 
-func (repo *OrganizationRepo) RemoveMember(id string, userId string) error {
+func (repo *PostgresOrganizationRepo) RemoveMember(id string, userId string) error {
 	db := repo.db.Exec("DELETE FROM organization_user WHERE organization_id = ? AND user_id = ?", id, userId)
 	if db.Error != nil {
 		return db.Error
@@ -194,8 +189,8 @@ func (repo *OrganizationRepo) RemoveMember(id string, userId string) error {
 	return nil
 }
 
-func (repo *OrganizationRepo) GetMembers(id string) ([]model.UserModel, error) {
-	var entities []*UserEntity
+func (repo *PostgresOrganizationRepo) GetMembers(id string) ([]model.UserModel, error) {
+	var entities []*PostgresUser
 	db := repo.db.
 		Raw(`SELECT DISTINCT u.* FROM "user" u INNER JOIN organization_user ou ON u.id = ou.user_id WHERE ou.organization_id = ? ORDER BY u.full_name ASC`, id).
 		Scan(&entities)
@@ -209,8 +204,8 @@ func (repo *OrganizationRepo) GetMembers(id string) ([]model.UserModel, error) {
 	return res, nil
 }
 
-func (repo *OrganizationRepo) GetGroups(id string) ([]model.GroupModel, error) {
-	var entities []*GroupEntity
+func (repo *PostgresOrganizationRepo) GetGroups(id string) ([]model.GroupModel, error) {
+	var entities []*PostgresGroup
 	db := repo.db.
 		Raw(`SELECT * FROM "group" g WHERE g.organization_id = ? ORDER BY g.name ASC`, id).
 		Scan(&entities)
@@ -227,7 +222,7 @@ func (repo *OrganizationRepo) GetGroups(id string) ([]model.GroupModel, error) {
 	return res, nil
 }
 
-func (repo *OrganizationRepo) GetOwnerCount(id string) (int64, error) {
+func (repo *PostgresOrganizationRepo) GetOwnerCount(id string) (int64, error) {
 	type Result struct {
 		Result int64
 	}
@@ -241,7 +236,7 @@ func (repo *OrganizationRepo) GetOwnerCount(id string) (int64, error) {
 	return res.Result, nil
 }
 
-func (repo *OrganizationRepo) GrantUserPermission(id string, userId string, permission string) error {
+func (repo *PostgresOrganizationRepo) GrantUserPermission(id string, userId string, permission string) error {
 	db := repo.db.Exec(
 		"INSERT INTO userpermission (id, user_id, resource_id, permission) "+
 			"VALUES (?, ?, ?, ?) ON CONFLICT (user_id, resource_id) DO UPDATE SET permission = ?",
@@ -252,7 +247,7 @@ func (repo *OrganizationRepo) GrantUserPermission(id string, userId string, perm
 	return nil
 }
 
-func (repo *OrganizationRepo) RevokeUserPermission(id string, userId string) error {
+func (repo *PostgresOrganizationRepo) RevokeUserPermission(id string, userId string) error {
 	db := repo.db.Exec("DELETE FROM userpermission WHERE user_id = ? AND resource_id = ?", userId, id)
 	if db.Error != nil {
 		return db.Error
@@ -260,7 +255,7 @@ func (repo *OrganizationRepo) RevokeUserPermission(id string, userId string) err
 	return nil
 }
 
-func (repo *OrganizationRepo) populateModelFields(organizations []*OrganizationEntity) error {
+func (repo *PostgresOrganizationRepo) populateModelFields(organizations []*OrganizationEntity) error {
 	for _, o := range organizations {
 		o.UserPermissions = make([]*model.UserPermission, 0)
 		userPermissions, err := repo.permissionRepo.GetUserPermissions(o.Id)

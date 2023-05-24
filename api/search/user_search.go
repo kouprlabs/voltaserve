@@ -30,7 +30,7 @@ func (svc *UserSearch) Query(query string) ([]model.UserModel, error) {
 		if err != nil {
 			return nil, err
 		}
-		var user repo.UserEntity
+		var user repo.PostgresUser
 		if err := json.Unmarshal(b, &user); err != nil {
 			return nil, err
 		}

@@ -8,23 +8,23 @@ import (
 )
 
 type storageMetadataUpdater struct {
-	snapshotRepo *repo.SnapshotRepo
-	fileRepo     *repo.FileRepo
+	snapshotRepo repo.CoreSnapshotRepo
+	fileRepo     repo.CoreFileRepo
 	fileCache    *cache.FileCache
 	fileSearch   *search.FileSearch
 }
 
 func newMetadataUpdater() *storageMetadataUpdater {
 	return &storageMetadataUpdater{
-		snapshotRepo: repo.NewSnapshotRepo(),
-		fileRepo:     repo.NewFileRepo(),
+		snapshotRepo: repo.NewPostgresSnapshotRepo(),
+		fileRepo:     repo.NewPostgresFileRepo(),
 		fileCache:    cache.NewFileCache(),
 		fileSearch:   search.NewFileSearch(),
 	}
 }
 
 func (mu *storageMetadataUpdater) update(snapshot model.SnapshotModel, fileId string) error {
-	if err := repo.NewSnapshotRepo().Save(snapshot); err != nil {
+	if err := repo.NewPostgresSnapshotRepo().Save(snapshot); err != nil {
 		return err
 	}
 	file, err := mu.fileRepo.Find(fileId)

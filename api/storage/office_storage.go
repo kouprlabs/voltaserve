@@ -13,7 +13,7 @@ import (
 
 type officeStorage struct {
 	s3              *infra.S3Manager
-	snapshotRepo    *repo.SnapshotRepo
+	snapshotRepo    repo.CoreSnapshotRepo
 	ocrStorage      *ocrStorage
 	cmd             *infra.Command
 	metadataUpdater *storageMetadataUpdater
@@ -32,7 +32,7 @@ type officeStorageOptions struct {
 func newOfficeStorage() *officeStorage {
 	return &officeStorage{
 		s3:              infra.NewS3Manager(),
-		snapshotRepo:    repo.NewSnapshotRepo(),
+		snapshotRepo:    repo.NewPostgresSnapshotRepo(),
 		ocrStorage:      newOcrStorage(),
 		cmd:             infra.NewCommand(),
 		metadataUpdater: newMetadataUpdater(),

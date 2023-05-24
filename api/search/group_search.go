@@ -10,14 +10,14 @@ import (
 type GroupSearch struct {
 	index     string
 	search    *infra.SearchManager
-	groupRepo *repo.GroupRepo
+	groupRepo repo.CoreGroupRepo
 }
 
 func NewGroupSearch() *GroupSearch {
 	return &GroupSearch{
 		index:     infra.GroupSearchIndex,
 		search:    infra.NewSearchManager(),
-		groupRepo: repo.NewGroupRepo(),
+		groupRepo: repo.NewPostgresGroupRepo(),
 	}
 }
 
@@ -71,7 +71,7 @@ func (search *GroupSearch) Query(query string) ([]model.GroupModel, error) {
 		if err != nil {
 			return nil, err
 		}
-		var group repo.GroupEntity
+		var group repo.PostgresGroup
 		if err = json.Unmarshal(b, &group); err != nil {
 			return nil, err
 		}
