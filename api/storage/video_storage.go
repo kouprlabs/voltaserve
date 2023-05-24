@@ -1,7 +1,6 @@
 package storage
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"voltaserve/cache"
@@ -68,7 +67,6 @@ func (svc *videoStorage) store(opts videoStorageOptions) error {
 func (svc *videoStorage) generateThumbnail(snapshot model.SnapshotModel, opts videoStorageOptions, inputPath string) error {
 	outputPath := filepath.FromSlash(os.TempDir() + "/" + helpers.NewId() + ".png")
 	if err := svc.videoProc.Thumbnail(inputPath, 0, svc.config.Limits.ImagePreviewMaxHeight, outputPath); err != nil {
-		fmt.Println("failed here!")
 		return err
 	}
 	b64, err := infra.ImageToBase64(outputPath)
