@@ -22,6 +22,7 @@ type StorageService struct {
 	ocrStorage     *ocrStorage
 	imageStorage   *imageStorage
 	officeStorage  *officeStorage
+	videoStorage   *videoStorage
 	workspaceCache *cache.WorkspaceCache
 	config         config.Config
 }
@@ -41,6 +42,7 @@ func NewStorageService() *StorageService {
 		ocrStorage:     newOcrStorage(),
 		imageStorage:   newImageStorage(),
 		officeStorage:  newOfficeStorage(),
+		videoStorage:   newVideoStorage(),
 		workspaceCache: cache.NewWorkspaceCache(),
 		config:         config.GetConfig(),
 	}
@@ -96,7 +98,7 @@ func (svc *StorageService) Store(opts StorageOptions, userId string) (*core.File
 		}
 		return v, nil
 	}
-	if svc.isPdf(filepath.Ext(opts.FilePath)) {
+	if svc.isPDF(filepath.Ext(opts.FilePath)) {
 		snapshot.SetPreview(&model.S3Object{
 			Bucket: original.Bucket,
 			Key:    original.Key,
@@ -137,6 +139,15 @@ func (svc *StorageService) Store(opts StorageOptions, userId string) (*core.File
 		}); err != nil {
 			return nil, err
 		}
+	} else if svc.isVideo(filepath.Ext(opts.FilePath)) {
+		if err = svc.videoStorage.store(videoStorageOptions{
+			FileId:     opts.FileId,
+			SnapshotId: snapshotId,
+			S3Bucket:   workspace.GetBucket(),
+			S3Key:      original.Key,
+		}); err != nil {
+			return nil, err
+		}
 	}
 	file, err = svc.fileCache.Refresh(file.GetId())
 	if err != nil {
@@ -149,7 +160,7 @@ func (svc *StorageService) Store(opts StorageOptions, userId string) (*core.File
 	return v, nil
 }
 
-func (svc *StorageService) isPdf(extension string) bool {
+func (svc *StorageService) isPDF(extension string) bool {
 	return strings.ToLower(extension) == ".pdf"
 }
 
@@ -229,6 +240,30 @@ func (svc *StorageService) isImage(extension string) bool {
 		".heif",
 		".xcf",
 		".svg",
+	}
+	for _, v := range extensions {
+		if strings.ToLower(extension) == v {
+			return true
+		}
+	}
+	return false
+}
+
+func (svc *StorageService) isVideo(extension string) bool {
+	extensions := []string{
+		".ogv",
+		".mpeg",
+		".mov",
+		".mqv",
+		".mp4",
+		".webm",
+		".3gp",
+		".3g2",
+		".avi",
+		".flv",
+		".mkv",
+		".asf",
+		".m4v",
 	}
 	for _, v := range extensions {
 		if strings.ToLower(extension) == v {

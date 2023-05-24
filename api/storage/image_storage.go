@@ -63,10 +63,10 @@ func (svc *imageStorage) store(opts imageStorageOptions) error {
 		}
 		inputPath = newInputFile
 	}
-	if err := svc.setImageProps(snapshot, inputPath); err != nil {
+	if err := svc.measureImageProps(snapshot, inputPath); err != nil {
 		return err
 	}
-	if err := svc.setThumbnail(snapshot, inputPath); err != nil {
+	if err := svc.generateThumbnail(snapshot, inputPath); err != nil {
 		return err
 	}
 	if err := svc.metadataUpdater.update(snapshot, opts.FileId); err != nil {
@@ -94,7 +94,7 @@ func (svc *imageStorage) store(opts imageStorageOptions) error {
 	return nil
 }
 
-func (svc *imageStorage) setImageProps(snapshot model.SnapshotModel, inputPath string) error {
+func (svc *imageStorage) measureImageProps(snapshot model.SnapshotModel, inputPath string) error {
 	width, height, err := svc.imageProc.Measure(inputPath)
 	if err != nil {
 		return err
@@ -108,7 +108,7 @@ func (svc *imageStorage) setImageProps(snapshot model.SnapshotModel, inputPath s
 	return nil
 }
 
-func (svc *imageStorage) setThumbnail(snapshot model.SnapshotModel, inputPath string) error {
+func (svc *imageStorage) generateThumbnail(snapshot model.SnapshotModel, inputPath string) error {
 	width := snapshot.GetOriginal().Image.Width
 	height := snapshot.GetOriginal().Image.Height
 	if width > svc.config.Limits.ImagePreviewMaxWidth || height > svc.config.Limits.ImagePreviewMaxHeight {

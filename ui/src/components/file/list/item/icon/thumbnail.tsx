@@ -1,14 +1,17 @@
 import { useMemo, useState } from 'react'
 import {
   Box,
+  Center,
   Image,
   Skeleton,
   useColorModeValue,
   useToken,
 } from '@chakra-ui/react'
 import { variables } from '@koupr/ui'
+import { BsPlayFill } from 'react-icons/bs'
 import { File } from '@/api/file'
 import { getSizeWithAspectRatio } from '@/helpers/aspect-ratio'
+import * as fileExtension from '@/helpers/file-extension'
 import SharedSign from './shared-sign'
 
 const MAX_WIDTH = 130
@@ -53,7 +56,12 @@ const Thumbnail = ({ file, scale }: ThumbnailProps) => {
   const [isLoading, setIsLoading] = useState(true)
   const borderColor = useColorModeValue('gray.300', 'gray.700')
   const [borderColorDecoded] = useToken('colors', [borderColor])
-
+  const isVideo = useMemo(
+    () =>
+      file.original?.extension &&
+      fileExtension.isVideo(file.original.extension),
+    [file.original]
+  )
   return (
     <Box position="relative" width={width} height={height}>
       <Image
@@ -78,6 +86,18 @@ const Thumbnail = ({ file, scale }: ThumbnailProps) => {
           height={height}
           borderRadius={variables.borderRadiusSm}
         />
+      )}
+      {isVideo && (
+        <Center
+          position="absolute"
+          top="0px"
+          left="0px"
+          width={width}
+          height={height}
+          opacity={0.5}
+        >
+          <BsPlayFill fontSize="40px" color="white" />
+        </Center>
       )}
       {file.isShared && <SharedSign bottom="-5px" right="-5px" />}
     </Box>
