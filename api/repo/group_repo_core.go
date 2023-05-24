@@ -12,9 +12,9 @@ type GroupInsertOptions struct {
 type CoreGroupRepo interface {
 	Insert(opts GroupInsertOptions) (model.GroupModel, error)
 	Find(id string) (model.GroupModel, error)
-	GetIdsForFile(fileId string) ([]string, error)
-	GetIdsForUser(userId string) ([]string, error)
-	GetIdsForOrganization(id string) ([]string, error)
+	GetIDsForFile(fileId string) ([]string, error)
+	GetIDsForUser(userId string) ([]string, error)
+	GetIDsForOrganization(id string) ([]string, error)
 	Save(group model.GroupModel) error
 	Delete(id string) error
 	AddUser(id string, userId string) error

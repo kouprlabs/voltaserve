@@ -303,7 +303,7 @@ func (svc *OrganizationService) RemoveMember(id string, memberId string, userId 
 	}
 
 	/* Remove member from all groups belonging to this organization */
-	groupsIds, err := svc.groupRepo.GetIdsForOrganization(org.GetId())
+	groupsIds, err := svc.groupRepo.GetIDsForOrganization(org.GetId())
 	if err != nil {
 		return err
 	}

@@ -233,7 +233,7 @@ func (repo *PostgresWorkspaceRepo) Delete(id string) error {
 	return nil
 }
 
-func (repo *PostgresWorkspaceRepo) GetIds() ([]string, error) {
+func (repo *PostgresWorkspaceRepo) GetIDs() ([]string, error) {
 	type IdResult struct {
 		Result string
 	}

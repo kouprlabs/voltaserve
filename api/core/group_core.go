@@ -190,7 +190,7 @@ func (svc *GroupService) FindAllForFile(fileId string, userId string) ([]*Group,
 	if err := svc.fileGuard.Authorize(user, file, model.PermissionViewer); err != nil {
 		return nil, err
 	}
-	ids, err := svc.groupRepo.GetIdsForFile(fileId)
+	ids, err := svc.groupRepo.GetIDsForFile(fileId)
 	if err != nil {
 		return nil, err
 	}

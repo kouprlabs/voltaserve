@@ -183,7 +183,7 @@ func (svc *WorkspaceService) FindAll(userId string) ([]*Workspace, error) {
 	if err != nil {
 		return nil, err
 	}
-	ids, err := svc.workspaceRepo.GetIds()
+	ids, err := svc.workspaceRepo.GetIDs()
 	if err != nil {
 		return nil, err
 	}

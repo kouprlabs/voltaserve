@@ -42,7 +42,7 @@ func (svc *StorageService) GetAccountUsage(userId string) (*StorageUsage, error)
 	if err != nil {
 		return nil, err
 	}
-	ids, err := svc.workspaceRepo.GetIds()
+	ids, err := svc.workspaceRepo.GetIDs()
 	if err != nil {
 		return nil, err
 	}

@@ -137,7 +137,7 @@ func (repo *PostgresGroupRepo) Find(id string) (model.GroupModel, error) {
 	return group, nil
 }
 
-func (repo *PostgresGroupRepo) GetIdsForFile(fileId string) ([]string, error) {
+func (repo *PostgresGroupRepo) GetIDsForFile(fileId string) ([]string, error) {
 	type Result struct {
 		Result string
 	}
@@ -155,7 +155,7 @@ func (repo *PostgresGroupRepo) GetIdsForFile(fileId string) ([]string, error) {
 	return res, nil
 }
 
-func (repo *PostgresGroupRepo) GetIdsForUser(userId string) ([]string, error) {
+func (repo *PostgresGroupRepo) GetIDsForUser(userId string) ([]string, error) {
 	type Result struct {
 		Result string
 	}
@@ -171,7 +171,7 @@ func (repo *PostgresGroupRepo) GetIdsForUser(userId string) ([]string, error) {
 	return res, nil
 }
 
-func (repo *PostgresGroupRepo) GetIdsForOrganization(id string) ([]string, error) {
+func (repo *PostgresGroupRepo) GetIDsForOrganization(id string) ([]string, error) {
 	type Result struct {
 		Result string
 	}
