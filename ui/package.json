@@ -19,7 +19,7 @@
     "@emotion/css": "11.11.0",
     "@emotion/react": "11.11.0",
     "@emotion/styled": "11.11.0",
-    "@koupr/ui": "1.0.7",
+    "@koupr/ui": "1.0.9",
     "@reduxjs/toolkit": "1.9.5",
     "cookie": "0.5.0",
     "dateformat": "5.0.3",
