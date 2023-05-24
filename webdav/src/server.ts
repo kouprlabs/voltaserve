@@ -91,5 +91,5 @@ const server = createServer((req: IncomingMessage, res: ServerResponse) => {
 })
 
 server.listen(PORT, () => {
-  console.log(`WebDAV server is listening on port ${PORT}`)
+  console.log(`Listening on port ${PORT}`)
 })
