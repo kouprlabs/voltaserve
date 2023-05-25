@@ -3,7 +3,7 @@ package repo
 import "voltaserve/model"
 
 type GroupInsertOptions struct {
-	Id             string
+	ID             string
 	Name           string
 	OrganizationId string
 	OwnerId        string

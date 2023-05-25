@@ -105,7 +105,7 @@ func (svc *GroupService) Create(req GroupCreateOptions, userId string) (*Group, 
 		return nil, err
 	}
 	group, err := svc.groupRepo.Insert(repo.GroupInsertOptions{
-		Id:             helpers.NewId(),
+		ID:             helpers.NewId(),
 		Name:           req.Name,
 		OrganizationId: req.OrganizationId,
 		OwnerId:        userId,

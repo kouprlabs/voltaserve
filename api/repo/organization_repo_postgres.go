@@ -12,7 +12,7 @@ import (
 )
 
 type OrganizationEntity struct {
-	Id               string                   `json:"id"`
+	ID               string                   `json:"id"`
 	Name             string                   `json:"name"`
 	UserPermissions  []*model.UserPermission  `json:"userPermissions" gorm:"-"`
 	GroupPermissions []*model.GroupPermission `json:"groupPermissions" gorm:"-"`
@@ -37,7 +37,7 @@ func (o *OrganizationEntity) BeforeSave(tx *gorm.DB) (err error) {
 }
 
 func (o OrganizationEntity) GetID() string {
-	return o.Id
+	return o.ID
 }
 
 func (o OrganizationEntity) GetName() string {
@@ -96,7 +96,7 @@ func NewPostgresOrganizationRepo() *PostgresOrganizationRepo {
 
 func (repo *PostgresOrganizationRepo) Insert(opts OrganizationInsertOptions) (model.CoreOrganization, error) {
 	org := OrganizationEntity{
-		Id:   opts.ID,
+		ID:   opts.ID,
 		Name: opts.Name,
 	}
 	if db := repo.db.Save(&org); db.Error != nil {
@@ -258,18 +258,18 @@ func (repo *PostgresOrganizationRepo) RevokeUserPermission(id string, userId str
 func (repo *PostgresOrganizationRepo) populateModelFields(organizations []*OrganizationEntity) error {
 	for _, o := range organizations {
 		o.UserPermissions = make([]*model.UserPermission, 0)
-		userPermissions, err := repo.permissionRepo.GetUserPermissions(o.Id)
+		userPermissions, err := repo.permissionRepo.GetUserPermissions(o.ID)
 		if err != nil {
 			return err
 		}
 		for _, p := range userPermissions {
 			o.UserPermissions = append(o.UserPermissions, &model.UserPermission{
-				UserId: p.UserId,
+				UserId: p.UserID,
 				Value:  p.Permission,
 			})
 		}
 		o.GroupPermissions = make([]*model.GroupPermission, 0)
-		groupPermissions, err := repo.permissionRepo.GetGroupPermissions(o.Id)
+		groupPermissions, err := repo.permissionRepo.GetGroupPermissions(o.ID)
 		if err != nil {
 			return err
 		}
@@ -279,7 +279,7 @@ func (repo *PostgresOrganizationRepo) populateModelFields(organizations []*Organ
 				Value:   p.Permission,
 			})
 		}
-		members, err := repo.GetMembers(o.Id)
+		members, err := repo.GetMembers(o.ID)
 		if err != nil {
 			return nil
 		}

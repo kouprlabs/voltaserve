@@ -3,7 +3,7 @@ package repo
 import "voltaserve/model"
 
 type WorkspaceInsertOptions struct {
-	Id              string
+	ID              string
 	Name            string
 	StorageCapacity int64
 	Image           *string

@@ -12,10 +12,10 @@ import (
 )
 
 type PostgresWorkspace struct {
-	Id               string                   `json:"id," gorm:"column:id;size:36"`
+	ID               string                   `json:"id," gorm:"column:id;size:36"`
 	Name             string                   `json:"name" gorm:"column:name;size:255"`
 	StorageCapacity  int64                    `json:"storageCapacity" gorm:"column:storage_capacity"`
-	RootId           string                   `json:"rootId" gorm:"column:root_id;size:36"`
+	RootID           string                   `json:"rootId" gorm:"column:root_id;size:36"`
 	OrganizationId   string                   `json:"organizationId" gorm:"column:organization_id;size:36"`
 	UserPermissions  []*model.UserPermission  `json:"userPermissions" gorm:"-"`
 	GroupPermissions []*model.GroupPermission `json:"groupPermissions" gorm:"-"`
@@ -40,7 +40,7 @@ func (w *PostgresWorkspace) BeforeSave(tx *gorm.DB) (err error) {
 }
 
 func (w PostgresWorkspace) GetID() string {
-	return w.Id
+	return w.ID
 }
 
 func (w PostgresWorkspace) GetName() string {
@@ -52,7 +52,7 @@ func (w PostgresWorkspace) GetStorageCapacity() int64 {
 }
 
 func (w PostgresWorkspace) GetRootID() string {
-	return w.RootId
+	return w.RootID
 }
 
 func (w PostgresWorkspace) GetOrganizationID() string {
@@ -109,16 +109,16 @@ func NewPostgresWorkspaceRepo() *PostgresWorkspaceRepo {
 
 func (repo *PostgresWorkspaceRepo) Insert(opts WorkspaceInsertOptions) (model.CoreWorkspace, error) {
 	var id string
-	if len(opts.Id) > 0 {
-		id = opts.Id
+	if len(opts.ID) > 0 {
+		id = opts.ID
 	} else {
 		id = helpers.NewId()
 	}
 	workspace := PostgresWorkspace{
-		Id:              id,
+		ID:              id,
 		Name:            opts.Name,
 		StorageCapacity: opts.StorageCapacity,
-		RootId:          opts.RootId,
+		RootID:          opts.RootId,
 		OrganizationId:  opts.OrganizationId,
 		Bucket:          opts.Bucket,
 	}
@@ -289,18 +289,18 @@ func (repo *PostgresWorkspaceRepo) GrantUserPermission(id string, userId string,
 func (repo *PostgresWorkspaceRepo) populateModelFields(workspaces []*PostgresWorkspace) error {
 	for _, w := range workspaces {
 		w.UserPermissions = make([]*model.UserPermission, 0)
-		userPermissions, err := repo.permissionRepo.GetUserPermissions(w.Id)
+		userPermissions, err := repo.permissionRepo.GetUserPermissions(w.ID)
 		if err != nil {
 			return err
 		}
 		for _, p := range userPermissions {
 			w.UserPermissions = append(w.UserPermissions, &model.UserPermission{
-				UserId: p.UserId,
+				UserId: p.UserID,
 				Value:  p.Permission,
 			})
 		}
 		w.GroupPermissions = make([]*model.GroupPermission, 0)
-		groupPermissions, err := repo.permissionRepo.GetGroupPermissions(w.Id)
+		groupPermissions, err := repo.permissionRepo.GetGroupPermissions(w.ID)
 		if err != nil {
 			return err
 		}

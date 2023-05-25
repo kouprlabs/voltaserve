@@ -1,15 +1,15 @@
 package repo
 
 type UserPermission struct {
-	Id         string `json:"id"`
-	UserId     string `json:"userId"`
-	ResourceId string `json:"resourceId"`
+	ID         string `json:"id"`
+	UserID     string `json:"userId"`
+	ResourceID string `json:"resourceId"`
 	Permission string `json:"permission"`
 	CreateTime string `json:"createTime"`
 }
 
 type GroupPermission struct {
-	Id         string `json:"id"`
+	ID         string `json:"id"`
 	GroupID    string `json:"groupId"`
 	ResourceId string `json:"resourceId"`
 	Permission string `json:"permission"`

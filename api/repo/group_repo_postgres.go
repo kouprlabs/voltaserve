@@ -12,7 +12,7 @@ import (
 )
 
 type PostgresGroup struct {
-	Id               string                   `json:"id"`
+	ID               string                   `json:"id"`
 	Name             string                   `json:"name"`
 	OrganizationId   string                   `json:"organizationId"`
 	UserPermissions  []*model.UserPermission  `json:"userPermissions" gorm:"-"`
@@ -38,7 +38,7 @@ func (g *PostgresGroup) BeforeSave(tx *gorm.DB) (err error) {
 }
 
 func (g PostgresGroup) GetID() string {
-	return g.Id
+	return g.ID
 }
 
 func (g PostgresGroup) GetName() string {
@@ -99,14 +99,14 @@ func NewPostgresGroupRepo() *PostgresGroupRepo {
 
 func (repo *PostgresGroupRepo) Insert(opts GroupInsertOptions) (model.CoreGroup, error) {
 	group := PostgresGroup{
-		Id:             opts.Id,
+		ID:             opts.ID,
 		Name:           opts.Name,
 		OrganizationId: opts.OrganizationId,
 	}
 	if db := repo.db.Save(&group); db.Error != nil {
 		return nil, db.Error
 	}
-	res, err := repo.Find(opts.Id)
+	res, err := repo.Find(opts.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -280,18 +280,18 @@ func (repo *PostgresGroupRepo) RevokeUserPermission(id string, userId string) er
 func (repo *PostgresGroupRepo) populateModelFields(groups []*PostgresGroup) error {
 	for _, g := range groups {
 		g.UserPermissions = make([]*model.UserPermission, 0)
-		userPermissions, err := repo.permissionRepo.GetUserPermissions(g.Id)
+		userPermissions, err := repo.permissionRepo.GetUserPermissions(g.ID)
 		if err != nil {
 			return err
 		}
 		for _, p := range userPermissions {
 			g.UserPermissions = append(g.UserPermissions, &model.UserPermission{
-				UserId: p.UserId,
+				UserId: p.UserID,
 				Value:  p.Permission,
 			})
 		}
 		g.GroupPermissions = make([]*model.GroupPermission, 0)
-		groupPermissions, err := repo.permissionRepo.GetGroupPermissions(g.Id)
+		groupPermissions, err := repo.permissionRepo.GetGroupPermissions(g.ID)
 		if err != nil {
 			return err
 		}
@@ -301,7 +301,7 @@ func (repo *PostgresGroupRepo) populateModelFields(groups []*PostgresGroup) erro
 				Value:   p.Permission,
 			})
 		}
-		members, err := repo.GetMembers(g.Id)
+		members, err := repo.GetMembers(g.ID)
 		if err != nil {
 			return nil
 		}

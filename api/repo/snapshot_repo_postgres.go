@@ -14,7 +14,7 @@ import (
 )
 
 type PostgresSnapshot struct {
-	Id         string         `json:"id" gorm:"column:id;size:36"`
+	ID         string         `json:"id" gorm:"column:id;size:36"`
 	Version    int64          `json:"version" gorm:"column:version"`
 	Original   datatypes.JSON `json:"original,omitempty" gorm:"column:original"`
 	Preview    datatypes.JSON `json:"preview,omitempty" gorm:"column:preview"`
@@ -41,7 +41,7 @@ func (s *PostgresSnapshot) BeforeSave(tx *gorm.DB) (err error) {
 }
 
 func (s PostgresSnapshot) GetID() string {
-	return s.Id
+	return s.ID
 }
 
 func (s PostgresSnapshot) GetVersion() int64 {

@@ -10,7 +10,7 @@ import (
 )
 
 type PostgresUser struct {
-	Id                     string  `json:"id"`
+	ID                     string  `json:"id"`
 	FullName               string  `json:"fullName"`
 	Username               string  `json:"username"`
 	Email                  string  `json:"email"`
@@ -30,7 +30,7 @@ func (PostgresUser) TableName() string {
 }
 
 func (u PostgresUser) GetID() string {
-	return u.Id
+	return u.ID
 }
 
 func (u PostgresUser) GetFullName() string {

@@ -856,9 +856,9 @@ func (svc *FileService) Copy(targetId string, sourceIds []string, userId string)
 			originalIds[c.GetID()] = o.GetID()
 			clones = append(clones, c)
 			permissions = append(permissions, &repo.UserPermission{
-				Id:         helpers.NewId(),
-				UserId:     userId,
-				ResourceId: c.GetID(),
+				ID:         helpers.NewId(),
+				UserID:     userId,
+				ResourceID: c.GetID(),
 				Permission: model.PermissionOwner,
 				CreateTime: time.Now().UTC().Format(time.RFC3339),
 			})
@@ -870,7 +870,7 @@ func (svc *FileService) Copy(targetId string, sourceIds []string, userId string)
 			clones[i].SetParentID(&id)
 		}
 
-		/* Parent Id of root clone is target Id */
+		/* Parent ID of root clone is target ID */
 		if clones != nil {
 			clones[rootCloneIndex].SetParentID(&targetId)
 		}
@@ -1331,15 +1331,15 @@ func (svc *FileService) GetUserPermissions(id string, userId string) ([]*UserPer
 	}
 	res := make([]*UserPermission, 0)
 	for _, p := range permissions {
-		if p.UserId == userId {
+		if p.UserID == userId {
 			continue
 		}
-		u, err := svc.userRepo.Find(p.UserId)
+		u, err := svc.userRepo.Find(p.UserID)
 		if err != nil {
 			return nil, err
 		}
 		res = append(res, &UserPermission{
-			ID:         p.Id,
+			ID:         p.ID,
 			User:       svc.userMapper.mapUser(u),
 			Permission: p.Permission,
 		})
@@ -1374,7 +1374,7 @@ func (svc *FileService) GetGroupPermissions(id string, userId string) ([]*GroupP
 			return nil, err
 		}
 		res = append(res, &GroupPermission{
-			ID:         p.Id,
+			ID:         p.ID,
 			Group:      g,
 			Permission: p.Permission,
 		})

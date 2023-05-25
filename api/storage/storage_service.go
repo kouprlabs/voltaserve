@@ -66,7 +66,7 @@ func (svc *StorageService) Store(opts StorageOptions, userId string) (*core.File
 	}
 	snapshotId := helpers.NewId()
 	snapshot := &repo.PostgresSnapshot{
-		Id:      snapshotId,
+		ID:      snapshotId,
 		Version: latestVersion,
 	}
 	if err = svc.snapshotRepo.Save(snapshot); err != nil {

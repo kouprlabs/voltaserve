@@ -87,7 +87,7 @@ func (svc *WorkspaceService) Create(req CreateWorkspaceOptions, userId string) (
 		return nil, err
 	}
 	workspace, err := svc.workspaceRepo.Insert(repo.WorkspaceInsertOptions{
-		Id:              id,
+		ID:              id,
 		Name:            req.Name,
 		StorageCapacity: req.StorageCapacity,
 		OrganizationId:  req.OrganizationId,

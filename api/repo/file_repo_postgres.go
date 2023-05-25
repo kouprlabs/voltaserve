@@ -12,7 +12,7 @@ import (
 )
 
 type PostgresFile struct {
-	Id               string                   `json:"id"`
+	ID               string                   `json:"id"`
 	WorkspaceId      string                   `json:"workspaceId"`
 	Name             string                   `json:"name"`
 	Type             string                   `json:"type"`
@@ -41,7 +41,7 @@ func (i *PostgresFile) BeforeSave(tx *gorm.DB) (err error) {
 }
 
 func (i PostgresFile) GetID() string {
-	return i.Id
+	return i.ID
 }
 
 func (i PostgresFile) GetWorkspaceID() string {
@@ -97,7 +97,7 @@ func (i PostgresFile) GetUpdateTime() *string {
 }
 
 func (i *PostgresFile) SetID(id string) {
-	i.Id = id
+	i.ID = id
 }
 
 func (i *PostgresFile) SetParentID(parentId *string) {
@@ -149,7 +149,7 @@ func (repo *PostgresFileRepo) New() model.CoreFile {
 func (repo *PostgresFileRepo) Insert(opts FileInsertOptions) (model.CoreFile, error) {
 	id := helpers.NewId()
 	file := PostgresFile{
-		Id:          id,
+		ID:          id,
 		WorkspaceId: opts.WorkspaceId,
 		Name:        opts.Name,
 		Type:        opts.Type,
@@ -189,7 +189,7 @@ func (repo *PostgresFileRepo) find(id string) (*PostgresFile, error) {
 			return nil, errorpkg.NewInternalServerError(db.Error)
 		}
 	}
-	if len(res.Id) == 0 {
+	if len(res.ID) == 0 {
 		return nil, errorpkg.NewFileNotFoundError(db.Error)
 	}
 	return &res, nil
@@ -507,18 +507,18 @@ func (repo *PostgresFileRepo) RevokeGroupPermission(id string, groupId string) e
 func (repo *PostgresFileRepo) populateModelFields(entities []*PostgresFile) error {
 	for _, f := range entities {
 		f.UserPermissions = make([]*model.UserPermission, 0)
-		userPermissions, err := repo.permissionRepo.GetUserPermissions(f.Id)
+		userPermissions, err := repo.permissionRepo.GetUserPermissions(f.ID)
 		if err != nil {
 			return err
 		}
 		for _, p := range userPermissions {
 			f.UserPermissions = append(f.UserPermissions, &model.UserPermission{
-				UserId: p.UserId,
+				UserId: p.UserID,
 				Value:  p.Permission,
 			})
 		}
 		f.GroupPermissions = make([]*model.GroupPermission, 0)
-		groupPermissions, err := repo.permissionRepo.GetGroupPermissions(f.Id)
+		groupPermissions, err := repo.permissionRepo.GetGroupPermissions(f.ID)
 		if err != nil {
 			return err
 		}
@@ -528,7 +528,7 @@ func (repo *PostgresFileRepo) populateModelFields(entities []*PostgresFile) erro
 				Value:   p.Permission,
 			})
 		}
-		snapshots, err := repo.snapshotRepo.findAllForFile(f.Id)
+		snapshots, err := repo.snapshotRepo.findAllForFile(f.ID)
 		if err != nil {
 			return nil
 		}

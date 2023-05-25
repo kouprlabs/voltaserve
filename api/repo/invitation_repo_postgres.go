@@ -12,7 +12,7 @@ import (
 )
 
 type PostgresInvitation struct {
-	Id             string  `json:"id"`
+	ID             string  `json:"id"`
 	OrganizationId string  `json:"organizationId"`
 	OwnerId        string  `json:"ownerId"`
 	Email          string  `json:"email"`
@@ -37,7 +37,7 @@ func (o *PostgresInvitation) BeforeSave(tx *gorm.DB) (err error) {
 }
 
 func (i PostgresInvitation) GetID() string {
-	return i.Id
+	return i.ID
 }
 
 func (i PostgresInvitation) GetOrganizationID() string {
@@ -88,7 +88,7 @@ func (repo *PostgresInvitationRepo) Insert(opts InvitationInsertOptions) ([]mode
 	var res []model.CoreInvitation
 	for _, e := range opts.Emails {
 		invitation := PostgresInvitation{
-			Id:             helpers.NewId(),
+			ID:             helpers.NewId(),
 			OrganizationId: opts.OrganizationId,
 			OwnerId:        opts.UserId,
 			Email:          e,
@@ -97,7 +97,7 @@ func (repo *PostgresInvitationRepo) Insert(opts InvitationInsertOptions) ([]mode
 		if db := repo.db.Save(&invitation); db.Error != nil {
 			return nil, db.Error
 		}
-		i, err := repo.Find(invitation.Id)
+		i, err := repo.Find(invitation.ID)
 		if err != nil {
 			return nil, err
 		}
