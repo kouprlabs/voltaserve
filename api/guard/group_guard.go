@@ -25,7 +25,7 @@ func (g *GroupGuard) IsAuthorized(user model.UserModel, group model.GroupModel, 
 		}
 	}
 	for _, p := range group.GetGroupPermissions() {
-		g, err := g.groupCache.Get(p.GetGroupId())
+		g, err := g.groupCache.Get(p.GetGroupID())
 		if err != nil {
 			log.Error(err)
 			return false

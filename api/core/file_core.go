@@ -1420,7 +1420,7 @@ func (mp *FileMapper) MapFile(m model.FileModel, userId string) (*File, error) {
 		}
 	}
 	for _, p := range m.GetGroupPermissions() {
-		g, err := mp.groupCache.Get(p.GetGroupId())
+		g, err := mp.groupCache.Get(p.GetGroupID())
 		if err != nil {
 			return nil, err
 		}

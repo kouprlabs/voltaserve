@@ -24,7 +24,7 @@ func (p UserPermission) GetValue() string {
 }
 
 type GroupPermissionModel interface {
-	GetGroupId() string
+	GetGroupID() string
 	GetValue() string
 }
 
@@ -33,7 +33,7 @@ type GroupPermission struct {
 	Value   string `json:"value,omitempty"`
 }
 
-func (p GroupPermission) GetGroupId() string {
+func (p GroupPermission) GetGroupID() string {
 	return p.GroupId
 }
 func (p GroupPermission) GetValue() string {

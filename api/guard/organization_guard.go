@@ -25,7 +25,7 @@ func (g *OrganizationGuard) IsAuthorized(user model.UserModel, org model.Organiz
 		}
 	}
 	for _, p := range org.GetGroupPermissions() {
-		g, err := g.groupCache.Get(p.GetGroupId())
+		g, err := g.groupCache.Get(p.GetGroupID())
 		if err != nil {
 			log.Error(err)
 			return false

@@ -25,7 +25,7 @@ func (g *FileGuard) IsAuthorized(user model.UserModel, file model.FileModel, per
 		}
 	}
 	for _, p := range file.GetGroupPermissions() {
-		g, err := g.groupCache.Get(p.GetGroupId())
+		g, err := g.groupCache.Get(p.GetGroupID())
 		if err != nil {
 			log.Error(err)
 			return false

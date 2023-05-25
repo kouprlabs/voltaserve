@@ -395,7 +395,7 @@ func (mp *organizationMapper) mapOrganization(m model.OrganizationModel, userId 
 		}
 	}
 	for _, p := range m.GetGroupPermissions() {
-		g, err := mp.groupCache.Get(p.GetGroupId())
+		g, err := mp.groupCache.Get(p.GetGroupID())
 		if err != nil {
 			return nil, err
 		}

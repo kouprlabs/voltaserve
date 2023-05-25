@@ -25,7 +25,7 @@ func (g *WorkspaceGuard) IsAuthorized(user model.UserModel, workspace model.Work
 		}
 	}
 	for _, p := range workspace.GetGroupPermissions() {
-		g, err := g.groupCache.Get(p.GetGroupId())
+		g, err := g.groupCache.Get(p.GetGroupID())
 		if err != nil {
 			log.Error(err)
 			return false

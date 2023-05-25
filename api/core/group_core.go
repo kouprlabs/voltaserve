@@ -521,7 +521,7 @@ func (mp *groupMapper) mapGroup(m model.GroupModel, userId string) (*Group, erro
 		}
 	}
 	for _, p := range m.GetGroupPermissions() {
-		g, err := mp.groupCache.Get(p.GetGroupId())
+		g, err := mp.groupCache.Get(p.GetGroupID())
 		if err != nil {
 			return nil, err
 		}

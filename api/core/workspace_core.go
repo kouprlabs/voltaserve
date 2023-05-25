@@ -379,7 +379,7 @@ func (mp *workspaceMapper) mapWorkspace(m model.WorkspaceModel, userId string) (
 		}
 	}
 	for _, p := range m.GetGroupPermissions() {
-		g, err := mp.groupCache.Get(p.GetGroupId())
+		g, err := mp.groupCache.Get(p.GetGroupID())
 		if err != nil {
 			return nil, err
 		}
