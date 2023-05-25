@@ -40,7 +40,7 @@ func (s *PostgresSnapshot) BeforeSave(tx *gorm.DB) (err error) {
 	return nil
 }
 
-func (s PostgresSnapshot) GetId() string {
+func (s PostgresSnapshot) GetID() string {
 	return s.Id
 }
 
@@ -84,7 +84,7 @@ func (s PostgresSnapshot) GetText() *model.S3Object {
 	return &res
 }
 
-func (s PostgresSnapshot) GetOcr() *model.S3Object {
+func (s PostgresSnapshot) GetOCR() *model.S3Object {
 	if s.Ocr.String() == "" {
 		return nil
 	}
@@ -141,7 +141,7 @@ func (s *PostgresSnapshot) SetText(m *model.S3Object) {
 	}
 }
 
-func (s *PostgresSnapshot) SetOcr(m *model.S3Object) {
+func (s *PostgresSnapshot) SetOCR(m *model.S3Object) {
 	b, err := json.Marshal(m)
 	if err != nil {
 		log.Fatal(err)
@@ -175,7 +175,7 @@ func (s PostgresSnapshot) HasText() bool {
 	return s.Text != nil
 }
 
-func (s PostgresSnapshot) HasOcr() bool {
+func (s PostgresSnapshot) HasOCR() bool {
 	return s.Ocr != nil
 }
 

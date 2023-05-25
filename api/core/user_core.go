@@ -21,7 +21,7 @@ func newUserMapper() *userMapper {
 
 func (mp *userMapper) mapUser(user model.UserModel) *User {
 	return &User{
-		Id:         user.GetId(),
+		Id:         user.GetID(),
 		FullName:   user.GetFullName(),
 		Picture:    user.GetPicture(),
 		Email:      user.GetEmail(),

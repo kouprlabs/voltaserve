@@ -97,34 +97,34 @@ func (svc *WorkspaceService) Create(req CreateWorkspaceOptions, userId string) (
 	if err != nil {
 		return nil, err
 	}
-	if err := svc.workspaceRepo.GrantUserPermission(workspace.GetId(), userId, model.PermissionOwner); err != nil {
+	if err := svc.workspaceRepo.GrantUserPermission(workspace.GetID(), userId, model.PermissionOwner); err != nil {
 		return nil, err
 	}
-	workspace, err = svc.workspaceRepo.FindByID(workspace.GetId())
+	workspace, err = svc.workspaceRepo.FindByID(workspace.GetID())
 	if err != nil {
 		return nil, err
 	}
 	root, err := svc.fileRepo.Insert(repo.FileInsertOptions{
 		Name:        "root",
-		WorkspaceId: workspace.GetId(),
+		WorkspaceId: workspace.GetID(),
 		Type:        model.FileTypeFolder,
 	})
 	if err != nil {
 		return nil, err
 	}
-	if err := svc.fileRepo.GrantUserPermission(root.GetId(), userId, model.PermissionOwner); err != nil {
+	if err := svc.fileRepo.GrantUserPermission(root.GetID(), userId, model.PermissionOwner); err != nil {
 		return nil, err
 	}
-	if err = svc.workspaceRepo.UpdateRootID(workspace.GetId(), root.GetId()); err != nil {
+	if err = svc.workspaceRepo.UpdateRootID(workspace.GetID(), root.GetID()); err != nil {
 		return nil, err
 	}
-	if workspace, err = svc.workspaceRepo.FindByID(workspace.GetId()); err != nil {
+	if workspace, err = svc.workspaceRepo.FindByID(workspace.GetID()); err != nil {
 		return nil, err
 	}
 	if err = svc.workspaceSearch.Index([]model.WorkspaceModel{workspace}); err != nil {
 		return nil, err
 	}
-	if root, err = svc.fileRepo.Find(root.GetId()); err != nil {
+	if root, err = svc.fileRepo.Find(root.GetID()); err != nil {
 		return nil, err
 	}
 	if err := svc.fileCache.Set(root); err != nil {
@@ -267,7 +267,7 @@ func (svc *WorkspaceService) UpdateStorageCapacity(id string, storageCapacity in
 	if err = svc.workspaceGuard.Authorize(user, workspace, model.PermissionEditor); err != nil {
 		return nil, err
 	}
-	size, err := svc.fileRepo.GetSize(workspace.GetRootId())
+	size, err := svc.fileRepo.GetSize(workspace.GetRootID())
 	if err != nil {
 		return nil, err
 	}
@@ -308,7 +308,7 @@ func (svc *WorkspaceService) Delete(id string, userId string) error {
 	if err = svc.workspaceRepo.Delete(id); err != nil {
 		return err
 	}
-	if err = svc.workspaceSearch.Delete([]string{workspace.GetId()}); err != nil {
+	if err = svc.workspaceSearch.Delete([]string{workspace.GetID()}); err != nil {
 		return err
 	}
 	if err = svc.workspaceCache.Delete(id); err != nil {
@@ -325,11 +325,11 @@ func (svc *WorkspaceService) HasEnoughSpaceForByteSize(id string, byteSize int64
 	if err != nil {
 		return false, err
 	}
-	root, err := svc.fileRepo.Find(workspace.GetRootId())
+	root, err := svc.fileRepo.Find(workspace.GetRootID())
 	if err != nil {
 		return false, err
 	}
-	usage, err := svc.fileRepo.GetSize(root.GetId())
+	usage, err := svc.fileRepo.GetSize(root.GetID())
 	if err != nil {
 		return false, err
 	}
@@ -355,7 +355,7 @@ func newWorkspaceMapper() *workspaceMapper {
 }
 
 func (mp *workspaceMapper) mapWorkspace(m model.WorkspaceModel, userId string) (*Workspace, error) {
-	org, err := mp.orgCache.Get(m.GetOrganizationId())
+	org, err := mp.orgCache.Get(m.GetOrganizationID())
 	if err != nil {
 		return nil, err
 	}
@@ -364,9 +364,9 @@ func (mp *workspaceMapper) mapWorkspace(m model.WorkspaceModel, userId string) (
 		return nil, err
 	}
 	res := &Workspace{
-		Id:              m.GetId(),
+		Id:              m.GetID(),
 		Name:            m.GetName(),
-		RootId:          m.GetRootId(),
+		RootId:          m.GetRootID(),
 		StorageCapacity: m.GetStorageCapacity(),
 		Organization:    *v,
 		CreateTime:      m.GetCreateTime(),
@@ -374,7 +374,7 @@ func (mp *workspaceMapper) mapWorkspace(m model.WorkspaceModel, userId string) (
 	}
 	res.Permission = ""
 	for _, p := range m.GetUserPermissions() {
-		if p.GetUserId() == userId && model.GetPermissionWeight(p.GetValue()) > model.GetPermissionWeight(res.Permission) {
+		if p.GetUserID() == userId && model.GetPermissionWeight(p.GetValue()) > model.GetPermissionWeight(res.Permission) {
 			res.Permission = p.GetValue()
 		}
 	}

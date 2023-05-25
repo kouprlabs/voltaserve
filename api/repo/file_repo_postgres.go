@@ -40,7 +40,7 @@ func (i *PostgresFile) BeforeSave(tx *gorm.DB) (err error) {
 	return nil
 }
 
-func (i PostgresFile) GetId() string {
+func (i PostgresFile) GetID() string {
 	return i.Id
 }
 
@@ -56,7 +56,7 @@ func (i PostgresFile) GetType() string {
 	return i.Type
 }
 
-func (i PostgresFile) GetParentId() *string {
+func (i PostgresFile) GetParentID() *string {
 	return i.ParentId
 }
 
@@ -96,15 +96,15 @@ func (i PostgresFile) GetUpdateTime() *string {
 	return i.UpdateTime
 }
 
-func (i *PostgresFile) SetId(id string) {
+func (i *PostgresFile) SetID(id string) {
 	i.Id = id
 }
 
-func (i *PostgresFile) SetParentId(parentId *string) {
+func (i *PostgresFile) SetParentID(parentId *string) {
 	i.ParentId = parentId
 }
 
-func (i *PostgresFile) SetWorkspaceId(workspaceId string) {
+func (i *PostgresFile) SetWorkspaceID(workspaceId string) {
 	i.WorkspaceId = workspaceId
 }
 
@@ -411,7 +411,7 @@ func (repo *PostgresFileRepo) GrantUserPermission(id string, userId string, perm
 	for _, f := range path {
 		db := repo.db.Exec("INSERT INTO userpermission (id, user_id, resource_id, permission) "+
 			"VALUES (?, ?, ?, 'viewer') ON CONFLICT DO NOTHING",
-			helpers.NewId(), userId, f.GetId())
+			helpers.NewId(), userId, f.GetID())
 		if db.Error != nil {
 			return db.Error
 		}
@@ -425,7 +425,7 @@ func (repo *PostgresFileRepo) GrantUserPermission(id string, userId string, perm
 	for _, f := range tree {
 		db := repo.db.Exec("INSERT INTO userpermission (id, user_id, resource_id, permission) "+
 			"VALUES (?, ?, ?, ?) ON CONFLICT (user_id, resource_id) DO UPDATE SET permission = ?",
-			helpers.NewId(), userId, f.GetId(), permission, permission)
+			helpers.NewId(), userId, f.GetID(), permission, permission)
 		if db.Error != nil {
 			return db.Error
 		}
@@ -440,7 +440,7 @@ func (repo *PostgresFileRepo) RevokeUserPermission(id string, userId string) err
 		return err
 	}
 	for _, f := range tree {
-		db := repo.db.Exec("DELETE FROM userpermission WHERE user_id = ? AND resource_id = ?", userId, f.GetId())
+		db := repo.db.Exec("DELETE FROM userpermission WHERE user_id = ? AND resource_id = ?", userId, f.GetID())
 		if db.Error != nil {
 			return db.Error
 		}
@@ -467,7 +467,7 @@ func (repo *PostgresFileRepo) GrantGroupPermission(id string, groupId string, pe
 	for _, f := range path {
 		db := repo.db.Exec("INSERT INTO grouppermission (id, group_id, resource_id, permission) "+
 			"VALUES (?, ?, ?, 'viewer') ON CONFLICT DO NOTHING",
-			helpers.NewId(), groupId, f.GetId())
+			helpers.NewId(), groupId, f.GetID())
 		if db.Error != nil {
 			return db.Error
 		}
@@ -481,7 +481,7 @@ func (repo *PostgresFileRepo) GrantGroupPermission(id string, groupId string, pe
 	for _, f := range tree {
 		db := repo.db.Exec("INSERT INTO grouppermission (id, group_id, resource_id, permission) "+
 			"VALUES (?, ?, ?, ?) ON CONFLICT (group_id, resource_id) DO UPDATE SET permission = ?",
-			helpers.NewId(), groupId, f.GetId(), permission, permission)
+			helpers.NewId(), groupId, f.GetID(), permission, permission)
 		if db.Error != nil {
 			return db.Error
 		}
@@ -496,7 +496,7 @@ func (repo *PostgresFileRepo) RevokeGroupPermission(id string, groupId string) e
 		return err
 	}
 	for _, f := range tree {
-		db := repo.db.Exec("DELETE FROM grouppermission WHERE group_id = ? AND resource_id = ?", groupId, f.GetId())
+		db := repo.db.Exec("DELETE FROM grouppermission WHERE group_id = ? AND resource_id = ?", groupId, f.GetID())
 		if db.Error != nil {
 			return db.Error
 		}

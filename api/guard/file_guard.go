@@ -20,7 +20,7 @@ func NewFileGuard() *FileGuard {
 
 func (g *FileGuard) IsAuthorized(user model.UserModel, file model.FileModel, permission string) bool {
 	for _, p := range file.GetUserPermissions() {
-		if p.GetUserId() == user.GetId() && model.IsEquivalentPermission(p.GetValue(), permission) {
+		if p.GetUserID() == user.GetID() && model.IsEquivalentPermission(p.GetValue(), permission) {
 			return true
 		}
 	}
@@ -31,7 +31,7 @@ func (g *FileGuard) IsAuthorized(user model.UserModel, file model.FileModel, per
 			return false
 		}
 		for _, u := range g.GetUsers() {
-			if u == user.GetId() && model.IsEquivalentPermission(p.GetValue(), permission) {
+			if u == user.GetID() && model.IsEquivalentPermission(p.GetValue(), permission) {
 				return true
 			}
 		}

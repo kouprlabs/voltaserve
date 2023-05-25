@@ -87,10 +87,10 @@ func (svc *OrganizationService) Create(req OrganizationCreateOptions, userId str
 	if err != nil {
 		return nil, err
 	}
-	if err := svc.orgRepo.GrantUserPermission(org.GetId(), userId, model.PermissionOwner); err != nil {
+	if err := svc.orgRepo.GrantUserPermission(org.GetID(), userId, model.PermissionOwner); err != nil {
 		return nil, err
 	}
-	org, err = svc.orgRepo.Find(org.GetId())
+	org, err = svc.orgRepo.Find(org.GetID())
 	if err != nil {
 		return nil, err
 	}
@@ -181,7 +181,7 @@ func (svc *OrganizationService) SearchMembers(id string, query string, userId st
 	var members []model.UserModel
 	for _, m := range orgMembers {
 		for _, u := range users {
-			if u.GetId() == m.GetId() {
+			if u.GetID() == m.GetID() {
 				members = append(members, m)
 			}
 		}
@@ -264,10 +264,10 @@ func (svc *OrganizationService) Delete(id string, userId string) error {
 	if err := svc.orgRepo.Delete(id); err != nil {
 		return err
 	}
-	if err := svc.orgCache.Delete(org.GetId()); err != nil {
+	if err := svc.orgCache.Delete(org.GetID()); err != nil {
 		return err
 	}
-	if err := svc.orgSearch.Delete([]string{org.GetId()}); err != nil {
+	if err := svc.orgSearch.Delete([]string{org.GetID()}); err != nil {
 		return err
 	}
 	return nil
@@ -288,38 +288,38 @@ func (svc *OrganizationService) RemoveMember(id string, memberId string, userId 
 	}
 
 	/* Make sure member is not the last remaining owner of the organization */
-	ownerCount, err := svc.orgRepo.GetOwnerCount(org.GetId())
+	ownerCount, err := svc.orgRepo.GetOwnerCount(org.GetID())
 	if err != nil {
 		return err
 	}
 	if svc.orgGuard.IsAuthorized(member, org, model.PermissionOwner) && ownerCount == 1 {
-		return errorpkg.NewCannotRemoveLastRemainingOwnerOfOrganizationError(org.GetId())
+		return errorpkg.NewCannotRemoveLastRemainingOwnerOfOrganizationError(org.GetID())
 	}
 
-	if userId != member.GetId() {
+	if userId != member.GetID() {
 		if err := svc.orgGuard.Authorize(user, org, model.PermissionEditor); err != nil {
 			return err
 		}
 	}
 
 	/* Remove member from all groups belonging to this organization */
-	groupsIds, err := svc.groupRepo.GetIDsForOrganization(org.GetId())
+	groupsIds, err := svc.groupRepo.GetIDsForOrganization(org.GetID())
 	if err != nil {
 		return err
 	}
 	for _, groupId := range groupsIds {
-		if err := svc.groupService.RemoveMemberUnauthorized(groupId, member.GetId()); err != nil {
+		if err := svc.groupService.RemoveMemberUnauthorized(groupId, member.GetID()); err != nil {
 			log.Error(err)
 		}
 	}
 
-	if err := svc.orgRepo.RevokeUserPermission(id, member.GetId()); err != nil {
+	if err := svc.orgRepo.RevokeUserPermission(id, member.GetID()); err != nil {
 		return err
 	}
-	if err := svc.orgRepo.RemoveMember(id, member.GetId()); err != nil {
+	if err := svc.orgRepo.RemoveMember(id, member.GetID()); err != nil {
 		return err
 	}
-	if _, err := svc.orgCache.Refresh(org.GetId()); err != nil {
+	if _, err := svc.orgCache.Refresh(org.GetID()); err != nil {
 		return err
 	}
 	return nil
@@ -383,14 +383,14 @@ func newOrganizationMapper() *organizationMapper {
 
 func (mp *organizationMapper) mapOrganization(m model.OrganizationModel, userId string) (*Organization, error) {
 	res := &Organization{
-		Id:         m.GetId(),
+		Id:         m.GetID(),
 		Name:       m.GetName(),
 		CreateTime: m.GetCreateTime(),
 		UpdateTime: m.GetUpdateTime(),
 	}
 	res.Permission = ""
 	for _, p := range m.GetUserPermissions() {
-		if p.GetUserId() == userId && model.GetPermissionWeight(p.GetValue()) > model.GetPermissionWeight(res.Permission) {
+		if p.GetUserID() == userId && model.GetPermissionWeight(p.GetValue()) > model.GetPermissionWeight(res.Permission) {
 			res.Permission = p.GetValue()
 		}
 	}

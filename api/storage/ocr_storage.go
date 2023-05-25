@@ -122,12 +122,12 @@ func (svc *ocrStorage) sendToPDFStorage(snapshot model.SnapshotModel, opts ocrOp
 		return err
 	}
 	ocrSize := stat.Size()
-	snapshot.SetOcr(&model.S3Object{
+	snapshot.SetOCR(&model.S3Object{
 		Bucket: workspace.GetBucket(),
 		Key:    filepath.FromSlash(opts.FileId + "/" + opts.SnapshotId + "/ocr.pdf"),
 		Size:   ocrSize,
 	})
-	if err := svc.minio.PutFile(snapshot.GetOcr().Key, outputPath, DetectMimeFromFile(outputPath), workspace.GetBucket()); err != nil {
+	if err := svc.minio.PutFile(snapshot.GetOCR().Key, outputPath, DetectMimeFromFile(outputPath), workspace.GetBucket()); err != nil {
 		return err
 	}
 	if err := svc.metadataUpdater.update(snapshot, opts.FileId); err != nil {
@@ -137,7 +137,7 @@ func (svc *ocrStorage) sendToPDFStorage(snapshot model.SnapshotModel, opts ocrOp
 		FileId:     opts.FileId,
 		SnapshotId: opts.SnapshotId,
 		S3Bucket:   opts.S3Bucket,
-		S3Key:      snapshot.GetOcr().Key,
+		S3Key:      snapshot.GetOCR().Key,
 	}); err != nil {
 		return err
 	}

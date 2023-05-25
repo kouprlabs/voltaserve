@@ -1,7 +1,7 @@
 package model
 
 type UserModel interface {
-	GetId() string
+	GetID() string
 	GetFullName() string
 	GetUsername() string
 	GetEmail() string

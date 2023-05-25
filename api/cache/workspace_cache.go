@@ -26,7 +26,7 @@ func (c *WorkspaceCache) Set(workspace model.WorkspaceModel) error {
 	if err != nil {
 		return err
 	}
-	err = c.redis.Set(c.keyPrefix+workspace.GetId(), string(b))
+	err = c.redis.Set(c.keyPrefix+workspace.GetID(), string(b))
 	if err != nil {
 		return err
 	}

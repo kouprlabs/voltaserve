@@ -26,7 +26,7 @@ func (c *OrganizationCache) Set(organization model.OrganizationModel) error {
 	if err != nil {
 		return err
 	}
-	err = c.redis.Set(c.keyPrefix+organization.GetId(), string(b))
+	err = c.redis.Set(c.keyPrefix+organization.GetID(), string(b))
 	if err != nil {
 		return err
 	}

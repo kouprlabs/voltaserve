@@ -149,7 +149,7 @@ func (svc *StorageService) Store(opts StorageOptions, userId string) (*core.File
 			return nil, err
 		}
 	}
-	file, err = svc.fileCache.Refresh(file.GetId())
+	file, err = svc.fileCache.Refresh(file.GetID())
 	if err != nil {
 		return nil, err
 	}

@@ -39,7 +39,7 @@ func (w *PostgresWorkspace) BeforeSave(tx *gorm.DB) (err error) {
 	return nil
 }
 
-func (w PostgresWorkspace) GetId() string {
+func (w PostgresWorkspace) GetID() string {
 	return w.Id
 }
 
@@ -51,11 +51,11 @@ func (w PostgresWorkspace) GetStorageCapacity() int64 {
 	return w.StorageCapacity
 }
 
-func (w PostgresWorkspace) GetRootId() string {
+func (w PostgresWorkspace) GetRootID() string {
 	return w.RootId
 }
 
-func (w PostgresWorkspace) GetOrganizationId() string {
+func (w PostgresWorkspace) GetOrganizationID() string {
 	return w.OrganizationId
 }
 

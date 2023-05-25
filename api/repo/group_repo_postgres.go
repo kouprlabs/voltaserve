@@ -37,7 +37,7 @@ func (g *PostgresGroup) BeforeSave(tx *gorm.DB) (err error) {
 	return nil
 }
 
-func (g PostgresGroup) GetId() string {
+func (g PostgresGroup) GetID() string {
 	return g.Id
 }
 
@@ -45,7 +45,7 @@ func (g PostgresGroup) GetName() string {
 	return g.Name
 }
 
-func (g PostgresGroup) GetOrganizationId() string {
+func (g PostgresGroup) GetOrganizationID() string {
 	return g.OrganizationId
 }
 
@@ -307,7 +307,7 @@ func (repo *PostgresGroupRepo) populateModelFields(groups []*PostgresGroup) erro
 		}
 		g.Members = make([]string, 0)
 		for _, u := range members {
-			g.Members = append(g.Members, u.GetId())
+			g.Members = append(g.Members, u.GetID())
 		}
 	}
 	return nil

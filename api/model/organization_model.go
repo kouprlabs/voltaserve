@@ -1,7 +1,7 @@
 package model
 
 type OrganizationModel interface {
-	GetId() string
+	GetID() string
 	GetName() string
 	GetUserPermissions() []UserPermissionModel
 	GetGroupPermissions() []GroupPermissionModel

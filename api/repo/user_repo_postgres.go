@@ -29,7 +29,7 @@ func (PostgresUser) TableName() string {
 	return "user"
 }
 
-func (u PostgresUser) GetId() string {
+func (u PostgresUser) GetID() string {
 	return u.Id
 }
 

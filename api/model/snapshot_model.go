@@ -1,24 +1,24 @@
 package model
 
 type SnapshotModel interface {
-	GetId() string
+	GetID() string
 	GetVersion() int64
 	GetOriginal() *S3Object
 	GetPreview() *S3Object
 	GetText() *S3Object
-	GetOcr() *S3Object
+	GetOCR() *S3Object
 	GetThumbnail() *Thumbnail
 	HasOriginal() bool
 	HasPreview() bool
 	HasText() bool
-	HasOcr() bool
+	HasOCR() bool
 	HasThumbnail() bool
 	GetCreateTime() string
 	GetUpdateTime() *string
 	SetOriginal(*S3Object)
 	SetPreview(*S3Object)
 	SetText(*S3Object)
-	SetOcr(*S3Object)
+	SetOCR(*S3Object)
 	SetThumbnail(*Thumbnail)
 }
 

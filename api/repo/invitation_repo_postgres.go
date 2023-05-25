@@ -36,15 +36,15 @@ func (o *PostgresInvitation) BeforeSave(tx *gorm.DB) (err error) {
 	return nil
 }
 
-func (i PostgresInvitation) GetId() string {
+func (i PostgresInvitation) GetID() string {
 	return i.Id
 }
 
-func (i PostgresInvitation) GetOrganizationId() string {
+func (i PostgresInvitation) GetOrganizationID() string {
 	return i.OrganizationId
 }
 
-func (i PostgresInvitation) GetOwnerId() string {
+func (i PostgresInvitation) GetOwnerID() string {
 	return i.OwnerId
 }
 

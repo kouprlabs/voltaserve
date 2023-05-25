@@ -113,10 +113,10 @@ func (svc *GroupService) Create(req GroupCreateOptions, userId string) (*Group, 
 	if err != nil {
 		return nil, err
 	}
-	if err := svc.groupRepo.GrantUserPermission(group.GetId(), userId, model.PermissionOwner); err != nil {
+	if err := svc.groupRepo.GrantUserPermission(group.GetID(), userId, model.PermissionOwner); err != nil {
 		return nil, err
 	}
-	group, err = svc.groupRepo.Find(group.GetId())
+	group, err = svc.groupRepo.Find(group.GetID())
 	if err != nil {
 		return nil, err
 	}
@@ -278,10 +278,10 @@ func (svc *GroupService) Delete(id string, userId string) error {
 	if err := svc.groupRepo.Delete(id); err != nil {
 		return err
 	}
-	if err := svc.groupSearch.Delete([]string{group.GetId()}); err != nil {
+	if err := svc.groupSearch.Delete([]string{group.GetID()}); err != nil {
 		return err
 	}
-	if err := svc.refreshCacheForOrganization(group.GetOrganizationId()); err != nil {
+	if err := svc.refreshCacheForOrganization(group.GetOrganizationID()); err != nil {
 		return err
 	}
 	return nil
@@ -305,13 +305,13 @@ func (svc *GroupService) AddMember(id string, memberId string, userId string) er
 	if err := svc.groupRepo.AddUser(id, memberId); err != nil {
 		return err
 	}
-	if err := svc.groupRepo.GrantUserPermission(group.GetId(), memberId, model.PermissionViewer); err != nil {
+	if err := svc.groupRepo.GrantUserPermission(group.GetID(), memberId, model.PermissionViewer); err != nil {
 		return err
 	}
-	if _, err := svc.groupCache.Refresh(group.GetId()); err != nil {
+	if _, err := svc.groupCache.Refresh(group.GetID()); err != nil {
 		return err
 	}
-	if err := svc.refreshCacheForOrganization(group.GetOrganizationId()); err != nil {
+	if err := svc.refreshCacheForOrganization(group.GetOrganizationID()); err != nil {
 		return err
 	}
 	return nil
@@ -349,10 +349,10 @@ func (svc *GroupService) RemoveMemberUnauthorized(id string, memberId string) er
 	if err := svc.groupRepo.RevokeUserPermission(id, memberId); err != nil {
 		return err
 	}
-	if _, err := svc.groupCache.Refresh(group.GetId()); err != nil {
+	if _, err := svc.groupCache.Refresh(group.GetID()); err != nil {
 		return err
 	}
-	if err := svc.refreshCacheForOrganization(group.GetOrganizationId()); err != nil {
+	if err := svc.refreshCacheForOrganization(group.GetOrganizationID()); err != nil {
 		return err
 	}
 	return nil
@@ -436,7 +436,7 @@ func (svc *GroupService) SearchMembers(id string, query string, userId string) (
 	var members []model.UserModel
 	for _, m := range groupMembers {
 		for _, u := range users {
-			if u.GetId() == m.GetId() {
+			if u.GetID() == m.GetID() {
 				members = append(members, m)
 			}
 		}
@@ -460,7 +460,7 @@ func (svc *GroupService) GetAvailableUsers(id string, userId string) ([]*User, e
 	if err := svc.groupGuard.Authorize(user, group, model.PermissionViewer); err != nil {
 		return nil, err
 	}
-	orgMembers, err := svc.orgRepo.GetMembers(group.GetOrganizationId())
+	orgMembers, err := svc.orgRepo.GetMembers(group.GetOrganizationID())
 	if err != nil {
 		return nil, err
 	}
@@ -472,7 +472,7 @@ func (svc *GroupService) GetAvailableUsers(id string, userId string) ([]*User, e
 	for _, om := range orgMembers {
 		found := false
 		for _, tm := range groupMembers {
-			if om.GetId() == tm.GetId() {
+			if om.GetID() == tm.GetID() {
 				found = true
 				break
 			}
@@ -499,7 +499,7 @@ func newGroupMapper() *groupMapper {
 }
 
 func (mp *groupMapper) mapGroup(m model.GroupModel, userId string) (*Group, error) {
-	org, err := mp.orgCache.Get(m.GetOrganizationId())
+	org, err := mp.orgCache.Get(m.GetOrganizationID())
 	if err != nil {
 		return nil, err
 	}
@@ -508,7 +508,7 @@ func (mp *groupMapper) mapGroup(m model.GroupModel, userId string) (*Group, erro
 		return nil, err
 	}
 	res := &Group{
-		Id:           m.GetId(),
+		Id:           m.GetID(),
 		Name:         m.GetName(),
 		Organization: *v,
 		CreateTime:   m.GetCreateTime(),
@@ -516,7 +516,7 @@ func (mp *groupMapper) mapGroup(m model.GroupModel, userId string) (*Group, erro
 	}
 	res.Permission = ""
 	for _, p := range m.GetUserPermissions() {
-		if p.GetUserId() == userId && model.GetPermissionWeight(p.GetValue()) > model.GetPermissionWeight(res.Permission) {
+		if p.GetUserID() == userId && model.GetPermissionWeight(p.GetValue()) > model.GetPermissionWeight(res.Permission) {
 			res.Permission = p.GetValue()
 		}
 	}

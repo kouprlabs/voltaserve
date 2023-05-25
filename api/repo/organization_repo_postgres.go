@@ -36,7 +36,7 @@ func (o *OrganizationEntity) BeforeSave(tx *gorm.DB) (err error) {
 	return nil
 }
 
-func (o OrganizationEntity) GetId() string {
+func (o OrganizationEntity) GetID() string {
 	return o.Id
 }
 
@@ -285,7 +285,7 @@ func (repo *PostgresOrganizationRepo) populateModelFields(organizations []*Organ
 		}
 		o.Members = make([]string, 0)
 		for _, u := range members {
-			o.Members = append(o.Members, u.GetId())
+			o.Members = append(o.Members, u.GetID())
 		}
 	}
 	return nil

@@ -7,7 +7,7 @@ const (
 )
 
 type UserPermissionModel interface {
-	GetUserId() string
+	GetUserID() string
 	GetValue() string
 }
 
@@ -16,7 +16,7 @@ type UserPermission struct {
 	Value  string `json:"value,omitempty"`
 }
 
-func (p UserPermission) GetUserId() string {
+func (p UserPermission) GetUserID() string {
 	return p.UserId
 }
 func (p UserPermission) GetValue() string {

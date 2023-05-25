@@ -64,7 +64,7 @@ func (svc *pdfStorage) store(opts pdfStorageOptions) error {
 			return err
 		}
 	} else {
-		if snapshot.HasOcr() {
+		if snapshot.HasOCR() {
 			if err := svc.deleteOCRData(snapshot, opts); err != nil {
 				return err
 			}
@@ -153,10 +153,10 @@ func (svc *pdfStorage) extractText(inputPath string) (string, int64, error) {
 }
 
 func (svc *pdfStorage) deleteOCRData(snapshot model.SnapshotModel, opts pdfStorageOptions) error {
-	if err := svc.minio.RemoveObject(snapshot.GetOcr().Key, snapshot.GetOcr().Bucket); err != nil {
+	if err := svc.minio.RemoveObject(snapshot.GetOCR().Key, snapshot.GetOCR().Bucket); err != nil {
 		return err
 	}
-	snapshot.SetOcr(nil)
+	snapshot.SetOCR(nil)
 	if err := svc.metadataUpdater.update(snapshot, opts.FileId); err != nil {
 		return err
 	}

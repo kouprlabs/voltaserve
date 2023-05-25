@@ -60,11 +60,11 @@ func (svc *StorageService) GetAccountUsage(userId string) (*StorageUsage, error)
 	var maxBytes int64 = 0
 	var b int64 = 0
 	for _, w := range workspaces {
-		root, err := svc.fileCache.Get(w.GetRootId())
+		root, err := svc.fileCache.Get(w.GetRootID())
 		if err != nil {
 			return nil, err
 		}
-		size, err := svc.fileRepo.GetSize(root.GetId())
+		size, err := svc.fileRepo.GetSize(root.GetID())
 		if err != nil {
 			return nil, err
 		}
@@ -86,14 +86,14 @@ func (svc *StorageService) GetWorkspaceUsage(workspaceId string, userId string) 
 	if err = svc.workspaceGuard.Authorize(user, workspace, model.PermissionViewer); err != nil {
 		return nil, err
 	}
-	root, err := svc.fileCache.Get(workspace.GetRootId())
+	root, err := svc.fileCache.Get(workspace.GetRootID())
 	if err != nil {
 		return nil, err
 	}
 	if err = svc.fileGuard.Authorize(user, root, model.PermissionViewer); err != nil {
 		return nil, err
 	}
-	size, err := svc.fileRepo.GetSize(root.GetId())
+	size, err := svc.fileRepo.GetSize(root.GetID())
 	if err != nil {
 		return nil, err
 	}
@@ -112,7 +112,7 @@ func (svc *StorageService) GetFileUsage(fileId string, userId string) (*StorageU
 	if err = svc.fileGuard.Authorize(user, file, model.PermissionViewer); err != nil {
 		return nil, err
 	}
-	size, err := svc.fileRepo.GetSize(file.GetId())
+	size, err := svc.fileRepo.GetSize(file.GetID())
 	if err != nil {
 		return nil, err
 	}

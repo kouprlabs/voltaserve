@@ -20,7 +20,7 @@ func NewGroupGuard() *GroupGuard {
 
 func (g *GroupGuard) IsAuthorized(user model.UserModel, group model.GroupModel, permission string) bool {
 	for _, p := range group.GetUserPermissions() {
-		if p.GetUserId() == user.GetId() && model.IsEquivalentPermission(p.GetValue(), permission) {
+		if p.GetUserID() == user.GetID() && model.IsEquivalentPermission(p.GetValue(), permission) {
 			return true
 		}
 	}
@@ -31,7 +31,7 @@ func (g *GroupGuard) IsAuthorized(user model.UserModel, group model.GroupModel, 
 			return false
 		}
 		for _, u := range g.GetUsers() {
-			if u == user.GetId() && model.IsEquivalentPermission(p.GetValue(), permission) {
+			if u == user.GetID() && model.IsEquivalentPermission(p.GetValue(), permission) {
 				return true
 			}
 		}

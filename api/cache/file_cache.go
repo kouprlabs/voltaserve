@@ -26,7 +26,7 @@ func (c *FileCache) Set(file model.FileModel) error {
 	if err != nil {
 		return err
 	}
-	err = c.redis.Set(c.keyPrefix+file.GetId(), string(b))
+	err = c.redis.Set(c.keyPrefix+file.GetID(), string(b))
 	if err != nil {
 		return err
 	}

@@ -1,9 +1,9 @@
 package model
 
 type GroupModel interface {
-	GetId() string
+	GetID() string
 	GetName() string
-	GetOrganizationId() string
+	GetOrganizationID() string
 	GetUserPermissions() []UserPermissionModel
 	GetGroupPermissions() []GroupPermissionModel
 	GetUsers() []string

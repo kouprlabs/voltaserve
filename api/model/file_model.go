@@ -6,20 +6,20 @@ const (
 )
 
 type FileModel interface {
-	GetId() string
+	GetID() string
 	GetWorkspaceId() string
 	GetName() string
 	GetType() string
-	GetParentId() *string
+	GetParentID() *string
 	GetCreateTime() string
 	GetUpdateTime() *string
 	GetSnapshots() []SnapshotModel
 	GetUserPermissions() []UserPermissionModel
 	GetGroupPermissions() []GroupPermissionModel
 	GetText() *string
-	SetId(string)
-	SetParentId(*string)
-	SetWorkspaceId(string)
+	SetID(string)
+	SetParentID(*string)
+	SetWorkspaceID(string)
 	SetType(string)
 	SetName(string)
 	SetText(*string)

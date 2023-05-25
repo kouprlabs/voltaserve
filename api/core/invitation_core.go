@@ -139,7 +139,7 @@ func (svc *InvitationService) GetOutgoing(id string, userId string) ([]*Invitati
 	if err != nil {
 		return nil, err
 	}
-	invitations, err := svc.invitationRepo.GetOutgoing(id, user.GetId())
+	invitations, err := svc.invitationRepo.GetOutgoing(id, user.GetID())
 	if err != nil {
 		return nil, err
 	}
@@ -165,7 +165,7 @@ func (svc *InvitationService) Accept(id string, userId string) error {
 	if user.GetEmail() != invitation.GetEmail() {
 		return errorpkg.NewUserNotAllowedToAcceptInvitationError(user, invitation)
 	}
-	org, err := svc.orgCache.Get(invitation.GetOrganizationId())
+	org, err := svc.orgCache.Get(invitation.GetOrganizationID())
 	if err != nil {
 		return err
 	}
@@ -178,13 +178,13 @@ func (svc *InvitationService) Accept(id string, userId string) error {
 	if err := svc.invitationRepo.Save(invitation); err != nil {
 		return err
 	}
-	if err := svc.orgRepo.AddUser(invitation.GetOrganizationId(), userId); err != nil {
+	if err := svc.orgRepo.AddUser(invitation.GetOrganizationID(), userId); err != nil {
 		return err
 	}
-	if err := svc.orgRepo.GrantUserPermission(invitation.GetOrganizationId(), userId, model.PermissionViewer); err != nil {
+	if err := svc.orgRepo.GrantUserPermission(invitation.GetOrganizationID(), userId, model.PermissionViewer); err != nil {
 		return err
 	}
-	if _, err := svc.orgCache.Refresh(invitation.GetOrganizationId()); err != nil {
+	if _, err := svc.orgCache.Refresh(invitation.GetOrganizationID()); err != nil {
 		return err
 	}
 	return nil
@@ -224,7 +224,7 @@ func (svc *InvitationService) Resend(id string, userId string) error {
 	if invitation.GetStatus() != model.InvitationStatusPending {
 		return errorpkg.NewCannotResendNonPendingInvitationError(invitation)
 	}
-	org, err := svc.orgCache.Get(invitation.GetOrganizationId())
+	org, err := svc.orgCache.Get(invitation.GetOrganizationID())
 	if err != nil {
 		return err
 	}
@@ -251,14 +251,14 @@ func (svc *InvitationService) Delete(id string, userId string) error {
 	if err != nil {
 		return err
 	}
-	if userId != invitation.GetOwnerId() {
+	if userId != invitation.GetOwnerID() {
 		user, err := svc.userRepo.Find(userId)
 		if err != nil {
 			return err
 		}
 		return errorpkg.NewUserNotAllowedToDeleteInvitationError(user, invitation)
 	}
-	if err := svc.invitationRepo.Delete(invitation.GetId()); err != nil {
+	if err := svc.invitationRepo.Delete(invitation.GetID()); err != nil {
 		return err
 	}
 	return nil
@@ -281,11 +281,11 @@ func newInvitationMapper() *invitationMapper {
 }
 
 func (mp *invitationMapper) mapInvitation(m model.InvitationModel, userId string) (*Invitation, error) {
-	owner, err := mp.userRepo.Find(m.GetOwnerId())
+	owner, err := mp.userRepo.Find(m.GetOwnerID())
 	if err != nil {
 		return nil, err
 	}
-	org, err := mp.orgCache.Get(m.GetOrganizationId())
+	org, err := mp.orgCache.Get(m.GetOrganizationID())
 	if err != nil {
 		return nil, err
 	}
@@ -294,7 +294,7 @@ func (mp *invitationMapper) mapInvitation(m model.InvitationModel, userId string
 		return nil, err
 	}
 	return &Invitation{
-		Id:           m.GetId(),
+		Id:           m.GetID(),
 		Owner:        mp.userMapper.mapUser(owner),
 		Email:        m.GetEmail(),
 		Organization: v,
