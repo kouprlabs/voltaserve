@@ -306,7 +306,7 @@ func (repo *PostgresWorkspaceRepo) populateModelFields(workspaces []*PostgresWor
 		}
 		for _, p := range groupPermissions {
 			w.GroupPermissions = append(w.GroupPermissions, &model.GroupPermission{
-				GroupId: p.GroupId,
+				GroupID: p.GroupID,
 				Value:   p.Permission,
 			})
 		}

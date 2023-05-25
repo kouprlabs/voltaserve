@@ -297,7 +297,7 @@ func (repo *PostgresGroupRepo) populateModelFields(groups []*PostgresGroup) erro
 		}
 		for _, p := range groupPermissions {
 			g.GroupPermissions = append(g.GroupPermissions, &model.GroupPermission{
-				GroupId: p.GroupId,
+				GroupID: p.GroupID,
 				Value:   p.Permission,
 			})
 		}

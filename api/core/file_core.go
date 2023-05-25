@@ -102,14 +102,14 @@ type FileRevokeUserPermissionOptions struct {
 }
 
 type FileGrantGroupPermissionOptions struct {
-	GroupId    string   `json:"groupId" validate:"required"`
+	GroupID    string   `json:"groupId" validate:"required"`
 	Ids        []string `json:"ids" validate:"required"`
 	Permission string   `json:"permission" validate:"required,oneof=viewer editor owner"`
 }
 
 type FileRevokeGroupPermissionOptions struct {
 	Ids     []string `json:"ids" validate:"required"`
-	GroupId string   `json:"groupId" validate:"required"`
+	GroupID string   `json:"groupId" validate:"required"`
 }
 
 type FileMoveOptions struct {
@@ -1365,7 +1365,7 @@ func (svc *FileService) GetGroupPermissions(id string, userId string) ([]*GroupP
 	}
 	res := make([]*GroupPermission, 0)
 	for _, p := range permissions {
-		m, err := svc.groupCache.Get(p.GroupId)
+		m, err := svc.groupCache.Get(p.GroupID)
 		if err != nil {
 			return nil, err
 		}

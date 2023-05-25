@@ -633,7 +633,7 @@ func (r *FileRouter) GrantGroupPermission(c *fiber.Ctx) error {
 	if err := validator.New().Struct(req); err != nil {
 		return errorpkg.NewRequestBodyValidationError(err)
 	}
-	if err := r.fileSvc.GrantGroupPermission(req.Ids, req.GroupId, req.Permission, userId); err != nil {
+	if err := r.fileSvc.GrantGroupPermission(req.Ids, req.GroupID, req.Permission, userId); err != nil {
 		return err
 	}
 	return c.SendStatus(http.StatusNoContent)
@@ -659,7 +659,7 @@ func (r *FileRouter) RevokeGroupPermission(c *fiber.Ctx) error {
 	if err := validator.New().Struct(req); err != nil {
 		return errorpkg.NewRequestBodyValidationError(err)
 	}
-	if err := r.fileSvc.RevokeGroupPermission(req.Ids, req.GroupId, userId); err != nil {
+	if err := r.fileSvc.RevokeGroupPermission(req.Ids, req.GroupID, userId); err != nil {
 		return err
 	}
 	return c.SendStatus(http.StatusNoContent)

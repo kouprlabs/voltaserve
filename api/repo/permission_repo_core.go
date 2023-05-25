@@ -10,7 +10,7 @@ type UserPermission struct {
 
 type GroupPermission struct {
 	Id         string `json:"id"`
-	GroupId    string `json:"groupId"`
+	GroupID    string `json:"groupId"`
 	ResourceId string `json:"resourceId"`
 	Permission string `json:"permission"`
 	CreateTime string `json:"createTime"`

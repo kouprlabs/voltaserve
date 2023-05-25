@@ -29,12 +29,12 @@ type GroupPermissionModel interface {
 }
 
 type GroupPermission struct {
-	GroupId string `json:"groupId,omitempty"`
+	GroupID string `json:"groupId,omitempty"`
 	Value   string `json:"value,omitempty"`
 }
 
 func (p GroupPermission) GetGroupID() string {
-	return p.GroupId
+	return p.GroupID
 }
 func (p GroupPermission) GetValue() string {
 	return p.Value
