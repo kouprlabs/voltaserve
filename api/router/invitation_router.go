@@ -2,20 +2,20 @@ package router
 
 import (
 	"net/http"
-	"voltaserve/core"
 	"voltaserve/errorpkg"
+	"voltaserve/service"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 )
 
 type InvitationRouter struct {
-	invitationSvc *core.InvitationService
+	invitationSvc *service.InvitationService
 }
 
 func NewInvitationRouter() *InvitationRouter {
 	return &InvitationRouter{
-		invitationSvc: core.NewInvitationService(),
+		invitationSvc: service.NewInvitationService(),
 	}
 }
 
@@ -44,7 +44,7 @@ func (r *InvitationRouter) AppendRoutes(g fiber.Router) {
 // @Router      /invitations [post]
 func (r *InvitationRouter) Create(c *fiber.Ctx) error {
 	userId := GetUserId(c)
-	req := new(core.InvitationCreateOptions)
+	req := new(service.InvitationCreateOptions)
 	if err := c.BodyParser(req); err != nil {
 		return err
 	}

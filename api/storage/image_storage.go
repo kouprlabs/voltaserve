@@ -15,7 +15,7 @@ import (
 
 type imageStorage struct {
 	s3              *infra.S3Manager
-	snapshotRepo    *repo.SnapshotRepo
+	snapshotRepo    repo.CoreSnapshotRepo
 	fileSearch      *search.FileSearch
 	ocrStorage      *ocrStorage
 	cmd             *infra.Command
@@ -94,7 +94,7 @@ func (svc *imageStorage) store(opts imageStorageOptions) error {
 	return nil
 }
 
-func (svc *imageStorage) measureImageProps(snapshot model.SnapshotModel, inputPath string) error {
+func (svc *imageStorage) measureImageProps(snapshot model.CoreSnapshot, inputPath string) error {
 	width, height, err := svc.imageProc.Measure(inputPath)
 	if err != nil {
 		return err
@@ -108,7 +108,7 @@ func (svc *imageStorage) measureImageProps(snapshot model.SnapshotModel, inputPa
 	return nil
 }
 
-func (svc *imageStorage) generateThumbnail(snapshot model.SnapshotModel, inputPath string) error {
+func (svc *imageStorage) generateThumbnail(snapshot model.CoreSnapshot, inputPath string) error {
 	width := snapshot.GetOriginal().Image.Width
 	height := snapshot.GetOriginal().Image.Height
 	if width > svc.config.Limits.ImagePreviewMaxWidth || height > svc.config.Limits.ImagePreviewMaxHeight {

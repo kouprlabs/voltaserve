@@ -13,7 +13,7 @@ import (
 
 type videoStorage struct {
 	minio           *infra.S3Manager
-	snapshotRepo    *repo.SnapshotRepo
+	snapshotRepo    repo.CoreSnapshotRepo
 	cmd             *infra.Command
 	metadataUpdater *storageMetadataUpdater
 	workspaceCache  *cache.WorkspaceCache
@@ -64,7 +64,7 @@ func (svc *videoStorage) store(opts videoStorageOptions) error {
 	return nil
 }
 
-func (svc *videoStorage) generateThumbnail(snapshot model.SnapshotModel, opts videoStorageOptions, inputPath string) error {
+func (svc *videoStorage) generateThumbnail(snapshot model.CoreSnapshot, opts videoStorageOptions, inputPath string) error {
 	outputPath := filepath.FromSlash(os.TempDir() + "/" + helpers.NewId() + ".png")
 	if err := svc.videoProc.Thumbnail(inputPath, 0, svc.config.Limits.ImagePreviewMaxHeight, outputPath); err != nil {
 		return err

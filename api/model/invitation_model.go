@@ -6,10 +6,10 @@ const (
 	InvitationStatusDeclined = "declined"
 )
 
-type InvitationModel interface {
-	GetId() string
-	GetOrganizationId() string
-	GetOwnerId() string
+type CoreInvitation interface {
+	GetID() string
+	GetOrganizationID() string
+	GetOwnerID() string
 	GetEmail() string
 	GetStatus() string
 	GetCreateTime() string

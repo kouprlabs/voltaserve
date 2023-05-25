@@ -17,7 +17,7 @@ const (
 )
 
 type SearchModel interface {
-	GetId() string
+	GetID() string
 }
 
 type SearchManager struct {

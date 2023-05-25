@@ -10,7 +10,7 @@ import (
 type GroupSearch struct {
 	index     string
 	search    *infra.SearchManager
-	groupRepo *repo.GroupRepo
+	groupRepo repo.CoreGroupRepo
 }
 
 func NewGroupSearch() *GroupSearch {
@@ -21,7 +21,7 @@ func NewGroupSearch() *GroupSearch {
 	}
 }
 
-func (search *GroupSearch) Index(groups []model.GroupModel) error {
+func (search *GroupSearch) Index(groups []model.CoreGroup) error {
 	if len(groups) == 0 {
 		return nil
 	}
@@ -35,7 +35,7 @@ func (search *GroupSearch) Index(groups []model.GroupModel) error {
 	return nil
 }
 
-func (search *GroupSearch) Update(groups []model.GroupModel) error {
+func (search *GroupSearch) Update(groups []model.CoreGroup) error {
 	if len(groups) == 0 {
 		return nil
 	}
@@ -59,19 +59,19 @@ func (search *GroupSearch) Delete(ids []string) error {
 	return nil
 }
 
-func (search *GroupSearch) Query(query string) ([]model.GroupModel, error) {
+func (search *GroupSearch) Query(query string) ([]model.CoreGroup, error) {
 	hits, err := search.search.Query(search.index, query)
 	if err != nil {
 		return nil, err
 	}
-	var res []model.GroupModel
+	var res []model.CoreGroup
 	for _, v := range hits {
 		var b []byte
 		b, err = json.Marshal(v)
 		if err != nil {
 			return nil, err
 		}
-		var group repo.GroupEntity
+		var group repo.PostgresGroup
 		if err = json.Unmarshal(b, &group); err != nil {
 			return nil, err
 		}

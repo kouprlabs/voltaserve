@@ -6,41 +6,25 @@ import (
 	"gorm.io/gorm"
 )
 
-type UserPermission struct {
-	Id         string `json:"id"`
-	UserId     string `json:"userId"`
-	ResourceId string `json:"resourceId"`
-	Permission string `json:"permission"`
-	CreateTime string `json:"createTime"`
-}
-
 func (UserPermission) TableName() string {
 	return "userpermission"
-}
-
-type GroupPermission struct {
-	Id         string `json:"id"`
-	GroupId    string `json:"groupId"`
-	ResourceId string `json:"resourceId"`
-	Permission string `json:"permission"`
-	CreateTime string `json:"createTime"`
 }
 
 func (GroupPermission) TableName() string {
 	return "grouppermission"
 }
 
-type PermissionRepo struct {
+type PostgresPermissionRepo struct {
 	db *gorm.DB
 }
 
-func NewPermissionRepo() *PermissionRepo {
-	return &PermissionRepo{
+func NewPostgresPermissionRepo() *PostgresPermissionRepo {
+	return &PostgresPermissionRepo{
 		db: infra.GetDb(),
 	}
 }
 
-func (repo *PermissionRepo) GetUserPermissions(id string) ([]*UserPermission, error) {
+func (repo *PostgresPermissionRepo) GetUserPermissions(id string) ([]*UserPermission, error) {
 	var res []*UserPermission
 	if db := repo.db.
 		Raw("SELECT * FROM userpermission WHERE resource_id = ?", id).
@@ -54,7 +38,7 @@ func (repo *PermissionRepo) GetUserPermissions(id string) ([]*UserPermission, er
 	}
 }
 
-func (repo *PermissionRepo) GetGroupPermissions(id string) ([]*GroupPermission, error) {
+func (repo *PostgresPermissionRepo) GetGroupPermissions(id string) ([]*GroupPermission, error) {
 	var res []*GroupPermission
 	if db := repo.db.
 		Raw("SELECT * FROM grouppermission WHERE resource_id = ?", id).

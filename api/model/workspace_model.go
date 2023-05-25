@@ -1,13 +1,13 @@
 package model
 
-type WorkspaceModel interface {
-	GetId() string
+type CoreWorkspace interface {
+	GetID() string
 	GetName() string
 	GetStorageCapacity() int64
-	GetRootId() string
-	GetOrganizationId() string
-	GetUserPermissions() []UserPermissionModel
-	GetGroupPermissions() []GroupPermissionModel
+	GetRootID() string
+	GetOrganizationID() string
+	GetUserPermissions() []CoreUserPermission
+	GetGroupPermissions() []CoreGroupPermission
 	GetBucket() string
 	GetCreateTime() string
 	GetUpdateTime() *string

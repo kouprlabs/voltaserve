@@ -2,20 +2,20 @@ package router
 
 import (
 	"net/http"
-	"voltaserve/core"
 	"voltaserve/errorpkg"
+	"voltaserve/service"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 )
 
 type WorkspaceRouter struct {
-	workspaceSvc *core.WorkspaceService
+	workspaceSvc *service.WorkspaceService
 }
 
 func NewWorkspaceRouter() *WorkspaceRouter {
 	return &WorkspaceRouter{
-		workspaceSvc: core.NewWorkspaceService(),
+		workspaceSvc: service.NewWorkspaceService(),
 	}
 }
 
@@ -43,7 +43,7 @@ func (r *WorkspaceRouter) AppendRoutes(g fiber.Router) {
 // @Router      /workspaces [post]
 func (r *WorkspaceRouter) Create(c *fiber.Ctx) error {
 	userId := GetUserId(c)
-	req := new(core.CreateWorkspaceOptions)
+	req := new(service.CreateWorkspaceOptions)
 	if err := c.BodyParser(req); err != nil {
 		return err
 	}
@@ -104,7 +104,7 @@ func (r *WorkspaceRouter) GetAll(c *fiber.Ctx) error {
 // @Failure     500  {object} errorpkg.ErrorResponse
 // @Router      /workspaces/search [get]
 func (r *WorkspaceRouter) Search(c *fiber.Ctx) error {
-	req := new(core.WorkspaceSearchOptions)
+	req := new(service.WorkspaceSearchOptions)
 	if err := c.BodyParser(req); err != nil {
 		return err
 	}
@@ -129,7 +129,7 @@ func (r *WorkspaceRouter) Search(c *fiber.Ctx) error {
 // @Failure     500  {object} errorpkg.ErrorResponse
 // @Router      /workspaces/{id}/update_name [post]
 func (r *WorkspaceRouter) UpdateName(c *fiber.Ctx) error {
-	req := new(core.UpdateWorkspaceNameOptions)
+	req := new(service.UpdateWorkspaceNameOptions)
 	if err := c.BodyParser(req); err != nil {
 		return err
 	}
@@ -154,7 +154,7 @@ func (r *WorkspaceRouter) UpdateName(c *fiber.Ctx) error {
 // @Failure     500  {object} errorpkg.ErrorResponse
 // @Router      /workspaces/{id}/update_storage_capacity [post]
 func (r *WorkspaceRouter) UpdateStorageCapacity(c *fiber.Ctx) error {
-	req := new(core.UpdateWorkspaceStorageCapacityOptions)
+	req := new(service.UpdateWorkspaceStorageCapacityOptions)
 	if err := c.BodyParser(req); err != nil {
 		return err
 	}

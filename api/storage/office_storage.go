@@ -13,7 +13,7 @@ import (
 
 type officeStorage struct {
 	s3              *infra.S3Manager
-	snapshotRepo    *repo.SnapshotRepo
+	snapshotRepo    repo.CoreSnapshotRepo
 	ocrStorage      *ocrStorage
 	cmd             *infra.Command
 	metadataUpdater *storageMetadataUpdater
@@ -101,12 +101,12 @@ func (svc *officeStorage) generatePDF(inputPath string) (string, error) {
 	return newOutputPath, nil
 }
 
-func (svc *officeStorage) save(snapshot model.SnapshotModel, opts officeStorageOptions, outputPath string) error {
+func (svc *officeStorage) save(snapshot model.CoreSnapshot, opts officeStorageOptions, outputPath string) error {
 	file, err := svc.fileCache.Get(opts.FileId)
 	if err != nil {
 		return err
 	}
-	workspace, err := svc.workspaceCache.Get(file.GetWorkspaceId())
+	workspace, err := svc.workspaceCache.Get(file.GetWorkspaceID())
 	if err != nil {
 		return err
 	}

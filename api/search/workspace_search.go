@@ -10,7 +10,7 @@ import (
 type WorkspaceSearch struct {
 	index         string
 	search        *infra.SearchManager
-	workspaceRepo *repo.WorkspaceRepo
+	workspaceRepo repo.CoreWorkspaceRepo
 }
 
 func NewWorkspaceSearch() *WorkspaceSearch {
@@ -21,7 +21,7 @@ func NewWorkspaceSearch() *WorkspaceSearch {
 	}
 }
 
-func (search *WorkspaceSearch) Index(workspaces []model.WorkspaceModel) error {
+func (search *WorkspaceSearch) Index(workspaces []model.CoreWorkspace) error {
 	if len(workspaces) == 0 {
 		return nil
 	}
@@ -35,7 +35,7 @@ func (search *WorkspaceSearch) Index(workspaces []model.WorkspaceModel) error {
 	return nil
 }
 
-func (search *WorkspaceSearch) Update(workspaces []model.WorkspaceModel) error {
+func (search *WorkspaceSearch) Update(workspaces []model.CoreWorkspace) error {
 	if len(workspaces) == 0 {
 		return nil
 	}
@@ -59,19 +59,19 @@ func (search *WorkspaceSearch) Delete(ids []string) error {
 	return nil
 }
 
-func (search *WorkspaceSearch) Query(query string) ([]model.WorkspaceModel, error) {
+func (search *WorkspaceSearch) Query(query string) ([]model.CoreWorkspace, error) {
 	hits, err := search.search.Query(search.index, query)
 	if err != nil {
 		return nil, err
 	}
-	var res []model.WorkspaceModel
+	var res []model.CoreWorkspace
 	for _, v := range hits {
 		var b []byte
 		b, err = json.Marshal(v)
 		if err != nil {
 			return nil, err
 		}
-		var workspace repo.WorkspaceEntity
+		var workspace repo.PostgresWorkspace
 		if err = json.Unmarshal(b, &workspace); err != nil {
 			return nil, err
 		}

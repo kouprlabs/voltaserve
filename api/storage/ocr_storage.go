@@ -39,7 +39,7 @@ type ocrImageToDataResponse struct {
 
 type ocrStorage struct {
 	minio           *infra.S3Manager
-	snapshotRepo    *repo.SnapshotRepo
+	snapshotRepo    repo.CoreSnapshotRepo
 	pdfStorage      *pdfStorage
 	cmd             *infra.Command
 	metadataUpdater *storageMetadataUpdater
@@ -108,12 +108,12 @@ func (svc *ocrStorage) generatePDFA(inputPath string) (string, error) {
 	return outputPath, nil
 }
 
-func (svc *ocrStorage) sendToPDFStorage(snapshot model.SnapshotModel, opts ocrOptions, outputPath string) error {
+func (svc *ocrStorage) sendToPDFStorage(snapshot model.CoreSnapshot, opts ocrOptions, outputPath string) error {
 	file, err := svc.fileCache.Get(opts.FileId)
 	if err != nil {
 		return err
 	}
-	workspace, err := svc.workspaceCache.Get(file.GetWorkspaceId())
+	workspace, err := svc.workspaceCache.Get(file.GetWorkspaceID())
 	if err != nil {
 		return err
 	}
@@ -122,12 +122,12 @@ func (svc *ocrStorage) sendToPDFStorage(snapshot model.SnapshotModel, opts ocrOp
 		return err
 	}
 	ocrSize := stat.Size()
-	snapshot.SetOcr(&model.S3Object{
+	snapshot.SetOCR(&model.S3Object{
 		Bucket: workspace.GetBucket(),
 		Key:    filepath.FromSlash(opts.FileId + "/" + opts.SnapshotId + "/ocr.pdf"),
 		Size:   ocrSize,
 	})
-	if err := svc.minio.PutFile(snapshot.GetOcr().Key, outputPath, DetectMimeFromFile(outputPath), workspace.GetBucket()); err != nil {
+	if err := svc.minio.PutFile(snapshot.GetOCR().Key, outputPath, DetectMimeFromFile(outputPath), workspace.GetBucket()); err != nil {
 		return err
 	}
 	if err := svc.metadataUpdater.update(snapshot, opts.FileId); err != nil {
@@ -137,7 +137,7 @@ func (svc *ocrStorage) sendToPDFStorage(snapshot model.SnapshotModel, opts ocrOp
 		FileId:     opts.FileId,
 		SnapshotId: opts.SnapshotId,
 		S3Bucket:   opts.S3Bucket,
-		S3Key:      snapshot.GetOcr().Key,
+		S3Key:      snapshot.GetOCR().Key,
 	}); err != nil {
 		return err
 	}

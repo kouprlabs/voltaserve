@@ -1,18 +1,18 @@
 package router
 
 import (
-	"voltaserve/core"
+	"voltaserve/service"
 
 	"github.com/gofiber/fiber/v2"
 )
 
 type NotificationRouter struct {
-	notificationSvc *core.NotificationService
+	notificationSvc *service.NotificationService
 }
 
 func NewNotificationRouter() *NotificationRouter {
 	return &NotificationRouter{
-		notificationSvc: core.NewNotificationService(),
+		notificationSvc: service.NewNotificationService(),
 	}
 }
 
