@@ -84,8 +84,8 @@ func NewPostgresInvitationRepo() *PostgresInvitationRepo {
 	}
 }
 
-func (repo *PostgresInvitationRepo) Insert(opts InvitationInsertOptions) ([]model.InvitationModel, error) {
-	var res []model.InvitationModel
+func (repo *PostgresInvitationRepo) Insert(opts InvitationInsertOptions) ([]model.CoreInvitation, error) {
+	var res []model.CoreInvitation
 	for _, e := range opts.Emails {
 		invitation := PostgresInvitation{
 			Id:             helpers.NewId(),
@@ -106,7 +106,7 @@ func (repo *PostgresInvitationRepo) Insert(opts InvitationInsertOptions) ([]mode
 	return res, nil
 }
 
-func (repo *PostgresInvitationRepo) Find(id string) (model.InvitationModel, error) {
+func (repo *PostgresInvitationRepo) Find(id string) (model.CoreInvitation, error) {
 	var invitation = PostgresInvitation{}
 	db := repo.db.Where("id = ?", id).First(&invitation)
 	if db.Error != nil {
@@ -119,7 +119,7 @@ func (repo *PostgresInvitationRepo) Find(id string) (model.InvitationModel, erro
 	return &invitation, nil
 }
 
-func (repo *PostgresInvitationRepo) GetIncoming(email string) ([]model.InvitationModel, error) {
+func (repo *PostgresInvitationRepo) GetIncoming(email string) ([]model.CoreInvitation, error) {
 	var invitations []*PostgresInvitation
 	db := repo.db.
 		Raw("SELECT * FROM invitation WHERE email = ? and status = 'pending' ORDER BY create_time DESC", email).
@@ -127,14 +127,14 @@ func (repo *PostgresInvitationRepo) GetIncoming(email string) ([]model.Invitatio
 	if db.Error != nil {
 		return nil, db.Error
 	}
-	var res []model.InvitationModel
+	var res []model.CoreInvitation
 	for _, inv := range invitations {
 		res = append(res, inv)
 	}
 	return res, nil
 }
 
-func (repo *PostgresInvitationRepo) GetOutgoing(organizationId string, userId string) ([]model.InvitationModel, error) {
+func (repo *PostgresInvitationRepo) GetOutgoing(organizationId string, userId string) ([]model.CoreInvitation, error) {
 	var invitations []*PostgresInvitation
 	db := repo.db.
 		Raw("SELECT * FROM invitation WHERE organization_id = ? and owner_id = ? ORDER BY create_time DESC", organizationId, userId).
@@ -142,14 +142,14 @@ func (repo *PostgresInvitationRepo) GetOutgoing(organizationId string, userId st
 	if db.Error != nil {
 		return nil, db.Error
 	}
-	var res []model.InvitationModel
+	var res []model.CoreInvitation
 	for _, inv := range invitations {
 		res = append(res, inv)
 	}
 	return res, nil
 }
 
-func (repo *PostgresInvitationRepo) Save(org model.InvitationModel) error {
+func (repo *PostgresInvitationRepo) Save(org model.CoreInvitation) error {
 	db := repo.db.Save(org)
 	if db.Error != nil {
 		return db.Error

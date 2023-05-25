@@ -16,10 +16,10 @@ import (
 )
 
 type Workspace struct {
-	Id              string       `json:"id"`
+	ID              string       `json:"id"`
 	Image           *string      `json:"image,omitempty"`
 	Name            string       `json:"name"`
-	RootId          string       `json:"rootId,omitempty"`
+	RootID          string       `json:"rootId,omitempty"`
 	StorageCapacity int64        `json:"storageCapacity"`
 	Permission      string       `json:"permission"`
 	Organization    Organization `json:"organization"`
@@ -121,7 +121,7 @@ func (svc *WorkspaceService) Create(req CreateWorkspaceOptions, userId string) (
 	if workspace, err = svc.workspaceRepo.FindByID(workspace.GetID()); err != nil {
 		return nil, err
 	}
-	if err = svc.workspaceSearch.Index([]model.WorkspaceModel{workspace}); err != nil {
+	if err = svc.workspaceSearch.Index([]model.CoreWorkspace{workspace}); err != nil {
 		return nil, err
 	}
 	if root, err = svc.fileRepo.Find(root.GetID()); err != nil {
@@ -189,7 +189,7 @@ func (svc *WorkspaceService) FindAll(userId string) ([]*Workspace, error) {
 	}
 	res := []*Workspace{}
 	for _, id := range ids {
-		var workspace model.WorkspaceModel
+		var workspace model.CoreWorkspace
 		workspace, err = svc.workspaceCache.Get(id)
 		if err != nil {
 			return nil, err
@@ -242,7 +242,7 @@ func (svc *WorkspaceService) UpdateName(id string, name string, userId string) (
 	if workspace, err = svc.workspaceRepo.UpdateName(id, name); err != nil {
 		return nil, err
 	}
-	if err = svc.workspaceSearch.Update([]model.WorkspaceModel{workspace}); err != nil {
+	if err = svc.workspaceSearch.Update([]model.CoreWorkspace{workspace}); err != nil {
 		return nil, err
 	}
 	if err = svc.workspaceCache.Set(workspace); err != nil {
@@ -277,7 +277,7 @@ func (svc *WorkspaceService) UpdateStorageCapacity(id string, storageCapacity in
 	if workspace, err = svc.workspaceRepo.UpdateStorageCapacity(id, storageCapacity); err != nil {
 		return nil, err
 	}
-	if err = svc.workspaceSearch.Update([]model.WorkspaceModel{workspace}); err != nil {
+	if err = svc.workspaceSearch.Update([]model.CoreWorkspace{workspace}); err != nil {
 		return nil, err
 	}
 	if err = svc.workspaceCache.Set(workspace); err != nil {
@@ -354,7 +354,7 @@ func newWorkspaceMapper() *workspaceMapper {
 	}
 }
 
-func (mp *workspaceMapper) mapWorkspace(m model.WorkspaceModel, userId string) (*Workspace, error) {
+func (mp *workspaceMapper) mapWorkspace(m model.CoreWorkspace, userId string) (*Workspace, error) {
 	org, err := mp.orgCache.Get(m.GetOrganizationID())
 	if err != nil {
 		return nil, err
@@ -364,9 +364,9 @@ func (mp *workspaceMapper) mapWorkspace(m model.WorkspaceModel, userId string) (
 		return nil, err
 	}
 	res := &Workspace{
-		Id:              m.GetID(),
+		ID:              m.GetID(),
 		Name:            m.GetName(),
-		RootId:          m.GetRootID(),
+		RootID:          m.GetRootID(),
 		StorageCapacity: m.GetStorageCapacity(),
 		Organization:    *v,
 		CreateTime:      m.GetCreateTime(),

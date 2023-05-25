@@ -44,16 +44,16 @@ func (o OrganizationEntity) GetName() string {
 	return o.Name
 }
 
-func (o OrganizationEntity) GetUserPermissions() []model.UserPermissionModel {
-	var res []model.UserPermissionModel
+func (o OrganizationEntity) GetUserPermissions() []model.CoreUserPermission {
+	var res []model.CoreUserPermission
 	for _, p := range o.UserPermissions {
 		res = append(res, p)
 	}
 	return res
 }
 
-func (o OrganizationEntity) GetGroupPermissions() []model.GroupPermissionModel {
-	var res []model.GroupPermissionModel
+func (o OrganizationEntity) GetGroupPermissions() []model.CoreGroupPermission {
+	var res []model.CoreGroupPermission
 	for _, p := range o.GroupPermissions {
 		res = append(res, p)
 	}
@@ -94,15 +94,15 @@ func NewPostgresOrganizationRepo() *PostgresOrganizationRepo {
 	}
 }
 
-func (repo *PostgresOrganizationRepo) Insert(opts OrganizationInsertOptions) (model.OrganizationModel, error) {
+func (repo *PostgresOrganizationRepo) Insert(opts OrganizationInsertOptions) (model.CoreOrganization, error) {
 	org := OrganizationEntity{
-		Id:   opts.Id,
+		Id:   opts.ID,
 		Name: opts.Name,
 	}
 	if db := repo.db.Save(&org); db.Error != nil {
 		return nil, db.Error
 	}
-	res, err := repo.Find(opts.Id)
+	res, err := repo.Find(opts.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -122,7 +122,7 @@ func (repo *PostgresOrganizationRepo) find(id string) (*OrganizationEntity, erro
 	return &res, nil
 }
 
-func (repo *PostgresOrganizationRepo) Find(id string) (model.OrganizationModel, error) {
+func (repo *PostgresOrganizationRepo) Find(id string) (model.CoreOrganization, error) {
 	org, err := repo.find(id)
 	if err != nil {
 		return nil, err
@@ -133,7 +133,7 @@ func (repo *PostgresOrganizationRepo) Find(id string) (model.OrganizationModel, 
 	return org, nil
 }
 
-func (repo *PostgresOrganizationRepo) Save(org model.OrganizationModel) error {
+func (repo *PostgresOrganizationRepo) Save(org model.CoreOrganization) error {
 	db := repo.db.Save(org)
 	if db.Error != nil {
 		return db.Error
@@ -189,7 +189,7 @@ func (repo *PostgresOrganizationRepo) RemoveMember(id string, userId string) err
 	return nil
 }
 
-func (repo *PostgresOrganizationRepo) GetMembers(id string) ([]model.UserModel, error) {
+func (repo *PostgresOrganizationRepo) GetMembers(id string) ([]model.CoreUser, error) {
 	var entities []*PostgresUser
 	db := repo.db.
 		Raw(`SELECT DISTINCT u.* FROM "user" u INNER JOIN organization_user ou ON u.id = ou.user_id WHERE ou.organization_id = ? ORDER BY u.full_name ASC`, id).
@@ -197,14 +197,14 @@ func (repo *PostgresOrganizationRepo) GetMembers(id string) ([]model.UserModel, 
 	if db.Error != nil {
 		return nil, db.Error
 	}
-	var res []model.UserModel
+	var res []model.CoreUser
 	for _, u := range entities {
 		res = append(res, u)
 	}
 	return res, nil
 }
 
-func (repo *PostgresOrganizationRepo) GetGroups(id string) ([]model.GroupModel, error) {
+func (repo *PostgresOrganizationRepo) GetGroups(id string) ([]model.CoreGroup, error) {
 	var entities []*PostgresGroup
 	db := repo.db.
 		Raw(`SELECT * FROM "group" g WHERE g.organization_id = ? ORDER BY g.name ASC`, id).
@@ -215,7 +215,7 @@ func (repo *PostgresOrganizationRepo) GetGroups(id string) ([]model.GroupModel, 
 	if err := repo.groupRepo.populateModelFields(entities); err != nil {
 		return nil, err
 	}
-	var res []model.GroupModel
+	var res []model.CoreGroup
 	for _, g := range entities {
 		res = append(res, g)
 	}

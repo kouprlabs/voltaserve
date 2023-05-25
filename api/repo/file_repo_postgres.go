@@ -60,24 +60,24 @@ func (i PostgresFile) GetParentID() *string {
 	return i.ParentId
 }
 
-func (i PostgresFile) GetSnapshots() []model.SnapshotModel {
-	var res []model.SnapshotModel
+func (i PostgresFile) GetSnapshots() []model.CoreSnapshot {
+	var res []model.CoreSnapshot
 	for _, s := range i.Snapshots {
 		res = append(res, s)
 	}
 	return res
 }
 
-func (i PostgresFile) GetUserPermissions() []model.UserPermissionModel {
-	var res []model.UserPermissionModel
+func (i PostgresFile) GetUserPermissions() []model.CoreUserPermission {
+	var res []model.CoreUserPermission
 	for _, p := range i.UserPermissions {
 		res = append(res, p)
 	}
 	return res
 }
 
-func (i PostgresFile) GetGroupPermissions() []model.GroupPermissionModel {
-	var res []model.GroupPermissionModel
+func (i PostgresFile) GetGroupPermissions() []model.CoreGroupPermission {
+	var res []model.CoreGroupPermission
 	for _, p := range i.GroupPermissions {
 		res = append(res, p)
 	}
@@ -142,11 +142,11 @@ func NewPostgresFileRepo() *PostgresFileRepo {
 	}
 }
 
-func (repo *PostgresFileRepo) New() model.FileModel {
+func (repo *PostgresFileRepo) New() model.CoreFile {
 	return &PostgresFile{}
 }
 
-func (repo *PostgresFileRepo) Insert(opts FileInsertOptions) (model.FileModel, error) {
+func (repo *PostgresFileRepo) Insert(opts FileInsertOptions) (model.CoreFile, error) {
 	id := helpers.NewId()
 	file := PostgresFile{
 		Id:          id,
@@ -168,7 +168,7 @@ func (repo *PostgresFileRepo) Insert(opts FileInsertOptions) (model.FileModel, e
 	return res, nil
 }
 
-func (repo *PostgresFileRepo) Find(id string) (model.FileModel, error) {
+func (repo *PostgresFileRepo) Find(id string) (model.CoreFile, error) {
 	file, err := repo.find(id)
 	if err != nil {
 		return nil, err
@@ -195,7 +195,7 @@ func (repo *PostgresFileRepo) find(id string) (*PostgresFile, error) {
 	return &res, nil
 }
 
-func (repo *PostgresFileRepo) FindChildren(id string) ([]model.FileModel, error) {
+func (repo *PostgresFileRepo) FindChildren(id string) ([]model.CoreFile, error) {
 	var entities []*PostgresFile
 	db := repo.db.Raw("SELECT * FROM file WHERE parent_id = ? ORDER BY create_time ASC", id).Scan(&entities)
 	if db.Error != nil {
@@ -204,14 +204,14 @@ func (repo *PostgresFileRepo) FindChildren(id string) ([]model.FileModel, error)
 	if err := repo.populateModelFields(entities); err != nil {
 		return nil, err
 	}
-	var res []model.FileModel
+	var res []model.CoreFile
 	for _, f := range entities {
 		res = append(res, f)
 	}
 	return res, nil
 }
 
-func (repo *PostgresFileRepo) FindPath(id string) ([]model.FileModel, error) {
+func (repo *PostgresFileRepo) FindPath(id string) ([]model.CoreFile, error) {
 	var entities []*PostgresFile
 	if db := repo.db.
 		Raw("WITH RECURSIVE rec (id, name, type, parent_id, workspace_id, create_time, update_time) AS "+
@@ -224,14 +224,14 @@ func (repo *PostgresFileRepo) FindPath(id string) ([]model.FileModel, error) {
 	if err := repo.populateModelFields(entities); err != nil {
 		return nil, err
 	}
-	var res []model.FileModel
+	var res []model.CoreFile
 	for _, f := range entities {
 		res = append(res, f)
 	}
 	return res, nil
 }
 
-func (repo *PostgresFileRepo) FindTree(id string) ([]model.FileModel, error) {
+func (repo *PostgresFileRepo) FindTree(id string) ([]model.CoreFile, error) {
 	var entities []*PostgresFile
 	db := repo.db.
 		Raw("WITH RECURSIVE rec (id, name, type, parent_id, workspace_id, create_time, update_time) AS "+
@@ -245,7 +245,7 @@ func (repo *PostgresFileRepo) FindTree(id string) ([]model.FileModel, error) {
 	if err := repo.populateModelFields(entities); err != nil {
 		return nil, err
 	}
-	var res []model.FileModel
+	var res []model.CoreFile
 	for _, f := range entities {
 		res = append(res, f)
 	}
@@ -284,14 +284,14 @@ func (repo *PostgresFileRepo) MoveSourceIntoTarget(targetId string, sourceId str
 	return nil
 }
 
-func (repo *PostgresFileRepo) Save(file model.FileModel) error {
+func (repo *PostgresFileRepo) Save(file model.CoreFile) error {
 	if db := repo.db.Save(file); db.Error != nil {
 		return db.Error
 	}
 	return nil
 }
 
-func (repo *PostgresFileRepo) BulkInsert(values []model.FileModel, chunkSize int) error {
+func (repo *PostgresFileRepo) BulkInsert(values []model.CoreFile, chunkSize int) error {
 	var entities []*PostgresFile
 	for _, f := range values {
 		entities = append(entities, f.(*PostgresFile))
@@ -528,7 +528,7 @@ func (repo *PostgresFileRepo) populateModelFields(entities []*PostgresFile) erro
 				Value:   p.Permission,
 			})
 		}
-		snapshots, err := repo.snapshotRepo.FindAllForFile(f.Id)
+		snapshots, err := repo.snapshotRepo.findAllForFile(f.Id)
 		if err != nil {
 			return nil
 		}

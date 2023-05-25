@@ -21,7 +21,7 @@ func NewGroupCache() *GroupCache {
 	}
 }
 
-func (c *GroupCache) Set(workspace model.GroupModel) error {
+func (c *GroupCache) Set(workspace model.CoreGroup) error {
 	b, err := json.Marshal(workspace)
 	if err != nil {
 		return err
@@ -33,7 +33,7 @@ func (c *GroupCache) Set(workspace model.GroupModel) error {
 	return nil
 }
 
-func (c *GroupCache) Get(id string) (model.GroupModel, error) {
+func (c *GroupCache) Get(id string) (model.CoreGroup, error) {
 	value, err := c.redis.Get(c.keyPrefix + id)
 	if err != nil {
 		return c.Refresh(id)
@@ -45,7 +45,7 @@ func (c *GroupCache) Get(id string) (model.GroupModel, error) {
 	return &group, nil
 }
 
-func (c *GroupCache) Refresh(id string) (model.GroupModel, error) {
+func (c *GroupCache) Refresh(id string) (model.CoreGroup, error) {
 	res, err := c.groupRepo.Find(id)
 	if err != nil {
 		return nil, err

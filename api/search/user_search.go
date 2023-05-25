@@ -19,12 +19,12 @@ func NewUserSearch() *UserSearch {
 	}
 }
 
-func (svc *UserSearch) Query(query string) ([]model.UserModel, error) {
+func (svc *UserSearch) Query(query string) ([]model.CoreUser, error) {
 	hits, err := svc.search.Query(svc.index, query)
 	if err != nil {
 		return nil, err
 	}
-	res := []model.UserModel{}
+	res := []model.CoreUser{}
 	for _, v := range hits {
 		b, err := json.Marshal(v)
 		if err != nil {

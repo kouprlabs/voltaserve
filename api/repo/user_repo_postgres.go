@@ -71,7 +71,7 @@ func NewPostgresUserRepo() *PostgresUserRepo {
 	}
 }
 
-func (repo *PostgresUserRepo) Find(id string) (model.UserModel, error) {
+func (repo *PostgresUserRepo) Find(id string) (model.CoreUser, error) {
 	var res = PostgresUser{}
 	db := repo.db.Where("id = ?", id).First(&res)
 	if db.Error != nil {
@@ -84,7 +84,7 @@ func (repo *PostgresUserRepo) Find(id string) (model.UserModel, error) {
 	return &res, nil
 }
 
-func (repo *PostgresUserRepo) FindByEmail(email string) (model.UserModel, error) {
+func (repo *PostgresUserRepo) FindByEmail(email string) (model.CoreUser, error) {
 	var res = PostgresUser{}
 	db := repo.db.Where("email = ?", email).First(&res)
 	if db.Error != nil {
@@ -93,13 +93,13 @@ func (repo *PostgresUserRepo) FindByEmail(email string) (model.UserModel, error)
 	return &res, nil
 }
 
-func (repo *PostgresUserRepo) FindAll() ([]model.UserModel, error) {
+func (repo *PostgresUserRepo) FindAll() ([]model.CoreUser, error) {
 	var entities []*PostgresUser
 	db := repo.db.Raw(`select * from "user" u`).Scan(&entities)
 	if db.Error != nil {
 		return nil, db.Error
 	}
-	var res []model.UserModel
+	var res []model.CoreUser
 	for _, u := range entities {
 		res = append(res, u)
 	}

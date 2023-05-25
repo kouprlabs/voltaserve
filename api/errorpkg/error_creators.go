@@ -109,7 +109,7 @@ func NewInternalServerError(err error) *ErrorResponse {
 	)
 }
 
-func NewOrganizationPermissionError(user model.UserModel, org model.OrganizationModel, permission string) *ErrorResponse {
+func NewOrganizationPermissionError(user model.CoreUser, org model.CoreOrganization, permission string) *ErrorResponse {
 	return NewErrorResponse(
 		"missing_organization_permission",
 		http.StatusForbidden,
@@ -131,7 +131,7 @@ func NewCannotRemoveLastRemainingOwnerOfOrganizationError(id string) *ErrorRespo
 	)
 }
 
-func NewGroupPermissionError(user model.UserModel, org model.OrganizationModel, permission string) *ErrorResponse {
+func NewGroupPermissionError(user model.CoreUser, org model.CoreOrganization, permission string) *ErrorResponse {
 	return NewErrorResponse(
 		"missing_group_permission",
 		http.StatusForbidden,
@@ -144,7 +144,7 @@ func NewGroupPermissionError(user model.UserModel, org model.OrganizationModel, 
 	)
 }
 
-func NewWorkspacePermissionError(user model.UserModel, workspace model.WorkspaceModel, permission string) *ErrorResponse {
+func NewWorkspacePermissionError(user model.CoreUser, workspace model.CoreWorkspace, permission string) *ErrorResponse {
 	return NewErrorResponse(
 		"missing_workspace_permission",
 		http.StatusForbidden,
@@ -157,7 +157,7 @@ func NewWorkspacePermissionError(user model.UserModel, workspace model.Workspace
 	)
 }
 
-func NewFilePermissionError(user model.UserModel, file model.FileModel, permission string) *ErrorResponse {
+func NewFilePermissionError(user model.CoreUser, file model.CoreFile, permission string) *ErrorResponse {
 	return NewErrorResponse(
 		"missing_file_permission",
 		http.StatusForbidden,
@@ -234,7 +234,7 @@ func NewRequestBodyValidationError(err error) *ErrorResponse {
 	)
 }
 
-func NewFileAlreadyChildOfDestinationError(source model.FileModel, target model.FileModel) *ErrorResponse {
+func NewFileAlreadyChildOfDestinationError(source model.CoreFile, target model.CoreFile) *ErrorResponse {
 	return NewErrorResponse(
 		"file_already_child_of_destination",
 		http.StatusForbidden,
@@ -244,7 +244,7 @@ func NewFileAlreadyChildOfDestinationError(source model.FileModel, target model.
 	)
 }
 
-func NewFileCannotBeMovedIntoItselfError(source model.FileModel) *ErrorResponse {
+func NewFileCannotBeMovedIntoItselfError(source model.CoreFile) *ErrorResponse {
 	return NewErrorResponse(
 		"file_cannot_be_moved_into_itself",
 		http.StatusForbidden,
@@ -254,7 +254,7 @@ func NewFileCannotBeMovedIntoItselfError(source model.FileModel) *ErrorResponse 
 	)
 }
 
-func NewFileIsNotAFolderError(file model.FileModel) *ErrorResponse {
+func NewFileIsNotAFolderError(file model.CoreFile) *ErrorResponse {
 	return NewErrorResponse(
 		"file_is_not_a_folder",
 		http.StatusForbidden,
@@ -264,7 +264,7 @@ func NewFileIsNotAFolderError(file model.FileModel) *ErrorResponse {
 	)
 }
 
-func NewTargetIsGrandChildOfSourceError(file model.FileModel) *ErrorResponse {
+func NewTargetIsGrandChildOfSourceError(file model.CoreFile) *ErrorResponse {
 	return NewErrorResponse(
 		"target_is_grant_child_of_source",
 		http.StatusForbidden,
@@ -274,7 +274,7 @@ func NewTargetIsGrandChildOfSourceError(file model.FileModel) *ErrorResponse {
 	)
 }
 
-func NewCannotDeleteWorkspaceRootError(file model.FileModel, workspace model.WorkspaceModel) *ErrorResponse {
+func NewCannotDeleteWorkspaceRootError(file model.CoreFile, workspace model.CoreWorkspace) *ErrorResponse {
 	return NewErrorResponse(
 		"cannot_delete_workspace_root",
 		http.StatusForbidden,
@@ -284,7 +284,7 @@ func NewCannotDeleteWorkspaceRootError(file model.FileModel, workspace model.Wor
 	)
 }
 
-func NewFileCannotBeCopiedIntoOwnSubtreeError(file model.FileModel) *ErrorResponse {
+func NewFileCannotBeCopiedIntoOwnSubtreeError(file model.CoreFile) *ErrorResponse {
 	return NewErrorResponse(
 		"file_cannot_be_coped_into_own_subtree",
 		http.StatusForbidden,
@@ -294,7 +294,7 @@ func NewFileCannotBeCopiedIntoOwnSubtreeError(file model.FileModel) *ErrorRespon
 	)
 }
 
-func NewFileCannotBeCopiedIntoIselfError(file model.FileModel) *ErrorResponse {
+func NewFileCannotBeCopiedIntoIselfError(file model.CoreFile) *ErrorResponse {
 	return NewErrorResponse(
 		"file_cannot_be_copied_into_itself",
 		http.StatusForbidden,
@@ -324,7 +324,7 @@ func NewInvalidSizeParameterError() *ErrorResponse {
 	)
 }
 
-func NewCannotAcceptNonPendingInvitationError(invitation model.InvitationModel) *ErrorResponse {
+func NewCannotAcceptNonPendingInvitationError(invitation model.CoreInvitation) *ErrorResponse {
 	return NewErrorResponse(
 		"cannot_accept_non_pending_invitation",
 		http.StatusForbidden,
@@ -334,7 +334,7 @@ func NewCannotAcceptNonPendingInvitationError(invitation model.InvitationModel) 
 	)
 }
 
-func NewCannotDeclineNonPendingInvitationError(invitation model.InvitationModel) *ErrorResponse {
+func NewCannotDeclineNonPendingInvitationError(invitation model.CoreInvitation) *ErrorResponse {
 	return NewErrorResponse(
 		"cannot_decline_non_pending_invitation",
 		http.StatusForbidden,
@@ -344,7 +344,7 @@ func NewCannotDeclineNonPendingInvitationError(invitation model.InvitationModel)
 	)
 }
 
-func NewCannotResendNonPendingInvitationError(invitation model.InvitationModel) *ErrorResponse {
+func NewCannotResendNonPendingInvitationError(invitation model.CoreInvitation) *ErrorResponse {
 	return NewErrorResponse(
 		"cannot_resend_non_pending_invitation",
 		http.StatusForbidden,
@@ -354,7 +354,7 @@ func NewCannotResendNonPendingInvitationError(invitation model.InvitationModel) 
 	)
 }
 
-func NewUserNotAllowedToAcceptInvitationError(user model.UserModel, invitation model.InvitationModel) *ErrorResponse {
+func NewUserNotAllowedToAcceptInvitationError(user model.CoreUser, invitation model.CoreInvitation) *ErrorResponse {
 	return NewErrorResponse(
 		"user_not_allowed_to_accept_invitation",
 		http.StatusForbidden,
@@ -364,7 +364,7 @@ func NewUserNotAllowedToAcceptInvitationError(user model.UserModel, invitation m
 	)
 }
 
-func NewUserNotAllowedToDeclineInvitationError(user model.UserModel, invitation model.InvitationModel) *ErrorResponse {
+func NewUserNotAllowedToDeclineInvitationError(user model.CoreUser, invitation model.CoreInvitation) *ErrorResponse {
 	return NewErrorResponse(
 		"user_not_allowed_to_decline_invitation",
 		http.StatusForbidden,
@@ -374,7 +374,7 @@ func NewUserNotAllowedToDeclineInvitationError(user model.UserModel, invitation 
 	)
 }
 
-func NewUserNotAllowedToDeleteInvitationError(user model.UserModel, invitation model.InvitationModel) *ErrorResponse {
+func NewUserNotAllowedToDeleteInvitationError(user model.CoreUser, invitation model.CoreInvitation) *ErrorResponse {
 	return NewErrorResponse(
 		"user_not_allowed_to_delete_invitation",
 		http.StatusForbidden,
@@ -384,7 +384,7 @@ func NewUserNotAllowedToDeleteInvitationError(user model.UserModel, invitation m
 	)
 }
 
-func NewUserAlreadyMemberOfOrganizationError(user model.UserModel, org model.OrganizationModel) *ErrorResponse {
+func NewUserAlreadyMemberOfOrganizationError(user model.CoreUser, org model.CoreOrganization) *ErrorResponse {
 	return NewErrorResponse(
 		"user_already_member_of_organization",
 		http.StatusForbidden,

@@ -87,7 +87,7 @@ func (r *FileRouter) Upload(c *fiber.Ctx) error {
 		if err != nil {
 			return err
 		}
-		parentId = workspace.RootId
+		parentId = workspace.RootID
 	}
 	fh, err := c.FormFile("file")
 	if err != nil {
@@ -114,7 +114,7 @@ func (r *FileRouter) Upload(c *fiber.Ctx) error {
 		return err
 	}
 	defer os.Remove(path)
-	file, err = r.storageSvc.Store(storage.StorageOptions{FileId: file.Id, FilePath: path}, userId)
+	file, err = r.storageSvc.Store(storage.StorageOptions{FileId: file.ID, FilePath: path}, userId)
 	if err != nil {
 		return err
 	}
@@ -157,7 +157,7 @@ func (r *FileRouter) Patch(c *fiber.Ctx) error {
 		return err
 	}
 	defer os.Remove(path)
-	file, err = r.storageSvc.Store(storage.StorageOptions{FileId: file.Id, FilePath: path}, userId)
+	file, err = r.storageSvc.Store(storage.StorageOptions{FileId: file.ID, FilePath: path}, userId)
 	if err != nil {
 		return err
 	}
@@ -191,7 +191,7 @@ func (r *FileRouter) CreateFolder(c *fiber.Ctx) error {
 		if err != nil {
 			return err
 		}
-		parentId = &workspace.RootId
+		parentId = &workspace.RootID
 	}
 	res, err := r.fileSvc.Create(core.FileCreateOptions{
 		Name:        req.Name,
@@ -388,7 +388,7 @@ func (r *FileRouter) Copy(c *fiber.Ctx) error {
 	if err := validator.New().Struct(req); err != nil {
 		return errorpkg.NewRequestBodyValidationError(err)
 	}
-	res, err := r.fileSvc.Copy(c.Params("id"), req.Ids, userId)
+	res, err := r.fileSvc.Copy(c.Params("id"), req.IDs, userId)
 	if err != nil {
 		return err
 	}
@@ -415,7 +415,7 @@ func (r *FileRouter) Move(c *fiber.Ctx) error {
 	if err := validator.New().Struct(req); err != nil {
 		return errorpkg.NewRequestBodyValidationError(err)
 	}
-	if _, err := r.fileSvc.Move(c.Params("id"), req.Ids, userId); err != nil {
+	if _, err := r.fileSvc.Move(c.Params("id"), req.IDs, userId); err != nil {
 		return err
 	}
 	return c.SendStatus(http.StatusNoContent)
@@ -487,7 +487,7 @@ func (r *FileRouter) BatchGet(c *fiber.Ctx) error {
 	if err := validator.New().Struct(req); err != nil {
 		return errorpkg.NewRequestBodyValidationError(err)
 	}
-	res, err := r.fileSvc.FindByID(req.Ids, userId)
+	res, err := r.fileSvc.FindByID(req.IDs, userId)
 	if err != nil {
 		return err
 	}
@@ -513,7 +513,7 @@ func (r *FileRouter) BatchDelete(c *fiber.Ctx) error {
 	if err := validator.New().Struct(req); err != nil {
 		return errorpkg.NewRequestBodyValidationError(err)
 	}
-	res, err := r.fileSvc.Delete(req.Ids, userId)
+	res, err := r.fileSvc.Delete(req.IDs, userId)
 	if err != nil {
 		return err
 	}
@@ -581,7 +581,7 @@ func (r *FileRouter) GrantUserPermission(c *fiber.Ctx) error {
 	if err := validator.New().Struct(req); err != nil {
 		return errorpkg.NewRequestBodyValidationError(err)
 	}
-	if err := r.fileSvc.GrantUserPermission(req.Ids, req.UserId, req.Permission, userId); err != nil {
+	if err := r.fileSvc.GrantUserPermission(req.IDs, req.UserID, req.Permission, userId); err != nil {
 		return err
 	}
 	return c.SendStatus(http.StatusNoContent)
@@ -607,7 +607,7 @@ func (r *FileRouter) RevokeUserPermission(c *fiber.Ctx) error {
 	if err := validator.New().Struct(req); err != nil {
 		return errorpkg.NewRequestBodyValidationError(err)
 	}
-	if err := r.fileSvc.RevokeUserPermission(req.Ids, req.UserId, userId); err != nil {
+	if err := r.fileSvc.RevokeUserPermission(req.IDs, req.UserID, userId); err != nil {
 		return err
 	}
 	return c.SendStatus(http.StatusNoContent)
@@ -633,7 +633,7 @@ func (r *FileRouter) GrantGroupPermission(c *fiber.Ctx) error {
 	if err := validator.New().Struct(req); err != nil {
 		return errorpkg.NewRequestBodyValidationError(err)
 	}
-	if err := r.fileSvc.GrantGroupPermission(req.Ids, req.GroupID, req.Permission, userId); err != nil {
+	if err := r.fileSvc.GrantGroupPermission(req.IDs, req.GroupID, req.Permission, userId); err != nil {
 		return err
 	}
 	return c.SendStatus(http.StatusNoContent)
@@ -659,7 +659,7 @@ func (r *FileRouter) RevokeGroupPermission(c *fiber.Ctx) error {
 	if err := validator.New().Struct(req); err != nil {
 		return errorpkg.NewRequestBodyValidationError(err)
 	}
-	if err := r.fileSvc.RevokeGroupPermission(req.Ids, req.GroupID, userId); err != nil {
+	if err := r.fileSvc.RevokeGroupPermission(req.IDs, req.GroupID, userId); err != nil {
 		return err
 	}
 	return c.SendStatus(http.StatusNoContent)

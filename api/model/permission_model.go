@@ -6,7 +6,7 @@ const (
 	PermissionOwner  = "owner"
 )
 
-type UserPermissionModel interface {
+type CoreUserPermission interface {
 	GetUserID() string
 	GetValue() string
 }
@@ -23,7 +23,7 @@ func (p UserPermission) GetValue() string {
 	return p.Value
 }
 
-type GroupPermissionModel interface {
+type CoreGroupPermission interface {
 	GetGroupID() string
 	GetValue() string
 }

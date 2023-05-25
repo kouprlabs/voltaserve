@@ -21,7 +21,7 @@ func NewFileCache() *FileCache {
 	}
 }
 
-func (c *FileCache) Set(file model.FileModel) error {
+func (c *FileCache) Set(file model.CoreFile) error {
 	b, err := json.Marshal(file)
 	if err != nil {
 		return err
@@ -33,7 +33,7 @@ func (c *FileCache) Set(file model.FileModel) error {
 	return nil
 }
 
-func (c *FileCache) Get(id string) (model.FileModel, error) {
+func (c *FileCache) Get(id string) (model.CoreFile, error) {
 	value, err := c.redis.Get(c.keyPrefix + id)
 	if err != nil {
 		return c.Refresh(id)
@@ -45,7 +45,7 @@ func (c *FileCache) Get(id string) (model.FileModel, error) {
 	return &file, nil
 }
 
-func (c *FileCache) Refresh(id string) (model.FileModel, error) {
+func (c *FileCache) Refresh(id string) (model.CoreFile, error) {
 	res, err := c.fileRepo.Find(id)
 	if err != nil {
 		return nil, err

@@ -277,7 +277,7 @@ func (r *OrganizationRouter) RemoveMember(c *fiber.Ctx) error {
 	if err := validator.New().Struct(req); err != nil {
 		return errorpkg.NewRequestBodyValidationError(err)
 	}
-	if err := r.orgSvc.RemoveMember(c.Params("id"), req.UserId, userId); err != nil {
+	if err := r.orgSvc.RemoveMember(c.Params("id"), req.UserID, userId); err != nil {
 		return err
 	}
 	return c.SendStatus(http.StatusNoContent)

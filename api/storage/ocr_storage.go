@@ -108,7 +108,7 @@ func (svc *ocrStorage) generatePDFA(inputPath string) (string, error) {
 	return outputPath, nil
 }
 
-func (svc *ocrStorage) sendToPDFStorage(snapshot model.SnapshotModel, opts ocrOptions, outputPath string) error {
+func (svc *ocrStorage) sendToPDFStorage(snapshot model.CoreSnapshot, opts ocrOptions, outputPath string) error {
 	file, err := svc.fileCache.Get(opts.FileId)
 	if err != nil {
 		return err

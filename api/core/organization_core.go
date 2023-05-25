@@ -16,7 +16,7 @@ import (
 )
 
 type Organization struct {
-	Id         string  `json:"id"`
+	ID         string  `json:"id"`
 	Name       string  `json:"name"`
 	Image      *string `json:"image,omitempty"`
 	Permission string  `json:"permission"`
@@ -42,7 +42,7 @@ type OrganizationUpdateImageOptions struct {
 }
 
 type OrganizationRemoveMemberOptions struct {
-	UserId string `json:"userId" validate:"required"`
+	UserID string `json:"userId" validate:"required"`
 }
 
 type OrganizationService struct {
@@ -81,7 +81,7 @@ func NewOrganizationService() *OrganizationService {
 
 func (svc *OrganizationService) Create(req OrganizationCreateOptions, userId string) (*Organization, error) {
 	org, err := svc.orgRepo.Insert(repo.OrganizationInsertOptions{
-		Id:   helpers.NewId(),
+		ID:   helpers.NewId(),
 		Name: req.Name,
 	})
 	if err != nil {
@@ -94,7 +94,7 @@ func (svc *OrganizationService) Create(req OrganizationCreateOptions, userId str
 	if err != nil {
 		return nil, err
 	}
-	if err := svc.orgSearch.Index([]model.OrganizationModel{org}); err != nil {
+	if err := svc.orgSearch.Index([]model.CoreOrganization{org}); err != nil {
 		return nil, err
 	}
 	if err := svc.orgCache.Set(org); err != nil {
@@ -178,7 +178,7 @@ func (svc *OrganizationService) SearchMembers(id string, query string, userId st
 	if err != nil {
 		return nil, err
 	}
-	var members []model.UserModel
+	var members []model.CoreUser
 	for _, m := range orgMembers {
 		for _, u := range users {
 			if u.GetID() == m.GetID() {
@@ -235,7 +235,7 @@ func (svc *OrganizationService) UpdateName(id string, name string, userId string
 	if err := svc.orgRepo.Save(org); err != nil {
 		return nil, err
 	}
-	if err := svc.orgSearch.Update([]model.OrganizationModel{org}); err != nil {
+	if err := svc.orgSearch.Update([]model.CoreOrganization{org}); err != nil {
 		return nil, err
 	}
 	err = svc.orgCache.Set(org)
@@ -381,9 +381,9 @@ func newOrganizationMapper() *organizationMapper {
 	}
 }
 
-func (mp *organizationMapper) mapOrganization(m model.OrganizationModel, userId string) (*Organization, error) {
+func (mp *organizationMapper) mapOrganization(m model.CoreOrganization, userId string) (*Organization, error) {
 	res := &Organization{
-		Id:         m.GetID(),
+		ID:         m.GetID(),
 		Name:       m.GetName(),
 		CreateTime: m.GetCreateTime(),
 		UpdateTime: m.GetUpdateTime(),

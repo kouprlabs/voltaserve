@@ -18,7 +18,7 @@ func NewWorkspaceGuard() *WorkspaceGuard {
 	}
 }
 
-func (g *WorkspaceGuard) IsAuthorized(user model.UserModel, workspace model.WorkspaceModel, permission string) bool {
+func (g *WorkspaceGuard) IsAuthorized(user model.CoreUser, workspace model.CoreWorkspace, permission string) bool {
 	for _, p := range workspace.GetUserPermissions() {
 		if p.GetUserID() == user.GetID() && model.IsEquivalentPermission(p.GetValue(), permission) {
 			return true
@@ -39,7 +39,7 @@ func (g *WorkspaceGuard) IsAuthorized(user model.UserModel, workspace model.Work
 	return false
 }
 
-func (g *WorkspaceGuard) Authorize(user model.UserModel, workspace model.WorkspaceModel, permission string) error {
+func (g *WorkspaceGuard) Authorize(user model.CoreUser, workspace model.CoreWorkspace, permission string) error {
 	if !g.IsAuthorized(user, workspace, permission) {
 		err := errorpkg.NewWorkspacePermissionError(user, workspace, permission)
 		if g.IsAuthorized(user, workspace, model.PermissionViewer) {

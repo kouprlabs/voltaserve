@@ -21,7 +21,7 @@ func NewOrganizationSearch() *OrganizationSearch {
 	}
 }
 
-func (search *OrganizationSearch) Index(orgs []model.OrganizationModel) error {
+func (search *OrganizationSearch) Index(orgs []model.CoreOrganization) error {
 	if len(orgs) == 0 {
 		return nil
 	}
@@ -35,7 +35,7 @@ func (search *OrganizationSearch) Index(orgs []model.OrganizationModel) error {
 	return nil
 }
 
-func (search *OrganizationSearch) Update(orgs []model.OrganizationModel) error {
+func (search *OrganizationSearch) Update(orgs []model.CoreOrganization) error {
 	if len(orgs) == 0 {
 		return nil
 	}
@@ -59,12 +59,12 @@ func (search *OrganizationSearch) Delete(ids []string) error {
 	return nil
 }
 
-func (search *OrganizationSearch) Query(query string) ([]model.OrganizationModel, error) {
+func (search *OrganizationSearch) Query(query string) ([]model.CoreOrganization, error) {
 	hits, err := search.search.Query(search.index, query)
 	if err != nil {
 		return nil, err
 	}
-	var res []model.OrganizationModel
+	var res []model.CoreOrganization
 	for _, v := range hits {
 		var b []byte
 		b, err = json.Marshal(v)

@@ -3,7 +3,7 @@ package core
 import "voltaserve/model"
 
 type User struct {
-	Id         string  `json:"id"`
+	ID         string  `json:"id"`
 	FullName   string  `json:"fullName"`
 	Picture    *string `json:"picture,omitempty"`
 	Email      string  `json:"email"`
@@ -19,9 +19,9 @@ func newUserMapper() *userMapper {
 	return &userMapper{}
 }
 
-func (mp *userMapper) mapUser(user model.UserModel) *User {
+func (mp *userMapper) mapUser(user model.CoreUser) *User {
 	return &User{
-		Id:         user.GetID(),
+		ID:         user.GetID(),
 		FullName:   user.GetFullName(),
 		Picture:    user.GetPicture(),
 		Email:      user.GetEmail(),
@@ -31,7 +31,7 @@ func (mp *userMapper) mapUser(user model.UserModel) *User {
 	}
 }
 
-func (mp *userMapper) mapUsers(users []model.UserModel) ([]*User, error) {
+func (mp *userMapper) mapUsers(users []model.CoreUser) ([]*User, error) {
 	res := []*User{}
 	for _, u := range users {
 		res = append(res, mp.mapUser(u))

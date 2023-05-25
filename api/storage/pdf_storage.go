@@ -78,7 +78,7 @@ func (svc *pdfStorage) store(opts pdfStorageOptions) error {
 	return nil
 }
 
-func (svc *pdfStorage) generateThumbnail(snapshot model.SnapshotModel, opts pdfStorageOptions, inputPath string) error {
+func (svc *pdfStorage) generateThumbnail(snapshot model.CoreSnapshot, opts pdfStorageOptions, inputPath string) error {
 	outputPath := filepath.FromSlash(os.TempDir() + "/" + helpers.NewId() + ".jpg")
 	if err := svc.imageProc.Thumbnail(inputPath, 0, svc.config.Limits.ImagePreviewMaxHeight, outputPath); err != nil {
 		return err
@@ -107,7 +107,7 @@ func (svc *pdfStorage) generateThumbnail(snapshot model.SnapshotModel, opts pdfS
 	return nil
 }
 
-func (svc *pdfStorage) storeInS3(snapshot model.SnapshotModel, opts pdfStorageOptions, text string, size int64) error {
+func (svc *pdfStorage) storeInS3(snapshot model.CoreSnapshot, opts pdfStorageOptions, text string, size int64) error {
 	file, err := svc.fileCache.Get(opts.FileId)
 	if err != nil {
 		return err
@@ -152,7 +152,7 @@ func (svc *pdfStorage) extractText(inputPath string) (string, int64, error) {
 	}
 }
 
-func (svc *pdfStorage) deleteOCRData(snapshot model.SnapshotModel, opts pdfStorageOptions) error {
+func (svc *pdfStorage) deleteOCRData(snapshot model.CoreSnapshot, opts pdfStorageOptions) error {
 	if err := svc.minio.RemoveObject(snapshot.GetOCR().Key, snapshot.GetOCR().Bucket); err != nil {
 		return err
 	}

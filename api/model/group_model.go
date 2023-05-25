@@ -1,11 +1,11 @@
 package model
 
-type GroupModel interface {
+type CoreGroup interface {
 	GetID() string
 	GetName() string
 	GetOrganizationID() string
-	GetUserPermissions() []UserPermissionModel
-	GetGroupPermissions() []GroupPermissionModel
+	GetUserPermissions() []CoreUserPermission
+	GetGroupPermissions() []CoreGroupPermission
 	GetUsers() []string
 	GetCreateTime() string
 	GetUpdateTime() *string

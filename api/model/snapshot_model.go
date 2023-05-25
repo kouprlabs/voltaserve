@@ -1,6 +1,6 @@
 package model
 
-type SnapshotModel interface {
+type CoreSnapshot interface {
 	GetID() string
 	GetVersion() int64
 	GetOriginal() *S3Object

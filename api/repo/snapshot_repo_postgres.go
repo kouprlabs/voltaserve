@@ -213,7 +213,7 @@ func (repo *PostgresSnapshotRepo) find(id string) (*PostgresSnapshot, error) {
 	return &res, nil
 }
 
-func (repo *PostgresSnapshotRepo) Find(id string) (model.SnapshotModel, error) {
+func (repo *PostgresSnapshotRepo) Find(id string) (model.CoreSnapshot, error) {
 	res, err := repo.find(id)
 	if err != nil {
 		return nil, err
@@ -221,7 +221,7 @@ func (repo *PostgresSnapshotRepo) Find(id string) (model.SnapshotModel, error) {
 	return res, nil
 }
 
-func (repo *PostgresSnapshotRepo) Save(snapshot model.SnapshotModel) error {
+func (repo *PostgresSnapshotRepo) Save(snapshot model.CoreSnapshot) error {
 	if db := repo.db.Save(snapshot); db.Error != nil {
 		return db.Error
 	}
@@ -242,7 +242,7 @@ func (repo *PostgresSnapshotRepo) DeleteMappingsForFile(fileId string) error {
 	return nil
 }
 
-func (repo *PostgresSnapshotRepo) FindAllForFile(fileId string) ([]*PostgresSnapshot, error) {
+func (repo *PostgresSnapshotRepo) findAllForFile(fileId string) ([]*PostgresSnapshot, error) {
 	var res []*PostgresSnapshot
 	db := repo.db.
 		Raw("SELECT * FROM snapshot s LEFT JOIN snapshot_file sf ON s.id = sf.snapshot_id WHERE sf.file_id = ? ORDER BY s.version", fileId).
@@ -253,13 +253,13 @@ func (repo *PostgresSnapshotRepo) FindAllForFile(fileId string) ([]*PostgresSnap
 	return res, nil
 }
 
-func (repo *PostgresSnapshotRepo) FindAllDangling() ([]model.SnapshotModel, error) {
+func (repo *PostgresSnapshotRepo) FindAllDangling() ([]model.CoreSnapshot, error) {
 	var snapshots []*PostgresSnapshot
 	db := repo.db.Raw("SELECT * FROM snapshot s LEFT JOIN snapshot_file sf ON s.id = sf.snapshot_id WHERE sf.snapshot_id IS NULL").Scan(&snapshots)
 	if db.Error != nil {
 		return nil, db.Error
 	}
-	var res []model.SnapshotModel
+	var res []model.CoreSnapshot
 	for _, s := range snapshots {
 		res = append(res, s)
 	}

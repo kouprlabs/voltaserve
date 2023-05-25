@@ -49,16 +49,16 @@ func (g PostgresGroup) GetOrganizationID() string {
 	return g.OrganizationId
 }
 
-func (g PostgresGroup) GetUserPermissions() []model.UserPermissionModel {
-	var res []model.UserPermissionModel
+func (g PostgresGroup) GetUserPermissions() []model.CoreUserPermission {
+	var res []model.CoreUserPermission
 	for _, p := range g.UserPermissions {
 		res = append(res, p)
 	}
 	return res
 }
 
-func (g PostgresGroup) GetGroupPermissions() []model.GroupPermissionModel {
-	var res []model.GroupPermissionModel
+func (g PostgresGroup) GetGroupPermissions() []model.CoreGroupPermission {
+	var res []model.CoreGroupPermission
 	for _, p := range g.GroupPermissions {
 		res = append(res, p)
 	}
@@ -97,7 +97,7 @@ func NewPostgresGroupRepo() *PostgresGroupRepo {
 	}
 }
 
-func (repo *PostgresGroupRepo) Insert(opts GroupInsertOptions) (model.GroupModel, error) {
+func (repo *PostgresGroupRepo) Insert(opts GroupInsertOptions) (model.CoreGroup, error) {
 	group := PostgresGroup{
 		Id:             opts.Id,
 		Name:           opts.Name,
@@ -126,7 +126,7 @@ func (repo *PostgresGroupRepo) find(id string) (*PostgresGroup, error) {
 	return &res, nil
 }
 
-func (repo *PostgresGroupRepo) Find(id string) (model.GroupModel, error) {
+func (repo *PostgresGroupRepo) Find(id string) (model.CoreGroup, error) {
 	group, err := repo.find(id)
 	if err != nil {
 		return nil, err
@@ -187,7 +187,7 @@ func (repo *PostgresGroupRepo) GetIDsForOrganization(id string) ([]string, error
 	return res, nil
 }
 
-func (repo *PostgresGroupRepo) Save(group model.GroupModel) error {
+func (repo *PostgresGroupRepo) Save(group model.CoreGroup) error {
 	db := repo.db.Save(group)
 	if db.Error != nil {
 		return db.Error
@@ -243,7 +243,7 @@ func (repo *PostgresGroupRepo) GetIDs() ([]string, error) {
 	return res, nil
 }
 
-func (repo *PostgresGroupRepo) GetMembers(id string) ([]model.UserModel, error) {
+func (repo *PostgresGroupRepo) GetMembers(id string) ([]model.CoreUser, error) {
 	var entities []*PostgresUser
 	db := repo.db.
 		Raw(`SELECT DISTINCT u.* FROM "user" u INNER JOIN group_user gu ON u.id = gu.user_id WHERE gu.group_id = ?`, id).
@@ -251,7 +251,7 @@ func (repo *PostgresGroupRepo) GetMembers(id string) ([]model.UserModel, error) 
 	if db.Error != nil {
 		return nil, db.Error
 	}
-	var res []model.UserModel
+	var res []model.CoreUser
 	for _, u := range entities {
 		res = append(res, u)
 	}

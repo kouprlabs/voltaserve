@@ -10,17 +10,17 @@ type FileInsertOptions struct {
 }
 
 type CoreFileRepo interface {
-	New() model.FileModel
-	Insert(opts FileInsertOptions) (model.FileModel, error)
-	Find(id string) (model.FileModel, error)
-	FindChildren(id string) ([]model.FileModel, error)
-	FindPath(id string) ([]model.FileModel, error)
-	FindTree(id string) ([]model.FileModel, error)
+	New() model.CoreFile
+	Insert(opts FileInsertOptions) (model.CoreFile, error)
+	Find(id string) (model.CoreFile, error)
+	FindChildren(id string) ([]model.CoreFile, error)
+	FindPath(id string) ([]model.CoreFile, error)
+	FindTree(id string) ([]model.CoreFile, error)
 	GetIdsByWorkspace(workspaceId string) ([]string, error)
 	AssignSnapshots(cloneId string, originalId string) error
 	MoveSourceIntoTarget(targetId string, sourceId string) error
-	Save(file model.FileModel) error
-	BulkInsert(values []model.FileModel, chunkSize int) error
+	Save(file model.CoreFile) error
+	BulkInsert(values []model.CoreFile, chunkSize int) error
 	BulkInsertPermissions(values []*UserPermission, chunkSize int) error
 	Delete(id string) error
 	GetChildrenIDs(id string) ([]string, error)

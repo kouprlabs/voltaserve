@@ -13,11 +13,11 @@ type WorkspaceInsertOptions struct {
 }
 
 type CoreWorkspaceRepo interface {
-	Insert(opts WorkspaceInsertOptions) (model.WorkspaceModel, error)
-	FindByName(name string) (model.WorkspaceModel, error)
-	FindByID(id string) (model.WorkspaceModel, error)
-	UpdateName(id string, name string) (model.WorkspaceModel, error)
-	UpdateStorageCapacity(id string, storageCapacity int64) (model.WorkspaceModel, error)
+	Insert(opts WorkspaceInsertOptions) (model.CoreWorkspace, error)
+	FindByName(name string) (model.CoreWorkspace, error)
+	FindByID(id string) (model.CoreWorkspace, error)
+	UpdateName(id string, name string) (model.CoreWorkspace, error)
+	UpdateStorageCapacity(id string, storageCapacity int64) (model.CoreWorkspace, error)
 	Delete(id string) error
 	GetIDs() ([]string, error)
 	GetIdsByOrganization(organizationId string) ([]string, error)

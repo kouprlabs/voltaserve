@@ -5,7 +5,7 @@ const (
 	FileTypeFolder = "folder"
 )
 
-type FileModel interface {
+type CoreFile interface {
 	GetID() string
 	GetWorkspaceID() string
 	GetName() string
@@ -13,9 +13,9 @@ type FileModel interface {
 	GetParentID() *string
 	GetCreateTime() string
 	GetUpdateTime() *string
-	GetSnapshots() []SnapshotModel
-	GetUserPermissions() []UserPermissionModel
-	GetGroupPermissions() []GroupPermissionModel
+	GetSnapshots() []CoreSnapshot
+	GetUserPermissions() []CoreUserPermission
+	GetGroupPermissions() []CoreGroupPermission
 	GetText() *string
 	SetID(string)
 	SetParentID(*string)

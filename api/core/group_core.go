@@ -13,7 +13,7 @@ import (
 )
 
 type Group struct {
-	Id           string       `json:"id"`
+	ID           string       `json:"id"`
 	Name         string       `json:"name"`
 	Image        *string      `json:"image,omitempty"`
 	Organization Organization `json:"organization"`
@@ -41,11 +41,11 @@ type GroupUpdateImageOptions struct {
 }
 
 type GroupAddMemberOptions struct {
-	UserId string `json:"userId" validate:"required"`
+	UserID string `json:"userId" validate:"required"`
 }
 
 type GroupRemoveMemberOptions struct {
-	UserId string `json:"userId" validate:"required"`
+	UserID string `json:"userId" validate:"required"`
 }
 
 type GroupService struct {
@@ -120,7 +120,7 @@ func (svc *GroupService) Create(req GroupCreateOptions, userId string) (*Group, 
 	if err != nil {
 		return nil, err
 	}
-	if err := svc.groupSearch.Index([]model.GroupModel{group}); err != nil {
+	if err := svc.groupSearch.Index([]model.CoreGroup{group}); err != nil {
 		return nil, err
 	}
 	if err := svc.groupCache.Set(group); err != nil {
@@ -249,7 +249,7 @@ func (svc *GroupService) UpdateName(id string, name string, userId string) (*Gro
 	if err := svc.groupRepo.Save(group); err != nil {
 		return nil, err
 	}
-	if err := svc.groupSearch.Update([]model.GroupModel{group}); err != nil {
+	if err := svc.groupSearch.Update([]model.CoreGroup{group}); err != nil {
 		return nil, err
 	}
 	err = svc.groupCache.Set(group)
@@ -433,7 +433,7 @@ func (svc *GroupService) SearchMembers(id string, query string, userId string) (
 	if err != nil {
 		return nil, err
 	}
-	var members []model.UserModel
+	var members []model.CoreUser
 	for _, m := range groupMembers {
 		for _, u := range users {
 			if u.GetID() == m.GetID() {
@@ -498,7 +498,7 @@ func newGroupMapper() *groupMapper {
 	}
 }
 
-func (mp *groupMapper) mapGroup(m model.GroupModel, userId string) (*Group, error) {
+func (mp *groupMapper) mapGroup(m model.CoreGroup, userId string) (*Group, error) {
 	org, err := mp.orgCache.Get(m.GetOrganizationID())
 	if err != nil {
 		return nil, err
@@ -508,7 +508,7 @@ func (mp *groupMapper) mapGroup(m model.GroupModel, userId string) (*Group, erro
 		return nil, err
 	}
 	res := &Group{
-		Id:           m.GetID(),
+		ID:           m.GetID(),
 		Name:         m.GetName(),
 		Organization: *v,
 		CreateTime:   m.GetCreateTime(),
@@ -534,7 +534,7 @@ func (mp *groupMapper) mapGroup(m model.GroupModel, userId string) (*Group, erro
 	return res, nil
 }
 
-func (mp *groupMapper) mapGroups(groups []model.GroupModel, userId string) ([]*Group, error) {
+func (mp *groupMapper) mapGroups(groups []model.CoreGroup, userId string) ([]*Group, error) {
 	res := []*Group{}
 	for _, g := range groups {
 		v, err := mp.mapGroup(g, userId)

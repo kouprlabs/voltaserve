@@ -10,17 +10,17 @@ type GroupInsertOptions struct {
 }
 
 type CoreGroupRepo interface {
-	Insert(opts GroupInsertOptions) (model.GroupModel, error)
-	Find(id string) (model.GroupModel, error)
+	Insert(opts GroupInsertOptions) (model.CoreGroup, error)
+	Find(id string) (model.CoreGroup, error)
 	GetIDsForFile(fileId string) ([]string, error)
 	GetIDsForUser(userId string) ([]string, error)
 	GetIDsForOrganization(id string) ([]string, error)
-	Save(group model.GroupModel) error
+	Save(group model.CoreGroup) error
 	Delete(id string) error
 	AddUser(id string, userId string) error
 	RemoveMember(id string, userId string) error
 	GetIDs() ([]string, error)
-	GetMembers(id string) ([]model.UserModel, error)
+	GetMembers(id string) ([]model.CoreUser, error)
 	GrantUserPermission(id string, userId string, permission string) error
 	RevokeUserPermission(id string, userId string) error
 }

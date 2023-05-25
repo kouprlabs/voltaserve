@@ -59,16 +59,16 @@ func (w PostgresWorkspace) GetOrganizationID() string {
 	return w.OrganizationId
 }
 
-func (w PostgresWorkspace) GetUserPermissions() []model.UserPermissionModel {
-	var res []model.UserPermissionModel
+func (w PostgresWorkspace) GetUserPermissions() []model.CoreUserPermission {
+	var res []model.CoreUserPermission
 	for _, p := range w.UserPermissions {
 		res = append(res, p)
 	}
 	return res
 }
 
-func (w PostgresWorkspace) GetGroupPermissions() []model.GroupPermissionModel {
-	var res []model.GroupPermissionModel
+func (w PostgresWorkspace) GetGroupPermissions() []model.CoreGroupPermission {
+	var res []model.CoreGroupPermission
 	for _, p := range w.GroupPermissions {
 		res = append(res, p)
 	}
@@ -107,7 +107,7 @@ func NewPostgresWorkspaceRepo() *PostgresWorkspaceRepo {
 	}
 }
 
-func (repo *PostgresWorkspaceRepo) Insert(opts WorkspaceInsertOptions) (model.WorkspaceModel, error) {
+func (repo *PostgresWorkspaceRepo) Insert(opts WorkspaceInsertOptions) (model.CoreWorkspace, error) {
 	var id string
 	if len(opts.Id) > 0 {
 		id = opts.Id
@@ -148,7 +148,7 @@ func (repo *PostgresWorkspaceRepo) findByName(name string) (*PostgresWorkspace, 
 	return &res, nil
 }
 
-func (repo *PostgresWorkspaceRepo) FindByName(name string) (model.WorkspaceModel, error) {
+func (repo *PostgresWorkspaceRepo) FindByName(name string) (model.CoreWorkspace, error) {
 	workspace, err := repo.findByName(name)
 	if err != nil {
 		return nil, err
@@ -172,7 +172,7 @@ func (repo *PostgresWorkspaceRepo) findByID(id string) (*PostgresWorkspace, erro
 	return &res, nil
 }
 
-func (repo *PostgresWorkspaceRepo) FindByID(id string) (model.WorkspaceModel, error) {
+func (repo *PostgresWorkspaceRepo) FindByID(id string) (model.CoreWorkspace, error) {
 	workspace, err := repo.findByID(id)
 	if err != nil {
 		return nil, err
@@ -183,7 +183,7 @@ func (repo *PostgresWorkspaceRepo) FindByID(id string) (model.WorkspaceModel, er
 	return workspace, err
 }
 
-func (repo *PostgresWorkspaceRepo) UpdateName(id string, name string) (model.WorkspaceModel, error) {
+func (repo *PostgresWorkspaceRepo) UpdateName(id string, name string) (model.CoreWorkspace, error) {
 	workspace, err := repo.findByID(id)
 	if err != nil {
 		return &PostgresWorkspace{}, err
@@ -200,7 +200,7 @@ func (repo *PostgresWorkspaceRepo) UpdateName(id string, name string) (model.Wor
 	return res, nil
 }
 
-func (repo *PostgresWorkspaceRepo) UpdateStorageCapacity(id string, storageCapacity int64) (model.WorkspaceModel, error) {
+func (repo *PostgresWorkspaceRepo) UpdateStorageCapacity(id string, storageCapacity int64) (model.CoreWorkspace, error) {
 	workspace, err := repo.findByID(id)
 	if err != nil {
 		return &PostgresWorkspace{}, err

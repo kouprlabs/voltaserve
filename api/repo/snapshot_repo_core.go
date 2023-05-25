@@ -3,12 +3,11 @@ package repo
 import "voltaserve/model"
 
 type CoreSnapshotRepo interface {
-	Find(id string) (model.SnapshotModel, error)
-	Save(snapshot model.SnapshotModel) error
+	Find(id string) (model.CoreSnapshot, error)
+	Save(snapshot model.CoreSnapshot) error
 	MapWithFile(id string, fileId string) error
 	DeleteMappingsForFile(fileId string) error
-	FindAllForFile(fileId string) ([]*PostgresSnapshot, error)
-	FindAllDangling() ([]model.SnapshotModel, error)
+	FindAllDangling() ([]model.CoreSnapshot, error)
 	DeleteAllDangling() error
 	GetLatestVersionForFile(fileId string) (int64, error)
 }

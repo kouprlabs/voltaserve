@@ -101,7 +101,7 @@ func (svc *officeStorage) generatePDF(inputPath string) (string, error) {
 	return newOutputPath, nil
 }
 
-func (svc *officeStorage) save(snapshot model.SnapshotModel, opts officeStorageOptions, outputPath string) error {
+func (svc *officeStorage) save(snapshot model.CoreSnapshot, opts officeStorageOptions, outputPath string) error {
 	file, err := svc.fileCache.Get(opts.FileId)
 	if err != nil {
 		return err
