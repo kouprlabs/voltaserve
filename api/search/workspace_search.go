@@ -17,7 +17,7 @@ func NewWorkspaceSearch() *WorkspaceSearch {
 	return &WorkspaceSearch{
 		index:         infra.WorkspaceSearchIndex,
 		search:        infra.NewSearchManager(),
-		workspaceRepo: repo.NewPostgresWorkspaceRepo(),
+		workspaceRepo: repo.NewWorkspaceRepo(),
 	}
 }
 

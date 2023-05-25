@@ -34,7 +34,7 @@ type imageStorageOptions struct {
 func newImageStorage() *imageStorage {
 	return &imageStorage{
 		s3:              infra.NewS3Manager(),
-		snapshotRepo:    repo.NewPostgresSnapshotRepo(),
+		snapshotRepo:    repo.NewSnapshotRepo(),
 		fileSearch:      search.NewFileSearch(),
 		ocrStorage:      newOcrStorage(),
 		cmd:             infra.NewCommand(),

@@ -11,3 +11,7 @@ type CoreSnapshotRepo interface {
 	DeleteAllDangling() error
 	GetLatestVersionForFile(fileId string) (int64, error)
 }
+
+func NewSnapshotRepo() CoreSnapshotRepo {
+	return NewPostgresSnapshotRepo()
+}

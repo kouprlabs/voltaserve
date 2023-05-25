@@ -16,7 +16,7 @@ type GroupCache struct {
 func NewGroupCache() *GroupCache {
 	return &GroupCache{
 		redis:     infra.NewRedisManager(),
-		groupRepo: repo.NewPostgresGroupRepo(),
+		groupRepo: repo.NewGroupRepo(),
 		keyPrefix: "group:",
 	}
 }

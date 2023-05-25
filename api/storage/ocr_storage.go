@@ -58,7 +58,7 @@ type ocrOptions struct {
 func newOcrStorage() *ocrStorage {
 	return &ocrStorage{
 		minio:           infra.NewS3Manager(),
-		snapshotRepo:    repo.NewPostgresSnapshotRepo(),
+		snapshotRepo:    repo.NewSnapshotRepo(),
 		pdfStorage:      newPDFStorage(),
 		cmd:             infra.NewCommand(),
 		metadataUpdater: newMetadataUpdater(),

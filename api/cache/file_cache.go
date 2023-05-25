@@ -15,7 +15,7 @@ type FileCache struct {
 
 func NewFileCache() *FileCache {
 	return &FileCache{
-		fileRepo:  repo.NewPostgresFileRepo(),
+		fileRepo:  repo.NewFileRepo(),
 		redis:     infra.NewRedisManager(),
 		keyPrefix: "file:",
 	}

@@ -17,7 +17,7 @@ func NewGroupSearch() *GroupSearch {
 	return &GroupSearch{
 		index:     infra.GroupSearchIndex,
 		search:    infra.NewSearchManager(),
-		groupRepo: repo.NewPostgresGroupRepo(),
+		groupRepo: repo.NewGroupRepo(),
 	}
 }
 

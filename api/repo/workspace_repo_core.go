@@ -24,3 +24,7 @@ type CoreWorkspaceRepo interface {
 	UpdateRootID(id string, rootNodeId string) error
 	GrantUserPermission(id string, userId string, permission string) error
 }
+
+func NewWorkspaceRepo() CoreWorkspaceRepo {
+	return NewPostgresWorkspaceRepo()
+}

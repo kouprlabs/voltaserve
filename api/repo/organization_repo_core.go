@@ -21,3 +21,7 @@ type CoreOrganizationRepo interface {
 	GrantUserPermission(id string, userId string, permission string) error
 	RevokeUserPermission(id string, userId string) error
 }
+
+func NewOrganizationRepo() CoreOrganizationRepo {
+	return NewPostgresOrganizationRepo()
+}

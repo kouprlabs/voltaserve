@@ -63,14 +63,14 @@ type OrganizationService struct {
 
 func NewOrganizationService() *OrganizationService {
 	return &OrganizationService{
-		orgRepo:      repo.NewPostgresOrganizationRepo(),
+		orgRepo:      repo.NewOrganizationRepo(),
 		orgCache:     cache.NewOrganizationCache(),
 		orgGuard:     guard.NewOrganizationGuard(),
 		orgSearch:    search.NewOrganizationSearch(),
 		orgMapper:    newOrganizationMapper(),
-		userRepo:     repo.NewPostgresUserRepo(),
+		userRepo:     repo.NewUserRepo(),
 		userSearch:   search.NewUserSearch(),
-		groupRepo:    repo.NewPostgresGroupRepo(),
+		groupRepo:    repo.NewGroupRepo(),
 		groupService: NewGroupService(),
 		groupMapper:  newGroupMapper(),
 		imageProc:    infra.NewImageProcessor(),

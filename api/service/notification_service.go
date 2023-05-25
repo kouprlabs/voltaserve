@@ -15,8 +15,8 @@ type NotificationService struct {
 
 func NewNotificationService() *NotificationService {
 	return &NotificationService{
-		userRepo:         repo.NewPostgresUserRepo(),
-		invitationRepo:   repo.NewPostgresInvitationRepo(),
+		userRepo:         repo.NewUserRepo(),
+		invitationRepo:   repo.NewInvitationRepo(),
 		invitationMapper: newInvitationMapper(),
 	}
 }

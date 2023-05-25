@@ -16,7 +16,7 @@ type OrganizationCache struct {
 func NewOrganizationCache() *OrganizationCache {
 	return &OrganizationCache{
 		redis:     infra.NewRedisManager(),
-		orgRepo:   repo.NewPostgresOrganizationRepo(),
+		orgRepo:   repo.NewOrganizationRepo(),
 		keyPrefix: "organization:",
 	}
 }

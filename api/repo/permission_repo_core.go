@@ -20,3 +20,7 @@ type CorePermissionRepo interface {
 	GetUserPermissions(id string) ([]*UserPermission, error)
 	GetGroupPermissions(id string) ([]*GroupPermission, error)
 }
+
+func NewPermissionRepo() CorePermissionRepo {
+	return NewPostgresPermissionRepo()
+}

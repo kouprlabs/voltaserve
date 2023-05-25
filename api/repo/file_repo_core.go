@@ -32,3 +32,7 @@ type CoreFileRepo interface {
 	GrantGroupPermission(id string, groupId string, permission string) error
 	RevokeGroupPermission(id string, groupId string) error
 }
+
+func NewFileRepo() CoreFileRepo {
+	return NewPostgresFileRepo()
+}

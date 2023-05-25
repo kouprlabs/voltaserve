@@ -16,15 +16,15 @@ type storageMetadataUpdater struct {
 
 func newMetadataUpdater() *storageMetadataUpdater {
 	return &storageMetadataUpdater{
-		snapshotRepo: repo.NewPostgresSnapshotRepo(),
-		fileRepo:     repo.NewPostgresFileRepo(),
+		snapshotRepo: repo.NewSnapshotRepo(),
+		fileRepo:     repo.NewFileRepo(),
 		fileCache:    cache.NewFileCache(),
 		fileSearch:   search.NewFileSearch(),
 	}
 }
 
 func (mu *storageMetadataUpdater) update(snapshot model.CoreSnapshot, fileId string) error {
-	if err := repo.NewPostgresSnapshotRepo().Save(snapshot); err != nil {
+	if err := repo.NewSnapshotRepo().Save(snapshot); err != nil {
 		return err
 	}
 	file, err := mu.fileRepo.Find(fileId)

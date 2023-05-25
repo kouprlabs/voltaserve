@@ -40,12 +40,12 @@ type InvitationService struct {
 
 func NewInvitationService() *InvitationService {
 	return &InvitationService{
-		orgRepo:          repo.NewPostgresOrganizationRepo(),
+		orgRepo:          repo.NewOrganizationRepo(),
 		orgCache:         cache.NewOrganizationCache(),
 		orgGuard:         guard.NewOrganizationGuard(),
-		invitationRepo:   repo.NewPostgresInvitationRepo(),
+		invitationRepo:   repo.NewInvitationRepo(),
 		invitationMapper: newInvitationMapper(),
-		userRepo:         repo.NewPostgresUserRepo(),
+		userRepo:         repo.NewUserRepo(),
 		mailTmpl:         infra.NewMailTemplate(),
 		orgMapper:        newOrganizationMapper(),
 		config:           config.GetConfig(),
@@ -274,7 +274,7 @@ type invitationMapper struct {
 func newInvitationMapper() *invitationMapper {
 	return &invitationMapper{
 		orgCache:   cache.NewOrganizationCache(),
-		userRepo:   repo.NewPostgresUserRepo(),
+		userRepo:   repo.NewUserRepo(),
 		userMapper: newUserMapper(),
 		orgMapper:  newOrganizationMapper(),
 	}

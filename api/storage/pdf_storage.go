@@ -33,7 +33,7 @@ type pdfStorageOptions struct {
 func newPDFStorage() *pdfStorage {
 	return &pdfStorage{
 		minio:           infra.NewS3Manager(),
-		snapshotRepo:    repo.NewPostgresSnapshotRepo(),
+		snapshotRepo:    repo.NewSnapshotRepo(),
 		cmd:             infra.NewCommand(),
 		metadataUpdater: newMetadataUpdater(),
 		workspaceCache:  cache.NewWorkspaceCache(),

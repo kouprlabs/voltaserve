@@ -35,8 +35,8 @@ type StorageOptions struct {
 func NewStorageService() *StorageService {
 	return &StorageService{
 		s3:             infra.NewS3Manager(),
-		snapshotRepo:   repo.NewPostgresSnapshotRepo(),
-		fileRepo:       repo.NewPostgresFileRepo(),
+		snapshotRepo:   repo.NewSnapshotRepo(),
+		fileRepo:       repo.NewFileRepo(),
 		fileCache:      cache.NewFileCache(),
 		fileMapper:     service.NewFileMapper(),
 		ocrStorage:     newOcrStorage(),

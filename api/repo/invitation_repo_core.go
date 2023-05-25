@@ -16,3 +16,7 @@ type CoreInvitationRepo interface {
 	Save(org model.CoreInvitation) error
 	Delete(id string) error
 }
+
+func NewInvitationRepo() CoreInvitationRepo {
+	return NewPostgresInvitationRepo()
+}

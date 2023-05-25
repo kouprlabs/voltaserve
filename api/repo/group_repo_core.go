@@ -24,3 +24,7 @@ type CoreGroupRepo interface {
 	GrantUserPermission(id string, userId string, permission string) error
 	RevokeUserPermission(id string, userId string) error
 }
+
+func NewGroupRepo() CoreGroupRepo {
+	return NewPostgresGroupRepo()
+}

@@ -26,14 +26,14 @@ type StorageService struct {
 
 func NewStorageService() *StorageService {
 	return &StorageService{
-		workspaceRepo:  repo.NewPostgresWorkspaceRepo(),
+		workspaceRepo:  repo.NewWorkspaceRepo(),
 		workspaceCache: cache.NewWorkspaceCache(),
 		workspaceGuard: guard.NewWorkspaceGuard(),
-		fileRepo:       repo.NewPostgresFileRepo(),
+		fileRepo:       repo.NewFileRepo(),
 		fileCache:      cache.NewFileCache(),
 		fileGuard:      guard.NewFileGuard(),
 		storageMapper:  newStorageMapper(),
-		userRepo:       repo.NewPostgresUserRepo(),
+		userRepo:       repo.NewUserRepo(),
 	}
 }
 

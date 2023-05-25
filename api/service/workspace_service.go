@@ -64,12 +64,12 @@ type WorkspaceService struct {
 
 func NewWorkspaceService() *WorkspaceService {
 	return &WorkspaceService{
-		workspaceRepo:   repo.NewPostgresWorkspaceRepo(),
+		workspaceRepo:   repo.NewWorkspaceRepo(),
 		workspaceCache:  cache.NewWorkspaceCache(),
 		workspaceSearch: search.NewWorkspaceSearch(),
 		workspaceGuard:  guard.NewWorkspaceGuard(),
 		workspaceMapper: newWorkspaceMapper(),
-		fileRepo:        repo.NewPostgresFileRepo(),
+		fileRepo:        repo.NewFileRepo(),
 		fileCache:       cache.NewFileCache(),
 		fileGuard:       guard.NewFileGuard(),
 		fileMapper:      NewFileMapper(),

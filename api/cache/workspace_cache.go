@@ -16,7 +16,7 @@ type WorkspaceCache struct {
 func NewWorkspaceCache() *WorkspaceCache {
 	return &WorkspaceCache{
 		redis:         infra.NewRedisManager(),
-		workspaceRepo: repo.NewPostgresWorkspaceRepo(),
+		workspaceRepo: repo.NewWorkspaceRepo(),
 		keyPrefix:     "workspace:",
 	}
 }

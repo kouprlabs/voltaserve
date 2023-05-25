@@ -33,7 +33,7 @@ type videoStorageOptions struct {
 func newVideoStorage() *videoStorage {
 	return &videoStorage{
 		minio:           infra.NewS3Manager(),
-		snapshotRepo:    repo.NewPostgresSnapshotRepo(),
+		snapshotRepo:    repo.NewSnapshotRepo(),
 		cmd:             infra.NewCommand(),
 		metadataUpdater: newMetadataUpdater(),
 		workspaceCache:  cache.NewWorkspaceCache(),

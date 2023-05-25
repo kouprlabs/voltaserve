@@ -7,3 +7,7 @@ type CoreUserRepo interface {
 	FindByEmail(email string) (model.CoreUser, error)
 	FindAll() ([]model.CoreUser, error)
 }
+
+func NewUserRepo() CoreUserRepo {
+	return NewPostgresUserRepo()
+}

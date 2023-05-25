@@ -179,22 +179,22 @@ type FileService struct {
 
 func NewFileService() *FileService {
 	return &FileService{
-		fileRepo:       repo.NewPostgresFileRepo(),
+		fileRepo:       repo.NewFileRepo(),
 		fileCache:      cache.NewFileCache(),
 		fileSearch:     search.NewFileSearch(),
 		fileGuard:      guard.NewFileGuard(),
 		fileMapper:     NewFileMapper(),
 		workspaceGuard: guard.NewWorkspaceGuard(),
 		workspaceCache: cache.NewWorkspaceCache(),
-		workspaceRepo:  repo.NewPostgresWorkspaceRepo(),
+		workspaceRepo:  repo.NewWorkspaceRepo(),
 		workspaceSvc:   NewWorkspaceService(),
-		snapshotRepo:   repo.NewPostgresSnapshotRepo(),
-		userRepo:       repo.NewPostgresUserRepo(),
+		snapshotRepo:   repo.NewSnapshotRepo(),
+		userRepo:       repo.NewUserRepo(),
 		userMapper:     newUserMapper(),
 		groupCache:     cache.NewGroupCache(),
 		groupGuard:     guard.NewGroupGuard(),
 		groupMapper:    newGroupMapper(),
-		permissionRepo: repo.NewPostgresPermissionRepo(),
+		permissionRepo: repo.NewPermissionRepo(),
 		s3:             infra.NewS3Manager(),
 	}
 }

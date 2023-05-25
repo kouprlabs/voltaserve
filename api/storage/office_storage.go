@@ -32,7 +32,7 @@ type officeStorageOptions struct {
 func newOfficeStorage() *officeStorage {
 	return &officeStorage{
 		s3:              infra.NewS3Manager(),
-		snapshotRepo:    repo.NewPostgresSnapshotRepo(),
+		snapshotRepo:    repo.NewSnapshotRepo(),
 		ocrStorage:      newOcrStorage(),
 		cmd:             infra.NewCommand(),
 		metadataUpdater: newMetadataUpdater(),
