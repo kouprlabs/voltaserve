@@ -113,7 +113,7 @@ func (svc *ocrStorage) sendToPDFStorage(snapshot model.SnapshotModel, opts ocrOp
 	if err != nil {
 		return err
 	}
-	workspace, err := svc.workspaceCache.Get(file.GetWorkspaceId())
+	workspace, err := svc.workspaceCache.Get(file.GetWorkspaceID())
 	if err != nil {
 		return err
 	}

@@ -116,7 +116,7 @@ func (svc *StorageService) GetFileUsage(fileId string, userId string) (*StorageU
 	if err != nil {
 		return nil, err
 	}
-	workspace, err := svc.workspaceCache.Get(file.GetWorkspaceId())
+	workspace, err := svc.workspaceCache.Get(file.GetWorkspaceID())
 	if err != nil {
 		return nil, err
 	}

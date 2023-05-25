@@ -106,7 +106,7 @@ func (svc *officeStorage) save(snapshot model.SnapshotModel, opts officeStorageO
 	if err != nil {
 		return err
 	}
-	workspace, err := svc.workspaceCache.Get(file.GetWorkspaceId())
+	workspace, err := svc.workspaceCache.Get(file.GetWorkspaceID())
 	if err != nil {
 		return err
 	}

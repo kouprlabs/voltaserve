@@ -691,7 +691,7 @@ func (svc *FileService) Search(req FileSearchOptions, page uint, size uint, user
 func (svc *FileService) doFilteringAndPaging(req FileSearchOptions, files []model.FileModel, page uint, size uint, userId string) ([]model.FileModel, uint, uint, error) {
 	filtered, _ := rxgo.Just(files)().
 		Filter(func(v interface{}) bool {
-			return v.(model.FileModel).GetWorkspaceId() == req.WorkspaceId
+			return v.(model.FileModel).GetWorkspaceID() == req.WorkspaceId
 		}).
 		Filter(func(v interface{}) bool {
 			if req.Type != nil {
@@ -845,7 +845,7 @@ func (svc *FileService) Copy(targetId string, sourceIds []string, userId string)
 			c := svc.fileRepo.New()
 			c.SetID(helpers.NewId())
 			c.SetParentID(o.GetParentID())
-			c.SetWorkspaceID(o.GetWorkspaceId())
+			c.SetWorkspaceID(o.GetWorkspaceID())
 			c.SetType(o.GetType())
 			c.SetName(o.GetName())
 			c.SetCreateTime(time.Now().UTC().Format(time.RFC3339))
@@ -1050,7 +1050,7 @@ func (svc *FileService) Delete(ids []string, userId string) ([]string, error) {
 			return nil, err
 		}
 		if file.GetParentID() == nil {
-			workspace, err := svc.workspaceCache.Get(file.GetWorkspaceId())
+			workspace, err := svc.workspaceCache.Get(file.GetWorkspaceID())
 			if err != nil {
 				return []string{}, err
 			}
@@ -1173,7 +1173,7 @@ func (svc *FileService) GrantUserPermission(ids []string, assigneeId string, per
 		if _, err := svc.fileCache.Refresh(file.GetID()); err != nil {
 			return err
 		}
-		workspace, err := svc.workspaceRepo.FindByID(file.GetWorkspaceId())
+		workspace, err := svc.workspaceRepo.FindByID(file.GetWorkspaceID())
 		if err != nil {
 			return err
 		}
@@ -1254,7 +1254,7 @@ func (svc *FileService) GrantGroupPermission(ids []string, groupId string, permi
 		if _, err := svc.fileCache.Refresh(file.GetID()); err != nil {
 			return err
 		}
-		workspace, err := svc.workspaceRepo.FindByID(file.GetWorkspaceId())
+		workspace, err := svc.workspaceRepo.FindByID(file.GetWorkspaceID())
 		if err != nil {
 			return err
 		}
@@ -1398,7 +1398,7 @@ func (mp *FileMapper) MapFile(m model.FileModel, userId string) (*File, error) {
 	snapshots := m.GetSnapshots()
 	res := &File{
 		Id:          m.GetID(),
-		WorkspaceId: m.GetWorkspaceId(),
+		WorkspaceId: m.GetWorkspaceID(),
 		Name:        m.GetName(),
 		Type:        m.GetType(),
 		ParentId:    m.GetParentID(),

@@ -56,7 +56,7 @@ func (svc *StorageService) Store(opts StorageOptions, userId string) (*core.File
 	if err = svc.fileCache.Set(file); err != nil {
 		return nil, err
 	}
-	workspace, err := svc.workspaceCache.Get(file.GetWorkspaceId())
+	workspace, err := svc.workspaceCache.Get(file.GetWorkspaceID())
 	if err != nil {
 		return nil, err
 	}

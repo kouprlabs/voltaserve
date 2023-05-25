@@ -112,7 +112,7 @@ func (svc *pdfStorage) storeInS3(snapshot model.SnapshotModel, opts pdfStorageOp
 	if err != nil {
 		return err
 	}
-	workspace, err := svc.workspaceCache.Get(file.GetWorkspaceId())
+	workspace, err := svc.workspaceCache.Get(file.GetWorkspaceID())
 	if err != nil {
 		return err
 	}

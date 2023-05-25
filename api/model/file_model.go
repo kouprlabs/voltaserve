@@ -7,7 +7,7 @@ const (
 
 type FileModel interface {
 	GetID() string
-	GetWorkspaceId() string
+	GetWorkspaceID() string
 	GetName() string
 	GetType() string
 	GetParentID() *string

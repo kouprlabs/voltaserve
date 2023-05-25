@@ -44,7 +44,7 @@ func (i PostgresFile) GetID() string {
 	return i.Id
 }
 
-func (i PostgresFile) GetWorkspaceId() string {
+func (i PostgresFile) GetWorkspaceID() string {
 	return i.WorkspaceId
 }
 
