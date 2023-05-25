@@ -1,19 +1,19 @@
 package router
 
 import (
-	"voltaserve/core"
 	"voltaserve/errorpkg"
+	"voltaserve/service"
 
 	"github.com/gofiber/fiber/v2"
 )
 
 type StorageRouter struct {
-	storageSvc *core.StorageService
+	storageSvc *service.StorageService
 }
 
 func NewStorageRouter() *StorageRouter {
 	return &StorageRouter{
-		storageSvc: core.NewStorageService(),
+		storageSvc: service.NewStorageService(),
 	}
 }
 

@@ -2,20 +2,20 @@ package router
 
 import (
 	"net/http"
-	"voltaserve/core"
 	"voltaserve/errorpkg"
+	"voltaserve/service"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 )
 
 type OrganizationRouter struct {
-	orgSvc *core.OrganizationService
+	orgSvc *service.OrganizationService
 }
 
 func NewOrganizationRouter() *OrganizationRouter {
 	return &OrganizationRouter{
-		orgSvc: core.NewOrganizationService(),
+		orgSvc: service.NewOrganizationService(),
 	}
 }
 
@@ -47,14 +47,14 @@ func (r *OrganizationRouter) AppendRoutes(g fiber.Router) {
 // @Router      /organizations [post]
 func (r *OrganizationRouter) Create(c *fiber.Ctx) error {
 	userId := GetUserId(c)
-	req := new(core.OrganizationCreateOptions)
+	req := new(service.OrganizationCreateOptions)
 	if err := c.BodyParser(req); err != nil {
 		return err
 	}
 	if err := validator.New().Struct(req); err != nil {
 		return errorpkg.NewRequestBodyValidationError(err)
 	}
-	res, err := r.orgSvc.Create(core.OrganizationCreateOptions{
+	res, err := r.orgSvc.Create(service.OrganizationCreateOptions{
 		Name:  req.Name,
 		Image: req.Image,
 	}, userId)
@@ -120,7 +120,7 @@ func (r *OrganizationRouter) Delete(c *fiber.Ctx) error {
 // @Router      /organizations/{id}/update_name [post]
 func (r *OrganizationRouter) UpdateName(c *fiber.Ctx) error {
 	userId := GetUserId(c)
-	req := new(core.OrganizationUpdateNameOptions)
+	req := new(service.OrganizationUpdateNameOptions)
 	if err := c.BodyParser(req); err != nil {
 		return err
 	}
@@ -162,7 +162,7 @@ func (r *OrganizationRouter) GetAll(c *fiber.Ctx) error {
 // @Failure     500  {object} errorpkg.ErrorResponse
 // @Router      /organizations/search [get]
 func (r *OrganizationRouter) Search(c *fiber.Ctx) error {
-	req := new(core.OrganizationSearchOptions)
+	req := new(service.OrganizationSearchOptions)
 	if err := c.BodyParser(req); err != nil {
 		return err
 	}
@@ -270,7 +270,7 @@ func (r *OrganizationRouter) Leave(c *fiber.Ctx) error {
 // @Router      /organizations/{id}/remove_member [post]
 func (r *OrganizationRouter) RemoveMember(c *fiber.Ctx) error {
 	userId := GetUserId(c)
-	req := new(core.OrganizationRemoveMemberOptions)
+	req := new(service.OrganizationRemoveMemberOptions)
 	if err := c.BodyParser(req); err != nil {
 		return err
 	}

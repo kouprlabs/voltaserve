@@ -6,11 +6,11 @@ import (
 	"strings"
 	"voltaserve/cache"
 	"voltaserve/config"
-	"voltaserve/core"
 	"voltaserve/helpers"
 	"voltaserve/infra"
 	"voltaserve/model"
 	"voltaserve/repo"
+	"voltaserve/service"
 )
 
 type StorageService struct {
@@ -18,7 +18,7 @@ type StorageService struct {
 	snapshotRepo   repo.CoreSnapshotRepo
 	fileRepo       repo.CoreFileRepo
 	fileCache      *cache.FileCache
-	fileMapper     *core.FileMapper
+	fileMapper     *service.FileMapper
 	ocrStorage     *ocrStorage
 	imageStorage   *imageStorage
 	officeStorage  *officeStorage
@@ -38,7 +38,7 @@ func NewStorageService() *StorageService {
 		snapshotRepo:   repo.NewPostgresSnapshotRepo(),
 		fileRepo:       repo.NewPostgresFileRepo(),
 		fileCache:      cache.NewFileCache(),
-		fileMapper:     core.NewFileMapper(),
+		fileMapper:     service.NewFileMapper(),
 		ocrStorage:     newOcrStorage(),
 		imageStorage:   newImageStorage(),
 		officeStorage:  newOfficeStorage(),
@@ -48,7 +48,7 @@ func NewStorageService() *StorageService {
 	}
 }
 
-func (svc *StorageService) Store(opts StorageOptions, userId string) (*core.File, error) {
+func (svc *StorageService) Store(opts StorageOptions, userId string) (*service.File, error) {
 	file, err := svc.fileRepo.Find(opts.FileId)
 	if err != nil {
 		return nil, err

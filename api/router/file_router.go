@@ -8,10 +8,10 @@ import (
 	"path/filepath"
 	"strconv"
 	"voltaserve/config"
-	"voltaserve/core"
 	"voltaserve/errorpkg"
 	"voltaserve/helpers"
 	"voltaserve/model"
+	"voltaserve/service"
 	"voltaserve/storage"
 
 	"github.com/go-playground/validator/v10"
@@ -20,16 +20,16 @@ import (
 )
 
 type FileRouter struct {
-	fileSvc      *core.FileService
-	workspaceSvc *core.WorkspaceService
+	fileSvc      *service.FileService
+	workspaceSvc *service.WorkspaceService
 	storageSvc   *storage.StorageService
 	config       config.Config
 }
 
 func NewFileRouter() *FileRouter {
 	return &FileRouter{
-		fileSvc:      core.NewFileService(),
-		workspaceSvc: core.NewWorkspaceService(),
+		fileSvc:      service.NewFileService(),
+		workspaceSvc: service.NewWorkspaceService(),
 		storageSvc:   storage.NewStorageService(),
 		config:       config.GetConfig(),
 	}
@@ -100,7 +100,7 @@ func (r *FileRouter) Upload(c *fiber.Ctx) error {
 	if !ok {
 		return errorpkg.NewStorageLimitExceededError()
 	}
-	file, err := r.fileSvc.Create(core.FileCreateOptions{
+	file, err := r.fileSvc.Create(service.FileCreateOptions{
 		Name:        fh.Filename,
 		Type:        model.FileTypeFile,
 		ParentId:    &parentId,
@@ -178,7 +178,7 @@ func (r *FileRouter) Patch(c *fiber.Ctx) error {
 // @Router      /files/create_folder [post]
 func (r *FileRouter) CreateFolder(c *fiber.Ctx) error {
 	userId := GetUserId(c)
-	req := new(core.FileCreateFolderOptions)
+	req := new(service.FileCreateFolderOptions)
 	if err := c.BodyParser(req); err != nil {
 		return err
 	}
@@ -193,7 +193,7 @@ func (r *FileRouter) CreateFolder(c *fiber.Ctx) error {
 		}
 		parentId = &workspace.RootID
 	}
-	res, err := r.fileSvc.Create(core.FileCreateOptions{
+	res, err := r.fileSvc.Create(service.FileCreateOptions{
 		Name:        req.Name,
 		Type:        model.FileTypeFolder,
 		ParentId:    parentId,
@@ -219,7 +219,7 @@ func (r *FileRouter) CreateFolder(c *fiber.Ctx) error {
 // @Router      /files/search [post]
 func (r *FileRouter) Search(c *fiber.Ctx) error {
 	userId := GetUserId(c)
-	req := new(core.FileSearchOptions)
+	req := new(service.FileSearchOptions)
 	if err := c.BodyParser(req); err != nil {
 		return err
 	}
@@ -381,7 +381,7 @@ func (r *FileRouter) GetPath(c *fiber.Ctx) error {
 // @Router      /files/{id}/copy [post]
 func (r *FileRouter) Copy(c *fiber.Ctx) error {
 	userId := GetUserId(c)
-	req := new(core.FileCopyOptions)
+	req := new(service.FileCopyOptions)
 	if err := c.BodyParser(req); err != nil {
 		return err
 	}
@@ -408,7 +408,7 @@ func (r *FileRouter) Copy(c *fiber.Ctx) error {
 // @Router      /files/{id}/move [post]
 func (r *FileRouter) Move(c *fiber.Ctx) error {
 	userId := GetUserId(c)
-	req := new(core.FileMoveOptions)
+	req := new(service.FileMoveOptions)
 	if err := c.BodyParser(req); err != nil {
 		return err
 	}
@@ -435,7 +435,7 @@ func (r *FileRouter) Move(c *fiber.Ctx) error {
 // @Router      /files/{id}/rename [post]
 func (r *FileRouter) Rename(c *fiber.Ctx) error {
 	userId := GetUserId(c)
-	req := new(core.FileRenameOptions)
+	req := new(service.FileRenameOptions)
 	if err := c.BodyParser(req); err != nil {
 		return err
 	}
@@ -480,7 +480,7 @@ func (r *FileRouter) Delete(c *fiber.Ctx) error {
 // @Router      /files/batch_get [post]
 func (r *FileRouter) BatchGet(c *fiber.Ctx) error {
 	userId := GetUserId(c)
-	req := new(core.FileBatchGetOptions)
+	req := new(service.FileBatchGetOptions)
 	if err := c.BodyParser(req); err != nil {
 		return err
 	}
@@ -506,7 +506,7 @@ func (r *FileRouter) BatchGet(c *fiber.Ctx) error {
 // @Router      /files/batch_delete [post]
 func (r *FileRouter) BatchDelete(c *fiber.Ctx) error {
 	userId := GetUserId(c)
-	req := new(core.FileBatchDeleteOptions)
+	req := new(service.FileBatchDeleteOptions)
 	if err := c.BodyParser(req); err != nil {
 		return err
 	}
@@ -574,7 +574,7 @@ func (r *FileRouter) GetItemCount(c *fiber.Ctx) error {
 // @Router      /files/grant_user_permission [post]
 func (r *FileRouter) GrantUserPermission(c *fiber.Ctx) error {
 	userId := GetUserId(c)
-	req := new(core.FileGrantUserPermissionOptions)
+	req := new(service.FileGrantUserPermissionOptions)
 	if err := c.BodyParser(req); err != nil {
 		return err
 	}
@@ -600,7 +600,7 @@ func (r *FileRouter) GrantUserPermission(c *fiber.Ctx) error {
 // @Router      /files/revoke_user_permission [post]
 func (r *FileRouter) RevokeUserPermission(c *fiber.Ctx) error {
 	userId := GetUserId(c)
-	req := new(core.FileRevokeUserPermissionOptions)
+	req := new(service.FileRevokeUserPermissionOptions)
 	if err := c.BodyParser(req); err != nil {
 		return err
 	}
@@ -626,7 +626,7 @@ func (r *FileRouter) RevokeUserPermission(c *fiber.Ctx) error {
 // @Router      /files/grant_group_permission [post]
 func (r *FileRouter) GrantGroupPermission(c *fiber.Ctx) error {
 	userId := GetUserId(c)
-	req := new(core.FileGrantGroupPermissionOptions)
+	req := new(service.FileGrantGroupPermissionOptions)
 	if err := c.BodyParser(req); err != nil {
 		return err
 	}
@@ -652,7 +652,7 @@ func (r *FileRouter) GrantGroupPermission(c *fiber.Ctx) error {
 // @Router      /files/{id}/revoke_group_permission [post]
 func (r *FileRouter) RevokeGroupPermission(c *fiber.Ctx) error {
 	userId := GetUserId(c)
-	req := new(core.FileRevokeGroupPermissionOptions)
+	req := new(service.FileRevokeGroupPermissionOptions)
 	if err := c.BodyParser(req); err != nil {
 		return err
 	}
@@ -706,13 +706,13 @@ func (r *FileRouter) GetGroupPermissions(c *fiber.Ctx) error {
 }
 
 type FileDownloadRouter struct {
-	fileSvc               *core.FileService
+	fileSvc               *service.FileService
 	accessTokenCookieName string
 }
 
 func NewFileDownloadRouter() *FileDownloadRouter {
 	return &FileDownloadRouter{
-		fileSvc:               core.NewFileService(),
+		fileSvc:               service.NewFileService(),
 		accessTokenCookieName: "voltaserve_access_token",
 	}
 }

@@ -2,20 +2,20 @@ package router
 
 import (
 	"net/http"
-	"voltaserve/core"
 	"voltaserve/errorpkg"
+	"voltaserve/service"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 )
 
 type GroupRouter struct {
-	groupSvc *core.GroupService
+	groupSvc *service.GroupService
 }
 
 func NewGroupRouter() *GroupRouter {
 	return &GroupRouter{
-		groupSvc: core.NewGroupService(),
+		groupSvc: service.NewGroupService(),
 	}
 }
 
@@ -47,7 +47,7 @@ func (r *GroupRouter) AppendRoutes(g fiber.Router) {
 // @Router      /groups [post]
 func (r *GroupRouter) Create(c *fiber.Ctx) error {
 	userId := GetUserId(c)
-	req := new(core.GroupCreateOptions)
+	req := new(service.GroupCreateOptions)
 	if err := c.BodyParser(req); err != nil {
 		return err
 	}
@@ -109,7 +109,7 @@ func (r *GroupRouter) GetAll(c *fiber.Ctx) error {
 // @Failure     500  {object} errorpkg.ErrorResponse
 // @Router      /groups/search [get]
 func (r *GroupRouter) Search(c *fiber.Ctx) error {
-	req := new(core.GroupSearchOptions)
+	req := new(service.GroupSearchOptions)
 	if err := c.BodyParser(req); err != nil {
 		return err
 	}
@@ -136,7 +136,7 @@ func (r *GroupRouter) Search(c *fiber.Ctx) error {
 // @Router      /groups/{id}/update_name [post]
 func (r *GroupRouter) UpdateName(c *fiber.Ctx) error {
 	userId := GetUserId(c)
-	req := new(core.GroupUpdateNameOptions)
+	req := new(service.GroupUpdateNameOptions)
 	if err := c.BodyParser(req); err != nil {
 		return err
 	}
@@ -184,7 +184,7 @@ func (r *GroupRouter) Delete(c *fiber.Ctx) error {
 // @Router      /groups/{id}/add_member [post]
 func (r *GroupRouter) AddMember(c *fiber.Ctx) error {
 	userId := GetUserId(c)
-	req := new(core.GroupAddMemberOptions)
+	req := new(service.GroupAddMemberOptions)
 	if err := c.BodyParser(req); err != nil {
 		return err
 	}
@@ -212,7 +212,7 @@ func (r *GroupRouter) AddMember(c *fiber.Ctx) error {
 // @Router      /groups/{id}/remove_member [post]
 func (r *GroupRouter) RemoveMember(c *fiber.Ctx) error {
 	userId := GetUserId(c)
-	req := new(core.GroupRemoveMemberOptions)
+	req := new(service.GroupRemoveMemberOptions)
 	if err := c.BodyParser(req); err != nil {
 		return err
 	}
