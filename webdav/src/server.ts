@@ -1,3 +1,4 @@
+import '@/infra/env'
 import { createServer, IncomingMessage, ServerResponse } from 'http'
 import passport from 'passport'
 import { BasicStrategy } from 'passport-http'
