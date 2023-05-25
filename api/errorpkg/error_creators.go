@@ -109,13 +109,13 @@ func NewInternalServerError(err error) *ErrorResponse {
 	)
 }
 
-func NewOrganizationPermissionError(user model.UserModel, org model.OrganizationModel, permission string) *ErrorResponse {
+func NewOrganizationPermissionError(user model.CoreUser, org model.CoreOrganization, permission string) *ErrorResponse {
 	return NewErrorResponse(
 		"missing_organization_permission",
 		http.StatusForbidden,
 		fmt.Sprintf(
 			"User '%s' (%s) is missing the permission '%s' for organization '%s' (%s).",
-			user.GetUsername(), user.GetId(), permission, org.GetName(), org.GetId(),
+			user.GetUsername(), user.GetID(), permission, org.GetName(), org.GetID(),
 		),
 		fmt.Sprintf("Sorry, you don't have enough permissions for organization '%s'.", org.GetName()),
 		nil,
@@ -131,39 +131,39 @@ func NewCannotRemoveLastRemainingOwnerOfOrganizationError(id string) *ErrorRespo
 	)
 }
 
-func NewGroupPermissionError(user model.UserModel, org model.OrganizationModel, permission string) *ErrorResponse {
+func NewGroupPermissionError(user model.CoreUser, org model.CoreOrganization, permission string) *ErrorResponse {
 	return NewErrorResponse(
 		"missing_group_permission",
 		http.StatusForbidden,
 		fmt.Sprintf(
 			"User '%s' (%s) is missing the permission '%s' for the group '%s' (%s).",
-			user.GetUsername(), user.GetId(), permission, org.GetName(), org.GetId(),
+			user.GetUsername(), user.GetID(), permission, org.GetName(), org.GetID(),
 		),
 		fmt.Sprintf("Sorry, you don't have enough permissions for the group '%s'.", org.GetName()),
 		nil,
 	)
 }
 
-func NewWorkspacePermissionError(user model.UserModel, workspace model.WorkspaceModel, permission string) *ErrorResponse {
+func NewWorkspacePermissionError(user model.CoreUser, workspace model.CoreWorkspace, permission string) *ErrorResponse {
 	return NewErrorResponse(
 		"missing_workspace_permission",
 		http.StatusForbidden,
 		fmt.Sprintf(
 			"User '%s' (%s) is missing the permission '%s' for the workspace '%s' (%s).",
-			user.GetUsername(), user.GetId(), permission, workspace.GetName(), workspace.GetId(),
+			user.GetUsername(), user.GetID(), permission, workspace.GetName(), workspace.GetID(),
 		),
 		fmt.Sprintf("Sorry, you don't have enough permissions for the workspace '%s'.", workspace.GetName()),
 		nil,
 	)
 }
 
-func NewFilePermissionError(user model.UserModel, file model.FileModel, permission string) *ErrorResponse {
+func NewFilePermissionError(user model.CoreUser, file model.CoreFile, permission string) *ErrorResponse {
 	return NewErrorResponse(
 		"missing_file_permission",
 		http.StatusForbidden,
 		fmt.Sprintf(
 			"User '%s' (%s) is missing the permission '%s' for the file '%s' (%s).",
-			user.GetUsername(), user.GetId(), permission, file.GetName(), file.GetId(),
+			user.GetUsername(), user.GetID(), permission, file.GetName(), file.GetID(),
 		),
 		fmt.Sprintf("Sorry, you don't have enough permissions for the item '%s'.", file.GetName()),
 		nil,
@@ -234,71 +234,71 @@ func NewRequestBodyValidationError(err error) *ErrorResponse {
 	)
 }
 
-func NewFileAlreadyChildOfDestinationError(source model.FileModel, target model.FileModel) *ErrorResponse {
+func NewFileAlreadyChildOfDestinationError(source model.CoreFile, target model.CoreFile) *ErrorResponse {
 	return NewErrorResponse(
 		"file_already_child_of_destination",
 		http.StatusForbidden,
-		fmt.Sprintf("File '%s' (%s) is already a child of '%s' (%s).", source.GetName(), source.GetId(), target.GetName(), target.GetId()),
+		fmt.Sprintf("File '%s' (%s) is already a child of '%s' (%s).", source.GetName(), source.GetID(), target.GetName(), target.GetID()),
 		fmt.Sprintf("Item '%s' is already within '%s'.", source.GetName(), target.GetName()),
 		nil,
 	)
 }
 
-func NewFileCannotBeMovedIntoItselfError(source model.FileModel) *ErrorResponse {
+func NewFileCannotBeMovedIntoItselfError(source model.CoreFile) *ErrorResponse {
 	return NewErrorResponse(
 		"file_cannot_be_moved_into_itself",
 		http.StatusForbidden,
-		fmt.Sprintf("File '%s' (%s) cannot be moved into itself.", source.GetName(), source.GetId()),
+		fmt.Sprintf("File '%s' (%s) cannot be moved into itself.", source.GetName(), source.GetID()),
 		fmt.Sprintf("Item '%s' cannot be moved into itself.", source.GetName()),
 		nil,
 	)
 }
 
-func NewFileIsNotAFolderError(file model.FileModel) *ErrorResponse {
+func NewFileIsNotAFolderError(file model.CoreFile) *ErrorResponse {
 	return NewErrorResponse(
 		"file_is_not_a_folder",
 		http.StatusForbidden,
-		fmt.Sprintf("File '%s' (%s) is not a folder.", file.GetName(), file.GetId()),
+		fmt.Sprintf("File '%s' (%s) is not a folder.", file.GetName(), file.GetID()),
 		fmt.Sprintf("Item '%s' is not a folder.", file.GetName()),
 		nil,
 	)
 }
 
-func NewTargetIsGrandChildOfSourceError(file model.FileModel) *ErrorResponse {
+func NewTargetIsGrandChildOfSourceError(file model.CoreFile) *ErrorResponse {
 	return NewErrorResponse(
 		"target_is_grant_child_of_source",
 		http.StatusForbidden,
-		fmt.Sprintf("File '%s' (%s) cannot be moved in another file within its own tree.", file.GetName(), file.GetId()),
+		fmt.Sprintf("File '%s' (%s) cannot be moved in another file within its own tree.", file.GetName(), file.GetID()),
 		fmt.Sprintf("Item '%s' cannot be moved in another item within its own tree.", file.GetName()),
 		nil,
 	)
 }
 
-func NewCannotDeleteWorkspaceRootError(file model.FileModel, workspace model.WorkspaceModel) *ErrorResponse {
+func NewCannotDeleteWorkspaceRootError(file model.CoreFile, workspace model.CoreWorkspace) *ErrorResponse {
 	return NewErrorResponse(
 		"cannot_delete_workspace_root",
 		http.StatusForbidden,
-		fmt.Sprintf("Cannot delete the root file (%s) of the workspace '%s' (%s).", file.GetId(), workspace.GetName(), workspace.GetId()),
+		fmt.Sprintf("Cannot delete the root file (%s) of the workspace '%s' (%s).", file.GetID(), workspace.GetName(), workspace.GetID()),
 		fmt.Sprintf("Cannot delete the root item of the workspace '%s'.", workspace.GetName()),
 		nil,
 	)
 }
 
-func NewFileCannotBeCopiedIntoOwnSubtreeError(file model.FileModel) *ErrorResponse {
+func NewFileCannotBeCopiedIntoOwnSubtreeError(file model.CoreFile) *ErrorResponse {
 	return NewErrorResponse(
 		"file_cannot_be_coped_into_own_subtree",
 		http.StatusForbidden,
-		fmt.Sprintf("File '%s' (%s) cannot be copied in another file within its own subtree.", file.GetName(), file.GetId()),
+		fmt.Sprintf("File '%s' (%s) cannot be copied in another file within its own subtree.", file.GetName(), file.GetID()),
 		fmt.Sprintf("Item '%s' cannot be copied in another item within its own subtree.", file.GetName()),
 		nil,
 	)
 }
 
-func NewFileCannotBeCopiedIntoIselfError(file model.FileModel) *ErrorResponse {
+func NewFileCannotBeCopiedIntoIselfError(file model.CoreFile) *ErrorResponse {
 	return NewErrorResponse(
 		"file_cannot_be_copied_into_itself",
 		http.StatusForbidden,
-		fmt.Sprintf("File '%s' (%s) cannot be copied into itself.", file.GetName(), file.GetId()),
+		fmt.Sprintf("File '%s' (%s) cannot be copied into itself.", file.GetName(), file.GetID()),
 		fmt.Sprintf("Item '%s' cannot be copied into itself.", file.GetName()),
 		nil,
 	)
@@ -324,71 +324,71 @@ func NewInvalidSizeParameterError() *ErrorResponse {
 	)
 }
 
-func NewCannotAcceptNonPendingInvitationError(invitation model.InvitationModel) *ErrorResponse {
+func NewCannotAcceptNonPendingInvitationError(invitation model.CoreInvitation) *ErrorResponse {
 	return NewErrorResponse(
 		"cannot_accept_non_pending_invitation",
 		http.StatusForbidden,
-		fmt.Sprintf("Cannot accept an invitation which is not pending, the status of the invitation (%s) is (%s).", invitation.GetId(), invitation.GetStatus()),
+		fmt.Sprintf("Cannot accept an invitation which is not pending, the status of the invitation (%s) is (%s).", invitation.GetID(), invitation.GetStatus()),
 		"Cannot accept an invitation which is not pending.",
 		nil,
 	)
 }
 
-func NewCannotDeclineNonPendingInvitationError(invitation model.InvitationModel) *ErrorResponse {
+func NewCannotDeclineNonPendingInvitationError(invitation model.CoreInvitation) *ErrorResponse {
 	return NewErrorResponse(
 		"cannot_decline_non_pending_invitation",
 		http.StatusForbidden,
-		fmt.Sprintf("Cannot decline an invitation which is not pending, the status of the invitation (%s) is (%s).", invitation.GetId(), invitation.GetStatus()),
+		fmt.Sprintf("Cannot decline an invitation which is not pending, the status of the invitation (%s) is (%s).", invitation.GetID(), invitation.GetStatus()),
 		"Cannot decline an invitation which is not pending.",
 		nil,
 	)
 }
 
-func NewCannotResendNonPendingInvitationError(invitation model.InvitationModel) *ErrorResponse {
+func NewCannotResendNonPendingInvitationError(invitation model.CoreInvitation) *ErrorResponse {
 	return NewErrorResponse(
 		"cannot_resend_non_pending_invitation",
 		http.StatusForbidden,
-		fmt.Sprintf("Cannot resend an invitation which is not pending, the status of the invitation (%s) is (%s).", invitation.GetId(), invitation.GetStatus()),
+		fmt.Sprintf("Cannot resend an invitation which is not pending, the status of the invitation (%s) is (%s).", invitation.GetID(), invitation.GetStatus()),
 		"Cannot resend an invitation which is not pending.",
 		nil,
 	)
 }
 
-func NewUserNotAllowedToAcceptInvitationError(user model.UserModel, invitation model.InvitationModel) *ErrorResponse {
+func NewUserNotAllowedToAcceptInvitationError(user model.CoreUser, invitation model.CoreInvitation) *ErrorResponse {
 	return NewErrorResponse(
 		"user_not_allowed_to_accept_invitation",
 		http.StatusForbidden,
-		fmt.Sprintf("User '%s' (%s) is not allowed to accept the invitation (%s).", user.GetUsername(), user.GetId(), invitation.GetId()),
+		fmt.Sprintf("User '%s' (%s) is not allowed to accept the invitation (%s).", user.GetUsername(), user.GetID(), invitation.GetID()),
 		"Not allowed to accept this invitation.",
 		nil,
 	)
 }
 
-func NewUserNotAllowedToDeclineInvitationError(user model.UserModel, invitation model.InvitationModel) *ErrorResponse {
+func NewUserNotAllowedToDeclineInvitationError(user model.CoreUser, invitation model.CoreInvitation) *ErrorResponse {
 	return NewErrorResponse(
 		"user_not_allowed_to_decline_invitation",
 		http.StatusForbidden,
-		fmt.Sprintf("User '%s' (%s) is not allowed to decline the invitation (%s).", user.GetUsername(), user.GetId(), invitation.GetId()),
+		fmt.Sprintf("User '%s' (%s) is not allowed to decline the invitation (%s).", user.GetUsername(), user.GetID(), invitation.GetID()),
 		"Not allowed to decline this invitation.",
 		nil,
 	)
 }
 
-func NewUserNotAllowedToDeleteInvitationError(user model.UserModel, invitation model.InvitationModel) *ErrorResponse {
+func NewUserNotAllowedToDeleteInvitationError(user model.CoreUser, invitation model.CoreInvitation) *ErrorResponse {
 	return NewErrorResponse(
 		"user_not_allowed_to_delete_invitation",
 		http.StatusForbidden,
-		fmt.Sprintf("User '%s' (%s) not allowed to delete the invitation (%s).", user.GetUsername(), user.GetId(), invitation.GetId()),
+		fmt.Sprintf("User '%s' (%s) not allowed to delete the invitation (%s).", user.GetUsername(), user.GetID(), invitation.GetID()),
 		"Not allowed to delete this invitation.",
 		nil,
 	)
 }
 
-func NewUserAlreadyMemberOfOrganizationError(user model.UserModel, org model.OrganizationModel) *ErrorResponse {
+func NewUserAlreadyMemberOfOrganizationError(user model.CoreUser, org model.CoreOrganization) *ErrorResponse {
 	return NewErrorResponse(
 		"user_already_member_of_organization",
 		http.StatusForbidden,
-		fmt.Sprintf("User '%s' (%s) is already a member of the organization '%s' (%s).", user.GetUsername(), user.GetId(), org.GetName(), org.GetId()),
+		fmt.Sprintf("User '%s' (%s) is already a member of the organization '%s' (%s).", user.GetUsername(), user.GetID(), org.GetName(), org.GetID()),
 		fmt.Sprintf("You are already a member of the organization '%s'.", org.GetName()),
 		nil,
 	)

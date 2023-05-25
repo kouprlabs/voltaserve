@@ -8,8 +8,8 @@ import (
 )
 
 type storageMetadataUpdater struct {
-	snapshotRepo *repo.SnapshotRepo
-	fileRepo     *repo.FileRepo
+	snapshotRepo repo.CoreSnapshotRepo
+	fileRepo     repo.CoreFileRepo
 	fileCache    *cache.FileCache
 	fileSearch   *search.FileSearch
 }
@@ -23,7 +23,7 @@ func newMetadataUpdater() *storageMetadataUpdater {
 	}
 }
 
-func (mu *storageMetadataUpdater) update(snapshot model.SnapshotModel, fileId string) error {
+func (mu *storageMetadataUpdater) update(snapshot model.CoreSnapshot, fileId string) error {
 	if err := repo.NewSnapshotRepo().Save(snapshot); err != nil {
 		return err
 	}
@@ -34,7 +34,7 @@ func (mu *storageMetadataUpdater) update(snapshot model.SnapshotModel, fileId st
 	if err = mu.fileCache.Set(file); err != nil {
 		return err
 	}
-	if err = mu.fileSearch.Update([]model.FileModel{file}); err != nil {
+	if err = mu.fileSearch.Update([]model.CoreFile{file}); err != nil {
 		return err
 	}
 	return nil

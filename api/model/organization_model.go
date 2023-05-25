@@ -1,10 +1,10 @@
 package model
 
-type OrganizationModel interface {
-	GetId() string
+type CoreOrganization interface {
+	GetID() string
 	GetName() string
-	GetUserPermissions() []UserPermissionModel
-	GetGroupPermissions() []GroupPermissionModel
+	GetUserPermissions() []CoreUserPermission
+	GetGroupPermissions() []CoreGroupPermission
 	GetUsers() []string
 	GetCreateTime() string
 	GetUpdateTime() *string

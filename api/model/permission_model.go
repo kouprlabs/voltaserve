@@ -6,8 +6,8 @@ const (
 	PermissionOwner  = "owner"
 )
 
-type UserPermissionModel interface {
-	GetUserId() string
+type CoreUserPermission interface {
+	GetUserID() string
 	GetValue() string
 }
 
@@ -16,25 +16,25 @@ type UserPermission struct {
 	Value  string `json:"value,omitempty"`
 }
 
-func (p UserPermission) GetUserId() string {
+func (p UserPermission) GetUserID() string {
 	return p.UserId
 }
 func (p UserPermission) GetValue() string {
 	return p.Value
 }
 
-type GroupPermissionModel interface {
-	GetGroupId() string
+type CoreGroupPermission interface {
+	GetGroupID() string
 	GetValue() string
 }
 
 type GroupPermission struct {
-	GroupId string `json:"groupId,omitempty"`
+	GroupID string `json:"groupId,omitempty"`
 	Value   string `json:"value,omitempty"`
 }
 
-func (p GroupPermission) GetGroupId() string {
-	return p.GroupId
+func (p GroupPermission) GetGroupID() string {
+	return p.GroupID
 }
 func (p GroupPermission) GetValue() string {
 	return p.Value

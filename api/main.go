@@ -23,9 +23,16 @@ import (
 // @version  1.0.0
 // @BasePath /v1
 func main() {
-	err := godotenv.Load()
-	if err != nil {
-		panic(err)
+	if _, err := os.Stat(".env.local"); err == nil {
+		err := godotenv.Load(".env.local")
+		if err != nil {
+			panic(err)
+		}
+	} else {
+		err := godotenv.Load()
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	log.SetOutput(os.Stdout)

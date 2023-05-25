@@ -1,4 +1,4 @@
-package core
+package service
 
 import (
 	"fmt"
@@ -13,7 +13,7 @@ import (
 )
 
 type Group struct {
-	Id           string       `json:"id"`
+	ID           string       `json:"id"`
 	Name         string       `json:"name"`
 	Image        *string      `json:"image,omitempty"`
 	Organization Organization `json:"organization"`
@@ -41,28 +41,28 @@ type GroupUpdateImageOptions struct {
 }
 
 type GroupAddMemberOptions struct {
-	UserId string `json:"userId" validate:"required"`
+	UserID string `json:"userId" validate:"required"`
 }
 
 type GroupRemoveMemberOptions struct {
-	UserId string `json:"userId" validate:"required"`
+	UserID string `json:"userId" validate:"required"`
 }
 
 type GroupService struct {
-	groupRepo      *repo.GroupRepo
+	groupRepo      repo.CoreGroupRepo
 	groupGuard     *guard.GroupGuard
 	groupSearch    *search.GroupSearch
 	groupMapper    *groupMapper
 	groupCache     *cache.GroupCache
-	userRepo       *repo.UserRepo
+	userRepo       repo.CoreUserRepo
 	userSearch     *search.UserSearch
 	userMapper     *userMapper
-	workspaceRepo  *repo.WorkspaceRepo
+	workspaceRepo  repo.CoreWorkspaceRepo
 	workspaceCache *cache.WorkspaceCache
-	fileRepo       *repo.FileRepo
+	fileRepo       repo.CoreFileRepo
 	fileCache      *cache.FileCache
 	fileGuard      *guard.FileGuard
-	orgRepo        *repo.OrganizationRepo
+	orgRepo        repo.CoreOrganizationRepo
 	orgCache       *cache.OrganizationCache
 	orgGuard       *guard.OrganizationGuard
 	imageProc      *infra.ImageProcessor
@@ -105,7 +105,7 @@ func (svc *GroupService) Create(req GroupCreateOptions, userId string) (*Group, 
 		return nil, err
 	}
 	group, err := svc.groupRepo.Insert(repo.GroupInsertOptions{
-		Id:             helpers.NewId(),
+		ID:             helpers.NewId(),
 		Name:           req.Name,
 		OrganizationId: req.OrganizationId,
 		OwnerId:        userId,
@@ -113,14 +113,14 @@ func (svc *GroupService) Create(req GroupCreateOptions, userId string) (*Group, 
 	if err != nil {
 		return nil, err
 	}
-	if err := svc.groupRepo.GrantUserPermission(group.GetId(), userId, model.PermissionOwner); err != nil {
+	if err := svc.groupRepo.GrantUserPermission(group.GetID(), userId, model.PermissionOwner); err != nil {
 		return nil, err
 	}
-	group, err = svc.groupRepo.Find(group.GetId())
+	group, err = svc.groupRepo.Find(group.GetID())
 	if err != nil {
 		return nil, err
 	}
-	if err := svc.groupSearch.Index([]model.GroupModel{group}); err != nil {
+	if err := svc.groupSearch.Index([]model.CoreGroup{group}); err != nil {
 		return nil, err
 	}
 	if err := svc.groupCache.Set(group); err != nil {
@@ -157,7 +157,7 @@ func (svc *GroupService) FindAll(userId string) ([]*Group, error) {
 	if err != nil {
 		return nil, err
 	}
-	ids, err := svc.groupRepo.GetIds()
+	ids, err := svc.groupRepo.GetIDs()
 	if err != nil {
 		return nil, err
 	}
@@ -190,7 +190,7 @@ func (svc *GroupService) FindAllForFile(fileId string, userId string) ([]*Group,
 	if err := svc.fileGuard.Authorize(user, file, model.PermissionViewer); err != nil {
 		return nil, err
 	}
-	ids, err := svc.groupRepo.GetIdsForFile(fileId)
+	ids, err := svc.groupRepo.GetIDsForFile(fileId)
 	if err != nil {
 		return nil, err
 	}
@@ -249,7 +249,7 @@ func (svc *GroupService) UpdateName(id string, name string, userId string) (*Gro
 	if err := svc.groupRepo.Save(group); err != nil {
 		return nil, err
 	}
-	if err := svc.groupSearch.Update([]model.GroupModel{group}); err != nil {
+	if err := svc.groupSearch.Update([]model.CoreGroup{group}); err != nil {
 		return nil, err
 	}
 	err = svc.groupCache.Set(group)
@@ -278,10 +278,10 @@ func (svc *GroupService) Delete(id string, userId string) error {
 	if err := svc.groupRepo.Delete(id); err != nil {
 		return err
 	}
-	if err := svc.groupSearch.Delete([]string{group.GetId()}); err != nil {
+	if err := svc.groupSearch.Delete([]string{group.GetID()}); err != nil {
 		return err
 	}
-	if err := svc.refreshCacheForOrganization(group.GetOrganizationId()); err != nil {
+	if err := svc.refreshCacheForOrganization(group.GetOrganizationID()); err != nil {
 		return err
 	}
 	return nil
@@ -305,13 +305,13 @@ func (svc *GroupService) AddMember(id string, memberId string, userId string) er
 	if err := svc.groupRepo.AddUser(id, memberId); err != nil {
 		return err
 	}
-	if err := svc.groupRepo.GrantUserPermission(group.GetId(), memberId, model.PermissionViewer); err != nil {
+	if err := svc.groupRepo.GrantUserPermission(group.GetID(), memberId, model.PermissionViewer); err != nil {
 		return err
 	}
-	if _, err := svc.groupCache.Refresh(group.GetId()); err != nil {
+	if _, err := svc.groupCache.Refresh(group.GetID()); err != nil {
 		return err
 	}
-	if err := svc.refreshCacheForOrganization(group.GetOrganizationId()); err != nil {
+	if err := svc.refreshCacheForOrganization(group.GetOrganizationID()); err != nil {
 		return err
 	}
 	return nil
@@ -349,10 +349,10 @@ func (svc *GroupService) RemoveMemberUnauthorized(id string, memberId string) er
 	if err := svc.groupRepo.RevokeUserPermission(id, memberId); err != nil {
 		return err
 	}
-	if _, err := svc.groupCache.Refresh(group.GetId()); err != nil {
+	if _, err := svc.groupCache.Refresh(group.GetID()); err != nil {
 		return err
 	}
-	if err := svc.refreshCacheForOrganization(group.GetOrganizationId()); err != nil {
+	if err := svc.refreshCacheForOrganization(group.GetOrganizationID()); err != nil {
 		return err
 	}
 	return nil
@@ -433,10 +433,10 @@ func (svc *GroupService) SearchMembers(id string, query string, userId string) (
 	if err != nil {
 		return nil, err
 	}
-	var members []model.UserModel
+	var members []model.CoreUser
 	for _, m := range groupMembers {
 		for _, u := range users {
-			if u.GetId() == m.GetId() {
+			if u.GetID() == m.GetID() {
 				members = append(members, m)
 			}
 		}
@@ -460,7 +460,7 @@ func (svc *GroupService) GetAvailableUsers(id string, userId string) ([]*User, e
 	if err := svc.groupGuard.Authorize(user, group, model.PermissionViewer); err != nil {
 		return nil, err
 	}
-	orgMembers, err := svc.orgRepo.GetMembers(group.GetOrganizationId())
+	orgMembers, err := svc.orgRepo.GetMembers(group.GetOrganizationID())
 	if err != nil {
 		return nil, err
 	}
@@ -472,7 +472,7 @@ func (svc *GroupService) GetAvailableUsers(id string, userId string) ([]*User, e
 	for _, om := range orgMembers {
 		found := false
 		for _, tm := range groupMembers {
-			if om.GetId() == tm.GetId() {
+			if om.GetID() == tm.GetID() {
 				found = true
 				break
 			}
@@ -498,8 +498,8 @@ func newGroupMapper() *groupMapper {
 	}
 }
 
-func (mp *groupMapper) mapGroup(m model.GroupModel, userId string) (*Group, error) {
-	org, err := mp.orgCache.Get(m.GetOrganizationId())
+func (mp *groupMapper) mapGroup(m model.CoreGroup, userId string) (*Group, error) {
+	org, err := mp.orgCache.Get(m.GetOrganizationID())
 	if err != nil {
 		return nil, err
 	}
@@ -508,7 +508,7 @@ func (mp *groupMapper) mapGroup(m model.GroupModel, userId string) (*Group, erro
 		return nil, err
 	}
 	res := &Group{
-		Id:           m.GetId(),
+		ID:           m.GetID(),
 		Name:         m.GetName(),
 		Organization: *v,
 		CreateTime:   m.GetCreateTime(),
@@ -516,12 +516,12 @@ func (mp *groupMapper) mapGroup(m model.GroupModel, userId string) (*Group, erro
 	}
 	res.Permission = ""
 	for _, p := range m.GetUserPermissions() {
-		if p.GetUserId() == userId && model.GetPermissionWeight(p.GetValue()) > model.GetPermissionWeight(res.Permission) {
+		if p.GetUserID() == userId && model.GetPermissionWeight(p.GetValue()) > model.GetPermissionWeight(res.Permission) {
 			res.Permission = p.GetValue()
 		}
 	}
 	for _, p := range m.GetGroupPermissions() {
-		g, err := mp.groupCache.Get(p.GetGroupId())
+		g, err := mp.groupCache.Get(p.GetGroupID())
 		if err != nil {
 			return nil, err
 		}
@@ -534,7 +534,7 @@ func (mp *groupMapper) mapGroup(m model.GroupModel, userId string) (*Group, erro
 	return res, nil
 }
 
-func (mp *groupMapper) mapGroups(groups []model.GroupModel, userId string) ([]*Group, error) {
+func (mp *groupMapper) mapGroups(groups []model.CoreGroup, userId string) ([]*Group, error) {
 	res := []*Group{}
 	for _, g := range groups {
 		v, err := mp.mapGroup(g, userId)

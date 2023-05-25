@@ -6,19 +6,19 @@ import (
 	"strings"
 	"voltaserve/cache"
 	"voltaserve/config"
-	"voltaserve/core"
 	"voltaserve/helpers"
 	"voltaserve/infra"
 	"voltaserve/model"
 	"voltaserve/repo"
+	"voltaserve/service"
 )
 
 type StorageService struct {
 	s3             *infra.S3Manager
-	snapshotRepo   *repo.SnapshotRepo
-	fileRepo       *repo.FileRepo
+	snapshotRepo   repo.CoreSnapshotRepo
+	fileRepo       repo.CoreFileRepo
 	fileCache      *cache.FileCache
-	fileMapper     *core.FileMapper
+	fileMapper     *service.FileMapper
 	ocrStorage     *ocrStorage
 	imageStorage   *imageStorage
 	officeStorage  *officeStorage
@@ -38,7 +38,7 @@ func NewStorageService() *StorageService {
 		snapshotRepo:   repo.NewSnapshotRepo(),
 		fileRepo:       repo.NewFileRepo(),
 		fileCache:      cache.NewFileCache(),
-		fileMapper:     core.NewFileMapper(),
+		fileMapper:     service.NewFileMapper(),
 		ocrStorage:     newOcrStorage(),
 		imageStorage:   newImageStorage(),
 		officeStorage:  newOfficeStorage(),
@@ -48,7 +48,7 @@ func NewStorageService() *StorageService {
 	}
 }
 
-func (svc *StorageService) Store(opts StorageOptions, userId string) (*core.File, error) {
+func (svc *StorageService) Store(opts StorageOptions, userId string) (*service.File, error) {
 	file, err := svc.fileRepo.Find(opts.FileId)
 	if err != nil {
 		return nil, err
@@ -56,7 +56,7 @@ func (svc *StorageService) Store(opts StorageOptions, userId string) (*core.File
 	if err = svc.fileCache.Set(file); err != nil {
 		return nil, err
 	}
-	workspace, err := svc.workspaceCache.Get(file.GetWorkspaceId())
+	workspace, err := svc.workspaceCache.Get(file.GetWorkspaceID())
 	if err != nil {
 		return nil, err
 	}
@@ -65,8 +65,8 @@ func (svc *StorageService) Store(opts StorageOptions, userId string) (*core.File
 		return nil, err
 	}
 	snapshotId := helpers.NewId()
-	snapshot := &repo.SnapshotEntity{
-		Id:      snapshotId,
+	snapshot := &repo.PostgresSnapshot{
+		ID:      snapshotId,
 		Version: latestVersion,
 	}
 	if err = svc.snapshotRepo.Save(snapshot); err != nil {
@@ -149,7 +149,7 @@ func (svc *StorageService) Store(opts StorageOptions, userId string) (*core.File
 			return nil, err
 		}
 	}
-	file, err = svc.fileCache.Refresh(file.GetId())
+	file, err = svc.fileCache.Refresh(file.GetID())
 	if err != nil {
 		return nil, err
 	}

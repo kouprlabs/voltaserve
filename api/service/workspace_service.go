@@ -1,4 +1,4 @@
-package core
+package service
 
 import (
 	"strings"
@@ -16,10 +16,10 @@ import (
 )
 
 type Workspace struct {
-	Id              string       `json:"id"`
+	ID              string       `json:"id"`
 	Image           *string      `json:"image,omitempty"`
 	Name            string       `json:"name"`
-	RootId          string       `json:"rootId,omitempty"`
+	RootID          string       `json:"rootId,omitempty"`
 	StorageCapacity int64        `json:"storageCapacity"`
 	Permission      string       `json:"permission"`
 	Organization    Organization `json:"organization"`
@@ -47,16 +47,16 @@ type UpdateWorkspaceStorageCapacityOptions struct {
 }
 
 type WorkspaceService struct {
-	workspaceRepo   *repo.WorkspaceRepo
+	workspaceRepo   repo.CoreWorkspaceRepo
 	workspaceCache  *cache.WorkspaceCache
 	workspaceGuard  *guard.WorkspaceGuard
 	workspaceSearch *search.WorkspaceSearch
 	workspaceMapper *workspaceMapper
-	fileRepo        *repo.FileRepo
+	fileRepo        repo.CoreFileRepo
 	fileCache       *cache.FileCache
 	fileGuard       *guard.FileGuard
 	fileMapper      *FileMapper
-	userRepo        *repo.UserRepo
+	userRepo        repo.CoreUserRepo
 	imageProc       *infra.ImageProcessor
 	s3              *infra.S3Manager
 	config          config.Config
@@ -73,7 +73,7 @@ func NewWorkspaceService() *WorkspaceService {
 		fileCache:       cache.NewFileCache(),
 		fileGuard:       guard.NewFileGuard(),
 		fileMapper:      NewFileMapper(),
-		userRepo:        repo.NewUserRepo(),
+		userRepo:        repo.NewPostgresUserRepo(),
 		imageProc:       infra.NewImageProcessor(),
 		s3:              infra.NewS3Manager(),
 		config:          config.GetConfig(),
@@ -87,7 +87,7 @@ func (svc *WorkspaceService) Create(req CreateWorkspaceOptions, userId string) (
 		return nil, err
 	}
 	workspace, err := svc.workspaceRepo.Insert(repo.WorkspaceInsertOptions{
-		Id:              id,
+		ID:              id,
 		Name:            req.Name,
 		StorageCapacity: req.StorageCapacity,
 		OrganizationId:  req.OrganizationId,
@@ -97,34 +97,34 @@ func (svc *WorkspaceService) Create(req CreateWorkspaceOptions, userId string) (
 	if err != nil {
 		return nil, err
 	}
-	if err := svc.workspaceRepo.GrantUserPermission(workspace.GetId(), userId, model.PermissionOwner); err != nil {
+	if err := svc.workspaceRepo.GrantUserPermission(workspace.GetID(), userId, model.PermissionOwner); err != nil {
 		return nil, err
 	}
-	workspace, err = svc.workspaceRepo.FindByID(workspace.GetId())
+	workspace, err = svc.workspaceRepo.FindByID(workspace.GetID())
 	if err != nil {
 		return nil, err
 	}
 	root, err := svc.fileRepo.Insert(repo.FileInsertOptions{
 		Name:        "root",
-		WorkspaceId: workspace.GetId(),
+		WorkspaceId: workspace.GetID(),
 		Type:        model.FileTypeFolder,
 	})
 	if err != nil {
 		return nil, err
 	}
-	if err := svc.fileRepo.GrantUserPermission(root.GetId(), userId, model.PermissionOwner); err != nil {
+	if err := svc.fileRepo.GrantUserPermission(root.GetID(), userId, model.PermissionOwner); err != nil {
 		return nil, err
 	}
-	if err = svc.workspaceRepo.UpdateRootId(workspace.GetId(), root.GetId()); err != nil {
+	if err = svc.workspaceRepo.UpdateRootID(workspace.GetID(), root.GetID()); err != nil {
 		return nil, err
 	}
-	if workspace, err = svc.workspaceRepo.FindByID(workspace.GetId()); err != nil {
+	if workspace, err = svc.workspaceRepo.FindByID(workspace.GetID()); err != nil {
 		return nil, err
 	}
-	if err = svc.workspaceSearch.Index([]model.WorkspaceModel{workspace}); err != nil {
+	if err = svc.workspaceSearch.Index([]model.CoreWorkspace{workspace}); err != nil {
 		return nil, err
 	}
-	if root, err = svc.fileRepo.Find(root.GetId()); err != nil {
+	if root, err = svc.fileRepo.Find(root.GetID()); err != nil {
 		return nil, err
 	}
 	if err := svc.fileCache.Set(root); err != nil {
@@ -183,13 +183,13 @@ func (svc *WorkspaceService) FindAll(userId string) ([]*Workspace, error) {
 	if err != nil {
 		return nil, err
 	}
-	ids, err := svc.workspaceRepo.GetIds()
+	ids, err := svc.workspaceRepo.GetIDs()
 	if err != nil {
 		return nil, err
 	}
 	res := []*Workspace{}
 	for _, id := range ids {
-		var workspace model.WorkspaceModel
+		var workspace model.CoreWorkspace
 		workspace, err = svc.workspaceCache.Get(id)
 		if err != nil {
 			return nil, err
@@ -242,7 +242,7 @@ func (svc *WorkspaceService) UpdateName(id string, name string, userId string) (
 	if workspace, err = svc.workspaceRepo.UpdateName(id, name); err != nil {
 		return nil, err
 	}
-	if err = svc.workspaceSearch.Update([]model.WorkspaceModel{workspace}); err != nil {
+	if err = svc.workspaceSearch.Update([]model.CoreWorkspace{workspace}); err != nil {
 		return nil, err
 	}
 	if err = svc.workspaceCache.Set(workspace); err != nil {
@@ -267,7 +267,7 @@ func (svc *WorkspaceService) UpdateStorageCapacity(id string, storageCapacity in
 	if err = svc.workspaceGuard.Authorize(user, workspace, model.PermissionEditor); err != nil {
 		return nil, err
 	}
-	size, err := svc.fileRepo.GetSize(workspace.GetRootId())
+	size, err := svc.fileRepo.GetSize(workspace.GetRootID())
 	if err != nil {
 		return nil, err
 	}
@@ -277,7 +277,7 @@ func (svc *WorkspaceService) UpdateStorageCapacity(id string, storageCapacity in
 	if workspace, err = svc.workspaceRepo.UpdateStorageCapacity(id, storageCapacity); err != nil {
 		return nil, err
 	}
-	if err = svc.workspaceSearch.Update([]model.WorkspaceModel{workspace}); err != nil {
+	if err = svc.workspaceSearch.Update([]model.CoreWorkspace{workspace}); err != nil {
 		return nil, err
 	}
 	if err = svc.workspaceCache.Set(workspace); err != nil {
@@ -308,7 +308,7 @@ func (svc *WorkspaceService) Delete(id string, userId string) error {
 	if err = svc.workspaceRepo.Delete(id); err != nil {
 		return err
 	}
-	if err = svc.workspaceSearch.Delete([]string{workspace.GetId()}); err != nil {
+	if err = svc.workspaceSearch.Delete([]string{workspace.GetID()}); err != nil {
 		return err
 	}
 	if err = svc.workspaceCache.Delete(id); err != nil {
@@ -325,11 +325,11 @@ func (svc *WorkspaceService) HasEnoughSpaceForByteSize(id string, byteSize int64
 	if err != nil {
 		return false, err
 	}
-	root, err := svc.fileRepo.Find(workspace.GetRootId())
+	root, err := svc.fileRepo.Find(workspace.GetRootID())
 	if err != nil {
 		return false, err
 	}
-	usage, err := svc.fileRepo.GetSize(root.GetId())
+	usage, err := svc.fileRepo.GetSize(root.GetID())
 	if err != nil {
 		return false, err
 	}
@@ -354,8 +354,8 @@ func newWorkspaceMapper() *workspaceMapper {
 	}
 }
 
-func (mp *workspaceMapper) mapWorkspace(m model.WorkspaceModel, userId string) (*Workspace, error) {
-	org, err := mp.orgCache.Get(m.GetOrganizationId())
+func (mp *workspaceMapper) mapWorkspace(m model.CoreWorkspace, userId string) (*Workspace, error) {
+	org, err := mp.orgCache.Get(m.GetOrganizationID())
 	if err != nil {
 		return nil, err
 	}
@@ -364,9 +364,9 @@ func (mp *workspaceMapper) mapWorkspace(m model.WorkspaceModel, userId string) (
 		return nil, err
 	}
 	res := &Workspace{
-		Id:              m.GetId(),
+		ID:              m.GetID(),
 		Name:            m.GetName(),
-		RootId:          m.GetRootId(),
+		RootID:          m.GetRootID(),
 		StorageCapacity: m.GetStorageCapacity(),
 		Organization:    *v,
 		CreateTime:      m.GetCreateTime(),
@@ -374,12 +374,12 @@ func (mp *workspaceMapper) mapWorkspace(m model.WorkspaceModel, userId string) (
 	}
 	res.Permission = ""
 	for _, p := range m.GetUserPermissions() {
-		if p.GetUserId() == userId && model.GetPermissionWeight(p.GetValue()) > model.GetPermissionWeight(res.Permission) {
+		if p.GetUserID() == userId && model.GetPermissionWeight(p.GetValue()) > model.GetPermissionWeight(res.Permission) {
 			res.Permission = p.GetValue()
 		}
 	}
 	for _, p := range m.GetGroupPermissions() {
-		g, err := mp.groupCache.Get(p.GetGroupId())
+		g, err := mp.groupCache.Get(p.GetGroupID())
 		if err != nil {
 			return nil, err
 		}

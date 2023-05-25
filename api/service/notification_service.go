@@ -1,4 +1,4 @@
-package core
+package service
 
 import "voltaserve/repo"
 
@@ -8,8 +8,8 @@ type Notification struct {
 }
 
 type NotificationService struct {
-	userRepo         *repo.UserRepo
-	invitationRepo   *repo.InvitationRepo
+	userRepo         repo.CoreUserRepo
+	invitationRepo   repo.CoreInvitationRepo
 	invitationMapper *invitationMapper
 }
 

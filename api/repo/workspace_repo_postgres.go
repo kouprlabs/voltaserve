@@ -11,11 +11,11 @@ import (
 	"gorm.io/gorm"
 )
 
-type WorkspaceEntity struct {
-	Id               string                   `json:"id," gorm:"column:id;size:36"`
+type PostgresWorkspace struct {
+	ID               string                   `json:"id," gorm:"column:id;size:36"`
 	Name             string                   `json:"name" gorm:"column:name;size:255"`
 	StorageCapacity  int64                    `json:"storageCapacity" gorm:"column:storage_capacity"`
-	RootId           string                   `json:"rootId" gorm:"column:root_id;size:36"`
+	RootID           string                   `json:"rootId" gorm:"column:root_id;size:36"`
 	OrganizationId   string                   `json:"organizationId" gorm:"column:organization_id;size:36"`
 	UserPermissions  []*model.UserPermission  `json:"userPermissions" gorm:"-"`
 	GroupPermissions []*model.GroupPermission `json:"groupPermissions" gorm:"-"`
@@ -24,111 +24,101 @@ type WorkspaceEntity struct {
 	UpdateTime       *string                  `json:"updateTime,omitempty" gorm:"column:update_time"`
 }
 
-func (WorkspaceEntity) TableName() string {
+func (PostgresWorkspace) TableName() string {
 	return "workspace"
 }
 
-func (w *WorkspaceEntity) BeforeCreate(tx *gorm.DB) (err error) {
+func (w *PostgresWorkspace) BeforeCreate(tx *gorm.DB) (err error) {
 	w.CreateTime = time.Now().UTC().Format(time.RFC3339)
 	return nil
 }
 
-func (w *WorkspaceEntity) BeforeSave(tx *gorm.DB) (err error) {
+func (w *PostgresWorkspace) BeforeSave(tx *gorm.DB) (err error) {
 	timeNow := time.Now().UTC().Format(time.RFC3339)
 	w.UpdateTime = &timeNow
 	return nil
 }
 
-func (w WorkspaceEntity) GetId() string {
-	return w.Id
+func (w PostgresWorkspace) GetID() string {
+	return w.ID
 }
 
-func (w WorkspaceEntity) GetName() string {
+func (w PostgresWorkspace) GetName() string {
 	return w.Name
 }
 
-func (w WorkspaceEntity) GetStorageCapacity() int64 {
+func (w PostgresWorkspace) GetStorageCapacity() int64 {
 	return w.StorageCapacity
 }
 
-func (w WorkspaceEntity) GetRootId() string {
-	return w.RootId
+func (w PostgresWorkspace) GetRootID() string {
+	return w.RootID
 }
 
-func (w WorkspaceEntity) GetOrganizationId() string {
+func (w PostgresWorkspace) GetOrganizationID() string {
 	return w.OrganizationId
 }
 
-func (w WorkspaceEntity) GetUserPermissions() []model.UserPermissionModel {
-	var res []model.UserPermissionModel
+func (w PostgresWorkspace) GetUserPermissions() []model.CoreUserPermission {
+	var res []model.CoreUserPermission
 	for _, p := range w.UserPermissions {
 		res = append(res, p)
 	}
 	return res
 }
 
-func (w WorkspaceEntity) GetGroupPermissions() []model.GroupPermissionModel {
-	var res []model.GroupPermissionModel
+func (w PostgresWorkspace) GetGroupPermissions() []model.CoreGroupPermission {
+	var res []model.CoreGroupPermission
 	for _, p := range w.GroupPermissions {
 		res = append(res, p)
 	}
 	return res
 }
 
-func (w WorkspaceEntity) GetBucket() string {
+func (w PostgresWorkspace) GetBucket() string {
 	return w.Bucket
 }
 
-func (w WorkspaceEntity) GetCreateTime() string {
+func (w PostgresWorkspace) GetCreateTime() string {
 	return w.CreateTime
 }
 
-func (w WorkspaceEntity) GetUpdateTime() *string {
+func (w PostgresWorkspace) GetUpdateTime() *string {
 	return w.UpdateTime
 }
 
-func (w *WorkspaceEntity) SetName(name string) {
+func (w *PostgresWorkspace) SetName(name string) {
 	w.Name = name
 }
 
-func (w *WorkspaceEntity) SetUpdateTime(updateTime *string) {
+func (w *PostgresWorkspace) SetUpdateTime(updateTime *string) {
 	w.UpdateTime = updateTime
 }
 
-type WorkspaceInsertOptions struct {
-	Id              string
-	Name            string
-	StorageCapacity int64
-	Image           *string
-	OrganizationId  string
-	RootId          string
-	Bucket          string
-}
-
-type WorkspaceRepo struct {
+type PostgresWorkspaceRepo struct {
 	db             *gorm.DB
-	permissionRepo *PermissionRepo
+	permissionRepo *PostgresPermissionRepo
 }
 
-func NewWorkspaceRepo() *WorkspaceRepo {
-	return &WorkspaceRepo{
+func NewPostgresWorkspaceRepo() *PostgresWorkspaceRepo {
+	return &PostgresWorkspaceRepo{
 		db:             infra.GetDb(),
-		permissionRepo: NewPermissionRepo(),
+		permissionRepo: NewPostgresPermissionRepo(),
 	}
 }
 
-func (repo *WorkspaceRepo) Insert(opts WorkspaceInsertOptions) (model.WorkspaceModel, error) {
+func (repo *PostgresWorkspaceRepo) Insert(opts WorkspaceInsertOptions) (model.CoreWorkspace, error) {
 	var id string
-	if len(opts.Id) > 0 {
-		id = opts.Id
+	if len(opts.ID) > 0 {
+		id = opts.ID
 	} else {
 		id = helpers.NewId()
 	}
-	workspace := WorkspaceEntity{
-		Id:              id,
+	workspace := PostgresWorkspace{
+		ID:              id,
 		Name:            opts.Name,
 		StorageCapacity: opts.StorageCapacity,
-		RootId:          opts.RootId,
+		RootID:          opts.RootId,
 		OrganizationId:  opts.OrganizationId,
 		Bucket:          opts.Bucket,
 	}
@@ -139,14 +129,14 @@ func (repo *WorkspaceRepo) Insert(opts WorkspaceInsertOptions) (model.WorkspaceM
 	if err != nil {
 		return nil, err
 	}
-	if err := repo.populateModelFields([]*WorkspaceEntity{res}); err != nil {
+	if err := repo.populateModelFields([]*PostgresWorkspace{res}); err != nil {
 		return nil, err
 	}
 	return res, nil
 }
 
-func (repo *WorkspaceRepo) findByName(name string) (*WorkspaceEntity, error) {
-	var res = WorkspaceEntity{}
+func (repo *PostgresWorkspaceRepo) findByName(name string) (*PostgresWorkspace, error) {
+	var res = PostgresWorkspace{}
 	db := repo.db.Where("name = ?", name).First(&res)
 	if db.Error != nil {
 		if errors.Is(db.Error, gorm.ErrRecordNotFound) {
@@ -158,19 +148,19 @@ func (repo *WorkspaceRepo) findByName(name string) (*WorkspaceEntity, error) {
 	return &res, nil
 }
 
-func (repo *WorkspaceRepo) FindByName(name string) (model.WorkspaceModel, error) {
+func (repo *PostgresWorkspaceRepo) FindByName(name string) (model.CoreWorkspace, error) {
 	workspace, err := repo.findByName(name)
 	if err != nil {
 		return nil, err
 	}
-	if err := repo.populateModelFields([]*WorkspaceEntity{workspace}); err != nil {
+	if err := repo.populateModelFields([]*PostgresWorkspace{workspace}); err != nil {
 		return nil, err
 	}
 	return workspace, err
 }
 
-func (repo *WorkspaceRepo) findByID(id string) (*WorkspaceEntity, error) {
-	var res = WorkspaceEntity{}
+func (repo *PostgresWorkspaceRepo) findByID(id string) (*PostgresWorkspace, error) {
+	var res = PostgresWorkspace{}
 	db := repo.db.Where("id = ?", id).First(&res)
 	if db.Error != nil {
 		if errors.Is(db.Error, gorm.ErrRecordNotFound) {
@@ -182,21 +172,21 @@ func (repo *WorkspaceRepo) findByID(id string) (*WorkspaceEntity, error) {
 	return &res, nil
 }
 
-func (repo *WorkspaceRepo) FindByID(id string) (model.WorkspaceModel, error) {
+func (repo *PostgresWorkspaceRepo) FindByID(id string) (model.CoreWorkspace, error) {
 	workspace, err := repo.findByID(id)
 	if err != nil {
 		return nil, err
 	}
-	if err := repo.populateModelFields([]*WorkspaceEntity{workspace}); err != nil {
+	if err := repo.populateModelFields([]*PostgresWorkspace{workspace}); err != nil {
 		return nil, err
 	}
 	return workspace, err
 }
 
-func (repo *WorkspaceRepo) UpdateName(id string, name string) (model.WorkspaceModel, error) {
+func (repo *PostgresWorkspaceRepo) UpdateName(id string, name string) (model.CoreWorkspace, error) {
 	workspace, err := repo.findByID(id)
 	if err != nil {
-		return &WorkspaceEntity{}, err
+		return &PostgresWorkspace{}, err
 	}
 	workspace.Name = name
 	db := repo.db.Save(&workspace)
@@ -210,10 +200,10 @@ func (repo *WorkspaceRepo) UpdateName(id string, name string) (model.WorkspaceMo
 	return res, nil
 }
 
-func (repo *WorkspaceRepo) UpdateStorageCapacity(id string, storageCapacity int64) (model.WorkspaceModel, error) {
+func (repo *PostgresWorkspaceRepo) UpdateStorageCapacity(id string, storageCapacity int64) (model.CoreWorkspace, error) {
 	workspace, err := repo.findByID(id)
 	if err != nil {
-		return &WorkspaceEntity{}, err
+		return &PostgresWorkspace{}, err
 	}
 	workspace.StorageCapacity = storageCapacity
 	db := repo.db.Save(&workspace)
@@ -227,7 +217,7 @@ func (repo *WorkspaceRepo) UpdateStorageCapacity(id string, storageCapacity int6
 	return res, nil
 }
 
-func (repo *WorkspaceRepo) Delete(id string) error {
+func (repo *PostgresWorkspaceRepo) Delete(id string) error {
 	db := repo.db.Exec("DELETE FROM workspace WHERE id = ?", id)
 	if db.Error != nil {
 		return db.Error
@@ -243,7 +233,7 @@ func (repo *WorkspaceRepo) Delete(id string) error {
 	return nil
 }
 
-func (repo *WorkspaceRepo) GetIds() ([]string, error) {
+func (repo *PostgresWorkspaceRepo) GetIDs() ([]string, error) {
 	type IdResult struct {
 		Result string
 	}
@@ -259,7 +249,7 @@ func (repo *WorkspaceRepo) GetIds() ([]string, error) {
 	return res, nil
 }
 
-func (repo *WorkspaceRepo) GetIdsByOrganization(organizationId string) ([]string, error) {
+func (repo *PostgresWorkspaceRepo) GetIdsByOrganization(organizationId string) ([]string, error) {
 	type IdResult struct {
 		Result string
 	}
@@ -277,7 +267,7 @@ func (repo *WorkspaceRepo) GetIdsByOrganization(organizationId string) ([]string
 	return res, nil
 }
 
-func (repo *WorkspaceRepo) UpdateRootId(id string, rootNodeId string) error {
+func (repo *PostgresWorkspaceRepo) UpdateRootID(id string, rootNodeId string) error {
 	db := repo.db.Exec("UPDATE workspace SET root_id = ? WHERE id = ?", rootNodeId, id)
 	if db.Error != nil {
 		return db.Error
@@ -285,7 +275,7 @@ func (repo *WorkspaceRepo) UpdateRootId(id string, rootNodeId string) error {
 	return nil
 }
 
-func (repo *WorkspaceRepo) GrantUserPermission(id string, userId string, permission string) error {
+func (repo *PostgresWorkspaceRepo) GrantUserPermission(id string, userId string, permission string) error {
 	db := repo.db.Exec(
 		"INSERT INTO userpermission (id, user_id, resource_id, permission) "+
 			"VALUES (?, ?, ?, ?) ON CONFLICT (user_id, resource_id) DO UPDATE SET permission = ?",
@@ -296,27 +286,27 @@ func (repo *WorkspaceRepo) GrantUserPermission(id string, userId string, permiss
 	return nil
 }
 
-func (repo *WorkspaceRepo) populateModelFields(workspaces []*WorkspaceEntity) error {
+func (repo *PostgresWorkspaceRepo) populateModelFields(workspaces []*PostgresWorkspace) error {
 	for _, w := range workspaces {
 		w.UserPermissions = make([]*model.UserPermission, 0)
-		userPermissions, err := repo.permissionRepo.GetUserPermissions(w.Id)
+		userPermissions, err := repo.permissionRepo.GetUserPermissions(w.ID)
 		if err != nil {
 			return err
 		}
 		for _, p := range userPermissions {
 			w.UserPermissions = append(w.UserPermissions, &model.UserPermission{
-				UserId: p.UserId,
+				UserId: p.UserID,
 				Value:  p.Permission,
 			})
 		}
 		w.GroupPermissions = make([]*model.GroupPermission, 0)
-		groupPermissions, err := repo.permissionRepo.GetGroupPermissions(w.Id)
+		groupPermissions, err := repo.permissionRepo.GetGroupPermissions(w.ID)
 		if err != nil {
 			return err
 		}
 		for _, p := range groupPermissions {
 			w.GroupPermissions = append(w.GroupPermissions, &model.GroupPermission{
-				GroupId: p.GroupId,
+				GroupID: p.GroupID,
 				Value:   p.Permission,
 			})
 		}

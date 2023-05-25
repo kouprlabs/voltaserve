@@ -21,7 +21,7 @@ func NewFileSearch() *FileSearch {
 	}
 }
 
-func (search *FileSearch) Index(files []model.FileModel) (err error) {
+func (search *FileSearch) Index(files []model.CoreFile) (err error) {
 	if len(files) == 0 {
 		return nil
 	}
@@ -38,7 +38,7 @@ func (search *FileSearch) Index(files []model.FileModel) (err error) {
 	return nil
 }
 
-func (search *FileSearch) Update(files []model.FileModel) (err error) {
+func (search *FileSearch) Update(files []model.CoreFile) (err error) {
 	if len(files) == 0 {
 		return nil
 	}
@@ -65,19 +65,19 @@ func (search *FileSearch) Delete(ids []string) error {
 	return nil
 }
 
-func (search *FileSearch) Query(query string) ([]model.FileModel, error) {
+func (search *FileSearch) Query(query string) ([]model.CoreFile, error) {
 	hits, err := search.search.Query(search.index, query)
 	if err != nil {
 		return nil, err
 	}
-	var res []model.FileModel
+	var res []model.CoreFile
 	for _, v := range hits {
 		var b []byte
 		b, err = json.Marshal(v)
 		if err != nil {
 			return nil, err
 		}
-		var file repo.FileEntity
+		var file repo.PostgresFile
 		if err = json.Unmarshal(b, &file); err != nil {
 			return nil, err
 		}
@@ -86,7 +86,7 @@ func (search *FileSearch) Query(query string) ([]model.FileModel, error) {
 	return res, nil
 }
 
-func (search *FileSearch) populateTextField(files []model.FileModel) error {
+func (search *FileSearch) populateTextField(files []model.CoreFile) error {
 	for _, f := range files {
 		if f.GetSnapshots() != nil &&
 			len(f.GetSnapshots()) > 0 &&

@@ -9,7 +9,7 @@ import (
 
 type FileCache struct {
 	redis     *infra.RedisManager
-	fileRepo  *repo.FileRepo
+	fileRepo  repo.CoreFileRepo
 	keyPrefix string
 }
 
@@ -21,31 +21,31 @@ func NewFileCache() *FileCache {
 	}
 }
 
-func (c *FileCache) Set(file model.FileModel) error {
+func (c *FileCache) Set(file model.CoreFile) error {
 	b, err := json.Marshal(file)
 	if err != nil {
 		return err
 	}
-	err = c.redis.Set(c.keyPrefix+file.GetId(), string(b))
+	err = c.redis.Set(c.keyPrefix+file.GetID(), string(b))
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (c *FileCache) Get(id string) (model.FileModel, error) {
+func (c *FileCache) Get(id string) (model.CoreFile, error) {
 	value, err := c.redis.Get(c.keyPrefix + id)
 	if err != nil {
 		return c.Refresh(id)
 	}
-	var file = repo.FileEntity{}
+	var file = repo.PostgresFile{}
 	if err = json.Unmarshal([]byte(value), &file); err != nil {
 		return nil, err
 	}
 	return &file, nil
 }
 
-func (c *FileCache) Refresh(id string) (model.FileModel, error) {
+func (c *FileCache) Refresh(id string) (model.CoreFile, error) {
 	res, err := c.fileRepo.Find(id)
 	if err != nil {
 		return nil, err
