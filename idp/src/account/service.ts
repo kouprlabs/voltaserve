@@ -5,7 +5,7 @@ import { newHashId, newHyphenlessUuid } from '@/infra/id'
 import { sendTemplateMail } from '@/infra/mail'
 import { hashPassword } from '@/infra/password'
 import search, { USER_SEARCH_INDEX } from '@/infra/search'
-import UserRepo from '@/user/repo'
+import userRepo from '@/user/repo'
 import { mapEntity, UserDTO } from '@/user/service'
 
 export type AccountCreateOptions = {
@@ -32,13 +32,13 @@ export async function createUser(
   options: AccountCreateOptions
 ): Promise<UserDTO> {
   const id = newHashId()
-  const existingUser = await UserRepo.find('username', options.email)
+  const existingUser = await userRepo.find('username', options.email)
   if (existingUser) {
     throw newError({ code: ErrorCode.UsernameUnavailable })
   }
   try {
     const emailConfirmationToken = newHyphenlessUuid()
-    const user = await UserRepo.insert({
+    const user = await userRepo.insert({
       id,
       username: options.email,
       email: options.email,
@@ -64,27 +64,27 @@ export async function createUser(
     })
     return mapEntity(user)
   } catch (error) {
-    await UserRepo.delete(id)
+    await userRepo.delete(id)
     await search.index(USER_SEARCH_INDEX).deleteDocuments([id])
     throw newError({ code: ErrorCode.InternalServerError, error })
   }
 }
 
 export async function resetPassword(options: AccountResetPasswordOptions) {
-  const user = await UserRepo.find('reset_password_token', options.token, true)
-  await UserRepo.update({
+  const user = await userRepo.find('reset_password_token', options.token, true)
+  await userRepo.update({
     id: user.id,
     passwordHash: hashPassword(options.newPassword),
   })
 }
 
 export async function confirmEmail(options: AccountConfirmEmailOptions) {
-  let user = await UserRepo.find(
+  let user = await userRepo.find(
     'email_confirmation_token',
     options.token,
     true
   )
-  user = await UserRepo.update({
+  user = await userRepo.update({
     id: user.id,
     isEmailConfirmed: true,
     emailConfirmationToken: null,
@@ -100,9 +100,9 @@ export async function confirmEmail(options: AccountConfirmEmailOptions) {
 export async function sendResetPasswordEmail(
   options: AccountSendResetPasswordEmailOptions
 ) {
-  let user = await UserRepo.find('email', options.email)
+  let user = await userRepo.find('email', options.email)
   if (user) {
-    user = await UserRepo.update({
+    user = await userRepo.update({
       id: user.id,
       resetPasswordToken: newHyphenlessUuid(),
     })
@@ -115,8 +115,8 @@ export async function sendResetPasswordEmail(
       'TOKEN': user.resetPasswordToken,
     })
   } catch (error) {
-    const { id } = await UserRepo.find('email', options.email, true)
-    await UserRepo.update({ id, resetPasswordToken: null })
+    const { id } = await userRepo.find('email', options.email, true)
+    await userRepo.update({ id, resetPasswordToken: null })
     throw newError({ code: ErrorCode.InternalServerError, error })
   }
 }
