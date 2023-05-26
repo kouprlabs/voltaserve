@@ -31,10 +31,10 @@ passport.use(
       audience: tokenConfig.audience,
     },
     async (jwt_payload, done) => {
-      const user = await userRepo.find('id', jwt_payload.sub)
-      if (user) {
+      try {
+        const user = await userRepo.findByID(jwt_payload.sub)
         return done(null, user)
-      } else {
+      } catch {
         return done(null, false)
       }
     }

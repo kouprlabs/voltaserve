@@ -1,22 +1,90 @@
 import { client } from '@/infra/db'
 import { ErrorCode, newError } from '@/infra/error'
-import { Field, InsertOptions, UpdateOptions, User } from './core'
+import { InsertOptions, UpdateOptions, User } from './core'
 
 export default class PostgresUserRepo {
-  async find(field: Field, value: any, canThrow?: boolean): Promise<User> {
+  async findByID(id: string): Promise<User> {
     const { rowCount, rows } = await client.query(
-      `SELECT * FROM "user" WHERE ${field} = $1`,
-      [value]
+      `SELECT * FROM "user" WHERE id = $1`,
+      [id]
     )
     if (rowCount < 1) {
-      if (canThrow === true) {
-        throw newError({
-          code: ErrorCode.ResourceNotFound,
-          error: `User with ${field}=${value} not found`,
-        })
-      } else {
-        return null
-      }
+      throw newError({
+        code: ErrorCode.ResourceNotFound,
+        error: `User with id=${id} not found`,
+      })
+    }
+    return this.mapRow(rows[0])
+  }
+
+  async findByUsername(username: string): Promise<User> {
+    const { rowCount, rows } = await client.query(
+      `SELECT * FROM "user" WHERE username = $1`,
+      [username]
+    )
+    if (rowCount < 1) {
+      throw newError({
+        code: ErrorCode.ResourceNotFound,
+        error: `User with username=${username} not found`,
+      })
+    }
+    return this.mapRow(rows[0])
+  }
+
+  async findByEmail(email: string): Promise<User> {
+    const { rowCount, rows } = await client.query(
+      `SELECT * FROM "user" WHERE email = $1`,
+      [email]
+    )
+    if (rowCount < 1) {
+      throw newError({
+        code: ErrorCode.ResourceNotFound,
+        error: `User with email=${email} not found`,
+      })
+    }
+    return this.mapRow(rows[0])
+  }
+
+  async findByRefreshTokenValue(refreshTokenValue: string): Promise<User> {
+    const { rowCount, rows } = await client.query(
+      `SELECT * FROM "user" WHERE refresh_token_value = $1`,
+      [refreshTokenValue]
+    )
+    if (rowCount < 1) {
+      throw newError({
+        code: ErrorCode.ResourceNotFound,
+        error: `User with refresh_token_value=${refreshTokenValue} not found`,
+      })
+    }
+    return this.mapRow(rows[0])
+  }
+
+  async findByResetPasswordToken(resetPasswordToken: string): Promise<User> {
+    const { rowCount, rows } = await client.query(
+      `SELECT * FROM "user" WHERE reset_password_token = $1`,
+      [resetPasswordToken]
+    )
+    if (rowCount < 1) {
+      throw newError({
+        code: ErrorCode.ResourceNotFound,
+        error: `User with reset_password_token=${resetPasswordToken} not found`,
+      })
+    }
+    return this.mapRow(rows[0])
+  }
+
+  async findByEmailConfirmationToken(
+    emailConfirmationToken: string
+  ): Promise<User> {
+    const { rowCount, rows } = await client.query(
+      `SELECT * FROM "user" WHERE email_confirmation_token = $1`,
+      [emailConfirmationToken]
+    )
+    if (rowCount < 1) {
+      throw newError({
+        code: ErrorCode.ResourceNotFound,
+        error: `User with email_confirmation_token=${emailConfirmationToken} not found`,
+      })
     }
     return this.mapRow(rows[0])
   }
@@ -33,6 +101,14 @@ export default class PostgresUserRepo {
       })
     }
     return this.mapRow(rows[0])
+  }
+
+  async isUsernameAvailable(username: string): Promise<boolean> {
+    const { rowCount } = await client.query(
+      `SELECT * FROM "user" WHERE username = $1`,
+      [username]
+    )
+    return rowCount === 0
   }
 
   async insert(data: InsertOptions): Promise<User> {
@@ -76,7 +152,7 @@ export default class PostgresUserRepo {
   }
 
   async update(data: UpdateOptions): Promise<User> {
-    const entity = await this.find('id', data.id)
+    const entity = await this.findByID(data.id)
     if (!entity) {
       throw newError({
         code: ErrorCode.InternalServerError,
