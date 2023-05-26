@@ -9,7 +9,7 @@ import (
 
 type GroupCache struct {
 	redis     *infra.RedisManager
-	groupRepo repo.CoreGroupRepo
+	groupRepo repo.GroupRepo
 	keyPrefix string
 }
 

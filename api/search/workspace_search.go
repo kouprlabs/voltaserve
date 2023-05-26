@@ -10,7 +10,7 @@ import (
 type WorkspaceSearch struct {
 	index         string
 	search        *infra.SearchManager
-	workspaceRepo repo.CoreWorkspaceRepo
+	workspaceRepo repo.WorkspaceRepo
 }
 
 func NewWorkspaceSearch() *WorkspaceSearch {

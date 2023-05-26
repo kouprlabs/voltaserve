@@ -13,6 +13,20 @@ import (
 	"gorm.io/gorm"
 )
 
+type SnapshotRepo interface {
+	Find(id string) (model.CoreSnapshot, error)
+	Save(snapshot model.CoreSnapshot) error
+	MapWithFile(id string, fileId string) error
+	DeleteMappingsForFile(fileId string) error
+	FindAllDangling() ([]model.CoreSnapshot, error)
+	DeleteAllDangling() error
+	GetLatestVersionForFile(fileId string) (int64, error)
+}
+
+func NewSnapshotRepo() SnapshotRepo {
+	return NewPostgresSnapshotRepo()
+}
+
 type PostgresSnapshot struct {
 	ID         string         `json:"id" gorm:"column:id;size:36"`
 	Version    int64          `json:"version" gorm:"column:version"`

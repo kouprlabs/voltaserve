@@ -9,7 +9,7 @@ import (
 
 type WorkspaceCache struct {
 	redis         *infra.RedisManager
-	workspaceRepo repo.CoreWorkspaceRepo
+	workspaceRepo repo.WorkspaceRepo
 	keyPrefix     string
 }
 

@@ -8,8 +8,8 @@ type Notification struct {
 }
 
 type NotificationService struct {
-	userRepo         repo.CoreUserRepo
-	invitationRepo   repo.CoreInvitationRepo
+	userRepo         repo.UserRepo
+	invitationRepo   repo.InvitationRepo
 	invitationMapper *invitationMapper
 }
 

@@ -15,8 +15,8 @@ import (
 
 type StorageService struct {
 	s3             *infra.S3Manager
-	snapshotRepo   repo.CoreSnapshotRepo
-	fileRepo       repo.CoreFileRepo
+	snapshotRepo   repo.SnapshotRepo
+	fileRepo       repo.FileRepo
 	fileCache      *cache.FileCache
 	fileMapper     *service.FileMapper
 	ocrStorage     *ocrStorage

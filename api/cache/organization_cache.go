@@ -9,7 +9,7 @@ import (
 
 type OrganizationCache struct {
 	redis     *infra.RedisManager
-	orgRepo   repo.CoreOrganizationRepo
+	orgRepo   repo.OrganizationRepo
 	keyPrefix string
 }
 

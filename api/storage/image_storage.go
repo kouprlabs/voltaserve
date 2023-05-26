@@ -15,7 +15,7 @@ import (
 
 type imageStorage struct {
 	s3              *infra.S3Manager
-	snapshotRepo    repo.CoreSnapshotRepo
+	snapshotRepo    repo.SnapshotRepo
 	fileSearch      *search.FileSearch
 	ocrStorage      *ocrStorage
 	cmd             *infra.Command

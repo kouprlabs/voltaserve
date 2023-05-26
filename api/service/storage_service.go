@@ -14,14 +14,14 @@ type StorageUsage struct {
 }
 
 type StorageService struct {
-	workspaceRepo  repo.CoreWorkspaceRepo
+	workspaceRepo  repo.WorkspaceRepo
 	workspaceCache *cache.WorkspaceCache
 	workspaceGuard *guard.WorkspaceGuard
-	fileRepo       repo.CoreFileRepo
+	fileRepo       repo.FileRepo
 	fileCache      *cache.FileCache
 	fileGuard      *guard.FileGuard
 	storageMapper  *storageMapper
-	userRepo       repo.CoreUserRepo
+	userRepo       repo.UserRepo
 }
 
 func NewStorageService() *StorageService {

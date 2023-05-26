@@ -13,7 +13,7 @@ import (
 
 type officeStorage struct {
 	s3              *infra.S3Manager
-	snapshotRepo    repo.CoreSnapshotRepo
+	snapshotRepo    repo.SnapshotRepo
 	ocrStorage      *ocrStorage
 	cmd             *infra.Command
 	metadataUpdater *storageMetadataUpdater

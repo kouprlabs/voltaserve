@@ -9,6 +9,16 @@ import (
 	"gorm.io/gorm"
 )
 
+type UserRepo interface {
+	Find(id string) (model.CoreUser, error)
+	FindByEmail(email string) (model.CoreUser, error)
+	FindAll() ([]model.CoreUser, error)
+}
+
+func NewUserRepo() UserRepo {
+	return NewPostgresUserRepo()
+}
+
 type PostgresUser struct {
 	ID                     string  `json:"id"`
 	FullName               string  `json:"fullName"`

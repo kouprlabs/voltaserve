@@ -10,7 +10,7 @@ import (
 type OrganizationSearch struct {
 	index   string
 	search  *infra.SearchManager
-	orgRepo repo.CoreOrganizationRepo
+	orgRepo repo.OrganizationRepo
 }
 
 func NewOrganizationSearch() *OrganizationSearch {

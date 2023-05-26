@@ -10,7 +10,7 @@ import (
 type GroupSearch struct {
 	index     string
 	search    *infra.SearchManager
-	groupRepo repo.CoreGroupRepo
+	groupRepo repo.GroupRepo
 }
 
 func NewGroupSearch() *GroupSearch {

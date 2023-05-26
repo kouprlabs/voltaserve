@@ -1,6 +1,6 @@
 import { Request } from 'express'
-import { UserEntity } from './postgres'
+import { User } from '@/user/repo'
 
 export interface PassportRequest extends Request {
-  user: UserEntity
+  user: User
 }
