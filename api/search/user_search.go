@@ -19,18 +19,18 @@ func NewUserSearch() *UserSearch {
 	}
 }
 
-func (svc *UserSearch) Query(query string) ([]model.CoreUser, error) {
+func (svc *UserSearch) Query(query string) ([]model.User, error) {
 	hits, err := svc.search.Query(svc.index, query)
 	if err != nil {
 		return nil, err
 	}
-	res := []model.CoreUser{}
+	res := []model.User{}
 	for _, v := range hits {
 		b, err := json.Marshal(v)
 		if err != nil {
 			return nil, err
 		}
-		var user repo.PostgresUser
+		user := repo.NewUser()
 		if err := json.Unmarshal(b, &user); err != nil {
 			return nil, err
 		}

@@ -10,9 +10,10 @@ import (
 	"voltaserve/config"
 	"voltaserve/errorpkg"
 	"voltaserve/helpers"
+	"voltaserve/infra"
 	"voltaserve/model"
+	"voltaserve/pipeline"
 	"voltaserve/service"
-	"voltaserve/storage"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
@@ -22,7 +23,7 @@ import (
 type FileRouter struct {
 	fileSvc      *service.FileService
 	workspaceSvc *service.WorkspaceService
-	storageSvc   *storage.StorageService
+	storageSvc   *pipeline.StoragePipeline
 	config       config.Config
 }
 
@@ -30,7 +31,7 @@ func NewFileRouter() *FileRouter {
 	return &FileRouter{
 		fileSvc:      service.NewFileService(),
 		workspaceSvc: service.NewWorkspaceService(),
-		storageSvc:   storage.NewStorageService(),
+		storageSvc:   pipeline.NewStoragePipeline(),
 		config:       config.GetConfig(),
 	}
 }
@@ -114,7 +115,7 @@ func (r *FileRouter) Upload(c *fiber.Ctx) error {
 		return err
 	}
 	defer os.Remove(path)
-	file, err = r.storageSvc.Store(storage.StorageOptions{FileId: file.ID, FilePath: path}, userId)
+	file, err = r.storageSvc.Run(pipeline.StoragePipelineOptions{FileId: file.ID, FilePath: path}, userId)
 	if err != nil {
 		return err
 	}
@@ -157,7 +158,7 @@ func (r *FileRouter) Patch(c *fiber.Ctx) error {
 		return err
 	}
 	defer os.Remove(path)
-	file, err = r.storageSvc.Store(storage.StorageOptions{FileId: file.ID, FilePath: path}, userId)
+	file, err = r.storageSvc.Run(pipeline.StoragePipelineOptions{FileId: file.ID, FilePath: path}, userId)
 	if err != nil {
 		return err
 	}
@@ -752,7 +753,7 @@ func (r *FileDownloadRouter) DownloadOriginal(c *fiber.Ctx) error {
 		return errorpkg.NewS3ObjectNotFoundError(nil)
 	}
 	bytes := buf.Bytes()
-	c.Set("Content-Type", storage.DetectMimeFromBytes(bytes))
+	c.Set("Content-Type", infra.DetectMimeFromBytes(bytes))
 	c.Set("Content-Disposition", fmt.Sprintf("filename=\"%s\"", file.GetName()))
 	return c.Send(bytes)
 }
@@ -787,7 +788,7 @@ func (r *FileDownloadRouter) DownloadPreview(c *fiber.Ctx) error {
 		return errorpkg.NewS3ObjectNotFoundError(nil)
 	}
 	bytes := buf.Bytes()
-	c.Set("Content-Type", storage.DetectMimeFromBytes(bytes))
+	c.Set("Content-Type", infra.DetectMimeFromBytes(bytes))
 	c.Set("Content-Disposition", fmt.Sprintf("filename=\"%s\"", file.GetName()))
 	return c.Send(bytes)
 }

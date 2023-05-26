@@ -10,16 +10,20 @@ import (
 )
 
 type UserRepo interface {
-	Find(id string) (model.CoreUser, error)
-	FindByEmail(email string) (model.CoreUser, error)
-	FindAll() ([]model.CoreUser, error)
+	Find(id string) (model.User, error)
+	FindByEmail(email string) (model.User, error)
+	FindAll() ([]model.User, error)
 }
 
 func NewUserRepo() UserRepo {
-	return NewPostgresUserRepo()
+	return newUserRepo()
 }
 
-type PostgresUser struct {
+func NewUser() model.User {
+	return &postgresUser{}
+}
+
+type postgresUser struct {
 	ID                     string  `json:"id"`
 	FullName               string  `json:"fullName"`
 	Username               string  `json:"username"`
@@ -35,54 +39,54 @@ type PostgresUser struct {
 	UpdateTime             *string `json:"updateTime"`
 }
 
-func (PostgresUser) TableName() string {
+func (postgresUser) TableName() string {
 	return "user"
 }
 
-func (u PostgresUser) GetID() string {
+func (u postgresUser) GetID() string {
 	return u.ID
 }
 
-func (u PostgresUser) GetFullName() string {
+func (u postgresUser) GetFullName() string {
 	return u.FullName
 }
 
-func (u PostgresUser) GetUsername() string {
+func (u postgresUser) GetUsername() string {
 	return u.Username
 }
 
-func (u PostgresUser) GetEmail() string {
+func (u postgresUser) GetEmail() string {
 	return u.Email
 }
 
-func (u PostgresUser) GetPicture() *string {
+func (u postgresUser) GetPicture() *string {
 	return u.Picture
 }
 
-func (u PostgresUser) GetIsEmailConfirmed() bool {
+func (u postgresUser) GetIsEmailConfirmed() bool {
 	return u.IsEmailConfirmed
 }
 
-func (u PostgresUser) GetCreateTime() string {
+func (u postgresUser) GetCreateTime() string {
 	return u.CreateTime
 }
 
-func (u PostgresUser) GetUpdateTime() *string {
+func (u postgresUser) GetUpdateTime() *string {
 	return u.UpdateTime
 }
 
-type PostgresUserRepo struct {
+type userRepo struct {
 	db *gorm.DB
 }
 
-func NewPostgresUserRepo() *PostgresUserRepo {
-	return &PostgresUserRepo{
+func newUserRepo() *userRepo {
+	return &userRepo{
 		db: infra.GetDb(),
 	}
 }
 
-func (repo *PostgresUserRepo) Find(id string) (model.CoreUser, error) {
-	var res = PostgresUser{}
+func (repo *userRepo) Find(id string) (model.User, error) {
+	var res = postgresUser{}
 	db := repo.db.Where("id = ?", id).First(&res)
 	if db.Error != nil {
 		if errors.Is(db.Error, gorm.ErrRecordNotFound) {
@@ -94,8 +98,8 @@ func (repo *PostgresUserRepo) Find(id string) (model.CoreUser, error) {
 	return &res, nil
 }
 
-func (repo *PostgresUserRepo) FindByEmail(email string) (model.CoreUser, error) {
-	var res = PostgresUser{}
+func (repo *userRepo) FindByEmail(email string) (model.User, error) {
+	var res = postgresUser{}
 	db := repo.db.Where("email = ?", email).First(&res)
 	if db.Error != nil {
 		return nil, db.Error
@@ -103,13 +107,13 @@ func (repo *PostgresUserRepo) FindByEmail(email string) (model.CoreUser, error) 
 	return &res, nil
 }
 
-func (repo *PostgresUserRepo) FindAll() ([]model.CoreUser, error) {
-	var entities []*PostgresUser
+func (repo *userRepo) FindAll() ([]model.User, error) {
+	var entities []*postgresUser
 	db := repo.db.Raw(`select * from "user" u`).Scan(&entities)
 	if db.Error != nil {
 		return nil, db.Error
 	}
-	var res []model.CoreUser
+	var res []model.User
 	for _, u := range entities {
 		res = append(res, u)
 	}

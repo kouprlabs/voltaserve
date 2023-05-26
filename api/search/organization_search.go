@@ -17,11 +17,11 @@ func NewOrganizationSearch() *OrganizationSearch {
 	return &OrganizationSearch{
 		index:   infra.OrganizationSearchIndex,
 		search:  infra.NewSearchManager(),
-		orgRepo: repo.NewPostgresOrganizationRepo(),
+		orgRepo: repo.NewOrganizationRepo(),
 	}
 }
 
-func (search *OrganizationSearch) Index(orgs []model.CoreOrganization) error {
+func (search *OrganizationSearch) Index(orgs []model.Organization) error {
 	if len(orgs) == 0 {
 		return nil
 	}
@@ -35,7 +35,7 @@ func (search *OrganizationSearch) Index(orgs []model.CoreOrganization) error {
 	return nil
 }
 
-func (search *OrganizationSearch) Update(orgs []model.CoreOrganization) error {
+func (search *OrganizationSearch) Update(orgs []model.Organization) error {
 	if len(orgs) == 0 {
 		return nil
 	}
@@ -59,23 +59,23 @@ func (search *OrganizationSearch) Delete(ids []string) error {
 	return nil
 }
 
-func (search *OrganizationSearch) Query(query string) ([]model.CoreOrganization, error) {
+func (search *OrganizationSearch) Query(query string) ([]model.Organization, error) {
 	hits, err := search.search.Query(search.index, query)
 	if err != nil {
 		return nil, err
 	}
-	var res []model.CoreOrganization
+	var res []model.Organization
 	for _, v := range hits {
 		var b []byte
 		b, err = json.Marshal(v)
 		if err != nil {
 			return nil, err
 		}
-		var org repo.OrganizationEntity
+		org := repo.NewOrganization()
 		if err = json.Unmarshal(b, &org); err != nil {
 			return nil, err
 		}
-		res = append(res, &org)
+		res = append(res, org)
 	}
 	return res, nil
 }

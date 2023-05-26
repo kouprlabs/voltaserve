@@ -11,33 +11,9 @@ type CoreUserPermission interface {
 	GetValue() string
 }
 
-type UserPermission struct {
-	UserId string `json:"userId,omitempty"`
-	Value  string `json:"value,omitempty"`
-}
-
-func (p UserPermission) GetUserID() string {
-	return p.UserId
-}
-func (p UserPermission) GetValue() string {
-	return p.Value
-}
-
 type CoreGroupPermission interface {
 	GetGroupID() string
 	GetValue() string
-}
-
-type GroupPermission struct {
-	GroupID string `json:"groupId,omitempty"`
-	Value   string `json:"value,omitempty"`
-}
-
-func (p GroupPermission) GetGroupID() string {
-	return p.GroupID
-}
-func (p GroupPermission) GetValue() string {
-	return p.Value
 }
 
 func GteViewerPermission(permission string) bool {

@@ -1,4 +1,4 @@
-package storage
+package pipeline
 
 import (
 	"os"
@@ -13,66 +13,65 @@ import (
 	"voltaserve/service"
 )
 
-type StorageService struct {
+type StoragePipeline struct {
 	s3             *infra.S3Manager
 	snapshotRepo   repo.SnapshotRepo
 	fileRepo       repo.FileRepo
 	fileCache      *cache.FileCache
 	fileMapper     *service.FileMapper
-	ocrStorage     *ocrStorage
-	imageStorage   *imageStorage
-	officeStorage  *officeStorage
-	videoStorage   *videoStorage
+	ocrPipeline    *OCRPipeline
+	imagePipeline  *ImagePipeline
+	officePipeline *OfficePipeline
+	videoPipeline  *VideoPipeline
 	workspaceCache *cache.WorkspaceCache
 	config         config.Config
 }
 
-type StorageOptions struct {
+type StoragePipelineOptions struct {
 	FileId   string
 	FilePath string
 }
 
-func NewStorageService() *StorageService {
-	return &StorageService{
+func NewStoragePipeline() *StoragePipeline {
+	return &StoragePipeline{
 		s3:             infra.NewS3Manager(),
 		snapshotRepo:   repo.NewSnapshotRepo(),
 		fileRepo:       repo.NewFileRepo(),
 		fileCache:      cache.NewFileCache(),
 		fileMapper:     service.NewFileMapper(),
-		ocrStorage:     newOcrStorage(),
-		imageStorage:   newImageStorage(),
-		officeStorage:  newOfficeStorage(),
-		videoStorage:   newVideoStorage(),
+		ocrPipeline:    NewOCRPipeline(),
+		imagePipeline:  NewImagePipeline(),
+		officePipeline: NewOfficePipeline(),
+		videoPipeline:  NewVideoPipeline(),
 		workspaceCache: cache.NewWorkspaceCache(),
 		config:         config.GetConfig(),
 	}
 }
 
-func (svc *StorageService) Store(opts StorageOptions, userId string) (*service.File, error) {
-	file, err := svc.fileRepo.Find(opts.FileId)
+func (p *StoragePipeline) Run(opts StoragePipelineOptions, userId string) (*service.File, error) {
+	file, err := p.fileRepo.Find(opts.FileId)
 	if err != nil {
 		return nil, err
 	}
-	if err = svc.fileCache.Set(file); err != nil {
+	if err = p.fileCache.Set(file); err != nil {
 		return nil, err
 	}
-	workspace, err := svc.workspaceCache.Get(file.GetWorkspaceID())
+	workspace, err := p.workspaceCache.Get(file.GetWorkspaceID())
 	if err != nil {
 		return nil, err
 	}
-	latestVersion, err := svc.snapshotRepo.GetLatestVersionForFile(opts.FileId)
+	latestVersion, err := p.snapshotRepo.GetLatestVersionForFile(opts.FileId)
 	if err != nil {
 		return nil, err
 	}
 	snapshotId := helpers.NewId()
-	snapshot := &repo.PostgresSnapshot{
-		ID:      snapshotId,
-		Version: latestVersion,
-	}
-	if err = svc.snapshotRepo.Save(snapshot); err != nil {
+	snapshot := repo.NewSnapshot()
+	snapshot.SetID(snapshotId)
+	snapshot.SetVersion(latestVersion)
+	if err = p.snapshotRepo.Save(snapshot); err != nil {
 		return nil, err
 	}
-	if err = svc.snapshotRepo.MapWithFile(snapshotId, opts.FileId); err != nil {
+	if err = p.snapshotRepo.MapWithFile(snapshotId, opts.FileId); err != nil {
 		return nil, err
 	}
 	stat, err := os.Stat(opts.FilePath)
@@ -84,36 +83,36 @@ func (svc *StorageService) Store(opts StorageOptions, userId string) (*service.F
 		Key:    filepath.FromSlash(opts.FileId + "/" + snapshotId + "/original" + strings.ToLower(filepath.Ext(opts.FilePath))),
 		Size:   stat.Size(),
 	}
-	if err = svc.s3.PutFile(original.Key, opts.FilePath, DetectMimeFromFile(opts.FilePath), workspace.GetBucket()); err != nil {
+	if err = p.s3.PutFile(original.Key, opts.FilePath, infra.DetectMimeFromFile(opts.FilePath), workspace.GetBucket()); err != nil {
 		return nil, err
 	}
 	snapshot.SetOriginal(&original)
-	if err := svc.snapshotRepo.Save(snapshot); err != nil {
+	if err := p.snapshotRepo.Save(snapshot); err != nil {
 		return nil, err
 	}
-	if stat.Size() >= int64(svc.config.Limits.FileProcessingMaxSizeMB*1000000) {
-		v, err := svc.fileMapper.MapFile(file, userId)
+	if stat.Size() >= int64(p.config.Limits.FileProcessingMaxSizeMB*1000000) {
+		v, err := p.fileMapper.MapFile(file, userId)
 		if err != nil {
 			return nil, err
 		}
 		return v, nil
 	}
-	if svc.isPDF(filepath.Ext(opts.FilePath)) {
+	if p.isPDF(filepath.Ext(opts.FilePath)) {
 		snapshot.SetPreview(&model.S3Object{
 			Bucket: original.Bucket,
 			Key:    original.Key,
 			Size:   original.Size,
 		})
-		if err = svc.snapshotRepo.Save(snapshot); err != nil {
+		if err = p.snapshotRepo.Save(snapshot); err != nil {
 			return nil, err
 		}
-		if file, err = svc.fileRepo.Find(opts.FileId); err != nil {
+		if file, err = p.fileRepo.Find(opts.FileId); err != nil {
 			return nil, err
 		}
-		if err := svc.fileCache.Set(file); err != nil {
+		if err := p.fileCache.Set(file); err != nil {
 			return nil, err
 		}
-		if err = svc.ocrStorage.store(ocrOptions{
+		if err = p.ocrPipeline.Run(OCRPipelineOptions{
 			FileId:     opts.FileId,
 			SnapshotId: snapshotId,
 			S3Bucket:   workspace.GetBucket(),
@@ -121,8 +120,8 @@ func (svc *StorageService) Store(opts StorageOptions, userId string) (*service.F
 		}); err != nil {
 			return nil, err
 		}
-	} else if svc.isOffice(filepath.Ext(opts.FilePath)) || svc.isPlainText(filepath.Ext(opts.FilePath)) {
-		if err = svc.officeStorage.store(officeStorageOptions{
+	} else if p.isOffice(filepath.Ext(opts.FilePath)) || p.isPlainText(filepath.Ext(opts.FilePath)) {
+		if err = p.officePipeline.Run(OfficePipelineOptions{
 			FileId:     opts.FileId,
 			SnapshotId: snapshotId,
 			S3Bucket:   workspace.GetBucket(),
@@ -130,8 +129,8 @@ func (svc *StorageService) Store(opts StorageOptions, userId string) (*service.F
 		}); err != nil {
 			return nil, err
 		}
-	} else if svc.isImage(filepath.Ext(opts.FilePath)) {
-		if err = svc.imageStorage.store(imageStorageOptions{
+	} else if p.isImage(filepath.Ext(opts.FilePath)) {
+		if err = p.imagePipeline.Run(ImagePipelineOptions{
 			FileId:     opts.FileId,
 			SnapshotId: snapshotId,
 			S3Bucket:   workspace.GetBucket(),
@@ -139,8 +138,8 @@ func (svc *StorageService) Store(opts StorageOptions, userId string) (*service.F
 		}); err != nil {
 			return nil, err
 		}
-	} else if svc.isVideo(filepath.Ext(opts.FilePath)) {
-		if err = svc.videoStorage.store(videoStorageOptions{
+	} else if p.isVideo(filepath.Ext(opts.FilePath)) {
+		if err = p.videoPipeline.Run(VideoPipelineOptions{
 			FileId:     opts.FileId,
 			SnapshotId: snapshotId,
 			S3Bucket:   workspace.GetBucket(),
@@ -149,22 +148,22 @@ func (svc *StorageService) Store(opts StorageOptions, userId string) (*service.F
 			return nil, err
 		}
 	}
-	file, err = svc.fileCache.Refresh(file.GetID())
+	file, err = p.fileCache.Refresh(file.GetID())
 	if err != nil {
 		return nil, err
 	}
-	v, err := svc.fileMapper.MapFile(file, userId)
+	v, err := p.fileMapper.MapFile(file, userId)
 	if err != nil {
 		return nil, err
 	}
 	return v, nil
 }
 
-func (svc *StorageService) isPDF(extension string) bool {
+func (svc *StoragePipeline) isPDF(extension string) bool {
 	return strings.ToLower(extension) == ".pdf"
 }
 
-func (svc *StorageService) isOffice(extension string) bool {
+func (svc *StoragePipeline) isOffice(extension string) bool {
 	extensions := []string{
 		".xls",
 		".doc",
@@ -192,7 +191,7 @@ func (svc *StorageService) isOffice(extension string) bool {
 	return false
 }
 
-func (svc *StorageService) isPlainText(extension string) bool {
+func (svc *StoragePipeline) isPlainText(extension string) bool {
 	extensions := []string{
 		".txt",
 		".html",
@@ -225,7 +224,7 @@ func (svc *StorageService) isPlainText(extension string) bool {
 	return false
 }
 
-func (svc *StorageService) isImage(extension string) bool {
+func (svc *StoragePipeline) isImage(extension string) bool {
 	extensions := []string{
 		".xpm",
 		".png",
@@ -249,7 +248,7 @@ func (svc *StorageService) isImage(extension string) bool {
 	return false
 }
 
-func (svc *StorageService) isVideo(extension string) bool {
+func (svc *StoragePipeline) isVideo(extension string) bool {
 	extensions := []string{
 		".ogv",
 		".mpeg",

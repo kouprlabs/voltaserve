@@ -1,4 +1,4 @@
-package storage
+package pipeline
 
 import (
 	"voltaserve/cache"
@@ -7,15 +7,15 @@ import (
 	"voltaserve/search"
 )
 
-type storageMetadataUpdater struct {
+type metadataUpdater struct {
 	snapshotRepo repo.SnapshotRepo
 	fileRepo     repo.FileRepo
 	fileCache    *cache.FileCache
 	fileSearch   *search.FileSearch
 }
 
-func newMetadataUpdater() *storageMetadataUpdater {
-	return &storageMetadataUpdater{
+func newMetadataUpdater() *metadataUpdater {
+	return &metadataUpdater{
 		snapshotRepo: repo.NewSnapshotRepo(),
 		fileRepo:     repo.NewFileRepo(),
 		fileCache:    cache.NewFileCache(),
@@ -23,7 +23,7 @@ func newMetadataUpdater() *storageMetadataUpdater {
 	}
 }
 
-func (mu *storageMetadataUpdater) update(snapshot model.CoreSnapshot, fileId string) error {
+func (mu *metadataUpdater) update(snapshot model.Snapshot, fileId string) error {
 	if err := repo.NewSnapshotRepo().Save(snapshot); err != nil {
 		return err
 	}
@@ -34,7 +34,7 @@ func (mu *storageMetadataUpdater) update(snapshot model.CoreSnapshot, fileId str
 	if err = mu.fileCache.Set(file); err != nil {
 		return err
 	}
-	if err = mu.fileSearch.Update([]model.CoreFile{file}); err != nil {
+	if err = mu.fileSearch.Update([]model.File{file}); err != nil {
 		return err
 	}
 	return nil

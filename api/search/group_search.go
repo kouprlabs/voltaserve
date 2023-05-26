@@ -21,7 +21,7 @@ func NewGroupSearch() *GroupSearch {
 	}
 }
 
-func (search *GroupSearch) Index(groups []model.CoreGroup) error {
+func (search *GroupSearch) Index(groups []model.Group) error {
 	if len(groups) == 0 {
 		return nil
 	}
@@ -35,7 +35,7 @@ func (search *GroupSearch) Index(groups []model.CoreGroup) error {
 	return nil
 }
 
-func (search *GroupSearch) Update(groups []model.CoreGroup) error {
+func (search *GroupSearch) Update(groups []model.Group) error {
 	if len(groups) == 0 {
 		return nil
 	}
@@ -59,23 +59,23 @@ func (search *GroupSearch) Delete(ids []string) error {
 	return nil
 }
 
-func (search *GroupSearch) Query(query string) ([]model.CoreGroup, error) {
+func (search *GroupSearch) Query(query string) ([]model.Group, error) {
 	hits, err := search.search.Query(search.index, query)
 	if err != nil {
 		return nil, err
 	}
-	var res []model.CoreGroup
+	var res []model.Group
 	for _, v := range hits {
 		var b []byte
 		b, err = json.Marshal(v)
 		if err != nil {
 			return nil, err
 		}
-		var group repo.PostgresGroup
+		group := repo.NewGroup()
 		if err = json.Unmarshal(b, &group); err != nil {
 			return nil, err
 		}
-		res = append(res, &group)
+		res = append(res, group)
 	}
 	return res, nil
 }

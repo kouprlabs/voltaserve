@@ -21,7 +21,7 @@ func NewWorkspaceCache() *WorkspaceCache {
 	}
 }
 
-func (c *WorkspaceCache) Set(workspace model.CoreWorkspace) error {
+func (c *WorkspaceCache) Set(workspace model.Workspace) error {
 	b, err := json.Marshal(workspace)
 	if err != nil {
 		return err
@@ -33,19 +33,19 @@ func (c *WorkspaceCache) Set(workspace model.CoreWorkspace) error {
 	return nil
 }
 
-func (c *WorkspaceCache) Get(id string) (model.CoreWorkspace, error) {
+func (c *WorkspaceCache) Get(id string) (model.Workspace, error) {
 	value, err := c.redis.Get(c.keyPrefix + id)
 	if err != nil {
 		return c.Refresh(id)
 	}
-	var workspace = repo.PostgresWorkspace{}
+	workspace := repo.NewWorkspace()
 	if err = json.Unmarshal([]byte(value), &workspace); err != nil {
 		return nil, err
 	}
-	return &workspace, nil
+	return workspace, nil
 }
 
-func (c *WorkspaceCache) Refresh(id string) (model.CoreWorkspace, error) {
+func (c *WorkspaceCache) Refresh(id string) (model.Workspace, error) {
 	res, err := c.workspaceRepo.FindByID(id)
 	if err != nil {
 		return nil, err

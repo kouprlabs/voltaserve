@@ -280,7 +280,7 @@ func newInvitationMapper() *invitationMapper {
 	}
 }
 
-func (mp *invitationMapper) mapInvitation(m model.CoreInvitation, userId string) (*Invitation, error) {
+func (mp *invitationMapper) mapInvitation(m model.Invitation, userId string) (*Invitation, error) {
 	owner, err := mp.userRepo.Find(m.GetOwnerID())
 	if err != nil {
 		return nil, err
@@ -304,7 +304,7 @@ func (mp *invitationMapper) mapInvitation(m model.CoreInvitation, userId string)
 	}, nil
 }
 
-func (mp *invitationMapper) mapInvitations(invitations []model.CoreInvitation, userId string) ([]*Invitation, error) {
+func (mp *invitationMapper) mapInvitations(invitations []model.Invitation, userId string) ([]*Invitation, error) {
 	res := make([]*Invitation, 0)
 	for _, m := range invitations {
 		v, err := mp.mapInvitation(m, userId)

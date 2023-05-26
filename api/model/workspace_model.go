@@ -1,6 +1,6 @@
 package model
 
-type CoreWorkspace interface {
+type Workspace interface {
 	GetID() string
 	GetName() string
 	GetStorageCapacity() int64

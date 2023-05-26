@@ -1,4 +1,4 @@
-package storage
+package pipeline
 
 import (
 	"os"
@@ -11,29 +11,29 @@ import (
 	"voltaserve/repo"
 )
 
-type officeStorage struct {
+type OfficePipeline struct {
 	s3              *infra.S3Manager
 	snapshotRepo    repo.SnapshotRepo
-	ocrStorage      *ocrStorage
+	ocrStorage      *OCRPipeline
 	cmd             *infra.Command
-	metadataUpdater *storageMetadataUpdater
+	metadataUpdater *metadataUpdater
 	workspaceCache  *cache.WorkspaceCache
 	fileCache       *cache.FileCache
 	config          config.Config
 }
 
-type officeStorageOptions struct {
+type OfficePipelineOptions struct {
 	FileId     string
 	SnapshotId string
 	S3Bucket   string
 	S3Key      string
 }
 
-func newOfficeStorage() *officeStorage {
-	return &officeStorage{
+func NewOfficePipeline() *OfficePipeline {
+	return &OfficePipeline{
 		s3:              infra.NewS3Manager(),
 		snapshotRepo:    repo.NewSnapshotRepo(),
-		ocrStorage:      newOcrStorage(),
+		ocrStorage:      NewOCRPipeline(),
 		cmd:             infra.NewCommand(),
 		metadataUpdater: newMetadataUpdater(),
 		workspaceCache:  cache.NewWorkspaceCache(),
@@ -42,7 +42,7 @@ func newOfficeStorage() *officeStorage {
 	}
 }
 
-func (svc *officeStorage) store(opts officeStorageOptions) error {
+func (svc *OfficePipeline) Run(opts OfficePipelineOptions) error {
 	snapshot, err := svc.snapshotRepo.Find(opts.SnapshotId)
 	if err != nil {
 		return err
@@ -58,7 +58,7 @@ func (svc *officeStorage) store(opts officeStorageOptions) error {
 	if err := svc.save(snapshot, opts, outputPath); err != nil {
 		return err
 	}
-	if err := svc.ocrStorage.store(ocrOptions{
+	if err := svc.ocrStorage.Run(OCRPipelineOptions{
 		FileId:     opts.FileId,
 		SnapshotId: opts.SnapshotId,
 		S3Bucket:   opts.S3Bucket,
@@ -79,7 +79,7 @@ func (svc *officeStorage) store(opts officeStorageOptions) error {
 	return nil
 }
 
-func (svc *officeStorage) generatePDF(inputPath string) (string, error) {
+func (svc *OfficePipeline) generatePDF(inputPath string) (string, error) {
 	outputDirectory := filepath.FromSlash(os.TempDir() + "/" + helpers.NewId())
 	if err := os.MkdirAll(outputDirectory, 0755); err != nil {
 		return "", err
@@ -101,7 +101,7 @@ func (svc *officeStorage) generatePDF(inputPath string) (string, error) {
 	return newOutputPath, nil
 }
 
-func (svc *officeStorage) save(snapshot model.CoreSnapshot, opts officeStorageOptions, outputPath string) error {
+func (svc *OfficePipeline) save(snapshot model.Snapshot, opts OfficePipelineOptions, outputPath string) error {
 	file, err := svc.fileCache.Get(opts.FileId)
 	if err != nil {
 		return err
@@ -120,7 +120,7 @@ func (svc *officeStorage) save(snapshot model.CoreSnapshot, opts officeStorageOp
 		Key:    filepath.FromSlash(opts.FileId + "/" + opts.SnapshotId + "/preview.pdf"),
 		Size:   size,
 	})
-	if err := svc.s3.PutFile(snapshot.GetPreview().Key, outputPath, DetectMimeFromFile(outputPath), workspace.GetBucket()); err != nil {
+	if err := svc.s3.PutFile(snapshot.GetPreview().Key, outputPath, infra.DetectMimeFromFile(outputPath), workspace.GetBucket()); err != nil {
 		return err
 	}
 	if err := svc.metadataUpdater.update(snapshot, opts.FileId); err != nil {

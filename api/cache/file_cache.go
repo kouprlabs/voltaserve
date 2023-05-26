@@ -21,7 +21,7 @@ func NewFileCache() *FileCache {
 	}
 }
 
-func (c *FileCache) Set(file model.CoreFile) error {
+func (c *FileCache) Set(file model.File) error {
 	b, err := json.Marshal(file)
 	if err != nil {
 		return err
@@ -33,19 +33,19 @@ func (c *FileCache) Set(file model.CoreFile) error {
 	return nil
 }
 
-func (c *FileCache) Get(id string) (model.CoreFile, error) {
+func (c *FileCache) Get(id string) (model.File, error) {
 	value, err := c.redis.Get(c.keyPrefix + id)
 	if err != nil {
 		return c.Refresh(id)
 	}
-	var file = repo.PostgresFile{}
+	file := repo.NewFile()
 	if err = json.Unmarshal([]byte(value), &file); err != nil {
 		return nil, err
 	}
-	return &file, nil
+	return file, nil
 }
 
-func (c *FileCache) Refresh(id string) (model.CoreFile, error) {
+func (c *FileCache) Refresh(id string) (model.File, error) {
 	res, err := c.fileRepo.Find(id)
 	if err != nil {
 		return nil, err

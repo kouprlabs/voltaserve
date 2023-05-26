@@ -1,4 +1,4 @@
-package storage
+package infra
 
 import "github.com/gabriel-vasile/mimetype"
 

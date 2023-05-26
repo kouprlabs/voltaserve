@@ -1,4 +1,4 @@
-package storage
+package pipeline
 
 import (
 	"os"
@@ -12,26 +12,26 @@ import (
 	"voltaserve/repo"
 )
 
-type pdfStorage struct {
+type PDFPipeline struct {
 	minio           *infra.S3Manager
 	snapshotRepo    repo.SnapshotRepo
 	cmd             *infra.Command
-	metadataUpdater *storageMetadataUpdater
+	metadataUpdater *metadataUpdater
 	workspaceCache  *cache.WorkspaceCache
 	fileCache       *cache.FileCache
 	imageProc       *infra.ImageProcessor
 	config          config.Config
 }
 
-type pdfStorageOptions struct {
+type PDFPipelineOptions struct {
 	FileId     string
 	SnapshotId string
 	S3Bucket   string
 	S3Key      string
 }
 
-func newPDFStorage() *pdfStorage {
-	return &pdfStorage{
+func NewPDFPipeline() *PDFPipeline {
+	return &PDFPipeline{
 		minio:           infra.NewS3Manager(),
 		snapshotRepo:    repo.NewSnapshotRepo(),
 		cmd:             infra.NewCommand(),
@@ -43,29 +43,29 @@ func newPDFStorage() *pdfStorage {
 	}
 }
 
-func (svc *pdfStorage) store(opts pdfStorageOptions) error {
-	snapshot, err := svc.snapshotRepo.Find(opts.SnapshotId)
+func (p *PDFPipeline) Run(opts PDFPipelineOptions) error {
+	snapshot, err := p.snapshotRepo.Find(opts.SnapshotId)
 	if err != nil {
 		return err
 	}
 	inputPath := filepath.FromSlash(os.TempDir() + "/" + helpers.NewId())
-	if err := svc.minio.GetFile(opts.S3Key, inputPath, opts.S3Bucket); err != nil {
+	if err := p.minio.GetFile(opts.S3Key, inputPath, opts.S3Bucket); err != nil {
 		return err
 	}
-	if err := svc.generateThumbnail(snapshot, opts, inputPath); err != nil {
+	if err := p.generateThumbnail(snapshot, opts, inputPath); err != nil {
 		return err
 	}
-	text, size, err := svc.extractText(inputPath)
+	text, size, err := p.extractText(inputPath)
 	if err != nil {
 		return err
 	}
 	if len(text) > 0 {
-		if err := svc.storeInS3(snapshot, opts, text, size); err != nil {
+		if err := p.storeInS3(snapshot, opts, text, size); err != nil {
 			return err
 		}
 	} else {
 		if snapshot.HasOCR() {
-			if err := svc.deleteOCRData(snapshot, opts); err != nil {
+			if err := p.deleteOCRData(snapshot, opts); err != nil {
 				return err
 			}
 		}
@@ -78,16 +78,16 @@ func (svc *pdfStorage) store(opts pdfStorageOptions) error {
 	return nil
 }
 
-func (svc *pdfStorage) generateThumbnail(snapshot model.CoreSnapshot, opts pdfStorageOptions, inputPath string) error {
+func (p *PDFPipeline) generateThumbnail(snapshot model.Snapshot, opts PDFPipelineOptions, inputPath string) error {
 	outputPath := filepath.FromSlash(os.TempDir() + "/" + helpers.NewId() + ".jpg")
-	if err := svc.imageProc.Thumbnail(inputPath, 0, svc.config.Limits.ImagePreviewMaxHeight, outputPath); err != nil {
+	if err := p.imageProc.Thumbnail(inputPath, 0, p.config.Limits.ImagePreviewMaxHeight, outputPath); err != nil {
 		return err
 	}
 	b64, err := infra.ImageToBase64(outputPath)
 	if err != nil {
 		return err
 	}
-	thumbnailWidth, thumbnailHeight, err := svc.imageProc.Measure(outputPath)
+	thumbnailWidth, thumbnailHeight, err := p.imageProc.Measure(outputPath)
 	if err != nil {
 		return err
 	}
@@ -96,7 +96,7 @@ func (svc *pdfStorage) generateThumbnail(snapshot model.CoreSnapshot, opts pdfSt
 		Width:  thumbnailWidth,
 		Height: thumbnailHeight,
 	})
-	if err := svc.metadataUpdater.update(snapshot, opts.FileId); err != nil {
+	if err := p.metadataUpdater.update(snapshot, opts.FileId); err != nil {
 		return err
 	}
 	if _, err := os.Stat(outputPath); err == nil {
@@ -107,12 +107,12 @@ func (svc *pdfStorage) generateThumbnail(snapshot model.CoreSnapshot, opts pdfSt
 	return nil
 }
 
-func (svc *pdfStorage) storeInS3(snapshot model.CoreSnapshot, opts pdfStorageOptions, text string, size int64) error {
-	file, err := svc.fileCache.Get(opts.FileId)
+func (p *PDFPipeline) storeInS3(snapshot model.Snapshot, opts PDFPipelineOptions, text string, size int64) error {
+	file, err := p.fileCache.Get(opts.FileId)
 	if err != nil {
 		return err
 	}
-	workspace, err := svc.workspaceCache.Get(file.GetWorkspaceID())
+	workspace, err := p.workspaceCache.Get(file.GetWorkspaceID())
 	if err != nil {
 		return err
 	}
@@ -121,18 +121,18 @@ func (svc *pdfStorage) storeInS3(snapshot model.CoreSnapshot, opts pdfStorageOpt
 		Key:    filepath.FromSlash(opts.FileId + "/" + opts.SnapshotId + "/text.txt"),
 		Size:   size,
 	})
-	if err := svc.minio.PutText(snapshot.GetText().Key, text, "text/plain", workspace.GetBucket()); err != nil {
+	if err := p.minio.PutText(snapshot.GetText().Key, text, "text/plain", workspace.GetBucket()); err != nil {
 		return err
 	}
-	if err := svc.metadataUpdater.update(snapshot, opts.FileId); err != nil {
+	if err := p.metadataUpdater.update(snapshot, opts.FileId); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (svc *pdfStorage) extractText(inputPath string) (string, int64, error) {
+func (p *PDFPipeline) extractText(inputPath string) (string, int64, error) {
 	outputPath := filepath.FromSlash(os.TempDir() + "/" + helpers.NewId())
-	if err := svc.cmd.Exec("pdftotext", inputPath, outputPath); err != nil {
+	if err := p.cmd.Exec("pdftotext", inputPath, outputPath); err != nil {
 		return "", 0, err
 	}
 	text := ""
@@ -152,12 +152,12 @@ func (svc *pdfStorage) extractText(inputPath string) (string, int64, error) {
 	}
 }
 
-func (svc *pdfStorage) deleteOCRData(snapshot model.CoreSnapshot, opts pdfStorageOptions) error {
-	if err := svc.minio.RemoveObject(snapshot.GetOCR().Key, snapshot.GetOCR().Bucket); err != nil {
+func (p *PDFPipeline) deleteOCRData(snapshot model.Snapshot, opts PDFPipelineOptions) error {
+	if err := p.minio.RemoveObject(snapshot.GetOCR().Key, snapshot.GetOCR().Bucket); err != nil {
 		return err
 	}
 	snapshot.SetOCR(nil)
-	if err := svc.metadataUpdater.update(snapshot, opts.FileId); err != nil {
+	if err := p.metadataUpdater.update(snapshot, opts.FileId); err != nil {
 		return err
 	}
 	return nil

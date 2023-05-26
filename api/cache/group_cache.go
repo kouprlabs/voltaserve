@@ -21,7 +21,7 @@ func NewGroupCache() *GroupCache {
 	}
 }
 
-func (c *GroupCache) Set(workspace model.CoreGroup) error {
+func (c *GroupCache) Set(workspace model.Group) error {
 	b, err := json.Marshal(workspace)
 	if err != nil {
 		return err
@@ -33,19 +33,19 @@ func (c *GroupCache) Set(workspace model.CoreGroup) error {
 	return nil
 }
 
-func (c *GroupCache) Get(id string) (model.CoreGroup, error) {
+func (c *GroupCache) Get(id string) (model.Group, error) {
 	value, err := c.redis.Get(c.keyPrefix + id)
 	if err != nil {
 		return c.Refresh(id)
 	}
-	var group = repo.PostgresGroup{}
+	group := repo.NewGroup()
 	if err = json.Unmarshal([]byte(value), &group); err != nil {
 		return nil, err
 	}
-	return &group, nil
+	return group, nil
 }
 
-func (c *GroupCache) Refresh(id string) (model.CoreGroup, error) {
+func (c *GroupCache) Refresh(id string) (model.Group, error) {
 	res, err := c.groupRepo.Find(id)
 	if err != nil {
 		return nil, err

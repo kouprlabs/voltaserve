@@ -120,7 +120,7 @@ func (svc *GroupService) Create(req GroupCreateOptions, userId string) (*Group, 
 	if err != nil {
 		return nil, err
 	}
-	if err := svc.groupSearch.Index([]model.CoreGroup{group}); err != nil {
+	if err := svc.groupSearch.Index([]model.Group{group}); err != nil {
 		return nil, err
 	}
 	if err := svc.groupCache.Set(group); err != nil {
@@ -249,7 +249,7 @@ func (svc *GroupService) UpdateName(id string, name string, userId string) (*Gro
 	if err := svc.groupRepo.Save(group); err != nil {
 		return nil, err
 	}
-	if err := svc.groupSearch.Update([]model.CoreGroup{group}); err != nil {
+	if err := svc.groupSearch.Update([]model.Group{group}); err != nil {
 		return nil, err
 	}
 	err = svc.groupCache.Set(group)
@@ -433,7 +433,7 @@ func (svc *GroupService) SearchMembers(id string, query string, userId string) (
 	if err != nil {
 		return nil, err
 	}
-	var members []model.CoreUser
+	var members []model.User
 	for _, m := range groupMembers {
 		for _, u := range users {
 			if u.GetID() == m.GetID() {
@@ -498,7 +498,7 @@ func newGroupMapper() *groupMapper {
 	}
 }
 
-func (mp *groupMapper) mapGroup(m model.CoreGroup, userId string) (*Group, error) {
+func (mp *groupMapper) mapGroup(m model.Group, userId string) (*Group, error) {
 	org, err := mp.orgCache.Get(m.GetOrganizationID())
 	if err != nil {
 		return nil, err
@@ -534,7 +534,7 @@ func (mp *groupMapper) mapGroup(m model.CoreGroup, userId string) (*Group, error
 	return res, nil
 }
 
-func (mp *groupMapper) mapGroups(groups []model.CoreGroup, userId string) ([]*Group, error) {
+func (mp *groupMapper) mapGroups(groups []model.Group, userId string) ([]*Group, error) {
 	res := []*Group{}
 	for _, g := range groups {
 		v, err := mp.mapGroup(g, userId)

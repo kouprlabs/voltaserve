@@ -94,7 +94,7 @@ func (svc *OrganizationService) Create(req OrganizationCreateOptions, userId str
 	if err != nil {
 		return nil, err
 	}
-	if err := svc.orgSearch.Index([]model.CoreOrganization{org}); err != nil {
+	if err := svc.orgSearch.Index([]model.Organization{org}); err != nil {
 		return nil, err
 	}
 	if err := svc.orgCache.Set(org); err != nil {
@@ -178,7 +178,7 @@ func (svc *OrganizationService) SearchMembers(id string, query string, userId st
 	if err != nil {
 		return nil, err
 	}
-	var members []model.CoreUser
+	var members []model.User
 	for _, m := range orgMembers {
 		for _, u := range users {
 			if u.GetID() == m.GetID() {
@@ -235,7 +235,7 @@ func (svc *OrganizationService) UpdateName(id string, name string, userId string
 	if err := svc.orgRepo.Save(org); err != nil {
 		return nil, err
 	}
-	if err := svc.orgSearch.Update([]model.CoreOrganization{org}); err != nil {
+	if err := svc.orgSearch.Update([]model.Organization{org}); err != nil {
 		return nil, err
 	}
 	err = svc.orgCache.Set(org)
@@ -381,7 +381,7 @@ func newOrganizationMapper() *organizationMapper {
 	}
 }
 
-func (mp *organizationMapper) mapOrganization(m model.CoreOrganization, userId string) (*Organization, error) {
+func (mp *organizationMapper) mapOrganization(m model.Organization, userId string) (*Organization, error) {
 	res := &Organization{
 		ID:         m.GetID(),
 		Name:       m.GetName(),

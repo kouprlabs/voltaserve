@@ -1,4 +1,4 @@
-package storage
+package pipeline
 
 import (
 	"os"
@@ -11,11 +11,11 @@ import (
 	"voltaserve/repo"
 )
 
-type videoStorage struct {
+type VideoPipeline struct {
 	minio           *infra.S3Manager
 	snapshotRepo    repo.SnapshotRepo
 	cmd             *infra.Command
-	metadataUpdater *storageMetadataUpdater
+	metadataUpdater *metadataUpdater
 	workspaceCache  *cache.WorkspaceCache
 	fileCache       *cache.FileCache
 	imageProc       *infra.ImageProcessor
@@ -23,15 +23,15 @@ type videoStorage struct {
 	config          config.Config
 }
 
-type videoStorageOptions struct {
+type VideoPipelineOptions struct {
 	FileId     string
 	SnapshotId string
 	S3Bucket   string
 	S3Key      string
 }
 
-func newVideoStorage() *videoStorage {
-	return &videoStorage{
+func NewVideoPipeline() *VideoPipeline {
+	return &VideoPipeline{
 		minio:           infra.NewS3Manager(),
 		snapshotRepo:    repo.NewSnapshotRepo(),
 		cmd:             infra.NewCommand(),
@@ -44,16 +44,16 @@ func newVideoStorage() *videoStorage {
 	}
 }
 
-func (svc *videoStorage) store(opts videoStorageOptions) error {
-	snapshot, err := svc.snapshotRepo.Find(opts.SnapshotId)
+func (p *VideoPipeline) Run(opts VideoPipelineOptions) error {
+	snapshot, err := p.snapshotRepo.Find(opts.SnapshotId)
 	if err != nil {
 		return err
 	}
 	inputPath := filepath.FromSlash(os.TempDir() + "/" + helpers.NewId())
-	if err := svc.minio.GetFile(opts.S3Key, inputPath, opts.S3Bucket); err != nil {
+	if err := p.minio.GetFile(opts.S3Key, inputPath, opts.S3Bucket); err != nil {
 		return err
 	}
-	if err := svc.generateThumbnail(snapshot, opts, inputPath); err != nil {
+	if err := p.generateThumbnail(snapshot, opts, inputPath); err != nil {
 		return err
 	}
 	if _, err := os.Stat(inputPath); err == nil {
@@ -64,16 +64,16 @@ func (svc *videoStorage) store(opts videoStorageOptions) error {
 	return nil
 }
 
-func (svc *videoStorage) generateThumbnail(snapshot model.CoreSnapshot, opts videoStorageOptions, inputPath string) error {
+func (p *VideoPipeline) generateThumbnail(snapshot model.Snapshot, opts VideoPipelineOptions, inputPath string) error {
 	outputPath := filepath.FromSlash(os.TempDir() + "/" + helpers.NewId() + ".png")
-	if err := svc.videoProc.Thumbnail(inputPath, 0, svc.config.Limits.ImagePreviewMaxHeight, outputPath); err != nil {
+	if err := p.videoProc.Thumbnail(inputPath, 0, p.config.Limits.ImagePreviewMaxHeight, outputPath); err != nil {
 		return err
 	}
 	b64, err := infra.ImageToBase64(outputPath)
 	if err != nil {
 		return err
 	}
-	thumbnailWidth, thumbnailHeight, err := svc.imageProc.Measure(outputPath)
+	thumbnailWidth, thumbnailHeight, err := p.imageProc.Measure(outputPath)
 	if err != nil {
 		return err
 	}
@@ -82,7 +82,7 @@ func (svc *videoStorage) generateThumbnail(snapshot model.CoreSnapshot, opts vid
 		Width:  thumbnailWidth,
 		Height: thumbnailHeight,
 	})
-	if err := svc.metadataUpdater.update(snapshot, opts.FileId); err != nil {
+	if err := p.metadataUpdater.update(snapshot, opts.FileId); err != nil {
 		return err
 	}
 	if _, err := os.Stat(outputPath); err == nil {

@@ -21,7 +21,7 @@ func NewOrganizationCache() *OrganizationCache {
 	}
 }
 
-func (c *OrganizationCache) Set(organization model.CoreOrganization) error {
+func (c *OrganizationCache) Set(organization model.Organization) error {
 	b, err := json.Marshal(organization)
 	if err != nil {
 		return err
@@ -33,19 +33,19 @@ func (c *OrganizationCache) Set(organization model.CoreOrganization) error {
 	return nil
 }
 
-func (c *OrganizationCache) Get(id string) (model.CoreOrganization, error) {
+func (c *OrganizationCache) Get(id string) (model.Organization, error) {
 	value, err := c.redis.Get(c.keyPrefix + id)
 	if err != nil {
 		return c.Refresh(id)
 	}
-	var org = repo.OrganizationEntity{}
+	var org = repo.NewOrganization()
 	if err = json.Unmarshal([]byte(value), &org); err != nil {
 		return nil, err
 	}
-	return &org, nil
+	return org, nil
 }
 
-func (c *OrganizationCache) Refresh(id string) (model.CoreOrganization, error) {
+func (c *OrganizationCache) Refresh(id string) (model.Organization, error) {
 	res, err := c.orgRepo.Find(id)
 	if err != nil {
 		return nil, err
