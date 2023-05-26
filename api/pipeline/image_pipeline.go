@@ -17,7 +17,7 @@ type ImagePipeline struct {
 	s3              *infra.S3Manager
 	snapshotRepo    repo.SnapshotRepo
 	fileSearch      *search.FileSearch
-	ocrStorage      *OCRPipeline
+	ocrPipeline     *OCRPipeline
 	cmd             *infra.Command
 	imageProc       *infra.ImageProcessor
 	metadataUpdater *metadataUpdater
@@ -36,7 +36,7 @@ func NewImagePipeline() *ImagePipeline {
 		s3:              infra.NewS3Manager(),
 		snapshotRepo:    repo.NewSnapshotRepo(),
 		fileSearch:      search.NewFileSearch(),
-		ocrStorage:      NewOCRPipeline(),
+		ocrPipeline:     NewOCRPipeline(),
 		cmd:             infra.NewCommand(),
 		metadataUpdater: newMetadataUpdater(),
 		imageProc:       infra.NewImageProcessor(),
@@ -72,9 +72,9 @@ func (p *ImagePipeline) Run(opts ImagePipelineOptions) error {
 	if err := p.metadataUpdater.update(snapshot, opts.FileId); err != nil {
 		return err
 	}
-	ocrData, err := p.ocrStorage.imageToData(inputPath)
+	ocrData, err := p.ocrPipeline.imageToData(inputPath)
 	if err == nil && ocrData.PositiveConfCount > ocrData.NegativeConfCount {
-		if err := p.ocrStorage.Run(OCRPipelineOptions(opts)); err != nil {
+		if err := p.ocrPipeline.Run(OCRPipelineOptions(opts)); err != nil {
 			/*
 				Here we intentionally ignore the error, here is the explanation why:
 				The reason we came here to begin with is because of
