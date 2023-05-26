@@ -1,5 +1,5 @@
-import { client } from '@/infra/db'
 import { ErrorCode, newError } from '@/infra/error'
+import { client } from '@/infra/postgres'
 import { InsertOptions, UpdateOptions, User } from './core'
 
 export default class PostgresUserRepo {

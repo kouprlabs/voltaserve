@@ -52,6 +52,7 @@ export interface UserRepo {
   findByEmail(email: string): Promise<User>
   findByRefreshTokenValue(refreshTokenValue: string): Promise<User>
   findByResetPasswordToken(resetPasswordToken: string): Promise<User>
+  findByEmailConfirmationToken(emailConfirmationToken: string): Promise<User>
   findByPicture(picture: string): Promise<User>
   isUsernameAvailable(username: string): Promise<boolean>
   insert(data: InsertOptions): Promise<User>

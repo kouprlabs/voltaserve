@@ -12,6 +12,7 @@ import { errorHandler } from '@/infra/error'
 import tokenRouter from '@/token/router'
 import userRepo from '@/user/repo'
 import userRouter from '@/user/router'
+import { client as postgres } from './infra/postgres'
 
 const app = express()
 
@@ -49,6 +50,8 @@ app.use(errorHandler)
 
 const port = new URL(getConfig().idpURL).port
 
-app.listen(port, () => {
-  console.log(`Listening on port ${port}`)
+postgres.connect().then(() => {
+  app.listen(port, () => {
+    console.log(`Listening on port ${port}`)
+  })
 })
