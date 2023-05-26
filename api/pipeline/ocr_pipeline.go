@@ -40,7 +40,7 @@ type OCRImageToDataResponse struct {
 type OCRPipeline struct {
 	minio           *infra.S3Manager
 	snapshotRepo    repo.SnapshotRepo
-	pdfStorage      *PDFPipeline
+	pdfPipeline     *PDFPipeline
 	cmd             *infra.Command
 	metadataUpdater *metadataUpdater
 	workspaceCache  *cache.WorkspaceCache
@@ -59,7 +59,7 @@ func NewOCRPipeline() *OCRPipeline {
 	return &OCRPipeline{
 		minio:           infra.NewS3Manager(),
 		snapshotRepo:    repo.NewSnapshotRepo(),
-		pdfStorage:      NewPDFPipeline(),
+		pdfPipeline:     NewPDFPipeline(),
 		cmd:             infra.NewCommand(),
 		metadataUpdater: newMetadataUpdater(),
 		workspaceCache:  cache.NewWorkspaceCache(),
@@ -79,11 +79,11 @@ func (p *OCRPipeline) Run(opts OCRPipelineOptions) error {
 	}
 	outputPath, _ := p.generatePDFA(inputPath)
 	if _, err := os.Stat(outputPath); os.IsNotExist(err) {
-		if err := p.pdfStorage.Run(PDFPipelineOptions(opts)); err != nil {
+		if err := p.pdfPipeline.Run(PDFPipelineOptions(opts)); err != nil {
 			return err
 		}
 	} else {
-		if err := p.sendToPDFStorage(snapshot, opts, outputPath); err != nil {
+		if err := p.forwardToPDFPipeline(snapshot, opts, outputPath); err != nil {
 			return err
 		}
 	}
@@ -108,7 +108,7 @@ func (p *OCRPipeline) generatePDFA(inputPath string) (string, error) {
 	return outputPath, nil
 }
 
-func (p *OCRPipeline) sendToPDFStorage(snapshot model.Snapshot, opts OCRPipelineOptions, outputPath string) error {
+func (p *OCRPipeline) forwardToPDFPipeline(snapshot model.Snapshot, opts OCRPipelineOptions, outputPath string) error {
 	file, err := p.fileCache.Get(opts.FileId)
 	if err != nil {
 		return err
@@ -133,7 +133,7 @@ func (p *OCRPipeline) sendToPDFStorage(snapshot model.Snapshot, opts OCRPipeline
 	if err := p.metadataUpdater.update(snapshot, opts.FileId); err != nil {
 		return err
 	}
-	if err := p.pdfStorage.Run(PDFPipelineOptions{
+	if err := p.pdfPipeline.Run(PDFPipelineOptions{
 		FileId:     opts.FileId,
 		SnapshotId: opts.SnapshotId,
 		S3Bucket:   opts.S3Bucket,
