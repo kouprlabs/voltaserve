@@ -1,6 +1,10 @@
 package repo
 
-import "voltaserve/model"
+import (
+	"fmt"
+	"voltaserve/config"
+	"voltaserve/model"
+)
 
 type CoreUserRepo interface {
 	Find(id string) (model.CoreUser, error)
@@ -9,5 +13,8 @@ type CoreUserRepo interface {
 }
 
 func NewUserRepo() CoreUserRepo {
-	return NewPostgresUserRepo()
+	if config.GetConfig().DatabaseType == config.DATABASE_TYPE_POSTGRES {
+		return NewPostgresUserRepo()
+	}
+	panic(fmt.Sprintf("database type %s repo not implemented", config.GetConfig().DatabaseType))
 }

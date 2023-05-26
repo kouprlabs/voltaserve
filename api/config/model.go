@@ -49,13 +49,14 @@ type SMTPConfig struct {
 }
 
 type Config struct {
-	APIURL      string         `json:"api_url"`
-	UIURL       string         `json:"ui_url"`
-	DatabaseURL string         `json:"database_url"`
-	Search      SearchConfig   `json:"search"`
-	Redis       RedisConfig    `json:"redis"`
-	S3          S3Config       `json:"s3"`
-	Limits      LimitsConfig   `json:"limits"`
-	Security    SecurityConfig `json:"security"`
-	SMTP        SMTPConfig     `json:"smtp"`
+	APIURL       string         `json:"api_url"`
+	UIURL        string         `json:"ui_url"`
+	DatabaseURL  string         `json:"database_url"`
+	Search       SearchConfig   `json:"search"`
+	Redis        RedisConfig    `json:"redis"`
+	S3           S3Config       `json:"s3"`
+	Limits       LimitsConfig   `json:"limits"`
+	Security     SecurityConfig `json:"security"`
+	SMTP         SMTPConfig     `json:"smtp"`
+	DatabaseType string         `json:"database_type"`
 }

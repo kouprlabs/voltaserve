@@ -1,10 +1,14 @@
 package config
 
 import (
+	"fmt"
 	"os"
 	"strconv"
 	"strings"
 )
+
+const DATABASE_TYPE_POSTGRES = "postgres"
+const DATABASE_TYPE_MONGO = "mongo"
 
 var config *Config
 
@@ -18,6 +22,7 @@ func GetConfig() Config {
 		readRedis(config)
 		readSMTP(config)
 		readLimits(config)
+		readDatabaseType(config)
 	}
 	return *config
 }
@@ -120,5 +125,12 @@ func readLimits(config *Config) {
 			panic(err)
 		}
 		config.Limits.MultipartBodyLengthLimitMB = int(v)
+	}
+}
+
+func readDatabaseType(config *Config) {
+	config.DatabaseType = os.Getenv("DATABASE_TYPE")
+	if config.DatabaseType != DATABASE_TYPE_POSTGRES && config.DatabaseType != DATABASE_TYPE_MONGO {
+		panic(fmt.Sprintf("invalid database type: %s", config.DatabaseType))
 	}
 }

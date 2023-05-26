@@ -1,6 +1,10 @@
 package repo
 
-import "voltaserve/model"
+import (
+	"fmt"
+	"voltaserve/config"
+	"voltaserve/model"
+)
 
 type FileInsertOptions struct {
 	Name        string
@@ -34,5 +38,8 @@ type CoreFileRepo interface {
 }
 
 func NewFileRepo() CoreFileRepo {
-	return NewPostgresFileRepo()
+	if config.GetConfig().DatabaseType == config.DATABASE_TYPE_POSTGRES {
+		return NewPostgresFileRepo()
+	}
+	panic(fmt.Sprintf("database type %s repo not implemented", config.GetConfig().DatabaseType))
 }

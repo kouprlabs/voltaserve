@@ -1,6 +1,10 @@
 package repo
 
-import "voltaserve/model"
+import (
+	"fmt"
+	"voltaserve/config"
+	"voltaserve/model"
+)
 
 type CoreSnapshotRepo interface {
 	Find(id string) (model.CoreSnapshot, error)
@@ -13,5 +17,8 @@ type CoreSnapshotRepo interface {
 }
 
 func NewSnapshotRepo() CoreSnapshotRepo {
-	return NewPostgresSnapshotRepo()
+	if config.GetConfig().DatabaseType == config.DATABASE_TYPE_POSTGRES {
+		return NewPostgresSnapshotRepo()
+	}
+	panic(fmt.Sprintf("database type %s repo not implemented", config.GetConfig().DatabaseType))
 }
