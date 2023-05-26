@@ -2,7 +2,7 @@ import fs from 'fs/promises'
 import { ErrorCode, newError } from '@/infra/error'
 import { hashPassword, verifyPassword } from '@/infra/password'
 import search, { USER_SEARCH_INDEX } from '@/infra/search'
-import UserRepo, { User } from '@/user/repo'
+import userRepo, { User } from '@/user/repo'
 
 export type UserDTO = {
   id: string
@@ -30,19 +30,19 @@ export type UserDeleteOptions = {
 }
 
 export async function getUser(id: string): Promise<UserDTO> {
-  return mapEntity(await UserRepo.find('id', id, true))
+  return mapEntity(await userRepo.find('id', id, true))
 }
 
 export async function getByPicture(picture: string): Promise<UserDTO> {
-  return mapEntity(await UserRepo.findByPicture(picture))
+  return mapEntity(await userRepo.findByPicture(picture))
 }
 
 export async function updateFullName(
   id: string,
   options: UserUpdateFullNameOptions
 ): Promise<UserDTO> {
-  let user = await UserRepo.find('id', id, true)
-  user = await UserRepo.update({ id: user.id, fullName: options.fullName })
+  let user = await userRepo.find('id', id, true)
+  user = await userRepo.update({ id: user.id, fullName: options.fullName })
   await search.index(USER_SEARCH_INDEX).updateDocuments([
     {
       ...user,
@@ -56,8 +56,8 @@ export async function updateEmail(
   id: string,
   options: UserUpdateEmailOptions
 ): Promise<UserDTO> {
-  let user = await UserRepo.find('id', id, true)
-  user = await UserRepo.update({
+  let user = await userRepo.find('id', id, true)
+  user = await userRepo.update({
     id: user.id,
     email: options.email,
     username: options.email,
@@ -76,9 +76,9 @@ export async function updatePassword(
   id: string,
   options: UserUpdatePasswordOptions
 ): Promise<UserDTO> {
-  let user = await UserRepo.find('id', id, true)
+  let user = await userRepo.find('id', id, true)
   if (verifyPassword(options.currentPassword, user.passwordHash)) {
-    user = await UserRepo.update({
+    user = await userRepo.update({
       id: user.id,
       passwordHash: hashPassword(options.newPassword),
     })
@@ -94,8 +94,8 @@ export async function updatePicture(
   contentType: string
 ): Promise<UserDTO> {
   const picture = await fs.readFile(path, { encoding: 'base64' })
-  const { id: userId } = await UserRepo.find('id', id, true)
-  const user = await UserRepo.update({
+  const { id: userId } = await userRepo.find('id', id, true)
+  const user = await userRepo.update({
     id: userId,
     picture: `data:${contentType};base64,${picture}`,
   })
@@ -103,15 +103,15 @@ export async function updatePicture(
 }
 
 export async function deletePicture(id: string): Promise<UserDTO> {
-  let user = await UserRepo.find('id', id, true)
-  user = await UserRepo.update({ id: user.id, picture: null })
+  let user = await userRepo.find('id', id, true)
+  user = await userRepo.update({ id: user.id, picture: null })
   return mapEntity(user)
 }
 
 export async function deleteUser(id: string, options: UserDeleteOptions) {
-  const user = await UserRepo.find('id', id, true)
+  const user = await userRepo.find('id', id, true)
   if (verifyPassword(options.password, user.passwordHash)) {
-    await UserRepo.delete(user.id)
+    await userRepo.delete(user.id)
     await search.index(USER_SEARCH_INDEX).deleteDocuments([user.id])
   } else {
     throw newError({ code: ErrorCode.InvalidPassword })

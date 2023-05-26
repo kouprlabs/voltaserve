@@ -10,7 +10,7 @@ import accountRouter from '@/account/router'
 import { getConfig } from '@/config/config'
 import { errorHandler } from '@/infra/error'
 import tokenRouter from '@/token/router'
-import UserRepo from '@/user/repo'
+import userRepo from '@/user/repo'
 import userRouter from '@/user/router'
 
 const app = express()
@@ -31,7 +31,7 @@ passport.use(
       audience: tokenConfig.audience,
     },
     async (jwt_payload, done) => {
-      const user = await UserRepo.find('id', jwt_payload.sub)
+      const user = await userRepo.find('id', jwt_payload.sub)
       if (user) {
         return done(null, user)
       } else {

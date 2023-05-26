@@ -1,73 +1,9 @@
 import { client } from '@/infra/db'
 import { ErrorCode, newError } from '@/infra/error'
+import { Field, InsertOptions, UpdateOptions, User } from './core'
 
-export type User = {
-  id: string
-  fullName: string
-  username: string
-  email: string
-  passwordHash: string
-  refreshTokenValue?: string
-  refreshTokenValidTo?: number
-  resetPasswordToken?: string
-  emailConfirmationToken?: string
-  isEmailConfirmed: boolean
-  picture?: string
-  createTime: string
-  updateTime?: string
-}
-
-export type InsertOptions = {
-  id: string
-  fullName?: string
-  username?: string
-  email?: string
-  passwordHash?: string
-  refreshTokenValue?: string
-  refreshTokenValidTo?: number
-  resetPasswordToken?: string
-  emailConfirmationToken?: string
-  isEmailConfirmed?: boolean
-  picture?: string
-  createTime?: string
-  updateTime?: string
-}
-
-export type UpdateOptions = {
-  id: string
-  fullName?: string
-  username?: string
-  email?: string
-  passwordHash?: string
-  refreshTokenValue?: string
-  refreshTokenValidTo?: number
-  resetPasswordToken?: string
-  emailConfirmationToken?: string
-  isEmailConfirmed?: boolean
-  picture?: string
-  createTime?: string
-  updateTime?: string
-}
-
-export type Field =
-  | 'id'
-  | 'full_name'
-  | 'username'
-  | 'email'
-  | 'password_hash'
-  | 'refresh_token_value'
-  | 'refresh_token_valid_to'
-  | 'reset_password_token'
-  | 'email_confirmation_token'
-  | 'is_email_confirmed'
-  | 'picture'
-
-export default class UserRepo {
-  static async find(
-    field: Field,
-    value: any,
-    canThrow?: boolean
-  ): Promise<User> {
+export default class PostgresUserRepo {
+  async find(field: Field, value: any, canThrow?: boolean): Promise<User> {
     const { rowCount, rows } = await client.query(
       `SELECT * FROM "user" WHERE ${field} = $1`,
       [value]
@@ -85,7 +21,7 @@ export default class UserRepo {
     return this.mapRow(rows[0])
   }
 
-  static async findByPicture(picture: string): Promise<User> {
+  async findByPicture(picture: string): Promise<User> {
     const { rowCount, rows } = await client.query(
       `SELECT * FROM "user" WHERE picture = $1`,
       [picture]
@@ -99,7 +35,7 @@ export default class UserRepo {
     return this.mapRow(rows[0])
   }
 
-  static async insert(data: InsertOptions): Promise<User> {
+  async insert(data: InsertOptions): Promise<User> {
     const { rowCount, rows } = await client.query(
       `INSERT INTO "user" (
         id,
@@ -139,7 +75,7 @@ export default class UserRepo {
     return this.mapRow(rows[0])
   }
 
-  static async update(data: UpdateOptions): Promise<User> {
+  async update(data: UpdateOptions): Promise<User> {
     const entity = await this.find('id', data.id)
     if (!entity) {
       throw newError({
@@ -189,11 +125,11 @@ export default class UserRepo {
     return this.mapRow(rows[0])
   }
 
-  static async delete(id: string): Promise<void> {
+  async delete(id: string): Promise<void> {
     await client.query('DELETE FROM "user" WHERE id = $1', [id])
   }
 
-  private static mapRow(row: any): User {
+  private mapRow(row: any): User {
     return {
       id: row.id,
       fullName: row.full_name,
