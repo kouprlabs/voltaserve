@@ -1,9 +1,9 @@
 import jwt from 'jsonwebtoken'
 import { getConfig } from '@/config/config'
-import { UserRepo } from '@/infra/db'
 import { ErrorCode, newError } from '@/infra/error'
 import { newHyphenlessUuid } from '@/infra/id'
 import { verifyPassword } from '@/infra/password'
+import UserRepo from '@/user/repo'
 
 export type TokenGrantType = 'password' | 'refresh_token'
 

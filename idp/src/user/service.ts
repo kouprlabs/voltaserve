@@ -1,10 +1,10 @@
 import fs from 'fs/promises'
-import { UserEntity, UserRepo } from '@/infra/db'
 import { ErrorCode, newError } from '@/infra/error'
 import { hashPassword, verifyPassword } from '@/infra/password'
 import search, { USER_SEARCH_INDEX } from '@/infra/search'
+import UserRepo, { User } from '@/user/repo'
 
-export type User = {
+export type UserDTO = {
   id: string
   fullName: string
   picture: string
@@ -29,18 +29,18 @@ export type UserDeleteOptions = {
   password: string
 }
 
-export async function getUser(id: string): Promise<User> {
+export async function getUser(id: string): Promise<UserDTO> {
   return mapEntity(await UserRepo.find('id', id, true))
 }
 
-export async function getByPicture(picture: string): Promise<User> {
+export async function getByPicture(picture: string): Promise<UserDTO> {
   return mapEntity(await UserRepo.findByPicture(picture))
 }
 
 export async function updateFullName(
   id: string,
   options: UserUpdateFullNameOptions
-): Promise<User> {
+): Promise<UserDTO> {
   let user = await UserRepo.find('id', id, true)
   user = await UserRepo.update({ id: user.id, fullName: options.fullName })
   await search.index(USER_SEARCH_INDEX).updateDocuments([
@@ -55,7 +55,7 @@ export async function updateFullName(
 export async function updateEmail(
   id: string,
   options: UserUpdateEmailOptions
-): Promise<User> {
+): Promise<UserDTO> {
   let user = await UserRepo.find('id', id, true)
   user = await UserRepo.update({
     id: user.id,
@@ -75,7 +75,7 @@ export async function updateEmail(
 export async function updatePassword(
   id: string,
   options: UserUpdatePasswordOptions
-): Promise<User> {
+): Promise<UserDTO> {
   let user = await UserRepo.find('id', id, true)
   if (verifyPassword(options.currentPassword, user.passwordHash)) {
     user = await UserRepo.update({
@@ -92,7 +92,7 @@ export async function updatePicture(
   id: string,
   path: string,
   contentType: string
-): Promise<User> {
+): Promise<UserDTO> {
   const picture = await fs.readFile(path, { encoding: 'base64' })
   const { id: userId } = await UserRepo.find('id', id, true)
   const user = await UserRepo.update({
@@ -102,7 +102,7 @@ export async function updatePicture(
   return mapEntity(user)
 }
 
-export async function deletePicture(id: string): Promise<User> {
+export async function deletePicture(id: string): Promise<UserDTO> {
   let user = await UserRepo.find('id', id, true)
   user = await UserRepo.update({ id: user.id, picture: null })
   return mapEntity(user)
@@ -118,7 +118,7 @@ export async function deleteUser(id: string, options: UserDeleteOptions) {
   }
 }
 
-export function mapEntity(entity: UserEntity): User {
+export function mapEntity(entity: User): UserDTO {
   const user = {
     id: entity.id,
     email: entity.email,
