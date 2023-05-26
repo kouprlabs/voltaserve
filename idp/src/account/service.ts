@@ -5,7 +5,7 @@ import { newHashId, newHyphenlessUuid } from '@/infra/id'
 import { sendTemplateMail } from '@/infra/mail'
 import { hashPassword } from '@/infra/password'
 import search, { USER_SEARCH_INDEX } from '@/infra/search'
-import userRepo from '@/user/repo'
+import userRepo, { User } from '@/user/repo'
 import { mapEntity, UserDTO } from '@/user/service'
 
 export type AccountCreateOptions = {
@@ -32,8 +32,7 @@ export async function createUser(
   options: AccountCreateOptions
 ): Promise<UserDTO> {
   const id = newHashId()
-  const existingUser = await userRepo.find('username', options.email)
-  if (existingUser) {
+  if (!userRepo.isUsernameAvailable(options.email)) {
     throw newError({ code: ErrorCode.UsernameUnavailable })
   }
   try {
@@ -71,7 +70,7 @@ export async function createUser(
 }
 
 export async function resetPassword(options: AccountResetPasswordOptions) {
-  const user = await userRepo.find('reset_password_token', options.token, true)
+  const user = await userRepo.findByResetPasswordToken(options.token)
   await userRepo.update({
     id: user.id,
     passwordHash: hashPassword(options.newPassword),
@@ -79,11 +78,7 @@ export async function resetPassword(options: AccountResetPasswordOptions) {
 }
 
 export async function confirmEmail(options: AccountConfirmEmailOptions) {
-  let user = await userRepo.find(
-    'email_confirmation_token',
-    options.token,
-    true
-  )
+  let user = await userRepo.findByEmailConfirmationToken(options.token)
   user = await userRepo.update({
     id: user.id,
     isEmailConfirmed: true,
@@ -100,13 +95,14 @@ export async function confirmEmail(options: AccountConfirmEmailOptions) {
 export async function sendResetPasswordEmail(
   options: AccountSendResetPasswordEmailOptions
 ) {
-  let user = await userRepo.find('email', options.email)
-  if (user) {
+  let user: User
+  try {
+    user = await userRepo.findByEmail(options.email)
     user = await userRepo.update({
       id: user.id,
       resetPasswordToken: newHyphenlessUuid(),
     })
-  } else {
+  } catch {
     return
   }
   try {
@@ -115,7 +111,7 @@ export async function sendResetPasswordEmail(
       'TOKEN': user.resetPasswordToken,
     })
   } catch (error) {
-    const { id } = await userRepo.find('email', options.email, true)
+    const { id } = await userRepo.findByEmail(options.email)
     await userRepo.update({ id, resetPasswordToken: null })
     throw newError({ code: ErrorCode.InternalServerError, error })
   }

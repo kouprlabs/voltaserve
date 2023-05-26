@@ -46,22 +46,14 @@ export type UpdateOptions = {
   updateTime?: string
 }
 
-export type Field =
-  | 'id'
-  | 'full_name'
-  | 'username'
-  | 'email'
-  | 'password_hash'
-  | 'refresh_token_value'
-  | 'refresh_token_valid_to'
-  | 'reset_password_token'
-  | 'email_confirmation_token'
-  | 'is_email_confirmed'
-  | 'picture'
-
 export interface UserRepo {
-  find(field: Field, value: any, canThrow?: boolean): Promise<User>
+  findByID(id: string): Promise<User>
+  findByUsername(username: string): Promise<User>
+  findByEmail(email: string): Promise<User>
+  findByRefreshTokenValue(refreshTokenValue: string): Promise<User>
+  findByResetPasswordToken(resetPasswordToken: string): Promise<User>
   findByPicture(picture: string): Promise<User>
+  isUsernameAvailable(username: string): Promise<boolean>
   insert(data: InsertOptions): Promise<User>
   update(data: UpdateOptions): Promise<User>
   delete(id: string): Promise<void>

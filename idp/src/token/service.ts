@@ -3,7 +3,7 @@ import { getConfig } from '@/config/config'
 import { ErrorCode, newError } from '@/infra/error'
 import { newHyphenlessUuid } from '@/infra/id'
 import { verifyPassword } from '@/infra/password'
-import userRepo from '@/user/repo'
+import userRepo, { User } from '@/user/repo'
 
 export type TokenGrantType = 'password' | 'refresh_token'
 
@@ -27,8 +27,10 @@ export async function exchange(options: TokenExchangeOptions): Promise<Token> {
   validateParemeters(options)
   // https://datatracker.ietf.org/doc/html/rfc6749#section-4.3
   if (options.grant_type === 'password') {
-    const user = await userRepo.find('username', options.username)
-    if (!user) {
+    let user: User
+    try {
+      user = await userRepo.findByUsername(options.username)
+    } catch {
       throw newError({ code: ErrorCode.InvalidUsernameOrPassword })
     }
     if (!user.isEmailConfirmed) {
@@ -42,11 +44,10 @@ export async function exchange(options: TokenExchangeOptions): Promise<Token> {
   }
   // https://datatracker.ietf.org/doc/html/rfc6749#section-6
   if (options.grant_type === 'refresh_token') {
-    const user = await userRepo.find(
-      'refresh_token_value',
-      options.refresh_token
-    )
-    if (!user) {
+    let user: User
+    try {
+      user = await userRepo.findByRefreshTokenValue(options.refresh_token)
+    } catch {
       throw newError({ code: ErrorCode.InvalidUsernameOrPassword })
     }
     if (!user.isEmailConfirmed) {
@@ -107,7 +108,7 @@ async function newToken(userId: string): Promise<Token> {
     token_type: 'Bearer',
     refresh_token: newHyphenlessUuid(),
   }
-  const user = await userRepo.find('id', userId, true)
+  const user = await userRepo.findByID(userId)
   await userRepo.update({
     id: user.id,
     refreshTokenValue: token.refresh_token,
