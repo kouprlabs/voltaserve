@@ -1,5 +1,10 @@
 package repo
 
+import (
+	"fmt"
+	"voltaserve/config"
+)
+
 type UserPermission struct {
 	ID         string `json:"id"`
 	UserID     string `json:"userId"`
@@ -22,5 +27,8 @@ type CorePermissionRepo interface {
 }
 
 func NewPermissionRepo() CorePermissionRepo {
-	return NewPostgresPermissionRepo()
+	if config.GetConfig().DatabaseType == config.DATABASE_TYPE_POSTGRES {
+		return NewPostgresPermissionRepo()
+	}
+	panic(fmt.Sprintf("database type %s repo not implemented", config.GetConfig().DatabaseType))
 }

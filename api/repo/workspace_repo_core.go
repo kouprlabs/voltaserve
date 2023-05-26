@@ -1,6 +1,10 @@
 package repo
 
-import "voltaserve/model"
+import (
+	"fmt"
+	"voltaserve/config"
+	"voltaserve/model"
+)
 
 type WorkspaceInsertOptions struct {
 	ID              string
@@ -26,5 +30,8 @@ type CoreWorkspaceRepo interface {
 }
 
 func NewWorkspaceRepo() CoreWorkspaceRepo {
-	return NewPostgresWorkspaceRepo()
+	if config.GetConfig().DatabaseType == config.DATABASE_TYPE_POSTGRES {
+		return NewPostgresWorkspaceRepo()
+	}
+	panic(fmt.Sprintf("database type %s repo not implemented", config.GetConfig().DatabaseType))
 }

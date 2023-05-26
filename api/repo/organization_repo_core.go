@@ -1,6 +1,10 @@
 package repo
 
-import "voltaserve/model"
+import (
+	"fmt"
+	"voltaserve/config"
+	"voltaserve/model"
+)
 
 type OrganizationInsertOptions struct {
 	ID   string
@@ -23,5 +27,8 @@ type CoreOrganizationRepo interface {
 }
 
 func NewOrganizationRepo() CoreOrganizationRepo {
-	return NewPostgresOrganizationRepo()
+	if config.GetConfig().DatabaseType == config.DATABASE_TYPE_POSTGRES {
+		return NewPostgresOrganizationRepo()
+	}
+	panic(fmt.Sprintf("database type %s repo not implemented", config.GetConfig().DatabaseType))
 }

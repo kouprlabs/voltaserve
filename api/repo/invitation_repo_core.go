@@ -1,6 +1,10 @@
 package repo
 
-import "voltaserve/model"
+import (
+	"fmt"
+	"voltaserve/config"
+	"voltaserve/model"
+)
 
 type InvitationInsertOptions struct {
 	UserId         string
@@ -18,5 +22,8 @@ type CoreInvitationRepo interface {
 }
 
 func NewInvitationRepo() CoreInvitationRepo {
-	return NewPostgresInvitationRepo()
+	if config.GetConfig().DatabaseType == config.DATABASE_TYPE_POSTGRES {
+		return NewPostgresInvitationRepo()
+	}
+	panic(fmt.Sprintf("database type %s repo not implemented", config.GetConfig().DatabaseType))
 }

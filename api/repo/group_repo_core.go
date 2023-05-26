@@ -1,6 +1,10 @@
 package repo
 
-import "voltaserve/model"
+import (
+	"fmt"
+	"voltaserve/config"
+	"voltaserve/model"
+)
 
 type GroupInsertOptions struct {
 	ID             string
@@ -26,5 +30,8 @@ type CoreGroupRepo interface {
 }
 
 func NewGroupRepo() CoreGroupRepo {
-	return NewPostgresGroupRepo()
+	if config.GetConfig().DatabaseType == config.DATABASE_TYPE_POSTGRES {
+		return NewPostgresGroupRepo()
+	}
+	panic(fmt.Sprintf("database type %s repo not implemented", config.GetConfig().DatabaseType))
 }
