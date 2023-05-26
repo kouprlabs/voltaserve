@@ -1,6 +1,6 @@
 package model
 
-type CoreSnapshot interface {
+type Snapshot interface {
 	GetID() string
 	GetVersion() int64
 	GetOriginal() *S3Object
@@ -15,6 +15,8 @@ type CoreSnapshot interface {
 	HasThumbnail() bool
 	GetCreateTime() string
 	GetUpdateTime() *string
+	SetID(string)
+	SetVersion(int64)
 	SetOriginal(*S3Object)
 	SetPreview(*S3Object)
 	SetText(*S3Object)

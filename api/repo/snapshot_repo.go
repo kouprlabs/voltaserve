@@ -14,20 +14,24 @@ import (
 )
 
 type SnapshotRepo interface {
-	Find(id string) (model.CoreSnapshot, error)
-	Save(snapshot model.CoreSnapshot) error
+	Find(id string) (model.Snapshot, error)
+	Save(snapshot model.Snapshot) error
 	MapWithFile(id string, fileId string) error
 	DeleteMappingsForFile(fileId string) error
-	FindAllDangling() ([]model.CoreSnapshot, error)
+	FindAllDangling() ([]model.Snapshot, error)
 	DeleteAllDangling() error
 	GetLatestVersionForFile(fileId string) (int64, error)
 }
 
 func NewSnapshotRepo() SnapshotRepo {
-	return NewPostgresSnapshotRepo()
+	return newSnapshotRepo()
 }
 
-type PostgresSnapshot struct {
+func NewSnapshot() model.Snapshot {
+	return &snapshotEntity{}
+}
+
+type snapshotEntity struct {
 	ID         string         `json:"id" gorm:"column:id;size:36"`
 	Version    int64          `json:"version" gorm:"column:version"`
 	Original   datatypes.JSON `json:"original,omitempty" gorm:"column:original"`
@@ -39,30 +43,30 @@ type PostgresSnapshot struct {
 	UpdateTime *string        `json:"updateTime,omitempty" gorm:"column:update_time"`
 }
 
-func (PostgresSnapshot) TableName() string {
+func (snapshotEntity) TableName() string {
 	return "snapshot"
 }
 
-func (s *PostgresSnapshot) BeforeCreate(tx *gorm.DB) (err error) {
+func (s *snapshotEntity) BeforeCreate(tx *gorm.DB) (err error) {
 	s.CreateTime = time.Now().UTC().Format(time.RFC3339)
 	return nil
 }
 
-func (s *PostgresSnapshot) BeforeSave(tx *gorm.DB) (err error) {
+func (s *snapshotEntity) BeforeSave(tx *gorm.DB) (err error) {
 	timeNow := time.Now().UTC().Format(time.RFC3339)
 	s.UpdateTime = &timeNow
 	return nil
 }
 
-func (s PostgresSnapshot) GetID() string {
+func (s snapshotEntity) GetID() string {
 	return s.ID
 }
 
-func (s PostgresSnapshot) GetVersion() int64 {
+func (s snapshotEntity) GetVersion() int64 {
 	return s.Version
 }
 
-func (s PostgresSnapshot) GetOriginal() *model.S3Object {
+func (s snapshotEntity) GetOriginal() *model.S3Object {
 	if s.Original.String() == "" {
 		return nil
 	}
@@ -74,7 +78,7 @@ func (s PostgresSnapshot) GetOriginal() *model.S3Object {
 	return &res
 }
 
-func (s PostgresSnapshot) GetPreview() *model.S3Object {
+func (s snapshotEntity) GetPreview() *model.S3Object {
 	if s.Preview.String() == "" {
 		return nil
 	}
@@ -86,7 +90,7 @@ func (s PostgresSnapshot) GetPreview() *model.S3Object {
 	return &res
 }
 
-func (s PostgresSnapshot) GetText() *model.S3Object {
+func (s snapshotEntity) GetText() *model.S3Object {
 	if s.Text.String() == "" {
 		return nil
 	}
@@ -98,7 +102,7 @@ func (s PostgresSnapshot) GetText() *model.S3Object {
 	return &res
 }
 
-func (s PostgresSnapshot) GetOCR() *model.S3Object {
+func (s snapshotEntity) GetOCR() *model.S3Object {
 	if s.Ocr.String() == "" {
 		return nil
 	}
@@ -110,7 +114,7 @@ func (s PostgresSnapshot) GetOCR() *model.S3Object {
 	return &res
 }
 
-func (s PostgresSnapshot) GetThumbnail() *model.Thumbnail {
+func (s snapshotEntity) GetThumbnail() *model.Thumbnail {
 	if s.Thumbnail.String() == "" {
 		return nil
 	}
@@ -122,7 +126,15 @@ func (s PostgresSnapshot) GetThumbnail() *model.Thumbnail {
 	return &res
 }
 
-func (s *PostgresSnapshot) SetOriginal(m *model.S3Object) {
+func (s *snapshotEntity) SetID(id string) {
+	s.ID = id
+}
+
+func (s *snapshotEntity) SetVersion(version int64) {
+	s.Version = version
+}
+
+func (s *snapshotEntity) SetOriginal(m *model.S3Object) {
 	b, err := json.Marshal(m)
 	if err != nil {
 		log.Fatal(err)
@@ -133,7 +145,7 @@ func (s *PostgresSnapshot) SetOriginal(m *model.S3Object) {
 	}
 }
 
-func (s *PostgresSnapshot) SetPreview(m *model.S3Object) {
+func (s *snapshotEntity) SetPreview(m *model.S3Object) {
 	b, err := json.Marshal(m)
 	if err != nil {
 		log.Fatal(err)
@@ -144,7 +156,7 @@ func (s *PostgresSnapshot) SetPreview(m *model.S3Object) {
 	}
 }
 
-func (s *PostgresSnapshot) SetText(m *model.S3Object) {
+func (s *snapshotEntity) SetText(m *model.S3Object) {
 	b, err := json.Marshal(m)
 	if err != nil {
 		log.Fatal(err)
@@ -155,7 +167,7 @@ func (s *PostgresSnapshot) SetText(m *model.S3Object) {
 	}
 }
 
-func (s *PostgresSnapshot) SetOCR(m *model.S3Object) {
+func (s *snapshotEntity) SetOCR(m *model.S3Object) {
 	b, err := json.Marshal(m)
 	if err != nil {
 		log.Fatal(err)
@@ -166,7 +178,7 @@ func (s *PostgresSnapshot) SetOCR(m *model.S3Object) {
 	}
 }
 
-func (s *PostgresSnapshot) SetThumbnail(m *model.Thumbnail) {
+func (s *snapshotEntity) SetThumbnail(m *model.Thumbnail) {
 	b, err := json.Marshal(m)
 	if err != nil {
 		log.Fatal(err)
@@ -177,46 +189,46 @@ func (s *PostgresSnapshot) SetThumbnail(m *model.Thumbnail) {
 	}
 }
 
-func (s PostgresSnapshot) HasOriginal() bool {
+func (s snapshotEntity) HasOriginal() bool {
 	return s.Original != nil
 }
 
-func (s PostgresSnapshot) HasPreview() bool {
+func (s snapshotEntity) HasPreview() bool {
 	return s.Preview != nil
 }
 
-func (s PostgresSnapshot) HasText() bool {
+func (s snapshotEntity) HasText() bool {
 	return s.Text != nil
 }
 
-func (s PostgresSnapshot) HasOCR() bool {
+func (s snapshotEntity) HasOCR() bool {
 	return s.Ocr != nil
 }
 
-func (s PostgresSnapshot) HasThumbnail() bool {
+func (s snapshotEntity) HasThumbnail() bool {
 	return s.Thumbnail != nil
 }
 
-func (s PostgresSnapshot) GetCreateTime() string {
+func (s snapshotEntity) GetCreateTime() string {
 	return s.CreateTime
 }
 
-func (s PostgresSnapshot) GetUpdateTime() *string {
+func (s snapshotEntity) GetUpdateTime() *string {
 	return s.UpdateTime
 }
 
-type PostgresSnapshotRepo struct {
+type snapshotRepo struct {
 	db *gorm.DB
 }
 
-func NewPostgresSnapshotRepo() *PostgresSnapshotRepo {
-	return &PostgresSnapshotRepo{
+func newSnapshotRepo() *snapshotRepo {
+	return &snapshotRepo{
 		db: infra.GetDb(),
 	}
 }
 
-func (repo *PostgresSnapshotRepo) find(id string) (*PostgresSnapshot, error) {
-	var res PostgresSnapshot
+func (repo *snapshotRepo) find(id string) (*snapshotEntity, error) {
+	var res snapshotEntity
 	if db := repo.db.Where("id = ?", id).First(&res); db.Error != nil {
 		if errors.Is(db.Error, gorm.ErrRecordNotFound) {
 			return nil, errorpkg.NewSnapshotNotFoundError(db.Error)
@@ -227,7 +239,7 @@ func (repo *PostgresSnapshotRepo) find(id string) (*PostgresSnapshot, error) {
 	return &res, nil
 }
 
-func (repo *PostgresSnapshotRepo) Find(id string) (model.CoreSnapshot, error) {
+func (repo *snapshotRepo) Find(id string) (model.Snapshot, error) {
 	res, err := repo.find(id)
 	if err != nil {
 		return nil, err
@@ -235,29 +247,29 @@ func (repo *PostgresSnapshotRepo) Find(id string) (model.CoreSnapshot, error) {
 	return res, nil
 }
 
-func (repo *PostgresSnapshotRepo) Save(snapshot model.CoreSnapshot) error {
+func (repo *snapshotRepo) Save(snapshot model.Snapshot) error {
 	if db := repo.db.Save(snapshot); db.Error != nil {
 		return db.Error
 	}
 	return nil
 }
 
-func (repo *PostgresSnapshotRepo) MapWithFile(id string, fileId string) error {
+func (repo *snapshotRepo) MapWithFile(id string, fileId string) error {
 	if db := repo.db.Exec("INSERT INTO snapshot_file (snapshot_id, file_id) VALUES (?, ?)", id, fileId); db.Error != nil {
 		return db.Error
 	}
 	return nil
 }
 
-func (repo *PostgresSnapshotRepo) DeleteMappingsForFile(fileId string) error {
+func (repo *snapshotRepo) DeleteMappingsForFile(fileId string) error {
 	if db := repo.db.Exec("DELETE FROM snapshot_file WHERE file_id = ?", fileId); db.Error != nil {
 		return db.Error
 	}
 	return nil
 }
 
-func (repo *PostgresSnapshotRepo) findAllForFile(fileId string) ([]*PostgresSnapshot, error) {
-	var res []*PostgresSnapshot
+func (repo *snapshotRepo) findAllForFile(fileId string) ([]*snapshotEntity, error) {
+	var res []*snapshotEntity
 	db := repo.db.
 		Raw("SELECT * FROM snapshot s LEFT JOIN snapshot_file sf ON s.id = sf.snapshot_id WHERE sf.file_id = ? ORDER BY s.version", fileId).
 		Scan(&res)
@@ -267,27 +279,27 @@ func (repo *PostgresSnapshotRepo) findAllForFile(fileId string) ([]*PostgresSnap
 	return res, nil
 }
 
-func (repo *PostgresSnapshotRepo) FindAllDangling() ([]model.CoreSnapshot, error) {
-	var snapshots []*PostgresSnapshot
+func (repo *snapshotRepo) FindAllDangling() ([]model.Snapshot, error) {
+	var snapshots []*snapshotEntity
 	db := repo.db.Raw("SELECT * FROM snapshot s LEFT JOIN snapshot_file sf ON s.id = sf.snapshot_id WHERE sf.snapshot_id IS NULL").Scan(&snapshots)
 	if db.Error != nil {
 		return nil, db.Error
 	}
-	var res []model.CoreSnapshot
+	var res []model.Snapshot
 	for _, s := range snapshots {
 		res = append(res, s)
 	}
 	return res, nil
 }
 
-func (repo *PostgresSnapshotRepo) DeleteAllDangling() error {
+func (repo *snapshotRepo) DeleteAllDangling() error {
 	if db := repo.db.Exec("DELETE FROM snapshot WHERE id IN (SELECT s.id FROM (SELECT * FROM snapshot) s LEFT JOIN snapshot_file sf ON s.id = sf.snapshot_id WHERE sf.snapshot_id IS NULL)"); db.Error != nil {
 		return db.Error
 	}
 	return nil
 }
 
-func (repo *PostgresSnapshotRepo) GetLatestVersionForFile(fileId string) (int64, error) {
+func (repo *snapshotRepo) GetLatestVersionForFile(fileId string) (int64, error) {
 	type Result struct {
 		Result int64
 	}

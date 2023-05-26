@@ -1,6 +1,6 @@
 package model
 
-type CoreGroup interface {
+type Group interface {
 	GetID() string
 	GetName() string
 	GetOrganizationID() string

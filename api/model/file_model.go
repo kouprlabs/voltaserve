@@ -5,7 +5,7 @@ const (
 	FileTypeFolder = "folder"
 )
 
-type CoreFile interface {
+type File interface {
 	GetID() string
 	GetWorkspaceID() string
 	GetName() string
@@ -13,7 +13,7 @@ type CoreFile interface {
 	GetParentID() *string
 	GetCreateTime() string
 	GetUpdateTime() *string
-	GetSnapshots() []CoreSnapshot
+	GetSnapshots() []Snapshot
 	GetUserPermissions() []CoreUserPermission
 	GetGroupPermissions() []CoreGroupPermission
 	GetText() *string

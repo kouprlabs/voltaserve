@@ -73,7 +73,7 @@ func NewWorkspaceService() *WorkspaceService {
 		fileCache:       cache.NewFileCache(),
 		fileGuard:       guard.NewFileGuard(),
 		fileMapper:      NewFileMapper(),
-		userRepo:        repo.NewPostgresUserRepo(),
+		userRepo:        repo.NewUserRepo(),
 		imageProc:       infra.NewImageProcessor(),
 		s3:              infra.NewS3Manager(),
 		config:          config.GetConfig(),
@@ -121,7 +121,7 @@ func (svc *WorkspaceService) Create(req CreateWorkspaceOptions, userId string) (
 	if workspace, err = svc.workspaceRepo.FindByID(workspace.GetID()); err != nil {
 		return nil, err
 	}
-	if err = svc.workspaceSearch.Index([]model.CoreWorkspace{workspace}); err != nil {
+	if err = svc.workspaceSearch.Index([]model.Workspace{workspace}); err != nil {
 		return nil, err
 	}
 	if root, err = svc.fileRepo.Find(root.GetID()); err != nil {
@@ -189,7 +189,7 @@ func (svc *WorkspaceService) FindAll(userId string) ([]*Workspace, error) {
 	}
 	res := []*Workspace{}
 	for _, id := range ids {
-		var workspace model.CoreWorkspace
+		var workspace model.Workspace
 		workspace, err = svc.workspaceCache.Get(id)
 		if err != nil {
 			return nil, err
@@ -242,7 +242,7 @@ func (svc *WorkspaceService) UpdateName(id string, name string, userId string) (
 	if workspace, err = svc.workspaceRepo.UpdateName(id, name); err != nil {
 		return nil, err
 	}
-	if err = svc.workspaceSearch.Update([]model.CoreWorkspace{workspace}); err != nil {
+	if err = svc.workspaceSearch.Update([]model.Workspace{workspace}); err != nil {
 		return nil, err
 	}
 	if err = svc.workspaceCache.Set(workspace); err != nil {
@@ -277,7 +277,7 @@ func (svc *WorkspaceService) UpdateStorageCapacity(id string, storageCapacity in
 	if workspace, err = svc.workspaceRepo.UpdateStorageCapacity(id, storageCapacity); err != nil {
 		return nil, err
 	}
-	if err = svc.workspaceSearch.Update([]model.CoreWorkspace{workspace}); err != nil {
+	if err = svc.workspaceSearch.Update([]model.Workspace{workspace}); err != nil {
 		return nil, err
 	}
 	if err = svc.workspaceCache.Set(workspace); err != nil {
@@ -354,7 +354,7 @@ func newWorkspaceMapper() *workspaceMapper {
 	}
 }
 
-func (mp *workspaceMapper) mapWorkspace(m model.CoreWorkspace, userId string) (*Workspace, error) {
+func (mp *workspaceMapper) mapWorkspace(m model.Workspace, userId string) (*Workspace, error) {
 	org, err := mp.orgCache.Get(m.GetOrganizationID())
 	if err != nil {
 		return nil, err

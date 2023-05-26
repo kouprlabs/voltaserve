@@ -46,9 +46,9 @@ func (svc *StorageService) GetAccountUsage(userId string) (*StorageUsage, error)
 	if err != nil {
 		return nil, err
 	}
-	workspaces := []model.CoreWorkspace{}
+	workspaces := []model.Workspace{}
 	for _, id := range ids {
-		var workspace model.CoreWorkspace
+		var workspace model.Workspace
 		workspace, err = svc.workspaceCache.Get(id)
 		if err != nil {
 			return nil, err

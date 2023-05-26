@@ -19,7 +19,7 @@ func newUserMapper() *userMapper {
 	return &userMapper{}
 }
 
-func (mp *userMapper) mapUser(user model.CoreUser) *User {
+func (mp *userMapper) mapUser(user model.User) *User {
 	return &User{
 		ID:         user.GetID(),
 		FullName:   user.GetFullName(),
@@ -31,7 +31,7 @@ func (mp *userMapper) mapUser(user model.CoreUser) *User {
 	}
 }
 
-func (mp *userMapper) mapUsers(users []model.CoreUser) ([]*User, error) {
+func (mp *userMapper) mapUsers(users []model.User) ([]*User, error) {
 	res := []*User{}
 	for _, u := range users {
 		res = append(res, mp.mapUser(u))

@@ -1,6 +1,6 @@
 package model
 
-type CoreOrganization interface {
+type Organization interface {
 	GetID() string
 	GetName() string
 	GetUserPermissions() []CoreUserPermission

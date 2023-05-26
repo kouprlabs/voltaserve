@@ -1,4 +1,4 @@
-package storage
+package pipeline
 
 import (
 	"io"
@@ -14,7 +14,7 @@ import (
 	"voltaserve/repo"
 )
 
-type ocrData struct {
+type OCRData struct {
 	BlockNum int64
 	Conf     int64
 	Height   int64
@@ -29,37 +29,37 @@ type ocrData struct {
 	WordNum  int64
 }
 
-type ocrImageToDataResponse struct {
-	Data                []ocrData
+type OCRImageToDataResponse struct {
+	Data                []OCRData
 	NegativeConfCount   int64
 	NegativeConfPercent float32
 	PositiveConfCount   int64
 	PositiveConfPercent float32
 }
 
-type ocrStorage struct {
+type OCRPipeline struct {
 	minio           *infra.S3Manager
 	snapshotRepo    repo.SnapshotRepo
-	pdfStorage      *pdfStorage
+	pdfStorage      *PDFPipeline
 	cmd             *infra.Command
-	metadataUpdater *storageMetadataUpdater
+	metadataUpdater *metadataUpdater
 	workspaceCache  *cache.WorkspaceCache
 	fileCache       *cache.FileCache
 	config          config.Config
 }
 
-type ocrOptions struct {
+type OCRPipelineOptions struct {
 	FileId     string
 	SnapshotId string
 	S3Bucket   string
 	S3Key      string
 }
 
-func newOcrStorage() *ocrStorage {
-	return &ocrStorage{
+func NewOCRPipeline() *OCRPipeline {
+	return &OCRPipeline{
 		minio:           infra.NewS3Manager(),
 		snapshotRepo:    repo.NewSnapshotRepo(),
-		pdfStorage:      newPDFStorage(),
+		pdfStorage:      NewPDFPipeline(),
 		cmd:             infra.NewCommand(),
 		metadataUpdater: newMetadataUpdater(),
 		workspaceCache:  cache.NewWorkspaceCache(),
@@ -68,22 +68,22 @@ func newOcrStorage() *ocrStorage {
 	}
 }
 
-func (svc *ocrStorage) store(opts ocrOptions) error {
-	snapshot, err := svc.snapshotRepo.Find(opts.SnapshotId)
+func (p *OCRPipeline) Run(opts OCRPipelineOptions) error {
+	snapshot, err := p.snapshotRepo.Find(opts.SnapshotId)
 	if err != nil {
 		return err
 	}
-	inputPath, err := svc.getSuitableInputPath(opts)
+	inputPath, err := p.getSuitableInputPath(opts)
 	if err != nil {
 		return err
 	}
-	outputPath, _ := svc.generatePDFA(inputPath)
+	outputPath, _ := p.generatePDFA(inputPath)
 	if _, err := os.Stat(outputPath); os.IsNotExist(err) {
-		if err := svc.pdfStorage.store(pdfStorageOptions(opts)); err != nil {
+		if err := p.pdfStorage.Run(PDFPipelineOptions(opts)); err != nil {
 			return err
 		}
 	} else {
-		if err := svc.sendToPDFStorage(snapshot, opts, outputPath); err != nil {
+		if err := p.sendToPDFStorage(snapshot, opts, outputPath); err != nil {
 			return err
 		}
 	}
@@ -100,20 +100,20 @@ func (svc *ocrStorage) store(opts ocrOptions) error {
 	return nil
 }
 
-func (svc *ocrStorage) generatePDFA(inputPath string) (string, error) {
+func (p *OCRPipeline) generatePDFA(inputPath string) (string, error) {
 	outputPath := filepath.FromSlash(os.TempDir() + "/" + helpers.NewId() + ".pdf")
-	if err := svc.cmd.Exec("ocrmypdf", "--rotate-pages", "--clean", "--deskew", "--image-dpi=300", inputPath, outputPath); err != nil {
+	if err := p.cmd.Exec("ocrmypdf", "--rotate-pages", "--clean", "--deskew", "--image-dpi=300", inputPath, outputPath); err != nil {
 		return "", err
 	}
 	return outputPath, nil
 }
 
-func (svc *ocrStorage) sendToPDFStorage(snapshot model.CoreSnapshot, opts ocrOptions, outputPath string) error {
-	file, err := svc.fileCache.Get(opts.FileId)
+func (p *OCRPipeline) sendToPDFStorage(snapshot model.Snapshot, opts OCRPipelineOptions, outputPath string) error {
+	file, err := p.fileCache.Get(opts.FileId)
 	if err != nil {
 		return err
 	}
-	workspace, err := svc.workspaceCache.Get(file.GetWorkspaceID())
+	workspace, err := p.workspaceCache.Get(file.GetWorkspaceID())
 	if err != nil {
 		return err
 	}
@@ -127,13 +127,13 @@ func (svc *ocrStorage) sendToPDFStorage(snapshot model.CoreSnapshot, opts ocrOpt
 		Key:    filepath.FromSlash(opts.FileId + "/" + opts.SnapshotId + "/ocr.pdf"),
 		Size:   ocrSize,
 	})
-	if err := svc.minio.PutFile(snapshot.GetOCR().Key, outputPath, DetectMimeFromFile(outputPath), workspace.GetBucket()); err != nil {
+	if err := p.minio.PutFile(snapshot.GetOCR().Key, outputPath, infra.DetectMimeFromFile(outputPath), workspace.GetBucket()); err != nil {
 		return err
 	}
-	if err := svc.metadataUpdater.update(snapshot, opts.FileId); err != nil {
+	if err := p.metadataUpdater.update(snapshot, opts.FileId); err != nil {
 		return err
 	}
-	if err := svc.pdfStorage.store(pdfStorageOptions{
+	if err := p.pdfStorage.Run(PDFPipelineOptions{
 		FileId:     opts.FileId,
 		SnapshotId: opts.SnapshotId,
 		S3Bucket:   opts.S3Bucket,
@@ -144,10 +144,10 @@ func (svc *ocrStorage) sendToPDFStorage(snapshot model.CoreSnapshot, opts ocrOpt
 	return nil
 }
 
-func (svc *ocrStorage) getSuitableInputPath(opts ocrOptions) (string, error) {
+func (p *OCRPipeline) getSuitableInputPath(opts OCRPipelineOptions) (string, error) {
 	extension := filepath.Ext(opts.S3Key)
 	path := filepath.FromSlash(os.TempDir() + "/" + helpers.NewId() + extension)
-	if err := svc.minio.GetFile(opts.S3Key, path, opts.S3Bucket); err != nil {
+	if err := p.minio.GetFile(opts.S3Key, path, opts.S3Bucket); err != nil {
 		return "", err
 	}
 
@@ -155,7 +155,7 @@ func (svc *ocrStorage) getSuitableInputPath(opts ocrOptions) (string, error) {
 	if extension == ".jpg" || extension == ".jpeg" {
 		oldPath := path
 		path = filepath.FromSlash(os.TempDir() + "/" + helpers.NewId() + ".jpg")
-		if err := svc.cmd.Exec("gm", "convert", oldPath, path); err != nil {
+		if err := p.cmd.Exec("gm", "convert", oldPath, path); err != nil {
 			return "", err
 		}
 		if err := os.Remove(oldPath); err != nil {
@@ -165,27 +165,27 @@ func (svc *ocrStorage) getSuitableInputPath(opts ocrOptions) (string, error) {
 	return path, nil
 }
 
-func (svc *ocrStorage) imageToData(inputPath string) (ocrImageToDataResponse, error) {
+func (p *OCRPipeline) imageToData(inputPath string) (OCRImageToDataResponse, error) {
 	outFile := helpers.NewId()
-	if err := svc.cmd.Exec("tesseract", inputPath, outFile, "tsv"); err != nil {
-		return ocrImageToDataResponse{}, err
+	if err := p.cmd.Exec("tesseract", inputPath, outFile, "tsv"); err != nil {
+		return OCRImageToDataResponse{}, err
 	}
-	var res = ocrImageToDataResponse{}
+	var res = OCRImageToDataResponse{}
 	outFile = outFile + ".tsv"
 	f, err := os.Open(outFile)
 	if err != nil {
-		return ocrImageToDataResponse{}, err
+		return OCRImageToDataResponse{}, err
 	}
 	b, err := io.ReadAll(f)
 	if err != nil {
-		return ocrImageToDataResponse{}, err
+		return OCRImageToDataResponse{}, err
 	}
 	text := string(b)
 	lines := strings.Split(text, "\n")
 	lines = lines[1 : len(lines)-2]
 	for _, l := range lines {
 		values := strings.Split(l, "\t")
-		data := ocrData{}
+		data := OCRData{}
 		data.Level, _ = strconv.ParseInt(values[0], 10, 64)
 		data.PageNum, _ = strconv.ParseInt(values[1], 10, 64)
 		data.BlockNum, _ = strconv.ParseInt(values[2], 10, 64)
@@ -212,7 +212,7 @@ func (svc *ocrStorage) imageToData(inputPath string) (ocrImageToDataResponse, er
 		res.PositiveConfPercent = float32((int(res.PositiveConfCount) * 100) / len(res.Data))
 	}
 	if err := os.Remove(outFile); err != nil {
-		return ocrImageToDataResponse{}, err
+		return OCRImageToDataResponse{}, err
 	}
 	return res, nil
 }

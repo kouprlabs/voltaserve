@@ -21,7 +21,7 @@ func NewWorkspaceSearch() *WorkspaceSearch {
 	}
 }
 
-func (search *WorkspaceSearch) Index(workspaces []model.CoreWorkspace) error {
+func (search *WorkspaceSearch) Index(workspaces []model.Workspace) error {
 	if len(workspaces) == 0 {
 		return nil
 	}
@@ -35,7 +35,7 @@ func (search *WorkspaceSearch) Index(workspaces []model.CoreWorkspace) error {
 	return nil
 }
 
-func (search *WorkspaceSearch) Update(workspaces []model.CoreWorkspace) error {
+func (search *WorkspaceSearch) Update(workspaces []model.Workspace) error {
 	if len(workspaces) == 0 {
 		return nil
 	}
@@ -59,23 +59,23 @@ func (search *WorkspaceSearch) Delete(ids []string) error {
 	return nil
 }
 
-func (search *WorkspaceSearch) Query(query string) ([]model.CoreWorkspace, error) {
+func (search *WorkspaceSearch) Query(query string) ([]model.Workspace, error) {
 	hits, err := search.search.Query(search.index, query)
 	if err != nil {
 		return nil, err
 	}
-	var res []model.CoreWorkspace
+	var res []model.Workspace
 	for _, v := range hits {
 		var b []byte
 		b, err = json.Marshal(v)
 		if err != nil {
 			return nil, err
 		}
-		var workspace repo.PostgresWorkspace
+		workspace := repo.NewWorkspace()
 		if err = json.Unmarshal(b, &workspace); err != nil {
 			return nil, err
 		}
-		res = append(res, &workspace)
+		res = append(res, workspace)
 	}
 	return res, nil
 }

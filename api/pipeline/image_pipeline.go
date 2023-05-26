@@ -1,4 +1,4 @@
-package storage
+package pipeline
 
 import (
 	"os"
@@ -13,30 +13,30 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-type imageStorage struct {
+type ImagePipeline struct {
 	s3              *infra.S3Manager
 	snapshotRepo    repo.SnapshotRepo
 	fileSearch      *search.FileSearch
-	ocrStorage      *ocrStorage
+	ocrStorage      *OCRPipeline
 	cmd             *infra.Command
 	imageProc       *infra.ImageProcessor
-	metadataUpdater *storageMetadataUpdater
+	metadataUpdater *metadataUpdater
 	config          config.Config
 }
 
-type imageStorageOptions struct {
+type ImagePipelineOptions struct {
 	FileId     string
 	SnapshotId string
 	S3Bucket   string
 	S3Key      string
 }
 
-func newImageStorage() *imageStorage {
-	return &imageStorage{
+func NewImagePipeline() *ImagePipeline {
+	return &ImagePipeline{
 		s3:              infra.NewS3Manager(),
 		snapshotRepo:    repo.NewSnapshotRepo(),
 		fileSearch:      search.NewFileSearch(),
-		ocrStorage:      newOcrStorage(),
+		ocrStorage:      NewOCRPipeline(),
 		cmd:             infra.NewCommand(),
 		metadataUpdater: newMetadataUpdater(),
 		imageProc:       infra.NewImageProcessor(),
@@ -44,18 +44,18 @@ func newImageStorage() *imageStorage {
 	}
 }
 
-func (svc *imageStorage) store(opts imageStorageOptions) error {
-	snapshot, err := svc.snapshotRepo.Find(opts.SnapshotId)
+func (p *ImagePipeline) Run(opts ImagePipelineOptions) error {
+	snapshot, err := p.snapshotRepo.Find(opts.SnapshotId)
 	if err != nil {
 		return err
 	}
 	inputPath := filepath.FromSlash(os.TempDir() + "/" + helpers.NewId() + filepath.Ext(opts.S3Key))
-	if err := svc.s3.GetFile(opts.S3Key, inputPath, opts.S3Bucket); err != nil {
+	if err := p.s3.GetFile(opts.S3Key, inputPath, opts.S3Bucket); err != nil {
 		return err
 	}
 	if filepath.Ext(opts.S3Key) == ".tiff" {
 		newInputFile := filepath.FromSlash(os.TempDir() + "/" + helpers.NewId() + ".jpg")
-		if err := svc.imageProc.Convert(inputPath, newInputFile); err != nil {
+		if err := p.imageProc.Convert(inputPath, newInputFile); err != nil {
 			return err
 		}
 		if err := os.Remove(inputPath); err != nil {
@@ -63,18 +63,18 @@ func (svc *imageStorage) store(opts imageStorageOptions) error {
 		}
 		inputPath = newInputFile
 	}
-	if err := svc.measureImageProps(snapshot, inputPath); err != nil {
+	if err := p.measureImageProps(snapshot, inputPath); err != nil {
 		return err
 	}
-	if err := svc.generateThumbnail(snapshot, inputPath); err != nil {
+	if err := p.generateThumbnail(snapshot, inputPath); err != nil {
 		return err
 	}
-	if err := svc.metadataUpdater.update(snapshot, opts.FileId); err != nil {
+	if err := p.metadataUpdater.update(snapshot, opts.FileId); err != nil {
 		return err
 	}
-	ocrData, err := svc.ocrStorage.imageToData(inputPath)
+	ocrData, err := p.ocrStorage.imageToData(inputPath)
 	if err == nil && ocrData.PositiveConfCount > ocrData.NegativeConfCount {
-		if err := svc.ocrStorage.store(ocrOptions(opts)); err != nil {
+		if err := p.ocrStorage.Run(OCRPipelineOptions(opts)); err != nil {
 			/*
 				Here we intentionally ignore the error, here is the explanation why:
 				The reason we came here to begin with is because of
@@ -94,8 +94,8 @@ func (svc *imageStorage) store(opts imageStorageOptions) error {
 	return nil
 }
 
-func (svc *imageStorage) measureImageProps(snapshot model.CoreSnapshot, inputPath string) error {
-	width, height, err := svc.imageProc.Measure(inputPath)
+func (p *ImagePipeline) measureImageProps(snapshot model.Snapshot, inputPath string) error {
+	width, height, err := p.imageProc.Measure(inputPath)
 	if err != nil {
 		return err
 	}
@@ -108,17 +108,17 @@ func (svc *imageStorage) measureImageProps(snapshot model.CoreSnapshot, inputPat
 	return nil
 }
 
-func (svc *imageStorage) generateThumbnail(snapshot model.CoreSnapshot, inputPath string) error {
+func (p *ImagePipeline) generateThumbnail(snapshot model.Snapshot, inputPath string) error {
 	width := snapshot.GetOriginal().Image.Width
 	height := snapshot.GetOriginal().Image.Height
-	if width > svc.config.Limits.ImagePreviewMaxWidth || height > svc.config.Limits.ImagePreviewMaxHeight {
+	if width > p.config.Limits.ImagePreviewMaxWidth || height > p.config.Limits.ImagePreviewMaxHeight {
 		outputPath := filepath.FromSlash(os.TempDir() + "/" + helpers.NewId() + filepath.Ext(inputPath))
 		if width > height {
-			if err := svc.imageProc.Resize(inputPath, svc.config.Limits.ImagePreviewMaxWidth, 0, outputPath); err != nil {
+			if err := p.imageProc.Resize(inputPath, p.config.Limits.ImagePreviewMaxWidth, 0, outputPath); err != nil {
 				return err
 			}
 		} else {
-			if err := svc.imageProc.Resize(inputPath, 0, svc.config.Limits.ImagePreviewMaxHeight, outputPath); err != nil {
+			if err := p.imageProc.Resize(inputPath, 0, p.config.Limits.ImagePreviewMaxHeight, outputPath); err != nil {
 				return err
 			}
 		}
@@ -126,7 +126,7 @@ func (svc *imageStorage) generateThumbnail(snapshot model.CoreSnapshot, inputPat
 		if err != nil {
 			return err
 		}
-		thumbnailWidth, thumbnailHeight, err := svc.imageProc.Measure(outputPath)
+		thumbnailWidth, thumbnailHeight, err := p.imageProc.Measure(outputPath)
 		if err != nil {
 			return err
 		}
@@ -145,7 +145,7 @@ func (svc *imageStorage) generateThumbnail(snapshot model.CoreSnapshot, inputPat
 		if err != nil {
 			return err
 		}
-		thumbnailWidth, thumbnailHeight, err := svc.imageProc.Measure(inputPath)
+		thumbnailWidth, thumbnailHeight, err := p.imageProc.Measure(inputPath)
 		if err != nil {
 			return err
 		}

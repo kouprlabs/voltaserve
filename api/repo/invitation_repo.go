@@ -18,19 +18,23 @@ type InvitationInsertOptions struct {
 }
 
 type InvitationRepo interface {
-	Insert(opts InvitationInsertOptions) ([]model.CoreInvitation, error)
-	Find(id string) (model.CoreInvitation, error)
-	GetIncoming(email string) ([]model.CoreInvitation, error)
-	GetOutgoing(organizationId string, userId string) ([]model.CoreInvitation, error)
-	Save(org model.CoreInvitation) error
+	Insert(opts InvitationInsertOptions) ([]model.Invitation, error)
+	Find(id string) (model.Invitation, error)
+	GetIncoming(email string) ([]model.Invitation, error)
+	GetOutgoing(organizationId string, userId string) ([]model.Invitation, error)
+	Save(org model.Invitation) error
 	Delete(id string) error
 }
 
 func NewInvitationRepo() InvitationRepo {
-	return NewPostgresInvitationRepo()
+	return newInvitationRepo()
 }
 
-type PostgresInvitation struct {
+func NewInvitation() model.Invitation {
+	return &invitationEntity{}
+}
+
+type invitationEntity struct {
 	ID             string  `json:"id"`
 	OrganizationId string  `json:"organizationId"`
 	OwnerId        string  `json:"ownerId"`
@@ -40,73 +44,73 @@ type PostgresInvitation struct {
 	UpdateTime     *string `json:"updateTime"`
 }
 
-func (PostgresInvitation) TableName() string {
+func (invitationEntity) TableName() string {
 	return "invitation"
 }
 
-func (o *PostgresInvitation) BeforeCreate(tx *gorm.DB) (err error) {
+func (o *invitationEntity) BeforeCreate(tx *gorm.DB) (err error) {
 	o.CreateTime = time.Now().UTC().Format(time.RFC3339)
 	return nil
 }
 
-func (o *PostgresInvitation) BeforeSave(tx *gorm.DB) (err error) {
+func (o *invitationEntity) BeforeSave(tx *gorm.DB) (err error) {
 	timeNow := time.Now().UTC().Format(time.RFC3339)
 	o.UpdateTime = &timeNow
 	return nil
 }
 
-func (i PostgresInvitation) GetID() string {
+func (i invitationEntity) GetID() string {
 	return i.ID
 }
 
-func (i PostgresInvitation) GetOrganizationID() string {
+func (i invitationEntity) GetOrganizationID() string {
 	return i.OrganizationId
 }
 
-func (i PostgresInvitation) GetOwnerID() string {
+func (i invitationEntity) GetOwnerID() string {
 	return i.OwnerId
 }
 
-func (i PostgresInvitation) GetEmail() string {
+func (i invitationEntity) GetEmail() string {
 	return i.Email
 }
 
-func (i PostgresInvitation) GetStatus() string {
+func (i invitationEntity) GetStatus() string {
 	return i.Status
 }
 
-func (i PostgresInvitation) GetCreateTime() string {
+func (i invitationEntity) GetCreateTime() string {
 	return i.CreateTime
 }
 
-func (i PostgresInvitation) GetUpdateTime() *string {
+func (i invitationEntity) GetUpdateTime() *string {
 	return i.UpdateTime
 }
 
-func (w *PostgresInvitation) SetStatus(status string) {
+func (w *invitationEntity) SetStatus(status string) {
 	w.Status = status
 }
 
-func (w *PostgresInvitation) SetUpdateTime(updateTime *string) {
+func (w *invitationEntity) SetUpdateTime(updateTime *string) {
 	w.UpdateTime = updateTime
 }
 
-type PostgresInvitationRepo struct {
+type invitationRepo struct {
 	db       *gorm.DB
-	userRepo *PostgresUserRepo
+	userRepo *userRepo
 }
 
-func NewPostgresInvitationRepo() *PostgresInvitationRepo {
-	return &PostgresInvitationRepo{
+func newInvitationRepo() *invitationRepo {
+	return &invitationRepo{
 		db:       infra.GetDb(),
-		userRepo: NewPostgresUserRepo(),
+		userRepo: newUserRepo(),
 	}
 }
 
-func (repo *PostgresInvitationRepo) Insert(opts InvitationInsertOptions) ([]model.CoreInvitation, error) {
-	var res []model.CoreInvitation
+func (repo *invitationRepo) Insert(opts InvitationInsertOptions) ([]model.Invitation, error) {
+	var res []model.Invitation
 	for _, e := range opts.Emails {
-		invitation := PostgresInvitation{
+		invitation := invitationEntity{
 			ID:             helpers.NewId(),
 			OrganizationId: opts.OrganizationId,
 			OwnerId:        opts.UserId,
@@ -125,8 +129,8 @@ func (repo *PostgresInvitationRepo) Insert(opts InvitationInsertOptions) ([]mode
 	return res, nil
 }
 
-func (repo *PostgresInvitationRepo) Find(id string) (model.CoreInvitation, error) {
-	var invitation = PostgresInvitation{}
+func (repo *invitationRepo) Find(id string) (model.Invitation, error) {
+	var invitation = invitationEntity{}
 	db := repo.db.Where("id = ?", id).First(&invitation)
 	if db.Error != nil {
 		if errors.Is(db.Error, gorm.ErrRecordNotFound) {
@@ -138,37 +142,37 @@ func (repo *PostgresInvitationRepo) Find(id string) (model.CoreInvitation, error
 	return &invitation, nil
 }
 
-func (repo *PostgresInvitationRepo) GetIncoming(email string) ([]model.CoreInvitation, error) {
-	var invitations []*PostgresInvitation
+func (repo *invitationRepo) GetIncoming(email string) ([]model.Invitation, error) {
+	var invitations []*invitationEntity
 	db := repo.db.
 		Raw("SELECT * FROM invitation WHERE email = ? and status = 'pending' ORDER BY create_time DESC", email).
 		Scan(&invitations)
 	if db.Error != nil {
 		return nil, db.Error
 	}
-	var res []model.CoreInvitation
+	var res []model.Invitation
 	for _, inv := range invitations {
 		res = append(res, inv)
 	}
 	return res, nil
 }
 
-func (repo *PostgresInvitationRepo) GetOutgoing(organizationId string, userId string) ([]model.CoreInvitation, error) {
-	var invitations []*PostgresInvitation
+func (repo *invitationRepo) GetOutgoing(organizationId string, userId string) ([]model.Invitation, error) {
+	var invitations []*invitationEntity
 	db := repo.db.
 		Raw("SELECT * FROM invitation WHERE organization_id = ? and owner_id = ? ORDER BY create_time DESC", organizationId, userId).
 		Scan(&invitations)
 	if db.Error != nil {
 		return nil, db.Error
 	}
-	var res []model.CoreInvitation
+	var res []model.Invitation
 	for _, inv := range invitations {
 		res = append(res, inv)
 	}
 	return res, nil
 }
 
-func (repo *PostgresInvitationRepo) Save(org model.CoreInvitation) error {
+func (repo *invitationRepo) Save(org model.Invitation) error {
 	db := repo.db.Save(org)
 	if db.Error != nil {
 		return db.Error
@@ -176,7 +180,7 @@ func (repo *PostgresInvitationRepo) Save(org model.CoreInvitation) error {
 	return nil
 }
 
-func (repo *PostgresInvitationRepo) Delete(id string) error {
+func (repo *invitationRepo) Delete(id string) error {
 	db := repo.db.Exec("DELETE FROM invitation WHERE id = ?", id)
 	if db.Error != nil {
 		return db.Error
