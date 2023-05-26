@@ -1,12 +1,12 @@
 import { getConfig } from '@/config/config'
 import { newDateTime } from '@/infra/date-time'
-import { UserRepo } from '@/infra/db'
 import { ErrorCode, newError } from '@/infra/error'
 import { newHashId, newHyphenlessUuid } from '@/infra/id'
 import { sendTemplateMail } from '@/infra/mail'
 import { hashPassword } from '@/infra/password'
 import search, { USER_SEARCH_INDEX } from '@/infra/search'
-import { mapEntity, User } from '@/user/service'
+import UserRepo from '@/user/repo'
+import { mapEntity, UserDTO } from '@/user/service'
 
 export type AccountCreateOptions = {
   email: string
@@ -28,7 +28,9 @@ export type AccountSendResetPasswordEmailOptions = {
   email: string
 }
 
-export async function createUser(options: AccountCreateOptions): Promise<User> {
+export async function createUser(
+  options: AccountCreateOptions
+): Promise<UserDTO> {
   const id = newHashId()
   const existingUser = await UserRepo.find('username', options.email)
   if (existingUser) {

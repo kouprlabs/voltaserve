@@ -8,9 +8,9 @@ import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt'
 import { URL } from 'url'
 import accountRouter from '@/account/router'
 import { getConfig } from '@/config/config'
-import { UserRepo } from '@/infra/db'
 import { errorHandler } from '@/infra/error'
 import tokenRouter from '@/token/router'
+import UserRepo from '@/user/repo'
 import userRouter from '@/user/router'
 
 const app = express()
