@@ -47,16 +47,16 @@ type UpdateWorkspaceStorageCapacityOptions struct {
 }
 
 type WorkspaceService struct {
-	workspaceRepo   repo.CoreWorkspaceRepo
+	workspaceRepo   repo.WorkspaceRepo
 	workspaceCache  *cache.WorkspaceCache
 	workspaceGuard  *guard.WorkspaceGuard
 	workspaceSearch *search.WorkspaceSearch
 	workspaceMapper *workspaceMapper
-	fileRepo        repo.CoreFileRepo
+	fileRepo        repo.FileRepo
 	fileCache       *cache.FileCache
 	fileGuard       *guard.FileGuard
 	fileMapper      *FileMapper
-	userRepo        repo.CoreUserRepo
+	userRepo        repo.UserRepo
 	imageProc       *infra.ImageProcessor
 	s3              *infra.S3Manager
 	config          config.Config

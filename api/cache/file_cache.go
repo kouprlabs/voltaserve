@@ -9,7 +9,7 @@ import (
 
 type FileCache struct {
 	redis     *infra.RedisManager
-	fileRepo  repo.CoreFileRepo
+	fileRepo  repo.FileRepo
 	keyPrefix string
 }
 

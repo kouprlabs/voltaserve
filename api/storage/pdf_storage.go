@@ -14,7 +14,7 @@ import (
 
 type pdfStorage struct {
 	minio           *infra.S3Manager
-	snapshotRepo    repo.CoreSnapshotRepo
+	snapshotRepo    repo.SnapshotRepo
 	cmd             *infra.Command
 	metadataUpdater *storageMetadataUpdater
 	workspaceCache  *cache.WorkspaceCache

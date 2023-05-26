@@ -1,8 +1,8 @@
 version: '3.8'
 
 volumes:
-  postgres:
-    name: voltaserve-postgres
+  cockroach:
+    name: voltaserve-cockroach
   minio:
     name: voltaserve-minio
   meilisearch:
@@ -13,17 +13,19 @@ volumes:
     name: voltaserve-redisinsight
 
 services:
-  postgres:
-    container_name: voltaserve-postgres
-    image: postgres:15.1
+  cockroach:
+    container_name: voltaserve-cockroach
+    image: cockroachdb/cockroach:latest-v23.1
     ports:
-      - ${VOLTASERVE_POSTGRES_PORT}:5432
+      - ${VOLTASERVE_POSTGRES_PORT}:26257
+      - "8080:8080"
     environment:
-      POSTGRES_USER: voltaserve
-      POSTGRES_PASSWORD: voltaserve
+      COCKROACH_DATABASE: voltaserve
+      COCKROACH_USER: voltaserve
     volumes:
-      - postgres:/var/lib/postgresql/data
-      - ./infra/postgres/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+      - cockroach:/cockroach/cockroach-data
+      - ./sql:/docker-entrypoint-initdb.d
+    command: start-single-node --insecure
   adminer:
     container_name: voltaserve-adminer
     image: adminer:4.8.1

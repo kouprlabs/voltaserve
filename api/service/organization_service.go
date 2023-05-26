@@ -46,15 +46,15 @@ type OrganizationRemoveMemberOptions struct {
 }
 
 type OrganizationService struct {
-	orgRepo      repo.CoreOrganizationRepo
+	orgRepo      repo.OrganizationRepo
 	orgCache     *cache.OrganizationCache
 	orgGuard     *guard.OrganizationGuard
 	orgMapper    *organizationMapper
 	orgSearch    *search.OrganizationSearch
-	userRepo     repo.CoreUserRepo
+	userRepo     repo.UserRepo
 	userSearch   *search.UserSearch
 	userMapper   *userMapper
-	groupRepo    repo.CoreGroupRepo
+	groupRepo    repo.GroupRepo
 	groupService *GroupService
 	groupMapper  *groupMapper
 	imageProc    *infra.ImageProcessor

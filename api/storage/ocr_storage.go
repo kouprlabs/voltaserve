@@ -39,7 +39,7 @@ type ocrImageToDataResponse struct {
 
 type ocrStorage struct {
 	minio           *infra.S3Manager
-	snapshotRepo    repo.CoreSnapshotRepo
+	snapshotRepo    repo.SnapshotRepo
 	pdfStorage      *pdfStorage
 	cmd             *infra.Command
 	metadataUpdater *storageMetadataUpdater

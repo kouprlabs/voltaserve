@@ -49,20 +49,20 @@ type GroupRemoveMemberOptions struct {
 }
 
 type GroupService struct {
-	groupRepo      repo.CoreGroupRepo
+	groupRepo      repo.GroupRepo
 	groupGuard     *guard.GroupGuard
 	groupSearch    *search.GroupSearch
 	groupMapper    *groupMapper
 	groupCache     *cache.GroupCache
-	userRepo       repo.CoreUserRepo
+	userRepo       repo.UserRepo
 	userSearch     *search.UserSearch
 	userMapper     *userMapper
-	workspaceRepo  repo.CoreWorkspaceRepo
+	workspaceRepo  repo.WorkspaceRepo
 	workspaceCache *cache.WorkspaceCache
-	fileRepo       repo.CoreFileRepo
+	fileRepo       repo.FileRepo
 	fileCache      *cache.FileCache
 	fileGuard      *guard.FileGuard
-	orgRepo        repo.CoreOrganizationRepo
+	orgRepo        repo.OrganizationRepo
 	orgCache       *cache.OrganizationCache
 	orgGuard       *guard.OrganizationGuard
 	imageProc      *infra.ImageProcessor

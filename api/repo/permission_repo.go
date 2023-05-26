@@ -6,6 +6,31 @@ import (
 	"gorm.io/gorm"
 )
 
+type UserPermission struct {
+	ID         string `json:"id"`
+	UserID     string `json:"userId"`
+	ResourceID string `json:"resourceId"`
+	Permission string `json:"permission"`
+	CreateTime string `json:"createTime"`
+}
+
+type GroupPermission struct {
+	ID         string `json:"id"`
+	GroupID    string `json:"groupId"`
+	ResourceId string `json:"resourceId"`
+	Permission string `json:"permission"`
+	CreateTime string `json:"createTime"`
+}
+
+type PermissionRepo interface {
+	GetUserPermissions(id string) ([]*UserPermission, error)
+	GetGroupPermissions(id string) ([]*GroupPermission, error)
+}
+
+func NewPermissionRepo() PermissionRepo {
+	return NewPostgresPermissionRepo()
+}
+
 func (UserPermission) TableName() string {
 	return "userpermission"
 }
