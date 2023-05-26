@@ -27,13 +27,13 @@ type InvitationCreateOptions struct {
 }
 
 type InvitationService struct {
-	orgRepo          repo.CoreOrganizationRepo
+	orgRepo          repo.OrganizationRepo
 	orgMapper        *organizationMapper
-	invitationRepo   repo.CoreInvitationRepo
+	invitationRepo   repo.InvitationRepo
 	invitationMapper *invitationMapper
 	orgCache         *cache.OrganizationCache
 	orgGuard         *guard.OrganizationGuard
-	userRepo         repo.CoreUserRepo
+	userRepo         repo.UserRepo
 	mailTmpl         *infra.MailTemplate
 	config           config.Config
 }
@@ -266,7 +266,7 @@ func (svc *InvitationService) Delete(id string, userId string) error {
 
 type invitationMapper struct {
 	orgCache   *cache.OrganizationCache
-	userRepo   repo.CoreUserRepo
+	userRepo   repo.UserRepo
 	userMapper *userMapper
 	orgMapper  *organizationMapper
 }

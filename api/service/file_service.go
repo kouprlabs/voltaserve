@@ -158,22 +158,22 @@ type GroupPermission struct {
 }
 
 type FileService struct {
-	fileRepo       repo.CoreFileRepo
+	fileRepo       repo.FileRepo
 	fileSearch     *search.FileSearch
 	fileGuard      *guard.FileGuard
 	fileMapper     *FileMapper
 	fileCache      *cache.FileCache
 	workspaceCache *cache.WorkspaceCache
-	workspaceRepo  repo.CoreWorkspaceRepo
+	workspaceRepo  repo.WorkspaceRepo
 	workspaceGuard *guard.WorkspaceGuard
 	workspaceSvc   *WorkspaceService
-	snapshotRepo   repo.CoreSnapshotRepo
-	userRepo       repo.CoreUserRepo
+	snapshotRepo   repo.SnapshotRepo
+	userRepo       repo.UserRepo
 	userMapper     *userMapper
 	groupCache     *cache.GroupCache
 	groupGuard     *guard.GroupGuard
 	groupMapper    *groupMapper
-	permissionRepo repo.CorePermissionRepo
+	permissionRepo repo.PermissionRepo
 	s3             *infra.S3Manager
 }
 

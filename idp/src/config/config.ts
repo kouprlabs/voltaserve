@@ -17,7 +17,7 @@ export function getConfig(): Config {
 export function readURLs(config: Config) {
   config.idpURL = process.env.IDP_URL
   config.uiURL = process.env.UI_URL
-  config.databaseURL = process.env.DATABASE_URL
+  config.databaseURL = process.env.POSTGRES_URL
 }
 
 export function readToken(config: Config) {
