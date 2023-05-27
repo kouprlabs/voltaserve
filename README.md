@@ -11,7 +11,7 @@ Install [Docker](https://docs.docker.com/get-docker) and [Docker Compose](https:
 1. Run:
 
 ```sh
-docker compose up
+docker compose up -d
 ```
 
 Wait a few minutes until all containers are up and running. You can check that by looking at their logs.
@@ -77,7 +77,7 @@ Other ports can be changed as well by editing their respective environment varia
 1. Run:
 
 ```sh
-docker compose -f ./docker-compose.multi-node.yml up
+docker compose -f ./docker-compose.multi-node.yml up -d
 ```
 
 2. Initialize CockroachDB cluster:
