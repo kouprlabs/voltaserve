@@ -63,7 +63,7 @@ export interface UserRepo {
   delete(id: string): Promise<void>
 }
 
-export class PostgresUserRepo {
+class UserRepoImpl {
   async findByID(id: string): Promise<User> {
     const { rowCount, rows } = await client.query(
       `SELECT * FROM "user" WHERE id = $1`,
@@ -285,6 +285,6 @@ export class PostgresUserRepo {
   }
 }
 
-const userRepo = new PostgresUserRepo()
+const userRepo: UserRepo = new UserRepoImpl()
 
 export default userRepo
