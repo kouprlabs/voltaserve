@@ -105,7 +105,7 @@ func (mgr *RedisManager) connect() error {
 			Password: mgr.config.Password,
 			DB:       mgr.config.DB,
 		})
-		if err := mgr.clusterClient.Ping(context.Background()).Err(); err != nil {
+		if err := mgr.client.Ping(context.Background()).Err(); err != nil {
 			return err
 		}
 	}
