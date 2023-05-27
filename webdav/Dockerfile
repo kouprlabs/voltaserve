@@ -14,6 +14,7 @@ WORKDIR /app
 ENV NODE_ENV production
 
 COPY --from=builder /build/pkg/voltaserve-webdav-alpine ./voltaserve-webdav
+COPY --from=builder /build/.env ./.env
 
 ENTRYPOINT ["./voltaserve-webdav"]
 

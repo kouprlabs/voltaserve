@@ -10,6 +10,7 @@ import (
 	"time"
 	"voltaserve/cache"
 	"voltaserve/config"
+	"voltaserve/conversion"
 	"voltaserve/errorpkg"
 	"voltaserve/guard"
 	"voltaserve/helpers"
@@ -194,6 +195,11 @@ type FileService struct {
 	permissionRepo repo.PermissionRepo
 	fileIdentifier *infra.FileIdentifier
 	s3             *infra.S3Manager
+	pdfPipeline    *conversion.PDFPipeline
+	imagePipeline  *conversion.ImagePipeline
+	officePipeline *conversion.OfficePipeline
+	videoPipeline  *conversion.VideoPipeline
+	config         config.Config
 }
 
 func NewFileService() *FileService {
@@ -216,6 +222,11 @@ func NewFileService() *FileService {
 		permissionRepo: repo.NewPermissionRepo(),
 		fileIdentifier: infra.NewFileIdentifier(),
 		s3:             infra.NewS3Manager(),
+		pdfPipeline:    conversion.NewPDFPipeline(),
+		imagePipeline:  conversion.NewImagePipeline(),
+		officePipeline: conversion.NewOfficePipeline(),
+		videoPipeline:  conversion.NewVideoPipeline(),
+		config:         config.GetConfig(),
 	}
 }
 
@@ -270,6 +281,117 @@ func (svc *FileService) validateParent(id string, userId string) error {
 		return errorpkg.NewFileIsNotAFolderError(file)
 	}
 	return nil
+}
+
+func (svc *FileService) Store(fileId string, filePath string, userId string) (*File, error) {
+	file, err := svc.fileRepo.Find(fileId)
+	if err != nil {
+		return nil, err
+	}
+	if err = svc.fileCache.Set(file); err != nil {
+		return nil, err
+	}
+	workspace, err := svc.workspaceCache.Get(file.GetWorkspaceID())
+	if err != nil {
+		return nil, err
+	}
+	latestVersion, err := svc.snapshotRepo.GetLatestVersionForFile(fileId)
+	if err != nil {
+		return nil, err
+	}
+	snapshotId := helpers.NewId()
+	snapshot := repo.NewSnapshot()
+	snapshot.SetID(snapshotId)
+	snapshot.SetVersion(latestVersion)
+	if err = svc.snapshotRepo.Save(snapshot); err != nil {
+		return nil, err
+	}
+	if err = svc.snapshotRepo.MapWithFile(snapshotId, fileId); err != nil {
+		return nil, err
+	}
+	stat, err := os.Stat(filePath)
+	if err != nil {
+		return nil, err
+	}
+	original := model.S3Object{
+		Bucket: workspace.GetBucket(),
+		Key:    filepath.FromSlash(fileId + "/" + snapshotId + "/original" + strings.ToLower(filepath.Ext(filePath))),
+		Size:   stat.Size(),
+	}
+	if err = svc.s3.PutFile(original.Key, filePath, infra.DetectMimeFromFile(filePath), workspace.GetBucket()); err != nil {
+		return nil, err
+	}
+	snapshot.SetOriginal(&original)
+	if err := svc.snapshotRepo.Save(snapshot); err != nil {
+		return nil, err
+	}
+	if stat.Size() >= int64(svc.config.Limits.FileProcessingMaxSizeMB*1000000) {
+		v, err := svc.fileMapper.MapFile(file, userId)
+		if err != nil {
+			return nil, err
+		}
+		return v, nil
+	}
+	if svc.fileIdentifier.IsPDF(filepath.Ext(filePath)) {
+		snapshot.SetPreview(&model.S3Object{
+			Bucket: original.Bucket,
+			Key:    original.Key,
+			Size:   original.Size,
+		})
+		if err = svc.snapshotRepo.Save(snapshot); err != nil {
+			return nil, err
+		}
+		if file, err = svc.fileRepo.Find(fileId); err != nil {
+			return nil, err
+		}
+		if err := svc.fileCache.Set(file); err != nil {
+			return nil, err
+		}
+		if err = svc.pdfPipeline.Run(conversion.PDFPipelineOptions{
+			FileId:     fileId,
+			SnapshotId: snapshotId,
+			S3Bucket:   workspace.GetBucket(),
+			S3Key:      original.Key,
+		}); err != nil {
+			return nil, err
+		}
+	} else if svc.fileIdentifier.IsOffice(filepath.Ext(filePath)) || svc.fileIdentifier.IsPlainText(filepath.Ext(filePath)) {
+		if err = svc.officePipeline.Run(conversion.OfficePipelineOptions{
+			FileId:     fileId,
+			SnapshotId: snapshotId,
+			S3Bucket:   workspace.GetBucket(),
+			S3Key:      original.Key,
+		}); err != nil {
+			return nil, err
+		}
+	} else if svc.fileIdentifier.IsImage(filepath.Ext(filePath)) {
+		if err = svc.imagePipeline.Run(conversion.ImagePipelineOptions{
+			FileId:     fileId,
+			SnapshotId: snapshotId,
+			S3Bucket:   workspace.GetBucket(),
+			S3Key:      original.Key,
+		}); err != nil {
+			return nil, err
+		}
+	} else if svc.fileIdentifier.IsVideo(filepath.Ext(filePath)) {
+		if err = svc.videoPipeline.Run(conversion.VideoPipelineOptions{
+			FileId:     fileId,
+			SnapshotId: snapshotId,
+			S3Bucket:   workspace.GetBucket(),
+			S3Key:      original.Key,
+		}); err != nil {
+			return nil, err
+		}
+	}
+	file, err = svc.fileCache.Refresh(file.GetID())
+	if err != nil {
+		return nil, err
+	}
+	v, err := svc.fileMapper.MapFile(file, userId)
+	if err != nil {
+		return nil, err
+	}
+	return v, nil
 }
 
 func (svc *FileService) DownloadOriginalFile(id string, userId string) (string, model.File, model.Snapshot, error) {
