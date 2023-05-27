@@ -8,7 +8,37 @@
 
 Install [Docker](https://docs.docker.com/get-docker) and [Docker Compose](https://docs.docker.com/compose/install).
 
-### Run with Docker
+1. Run:
+
+```sh
+docker compose up
+```
+
+Wait a few minutes until all containers are up and running. You can check that by looking at their logs.
+
+2. Go to the **sign up page** <http://localhost:3000/sign-up> and create an account.
+
+3. Open MailCatcher <http://localhost:11080>, select the received email and click the **confirm email** link.
+
+4. Finally, go to the **sign in page** <http://localhost:3000/sign-in> and login with your credentials.
+
+### Connect with WebDAV
+
+Voltaserve supports [WebDAV](https://en.wikipedia.org/wiki/WebDAV), by default it's listening on the port `6000`.
+
+You can change it by editing the `VOLTASERVE_WEBDAV_PORT` environment variable in [.env](.env) file as follows:
+
+```properties
+VOLTASERVE_WEBDAV_PORT=6000
+```
+
+The port needs to be open and accessible from the outside. One way of doing it in Linux is by using `ufw`:
+
+```shell
+sudo ufw allow 6000
+```
+
+### Configuration
 
 Update the `VOLTASERVE_HOSTNAME` environment variable in [.env](.env) file to match your hostname (it can optionally be an IP address as well):
 
@@ -42,61 +72,27 @@ VOLTASERVE_UI_PORT=80
 
 Other ports can be changed as well by editing their respective environment variables in [.env](.env) file.
 
-Build Docker images:
+### Run Infrastructure Services as Multi-Node Clusters
+
+1. Run:
 
 ```sh
-docker compose build
+docker compose -f ./docker-compose.cluster.yml up
 ```
 
-Then:
-
-```sh
-docker compose up
-```
-
-Make sure all containers are up and running by checking their logs.
-
-_Note: here you should replace `my-hostname` and `3000` with the hostname and port that matches your configuration, if you have SSL then make sure you are using `https://`._
-
-1. Go to the **sign up page** <http://my-hostname:3000/sign-up> and create an account.
-
-2. Confirm your email.
-
-3. Finally, go to the **sign in page** <http://my-hostname:3000/sign-in> and login with your credentials.
-
-### Run for Development
-
-```sh
-docker compose -f ./docker-compose.dev.yml up
-```
-
-Wait a few minutes until all containers are up and running. You can check that by looking at their logs.
-
-1. Go to the **sign up page** <http://localhost:3000/sign-up> and create an account.
-
-2. Open MailCatcher <http://localhost:11080>, select the received email and click the **confirm email** link.
-
-3. Finally, go to the **sign in page** <http://localhost:3000/sign-in> and login with your credentials.
-
-### Run a Multi-Node Cluster
-
-```sh
-docker compose -f ./docker-compose.multi-node.yml up
-```
-
-1. Initialize CockroachDB cluster:
+2. Initialize CockroachDB cluster:
 
 ```sh
 docker exec -it voltaserve-roach1 ./cockroach init --insecure
 ```
 
-2. Initialize Redis cluster:
+3. Initialize Redis cluster:
 
 ```sh
 docker run --rm -it --name=redis-cluster-init --network=voltaserve-net --ip=172.20.0.30 redis:7.0.8 redis-cli --cluster create 172.20.0.31:6373 172.20.0.32:6374 172.20.0.33:6375 172.20.0.34:6376 172.20.0.35:6377 172.20.0.36:6378 --cluster-replicas 1 --cluster-yes
 ```
 
-2. Connect to CockroachDB with root to create a user and database:
+4. Connect to CockroachDB with root to create a user and database:
 
 ```sql
 CREATE DATABASE voltaserve;
@@ -104,23 +100,7 @@ CREATE USER voltaserve;
 GRANT ALL PRIVILEGES ON DATABASE voltaserve TO voltaserve;
 ```
 
-3. Connect to CockroachDB with the user `voltaserve` and database `voltaserve`, then run the following SQL script to create the database objects: [sql/schema.sql](sql/schema.sql).
-
-### Connect with WebDAV
-
-Voltaserve supports [WebDAV](https://en.wikipedia.org/wiki/WebDAV), by default it's listening on the port `6000`.
-
-You can change it by editing the `VOLTASERVE_WEBDAV_PORT` environment variable in [.env](.env) file as follows:
-
-```properties
-VOLTASERVE_WEBDAV_PORT=6000
-```
-
-The port needs to be open and accessible from the outside. One way of doing it in Linux is by using `ufw`:
-
-```shell
-sudo ufw allow 6000
-```
+5. Connect to CockroachDB with the user `voltaserve` and database `voltaserve`, then run the following SQL script to create the database objects: [sql/schema.sql](sql/schema.sql).
 
 ## Troubleshooting
 
