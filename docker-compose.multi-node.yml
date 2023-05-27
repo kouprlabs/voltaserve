@@ -253,3 +253,97 @@ services:
     ports:
       - ${VOLTASERVE_MAILCATCHER_WEB_PORT}:1080
       - ${VOLTASERVE_MAILCATCHER_SMTP_PORT}:1025
+  idp:
+    container_name: voltaserve-idp
+    image: voltaserve/idp
+    build:
+      context: ./idp
+    ports:
+      - ${VOLTASERVE_IDP_PORT}:7000
+    environment:
+      - IDP_URL=http://${VOLTASERVE_HOSTNAME}:${VOLTASERVE_IDP_PORT}
+      - UI_URL=http://${VOLTASERVE_HOSTNAME}:${VOLTASERVE_UI_PORT}
+      - DATABASE_URL=postgresql://voltaserve:voltaserve@postgres:5432/voltaserve
+      - SEARCH_URL=http://meilisearch:7700
+      - SMTP_HOST=${VOLTASERVE_SMTP_HOST}
+      - SMTP_PORT=${VOLTASERVE_SMTP_PORT}
+      - SMTP_SECURE=${VOLTASERVE_SMTP_SECURE}
+      - SMTP_USERNAME=${VOLTASERVE_SMTP_USERNAME}
+      - SMTP_PASSWORD=${VOLTASERVE_SMTP_PASSWORD}
+      - SMTP_SENDER_ADDRESS=${VOLTASERVE_SMTP_SENDER_ADDRESS}
+      - SMTP_SENDER_NAME=${VOLTASERVE_SMTP_SENDER_NAME}
+    depends_on:
+      - postgres
+      - meilisearch
+      - minio
+    restart: on-failure
+    networks:
+      voltaserve-net:
+        ipv4_address: 172.20.0.40
+  api:
+    container_name: voltaserve-api
+    image: voltaserve/api
+    build:
+      context: ./api
+    environment:
+      - API_URL=http://${VOLTASERVE_HOSTNAME}:${VOLTASERVE_API_PORT}
+      - UI_URL=http://${VOLTASERVE_HOSTNAME}:${VOLTASERVE_UI_PORT}
+      - DATABASE_URL=postgresql://voltaserve:voltaserve@postgres:5432/voltaserve
+      - S3_URL=minio:9000
+      - SEARCH_URL=http://meilisearch:7700
+      - REDIS_ADDR=redis:6379
+      - SMTP_HOST=${VOLTASERVE_SMTP_HOST}
+      - SMTP_PORT=${VOLTASERVE_SMTP_PORT}
+      - SMTP_SECURE=${VOLTASERVE_SMTP_SECURE}
+      - SMTP_USERNAME=${VOLTASERVE_SMTP_USERNAME}
+      - SMTP_PASSWORD=${VOLTASERVE_SMTP_PASSWORD}
+      - SMTP_SENDER_ADDRESS=${VOLTASERVE_SMTP_SENDER_ADDRESS}
+      - SMTP_SENDER_NAME=${VOLTASERVE_SMTP_SENDER_NAME}
+    ports:
+      - ${VOLTASERVE_API_PORT}:5000
+    depends_on:
+      - postgres
+      - redis
+      - minio
+      - meilisearch
+    restart: on-failure
+    networks:
+      voltaserve-net:
+        ipv4_address: 172.20.0.41
+  ui:
+    container_name: voltaserve-ui
+    image: voltaserve/ui
+    build:
+      context: ./ui
+      args:
+        - API_URL=http://api:${VOLTASERVE_API_PORT}
+        - IDP_URL=http://idp:${VOLTASERVE_IDP_PORT}
+    ports:
+      - ${VOLTASERVE_UI_PORT}:3000
+    environment:
+      - API_URL=http://api:${VOLTASERVE_API_PORT}
+      - IDP_URL=http://idp:${VOLTASERVE_IDP_PORT}
+    depends_on:
+      - idp
+      - api
+    restart: on-failure
+    networks:
+      voltaserve-net:
+        ipv4_address: 172.20.0.42
+  webdav:
+    container_name: voltaserve-webdav
+    image: voltaserve/webdav
+    build:
+      context: ./webdav
+    ports:
+      - ${VOLTASERVE_WEBDAV_PORT}:6000
+    environment:
+      - IDP_URL=http://idp:${VOLTASERVE_IDP_PORT}
+      - API_URL=http://api:${VOLTASERVE_API_PORT}
+    depends_on:
+      - idp
+      - api
+    restart: on-failure
+    networks:
+      voltaserve-net:
+        ipv4_address: 172.20.0.43

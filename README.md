@@ -8,7 +8,7 @@
 
 Install [Docker](https://docs.docker.com/get-docker) and [Docker Compose](https://docs.docker.com/compose/install).
 
-### Run for Production
+### Run with Docker
 
 Update the `VOLTASERVE_HOSTNAME` environment variable in [.env](.env) file to match your hostname (it can optionally be an IP address as well):
 
@@ -64,7 +64,7 @@ _Note: here you should replace `my-hostname` and `3000` with the hostname and po
 
 3. Finally, go to the **sign in page** <http://my-hostname:3000/sign-in> and login with your credentials.
 
-### Run for Experimentation, Testing and Development
+### Run for Development
 
 ```sh
 docker compose -f ./docker-compose.dev.yml up
@@ -77,6 +77,24 @@ Wait a few minutes until all containers are up and running. You can check that b
 2. Open MailCatcher <http://localhost:11080>, select the received email and click the **confirm email** link.
 
 3. Finally, go to the **sign in page** <http://localhost:3000/sign-in> and login with your credentials.
+
+### Run a Multi-Node Cluster
+
+1. Initialize CockroachDB cluster:
+
+```sh
+docker exec -it voltaserve-roach1 ./cockroach init --insecure
+```
+
+2. Connect to CockroachDB with root and create the user and database:
+
+```sql
+CREATE DATABASE voltaserve;
+CREATE USER voltaserve;
+GRANT ALL PRIVILEGES ON DATABASE voltaserve TO voltaserve;
+```
+
+3. Connect to CockroachDB with the the user `voltaserve` and database `voltaserve`, and run the following SQL script to create database objects: [sql/schema.sql](sql/schema.sql).
 
 ### Connect with WebDAV
 
@@ -93,24 +111,6 @@ The port needs to be open and accessible from the outside. One way of doing it i
 ```shell
 sudo ufw allow 6000
 ```
-
-### Multi-Node
-
-1. Initialize CockroachDB cluster:
-
-```sh
-docker exec -it voltaserve-roach1 ./cockroach init --insecure
-```
-
-2. Create user and database:
-
-```sql
-CREATE DATABASE voltaserve;
-CREATE USER voltaserve;
-GRANT ALL PRIVILEGES ON DATABASE voltaserve TO voltaserve;
-```
-
-3. Run [sql/schema.sql](sql/schema.sql).
 
 ## Troubleshooting
 
