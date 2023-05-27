@@ -8,11 +8,11 @@ import (
 	"path/filepath"
 	"strconv"
 	"voltaserve/config"
+	"voltaserve/conversion"
 	"voltaserve/errorpkg"
 	"voltaserve/helpers"
 	"voltaserve/infra"
 	"voltaserve/model"
-	"voltaserve/pipeline"
 	"voltaserve/service"
 
 	"github.com/go-playground/validator/v10"
@@ -23,7 +23,7 @@ import (
 type FileRouter struct {
 	fileSvc      *service.FileService
 	workspaceSvc *service.WorkspaceService
-	storageSvc   *pipeline.StoragePipeline
+	storageSvc   *conversion.StoragePipeline
 	config       config.Config
 }
 
@@ -31,7 +31,7 @@ func NewFileRouter() *FileRouter {
 	return &FileRouter{
 		fileSvc:      service.NewFileService(),
 		workspaceSvc: service.NewWorkspaceService(),
-		storageSvc:   pipeline.NewStoragePipeline(),
+		storageSvc:   conversion.NewStoragePipeline(),
 		config:       config.GetConfig(),
 	}
 }
@@ -115,7 +115,7 @@ func (r *FileRouter) Upload(c *fiber.Ctx) error {
 		return err
 	}
 	defer os.Remove(path)
-	file, err = r.storageSvc.Run(pipeline.StoragePipelineOptions{FileId: file.ID, FilePath: path}, userId)
+	file, err = r.storageSvc.Run(conversion.StoragePipelineOptions{FileId: file.ID, FilePath: path}, userId)
 	if err != nil {
 		return err
 	}
@@ -158,7 +158,7 @@ func (r *FileRouter) Patch(c *fiber.Ctx) error {
 		return err
 	}
 	defer os.Remove(path)
-	file, err = r.storageSvc.Run(pipeline.StoragePipelineOptions{FileId: file.ID, FilePath: path}, userId)
+	file, err = r.storageSvc.Run(conversion.StoragePipelineOptions{FileId: file.ID, FilePath: path}, userId)
 	if err != nil {
 		return err
 	}
