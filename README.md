@@ -10,13 +10,13 @@ Install [Docker](https://docs.docker.com/get-docker) and [Docker Compose](https:
 
 ### Run for Production
 
-Update the `VOLTASERVE_HOSTNAME` environment variable in [.env](./.env) file to match your hostname (it can optionally be an IP address as well):
+Update the `VOLTASERVE_HOSTNAME` environment variable in [.env](.env) file to match your hostname (it can optionally be an IP address as well):
 
 ```properties
 VOLTASERVE_HOSTNAME="my-hostname"
 ```
 
-Update the following environment variables in [.env](./.env) file to match your SMTP server:
+Update the following environment variables in [.env](.env) file to match your SMTP server:
 
 ```properties
 VOLTASERVE_SMTP_HOST="my-smtp-hostname"
@@ -34,13 +34,13 @@ The port `3000` is used for the UI, therefore it needs to be open and accessible
 sudo ufw allow 3000
 ```
 
-You can change the UI port to something else, other than `3000`, like `80` for example. This can be done by editing the `VOLTASERVE_UI_PORT` environment variable in [.env](./.env) file as follows:
+You can change the UI port to something else, other than `3000`, like `80` for example. This can be done by editing the `VOLTASERVE_UI_PORT` environment variable in [.env](.env) file as follows:
 
 ```properties
 VOLTASERVE_UI_PORT=80
 ```
 
-Other ports can be changed as well by editing their respective environment variables in [.env](./.env) file.
+Other ports can be changed as well by editing their respective environment variables in [.env](.env) file.
 
 Build Docker images:
 
@@ -82,7 +82,7 @@ Wait a few minutes until all containers are up and running. You can check that b
 
 Voltaserve supports [WebDAV](https://en.wikipedia.org/wiki/WebDAV), by default it's listening on the port `6000`.
 
-You can change it by editing the `VOLTASERVE_WEBDAV_PORT` environment variable in [.env](./.env) file as follows:
+You can change it by editing the `VOLTASERVE_WEBDAV_PORT` environment variable in [.env](.env) file as follows:
 
 ```properties
 VOLTASERVE_WEBDAV_PORT=6000
@@ -94,15 +94,33 @@ The port needs to be open and accessible from the outside. One way of doing it i
 sudo ufw allow 6000
 ```
 
+### Multi-Node
+
+1. Initialize CockroachDB cluster:
+
+```sh
+docker exec -it voltaserve-roach1 ./cockroach init --insecure
+```
+
+2. Create user and database:
+
+```sql
+CREATE DATABASE voltaserve;
+CREATE USER voltaserve;
+GRANT ALL PRIVILEGES ON DATABASE voltaserve TO voltaserve;
+```
+
+3. Run [sql/schema.sql](sql/schema.sql).
+
 ## Troubleshooting
 
 **My containers have issues starting up, what should I do?**
 
-One reason might be that some ports are already allocated on your machine, in this case you can change the Voltaserve ports in [.env](./.env) file.
+One reason might be that some ports are already allocated on your machine, in this case you can change the Voltaserve ports in [.env](.env) file.
 
 **I'm not happy with `localhost`, can I change it?**
 
-You can achieve this by changing the `VOLTASERVE_HOSTNAME` environment variable in [.env](./.env) file.
+You can achieve this by changing the `VOLTASERVE_HOSTNAME` environment variable in [.env](.env) file.
 
 It can be any IP address, like:
 
