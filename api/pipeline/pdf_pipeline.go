@@ -30,6 +30,13 @@ type PDFPipelineOptions struct {
 	S3Key      string
 }
 
+type processPDFOptions struct {
+	FileId     string
+	SnapshotId string
+	S3Bucket   string
+	S3Key      string
+}
+
 func NewPDFPipeline() *PDFPipeline {
 	return &PDFPipeline{
 		minio:           infra.NewS3Manager(),
@@ -44,6 +51,103 @@ func NewPDFPipeline() *PDFPipeline {
 }
 
 func (p *PDFPipeline) Run(opts PDFPipelineOptions) error {
+	snapshot, err := p.snapshotRepo.Find(opts.SnapshotId)
+	if err != nil {
+		return err
+	}
+	inputPath, err := p.getSuitableInputPath(opts)
+	if err != nil {
+		return err
+	}
+	outputPath, _ := p.generatePDFA(inputPath)
+	if _, err := os.Stat(outputPath); os.IsNotExist(err) {
+		if err := p.process(processPDFOptions(opts)); err != nil {
+			return err
+		}
+	} else {
+		if err := p.saveOCRAndProcess(snapshot, opts, outputPath); err != nil {
+			return err
+		}
+	}
+	if _, err := os.Stat(inputPath); err == nil {
+		if err := os.Remove(inputPath); err != nil {
+			return err
+		}
+	}
+	if _, err := os.Stat(outputPath); err == nil {
+		if err := os.Remove(outputPath); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (p *PDFPipeline) generatePDFA(inputPath string) (string, error) {
+	outputPath := filepath.FromSlash(os.TempDir() + "/" + helpers.NewId() + ".pdf")
+	if err := p.cmd.Exec("ocrmypdf", "--rotate-pages", "--clean", "--deskew", "--image-dpi=300", inputPath, outputPath); err != nil {
+		return "", err
+	}
+	return outputPath, nil
+}
+
+func (p *PDFPipeline) saveOCRAndProcess(snapshot model.Snapshot, opts PDFPipelineOptions, outputPath string) error {
+	file, err := p.fileCache.Get(opts.FileId)
+	if err != nil {
+		return err
+	}
+	workspace, err := p.workspaceCache.Get(file.GetWorkspaceID())
+	if err != nil {
+		return err
+	}
+	stat, err := os.Stat(outputPath)
+	if err != nil {
+		return err
+	}
+	ocrSize := stat.Size()
+	snapshot.SetOCR(&model.S3Object{
+		Bucket: workspace.GetBucket(),
+		Key:    filepath.FromSlash(opts.FileId + "/" + opts.SnapshotId + "/ocr.pdf"),
+		Size:   ocrSize,
+	})
+	if err := p.minio.PutFile(snapshot.GetOCR().Key, outputPath, infra.DetectMimeFromFile(outputPath), workspace.GetBucket()); err != nil {
+		return err
+	}
+	if err := p.metadataUpdater.update(snapshot, opts.FileId); err != nil {
+		return err
+	}
+	if err := p.process(processPDFOptions{
+		FileId:     opts.FileId,
+		SnapshotId: opts.SnapshotId,
+		S3Bucket:   opts.S3Bucket,
+		S3Key:      snapshot.GetOCR().Key,
+	}); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (p *PDFPipeline) getSuitableInputPath(opts PDFPipelineOptions) (string, error) {
+	extension := filepath.Ext(opts.S3Key)
+	path := filepath.FromSlash(os.TempDir() + "/" + helpers.NewId() + extension)
+	if err := p.minio.GetFile(opts.S3Key, path, opts.S3Bucket); err != nil {
+		return "", err
+	}
+
+	// If an image, convert it to jpeg, because ocrmypdf supports jpeg only
+	if extension == ".jpg" || extension == ".jpeg" {
+		oldPath := path
+		path = filepath.FromSlash(os.TempDir() + "/" + helpers.NewId() + ".jpg")
+		if err := p.cmd.Exec("gm", "convert", oldPath, path); err != nil {
+			return "", err
+		}
+		if err := os.Remove(oldPath); err != nil {
+			return "", err
+		}
+	}
+	return path, nil
+}
+
+func (p *PDFPipeline) process(opts processPDFOptions) error {
 	snapshot, err := p.snapshotRepo.Find(opts.SnapshotId)
 	if err != nil {
 		return err
@@ -78,7 +182,7 @@ func (p *PDFPipeline) Run(opts PDFPipelineOptions) error {
 	return nil
 }
 
-func (p *PDFPipeline) generateThumbnail(snapshot model.Snapshot, opts PDFPipelineOptions, inputPath string) error {
+func (p *PDFPipeline) generateThumbnail(snapshot model.Snapshot, opts processPDFOptions, inputPath string) error {
 	outputPath := filepath.FromSlash(os.TempDir() + "/" + helpers.NewId() + ".jpg")
 	if err := p.imageProc.Thumbnail(inputPath, 0, p.config.Limits.ImagePreviewMaxHeight, outputPath); err != nil {
 		return err
@@ -107,7 +211,7 @@ func (p *PDFPipeline) generateThumbnail(snapshot model.Snapshot, opts PDFPipelin
 	return nil
 }
 
-func (p *PDFPipeline) storeInS3(snapshot model.Snapshot, opts PDFPipelineOptions, text string, size int64) error {
+func (p *PDFPipeline) storeInS3(snapshot model.Snapshot, opts processPDFOptions, text string, size int64) error {
 	file, err := p.fileCache.Get(opts.FileId)
 	if err != nil {
 		return err
@@ -152,7 +256,7 @@ func (p *PDFPipeline) extractText(inputPath string) (string, int64, error) {
 	}
 }
 
-func (p *PDFPipeline) deleteOCRData(snapshot model.Snapshot, opts PDFPipelineOptions) error {
+func (p *PDFPipeline) deleteOCRData(snapshot model.Snapshot, opts processPDFOptions) error {
 	if err := p.minio.RemoveObject(snapshot.GetOCR().Key, snapshot.GetOCR().Bucket); err != nil {
 		return err
 	}

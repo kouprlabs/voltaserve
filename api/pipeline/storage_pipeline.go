@@ -19,7 +19,7 @@ type StoragePipeline struct {
 	fileRepo       repo.FileRepo
 	fileCache      *cache.FileCache
 	fileMapper     *service.FileMapper
-	ocrPipeline    *OCRPipeline
+	pdfPipeline    *PDFPipeline
 	imagePipeline  *ImagePipeline
 	officePipeline *OfficePipeline
 	videoPipeline  *VideoPipeline
@@ -40,7 +40,7 @@ func NewStoragePipeline() *StoragePipeline {
 		fileRepo:       repo.NewFileRepo(),
 		fileCache:      cache.NewFileCache(),
 		fileMapper:     service.NewFileMapper(),
-		ocrPipeline:    NewOCRPipeline(),
+		pdfPipeline:    NewPDFPipeline(),
 		imagePipeline:  NewImagePipeline(),
 		officePipeline: NewOfficePipeline(),
 		videoPipeline:  NewVideoPipeline(),
@@ -114,7 +114,7 @@ func (p *StoragePipeline) Run(opts StoragePipelineOptions, userId string) (*serv
 		if err := p.fileCache.Set(file); err != nil {
 			return nil, err
 		}
-		if err = p.ocrPipeline.Run(OCRPipelineOptions{
+		if err = p.pdfPipeline.Run(PDFPipelineOptions{
 			FileId:     opts.FileId,
 			SnapshotId: snapshotId,
 			S3Bucket:   workspace.GetBucket(),

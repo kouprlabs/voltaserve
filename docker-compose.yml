@@ -67,7 +67,7 @@ services:
     environment:
       - API_URL=http://${VOLTASERVE_HOSTNAME}:${VOLTASERVE_API_PORT}
       - UI_URL=http://${VOLTASERVE_HOSTNAME}:${VOLTASERVE_UI_PORT}
-      - DATABASE_URL=postgresql://voltaserve:voltaserve@postgres:5432/voltaserve
+      - POSTGRES_URL=postgresql://voltaserve@cockroach:26257/voltaserve
       - S3_URL=minio:9000
       - SEARCH_URL=http://meilisearch:7700
       - REDIS_ADDRESS=redis:6379
@@ -81,7 +81,7 @@ services:
     volumes:
       - ./api:/app
     depends_on:
-      - postgres
+      - cockroach
       - redis
       - minio
       - meilisearch
@@ -95,7 +95,7 @@ services:
     environment:
       - IDP_URL=http://${VOLTASERVE_HOSTNAME}:${VOLTASERVE_IDP_PORT}
       - UI_URL=http://${VOLTASERVE_HOSTNAME}:${VOLTASERVE_UI_PORT}
-      - DATABASE_URL=postgresql://voltaserve:voltaserve@postgres:5432/voltaserve
+      - POSTGRES_URL=postgresql://voltaserve@cockroach:26257/voltaserve
       - SEARCH_URL=http://meilisearch:7700
       - SMTP_HOST=${VOLTASERVE_SMTP_HOST}
       - SMTP_PORT=${VOLTASERVE_SMTP_PORT}
@@ -108,7 +108,7 @@ services:
       - ./idp:/app
       - /app/node_modules
     depends_on:
-      - postgres
+      - cockroach
       - meilisearch
       - minio
   ui:
