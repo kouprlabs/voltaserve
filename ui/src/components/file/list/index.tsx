@@ -4,6 +4,7 @@ import { Wrap, WrapItem, Text, Center } from '@chakra-ui/react'
 import { Spinner, variables } from '@koupr/ui'
 import FileAPI, { FileList as FileListData } from '@/api/file'
 import { swrConfig } from '@/api/options'
+import { decodeQuery } from '@/helpers/query'
 import { listUpdated, folderUpdated } from '@/store/entities/files'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import {
@@ -11,7 +12,6 @@ import {
   rangeSelectKeyUpdated,
   selectionUpdated,
 } from '@/store/ui/files'
-import { decodeQuery } from '@/helpers/query'
 import Item from './item'
 
 type ListProps = {
@@ -26,6 +26,8 @@ const List = ({ scale }: ListProps) => {
   const [searchParams] = useSearchParams()
   const query = decodeQuery(searchParams.get('q') as string)
   const list = useAppSelector((state) => state.entities.files.list)
+  const sortBy = useAppSelector((state) => state.ui.files.sortBy)
+  const sortOrder = useAppSelector((state) => state.ui.files.sortOrder)
   const [isLoading, setIsLoading] = useState(false)
   const { data: folder } = FileAPI.useGetById(fileId, swrConfig())
   const { data: itemCount } = FileAPI.useGetItemCount(fileId, swrConfig())
@@ -70,14 +72,21 @@ const List = ({ scale }: ListProps) => {
             1
           )
         } else {
-          result = await FileAPI.list(fileId, FileAPI.DEFAULT_PAGE_SIZE, 1)
+          result = await FileAPI.list(
+            fileId,
+            FileAPI.DEFAULT_PAGE_SIZE,
+            1,
+            undefined,
+            sortBy,
+            sortOrder
+          )
         }
         dispatch(listUpdated(result))
       } finally {
         setIsLoading(false)
       }
     })()
-  }, [workspaceId, fileId, query, dispatch])
+  }, [workspaceId, fileId, query, sortBy, sortOrder, dispatch])
 
   /* TODO: check if this is really needed */
   useEffect(() => {
@@ -91,7 +100,10 @@ const List = ({ scale }: ListProps) => {
             const result = await FileAPI.list(
               fileId,
               FileAPI.DEFAULT_PAGE_SIZE,
-              1
+              1,
+              undefined,
+              sortBy,
+              sortOrder
             )
             dispatch(listUpdated(result))
           } finally {
@@ -100,7 +112,7 @@ const List = ({ scale }: ListProps) => {
         }
       })()
     }
-  }, [fileId, list, dispatch])
+  }, [fileId, list, sortBy, sortOrder, dispatch])
 
   if (isLoading || !list) {
     return (

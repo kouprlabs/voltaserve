@@ -22,6 +22,8 @@ const Copy = () => {
   const { fileId: fileIdQuery } = useParams()
   const isModalOpen = useAppSelector((state) => state.ui.files.isCopyModalOpen)
   const selection = useAppSelector((state) => state.ui.files.selection)
+  const sortBy = useAppSelector((state) => state.ui.files.sortBy)
+  const sortOrder = useAppSelector((state) => state.ui.files.sortOrder)
   const [loading, setLoading] = useState(false)
   const [fileId, setFileId] = useState<string>()
 
@@ -35,7 +37,14 @@ const Copy = () => {
         ids: selection,
       })
       if (fileIdQuery === fileId) {
-        const result = await FileAPI.list(fileId, FileAPI.DEFAULT_PAGE_SIZE, 1)
+        const result = await FileAPI.list(
+          fileId,
+          FileAPI.DEFAULT_PAGE_SIZE,
+          1,
+          undefined,
+          sortBy,
+          sortOrder
+        )
         dispatch(listUpdated(result))
       }
       dispatch(selectionUpdated([]))
@@ -43,7 +52,7 @@ const Copy = () => {
     } finally {
       setLoading(false)
     }
-  }, [fileId, fileIdQuery, selection, dispatch])
+  }, [fileId, fileIdQuery, selection, sortBy, sortOrder, dispatch])
 
   return (
     <Modal isOpen={isModalOpen} onClose={() => dispatch(copyModalDidClose())}>

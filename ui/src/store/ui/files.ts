@@ -1,4 +1,8 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
+import { SortBy, SortOrder } from '@/api/file'
+
+export const SORT_BY_KEY = 'voltaserve_file_sort_by'
+export const SORT_ORDER_KEY = 'voltaserve_file_sort_order'
 
 export type FilesState = {
   selection: string[]
@@ -11,6 +15,8 @@ export type FilesState = {
   isRenameModalOpen: boolean
   isShareModalOpen: boolean
   iconScale: number
+  sortBy: SortBy
+  sortOrder: SortOrder
 }
 
 const initialState: FilesState = {
@@ -24,6 +30,9 @@ const initialState: FilesState = {
   isRenameModalOpen: false,
   isShareModalOpen: false,
   iconScale: 1,
+  sortBy: (localStorage.getItem(SORT_BY_KEY) as SortBy) || SortBy.DateCreated,
+  sortOrder:
+    (localStorage.getItem(SORT_ORDER_KEY) as SortOrder) || SortOrder.Desc,
 }
 
 const slice = createSlice({
@@ -84,6 +93,12 @@ const slice = createSlice({
     iconScaleUpdated: (state, action: PayloadAction<number>) => {
       state.iconScale = action.payload
     },
+    sortByUpdated: (state, action: PayloadAction<SortBy>) => {
+      state.sortBy = action.payload
+    },
+    sortOrderUpdated: (state, action: PayloadAction<SortOrder>) => {
+      state.sortOrder = action.payload
+    },
   },
 })
 
@@ -106,6 +121,8 @@ export const {
   multiSelectKeyUpdated,
   rangeSelectKeyUpdated,
   iconScaleUpdated,
+  sortByUpdated,
+  sortOrderUpdated,
 } = slice.actions
 
 export default slice.reducer
