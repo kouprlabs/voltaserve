@@ -34,15 +34,15 @@ type ImagePipelineOptions struct {
 	S3Key      string
 }
 
-type ImageToDataResponse struct {
-	Data                []TesseractData
+type imageToDataResponse struct {
+	Data                []tesseractData
 	NegativeConfCount   int64
 	NegativeConfPercent float32
 	PositiveConfCount   int64
 	PositiveConfPercent float32
 }
 
-type TesseractData struct {
+type tesseractData struct {
 	BlockNum int64
 	Conf     int64
 	Height   int64
@@ -121,27 +121,27 @@ func (p *ImagePipeline) Run(opts ImagePipelineOptions) error {
 	return nil
 }
 
-func (p *ImagePipeline) imageToData(inputPath string) (ImageToDataResponse, error) {
+func (p *ImagePipeline) imageToData(inputPath string) (imageToDataResponse, error) {
 	outFile := helpers.NewId()
 	if err := p.cmd.Exec("tesseract", inputPath, outFile, "tsv"); err != nil {
-		return ImageToDataResponse{}, err
+		return imageToDataResponse{}, err
 	}
-	var res = ImageToDataResponse{}
+	var res = imageToDataResponse{}
 	outFile = outFile + ".tsv"
 	f, err := os.Open(outFile)
 	if err != nil {
-		return ImageToDataResponse{}, err
+		return imageToDataResponse{}, err
 	}
 	b, err := io.ReadAll(f)
 	if err != nil {
-		return ImageToDataResponse{}, err
+		return imageToDataResponse{}, err
 	}
 	text := string(b)
 	lines := strings.Split(text, "\n")
 	lines = lines[1 : len(lines)-2]
 	for _, l := range lines {
 		values := strings.Split(l, "\t")
-		data := TesseractData{}
+		data := tesseractData{}
 		data.Level, _ = strconv.ParseInt(values[0], 10, 64)
 		data.PageNum, _ = strconv.ParseInt(values[1], 10, 64)
 		data.BlockNum, _ = strconv.ParseInt(values[2], 10, 64)
@@ -168,7 +168,7 @@ func (p *ImagePipeline) imageToData(inputPath string) (ImageToDataResponse, erro
 		res.PositiveConfPercent = float32((int(res.PositiveConfCount) * 100) / len(res.Data))
 	}
 	if err := os.Remove(outFile); err != nil {
-		return ImageToDataResponse{}, err
+		return imageToDataResponse{}, err
 	}
 	return res, nil
 }

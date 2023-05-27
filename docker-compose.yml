@@ -9,6 +9,8 @@ volumes:
     name: voltaserve-meilisearch
   redis:
     name: voltaserve-redis
+  redisinsight:
+    name: voltaserve-redisinsight
 
 services:
   cockroach:
@@ -51,6 +53,13 @@ services:
       - ${VOLTASERVE_REDIS_PORT}:6379
     volumes:
       - redis:/data
+  redisinsight:
+    container_name: voltaserve-redisinsight
+    image: redislabs/redisinsight:1.14.0
+    ports:
+      - ${VOLTASERVE_REDISINSIGHT_PORT}:8001
+    volumes:
+      - redisinsight:/db
   mailcatcher:
     container_name: voltaserve-mailcatcher
     image: sj26/mailcatcher:v0.8.2
