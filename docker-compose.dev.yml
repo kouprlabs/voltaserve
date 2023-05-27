@@ -57,6 +57,34 @@ services:
     ports:
       - ${VOLTASERVE_MAILCATCHER_WEB_PORT}:1080
       - ${VOLTASERVE_MAILCATCHER_SMTP_PORT}:1025
+  api:
+    container_name: voltaserve-api
+    image: golang:1.19-bullseye
+    working_dir: /app
+    command: sh -c "./install-deps.sh && go run ."
+    ports:
+      - ${VOLTASERVE_API_PORT}:5000
+    environment:
+      - API_URL=http://${VOLTASERVE_HOSTNAME}:${VOLTASERVE_API_PORT}
+      - UI_URL=http://${VOLTASERVE_HOSTNAME}:${VOLTASERVE_UI_PORT}
+      - DATABASE_URL=postgresql://voltaserve:voltaserve@postgres:5432/voltaserve
+      - S3_URL=minio:9000
+      - SEARCH_URL=http://meilisearch:7700
+      - REDIS_ADDRESS=redis:6379
+      - SMTP_HOST=${VOLTASERVE_SMTP_HOST}
+      - SMTP_PORT=${VOLTASERVE_SMTP_PORT}
+      - SMTP_SECURE=${VOLTASERVE_SMTP_SECURE}
+      - SMTP_USERNAME=${VOLTASERVE_SMTP_USERNAME}
+      - SMTP_PASSWORD=${VOLTASERVE_SMTP_PASSWORD}
+      - SMTP_SENDER_ADDRESS=${VOLTASERVE_SMTP_SENDER_ADDRESS}
+      - SMTP_SENDER_NAME=${VOLTASERVE_SMTP_SENDER_NAME}
+    volumes:
+      - ./api:/app
+    depends_on:
+      - postgres
+      - redis
+      - minio
+      - meilisearch
   idp:
     container_name: voltaserve-idp
     image: node:18-alpine
@@ -83,34 +111,6 @@ services:
       - postgres
       - meilisearch
       - minio
-  api:
-    container_name: voltaserve-api
-    image: golang:1.19-bullseye
-    working_dir: /app
-    command: sh -c "./install-deps.sh && go run ."
-    ports:
-      - ${VOLTASERVE_API_PORT}:5000
-    environment:
-      - API_URL=http://${VOLTASERVE_HOSTNAME}:${VOLTASERVE_API_PORT}
-      - UI_URL=http://${VOLTASERVE_HOSTNAME}:${VOLTASERVE_UI_PORT}
-      - DATABASE_URL=postgresql://voltaserve:voltaserve@postgres:5432/voltaserve
-      - S3_URL=minio:9000
-      - SEARCH_URL=http://meilisearch:7700
-      - REDIS_ADDR=redis:6379
-      - SMTP_HOST=${VOLTASERVE_SMTP_HOST}
-      - SMTP_PORT=${VOLTASERVE_SMTP_PORT}
-      - SMTP_SECURE=${VOLTASERVE_SMTP_SECURE}
-      - SMTP_USERNAME=${VOLTASERVE_SMTP_USERNAME}
-      - SMTP_PASSWORD=${VOLTASERVE_SMTP_PASSWORD}
-      - SMTP_SENDER_ADDRESS=${VOLTASERVE_SMTP_SENDER_ADDRESS}
-      - SMTP_SENDER_NAME=${VOLTASERVE_SMTP_SENDER_NAME}
-    volumes:
-      - ./api:/app
-    depends_on:
-      - postgres
-      - redis
-      - minio
-      - meilisearch
   ui:
     container_name: voltaserve-ui
     image: node:18-alpine

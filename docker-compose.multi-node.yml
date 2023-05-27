@@ -49,18 +49,20 @@ volumes:
     name: voltaserve-minio-data4-2
   meilisearch:
     name: voltaserve-meilisearch
-  redis-node-1-data:
-    name: voltaserve-redis-node-1-data
-  redis-node-2-data:
-    name: voltaserve-redis-node-2-data
-  redis-node-3-data:
-    name: voltaserve-redis-node-3-data
-  redis-node-4-data:
-    name: voltaserve-redis-node-4-data
-  redis-node-5-data:
-    name: voltaserve-redis-node-5-data
-  redis-node-6-data:
-    name: voltaserve-redis-node-6-data
+  redis-data1:
+    name: voltaserve-redis-data1
+  redis-data2:
+    name: voltaserve-redis-data2
+  redis-data3:
+    name: voltaserve-redis-data3
+  redis-data4:
+    name: voltaserve-redis-data4
+  redis-data5:
+    name: voltaserve-redis-data5
+  redis-data6:
+    name: voltaserve-redis-data6
+  redisinsight:
+    name: voltaserve-redisinsight
 
 services:
   roach1:
@@ -105,7 +107,7 @@ services:
     image: nginx:1.19.2-alpine
     hostname: nginx
     volumes:
-      - ./multi-node/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./multi-node/minio-nginx.conf:/etc/nginx/nginx.conf:ro
     ports:
       - ${VOLTASERVE_MINIO_PORT}:9000
       - ${VOLTASERVE_MINIO_CONSOLE_PORT}:9001
@@ -164,134 +166,114 @@ services:
       - ${VOLTASERVE_MEILISEARCH_PORT}:7700
     volumes:
       - meilisearch:/meili_data
-  redis-cluster-init:
-    container_name: voltaserve-redis-cluster-init
-    image: redis:7.0.8
-    command: redis-cli --cluster create 172.20.0.31:6373 172.20.0.32:6374 172.20.0.33:6375 172.20.0.34:6376 172.20.0.35:6377 172.20.0.36:6378 --cluster-replicas 1 --cluster-yes
-    depends_on:
-      - redis-node-1
-      - redis-node-2
-      - redis-node-3
-      - redis-node-4
-      - redis-node-5
-      - redis-node-6
-  redis-node-1:
-    container_name: voltaserve-redis-node-1
+    networks:
+      voltaserve-net:
+        ipv4_address: 172.20.0.50
+  redis1:
+    container_name: voltaserve-redis1
     image: redis:7.0.8
     command: redis-server /usr/local/etc/redis/redis.conf
     ports:
-      - ${VOLTASERVE_REDIS_PORT}:6373
+      - 6373:6373
     volumes:
-      - redis-node-1-data:/var/lib/redis
-      - ./multi-node/redis-node-1.conf:/usr/local/etc/redis/redis.conf
+      - redis-data1:/var/lib/redis
+      - ./multi-node/redis1.conf:/usr/local/etc/redis/redis.conf
     networks:
       voltaserve-net:
         ipv4_address: 172.20.0.31
-  redis-node-2:
-    container_name: voltaserve-redis-node-2
+  redis2:
+    container_name: voltaserve-redis2
     image: redis:7.0.8
     command: redis-server /usr/local/etc/redis/redis.conf
     ports:
-      - 16374:6374
+      - 6374:6374
     volumes:
-      - redis-node-2-data:/var/lib/redis
-      - ./multi-node/redis-node-2.conf:/usr/local/etc/redis/redis.conf
+      - redis-data2:/var/lib/redis
+      - ./multi-node/redis2.conf:/usr/local/etc/redis/redis.conf
     networks:
       voltaserve-net:
         ipv4_address: 172.20.0.32
-  redis-node-3:
-    container_name: voltaserve-redis-node-3
+  redis3:
+    container_name: voltaserve-redis3
     image: redis:7.0.8
     command: redis-server /usr/local/etc/redis/redis.conf
     ports:
-      - 16375:6375
+      - 6375:6375
     volumes:
-      - redis-node-3-data:/var/lib/redis
-      - ./multi-node/redis-node-3.conf:/usr/local/etc/redis/redis.conf
+      - redis-data3:/var/lib/redis
+      - ./multi-node/redis3.conf:/usr/local/etc/redis/redis.conf
     networks:
       voltaserve-net:
         ipv4_address: 172.20.0.33
-  redis-node-4:
-    container_name: voltaserve-redis-node-4
+  redis4:
+    container_name: voltaserve-redis4
     image: redis:7.0.8
     command: redis-server /usr/local/etc/redis/redis.conf
     ports:
-      - 16376:6376
+      - 6376:6376
     volumes:
-      - redis-node-3-data:/var/lib/redis
-      - ./multi-node/redis-node-4.conf:/usr/local/etc/redis/redis.conf
+      - redis-data4:/var/lib/redis
+      - ./multi-node/redis4.conf:/usr/local/etc/redis/redis.conf
     networks:
       voltaserve-net:
         ipv4_address: 172.20.0.34
-  redis-node-5:
-    container_name: voltaserve-redis-node-5
+  redis5:
+    container_name: voltaserve-redis5
     image: redis:7.0.8
     command: redis-server /usr/local/etc/redis/redis.conf
     ports:
-      - 16377:6377
+      - 6377:6377
     volumes:
-      - redis-node-3-data:/var/lib/redis
-      - ./multi-node/redis-node-5.conf:/usr/local/etc/redis/redis.conf
+      - redis-data5:/var/lib/redis
+      - ./multi-node/redis5.conf:/usr/local/etc/redis/redis.conf
     networks:
       voltaserve-net:
         ipv4_address: 172.20.0.35
-  redis-node-6:
-    container_name: voltaserve-redis-node-6
+  redis6:
+    container_name: voltaserve-redis6
     image: redis:7.0.8
     command: redis-server /usr/local/etc/redis/redis.conf
     ports:
-      - 16378:6378
+      - 6378:6378
     volumes:
-      - redis-node-3-data:/var/lib/redis
-      - ./multi-node/redis-node-6.conf:/usr/local/etc/redis/redis.conf
+      - redis-data6:/var/lib/redis
+      - ./multi-node/redis6.conf:/usr/local/etc/redis/redis.conf
     networks:
       voltaserve-net:
         ipv4_address: 172.20.0.36
+  redisinsight:
+    container_name: voltaserve-redisinsight
+    image: redislabs/redisinsight:1.14.0
+    ports:
+      - ${VOLTASERVE_REDISINSIGHT_PORT}:8001
+    volumes:
+      - redisinsight:/db
+    networks:
+      voltaserve-net:
+        ipv4_address: 172.20.0.37
   mailcatcher:
     container_name: voltaserve-mailcatcher
     image: sj26/mailcatcher:v0.8.2
     ports:
       - ${VOLTASERVE_MAILCATCHER_WEB_PORT}:1080
       - ${VOLTASERVE_MAILCATCHER_SMTP_PORT}:1025
-  idp:
-    container_name: voltaserve-idp
-    image: voltaserve/idp
-    build:
-      context: ./idp
-    ports:
-      - ${VOLTASERVE_IDP_PORT}:7000
-    environment:
-      - IDP_URL=http://${VOLTASERVE_HOSTNAME}:${VOLTASERVE_IDP_PORT}
-      - UI_URL=http://${VOLTASERVE_HOSTNAME}:${VOLTASERVE_UI_PORT}
-      - DATABASE_URL=postgresql://voltaserve:voltaserve@postgres:5432/voltaserve
-      - SEARCH_URL=http://meilisearch:7700
-      - SMTP_HOST=${VOLTASERVE_SMTP_HOST}
-      - SMTP_PORT=${VOLTASERVE_SMTP_PORT}
-      - SMTP_SECURE=${VOLTASERVE_SMTP_SECURE}
-      - SMTP_USERNAME=${VOLTASERVE_SMTP_USERNAME}
-      - SMTP_PASSWORD=${VOLTASERVE_SMTP_PASSWORD}
-      - SMTP_SENDER_ADDRESS=${VOLTASERVE_SMTP_SENDER_ADDRESS}
-      - SMTP_SENDER_NAME=${VOLTASERVE_SMTP_SENDER_NAME}
-    depends_on:
-      - postgres
-      - meilisearch
-      - minio
-    restart: on-failure
     networks:
       voltaserve-net:
-        ipv4_address: 172.20.0.40
+        ipv4_address: 172.20.0.60
   api:
     container_name: voltaserve-api
-    image: voltaserve/api
-    build:
-      context: ./api
+    image: golang:1.19-bullseye
+    working_dir: /app
+    command: sh -c "./install-deps.sh && go run ."
+    volumes:
+      - ./api:/app
     environment:
       - API_URL=http://${VOLTASERVE_HOSTNAME}:${VOLTASERVE_API_PORT}
       - UI_URL=http://${VOLTASERVE_HOSTNAME}:${VOLTASERVE_UI_PORT}
-      - DATABASE_URL=postgresql://voltaserve:voltaserve@postgres:5432/voltaserve
-      - S3_URL=minio:9000
+      - POSTGRES_URL=postgresql://voltaserve@roach1:26257/voltaserve
+      - S3_URL=minio-nginx:9000
       - SEARCH_URL=http://meilisearch:7700
-      - REDIS_ADDR=redis:6379
+      - REDIS_ADDRESS=redis1:6373;redis2:6374;redis3:6375;redis4:6376;redis5:6377;redis6:6378
       - SMTP_HOST=${VOLTASERVE_SMTP_HOST}
       - SMTP_PORT=${VOLTASERVE_SMTP_PORT}
       - SMTP_SECURE=${VOLTASERVE_SMTP_SECURE}
@@ -302,22 +284,63 @@ services:
     ports:
       - ${VOLTASERVE_API_PORT}:5000
     depends_on:
-      - postgres
-      - redis
-      - minio
+      - roach1
+      - roach2
+      - roach3
+      - minio-nginx
+      - minio1
+      - minio2
+      - minio3
+      - minio4
+      - redis1
+      - redis2
+      - redis3
+      - redis4
+      - redis5
+      - redis6
       - meilisearch
     restart: on-failure
     networks:
       voltaserve-net:
         ipv4_address: 172.20.0.41
+  idp:
+    container_name: voltaserve-idp
+    image: node:18-alpine
+    working_dir: /app
+    command: sh -c "npm i && npm run dev"
+    ports:
+      - ${VOLTASERVE_IDP_PORT}:7000
+    volumes:
+      - ./idp:/app
+      - /app/node_modules
+    environment:
+      - IDP_URL=http://${VOLTASERVE_HOSTNAME}:${VOLTASERVE_IDP_PORT}
+      - UI_URL=http://${VOLTASERVE_HOSTNAME}:${VOLTASERVE_UI_PORT}
+      - POSTGRES_URL=postgresql://voltaserve@roach1:26257/voltaserve
+      - SEARCH_URL=http://meilisearch:7700
+      - SMTP_HOST=${VOLTASERVE_SMTP_HOST}
+      - SMTP_PORT=${VOLTASERVE_SMTP_PORT}
+      - SMTP_SECURE=${VOLTASERVE_SMTP_SECURE}
+      - SMTP_USERNAME=${VOLTASERVE_SMTP_USERNAME}
+      - SMTP_PASSWORD=${VOLTASERVE_SMTP_PASSWORD}
+      - SMTP_SENDER_ADDRESS=${VOLTASERVE_SMTP_SENDER_ADDRESS}
+      - SMTP_SENDER_NAME=${VOLTASERVE_SMTP_SENDER_NAME}
+    depends_on:
+      - roach1
+      - roach2
+      - roach3
+    restart: on-failure
+    networks:
+      voltaserve-net:
+        ipv4_address: 172.20.0.40
   ui:
     container_name: voltaserve-ui
-    image: voltaserve/ui
-    build:
-      context: ./ui
-      args:
-        - API_URL=http://api:${VOLTASERVE_API_PORT}
-        - IDP_URL=http://idp:${VOLTASERVE_IDP_PORT}
+    image: node:18-alpine
+    working_dir: /app
+    command: sh -c "npm i && npm run dev"
+    volumes:
+      - ./ui:/app
+      - /app/node_modules
     ports:
       - ${VOLTASERVE_UI_PORT}:3000
     environment:
@@ -332,9 +355,12 @@ services:
         ipv4_address: 172.20.0.42
   webdav:
     container_name: voltaserve-webdav
-    image: voltaserve/webdav
-    build:
-      context: ./webdav
+    image: node:18-alpine
+    working_dir: /app
+    command: sh -c "npm i && npm run dev"
+    volumes:
+      - ./webdav:/app
+      - /app/node_modules
     ports:
       - ${VOLTASERVE_WEBDAV_PORT}:6000
     environment:

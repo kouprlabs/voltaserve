@@ -80,13 +80,23 @@ Wait a few minutes until all containers are up and running. You can check that b
 
 ### Run a Multi-Node Cluster
 
+```sh
+docker compose -f ./docker-compose.multi-node.yml up
+```
+
 1. Initialize CockroachDB cluster:
 
 ```sh
 docker exec -it voltaserve-roach1 ./cockroach init --insecure
 ```
 
-2. Connect to CockroachDB with root and create the user and database:
+2. Initialize Redis cluster:
+
+```sh
+docker run --rm -it --name=redis-cluster-init --network=voltaserve-net --ip=172.20.0.30 redis:7.0.8 redis-cli --cluster create 172.20.0.31:6373 172.20.0.32:6374 172.20.0.33:6375 172.20.0.34:6376 172.20.0.35:6377 172.20.0.36:6378 --cluster-replicas 1 --cluster-yes
+```
+
+2. Connect to CockroachDB with root to create a user and database:
 
 ```sql
 CREATE DATABASE voltaserve;
@@ -94,7 +104,7 @@ CREATE USER voltaserve;
 GRANT ALL PRIVILEGES ON DATABASE voltaserve TO voltaserve;
 ```
 
-3. Connect to CockroachDB with the the user `voltaserve` and database `voltaserve`, and run the following SQL script to create database objects: [sql/schema.sql](sql/schema.sql).
+3. Connect to CockroachDB with the user `voltaserve` and database `voltaserve`, then run the following SQL script to create the database objects: [sql/schema.sql](sql/schema.sql).
 
 ### Connect with WebDAV
 
