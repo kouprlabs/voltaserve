@@ -24,6 +24,7 @@ type StoragePipeline struct {
 	officePipeline *OfficePipeline
 	videoPipeline  *VideoPipeline
 	workspaceCache *cache.WorkspaceCache
+	fileIdentifier *infra.FileIdentifier
 	config         config.Config
 }
 
@@ -44,6 +45,7 @@ func NewStoragePipeline() *StoragePipeline {
 		officePipeline: NewOfficePipeline(),
 		videoPipeline:  NewVideoPipeline(),
 		workspaceCache: cache.NewWorkspaceCache(),
+		fileIdentifier: infra.NewFileIdentifier(),
 		config:         config.GetConfig(),
 	}
 }
@@ -97,7 +99,7 @@ func (p *StoragePipeline) Run(opts StoragePipelineOptions, userId string) (*serv
 		}
 		return v, nil
 	}
-	if p.isPDF(filepath.Ext(opts.FilePath)) {
+	if p.fileIdentifier.IsPDF(filepath.Ext(opts.FilePath)) {
 		snapshot.SetPreview(&model.S3Object{
 			Bucket: original.Bucket,
 			Key:    original.Key,
@@ -120,7 +122,7 @@ func (p *StoragePipeline) Run(opts StoragePipelineOptions, userId string) (*serv
 		}); err != nil {
 			return nil, err
 		}
-	} else if p.isOffice(filepath.Ext(opts.FilePath)) || p.isPlainText(filepath.Ext(opts.FilePath)) {
+	} else if p.fileIdentifier.IsOffice(filepath.Ext(opts.FilePath)) || p.fileIdentifier.IsPlainText(filepath.Ext(opts.FilePath)) {
 		if err = p.officePipeline.Run(OfficePipelineOptions{
 			FileId:     opts.FileId,
 			SnapshotId: snapshotId,
@@ -129,7 +131,7 @@ func (p *StoragePipeline) Run(opts StoragePipelineOptions, userId string) (*serv
 		}); err != nil {
 			return nil, err
 		}
-	} else if p.isImage(filepath.Ext(opts.FilePath)) {
+	} else if p.fileIdentifier.IsImage(filepath.Ext(opts.FilePath)) {
 		if err = p.imagePipeline.Run(ImagePipelineOptions{
 			FileId:     opts.FileId,
 			SnapshotId: snapshotId,
@@ -138,7 +140,7 @@ func (p *StoragePipeline) Run(opts StoragePipelineOptions, userId string) (*serv
 		}); err != nil {
 			return nil, err
 		}
-	} else if p.isVideo(filepath.Ext(opts.FilePath)) {
+	} else if p.fileIdentifier.IsVideo(filepath.Ext(opts.FilePath)) {
 		if err = p.videoPipeline.Run(VideoPipelineOptions{
 			FileId:     opts.FileId,
 			SnapshotId: snapshotId,
@@ -157,117 +159,4 @@ func (p *StoragePipeline) Run(opts StoragePipelineOptions, userId string) (*serv
 		return nil, err
 	}
 	return v, nil
-}
-
-func (svc *StoragePipeline) isPDF(extension string) bool {
-	return strings.ToLower(extension) == ".pdf"
-}
-
-func (svc *StoragePipeline) isOffice(extension string) bool {
-	extensions := []string{
-		".xls",
-		".doc",
-		".ppt",
-		".xlsx",
-		".docx",
-		".pptx",
-		".odt",
-		".ott",
-		".ods",
-		".ots",
-		".odp",
-		".otp",
-		".odg",
-		".otg",
-		".odf",
-		".odc",
-		".rtf",
-	}
-	for _, v := range extensions {
-		if strings.ToLower(extension) == v {
-			return true
-		}
-	}
-	return false
-}
-
-func (svc *StoragePipeline) isPlainText(extension string) bool {
-	extensions := []string{
-		".txt",
-		".html",
-		".js",
-		"jsx",
-		".ts",
-		".tsx",
-		".css",
-		".sass",
-		".scss",
-		".go",
-		".py",
-		".rb",
-		".java",
-		".c",
-		".h",
-		".cpp",
-		".hpp",
-		".json",
-		".yml",
-		".yaml",
-		".toml",
-		".md",
-	}
-	for _, v := range extensions {
-		if strings.ToLower(extension) == v {
-			return true
-		}
-	}
-	return false
-}
-
-func (svc *StoragePipeline) isImage(extension string) bool {
-	extensions := []string{
-		".xpm",
-		".png",
-		".jpg",
-		".jpeg",
-		".jp2",
-		".gif",
-		".webp",
-		".tiff",
-		".bmp",
-		".ico",
-		".heif",
-		".xcf",
-		".svg",
-	}
-	for _, v := range extensions {
-		if strings.ToLower(extension) == v {
-			return true
-		}
-	}
-	return false
-}
-
-func (svc *StoragePipeline) isVideo(extension string) bool {
-	extensions := []string{
-		".ogv",
-		".mpeg",
-		".mov",
-		".mqv",
-		".mp4",
-		".webm",
-		".3gp",
-		".3g2",
-		".avi",
-		".flv",
-		".mkv",
-		".asf",
-		".m4v",
-	}
-	for _, v := range extensions {
-		if strings.ToLower(extension) == v {
-			return true
-		}
-	}
-	return false
 }

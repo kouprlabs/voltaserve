@@ -23,6 +23,8 @@ const Move = () => {
   const dispatch = useAppDispatch()
   const selection = useAppSelector((state) => state.ui.files.selection)
   const isModalOpen = useAppSelector((state) => state.ui.files.isMoveModalOpen)
+  const sortBy = useAppSelector((state) => state.ui.files.sortBy)
+  const sortOrder = useAppSelector((state) => state.ui.files.sortOrder)
   const [loading, setLoading] = useState(false)
   const [newFileId, setNewFileId] = useState<string>()
 
@@ -37,7 +39,10 @@ const Move = () => {
         const { data: files } = await FileAPI.list(
           newFileId,
           FileAPI.DEFAULT_PAGE_SIZE,
-          1
+          1,
+          undefined,
+          sortBy,
+          sortOrder
         )
         dispatch(filesUpdated(files))
       } else {
@@ -48,7 +53,7 @@ const Move = () => {
     } finally {
       setLoading(false)
     }
-  }, [newFileId, fileId, selection, dispatch])
+  }, [newFileId, fileId, selection, sortBy, sortOrder, dispatch])
 
   return (
     <Modal isOpen={isModalOpen} onClose={() => dispatch(moveModalDidClose())}>

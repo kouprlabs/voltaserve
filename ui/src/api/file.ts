@@ -13,6 +13,19 @@ export enum FileType {
   Folder = 'folder',
 }
 
+export enum SortBy {
+  Name = 'name',
+  Kind = 'kind',
+  Size = 'size',
+  DateCreated = 'date_created',
+  DateModified = 'date_modified',
+}
+
+export enum SortOrder {
+  Asc = 'asc',
+  Desc = 'desc',
+}
+
 export type File = {
   id: string
   workspaceId: string
@@ -203,11 +216,19 @@ export default class FileAPI {
     id: string,
     size: number,
     page: number,
-    type?: FileType
+    type?: FileType,
+    sortBy?: SortBy,
+    sortOrder?: SortOrder
   ): Promise<FileList> {
     const params: any = {
       page: page.toString(),
       size: size.toString(),
+    }
+    if (sortBy) {
+      params.sort_by = sortBy.toString()
+    }
+    if (sortOrder) {
+      params.sort_order = sortOrder.toString()
     }
     if (type) {
       params.type = type
