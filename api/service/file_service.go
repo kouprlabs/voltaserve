@@ -192,6 +192,7 @@ type FileService struct {
 	groupGuard     *guard.GroupGuard
 	groupMapper    *groupMapper
 	permissionRepo repo.PermissionRepo
+	fileIdentifier *infra.FileIdentifier
 	s3             *infra.S3Manager
 }
 
@@ -213,6 +214,7 @@ func NewFileService() *FileService {
 		groupGuard:     guard.NewGroupGuard(),
 		groupMapper:    newGroupMapper(),
 		permissionRepo: repo.NewPermissionRepo(),
+		fileIdentifier: infra.NewFileIdentifier(),
 		s3:             infra.NewS3Manager(),
 	}
 }
@@ -697,6 +699,100 @@ func (svc *FileService) doSorting(data []model.File, sortBy string, sortOrder st
 				return v.(model.File).GetType() == model.FileTypeFile
 			}).
 			ToSlice(0)
+		images, _ := rxgo.Just(files)().
+			Filter(func(v interface{}) bool {
+				f, err := svc.fileMapper.MapFile(v.(model.File), userId)
+				if err != nil {
+					return false
+				}
+				if f.Original == nil {
+					return false
+				}
+				if svc.fileIdentifier.IsImage(f.Original.Extension) {
+					return true
+				}
+				return false
+			}).
+			ToSlice(0)
+		pdfs, _ := rxgo.Just(files)().
+			Filter(func(v interface{}) bool {
+				f, err := svc.fileMapper.MapFile(v.(model.File), userId)
+				if err != nil {
+					return false
+				}
+				if f.Original == nil {
+					return false
+				}
+				if svc.fileIdentifier.IsPDF(f.Original.Extension) {
+					return true
+				}
+				return false
+			}).
+			ToSlice(0)
+		documents, _ := rxgo.Just(files)().
+			Filter(func(v interface{}) bool {
+				f, err := svc.fileMapper.MapFile(v.(model.File), userId)
+				if err != nil {
+					return false
+				}
+				if f.Original == nil {
+					return false
+				}
+				if svc.fileIdentifier.IsOffice(f.Original.Extension) {
+					return true
+				}
+				return false
+			}).
+			ToSlice(0)
+		videos, _ := rxgo.Just(files)().
+			Filter(func(v interface{}) bool {
+				f, err := svc.fileMapper.MapFile(v.(model.File), userId)
+				if err != nil {
+					return false
+				}
+				if f.Original == nil {
+					return false
+				}
+				if svc.fileIdentifier.IsVideo(f.Original.Extension) {
+					return true
+				}
+				return false
+			}).
+			ToSlice(0)
+		texts, _ := rxgo.Just(files)().
+			Filter(func(v interface{}) bool {
+				f, err := svc.fileMapper.MapFile(v.(model.File), userId)
+				if err != nil {
+					return false
+				}
+				if f.Original == nil {
+					return false
+				}
+				if svc.fileIdentifier.IsPlainText(f.Original.Extension) {
+					return true
+				}
+				return false
+			}).
+			ToSlice(0)
+		others, _ := rxgo.Just(files)().
+			Filter(func(v interface{}) bool {
+				f, err := svc.fileMapper.MapFile(v.(model.File), userId)
+				if err != nil {
+					return false
+				}
+				if f.Original == nil {
+					return false
+				}
+				if !svc.fileIdentifier.IsImage(f.Original.Extension) &&
+					!svc.fileIdentifier.IsPDF(f.Original.Extension) &&
+					!svc.fileIdentifier.IsOffice(f.Original.Extension) &&
+					!svc.fileIdentifier.IsVideo(f.Original.Extension) &&
+					!svc.fileIdentifier.IsPlainText(f.Original.Extension) {
+					return true
+				}
+				return false
+			}).
+			ToSlice(0)
 		var res []model.File
 		for _, v := range folders {
 			var file model.File
@@ -706,7 +802,47 @@ func (svc *FileService) doSorting(data []model.File, sortBy string, sortOrder st
 			}
 			res = append(res, file)
 		}
-		for _, v := range files {
+		for _, v := range images {
+			var file model.File
+			file, err := svc.fileCache.Get(v.(model.File).GetID())
+			if err != nil {
+				return data
+			}
+			res = append(res, file)
+		}
+		for _, v := range pdfs {
+			var file model.File
+			file, err := svc.fileCache.Get(v.(model.File).GetID())
+			if err != nil {
+				return data
+			}
+			res = append(res, file)
+		}
+		for _, v := range documents {
+			var file model.File
+			file, err := svc.fileCache.Get(v.(model.File).GetID())
+			if err != nil {
+				return data
+			}
+			res = append(res, file)
+		}
+		for _, v := range videos {
+			var file model.File
+			file, err := svc.fileCache.Get(v.(model.File).GetID())
+			if err != nil {
+				return data
+			}
+			res = append(res, file)
+		}
+		for _, v := range texts {
+			var file model.File
+			file, err := svc.fileCache.Get(v.(model.File).GetID())
+			if err != nil {
+				return data
+			}
+			res = append(res, file)
+		}
+		for _, v := range others {
 			var file model.File
 			file, err := svc.fileCache.Get(v.(model.File).GetID())
 			if err != nil {
