@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"time"
 	"voltaserve/cache"
@@ -155,6 +156,23 @@ type GroupPermission struct {
 	ID         string `json:"id"`
 	Group      *Group `json:"group"`
 	Permission string `json:"permission"`
+}
+
+const SortByName = "name"
+const SortByKind = "kind"
+const SortBySize = "size"
+const SortByDateCreated = "date_created"
+const SortByDateModified = "date_modified"
+
+const SortOrderAsc = "asc"
+const SortOrderDesc = "desc"
+
+func IsValidSortBy(value string) bool {
+	return value == "" || value == SortByName || value == SortByKind || value == SortBySize || value == SortByDateCreated || value == SortByDateModified
+}
+
+func IsValidSortOrder(value string) bool {
+	return value == "" || value == SortOrderAsc || value == SortOrderDesc
 }
 
 type FileService struct {
@@ -560,7 +578,7 @@ func (svc *FileService) ListByPath(path string, userId string) ([]*File, error) 
 	}
 }
 
-func (svc *FileService) ListByID(id string, page uint, size uint, fileType string, userId string) (*FileList, error) {
+func (svc *FileService) ListByID(id string, page uint, size uint, sortBy string, sortOrder string, fileType string, userId string) (*FileList, error) {
 	user, err := svc.userRepo.Find(userId)
 	if err != nil {
 		return nil, err
@@ -582,28 +600,123 @@ func (svc *FileService) ListByID(id string, page uint, size uint, fileType strin
 	if err != nil {
 		return nil, err
 	}
-	authorized, err := svc.getAuthorized(ids, user)
+	authorizedFiles, err := svc.getAuthorized(ids, user)
 	if err != nil {
 		return nil, err
 	}
-	var filtered []model.File
-	for _, f := range authorized {
+	var filteredFiles []model.File
+	for _, f := range authorizedFiles {
 		if fileType == "" || f.GetType() == fileType {
-			filtered = append(filtered, f)
+			filteredFiles = append(filteredFiles, f)
 		}
 	}
-	data, totalElements, totalPages := svc.doPaging(filtered, page, size)
-	v, err := svc.fileMapper.MapFiles(data, userId)
+	sortedFiles := svc.doSorting(filteredFiles, sortBy, sortOrder, userId)
+	data, totalElements, totalPages := svc.doPaging(sortedFiles, page, size)
+	mappedFiles, err := svc.fileMapper.MapFiles(data, userId)
 	if err != nil {
 		return nil, err
 	}
 	return &FileList{
-		Data:          v,
+		Data:          mappedFiles,
 		TotalElements: totalElements,
 		TotalPages:    totalPages,
 		Page:          page,
 		Size:          size,
 	}, nil
+}
+
+func (svc *FileService) doSorting(data []model.File, sortBy string, sortOrder string, userId string) []model.File {
+	if sortBy == SortByName {
+		sort.Slice(data, func(i, j int) bool {
+			if sortOrder == SortOrderDesc {
+				return data[i].GetName() > data[j].GetName()
+			} else {
+				return data[i].GetName() < data[j].GetName()
+			}
+		})
+		return data
+	} else if sortBy == SortBySize {
+		sort.Slice(data, func(i, j int) bool {
+			fileA, err := svc.fileMapper.MapFile(data[i], userId)
+			if err != nil {
+				return false
+			}
+			fileB, err := svc.fileMapper.MapFile(data[j], userId)
+			if err != nil {
+				return false
+			}
+			var sizeA int64 = 0
+			if fileA.Original != nil {
+				sizeA = int64(fileA.Original.Size)
+			}
+			var sizeB int64 = 0
+			if fileB.Original != nil {
+				sizeB = int64(fileB.Original.Size)
+			}
+			if sortOrder == SortOrderDesc {
+				return sizeA > sizeB
+			} else {
+				return sizeA < sizeB
+			}
+		})
+		return data
+	} else if sortBy == SortByDateCreated {
+		sort.Slice(data, func(i, j int) bool {
+			a, _ := time.Parse(time.RFC3339, data[i].GetCreateTime())
+			b, _ := time.Parse(time.RFC3339, data[j].GetCreateTime())
+			if sortOrder == SortOrderDesc {
+				return a.UnixMilli() > b.UnixMilli()
+			} else {
+				return a.UnixMilli() < b.UnixMilli()
+			}
+		})
+		return data
+	} else if sortBy == SortByDateModified {
+		sort.Slice(data, func(i, j int) bool {
+			if data[i].GetUpdateTime() != nil && data[j].GetUpdateTime() != nil {
+				a, _ := time.Parse(time.RFC3339, *data[i].GetUpdateTime())
+				b, _ := time.Parse(time.RFC3339, *data[j].GetUpdateTime())
+				if sortOrder == SortOrderDesc {
+					return a.UnixMilli() > b.UnixMilli()
+				} else {
+					return a.UnixMilli() < b.UnixMilli()
+				}
+			} else {
+				return false
+			}
+		})
+		return data
+	} else if sortBy == SortByKind {
+		folders, _ := rxgo.Just(data)().
+			Filter(func(v interface{}) bool {
+				return v.(model.File).GetType() == model.FileTypeFolder
+			}).
+			ToSlice(0)
+		files, _ := rxgo.Just(data)().
+			Filter(func(v interface{}) bool {
+				return v.(model.File).GetType() == model.FileTypeFile
+			}).
+			ToSlice(0)
+		var res []model.File
+		for _, v := range folders {
+			var file model.File
+			file, err := svc.fileCache.Get(v.(model.File).GetID())
+			if err != nil {
+				return data
+			}
+			res = append(res, file)
+		}
+		for _, v := range files {
+			var file model.File
+			file, err := svc.fileCache.Get(v.(model.File).GetID())
+			if err != nil {
+				return data
+			}
+			res = append(res, file)
+		}
+		return res
+	}
+	return data
 }
 
 func (svc *FileService) doPaging(files []model.File, page uint, size uint) ([]model.File, uint, uint) {

@@ -329,6 +329,14 @@ func (r *FileRouter) ListByID(c *fiber.Ctx) error {
 	if c.Query("size") == "" {
 		return errorpkg.NewMissingQueryParamError("size")
 	}
+	sortBy := c.Query("sort_by")
+	if !service.IsValidSortBy(sortBy) {
+		return errorpkg.NewInvalidQueryParamError("sort_by")
+	}
+	sortOrder := c.Query("sort_order")
+	if !service.IsValidSortOrder(sortOrder) {
+		return errorpkg.NewInvalidQueryParamError("sort_order")
+	}
 	fileType := c.Query("type")
 	if fileType != model.FileTypeFile && fileType != model.FileTypeFolder && fileType != "" {
 		return errorpkg.NewInvalidQueryParamError("type")
@@ -342,7 +350,7 @@ func (r *FileRouter) ListByID(c *fiber.Ctx) error {
 	if err != nil {
 		size = 100
 	}
-	res, err := r.fileSvc.ListByID(c.Params("id"), uint(page), uint(size), fileType, userId)
+	res, err := r.fileSvc.ListByID(c.Params("id"), uint(page), uint(size), sortBy, sortOrder, fileType, userId)
 	if err != nil {
 		return err
 	}

@@ -36,19 +36,20 @@ import {
   IconSortUp,
   IconSortDown,
 } from '@koupr/ui'
-import FileAPI, { FileList } from '@/api/file'
+import FileAPI, { FileList, SortBy, SortOrder } from '@/api/file'
 import { ltEditorPermission, ltOwnerPermission } from '@/api/permission'
 import downloadFile from '@/helpers/download-file'
 import mapFileList from '@/helpers/map-file-list'
 import { decodeQuery } from '@/helpers/query'
-import { SortDirection, SortType } from '@/models/sort'
-import {
-  listUpdated,
-  sortDirectionUpdated,
-  sortTypeUpdated,
-} from '@/store/entities/files'
+import { listUpdated } from '@/store/entities/files'
 import { uploadAdded, UploadDecorator } from '@/store/entities/uploads'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
+import {
+  sortOrderUpdated,
+  sortByUpdated,
+  SORT_BY_KEY,
+  SORT_ORDER_KEY,
+} from '@/store/ui/files'
 import {
   copyModalDidOpen,
   createModalDidOpen,
@@ -62,8 +63,6 @@ import {
 import { uploadsDrawerOpened } from '@/store/ui/uploads-drawer'
 
 const ICON_SCALE_KEY = 'voltaserve_file_icon_scale'
-const SORT_TYPE_KEY = 'voltaserve_file_sort_type'
-const SORT_DIRECTION_KEY = 'voltaserve_file_sort_direction'
 const SPACING = variables.spacingXs
 
 const Toolbar = () => {
@@ -87,10 +86,8 @@ const Toolbar = () => {
   const folder = useAppSelector((state) => state.entities.files.folder)
   const files = useAppSelector((state) => state.entities.files.list?.data)
   const iconScale = useAppSelector((state) => state.ui.files.iconScale)
-  const sortType = useAppSelector((state) => state.entities.files.sortType)
-  const sortDirection = useAppSelector(
-    (state) => state.entities.files.sortDirection
-  )
+  const sortBy = useAppSelector((state) => state.ui.files.sortBy)
+  const sortOrder = useAppSelector((state) => state.ui.files.sortOrder)
   const hasOwnerPermission = useAppSelector(
     (state) =>
       state.entities.files.list?.data.findIndex(
@@ -116,13 +113,13 @@ const Toolbar = () => {
     if (iconScale) {
       dispatch(iconScaleUpdated(JSON.parse(iconScale)))
     }
-    const sortType = localStorage.getItem(SORT_TYPE_KEY)
-    if (sortType) {
-      dispatch(sortTypeUpdated(sortType as SortType))
+    const sortBy = localStorage.getItem(SORT_BY_KEY)
+    if (sortBy) {
+      dispatch(sortByUpdated(sortBy as SortBy))
     }
-    const sortDirection = localStorage.getItem(SORT_DIRECTION_KEY)
-    if (sortDirection) {
-      dispatch(sortDirectionUpdated(sortDirection as SortDirection))
+    const sortOrder = localStorage.getItem(SORT_ORDER_KEY)
+    if (sortOrder) {
+      dispatch(sortOrderUpdated(sortOrder as SortOrder))
     }
   }, [dispatch])
 
@@ -171,49 +168,54 @@ const Toolbar = () => {
           1
         )
       } else {
-        result = await FileAPI.list(fileId, FileAPI.DEFAULT_PAGE_SIZE, 1)
+        result = await FileAPI.list(
+          fileId,
+          FileAPI.DEFAULT_PAGE_SIZE,
+          1,
+          undefined,
+          sortBy,
+          sortOrder
+        )
       }
       dispatch(listUpdated(result))
     } finally {
       setIsRefreshing(false)
     }
-  }, [dispatch, fileId, workspaceId, query])
+  }, [dispatch, fileId, workspaceId, query, sortBy, sortOrder])
 
-  const handleSortTypeChange = useCallback(
-    (value: SortType) => {
-      localStorage.setItem(SORT_TYPE_KEY, value.toString())
-      dispatch(sortTypeUpdated(value))
+  const handleSortByChange = useCallback(
+    (value: SortBy) => {
+      localStorage.setItem(SORT_BY_KEY, value.toString())
+      dispatch(sortByUpdated(value))
     },
     [dispatch]
   )
 
-  const handleSortDirectionToggle = useCallback(() => {
-    const value: SortDirection =
-      sortDirection === SortDirection.Ascending
-        ? SortDirection.Descending
-        : SortDirection.Ascending
-    localStorage.setItem(SORT_DIRECTION_KEY, value.toString())
-    dispatch(sortDirectionUpdated(value))
-  }, [sortDirection, dispatch])
+  const handleSortOrderToggle = useCallback(() => {
+    const value: SortOrder =
+      sortOrder === SortOrder.Asc ? SortOrder.Desc : SortOrder.Asc
+    localStorage.setItem(SORT_ORDER_KEY, value.toString())
+    dispatch(sortOrderUpdated(value))
+  }, [sortOrder, dispatch])
 
-  const getSortTypeIcon = useCallback(
-    (value: SortType) => {
-      if (value === sortType) {
+  const getSortByIcon = useCallback(
+    (value: SortBy) => {
+      if (value === sortBy) {
         return <IconCheckCircle />
       } else {
         return <IconCircle />
       }
     },
-    [sortType]
+    [sortBy]
   )
 
-  const getSortDirectionIcon = useCallback(() => {
-    if (sortDirection === SortDirection.Ascending) {
+  const getSortOrderIcon = useCallback(() => {
+    if (sortOrder === SortOrder.Asc) {
       return <IconSortUp />
-    } else if (sortDirection === SortDirection.Descending) {
+    } else if (sortOrder === SortOrder.Desc) {
       return <IconSortDown />
     }
-  }, [sortDirection])
+  }, [sortOrder])
 
   return (
     <>
@@ -371,11 +373,11 @@ const Toolbar = () => {
           </Slider>
           <Stack direction="row" spacing={SPACING}>
             <IconButton
-              icon={getSortDirectionIcon()}
+              icon={getSortOrderIcon()}
               fontSize="16px"
               variant="solid"
               aria-label=""
-              onClick={handleSortDirectionToggle}
+              onClick={handleSortOrderToggle}
             />
             <Box>
               <Menu>
@@ -388,36 +390,32 @@ const Toolbar = () => {
                 <Portal>
                   <MenuList zIndex="dropdown">
                     <MenuItem
-                      icon={getSortTypeIcon(SortType.ByName)}
-                      onClick={() => handleSortTypeChange(SortType.ByName)}
+                      icon={getSortByIcon(SortBy.Name)}
+                      onClick={() => handleSortByChange(SortBy.Name)}
                     >
                       Sort By Name
                     </MenuItem>
                     <MenuItem
-                      icon={getSortTypeIcon(SortType.ByKind)}
-                      onClick={() => handleSortTypeChange(SortType.ByKind)}
+                      icon={getSortByIcon(SortBy.Kind)}
+                      onClick={() => handleSortByChange(SortBy.Kind)}
                     >
                       Sort By Kind
                     </MenuItem>
                     <MenuItem
-                      icon={getSortTypeIcon(SortType.BySize)}
-                      onClick={() => handleSortTypeChange(SortType.BySize)}
+                      icon={getSortByIcon(SortBy.Size)}
+                      onClick={() => handleSortByChange(SortBy.Size)}
                     >
                       Sort By Size
                     </MenuItem>
                     <MenuItem
-                      icon={getSortTypeIcon(SortType.ByDateCreated)}
-                      onClick={() =>
-                        handleSortTypeChange(SortType.ByDateCreated)
-                      }
+                      icon={getSortByIcon(SortBy.DateCreated)}
+                      onClick={() => handleSortByChange(SortBy.DateCreated)}
                     >
                       Sort By Date Created
                     </MenuItem>
                     <MenuItem
-                      icon={getSortTypeIcon(SortType.ByDateModified)}
-                      onClick={() =>
-                        handleSortTypeChange(SortType.ByDateModified)
-                      }
+                      icon={getSortByIcon(SortBy.DateModified)}
+                      onClick={() => handleSortByChange(SortBy.DateModified)}
                     >
                       Sort By Date Modified
                     </MenuItem>

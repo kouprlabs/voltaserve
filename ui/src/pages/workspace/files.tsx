@@ -6,9 +6,6 @@ import { Helmet } from 'react-helmet-async'
 import FileAPI from '@/api/file'
 import { swrConfig } from '@/api/options'
 import WorkspaceAPI from '@/api/workspace'
-import { currentUpdated, listPatched } from '@/store/entities/files'
-import { useAppDispatch, useAppSelector } from '@/store/hook'
-import { selectionUpdated } from '@/store/ui/files'
 import Copy from '@/components/file/copy'
 import Create from '@/components/file/create'
 import Delete from '@/components/file/delete'
@@ -19,6 +16,9 @@ import Rename from '@/components/file/rename'
 import Sharing from '@/components/file/sharing'
 import Toolbar from '@/components/file/toolbar'
 import { percentageOf } from '@/helpers/percentage-of'
+import { currentUpdated, listPatched } from '@/store/entities/files'
+import { useAppDispatch, useAppSelector } from '@/store/hook'
+import { selectionUpdated } from '@/store/ui/files'
 
 let isLoadingMore = false
 
@@ -27,6 +27,8 @@ const WorkspaceFilesPage = () => {
   const fileId = params.fileId as string
   const dispatch = useAppDispatch()
   const list = useAppSelector((state) => state.entities.files.list)
+  const sortBy = useAppSelector((state) => state.ui.files.sortBy)
+  const sortOrder = useAppSelector((state) => state.ui.files.sortOrder)
   const iconScale = useAppSelector((state) => state.ui.files.iconScale)
   const [isSpinnerVisible, setIsSpinnerVisible] = useState(false)
   const borderColor = useColorModeValue('gray.300', 'gray.600')
@@ -50,14 +52,17 @@ const WorkspaceFilesPage = () => {
       const result = await FileAPI.list(
         fileId,
         FileAPI.DEFAULT_PAGE_SIZE,
-        list.page + 1
+        list.page + 1,
+        undefined,
+        sortBy,
+        sortOrder
       )
       dispatch(listPatched(result))
     } finally {
       setIsSpinnerVisible(false)
       isLoadingMore = false
     }
-  }, [fileId, list, dispatch])
+  }, [fileId, list, sortBy, sortOrder, dispatch])
 
   const handleScroll = useCallback(() => {
     if (listContainer.current && list) {
