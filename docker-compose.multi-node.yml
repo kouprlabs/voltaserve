@@ -16,6 +16,14 @@ x-minio-common: &minio-common
     timeout: 20s
     retries: 3
 
+networks:
+  voltaserve-net:
+    name: voltaserve-net
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24
+
 volumes:
   roach1:
     name: voltaserve-roach1
@@ -41,8 +49,18 @@ volumes:
     name: voltaserve-minio-data4-2
   meilisearch:
     name: voltaserve-meilisearch
-  redis:
-    name: voltaserve-redis
+  redis-node-1-data:
+    name: voltaserve-redis-node-1-data
+  redis-node-2-data:
+    name: voltaserve-redis-node-2-data
+  redis-node-3-data:
+    name: voltaserve-redis-node-3-data
+  redis-node-4-data:
+    name: voltaserve-redis-node-4-data
+  redis-node-5-data:
+    name: voltaserve-redis-node-5-data
+  redis-node-6-data:
+    name: voltaserve-redis-node-6-data
 
 services:
   roach1:
@@ -59,6 +77,9 @@ services:
       - roach1:/cockroach/cockroach-data
       - ./sql:/docker-entrypoint-initdb.d
     command: start --insecure --join=roach1,roach2,roach3
+    networks:
+      voltaserve-net:
+        ipv4_address: 172.20.0.10
   roach2:
     container_name: voltaserve-roach2
     hostname: roach2
@@ -66,6 +87,9 @@ services:
     volumes:
       - roach2:/cockroach/cockroach-data
     command: start --insecure --join=roach1,roach2,roach3
+    networks:
+      voltaserve-net:
+        ipv4_address: 172.20.0.11
   roach3:
     container_name: voltaserve-roach3
     hostname: roach3
@@ -73,40 +97,15 @@ services:
     volumes:
       - roach3:/cockroach/cockroach-data
     command: start --insecure --join=roach1,roach2,roach3
-  minio1:
-    <<: *minio-common
-    container_name: voltaserve-minio1
-    hostname: minio1
-    volumes:
-      - minio-data1-1:/data1
-      - minio-data1-2:/data2
-  minio2:
-    <<: *minio-common
-    container_name: voltaserve-minio2
-    hostname: minio2
-    volumes:
-      - minio-data2-1:/data1
-      - minio-data2-2:/data2
-  minio3:
-    <<: *minio-common
-    container_name: voltaserve-minio3
-    hostname: minio3
-    volumes:
-      - minio-data3-1:/data1
-      - minio-data3-2:/data2
-  minio4:
-    <<: *minio-common
-    container_name: voltaserve-minio4
-    hostname: minio4
-    volumes:
-      - minio-data4-1:/data1
-      - minio-data4-2:/data2
+    networks:
+      voltaserve-net:
+        ipv4_address: 172.20.0.12
   minio-nginx:
     container_name: voltaserve-minio-nginx
     image: nginx:1.19.2-alpine
     hostname: nginx
     volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./multi-node/nginx.conf:/etc/nginx/nginx.conf:ro
     ports:
       - ${VOLTASERVE_MINIO_PORT}:9000
       - ${VOLTASERVE_MINIO_CONSOLE_PORT}:9001
@@ -115,6 +114,49 @@ services:
       - minio2
       - minio3
       - minio4
+    networks:
+      voltaserve-net:
+        ipv4_address: 172.20.0.20
+  minio1:
+    <<: *minio-common
+    container_name: voltaserve-minio1
+    hostname: minio1
+    volumes:
+      - minio-data1-1:/data1
+      - minio-data1-2:/data2
+    networks:
+      voltaserve-net:
+        ipv4_address: 172.20.0.21
+  minio2:
+    <<: *minio-common
+    container_name: voltaserve-minio2
+    hostname: minio2
+    volumes:
+      - minio-data2-1:/data1
+      - minio-data2-2:/data2
+    networks:
+      voltaserve-net:
+        ipv4_address: 172.20.0.22
+  minio3:
+    <<: *minio-common
+    container_name: voltaserve-minio3
+    hostname: minio3
+    volumes:
+      - minio-data3-1:/data1
+      - minio-data3-2:/data2
+    networks:
+      voltaserve-net:
+        ipv4_address: 172.20.0.23
+  minio4:
+    <<: *minio-common
+    container_name: voltaserve-minio4
+    hostname: minio4
+    volumes:
+      - minio-data4-1:/data1
+      - minio-data4-2:/data2
+    networks:
+      voltaserve-net:
+        ipv4_address: 172.20.0.24
   meilisearch:
     container_name: voltaserve-meilisearch
     image: getmeili/meilisearch:v0.30
@@ -122,13 +164,89 @@ services:
       - ${VOLTASERVE_MEILISEARCH_PORT}:7700
     volumes:
       - meilisearch:/meili_data
-  redis:
-    container_name: voltaserve-redis
+  redis-cluster-init:
+    container_name: voltaserve-redis-cluster-init
     image: redis:7.0.8
+    command: redis-cli --cluster create 172.20.0.31:6373 172.20.0.32:6374 172.20.0.33:6375 172.20.0.34:6376 172.20.0.35:6377 172.20.0.36:6378 --cluster-replicas 1 --cluster-yes
+    depends_on:
+      - redis-node-1
+      - redis-node-2
+      - redis-node-3
+      - redis-node-4
+      - redis-node-5
+      - redis-node-6
+  redis-node-1:
+    container_name: voltaserve-redis-node-1
+    image: redis:7.0.8
+    command: redis-server /usr/local/etc/redis/redis.conf
     ports:
-      - ${VOLTASERVE_REDIS_PORT}:6379
+      - ${VOLTASERVE_REDIS_PORT}:6373
     volumes:
-      - redis:/data
+      - redis-node-1-data:/var/lib/redis
+      - ./multi-node/redis-node-1.conf:/usr/local/etc/redis/redis.conf
+    networks:
+      voltaserve-net:
+        ipv4_address: 172.20.0.31
+  redis-node-2:
+    container_name: voltaserve-redis-node-2
+    image: redis:7.0.8
+    command: redis-server /usr/local/etc/redis/redis.conf
+    ports:
+      - 16374:6374
+    volumes:
+      - redis-node-2-data:/var/lib/redis
+      - ./multi-node/redis-node-2.conf:/usr/local/etc/redis/redis.conf
+    networks:
+      voltaserve-net:
+        ipv4_address: 172.20.0.32
+  redis-node-3:
+    container_name: voltaserve-redis-node-3
+    image: redis:7.0.8
+    command: redis-server /usr/local/etc/redis/redis.conf
+    ports:
+      - 16375:6375
+    volumes:
+      - redis-node-3-data:/var/lib/redis
+      - ./multi-node/redis-node-3.conf:/usr/local/etc/redis/redis.conf
+    networks:
+      voltaserve-net:
+        ipv4_address: 172.20.0.33
+  redis-node-4:
+    container_name: voltaserve-redis-node-4
+    image: redis:7.0.8
+    command: redis-server /usr/local/etc/redis/redis.conf
+    ports:
+      - 16376:6376
+    volumes:
+      - redis-node-3-data:/var/lib/redis
+      - ./multi-node/redis-node-4.conf:/usr/local/etc/redis/redis.conf
+    networks:
+      voltaserve-net:
+        ipv4_address: 172.20.0.34
+  redis-node-5:
+    container_name: voltaserve-redis-node-5
+    image: redis:7.0.8
+    command: redis-server /usr/local/etc/redis/redis.conf
+    ports:
+      - 16377:6377
+    volumes:
+      - redis-node-3-data:/var/lib/redis
+      - ./multi-node/redis-node-5.conf:/usr/local/etc/redis/redis.conf
+    networks:
+      voltaserve-net:
+        ipv4_address: 172.20.0.35
+  redis-node-6:
+    container_name: voltaserve-redis-node-6
+    image: redis:7.0.8
+    command: redis-server /usr/local/etc/redis/redis.conf
+    ports:
+      - 16378:6378
+    volumes:
+      - redis-node-3-data:/var/lib/redis
+      - ./multi-node/redis-node-6.conf:/usr/local/etc/redis/redis.conf
+    networks:
+      voltaserve-net:
+        ipv4_address: 172.20.0.36
   mailcatcher:
     container_name: voltaserve-mailcatcher
     image: sj26/mailcatcher:v0.8.2
