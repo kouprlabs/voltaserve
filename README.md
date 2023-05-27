@@ -8,15 +8,45 @@
 
 Install [Docker](https://docs.docker.com/get-docker) and [Docker Compose](https://docs.docker.com/compose/install).
 
-### Run for Production
+1. Run:
 
-Update the `VOLTASERVE_HOSTNAME` environment variable in [.env](./.env) file to match your hostname (it can optionally be an IP address as well):
+```sh
+docker compose up -d
+```
+
+Wait a few minutes until all containers are up and running. You can check that by looking at their logs.
+
+2. Go to the **sign up page** <http://localhost:3000/sign-up> and create an account.
+
+3. Open MailCatcher <http://localhost:11080>, select the received email and click the **confirm email** link.
+
+4. Finally, go to the **sign in page** <http://localhost:3000/sign-in> and login with your credentials.
+
+### Connect with WebDAV
+
+Voltaserve supports [WebDAV](https://en.wikipedia.org/wiki/WebDAV), by default it's listening on the port `6000`.
+
+You can change it by editing the `VOLTASERVE_WEBDAV_PORT` environment variable in [.env](.env) file as follows:
+
+```properties
+VOLTASERVE_WEBDAV_PORT=6000
+```
+
+The port needs to be open and accessible from the outside. One way of doing it in Linux is by using `ufw`:
+
+```shell
+sudo ufw allow 6000
+```
+
+### Configuration
+
+Update the `VOLTASERVE_HOSTNAME` environment variable in [.env](.env) file to match your hostname (it can optionally be an IP address as well):
 
 ```properties
 VOLTASERVE_HOSTNAME="my-hostname"
 ```
 
-Update the following environment variables in [.env](./.env) file to match your SMTP server:
+Update the following environment variables in [.env](.env) file to match your SMTP server:
 
 ```properties
 VOLTASERVE_SMTP_HOST="my-smtp-hostname"
@@ -34,75 +64,53 @@ The port `3000` is used for the UI, therefore it needs to be open and accessible
 sudo ufw allow 3000
 ```
 
-You can change the UI port to something else, other than `3000`, like `80` for example. This can be done by editing the `VOLTASERVE_UI_PORT` environment variable in [.env](./.env) file as follows:
+You can change the UI port to something else, other than `3000`, like `80` for example. This can be done by editing the `VOLTASERVE_UI_PORT` environment variable in [.env](.env) file as follows:
 
 ```properties
 VOLTASERVE_UI_PORT=80
 ```
 
-Other ports can be changed as well by editing their respective environment variables in [.env](./.env) file.
+Other ports can be changed as well by editing their respective environment variables in [.env](.env) file.
 
-Build Docker images:
+### Run Infrastructure Services as Multi-Node Clusters
 
-```sh
-docker compose build
-```
-
-Then:
+1. Run:
 
 ```sh
-docker compose up
+docker compose -f ./docker-compose.multi-node.yml up -d
 ```
 
-Make sure all containers are up and running by checking their logs.
-
-_Note: here you should replace `my-hostname` and `3000` with the hostname and port that matches your configuration, if you have SSL then make sure you are using `https://`._
-
-1. Go to the **sign up page** <http://my-hostname:3000/sign-up> and create an account.
-
-2. Confirm your email.
-
-3. Finally, go to the **sign in page** <http://my-hostname:3000/sign-in> and login with your credentials.
-
-### Run for Experimentation, Testing and Development
+2. Initialize CockroachDB cluster:
 
 ```sh
-docker compose -f ./docker-compose.dev.yml up
+docker exec -it voltaserve-roach1 ./cockroach init --insecure
 ```
 
-Wait a few minutes until all containers are up and running. You can check that by looking at their logs.
+3. Initialize Redis cluster:
 
-1. Go to the **sign up page** <http://localhost:3000/sign-up> and create an account.
-
-2. Open MailCatcher <http://localhost:11080>, select the received email and click the **confirm email** link.
-
-3. Finally, go to the **sign in page** <http://localhost:3000/sign-in> and login with your credentials.
-
-### Connect with WebDAV
-
-Voltaserve supports [WebDAV](https://en.wikipedia.org/wiki/WebDAV), by default it's listening on the port `6000`.
-
-You can change it by editing the `VOLTASERVE_WEBDAV_PORT` environment variable in [.env](./.env) file as follows:
-
-```properties
-VOLTASERVE_WEBDAV_PORT=6000
+```sh
+docker run --rm -it --name=redis-cluster-init --network=voltaserve-net --ip=172.20.0.30 redis:7.0.8 redis-cli --cluster create 172.20.0.31:6373 172.20.0.32:6374 172.20.0.33:6375 172.20.0.34:6376 172.20.0.35:6377 172.20.0.36:6378 --cluster-replicas 1 --cluster-yes
 ```
 
-The port needs to be open and accessible from the outside. One way of doing it in Linux is by using `ufw`:
+4. Connect to CockroachDB with root to create a user and database:
 
-```shell
-sudo ufw allow 6000
+```sql
+CREATE DATABASE voltaserve;
+CREATE USER voltaserve;
+GRANT ALL PRIVILEGES ON DATABASE voltaserve TO voltaserve;
 ```
+
+5. Connect to CockroachDB with the user `voltaserve` and database `voltaserve`, then run the following SQL script to create the database objects: [sql/schema.sql](sql/schema.sql).
 
 ## Troubleshooting
 
 **My containers have issues starting up, what should I do?**
 
-One reason might be that some ports are already allocated on your machine, in this case you can change the Voltaserve ports in [.env](./.env) file.
+One reason might be that some ports are already allocated on your machine, in this case you can change the Voltaserve ports in [.env](.env) file.
 
 **I'm not happy with `localhost`, can I change it?**
 
-You can achieve this by changing the `VOLTASERVE_HOSTNAME` environment variable in [.env](./.env) file.
+You can achieve this by changing the `VOLTASERVE_HOSTNAME` environment variable in [.env](.env) file.
 
 It can be any IP address, like:
 

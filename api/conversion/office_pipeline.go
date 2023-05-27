@@ -1,4 +1,4 @@
-package pipeline
+package conversion
 
 import (
 	"os"
@@ -14,7 +14,7 @@ import (
 type OfficePipeline struct {
 	s3              *infra.S3Manager
 	snapshotRepo    repo.SnapshotRepo
-	ocrPipeline     *OCRPipeline
+	pdfPipeline     *PDFPipeline
 	cmd             *infra.Command
 	metadataUpdater *metadataUpdater
 	workspaceCache  *cache.WorkspaceCache
@@ -33,7 +33,7 @@ func NewOfficePipeline() *OfficePipeline {
 	return &OfficePipeline{
 		s3:              infra.NewS3Manager(),
 		snapshotRepo:    repo.NewSnapshotRepo(),
-		ocrPipeline:     NewOCRPipeline(),
+		pdfPipeline:     NewPDFPipeline(),
 		cmd:             infra.NewCommand(),
 		metadataUpdater: newMetadataUpdater(),
 		workspaceCache:  cache.NewWorkspaceCache(),
@@ -58,7 +58,7 @@ func (svc *OfficePipeline) Run(opts OfficePipelineOptions) error {
 	if err := svc.save(snapshot, opts, outputPath); err != nil {
 		return err
 	}
-	if err := svc.ocrPipeline.Run(OCRPipelineOptions{
+	if err := svc.pdfPipeline.Run(PDFPipelineOptions{
 		FileId:     opts.FileId,
 		SnapshotId: opts.SnapshotId,
 		S3Bucket:   opts.S3Bucket,
