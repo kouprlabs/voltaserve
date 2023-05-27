@@ -77,7 +77,7 @@ Other ports can be changed as well by editing their respective environment varia
 1. Run:
 
 ```sh
-docker compose -f ./docker-compose.cluster.yml up
+docker compose -f ./docker-compose.multi-node.yml up
 ```
 
 2. Initialize CockroachDB cluster:

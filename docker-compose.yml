@@ -22,7 +22,7 @@ services:
       COCKROACH_USER: voltaserve
     volumes:
       - cockroach:/cockroach/cockroach-data
-      - ./sql:/docker-entrypoint-initdb.d
+      - ./infra/sql:/docker-entrypoint-initdb.d
     command: start-single-node --insecure
   minio:
     container_name: voltaserve-minio
