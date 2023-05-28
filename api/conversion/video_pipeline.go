@@ -23,14 +23,7 @@ type VideoPipeline struct {
 	config          config.Config
 }
 
-type VideoPipelineOptions struct {
-	FileId     string
-	SnapshotId string
-	S3Bucket   string
-	S3Key      string
-}
-
-func NewVideoPipeline() *VideoPipeline {
+func NewVideoPipeline() Pipeline {
 	return &VideoPipeline{
 		minio:           infra.NewS3Manager(),
 		snapshotRepo:    repo.NewSnapshotRepo(),
@@ -44,7 +37,7 @@ func NewVideoPipeline() *VideoPipeline {
 	}
 }
 
-func (p *VideoPipeline) Run(opts VideoPipelineOptions) error {
+func (p *VideoPipeline) Run(opts PipelineOptions) error {
 	snapshot, err := p.snapshotRepo.Find(opts.SnapshotId)
 	if err != nil {
 		return err
@@ -64,7 +57,7 @@ func (p *VideoPipeline) Run(opts VideoPipelineOptions) error {
 	return nil
 }
 
-func (p *VideoPipeline) generateThumbnail(snapshot model.Snapshot, opts VideoPipelineOptions, inputPath string) error {
+func (p *VideoPipeline) generateThumbnail(snapshot model.Snapshot, opts PipelineOptions, inputPath string) error {
 	outputPath := filepath.FromSlash(os.TempDir() + "/" + helpers.NewId() + ".png")
 	if err := p.videoProc.Thumbnail(inputPath, 0, p.config.Limits.ImagePreviewMaxHeight, outputPath); err != nil {
 		return err
