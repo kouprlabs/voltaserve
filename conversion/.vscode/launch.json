@@ -5,11 +5,11 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Web API",
+      "name": "Launch Package",
       "type": "go",
       "request": "launch",
       "mode": "auto",
-      "program": "${workspaceFolder}/api/main.go"
+      "program": "main.go"
     }
   ]
 }
