@@ -23,7 +23,7 @@ import (
 var queue [][]core.PipelineOptions
 var workerCount = 1
 
-func worker(index int) {
+func pipelineWorker(index int) {
 	dispatcher := pipeline.NewDispatcher()
 	queue[index] = make([]core.PipelineOptions, 0)
 	fmt.Printf("[%d] Worker running...\n", index)
@@ -63,6 +63,21 @@ func worker(index int) {
 			}
 		} else {
 			time.Sleep(500 * time.Millisecond)
+		}
+	}
+}
+
+func statusWorker() {
+	for {
+		time.Sleep(5 * time.Second)
+		sum := 0
+		for i := 0; i < workerCount; i++ {
+			sum += len(queue[i])
+		}
+		if sum == 0 {
+			fmt.Printf("🌈 Queue empty!\n")
+		} else {
+			fmt.Printf("⏳ Total items in queue: %d\n", sum)
 		}
 	}
 }
@@ -107,15 +122,17 @@ func main() {
 
 	fmt.Printf("Number of CPU cores: %d\n", runtime.NumCPU())
 
-	workerCount = runtime.NumCPU() / 2
+	workerCount = runtime.NumCPU()
 
 	fmt.Printf("Setting the number of workers to: %d\n", workerCount)
 
 	queue = make([][]core.PipelineOptions, workerCount)
 
 	for i := 0; i < workerCount; i++ {
-		go worker(i)
+		go pipelineWorker(i)
 	}
+
+	go statusWorker()
 
 	url, err := url.Parse(cfg.ConversionURL)
 	if err != nil {

@@ -15,9 +15,6 @@ type Config struct {
 
 type LimitsConfig struct {
 	ExternalCommandTimeoutSeconds int `json:"external_command_timeout_seconds"`
-	FileProcessingMaxSizeMB       int `json:"file_processing_max_size_mb"`
-	ImagePreviewMaxWidth          int `json:"image_preview_max_width"`
-	ImagePreviewMaxHeight         int `json:"image_preview_max_height"`
 	MultipartBodyLengthLimitMB    int `json:"multipart_body_length_limit_mb"`
 }
 

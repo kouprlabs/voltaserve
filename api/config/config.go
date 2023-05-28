@@ -95,27 +95,6 @@ func readLimits(config *Config) {
 		}
 		config.Limits.ExternalCommandTimeoutSeconds = int(v)
 	}
-	if len(os.Getenv("LIMITS_FILE_PROCESSING_MAX_SIZE_MB")) > 0 {
-		v, err := strconv.ParseInt(os.Getenv("LIMITS_FILE_PROCESSING_MAX_SIZE_MB"), 10, 32)
-		if err != nil {
-			panic(err)
-		}
-		config.Limits.FileProcessingMaxSizeMB = int(v)
-	}
-	if len(os.Getenv("LIMITS_IMAGE_PREVIEW_MAX_WIDTH")) > 0 {
-		v, err := strconv.ParseInt(os.Getenv("LIMITS_IMAGE_PREVIEW_MAX_WIDTH"), 10, 32)
-		if err != nil {
-			panic(err)
-		}
-		config.Limits.ImagePreviewMaxWidth = int(v)
-	}
-	if len(os.Getenv("LIMITS_IMAGE_PREVIEW_MAX_HEIGHT")) > 0 {
-		v, err := strconv.ParseInt(os.Getenv("LIMITS_IMAGE_PREVIEW_MAX_HEIGHT"), 10, 32)
-		if err != nil {
-			panic(err)
-		}
-		config.Limits.ImagePreviewMaxHeight = int(v)
-	}
 	if len(os.Getenv("LIMITS_MULTIPART_BODY_LENGTH_LIMIT_MB")) > 0 {
 		v, err := strconv.ParseInt(os.Getenv("LIMITS_MULTIPART_BODY_LENGTH_LIMIT_MB"), 10, 32)
 		if err != nil {
