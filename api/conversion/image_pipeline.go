@@ -16,22 +16,15 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-type ImagePipeline struct {
+type imagePipeline struct {
 	s3              *infra.S3Manager
 	snapshotRepo    repo.SnapshotRepo
 	fileSearch      *search.FileSearch
-	pdfPipeline     *PDFPipeline
+	pdfPipeline     Pipeline
 	cmd             *infra.Command
 	imageProc       *infra.ImageProcessor
 	metadataUpdater *metadataUpdater
 	config          config.Config
-}
-
-type ImagePipelineOptions struct {
-	FileId     string
-	SnapshotId string
-	S3Bucket   string
-	S3Key      string
 }
 
 type imageToDataResponse struct {
@@ -57,8 +50,8 @@ type tesseractData struct {
 	WordNum  int64
 }
 
-func NewImagePipeline() *ImagePipeline {
-	return &ImagePipeline{
+func NewImagePipeline() Pipeline {
+	return &imagePipeline{
 		s3:              infra.NewS3Manager(),
 		snapshotRepo:    repo.NewSnapshotRepo(),
 		fileSearch:      search.NewFileSearch(),
@@ -70,7 +63,7 @@ func NewImagePipeline() *ImagePipeline {
 	}
 }
 
-func (p *ImagePipeline) Run(opts ImagePipelineOptions) error {
+func (p *imagePipeline) Run(opts PipelineOptions) error {
 	snapshot, err := p.snapshotRepo.Find(opts.SnapshotId)
 	if err != nil {
 		return err
@@ -101,7 +94,7 @@ func (p *ImagePipeline) Run(opts ImagePipelineOptions) error {
 	imageData, err := p.imageToData(inputPath)
 	if err == nil && imageData.PositiveConfCount > imageData.NegativeConfCount {
 		/* We treat this as a text image, we convert it to PDF/A */
-		if err := p.pdfPipeline.Run(PDFPipelineOptions(opts)); err != nil {
+		if err := p.pdfPipeline.Run(opts); err != nil {
 			/*
 				Here we intentionally ignore the error, here is the explanation why:
 				The reason we came here to begin with is because of
@@ -121,7 +114,7 @@ func (p *ImagePipeline) Run(opts ImagePipelineOptions) error {
 	return nil
 }
 
-func (p *ImagePipeline) imageToData(inputPath string) (imageToDataResponse, error) {
+func (p *imagePipeline) imageToData(inputPath string) (imageToDataResponse, error) {
 	outFile := helpers.NewId()
 	if err := p.cmd.Exec("tesseract", inputPath, outFile, "tsv"); err != nil {
 		return imageToDataResponse{}, err
@@ -173,7 +166,7 @@ func (p *ImagePipeline) imageToData(inputPath string) (imageToDataResponse, erro
 	return res, nil
 }
 
-func (p *ImagePipeline) measureImageProps(snapshot model.Snapshot, inputPath string) error {
+func (p *imagePipeline) measureImageProps(snapshot model.Snapshot, inputPath string) error {
 	width, height, err := p.imageProc.Measure(inputPath)
 	if err != nil {
 		return err
@@ -187,7 +180,7 @@ func (p *ImagePipeline) measureImageProps(snapshot model.Snapshot, inputPath str
 	return nil
 }
 
-func (p *ImagePipeline) generateThumbnail(snapshot model.Snapshot, inputPath string) error {
+func (p *imagePipeline) generateThumbnail(snapshot model.Snapshot, inputPath string) error {
 	width := snapshot.GetOriginal().Image.Width
 	height := snapshot.GetOriginal().Image.Height
 	if width > p.config.Limits.ImagePreviewMaxWidth || height > p.config.Limits.ImagePreviewMaxHeight {

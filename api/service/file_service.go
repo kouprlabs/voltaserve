@@ -195,10 +195,10 @@ type FileService struct {
 	permissionRepo repo.PermissionRepo
 	fileIdentifier *infra.FileIdentifier
 	s3             *infra.S3Manager
-	pdfPipeline    *conversion.PDFPipeline
-	imagePipeline  *conversion.ImagePipeline
-	officePipeline *conversion.OfficePipeline
-	videoPipeline  *conversion.VideoPipeline
+	pdfPipeline    conversion.Pipeline
+	imagePipeline  conversion.Pipeline
+	officePipeline conversion.Pipeline
+	videoPipeline  conversion.Pipeline
 	config         config.Config
 }
 
@@ -347,7 +347,7 @@ func (svc *FileService) Store(fileId string, filePath string, userId string) (*F
 		if err := svc.fileCache.Set(file); err != nil {
 			return nil, err
 		}
-		if err = svc.pdfPipeline.Run(conversion.PDFPipelineOptions{
+		if err = svc.pdfPipeline.Run(conversion.PipelineOptions{
 			FileId:     fileId,
 			SnapshotId: snapshotId,
 			S3Bucket:   workspace.GetBucket(),
@@ -356,7 +356,7 @@ func (svc *FileService) Store(fileId string, filePath string, userId string) (*F
 			return nil, err
 		}
 	} else if svc.fileIdentifier.IsOffice(filepath.Ext(filePath)) || svc.fileIdentifier.IsPlainText(filepath.Ext(filePath)) {
-		if err = svc.officePipeline.Run(conversion.OfficePipelineOptions{
+		if err = svc.officePipeline.Run(conversion.PipelineOptions{
 			FileId:     fileId,
 			SnapshotId: snapshotId,
 			S3Bucket:   workspace.GetBucket(),
@@ -365,7 +365,7 @@ func (svc *FileService) Store(fileId string, filePath string, userId string) (*F
 			return nil, err
 		}
 	} else if svc.fileIdentifier.IsImage(filepath.Ext(filePath)) {
-		if err = svc.imagePipeline.Run(conversion.ImagePipelineOptions{
+		if err = svc.imagePipeline.Run(conversion.PipelineOptions{
 			FileId:     fileId,
 			SnapshotId: snapshotId,
 			S3Bucket:   workspace.GetBucket(),
@@ -374,7 +374,7 @@ func (svc *FileService) Store(fileId string, filePath string, userId string) (*F
 			return nil, err
 		}
 	} else if svc.fileIdentifier.IsVideo(filepath.Ext(filePath)) {
-		if err = svc.videoPipeline.Run(conversion.VideoPipelineOptions{
+		if err = svc.videoPipeline.Run(conversion.PipelineOptions{
 			FileId:     fileId,
 			SnapshotId: snapshotId,
 			S3Bucket:   workspace.GetBucket(),

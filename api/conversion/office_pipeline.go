@@ -11,10 +11,10 @@ import (
 	"voltaserve/repo"
 )
 
-type OfficePipeline struct {
+type officePipeline struct {
 	s3              *infra.S3Manager
 	snapshotRepo    repo.SnapshotRepo
-	pdfPipeline     *PDFPipeline
+	pdfPipeline     Pipeline
 	cmd             *infra.Command
 	metadataUpdater *metadataUpdater
 	workspaceCache  *cache.WorkspaceCache
@@ -22,15 +22,8 @@ type OfficePipeline struct {
 	config          config.Config
 }
 
-type OfficePipelineOptions struct {
-	FileId     string
-	SnapshotId string
-	S3Bucket   string
-	S3Key      string
-}
-
-func NewOfficePipeline() *OfficePipeline {
-	return &OfficePipeline{
+func NewOfficePipeline() Pipeline {
+	return &officePipeline{
 		s3:              infra.NewS3Manager(),
 		snapshotRepo:    repo.NewSnapshotRepo(),
 		pdfPipeline:     NewPDFPipeline(),
@@ -42,7 +35,7 @@ func NewOfficePipeline() *OfficePipeline {
 	}
 }
 
-func (svc *OfficePipeline) Run(opts OfficePipelineOptions) error {
+func (svc *officePipeline) Run(opts PipelineOptions) error {
 	snapshot, err := svc.snapshotRepo.Find(opts.SnapshotId)
 	if err != nil {
 		return err
@@ -58,7 +51,7 @@ func (svc *OfficePipeline) Run(opts OfficePipelineOptions) error {
 	if err := svc.save(snapshot, opts, outputPath); err != nil {
 		return err
 	}
-	if err := svc.pdfPipeline.Run(PDFPipelineOptions{
+	if err := svc.pdfPipeline.Run(PipelineOptions{
 		FileId:     opts.FileId,
 		SnapshotId: opts.SnapshotId,
 		S3Bucket:   opts.S3Bucket,
@@ -79,7 +72,7 @@ func (svc *OfficePipeline) Run(opts OfficePipelineOptions) error {
 	return nil
 }
 
-func (svc *OfficePipeline) generatePDF(inputPath string) (string, error) {
+func (svc *officePipeline) generatePDF(inputPath string) (string, error) {
 	outputDirectory := filepath.FromSlash(os.TempDir() + "/" + helpers.NewId())
 	if err := os.MkdirAll(outputDirectory, 0755); err != nil {
 		return "", err
@@ -101,7 +94,7 @@ func (svc *OfficePipeline) generatePDF(inputPath string) (string, error) {
 	return newOutputPath, nil
 }
 
-func (svc *OfficePipeline) save(snapshot model.Snapshot, opts OfficePipelineOptions, outputPath string) error {
+func (svc *officePipeline) save(snapshot model.Snapshot, opts PipelineOptions, outputPath string) error {
 	file, err := svc.fileCache.Get(opts.FileId)
 	if err != nil {
 		return err
