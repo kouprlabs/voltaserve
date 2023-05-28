@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"runtime"
+	"time"
 
 	"voltaserve/config"
 	"voltaserve/core"
@@ -18,20 +20,23 @@ import (
 	"github.com/joho/godotenv"
 )
 
-var queue = make([]core.PipelineOptions, 0)
+var queue [][]core.PipelineOptions
+var workerCount = 1
 
-func worker() {
+func worker(index int) {
 	dispatcher := pipeline.NewDispatcher()
+	queue[index] = make([]core.PipelineOptions, 0)
+	fmt.Printf("[%d] Worker running...\n", index)
 	for {
-		if len(queue) > 0 {
-			opts := queue[0]
-			queue = queue[1:]
-			fmt.Printf("[Started 🚀] FileID=%s SnapshotID=%s S3Bucket=%s S3Key=%s\n", opts.FileID, opts.SnapshotID, opts.Bucket, opts.Key)
+		if len(queue[index]) > 0 {
+			opts := queue[index][0]
+			queue[index] = queue[index][1:]
+			fmt.Printf("[%d] [🚀 Pipeline started] FileID=%s SnapshotID=%s S3Bucket=%s S3Key=%s\n", index, opts.FileID, opts.SnapshotID, opts.Bucket, opts.Key)
 			pipelineResponse, err := dispatcher.Dispatch(opts)
 			if err == nil {
 				pipelineResponse.Options = opts
-				fmt.Printf("[Completed 🎉] FileID=%s SnapshotID=%s S3Bucket=%s S3Key=%s\n", opts.FileID, opts.SnapshotID, opts.Bucket, opts.Key)
-				fmt.Printf("[Result ☕️] Thumbnail=%t Preview=%t Text=%t OCR=%t\n", pipelineResponse.Thumbnail != nil, pipelineResponse.Preview != nil, pipelineResponse.Text != nil, pipelineResponse.OCR != nil)
+				fmt.Printf("[%d] [👍 Pipeline completed] FileID=%s SnapshotID=%s S3Bucket=%s S3Key=%s\n", index, opts.FileID, opts.SnapshotID, opts.Bucket, opts.Key)
+				fmt.Printf("[%d] [☕️ Pipeline Result] Thumbnail=%t Preview=%t Text=%t OCR=%t\n", index, pipelineResponse.Thumbnail != nil, pipelineResponse.Preview != nil, pipelineResponse.Text != nil, pipelineResponse.OCR != nil)
 				body, err := json.Marshal(pipelineResponse)
 				if err != nil {
 					log.Error(err)
@@ -47,13 +52,17 @@ func worker() {
 				client := &http.Client{}
 				res, err := client.Do(req)
 				if err != nil {
+					fmt.Printf("[%d] [❌ Request failed!]\n", index)
 					log.Error(err)
 					continue
 				}
 				res.Body.Close()
+				fmt.Printf("[%d] [🎉 Request succeeded!]\n", index)
 			} else {
-				fmt.Printf("[Failed ❌] FileID=%s SnapshotID=%s S3Bucket=%s S3Key=%s\n", opts.FileID, opts.SnapshotID, opts.Bucket, opts.Key)
+				fmt.Printf("[%d] [❌ Pipeline failed] FileID=%s SnapshotID=%s S3Bucket=%s S3Key=%s\n", index, opts.FileID, opts.SnapshotID, opts.Bucket, opts.Key)
 			}
+		} else {
+			time.Sleep(500 * time.Millisecond)
 		}
 	}
 }
@@ -83,11 +92,30 @@ func main() {
 		if err := c.BodyParser(opts); err != nil {
 			return err
 		}
-		queue = append(queue, *opts)
+		workerIndex := 0
+		queueLength := len(queue[0])
+		for i := 0; i < workerCount; i++ {
+			if len(queue[i]) < queueLength {
+				workerIndex = i
+				queueLength = len(queue[i])
+			}
+		}
+		fmt.Printf("Choosing worker 👉 %d\n", workerIndex)
+		queue[workerIndex] = append(queue[workerIndex], *opts)
 		return c.SendStatus(200)
 	})
 
-	go worker()
+	fmt.Printf("Number of CPU cores: %d\n", runtime.NumCPU())
+
+	workerCount = runtime.NumCPU() / 2
+
+	fmt.Printf("Setting the number of workers to: %d\n", workerCount)
+
+	queue = make([][]core.PipelineOptions, workerCount)
+
+	for i := 0; i < workerCount; i++ {
+		go worker(i)
+	}
 
 	url, err := url.Parse(cfg.ConversionURL)
 	if err != nil {
