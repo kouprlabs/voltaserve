@@ -1,5 +1,17 @@
 package config
 
+type Config struct {
+	APIURL      string         `json:"api_url"`
+	UIURL       string         `json:"ui_url"`
+	DatabaseURL string         `json:"database_url"`
+	Search      SearchConfig   `json:"search"`
+	Redis       RedisConfig    `json:"redis"`
+	S3          S3Config       `json:"s3"`
+	Limits      LimitsConfig   `json:"limits"`
+	Security    SecurityConfig `json:"security"`
+	SMTP        SMTPConfig     `json:"smtp"`
+}
+
 type LimitsConfig struct {
 	ExternalCommandTimeoutSeconds int `json:"external_command_timeout_seconds"`
 	FileProcessingMaxSizeMB       int `json:"file_processing_max_size_mb"`
@@ -46,16 +58,4 @@ type SMTPConfig struct {
 	Password      string `json:"password"`
 	SenderAddress string `json:"sender_address"`
 	SenderName    string `json:"sender_name"`
-}
-
-type Config struct {
-	APIURL      string         `json:"api_url"`
-	UIURL       string         `json:"ui_url"`
-	DatabaseURL string         `json:"database_url"`
-	Search      SearchConfig   `json:"search"`
-	Redis       RedisConfig    `json:"redis"`
-	S3          S3Config       `json:"s3"`
-	Limits      LimitsConfig   `json:"limits"`
-	Security    SecurityConfig `json:"security"`
-	SMTP        SMTPConfig     `json:"smtp"`
 }
