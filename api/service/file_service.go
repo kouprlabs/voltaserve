@@ -341,13 +341,13 @@ func (svc *FileService) Store(fileId string, filePath string, userId string) (*F
 	if err != nil {
 		return nil, err
 	}
-	pipelineOptions := ConversionWebhookOptions{
+	webhookOptions := ConversionWebhookOptions{
 		FileID:     file.GetID(),
 		SnapshotID: snapshot.GetID(),
 		Bucket:     original.Bucket,
 		Key:        original.Key,
 	}
-	body, err := json.Marshal(pipelineOptions)
+	body, err := json.Marshal(webhookOptions)
 	if err != nil {
 		return nil, err
 	}
