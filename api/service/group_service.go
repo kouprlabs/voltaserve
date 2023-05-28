@@ -5,7 +5,7 @@ import (
 	"voltaserve/cache"
 	"voltaserve/config"
 	"voltaserve/guard"
-	"voltaserve/helpers"
+	"voltaserve/helper"
 	"voltaserve/infra"
 	"voltaserve/model"
 	"voltaserve/repo"
@@ -105,7 +105,7 @@ func (svc *GroupService) Create(req GroupCreateOptions, userId string) (*Group, 
 		return nil, err
 	}
 	group, err := svc.groupRepo.Insert(repo.GroupInsertOptions{
-		ID:             helpers.NewId(),
+		ID:             helper.NewId(),
 		Name:           req.Name,
 		OrganizationId: req.OrganizationId,
 		OwnerId:        userId,

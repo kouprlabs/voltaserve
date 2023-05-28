@@ -6,7 +6,7 @@ import (
 	"strings"
 	"voltaserve/cache"
 	"voltaserve/config"
-	"voltaserve/helpers"
+	"voltaserve/helper"
 	"voltaserve/infra"
 	"voltaserve/model"
 	"voltaserve/repo"
@@ -69,7 +69,7 @@ func (p *pdfPipeline) Run(opts PipelineOptions) error {
 }
 
 func (p *pdfPipeline) generateOCR(inputPath string) (string, error) {
-	outputPath := filepath.FromSlash(os.TempDir() + "/" + helpers.NewId() + ".pdf")
+	outputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewId() + ".pdf")
 	if err := p.cmd.Exec("ocrmypdf", "--rotate-pages", "--clean", "--deskew", "--image-dpi=300", inputPath, outputPath); err != nil {
 		return "", err
 	}
@@ -114,7 +114,7 @@ func (p *pdfPipeline) saveOCRAndProcess(snapshot model.Snapshot, opts PipelineOp
 
 func (p *pdfPipeline) getSuitableInputPath(opts PipelineOptions) (string, error) {
 	extension := filepath.Ext(opts.S3Key)
-	path := filepath.FromSlash(os.TempDir() + "/" + helpers.NewId() + extension)
+	path := filepath.FromSlash(os.TempDir() + "/" + helper.NewId() + extension)
 	if err := p.minio.GetFile(opts.S3Key, path, opts.S3Bucket); err != nil {
 		return "", err
 	}
@@ -122,7 +122,7 @@ func (p *pdfPipeline) getSuitableInputPath(opts PipelineOptions) (string, error)
 	// If an image, convert it to jpeg, because ocrmypdf supports jpeg only
 	if extension == ".jpg" || extension == ".jpeg" {
 		oldPath := path
-		path = filepath.FromSlash(os.TempDir() + "/" + helpers.NewId() + ".jpg")
+		path = filepath.FromSlash(os.TempDir() + "/" + helper.NewId() + ".jpg")
 		if err := p.cmd.Exec("gm", "convert", oldPath, path); err != nil {
 			return "", err
 		}
@@ -138,7 +138,7 @@ func (p *pdfPipeline) process(opts PipelineOptions) error {
 	if err != nil {
 		return err
 	}
-	inputPath := filepath.FromSlash(os.TempDir() + "/" + helpers.NewId())
+	inputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewId())
 	if err := p.minio.GetFile(opts.S3Key, inputPath, opts.S3Bucket); err != nil {
 		return err
 	}
@@ -169,7 +169,7 @@ func (p *pdfPipeline) process(opts PipelineOptions) error {
 }
 
 func (p *pdfPipeline) generateThumbnail(snapshot model.Snapshot, opts PipelineOptions, inputPath string) error {
-	outputPath := filepath.FromSlash(os.TempDir() + "/" + helpers.NewId() + ".jpg")
+	outputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewId() + ".jpg")
 	if err := p.imageProc.Thumbnail(inputPath, 0, p.config.Limits.ImagePreviewMaxHeight, outputPath); err != nil {
 		return err
 	}
@@ -221,7 +221,7 @@ func (p *pdfPipeline) storeInS3(snapshot model.Snapshot, opts PipelineOptions, t
 }
 
 func (p *pdfPipeline) extractText(inputPath string) (string, int64, error) {
-	outputPath := filepath.FromSlash(os.TempDir() + "/" + helpers.NewId())
+	outputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewId())
 	if err := p.cmd.Exec("pdftotext", inputPath, outputPath); err != nil {
 		return "", 0, err
 	}

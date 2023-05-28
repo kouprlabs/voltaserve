@@ -4,7 +4,7 @@ import (
 	"errors"
 	"time"
 	"voltaserve/errorpkg"
-	"voltaserve/helpers"
+	"voltaserve/helper"
 	"voltaserve/infra"
 	"voltaserve/model"
 
@@ -143,7 +143,7 @@ func (repo *workspaceRepo) Insert(opts WorkspaceInsertOptions) (model.Workspace,
 	if len(opts.ID) > 0 {
 		id = opts.ID
 	} else {
-		id = helpers.NewId()
+		id = helper.NewId()
 	}
 	workspace := workspaceEntity{
 		ID:              id,
@@ -310,7 +310,7 @@ func (repo *workspaceRepo) GrantUserPermission(id string, userId string, permiss
 	db := repo.db.Exec(
 		"INSERT INTO userpermission (id, user_id, resource_id, permission) "+
 			"VALUES (?, ?, ?, ?) ON CONFLICT (user_id, resource_id) DO UPDATE SET permission = ?",
-		helpers.NewId(), userId, id, permission, permission)
+		helper.NewId(), userId, id, permission, permission)
 	if db.Error != nil {
 		return db.Error
 	}

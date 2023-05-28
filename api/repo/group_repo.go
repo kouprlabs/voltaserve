@@ -4,7 +4,7 @@ import (
 	"errors"
 	"time"
 	"voltaserve/errorpkg"
-	"voltaserve/helpers"
+	"voltaserve/helper"
 	"voltaserve/infra"
 	"voltaserve/model"
 
@@ -293,7 +293,7 @@ func (repo *groupRepo) GrantUserPermission(id string, userId string, permission 
 	db := repo.db.Exec(
 		"INSERT INTO userpermission (id, user_id, resource_id, permission) "+
 			"VALUES (?, ?, ?, ?) ON CONFLICT (user_id, resource_id) DO UPDATE SET permission = ?",
-		helpers.NewId(), userId, id, permission, permission)
+		helper.NewId(), userId, id, permission, permission)
 	if db.Error != nil {
 		return db.Error
 	}

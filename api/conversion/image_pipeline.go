@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 	"voltaserve/config"
-	"voltaserve/helpers"
+	"voltaserve/helper"
 	"voltaserve/infra"
 	"voltaserve/model"
 	"voltaserve/repo"
@@ -68,12 +68,12 @@ func (p *imagePipeline) Run(opts PipelineOptions) error {
 	if err != nil {
 		return err
 	}
-	inputPath := filepath.FromSlash(os.TempDir() + "/" + helpers.NewId() + filepath.Ext(opts.S3Key))
+	inputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewId() + filepath.Ext(opts.S3Key))
 	if err := p.s3.GetFile(opts.S3Key, inputPath, opts.S3Bucket); err != nil {
 		return err
 	}
 	if filepath.Ext(opts.S3Key) == ".tiff" {
-		newInputFile := filepath.FromSlash(os.TempDir() + "/" + helpers.NewId() + ".jpg")
+		newInputFile := filepath.FromSlash(os.TempDir() + "/" + helper.NewId() + ".jpg")
 		if err := p.imageProc.Convert(inputPath, newInputFile); err != nil {
 			return err
 		}
@@ -115,7 +115,7 @@ func (p *imagePipeline) Run(opts PipelineOptions) error {
 }
 
 func (p *imagePipeline) imageToData(inputPath string) (imageToDataResponse, error) {
-	outFile := helpers.NewId()
+	outFile := helper.NewId()
 	if err := p.cmd.Exec("tesseract", inputPath, outFile, "tsv"); err != nil {
 		return imageToDataResponse{}, err
 	}
@@ -184,7 +184,7 @@ func (p *imagePipeline) generateThumbnail(snapshot model.Snapshot, inputPath str
 	width := snapshot.GetOriginal().Image.Width
 	height := snapshot.GetOriginal().Image.Height
 	if width > p.config.Limits.ImagePreviewMaxWidth || height > p.config.Limits.ImagePreviewMaxHeight {
-		outputPath := filepath.FromSlash(os.TempDir() + "/" + helpers.NewId() + filepath.Ext(inputPath))
+		outputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewId() + filepath.Ext(inputPath))
 		if width > height {
 			if err := p.imageProc.Resize(inputPath, p.config.Limits.ImagePreviewMaxWidth, 0, outputPath); err != nil {
 				return err

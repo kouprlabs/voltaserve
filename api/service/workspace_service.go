@@ -6,7 +6,7 @@ import (
 	"voltaserve/config"
 	"voltaserve/errorpkg"
 	"voltaserve/guard"
-	"voltaserve/helpers"
+	"voltaserve/helper"
 	"voltaserve/infra"
 	"voltaserve/model"
 	"voltaserve/repo"
@@ -81,7 +81,7 @@ func NewWorkspaceService() *WorkspaceService {
 }
 
 func (svc *WorkspaceService) Create(req CreateWorkspaceOptions, userId string) (*Workspace, error) {
-	id := helpers.NewId()
+	id := helper.NewId()
 	bucket := strings.ReplaceAll(uuid.NewString(), "-", "")
 	if err := svc.s3.CreateBucket(bucket); err != nil {
 		return nil, err
