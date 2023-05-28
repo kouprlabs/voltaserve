@@ -273,6 +273,7 @@ services:
     environment:
       - API_URL=http://${VOLTASERVE_HOSTNAME}:${VOLTASERVE_API_PORT}
       - UI_URL=http://${VOLTASERVE_HOSTNAME}:${VOLTASERVE_UI_PORT}
+      - CONVERSION_URL=http://conversion:5001
       - POSTGRES_URL=postgresql://voltaserve@roach1:26257/voltaserve
       - S3_URL=minio-nginx:9000
       - SEARCH_URL=http://meilisearch:7700
