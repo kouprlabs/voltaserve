@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -103,6 +104,15 @@ func main() {
 	app := fiber.New()
 
 	app.Post("v1/pipelines", func(c *fiber.Ctx) error {
+		apiKey := c.Query("api_key")
+		if apiKey == "" {
+			c.SendStatus(http.StatusBadRequest)
+			return errors.New("missing query param api_key")
+		}
+		if apiKey != cfg.Security.APIKey {
+			c.SendStatus(http.StatusUnauthorized)
+			return errors.New("invalid api_key")
+		}
 		opts := new(core.PipelineOptions)
 		if err := c.BodyParser(opts); err != nil {
 			return err

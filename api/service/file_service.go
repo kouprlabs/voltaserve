@@ -351,7 +351,8 @@ func (svc *FileService) Store(fileId string, filePath string, userId string) (*F
 	if err != nil {
 		return nil, err
 	}
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/pipelines", config.GetConfig().ConversionURL), bytes.NewBuffer(body))
+	cfg := config.GetConfig()
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/pipelines?api_key=%s", cfg.ConversionURL, cfg.Security.APIKey), bytes.NewBuffer(body))
 	if err != nil {
 		return nil, err
 	}
@@ -366,8 +367,8 @@ func (svc *FileService) Store(fileId string, filePath string, userId string) (*F
 	return res, nil
 }
 
-func (svc *FileService) UpdateSnapshot(opts UpdateSnapshotOptions, accessToken string) error {
-	if accessToken != svc.config.Security.APIKey {
+func (svc *FileService) UpdateSnapshot(opts UpdateSnapshotOptions, apiKey string) error {
+	if apiKey != svc.config.Security.APIKey {
 		return errorpkg.NewInvalidAPIKeyError()
 	}
 	snapshot, err := svc.snapshotRepo.Find(opts.Options.SnapshotID)
