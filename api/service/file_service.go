@@ -348,8 +348,8 @@ func (svc *FileService) Store(fileId string, filePath string, userId string) (*F
 			return nil, err
 		}
 		if err = svc.pdfPipeline.Run(conversion.PipelineOptions{
-			FileId:     fileId,
-			SnapshotId: snapshotId,
+			FileID:     fileId,
+			SnapshotID: snapshotId,
 			S3Bucket:   workspace.GetBucket(),
 			S3Key:      original.Key,
 		}); err != nil {
@@ -357,8 +357,8 @@ func (svc *FileService) Store(fileId string, filePath string, userId string) (*F
 		}
 	} else if svc.fileIdentifier.IsOffice(filepath.Ext(filePath)) || svc.fileIdentifier.IsPlainText(filepath.Ext(filePath)) {
 		if err = svc.officePipeline.Run(conversion.PipelineOptions{
-			FileId:     fileId,
-			SnapshotId: snapshotId,
+			FileID:     fileId,
+			SnapshotID: snapshotId,
 			S3Bucket:   workspace.GetBucket(),
 			S3Key:      original.Key,
 		}); err != nil {
@@ -366,8 +366,8 @@ func (svc *FileService) Store(fileId string, filePath string, userId string) (*F
 		}
 	} else if svc.fileIdentifier.IsImage(filepath.Ext(filePath)) {
 		if err = svc.imagePipeline.Run(conversion.PipelineOptions{
-			FileId:     fileId,
-			SnapshotId: snapshotId,
+			FileID:     fileId,
+			SnapshotID: snapshotId,
 			S3Bucket:   workspace.GetBucket(),
 			S3Key:      original.Key,
 		}); err != nil {
@@ -375,8 +375,8 @@ func (svc *FileService) Store(fileId string, filePath string, userId string) (*F
 		}
 	} else if svc.fileIdentifier.IsVideo(filepath.Ext(filePath)) {
 		if err = svc.videoPipeline.Run(conversion.PipelineOptions{
-			FileId:     fileId,
-			SnapshotId: snapshotId,
+			FileID:     fileId,
+			SnapshotID: snapshotId,
 			S3Bucket:   workspace.GetBucket(),
 			S3Key:      original.Key,
 		}); err != nil {

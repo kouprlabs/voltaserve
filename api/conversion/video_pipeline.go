@@ -38,7 +38,7 @@ func NewVideoPipeline() Pipeline {
 }
 
 func (p *VideoPipeline) Run(opts PipelineOptions) error {
-	snapshot, err := p.snapshotRepo.Find(opts.SnapshotId)
+	snapshot, err := p.snapshotRepo.Find(opts.SnapshotID)
 	if err != nil {
 		return err
 	}
@@ -75,7 +75,7 @@ func (p *VideoPipeline) generateThumbnail(snapshot model.Snapshot, opts Pipeline
 		Width:  thumbnailWidth,
 		Height: thumbnailHeight,
 	})
-	if err := p.metadataUpdater.update(snapshot, opts.FileId); err != nil {
+	if err := p.metadataUpdater.update(snapshot, opts.FileID); err != nil {
 		return err
 	}
 	if _, err := os.Stat(outputPath); err == nil {

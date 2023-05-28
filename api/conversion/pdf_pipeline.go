@@ -37,7 +37,7 @@ func NewPDFPipeline() Pipeline {
 }
 
 func (p *pdfPipeline) Run(opts PipelineOptions) error {
-	snapshot, err := p.snapshotRepo.Find(opts.SnapshotId)
+	snapshot, err := p.snapshotRepo.Find(opts.SnapshotID)
 	if err != nil {
 		return err
 	}
@@ -77,7 +77,7 @@ func (p *pdfPipeline) generateOCR(inputPath string) (string, error) {
 }
 
 func (p *pdfPipeline) saveOCRAndProcess(snapshot model.Snapshot, opts PipelineOptions, outputPath string) error {
-	file, err := p.fileCache.Get(opts.FileId)
+	file, err := p.fileCache.Get(opts.FileID)
 	if err != nil {
 		return err
 	}
@@ -92,18 +92,18 @@ func (p *pdfPipeline) saveOCRAndProcess(snapshot model.Snapshot, opts PipelineOp
 	ocrSize := stat.Size()
 	snapshot.SetOCR(&model.S3Object{
 		Bucket: workspace.GetBucket(),
-		Key:    filepath.FromSlash(opts.FileId + "/" + opts.SnapshotId + "/ocr.pdf"),
+		Key:    filepath.FromSlash(opts.FileID + "/" + opts.SnapshotID + "/ocr.pdf"),
 		Size:   ocrSize,
 	})
 	if err := p.minio.PutFile(snapshot.GetOCR().Key, outputPath, infra.DetectMimeFromFile(outputPath), workspace.GetBucket()); err != nil {
 		return err
 	}
-	if err := p.metadataUpdater.update(snapshot, opts.FileId); err != nil {
+	if err := p.metadataUpdater.update(snapshot, opts.FileID); err != nil {
 		return err
 	}
 	if err := p.process(PipelineOptions{
-		FileId:     opts.FileId,
-		SnapshotId: opts.SnapshotId,
+		FileID:     opts.FileID,
+		SnapshotID: opts.SnapshotID,
 		S3Bucket:   opts.S3Bucket,
 		S3Key:      snapshot.GetOCR().Key,
 	}); err != nil {
@@ -134,7 +134,7 @@ func (p *pdfPipeline) getSuitableInputPath(opts PipelineOptions) (string, error)
 }
 
 func (p *pdfPipeline) process(opts PipelineOptions) error {
-	snapshot, err := p.snapshotRepo.Find(opts.SnapshotId)
+	snapshot, err := p.snapshotRepo.Find(opts.SnapshotID)
 	if err != nil {
 		return err
 	}
@@ -186,7 +186,7 @@ func (p *pdfPipeline) generateThumbnail(snapshot model.Snapshot, opts PipelineOp
 		Width:  thumbnailWidth,
 		Height: thumbnailHeight,
 	})
-	if err := p.metadataUpdater.update(snapshot, opts.FileId); err != nil {
+	if err := p.metadataUpdater.update(snapshot, opts.FileID); err != nil {
 		return err
 	}
 	if _, err := os.Stat(outputPath); err == nil {
@@ -198,7 +198,7 @@ func (p *pdfPipeline) generateThumbnail(snapshot model.Snapshot, opts PipelineOp
 }
 
 func (p *pdfPipeline) storeInS3(snapshot model.Snapshot, opts PipelineOptions, text string, size int64) error {
-	file, err := p.fileCache.Get(opts.FileId)
+	file, err := p.fileCache.Get(opts.FileID)
 	if err != nil {
 		return err
 	}
@@ -208,13 +208,13 @@ func (p *pdfPipeline) storeInS3(snapshot model.Snapshot, opts PipelineOptions, t
 	}
 	snapshot.SetText(&model.S3Object{
 		Bucket: workspace.GetBucket(),
-		Key:    filepath.FromSlash(opts.FileId + "/" + opts.SnapshotId + "/text.txt"),
+		Key:    filepath.FromSlash(opts.FileID + "/" + opts.SnapshotID + "/text.txt"),
 		Size:   size,
 	})
 	if err := p.minio.PutText(snapshot.GetText().Key, text, "text/plain", workspace.GetBucket()); err != nil {
 		return err
 	}
-	if err := p.metadataUpdater.update(snapshot, opts.FileId); err != nil {
+	if err := p.metadataUpdater.update(snapshot, opts.FileID); err != nil {
 		return err
 	}
 	return nil
@@ -247,7 +247,7 @@ func (p *pdfPipeline) deleteOCRData(snapshot model.Snapshot, opts PipelineOption
 		return err
 	}
 	snapshot.SetOCR(nil)
-	if err := p.metadataUpdater.update(snapshot, opts.FileId); err != nil {
+	if err := p.metadataUpdater.update(snapshot, opts.FileID); err != nil {
 		return err
 	}
 	return nil
