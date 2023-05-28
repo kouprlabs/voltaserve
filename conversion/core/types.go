@@ -8,15 +8,15 @@ type PipelineOptions struct {
 }
 
 type PipelineResponse struct {
-	Preview   *S3Object
-	Text      *S3Object
-	OCR       *S3Object
-	Thumbnail *Thumbnail
+	Preview   *S3Object  `json:"preview,omitempty"`
+	Text      *S3Object  `json:"text,omitempty"`
+	OCR       *S3Object  `json:"ocr,omitempty"`
+	Thumbnail *Thumbnail `json:"thumbnail,omitempty"`
 }
 
 type S3Object struct {
-	Bucket string      `json:"bucket,omitempty"`
-	Key    string      `json:"key,omitempty"`
+	Bucket string      `json:"bucket"`
+	Key    string      `json:"key"`
 	Size   int64       `json:"size"`
 	Image  *ImageProps `json:"image,omitempty"`
 }

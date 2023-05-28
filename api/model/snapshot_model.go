@@ -25,8 +25,8 @@ type Snapshot interface {
 }
 
 type S3Object struct {
-	Bucket string      `json:"bucket,omitempty"`
-	Key    string      `json:"key,omitempty"`
+	Bucket string      `json:"bucket"`
+	Key    string      `json:"key"`
 	Size   int64       `json:"size"`
 	Image  *ImageProps `json:"image,omitempty"`
 }

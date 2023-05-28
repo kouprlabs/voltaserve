@@ -11,6 +11,7 @@ func GetConfig() Config {
 	if config == nil {
 		config = &Config{}
 		readURLs(config)
+		readSecurity(config)
 		readS3(config)
 		readLimits(config)
 	}
@@ -20,6 +21,10 @@ func GetConfig() Config {
 func readURLs(config *Config) {
 	config.ConversionURL = os.Getenv("CONVERSION_URL")
 	config.APIURL = os.Getenv("API_URL")
+}
+
+func readSecurity(config *Config) {
+	config.Security.APIKey = os.Getenv("SECURITY_API_KEY")
 }
 
 func readS3(config *Config) {

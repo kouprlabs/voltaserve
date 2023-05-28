@@ -52,8 +52,12 @@ func main() {
 	}))
 
 	f := v1.Group("files")
+
 	fileDownloads := router.NewFileDownloadRouter()
 	fileDownloads.AppendRoutes(f)
+
+	conversionWebhook := router.NewConversionWebhookRouter()
+	conversionWebhook.AppendRoutes(f)
 
 	app.Use(jwtware.New(jwtware.Config{
 		SigningKey: []byte(settings.Security.JWTSigningKey),

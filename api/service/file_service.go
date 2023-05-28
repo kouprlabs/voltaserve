@@ -159,6 +159,13 @@ type GroupPermission struct {
 	Permission string `json:"permission"`
 }
 
+type UpdateSnapshotOptions struct {
+	Preview   *model.S3Object `json:"preview"`
+	Text      *model.S3Object `json:"text"`
+	OCR       *model.S3Object `json:"ocr"`
+	Thumbnail *Thumbnail      `json:"thumbnail"`
+}
+
 const SortByName = "name"
 const SortByKind = "kind"
 const SortBySize = "size"
@@ -392,6 +399,13 @@ func (svc *FileService) Store(fileId string, filePath string, userId string) (*F
 		return nil, err
 	}
 	return v, nil
+}
+
+func (svc *FileService) UpdateSnapshot(opts UpdateSnapshotOptions, accessToken string) error {
+	if accessToken != svc.config.Security.APIKey {
+		return errorpkg.NewInvalidAPIKeyError()
+	}
+	return nil
 }
 
 func (svc *FileService) DownloadOriginalFile(id string, userId string) (string, model.File, model.Snapshot, error) {

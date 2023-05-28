@@ -31,6 +31,7 @@ func readURLs(config *Config) {
 func readSecurity(config *Config) {
 	config.Security.JWTSigningKey = os.Getenv("SECURITY_JWT_SIGNING_KEY")
 	config.Security.CORSOrigins = strings.Split(os.Getenv("SECURITY_CORS_ORIGINS"), ",")
+	config.Security.APIKey = os.Getenv("SECURITY_API_KEY")
 }
 
 func readS3(config *Config) {

@@ -48,6 +48,7 @@ type S3Config struct {
 type SecurityConfig struct {
 	JWTSigningKey string   `json:"jwt_signing_key"`
 	CORSOrigins   []string `json:"cors_origins"`
+	APIKey        string   `json:"api_key"`
 }
 
 type SMTPConfig struct {

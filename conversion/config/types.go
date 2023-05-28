@@ -1,10 +1,15 @@
 package config
 
 type Config struct {
-	ConversionURL string       `json:"conversion_url"`
-	APIURL        string       `json:"api_url"`
-	Limits        LimitsConfig `json:"limits"`
-	S3            S3Config     `json:"s3"`
+	ConversionURL string         `json:"conversion_url"`
+	APIURL        string         `json:"api_url"`
+	Security      SecurityConfig `json:"security"`
+	Limits        LimitsConfig   `json:"limits"`
+	S3            S3Config       `json:"s3"`
+}
+
+type SecurityConfig struct {
+	APIKey string `json:"api_key"`
 }
 
 type LimitsConfig struct {
