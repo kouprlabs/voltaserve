@@ -2,7 +2,9 @@ package service
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
+	"net/http"
 	"os"
 	"path/filepath"
 	"sort"
@@ -10,7 +12,6 @@ import (
 	"time"
 	"voltaserve/cache"
 	"voltaserve/config"
-	"voltaserve/conversion"
 	"voltaserve/errorpkg"
 	"voltaserve/guard"
 	"voltaserve/helper"
@@ -159,6 +160,22 @@ type GroupPermission struct {
 	Permission string `json:"permission"`
 }
 
+type ConversionWebhookOptions struct {
+	FileID     string `json:"fileId"`
+	SnapshotID string `json:"snapshotId"`
+	Bucket     string `json:"bucket"`
+	Key        string `json:"key"`
+}
+
+type UpdateSnapshotOptions struct {
+	Options   ConversionWebhookOptions `json:"options"`
+	Original  *model.S3Object          `json:"original"`
+	Preview   *model.S3Object          `json:"preview"`
+	Text      *model.S3Object          `json:"text"`
+	OCR       *model.S3Object          `json:"ocr"`
+	Thumbnail *model.Thumbnail         `json:"thumbnail"`
+}
+
 const SortByName = "name"
 const SortByKind = "kind"
 const SortBySize = "size"
@@ -195,10 +212,6 @@ type FileService struct {
 	permissionRepo repo.PermissionRepo
 	fileIdentifier *infra.FileIdentifier
 	s3             *infra.S3Manager
-	pdfPipeline    conversion.Pipeline
-	imagePipeline  conversion.Pipeline
-	officePipeline conversion.Pipeline
-	videoPipeline  conversion.Pipeline
 	config         config.Config
 }
 
@@ -222,10 +235,6 @@ func NewFileService() *FileService {
 		permissionRepo: repo.NewPermissionRepo(),
 		fileIdentifier: infra.NewFileIdentifier(),
 		s3:             infra.NewS3Manager(),
-		pdfPipeline:    conversion.NewPDFPipeline(),
-		imagePipeline:  conversion.NewImagePipeline(),
-		officePipeline: conversion.NewOfficePipeline(),
-		videoPipeline:  conversion.NewVideoPipeline(),
 		config:         config.GetConfig(),
 	}
 }
@@ -325,73 +334,74 @@ func (svc *FileService) Store(fileId string, filePath string, userId string) (*F
 	if err := svc.snapshotRepo.Save(snapshot); err != nil {
 		return nil, err
 	}
-	if stat.Size() >= int64(svc.config.Limits.FileProcessingMaxSizeMB*1000000) {
-		v, err := svc.fileMapper.MapFile(file, userId)
-		if err != nil {
-			return nil, err
-		}
-		return v, nil
-	}
-	if svc.fileIdentifier.IsPDF(filepath.Ext(filePath)) {
-		snapshot.SetPreview(&model.S3Object{
-			Bucket: original.Bucket,
-			Key:    original.Key,
-			Size:   original.Size,
-		})
-		if err = svc.snapshotRepo.Save(snapshot); err != nil {
-			return nil, err
-		}
-		if file, err = svc.fileRepo.Find(fileId); err != nil {
-			return nil, err
-		}
-		if err := svc.fileCache.Set(file); err != nil {
-			return nil, err
-		}
-		if err = svc.pdfPipeline.Run(conversion.PipelineOptions{
-			FileID:     fileId,
-			SnapshotID: snapshotId,
-			S3Bucket:   workspace.GetBucket(),
-			S3Key:      original.Key,
-		}); err != nil {
-			return nil, err
-		}
-	} else if svc.fileIdentifier.IsOffice(filepath.Ext(filePath)) || svc.fileIdentifier.IsPlainText(filepath.Ext(filePath)) {
-		if err = svc.officePipeline.Run(conversion.PipelineOptions{
-			FileID:     fileId,
-			SnapshotID: snapshotId,
-			S3Bucket:   workspace.GetBucket(),
-			S3Key:      original.Key,
-		}); err != nil {
-			return nil, err
-		}
-	} else if svc.fileIdentifier.IsImage(filepath.Ext(filePath)) {
-		if err = svc.imagePipeline.Run(conversion.PipelineOptions{
-			FileID:     fileId,
-			SnapshotID: snapshotId,
-			S3Bucket:   workspace.GetBucket(),
-			S3Key:      original.Key,
-		}); err != nil {
-			return nil, err
-		}
-	} else if svc.fileIdentifier.IsVideo(filepath.Ext(filePath)) {
-		if err = svc.videoPipeline.Run(conversion.PipelineOptions{
-			FileID:     fileId,
-			SnapshotID: snapshotId,
-			S3Bucket:   workspace.GetBucket(),
-			S3Key:      original.Key,
-		}); err != nil {
-			return nil, err
-		}
-	}
 	file, err = svc.fileCache.Refresh(file.GetID())
 	if err != nil {
 		return nil, err
 	}
-	v, err := svc.fileMapper.MapFile(file, userId)
+	res, err := svc.fileMapper.MapFile(file, userId)
 	if err != nil {
 		return nil, err
 	}
-	return v, nil
+	webhookOptions := ConversionWebhookOptions{
+		FileID:     file.GetID(),
+		SnapshotID: snapshot.GetID(),
+		Bucket:     original.Bucket,
+		Key:        original.Key,
+	}
+	body, err := json.Marshal(webhookOptions)
+	if err != nil {
+		return nil, err
+	}
+	cfg := config.GetConfig()
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/pipelines?api_key=%s", cfg.ConversionURL, cfg.Security.APIKey), bytes.NewBuffer(body))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json; charset=UTF-8")
+	client := &http.Client{}
+	httpResponse, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	httpResponse.Body.Close()
+
+	return res, nil
+}
+
+func (svc *FileService) UpdateSnapshot(opts UpdateSnapshotOptions, apiKey string) error {
+	if apiKey != svc.config.Security.APIKey {
+		return errorpkg.NewInvalidAPIKeyError()
+	}
+	snapshot, err := svc.snapshotRepo.Find(opts.Options.SnapshotID)
+	if err != nil {
+		return err
+	}
+	if opts.Thumbnail != nil {
+		snapshot.SetThumbnail(opts.Thumbnail)
+	}
+	if opts.Original != nil {
+		snapshot.SetOriginal(opts.Original)
+	}
+	if opts.Preview != nil {
+		snapshot.SetPreview(opts.Preview)
+	}
+	if opts.OCR != nil {
+		snapshot.SetOCR(opts.OCR)
+	}
+	if opts.Text != nil {
+		snapshot.SetText(opts.Text)
+	}
+	if err := svc.snapshotRepo.Save(snapshot); err != nil {
+		return err
+	}
+	file, err := svc.fileCache.Refresh(opts.Options.FileID)
+	if err != nil {
+		return err
+	}
+	if err = svc.fileSearch.Update([]model.File{file}); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (svc *FileService) DownloadOriginalFile(id string, userId string) (string, model.File, model.Snapshot, error) {
@@ -1873,7 +1883,7 @@ func (mp *FileMapper) MapPreview(m *model.S3Object) *Download {
 	return download
 }
 
-func (mp *FileMapper) MapOcr(m *model.S3Object) *Download {
+func (mp *FileMapper) MapOCR(m *model.S3Object) *Download {
 	return &Download{
 		Extension: filepath.Ext(m.Key),
 		Size:      m.Size,

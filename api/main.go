@@ -38,25 +38,29 @@ func main() {
 	log.SetOutput(os.Stdout)
 	log.SetReportCaller(true)
 
-	settings := config.GetConfig()
+	cfg := config.GetConfig()
 
 	app := fiber.New(fiber.Config{
 		ErrorHandler: errorpkg.ErrorHandler,
-		BodyLimit:    int(helper.MegabyteToByte(settings.Limits.MultipartBodyLengthLimitMB)),
+		BodyLimit:    int(helper.MegabyteToByte(cfg.Limits.MultipartBodyLengthLimitMB)),
 	})
 
 	v1 := app.Group("/v1")
 
 	app.Use(cors.New(cors.Config{
-		AllowOrigins: strings.Join(settings.Security.CORSOrigins, ","),
+		AllowOrigins: strings.Join(cfg.Security.CORSOrigins, ","),
 	}))
 
 	f := v1.Group("files")
+
 	fileDownloads := router.NewFileDownloadRouter()
 	fileDownloads.AppendRoutes(f)
 
+	conversionWebhook := router.NewConversionWebhookRouter()
+	conversionWebhook.AppendRoutes(f)
+
 	app.Use(jwtware.New(jwtware.Config{
-		SigningKey: []byte(settings.Security.JWTSigningKey),
+		SigningKey: []byte(cfg.Security.JWTSigningKey),
 	}))
 
 	files := router.NewFileRouter()
@@ -80,7 +84,7 @@ func main() {
 	groups := router.NewGroupRouter()
 	groups.AppendRoutes(v1.Group("groups"))
 
-	url, err := url.Parse(settings.APIURL)
+	url, err := url.Parse(cfg.APIURL)
 	if err != nil {
 		panic(err)
 	}
