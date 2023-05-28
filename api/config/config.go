@@ -25,6 +25,7 @@ func GetConfig() Config {
 func readURLs(config *Config) {
 	config.APIURL = os.Getenv("API_URL")
 	config.UIURL = os.Getenv("UI_URL")
+	config.ConversionURL = os.Getenv("CONVERSION_URL")
 	config.DatabaseURL = os.Getenv("POSTGRES_URL")
 }
 

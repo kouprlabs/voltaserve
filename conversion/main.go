@@ -37,7 +37,8 @@ func worker() {
 					log.Error(err)
 					continue
 				}
-				req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/files/conversion_webhook/update_snapshot?api_key=%s", config.GetConfig().APIURL, config.GetConfig().Security.APIKey), bytes.NewBuffer(body))
+				cfg := config.GetConfig()
+				req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/files/conversion_webhook/update_snapshot?api_key=%s", cfg.APIURL, cfg.Security.APIKey), bytes.NewBuffer(body))
 				if err != nil {
 					log.Error(err)
 					continue
@@ -73,7 +74,7 @@ func main() {
 	log.SetOutput(os.Stdout)
 	log.SetReportCaller(true)
 
-	settings := config.GetConfig()
+	cfg := config.GetConfig()
 
 	app := fiber.New()
 
@@ -88,7 +89,7 @@ func main() {
 
 	go worker()
 
-	url, err := url.Parse(settings.ConversionURL)
+	url, err := url.Parse(cfg.ConversionURL)
 	if err != nil {
 		panic(err)
 	}

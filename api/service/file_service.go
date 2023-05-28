@@ -2,7 +2,9 @@ package service
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
+	"net/http"
 	"os"
 	"path/filepath"
 	"sort"
@@ -10,7 +12,6 @@ import (
 	"time"
 	"voltaserve/cache"
 	"voltaserve/config"
-	"voltaserve/conversion"
 	"voltaserve/errorpkg"
 	"voltaserve/guard"
 	"voltaserve/helper"
@@ -210,10 +211,6 @@ type FileService struct {
 	permissionRepo repo.PermissionRepo
 	fileIdentifier *infra.FileIdentifier
 	s3             *infra.S3Manager
-	pdfPipeline    conversion.Pipeline
-	imagePipeline  conversion.Pipeline
-	officePipeline conversion.Pipeline
-	videoPipeline  conversion.Pipeline
 	config         config.Config
 }
 
@@ -237,10 +234,6 @@ func NewFileService() *FileService {
 		permissionRepo: repo.NewPermissionRepo(),
 		fileIdentifier: infra.NewFileIdentifier(),
 		s3:             infra.NewS3Manager(),
-		pdfPipeline:    conversion.NewPDFPipeline(),
-		imagePipeline:  conversion.NewImagePipeline(),
-		officePipeline: conversion.NewOfficePipeline(),
-		videoPipeline:  conversion.NewVideoPipeline(),
 		config:         config.GetConfig(),
 	}
 }
@@ -348,6 +341,28 @@ func (svc *FileService) Store(fileId string, filePath string, userId string) (*F
 	if err != nil {
 		return nil, err
 	}
+	pipelineOptions := ConversionWebhookOptions{
+		FileID:     file.GetID(),
+		SnapshotID: snapshot.GetID(),
+		Bucket:     original.Bucket,
+		Key:        original.Key,
+	}
+	body, err := json.Marshal(pipelineOptions)
+	if err != nil {
+		return nil, err
+	}
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/pipelines", config.GetConfig().ConversionURL), bytes.NewBuffer(body))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json; charset=UTF-8")
+	client := &http.Client{}
+	httpResponse, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	httpResponse.Body.Close()
+
 	return res, nil
 }
 
