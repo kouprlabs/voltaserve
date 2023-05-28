@@ -169,6 +169,7 @@ type ConversionWebhookOptions struct {
 
 type UpdateSnapshotOptions struct {
 	Options   ConversionWebhookOptions `json:"options"`
+	Original  *model.S3Object          `json:"original"`
 	Preview   *model.S3Object          `json:"preview"`
 	Text      *model.S3Object          `json:"text"`
 	OCR       *model.S3Object          `json:"ocr"`
@@ -377,6 +378,9 @@ func (svc *FileService) UpdateSnapshot(opts UpdateSnapshotOptions, apiKey string
 	}
 	if opts.Thumbnail != nil {
 		snapshot.SetThumbnail(opts.Thumbnail)
+	}
+	if opts.Original != nil {
+		snapshot.SetOriginal(opts.Original)
 	}
 	if opts.Preview != nil {
 		snapshot.SetPreview(opts.Preview)

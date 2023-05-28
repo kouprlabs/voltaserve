@@ -28,11 +28,25 @@ func NewPDFPipeline() core.Pipeline {
 }
 
 func (p *pdfPipeline) Run(opts core.PipelineOptions) (core.PipelineResponse, error) {
-	inputPath, err := p.getFileAndNormalize(opts)
+	inputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewId() + filepath.Ext(opts.Key))
+	if err := p.s3.GetFile(opts.Key, inputPath, opts.Bucket); err != nil {
+		return core.PipelineResponse{}, err
+	}
+	stat, err := os.Stat(inputPath)
 	if err != nil {
 		return core.PipelineResponse{}, err
 	}
-	res := core.PipelineResponse{}
+	inputPath, err = p.normalize(inputPath)
+	if err != nil {
+		return core.PipelineResponse{}, err
+	}
+	res := core.PipelineResponse{
+		Preview: &core.S3Object{
+			Bucket: opts.Bucket,
+			Key:    opts.Key,
+			Size:   stat.Size(),
+		},
+	}
 	workingPath := inputPath
 	outputPath, _ := p.pdfProc.GenerateOCR(workingPath)
 	if _, err := os.Stat(outputPath); !os.IsNotExist(err) {
@@ -84,12 +98,8 @@ func (p *pdfPipeline) Run(opts core.PipelineOptions) (core.PipelineResponse, err
 	return res, nil
 }
 
-func (p *pdfPipeline) getFileAndNormalize(opts core.PipelineOptions) (string, error) {
-	ext := filepath.Ext(opts.Key)
-	path := filepath.FromSlash(os.TempDir() + "/" + helper.NewId() + ext)
-	if err := p.s3.GetFile(opts.Key, path, opts.Bucket); err != nil {
-		return "", err
-	}
+func (p *pdfPipeline) normalize(path string) (string, error) {
+	ext := filepath.Ext(path)
 	/* If an image, convert it to jpeg, because ocrmypdf supports jpeg only */
 	if ext == ".jpg" || ext == ".jpeg" {
 		oldPath := path

@@ -27,17 +27,17 @@ var workerCount = 1
 func pipelineWorker(index int) {
 	dispatcher := pipeline.NewDispatcher()
 	queue[index] = make([]core.PipelineOptions, 0)
-	fmt.Printf("[%d] Worker running...\n", index)
+	fmt.Printf("[Worker %d] Running...\n", index)
 	for {
 		if len(queue[index]) > 0 {
 			opts := queue[index][0]
 			queue[index] = queue[index][1:]
-			fmt.Printf("[%d] [🚀 Pipeline started] FileID=%s SnapshotID=%s S3Bucket=%s S3Key=%s\n", index, opts.FileID, opts.SnapshotID, opts.Bucket, opts.Key)
+			fmt.Printf("[Worker %d] [🚀 Pipeline started] FileID=%s SnapshotID=%s S3Bucket=%s S3Key=%s\n", index, opts.FileID, opts.SnapshotID, opts.Bucket, opts.Key)
 			pipelineResponse, err := dispatcher.Dispatch(opts)
 			if err == nil {
 				pipelineResponse.Options = opts
-				fmt.Printf("[%d] [👍 Pipeline completed] FileID=%s SnapshotID=%s S3Bucket=%s S3Key=%s\n", index, opts.FileID, opts.SnapshotID, opts.Bucket, opts.Key)
-				fmt.Printf("[%d] [☕️ Pipeline Result] Thumbnail=%t Preview=%t Text=%t OCR=%t\n", index, pipelineResponse.Thumbnail != nil, pipelineResponse.Preview != nil, pipelineResponse.Text != nil, pipelineResponse.OCR != nil)
+				fmt.Printf("[Worker %d] [👍 Pipeline completed] FileID=%s SnapshotID=%s S3Bucket=%s S3Key=%s\n", index, opts.FileID, opts.SnapshotID, opts.Bucket, opts.Key)
+				fmt.Printf("[Worker %d] [☕️ Pipeline Result] Thumbnail=%t Preview=%t Text=%t OCR=%t\n", index, pipelineResponse.Thumbnail != nil, pipelineResponse.Preview != nil, pipelineResponse.Text != nil, pipelineResponse.OCR != nil)
 				body, err := json.Marshal(pipelineResponse)
 				if err != nil {
 					log.Error(err)
@@ -53,14 +53,14 @@ func pipelineWorker(index int) {
 				client := &http.Client{}
 				res, err := client.Do(req)
 				if err != nil {
-					fmt.Printf("[%d] [❌ Request failed!]\n", index)
+					fmt.Printf("[Worker %d] [❌ Request failed!]\n", index)
 					log.Error(err)
 					continue
 				}
 				res.Body.Close()
-				fmt.Printf("[%d] [🎉 Request succeeded!]\n", index)
+				fmt.Printf("[Worker %d] [🎉 Request succeeded!]\n", index)
 			} else {
-				fmt.Printf("[%d] [❌ Pipeline failed] FileID=%s SnapshotID=%s S3Bucket=%s S3Key=%s\n", index, opts.FileID, opts.SnapshotID, opts.Bucket, opts.Key)
+				fmt.Printf("[Worker %d] [❌ Pipeline failed] FileID=%s SnapshotID=%s S3Bucket=%s S3Key=%s\n", index, opts.FileID, opts.SnapshotID, opts.Bucket, opts.Key)
 			}
 		} else {
 			time.Sleep(500 * time.Millisecond)
@@ -76,9 +76,9 @@ func statusWorker() {
 			sum += len(queue[i])
 		}
 		if sum == 0 {
-			fmt.Printf("🌈 Queue empty!\n")
+			fmt.Printf("[Status] 🌈 Queue empty!\n")
 		} else {
-			fmt.Printf("⏳ Total items in queue: %d\n", sum)
+			fmt.Printf("[Status] ⏳ Total items in queue: %d\n", sum)
 		}
 	}
 }

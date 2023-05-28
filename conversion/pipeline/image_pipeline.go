@@ -44,6 +44,7 @@ func (p *imagePipeline) Run(opts core.PipelineOptions) (core.PipelineResponse, e
 		}
 		inputPath = newInputFile
 	}
+
 	imageProps, err := p.imageProc.Measure(inputPath)
 	if err != nil {
 		return core.PipelineResponse{}, err
@@ -52,10 +53,18 @@ func (p *imagePipeline) Run(opts core.PipelineOptions) (core.PipelineResponse, e
 	if err != nil {
 		return core.PipelineResponse{}, err
 	}
+	res := core.PipelineResponse{
+		Original: &core.S3Object{
+			Bucket: opts.Bucket,
+			Key:    opts.Key,
+			Image:  &imageProps,
+		},
+		Thumbnail: &thumbnail,
+	}
 	imageData, err := p.imageProc.ImageToData(inputPath)
 	if err == nil && imageData.PositiveConfCount > imageData.NegativeConfCount {
 		/* We treat this as a text image, we convert it to PDF/A */
-		res, err := p.pdfPipeline.Run(opts)
+		pdfRes, err := p.pdfPipeline.Run(opts)
 		if err != nil {
 			/*
 				Here we intentionally ignore the error, here is the explanation why:
@@ -67,11 +76,9 @@ func (p *imagePipeline) Run(opts core.PipelineOptions) (core.PipelineResponse, e
 			*/
 			log.Error(err)
 		} else {
-			return core.PipelineResponse{
-				Thumbnail: &thumbnail,
-				OCR:       res.OCR,
-				Text:      res.Text,
-			}, nil
+			res.OCR = pdfRes.OCR
+			res.Text = pdfRes.Text
+			return res, nil
 		}
 	}
 	if _, err := os.Stat(inputPath); err == nil {
@@ -79,7 +86,5 @@ func (p *imagePipeline) Run(opts core.PipelineOptions) (core.PipelineResponse, e
 			return core.PipelineResponse{}, err
 		}
 	}
-	return core.PipelineResponse{
-		Thumbnail: &thumbnail,
-	}, nil
+	return res, nil
 }

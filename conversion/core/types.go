@@ -9,6 +9,7 @@ type PipelineOptions struct {
 
 type PipelineResponse struct {
 	Options   PipelineOptions `json:"options,omitempty"`
+	Original  *S3Object       `json:"original,omitempty"`
 	Preview   *S3Object       `json:"preview,omitempty"`
 	Text      *S3Object       `json:"text,omitempty"`
 	OCR       *S3Object       `json:"ocr,omitempty"`
