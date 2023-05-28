@@ -8,10 +8,11 @@ type PipelineOptions struct {
 }
 
 type PipelineResponse struct {
-	Preview   *S3Object  `json:"preview,omitempty"`
-	Text      *S3Object  `json:"text,omitempty"`
-	OCR       *S3Object  `json:"ocr,omitempty"`
-	Thumbnail *Thumbnail `json:"thumbnail,omitempty"`
+	Options   PipelineOptions `json:"options,omitempty"`
+	Preview   *S3Object       `json:"preview,omitempty"`
+	Text      *S3Object       `json:"text,omitempty"`
+	OCR       *S3Object       `json:"ocr,omitempty"`
+	Thumbnail *Thumbnail      `json:"thumbnail,omitempty"`
 }
 
 type S3Object struct {

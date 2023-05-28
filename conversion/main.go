@@ -29,6 +29,7 @@ func worker() {
 			fmt.Printf("[Started 🚀] FileID=%s SnapshotID=%s S3Bucket=%s S3Key=%s\n", opts.FileID, opts.SnapshotID, opts.Bucket, opts.Key)
 			pipelineResponse, err := dispatcher.Dispatch(opts)
 			if err == nil {
+				pipelineResponse.Options = opts
 				fmt.Printf("[Completed 🎉] FileID=%s SnapshotID=%s S3Bucket=%s S3Key=%s\n", opts.FileID, opts.SnapshotID, opts.Bucket, opts.Key)
 				fmt.Printf("[Result ☕️] Thumbnail=%t Preview=%t Text=%t OCR=%t\n", pipelineResponse.Thumbnail != nil, pipelineResponse.Preview != nil, pipelineResponse.Text != nil, pipelineResponse.OCR != nil)
 				body, err := json.Marshal(pipelineResponse)
