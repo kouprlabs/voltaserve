@@ -1,0 +1,20 @@
+{
+  "folders": [
+    {
+      "path": "./api"
+    },
+    {
+      "path": "./idp"
+    },
+    {
+      "path": "./webdav"
+    },
+    {
+      "path": "./conversion"
+    },
+    {
+      "path": "./ui"
+    }
+  ],
+  "settings": {}
+}

@@ -25,12 +25,14 @@ func GetConfig() Config {
 func readURLs(config *Config) {
 	config.APIURL = os.Getenv("API_URL")
 	config.UIURL = os.Getenv("UI_URL")
+	config.ConversionURL = os.Getenv("CONVERSION_URL")
 	config.DatabaseURL = os.Getenv("POSTGRES_URL")
 }
 
 func readSecurity(config *Config) {
 	config.Security.JWTSigningKey = os.Getenv("SECURITY_JWT_SIGNING_KEY")
 	config.Security.CORSOrigins = strings.Split(os.Getenv("SECURITY_CORS_ORIGINS"), ",")
+	config.Security.APIKey = os.Getenv("SECURITY_API_KEY")
 }
 
 func readS3(config *Config) {
@@ -92,27 +94,6 @@ func readLimits(config *Config) {
 			panic(err)
 		}
 		config.Limits.ExternalCommandTimeoutSeconds = int(v)
-	}
-	if len(os.Getenv("LIMITS_FILE_PROCESSING_MAX_SIZE_MB")) > 0 {
-		v, err := strconv.ParseInt(os.Getenv("LIMITS_FILE_PROCESSING_MAX_SIZE_MB"), 10, 32)
-		if err != nil {
-			panic(err)
-		}
-		config.Limits.FileProcessingMaxSizeMB = int(v)
-	}
-	if len(os.Getenv("LIMITS_IMAGE_PREVIEW_MAX_WIDTH")) > 0 {
-		v, err := strconv.ParseInt(os.Getenv("LIMITS_IMAGE_PREVIEW_MAX_WIDTH"), 10, 32)
-		if err != nil {
-			panic(err)
-		}
-		config.Limits.ImagePreviewMaxWidth = int(v)
-	}
-	if len(os.Getenv("LIMITS_IMAGE_PREVIEW_MAX_HEIGHT")) > 0 {
-		v, err := strconv.ParseInt(os.Getenv("LIMITS_IMAGE_PREVIEW_MAX_HEIGHT"), 10, 32)
-		if err != nil {
-			panic(err)
-		}
-		config.Limits.ImagePreviewMaxHeight = int(v)
 	}
 	if len(os.Getenv("LIMITS_MULTIPART_BODY_LENGTH_LIMIT_MB")) > 0 {
 		v, err := strconv.ParseInt(os.Getenv("LIMITS_MULTIPART_BODY_LENGTH_LIMIT_MB"), 10, 32)

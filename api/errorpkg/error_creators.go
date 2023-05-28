@@ -393,3 +393,13 @@ func NewUserAlreadyMemberOfOrganizationError(user model.User, org model.Organiza
 		nil,
 	)
 }
+
+func NewInvalidAPIKeyError() *ErrorResponse {
+	return NewErrorResponse(
+		"invalid_api_key",
+		http.StatusUnauthorized,
+		"Invalid API key.",
+		"The API key is either missing or invalid.",
+		nil,
+	)
+}

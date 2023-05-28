@@ -814,3 +814,46 @@ func (r *FileDownloadRouter) getUserId(accessToken string) (string, error) {
 		return "", errors.New("cannot find sub claim")
 	}
 }
+
+type ConversionWebhookRouter struct {
+	fileSvc *service.FileService
+}
+
+func NewConversionWebhookRouter() *ConversionWebhookRouter {
+	return &ConversionWebhookRouter{
+		fileSvc: service.NewFileService(),
+	}
+}
+
+func (r *ConversionWebhookRouter) AppendRoutes(g fiber.Router) {
+	g.Post("/conversion_webhook/update_snapshot", r.UpdateSnapshot)
+}
+
+// Update snapshot godoc
+// @Summary     Update snapshot
+// @Description Update snapshot
+// @Tags        Files
+// @Id          files_conversion_webhook_update_snapshot
+// @Produce     json
+// @Param       body body     core.UpdateSnapshotOptions true "Body"
+// @Success     201
+// @Failure     401  {object} errorpkg.ErrorResponse
+// @Failure     500  {object} errorpkg.ErrorResponse
+// @Router      /files/conversion_webhook/update_snapshot [post]
+func (r *ConversionWebhookRouter) UpdateSnapshot(c *fiber.Ctx) error {
+	apiKey := c.Query("api_key")
+	if apiKey == "" {
+		return errorpkg.NewMissingQueryParamError("api_key")
+	}
+	req := new(service.UpdateSnapshotOptions)
+	if err := c.BodyParser(req); err != nil {
+		return err
+	}
+	if err := validator.New().Struct(req); err != nil {
+		return errorpkg.NewRequestBodyValidationError(err)
+	}
+	if err := r.fileSvc.UpdateSnapshot(*req, apiKey); err != nil {
+		return err
+	}
+	return c.SendStatus(204)
+}
