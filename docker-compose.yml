@@ -68,9 +68,9 @@ services:
       - ${VOLTASERVE_MAILCATCHER_SMTP_PORT}:1025
   api:
     container_name: voltaserve-api
-    image: golang:1.19-bullseye
+    image: golang:1.20-alpine
     working_dir: /app
-    command: sh -c "./install-deps.sh && go run ."
+    command: sh -c "go run ."
     ports:
       - ${VOLTASERVE_API_PORT}:5000
     environment:
@@ -152,3 +152,18 @@ services:
     depends_on:
       - idp
       - api
+  conversion:
+    container_name: voltaserve-conversion
+    image: golang:1.20-bullseye
+    working_dir: /app
+    command: sh -c "./install-deps.sh && go run ."
+    ports:
+      - ${VOLTASERVE_CONVERSION_PORT}:5001
+    environment:
+      - CONVERSION_URL=http://conversion:5001
+      - API_URL=http://api:5000
+    volumes:
+      - ./conversion:/app
+    depends_on:
+      - api
+      - minio

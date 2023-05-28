@@ -1,6 +1,7 @@
 version: '3.8'
 
-x-minio-common: &minio-common
+x-minio-common:
+  &minio-common
   image: quay.io/minio/minio:RELEASE.2023-05-18T00-05-36Z
   command: server --console-address ":9001" http://minio{1...4}/data{1...2}
   expose:
@@ -11,7 +12,13 @@ x-minio-common: &minio-common
     MINIO_ROOT_PASSWORD: voltaserve
     MINIO_REGION: us-east-1
   healthcheck:
-    test: ["CMD", "curl", "-f", "http://${VOLTASERVE_HOSTNAME}:9000/minio/health/live"]
+    test:
+      [
+        "CMD",
+        "curl",
+        "-f",
+        "http://${VOLTASERVE_HOSTNAME}:9000/minio/health/live"
+      ]
     interval: 30s
     timeout: 20s
     retries: 3
@@ -258,9 +265,9 @@ services:
         ipv4_address: 172.20.0.60
   api:
     container_name: voltaserve-api
-    image: golang:1.19-bullseye
+    image: golang:1.20-alpine
     working_dir: /app
-    command: sh -c "./install-deps.sh && go run ."
+    command: sh -c "go run ."
     volumes:
       - ./api:/app
     environment:
@@ -369,3 +376,21 @@ services:
     networks:
       voltaserve-net:
         ipv4_address: 172.20.0.43
+  conversion:
+    container_name: voltaserve-conversion
+    image: golang:1.20-bullseye
+    working_dir: /app
+    command: sh -c "./install-deps.sh && go run ."
+    ports:
+      - ${VOLTASERVE_CONVERSION_PORT}:5001
+    environment:
+      - CONVERSION_URL=http://conversion:5001
+      - API_URL=http://api:5000
+    volumes:
+      - ./conversion:/app
+    depends_on:
+      - api
+      - minio
+    networks:
+      voltaserve-net:
+        ipv4_address: 172.20.0.44
