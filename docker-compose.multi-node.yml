@@ -367,8 +367,8 @@ services:
     ports:
       - ${VOLTASERVE_WEBDAV_PORT}:6000
     environment:
-      - IDP_URL=http://idp:${VOLTASERVE_IDP_PORT}
-      - API_URL=http://api:${VOLTASERVE_API_PORT}
+      - IDP_URL=http://idp:7000
+      - API_URL=http://api:5000
     depends_on:
       - idp
       - api
