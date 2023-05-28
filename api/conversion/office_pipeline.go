@@ -36,7 +36,7 @@ func NewOfficePipeline() Pipeline {
 }
 
 func (svc *officePipeline) Run(opts PipelineOptions) error {
-	snapshot, err := svc.snapshotRepo.Find(opts.SnapshotId)
+	snapshot, err := svc.snapshotRepo.Find(opts.SnapshotID)
 	if err != nil {
 		return err
 	}
@@ -52,8 +52,8 @@ func (svc *officePipeline) Run(opts PipelineOptions) error {
 		return err
 	}
 	if err := svc.pdfPipeline.Run(PipelineOptions{
-		FileId:     opts.FileId,
-		SnapshotId: opts.SnapshotId,
+		FileID:     opts.FileID,
+		SnapshotID: opts.SnapshotID,
 		S3Bucket:   opts.S3Bucket,
 		S3Key:      snapshot.GetPreview().Key,
 	}); err != nil {
@@ -95,7 +95,7 @@ func (svc *officePipeline) generatePDF(inputPath string) (string, error) {
 }
 
 func (svc *officePipeline) save(snapshot model.Snapshot, opts PipelineOptions, outputPath string) error {
-	file, err := svc.fileCache.Get(opts.FileId)
+	file, err := svc.fileCache.Get(opts.FileID)
 	if err != nil {
 		return err
 	}
@@ -110,13 +110,13 @@ func (svc *officePipeline) save(snapshot model.Snapshot, opts PipelineOptions, o
 	size := stat.Size()
 	snapshot.SetPreview(&model.S3Object{
 		Bucket: workspace.GetBucket(),
-		Key:    filepath.FromSlash(opts.FileId + "/" + opts.SnapshotId + "/preview.pdf"),
+		Key:    filepath.FromSlash(opts.FileID + "/" + opts.SnapshotID + "/preview.pdf"),
 		Size:   size,
 	})
 	if err := svc.s3.PutFile(snapshot.GetPreview().Key, outputPath, infra.DetectMimeFromFile(outputPath), workspace.GetBucket()); err != nil {
 		return err
 	}
-	if err := svc.metadataUpdater.update(snapshot, opts.FileId); err != nil {
+	if err := svc.metadataUpdater.update(snapshot, opts.FileID); err != nil {
 		return err
 	}
 	return nil

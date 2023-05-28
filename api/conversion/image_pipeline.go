@@ -64,7 +64,7 @@ func NewImagePipeline() Pipeline {
 }
 
 func (p *imagePipeline) Run(opts PipelineOptions) error {
-	snapshot, err := p.snapshotRepo.Find(opts.SnapshotId)
+	snapshot, err := p.snapshotRepo.Find(opts.SnapshotID)
 	if err != nil {
 		return err
 	}
@@ -88,7 +88,7 @@ func (p *imagePipeline) Run(opts PipelineOptions) error {
 	if err := p.generateThumbnail(snapshot, inputPath); err != nil {
 		return err
 	}
-	if err := p.metadataUpdater.update(snapshot, opts.FileId); err != nil {
+	if err := p.metadataUpdater.update(snapshot, opts.FileID); err != nil {
 		return err
 	}
 	imageData, err := p.imageToData(inputPath)

@@ -1,8 +1,8 @@
 package conversion
 
 type PipelineOptions struct {
-	FileId     string
-	SnapshotId string
+	FileID     string
+	SnapshotID string
 	S3Bucket   string
 	S3Key      string
 }
