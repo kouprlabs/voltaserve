@@ -1873,7 +1873,7 @@ func (mp *FileMapper) MapPreview(m *model.S3Object) *Download {
 	return download
 }
 
-func (mp *FileMapper) MapOcr(m *model.S3Object) *Download {
+func (mp *FileMapper) MapOCR(m *model.S3Object) *Download {
 	return &Download{
 		Extension: filepath.Ext(m.Key),
 		Size:      m.Size,
