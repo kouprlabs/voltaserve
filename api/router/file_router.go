@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"voltaserve/config"
 	"voltaserve/errorpkg"
-	"voltaserve/helpers"
+	"voltaserve/helper"
 	"voltaserve/infra"
 	"voltaserve/model"
 	"voltaserve/service"
@@ -107,7 +107,7 @@ func (r *FileRouter) Upload(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	path := filepath.FromSlash(os.TempDir() + "/" + helpers.NewId() + filepath.Ext(fh.Filename))
+	path := filepath.FromSlash(os.TempDir() + "/" + helper.NewId() + filepath.Ext(fh.Filename))
 	if err := c.SaveFile(fh, path); err != nil {
 		return err
 	}
@@ -150,7 +150,7 @@ func (r *FileRouter) Patch(c *fiber.Ctx) error {
 	if !ok {
 		return errorpkg.NewStorageLimitExceededError()
 	}
-	path := filepath.FromSlash(os.TempDir() + "/" + helpers.NewId() + filepath.Ext(fh.Filename))
+	path := filepath.FromSlash(os.TempDir() + "/" + helper.NewId() + filepath.Ext(fh.Filename))
 	if err := c.SaveFile(fh, path); err != nil {
 		return err
 	}

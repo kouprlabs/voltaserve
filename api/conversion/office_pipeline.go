@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"voltaserve/cache"
 	"voltaserve/config"
-	"voltaserve/helpers"
+	"voltaserve/helper"
 	"voltaserve/infra"
 	"voltaserve/model"
 	"voltaserve/repo"
@@ -40,7 +40,7 @@ func (svc *officePipeline) Run(opts PipelineOptions) error {
 	if err != nil {
 		return err
 	}
-	inputPath := filepath.FromSlash(os.TempDir() + "/" + helpers.NewId())
+	inputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewId())
 	if err := svc.s3.GetFile(opts.S3Key, inputPath, opts.S3Bucket); err != nil {
 		return err
 	}
@@ -73,7 +73,7 @@ func (svc *officePipeline) Run(opts PipelineOptions) error {
 }
 
 func (svc *officePipeline) generatePDF(inputPath string) (string, error) {
-	outputDirectory := filepath.FromSlash(os.TempDir() + "/" + helpers.NewId())
+	outputDirectory := filepath.FromSlash(os.TempDir() + "/" + helper.NewId())
 	if err := os.MkdirAll(outputDirectory, 0755); err != nil {
 		return "", err
 	}

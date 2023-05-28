@@ -3,7 +3,7 @@ package infra
 import (
 	"os"
 	"path/filepath"
-	"voltaserve/helpers"
+	"voltaserve/helper"
 )
 
 type VideoProcessor struct {
@@ -19,7 +19,7 @@ func NewVideoProcessor() *VideoProcessor {
 }
 
 func (p *VideoProcessor) Thumbnail(inputPath string, width int, height int, outputPath string) error {
-	tmpPath := filepath.FromSlash(os.TempDir() + "/" + helpers.NewId() + ".png")
+	tmpPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewId() + ".png")
 	if err := p.cmd.Exec("ffmpeg", "-i", inputPath, "-frames:v", "1", tmpPath); err != nil {
 		return err
 	}

@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
-	"voltaserve/helpers"
+	"voltaserve/helper"
 )
 
 type ImageProcessor struct {
@@ -71,11 +71,11 @@ func (p *ImageProcessor) Measure(path string) (width int, height int, err error)
 		return 0, 0, err
 	}
 	values := strings.Split(res, ",")
-	width, err = strconv.Atoi(helpers.RemoveNonNumeric(values[0]))
+	width, err = strconv.Atoi(helper.RemoveNonNumeric(values[0]))
 	if err != nil {
 		return 0, 0, err
 	}
-	height, err = strconv.Atoi(helpers.RemoveNonNumeric(values[1]))
+	height, err = strconv.Atoi(helper.RemoveNonNumeric(values[1]))
 	if err != nil {
 		return 0, 0, err
 	}

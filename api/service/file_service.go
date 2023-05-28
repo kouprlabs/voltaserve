@@ -13,7 +13,7 @@ import (
 	"voltaserve/conversion"
 	"voltaserve/errorpkg"
 	"voltaserve/guard"
-	"voltaserve/helpers"
+	"voltaserve/helper"
 	"voltaserve/infra"
 	"voltaserve/model"
 	"voltaserve/repo"
@@ -299,7 +299,7 @@ func (svc *FileService) Store(fileId string, filePath string, userId string) (*F
 	if err != nil {
 		return nil, err
 	}
-	snapshotId := helpers.NewId()
+	snapshotId := helper.NewId()
 	snapshot := repo.NewSnapshot()
 	snapshot.SetID(snapshotId)
 	snapshot.SetVersion(latestVersion)
@@ -413,7 +413,7 @@ func (svc *FileService) DownloadOriginalFile(id string, userId string) (string, 
 	latestSnapshot := snapshots[len(snapshots)-1]
 	if latestSnapshot.HasOriginal() {
 		original := latestSnapshot.GetOriginal()
-		path := filepath.FromSlash(os.TempDir() + "/" + helpers.NewId() + filepath.Ext(original.Key))
+		path := filepath.FromSlash(os.TempDir() + "/" + helper.NewId() + filepath.Ext(original.Key))
 		if err := svc.s3.GetFile(original.Key, path, original.Bucket); err != nil {
 			return "", nil, nil, err
 		}
@@ -471,7 +471,7 @@ func (svc *FileService) DownloadPreviewFile(id string, userId string) (string, m
 	latestSnapshot := snapshots[len(snapshots)-1]
 	if latestSnapshot.HasPreview() {
 		preview := latestSnapshot.GetPreview()
-		path := filepath.FromSlash(os.TempDir() + "/" + helpers.NewId() + filepath.Ext(preview.Key))
+		path := filepath.FromSlash(os.TempDir() + "/" + helper.NewId() + filepath.Ext(preview.Key))
 		if err := svc.s3.GetFile(preview.Key, path, preview.Bucket); err != nil {
 			return "", nil, nil, err
 		}
@@ -1214,7 +1214,7 @@ func (svc *FileService) Copy(targetId string, sourceIds []string, userId string)
 		var permissions []*repo.UserPermission
 		for i, o := range sourceTree {
 			c := repo.NewFile()
-			c.SetID(helpers.NewId())
+			c.SetID(helper.NewId())
 			c.SetParentID(o.GetParentID())
 			c.SetWorkspaceID(o.GetWorkspaceID())
 			c.SetType(o.GetType())
@@ -1227,7 +1227,7 @@ func (svc *FileService) Copy(targetId string, sourceIds []string, userId string)
 			originalIds[c.GetID()] = o.GetID()
 			clones = append(clones, c)
 			permissions = append(permissions, &repo.UserPermission{
-				ID:         helpers.NewId(),
+				ID:         helper.NewId(),
 				UserID:     userId,
 				ResourceID: c.GetID(),
 				Permission: model.PermissionOwner,

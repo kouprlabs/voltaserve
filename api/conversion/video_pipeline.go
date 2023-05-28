@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"voltaserve/cache"
 	"voltaserve/config"
-	"voltaserve/helpers"
+	"voltaserve/helper"
 	"voltaserve/infra"
 	"voltaserve/model"
 	"voltaserve/repo"
@@ -42,7 +42,7 @@ func (p *VideoPipeline) Run(opts PipelineOptions) error {
 	if err != nil {
 		return err
 	}
-	inputPath := filepath.FromSlash(os.TempDir() + "/" + helpers.NewId())
+	inputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewId())
 	if err := p.minio.GetFile(opts.S3Key, inputPath, opts.S3Bucket); err != nil {
 		return err
 	}
@@ -58,7 +58,7 @@ func (p *VideoPipeline) Run(opts PipelineOptions) error {
 }
 
 func (p *VideoPipeline) generateThumbnail(snapshot model.Snapshot, opts PipelineOptions, inputPath string) error {
-	outputPath := filepath.FromSlash(os.TempDir() + "/" + helpers.NewId() + ".png")
+	outputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewId() + ".png")
 	if err := p.videoProc.Thumbnail(inputPath, 0, p.config.Limits.ImagePreviewMaxHeight, outputPath); err != nil {
 		return err
 	}

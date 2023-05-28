@@ -6,7 +6,7 @@ import (
 	"voltaserve/config"
 	"voltaserve/errorpkg"
 	"voltaserve/guard"
-	"voltaserve/helpers"
+	"voltaserve/helper"
 	"voltaserve/infra"
 	"voltaserve/model"
 	"voltaserve/repo"
@@ -81,7 +81,7 @@ func NewOrganizationService() *OrganizationService {
 
 func (svc *OrganizationService) Create(req OrganizationCreateOptions, userId string) (*Organization, error) {
 	org, err := svc.orgRepo.Insert(repo.OrganizationInsertOptions{
-		ID:   helpers.NewId(),
+		ID:   helper.NewId(),
 		Name: req.Name,
 	})
 	if err != nil {

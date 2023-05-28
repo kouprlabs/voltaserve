@@ -10,7 +10,7 @@ import (
 
 	"voltaserve/config"
 	"voltaserve/errorpkg"
-	"voltaserve/helpers"
+	"voltaserve/helper"
 	"voltaserve/router"
 
 	jwtware "github.com/gofiber/jwt/v3"
@@ -42,7 +42,7 @@ func main() {
 
 	app := fiber.New(fiber.Config{
 		ErrorHandler: errorpkg.ErrorHandler,
-		BodyLimit:    int(helpers.MegabyteToByte(settings.Limits.MultipartBodyLengthLimitMB)),
+		BodyLimit:    int(helper.MegabyteToByte(settings.Limits.MultipartBodyLengthLimitMB)),
 	})
 
 	v1 := app.Group("/v1")

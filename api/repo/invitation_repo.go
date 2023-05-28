@@ -4,7 +4,7 @@ import (
 	"errors"
 	"time"
 	"voltaserve/errorpkg"
-	"voltaserve/helpers"
+	"voltaserve/helper"
 	"voltaserve/infra"
 	"voltaserve/model"
 
@@ -111,7 +111,7 @@ func (repo *invitationRepo) Insert(opts InvitationInsertOptions) ([]model.Invita
 	var res []model.Invitation
 	for _, e := range opts.Emails {
 		invitation := invitationEntity{
-			ID:             helpers.NewId(),
+			ID:             helper.NewId(),
 			OrganizationId: opts.OrganizationId,
 			OwnerId:        opts.UserId,
 			Email:          e,
