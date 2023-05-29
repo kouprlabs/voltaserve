@@ -1,60 +1,60 @@
 package config
 
 type Config struct {
-	APIURL        string         `json:"api_url"`
-	UIURL         string         `json:"ui_url"`
-	ConversionURL string         `json:"conversion_url"`
-	DatabaseURL   string         `json:"database_url"`
-	Search        SearchConfig   `json:"search"`
-	Redis         RedisConfig    `json:"redis"`
-	S3            S3Config       `json:"s3"`
-	Limits        LimitsConfig   `json:"limits"`
-	Security      SecurityConfig `json:"security"`
-	SMTP          SMTPConfig     `json:"smtp"`
+	Port          int
+	PublicUIURL   string
+	ConversionURL string
+	DatabaseURL   string
+	Search        SearchConfig
+	Redis         RedisConfig
+	S3            S3Config
+	Limits        LimitsConfig
+	Security      SecurityConfig
+	SMTP          SMTPConfig
 }
 
 type LimitsConfig struct {
-	ExternalCommandTimeoutSeconds int `json:"external_command_timeout_seconds"`
-	MultipartBodyLengthLimitMB    int `json:"multipart_body_length_limit_mb"`
+	ExternalCommandTimeoutSeconds int
+	MultipartBodyLengthLimitMB    int
 }
 
 type TokenConfig struct {
-	AccessTokenLifetime  int    `json:"access_token_lifetime"`
-	RefreshTokenLifetime int    `json:"refresh_token_lifetime"`
-	TokenAudience        string `json:"token_audience"`
-	TokenIssuer          string `json:"token_issuer"`
+	AccessTokenLifetime  int
+	RefreshTokenLifetime int
+	TokenAudience        string
+	TokenIssuer          string
 }
 
 type SearchConfig struct {
-	URL string `json:"url"`
+	URL string
 }
 
 type RedisConfig struct {
-	Address  string `json:"address"`
-	Password string `json:"password"`
-	DB       int    `json:"db"`
+	Address  string
+	Password string
+	DB       int
 }
 
 type S3Config struct {
-	URL       string `json:"url"`
-	AccessKey string `json:"access_key"`
-	SecretKey string `json:"secret_key"`
-	Region    string `json:"region"`
-	Secure    bool   `json:"secure"`
+	URL       string
+	AccessKey string
+	SecretKey string
+	Region    string
+	Secure    bool
 }
 
 type SecurityConfig struct {
-	JWTSigningKey string   `json:"jwt_signing_key"`
-	CORSOrigins   []string `json:"cors_origins"`
-	APIKey        string   `json:"api_key"`
+	JWTSigningKey string
+	CORSOrigins   []string
+	APIKey        string
 }
 
 type SMTPConfig struct {
-	Host          string `json:"host"`
-	Port          int    `json:"port"`
-	Secure        bool   `json:"secure"`
-	Username      string `json:"username"`
-	Password      string `json:"password"`
-	SenderAddress string `json:"sender_address"`
-	SenderName    string `json:"sender_name"`
+	Host          string
+	Port          int
+	Secure        bool
+	Username      string
+	Password      string
+	SenderAddress string
+	SenderName    string
 }

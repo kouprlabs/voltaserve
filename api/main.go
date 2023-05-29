@@ -1,7 +1,7 @@
 package main
 
 import (
-	"net/url"
+	"fmt"
 	"os"
 	"strings"
 
@@ -84,11 +84,7 @@ func main() {
 	groups := router.NewGroupRouter()
 	groups.AppendRoutes(v1.Group("groups"))
 
-	url, err := url.Parse(cfg.APIURL)
-	if err != nil {
-		panic(err)
-	}
-	if err := app.Listen(":" + url.Port()); err != nil {
+	if err := app.Listen(fmt.Sprintf(":%d", cfg.Port)); err != nil {
 		panic(err)
 	}
 }

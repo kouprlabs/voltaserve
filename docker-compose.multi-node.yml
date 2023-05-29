@@ -271,8 +271,8 @@ services:
     volumes:
       - ./api:/app
     environment:
-      - API_URL=http://${VOLTASERVE_HOSTNAME}:${VOLTASERVE_API_PORT}
-      - UI_URL=http://${VOLTASERVE_HOSTNAME}:${VOLTASERVE_UI_PORT}
+      - PORT=5000
+      - PUBLIC_UI_URL=http://${VOLTASERVE_HOSTNAME}:${VOLTASERVE_UI_PORT}
       - CONVERSION_URL=http://conversion:5001
       - POSTGRES_URL=postgresql://voltaserve@roach1:26257/voltaserve
       - S3_URL=minio-nginx:9000
@@ -318,8 +318,8 @@ services:
       - ./idp:/app
       - /app/node_modules
     environment:
-      - IDP_URL=http://${VOLTASERVE_HOSTNAME}:${VOLTASERVE_IDP_PORT}
-      - UI_URL=http://${VOLTASERVE_HOSTNAME}:${VOLTASERVE_UI_PORT}
+      - PORT=7000
+      - PUBLIC_UI_URL=http://${VOLTASERVE_HOSTNAME}:${VOLTASERVE_UI_PORT}
       - POSTGRES_URL=postgresql://voltaserve@roach1:26257/voltaserve
       - SEARCH_URL=http://meilisearch:7700
       - SMTP_HOST=${VOLTASERVE_SMTP_HOST}

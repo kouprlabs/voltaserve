@@ -10,7 +10,13 @@ var config *Config
 
 func GetConfig() Config {
 	if config == nil {
-		config = &Config{}
+		port, err := strconv.Atoi(os.Getenv("PORT"))
+		if err != nil {
+			panic(err)
+		}
+		config = &Config{
+			Port: port,
+		}
 		readURLs(config)
 		readSecurity(config)
 		readS3(config)
@@ -23,8 +29,7 @@ func GetConfig() Config {
 }
 
 func readURLs(config *Config) {
-	config.APIURL = os.Getenv("API_URL")
-	config.UIURL = os.Getenv("UI_URL")
+	config.PublicUIURL = os.Getenv("PUBLIC_UI_URL")
 	config.ConversionURL = os.Getenv("CONVERSION_URL")
 	config.DatabaseURL = os.Getenv("POSTGRES_URL")
 }

@@ -74,8 +74,8 @@ services:
     ports:
       - ${VOLTASERVE_API_PORT}:5000
     environment:
-      - API_URL=http://${VOLTASERVE_HOSTNAME}:${VOLTASERVE_API_PORT}
-      - UI_URL=http://${VOLTASERVE_HOSTNAME}:${VOLTASERVE_UI_PORT}
+      - PORT=5000
+      - PUBLIC_UI_URL=http://${VOLTASERVE_HOSTNAME}:${VOLTASERVE_UI_PORT}
       - CONVERSION_URL=http://conversion:5001
       - POSTGRES_URL=postgresql://voltaserve@cockroach:26257/voltaserve
       - S3_URL=minio:9000
@@ -103,8 +103,8 @@ services:
     ports:
       - ${VOLTASERVE_IDP_PORT}:7000
     environment:
-      - IDP_URL=http://${VOLTASERVE_HOSTNAME}:${VOLTASERVE_IDP_PORT}
-      - UI_URL=http://${VOLTASERVE_HOSTNAME}:${VOLTASERVE_UI_PORT}
+      - PORT=7000
+      - PUBLIC_UI_URL=http://${VOLTASERVE_HOSTNAME}:${VOLTASERVE_UI_PORT}
       - POSTGRES_URL=postgresql://voltaserve@cockroach:26257/voltaserve
       - SEARCH_URL=http://meilisearch:7700
       - SMTP_HOST=${VOLTASERVE_SMTP_HOST}

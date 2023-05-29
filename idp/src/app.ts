@@ -5,7 +5,6 @@ import express from 'express'
 import logger from 'morgan'
 import passport from 'passport'
 import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt'
-import { URL } from 'url'
 import accountRouter from '@/account/router'
 import { getConfig } from '@/config/config'
 import { errorHandler } from '@/infra/error'
@@ -48,7 +47,7 @@ app.use('/v1/token', tokenRouter)
 
 app.use(errorHandler)
 
-const port = new URL(getConfig().idpURL).port
+const port = getConfig().port
 
 postgres.connect().then(() => {
   app.listen(port, () => {

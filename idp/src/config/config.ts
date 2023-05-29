@@ -5,6 +5,7 @@ let config: Config
 export function getConfig(): Config {
   if (!config) {
     config = new Config()
+    config.port = parseInt(process.env.PORT)
     readURLs(config)
     readToken(config)
     readCORS(config)
@@ -15,8 +16,7 @@ export function getConfig(): Config {
 }
 
 export function readURLs(config: Config) {
-  config.idpURL = process.env.IDP_URL
-  config.uiURL = process.env.UI_URL
+  config.publicUIURL = process.env.PUBLIC_UI_URL
   config.databaseURL = process.env.POSTGRES_URL
 }
 
