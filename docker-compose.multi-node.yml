@@ -319,9 +319,9 @@ services:
       - /app/node_modules
     environment:
       - PORT=7000
-      - PUBLIC_UI_URL=http://${VOLTASERVE_HOSTNAME}:${VOLTASERVE_UI_PORT}
       - POSTGRES_URL=postgresql://voltaserve@roach1:26257/voltaserve
       - SEARCH_URL=http://meilisearch:7700
+      - PUBLIC_UI_URL=http://${VOLTASERVE_HOSTNAME}:${VOLTASERVE_UI_PORT}
       - SMTP_HOST=${VOLTASERVE_SMTP_HOST}
       - SMTP_PORT=${VOLTASERVE_SMTP_PORT}
       - SMTP_SECURE=${VOLTASERVE_SMTP_SECURE}
@@ -348,8 +348,8 @@ services:
     ports:
       - ${VOLTASERVE_UI_PORT}:3000
     environment:
-      - API_URL=http://api:${VOLTASERVE_API_PORT}
-      - IDP_URL=http://idp:${VOLTASERVE_IDP_PORT}
+      - API_URL=http://api:5000
+      - IDP_URL=http://idp:7000
     depends_on:
       - idp
       - api
