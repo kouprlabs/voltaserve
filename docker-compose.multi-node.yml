@@ -449,6 +449,7 @@ services:
     depends_on:
       - api
       - minio
+    restart: on-failure
     networks:
       voltaserve-net:
         ipv4_address: 172.20.0.44

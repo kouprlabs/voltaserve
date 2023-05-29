@@ -128,6 +128,7 @@ services:
       - redis
       - minio
       - meilisearch
+    restart: on-failure
   idp:
     container_name: voltaserve-idp
     image: node:18-alpine
@@ -157,6 +158,7 @@ services:
       - cockroach
       - meilisearch
       - minio
+    restart: on-failure
   ui:
     container_name: voltaserve-ui
     image: node:18-alpine
@@ -176,6 +178,7 @@ services:
     depends_on:
       - idp
       - api
+    restart: on-failure
   webdav:
     container_name: voltaserve-webdav
     image: node:18-alpine
@@ -196,6 +199,7 @@ services:
     depends_on:
       - idp
       - api
+    restart: on-failure
   conversion:
     container_name: voltaserve-conversion
     image: golang:1.20-bullseye
@@ -224,3 +228,4 @@ services:
     depends_on:
       - api
       - minio
+    restart: on-failure
