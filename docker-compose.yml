@@ -11,7 +11,26 @@ volumes:
     name: voltaserve-redis
   redisinsight:
     name: voltaserve-redisinsight
-
+  conversion-lib:
+    name: voltraserve-conversion-lib
+  conversion-etc:
+    name: voltraserve-conversion-etc
+  conversion-bin:
+    name: voltraserve-conversion-bin
+  conversion-usr:
+    name: voltraserve-conversion-usr
+  conversion-var:
+    name: voltraserve-conversion-var
+  conversion-root:
+    name: voltraserve-conversion-root
+  conversion-opt:
+    name: voltraserve-conversion-opt
+  conversion-sbin:
+    name: voltraserve-conversion-sbin
+  conversion-home:
+    name: voltraserve-conversion-home
+  conversion-go:
+    name: voltraserve-conversion-go
 services:
   cockroach:
     container_name: voltaserve-cockroach
@@ -167,6 +186,16 @@ services:
       - S3_URL=minio:9000
     volumes:
       - ./conversion:/app
+      - conversion-lib:/lib
+      - conversion-etc:/etc
+      - conversion-bin:/bin
+      - conversion-sbin:/sbin
+      - conversion-usr:/usr
+      - conversion-var:/var
+      - conversion-opt:/opt
+      - conversion-root:/root
+      - conversion-home:/home
+      - conversion-go:/go
     depends_on:
       - api
       - minio

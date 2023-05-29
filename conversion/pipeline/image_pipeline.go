@@ -34,6 +34,10 @@ func (p *imagePipeline) Run(opts core.PipelineOptions) (core.PipelineResponse, e
 	if err := p.s3.GetFile(opts.Key, inputPath, opts.Bucket); err != nil {
 		return core.PipelineResponse{}, err
 	}
+	stat, err := os.Stat(inputPath)
+	if err != nil {
+		return core.PipelineResponse{}, err
+	}
 	if filepath.Ext(inputPath) == ".tiff" {
 		newInputFile := filepath.FromSlash(os.TempDir() + "/" + helper.NewId() + ".jpg")
 		if err := p.imageProc.Convert(inputPath, newInputFile); err != nil {
@@ -58,6 +62,7 @@ func (p *imagePipeline) Run(opts core.PipelineOptions) (core.PipelineResponse, e
 			Bucket: opts.Bucket,
 			Key:    opts.Key,
 			Image:  &imageProps,
+			Size:   stat.Size(),
 		},
 		Thumbnail: &thumbnail,
 	}
