@@ -32,7 +32,7 @@ You can check that by running the command `docker ps` and look at the `STATUS` c
 
 ### Connect with WebDAV
 
-Voltaserve supports [WebDAV](https://en.wikipedia.org/wiki/WebDAV), by default using the port `6000`.
+Voltaserve supports [WebDAV](https://en.wikipedia.org/wiki/WebDAV), by default it's using the port `6000`.
 
 To connect you can use [WinSCP](https://winscp.net) on Windows and [Cyberduck](https://cyberduck.io) on macOS.
 
