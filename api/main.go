@@ -47,6 +47,10 @@ func main() {
 
 	v1 := app.Group("/v1")
 
+	app.Get("v1/health", func(c *fiber.Ctx) error {
+		return c.SendStatus(200)
+	})
+
 	app.Use(cors.New(cors.Config{
 		AllowOrigins: strings.Join(cfg.Security.CORSOrigins, ","),
 	}))

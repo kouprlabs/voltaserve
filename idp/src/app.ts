@@ -1,7 +1,7 @@
 import '@/infra/env'
 import bodyParser from 'body-parser'
 import cors from 'cors'
-import express from 'express'
+import express, { Request, Response } from 'express'
 import logger from 'morgan'
 import passport from 'passport'
 import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt'
@@ -40,6 +40,10 @@ passport.use(
     }
   )
 )
+
+app.get('/v1/health', (_: Request, res: Response) => {
+  res.sendStatus(200)
+})
 
 app.use('/v1/user', userRouter)
 app.use('/v1/accounts', accountRouter)

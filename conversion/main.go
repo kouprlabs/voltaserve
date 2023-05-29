@@ -102,6 +102,10 @@ func main() {
 
 	app := fiber.New()
 
+	app.Get("v1/health", func(c *fiber.Ctx) error {
+		return c.SendStatus(200)
+	})
+
 	app.Post("v1/pipelines", func(c *fiber.Ctx) error {
 		apiKey := c.Query("api_key")
 		if apiKey == "" {

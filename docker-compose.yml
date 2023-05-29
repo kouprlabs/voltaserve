@@ -121,6 +121,8 @@ services:
       - ./api:/app
       - api-root:/root
       - api-go:/go
+    healthcheck:
+      test: wget --spider --quiet http://localhost:5000/v1/health || exit 1
     depends_on:
       - cockroach
       - redis
@@ -149,6 +151,8 @@ services:
       - ./idp:/app
       - /app/node_modules
       - idp-root:/root
+    healthcheck:
+      test: wget --spider --quiet http://localhost:7000/v1/health || exit 1
     depends_on:
       - cockroach
       - meilisearch
@@ -167,6 +171,8 @@ services:
       - ./ui:/app
       - /app/node_modules
       - ui-root:/root
+    healthcheck:
+      test: wget --spider --quiet http://localhost:3000/index.html || exit 1
     depends_on:
       - idp
       - api
@@ -185,6 +191,8 @@ services:
       - ./webdav:/app
       - /app/node_modules
       - webdav-root:/root
+    healthcheck:
+      test: wget --spider --quiet http://localhost:6000/v1/health || exit 1
     depends_on:
       - idp
       - api
@@ -211,6 +219,8 @@ services:
       - conversion-root:/root
       - conversion-home:/home
       - conversion-go:/go
+    healthcheck:
+      test: wget --spider --quiet http://localhost:5001/v1/health || exit 1
     depends_on:
       - api
       - minio
