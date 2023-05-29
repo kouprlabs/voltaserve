@@ -13,6 +13,7 @@ brew install ocrmypdf
 brew install graphicsmagick
 brew install libreoffice
 brew install poppler
+brew install ffmpeg
 ```
 
 ### Install Dependencies for Debian and Ubuntu
