@@ -14,7 +14,7 @@ Install [Docker](https://docs.docker.com/get-docker) and [Docker Compose](https:
 docker compose up -d
 ```
 
-Wait a few minutes (it takes longer only the first time) until the status of the following containers to be `healthy`:
+Wait a few minutes (it takes longer only the first time) until the status of the following containers is `healthy`:
 
 - `voltaserve-api`
 - `voltaserve-idp`
