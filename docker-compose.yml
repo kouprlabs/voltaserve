@@ -163,6 +163,7 @@ services:
     environment:
       - CONVERSION_URL=http://conversion:5001
       - API_URL=http://api:5000
+      - S3_URL=minio:9000
     volumes:
       - ./conversion:/app
     depends_on:
