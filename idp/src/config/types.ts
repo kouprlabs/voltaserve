@@ -1,6 +1,6 @@
 export class Config {
-  idpURL: string
-  uiURL: string
+  port: number
+  publicUIURL: string
   databaseURL: string
   token: TokenConfig
   corsOrigins: string[]

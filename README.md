@@ -14,7 +14,15 @@ Install [Docker](https://docs.docker.com/get-docker) and [Docker Compose](https:
 docker compose up -d
 ```
 
-Wait a few minutes until all containers are up and running. You can check that by looking at their logs.
+Wait a few minutes (it takes longer only the first time) until the status of the following containers is `healthy`:
+
+- `voltaserve-api`
+- `voltaserve-idp`
+- `voltaserve-conversion`
+- `voltaserve-webdav`
+- `voltaserve-ui`
+
+You can check that by running the command `docker ps` and look at the `STATUS` column.
 
 2. Go to the **sign up page** <http://localhost:3000/sign-up> and create an account.
 

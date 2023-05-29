@@ -1,7 +1,7 @@
 package main
 
 import (
-	"net/url"
+	"fmt"
 	"os"
 	"strings"
 
@@ -47,6 +47,10 @@ func main() {
 
 	v1 := app.Group("/v1")
 
+	app.Get("v1/health", func(c *fiber.Ctx) error {
+		return c.SendStatus(200)
+	})
+
 	app.Use(cors.New(cors.Config{
 		AllowOrigins: strings.Join(cfg.Security.CORSOrigins, ","),
 	}))
@@ -84,11 +88,7 @@ func main() {
 	groups := router.NewGroupRouter()
 	groups.AppendRoutes(v1.Group("groups"))
 
-	url, err := url.Parse(cfg.APIURL)
-	if err != nil {
-		panic(err)
-	}
-	if err := app.Listen(":" + url.Port()); err != nil {
+	if err := app.Listen(fmt.Sprintf(":%d", cfg.Port)); err != nil {
 		panic(err)
 	}
 }

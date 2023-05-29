@@ -41,6 +41,11 @@ passport.use(
 )
 
 const server = createServer((req: IncomingMessage, res: ServerResponse) => {
+  if (req.url === '/v1/health' && req.method === 'GET') {
+    res.statusCode = 200
+    res.end('OK')
+    return
+  }
   passport.authenticate(
     'basic',
     { session: false },

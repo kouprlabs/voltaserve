@@ -1,11 +1,10 @@
 import '@/infra/env'
 import bodyParser from 'body-parser'
 import cors from 'cors'
-import express from 'express'
+import express, { Request, Response } from 'express'
 import logger from 'morgan'
 import passport from 'passport'
 import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt'
-import { URL } from 'url'
 import accountRouter from '@/account/router'
 import { getConfig } from '@/config/config'
 import { errorHandler } from '@/infra/error'
@@ -42,13 +41,17 @@ passport.use(
   )
 )
 
+app.get('/v1/health', (_: Request, res: Response) => {
+  res.sendStatus(200)
+})
+
 app.use('/v1/user', userRouter)
 app.use('/v1/accounts', accountRouter)
 app.use('/v1/token', tokenRouter)
 
 app.use(errorHandler)
 
-const port = new URL(getConfig().idpURL).port
+const port = getConfig().port
 
 postgres.connect().then(() => {
   app.listen(port, () => {

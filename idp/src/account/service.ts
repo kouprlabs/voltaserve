@@ -58,7 +58,7 @@ export async function createUser(
       },
     ])
     await sendTemplateMail('email-confirmation', options.email, {
-      'UI_URL': getConfig().uiURL,
+      'UI_URL': getConfig().publicUIURL,
       'TOKEN': emailConfirmationToken,
     })
     return mapEntity(user)
@@ -107,7 +107,7 @@ export async function sendResetPasswordEmail(
   }
   try {
     await sendTemplateMail('reset-password', user.email, {
-      'UI_URL': getConfig().uiURL,
+      'UI_URL': getConfig().publicUIURL,
       'TOKEN': user.resetPasswordToken,
     })
   } catch (error) {
