@@ -32,19 +32,9 @@ You can check that by running the command `docker ps` and look at the `STATUS` c
 
 ### Connect with WebDAV
 
-Voltaserve supports [WebDAV](https://en.wikipedia.org/wiki/WebDAV), by default it's listening on the port `6000`.
+Voltaserve supports [WebDAV](https://en.wikipedia.org/wiki/WebDAV), by default using the port `6000`.
 
-You can change it by editing the `VOLTASERVE_WEBDAV_PORT` environment variable in [.env](.env) file as follows:
-
-```properties
-VOLTASERVE_WEBDAV_PORT=6000
-```
-
-The port needs to be open and accessible from the outside. One way of doing it in Linux is by using `ufw`:
-
-```shell
-sudo ufw allow 6000
-```
+To connect you can use [WinSCP](https://winscp.net) on Windows and [Cyberduck](https://cyberduck.io) on macOS.
 
 ### Configuration
 
@@ -76,6 +66,18 @@ You can change the UI port to something else, other than `3000`, like `80` for e
 
 ```properties
 VOLTASERVE_UI_PORT=80
+```
+
+The port `6000` is used for WebDAV, you can change it by editing the `VOLTASERVE_WEBDAV_PORT` environment variable in [.env](.env) file as follows:
+
+```properties
+VOLTASERVE_WEBDAV_PORT=6000
+```
+
+The port needs to be open and accessible from the outside. One way of doing it in Linux is by using `ufw`:
+
+```shell
+sudo ufw allow 6000
 ```
 
 Other ports can be changed as well by editing their respective environment variables in [.env](.env) file.
