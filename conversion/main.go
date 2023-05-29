@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"net/url"
 	"os"
 	"runtime"
 	"time"
@@ -103,6 +102,10 @@ func main() {
 
 	app := fiber.New()
 
+	app.Get("v1/health", func(c *fiber.Ctx) error {
+		return c.SendStatus(200)
+	})
+
 	app.Post("v1/pipelines", func(c *fiber.Ctx) error {
 		apiKey := c.Query("api_key")
 		if apiKey == "" {
@@ -144,11 +147,7 @@ func main() {
 
 	go statusWorker()
 
-	url, err := url.Parse(cfg.ConversionURL)
-	if err != nil {
-		panic(err)
-	}
-	if err := app.Listen(":" + url.Port()); err != nil {
+	if err := app.Listen(fmt.Sprintf(":%d", cfg.Port)); err != nil {
 		panic(err)
 	}
 }

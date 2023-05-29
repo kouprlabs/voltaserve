@@ -11,7 +11,36 @@ volumes:
     name: voltaserve-redis
   redisinsight:
     name: voltaserve-redisinsight
-
+  api-root:
+    name: voltaserve-api-root
+  api-go:
+    name: voltaserve-api-go
+  idp-root:
+    name: voltaserve-idp-root
+  ui-root:
+    name: voltaserve-ui-root
+  webdav-root:
+    name: voltaserve-webdav-root
+  conversion-lib:
+    name: voltraserve-conversion-lib
+  conversion-etc:
+    name: voltraserve-conversion-etc
+  conversion-bin:
+    name: voltraserve-conversion-bin
+  conversion-usr:
+    name: voltraserve-conversion-usr
+  conversion-var:
+    name: voltraserve-conversion-var
+  conversion-root:
+    name: voltraserve-conversion-root
+  conversion-opt:
+    name: voltraserve-conversion-opt
+  conversion-sbin:
+    name: voltraserve-conversion-sbin
+  conversion-home:
+    name: voltraserve-conversion-home
+  conversion-go:
+    name: voltraserve-conversion-go
 services:
   cockroach:
     container_name: voltaserve-cockroach
@@ -74,12 +103,12 @@ services:
     ports:
       - ${VOLTASERVE_API_PORT}:5000
     environment:
-      - API_URL=http://${VOLTASERVE_HOSTNAME}:${VOLTASERVE_API_PORT}
-      - UI_URL=http://${VOLTASERVE_HOSTNAME}:${VOLTASERVE_UI_PORT}
+      - PORT=5000
       - CONVERSION_URL=http://conversion:5001
       - POSTGRES_URL=postgresql://voltaserve@cockroach:26257/voltaserve
       - S3_URL=minio:9000
       - SEARCH_URL=http://meilisearch:7700
+      - PUBLIC_UI_URL=http://${VOLTASERVE_HOSTNAME}:${VOLTASERVE_UI_PORT}
       - REDIS_ADDRESS=redis:6379
       - SMTP_HOST=${VOLTASERVE_SMTP_HOST}
       - SMTP_PORT=${VOLTASERVE_SMTP_PORT}
@@ -90,11 +119,16 @@ services:
       - SMTP_SENDER_NAME=${VOLTASERVE_SMTP_SENDER_NAME}
     volumes:
       - ./api:/app
+      - api-root:/root
+      - api-go:/go
+    healthcheck:
+      test: wget --spider --quiet http://localhost:5000/v1/health || exit 1
     depends_on:
       - cockroach
       - redis
       - minio
       - meilisearch
+    restart: on-failure
   idp:
     container_name: voltaserve-idp
     image: node:18-alpine
@@ -103,10 +137,10 @@ services:
     ports:
       - ${VOLTASERVE_IDP_PORT}:7000
     environment:
-      - IDP_URL=http://${VOLTASERVE_HOSTNAME}:${VOLTASERVE_IDP_PORT}
-      - UI_URL=http://${VOLTASERVE_HOSTNAME}:${VOLTASERVE_UI_PORT}
+      - PORT=7000
       - POSTGRES_URL=postgresql://voltaserve@cockroach:26257/voltaserve
       - SEARCH_URL=http://meilisearch:7700
+      - PUBLIC_UI_URL=http://${VOLTASERVE_HOSTNAME}:${VOLTASERVE_UI_PORT}
       - SMTP_HOST=${VOLTASERVE_SMTP_HOST}
       - SMTP_PORT=${VOLTASERVE_SMTP_PORT}
       - SMTP_SECURE=${VOLTASERVE_SMTP_SECURE}
@@ -117,10 +151,14 @@ services:
     volumes:
       - ./idp:/app
       - /app/node_modules
+      - idp-root:/root
+    healthcheck:
+      test: wget --spider --quiet http://localhost:7000/v1/health || exit 1
     depends_on:
       - cockroach
       - meilisearch
       - minio
+    restart: on-failure
   ui:
     container_name: voltaserve-ui
     image: node:18-alpine
@@ -129,14 +167,18 @@ services:
     ports:
       - ${VOLTASERVE_UI_PORT}:3000
     environment:
-      - API_URL=http://api:${VOLTASERVE_API_PORT}
-      - IDP_URL=http://idp:${VOLTASERVE_IDP_PORT}
+      - API_URL=http://api:5000
+      - IDP_URL=http://idp:7000
     volumes:
       - ./ui:/app
       - /app/node_modules
+      - ui-root:/root
+    healthcheck:
+      test: wget --spider --quiet http://localhost:3000/index.html || exit 1
     depends_on:
       - idp
       - api
+    restart: on-failure
   webdav:
     container_name: voltaserve-webdav
     image: node:18-alpine
@@ -145,14 +187,19 @@ services:
     ports:
       - ${VOLTASERVE_WEBDAV_PORT}:6000
     environment:
+      - PORT=6000
       - IDP_URL=http://idp:7000
       - API_URL=http://api:5000
     volumes:
       - ./webdav:/app
       - /app/node_modules
+      - webdav-root:/root
+    healthcheck:
+      test: wget --spider --quiet http://localhost:6000/v1/health || exit 1
     depends_on:
       - idp
       - api
+    restart: on-failure
   conversion:
     container_name: voltaserve-conversion
     image: golang:1.20-bullseye
@@ -161,11 +208,24 @@ services:
     ports:
       - ${VOLTASERVE_CONVERSION_PORT}:5001
     environment:
-      - CONVERSION_URL=http://conversion:5001
+      - PORT=5001
       - API_URL=http://api:5000
       - S3_URL=minio:9000
     volumes:
       - ./conversion:/app
+      - conversion-lib:/lib
+      - conversion-etc:/etc
+      - conversion-bin:/bin
+      - conversion-sbin:/sbin
+      - conversion-usr:/usr
+      - conversion-var:/var
+      - conversion-opt:/opt
+      - conversion-root:/root
+      - conversion-home:/home
+      - conversion-go:/go
+    healthcheck:
+      test: wget --spider --quiet http://localhost:5001/v1/health || exit 1
     depends_on:
       - api
       - minio
+    restart: on-failure
