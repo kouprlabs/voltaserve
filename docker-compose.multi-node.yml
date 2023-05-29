@@ -272,11 +272,11 @@ services:
       - ./api:/app
     environment:
       - PORT=5000
-      - PUBLIC_UI_URL=http://${VOLTASERVE_HOSTNAME}:${VOLTASERVE_UI_PORT}
       - CONVERSION_URL=http://conversion:5001
       - POSTGRES_URL=postgresql://voltaserve@roach1:26257/voltaserve
       - S3_URL=minio-nginx:9000
       - SEARCH_URL=http://meilisearch:7700
+      - PUBLIC_UI_URL=http://${VOLTASERVE_HOSTNAME}:${VOLTASERVE_UI_PORT}
       - REDIS_ADDRESS=redis1:6373;redis2:6374;redis3:6375;redis4:6376;redis5:6377;redis6:6378
       - SMTP_HOST=${VOLTASERVE_SMTP_HOST}
       - SMTP_PORT=${VOLTASERVE_SMTP_PORT}
