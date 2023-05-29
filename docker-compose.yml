@@ -11,6 +11,16 @@ volumes:
     name: voltaserve-redis
   redisinsight:
     name: voltaserve-redisinsight
+  api-root:
+    name: voltaserve-api-root
+  api-go:
+    name: voltaserve-api-go
+  idp-root:
+    name: voltaserve-idp-root
+  ui-root:
+    name: voltaserve-ui-root
+  webdav-root:
+    name: voltaserve-webdav-root
   conversion-lib:
     name: voltraserve-conversion-lib
   conversion-etc:
@@ -109,6 +119,8 @@ services:
       - SMTP_SENDER_NAME=${VOLTASERVE_SMTP_SENDER_NAME}
     volumes:
       - ./api:/app
+      - api-root:/root
+      - api-go:/go
     depends_on:
       - cockroach
       - redis
@@ -136,6 +148,7 @@ services:
     volumes:
       - ./idp:/app
       - /app/node_modules
+      - idp-root:/root
     depends_on:
       - cockroach
       - meilisearch
@@ -153,6 +166,7 @@ services:
     volumes:
       - ./ui:/app
       - /app/node_modules
+      - ui-root:/root
     depends_on:
       - idp
       - api
@@ -170,6 +184,7 @@ services:
     volumes:
       - ./webdav:/app
       - /app/node_modules
+      - webdav-root:/root
     depends_on:
       - idp
       - api

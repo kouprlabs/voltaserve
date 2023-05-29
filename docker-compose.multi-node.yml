@@ -70,6 +70,16 @@ volumes:
     name: voltaserve-redis-data6
   redisinsight:
     name: voltaserve-redisinsight
+  api-root:
+    name: voltaserve-api-root
+  api-go:
+    name: voltaserve-api-go
+  idp-root:
+    name: voltaserve-idp-root
+  ui-root:
+    name: voltaserve-ui-root
+  webdav-root:
+    name: voltaserve-webdav-root
   conversion-lib:
     name: voltraserve-conversion-lib
   conversion-etc:
@@ -290,6 +300,8 @@ services:
     command: sh -c "go run ."
     volumes:
       - ./api:/app
+      - api-root:/root
+      - api-go:/go
     environment:
       - PORT=5000
       - CONVERSION_URL=http://conversion:5001
@@ -337,6 +349,7 @@ services:
     volumes:
       - ./idp:/app
       - /app/node_modules
+      - idp-root:/root
     environment:
       - PORT=7000
       - POSTGRES_URL=postgresql://voltaserve@roach1:26257/voltaserve
@@ -365,6 +378,7 @@ services:
     volumes:
       - ./ui:/app
       - /app/node_modules
+      - ui-root:/root
     ports:
       - ${VOLTASERVE_UI_PORT}:3000
     environment:
@@ -385,6 +399,7 @@ services:
     volumes:
       - ./webdav:/app
       - /app/node_modules
+      - webdav-root:/root
     ports:
       - ${VOLTASERVE_WEBDAV_PORT}:6000
     environment:
