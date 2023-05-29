@@ -74,10 +74,16 @@ volumes:
     name: voltaserve-api-root
   api-go:
     name: voltaserve-api-go
+  idp-node-modules:
+    name: voltaserve-idp-node-modules
   idp-root:
     name: voltaserve-idp-root
   ui-root:
     name: voltaserve-ui-root
+  ui-node-modules:
+    name: voltaserve-ui-node-modules
+  webdav-node-modules:
+    name: voltaserve-webdav-node-modules
   webdav-root:
     name: voltaserve-webdav-root
   conversion-lib:
@@ -350,7 +356,7 @@ services:
       - ${VOLTASERVE_IDP_PORT}:7000
     volumes:
       - ./idp:/app
-      - /app/node_modules
+      - idp-node-modules:/app/node_modules
       - idp-root:/root
     environment:
       - PORT=7000
@@ -381,7 +387,7 @@ services:
     command: sh -c "npm i && npm run dev"
     volumes:
       - ./ui:/app
-      - /app/node_modules
+      - ui-node-modules:/app/node_modules
       - ui-root:/root
     ports:
       - ${VOLTASERVE_UI_PORT}:3000
@@ -404,7 +410,7 @@ services:
     command: sh -c "npm i && npm run dev"
     volumes:
       - ./webdav:/app
-      - /app/node_modules
+      - webdav-node-modules:/app/node_modules
       - webdav-root:/root
     ports:
       - ${VOLTASERVE_WEBDAV_PORT}:6000

@@ -15,10 +15,16 @@ volumes:
     name: voltaserve-api-root
   api-go:
     name: voltaserve-api-go
+  idp-node-modules:
+    name: voltaserve-idp-node-modules
   idp-root:
     name: voltaserve-idp-root
+  ui-node-modules:
+    name: voltaserve-ui-node-modules
   ui-root:
     name: voltaserve-ui-root
+  webdav-node-modules:
+    name: voltaserve-webdav-node-modules
   webdav-root:
     name: voltaserve-webdav-root
   conversion-lib:
@@ -150,7 +156,7 @@ services:
       - SMTP_SENDER_NAME=${VOLTASERVE_SMTP_SENDER_NAME}
     volumes:
       - ./idp:/app
-      - /app/node_modules
+      - idp-node-modules:/app/node_modules
       - idp-root:/root
     healthcheck:
       test: wget --spider --quiet http://localhost:7000/v1/health || exit 1
@@ -171,7 +177,7 @@ services:
       - IDP_URL=http://idp:7000
     volumes:
       - ./ui:/app
-      - /app/node_modules
+      - ui-node-modules:/app/node_modules
       - ui-root:/root
     healthcheck:
       test: wget --spider --quiet http://localhost:3000/index.html || exit 1
@@ -192,7 +198,7 @@ services:
       - API_URL=http://api:5000
     volumes:
       - ./webdav:/app
-      - /app/node_modules
+      - webdav-node-modules:/app/node_modules
       - webdav-root:/root
     healthcheck:
       test: wget --spider --quiet http://localhost:6000/v1/health || exit 1
