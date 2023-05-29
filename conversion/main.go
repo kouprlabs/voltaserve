@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"net/url"
 	"os"
 	"runtime"
 	"time"
@@ -144,11 +143,7 @@ func main() {
 
 	go statusWorker()
 
-	url, err := url.Parse(cfg.ConversionURL)
-	if err != nil {
-		panic(err)
-	}
-	if err := app.Listen(":" + url.Port()); err != nil {
+	if err := app.Listen(fmt.Sprintf(":%d", cfg.Port)); err != nil {
 		panic(err)
 	}
 }

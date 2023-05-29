@@ -368,6 +368,7 @@ services:
     ports:
       - ${VOLTASERVE_WEBDAV_PORT}:6000
     environment:
+      - PORT=6000
       - IDP_URL=http://idp:7000
       - API_URL=http://api:5000
     depends_on:
@@ -385,7 +386,7 @@ services:
     ports:
       - ${VOLTASERVE_CONVERSION_PORT}:5001
     environment:
-      - CONVERSION_URL=http://conversion:5001
+      - PORT=5001
       - API_URL=http://api:5000
       - S3_URL=minio-nginx:9000
     volumes:
