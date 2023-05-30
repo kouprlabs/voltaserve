@@ -152,4 +152,4 @@ Additional instructions:
 
 ## Licensing
 
-Voltaserve is released under the [The MIT License](./LICENSE).
+Voltaserve is released under the [The MIT License](./LICENSE.md).
