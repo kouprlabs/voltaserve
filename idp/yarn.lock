@@ -5056,6 +5056,7 @@ __metadata:
     tsconfig-paths: 4.2.0
     typescript: 5.0.4
     uuid: 9.0.0
+    yn: 5.0.0
   bin:
     voltaserve-idp: build/app.js
   languageName: unknown
@@ -5228,6 +5229,13 @@ __metadata:
   version: 3.1.1
   resolution: "yn@npm:3.1.1"
   checksum: 2c487b0e149e746ef48cda9f8bad10fc83693cd69d7f9dcd8be4214e985de33a29c9e24f3c0d6bcf2288427040a8947406ab27f7af67ee9456e6b84854f02dd6
+  languageName: node
+  linkType: hard
+
+"yn@npm:5.0.0":
+  version: 5.0.0
+  resolution: "yn@npm:5.0.0"
+  checksum: f0ec7710d3d697e88a67a46e8072542448f04677a7e6580c56b1b78da202fa5cd73fabba94957d58ee306e4ce6366c5c38c1a9fb7fd76d07ad77a4d1908b66b0
   languageName: node
   linkType: hard
 

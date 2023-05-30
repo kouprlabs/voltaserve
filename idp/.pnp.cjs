@@ -72,7 +72,8 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["tsc-alias", "npm:1.8.6"],\
             ["tsconfig-paths", "npm:4.2.0"],\
             ["typescript", "patch:typescript@npm%3A5.0.4#~builtin<compat/typescript>::version=5.0.4&hash=b5f058"],\
-            ["uuid", "npm:9.0.0"]\
+            ["uuid", "npm:9.0.0"],\
+            ["yn", "npm:5.0.0"]\
           ],\
           "linkType": "SOFT"\
         }]\
@@ -5941,7 +5942,8 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["tsc-alias", "npm:1.8.6"],\
             ["tsconfig-paths", "npm:4.2.0"],\
             ["typescript", "patch:typescript@npm%3A5.0.4#~builtin<compat/typescript>::version=5.0.4&hash=b5f058"],\
-            ["uuid", "npm:9.0.0"]\
+            ["uuid", "npm:9.0.0"],\
+            ["yn", "npm:5.0.0"]\
           ],\
           "linkType": "SOFT"\
         }]\
@@ -6137,6 +6139,13 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/yn-npm-3.1.1-8ad4259784-2c487b0e14.zip/node_modules/yn/",\
           "packageDependencies": [\
             ["yn", "npm:3.1.1"]\
+          ],\
+          "linkType": "HARD"\
+        }],\
+        ["npm:5.0.0", {\
+          "packageLocation": "./.yarn/cache/yn-npm-5.0.0-b001dab23c-f0ec7710d3.zip/node_modules/yn/",\
+          "packageDependencies": [\
+            ["yn", "npm:5.0.0"]\
           ],\
           "linkType": "HARD"\
         }]\

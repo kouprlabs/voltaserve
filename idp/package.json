@@ -72,6 +72,7 @@
     "swagger-autogen": "2.23.1",
     "ts-node": "10.9.1",
     "tsc-alias": "1.8.6",
-    "tsconfig-paths": "4.2.0"
+    "tsconfig-paths": "4.2.0",
+    "yn": "5.0.0"
   }
 }
