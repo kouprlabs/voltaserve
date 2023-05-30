@@ -4,6 +4,7 @@
   "license": "MIT",
   "type": "module",
   "private": true,
+  "packageManager": "yarn@3.5.1",
   "scripts": {
     "dev": "vite --host 0.0.0.0",
     "build": "tsc && vite build",
@@ -16,6 +17,7 @@
   },
   "dependencies": {
     "@chakra-ui/react": "2.6.1",
+    "@chakra-ui/system": "2.5.7",
     "@emotion/css": "11.11.0",
     "@emotion/react": "11.11.0",
     "@emotion/styled": "11.11.0",
@@ -35,11 +37,13 @@
     "react-icons": "4.8.0",
     "react-redux": "8.0.5",
     "react-router-dom": "6.11.1",
+    "redux": "4.2.1",
     "swr": "2.1.5",
     "uuid": "9.0.0",
     "yup": "1.1.1"
   },
   "devDependencies": {
+    "@esbuild/linux-x64": "0.17.19",
     "@trivago/prettier-plugin-sort-imports": "4.1.1",
     "@types/cookie": "0.5.1",
     "@types/cors": "2.8.13",

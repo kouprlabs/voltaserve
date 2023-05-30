@@ -1,0 +1,390 @@
+version: '3.8'
+
+x-minio-common:
+  &minio-common
+  image: quay.io/minio/minio:RELEASE.2023-05-18T00-05-36Z
+  command: server --console-address ":9001" http://minio{1...4}/data{1...2}
+  expose:
+    - "9000"
+    - "9001"
+  environment:
+    MINIO_ROOT_USER: voltaserve
+    MINIO_ROOT_PASSWORD: voltaserve
+    MINIO_REGION: us-east-1
+  healthcheck:
+    test: curl --fail http://localhost:9000/minio/health/live || exit 1
+    interval: 30s
+    timeout: 20s
+    retries: 3
+
+networks:
+  default:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/24
+
+volumes:
+  cockroach1:
+  cockroach2:
+  cockroach3:
+  minio_data1_1:
+  minio_data1_2:
+  minio_data2_1:
+  minio_data2_2:
+  minio_data3_1:
+  minio_data3_2:
+  minio_data4_1:
+  minio_data4_2:
+  meilisearch:
+  redis_data1:
+  redis_data2:
+  redis_data3:
+  redis_data4:
+  redis_data5:
+  redis_data6:
+  redisinsight:
+  api_root:
+  api_go:
+  idp_root:
+  ui_root:
+  webdav_root:
+  conversion_lib:
+  conversion_etc:
+  conversion_bin:
+  conversion_usr:
+  conversion_var:
+  conversion_root:
+  conversion_opt:
+  conversion_sbin:
+  conversion_home:
+  conversion_go:
+
+
+services:
+  cockroach1:
+    hostname: cockroach1
+    image: cockroachdb/cockroach:latest-v23.1
+    ports:
+      - ${VOLTASERVE_POSTGRES_PORT}:26257
+      - ${VOLTASERVE_COCKROACH_CONSOLE_PORT}:8080
+    volumes:
+      - cockroach1:/cockroach/cockroach-data
+    command: start --insecure --join=cockroach1,cockroach2,cockroach3
+    networks:
+      default:
+        ipv4_address: 172.20.0.10
+  cockroach2:
+    hostname: cockroach2
+    image: cockroachdb/cockroach:latest-v23.1
+    volumes:
+      - cockroach2:/cockroach/cockroach-data
+    command: start --insecure --join=cockroach1,cockroach2,cockroach3
+    networks:
+      default:
+        ipv4_address: 172.20.0.11
+  cockroach3:
+    hostname: cockroach3
+    image: cockroachdb/cockroach:latest-v23.1
+    volumes:
+      - cockroach3:/cockroach/cockroach-data
+    command: start --insecure --join=cockroach1,cockroach2,cockroach3
+    networks:
+      default:
+        ipv4_address: 172.20.0.12
+  minio:
+    image: nginx:1.19.2-alpine
+    hostname: nginx
+    volumes:
+      - ./infra/cluster/minio.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - ${VOLTASERVE_MINIO_PORT}:9000
+      - ${VOLTASERVE_MINIO_CONSOLE_PORT}:9001
+    depends_on:
+      - minio1
+      - minio2
+      - minio3
+      - minio4
+    networks:
+      default:
+        ipv4_address: 172.20.0.20
+  minio1:
+    <<: *minio-common
+    hostname: minio1
+    volumes:
+      - minio_data1_1:/data1
+      - minio_data1_2:/data2
+    networks:
+      default:
+        ipv4_address: 172.20.0.21
+  minio2:
+    <<: *minio-common
+    hostname: minio2
+    volumes:
+      - minio_data2_1:/data1
+      - minio_data2_2:/data2
+    networks:
+      default:
+        ipv4_address: 172.20.0.22
+  minio3:
+    <<: *minio-common
+    hostname: minio3
+    volumes:
+      - minio_data3_1:/data1
+      - minio_data3_2:/data2
+    networks:
+      default:
+        ipv4_address: 172.20.0.23
+  minio4:
+    <<: *minio-common
+    hostname: minio4
+    volumes:
+      - minio_data4_1:/data1
+      - minio_data4_2:/data2
+    networks:
+      default:
+        ipv4_address: 172.20.0.24
+  meilisearch:
+    image: getmeili/meilisearch:v0.30
+    ports:
+      - ${VOLTASERVE_MEILISEARCH_PORT}:7700
+    volumes:
+      - meilisearch:/meili_data
+    networks:
+      default:
+        ipv4_address: 172.20.0.50
+  redis1:
+    image: redis:7.0.8
+    command: redis-server /usr/local/etc/redis/redis.conf
+    ports:
+      - 6373:6373
+    volumes:
+      - redis_data1:/var/lib/redis
+      - ./infra/cluster/redis1.conf:/usr/local/etc/redis/redis.conf
+    networks:
+      default:
+        ipv4_address: 172.20.0.31
+  redis2:
+    image: redis:7.0.8
+    command: redis-server /usr/local/etc/redis/redis.conf
+    ports:
+      - 6374:6374
+    volumes:
+      - redis_data2:/var/lib/redis
+      - ./infra/cluster/redis2.conf:/usr/local/etc/redis/redis.conf
+    networks:
+      default:
+        ipv4_address: 172.20.0.32
+  redis3:
+    image: redis:7.0.8
+    command: redis-server /usr/local/etc/redis/redis.conf
+    ports:
+      - 6375:6375
+    volumes:
+      - redis_data3:/var/lib/redis
+      - ./infra/cluster/redis3.conf:/usr/local/etc/redis/redis.conf
+    networks:
+      default:
+        ipv4_address: 172.20.0.33
+  redis4:
+    image: redis:7.0.8
+    command: redis-server /usr/local/etc/redis/redis.conf
+    ports:
+      - 6376:6376
+    volumes:
+      - redis_data4:/var/lib/redis
+      - ./infra/cluster/redis4.conf:/usr/local/etc/redis/redis.conf
+    networks:
+      default:
+        ipv4_address: 172.20.0.34
+  redis5:
+    image: redis:7.0.8
+    command: redis-server /usr/local/etc/redis/redis.conf
+    ports:
+      - 6377:6377
+    volumes:
+      - redis_data5:/var/lib/redis
+      - ./infra/cluster/redis5.conf:/usr/local/etc/redis/redis.conf
+    networks:
+      default:
+        ipv4_address: 172.20.0.35
+  redis6:
+    image: redis:7.0.8
+    command: redis-server /usr/local/etc/redis/redis.conf
+    ports:
+      - 6378:6378
+    volumes:
+      - redis_data6:/var/lib/redis
+      - ./infra/cluster/redis6.conf:/usr/local/etc/redis/redis.conf
+    networks:
+      default:
+        ipv4_address: 172.20.0.36
+  redisinsight:
+    image: redislabs/redisinsight:1.14.0
+    ports:
+      - ${VOLTASERVE_REDISINSIGHT_PORT}:8001
+    volumes:
+      - redisinsight:/db
+    networks:
+      default:
+        ipv4_address: 172.20.0.37
+  mailcatcher:
+    image: sj26/mailcatcher:v0.8.2
+    ports:
+      - ${VOLTASERVE_MAILCATCHER_WEB_PORT}:1080
+      - ${VOLTASERVE_MAILCATCHER_SMTP_PORT}:1025
+    networks:
+      default:
+        ipv4_address: 172.20.0.60
+  api:
+    image: golang:1.20-alpine
+    working_dir: /app
+    command: sh -c "go run ."
+    volumes:
+      - ./api:/app
+      - api_root:/root
+      - api_go:/go
+    environment:
+      - PORT=5000
+      - CONVERSION_URL=http://conversion:5001
+      - POSTGRES_URL=postgresql://voltaserve@cockroach1:26257/voltaserve
+      - S3_URL=minio:9000
+      - SEARCH_URL=http://meilisearch:7700
+      - PUBLIC_UI_URL=http://${VOLTASERVE_HOSTNAME}:${VOLTASERVE_UI_PORT}
+      - REDIS_ADDRESS=redis1:6373;redis2:6374;redis3:6375;redis4:6376;redis5:6377;redis6:6378
+      - SMTP_HOST=${VOLTASERVE_SMTP_HOST}
+      - SMTP_PORT=${VOLTASERVE_SMTP_PORT}
+      - SMTP_SECURE=${VOLTASERVE_SMTP_SECURE}
+      - SMTP_USERNAME=${VOLTASERVE_SMTP_USERNAME}
+      - SMTP_PASSWORD=${VOLTASERVE_SMTP_PASSWORD}
+      - SMTP_SENDER_ADDRESS=${VOLTASERVE_SMTP_SENDER_ADDRESS}
+      - SMTP_SENDER_NAME=${VOLTASERVE_SMTP_SENDER_NAME}
+    ports:
+      - ${VOLTASERVE_API_PORT}:5000
+    healthcheck:
+      test: wget --spider --quiet http://localhost:5000/v1/health || exit 1
+    depends_on:
+      - cockroach1
+      - cockroach2
+      - cockroach3
+      - minio
+      - minio1
+      - minio2
+      - minio3
+      - minio4
+      - redis1
+      - redis2
+      - redis3
+      - redis4
+      - redis5
+      - redis6
+      - meilisearch
+    restart: on-failure
+    networks:
+      default:
+        ipv4_address: 172.20.0.41
+  idp:
+    image: node:18-alpine
+    working_dir: /app
+    command: sh -c "yarn run dev"
+    ports:
+      - ${VOLTASERVE_IDP_PORT}:7000
+    volumes:
+      - ./idp:/app
+      - idp_root:/root
+    environment:
+      - PORT=7000
+      - POSTGRES_URL=postgresql://voltaserve@cockroach1:26257/voltaserve
+      - SEARCH_URL=http://meilisearch:7700
+      - PUBLIC_UI_URL=http://${VOLTASERVE_HOSTNAME}:${VOLTASERVE_UI_PORT}
+      - SMTP_HOST=${VOLTASERVE_SMTP_HOST}
+      - SMTP_PORT=${VOLTASERVE_SMTP_PORT}
+      - SMTP_SECURE=${VOLTASERVE_SMTP_SECURE}
+      - SMTP_USERNAME=${VOLTASERVE_SMTP_USERNAME}
+      - SMTP_PASSWORD=${VOLTASERVE_SMTP_PASSWORD}
+      - SMTP_SENDER_ADDRESS=${VOLTASERVE_SMTP_SENDER_ADDRESS}
+      - SMTP_SENDER_NAME=${VOLTASERVE_SMTP_SENDER_NAME}
+    healthcheck:
+      test: wget --spider --quiet http://localhost:7000/v1/health || exit 1
+    depends_on:
+      - cockroach1
+      - cockroach2
+      - cockroach3
+    restart: on-failure
+    networks:
+      default:
+        ipv4_address: 172.20.0.40
+  ui:
+    image: node:18-alpine
+    working_dir: /app
+    command: sh -c "yarn run dev"
+    volumes:
+      - ./ui:/app
+      - ui_root:/root
+    ports:
+      - ${VOLTASERVE_UI_PORT}:3000
+    environment:
+      - API_URL=http://api:5000
+      - IDP_URL=http://idp:7000
+    healthcheck:
+      test: wget --spider --quiet http://localhost:3000/index.html || exit 1
+    depends_on:
+      - idp
+      - api
+    restart: on-failure
+    networks:
+      default:
+        ipv4_address: 172.20.0.42
+  webdav:
+    image: node:18-alpine
+    working_dir: /app
+    command: sh -c "yarn run dev"
+    volumes:
+      - ./webdav:/app
+      - webdav_root:/root
+    ports:
+      - ${VOLTASERVE_WEBDAV_PORT}:6000
+    environment:
+      - PORT=6000
+      - IDP_URL=http://idp:7000
+      - API_URL=http://api:5000
+    healthcheck:
+      test: wget --spider --quiet http://localhost:6000/v1/health || exit 1
+    depends_on:
+      - idp
+      - api
+    restart: on-failure
+    networks:
+      default:
+        ipv4_address: 172.20.0.43
+  conversion:
+    image: golang:1.20-bullseye
+    working_dir: /app
+    command: sh -c "./install-deps.sh && go run ."
+    ports:
+      - ${VOLTASERVE_CONVERSION_PORT}:5001
+    environment:
+      - PORT=5001
+      - API_URL=http://api:5000
+      - S3_URL=minio:9000
+    volumes:
+      - ./conversion:/app
+      - conversion_lib:/lib
+      - conversion_etc:/etc
+      - conversion_bin:/bin
+      - conversion_sbin:/sbin
+      - conversion_usr:/usr
+      - conversion_var:/var
+      - conversion_opt:/opt
+      - conversion_root:/root
+      - conversion_home:/home
+      - conversion_go:/go
+    healthcheck:
+      test: wget --spider --quiet http://localhost:5001/v1/health || exit 1
+    depends_on:
+      - api
+      - minio
+    restart: on-failure
+    networks:
+      default:
+        ipv4_address: 172.20.0.44
