@@ -148,6 +148,7 @@ Additional instructions:
 - [Voltaserve UI](ui/README.md)
 - [Voltaserve Identity Provider](idp/README.md)
 - [Voltaserve WebDAV](webdav/README.md)
+- [Voltaserve Conversion](conversion/README.md)
 
 ## Licensing
 
