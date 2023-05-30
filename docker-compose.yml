@@ -105,7 +105,7 @@ services:
   idp:
     image: node:18-alpine
     working_dir: /app
-    command: sh -c "yarn run dev"
+    command: sh -c "yarn dev"
     ports:
       - ${VOLTASERVE_IDP_PORT}:7000
     environment:
@@ -133,7 +133,7 @@ services:
   ui:
     image: node:18-alpine
     working_dir: /app
-    command: sh -c "yarn run dev"
+    command: sh -c "yarn dev"
     ports:
       - ${VOLTASERVE_UI_PORT}:3000
     environment:
@@ -151,7 +151,7 @@ services:
   webdav:
     image: node:18-alpine
     working_dir: /app
-    command: sh -c "yarn run dev"
+    command: sh -c "yarn dev"
     ports:
       - ${VOLTASERVE_WEBDAV_PORT}:6000
     environment:
