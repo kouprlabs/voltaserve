@@ -2,54 +2,27 @@ version: '3.8'
 
 volumes:
   cockroach:
-    name: voltaserve-cockroach
   minio:
-    name: voltaserve-minio
   meilisearch:
-    name: voltaserve-meilisearch
   redis:
-    name: voltaserve-redis
   redisinsight:
-    name: voltaserve-redisinsight
-  api-root:
-    name: voltaserve-api-root
-  api-go:
-    name: voltaserve-api-go
-  idp-node-modules:
-    name: voltaserve-idp-node-modules
-  idp-root:
-    name: voltaserve-idp-root
-  ui-node-modules:
-    name: voltaserve-ui-node-modules
-  ui-root:
-    name: voltaserve-ui-root
-  webdav-node-modules:
-    name: voltaserve-webdav-node-modules
-  webdav-root:
-    name: voltaserve-webdav-root
-  conversion-lib:
-    name: voltraserve-conversion-lib
-  conversion-etc:
-    name: voltraserve-conversion-etc
-  conversion-bin:
-    name: voltraserve-conversion-bin
-  conversion-usr:
-    name: voltraserve-conversion-usr
-  conversion-var:
-    name: voltraserve-conversion-var
-  conversion-root:
-    name: voltraserve-conversion-root
-  conversion-opt:
-    name: voltraserve-conversion-opt
-  conversion-sbin:
-    name: voltraserve-conversion-sbin
-  conversion-home:
-    name: voltraserve-conversion-home
-  conversion-go:
-    name: voltraserve-conversion-go
+  api_root:
+  api_go:
+  idp_root:
+  ui_root:
+  webdav_root:
+  conversion_lib:
+  conversion_etc:
+  conversion_bin:
+  conversion_usr:
+  conversion_var:
+  conversion_root:
+  conversion_opt:
+  conversion_sbin:
+  conversion_home:
+  conversion_go:
 services:
   cockroach:
-    container_name: voltaserve-cockroach
     image: cockroachdb/cockroach:latest-v23.1
     ports:
       - ${VOLTASERVE_POSTGRES_PORT}:26257
@@ -62,8 +35,7 @@ services:
       - ./infra/sql:/docker-entrypoint-initdb.d
     command: start-single-node --insecure
   minio:
-    container_name: voltaserve-minio
-    image: minio/minio:RELEASE.2023-01-25T00-19-54Z
+    image: minio/minio:RELEASE.2023-05-18T00-05-36Z
     ports:
       - ${VOLTASERVE_MINIO_PORT}:9000
       - ${VOLTASERVE_MINIO_CONSOLE_PORT}:9001
@@ -75,34 +47,29 @@ services:
       - minio:/data
     command: server /data --console-address ":9001"
   meilisearch:
-    container_name: voltaserve-meilisearch
     image: getmeili/meilisearch:v0.30
     ports:
       - ${VOLTASERVE_MEILISEARCH_PORT}:7700
     volumes:
       - meilisearch:/meili_data
   redis:
-    container_name: voltaserve-redis
     image: redis:7.0.8
     ports:
       - ${VOLTASERVE_REDIS_PORT}:6379
     volumes:
       - redis:/data
   redisinsight:
-    container_name: voltaserve-redisinsight
     image: redislabs/redisinsight:1.14.0
     ports:
       - ${VOLTASERVE_REDISINSIGHT_PORT}:8001
     volumes:
       - redisinsight:/db
   mailcatcher:
-    container_name: voltaserve-mailcatcher
     image: sj26/mailcatcher:v0.8.2
     ports:
       - ${VOLTASERVE_MAILCATCHER_WEB_PORT}:1080
       - ${VOLTASERVE_MAILCATCHER_SMTP_PORT}:1025
   api:
-    container_name: voltaserve-api
     image: golang:1.20-alpine
     working_dir: /app
     command: sh -c "go run ."
@@ -125,8 +92,8 @@ services:
       - SMTP_SENDER_NAME=${VOLTASERVE_SMTP_SENDER_NAME}
     volumes:
       - ./api:/app
-      - api-root:/root
-      - api-go:/go
+      - api_root:/root
+      - api_go:/go
     healthcheck:
       test: wget --spider --quiet http://localhost:5000/v1/health || exit 1
     depends_on:
@@ -136,7 +103,6 @@ services:
       - meilisearch
     restart: on-failure
   idp:
-    container_name: voltaserve-idp
     image: node:18-alpine
     working_dir: /app
     command: sh -c "npm i && npm run dev"
@@ -156,8 +122,7 @@ services:
       - SMTP_SENDER_NAME=${VOLTASERVE_SMTP_SENDER_NAME}
     volumes:
       - ./idp:/app
-      - idp-node-modules:/app/node_modules
-      - idp-root:/root
+      - idp_root:/root
     healthcheck:
       test: wget --spider --quiet http://localhost:7000/v1/health || exit 1
     depends_on:
@@ -166,7 +131,6 @@ services:
       - minio
     restart: on-failure
   ui:
-    container_name: voltaserve-ui
     image: node:18-alpine
     working_dir: /app
     command: sh -c "npm i && npm run dev"
@@ -177,8 +141,7 @@ services:
       - IDP_URL=http://idp:7000
     volumes:
       - ./ui:/app
-      - ui-node-modules:/app/node_modules
-      - ui-root:/root
+      - ui_root:/root
     healthcheck:
       test: wget --spider --quiet http://localhost:3000/index.html || exit 1
     depends_on:
@@ -186,7 +149,6 @@ services:
       - api
     restart: on-failure
   webdav:
-    container_name: voltaserve-webdav
     image: node:18-alpine
     working_dir: /app
     command: sh -c "npm i && npm run dev"
@@ -198,8 +160,7 @@ services:
       - API_URL=http://api:5000
     volumes:
       - ./webdav:/app
-      - webdav-node-modules:/app/node_modules
-      - webdav-root:/root
+      - webdav_root:/root
     healthcheck:
       test: wget --spider --quiet http://localhost:6000/v1/health || exit 1
     depends_on:
@@ -207,7 +168,6 @@ services:
       - api
     restart: on-failure
   conversion:
-    container_name: voltaserve-conversion
     image: golang:1.20-bullseye
     working_dir: /app
     command: sh -c "./install-deps.sh && go run ."
@@ -219,16 +179,16 @@ services:
       - S3_URL=minio:9000
     volumes:
       - ./conversion:/app
-      - conversion-lib:/lib
-      - conversion-etc:/etc
-      - conversion-bin:/bin
-      - conversion-sbin:/sbin
-      - conversion-usr:/usr
-      - conversion-var:/var
-      - conversion-opt:/opt
-      - conversion-root:/root
-      - conversion-home:/home
-      - conversion-go:/go
+      - conversion_lib:/lib
+      - conversion_etc:/etc
+      - conversion_bin:/bin
+      - conversion_sbin:/sbin
+      - conversion_usr:/usr
+      - conversion_var:/var
+      - conversion_opt:/opt
+      - conversion_root:/root
+      - conversion_home:/home
+      - conversion_go:/go
     healthcheck:
       test: wget --spider --quiet http://localhost:5001/v1/health || exit 1
     depends_on:

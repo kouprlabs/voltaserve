@@ -14,6 +14,9 @@
     },
     {
       "path": "./ui"
+    },
+    {
+      "path": "infra"
     }
   ],
   "settings": {}
