@@ -33,6 +33,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@emotion/css", "npm:11.11.0"],\
             ["@emotion/react", "virtual:d2dda33531a1c097d380e079d9a41540a57ce25bd68f08d94628560d31252fd9b8d42b40e3e5807ce4bb6d84ece4e7c2640566e8598a77627d8e6cddc8fc6a6b#npm:11.11.0"],\
             ["@emotion/styled", "virtual:d2dda33531a1c097d380e079d9a41540a57ce25bd68f08d94628560d31252fd9b8d42b40e3e5807ce4bb6d84ece4e7c2640566e8598a77627d8e6cddc8fc6a6b#npm:11.11.0"],\
+            ["@esbuild/linux-x64", "npm:0.17.19"],\
             ["@koupr/ui", "virtual:d2dda33531a1c097d380e079d9a41540a57ce25bd68f08d94628560d31252fd9b8d42b40e3e5807ce4bb6d84ece4e7c2640566e8598a77627d8e6cddc8fc6a6b#npm:1.0.9"],\
             ["@reduxjs/toolkit", "virtual:d2dda33531a1c097d380e079d9a41540a57ce25bd68f08d94628560d31252fd9b8d42b40e3e5807ce4bb6d84ece4e7c2640566e8598a77627d8e6cddc8fc6a6b#npm:1.9.5"],\
             ["@trivago/prettier-plugin-sort-imports", "virtual:d2dda33531a1c097d380e079d9a41540a57ce25bd68f08d94628560d31252fd9b8d42b40e3e5807ce4bb6d84ece4e7c2640566e8598a77627d8e6cddc8fc6a6b#npm:4.1.1"],\
@@ -12406,6 +12407,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@emotion/css", "npm:11.11.0"],\
             ["@emotion/react", "virtual:d2dda33531a1c097d380e079d9a41540a57ce25bd68f08d94628560d31252fd9b8d42b40e3e5807ce4bb6d84ece4e7c2640566e8598a77627d8e6cddc8fc6a6b#npm:11.11.0"],\
             ["@emotion/styled", "virtual:d2dda33531a1c097d380e079d9a41540a57ce25bd68f08d94628560d31252fd9b8d42b40e3e5807ce4bb6d84ece4e7c2640566e8598a77627d8e6cddc8fc6a6b#npm:11.11.0"],\
+            ["@esbuild/linux-x64", "npm:0.17.19"],\
             ["@koupr/ui", "virtual:d2dda33531a1c097d380e079d9a41540a57ce25bd68f08d94628560d31252fd9b8d42b40e3e5807ce4bb6d84ece4e7c2640566e8598a77627d8e6cddc8fc6a6b#npm:1.0.9"],\
             ["@reduxjs/toolkit", "virtual:d2dda33531a1c097d380e079d9a41540a57ce25bd68f08d94628560d31252fd9b8d42b40e3e5807ce4bb6d84ece4e7c2640566e8598a77627d8e6cddc8fc6a6b#npm:1.9.5"],\
             ["@trivago/prettier-plugin-sort-imports", "virtual:d2dda33531a1c097d380e079d9a41540a57ce25bd68f08d94628560d31252fd9b8d42b40e3e5807ce4bb6d84ece4e7c2640566e8598a77627d8e6cddc8fc6a6b#npm:4.1.1"],\

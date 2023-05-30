@@ -3119,6 +3119,7 @@ __metadata:
 "@esbuild/linux-x64@npm:0.17.19":
   version: 0.17.19
   resolution: "@esbuild/linux-x64@npm:0.17.19"
+  checksum: 03ff211ae04a0e225173f23b3cdbb068148d45ed4118ceef084c34958a2e475c6fdbff799e3ae4651a1941ae5f14cdd2ac6222cd44464018c2dad1a21dc38ef5
   conditions: os=linux & cpu=x64
   languageName: node
   linkType: hard
@@ -8549,6 +8550,7 @@ __metadata:
     "@emotion/css": 11.11.0
     "@emotion/react": 11.11.0
     "@emotion/styled": 11.11.0
+    "@esbuild/linux-x64": 0.17.19
     "@koupr/ui": 1.0.9
     "@reduxjs/toolkit": 1.9.5
     "@trivago/prettier-plugin-sort-imports": 4.1.1
