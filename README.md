@@ -87,19 +87,19 @@ Other ports can be changed as well by editing their respective environment varia
 1. Run:
 
 ```sh
-docker compose -f ./docker-compose.multi-node.yml up -d
+docker compose -p voltaservecluster -f ./docker-compose.cluster.yml up -d
 ```
 
 2. Initialize CockroachDB cluster:
 
 ```sh
-docker exec -it voltaserve-roach1 ./cockroach init --insecure
+docker exec -it voltaservecluster-cockroach1-1 ./cockroach init --insecure
 ```
 
 3. Initialize Redis cluster:
 
 ```sh
-docker run --rm -it --name=redis-cluster-init --network=voltaserve-net --ip=172.20.0.30 redis:7.0.8 redis-cli --cluster create 172.20.0.31:6373 172.20.0.32:6374 172.20.0.33:6375 172.20.0.34:6376 172.20.0.35:6377 172.20.0.36:6378 --cluster-replicas 1 --cluster-yes
+docker run --rm -it --name=redis_cluster_init --network=voltaservecluster_default --ip=172.20.0.30 redis:7.0.8 redis-cli --cluster create 172.20.0.31:6373 172.20.0.32:6374 172.20.0.33:6375 172.20.0.34:6376 172.20.0.35:6377 172.20.0.36:6378 --cluster-replicas 1 --cluster-yes
 ```
 
 4. Connect to CockroachDB with root to create a user and database:
