@@ -4,8 +4,7 @@ WORKDIR /build
 
 COPY . .
 
-RUN npm install
-RUN npm run pkg
+RUN yarn run pkg
 
 FROM node:18-alpine AS runner
 

@@ -4,8 +4,6 @@ WORKDIR /app
 
 COPY . .
 
-RUN npm install
-
-ENTRYPOINT ["/bin/sh", "-c", "npm run dev"]
+ENTRYPOINT ["/bin/sh", "-c", "yarn run dev"]
 
 EXPOSE 3000
