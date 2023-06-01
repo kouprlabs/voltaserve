@@ -1,4 +1,3 @@
-import fs from 'fs'
 import { IncomingMessage, ServerResponse } from 'http'
 import path from 'path'
 import { File } from '@/api/file'

@@ -10,7 +10,7 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "prettier": "prettier --write .",
-    "eslint": "eslint 'src/**/*.{ts,tsx}'"
+    "eslint": "eslint './src/**/*.{ts,tsx}'"
   },
   "engines": {
     "node": ">= 18.x"
@@ -53,8 +53,8 @@
     "@types/react-dom": "18.2.4",
     "@types/react-helmet-async": "1.0.3",
     "@types/uuid": "9.0.1",
-    "@typescript-eslint/eslint-plugin": "5.59.6",
-    "@typescript-eslint/parser": "5.59.6",
+    "@typescript-eslint/eslint-plugin": "5.59.8",
+    "@typescript-eslint/parser": "5.59.8",
     "@vitejs/plugin-react": "4.0.0",
     "autoprefixer": "10.4.14",
     "eslint": "8.40.0",

@@ -41,7 +41,9 @@ async function handlePut(
         'Content-Type': 'application/json',
       },
     })
-  } catch (err) {}
+  } catch (err) {
+    // Ignored
+  }
   try {
     const result = await fetch(
       `${API_URL}/v1/files/get?path=${path.dirname(req.url)}`,
