@@ -12,6 +12,8 @@ export type User = {
   resetPasswordToken?: string
   emailConfirmationToken?: string
   isEmailConfirmed: boolean
+  emailUpdateToken?: string
+  emailUpdateValue?: string
   picture?: string
   createTime: string
   updateTime?: string
@@ -44,6 +46,8 @@ export type UpdateOptions = {
   resetPasswordToken?: string
   emailConfirmationToken?: string
   isEmailConfirmed?: boolean
+  emailUpdateToken?: string
+  emailUpdateValue?: string
   picture?: string
   createTime?: string
   updateTime?: string
