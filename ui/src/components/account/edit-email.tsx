@@ -56,7 +56,7 @@ const EditEmail = ({ open, user, onClose }: EditEmailProps) => {
     ) => {
       setSubmitting(true)
       try {
-        const result = await UserAPI.updateEmail({
+        const result = await UserAPI.updateEmailRequest({
           email,
         })
         mutate(`/user`, result)

@@ -9,15 +9,17 @@ import { PassportRequest } from '@/infra/passport-request'
 import {
   deleteUser,
   getUser,
-  updateEmail,
   updateFullName,
   updatePicture,
   updatePassword,
   UserDeleteOptions,
-  UserUpdateEmailOptions,
   UserUpdateFullNameOptions,
   UserUpdatePasswordOptions,
   deletePicture,
+  UserUpdateEmailRequestOptions,
+  UserUpdateEmailConfirmationOptions,
+  updateEmailRequest,
+  updateEmailConfirmation,
 } from './service'
 
 const router = Router()
@@ -54,7 +56,7 @@ router.post(
 )
 
 router.post(
-  '/update_email',
+  '/update_email_request',
   passport.authenticate('jwt', { session: false }),
   body('email').isEmail().isLength({ max: 255 }),
   async (req: PassportRequest, res: Response, next: NextFunction) => {
@@ -64,7 +66,31 @@ router.post(
         throw parseValidationError(result)
       }
       res.json(
-        await updateEmail(req.user.id, req.body as UserUpdateEmailOptions)
+        await updateEmailRequest(
+          req.user.id,
+          req.body as UserUpdateEmailRequestOptions
+        )
+      )
+    } catch (err) {
+      next(err)
+    }
+  }
+)
+
+router.post(
+  '/update_email_confirmation',
+  passport.authenticate('jwt', { session: false }),
+  body('token').isString().notEmpty().trim(),
+  async (req: PassportRequest, res: Response, next: NextFunction) => {
+    try {
+      const result = validationResult(req)
+      if (!result.isEmpty()) {
+        throw parseValidationError(result)
+      }
+      res.json(
+        await updateEmailConfirmation(
+          req.body as UserUpdateEmailConfirmationOptions
+        )
       )
     } catch (err) {
       next(err)

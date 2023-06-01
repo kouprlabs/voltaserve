@@ -60,6 +60,7 @@ export interface UserRepo {
   findByRefreshTokenValue(refreshTokenValue: string): Promise<User>
   findByResetPasswordToken(resetPasswordToken: string): Promise<User>
   findByEmailConfirmationToken(emailConfirmationToken: string): Promise<User>
+  findByEmailUpdateToken(emailUpdateToken: string): Promise<User>
   findByPicture(picture: string): Promise<User>
   isUsernameAvailable(username: string): Promise<boolean>
   insert(data: InsertOptions): Promise<User>
@@ -154,6 +155,20 @@ class UserRepoImpl {
     return this.mapRow(rows[0])
   }
 
+  async findByEmailUpdateToken(emailUpdateToken: string): Promise<User> {
+    const { rowCount, rows } = await client.query(
+      `SELECT * FROM "user" WHERE email_update_token = $1`,
+      [emailUpdateToken]
+    )
+    if (rowCount < 1) {
+      throw newError({
+        code: ErrorCode.ResourceNotFound,
+        error: `User with email_update_token=${emailUpdateToken} not found`,
+      })
+    }
+    return this.mapRow(rows[0])
+  }
+
   async findByPicture(picture: string): Promise<User> {
     const { rowCount, rows } = await client.query(
       `SELECT * FROM "user" WHERE picture = $1`,
@@ -238,9 +253,11 @@ class UserRepoImpl {
           reset_password_token = $7,
           email_confirmation_token = $8,
           is_email_confirmed = $9,
-          picture = $10,
-          update_time = $11
-        WHERE id = $12
+          email_update_token = $10,
+          email_update_value = $11,
+          picture = $12,
+          update_time = $13
+        WHERE id = $14
         RETURNING *`,
       [
         entity.fullName,
@@ -252,6 +269,8 @@ class UserRepoImpl {
         entity.resetPasswordToken,
         entity.emailConfirmationToken,
         entity.isEmailConfirmed,
+        entity.emailUpdateToken,
+        entity.emailUpdateValue,
         entity.picture,
         new Date().toISOString(),
         entity.id,
@@ -282,6 +301,8 @@ class UserRepoImpl {
       resetPasswordToken: row.reset_password_token,
       emailConfirmationToken: row.email_confirmation_token,
       isEmailConfirmed: row.is_email_confirmed,
+      emailUpdateToken: row.email_update_token,
+      emailUpdateValue: row.email_update_value,
       picture: row.picture,
       createTime: row.create_time,
       updateTime: row.update_time,
