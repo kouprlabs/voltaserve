@@ -9,6 +9,8 @@ CREATE TABLE IF NOT EXISTS "user" (
   refresh_token_valid_to bigint,
   reset_password_token text UNIQUE,
   email_confirmation_token text UNIQUE,
+  email_update_token text UNIQUE,
+  email_update_value text UNIQUE,
   is_email_confirmed boolean NOT NULL DEFAULT FALSE,
   picture text,
   create_time text NOT NULL DEFAULT (to_json(now())#>>'{}'),
