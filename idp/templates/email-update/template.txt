@@ -1,0 +1,1 @@
+Please follow this link: {{UI_URL}}/update-email/{{TOKEN}}, to confirm your new email address: {{EMAIL}}.

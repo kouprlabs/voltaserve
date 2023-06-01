@@ -3,6 +3,9 @@ import { ErrorCode, newError } from '@/infra/error'
 import { hashPassword, verifyPassword } from '@/infra/password'
 import search, { USER_SEARCH_INDEX } from '@/infra/search'
 import userRepo, { User } from '@/user/repo'
+import { newHyphenlessUuid } from '@/infra/id'
+import { sendTemplateMail } from '@/infra/mail'
+import { getConfig } from '@/config/config'
 
 export type UserDTO = {
   id: string
@@ -17,6 +20,10 @@ export type UserUpdateFullNameOptions = {
 }
 
 export type UserUpdateEmailOptions = {
+  email: string
+}
+
+export type UserSendEmailUpdateConfirmationOptions = {
   email: string
 }
 
@@ -70,6 +77,32 @@ export async function updateEmail(
     },
   ])
   return mapEntity(user)
+}
+
+export async function sendEmailUpdateConfirmation(
+  id: string,
+  options: UserSendEmailUpdateConfirmationOptions
+) {
+  let user = await userRepo.findByID(id)
+  user = await userRepo.update({
+    id: user.id,
+    emailUpdateToken: newHyphenlessUuid(),
+    emailUpdateValue: options.email,
+  })
+  try {
+    await sendTemplateMail('email-update', user.email, {
+      'EMAIL': options.email,
+      'UI_URL': getConfig().publicUIURL,
+      'TOKEN': user.resetPasswordToken,
+    })
+  } catch (error) {
+    await userRepo.update({
+      id,
+      emailUpdateToken: null,
+      emailUpdateValue: null,
+    })
+    throw newError({ code: ErrorCode.InternalServerError, error })
+  }
 }
 
 export async function updatePassword(

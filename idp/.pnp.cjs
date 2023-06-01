@@ -36,7 +36,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@types/minio", "npm:7.0.18"],\
             ["@types/morgan", "npm:1.9.4"],\
             ["@types/multer", "npm:1.4.7"],\
-            ["@types/node", "npm:20.1.5"],\
+            ["@types/node", "npm:20.2.5"],\
             ["@types/nodemailer", "npm:6.4.7"],\
             ["@types/passport-jwt", "npm:3.0.8"],\
             ["@types/pg", "npm:8.6.6"],\
@@ -722,13 +722,6 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         }]\
       ]],\
       ["@types/node", [\
-        ["npm:20.1.5", {\
-          "packageLocation": "./.yarn/cache/@types-node-npm-20.1.5-d8bc1146d5-0d073ed7b9.zip/node_modules/@types/node/",\
-          "packageDependencies": [\
-            ["@types/node", "npm:20.1.5"]\
-          ],\
-          "linkType": "HARD"\
-        }],\
         ["npm:20.2.5", {\
           "packageLocation": "./.yarn/cache/@types-node-npm-20.2.5-0014d2d9ce-38ce7c7e9d.zip/node_modules/@types/node/",\
           "packageDependencies": [\
@@ -5601,7 +5594,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@tsconfig/node12", "npm:1.0.11"],\
             ["@tsconfig/node14", "npm:1.0.3"],\
             ["@tsconfig/node16", "npm:1.0.4"],\
-            ["@types/node", "npm:20.1.5"],\
+            ["@types/node", "npm:20.2.5"],\
             ["@types/swc__core", null],\
             ["@types/swc__wasm", null],\
             ["@types/typescript", null],\
@@ -5905,7 +5898,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@types/minio", "npm:7.0.18"],\
             ["@types/morgan", "npm:1.9.4"],\
             ["@types/multer", "npm:1.4.7"],\
-            ["@types/node", "npm:20.1.5"],\
+            ["@types/node", "npm:20.2.5"],\
             ["@types/nodemailer", "npm:6.4.7"],\
             ["@types/passport-jwt", "npm:3.0.8"],\
             ["@types/pg", "npm:8.6.6"],\

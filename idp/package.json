@@ -45,7 +45,6 @@
     "passport": "0.6.0",
     "passport-jwt": "4.0.1",
     "pg": "8.11.0",
-    "typescript": "5.0.4",
     "uuid": "9.0.0"
   },
   "devDependencies": {
@@ -57,7 +56,7 @@
     "@types/minio": "7.0.18",
     "@types/morgan": "1.9.4",
     "@types/multer": "1.4.7",
-    "@types/node": "20.1.5",
+    "@types/node": "20.2.5",
     "@types/nodemailer": "6.4.7",
     "@types/passport-jwt": "3.0.8",
     "@types/pg": "8.6.6",
@@ -72,6 +71,7 @@
     "swagger-autogen": "2.23.1",
     "ts-node": "10.9.1",
     "tsc-alias": "1.8.6",
-    "tsconfig-paths": "4.2.0"
+    "tsconfig-paths": "4.2.0",
+    "typescript": "5.0.4"
   }
 }
