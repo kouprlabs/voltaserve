@@ -77,7 +77,7 @@ const EditEmail = ({ open, user, onClose }: EditEmailProps) => {
         <ModalCloseButton />
         <Formik
           enableReinitialize={true}
-          initialValues={{ email: user?.email }}
+          initialValues={{ email: user?.pendingEmail || user?.email }}
           validationSchema={formSchema}
           validateOnBlur={false}
           onSubmit={handleSubmit}

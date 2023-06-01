@@ -65,25 +65,44 @@ export async function updateEmailRequest(
   options: UserUpdateEmailRequestOptions
 ): Promise<UserDTO> {
   let user = await userRepo.findByID(id)
-  user = await userRepo.update({
-    id: user.id,
-    emailUpdateToken: newHyphenlessUuid(),
-    emailUpdateValue: options.email,
-  })
-  try {
-    await sendTemplateMail('email-update', options.email, {
-      'EMAIL': options.email,
-      'UI_URL': getConfig().publicUIURL,
-      'TOKEN': user.emailUpdateToken,
-    })
-    return mapEntity(user)
-  } catch (error) {
-    await userRepo.update({
-      id,
+  if (options.email === user.email) {
+    user = await userRepo.update({
+      id: user.id,
       emailUpdateToken: null,
       emailUpdateValue: null,
     })
-    throw newError({ code: ErrorCode.InternalServerError, error })
+    return mapEntity(user)
+  } else {
+    let usernameUnavailable = false
+    try {
+      await userRepo.findByUsername(options.email)
+      usernameUnavailable = true
+    } catch {
+      // Ignored
+    }
+    if (usernameUnavailable) {
+      throw newError({ code: ErrorCode.UsernameUnavailable })
+    }
+    user = await userRepo.update({
+      id: user.id,
+      emailUpdateToken: newHyphenlessUuid(),
+      emailUpdateValue: options.email,
+    })
+    try {
+      await sendTemplateMail('email-update', options.email, {
+        'EMAIL': options.email,
+        'UI_URL': getConfig().publicUIURL,
+        'TOKEN': user.emailUpdateToken,
+      })
+      return mapEntity(user)
+    } catch (error) {
+      await userRepo.update({
+        id,
+        emailUpdateToken: null,
+        emailUpdateValue: null,
+      })
+      throw newError({ code: ErrorCode.InternalServerError, error })
+    }
   }
 }
 
