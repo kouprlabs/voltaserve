@@ -27,6 +27,7 @@ import WorkspaceFilesPage from '@/pages/workspace/files'
 import WorkspaceLayout from '@/pages/workspace/layout'
 import WorkspaceListPage from '@/pages/workspace/list'
 import WorkspaceSettingsPage from '@/pages/workspace/settings'
+import UpdateEmailPage from './pages/update-email'
 
 const router = createBrowserRouter([
   {
@@ -145,6 +146,10 @@ const router = createBrowserRouter([
       {
         path: '/confirm-email/:token',
         element: <ConfirmEmailPage />,
+      },
+      {
+        path: '/update-email/:token',
+        element: <UpdateEmailPage />,
       },
     ],
   },

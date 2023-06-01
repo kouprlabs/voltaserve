@@ -9,10 +9,12 @@ import {
   Stack,
   Switch,
   Text,
+  Tooltip,
   useColorMode,
 } from '@chakra-ui/react'
 import { variables, IconEdit, IconTrash, SectionSpinner } from '@koupr/ui'
 import { Helmet } from 'react-helmet-async'
+import { IoWarning } from 'react-icons/io5'
 import { swrConfig } from '@/api/options'
 import StorageAPI from '@/api/storage'
 import UserAPI from '@/api/user'
@@ -94,7 +96,19 @@ const AccountSettingsPage = () => {
           <HStack spacing={variables.spacing} h={ROW_HEIGHT}>
             <Text>Email</Text>
             <Spacer />
-            <Text>{user.email}</Text>
+            {user.pendingEmail && (
+              <HStack>
+                <Tooltip label="Please check your inbox to confirm your email.">
+                  <Box>
+                    <IoWarning fontSize="20px" color="gold" />
+                  </Box>
+                </Tooltip>
+                <Text>{user.pendingEmail}</Text>
+              </HStack>
+            )}
+            {!user.pendingEmail && (
+              <Text>{user.pendingEmail || user.email}</Text>
+            )}
             <EditButton
               aria-label=""
               onClick={() => {
