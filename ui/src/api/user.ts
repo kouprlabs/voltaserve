@@ -9,14 +9,19 @@ export type User = {
   email: string
   fullName: string
   picture?: string
+  pendingEmail?: string
 }
 
 export type UserUpdateFullNameOptions = {
   fullName: string
 }
 
-export type UserUpdateEmailOptions = {
+export type UserUpdateEmailRequestOptions = {
   email: string
+}
+
+export type UserUpdateEmailConfirmationOptions = {
+  token: string
 }
 
 export type UserUpdatePasswordOptions = {
@@ -46,8 +51,23 @@ export default class UserAPI {
     }).then((result) => result.json())
   }
 
-  static async updateEmail(options: UserUpdateEmailOptions): Promise<User> {
-    return idpFetch(`/user/update_email`, {
+  static async updateEmailRequest(
+    options: UserUpdateEmailRequestOptions
+  ): Promise<User> {
+    return idpFetch(`/user/update_email_request`, {
+      method: 'POST',
+      body: JSON.stringify(options),
+      headers: {
+        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
+        'Content-Type': 'application/json',
+      },
+    }).then((result) => result.json())
+  }
+
+  static async updateEmailConfirmation(
+    options: UserUpdateEmailConfirmationOptions
+  ): Promise<User> {
+    return idpFetch(`/user/update_email_confirmation`, {
       method: 'POST',
       body: JSON.stringify(options),
       headers: {

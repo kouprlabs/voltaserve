@@ -13,18 +13,19 @@ export type UserDTO = {
   picture: string
   email: string
   username: string
+  pendingEmail?: string
+}
+
+export type UserUpdateEmailRequestOptions = {
+  email: string
+}
+
+export type UserUpdateEmailConfirmationOptions = {
+  token: string
 }
 
 export type UserUpdateFullNameOptions = {
   fullName: string
-}
-
-export type UserUpdateEmailOptions = {
-  email: string
-}
-
-export type UserSendEmailUpdateConfirmationOptions = {
-  email: string
 }
 
 export type UserUpdatePasswordOptions = {
@@ -59,30 +60,10 @@ export async function updateFullName(
   return mapEntity(user)
 }
 
-export async function updateEmail(
+export async function updateEmailRequest(
   id: string,
-  options: UserUpdateEmailOptions
+  options: UserUpdateEmailRequestOptions
 ): Promise<UserDTO> {
-  let user = await userRepo.findByID(id)
-  user = await userRepo.update({
-    id: user.id,
-    email: options.email,
-    username: options.email,
-  })
-  await search.index(USER_SEARCH_INDEX).updateDocuments([
-    {
-      ...user,
-      email: user.email,
-      username: user.email,
-    },
-  ])
-  return mapEntity(user)
-}
-
-export async function sendEmailUpdateConfirmation(
-  id: string,
-  options: UserSendEmailUpdateConfirmationOptions
-) {
   let user = await userRepo.findByID(id)
   user = await userRepo.update({
     id: user.id,
@@ -90,11 +71,12 @@ export async function sendEmailUpdateConfirmation(
     emailUpdateValue: options.email,
   })
   try {
-    await sendTemplateMail('email-update', user.email, {
+    await sendTemplateMail('email-update', options.email, {
       'EMAIL': options.email,
       'UI_URL': getConfig().publicUIURL,
-      'TOKEN': user.resetPasswordToken,
+      'TOKEN': user.emailUpdateToken,
     })
+    return mapEntity(user)
   } catch (error) {
     await userRepo.update({
       id,
@@ -103,6 +85,29 @@ export async function sendEmailUpdateConfirmation(
     })
     throw newError({ code: ErrorCode.InternalServerError, error })
   }
+}
+
+export async function updateEmailConfirmation(
+  options: UserUpdateEmailConfirmationOptions
+) {
+  let user = await userRepo.findByEmailUpdateToken(options.token)
+  user = await userRepo.update({
+    id: user.id,
+    email: user.emailUpdateValue,
+    username: user.emailUpdateValue,
+    emailUpdateToken: null,
+    emailUpdateValue: null,
+  })
+  await search.index(USER_SEARCH_INDEX).updateDocuments([
+    {
+      ...user,
+      email: user.email,
+      username: user.email,
+      emailUpdateToken: null,
+      emailUpdateValue: null,
+    },
+  ])
+  return mapEntity(user)
 }
 
 export async function updatePassword(
@@ -152,12 +157,13 @@ export async function deleteUser(id: string, options: UserDeleteOptions) {
 }
 
 export function mapEntity(entity: User): UserDTO {
-  const user = {
+  const user: UserDTO = {
     id: entity.id,
     email: entity.email,
     username: entity.username,
     fullName: entity.fullName,
     picture: entity.picture,
+    pendingEmail: entity.emailUpdateValue,
   }
   Object.keys(user).forEach(
     (index) => !user[index] && user[index] !== undefined && delete user[index]
