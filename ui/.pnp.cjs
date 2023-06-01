@@ -51,6 +51,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["autoprefixer", "virtual:d2dda33531a1c097d380e079d9a41540a57ce25bd68f08d94628560d31252fd9b8d42b40e3e5807ce4bb6d84ece4e7c2640566e8598a77627d8e6cddc8fc6a6b#npm:10.4.14"],\
             ["cookie", "npm:0.5.0"],\
             ["dateformat", "npm:5.0.3"],\
+            ["esbuild", "npm:0.17.19"],\
             ["eslint", "npm:8.40.0"],\
             ["eslint-config-prettier", "virtual:d2dda33531a1c097d380e079d9a41540a57ce25bd68f08d94628560d31252fd9b8d42b40e3e5807ce4bb6d84ece4e7c2640566e8598a77627d8e6cddc8fc6a6b#npm:8.8.0"],\
             ["eslint-config-react-app", "virtual:d2dda33531a1c097d380e079d9a41540a57ce25bd68f08d94628560d31252fd9b8d42b40e3e5807ce4bb6d84ece4e7c2640566e8598a77627d8e6cddc8fc6a6b#npm:7.0.1"],\
@@ -12231,6 +12232,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["autoprefixer", "virtual:d2dda33531a1c097d380e079d9a41540a57ce25bd68f08d94628560d31252fd9b8d42b40e3e5807ce4bb6d84ece4e7c2640566e8598a77627d8e6cddc8fc6a6b#npm:10.4.14"],\
             ["cookie", "npm:0.5.0"],\
             ["dateformat", "npm:5.0.3"],\
+            ["esbuild", "npm:0.17.19"],\
             ["eslint", "npm:8.40.0"],\
             ["eslint-config-prettier", "virtual:d2dda33531a1c097d380e079d9a41540a57ce25bd68f08d94628560d31252fd9b8d42b40e3e5807ce4bb6d84ece4e7c2640566e8598a77627d8e6cddc8fc6a6b#npm:8.8.0"],\
             ["eslint-config-react-app", "virtual:d2dda33531a1c097d380e079d9a41540a57ce25bd68f08d94628560d31252fd9b8d42b40e3e5807ce4bb6d84ece4e7c2640566e8598a77627d8e6cddc8fc6a6b#npm:7.0.1"],\
