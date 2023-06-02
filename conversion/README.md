@@ -8,7 +8,7 @@ Install [Golang](https://go.dev/doc/install).
 
 Install [Homebrew](https://brew.sh).
 
-```sh
+```shell
 brew install ocrmypdf
 brew install graphicsmagick
 brew install libreoffice
@@ -20,29 +20,29 @@ brew install ffmpeg
 
 Run the follwing script:
 
-```sh
+```shell
 ./install-deps.sh
 ```
 
 ### Install Dependencies for Fedora
 
-```sh
+```shell
 sudo dnf install ocrmypdf GraphicsMagick poppler-utils libreoffice tesseract
 ```
 
 Enable RPM Fusion repositories: <https://docs.fedoraproject.org/en-US/quick-docs/setup_rpmfusion>
 
-```sh
+```shell
 sudo dnf install https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm
 ```
 
-```sh
+```shell
 sudo dnf install https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
 ```
 
 Install `ffmpeg`:
 
-```sh
+```shell
 sudo dnf swap ffmpeg-free ffmpeg --allowerasing
 ```
 
@@ -50,19 +50,19 @@ sudo dnf swap ffmpeg-free ffmpeg --allowerasing
 
 Run for development:
 
-```sh
+```shell
 go run .
 ```
 
 Build binary:
 
-```sh
+```shell
 go build .
 ```
 
 Build Docker image:
 
-```sh
+```shell
 docker build -t voltaserve/conversion .
 ```
 

@@ -6,13 +6,13 @@ Install [golangci-lint](https://golangci-lint.run).
 
 Run the following and make sure there are no issues:
 
-```sh
+```shell
 golangci-lint run
 ```
 
 Format swag comments:
 
-```sh
+```shell
 swag fmt
 ```
 
@@ -20,7 +20,7 @@ swag fmt
 
 Install [swag](https://github.com/swaggo/swag):
 
-```sh
+```shell
 go install github.com/swaggo/swag/cmd/swag@latest
 ```
 
@@ -28,19 +28,19 @@ We suppose that the [api-docs](https://github.com/voltaserve/api-docs) repositor
 
 Generate `swagger.yml`:
 
-```sh
+```shell
 swag init --output ../../api-docs/ --outputTypes yaml
 ```
 
 Preview (will be served at [http://127.0.0.1:5555](http://127.0.0.1:5555)):
 
-```sh
+```shell
 npx @redocly/cli preview-docs --port 5555 ../../api-docs/swagger.yaml
 ```
 
 Generate the final static HTML documentation:
 
-```sh
+```shell
 npx @redocly/cli build-docs ../../api-docs/swagger.yaml --output ../../api-docs/index.html
 ```
 

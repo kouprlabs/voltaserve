@@ -8,19 +8,19 @@ Install [Golang](https://go.dev/doc/install).
 
 Run for development:
 
-```sh
+```shell
 go run .
 ```
 
 Build binary:
 
-```sh
+```shell
 go build .
 ```
 
 Build Docker image:
 
-```sh
+```shell
 docker build -t voltaserve/api .
 ```
 
