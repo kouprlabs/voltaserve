@@ -5,7 +5,7 @@ import { useAppSelector } from '@/store/hook'
 import { NavType } from '@/store/ui/nav'
 
 type ActiveCircleProps = {
-  children: ReactNode
+  children?: ReactNode
 }
 
 const ActiveCircle = ({ children }: ActiveCircleProps) => {
