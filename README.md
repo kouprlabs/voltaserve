@@ -10,7 +10,7 @@ Install [Docker](https://docs.docker.com/get-docker) and [Docker Compose](https:
 
 1. Run:
 
-```sh
+```shell
 docker compose up -d
 ```
 
@@ -86,19 +86,19 @@ Other ports can be changed as well by editing their respective environment varia
 
 1. Run:
 
-```sh
+```shell
 docker compose -p voltaservecluster -f ./docker-compose.cluster.yml up -d
 ```
 
 2. Initialize CockroachDB cluster:
 
-```sh
+```shell
 docker exec -it voltaservecluster-cockroach1-1 ./cockroach init --insecure
 ```
 
 3. Initialize Redis cluster:
 
-```sh
+```shell
 docker run --rm -it --name=redis_cluster_init --network=voltaservecluster_default --ip=172.20.0.30 redis:7.0.8 redis-cli --cluster create 172.20.0.31:6373 172.20.0.32:6374 172.20.0.33:6375 172.20.0.34:6376 172.20.0.35:6377 172.20.0.36:6378 --cluster-replicas 1 --cluster-yes
 ```
 

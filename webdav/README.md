@@ -8,12 +8,12 @@ Install [Node.js](https://nodejs.org/en/download), preferrably with [NVM](https:
 
 Run for development:
 
-```sh
+```shell
 yarn dev
 ```
 
 Build Docker image:
 
-```sh
+```shell
 docker build -t voltaserve/webdav .
 ```
