@@ -40,6 +40,7 @@ const Item = ({ upload: uploadProp }: ItemProps) => {
             value={upload.progress}
             max={100}
             isIndeterminate={upload.progress === 100 && !upload.error}
+            color="black"
             size="20px"
           />
         )}
