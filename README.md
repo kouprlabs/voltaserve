@@ -8,6 +8,8 @@
 
 Install [Docker](https://docs.docker.com/get-docker) and [Docker Compose](https://docs.docker.com/compose/install).
 
+Alternatively, you can instead install [Podman](https://podman.io) and [Podman Compose](https://github.com/containers/podman-compose#installation).
+
 1. Run:
 
 ```shell
