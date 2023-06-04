@@ -56,7 +56,6 @@ const server = createServer((req: IncomingMessage, res: ServerResponse) => {
         res.end()
       } else {
         const method = req.method
-        console.log(method)
         switch (method) {
           case 'OPTIONS':
             await handleOptions(req, res)
