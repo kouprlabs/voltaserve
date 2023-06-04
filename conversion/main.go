@@ -36,7 +36,7 @@ func pipelineWorker(index int) {
 			if err == nil {
 				pipelineResponse.Options = opts
 				fmt.Printf("[Worker %d] [👍 Pipeline completed] FileID=%s SnapshotID=%s S3Bucket=%s S3Key=%s\n", index, opts.FileID, opts.SnapshotID, opts.Bucket, opts.Key)
-				fmt.Printf("[Worker %d] [☕️ Pipeline Result] Thumbnail=%t Preview=%t Text=%t OCR=%t\n", index, pipelineResponse.Thumbnail != nil, pipelineResponse.Preview != nil, pipelineResponse.Text != nil, pipelineResponse.OCR != nil)
+				fmt.Printf("[Worker %d] [📃 Pipeline Result] Thumbnail=%t Preview=%t Text=%t OCR=%t\n", index, pipelineResponse.Thumbnail != nil, pipelineResponse.Preview != nil, pipelineResponse.Text != nil, pipelineResponse.OCR != nil)
 				body, err := json.Marshal(pipelineResponse)
 				if err != nil {
 					log.Error(err)
@@ -52,14 +52,14 @@ func pipelineWorker(index int) {
 				client := &http.Client{}
 				res, err := client.Do(req)
 				if err != nil {
-					fmt.Printf("[Worker %d] [❌ Request failed!]\n", index)
+					fmt.Printf("[Worker %d] [🔥 Request failed!]\n", index)
 					log.Error(err)
 					continue
 				}
 				res.Body.Close()
 				fmt.Printf("[Worker %d] [🎉 Request succeeded!]\n", index)
 			} else {
-				fmt.Printf("[Worker %d] [❌ Pipeline failed] FileID=%s SnapshotID=%s S3Bucket=%s S3Key=%s\n", index, opts.FileID, opts.SnapshotID, opts.Bucket, opts.Key)
+				fmt.Printf("[Worker %d] [🔥 Pipeline failed] FileID=%s SnapshotID=%s S3Bucket=%s S3Key=%s\n", index, opts.FileID, opts.SnapshotID, opts.Bucket, opts.Key)
 			}
 		} else {
 			time.Sleep(500 * time.Millisecond)
