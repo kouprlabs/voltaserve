@@ -6,9 +6,11 @@ import (
 	"time"
 
 	"voltaserve/core"
+	"voltaserve/helper"
 	"voltaserve/infra"
 	"voltaserve/pipeline"
 
+	"github.com/fatih/color"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -56,21 +58,30 @@ func (s *Scheduler) worker(index int) {
 		if len(s.queue[index]) > 0 {
 			opts := s.queue[index][0]
 			s.queue[index] = s.queue[index][1:]
-			fmt.Printf("[Worker %d] 🚀 Pipeline started (FileID=%s SnapshotID=%s S3Bucket=%s S3Key=%s)\n", index, opts.FileID, opts.SnapshotID, opts.Bucket, opts.Key)
+			fmt.Printf("[Worker %d] 🚀 Pipeline started ", index)
+			helper.PrintlnPipelineOptions(&opts)
 			start := time.Now()
 			pr, err := dispatcher.Dispatch(opts)
 			elapsed := time.Since(start)
-			fmt.Printf("[Worker %d] ⌚ Pipeline took %s (FileID=%s SnapshotID=%s S3Bucket=%s S3Key=%s)\n", index, elapsed, opts.FileID, opts.SnapshotID, opts.Bucket, opts.Key)
+			fmt.Printf("[Worker %d] ⌚ Pipeline took ", index)
+			color.Set(color.FgMagenta)
+			fmt.Printf("%s ", elapsed)
+			color.Unset()
+			helper.PrintlnPipelineOptions(&opts)
 			if err == nil {
 				pr.Options = opts
-				fmt.Printf("[Worker %d] 📝 Updating snapshot (FileID=%s SnapshotID=%s S3Bucket=%s S3Key=%s)\n", index, opts.FileID, opts.SnapshotID, opts.Bucket, opts.Key)
+				fmt.Printf("[Worker %d] 📝 Updating snapshot ", index)
+				helper.PrintlnPipelineOptions(&opts)
 				if err := s.apiClient.UpdateSnapshot(&pr); err != nil {
-					fmt.Printf("[Worker %d] 🔥 Failed to update snapshot!\n", index)
+					fmt.Printf("[Worker %d] 🔥 Failed to update snapshot! ", index)
+					helper.PrintlnPipelineOptions(&opts)
 					log.Error(err)
 				}
-				fmt.Printf("[Worker %d] 🎉 Succeeded! (FileID=%s SnapshotID=%s S3Bucket=%s S3Key=%s)\n", index, opts.FileID, opts.SnapshotID, opts.Bucket, opts.Key)
+				fmt.Printf("[Worker %d] 🎉 Succeeded! ", index)
+				helper.PrintlnPipelineOptions(&opts)
 			} else {
-				fmt.Printf("[Worker %d] 🔥 Pipeline failed! (FileID=%s SnapshotID=%s S3Bucket=%s S3Key=%s)\n", index, opts.FileID, opts.SnapshotID, opts.Bucket, opts.Key)
+				fmt.Printf("[Worker %d] 🔥 Pipeline failed! ", index)
+				helper.PrintlnPipelineOptions(&opts)
 			}
 		} else {
 			time.Sleep(500 * time.Millisecond)
@@ -88,9 +99,13 @@ func (s *Scheduler) status() {
 		}
 		if sum != previousSum {
 			if sum == 0 {
+				color.Set(color.FgGreen)
 				fmt.Printf("[Status] 🌈 Queue empty\n")
+				color.Unset()
 			} else {
+				color.Set(color.FgBlue)
 				fmt.Printf("[Status] ⏳ Items waiting in queue: %d\n", sum)
+				color.Unset()
 			}
 		}
 		previousSum = sum
