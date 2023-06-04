@@ -17,6 +17,7 @@ import (
 type Scheduler struct {
 	queue       [][]core.PipelineOptions
 	workerCount int
+	activeCount int
 	apiClient   *infra.APIClient
 }
 
@@ -34,7 +35,8 @@ func (s *Scheduler) Start() {
 	for i := 0; i < s.workerCount; i++ {
 		go s.worker(i)
 	}
-	go s.status()
+	go s.queueStatus()
+	go s.workerStatus()
 }
 
 func (s *Scheduler) Schedule(opts *core.PipelineOptions) {
@@ -56,6 +58,7 @@ func (s *Scheduler) worker(index int) {
 	fmt.Printf("[Worker %d] Started\n", index)
 	for {
 		if len(s.queue[index]) > 0 {
+			s.activeCount++
 			opts := s.queue[index][0]
 			s.queue[index] = s.queue[index][1:]
 			fmt.Printf("[Worker %d] 🚀 Pipeline started ", index)
@@ -73,31 +76,32 @@ func (s *Scheduler) worker(index int) {
 				fmt.Printf("[Worker %d] 📝 Updating snapshot ", index)
 				helper.PrintlnPipelineOptions(&opts)
 				if err := s.apiClient.UpdateSnapshot(&pr); err != nil {
-					fmt.Printf("[Worker %d] 🔥 Failed to update snapshot! ", index)
+					fmt.Printf("[Worker %d] ⛈️  Failed to update snapshot! ", index)
 					helper.PrintlnPipelineOptions(&opts)
 					log.Error(err)
 				}
 				fmt.Printf("[Worker %d] 🎉 Succeeded! ", index)
 				helper.PrintlnPipelineOptions(&opts)
 			} else {
-				fmt.Printf("[Worker %d] 🔥 Pipeline failed! ", index)
+				fmt.Printf("[Worker %d] ⛈️  Pipeline failed! ", index)
 				helper.PrintlnPipelineOptions(&opts)
 			}
+			s.activeCount--
 		} else {
 			time.Sleep(500 * time.Millisecond)
 		}
 	}
 }
 
-func (s *Scheduler) status() {
-	previousSum := -1
+func (s *Scheduler) queueStatus() {
+	previous := -1
 	for {
 		time.Sleep(5 * time.Second)
 		sum := 0
 		for i := 0; i < s.workerCount; i++ {
 			sum += len(s.queue[i])
 		}
-		if sum != previousSum {
+		if sum != previous {
 			if sum == 0 {
 				color.Set(color.FgGreen)
 				fmt.Printf("[Status] 🌈 Queue empty\n")
@@ -108,6 +112,25 @@ func (s *Scheduler) status() {
 				color.Unset()
 			}
 		}
-		previousSum = sum
+		previous = sum
+	}
+}
+
+func (s *Scheduler) workerStatus() {
+	previous := -1
+	for {
+		time.Sleep(3 * time.Second)
+		if previous != s.activeCount {
+			if s.activeCount == 0 {
+				color.Set(color.FgGreen)
+				fmt.Printf("[Status] 🌤️  Workers idle\n")
+				color.Unset()
+			} else {
+				color.Set(color.FgRed)
+				fmt.Printf("[Status] 🔥 Active workers: %d\n", s.activeCount)
+				color.Unset()
+			}
+		}
+		previous = s.activeCount
 	}
 }
