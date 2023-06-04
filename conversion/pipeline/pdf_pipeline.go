@@ -56,7 +56,7 @@ func (p *pdfPipeline) Run(opts core.PipelineOptions) (core.PipelineResponse, err
 		}
 		s3Object := core.S3Object{
 			Bucket: opts.Bucket,
-			Key:    filepath.FromSlash(opts.FileID + "/" + opts.SnapshotID + "/ocr.pdf"),
+			Key:    opts.FileID + "/" + opts.SnapshotID + "/ocr.pdf",
 			Size:   stat.Size(),
 		}
 		if err := p.s3.PutFile(s3Object.Key, outputPath, infra.DetectMimeFromFile(outputPath), s3Object.Bucket); err != nil {
@@ -77,7 +77,7 @@ func (p *pdfPipeline) Run(opts core.PipelineOptions) (core.PipelineResponse, err
 	if len(text) > 0 {
 		s3Object := core.S3Object{
 			Bucket: opts.Bucket,
-			Key:    filepath.FromSlash(opts.FileID + "/" + opts.SnapshotID + "/text.txt"),
+			Key:    opts.FileID + "/" + opts.SnapshotID + "/text.txt",
 			Size:   size,
 		}
 		if err := p.s3.PutText(s3Object.Key, text, "text/plain", s3Object.Bucket); err != nil {

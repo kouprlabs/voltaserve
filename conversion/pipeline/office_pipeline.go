@@ -40,7 +40,7 @@ func (p *officePipeline) Run(opts core.PipelineOptions) (core.PipelineResponse, 
 	}
 	s3Object := core.S3Object{
 		Bucket: opts.Bucket,
-		Key:    filepath.FromSlash(opts.FileID + "/" + opts.SnapshotID + "/preview.pdf"),
+		Key:    opts.FileID + "/" + opts.SnapshotID + "/preview.pdf",
 		Size:   stat.Size(),
 	}
 	if err := p.s3.PutFile(s3Object.Key, outputPath, infra.DetectMimeFromFile(outputPath), s3Object.Bucket); err != nil {
