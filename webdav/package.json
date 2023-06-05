@@ -7,7 +7,8 @@
   "scripts": {
     "start": "ts-node -r tsconfig-paths/register src/server.ts",
     "dev": "nodemon --exec ts-node -r tsconfig-paths/register src/server.ts",
-    "pkg": "tsc --project ./ && tsc-alias && pkg .",
+    "tsc": "tsc --project .",
+    "pkg": "tsc --project . && tsc-alias && pkg .",
     "prettier": "prettier --write .",
     "eslint": "eslint './src/**/*.ts'"
   },

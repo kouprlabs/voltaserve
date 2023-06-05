@@ -4,8 +4,8 @@ import { IncomingMessage, ServerResponse } from 'http'
 import os from 'os'
 import path from 'path'
 import { v4 as uuidv4 } from 'uuid'
-import { Token } from '@/api/token'
-import { API_URL } from '@/config/config'
+import { Token } from '@/client/idp'
+import { FileAPI } from '@/client/api'
 
 /*
   This method creates or updates a resource with the provided content.
@@ -24,39 +24,16 @@ async function handlePut(
   res: ServerResponse,
   token: Token
 ) {
+  const api = new FileAPI(token)
   try {
     /* Delete existing file (simulate an overwrite) */
-    const result = await fetch(`${API_URL}/v1/files/get?path=${req.url}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token.access_token}`,
-        'Content-Type': 'application/json',
-      },
-    })
-    const file = await result.json()
-    await fetch(`${API_URL}/v1/files/${file.id}`, {
-      method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${token.access_token}`,
-        'Content-Type': 'application/json',
-      },
-    })
+    const file = await api.getByPath(req.url)
+    await api.delete(file.id)
   } catch (err) {
     // Ignored
   }
   try {
-    const result = await fetch(
-      `${API_URL}/v1/files/get?path=${path.dirname(req.url)}`,
-      {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token.access_token}`,
-          'Content-Type': 'application/json',
-        },
-      }
-    )
-    const directory = await result.json()
-
+    const directory = await api.getByPath(path.dirname(req.url))
     const filePath = path.join(os.tmpdir(), uuidv4())
     const ws = fs.createWriteStream(filePath)
     req.pipe(ws)
@@ -70,21 +47,13 @@ async function handlePut(
         res.statusCode = 201
         res.end()
 
-        const params = new URLSearchParams({
-          workspace_id: directory.workspaceId,
-        })
-        params.append('parent_id', directory.id)
-
-        const formData = new FormData()
         const blob = new Blob([await readFile(filePath)])
-        formData.set('file', blob, decodeURIComponent(path.basename(req.url)))
 
-        await fetch(`${API_URL}/v1/files?${params}`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token.access_token}`,
-          },
-          body: formData,
+        await api.upload({
+          workspaceId: directory.workspaceId,
+          parentId: directory.id,
+          name: decodeURIComponent(path.basename(req.url)),
+          blob,
         })
       } catch (err) {
         console.error(err)

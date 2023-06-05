@@ -2,8 +2,8 @@ import '@/infra/env'
 import { createServer, IncomingMessage, ServerResponse } from 'http'
 import passport from 'passport'
 import { BasicStrategy } from 'passport-http'
-import { Token } from '@/api/token'
-import { IDP_URL, PORT } from '@/config/config'
+import { TokenAPI, Token } from '@/client/idp'
+import { PORT } from '@/config'
 import handleCopy from '@/handler/handle-copy'
 import handleDelete from '@/handler/handle-delete'
 import handleGet from '@/handler/handle-get'
@@ -19,19 +19,12 @@ const tokens = new Map<string, Token>()
 
 passport.use(
   new BasicStrategy(async (username, password, done) => {
-    const formBody = []
-    formBody.push('grant_type=password')
-    formBody.push(`username=${encodeURIComponent(username)}`)
-    formBody.push(`password=${encodeURIComponent(password)}`)
     try {
-      const result = await fetch(`${IDP_URL}/v1/token`, {
-        method: 'POST',
-        body: formBody.join('&'),
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
+      const token = await new TokenAPI().exchange({
+        username,
+        password,
+        grant_type: 'password',
       })
-      const token = await result.json()
       tokens.set(username, token)
       return done(null, token)
     } catch (err) {

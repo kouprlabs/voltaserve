@@ -1,7 +1,6 @@
 import { IncomingMessage, ServerResponse } from 'http'
-import { File } from '@/api/file'
-import { Token } from '@/api/token'
-import { API_URL } from '@/config/config'
+import { FileAPI } from '@/client/api'
+import { Token } from '@/client/idp'
 
 /*
   This method deletes a resource identified by the URL.
@@ -19,21 +18,10 @@ async function handleDelete(
   token: Token
 ) {
   try {
-    const result = await fetch(`${API_URL}/v1/files/get?path=${req.url}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token.access_token}`,
-        'Content-Type': 'application/json',
-      },
-    })
-    const file: File = await result.json()
-    await fetch(`${API_URL}/v1/files/${file.id}`, {
-      method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${token.access_token}`,
-        'Content-Type': 'application/json',
-      },
-    })
+    const api = new FileAPI(token)
+    const file = await api.getByPath(req.url)
+    await api.delete(file.id)
+
     res.statusCode = 204
     res.end()
   } catch (err) {

@@ -1,9 +1,8 @@
 import { IncomingMessage, ServerResponse } from 'http'
 import path from 'path'
-import { API_URL } from '@/config/config'
 import { getTargetPath } from '@/infra/path'
-import { File } from '@/api/file'
-import { Token } from '@/api/token'
+import { FileAPI } from '@/client/api'
+import { Token } from '@/client/idp'
 
 /*
   This method copies a resource from a source URL to a destination URL.
@@ -21,29 +20,9 @@ async function handleCopy(
   token: Token
 ) {
   try {
-    const sourceResult = await fetch(
-      `${API_URL}/v1/files/get?path=${req.url}`,
-      {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token.access_token}`,
-          'Content-Type': 'application/json',
-        },
-      }
-    )
-    const sourceFile: File = await sourceResult.json()
-
-    const targetResult = await fetch(
-      `${API_URL}/v1/files/get?path=${path.dirname(getTargetPath(req))}`,
-      {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token.access_token}`,
-          'Content-Type': 'application/json',
-        },
-      }
-    )
-    const targetFile: File = await targetResult.json()
+    const api = new FileAPI(token)
+    const sourceFile = await api.getByPath(req.url)
+    const targetFile = await api.getByPath(path.dirname(getTargetPath(req)))
 
     if (sourceFile.workspaceId !== targetFile.workspaceId) {
       res.statusCode = 400
@@ -51,31 +30,8 @@ async function handleCopy(
       return
     }
 
-    const copyResponse = await fetch(
-      `${API_URL}/v1/files/${targetFile.id}/copy`,
-      {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token.access_token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ids: [sourceFile.id],
-        }),
-      }
-    )
-    const clones: File = await copyResponse.json()
-
-    await fetch(`${API_URL}/v1/files/${clones[0].id}/rename`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token.access_token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        name: path.basename(getTargetPath(req)),
-      }),
-    })
+    const clones = await api.copy(targetFile.id, { ids: [sourceFile.id] })
+    await api.rename(clones[0].id, { name: path.basename(getTargetPath(req)) })
 
     res.statusCode = 204
     res.end()

@@ -1,8 +1,7 @@
 import { IncomingMessage, ServerResponse } from 'http'
 import path from 'path'
-import { File } from '@/api/file'
-import { Token } from '@/api/token'
-import { API_URL } from '@/config/config'
+import { File, FileAPI } from '@/client/api'
+import { Token } from '@/client/idp'
 
 /*
   This method creates a new collection (directory) at the specified URL.
@@ -21,29 +20,14 @@ async function handleMkcol(
 ) {
   let directory: File
   try {
-    const result = await fetch(
-      `${API_URL}/v1/files/get?path=${path.dirname(req.url)}`,
-      {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token.access_token}`,
-          'Content-Type': 'application/json',
-        },
-      }
-    )
-    directory = await result.json()
-    await fetch(`${API_URL}/v1/files/create_folder`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token.access_token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        workspaceId: directory.workspaceId,
-        parentId: directory.id,
-        name: decodeURIComponent(path.basename(req.url)),
-      }),
+    const api = new FileAPI(token)
+    directory = await api.getByPath(path.dirname(req.url))
+    await api.createFolder({
+      workspaceId: directory.workspaceId,
+      parentId: directory.id,
+      name: decodeURIComponent(path.basename(req.url)),
     })
+
     res.statusCode = 201
     res.end()
   } catch (err) {
