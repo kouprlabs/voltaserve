@@ -53,6 +53,9 @@ export async function exchange(options: TokenExchangeOptions): Promise<Token> {
     if (!user.isEmailConfirmed) {
       throw newError({ code: ErrorCode.EmailNotConfimed })
     }
+    if (new Date() >= new Date(user.refreshTokenExpiry)) {
+      throw newError({ code: ErrorCode.RefreshTokenExpired })
+    }
     return newToken(user.id)
   }
 }
@@ -99,7 +102,7 @@ async function newToken(userId: string): Promise<Token> {
   const config = getConfig().token
   const token: Token = {
     access_token: jwt.sign({}, config.jwtSigningKey, {
-      expiresIn: newAccessTokenExpiry(),
+      expiresIn: config.accessTokenLifetime,
       audience: config.audience,
       issuer: config.issuer,
       subject: userId,
@@ -112,19 +115,13 @@ async function newToken(userId: string): Promise<Token> {
   await userRepo.update({
     id: user.id,
     refreshTokenValue: token.refresh_token,
-    refreshTokenValidTo: newRefreshTokenExpiry(),
+    refreshTokenExpiry: newRefreshTokenExpiry(),
   })
   return token
 }
 
-function newAccessTokenExpiry(): number {
-  const now = new Date()
-  now.setSeconds(now.getSeconds() + getConfig().token.accessTokenLifetime)
-  return Math.floor(now.getTime() / 1000)
-}
-
-function newRefreshTokenExpiry(): number {
+function newRefreshTokenExpiry(): string {
   const now = new Date()
   now.setSeconds(now.getSeconds() + getConfig().token.refreshTokenLifetime)
-  return Math.floor(now.getTime() / 1000)
+  return now.toISOString()
 }

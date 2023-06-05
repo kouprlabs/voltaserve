@@ -32,6 +32,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@types/cors", "npm:2.8.13"],\
             ["@types/express", "npm:4.17.17"],\
             ["@types/js-yaml", "npm:4.0.5"],\
+            ["@types/jsonwebtoken", "npm:9.0.2"],\
             ["@types/mime-types", "npm:2.1.1"],\
             ["@types/minio", "npm:7.0.18"],\
             ["@types/morgan", "npm:1.9.4"],\
@@ -5894,6 +5895,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@types/cors", "npm:2.8.13"],\
             ["@types/express", "npm:4.17.17"],\
             ["@types/js-yaml", "npm:4.0.5"],\
+            ["@types/jsonwebtoken", "npm:9.0.2"],\
             ["@types/mime-types", "npm:2.1.1"],\
             ["@types/minio", "npm:7.0.18"],\
             ["@types/morgan", "npm:1.9.4"],\

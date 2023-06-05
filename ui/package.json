@@ -8,6 +8,7 @@
   "scripts": {
     "dev": "vite --host 0.0.0.0",
     "build": "tsc && vite build",
+    "tsc": "tsc",
     "preview": "vite preview",
     "prettier": "prettier --write .",
     "eslint": "eslint './src/**/*.{ts,tsx}'"

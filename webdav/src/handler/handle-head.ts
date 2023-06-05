@@ -1,5 +1,5 @@
 import { IncomingMessage, ServerResponse } from 'http'
-import { File, FileAPI, FileType } from '@/client/api'
+import { FileAPI, FileType } from '@/client/api'
 import { Token } from '@/client/idp'
 
 /*
@@ -19,9 +19,7 @@ async function handleHead(
   token: Token
 ) {
   try {
-    const list = await new FileAPI(token).listByPath(req.url)
-
-    const file: File = list[0]
+    const file = await new FileAPI(token).getByPath(req.url)
     if (file.type === FileType.File) {
       res.statusCode = 200
       res.setHeader('Content-Length', file.original.size)

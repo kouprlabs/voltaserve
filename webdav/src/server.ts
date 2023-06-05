@@ -16,16 +16,44 @@ import handleProppatch from '@/handler/handle-proppatch'
 import handlePut from '@/handler/handle-put'
 
 const tokens = new Map<string, Token>()
+const expiries = new Map<string, Date>()
+const api = new TokenAPI()
+
+function newExpiry(token: Token): Date {
+  const now = new Date()
+  now.setSeconds(now.getSeconds() + token.expires_in)
+  return now
+}
+
+setInterval(async () => {
+  for (const [username, token] of tokens) {
+    const expiry = expiries.get(username)
+    const earlyExpiry = new Date(expiry)
+    earlyExpiry.setMinutes(earlyExpiry.getMinutes() - 1)
+    if (new Date() >= earlyExpiry) {
+      const newToken = await api.exchange({
+        grant_type: 'refresh_token',
+        refresh_token: token.refresh_token,
+      })
+      tokens.set(username, newToken)
+      expiries.set(username, newExpiry(newToken))
+    }
+  }
+}, 5000)
 
 passport.use(
   new BasicStrategy(async (username, password, done) => {
     try {
-      const token = await new TokenAPI().exchange({
-        username,
-        password,
-        grant_type: 'password',
-      })
-      tokens.set(username, token)
+      let token = tokens.get(username)
+      if (!token) {
+        token = await new TokenAPI().exchange({
+          username,
+          password,
+          grant_type: 'password',
+        })
+        tokens.set(username, token)
+        expiries.set(username, newExpiry(token))
+      }
       return done(null, token)
     } catch (err) {
       return done(err, false)
