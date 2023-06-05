@@ -3,6 +3,7 @@ module voltaserve
 go 1.20
 
 require (
+	github.com/fatih/color v1.15.0
 	github.com/gabriel-vasile/mimetype v1.4.2
 	github.com/gofiber/fiber/v2 v2.46.0
 	github.com/google/uuid v1.3.0

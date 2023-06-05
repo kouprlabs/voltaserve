@@ -1,5 +1,4 @@
 import { IncomingMessage, ServerResponse } from 'http'
-import path from 'path'
 import { File, FileType } from '@/api/file'
 import { Token } from '@/api/token'
 import { API_URL } from '@/config/config'
@@ -88,10 +87,7 @@ async function handlePropfind(
             .map((item) => {
               return `
                 <D:response>
-                  <D:href>${path.join(
-                    req.url,
-                    encodeURIComponent(item.name)
-                  )}</D:href>
+                  <D:href>${req.url}${encodeURIComponent(item.name)}</D:href>
                   <D:propstat>
                     <D:prop>
                       <D:resourcetype>${
