@@ -2,9 +2,7 @@ package service
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
-	"net/http"
 	"os"
 	"path/filepath"
 	"sort"
@@ -160,15 +158,8 @@ type GroupPermission struct {
 	Permission string `json:"permission"`
 }
 
-type ConversionWebhookOptions struct {
-	FileID     string `json:"fileId"`
-	SnapshotID string `json:"snapshotId"`
-	Bucket     string `json:"bucket"`
-	Key        string `json:"key"`
-}
-
 type UpdateSnapshotOptions struct {
-	Options   ConversionWebhookOptions `json:"options"`
+	Options   infra.RunPipelineOptions `json:"options"`
 	Original  *model.S3Object          `json:"original"`
 	Preview   *model.S3Object          `json:"preview"`
 	Text      *model.S3Object          `json:"text"`
@@ -194,48 +185,50 @@ func IsValidSortOrder(value string) bool {
 }
 
 type FileService struct {
-	fileRepo       repo.FileRepo
-	fileSearch     *search.FileSearch
-	fileGuard      *guard.FileGuard
-	fileMapper     *FileMapper
-	fileCache      *cache.FileCache
-	workspaceCache *cache.WorkspaceCache
-	workspaceRepo  repo.WorkspaceRepo
-	workspaceGuard *guard.WorkspaceGuard
-	workspaceSvc   *WorkspaceService
-	snapshotRepo   repo.SnapshotRepo
-	userRepo       repo.UserRepo
-	userMapper     *userMapper
-	groupCache     *cache.GroupCache
-	groupGuard     *guard.GroupGuard
-	groupMapper    *groupMapper
-	permissionRepo repo.PermissionRepo
-	fileIdentifier *infra.FileIdentifier
-	s3             *infra.S3Manager
-	config         config.Config
+	fileRepo         repo.FileRepo
+	fileSearch       *search.FileSearch
+	fileGuard        *guard.FileGuard
+	fileMapper       *FileMapper
+	fileCache        *cache.FileCache
+	workspaceCache   *cache.WorkspaceCache
+	workspaceRepo    repo.WorkspaceRepo
+	workspaceGuard   *guard.WorkspaceGuard
+	workspaceSvc     *WorkspaceService
+	snapshotRepo     repo.SnapshotRepo
+	userRepo         repo.UserRepo
+	userMapper       *userMapper
+	groupCache       *cache.GroupCache
+	groupGuard       *guard.GroupGuard
+	groupMapper      *groupMapper
+	permissionRepo   repo.PermissionRepo
+	fileIdentifier   *infra.FileIdentifier
+	s3               *infra.S3Manager
+	conversionClient *infra.ConversionClient
+	config           config.Config
 }
 
 func NewFileService() *FileService {
 	return &FileService{
-		fileRepo:       repo.NewFileRepo(),
-		fileCache:      cache.NewFileCache(),
-		fileSearch:     search.NewFileSearch(),
-		fileGuard:      guard.NewFileGuard(),
-		fileMapper:     NewFileMapper(),
-		workspaceGuard: guard.NewWorkspaceGuard(),
-		workspaceCache: cache.NewWorkspaceCache(),
-		workspaceRepo:  repo.NewWorkspaceRepo(),
-		workspaceSvc:   NewWorkspaceService(),
-		snapshotRepo:   repo.NewSnapshotRepo(),
-		userRepo:       repo.NewUserRepo(),
-		userMapper:     newUserMapper(),
-		groupCache:     cache.NewGroupCache(),
-		groupGuard:     guard.NewGroupGuard(),
-		groupMapper:    newGroupMapper(),
-		permissionRepo: repo.NewPermissionRepo(),
-		fileIdentifier: infra.NewFileIdentifier(),
-		s3:             infra.NewS3Manager(),
-		config:         config.GetConfig(),
+		fileRepo:         repo.NewFileRepo(),
+		fileCache:        cache.NewFileCache(),
+		fileSearch:       search.NewFileSearch(),
+		fileGuard:        guard.NewFileGuard(),
+		fileMapper:       NewFileMapper(),
+		workspaceGuard:   guard.NewWorkspaceGuard(),
+		workspaceCache:   cache.NewWorkspaceCache(),
+		workspaceRepo:    repo.NewWorkspaceRepo(),
+		workspaceSvc:     NewWorkspaceService(),
+		snapshotRepo:     repo.NewSnapshotRepo(),
+		userRepo:         repo.NewUserRepo(),
+		userMapper:       newUserMapper(),
+		groupCache:       cache.NewGroupCache(),
+		groupGuard:       guard.NewGroupGuard(),
+		groupMapper:      newGroupMapper(),
+		permissionRepo:   repo.NewPermissionRepo(),
+		fileIdentifier:   infra.NewFileIdentifier(),
+		s3:               infra.NewS3Manager(),
+		conversionClient: infra.NewConversionClient(),
+		config:           config.GetConfig(),
 	}
 }
 
@@ -324,7 +317,7 @@ func (svc *FileService) Store(fileId string, filePath string, userId string) (*F
 	}
 	original := model.S3Object{
 		Bucket: workspace.GetBucket(),
-		Key:    filepath.FromSlash(fileId + "/" + snapshotId + "/original" + strings.ToLower(filepath.Ext(filePath))),
+		Key:    fileId + "/" + snapshotId + "/original" + strings.ToLower(filepath.Ext(filePath)),
 		Size:   stat.Size(),
 	}
 	if err = svc.s3.PutFile(original.Key, filePath, infra.DetectMimeFromFile(filePath), workspace.GetBucket()); err != nil {
@@ -342,29 +335,12 @@ func (svc *FileService) Store(fileId string, filePath string, userId string) (*F
 	if err != nil {
 		return nil, err
 	}
-	webhookOptions := ConversionWebhookOptions{
+	svc.conversionClient.RunPipeline(&infra.RunPipelineOptions{
 		FileID:     file.GetID(),
 		SnapshotID: snapshot.GetID(),
 		Bucket:     original.Bucket,
 		Key:        original.Key,
-	}
-	body, err := json.Marshal(webhookOptions)
-	if err != nil {
-		return nil, err
-	}
-	cfg := config.GetConfig()
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/pipelines?api_key=%s", cfg.ConversionURL, cfg.Security.APIKey), bytes.NewBuffer(body))
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Content-Type", "application/json; charset=UTF-8")
-	client := &http.Client{}
-	httpResponse, err := client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	httpResponse.Body.Close()
-
+	})
 	return res, nil
 }
 
