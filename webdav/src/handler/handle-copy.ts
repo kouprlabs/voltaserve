@@ -21,8 +21,10 @@ async function handleCopy(
 ) {
   try {
     const api = new FileAPI(token)
-    const sourceFile = await api.getByPath(req.url)
-    const targetFile = await api.getByPath(path.dirname(getTargetPath(req)))
+    const sourceFile = await api.getByPath(decodeURI(req.url))
+    const targetFile = await api.getByPath(
+      decodeURI(path.dirname(getTargetPath(req)))
+    )
 
     if (sourceFile.workspaceId !== targetFile.workspaceId) {
       res.statusCode = 400
@@ -31,7 +33,9 @@ async function handleCopy(
     }
 
     const clones = await api.copy(targetFile.id, { ids: [sourceFile.id] })
-    await api.rename(clones[0].id, { name: path.basename(getTargetPath(req)) })
+    await api.rename(clones[0].id, {
+      name: decodeURIComponent(path.basename(getTargetPath(req))),
+    })
 
     res.statusCode = 204
     res.end()

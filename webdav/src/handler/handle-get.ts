@@ -23,7 +23,7 @@ async function handleGet(
 ) {
   try {
     const api = new FileAPI(token)
-    const file = await api.getByPath(req.url)
+    const file = await api.getByPath(decodeURI(req.url))
 
     const outputPath = path.join(os.tmpdir(), uuidv4())
     await api.downloadOriginal(file, outputPath)

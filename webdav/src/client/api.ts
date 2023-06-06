@@ -100,24 +100,30 @@ export class FileAPI {
   }
 
   async getByPath(path: string): Promise<File> {
-    const result = await fetch(`${API_URL}/v1/files/get?path=${path}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${this.token.access_token}`,
-        'Content-Type': 'application/json',
-      },
-    })
+    const result = await fetch(
+      `${API_URL}/v1/files/get?path=${encodeURIComponent(path)}`,
+      {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${this.token.access_token}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    )
     return result.json()
   }
 
   async listByPath(path: string): Promise<File[]> {
-    const result = await fetch(`${API_URL}/v1/files/list?path=${path}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${this.token.access_token}`,
-        'Content-Type': 'application/json',
-      },
-    })
+    const result = await fetch(
+      `${API_URL}/v1/files/list?path=${encodeURIComponent(path)}`,
+      {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${this.token.access_token}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    )
     return result.json()
   }
 

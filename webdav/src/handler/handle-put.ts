@@ -27,15 +27,15 @@ async function handlePut(
   const api = new FileAPI(token)
   try {
     /* Delete existing file (simulate an overwrite) */
-    const file = await api.getByPath(req.url)
+    const file = await api.getByPath(decodeURI(req.url))
     await api.delete(file.id)
   } catch (err) {
     // Ignored
   }
   try {
-    const directory = await api.getByPath(path.dirname(req.url))
-    const filePath = path.join(os.tmpdir(), uuidv4())
-    const ws = fs.createWriteStream(filePath)
+    const directory = await api.getByPath(decodeURI(path.dirname(req.url)))
+    const outputPath = path.join(os.tmpdir(), uuidv4())
+    const ws = fs.createWriteStream(outputPath)
     req.pipe(ws)
     ws.on('error', (err) => {
       console.error(err)
@@ -47,7 +47,7 @@ async function handlePut(
         res.statusCode = 201
         res.end()
 
-        const blob = new Blob([await readFile(filePath)])
+        const blob = new Blob([await readFile(outputPath)])
 
         await api.upload({
           workspaceId: directory.workspaceId,
@@ -60,7 +60,7 @@ async function handlePut(
         res.statusCode = 500
         res.end()
       } finally {
-        fs.rmSync(filePath)
+        fs.rmSync(outputPath)
       }
     })
   } catch (err) {
