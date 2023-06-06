@@ -1,4 +1,4 @@
-import fs from 'fs'
+import fs, { createReadStream, rmSync } from 'fs'
 import { IncomingMessage, ServerResponse } from 'http'
 import os from 'os'
 import path from 'path'
@@ -23,28 +23,41 @@ async function handleGet(
 ) {
   try {
     const api = new FileAPI(token)
-    const list = await api.listByPath(req.url)
+    const file = await api.getByPath(req.url)
 
     const outputPath = path.join(os.tmpdir(), uuidv4())
+    await api.downloadOriginal(file, outputPath)
 
-    api.downloadOriginal(list[0], (response) => {
-      const ws = fs.createWriteStream(outputPath)
-      response.pipe(ws)
-      ws.on('finish', () => {
-        ws.close()
-        const rs = fs.createReadStream(outputPath)
-        rs.on('error', (error) => {
-          console.error(error)
-          res.statusCode = 500
-          res.end()
-        })
-        rs.on('end', () => {
-          fs.rmSync(outputPath)
-        })
-        rs.pipe(res)
+    const stat = fs.statSync(outputPath)
+    const rangeHeader = req.headers.range
+    if (rangeHeader) {
+      const [start, end] = rangeHeader.replace(/bytes=/, '').split('-')
+      const rangeStart = parseInt(start, 10) || 0
+      const rangeEnd = parseInt(end, 10) || stat.size - 1
+      const chunkSize = rangeEnd - rangeStart + 1
+      res.writeHead(206, {
+        'Content-Range': `bytes ${rangeStart}-${rangeEnd}/${stat.size}`,
+        'Accept-Ranges': 'bytes',
+        'Content-Length': chunkSize.toString(),
+        'Content-Type': 'application/octet-stream',
       })
-    })
-  } catch {
+      createReadStream(outputPath, {
+        start: rangeStart,
+        end: rangeEnd,
+      })
+        .pipe(res)
+        .on('finish', () => rmSync(outputPath))
+    } else {
+      res.writeHead(200, {
+        'Content-Length': stat.size.toString(),
+        'Content-Type': 'application/octet-stream',
+      })
+      createReadStream(outputPath)
+        .pipe(res)
+        .on('finish', () => rmSync(outputPath))
+    }
+  } catch (err) {
+    console.error(err)
     res.statusCode = 500
     res.end()
   }

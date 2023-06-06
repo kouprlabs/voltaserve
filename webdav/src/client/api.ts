@@ -1,6 +1,7 @@
 import { API_URL } from '@/config'
 import { Token } from './idp'
-import { IncomingMessage, get } from 'http'
+import { get } from 'http'
+import { createWriteStream, unlink } from 'fs'
 
 export enum FileType {
   File = 'file',
@@ -186,10 +187,24 @@ export class FileAPI {
     })
   }
 
-  downloadOriginal(file: File, callback: (response: IncomingMessage) => void) {
-    get(
-      `${API_URL}/v1/files/${file.id}/original${file.original.extension}?access_token=${this.token.access_token}`,
-      callback
-    )
+  downloadOriginal(file: File, outputPath: string): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      const ws = createWriteStream(outputPath)
+      const request = get(
+        `${API_URL}/v1/files/${file.id}/original${file.original.extension}?access_token=${this.token.access_token}`,
+        (response) => {
+          response.pipe(ws)
+          ws.on('finish', () => {
+            ws.close()
+            resolve()
+          })
+        }
+      )
+      request.on('error', (error) => {
+        unlink(outputPath, () => {
+          reject(error)
+        })
+      })
+    })
   }
 }
