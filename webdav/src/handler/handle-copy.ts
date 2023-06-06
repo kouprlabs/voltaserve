@@ -1,6 +1,6 @@
 import { IncomingMessage, ServerResponse } from 'http'
 import path from 'path'
-import { getTargetPath } from '@/infra/path'
+import { getTargetPath } from '@/helper/path'
 import { FileAPI } from '@/client/api'
 import { Token } from '@/client/idp'
 

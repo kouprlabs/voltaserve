@@ -2,7 +2,7 @@ import { IncomingMessage, ServerResponse } from 'http'
 import path from 'path'
 import { FileAPI } from '@/client/api'
 import { Token } from '@/client/idp'
-import { getTargetPath } from '@/infra/path'
+import { getTargetPath } from '@/helper/path'
 
 /*
   This method moves or renames a resource from a source URL to a destination URL.
