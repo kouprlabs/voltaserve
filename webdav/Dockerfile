@@ -2,7 +2,7 @@ FROM redhat/ubi9
 
 WORKDIR /app
 
-COPY src .
+COPY src ./src
 COPY .env .
 COPY package.json .
 COPY pnpm-lock.yaml .

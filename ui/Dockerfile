@@ -2,11 +2,12 @@ FROM redhat/ubi9
 
 WORKDIR /app
 
-COPY src .
-COPY public .
+COPY src ./src
+COPY public ./public
+COPY index.html .
 COPY postcss.config.cjs .
 COPY tailwind.config.cjs .
-COPY vite.config.js .
+COPY vite.config.ts .
 COPY .env .
 COPY package.json .
 COPY pnpm-lock.yaml .
@@ -21,6 +22,6 @@ RUN corepack enable
 
 RUN pnpm install
 
-ENTRYPOINT ["/bin/sh", "-c", "pnpm run dev"]
+ENTRYPOINT ["pnpm", "run", "dev"]
 
 EXPOSE 3000

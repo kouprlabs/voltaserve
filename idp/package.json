@@ -11,7 +11,6 @@
     "swagger-autogen": "node ./swagger.js",
     "eslint": "eslint './src/**/*.ts'"
   },
-  "bin": "build/app.js",
   "engines": {
     "node": ">= 18.x"
   },

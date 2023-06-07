@@ -200,7 +200,7 @@ class UserRepoImpl {
         email,
         password_hash,
         refresh_token_value,
-        refresh_token_valid_to,
+        refresh_token_expiry,
         reset_password_token,
         email_confirmation_token,
         is_email_confirmed,

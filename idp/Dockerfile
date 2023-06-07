@@ -2,8 +2,8 @@ FROM redhat/ubi9
 
 WORKDIR /app
 
-COPY src .
-COPY templates .
+COPY src ./src
+COPY templates ./templates
 COPY .env .
 COPY package.json .
 COPY pnpm-lock.yaml .
