@@ -2,14 +2,32 @@
 
 ## Getting Started
 
-Install [Node.js](https://nodejs.org/en/download), preferrably with [NVM](https://github.com/nvm-sh/nvm).
+Install [Node.js 18.x](https://nodejs.org).
+
+Enable [pnpm](https://pnpm.io):
+
+```shell
+corepack enable
+```
 
 ### Build and Run
+
+Install dependencies:
+
+```shell
+pnpm install
+```
 
 Run for development:
 
 ```shell
-yarn dev
+pnpm run dev
+```
+
+Run for production:
+
+```shell
+pnpm run start
 ```
 
 Build Docker image:

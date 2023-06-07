@@ -14,17 +14,13 @@ import handleOptions from '@/handler/handle-options'
 import handlePropfind from '@/handler/handle-propfind'
 import handleProppatch from '@/handler/handle-proppatch'
 import handlePut from '@/handler/handle-put'
+import { newExpiry } from '@/helper/token'
 
 const tokens = new Map<string, Token>()
 const expiries = new Map<string, Date>()
 const api = new TokenAPI()
 
-function newExpiry(token: Token): Date {
-  const now = new Date()
-  now.setSeconds(now.getSeconds() + token.expires_in)
-  return now
-}
-
+/* Refresh tokens */
 setInterval(async () => {
   for (const [username, token] of tokens) {
     const expiry = expiries.get(username)

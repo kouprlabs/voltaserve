@@ -1,7 +1,6 @@
-version: '3.8'
+version: "3.8"
 
-x-minio-common:
-  &minio-common
+x-minio-common: &minio-common
   image: quay.io/minio/minio:RELEASE.2023-05-18T00-05-36Z
   command: server --console-address ":9001" http://minio{1...4}/data{1...2}
   expose:
@@ -44,22 +43,6 @@ volumes:
   redis_data5:
   redis_data6:
   redisinsight:
-  api_root:
-  api_go:
-  idp_root:
-  ui_root:
-  webdav_root:
-  conversion_lib:
-  conversion_etc:
-  conversion_bin:
-  conversion_usr:
-  conversion_var:
-  conversion_root:
-  conversion_opt:
-  conversion_sbin:
-  conversion_home:
-  conversion_go:
-
 
 services:
   cockroach1:
@@ -237,13 +220,9 @@ services:
       default:
         ipv4_address: 172.20.0.60
   api:
-    image: golang:1.20-alpine
-    working_dir: /app
-    command: sh -c "go run ."
-    volumes:
-      - ./api:/app
-      - api_root:/root
-      - api_go:/go
+    image: voltaserve/api
+    build:
+      context: ./api
     environment:
       - PORT=5000
       - CONVERSION_URL=http://conversion:5001
@@ -284,14 +263,11 @@ services:
       default:
         ipv4_address: 172.20.0.41
   idp:
-    image: node:18-alpine
-    working_dir: /app
-    command: sh -c "yarn dev"
+    image: voltaserve/idp
+    build:
+      context: ./idp
     ports:
       - ${VOLTASERVE_IDP_PORT}:7000
-    volumes:
-      - ./idp:/app
-      - idp_root:/root
     environment:
       - PORT=7000
       - POSTGRES_URL=postgresql://voltaserve@cockroach1:26257/voltaserve
@@ -315,12 +291,9 @@ services:
       default:
         ipv4_address: 172.20.0.40
   ui:
-    image: node:18-alpine
-    working_dir: /app
-    command: sh -c "yarn dev"
-    volumes:
-      - ./ui:/app
-      - ui_root:/root
+    image: voltaserve/ui
+    build:
+      context: ./ui
     ports:
       - ${VOLTASERVE_UI_PORT}:3000
     environment:
@@ -336,12 +309,9 @@ services:
       default:
         ipv4_address: 172.20.0.42
   webdav:
-    image: node:18-alpine
-    working_dir: /app
-    command: sh -c "yarn dev"
-    volumes:
-      - ./webdav:/app
-      - webdav_root:/root
+    image: voltaserve/webdav
+    build:
+      context: ./webdav
     ports:
       - ${VOLTASERVE_WEBDAV_PORT}:6000
     environment:
@@ -358,27 +328,15 @@ services:
       default:
         ipv4_address: 172.20.0.43
   conversion:
-    image: golang:1.20-bullseye
-    working_dir: /app
-    command: sh -c "./install-deps.sh && go run ."
+    image: voltaserve/conversion
+    build:
+      context: ./conversion
     ports:
       - ${VOLTASERVE_CONVERSION_PORT}:5001
     environment:
       - PORT=5001
       - API_URL=http://api:5000
       - S3_URL=minio:9000
-    volumes:
-      - ./conversion:/app
-      - conversion_lib:/lib
-      - conversion_etc:/etc
-      - conversion_bin:/bin
-      - conversion_sbin:/sbin
-      - conversion_usr:/usr
-      - conversion_var:/var
-      - conversion_opt:/opt
-      - conversion_root:/root
-      - conversion_home:/home
-      - conversion_go:/go
     healthcheck:
       test: wget --spider --quiet http://localhost:5001/v1/health || exit 1
     depends_on:

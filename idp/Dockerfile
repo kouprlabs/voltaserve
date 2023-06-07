@@ -1,21 +1,22 @@
-FROM node:18-alpine as builder
-
-WORKDIR /build
-
-COPY . .
-
-RUN yarn run pkg
-
-FROM node:18-alpine AS runner
+FROM redhat/ubi9
 
 WORKDIR /app
 
-ENV NODE_ENV production
+COPY src .
+COPY templates .
+COPY .env .
+COPY package.json .
+COPY pnpm-lock.yaml .
+COPY tsconfig.json .
 
-COPY --from=builder /build/pkg/voltaserve-idp-alpine ./voltaserve-idp
-COPY --from=builder /build/templates ./templates
-COPY --from=builder /build/.env ./.env
+RUN dnf module -y enable nodejs:18
+RUN dnf module -y install nodejs:18/common
 
-ENTRYPOINT ["./voltaserve-idp"]
+RUN npm install -g corepack
+RUN corepack enable
+
+RUN pnpm install
+
+ENTRYPOINT ["pnpm", "run", "start"]
 
 EXPOSE 7000

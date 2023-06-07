@@ -5,7 +5,7 @@ export function getTargetPath(req: IncomingMessage) {
   if (!destination) {
     return null
   }
-  // Check if the destination header is a full URL
+  /* Check if the destination header is a full URL */
   if (destination.startsWith('http://') || destination.startsWith('https://')) {
     return new URL(destination).pathname
   } else {
