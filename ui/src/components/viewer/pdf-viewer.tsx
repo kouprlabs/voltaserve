@@ -8,7 +8,6 @@ type PdfViewerProps = {
 const PdfViewer = ({ file }: PdfViewerProps) => {
   const download = useMemo(() => file.preview || file.original, [file])
   const urlPath = useMemo(() => (file.preview ? 'preview' : 'original'), [file])
-
   const url = useMemo(() => {
     if (!download || !download.extension) {
       return ''
