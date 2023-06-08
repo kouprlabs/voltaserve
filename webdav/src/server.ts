@@ -2,8 +2,8 @@ import '@/infra/env'
 import { createServer, IncomingMessage, ServerResponse } from 'http'
 import passport from 'passport'
 import { BasicStrategy } from 'passport-http'
-import { Token } from '@/api/token'
-import { IDP_URL, PORT } from '@/config/config'
+import { TokenAPI, Token } from '@/client/idp'
+import { PORT } from '@/config'
 import handleCopy from '@/handler/handle-copy'
 import handleDelete from '@/handler/handle-delete'
 import handleGet from '@/handler/handle-get'
@@ -14,25 +14,42 @@ import handleOptions from '@/handler/handle-options'
 import handlePropfind from '@/handler/handle-propfind'
 import handleProppatch from '@/handler/handle-proppatch'
 import handlePut from '@/handler/handle-put'
+import { newExpiry } from '@/helper/token'
 
 const tokens = new Map<string, Token>()
+const expiries = new Map<string, Date>()
+const api = new TokenAPI()
+
+/* Refresh tokens */
+setInterval(async () => {
+  for (const [username, token] of tokens) {
+    const expiry = expiries.get(username)
+    const earlyExpiry = new Date(expiry)
+    earlyExpiry.setMinutes(earlyExpiry.getMinutes() - 1)
+    if (new Date() >= earlyExpiry) {
+      const newToken = await api.exchange({
+        grant_type: 'refresh_token',
+        refresh_token: token.refresh_token,
+      })
+      tokens.set(username, newToken)
+      expiries.set(username, newExpiry(newToken))
+    }
+  }
+}, 5000)
 
 passport.use(
   new BasicStrategy(async (username, password, done) => {
-    const formBody = []
-    formBody.push('grant_type=password')
-    formBody.push(`username=${encodeURIComponent(username)}`)
-    formBody.push(`password=${encodeURIComponent(password)}`)
     try {
-      const result = await fetch(`${IDP_URL}/v1/token`, {
-        method: 'POST',
-        body: formBody.join('&'),
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-      })
-      const token = await result.json()
-      tokens.set(username, token)
+      let token = tokens.get(username)
+      if (!token) {
+        token = await new TokenAPI().exchange({
+          username,
+          password,
+          grant_type: 'password',
+        })
+        tokens.set(username, token)
+        expiries.set(username, newExpiry(token))
+      }
       return done(null, token)
     } catch (err) {
       return done(err, false)

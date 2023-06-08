@@ -1,11 +1,10 @@
-import fs from 'fs'
-import { IncomingMessage, ServerResponse, get } from 'http'
+import fs, { createReadStream, rmSync } from 'fs'
+import { IncomingMessage, ServerResponse } from 'http'
 import os from 'os'
 import path from 'path'
 import { v4 as uuidv4 } from 'uuid'
-import { File } from '@/api/file'
-import { Token } from '@/api/token'
-import { API_URL } from '@/config/config'
+import { FileAPI } from '@/client/api'
+import { Token } from '@/client/idp'
 
 /*
   This method retrieves the content of a resource identified by the URL.
@@ -23,36 +22,45 @@ async function handleGet(
   token: Token
 ) {
   try {
-    const result = await fetch(`${API_URL}/v1/files/list?path=${req.url}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token.access_token}`,
-        'Content-Type': 'application/json',
-      },
-    })
-    const file: File = (await result.json())[0]
-    const filePath = path.join(os.tmpdir(), uuidv4())
-    get(
-      `${API_URL}/v1/files/${file.id}/original${file.original.extension}?access_token=${token.access_token}`,
-      (response) => {
-        const ws = fs.createWriteStream(filePath)
-        response.pipe(ws)
-        ws.on('finish', () => {
-          ws.close()
-          const rs = fs.createReadStream(filePath)
-          rs.on('error', (error) => {
-            console.error(error)
-            res.statusCode = 500
-            res.end()
-          })
-          rs.on('end', () => {
-            fs.rmSync(filePath)
-          })
-          rs.pipe(res)
-        })
-      }
-    )
-  } catch {
+    const api = new FileAPI(token)
+    const file = await api.getByPath(decodeURI(req.url))
+
+    /* TODO: This should be optimized for the case when there is a range header,
+       only a partial file should be fetched, here we are fetching the whole file
+       which is not ideal. */
+    const outputPath = path.join(os.tmpdir(), uuidv4())
+    await api.downloadOriginal(file, outputPath)
+
+    const stat = fs.statSync(outputPath)
+    const rangeHeader = req.headers.range
+    if (rangeHeader) {
+      const [start, end] = rangeHeader.replace(/bytes=/, '').split('-')
+      const rangeStart = parseInt(start, 10) || 0
+      const rangeEnd = parseInt(end, 10) || stat.size - 1
+      const chunkSize = rangeEnd - rangeStart + 1
+      res.writeHead(206, {
+        'Content-Range': `bytes ${rangeStart}-${rangeEnd}/${stat.size}`,
+        'Accept-Ranges': 'bytes',
+        'Content-Length': chunkSize.toString(),
+        'Content-Type': 'application/octet-stream',
+      })
+      createReadStream(outputPath, {
+        start: rangeStart,
+        end: rangeEnd,
+      })
+        .pipe(res)
+        .on('finish', () => rmSync(outputPath))
+    } else {
+      res.writeHead(200, {
+        'Content-Length': stat.size.toString(),
+        'Content-Type': 'application/octet-stream',
+      })
+      createReadStream(outputPath)
+        .pipe(res)
+        .on('finish', () => rmSync(outputPath))
+    }
+  } catch (err) {
+    console.error(err)
     res.statusCode = 500
     res.end()
   }

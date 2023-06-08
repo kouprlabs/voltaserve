@@ -1,9 +1,8 @@
 import { IncomingMessage, ServerResponse } from 'http'
 import path from 'path'
-import { File } from '@/api/file'
-import { Token } from '@/api/token'
-import { API_URL } from '@/config/config'
-import { getTargetPath } from '@/infra/path'
+import { FileAPI } from '@/client/api'
+import { Token } from '@/client/idp'
+import { getTargetPath } from '@/helper/path'
 
 /*
   This method moves or renames a resource from a source URL to a destination URL.
@@ -24,29 +23,11 @@ async function handleMove(
     const sourcePath = decodeURI(req.url)
     const targetPath = getTargetPath(req)
 
-    const sourceResult = await fetch(
-      `${API_URL}/v1/files/get?path=${req.url}`,
-      {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token.access_token}`,
-          'Content-Type': 'application/json',
-        },
-      }
+    const api = new FileAPI(token)
+    const sourceFile = await api.getByPath(decodeURI(req.url))
+    const targetFile = await api.getByPath(
+      decodeURI(path.dirname(getTargetPath(req)))
     )
-    const sourceFile: File = await sourceResult.json()
-
-    const targetResult = await fetch(
-      `${API_URL}/v1/files/get?path=${path.dirname(getTargetPath(req))}`,
-      {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token.access_token}`,
-          'Content-Type': 'application/json',
-        },
-      }
-    )
-    const targetFile: File = await targetResult.json()
 
     if (sourceFile.workspaceId !== targetFile.workspaceId) {
       res.statusCode = 400
@@ -58,27 +39,9 @@ async function handleMove(
       sourcePath.split('/').length === targetPath.split('/').length &&
       path.dirname(sourcePath) === path.dirname(targetPath)
     ) {
-      await fetch(`${API_URL}/v1/files/${sourceFile.id}/rename`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token.access_token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: path.basename(targetPath),
-        }),
-      })
+      await api.rename(sourceFile.id, { name: path.basename(targetPath) })
     } else {
-      await fetch(`${API_URL}/v1/files/${targetFile.id}/move`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token.access_token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ids: [sourceFile.id],
-        }),
-      })
+      await api.move(targetFile.id, { ids: [sourceFile.id] })
     }
 
     res.statusCode = 204
