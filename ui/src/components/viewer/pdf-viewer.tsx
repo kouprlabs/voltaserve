@@ -10,14 +10,10 @@ const PdfViewer = ({ file }: PdfViewerProps) => {
   const urlPath = useMemo(() => (file.preview ? 'preview' : 'original'), [file])
 
   const url = useMemo(() => {
-    if (!download) {
+    if (!download || !download.extension) {
       return ''
     }
-    if (download.extension) {
-      return `/proxy/api/v1/files/${file.id}/${urlPath}${download.extension}`
-    } else {
-      return ''
-    }
+    return `/proxy/api/v1/files/${file.id}/${urlPath}${download.extension}`
   }, [file, download, urlPath])
 
   if (!download) {
