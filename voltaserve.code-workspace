@@ -16,7 +16,7 @@
       "path": "./ui"
     },
     {
-      "path": "infra"
+      "path": "./infra"
     }
   ],
   "settings": {}

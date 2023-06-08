@@ -8,7 +8,7 @@ export type User = {
   email: string
   passwordHash: string
   refreshTokenValue?: string
-  refreshTokenValidTo?: number
+  refreshTokenExpiry?: string
   resetPasswordToken?: string
   emailConfirmationToken?: string
   isEmailConfirmed: boolean
@@ -26,7 +26,7 @@ export type InsertOptions = {
   email?: string
   passwordHash?: string
   refreshTokenValue?: string
-  refreshTokenValidTo?: number
+  refreshTokenExpiry?: string
   resetPasswordToken?: string
   emailConfirmationToken?: string
   isEmailConfirmed?: boolean
@@ -42,7 +42,7 @@ export type UpdateOptions = {
   email?: string
   passwordHash?: string
   refreshTokenValue?: string
-  refreshTokenValidTo?: number
+  refreshTokenExpiry?: string
   resetPasswordToken?: string
   emailConfirmationToken?: string
   isEmailConfirmed?: boolean
@@ -200,7 +200,7 @@ class UserRepoImpl {
         email,
         password_hash,
         refresh_token_value,
-        refresh_token_valid_to,
+        refresh_token_expiry,
         reset_password_token,
         email_confirmation_token,
         is_email_confirmed,
@@ -214,7 +214,7 @@ class UserRepoImpl {
         data.email,
         data.passwordHash,
         data.refreshTokenValue,
-        data.refreshTokenValidTo,
+        data.refreshTokenExpiry,
         data.resetPasswordToken,
         data.emailConfirmationToken,
         data.isEmailConfirmed || false,
@@ -249,7 +249,7 @@ class UserRepoImpl {
           email = $3,
           password_hash = $4,
           refresh_token_value = $5,
-          refresh_token_valid_to = $6,
+          refresh_token_expiry = $6,
           reset_password_token = $7,
           email_confirmation_token = $8,
           is_email_confirmed = $9,
@@ -265,7 +265,7 @@ class UserRepoImpl {
         entity.email,
         entity.passwordHash,
         entity.refreshTokenValue,
-        entity.refreshTokenValidTo,
+        entity.refreshTokenExpiry,
         entity.resetPasswordToken,
         entity.emailConfirmationToken,
         entity.isEmailConfirmed,
@@ -297,7 +297,7 @@ class UserRepoImpl {
       email: row.email,
       passwordHash: row.password_hash,
       refreshTokenValue: row.refresh_token_value,
-      refreshTokenValidTo: row.refresh_token_valid_to,
+      refreshTokenExpiry: row.refresh_token_expiry,
       resetPasswordToken: row.reset_password_token,
       emailConfirmationToken: row.email_confirmation_token,
       isEmailConfirmed: row.is_email_confirmed,

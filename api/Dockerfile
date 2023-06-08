@@ -1,15 +1,15 @@
-FROM golang:1.20-alpine as builder
+FROM redhat/ubi9 as builder
 
 WORKDIR /build
 
 COPY . .
 
-ENV GOPROXY=direct
+RUN dnf install -y golang
 
 RUN go mod download
 RUN go build -o voltaserve-api
 
-FROM alpine AS runner
+FROM redhat/ubi9 AS runner
 
 WORKDIR /app
 

@@ -1,7 +1,6 @@
 import { IncomingMessage, ServerResponse } from 'http'
-import { File, FileType } from '@/api/file'
-import { Token } from '@/api/token'
-import { API_URL } from '@/config/config'
+import { FileAPI, FileType } from '@/client/api'
+import { Token } from '@/client/idp'
 
 /*
   This method retrieves properties and metadata of a resource.
@@ -21,14 +20,8 @@ async function handlePropfind(
   token: Token
 ) {
   try {
-    const result = await fetch(`${API_URL}/v1/files/get?path=${req.url}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token.access_token}`,
-        'Content-Type': 'application/json',
-      },
-    })
-    const file: File = await result.json()
+    const api = new FileAPI(token)
+    const file = await api.getByPath(decodeURI(req.url))
     if (file.type === FileType.File) {
       const responseXml = `
         <D:multistatus xmlns:D="DAV:">
@@ -57,14 +50,7 @@ async function handlePropfind(
       res.setHeader('Content-Type', 'application/xml; charset=utf-8')
       res.end(responseXml)
     } else if (file.type === FileType.Folder) {
-      const result = await fetch(`${API_URL}/v1/files/list?path=${req.url}`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token.access_token}`,
-          'Content-Type': 'application/json',
-        },
-      })
-      const files: File[] = await result.json()
+      const list = await api.listByPath(decodeURI(req.url))
       const responseXml = `
         <D:multistatus xmlns:D="DAV:">
           <D:response>
@@ -83,7 +69,7 @@ async function handlePropfind(
               <D:status>HTTP/1.1 200 OK</D:status>
             </D:propstat>
           </D:response>
-          ${files
+          ${list
             .map((item) => {
               return `
                 <D:response>

@@ -10,7 +10,13 @@ Install [Docker](https://docs.docker.com/get-docker) and [Docker Compose](https:
 
 Alternatively, you can instead install [Podman](https://podman.io) and [Podman Compose](https://github.com/containers/podman-compose#installation).
 
-1. Run:
+1. Build images:
+
+```shell
+docker compose build
+```
+
+2. Run:
 
 ```shell
 docker compose up -d
@@ -26,11 +32,11 @@ Wait a few minutes (it takes longer only the first time) until the status of the
 
 You can check that by running the command `docker ps` and look at the `STATUS` column.
 
-2. Go to the **sign up page** <http://localhost:3000/sign-up> and create an account.
+3. Go to the **sign up page** <http://localhost:3000/sign-up> and create an account.
 
-3. Open MailCatcher <http://localhost:11080>, select the received email and click the **confirm email** link.
+4. Open MailCatcher <http://localhost:11080>, select the received email and click the **confirm email** link.
 
-4. Finally, go to the **sign in page** <http://localhost:3000/sign-in> and login with your credentials.
+5. Finally, go to the **sign in page** <http://localhost:3000/sign-in> and login with your credentials.
 
 ### Connect with WebDAV
 

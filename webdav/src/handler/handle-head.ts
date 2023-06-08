@@ -1,7 +1,6 @@
 import { IncomingMessage, ServerResponse } from 'http'
-import { File, FileType } from '@/api/file'
-import { Token } from '@/api/token'
-import { API_URL } from '@/config/config'
+import { FileAPI, FileType } from '@/client/api'
+import { Token } from '@/client/idp'
 
 /*
   This method is similar to GET but only retrieves the metadata of a resource, without returning the actual content.
@@ -20,14 +19,7 @@ async function handleHead(
   token: Token
 ) {
   try {
-    const result = await fetch(`${API_URL}/v1/files/list?path=${req.url}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token.access_token}`,
-        'Content-Type': 'application/json',
-      },
-    })
-    const file: File = (await result.json())[0]
+    const file = await new FileAPI(token).getByPath(decodeURI(req.url))
     if (file.type === FileType.File) {
       res.statusCode = 200
       res.setHeader('Content-Length', file.original.size)

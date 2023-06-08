@@ -1,20 +1,21 @@
-FROM node:18-alpine as builder
-
-WORKDIR /build
-
-COPY . .
-
-RUN yarn run pkg
-
-FROM node:18-alpine AS runner
+FROM redhat/ubi9
 
 WORKDIR /app
 
-ENV NODE_ENV production
+COPY src ./src
+COPY .env .
+COPY package.json .
+COPY pnpm-lock.yaml .
+COPY tsconfig.json .
 
-COPY --from=builder /build/pkg/voltaserve-webdav-alpine ./voltaserve-webdav
-COPY --from=builder /build/.env ./.env
+RUN dnf module -y enable nodejs:18
+RUN dnf module -y install nodejs:18/common
 
-ENTRYPOINT ["./voltaserve-webdav"]
+RUN npm install -g corepack
+RUN corepack enable
 
-EXPOSE 6000
+RUN pnpm install
+
+ENTRYPOINT ["pnpm", "run", "start"]
+
+EXPOSE 7000

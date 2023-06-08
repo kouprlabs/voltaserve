@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS "user" (
   email text UNIQUE,
   password_hash text NOT NULL,
   refresh_token_value text UNIQUE,
-  refresh_token_valid_to bigint,
+  refresh_token_expiry text,
   reset_password_token text UNIQUE,
   email_confirmation_token text UNIQUE,
   email_update_token text UNIQUE,

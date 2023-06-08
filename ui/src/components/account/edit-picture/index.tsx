@@ -46,12 +46,12 @@ const EditPicture = ({ open, user, onClose }: EditPictureProps) => {
       .test(
         'fileSize',
         'Image is too big, should be less than 3 MB',
-        (value) => value === null || (value && value.size <= 3000000)
+        (value: any) => value === null || (value && value.size <= 3000000)
       )
       .test(
         'fileType',
         'Unsupported file format',
-        (value) =>
+        (value: any) =>
           value === null ||
           (value &&
             ['image/jpg', 'image/jpeg', 'image/gif', 'image/png'].includes(
