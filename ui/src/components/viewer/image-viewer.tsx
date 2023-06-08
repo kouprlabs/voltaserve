@@ -9,16 +9,19 @@ type ImageViewerProps = {
 
 const ImageViewer = ({ file }: ImageViewerProps) => {
   const [isLoading, setIsLoading] = useState(true)
+  const download = useMemo(() => file.preview || file.original, [file])
+  const urlPath = useMemo(() => (file.preview ? 'preview' : 'original'), [file])
   const url = useMemo(() => {
-    if (file.original?.extension) {
-      return `/proxy/api/v1/files/${file.id}/original${file.original.extension}`
-    } else {
+    if (!download || !download.extension) {
       return ''
     }
-  }, [file])
-  if (!file.original?.image) {
+    return `/proxy/api/v1/files/${file.id}/${urlPath}${download.extension}`
+  }, [file, download, urlPath])
+
+  if (!download) {
     return null
   }
+
   return (
     <Stack direction="column" w="100%" h="100%" spacing={variables.spacing}>
       <Center
@@ -31,8 +34,6 @@ const ImageViewer = ({ file }: ImageViewerProps) => {
         {isLoading && <SectionSpinner />}
         <img
           src={url}
-          width={file.original.image.width}
-          height={file.original.image.height}
           style={{
             objectFit: 'contain',
             width: isLoading ? 0 : 'auto',

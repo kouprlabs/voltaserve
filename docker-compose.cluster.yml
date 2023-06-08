@@ -241,7 +241,7 @@ services:
     ports:
       - ${VOLTASERVE_API_PORT}:5000
     healthcheck:
-      test: wget --spider --quiet http://localhost:5000/v1/health || exit 1
+      test: curl --fail http://localhost:5000/v1/health || exit 1
     depends_on:
       - cockroach1
       - cockroach2
@@ -281,7 +281,7 @@ services:
       - SMTP_SENDER_ADDRESS=${VOLTASERVE_SMTP_SENDER_ADDRESS}
       - SMTP_SENDER_NAME=${VOLTASERVE_SMTP_SENDER_NAME}
     healthcheck:
-      test: wget --spider --quiet http://localhost:7000/v1/health || exit 1
+      test: curl --fail http://localhost:7000/v1/health || exit 1
     depends_on:
       - cockroach1
       - cockroach2
@@ -300,7 +300,7 @@ services:
       - API_URL=http://api:5000
       - IDP_URL=http://idp:7000
     healthcheck:
-      test: wget --spider --quiet http://localhost:3000/index.html || exit 1
+      test: curl --fail http://localhost:3000/index.html || exit 1
     depends_on:
       - idp
       - api
@@ -319,7 +319,7 @@ services:
       - IDP_URL=http://idp:7000
       - API_URL=http://api:5000
     healthcheck:
-      test: wget --spider --quiet http://localhost:6000/v1/health || exit 1
+      test: curl --fail http://localhost:6000/v1/health || exit 1
     depends_on:
       - idp
       - api
@@ -338,7 +338,7 @@ services:
       - API_URL=http://api:5000
       - S3_URL=minio:9000
     healthcheck:
-      test: wget --spider --quiet http://localhost:5001/v1/health || exit 1
+      test: curl --fail http://localhost:5001/v1/health || exit 1
     depends_on:
       - api
       - minio
