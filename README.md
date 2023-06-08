@@ -22,7 +22,7 @@ docker compose build
 docker compose up -d
 ```
 
-Wait a few minutes (it takes longer only the first time) until the status of the following containers is `healthy`:
+Wait until the status of the following containers is `healthy`:
 
 - `voltaserve-api`
 - `voltaserve-idp`
