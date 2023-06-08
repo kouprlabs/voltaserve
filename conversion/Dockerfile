@@ -17,7 +17,7 @@ RUN dnf install -y libreoffice
 RUN dnf install -y python3-pip
 RUN dnf install -y ghostscript
 RUN dnf install -y tesseract
-RUN dnf install -y
+RUN dnf install -y wget
 
 RUN mkdir -p /tess/traineddata
 
