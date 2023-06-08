@@ -1,4 +1,4 @@
-FROM almalinux:9 as builder
+FROM rockylinux:9 as builder
 
 WORKDIR /build
 
@@ -9,7 +9,7 @@ RUN dnf install -y golang
 RUN go mod download
 RUN go build -o voltaserve-conversion
 
-FROM almalinux:9 AS runner
+FROM rockylinux:9 AS runner
 
 RUN dnf install -y git
 RUN dnf install -y poppler-utils
