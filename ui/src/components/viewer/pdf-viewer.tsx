@@ -6,16 +6,24 @@ type PdfViewerProps = {
 }
 
 const PdfViewer = ({ file }: PdfViewerProps) => {
+  const download = useMemo(() => file.preview || file.original, [file])
+  const urlPath = useMemo(() => (file.preview ? 'preview' : 'original'), [file])
+
   const url = useMemo(() => {
-    if (file.preview?.extension) {
-      return `/proxy/api/v1/files/${file.id}/preview${file.preview.extension}`
+    if (!download) {
+      return ''
+    }
+    if (download.extension) {
+      return `/proxy/api/v1/files/${file.id}/${urlPath}${download.extension}`
     } else {
       return ''
     }
-  }, [file])
-  if (!file.preview) {
+  }, [file, download, urlPath])
+
+  if (!download) {
     return null
   }
+
   return <iframe width="100%" height="100%" src={url} title={file.name} />
 }
 

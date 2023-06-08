@@ -17,7 +17,10 @@ const FileViewerPage = () => {
   const { data: file } = FileAPI.useGetById(params.id as string)
 
   const renderViewer = useCallback((file: File) => {
-    if (file.preview && isPDF(file.preview.extension)) {
+    if (
+      (file.original && isPDF(file.original.extension)) ||
+      (file.preview && isPDF(file.preview.extension))
+    ) {
       return <PdfViewer file={file} />
     } else if (file.original && isImage(file.original.extension)) {
       return <ImageViewer file={file} />
