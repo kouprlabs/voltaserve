@@ -25,21 +25,21 @@ ENV TESSDATA_PREFIX=/tess/traineddata
 
 WORKDIR /tess/traineddata
 
-RUN wget https://github.com/tesseract-ocr/tessdata/raw/main/eng.traineddata
-RUN wget https://github.com/tesseract-ocr/tessdata/raw/main/deu.traineddata
-RUN wget https://github.com/tesseract-ocr/tessdata/raw/main/fra.traineddata
-RUN wget https://github.com/tesseract-ocr/tessdata/raw/main/nld.traineddata
-RUN wget https://github.com/tesseract-ocr/tessdata/raw/main/ita.traineddata
-RUN wget https://github.com/tesseract-ocr/tessdata/raw/main/spa.traineddata
-RUN wget https://github.com/tesseract-ocr/tessdata/raw/main/por.traineddata
-RUN wget https://github.com/tesseract-ocr/tessdata/raw/main/jpn.traineddata
-RUN wget https://github.com/tesseract-ocr/tessdata/raw/main/nor.traineddata
-RUN wget https://github.com/tesseract-ocr/tessdata/raw/main/swe.traineddata
-RUN wget https://github.com/tesseract-ocr/tessdata/raw/main/fin.traineddata
-RUN wget https://github.com/tesseract-ocr/tessdata/raw/main/dan.traineddata
-RUN wget https://github.com/tesseract-ocr/tessdata/raw/main/rus.traineddata
-RUN wget https://github.com/tesseract-ocr/tessdata/raw/main/chi_sim.traineddata
-RUN wget https://github.com/tesseract-ocr/tessdata/raw/main/chi_tra.traineddata
+RUN wget https://github.com/kouprlabs/tessdata/raw/main/eng.traineddata
+RUN wget https://github.com/kouprlabs/tessdata/raw/main/deu.traineddata
+RUN wget https://github.com/kouprlabs/tessdata/raw/main/fra.traineddata
+RUN wget https://github.com/kouprlabs/tessdata/raw/main/nld.traineddata
+RUN wget https://github.com/kouprlabs/tessdata/raw/main/ita.traineddata
+RUN wget https://github.com/kouprlabs/tessdata/raw/main/spa.traineddata
+RUN wget https://github.com/kouprlabs/tessdata/raw/main/por.traineddata
+RUN wget https://github.com/kouprlabs/tessdata/raw/main/jpn.traineddata
+RUN wget https://github.com/kouprlabs/tessdata/raw/main/nor.traineddata
+RUN wget https://github.com/kouprlabs/tessdata/raw/main/swe.traineddata
+RUN wget https://github.com/kouprlabs/tessdata/raw/main/fin.traineddata
+RUN wget https://github.com/kouprlabs/tessdata/raw/main/dan.traineddata
+RUN wget https://github.com/kouprlabs/tessdata/raw/main/rus.traineddata
+RUN wget https://github.com/kouprlabs/tessdata/raw/main/chi_sim.traineddata
+RUN wget https://github.com/kouprlabs/tessdata/raw/main/chi_tra.traineddata
 
 WORKDIR /build
 
@@ -73,7 +73,7 @@ RUN dnf install -y libpng-devel
 RUN dnf install -y leptonica-devel
 
 WORKDIR /root
-RUN git clone https://github.com/agl/jbig2enc.git
+RUN git clone https://github.com/kouprlabs/jbig2enc.git
 WORKDIR /root/jbig2enc
 RUN git checkout tags/0.29
 RUN ./autogen.sh
