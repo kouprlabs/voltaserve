@@ -17,21 +17,31 @@ RUN dnf install -y libreoffice
 RUN dnf install -y python3-pip
 RUN dnf install -y ghostscript
 RUN dnf install -y tesseract
-RUN dnf install -y tesseract-langpack-eng
-RUN dnf install -y tesseract-langpack-deu
-RUN dnf install -y tesseract-langpack-fra
-RUN dnf install -y tesseract-langpack-nld
-RUN dnf install -y tesseract-langpack-ita
-RUN dnf install -y tesseract-langpack-spa
-RUN dnf install -y tesseract-langpack-por
-RUN dnf install -y tesseract-langpack-jpn
-RUN dnf install -y tesseract-langpack-nor
-RUN dnf install -y tesseract-langpack-swe
-RUN dnf install -y tesseract-langpack-fin
-RUN dnf install -y tesseract-langpack-dan
-RUN dnf install -y tesseract-langpack-rus
-RUN dnf install -y tesseract-langpack-chi-sim
-RUN dnf install -y tesseract-langpack-chi-tra
+RUN dnf install -y
+
+RUN mkdir -p /tess/traineddata
+
+ENV TESSDATA_PREFIX=/tess/traineddata
+
+WORKDIR /tess/traineddata
+
+RUN wget https://github.com/tesseract-ocr/tessdata/raw/main/eng.traineddata
+RUN wget https://github.com/tesseract-ocr/tessdata/raw/main/deu.traineddata
+RUN wget https://github.com/tesseract-ocr/tessdata/raw/main/fra.traineddata
+RUN wget https://github.com/tesseract-ocr/tessdata/raw/main/nld.traineddata
+RUN wget https://github.com/tesseract-ocr/tessdata/raw/main/ita.traineddata
+RUN wget https://github.com/tesseract-ocr/tessdata/raw/main/spa.traineddata
+RUN wget https://github.com/tesseract-ocr/tessdata/raw/main/por.traineddata
+RUN wget https://github.com/tesseract-ocr/tessdata/raw/main/jpn.traineddata
+RUN wget https://github.com/tesseract-ocr/tessdata/raw/main/nor.traineddata
+RUN wget https://github.com/tesseract-ocr/tessdata/raw/main/swe.traineddata
+RUN wget https://github.com/tesseract-ocr/tessdata/raw/main/fin.traineddata
+RUN wget https://github.com/tesseract-ocr/tessdata/raw/main/dan.traineddata
+RUN wget https://github.com/tesseract-ocr/tessdata/raw/main/rus.traineddata
+RUN wget https://github.com/tesseract-ocr/tessdata/raw/main/chi_sim.traineddata
+RUN wget https://github.com/tesseract-ocr/tessdata/raw/main/chi_tra.traineddata
+
+WORKDIR /build
 
 RUN dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
 RUN dnf install -y GraphicsMagick
