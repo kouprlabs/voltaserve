@@ -1462,6 +1462,16 @@ func (svc *FileService) Delete(ids []string, userId string) ([]string, error) {
 					return nil, err
 				}
 			}
+			if s.HasText() {
+				if err = svc.s3.RemoveObject(s.GetText().Key, s.GetText().Bucket); err != nil {
+					return nil, err
+				}
+			}
+			if s.HasOCR() {
+				if err = svc.s3.RemoveObject(s.GetOCR().Key, s.GetOCR().Bucket); err != nil {
+					return nil, err
+				}
+			}
 		}
 		if err = svc.snapshotRepo.DeleteAllDangling(); err != nil {
 			return nil, err
