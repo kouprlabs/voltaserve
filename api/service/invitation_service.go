@@ -71,13 +71,24 @@ func (svc *InvitationService) Create(opts InvitationCreateOptions, userId string
 	if err != nil {
 		return err
 	}
+	outgoingInvitations, err := svc.invitationRepo.GetOutgoing(opts.OrganizationId, userId)
+	if err != nil {
+		return err
+	}
 
-	/* Collect emails of non existing members */
 	var emails []string
+
+	/* Collect emails of non existing members and outgoing invitations */
 	for _, e := range opts.Emails {
 		existing := false
 		for _, u := range orgMembers {
 			if e == u.GetEmail() {
+				existing = true
+				break
+			}
+		}
+		for _, i := range outgoingInvitations {
+			if e == i.GetEmail() {
 				existing = true
 				break
 			}
