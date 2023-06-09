@@ -232,17 +232,17 @@ func NewFileService() *FileService {
 	}
 }
 
-func (svc *FileService) Create(req FileCreateOptions, userId string) (*File, error) {
-	if len(*req.ParentId) > 0 {
-		if err := svc.validateParent(*req.ParentId, userId); err != nil {
+func (svc *FileService) Create(opts FileCreateOptions, userId string) (*File, error) {
+	if len(*opts.ParentId) > 0 {
+		if err := svc.validateParent(*opts.ParentId, userId); err != nil {
 			return nil, err
 		}
 	}
 	file, err := svc.fileRepo.Insert(repo.FileInsertOptions{
-		Name:        req.Name,
-		WorkspaceId: req.WorkspaceId,
-		ParentId:    req.ParentId,
-		Type:        req.Type,
+		Name:        opts.Name,
+		WorkspaceId: opts.WorkspaceId,
+		ParentId:    opts.ParentId,
+		Type:        opts.Type,
 	})
 	if err != nil {
 		return nil, err
