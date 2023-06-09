@@ -59,7 +59,7 @@ const InviteMembers = ({ open, id, onClose }: InviteMembersProps) => {
       try {
         await InvitationAPI.create({
           organizationId: id,
-          emails: emails.split(',').map((e: string) => e.trim()),
+          emails: [...new Set(emails.split(',').map((e: string) => e.trim()))],
         })
         mutate(
           `/invitations/get_outgoing?${new URLSearchParams({
