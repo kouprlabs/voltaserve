@@ -77,7 +77,12 @@ const InviteMembers = ({ open, id, onClose }: InviteMembersProps) => {
   )
 
   return (
-    <Modal isOpen={isModalOpen} onClose={() => onClose?.()} size="3xl">
+    <Modal
+      isOpen={isModalOpen}
+      onClose={() => onClose?.()}
+      size="3xl"
+      closeOnOverlayClick={false}
+    >
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>Invite Members</ModalHeader>

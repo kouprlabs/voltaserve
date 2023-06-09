@@ -92,12 +92,12 @@ func NewGroupService() *GroupService {
 	}
 }
 
-func (svc *GroupService) Create(req GroupCreateOptions, userId string) (*Group, error) {
+func (svc *GroupService) Create(opts GroupCreateOptions, userId string) (*Group, error) {
 	user, err := svc.userRepo.Find(userId)
 	if err != nil {
 		return nil, err
 	}
-	org, err := svc.orgCache.Get(req.OrganizationId)
+	org, err := svc.orgCache.Get(opts.OrganizationId)
 	if err != nil {
 		return nil, err
 	}
@@ -106,8 +106,8 @@ func (svc *GroupService) Create(req GroupCreateOptions, userId string) (*Group, 
 	}
 	group, err := svc.groupRepo.Insert(repo.GroupInsertOptions{
 		ID:             helper.NewId(),
-		Name:           req.Name,
-		OrganizationId: req.OrganizationId,
+		Name:           opts.Name,
+		OrganizationId: opts.OrganizationId,
 		OwnerId:        userId,
 	})
 	if err != nil {

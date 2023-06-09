@@ -80,7 +80,7 @@ func NewWorkspaceService() *WorkspaceService {
 	}
 }
 
-func (svc *WorkspaceService) Create(req CreateWorkspaceOptions, userId string) (*Workspace, error) {
+func (svc *WorkspaceService) Create(opts CreateWorkspaceOptions, userId string) (*Workspace, error) {
 	id := helper.NewId()
 	bucket := strings.ReplaceAll(uuid.NewString(), "-", "")
 	if err := svc.s3.CreateBucket(bucket); err != nil {
@@ -88,10 +88,10 @@ func (svc *WorkspaceService) Create(req CreateWorkspaceOptions, userId string) (
 	}
 	workspace, err := svc.workspaceRepo.Insert(repo.WorkspaceInsertOptions{
 		ID:              id,
-		Name:            req.Name,
-		StorageCapacity: req.StorageCapacity,
-		OrganizationId:  req.OrganizationId,
-		Image:           req.Image,
+		Name:            opts.Name,
+		StorageCapacity: opts.StorageCapacity,
+		OrganizationId:  opts.OrganizationId,
+		Image:           opts.Image,
 		Bucket:          bucket,
 	})
 	if err != nil {

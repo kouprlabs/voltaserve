@@ -79,10 +79,10 @@ func NewOrganizationService() *OrganizationService {
 	}
 }
 
-func (svc *OrganizationService) Create(req OrganizationCreateOptions, userId string) (*Organization, error) {
+func (svc *OrganizationService) Create(opts OrganizationCreateOptions, userId string) (*Organization, error) {
 	org, err := svc.orgRepo.Insert(repo.OrganizationInsertOptions{
 		ID:   helper.NewId(),
-		Name: req.Name,
+		Name: opts.Name,
 	})
 	if err != nil {
 		return nil, err
