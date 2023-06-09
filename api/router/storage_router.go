@@ -24,14 +24,14 @@ func (r *StorageRouter) AppendRoutes(g fiber.Router) {
 }
 
 // GetAccountUsage godoc
-// @Summary     Get account usage
-// @Description Get account usage
-// @Tags        Storage
-// @Id          storage_get_account_usage
-// @Produce     json
-// @Success     200 {object} core.StorageUsage
-// @Failure     500
-// @Router      /storage/get_account_usage [get]
+//	@Summary		Get account usage
+//	@Description	Get account usage
+//	@Tags			Storage
+//	@Id				storage_get_account_usage
+//	@Produce		json
+//	@Success		200	{object}	core.StorageUsage
+//	@Failure		500
+//	@Router			/storage/get_account_usage [get]
 func (r *StorageRouter) GetAccountUsage(c *fiber.Ctx) error {
 	res, err := r.storageSvc.GetAccountUsage(GetUserId(c))
 	if err != nil {
@@ -41,15 +41,15 @@ func (r *StorageRouter) GetAccountUsage(c *fiber.Ctx) error {
 }
 
 // GetWorkspaceUsage godoc
-// @Summary     Get workspace usage
-// @Description Get workspace usage
-// @Tags        Storage
-// @Id          storage_get_workspace_usage
-// @Produce     json
-// @Param       id  query    string true "Workspace Id"
-// @Success     200 {object} core.StorageUsage
-// @Failure     500
-// @Router      /storage/get_workspace_usage [get]
+//	@Summary		Get workspace usage
+//	@Description	Get workspace usage
+//	@Tags			Storage
+//	@Id				storage_get_workspace_usage
+//	@Produce		json
+//	@Param			id	query		string	true	"Workspace Id"
+//	@Success		200	{object}	core.StorageUsage
+//	@Failure		500
+//	@Router			/storage/get_workspace_usage [get]
 func (r *StorageRouter) GetWorkspaceUsage(c *fiber.Ctx) error {
 	id := c.Query("id")
 	if id == "" {
@@ -63,15 +63,15 @@ func (r *StorageRouter) GetWorkspaceUsage(c *fiber.Ctx) error {
 }
 
 // GetFileUsage godoc
-// @Summary     Get file usage
-// @Description Get file usage
-// @Tags        Storage
-// @Id          storage_get_file_usage
-// @Produce     json
-// @Param       id  query    string true "File Id"
-// @Success     200 {object} core.StorageUsage
-// @Failure     500
-// @Router      /storage/get_file_usage [get]
+//	@Summary		Get file usage
+//	@Description	Get file usage
+//	@Tags			Storage
+//	@Id				storage_get_file_usage
+//	@Produce		json
+//	@Param			id	query		string	true	"File Id"
+//	@Success		200	{object}	core.StorageUsage
+//	@Failure		500
+//	@Router			/storage/get_file_usage [get]
 func (r *StorageRouter) GetFileUsage(c *fiber.Ctx) error {
 	id := c.Query("id")
 	if id == "" {

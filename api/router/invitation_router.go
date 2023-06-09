@@ -30,18 +30,18 @@ func (r *InvitationRouter) AppendRoutes(g fiber.Router) {
 }
 
 // Create godoc
-// @Summary     Create
-// @Description Create
-// @Tags        Invitations
-// @Id          invitations_create
-// @Accept      json
-// @Produce     json
-// @Param       id   path     string                       true "Id"
-// @Param       body body     core.InvitationCreateOptions true "Body"
-// @Failure     404  {object} errorpkg.ErrorResponse
-// @Failure     400  {object} errorpkg.ErrorResponse
-// @Failure     500  {object} errorpkg.ErrorResponse
-// @Router      /invitations [post]
+//	@Summary		Create
+//	@Description	Create
+//	@Tags			Invitations
+//	@Id				invitations_create
+//	@Accept			json
+//	@Produce		json
+//	@Param			id		path		string							true	"Id"
+//	@Param			body	body		core.InvitationCreateOptions	true	"Body"
+//	@Failure		404		{object}	errorpkg.ErrorResponse
+//	@Failure		400		{object}	errorpkg.ErrorResponse
+//	@Failure		500		{object}	errorpkg.ErrorResponse
+//	@Router			/invitations [post]
 func (r *InvitationRouter) Create(c *fiber.Ctx) error {
 	userId := GetUserId(c)
 	req := new(service.InvitationCreateOptions)
@@ -58,14 +58,14 @@ func (r *InvitationRouter) Create(c *fiber.Ctx) error {
 }
 
 // GetIncoming godoc
-// @Summary     Get incoming
-// @Description Get incoming
-// @Tags        Invitations
-// @Id          invitation_get_incoming
-// @Produce     json
-// @Success     200 {array}  core.Invitation
-// @Failure     500 {object} errorpkg.ErrorResponse
-// @Router      /invitations/get_incoming [get]
+//	@Summary		Get incoming
+//	@Description	Get incoming
+//	@Tags			Invitations
+//	@Id				invitation_get_incoming
+//	@Produce		json
+//	@Success		200	{array}		core.Invitation
+//	@Failure		500	{object}	errorpkg.ErrorResponse
+//	@Router			/invitations/get_incoming [get]
 func (r *InvitationRouter) GetIncoming(c *fiber.Ctx) error {
 	userId := GetUserId(c)
 	res, err := r.invitationSvc.GetIncoming(userId)
@@ -76,15 +76,15 @@ func (r *InvitationRouter) GetIncoming(c *fiber.Ctx) error {
 }
 
 // GetOutgoing godoc
-// @Summary     Get outgoing
-// @Description Get outgoing
-// @Tags        Invitations
-// @Id          invitation_get_outgoing
-// @Produce     json
-// @Param       organization_id query    string true "Organization Id"
-// @Success     200             {array}  core.Invitation
-// @Failure     500             {object} errorpkg.ErrorResponse
-// @Router      /invitations/get_outgoing [get]
+//	@Summary		Get outgoing
+//	@Description	Get outgoing
+//	@Tags			Invitations
+//	@Id				invitation_get_outgoing
+//	@Produce		json
+//	@Param			organization_id	query		string	true	"Organization Id"
+//	@Success		200				{array}		core.Invitation
+//	@Failure		500				{object}	errorpkg.ErrorResponse
+//	@Router			/invitations/get_outgoing [get]
 func (r *InvitationRouter) GetOutgoing(c *fiber.Ctx) error {
 	organizationId := c.Query("organization_id")
 	if organizationId == "" {
@@ -99,17 +99,17 @@ func (r *InvitationRouter) GetOutgoing(c *fiber.Ctx) error {
 }
 
 // Delete godoc
-// @Summary     Delete
-// @Description Delete
-// @Tags        Invitations
-// @Id          invitations_delete
-// @Accept      json
-// @Produce     json
-// @Param       id  path     string true "Id"
-// @Failure     404 {object} errorpkg.ErrorResponse
-// @Failure     400 {object} errorpkg.ErrorResponse
-// @Failure     500 {object} errorpkg.ErrorResponse
-// @Router      /invitations/{id} [delete]
+//	@Summary		Delete
+//	@Description	Delete
+//	@Tags			Invitations
+//	@Id				invitations_delete
+//	@Accept			json
+//	@Produce		json
+//	@Param			id	path		string	true	"Id"
+//	@Failure		404	{object}	errorpkg.ErrorResponse
+//	@Failure		400	{object}	errorpkg.ErrorResponse
+//	@Failure		500	{object}	errorpkg.ErrorResponse
+//	@Router			/invitations/{id} [delete]
 func (r *InvitationRouter) Delete(c *fiber.Ctx) error {
 	userId := GetUserId(c)
 	if err := r.invitationSvc.Delete(c.Params("id"), userId); err != nil {
@@ -119,17 +119,17 @@ func (r *InvitationRouter) Delete(c *fiber.Ctx) error {
 }
 
 // Resend godoc
-// @Summary     Resend
-// @Description Resend
-// @Tags        Invitations
-// @Id          invitations_resend
-// @Accept      json
-// @Produce     json
-// @Param       id  path     string true "Id"
-// @Failure     404 {object} errorpkg.ErrorResponse
-// @Failure     400 {object} errorpkg.ErrorResponse
-// @Failure     500 {object} errorpkg.ErrorResponse
-// @Router      /invitations/{id}/resend [post]
+//	@Summary		Resend
+//	@Description	Resend
+//	@Tags			Invitations
+//	@Id				invitations_resend
+//	@Accept			json
+//	@Produce		json
+//	@Param			id	path		string	true	"Id"
+//	@Failure		404	{object}	errorpkg.ErrorResponse
+//	@Failure		400	{object}	errorpkg.ErrorResponse
+//	@Failure		500	{object}	errorpkg.ErrorResponse
+//	@Router			/invitations/{id}/resend [post]
 func (r *InvitationRouter) Resend(c *fiber.Ctx) error {
 	userId := GetUserId(c)
 	if err := r.invitationSvc.Resend(c.Params("id"), userId); err != nil {
@@ -139,17 +139,17 @@ func (r *InvitationRouter) Resend(c *fiber.Ctx) error {
 }
 
 // Accept godoc
-// @Summary     Accept
-// @Description Accept
-// @Tags        Invitations
-// @Id          invitation_accept
-// @Accept      json
-// @Produce     json
-// @Param       id  path     string true "Id"
-// @Failure     404 {object} errorpkg.ErrorResponse
-// @Failure     400 {object} errorpkg.ErrorResponse
-// @Failure     500 {object} errorpkg.ErrorResponse
-// @Router      /invitations/{id}/accept [post]
+//	@Summary		Accept
+//	@Description	Accept
+//	@Tags			Invitations
+//	@Id				invitation_accept
+//	@Accept			json
+//	@Produce		json
+//	@Param			id	path		string	true	"Id"
+//	@Failure		404	{object}	errorpkg.ErrorResponse
+//	@Failure		400	{object}	errorpkg.ErrorResponse
+//	@Failure		500	{object}	errorpkg.ErrorResponse
+//	@Router			/invitations/{id}/accept [post]
 func (r *InvitationRouter) Accept(c *fiber.Ctx) error {
 	userId := GetUserId(c)
 	if err := r.invitationSvc.Accept(c.Params("id"), userId); err != nil {
@@ -159,17 +159,17 @@ func (r *InvitationRouter) Accept(c *fiber.Ctx) error {
 }
 
 // Decline godoc
-// @Summary     Delete
-// @Description Delete
-// @Tags        Invitations
-// @Id          invitations_decline
-// @Accept      json
-// @Produce     json
-// @Param       id  path     string true "Id"
-// @Failure     404 {object} errorpkg.ErrorResponse
-// @Failure     400 {object} errorpkg.ErrorResponse
-// @Failure     500 {object} errorpkg.ErrorResponse
-// @Router      /invitations/{id}/decline [post]
+//	@Summary		Delete
+//	@Description	Delete
+//	@Tags			Invitations
+//	@Id				invitations_decline
+//	@Accept			json
+//	@Produce		json
+//	@Param			id	path		string	true	"Id"
+//	@Failure		404	{object}	errorpkg.ErrorResponse
+//	@Failure		400	{object}	errorpkg.ErrorResponse
+//	@Failure		500	{object}	errorpkg.ErrorResponse
+//	@Router			/invitations/{id}/decline [post]
 func (r *InvitationRouter) Decline(c *fiber.Ctx) error {
 	userId := GetUserId(c)
 	if err := r.invitationSvc.Decline(c.Params("id"), userId); err != nil {

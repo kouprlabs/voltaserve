@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { File } from '@/api/file'
 import { getAccessTokenOrRedirect } from '@/infra/token'
 
@@ -6,18 +7,25 @@ type AudioPlayerProps = {
 }
 
 const AudioPlayer = ({ file }: AudioPlayerProps) => {
-  if (!file.original) {
+  const download = useMemo(() => file.original, [file])
+  const url = useMemo(() => {
+    if (!download || !download.extension) {
+      return ''
+    }
+    return `/proxy/api/v1/files/${file.id}/original${
+      download.extension
+    }?${new URLSearchParams({
+      access_token: getAccessTokenOrRedirect(),
+    })}`
+  }, [file, download])
+
+  if (!download) {
     return null
   }
+
   return (
     <audio controls>
-      <source
-        src={`/proxy/api/v1/files/${file.id}/original${
-          file.original.extension
-        }?${new URLSearchParams({
-          access_token: getAccessTokenOrRedirect(),
-        })}`}
-      />
+      <source src={url} />
     </audio>
   )
 }
