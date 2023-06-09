@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { Center, Stack } from '@chakra-ui/react'
 import { SectionSpinner, variables } from '@koupr/ui'
 import { File } from '@/api/file'
+import { getAccessTokenOrRedirect } from '@/infra/token'
 
 type ImageViewerProps = {
   file: File
@@ -15,7 +16,11 @@ const ImageViewer = ({ file }: ImageViewerProps) => {
     if (!download || !download.extension) {
       return ''
     }
-    return `/proxy/api/v1/files/${file.id}/${urlPath}${download.extension}`
+    return `/proxy/api/v1/files/${file.id}/${urlPath}${
+      download.extension
+    }?${new URLSearchParams({
+      access_token: getAccessTokenOrRedirect(),
+    })}`
   }, [file, download, urlPath])
 
   if (!download) {
