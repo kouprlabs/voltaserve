@@ -7,16 +7,22 @@ type VideoPlayerProps = {
 }
 
 const VideoPlayer = ({ file }: VideoPlayerProps) => {
+  const download = useMemo(() => file.original, [file])
   const url = useMemo(() => {
-    if (file.original?.extension) {
-      const searchParams = new URLSearchParams({
-        access_token: getAccessTokenOrRedirect(),
-      })
-      return `/proxy/api/v1/files/${file.id}/original${file.original.extension}?${searchParams}`
-    } else {
+    if (!download || !download.extension) {
       return ''
     }
-  }, [file])
+    return `/proxy/api/v1/files/${file.id}/original${
+      download.extension
+    }?${new URLSearchParams({
+      access_token: getAccessTokenOrRedirect(),
+    })}`
+  }, [file, download])
+
+  if (!download) {
+    return null
+  }
+
   return (
     <video controls autoPlay style={{ maxWidth: '100%', maxHeight: '100%' }}>
       <source src={url} />

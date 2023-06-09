@@ -34,17 +34,17 @@ func (r *GroupRouter) AppendRoutes(g fiber.Router) {
 }
 
 // Create godoc
-// @Summary     Create
-// @Description Create
-// @Tags        Groups
-// @Id          groups_create
-// @Accept      json
-// @Produce     json
-// @Param       body body     core.GroupCreateOptions true "Body"
-// @Success     200  {object} core.Group
-// @Failure     400  {object} errorpkg.ErrorResponse
-// @Failure     500  {object} errorpkg.ErrorResponse
-// @Router      /groups [post]
+//	@Summary		Create
+//	@Description	Create
+//	@Tags			Groups
+//	@Id				groups_create
+//	@Accept			json
+//	@Produce		json
+//	@Param			body	body		core.GroupCreateOptions	true	"Body"
+//	@Success		200		{object}	core.Group
+//	@Failure		400		{object}	errorpkg.ErrorResponse
+//	@Failure		500		{object}	errorpkg.ErrorResponse
+//	@Router			/groups [post]
 func (r *GroupRouter) Create(c *fiber.Ctx) error {
 	userId := GetUserId(c)
 	req := new(service.GroupCreateOptions)
@@ -62,16 +62,16 @@ func (r *GroupRouter) Create(c *fiber.Ctx) error {
 }
 
 // GetById godoc
-// @Summary     Get by Id
-// @Description Get by Id
-// @Tags        Groups
-// @Id          groups_get_by_id
-// @Produce     json
-// @Param       id  path     string true "Id"
-// @Success     200 {object} core.Group
-// @Failure     404 {object} errorpkg.ErrorResponse
-// @Failure     500 {object} errorpkg.ErrorResponse
-// @Router      /groups/{id} [get]
+//	@Summary		Get by Id
+//	@Description	Get by Id
+//	@Tags			Groups
+//	@Id				groups_get_by_id
+//	@Produce		json
+//	@Param			id	path		string	true	"Id"
+//	@Success		200	{object}	core.Group
+//	@Failure		404	{object}	errorpkg.ErrorResponse
+//	@Failure		500	{object}	errorpkg.ErrorResponse
+//	@Router			/groups/{id} [get]
 func (r *GroupRouter) GetById(c *fiber.Ctx) error {
 	userId := GetUserId(c)
 	res, err := r.groupSvc.Find(c.Params("id"), userId)
@@ -82,14 +82,14 @@ func (r *GroupRouter) GetById(c *fiber.Ctx) error {
 }
 
 // GetAll godoc
-// @Summary     Get all
-// @Description Get all
-// @Tags        Groups
-// @Id          groups_get_all
-// @Produce     json
-// @Success     200 {array}  core.Group
-// @Failure     500 {object} errorpkg.ErrorResponse
-// @Router      /groups [get]
+//	@Summary		Get all
+//	@Description	Get all
+//	@Tags			Groups
+//	@Id				groups_get_all
+//	@Produce		json
+//	@Success		200	{array}		core.Group
+//	@Failure		500	{object}	errorpkg.ErrorResponse
+//	@Router			/groups [get]
 func (r *GroupRouter) GetAll(c *fiber.Ctx) error {
 	groups, err := r.groupSvc.FindAll(GetUserId(c))
 	if err != nil {
@@ -99,15 +99,15 @@ func (r *GroupRouter) GetAll(c *fiber.Ctx) error {
 }
 
 // Search godoc
-// @Summary     Search
-// @Description Search
-// @Tags        Groups
-// @Id          groups_search
-// @Produce     json
-// @Param       body body     core.GroupSearchOptions true "Body"
-// @Success     200  {array}  core.Group
-// @Failure     500  {object} errorpkg.ErrorResponse
-// @Router      /groups/search [get]
+//	@Summary		Search
+//	@Description	Search
+//	@Tags			Groups
+//	@Id				groups_search
+//	@Produce		json
+//	@Param			body	body		core.GroupSearchOptions	true	"Body"
+//	@Success		200		{array}		core.Group
+//	@Failure		500		{object}	errorpkg.ErrorResponse
+//	@Router			/groups/search [get]
 func (r *GroupRouter) Search(c *fiber.Ctx) error {
 	req := new(service.GroupSearchOptions)
 	if err := c.BodyParser(req); err != nil {
@@ -121,19 +121,19 @@ func (r *GroupRouter) Search(c *fiber.Ctx) error {
 }
 
 // UpdateName godoc
-// @Summary     Update name
-// @Description Update name
-// @Tags        Groups
-// @Id          groups_update_name
-// @Accept      json
-// @Produce     json
-// @Param       id   path     string                      true "Id"
-// @Param       body body     core.GroupUpdateNameOptions true "Body"
-// @Success     200  {object} core.Group
-// @Failure     404  {object} errorpkg.ErrorResponse
-// @Failure     400  {object} errorpkg.ErrorResponse
-// @Failure     500  {object} errorpkg.ErrorResponse
-// @Router      /groups/{id}/update_name [post]
+//	@Summary		Update name
+//	@Description	Update name
+//	@Tags			Groups
+//	@Id				groups_update_name
+//	@Accept			json
+//	@Produce		json
+//	@Param			id		path		string						true	"Id"
+//	@Param			body	body		core.GroupUpdateNameOptions	true	"Body"
+//	@Success		200		{object}	core.Group
+//	@Failure		404		{object}	errorpkg.ErrorResponse
+//	@Failure		400		{object}	errorpkg.ErrorResponse
+//	@Failure		500		{object}	errorpkg.ErrorResponse
+//	@Router			/groups/{id}/update_name [post]
 func (r *GroupRouter) UpdateName(c *fiber.Ctx) error {
 	userId := GetUserId(c)
 	req := new(service.GroupUpdateNameOptions)
@@ -151,17 +151,17 @@ func (r *GroupRouter) UpdateName(c *fiber.Ctx) error {
 }
 
 // Delete godoc
-// @Summary     Delete
-// @Description Delete
-// @Tags        Groups
-// @Id          groups_delete
-// @Accept      json
-// @Produce     json
-// @Param       id path string true "Id"
-// @Success     200
-// @Failure     404 {object} errorpkg.ErrorResponse
-// @Failure     500 {object} errorpkg.ErrorResponse
-// @Router      /groups/{id} [delete]
+//	@Summary		Delete
+//	@Description	Delete
+//	@Tags			Groups
+//	@Id				groups_delete
+//	@Accept			json
+//	@Produce		json
+//	@Param			id	path	string	true	"Id"
+//	@Success		200
+//	@Failure		404	{object}	errorpkg.ErrorResponse
+//	@Failure		500	{object}	errorpkg.ErrorResponse
+//	@Router			/groups/{id} [delete]
 func (r *GroupRouter) Delete(c *fiber.Ctx) error {
 	userId := GetUserId(c)
 	if err := r.groupSvc.Delete(c.Params("id"), userId); err != nil {
@@ -171,17 +171,17 @@ func (r *GroupRouter) Delete(c *fiber.Ctx) error {
 }
 
 // AddMember godoc
-// @Summary     Add member
-// @Description Add member
-// @Tags        Groups
-// @Id          groups_add_member
-// @Accept      json
-// @Produce     json
-// @Param       id  path     string true "Id"
-// @Failure     404 {object} errorpkg.ErrorResponse
-// @Failure     400 {object} errorpkg.ErrorResponse
-// @Failure     500 {object} errorpkg.ErrorResponse
-// @Router      /groups/{id}/add_member [post]
+//	@Summary		Add member
+//	@Description	Add member
+//	@Tags			Groups
+//	@Id				groups_add_member
+//	@Accept			json
+//	@Produce		json
+//	@Param			id	path		string	true	"Id"
+//	@Failure		404	{object}	errorpkg.ErrorResponse
+//	@Failure		400	{object}	errorpkg.ErrorResponse
+//	@Failure		500	{object}	errorpkg.ErrorResponse
+//	@Router			/groups/{id}/add_member [post]
 func (r *GroupRouter) AddMember(c *fiber.Ctx) error {
 	userId := GetUserId(c)
 	req := new(service.GroupAddMemberOptions)
@@ -198,18 +198,18 @@ func (r *GroupRouter) AddMember(c *fiber.Ctx) error {
 }
 
 // RemoveMember godoc
-// @Summary     Remove member
-// @Description Remove member
-// @Tags        Groups
-// @Id          groups_remove_member
-// @Accept      json
-// @Produce     json
-// @Param       id   path     string                        true "Id"
-// @Param       body body     core.GroupRemoveMemberOptions true "Body"
-// @Failure     404  {object} errorpkg.ErrorResponse
-// @Failure     400  {object} errorpkg.ErrorResponse
-// @Failure     500  {object} errorpkg.ErrorResponse
-// @Router      /groups/{id}/remove_member [post]
+//	@Summary		Remove member
+//	@Description	Remove member
+//	@Tags			Groups
+//	@Id				groups_remove_member
+//	@Accept			json
+//	@Produce		json
+//	@Param			id		path		string							true	"Id"
+//	@Param			body	body		core.GroupRemoveMemberOptions	true	"Body"
+//	@Failure		404		{object}	errorpkg.ErrorResponse
+//	@Failure		400		{object}	errorpkg.ErrorResponse
+//	@Failure		500		{object}	errorpkg.ErrorResponse
+//	@Router			/groups/{id}/remove_member [post]
 func (r *GroupRouter) RemoveMember(c *fiber.Ctx) error {
 	userId := GetUserId(c)
 	req := new(service.GroupRemoveMemberOptions)
@@ -226,15 +226,15 @@ func (r *GroupRouter) RemoveMember(c *fiber.Ctx) error {
 }
 
 // GetMembers godoc
-// @Summary     Get members
-// @Description Get members
-// @Tags        Groups
-// @Id          groups_get_members
-// @Produce     json
-// @Param       id  path     string true "Id"
-// @Success     200 {array}  core.User
-// @Failure     500 {object} errorpkg.ErrorResponse
-// @Router      /groups/{id}/get_members [get]
+//	@Summary		Get members
+//	@Description	Get members
+//	@Tags			Groups
+//	@Id				groups_get_members
+//	@Produce		json
+//	@Param			id	path		string	true	"Id"
+//	@Success		200	{array}		core.User
+//	@Failure		500	{object}	errorpkg.ErrorResponse
+//	@Router			/groups/{id}/get_members [get]
 func (r *GroupRouter) GetMembers(c *fiber.Ctx) error {
 	res, err := r.groupSvc.GetMembers(c.Params("id"), GetUserId(c))
 	if err != nil {
@@ -244,16 +244,16 @@ func (r *GroupRouter) GetMembers(c *fiber.Ctx) error {
 }
 
 // SearchMembers godoc
-// @Summary     Search members
-// @Description Search members
-// @Tags        Groups
-// @Id          groups_search_members
-// @Produce     json
-// @Param       id    path     string true "Id"
-// @Param       query query    string true "Query"
-// @Success     200   {array}  core.User
-// @Failure     500   {object} errorpkg.ErrorResponse
-// @Router      /groups/{id}/search_members [get]
+//	@Summary		Search members
+//	@Description	Search members
+//	@Tags			Groups
+//	@Id				groups_search_members
+//	@Produce		json
+//	@Param			id		path		string	true	"Id"
+//	@Param			query	query		string	true	"Query"
+//	@Success		200		{array}		core.User
+//	@Failure		500		{object}	errorpkg.ErrorResponse
+//	@Router			/groups/{id}/search_members [get]
 func (r *GroupRouter) SearchMembers(c *fiber.Ctx) error {
 	res, err := r.groupSvc.SearchMembers(c.Params("id"), c.Query("query"), GetUserId(c))
 	if err != nil {
@@ -263,15 +263,15 @@ func (r *GroupRouter) SearchMembers(c *fiber.Ctx) error {
 }
 
 // SearchMembers godoc
-// @Summary     Search
-// @Description Search
-// @Tags        Groups
-// @Id          groups_get_available_users
-// @Produce     json
-// @Param       id  path     string true "Id"
-// @Success     200 {array}  core.User
-// @Failure     500 {object} errorpkg.ErrorResponse
-// @Router      /groups/{id}/get_available_users [get]
+//	@Summary		Search
+//	@Description	Search
+//	@Tags			Groups
+//	@Id				groups_get_available_users
+//	@Produce		json
+//	@Param			id	path		string	true	"Id"
+//	@Success		200	{array}		core.User
+//	@Failure		500	{object}	errorpkg.ErrorResponse
+//	@Router			/groups/{id}/get_available_users [get]
 func (r *GroupRouter) GetAvailableUsers(c *fiber.Ctx) error {
 	userId := GetUserId(c)
 	res, err := r.groupSvc.GetAvailableUsers(c.Params("id"), userId)
