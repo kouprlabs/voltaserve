@@ -52,32 +52,43 @@ func NewInvitationService() *InvitationService {
 	}
 }
 
-func (svc *InvitationService) Create(req InvitationCreateOptions, userId string) error {
-	for i := range req.Emails {
-		req.Emails[i] = strings.ToLower(req.Emails[i])
+func (svc *InvitationService) Create(opts InvitationCreateOptions, userId string) error {
+	for i := range opts.Emails {
+		opts.Emails[i] = strings.ToLower(opts.Emails[i])
 	}
 	user, err := svc.userRepo.Find(userId)
 	if err != nil {
 		return err
 	}
-	org, err := svc.orgCache.Get(req.OrganizationId)
+	org, err := svc.orgCache.Get(opts.OrganizationId)
 	if err != nil {
 		return err
 	}
 	if err := svc.orgGuard.Authorize(user, org, model.PermissionOwner); err != nil {
 		return err
 	}
-	orgMembers, err := svc.orgRepo.GetMembers(req.OrganizationId)
+	orgMembers, err := svc.orgRepo.GetMembers(opts.OrganizationId)
+	if err != nil {
+		return err
+	}
+	outgoingInvitations, err := svc.invitationRepo.GetOutgoing(opts.OrganizationId, userId)
 	if err != nil {
 		return err
 	}
 
-	/* Collect emails of non existing members */
 	var emails []string
-	for _, e := range req.Emails {
+
+	/* Collect emails of non existing members and outgoing invitations */
+	for _, e := range opts.Emails {
 		existing := false
 		for _, u := range orgMembers {
 			if e == u.GetEmail() {
+				existing = true
+				break
+			}
+		}
+		for _, i := range outgoingInvitations {
+			if e == i.GetEmail() {
 				existing = true
 				break
 			}
@@ -90,7 +101,7 @@ func (svc *InvitationService) Create(req InvitationCreateOptions, userId string)
 	/* Persist invitations */
 	invitations, err := svc.invitationRepo.Insert(repo.InvitationInsertOptions{
 		UserId:         userId,
-		OrganizationId: req.OrganizationId,
+		OrganizationId: opts.OrganizationId,
 		Emails:         emails,
 	})
 	if err != nil {
