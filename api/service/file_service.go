@@ -1147,7 +1147,7 @@ func (svc *FileService) GetPath(id string, userID string) ([]*File, error) {
 	return res, nil
 }
 
-func (svc *FileService) Copy(targetID string, sourceIDs []string, userID string) ([]*File, error) {
+func (svc *FileService) Copy(targetID string, sourceIDs []string, userID string) (copiedFiles []*File, err error) {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
@@ -1268,16 +1268,16 @@ func (svc *FileService) Copy(targetID string, sourceIDs []string, userID string)
 		return nil, err
 	}
 
-	res, err := svc.fileMapper.MapFiles(allClones, userID)
+	copiedFiles, err = svc.fileMapper.MapFiles(allClones, userID)
 	if err != nil {
 		return nil, err
 	}
 
-	return res, nil
+	return copiedFiles, nil
 }
 
-func (svc *FileService) Move(targetID string, sourceIDs []string, userID string) ([]string, error) {
-	res := []string{}
+func (svc *FileService) Move(targetID string, sourceIDs []string, userID string) (parentIDs []string, err error) {
+	parentIDs = []string{}
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return []string{}, err
@@ -1319,7 +1319,7 @@ func (svc *FileService) Move(targetID string, sourceIDs []string, userID string)
 		source, _ := svc.fileCache.Get(id)
 
 		/* Add old parent */
-		res = append(res, *source.GetParentID())
+		parentIDs = append(parentIDs, *source.GetParentID())
 
 		/* Move source into target */
 		if err := svc.fileRepo.MoveSourceIntoTarget(target.GetID(), source.GetID()); err != nil {
@@ -1333,7 +1333,7 @@ func (svc *FileService) Move(targetID string, sourceIDs []string, userID string)
 		}
 
 		// Add new parent
-		res = append(res, *source.GetParentID())
+		parentIDs = append(parentIDs, *source.GetParentID())
 
 		/* Refresh updateTime on source and target */
 		timeNow := time.Now().UTC().Format(time.RFC3339)
@@ -1358,7 +1358,7 @@ func (svc *FileService) Move(targetID string, sourceIDs []string, userID string)
 			}
 		}
 	}
-	return res, nil
+	return parentIDs, nil
 }
 
 func (svc *FileService) Rename(id string, name string, userID string) (*File, error) {
