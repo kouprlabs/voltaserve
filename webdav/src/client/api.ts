@@ -2,7 +2,20 @@ import { API_URL } from '@/config'
 import { Token } from './idp'
 import { get } from 'http'
 import { createWriteStream, unlink } from 'fs'
-import { ClientError } from './error'
+
+export type APIErrorResponse = {
+  code: string
+  status: number
+  message: string
+  userMessage: string
+  moreInfo: string
+}
+
+export class APIError extends Error {
+  constructor(readonly error: APIErrorResponse) {
+    super(JSON.stringify(error, null, 2))
+  }
+}
 
 export enum FileType {
   File = 'file',
@@ -82,7 +95,21 @@ export type FileMoveOptions = {
 export class FileAPI {
   constructor(private token: Token) {}
 
-  async upload(options: FileUploadOptions) {
+  private async jsonResponseOrThrow<T>(response: Response): Promise<T> {
+    if (response.headers.get('content-type')?.includes('application/json')) {
+      const json = await response.json()
+      if (response.status > 299) {
+        throw new APIError(json)
+      }
+      return json
+    } else {
+      if (response.status > 299) {
+        throw new Error(response.statusText)
+      }
+    }
+  }
+
+  async upload(options: FileUploadOptions): Promise<void> {
     const params = new URLSearchParams({
       workspace_id: options.workspaceId,
     })
@@ -91,21 +118,18 @@ export class FileAPI {
     }
     const formData = new FormData()
     formData.set('file', options.blob, options.name)
-    const result = await fetch(`${API_URL}/v1/files?${params}`, {
+    const response = await fetch(`${API_URL}/v1/files?${params}`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${this.token.access_token}`,
       },
       body: formData,
     })
-    const json = await result.json()
-    if (result.status > 299) {
-      throw new ClientError(json)
-    }
+    return this.jsonResponseOrThrow(response)
   }
 
   async getByPath(path: string): Promise<File> {
-    const result = await fetch(
+    const response = await fetch(
       `${API_URL}/v1/files/get?path=${encodeURIComponent(path)}`,
       {
         method: 'GET',
@@ -115,15 +139,11 @@ export class FileAPI {
         },
       }
     )
-    const json = await result.json()
-    if (result.status > 299) {
-      throw new ClientError(json)
-    }
-    return json
+    return this.jsonResponseOrThrow(response)
   }
 
   async listByPath(path: string): Promise<File[]> {
-    const result = await fetch(
+    const response = await fetch(
       `${API_URL}/v1/files/list?path=${encodeURIComponent(path)}`,
       {
         method: 'GET',
@@ -133,15 +153,11 @@ export class FileAPI {
         },
       }
     )
-    const json = await result.json()
-    if (result.status > 299) {
-      throw new ClientError(json)
-    }
-    return json
+    return this.jsonResponseOrThrow(response)
   }
 
   async createFolder(options: FileCreateFolderOptions): Promise<void> {
-    const result = await fetch(`${API_URL}/v1/files/create_folder`, {
+    const response = await fetch(`${API_URL}/v1/files/create_folder`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${this.token.access_token}`,
@@ -153,14 +169,11 @@ export class FileAPI {
         name: options.name,
       }),
     })
-    const json = await result.json()
-    if (result.status > 299) {
-      throw new ClientError(json)
-    }
+    return this.jsonResponseOrThrow(response)
   }
 
   async copy(id: string, options: FileCopyOptions): Promise<File[]> {
-    const result = await fetch(`${API_URL}/v1/files/${id}/copy`, {
+    const response = await fetch(`${API_URL}/v1/files/${id}/copy`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${this.token.access_token}`,
@@ -170,15 +183,11 @@ export class FileAPI {
         ids: options.ids,
       }),
     })
-    const json = await result.json()
-    if (result.status > 299) {
-      throw new ClientError(json)
-    }
-    return json
+    return this.jsonResponseOrThrow(response)
   }
 
-  async move(id: string, options: FileMoveOptions) {
-    const result = await fetch(`${API_URL}/v1/files/${id}/move`, {
+  async move(id: string, options: FileMoveOptions): Promise<void> {
+    const response = await fetch(`${API_URL}/v1/files/${id}/move`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${this.token.access_token}`,
@@ -188,14 +197,11 @@ export class FileAPI {
         ids: options.ids,
       }),
     })
-    const json = await result.json()
-    if (result.status > 299) {
-      throw new ClientError(json)
-    }
+    return this.jsonResponseOrThrow(response)
   }
 
   async rename(id: string, options: FileRenameOptions): Promise<File> {
-    const result = await fetch(`${API_URL}/v1/files/${id}/rename`, {
+    const response = await fetch(`${API_URL}/v1/files/${id}/rename`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${this.token.access_token}`,
@@ -205,25 +211,18 @@ export class FileAPI {
         name: options.name,
       }),
     })
-    const json = await result.json()
-    if (result.status > 299) {
-      throw new ClientError(json)
-    }
-    return json
+    return this.jsonResponseOrThrow(response)
   }
 
   async delete(id: string): Promise<void> {
-    const result = await fetch(`${API_URL}/v1/files/${id}`, {
+    const response = await fetch(`${API_URL}/v1/files/${id}`, {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${this.token.access_token}`,
         'Content-Type': 'application/json',
       },
     })
-    const json = await result.json()
-    if (result.status > 299) {
-      throw new ClientError(json)
-    }
+    return this.jsonResponseOrThrow(response)
   }
 
   downloadOriginal(file: File, outputPath: string): Promise<void> {

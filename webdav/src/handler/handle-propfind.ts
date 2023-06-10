@@ -22,7 +22,7 @@ async function handlePropfind(
 ) {
   try {
     const api = new FileAPI(token)
-    const file = await api.getByPath(decodeURI(req.url))
+    const file = await api.getByPath(decodeURIComponent(req.url))
     if (file.type === FileType.File) {
       const responseXml = `
         <D:multistatus xmlns:D="DAV:">
@@ -51,7 +51,7 @@ async function handlePropfind(
       res.setHeader('Content-Type', 'application/xml; charset=utf-8')
       res.end(responseXml)
     } else if (file.type === FileType.Folder) {
-      const list = await api.listByPath(decodeURI(req.url))
+      const list = await api.listByPath(decodeURIComponent(req.url))
       const responseXml = `
         <D:multistatus xmlns:D="DAV:">
           <D:response>

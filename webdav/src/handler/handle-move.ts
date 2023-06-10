@@ -25,9 +25,9 @@ async function handleMove(
     const targetPath = getTargetPath(req)
 
     const api = new FileAPI(token)
-    const sourceFile = await api.getByPath(decodeURI(req.url))
+    const sourceFile = await api.getByPath(decodeURIComponent(req.url))
     const targetFile = await api.getByPath(
-      decodeURI(path.dirname(getTargetPath(req)))
+      decodeURIComponent(path.dirname(getTargetPath(req)))
     )
 
     if (sourceFile.workspaceId !== targetFile.workspaceId) {

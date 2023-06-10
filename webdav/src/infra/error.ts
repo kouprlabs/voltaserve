@@ -1,14 +1,18 @@
-import { ClientError } from "@/client/error"
+import { APIError } from "@/client/api"
+import { IdPError } from "@/client/idp"
 import { ServerResponse } from "http"
 
 export function handleException(err: any, res: ServerResponse) {
-  if (err instanceof ClientError) {
-    console.error(JSON.stringify(err.error, null, 2))
+  console.error(err)
+  if (err instanceof APIError) {
     res.statusCode = err.error.status
     res.statusMessage = err.error.userMessage
     res.end()
-  } else {
-    console.error(err)
+  } else if (err instanceof IdPError) {
+    res.statusCode = err.error.status
+    res.statusMessage = err.error.userMessage
+    res.end()
+  } else if (err instanceof Error) {
     res.statusCode = 500
     res.end()
   }

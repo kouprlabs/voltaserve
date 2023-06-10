@@ -5,7 +5,7 @@ import os from 'os'
 import path from 'path'
 import { v4 as uuidv4 } from 'uuid'
 import { Token } from '@/client/idp'
-import { FileAPI } from '@/client/api'
+import { File, FileAPI } from '@/client/api'
 import { handleException } from '@/infra/error'
 
 /*
@@ -27,7 +27,7 @@ async function handlePut(
 ) {
   const api = new FileAPI(token)
   try {
-    const directory = await api.getByPath(decodeURI(path.dirname(req.url)))
+    const directory = await api.getByPath(decodeURIComponent(path.dirname(req.url)))
     const outputPath = path.join(os.tmpdir(), uuidv4())
     const ws = fs.createWriteStream(outputPath)
     req.pipe(ws)
@@ -43,6 +43,13 @@ async function handlePut(
 
         const blob = new Blob([await readFile(outputPath)])
 
+        let existingFile: File | null = null
+        try {
+          existingFile = await api.getByPath(decodeURIComponent(req.url))
+        } catch {
+          // Ignored
+        }
+
         await api.upload({
           workspaceId: directory.workspaceId,
           parentId: directory.id,
@@ -50,9 +57,10 @@ async function handlePut(
           blob,
         })
 
-        /* Delete existing file (simulate an overwrite) */
-        const existingFile = await api.getByPath(decodeURI(req.url))
-        await api.delete(existingFile.id)
+        if (existingFile) {
+          // Delete existing file to simulate an overwrite
+          await api.delete(existingFile.id)
+        }
       } catch (err) {
         handleException(err, res)
       } finally {

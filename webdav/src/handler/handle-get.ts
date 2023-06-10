@@ -24,7 +24,7 @@ async function handleGet(
 ) {
   try {
     const api = new FileAPI(token)
-    const file = await api.getByPath(decodeURI(req.url))
+    const file = await api.getByPath(decodeURIComponent(req.url))
 
     /* TODO: This should be optimized for the case when there is a range header,
        only a partial file should be fetched, here we are fetching the whole file
