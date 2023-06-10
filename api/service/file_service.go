@@ -237,6 +237,13 @@ func (svc *FileService) Create(opts FileCreateOptions, userID string) (*File, er
 		if err := svc.validateParent(*opts.ParentID, userID); err != nil {
 			return nil, err
 		}
+		nameExists, err := svc.hasChildWithName(*opts.ParentID, opts.Name)
+		if err != nil {
+			return nil, err
+		}
+		if nameExists {
+			return nil, errorpkg.NewFileWithSimilarNameExistsError()
+		}
 	}
 	file, err := svc.fileRepo.Insert(repo.FileInsertOptions{
 		Name:        opts.Name,
@@ -1224,9 +1231,20 @@ func (svc *FileService) Copy(targetID string, sourceIDs []string, userID string)
 			clones[i].SetParentID(&id)
 		}
 
+		rootClone := clones[rootCloneIndex]
+
 		/* Parent ID of root clone is target ID */
 		if clones != nil {
-			clones[rootCloneIndex].SetParentID(&targetID)
+			rootClone.SetParentID(&targetID)
+		}
+
+		/* If there is a file with similar name, append a suffix */
+		nameExists, err := svc.hasChildWithName(targetID, rootClone.GetName())
+		if err != nil {
+			return nil, err
+		}
+		if nameExists {
+			rootClone.SetName(fmt.Sprintf("Copy of %s", rootClone.GetName()))
 		}
 
 		/* Persist clones */
@@ -1292,6 +1310,15 @@ func (svc *FileService) Move(targetID string, sourceIDs []string, userID string)
 		source, err := svc.fileCache.Get(id)
 		if err != nil {
 			return []string{}, err
+		}
+		if source.GetParentID() != nil {
+			nameExists, err := svc.hasChildWithName(targetID, source.GetName())
+			if err != nil {
+				return nil, err
+			}
+			if nameExists {
+				return nil, errorpkg.NewFileWithSimilarNameExistsError()
+			}
 		}
 		if err := svc.fileGuard.Authorize(user, target, model.PermissionEditor); err != nil {
 			return []string{}, err
@@ -1369,6 +1396,15 @@ func (svc *FileService) Rename(id string, name string, userID string) (*File, er
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return nil, err
+	}
+	if file.GetParentID() != nil {
+		nameExists, err := svc.hasChildWithName(*file.GetParentID(), name)
+		if err != nil {
+			return nil, err
+		}
+		if nameExists {
+			return nil, errorpkg.NewFileWithSimilarNameExistsError()
+		}
 	}
 	if err = svc.fileGuard.Authorize(user, file, model.PermissionEditor); err != nil {
 		return nil, err
@@ -1744,6 +1780,19 @@ func (svc *FileService) GetGroupPermissions(id string, userID string) ([]*GroupP
 		})
 	}
 	return res, nil
+}
+
+func (svc *FileService) hasChildWithName(id string, name string) (bool, error) {
+	children, err := svc.fileRepo.FindChildren(id)
+	if err != nil {
+		return false, err
+	}
+	for _, child := range children {
+		if child.GetName() == name {
+			return true, nil
+		}
+	}
+	return false, nil
 }
 
 type FileMapper struct {

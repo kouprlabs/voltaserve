@@ -21,8 +21,8 @@ async function handleMove(
   token: Token
 ) {
   try {
-    const sourcePath = decodeURI(req.url)
-    const targetPath = getTargetPath(req)
+    const sourcePath = decodeURIComponent(req.url)
+    const targetPath = decodeURIComponent(getTargetPath(req))
 
     const api = new FileAPI(token)
     const sourceFile = await api.getByPath(decodeURIComponent(req.url))
