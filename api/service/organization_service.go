@@ -297,7 +297,7 @@ func (svc *OrganizationService) RemoveMember(id string, memberId string, userId 
 	}
 
 	if userId != member.GetID() {
-		if err := svc.orgGuard.Authorize(user, org, model.PermissionEditor); err != nil {
+		if err := svc.orgGuard.Authorize(user, org, model.PermissionOwner); err != nil {
 			return err
 		}
 	}

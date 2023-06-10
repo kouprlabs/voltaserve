@@ -14,6 +14,7 @@ import {
   VStack,
   Text,
   Avatar,
+  Badge,
 } from '@chakra-ui/react'
 import { SectionSpinner, variables } from '@koupr/ui'
 import { Helmet } from 'react-helmet-async'
@@ -59,6 +60,7 @@ const GroupListPage = () => {
               <Tr>
                 <Th>Name</Th>
                 <Th>Organization</Th>
+                <Th>Permission</Th>
                 <Th>Date</Th>
               </Tr>
             </Thead>
@@ -90,6 +92,9 @@ const GroupListPage = () => {
                     >
                       {g.organization.name}
                     </ChakraLink>
+                  </Td>
+                  <Td>
+                    <Badge>{g.permission}</Badge>
                   </Td>
                   <Td>{prettyDate(g.updateTime || g.createTime)}</Td>
                 </Tr>

@@ -296,7 +296,7 @@ func (svc *GroupService) AddMember(id string, memberId string, userId string) er
 	if err != nil {
 		return nil
 	}
-	if err := svc.groupGuard.Authorize(user, group, model.PermissionViewer); err != nil {
+	if err := svc.groupGuard.Authorize(user, group, model.PermissionOwner); err != nil {
 		return err
 	}
 	if _, err := svc.userRepo.Find(memberId); err != nil {
@@ -326,7 +326,7 @@ func (svc *GroupService) RemoveMember(id string, memberId string, userId string)
 	if err != nil {
 		return nil
 	}
-	if err := svc.groupGuard.Authorize(user, group, model.PermissionViewer); err != nil {
+	if err := svc.groupGuard.Authorize(user, group, model.PermissionOwner); err != nil {
 		return err
 	}
 	if err := svc.RemoveMemberUnauthorized(id, memberId); err != nil {

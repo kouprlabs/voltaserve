@@ -1,7 +1,7 @@
 import { getConfig } from '@/config/config'
+import { getAccessTokenOrRedirect } from '@/infra/token'
 import store from '@/store/configure-store'
 import { errorOccurred } from '@/store/ui/error'
-import { getAccessTokenOrRedirect } from '@/infra/token'
 import { errorToString } from './error'
 
 export const apiFetch = async (url: string, init?: RequestInit) =>

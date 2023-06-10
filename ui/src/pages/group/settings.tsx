@@ -11,7 +11,7 @@ import {
 import { Helmet } from 'react-helmet-async'
 import GroupAPI from '@/api/group'
 import { swrConfig } from '@/api/options'
-import { geEditorPermission } from '@/api/permission'
+import { geEditorPermission, geOwnerPermission } from '@/api/permission'
 import AddMember from '@/components/group/add-member'
 import Delete from '@/components/group/delete'
 import EditName from '@/components/group/edit-name'
@@ -89,16 +89,20 @@ const GroupSettingsPage = () => {
           group={group}
           onClose={() => setIsNameModalOpen(false)}
         />
-        <AddMember
-          open={isAddMembersModalOpen}
-          group={group}
-          onClose={() => setIsAddMembersModalOpen(false)}
-        />
-        <Delete
-          open={deleteModalOpen}
-          group={group}
-          onClose={() => setDeleteModalOpen(false)}
-        />
+        {geOwnerPermission(group.permission) && (
+          <>
+            <AddMember
+              open={isAddMembersModalOpen}
+              group={group}
+              onClose={() => setIsAddMembersModalOpen(false)}
+            />
+            <Delete
+              open={deleteModalOpen}
+              group={group}
+              onClose={() => setDeleteModalOpen(false)}
+            />
+          </>
+        )}
       </Stack>
     </>
   )

@@ -34,6 +34,8 @@ import {
   ltOwnerPermission,
   ltViewerPermission,
 } from '@/api/permission'
+import downloadFile from '@/helpers/download-file'
+import relativeDate from '@/helpers/relative-date'
 import store from '@/store/configure-store'
 import { useAppDispatch } from '@/store/hook'
 import {
@@ -46,8 +48,6 @@ import {
   selectionUpdated,
   sharingModalDidOpen,
 } from '@/store/ui/files'
-import downloadFile from '@/helpers/download-file'
-import relativeDate from '@/helpers/relative-date'
 import Icon from './icon'
 import { performMultiSelect, performRangeSelect } from './perform-select'
 

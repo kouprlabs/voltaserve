@@ -12,7 +12,7 @@ import {
 import { Helmet } from 'react-helmet-async'
 import { swrConfig } from '@/api/options'
 import OrganizationAPI from '@/api/organization'
-import { geEditorPermission } from '@/api/permission'
+import { geEditorPermission, geOwnerPermission } from '@/api/permission'
 import Delete from '@/components/organization/delete'
 import EditName from '@/components/organization/edit-name'
 import InviteMembers from '@/components/organization/invite-members'
@@ -101,21 +101,25 @@ const OrganizationSettingsPage = () => {
           organization={org}
           onClose={() => setIsNameModalOpen(false)}
         />
-        <InviteMembers
-          open={isInviteMembersModalOpen}
-          id={org.id}
-          onClose={() => setIsInviteMembersModalOpen(false)}
-        />
+        {geOwnerPermission(org.permission) && (
+          <InviteMembers
+            open={isInviteMembersModalOpen}
+            id={org.id}
+            onClose={() => setIsInviteMembersModalOpen(false)}
+          />
+        )}
         <Leave
           open={isLeaveModalOpen}
           id={org.id}
           onClose={() => setIsLeaveModalOpen(false)}
         />
-        <Delete
-          open={isDeleteModalOpen}
-          organization={org}
-          onClose={() => setIsDeleteModalOpen(false)}
-        />
+        {geOwnerPermission(org.permission) && (
+          <Delete
+            open={isDeleteModalOpen}
+            organization={org}
+            onClose={() => setIsDeleteModalOpen(false)}
+          />
+        )}
       </Stack>
     </>
   )

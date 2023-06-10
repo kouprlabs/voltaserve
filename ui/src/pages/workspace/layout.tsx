@@ -3,6 +3,7 @@ import { Outlet, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { Heading, Stack, Tab, TabList, Tabs } from '@chakra-ui/react'
 import { variables } from '@koupr/ui'
 import { swrConfig } from '@/api/options'
+import { geEditorPermission } from '@/api/permission'
 import WorkspaceAPI from '@/api/workspace'
 
 const WorkspaceLayout = () => {
@@ -39,9 +40,11 @@ const WorkspaceLayout = () => {
           >
             Files
           </Tab>
-          <Tab onClick={() => navigate(`/workspace/${workspaceId}/settings`)}>
-            Settings
-          </Tab>
+          {geEditorPermission(workspace.permission) && (
+            <Tab onClick={() => navigate(`/workspace/${workspaceId}/settings`)}>
+              Settings
+            </Tab>
+          )}
         </TabList>
       </Tabs>
       <Outlet />
