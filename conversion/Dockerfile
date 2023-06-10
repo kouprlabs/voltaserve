@@ -21,6 +21,7 @@ RUN dnf install -y wget
 
 WORKDIR /usr/share/tesseract/tessdata
 
+RUN wget https://github.com/kouprlabs/tessdata/raw/main/osd.traineddata
 RUN wget https://github.com/kouprlabs/tessdata/raw/main/eng.traineddata
 RUN wget https://github.com/kouprlabs/tessdata/raw/main/deu.traineddata
 RUN wget https://github.com/kouprlabs/tessdata/raw/main/fra.traineddata
