@@ -5,7 +5,8 @@ import os from 'os'
 import path from 'path'
 import { v4 as uuidv4 } from 'uuid'
 import { Token } from '@/client/idp'
-import { FileAPI, geEditorPermission } from '@/client/api'
+import { FileAPI } from '@/client/api'
+import { handleException } from '@/infra/error'
 
 /*
   This method creates or updates a resource with the provided content.
@@ -27,16 +28,6 @@ async function handlePut(
   const api = new FileAPI(token)
   try {
     const directory = await api.getByPath(decodeURI(path.dirname(req.url)))
-    if (!geEditorPermission(directory.permission)) {
-      res.statusCode = 401
-      res.end()
-      return
-    }
-
-    /* Delete existing file (simulate an overwrite) */
-    const file = await api.getByPath(decodeURI(req.url))
-    await api.delete(file.id)
-
     const outputPath = path.join(os.tmpdir(), uuidv4())
     const ws = fs.createWriteStream(outputPath)
     req.pipe(ws)
@@ -58,19 +49,18 @@ async function handlePut(
           name: decodeURIComponent(path.basename(req.url)),
           blob,
         })
+
+        /* Delete existing file (simulate an overwrite) */
+        const existingFile = await api.getByPath(decodeURI(req.url))
+        await api.delete(existingFile.id)
       } catch (err) {
-        console.error(err)
-        res.statusCode = 500
-        res.end()
+        handleException(err, res)
       } finally {
         fs.rmSync(outputPath)
       }
     })
   } catch (err) {
-    console.error(err)
-    res.statusCode = 500
-    res.end()
-    return
+    handleException(err, res)
   }
 }
 

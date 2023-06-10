@@ -1,4 +1,5 @@
 import { IDP_URL } from '@/config'
+import { ClientError } from './error'
 
 export type Token = {
   access_token: string
@@ -33,6 +34,10 @@ export class TokenAPI {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
     })
-    return result.json()
+    const json = await result.json()
+    if (result.status > 299) {
+      throw new ClientError(json)
+    }
+    return json
   }
 }

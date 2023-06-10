@@ -1,6 +1,7 @@
 import { IncomingMessage, ServerResponse } from 'http'
 import { FileAPI, FileType } from '@/client/api'
 import { Token } from '@/client/idp'
+import { handleException } from '@/infra/error'
 
 /*
   This method retrieves properties and metadata of a resource.
@@ -103,9 +104,7 @@ async function handlePropfind(
       res.end(responseXml)
     }
   } catch (err) {
-    console.error(err)
-    res.statusCode = 500
-    res.end()
+    handleException(err, res)
   }
 }
 

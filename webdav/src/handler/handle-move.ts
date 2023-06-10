@@ -1,8 +1,9 @@
 import { IncomingMessage, ServerResponse } from 'http'
 import path from 'path'
-import { FileAPI, geEditorPermission } from '@/client/api'
+import { FileAPI } from '@/client/api'
 import { Token } from '@/client/idp'
 import { getTargetPath } from '@/helper/path'
+import { handleException } from '@/infra/error'
 
 /*
   This method moves or renames a resource from a source URL to a destination URL.
@@ -39,30 +40,15 @@ async function handleMove(
       sourcePath.split('/').length === targetPath.split('/').length &&
       path.dirname(sourcePath) === path.dirname(targetPath)
     ) {
-      if (!geEditorPermission(sourceFile.permission)) {
-        res.statusCode = 401
-        res.end()
-        return
-      }
       await api.rename(sourceFile.id, { name: decodeURIComponent(path.basename(targetPath)) })
     } else {
-      if (
-        !geEditorPermission(sourceFile.permission) ||
-        !geEditorPermission(targetFile.permission)
-      ) {
-        res.statusCode = 401
-        res.end()
-        return
-      }
       await api.move(targetFile.id, { ids: [sourceFile.id] })
     }
 
     res.statusCode = 204
     res.end()
   } catch (err) {
-    console.error(err)
-    res.statusCode = 500
-    res.end()
+    handleException(err, res)
   }
 }
 

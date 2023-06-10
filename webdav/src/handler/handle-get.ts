@@ -5,6 +5,7 @@ import path from 'path'
 import { v4 as uuidv4 } from 'uuid'
 import { FileAPI } from '@/client/api'
 import { Token } from '@/client/idp'
+import { handleException } from '@/infra/error'
 
 /*
   This method retrieves the content of a resource identified by the URL.
@@ -60,9 +61,7 @@ async function handleGet(
         .on('finish', () => rmSync(outputPath))
     }
   } catch (err) {
-    console.error(err)
-    res.statusCode = 500
-    res.end()
+    handleException(err, res)
   }
 }
 

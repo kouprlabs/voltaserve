@@ -1,7 +1,8 @@
 import { IncomingMessage, ServerResponse } from 'http'
 import path from 'path'
-import { File, FileAPI, geEditorPermission } from '@/client/api'
+import { File, FileAPI } from '@/client/api'
 import { Token } from '@/client/idp'
+import { handleException } from '@/infra/error'
 
 /*
   This method creates a new collection (directory) at the specified URL.
@@ -23,12 +24,6 @@ async function handleMkcol(
     const api = new FileAPI(token)
     directory = await api.getByPath(decodeURI(path.dirname(req.url)))
 
-    if (!geEditorPermission(directory.permission)) {
-      res.statusCode = 401
-      res.end()
-      return
-    }
-
     await api.createFolder({
       workspaceId: directory.workspaceId,
       parentId: directory.id,
@@ -38,9 +33,7 @@ async function handleMkcol(
     res.statusCode = 201
     res.end()
   } catch (err) {
-    console.error(err)
-    res.statusCode = 500
-    res.end()
+    handleException(err, res)
   }
 }
 

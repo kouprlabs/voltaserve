@@ -1,6 +1,7 @@
 import { IncomingMessage, ServerResponse } from 'http'
-import { FileAPI, geOwnerPermission } from '@/client/api'
+import { FileAPI } from '@/client/api'
 import { Token } from '@/client/idp'
+import { handleException } from '@/infra/error'
 
 /*
   This method deletes a resource identified by the URL.
@@ -21,20 +22,12 @@ async function handleDelete(
     const api = new FileAPI(token)
     const file = await api.getByPath(decodeURI(req.url))
 
-    if (!geOwnerPermission(file.permission)) {
-      res.statusCode = 401
-      res.end()
-      return
-    }
-
     await api.delete(file.id)
 
     res.statusCode = 204
     res.end()
   } catch (err) {
-    console.error(err)
-    res.statusCode = 500
-    res.end()
+    handleException(err, res)
   }
 }
 

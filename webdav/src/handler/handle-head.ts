@@ -1,6 +1,7 @@
 import { IncomingMessage, ServerResponse } from 'http'
 import { FileAPI, FileType } from '@/client/api'
 import { Token } from '@/client/idp'
+import { handleException } from '@/infra/error'
 
 /*
   This method is similar to GET but only retrieves the metadata of a resource, without returning the actual content.
@@ -29,9 +30,7 @@ async function handleHead(
       res.end()
     }
   } catch (err) {
-    console.error(err)
-    res.statusCode = 500
-    res.end()
+    handleException(err, res)
   }
 }
 
