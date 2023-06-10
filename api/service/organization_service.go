@@ -79,15 +79,15 @@ func NewOrganizationService() *OrganizationService {
 	}
 }
 
-func (svc *OrganizationService) Create(opts OrganizationCreateOptions, userId string) (*Organization, error) {
+func (svc *OrganizationService) Create(opts OrganizationCreateOptions, userID string) (*Organization, error) {
 	org, err := svc.orgRepo.Insert(repo.OrganizationInsertOptions{
-		ID:   helper.NewId(),
+		ID:   helper.NewID(),
 		Name: opts.Name,
 	})
 	if err != nil {
 		return nil, err
 	}
-	if err := svc.orgRepo.GrantUserPermission(org.GetID(), userId, model.PermissionOwner); err != nil {
+	if err := svc.orgRepo.GrantUserPermission(org.GetID(), userID, model.PermissionOwner); err != nil {
 		return nil, err
 	}
 	org, err = svc.orgRepo.Find(org.GetID())
@@ -100,15 +100,15 @@ func (svc *OrganizationService) Create(opts OrganizationCreateOptions, userId st
 	if err := svc.orgCache.Set(org); err != nil {
 		return nil, nil
 	}
-	res, err := svc.orgMapper.mapOrganization(org, userId)
+	res, err := svc.orgMapper.mapOrganization(org, userID)
 	if err != nil {
 		return nil, err
 	}
 	return res, nil
 }
 
-func (svc *OrganizationService) Find(id string, userId string) (*Organization, error) {
-	user, err := svc.userRepo.Find(userId)
+func (svc *OrganizationService) Find(id string, userID string) (*Organization, error) {
+	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
 	}
@@ -119,26 +119,26 @@ func (svc *OrganizationService) Find(id string, userId string) (*Organization, e
 	if err := svc.orgGuard.Authorize(user, org, model.PermissionViewer); err != nil {
 		return nil, err
 	}
-	res, err := svc.orgMapper.mapOrganization(org, userId)
+	res, err := svc.orgMapper.mapOrganization(org, userID)
 	if err != nil {
 		return nil, err
 	}
 	return res, nil
 }
 
-func (svc *OrganizationService) Search(query string, userId string) ([]*Organization, error) {
+func (svc *OrganizationService) Search(query string, userID string) ([]*Organization, error) {
 	orgs, err := svc.orgSearch.Query(query)
 	if err != nil {
 		return nil, err
 	}
-	user, err := svc.userRepo.Find(userId)
+	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
 	}
 	org := make([]*Organization, 0)
 	for _, o := range orgs {
 		if svc.orgGuard.IsAuthorized(user, o, model.PermissionViewer) {
-			v, err := svc.orgMapper.mapOrganization(o, userId)
+			v, err := svc.orgMapper.mapOrganization(o, userID)
 			if err != nil {
 				return nil, err
 			}
@@ -148,8 +148,8 @@ func (svc *OrganizationService) Search(query string, userId string) ([]*Organiza
 	return org, nil
 }
 
-func (svc *OrganizationService) SearchMembers(id string, query string, userId string) ([]*User, error) {
-	user, err := svc.userRepo.Find(userId)
+func (svc *OrganizationService) SearchMembers(id string, query string, userID string) ([]*User, error) {
+	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
 	}
@@ -193,8 +193,8 @@ func (svc *OrganizationService) SearchMembers(id string, query string, userId st
 	return res, nil
 }
 
-func (svc *OrganizationService) FindAll(userId string) ([]*Organization, error) {
-	user, err := svc.userRepo.Find(userId)
+func (svc *OrganizationService) FindAll(userID string) ([]*Organization, error) {
+	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
 	}
@@ -209,7 +209,7 @@ func (svc *OrganizationService) FindAll(userId string) ([]*Organization, error) 
 			return nil, err
 		}
 		if svc.orgGuard.IsAuthorized(user, org, model.PermissionViewer) {
-			v, err := svc.orgMapper.mapOrganization(org, userId)
+			v, err := svc.orgMapper.mapOrganization(org, userID)
 			if err != nil {
 				return nil, err
 			}
@@ -219,8 +219,8 @@ func (svc *OrganizationService) FindAll(userId string) ([]*Organization, error) 
 	return res, nil
 }
 
-func (svc *OrganizationService) UpdateName(id string, name string, userId string) (*Organization, error) {
-	user, err := svc.userRepo.Find(userId)
+func (svc *OrganizationService) UpdateName(id string, name string, userID string) (*Organization, error) {
+	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
 	}
@@ -242,15 +242,15 @@ func (svc *OrganizationService) UpdateName(id string, name string, userId string
 	if err != nil {
 		return nil, err
 	}
-	res, err := svc.orgMapper.mapOrganization(org, userId)
+	res, err := svc.orgMapper.mapOrganization(org, userID)
 	if err != nil {
 		return nil, err
 	}
 	return res, nil
 }
 
-func (svc *OrganizationService) Delete(id string, userId string) error {
-	user, err := svc.userRepo.Find(userId)
+func (svc *OrganizationService) Delete(id string, userID string) error {
+	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return err
 	}
@@ -273,12 +273,12 @@ func (svc *OrganizationService) Delete(id string, userId string) error {
 	return nil
 }
 
-func (svc *OrganizationService) RemoveMember(id string, memberId string, userId string) error {
-	user, err := svc.userRepo.Find(userId)
+func (svc *OrganizationService) RemoveMember(id string, memberID string, userID string) error {
+	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return err
 	}
-	member, err := svc.userRepo.Find(memberId)
+	member, err := svc.userRepo.Find(memberID)
 	if err != nil {
 		return err
 	}
@@ -296,19 +296,19 @@ func (svc *OrganizationService) RemoveMember(id string, memberId string, userId 
 		return errorpkg.NewCannotRemoveLastRemainingOwnerOfOrganizationError(org.GetID())
 	}
 
-	if userId != member.GetID() {
+	if userID != member.GetID() {
 		if err := svc.orgGuard.Authorize(user, org, model.PermissionOwner); err != nil {
 			return err
 		}
 	}
 
 	/* Remove member from all groups belonging to this organization */
-	groupsIds, err := svc.groupRepo.GetIDsForOrganization(org.GetID())
+	groupsIDs, err := svc.groupRepo.GetIDsForOrganization(org.GetID())
 	if err != nil {
 		return err
 	}
-	for _, groupId := range groupsIds {
-		if err := svc.groupService.RemoveMemberUnauthorized(groupId, member.GetID()); err != nil {
+	for _, groupID := range groupsIDs {
+		if err := svc.groupService.RemoveMemberUnauthorized(groupID, member.GetID()); err != nil {
 			log.Error(err)
 		}
 	}
@@ -325,8 +325,8 @@ func (svc *OrganizationService) RemoveMember(id string, memberId string, userId 
 	return nil
 }
 
-func (svc *OrganizationService) GetMembers(id string, userId string) ([]*User, error) {
-	user, err := svc.userRepo.Find(userId)
+func (svc *OrganizationService) GetMembers(id string, userID string) ([]*User, error) {
+	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
 	}
@@ -348,8 +348,8 @@ func (svc *OrganizationService) GetMembers(id string, userId string) ([]*User, e
 	return res, nil
 }
 
-func (svc *OrganizationService) GetGroups(id string, userId string) ([]*Group, error) {
-	user, err := svc.userRepo.Find(userId)
+func (svc *OrganizationService) GetGroups(id string, userID string) ([]*Group, error) {
+	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
 	}
@@ -364,7 +364,7 @@ func (svc *OrganizationService) GetGroups(id string, userId string) ([]*Group, e
 	if err != nil {
 		return nil, err
 	}
-	res, err := svc.groupMapper.mapGroups(groups, userId)
+	res, err := svc.groupMapper.mapGroups(groups, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -381,7 +381,7 @@ func newOrganizationMapper() *organizationMapper {
 	}
 }
 
-func (mp *organizationMapper) mapOrganization(m model.Organization, userId string) (*Organization, error) {
+func (mp *organizationMapper) mapOrganization(m model.Organization, userID string) (*Organization, error) {
 	res := &Organization{
 		ID:         m.GetID(),
 		Name:       m.GetName(),
@@ -390,7 +390,7 @@ func (mp *organizationMapper) mapOrganization(m model.Organization, userId strin
 	}
 	res.Permission = ""
 	for _, p := range m.GetUserPermissions() {
-		if p.GetUserID() == userId && model.GetPermissionWeight(p.GetValue()) > model.GetPermissionWeight(res.Permission) {
+		if p.GetUserID() == userID && model.GetPermissionWeight(p.GetValue()) > model.GetPermissionWeight(res.Permission) {
 			res.Permission = p.GetValue()
 		}
 	}
@@ -400,7 +400,7 @@ func (mp *organizationMapper) mapOrganization(m model.Organization, userId strin
 			return nil, err
 		}
 		for _, u := range g.GetUsers() {
-			if u == userId && model.GetPermissionWeight(p.GetValue()) > model.GetPermissionWeight(res.Permission) {
+			if u == userID && model.GetPermissionWeight(p.GetValue()) > model.GetPermissionWeight(res.Permission) {
 				res.Permission = p.GetValue()
 			}
 		}

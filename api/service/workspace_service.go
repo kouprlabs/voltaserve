@@ -34,7 +34,7 @@ type WorkspaceSearchOptions struct {
 type CreateWorkspaceOptions struct {
 	Name            string  `json:"name" validate:"required,max=255"`
 	Image           *string `json:"image"`
-	OrganizationId  string  `json:"organizationId" validate:"required"`
+	OrganizationID  string  `json:"organizationId" validate:"required"`
 	StorageCapacity int64   `json:"storageCapacity" validate:"required,min=1"`
 }
 
@@ -80,8 +80,8 @@ func NewWorkspaceService() *WorkspaceService {
 	}
 }
 
-func (svc *WorkspaceService) Create(opts CreateWorkspaceOptions, userId string) (*Workspace, error) {
-	id := helper.NewId()
+func (svc *WorkspaceService) Create(opts CreateWorkspaceOptions, userID string) (*Workspace, error) {
+	id := helper.NewID()
 	bucket := strings.ReplaceAll(uuid.NewString(), "-", "")
 	if err := svc.s3.CreateBucket(bucket); err != nil {
 		return nil, err
@@ -90,14 +90,14 @@ func (svc *WorkspaceService) Create(opts CreateWorkspaceOptions, userId string) 
 		ID:              id,
 		Name:            opts.Name,
 		StorageCapacity: opts.StorageCapacity,
-		OrganizationId:  opts.OrganizationId,
+		OrganizationID:  opts.OrganizationID,
 		Image:           opts.Image,
 		Bucket:          bucket,
 	})
 	if err != nil {
 		return nil, err
 	}
-	if err := svc.workspaceRepo.GrantUserPermission(workspace.GetID(), userId, model.PermissionOwner); err != nil {
+	if err := svc.workspaceRepo.GrantUserPermission(workspace.GetID(), userID, model.PermissionOwner); err != nil {
 		return nil, err
 	}
 	workspace, err = svc.workspaceRepo.Find(workspace.GetID())
@@ -106,13 +106,13 @@ func (svc *WorkspaceService) Create(opts CreateWorkspaceOptions, userId string) 
 	}
 	root, err := svc.fileRepo.Insert(repo.FileInsertOptions{
 		Name:        "root",
-		WorkspaceId: workspace.GetID(),
+		WorkspaceID: workspace.GetID(),
 		Type:        model.FileTypeFolder,
 	})
 	if err != nil {
 		return nil, err
 	}
-	if err := svc.fileRepo.GrantUserPermission(root.GetID(), userId, model.PermissionOwner); err != nil {
+	if err := svc.fileRepo.GrantUserPermission(root.GetID(), userID, model.PermissionOwner); err != nil {
 		return nil, err
 	}
 	if err = svc.workspaceRepo.UpdateRootID(workspace.GetID(), root.GetID()); err != nil {
@@ -133,15 +133,15 @@ func (svc *WorkspaceService) Create(opts CreateWorkspaceOptions, userId string) 
 	if err = svc.workspaceCache.Set(workspace); err != nil {
 		return nil, err
 	}
-	res, err := svc.workspaceMapper.mapWorkspace(workspace, userId)
+	res, err := svc.workspaceMapper.mapWorkspace(workspace, userID)
 	if err != nil {
 		return nil, err
 	}
 	return res, nil
 }
 
-func (svc *WorkspaceService) Find(id string, userId string) (*Workspace, error) {
-	user, err := svc.userRepo.Find(userId)
+func (svc *WorkspaceService) Find(id string, userID string) (*Workspace, error) {
+	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
 	}
@@ -152,15 +152,15 @@ func (svc *WorkspaceService) Find(id string, userId string) (*Workspace, error) 
 	if err = svc.workspaceGuard.Authorize(user, workspace, model.PermissionViewer); err != nil {
 		return nil, err
 	}
-	res, err := svc.workspaceMapper.mapWorkspace(workspace, userId)
+	res, err := svc.workspaceMapper.mapWorkspace(workspace, userID)
 	if err != nil {
 		return nil, err
 	}
 	return res, nil
 }
 
-func (svc *WorkspaceService) FindAll(userId string) ([]*Workspace, error) {
-	user, err := svc.userRepo.Find(userId)
+func (svc *WorkspaceService) FindAll(userID string) ([]*Workspace, error) {
+	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
 	}
@@ -176,7 +176,7 @@ func (svc *WorkspaceService) FindAll(userId string) ([]*Workspace, error) {
 			return nil, err
 		}
 		if svc.workspaceGuard.IsAuthorized(user, workspace, model.PermissionViewer) {
-			dto, err := svc.workspaceMapper.mapWorkspace(workspace, userId)
+			dto, err := svc.workspaceMapper.mapWorkspace(workspace, userID)
 			if err != nil {
 				return nil, err
 			}
@@ -186,19 +186,19 @@ func (svc *WorkspaceService) FindAll(userId string) ([]*Workspace, error) {
 	return res, nil
 }
 
-func (svc *WorkspaceService) Search(query string, userId string) ([]*Workspace, error) {
+func (svc *WorkspaceService) Search(query string, userID string) ([]*Workspace, error) {
 	workspaces, err := svc.workspaceSearch.Query(query)
 	if err != nil {
 		return nil, err
 	}
-	user, err := svc.userRepo.Find(userId)
+	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
 	}
 	res := []*Workspace{}
 	for _, w := range workspaces {
 		if svc.workspaceGuard.IsAuthorized(user, w, model.PermissionViewer) {
-			dto, err := svc.workspaceMapper.mapWorkspace(w, userId)
+			dto, err := svc.workspaceMapper.mapWorkspace(w, userID)
 			if err != nil {
 				return nil, err
 			}
@@ -208,8 +208,8 @@ func (svc *WorkspaceService) Search(query string, userId string) ([]*Workspace, 
 	return res, nil
 }
 
-func (svc *WorkspaceService) UpdateName(id string, name string, userId string) (*Workspace, error) {
-	user, err := svc.userRepo.Find(userId)
+func (svc *WorkspaceService) UpdateName(id string, name string, userID string) (*Workspace, error) {
+	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
 	}
@@ -229,15 +229,15 @@ func (svc *WorkspaceService) UpdateName(id string, name string, userId string) (
 	if err = svc.workspaceCache.Set(workspace); err != nil {
 		return nil, err
 	}
-	res, err := svc.workspaceMapper.mapWorkspace(workspace, userId)
+	res, err := svc.workspaceMapper.mapWorkspace(workspace, userID)
 	if err != nil {
 		return nil, err
 	}
 	return res, nil
 }
 
-func (svc *WorkspaceService) UpdateStorageCapacity(id string, storageCapacity int64, userId string) (*Workspace, error) {
-	user, err := svc.userRepo.Find(userId)
+func (svc *WorkspaceService) UpdateStorageCapacity(id string, storageCapacity int64, userID string) (*Workspace, error) {
+	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
 	}
@@ -264,15 +264,15 @@ func (svc *WorkspaceService) UpdateStorageCapacity(id string, storageCapacity in
 	if err = svc.workspaceCache.Set(workspace); err != nil {
 		return nil, err
 	}
-	res, err := svc.workspaceMapper.mapWorkspace(workspace, userId)
+	res, err := svc.workspaceMapper.mapWorkspace(workspace, userID)
 	if err != nil {
 		return nil, err
 	}
 	return res, nil
 }
 
-func (svc *WorkspaceService) Delete(id string, userId string) error {
-	user, err := svc.userRepo.Find(userId)
+func (svc *WorkspaceService) Delete(id string, userID string) error {
+	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return err
 	}
@@ -335,12 +335,12 @@ func newWorkspaceMapper() *workspaceMapper {
 	}
 }
 
-func (mp *workspaceMapper) mapWorkspace(m model.Workspace, userId string) (*Workspace, error) {
+func (mp *workspaceMapper) mapWorkspace(m model.Workspace, userID string) (*Workspace, error) {
 	org, err := mp.orgCache.Get(m.GetOrganizationID())
 	if err != nil {
 		return nil, err
 	}
-	v, err := mp.orgMapper.mapOrganization(org, userId)
+	v, err := mp.orgMapper.mapOrganization(org, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -355,7 +355,7 @@ func (mp *workspaceMapper) mapWorkspace(m model.Workspace, userId string) (*Work
 	}
 	res.Permission = ""
 	for _, p := range m.GetUserPermissions() {
-		if p.GetUserID() == userId && model.GetPermissionWeight(p.GetValue()) > model.GetPermissionWeight(res.Permission) {
+		if p.GetUserID() == userID && model.GetPermissionWeight(p.GetValue()) > model.GetPermissionWeight(res.Permission) {
 			res.Permission = p.GetValue()
 		}
 	}
@@ -365,7 +365,7 @@ func (mp *workspaceMapper) mapWorkspace(m model.Workspace, userId string) (*Work
 			return nil, err
 		}
 		for _, u := range g.GetUsers() {
-			if u == userId && model.GetPermissionWeight(p.GetValue()) > model.GetPermissionWeight(res.Permission) {
+			if u == userID && model.GetPermissionWeight(p.GetValue()) > model.GetPermissionWeight(res.Permission) {
 				res.Permission = p.GetValue()
 			}
 		}

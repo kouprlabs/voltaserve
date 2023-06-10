@@ -21,6 +21,7 @@ func (r *NotificationRouter) AppendRoutes(g fiber.Router) {
 }
 
 // GetAll godoc
+//
 //	@Summary		Get notifications
 //	@Description	Get notifications
 //	@Tags			Notifications
@@ -30,8 +31,8 @@ func (r *NotificationRouter) AppendRoutes(g fiber.Router) {
 //	@Failure		500
 //	@Router			/notifications [get]
 func (r *NotificationRouter) GetAll(c *fiber.Ctx) error {
-	userId := GetUserId(c)
-	res, err := r.notificationSvc.GetAll(userId)
+	userID := GetUserID(c)
+	res, err := r.notificationSvc.GetAll(userID)
 	if err != nil {
 		return err
 	}

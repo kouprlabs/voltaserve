@@ -22,7 +22,7 @@ type Invitation struct {
 }
 
 type InvitationCreateOptions struct {
-	OrganizationId string   `json:"organizationId" validate:"required"`
+	OrganizationID string   `json:"organizationId" validate:"required"`
 	Emails         []string `json:"emails" validate:"required,dive,email"`
 }
 
@@ -52,26 +52,26 @@ func NewInvitationService() *InvitationService {
 	}
 }
 
-func (svc *InvitationService) Create(opts InvitationCreateOptions, userId string) error {
+func (svc *InvitationService) Create(opts InvitationCreateOptions, userID string) error {
 	for i := range opts.Emails {
 		opts.Emails[i] = strings.ToLower(opts.Emails[i])
 	}
-	user, err := svc.userRepo.Find(userId)
+	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return err
 	}
-	org, err := svc.orgCache.Get(opts.OrganizationId)
+	org, err := svc.orgCache.Get(opts.OrganizationID)
 	if err != nil {
 		return err
 	}
 	if err := svc.orgGuard.Authorize(user, org, model.PermissionOwner); err != nil {
 		return err
 	}
-	orgMembers, err := svc.orgRepo.GetMembers(opts.OrganizationId)
+	orgMembers, err := svc.orgRepo.GetMembers(opts.OrganizationID)
 	if err != nil {
 		return err
 	}
-	outgoingInvitations, err := svc.invitationRepo.GetOutgoing(opts.OrganizationId, userId)
+	outgoingInvitations, err := svc.invitationRepo.GetOutgoing(opts.OrganizationID, userID)
 	if err != nil {
 		return err
 	}
@@ -100,8 +100,8 @@ func (svc *InvitationService) Create(opts InvitationCreateOptions, userId string
 
 	/* Persist invitations */
 	invitations, err := svc.invitationRepo.Insert(repo.InvitationInsertOptions{
-		UserId:         userId,
-		OrganizationId: opts.OrganizationId,
+		UserID:         userID,
+		OrganizationID: opts.OrganizationID,
 		Emails:         emails,
 	})
 	if err != nil {
@@ -129,8 +129,8 @@ func (svc *InvitationService) Create(opts InvitationCreateOptions, userId string
 	return nil
 }
 
-func (svc *InvitationService) GetIncoming(userId string) ([]*Invitation, error) {
-	user, err := svc.userRepo.Find(userId)
+func (svc *InvitationService) GetIncoming(userID string) ([]*Invitation, error) {
+	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
 	}
@@ -138,15 +138,15 @@ func (svc *InvitationService) GetIncoming(userId string) ([]*Invitation, error) 
 	if err != nil {
 		return nil, err
 	}
-	res, err := svc.invitationMapper.mapInvitations(invitations, userId)
+	res, err := svc.invitationMapper.mapInvitations(invitations, userID)
 	if err != nil {
 		return nil, err
 	}
 	return res, nil
 }
 
-func (svc *InvitationService) GetOutgoing(id string, userId string) ([]*Invitation, error) {
-	user, err := svc.userRepo.Find(userId)
+func (svc *InvitationService) GetOutgoing(id string, userID string) ([]*Invitation, error) {
+	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
 	}
@@ -154,15 +154,15 @@ func (svc *InvitationService) GetOutgoing(id string, userId string) ([]*Invitati
 	if err != nil {
 		return nil, err
 	}
-	res, err := svc.invitationMapper.mapInvitations(invitations, userId)
+	res, err := svc.invitationMapper.mapInvitations(invitations, userID)
 	if err != nil {
 		return nil, err
 	}
 	return res, nil
 }
 
-func (svc *InvitationService) Accept(id string, userId string) error {
-	user, err := svc.userRepo.Find(userId)
+func (svc *InvitationService) Accept(id string, userID string) error {
+	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return err
 	}
@@ -181,7 +181,7 @@ func (svc *InvitationService) Accept(id string, userId string) error {
 		return err
 	}
 	for _, u := range org.GetUsers() {
-		if u == userId {
+		if u == userID {
 			return errorpkg.NewUserAlreadyMemberOfOrganizationError(user, org)
 		}
 	}
@@ -189,10 +189,10 @@ func (svc *InvitationService) Accept(id string, userId string) error {
 	if err := svc.invitationRepo.Save(invitation); err != nil {
 		return err
 	}
-	if err := svc.orgRepo.AddUser(invitation.GetOrganizationID(), userId); err != nil {
+	if err := svc.orgRepo.AddUser(invitation.GetOrganizationID(), userID); err != nil {
 		return err
 	}
-	if err := svc.orgRepo.GrantUserPermission(invitation.GetOrganizationID(), userId, model.PermissionViewer); err != nil {
+	if err := svc.orgRepo.GrantUserPermission(invitation.GetOrganizationID(), userID, model.PermissionViewer); err != nil {
 		return err
 	}
 	if _, err := svc.orgCache.Refresh(invitation.GetOrganizationID()); err != nil {
@@ -201,8 +201,8 @@ func (svc *InvitationService) Accept(id string, userId string) error {
 	return nil
 }
 
-func (svc *InvitationService) Decline(id string, userId string) error {
-	user, err := svc.userRepo.Find(userId)
+func (svc *InvitationService) Decline(id string, userID string) error {
+	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return err
 	}
@@ -223,8 +223,8 @@ func (svc *InvitationService) Decline(id string, userId string) error {
 	return nil
 }
 
-func (svc *InvitationService) Resend(id string, userId string) error {
-	user, err := svc.userRepo.Find(userId)
+func (svc *InvitationService) Resend(id string, userID string) error {
+	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return err
 	}
@@ -257,13 +257,13 @@ func (svc *InvitationService) Resend(id string, userId string) error {
 	return nil
 }
 
-func (svc *InvitationService) Delete(id string, userId string) error {
+func (svc *InvitationService) Delete(id string, userID string) error {
 	invitation, err := svc.invitationRepo.Find(id)
 	if err != nil {
 		return err
 	}
-	if userId != invitation.GetOwnerID() {
-		user, err := svc.userRepo.Find(userId)
+	if userID != invitation.GetOwnerID() {
+		user, err := svc.userRepo.Find(userID)
 		if err != nil {
 			return err
 		}
@@ -291,7 +291,7 @@ func newInvitationMapper() *invitationMapper {
 	}
 }
 
-func (mp *invitationMapper) mapInvitation(m model.Invitation, userId string) (*Invitation, error) {
+func (mp *invitationMapper) mapInvitation(m model.Invitation, userID string) (*Invitation, error) {
 	owner, err := mp.userRepo.Find(m.GetOwnerID())
 	if err != nil {
 		return nil, err
@@ -300,7 +300,7 @@ func (mp *invitationMapper) mapInvitation(m model.Invitation, userId string) (*I
 	if err != nil {
 		return nil, err
 	}
-	v, err := mp.orgMapper.mapOrganization(org, userId)
+	v, err := mp.orgMapper.mapOrganization(org, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -315,10 +315,10 @@ func (mp *invitationMapper) mapInvitation(m model.Invitation, userId string) (*I
 	}, nil
 }
 
-func (mp *invitationMapper) mapInvitations(invitations []model.Invitation, userId string) ([]*Invitation, error) {
+func (mp *invitationMapper) mapInvitations(invitations []model.Invitation, userID string) ([]*Invitation, error) {
 	res := make([]*Invitation, 0)
 	for _, m := range invitations {
-		v, err := mp.mapInvitation(m, userId)
+		v, err := mp.mapInvitation(m, userID)
 		if err != nil {
 			return nil, err
 		}
