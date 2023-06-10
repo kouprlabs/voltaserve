@@ -30,6 +30,7 @@ func (r *WorkspaceRouter) AppendRoutes(g fiber.Router) {
 }
 
 // Create godoc
+//
 //	@Summary		Create
 //	@Description	Create
 //	@Tags			Workspaces
@@ -58,6 +59,7 @@ func (r *WorkspaceRouter) Create(c *fiber.Ctx) error {
 }
 
 // GetById godoc
+//
 //	@Summary		Get by Id
 //	@Description	Get by Id
 //	@Tags			Workspaces
@@ -69,7 +71,7 @@ func (r *WorkspaceRouter) Create(c *fiber.Ctx) error {
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/workspaces/{id} [get]
 func (r *WorkspaceRouter) GetById(c *fiber.Ctx) error {
-	res, err := r.workspaceSvc.FindByID(c.Params("id"), GetUserId(c))
+	res, err := r.workspaceSvc.Find(c.Params("id"), GetUserId(c))
 	if err != nil {
 		return err
 	}
@@ -77,6 +79,7 @@ func (r *WorkspaceRouter) GetById(c *fiber.Ctx) error {
 }
 
 // GetAll godoc
+//
 //	@Summary		Get all
 //	@Description	Get all
 //	@Tags			Workspaces
@@ -94,6 +97,7 @@ func (r *WorkspaceRouter) GetAll(c *fiber.Ctx) error {
 }
 
 // Search godoc
+//
 //	@Summary		Search
 //	@Description	Search
 //	@Tags			Workspaces
@@ -116,6 +120,7 @@ func (r *WorkspaceRouter) Search(c *fiber.Ctx) error {
 }
 
 // UpdateName godoc
+//
 //	@Summary		Update name
 //	@Description	Update name
 //	@Tags			Workspaces
@@ -141,6 +146,7 @@ func (r *WorkspaceRouter) UpdateName(c *fiber.Ctx) error {
 }
 
 // UpdateName godoc
+//
 //	@Summary		Update storage capacity
 //	@Description	Update storage capacity
 //	@Tags			Workspaces
@@ -166,6 +172,7 @@ func (r *WorkspaceRouter) UpdateStorageCapacity(c *fiber.Ctx) error {
 }
 
 // Delete godoc
+//
 //	@Summary		Delete
 //	@Description	Delete
 //	@Tags			Workspaces

@@ -544,7 +544,7 @@ func (svc *FileService) FindByPath(path string, userId string) (*File, error) {
 	if len(components) == 0 || components[0] == "" {
 		return nil, errorpkg.NewInvalidPathError(fmt.Errorf("invalid path '%s'", path))
 	}
-	workspace, err := svc.workspaceSvc.FindByName(components[0], userId)
+	workspace, err := svc.workspaceSvc.Find(helper.SlugToWorkspaceId(components[0]), userId)
 	if err != nil {
 		return nil, err
 	}
@@ -552,7 +552,7 @@ func (svc *FileService) FindByPath(path string, userId string) (*File, error) {
 		return &File{
 			ID:          workspace.RootID,
 			WorkspaceId: workspace.ID,
-			Name:        workspace.Name,
+			Name:        helper.WorkspaceToSlug(workspace.ID, workspace.Name),
 			Type:        model.FileTypeFolder,
 			Permission:  workspace.Permission,
 			CreateTime:  workspace.CreateTime,
@@ -610,7 +610,7 @@ func (svc *FileService) ListByPath(path string, userId string) ([]*File, error) 
 			result = append(result, &File{
 				ID:          w.RootID,
 				WorkspaceId: w.ID,
-				Name:        w.Name,
+				Name:        helper.WorkspaceToSlug(w.ID, w.Name),
 				Type:        model.FileTypeFolder,
 				Permission:  w.Permission,
 				CreateTime:  w.CreateTime,
@@ -628,7 +628,7 @@ func (svc *FileService) ListByPath(path string, userId string) ([]*File, error) 
 	if len(components) == 0 || components[0] == "" {
 		return nil, errorpkg.NewInvalidPathError(fmt.Errorf("invalid path '%s'", path))
 	}
-	workspace, err := svc.workspaceRepo.FindByName(components[0])
+	workspace, err := svc.workspaceRepo.Find(helper.SlugToWorkspaceId(components[0]))
 	if err != nil {
 		return nil, err
 	}
@@ -1015,7 +1015,7 @@ func (svc *FileService) Search(req FileSearchOptions, page uint, size uint, user
 	if err != nil {
 		return nil, err
 	}
-	workspace, err := svc.workspaceRepo.FindByID(req.WorkspaceId)
+	workspace, err := svc.workspaceRepo.Find(req.WorkspaceId)
 	if err != nil {
 		return nil, err
 	}
@@ -1540,7 +1540,7 @@ func (svc *FileService) GrantUserPermission(ids []string, assigneeId string, per
 		if _, err := svc.fileCache.Refresh(file.GetID()); err != nil {
 			return err
 		}
-		workspace, err := svc.workspaceRepo.FindByID(file.GetWorkspaceID())
+		workspace, err := svc.workspaceRepo.Find(file.GetWorkspaceID())
 		if err != nil {
 			return err
 		}
@@ -1621,7 +1621,7 @@ func (svc *FileService) GrantGroupPermission(ids []string, groupId string, permi
 		if _, err := svc.fileCache.Refresh(file.GetID()); err != nil {
 			return err
 		}
-		workspace, err := svc.workspaceRepo.FindByID(file.GetWorkspaceID())
+		workspace, err := svc.workspaceRepo.Find(file.GetWorkspaceID())
 		if err != nil {
 			return err
 		}

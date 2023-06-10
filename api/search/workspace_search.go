@@ -21,7 +21,7 @@ func NewWorkspaceSearch() *WorkspaceSearch {
 	}
 }
 
-func (search *WorkspaceSearch) Index(workspaces []model.Workspace) error {
+func (s *WorkspaceSearch) Index(workspaces []model.Workspace) error {
 	if len(workspaces) == 0 {
 		return nil
 	}
@@ -29,13 +29,13 @@ func (search *WorkspaceSearch) Index(workspaces []model.Workspace) error {
 	for _, w := range workspaces {
 		res = append(res, w)
 	}
-	if err := search.search.Index(search.index, res); err != nil {
+	if err := s.search.Index(s.index, res); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (search *WorkspaceSearch) Update(workspaces []model.Workspace) error {
+func (s *WorkspaceSearch) Update(workspaces []model.Workspace) error {
 	if len(workspaces) == 0 {
 		return nil
 	}
@@ -43,24 +43,24 @@ func (search *WorkspaceSearch) Update(workspaces []model.Workspace) error {
 	for _, w := range workspaces {
 		res = append(res, w)
 	}
-	if err := search.search.Update(search.index, res); err != nil {
+	if err := s.search.Update(s.index, res); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (search *WorkspaceSearch) Delete(ids []string) error {
+func (s *WorkspaceSearch) Delete(ids []string) error {
 	if len(ids) == 0 {
 		return nil
 	}
-	if err := search.search.Delete(search.index, ids); err != nil {
+	if err := s.search.Delete(s.index, ids); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (search *WorkspaceSearch) Query(query string) ([]model.Workspace, error) {
-	hits, err := search.search.Query(search.index, query)
+func (s *WorkspaceSearch) Query(query string) ([]model.Workspace, error) {
+	hits, err := s.search.Query(s.index, query)
 	if err != nil {
 		return nil, err
 	}

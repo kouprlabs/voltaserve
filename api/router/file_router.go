@@ -82,7 +82,7 @@ func (r *FileRouter) Upload(c *fiber.Ctx) error {
 	}
 	parentId := c.Query("parent_id")
 	if parentId == "" {
-		workspace, err := r.workspaceSvc.FindByID(workspaceId, userId)
+		workspace, err := r.workspaceSvc.Find(workspaceId, userId)
 		if err != nil {
 			return err
 		}
@@ -188,7 +188,7 @@ func (r *FileRouter) CreateFolder(c *fiber.Ctx) error {
 	}
 	parentId := req.ParentId
 	if parentId == nil {
-		workspace, err := r.workspaceSvc.FindByID(req.WorkspaceId, userId)
+		workspace, err := r.workspaceSvc.Find(req.WorkspaceId, userId)
 		if err != nil {
 			return err
 		}

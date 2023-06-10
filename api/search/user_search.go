@@ -19,8 +19,8 @@ func NewUserSearch() *UserSearch {
 	}
 }
 
-func (svc *UserSearch) Query(query string) ([]model.User, error) {
-	hits, err := svc.search.Query(svc.index, query)
+func (s *UserSearch) Query(query string) ([]model.User, error) {
+	hits, err := s.search.Query(s.index, query)
 	if err != nil {
 		return nil, err
 	}

@@ -29,8 +29,20 @@ func NewSearchManager() *SearchManager {
 		searchClient = meilisearch.NewClient(meilisearch.ClientConfig{
 			Host: config.GetConfig().Search.URL,
 		})
+		if _, err := searchClient.CreateIndex(&meilisearch.IndexConfig{
+			Uid:        FileSearchIndex,
+			PrimaryKey: "id",
+		}); err != nil {
+			panic(err)
+		}
 		if _, err := searchClient.Index(FileSearchIndex).UpdateSettings(&meilisearch.Settings{
 			SearchableAttributes: []string{"name", "text"},
+		}); err != nil {
+			panic(err)
+		}
+		if _, err := searchClient.CreateIndex(&meilisearch.IndexConfig{
+			Uid:        GroupSearchIndex,
+			PrimaryKey: "id",
 		}); err != nil {
 			panic(err)
 		}
@@ -39,13 +51,31 @@ func NewSearchManager() *SearchManager {
 		}); err != nil {
 			panic(err)
 		}
+		if _, err := searchClient.CreateIndex(&meilisearch.IndexConfig{
+			Uid:        WorkspaceSearchIndex,
+			PrimaryKey: "id",
+		}); err != nil {
+			panic(err)
+		}
 		if _, err := searchClient.Index(WorkspaceSearchIndex).UpdateSettings(&meilisearch.Settings{
 			SearchableAttributes: []string{"name"},
 		}); err != nil {
 			panic(err)
 		}
+		if _, err := searchClient.CreateIndex(&meilisearch.IndexConfig{
+			Uid:        OrganizationSearchIndex,
+			PrimaryKey: "id",
+		}); err != nil {
+			panic(err)
+		}
 		if _, err := searchClient.Index(OrganizationSearchIndex).UpdateSettings(&meilisearch.Settings{
 			SearchableAttributes: []string{"name"},
+		}); err != nil {
+			panic(err)
+		}
+		if _, err := searchClient.CreateIndex(&meilisearch.IndexConfig{
+			Uid:        UserSearchIndex,
+			PrimaryKey: "id",
 		}); err != nil {
 			panic(err)
 		}
