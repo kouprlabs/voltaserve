@@ -2,7 +2,7 @@ import { IncomingMessage, ServerResponse } from 'http'
 import path from 'path'
 import { File, FileAPI } from '@/client/api'
 import { Token } from '@/client/idp'
-import { handleException } from '@/infra/error'
+import { handleError } from '@/infra/error'
 
 /*
   This method creates a new collection (directory) at the specified URL.
@@ -32,7 +32,7 @@ async function handleMkcol(
     res.statusCode = 201
     res.end()
   } catch (err) {
-    handleException(err, res)
+    handleError(err, res)
   }
 }
 

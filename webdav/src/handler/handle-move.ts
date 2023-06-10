@@ -3,7 +3,7 @@ import path from 'path'
 import { FileAPI } from '@/client/api'
 import { Token } from '@/client/idp'
 import { getTargetPath } from '@/helper/path'
-import { handleException } from '@/infra/error'
+import { handleError } from '@/infra/error'
 
 /*
   This method moves or renames a resource from a source URL to a destination URL.
@@ -48,7 +48,7 @@ async function handleMove(
     res.statusCode = 204
     res.end()
   } catch (err) {
-    handleException(err, res)
+    handleError(err, res)
   }
 }
 

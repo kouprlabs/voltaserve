@@ -2,7 +2,7 @@ import { APIError } from "@/client/api"
 import { IdPError } from "@/client/idp"
 import { ServerResponse } from "http"
 
-export function handleException(err: any, res: ServerResponse) {
+export function handleError(err: any, res: ServerResponse) {
   console.error(err)
   if (err instanceof APIError) {
     res.statusCode = err.error.status

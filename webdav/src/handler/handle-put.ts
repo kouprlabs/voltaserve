@@ -6,7 +6,7 @@ import path from 'path'
 import { v4 as uuidv4 } from 'uuid'
 import { Token } from '@/client/idp'
 import { File, FileAPI } from '@/client/api'
-import { handleException } from '@/infra/error'
+import { handleError } from '@/infra/error'
 
 /*
   This method creates or updates a resource with the provided content.
@@ -62,13 +62,13 @@ async function handlePut(
           await api.delete(existingFile.id)
         }
       } catch (err) {
-        handleException(err, res)
+        handleError(err, res)
       } finally {
         fs.rmSync(outputPath)
       }
     })
   } catch (err) {
-    handleException(err, res)
+    handleError(err, res)
   }
 }
 

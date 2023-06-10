@@ -1,7 +1,7 @@
 import { IncomingMessage, ServerResponse } from 'http'
 import { FileAPI } from '@/client/api'
 import { Token } from '@/client/idp'
-import { handleException } from '@/infra/error'
+import { handleError } from '@/infra/error'
 
 /*
   This method deletes a resource identified by the URL.
@@ -27,7 +27,7 @@ async function handleDelete(
     res.statusCode = 204
     res.end()
   } catch (err) {
-    handleException(err, res)
+    handleError(err, res)
   }
 }
 
