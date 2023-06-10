@@ -1,6 +1,6 @@
-import { APIError } from "@/client/api"
-import { IdPError } from "@/client/idp"
-import { ServerResponse } from "http"
+import { APIError } from '@/client/api'
+import { IdPError } from '@/client/idp'
+import { ServerResponse } from 'http'
 
 export function handleError(err: any, res: ServerResponse) {
   console.error(err)

@@ -27,7 +27,9 @@ async function handlePut(
 ) {
   const api = new FileAPI(token)
   try {
-    const directory = await api.getByPath(decodeURIComponent(path.dirname(req.url)))
+    const directory = await api.getByPath(
+      decodeURIComponent(path.dirname(req.url))
+    )
     const outputPath = path.join(os.tmpdir(), uuidv4())
     const ws = fs.createWriteStream(outputPath)
     req.pipe(ws)
