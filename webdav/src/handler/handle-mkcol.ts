@@ -23,7 +23,6 @@ async function handleMkcol(
   try {
     const api = new FileAPI(token)
     directory = await api.getByPath(decodeURI(path.dirname(req.url)))
-
     await api.createFolder({
       workspaceId: directory.workspaceId,
       parentId: directory.id,
