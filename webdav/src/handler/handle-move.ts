@@ -1,6 +1,6 @@
 import { IncomingMessage, ServerResponse } from 'http'
 import path from 'path'
-import { FileAPI } from '@/client/api'
+import { FileAPI, geEditorPermission } from '@/client/api'
 import { Token } from '@/client/idp'
 import { getTargetPath } from '@/helper/path'
 
@@ -39,8 +39,21 @@ async function handleMove(
       sourcePath.split('/').length === targetPath.split('/').length &&
       path.dirname(sourcePath) === path.dirname(targetPath)
     ) {
-      await api.rename(sourceFile.id, { name: path.basename(targetPath) })
+      if (!geEditorPermission(sourceFile.permission)) {
+        res.statusCode = 401
+        res.end()
+        return
+      }
+      await api.rename(sourceFile.id, { name: decodeURIComponent(path.basename(targetPath)) })
     } else {
+      if (
+        !geEditorPermission(sourceFile.permission) ||
+        !geEditorPermission(targetFile.permission)
+      ) {
+        res.statusCode = 401
+        res.end()
+        return
+      }
       await api.move(targetFile.id, { ids: [sourceFile.id] })
     }
 

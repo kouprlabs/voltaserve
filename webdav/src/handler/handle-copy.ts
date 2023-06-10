@@ -1,7 +1,7 @@
 import { IncomingMessage, ServerResponse } from 'http'
 import path from 'path'
 import { getTargetPath } from '@/helper/path'
-import { FileAPI } from '@/client/api'
+import { FileAPI, geEditorPermission } from '@/client/api'
 import { Token } from '@/client/idp'
 
 /*
@@ -25,6 +25,15 @@ async function handleCopy(
     const targetFile = await api.getByPath(
       decodeURI(path.dirname(getTargetPath(req)))
     )
+
+    if (
+      !geEditorPermission(sourceFile.permission) ||
+      !geEditorPermission(targetFile.permission)
+    ) {
+      res.statusCode = 401
+      res.end()
+      return
+    }
 
     if (sourceFile.workspaceId !== targetFile.workspaceId) {
       res.statusCode = 400

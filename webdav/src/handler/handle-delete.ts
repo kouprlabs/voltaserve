@@ -1,5 +1,5 @@
 import { IncomingMessage, ServerResponse } from 'http'
-import { FileAPI } from '@/client/api'
+import { FileAPI, geOwnerPermission } from '@/client/api'
 import { Token } from '@/client/idp'
 
 /*
@@ -20,6 +20,13 @@ async function handleDelete(
   try {
     const api = new FileAPI(token)
     const file = await api.getByPath(decodeURI(req.url))
+
+    if (!geOwnerPermission(file.permission)) {
+      res.statusCode = 401
+      res.end()
+      return
+    }
+
     await api.delete(file.id)
 
     res.statusCode = 204

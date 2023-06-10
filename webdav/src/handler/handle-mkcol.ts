@@ -1,6 +1,6 @@
 import { IncomingMessage, ServerResponse } from 'http'
 import path from 'path'
-import { File, FileAPI } from '@/client/api'
+import { File, FileAPI, geEditorPermission } from '@/client/api'
 import { Token } from '@/client/idp'
 
 /*
@@ -22,6 +22,13 @@ async function handleMkcol(
   try {
     const api = new FileAPI(token)
     directory = await api.getByPath(decodeURI(path.dirname(req.url)))
+
+    if (!geEditorPermission(directory.permission)) {
+      res.statusCode = 401
+      res.end()
+      return
+    }
+
     await api.createFolder({
       workspaceId: directory.workspaceId,
       parentId: directory.id,

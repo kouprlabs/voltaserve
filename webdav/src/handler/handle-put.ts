@@ -5,7 +5,7 @@ import os from 'os'
 import path from 'path'
 import { v4 as uuidv4 } from 'uuid'
 import { Token } from '@/client/idp'
-import { FileAPI } from '@/client/api'
+import { FileAPI, geEditorPermission } from '@/client/api'
 
 /*
   This method creates or updates a resource with the provided content.
@@ -26,14 +26,17 @@ async function handlePut(
 ) {
   const api = new FileAPI(token)
   try {
+    const directory = await api.getByPath(decodeURI(path.dirname(req.url)))
+    if (!geEditorPermission(directory.permission)) {
+      res.statusCode = 401
+      res.end()
+      return
+    }
+
     /* Delete existing file (simulate an overwrite) */
     const file = await api.getByPath(decodeURI(req.url))
     await api.delete(file.id)
-  } catch (err) {
-    // Ignored
-  }
-  try {
-    const directory = await api.getByPath(decodeURI(path.dirname(req.url)))
+
     const outputPath = path.join(os.tmpdir(), uuidv4())
     const ws = fs.createWriteStream(outputPath)
     req.pipe(ws)
