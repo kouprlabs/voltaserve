@@ -19,11 +19,7 @@ RUN dnf install -y ghostscript
 RUN dnf install -y tesseract
 RUN dnf install -y wget
 
-RUN mkdir -p /tess/traineddata
-
-ENV TESSDATA_PREFIX=/tess/traineddata
-
-WORKDIR /tess/traineddata
+WORKDIR /usr/share/tesseract/tessdata
 
 RUN wget https://github.com/kouprlabs/tessdata/raw/main/eng.traineddata
 RUN wget https://github.com/kouprlabs/tessdata/raw/main/deu.traineddata

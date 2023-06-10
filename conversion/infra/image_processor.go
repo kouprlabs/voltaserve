@@ -169,13 +169,13 @@ type TesseractData struct {
 }
 
 func (p *ImageProcessor) ImageToData(inputPath string) (ImageToDataResult, error) {
-	outFile := helper.NewId()
-	if err := p.cmd.Exec("tesseract", inputPath, outFile, "tsv"); err != nil {
+	basePath := filepath.FromSlash(os.TempDir() + "/" + helper.NewId())
+	tsvPath := filepath.FromSlash(basePath + ".tsv")
+	if err := p.cmd.Exec("tesseract", inputPath, basePath, "tsv"); err != nil {
 		return ImageToDataResult{}, err
 	}
 	var res = ImageToDataResult{}
-	outFile = outFile + ".tsv"
-	f, err := os.Open(outFile)
+	f, err := os.Open(tsvPath)
 	if err != nil {
 		return ImageToDataResult{}, err
 	}
@@ -214,7 +214,7 @@ func (p *ImageProcessor) ImageToData(inputPath string) (ImageToDataResult, error
 		res.NegativeConfPercent = float32((int(res.NegativeConfCount) * 100) / len(res.Data))
 		res.PositiveConfPercent = float32((int(res.PositiveConfCount) * 100) / len(res.Data))
 	}
-	if err := os.Remove(outFile); err != nil {
+	if err := os.Remove(tsvPath); err != nil {
 		return ImageToDataResult{}, err
 	}
 	return res, nil
