@@ -52,7 +52,7 @@ const OrganizationSettingsPage = () => {
           <Text>{org.name}</Text>
           <IconButton
             icon={<IconEdit />}
-            disabled={!geEditorPermission(org.permission)}
+            isDisabled={!geEditorPermission(org.permission)}
             aria-label=""
             onClick={() => {
               setIsNameModalOpen(true)
@@ -60,18 +60,20 @@ const OrganizationSettingsPage = () => {
           />
         </HStack>
         <Divider />
+
         <HStack spacing={variables.spacing}>
           <Text>Invite members</Text>
           <Spacer />
           <IconButton
             icon={<IconUserPlus />}
-            disabled={!geEditorPermission(org.permission)}
+            isDisabled={!geOwnerPermission(org.permission)}
             aria-label=""
             onClick={() => {
               setIsInviteMembersModalOpen(true)
             }}
           />
         </HStack>
+
         <HStack spacing={variables.spacing}>
           <Text>Leave</Text>
           <Spacer />
@@ -91,7 +93,7 @@ const OrganizationSettingsPage = () => {
             icon={<IconTrash />}
             variant="solid"
             colorScheme="red"
-            disabled={!geEditorPermission(org.permission)}
+            isDisabled={!geEditorPermission(org.permission)}
             aria-label=""
             onClick={() => setIsDeleteModalOpen(true)}
           />
@@ -101,25 +103,21 @@ const OrganizationSettingsPage = () => {
           organization={org}
           onClose={() => setIsNameModalOpen(false)}
         />
-        {geOwnerPermission(org.permission) && (
-          <InviteMembers
-            open={isInviteMembersModalOpen}
-            id={org.id}
-            onClose={() => setIsInviteMembersModalOpen(false)}
-          />
-        )}
+        <InviteMembers
+          open={isInviteMembersModalOpen}
+          id={org.id}
+          onClose={() => setIsInviteMembersModalOpen(false)}
+        />
         <Leave
           open={isLeaveModalOpen}
           id={org.id}
           onClose={() => setIsLeaveModalOpen(false)}
         />
-        {geOwnerPermission(org.permission) && (
-          <Delete
-            open={isDeleteModalOpen}
-            organization={org}
-            onClose={() => setIsDeleteModalOpen(false)}
-          />
-        )}
+        <Delete
+          open={isDeleteModalOpen}
+          organization={org}
+          onClose={() => setIsDeleteModalOpen(false)}
+        />
       </Stack>
     </>
   )

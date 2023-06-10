@@ -31,6 +31,10 @@ const GroupSettingsPage = () => {
     () => group && geEditorPermission(group.permission),
     [group]
   )
+  const hasOwnerPermission = useMemo(
+    () => group && geOwnerPermission(group.permission),
+    [group]
+  )
 
   if (error) {
     return null
@@ -51,7 +55,7 @@ const GroupSettingsPage = () => {
           <Text>{group.name}</Text>
           <IconButton
             icon={<IconEdit />}
-            disabled={!hasEditPermission}
+            isDisabled={!hasEditPermission}
             aria-label=""
             onClick={() => {
               setIsNameModalOpen(true)
@@ -64,7 +68,7 @@ const GroupSettingsPage = () => {
           <Spacer />
           <IconButton
             icon={<IconUserPlus />}
-            disabled={!hasEditPermission}
+            isDisabled={!hasOwnerPermission}
             aria-label=""
             onClick={() => {
               setIsAddMembersModalOpen(true)
@@ -79,7 +83,7 @@ const GroupSettingsPage = () => {
             icon={<IconTrash />}
             variant="solid"
             colorScheme="red"
-            disabled={!hasEditPermission}
+            isDisabled={!hasOwnerPermission}
             aria-label=""
             onClick={() => setDeleteModalOpen(true)}
           />
@@ -89,20 +93,16 @@ const GroupSettingsPage = () => {
           group={group}
           onClose={() => setIsNameModalOpen(false)}
         />
-        {geOwnerPermission(group.permission) && (
-          <>
-            <AddMember
-              open={isAddMembersModalOpen}
-              group={group}
-              onClose={() => setIsAddMembersModalOpen(false)}
-            />
-            <Delete
-              open={deleteModalOpen}
-              group={group}
-              onClose={() => setDeleteModalOpen(false)}
-            />
-          </>
-        )}
+        <AddMember
+          open={isAddMembersModalOpen}
+          group={group}
+          onClose={() => setIsAddMembersModalOpen(false)}
+        />
+        <Delete
+          open={deleteModalOpen}
+          group={group}
+          onClose={() => setDeleteModalOpen(false)}
+        />
       </Stack>
     </>
   )

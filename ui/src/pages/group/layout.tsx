@@ -4,7 +4,6 @@ import { Heading, Stack, Tab, TabList, Tabs } from '@chakra-ui/react'
 import { variables } from '@koupr/ui'
 import GroupAPI from '@/api/group'
 import { swrConfig } from '@/api/options'
-import { geEditorPermission } from '@/api/permission'
 
 const GroupLayout = () => {
   const location = useLocation()
@@ -36,11 +35,9 @@ const GroupLayout = () => {
           <Tab onClick={() => navigate(`/group/${groupId}/member`)}>
             Members
           </Tab>
-          {geEditorPermission(group.permission) && (
-            <Tab onClick={() => navigate(`/group/${groupId}/settings`)}>
-              Settings
-            </Tab>
-          )}
+          <Tab onClick={() => navigate(`/group/${groupId}/settings`)}>
+            Settings
+          </Tab>
         </TabList>
       </Tabs>
       <Outlet />

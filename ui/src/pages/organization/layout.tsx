@@ -4,7 +4,7 @@ import { Heading, Stack, Tab, TabList, Tabs } from '@chakra-ui/react'
 import { variables } from '@koupr/ui'
 import { swrConfig } from '@/api/options'
 import OrganizationAPI from '@/api/organization'
-import { geEditorPermission, geOwnerPermission } from '@/api/permission'
+import { geOwnerPermission } from '@/api/permission'
 
 const OrganizationLayout = () => {
   const location = useLocation()
@@ -38,16 +38,15 @@ const OrganizationLayout = () => {
           <Tab onClick={() => navigate(`/organization/${orgId}/member`)}>
             Members
           </Tab>
-          {geOwnerPermission(org.permission) && (
-            <Tab onClick={() => navigate(`/organization/${orgId}/invitation`)}>
-              Invitations
-            </Tab>
-          )}
-          {geEditorPermission(org.permission) && (
-            <Tab onClick={() => navigate(`/organization/${orgId}/settings`)}>
-              Settings
-            </Tab>
-          )}
+          <Tab
+            onClick={() => navigate(`/organization/${orgId}/invitation`)}
+            display={geOwnerPermission(org.permission) ? 'auto' : 'none'}
+          >
+            Invitations
+          </Tab>
+          <Tab onClick={() => navigate(`/organization/${orgId}/settings`)}>
+            Settings
+          </Tab>
         </TabList>
       </Tabs>
       <Outlet />
