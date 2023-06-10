@@ -963,11 +963,10 @@ func (svc *FileService) doSorting(data []model.File, sortBy string, sortOrder st
 	return data
 }
 
-func (svc *FileService) doPaging(files []model.File, page uint, size uint) ([]model.File, uint, uint) {
+func (svc *FileService) doPaging(files []model.File, page uint, size uint) (pagedFiles []model.File, totalElements uint, totalPages uint) {
 	page = page - 1
 	low := size * page
 	high := low + size
-	var pagedFiles []model.File
 	if low >= uint(len(files)) {
 		pagedFiles = []model.File{}
 	} else if high >= uint(len(files)) {
@@ -976,8 +975,7 @@ func (svc *FileService) doPaging(files []model.File, page uint, size uint) ([]mo
 	} else {
 		pagedFiles = files[low:high]
 	}
-	totalElements := uint(len(files))
-	var totalPages uint
+	totalElements = uint(len(files))
 	if totalElements == 0 {
 		totalPages = 1
 	} else {
@@ -1045,22 +1043,22 @@ func (svc *FileService) Search(req FileSearchOptions, page uint, size uint, user
 	return res, nil
 }
 
-func (svc *FileService) doFilteringAndPaging(req FileSearchOptions, files []model.File, page uint, size uint, userID string) ([]model.File, uint, uint, error) {
+func (svc *FileService) doFilteringAndPaging(opts FileSearchOptions, files []model.File, page uint, size uint, userID string) (filteredFiles []model.File, totalElements uint, totalPages uint, err error) {
 	filtered, _ := rxgo.Just(files)().
 		Filter(func(v interface{}) bool {
-			return v.(model.File).GetWorkspaceID() == req.WorkspaceID
+			return v.(model.File).GetWorkspaceID() == opts.WorkspaceID
 		}).
 		Filter(func(v interface{}) bool {
-			if req.Type != nil {
-				return v.(model.File).GetType() == *req.Type
+			if opts.Type != nil {
+				return v.(model.File).GetType() == *opts.Type
 			} else {
 				return true
 			}
 		}).
 		Filter(func(v interface{}) bool {
 			file := v.(model.File)
-			if req.ParentID != nil {
-				res, err := svc.fileRepo.IsGrandChildOf(file.GetID(), *req.ParentID)
+			if opts.ParentID != nil {
+				res, err := svc.fileRepo.IsGrandChildOf(file.GetID(), *opts.ParentID)
 				if err != nil {
 					return false
 				}
@@ -1070,35 +1068,35 @@ func (svc *FileService) doFilteringAndPaging(req FileSearchOptions, files []mode
 			}
 		}).
 		Filter(func(v interface{}) bool {
-			if req.CreateTimeBefore != nil {
+			if opts.CreateTimeBefore != nil {
 				t, _ := time.Parse(time.RFC3339, v.(model.File).GetCreateTime())
-				return t.UnixMilli() >= *req.CreateTimeAfter
+				return t.UnixMilli() >= *opts.CreateTimeAfter
 			} else {
 				return true
 			}
 		}).
 		Filter(func(v interface{}) bool {
-			if req.CreateTimeBefore != nil {
+			if opts.CreateTimeBefore != nil {
 				t, _ := time.Parse(time.RFC3339, v.(model.File).GetCreateTime())
-				return t.UnixMilli() <= *req.CreateTimeBefore
+				return t.UnixMilli() <= *opts.CreateTimeBefore
 			} else {
 				return true
 			}
 		}).
 		Filter(func(v interface{}) bool {
-			if req.UpdateTimeAfter != nil {
+			if opts.UpdateTimeAfter != nil {
 				file := v.(model.File)
 				t, _ := time.Parse(time.RFC3339, v.(model.File).GetCreateTime())
-				return file.GetUpdateTime() != nil && t.UnixMilli() >= *req.UpdateTimeAfter
+				return file.GetUpdateTime() != nil && t.UnixMilli() >= *opts.UpdateTimeAfter
 			} else {
 				return true
 			}
 		}).
 		Filter(func(v interface{}) bool {
-			if req.UpdateTimeBefore != nil {
+			if opts.UpdateTimeBefore != nil {
 				file := v.(model.File)
 				t, _ := time.Parse(time.RFC3339, v.(model.File).GetCreateTime())
-				return file.GetUpdateTime() != nil && t.UnixMilli() <= *req.UpdateTimeBefore
+				return file.GetUpdateTime() != nil && t.UnixMilli() <= *opts.UpdateTimeBefore
 			} else {
 				return true
 			}
@@ -1106,21 +1104,20 @@ func (svc *FileService) doFilteringAndPaging(req FileSearchOptions, files []mode
 		Skip((page - 1) * size).
 		Take(size).
 		ToSlice(0)
-	var res []model.File
 	for _, v := range filtered {
 		var file model.File
 		file, err := svc.fileCache.Get(v.(model.File).GetID())
 		if err != nil {
 			return nil, 0, 0, err
 		}
-		res = append(res, file)
+		filteredFiles = append(filteredFiles, file)
 	}
-	totalPages := uint(len(res)) / size
+	totalPages = uint(len(filteredFiles)) / size
 	if totalPages == 0 {
 		totalPages = 1
 	}
-	totalElements := uint(len(res))
-	return res, totalElements, totalPages, nil
+	totalElements = uint(len(filteredFiles))
+	return filteredFiles, totalElements, totalPages, nil
 }
 
 func (svc *FileService) GetPath(id string, userID string) ([]*File, error) {
