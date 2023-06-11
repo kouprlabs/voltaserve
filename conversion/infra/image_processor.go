@@ -14,14 +14,16 @@ import (
 )
 
 type ImageProcessor struct {
-	cmd    *Command
-	config config.Config
+	cmd         *Command
+	languageAPI *LanguageAPI
+	config      config.Config
 }
 
 func NewImageProcessor() *ImageProcessor {
 	return &ImageProcessor{
-		cmd:    NewCommand(),
-		config: config.GetConfig(),
+		cmd:         NewCommand(),
+		languageAPI: NewLanguageAPI(),
+		config:      config.GetConfig(),
 	}
 }
 
@@ -236,7 +238,7 @@ func (p *ImageProcessor) ImageData(inputPath string) (ImageData, error) {
 			continue
 		}
 		result.Text = string(b)
-		detection, err := DetectLanguage(result.Text)
+		detection, err := p.languageAPI.Detect(result.Text)
 		if err == nil {
 			result.LanguageProps = &detection
 		}

@@ -3,8 +3,10 @@ package infra
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
+	"voltaserve/config"
 )
 
 type LanguageProps struct {
@@ -12,7 +14,17 @@ type LanguageProps struct {
 	Score    float64 `json:"score"`
 }
 
-func DetectLanguage(text string) (LanguageProps, error) {
+type LanguageAPI struct {
+	config config.Config
+}
+
+func NewLanguageAPI() *LanguageAPI {
+	return &LanguageAPI{
+		config: config.GetConfig(),
+	}
+}
+
+func (api *LanguageAPI) Detect(text string) (LanguageProps, error) {
 	requestBody := struct {
 		Text string `json:"text"`
 	}{
@@ -22,8 +34,7 @@ func DetectLanguage(text string) (LanguageProps, error) {
 	if err != nil {
 		return LanguageProps{}, err
 	}
-	url := "http://localhost:5002/v1/detect"
-	response, err := http.Post(url, "application/json", bytes.NewBuffer(jsonBody))
+	response, err := http.Post(fmt.Sprintf("%s/v1/detect", api.config.LanguageURL), "application/json", bytes.NewBuffer(jsonBody))
 	if err != nil {
 		return LanguageProps{}, err
 	}

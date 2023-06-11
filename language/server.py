@@ -8,6 +8,10 @@ app = Flask(__name__)
 nlp = spacy.blank('xx')
 nlp.add_pipe('language_detector')
 
+@app.route('/v1/health', methods=['GET'])
+def health():
+  return 'OK'
+
 @app.route('/v1/detect', methods=['POST'])
 def ocr_image_to_data():
   content = request.json
