@@ -5,6 +5,7 @@ type PipelineOptions struct {
 	SnapshotID string `json:"snapshotId"`
 	Bucket     string `json:"bucket"`
 	Key        string `json:"key"`
+	Language   string `json:"language"`
 }
 
 type PipelineResponse struct {
@@ -14,6 +15,7 @@ type PipelineResponse struct {
 	Text      *S3Object       `json:"text,omitempty"`
 	OCR       *S3Object       `json:"ocr,omitempty"`
 	Thumbnail *Thumbnail      `json:"thumbnail,omitempty"`
+	Language  *string         `json:"language,omitempty"`
 }
 
 type S3Object struct {

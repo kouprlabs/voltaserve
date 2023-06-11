@@ -1,0 +1,5 @@
+Flask==2.3.2
+spacy==3.5.3
+spacy-fastlang==1.0.1
+iso639-lang==2.1.0
+black==23.3.0

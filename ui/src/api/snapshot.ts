@@ -5,6 +5,7 @@ export type Snapshot = {
   ocr?: Download
   text?: Download
   thumbnail?: Thumbnail
+  language?: string
 }
 
 export type Download = {

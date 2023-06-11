@@ -26,19 +26,23 @@ require (
 	github.com/minio/sha256-simd v1.0.1 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
+	github.com/pemistahl/lingua-go v1.3.4 // indirect
 	github.com/philhofer/fwd v1.1.2 // indirect
 	github.com/rivo/uniseg v0.4.4 // indirect
 	github.com/rs/xid v1.5.0 // indirect
 	github.com/savsgio/dictpool v0.0.0-20221023140959-7bf2e61cea94 // indirect
 	github.com/savsgio/gotils v0.0.0-20230208104028-c358bd845dee // indirect
-	github.com/stretchr/testify v1.8.2 // indirect
+	github.com/shopspring/decimal v1.3.1 // indirect
+	github.com/stretchr/testify v1.8.4 // indirect
 	github.com/tinylib/msgp v1.1.8 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasthttp v1.47.0 // indirect
 	github.com/valyala/tcplisten v1.0.0 // indirect
 	golang.org/x/crypto v0.9.0 // indirect
+	golang.org/x/exp v0.0.0-20221106115401-f9659909a136 // indirect
 	golang.org/x/net v0.10.0 // indirect
 	golang.org/x/sys v0.8.0 // indirect
 	golang.org/x/text v0.9.0 // indirect
+	google.golang.org/protobuf v1.30.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 )

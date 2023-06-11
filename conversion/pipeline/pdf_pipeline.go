@@ -48,7 +48,7 @@ func (p *pdfPipeline) Run(opts core.PipelineOptions) (core.PipelineResponse, err
 		},
 	}
 	workingPath := inputPath
-	outputPath, _ := p.pdfProc.GenerateOCR(workingPath)
+	outputPath, _ := p.pdfProc.GenerateOCR(workingPath, opts.Language)
 	if _, err := os.Stat(outputPath); !os.IsNotExist(err) {
 		stat, err := os.Stat(outputPath)
 		if err != nil {

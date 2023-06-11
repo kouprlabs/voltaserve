@@ -39,6 +39,7 @@ type snapshotEntity struct {
 	Text       datatypes.JSON `json:"text,omitempty" gorm:"column:text"`
 	OCR        datatypes.JSON `json:"ocr,omitempty" gorm:"column:ocr"`
 	Thumbnail  datatypes.JSON `json:"thumbnail,omitempty" gorm:"column:thumbnail"`
+	Language   *string        `json:"language,omitempty" gorm:"column:language"`
 	CreateTime string         `json:"createTime" gorm:"column:create_time"`
 	UpdateTime *string        `json:"updateTime,omitempty" gorm:"column:update_time"`
 }
@@ -126,6 +127,10 @@ func (s snapshotEntity) GetThumbnail() *model.Thumbnail {
 	return &res
 }
 
+func (s snapshotEntity) GetLanguage() *string {
+	return s.Language
+}
+
 func (s *snapshotEntity) SetID(id string) {
 	s.ID = id
 }
@@ -189,6 +194,10 @@ func (s *snapshotEntity) SetThumbnail(m *model.Thumbnail) {
 	}
 }
 
+func (s *snapshotEntity) SetLanguage(language string) {
+	s.Language = &language
+}
+
 func (s snapshotEntity) HasOriginal() bool {
 	return s.Original != nil
 }
@@ -207,6 +216,10 @@ func (s snapshotEntity) HasOCR() bool {
 
 func (s snapshotEntity) HasThumbnail() bool {
 	return s.Thumbnail != nil
+}
+
+func (s snapshotEntity) HasLanguage() bool {
+	return s.Language != nil
 }
 
 func (s snapshotEntity) GetCreateTime() string {

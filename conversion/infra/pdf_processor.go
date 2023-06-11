@@ -1,6 +1,7 @@
 package infra
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -23,9 +24,13 @@ func NewPDFProcessor() *PDFProcessor {
 	}
 }
 
-func (p *PDFProcessor) GenerateOCR(inputPath string) (string, error) {
+func (p *PDFProcessor) GenerateOCR(inputPath string, language string) (string, error) {
 	outputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewId() + ".pdf")
-	if err := p.cmd.Exec("ocrmypdf", "--rotate-pages", "--clean", "--deskew", "--image-dpi=300", inputPath, outputPath); err != nil {
+	languageOption := ""
+	if language != "" {
+		languageOption = fmt.Sprintf("--language=%s", language)
+	}
+	if err := p.cmd.Exec("ocrmypdf", "--rotate-pages", "--clean", "--deskew", "--image-dpi=300", languageOption, inputPath, outputPath); err != nil {
 		return "", err
 	}
 	return outputPath, nil

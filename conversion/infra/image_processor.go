@@ -145,12 +145,14 @@ func (p *ImageProcessor) ToBase64(path string) (string, error) {
 	return "data:" + mimeType + ";base64," + base64.StdEncoding.EncodeToString(b), nil
 }
 
-type ImageToDataResult struct {
+type ImageData struct {
 	Data                []TesseractData
 	NegativeConfCount   int64
 	NegativeConfPercent float32
 	PositiveConfCount   int64
 	PositiveConfPercent float32
+	Text                string
+	LanguageProps       *LanguageProps
 }
 
 type TesseractData struct {
@@ -168,54 +170,96 @@ type TesseractData struct {
 	WordNum  int64
 }
 
-func (p *ImageProcessor) ImageToData(inputPath string) (ImageToDataResult, error) {
-	basePath := filepath.FromSlash(os.TempDir() + "/" + helper.NewId())
-	tsvPath := filepath.FromSlash(basePath + ".tsv")
-	if err := p.cmd.Exec("tesseract", inputPath, basePath, "tsv"); err != nil {
-		return ImageToDataResult{}, err
+func (p *ImageProcessor) ImageData(inputPath string) (ImageData, error) {
+	languages := []string{
+		"eng", "deu", "fra", "nld", "ita", "spa", "por", "nor", "swe", "fin", "dan", "rus", "jpn",
+		"chi_sim", "chi_tra", "kor", "vie", "hin", "ben", "mar", "tel", "pan", "urd", "tur", "ind", "ara",
 	}
-	var res = ImageToDataResult{}
-	f, err := os.Open(tsvPath)
-	if err != nil {
-		return ImageToDataResult{}, err
+	results := []ImageData{}
+	for _, language := range languages {
+		basePath := filepath.FromSlash(os.TempDir() + "/" + helper.NewId())
+		tsvPath := filepath.FromSlash(basePath + ".tsv")
+		if err := p.cmd.Exec("tesseract", inputPath, basePath, "-l", language, "tsv"); err != nil {
+			continue
+		}
+		var result = ImageData{}
+		f, err := os.Open(tsvPath)
+		if err != nil {
+			continue
+		}
+		b, err := io.ReadAll(f)
+		if err != nil {
+			continue
+		}
+		lines := strings.Split(string(b), "\n")
+		lines = lines[1 : len(lines)-2]
+		for _, l := range lines {
+			values := strings.Split(l, "\t")
+			data := TesseractData{}
+			data.Level, _ = strconv.ParseInt(values[0], 10, 64)
+			data.PageNum, _ = strconv.ParseInt(values[1], 10, 64)
+			data.BlockNum, _ = strconv.ParseInt(values[2], 10, 64)
+			data.ParNum, _ = strconv.ParseInt(values[3], 10, 64)
+			data.LineNum, _ = strconv.ParseInt(values[4], 10, 64)
+			data.WordNum, _ = strconv.ParseInt(values[5], 10, 64)
+			data.Left, _ = strconv.ParseInt(values[6], 10, 64)
+			data.Top, _ = strconv.ParseInt(values[7], 10, 64)
+			data.Width, _ = strconv.ParseInt(values[8], 10, 64)
+			data.Height, _ = strconv.ParseInt(values[9], 10, 64)
+			data.Conf, _ = strconv.ParseInt(values[10], 10, 64)
+			data.Text = values[11]
+			result.Data = append(result.Data, data)
+		}
+		for _, v := range result.Data {
+			if v.Conf < 0 {
+				result.NegativeConfCount++
+			} else {
+				result.PositiveConfCount++
+			}
+		}
+		if len(result.Data) > 0 {
+			result.NegativeConfPercent = float32((int(result.NegativeConfCount) * 100) / len(result.Data))
+			result.PositiveConfPercent = float32((int(result.PositiveConfCount) * 100) / len(result.Data))
+		}
+		if err := os.Remove(tsvPath); err != nil {
+			continue
+		}
+		if err := p.cmd.Exec("tesseract", inputPath, basePath, "-l", language, "txt"); err != nil {
+			return ImageData{}, err
+		}
+		f, err = os.Open(filepath.FromSlash(basePath + ".txt"))
+		if err != nil {
+			continue
+		}
+		b, err = io.ReadAll(f)
+		if err != nil {
+			continue
+		}
+		result.Text = string(b)
+		detection, err := DetectLanguage(result.Text)
+		if err == nil {
+			result.LanguageProps = &detection
+		}
+		results = append(results, result)
 	}
-	b, err := io.ReadAll(f)
-	if err != nil {
-		return ImageToDataResult{}, err
-	}
-	text := string(b)
-	lines := strings.Split(text, "\n")
-	lines = lines[1 : len(lines)-2]
-	for _, l := range lines {
-		values := strings.Split(l, "\t")
-		data := TesseractData{}
-		data.Level, _ = strconv.ParseInt(values[0], 10, 64)
-		data.PageNum, _ = strconv.ParseInt(values[1], 10, 64)
-		data.BlockNum, _ = strconv.ParseInt(values[2], 10, 64)
-		data.ParNum, _ = strconv.ParseInt(values[3], 10, 64)
-		data.LineNum, _ = strconv.ParseInt(values[4], 10, 64)
-		data.WordNum, _ = strconv.ParseInt(values[5], 10, 64)
-		data.Left, _ = strconv.ParseInt(values[6], 10, 64)
-		data.Top, _ = strconv.ParseInt(values[7], 10, 64)
-		data.Width, _ = strconv.ParseInt(values[8], 10, 64)
-		data.Height, _ = strconv.ParseInt(values[9], 10, 64)
-		data.Conf, _ = strconv.ParseInt(values[10], 10, 64)
-		data.Text = values[11]
-		res.Data = append(res.Data, data)
-	}
-	for _, v := range res.Data {
-		if v.Conf < 0 {
-			res.NegativeConfCount++
-		} else {
-			res.PositiveConfCount++
+	var chosen = results[0]
+	for _, result := range results {
+		if result.LanguageProps == nil {
+			continue
+		}
+		if chosen.LanguageProps == nil {
+			chosen = result
+			continue
+		}
+		isSupportedLanguage := false
+		for _, l := range languages {
+			if result.LanguageProps.Language == l {
+				isSupportedLanguage = true
+			}
+		}
+		if isSupportedLanguage && result.LanguageProps.Score > 0.5 && result.LanguageProps.Score > chosen.LanguageProps.Score && result.PositiveConfCount > result.NegativeConfCount && result.PositiveConfCount > chosen.PositiveConfCount {
+			chosen = result
 		}
 	}
-	if len(res.Data) > 0 {
-		res.NegativeConfPercent = float32((int(res.NegativeConfCount) * 100) / len(res.Data))
-		res.PositiveConfPercent = float32((int(res.PositiveConfCount) * 100) / len(res.Data))
-	}
-	if err := os.Remove(tsvPath); err != nil {
-		return ImageToDataResult{}, err
-	}
-	return res, nil
+	return chosen, nil
 }

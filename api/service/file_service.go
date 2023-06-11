@@ -32,6 +32,7 @@ type File struct {
 	Preview     *Download   `json:"preview,omitempty"`
 	OCR         *Download   `json:"ocr,omitempty"`
 	Thumbnail   *Thumbnail  `json:"thumbnail,omitempty"`
+	Language    *string     `json:"language,omitempty"`
 	Snapshots   []*Snapshot `json:"snapshots,omitempty"`
 	Permission  string      `json:"permission"`
 	IsShared    bool        `json:"isShared"`
@@ -129,6 +130,7 @@ type Snapshot struct {
 	Preview   *Download  `json:"preview,omitempty"`
 	OCR       *Download  `json:"ocr,omitempty"`
 	Thumbnail *Thumbnail `json:"thumbnail,omitempty"`
+	Language  *string    `json:"language,omitempty"`
 }
 
 type ImageProps struct {
@@ -162,11 +164,12 @@ type GroupPermission struct {
 
 type UpdateSnapshotOptions struct {
 	Options   infra.RunPipelineOptions `json:"options"`
-	Original  *model.S3Object          `json:"original"`
-	Preview   *model.S3Object          `json:"preview"`
-	Text      *model.S3Object          `json:"text"`
-	OCR       *model.S3Object          `json:"ocr"`
-	Thumbnail *model.Thumbnail         `json:"thumbnail"`
+	Original  *model.S3Object          `json:"original,omitempty"`
+	Preview   *model.S3Object          `json:"preview,omitempty"`
+	Text      *model.S3Object          `json:"text,omitempty"`
+	OCR       *model.S3Object          `json:"ocr,omitempty"`
+	Thumbnail *model.Thumbnail         `json:"thumbnail,omitempty"`
+	Language  *string                  `json:"language,omitempty"`
 }
 
 const SortByName = "name"
@@ -377,6 +380,9 @@ func (svc *FileService) UpdateSnapshot(opts UpdateSnapshotOptions, apiKey string
 	}
 	if opts.Text != nil {
 		snapshot.SetText(opts.Text)
+	}
+	if opts.Language != nil {
+		snapshot.SetLanguage(*opts.Language)
 	}
 	if err := svc.snapshotRepo.Save(snapshot); err != nil {
 		return err
@@ -1801,6 +1807,7 @@ func (mp *FileMapper) MapFile(m model.File, userID string) (*File, error) {
 		res.Preview = latest.Preview
 		res.OCR = latest.OCR
 		res.Thumbnail = latest.Thumbnail
+		res.Language = latest.Language
 	}
 	res.Permission = ""
 	for _, p := range m.GetUserPermissions() {
@@ -1862,6 +1869,9 @@ func (mp *FileMapper) MapSnapshot(m model.Snapshot) *Snapshot {
 	}
 	if m.HasThumbnail() {
 		s.Thumbnail = mp.MapThumbnail(m.GetThumbnail())
+	}
+	if m.HasLanguage() {
+		s.Language = m.GetLanguage()
 	}
 	return s
 }
