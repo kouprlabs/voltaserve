@@ -156,6 +156,7 @@ services:
       test: curl --fail http://localhost:5001/v1/health || exit 1
     depends_on:
       - api
+      - language
       - minio
     restart: on-failure
   language:
