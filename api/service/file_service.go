@@ -344,12 +344,14 @@ func (svc *FileService) Store(fileID string, filePath string, userID string) (*F
 	if err != nil {
 		return nil, err
 	}
-	svc.conversionClient.RunPipeline(&infra.RunPipelineOptions{
+	if err := svc.conversionClient.RunPipeline(&infra.RunPipelineOptions{
 		FileID:     file.GetID(),
 		SnapshotID: snapshot.GetID(),
 		Bucket:     original.Bucket,
 		Key:        original.Key,
-	})
+	}); err != nil {
+		return nil, err
+	}
 	return res, nil
 }
 

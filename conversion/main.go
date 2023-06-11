@@ -43,11 +43,15 @@ func main() {
 	app.Post("v1/run_pipeline", func(c *fiber.Ctx) error {
 		apiKey := c.Query("api_key")
 		if apiKey == "" {
-			c.SendStatus(http.StatusBadRequest)
+			if err := c.SendStatus(http.StatusBadRequest); err != nil {
+				return err
+			}
 			return errors.New("missing query param api_key")
 		}
 		if apiKey != cfg.Security.APIKey {
-			c.SendStatus(http.StatusUnauthorized)
+			if err := c.SendStatus(http.StatusUnauthorized); err != nil {
+				return err
+			}
 			return errors.New("invalid api_key")
 		}
 		opts := new(core.PipelineOptions)
