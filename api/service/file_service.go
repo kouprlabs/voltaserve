@@ -30,6 +30,7 @@ type File struct {
 	Version     *int64      `json:"version,omitempty"`
 	Original    *Download   `json:"original,omitempty"`
 	Preview     *Download   `json:"preview,omitempty"`
+	OCR         *Download   `json:"ocr,omitempty"`
 	Thumbnail   *Thumbnail  `json:"thumbnail,omitempty"`
 	Snapshots   []*Snapshot `json:"snapshots,omitempty"`
 	Permission  string      `json:"permission"`
@@ -126,6 +127,7 @@ type Snapshot struct {
 	Version   int64      `json:"version"`
 	Original  *Download  `json:"original,omitempty"`
 	Preview   *Download  `json:"preview,omitempty"`
+	OCR       *Download  `json:"ocr,omitempty"`
 	Thumbnail *Thumbnail `json:"thumbnail,omitempty"`
 }
 
@@ -387,35 +389,6 @@ func (svc *FileService) UpdateSnapshot(opts UpdateSnapshotOptions, apiKey string
 	return nil
 }
 
-func (svc *FileService) DownloadOriginalFile(id string, userID string) (string, model.File, model.Snapshot, error) {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return "", nil, nil, err
-	}
-	file, err := svc.fileCache.Get(id)
-	if err != nil {
-		return "", nil, nil, err
-	}
-	if err = svc.fileGuard.Authorize(user, file, model.PermissionViewer); err != nil {
-		return "", nil, nil, err
-	}
-	snapshots := file.GetSnapshots()
-	if len(snapshots) == 0 {
-		return "", nil, nil, errorpkg.NewSnapshotNotFoundError(nil)
-	}
-	latestSnapshot := snapshots[len(snapshots)-1]
-	if latestSnapshot.HasOriginal() {
-		original := latestSnapshot.GetOriginal()
-		path := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(original.Key))
-		if err := svc.s3.GetFile(original.Key, path, original.Bucket); err != nil {
-			return "", nil, nil, err
-		}
-		return path, file, latestSnapshot, nil
-	} else {
-		return "", nil, nil, errorpkg.NewS3ObjectNotFoundError(nil)
-	}
-}
-
 func (svc *FileService) DownloadOriginalBuffer(id string, userID string) (*bytes.Buffer, model.File, model.Snapshot, error) {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
@@ -445,35 +418,6 @@ func (svc *FileService) DownloadOriginalBuffer(id string, userID string) (*bytes
 	}
 }
 
-func (svc *FileService) DownloadPreviewFile(id string, userID string) (string, model.File, model.Snapshot, error) {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return "", nil, nil, err
-	}
-	file, err := svc.fileCache.Get(id)
-	if err != nil {
-		return "", nil, nil, err
-	}
-	if err = svc.fileGuard.Authorize(user, file, model.PermissionViewer); err != nil {
-		return "", nil, nil, err
-	}
-	snapshots := file.GetSnapshots()
-	if len(snapshots) == 0 {
-		return "", nil, nil, errorpkg.NewSnapshotNotFoundError(nil)
-	}
-	latestSnapshot := snapshots[len(snapshots)-1]
-	if latestSnapshot.HasPreview() {
-		preview := latestSnapshot.GetPreview()
-		path := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(preview.Key))
-		if err := svc.s3.GetFile(preview.Key, path, preview.Bucket); err != nil {
-			return "", nil, nil, err
-		}
-		return path, file, latestSnapshot, nil
-	} else {
-		return "", nil, nil, errorpkg.NewS3ObjectNotFoundError(nil)
-	}
-}
-
 func (svc *FileService) DownloadPreviewBuffer(id string, userID string) (*bytes.Buffer, model.File, model.Snapshot, error) {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
@@ -494,6 +438,35 @@ func (svc *FileService) DownloadPreviewBuffer(id string, userID string) (*bytes.
 	if latestSnapshot.HasPreview() {
 		preview := latestSnapshot.GetPreview()
 		buf, err := svc.s3.GetObject(preview.Key, preview.Bucket)
+		if err != nil {
+			return nil, nil, nil, err
+		}
+		return buf, file, latestSnapshot, nil
+	} else {
+		return nil, nil, nil, errorpkg.NewS3ObjectNotFoundError(nil)
+	}
+}
+
+func (svc *FileService) DownloadOCRBuffer(id string, userID string) (*bytes.Buffer, model.File, model.Snapshot, error) {
+	user, err := svc.userRepo.Find(userID)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	file, err := svc.fileCache.Get(id)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	if err = svc.fileGuard.Authorize(user, file, model.PermissionViewer); err != nil {
+		return nil, nil, nil, err
+	}
+	snapshots := file.GetSnapshots()
+	if len(snapshots) == 0 {
+		return nil, nil, nil, errorpkg.NewSnapshotNotFoundError(nil)
+	}
+	latestSnapshot := snapshots[len(snapshots)-1]
+	if latestSnapshot.HasOCR() {
+		ocr := latestSnapshot.GetOCR()
+		buf, err := svc.s3.GetObject(ocr.Key, ocr.Bucket)
 		if err != nil {
 			return nil, nil, nil, err
 		}
@@ -1824,6 +1797,7 @@ func (mp *FileMapper) MapFile(m model.File, userID string) (*File, error) {
 		res.Version = &latest.Version
 		res.Original = latest.Original
 		res.Preview = latest.Preview
+		res.OCR = latest.OCR
 		res.Thumbnail = latest.Thumbnail
 	}
 	res.Permission = ""
@@ -1880,6 +1854,9 @@ func (mp *FileMapper) MapSnapshot(m model.Snapshot) *Snapshot {
 	}
 	if m.HasPreview() {
 		s.Preview = mp.MapPreview(m.GetPreview())
+	}
+	if m.HasOCR() {
+		s.OCR = mp.MapOCR(m.GetOCR())
 	}
 	if m.HasThumbnail() {
 		s.Thumbnail = mp.MapThumbnail(m.GetThumbnail())

@@ -2,23 +2,22 @@ import { useMemo } from 'react'
 import { File } from '@/api/file'
 import { getAccessTokenOrRedirect } from '@/infra/token'
 
-type PDFViewerProps = {
+type OCRViewerProps = {
   file: File
 }
 
-const PDFViewer = ({ file }: PDFViewerProps) => {
-  const download = useMemo(() => file.preview || file.original, [file])
-  const urlPath = useMemo(() => (file.preview ? 'preview' : 'original'), [file])
+const OCRViewer = ({ file }: OCRViewerProps) => {
+  const download = useMemo(() => file.ocr, [file])
   const url = useMemo(() => {
     if (!download || !download.extension) {
       return ''
     }
-    return `/proxy/api/v1/files/${file.id}/${urlPath}${
+    return `/proxy/api/v1/files/${file.id}/ocr${
       download.extension
     }?${new URLSearchParams({
       access_token: getAccessTokenOrRedirect(),
     })}`
-  }, [file, download, urlPath])
+  }, [file, download])
 
   if (!download) {
     return null
@@ -27,4 +26,4 @@ const PDFViewer = ({ file }: PDFViewerProps) => {
   return <iframe width="100%" height="100%" src={url} title={file.name} />
 }
 
-export default PDFViewer
+export default OCRViewer

@@ -747,6 +747,7 @@ func NewFileDownloadRouter() *FileDownloadRouter {
 func (r *FileDownloadRouter) AppendRoutes(g fiber.Router) {
 	g.Get("/:id/original:ext", r.DownloadOriginal)
 	g.Get("/:id/preview:ext", r.DownloadPreview)
+	g.Get("/:id/ocr:ext", r.DownloadOCR)
 }
 
 // DownloadOriginal godoc
@@ -809,6 +810,40 @@ func (r *FileDownloadRouter) DownloadPreview(c *fiber.Ctx) error {
 		return err
 	}
 	if filepath.Ext(snapshot.GetPreview().Key) != c.Params("ext") {
+		return errorpkg.NewS3ObjectNotFoundError(nil)
+	}
+	bytes := buf.Bytes()
+	c.Set("Content-Type", infra.DetectMimeFromBytes(bytes))
+	c.Set("Content-Disposition", fmt.Sprintf("filename=\"%s\"", file.GetName()))
+	return c.Send(bytes)
+}
+
+// DownloadOCR godoc
+//
+//	@Summary		Download OCR
+//	@Description	Download OCR
+//	@Tags			Files
+//	@Id				files_download_ocr
+//	@Produce		json
+//	@Param			id				path		string	true	"ID"
+//	@Param			access_token	query		string	true	"Access Token"
+//	@Failure		404				{object}	errorpkg.ErrorResponse
+//	@Failure		500				{object}	errorpkg.ErrorResponse
+//	@Router			/files/{id}/ocr{ext} [get]
+func (r *FileDownloadRouter) DownloadOCR(c *fiber.Ctx) error {
+	accessToken := c.Query("access_token")
+	if accessToken == "" {
+		return errorpkg.NewFileNotFoundError(nil)
+	}
+	userID, err := r.getUserID(accessToken)
+	if err != nil {
+		return c.SendStatus(http.StatusNotFound)
+	}
+	buf, file, snapshot, err := r.fileSvc.DownloadOCRBuffer(c.Params("id"), userID)
+	if err != nil {
+		return err
+	}
+	if filepath.Ext(snapshot.GetOCR().Key) != c.Params("ext") {
 		return errorpkg.NewS3ObjectNotFoundError(nil)
 	}
 	bytes := buf.Bytes()

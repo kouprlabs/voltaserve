@@ -35,6 +35,7 @@ export type File = {
   version: number
   original?: Download
   preview?: Download
+  ocr?: Download
   thumbnail?: Thumbnail
   snapshots: Snapshot[]
   permission: PermissionType
