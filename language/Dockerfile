@@ -6,6 +6,7 @@ COPY . .
 
 RUN dnf install -y python3-pip
 RUN dnf install -y python3-devel
+RUN dnf install -y clang
 
 RUN pip3 install -r requirements.txt
 ENV FLASK_APP=server.py
