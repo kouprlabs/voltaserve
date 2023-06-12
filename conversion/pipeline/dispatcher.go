@@ -25,32 +25,28 @@ func NewDispatcher() *Dispatcher {
 	}
 }
 
-func (svc *Dispatcher) Dispatch(opts core.PipelineOptions) (core.PipelineResponse, error) {
+func (svc *Dispatcher) Dispatch(opts core.PipelineOptions) error {
 	ext := filepath.Ext(opts.Key)
 	if svc.fileIdentifier.IsPDF(ext) {
-		res, err := svc.pdfPipeline.Run(opts)
-		if err != nil {
-			return core.PipelineResponse{}, err
+		if err := svc.pdfPipeline.Run(opts); err != nil {
+			return err
 		}
-		return res, nil
+		return nil
 	} else if svc.fileIdentifier.IsOffice(ext) || svc.fileIdentifier.IsPlainText(ext) {
-		res, err := svc.officePipeline.Run(opts)
-		if err != nil {
-			return core.PipelineResponse{}, err
+		if err := svc.officePipeline.Run(opts); err != nil {
+			return err
 		}
-		return res, nil
+		return nil
 	} else if svc.fileIdentifier.IsImage(ext) {
-		res, err := svc.imagePipeline.Run(opts)
-		if err != nil {
-			return core.PipelineResponse{}, err
+		if err := svc.imagePipeline.Run(opts); err != nil {
+			return err
 		}
-		return res, nil
+		return nil
 	} else if svc.fileIdentifier.IsVideo(ext) {
-		res, err := svc.videoPipeline.Run(opts)
-		if err != nil {
-			return core.PipelineResponse{}, err
+		if err := svc.videoPipeline.Run(opts); err != nil {
+			return err
 		}
-		return res, nil
+		return nil
 	}
-	return core.PipelineResponse{}, errors.New("no matching pipeline found")
+	return errors.New("no matching pipeline found")
 }

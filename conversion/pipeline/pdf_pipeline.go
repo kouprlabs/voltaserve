@@ -14,6 +14,7 @@ type pdfPipeline struct {
 	pdfProc   *infra.PDFProcessor
 	imageProc *infra.ImageProcessor
 	s3        *infra.S3Manager
+	apiClient *infra.APIClient
 	config    config.Config
 }
 
@@ -23,36 +24,46 @@ func NewPDFPipeline() core.Pipeline {
 		pdfProc:   infra.NewPDFProcessor(),
 		imageProc: infra.NewImageProcessor(),
 		s3:        infra.NewS3Manager(),
+		apiClient: infra.NewAPIClient(),
 		config:    config.GetConfig(),
 	}
 }
 
-func (p *pdfPipeline) Run(opts core.PipelineOptions) (core.PipelineResponse, error) {
+func (p *pdfPipeline) Run(opts core.PipelineOptions) error {
 	inputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewId() + filepath.Ext(opts.Key))
 	if err := p.s3.GetFile(opts.Key, inputPath, opts.Bucket); err != nil {
-		return core.PipelineResponse{}, err
+		return err
 	}
 	stat, err := os.Stat(inputPath)
 	if err != nil {
-		return core.PipelineResponse{}, err
+		return err
 	}
 	inputPath, err = p.normalize(inputPath)
 	if err != nil {
-		return core.PipelineResponse{}, err
+		return err
+	}
+	workingPath := inputPath
+	thumbnail, err := p.pdfProc.ThumbnailBase64(workingPath)
+	if err != nil {
+		return err
 	}
 	res := core.PipelineResponse{
+		Options: opts,
 		Preview: &core.S3Object{
 			Bucket: opts.Bucket,
 			Key:    opts.Key,
 			Size:   stat.Size(),
 		},
+		Thumbnail: &thumbnail,
 	}
-	workingPath := inputPath
+	if err := p.apiClient.UpdateSnapshot(&res); err != nil {
+		return err
+	}
 	outputPath, _ := p.pdfProc.GenerateOCR(workingPath, opts.Language)
 	if _, err := os.Stat(outputPath); !os.IsNotExist(err) {
 		stat, err := os.Stat(outputPath)
 		if err != nil {
-			return core.PipelineResponse{}, err
+			return err
 		}
 		s3Object := core.S3Object{
 			Bucket: opts.Bucket,
@@ -60,19 +71,17 @@ func (p *pdfPipeline) Run(opts core.PipelineOptions) (core.PipelineResponse, err
 			Size:   stat.Size(),
 		}
 		if err := p.s3.PutFile(s3Object.Key, outputPath, infra.DetectMimeFromFile(outputPath), s3Object.Bucket); err != nil {
-			return core.PipelineResponse{}, err
+			return err
 		}
 		res.OCR = &s3Object
+		if err := p.apiClient.UpdateSnapshot(&res); err != nil {
+			return err
+		}
 		workingPath = outputPath
 	}
-	thumbnail, err := p.pdfProc.ThumbnailBase64(workingPath)
-	if err != nil {
-		return core.PipelineResponse{}, err
-	}
-	res.Thumbnail = &thumbnail
 	text, size, err := p.pdfProc.ExtractText(workingPath)
 	if err != nil {
-		return core.PipelineResponse{}, err
+		return err
 	}
 	if len(text) > 0 {
 		s3Object := core.S3Object{
@@ -81,21 +90,24 @@ func (p *pdfPipeline) Run(opts core.PipelineOptions) (core.PipelineResponse, err
 			Size:   size,
 		}
 		if err := p.s3.PutText(s3Object.Key, text, "text/plain", s3Object.Bucket); err != nil {
-			return core.PipelineResponse{}, err
+			return err
 		}
 		res.Text = &s3Object
+		if err := p.apiClient.UpdateSnapshot(&res); err != nil {
+			return err
+		}
 	}
 	if _, err := os.Stat(inputPath); err == nil {
 		if err := os.Remove(inputPath); err != nil {
-			return core.PipelineResponse{}, err
+			return err
 		}
 	}
 	if _, err := os.Stat(outputPath); err == nil {
 		if err := os.Remove(outputPath); err != nil {
-			return core.PipelineResponse{}, err
+			return err
 		}
 	}
-	return res, nil
+	return nil
 }
 
 func (p *pdfPipeline) normalize(path string) (string, error) {

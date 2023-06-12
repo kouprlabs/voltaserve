@@ -16,6 +16,7 @@ type imagePipeline struct {
 	cmd         *infra.Command
 	imageProc   *infra.ImageProcessor
 	s3          *infra.S3Manager
+	apiClient   *infra.APIClient
 	config      config.Config
 }
 
@@ -25,39 +26,41 @@ func NewImagePipeline() core.Pipeline {
 		cmd:         infra.NewCommand(),
 		imageProc:   infra.NewImageProcessor(),
 		s3:          infra.NewS3Manager(),
+		apiClient:   infra.NewAPIClient(),
 		config:      config.GetConfig(),
 	}
 }
 
-func (p *imagePipeline) Run(opts core.PipelineOptions) (core.PipelineResponse, error) {
+func (p *imagePipeline) Run(opts core.PipelineOptions) error {
 	inputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewId() + filepath.Ext(opts.Key))
 	if err := p.s3.GetFile(opts.Key, inputPath, opts.Bucket); err != nil {
-		return core.PipelineResponse{}, err
+		return err
 	}
 	stat, err := os.Stat(inputPath)
 	if err != nil {
-		return core.PipelineResponse{}, err
+		return err
 	}
 	if filepath.Ext(inputPath) == ".tiff" {
 		newInputFile := filepath.FromSlash(os.TempDir() + "/" + helper.NewId() + ".jpg")
 		if err := p.imageProc.Convert(inputPath, newInputFile); err != nil {
-			return core.PipelineResponse{}, err
+			return err
 		}
 		if err := os.Remove(inputPath); err != nil {
-			return core.PipelineResponse{}, err
+			return err
 		}
 		inputPath = newInputFile
 	}
 
 	imageProps, err := p.imageProc.Measure(inputPath)
 	if err != nil {
-		return core.PipelineResponse{}, err
+		return err
 	}
 	thumbnail, err := p.imageProc.ThumbnailBase64(inputPath, imageProps)
 	if err != nil {
-		return core.PipelineResponse{}, err
+		return err
 	}
 	res := core.PipelineResponse{
+		Options: opts,
 		Original: &core.S3Object{
 			Bucket: opts.Bucket,
 			Key:    opts.Key,
@@ -66,15 +69,21 @@ func (p *imagePipeline) Run(opts core.PipelineOptions) (core.PipelineResponse, e
 		},
 		Thumbnail: &thumbnail,
 	}
+	if err := p.apiClient.UpdateSnapshot(&res); err != nil {
+		return err
+	}
 	imageData, err := p.imageProc.ImageData(inputPath)
 	if err == nil && imageData.PositiveConfCount > imageData.NegativeConfCount {
 		/* We treat this as a text image, we convert it to PDF/A */
 		if imageData.LanguageProps != nil {
 			opts.Language = imageData.LanguageProps.Language
 			res.Language = &imageData.LanguageProps.Language
+			if err := p.apiClient.UpdateSnapshot(&res); err != nil {
+				return err
+			}
 		}
-		pdfRes, err := p.pdfPipeline.Run(opts)
-		if err != nil {
+
+		if err := p.pdfPipeline.Run(opts); err != nil {
 			/*
 				Here we intentionally ignore the error, here is the explanation why:
 				The reason we came here to begin with is because of
@@ -84,16 +93,12 @@ func (p *imagePipeline) Run(opts core.PipelineOptions) (core.PipelineResponse, e
 				So we log the error and move on...
 			*/
 			log.Error(err)
-		} else {
-			res.OCR = pdfRes.OCR
-			res.Text = pdfRes.Text
-			return res, nil
 		}
 	}
 	if _, err := os.Stat(inputPath); err == nil {
 		if err := os.Remove(inputPath); err != nil {
-			return core.PipelineResponse{}, err
+			return err
 		}
 	}
-	return res, nil
+	return nil
 }

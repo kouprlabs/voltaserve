@@ -13,6 +13,7 @@ type videoPipeline struct {
 	imageProc *infra.ImageProcessor
 	videoProc *infra.VideoProcessor
 	s3        *infra.S3Manager
+	apiClient *infra.APIClient
 }
 
 func NewVideoPipeline() *videoPipeline {
@@ -21,24 +22,30 @@ func NewVideoPipeline() *videoPipeline {
 		imageProc: infra.NewImageProcessor(),
 		videoProc: infra.NewVideoProcessor(),
 		s3:        infra.NewS3Manager(),
+		apiClient: infra.NewAPIClient(),
 	}
 }
 
-func (p *videoPipeline) Run(opts core.PipelineOptions) (core.PipelineResponse, error) {
+func (p *videoPipeline) Run(opts core.PipelineOptions) error {
 	inputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewId() + filepath.Ext(opts.Key))
 	if err := p.s3.GetFile(opts.Key, inputPath, opts.Bucket); err != nil {
-		return core.PipelineResponse{}, err
+		return err
 	}
 	thumbnail, err := p.videoProc.ThumbnailBase64(inputPath)
 	if err != nil {
-		return core.PipelineResponse{}, err
+		return err
+	}
+	res := core.PipelineResponse{
+		Options:   opts,
+		Thumbnail: &thumbnail,
+	}
+	if err := p.apiClient.UpdateSnapshot(&res); err != nil {
+		return err
 	}
 	if _, err := os.Stat(inputPath); err == nil {
 		if err := os.Remove(inputPath); err != nil {
-			return core.PipelineResponse{}, err
+			return err
 		}
 	}
-	return core.PipelineResponse{
-		Thumbnail: &thumbnail,
-	}, nil
+	return nil
 }

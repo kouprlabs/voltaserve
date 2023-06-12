@@ -25,50 +25,44 @@ func NewOfficePipeline() core.Pipeline {
 	}
 }
 
-func (p *officePipeline) Run(opts core.PipelineOptions) (core.PipelineResponse, error) {
+func (p *officePipeline) Run(opts core.PipelineOptions) error {
 	inputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewId() + filepath.Ext(opts.Key))
 	if err := p.s3.GetFile(opts.Key, inputPath, opts.Bucket); err != nil {
-		return core.PipelineResponse{}, err
+		return err
 	}
 	outputPath, err := p.officeProc.PDF(inputPath)
 	if err != nil {
-		return core.PipelineResponse{}, err
+		return err
 	}
 	stat, err := os.Stat(outputPath)
 	if err != nil {
-		return core.PipelineResponse{}, err
+		return err
 	}
-	s3Object := core.S3Object{
+	preview := core.S3Object{
 		Bucket: opts.Bucket,
 		Key:    opts.FileID + "/" + opts.SnapshotID + "/preview.pdf",
 		Size:   stat.Size(),
 	}
-	if err := p.s3.PutFile(s3Object.Key, outputPath, infra.DetectMimeFromFile(outputPath), s3Object.Bucket); err != nil {
-		return core.PipelineResponse{}, err
+	if err := p.s3.PutFile(preview.Key, outputPath, infra.DetectMimeFromFile(outputPath), preview.Bucket); err != nil {
+		return err
 	}
-	res, err := p.pdfPipeline.Run(core.PipelineOptions{
-		Bucket:     s3Object.Bucket,
-		Key:        s3Object.Key,
+	if err := p.pdfPipeline.Run(core.PipelineOptions{
+		Bucket:     preview.Bucket,
+		Key:        preview.Key,
 		FileID:     opts.FileID,
 		SnapshotID: opts.SnapshotID,
-	})
-	if err != nil {
-		return core.PipelineResponse{}, err
+	}); err != nil {
+		return err
 	}
 	if _, err := os.Stat(inputPath); err == nil {
 		if err := os.Remove(inputPath); err != nil {
-			return core.PipelineResponse{}, err
+			return err
 		}
 	}
 	if _, err := os.Stat(outputPath); err == nil {
 		if err := os.Remove(outputPath); err != nil {
-			return core.PipelineResponse{}, err
+			return err
 		}
 	}
-	return core.PipelineResponse{
-		Preview:   &s3Object,
-		Thumbnail: res.Thumbnail,
-		OCR:       res.OCR,
-		Text:      res.Text,
-	}, nil
+	return nil
 }

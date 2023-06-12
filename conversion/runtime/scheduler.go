@@ -11,7 +11,6 @@ import (
 	"voltaserve/pipeline"
 
 	"github.com/fatih/color"
-	log "github.com/sirupsen/logrus"
 )
 
 type Scheduler struct {
@@ -41,11 +40,11 @@ func (s *Scheduler) Start() {
 
 func (s *Scheduler) Schedule(opts *core.PipelineOptions) {
 	index := 0
-	queueLength := len(s.queue[0])
+	length := len(s.queue[0])
 	for i := 0; i < s.workerCount; i++ {
-		if len(s.queue[i]) < queueLength {
+		if len(s.queue[i]) < length {
 			index = i
-			queueLength = len(s.queue[i])
+			length = len(s.queue[i])
 		}
 	}
 	fmt.Printf("[Scheduler] 👉 Choosing worker %d\n", index)
@@ -60,11 +59,10 @@ func (s *Scheduler) worker(index int) {
 		if len(s.queue[index]) > 0 {
 			s.activeCount++
 			opts := s.queue[index][0]
-			s.queue[index] = s.queue[index][1:]
 			fmt.Printf("[Worker %d] 🚀 Pipeline started ", index)
 			helper.PrintlnPipelineOptions(&opts)
 			start := time.Now()
-			pr, err := dispatcher.Dispatch(opts)
+			err := dispatcher.Dispatch(opts)
 			elapsed := time.Since(start)
 			fmt.Printf("[Worker %d] ⌚ Pipeline took ", index)
 			color.Set(color.FgMagenta)
@@ -72,20 +70,13 @@ func (s *Scheduler) worker(index int) {
 			color.Unset()
 			helper.PrintlnPipelineOptions(&opts)
 			if err == nil {
-				pr.Options = opts
-				fmt.Printf("[Worker %d] 📝 Updating snapshot ", index)
-				helper.PrintlnPipelineOptions(&opts)
-				if err := s.apiClient.UpdateSnapshot(&pr); err != nil {
-					fmt.Printf("[Worker %d] ⛈️  Failed to update snapshot! ", index)
-					helper.PrintlnPipelineOptions(&opts)
-					log.Error(err)
-				}
-				fmt.Printf("[Worker %d] 🎉 Succeeded! ", index)
+				fmt.Printf("[Worker %d] 🎉 Pipeline succeeded! ", index)
 				helper.PrintlnPipelineOptions(&opts)
 			} else {
 				fmt.Printf("[Worker %d] ⛈️  Pipeline failed! ", index)
 				helper.PrintlnPipelineOptions(&opts)
 			}
+			s.queue[index] = s.queue[index][1:]
 			s.activeCount--
 		} else {
 			time.Sleep(500 * time.Millisecond)
