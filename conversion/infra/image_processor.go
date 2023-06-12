@@ -227,10 +227,11 @@ func (p *ImageProcessor) ImageData(inputPath string) (ImageData, error) {
 		if err := os.Remove(tsvPath); err != nil {
 			continue
 		}
+		txtPath := filepath.FromSlash(basePath + ".txt")
 		if err := p.cmd.Exec("tesseract", inputPath, basePath, "-l", language, "txt"); err != nil {
 			return ImageData{}, err
 		}
-		f, err = os.Open(filepath.FromSlash(basePath + ".txt"))
+		f, err = os.Open(txtPath)
 		if err != nil {
 			continue
 		}
@@ -244,6 +245,9 @@ func (p *ImageProcessor) ImageData(inputPath string) (ImageData, error) {
 			result.LanguageProps = &detection
 		}
 		results = append(results, result)
+		if err := os.Remove(txtPath); err != nil {
+			continue
+		}
 	}
 	var chosen = results[0]
 	for _, result := range results {
