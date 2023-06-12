@@ -1,4 +1,4 @@
-package infra
+package client
 
 import (
 	"bytes"
@@ -14,17 +14,17 @@ type LanguageProps struct {
 	Score    float64 `json:"score"`
 }
 
-type LanguageAPI struct {
+type LanguageClient struct {
 	config config.Config
 }
 
-func NewLanguageAPI() *LanguageAPI {
-	return &LanguageAPI{
+func NewLanguageClient() *LanguageClient {
+	return &LanguageClient{
 		config: config.GetConfig(),
 	}
 }
 
-func (api *LanguageAPI) Detect(text string) (LanguageProps, error) {
+func (api *LanguageClient) Detect(text string) (LanguageProps, error) {
 	requestBody := struct {
 		Text string `json:"text"`
 	}{

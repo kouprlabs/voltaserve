@@ -24,11 +24,11 @@ func NewPDFProcessor() *PDFProcessor {
 	}
 }
 
-func (p *PDFProcessor) GenerateOCR(inputPath string, language string) (string, error) {
+func (p *PDFProcessor) GenerateOCR(inputPath string, language *string) (string, error) {
 	outputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewId() + ".pdf")
 	languageOption := ""
-	if language != "" {
-		languageOption = fmt.Sprintf("--language=%s", language)
+	if language != nil {
+		languageOption = fmt.Sprintf("--language=%s", *language)
 	}
 	if err := p.cmd.Exec("ocrmypdf", "--rotate-pages", "--clean", "--deskew", "--image-dpi=300", languageOption, inputPath, outputPath); err != nil {
 		return "", err

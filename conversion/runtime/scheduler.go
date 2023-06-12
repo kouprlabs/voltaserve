@@ -5,9 +5,9 @@ import (
 	"runtime"
 	"time"
 
+	"voltaserve/client"
 	"voltaserve/core"
 	"voltaserve/helper"
-	"voltaserve/infra"
 	"voltaserve/pipeline"
 
 	"github.com/fatih/color"
@@ -17,7 +17,7 @@ type Scheduler struct {
 	queue       [][]core.PipelineOptions
 	workerCount int
 	activeCount int
-	apiClient   *infra.APIClient
+	apiClient   *client.APIClient
 }
 
 func NewScheduler() *Scheduler {
@@ -25,7 +25,7 @@ func NewScheduler() *Scheduler {
 	return &Scheduler{
 		queue:       make([][]core.PipelineOptions, workerCount),
 		workerCount: workerCount,
-		apiClient:   infra.NewAPIClient(),
+		apiClient:   client.NewAPIClient(),
 	}
 }
 

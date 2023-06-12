@@ -1,11 +1,11 @@
 package core
 
 type PipelineOptions struct {
-	FileID     string `json:"fileId"`
-	SnapshotID string `json:"snapshotId"`
-	Bucket     string `json:"bucket"`
-	Key        string `json:"key"`
-	Language   string `json:"language"`
+	FileID     string  `json:"fileId"`
+	SnapshotID string  `json:"snapshotId"`
+	Bucket     string  `json:"bucket"`
+	Key        string  `json:"key"`
+	Language   *string `json:"language,omitempty"`
 }
 
 type PipelineResponse struct {

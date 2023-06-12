@@ -3,6 +3,7 @@ package pipeline
 import (
 	"os"
 	"path/filepath"
+	"voltaserve/client"
 	"voltaserve/core"
 	"voltaserve/helper"
 	"voltaserve/infra"
@@ -13,7 +14,7 @@ type videoPipeline struct {
 	imageProc *infra.ImageProcessor
 	videoProc *infra.VideoProcessor
 	s3        *infra.S3Manager
-	apiClient *infra.APIClient
+	apiClient *client.APIClient
 }
 
 func NewVideoPipeline() *videoPipeline {
@@ -22,7 +23,7 @@ func NewVideoPipeline() *videoPipeline {
 		imageProc: infra.NewImageProcessor(),
 		videoProc: infra.NewVideoProcessor(),
 		s3:        infra.NewS3Manager(),
-		apiClient: infra.NewAPIClient(),
+		apiClient: client.NewAPIClient(),
 	}
 }
 

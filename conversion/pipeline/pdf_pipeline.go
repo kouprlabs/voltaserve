@@ -3,6 +3,7 @@ package pipeline
 import (
 	"os"
 	"path/filepath"
+	"voltaserve/client"
 	"voltaserve/config"
 	"voltaserve/core"
 	"voltaserve/helper"
@@ -10,22 +11,24 @@ import (
 )
 
 type pdfPipeline struct {
-	cmd       *infra.Command
-	pdfProc   *infra.PDFProcessor
-	imageProc *infra.ImageProcessor
-	s3        *infra.S3Manager
-	apiClient *infra.APIClient
-	config    config.Config
+	cmd            *infra.Command
+	pdfProc        *infra.PDFProcessor
+	imageProc      *infra.ImageProcessor
+	s3             *infra.S3Manager
+	apiClient      *client.APIClient
+	languageClient *client.LanguageClient
+	config         config.Config
 }
 
 func NewPDFPipeline() core.Pipeline {
 	return &pdfPipeline{
-		cmd:       infra.NewCommand(),
-		pdfProc:   infra.NewPDFProcessor(),
-		imageProc: infra.NewImageProcessor(),
-		s3:        infra.NewS3Manager(),
-		apiClient: infra.NewAPIClient(),
-		config:    config.GetConfig(),
+		cmd:            infra.NewCommand(),
+		pdfProc:        infra.NewPDFProcessor(),
+		imageProc:      infra.NewImageProcessor(),
+		s3:             infra.NewS3Manager(),
+		apiClient:      client.NewAPIClient(),
+		languageClient: client.NewLanguageClient(),
+		config:         config.GetConfig(),
 	}
 }
 
@@ -55,6 +58,7 @@ func (p *pdfPipeline) Run(opts core.PipelineOptions) error {
 			Size:   stat.Size(),
 		},
 		Thumbnail: &thumbnail,
+		Language:  opts.Language,
 	}
 	if err := p.apiClient.UpdateSnapshot(&res); err != nil {
 		return err
@@ -95,6 +99,15 @@ func (p *pdfPipeline) Run(opts core.PipelineOptions) error {
 		res.Text = &s3Object
 		if err := p.apiClient.UpdateSnapshot(&res); err != nil {
 			return err
+		}
+		if res.Language == nil {
+			detection, err := p.languageClient.Detect(text)
+			if err == nil {
+				res.Language = &detection.Language
+			}
+			if err := p.apiClient.UpdateSnapshot(&res); err != nil {
+				return err
+			}
 		}
 	}
 	if _, err := os.Stat(inputPath); err == nil {

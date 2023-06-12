@@ -3,6 +3,7 @@ package pipeline
 import (
 	"os"
 	"path/filepath"
+	"voltaserve/client"
 	"voltaserve/config"
 	"voltaserve/core"
 	"voltaserve/helper"
@@ -16,7 +17,7 @@ type imagePipeline struct {
 	cmd         *infra.Command
 	imageProc   *infra.ImageProcessor
 	s3          *infra.S3Manager
-	apiClient   *infra.APIClient
+	apiClient   *client.APIClient
 	config      config.Config
 }
 
@@ -26,7 +27,7 @@ func NewImagePipeline() core.Pipeline {
 		cmd:         infra.NewCommand(),
 		imageProc:   infra.NewImageProcessor(),
 		s3:          infra.NewS3Manager(),
-		apiClient:   infra.NewAPIClient(),
+		apiClient:   client.NewAPIClient(),
 		config:      config.GetConfig(),
 	}
 }
@@ -74,15 +75,14 @@ func (p *imagePipeline) Run(opts core.PipelineOptions) error {
 	}
 	imageData, err := p.imageProc.ImageData(inputPath)
 	if err == nil && imageData.PositiveConfCount > imageData.NegativeConfCount {
-		/* We treat this as a text image, we convert it to PDF/A */
+		/* We treat it as a text image, we convert it to PDF/A */
 		if imageData.LanguageProps != nil {
-			opts.Language = imageData.LanguageProps.Language
+			opts.Language = &imageData.LanguageProps.Language
 			res.Language = &imageData.LanguageProps.Language
 			if err := p.apiClient.UpdateSnapshot(&res); err != nil {
 				return err
 			}
 		}
-
 		if err := p.pdfPipeline.Run(opts); err != nil {
 			/*
 				Here we intentionally ignore the error, here is the explanation why:

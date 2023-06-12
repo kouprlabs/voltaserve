@@ -8,22 +8,48 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"voltaserve/client"
 	"voltaserve/config"
 	"voltaserve/core"
 	"voltaserve/helper"
 )
 
 type ImageProcessor struct {
-	cmd         *Command
-	languageAPI *LanguageAPI
-	config      config.Config
+	cmd            *Command
+	languageClient *client.LanguageClient
+	config         config.Config
+}
+
+type ImageData struct {
+	Data                []TesseractData
+	NegativeConfCount   int64
+	NegativeConfPercent float32
+	PositiveConfCount   int64
+	PositiveConfPercent float32
+	Text                string
+	LanguageProps       *client.LanguageProps
+}
+
+type TesseractData struct {
+	BlockNum int64
+	Conf     int64
+	Height   int64
+	Left     int64
+	Level    int64
+	LineNum  int64
+	PageNum  int64
+	ParNum   int64
+	Text     string
+	Top      int64
+	Width    int64
+	WordNum  int64
 }
 
 func NewImageProcessor() *ImageProcessor {
 	return &ImageProcessor{
-		cmd:         NewCommand(),
-		languageAPI: NewLanguageAPI(),
-		config:      config.GetConfig(),
+		cmd:            NewCommand(),
+		languageClient: client.NewLanguageClient(),
+		config:         config.GetConfig(),
 	}
 }
 
@@ -147,31 +173,6 @@ func (p *ImageProcessor) ToBase64(path string) (string, error) {
 	return "data:" + mimeType + ";base64," + base64.StdEncoding.EncodeToString(b), nil
 }
 
-type ImageData struct {
-	Data                []TesseractData
-	NegativeConfCount   int64
-	NegativeConfPercent float32
-	PositiveConfCount   int64
-	PositiveConfPercent float32
-	Text                string
-	LanguageProps       *LanguageProps
-}
-
-type TesseractData struct {
-	BlockNum int64
-	Conf     int64
-	Height   int64
-	Left     int64
-	Level    int64
-	LineNum  int64
-	PageNum  int64
-	ParNum   int64
-	Text     string
-	Top      int64
-	Width    int64
-	WordNum  int64
-}
-
 func (p *ImageProcessor) ImageData(inputPath string) (ImageData, error) {
 	languages := []string{
 		"eng", "deu", "fra", "nld", "ita", "spa", "por", "nor", "swe", "fin", "dan", "rus", "jpn",
@@ -238,7 +239,7 @@ func (p *ImageProcessor) ImageData(inputPath string) (ImageData, error) {
 			continue
 		}
 		result.Text = string(b)
-		detection, err := p.languageAPI.Detect(result.Text)
+		detection, err := p.languageClient.Detect(result.Text)
 		if err == nil {
 			result.LanguageProps = &detection
 		}
