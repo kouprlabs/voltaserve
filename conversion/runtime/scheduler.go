@@ -17,28 +17,38 @@ import (
 type Scheduler struct {
 	pipelineQueue       [][]core.PipelineOptions
 	builderQueue        [][]core.PipelineOptions
-	workerCount         int
+	pipelineWorkerCount int
+	builderWorkerCount  int
 	activePipelineCount int
 	activeBuilderCount  int
 	apiClient           *client.APIClient
 }
 
 func NewScheduler() *Scheduler {
-	workerCount := runtime.NumCPU()
+	var pipelineWorkerCount int
+	var builderWorkerCount int
+	if runtime.NumCPU() == 1 {
+		pipelineWorkerCount = 1
+		builderWorkerCount = 1
+	} else {
+		pipelineWorkerCount = runtime.NumCPU() / 2
+		builderWorkerCount = runtime.NumCPU() / 2
+	}
 	return &Scheduler{
-		pipelineQueue: make([][]core.PipelineOptions, workerCount),
-		builderQueue:  make([][]core.PipelineOptions, workerCount),
-		workerCount:   workerCount,
-		apiClient:     client.NewAPIClient(),
+		pipelineQueue:       make([][]core.PipelineOptions, pipelineWorkerCount),
+		builderQueue:        make([][]core.PipelineOptions, builderWorkerCount),
+		pipelineWorkerCount: pipelineWorkerCount,
+		builderWorkerCount:  builderWorkerCount,
+		apiClient:           client.NewAPIClient(),
 	}
 }
 
 func (s *Scheduler) Start() {
-	fmt.Printf("[Scheduler] Starting %d workers\n", s.workerCount)
-	for i := 0; i < s.workerCount; i++ {
+	fmt.Printf("[Scheduler] Starting %d workers\n", s.pipelineWorkerCount)
+	for i := 0; i < s.pipelineWorkerCount; i++ {
 		go s.pipelineWorker(i)
 	}
-	for i := 0; i < s.workerCount; i++ {
+	for i := 0; i < s.pipelineWorkerCount; i++ {
 		go s.builderWorker(i)
 	}
 	go s.pipelineQueueStatus()
@@ -50,7 +60,7 @@ func (s *Scheduler) Start() {
 func (s *Scheduler) SchedulePipeline(opts *core.PipelineOptions) {
 	index := 0
 	length := len(s.pipelineQueue[0])
-	for i := 0; i < s.workerCount; i++ {
+	for i := 0; i < s.pipelineWorkerCount; i++ {
 		if len(s.pipelineQueue[i]) < length {
 			index = i
 			length = len(s.pipelineQueue[i])
@@ -63,7 +73,7 @@ func (s *Scheduler) SchedulePipeline(opts *core.PipelineOptions) {
 func (s *Scheduler) ScheduleBuilder(opts *core.PipelineOptions) {
 	index := 0
 	length := len(s.builderQueue[0])
-	for i := 0; i < s.workerCount; i++ {
+	for i := 0; i < s.builderWorkerCount; i++ {
 		if len(s.builderQueue[i]) < length {
 			index = i
 			length = len(s.builderQueue[i])
@@ -144,7 +154,7 @@ func (s *Scheduler) pipelineQueueStatus() {
 	for {
 		time.Sleep(5 * time.Second)
 		sum := 0
-		for i := 0; i < s.workerCount; i++ {
+		for i := 0; i < s.pipelineWorkerCount; i++ {
 			sum += len(s.pipelineQueue[i])
 		}
 		if sum != previous {
@@ -167,7 +177,7 @@ func (s *Scheduler) builderQueueStatus() {
 	for {
 		time.Sleep(5 * time.Second)
 		sum := 0
-		for i := 0; i < s.workerCount; i++ {
+		for i := 0; i < s.builderWorkerCount; i++ {
 			sum += len(s.builderQueue[i])
 		}
 		if sum != previous {
