@@ -93,7 +93,11 @@ func (p *ImageProcessor) ThumbnailImage(inputPath string, width int, height int,
 	return nil
 }
 
-func (p *ImageProcessor) ThumbnailBase64(inputPath string, inputSize core.ImageProps) (core.Thumbnail, error) {
+func (p *ImageProcessor) ThumbnailBase64(inputPath string) (core.Thumbnail, error) {
+	inputSize, err := p.Measure(inputPath)
+	if err != nil {
+		return core.Thumbnail{}, err
+	}
 	if inputSize.Width > p.config.Limits.ImagePreviewMaxWidth || inputSize.Height > p.config.Limits.ImagePreviewMaxHeight {
 		outputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewId() + filepath.Ext(inputPath))
 		if inputSize.Width > inputSize.Height {

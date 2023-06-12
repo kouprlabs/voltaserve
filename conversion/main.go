@@ -58,7 +58,8 @@ func main() {
 		if err := c.BodyParser(opts); err != nil {
 			return err
 		}
-		scheduler.Schedule(opts)
+		scheduler.SchedulePipeline(opts)
+		scheduler.ScheduleBuilder(opts)
 		return c.SendStatus(200)
 	})
 

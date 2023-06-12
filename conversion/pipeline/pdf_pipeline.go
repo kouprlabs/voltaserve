@@ -11,7 +11,6 @@ import (
 )
 
 type pdfPipeline struct {
-	cmd            *infra.Command
 	pdfProc        *infra.PDFProcessor
 	imageProc      *infra.ImageProcessor
 	s3             *infra.S3Manager
@@ -22,7 +21,6 @@ type pdfPipeline struct {
 
 func NewPDFPipeline() core.Pipeline {
 	return &pdfPipeline{
-		cmd:            infra.NewCommand(),
 		pdfProc:        infra.NewPDFProcessor(),
 		imageProc:      infra.NewImageProcessor(),
 		s3:             infra.NewS3Manager(),
@@ -46,10 +44,6 @@ func (p *pdfPipeline) Run(opts core.PipelineOptions) error {
 		return err
 	}
 	workingPath := inputPath
-	thumbnail, err := p.pdfProc.ThumbnailBase64(workingPath)
-	if err != nil {
-		return err
-	}
 	res := core.PipelineResponse{
 		Options: opts,
 		Preview: &core.S3Object{
@@ -57,8 +51,7 @@ func (p *pdfPipeline) Run(opts core.PipelineOptions) error {
 			Key:    opts.Key,
 			Size:   stat.Size(),
 		},
-		Thumbnail: &thumbnail,
-		Language:  opts.Language,
+		Language: opts.Language,
 	}
 	if err := p.apiClient.UpdateSnapshot(&res); err != nil {
 		return err

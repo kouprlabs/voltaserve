@@ -35,3 +35,11 @@ type Thumbnail struct {
 	Width  int    `json:"width"`
 	Height int    `json:"height"`
 }
+
+type Pipeline interface {
+	Run(PipelineOptions) error
+}
+
+type Builder interface {
+	Build(PipelineOptions) error
+}
