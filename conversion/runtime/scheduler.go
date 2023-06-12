@@ -73,7 +73,7 @@ func (s *Scheduler) worker(index int) {
 				fmt.Printf("[Worker %d] 🎉 Pipeline succeeded! ", index)
 				helper.PrintlnPipelineOptions(&opts)
 			} else {
-				fmt.Printf("[Worker %d] ⛈️  Pipeline failed! ", index)
+				fmt.Printf("[Worker %d] ⛈️ Pipeline failed! ", index)
 				helper.PrintlnPipelineOptions(&opts)
 			}
 			s.queue[index] = s.queue[index][1:]
@@ -99,7 +99,7 @@ func (s *Scheduler) queueStatus() {
 				color.Unset()
 			} else {
 				color.Set(color.FgBlue)
-				fmt.Printf("[Status] ⏳ Items waiting in queue: %d\n", sum)
+				fmt.Printf("[Status] ⏳ Items in queue: %d\n", sum)
 				color.Unset()
 			}
 		}
@@ -114,7 +114,7 @@ func (s *Scheduler) workerStatus() {
 		if previous != s.activeCount {
 			if s.activeCount == 0 {
 				color.Set(color.FgGreen)
-				fmt.Printf("[Status] 🌤️  Workers idle\n")
+				fmt.Printf("[Status] 🌤️ Workers idle\n")
 				color.Unset()
 			} else {
 				color.Set(color.FgRed)
