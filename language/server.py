@@ -13,7 +13,7 @@ def health():
   return 'OK'
 
 @app.route('/v1/detect', methods=['POST'])
-def ocr_image_to_data():
+def detect():
   content = request.json
   text = content['text']
   doc = nlp(text)
