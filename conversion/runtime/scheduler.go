@@ -86,12 +86,12 @@ func (s *Scheduler) ScheduleBuilder(opts *core.PipelineOptions) {
 func (s *Scheduler) pipelineWorker(index int) {
 	dispatcher := pipeline.NewDispatcher()
 	s.pipelineQueue[index] = make([]core.PipelineOptions, 0)
-	fmt.Printf("[Pipeline Worker %d] Running\n", index)
+	fmt.Printf("[Pipeline Worker %d] 🚀 Launched\n", index)
 	for {
 		if len(s.pipelineQueue[index]) > 0 {
 			s.activePipelineCount++
 			opts := s.pipelineQueue[index][0]
-			fmt.Printf("[Pipeline Worker %d] 🚀 Working... ", index)
+			fmt.Printf("[Pipeline Worker %d] 🔨 Working... ", index)
 			helper.PrintlnPipelineOptions(&opts)
 			start := time.Now()
 			err := dispatcher.Dispatch(opts)
@@ -117,17 +117,17 @@ func (s *Scheduler) pipelineWorker(index int) {
 }
 
 func (s *Scheduler) builderWorker(index int) {
-	builder := builder.NewThunmbnailBuilder()
+	dispatcher := builder.NewDispatcher()
 	s.builderQueue[index] = make([]core.PipelineOptions, 0)
-	fmt.Printf("[Builder Worker %d] Running\n", index)
+	fmt.Printf("[Builder Worker %d] 🚀 Launched\n", index)
 	for {
 		if len(s.builderQueue[index]) > 0 {
 			s.activeBuilderCount++
 			opts := s.builderQueue[index][0]
-			fmt.Printf("[Builder Worker %d] 🚀 Working... ", index)
+			fmt.Printf("[Builder Worker %d] 🔨 Working... ", index)
 			helper.PrintlnPipelineOptions(&opts)
 			start := time.Now()
-			err := builder.Build(opts)
+			err := dispatcher.Dispatch(opts)
 			elapsed := time.Since(start)
 			fmt.Printf("[Builder Worker %d] ⌚ Took ", index)
 			color.Set(color.FgMagenta)
@@ -135,10 +135,10 @@ func (s *Scheduler) builderWorker(index int) {
 			color.Unset()
 			helper.PrintlnPipelineOptions(&opts)
 			if err == nil {
-				fmt.Printf("[Pipeline Worker %d] 🎉 Succeeded! ", index)
+				fmt.Printf("[Builder Worker %d] 🎉 Succeeded! ", index)
 				helper.PrintlnPipelineOptions(&opts)
 			} else {
-				fmt.Printf("[Pipeline Worker %d] ⛈️ Failed! ", index)
+				fmt.Printf("[Builder Worker %d] ⛈️ Failed! ", index)
 				helper.PrintlnPipelineOptions(&opts)
 			}
 			s.builderQueue[index] = s.builderQueue[index][1:]
