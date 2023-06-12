@@ -39,7 +39,7 @@ func (p *pdfPipeline) Run(opts core.PipelineOptions) error {
 	if err != nil {
 		return err
 	}
-	inputPath, err = p.normalize(inputPath)
+	inputPath, err = p.convertToCompatibleJPEG(inputPath)
 	if err != nil {
 		return err
 	}
@@ -116,18 +116,13 @@ func (p *pdfPipeline) Run(opts core.PipelineOptions) error {
 	return nil
 }
 
-func (p *pdfPipeline) normalize(path string) (string, error) {
-	ext := filepath.Ext(path)
-	/* If an image, convert it to jpeg, because ocrmypdf supports jpeg only */
-	if ext == ".jpg" || ext == ".jpeg" {
-		oldPath := path
-		path = filepath.FromSlash(os.TempDir() + "/" + helper.NewId() + ".jpg")
-		if err := p.imageProc.Convert(oldPath, path); err != nil {
-			return "", err
-		}
-		if err := os.Remove(oldPath); err != nil {
-			return "", err
-		}
+func (p *pdfPipeline) convertToCompatibleJPEG(path string) (string, error) {
+	newPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewId() + ".jpg")
+	if err := p.imageProc.RemoveAlphaChannel(path, newPath); err != nil {
+		return "", err
 	}
-	return path, nil
+	if err := os.Remove(path); err != nil {
+		return "", err
+	}
+	return newPath, nil
 }

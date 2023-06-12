@@ -146,6 +146,13 @@ func (p *ImageProcessor) Convert(inputPath string, outputPath string) error {
 	return nil
 }
 
+func (p *ImageProcessor) RemoveAlphaChannel(inputPath string, outputPath string) error {
+	if err := p.cmd.Exec("gm", "convert", inputPath, "-background", "white", "-flatten", outputPath); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (p *ImageProcessor) Measure(path string) (core.ImageProps, error) {
 	res, err := p.cmd.ReadOutput("gm", "identify", "-format", "%w,%h", path)
 	if err != nil {
@@ -268,7 +275,7 @@ func (p *ImageProcessor) ImageData(inputPath string) (ImageData, error) {
 				isSupportedLanguage = true
 			}
 		}
-		if isSupportedLanguage && result.LanguageProps.Score > 0.5 && result.LanguageProps.Score > chosen.LanguageProps.Score && result.PositiveConfCount > result.NegativeConfCount && result.PositiveConfCount > chosen.PositiveConfCount {
+		if isSupportedLanguage && result.LanguageProps.Score >= 0.99 && result.LanguageProps.Score > chosen.LanguageProps.Score && result.PositiveConfCount > result.NegativeConfCount && result.PositiveConfCount > chosen.PositiveConfCount {
 			chosen = result
 		}
 	}
