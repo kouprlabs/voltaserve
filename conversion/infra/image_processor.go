@@ -270,16 +270,8 @@ func (p *ImageProcessor) ImageData(inputPath string) (ImageData, error) {
 	}
 	var chosen = results[0]
 	for _, result := range results {
-		if result.LanguageProps.Score >= 0.99 && chosen.LanguageProps.Score >= 0.99 {
-			/* Here both the result and chosen have a high score of 0.99, the decisive factor will then be PositiveConfPercent and NegativeConfPercent */
-			if result.PositiveConfPercent > chosen.PositiveConfPercent && result.NegativeConfPercent < chosen.NegativeConfPercent {
-				chosen = result
-			}
-		} else {
-			/* Here we are dealing with scores less than 0.99, the decisive factor will then be the score itself only */
-			if result.LanguageProps.Score > chosen.LanguageProps.Score {
-				chosen = result
-			}
+		if result.LanguageProps.Score > chosen.LanguageProps.Score {
+			chosen = result
 		}
 	}
 	/* We don't accept a result with less than 0.95 confidence, better have no OCR than have a wrong one :) */
