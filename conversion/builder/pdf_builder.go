@@ -1,4 +1,4 @@
-package pipeline
+package builder
 
 import (
 	"os"
@@ -9,30 +9,28 @@ import (
 	"voltaserve/infra"
 )
 
-type videoPipeline struct {
-	cmd       *infra.Command
-	imageProc *infra.ImageProcessor
-	videoProc *infra.VideoProcessor
-	s3        *infra.S3Manager
-	apiClient *client.APIClient
+type pdfBuilder struct {
+	pipelineIdentifier *infra.PipelineIdentifier
+	pdfProc            *infra.PDFProcessor
+	s3                 *infra.S3Manager
+	apiClient          *client.APIClient
 }
 
-func NewVideoPipeline() *videoPipeline {
-	return &videoPipeline{
-		cmd:       infra.NewCommand(),
-		imageProc: infra.NewImageProcessor(),
-		videoProc: infra.NewVideoProcessor(),
-		s3:        infra.NewS3Manager(),
-		apiClient: client.NewAPIClient(),
+func NewPDFBuilder() core.Builder {
+	return &pdfBuilder{
+		pipelineIdentifier: infra.NewPipelineIdentifier(),
+		pdfProc:            infra.NewPDFProcessor(),
+		s3:                 infra.NewS3Manager(),
+		apiClient:          client.NewAPIClient(),
 	}
 }
 
-func (p *videoPipeline) Run(opts core.PipelineOptions) error {
+func (p *pdfBuilder) Build(opts core.PipelineOptions) error {
 	inputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewId() + filepath.Ext(opts.Key))
 	if err := p.s3.GetFile(opts.Key, inputPath, opts.Bucket); err != nil {
 		return err
 	}
-	thumbnail, err := p.videoProc.ThumbnailBase64(inputPath)
+	thumbnail, err := p.pdfProc.ThumbnailBase64(inputPath)
 	if err != nil {
 		return err
 	}

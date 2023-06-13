@@ -2,7 +2,9 @@ package infra
 
 import (
 	"encoding/base64"
+	"errors"
 	"io"
+	"math"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -27,7 +29,13 @@ type ImageData struct {
 	PositiveConfCount   int64
 	PositiveConfPercent float32
 	Text                string
-	LanguageProps       *client.LanguageProps
+	LanguageProps       LanguageProps
+}
+
+type LanguageProps struct {
+	Language       string
+	Score          float64
+	TesseractModel string
 }
 
 type TesseractData struct {
@@ -93,7 +101,11 @@ func (p *ImageProcessor) ThumbnailImage(inputPath string, width int, height int,
 	return nil
 }
 
-func (p *ImageProcessor) ThumbnailBase64(inputPath string, inputSize core.ImageProps) (core.Thumbnail, error) {
+func (p *ImageProcessor) ThumbnailBase64(inputPath string) (core.Thumbnail, error) {
+	inputSize, err := p.Measure(inputPath)
+	if err != nil {
+		return core.Thumbnail{}, err
+	}
 	if inputSize.Width > p.config.Limits.ImagePreviewMaxWidth || inputSize.Height > p.config.Limits.ImagePreviewMaxHeight {
 		outputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewId() + filepath.Ext(inputPath))
 		if inputSize.Width > inputSize.Height {
@@ -142,6 +154,13 @@ func (p *ImageProcessor) Convert(inputPath string, outputPath string) error {
 	return nil
 }
 
+func (p *ImageProcessor) RemoveAlphaChannel(inputPath string, outputPath string) error {
+	if err := p.cmd.Exec("gm", "convert", inputPath, "-background", "white", "-flatten", outputPath); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (p *ImageProcessor) Measure(path string) (core.ImageProps, error) {
 	res, err := p.cmd.ReadOutput("gm", "identify", "-format", "%w,%h", path)
 	if err != nil {
@@ -174,15 +193,11 @@ func (p *ImageProcessor) ToBase64(path string) (string, error) {
 }
 
 func (p *ImageProcessor) ImageData(inputPath string) (ImageData, error) {
-	languages := []string{
-		"eng", "deu", "fra", "nld", "ita", "spa", "por", "nor", "swe", "fin", "dan", "rus", "jpn",
-		"chi_sim", "chi_tra", "kor", "vie", "hin", "ben", "mar", "tel", "pan", "urd", "tur", "ind", "ara",
-	}
 	results := []ImageData{}
-	for _, language := range languages {
+	for tesseractModel := range TesseractModelToLanguage {
 		basePath := filepath.FromSlash(os.TempDir() + "/" + helper.NewId())
 		tsvPath := filepath.FromSlash(basePath + ".tsv")
-		if err := p.cmd.Exec("tesseract", inputPath, basePath, "-l", language, "tsv"); err != nil {
+		if err := p.cmd.Exec("tesseract", inputPath, basePath, "-l", tesseractModel, "tsv"); err != nil {
 			continue
 		}
 		var result = ImageData{}
@@ -228,7 +243,7 @@ func (p *ImageProcessor) ImageData(inputPath string) (ImageData, error) {
 			continue
 		}
 		txtPath := filepath.FromSlash(basePath + ".txt")
-		if err := p.cmd.Exec("tesseract", inputPath, basePath, "-l", language, "txt"); err != nil {
+		if err := p.cmd.Exec("tesseract", inputPath, basePath, "-l", tesseractModel, "txt"); err != nil {
 			return ImageData{}, err
 		}
 		f, err = os.Open(txtPath)
@@ -241,32 +256,27 @@ func (p *ImageProcessor) ImageData(inputPath string) (ImageData, error) {
 		}
 		result.Text = string(b)
 		detection, err := p.languageClient.Detect(result.Text)
-		if err == nil {
-			result.LanguageProps = &detection
+		if err == nil && TesseractModelToLanguage[tesseractModel] == detection.Language {
+			result.LanguageProps = LanguageProps{
+				Language:       detection.Language,
+				Score:          detection.Score,
+				TesseractModel: tesseractModel,
+			}
+			results = append(results, result)
 		}
-		results = append(results, result)
 		if err := os.Remove(txtPath); err != nil {
 			continue
 		}
 	}
 	var chosen = results[0]
 	for _, result := range results {
-		if result.LanguageProps == nil {
-			continue
-		}
-		if chosen.LanguageProps == nil {
-			chosen = result
-			continue
-		}
-		isSupportedLanguage := false
-		for _, l := range languages {
-			if result.LanguageProps.Language == l {
-				isSupportedLanguage = true
-			}
-		}
-		if isSupportedLanguage && result.LanguageProps.Score > 0.5 && result.LanguageProps.Score > chosen.LanguageProps.Score && result.PositiveConfCount > result.NegativeConfCount && result.PositiveConfCount > chosen.PositiveConfCount {
+		if result.LanguageProps.Score > chosen.LanguageProps.Score {
 			chosen = result
 		}
+	}
+	/* We don't accept a result with less than 0.95 confidence, better have no OCR than have a wrong one :) */
+	if math.Round(chosen.LanguageProps.Score*100)/100 < 0.95 {
+		return ImageData{}, errors.New("could not detect language")
 	}
 	return chosen, nil
 }

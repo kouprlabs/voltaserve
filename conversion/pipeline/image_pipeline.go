@@ -14,7 +14,6 @@ import (
 
 type imagePipeline struct {
 	pdfPipeline core.Pipeline
-	cmd         *infra.Command
 	imageProc   *infra.ImageProcessor
 	s3          *infra.S3Manager
 	apiClient   *client.APIClient
@@ -24,7 +23,6 @@ type imagePipeline struct {
 func NewImagePipeline() core.Pipeline {
 	return &imagePipeline{
 		pdfPipeline: NewPDFPipeline(),
-		cmd:         infra.NewCommand(),
 		imageProc:   infra.NewImageProcessor(),
 		s3:          infra.NewS3Manager(),
 		apiClient:   client.NewAPIClient(),
@@ -51,12 +49,7 @@ func (p *imagePipeline) Run(opts core.PipelineOptions) error {
 		}
 		inputPath = newInputFile
 	}
-
 	imageProps, err := p.imageProc.Measure(inputPath)
-	if err != nil {
-		return err
-	}
-	thumbnail, err := p.imageProc.ThumbnailBase64(inputPath, imageProps)
 	if err != nil {
 		return err
 	}
@@ -68,20 +61,17 @@ func (p *imagePipeline) Run(opts core.PipelineOptions) error {
 			Image:  &imageProps,
 			Size:   stat.Size(),
 		},
-		Thumbnail: &thumbnail,
 	}
 	if err := p.apiClient.UpdateSnapshot(&res); err != nil {
 		return err
 	}
 	imageData, err := p.imageProc.ImageData(inputPath)
-	if err == nil && imageData.PositiveConfCount > imageData.NegativeConfCount {
+	if err == nil {
 		/* We treat it as a text image, we convert it to PDF/A */
-		if imageData.LanguageProps != nil {
-			opts.Language = &imageData.LanguageProps.Language
-			res.Language = &imageData.LanguageProps.Language
-			if err := p.apiClient.UpdateSnapshot(&res); err != nil {
-				return err
-			}
+		opts.Language = &imageData.LanguageProps.Language
+		res.Language = &imageData.LanguageProps.Language
+		if err := p.apiClient.UpdateSnapshot(&res); err != nil {
+			return err
 		}
 		if err := p.pdfPipeline.Run(opts); err != nil {
 			/*
