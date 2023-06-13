@@ -52,3 +52,8 @@ cd $HOME
 rm -rf ./jbig2enc
 
 sudo pip3 install ocrmypdf
+
+sudo dnf module -y enable nodejs:18
+sudo dnf module -y install nodejs:18/common
+sudo npm install -g corepack
+corepack enable
