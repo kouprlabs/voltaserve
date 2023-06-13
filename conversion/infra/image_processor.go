@@ -193,26 +193,8 @@ func (p *ImageProcessor) ToBase64(path string) (string, error) {
 }
 
 func (p *ImageProcessor) ImageData(inputPath string) (ImageData, error) {
-	tesseractModelToLanguage := map[string]string{
-		"eng":     "eng",
-		"deu":     "deu",
-		"fra":     "fra",
-		"nld":     "nld",
-		"ita":     "ita",
-		"spa":     "spa",
-		"por":     "por",
-		"swe":     "swe",
-		"fin":     "fin",
-		"jpn":     "jpn",
-		"chi_sim": "zho",
-		"chi_tra": "zho",
-		"kor":     "kor",
-		"hin":     "hin",
-		"rus":     "rus",
-		"ara":     "ara",
-	}
 	results := []ImageData{}
-	for tesseractModel := range tesseractModelToLanguage {
+	for tesseractModel := range TesseractModelToLanguage {
 		basePath := filepath.FromSlash(os.TempDir() + "/" + helper.NewId())
 		tsvPath := filepath.FromSlash(basePath + ".tsv")
 		if err := p.cmd.Exec("tesseract", inputPath, basePath, "-l", tesseractModel, "tsv"); err != nil {
@@ -274,7 +256,7 @@ func (p *ImageProcessor) ImageData(inputPath string) (ImageData, error) {
 		}
 		result.Text = string(b)
 		detection, err := p.languageClient.Detect(result.Text)
-		if err == nil && tesseractModelToLanguage[tesseractModel] == detection.Language {
+		if err == nil && TesseractModelToLanguage[tesseractModel] == detection.Language {
 			result.LanguageProps = LanguageProps{
 				Language:       detection.Language,
 				Score:          detection.Score,
