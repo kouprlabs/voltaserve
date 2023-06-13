@@ -2,7 +2,9 @@ package infra
 
 import (
 	"encoding/base64"
+	"errors"
 	"io"
+	"math"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -27,7 +29,13 @@ type ImageData struct {
 	PositiveConfCount   int64
 	PositiveConfPercent float32
 	Text                string
-	LanguageProps       *client.LanguageProps
+	LanguageProps       LanguageProps
+}
+
+type LanguageProps struct {
+	Language       string
+	Score          float64
+	TesseractModel string
 }
 
 type TesseractData struct {
@@ -185,15 +193,29 @@ func (p *ImageProcessor) ToBase64(path string) (string, error) {
 }
 
 func (p *ImageProcessor) ImageData(inputPath string) (ImageData, error) {
-	languages := []string{
-		"eng", "deu", "fra", "nld", "ita", "spa", "por", "nor", "swe", "fin", "dan", "rus", "jpn",
-		"chi_sim", "chi_tra", "kor", "vie", "hin", "ben", "mar", "tel", "pan", "urd", "tur", "ind", "ara",
+	tesseractModelToLanguage := map[string]string{
+		"eng":     "eng",
+		"deu":     "deu",
+		"fra":     "fra",
+		"nld":     "nld",
+		"ita":     "ita",
+		"spa":     "spa",
+		"por":     "por",
+		"swe":     "swe",
+		"fin":     "fin",
+		"jpn":     "jpn",
+		"chi_sim": "zho",
+		"chi_tra": "zho",
+		"kor":     "kor",
+		"hin":     "hin",
+		"rus":     "rus",
+		"ara":     "ara",
 	}
 	results := []ImageData{}
-	for _, language := range languages {
+	for tesseractModel := range tesseractModelToLanguage {
 		basePath := filepath.FromSlash(os.TempDir() + "/" + helper.NewId())
 		tsvPath := filepath.FromSlash(basePath + ".tsv")
-		if err := p.cmd.Exec("tesseract", inputPath, basePath, "-l", language, "tsv"); err != nil {
+		if err := p.cmd.Exec("tesseract", inputPath, basePath, "-l", tesseractModel, "tsv"); err != nil {
 			continue
 		}
 		var result = ImageData{}
@@ -239,7 +261,7 @@ func (p *ImageProcessor) ImageData(inputPath string) (ImageData, error) {
 			continue
 		}
 		txtPath := filepath.FromSlash(basePath + ".txt")
-		if err := p.cmd.Exec("tesseract", inputPath, basePath, "-l", language, "txt"); err != nil {
+		if err := p.cmd.Exec("tesseract", inputPath, basePath, "-l", tesseractModel, "txt"); err != nil {
 			return ImageData{}, err
 		}
 		f, err = os.Open(txtPath)
@@ -252,32 +274,35 @@ func (p *ImageProcessor) ImageData(inputPath string) (ImageData, error) {
 		}
 		result.Text = string(b)
 		detection, err := p.languageClient.Detect(result.Text)
-		if err == nil {
-			result.LanguageProps = &detection
+		if err == nil && tesseractModelToLanguage[tesseractModel] == detection.Language {
+			result.LanguageProps = LanguageProps{
+				Language:       detection.Language,
+				Score:          detection.Score,
+				TesseractModel: tesseractModel,
+			}
+			results = append(results, result)
 		}
-		results = append(results, result)
 		if err := os.Remove(txtPath); err != nil {
 			continue
 		}
 	}
 	var chosen = results[0]
 	for _, result := range results {
-		if result.LanguageProps == nil {
-			continue
-		}
-		if chosen.LanguageProps == nil {
-			chosen = result
-			continue
-		}
-		isSupportedLanguage := false
-		for _, l := range languages {
-			if result.LanguageProps.Language == l {
-				isSupportedLanguage = true
+		if result.LanguageProps.Score >= 0.99 && chosen.LanguageProps.Score >= 0.99 {
+			/* Here both the result and chosen have a high score of 0.99, the decisive factor will then be PositiveConfPercent and NegativeConfPercent */
+			if result.PositiveConfPercent > chosen.PositiveConfPercent && result.NegativeConfPercent < chosen.NegativeConfPercent {
+				chosen = result
+			}
+		} else {
+			/* Here we are dealing with scores less than 0.99, the decisive factor will then be the score itself only */
+			if result.LanguageProps.Score > chosen.LanguageProps.Score {
+				chosen = result
 			}
 		}
-		if isSupportedLanguage && result.LanguageProps.Score >= 0.99 && result.LanguageProps.Score > chosen.LanguageProps.Score && result.PositiveConfCount > result.NegativeConfCount && result.PositiveConfCount > chosen.PositiveConfCount {
-			chosen = result
-		}
+	}
+	/* We don't accept a result with less than 0.95 confidence, better have no OCR than have a wrong one :) */
+	if math.Round(chosen.LanguageProps.Score*100)/100 < 0.95 {
+		return ImageData{}, errors.New("could not detect language")
 	}
 	return chosen, nil
 }

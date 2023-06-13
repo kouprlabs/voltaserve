@@ -66,14 +66,12 @@ func (p *imagePipeline) Run(opts core.PipelineOptions) error {
 		return err
 	}
 	imageData, err := p.imageProc.ImageData(inputPath)
-	if err == nil && imageData.PositiveConfCount > imageData.NegativeConfCount {
+	if err == nil {
 		/* We treat it as a text image, we convert it to PDF/A */
-		if imageData.LanguageProps != nil {
-			opts.Language = &imageData.LanguageProps.Language
-			res.Language = &imageData.LanguageProps.Language
-			if err := p.apiClient.UpdateSnapshot(&res); err != nil {
-				return err
-			}
+		opts.Language = &imageData.LanguageProps.Language
+		res.Language = &imageData.LanguageProps.Language
+		if err := p.apiClient.UpdateSnapshot(&res); err != nil {
+			return err
 		}
 		if err := p.pdfPipeline.Run(opts); err != nil {
 			/*

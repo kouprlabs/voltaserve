@@ -9,7 +9,7 @@ import (
 	"voltaserve/config"
 )
 
-type LanguageProps struct {
+type LanguageDetectionResult struct {
 	Language string  `json:"language"`
 	Score    float64 `json:"score"`
 }
@@ -24,7 +24,7 @@ func NewLanguageClient() *LanguageClient {
 	}
 }
 
-func (api *LanguageClient) Detect(text string) (LanguageProps, error) {
+func (api *LanguageClient) Detect(text string) (LanguageDetectionResult, error) {
 	requestBody := struct {
 		Text string `json:"text"`
 	}{
@@ -32,21 +32,21 @@ func (api *LanguageClient) Detect(text string) (LanguageProps, error) {
 	}
 	jsonBody, err := json.Marshal(requestBody)
 	if err != nil {
-		return LanguageProps{}, err
+		return LanguageDetectionResult{}, err
 	}
 	response, err := http.Post(fmt.Sprintf("%s/v1/detect", api.config.LanguageURL), "application/json", bytes.NewBuffer(jsonBody))
 	if err != nil {
-		return LanguageProps{}, err
+		return LanguageDetectionResult{}, err
 	}
 	defer response.Body.Close()
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
-		return LanguageProps{}, err
+		return LanguageDetectionResult{}, err
 	}
-	var result LanguageProps
+	var result LanguageDetectionResult
 	err = json.Unmarshal(body, &result)
 	if err != nil {
-		return LanguageProps{}, err
+		return LanguageDetectionResult{}, err
 	}
 	return result, nil
 }

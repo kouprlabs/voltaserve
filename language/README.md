@@ -1,10 +1,22 @@
-### Run these commands before starting the app
+# Voltaserve Language
+
+## Getting Started
+
+Install [Pipenv](https://pipenv.pypa.io/en/latest/installation/#installing-pipenv).
+
+Install `clang` and `python3-devel`. For RHEL based operating systems, run:
 
 ```shell
-pip3 install -r requirements.txt
+sudo dnf install -y clang python3-pip python3-devel
 ```
 
-### Run
+Install dependencies:
+
+```shell
+pipenv install
+```
+
+Run:
 
 ```shell
 FLASK_APP=server.py flask run --host=0.0.0.0 --port=5002 --debug
