@@ -1,6 +1,6 @@
 #!/bin/bash
 
-sudo dnf install -y git golang poppler-utils libreoffice python3-pip ghostscript tesseract wget
+sudo dnf install -y git golang poppler-utils libreoffice python3-pip python3-devel ghostscript tesseract wget
 
 cd /usr/share/tesseract/tessdata
 sudo wget -c https://github.com/kouprlabs/tessdata/raw/main/osd.traineddata && \
