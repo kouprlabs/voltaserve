@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"flag"
 	"fmt"
 	"net/http"
 	"os"
@@ -33,7 +34,16 @@ func main() {
 	log.SetReportCaller(true)
 
 	cfg := config.GetConfig()
-	scheduler := runtime.NewScheduler()
+
+	schedulerOpts := runtime.NewDefaultSchedulerOptions()
+	pipelineWorkers := flag.Int("pipeline-workers", schedulerOpts.PipelineWorkerCount, "Number of pipeline workers")
+	builderWorkers := flag.Int("builder-workers", schedulerOpts.BuilderWorkerCount, "Number of builder workers")
+	flag.Parse()
+	scheduler := runtime.NewScheduler(runtime.SchedulerOptions{
+		PipelineWorkerCount: *pipelineWorkers,
+		BuilderWorkerCount:  *builderWorkers,
+	})
+
 	app := fiber.New()
 
 	app.Get("v1/health", func(c *fiber.Ctx) error {

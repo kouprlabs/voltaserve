@@ -24,31 +24,40 @@ type Scheduler struct {
 	apiClient           *client.APIClient
 }
 
-func NewScheduler() *Scheduler {
-	var pipelineWorkerCount int
-	var builderWorkerCount int
+type SchedulerOptions struct {
+	PipelineWorkerCount int
+	BuilderWorkerCount  int
+}
+
+func NewDefaultSchedulerOptions() SchedulerOptions {
+	opts := SchedulerOptions{}
 	if runtime.NumCPU() == 1 {
-		pipelineWorkerCount = 1
-		builderWorkerCount = 1
+		opts.PipelineWorkerCount = 1
+		opts.BuilderWorkerCount = 1
 	} else {
-		pipelineWorkerCount = runtime.NumCPU() / 2
-		builderWorkerCount = runtime.NumCPU() / 2
+		opts.PipelineWorkerCount = runtime.NumCPU() / 2
+		opts.BuilderWorkerCount = runtime.NumCPU() / 2
 	}
+	return opts
+}
+
+func NewScheduler(opts SchedulerOptions) *Scheduler {
 	return &Scheduler{
-		pipelineQueue:       make([][]core.PipelineOptions, pipelineWorkerCount),
-		builderQueue:        make([][]core.PipelineOptions, builderWorkerCount),
-		pipelineWorkerCount: pipelineWorkerCount,
-		builderWorkerCount:  builderWorkerCount,
+		pipelineQueue:       make([][]core.PipelineOptions, opts.PipelineWorkerCount),
+		builderQueue:        make([][]core.PipelineOptions, opts.BuilderWorkerCount),
+		pipelineWorkerCount: opts.PipelineWorkerCount,
+		builderWorkerCount:  opts.BuilderWorkerCount,
 		apiClient:           client.NewAPIClient(),
 	}
 }
 
 func (s *Scheduler) Start() {
-	fmt.Printf("[Scheduler] Starting %d workers\n", s.pipelineWorkerCount)
+	fmt.Printf("[Scheduler] 🚀 Lauching %d pipeline workers...\n", s.pipelineWorkerCount)
 	for i := 0; i < s.pipelineWorkerCount; i++ {
 		go s.pipelineWorker(i)
 	}
-	for i := 0; i < s.pipelineWorkerCount; i++ {
+	fmt.Printf("[Scheduler] 🚀 Launching %d builder workers...\n", s.builderWorkerCount)
+	for i := 0; i < s.builderWorkerCount; i++ {
 		go s.builderWorker(i)
 	}
 	go s.pipelineQueueStatus()
@@ -86,7 +95,7 @@ func (s *Scheduler) ScheduleBuilder(opts *core.PipelineOptions) {
 func (s *Scheduler) pipelineWorker(index int) {
 	dispatcher := pipeline.NewDispatcher()
 	s.pipelineQueue[index] = make([]core.PipelineOptions, 0)
-	fmt.Printf("[Pipeline Worker %d] 🚀 Launched\n", index)
+	fmt.Printf("[Pipeline Worker %d] Running\n", index)
 	for {
 		if len(s.pipelineQueue[index]) > 0 {
 			s.activePipelineCount++
@@ -119,7 +128,7 @@ func (s *Scheduler) pipelineWorker(index int) {
 func (s *Scheduler) builderWorker(index int) {
 	dispatcher := builder.NewDispatcher()
 	s.builderQueue[index] = make([]core.PipelineOptions, 0)
-	fmt.Printf("[Builder Worker %d] 🚀 Launched\n", index)
+	fmt.Printf("[Builder Worker %d] Running\n", index)
 	for {
 		if len(s.builderQueue[index]) > 0 {
 			s.activeBuilderCount++
