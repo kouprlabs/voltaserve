@@ -1219,7 +1219,7 @@ func (svc *FileService) Copy(targetID string, sourceIDs []string, userID string)
 			rootClone.SetParentID(&targetID)
 		}
 
-		/* If there is a file with similar name, append a suffix */
+		/* If there is a file with similar name, append a prefix */
 		nameExists, err := svc.hasChildWithName(targetID, rootClone.GetName())
 		if err != nil {
 			return nil, err
