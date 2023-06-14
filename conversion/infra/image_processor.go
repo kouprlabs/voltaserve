@@ -243,6 +243,9 @@ func (p *ImageProcessor) ImageData(inputPath string) (ImageData, error) {
 		if err := os.Remove(tsvPath); err != nil {
 			continue
 		}
+		if result.PositiveConfCount < result.NegativeConfCount {
+			return ImageData{}, errors.New("image contains no text")
+		}
 		txtPath := filepath.FromSlash(basePath + ".txt")
 		if err := p.cmd.Exec("tesseract", inputPath, basePath, "-l", tesseractModel, "txt"); err != nil {
 			return ImageData{}, err
