@@ -1,5 +1,6 @@
-type ErrorResponse = {
+export type ErrorResponse = {
   code: string
+  status: number
   message: string
   userMessage: string
   moreInfo: string

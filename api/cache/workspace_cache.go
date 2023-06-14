@@ -46,7 +46,7 @@ func (c *WorkspaceCache) Get(id string) (model.Workspace, error) {
 }
 
 func (c *WorkspaceCache) Refresh(id string) (model.Workspace, error) {
-	res, err := c.workspaceRepo.FindByID(id)
+	res, err := c.workspaceRepo.Find(id)
 	if err != nil {
 		return nil, err
 	}

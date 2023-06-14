@@ -21,7 +21,7 @@ func NewGroupSearch() *GroupSearch {
 	}
 }
 
-func (search *GroupSearch) Index(groups []model.Group) error {
+func (s *GroupSearch) Index(groups []model.Group) error {
 	if len(groups) == 0 {
 		return nil
 	}
@@ -29,13 +29,13 @@ func (search *GroupSearch) Index(groups []model.Group) error {
 	for _, g := range groups {
 		res = append(res, g)
 	}
-	if err := search.search.Index(search.index, res); err != nil {
+	if err := s.search.Index(s.index, res); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (search *GroupSearch) Update(groups []model.Group) error {
+func (s *GroupSearch) Update(groups []model.Group) error {
 	if len(groups) == 0 {
 		return nil
 	}
@@ -43,24 +43,24 @@ func (search *GroupSearch) Update(groups []model.Group) error {
 	for _, g := range groups {
 		res = append(res, g)
 	}
-	if err := search.search.Update(search.index, res); err != nil {
+	if err := s.search.Update(s.index, res); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (search *GroupSearch) Delete(ids []string) error {
+func (s *GroupSearch) Delete(ids []string) error {
 	if len(ids) == 0 {
 		return nil
 	}
-	if err := search.search.Delete(search.index, ids); err != nil {
+	if err := s.search.Delete(s.index, ids); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (search *GroupSearch) Query(query string) ([]model.Group, error) {
-	hits, err := search.search.Query(search.index, query)
+func (s *GroupSearch) Query(query string) ([]model.Group, error) {
+	hits, err := s.search.Query(s.index, query)
 	if err != nil {
 		return nil, err
 	}

@@ -17,7 +17,7 @@ type UserPermission struct {
 type GroupPermission struct {
 	ID         string `json:"id"`
 	GroupID    string `json:"groupId"`
-	ResourceId string `json:"resourceId"`
+	ResourceID string `json:"resourceId"`
 	Permission string `json:"permission"`
 	CreateTime string `json:"createTime"`
 }
@@ -40,12 +40,12 @@ func (GroupPermission) TableName() string {
 }
 
 type userPermissionValue struct {
-	UserId string `json:"userId,omitempty"`
+	UserID string `json:"userId,omitempty"`
 	Value  string `json:"value,omitempty"`
 }
 
 func (p userPermissionValue) GetUserID() string {
-	return p.UserId
+	return p.UserID
 }
 func (p userPermissionValue) GetValue() string {
 	return p.Value

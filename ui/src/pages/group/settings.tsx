@@ -11,7 +11,7 @@ import {
 import { Helmet } from 'react-helmet-async'
 import GroupAPI from '@/api/group'
 import { swrConfig } from '@/api/options'
-import { geEditorPermission } from '@/api/permission'
+import { geEditorPermission, geOwnerPermission } from '@/api/permission'
 import AddMember from '@/components/group/add-member'
 import Delete from '@/components/group/delete'
 import EditName from '@/components/group/edit-name'
@@ -29,6 +29,10 @@ const GroupSettingsPage = () => {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
   const hasEditPermission = useMemo(
     () => group && geEditorPermission(group.permission),
+    [group]
+  )
+  const hasOwnerPermission = useMemo(
+    () => group && geOwnerPermission(group.permission),
     [group]
   )
 
@@ -51,7 +55,7 @@ const GroupSettingsPage = () => {
           <Text>{group.name}</Text>
           <IconButton
             icon={<IconEdit />}
-            disabled={!hasEditPermission}
+            isDisabled={!hasEditPermission}
             aria-label=""
             onClick={() => {
               setIsNameModalOpen(true)
@@ -64,7 +68,7 @@ const GroupSettingsPage = () => {
           <Spacer />
           <IconButton
             icon={<IconUserPlus />}
-            disabled={!hasEditPermission}
+            isDisabled={!hasOwnerPermission}
             aria-label=""
             onClick={() => {
               setIsAddMembersModalOpen(true)
@@ -79,7 +83,7 @@ const GroupSettingsPage = () => {
             icon={<IconTrash />}
             variant="solid"
             colorScheme="red"
-            disabled={!hasEditPermission}
+            isDisabled={!hasOwnerPermission}
             aria-label=""
             onClick={() => setDeleteModalOpen(true)}
           />

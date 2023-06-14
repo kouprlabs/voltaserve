@@ -1,14 +1,14 @@
 import React from 'react'
+import ReactDOM from 'react-dom/client'
 import { RouterProvider } from 'react-router-dom'
 import { Provider } from 'react-redux'
 import { ChakraProvider } from '@chakra-ui/react'
 import { theme } from '@koupr/ui'
-import ReactDOM from 'react-dom/client'
+import '@koupr/ui/styles/index.css'
 import { HelmetProvider } from 'react-helmet-async'
 import store from '@/store/configure-store'
-import router from './router'
 import '@/styles/index.css'
-import '@koupr/ui/styles/index.css'
+import router from './router'
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>

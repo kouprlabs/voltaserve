@@ -23,14 +23,16 @@ import (
 
 type File struct {
 	ID          string      `json:"id"`
-	WorkspaceId string      `json:"workspaceId"`
+	WorkspaceID string      `json:"workspaceId"`
 	Name        string      `json:"name"`
 	Type        string      `json:"type"`
-	ParentId    *string     `json:"parentId,omitempty"`
+	ParentID    *string     `json:"parentId,omitempty"`
 	Version     *int64      `json:"version,omitempty"`
 	Original    *Download   `json:"original,omitempty"`
 	Preview     *Download   `json:"preview,omitempty"`
+	OCR         *Download   `json:"ocr,omitempty"`
 	Thumbnail   *Thumbnail  `json:"thumbnail,omitempty"`
+	Language    *string     `json:"language,omitempty"`
 	Snapshots   []*Snapshot `json:"snapshots,omitempty"`
 	Permission  string      `json:"permission"`
 	IsShared    bool        `json:"isShared"`
@@ -48,8 +50,8 @@ type FileList struct {
 
 type FileSearchOptions struct {
 	Text             string  `json:"text" validate:"required"`
-	WorkspaceId      string  `json:"workspaceId" validate:"required"`
-	ParentId         *string `json:"parentId,omitempty"`
+	WorkspaceID      string  `json:"workspaceId" validate:"required"`
+	ParentID         *string `json:"parentId,omitempty"`
 	Type             *string `json:"type,omitempty" validate:"omitempty,oneof=file folder"`
 	CreateTimeAfter  *int64  `json:"createTimeAfter,omitempty"`
 	CreateTimeBefore *int64  `json:"createTimeBefore,omitempty"`
@@ -67,16 +69,16 @@ type FileSearchResult struct {
 }
 
 type FileCreateOptions struct {
-	WorkspaceId string  `json:"workspaceId" validate:"required"`
+	WorkspaceID string  `json:"workspaceId" validate:"required"`
 	Name        string  `json:"name" validate:"required,max=255"`
 	Type        string  `json:"type" validate:"required,oneof=file folder"`
-	ParentId    *string `json:"parentId" validate:"required"`
+	ParentID    *string `json:"parentId" validate:"required"`
 }
 
 type FileCreateFolderOptions struct {
-	WorkspaceId string  `json:"workspaceId" validate:"required"`
+	WorkspaceID string  `json:"workspaceId" validate:"required"`
 	Name        string  `json:"name" validate:"required,max=255"`
-	ParentId    *string `json:"parentId"`
+	ParentID    *string `json:"parentId"`
 }
 
 type FileCopyOptions struct {
@@ -126,7 +128,9 @@ type Snapshot struct {
 	Version   int64      `json:"version"`
 	Original  *Download  `json:"original,omitempty"`
 	Preview   *Download  `json:"preview,omitempty"`
+	OCR       *Download  `json:"ocr,omitempty"`
 	Thumbnail *Thumbnail `json:"thumbnail,omitempty"`
+	Language  *string    `json:"language,omitempty"`
 }
 
 type ImageProps struct {
@@ -160,11 +164,12 @@ type GroupPermission struct {
 
 type UpdateSnapshotOptions struct {
 	Options   infra.RunPipelineOptions `json:"options"`
-	Original  *model.S3Object          `json:"original"`
-	Preview   *model.S3Object          `json:"preview"`
-	Text      *model.S3Object          `json:"text"`
-	OCR       *model.S3Object          `json:"ocr"`
-	Thumbnail *model.Thumbnail         `json:"thumbnail"`
+	Original  *model.S3Object          `json:"original,omitempty"`
+	Preview   *model.S3Object          `json:"preview,omitempty"`
+	Text      *model.S3Object          `json:"text,omitempty"`
+	OCR       *model.S3Object          `json:"ocr,omitempty"`
+	Thumbnail *model.Thumbnail         `json:"thumbnail,omitempty"`
+	Language  *string                  `json:"language,omitempty"`
 }
 
 const SortByName = "name"
@@ -232,22 +237,29 @@ func NewFileService() *FileService {
 	}
 }
 
-func (svc *FileService) Create(opts FileCreateOptions, userId string) (*File, error) {
-	if len(*opts.ParentId) > 0 {
-		if err := svc.validateParent(*opts.ParentId, userId); err != nil {
+func (svc *FileService) Create(opts FileCreateOptions, userID string) (*File, error) {
+	if len(*opts.ParentID) > 0 {
+		if err := svc.validateParent(*opts.ParentID, userID); err != nil {
 			return nil, err
+		}
+		nameExists, err := svc.hasChildWithName(*opts.ParentID, opts.Name)
+		if err != nil {
+			return nil, err
+		}
+		if nameExists {
+			return nil, errorpkg.NewFileWithSimilarNameExistsError()
 		}
 	}
 	file, err := svc.fileRepo.Insert(repo.FileInsertOptions{
 		Name:        opts.Name,
-		WorkspaceId: opts.WorkspaceId,
-		ParentId:    opts.ParentId,
+		WorkspaceID: opts.WorkspaceID,
+		ParentID:    opts.ParentID,
 		Type:        opts.Type,
 	})
 	if err != nil {
 		return nil, err
 	}
-	if err := svc.fileRepo.GrantUserPermission(file.GetID(), userId, model.PermissionOwner); err != nil {
+	if err := svc.fileRepo.GrantUserPermission(file.GetID(), userID, model.PermissionOwner); err != nil {
 		return nil, err
 	}
 	file, err = svc.fileRepo.Find(file.GetID())
@@ -260,15 +272,15 @@ func (svc *FileService) Create(opts FileCreateOptions, userId string) (*File, er
 	if err = svc.fileCache.Set(file); err != nil {
 		return nil, err
 	}
-	res, err := svc.fileMapper.MapFile(file, userId)
+	res, err := svc.fileMapper.MapFile(file, userID)
 	if err != nil {
 		return nil, err
 	}
 	return res, nil
 }
 
-func (svc *FileService) validateParent(id string, userId string) error {
-	user, err := svc.userRepo.Find(userId)
+func (svc *FileService) validateParent(id string, userID string) error {
+	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return err
 	}
@@ -285,8 +297,8 @@ func (svc *FileService) validateParent(id string, userId string) error {
 	return nil
 }
 
-func (svc *FileService) Store(fileId string, filePath string, userId string) (*File, error) {
-	file, err := svc.fileRepo.Find(fileId)
+func (svc *FileService) Store(fileID string, filePath string, userID string) (*File, error) {
+	file, err := svc.fileRepo.Find(fileID)
 	if err != nil {
 		return nil, err
 	}
@@ -297,18 +309,18 @@ func (svc *FileService) Store(fileId string, filePath string, userId string) (*F
 	if err != nil {
 		return nil, err
 	}
-	latestVersion, err := svc.snapshotRepo.GetLatestVersionForFile(fileId)
+	latestVersion, err := svc.snapshotRepo.GetLatestVersionForFile(fileID)
 	if err != nil {
 		return nil, err
 	}
-	snapshotId := helper.NewId()
+	snapshotID := helper.NewID()
 	snapshot := repo.NewSnapshot()
-	snapshot.SetID(snapshotId)
+	snapshot.SetID(snapshotID)
 	snapshot.SetVersion(latestVersion)
 	if err = svc.snapshotRepo.Save(snapshot); err != nil {
 		return nil, err
 	}
-	if err = svc.snapshotRepo.MapWithFile(snapshotId, fileId); err != nil {
+	if err = svc.snapshotRepo.MapWithFile(snapshotID, fileID); err != nil {
 		return nil, err
 	}
 	stat, err := os.Stat(filePath)
@@ -317,7 +329,7 @@ func (svc *FileService) Store(fileId string, filePath string, userId string) (*F
 	}
 	original := model.S3Object{
 		Bucket: workspace.GetBucket(),
-		Key:    fileId + "/" + snapshotId + "/original" + strings.ToLower(filepath.Ext(filePath)),
+		Key:    fileID + "/" + snapshotID + "/original" + strings.ToLower(filepath.Ext(filePath)),
 		Size:   stat.Size(),
 	}
 	if err = svc.s3.PutFile(original.Key, filePath, infra.DetectMimeFromFile(filePath), workspace.GetBucket()); err != nil {
@@ -331,16 +343,18 @@ func (svc *FileService) Store(fileId string, filePath string, userId string) (*F
 	if err != nil {
 		return nil, err
 	}
-	res, err := svc.fileMapper.MapFile(file, userId)
+	res, err := svc.fileMapper.MapFile(file, userID)
 	if err != nil {
 		return nil, err
 	}
-	svc.conversionClient.RunPipeline(&infra.RunPipelineOptions{
+	if err := svc.conversionClient.RunPipeline(&infra.RunPipelineOptions{
 		FileID:     file.GetID(),
 		SnapshotID: snapshot.GetID(),
 		Bucket:     original.Bucket,
 		Key:        original.Key,
-	})
+	}); err != nil {
+		return nil, err
+	}
 	return res, nil
 }
 
@@ -367,6 +381,9 @@ func (svc *FileService) UpdateSnapshot(opts UpdateSnapshotOptions, apiKey string
 	if opts.Text != nil {
 		snapshot.SetText(opts.Text)
 	}
+	if opts.Language != nil {
+		snapshot.SetLanguage(*opts.Language)
+	}
 	if err := svc.snapshotRepo.Save(snapshot); err != nil {
 		return err
 	}
@@ -380,37 +397,8 @@ func (svc *FileService) UpdateSnapshot(opts UpdateSnapshotOptions, apiKey string
 	return nil
 }
 
-func (svc *FileService) DownloadOriginalFile(id string, userId string) (string, model.File, model.Snapshot, error) {
-	user, err := svc.userRepo.Find(userId)
-	if err != nil {
-		return "", nil, nil, err
-	}
-	file, err := svc.fileCache.Get(id)
-	if err != nil {
-		return "", nil, nil, err
-	}
-	if err = svc.fileGuard.Authorize(user, file, model.PermissionViewer); err != nil {
-		return "", nil, nil, err
-	}
-	snapshots := file.GetSnapshots()
-	if len(snapshots) == 0 {
-		return "", nil, nil, errorpkg.NewSnapshotNotFoundError(nil)
-	}
-	latestSnapshot := snapshots[len(snapshots)-1]
-	if latestSnapshot.HasOriginal() {
-		original := latestSnapshot.GetOriginal()
-		path := filepath.FromSlash(os.TempDir() + "/" + helper.NewId() + filepath.Ext(original.Key))
-		if err := svc.s3.GetFile(original.Key, path, original.Bucket); err != nil {
-			return "", nil, nil, err
-		}
-		return path, file, latestSnapshot, nil
-	} else {
-		return "", nil, nil, errorpkg.NewS3ObjectNotFoundError(nil)
-	}
-}
-
-func (svc *FileService) DownloadOriginalBuffer(id string, userId string) (*bytes.Buffer, model.File, model.Snapshot, error) {
-	user, err := svc.userRepo.Find(userId)
+func (svc *FileService) DownloadOriginalBuffer(id string, userID string) (*bytes.Buffer, model.File, model.Snapshot, error) {
+	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -438,37 +426,8 @@ func (svc *FileService) DownloadOriginalBuffer(id string, userId string) (*bytes
 	}
 }
 
-func (svc *FileService) DownloadPreviewFile(id string, userId string) (string, model.File, model.Snapshot, error) {
-	user, err := svc.userRepo.Find(userId)
-	if err != nil {
-		return "", nil, nil, err
-	}
-	file, err := svc.fileCache.Get(id)
-	if err != nil {
-		return "", nil, nil, err
-	}
-	if err = svc.fileGuard.Authorize(user, file, model.PermissionViewer); err != nil {
-		return "", nil, nil, err
-	}
-	snapshots := file.GetSnapshots()
-	if len(snapshots) == 0 {
-		return "", nil, nil, errorpkg.NewSnapshotNotFoundError(nil)
-	}
-	latestSnapshot := snapshots[len(snapshots)-1]
-	if latestSnapshot.HasPreview() {
-		preview := latestSnapshot.GetPreview()
-		path := filepath.FromSlash(os.TempDir() + "/" + helper.NewId() + filepath.Ext(preview.Key))
-		if err := svc.s3.GetFile(preview.Key, path, preview.Bucket); err != nil {
-			return "", nil, nil, err
-		}
-		return path, file, latestSnapshot, nil
-	} else {
-		return "", nil, nil, errorpkg.NewS3ObjectNotFoundError(nil)
-	}
-}
-
-func (svc *FileService) DownloadPreviewBuffer(id string, userId string) (*bytes.Buffer, model.File, model.Snapshot, error) {
-	user, err := svc.userRepo.Find(userId)
+func (svc *FileService) DownloadPreviewBuffer(id string, userID string) (*bytes.Buffer, model.File, model.Snapshot, error) {
+	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -496,8 +455,37 @@ func (svc *FileService) DownloadPreviewBuffer(id string, userId string) (*bytes.
 	}
 }
 
-func (svc *FileService) FindByID(ids []string, userId string) ([]*File, error) {
-	user, err := svc.userRepo.Find(userId)
+func (svc *FileService) DownloadOCRBuffer(id string, userID string) (*bytes.Buffer, model.File, model.Snapshot, error) {
+	user, err := svc.userRepo.Find(userID)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	file, err := svc.fileCache.Get(id)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	if err = svc.fileGuard.Authorize(user, file, model.PermissionViewer); err != nil {
+		return nil, nil, nil, err
+	}
+	snapshots := file.GetSnapshots()
+	if len(snapshots) == 0 {
+		return nil, nil, nil, errorpkg.NewSnapshotNotFoundError(nil)
+	}
+	latestSnapshot := snapshots[len(snapshots)-1]
+	if latestSnapshot.HasOCR() {
+		ocr := latestSnapshot.GetOCR()
+		buf, err := svc.s3.GetObject(ocr.Key, ocr.Bucket)
+		if err != nil {
+			return nil, nil, nil, err
+		}
+		return buf, file, latestSnapshot, nil
+	} else {
+		return nil, nil, nil, errorpkg.NewS3ObjectNotFoundError(nil)
+	}
+}
+
+func (svc *FileService) FindByID(ids []string, userID string) ([]*File, error) {
+	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
 	}
@@ -510,7 +498,7 @@ func (svc *FileService) FindByID(ids []string, userId string) ([]*File, error) {
 		if err = svc.fileGuard.Authorize(user, file, model.PermissionViewer); err != nil {
 			return nil, err
 		}
-		f, err := svc.fileMapper.MapFile(file, userId)
+		f, err := svc.fileMapper.MapFile(file, userID)
 		if err != nil {
 			return nil, err
 		}
@@ -519,15 +507,15 @@ func (svc *FileService) FindByID(ids []string, userId string) ([]*File, error) {
 	return res, nil
 }
 
-func (svc *FileService) FindByPath(path string, userId string) (*File, error) {
-	user, err := svc.userRepo.Find(userId)
+func (svc *FileService) FindByPath(path string, userID string) (*File, error) {
+	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
 	}
 	if path == "/" {
 		return &File{
 			ID:          user.GetID(),
-			WorkspaceId: "",
+			WorkspaceID: "",
 			Name:        "/",
 			Type:        model.FileTypeFolder,
 			Permission:  "owner",
@@ -544,15 +532,15 @@ func (svc *FileService) FindByPath(path string, userId string) (*File, error) {
 	if len(components) == 0 || components[0] == "" {
 		return nil, errorpkg.NewInvalidPathError(fmt.Errorf("invalid path '%s'", path))
 	}
-	workspace, err := svc.workspaceSvc.FindByName(components[0], userId)
+	workspace, err := svc.workspaceSvc.Find(helper.SlugToWorkspaceID(components[0]), userID)
 	if err != nil {
 		return nil, err
 	}
 	if len(components) == 1 {
 		return &File{
 			ID:          workspace.RootID,
-			WorkspaceId: workspace.ID,
-			Name:        workspace.Name,
+			WorkspaceID: workspace.ID,
+			Name:        helper.WorkspaceToSlug(workspace.ID, workspace.Name),
 			Type:        model.FileTypeFolder,
 			Permission:  workspace.Permission,
 			CreateTime:  workspace.CreateTime,
@@ -588,20 +576,20 @@ func (svc *FileService) FindByPath(path string, userId string) (*File, error) {
 			return nil, errorpkg.NewFileNotFoundError(fmt.Errorf("component not found '%s'", component))
 		}
 	}
-	result, err := svc.FindByID([]string{currentID}, userId)
+	result, err := svc.FindByID([]string{currentID}, userID)
 	if err != nil {
 		return nil, err
 	}
 	return result[0], nil
 }
 
-func (svc *FileService) ListByPath(path string, userId string) ([]*File, error) {
-	user, err := svc.userRepo.Find(userId)
+func (svc *FileService) ListByPath(path string, userID string) ([]*File, error) {
+	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
 	}
 	if path == "/" {
-		workspaces, err := svc.workspaceSvc.FindAll(userId)
+		workspaces, err := svc.workspaceSvc.FindAll(userID)
 		if err != nil {
 			return nil, err
 		}
@@ -609,8 +597,8 @@ func (svc *FileService) ListByPath(path string, userId string) ([]*File, error) 
 		for _, w := range workspaces {
 			result = append(result, &File{
 				ID:          w.RootID,
-				WorkspaceId: w.ID,
-				Name:        w.Name,
+				WorkspaceID: w.ID,
+				Name:        helper.WorkspaceToSlug(w.ID, w.Name),
 				Type:        model.FileTypeFolder,
 				Permission:  w.Permission,
 				CreateTime:  w.CreateTime,
@@ -628,7 +616,7 @@ func (svc *FileService) ListByPath(path string, userId string) ([]*File, error) 
 	if len(components) == 0 || components[0] == "" {
 		return nil, errorpkg.NewInvalidPathError(fmt.Errorf("invalid path '%s'", path))
 	}
-	workspace, err := svc.workspaceRepo.FindByName(components[0])
+	workspace, err := svc.workspaceRepo.Find(helper.SlugToWorkspaceID(components[0]))
 	if err != nil {
 		return nil, err
 	}
@@ -672,13 +660,13 @@ func (svc *FileService) ListByPath(path string, userId string) ([]*File, error) 
 		if err != nil {
 			return nil, err
 		}
-		result, err := svc.fileMapper.MapFiles(authorized, userId)
+		result, err := svc.fileMapper.MapFiles(authorized, userID)
 		if err != nil {
 			return nil, err
 		}
 		return result, nil
 	} else if currentType == model.FileTypeFile {
-		result, err := svc.FindByID([]string{currentID}, userId)
+		result, err := svc.FindByID([]string{currentID}, userID)
 		if err != nil {
 			return nil, err
 		}
@@ -688,8 +676,8 @@ func (svc *FileService) ListByPath(path string, userId string) ([]*File, error) 
 	}
 }
 
-func (svc *FileService) ListByID(id string, page uint, size uint, sortBy string, sortOrder string, fileType string, userId string) (*FileList, error) {
-	user, err := svc.userRepo.Find(userId)
+func (svc *FileService) ListByID(id string, page uint, size uint, sortBy string, sortOrder string, fileType string, userID string) (*FileList, error) {
+	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
 	}
@@ -720,9 +708,9 @@ func (svc *FileService) ListByID(id string, page uint, size uint, sortBy string,
 			filteredFiles = append(filteredFiles, f)
 		}
 	}
-	sortedFiles := svc.doSorting(filteredFiles, sortBy, sortOrder, userId)
+	sortedFiles := svc.doSorting(filteredFiles, sortBy, sortOrder, userID)
 	data, totalElements, totalPages := svc.doPaging(sortedFiles, page, size)
-	mappedFiles, err := svc.fileMapper.MapFiles(data, userId)
+	mappedFiles, err := svc.fileMapper.MapFiles(data, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -735,7 +723,7 @@ func (svc *FileService) ListByID(id string, page uint, size uint, sortBy string,
 	}, nil
 }
 
-func (svc *FileService) doSorting(data []model.File, sortBy string, sortOrder string, userId string) []model.File {
+func (svc *FileService) doSorting(data []model.File, sortBy string, sortOrder string, userID string) []model.File {
 	if sortBy == SortByName {
 		sort.Slice(data, func(i, j int) bool {
 			if sortOrder == SortOrderDesc {
@@ -747,11 +735,11 @@ func (svc *FileService) doSorting(data []model.File, sortBy string, sortOrder st
 		return data
 	} else if sortBy == SortBySize {
 		sort.Slice(data, func(i, j int) bool {
-			fileA, err := svc.fileMapper.MapFile(data[i], userId)
+			fileA, err := svc.fileMapper.MapFile(data[i], userID)
 			if err != nil {
 				return false
 			}
-			fileB, err := svc.fileMapper.MapFile(data[j], userId)
+			fileB, err := svc.fileMapper.MapFile(data[j], userID)
 			if err != nil {
 				return false
 			}
@@ -809,7 +797,7 @@ func (svc *FileService) doSorting(data []model.File, sortBy string, sortOrder st
 			ToSlice(0)
 		images, _ := rxgo.Just(files)().
 			Filter(func(v interface{}) bool {
-				f, err := svc.fileMapper.MapFile(v.(model.File), userId)
+				f, err := svc.fileMapper.MapFile(v.(model.File), userID)
 				if err != nil {
 					return false
 				}
@@ -824,7 +812,7 @@ func (svc *FileService) doSorting(data []model.File, sortBy string, sortOrder st
 			ToSlice(0)
 		pdfs, _ := rxgo.Just(files)().
 			Filter(func(v interface{}) bool {
-				f, err := svc.fileMapper.MapFile(v.(model.File), userId)
+				f, err := svc.fileMapper.MapFile(v.(model.File), userID)
 				if err != nil {
 					return false
 				}
@@ -839,7 +827,7 @@ func (svc *FileService) doSorting(data []model.File, sortBy string, sortOrder st
 			ToSlice(0)
 		documents, _ := rxgo.Just(files)().
 			Filter(func(v interface{}) bool {
-				f, err := svc.fileMapper.MapFile(v.(model.File), userId)
+				f, err := svc.fileMapper.MapFile(v.(model.File), userID)
 				if err != nil {
 					return false
 				}
@@ -854,7 +842,7 @@ func (svc *FileService) doSorting(data []model.File, sortBy string, sortOrder st
 			ToSlice(0)
 		videos, _ := rxgo.Just(files)().
 			Filter(func(v interface{}) bool {
-				f, err := svc.fileMapper.MapFile(v.(model.File), userId)
+				f, err := svc.fileMapper.MapFile(v.(model.File), userID)
 				if err != nil {
 					return false
 				}
@@ -869,7 +857,7 @@ func (svc *FileService) doSorting(data []model.File, sortBy string, sortOrder st
 			ToSlice(0)
 		texts, _ := rxgo.Just(files)().
 			Filter(func(v interface{}) bool {
-				f, err := svc.fileMapper.MapFile(v.(model.File), userId)
+				f, err := svc.fileMapper.MapFile(v.(model.File), userID)
 				if err != nil {
 					return false
 				}
@@ -884,7 +872,7 @@ func (svc *FileService) doSorting(data []model.File, sortBy string, sortOrder st
 			ToSlice(0)
 		others, _ := rxgo.Just(files)().
 			Filter(func(v interface{}) bool {
-				f, err := svc.fileMapper.MapFile(v.(model.File), userId)
+				f, err := svc.fileMapper.MapFile(v.(model.File), userID)
 				if err != nil {
 					return false
 				}
@@ -963,11 +951,10 @@ func (svc *FileService) doSorting(data []model.File, sortBy string, sortOrder st
 	return data
 }
 
-func (svc *FileService) doPaging(files []model.File, page uint, size uint) ([]model.File, uint, uint) {
+func (svc *FileService) doPaging(files []model.File, page uint, size uint) (pagedFiles []model.File, totalElements uint, totalPages uint) {
 	page = page - 1
 	low := size * page
 	high := low + size
-	var pagedFiles []model.File
 	if low >= uint(len(files)) {
 		pagedFiles = []model.File{}
 	} else if high >= uint(len(files)) {
@@ -976,8 +963,7 @@ func (svc *FileService) doPaging(files []model.File, page uint, size uint) ([]mo
 	} else {
 		pagedFiles = files[low:high]
 	}
-	totalElements := uint(len(files))
-	var totalPages uint
+	totalElements = uint(len(files))
 	if totalElements == 0 {
 		totalPages = 1
 	} else {
@@ -1010,12 +996,12 @@ func (svc *FileService) getAuthorized(ids []string, user model.User) ([]model.Fi
 	return res, nil
 }
 
-func (svc *FileService) Search(req FileSearchOptions, page uint, size uint, userId string) (*FileSearchResult, error) {
-	user, err := svc.userRepo.Find(userId)
+func (svc *FileService) Search(req FileSearchOptions, page uint, size uint, userID string) (*FileSearchResult, error) {
+	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
 	}
-	workspace, err := svc.workspaceRepo.FindByID(req.WorkspaceId)
+	workspace, err := svc.workspaceRepo.Find(req.WorkspaceID)
 	if err != nil {
 		return nil, err
 	}
@@ -1026,11 +1012,11 @@ func (svc *FileService) Search(req FileSearchOptions, page uint, size uint, user
 	if err != nil {
 		return nil, err
 	}
-	data, totalElements, totalPages, err := svc.doFilteringAndPaging(req, files, page, size, userId)
+	data, totalElements, totalPages, err := svc.doFilteringAndPaging(req, files, page, size, userID)
 	if err != nil {
 		return nil, err
 	}
-	v, err := svc.fileMapper.MapFiles(data, userId)
+	v, err := svc.fileMapper.MapFiles(data, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -1045,22 +1031,22 @@ func (svc *FileService) Search(req FileSearchOptions, page uint, size uint, user
 	return res, nil
 }
 
-func (svc *FileService) doFilteringAndPaging(req FileSearchOptions, files []model.File, page uint, size uint, userId string) ([]model.File, uint, uint, error) {
+func (svc *FileService) doFilteringAndPaging(opts FileSearchOptions, files []model.File, page uint, size uint, userID string) (filteredFiles []model.File, totalElements uint, totalPages uint, err error) {
 	filtered, _ := rxgo.Just(files)().
 		Filter(func(v interface{}) bool {
-			return v.(model.File).GetWorkspaceID() == req.WorkspaceId
+			return v.(model.File).GetWorkspaceID() == opts.WorkspaceID
 		}).
 		Filter(func(v interface{}) bool {
-			if req.Type != nil {
-				return v.(model.File).GetType() == *req.Type
+			if opts.Type != nil {
+				return v.(model.File).GetType() == *opts.Type
 			} else {
 				return true
 			}
 		}).
 		Filter(func(v interface{}) bool {
 			file := v.(model.File)
-			if req.ParentId != nil {
-				res, err := svc.fileRepo.IsGrandChildOf(file.GetID(), *req.ParentId)
+			if opts.ParentID != nil {
+				res, err := svc.fileRepo.IsGrandChildOf(file.GetID(), *opts.ParentID)
 				if err != nil {
 					return false
 				}
@@ -1070,35 +1056,35 @@ func (svc *FileService) doFilteringAndPaging(req FileSearchOptions, files []mode
 			}
 		}).
 		Filter(func(v interface{}) bool {
-			if req.CreateTimeBefore != nil {
+			if opts.CreateTimeBefore != nil {
 				t, _ := time.Parse(time.RFC3339, v.(model.File).GetCreateTime())
-				return t.UnixMilli() >= *req.CreateTimeAfter
+				return t.UnixMilli() >= *opts.CreateTimeAfter
 			} else {
 				return true
 			}
 		}).
 		Filter(func(v interface{}) bool {
-			if req.CreateTimeBefore != nil {
+			if opts.CreateTimeBefore != nil {
 				t, _ := time.Parse(time.RFC3339, v.(model.File).GetCreateTime())
-				return t.UnixMilli() <= *req.CreateTimeBefore
+				return t.UnixMilli() <= *opts.CreateTimeBefore
 			} else {
 				return true
 			}
 		}).
 		Filter(func(v interface{}) bool {
-			if req.UpdateTimeAfter != nil {
+			if opts.UpdateTimeAfter != nil {
 				file := v.(model.File)
 				t, _ := time.Parse(time.RFC3339, v.(model.File).GetCreateTime())
-				return file.GetUpdateTime() != nil && t.UnixMilli() >= *req.UpdateTimeAfter
+				return file.GetUpdateTime() != nil && t.UnixMilli() >= *opts.UpdateTimeAfter
 			} else {
 				return true
 			}
 		}).
 		Filter(func(v interface{}) bool {
-			if req.UpdateTimeBefore != nil {
+			if opts.UpdateTimeBefore != nil {
 				file := v.(model.File)
 				t, _ := time.Parse(time.RFC3339, v.(model.File).GetCreateTime())
-				return file.GetUpdateTime() != nil && t.UnixMilli() <= *req.UpdateTimeBefore
+				return file.GetUpdateTime() != nil && t.UnixMilli() <= *opts.UpdateTimeBefore
 			} else {
 				return true
 			}
@@ -1106,25 +1092,24 @@ func (svc *FileService) doFilteringAndPaging(req FileSearchOptions, files []mode
 		Skip((page - 1) * size).
 		Take(size).
 		ToSlice(0)
-	var res []model.File
 	for _, v := range filtered {
 		var file model.File
 		file, err := svc.fileCache.Get(v.(model.File).GetID())
 		if err != nil {
 			return nil, 0, 0, err
 		}
-		res = append(res, file)
+		filteredFiles = append(filteredFiles, file)
 	}
-	totalPages := uint(len(res)) / size
+	totalPages = uint(len(filteredFiles)) / size
 	if totalPages == 0 {
 		totalPages = 1
 	}
-	totalElements := uint(len(res))
-	return res, totalElements, totalPages, nil
+	totalElements = uint(len(filteredFiles))
+	return filteredFiles, totalElements, totalPages, nil
 }
 
-func (svc *FileService) GetPath(id string, userId string) ([]*File, error) {
-	user, err := svc.userRepo.Find(userId)
+func (svc *FileService) GetPath(id string, userID string) ([]*File, error) {
+	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
 	}
@@ -1141,7 +1126,7 @@ func (svc *FileService) GetPath(id string, userId string) ([]*File, error) {
 	}
 	res := []*File{}
 	for _, f := range path {
-		v, err := svc.fileMapper.MapFile(f, userId)
+		v, err := svc.fileMapper.MapFile(f, userID)
 		if err != nil {
 			return nil, err
 		}
@@ -1150,20 +1135,20 @@ func (svc *FileService) GetPath(id string, userId string) ([]*File, error) {
 	return res, nil
 }
 
-func (svc *FileService) Copy(targetId string, sourceIds []string, userId string) ([]*File, error) {
-	user, err := svc.userRepo.Find(userId)
+func (svc *FileService) Copy(targetID string, sourceIDs []string, userID string) (copiedFiles []*File, err error) {
+	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
 	}
-	target, err := svc.fileCache.Get(targetId)
+	target, err := svc.fileCache.Get(targetID)
 	if err != nil {
 		return nil, err
 	}
 
 	/* Do checks */
-	for _, sourceId := range sourceIds {
+	for _, sourceID := range sourceIDs {
 		var source model.File
-		if source, err = svc.fileCache.Get(sourceId); err != nil {
+		if source, err = svc.fileCache.Get(sourceID); err != nil {
 			return nil, err
 		}
 		if err = svc.fileGuard.Authorize(user, target, model.PermissionEditor); err != nil {
@@ -1185,51 +1170,62 @@ func (svc *FileService) Copy(targetId string, sourceIds []string, userId string)
 
 	/* Do copying */
 	allClones := []model.File{}
-	for _, sourceId := range sourceIds {
+	for _, sourceID := range sourceIDs {
 		/* Get original tree */
 		var sourceTree []model.File
-		if sourceTree, err = svc.fileRepo.FindTree(sourceId); err != nil {
+		if sourceTree, err = svc.fileRepo.FindTree(sourceID); err != nil {
 			return nil, err
 		}
 
 		/* Clone source tree */
 		var rootCloneIndex int
-		var cloneIds = make(map[string]string)
-		var originalIds = make(map[string]string)
+		var cloneIDs = make(map[string]string)
+		var originalIDs = make(map[string]string)
 		var clones []model.File
 		var permissions []*repo.UserPermission
 		for i, o := range sourceTree {
 			c := repo.NewFile()
-			c.SetID(helper.NewId())
+			c.SetID(helper.NewID())
 			c.SetParentID(o.GetParentID())
 			c.SetWorkspaceID(o.GetWorkspaceID())
 			c.SetType(o.GetType())
 			c.SetName(o.GetName())
 			c.SetCreateTime(time.Now().UTC().Format(time.RFC3339))
-			if o.GetID() == sourceId {
+			if o.GetID() == sourceID {
 				rootCloneIndex = i
 			}
-			cloneIds[o.GetID()] = c.GetID()
-			originalIds[c.GetID()] = o.GetID()
+			cloneIDs[o.GetID()] = c.GetID()
+			originalIDs[c.GetID()] = o.GetID()
 			clones = append(clones, c)
 			permissions = append(permissions, &repo.UserPermission{
-				ID:         helper.NewId(),
-				UserID:     userId,
+				ID:         helper.NewID(),
+				UserID:     userID,
 				ResourceID: c.GetID(),
 				Permission: model.PermissionOwner,
 				CreateTime: time.Now().UTC().Format(time.RFC3339),
 			})
 		}
 
-		/* Set parent Ids of clones */
+		/* Set parent IDs of clones */
 		for i, c := range clones {
-			id := cloneIds[*c.GetParentID()]
+			id := cloneIDs[*c.GetParentID()]
 			clones[i].SetParentID(&id)
 		}
 
+		rootClone := clones[rootCloneIndex]
+
 		/* Parent ID of root clone is target ID */
 		if clones != nil {
-			clones[rootCloneIndex].SetParentID(&targetId)
+			rootClone.SetParentID(&targetID)
+		}
+
+		/* If there is a file with similar name, append a prefix */
+		nameExists, err := svc.hasChildWithName(targetID, rootClone.GetName())
+		if err != nil {
+			return nil, err
+		}
+		if nameExists {
+			rootClone.SetName(fmt.Sprintf("Copy of %s", rootClone.GetName()))
 		}
 
 		/* Persist clones */
@@ -1244,7 +1240,7 @@ func (svc *FileService) Copy(targetId string, sourceIds []string, userId string)
 
 		/* Assign snapshots to clones */
 		for _, c := range clones {
-			if err := svc.fileRepo.AssignSnapshots(c.GetID(), originalIds[c.GetID()]); err != nil {
+			if err := svc.fileRepo.AssignSnapshots(c.GetID(), originalIDs[c.GetID()]); err != nil {
 				return nil, err
 			}
 		}
@@ -1271,30 +1267,39 @@ func (svc *FileService) Copy(targetId string, sourceIds []string, userId string)
 		return nil, err
 	}
 
-	res, err := svc.fileMapper.MapFiles(allClones, userId)
+	copiedFiles, err = svc.fileMapper.MapFiles(allClones, userID)
 	if err != nil {
 		return nil, err
 	}
 
-	return res, nil
+	return copiedFiles, nil
 }
 
-func (svc *FileService) Move(targetId string, sourceIds []string, userId string) ([]string, error) {
-	res := []string{}
-	user, err := svc.userRepo.Find(userId)
+func (svc *FileService) Move(targetID string, sourceIDs []string, userID string) (parentIDs []string, err error) {
+	parentIDs = []string{}
+	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return []string{}, err
 	}
-	target, err := svc.fileCache.Get(targetId)
+	target, err := svc.fileCache.Get(targetID)
 	if err != nil {
 		return []string{}, err
 	}
 
 	/* Do checks */
-	for _, id := range sourceIds {
+	for _, id := range sourceIDs {
 		source, err := svc.fileCache.Get(id)
 		if err != nil {
 			return []string{}, err
+		}
+		if source.GetParentID() != nil {
+			nameExists, err := svc.hasChildWithName(targetID, source.GetName())
+			if err != nil {
+				return nil, err
+			}
+			if nameExists {
+				return nil, errorpkg.NewFileWithSimilarNameExistsError()
+			}
 		}
 		if err := svc.fileGuard.Authorize(user, target, model.PermissionEditor); err != nil {
 			return []string{}, err
@@ -1318,11 +1323,11 @@ func (svc *FileService) Move(targetId string, sourceIds []string, userId string)
 	}
 
 	/* Do moving */
-	for _, id := range sourceIds {
+	for _, id := range sourceIDs {
 		source, _ := svc.fileCache.Get(id)
 
 		/* Add old parent */
-		res = append(res, *source.GetParentID())
+		parentIDs = append(parentIDs, *source.GetParentID())
 
 		/* Move source into target */
 		if err := svc.fileRepo.MoveSourceIntoTarget(target.GetID(), source.GetID()); err != nil {
@@ -1336,7 +1341,7 @@ func (svc *FileService) Move(targetId string, sourceIds []string, userId string)
 		}
 
 		// Add new parent
-		res = append(res, *source.GetParentID())
+		parentIDs = append(parentIDs, *source.GetParentID())
 
 		/* Refresh updateTime on source and target */
 		timeNow := time.Now().UTC().Format(time.RFC3339)
@@ -1361,17 +1366,26 @@ func (svc *FileService) Move(targetId string, sourceIds []string, userId string)
 			}
 		}
 	}
-	return res, nil
+	return parentIDs, nil
 }
 
-func (svc *FileService) Rename(id string, name string, userId string) (*File, error) {
-	user, err := svc.userRepo.Find(userId)
+func (svc *FileService) Rename(id string, name string, userID string) (*File, error) {
+	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
 	}
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return nil, err
+	}
+	if file.GetParentID() != nil {
+		nameExists, err := svc.hasChildWithName(*file.GetParentID(), name)
+		if err != nil {
+			return nil, err
+		}
+		if nameExists {
+			return nil, errorpkg.NewFileWithSimilarNameExistsError()
+		}
 	}
 	if err = svc.fileGuard.Authorize(user, file, model.PermissionEditor); err != nil {
 		return nil, err
@@ -1387,18 +1401,18 @@ func (svc *FileService) Rename(id string, name string, userId string) (*File, er
 	if err != nil {
 		return nil, err
 	}
-	res, err := svc.fileMapper.MapFile(file, userId)
+	res, err := svc.fileMapper.MapFile(file, userID)
 	if err != nil {
 		return nil, err
 	}
 	return res, nil
 }
 
-func (svc *FileService) Delete(ids []string, userId string) ([]string, error) {
+func (svc *FileService) Delete(ids []string, userID string) ([]string, error) {
 	var res []string
 	for _, id := range ids {
 		var user model.User
-		user, err := svc.userRepo.Find(userId)
+		user, err := svc.userRepo.Find(userID)
 		if err != nil {
 			return nil, err
 		}
@@ -1425,11 +1439,11 @@ func (svc *FileService) Delete(ids []string, userId string) ([]string, error) {
 		if err != nil {
 			return nil, err
 		}
-		var treeIds []string
+		var treeIDs []string
 		for _, f := range tree {
-			treeIds = append(treeIds, f.GetID())
+			treeIDs = append(treeIDs, f.GetID())
 		}
-		if err := svc.fileSearch.Delete(treeIds); err != nil {
+		if err := svc.fileSearch.Delete(treeIDs); err != nil {
 			// Here we don't return an error or panic but we just print the error
 			fmt.Println(err)
 		}
@@ -1480,8 +1494,8 @@ func (svc *FileService) Delete(ids []string, userId string) ([]string, error) {
 	return res, nil
 }
 
-func (svc *FileService) GetSize(id string, userId string) (int64, error) {
-	user, err := svc.userRepo.Find(userId)
+func (svc *FileService) GetSize(id string, userID string) (int64, error) {
+	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return -1, err
 	}
@@ -1499,8 +1513,8 @@ func (svc *FileService) GetSize(id string, userId string) (int64, error) {
 	return res, nil
 }
 
-func (svc *FileService) GetItemCount(id string, userId string) (int64, error) {
-	user, err := svc.userRepo.Find(userId)
+func (svc *FileService) GetItemCount(id string, userID string) (int64, error) {
+	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return 0, err
 	}
@@ -1518,8 +1532,8 @@ func (svc *FileService) GetItemCount(id string, userId string) (int64, error) {
 	return res, nil
 }
 
-func (svc *FileService) GrantUserPermission(ids []string, assigneeId string, permission string, userId string) error {
-	user, err := svc.userRepo.Find(userId)
+func (svc *FileService) GrantUserPermission(ids []string, assigneeID string, permission string, userID string) error {
+	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return err
 	}
@@ -1531,16 +1545,16 @@ func (svc *FileService) GrantUserPermission(ids []string, assigneeId string, per
 		if err = svc.fileGuard.Authorize(user, file, model.PermissionOwner); err != nil {
 			return err
 		}
-		if _, err := svc.userRepo.Find(assigneeId); err != nil {
+		if _, err := svc.userRepo.Find(assigneeID); err != nil {
 			return err
 		}
-		if err = svc.fileRepo.GrantUserPermission(id, assigneeId, permission); err != nil {
+		if err = svc.fileRepo.GrantUserPermission(id, assigneeID, permission); err != nil {
 			return err
 		}
 		if _, err := svc.fileCache.Refresh(file.GetID()); err != nil {
 			return err
 		}
-		workspace, err := svc.workspaceRepo.FindByID(file.GetWorkspaceID())
+		workspace, err := svc.workspaceRepo.Find(file.GetWorkspaceID())
 		if err != nil {
 			return err
 		}
@@ -1569,8 +1583,8 @@ func (svc *FileService) GrantUserPermission(ids []string, assigneeId string, per
 	return nil
 }
 
-func (svc *FileService) RevokeUserPermission(ids []string, assigneeId string, userId string) error {
-	user, err := svc.userRepo.Find(userId)
+func (svc *FileService) RevokeUserPermission(ids []string, assigneeID string, userID string) error {
+	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return err
 	}
@@ -1582,10 +1596,10 @@ func (svc *FileService) RevokeUserPermission(ids []string, assigneeId string, us
 		if err := svc.fileGuard.Authorize(user, file, model.PermissionOwner); err != nil {
 			return err
 		}
-		if _, err := svc.userRepo.Find(assigneeId); err != nil {
+		if _, err := svc.userRepo.Find(assigneeID); err != nil {
 			return err
 		}
-		if err := svc.fileRepo.RevokeUserPermission(id, assigneeId); err != nil {
+		if err := svc.fileRepo.RevokeUserPermission(id, assigneeID); err != nil {
 			return err
 		}
 		if _, err := svc.fileCache.Refresh(file.GetID()); err != nil {
@@ -1595,8 +1609,8 @@ func (svc *FileService) RevokeUserPermission(ids []string, assigneeId string, us
 	return nil
 }
 
-func (svc *FileService) GrantGroupPermission(ids []string, groupId string, permission string, userId string) error {
-	user, err := svc.userRepo.Find(userId)
+func (svc *FileService) GrantGroupPermission(ids []string, groupID string, permission string, userID string) error {
+	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return err
 	}
@@ -1608,20 +1622,20 @@ func (svc *FileService) GrantGroupPermission(ids []string, groupId string, permi
 		if err = svc.fileGuard.Authorize(user, file, model.PermissionOwner); err != nil {
 			return err
 		}
-		group, err := svc.groupCache.Get(groupId)
+		group, err := svc.groupCache.Get(groupID)
 		if err != nil {
 			return err
 		}
 		if err := svc.groupGuard.Authorize(user, group, model.PermissionViewer); err != nil {
 			return err
 		}
-		if err = svc.fileRepo.GrantGroupPermission(id, groupId, permission); err != nil {
+		if err = svc.fileRepo.GrantGroupPermission(id, groupID, permission); err != nil {
 			return err
 		}
 		if _, err := svc.fileCache.Refresh(file.GetID()); err != nil {
 			return err
 		}
-		workspace, err := svc.workspaceRepo.FindByID(file.GetWorkspaceID())
+		workspace, err := svc.workspaceRepo.Find(file.GetWorkspaceID())
 		if err != nil {
 			return err
 		}
@@ -1650,8 +1664,8 @@ func (svc *FileService) GrantGroupPermission(ids []string, groupId string, permi
 	return nil
 }
 
-func (svc *FileService) RevokeGroupPermission(ids []string, groupId string, userId string) error {
-	user, err := svc.userRepo.Find(userId)
+func (svc *FileService) RevokeGroupPermission(ids []string, groupID string, userID string) error {
+	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return err
 	}
@@ -1663,14 +1677,14 @@ func (svc *FileService) RevokeGroupPermission(ids []string, groupId string, user
 		if err := svc.fileGuard.Authorize(user, file, model.PermissionOwner); err != nil {
 			return err
 		}
-		group, err := svc.groupCache.Get(groupId)
+		group, err := svc.groupCache.Get(groupID)
 		if err != nil {
 			return err
 		}
 		if err := svc.groupGuard.Authorize(user, group, model.PermissionViewer); err != nil {
 			return err
 		}
-		if err := svc.fileRepo.RevokeGroupPermission(id, groupId); err != nil {
+		if err := svc.fileRepo.RevokeGroupPermission(id, groupID); err != nil {
 			return err
 		}
 		if _, err := svc.fileCache.Refresh(file.GetID()); err != nil {
@@ -1680,8 +1694,8 @@ func (svc *FileService) RevokeGroupPermission(ids []string, groupId string, user
 	return nil
 }
 
-func (svc *FileService) GetUserPermissions(id string, userId string) ([]*UserPermission, error) {
-	user, err := svc.userRepo.Find(userId)
+func (svc *FileService) GetUserPermissions(id string, userID string) ([]*UserPermission, error) {
+	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
 	}
@@ -1698,7 +1712,7 @@ func (svc *FileService) GetUserPermissions(id string, userId string) ([]*UserPer
 	}
 	res := make([]*UserPermission, 0)
 	for _, p := range permissions {
-		if p.UserID == userId {
+		if p.UserID == userID {
 			continue
 		}
 		u, err := svc.userRepo.Find(p.UserID)
@@ -1714,8 +1728,8 @@ func (svc *FileService) GetUserPermissions(id string, userId string) ([]*UserPer
 	return res, nil
 }
 
-func (svc *FileService) GetGroupPermissions(id string, userId string) ([]*GroupPermission, error) {
-	user, err := svc.userRepo.Find(userId)
+func (svc *FileService) GetGroupPermissions(id string, userID string) ([]*GroupPermission, error) {
+	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
 	}
@@ -1736,7 +1750,7 @@ func (svc *FileService) GetGroupPermissions(id string, userId string) ([]*GroupP
 		if err != nil {
 			return nil, err
 		}
-		g, err := svc.groupMapper.mapGroup(m, userId)
+		g, err := svc.groupMapper.mapGroup(m, userID)
 		if err != nil {
 			return nil, err
 		}
@@ -1747,6 +1761,19 @@ func (svc *FileService) GetGroupPermissions(id string, userId string) ([]*GroupP
 		})
 	}
 	return res, nil
+}
+
+func (svc *FileService) hasChildWithName(id string, name string) (bool, error) {
+	children, err := svc.fileRepo.FindChildren(id)
+	if err != nil {
+		return false, err
+	}
+	for _, child := range children {
+		if child.GetName() == name {
+			return true, nil
+		}
+	}
+	return false, nil
 }
 
 type FileMapper struct {
@@ -1761,14 +1788,14 @@ func NewFileMapper() *FileMapper {
 	}
 }
 
-func (mp *FileMapper) MapFile(m model.File, userId string) (*File, error) {
+func (mp *FileMapper) MapFile(m model.File, userID string) (*File, error) {
 	snapshots := m.GetSnapshots()
 	res := &File{
 		ID:          m.GetID(),
-		WorkspaceId: m.GetWorkspaceID(),
+		WorkspaceID: m.GetWorkspaceID(),
 		Name:        m.GetName(),
 		Type:        m.GetType(),
-		ParentId:    m.GetParentID(),
+		ParentID:    m.GetParentID(),
 		Snapshots:   mp.MapSnapshots(snapshots, m.GetID()),
 		CreateTime:  m.GetCreateTime(),
 		UpdateTime:  m.GetUpdateTime(),
@@ -1778,11 +1805,13 @@ func (mp *FileMapper) MapFile(m model.File, userId string) (*File, error) {
 		res.Version = &latest.Version
 		res.Original = latest.Original
 		res.Preview = latest.Preview
+		res.OCR = latest.OCR
 		res.Thumbnail = latest.Thumbnail
+		res.Language = latest.Language
 	}
 	res.Permission = ""
 	for _, p := range m.GetUserPermissions() {
-		if p.GetUserID() == userId && model.GetPermissionWeight(p.GetValue()) > model.GetPermissionWeight(res.Permission) {
+		if p.GetUserID() == userID && model.GetPermissionWeight(p.GetValue()) > model.GetPermissionWeight(res.Permission) {
 			res.Permission = p.GetValue()
 		}
 	}
@@ -1792,14 +1821,14 @@ func (mp *FileMapper) MapFile(m model.File, userId string) (*File, error) {
 			return nil, err
 		}
 		for _, u := range g.GetUsers() {
-			if u == userId && model.GetPermissionWeight(p.GetValue()) > model.GetPermissionWeight(res.Permission) {
+			if u == userID && model.GetPermissionWeight(p.GetValue()) > model.GetPermissionWeight(res.Permission) {
 				res.Permission = p.GetValue()
 			}
 		}
 	}
 	shareCount := 0
 	for _, p := range m.GetUserPermissions() {
-		if p.GetUserID() != userId {
+		if p.GetUserID() != userID {
 			shareCount++
 		}
 	}
@@ -1812,10 +1841,10 @@ func (mp *FileMapper) MapFile(m model.File, userId string) (*File, error) {
 	return res, nil
 }
 
-func (mp *FileMapper) MapFiles(files []model.File, userId string) ([]*File, error) {
+func (mp *FileMapper) MapFiles(files []model.File, userID string) ([]*File, error) {
 	res := make([]*File, 0)
 	for _, f := range files {
-		v, err := mp.MapFile(f, userId)
+		v, err := mp.MapFile(f, userID)
 		if err != nil {
 			return nil, err
 		}
@@ -1835,8 +1864,14 @@ func (mp *FileMapper) MapSnapshot(m model.Snapshot) *Snapshot {
 	if m.HasPreview() {
 		s.Preview = mp.MapPreview(m.GetPreview())
 	}
+	if m.HasOCR() {
+		s.OCR = mp.MapOCR(m.GetOCR())
+	}
 	if m.HasThumbnail() {
 		s.Thumbnail = mp.MapThumbnail(m.GetThumbnail())
+	}
+	if m.HasLanguage() {
+		s.Language = m.GetLanguage()
 	}
 	return s
 }
@@ -1891,7 +1926,7 @@ func (mp *FileMapper) MapText(m *model.S3Object) *Download {
 	}
 }
 
-func (mp *FileMapper) MapSnapshots(snapshots []model.Snapshot, fileId string) []*Snapshot {
+func (mp *FileMapper) MapSnapshots(snapshots []model.Snapshot, fileID string) []*Snapshot {
 	res := make([]*Snapshot, 0)
 	for _, s := range snapshots {
 		res = append(res, mp.MapSnapshot(s))

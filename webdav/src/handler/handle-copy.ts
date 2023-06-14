@@ -3,6 +3,7 @@ import path from 'path'
 import { getTargetPath } from '@/helper/path'
 import { FileAPI } from '@/client/api'
 import { Token } from '@/client/idp'
+import { handleError } from '@/infra/error'
 
 /*
   This method copies a resource from a source URL to a destination URL.
@@ -21,9 +22,9 @@ async function handleCopy(
 ) {
   try {
     const api = new FileAPI(token)
-    const sourceFile = await api.getByPath(decodeURI(req.url))
+    const sourceFile = await api.getByPath(decodeURIComponent(req.url))
     const targetFile = await api.getByPath(
-      decodeURI(path.dirname(getTargetPath(req)))
+      decodeURIComponent(path.dirname(getTargetPath(req)))
     )
 
     if (sourceFile.workspaceId !== targetFile.workspaceId) {
@@ -40,9 +41,7 @@ async function handleCopy(
     res.statusCode = 204
     res.end()
   } catch (err) {
-    console.error(err)
-    res.statusCode = 500
-    res.end()
+    handleError(err, res)
   }
 }
 

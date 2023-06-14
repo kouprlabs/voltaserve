@@ -12,7 +12,7 @@ import {
 import { Helmet } from 'react-helmet-async'
 import { swrConfig } from '@/api/options'
 import OrganizationAPI from '@/api/organization'
-import { geEditorPermission } from '@/api/permission'
+import { geEditorPermission, geOwnerPermission } from '@/api/permission'
 import Delete from '@/components/organization/delete'
 import EditName from '@/components/organization/edit-name'
 import InviteMembers from '@/components/organization/invite-members'
@@ -52,7 +52,7 @@ const OrganizationSettingsPage = () => {
           <Text>{org.name}</Text>
           <IconButton
             icon={<IconEdit />}
-            disabled={!geEditorPermission(org.permission)}
+            isDisabled={!geEditorPermission(org.permission)}
             aria-label=""
             onClick={() => {
               setIsNameModalOpen(true)
@@ -60,18 +60,20 @@ const OrganizationSettingsPage = () => {
           />
         </HStack>
         <Divider />
+
         <HStack spacing={variables.spacing}>
           <Text>Invite members</Text>
           <Spacer />
           <IconButton
             icon={<IconUserPlus />}
-            disabled={!geEditorPermission(org.permission)}
+            isDisabled={!geOwnerPermission(org.permission)}
             aria-label=""
             onClick={() => {
               setIsInviteMembersModalOpen(true)
             }}
           />
         </HStack>
+
         <HStack spacing={variables.spacing}>
           <Text>Leave</Text>
           <Spacer />
@@ -91,7 +93,7 @@ const OrganizationSettingsPage = () => {
             icon={<IconTrash />}
             variant="solid"
             colorScheme="red"
-            disabled={!geEditorPermission(org.permission)}
+            isDisabled={!geEditorPermission(org.permission)}
             aria-label=""
             onClick={() => setIsDeleteModalOpen(true)}
           />

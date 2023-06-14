@@ -1,10 +1,12 @@
 package core
 
 type PipelineOptions struct {
-	FileID     string `json:"fileId"`
-	SnapshotID string `json:"snapshotId"`
-	Bucket     string `json:"bucket"`
-	Key        string `json:"key"`
+	FileID         string  `json:"fileId"`
+	SnapshotID     string  `json:"snapshotId"`
+	Bucket         string  `json:"bucket"`
+	Key            string  `json:"key"`
+	Language       *string `json:"language,omitempty"`
+	TesseractModel *string `json:"tesseractModel,omitempty"`
 }
 
 type PipelineResponse struct {
@@ -14,6 +16,7 @@ type PipelineResponse struct {
 	Text      *S3Object       `json:"text,omitempty"`
 	OCR       *S3Object       `json:"ocr,omitempty"`
 	Thumbnail *Thumbnail      `json:"thumbnail,omitempty"`
+	Language  *string         `json:"language,omitempty"`
 }
 
 type S3Object struct {
@@ -32,4 +35,12 @@ type Thumbnail struct {
 	Base64 string `json:"base64"`
 	Width  int    `json:"width"`
 	Height int    `json:"height"`
+}
+
+type Pipeline interface {
+	Run(PipelineOptions) error
+}
+
+type Builder interface {
+	Build(PipelineOptions) error
 }

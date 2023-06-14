@@ -21,52 +21,52 @@ func NewFileSearch() *FileSearch {
 	}
 }
 
-func (search *FileSearch) Index(files []model.File) (err error) {
+func (s *FileSearch) Index(files []model.File) (err error) {
 	if len(files) == 0 {
 		return nil
 	}
-	if err = search.populateTextField(files); err != nil {
+	if err = s.populateTextField(files); err != nil {
 		return err
 	}
 	var res []infra.SearchModel
 	for _, f := range files {
 		res = append(res, f)
 	}
-	if err := search.search.Index(search.index, res); err != nil {
+	if err := s.search.Index(s.index, res); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (search *FileSearch) Update(files []model.File) (err error) {
+func (s *FileSearch) Update(files []model.File) (err error) {
 	if len(files) == 0 {
 		return nil
 	}
-	if err = search.populateTextField(files); err != nil {
+	if err = s.populateTextField(files); err != nil {
 		return err
 	}
 	var res []infra.SearchModel
 	for _, f := range files {
 		res = append(res, f)
 	}
-	if err := search.search.Update(search.index, res); err != nil {
+	if err := s.search.Update(s.index, res); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (search *FileSearch) Delete(ids []string) error {
+func (s *FileSearch) Delete(ids []string) error {
 	if len(ids) == 0 {
 		return nil
 	}
-	if err := search.search.Delete(search.index, ids); err != nil {
+	if err := s.search.Delete(s.index, ids); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (search *FileSearch) Query(query string) ([]model.File, error) {
-	hits, err := search.search.Query(search.index, query)
+func (s *FileSearch) Query(query string) ([]model.File, error) {
+	hits, err := s.search.Query(s.index, query)
 	if err != nil {
 		return nil, err
 	}
@@ -86,13 +86,13 @@ func (search *FileSearch) Query(query string) ([]model.File, error) {
 	return res, nil
 }
 
-func (search *FileSearch) populateTextField(files []model.File) error {
+func (s *FileSearch) populateTextField(files []model.File) error {
 	for _, f := range files {
 		if f.GetSnapshots() != nil &&
 			len(f.GetSnapshots()) > 0 &&
 			f.GetSnapshots()[0].HasText() {
 			var text string
-			text, err := search.s3.GetText(f.GetSnapshots()[0].GetText().Key, f.GetSnapshots()[0].GetText().Bucket)
+			text, err := s.s3.GetText(f.GetSnapshots()[0].GetText().Key, f.GetSnapshots()[0].GetText().Bucket)
 			if err != nil {
 				return err
 			}

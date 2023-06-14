@@ -1,5 +1,13 @@
 # Development
 
+## Install Dependencies
+
+Install [swag](https://github.com/swaggo/swag):
+
+```shell
+go install github.com/swaggo/swag/cmd/swag@latest
+```
+
 ## Linter
 
 Install [golangci-lint](https://golangci-lint.run).
@@ -10,6 +18,8 @@ Run the following and make sure there are no issues:
 golangci-lint run
 ```
 
+## Formatter
+
 Format swag comments:
 
 ```shell
@@ -17,12 +27,6 @@ swag fmt
 ```
 
 ## Generate and Publish Documentation
-
-Install [swag](https://github.com/swaggo/swag):
-
-```shell
-go install github.com/swaggo/swag/cmd/swag@latest
-```
 
 We suppose that the [api-docs](https://github.com/voltaserve/api-docs) repository is cloned locally at: `../../api-docs/`.
 

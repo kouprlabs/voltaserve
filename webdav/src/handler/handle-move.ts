@@ -3,6 +3,7 @@ import path from 'path'
 import { FileAPI } from '@/client/api'
 import { Token } from '@/client/idp'
 import { getTargetPath } from '@/helper/path'
+import { handleError } from '@/infra/error'
 
 /*
   This method moves or renames a resource from a source URL to a destination URL.
@@ -20,13 +21,13 @@ async function handleMove(
   token: Token
 ) {
   try {
-    const sourcePath = decodeURI(req.url)
-    const targetPath = getTargetPath(req)
+    const sourcePath = decodeURIComponent(req.url)
+    const targetPath = decodeURIComponent(getTargetPath(req))
 
     const api = new FileAPI(token)
-    const sourceFile = await api.getByPath(decodeURI(req.url))
+    const sourceFile = await api.getByPath(decodeURIComponent(req.url))
     const targetFile = await api.getByPath(
-      decodeURI(path.dirname(getTargetPath(req)))
+      decodeURIComponent(path.dirname(getTargetPath(req)))
     )
 
     if (sourceFile.workspaceId !== targetFile.workspaceId) {
@@ -39,7 +40,9 @@ async function handleMove(
       sourcePath.split('/').length === targetPath.split('/').length &&
       path.dirname(sourcePath) === path.dirname(targetPath)
     ) {
-      await api.rename(sourceFile.id, { name: path.basename(targetPath) })
+      await api.rename(sourceFile.id, {
+        name: decodeURIComponent(path.basename(targetPath)),
+      })
     } else {
       await api.move(targetFile.id, { ids: [sourceFile.id] })
     }
@@ -47,9 +50,7 @@ async function handleMove(
     res.statusCode = 204
     res.end()
   } catch (err) {
-    console.error(err)
-    res.statusCode = 500
-    res.end()
+    handleError(err, res)
   }
 }
 

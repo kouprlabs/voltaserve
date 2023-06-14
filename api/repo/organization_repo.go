@@ -22,13 +22,13 @@ type OrganizationRepo interface {
 	Save(org model.Organization) error
 	Delete(id string) error
 	GetIDs() ([]string, error)
-	AddUser(id string, userId string) error
-	RemoveMember(id string, userId string) error
+	AddUser(id string, userID string) error
+	RemoveMember(id string, userID string) error
 	GetMembers(id string) ([]model.User, error)
 	GetGroups(id string) ([]model.Group, error)
 	GetOwnerCount(id string) (int64, error)
-	GrantUserPermission(id string, userId string, permission string) error
-	RevokeUserPermission(id string, userId string) error
+	GrantUserPermission(id string, userID string, permission string) error
+	RevokeUserPermission(id string, userID string) error
 }
 
 func NewOrganizationRepo() OrganizationRepo {
@@ -201,16 +201,16 @@ func (repo *organizationRepo) GetIDs() ([]string, error) {
 	return res, nil
 }
 
-func (repo *organizationRepo) AddUser(id string, userId string) error {
-	db := repo.db.Exec("INSERT INTO organization_user (organization_id, user_id) VALUES (?, ?)", id, userId)
+func (repo *organizationRepo) AddUser(id string, userID string) error {
+	db := repo.db.Exec("INSERT INTO organization_user (organization_id, user_id) VALUES (?, ?)", id, userID)
 	if db.Error != nil {
 		return db.Error
 	}
 	return nil
 }
 
-func (repo *organizationRepo) RemoveMember(id string, userId string) error {
-	db := repo.db.Exec("DELETE FROM organization_user WHERE organization_id = ? AND user_id = ?", id, userId)
+func (repo *organizationRepo) RemoveMember(id string, userID string) error {
+	db := repo.db.Exec("DELETE FROM organization_user WHERE organization_id = ? AND user_id = ?", id, userID)
 	if db.Error != nil {
 		return db.Error
 	}
@@ -264,19 +264,19 @@ func (repo *organizationRepo) GetOwnerCount(id string) (int64, error) {
 	return res.Result, nil
 }
 
-func (repo *organizationRepo) GrantUserPermission(id string, userId string, permission string) error {
+func (repo *organizationRepo) GrantUserPermission(id string, userID string, permission string) error {
 	db := repo.db.Exec(
 		"INSERT INTO userpermission (id, user_id, resource_id, permission) "+
 			"VALUES (?, ?, ?, ?) ON CONFLICT (user_id, resource_id) DO UPDATE SET permission = ?",
-		helper.NewId(), userId, id, permission, permission)
+		helper.NewID(), userID, id, permission, permission)
 	if db.Error != nil {
 		return db.Error
 	}
 	return nil
 }
 
-func (repo *organizationRepo) RevokeUserPermission(id string, userId string) error {
-	db := repo.db.Exec("DELETE FROM userpermission WHERE user_id = ? AND resource_id = ?", userId, id)
+func (repo *organizationRepo) RevokeUserPermission(id string, userID string) error {
+	db := repo.db.Exec("DELETE FROM userpermission WHERE user_id = ? AND resource_id = ?", userID, id)
 	if db.Error != nil {
 		return db.Error
 	}
@@ -292,7 +292,7 @@ func (repo *organizationRepo) populateModelFields(organizations []*organizationE
 		}
 		for _, p := range userPermissions {
 			o.UserPermissions = append(o.UserPermissions, &userPermissionValue{
-				UserId: p.UserID,
+				UserID: p.UserID,
 				Value:  p.Permission,
 			})
 		}

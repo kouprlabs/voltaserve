@@ -16,11 +16,11 @@ import (
 type SnapshotRepo interface {
 	Find(id string) (model.Snapshot, error)
 	Save(snapshot model.Snapshot) error
-	MapWithFile(id string, fileId string) error
-	DeleteMappingsForFile(fileId string) error
+	MapWithFile(id string, fileID string) error
+	DeleteMappingsForFile(fileID string) error
 	FindAllDangling() ([]model.Snapshot, error)
 	DeleteAllDangling() error
-	GetLatestVersionForFile(fileId string) (int64, error)
+	GetLatestVersionForFile(fileID string) (int64, error)
 }
 
 func NewSnapshotRepo() SnapshotRepo {
@@ -39,6 +39,7 @@ type snapshotEntity struct {
 	Text       datatypes.JSON `json:"text,omitempty" gorm:"column:text"`
 	OCR        datatypes.JSON `json:"ocr,omitempty" gorm:"column:ocr"`
 	Thumbnail  datatypes.JSON `json:"thumbnail,omitempty" gorm:"column:thumbnail"`
+	Language   *string        `json:"language,omitempty" gorm:"column:language"`
 	CreateTime string         `json:"createTime" gorm:"column:create_time"`
 	UpdateTime *string        `json:"updateTime,omitempty" gorm:"column:update_time"`
 }
@@ -126,6 +127,10 @@ func (s snapshotEntity) GetThumbnail() *model.Thumbnail {
 	return &res
 }
 
+func (s snapshotEntity) GetLanguage() *string {
+	return s.Language
+}
+
 func (s *snapshotEntity) SetID(id string) {
 	s.ID = id
 }
@@ -189,6 +194,10 @@ func (s *snapshotEntity) SetThumbnail(m *model.Thumbnail) {
 	}
 }
 
+func (s *snapshotEntity) SetLanguage(language string) {
+	s.Language = &language
+}
+
 func (s snapshotEntity) HasOriginal() bool {
 	return s.Original != nil
 }
@@ -207,6 +216,10 @@ func (s snapshotEntity) HasOCR() bool {
 
 func (s snapshotEntity) HasThumbnail() bool {
 	return s.Thumbnail != nil
+}
+
+func (s snapshotEntity) HasLanguage() bool {
+	return s.Language != nil
 }
 
 func (s snapshotEntity) GetCreateTime() string {
@@ -254,24 +267,24 @@ func (repo *snapshotRepo) Save(snapshot model.Snapshot) error {
 	return nil
 }
 
-func (repo *snapshotRepo) MapWithFile(id string, fileId string) error {
-	if db := repo.db.Exec("INSERT INTO snapshot_file (snapshot_id, file_id) VALUES (?, ?)", id, fileId); db.Error != nil {
+func (repo *snapshotRepo) MapWithFile(id string, fileID string) error {
+	if db := repo.db.Exec("INSERT INTO snapshot_file (snapshot_id, file_id) VALUES (?, ?)", id, fileID); db.Error != nil {
 		return db.Error
 	}
 	return nil
 }
 
-func (repo *snapshotRepo) DeleteMappingsForFile(fileId string) error {
-	if db := repo.db.Exec("DELETE FROM snapshot_file WHERE file_id = ?", fileId); db.Error != nil {
+func (repo *snapshotRepo) DeleteMappingsForFile(fileID string) error {
+	if db := repo.db.Exec("DELETE FROM snapshot_file WHERE file_id = ?", fileID); db.Error != nil {
 		return db.Error
 	}
 	return nil
 }
 
-func (repo *snapshotRepo) findAllForFile(fileId string) ([]*snapshotEntity, error) {
+func (repo *snapshotRepo) findAllForFile(fileID string) ([]*snapshotEntity, error) {
 	var res []*snapshotEntity
 	db := repo.db.
-		Raw("SELECT * FROM snapshot s LEFT JOIN snapshot_file sf ON s.id = sf.snapshot_id WHERE sf.file_id = ? ORDER BY s.version", fileId).
+		Raw("SELECT * FROM snapshot s LEFT JOIN snapshot_file sf ON s.id = sf.snapshot_id WHERE sf.file_id = ? ORDER BY s.version", fileID).
 		Scan(&res)
 	if db.Error != nil {
 		return nil, db.Error
@@ -299,13 +312,13 @@ func (repo *snapshotRepo) DeleteAllDangling() error {
 	return nil
 }
 
-func (repo *snapshotRepo) GetLatestVersionForFile(fileId string) (int64, error) {
+func (repo *snapshotRepo) GetLatestVersionForFile(fileID string) (int64, error) {
 	type Result struct {
 		Result int64
 	}
 	var res Result
 	if db := repo.db.
-		Raw("SELECT coalesce(max(s.version), 0) + 1 result FROM snapshot s LEFT JOIN snapshot_file map ON s.id = map.snapshot_id WHERE map.file_id = ?", fileId).
+		Raw("SELECT coalesce(max(s.version), 0) + 1 result FROM snapshot s LEFT JOIN snapshot_file map ON s.id = map.snapshot_id WHERE map.file_id = ?", fileID).
 		Scan(&res); db.Error != nil {
 		return 0, db.Error
 	}
