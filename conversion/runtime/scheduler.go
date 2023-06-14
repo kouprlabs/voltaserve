@@ -52,7 +52,7 @@ func NewScheduler(opts SchedulerOptions) *Scheduler {
 }
 
 func (s *Scheduler) Start() {
-	fmt.Printf("[Scheduler] 🚀 Lauching %d pipeline workers...\n", s.pipelineWorkerCount)
+	fmt.Printf("[Scheduler] 🚀 Launching %d pipeline workers...\n", s.pipelineWorkerCount)
 	for i := 0; i < s.pipelineWorkerCount; i++ {
 		go s.pipelineWorker(i)
 	}
