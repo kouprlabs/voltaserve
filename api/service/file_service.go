@@ -532,7 +532,7 @@ func (svc *FileService) FindByPath(path string, userID string) (*File, error) {
 	if len(components) == 0 || components[0] == "" {
 		return nil, errorpkg.NewInvalidPathError(fmt.Errorf("invalid path '%s'", path))
 	}
-	workspace, err := svc.workspaceSvc.Find(helper.SlugToWorkspaceID(components[0]), userID)
+	workspace, err := svc.workspaceSvc.Find(helper.WorkspaceIDFromSlug(components[0]), userID)
 	if err != nil {
 		return nil, err
 	}
@@ -540,7 +540,7 @@ func (svc *FileService) FindByPath(path string, userID string) (*File, error) {
 		return &File{
 			ID:          workspace.RootID,
 			WorkspaceID: workspace.ID,
-			Name:        helper.WorkspaceToSlug(workspace.ID, workspace.Name),
+			Name:        helper.SlugFromWorkspace(workspace.ID, workspace.Name),
 			Type:        model.FileTypeFolder,
 			Permission:  workspace.Permission,
 			CreateTime:  workspace.CreateTime,
@@ -598,7 +598,7 @@ func (svc *FileService) ListByPath(path string, userID string) ([]*File, error) 
 			result = append(result, &File{
 				ID:          w.RootID,
 				WorkspaceID: w.ID,
-				Name:        helper.WorkspaceToSlug(w.ID, w.Name),
+				Name:        helper.SlugFromWorkspace(w.ID, w.Name),
 				Type:        model.FileTypeFolder,
 				Permission:  w.Permission,
 				CreateTime:  w.CreateTime,
@@ -616,7 +616,7 @@ func (svc *FileService) ListByPath(path string, userID string) ([]*File, error) 
 	if len(components) == 0 || components[0] == "" {
 		return nil, errorpkg.NewInvalidPathError(fmt.Errorf("invalid path '%s'", path))
 	}
-	workspace, err := svc.workspaceRepo.Find(helper.SlugToWorkspaceID(components[0]))
+	workspace, err := svc.workspaceRepo.Find(helper.WorkspaceIDFromSlug(components[0]))
 	if err != nil {
 		return nil, err
 	}
