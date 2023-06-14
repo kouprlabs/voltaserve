@@ -7,8 +7,8 @@ COPY . .
 RUN dnf install -y clang python3-pip python3-devel
 
 RUN pip3 install --user --upgrade pipenv
-RUN ~/.local/bin/pipenv pipenv install
-RUN ~/.local/bin/pipenv pipenv shell
+RUN ~/.local/bin/pipenv install
+RUN ~/.local/bin/pipenv shell
 
 ENV FLASK_APP=server.py
 
