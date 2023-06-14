@@ -69,6 +69,7 @@ func (p *imagePipeline) Run(opts core.PipelineOptions) error {
 	if err == nil {
 		/* We treat it as a text image, we convert it to PDF/A */
 		opts.Language = &imageData.LanguageProps.Language
+		opts.TesseractModel = &imageData.LanguageProps.TesseractModel
 		res.Language = &imageData.LanguageProps.Language
 		if err := p.apiClient.UpdateSnapshot(&res); err != nil {
 			return err

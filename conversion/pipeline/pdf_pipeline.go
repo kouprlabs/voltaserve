@@ -61,7 +61,7 @@ func (p *pdfPipeline) Run(opts core.PipelineOptions) error {
 			dpi = 0
 		}
 	}
-	newInputPath, _ := p.pdfProc.GenerateOCR(inputPath, opts.Language, &dpi)
+	newInputPath, _ := p.pdfProc.GenerateOCR(inputPath, opts.TesseractModel, &dpi)
 	if stat, err := os.Stat(newInputPath); err == nil {
 		if err := os.Remove(inputPath); err != nil {
 			return err
