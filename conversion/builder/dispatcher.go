@@ -11,6 +11,7 @@ type Dispatcher struct {
 	pdfBuilder         core.Builder
 	imageBuilder       core.Builder
 	videoBuilder       core.Builder
+	officeBuilder      core.Builder
 }
 
 func NewDispatcher() *Dispatcher {
@@ -19,6 +20,7 @@ func NewDispatcher() *Dispatcher {
 		pdfBuilder:         NewPDFBuilder(),
 		imageBuilder:       NewImageBuilder(),
 		videoBuilder:       NewVideoBuilder(),
+		officeBuilder:      NewOfficeBuilder(),
 	}
 }
 
@@ -36,6 +38,11 @@ func (d *Dispatcher) Dispatch(opts core.PipelineOptions) error {
 		return nil
 	} else if pipeline == core.PipelineVideo {
 		if err := d.videoBuilder.Build(opts); err != nil {
+			return err
+		}
+		return nil
+	} else if pipeline == core.PipelineOffice {
+		if err := d.officeBuilder.Build(opts); err != nil {
 			return err
 		}
 		return nil

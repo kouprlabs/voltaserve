@@ -162,7 +162,7 @@ type GroupPermission struct {
 	Permission string `json:"permission"`
 }
 
-type UpdateSnapshotOptions struct {
+type SnapshotUpdateOptions struct {
 	Options   infra.RunPipelineOptions `json:"options"`
 	Original  *model.S3Object          `json:"original,omitempty"`
 	Preview   *model.S3Object          `json:"preview,omitempty"`
@@ -358,33 +358,18 @@ func (svc *FileService) Store(fileID string, filePath string, userID string) (*F
 	return res, nil
 }
 
-func (svc *FileService) UpdateSnapshot(opts UpdateSnapshotOptions, apiKey string) error {
+func (svc *FileService) UpdateSnapshot(opts SnapshotUpdateOptions, apiKey string) error {
 	if apiKey != svc.config.Security.APIKey {
 		return errorpkg.NewInvalidAPIKeyError()
 	}
-	snapshot, err := svc.snapshotRepo.Find(opts.Options.SnapshotID)
-	if err != nil {
-		return err
-	}
-	if opts.Thumbnail != nil {
-		snapshot.SetThumbnail(opts.Thumbnail)
-	}
-	if opts.Original != nil {
-		snapshot.SetOriginal(opts.Original)
-	}
-	if opts.Preview != nil {
-		snapshot.SetPreview(opts.Preview)
-	}
-	if opts.OCR != nil {
-		snapshot.SetOCR(opts.OCR)
-	}
-	if opts.Text != nil {
-		snapshot.SetText(opts.Text)
-	}
-	if opts.Language != nil {
-		snapshot.SetLanguage(*opts.Language)
-	}
-	if err := svc.snapshotRepo.Save(snapshot); err != nil {
+	if err := svc.snapshotRepo.Update(opts.Options.SnapshotID, repo.SnapshotUpdateOptions{
+		Thumbnail: opts.Thumbnail,
+		Original:  opts.Original,
+		Preview:   opts.Preview,
+		Text:      opts.Text,
+		OCR:       opts.OCR,
+		Language:  opts.Language,
+	}); err != nil {
 		return err
 	}
 	file, err := svc.fileCache.Refresh(opts.Options.FileID)

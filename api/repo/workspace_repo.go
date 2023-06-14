@@ -195,8 +195,7 @@ func (repo *workspaceRepo) UpdateName(id string, name string) (model.Workspace, 
 		return &workspaceEntity{}, err
 	}
 	workspace.Name = name
-	db := repo.db.Save(&workspace)
-	if db.Error != nil {
+	if db := repo.db.Save(&workspace); db.Error != nil {
 		return nil, db.Error
 	}
 	res, err := repo.Find(id)

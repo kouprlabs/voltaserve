@@ -890,7 +890,7 @@ func (r *ConversionWebhookRouter) AppendRoutes(g fiber.Router) {
 //	@Tags			Files
 //	@Id				files_conversion_webhook_update_snapshot
 //	@Produce		json
-//	@Param			body	body	core.UpdateSnapshotOptions	true	"Body"
+//	@Param			body	body	service.SnapshotUpdateOptions	true	"Body"
 //	@Success		201
 //	@Failure		401	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
@@ -900,7 +900,7 @@ func (r *ConversionWebhookRouter) UpdateSnapshot(c *fiber.Ctx) error {
 	if apiKey == "" {
 		return errorpkg.NewMissingQueryParamError("api_key")
 	}
-	req := new(service.UpdateSnapshotOptions)
+	req := new(service.SnapshotUpdateOptions)
 	if err := c.BodyParser(req); err != nil {
 		return err
 	}
