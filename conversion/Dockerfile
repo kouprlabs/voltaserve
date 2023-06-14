@@ -45,7 +45,7 @@ RUN dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.n
 RUN dnf install -y GraphicsMagick
 RUN dnf install -y pngquant
 RUN dnf install -y unpaper
-RUN dnf install perl-Image-ExifTool
+RUN dnf install -y perl-Image-ExifTool
 
 RUN dnf install -y https://mirrors.rpmfusion.org/free/el/rpmfusion-free-release-9.noarch.rpm
 RUN dnf install -y https://mirrors.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-9.noarch.rpm
