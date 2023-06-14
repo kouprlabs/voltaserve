@@ -7,6 +7,7 @@ import (
 	"math"
 	"net/http"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -279,4 +280,23 @@ func (p *ImageProcessor) ImageData(inputPath string) (ImageData, error) {
 		return ImageData{}, errors.New("could not detect language")
 	}
 	return chosen, nil
+}
+
+func (p *ImageProcessor) DPI(imagePath string) (int, error) {
+	cmd := exec.Command("exiftool", "-S", "-s", "-ImageWidth", "-ImageHeight", "-XResolution", "-YResolution", "-ResolutionUnit", imagePath)
+	output, err := cmd.Output()
+	if err != nil {
+		return 0, err
+	}
+	lines := strings.Split(string(output), "\n")
+	xRes, err := strconv.ParseFloat(lines[2], 64)
+	if err != nil {
+		return 0, err
+	}
+	yRes, err := strconv.ParseFloat(lines[3], 64)
+	if err != nil {
+		return 0, err
+	}
+	dpi := int((xRes + yRes) / 2)
+	return dpi, nil
 }

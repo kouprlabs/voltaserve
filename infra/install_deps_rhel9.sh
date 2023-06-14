@@ -22,7 +22,7 @@ sudo wget -c https://github.com/kouprlabs/tessdata/raw/main/rus.traineddata && \
 sudo wget -c https://github.com/kouprlabs/tessdata/raw/main/ara.traineddata
 
 sudo dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
-sudo dnf install -y GraphicsMagick pngquant unpaper
+sudo dnf install -y GraphicsMagick pngquant unpaper perl-Image-ExifTool
 
 sudo dnf install -y https://mirrors.rpmfusion.org/free/el/rpmfusion-free-release-9.noarch.rpm
 sudo dnf install -y https://mirrors.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-9.noarch.rpm

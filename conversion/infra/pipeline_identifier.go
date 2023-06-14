@@ -1,7 +1,6 @@
 package infra
 
 import (
-	"path/filepath"
 	"voltaserve/core"
 )
 
@@ -16,14 +15,13 @@ func NewPipelineIdentifier() *PipelineIdentifier {
 }
 
 func (pi *PipelineIdentifier) Identify(opts core.PipelineOptions) string {
-	ext := filepath.Ext(opts.Key)
-	if pi.fileIdentifier.IsPDF(ext) {
+	if pi.fileIdentifier.IsPDF(opts.Key) {
 		return core.PipelinePDF
-	} else if pi.fileIdentifier.IsOffice(ext) || pi.fileIdentifier.IsPlainText(ext) {
+	} else if pi.fileIdentifier.IsOffice(opts.Key) || pi.fileIdentifier.IsPlainText(opts.Key) {
 		return core.PipelineOffice
-	} else if pi.fileIdentifier.IsImage(ext) {
+	} else if pi.fileIdentifier.IsImage(opts.Key) {
 		return core.PipelineImage
-	} else if pi.fileIdentifier.IsVideo(ext) {
+	} else if pi.fileIdentifier.IsVideo(opts.Key) {
 		return core.PipelineVideo
 	}
 	return ""

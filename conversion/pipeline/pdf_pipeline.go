@@ -16,6 +16,7 @@ type pdfPipeline struct {
 	s3             *infra.S3Manager
 	apiClient      *client.APIClient
 	languageClient *client.LanguageClient
+	fileIdentifier *infra.FileIdentifier
 	config         config.Config
 }
 
@@ -26,6 +27,7 @@ func NewPDFPipeline() core.Pipeline {
 		s3:             infra.NewS3Manager(),
 		apiClient:      client.NewAPIClient(),
 		languageClient: client.NewLanguageClient(),
+		fileIdentifier: infra.NewFileIdentifier(),
 		config:         config.GetConfig(),
 	}
 }
@@ -35,48 +37,50 @@ func (p *pdfPipeline) Run(opts core.PipelineOptions) error {
 	if err := p.s3.GetFile(opts.Key, inputPath, opts.Bucket); err != nil {
 		return err
 	}
-	stat, err := os.Stat(inputPath)
-	if err != nil {
-		return err
-	}
-	inputPath, err = p.convertToCompatibleJPEG(inputPath)
-	if err != nil {
-		return err
-	}
-	workingPath := inputPath
 	res := core.PipelineResponse{
 		Options: opts,
-		Preview: &core.S3Object{
-			Bucket: opts.Bucket,
-			Key:    opts.Key,
-			Size:   stat.Size(),
-		},
-		Language: opts.Language,
 	}
-	if err := p.apiClient.UpdateSnapshot(&res); err != nil {
-		return err
-	}
-	outputPath, _ := p.pdfProc.GenerateOCR(workingPath, opts.Language)
-	if _, err := os.Stat(outputPath); !os.IsNotExist(err) {
-		stat, err := os.Stat(outputPath)
+	var dpi int
+	if p.fileIdentifier.IsImage(inputPath) {
+		if opts.Language != nil {
+			res.Language = opts.Language
+		}
+		if err := p.apiClient.UpdateSnapshot(&res); err != nil {
+			return err
+		}
+		newInputPath, err := p.convertToCompatibleJPEG(inputPath)
 		if err != nil {
 			return err
 		}
+		if err := os.Remove(inputPath); err != nil {
+			return err
+		}
+		inputPath = newInputPath
+		dpi, err = p.imageProc.DPI(inputPath)
+		if err != nil {
+			dpi = 0
+		}
+	}
+	newInputPath, _ := p.pdfProc.GenerateOCR(inputPath, opts.Language, &dpi)
+	if stat, err := os.Stat(newInputPath); err == nil {
+		if err := os.Remove(inputPath); err != nil {
+			return err
+		}
+		inputPath = newInputPath
 		s3Object := core.S3Object{
 			Bucket: opts.Bucket,
 			Key:    opts.FileID + "/" + opts.SnapshotID + "/ocr.pdf",
 			Size:   stat.Size(),
 		}
-		if err := p.s3.PutFile(s3Object.Key, outputPath, infra.DetectMimeFromFile(outputPath), s3Object.Bucket); err != nil {
+		if err := p.s3.PutFile(s3Object.Key, inputPath, infra.DetectMimeFromFile(inputPath), s3Object.Bucket); err != nil {
 			return err
 		}
 		res.OCR = &s3Object
 		if err := p.apiClient.UpdateSnapshot(&res); err != nil {
 			return err
 		}
-		workingPath = outputPath
 	}
-	text, size, err := p.pdfProc.ExtractText(workingPath)
+	text, size, err := p.pdfProc.ExtractText(inputPath)
 	if err != nil {
 		return err
 	}
@@ -108,21 +112,13 @@ func (p *pdfPipeline) Run(opts core.PipelineOptions) error {
 			return err
 		}
 	}
-	if _, err := os.Stat(outputPath); err == nil {
-		if err := os.Remove(outputPath); err != nil {
-			return err
-		}
-	}
 	return nil
 }
 
 func (p *pdfPipeline) convertToCompatibleJPEG(path string) (string, error) {
-	newPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewId() + ".jpg")
-	if err := p.imageProc.RemoveAlphaChannel(path, newPath); err != nil {
+	res := filepath.FromSlash(os.TempDir() + "/" + helper.NewId() + ".jpg")
+	if err := p.imageProc.RemoveAlphaChannel(path, res); err != nil {
 		return "", err
 	}
-	if err := os.Remove(path); err != nil {
-		return "", err
-	}
-	return newPath, nil
+	return res, nil
 }
