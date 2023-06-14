@@ -13,8 +13,8 @@ import (
 
 type FileInsertOptions struct {
 	Name        string
-	WorkspaceId string
-	ParentId    *string
+	WorkspaceID string
+	ParentID    *string
 	Type        string
 }
 
@@ -24,21 +24,21 @@ type FileRepo interface {
 	FindChildren(id string) ([]model.File, error)
 	FindPath(id string) ([]model.File, error)
 	FindTree(id string) ([]model.File, error)
-	GetIdsByWorkspace(workspaceId string) ([]string, error)
-	AssignSnapshots(cloneId string, originalId string) error
-	MoveSourceIntoTarget(targetId string, sourceId string) error
+	GetIDsByWorkspace(workspaceID string) ([]string, error)
+	AssignSnapshots(cloneID string, originalID string) error
+	MoveSourceIntoTarget(targetID string, sourceID string) error
 	Save(file model.File) error
 	BulkInsert(values []model.File, chunkSize int) error
 	BulkInsertPermissions(values []*UserPermission, chunkSize int) error
 	Delete(id string) error
 	GetChildrenIDs(id string) ([]string, error)
 	GetItemCount(id string) (int64, error)
-	IsGrandChildOf(id string, ancestorId string) (bool, error)
+	IsGrandChildOf(id string, ancestorID string) (bool, error)
 	GetSize(id string) (int64, error)
-	GrantUserPermission(id string, userId string, permission string) error
-	RevokeUserPermission(id string, userId string) error
-	GrantGroupPermission(id string, groupId string, permission string) error
-	RevokeGroupPermission(id string, groupId string) error
+	GrantUserPermission(id string, userID string, permission string) error
+	RevokeUserPermission(id string, userID string) error
+	GrantGroupPermission(id string, groupID string, permission string) error
+	RevokeGroupPermission(id string, groupID string) error
 }
 
 func NewFileRepo() FileRepo {
@@ -51,10 +51,10 @@ func NewFile() model.File {
 
 type fileEntity struct {
 	ID               string                  `json:"id"`
-	WorkspaceId      string                  `json:"workspaceId"`
+	WorkspaceID      string                  `json:"workspaceId"`
 	Name             string                  `json:"name"`
 	Type             string                  `json:"type"`
-	ParentId         *string                 `json:"parentId,omitempty"`
+	ParentID         *string                 `json:"parentId,omitempty"`
 	Snapshots        []*snapshotEntity       `json:"snapshots,omitempty" gorm:"-"`
 	UserPermissions  []*userPermissionValue  `json:"userPermissions" gorm:"-"`
 	GroupPermissions []*groupPermissionValue `json:"groupPermissions" gorm:"-"`
@@ -83,7 +83,7 @@ func (i fileEntity) GetID() string {
 }
 
 func (i fileEntity) GetWorkspaceID() string {
-	return i.WorkspaceId
+	return i.WorkspaceID
 }
 
 func (i fileEntity) GetName() string {
@@ -95,7 +95,7 @@ func (i fileEntity) GetType() string {
 }
 
 func (i fileEntity) GetParentID() *string {
-	return i.ParentId
+	return i.ParentID
 }
 
 func (i fileEntity) GetSnapshots() []model.Snapshot {
@@ -138,12 +138,12 @@ func (i *fileEntity) SetID(id string) {
 	i.ID = id
 }
 
-func (i *fileEntity) SetParentID(parentId *string) {
-	i.ParentId = parentId
+func (i *fileEntity) SetParentID(parentID *string) {
+	i.ParentID = parentID
 }
 
-func (i *fileEntity) SetWorkspaceID(workspaceId string) {
-	i.WorkspaceId = workspaceId
+func (i *fileEntity) SetWorkspaceID(workspaceID string) {
+	i.WorkspaceID = workspaceID
 }
 
 func (i *fileEntity) SetType(fileType string) {
@@ -181,13 +181,13 @@ func newFileRepo() *fileRepo {
 }
 
 func (repo *fileRepo) Insert(opts FileInsertOptions) (model.File, error) {
-	id := helper.NewId()
+	id := helper.NewID()
 	file := fileEntity{
 		ID:          id,
-		WorkspaceId: opts.WorkspaceId,
+		WorkspaceID: opts.WorkspaceID,
 		Name:        opts.Name,
 		Type:        opts.Type,
-		ParentId:    opts.ParentId,
+		ParentID:    opts.ParentID,
 	}
 	if db := repo.db.Save(&file); db.Error != nil {
 		return nil, db.Error
@@ -286,12 +286,12 @@ func (repo *fileRepo) FindTree(id string) ([]model.File, error) {
 	return res, nil
 }
 
-func (repo *fileRepo) GetIdsByWorkspace(workspaceId string) ([]string, error) {
-	type IdResult struct {
+func (repo *fileRepo) GetIDsByWorkspace(workspaceID string) ([]string, error) {
+	type IDResult struct {
 		Result string
 	}
-	var ids []IdResult
-	db := repo.db.Raw("SELECT id result FROM file WHERE workspace_id = ? ORDER BY create_time ASC", workspaceId).Scan(&ids)
+	var ids []IDResult
+	db := repo.db.Raw("SELECT id result FROM file WHERE workspace_id = ? ORDER BY create_time ASC", workspaceID).Scan(&ids)
 	if db.Error != nil {
 		return nil, db.Error
 	}
@@ -302,17 +302,17 @@ func (repo *fileRepo) GetIdsByWorkspace(workspaceId string) ([]string, error) {
 	return res, nil
 }
 
-func (repo *fileRepo) AssignSnapshots(cloneId string, originalId string) error {
+func (repo *fileRepo) AssignSnapshots(cloneID string, originalID string) error {
 	if db := repo.db.Exec("INSERT INTO snapshot_file (snapshot_id, file_id) SELECT s.id, ? "+
 		"FROM snapshot s LEFT JOIN snapshot_file map ON s.id = map.snapshot_id "+
-		"WHERE map.file_id = ? ORDER BY s.version DESC LIMIT 1", cloneId, originalId); db.Error != nil {
+		"WHERE map.file_id = ? ORDER BY s.version DESC LIMIT 1", cloneID, originalID); db.Error != nil {
 		return db.Error
 	}
 	return nil
 }
 
-func (repo *fileRepo) MoveSourceIntoTarget(targetId string, sourceId string) error {
-	if db := repo.db.Exec("UPDATE file SET parent_id = ? WHERE id = ?", targetId, sourceId); db.Error != nil {
+func (repo *fileRepo) MoveSourceIntoTarget(targetID string, sourceID string) error {
+	if db := repo.db.Exec("UPDATE file SET parent_id = ? WHERE id = ?", targetID, sourceID); db.Error != nil {
 		return db.Error
 	}
 	return nil
@@ -392,7 +392,7 @@ func (repo *fileRepo) GetItemCount(id string) (int64, error) {
 	return res.Result - 1, nil
 }
 
-func (repo *fileRepo) IsGrandChildOf(id string, ancestorId string) (bool, error) {
+func (repo *fileRepo) IsGrandChildOf(id string, ancestorID string) (bool, error) {
 	type Result struct {
 		Result bool
 	}
@@ -401,7 +401,7 @@ func (repo *fileRepo) IsGrandChildOf(id string, ancestorId string) (bool, error)
 		Raw("WITH RECURSIVE rec (id, parent_id) AS "+
 			"(SELECT f.id, f.parent_id FROM file f WHERE f.id = ? "+
 			"UNION SELECT f.id, f.parent_id FROM rec, file f WHERE f.parent_id = rec.id) "+
-			"SELECT count(rec.id) > 0 as result FROM rec WHERE rec.id = ?", ancestorId, id).
+			"SELECT count(rec.id) > 0 as result FROM rec WHERE rec.id = ?", ancestorID, id).
 		Scan(&res); db.Error != nil {
 		return false, db.Error
 	}
@@ -426,13 +426,13 @@ func (repo *fileRepo) GetSize(id string) (int64, error) {
 	return res.Result, nil
 }
 
-func (repo *fileRepo) GrantUserPermission(id string, userId string, permission string) error {
+func (repo *fileRepo) GrantUserPermission(id string, userID string, permission string) error {
 	/* Grant permission to workspace */
 	db := repo.db.Exec("INSERT INTO userpermission (id, user_id, resource_id, permission) "+
 		"(SELECT ?, ?, w.id, 'viewer' FROM file f "+
 		"INNER JOIN workspace w ON w.id = f.workspace_id AND f.id = ?) "+
 		"ON CONFLICT DO NOTHING",
-		helper.NewId(), userId, id)
+		helper.NewID(), userID, id)
 	if db.Error != nil {
 		return db.Error
 	}
@@ -445,7 +445,7 @@ func (repo *fileRepo) GrantUserPermission(id string, userId string, permission s
 	for _, f := range path {
 		db := repo.db.Exec("INSERT INTO userpermission (id, user_id, resource_id, permission) "+
 			"VALUES (?, ?, ?, 'viewer') ON CONFLICT DO NOTHING",
-			helper.NewId(), userId, f.GetID())
+			helper.NewID(), userID, f.GetID())
 		if db.Error != nil {
 			return db.Error
 		}
@@ -459,7 +459,7 @@ func (repo *fileRepo) GrantUserPermission(id string, userId string, permission s
 	for _, f := range tree {
 		db := repo.db.Exec("INSERT INTO userpermission (id, user_id, resource_id, permission) "+
 			"VALUES (?, ?, ?, ?) ON CONFLICT (user_id, resource_id) DO UPDATE SET permission = ?",
-			helper.NewId(), userId, f.GetID(), permission, permission)
+			helper.NewID(), userID, f.GetID(), permission, permission)
 		if db.Error != nil {
 			return db.Error
 		}
@@ -468,13 +468,13 @@ func (repo *fileRepo) GrantUserPermission(id string, userId string, permission s
 	return nil
 }
 
-func (repo *fileRepo) RevokeUserPermission(id string, userId string) error {
+func (repo *fileRepo) RevokeUserPermission(id string, userID string) error {
 	tree, err := repo.FindTree(id)
 	if err != nil {
 		return err
 	}
 	for _, f := range tree {
-		db := repo.db.Exec("DELETE FROM userpermission WHERE user_id = ? AND resource_id = ?", userId, f.GetID())
+		db := repo.db.Exec("DELETE FROM userpermission WHERE user_id = ? AND resource_id = ?", userID, f.GetID())
 		if db.Error != nil {
 			return db.Error
 		}
@@ -482,13 +482,13 @@ func (repo *fileRepo) RevokeUserPermission(id string, userId string) error {
 	return nil
 }
 
-func (repo *fileRepo) GrantGroupPermission(id string, groupId string, permission string) error {
+func (repo *fileRepo) GrantGroupPermission(id string, groupID string, permission string) error {
 	/* Grant permission to workspace */
 	db := repo.db.Exec("INSERT INTO grouppermission (id, group_id, resource_id, permission) "+
 		"(SELECT ?, ?, w.id, 'viewer' FROM file f "+
 		"INNER JOIN workspace w ON w.id = f.workspace_id AND f.id = ?) "+
 		"ON CONFLICT DO NOTHING",
-		helper.NewId(), groupId, id)
+		helper.NewID(), groupID, id)
 	if db.Error != nil {
 		return db.Error
 	}
@@ -501,7 +501,7 @@ func (repo *fileRepo) GrantGroupPermission(id string, groupId string, permission
 	for _, f := range path {
 		db := repo.db.Exec("INSERT INTO grouppermission (id, group_id, resource_id, permission) "+
 			"VALUES (?, ?, ?, 'viewer') ON CONFLICT DO NOTHING",
-			helper.NewId(), groupId, f.GetID())
+			helper.NewID(), groupID, f.GetID())
 		if db.Error != nil {
 			return db.Error
 		}
@@ -515,7 +515,7 @@ func (repo *fileRepo) GrantGroupPermission(id string, groupId string, permission
 	for _, f := range tree {
 		db := repo.db.Exec("INSERT INTO grouppermission (id, group_id, resource_id, permission) "+
 			"VALUES (?, ?, ?, ?) ON CONFLICT (group_id, resource_id) DO UPDATE SET permission = ?",
-			helper.NewId(), groupId, f.GetID(), permission, permission)
+			helper.NewID(), groupID, f.GetID(), permission, permission)
 		if db.Error != nil {
 			return db.Error
 		}
@@ -524,13 +524,13 @@ func (repo *fileRepo) GrantGroupPermission(id string, groupId string, permission
 	return nil
 }
 
-func (repo *fileRepo) RevokeGroupPermission(id string, groupId string) error {
+func (repo *fileRepo) RevokeGroupPermission(id string, groupID string) error {
 	tree, err := repo.FindTree(id)
 	if err != nil {
 		return err
 	}
 	for _, f := range tree {
-		db := repo.db.Exec("DELETE FROM grouppermission WHERE group_id = ? AND resource_id = ?", groupId, f.GetID())
+		db := repo.db.Exec("DELETE FROM grouppermission WHERE group_id = ? AND resource_id = ?", groupID, f.GetID())
 		if db.Error != nil {
 			return db.Error
 		}
@@ -547,7 +547,7 @@ func (repo *fileRepo) populateModelFields(entities []*fileEntity) error {
 		}
 		for _, p := range userPermissions {
 			f.UserPermissions = append(f.UserPermissions, &userPermissionValue{
-				UserId: p.UserID,
+				UserID: p.UserID,
 				Value:  p.Permission,
 			})
 		}

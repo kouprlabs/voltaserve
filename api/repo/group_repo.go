@@ -14,24 +14,24 @@ import (
 type GroupInsertOptions struct {
 	ID             string
 	Name           string
-	OrganizationId string
-	OwnerId        string
+	OrganizationID string
+	OwnerID        string
 }
 
 type GroupRepo interface {
 	Insert(opts GroupInsertOptions) (model.Group, error)
 	Find(id string) (model.Group, error)
-	GetIDsForFile(fileId string) ([]string, error)
-	GetIDsForUser(userId string) ([]string, error)
+	GetIDsForFile(fileID string) ([]string, error)
+	GetIDsForUser(userID string) ([]string, error)
 	GetIDsForOrganization(id string) ([]string, error)
 	Save(group model.Group) error
 	Delete(id string) error
-	AddUser(id string, userId string) error
-	RemoveMember(id string, userId string) error
+	AddUser(id string, userID string) error
+	RemoveMember(id string, userID string) error
 	GetIDs() ([]string, error)
 	GetMembers(id string) ([]model.User, error)
-	GrantUserPermission(id string, userId string, permission string) error
-	RevokeUserPermission(id string, userId string) error
+	GrantUserPermission(id string, userID string, permission string) error
+	RevokeUserPermission(id string, userID string) error
 }
 
 func NewGroupRepo() GroupRepo {
@@ -45,7 +45,7 @@ func NewGroup() model.Group {
 type groupEntity struct {
 	ID               string                  `json:"id"`
 	Name             string                  `json:"name"`
-	OrganizationId   string                  `json:"organizationId"`
+	OrganizationID   string                  `json:"organizationId"`
 	UserPermissions  []*userPermissionValue  `json:"userPermissions" gorm:"-"`
 	GroupPermissions []*groupPermissionValue `json:"groupPermissions" gorm:"-"`
 	Members          []string                `json:"members" gorm:"-"`
@@ -77,7 +77,7 @@ func (g groupEntity) GetName() string {
 }
 
 func (g groupEntity) GetOrganizationID() string {
-	return g.OrganizationId
+	return g.OrganizationID
 }
 
 func (g groupEntity) GetUserPermissions() []model.CoreUserPermission {
@@ -132,7 +132,7 @@ func (repo *groupRepo) Insert(opts GroupInsertOptions) (model.Group, error) {
 	group := groupEntity{
 		ID:             opts.ID,
 		Name:           opts.Name,
-		OrganizationId: opts.OrganizationId,
+		OrganizationID: opts.OrganizationID,
 	}
 	if db := repo.db.Save(&group); db.Error != nil {
 		return nil, db.Error
@@ -168,13 +168,13 @@ func (repo *groupRepo) Find(id string) (model.Group, error) {
 	return group, nil
 }
 
-func (repo *groupRepo) GetIDsForFile(fileId string) ([]string, error) {
+func (repo *groupRepo) GetIDsForFile(fileID string) ([]string, error) {
 	type Result struct {
 		Result string
 	}
 	var results []Result
 	db := repo.db.
-		Raw(`SELECT DISTINCT g.id as result FROM "group" g INNER JOIN grouppermission p ON p.resource_id = ? WHERE p.group_id = g.id`, fileId).
+		Raw(`SELECT DISTINCT g.id as result FROM "group" g INNER JOIN grouppermission p ON p.resource_id = ? WHERE p.group_id = g.id`, fileID).
 		Scan(&results)
 	if db.Error != nil {
 		return []string{}, db.Error
@@ -186,12 +186,12 @@ func (repo *groupRepo) GetIDsForFile(fileId string) ([]string, error) {
 	return res, nil
 }
 
-func (repo *groupRepo) GetIDsForUser(userId string) ([]string, error) {
+func (repo *groupRepo) GetIDsForUser(userID string) ([]string, error) {
 	type Result struct {
 		Result string
 	}
 	var results []Result
-	db := repo.db.Raw(`SELECT id from group_user WHERE user_id = ?`, userId).Scan(&results)
+	db := repo.db.Raw(`SELECT id from group_user WHERE user_id = ?`, userID).Scan(&results)
 	if db.Error != nil {
 		return []string{}, db.Error
 	}
@@ -242,16 +242,16 @@ func (repo *groupRepo) Delete(id string) error {
 	return nil
 }
 
-func (repo *groupRepo) AddUser(id string, userId string) error {
-	db := repo.db.Exec("INSERT INTO group_user (group_id, user_id) VALUES (?, ?)", id, userId)
+func (repo *groupRepo) AddUser(id string, userID string) error {
+	db := repo.db.Exec("INSERT INTO group_user (group_id, user_id) VALUES (?, ?)", id, userID)
 	if db.Error != nil {
 		return db.Error
 	}
 	return nil
 }
 
-func (repo *groupRepo) RemoveMember(id string, userId string) error {
-	db := repo.db.Exec("DELETE FROM group_user WHERE group_id = ? AND user_id = ?", id, userId)
+func (repo *groupRepo) RemoveMember(id string, userID string) error {
+	db := repo.db.Exec("DELETE FROM group_user WHERE group_id = ? AND user_id = ?", id, userID)
 	if db.Error != nil {
 		return db.Error
 	}
@@ -289,19 +289,19 @@ func (repo *groupRepo) GetMembers(id string) ([]model.User, error) {
 	return res, nil
 }
 
-func (repo *groupRepo) GrantUserPermission(id string, userId string, permission string) error {
+func (repo *groupRepo) GrantUserPermission(id string, userID string, permission string) error {
 	db := repo.db.Exec(
 		"INSERT INTO userpermission (id, user_id, resource_id, permission) "+
 			"VALUES (?, ?, ?, ?) ON CONFLICT (user_id, resource_id) DO UPDATE SET permission = ?",
-		helper.NewId(), userId, id, permission, permission)
+		helper.NewID(), userID, id, permission, permission)
 	if db.Error != nil {
 		return db.Error
 	}
 	return nil
 }
 
-func (repo *groupRepo) RevokeUserPermission(id string, userId string) error {
-	db := repo.db.Exec("DELETE FROM userpermission WHERE user_id = ? AND resource_id = ?", userId, id)
+func (repo *groupRepo) RevokeUserPermission(id string, userID string) error {
+	db := repo.db.Exec("DELETE FROM userpermission WHERE user_id = ? AND resource_id = ?", userID, id)
 	if db.Error != nil {
 		return db.Error
 	}
@@ -317,7 +317,7 @@ func (repo *groupRepo) populateModelFields(groups []*groupEntity) error {
 		}
 		for _, p := range userPermissions {
 			g.UserPermissions = append(g.UserPermissions, &userPermissionValue{
-				UserId: p.UserID,
+				UserID: p.UserID,
 				Value:  p.Permission,
 			})
 		}

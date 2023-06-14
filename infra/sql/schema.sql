@@ -52,6 +52,7 @@ CREATE TABLE IF NOT EXISTS snapshot (
   text jsonb,
   ocr jsonb,
   thumbnail jsonb,
+  language text,
   create_time text NOT NULL DEFAULT (to_json(now())#>>'{}'),
   update_time text ON UPDATE (to_json(now())#>>'{}')
 );

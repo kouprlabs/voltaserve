@@ -7,7 +7,7 @@ import (
 	"github.com/speps/go-hashids/v2"
 )
 
-func NewId() string {
+func NewID() string {
 	hd := hashids.NewData()
 	hd.Salt = uuid.NewString()
 	h, err := hashids.NewWithData(hd)

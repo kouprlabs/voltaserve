@@ -1,6 +1,7 @@
 import { IncomingMessage, ServerResponse } from 'http'
 import { FileAPI, FileType } from '@/client/api'
 import { Token } from '@/client/idp'
+import { handleError } from '@/infra/error'
 
 /*
   This method is similar to GET but only retrieves the metadata of a resource, without returning the actual content.
@@ -19,7 +20,7 @@ async function handleHead(
   token: Token
 ) {
   try {
-    const file = await new FileAPI(token).getByPath(decodeURI(req.url))
+    const file = await new FileAPI(token).getByPath(decodeURIComponent(req.url))
     if (file.type === FileType.File) {
       res.statusCode = 200
       res.setHeader('Content-Length', file.original.size)
@@ -29,9 +30,7 @@ async function handleHead(
       res.end()
     }
   } catch (err) {
-    console.error(err)
-    res.statusCode = 500
-    res.end()
+    handleError(err, res)
   }
 }
 

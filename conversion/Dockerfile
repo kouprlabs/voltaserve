@@ -19,12 +19,9 @@ RUN dnf install -y ghostscript
 RUN dnf install -y tesseract
 RUN dnf install -y wget
 
-RUN mkdir -p /tess/traineddata
+WORKDIR /usr/share/tesseract/tessdata
 
-ENV TESSDATA_PREFIX=/tess/traineddata
-
-WORKDIR /tess/traineddata
-
+RUN wget https://github.com/kouprlabs/tessdata/raw/main/osd.traineddata
 RUN wget https://github.com/kouprlabs/tessdata/raw/main/eng.traineddata
 RUN wget https://github.com/kouprlabs/tessdata/raw/main/deu.traineddata
 RUN wget https://github.com/kouprlabs/tessdata/raw/main/fra.traineddata
@@ -32,24 +29,14 @@ RUN wget https://github.com/kouprlabs/tessdata/raw/main/nld.traineddata
 RUN wget https://github.com/kouprlabs/tessdata/raw/main/ita.traineddata
 RUN wget https://github.com/kouprlabs/tessdata/raw/main/spa.traineddata
 RUN wget https://github.com/kouprlabs/tessdata/raw/main/por.traineddata
-RUN wget https://github.com/kouprlabs/tessdata/raw/main/nor.traineddata
 RUN wget https://github.com/kouprlabs/tessdata/raw/main/swe.traineddata
 RUN wget https://github.com/kouprlabs/tessdata/raw/main/fin.traineddata
-RUN wget https://github.com/kouprlabs/tessdata/raw/main/dan.traineddata
-RUN wget https://github.com/kouprlabs/tessdata/raw/main/rus.traineddata
 RUN wget https://github.com/kouprlabs/tessdata/raw/main/jpn.traineddata
 RUN wget https://github.com/kouprlabs/tessdata/raw/main/chi_sim.traineddata
 RUN wget https://github.com/kouprlabs/tessdata/raw/main/chi_tra.traineddata
 RUN wget https://github.com/kouprlabs/tessdata/raw/main/kor.traineddata
-RUN wget https://github.com/kouprlabs/tessdata/raw/main/vie.traineddata
 RUN wget https://github.com/kouprlabs/tessdata/raw/main/hin.traineddata
-RUN wget https://github.com/kouprlabs/tessdata/raw/main/ben.traineddata
-RUN wget https://github.com/kouprlabs/tessdata/raw/main/mar.traineddata
-RUN wget https://github.com/kouprlabs/tessdata/raw/main/tel.traineddata
-RUN wget https://github.com/kouprlabs/tessdata/raw/main/pan.traineddata
-RUN wget https://github.com/kouprlabs/tessdata/raw/main/urd.traineddata
-RUN wget https://github.com/kouprlabs/tessdata/raw/main/tur.traineddata
-RUN wget https://github.com/kouprlabs/tessdata/raw/main/ind.traineddata
+RUN wget https://github.com/kouprlabs/tessdata/raw/main/rus.traineddata
 RUN wget https://github.com/kouprlabs/tessdata/raw/main/ara.traineddata
 
 WORKDIR /build
@@ -58,6 +45,7 @@ RUN dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.n
 RUN dnf install -y GraphicsMagick
 RUN dnf install -y pngquant
 RUN dnf install -y unpaper
+RUN dnf install perl-Image-ExifTool
 
 RUN dnf install -y https://mirrors.rpmfusion.org/free/el/rpmfusion-free-release-9.noarch.rpm
 RUN dnf install -y https://mirrors.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-9.noarch.rpm

@@ -3,10 +3,10 @@ import { Stack, useToast } from '@chakra-ui/react'
 import { Flex } from '@chakra-ui/react'
 import { Drawer, DrawerItem, variables } from '@koupr/ui'
 import { IconGroup, IconOrganization, IconWorkspace } from '@koupr/ui'
-import { useAppDispatch, useAppSelector } from '@/store/hook'
-import { errorCleared } from '@/store/ui/error'
 import Logo from '@/components/common/logo'
 import TopBar from '@/components/top-bar'
+import { useAppDispatch, useAppSelector } from '@/store/hook'
+import { errorCleared } from '@/store/ui/error'
 
 type DrawerLayoutProps = {
   children?: ReactElement

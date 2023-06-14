@@ -21,7 +21,7 @@ func NewOrganizationSearch() *OrganizationSearch {
 	}
 }
 
-func (search *OrganizationSearch) Index(orgs []model.Organization) error {
+func (s *OrganizationSearch) Index(orgs []model.Organization) error {
 	if len(orgs) == 0 {
 		return nil
 	}
@@ -29,13 +29,13 @@ func (search *OrganizationSearch) Index(orgs []model.Organization) error {
 	for _, o := range orgs {
 		res = append(res, o)
 	}
-	if err := search.search.Index(search.index, res); err != nil {
+	if err := s.search.Index(s.index, res); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (search *OrganizationSearch) Update(orgs []model.Organization) error {
+func (s *OrganizationSearch) Update(orgs []model.Organization) error {
 	if len(orgs) == 0 {
 		return nil
 	}
@@ -43,24 +43,24 @@ func (search *OrganizationSearch) Update(orgs []model.Organization) error {
 	for _, o := range orgs {
 		res = append(res, o)
 	}
-	if err := search.search.Update(search.index, res); err != nil {
+	if err := s.search.Update(s.index, res); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (search *OrganizationSearch) Delete(ids []string) error {
+func (s *OrganizationSearch) Delete(ids []string) error {
 	if len(ids) == 0 {
 		return nil
 	}
-	if err := search.search.Delete(search.index, ids); err != nil {
+	if err := s.search.Delete(s.index, ids); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (search *OrganizationSearch) Query(query string) ([]model.Organization, error) {
-	hits, err := search.search.Query(search.index, query)
+func (s *OrganizationSearch) Query(query string) ([]model.Organization, error) {
+	hits, err := s.search.Query(s.index, query)
 	if err != nil {
 		return nil, err
 	}

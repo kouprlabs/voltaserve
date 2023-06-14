@@ -2,55 +2,43 @@ package pipeline
 
 import (
 	"errors"
-	"path/filepath"
 	"voltaserve/core"
 	"voltaserve/infra"
 )
 
 type Dispatcher struct {
-	fileIdentifier *infra.FileIdentifier
-	pdfPipeline    core.Pipeline
-	imagePipeline  core.Pipeline
-	officePipeline core.Pipeline
-	videoPipeline  core.Pipeline
+	pipelineIdentifier *infra.PipelineIdentifier
+	pdfPipeline        core.Pipeline
+	imagePipeline      core.Pipeline
+	officePipeline     core.Pipeline
 }
 
 func NewDispatcher() *Dispatcher {
 	return &Dispatcher{
-		fileIdentifier: infra.NewFileIdentifier(),
-		pdfPipeline:    NewPDFPipeline(),
-		imagePipeline:  NewImagePipeline(),
-		officePipeline: NewOfficePipeline(),
-		videoPipeline:  NewVideoPipeline(),
+		pipelineIdentifier: infra.NewPipelineIdentifier(),
+		pdfPipeline:        NewPDFPipeline(),
+		imagePipeline:      NewImagePipeline(),
+		officePipeline:     NewOfficePipeline(),
 	}
 }
 
-func (svc *Dispatcher) Dispatch(opts core.PipelineOptions) (core.PipelineResponse, error) {
-	ext := filepath.Ext(opts.Key)
-	if svc.fileIdentifier.IsPDF(ext) {
-		res, err := svc.pdfPipeline.Run(opts)
-		if err != nil {
-			return core.PipelineResponse{}, err
+func (d *Dispatcher) Dispatch(opts core.PipelineOptions) error {
+	pipeline := d.pipelineIdentifier.Identify(opts)
+	if pipeline == core.PipelinePDF {
+		if err := d.pdfPipeline.Run(opts); err != nil {
+			return err
 		}
-		return res, nil
-	} else if svc.fileIdentifier.IsOffice(ext) || svc.fileIdentifier.IsPlainText(ext) {
-		res, err := svc.officePipeline.Run(opts)
-		if err != nil {
-			return core.PipelineResponse{}, err
+		return nil
+	} else if pipeline == core.PipelineOffice {
+		if err := d.officePipeline.Run(opts); err != nil {
+			return err
 		}
-		return res, nil
-	} else if svc.fileIdentifier.IsImage(ext) {
-		res, err := svc.imagePipeline.Run(opts)
-		if err != nil {
-			return core.PipelineResponse{}, err
+		return nil
+	} else if pipeline == core.PipelineImage {
+		if err := d.imagePipeline.Run(opts); err != nil {
+			return err
 		}
-		return res, nil
-	} else if svc.fileIdentifier.IsVideo(ext) {
-		res, err := svc.videoPipeline.Run(opts)
-		if err != nil {
-			return core.PipelineResponse{}, err
-		}
-		return res, nil
+		return nil
 	}
-	return core.PipelineResponse{}, errors.New("no matching pipeline found")
+	return errors.New("no matching pipeline found")
 }

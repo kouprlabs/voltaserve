@@ -12,8 +12,8 @@ import (
 )
 
 type InvitationInsertOptions struct {
-	UserId         string
-	OrganizationId string
+	UserID         string
+	OrganizationID string
 	Emails         []string
 }
 
@@ -21,7 +21,7 @@ type InvitationRepo interface {
 	Insert(opts InvitationInsertOptions) ([]model.Invitation, error)
 	Find(id string) (model.Invitation, error)
 	GetIncoming(email string) ([]model.Invitation, error)
-	GetOutgoing(organizationId string, userId string) ([]model.Invitation, error)
+	GetOutgoing(organizationID string, userID string) ([]model.Invitation, error)
 	Save(org model.Invitation) error
 	Delete(id string) error
 }
@@ -36,8 +36,8 @@ func NewInvitation() model.Invitation {
 
 type invitationEntity struct {
 	ID             string  `json:"id"`
-	OrganizationId string  `json:"organizationId"`
-	OwnerId        string  `json:"ownerId"`
+	OrganizationID string  `json:"organizationId"`
+	OwnerID        string  `json:"ownerId"`
 	Email          string  `json:"email"`
 	Status         string  `json:"status"`
 	CreateTime     string  `json:"createTime"`
@@ -64,11 +64,11 @@ func (i invitationEntity) GetID() string {
 }
 
 func (i invitationEntity) GetOrganizationID() string {
-	return i.OrganizationId
+	return i.OrganizationID
 }
 
 func (i invitationEntity) GetOwnerID() string {
-	return i.OwnerId
+	return i.OwnerID
 }
 
 func (i invitationEntity) GetEmail() string {
@@ -111,9 +111,9 @@ func (repo *invitationRepo) Insert(opts InvitationInsertOptions) ([]model.Invita
 	var res []model.Invitation
 	for _, e := range opts.Emails {
 		invitation := invitationEntity{
-			ID:             helper.NewId(),
-			OrganizationId: opts.OrganizationId,
-			OwnerId:        opts.UserId,
+			ID:             helper.NewID(),
+			OrganizationID: opts.OrganizationID,
+			OwnerID:        opts.UserID,
 			Email:          e,
 			Status:         model.InvitationStatusPending,
 		}
@@ -157,10 +157,10 @@ func (repo *invitationRepo) GetIncoming(email string) ([]model.Invitation, error
 	return res, nil
 }
 
-func (repo *invitationRepo) GetOutgoing(organizationId string, userId string) ([]model.Invitation, error) {
+func (repo *invitationRepo) GetOutgoing(organizationID string, userID string) ([]model.Invitation, error) {
 	var invitations []*invitationEntity
 	db := repo.db.
-		Raw("SELECT * FROM invitation WHERE organization_id = ? and owner_id = ? ORDER BY create_time DESC", organizationId, userId).
+		Raw("SELECT * FROM invitation WHERE organization_id = ? and owner_id = ? ORDER BY create_time DESC", organizationID, userID).
 		Scan(&invitations)
 	if db.Error != nil {
 		return nil, db.Error

@@ -5,6 +5,7 @@ import path from 'path'
 import { v4 as uuidv4 } from 'uuid'
 import { FileAPI } from '@/client/api'
 import { Token } from '@/client/idp'
+import { handleError } from '@/infra/error'
 
 /*
   This method retrieves the content of a resource identified by the URL.
@@ -23,7 +24,7 @@ async function handleGet(
 ) {
   try {
     const api = new FileAPI(token)
-    const file = await api.getByPath(decodeURI(req.url))
+    const file = await api.getByPath(decodeURIComponent(req.url))
 
     /* TODO: This should be optimized for the case when there is a range header,
        only a partial file should be fetched, here we are fetching the whole file
@@ -60,9 +61,7 @@ async function handleGet(
         .on('finish', () => rmSync(outputPath))
     }
   } catch (err) {
-    console.error(err)
-    res.statusCode = 500
-    res.end()
+    handleError(err, res)
   }
 }
 

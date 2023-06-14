@@ -1,6 +1,7 @@
 import { IncomingMessage, ServerResponse } from 'http'
 import { FileAPI } from '@/client/api'
 import { Token } from '@/client/idp'
+import { handleError } from '@/infra/error'
 
 /*
   This method deletes a resource identified by the URL.
@@ -19,15 +20,14 @@ async function handleDelete(
 ) {
   try {
     const api = new FileAPI(token)
-    const file = await api.getByPath(decodeURI(req.url))
+    const file = await api.getByPath(decodeURIComponent(req.url))
+
     await api.delete(file.id)
 
     res.statusCode = 204
     res.end()
   } catch (err) {
-    console.error(err)
-    res.statusCode = 500
-    res.end()
+    handleError(err, res)
   }
 }
 

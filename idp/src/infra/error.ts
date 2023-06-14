@@ -48,6 +48,7 @@ export type ErrorData = {
 
 export type ErrorResponse = {
   code: string
+  status: number
   message: string
   userMessage: string
   moreInfo: string
@@ -78,6 +79,7 @@ export function newError(options: ErrorOptions): ErrorData {
 export function newResponse(data: ErrorData): ErrorResponse {
   return {
     code: data.code,
+    status: data.status,
     message: data.message,
     userMessage: data.userMessage,
     moreInfo: data.moreInfo,

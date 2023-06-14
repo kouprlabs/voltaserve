@@ -16,22 +16,21 @@ type WorkspaceInsertOptions struct {
 	Name            string
 	StorageCapacity int64
 	Image           *string
-	OrganizationId  string
-	RootId          string
+	OrganizationID  string
+	RootID          string
 	Bucket          string
 }
 
 type WorkspaceRepo interface {
 	Insert(opts WorkspaceInsertOptions) (model.Workspace, error)
-	FindByName(name string) (model.Workspace, error)
-	FindByID(id string) (model.Workspace, error)
+	Find(id string) (model.Workspace, error)
 	UpdateName(id string, name string) (model.Workspace, error)
 	UpdateStorageCapacity(id string, storageCapacity int64) (model.Workspace, error)
 	Delete(id string) error
 	GetIDs() ([]string, error)
-	GetIdsByOrganization(organizationId string) ([]string, error)
-	UpdateRootID(id string, rootNodeId string) error
-	GrantUserPermission(id string, userId string, permission string) error
+	GetIDsByOrganization(organizationID string) ([]string, error)
+	UpdateRootID(id string, rootNodeID string) error
+	GrantUserPermission(id string, userID string, permission string) error
 }
 
 func NewWorkspaceRepo() WorkspaceRepo {
@@ -47,7 +46,7 @@ type workspaceEntity struct {
 	Name             string                  `json:"name" gorm:"column:name;size:255"`
 	StorageCapacity  int64                   `json:"storageCapacity" gorm:"column:storage_capacity"`
 	RootID           string                  `json:"rootId" gorm:"column:root_id;size:36"`
-	OrganizationId   string                  `json:"organizationId" gorm:"column:organization_id;size:36"`
+	OrganizationID   string                  `json:"organizationId" gorm:"column:organization_id;size:36"`
 	UserPermissions  []*userPermissionValue  `json:"userPermissions" gorm:"-"`
 	GroupPermissions []*groupPermissionValue `json:"groupPermissions" gorm:"-"`
 	Bucket           string                  `json:"bucket" gorm:"column:bucket;size:255"`
@@ -87,7 +86,7 @@ func (w workspaceEntity) GetRootID() string {
 }
 
 func (w workspaceEntity) GetOrganizationID() string {
-	return w.OrganizationId
+	return w.OrganizationID
 }
 
 func (w workspaceEntity) GetUserPermissions() []model.CoreUserPermission {
@@ -143,20 +142,20 @@ func (repo *workspaceRepo) Insert(opts WorkspaceInsertOptions) (model.Workspace,
 	if len(opts.ID) > 0 {
 		id = opts.ID
 	} else {
-		id = helper.NewId()
+		id = helper.NewID()
 	}
 	workspace := workspaceEntity{
 		ID:              id,
 		Name:            opts.Name,
 		StorageCapacity: opts.StorageCapacity,
-		RootID:          opts.RootId,
-		OrganizationId:  opts.OrganizationId,
+		RootID:          opts.RootID,
+		OrganizationID:  opts.OrganizationID,
 		Bucket:          opts.Bucket,
 	}
 	if db := repo.db.Save(&workspace); db.Error != nil {
 		return nil, db.Error
 	}
-	res, err := repo.findByID(id)
+	res, err := repo.find(id)
 	if err != nil {
 		return nil, err
 	}
@@ -166,31 +165,7 @@ func (repo *workspaceRepo) Insert(opts WorkspaceInsertOptions) (model.Workspace,
 	return res, nil
 }
 
-func (repo *workspaceRepo) findByName(name string) (*workspaceEntity, error) {
-	var res = workspaceEntity{}
-	db := repo.db.Where("name = ?", name).First(&res)
-	if db.Error != nil {
-		if errors.Is(db.Error, gorm.ErrRecordNotFound) {
-			return nil, errorpkg.NewWorkspaceNotFoundError(db.Error)
-		} else {
-			return nil, errorpkg.NewInternalServerError(db.Error)
-		}
-	}
-	return &res, nil
-}
-
-func (repo *workspaceRepo) FindByName(name string) (model.Workspace, error) {
-	workspace, err := repo.findByName(name)
-	if err != nil {
-		return nil, err
-	}
-	if err := repo.populateModelFields([]*workspaceEntity{workspace}); err != nil {
-		return nil, err
-	}
-	return workspace, err
-}
-
-func (repo *workspaceRepo) findByID(id string) (*workspaceEntity, error) {
+func (repo *workspaceRepo) find(id string) (*workspaceEntity, error) {
 	var res = workspaceEntity{}
 	db := repo.db.Where("id = ?", id).First(&res)
 	if db.Error != nil {
@@ -203,8 +178,8 @@ func (repo *workspaceRepo) findByID(id string) (*workspaceEntity, error) {
 	return &res, nil
 }
 
-func (repo *workspaceRepo) FindByID(id string) (model.Workspace, error) {
-	workspace, err := repo.findByID(id)
+func (repo *workspaceRepo) Find(id string) (model.Workspace, error) {
+	workspace, err := repo.find(id)
 	if err != nil {
 		return nil, err
 	}
@@ -215,7 +190,7 @@ func (repo *workspaceRepo) FindByID(id string) (model.Workspace, error) {
 }
 
 func (repo *workspaceRepo) UpdateName(id string, name string) (model.Workspace, error) {
-	workspace, err := repo.findByID(id)
+	workspace, err := repo.find(id)
 	if err != nil {
 		return &workspaceEntity{}, err
 	}
@@ -224,7 +199,7 @@ func (repo *workspaceRepo) UpdateName(id string, name string) (model.Workspace, 
 	if db.Error != nil {
 		return nil, db.Error
 	}
-	res, err := repo.FindByID(id)
+	res, err := repo.Find(id)
 	if err != nil {
 		return nil, err
 	}
@@ -232,7 +207,7 @@ func (repo *workspaceRepo) UpdateName(id string, name string) (model.Workspace, 
 }
 
 func (repo *workspaceRepo) UpdateStorageCapacity(id string, storageCapacity int64) (model.Workspace, error) {
-	workspace, err := repo.findByID(id)
+	workspace, err := repo.find(id)
 	if err != nil {
 		return &workspaceEntity{}, err
 	}
@@ -241,7 +216,7 @@ func (repo *workspaceRepo) UpdateStorageCapacity(id string, storageCapacity int6
 	if db.Error != nil {
 		return nil, db.Error
 	}
-	res, err := repo.FindByID(id)
+	res, err := repo.Find(id)
 	if err != nil {
 		return nil, err
 	}
@@ -265,10 +240,10 @@ func (repo *workspaceRepo) Delete(id string) error {
 }
 
 func (repo *workspaceRepo) GetIDs() ([]string, error) {
-	type IdResult struct {
+	type IDResult struct {
 		Result string
 	}
-	var ids []IdResult
+	var ids []IDResult
 	db := repo.db.Raw("SELECT id result FROM workspace ORDER BY create_time DESC").Scan(&ids)
 	if db.Error != nil {
 		return []string{}, db.Error
@@ -280,13 +255,13 @@ func (repo *workspaceRepo) GetIDs() ([]string, error) {
 	return res, nil
 }
 
-func (repo *workspaceRepo) GetIdsByOrganization(organizationId string) ([]string, error) {
-	type IdResult struct {
+func (repo *workspaceRepo) GetIDsByOrganization(organizationID string) ([]string, error) {
+	type IDResult struct {
 		Result string
 	}
-	var ids []IdResult
+	var ids []IDResult
 	db := repo.db.
-		Raw("SELECT id result FROM workspace WHERE organization_id = ? ORDER BY create_time DESC", organizationId).
+		Raw("SELECT id result FROM workspace WHERE organization_id = ? ORDER BY create_time DESC", organizationID).
 		Scan(&ids)
 	if db.Error != nil {
 		return nil, db.Error
@@ -298,19 +273,19 @@ func (repo *workspaceRepo) GetIdsByOrganization(organizationId string) ([]string
 	return res, nil
 }
 
-func (repo *workspaceRepo) UpdateRootID(id string, rootNodeId string) error {
-	db := repo.db.Exec("UPDATE workspace SET root_id = ? WHERE id = ?", rootNodeId, id)
+func (repo *workspaceRepo) UpdateRootID(id string, rootNodeID string) error {
+	db := repo.db.Exec("UPDATE workspace SET root_id = ? WHERE id = ?", rootNodeID, id)
 	if db.Error != nil {
 		return db.Error
 	}
 	return nil
 }
 
-func (repo *workspaceRepo) GrantUserPermission(id string, userId string, permission string) error {
+func (repo *workspaceRepo) GrantUserPermission(id string, userID string, permission string) error {
 	db := repo.db.Exec(
 		"INSERT INTO userpermission (id, user_id, resource_id, permission) "+
 			"VALUES (?, ?, ?, ?) ON CONFLICT (user_id, resource_id) DO UPDATE SET permission = ?",
-		helper.NewId(), userId, id, permission, permission)
+		helper.NewID(), userID, id, permission, permission)
 	if db.Error != nil {
 		return db.Error
 	}
@@ -326,7 +301,7 @@ func (repo *workspaceRepo) populateModelFields(workspaces []*workspaceEntity) er
 		}
 		for _, p := range userPermissions {
 			w.UserPermissions = append(w.UserPermissions, &userPermissionValue{
-				UserId: p.UserID,
+				UserID: p.UserID,
 				Value:  p.Permission,
 			})
 		}

@@ -7,6 +7,7 @@ volumes:
   redis:
   redisinsight:
 
+
 services:
   cockroach:
     image: cockroachdb/cockroach:latest-v23.1
@@ -149,10 +150,21 @@ services:
     environment:
       - PORT=5001
       - API_URL=http://api:5000
+      - LANGUAGE_URL=http://language:5002
       - S3_URL=minio:9000
     healthcheck:
       test: curl --fail http://localhost:5001/v1/health || exit 1
     depends_on:
       - api
+      - language
       - minio
+    restart: on-failure
+  language:
+    image: voltaserve/language
+    build:
+      context: ./language
+    ports:
+      - ${VOLTASERVE_LANGUAGE_PORT}:5002
+    healthcheck:
+      test: curl --fail http://localhost:5002/v1/health || exit 1
     restart: on-failure

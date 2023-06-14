@@ -2,26 +2,63 @@ package infra
 
 import (
 	"encoding/base64"
+	"errors"
 	"io"
+	"math"
 	"net/http"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
+	"voltaserve/client"
 	"voltaserve/config"
 	"voltaserve/core"
 	"voltaserve/helper"
 )
 
 type ImageProcessor struct {
-	cmd    *Command
-	config config.Config
+	cmd            *Command
+	languageClient *client.LanguageClient
+	config         config.Config
+}
+
+type ImageData struct {
+	Data                []TesseractData
+	NegativeConfCount   int64
+	NegativeConfPercent float32
+	PositiveConfCount   int64
+	PositiveConfPercent float32
+	Text                string
+	LanguageProps       LanguageProps
+}
+
+type LanguageProps struct {
+	Language       string
+	Score          float64
+	TesseractModel string
+}
+
+type TesseractData struct {
+	BlockNum int64
+	Conf     int64
+	Height   int64
+	Left     int64
+	Level    int64
+	LineNum  int64
+	PageNum  int64
+	ParNum   int64
+	Text     string
+	Top      int64
+	Width    int64
+	WordNum  int64
 }
 
 func NewImageProcessor() *ImageProcessor {
 	return &ImageProcessor{
-		cmd:    NewCommand(),
-		config: config.GetConfig(),
+		cmd:            NewCommand(),
+		languageClient: client.NewLanguageClient(),
+		config:         config.GetConfig(),
 	}
 }
 
@@ -65,7 +102,11 @@ func (p *ImageProcessor) ThumbnailImage(inputPath string, width int, height int,
 	return nil
 }
 
-func (p *ImageProcessor) ThumbnailBase64(inputPath string, inputSize core.ImageProps) (core.Thumbnail, error) {
+func (p *ImageProcessor) ThumbnailBase64(inputPath string) (core.Thumbnail, error) {
+	inputSize, err := p.Measure(inputPath)
+	if err != nil {
+		return core.Thumbnail{}, err
+	}
 	if inputSize.Width > p.config.Limits.ImagePreviewMaxWidth || inputSize.Height > p.config.Limits.ImagePreviewMaxHeight {
 		outputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewId() + filepath.Ext(inputPath))
 		if inputSize.Width > inputSize.Height {
@@ -114,6 +155,13 @@ func (p *ImageProcessor) Convert(inputPath string, outputPath string) error {
 	return nil
 }
 
+func (p *ImageProcessor) RemoveAlphaChannel(inputPath string, outputPath string) error {
+	if err := p.cmd.Exec("gm", "convert", inputPath, "-background", "white", "-flatten", outputPath); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (p *ImageProcessor) Measure(path string) (core.ImageProps, error) {
 	res, err := p.cmd.ReadOutput("gm", "identify", "-format", "%w,%h", path)
 	if err != nil {
@@ -145,77 +193,113 @@ func (p *ImageProcessor) ToBase64(path string) (string, error) {
 	return "data:" + mimeType + ";base64," + base64.StdEncoding.EncodeToString(b), nil
 }
 
-type ImageToDataResult struct {
-	Data                []TesseractData
-	NegativeConfCount   int64
-	NegativeConfPercent float32
-	PositiveConfCount   int64
-	PositiveConfPercent float32
-}
-
-type TesseractData struct {
-	BlockNum int64
-	Conf     int64
-	Height   int64
-	Left     int64
-	Level    int64
-	LineNum  int64
-	PageNum  int64
-	ParNum   int64
-	Text     string
-	Top      int64
-	Width    int64
-	WordNum  int64
-}
-
-func (p *ImageProcessor) ImageToData(inputPath string) (ImageToDataResult, error) {
-	outFile := helper.NewId()
-	if err := p.cmd.Exec("tesseract", inputPath, outFile, "tsv"); err != nil {
-		return ImageToDataResult{}, err
-	}
-	var res = ImageToDataResult{}
-	outFile = outFile + ".tsv"
-	f, err := os.Open(outFile)
-	if err != nil {
-		return ImageToDataResult{}, err
-	}
-	b, err := io.ReadAll(f)
-	if err != nil {
-		return ImageToDataResult{}, err
-	}
-	text := string(b)
-	lines := strings.Split(text, "\n")
-	lines = lines[1 : len(lines)-2]
-	for _, l := range lines {
-		values := strings.Split(l, "\t")
-		data := TesseractData{}
-		data.Level, _ = strconv.ParseInt(values[0], 10, 64)
-		data.PageNum, _ = strconv.ParseInt(values[1], 10, 64)
-		data.BlockNum, _ = strconv.ParseInt(values[2], 10, 64)
-		data.ParNum, _ = strconv.ParseInt(values[3], 10, 64)
-		data.LineNum, _ = strconv.ParseInt(values[4], 10, 64)
-		data.WordNum, _ = strconv.ParseInt(values[5], 10, 64)
-		data.Left, _ = strconv.ParseInt(values[6], 10, 64)
-		data.Top, _ = strconv.ParseInt(values[7], 10, 64)
-		data.Width, _ = strconv.ParseInt(values[8], 10, 64)
-		data.Height, _ = strconv.ParseInt(values[9], 10, 64)
-		data.Conf, _ = strconv.ParseInt(values[10], 10, 64)
-		data.Text = values[11]
-		res.Data = append(res.Data, data)
-	}
-	for _, v := range res.Data {
-		if v.Conf < 0 {
-			res.NegativeConfCount++
-		} else {
-			res.PositiveConfCount++
+func (p *ImageProcessor) ImageData(inputPath string) (ImageData, error) {
+	results := []ImageData{}
+	for tesseractModel := range TesseractModelToLanguage {
+		basePath := filepath.FromSlash(os.TempDir() + "/" + helper.NewId())
+		tsvPath := filepath.FromSlash(basePath + ".tsv")
+		if err := p.cmd.Exec("tesseract", inputPath, basePath, "-l", tesseractModel, "tsv"); err != nil {
+			continue
+		}
+		var result = ImageData{}
+		f, err := os.Open(tsvPath)
+		if err != nil {
+			continue
+		}
+		b, err := io.ReadAll(f)
+		if err != nil {
+			continue
+		}
+		lines := strings.Split(string(b), "\n")
+		lines = lines[1 : len(lines)-2]
+		for _, l := range lines {
+			values := strings.Split(l, "\t")
+			data := TesseractData{}
+			data.Level, _ = strconv.ParseInt(values[0], 10, 64)
+			data.PageNum, _ = strconv.ParseInt(values[1], 10, 64)
+			data.BlockNum, _ = strconv.ParseInt(values[2], 10, 64)
+			data.ParNum, _ = strconv.ParseInt(values[3], 10, 64)
+			data.LineNum, _ = strconv.ParseInt(values[4], 10, 64)
+			data.WordNum, _ = strconv.ParseInt(values[5], 10, 64)
+			data.Left, _ = strconv.ParseInt(values[6], 10, 64)
+			data.Top, _ = strconv.ParseInt(values[7], 10, 64)
+			data.Width, _ = strconv.ParseInt(values[8], 10, 64)
+			data.Height, _ = strconv.ParseInt(values[9], 10, 64)
+			data.Conf, _ = strconv.ParseInt(values[10], 10, 64)
+			data.Text = values[11]
+			result.Data = append(result.Data, data)
+		}
+		for _, v := range result.Data {
+			if v.Conf < 0 {
+				result.NegativeConfCount++
+			} else {
+				result.PositiveConfCount++
+			}
+		}
+		if len(result.Data) > 0 {
+			result.NegativeConfPercent = float32((int(result.NegativeConfCount) * 100) / len(result.Data))
+			result.PositiveConfPercent = float32((int(result.PositiveConfCount) * 100) / len(result.Data))
+		}
+		if err := os.Remove(tsvPath); err != nil {
+			continue
+		}
+		if result.PositiveConfCount < result.NegativeConfCount {
+			return ImageData{}, errors.New("image contains no text")
+		}
+		txtPath := filepath.FromSlash(basePath + ".txt")
+		if err := p.cmd.Exec("tesseract", inputPath, basePath, "-l", tesseractModel, "txt"); err != nil {
+			return ImageData{}, err
+		}
+		f, err = os.Open(txtPath)
+		if err != nil {
+			continue
+		}
+		b, err = io.ReadAll(f)
+		if err != nil {
+			continue
+		}
+		result.Text = string(b)
+		detection, err := p.languageClient.Detect(result.Text)
+		if err == nil && TesseractModelToLanguage[tesseractModel] == detection.Language {
+			result.LanguageProps = LanguageProps{
+				Language:       detection.Language,
+				Score:          detection.Score,
+				TesseractModel: tesseractModel,
+			}
+			results = append(results, result)
+		}
+		if err := os.Remove(txtPath); err != nil {
+			continue
 		}
 	}
-	if len(res.Data) > 0 {
-		res.NegativeConfPercent = float32((int(res.NegativeConfCount) * 100) / len(res.Data))
-		res.PositiveConfPercent = float32((int(res.PositiveConfCount) * 100) / len(res.Data))
+	var chosen = results[0]
+	for _, result := range results {
+		if result.LanguageProps.Score > chosen.LanguageProps.Score {
+			chosen = result
+		}
 	}
-	if err := os.Remove(outFile); err != nil {
-		return ImageToDataResult{}, err
+	/* We don't accept a result with less than 0.95 confidence, better have no OCR than have a wrong one :) */
+	if math.Round(chosen.LanguageProps.Score*100)/100 < 0.95 {
+		return ImageData{}, errors.New("could not detect language")
 	}
-	return res, nil
+	return chosen, nil
+}
+
+func (p *ImageProcessor) DPI(imagePath string) (int, error) {
+	cmd := exec.Command("exiftool", "-S", "-s", "-ImageWidth", "-ImageHeight", "-XResolution", "-YResolution", "-ResolutionUnit", imagePath)
+	output, err := cmd.Output()
+	if err != nil {
+		return 0, err
+	}
+	lines := strings.Split(string(output), "\n")
+	xRes, err := strconv.ParseFloat(lines[2], 64)
+	if err != nil {
+		return 0, err
+	}
+	yRes, err := strconv.ParseFloat(lines[3], 64)
+	if err != nil {
+		return 0, err
+	}
+	dpi := int((xRes + yRes) / 2)
+	return dpi, nil
 }

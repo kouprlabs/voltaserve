@@ -2,11 +2,11 @@ import { useMemo } from 'react'
 import { File } from '@/api/file'
 import { getAccessTokenOrRedirect } from '@/infra/token'
 
-type PdfViewerProps = {
+type PDFViewerProps = {
   file: File
 }
 
-const PdfViewer = ({ file }: PdfViewerProps) => {
+const PDFViewer = ({ file }: PDFViewerProps) => {
   const download = useMemo(() => file.preview || file.original, [file])
   const urlPath = useMemo(() => (file.preview ? 'preview' : 'original'), [file])
   const url = useMemo(() => {
@@ -27,4 +27,4 @@ const PdfViewer = ({ file }: PdfViewerProps) => {
   return <iframe width="100%" height="100%" src={url} title={file.name} />
 }
 
-export default PdfViewer
+export default PDFViewer

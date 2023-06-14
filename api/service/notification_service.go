@@ -21,8 +21,8 @@ func NewNotificationService() *NotificationService {
 	}
 }
 
-func (svc *NotificationService) GetAll(userId string) ([]*Notification, error) {
-	user, err := svc.userRepo.Find(userId)
+func (svc *NotificationService) GetAll(userID string) ([]*Notification, error) {
+	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
 	}
@@ -32,7 +32,7 @@ func (svc *NotificationService) GetAll(userId string) ([]*Notification, error) {
 	}
 	notifications := make([]*Notification, 0)
 	for _, inv := range invitations {
-		v, err := svc.invitationMapper.mapInvitation(inv, userId)
+		v, err := svc.invitationMapper.mapInvitation(inv, userID)
 		if err != nil {
 			return nil, err
 		}

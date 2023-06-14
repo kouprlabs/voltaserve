@@ -1,6 +1,7 @@
 import { IncomingMessage, ServerResponse } from 'http'
 import { FileAPI, FileType } from '@/client/api'
 import { Token } from '@/client/idp'
+import { handleError } from '@/infra/error'
 
 /*
   This method retrieves properties and metadata of a resource.
@@ -21,7 +22,7 @@ async function handlePropfind(
 ) {
   try {
     const api = new FileAPI(token)
-    const file = await api.getByPath(decodeURI(req.url))
+    const file = await api.getByPath(decodeURIComponent(req.url))
     if (file.type === FileType.File) {
       const responseXml = `
         <D:multistatus xmlns:D="DAV:">
@@ -50,7 +51,7 @@ async function handlePropfind(
       res.setHeader('Content-Type', 'application/xml; charset=utf-8')
       res.end(responseXml)
     } else if (file.type === FileType.Folder) {
-      const list = await api.listByPath(decodeURI(req.url))
+      const list = await api.listByPath(decodeURIComponent(req.url))
       const responseXml = `
         <D:multistatus xmlns:D="DAV:">
           <D:response>
@@ -103,9 +104,7 @@ async function handlePropfind(
       res.end(responseXml)
     }
   } catch (err) {
-    console.error(err)
-    res.statusCode = 500
-    res.end()
+    handleError(err, res)
   }
 }
 

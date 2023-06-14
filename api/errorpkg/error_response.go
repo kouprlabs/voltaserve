@@ -4,7 +4,7 @@ import "fmt"
 
 type ErrorResponse struct {
 	Code        string `json:"code"`
-	Status      int    `json:"-"`
+	Status      int    `json:"status"`
 	Message     string `json:"message"`
 	UserMessage string `json:"userMessage"`
 	MoreInfo    string `json:"moreInfo"`

@@ -29,7 +29,7 @@ type GroupSearchOptions struct {
 type GroupCreateOptions struct {
 	Name           string  `json:"name" validate:"required,max=255"`
 	Image          *string `json:"image"`
-	OrganizationId string  `json:"organizationId" validate:"required"`
+	OrganizationID string  `json:"organizationId" validate:"required"`
 }
 
 type GroupUpdateNameOptions struct {
@@ -92,12 +92,12 @@ func NewGroupService() *GroupService {
 	}
 }
 
-func (svc *GroupService) Create(opts GroupCreateOptions, userId string) (*Group, error) {
-	user, err := svc.userRepo.Find(userId)
+func (svc *GroupService) Create(opts GroupCreateOptions, userID string) (*Group, error) {
+	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
 	}
-	org, err := svc.orgCache.Get(opts.OrganizationId)
+	org, err := svc.orgCache.Get(opts.OrganizationID)
 	if err != nil {
 		return nil, err
 	}
@@ -105,15 +105,15 @@ func (svc *GroupService) Create(opts GroupCreateOptions, userId string) (*Group,
 		return nil, err
 	}
 	group, err := svc.groupRepo.Insert(repo.GroupInsertOptions{
-		ID:             helper.NewId(),
+		ID:             helper.NewID(),
 		Name:           opts.Name,
-		OrganizationId: opts.OrganizationId,
-		OwnerId:        userId,
+		OrganizationID: opts.OrganizationID,
+		OwnerID:        userID,
 	})
 	if err != nil {
 		return nil, err
 	}
-	if err := svc.groupRepo.GrantUserPermission(group.GetID(), userId, model.PermissionOwner); err != nil {
+	if err := svc.groupRepo.GrantUserPermission(group.GetID(), userID, model.PermissionOwner); err != nil {
 		return nil, err
 	}
 	group, err = svc.groupRepo.Find(group.GetID())
@@ -126,15 +126,15 @@ func (svc *GroupService) Create(opts GroupCreateOptions, userId string) (*Group,
 	if err := svc.groupCache.Set(group); err != nil {
 		return nil, err
 	}
-	res, err := svc.groupMapper.mapGroup(group, userId)
+	res, err := svc.groupMapper.mapGroup(group, userID)
 	if err != nil {
 		return nil, err
 	}
 	return res, nil
 }
 
-func (svc *GroupService) Find(id string, userId string) (*Group, error) {
-	user, err := svc.userRepo.Find(userId)
+func (svc *GroupService) Find(id string, userID string) (*Group, error) {
+	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
 	}
@@ -145,15 +145,15 @@ func (svc *GroupService) Find(id string, userId string) (*Group, error) {
 	if err := svc.groupGuard.Authorize(user, group, model.PermissionViewer); err != nil {
 		return nil, err
 	}
-	res, err := svc.groupMapper.mapGroup(group, userId)
+	res, err := svc.groupMapper.mapGroup(group, userID)
 	if err != nil {
 		return nil, err
 	}
 	return res, nil
 }
 
-func (svc *GroupService) FindAll(userId string) ([]*Group, error) {
-	user, err := svc.userRepo.Find(userId)
+func (svc *GroupService) FindAll(userID string) ([]*Group, error) {
+	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
 	}
@@ -168,7 +168,7 @@ func (svc *GroupService) FindAll(userId string) ([]*Group, error) {
 			return nil, err
 		}
 		if svc.groupGuard.IsAuthorized(user, group, model.PermissionViewer) {
-			dto, err := svc.groupMapper.mapGroup(group, userId)
+			dto, err := svc.groupMapper.mapGroup(group, userID)
 			if err != nil {
 				return nil, err
 			}
@@ -178,19 +178,19 @@ func (svc *GroupService) FindAll(userId string) ([]*Group, error) {
 	return res, nil
 }
 
-func (svc *GroupService) FindAllForFile(fileId string, userId string) ([]*Group, error) {
-	user, err := svc.userRepo.Find(userId)
+func (svc *GroupService) FindAllForFile(fileID string, userID string) ([]*Group, error) {
+	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
 	}
-	file, err := svc.fileCache.Get(fileId)
+	file, err := svc.fileCache.Get(fileID)
 	if err != nil {
 		return nil, err
 	}
 	if err := svc.fileGuard.Authorize(user, file, model.PermissionViewer); err != nil {
 		return nil, err
 	}
-	ids, err := svc.groupRepo.GetIDsForFile(fileId)
+	ids, err := svc.groupRepo.GetIDsForFile(fileID)
 	if err != nil {
 		return nil, err
 	}
@@ -201,7 +201,7 @@ func (svc *GroupService) FindAllForFile(fileId string, userId string) ([]*Group,
 			return nil, err
 		}
 		if svc.groupGuard.IsAuthorized(user, group, model.PermissionViewer) {
-			dto, err := svc.groupMapper.mapGroup(group, userId)
+			dto, err := svc.groupMapper.mapGroup(group, userID)
 			if err != nil {
 				return nil, err
 			}
@@ -211,19 +211,19 @@ func (svc *GroupService) FindAllForFile(fileId string, userId string) ([]*Group,
 	return res, nil
 }
 
-func (svc *GroupService) Search(query string, userId string) ([]*Group, error) {
+func (svc *GroupService) Search(query string, userID string) ([]*Group, error) {
 	groups, err := svc.groupSearch.Query(query)
 	if err != nil {
 		return nil, err
 	}
-	user, err := svc.userRepo.Find(userId)
+	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
 	}
 	var res []*Group
 	for _, g := range groups {
 		if svc.groupGuard.IsAuthorized(user, g, model.PermissionViewer) {
-			dto, err := svc.groupMapper.mapGroup(g, userId)
+			dto, err := svc.groupMapper.mapGroup(g, userID)
 			if err != nil {
 				return nil, err
 			}
@@ -233,8 +233,8 @@ func (svc *GroupService) Search(query string, userId string) ([]*Group, error) {
 	return res, nil
 }
 
-func (svc *GroupService) UpdateName(id string, name string, userId string) (*Group, error) {
-	user, err := svc.userRepo.Find(userId)
+func (svc *GroupService) UpdateName(id string, name string, userID string) (*Group, error) {
+	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
 	}
@@ -256,15 +256,15 @@ func (svc *GroupService) UpdateName(id string, name string, userId string) (*Gro
 	if err != nil {
 		return nil, err
 	}
-	res, err := svc.groupMapper.mapGroup(group, userId)
+	res, err := svc.groupMapper.mapGroup(group, userID)
 	if err != nil {
 		return nil, err
 	}
 	return res, nil
 }
 
-func (svc *GroupService) Delete(id string, userId string) error {
-	user, err := svc.userRepo.Find(userId)
+func (svc *GroupService) Delete(id string, userID string) error {
+	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return err
 	}
@@ -287,8 +287,8 @@ func (svc *GroupService) Delete(id string, userId string) error {
 	return nil
 }
 
-func (svc *GroupService) AddMember(id string, memberId string, userId string) error {
-	user, err := svc.userRepo.Find(userId)
+func (svc *GroupService) AddMember(id string, memberID string, userID string) error {
+	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return err
 	}
@@ -296,16 +296,16 @@ func (svc *GroupService) AddMember(id string, memberId string, userId string) er
 	if err != nil {
 		return nil
 	}
-	if err := svc.groupGuard.Authorize(user, group, model.PermissionViewer); err != nil {
+	if err := svc.groupGuard.Authorize(user, group, model.PermissionOwner); err != nil {
 		return err
 	}
-	if _, err := svc.userRepo.Find(memberId); err != nil {
+	if _, err := svc.userRepo.Find(memberID); err != nil {
 		return err
 	}
-	if err := svc.groupRepo.AddUser(id, memberId); err != nil {
+	if err := svc.groupRepo.AddUser(id, memberID); err != nil {
 		return err
 	}
-	if err := svc.groupRepo.GrantUserPermission(group.GetID(), memberId, model.PermissionViewer); err != nil {
+	if err := svc.groupRepo.GrantUserPermission(group.GetID(), memberID, model.PermissionViewer); err != nil {
 		return err
 	}
 	if _, err := svc.groupCache.Refresh(group.GetID()); err != nil {
@@ -317,8 +317,8 @@ func (svc *GroupService) AddMember(id string, memberId string, userId string) er
 	return nil
 }
 
-func (svc *GroupService) RemoveMember(id string, memberId string, userId string) error {
-	user, err := svc.userRepo.Find(userId)
+func (svc *GroupService) RemoveMember(id string, memberID string, userID string) error {
+	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return err
 	}
@@ -326,27 +326,27 @@ func (svc *GroupService) RemoveMember(id string, memberId string, userId string)
 	if err != nil {
 		return nil
 	}
-	if err := svc.groupGuard.Authorize(user, group, model.PermissionViewer); err != nil {
+	if err := svc.groupGuard.Authorize(user, group, model.PermissionOwner); err != nil {
 		return err
 	}
-	if err := svc.RemoveMemberUnauthorized(id, memberId); err != nil {
+	if err := svc.RemoveMemberUnauthorized(id, memberID); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (svc *GroupService) RemoveMemberUnauthorized(id string, memberId string) error {
+func (svc *GroupService) RemoveMemberUnauthorized(id string, memberID string) error {
 	group, err := svc.groupCache.Get(id)
 	if err != nil {
 		return nil
 	}
-	if _, err := svc.userRepo.Find(memberId); err != nil {
+	if _, err := svc.userRepo.Find(memberID); err != nil {
 		return err
 	}
-	if err := svc.groupRepo.RemoveMember(id, memberId); err != nil {
+	if err := svc.groupRepo.RemoveMember(id, memberID); err != nil {
 		return err
 	}
-	if err := svc.groupRepo.RevokeUserPermission(id, memberId); err != nil {
+	if err := svc.groupRepo.RevokeUserPermission(id, memberID); err != nil {
 		return err
 	}
 	if _, err := svc.groupCache.Refresh(group.GetID()); err != nil {
@@ -358,20 +358,20 @@ func (svc *GroupService) RemoveMemberUnauthorized(id string, memberId string) er
 	return nil
 }
 
-func (svc *GroupService) refreshCacheForOrganization(organizationId string) error {
-	workspaceIds, err := svc.workspaceRepo.GetIdsByOrganization(organizationId)
+func (svc *GroupService) refreshCacheForOrganization(organizationID string) error {
+	workspaceIDs, err := svc.workspaceRepo.GetIDsByOrganization(organizationID)
 	if err != nil {
 		return err
 	}
-	for _, workspaceId := range workspaceIds {
-		if _, err := svc.workspaceCache.Refresh(workspaceId); err != nil {
+	for _, workspaceID := range workspaceIDs {
+		if _, err := svc.workspaceCache.Refresh(workspaceID); err != nil {
 			return err
 		}
-		filesIds, err := svc.fileRepo.GetIdsByWorkspace(workspaceId)
+		filesIDs, err := svc.fileRepo.GetIDsByWorkspace(workspaceID)
 		if err != nil {
 			return err
 		}
-		for _, id := range filesIds {
+		for _, id := range filesIDs {
 			if _, err := svc.fileCache.Refresh(id); err != nil {
 				return err
 			}
@@ -380,8 +380,8 @@ func (svc *GroupService) refreshCacheForOrganization(organizationId string) erro
 	return nil
 }
 
-func (svc *GroupService) GetMembers(id string, userId string) ([]*User, error) {
-	user, err := svc.userRepo.Find(userId)
+func (svc *GroupService) GetMembers(id string, userID string) ([]*User, error) {
+	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
 	}
@@ -403,8 +403,8 @@ func (svc *GroupService) GetMembers(id string, userId string) ([]*User, error) {
 	return res, nil
 }
 
-func (svc *GroupService) SearchMembers(id string, query string, userId string) ([]*User, error) {
-	user, err := svc.userRepo.Find(userId)
+func (svc *GroupService) SearchMembers(id string, query string, userID string) ([]*User, error) {
+	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
 	}
@@ -448,8 +448,8 @@ func (svc *GroupService) SearchMembers(id string, query string, userId string) (
 	return res, nil
 }
 
-func (svc *GroupService) GetAvailableUsers(id string, userId string) ([]*User, error) {
-	user, err := svc.userRepo.Find(userId)
+func (svc *GroupService) GetAvailableUsers(id string, userID string) ([]*User, error) {
+	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
 	}
@@ -498,12 +498,12 @@ func newGroupMapper() *groupMapper {
 	}
 }
 
-func (mp *groupMapper) mapGroup(m model.Group, userId string) (*Group, error) {
+func (mp *groupMapper) mapGroup(m model.Group, userID string) (*Group, error) {
 	org, err := mp.orgCache.Get(m.GetOrganizationID())
 	if err != nil {
 		return nil, err
 	}
-	v, err := mp.orgMapper.mapOrganization(org, userId)
+	v, err := mp.orgMapper.mapOrganization(org, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -516,7 +516,7 @@ func (mp *groupMapper) mapGroup(m model.Group, userId string) (*Group, error) {
 	}
 	res.Permission = ""
 	for _, p := range m.GetUserPermissions() {
-		if p.GetUserID() == userId && model.GetPermissionWeight(p.GetValue()) > model.GetPermissionWeight(res.Permission) {
+		if p.GetUserID() == userID && model.GetPermissionWeight(p.GetValue()) > model.GetPermissionWeight(res.Permission) {
 			res.Permission = p.GetValue()
 		}
 	}
@@ -526,7 +526,7 @@ func (mp *groupMapper) mapGroup(m model.Group, userId string) (*Group, error) {
 			return nil, err
 		}
 		for _, u := range g.GetUsers() {
-			if u == userId && model.GetPermissionWeight(p.GetValue()) > model.GetPermissionWeight(res.Permission) {
+			if u == userID && model.GetPermissionWeight(p.GetValue()) > model.GetPermissionWeight(res.Permission) {
 				res.Permission = p.GetValue()
 			}
 		}
@@ -534,10 +534,10 @@ func (mp *groupMapper) mapGroup(m model.Group, userId string) (*Group, error) {
 	return res, nil
 }
 
-func (mp *groupMapper) mapGroups(groups []model.Group, userId string) ([]*Group, error) {
+func (mp *groupMapper) mapGroups(groups []model.Group, userID string) ([]*Group, error) {
 	res := []*Group{}
 	for _, g := range groups {
-		v, err := mp.mapGroup(g, userId)
+		v, err := mp.mapGroup(g, userID)
 		if err != nil {
 			return nil, err
 		}

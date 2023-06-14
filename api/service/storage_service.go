@@ -37,8 +37,8 @@ func NewStorageService() *StorageService {
 	}
 }
 
-func (svc *StorageService) GetAccountUsage(userId string) (*StorageUsage, error) {
-	user, err := svc.userRepo.Find(userId)
+func (svc *StorageService) GetAccountUsage(userID string) (*StorageUsage, error) {
+	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
 	}
@@ -74,12 +74,12 @@ func (svc *StorageService) GetAccountUsage(userId string) (*StorageUsage, error)
 	return svc.storageMapper.mapStorageUsage(b, maxBytes), nil
 }
 
-func (svc *StorageService) GetWorkspaceUsage(workspaceId string, userId string) (*StorageUsage, error) {
-	user, err := svc.userRepo.Find(userId)
+func (svc *StorageService) GetWorkspaceUsage(workspaceID string, userID string) (*StorageUsage, error) {
+	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
 	}
-	workspace, err := svc.workspaceCache.Get(workspaceId)
+	workspace, err := svc.workspaceCache.Get(workspaceID)
 	if err != nil {
 		return nil, err
 	}
@@ -100,12 +100,12 @@ func (svc *StorageService) GetWorkspaceUsage(workspaceId string, userId string) 
 	return svc.storageMapper.mapStorageUsage(size, workspace.GetStorageCapacity()), nil
 }
 
-func (svc *StorageService) GetFileUsage(fileId string, userId string) (*StorageUsage, error) {
-	user, err := svc.userRepo.Find(userId)
+func (svc *StorageService) GetFileUsage(fileID string, userID string) (*StorageUsage, error) {
+	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
 	}
-	file, err := svc.fileCache.Get(fileId)
+	file, err := svc.fileCache.Get(fileID)
 	if err != nil {
 		return nil, err
 	}
