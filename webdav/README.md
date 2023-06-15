@@ -2,13 +2,7 @@
 
 ## Getting Started
 
-Install [Node.js 18.x](https://nodejs.org).
-
-Enable [pnpm](https://pnpm.io):
-
-```shell
-corepack enable
-```
+We assume the development environment is setup as described [here](../DEVELOPMENT.md).
 
 ### Build and Run
 
