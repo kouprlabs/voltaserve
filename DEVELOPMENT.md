@@ -51,6 +51,8 @@ Create schema:
 curl -L "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/sql/schema.sql?t=$(date +%s)" | /opt/cockroach/cockroach sql --insecure -u voltaserve
 ```
 
+_Note: the scripts above can also be ran directly from the [infra/sql](infra/sql) directory._
+
 ## 4) Developing
 
 You can clone the [repository](https://github.com/kouprlabs/voltaserve) in your home directory, and run the services from there. One option could be to use Visual Studio Code's remote development feature as described [here](https://code.visualstudio.com/docs/remote/remote-overview) to connect to your development environment VM from your host OS.
