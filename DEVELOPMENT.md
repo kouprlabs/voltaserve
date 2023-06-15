@@ -13,6 +13,8 @@ It is recommended to have a fresh install of one of these operating systems. One
 
 If you run your VM under Windows WSL, make sure `systemd` is enabled as described [here](https://learn.microsoft.com/en-us/windows/wsl/wsl-config#systemd-support).
 
+We provide first class support for VSCode as an IDE/editor, like debugging configurations and extension recommendations for formatters, linters, etc.
+
 ## Dependencies
 
 Install:
