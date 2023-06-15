@@ -160,7 +160,7 @@ Additional instructions:
 
 ## Development
 
-To setup a development environment with the purpose of developing and debugging Voltserve, please read [DEVELOPMENT.md](DEVELOPMENT.md).
+To setup a development environment with the purpose of developing and debugging Voltaserve, please read [DEVELOPMENT.md](DEVELOPMENT.md).
 
 ## Licensing
 
