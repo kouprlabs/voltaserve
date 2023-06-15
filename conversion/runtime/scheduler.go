@@ -68,11 +68,11 @@ func NewScheduler(opts SchedulerOptions) *Scheduler {
 }
 
 func (s *Scheduler) Start() {
-	s.logger.Named(StrScheduler).Infow("🚀 launching", "type", "pipeline", "count", s.pipelineWorkerCount)
+	s.logger.Named(StrScheduler).Infow("🚀  launching", "type", "pipeline", "count", s.pipelineWorkerCount)
 	for i := 0; i < s.pipelineWorkerCount; i++ {
 		go s.pipelineWorker(i)
 	}
-	s.logger.Named(StrScheduler).Infow("🚀 launching", "type", "builder", "count", s.builderWorkerCount)
+	s.logger.Named(StrScheduler).Infow("🚀  launching", "type", "builder", "count", s.builderWorkerCount)
 	for i := 0; i < s.builderWorkerCount; i++ {
 		go s.builderWorker(i)
 	}
@@ -91,7 +91,7 @@ func (s *Scheduler) SchedulePipeline(opts *core.PipelineOptions) {
 			length = len(s.pipelineQueue[i])
 		}
 	}
-	s.logger.Named(StrScheduler).Infow("👉 choosing", "pipeline", index)
+	s.logger.Named(StrScheduler).Infow("👉  choosing", "pipeline", index)
 	s.pipelineQueue[index] = append(s.pipelineQueue[index], *opts)
 }
 
@@ -104,7 +104,7 @@ func (s *Scheduler) ScheduleBuilder(opts *core.PipelineOptions) {
 			length = len(s.builderQueue[i])
 		}
 	}
-	s.logger.Named(StrScheduler).Infow("👉 choosing", "builder", index)
+	s.logger.Named(StrScheduler).Infow("👉  choosing", "builder", index)
 	s.builderQueue[index] = append(s.builderQueue[index], *opts)
 }
 
@@ -116,14 +116,14 @@ func (s *Scheduler) pipelineWorker(index int) {
 		if len(s.pipelineQueue[index]) > 0 {
 			s.activePipelineCount++
 			opts := s.pipelineQueue[index][0]
-			s.logger.Named(StrPipeline).Infow("🔨 working", "worker", index, "key", opts.Key, "bucket", opts.Bucket)
+			s.logger.Named(StrPipeline).Infow("🔨  working", "worker", index, "key", opts.Key, "bucket", opts.Bucket)
 			start := time.Now()
 			err := dispatcher.Dispatch(opts)
 			elapsed := time.Since(start)
 			if err == nil {
-				s.logger.Named(StrPipeline).Infow("🎉 succeeded", "worker", index, "elapsed", elapsed, "key", opts.Key, "bucket", opts.Bucket)
+				s.logger.Named(StrPipeline).Infow("🎉  succeeded", "worker", index, "elapsed", elapsed, "key", opts.Key, "bucket", opts.Bucket)
 			} else {
-				s.logger.Named(StrPipeline).Errorw("⛈️ failed", "worker", index, "elapsed", elapsed, "key", opts.Key, "bucket", opts.Bucket)
+				s.logger.Named(StrPipeline).Errorw("⛈️  failed", "worker", index, "elapsed", elapsed, "key", opts.Key, "bucket", opts.Bucket)
 			}
 			s.pipelineQueue[index] = s.pipelineQueue[index][1:]
 			s.activePipelineCount--
@@ -141,14 +141,14 @@ func (s *Scheduler) builderWorker(index int) {
 		if len(s.builderQueue[index]) > 0 {
 			s.activeBuilderCount++
 			opts := s.builderQueue[index][0]
-			s.logger.Named(StrBuilder).Infow("🔨 working", "worker", index, "key", opts.Key, "bucket", opts.Bucket)
+			s.logger.Named(StrBuilder).Infow("🔨  working", "worker", index, "key", opts.Key, "bucket", opts.Bucket)
 			start := time.Now()
 			err := dispatcher.Dispatch(opts)
 			elapsed := time.Since(start)
 			if err == nil {
-				s.logger.Named(StrBuilder).Infow("🎉 succeeded", "worker", index, "elapsed", elapsed, "key", opts.Key, "bucket", opts.Bucket)
+				s.logger.Named(StrBuilder).Infow("🎉  succeeded", "worker", index, "elapsed", elapsed, "key", opts.Key, "bucket", opts.Bucket)
 			} else {
-				s.logger.Named(StrBuilder).Errorw("⛈️ failed", "worker", index, "elapsed", elapsed, "key", opts.Key, "bucket", opts.Bucket)
+				s.logger.Named(StrBuilder).Errorw("⛈️  failed", "worker", index, "elapsed", elapsed, "key", opts.Key, "bucket", opts.Bucket)
 			}
 			s.builderQueue[index] = s.builderQueue[index][1:]
 			s.activeBuilderCount--
@@ -168,9 +168,9 @@ func (s *Scheduler) pipelineQueueStatus() {
 		}
 		if sum != previous {
 			if sum == 0 {
-				s.logger.Named(StrQueueStatus).Infow("🌈 empty", "type", "pipeline")
+				s.logger.Named(StrQueueStatus).Infow("🌈  empty", "type", "pipeline")
 			} else {
-				s.logger.Named(StrQueueStatus).Infow("⏳ items", "type", "pipeline", "count", sum)
+				s.logger.Named(StrQueueStatus).Infow("⏳  items", "type", "pipeline", "count", sum)
 			}
 		}
 		previous = sum
@@ -187,9 +187,9 @@ func (s *Scheduler) builderQueueStatus() {
 		}
 		if sum != previous {
 			if sum == 0 {
-				s.logger.Named(StrQueueStatus).Infow("🌈 empty", "type", "builder")
+				s.logger.Named(StrQueueStatus).Infow("🌈  empty", "type", "builder")
 			} else {
-				s.logger.Named(StrQueueStatus).Infow("⏳ items", "type", "builder", "count", sum)
+				s.logger.Named(StrQueueStatus).Infow("⏳  items", "type", "builder", "count", sum)
 			}
 		}
 		previous = sum
@@ -204,7 +204,7 @@ func (s *Scheduler) pipelineWorkerStatus() {
 			if s.activePipelineCount == 0 {
 				s.logger.Named(StrWorkerStatus).Infow("🌤️  all idle", "type", "pipeline")
 			} else {
-				s.logger.Named(StrWorkerStatus).Infow("🔥 active", "type", "pipeline", "count", s.activePipelineCount)
+				s.logger.Named(StrWorkerStatus).Infow("🔥  active", "type", "pipeline", "count", s.activePipelineCount)
 			}
 		}
 		previous = s.activePipelineCount
@@ -219,7 +219,7 @@ func (s *Scheduler) builderWorkerStatus() {
 			if s.activePipelineCount == 0 {
 				s.logger.Named(StrWorkerStatus).Infow("🌤️  all idle", "type", "builder")
 			} else {
-				s.logger.Named(StrWorkerStatus).Infow("🔥 active", "type", "builder", "count", s.activeBuilderCount)
+				s.logger.Named(StrWorkerStatus).Infow("🔥  active", "type", "builder", "count", s.activeBuilderCount)
 			}
 		}
 		previous = s.activeBuilderCount
