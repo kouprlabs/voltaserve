@@ -183,13 +183,15 @@ install_corepack() {
 
 check_supported_system
 
+install_dnf_package "wget"
+install_dnf_package "git"
+
 install_cockroach
 install_meilisearch
 install_mailhog
 install_minio
 install_redis
 
-install_dnf_package "git"
 install_dnf_package "golang"
 install_dnf_package "poppler-utils"
 install_dnf_package "libreoffice"
@@ -197,7 +199,6 @@ install_dnf_package "python3-pip"
 install_dnf_package "python3-devel"
 install_dnf_package "ghostscript"
 install_dnf_package "tesseract"
-install_dnf_package "wget"
 
 download_tesseract_trained_data "osd"
 download_tesseract_trained_data "osd"
