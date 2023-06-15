@@ -116,14 +116,14 @@ func (s *Scheduler) pipelineWorker(index int) {
 		if len(s.pipelineQueue[index]) > 0 {
 			s.activePipelineCount++
 			opts := s.pipelineQueue[index][0]
-			s.logger.Named(StrPipeline).Infow("🔨  working", "worker", index, "key", opts.Key, "bucket", opts.Bucket)
+			s.logger.Named(StrPipeline).Infow("🔨  working", "worker", index, "bucket", opts.Bucket, "key", opts.Key)
 			start := time.Now()
 			err := dispatcher.Dispatch(opts)
 			elapsed := time.Since(start)
 			if err == nil {
-				s.logger.Named(StrPipeline).Infow("🎉  succeeded", "worker", index, "elapsed", elapsed, "key", opts.Key, "bucket", opts.Bucket)
+				s.logger.Named(StrPipeline).Infow("🎉  succeeded", "worker", index, "elapsed", elapsed, "bucket", opts.Bucket, "key", opts.Key)
 			} else {
-				s.logger.Named(StrPipeline).Errorw("⛈️  failed", "worker", index, "elapsed", elapsed, "key", opts.Key, "bucket", opts.Bucket)
+				s.logger.Named(StrPipeline).Errorw("⛈️  failed", "worker", index, "elapsed", elapsed, "bucket", opts.Bucket, "key", opts.Key)
 			}
 			s.pipelineQueue[index] = s.pipelineQueue[index][1:]
 			s.activePipelineCount--
@@ -141,14 +141,14 @@ func (s *Scheduler) builderWorker(index int) {
 		if len(s.builderQueue[index]) > 0 {
 			s.activeBuilderCount++
 			opts := s.builderQueue[index][0]
-			s.logger.Named(StrBuilder).Infow("🔨  working", "worker", index, "key", opts.Key, "bucket", opts.Bucket)
+			s.logger.Named(StrBuilder).Infow("🔨  working", "worker", index, "bucket", opts.Bucket, "key", opts.Key)
 			start := time.Now()
 			err := dispatcher.Dispatch(opts)
 			elapsed := time.Since(start)
 			if err == nil {
-				s.logger.Named(StrBuilder).Infow("🎉  succeeded", "worker", index, "elapsed", elapsed, "key", opts.Key, "bucket", opts.Bucket)
+				s.logger.Named(StrBuilder).Infow("🎉  succeeded", "worker", index, "elapsed", elapsed, "bucket", opts.Bucket, "key", opts.Key)
 			} else {
-				s.logger.Named(StrBuilder).Errorw("⛈️  failed", "worker", index, "elapsed", elapsed, "key", opts.Key, "bucket", opts.Bucket)
+				s.logger.Named(StrBuilder).Errorw("⛈️  failed", "worker", index, "elapsed", elapsed, "bucket", opts.Bucket, "key", opts.Key)
 			}
 			s.builderQueue[index] = s.builderQueue[index][1:]
 			s.activeBuilderCount--
