@@ -4,7 +4,7 @@
 
 We assume the development environment is setup as described [here](../DEVELOPMENT.md).
 
-Install [Pipenv](https://pipenv.pypa.io/en/latest/installation/#installing-pipenv).
+Install Pipenv as described [here](https://pipenv.pypa.io/en/latest/installation/#installing-pipenv).
 
 Install dependencies:
 
