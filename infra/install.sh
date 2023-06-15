@@ -119,7 +119,7 @@ install_rpm_repository() {
 install_code_ready_builder_repository() {
     local cpe_name=$(grep -oP '(?<=^CPE_NAME=).+' /etc/os-release)
     cpe_name="${cpe_name//\"/}"
-    arch=$(uname -m)
+    local arch=$(uname -m)
     if [[ $cpe_name == "cpe:/o:redhat:enterprise_linux:9:"* ]]; then
         local repo="codeready-builder-for-rhel-9-${arch}-rpms"
         if ! dnf repolist | grep -q "^${repo//\./\\.}"; then
