@@ -35,7 +35,7 @@ Stop:
 curl -L "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/stop.sh?t=$(date +%s)" | sudo bash
 ```
 
-_The scripts above can also be ran directly from the [infra](infra) directory._
+_Note: the scripts above can also be ran directly from the [infra](infra) directory._
 
 ## Developing
 
