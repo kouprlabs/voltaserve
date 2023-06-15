@@ -8,10 +8,7 @@ start_cockroach() {
 }
 
 start_redis() {
-    dnf install redis
-    systemctl enable redis
     systemctl start redis
-
 }
 
 start_minio() {
