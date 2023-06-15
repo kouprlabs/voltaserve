@@ -8,10 +8,10 @@ import (
 	"voltaserve/builder"
 	"voltaserve/client"
 	"voltaserve/core"
-	"voltaserve/helper"
 	"voltaserve/pipeline"
 
-	"github.com/fatih/color"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 type Scheduler struct {
@@ -22,12 +22,19 @@ type Scheduler struct {
 	activePipelineCount int
 	activeBuilderCount  int
 	apiClient           *client.APIClient
+	logger              *zap.SugaredLogger
 }
 
 type SchedulerOptions struct {
 	PipelineWorkerCount int
 	BuilderWorkerCount  int
 }
+
+var StrScheduler = fmt.Sprintf("%-13s", "scheduler")
+var StrPipeline = fmt.Sprintf("%-13s", "pipeline")
+var StrBuilder = fmt.Sprintf("%-13s", "builder")
+var StrWorkerStatus = fmt.Sprintf("%-13s", "worker_status")
+var StrQueueStatus = fmt.Sprintf("%-13s", "queue_status")
 
 func NewDefaultSchedulerOptions() SchedulerOptions {
 	opts := SchedulerOptions{}
@@ -42,21 +49,30 @@ func NewDefaultSchedulerOptions() SchedulerOptions {
 }
 
 func NewScheduler(opts SchedulerOptions) *Scheduler {
+	config := zap.NewDevelopmentConfig()
+	config.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
+	config.DisableCaller = true
+	logger, err := config.Build()
+	if err != nil {
+		panic(err)
+	}
+	logger.Sync()
 	return &Scheduler{
 		pipelineQueue:       make([][]core.PipelineOptions, opts.PipelineWorkerCount),
 		builderQueue:        make([][]core.PipelineOptions, opts.BuilderWorkerCount),
 		pipelineWorkerCount: opts.PipelineWorkerCount,
 		builderWorkerCount:  opts.BuilderWorkerCount,
 		apiClient:           client.NewAPIClient(),
+		logger:              logger.Sugar(),
 	}
 }
 
 func (s *Scheduler) Start() {
-	fmt.Printf("[Scheduler] 🚀 Launching %d pipeline workers...\n", s.pipelineWorkerCount)
+	s.logger.Named(StrScheduler).Infow("🚀 launching", "type", "pipeline", "count", s.pipelineWorkerCount)
 	for i := 0; i < s.pipelineWorkerCount; i++ {
 		go s.pipelineWorker(i)
 	}
-	fmt.Printf("[Scheduler] 🚀 Launching %d builder workers...\n", s.builderWorkerCount)
+	s.logger.Named(StrScheduler).Infow("🚀 launching", "type", "builder", "count", s.builderWorkerCount)
 	for i := 0; i < s.builderWorkerCount; i++ {
 		go s.builderWorker(i)
 	}
@@ -75,7 +91,7 @@ func (s *Scheduler) SchedulePipeline(opts *core.PipelineOptions) {
 			length = len(s.pipelineQueue[i])
 		}
 	}
-	fmt.Printf("[Scheduler] 👉 Choosing pipline worker %d\n", index)
+	s.logger.Named(StrScheduler).Infow("👉 choosing", "pipeline", index)
 	s.pipelineQueue[index] = append(s.pipelineQueue[index], *opts)
 }
 
@@ -88,34 +104,26 @@ func (s *Scheduler) ScheduleBuilder(opts *core.PipelineOptions) {
 			length = len(s.builderQueue[i])
 		}
 	}
-	fmt.Printf("[Scheduler] 👉 Choosing builder worker %d\n", index)
+	s.logger.Named(StrScheduler).Infow("👉 choosing", "builder", index)
 	s.builderQueue[index] = append(s.builderQueue[index], *opts)
 }
 
 func (s *Scheduler) pipelineWorker(index int) {
 	dispatcher := pipeline.NewDispatcher()
 	s.pipelineQueue[index] = make([]core.PipelineOptions, 0)
-	fmt.Printf("[Pipeline Worker %d] Running\n", index)
+	s.logger.Named(StrPipeline).Infow("⚙️  running", "worker", index)
 	for {
 		if len(s.pipelineQueue[index]) > 0 {
 			s.activePipelineCount++
 			opts := s.pipelineQueue[index][0]
-			fmt.Printf("[Pipeline Worker %d] 🔨 Working... ", index)
-			helper.PrintlnPipelineOptions(&opts)
+			s.logger.Named(StrPipeline).Infow("🔨 working", "worker", index, "key", opts.Key, "bucket", opts.Bucket)
 			start := time.Now()
 			err := dispatcher.Dispatch(opts)
 			elapsed := time.Since(start)
-			fmt.Printf("[Pipeline Worker %d] ⌚ Took ", index)
-			color.Set(color.FgMagenta)
-			fmt.Printf("%s ", elapsed)
-			color.Unset()
-			helper.PrintlnPipelineOptions(&opts)
 			if err == nil {
-				fmt.Printf("[Pipeline Worker %d] 🎉 Succeeded! ", index)
-				helper.PrintlnPipelineOptions(&opts)
+				s.logger.Named(StrPipeline).Infow("🎉 succeeded", "worker", index, "elapsed", elapsed, "key", opts.Key, "bucket", opts.Bucket)
 			} else {
-				fmt.Printf("[Pipeline Worker %d] ⛈️ Failed! ", index)
-				helper.PrintlnPipelineOptions(&opts)
+				s.logger.Named(StrPipeline).Errorw("⛈️ failed", "worker", index, "elapsed", elapsed, "key", opts.Key, "bucket", opts.Bucket)
 			}
 			s.pipelineQueue[index] = s.pipelineQueue[index][1:]
 			s.activePipelineCount--
@@ -128,27 +136,19 @@ func (s *Scheduler) pipelineWorker(index int) {
 func (s *Scheduler) builderWorker(index int) {
 	dispatcher := builder.NewDispatcher()
 	s.builderQueue[index] = make([]core.PipelineOptions, 0)
-	fmt.Printf("[Builder Worker %d] Running\n", index)
+	s.logger.Named(StrBuilder).Infow("⚙️  running", "worker", index)
 	for {
 		if len(s.builderQueue[index]) > 0 {
 			s.activeBuilderCount++
 			opts := s.builderQueue[index][0]
-			fmt.Printf("[Builder Worker %d] 🔨 Working... ", index)
-			helper.PrintlnPipelineOptions(&opts)
+			s.logger.Named(StrBuilder).Infow("🔨 working", "worker", index, "key", opts.Key, "bucket", opts.Bucket)
 			start := time.Now()
 			err := dispatcher.Dispatch(opts)
 			elapsed := time.Since(start)
-			fmt.Printf("[Builder Worker %d] ⌚ Took ", index)
-			color.Set(color.FgMagenta)
-			fmt.Printf("%s ", elapsed)
-			color.Unset()
-			helper.PrintlnPipelineOptions(&opts)
 			if err == nil {
-				fmt.Printf("[Builder Worker %d] 🎉 Succeeded! ", index)
-				helper.PrintlnPipelineOptions(&opts)
+				s.logger.Named(StrBuilder).Infow("🎉 succeeded", "worker", index, "elapsed", elapsed, "key", opts.Key, "bucket", opts.Bucket)
 			} else {
-				fmt.Printf("[Builder Worker %d] ⛈️ Failed! ", index)
-				helper.PrintlnPipelineOptions(&opts)
+				s.logger.Named(StrBuilder).Errorw("⛈️ failed", "worker", index, "elapsed", elapsed, "key", opts.Key, "bucket", opts.Bucket)
 			}
 			s.builderQueue[index] = s.builderQueue[index][1:]
 			s.activeBuilderCount--
@@ -168,13 +168,9 @@ func (s *Scheduler) pipelineQueueStatus() {
 		}
 		if sum != previous {
 			if sum == 0 {
-				color.Set(color.FgGreen)
-				fmt.Printf("[Pipeline Status] 🌈 Queue empty\n")
-				color.Unset()
+				s.logger.Named(StrQueueStatus).Infow("🌈 empty", "type", "pipeline")
 			} else {
-				color.Set(color.FgBlue)
-				fmt.Printf("[Pipeline Status] ⏳ Items in queue: %d\n", sum)
-				color.Unset()
+				s.logger.Named(StrQueueStatus).Infow("⏳ items", "type", "pipeline", "count", sum)
 			}
 		}
 		previous = sum
@@ -191,13 +187,9 @@ func (s *Scheduler) builderQueueStatus() {
 		}
 		if sum != previous {
 			if sum == 0 {
-				color.Set(color.FgGreen)
-				fmt.Printf("[Builder Status] 🌈 Queue empty\n")
-				color.Unset()
+				s.logger.Named(StrQueueStatus).Infow("🌈 empty", "type", "builder")
 			} else {
-				color.Set(color.FgBlue)
-				fmt.Printf("[Builder Status] ⏳ Items in queue: %d\n", sum)
-				color.Unset()
+				s.logger.Named(StrQueueStatus).Infow("⏳ items", "type", "builder", "count", sum)
 			}
 		}
 		previous = sum
@@ -210,13 +202,9 @@ func (s *Scheduler) pipelineWorkerStatus() {
 		time.Sleep(3 * time.Second)
 		if previous != s.activePipelineCount {
 			if s.activePipelineCount == 0 {
-				color.Set(color.FgGreen)
-				fmt.Printf("[Pipeline Status] 🌤️ Workers idle\n")
-				color.Unset()
+				s.logger.Named(StrWorkerStatus).Infow("🌤️  all idle", "type", "pipeline")
 			} else {
-				color.Set(color.FgRed)
-				fmt.Printf("[Pipeline Status] 🔥 Active workers: %d\n", s.activePipelineCount)
-				color.Unset()
+				s.logger.Named(StrWorkerStatus).Infow("🔥 active", "type", "pipeline", "count", s.activePipelineCount)
 			}
 		}
 		previous = s.activePipelineCount
@@ -228,14 +216,10 @@ func (s *Scheduler) builderWorkerStatus() {
 	for {
 		time.Sleep(3 * time.Second)
 		if previous != s.activeBuilderCount {
-			if s.activeBuilderCount == 0 {
-				color.Set(color.FgGreen)
-				fmt.Printf("[Builder Status] 🌤️ Workers idle\n")
-				color.Unset()
+			if s.activePipelineCount == 0 {
+				s.logger.Named(StrWorkerStatus).Infow("🌤️  all idle", "type", "builder")
 			} else {
-				color.Set(color.FgRed)
-				fmt.Printf("[Builder Status] 🔥 Active workers: %d\n", s.activeBuilderCount)
-				color.Unset()
+				s.logger.Named(StrWorkerStatus).Infow("🔥 active", "type", "builder", "count", s.activeBuilderCount)
 			}
 		}
 		previous = s.activeBuilderCount

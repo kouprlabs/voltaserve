@@ -13,9 +13,19 @@ import (
 	"gorm.io/gorm"
 )
 
+type SnapshotUpdateOptions struct {
+	Original  *model.S3Object
+	Preview   *model.S3Object
+	Text      *model.S3Object
+	OCR       *model.S3Object
+	Thumbnail *model.Thumbnail
+	Language  *string
+}
+
 type SnapshotRepo interface {
 	Find(id string) (model.Snapshot, error)
 	Save(snapshot model.Snapshot) error
+	Update(id string, opts SnapshotUpdateOptions) error
 	MapWithFile(id string, fileID string) error
 	DeleteMappingsForFile(fileID string) error
 	FindAllDangling() ([]model.Snapshot, error)
@@ -194,8 +204,8 @@ func (s *snapshotEntity) SetThumbnail(m *model.Thumbnail) {
 	}
 }
 
-func (s *snapshotEntity) SetLanguage(language string) {
-	s.Language = &language
+func (s *snapshotEntity) SetLanguage(language *string) {
+	s.Language = language
 }
 
 func (s snapshotEntity) HasOriginal() bool {
@@ -262,6 +272,35 @@ func (repo *snapshotRepo) Find(id string) (model.Snapshot, error) {
 
 func (repo *snapshotRepo) Save(snapshot model.Snapshot) error {
 	if db := repo.db.Save(snapshot); db.Error != nil {
+		return db.Error
+	}
+	return nil
+}
+
+func (repo *snapshotRepo) Update(id string, opts SnapshotUpdateOptions) error {
+	snapshot, err := repo.find(id)
+	if err != nil {
+		return err
+	}
+	if opts.Thumbnail != nil {
+		snapshot.SetThumbnail(opts.Thumbnail)
+	}
+	if opts.Original != nil {
+		snapshot.SetOriginal(opts.Original)
+	}
+	if opts.Preview != nil {
+		snapshot.SetPreview(opts.Preview)
+	}
+	if opts.OCR != nil {
+		snapshot.SetOCR(opts.OCR)
+	}
+	if opts.Text != nil {
+		snapshot.SetText(opts.Text)
+	}
+	if opts.Language != nil {
+		snapshot.SetLanguage(opts.Language)
+	}
+	if db := repo.db.Save(&snapshot); db.Error != nil {
 		return db.Error
 	}
 	return nil

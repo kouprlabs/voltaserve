@@ -24,7 +24,7 @@ type Snapshot interface {
 	SetText(*S3Object)
 	SetOCR(*S3Object)
 	SetThumbnail(*Thumbnail)
-	SetLanguage(string)
+	SetLanguage(*string)
 }
 
 type S3Object struct {
