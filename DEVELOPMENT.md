@@ -2,7 +2,7 @@
 
 ## Supported Operating Systems
 
-To develop Voltaserve, we support the following operating systems:
+For development, we support the following operating systems:
 
 - Red Hat Enterprise Linux 9.x
 - Rocky Linux 9.x
