@@ -79,7 +79,7 @@ install_dnf_package() {
     local extra_args="$2"
     if ! dnf list installed "${package_name}" | grep -q "^${package_name}"; then
         echo "📦  Installing package '${package_name}'..."
-        dnf install -y $extra_args
+        dnf install -y $package_name $extra_args
     else
         echo "✅  Found package '${package_name}'. Skipping."
     fi
