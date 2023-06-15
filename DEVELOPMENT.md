@@ -28,3 +28,5 @@ Stop:
 ```shell
 curl -L "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/stop.sh?t=$(date +%s)" | bash
 ```
+
+_The scripts above can also be ran directly from the [infra](infra) directory._
