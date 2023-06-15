@@ -20,7 +20,7 @@ install_cockroach() {
     if ! (command -v "${cockroach_bin}" >/dev/null 2>&1 && "${cockroach_bin}" --version >/dev/null 2>&1); then
         echo "📦  Installing binary '${cockroach_bin}'..."
         wget -c https://binaries.cockroachdb.com/cockroach-v23.1.3.linux-amd64.tgz -P $HOME
-        tar -xzf $HOME/cockroach-v23.1.3.linux-amd64.tgz -P $HOME --transform='s/^cockroach-v23.1.3.linux-amd64/cockroach/'
+        tar -xzf $HOME/cockroach-v23.1.3.linux-amd64.tgz -C $HOME --transform='s/^cockroach-v23.1.3.linux-amd64/cockroach/'
     else
         echo "✅  Found binary '${cockroach_bin}'. Skipping."
     fi
