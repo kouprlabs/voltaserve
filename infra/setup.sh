@@ -31,7 +31,7 @@ install_minio() {
     if ! rpm -q "${minio_pkg}" >/dev/null; then
         echo "📦  Installing package '$minio_pkg'..."
         wget -c https://dl.min.io/server/minio/release/linux-amd64/archive/minio-20230609073212.0.0.x86_64.rpm -P $HOME -O minio.rpm
-        sudo dnf install $HOME/minio.rpm
+        sudo dnf install -y $HOME/minio.rpm
         sudo rm -f $HOME/minio.rpm
         mkdir $HOME/minio
     else
@@ -79,7 +79,7 @@ install_dnf_package() {
     local extra_args="$2"
     if ! dnf list installed "${package_name}" | grep -q "^${package_name}"; then
         echo "📦  Installing package '${package_name}'..."
-        dnf install -y $extra_args
+        sudo dnf install -y $extra_args
     else
         echo "✅  Found package '${package_name}'. Skipping."
     fi
@@ -101,8 +101,8 @@ install_rpm_repository() {
     local url="$2"
     if ! dnf repolist | grep -q "${repository_name}"; then
         echo "🪐  Installing repository '${repository_name}'..."
-        dnf config-manager --add-repo="${url}"
-        dnf install -y $url
+        sudo dnf config-manager --add-repo="${url}"
+        sudo dnf install -y $url
     else
         echo "✅  Found repository '${repository_name}'. Skipping."
     fi
