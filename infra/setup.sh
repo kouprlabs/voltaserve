@@ -86,11 +86,12 @@ install_dnf_package() {
 }
 
 download_tesseract_trained_data() {
-    local file_path="/usr/share/tesseract/tessdata/$1.traineddata"
+    local tessdata_dir="/usr/share/tesseract/tessdata"
+    local file_path="${tessdata_dir}/$1.traineddata"
     local url="https://github.com/kouprlabs/tessdata/raw/main/$1.traineddata"
     if [ ! -f "${file_path}" ]; then
         echo "🧠  Downloading Tesseract trained data '${file_path}'..."
-        wget $url -P $file_path
+        wget $url -P $tessdata_dir
     else
         echo "✅  Found Tesseract trained data '${file_path}'. Skipping."
     fi
