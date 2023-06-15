@@ -37,7 +37,7 @@ install_minio() {
         wget "https://dl.min.io/server/minio/release/linux-amd64/archive/${minio_rpm}" -P $HOME
         dnf install -y "${HOME}/${minio_rpm}"
         rm -f "${HOME}/${minio_rpm}"
-        mkdir $HOME/minio
+        mkdir -p $HOME/minio
     else
         echo "✅  Found package '${minio_pkg}' package. Skipping."
     fi
@@ -56,10 +56,10 @@ install_redis() {
 }
 
 install_meilisearch() {
-    local meilisearch_bin="$HOME/meilisearch/meilisearch"
+    local meilisearch_bin="${HOME}/meilisearch/meilisearch"
     if ! (command -v $meilisearch_bin >/dev/null 2>&1 && $meilisearch_bin --version >/dev/null 2>&1); then
         echo "📦  Installing binary '${meilisearch_bin}'..."
-        mkdir $HOME/meilisearch
+        mkdir -p $HOME/meilisearch
         cd $HOME/meilisearch
         curl -L https://install.meilisearch.com | sh
     else
@@ -68,11 +68,12 @@ install_meilisearch() {
 }
 
 install_mailhog() {
-    local mailhog_bin="$HOME/mailhog/MailHog_linux_amd64"
+    local mailhog_bin="${HOME}/mailhog/MailHog_linux_amd64"
     if ! (command -v $mailhog_bin >/dev/null 2>&1 && $mailhog_bin --version >/dev/null 2>&1); then
         echo "📦  Installing binary '${mailhog_bin}'..."
-        mkdir $HOME/mailhog
+        mkdir -p $HOME/mailhog
         wget https://github.com/mailhog/MailHog/releases/download/v1.0.1/MailHog_linux_amd64 -P $HOME/mailhog
+        chmod +x $mailhog_bin
     else
         echo "✅  Found binary '${mailhog_bin}'. Skipping."
     fi
