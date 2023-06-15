@@ -1,6 +1,7 @@
 #!/bin/bash
 
 $BASE_DIR="/opt"
+mkdir -p $BASE_DIR
 
 check_supported_system() {
     local cpe_name=$(grep -oP '(?<=^CPE_NAME=).+' /etc/os-release)
