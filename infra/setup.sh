@@ -1,6 +1,6 @@
 #!/bin/bash
 
-$BASE_DIR="/opt"
+BASE_DIR="/opt"
 mkdir -p $BASE_DIR
 
 check_supported_system() {
