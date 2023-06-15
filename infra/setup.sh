@@ -101,7 +101,6 @@ install_rpm_repository() {
     local url="$2"
     if ! dnf repolist | grep -q "${repository_name}"; then
         echo "🪐  Installing repository '${repository_name}'..."
-        dnf config-manager --add-repo="${url}"
         dnf install -y $url
     else
         echo "✅  Found repository '${repository_name}'. Skipping."
