@@ -48,7 +48,7 @@ curl -L "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/sql/c
 Create schema:
 
 ```shell
-curl -L "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/sql/schema.sql?t=$(date +%s)" | /opt/cockroach/cockroach sql --insecure -u root
+curl -L "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/sql/schema.sql?t=$(date +%s)" | /opt/cockroach/cockroach sql --insecure -u voltaserve
 ```
 
 ## 4) Developing
