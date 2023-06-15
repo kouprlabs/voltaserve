@@ -15,7 +15,7 @@ start_redis() {
 start_minio() {
     cd "${BASE_DIR}/minio"
     echo "🚀  Starting MinIO..."
-    MINIO_ROOT_USER=voltaserve MINIO_ROOT_PASSWORD=voltaserve nohup minio server ./data --console-address ":9001" >log.txt &
+    MINIO_ROOT_USER=voltaserve MINIO_ROOT_PASSWORD=voltaserve nohup /usr/local/bin/minio server "${BASE_DIR}/minio/data" --console-address ":9001" >log.txt &
 }
 
 start_meilisearch() {
