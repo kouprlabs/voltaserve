@@ -9,7 +9,7 @@ For development, we support the following operating systems:
 - [AlmaLinux 9.x](https://almalinux.org)
 - [Oracle Linux 9.x](https://www.oracle.com/linux)
 
-It is recommended to have a fresh install of one of these operating systems. One approach is to have a VM dedicated just to Voltaserve development.
+It is recommended to have a fresh install of one of these operating systems, one way to do it is to have a VM dedicated just to Voltaserve development.
 
 If you run your VM under [Windows WSL](https://learn.microsoft.com/en-us/windows/wsl), make sure `systemd` is enabled as described [here](https://learn.microsoft.com/en-us/windows/wsl/wsl-config#systemd-support).
 
