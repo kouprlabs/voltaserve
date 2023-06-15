@@ -90,7 +90,7 @@ download_tesseract_trained_data() {
     local url="https://github.com/kouprlabs/tessdata/raw/main/$1.traineddata"
     if [ ! -f "${file_path}" ]; then
         echo "🧠  Downloading Tesseract trained data '${file_path}'..."
-        wget -q "${url}" -O "${file_path}"
+        wget $url -P $file_path
     else
         echo "✅  Found Tesseract trained data '${file_path}'. Skipping."
     fi
