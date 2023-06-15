@@ -20,19 +20,19 @@ We provide first class support for [Visual Studio Code](https://code.visualstudi
 Install:
 
 ```shell
-curl -L "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/install.sh?t=$(date +%s)" | bash
+curl -L "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/install.sh?t=$(date +%s)" | sudo bash
 ```
 
 Start:
 
 ```shell
-curl -L "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/start.sh?t=$(date +%s)" | bash
+curl -L "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/start.sh?t=$(date +%s)" | sudo bash
 ```
 
 Stop:
 
 ```shell
-curl -L "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/stop.sh?t=$(date +%s)" | bash
+curl -L "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/stop.sh?t=$(date +%s)" | sudo bash
 ```
 
 _The scripts above can also be ran directly from the [infra](infra) directory._
