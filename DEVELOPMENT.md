@@ -76,3 +76,4 @@ You can read about how to run each microservice in development mode here:
 - [Voltaserve Identity Provider](idp/README.md)
 - [Voltaserve WebDAV](webdav/README.md)
 - [Voltaserve Conversion](conversion/README.md)
+- [Voltaserve Language](language/README.md)

@@ -28,6 +28,7 @@ Wait until the status of the following containers is `healthy`:
 - `voltaserve-idp`
 - `voltaserve-conversion`
 - `voltaserve-webdav`
+- `voltaserve-language`
 - `voltaserve-ui`
 
 You can check that by running the command `docker ps` and look at the `STATUS` column.
