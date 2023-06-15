@@ -1,6 +1,6 @@
 # Voltaserve Development
 
-## Supported Operating Systems
+## 1) Supported Operating Systems
 
 For development, we support the following operating systems:
 
@@ -15,7 +15,7 @@ If you run your VM under [Windows WSL](https://learn.microsoft.com/en-us/windows
 
 We provide first class support for [Visual Studio Code](https://code.visualstudio.com) as an IDE/editor, like debugging configurations and extension recommendations for formatters, linters, etc.
 
-## Dependencies
+## 2) Dependencies
 
 Install:
 
@@ -37,7 +37,21 @@ curl -L "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/stop.
 
 _Note: the scripts above can also be ran directly from the [infra](infra) directory._
 
-## Developing
+## 3) Setup the SQL Database
+
+Create user and database:
+
+```shell
+curl -sSL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/sql/create_user_and_database.sql?t=$(date +%s)" | sudo -u root psql
+```
+
+Create schema:
+
+```shell
+curl -sSL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/sql/schema.sql?t=$(date +%s)" | sudo -u root psql
+```
+
+## 4) Developing
 
 You can clone the [repository](https://github.com/kouprlabs/voltaserve) in your home directory, and run the services from there. One option could be to use Visual Studio Code's remote development feature as described [here](https://code.visualstudio.com/docs/remote/remote-overview) to connect to your development environment VM from your host OS.
 
