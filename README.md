@@ -142,22 +142,6 @@ Or any custom hostname, like:
 VOLTASERVE_HOSTNAME="my-hostname"
 ```
 
-**I want to start developing and contributing, how can I start?**
-
-The UI `votaserve-ui` and Identity Providers `voltaserve-idp` are running in development/watch mode, you can simply open this repo in your favorite editor, change some code and it will reload automatically to reflect your changes.
-
-As for the API `voltaserve-api`, once you edit the code, you should restart the container for the new changes to apply.
-
-In case, you can also follow the instructions below for more detailed development instructions, like if you want to run the services directly on your OS without Docker. But when you do this, remember to stop the respective containers in Docker to avoid port conflicts.
-
-Additional instructions:
-
-- [Voltaserve API](api/README.md)
-- [Voltaserve UI](ui/README.md)
-- [Voltaserve Identity Provider](idp/README.md)
-- [Voltaserve WebDAV](webdav/README.md)
-- [Voltaserve Conversion](conversion/README.md)
-
 ## Development
 
 To setup a development environment for the purpose of developing and debugging Voltaserve, please read the development documentation available [here](DEVELOPMENT.md).

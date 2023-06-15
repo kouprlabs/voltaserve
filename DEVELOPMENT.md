@@ -36,3 +36,15 @@ curl -L "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/stop.
 ```
 
 _The scripts above can also be ran directly from the [infra](infra) directory._
+
+## Developing
+
+You can clone this repository in your home directory, and run the services from there. One option could be to use Visual Studio Code's remote development feature to connect to your development environment VM.
+
+You can read about how to run each microservice in development mode here:
+
+- [Voltaserve API](api/README.md)
+- [Voltaserve UI](ui/README.md)
+- [Voltaserve Identity Provider](idp/README.md)
+- [Voltaserve WebDAV](webdav/README.md)
+- [Voltaserve Conversion](conversion/README.md)
