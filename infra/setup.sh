@@ -4,7 +4,7 @@ check_supported_system() {
     local cpe_name=$(grep -oP '(?<=^CPE_NAME=).+' /etc/os-release)
     cpe_name="${cpe_name//\"/}"
     local pretty_name=$(grep -oP '(?<=^PRETTY_NAME=").*"' /etc/os-release | tr -d '"')
-    if [[ "$cpe_name" == "cpe:/o:redhat:enterprise_linux:9:"* ||
+    if [[ $cpe_name == "cpe:/o:redhat:enterprise_linux:9:"* ||
         "$cpe_name" == "cpe:/o:rocky:rocky:9:"* ||
         "$cpe_name" == "cpe:/o:almalinux:almalinux:9:"* ||
         "$cpe_name" == "cpe:/o:oracle:linux:9:"* ]]; then
@@ -17,7 +17,7 @@ check_supported_system() {
 
 install_cockroach() {
     local cockroach_bin="$HOME/cockroach/cockroach"
-    if ! (command -v "${cockroach_bin}" >/dev/null 2>&1 && "${cockroach_bin}" --version >/dev/null 2>&1); then
+    if ! (command -v $cockroach_bin >/dev/null 2>&1 && $cockroach_bin --version >/dev/null 2>&1); then
         echo "📦  Installing binary '${cockroach_bin}'..."
         wget -c https://binaries.cockroachdb.com/cockroach-v23.1.3.linux-amd64.tgz -P $HOME
         tar -xzf $HOME/cockroach-v23.1.3.linux-amd64.tgz -C $HOME --transform='s/^cockroach-v23.1.3.linux-amd64/cockroach/'
@@ -28,7 +28,7 @@ install_cockroach() {
 
 install_minio() {
     local minio_pkg="minio"
-    if ! rpm -q "${minio_pkg}" >/dev/null; then
+    if ! rpm -q $minio_pkg >/dev/null; then
         echo "📦  Installing package '$minio_pkg'..."
         wget -c https://dl.min.io/server/minio/release/linux-amd64/archive/minio-20230609073212.0.0.x86_64.rpm -P $HOME -O minio.rpm
         dnf install -y $HOME/minio.rpm
@@ -41,7 +41,7 @@ install_minio() {
 
 install_redis() {
     local redis_service="redis"
-    if ! systemctl list-unit-files | grep -q "$redis_service.service"; then
+    if ! systemctl list-unit-files | grep -q "${redis_service}.service"; then
         echo "📦  Installing service '${redis_service}'..."
         dnf install -y $redis_service
         systemctl enable $redis_service
@@ -53,7 +53,7 @@ install_redis() {
 
 install_meilisearch() {
     local meilisearch_bin="$HOME/meilisearch/meilisearch"
-    if ! (command -v "${meilisearch_bin}" >/dev/null 2>&1 && "${meilisearch_bin}" --version >/dev/null 2>&1); then
+    if ! (command -v $meilisearch_bin >/dev/null 2>&1 && $meilisearch_bin --version >/dev/null 2>&1); then
         echo "📦  Installing binary '${meilisearch_bin}'..."
         mkdir $HOME/meilisearch
         cd $HOME/meilisearch
@@ -65,7 +65,7 @@ install_meilisearch() {
 
 install_mailhog() {
     local mailhog_bin="$HOME/mailhog/MailHog_linux_amd64"
-    if ! (command -v "${mailhog_bin}" >/dev/null 2>&1 && "${mailhog_bin}" --version >/dev/null 2>&1); then
+    if ! (command -v $mailhog_bin >/dev/null 2>&1 && $mailhog_bin --version >/dev/null 2>&1); then
         echo "📦  Installing binary '${mailhog_bin}'..."
         mkdir $HOME/mailhog
         wget -c https://github.com/mailhog/MailHog/releases/download/v1.0.1/MailHog_linux_amd64 -P $HOME/mailhog
@@ -77,7 +77,7 @@ install_mailhog() {
 install_dnf_package() {
     local package_name="$1"
     local extra_args="$2"
-    if ! dnf list installed "${package_name}" | grep -q "^${package_name}"; then
+    if ! dnf list installed $package_name &>/dev/null; then
         echo "📦  Installing package '${package_name}'..."
         dnf install -y $package_name $extra_args
     else
@@ -89,7 +89,7 @@ download_tesseract_trained_data() {
     local tessdata_dir="/usr/share/tesseract/tessdata"
     local file_path="${tessdata_dir}/$1.traineddata"
     local url="https://github.com/kouprlabs/tessdata/raw/main/$1.traineddata"
-    if [ ! -f "${file_path}" ]; then
+    if [ ! -f $file_path ]; then
         echo "🧠  Downloading Tesseract trained data '${file_path}'..."
         wget $url -P $tessdata_dir
     else
@@ -100,7 +100,7 @@ download_tesseract_trained_data() {
 install_rpm_repository() {
     local repository_name="$1"
     local url="$2"
-    if ! dnf repolist | grep -q "${repository_name}"; then
+    if ! dnf repolist | grep -q $repository_name; then
         echo "🪐  Installing repository '${repository_name}'..."
         dnf install -y $url
     else
