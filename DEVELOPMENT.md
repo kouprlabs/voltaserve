@@ -39,7 +39,7 @@ _The scripts above can also be ran directly from the [infra](infra) directory._
 
 ## Developing
 
-You can clone this repository in your home directory, and run the services from there. One option could be to use Visual Studio Code's remote development feature to connect to your development environment VM.
+You can clone the [repository](https://github.com/kouprlabs/voltaserve) in your home directory, and run the services from there. One option could be to use Visual Studio Code's remote development feature to connect to your development environment VM.
 
 You can read about how to run each microservice in development mode here:
 
