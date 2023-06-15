@@ -19,7 +19,7 @@ install_cockroach() {
     local cockroach_bin="$HOME/cockroach/cockroach"
     if ! (command -v $cockroach_bin >/dev/null 2>&1 && $cockroach_bin --version >/dev/null 2>&1); then
         echo "📦  Installing binary '${cockroach_bin}'..."
-        wget -c https://binaries.cockroachdb.com/cockroach-v23.1.3.linux-amd64.tgz -P $HOME
+        wget https://binaries.cockroachdb.com/cockroach-v23.1.3.linux-amd64.tgz -P $HOME
         tar -xzf $HOME/cockroach-v23.1.3.linux-amd64.tgz -C $HOME --transform='s/^cockroach-v23.1.3.linux-amd64/cockroach/'
     else
         echo "✅  Found binary '${cockroach_bin}'. Skipping."
@@ -30,9 +30,10 @@ install_minio() {
     local minio_pkg="minio"
     if ! rpm -q $minio_pkg >/dev/null; then
         echo "📦  Installing package '$minio_pkg'..."
-        wget -c https://dl.min.io/server/minio/release/linux-amd64/archive/minio-20230609073212.0.0.x86_64.rpm -P $HOME -O minio.rpm
-        dnf install -y $HOME/minio.rpm
-        rm -f $HOME/minio.rpm
+        local minio_rpm="minio-20230609073212.0.0.x86_64.rpm"
+        wget "https://dl.min.io/server/minio/release/linux-amd64/archive/${minio_rpm}" -P $HOME
+        dnf install -y "${HOME}/${minio_rpm}"
+        rm -f "${HOME}/${minio_rpm}"
         mkdir $HOME/minio
     else
         echo "✅  Found package '${minio_pkg}' package. Skipping."
@@ -68,7 +69,7 @@ install_mailhog() {
     if ! (command -v $mailhog_bin >/dev/null 2>&1 && $mailhog_bin --version >/dev/null 2>&1); then
         echo "📦  Installing binary '${mailhog_bin}'..."
         mkdir $HOME/mailhog
-        wget -c https://github.com/mailhog/MailHog/releases/download/v1.0.1/MailHog_linux_amd64 -P $HOME/mailhog
+        wget https://github.com/mailhog/MailHog/releases/download/v1.0.1/MailHog_linux_amd64 -P $HOME/mailhog
     else
         echo "✅  Found binary '${mailhog_bin}'. Skipping."
     fi
