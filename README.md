@@ -158,6 +158,10 @@ Additional instructions:
 - [Voltaserve WebDAV](webdav/README.md)
 - [Voltaserve Conversion](conversion/README.md)
 
+## Development
+
+To setup a development environment with the purpose of developing and debugging Voltserve, please read [DEVELOPMENT.md](DEVELOPMENT.md).
+
 ## Licensing
 
 Voltaserve is released under the [The MIT License](./LICENSE.md).
