@@ -53,7 +53,19 @@ curl -L "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/sql/s
 
 _Note: the scripts above can also be ran directly from the [infra/sql](infra/sql) directory._
 
-## 4) Developing
+## 4) Disable Firewall
+
+During development, if you need to access your development enviroment remotely, you can disable the firewall so you don't need to disable each port separately, this can be done as follows:
+
+```shell
+sudo systemctl disable firewalld
+```
+
+```shell
+sudo systemctl stop firewalld
+```
+
+## 5) Developing
 
 You can clone the [repository](https://github.com/kouprlabs/voltaserve) in your home directory, and run the services from there. One option could be to use Visual Studio Code's remote development feature as described [here](https://code.visualstudio.com/docs/remote/remote-overview) to connect to your development environment VM from your host OS.
 
