@@ -31,8 +31,8 @@ install_minio() {
     if ! rpm -q "${minio_pkg}" >/dev/null; then
         echo "📦  Installing package '$minio_pkg'..."
         wget -c https://dl.min.io/server/minio/release/linux-amd64/archive/minio-20230609073212.0.0.x86_64.rpm -P $HOME -O minio.rpm
-        sudo dnf install -y $HOME/minio.rpm
-        sudo rm -f $HOME/minio.rpm
+        dnf install -y $HOME/minio.rpm
+        rm -f $HOME/minio.rpm
         mkdir $HOME/minio
     else
         echo "✅  Found package '${minio_pkg}' package. Skipping."
@@ -43,9 +43,9 @@ install_redis() {
     local redis_service="redis"
     if ! systemctl list-unit-files | grep -q "$redis_service.service"; then
         echo "📦  Installing service '${redis_service}'..."
-        sudo dnf install -y $redis_service
-        sudo systemctl enable $redis_service
-        sudo systemctl start $redis_service
+        dnf install -y $redis_service
+        systemctl enable $redis_service
+        systemctl start $redis_service
     else
         echo "✅  Found service '$redis_service'. Skipping."
     fi
@@ -79,7 +79,7 @@ install_dnf_package() {
     local extra_args="$2"
     if ! dnf list installed "${package_name}" | grep -q "^${package_name}"; then
         echo "📦  Installing package '${package_name}'..."
-        sudo dnf install -y $extra_args
+        dnf install -y $extra_args
     else
         echo "✅  Found package '${package_name}'. Skipping."
     fi
@@ -101,8 +101,8 @@ install_rpm_repository() {
     local url="$2"
     if ! dnf repolist | grep -q "${repository_name}"; then
         echo "🪐  Installing repository '${repository_name}'..."
-        sudo dnf config-manager --add-repo="${url}"
-        sudo dnf install -y $url
+        dnf config-manager --add-repo="${url}"
+        dnf install -y $url
     else
         echo "✅  Found repository '${repository_name}'. Skipping."
     fi
@@ -115,7 +115,7 @@ install_code_ready_builder_repository() {
         local repo="codeready-builder-for-rhel-9-${arch}-rpms"
         if ! dnf repolist | grep -q "^${repo//\./\\.}"; then
             echo "🪐  Installing repository '${repo}'..."
-            sudo dnf config-manager --set-enabled codeready-builder-for-rhel-9-${arch}-rpms
+            dnf config-manager --set-enabled codeready-builder-for-rhel-9-${arch}-rpms
         else
             echo "✅  Found repository '$repo'. Skipping."
         fi
@@ -123,7 +123,7 @@ install_code_ready_builder_repository() {
         local repo="crb"
         if ! dnf repolist | grep -q "^${repo//\./\\.}"; then
             echo "🪐  Installing repository '${repo}'..."
-            sudo dnf config-manager --set-enabled crb
+            dnf config-manager --set-enabled crb
         else
             echo "✅  Found repository '$repo'. Skipping."
         fi
@@ -131,7 +131,7 @@ install_code_ready_builder_repository() {
         local repo="ol9_codeready_builder"
         if ! dnf repolist | grep -q "^${repo//\./\\.}"; then
             echo "🪐  Installing repository '${repo}'..."
-            sudo dnf config-manager --set-enabled ol9_codeready_builder
+            dnf config-manager --set-enabled ol9_codeready_builder
         else
             echo "✅  Found repository '$repo'. Skipping."
         fi
@@ -148,7 +148,7 @@ install_jbig2enc() {
     ./autogen.sh
     ./configure --with-extra-libraries=/usr/local/lib/ --with-extra-includes=/usr/local/include/
     make
-    sudo make install
+    make install
     cd $HOME
     rm -rf $HOME/jbig2enc
 }
@@ -157,7 +157,7 @@ install_pip_package() {
     local package_name="$1"
     if ! pip show "$package_name" >/dev/null 2>&1; then
         echo "🐍  Installing Python package '${package_name}'..."
-        sudo pip3 install $package_name
+        pip3 install $package_name
     else
         echo "✅  Found Python package '$package_name'. Skipping."
     fi
@@ -166,8 +166,8 @@ install_pip_package() {
 install_nodejs_18() {
     if ! dnf list installed nodejs >/dev/null 2>&1 || ! node --version | grep -qE "^v18\."; then
         echo "💎  Installing Node.js v18..."
-        sudo dnf module -y enable nodejs:18
-        sudo dnf module -y install nodejs:18/common
+        dnf module -y enable nodejs:18
+        dnf module -y install nodejs:18/common
     else
         echo "✅  Found Node.js v18'. Skipping."
     fi
