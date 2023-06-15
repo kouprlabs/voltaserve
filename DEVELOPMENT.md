@@ -42,13 +42,13 @@ _Note: the scripts above can also be ran directly from the [infra](infra) direct
 Create user and database:
 
 ```shell
-curl -sSL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/sql/create_user_and_database.sql?t=$(date +%s)" | sudo -u root psql
+curl -L "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/sql/create_user_and_database.sql?t=$(date +%s)" | psql -U root
 ```
 
 Create schema:
 
 ```shell
-curl -sSL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/sql/schema.sql?t=$(date +%s)" | sudo -u root psql
+curl -L "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/sql/schema.sql?t=$(date +%s)" | psql -U root
 ```
 
 ## 4) Developing
