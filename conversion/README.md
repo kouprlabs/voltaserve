@@ -23,11 +23,3 @@ Build Docker image:
 ```shell
 docker build -t voltaserve/conversion .
 ```
-
-## Development
-
-For additional details, please read the development documentation available [here](./DEVELOPMENT.md).
-
-## Documentation
-
-[API Reference](https://voltaserve.com/api-docs/)
