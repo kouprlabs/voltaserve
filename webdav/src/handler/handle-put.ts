@@ -42,27 +42,21 @@ async function handlePut(
       try {
         res.statusCode = 201
         res.end()
-
         const blob = new Blob([await readFile(outputPath)])
-
         let existingFile: File | null = null
         try {
           existingFile = await api.getByPath(decodeURIComponent(req.url))
+          // Delete existing file to simulate an overwrite
+          await api.delete(existingFile.id)
         } catch {
           // Ignored
         }
-
         await api.upload({
           workspaceId: directory.workspaceId,
           parentId: directory.id,
           name: decodeURIComponent(path.basename(req.url)),
           blob,
         })
-
-        if (existingFile) {
-          // Delete existing file to simulate an overwrite
-          await api.delete(existingFile.id)
-        }
       } catch (err) {
         handleError(err, res)
       } finally {

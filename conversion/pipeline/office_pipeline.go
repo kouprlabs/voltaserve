@@ -3,6 +3,7 @@ package pipeline
 import (
 	"os"
 	"path/filepath"
+	"voltaserve/client"
 	"voltaserve/config"
 	"voltaserve/core"
 	"voltaserve/helper"
@@ -14,6 +15,7 @@ type officePipeline struct {
 	officeProc  *infra.OfficeProcessor
 	s3          *infra.S3Manager
 	config      config.Config
+	apiClient   *client.APIClient
 }
 
 func NewOfficePipeline() core.Pipeline {
@@ -22,6 +24,7 @@ func NewOfficePipeline() core.Pipeline {
 		officeProc:  infra.NewOfficeProcessor(),
 		s3:          infra.NewS3Manager(),
 		config:      config.GetConfig(),
+		apiClient:   client.NewAPIClient(),
 	}
 }
 
@@ -44,6 +47,13 @@ func (p *officePipeline) Run(opts core.PipelineOptions) error {
 		Size:   stat.Size(),
 	}
 	if err := p.s3.PutFile(preview.Key, outputPath, infra.DetectMimeFromFile(outputPath), preview.Bucket); err != nil {
+		return err
+	}
+	res := core.PipelineResponse{
+		Options: opts,
+		Preview: &preview,
+	}
+	if err := p.apiClient.UpdateSnapshot(&res); err != nil {
 		return err
 	}
 	if err := p.pdfPipeline.Run(core.PipelineOptions{
