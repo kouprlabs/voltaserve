@@ -8,7 +8,6 @@ stop_cockroach() {
 
 stop_redis() {
     systemctl stop redis
-
 }
 
 stop_minio() {
