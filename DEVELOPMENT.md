@@ -1,0 +1,30 @@
+# Voltaserve Development
+
+## Supported operating systems:
+
+To develop Voltaserve, the only supported operating systems at the moment are:
+
+- Red Hat Enterprise Linux 9.x
+- Rocky Linux 9.x
+- AlmaLinux 9.x
+- Oracle Linux 9.x
+
+## Dependencies
+
+Install:
+
+```shell
+curl -L "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/install.sh?t=$(date +%s)" | bash
+```
+
+Start:
+
+```shell
+curl -L "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/start.sh?t=$(date +%s)" | bash
+```
+
+Stop:
+
+```shell
+curl -L "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/stop.sh?t=$(date +%s)" | bash
+```
