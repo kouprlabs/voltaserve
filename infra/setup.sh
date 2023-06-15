@@ -181,6 +181,7 @@ install_nodejs_18() {
 install_corepack() {
     if ! npm list -g corepack >/dev/null 2>&1; then
         echo "💎  Installing NPM package 'corepack'..."
+        npm install -g corepack
     else
         echo "✅  Found NPM package 'corepack'. Skipping."
     fi
