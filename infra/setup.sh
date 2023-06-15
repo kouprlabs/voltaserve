@@ -1,5 +1,7 @@
 #!/bin/bash
 
+$BASE_DIR="/opt"
+
 check_supported_system() {
     local cpe_name=$(grep -oP '(?<=^CPE_NAME=).+' /etc/os-release)
     cpe_name="${cpe_name//\"/}"
@@ -16,14 +18,14 @@ check_supported_system() {
 }
 
 install_cockroach() {
-    local cockroach_bin="$HOME/cockroach/cockroach"
+    local cockroach_bin="${BASE_DIR}/cockroach/cockroach"
     if ! (command -v $cockroach_bin >/dev/null 2>&1 && $cockroach_bin --version >/dev/null 2>&1); then
         echo "📦  Installing binary '${cockroach_bin}'..."
         cockroach_filename="cockroach-v23.1.3.linux-amd64"
         cockroach_tgz="${cockroach_filename}.tgz"
-        wget "https://binaries.cockroachdb.com/${cockroach_tgz}" -P $HOME
-        tar -xzf "${HOME}/${cockroach_tgz}" -C $HOME --transform="s/^${cockroach_filename}/cockroach/"
-        rm -f "${HOME}/${cockroach_tgz}"
+        wget "https://binaries.cockroachdb.com/${cockroach_tgz}" -P $BASE_DIR
+        tar -xzf "${BASE_DIR}/${cockroach_tgz}" -C $BASE_DIR --transform="s/^${cockroach_filename}/cockroach/"
+        rm -f "${BASE_DIR}/${cockroach_tgz}"
     else
         echo "✅  Found binary '${cockroach_bin}'. Skipping."
     fi
@@ -34,10 +36,10 @@ install_minio() {
     if ! rpm -q $minio_pkg >/dev/null; then
         echo "📦  Installing package '$minio_pkg'..."
         local minio_rpm="minio-20230609073212.0.0.x86_64.rpm"
-        wget "https://dl.min.io/server/minio/release/linux-amd64/archive/${minio_rpm}" -P $HOME
-        dnf install -y "${HOME}/${minio_rpm}"
-        rm -f "${HOME}/${minio_rpm}"
-        mkdir -p $HOME/minio
+        wget "https://dl.min.io/server/minio/release/linux-amd64/archive/${minio_rpm}" -P $BASE_DIR
+        dnf install -y "${BASE_DIR}/${minio_rpm}"
+        rm -f "${BASE_DIR}/${minio_rpm}"
+        mkdir -p "${BASE_DIR}/minio"
     else
         echo "✅  Found package '${minio_pkg}' package. Skipping."
     fi
@@ -56,11 +58,11 @@ install_redis() {
 }
 
 install_meilisearch() {
-    local meilisearch_bin="${HOME}/meilisearch/meilisearch"
+    local meilisearch_bin="${BASE_DIR}/meilisearch/meilisearch"
     if ! (command -v $meilisearch_bin >/dev/null 2>&1 && $meilisearch_bin --version >/dev/null 2>&1); then
         echo "📦  Installing binary '${meilisearch_bin}'..."
-        mkdir -p $HOME/meilisearch
-        cd $HOME/meilisearch
+        mkdir -p "${BASE_DIR}/meilisearch"
+        cd "${BASE_DIR}/meilisearch"
         curl -L https://install.meilisearch.com | sh
     else
         echo "✅  Found binary '${meilisearch_bin}'. Skipping."
@@ -68,11 +70,11 @@ install_meilisearch() {
 }
 
 install_mailhog() {
-    local mailhog_bin="${HOME}/mailhog/MailHog_linux_amd64"
+    local mailhog_bin="${BASE_DIR}/mailhog/MailHog_linux_amd64"
     if ! (command -v $mailhog_bin >/dev/null 2>&1 && $mailhog_bin --version >/dev/null 2>&1); then
         echo "📦  Installing binary '${mailhog_bin}'..."
-        mkdir -p $HOME/mailhog
-        wget https://github.com/mailhog/MailHog/releases/download/v1.0.1/MailHog_linux_amd64 -P $HOME/mailhog
+        mkdir -p "${BASE_DIR}/mailhog"
+        wget https://github.com/mailhog/MailHog/releases/download/v1.0.1/MailHog_linux_amd64 -P "${BASE_DIR}/mailhog"
         chmod +x $mailhog_bin
     else
         echo "✅  Found binary '${mailhog_bin}'. Skipping."
@@ -146,16 +148,16 @@ install_code_ready_builder_repository() {
 }
 
 install_jbig2enc() {
-    cd $HOME
+    cd $BASE_DIR
     git clone https://github.com/kouprlabs/jbig2enc.git
-    cd $HOME/jbig2enc
+    cd "${BASE_DIR}/jbig2enc"
     git checkout tags/0.29
     ./autogen.sh
     ./configure --with-extra-libraries=/usr/local/lib/ --with-extra-includes=/usr/local/include/
     make
     make install
-    cd $HOME
-    rm -rf $HOME/jbig2enc
+    cd $BASE_DIR
+    rm -rf "${BASE_DIR}/jbig2enc"
 }
 
 install_pip_package() {
