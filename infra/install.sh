@@ -213,7 +213,7 @@ install_swag() {
 
 install_air() {
     local air_bin="$(go env GOPATH)/bin/air"
-    if ! (command -v $air_bin >/dev/null 2>&1 && $air_bin --version >/dev/null 2>&1); then
+    if ! (command -v $air_bin >/dev/null 2>&1 && $air_bin -v >/dev/null 2>&1); then
         echo "🐹  Installing Go binary '${air_bin}'..."
         curl -sSfL https://raw.githubusercontent.com/cosmtrek/air/master/install.sh | sh -s -- -b $(go env GOPATH)/bin
     else
