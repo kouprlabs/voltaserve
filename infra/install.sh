@@ -300,7 +300,7 @@ install_air
 install_golangci
 install_swag
 
-printf "\n🎉 \033[1mNow you are ready to develop Voltaserve!\n\n\033[0m"
+printf "\n🎉 \033[1mYou are ready to develop Voltaserve!\n\n\033[0m"
 
 echo "1) Start infrastructure services:"
 start_cmd="curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/start.sh?t=$(date +%s)" | sudo sh -s"
