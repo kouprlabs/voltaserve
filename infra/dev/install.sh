@@ -308,7 +308,7 @@ install_swag
 printf "\n🎉 \033[1mYou are ready to develop Voltaserve!\n\n\033[0m"
 
 echo "1) Start infrastructure services:"
-start_cmd="curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/start.sh?t=$(date +%s)" | sh -s"
+start_cmd="curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/dev/start.sh?t=$(date +%s)" | sh -s"
 printf "\033[36m${start_cmd}\n\n\033[0m"
 
 echo "2) Create a user and database in CockroachDB (run only first time):"
@@ -353,5 +353,5 @@ run_cmd="pnpm i && pnpm dev"
 printf "\033[35m${run_cmd}\n\n\033[0m"
 
 echo "5) To stop infrastructure services (if needed):"
-stop_cmd="curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/stop.sh?t=$(date +%s)" | sh -s"
+stop_cmd="curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/dev/stop.sh?t=$(date +%s)" | sh -s"
 printf "\033[36m${stop_cmd}\n\n\033[0m"
