@@ -195,7 +195,7 @@ install_golangci() {
     local golangci_bin="$(go env GOPATH)/bin/golangci-lint"
     if ! (command -v $golangci_bin >/dev/null 2>&1 && $golangci_bin --version >/dev/null 2>&1); then
         echo "🐹  Installing Go binary '${golangci_bin}'..."
-        curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.53.2
+        curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.53.2
     else
         echo "✅  Found Go binary '${golangci_bin}'. Skipping."
     fi
@@ -206,6 +206,8 @@ install_swag() {
     if ! (command -v $swag_bin >/dev/null 2>&1 && $swag_bin --version >/dev/null 2>&1); then
         echo "🐹  Installing Go binary '${swag_bin}'..."
         go install github.com/swaggo/swag/cmd/swag@latest
+        mkdir -p $HOME/bin
+        mv $(go env GOPATH)/bin/swag $HOME/bin/swag
     else
         echo "✅  Found Go binary '${swag_bin}'. Skipping."
     fi
@@ -215,7 +217,7 @@ install_air() {
     local air_bin="$(go env GOPATH)/bin/air"
     if ! (command -v $air_bin >/dev/null 2>&1 && $air_bin -v >/dev/null 2>&1); then
         echo "🐹  Installing Go binary '${air_bin}'..."
-        curl -sSfL https://raw.githubusercontent.com/cosmtrek/air/master/install.sh | sh -s -- -b $(go env GOPATH)/bin
+        curl -sSfL https://raw.githubusercontent.com/cosmtrek/air/master/install.sh | sh -s
     else
         echo "✅  Found Go binary '${air_bin}'. Skipping."
     fi
@@ -314,12 +316,7 @@ echo "3) Create database schema (run only first time):"
 schema_cmd="curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/sql/schema.sql?t=$(date +%s)" | /opt/cockroach/cockroach sql --insecure -u voltaserve"
 printf "\033[36m${schema_cmd}\n\n\033[0m"
 
-go_bin_path="$(go env GOPATH)/bin"
-echo "4) Add '${go_bin_path}' to your PATH, and make it permanent by adding it to ~/.bashrc or ~/.zshrc depending on your shell"
-path_cmd="export PATH=\"\$PATH:${go_bin_path}\""
-printf "\033[34m${path_cmd}\n\n\033[0m"
-
-echo "5) Open a terminal in each microservice's subfolder, then start each one in development mode:"
+echo "4) Open a terminal in each microservice's subfolder, then start each one in development mode:"
 echo
 
 cd_cmd="cd ./api"
