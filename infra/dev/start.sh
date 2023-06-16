@@ -13,23 +13,26 @@ start_redis() {
 
 start_minio() {
     echo "🚀  Starting MinIO..."
+    local opt_dir="${BASE_DIR}/minio"
     local log_dir="/var/log/minio"
     sudo mkdir -p $log_dir
-    MINIO_ROOT_USER=voltaserve MINIO_ROOT_PASSWORD=voltaserve sudo sh -c 'nohup /usr/local/bin/minio server /opt/minio/data --console-address ":9001" > /var/log/minio/log.txt 2>&1 &'
+    MINIO_ROOT_USER=voltaserve MINIO_ROOT_PASSWORD=voltaserve sudo sh -c 'nohup /usr/local/bin/minio server '"$opt_dir"'/data --console-address ":9001" > '"$log_dir"'/log.txt 2>&1 &'
 }
 
 start_meilisearch() {
     echo "🚀  Starting Meilisearch..."
+    local opt_dir="${BASE_DIR}/meilisearch"
     local log_dir="/var/log/meilisearch"
     sudo mkdir -p $log_dir
-    sudo sh -c 'nohup /opt/meilisearch/meilisearch --http-addr=0.0.0.0:7700 > /var/log/meilisearch/log.txt 2>&1 &'
+    sudo sh -c 'nohup '"$opt_dir"'/meilisearch --http-addr=0.0.0.0:7700 > '"$log_dir"'/log.txt 2>&1 &'
 }
 
 start_mailhog() {
     echo "🚀  Starting MailHog..."
+    local opt_dir="${BASE_DIR}/mailhog"
     local log_dir="/var/log/mailhog"
     sudo mkdir -p $log_dir
-    sudo sh -c 'nohup /opt/mailhog/MailHog_linux_amd64 > /var/log/mailhog/log.txt 2>&1 &'
+    sudo sh -c 'nohup '"$opt_dir"'/MailHog_linux_amd64 > /var/log/mailhog/log.txt 2>&1 &'
 }
 
 start_cockroach
