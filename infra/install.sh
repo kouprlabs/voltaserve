@@ -64,7 +64,7 @@ install_meilisearch() {
         echo "📦  Installing binary '${meilisearch_bin}'..."
         sudo mkdir -p "${BASE_DIR}/meilisearch"
         cd "${BASE_DIR}/meilisearch"
-        sudo curl -L https://install.meilisearch.com | sh
+        curl -L https://install.meilisearch.com | sudo sh
         sudo chmod +x $meilisearch_bin
     else
         echo "✅  Found binary '${meilisearch_bin}'. Skipping."
