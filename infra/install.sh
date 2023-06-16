@@ -299,3 +299,5 @@ install_corepack
 install_air
 install_golangci
 install_swag
+
+echo "🎉 You are ready to develop Voltaserve! You can now run the start script."
