@@ -300,10 +300,8 @@ install_air
 install_golangci
 install_swag
 
-echo
-echo "🎉 Now you are ready to develop Voltaserve!"
+printf "\n🎉 \033[1mNow you are ready to develop Voltaserve!\n\n\033[0m"
 
-echo
 echo "1) Start infrastructure services:"
 start_cmd="curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/start.sh?t=$(date +%s)" | sudo sh -s"
 printf "\033[32m${start_cmd}\n\n\033[0m"
@@ -316,7 +314,12 @@ echo "3) Create database schema (run only first time):"
 schema_cmd="curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/sql/schema.sql?t=$(date +%s)" | /opt/cockroach/cockroach sql --insecure -u voltaserve"
 printf "\033[36m${schema_cmd}\n\n\033[0m"
 
-echo "4) Open a terminal in each microservice's subfolder, then start each one in development mode:"
+go_bin_path="$(go env GOPATH)/bin"
+echo "4) Add '${go_bin_path}' to your PATH"
+path_cmd="export PATH=\"\$PATH:${go_bin_path}\""
+printf "\033[34m${path_cmd}\n\n\033[0m"
+
+echo "5) Open a terminal in each microservice's subfolder, then start each one in development mode:"
 echo
 
 cd_cmd="cd ./api"
@@ -349,6 +352,6 @@ printf "\033[90m${cd_cmd}\n\033[0m"
 run_cmd="pnpm i && pnpm dev"
 printf "\033[35m${run_cmd}\n\n\033[0m"
 
-echo "5) Stop infrastructure services (if needed):"
+echo "5) To stop infrastructure services (if needed):"
 stop_cmd="curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/stop.sh?t=$(date +%s)" | sudo sh -s"
-printf "\033[34m${stop_cmd}\n\n\033[0m"
+printf "\033[32m${stop_cmd}\n\n\033[0m"
