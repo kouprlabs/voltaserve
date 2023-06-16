@@ -261,6 +261,7 @@ install_dnf_package "libpng-devel"
 install_dnf_package "leptonica-devel"
 
 install_pip_package "ocrmypdf"
+install_pip_package "pipenv"
 
 install_nodejs_18
 install_corepack
