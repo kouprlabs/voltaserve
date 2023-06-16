@@ -196,6 +196,7 @@ install_golangci() {
     local golangci_bin="${HOME}/bin/golangci-lint"
     if ! (command -v $golangci_bin >/dev/null 2>&1 && $golangci_bin --version >/dev/null 2>&1); then
         echo "🐹  Installing Go binary '${golangci_bin}'..."
+        mkdir -p $HOME/bin
         curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.53.2
     else
         echo "✅  Found Go binary '${golangci_bin}'. Skipping."
@@ -218,6 +219,7 @@ install_air() {
     local air_bin="${HOME}/bin/air"
     if ! (command -v $air_bin >/dev/null 2>&1 && $air_bin -v >/dev/null 2>&1); then
         echo "🐹  Installing Go binary '${air_bin}'..."
+        mkdir -p $HOME/bin
         curl -sSfL https://raw.githubusercontent.com/cosmtrek/air/master/install.sh | sh -s
     else
         echo "✅  Found Go binary '${air_bin}'. Skipping."
