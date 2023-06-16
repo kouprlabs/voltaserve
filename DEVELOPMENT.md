@@ -20,19 +20,19 @@ We provide first class support for [Visual Studio Code](https://code.visualstudi
 Install:
 
 ```shell
-curl -L "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/install.sh?t=$(date +%s)" | sudo bash
+curl -sSL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/install.sh?t=$(date +%s)" | sudo bash
 ```
 
 Start:
 
 ```shell
-curl -L "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/start.sh?t=$(date +%s)" | sudo bash
+curl -sSL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/start.sh?t=$(date +%s)" | sudo bash
 ```
 
 Stop:
 
 ```shell
-curl -L "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/stop.sh?t=$(date +%s)" | sudo bash
+curl -sSL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/stop.sh?t=$(date +%s)" | sudo bash
 ```
 
 _Note: the scripts above can also be ran directly from the [infra](infra) directory._
@@ -42,13 +42,13 @@ _Note: the scripts above can also be ran directly from the [infra](infra) direct
 Create user and database:
 
 ```shell
-curl -L "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/sql/create_user_and_database.sql?t=$(date +%s)" | /opt/cockroach/cockroach sql --insecure -u root
+curl -sSL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/sql/create_user_and_database.sql?t=$(date +%s)" | /opt/cockroach/cockroach sql --insecure -u root
 ```
 
 Create schema:
 
 ```shell
-curl -L "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/sql/schema.sql?t=$(date +%s)" | /opt/cockroach/cockroach sql --insecure -u voltaserve
+curl -sSL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/sql/schema.sql?t=$(date +%s)" | /opt/cockroach/cockroach sql --insecure -u voltaserve
 ```
 
 _Note: the scripts above can also be ran directly from the [infra/sql](infra/sql) directory._
