@@ -37,7 +37,7 @@ curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/st
 
 _Note: the scripts above can also be ran directly from the [infra](infra) directory._
 
-## Setup SQL Database
+## SQL Database
 
 Create a user and database:
 
