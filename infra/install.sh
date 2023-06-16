@@ -301,5 +301,5 @@ install_golangci
 install_swag
 
 echo "🎉 You are ready to develop Voltaserve! You can now run the start script below:"
-start_cmd="curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/start.sh?t=$(date +%s)" | sudo bash"
+start_cmd="curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/start.sh?t=$(date +%s)" | sudo sh -s"
 printf "\033[36m${start_cmd}\n\e\033[0m"
