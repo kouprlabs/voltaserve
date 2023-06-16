@@ -301,7 +301,7 @@ install_golangci
 install_swag
 
 echo "🎉 Now you are ready to develop Voltaserve!"
-echo "Run the command below to start the infrastrucutre sevices:"
+echo "Run the command below to start the infrastrucutre services:"
 start_cmd="curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/start.sh?t=$(date +%s)" | sudo sh -s"
 printf "\033[36m${start_cmd}\n\e\033[0m"
 echo "To stop them, run:"
