@@ -4,7 +4,10 @@ BASE_DIR="/opt"
 
 start_cockroach() {
     echo "🚀  Starting CockroachDB..."
-    sudo /opt/cockroach/cockroach start-single-node --insecure --listen-addr=0.0.0.0:26257 --http-addr=0.0.0.0:8080 --background
+    local opt_dir="${BASE_DIR}/cockroach"
+    local log_dir="/var/log/cockroach"
+    sudo mkdir -p $log_dir
+    sudo sh -c ''"$opt_dir"'/cockroach start-single-node --insecure --listen-addr=0.0.0.0:26257 --http-addr=0.0.0.0:8080 --background > '"$log_dir"'/log.txt 2>&1 &'
 }
 
 start_redis() {
