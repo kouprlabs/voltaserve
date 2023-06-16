@@ -9,7 +9,7 @@ We assume the development environment is setup as described [here](../DEVELOPMEN
 Run for development:
 
 ```shell
-go run .
+air
 ```
 
 Build binary:
@@ -26,21 +26,13 @@ docker build -t voltaserve/api .
 
 ### Setup the Linter
 
-Install [golangci-lint](https://golangci-lint.run).
-
-Run the following and make sure there are no issues:
+Run linter:
 
 ```shell
 golangci-lint run
 ```
 
 ### Generate and Publish Documentation
-
-Install [swag](https://github.com/swaggo/swag):
-
-```shell
-go install github.com/swaggo/swag/cmd/swag@latest
-```
 
 Format swag comments:
 

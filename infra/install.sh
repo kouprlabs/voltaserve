@@ -191,6 +191,36 @@ install_corepack() {
     fi
 }
 
+install_golangci() {
+    local golangci_bin="$(go env GOPATH)/bin/golangci-lint"
+    if ! (command -v $golangci_bin >/dev/null 2>&1 && $golangci_bin --version >/dev/null 2>&1); then
+        echo "🐹  Installing Go binary '${golangci_bin}'..."
+        curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.53.2
+    else
+        echo "✅  Found Go binary '${golangci_bin}'. Skipping."
+    fi
+}
+
+install_swag() {
+    local swag_bin="$(go env GOPATH)/bin/swag"
+    if ! (command -v $swag_bin >/dev/null 2>&1 && $swag_bin --version >/dev/null 2>&1); then
+        echo "🐹  Installing Go binary '${swag_bin}'..."
+        go install github.com/swaggo/swag/cmd/swag@latest
+    else
+        echo "✅  Found Go binary '${swag_bin}'. Skipping."
+    fi
+}
+
+install_air() {
+    local air_bin="$(go env GOPATH)/bin/air"
+    if ! (command -v $air_bin >/dev/null 2>&1 && $air_bin --version >/dev/null 2>&1); then
+        echo "🐹  Installing Go binary '${air_bin}'..."
+        curl -sSfL https://raw.githubusercontent.com/cosmtrek/air/master/install.sh | sh -s -- -b $(go env GOPATH)/bin
+    else
+        echo "✅  Found Go binary '${air_bin}'. Skipping."
+    fi
+}
+
 check_supported_system
 
 install_dnf_package "wget"
@@ -265,3 +295,7 @@ install_pip_package "pipenv"
 
 install_nodejs_18
 install_corepack
+
+install_air
+install_golangci
+install_swag

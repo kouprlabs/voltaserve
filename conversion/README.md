@@ -9,7 +9,7 @@ We assume the development environment is setup as described [here](../DEVELOPMEN
 Run for development:
 
 ```shell
-go run .
+air
 ```
 
 Build binary:
