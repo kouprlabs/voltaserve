@@ -37,7 +37,7 @@ curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/st
 
 _Note: the scripts above can also be ran directly from the [infra](infra) directory._
 
-## 3) Setup SQL Database
+## Setup SQL Database
 
 Create a user and database:
 
@@ -53,7 +53,7 @@ curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/sq
 
 _Note: the scripts above can also be ran directly from the [infra/sql](infra/sql) directory._
 
-## 4) Disable Firewall
+## Disable Firewall
 
 During development, if you need to access your development enviroment remotely, you can disable the firewall so you don't need to disable each port separately, this can be done as follows:
 
@@ -65,9 +65,9 @@ sudo systemctl disable firewalld
 sudo systemctl stop firewalld
 ```
 
-## 5) Developing
+## Start Microservices Development
 
-You can clone the [repository](https://github.com/kouprlabs/voltaserve) in your home directory, and run the services from there. One option could be to use Visual Studio Code's remote development feature as described [here](https://code.visualstudio.com/docs/remote/remote-overview) to connect to your development environment VM from your host OS.
+You can clone the [repository](https://github.com/kouprlabs/voltaserve) in your home directory, and run the microservices from there. One option could be to use Visual Studio Code's remote development feature as described [here](https://code.visualstudio.com/docs/remote/remote-overview) to connect to your development environment VM from your host OS.
 
 You can read about how to run each microservice in development mode here:
 
