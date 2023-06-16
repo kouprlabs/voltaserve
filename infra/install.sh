@@ -193,7 +193,7 @@ install_corepack() {
 }
 
 install_golangci() {
-    local golangci_bin="$(go env GOPATH)/bin/golangci-lint"
+    local golangci_bin="${HOME}/bin/golangci-lint"
     if ! (command -v $golangci_bin >/dev/null 2>&1 && $golangci_bin --version >/dev/null 2>&1); then
         echo "🐹  Installing Go binary '${golangci_bin}'..."
         curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.53.2
@@ -203,7 +203,7 @@ install_golangci() {
 }
 
 install_swag() {
-    local swag_bin="$(go env GOPATH)/bin/swag"
+    local swag_bin="${HOME}/bin/swag"
     if ! (command -v $swag_bin >/dev/null 2>&1 && $swag_bin --version >/dev/null 2>&1); then
         echo "🐹  Installing Go binary '${swag_bin}'..."
         go install github.com/swaggo/swag/cmd/swag@latest
@@ -215,7 +215,7 @@ install_swag() {
 }
 
 install_air() {
-    local air_bin="$(go env GOPATH)/bin/air"
+    local air_bin="${HOME}/bin/air"
     if ! (command -v $air_bin >/dev/null 2>&1 && $air_bin -v >/dev/null 2>&1); then
         echo "🐹  Installing Go binary '${air_bin}'..."
         curl -sSfL https://raw.githubusercontent.com/cosmtrek/air/master/install.sh | sh -s
