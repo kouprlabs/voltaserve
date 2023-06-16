@@ -15,19 +15,19 @@ start_redis() {
 start_minio() {
     cd "${BASE_DIR}/minio"
     echo "🚀  Starting MinIO..."
-    MINIO_ROOT_USER=voltaserve MINIO_ROOT_PASSWORD=voltaserve sudo nohup /usr/local/bin/minio server "${BASE_DIR}/minio/data" --console-address ":9001" >log.txt &
+    sudo MINIO_ROOT_USER=voltaserve MINIO_ROOT_PASSWORD=voltaserve sh -c nohup /usr/local/bin/minio server "${BASE_DIR}/minio/data" --console-address ":9001" >log.txt &
 }
 
 start_meilisearch() {
     cd "${BASE_DIR}/meilisearch"
     echo "🚀  Starting Meilisearch..."
-    sudo nohup ./meilisearch --http-addr=0.0.0.0:7700 >log.txt &
+    sudo sh -c nohup ./meilisearch --http-addr=0.0.0.0:7700 >log.txt &
 }
 
 start_mailhog() {
     cd "${BASE_DIR}/mailhog"
     echo "🚀  Starting MailHog..."
-    sudo nohup ./MailHog_linux_amd64 >log.txt &
+    sudo sh -c nohup ./MailHog_linux_amd64 >log.txt &
 }
 
 start_cockroach
