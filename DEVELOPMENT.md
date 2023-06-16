@@ -1,6 +1,6 @@
 # Voltaserve Development
 
-## 1) Supported Operating Systems
+## Supported Operating Systems
 
 For development, we support the following operating systems:
 
@@ -15,7 +15,7 @@ If you run your VM under [Windows WSL](https://learn.microsoft.com/en-us/windows
 
 We provide first class support for [Visual Studio Code](https://code.visualstudio.com) as an IDE/editor, like debugging configurations and extension recommendations for formatters, linters, etc.
 
-## 2) Dependencies
+## Setup Infrastructure Services
 
 Install:
 
@@ -37,9 +37,9 @@ curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/st
 
 _Note: the scripts above can also be ran directly from the [infra](infra) directory._
 
-## 3) Setup the SQL Database
+## 3) Setup SQL Database
 
-Create user and database:
+Create a user and database:
 
 ```shell
 curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/sql/create_user_and_database.sql?t=$(date +%s)" | /opt/cockroach/cockroach sql --insecure -u root
