@@ -20,7 +20,7 @@ check_supported_system() {
 
 install_cockroach() {
     local cockroach_bin="${BASE_DIR}/cockroach/cockroach"
-    if ! (command -v $cockroach_bin >/dev/null 2>&1 && $cockroach_bin --version >/dev/null 2>&1); then
+    if ! (sudo command -v $cockroach_bin >/dev/null 2>&1 && sudo $cockroach_bin --version >/dev/null 2>&1); then
         echo "📦  Installing binary '${cockroach_bin}'..."
         cockroach_filename="cockroach-v23.1.3.linux-amd64"
         cockroach_tgz="${cockroach_filename}.tgz"
@@ -60,7 +60,7 @@ install_redis() {
 
 install_meilisearch() {
     local meilisearch_bin="${BASE_DIR}/meilisearch/meilisearch"
-    if ! (command -v $meilisearch_bin >/dev/null 2>&1 && $meilisearch_bin --version >/dev/null 2>&1); then
+    if ! (sudo command -v $meilisearch_bin >/dev/null 2>&1 && sudo $meilisearch_bin --version >/dev/null 2>&1); then
         echo "📦  Installing binary '${meilisearch_bin}'..."
         sudo mkdir -p "${BASE_DIR}/meilisearch"
         cd "${BASE_DIR}/meilisearch"
@@ -72,7 +72,7 @@ install_meilisearch() {
 
 install_mailhog() {
     local mailhog_bin="${BASE_DIR}/mailhog/MailHog_linux_amd64"
-    if ! (command -v $mailhog_bin >/dev/null 2>&1 && $mailhog_bin --version >/dev/null 2>&1); then
+    if ! (sudo command -v $mailhog_bin >/dev/null 2>&1 && sudo $mailhog_bin --version >/dev/null 2>&1); then
         echo "📦  Installing binary '${mailhog_bin}'..."
         sudo mkdir -p "${BASE_DIR}/mailhog"
         sudo wget https://github.com/mailhog/MailHog/releases/download/v1.0.1/MailHog_linux_amd64 -P "${BASE_DIR}/mailhog"
