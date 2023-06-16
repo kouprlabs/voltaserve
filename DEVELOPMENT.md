@@ -15,7 +15,7 @@ If you run your VM under [Windows WSL](https://learn.microsoft.com/en-us/windows
 
 We provide first class support for [Visual Studio Code](https://code.visualstudio.com) as an IDE/editor, like debugging configurations and extension recommendations for formatters, linters, etc.
 
-## Setup Infrastructure Services
+## Infrastructure Services
 
 Install:
 
