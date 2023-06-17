@@ -20,13 +20,20 @@ check_supported_system() {
 
 install_cockroach() {
     local cockroach_bin="${BASE_DIR}/cockroach/cockroach"
-    if ! (command -v $cockroach_bin >/dev/null 2>&1 && $cockroach_bin --version >/dev/null 2>&1); then
+    local not_found="! (command -v $cockroach_bin >/dev/null 2>&1 && $cockroach_bin --version >/dev/null 2>&1)"
+    if [[ $not_found ]]; then
         echo "📦  Installing binary '${cockroach_bin}'..."
         cockroach_filename="cockroach-v23.1.3.linux-amd64"
         cockroach_tgz="${cockroach_filename}.tgz"
         sudo wget "https://binaries.cockroachdb.com/${cockroach_tgz}" -P $BASE_DIR
         sudo tar -xzf "${BASE_DIR}/${cockroach_tgz}" -C $BASE_DIR --transform="s/^${cockroach_filename}/cockroach/"
         sudo rm -f "${BASE_DIR}/${cockroach_tgz}"
+        if [[ $not_found ]]; then
+            echo "⛈️  Failed to install binary '${cockroach_bin}'. Aborting."
+            exit 1
+        else
+            echo "✅  Binary '${cockroach_bin}' installed successfully."
+        fi
     else
         echo "✅  Found binary '${cockroach_bin}'. Skipping."
     fi
@@ -34,13 +41,20 @@ install_cockroach() {
 
 install_minio() {
     local minio_pkg="minio"
-    if ! rpm -q $minio_pkg >/dev/null; then
+    local not_found="! rpm -q $minio_pkg >/dev/null"
+    if [[ $not_found ]]; then
         echo "📦  Installing package '$minio_pkg'..."
         local minio_rpm="minio-20230609073212.0.0.x86_64.rpm"
         sudo wget "https://dl.min.io/server/minio/release/linux-amd64/archive/${minio_rpm}" -P $BASE_DIR
         sudo dnf install -y "${BASE_DIR}/${minio_rpm}"
         sudo rm -f "${BASE_DIR}/${minio_rpm}"
         sudo mkdir -p "${BASE_DIR}/minio"
+        if [[ $not_found ]]; then
+            echo "⛈️  Failed to install package '${minio_pkg}'. Aborting."
+            exit 1
+        else
+            echo "✅  Package '${minio_pkg}' installed successfully."
+        fi
     else
         echo "✅  Found package '${minio_pkg}' package. Skipping."
     fi
@@ -48,11 +62,18 @@ install_minio() {
 
 install_redis() {
     local redis_service="redis"
-    if ! systemctl list-unit-files | grep -q "${redis_service}.service"; then
+    local not_found='! systemctl list-unit-files | grep -q '"${redis_service}.service"''
+    if [[ $not_found ]]; then
         echo "📦  Installing service '${redis_service}'..."
         sudo dnf install -y $redis_service
         sudo systemctl enable $redis_service
         sudo systemctl start $redis_service
+        if [[ $not_found ]]; then
+            echo "⛈️  Failed to install service '${redis_service}'. Aborting."
+            exit 1
+        else
+            echo "✅  Service '${redis_service}' installed successfully."
+        fi
     else
         echo "✅  Found service '$redis_service'. Skipping."
     fi
@@ -60,12 +81,19 @@ install_redis() {
 
 install_meilisearch() {
     local meilisearch_bin="${BASE_DIR}/meilisearch/meilisearch"
-    if ! (command -v $meilisearch_bin >/dev/null 2>&1 && $meilisearch_bin --version >/dev/null 2>&1); then
+    local not_found="! (command -v $meilisearch_bin >/dev/null 2>&1 && $meilisearch_bin --version >/dev/null 2>&1)"
+    if [[ $not_found ]]; then
         echo "📦  Installing binary '${meilisearch_bin}'..."
         sudo mkdir -p "${BASE_DIR}/meilisearch"
         cd "${BASE_DIR}/meilisearch"
         curl -L https://install.meilisearch.com | sudo sh
         sudo chmod +x $meilisearch_bin
+        if [[ $not_found ]]; then
+            echo "⛈️  Failed to install binary '${meilisearch_bin}'. Aborting."
+            exit 1
+        else
+            echo "✅  Binary '${meilisearch_bin}' installed successfully."
+        fi
     else
         echo "✅  Found binary '${meilisearch_bin}'. Skipping."
     fi
@@ -73,11 +101,18 @@ install_meilisearch() {
 
 install_mailhog() {
     local mailhog_bin="${BASE_DIR}/mailhog/MailHog_linux_amd64"
-    if ! (command -v $mailhog_bin >/dev/null 2>&1 && $mailhog_bin --version >/dev/null 2>&1); then
+    local not_found="! (command -v $mailhog_bin >/dev/null 2>&1 && $mailhog_bin --version >/dev/null 2>&1)"
+    if [[ $not_found ]]; then
         echo "📦  Installing binary '${mailhog_bin}'..."
         sudo mkdir -p "${BASE_DIR}/mailhog"
         sudo wget https://github.com/mailhog/MailHog/releases/download/v1.0.1/MailHog_linux_amd64 -P "${BASE_DIR}/mailhog"
         sudo chmod +x $mailhog_bin
+        if [[ $not_found ]]; then
+            echo "⛈️  Failed to install binary '${mailhog_bin}'. Aborting."
+            exit 1
+        else
+            echo "✅  Binary '${mailhog_bin}' installed successfully."
+        fi
     else
         echo "✅  Found binary '${mailhog_bin}'. Skipping."
     fi
@@ -86,9 +121,16 @@ install_mailhog() {
 install_dnf_package() {
     local package_name="$1"
     local extra_args="$2"
-    if ! dnf list installed $package_name &>/dev/null; then
+    local not_found="! dnf list installed $package_name &>/dev/null"
+    if [[ $not_found ]]; then
         echo "📦  Installing package '${package_name}'..."
         sudo dnf install -y $package_name $extra_args
+        if [[ $not_found ]]; then
+            echo "⛈️  Failed to install package '${package_name}'. Aborting."
+            exit 1
+        else
+            echo "✅  Package '${package_name}' installed successfully."
+        fi
     else
         echo "✅  Found package '${package_name}'. Skipping."
     fi
@@ -98,9 +140,16 @@ download_tesseract_trained_data() {
     local tessdata_dir="/usr/share/tesseract/tessdata"
     local file_path="${tessdata_dir}/$1.traineddata"
     local url="https://github.com/kouprlabs/tessdata/raw/main/$1.traineddata"
-    if [ ! -f $file_path ]; then
+    local not_found="! -f $file_path"
+    if [[ $not_found ]]; then
         echo "🧠  Downloading Tesseract trained data '${file_path}'..."
         sudo wget $url -P $tessdata_dir
+        if [[ $not_found ]]; then
+            echo "⛈️  Failed to download Tesseract trained data '${file_path}'. Aborting."
+            exit 1
+        else
+            echo "✅  Tesseract trained data '${file_path}' downloaded successfully."
+        fi
     else
         echo "✅  Found Tesseract trained data '${file_path}'. Skipping."
     fi
@@ -109,9 +158,16 @@ download_tesseract_trained_data() {
 install_rpm_repository() {
     local repository_name="$1"
     local url="$2"
-    if ! dnf repolist | grep -q $repository_name; then
+    local not_found="! dnf repolist | grep -q $repository_name"
+    if [[ $not_found ]]; then
         echo "🪐  Installing repository '${repository_name}'..."
         sudo dnf install -y $url
+        if [[ $not_found ]]; then
+            echo "⛈️  Failed to install repository '${repository_name}'. Aborting."
+            exit 1
+        else
+            echo "✅  Repository '${repository_name}' installed successfully."
+        fi
     else
         echo "✅  Found repository '${repository_name}'. Skipping."
     fi
@@ -123,25 +179,46 @@ install_code_ready_builder_repository() {
     local arch=$(uname -m)
     if [[ $cpe_name == "cpe:/o:redhat:enterprise_linux:9:"* ]]; then
         local repo="codeready-builder-for-rhel-9-${arch}-rpms"
-        if ! dnf repolist | grep -q "^${repo//\./\\.}"; then
+        local not_found="! dnf repolist | grep -q "^${repo//\./\\.}""
+        if [[ $not_found ]]; then
             echo "🪐  Installing repository '${repo}'..."
             sudo dnf config-manager --set-enabled codeready-builder-for-rhel-9-${arch}-rpms
+            if [[ $not_found ]]; then
+                echo "⛈️  Failed to install repository '${repo}'. Aborting."
+                exit 1
+            else
+                echo "✅  Repository '${repo}' installed successfully."
+            fi
         else
             echo "✅  Found repository '$repo'. Skipping."
         fi
     elif [[ $cpe_name == "cpe:/o:rocky:rocky:9:"* || $cpe_name == "cpe:/o:almalinux:almalinux:9:"* ]]; then
         local repo="crb"
-        if ! dnf repolist | grep -q "^${repo//\./\\.}"; then
+        local not_found="! dnf repolist | grep -q "^${repo//\./\\.}""
+        if [[ $not_found ]]; then
             echo "🪐  Installing repository '${repo}'..."
             sudo dnf config-manager --set-enabled crb
+            if [[ $not_found ]]; then
+                echo "⛈️  Failed to install repository '${repo}'. Aborting."
+                exit 1
+            else
+                echo "✅  Repository '${repo}' installed successfully."
+            fi
         else
             echo "✅  Found repository '$repo'. Skipping."
         fi
     elif [[ $cpe_name == "cpe:/o:oracle:linux:9:"* ]]; then
         local repo="ol9_codeready_builder"
-        if ! dnf repolist | grep -q "^${repo//\./\\.}"; then
+        local not_found="! dnf repolist | grep -q "^${repo//\./\\.}""
+        if [[ $not_found ]]; then
             echo "🪐  Installing repository '${repo}'..."
             sudo dnf config-manager --set-enabled ol9_codeready_builder
+            if [[ $not_found ]]; then
+                echo "⛈️  Failed to install repository '${repo}'. Aborting."
+                exit 1
+            else
+                echo "✅  Repository '${repo}' installed successfully."
+            fi
         else
             echo "✅  Found repository '$repo'. Skipping."
         fi
@@ -151,42 +228,76 @@ install_code_ready_builder_repository() {
 }
 
 install_jbig2enc() {
-    cd $BASE_DIR
-    sudo git clone https://github.com/kouprlabs/jbig2enc.git
-    cd "${BASE_DIR}/jbig2enc"
-    sudo git checkout tags/0.29
-    sudo ./autogen.sh
-    sudo ./configure --with-extra-libraries=/usr/local/lib/ --with-extra-includes=/usr/local/include/
-    sudo make
-    sudo make install
-    cd $BASE_DIR
-    sudo rm -rf "${BASE_DIR}/jbig2enc"
+    local jbig2_bin="/usr/local/bin/jbig2"
+    local not_found="! (command -v $jbig2_bin >/dev/null 2>&1 && $jbig2_bin --version >/dev/null 2>&1)"
+    if [[ $not_found ]]; then
+        echo "🔨  Building binary '${jbig2_bin}'..."
+        cd $BASE_DIR
+        sudo git clone https://github.com/kouprlabs/jbig2enc.git
+        cd "${BASE_DIR}/jbig2enc"
+        sudo git checkout tags/0.29
+        sudo ./autogen.sh
+        sudo ./configure --with-extra-libraries=/usr/local/lib/ --with-extra-includes=/usr/local/include/
+        sudo make
+        sudo make install
+        cd $BASE_DIR
+        sudo rm -rf "${BASE_DIR}/jbig2enc"
+        if [[ $not_found ]]; then
+            echo "⛈️  Failed to build binary '${jbig2_bin}'. Aborting."
+            exit 1
+        else
+            echo "✅  Binary '${jbig2_bin}' installed successfully."
+        fi
+    else
+        echo "✅  Found binary '${jbig2_bin}'. Skipping."
+    fi
 }
 
 install_pip_package() {
     local package_name="$1"
-    if ! pip show "$package_name" >/dev/null 2>&1; then
+    local not_found="! pip show "$package_name" >/dev/null 2>&1"
+    if [[ $not_found ]]; then
         echo "🐍  Installing Python package '${package_name}'..."
         pip3 install $package_name
+        if [[ $not_found ]]; then
+            echo "⛈️  Failed to install Python package '${package_name}'. Aborting."
+            exit 1
+        else
+            echo "✅  Python package '${package_name}' installed successfully."
+        fi
     else
         echo "✅  Found Python package '$package_name'. Skipping."
     fi
 }
 
 install_nodejs_18() {
-    if ! dnf list installed nodejs >/dev/null 2>&1 || ! node --version | grep -qE "^v18\."; then
+    local not_found='! dnf list installed nodejs >/dev/null 2>&1 || ! node --version | grep -qE "^v18\."'
+    if [[ $not_found ]]; then
         echo "💎  Installing Node.js v18..."
         sudo dnf module -y enable nodejs:18
         sudo dnf module -y install nodejs:18/common
+        if [[ $not_found ]]; then
+            echo "⛈️  Failed to install Node.js v18 '${package_name}'. Aborting."
+            exit 1
+        else
+            echo "✅  Node.js v18 '${package_name}' installed successfully."
+        fi
     else
         echo "✅  Found Node.js v18'. Skipping."
     fi
 }
 
 install_corepack() {
-    if ! npm list -g corepack >/dev/null 2>&1; then
+    local not_found="! npm list -g corepack >/dev/null 2>&1"
+    if [[ $not_found ]]; then
         echo "💎  Installing NPM package 'corepack'..."
         sudo npm install -g corepack
+        if [[ $not_found ]]; then
+            echo "⛈️  Failed to install NPM package 'corepack'. Aborting."
+            exit 1
+        else
+            echo "✅  NPM package 'corepack' installed successfully."
+        fi
     else
         echo "✅  Found NPM package 'corepack'. Skipping."
     fi
@@ -194,10 +305,17 @@ install_corepack() {
 
 install_golangci() {
     local golangci_bin="${HOME}/bin/golangci-lint"
-    if ! (command -v $golangci_bin >/dev/null 2>&1 && $golangci_bin --version >/dev/null 2>&1); then
+    local not_found="! (command -v $golangci_bin >/dev/null 2>&1 && $golangci_bin --version >/dev/null 2>&1)"
+    if [[ $not_found ]]; then
         echo "🐹  Installing Go binary '${golangci_bin}'..."
         mkdir -p $HOME/bin
         curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.53.2
+        if [[ $not_found ]]; then
+            echo "⛈️  Failed to install Go binary '${golangci_bin}'. Aborting."
+            exit 1
+        else
+            echo "✅  Go binary '${golangci_bin}' installed successfully."
+        fi
     else
         echo "✅  Found Go binary '${golangci_bin}'. Skipping."
     fi
@@ -205,11 +323,18 @@ install_golangci() {
 
 install_swag() {
     local swag_bin="${HOME}/bin/swag"
-    if ! (command -v $swag_bin >/dev/null 2>&1 && $swag_bin --version >/dev/null 2>&1); then
+    local not_found="! (command -v $swag_bin >/dev/null 2>&1 && $swag_bin --version >/dev/null 2>&1)"
+    if [[ $not_found ]]; then
         echo "🐹  Installing Go binary '${swag_bin}'..."
         go install github.com/swaggo/swag/cmd/swag@latest
         mkdir -p $HOME/bin
         mv $(go env GOPATH)/bin/swag $HOME/bin/swag
+        if [[ $not_found ]]; then
+            echo "⛈️  Failed to install Go binary '${swag_bin}'. Aborting."
+            exit 1
+        else
+            echo "✅  Go binary '${swag_bin}' installed successfully."
+        fi
     else
         echo "✅  Found Go binary '${swag_bin}'. Skipping."
     fi
@@ -217,66 +342,81 @@ install_swag() {
 
 install_air() {
     local air_bin="${HOME}/bin/air"
-    if ! (command -v $air_bin >/dev/null 2>&1 && $air_bin -v >/dev/null 2>&1); then
+    local not_found="! (command -v $air_bin >/dev/null 2>&1 && $air_bin -v >/dev/null 2>&1)"
+    if [[ $not_found ]]; then
         echo "🐹  Installing Go binary '${air_bin}'..."
         mkdir -p $HOME/bin
         curl -sSfL https://raw.githubusercontent.com/cosmtrek/air/master/install.sh | sh -s
+        if [[ $not_found ]]; then
+            echo "⛈️  Failed to install Go binary '${air_bin}'. Aborting."
+            exit 1
+        else
+            echo "✅  Go binary '${air_bin}' installed successfully."
+        fi
     else
         echo "✅  Found Go binary '${air_bin}'. Skipping."
     fi
 }
 
+printf_bold() {
+    local msg="$1"
+    printf "\033[1m${msg}\033[0m"
+}
+
+printf_cyan() {
+    local msg="$1"
+    printf "\033[36m${msg}\033[0m"
+}
+
+printf_grey() {
+    local msg="$1"
+    printf "\033[90m${msg}\033[0m"
+}
+
+printf_magenta() {
+    local msg="$1"
+    printf "\033[35m${msg}\033[0m"
+}
+
 show_next_steps() {
-    printf "\n🎉 \033[1mYou are ready to develop Voltaserve!\n\n\033[0m"
+    printf_bold "\n🎉 You are ready to develop Voltaserve!\n\n"
 
     echo "1) Start infrastructure services:"
-    start_cmd='curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/dev/start.sh?t=$(date +%s)" | sh -s'
-    printf "\033[36m${start_cmd}\n\n\033[0m"
+    local start_cmd='curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/dev/start.sh?t=$(date +%s)" | sh -s'
+    printf_cyan "${start_cmd}\n\n"
 
     echo "2) Create a user and database in CockroachDB (run only first time):"
-    user_and_db_cmd="curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/sql/create_user_and_database.sql?t=$(date +%s)" | /opt/cockroach/cockroach sql --insecure -u root"
-    printf "\033[36m${user_and_db_cmd}\n\n\033[0m"
+    local user_and_db_cmd="curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/sql/create_user_and_database.sql?t=$(date +%s)" | /opt/cockroach/cockroach sql --insecure -u root"
+    printf_cyan "${user_and_db_cmd}\n\n"
 
     echo "3) Create database schema (run only first time):"
-    schema_cmd='curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/sql/schema.sql?t=$(date +%s)" | /opt/cockroach/cockroach sql --insecure -u voltaserve'
-    printf "\033[36m${schema_cmd}\n\n\033[0m"
+    local schema_cmd='curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/sql/schema.sql?t=$(date +%s)" | /opt/cockroach/cockroach sql --insecure -u voltaserve'
+    printf_cyan "${schema_cmd}\n\n"
 
     echo "4) Open a terminal in each microservice's subfolder, then start each one in development mode:"
     echo
 
-    cd_cmd="cd ./api"
-    printf "\033[90m${cd_cmd}\n\033[0m"
-    run_cmd="go mod download && air"
-    printf "\033[35m${run_cmd}\n\n\033[0m"
+    printf_grey "cd ./api\n"
+    printf_magenta "go mod download && air\n\n"
 
-    cd_cmd="cd ./idp"
-    printf "\033[90m${cd_cmd}\n\033[0m"
-    run_cmd="pnpm i && pnpm dev"
-    printf "\033[35m${run_cmd}\n\n\033[0m"
+    printf_grey "cd ./idp\n"
+    printf_magenta "pnpm i && pnpm dev\n\n"
 
-    cd_cmd="cd ./webdav"
-    printf "\033[90m${cd_cmd}\n\033[0m"
-    run_cmd="pnpm i && pnpm dev"
-    printf "\033[35m${run_cmd}\n\n\033[0m"
+    printf_grey "cd ./webdav\n"
+    printf_magenta "pnpm i && pnpm dev\n\n"
 
-    cd_cmd="cd ./conversion"
-    printf "\033[90m${cd_cmd}\n\033[0m"
-    run_cmd="go mod download && air"
-    printf "\033[35m${run_cmd}\n\n\033[0m"
+    printf_grey "cd ./conversion\n"
+    printf_magenta "go mod download && air\n\n"
 
-    cd_cmd="cd ./language"
-    printf "\033[90m${cd_cmd}\n\033[0m"
-    run_cmd="go mod download && air"
-    printf "\033[35m${run_cmd}\n\n\033[0m"
+    printf_grey "cd ./language\n"
+    printf_magenta "go mod download && air\n\n"
 
-    cd_cmd="cd ./ui"
-    printf "\033[90m${cd_cmd}\n\033[0m"
-    run_cmd="pnpm i && pnpm dev"
-    printf "\033[35m${run_cmd}\n\n\033[0m"
+    printf_grey "cd ./ui\n"
+    printf_magenta "pnpm i && pnpm dev\n\n"
 
     echo "5) To stop infrastructure services (if needed):"
-    stop_cmd='curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/dev/stop.sh?t=$(date +%s)" | sh -s'
-    printf "\033[36m${stop_cmd}\n\n\033[0m"
+    local stop_cmd='curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/dev/stop.sh?t=$(date +%s)" | sh -s'
+    printf_cyan "${stop_cmd}\n\n"
 }
 
 check_supported_system
@@ -348,6 +488,8 @@ install_dnf_package "libtiff-devel"
 install_dnf_package "libpng"
 install_dnf_package "libpng-devel"
 install_dnf_package "leptonica-devel"
+
+install_jbig2enc
 
 install_pip_package "ocrmypdf"
 install_pip_package "pipenv"
