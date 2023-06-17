@@ -1,5 +1,15 @@
 # Voltaserve Development
 
+## Getting Started
+
+Make your operating system is supported for development as described [here](#supported-operating-systems).
+
+Run the install script and follow the instructions on the terminal:
+
+```shell
+curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/dev/install.sh?t=$(date +%s)" | sh -s
+```
+
 ## Supported Operating Systems
 
 For development, we support the following operating systems:
