@@ -4,27 +4,27 @@ BASE_DIR="/opt"
 
 stop_cockroach() {
     echo "🛑  Stopping CockroachDB..."
-    pkill -f cockroach
+    sudo pkill -f cockroach
 }
 
 stop_redis() {
     echo "🛑  Stopping Redis..."
-    systemctl stop redis
+    sudo systemctl stop redis
 }
 
 stop_minio() {
     echo "🛑  Stopping MinIO..."
-    pkill -f minio
+    sudo pkill -f minio
 }
 
 stop_meilisearch() {
     echo "🛑  Stopping Meilisearch..."
-    pkill -f meilisearch
+    sudo pkill -f meilisearch
 }
 
 stop_mailhog() {
     echo "🛑  Stopping MailHog..."
-    pkill -f MailHog_linux_amd64
+    sudo pkill -f MailHog_linux_amd64
 }
 
 stop_cockroach
