@@ -228,6 +228,7 @@ install_air() {
 
 check_supported_system
 
+install_dnf_package "tar"
 install_dnf_package "wget"
 install_dnf_package "git"
 
