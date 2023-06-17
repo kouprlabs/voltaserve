@@ -116,7 +116,8 @@ install_meilisearch() {
         printf_bold "📦  Installing binary '${meilisearch_bin}'...\n"
         sudo mkdir -p "${BASE_DIR}/meilisearch"
         cd "${BASE_DIR}/meilisearch"
-        curl -L https://install.meilisearch.com | sudo sh
+        sudo wget "https://github.com/meilisearch/meilisearch/releases/download/v1.2.0/meilisearch-linux-amd64"
+        sudo mv ./meilisearch-linux-amd64 ./meilisearch
         sudo chmod +x $meilisearch_bin
         if eval "$not_found"; then
             printf_red "⛈️  Failed to install binary '${meilisearch_bin}'. Aborting.\n"
