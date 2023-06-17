@@ -391,7 +391,7 @@ install_air() {
 }
 
 show_next_steps() {
-    printf_bold "\n🎉 You are ready to develop Voltaserve!\n\n"
+    printf_bold "\n\n🎉 You are ready to develop Voltaserve!\n\n"
 
     echo "1) Start infrastructure services:"
     local start_cmd='curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/dev/start.sh?t=$(date +%s)" | sh -s'
