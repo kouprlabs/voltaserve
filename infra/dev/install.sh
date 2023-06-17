@@ -437,86 +437,86 @@ show_next_steps() {
     printf_cyan "${stop_cmd}\n\n"
 }
 
-# check_supported_system
+check_supported_system
 
-# install_dnf_package "tar"
-# install_dnf_package "wget"
-# install_dnf_package "git"
+install_dnf_package "tar"
+install_dnf_package "wget"
+install_dnf_package "git"
 
-# install_cockroach
-# install_meilisearch
-# install_mailhog
-# install_minio
-# install_redis
+install_cockroach
+install_meilisearch
+install_mailhog
+install_minio
+install_redis
 
-# install_dnf_package "golang"
-# install_dnf_package "poppler-utils"
-# install_dnf_package "libreoffice"
-# install_dnf_package "python3-pip"
-# install_dnf_package "python3-devel"
-# install_dnf_package "ghostscript"
-# install_dnf_package "tesseract"
-# install_dnf_package "postgresql"
+install_dnf_package "golang"
+install_dnf_package "poppler-utils"
+install_dnf_package "libreoffice"
+install_dnf_package "python3-pip"
+install_dnf_package "python3-devel"
+install_dnf_package "ghostscript"
+install_dnf_package "tesseract"
+install_dnf_package "postgresql"
 
-# download_tesseract_trained_data "osd"
-# download_tesseract_trained_data "osd"
-# download_tesseract_trained_data "eng"
-# download_tesseract_trained_data "deu"
-# download_tesseract_trained_data "fra"
-# download_tesseract_trained_data "nld"
-# download_tesseract_trained_data "ita"
-# download_tesseract_trained_data "spa"
-# download_tesseract_trained_data "por"
-# download_tesseract_trained_data "swe"
-# download_tesseract_trained_data "fin"
-# download_tesseract_trained_data "jpn"
-# download_tesseract_trained_data "chi_sim"
-# download_tesseract_trained_data "chi_tra"
-# download_tesseract_trained_data "kor"
-# download_tesseract_trained_data "hin"
-# download_tesseract_trained_data "rus"
-# download_tesseract_trained_data "ara"
+download_tesseract_trained_data "osd"
+download_tesseract_trained_data "osd"
+download_tesseract_trained_data "eng"
+download_tesseract_trained_data "deu"
+download_tesseract_trained_data "fra"
+download_tesseract_trained_data "nld"
+download_tesseract_trained_data "ita"
+download_tesseract_trained_data "spa"
+download_tesseract_trained_data "por"
+download_tesseract_trained_data "swe"
+download_tesseract_trained_data "fin"
+download_tesseract_trained_data "jpn"
+download_tesseract_trained_data "chi_sim"
+download_tesseract_trained_data "chi_tra"
+download_tesseract_trained_data "kor"
+download_tesseract_trained_data "hin"
+download_tesseract_trained_data "rus"
+download_tesseract_trained_data "ara"
 
-# install_rpm_repository "epel" "https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm"
-# install_rpm_repository "rpmfusion-free-updates" "https://mirrors.rpmfusion.org/free/el/rpmfusion-free-release-9.noarch.rpm"
-# install_rpm_repository "rpmfusion-nonfree-updates" "https://mirrors.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-9.noarch.rpm"
+install_rpm_repository "epel" "https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm"
+install_rpm_repository "rpmfusion-free-updates" "https://mirrors.rpmfusion.org/free/el/rpmfusion-free-release-9.noarch.rpm"
+install_rpm_repository "rpmfusion-nonfree-updates" "https://mirrors.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-9.noarch.rpm"
 
-# install_dnf_package "GraphicsMagick"
-# install_dnf_package "pngquant"
-# install_dnf_package "unpaper"
-# install_dnf_package "perl-Image-ExifTool"
-# install_dnf_package "dnf-plugins-core"
+install_dnf_package "GraphicsMagick"
+install_dnf_package "pngquant"
+install_dnf_package "unpaper"
+install_dnf_package "perl-Image-ExifTool"
+install_dnf_package "dnf-plugins-core"
 
-# install_code_ready_builder_repository
+install_code_ready_builder_repository
 
-# install_dnf_package "ffmpeg" "--allowerasing"
-# install_dnf_package "automake"
-# install_dnf_package "make"
-# install_dnf_package "autoconf"
-# install_dnf_package "libtool"
-# install_dnf_package "clang"
-# install_dnf_package "zlib"
-# install_dnf_package "zlib-devel"
-# install_dnf_package "libjpeg-turbo"
-# install_dnf_package "libjpeg-turbo-devel"
-# install_dnf_package "libwebp"
-# install_dnf_package "libwebp-devel"
-# install_dnf_package "libtiff"
-# install_dnf_package "libtiff-devel"
-# install_dnf_package "libpng"
-# install_dnf_package "libpng-devel"
-# install_dnf_package "leptonica-devel"
+install_dnf_package "ffmpeg" "--allowerasing"
+install_dnf_package "automake"
+install_dnf_package "make"
+install_dnf_package "autoconf"
+install_dnf_package "libtool"
+install_dnf_package "clang"
+install_dnf_package "zlib"
+install_dnf_package "zlib-devel"
+install_dnf_package "libjpeg-turbo"
+install_dnf_package "libjpeg-turbo-devel"
+install_dnf_package "libwebp"
+install_dnf_package "libwebp-devel"
+install_dnf_package "libtiff"
+install_dnf_package "libtiff-devel"
+install_dnf_package "libpng"
+install_dnf_package "libpng-devel"
+install_dnf_package "leptonica-devel"
 
-# install_jbig2enc
+install_jbig2enc
 
-# install_pip_package "ocrmypdf"
-# install_pip_package "pipenv"
+install_pip_package "ocrmypdf"
+install_pip_package "pipenv"
 
-# install_nodejs_18
-# install_corepack
+install_nodejs_18
+install_corepack
 
-# install_air
-# install_golangci
-# install_swag
+install_air
+install_golangci
+install_swag
 
 show_next_steps
