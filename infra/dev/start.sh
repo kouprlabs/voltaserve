@@ -45,7 +45,7 @@ start_minio() {
         local log_dir="/var/log/minio"
         sudo mkdir -p $log_dir
         cd $opt_dir
-        MINIO_ROOT_USER=voltaserve MINIO_ROOT_PASSWORD=voltaserve sudo sh -c 'nohup /usr/local/bin/minio server '"$opt_dir"'/data --console-address ":9001" > '"$log_dir"'/log.txt 2>&1 &'
+        sudo sh -c 'MINIO_ROOT_USER=voltaserve MINIO_ROOT_PASSWORD=voltaserve nohup /usr/local/bin/minio server '"$opt_dir"'/data --console-address ":9001" > '"$log_dir"'/log.txt 2>&1 &'
         if eval "$not_found"; then
             echo "⛈️  Failed to start MinIO."
         else
