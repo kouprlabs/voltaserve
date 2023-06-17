@@ -55,7 +55,7 @@ install_cockroach() {
         printf_bold "📦  Installing binary '${cockroach_bin}'...\n"
         cockroach_filename="cockroach-v23.1.3.linux-amd64"
         cockroach_tgz="${cockroach_filename}.tgz"
-        sudo wget "https://binaries.cockroachdb.com/${cockroach_tgz}" -P $BASE_DIR
+        sudo wget -c "https://binaries.cockroachdb.com/${cockroach_tgz}" -P $BASE_DIR
         sudo tar -xzf "${BASE_DIR}/${cockroach_tgz}" -C $BASE_DIR --transform="s/^${cockroach_filename}/cockroach/"
         sudo rm -f "${BASE_DIR}/${cockroach_tgz}"
         if eval "$not_found"; then
@@ -75,7 +75,7 @@ install_minio() {
     if eval "$not_found"; then
         printf_bold "📦  Installing package '${minio_pkg}'...\n"
         local minio_rpm="minio-20230609073212.0.0.x86_64.rpm"
-        sudo wget "https://dl.min.io/server/minio/release/linux-amd64/archive/${minio_rpm}" -P $BASE_DIR
+        sudo wget -c "https://dl.min.io/server/minio/release/linux-amd64/archive/${minio_rpm}" -P $BASE_DIR
         sudo dnf install -y "${BASE_DIR}/${minio_rpm}"
         sudo rm -f "${BASE_DIR}/${minio_rpm}"
         sudo mkdir -p "${BASE_DIR}/minio"
@@ -116,7 +116,7 @@ install_meilisearch() {
         printf_bold "📦  Installing binary '${meilisearch_bin}'...\n"
         sudo mkdir -p "${BASE_DIR}/meilisearch"
         cd "${BASE_DIR}/meilisearch"
-        sudo wget "https://github.com/meilisearch/meilisearch/releases/download/v1.2.0/meilisearch-linux-amd64"
+        sudo wget -c "https://github.com/meilisearch/meilisearch/releases/download/v1.2.0/meilisearch-linux-amd64"
         sudo mv ./meilisearch-linux-amd64 ./meilisearch
         sudo chmod +x $meilisearch_bin
         if eval "$not_found"; then
@@ -136,7 +136,7 @@ install_mailhog() {
     if eval "$not_found"; then
         printf_bold "📦  Installing binary '${mailhog_bin}'...\n"
         sudo mkdir -p "${BASE_DIR}/mailhog"
-        sudo wget https://github.com/mailhog/MailHog/releases/download/v1.0.1/MailHog_linux_amd64 -P "${BASE_DIR}/mailhog"
+        sudo wget -c https://github.com/mailhog/MailHog/releases/download/v1.0.1/MailHog_linux_amd64 -P "${BASE_DIR}/mailhog"
         sudo chmod +x $mailhog_bin
         if eval "$not_found"; then
             printf_red "⛈️  Failed to install binary '${mailhog_bin}'. Aborting.\n"
@@ -173,7 +173,7 @@ download_tesseract_trained_data() {
     local url="https://github.com/kouprlabs/tessdata/raw/main/$1.traineddata"
     if [[ ! -f "$file_path" ]]; then
         printf_bold "🧠  Downloading Tesseract trained data '${file_path}'...\n"
-        sudo wget $url -P $tessdata_dir
+        sudo wget -c $url -P $tessdata_dir
         if [[ ! -f "$file_path" ]]; then
             printf_red "⛈️  Failed to download Tesseract trained data '${file_path}'. Aborting.\n"
             exit 1
