@@ -170,7 +170,7 @@ install_dnf_package() {
 download_tesseract_trained_data() {
     local tessdata_dir="/usr/share/tesseract/tessdata"
     local file_path="${tessdata_dir}/$1.traineddata"
-    local url="https://github.com/kouprlabs/tessdata/raw/main/$1.traineddata"
+    local url="https://github.com/kouprlabs/tessdata/raw/4.1.0/$1.traineddata"
     if [[ ! -f "$file_path" ]]; then
         printf_bold "🧠  Downloading Tesseract trained data '${file_path}'...\n"
         sudo wget -c $url -P $tessdata_dir
