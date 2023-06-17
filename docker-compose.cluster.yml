@@ -2,7 +2,7 @@ version: "3.8"
 
 x-minio-common:
   &minio-common
-  image: quay.io/minio/minio:RELEASE.2023-05-18T00-05-36Z
+  image: quay.io/minio/minio:RELEASE.2023-06-09T07-32-12Z
   command: server --console-address ":9001" http://minio{1...4}/data{1...2}
   expose:
     - "9000"
@@ -16,6 +16,15 @@ x-minio-common:
     interval: 30s
     timeout: 20s
     retries: 3
+
+x-redis-common:
+  &redis-common
+  image: redis:6.2.7
+  command: redis-server /usr/local/etc/redis/redis.conf
+
+x-cockroach-common:
+  &cockroach-common
+  image: cockroachdb/cockroach:v23.1.3
 
 networks:
   default:
@@ -48,8 +57,8 @@ volumes:
 
 services:
   cockroach1:
+    <<: *cockroach-common
     hostname: cockroach1
-    image: cockroachdb/cockroach:latest-v23.1
     ports:
       - ${VOLTASERVE_POSTGRES_PORT}:26257
       - ${VOLTASERVE_COCKROACH_CONSOLE_PORT}:8080
@@ -60,8 +69,8 @@ services:
       default:
         ipv4_address: 172.20.0.10
   cockroach2:
+    <<: *cockroach-common
     hostname: cockroach2
-    image: cockroachdb/cockroach:latest-v23.1
     volumes:
       - cockroach2:/cockroach/cockroach-data
     command: start --insecure --join=cockroach1,cockroach2,cockroach3
@@ -69,8 +78,8 @@ services:
       default:
         ipv4_address: 172.20.0.11
   cockroach3:
+    <<: *cockroach-common
     hostname: cockroach3
-    image: cockroachdb/cockroach:latest-v23.1
     volumes:
       - cockroach3:/cockroach/cockroach-data
     command: start --insecure --join=cockroach1,cockroach2,cockroach3
@@ -130,7 +139,7 @@ services:
       default:
         ipv4_address: 172.20.0.24
   meilisearch:
-    image: getmeili/meilisearch:v0.30
+    image: getmeili/meilisearch:v1.2.0
     ports:
       - ${VOLTASERVE_MEILISEARCH_PORT}:7700
     volumes:
@@ -139,8 +148,7 @@ services:
       default:
         ipv4_address: 172.20.0.50
   redis1:
-    image: redis:7.0.8
-    command: redis-server /usr/local/etc/redis/redis.conf
+    <<: *redis-common
     ports:
       - 6373:6373
     volumes:
@@ -150,8 +158,7 @@ services:
       default:
         ipv4_address: 172.20.0.31
   redis2:
-    image: redis:7.0.8
-    command: redis-server /usr/local/etc/redis/redis.conf
+    <<: *redis-common
     ports:
       - 6374:6374
     volumes:
@@ -161,8 +168,7 @@ services:
       default:
         ipv4_address: 172.20.0.32
   redis3:
-    image: redis:7.0.8
-    command: redis-server /usr/local/etc/redis/redis.conf
+    <<: *redis-common
     ports:
       - 6375:6375
     volumes:
@@ -172,8 +178,7 @@ services:
       default:
         ipv4_address: 172.20.0.33
   redis4:
-    image: redis:7.0.8
-    command: redis-server /usr/local/etc/redis/redis.conf
+    <<: *redis-common
     ports:
       - 6376:6376
     volumes:
@@ -183,8 +188,7 @@ services:
       default:
         ipv4_address: 172.20.0.34
   redis5:
-    image: redis:7.0.8
-    command: redis-server /usr/local/etc/redis/redis.conf
+    <<: *redis-common
     ports:
       - 6377:6377
     volumes:
@@ -194,8 +198,7 @@ services:
       default:
         ipv4_address: 172.20.0.35
   redis6:
-    image: redis:7.0.8
-    command: redis-server /usr/local/etc/redis/redis.conf
+    <<: *redis-common
     ports:
       - 6378:6378
     volumes:
