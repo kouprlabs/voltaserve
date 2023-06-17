@@ -284,10 +284,11 @@ install_jbig2enc() {
 
 install_pip_package() {
     local package_name="$1"
+    local package_version="$2"
     local not_found="! pip show "$package_name" >/dev/null 2>&1"
     if eval "$not_found"; then
         printf_bold "🐍  Installing Python package '${package_name}'..."
-        pip3 install $package_name
+        pip3 install "${package_name}==${package_version}"
         if eval "$not_found"; then
             printf_red "⛈️  Failed to install Python package '${package_name}'. Aborting."
             exit 1
@@ -320,7 +321,7 @@ install_corepack() {
     local not_found="! npm list -g corepack >/dev/null 2>&1"
     if eval "$not_found"; then
         printf_bold "💎  Installing NPM package 'corepack'..."
-        sudo npm install -g corepack
+        sudo npm install -g corepack@0.18.1
         if eval "$not_found"; then
             printf_red "⛈️  Failed to install NPM package 'corepack'. Aborting."
             exit 1
@@ -514,8 +515,8 @@ install_dnf_package "leptonica-devel"
 
 install_jbig2enc
 
-install_pip_package "ocrmypdf"
-install_pip_package "pipenv"
+install_pip_package "ocrmypdf" "14.2.1"
+install_pip_package "pipenv" "2023.6.12"
 
 install_nodejs_18
 install_corepack
