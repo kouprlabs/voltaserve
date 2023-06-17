@@ -466,7 +466,6 @@ install_dnf_package "tesseract"
 install_dnf_package "postgresql"
 
 download_tesseract_trained_data "osd"
-download_tesseract_trained_data "osd"
 download_tesseract_trained_data "eng"
 download_tesseract_trained_data "deu"
 download_tesseract_trained_data "fra"
