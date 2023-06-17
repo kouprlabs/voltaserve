@@ -263,9 +263,8 @@ install_jbig2enc() {
     if eval "$not_found"; then
         printf_bold "🔨  Building binary '${jbig2_bin}'..."
         cd $BASE_DIR
-        sudo git clone https://github.com/kouprlabs/jbig2enc.git
+        sudo git clone --branch 0.29 --single-branch https://github.com/kouprlabs/jbig2enc.git
         cd "${BASE_DIR}/jbig2enc"
-        sudo git checkout tags/0.29
         sudo ./autogen.sh
         sudo ./configure --with-extra-libraries=/usr/local/lib/ --with-extra-includes=/usr/local/include/
         sudo make
