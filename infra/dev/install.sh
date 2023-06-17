@@ -361,22 +361,27 @@ install_air() {
 
 printf_bold() {
     local msg="$1"
-    printf "\033[1m${msg}\033[0m"
+    printf "\e[1m${msg}\e[0m"
 }
 
 printf_cyan() {
     local msg="$1"
-    printf "\033[36m${msg}\033[0m"
+    printf "\e[36m${msg}\e[0m"
 }
 
 printf_grey() {
     local msg="$1"
-    printf "\033[90m${msg}\033[0m"
+    printf "\e[90m${msg}\e[0m"
 }
 
 printf_magenta() {
     local msg="$1"
-    printf "\033[35m${msg}\033[0m"
+    printf "\e[35m${msg}\e[0m"
+}
+
+printf_underlined() {
+    local msg="$1"
+    printf "\e[4m${msg}\e[0m"
 }
 
 show_next_steps() {
@@ -394,11 +399,17 @@ show_next_steps() {
     local schema_cmd='curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/sql/schema.sql?t=$(date +%s)" | /opt/cockroach/cockroach sql --insecure -u voltaserve'
     printf_cyan "${schema_cmd}\n\n"
 
-    echo "4) Open a terminal in each microservice's subfolder, then start each one in development mode:"
+    echo "4) Clone the repository in your home directory:"
+    printf_cyan "git clone https://github.com/kouprlabs/voltaserve.git\n\n"
+
+    echo "5) Open a terminal in each microservice's subfolder, then start each one in development mode:"
     echo
 
     printf_grey "cd ./api\n"
-    printf_magenta "go mod download && air\n\n"
+    printf_magenta "air\n\n"
+
+    printf_grey "cd ./conversion\n"
+    printf_magenta "air\n\n"
 
     printf_grey "cd ./idp\n"
     printf_magenta "pnpm i && pnpm dev\n\n"
@@ -406,16 +417,17 @@ show_next_steps() {
     printf_grey "cd ./webdav\n"
     printf_magenta "pnpm i && pnpm dev\n\n"
 
-    printf_grey "cd ./conversion\n"
-    printf_magenta "go mod download && air\n\n"
-
     printf_grey "cd ./language\n"
-    printf_magenta "go mod download && air\n\n"
+    printf_magenta "pnpm i && pnpm dev\n\n"
 
     printf_grey "cd ./ui\n"
     printf_magenta "pnpm i && pnpm dev\n\n"
 
-    echo "5) To stop infrastructure services (if needed):"
+    printf "Alternatively, if this is a VM you can use Visual Studio Code's remote development as described here: "
+    printf_underlined "https://code.visualstudio.com/docs/remote/remote-overview"
+    printf ", for this you can find the workspace file (voltaserve.code-workspace) in the repository's root.\n\n"
+
+    echo "6) To stop infrastructure services (if needed):"
     local stop_cmd='curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/dev/stop.sh?t=$(date +%s)" | sh -s'
     printf_cyan "${stop_cmd}\n\n"
 }
