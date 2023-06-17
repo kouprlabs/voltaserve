@@ -226,6 +226,59 @@ install_air() {
     fi
 }
 
+show_next_steps() {
+    printf "\n🎉 \033[1mYou are ready to develop Voltaserve!\n\n\033[0m"
+
+    echo "1) Start infrastructure services:"
+    start_cmd='curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/dev/start.sh?t=$(date +%s)" | sh -s'
+    printf "\033[36m${start_cmd}\n\n\033[0m"
+
+    echo "2) Create a user and database in CockroachDB (run only first time):"
+    user_and_db_cmd="curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/sql/create_user_and_database.sql?t=$(date +%s)" | /opt/cockroach/cockroach sql --insecure -u root"
+    printf "\033[36m${user_and_db_cmd}\n\n\033[0m"
+
+    echo "3) Create database schema (run only first time):"
+    schema_cmd='curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/sql/schema.sql?t=$(date +%s)" | /opt/cockroach/cockroach sql --insecure -u voltaserve'
+    printf "\033[36m${schema_cmd}\n\n\033[0m"
+
+    echo "4) Open a terminal in each microservice's subfolder, then start each one in development mode:"
+    echo
+
+    cd_cmd="cd ./api"
+    printf "\033[90m${cd_cmd}\n\033[0m"
+    run_cmd="go mod download && air"
+    printf "\033[35m${run_cmd}\n\n\033[0m"
+
+    cd_cmd="cd ./idp"
+    printf "\033[90m${cd_cmd}\n\033[0m"
+    run_cmd="pnpm i && pnpm dev"
+    printf "\033[35m${run_cmd}\n\n\033[0m"
+
+    cd_cmd="cd ./webdav"
+    printf "\033[90m${cd_cmd}\n\033[0m"
+    run_cmd="pnpm i && pnpm dev"
+    printf "\033[35m${run_cmd}\n\n\033[0m"
+
+    cd_cmd="cd ./conversion"
+    printf "\033[90m${cd_cmd}\n\033[0m"
+    run_cmd="go mod download && air"
+    printf "\033[35m${run_cmd}\n\n\033[0m"
+
+    cd_cmd="cd ./language"
+    printf "\033[90m${cd_cmd}\n\033[0m"
+    run_cmd="go mod download && air"
+    printf "\033[35m${run_cmd}\n\n\033[0m"
+
+    cd_cmd="cd ./ui"
+    printf "\033[90m${cd_cmd}\n\033[0m"
+    run_cmd="pnpm i && pnpm dev"
+    printf "\033[35m${run_cmd}\n\n\033[0m"
+
+    echo "5) To stop infrastructure services (if needed):"
+    stop_cmd='curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/dev/stop.sh?t=$(date +%s)" | sh -s'
+    printf "\033[36m${stop_cmd}\n\n\033[0m"
+}
+
 check_supported_system
 
 install_dnf_package "tar"
@@ -306,53 +359,4 @@ install_air
 install_golangci
 install_swag
 
-printf "\n🎉 \033[1mYou are ready to develop Voltaserve!\n\n\033[0m"
-
-echo "1) Start infrastructure services:"
-start_cmd='curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/dev/start.sh?t=$(date +%s)" | sh -s'
-printf "\033[36m${start_cmd}\n\n\033[0m"
-
-echo "2) Create a user and database in CockroachDB (run only first time):"
-user_and_db_cmd="curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/sql/create_user_and_database.sql?t=$(date +%s)" | /opt/cockroach/cockroach sql --insecure -u root"
-printf "\033[36m${user_and_db_cmd}\n\n\033[0m"
-
-echo "3) Create database schema (run only first time):"
-schema_cmd='curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/sql/schema.sql?t=$(date +%s)" | /opt/cockroach/cockroach sql --insecure -u voltaserve'
-printf "\033[36m${schema_cmd}\n\n\033[0m"
-
-echo "4) Open a terminal in each microservice's subfolder, then start each one in development mode:"
-echo
-
-cd_cmd="cd ./api"
-printf "\033[90m${cd_cmd}\n\033[0m"
-run_cmd="go mod download && air"
-printf "\033[35m${run_cmd}\n\n\033[0m"
-
-cd_cmd="cd ./idp"
-printf "\033[90m${cd_cmd}\n\033[0m"
-run_cmd="pnpm i && pnpm dev"
-printf "\033[35m${run_cmd}\n\n\033[0m"
-
-cd_cmd="cd ./webdav"
-printf "\033[90m${cd_cmd}\n\033[0m"
-run_cmd="pnpm i && pnpm dev"
-printf "\033[35m${run_cmd}\n\n\033[0m"
-
-cd_cmd="cd ./conversion"
-printf "\033[90m${cd_cmd}\n\033[0m"
-run_cmd="go mod download && air"
-printf "\033[35m${run_cmd}\n\n\033[0m"
-
-cd_cmd="cd ./language"
-printf "\033[90m${cd_cmd}\n\033[0m"
-run_cmd="go mod download && air"
-printf "\033[35m${run_cmd}\n\n\033[0m"
-
-cd_cmd="cd ./ui"
-printf "\033[90m${cd_cmd}\n\033[0m"
-run_cmd="pnpm i && pnpm dev"
-printf "\033[35m${run_cmd}\n\n\033[0m"
-
-echo "5) To stop infrastructure services (if needed):"
-stop_cmd='curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/dev/stop.sh?t=$(date +%s)" | sh -s'
-printf "\033[36m${stop_cmd}\n\n\033[0m"
+show_next_steps
