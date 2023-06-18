@@ -49,12 +49,13 @@ check_supported_system() {
 }
 
 install_postgres() {
-    local postgres_service="postgresql-server"
+    local postgres_service="postgresql"
     local not_found='! systemctl list-unit-files | grep -q '"${postgres_service}.service"''
     if eval "$not_found"; then
         printf_bold "📦  Installing service '${postgres_service}'...\n"
-        sudo dnf install -y $postgres_service
+        sudo dnf install -y postgresql-server
         sudo systemctl enable $postgres_service
+        sudo postgresql-setup --initdb
         sudo systemctl start $postgres_service
         if eval "$not_found"; then
             printf_red "⛈️  Failed to install service '${postgres_service}'. Aborting.\n"
