@@ -58,7 +58,7 @@ install_postgres() {
         sudo dnf module -y install postgresql:15/server
 
         sudo postgresql-setup --initdb
-        
+
         sudo systemctl enable $postgres_service
         sudo systemctl start $postgres_service
 
@@ -419,7 +419,7 @@ show_next_steps() {
     printf_cyan "${user_and_db_cmd}\n\n"
 
     echo "3) Create database schema (run only first time):"
-    local schema_cmd='curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/postgres/schema.sql?t=$(date +%s)" | PGPASSWORD=voltaserve psql -U voltaserve -d voltaserve'
+    local schema_cmd='curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/postgres/schema.sql?t=$(date +%s)" | PGPASSWORD=postgres psql -U postgres -d voltaserve'
     printf_cyan "${schema_cmd}\n\n"
 
     echo "4) Clone the repository in your home directory:"
