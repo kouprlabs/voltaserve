@@ -257,8 +257,8 @@ EXECUTE PROCEDURE create_time_before_insert();
 CREATE TABLE IF NOT EXISTS invitation
 (
   id              text PRIMARY KEY,
-  organization_id text  NOT NULL REFERENCES organization (id) ON DELETE CASCADE,
-  owner_id        text  NOT NULL REFERENCES "user" (id) ON DELETE CASCADE,
+  organization_id text NOT NULL REFERENCES organization (id) ON DELETE CASCADE,
+  owner_id        text NOT NULL REFERENCES "user" (id) ON DELETE CASCADE,
   email           text NOT NULL,
   status          text NOT NULL DEFAULT 'pending',
   create_time     text NOT NULL DEFAULT (to_json(now())#>>'{}'),
