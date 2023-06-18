@@ -412,11 +412,11 @@ show_next_steps() {
     printf_cyan "${start_cmd}\n\n"
 
     echo "2) Create a user and database in PostgreSQL (run only first time):"
-    local user_and_db_cmd="curl -sSfL https://raw.githubusercontent.com/kouprlabs/voltaserve/infra-update/infra/postgres/schema.sql?t=$(date +%s) | sudo -u postgres psql"
+    local user_and_db_cmd='curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/postgres/create_user_and_database.sql?t=$(date +%s)" | PGPASSWORD=postgres psql -U postgres -d postgres'
     printf_cyan "${user_and_db_cmd}\n\n"
 
     echo "3) Create database schema (run only first time):"
-    local schema_cmd="curl -sSfL https://raw.githubusercontent.com/kouprlabs/voltaserve/infra-update/infra/postgres/schema.sql?t=$(date +%s) | sudo -u postgres psql"
+    local schema_cmd='curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/postgres/schema.sql?t=$(date +%s)" | PGPASSWORD=voltaserve psql -U voltaserve -d voltaserve'
     printf_cyan "${schema_cmd}\n\n"
 
     echo "4) Clone the repository in your home directory:"
