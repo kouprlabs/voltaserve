@@ -57,6 +57,9 @@ install_postgres() {
         sudo dnf install -y postgresql-server
         sudo postgresql-setup --initdb
         sudo systemctl enable $postgres_service
+        sudo systemctl start $postgres_service
+
+        sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD 'postgres';"
         
         local postgresql_conf="/var/lib/pgsql/data/postgresql.conf"
         sudo sed -i "s/^#listen_addresses = .*$/listen_addresses = '*'/" "$postgresql_conf"
@@ -67,7 +70,7 @@ install_postgres() {
         sudo sed -i '/^host\s\+all\s\+all\s\+127\.0\.0\.1\/32\s\+ident$/d' "$pg_hba_conf"
         sudo sed -i '/^host\s\+replication\s\+all\s\+127\.0\.0\.1\/32\s\+ident$/d' "$pg_hba_conf"
 
-        sudo systemctl start $postgres_service
+        sudo systemctl restart $postgres_service
         if eval "$not_found"; then
             printf_red "⛈️  Failed to install service '${postgres_service}'. Aborting.\n"
             exit 1
