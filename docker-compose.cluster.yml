@@ -60,7 +60,7 @@ services:
     <<: *cockroach-common
     hostname: cockroach1
     ports:
-      - ${VOLTASERVE_POSTGRES_PORT}:26257
+      - ${VOLTASERVE_COCKROACH_PORT}:26257
       - ${VOLTASERVE_COCKROACH_CONSOLE_PORT}:8080
     volumes:
       - cockroach1:/cockroach/cockroach-data
@@ -216,11 +216,11 @@ services:
     networks:
       default:
         ipv4_address: 172.20.0.37
-  mailcatcher:
-    image: sj26/mailcatcher:v0.8.2
+  mailhog:
+    image: mailhog/mailhog:v1.0.1
     ports:
-      - ${VOLTASERVE_MAILCATCHER_WEB_PORT}:1080
-      - ${VOLTASERVE_MAILCATCHER_SMTP_PORT}:1025
+      - ${VOLTASERVE_MAILHOG_SMTP_PORT}:1025
+      - ${VOLTASERVE_MAILHOG_WEB_PORT}:8025
     networks:
       default:
         ipv4_address: 172.20.0.60

@@ -6,7 +6,7 @@ COPY . .
 
 RUN dnf install -y clang python3-pip python3-devel
 
-RUN pip3 install --user --upgrade pipenv
+RUN pip3 install pipenv==2023.6.12
 
 ENV PATH="/root/.local/bin:${PATH}"
 

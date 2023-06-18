@@ -21,23 +21,23 @@ RUN dnf install -y wget
 
 WORKDIR /usr/share/tesseract/tessdata
 
-RUN wget https://github.com/kouprlabs/tessdata/raw/main/osd.traineddata
-RUN wget https://github.com/kouprlabs/tessdata/raw/main/eng.traineddata
-RUN wget https://github.com/kouprlabs/tessdata/raw/main/deu.traineddata
-RUN wget https://github.com/kouprlabs/tessdata/raw/main/fra.traineddata
-RUN wget https://github.com/kouprlabs/tessdata/raw/main/nld.traineddata
-RUN wget https://github.com/kouprlabs/tessdata/raw/main/ita.traineddata
-RUN wget https://github.com/kouprlabs/tessdata/raw/main/spa.traineddata
-RUN wget https://github.com/kouprlabs/tessdata/raw/main/por.traineddata
-RUN wget https://github.com/kouprlabs/tessdata/raw/main/swe.traineddata
-RUN wget https://github.com/kouprlabs/tessdata/raw/main/fin.traineddata
-RUN wget https://github.com/kouprlabs/tessdata/raw/main/jpn.traineddata
-RUN wget https://github.com/kouprlabs/tessdata/raw/main/chi_sim.traineddata
-RUN wget https://github.com/kouprlabs/tessdata/raw/main/chi_tra.traineddata
-RUN wget https://github.com/kouprlabs/tessdata/raw/main/kor.traineddata
-RUN wget https://github.com/kouprlabs/tessdata/raw/main/hin.traineddata
-RUN wget https://github.com/kouprlabs/tessdata/raw/main/rus.traineddata
-RUN wget https://github.com/kouprlabs/tessdata/raw/main/ara.traineddata
+RUN wget https://github.com/kouprlabs/tessdata/raw/4.1.0/osd.traineddata
+RUN wget https://github.com/kouprlabs/tessdata/raw/4.1.0/eng.traineddata
+RUN wget https://github.com/kouprlabs/tessdata/raw/4.1.0/deu.traineddata
+RUN wget https://github.com/kouprlabs/tessdata/raw/4.1.0/fra.traineddata
+RUN wget https://github.com/kouprlabs/tessdata/raw/4.1.0/nld.traineddata
+RUN wget https://github.com/kouprlabs/tessdata/raw/4.1.0/ita.traineddata
+RUN wget https://github.com/kouprlabs/tessdata/raw/4.1.0/spa.traineddata
+RUN wget https://github.com/kouprlabs/tessdata/raw/4.1.0/por.traineddata
+RUN wget https://github.com/kouprlabs/tessdata/raw/4.1.0/swe.traineddata
+RUN wget https://github.com/kouprlabs/tessdata/raw/4.1.0/fin.traineddata
+RUN wget https://github.com/kouprlabs/tessdata/raw/4.1.0/jpn.traineddata
+RUN wget https://github.com/kouprlabs/tessdata/raw/4.1.0/chi_sim.traineddata
+RUN wget https://github.com/kouprlabs/tessdata/raw/4.1.0/chi_tra.traineddata
+RUN wget https://github.com/kouprlabs/tessdata/raw/4.1.0/kor.traineddata
+RUN wget https://github.com/kouprlabs/tessdata/raw/4.1.0/hin.traineddata
+RUN wget https://github.com/kouprlabs/tessdata/raw/4.1.0/rus.traineddata
+RUN wget https://github.com/kouprlabs/tessdata/raw/4.1.0/ara.traineddata
 
 WORKDIR /build
 
@@ -72,9 +72,8 @@ RUN dnf install -y libpng-devel
 RUN dnf install -y leptonica-devel
 
 WORKDIR /root
-RUN git clone https://github.com/kouprlabs/jbig2enc.git
+RUN git clone --branch 0.29 --single-branch https://github.com/kouprlabs/jbig2enc.git
 WORKDIR /root/jbig2enc
-RUN git checkout tags/0.29
 RUN ./autogen.sh
 RUN ./configure --with-extra-libraries=/usr/local/lib/ --with-extra-includes=/usr/local/include/
 RUN make
@@ -82,7 +81,7 @@ RUN make install
 WORKDIR /root
 RUN rm -rf jbig2enc
 
-RUN pip3 install ocrmypdf
+RUN pip3 install ocrmypdf==14.2.1
 
 WORKDIR /app
 

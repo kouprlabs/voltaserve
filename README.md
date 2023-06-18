@@ -35,7 +35,7 @@ You can check that by running the command `docker ps` and look at the `STATUS` c
 
 3. Go to the **sign up page** <http://localhost:3000/sign-up> and create an account.
 
-4. Open MailCatcher <http://localhost:11080>, select the received email and click the **confirm email** link.
+4. Open MailCatcher <http://localhost:18025>, select the received email and click the **confirm email** link.
 
 5. Finally, go to the **sign in page** <http://localhost:3000/sign-in> and login with your credentials.
 
@@ -90,36 +90,6 @@ sudo ufw allow 6000
 ```
 
 Other ports can be changed as well by editing their respective environment variables in [.env](.env) file.
-
-### Run Infrastructure Services as Multi-Node Clusters
-
-1. Run:
-
-```shell
-docker compose -p voltaservecluster -f ./docker-compose.cluster.yml up -d
-```
-
-2. Initialize CockroachDB cluster:
-
-```shell
-docker exec -it voltaservecluster-cockroach1-1 ./cockroach init --insecure
-```
-
-3. Initialize Redis cluster:
-
-```shell
-docker run --rm -it --name=redis_cluster_init --network=voltaservecluster_default --ip=172.20.0.30 redis:7.0.8 redis-cli --cluster create 172.20.0.31:6373 172.20.0.32:6374 172.20.0.33:6375 172.20.0.34:6376 172.20.0.35:6377 172.20.0.36:6378 --cluster-replicas 1 --cluster-yes
-```
-
-4. Connect to CockroachDB with root to create a user and database:
-
-```sql
-CREATE DATABASE voltaserve;
-CREATE USER voltaserve;
-GRANT ALL PRIVILEGES ON DATABASE voltaserve TO voltaserve;
-```
-
-5. Connect to CockroachDB with the user `voltaserve` and database `voltaserve`, then run the following SQL script to create the database objects: [sql/schema.sql](sql/schema.sql).
 
 ## Troubleshooting
 
