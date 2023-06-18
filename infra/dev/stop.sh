@@ -4,7 +4,7 @@ BASE_DIR="/opt"
 
 stop_postgres() {
     echo "🛑  Stopping PostgreSQL..."
-    sudo pkill -f postgresql
+    sudo systemctl stop postgresql
 }
 
 stop_redis() {
