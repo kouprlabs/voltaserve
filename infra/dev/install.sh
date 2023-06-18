@@ -63,6 +63,7 @@ install_postgres() {
         
         local pg_hba_conf="/var/lib/pgsql/data/pg_hba.conf"
         echo "host    all             all             0.0.0.0/0               md5" | sudo tee -a "$pg_hba_conf" > /dev/null
+        sudo sh -c 'sed -i "$(grep -n "^local\s\+all\s\+all\s\+peer\s*$" "'$pg_hba_conf'" | cut -d ":" -f 1)s/peer/md5/" "'$pg_hba_conf'"'
 
         sudo systemctl start $postgres_service
         if eval "$not_found"; then
@@ -405,11 +406,11 @@ show_next_steps() {
     printf_cyan "${start_cmd}\n\n"
 
     echo "2) Create a user and database in PostgreSQL (run only first time):"
-    local user_and_db_cmd="curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/sql/create_user_and_database.sql?t=$(date +%s)" | /opt/cockroach/cockroach sql --insecure -u root"
+    local user_and_db_cmd="curl -sSfL https://raw.githubusercontent.com/kouprlabs/voltaserve/infra-update/infra/postgres/schema.sql?t=$(date +%s) | sudo -u postgres psql"
     printf_cyan "${user_and_db_cmd}\n\n"
 
     echo "3) Create database schema (run only first time):"
-    local schema_cmd='curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/sql/schema.sql?t=$(date +%s)" | /opt/cockroach/cockroach sql --insecure -u voltaserve'
+    local schema_cmd="curl -sSfL https://raw.githubusercontent.com/kouprlabs/voltaserve/infra-update/infra/postgres/schema.sql?t=$(date +%s) | sudo -u postgres psql"
     printf_cyan "${schema_cmd}\n\n"
 
     echo "4) Clone the repository in your home directory:"

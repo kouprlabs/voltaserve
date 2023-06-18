@@ -52,13 +52,13 @@ _Note: the scripts above can also be ran directly from the [infra](infra) direct
 Create a user and database:
 
 ```shell
-curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/sql/create_user_and_database.sql?t=$(date +%s)" | /opt/cockroach/cockroach sql --insecure -u root
+curl -sSfL https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/postgres/create_user_and_database.sql?t=$(date +%s) | sudo -u postgres psql
 ```
 
 Create schema:
 
 ```shell
-curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/sql/schema.sql?t=$(date +%s)" | /opt/cockroach/cockroach sql --insecure -u voltaserve
+curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/postgres/schema.sql" | PGPASSWORD=voltaserve psql -U voltaserve -d voltaserve
 ```
 
 _Note: the scripts above can also be ran directly from the [infra/sql](infra/sql) directory._
