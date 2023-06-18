@@ -2,9 +2,9 @@
 
 BASE_DIR="/opt"
 
-stop_cockroach() {
-    echo "🛑  Stopping CockroachDB..."
-    sudo pkill -f cockroach
+stop_postgres() {
+    echo "🛑  Stopping PostgreSQL..."
+    sudo pkill -f postgresql
 }
 
 stop_redis() {
@@ -27,7 +27,7 @@ stop_mailhog() {
     sudo pkill -f MailHog_linux_amd64
 }
 
-stop_cockroach
+stop_postgres
 stop_redis
 stop_minio
 stop_meilisearch

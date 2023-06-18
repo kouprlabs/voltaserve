@@ -2,22 +2,18 @@
 
 BASE_DIR="/opt"
 
-start_cockroach() {
-    local not_found="! pgrep -f cockroach >/dev/null"
+start_postgres() {
+    local not_found="! systemctl is-active --quiet postgresql"
     if eval "$not_found"; then
-        echo "🚀  Starting CockroachDB..."
-        local opt_dir="${BASE_DIR}/cockroach"
-        local log_dir="/var/log/cockroach"
-        sudo mkdir -p $log_dir
-        cd $opt_dir
-        sudo sh -c ''"$opt_dir"'/cockroach start-single-node --insecure --listen-addr=0.0.0.0:26257 --http-addr=0.0.0.0:8080 --background > '"$log_dir"'/log.txt 2>&1 &'
+        echo "🚀  Starting PostgreSQL..."
+        sudo systemctl start postgresql
         if eval "$not_found"; then
-            echo "⛈️  Failed to start CockroachDB."
+            echo "⛈️  Failed to start PostgreSQL."
         else
-            echo "✅  CockroachDB started successfully."
+            echo "✅  Redis started successfully."
         fi
     else
-        echo "✅  CockroachDB is running. Skipping."
+        echo "✅  PostgreSQL is running. Skipping."
     fi
 }
 
@@ -34,7 +30,6 @@ start_redis() {
     else
         echo "✅  Redis is running. Skipping."
     fi
-
 }
 
 start_minio() {
@@ -94,7 +89,7 @@ start_mailhog() {
     fi
 }
 
-start_cockroach
+start_postgres
 start_redis
 start_minio
 start_meilisearch
