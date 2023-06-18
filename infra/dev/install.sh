@@ -295,7 +295,7 @@ install_pip_package() {
     local package_version="$2"
     local not_found="! pip show "$package_name" >/dev/null 2>&1"
     if eval "$not_found"; then
-        printf_bold "🐍  Installing Python package '${package_name}'..."
+        printf_bold "🐍  Installing Python package '${package_name}'...\n"
         pip3 install "${package_name}==${package_version}"
         if eval "$not_found"; then
             printf_red "⛈️  Failed to install Python package '${package_name}'. Aborting."
