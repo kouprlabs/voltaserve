@@ -53,9 +53,17 @@ install_postgres() {
     local not_found='! systemctl list-unit-files | grep -q '"${postgres_service}.service"''
     if eval "$not_found"; then
         printf_bold "📦  Installing service '${postgres_service}'...\n"
+
         sudo dnf install -y postgresql-server
-        sudo systemctl enable $postgres_service
         sudo postgresql-setup --initdb
+        sudo systemctl enable $postgres_service
+        
+        local postgresql_conf="/var/lib/pgsql/data/postgresql.conf"
+        sudo sed -i "s/^#listen_addresses = .*$/listen_addresses = '*'/" "$postgresql_conf"
+        
+        local pg_hba_conf="/var/lib/pgsql/data/pg_hba.conf"
+        echo "host    all             all             0.0.0.0/0               md5" | sudo tee -a "$pg_hba_conf" > /dev/null
+
         sudo systemctl start $postgres_service
         if eval "$not_found"; then
             printf_red "⛈️  Failed to install service '${postgres_service}'. Aborting.\n"
