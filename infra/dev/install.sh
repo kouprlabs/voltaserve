@@ -286,7 +286,7 @@ install_jbig2enc() {
             printf_bold "✅  Binary '${jbig2_bin}' installed successfully."
         fi
     else
-        printf_bold "✅  Found binary '${jbig2_bin}'. Skipping."
+        printf_bold "✅  Found binary '${jbig2_bin}'. Skipping.\n"
     fi
 }
 
