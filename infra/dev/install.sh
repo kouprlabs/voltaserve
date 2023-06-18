@@ -272,7 +272,7 @@ install_jbig2enc() {
     local jbig2_bin="/usr/local/bin/jbig2"
     local not_found="! (command -v $jbig2_bin >/dev/null 2>&1 && $jbig2_bin --version >/dev/null 2>&1)"
     if eval "$not_found"; then
-        printf_bold "🔨  Building binary '${jbig2_bin}'..."
+        printf_bold "🔨  Building binary '${jbig2_bin}'...\n"
         cd $BASE_DIR
         sudo git clone --branch 0.29 --single-branch https://github.com/kouprlabs/jbig2enc.git
         cd "${BASE_DIR}/jbig2enc"
@@ -283,10 +283,10 @@ install_jbig2enc() {
         cd $BASE_DIR
         sudo rm -rf "${BASE_DIR}/jbig2enc"
         if eval "$not_found"; then
-            printf_red "⛈️  Failed to build binary '${jbig2_bin}'. Aborting."
+            printf_red "⛈️  Failed to build binary '${jbig2_bin}'. Aborting.\n"
             exit 1
         else
-            printf_bold "✅  Binary '${jbig2_bin}' installed successfully."
+            printf_bold "✅  Binary '${jbig2_bin}' installed successfully.\n"
         fi
     else
         printf_bold "✅  Found binary '${jbig2_bin}'. Skipping.\n"
@@ -301,10 +301,10 @@ install_pip_package() {
         printf_bold "🐍  Installing Python package '${package_name}'...\n"
         pip3 install "${package_name}==${package_version}"
         if eval "$not_found"; then
-            printf_red "⛈️  Failed to install Python package '${package_name}'. Aborting."
+            printf_red "⛈️  Failed to install Python package '${package_name}'. Aborting.\n"
             exit 1
         else
-            printf_bold "✅  Python package '${package_name}' installed successfully."
+            printf_bold "✅  Python package '${package_name}' installed successfully.\n"
         fi
     else
         printf_bold "✅  Found Python package '$package_name'. Skipping.\n"
@@ -314,14 +314,14 @@ install_pip_package() {
 install_nodejs_18() {
     local not_found='! dnf list installed nodejs >/dev/null 2>&1 || ! node --version | grep -qE "^v18\."'
     if eval "$not_found"; then
-        printf_bold "💎  Installing Node.js v18..."
+        printf_bold "💎  Installing Node.js v18...\n"
         sudo dnf module -y enable nodejs:18
         sudo dnf module -y install nodejs:18/common
         if eval "$not_found"; then
-            printf_red "⛈️  Failed to install Node.js v18 '${package_name}'. Aborting."
+            printf_red "⛈️  Failed to install Node.js v18 '${package_name}'. Aborting.\n"
             exit 1
         else
-            printf_bold "✅  Node.js v18 '${package_name}' installed successfully."
+            printf_bold "✅  Node.js v18 '${package_name}' installed successfully.\n"
         fi
     else
         printf_bold "✅  Found Node.js v18'. Skipping.\n"
@@ -331,13 +331,13 @@ install_nodejs_18() {
 install_corepack() {
     local not_found="! npm list -g corepack >/dev/null 2>&1"
     if eval "$not_found"; then
-        printf_bold "💎  Installing NPM package 'corepack'..."
+        printf_bold "💎  Installing NPM package 'corepack'...\n"
         sudo npm install -g corepack@0.18.1
         if eval "$not_found"; then
-            printf_red "⛈️  Failed to install NPM package 'corepack'. Aborting."
+            printf_red "⛈️  Failed to install NPM package 'corepack'. Aborting.\n"
             exit 1
         else
-            printf_bold "✅  NPM package 'corepack' installed successfully."
+            printf_bold "✅  NPM package 'corepack' installed successfully.\n"
         fi
     else
         printf_bold "✅  Found NPM package 'corepack'. Skipping.\n"
@@ -348,15 +348,15 @@ install_golangci() {
     local golangci_bin="${HOME}/bin/golangci-lint"
     local not_found="! (command -v $golangci_bin >/dev/null 2>&1 && $golangci_bin --version >/dev/null 2>&1)"
     if eval "$not_found"; then
-        printf_bold "🐹  Installing Go binary '${golangci_bin}'..."
+        printf_bold "🐹  Installing Go binary '${golangci_bin}'...\n"
         mkdir -p $HOME/bin
         cd $HOME
         curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.53.2
         if eval "$not_found"; then
-            printf_red "⛈️  Failed to install Go binary '${golangci_bin}'. Aborting."
+            printf_red "⛈️  Failed to install Go binary '${golangci_bin}'. Aborting.\n"
             exit 1
         else
-            printf_bold "✅  Go binary '${golangci_bin}' installed successfully."
+            printf_bold "✅  Go binary '${golangci_bin}' installed successfully.\n"
         fi
     else
         printf_bold "✅  Found Go binary '${golangci_bin}'. Skipping.\n"
@@ -367,15 +367,15 @@ install_swag() {
     local swag_bin="${HOME}/bin/swag"
     local not_found="! (command -v $swag_bin >/dev/null 2>&1 && $swag_bin --version >/dev/null 2>&1)"
     if eval "$not_found"; then
-        printf_bold "🐹  Installing Go binary '${swag_bin}'..."
+        printf_bold "🐹  Installing Go binary '${swag_bin}'...\n"
         go install github.com/swaggo/swag/cmd/swag@v1.8.12
         mkdir -p $HOME/bin
         mv $(go env GOPATH)/bin/swag $HOME/bin/swag
         if eval "$not_found"; then
-            printf_red "⛈️  Failed to install Go binary '${swag_bin}'. Aborting."
+            printf_red "⛈️  Failed to install Go binary '${swag_bin}'. Aborting.\n"
             exit 1
         else
-            printf_bold "✅  Go binary '${swag_bin}' installed successfully."
+            printf_bold "✅  Go binary '${swag_bin}' installed successfully.\n"
         fi
     else
         printf_bold "✅  Found Go binary '${swag_bin}'. Skipping.\n"
@@ -386,15 +386,15 @@ install_air() {
     local air_bin="${HOME}/bin/air"
     local not_found="! (command -v $air_bin >/dev/null 2>&1 && $air_bin -v >/dev/null 2>&1)"
     if eval "$not_found"; then
-        printf_bold "🐹  Installing Go binary '${air_bin}'..."
+        printf_bold "🐹  Installing Go binary '${air_bin}'...\n"
         go install github.com/cosmtrek/air@v1.44.0
         mkdir -p $HOME/bin
         mv $(go env GOPATH)/bin/air $HOME/bin/air
         if eval "$not_found"; then
-            printf_red "⛈️  Failed to install Go binary '${air_bin}'. Aborting."
+            printf_red "⛈️  Failed to install Go binary '${air_bin}'. Aborting.\n"
             exit 1
         else
-            printf_bold "✅  Go binary '${air_bin}' installed successfully."
+            printf_bold "✅  Go binary '${air_bin}' installed successfully.\n"
         fi
     else
         printf_bold "✅  Found Go binary '${air_bin}'. Skipping.\n"
