@@ -1,0 +1,3 @@
+CREATE DATABASE voltaserve;
+CREATE USER voltaserve WITH ENCRYPTED PASSWORD 'voltaserve';
+GRANT ALL PRIVILEGES ON DATABASE voltaserve TO voltaserve;

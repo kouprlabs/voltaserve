@@ -48,24 +48,22 @@ check_supported_system() {
     fi
 }
 
-install_cockroach() {
-    local cockroach_bin="${BASE_DIR}/cockroach/cockroach"
-    local not_found="! (command -v $cockroach_bin >/dev/null 2>&1 && $cockroach_bin --version >/dev/null 2>&1)"
+install_postgres() {
+    local postgres_service="postgresql-server"
+    local not_found='! systemctl list-unit-files | grep -q '"${postgres_service}.service"''
     if eval "$not_found"; then
-        printf_bold "📦  Installing binary '${cockroach_bin}'...\n"
-        cockroach_filename="cockroach-v23.1.3.linux-amd64"
-        cockroach_tgz="${cockroach_filename}.tgz"
-        sudo wget -c "https://binaries.cockroachdb.com/${cockroach_tgz}" -P $BASE_DIR
-        sudo tar -xzf "${BASE_DIR}/${cockroach_tgz}" -C $BASE_DIR --transform="s/^${cockroach_filename}/cockroach/"
-        sudo rm -f "${BASE_DIR}/${cockroach_tgz}"
+        printf_bold "📦  Installing service '${postgres_service}'...\n"
+        sudo dnf install -y $postgres_service
+        sudo systemctl enable $postgres_service
+        sudo systemctl start $postgres_service
         if eval "$not_found"; then
-            printf_red "⛈️  Failed to install binary '${cockroach_bin}'. Aborting.\n"
+            printf_red "⛈️  Failed to install service '${postgres_service}'. Aborting.\n"
             exit 1
         else
-            printf_bold "✅  Binary '${cockroach_bin}' installed successfully.\n"
+            printf_bold "✅  Service '${postgres_service}' installed successfully.\n"
         fi
     else
-        printf_bold "✅  Found binary '${cockroach_bin}'. Skipping.\n"
+        printf_bold "✅  Found service '$postgres_service'. Skipping.\n"
     fi
 }
 
@@ -397,7 +395,7 @@ show_next_steps() {
     local start_cmd='curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/dev/start.sh?t=$(date +%s)" | sh -s'
     printf_cyan "${start_cmd}\n\n"
 
-    echo "2) Create a user and database in CockroachDB (run only first time):"
+    echo "2) Create a user and database in PostgreSQL (run only first time):"
     local user_and_db_cmd="curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/sql/create_user_and_database.sql?t=$(date +%s)" | /opt/cockroach/cockroach sql --insecure -u root"
     printf_cyan "${user_and_db_cmd}\n\n"
 
@@ -449,7 +447,7 @@ install_dnf_package "tar"
 install_dnf_package "wget"
 install_dnf_package "git"
 
-install_cockroach
+install_postgres
 install_meilisearch
 install_mailhog
 install_minio
