@@ -64,6 +64,8 @@ install_postgres() {
         local pg_hba_conf="/var/lib/pgsql/data/pg_hba.conf"
         echo "host    all             all             0.0.0.0/0               md5" | sudo tee -a "$pg_hba_conf" > /dev/null
         sudo sh -c 'sed -i "$(grep -n "^local\s\+all\s\+all\s\+peer\s*$" "'$pg_hba_conf'" | cut -d ":" -f 1)s/peer/md5/" "'$pg_hba_conf'"'
+        sudo sed -i '/^host\s\+all\s\+all\s\+127\.0\.0\.1\/32\s\+ident$/d' "$pg_hba_conf"
+        sudo sed -i '/^host\s\+replication\s\+all\s\+127\.0\.0\.1\/32\s\+ident$/d' "$pg_hba_conf"
 
         sudo systemctl start $postgres_service
         if eval "$not_found"; then
