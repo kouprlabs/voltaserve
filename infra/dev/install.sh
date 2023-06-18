@@ -304,7 +304,7 @@ install_pip_package() {
             printf_bold "✅  Python package '${package_name}' installed successfully."
         fi
     else
-        printf_bold "✅  Found Python package '$package_name'. Skipping."
+        printf_bold "✅  Found Python package '$package_name'. Skipping.\n"
     fi
 }
 
@@ -321,7 +321,7 @@ install_nodejs_18() {
             printf_bold "✅  Node.js v18 '${package_name}' installed successfully."
         fi
     else
-        printf_bold "✅  Found Node.js v18'. Skipping."
+        printf_bold "✅  Found Node.js v18'. Skipping.\n"
     fi
 }
 
@@ -337,7 +337,7 @@ install_corepack() {
             printf_bold "✅  NPM package 'corepack' installed successfully."
         fi
     else
-        printf_bold "✅  Found NPM package 'corepack'. Skipping."
+        printf_bold "✅  Found NPM package 'corepack'. Skipping.\n"
     fi
 }
 
@@ -356,7 +356,7 @@ install_golangci() {
             printf_bold "✅  Go binary '${golangci_bin}' installed successfully."
         fi
     else
-        printf_bold "✅  Found Go binary '${golangci_bin}'. Skipping."
+        printf_bold "✅  Found Go binary '${golangci_bin}'. Skipping.\n"
     fi
 }
 
@@ -375,7 +375,7 @@ install_swag() {
             printf_bold "✅  Go binary '${swag_bin}' installed successfully."
         fi
     else
-        printf_bold "✅  Found Go binary '${swag_bin}'. Skipping."
+        printf_bold "✅  Found Go binary '${swag_bin}'. Skipping.\n"
     fi
 }
 
@@ -394,7 +394,7 @@ install_air() {
             printf_bold "✅  Go binary '${air_bin}' installed successfully."
         fi
     else
-        printf_bold "✅  Found Go binary '${air_bin}'. Skipping."
+        printf_bold "✅  Found Go binary '${air_bin}'. Skipping.\n"
     fi
 }
 
