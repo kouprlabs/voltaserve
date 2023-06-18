@@ -24,7 +24,7 @@ stop_meilisearch() {
 
 stop_mailhog() {
     echo "🛑  Stopping MailHog..."
-    sudo pkill -f MailHog_linux_amd64
+    sudo pkill -f mailhog
 }
 
 stop_postgres

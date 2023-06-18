@@ -71,14 +71,14 @@ start_meilisearch() {
 }
 
 start_mailhog() {
-    local not_found="! pgrep -f MailHog_linux_amd64 >/dev/null"
+    local not_found="! pgrep -f mailhog >/dev/null"
     if eval "$not_found"; then
         echo "🚀  Starting MailHog..."
         local opt_dir="${BASE_DIR}/mailhog"
         local log_dir="/var/log/mailhog"
         sudo mkdir -p $log_dir
         cd $opt_dir
-        sudo sh -c 'nohup '"$opt_dir"'/MailHog_linux_amd64 > '"$log_dir"'/log.txt 2>&1 &'
+        sudo sh -c 'nohup '"$opt_dir"'/mailhog > '"$log_dir"'/log.txt 2>&1 &'
         if eval "$not_found"; then
             echo "⛈️  Failed to start MailHog."
         else

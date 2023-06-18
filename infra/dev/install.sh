@@ -139,12 +139,13 @@ install_meilisearch() {
 }
 
 install_mailhog() {
-    local mailhog_bin="${BASE_DIR}/mailhog/MailHog_linux_amd64"
+    local mailhog_bin="${BASE_DIR}/mailhog/mailhog"
     local not_found="! (command -v $mailhog_bin >/dev/null 2>&1 && $mailhog_bin --version >/dev/null 2>&1)"
     if eval "$not_found"; then
         printf_bold "📦  Installing binary '${mailhog_bin}'...\n"
         sudo mkdir -p "${BASE_DIR}/mailhog"
         sudo wget -c https://github.com/mailhog/MailHog/releases/download/v1.0.1/MailHog_linux_amd64 -P "${BASE_DIR}/mailhog"
+        sudo mv "${BASE_DIR}/mailhog/MailHog_linux_amd64" $mailhog_bin
         sudo chmod +x $mailhog_bin
         if eval "$not_found"; then
             printf_red "⛈️  Failed to install binary '${mailhog_bin}'. Aborting.\n"
