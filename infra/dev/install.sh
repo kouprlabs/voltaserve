@@ -54,8 +54,11 @@ install_postgres() {
     if eval "$not_found"; then
         printf_bold "📦  Installing service '${postgres_service}'...\n"
 
-        sudo dnf install -y postgresql-server
+        sudo dnf module -y enable postgresql:15
+        sudo dnf module -y install postgresql:15/server
+
         sudo postgresql-setup --initdb
+        
         sudo systemctl enable $postgres_service
         sudo systemctl start $postgres_service
 
