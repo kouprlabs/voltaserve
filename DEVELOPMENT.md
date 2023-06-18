@@ -52,7 +52,7 @@ _Note: the scripts above can also be ran directly from the [infra](infra) direct
 Create a user and database:
 
 ```shell
-curl -sSfL https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/postgres/create_user_and_database.sql?t=$(date +%s) | sudo -u postgres psql
+curl -sSfL https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/postgres/create_user_and_database.sql?t=$(date +%s) | PGPASSWORD=postgres psql -U postgres -d postgres
 ```
 
 Create schema:
