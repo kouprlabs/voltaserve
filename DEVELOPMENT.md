@@ -45,7 +45,7 @@ Stop:
 curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/dev/stop.sh?t=$(date +%s)" | sh -s
 ```
 
-_Note: the scripts above can also be ran directly from the [infra](infra) directory._
+_Note: the scripts above can also be ran directly from the [infra/dev](infra/dev) directory._
 
 ## SQL Database
 
@@ -61,7 +61,7 @@ Create tables:
 curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/postgres/schema.sql?t=$(date +%s)" | PGPASSWORD=postgres psql -U postgres -d voltaserve
 ```
 
-_Note: the scripts above can also be ran directly from the [infra/sql](infra/sql) directory._
+_Note: the scripts above can also be ran directly from the [infra/postgres](infra/postgres) directory._
 
 ## Disable Firewall
 
