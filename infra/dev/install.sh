@@ -143,16 +143,17 @@ install_meilisearch() {
         sudo mkdir -p "${BASE_DIR}/meilisearch"
         cd "${BASE_DIR}/meilisearch"
         local arch=$(uname -m)
+        local filename=""
         if [ "$arch" = "amd64" ]; then
-            sudo wget -c "https://github.com/meilisearch/meilisearch/releases/download/v1.2.0/meilisearch-linux-amd64"
-            sudo mv ./meilisearch-linux-amd64 ./meilisearch
+            filename="meilisearch-linux-amd64"
         elif [ "$arch" = "aarch64" ]; then
-            sudo wget -c "https://github.com/meilisearch/meilisearch/releases/download/v1.2.0/meilisearch-linux-aarch64"
-            sudo mv ./meilisearch-linux-aarch64 ./meilisearch
+            filename="meilisearch-linux-aarch64"
         else
             printf_red "⛈️  Failed to install binary '${meilisearch_bin}'. Unsupported CPU architecture: $arch.\n"
             exit 1
         fi
+        sudo wget -c "https://github.com/meilisearch/meilisearch/releases/download/v1.2.0/${filename}"
+        sudo mv "./${filename}" ./meilisearch
         sudo chmod +x $meilisearch_bin
         if eval "$not_found"; then
             printf_red "⛈️  Failed to install binary '${meilisearch_bin}'. Aborting.\n"
@@ -172,16 +173,17 @@ install_mailhog() {
         printf_bold "📦  Installing binary '${mailhog_bin}'...\n"
         sudo mkdir -p "${BASE_DIR}/mailhog"
         local arch=$(uname -m)
+        local filename=""
         if [ "$arch" = "amd64" ]; then
-            sudo wget -c "https://github.com/mailhog/MailHog/releases/download/v1.0.1/MailHog_linux_amd64" -P "${BASE_DIR}/mailhog"
-            sudo mv "${BASE_DIR}/mailhog/MailHog_linux_amd64" $mailhog_bin
+            filename="MailHog_linux_amd64"
         elif [ "$arch" = "aarch64" ]; then
-            sudo wget -c "https://github.com/mailhog/MailHog/releases/download/v1.0.1/MailHog_linux_arm" -P "${BASE_DIR}/mailhog"
-            sudo mv "${BASE_DIR}/mailhog/MailHog_linux_arm" $mailhog_bin
+            filename="MailHog_linux_arm"
         else
             printf_red "⛈️  Failed to install binary '${mailhog_bin}'. Unsupported CPU architecture: $arch.\n"
             exit 1
         fi
+        sudo wget -c "https://github.com/mailhog/MailHog/releases/download/v1.0.1/${filename}" -P "${BASE_DIR}/mailhog"
+        sudo mv "${BASE_DIR}/mailhog/${filename}" $mailhog_bin
         sudo chmod +x $mailhog_bin
         if eval "$not_found"; then
             printf_red "⛈️  Failed to install binary '${mailhog_bin}'. Aborting.\n"
