@@ -55,7 +55,7 @@ Create database:
 curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/postgres/create_database.sql?t=$(date +%s)" | PGPASSWORD=postgres psql -U postgres -d postgres
 ```
 
-Create schema:
+Create tables:
 
 ```shell
 curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/postgres/schema.sql?t=$(date +%s)" | PGPASSWORD=postgres psql -U postgres -d voltaserve
