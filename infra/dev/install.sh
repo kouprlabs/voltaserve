@@ -92,7 +92,7 @@ install_minio() {
         printf_bold "📦  Installing package '${minio_pkg}'...\n"
         local arch=$(uname -m)
         local minio_rpm=""
-        if [ "$arch" = "amd64" ]; then
+        if [ "$arch" = "x86_64" ]; then
             minio_rpm="minio-20230609073212.0.0.x86_64.rpm"
             sudo wget -c "https://dl.min.io/server/minio/release/linux-amd64/${minio_rpm}" -P $BASE_DIR
         elif [ "$arch" = "aarch64" ]; then
@@ -144,7 +144,7 @@ install_meilisearch() {
         cd "${BASE_DIR}/meilisearch"
         local arch=$(uname -m)
         local filename=""
-        if [ "$arch" = "amd64" ]; then
+        if [ "$arch" = "x86_64" ]; then
             filename="meilisearch-linux-amd64"
         elif [ "$arch" = "aarch64" ]; then
             filename="meilisearch-linux-aarch64"
@@ -174,7 +174,7 @@ install_mailhog() {
         sudo mkdir -p "${BASE_DIR}/mailhog"
         local arch=$(uname -m)
         local filename=""
-        if [ "$arch" = "amd64" ]; then
+        if [ "$arch" = "x86_64" ]; then
             filename="MailHog_linux_amd64"
         elif [ "$arch" = "aarch64" ]; then
             filename="MailHog_linux_arm"
