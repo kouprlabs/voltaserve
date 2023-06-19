@@ -93,11 +93,9 @@ install_minio() {
         local arch=$(uname -m)
         local minio_rpm=""
         if [ "$arch" = "x86_64" ]; then
-            minio_rpm="minio-20230609073212.0.0.x86_64.rpm"
-            sudo wget -c "https://dl.min.io/server/minio/release/linux-amd64/${minio_rpm}" -P $BASE_DIR
+            sudo dnf install https://dl.min.io/server/minio/release/linux-amd64/minio-20230616024106.0.0.x86_64.rpm
         elif [ "$arch" = "aarch64" ]; then
-            minio_rpm="minio-20230616024106.0.0.aarch64.rpm"
-            sudo wget -c "https://dl.min.io/server/minio/release/linux-arm64/${minio_rpm}" -P $BASE_DIR
+            sudo dnf install https://dl.min.io/server/minio/release/linux-arm64/minio-20230616024106.0.0.aarch64.rpm
         else
             printf_red "⛈️  Failed to install package '${minio_pkg}'. Unsupported CPU architecture: $arch.\n"
             exit 1
