@@ -2,7 +2,7 @@
 
 ## Getting Started
 
-Make your operating system is supported for development as described [here](#supported-operating-systems).
+Make sure your operating system is supported for development as described [here](#supported-operating-systems).
 
 Run the install script and follow the instructions on the terminal:
 
@@ -45,27 +45,27 @@ Stop:
 curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/dev/stop.sh?t=$(date +%s)" | sh -s
 ```
 
-_Note: the scripts above can also be ran directly from the [infra](infra) directory._
+_Note: the scripts above can also be ran directly from the [infra/dev](infra/dev) directory._
 
 ## SQL Database
 
-Create a user and database:
+Create database:
 
 ```shell
 curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/postgres/create_database.sql?t=$(date +%s)" | PGPASSWORD=postgres psql -U postgres -d postgres
 ```
 
-Create schema:
+Create tables:
 
 ```shell
 curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/postgres/schema.sql?t=$(date +%s)" | PGPASSWORD=postgres psql -U postgres -d voltaserve
 ```
 
-_Note: the scripts above can also be ran directly from the [infra/sql](infra/sql) directory._
+_Note: the scripts above can also be ran directly from the [infra/postgres](infra/postgres) directory._
 
 ## Disable Firewall
 
-During development, if you need to access your development enviroment remotely, you can disable the firewall so you don't need to disable each port separately, this can be done as follows:
+During development, if you need to access your development enviroment remotely, you can disable the firewall so you don't need to open each port separately, this can be done as follows:
 
 ```shell
 sudo systemctl disable firewalld
@@ -87,7 +87,7 @@ export PATH="$PATH:$HOME/.local/bin"
 
 You can clone the [repository](https://github.com/kouprlabs/voltaserve) in your home directory, and run the microservices from there. One option could be to use Visual Studio Code's remote development feature as described [here](https://code.visualstudio.com/docs/remote/remote-overview) to connect to your development environment VM from your host OS.
 
-You can read about how to run each microservice in development mode here:
+You can read how to run each microservice in development mode here:
 
 - [Voltaserve API](api/README.md)
 - [Voltaserve UI](ui/README.md)
