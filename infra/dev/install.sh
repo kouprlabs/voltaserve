@@ -92,9 +92,9 @@ install_minio() {
         printf_bold "📦  Installing package '${minio_pkg}'...\n"
         local arch=$(uname -m)
         if [ "$arch" = "x86_64" ]; then
-            sudo dnf install https://dl.min.io/server/minio/release/linux-amd64/minio-20230616024106.0.0.x86_64.rpm
+            sudo dnf install -y https://dl.min.io/server/minio/release/linux-amd64/minio-20230616024106.0.0.x86_64.rpm
         elif [ "$arch" = "aarch64" ]; then
-            sudo dnf install https://dl.min.io/server/minio/release/linux-arm64/minio-20230616024106.0.0.aarch64.rpm
+            sudo dnf install -y https://dl.min.io/server/minio/release/linux-arm64/minio-20230616024106.0.0.aarch64.rpm
         else
             printf_red "⛈️  Failed to install package '${minio_pkg}'. Unsupported CPU architecture: $arch.\n"
             exit 1
@@ -508,7 +508,7 @@ install_dnf_package "poppler-utils" # Used by conversion microservice (pdftotext
 install_dnf_package "libreoffice"   # Used by conversion microservice
 
 install_rpm_repository "epel" "https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm"
-install_dnf_package "GraphicsMagick" # From EPEL
+install_dnf_package "GraphicsMagick" # Used by conversion microservice. From EPEL
 
 install_dnf_package "tesseract" # Used by conversion microservice
 download_tesseract_trained_data "osd"
