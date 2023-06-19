@@ -49,7 +49,7 @@ _Note: the scripts above can also be ran directly from the [infra](infra) direct
 
 ## SQL Database
 
-Create a user and database:
+Create a database:
 
 ```shell
 curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/postgres/create_database.sql?t=$(date +%s)" | PGPASSWORD=postgres psql -U postgres -d postgres
