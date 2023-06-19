@@ -33,35 +33,14 @@ printf_underlined() {
     printf "\e[4m${msg}\e[0m"
 }
 
-is_el8() {
-    local cpe_name=$(grep -oP '(?<=^CPE_NAME=).+' /etc/os-release)
-    cpe_name="${cpe_name//\"/}"
-    if [[ $cpe_name == "cpe:/o:redhat:enterprise_linux:8:"* ||
-        $cpe_name == "cpe:/o:rocky:rocky:8:"* ||
-        $cpe_name == "cpe:/o:almalinux:almalinux:8:"* ||
-        $cpe_name == "cpe:/o:oracle:linux:8:"* ]]; then
-        return 0
-    else
-        return 1
-    fi
-}
-
-is_el9() {
-    local cpe_name=$(grep -oP '(?<=^CPE_NAME=).+' /etc/os-release)
-    cpe_name="${cpe_name//\"/}"
-    if [[ $cpe_name == "cpe:/o:redhat:enterprise_linux:9:"* ||
-        $cpe_name == "cpe:/o:rocky:rocky:9:"* ||
-        $cpe_name == "cpe:/o:almalinux:almalinux:9:"* ||
-        $cpe_name == "cpe:/o:oracle:linux:9:"* ]]; then
-        return 0
-    else
-        return 1
-    fi
-}
-
 check_supported_system() {
+    local cpe_name=$(grep -oP '(?<=^CPE_NAME=).+' /etc/os-release)
+    cpe_name="${cpe_name//\"/}"
     local pretty_name=$(grep -oP '(?<=^PRETTY_NAME=").*"' /etc/os-release | tr -d '"')
-    if is_el8 || is_el9; then
+    if [[ $cpe_name == "cpe:/o:redhat:enterprise_linux:9:"* ||
+        "$cpe_name" == "cpe:/o:rocky:rocky:9:"* ||
+        "$cpe_name" == "cpe:/o:almalinux:almalinux:9:"* ||
+        "$cpe_name" == "cpe:/o:oracle:linux:9:"* ]]; then
         printf_bold "✅  Found supported operating system '$pretty_name'\n"
     else
         printf_red "⛈️  Operating system not supported: ${pretty_name}\n"
@@ -112,14 +91,19 @@ install_minio() {
     if eval "$not_found"; then
         printf_bold "📦  Installing package '${minio_pkg}'...\n"
         local arch=$(uname -m)
+        local minio_rpm=""
         if [ "$arch" = "x86_64" ]; then
-            sudo dnf install https://dl.min.io/server/minio/release/linux-amd64/minio-20230616024106.0.0.x86_64.rpm
+            minio_rpm="minio-20230609073212.0.0.x86_64.rpm"
+            sudo wget -c "https://dl.min.io/server/minio/release/linux-amd64/${minio_rpm}" -P $BASE_DIR
         elif [ "$arch" = "aarch64" ]; then
-            dnf install https://dl.min.io/server/minio/release/linux-arm64/minio-20230616024106.0.0.aarch64.rpm
+            minio_rpm="minio-20230616024106.0.0.aarch64.rpm"
+            sudo wget -c "https://dl.min.io/server/minio/release/linux-arm64/${minio_rpm}" -P $BASE_DIR
         else
             printf_red "⛈️  Failed to install package '${minio_pkg}'. Unsupported CPU architecture: $arch.\n"
             exit 1
         fi
+        sudo dnf install -y "${BASE_DIR}/${minio_rpm}"
+        sudo rm -f "${BASE_DIR}/${minio_rpm}"
         sudo mkdir -p "${BASE_DIR}/minio"
         if eval "$not_found"; then
             printf_red "⛈️  Failed to install package '${minio_pkg}'. Aborting.\n"
@@ -137,14 +121,9 @@ install_redis() {
     local not_found='! systemctl list-unit-files | grep -q '"${redis_service}.service"''
     if eval "$not_found"; then
         printf_bold "📦  Installing service '${redis_service}'...\n"
-        if is_el9; then
-            sudo dnf install -y $redis_service
-            sudo systemctl enable $redis_service
-            sudo systemctl start $redis_service
-        elif is_el8; then
-            sudo dnf module -y enable redis:6
-            sudo dnf module -y install redis:6/common
-        fi
+        sudo dnf install -y $redis_service
+        sudo systemctl enable $redis_service
+        sudo systemctl start $redis_service
         if eval "$not_found"; then
             printf_red "⛈️  Failed to install service '${redis_service}'. Aborting.\n"
             exit 1
@@ -458,15 +437,6 @@ install_air() {
     fi
 }
 
-install_python_devel() {
-    if is_el9; then
-        install_dnf_package "python3-devel"
-    elif is_el8; then
-        sudo dnf module -y enable python39
-        sudo dnf module -y install python39/common
-    fi
-}
-
 show_next_steps() {
     printf_bold "\n\n🎉 You are ready to develop Voltaserve!\n\n"
 
@@ -539,11 +509,10 @@ install_dnf_package "golang"
 install_dnf_package "poppler-utils"
 install_dnf_package "libreoffice"
 install_dnf_package "python3-pip"
+install_dnf_package "python3-devel"
 install_dnf_package "ghostscript"
 install_dnf_package "tesseract"
 install_dnf_package "postgresql"
-
-install_python_devel
 
 download_tesseract_trained_data "osd"
 download_tesseract_trained_data "eng"
