@@ -63,12 +63,12 @@ install_postgres() {
         sudo systemctl start $postgres_service
 
         sudo -u postgres psql -c "ALTER USER postgres WITH PASSWORD 'postgres';"
-        
+
         local postgresql_conf="/var/lib/pgsql/data/postgresql.conf"
         sudo sed -i "s/^#listen_addresses = .*$/listen_addresses = '*'/" "$postgresql_conf"
-        
+
         local pg_hba_conf="/var/lib/pgsql/data/pg_hba.conf"
-        echo "host    all             all             0.0.0.0/0               md5" | sudo tee -a "$pg_hba_conf" > /dev/null
+        echo "host    all             all             0.0.0.0/0               md5" | sudo tee -a "$pg_hba_conf" >/dev/null
         sudo sh -c 'sed -i "$(grep -n "^local\s\+all\s\+all\s\+peer\s*$" "'$pg_hba_conf'" | cut -d ":" -f 1)s/peer/md5/" "'$pg_hba_conf'"'
         sudo sed -i '/^host\s\+all\s\+all\s\+127\.0\.0\.1\/32\s\+ident$/d' "$pg_hba_conf"
         sudo sed -i '/^host\s\+replication\s\+all\s\+127\.0\.0\.1\/32\s\+ident$/d' "$pg_hba_conf"
@@ -90,8 +90,18 @@ install_minio() {
     local not_found="! rpm -q $minio_pkg >/dev/null"
     if eval "$not_found"; then
         printf_bold "📦  Installing package '${minio_pkg}'...\n"
-        local minio_rpm="minio-20230609073212.0.0.x86_64.rpm"
-        sudo wget -c "https://dl.min.io/server/minio/release/linux-amd64/archive/${minio_rpm}" -P $BASE_DIR
+        local arch=$(uname -m)
+        local minio_rpm=""
+        if [ "$arch" = "amd64" ]; then
+            minio_rpm="minio-20230609073212.0.0.x86_64.rpm"
+            sudo wget -c "https://dl.min.io/server/minio/release/linux-amd64/${minio_rpm}" -P $BASE_DIR
+        elif [ "$arch" = "aarch64" ]; then
+            minio_rpm="minio-20230616024106.0.0.aarch64.rpm"
+            sudo wget -c "https://dl.min.io/server/minio/release/linux-arm64/${minio_rpm}" -P $BASE_DIR
+        else
+            printf_red "⛈️  Failed to install package '${minio_pkg}'. Unsupported CPU architecture: $arch.\n"
+            exit 1
+        fi
         sudo dnf install -y "${BASE_DIR}/${minio_rpm}"
         sudo rm -f "${BASE_DIR}/${minio_rpm}"
         sudo mkdir -p "${BASE_DIR}/minio"
@@ -132,8 +142,17 @@ install_meilisearch() {
         printf_bold "📦  Installing binary '${meilisearch_bin}'...\n"
         sudo mkdir -p "${BASE_DIR}/meilisearch"
         cd "${BASE_DIR}/meilisearch"
-        sudo wget -c "https://github.com/meilisearch/meilisearch/releases/download/v1.2.0/meilisearch-linux-amd64"
-        sudo mv ./meilisearch-linux-amd64 ./meilisearch
+        local arch=$(uname -m)
+        if [ "$arch" = "amd64" ]; then
+            sudo wget -c "https://github.com/meilisearch/meilisearch/releases/download/v1.2.0/meilisearch-linux-amd64"
+            sudo mv ./meilisearch-linux-amd64 ./meilisearch
+        elif [ "$arch" = "aarch64" ]; then
+            sudo wget -c "https://github.com/meilisearch/meilisearch/releases/download/v1.2.0/meilisearch-linux-aarch64"
+            sudo mv ./meilisearch-linux-aarch64 ./meilisearch
+        else
+            printf_red "⛈️  Failed to install binary '${meilisearch_bin}'. Unsupported CPU architecture: $arch.\n"
+            exit 1
+        fi
         sudo chmod +x $meilisearch_bin
         if eval "$not_found"; then
             printf_red "⛈️  Failed to install binary '${meilisearch_bin}'. Aborting.\n"
@@ -152,8 +171,17 @@ install_mailhog() {
     if eval "$not_found"; then
         printf_bold "📦  Installing binary '${mailhog_bin}'...\n"
         sudo mkdir -p "${BASE_DIR}/mailhog"
-        sudo wget -c https://github.com/mailhog/MailHog/releases/download/v1.0.1/MailHog_linux_amd64 -P "${BASE_DIR}/mailhog"
-        sudo mv "${BASE_DIR}/mailhog/MailHog_linux_amd64" $mailhog_bin
+        local arch=$(uname -m)
+        if [ "$arch" = "amd64" ]; then
+            sudo wget -c "https://github.com/mailhog/MailHog/releases/download/v1.0.1/MailHog_linux_amd64" -P "${BASE_DIR}/mailhog"
+            sudo mv "${BASE_DIR}/mailhog/MailHog_linux_amd64" $mailhog_bin
+        elif [ "$arch" = "aarch64" ]; then
+            sudo wget -c "https://github.com/mailhog/MailHog/releases/download/v1.0.1/MailHog_linux_arm" -P "${BASE_DIR}/mailhog"
+            sudo mv "${BASE_DIR}/mailhog/MailHog_linux_arm" $mailhog_bin
+        else
+            printf_red "⛈️  Failed to install binary '${mailhog_bin}'. Unsupported CPU architecture: $arch.\n"
+            exit 1
+        fi
         sudo chmod +x $mailhog_bin
         if eval "$not_found"; then
             printf_red "⛈️  Failed to install binary '${mailhog_bin}'. Aborting.\n"
