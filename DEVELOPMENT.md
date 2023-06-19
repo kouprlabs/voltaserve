@@ -65,7 +65,7 @@ _Note: the scripts above can also be ran directly from the [infra/postgres](infr
 
 ## Disable Firewall
 
-During development, if you need to access your development enviroment remotely, you can disable the firewall so you don't need to disable each port separately, this can be done as follows:
+During development, if you need to access your development enviroment remotely, you can disable the firewall so you don't need to open each port separately, this can be done as follows:
 
 ```shell
 sudo systemctl disable firewalld
