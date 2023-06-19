@@ -91,7 +91,6 @@ install_minio() {
     if eval "$not_found"; then
         printf_bold "📦  Installing package '${minio_pkg}'...\n"
         local arch=$(uname -m)
-        local minio_rpm=""
         if [ "$arch" = "x86_64" ]; then
             sudo dnf install https://dl.min.io/server/minio/release/linux-amd64/minio-20230616024106.0.0.x86_64.rpm
         elif [ "$arch" = "aarch64" ]; then
@@ -100,8 +99,6 @@ install_minio() {
             printf_red "⛈️  Failed to install package '${minio_pkg}'. Unsupported CPU architecture: $arch.\n"
             exit 1
         fi
-        sudo dnf install -y "${BASE_DIR}/${minio_rpm}"
-        sudo rm -f "${BASE_DIR}/${minio_rpm}"
         sudo mkdir -p "${BASE_DIR}/minio"
         if eval "$not_found"; then
             printf_red "⛈️  Failed to install package '${minio_pkg}'. Aborting.\n"
