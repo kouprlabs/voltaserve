@@ -2,7 +2,7 @@
 
 ## Getting Started
 
-Make your operating system is supported for development as described [here](#supported-operating-systems).
+Make sure your operating system is supported for development as described [here](#supported-operating-systems).
 
 Run the install script and follow the instructions on the terminal:
 
