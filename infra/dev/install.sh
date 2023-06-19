@@ -38,9 +38,13 @@ check_supported_system() {
     cpe_name="${cpe_name//\"/}"
     local pretty_name=$(grep -oP '(?<=^PRETTY_NAME=").*"' /etc/os-release | tr -d '"')
     if [[ $cpe_name == "cpe:/o:redhat:enterprise_linux:9:"* ||
-        "$cpe_name" == "cpe:/o:rocky:rocky:9:"* ||
-        "$cpe_name" == "cpe:/o:almalinux:almalinux:9:"* ||
-        "$cpe_name" == "cpe:/o:oracle:linux:9:"* ]]; then
+        $cpe_name == "cpe:/o:redhat:enterprise_linux:8:"* ||
+        $cpe_name == "cpe:/o:rocky:rocky:9:"* ||
+        $cpe_name == "cpe:/o:rocky:rocky:8:"* ||
+        $cpe_name == "cpe:/o:almalinux:almalinux:9:"* ||
+        $cpe_name == "cpe:/o:almalinux:almalinux:8:"* ||
+        $cpe_name == "cpe:/o:oracle:linux:9:"* ||
+        $cpe_name == "cpe:/o:oracle:linux:8:"* ]]; then
         printf_bold "✅  Found supported operating system '$pretty_name'\n"
     else
         printf_red "⛈️  Operating system not supported: ${pretty_name}\n"
