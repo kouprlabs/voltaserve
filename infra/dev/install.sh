@@ -510,7 +510,6 @@ install_dnf_package "python3-pip"
 install_dnf_package "python3-devel"
 install_dnf_package "ghostscript"
 install_dnf_package "tesseract"
-install_dnf_package "postgresql"
 
 download_tesseract_trained_data "osd"
 download_tesseract_trained_data "eng"
