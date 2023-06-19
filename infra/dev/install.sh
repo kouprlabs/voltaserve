@@ -531,7 +531,9 @@ download_tesseract_trained_data "ara"
 
 install_rpm_repository "rpmfusion-free-updates" "https://mirrors.rpmfusion.org/free/el/rpmfusion-free-release-9.noarch.rpm"
 install_rpm_repository "rpmfusion-nonfree-updates" "https://mirrors.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-9.noarch.rpm"
-install_dnf_package "ffmpeg" "--allowerasing" # Used by conversion microservice. From RPM Fusion
+install_dnf_package "dnf-plugins-core" # Needed to enable CodeReady Builder
+install_code_ready_builder_repository
+install_dnf_package "ffmpeg" "--allowerasing" # Used by conversion microservice. Needs libraries from CodeReady Builder. From RPM Fusion
 
 # Required by OCRmyPDF
 install_dnf_package "ghostscript"
@@ -557,8 +559,6 @@ install_dnf_package "libtiff"
 install_dnf_package "libtiff-devel"
 install_dnf_package "libpng"
 install_dnf_package "libpng-devel"
-install_dnf_package "dnf-plugins-core" # Needed to enable CodeReady Builder
-install_code_ready_builder_repository
 install_dnf_package "leptonica-devel" # From CodeReady Builder
 
 build_jbig2enc # Required by OCRmyPDF
