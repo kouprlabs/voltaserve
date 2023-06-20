@@ -93,23 +93,34 @@ func main() {
 		}
 		outpufFile := ""
 		for index, arg := range opts.Args {
-			re := regexp.MustCompile(`\${output\.[a-zA-Z0-9*]+}`)
+			re := regexp.MustCompile(`\${output(?:\.[a-zA-Z0-9*#]+)*(?:\.[a-zA-Z0-9*#]+)?}`)
 			substring := re.FindString(arg)
 			if substring != "" {
+				substring = regexp.MustCompile(`\${(.*?)}`).ReplaceAllString(substring, "$1")
 				parts := strings.Split(substring, ".")
-				ext := strings.ReplaceAll(parts[1], "}", "")
-				if ext == "*" {
-					filename := filepath.Base(inputPath)
-					outputDir := filepath.FromSlash(os.TempDir() + "/" + helper.NewID())
-					if err := os.MkdirAll(outputDir, 0755); err != nil {
-						return err
-					}
-					outpufFile = filepath.FromSlash(outputDir + "/" + strings.TrimSuffix(filename, filepath.Ext(filename)) + ".pdf")
-					opts.Args[index] = re.ReplaceAllString(arg, outputDir)
-				} else {
-					outpufFile = filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + "." + ext)
+				if len(parts) == 1 {
+					outpufFile = filepath.FromSlash(os.TempDir() + "/" + helper.NewID())
 					opts.Args[index] = re.ReplaceAllString(arg, outpufFile)
+				} else if len(parts) == 2 {
+					outpufFile = filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + "." + parts[1])
+					opts.Args[index] = re.ReplaceAllString(arg, outpufFile)
+				} else if len(parts) == 3 {
+					if parts[1] == "*" {
+						filename := filepath.Base(inputPath)
+						outputDir := filepath.FromSlash(os.TempDir() + "/" + helper.NewID())
+						if err := os.MkdirAll(outputDir, 0755); err != nil {
+							return err
+						}
+						outpufFile = filepath.FromSlash(outputDir + "/" + strings.TrimSuffix(filename, filepath.Ext(filename)) + "." + parts[2])
+						opts.Args[index] = re.ReplaceAllString(arg, outputDir)
+					} else if parts[1] == "#" {
+						filename := filepath.Base(inputPath)
+						basePath := filepath.FromSlash(os.TempDir() + "/" + strings.TrimSuffix(filename, filepath.Ext(filename)))
+						outpufFile = filepath.FromSlash(basePath + "." + parts[2])
+						opts.Args[index] = re.ReplaceAllString(arg, basePath)
+					}
 				}
+
 			}
 		}
 		cmd := infra.NewCommand()

@@ -98,9 +98,27 @@ docker build -t voltaserve/conversion .
     "--convert-to",
     "pdf",
     "--outdir",
-    "${output.*}",
+    "${output.*.pdf}",
     "${input}"
   ],
+  "stdout": true
+}
+```
+
+### Get TSV Data From an Image Using Tesseract
+
+`POST http://localhost:6001/v1/run?api_key=MY_API_KEY`
+
+**form-data:**
+
+`file`: `image.jpg`
+
+`json`:
+
+```json
+{
+  "bin": "tesseract",
+  "args": ["${input}", "${output.#.tsv}", "-l", "deu", "tsv"],
   "stdout": true
 }
 ```
