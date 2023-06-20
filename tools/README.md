@@ -30,7 +30,7 @@ docker build -t voltaserve/conversion .
 
 `POST http://localhost:6001/v1/run?api_key=MY_API_KEY`
 
-form-data:
+**form-data:**
 
 `file`: `image.jpg`
 
@@ -48,7 +48,7 @@ form-data:
 
 `POST http://localhost:6001/v1/run?api_key=MY_API_KEY`
 
-form-data:
+**form-data:**
 
 `file`: `image.jpg`
 
@@ -66,7 +66,7 @@ form-data:
 
 `POST http://localhost:6001/v1/run?api_key=MY_API_KEY`
 
-form-data:
+**form-data:**
 
 `file`: `image.jpg`
 
@@ -84,7 +84,7 @@ form-data:
 
 `POST http://localhost:6001/v1/run?api_key=MY_API_KEY`
 
-form-data:
+**form-data:**
 
 `file`: `image.jpg`
 
