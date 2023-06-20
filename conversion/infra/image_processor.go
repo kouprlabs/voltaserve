@@ -272,17 +272,21 @@ func (p *ImageProcessor) ImageData(inputPath string) (ImageData, error) {
 			continue
 		}
 	}
-	var chosen = results[0]
-	for _, result := range results {
-		if result.LanguageProps.Score > chosen.LanguageProps.Score {
-			chosen = result
+	if len(results) > 0 {
+		var chosen = results[0]
+		for _, result := range results {
+			if result.LanguageProps.Score > chosen.LanguageProps.Score {
+				chosen = result
+			}
 		}
+		/* We don't accept a result with less than 0.95 confidence, better have no OCR than have a wrong one :) */
+		if math.Round(chosen.LanguageProps.Score*100)/100 < 0.95 {
+			return ImageData{}, errors.New("could not detect language")
+		}
+		return chosen, nil
+	} else {
+		return ImageData{}, nil
 	}
-	/* We don't accept a result with less than 0.95 confidence, better have no OCR than have a wrong one :) */
-	if math.Round(chosen.LanguageProps.Score*100)/100 < 0.95 {
-		return ImageData{}, errors.New("could not detect language")
-	}
-	return chosen, nil
 }
 
 func (p *ImageProcessor) DPI(imagePath string) (int, error) {
