@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"voltaserve/config"
@@ -68,7 +69,7 @@ func main() {
 			}
 		}
 		var opts core.RunOptions
-		if len(inputPath) > 0 {
+		if inputPath != "" {
 			if err := json.Unmarshal([]byte(c.FormValue("json")), &opts); err != nil {
 				return err
 			}
@@ -81,19 +82,34 @@ func main() {
 		if err := validator.New().Struct(opts); err != nil {
 			return errorpkg.NewRequestBodyValidationError(err)
 		}
-		if len(inputPath) > 0 {
+		if inputPath != "" {
 			for index, arg := range opts.Args {
-				if arg == "$input" {
-					opts.Args[index] = inputPath
+				re := regexp.MustCompile(`\${input}`)
+				substring := re.FindString(arg)
+				if substring != "" {
+					opts.Args[index] = re.ReplaceAllString(arg, inputPath)
 				}
 			}
 		}
 		outpufFile := ""
 		for index, arg := range opts.Args {
-			if strings.HasPrefix(arg, "$output") {
-				parts := strings.Split(arg, ".")
-				outpufFile = filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + "." + parts[1])
-				opts.Args[index] = outpufFile
+			re := regexp.MustCompile(`\${output\.[a-zA-Z0-9*]+}`)
+			substring := re.FindString(arg)
+			if substring != "" {
+				parts := strings.Split(substring, ".")
+				ext := strings.ReplaceAll(parts[1], "}", "")
+				if ext == "*" {
+					filename := filepath.Base(inputPath)
+					outputDir := filepath.FromSlash(os.TempDir() + "/" + helper.NewID())
+					if err := os.MkdirAll(outputDir, 0755); err != nil {
+						return err
+					}
+					outpufFile = filepath.FromSlash(outputDir + "/" + strings.TrimSuffix(filename, filepath.Ext(filename)) + ".pdf")
+					opts.Args[index] = re.ReplaceAllString(arg, outputDir)
+				} else {
+					outpufFile = filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + "." + ext)
+					opts.Args[index] = re.ReplaceAllString(arg, outpufFile)
+				}
 			}
 		}
 		cmd := infra.NewCommand()
@@ -103,7 +119,7 @@ func main() {
 				c.Status(500)
 				return c.SendString(err.Error())
 			} else {
-				if len(outpufFile) > 0 {
+				if outpufFile != "" {
 					return c.Download(outpufFile)
 				} else {
 					return c.SendString(stdout)
@@ -114,7 +130,7 @@ func main() {
 				c.Status(500)
 				return c.SendString(err.Error())
 			} else {
-				if len(outpufFile) > 0 {
+				if outpufFile != "" {
 					return c.Download(outpufFile)
 				} else {
 					return c.SendStatus(200)

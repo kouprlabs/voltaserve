@@ -18,15 +18,15 @@ func NewOfficeProcessor() *OfficeProcessor {
 }
 
 func (p *OfficeProcessor) PDF(inputPath string) (string, error) {
-	outputDirectory := filepath.FromSlash(os.TempDir() + "/" + helper.NewID())
-	if err := os.MkdirAll(outputDirectory, 0755); err != nil {
+	outputDir := filepath.FromSlash(os.TempDir() + "/" + helper.NewID())
+	if err := os.MkdirAll(outputDir, 0755); err != nil {
 		return "", err
 	}
-	if err := p.cmd.Exec("soffice", "--headless", "--convert-to", "pdf", inputPath, "--outdir", outputDirectory); err != nil {
+	if err := p.cmd.Exec("soffice", "--headless", "--convert-to", "pdf", inputPath, "--outdir", outputDir); err != nil {
 		return "", err
 	}
 	filename := filepath.Base(inputPath)
-	outputPath := filepath.FromSlash(outputDirectory + "/" + strings.TrimSuffix(filename, filepath.Ext(filename)) + ".pdf")
+	outputPath := filepath.FromSlash(outputDir + "/" + strings.TrimSuffix(filename, filepath.Ext(filename)) + ".pdf")
 	if _, err := os.Stat(outputPath); os.IsNotExist(err) {
 		return "", err
 	}
