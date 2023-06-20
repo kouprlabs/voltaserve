@@ -108,7 +108,7 @@ func (p *ImageProcessor) ThumbnailBase64(inputPath string) (core.Thumbnail, erro
 		return core.Thumbnail{}, err
 	}
 	if inputSize.Width > p.config.Limits.ImagePreviewMaxWidth || inputSize.Height > p.config.Limits.ImagePreviewMaxHeight {
-		outputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewId() + filepath.Ext(inputPath))
+		outputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(inputPath))
 		if inputSize.Width > inputSize.Height {
 			if err := p.Resize(inputPath, p.config.Limits.ImagePreviewMaxWidth, 0, outputPath); err != nil {
 				return core.Thumbnail{}, err
@@ -196,7 +196,7 @@ func (p *ImageProcessor) ToBase64(path string) (string, error) {
 func (p *ImageProcessor) ImageData(inputPath string) (ImageData, error) {
 	results := []ImageData{}
 	for tesseractModel := range TesseractModelToLanguage {
-		basePath := filepath.FromSlash(os.TempDir() + "/" + helper.NewId())
+		basePath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID())
 		tsvPath := filepath.FromSlash(basePath + ".tsv")
 		if err := p.cmd.Exec("tesseract", inputPath, basePath, "-l", tesseractModel, "tsv"); err != nil {
 			continue

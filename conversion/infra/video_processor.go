@@ -23,7 +23,7 @@ func NewVideoProcessor() *VideoProcessor {
 }
 
 func (p *VideoProcessor) Thumbnail(inputPath string, width int, height int, outputPath string) error {
-	tmpPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewId() + ".png")
+	tmpPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".png")
 	if err := p.cmd.Exec("ffmpeg", "-i", inputPath, "-frames:v", "1", tmpPath); err != nil {
 		return err
 	}
@@ -39,7 +39,7 @@ func (p *VideoProcessor) Thumbnail(inputPath string, width int, height int, outp
 }
 
 func (p *VideoProcessor) ThumbnailBase64(inputPath string) (core.Thumbnail, error) {
-	outputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewId() + ".png")
+	outputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".png")
 	if err := p.Thumbnail(inputPath, 0, p.config.Limits.ImagePreviewMaxHeight, outputPath); err != nil {
 		return core.Thumbnail{}, err
 	}

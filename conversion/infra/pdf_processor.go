@@ -25,7 +25,7 @@ func NewPDFProcessor() *PDFProcessor {
 }
 
 func (p *PDFProcessor) GenerateOCR(inputPath string, language *string, dpi *int) (string, error) {
-	outputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewId() + ".pdf")
+	outputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".pdf")
 	languageOption := ""
 	if language != nil && *language != "" {
 		languageOption = fmt.Sprintf("--language=%s", *language)
@@ -41,7 +41,7 @@ func (p *PDFProcessor) GenerateOCR(inputPath string, language *string, dpi *int)
 }
 
 func (p *PDFProcessor) ExtractText(inputPath string) (string, int64, error) {
-	outputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewId())
+	outputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID())
 	if err := p.cmd.Exec("pdftotext", inputPath, outputPath); err != nil {
 		return "", 0, err
 	}
@@ -62,7 +62,7 @@ func (p *PDFProcessor) ExtractText(inputPath string) (string, int64, error) {
 }
 
 func (p *PDFProcessor) ThumbnailBase64(inputPath string) (core.Thumbnail, error) {
-	outputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewId() + ".jpg")
+	outputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".jpg")
 	if err := p.imageProc.ThumbnailImage(inputPath, 0, p.config.Limits.ImagePreviewMaxHeight, outputPath); err != nil {
 		return core.Thumbnail{}, err
 	}

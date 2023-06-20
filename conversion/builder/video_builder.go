@@ -26,7 +26,7 @@ func NewVideoBuilder() core.Builder {
 }
 
 func (p *videoBuilder) Build(opts core.PipelineOptions) error {
-	inputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewId() + filepath.Ext(opts.Key))
+	inputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(opts.Key))
 	if err := p.s3.GetFile(opts.Key, inputPath, opts.Bucket); err != nil {
 		return err
 	}

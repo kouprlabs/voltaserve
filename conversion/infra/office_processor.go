@@ -18,7 +18,7 @@ func NewOfficeProcessor() *OfficeProcessor {
 }
 
 func (p *OfficeProcessor) PDF(inputPath string) (string, error) {
-	outputDirectory := filepath.FromSlash(os.TempDir() + "/" + helper.NewId())
+	outputDirectory := filepath.FromSlash(os.TempDir() + "/" + helper.NewID())
 	if err := os.MkdirAll(outputDirectory, 0755); err != nil {
 		return "", err
 	}
