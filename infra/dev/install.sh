@@ -439,11 +439,11 @@ show_next_steps() {
     local start_cmd='curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/dev/start.sh?t=$(date +%s)" | sh -s'
     printf_cyan "${start_cmd}\n\n"
 
-    echo "2) Create a user and database in PostgreSQL (run only first time):"
+    echo "2) Create SQL database (run only first time):"
     local user_and_db_cmd='curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/postgres/create_database.sql?t=$(date +%s)" | PGPASSWORD=postgres psql -U postgres -d postgres'
     printf_cyan "${user_and_db_cmd}\n\n"
 
-    echo "3) Create database schema (run only first time):"
+    echo "3) Create SQL tables (run only first time):"
     local schema_cmd='curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/postgres/schema.sql?t=$(date +%s)" | PGPASSWORD=postgres psql -U postgres -d voltaserve'
     printf_cyan "${schema_cmd}\n\n"
 
