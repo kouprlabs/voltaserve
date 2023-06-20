@@ -122,3 +122,29 @@ docker build -t voltaserve/conversion .
   "stdout": true
 }
 ```
+
+### Generate PDF with OCR Text Layer From an Image Using OCRmyPDF
+
+`POST http://localhost:6001/v1/run?api_key=MY_API_KEY`
+
+**form-data:**
+
+`file`: `image.jpg`
+
+`json`:
+
+```json
+{
+  "bin": "ocrmypdf",
+  "args": [
+    "--rotate-pages",
+    "--clean",
+    "--deskew",
+    "--language=kor",
+    "--image-dpi=300",
+    "${input}",
+    "${output}"
+  ],
+  "stdout": true
+}
+```
