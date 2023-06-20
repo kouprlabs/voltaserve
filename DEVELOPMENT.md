@@ -75,14 +75,6 @@ sudo systemctl disable firewalld
 sudo systemctl stop firewalld
 ```
 
-## Shell
-
-Add `~/.local/bin` to your path:
-
-```shell
-export PATH="$PATH:$HOME/.local/bin"
-```
-
 ## Microservices Development
 
 You can clone the [repository](https://github.com/kouprlabs/voltaserve) in your home directory, and run the microservices from there. One option could be to use Visual Studio Code's remote development feature as described [here](https://code.visualstudio.com/docs/remote/remote-overview) to connect to your development environment VM from your host OS.

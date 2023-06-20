@@ -450,10 +450,7 @@ show_next_steps() {
     echo "4) Clone the repository in your home directory:"
     printf_cyan "git clone https://github.com/kouprlabs/voltaserve.git\n\n"
 
-    echo "5) Add '~/.local/bin' to your \$PATH:"
-    printf_cyan "export PATH="\$PATH:\$HOME/.local/bin""
-
-    echo "6) Open a terminal in each microservice's subfolder, then start each one in development mode:"
+    echo "5) Open a terminal in each microservice's subfolder, then start each one in development mode:"
     echo
 
     printf_grey "cd ./api\n"
@@ -483,7 +480,7 @@ show_next_steps() {
     printf_underlined "https://code.visualstudio.com/docs/remote/remote-overview"
     printf ", for this you can find the workspace file (voltaserve.code-workspace) in the repository's root.\n\n"
 
-    echo "7) To stop infrastructure services (if needed):"
+    echo "6) To stop infrastructure services (if needed):"
     local stop_cmd='curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/dev/stop.sh?t=$(date +%s)" | sh -s'
     printf_cyan "${stop_cmd}\n\n"
 }
