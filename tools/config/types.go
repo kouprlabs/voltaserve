@@ -12,4 +12,5 @@ type SecurityConfig struct {
 
 type LimitsConfig struct {
 	ExternalCommandTimeoutSeconds int
+	MultipartBodyLengthLimitMB    int
 }

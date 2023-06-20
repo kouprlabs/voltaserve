@@ -34,4 +34,11 @@ func readLimits(config *Config) {
 		}
 		config.Limits.ExternalCommandTimeoutSeconds = int(v)
 	}
+	if len(os.Getenv("LIMITS_MULTIPART_BODY_LENGTH_LIMIT_MB")) > 0 {
+		v, err := strconv.ParseInt(os.Getenv("LIMITS_MULTIPART_BODY_LENGTH_LIMIT_MB"), 10, 32)
+		if err != nil {
+			panic(err)
+		}
+		config.Limits.MultipartBodyLengthLimitMB = int(v)
+	}
 }

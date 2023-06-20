@@ -2,18 +2,18 @@ package main
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
-	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
 
 	"voltaserve/config"
 	"voltaserve/core"
+	"voltaserve/errorpkg"
 	"voltaserve/helper"
 	"voltaserve/infra"
 
+	"github.com/go-playground/validator/v10"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/gofiber/fiber/v2"
@@ -38,7 +38,10 @@ func main() {
 
 	cfg := config.GetConfig()
 
-	app := fiber.New()
+	app := fiber.New(fiber.Config{
+		ErrorHandler: errorpkg.ErrorHandler,
+		BodyLimit:    int(helper.MegabyteToByte(cfg.Limits.MultipartBodyLengthLimitMB)),
+	})
 
 	app.Get("v1/health", func(c *fiber.Ctx) error {
 		return c.SendStatus(200)
@@ -47,16 +50,12 @@ func main() {
 	app.Post("v1/run", func(c *fiber.Ctx) error {
 		apiKey := c.Query("api_key")
 		if apiKey == "" {
-			if err := c.SendStatus(http.StatusBadRequest); err != nil {
-				return err
-			}
-			return errors.New("missing query param api_key")
+			return errorpkg.NewMissingQueryParamError("api_key")
 		}
 		if apiKey != cfg.Security.APIKey {
-			if err := c.SendStatus(http.StatusUnauthorized); err != nil {
-				return err
+			if apiKey != cfg.Security.APIKey {
+				return errorpkg.NewInvalidAPIKeyError()
 			}
-			return errors.New("invalid api_key")
 		}
 		fh, ferr := c.FormFile("file")
 		inputPath := ""
@@ -78,6 +77,9 @@ func main() {
 			if err := c.BodyParser(opts); err != nil {
 				return err
 			}
+		}
+		if err := validator.New().Struct(opts); err != nil {
+			return errorpkg.NewRequestBodyValidationError(err)
 		}
 		if len(inputPath) > 0 {
 			for index, arg := range opts.Args {
