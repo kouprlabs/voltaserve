@@ -80,7 +80,7 @@ docker build -t voltaserve/conversion .
 }
 ```
 
-### Convert an DOCX file to PDF using LibreOffice
+### Convert DOCX to PDF using LibreOffice
 
 `POST http://localhost:6001/v1/run?api_key=MY_API_KEY`
 
