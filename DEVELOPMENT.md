@@ -58,7 +58,7 @@ curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/po
 Create tables:
 
 ```shell
-curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/postgres/schema.sql?t=$(date +%s)" | PGPASSWORD=postgres psql -U postgres -d voltaserve
+curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/infra/postgres/create_tables.sql?t=$(date +%s)" | PGPASSWORD=postgres psql -U postgres -d voltaserve
 ```
 
 _Note: the scripts above can also be ran directly from the [infra/postgres](infra/postgres) directory._

@@ -1,3 +1,3 @@
 FROM postgres:15.2
 
-COPY ./schema.sql /docker-entrypoint-initdb.d/schema.sql
+COPY ./create_tables.sql /docker-entrypoint-initdb.d/create_tables.sql
