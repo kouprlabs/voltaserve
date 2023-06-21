@@ -30,6 +30,7 @@ Wait until the status of the following containers is `healthy`:
 - `voltaserve-webdav`
 - `voltaserve-language`
 - `voltaserve-ui`
+- `voltaserve-exiftool`
 - `voltaserve-ffmpeg`
 - `voltaserve-graphicsmagick`
 - `voltaserve-libreoffice`
