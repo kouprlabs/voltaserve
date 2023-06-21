@@ -11,8 +11,9 @@ docker compose up -d \
     meilisearch \
     redis \
     mailhog \
+    exiftool \
     ffmpeg \
-    graphicsmagick 
+    graphicsmagick \
     libreoffice \
     ocrmypdf \
     poppler \
@@ -27,3 +28,4 @@ Start each microservice separately in a new terminal as described here:
 - [Voltaserve WebDAV](webdav/README.md)
 - [Voltaserve Conversion](conversion/README.md)
 - [Voltaserve Language](language/README.md)
+- [Voltaserve Tools](tools/README.md)

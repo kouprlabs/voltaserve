@@ -91,7 +91,7 @@ func main() {
 				}
 			}
 		}
-		outpufFile := ""
+		outputFile := ""
 		for index, arg := range opts.Args {
 			re := regexp.MustCompile(`\${output(?:\.[a-zA-Z0-9*#]+)*(?:\.[a-zA-Z0-9*#]+)?}`)
 			substring := re.FindString(arg)
@@ -99,11 +99,11 @@ func main() {
 				substring = regexp.MustCompile(`\${(.*?)}`).ReplaceAllString(substring, "$1")
 				parts := strings.Split(substring, ".")
 				if len(parts) == 1 {
-					outpufFile = filepath.FromSlash(os.TempDir() + "/" + helper.NewID())
-					opts.Args[index] = re.ReplaceAllString(arg, outpufFile)
+					outputFile = filepath.FromSlash(os.TempDir() + "/" + helper.NewID())
+					opts.Args[index] = re.ReplaceAllString(arg, outputFile)
 				} else if len(parts) == 2 {
-					outpufFile = filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + "." + parts[1])
-					opts.Args[index] = re.ReplaceAllString(arg, outpufFile)
+					outputFile = filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + "." + parts[1])
+					opts.Args[index] = re.ReplaceAllString(arg, outputFile)
 				} else if len(parts) == 3 {
 					if parts[1] == "*" {
 						filename := filepath.Base(inputPath)
@@ -111,12 +111,12 @@ func main() {
 						if err := os.MkdirAll(outputDir, 0755); err != nil {
 							return err
 						}
-						outpufFile = filepath.FromSlash(outputDir + "/" + strings.TrimSuffix(filename, filepath.Ext(filename)) + "." + parts[2])
+						outputFile = filepath.FromSlash(outputDir + "/" + strings.TrimSuffix(filename, filepath.Ext(filename)) + "." + parts[2])
 						opts.Args[index] = re.ReplaceAllString(arg, outputDir)
 					} else if parts[1] == "#" {
 						filename := filepath.Base(inputPath)
 						basePath := filepath.FromSlash(os.TempDir() + "/" + strings.TrimSuffix(filename, filepath.Ext(filename)))
-						outpufFile = filepath.FromSlash(basePath + "." + parts[2])
+						outputFile = filepath.FromSlash(basePath + "." + parts[2])
 						opts.Args[index] = re.ReplaceAllString(arg, basePath)
 					}
 				}
@@ -130,8 +130,8 @@ func main() {
 				c.Status(500)
 				return c.SendString(err.Error())
 			} else {
-				if outpufFile != "" {
-					return c.Download(outpufFile)
+				if outputFile != "" {
+					return c.Download(outputFile)
 				} else {
 					return c.SendString(stdout)
 				}
@@ -141,8 +141,8 @@ func main() {
 				c.Status(500)
 				return c.SendString(err.Error())
 			} else {
-				if outpufFile != "" {
-					return c.Download(outpufFile)
+				if outputFile != "" {
+					return c.Download(outputFile)
 				} else {
 					return c.SendStatus(200)
 				}

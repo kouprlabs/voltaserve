@@ -1,0 +1,3 @@
+FROM voltaserve/tools
+
+RUN zypper install -y exiftool

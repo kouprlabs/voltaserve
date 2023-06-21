@@ -1,7 +1,12 @@
 package infra
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"io"
+	"mime/multipart"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
@@ -25,7 +30,6 @@ func NewPDFProcessor() *PDFProcessor {
 }
 
 func (p *PDFProcessor) GenerateOCR(inputPath string, language *string, dpi *int) (string, error) {
-	outputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".pdf")
 	languageOption := ""
 	if language != nil && *language != "" {
 		languageOption = fmt.Sprintf("--language=%s", *language)
@@ -34,16 +38,118 @@ func (p *PDFProcessor) GenerateOCR(inputPath string, language *string, dpi *int)
 	if dpi != nil && *dpi != 0 {
 		dpiOption = fmt.Sprintf("--image-dpi=%d", *dpi)
 	}
-	if err := p.cmd.Exec("ocrmypdf", "--rotate-pages", "--clean", "--deskew", dpiOption, languageOption, inputPath, outputPath); err != nil {
+	file, err := os.Open(inputPath)
+	if err != nil {
+		return "", err
+	}
+	defer file.Close()
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+	fileField, err := writer.CreateFormFile("file", inputPath)
+	if err != nil {
+		return "", err
+	}
+	io.Copy(fileField, file)
+	jsonField, err := writer.CreateFormField("json")
+	if err != nil {
+		return "", err
+	}
+	jsonData := map[string]interface{}{
+		"bin": "ocrmypdf",
+		"args": []string{
+			"--rotate-pages",
+			"--clean",
+			"--deskew",
+			languageOption,
+			dpiOption,
+			"${input}",
+			"${output}"},
+		"stdout": true,
+	}
+	jsonBytes, err := json.Marshal(jsonData)
+	if err != nil {
+		return "", err
+	}
+	jsonField.Write(jsonBytes)
+	writer.Close()
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", p.config.OCRMyPDFURL, p.config.Security.APIKey), body)
+	if err != nil {
+		return "", err
+	}
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+	client := &http.Client{}
+	res, err := client.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer res.Body.Close()
+	if res.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("request failed with status %d", res.StatusCode)
+	}
+	outputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".pdf")
+	outputFile, err := os.Create(outputPath)
+	if err != nil {
+		return "", err
+	}
+	defer outputFile.Close()
+	_, err = io.Copy(outputFile, res.Body)
+	if err != nil {
 		return "", err
 	}
 	return outputPath, nil
 }
 
 func (p *PDFProcessor) ExtractText(inputPath string) (string, int64, error) {
+	file, err := os.Open(inputPath)
+	if err != nil {
+		return "", -1, err
+	}
+	defer file.Close()
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+	fileField, err := writer.CreateFormFile("file", inputPath)
+	if err != nil {
+		return "", -1, err
+	}
+	io.Copy(fileField, file)
+	jsonField, err := writer.CreateFormField("json")
+	if err != nil {
+		return "", -1, err
+	}
+	jsonData := map[string]interface{}{
+		"bin":    "pdftotext",
+		"args":   []string{"${input}", "${output.txt}"},
+		"stdout": true,
+	}
+	jsonBytes, err := json.Marshal(jsonData)
+	if err != nil {
+		return "", -1, err
+	}
+	jsonField.Write(jsonBytes)
+	writer.Close()
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", p.config.PopplerURL, p.config.Security.APIKey), body)
+	if err != nil {
+		return "", -1, err
+	}
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+	client := &http.Client{}
+	res, err := client.Do(req)
+	if err != nil {
+		return "", -1, err
+	}
+	defer res.Body.Close()
+	if res.StatusCode != http.StatusOK {
+		return "", -1, fmt.Errorf("request failed with status %d", res.StatusCode)
+	}
 	outputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID())
-	if err := p.cmd.Exec("pdftotext", inputPath, outputPath); err != nil {
-		return "", 0, err
+	outputFile, err := os.Create(outputPath)
+	if err != nil {
+		return "", -1, err
+	}
+	defer outputFile.Close()
+	_, err = io.Copy(outputFile, res.Body)
+	if err != nil {
+		return "", -1, err
 	}
 	text := ""
 	if _, err := os.Stat(outputPath); err == nil {

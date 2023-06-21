@@ -192,6 +192,10 @@ docker build -t voltaserve/tools .
 ```
 
 ```shell
+docker build -t voltaserve/exiftool -f Dockerfile.exiftool .
+```
+
+```shell
 docker build -t voltaserve/ffmpeg -f Dockerfile.ffmpeg .
 ```
 

@@ -1,13 +1,16 @@
 package infra
 
 import (
+	"bytes"
 	"encoding/base64"
+	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"math"
+	"mime/multipart"
 	"net/http"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -18,7 +21,6 @@ import (
 )
 
 type ImageProcessor struct {
-	cmd            *Command
 	languageClient *client.LanguageClient
 	config         config.Config
 }
@@ -56,7 +58,6 @@ type TesseractData struct {
 
 func NewImageProcessor() *ImageProcessor {
 	return &ImageProcessor{
-		cmd:            NewCommand(),
 		languageClient: client.NewLanguageClient(),
 		config:         config.GetConfig(),
 	}
@@ -76,7 +77,54 @@ func (p *ImageProcessor) Resize(inputPath string, width int, height int, outputP
 		heightStr = strconv.FormatInt(int64(height), 10)
 	}
 	size := widthStr + "x" + heightStr
-	if err := p.cmd.Exec("gm", "convert", "-resize", size, inputPath, outputPath); err != nil {
+	file, err := os.Open(inputPath)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+	fileField, err := writer.CreateFormFile("file", inputPath)
+	if err != nil {
+		return err
+	}
+	io.Copy(fileField, file)
+	jsonField, err := writer.CreateFormField("json")
+	if err != nil {
+		return err
+	}
+	jsonData := map[string]interface{}{
+		"bin":    "gm",
+		"args":   []string{"convert", "-resize", size, "${input}", "${output.png}"},
+		"stdout": true,
+	}
+	jsonBytes, err := json.Marshal(jsonData)
+	if err != nil {
+		return err
+	}
+	jsonField.Write(jsonBytes)
+	writer.Close()
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", p.config.GraphicsMagickURL, p.config.Security.APIKey), body)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+	client := &http.Client{}
+	res, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer res.Body.Close()
+	if res.StatusCode != http.StatusOK {
+		return fmt.Errorf("request failed with status %d", res.StatusCode)
+	}
+	outputFile, err := os.Create(outputPath)
+	if err != nil {
+		return err
+	}
+	defer outputFile.Close()
+	_, err = io.Copy(outputFile, res.Body)
+	if err != nil {
 		return err
 	}
 	return nil
@@ -96,7 +144,54 @@ func (p *ImageProcessor) ThumbnailImage(inputPath string, width int, height int,
 		heightStr = strconv.FormatInt(int64(height), 10)
 	}
 	size := widthStr + "x" + heightStr
-	if err := p.cmd.Exec("gm", "convert", "-thumbnail", size, inputPath, outputPath); err != nil {
+	file, err := os.Open(inputPath)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+	fileField, err := writer.CreateFormFile("file", inputPath)
+	if err != nil {
+		return err
+	}
+	io.Copy(fileField, file)
+	jsonField, err := writer.CreateFormField("json")
+	if err != nil {
+		return err
+	}
+	jsonData := map[string]interface{}{
+		"bin":    "gm",
+		"args":   []string{"convert", "-thumbnail", size, "${input}", "${output}"},
+		"stdout": true,
+	}
+	jsonBytes, err := json.Marshal(jsonData)
+	if err != nil {
+		return err
+	}
+	jsonField.Write(jsonBytes)
+	writer.Close()
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", p.config.GraphicsMagickURL, p.config.Security.APIKey), body)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+	client := &http.Client{}
+	res, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer res.Body.Close()
+	if res.StatusCode != http.StatusOK {
+		return fmt.Errorf("request failed with status %d", res.StatusCode)
+	}
+	outputFile, err := os.Create(outputPath)
+	if err != nil {
+		return err
+	}
+	defer outputFile.Close()
+	_, err = io.Copy(outputFile, res.Body)
+	if err != nil {
 		return err
 	}
 	return nil
@@ -149,25 +244,162 @@ func (p *ImageProcessor) ThumbnailBase64(inputPath string) (core.Thumbnail, erro
 }
 
 func (p *ImageProcessor) Convert(inputPath string, outputPath string) error {
-	if err := p.cmd.Exec("gm", "convert", inputPath, outputPath); err != nil {
+	file, err := os.Open(inputPath)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+	fileField, err := writer.CreateFormFile("file", inputPath)
+	if err != nil {
+		return err
+	}
+	io.Copy(fileField, file)
+	jsonField, err := writer.CreateFormField("json")
+	if err != nil {
+		return err
+	}
+	jsonData := map[string]interface{}{
+		"bin":    "gm",
+		"args":   []string{"convert", "${input}", fmt.Sprintf("${output%s}", filepath.Ext(outputPath))},
+		"stdout": true,
+	}
+	jsonBytes, err := json.Marshal(jsonData)
+	if err != nil {
+		return err
+	}
+	jsonField.Write(jsonBytes)
+	writer.Close()
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", p.config.GraphicsMagickURL, p.config.Security.APIKey), body)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+	client := &http.Client{}
+	res, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer res.Body.Close()
+	if res.StatusCode != http.StatusOK {
+		return fmt.Errorf("request failed with status %d", res.StatusCode)
+	}
+	outputFile, err := os.Create(outputPath)
+	if err != nil {
+		return err
+	}
+	defer outputFile.Close()
+	_, err = io.Copy(outputFile, res.Body)
+	if err != nil {
 		return err
 	}
 	return nil
 }
 
 func (p *ImageProcessor) RemoveAlphaChannel(inputPath string, outputPath string) error {
-	if err := p.cmd.Exec("gm", "convert", inputPath, "-background", "white", "-flatten", outputPath); err != nil {
+	file, err := os.Open(inputPath)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+	fileField, err := writer.CreateFormFile("file", inputPath)
+	if err != nil {
+		return err
+	}
+	io.Copy(fileField, file)
+	jsonField, err := writer.CreateFormField("json")
+	if err != nil {
+		return err
+	}
+	jsonData := map[string]interface{}{
+		"bin":    "gm",
+		"args":   []string{"convert", "${input}", "-background", "white", "-flatten", fmt.Sprintf("${output%s}", filepath.Ext(outputPath))},
+		"stdout": true,
+	}
+	jsonBytes, err := json.Marshal(jsonData)
+	if err != nil {
+		return err
+	}
+	jsonField.Write(jsonBytes)
+	writer.Close()
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", p.config.GraphicsMagickURL, p.config.Security.APIKey), body)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+	client := &http.Client{}
+	res, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer res.Body.Close()
+	if res.StatusCode != http.StatusOK {
+		return fmt.Errorf("request failed with status %d", res.StatusCode)
+	}
+	outputFile, err := os.Create(outputPath)
+	if err != nil {
+		return err
+	}
+	defer outputFile.Close()
+	_, err = io.Copy(outputFile, res.Body)
+	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (p *ImageProcessor) Measure(path string) (core.ImageProps, error) {
-	res, err := p.cmd.ReadOutput("gm", "identify", "-format", "%w,%h", path)
+func (p *ImageProcessor) Measure(inputPath string) (core.ImageProps, error) {
+	file, err := os.Open(inputPath)
 	if err != nil {
 		return core.ImageProps{}, err
 	}
-	values := strings.Split(res, ",")
+	defer file.Close()
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+	fileField, err := writer.CreateFormFile("file", inputPath)
+	if err != nil {
+		return core.ImageProps{}, err
+	}
+	io.Copy(fileField, file)
+	jsonField, err := writer.CreateFormField("json")
+	if err != nil {
+		return core.ImageProps{}, err
+	}
+	jsonData := map[string]interface{}{
+		"bin":    "gm",
+		"args":   []string{"identify", "-format", "%w,%h", "${input}"},
+		"stdout": true,
+	}
+	jsonBytes, err := json.Marshal(jsonData)
+	if err != nil {
+		return core.ImageProps{}, err
+	}
+	jsonField.Write(jsonBytes)
+	writer.Close()
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", p.config.GraphicsMagickURL, p.config.Security.APIKey), body)
+	if err != nil {
+		return core.ImageProps{}, err
+	}
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+	client := &http.Client{}
+	res, err := client.Do(req)
+	if err != nil {
+		return core.ImageProps{}, err
+	}
+	defer res.Body.Close()
+	if res.StatusCode != http.StatusOK {
+		return core.ImageProps{}, fmt.Errorf("request failed with status %d", res.StatusCode)
+	}
+	var buf bytes.Buffer
+	_, err = io.Copy(&buf, res.Body)
+	if err != nil {
+		return core.ImageProps{}, err
+	}
+	size := buf.String()
+	values := strings.Split(size, ",")
 	width, err := strconv.Atoi(helper.RemoveNonNumeric(values[0]))
 	if err != nil {
 		return core.ImageProps{}, err
@@ -193,12 +425,122 @@ func (p *ImageProcessor) ToBase64(path string) (string, error) {
 	return "data:" + mimeType + ";base64," + base64.StdEncoding.EncodeToString(b), nil
 }
 
+func (p *ImageProcessor) TSV(inputPath string, basePath string, tesseractModel string) (string, error) {
+	file, err := os.Open(inputPath)
+	if err != nil {
+		return "", err
+	}
+	defer file.Close()
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+	fileField, err := writer.CreateFormFile("file", inputPath)
+	if err != nil {
+		return "", err
+	}
+	io.Copy(fileField, file)
+	jsonField, err := writer.CreateFormField("json")
+	if err != nil {
+		return "", err
+	}
+	jsonData := map[string]interface{}{
+		"bin":    "tesseract",
+		"args":   []string{"${input}", "${output.#.tsv}", "-l", tesseractModel, "tsv"},
+		"stdout": true,
+	}
+	jsonBytes, err := json.Marshal(jsonData)
+	if err != nil {
+		return "", err
+	}
+	jsonField.Write(jsonBytes)
+	writer.Close()
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", p.config.TesseractURL, p.config.Security.APIKey), body)
+	if err != nil {
+		return "", err
+	}
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+	client := &http.Client{}
+	res, err := client.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer res.Body.Close()
+	if res.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("request failed with status %d", res.StatusCode)
+	}
+	outputPath := filepath.FromSlash(basePath + ".tsv")
+	outputFile, err := os.Create(outputPath)
+	if err != nil {
+		return "", err
+	}
+	defer outputFile.Close()
+	_, err = io.Copy(outputFile, res.Body)
+	if err != nil {
+		return "", err
+	}
+	return outputPath, nil
+}
+
+func (p *ImageProcessor) Text(inputPath string, basePath string, tesseractModel string) (string, error) {
+	file, err := os.Open(inputPath)
+	if err != nil {
+		return "", err
+	}
+	defer file.Close()
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+	fileField, err := writer.CreateFormFile("file", inputPath)
+	if err != nil {
+		return "", err
+	}
+	io.Copy(fileField, file)
+	jsonField, err := writer.CreateFormField("json")
+	if err != nil {
+		return "", err
+	}
+	jsonData := map[string]interface{}{
+		"bin":    "tesseract",
+		"args":   []string{"${input}", "${output.#.txt}", "-l", tesseractModel, "txt"},
+		"stdout": true,
+	}
+	jsonBytes, err := json.Marshal(jsonData)
+	if err != nil {
+		return "", err
+	}
+	jsonField.Write(jsonBytes)
+	writer.Close()
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", p.config.TesseractURL, p.config.Security.APIKey), body)
+	if err != nil {
+		return "", err
+	}
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+	client := &http.Client{}
+	res, err := client.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer res.Body.Close()
+	if res.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("request failed with status %d", res.StatusCode)
+	}
+	outputPath := filepath.FromSlash(basePath + ".tsv")
+	outputFile, err := os.Create(outputPath)
+	if err != nil {
+		return "", err
+	}
+	defer outputFile.Close()
+	_, err = io.Copy(outputFile, res.Body)
+	if err != nil {
+		return "", err
+	}
+	return outputPath, nil
+}
+
 func (p *ImageProcessor) ImageData(inputPath string) (ImageData, error) {
 	results := []ImageData{}
 	for tesseractModel := range TesseractModelToLanguage {
 		basePath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID())
-		tsvPath := filepath.FromSlash(basePath + ".tsv")
-		if err := p.cmd.Exec("tesseract", inputPath, basePath, "-l", tesseractModel, "tsv"); err != nil {
+		tsvPath, err := p.TSV(inputPath, basePath, tesseractModel)
+		if err != nil {
 			continue
 		}
 		var result = ImageData{}
@@ -246,8 +588,8 @@ func (p *ImageProcessor) ImageData(inputPath string) (ImageData, error) {
 		if result.PositiveConfCount < result.NegativeConfCount {
 			return ImageData{}, errors.New("image contains no text")
 		}
-		txtPath := filepath.FromSlash(basePath + ".txt")
-		if err := p.cmd.Exec("tesseract", inputPath, basePath, "-l", tesseractModel, "txt"); err != nil {
+		txtPath, err := p.Text(inputPath, basePath, tesseractModel)
+		if err != nil {
 			return ImageData{}, err
 		}
 		f, err = os.Open(txtPath)
@@ -289,13 +631,55 @@ func (p *ImageProcessor) ImageData(inputPath string) (ImageData, error) {
 	}
 }
 
-func (p *ImageProcessor) DPI(imagePath string) (int, error) {
-	cmd := exec.Command("exiftool", "-S", "-s", "-ImageWidth", "-ImageHeight", "-XResolution", "-YResolution", "-ResolutionUnit", imagePath)
-	output, err := cmd.Output()
+func (p *ImageProcessor) DPI(inputPath string) (int, error) {
+	file, err := os.Open(inputPath)
 	if err != nil {
-		return 0, err
+		return -1, err
 	}
-	lines := strings.Split(string(output), "\n")
+	defer file.Close()
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+	fileField, err := writer.CreateFormFile("file", inputPath)
+	if err != nil {
+		return -1, err
+	}
+	io.Copy(fileField, file)
+	jsonField, err := writer.CreateFormField("json")
+	if err != nil {
+		return -1, err
+	}
+	jsonData := map[string]interface{}{
+		"bin":    "gm",
+		"args":   []string{"exiftool", "-S", "-s", "-ImageWidth", "-ImageHeight", "-XResolution", "-YResolution", "-ResolutionUnit", "${input}"},
+		"stdout": true,
+	}
+	jsonBytes, err := json.Marshal(jsonData)
+	if err != nil {
+		return -1, err
+	}
+	jsonField.Write(jsonBytes)
+	writer.Close()
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", p.config.GraphicsMagickURL, p.config.Security.APIKey), body)
+	if err != nil {
+		return -1, err
+	}
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+	client := &http.Client{}
+	res, err := client.Do(req)
+	if err != nil {
+		return -1, err
+	}
+	defer res.Body.Close()
+	if res.StatusCode != http.StatusOK {
+		return -1, fmt.Errorf("request failed with status %d", res.StatusCode)
+	}
+	var buf bytes.Buffer
+	_, err = io.Copy(&buf, res.Body)
+	if err != nil {
+		return -1, err
+	}
+	values := buf.String()
+	lines := strings.Split(values, "\n")
 	xRes, err := strconv.ParseFloat(lines[2], 64)
 	if err != nil {
 		return 0, err

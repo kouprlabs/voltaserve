@@ -6,7 +6,7 @@ COPY . .
 
 RUN zypper install -y python311 python311-devel python311-pip
 
-RUN pip3 install pipenv==2023.6.12
+RUN pip3 install pipenv==2023.6.12 --user
 
 ENV PATH="/root/.local/bin:${PATH}"
 

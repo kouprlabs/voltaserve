@@ -27,6 +27,13 @@ func GetConfig() Config {
 func readURLs(config *Config) {
 	config.APIURL = os.Getenv("API_URL")
 	config.LanguageURL = os.Getenv("LANGUAGE_URL")
+	config.FFMPEGURL = os.Getenv("VOLTASERVE_FFMPEG_URL")
+	config.ExiftoolURL = os.Getenv("VOLTASERVE_EXIFTOOL_URL")
+	config.GraphicsMagickURL = os.Getenv("VOLTASERVE_GRAPHICSMAGICK_URL")
+	config.LibreOfficeURL = os.Getenv("VOLTASERVE_LIBREOFFICE_URL")
+	config.OCRMyPDFURL = os.Getenv("VOLTASERVE_OCRMYPDF_URL")
+	config.PopplerURL = os.Getenv("VOLTASERVE_POPPLER_URL")
+	config.TesseractURL = os.Getenv("VOLTASERVE_TESSERACT_URL")
 }
 
 func readSecurity(config *Config) {
