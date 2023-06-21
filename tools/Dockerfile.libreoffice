@@ -1,3 +1,4 @@
 FROM voltaserve/tools
 
 RUN zypper install -y libreoffice libreoffice-writer libreoffice-calc libreoffice-impress libreoffice-draw libreoffice-math libreoffice-base
+RUN zypper install -y $(zypper search --type package --not-installed-only '*-fonts' | awk '{ if ($2 ~ /.*-fonts$/) print $2 }')
