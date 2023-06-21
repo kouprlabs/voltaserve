@@ -26,7 +26,7 @@ docker build -t voltaserve/conversion .
 
 ## Example Requests
 
-### Get Image Size with GraphicsMagick
+### Get Image Size using GraphicsMagick
 
 `POST http://localhost:6001/v1/run?api_key=MY_API_KEY`
 
@@ -44,7 +44,7 @@ docker build -t voltaserve/conversion .
 }
 ```
 
-### Convert JPEG to PNG with GraphicsMagick
+### Convert JPEG to PNG using GraphicsMagick
 
 `POST http://localhost:6001/v1/run?api_key=MY_API_KEY`
 
@@ -58,6 +58,24 @@ docker build -t voltaserve/conversion .
 {
   "bin": "gm",
   "args": ["convert", "${input}", "${output.png}"],
+  "stdout": true
+}
+```
+
+### Resize an Image using GraphicsMagick
+
+`POST http://localhost:6001/v1/run?api_key=MY_API_KEY`
+
+**form-data:**
+
+`file`: `image.jpg`
+
+`json`:
+
+```json
+{
+  "bin": "gm",
+  "args": ["convert", "-resize", "300x", "${input}", "${output.png}"],
   "stdout": true
 }
 ```
