@@ -2,7 +2,7 @@
 
 ## Getting Started
 
-We assume the development environment is setup as described [here](../DEVELOPMENT.md).
+Install [Golang](https://go.dev/doc/install).
 
 ### Build and Run
 
