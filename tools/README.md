@@ -68,7 +68,7 @@ docker build -t voltaserve/conversion .
 
 **form-data:**
 
-`file`: `image.jpg`
+`file`: `document.pdf`
 
 `json`:
 
@@ -86,7 +86,7 @@ docker build -t voltaserve/conversion .
 
 **form-data:**
 
-`file`: `image.jpg`
+`file`: `document.docx`
 
 `json`:
 
@@ -101,6 +101,24 @@ docker build -t voltaserve/conversion .
     "${output.*.pdf}",
     "${input}"
   ],
+  "stdout": true
+}
+```
+
+### Convert PDF to Text using Poppler
+
+`POST http://localhost:6001/v1/run?api_key=MY_API_KEY`
+
+**form-data:**
+
+`file`: `document.pdf`
+
+`json`:
+
+```json
+{
+  "bin": "pdftotext",
+  "args": ["${input}", "${output.txt}"],
   "stdout": true
 }
 ```
@@ -172,7 +190,7 @@ docker build -t voltaserve/ocrmypdf -f Dockerfile.ocrmypdf .
 ```
 
 ```shell
-docker build -t voltaserve/poppler-tools -f Dockerfile.poppler-tools .
+docker build -t voltaserve/poppler -f Dockerfile.poppler .
 ```
 
 ```shell
