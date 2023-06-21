@@ -152,6 +152,10 @@ docker build -t voltaserve/conversion .
 ### Build Docker Images
 
 ```shell
+docker build -t voltaserve/tools .
+```
+
+```shell
 docker build -t voltaserve/ffmpeg -f Dockerfile.ffmpeg .
 ```
 
