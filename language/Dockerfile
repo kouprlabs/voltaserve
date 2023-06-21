@@ -1,8 +1,10 @@
-FROM registry.suse.com/bci/python:3.11
+FROM opensuse/leap:15.5
 
 WORKDIR /app
 
 COPY . .
+
+RUN zypper install -y python311 python311-devel python311-pip
 
 RUN pip3 install pipenv==2023.6.12
 

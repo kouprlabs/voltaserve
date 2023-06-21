@@ -1,4 +1,4 @@
-FROM registry.suse.com/bci/golang:1.20 as builder
+FROM opensuse/leap:15.5 as builder
 
 WORKDIR /build
 
@@ -9,7 +9,7 @@ RUN zypper install -y go1.20
 RUN go mod download
 RUN go build -o voltaserve-conversion
 
-FROM registry.suse.com/bci/bci-base:15.4 AS runner
+FROM opensuse/leap:15.5 AS runner
 
 WORKDIR /app
 
