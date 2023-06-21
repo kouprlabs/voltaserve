@@ -148,3 +148,29 @@ docker build -t voltaserve/conversion .
   "stdout": true
 }
 ```
+
+### Build Docker Images
+
+```shell
+docker build -t voltaserve/ffmpeg -f Dockerfile.ffmpeg .
+```
+
+```shell
+docker build -t voltaserve/graphicsmagick -f Dockerfile.graphicsmagick .
+```
+
+```shell
+docker build -t voltaserve/libreoffice -f Dockerfile.libreoffice .
+```
+
+```shell
+docker build -t voltaserve/ocrmypdf -f Dockerfile.ocrmypdf .
+```
+
+```shell
+docker build -t voltaserve/poppler-tools -f Dockerfile.poppler-tools .
+```
+
+```shell
+docker build -t voltaserve/tesseract -f Dockerfile.tesseract .
+```

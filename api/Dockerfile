@@ -1,15 +1,13 @@
-FROM redhat/ubi9 as builder
+FROM registry.suse.com/bci/golang:1.20-3.5 as builder
 
 WORKDIR /build
 
 COPY . .
 
-RUN dnf install -y golang
-
 RUN go mod download
 RUN go build -o voltaserve-api
 
-FROM redhat/ubi9 AS runner
+FROM registry.suse.com/bci/bci-base:15.4 AS runner
 
 WORKDIR /app
 

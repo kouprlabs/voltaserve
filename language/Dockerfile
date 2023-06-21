@@ -1,10 +1,8 @@
-FROM redhat/ubi9
+FROM registry.suse.com/bci/python:3.11
 
 WORKDIR /app
 
 COPY . .
-
-RUN dnf install -y clang python3-pip python3-devel
 
 RUN pip3 install pipenv==2023.6.12
 

@@ -1,4 +1,4 @@
-FROM redhat/ubi9
+FROM registry.suse.com/bci/nodejs:18-4.3
 
 WORKDIR /app
 
@@ -13,9 +13,6 @@ COPY package.json .
 COPY pnpm-lock.yaml .
 COPY tsconfig.json .
 COPY tsconfig.node.json .
-
-RUN dnf module -y enable nodejs:18
-RUN dnf module -y install nodejs:18/common
 
 RUN npm install -g corepack
 RUN corepack enable
