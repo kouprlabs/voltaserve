@@ -5,7 +5,9 @@ WORKDIR /build
 COPY . .
 
 RUN apt-get update
-RUN apt-get install -y golang-1.20
+RUN apt-get install -y ca-certificates
+RUN update-ca-certificates
+RUN apt-get install -y golang
 
 RUN go mod download
 RUN go build -o voltaserve-tools
