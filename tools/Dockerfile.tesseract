@@ -22,3 +22,5 @@ RUN wget https://github.com/kouprlabs/tessdata/raw/4.1.0/kor.traineddata
 RUN wget https://github.com/kouprlabs/tessdata/raw/4.1.0/hin.traineddata
 RUN wget https://github.com/kouprlabs/tessdata/raw/4.1.0/rus.traineddata
 RUN wget https://github.com/kouprlabs/tessdata/raw/4.1.0/ara.traineddata
+
+WORKDIR /app
