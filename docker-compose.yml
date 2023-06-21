@@ -52,6 +52,7 @@ services:
     image: voltaserve/tools
     build:
       context: ./tools
+    external: true
   exiftool:
     image: voltaserve/exiftool
     build:
