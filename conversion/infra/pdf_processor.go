@@ -168,7 +168,7 @@ func (p *PDFProcessor) ExtractText(inputPath string) (string, int64, error) {
 }
 
 func (p *PDFProcessor) ThumbnailBase64(inputPath string) (core.Thumbnail, error) {
-	outputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".jpg")
+	outputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".png")
 	if err := p.imageProc.ThumbnailImage(inputPath, 0, p.config.Limits.ImagePreviewMaxHeight, outputPath); err != nil {
 		return core.Thumbnail{}, err
 	}

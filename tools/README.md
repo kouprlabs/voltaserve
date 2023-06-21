@@ -26,7 +26,7 @@ docker build -t voltaserve/conversion .
 
 ## Example Requests
 
-### Get Image Size using GraphicsMagick
+### Get Image Size using ImageMagick
 
 `POST http://localhost:6001/v1/run?api_key=MY_API_KEY`
 
@@ -38,13 +38,13 @@ docker build -t voltaserve/conversion .
 
 ```json
 {
-  "bin": "gm",
-  "args": ["identify", "-format", "%w,%h", "${input}"],
+  "bin": "identify",
+  "args": ["-format", "%w,%h", "${input}"],
   "output": true
 }
 ```
 
-### Convert JPEG to PNG using GraphicsMagick
+### Convert JPEG to PNG using ImageMagick
 
 `POST http://localhost:6001/v1/run?api_key=MY_API_KEY`
 
@@ -56,13 +56,13 @@ docker build -t voltaserve/conversion .
 
 ```json
 {
-  "bin": "gm",
-  "args": ["convert", "${input}", "${output.png}"],
+  "bin": "convert",
+  "args": ["${input}", "${output.png}"],
   "stdout": true
 }
 ```
 
-### Resize an Image using GraphicsMagick
+### Resize an Image using ImageMagick
 
 `POST http://localhost:6001/v1/run?api_key=MY_API_KEY`
 
@@ -74,13 +74,13 @@ docker build -t voltaserve/conversion .
 
 ```json
 {
-  "bin": "gm",
-  "args": ["convert", "-resize", "300x", "${input}", "${output.png}"],
+  "bin": "convert",
+  "args": ["-resize", "300x", "${input}", "${output.png}"],
   "stdout": true
 }
 ```
 
-### Generate a Thumbnail for a PDF using GraphicsMagick
+### Generate a Thumbnail for a PDF using ImageMagick
 
 `POST http://localhost:6001/v1/run?api_key=MY_API_KEY`
 
@@ -92,8 +92,8 @@ docker build -t voltaserve/conversion .
 
 ```json
 {
-  "bin": "gm",
-  "args": ["convert", "-thumbnail", "x250", "${input}", "${output.png}"],
+  "bin": "convert",
+  "args": ["-thumbnail", "x250", "${input}[0]", "${output.png}"],
   "stdout": true
 }
 ```
@@ -200,7 +200,7 @@ docker build -t voltaserve/ffmpeg -f Dockerfile.ffmpeg .
 ```
 
 ```shell
-docker build -t voltaserve/graphicsmagick -f Dockerfile.graphicsmagick .
+docker build -t voltaserve/imagemagick -f Dockerfile.imagemagick .
 ```
 
 ```shell

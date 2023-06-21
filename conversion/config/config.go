@@ -29,7 +29,7 @@ func readURLs(config *Config) {
 	config.LanguageURL = os.Getenv("LANGUAGE_URL")
 	config.FFMPEGURL = os.Getenv("VOLTASERVE_FFMPEG_URL")
 	config.ExiftoolURL = os.Getenv("VOLTASERVE_EXIFTOOL_URL")
-	config.GraphicsMagickURL = os.Getenv("VOLTASERVE_GRAPHICSMAGICK_URL")
+	config.ImageMagickURL = os.Getenv("VOLTASERVE_IMAGEMAGICK_URL")
 	config.LibreOfficeURL = os.Getenv("VOLTASERVE_LIBREOFFICE_URL")
 	config.OCRMyPDFURL = os.Getenv("VOLTASERVE_OCRMYPDF_URL")
 	config.PopplerURL = os.Getenv("VOLTASERVE_POPPLER_URL")

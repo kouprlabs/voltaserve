@@ -78,13 +78,13 @@ services:
     depends_on:
       - tools
     restart: on-failure
-  graphicsmagick:
-    image: voltaserve/graphicsmagick
+  imagemagick:
+    image: voltaserve/imagemagick
     build:
       context: ./tools
-      dockerfile: ./Dockerfile.graphicsmagick
+      dockerfile: ./Dockerfile.imagemagick
     ports:
-      - ${VOLTASERVE_GRAPHICSMAGICK_PORT}:6001
+      - ${VOLTASERVE_IMAGEMAGICK_PORT}:6001
     healthcheck:
       test: curl --fail http://localhost:5002/v1/health || exit 1
     depends_on:

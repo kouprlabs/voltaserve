@@ -13,7 +13,7 @@ docker compose up -d \
     mailhog \
     exiftool \
     ffmpeg \
-    graphicsmagick \
+    imagemagick \
     libreoffice \
     ocrmypdf \
     poppler \

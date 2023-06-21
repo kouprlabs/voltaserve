@@ -94,8 +94,8 @@ func (p *ImageProcessor) Resize(inputPath string, width int, height int, outputP
 		return err
 	}
 	jsonData := map[string]interface{}{
-		"bin":    "gm",
-		"args":   []string{"convert", "-resize", size, "${input}", "${output.png}"},
+		"bin":    "convert",
+		"args":   []string{"-resize", size, "${input}", "${output.png}"},
 		"stdout": true,
 	}
 	jsonBytes, err := json.Marshal(jsonData)
@@ -104,7 +104,7 @@ func (p *ImageProcessor) Resize(inputPath string, width int, height int, outputP
 	}
 	jsonField.Write(jsonBytes)
 	writer.Close()
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", p.config.GraphicsMagickURL, p.config.Security.APIKey), body)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", p.config.ImageMagickURL, p.config.Security.APIKey), body)
 	if err != nil {
 		return err
 	}
@@ -161,8 +161,8 @@ func (p *ImageProcessor) ThumbnailImage(inputPath string, width int, height int,
 		return err
 	}
 	jsonData := map[string]interface{}{
-		"bin":    "gm",
-		"args":   []string{"convert", "-thumbnail", size, "${input}", "${output}"},
+		"bin":    "convert",
+		"args":   []string{"-thumbnail", size, "-background", "white", "-alpha", "remove", "-flatten", "${input}[0]", fmt.Sprintf("${output%s}", filepath.Ext(outputPath))},
 		"stdout": true,
 	}
 	jsonBytes, err := json.Marshal(jsonData)
@@ -171,7 +171,7 @@ func (p *ImageProcessor) ThumbnailImage(inputPath string, width int, height int,
 	}
 	jsonField.Write(jsonBytes)
 	writer.Close()
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", p.config.GraphicsMagickURL, p.config.Security.APIKey), body)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", p.config.ImageMagickURL, p.config.Security.APIKey), body)
 	if err != nil {
 		return err
 	}
@@ -261,8 +261,8 @@ func (p *ImageProcessor) Convert(inputPath string, outputPath string) error {
 		return err
 	}
 	jsonData := map[string]interface{}{
-		"bin":    "gm",
-		"args":   []string{"convert", "${input}", fmt.Sprintf("${output%s}", filepath.Ext(outputPath))},
+		"bin":    "convert",
+		"args":   []string{"${input}", fmt.Sprintf("${output%s}", filepath.Ext(outputPath))},
 		"stdout": true,
 	}
 	jsonBytes, err := json.Marshal(jsonData)
@@ -271,7 +271,7 @@ func (p *ImageProcessor) Convert(inputPath string, outputPath string) error {
 	}
 	jsonField.Write(jsonBytes)
 	writer.Close()
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", p.config.GraphicsMagickURL, p.config.Security.APIKey), body)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", p.config.ImageMagickURL, p.config.Security.APIKey), body)
 	if err != nil {
 		return err
 	}
@@ -315,8 +315,8 @@ func (p *ImageProcessor) RemoveAlphaChannel(inputPath string, outputPath string)
 		return err
 	}
 	jsonData := map[string]interface{}{
-		"bin":    "gm",
-		"args":   []string{"convert", "${input}", "-background", "white", "-flatten", fmt.Sprintf("${output%s}", filepath.Ext(outputPath))},
+		"bin":    "convert",
+		"args":   []string{"${input}", "-background", "white", "-flatten", fmt.Sprintf("${output%s}", filepath.Ext(outputPath))},
 		"stdout": true,
 	}
 	jsonBytes, err := json.Marshal(jsonData)
@@ -325,7 +325,7 @@ func (p *ImageProcessor) RemoveAlphaChannel(inputPath string, outputPath string)
 	}
 	jsonField.Write(jsonBytes)
 	writer.Close()
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", p.config.GraphicsMagickURL, p.config.Security.APIKey), body)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", p.config.ImageMagickURL, p.config.Security.APIKey), body)
 	if err != nil {
 		return err
 	}
@@ -369,8 +369,8 @@ func (p *ImageProcessor) Measure(inputPath string) (core.ImageProps, error) {
 		return core.ImageProps{}, err
 	}
 	jsonData := map[string]interface{}{
-		"bin":    "gm",
-		"args":   []string{"identify", "-format", "%w,%h", "${input}"},
+		"bin":    "identify",
+		"args":   []string{"-format", "%w,%h", "${input}"},
 		"stdout": true,
 	}
 	jsonBytes, err := json.Marshal(jsonData)
@@ -379,7 +379,7 @@ func (p *ImageProcessor) Measure(inputPath string) (core.ImageProps, error) {
 	}
 	jsonField.Write(jsonBytes)
 	writer.Close()
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", p.config.GraphicsMagickURL, p.config.Security.APIKey), body)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", p.config.ImageMagickURL, p.config.Security.APIKey), body)
 	if err != nil {
 		return core.ImageProps{}, err
 	}
@@ -649,8 +649,8 @@ func (p *ImageProcessor) DPI(inputPath string) (int, error) {
 		return -1, err
 	}
 	jsonData := map[string]interface{}{
-		"bin":    "gm",
-		"args":   []string{"exiftool", "-S", "-s", "-ImageWidth", "-ImageHeight", "-XResolution", "-YResolution", "-ResolutionUnit", "${input}"},
+		"bin":    "exiftool",
+		"args":   []string{"-S", "-s", "-ImageWidth", "-ImageHeight", "-XResolution", "-YResolution", "-ResolutionUnit", "${input}"},
 		"stdout": true,
 	}
 	jsonBytes, err := json.Marshal(jsonData)
@@ -659,7 +659,7 @@ func (p *ImageProcessor) DPI(inputPath string) (int, error) {
 	}
 	jsonField.Write(jsonBytes)
 	writer.Close()
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", p.config.GraphicsMagickURL, p.config.Security.APIKey), body)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", p.config.ImageMagickURL, p.config.Security.APIKey), body)
 	if err != nil {
 		return -1, err
 	}

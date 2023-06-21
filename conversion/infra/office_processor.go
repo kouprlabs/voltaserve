@@ -53,7 +53,7 @@ func (p *OfficeProcessor) PDF(inputPath string) (string, error) {
 	}
 	jsonField.Write(jsonBytes)
 	writer.Close()
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", p.config.GraphicsMagickURL, p.config.Security.APIKey), body)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", p.config.LibreOfficeURL, p.config.Security.APIKey), body)
 	if err != nil {
 		return "", err
 	}
