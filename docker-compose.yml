@@ -10,6 +10,8 @@ volumes:
 services:
   postgres:
     image: voltaserve/postgres
+    build:
+      context: ./postgres
     ports:
       - ${VOLTASERVE_POSTGRES_PORT}:5432
     environment:
@@ -46,6 +48,70 @@ services:
     ports:
       - ${VOLTASERVE_MAILHOG_SMTP_PORT}:1025
       - ${VOLTASERVE_MAILHOG_WEB_PORT}:8025
+  tools:
+    image: voltaserve/tools
+    build:
+      context: ./tools
+  ffmpeg:
+    image: voltaserve/ffmpeg
+    build:
+      context: ./tools
+      dockerfile: ./Dockerfile.ffmpeg
+    ports:
+      - ${VOLTASERVE_FFMPEG_PORT}:6001
+    healthcheck:
+      test: curl --fail http://localhost:5002/v1/health || exit 1
+    restart: on-failure
+  graphicsmagick:
+    image: voltaserve/graphicsmagick
+    build:
+      context: ./tools
+      dockerfile: ./Dockerfile.graphicsmagick
+    ports:
+      - ${VOLTASERVE_GRAPHICSMAGICK_PORT}:6001
+    healthcheck:
+      test: curl --fail http://localhost:5002/v1/health || exit 1
+    restart: on-failure
+  libreoffice:
+    image: voltaserve/libreoffice
+    build:
+      context: ./tools
+      dockerfile: ./Dockerfile.libreoffice
+    ports:
+      - ${VOLTASERVE_LIBREOFFICE_PORT}:6001
+    healthcheck:
+      test: curl --fail http://localhost:5002/v1/health || exit 1
+    restart: on-failure
+  ocrmypdf:
+    image: voltaserve/ocrmypdf
+    build:
+      context: ./tools
+      dockerfile: ./Dockerfile.ocrmypdf
+    ports:
+      - ${VOLTASERVE_OCRMYPDF_PORT}:6001
+    healthcheck:
+      test: curl --fail http://localhost:5002/v1/health || exit 1
+    restart: on-failure
+  poppler:
+    image: voltaserve/poppler
+    build:
+      context: ./tools
+      dockerfile: ./Dockerfile.poppler
+    ports:
+      - ${VOLTASERVE_POPPLER_PORT}:6001
+    healthcheck:
+      test: curl --fail http://localhost:5002/v1/health || exit 1
+    restart: on-failure
+  tesseract:
+    image: voltaserve/tesseract
+    build:
+      context: ./tools
+      dockerfile: ./Dockerfile.tesseract
+    ports:
+      - ${VOLTASERVE_TESSERACT_PORT}:6001
+    healthcheck:
+      test: curl --fail http://localhost:5002/v1/health || exit 1
+    restart: on-failure
   api:
     image: voltaserve/api
     build:

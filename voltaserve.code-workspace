@@ -1,31 +1,46 @@
 {
   "folders": [
     {
-      "path": "./api"
+      "path": "api"
     },
     {
-      "path": "./idp"
+      "path": "idp"
     },
     {
-      "path": "./webdav"
+      "path": "webdav"
     },
     {
-      "path": "./conversion"
+      "path": "conversion"
     },
     {
-      "path": "./language"
+      "path": "language"
     },
     {
-      "path": "./ui"
+      "path": "ui"
     },
     {
-      "path": "./infra"
+      "path": "postgres"
     },
     {
       "path": "tools"
     }
   ],
   "settings": {
+    "[typescript]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[dockercompose]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[typescriptreact]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[jsonc]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[dockerfile]": {
+      "editor.defaultFormatter": "ms-azuretools.vscode-docker"
+    },
     "[python]": {
       "editor.defaultFormatter": "ms-python.black-formatter"
     },
