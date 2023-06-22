@@ -1,12 +1,12 @@
-FROM redhat/ubi9
+FROM opensuse/leap:15.5
 
 WORKDIR /app
 
 COPY . .
 
-RUN dnf install -y clang python3-pip python3-devel
+RUN zypper install -y python311 python311-devel python311-pip
 
-RUN pip3 install pipenv==2023.6.12
+RUN pip3 install pipenv==2023.6.12 --user
 
 ENV PATH="/root/.local/bin:${PATH}"
 

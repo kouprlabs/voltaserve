@@ -1,6 +1,12 @@
 package infra
 
 import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"io"
+	"mime/multipart"
+	"net/http"
 	"os"
 	"path/filepath"
 	"voltaserve/config"
@@ -23,8 +29,55 @@ func NewVideoProcessor() *VideoProcessor {
 }
 
 func (p *VideoProcessor) Thumbnail(inputPath string, width int, height int, outputPath string) error {
-	tmpPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewId() + ".png")
-	if err := p.cmd.Exec("ffmpeg", "-i", inputPath, "-frames:v", "1", tmpPath); err != nil {
+	file, err := os.Open(inputPath)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+	fileField, err := writer.CreateFormFile("file", inputPath)
+	if err != nil {
+		return err
+	}
+	io.Copy(fileField, file)
+	jsonField, err := writer.CreateFormField("json")
+	if err != nil {
+		return err
+	}
+	jsonData := map[string]interface{}{
+		"bin":    "ffmpeg",
+		"args":   []string{"-i", "${input}", "-frames:v", "1", "${output}"},
+		"stdout": true,
+	}
+	jsonBytes, err := json.Marshal(jsonData)
+	if err != nil {
+		return err
+	}
+	jsonField.Write(jsonBytes)
+	writer.Close()
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", p.config.FFMPEGURL, p.config.Security.APIKey), body)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+	client := &http.Client{}
+	res, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer res.Body.Close()
+	if res.StatusCode != http.StatusOK {
+		return fmt.Errorf("request failed with status %d", res.StatusCode)
+	}
+	tmpPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".png")
+	tmpFile, err := os.Create(outputPath)
+	if err != nil {
+		return err
+	}
+	defer tmpFile.Close()
+	_, err = io.Copy(tmpFile, res.Body)
+	if err != nil {
 		return err
 	}
 	if err := p.imageProc.Resize(tmpPath, width, height, outputPath); err != nil {
@@ -39,7 +92,7 @@ func (p *VideoProcessor) Thumbnail(inputPath string, width int, height int, outp
 }
 
 func (p *VideoProcessor) ThumbnailBase64(inputPath string) (core.Thumbnail, error) {
-	outputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewId() + ".png")
+	outputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".png")
 	if err := p.Thumbnail(inputPath, 0, p.config.Limits.ImagePreviewMaxHeight, outputPath); err != nil {
 		return core.Thumbnail{}, err
 	}

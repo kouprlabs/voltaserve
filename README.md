@@ -30,12 +30,19 @@ Wait until the status of the following containers is `healthy`:
 - `voltaserve-webdav`
 - `voltaserve-language`
 - `voltaserve-ui`
+- `voltaserve-exiftool`
+- `voltaserve-ffmpeg`
+- `voltaserve-graphicsmagick`
+- `voltaserve-libreoffice`
+- `voltaserve-ocrmypdf`
+- `voltaserve-poppler`
+- `voltaserve-tesseract`
 
 You can check that by running the command `docker ps` and look at the `STATUS` column.
 
 3. Go to the **sign up page** <http://localhost:3000/sign-up> and create an account.
 
-4. Open MailCatcher <http://localhost:18025>, select the received email and click the **confirm email** link.
+4. Open MailCatcher <http://localhost:8025>, select the received email and click the **confirm email** link.
 
 5. Finally, go to the **sign in page** <http://localhost:3000/sign-in> and login with your credentials.
 

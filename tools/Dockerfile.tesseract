@@ -1,0 +1,20 @@
+FROM voltaserve/tools
+
+RUN zypper install -y tesseract-ocr \
+    tesseract-ocr-traineddata-osd \
+    tesseract-ocr-traineddata-eng \
+    tesseract-ocr-traineddata-deu \
+    tesseract-ocr-traineddata-fra \
+    tesseract-ocr-traineddata-nld \
+    tesseract-ocr-traineddata-ita \
+    tesseract-ocr-traineddata-spa \
+    tesseract-ocr-traineddata-por \
+    tesseract-ocr-traineddata-swe \
+    tesseract-ocr-traineddata-fin \
+    tesseract-ocr-traineddata-jpn \
+    tesseract-ocr-traineddata-chi_sim \
+    tesseract-ocr-traineddata-chi_tra \
+    tesseract-ocr-traineddata-kor \
+    tesseract-ocr-traineddata-hin \
+    tesseract-ocr-traineddata-rus \
+    tesseract-ocr-traineddata-ara
