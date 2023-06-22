@@ -659,7 +659,7 @@ func (p *ImageProcessor) DPI(inputPath string) (int, error) {
 	}
 	jsonField.Write(jsonBytes)
 	writer.Close()
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", p.config.ImageMagickURL, p.config.Security.APIKey), body)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", p.config.ExiftoolURL, p.config.Security.APIKey), body)
 	if err != nil {
 		return -1, err
 	}
