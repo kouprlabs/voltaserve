@@ -120,7 +120,6 @@ func main() {
 						opts.Args[index] = re.ReplaceAllString(arg, basePath)
 					}
 				}
-
 			}
 		}
 		cmd := infra.NewCommand()
