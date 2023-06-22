@@ -1,4 +1,4 @@
-FROM redhat/ubi9
+FROM opensuse/leap:15.5
 
 WORKDIR /app
 
@@ -14,8 +14,7 @@ COPY pnpm-lock.yaml .
 COPY tsconfig.json .
 COPY tsconfig.node.json .
 
-RUN dnf module -y enable nodejs:18
-RUN dnf module -y install nodejs:18/common
+RUN zypper install -y nodejs18
 
 RUN npm install -g corepack
 RUN corepack enable

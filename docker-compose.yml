@@ -1,28 +1,26 @@
-version: "3.8"
+version: "3.9"
 
 volumes:
-  cockroach:
+  postgres:
   minio:
   meilisearch:
   redis:
-  redisinsight:
 
 
 services:
-  cockroach:
-    image: cockroachdb/cockroach:v23.1.3
+  postgres:
+    image: voltaserve/postgres
+    build:
+      context: ./postgres
     ports:
-      - ${VOLTASERVE_POSTGRES_PORT}:26257
-      - ${VOLTASERVE_COCKROACH_CONSOLE_PORT}:8080
+      - ${VOLTASERVE_POSTGRES_PORT}:5432
     environment:
-      COCKROACH_DATABASE: voltaserve
-      COCKROACH_USER: voltaserve
+      POSTGRES_USER: voltaserve
+      POSTGRES_PASSWORD: voltaserve
     volumes:
-      - cockroach:/cockroach/cockroach-data
-      - ./infra/sql:/docker-entrypoint-initdb.d
-    command: start-single-node --insecure
+      - postgres:/var/lib/postgresql/data
   minio:
-    image: minio/minio:RELEASE.2023-06-09T07-32-12Z
+    image: minio/minio:RELEASE.2023-06-19T19-52-50Z
     ports:
       - ${VOLTASERVE_MINIO_PORT}:9000
       - ${VOLTASERVE_MINIO_CONSOLE_PORT}:9001
@@ -34,28 +32,112 @@ services:
       - minio:/data
     command: server /data --console-address ":9001"
   meilisearch:
-    image: getmeili/meilisearch:v1.2.0
+    image: getmeili/meilisearch:v1.2
     ports:
       - ${VOLTASERVE_MEILISEARCH_PORT}:7700
     volumes:
       - meilisearch:/meili_data
   redis:
-    image: redis:6.2.7
+    image: redis:7.0
     ports:
       - ${VOLTASERVE_REDIS_PORT}:6379
     volumes:
       - redis:/data
-  redisinsight:
-    image: redislabs/redisinsight:1.14.0
+  mailhog:
+    image: mailhog/mailhog:v1.0.1
     ports:
-      - ${VOLTASERVE_REDISINSIGHT_PORT}:8001
-    volumes:
-      - redisinsight:/db
-  mailcatcher:
-    image: sj26/mailcatcher:v0.8.2
+      - ${VOLTASERVE_MAILHOG_SMTP_PORT}:1025
+      - ${VOLTASERVE_MAILHOG_WEB_PORT}:8025
+  tools:
+    image: voltaserve/tools
+    build:
+      context: ./tools
+    deploy:
+      mode: none
+  exiftool:
+    image: voltaserve/exiftool
+    build:
+      context: ./tools
+      dockerfile: ./Dockerfile.exiftool
     ports:
-      - ${VOLTASERVE_MAILCATCHER_WEB_PORT}:1080
-      - ${VOLTASERVE_MAILCATCHER_SMTP_PORT}:1025
+      - ${VOLTASERVE_EXIFTOOL_PORT}:6001
+    healthcheck:
+      test: curl --fail http://localhost:5002/v1/health || exit 1
+    depends_on:
+      - tools
+    restart: on-failure
+  ffmpeg:
+    image: voltaserve/ffmpeg
+    build:
+      context: ./tools
+      dockerfile: ./Dockerfile.ffmpeg
+    ports:
+      - ${VOLTASERVE_FFMPEG_PORT}:6001
+    healthcheck:
+      test: curl --fail http://localhost:5002/v1/health || exit 1
+    depends_on:
+      - tools
+    restart: on-failure
+  imagemagick:
+    image: voltaserve/imagemagick
+    build:
+      context: ./tools
+      dockerfile: ./Dockerfile.imagemagick
+    ports:
+      - ${VOLTASERVE_IMAGEMAGICK_PORT}:6001
+    healthcheck:
+      test: curl --fail http://localhost:5002/v1/health || exit 1
+    depends_on:
+      - tools
+    restart: on-failure
+  libreoffice:
+    image: voltaserve/libreoffice
+    build:
+      context: ./tools
+      dockerfile: ./Dockerfile.libreoffice
+    ports:
+      - ${VOLTASERVE_LIBREOFFICE_PORT}:6001
+    healthcheck:
+      test: curl --fail http://localhost:5002/v1/health || exit 1
+    depends_on:
+      - tools
+    restart: on-failure
+  ocrmypdf:
+    image: voltaserve/ocrmypdf
+    build:
+      context: ./tools
+      dockerfile: ./Dockerfile.ocrmypdf
+    ports:
+      - ${VOLTASERVE_OCRMYPDF_PORT}:6001
+    healthcheck:
+      test: curl --fail http://localhost:5002/v1/health || exit 1
+    depends_on:
+      - tools
+    restart: on-failure
+  poppler:
+    image: voltaserve/poppler
+    build:
+      context: ./tools
+      dockerfile: ./Dockerfile.poppler
+    ports:
+      - ${VOLTASERVE_POPPLER_PORT}:6001
+    healthcheck:
+      test: curl --fail http://localhost:5002/v1/health || exit 1
+    depends_on:
+      - tools
+    restart: on-failure
+  tesseract:
+    image: voltaserve/tesseract
+    build:
+      context: ./tools
+      dockerfile: ./Dockerfile.tesseract
+    ports:
+      - ${VOLTASERVE_TESSERACT_PORT}:6001
+    healthcheck:
+      test: curl --fail http://localhost:5002/v1/health || exit 1
+    depends_on:
+      - tools
+    restart: on-failure
   api:
     image: voltaserve/api
     build:
@@ -65,7 +147,7 @@ services:
     environment:
       - PORT=5000
       - CONVERSION_URL=http://conversion:5001
-      - POSTGRES_URL=postgresql://voltaserve@cockroach:26257/voltaserve
+      - POSTGRES_URL=postgresql://voltaserve:voltaserve@postgres:5432/voltaserve
       - S3_URL=minio:9000
       - SEARCH_URL=http://meilisearch:7700
       - PUBLIC_UI_URL=http://${VOLTASERVE_HOSTNAME}:${VOLTASERVE_UI_PORT}
@@ -80,7 +162,7 @@ services:
     healthcheck:
       test: curl --fail http://localhost:5000/v1/health || exit 1
     depends_on:
-      - cockroach
+      - postgres
       - redis
       - minio
       - meilisearch
@@ -93,7 +175,7 @@ services:
       - ${VOLTASERVE_IDP_PORT}:7000
     environment:
       - PORT=7000
-      - POSTGRES_URL=postgresql://voltaserve@cockroach:26257/voltaserve
+      - POSTGRES_URL=postgresql://voltaserve:voltaserve@postgres:5432/voltaserve
       - SEARCH_URL=http://meilisearch:7700
       - PUBLIC_UI_URL=http://${VOLTASERVE_HOSTNAME}:${VOLTASERVE_UI_PORT}
       - SMTP_HOST=${VOLTASERVE_SMTP_HOST}
@@ -106,7 +188,7 @@ services:
     healthcheck:
       test: curl --fail http://localhost:7000/v1/health || exit 1
     depends_on:
-      - cockroach
+      - postgres
       - meilisearch
       - minio
     restart: on-failure

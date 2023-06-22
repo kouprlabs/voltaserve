@@ -2,7 +2,7 @@
 
 ## Getting Started
 
-We assume the development environment is setup as described [here](../DEVELOPMENT.md).
+Install [Python](https://www.python.org) and [Pipenv](https://pipenv.pypa.io).
 
 Install dependencies:
 

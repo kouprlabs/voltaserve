@@ -1,15 +1,15 @@
-FROM redhat/ubi9 as builder
+FROM opensuse/leap:15.5 as builder
 
 WORKDIR /build
 
 COPY . .
 
-RUN dnf install -y golang
+RUN zypper install -y go1.20
 
 RUN go mod download
 RUN go build -o voltaserve-api
 
-FROM redhat/ubi9 AS runner
+FROM opensuse/leap:15.5 AS runner
 
 WORKDIR /app
 

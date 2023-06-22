@@ -7,7 +7,6 @@ import (
 	"voltaserve/errorpkg"
 	"voltaserve/guard"
 	"voltaserve/helper"
-	"voltaserve/infra"
 	"voltaserve/model"
 	"voltaserve/repo"
 	"voltaserve/search"
@@ -57,7 +56,6 @@ type OrganizationService struct {
 	groupRepo    repo.GroupRepo
 	groupService *GroupService
 	groupMapper  *groupMapper
-	imageProc    *infra.ImageProcessor
 	config       config.Config
 }
 
@@ -73,7 +71,6 @@ func NewOrganizationService() *OrganizationService {
 		groupRepo:    repo.NewGroupRepo(),
 		groupService: NewGroupService(),
 		groupMapper:  newGroupMapper(),
-		imageProc:    infra.NewImageProcessor(),
 		userMapper:   newUserMapper(),
 		config:       config.GetConfig(),
 	}
