@@ -1,0 +1,44 @@
+FROM ubuntu:23.04 as builder
+
+WORKDIR /build
+
+COPY . .
+
+RUN apt-get update
+RUN apt-get install -y ca-certificates
+RUN update-ca-certificates
+RUN apt-get install -y golang
+
+RUN go mod download
+RUN go build -o voltaserve-tools
+
+FROM ubuntu:23.04 AS runner
+
+RUN apt-get update
+RUN apt-get install -y ocrmypdf \
+    tesseract-ocr-osd \
+    tesseract-ocr-eng \
+    tesseract-ocr-deu \
+    tesseract-ocr-fra \
+    tesseract-ocr-nld \
+    tesseract-ocr-ita \
+    tesseract-ocr-spa \
+    tesseract-ocr-por \
+    tesseract-ocr-swe \
+    tesseract-ocr-fin \
+    tesseract-ocr-jpn \
+    tesseract-ocr-chi-sim \
+    tesseract-ocr-chi-tra \
+    tesseract-ocr-kor \
+    tesseract-ocr-hin \
+    tesseract-ocr-rus \
+    tesseract-ocr-ara
+
+WORKDIR /app
+
+COPY --from=builder /build/voltaserve-tools ./voltaserve-tools
+COPY --from=builder /build/.env ./.env
+
+ENTRYPOINT ["./voltaserve-tools"]
+
+EXPOSE 6001

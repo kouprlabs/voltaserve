@@ -57,7 +57,6 @@ type WorkspaceService struct {
 	fileGuard       *guard.FileGuard
 	fileMapper      *FileMapper
 	userRepo        repo.UserRepo
-	imageProc       *infra.ImageProcessor
 	s3              *infra.S3Manager
 	config          config.Config
 }
@@ -74,7 +73,6 @@ func NewWorkspaceService() *WorkspaceService {
 		fileGuard:       guard.NewFileGuard(),
 		fileMapper:      NewFileMapper(),
 		userRepo:        repo.NewUserRepo(),
-		imageProc:       infra.NewImageProcessor(),
 		s3:              infra.NewS3Manager(),
 		config:          config.GetConfig(),
 	}

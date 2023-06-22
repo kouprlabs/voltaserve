@@ -19,16 +19,14 @@ type MessageParams struct {
 }
 
 type MailTemplate struct {
-	dialer    *gomail.Dialer
-	imageProc *ImageProcessor
-	config    config.SMTPConfig
+	dialer *gomail.Dialer
+	config config.SMTPConfig
 }
 
 func NewMailTemplate() *MailTemplate {
 	mt := new(MailTemplate)
 	mt.config = config.GetConfig().SMTP
 	mt.dialer = gomail.NewDialer(mt.config.Host, mt.config.Port, mt.config.Username, mt.config.Password)
-	mt.imageProc = NewImageProcessor()
 	return mt
 }
 

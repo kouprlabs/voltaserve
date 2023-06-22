@@ -6,7 +6,6 @@ import (
 	"voltaserve/config"
 	"voltaserve/guard"
 	"voltaserve/helper"
-	"voltaserve/infra"
 	"voltaserve/model"
 	"voltaserve/repo"
 	"voltaserve/search"
@@ -65,7 +64,6 @@ type GroupService struct {
 	orgRepo        repo.OrganizationRepo
 	orgCache       *cache.OrganizationCache
 	orgGuard       *guard.OrganizationGuard
-	imageProc      *infra.ImageProcessor
 	config         config.Config
 }
 
@@ -86,7 +84,6 @@ func NewGroupService() *GroupService {
 		orgRepo:        repo.NewOrganizationRepo(),
 		orgGuard:       guard.NewOrganizationGuard(),
 		orgCache:       cache.NewOrganizationCache(),
-		imageProc:      infra.NewImageProcessor(),
 		fileGuard:      guard.NewFileGuard(),
 		config:         config.GetConfig(),
 	}
