@@ -10,6 +10,10 @@ Install dependencies:
 pipenv install
 ```
 
+```shell
+python3 -m spacy download xx_ent_wiki_sm
+```
+
 Activate the environment:
 
 ```shell

@@ -14,7 +14,6 @@ RUN zypper install -y tesseract-ocr \
     tesseract-ocr-traineddata-jpn \
     tesseract-ocr-traineddata-chi_sim \
     tesseract-ocr-traineddata-chi_tra \
-    tesseract-ocr-traineddata-kor \
     tesseract-ocr-traineddata-hin \
     tesseract-ocr-traineddata-rus \
     tesseract-ocr-traineddata-ara

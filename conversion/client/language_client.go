@@ -9,9 +9,10 @@ import (
 	"voltaserve/config"
 )
 
-type LanguageDetectionResult struct {
-	Language string  `json:"language"`
-	Score    float64 `json:"score"`
+type LanguageDetect struct {
+	Language    string  `json:"language"`
+	Score       float64 `json:"score"`
+	EntityCount int64   `json:"entity_count"`
 }
 
 type LanguageClient struct {
@@ -24,7 +25,7 @@ func NewLanguageClient() *LanguageClient {
 	}
 }
 
-func (api *LanguageClient) Detect(text string) (LanguageDetectionResult, error) {
+func (api *LanguageClient) Detect(text string) (LanguageDetect, error) {
 	requestBody := struct {
 		Text string `json:"text"`
 	}{
@@ -32,21 +33,21 @@ func (api *LanguageClient) Detect(text string) (LanguageDetectionResult, error) 
 	}
 	jsonBody, err := json.Marshal(requestBody)
 	if err != nil {
-		return LanguageDetectionResult{}, err
+		return LanguageDetect{}, err
 	}
 	response, err := http.Post(fmt.Sprintf("%s/v1/detect", api.config.LanguageURL), "application/json", bytes.NewBuffer(jsonBody))
 	if err != nil {
-		return LanguageDetectionResult{}, err
+		return LanguageDetect{}, err
 	}
 	defer response.Body.Close()
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
-		return LanguageDetectionResult{}, err
+		return LanguageDetect{}, err
 	}
-	var result LanguageDetectionResult
+	var result LanguageDetect
 	err = json.Unmarshal(body, &result)
 	if err != nil {
-		return LanguageDetectionResult{}, err
+		return LanguageDetect{}, err
 	}
 	return result, nil
 }
