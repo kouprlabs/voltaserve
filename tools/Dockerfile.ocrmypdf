@@ -29,7 +29,6 @@ RUN apt-get install -y ocrmypdf \
     tesseract-ocr-jpn \
     tesseract-ocr-chi-sim \
     tesseract-ocr-chi-tra \
-    tesseract-ocr-kor \
     tesseract-ocr-hin \
     tesseract-ocr-rus \
     tesseract-ocr-ara

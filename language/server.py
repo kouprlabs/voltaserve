@@ -5,7 +5,7 @@ import spacy_fastlang  # noqa: F401 # pylint: disable=unused-import
 
 app = Flask(__name__)
 
-nlp = spacy.blank("xx")
+nlp = spacy.load("xx_ent_wiki_sm")
 nlp.add_pipe("language_detector")
 
 
@@ -19,5 +19,9 @@ def detect():
     content = request.json
     text = content["text"]
     doc = nlp(text)
-    result = {"language": Lang(doc._.language).pt3, "score": doc._.language_score}
+    result = {
+        "language": Lang(doc._.language).pt3,
+        "score": doc._.language_score,
+        "entity_count": len(doc.ents),
+    }
     return jsonify(result)
