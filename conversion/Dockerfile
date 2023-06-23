@@ -4,7 +4,7 @@ WORKDIR /build
 
 COPY . .
 
-RUN zypper install -y go1.20
+RUN zypper install -y go1.20 git
 
 RUN go mod download
 RUN go build -o voltaserve-conversion
