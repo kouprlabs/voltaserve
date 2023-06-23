@@ -6,6 +6,7 @@ COPY . .
 
 RUN zypper install -y go1.20
 
+ENV GOPROXY=direct
 RUN go mod download
 RUN go build -o voltaserve-conversion
 
