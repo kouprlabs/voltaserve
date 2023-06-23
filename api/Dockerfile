@@ -4,9 +4,8 @@ WORKDIR /build
 
 COPY . .
 
-RUN zypper install -y go1.20
+RUN zypper install -y go1.20 git
 
-ENV GOPROXY=direct
 RUN go mod download
 RUN go build -o voltaserve-api
 
