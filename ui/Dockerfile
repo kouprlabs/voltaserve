@@ -14,7 +14,7 @@ COPY pnpm-lock.yaml .
 COPY tsconfig.json .
 COPY tsconfig.node.json .
 
-RUN zypper install -y nodejs18
+RUN zypper install -y nodejs18 npm18
 
 RUN npm install -g corepack
 RUN corepack enable
