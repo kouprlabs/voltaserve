@@ -41,6 +41,7 @@ func (p *pdfPipeline) Run(opts core.PipelineOptions) error {
 		Options: opts,
 	}
 	var dpi int
+	var err error
 	if p.fileIdentifier.IsImage(inputPath) {
 		if opts.Language != nil {
 			res.Language = opts.Language
@@ -48,8 +49,8 @@ func (p *pdfPipeline) Run(opts core.PipelineOptions) error {
 		if err := p.apiClient.UpdateSnapshot(&res); err != nil {
 			return err
 		}
-		newInputPath, err := p.convertToCompatibleJPEG(inputPath)
-		if err != nil {
+		newInputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(inputPath))
+		if err := p.imageProc.RemoveAlphaChannel(inputPath, newInputPath); err != nil {
 			return err
 		}
 		if err := os.Remove(inputPath); err != nil {
@@ -58,7 +59,7 @@ func (p *pdfPipeline) Run(opts core.PipelineOptions) error {
 		inputPath = newInputPath
 		dpi, err = p.imageProc.DPI(inputPath)
 		if err != nil {
-			dpi = 0
+			dpi = 72
 		}
 	}
 	newInputPath, _ := p.pdfProc.GenerateOCR(inputPath, opts.TesseractModel, &dpi)
@@ -113,12 +114,4 @@ func (p *pdfPipeline) Run(opts core.PipelineOptions) error {
 		}
 	}
 	return nil
-}
-
-func (p *pdfPipeline) convertToCompatibleJPEG(path string) (string, error) {
-	res := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".jpg")
-	if err := p.imageProc.RemoveAlphaChannel(path, res); err != nil {
-		return "", err
-	}
-	return res, nil
 }

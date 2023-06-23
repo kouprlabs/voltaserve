@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
 	"voltaserve/client"
@@ -38,6 +39,7 @@ type ImageData struct {
 type LanguageProps struct {
 	Language       string
 	Score          float64
+	EntityCount    int64
 	TesseractModel string
 }
 
@@ -316,7 +318,7 @@ func (p *ImageProcessor) RemoveAlphaChannel(inputPath string, outputPath string)
 	}
 	jsonData := map[string]interface{}{
 		"bin":    "convert",
-		"args":   []string{"${input}", "-background", "white", "-flatten", fmt.Sprintf("${output%s}", filepath.Ext(outputPath))},
+		"args":   []string{"${input}", "-alpha", "off", fmt.Sprintf("${output%s}", filepath.Ext(outputPath))},
 		"stdout": true,
 	}
 	jsonBytes, err := json.Marshal(jsonData)
@@ -585,12 +587,9 @@ func (p *ImageProcessor) ImageData(inputPath string) (ImageData, error) {
 		if err := os.Remove(tsvPath); err != nil {
 			continue
 		}
-		if result.PositiveConfCount < result.NegativeConfCount {
-			return ImageData{}, errors.New("image contains no text")
-		}
 		txtPath, err := p.Text(inputPath, basePath, tesseractModel)
 		if err != nil {
-			return ImageData{}, err
+			continue
 		}
 		f, err = os.Open(txtPath)
 		if err != nil {
@@ -601,28 +600,38 @@ func (p *ImageProcessor) ImageData(inputPath string) (ImageData, error) {
 			continue
 		}
 		result.Text = string(b)
-		detection, err := p.languageClient.Detect(result.Text)
-		if err == nil && TesseractModelToLanguage[tesseractModel] == detection.Language {
+		langDetect, err := p.languageClient.Detect(result.Text)
+		if err == nil && TesseractModelToLanguage[tesseractModel] == langDetect.Language {
 			result.LanguageProps = LanguageProps{
-				Language:       detection.Language,
-				Score:          detection.Score,
+				Language:       langDetect.Language,
+				Score:          langDetect.Score,
+				EntityCount:    langDetect.EntityCount,
 				TesseractModel: tesseractModel,
 			}
 			results = append(results, result)
+		}
+		if langDetect.Language != TesseractModelToLanguage[tesseractModel] {
+			continue
+		}
+		if result.PositiveConfCount < result.NegativeConfCount && result.PositiveConfPercent < 50 {
+			return ImageData{}, errors.New("image contains no text")
 		}
 		if err := os.Remove(txtPath); err != nil {
 			continue
 		}
 	}
 	if len(results) > 0 {
+		sort.Slice(results, func(a, b int) bool {
+			return results[a].LanguageProps.Score > results[b].LanguageProps.Score
+		})
 		var chosen = results[0]
 		for _, result := range results {
-			if result.LanguageProps.Score > chosen.LanguageProps.Score {
+			if result.LanguageProps.Score >= p.config.Limits.LanguageScoreThreshold && result.PositiveConfCount > chosen.PositiveConfCount && result.LanguageProps.EntityCount > chosen.LanguageProps.EntityCount {
 				chosen = result
 			}
 		}
 		/* We don't accept a result with less than 0.95 confidence, better have no OCR than have a wrong one :) */
-		if math.Round(chosen.LanguageProps.Score*100)/100 < 0.95 {
+		if math.Round(chosen.LanguageProps.Score*100)/100 < p.config.Limits.LanguageScoreThreshold {
 			return ImageData{}, errors.New("could not detect language")
 		}
 		return chosen, nil
@@ -678,8 +687,10 @@ func (p *ImageProcessor) DPI(inputPath string) (int, error) {
 	if err != nil {
 		return -1, err
 	}
-	values := buf.String()
-	lines := strings.Split(values, "\n")
+	lines := strings.Split(buf.String(), "\n")
+	if len(lines) < 5 || lines[4] != "inches" {
+		return 72, nil
+	}
 	xRes, err := strconv.ParseFloat(lines[2], 64)
 	if err != nil {
 		return 0, err
@@ -688,6 +699,5 @@ func (p *ImageProcessor) DPI(inputPath string) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	dpi := int((xRes + yRes) / 2)
-	return dpi, nil
+	return int((xRes + yRes) / 2), nil
 }

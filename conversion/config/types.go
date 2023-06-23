@@ -25,6 +25,7 @@ type LimitsConfig struct {
 	FileProcessingMaxSizeMB       int
 	ImagePreviewMaxWidth          int
 	ImagePreviewMaxHeight         int
+	LanguageScoreThreshold        float64
 }
 
 type S3Config struct {

@@ -13,7 +13,6 @@ var TesseractModelToLanguage = map[string]string{
 	"jpn":     "jpn",
 	"chi_sim": "zho",
 	"chi_tra": "zho",
-	"kor":     "kor",
 	"hin":     "hin",
 	"rus":     "rus",
 	"ara":     "ara",
