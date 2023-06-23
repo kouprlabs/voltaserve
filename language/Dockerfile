@@ -12,6 +12,8 @@ ENV PATH="/root/.local/bin:${PATH}"
 
 RUN pipenv install
 
+RUN python3 -m spacy download xx_ent_wiki_sm
+
 ENV FLASK_APP=server.py
 
 ENTRYPOINT ["pipenv", "run", "flask", "run", "--host=0.0.0.0", "--port=5002"]
