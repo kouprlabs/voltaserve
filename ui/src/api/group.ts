@@ -127,7 +127,7 @@ export default class GroupAPI {
   }
 
   static useList(swrOptions?: any) {
-    return useSWR<List>('/organizations', () => this.list(), swrOptions)
+    return useSWR<List>('/groups', () => this.list(), swrOptions)
   }
 
   static async list(options?: ListOptions): Promise<List> {
