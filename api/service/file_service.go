@@ -1381,7 +1381,7 @@ func (svc *FileService) GetGroupPermissions(id string, userID string) ([]*GroupP
 		if err != nil {
 			return nil, err
 		}
-		g, err := svc.groupMapper.mapGroup(m, userID)
+		g, err := svc.groupMapper.mapOne(m, userID)
 		if err != nil {
 			return nil, err
 		}
@@ -1407,13 +1407,13 @@ func (svc *FileService) doAuthorization(data []model.File, user model.User) ([]m
 func (svc *FileService) doAuthorizationByIDs(ids []string, user model.User) ([]model.File, error) {
 	var res []model.File
 	for _, id := range ids {
-		var file model.File
-		file, err := svc.fileCache.Get(id)
+		var f model.File
+		f, err := svc.fileCache.Get(id)
 		if err != nil {
 			return nil, err
 		}
-		if svc.fileGuard.IsAuthorized(user, file, model.PermissionViewer) {
-			res = append(res, file)
+		if svc.fileGuard.IsAuthorized(user, f, model.PermissionViewer) {
+			res = append(res, f)
 		}
 	}
 	return res, nil

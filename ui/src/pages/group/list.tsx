@@ -27,7 +27,7 @@ import { decodeQuery } from '@/helpers/query'
 const GroupListPage = () => {
   const [searchParams] = useSearchParams()
   const query = decodeQuery(searchParams.get('q') as string)
-  const { data: groups, error } = GroupAPI.useGetAllOrSearch(
+  const { data: list, error } = GroupAPI.useListOrSearch(
     query ? { search: { text: query } } : undefined,
     swrConfig()
   )
@@ -45,8 +45,8 @@ const GroupListPage = () => {
             <Text>Failed to load groups.</Text>
           </Center>
         )}
-        {!groups && !error && <SectionSpinner />}
-        {groups && groups.length === 0 && (
+        {!list && !error && <SectionSpinner />}
+        {list && list.data.length === 0 && (
           <Center h="300px">
             <VStack spacing={variables.spacing}>
               <Text>There are no groups.</Text>
@@ -54,7 +54,7 @@ const GroupListPage = () => {
             </VStack>
           </Center>
         )}
-        {groups && groups.length > 0 && (
+        {list && list.data.length > 0 && (
           <Table variant="simple">
             <Thead>
               <Tr>
@@ -65,7 +65,7 @@ const GroupListPage = () => {
               </Tr>
             </Thead>
             <Tbody>
-              {groups.map((g: Group) => (
+              {list.data.map((g: Group) => (
                 <Tr key={g.id}>
                   <Td>
                     <HStack spacing={variables.spacing}>

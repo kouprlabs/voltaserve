@@ -162,7 +162,7 @@ func (svc *OrganizationService) List(page uint, size uint, sortBy string, sortOr
 }
 
 func (svc *OrganizationService) Search(query string, page uint, size uint, userID string) (*OrganizationList, error) {
-	workspaces, err := svc.orgSearch.Query(query)
+	orgs, err := svc.orgSearch.Query(query)
 	if err != nil {
 		return nil, err
 	}
@@ -170,7 +170,7 @@ func (svc *OrganizationService) Search(query string, page uint, size uint, userI
 	if err != nil {
 		return nil, err
 	}
-	authorized, err := svc.doAuthorization(workspaces, user)
+	authorized, err := svc.doAuthorization(orgs, user)
 	if err != nil {
 		return nil, err
 	}
@@ -378,7 +378,7 @@ func (svc *OrganizationService) GetGroups(id string, userID string) ([]*Group, e
 	if err != nil {
 		return nil, err
 	}
-	res, err := svc.groupMapper.mapGroups(groups, userID)
+	res, err := svc.groupMapper.mapMany(groups, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -387,9 +387,9 @@ func (svc *OrganizationService) GetGroups(id string, userID string) ([]*Group, e
 
 func (svc *OrganizationService) doAuthorization(data []model.Organization, user model.User) ([]model.Organization, error) {
 	var res []model.Organization
-	for _, w := range data {
-		if svc.orgGuard.IsAuthorized(user, w, model.PermissionViewer) {
-			res = append(res, w)
+	for _, o := range data {
+		if svc.orgGuard.IsAuthorized(user, o, model.PermissionViewer) {
+			res = append(res, o)
 		}
 	}
 	return res, nil
@@ -398,13 +398,13 @@ func (svc *OrganizationService) doAuthorization(data []model.Organization, user 
 func (svc *OrganizationService) doAuthorizationByIDs(ids []string, user model.User) ([]model.Organization, error) {
 	var res []model.Organization
 	for _, id := range ids {
-		var org model.Organization
-		org, err := svc.orgCache.Get(id)
+		var o model.Organization
+		o, err := svc.orgCache.Get(id)
 		if err != nil {
 			return nil, err
 		}
-		if svc.orgGuard.IsAuthorized(user, org, model.PermissionViewer) {
-			res = append(res, org)
+		if svc.orgGuard.IsAuthorized(user, o, model.PermissionViewer) {
+			res = append(res, o)
 		}
 	}
 	return res, nil

@@ -2,6 +2,8 @@ package service
 
 import (
 	"fmt"
+	"sort"
+	"time"
 	"voltaserve/cache"
 	"voltaserve/config"
 	"voltaserve/guard"
@@ -19,6 +21,14 @@ type Group struct {
 	Permission   string       `json:"permission"`
 	CreateTime   string       `json:"createTime,omitempty"`
 	UpdateTime   *string      `json:"updateTime"`
+}
+
+type GroupList struct {
+	Data          []*Group `json:"data"`
+	TotalPages    uint     `json:"totalPages"`
+	TotalElements uint     `json:"totalElements"`
+	Page          uint     `json:"page"`
+	Size          uint     `json:"size"`
 }
 
 type GroupSearchOptions struct {
@@ -123,7 +133,7 @@ func (svc *GroupService) Create(opts GroupCreateOptions, userID string) (*Group,
 	if err := svc.groupCache.Set(group); err != nil {
 		return nil, err
 	}
-	res, err := svc.groupMapper.mapGroup(group, userID)
+	res, err := svc.groupMapper.mapOne(group, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -142,14 +152,14 @@ func (svc *GroupService) Find(id string, userID string) (*Group, error) {
 	if err := svc.groupGuard.Authorize(user, group, model.PermissionViewer); err != nil {
 		return nil, err
 	}
-	res, err := svc.groupMapper.mapGroup(group, userID)
+	res, err := svc.groupMapper.mapOne(group, userID)
 	if err != nil {
 		return nil, err
 	}
 	return res, nil
 }
 
-func (svc *GroupService) FindAll(userID string) ([]*Group, error) {
+func (svc *GroupService) List(page uint, size uint, sortBy string, sortOrder string, userID string) (*GroupList, error) {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
@@ -158,57 +168,26 @@ func (svc *GroupService) FindAll(userID string) ([]*Group, error) {
 	if err != nil {
 		return nil, err
 	}
-	res := make([]*Group, 0)
-	for _, id := range ids {
-		group, err := svc.groupCache.Get(id)
-		if err != nil {
-			return nil, err
-		}
-		if svc.groupGuard.IsAuthorized(user, group, model.PermissionViewer) {
-			dto, err := svc.groupMapper.mapGroup(group, userID)
-			if err != nil {
-				return nil, err
-			}
-			res = append(res, dto)
-		}
+	authorized, err := svc.doAuthorizationByIDs(ids, user)
+	if err != nil {
+		return nil, err
 	}
-	return res, nil
+	sorted := svc.doSorting(authorized, sortBy, sortOrder, userID)
+	paged, totalElements, totalPages := svc.doPaging(sorted, page, size)
+	mapped, err := svc.groupMapper.mapMany(paged, userID)
+	if err != nil {
+		return nil, err
+	}
+	return &GroupList{
+		Data:          mapped,
+		TotalPages:    totalPages,
+		TotalElements: totalElements,
+		Page:          page,
+		Size:          size,
+	}, nil
 }
 
-func (svc *GroupService) FindAllForFile(fileID string, userID string) ([]*Group, error) {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return nil, err
-	}
-	file, err := svc.fileCache.Get(fileID)
-	if err != nil {
-		return nil, err
-	}
-	if err := svc.fileGuard.Authorize(user, file, model.PermissionViewer); err != nil {
-		return nil, err
-	}
-	ids, err := svc.groupRepo.GetIDsForFile(fileID)
-	if err != nil {
-		return nil, err
-	}
-	res := make([]*Group, 0)
-	for _, id := range ids {
-		group, err := svc.groupCache.Get(id)
-		if err != nil {
-			return nil, err
-		}
-		if svc.groupGuard.IsAuthorized(user, group, model.PermissionViewer) {
-			dto, err := svc.groupMapper.mapGroup(group, userID)
-			if err != nil {
-				return nil, err
-			}
-			res = append(res, dto)
-		}
-	}
-	return res, nil
-}
-
-func (svc *GroupService) Search(query string, userID string) ([]*Group, error) {
+func (svc *GroupService) Search(query string, page uint, size uint, userID string) (*GroupList, error) {
 	groups, err := svc.groupSearch.Query(query)
 	if err != nil {
 		return nil, err
@@ -217,17 +196,22 @@ func (svc *GroupService) Search(query string, userID string) ([]*Group, error) {
 	if err != nil {
 		return nil, err
 	}
-	var res []*Group
-	for _, g := range groups {
-		if svc.groupGuard.IsAuthorized(user, g, model.PermissionViewer) {
-			dto, err := svc.groupMapper.mapGroup(g, userID)
-			if err != nil {
-				return nil, err
-			}
-			res = append(res, dto)
-		}
+	authorized, err := svc.doAuthorization(groups, user)
+	if err != nil {
+		return nil, err
 	}
-	return res, nil
+	paged, totalElements, totalPages := svc.doPaging(authorized, page, size)
+	mapped, err := svc.groupMapper.mapMany(paged, userID)
+	if err != nil {
+		return nil, err
+	}
+	return &GroupList{
+		Data:          mapped,
+		TotalElements: totalElements,
+		TotalPages:    totalPages,
+		Page:          page,
+		Size:          size,
+	}, nil
 }
 
 func (svc *GroupService) UpdateName(id string, name string, userID string) (*Group, error) {
@@ -253,7 +237,7 @@ func (svc *GroupService) UpdateName(id string, name string, userID string) (*Gro
 	if err != nil {
 		return nil, err
 	}
-	res, err := svc.groupMapper.mapGroup(group, userID)
+	res, err := svc.groupMapper.mapOne(group, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -481,6 +465,101 @@ func (svc *GroupService) GetAvailableUsers(id string, userID string) ([]*User, e
 	return res, nil
 }
 
+func (svc *GroupService) doAuthorization(data []model.Group, user model.User) ([]model.Group, error) {
+	var res []model.Group
+	for _, g := range data {
+		if svc.groupGuard.IsAuthorized(user, g, model.PermissionViewer) {
+			res = append(res, g)
+		}
+	}
+	return res, nil
+}
+
+func (svc *GroupService) doAuthorizationByIDs(ids []string, user model.User) ([]model.Group, error) {
+	var res []model.Group
+	for _, id := range ids {
+		var o model.Group
+		o, err := svc.groupCache.Get(id)
+		if err != nil {
+			return nil, err
+		}
+		if svc.groupGuard.IsAuthorized(user, o, model.PermissionViewer) {
+			res = append(res, o)
+		}
+	}
+	return res, nil
+}
+
+func (svc *GroupService) doSorting(data []model.Group, sortBy string, sortOrder string, userID string) []model.Group {
+	if sortBy == SortByName {
+		sort.Slice(data, func(i, j int) bool {
+			if sortOrder == SortOrderDesc {
+				return data[i].GetName() > data[j].GetName()
+			} else {
+				return data[i].GetName() < data[j].GetName()
+			}
+		})
+		return data
+	} else if sortBy == SortByDateCreated {
+		sort.Slice(data, func(i, j int) bool {
+			a, _ := time.Parse(time.RFC3339, data[i].GetCreateTime())
+			b, _ := time.Parse(time.RFC3339, data[j].GetCreateTime())
+			if sortOrder == SortOrderDesc {
+				return a.UnixMilli() > b.UnixMilli()
+			} else {
+				return a.UnixMilli() < b.UnixMilli()
+			}
+		})
+		return data
+	} else if sortBy == SortByDateModified {
+		sort.Slice(data, func(i, j int) bool {
+			if data[i].GetUpdateTime() != nil && data[j].GetUpdateTime() != nil {
+				a, _ := time.Parse(time.RFC3339, *data[i].GetUpdateTime())
+				b, _ := time.Parse(time.RFC3339, *data[j].GetUpdateTime())
+				if sortOrder == SortOrderDesc {
+					return a.UnixMilli() > b.UnixMilli()
+				} else {
+					return a.UnixMilli() < b.UnixMilli()
+				}
+			} else {
+				return false
+			}
+		})
+		return data
+	}
+	return data
+}
+
+func (svc *GroupService) doPaging(data []model.Group, page uint, size uint) (pageData []model.Group, totalElements uint, totalPages uint) {
+	page = page - 1
+	low := size * page
+	high := low + size
+	if low >= uint(len(data)) {
+		pageData = []model.Group{}
+	} else if high >= uint(len(data)) {
+		high = uint(len(data))
+		pageData = data[low:high]
+	} else {
+		pageData = data[low:high]
+	}
+	totalElements = uint(len(data))
+	if totalElements == 0 {
+		totalPages = 1
+	} else {
+		if size > uint(len(data)) {
+			size = uint(len(data))
+		}
+		totalPages = totalElements / size
+		if totalPages == 0 {
+			totalPages = 1
+		}
+		if totalElements%size > 0 {
+			totalPages = totalPages + 1
+		}
+	}
+	return pageData, totalElements, totalPages
+}
+
 type groupMapper struct {
 	orgCache   *cache.OrganizationCache
 	orgMapper  *organizationMapper
@@ -495,7 +574,7 @@ func newGroupMapper() *groupMapper {
 	}
 }
 
-func (mp *groupMapper) mapGroup(m model.Group, userID string) (*Group, error) {
+func (mp *groupMapper) mapOne(m model.Group, userID string) (*Group, error) {
 	org, err := mp.orgCache.Get(m.GetOrganizationID())
 	if err != nil {
 		return nil, err
@@ -531,10 +610,10 @@ func (mp *groupMapper) mapGroup(m model.Group, userID string) (*Group, error) {
 	return res, nil
 }
 
-func (mp *groupMapper) mapGroups(groups []model.Group, userID string) ([]*Group, error) {
+func (mp *groupMapper) mapMany(groups []model.Group, userID string) ([]*Group, error) {
 	res := []*Group{}
 	for _, g := range groups {
-		v, err := mp.mapGroup(g, userID)
+		v, err := mp.mapOne(g, userID)
 		if err != nil {
 			return nil, err
 		}

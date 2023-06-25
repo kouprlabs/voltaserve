@@ -2,6 +2,7 @@ package router
 
 import (
 	"net/http"
+	"strconv"
 	"voltaserve/errorpkg"
 	"voltaserve/service"
 
@@ -20,7 +21,7 @@ func NewGroupRouter() *GroupRouter {
 }
 
 func (r *GroupRouter) AppendRoutes(g fiber.Router) {
-	g.Get("/", r.GetAll)
+	g.Get("/", r.List)
 	g.Post("/search", r.Search)
 	g.Post("/", r.Create)
 	g.Get("/:id", r.GetByID)
@@ -83,22 +84,53 @@ func (r *GroupRouter) GetByID(c *fiber.Ctx) error {
 	return c.JSON(res)
 }
 
-// GetAll godoc
+// List godoc
 //
-//	@Summary		Get all
-//	@Description	Get all
+//	@Summary		List
+//	@Description	List
 //	@Tags			Groups
-//	@Id				groups_get_all
+//	@Id				groups_list
 //	@Produce		json
-//	@Success		200	{array}		core.Group
-//	@Failure		500	{object}	errorpkg.ErrorResponse
+//	@Param			id		path		string	true	"ID"
+//	@Param			page	query		string	true	"Page"
+//	@Param			size	query		string	true	"Size"
+//	@Success		200		{object}	core.GroupList
+//	@Failure		404		{object}	errorpkg.ErrorResponse
+//	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/groups [get]
-func (r *GroupRouter) GetAll(c *fiber.Ctx) error {
-	groups, err := r.groupSvc.FindAll(GetUserID(c))
+func (r *GroupRouter) List(c *fiber.Ctx) error {
+	var err error
+	var page int64
+	if c.Query("page") == "" {
+		page = 1
+	} else {
+		page, err = strconv.ParseInt(c.Query("page"), 10, 32)
+		if err != nil {
+			page = 1
+		}
+	}
+	var size int64
+	if c.Query("size") == "" {
+		size = GroupDefaultPageSize
+	} else {
+		size, err = strconv.ParseInt(c.Query("size"), 10, 32)
+		if err != nil {
+			return err
+		}
+	}
+	sortBy := c.Query("sort_by")
+	if !service.IsValidSortBy(sortBy) {
+		return errorpkg.NewInvalidQueryParamError("sort_by")
+	}
+	sortOrder := c.Query("sort_order")
+	if !service.IsValidSortOrder(sortOrder) {
+		return errorpkg.NewInvalidQueryParamError("sort_order")
+	}
+	res, err := r.groupSvc.List(uint(page), uint(size), sortBy, sortOrder, GetUserID(c))
 	if err != nil {
 		return err
 	}
-	return c.JSON(groups)
+	return c.JSON(res)
 }
 
 // Search godoc
@@ -109,19 +141,38 @@ func (r *GroupRouter) GetAll(c *fiber.Ctx) error {
 //	@Id				groups_search
 //	@Produce		json
 //	@Param			body	body		core.GroupSearchOptions	true	"Body"
-//	@Success		200		{array}		core.Group
+//	@Success		200		{object}	core.GroupList
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/groups/search [get]
 func (r *GroupRouter) Search(c *fiber.Ctx) error {
-	req := new(service.GroupSearchOptions)
-	if err := c.BodyParser(req); err != nil {
+	opts := new(service.GroupSearchOptions)
+	if err := c.BodyParser(opts); err != nil {
 		return err
 	}
-	groups, err := r.groupSvc.Search(req.Text, GetUserID(c))
+	var err error
+	var page int64
+	if c.Query("page") == "" {
+		page = 1
+	} else {
+		page, err = strconv.ParseInt(c.Query("page"), 10, 32)
+		if err != nil {
+			page = 1
+		}
+	}
+	var size int64
+	if c.Query("size") == "" {
+		size = GroupDefaultPageSize
+	} else {
+		size, err = strconv.ParseInt(c.Query("size"), 10, 32)
+		if err != nil {
+			return err
+		}
+	}
+	res, err := r.groupSvc.Search(opts.Text, uint(page), uint(size), GetUserID(c))
 	if err != nil {
 		return err
 	}
-	return c.JSON(groups)
+	return c.JSON(res)
 }
 
 // UpdateName godoc

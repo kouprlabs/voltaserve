@@ -41,18 +41,18 @@ type WorkspaceSearchOptions struct {
 	Text string `json:"text" validate:"required"`
 }
 
-type CreateWorkspaceOptions struct {
+type WorkspaceCreateOptions struct {
 	Name            string  `json:"name" validate:"required,max=255"`
 	Image           *string `json:"image"`
 	OrganizationID  string  `json:"organizationId" validate:"required"`
 	StorageCapacity int64   `json:"storageCapacity" validate:"required,min=1"`
 }
 
-type UpdateWorkspaceNameOptions struct {
+type WorkspaceUpdateNameOptions struct {
 	Name string `json:"name" validate:"required,max=255"`
 }
 
-type UpdateWorkspaceStorageCapacityOptions struct {
+type WorkspaceUpdateStorageCapacityOptions struct {
 	StorageCapacity int64 `json:"storageCapacity" validate:"required,min=1"`
 }
 
@@ -88,7 +88,7 @@ func NewWorkspaceService() *WorkspaceService {
 	}
 }
 
-func (svc *WorkspaceService) Create(opts CreateWorkspaceOptions, userID string) (*Workspace, error) {
+func (svc *WorkspaceService) Create(opts WorkspaceCreateOptions, userID string) (*Workspace, error) {
 	id := helper.NewID()
 	bucket := strings.ReplaceAll(uuid.NewString(), "-", "")
 	if err := svc.s3.CreateBucket(bucket); err != nil {
@@ -368,13 +368,13 @@ func (svc *WorkspaceService) doAuthorization(data []model.Workspace, user model.
 func (svc *WorkspaceService) doAuthorizationByIDs(ids []string, user model.User) ([]model.Workspace, error) {
 	var res []model.Workspace
 	for _, id := range ids {
-		var workspace model.Workspace
-		workspace, err := svc.workspaceCache.Get(id)
+		var w model.Workspace
+		w, err := svc.workspaceCache.Get(id)
 		if err != nil {
 			return nil, err
 		}
-		if svc.workspaceGuard.IsAuthorized(user, workspace, model.PermissionViewer) {
-			res = append(res, workspace)
+		if svc.workspaceGuard.IsAuthorized(user, w, model.PermissionViewer) {
+			res = append(res, w)
 		}
 	}
 	return res, nil

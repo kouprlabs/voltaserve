@@ -45,7 +45,7 @@ func (r *WorkspaceRouter) AppendRoutes(g fiber.Router) {
 //	@Router			/workspaces [post]
 func (r *WorkspaceRouter) Create(c *fiber.Ctx) error {
 	userID := GetUserID(c)
-	opts := new(service.CreateWorkspaceOptions)
+	opts := new(service.WorkspaceCreateOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
 	}
@@ -156,18 +156,18 @@ func (r *WorkspaceRouter) Search(c *fiber.Ctx) error {
 	}
 	var size int64
 	if c.Query("size") == "" {
-		size = FileDefaultPageSize
+		size = WorkspaceDefaultPageSize
 	} else {
 		size, err = strconv.ParseInt(c.Query("size"), 10, 32)
 		if err != nil {
 			return err
 		}
 	}
-	workspaces, err := r.workspaceSvc.Search(opts.Text, uint(page), uint(size), GetUserID(c))
+	res, err := r.workspaceSvc.Search(opts.Text, uint(page), uint(size), GetUserID(c))
 	if err != nil {
 		return err
 	}
-	return c.JSON(workspaces)
+	return c.JSON(res)
 }
 
 // UpdateName godoc
@@ -185,7 +185,7 @@ func (r *WorkspaceRouter) Search(c *fiber.Ctx) error {
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/workspaces/{id}/update_name [post]
 func (r *WorkspaceRouter) UpdateName(c *fiber.Ctx) error {
-	opts := new(service.UpdateWorkspaceNameOptions)
+	opts := new(service.WorkspaceUpdateNameOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
 	}
@@ -211,7 +211,7 @@ func (r *WorkspaceRouter) UpdateName(c *fiber.Ctx) error {
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/workspaces/{id}/update_storage_capacity [post]
 func (r *WorkspaceRouter) UpdateStorageCapacity(c *fiber.Ctx) error {
-	opts := new(service.UpdateWorkspaceStorageCapacityOptions)
+	opts := new(service.WorkspaceUpdateStorageCapacityOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
 	}
