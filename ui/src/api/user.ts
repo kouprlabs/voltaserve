@@ -38,9 +38,7 @@ export default class UserAPI {
     return useSWR<User>(`/user`, idpFetcher, swrOptions)
   }
 
-  static async updateFullName(
-    options: UpdateFullNameOptions
-  ): Promise<User> {
+  static async updateFullName(options: UpdateFullNameOptions): Promise<User> {
     return idpFetch(`/user/update_full_name`, {
       method: 'POST',
       body: JSON.stringify(options),
@@ -77,9 +75,7 @@ export default class UserAPI {
     }).then((result) => result.json())
   }
 
-  static async updatePassword(
-    options: UpdatePasswordOptions
-  ): Promise<User> {
+  static async updatePassword(options: UpdatePasswordOptions): Promise<User> {
     return idpFetch(`/user/update_password`, {
       method: 'POST',
       body: JSON.stringify(options),

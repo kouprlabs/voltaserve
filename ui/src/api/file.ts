@@ -404,9 +404,7 @@ export default class FileAPI {
     })
   }
 
-  static async revokeGroupPermission(
-    options: RevokeGroupPermissionOptions
-  ) {
+  static async revokeGroupPermission(options: RevokeGroupPermissionOptions) {
     return apiFetch(`/files/revoke_group_permission`, {
       method: 'POST',
       body: JSON.stringify(options),

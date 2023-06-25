@@ -32,9 +32,7 @@ export default class AccountAPI {
     }).then((result) => result.json())
   }
 
-  static async sendResetPasswordEmail(
-    options: SendResetPasswordEmailOptions
-  ) {
+  static async sendResetPasswordEmail(options: SendResetPasswordEmailOptions) {
     return idpFetch(`/accounts/send_reset_password_email`, {
       method: 'POST',
       body: JSON.stringify(options),

@@ -69,9 +69,7 @@ export default class OrganizationAPI {
     )
   }
 
-  static async search(
-    options: SearchOptions
-  ): Promise<Organization[]> {
+  static async search(options: SearchOptions): Promise<Organization[]> {
     return apiFetch('/organizations/search', {
       method: 'POST',
       body: JSON.stringify(options),
@@ -100,9 +98,7 @@ export default class OrganizationAPI {
     }).then((result) => result.json())
   }
 
-  static async create(
-    options: CreateOptions
-  ): Promise<Organization> {
+  static async create(options: CreateOptions): Promise<Organization> {
     return apiFetch(`/organizations`, {
       method: 'POST',
       body: JSON.stringify(options),
@@ -223,10 +219,7 @@ export default class OrganizationAPI {
     ).then((result) => result.json())
   }
 
-  static async removeMember(
-    id: string,
-    options: RemoveMemberOptions
-  ) {
+  static async removeMember(id: string, options: RemoveMemberOptions) {
     return apiFetch(`/organizations/${id}/remove_member`, {
       method: 'POST',
       body: JSON.stringify(options),
