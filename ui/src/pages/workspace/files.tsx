@@ -49,14 +49,13 @@ const WorkspaceFilesPage = () => {
     isLoadingMore = true
     setIsSpinnerVisible(true)
     try {
-      const result = await FileAPI.list(
-        fileId,
-        FileAPI.DEFAULT_PAGE_SIZE,
-        list.page + 1,
-        undefined,
+      const result = await FileAPI.list({
+        id: fileId,
+        page: list.page + 1,
+        size: FileAPI.DEFAULT_PAGE_SIZE,
         sortBy,
-        sortOrder
-      )
+        sortOrder,
+      })
       dispatch(listExtended(result))
     } finally {
       setIsSpinnerVisible(false)

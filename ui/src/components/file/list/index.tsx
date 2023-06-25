@@ -72,14 +72,13 @@ const List = ({ scale }: ListProps) => {
             1
           )
         } else {
-          result = await FileAPI.list(
-            fileId,
-            FileAPI.DEFAULT_PAGE_SIZE,
-            1,
-            undefined,
+          result = await FileAPI.list({
+            id: fileId,
+            page: 1,
+            size: FileAPI.DEFAULT_PAGE_SIZE,
             sortBy,
-            sortOrder
-          )
+            sortOrder,
+          })
         }
         dispatch(listUpdated(result))
       } finally {
@@ -97,14 +96,13 @@ const List = ({ scale }: ListProps) => {
           setIsLoading(true)
           dispatch(selectionUpdated([]))
           try {
-            const result = await FileAPI.list(
-              fileId,
-              FileAPI.DEFAULT_PAGE_SIZE,
-              1,
-              undefined,
+            const result = await FileAPI.list({
+              id: fileId,
+              page: 1,
+              size: FileAPI.DEFAULT_PAGE_SIZE,
               sortBy,
-              sortOrder
-            )
+              sortOrder,
+            })
             dispatch(listUpdated(result))
           } finally {
             setIsLoading(false)
