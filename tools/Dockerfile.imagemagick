@@ -1,4 +1,15 @@
-FROM voltaserve/tools
+FROM opensuse/leap:15.5 as builder
+
+WORKDIR /build
+
+COPY . .
+
+RUN zypper install -y go1.20 git
+
+RUN go mod download
+RUN go build -o voltaserve-tools
+
+FROM opensuse/leap:15.5 AS runner
 
 RUN zypper install -y ImageMagick ghostscript
 
@@ -6,3 +17,12 @@ RUN zypper install -y ImageMagick ghostscript
 RUN policy_path=$(identify -list policy | awk '/Path:/ {print $2}' | sed 's/\[built-in\]//') \
     && awk '/pattern="(PS|PS2|PS3|PDF|XPS|EPS|PCL)"/ { sub(/rights="write"/, "rights=\"read|write\"") } { print }' "$policy_path" > "$policy_path.tmp" \
     && mv "$policy_path.tmp" "$policy_path"
+
+WORKDIR /app
+
+COPY --from=builder /build/voltaserve-tools ./voltaserve-tools
+COPY --from=builder /build/.env ./.env
+
+ENTRYPOINT ["./voltaserve-tools"]
+
+EXPOSE 6001

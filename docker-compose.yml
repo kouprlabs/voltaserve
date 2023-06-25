@@ -48,12 +48,6 @@ services:
     ports:
       - ${VOLTASERVE_MAILHOG_SMTP_PORT}:1025
       - ${VOLTASERVE_MAILHOG_WEB_PORT}:8025
-  tools:
-    image: voltaserve/tools
-    build:
-      context: ./tools
-    deploy:
-      mode: none
   exiftool:
     image: voltaserve/exiftool
     build:
@@ -63,8 +57,6 @@ services:
       - ${VOLTASERVE_EXIFTOOL_PORT}:6001
     healthcheck:
       test: curl --fail http://localhost:5002/v1/health || exit 1
-    depends_on:
-      - tools
     restart: on-failure
   ffmpeg:
     image: voltaserve/ffmpeg
@@ -75,8 +67,6 @@ services:
       - ${VOLTASERVE_FFMPEG_PORT}:6001
     healthcheck:
       test: curl --fail http://localhost:5002/v1/health || exit 1
-    depends_on:
-      - tools
     restart: on-failure
   imagemagick:
     image: voltaserve/imagemagick
@@ -87,8 +77,6 @@ services:
       - ${VOLTASERVE_IMAGEMAGICK_PORT}:6001
     healthcheck:
       test: curl --fail http://localhost:5002/v1/health || exit 1
-    depends_on:
-      - tools
     restart: on-failure
   libreoffice:
     image: voltaserve/libreoffice
@@ -99,8 +87,6 @@ services:
       - ${VOLTASERVE_LIBREOFFICE_PORT}:6001
     healthcheck:
       test: curl --fail http://localhost:5002/v1/health || exit 1
-    depends_on:
-      - tools
     restart: on-failure
   ocrmypdf:
     image: voltaserve/ocrmypdf
@@ -111,8 +97,6 @@ services:
       - ${VOLTASERVE_OCRMYPDF_PORT}:6001
     healthcheck:
       test: curl --fail http://localhost:5002/v1/health || exit 1
-    depends_on:
-      - tools
     restart: on-failure
   poppler:
     image: voltaserve/poppler
@@ -123,8 +107,6 @@ services:
       - ${VOLTASERVE_POPPLER_PORT}:6001
     healthcheck:
       test: curl --fail http://localhost:5002/v1/health || exit 1
-    depends_on:
-      - tools
     restart: on-failure
   tesseract:
     image: voltaserve/tesseract
@@ -135,8 +117,6 @@ services:
       - ${VOLTASERVE_TESSERACT_PORT}:6001
     healthcheck:
       test: curl --fail http://localhost:5002/v1/health || exit 1
-    depends_on:
-      - tools
     restart: on-failure
   api:
     image: voltaserve/api
