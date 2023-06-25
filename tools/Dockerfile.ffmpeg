@@ -1,3 +1,23 @@
-FROM voltaserve/tools
+FROM opensuse/leap:15.5 as builder
+
+WORKDIR /build
+
+COPY . .
+
+RUN zypper install -y go1.20 git
+
+RUN go mod download
+RUN go build -o voltaserve-tools
+
+FROM opensuse/leap:15.5 AS runner
 
 RUN zypper install -y ffmpeg-4
+
+WORKDIR /app
+
+COPY --from=builder /build/voltaserve-tools ./voltaserve-tools
+COPY --from=builder /build/.env ./.env
+
+ENTRYPOINT ["./voltaserve-tools"]
+
+EXPOSE 6001
