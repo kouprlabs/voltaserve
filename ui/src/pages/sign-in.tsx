@@ -57,8 +57,8 @@ const SignInPage = () => {
           grant_type: 'password',
         })
         saveToken(token)
-        const { length: organizationCount } = await OrganizationAPI.getAll()
-        if (organizationCount === 0) {
+        const orgList = await OrganizationAPI.list()
+        if (orgList.totalElements === 0) {
           const { id: organizationId } = await OrganizationAPI.create({
             name: 'My Organization',
           })
@@ -73,10 +73,10 @@ const SignInPage = () => {
           })
           navigate(`/workspace/${workspaceId}/file/${rootId}`)
         } else {
-          const result = await WorkspaceAPI.list()
-          if (result.data.length === 1) {
+          const workspaceList = await WorkspaceAPI.list()
+          if (workspaceList.totalElements === 1) {
             navigate(
-              `/workspace/${result.data[0].id}/file/${result.data[0].rootId}`
+              `/workspace/${workspaceList.data[0].id}/file/${workspaceList.data[0].rootId}`
             )
           } else {
             navigate('/workspace')

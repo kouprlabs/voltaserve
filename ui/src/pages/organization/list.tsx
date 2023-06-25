@@ -27,7 +27,7 @@ import { decodeQuery } from '@/helpers/query'
 const OrganizationListPage = () => {
   const [searchParams] = useSearchParams()
   const query = decodeQuery(searchParams.get('q') as string)
-  const { data: orgs, error } = OrganizationAPI.useGetAllOrSearch(
+  const { data: list, error } = OrganizationAPI.useListOrSearch(
     query ? { search: { text: query } } : undefined,
     swrConfig()
   )
@@ -40,13 +40,13 @@ const OrganizationListPage = () => {
         <Heading size="lg" pl={variables.spacingMd}>
           Organizations
         </Heading>
-        {!orgs && error && (
+        {!list && error && (
           <Center h="300px">
             <Text>Failed to load organizations.</Text>
           </Center>
         )}
-        {!orgs && !error && <SectionSpinner />}
-        {orgs && orgs.length === 0 && (
+        {!list && !error && <SectionSpinner />}
+        {list && list.data.length === 0 && (
           <Center h="300px">
             <VStack spacing={variables.spacing}>
               <Text>There are no organizations.</Text>
@@ -54,7 +54,7 @@ const OrganizationListPage = () => {
             </VStack>
           </Center>
         )}
-        {orgs && orgs.length > 0 && (
+        {list && list.data.length > 0 && (
           <Table variant="simple">
             <Thead>
               <Tr>
@@ -64,7 +64,7 @@ const OrganizationListPage = () => {
               </Tr>
             </Thead>
             <Tbody>
-              {orgs.map((o: Organization) => (
+              {list.data.map((o: Organization) => (
                 <Tr key={o.id}>
                   <Td>
                     <HStack spacing={variables.spacing}>
