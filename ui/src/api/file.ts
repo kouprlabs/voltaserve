@@ -87,7 +87,6 @@ export type SearchOptions = {
 }
 
 export type ListOptions = {
-  id: string
   size: number
   page: number
   type?: FileType
@@ -223,7 +222,7 @@ export default class FileAPI {
     }).then((result) => result.json())
   }
 
-  static async list(options: ListOptions): Promise<List> {
+  static async list(id: string, options: ListOptions): Promise<List> {
     const params: any = {
       page: options.page.toString(),
       size: options.size.toString(),
@@ -237,16 +236,13 @@ export default class FileAPI {
     if (options.type) {
       params.type = options.type
     }
-    return apiFetch(
-      `/files/${options.id}/list?${new URLSearchParams(params)}`,
-      {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
-          'Content-Type': 'application/json',
-        },
-      }
-    ).then((result) => result.json())
+    return apiFetch(`/files/${id}/list?${new URLSearchParams(params)}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
+        'Content-Type': 'application/json',
+      },
+    }).then((result) => result.json())
   }
 
   static async search(

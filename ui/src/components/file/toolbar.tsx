@@ -168,8 +168,7 @@ const Toolbar = () => {
           1
         )
       } else {
-        result = await FileAPI.list({
-          id: fileId,
+        result = await FileAPI.list(fileId, {
           page: 1,
           size: FileAPI.DEFAULT_PAGE_SIZE,
           sortBy,

@@ -36,8 +36,7 @@ const Move = () => {
       setLoading(true)
       await FileAPI.move(newFileId, { ids: selection })
       if (fileId === newFileId) {
-        const { data: files } = await FileAPI.list({
-          id: newFileId,
+        const { data: files } = await FileAPI.list(newFileId, {
           page: 1,
           size: FileAPI.DEFAULT_PAGE_SIZE,
           sortBy,

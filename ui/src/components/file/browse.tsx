@@ -55,8 +55,7 @@ const Browse = ({ onChange }: BrowseProps) => {
       if (fileId) {
         try {
           const timeoutId = setTimeout(() => setIsSpinnerVisible(true), 250)
-          const result = await FileAPI.list({
-            id: fileId,
+          const result = await FileAPI.list(fileId, {
             page: 1,
             size: FileAPI.DEFAULT_PAGE_SIZE,
             type: FileType.Folder,
@@ -80,8 +79,7 @@ const Browse = ({ onChange }: BrowseProps) => {
   const handleLoadMore = useCallback(async (fileId: string, page: number) => {
     try {
       setLoading(true)
-      const result = await FileAPI.list({
-        id: fileId,
+      const result = await FileAPI.list(fileId, {
         page,
         size: FileAPI.DEFAULT_PAGE_SIZE,
         type: FileType.Folder,

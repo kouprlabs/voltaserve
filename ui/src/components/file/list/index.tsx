@@ -72,8 +72,7 @@ const List = ({ scale }: ListProps) => {
             1
           )
         } else {
-          result = await FileAPI.list({
-            id: fileId,
+          result = await FileAPI.list(fileId, {
             page: 1,
             size: FileAPI.DEFAULT_PAGE_SIZE,
             sortBy,
@@ -96,8 +95,7 @@ const List = ({ scale }: ListProps) => {
           setIsLoading(true)
           dispatch(selectionUpdated([]))
           try {
-            const result = await FileAPI.list({
-              id: fileId,
+            const result = await FileAPI.list(fileId, {
               page: 1,
               size: FileAPI.DEFAULT_PAGE_SIZE,
               sortBy,
