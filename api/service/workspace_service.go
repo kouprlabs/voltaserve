@@ -469,7 +469,7 @@ func (mp *workspaceMapper) mapOne(m model.Workspace, userID string) (*Workspace,
 	if err != nil {
 		return nil, err
 	}
-	v, err := mp.orgMapper.mapOrganization(org, userID)
+	v, err := mp.orgMapper.mapOne(org, userID)
 	if err != nil {
 		return nil, err
 	}

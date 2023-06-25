@@ -136,7 +136,7 @@ func (r *WorkspaceRouter) List(c *fiber.Ctx) error {
 //	@Id				workspaces_search
 //	@Produce		json
 //	@Param			body	body		core.WorkspaceSearchOptions	true	"Body"
-//	@Success		200		{array}		core.Workspace
+//	@Success		200		{object}	core.WorkspaceList
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/workspaces/search [get]
 func (r *WorkspaceRouter) Search(c *fiber.Ctx) error {

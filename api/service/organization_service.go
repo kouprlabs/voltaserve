@@ -2,6 +2,8 @@ package service
 
 import (
 	"fmt"
+	"sort"
+	"time"
 	"voltaserve/cache"
 	"voltaserve/config"
 	"voltaserve/errorpkg"
@@ -21,6 +23,14 @@ type Organization struct {
 	Permission string  `json:"permission"`
 	CreateTime string  `json:"createTime"`
 	UpdateTime *string `json:"updateTime,omitempty"`
+}
+
+type OrganizationList struct {
+	Data          []*Organization `json:"data"`
+	TotalPages    uint            `json:"totalPages"`
+	TotalElements uint            `json:"totalElements"`
+	Page          uint            `json:"page"`
+	Size          uint            `json:"size"`
 }
 
 type OrganizationSearchOptions struct {
@@ -97,7 +107,7 @@ func (svc *OrganizationService) Create(opts OrganizationCreateOptions, userID st
 	if err := svc.orgCache.Set(org); err != nil {
 		return nil, nil
 	}
-	res, err := svc.orgMapper.mapOrganization(org, userID)
+	res, err := svc.orgMapper.mapOne(org, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -116,15 +126,43 @@ func (svc *OrganizationService) Find(id string, userID string) (*Organization, e
 	if err := svc.orgGuard.Authorize(user, org, model.PermissionViewer); err != nil {
 		return nil, err
 	}
-	res, err := svc.orgMapper.mapOrganization(org, userID)
+	res, err := svc.orgMapper.mapOne(org, userID)
 	if err != nil {
 		return nil, err
 	}
 	return res, nil
 }
 
-func (svc *OrganizationService) Search(query string, userID string) ([]*Organization, error) {
-	orgs, err := svc.orgSearch.Query(query)
+func (svc *OrganizationService) List(page uint, size uint, sortBy string, sortOrder string, userID string) (*OrganizationList, error) {
+	user, err := svc.userRepo.Find(userID)
+	if err != nil {
+		return nil, err
+	}
+	ids, err := svc.orgRepo.GetIDs()
+	if err != nil {
+		return nil, err
+	}
+	authorized, err := svc.doAuthorizationByIDs(ids, user)
+	if err != nil {
+		return nil, err
+	}
+	sorted := svc.doSorting(authorized, sortBy, sortOrder, userID)
+	paged, totalElements, totalPages := svc.doPaging(sorted, page, size)
+	mapped, err := svc.orgMapper.mapMany(paged, userID)
+	if err != nil {
+		return nil, err
+	}
+	return &OrganizationList{
+		Data:          mapped,
+		TotalPages:    totalPages,
+		TotalElements: totalElements,
+		Page:          page,
+		Size:          size,
+	}, nil
+}
+
+func (svc *OrganizationService) Search(query string, page uint, size uint, userID string) (*OrganizationList, error) {
+	workspaces, err := svc.orgSearch.Query(query)
 	if err != nil {
 		return nil, err
 	}
@@ -132,17 +170,22 @@ func (svc *OrganizationService) Search(query string, userID string) ([]*Organiza
 	if err != nil {
 		return nil, err
 	}
-	org := make([]*Organization, 0)
-	for _, o := range orgs {
-		if svc.orgGuard.IsAuthorized(user, o, model.PermissionViewer) {
-			v, err := svc.orgMapper.mapOrganization(o, userID)
-			if err != nil {
-				return nil, err
-			}
-			org = append(org, v)
-		}
+	authorized, err := svc.doAuthorization(workspaces, user)
+	if err != nil {
+		return nil, err
 	}
-	return org, nil
+	paged, totalElements, totalPages := svc.doPaging(authorized, page, size)
+	mapped, err := svc.orgMapper.mapMany(paged, userID)
+	if err != nil {
+		return nil, err
+	}
+	return &OrganizationList{
+		Data:          mapped,
+		TotalElements: totalElements,
+		TotalPages:    totalPages,
+		Page:          page,
+		Size:          size,
+	}, nil
 }
 
 func (svc *OrganizationService) SearchMembers(id string, query string, userID string) ([]*User, error) {
@@ -190,32 +233,6 @@ func (svc *OrganizationService) SearchMembers(id string, query string, userID st
 	return res, nil
 }
 
-func (svc *OrganizationService) FindAll(userID string) ([]*Organization, error) {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return nil, err
-	}
-	ids, err := svc.orgRepo.GetIDs()
-	if err != nil {
-		return nil, err
-	}
-	res := make([]*Organization, 0)
-	for _, id := range ids {
-		org, err := svc.orgCache.Get(id)
-		if err != nil {
-			return nil, err
-		}
-		if svc.orgGuard.IsAuthorized(user, org, model.PermissionViewer) {
-			v, err := svc.orgMapper.mapOrganization(org, userID)
-			if err != nil {
-				return nil, err
-			}
-			res = append(res, v)
-		}
-	}
-	return res, nil
-}
-
 func (svc *OrganizationService) UpdateName(id string, name string, userID string) (*Organization, error) {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
@@ -239,7 +256,7 @@ func (svc *OrganizationService) UpdateName(id string, name string, userID string
 	if err != nil {
 		return nil, err
 	}
-	res, err := svc.orgMapper.mapOrganization(org, userID)
+	res, err := svc.orgMapper.mapOne(org, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -368,6 +385,101 @@ func (svc *OrganizationService) GetGroups(id string, userID string) ([]*Group, e
 	return res, nil
 }
 
+func (svc *OrganizationService) doAuthorization(data []model.Organization, user model.User) ([]model.Organization, error) {
+	var res []model.Organization
+	for _, w := range data {
+		if svc.orgGuard.IsAuthorized(user, w, model.PermissionViewer) {
+			res = append(res, w)
+		}
+	}
+	return res, nil
+}
+
+func (svc *OrganizationService) doAuthorizationByIDs(ids []string, user model.User) ([]model.Organization, error) {
+	var res []model.Organization
+	for _, id := range ids {
+		var org model.Organization
+		org, err := svc.orgCache.Get(id)
+		if err != nil {
+			return nil, err
+		}
+		if svc.orgGuard.IsAuthorized(user, org, model.PermissionViewer) {
+			res = append(res, org)
+		}
+	}
+	return res, nil
+}
+
+func (svc *OrganizationService) doSorting(data []model.Organization, sortBy string, sortOrder string, userID string) []model.Organization {
+	if sortBy == SortByName {
+		sort.Slice(data, func(i, j int) bool {
+			if sortOrder == SortOrderDesc {
+				return data[i].GetName() > data[j].GetName()
+			} else {
+				return data[i].GetName() < data[j].GetName()
+			}
+		})
+		return data
+	} else if sortBy == SortByDateCreated {
+		sort.Slice(data, func(i, j int) bool {
+			a, _ := time.Parse(time.RFC3339, data[i].GetCreateTime())
+			b, _ := time.Parse(time.RFC3339, data[j].GetCreateTime())
+			if sortOrder == SortOrderDesc {
+				return a.UnixMilli() > b.UnixMilli()
+			} else {
+				return a.UnixMilli() < b.UnixMilli()
+			}
+		})
+		return data
+	} else if sortBy == SortByDateModified {
+		sort.Slice(data, func(i, j int) bool {
+			if data[i].GetUpdateTime() != nil && data[j].GetUpdateTime() != nil {
+				a, _ := time.Parse(time.RFC3339, *data[i].GetUpdateTime())
+				b, _ := time.Parse(time.RFC3339, *data[j].GetUpdateTime())
+				if sortOrder == SortOrderDesc {
+					return a.UnixMilli() > b.UnixMilli()
+				} else {
+					return a.UnixMilli() < b.UnixMilli()
+				}
+			} else {
+				return false
+			}
+		})
+		return data
+	}
+	return data
+}
+
+func (svc *OrganizationService) doPaging(data []model.Organization, page uint, size uint) (pageData []model.Organization, totalElements uint, totalPages uint) {
+	page = page - 1
+	low := size * page
+	high := low + size
+	if low >= uint(len(data)) {
+		pageData = []model.Organization{}
+	} else if high >= uint(len(data)) {
+		high = uint(len(data))
+		pageData = data[low:high]
+	} else {
+		pageData = data[low:high]
+	}
+	totalElements = uint(len(data))
+	if totalElements == 0 {
+		totalPages = 1
+	} else {
+		if size > uint(len(data)) {
+			size = uint(len(data))
+		}
+		totalPages = totalElements / size
+		if totalPages == 0 {
+			totalPages = 1
+		}
+		if totalElements%size > 0 {
+			totalPages = totalPages + 1
+		}
+	}
+	return pageData, totalElements, totalPages
+}
+
 type organizationMapper struct {
 	groupCache *cache.GroupCache
 }
@@ -378,7 +490,7 @@ func newOrganizationMapper() *organizationMapper {
 	}
 }
 
-func (mp *organizationMapper) mapOrganization(m model.Organization, userID string) (*Organization, error) {
+func (mp *organizationMapper) mapOne(m model.Organization, userID string) (*Organization, error) {
 	res := &Organization{
 		ID:         m.GetID(),
 		Name:       m.GetName(),
@@ -401,6 +513,18 @@ func (mp *organizationMapper) mapOrganization(m model.Organization, userID strin
 				res.Permission = p.GetValue()
 			}
 		}
+	}
+	return res, nil
+}
+
+func (mp *organizationMapper) mapMany(orgs []model.Organization, userID string) ([]*Organization, error) {
+	res := make([]*Organization, 0)
+	for _, f := range orgs {
+		v, err := mp.mapOne(f, userID)
+		if err != nil {
+			return nil, err
+		}
+		res = append(res, v)
 	}
 	return res, nil
 }

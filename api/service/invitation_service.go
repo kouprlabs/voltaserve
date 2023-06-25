@@ -300,7 +300,7 @@ func (mp *invitationMapper) mapInvitation(m model.Invitation, userID string) (*I
 	if err != nil {
 		return nil, err
 	}
-	v, err := mp.orgMapper.mapOrganization(org, userID)
+	v, err := mp.orgMapper.mapOne(org, userID)
 	if err != nil {
 		return nil, err
 	}

@@ -500,7 +500,7 @@ func (mp *groupMapper) mapGroup(m model.Group, userID string) (*Group, error) {
 	if err != nil {
 		return nil, err
 	}
-	v, err := mp.orgMapper.mapOrganization(org, userID)
+	v, err := mp.orgMapper.mapOne(org, userID)
 	if err != nil {
 		return nil, err
 	}

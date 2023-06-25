@@ -216,7 +216,7 @@ func (r *FileRouter) CreateFolder(c *fiber.Ctx) error {
 //	@Param			page	query		string					true	"Page"
 //	@Param			size	query		string					true	"Size"
 //	@Param			body	body		core.FileSearchOptions	true	"Body"
-//	@Success		200		{object}	core.FileSearchResult
+//	@Success		200		{object}	core.FileList
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/files/search [post]
 func (r *FileRouter) Search(c *fiber.Ctx) error {
