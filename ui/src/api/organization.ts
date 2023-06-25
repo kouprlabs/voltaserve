@@ -77,18 +77,18 @@ export default class OrganizationAPI {
   }
 
   static useListOrSearch(
-    options?: { search?: SearchOptions },
+    options?: { search?: SearchOptions; list?: ListOptions },
     swrOptions?: any
   ) {
     if (options?.search) {
       return this.useSearch(options?.search, swrOptions)
     } else {
-      return this.useList(swrOptions)
+      return this.useList(options?.list, swrOptions)
     }
   }
 
-  static useList(swrOptions?: any) {
-    return useSWR<List>('/organizations', () => this.list(), swrOptions)
+  static useList(options?: ListOptions, swrOptions?: any) {
+    return useSWR<List>('/organizations', () => this.list(options), swrOptions)
   }
 
   static async list(options?: ListOptions): Promise<List> {
