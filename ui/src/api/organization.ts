@@ -14,20 +14,20 @@ export type Organization = {
   updateTime?: string
 }
 
-export interface OrganizationSearchOptions {
+export interface SearchOptions {
   text: string
 }
 
-export type OrganizationCreateOptions = {
+export type CreateOptions = {
   name: string
   image?: string
 }
 
-export type OrganizationUpdateNameOptions = {
+export type UpdateNameOptions = {
   name: string
 }
 
-export type OrganizationRemoveMemberOptions = {
+export type RemoveMemberOptions = {
   userId: string
 }
 
@@ -51,7 +51,7 @@ export default class OrganizationAPI {
   }
 
   static useGetAllOrSearch(
-    options?: { search?: OrganizationSearchOptions },
+    options?: { search?: SearchOptions },
     swrOptions?: any
   ) {
     if (options?.search) {
@@ -61,7 +61,7 @@ export default class OrganizationAPI {
     }
   }
 
-  static useSearch(options: OrganizationSearchOptions, swrOptions?: any) {
+  static useSearch(options: SearchOptions, swrOptions?: any) {
     return useSWR<Organization[]>(
       '/organizations/search',
       () => this.search(options),
@@ -70,7 +70,7 @@ export default class OrganizationAPI {
   }
 
   static async search(
-    options: OrganizationSearchOptions
+    options: SearchOptions
   ): Promise<Organization[]> {
     return apiFetch('/organizations/search', {
       method: 'POST',
@@ -101,7 +101,7 @@ export default class OrganizationAPI {
   }
 
   static async create(
-    options: OrganizationCreateOptions
+    options: CreateOptions
   ): Promise<Organization> {
     return apiFetch(`/organizations`, {
       method: 'POST',
@@ -115,7 +115,7 @@ export default class OrganizationAPI {
 
   static async updateName(
     id: string,
-    options: OrganizationUpdateNameOptions
+    options: UpdateNameOptions
   ): Promise<Organization> {
     return apiFetch(`/organizations/${id}/update_name`, {
       method: 'POST',
@@ -225,7 +225,7 @@ export default class OrganizationAPI {
 
   static async removeMember(
     id: string,
-    options: OrganizationRemoveMemberOptions
+    options: RemoveMemberOptions
   ) {
     return apiFetch(`/organizations/${id}/remove_member`, {
       method: 'POST',

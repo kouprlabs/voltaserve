@@ -45,13 +45,13 @@ export type File = {
   updateTime?: string
 }
 
-export type FileCreateFolderOptions = {
+export type CreateFolderOptions = {
   workspaceId: string
   name: string
   parentId: string
 }
 
-export type FileList = {
+export type List = {
   data: File[]
   totalPages: number
   totalElements: number
@@ -59,9 +59,9 @@ export type FileList = {
   size: number
 }
 
-export type FileSearchResult = {
-  request: FileSearchOptions
-} & FileList
+export type SearchResult = {
+  request: SearchOptions
+} & List
 
 export type UserPermission = {
   id: string
@@ -75,7 +75,7 @@ export type GroupPermission = {
   permission: string
 }
 
-export type FileSearchOptions = {
+export type SearchOptions = {
   text: string
   workspaceId: string
   parentId?: string
@@ -86,44 +86,44 @@ export type FileSearchOptions = {
   updateTimeBefore?: number
 }
 
-export type FileMoveOptions = {
+export type MoveOptions = {
   ids: string[]
 }
 
-export type FileCopyOptions = {
+export type CopyOptions = {
   ids: string[]
 }
 
-export type FileBatchDeleteOptions = {
+export type BatchDeleteOptions = {
   ids: string[]
 }
 
-export type FileBatchGetOptions = {
+export type BatchGetOptions = {
   ids: string[]
 }
 
-export type FileRenameOptions = {
+export type RenameOptions = {
   name: string
 }
 
-export type FileGrantUserPermissionOptions = {
+export type GrantUserPermissionOptions = {
   ids: string[]
   userId: string
   permission: string
 }
 
-export type FileRevokeUserPermissionOptions = {
+export type RevokeUserPermissionOptions = {
   ids: string[]
   userId: string
 }
 
-export type FileGrantGroupPermissionOptions = {
+export type GrantGroupPermissionOptions = {
   ids: string[]
   groupId: string
   permission: string
 }
 
-export type FileRevokeGroupPermissionOptions = {
+export type RevokeGroupPermissionOptions = {
   ids: string[]
   groupId: string
 }
@@ -203,7 +203,7 @@ export default class FileAPI {
     })
   }
 
-  static async createFolder(options: FileCreateFolderOptions): Promise<File> {
+  static async createFolder(options: CreateFolderOptions): Promise<File> {
     return apiFetch('/files/create_folder', {
       method: 'POST',
       body: JSON.stringify(options),
@@ -221,7 +221,7 @@ export default class FileAPI {
     type?: FileType,
     sortBy?: SortBy,
     sortOrder?: SortOrder
-  ): Promise<FileList> {
+  ): Promise<List> {
     const params: any = {
       page: page.toString(),
       size: size.toString(),
@@ -245,10 +245,10 @@ export default class FileAPI {
   }
 
   static async search(
-    options: FileSearchOptions,
+    options: SearchOptions,
     size: number,
     page: number
-  ): Promise<FileList> {
+  ): Promise<List> {
     return apiFetch(
       `/files/search?${new URLSearchParams({
         page: page.toString(),
@@ -274,7 +274,7 @@ export default class FileAPI {
     }).then(async (result) => await result.json())
   }
 
-  static async rename(id: string, options: FileRenameOptions): Promise<File> {
+  static async rename(id: string, options: RenameOptions): Promise<File> {
     return apiFetch(`/files/${id}/rename`, {
       method: 'POST',
       body: JSON.stringify(options),
@@ -295,7 +295,7 @@ export default class FileAPI {
     })
   }
 
-  static async batchDelete(options: FileBatchDeleteOptions) {
+  static async batchDelete(options: BatchDeleteOptions) {
     return apiFetch(`/files/batch_delete`, {
       method: 'POST',
       body: JSON.stringify(options),
@@ -306,7 +306,7 @@ export default class FileAPI {
     })
   }
 
-  static async move(id: string, options: FileMoveOptions) {
+  static async move(id: string, options: MoveOptions) {
     return apiFetch(`/files/${id}/move`, {
       method: 'POST',
       body: JSON.stringify(options),
@@ -317,7 +317,7 @@ export default class FileAPI {
     })
   }
 
-  static async copy(id: string, options: FileCopyOptions) {
+  static async copy(id: string, options: CopyOptions) {
     return apiFetch(`/files/${id}/copy`, {
       method: 'POST',
       body: JSON.stringify(options),
@@ -342,7 +342,7 @@ export default class FileAPI {
     }).then((result) => result.json())
   }
 
-  static async batchGet(options: FileBatchGetOptions): Promise<File[]> {
+  static async batchGet(options: BatchGetOptions): Promise<File[]> {
     return apiFetch(`/files/batch_get`, {
       method: 'POST',
       body: JSON.stringify(options),
@@ -371,7 +371,7 @@ export default class FileAPI {
     )
   }
 
-  static async grantUserPermission(options: FileGrantUserPermissionOptions) {
+  static async grantUserPermission(options: GrantUserPermissionOptions) {
     return apiFetch(`/files/grant_user_permission`, {
       method: 'POST',
       body: JSON.stringify(options),
@@ -382,7 +382,7 @@ export default class FileAPI {
     })
   }
 
-  static async revokeUserPermission(options: FileRevokeUserPermissionOptions) {
+  static async revokeUserPermission(options: RevokeUserPermissionOptions) {
     return apiFetch(`/files/revoke_user_permission`, {
       method: 'POST',
       body: JSON.stringify(options),
@@ -393,7 +393,7 @@ export default class FileAPI {
     })
   }
 
-  static async grantGroupPermission(options: FileGrantGroupPermissionOptions) {
+  static async grantGroupPermission(options: GrantGroupPermissionOptions) {
     return apiFetch(`/files/grant_group_permission`, {
       method: 'POST',
       body: JSON.stringify(options),
@@ -405,7 +405,7 @@ export default class FileAPI {
   }
 
   static async revokeGroupPermission(
-    options: FileRevokeGroupPermissionOptions
+    options: RevokeGroupPermissionOptions
   ) {
     return apiFetch(`/files/revoke_group_permission`, {
       method: 'POST',

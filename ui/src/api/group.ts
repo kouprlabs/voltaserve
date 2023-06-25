@@ -13,30 +13,30 @@ export type Group = {
   updateTime?: string
 }
 
-export interface GroupSearchOptions {
+export interface SearchOptions {
   text: string
 }
 
-export type GroupCreateOptions = {
+export type CreateOptions = {
   name: string
   image?: string
   organizationId: string
 }
 
-export type GroupUpdateNameOptions = {
+export type UpdateNameOptions = {
   name: string
 }
 
-export type GroupAddMemberOptions = {
+export type AddMemberOptions = {
   userId: string
 }
 
-export type GroupRemoveMemberOptions = {
+export type RemoveMemberOptions = {
   userId: string
 }
 
 export default class GroupAPI {
-  static create = (options: GroupCreateOptions): Promise<Group> =>
+  static create = (options: CreateOptions): Promise<Group> =>
     apiFetch(`/groups`, {
       method: 'POST',
       body: JSON.stringify(options),
@@ -48,7 +48,7 @@ export default class GroupAPI {
 
   static updateName = (
     id: string,
-    options: GroupUpdateNameOptions
+    options: UpdateNameOptions
   ): Promise<Group> =>
     apiFetch(`/groups/${id}/update_name`, {
       method: 'POST',
@@ -90,7 +90,7 @@ export default class GroupAPI {
   }
 
   static useGetAllOrSearch(
-    options?: { search?: GroupSearchOptions },
+    options?: { search?: SearchOptions },
     swrOptions?: any
   ) {
     if (options?.search) {
@@ -113,7 +113,7 @@ export default class GroupAPI {
     }).then((result) => result.json())
   }
 
-  static useSearch(options: GroupSearchOptions, swrOptions?: any) {
+  static useSearch(options: SearchOptions, swrOptions?: any) {
     return useSWR<Group[]>(
       '/groups/search',
       () => this.search(options),
@@ -121,7 +121,7 @@ export default class GroupAPI {
     )
   }
 
-  static async search(options: GroupSearchOptions): Promise<Group[]> {
+  static async search(options: SearchOptions): Promise<Group[]> {
     return apiFetch('/groups/search', {
       method: 'POST',
       body: JSON.stringify(options),
@@ -184,7 +184,7 @@ export default class GroupAPI {
     ).then((result) => result.json())
   }
 
-  static addMember = (id: string, options: GroupAddMemberOptions) =>
+  static addMember = (id: string, options: AddMemberOptions) =>
     apiFetch(`/groups/${id}/add_member`, {
       method: 'POST',
       body: JSON.stringify(options),
@@ -194,7 +194,7 @@ export default class GroupAPI {
       },
     })
 
-  static removeMember = (id: string, options: GroupRemoveMemberOptions) =>
+  static removeMember = (id: string, options: RemoveMemberOptions) =>
     apiFetch(`/groups/${id}/remove_member`, {
       method: 'POST',
       body: JSON.stringify(options),

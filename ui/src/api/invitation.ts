@@ -17,13 +17,13 @@ export type Invitation = {
   updateTime?: string
 }
 
-export type InvitationCreateOptions = {
+export type CreateOptions = {
   organizationId: string
   emails: string[]
 }
 
 export default class InvitationAPI {
-  static async create(options: InvitationCreateOptions) {
+  static async create(options: CreateOptions) {
     return apiFetch(`/invitations`, {
       method: 'POST',
       body: JSON.stringify(options),

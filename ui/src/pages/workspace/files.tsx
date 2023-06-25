@@ -16,7 +16,7 @@ import Rename from '@/components/file/rename'
 import Sharing from '@/components/file/sharing'
 import Toolbar from '@/components/file/toolbar'
 import { percentageOf } from '@/helpers/percentage-of'
-import { currentUpdated, listPatched } from '@/store/entities/files'
+import { currentUpdated, listExtended } from '@/store/entities/files'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { selectionUpdated } from '@/store/ui/files'
 
@@ -57,7 +57,7 @@ const WorkspaceFilesPage = () => {
         sortBy,
         sortOrder
       )
-      dispatch(listPatched(result))
+      dispatch(listExtended(result))
     } finally {
       setIsSpinnerVisible(false)
       isLoadingMore = false

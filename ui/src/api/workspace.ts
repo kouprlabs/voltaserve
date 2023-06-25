@@ -16,22 +16,22 @@ export type Workspace = {
   updateTime?: string
 }
 
-export interface WorkspaceSearchOptions {
+export interface SearchOptions {
   text: string
 }
 
-export interface WorkspaceCreateOptions {
+export interface CreateOptions {
   name: string
   image?: string
   organizationId: string
   storageCapacity: number
 }
 
-export interface WorkspaceUpdateNameOptions {
+export interface UpdateNameOptions {
   name: string
 }
 
-export interface WorkspaceStorageCapacityOptions {
+export interface StorageCapacityOptions {
   storageCapacity: number
 }
 
@@ -55,7 +55,7 @@ export default class WorkspaceAPI {
   }
 
   static useGetAllOrSearch(
-    options?: { search?: WorkspaceSearchOptions },
+    options?: { search?: SearchOptions },
     swrOptions?: any
   ) {
     if (options?.search) {
@@ -79,7 +79,7 @@ export default class WorkspaceAPI {
     }).then((result) => result.json())
   }
 
-  static useSearch(options: WorkspaceSearchOptions, swrOptions?: any) {
+  static useSearch(options: SearchOptions, swrOptions?: any) {
     return useSWR<Workspace[]>(
       '/workspaces/search',
       () => this.search(options),
@@ -87,7 +87,7 @@ export default class WorkspaceAPI {
     )
   }
 
-  static async search(options: WorkspaceSearchOptions): Promise<Workspace[]> {
+  static async search(options: SearchOptions): Promise<Workspace[]> {
     return apiFetch('/workspaces/search', {
       method: 'POST',
       body: JSON.stringify(options),
@@ -98,7 +98,7 @@ export default class WorkspaceAPI {
     }).then((result) => result.json())
   }
 
-  static async create(options: WorkspaceCreateOptions): Promise<Workspace> {
+  static async create(options: CreateOptions): Promise<Workspace> {
     return apiFetch('/workspaces', {
       method: 'POST',
       body: JSON.stringify(options),
@@ -111,7 +111,7 @@ export default class WorkspaceAPI {
 
   static async updateName(
     id: string,
-    options: WorkspaceUpdateNameOptions
+    options: UpdateNameOptions
   ): Promise<Workspace> {
     return apiFetch(`/workspaces/${id}/update_name`, {
       method: 'POST',
@@ -125,7 +125,7 @@ export default class WorkspaceAPI {
 
   static async updateStorageCapacity(
     id: string,
-    options: WorkspaceStorageCapacityOptions
+    options: StorageCapacityOptions
   ): Promise<Workspace> {
     return apiFetch(`/workspaces/${id}/update_storage_capacity`, {
       method: 'POST',

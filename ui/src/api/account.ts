@@ -1,28 +1,28 @@
 import { idpFetch } from './fetch'
 import { User } from './user'
 
-export type AccountCreateOptions = {
+export type CreateOptions = {
   email: string
   password: string
   fullName: string
   picture?: string
 }
 
-export type AccountSendResetPasswordEmailOptions = {
+export type SendResetPasswordEmailOptions = {
   email: string
 }
 
-export type AccountResetPasswordOptions = {
+export type ResetPasswordOptions = {
   token: string
   newPassword: string
 }
 
-export type AccountConfirmEmailOptions = {
+export type ConfirmEmailOptions = {
   token: string
 }
 
 export default class AccountAPI {
-  static async create(options: AccountCreateOptions): Promise<User> {
+  static async create(options: CreateOptions): Promise<User> {
     return idpFetch(`/accounts`, {
       method: 'POST',
       body: JSON.stringify(options),
@@ -33,7 +33,7 @@ export default class AccountAPI {
   }
 
   static async sendResetPasswordEmail(
-    options: AccountSendResetPasswordEmailOptions
+    options: SendResetPasswordEmailOptions
   ) {
     return idpFetch(`/accounts/send_reset_password_email`, {
       method: 'POST',
@@ -44,7 +44,7 @@ export default class AccountAPI {
     })
   }
 
-  static async resetPassword(options: AccountResetPasswordOptions) {
+  static async resetPassword(options: ResetPasswordOptions) {
     return idpFetch(`/accounts/reset_password`, {
       method: 'POST',
       body: JSON.stringify(options),
@@ -54,7 +54,7 @@ export default class AccountAPI {
     })
   }
 
-  static async confirmEmail(options: AccountConfirmEmailOptions) {
+  static async confirmEmail(options: ConfirmEmailOptions) {
     return idpFetch(`/accounts/confirm_email`, {
       method: 'POST',
       body: JSON.stringify(options),

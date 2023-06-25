@@ -12,24 +12,24 @@ export type User = {
   pendingEmail?: string
 }
 
-export type UserUpdateFullNameOptions = {
+export type UpdateFullNameOptions = {
   fullName: string
 }
 
-export type UserUpdateEmailRequestOptions = {
+export type UpdateEmailRequestOptions = {
   email: string
 }
 
-export type UserUpdateEmailConfirmationOptions = {
+export type UpdateEmailConfirmationOptions = {
   token: string
 }
 
-export type UserUpdatePasswordOptions = {
+export type UpdatePasswordOptions = {
   currentPassword: string
   newPassword: string
 }
 
-export type UserDeleteOptions = {
+export type DeleteOptions = {
   password: string
 }
 
@@ -39,7 +39,7 @@ export default class UserAPI {
   }
 
   static async updateFullName(
-    options: UserUpdateFullNameOptions
+    options: UpdateFullNameOptions
   ): Promise<User> {
     return idpFetch(`/user/update_full_name`, {
       method: 'POST',
@@ -52,7 +52,7 @@ export default class UserAPI {
   }
 
   static async updateEmailRequest(
-    options: UserUpdateEmailRequestOptions
+    options: UpdateEmailRequestOptions
   ): Promise<User> {
     return idpFetch(`/user/update_email_request`, {
       method: 'POST',
@@ -65,7 +65,7 @@ export default class UserAPI {
   }
 
   static async updateEmailConfirmation(
-    options: UserUpdateEmailConfirmationOptions
+    options: UpdateEmailConfirmationOptions
   ): Promise<User> {
     return idpFetch(`/user/update_email_confirmation`, {
       method: 'POST',
@@ -78,7 +78,7 @@ export default class UserAPI {
   }
 
   static async updatePassword(
-    options: UserUpdatePasswordOptions
+    options: UpdatePasswordOptions
   ): Promise<User> {
     return idpFetch(`/user/update_password`, {
       method: 'POST',
@@ -90,7 +90,7 @@ export default class UserAPI {
     }).then((result) => result.json())
   }
 
-  static async delete(options: UserDeleteOptions) {
+  static async delete(options: DeleteOptions) {
     return idpFetch(`/user`, {
       method: 'DELETE',
       body: JSON.stringify(options),
