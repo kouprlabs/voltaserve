@@ -87,8 +87,8 @@ export type SearchOptions = {
 }
 
 export type ListOptions = {
-  size: number
-  page: number
+  size?: number
+  page?: number
   type?: FileType
   sortBy?: SortBy
   sortOrder?: SortOrder
@@ -223,9 +223,12 @@ export default class FileAPI {
   }
 
   static async list(id: string, options: ListOptions): Promise<List> {
-    const params: any = {
-      page: options.page.toString(),
-      size: options.size.toString(),
+    const params: any = {}
+    if (options?.page) {
+      params.page = options.page.toString()
+    }
+    if (options?.size) {
+      params.size = options.size.toString()
     }
     if (options.sortBy) {
       params.sort_by = options.sortBy.toString()

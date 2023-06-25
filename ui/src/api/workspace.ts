@@ -5,6 +5,17 @@ import { apiFetch } from './fetch'
 import { Organization } from './organization'
 import { PermissionType } from './permission'
 
+export enum SortBy {
+  Name = 'name',
+  DateCreated = 'date_created',
+  DateModified = 'date_modified',
+}
+
+export enum SortOrder {
+  Asc = 'asc',
+  Desc = 'desc',
+}
+
 export type Workspace = {
   id: string
   name: string
@@ -16,8 +27,23 @@ export type Workspace = {
   updateTime?: string
 }
 
+export type List = {
+  data: Workspace[]
+  totalPages: number
+  totalElements: number
+  page: number
+  size: number
+}
+
 export interface SearchOptions {
   text: string
+}
+
+export type ListOptions = {
+  size?: number
+  page?: number
+  sortBy?: SortBy
+  sortOrder?: SortOrder
 }
 
 export interface CreateOptions {
@@ -54,23 +80,36 @@ export default class WorkspaceAPI {
     }).then((result) => result.json())
   }
 
-  static useGetAllOrSearch(
+  static useListOrSearch(
     options?: { search?: SearchOptions },
     swrOptions?: any
   ) {
     if (options?.search) {
       return this.useSearch(options?.search, swrOptions)
     } else {
-      return this.useGetAll(swrOptions)
+      return this.useList(swrOptions)
     }
   }
 
-  static useGetAll(swrOptions?: any) {
-    return useSWR<Workspace[]>('/workspaces', () => this.getAll(), swrOptions)
+  static useList(swrOptions?: any) {
+    return useSWR<List>('/workspaces', () => this.list(), swrOptions)
   }
 
-  static async getAll(): Promise<Workspace[]> {
-    return apiFetch('/workspaces', {
+  static async list(options?: ListOptions): Promise<List> {
+    const params: any = {}
+    if (options?.page) {
+      params.page = options.page.toString()
+    }
+    if (options?.size) {
+      params.size = options.size.toString()
+    }
+    if (options?.sortBy) {
+      params.sort_by = options.sortBy.toString()
+    }
+    if (options?.sortOrder) {
+      params.sort_order = options.sortOrder.toString()
+    }
+    return apiFetch(`/workspaces?${new URLSearchParams(params)}`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
@@ -80,14 +119,14 @@ export default class WorkspaceAPI {
   }
 
   static useSearch(options: SearchOptions, swrOptions?: any) {
-    return useSWR<Workspace[]>(
+    return useSWR<List>(
       '/workspaces/search',
       () => this.search(options),
       swrOptions
     )
   }
 
-  static async search(options: SearchOptions): Promise<Workspace[]> {
+  static async search(options: SearchOptions): Promise<List> {
     return apiFetch('/workspaces/search', {
       method: 'POST',
       body: JSON.stringify(options),

@@ -73,9 +73,11 @@ const SignInPage = () => {
           })
           navigate(`/workspace/${workspaceId}/file/${rootId}`)
         } else {
-          const result = await WorkspaceAPI.getAll()
-          if (result.length === 1) {
-            navigate(`/workspace/${result[0].id}/file/${result[0].rootId}`)
+          const result = await WorkspaceAPI.list()
+          if (result.data.length === 1) {
+            navigate(
+              `/workspace/${result.data[0].id}/file/${result.data[0].rootId}`
+            )
           } else {
             navigate('/workspace')
           }

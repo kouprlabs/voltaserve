@@ -27,7 +27,7 @@ import { decodeQuery } from '@/helpers/query'
 const WorkspaceListPage = () => {
   const [searchParams] = useSearchParams()
   const query = decodeQuery(searchParams.get('q') as string)
-  const { data: workspaces, error } = WorkspaceAPI.useGetAllOrSearch(
+  const { data: list, error } = WorkspaceAPI.useListOrSearch(
     query ? { search: { text: query } } : undefined,
     swrConfig()
   )
@@ -40,13 +40,13 @@ const WorkspaceListPage = () => {
         <Heading size="lg" pl={variables.spacingMd}>
           Workspaces
         </Heading>
-        {!workspaces && error && (
+        {!list && error && (
           <Center h="300px">
             <Text>Failed to load workspaces.</Text>
           </Center>
         )}
-        {!workspaces && !error && <SectionSpinner />}
-        {workspaces && workspaces.length === 0 && !error ? (
+        {!list && !error && <SectionSpinner />}
+        {list && list.data.length === 0 && !error ? (
           <Center h="300px">
             <VStack spacing={variables.spacing}>
               <Text>There are no workspaces.</Text>
@@ -54,7 +54,7 @@ const WorkspaceListPage = () => {
             </VStack>
           </Center>
         ) : null}
-        {workspaces && workspaces.length > 0 && (
+        {list && list.data.length > 0 && (
           <Table variant="simple">
             <Thead>
               <Tr>
@@ -65,7 +65,7 @@ const WorkspaceListPage = () => {
               </Tr>
             </Thead>
             <Tbody>
-              {workspaces.map((w: Workspace) => (
+              {list.data.map((w: Workspace) => (
                 <Tr key={w.id}>
                   <Td>
                     <HStack spacing={variables.spacing}>

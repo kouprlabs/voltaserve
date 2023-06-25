@@ -2,6 +2,7 @@ package router
 
 import (
 	"net/http"
+	"strconv"
 	"voltaserve/errorpkg"
 	"voltaserve/service"
 
@@ -20,7 +21,7 @@ func NewWorkspaceRouter() *WorkspaceRouter {
 }
 
 func (r *WorkspaceRouter) AppendRoutes(g fiber.Router) {
-	g.Get("/", r.GetAll)
+	g.Get("/", r.List)
 	g.Post("/search", r.Search)
 	g.Post("/", r.Create)
 	g.Get("/:id", r.GetByID)
@@ -44,14 +45,14 @@ func (r *WorkspaceRouter) AppendRoutes(g fiber.Router) {
 //	@Router			/workspaces [post]
 func (r *WorkspaceRouter) Create(c *fiber.Ctx) error {
 	userID := GetUserID(c)
-	req := new(service.CreateWorkspaceOptions)
-	if err := c.BodyParser(req); err != nil {
+	opts := new(service.CreateWorkspaceOptions)
+	if err := c.BodyParser(opts); err != nil {
 		return err
 	}
-	if err := validator.New().Struct(req); err != nil {
+	if err := validator.New().Struct(opts); err != nil {
 		return errorpkg.NewRequestBodyValidationError(err)
 	}
-	res, err := r.workspaceSvc.Create(*req, userID)
+	res, err := r.workspaceSvc.Create(*opts, userID)
 	if err != nil {
 		return err
 	}
@@ -78,22 +79,53 @@ func (r *WorkspaceRouter) GetByID(c *fiber.Ctx) error {
 	return c.JSON(res)
 }
 
-// GetAll godoc
+// List godoc
 //
-//	@Summary		Get all
-//	@Description	Get all
+//	@Summary		List
+//	@Description	List
 //	@Tags			Workspaces
-//	@Id				workspaces_get_all
+//	@Id				workspaces_list
 //	@Produce		json
-//	@Success		200	{array}		core.Workspace
-//	@Failure		500	{object}	errorpkg.ErrorResponse
+//	@Param			id		path		string	true	"ID"
+//	@Param			page	query		string	true	"Page"
+//	@Param			size	query		string	true	"Size"
+//	@Success		200		{object}	core.WorkspaceList
+//	@Failure		404		{object}	errorpkg.ErrorResponse
+//	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/workspaces [get]
-func (r *WorkspaceRouter) GetAll(c *fiber.Ctx) error {
-	workspaces, err := r.workspaceSvc.FindAll(GetUserID(c))
+func (r *WorkspaceRouter) List(c *fiber.Ctx) error {
+	var err error
+	var page int64
+	if c.Query("page") == "" {
+		page = 1
+	} else {
+		page, err = strconv.ParseInt(c.Query("page"), 10, 32)
+		if err != nil {
+			page = 1
+		}
+	}
+	var size int64
+	if c.Query("size") == "" {
+		size = WorkspaceDefaultPageSize
+	} else {
+		size, err = strconv.ParseInt(c.Query("size"), 10, 32)
+		if err != nil {
+			return err
+		}
+	}
+	sortBy := c.Query("sort_by")
+	if !service.IsValidSortBy(sortBy) {
+		return errorpkg.NewInvalidQueryParamError("sort_by")
+	}
+	sortOrder := c.Query("sort_order")
+	if !service.IsValidSortOrder(sortOrder) {
+		return errorpkg.NewInvalidQueryParamError("sort_order")
+	}
+	res, err := r.workspaceSvc.List(uint(page), uint(size), sortBy, sortOrder, GetUserID(c))
 	if err != nil {
 		return err
 	}
-	return c.JSON(workspaces)
+	return c.JSON(res)
 }
 
 // Search godoc
@@ -108,11 +140,30 @@ func (r *WorkspaceRouter) GetAll(c *fiber.Ctx) error {
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/workspaces/search [get]
 func (r *WorkspaceRouter) Search(c *fiber.Ctx) error {
-	req := new(service.WorkspaceSearchOptions)
-	if err := c.BodyParser(req); err != nil {
+	opts := new(service.WorkspaceSearchOptions)
+	if err := c.BodyParser(opts); err != nil {
 		return err
 	}
-	workspaces, err := r.workspaceSvc.Search(req.Text, GetUserID(c))
+	var err error
+	var page int64
+	if c.Query("page") == "" {
+		page = 1
+	} else {
+		page, err = strconv.ParseInt(c.Query("page"), 10, 32)
+		if err != nil {
+			page = 1
+		}
+	}
+	var size int64
+	if c.Query("size") == "" {
+		size = FileDefaultPageSize
+	} else {
+		size, err = strconv.ParseInt(c.Query("size"), 10, 32)
+		if err != nil {
+			return err
+		}
+	}
+	workspaces, err := r.workspaceSvc.Search(opts.Text, uint(page), uint(size), GetUserID(c))
 	if err != nil {
 		return err
 	}
@@ -134,11 +185,11 @@ func (r *WorkspaceRouter) Search(c *fiber.Ctx) error {
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/workspaces/{id}/update_name [post]
 func (r *WorkspaceRouter) UpdateName(c *fiber.Ctx) error {
-	req := new(service.UpdateWorkspaceNameOptions)
-	if err := c.BodyParser(req); err != nil {
+	opts := new(service.UpdateWorkspaceNameOptions)
+	if err := c.BodyParser(opts); err != nil {
 		return err
 	}
-	res, err := r.workspaceSvc.UpdateName(c.Params("id"), req.Name, GetUserID(c))
+	res, err := r.workspaceSvc.UpdateName(c.Params("id"), opts.Name, GetUserID(c))
 	if err != nil {
 		return err
 	}
@@ -160,11 +211,11 @@ func (r *WorkspaceRouter) UpdateName(c *fiber.Ctx) error {
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/workspaces/{id}/update_storage_capacity [post]
 func (r *WorkspaceRouter) UpdateStorageCapacity(c *fiber.Ctx) error {
-	req := new(service.UpdateWorkspaceStorageCapacityOptions)
-	if err := c.BodyParser(req); err != nil {
+	opts := new(service.UpdateWorkspaceStorageCapacityOptions)
+	if err := c.BodyParser(opts); err != nil {
 		return err
 	}
-	res, err := r.workspaceSvc.UpdateStorageCapacity(c.Params("id"), req.StorageCapacity, GetUserID(c))
+	res, err := r.workspaceSvc.UpdateStorageCapacity(c.Params("id"), opts.StorageCapacity, GetUserID(c))
 	if err != nil {
 		return err
 	}
