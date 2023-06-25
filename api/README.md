@@ -9,7 +9,7 @@ Install [Golang](https://go.dev/doc/install).
 Run for development:
 
 ```shell
-air
+go run .
 ```
 
 Build binary:
