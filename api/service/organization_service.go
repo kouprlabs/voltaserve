@@ -133,26 +133,6 @@ func (svc *OrganizationService) Find(id string, userID string) (*Organization, e
 	return res, nil
 }
 
-func (svc *OrganizationService) FindAll(userID string) ([]*Organization, error) {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return nil, err
-	}
-	ids, err := svc.orgRepo.GetIDs()
-	if err != nil {
-		return nil, err
-	}
-	authorized, err := svc.doAuthorizationByIDs(ids, user)
-	if err != nil {
-		return nil, err
-	}
-	mapped, err := svc.orgMapper.mapMany(authorized, userID)
-	if err != nil {
-		return nil, err
-	}
-	return mapped, nil
-}
-
 func (svc *OrganizationService) List(page uint, size uint, sortBy string, sortOrder string, userID string) (*OrganizationList, error) {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {

@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import {
   Heading,
@@ -27,10 +28,16 @@ import { decodeQuery } from '@/helpers/query'
 const WorkspaceListPage = () => {
   const [searchParams] = useSearchParams()
   const query = decodeQuery(searchParams.get('q') as string)
-  const { data: list, error } = WorkspaceAPI.useListOrSearch(
-    query ? { search: { text: query } } : undefined,
-    swrConfig()
-  )
+  const {
+    data: list,
+    error,
+    mutate,
+  } = WorkspaceAPI.useList({ query }, swrConfig())
+
+  useEffect(() => {
+    mutate()
+  }, [query])
+
   return (
     <>
       <Helmet>

@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import {
   Heading,
@@ -27,10 +28,16 @@ import { decodeQuery } from '@/helpers/query'
 const OrganizationListPage = () => {
   const [searchParams] = useSearchParams()
   const query = decodeQuery(searchParams.get('q') as string)
-  const { data: list, error } = OrganizationAPI.useListOrSearch(
-    query ? { search: { text: query } } : undefined,
-    swrConfig()
-  )
+  const {
+    data: list,
+    error,
+    mutate,
+  } = OrganizationAPI.useList({ query }, swrConfig())
+
+  useEffect(() => {
+    mutate()
+  }, [query])
+
   return (
     <>
       <Helmet>

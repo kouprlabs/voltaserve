@@ -22,8 +22,6 @@ func NewGroupRouter() *GroupRouter {
 
 func (r *GroupRouter) AppendRoutes(g fiber.Router) {
 	g.Get("/", r.List)
-	g.Get("/all", r.GetAll)
-	g.Post("/search", r.Search)
 	g.Post("/", r.Create)
 	g.Get("/:id", r.GetByID)
 	g.Delete("/:id", r.Delete)
@@ -85,24 +83,6 @@ func (r *GroupRouter) GetByID(c *fiber.Ctx) error {
 	return c.JSON(res)
 }
 
-// GetAll godoc
-//
-//	@Summary		Get all
-//	@Description	Get all
-//	@Tags			Groups
-//	@Id				groups_get_all
-//	@Produce		json
-//	@Success		200	{array}		core.Group
-//	@Failure		500	{object}	errorpkg.ErrorResponse
-//	@Router			/groups [get]
-func (r *GroupRouter) GetAll(c *fiber.Ctx) error {
-	groups, err := r.groupSvc.FindAll(GetUserID(c))
-	if err != nil {
-		return err
-	}
-	return c.JSON(groups)
-}
-
 // List godoc
 //
 //	@Summary		List
@@ -145,51 +125,19 @@ func (r *GroupRouter) List(c *fiber.Ctx) error {
 	if !service.IsValidSortOrder(sortOrder) {
 		return errorpkg.NewInvalidQueryParamError("sort_order")
 	}
-	res, err := r.groupSvc.List(uint(page), uint(size), sortBy, sortOrder, GetUserID(c))
-	if err != nil {
-		return err
-	}
-	return c.JSON(res)
-}
-
-// Search godoc
-//
-//	@Summary		Search
-//	@Description	Search
-//	@Tags			Groups
-//	@Id				groups_search
-//	@Produce		json
-//	@Param			body	body		core.GroupSearchOptions	true	"Body"
-//	@Success		200		{object}	core.GroupList
-//	@Failure		500		{object}	errorpkg.ErrorResponse
-//	@Router			/groups/search [get]
-func (r *GroupRouter) Search(c *fiber.Ctx) error {
-	opts := new(service.GroupSearchOptions)
-	if err := c.BodyParser(opts); err != nil {
-		return err
-	}
-	var err error
-	var page int64
-	if c.Query("page") == "" {
-		page = 1
-	} else {
-		page, err = strconv.ParseInt(c.Query("page"), 10, 32)
-		if err != nil {
-			page = 1
-		}
-	}
-	var size int64
-	if c.Query("size") == "" {
-		size = GroupDefaultPageSize
-	} else {
-		size, err = strconv.ParseInt(c.Query("size"), 10, 32)
+	var res *service.GroupList
+	userID := GetUserID(c)
+	query := c.Query("query")
+	if query == "" {
+		res, err = r.groupSvc.List(uint(page), uint(size), sortBy, sortOrder, userID)
 		if err != nil {
 			return err
 		}
-	}
-	res, err := r.groupSvc.Search(opts.Text, uint(page), uint(size), GetUserID(c))
-	if err != nil {
-		return err
+	} else {
+		res, err = r.groupSvc.Search(query, uint(page), uint(size), GetUserID(c))
+		if err != nil {
+			return err
+		}
 	}
 	return c.JSON(res)
 }

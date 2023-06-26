@@ -46,8 +46,8 @@ const NewGroupPage = () => {
 
   useEffect(() => {
     ;(async () => {
-      const result = await OrganizationAPI.getAll()
-      setOrgs(result.filter((o) => geEditorPermission(o.permission)))
+      const list = await OrganizationAPI.list()
+      setOrgs(list.data.filter((o) => geEditorPermission(o.permission)))
     })()
   }, [])
 

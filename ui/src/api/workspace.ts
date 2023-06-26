@@ -35,11 +35,8 @@ export type List = {
   size: number
 }
 
-export interface SearchOptions {
-  text: string
-}
-
 export type ListOptions = {
+  query?: string
   size?: number
   page?: number
   sortBy?: SortBy
@@ -80,33 +77,15 @@ export default class WorkspaceAPI {
     }).then((result) => result.json())
   }
 
-  static async getAll(): Promise<Workspace[]> {
-    return apiFetch('/workspaces/all', {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
-        'Content-Type': 'application/json',
-      },
-    }).then((result) => result.json())
-  }
-
-  static useListOrSearch(
-    options?: { search?: SearchOptions; list?: ListOptions },
-    swrOptions?: any
-  ) {
-    if (options?.search) {
-      return this.useSearch(options?.search, swrOptions)
-    } else {
-      return this.useList(options?.list, swrOptions)
-    }
-  }
-
   static useList(options?: ListOptions, swrOptions?: any) {
     return useSWR<List>('/workspaces', () => this.list(options), swrOptions)
   }
 
   static async list(options?: ListOptions): Promise<List> {
     const params: any = {}
+    if (options?.query) {
+      params.query = encodeURIComponent(options.query.toString())
+    }
     if (options?.page) {
       params.page = options.page.toString()
     }
@@ -121,25 +100,6 @@ export default class WorkspaceAPI {
     }
     return apiFetch(`/workspaces?${new URLSearchParams(params)}`, {
       method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
-        'Content-Type': 'application/json',
-      },
-    }).then((result) => result.json())
-  }
-
-  static useSearch(options: SearchOptions, swrOptions?: any) {
-    return useSWR<List>(
-      '/workspaces/search',
-      () => this.search(options),
-      swrOptions
-    )
-  }
-
-  static async search(options: SearchOptions): Promise<List> {
-    return apiFetch('/workspaces/search', {
-      method: 'POST',
-      body: JSON.stringify(options),
       headers: {
         'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
         'Content-Type': 'application/json',

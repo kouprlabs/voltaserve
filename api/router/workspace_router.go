@@ -22,8 +22,6 @@ func NewWorkspaceRouter() *WorkspaceRouter {
 
 func (r *WorkspaceRouter) AppendRoutes(g fiber.Router) {
 	g.Get("/", r.List)
-	g.Get("/all", r.GetAll)
-	g.Post("/search", r.Search)
 	g.Post("/", r.Create)
 	g.Get("/:id", r.GetByID)
 	g.Delete("/:id", r.Delete)
@@ -80,24 +78,6 @@ func (r *WorkspaceRouter) GetByID(c *fiber.Ctx) error {
 	return c.JSON(res)
 }
 
-// GetAll godoc
-//
-//	@Summary		Get all
-//	@Description	Get all
-//	@Tags			Workspaces
-//	@Id				workspaces_get_all
-//	@Produce		json
-//	@Success		200	{array}		core.Workspace
-//	@Failure		500	{object}	errorpkg.ErrorResponse
-//	@Router			/workspaces [get]
-func (r *WorkspaceRouter) GetAll(c *fiber.Ctx) error {
-	workspaces, err := r.workspaceSvc.FindAll(GetUserID(c))
-	if err != nil {
-		return err
-	}
-	return c.JSON(workspaces)
-}
-
 // List godoc
 //
 //	@Summary		List
@@ -140,51 +120,19 @@ func (r *WorkspaceRouter) List(c *fiber.Ctx) error {
 	if !service.IsValidSortOrder(sortOrder) {
 		return errorpkg.NewInvalidQueryParamError("sort_order")
 	}
-	res, err := r.workspaceSvc.List(uint(page), uint(size), sortBy, sortOrder, GetUserID(c))
-	if err != nil {
-		return err
-	}
-	return c.JSON(res)
-}
-
-// Search godoc
-//
-//	@Summary		Search
-//	@Description	Search
-//	@Tags			Workspaces
-//	@Id				workspaces_search
-//	@Produce		json
-//	@Param			body	body		core.WorkspaceSearchOptions	true	"Body"
-//	@Success		200		{object}	core.WorkspaceList
-//	@Failure		500		{object}	errorpkg.ErrorResponse
-//	@Router			/workspaces/search [get]
-func (r *WorkspaceRouter) Search(c *fiber.Ctx) error {
-	opts := new(service.WorkspaceSearchOptions)
-	if err := c.BodyParser(opts); err != nil {
-		return err
-	}
-	var err error
-	var page int64
-	if c.Query("page") == "" {
-		page = 1
-	} else {
-		page, err = strconv.ParseInt(c.Query("page"), 10, 32)
-		if err != nil {
-			page = 1
-		}
-	}
-	var size int64
-	if c.Query("size") == "" {
-		size = WorkspaceDefaultPageSize
-	} else {
-		size, err = strconv.ParseInt(c.Query("size"), 10, 32)
+	var res *service.WorkspaceList
+	userID := GetUserID(c)
+	query := c.Query("query")
+	if query == "" {
+		res, err = r.workspaceSvc.List(uint(page), uint(size), sortBy, sortOrder, userID)
 		if err != nil {
 			return err
 		}
-	}
-	res, err := r.workspaceSvc.Search(opts.Text, uint(page), uint(size), GetUserID(c))
-	if err != nil {
-		return err
+	} else {
+		res, err = r.workspaceSvc.Search(query, uint(page), uint(size), userID)
+		if err != nil {
+			return err
+		}
 	}
 	return c.JSON(res)
 }

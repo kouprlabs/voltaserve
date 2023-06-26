@@ -22,8 +22,6 @@ func NewOrganizationRouter() *OrganizationRouter {
 
 func (r *OrganizationRouter) AppendRoutes(g fiber.Router) {
 	g.Get("/", r.List)
-	g.Get("/all", r.GetAll)
-	g.Post("/search", r.Search)
 	g.Post("/", r.Create)
 	g.Get("/:id", r.GetByID)
 	g.Delete("/:id", r.Delete)
@@ -140,24 +138,6 @@ func (r *OrganizationRouter) UpdateName(c *fiber.Ctx) error {
 	return c.JSON(res)
 }
 
-// GetAll godoc
-//
-//	@Summary		Get all
-//	@Description	Get all
-//	@Tags			Organizations
-//	@Id				organizations_get_all
-//	@Produce		json
-//	@Success		200	{array}		core.Organization
-//	@Failure		500	{object}	errorpkg.ErrorResponse
-//	@Router			/organizations [get]
-func (r *OrganizationRouter) GetAll(c *fiber.Ctx) error {
-	orgs, err := r.orgSvc.FindAll(GetUserID(c))
-	if err != nil {
-		return err
-	}
-	return c.JSON(orgs)
-}
-
 // List godoc
 //
 //	@Summary		List
@@ -200,57 +180,19 @@ func (r *OrganizationRouter) List(c *fiber.Ctx) error {
 	if !service.IsValidSortOrder(sortOrder) {
 		return errorpkg.NewInvalidQueryParamError("sort_order")
 	}
-	res, err := r.orgSvc.List(uint(page), uint(size), sortBy, sortOrder, GetUserID(c))
-	if err != nil {
-		return err
-	}
-	return c.JSON(res)
-}
-
-// Search godoc
-//
-//	@Summary		Search
-//	@Description	Search
-//	@Tags			Organizations
-//	@Id				organizations_search
-//	@Produce		json
-//	@Param			page	query		string							true	"Page"
-//	@Param			size	query		string							true	"Size"
-//	@Param			body	body		core.OrganizationSearchOptions	true	"Body"
-//	@Success		200		{object}	core.OrganizationList
-//	@Failure		500		{object}	errorpkg.ErrorResponse
-//	@Router			/organizations/search [post]
-func (r *OrganizationRouter) Search(c *fiber.Ctx) error {
+	var res *service.OrganizationList
 	userID := GetUserID(c)
-	opts := new(service.OrganizationSearchOptions)
-	if err := c.BodyParser(opts); err != nil {
-		return err
-	}
-	if err := validator.New().Struct(opts); err != nil {
-		return errorpkg.NewRequestBodyValidationError(err)
-	}
-	var err error
-	var page int64
-	if c.Query("page") == "" {
-		page = 1
-	} else {
-		page, err = strconv.ParseInt(c.Query("page"), 10, 32)
-		if err != nil {
-			page = 1
-		}
-	}
-	var size int64
-	if c.Query("size") == "" {
-		size = OrganizationDefaultPageSize
-	} else {
-		size, err = strconv.ParseInt(c.Query("size"), 10, 32)
+	query := c.Query("query")
+	if query == "" {
+		res, err = r.orgSvc.List(uint(page), uint(size), sortBy, sortOrder, userID)
 		if err != nil {
 			return err
 		}
-	}
-	res, err := r.orgSvc.Search(opts.Text, uint(page), uint(size), userID)
-	if err != nil {
-		return err
+	} else {
+		res, err = r.orgSvc.Search(query, uint(page), uint(size), userID)
+		if err != nil {
+			return err
+		}
 	}
 	return c.JSON(res)
 }
