@@ -565,7 +565,7 @@ func (svc *FileService) ListByPath(path string, userID string) ([]*File, error) 
 		return nil, err
 	}
 	if path == "/" {
-		workspaces, err := svc.workspaceSvc.findAll(userID)
+		workspaces, err := svc.workspaceSvc.FindAll(userID)
 		if err != nil {
 			return nil, err
 		}

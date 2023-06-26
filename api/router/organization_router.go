@@ -22,6 +22,7 @@ func NewOrganizationRouter() *OrganizationRouter {
 
 func (r *OrganizationRouter) AppendRoutes(g fiber.Router) {
 	g.Get("/", r.List)
+	g.Get("/all", r.GetAll)
 	g.Post("/search", r.Search)
 	g.Post("/", r.Create)
 	g.Get("/:id", r.GetByID)
@@ -137,6 +138,24 @@ func (r *OrganizationRouter) UpdateName(c *fiber.Ctx) error {
 		return err
 	}
 	return c.JSON(res)
+}
+
+// GetAll godoc
+//
+//	@Summary		Get all
+//	@Description	Get all
+//	@Tags			Organizations
+//	@Id				organizations_get_all
+//	@Produce		json
+//	@Success		200	{array}		core.Organization
+//	@Failure		500	{object}	errorpkg.ErrorResponse
+//	@Router			/organizations [get]
+func (r *OrganizationRouter) GetAll(c *fiber.Ctx) error {
+	orgs, err := r.orgSvc.FindAll(GetUserID(c))
+	if err != nil {
+		return err
+	}
+	return c.JSON(orgs)
 }
 
 // List godoc

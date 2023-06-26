@@ -115,6 +115,16 @@ export default class GroupAPI {
     }).then((result) => result.json())
   }
 
+  static async getAll(): Promise<Group[]> {
+    return apiFetch('/groups/all', {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
+        'Content-Type': 'application/json',
+      },
+    }).then((result) => result.json())
+  }
+
   static useListOrSearch(
     options?: { search?: SearchOptions; list?: ListOptions },
     swrOptions?: any

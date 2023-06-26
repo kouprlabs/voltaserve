@@ -159,6 +159,26 @@ func (svc *GroupService) Find(id string, userID string) (*Group, error) {
 	return res, nil
 }
 
+func (svc *GroupService) FindAll(userID string) ([]*Group, error) {
+	user, err := svc.userRepo.Find(userID)
+	if err != nil {
+		return nil, err
+	}
+	ids, err := svc.orgRepo.GetIDs()
+	if err != nil {
+		return nil, err
+	}
+	authorized, err := svc.doAuthorizationByIDs(ids, user)
+	if err != nil {
+		return nil, err
+	}
+	mapped, err := svc.groupMapper.mapMany(authorized, userID)
+	if err != nil {
+		return nil, err
+	}
+	return mapped, nil
+}
+
 func (svc *GroupService) List(page uint, size uint, sortBy string, sortOrder string, userID string) (*GroupList, error) {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {

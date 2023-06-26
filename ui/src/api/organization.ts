@@ -76,6 +76,16 @@ export default class OrganizationAPI {
     }).then((result) => result.json())
   }
 
+  static async getAll(): Promise<Organization[]> {
+    return apiFetch('/organizations/all', {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
+        'Content-Type': 'application/json',
+      },
+    }).then((result) => result.json())
+  }
+
   static useListOrSearch(
     options?: { search?: SearchOptions; list?: ListOptions },
     swrOptions?: any

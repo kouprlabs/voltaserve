@@ -22,6 +22,7 @@ func NewGroupRouter() *GroupRouter {
 
 func (r *GroupRouter) AppendRoutes(g fiber.Router) {
 	g.Get("/", r.List)
+	g.Get("/all", r.GetAll)
 	g.Post("/search", r.Search)
 	g.Post("/", r.Create)
 	g.Get("/:id", r.GetByID)
@@ -82,6 +83,24 @@ func (r *GroupRouter) GetByID(c *fiber.Ctx) error {
 		return err
 	}
 	return c.JSON(res)
+}
+
+// GetAll godoc
+//
+//	@Summary		Get all
+//	@Description	Get all
+//	@Tags			Groups
+//	@Id				groups_get_all
+//	@Produce		json
+//	@Success		200	{array}		core.Group
+//	@Failure		500	{object}	errorpkg.ErrorResponse
+//	@Router			/groups [get]
+func (r *GroupRouter) GetAll(c *fiber.Ctx) error {
+	groups, err := r.groupSvc.FindAll(GetUserID(c))
+	if err != nil {
+		return err
+	}
+	return c.JSON(groups)
 }
 
 // List godoc

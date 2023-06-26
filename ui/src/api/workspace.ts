@@ -80,6 +80,16 @@ export default class WorkspaceAPI {
     }).then((result) => result.json())
   }
 
+  static async getAll(): Promise<Workspace[]> {
+    return apiFetch('/workspaces/all', {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
+        'Content-Type': 'application/json',
+      },
+    }).then((result) => result.json())
+  }
+
   static useListOrSearch(
     options?: { search?: SearchOptions; list?: ListOptions },
     swrOptions?: any

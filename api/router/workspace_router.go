@@ -22,6 +22,7 @@ func NewWorkspaceRouter() *WorkspaceRouter {
 
 func (r *WorkspaceRouter) AppendRoutes(g fiber.Router) {
 	g.Get("/", r.List)
+	g.Get("/all", r.GetAll)
 	g.Post("/search", r.Search)
 	g.Post("/", r.Create)
 	g.Get("/:id", r.GetByID)
@@ -77,6 +78,24 @@ func (r *WorkspaceRouter) GetByID(c *fiber.Ctx) error {
 		return err
 	}
 	return c.JSON(res)
+}
+
+// GetAll godoc
+//
+//	@Summary		Get all
+//	@Description	Get all
+//	@Tags			Workspaces
+//	@Id				workspaces_get_all
+//	@Produce		json
+//	@Success		200	{array}		core.Workspace
+//	@Failure		500	{object}	errorpkg.ErrorResponse
+//	@Router			/workspaces [get]
+func (r *WorkspaceRouter) GetAll(c *fiber.Ctx) error {
+	workspaces, err := r.workspaceSvc.FindAll(GetUserID(c))
+	if err != nil {
+		return err
+	}
+	return c.JSON(workspaces)
 }
 
 // List godoc
