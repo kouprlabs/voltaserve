@@ -120,19 +120,15 @@ func (r *WorkspaceRouter) List(c *fiber.Ctx) error {
 	if !IsValidSortOrder(sortOrder) {
 		return errorpkg.NewInvalidQueryParamError("sort_order")
 	}
-	var res *service.WorkspaceList
-	userID := GetUserID(c)
-	query := c.Query("query")
-	if query == "" {
-		res, err = r.workspaceSvc.List(uint(page), uint(size), sortBy, sortOrder, userID)
-		if err != nil {
-			return err
-		}
-	} else {
-		res, err = r.workspaceSvc.Search(query, uint(page), uint(size), userID)
-		if err != nil {
-			return err
-		}
+	res, err := r.workspaceSvc.List(service.WorkspaceListOptions{
+		Query:     c.Query("query"),
+		Page:      uint(page),
+		Size:      uint(size),
+		SortBy:    sortBy,
+		SortOrder: sortOrder,
+	}, GetUserID(c))
+	if err != nil {
+		return err
 	}
 	return c.JSON(res)
 }

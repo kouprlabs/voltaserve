@@ -48,6 +48,14 @@ type WorkspaceCreateOptions struct {
 	StorageCapacity int64   `json:"storageCapacity" validate:"required,min=1"`
 }
 
+type WorkspaceListOptions struct {
+	Query     string
+	Page      uint
+	Size      uint
+	SortBy    string
+	SortOrder string
+}
+
 type WorkspaceUpdateNameOptions struct {
 	Name string `json:"name" validate:"required,max=255"`
 }
@@ -167,21 +175,33 @@ func (svc *WorkspaceService) Find(id string, userID string) (*Workspace, error) 
 	return res, nil
 }
 
-func (svc *WorkspaceService) List(page uint, size uint, sortBy string, sortOrder string, userID string) (*WorkspaceList, error) {
+func (svc *WorkspaceService) List(opts WorkspaceListOptions, userID string) (*WorkspaceList, error) {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
 	}
-	ids, err := svc.workspaceRepo.GetIDs()
-	if err != nil {
-		return nil, err
+	var authorized []model.Workspace
+	if opts.Query == "" {
+		ids, err := svc.workspaceRepo.GetIDs()
+		if err != nil {
+			return nil, err
+		}
+		authorized, err = svc.doAuthorizationByIDs(ids, user)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		workspaces, err := svc.workspaceSearch.Query(opts.Query)
+		if err != nil {
+			return nil, err
+		}
+		authorized, err = svc.doAuthorization(workspaces, user)
+		if err != nil {
+			return nil, err
+		}
 	}
-	authorized, err := svc.doAuthorizationByIDs(ids, user)
-	if err != nil {
-		return nil, err
-	}
-	sorted := svc.doSorting(authorized, sortBy, sortOrder, userID)
-	paged, totalElements, totalPages := svc.doPaging(sorted, page, size)
+	sorted := svc.doSorting(authorized, opts.SortBy, opts.SortOrder, userID)
+	paged, totalElements, totalPages := svc.doPaging(sorted, opts.Page, opts.Size)
 	mapped, err := svc.workspaceMapper.mapMany(paged, userID)
 	if err != nil {
 		return nil, err
@@ -190,34 +210,7 @@ func (svc *WorkspaceService) List(page uint, size uint, sortBy string, sortOrder
 		Data:          mapped,
 		TotalPages:    totalPages,
 		TotalElements: totalElements,
-		Page:          page,
-		Size:          uint(len(mapped)),
-	}, nil
-}
-
-func (svc *WorkspaceService) Search(query string, page uint, size uint, userID string) (*WorkspaceList, error) {
-	workspaces, err := svc.workspaceSearch.Query(query)
-	if err != nil {
-		return nil, err
-	}
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return nil, err
-	}
-	authorized, err := svc.doAuthorization(workspaces, user)
-	if err != nil {
-		return nil, err
-	}
-	paged, totalElements, totalPages := svc.doPaging(authorized, page, size)
-	mapped, err := svc.workspaceMapper.mapMany(paged, userID)
-	if err != nil {
-		return nil, err
-	}
-	return &WorkspaceList{
-		Data:          mapped,
-		TotalElements: totalElements,
-		TotalPages:    totalPages,
-		Page:          page,
+		Page:          opts.Page,
 		Size:          uint(len(mapped)),
 	}, nil
 }

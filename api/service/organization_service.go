@@ -41,6 +41,14 @@ type OrganizationCreateOptions struct {
 	Image *string `json:"image"`
 }
 
+type OrganizationListOptions struct {
+	Query     string
+	Page      uint
+	Size      uint
+	SortBy    string
+	SortOrder string
+}
+
 type OrganizationUpdateNameOptions struct {
 	Name string `json:"name" validate:"required,max=255"`
 }
@@ -132,21 +140,33 @@ func (svc *OrganizationService) Find(id string, userID string) (*Organization, e
 	return res, nil
 }
 
-func (svc *OrganizationService) List(page uint, size uint, sortBy string, sortOrder string, userID string) (*OrganizationList, error) {
+func (svc *OrganizationService) List(opts OrganizationListOptions, userID string) (*OrganizationList, error) {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
 	}
-	ids, err := svc.orgRepo.GetIDs()
-	if err != nil {
-		return nil, err
+	var authorized []model.Organization
+	if opts.Query == "" {
+		ids, err := svc.orgRepo.GetIDs()
+		if err != nil {
+			return nil, err
+		}
+		authorized, err = svc.doAuthorizationByIDs(ids, user)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		orgs, err := svc.orgSearch.Query(opts.Query)
+		if err != nil {
+			return nil, err
+		}
+		authorized, err = svc.doAuthorization(orgs, user)
+		if err != nil {
+			return nil, err
+		}
 	}
-	authorized, err := svc.doAuthorizationByIDs(ids, user)
-	if err != nil {
-		return nil, err
-	}
-	sorted := svc.doSorting(authorized, sortBy, sortOrder, userID)
-	paged, totalElements, totalPages := svc.doPaging(sorted, page, size)
+	sorted := svc.doSorting(authorized, opts.SortBy, opts.SortOrder, userID)
+	paged, totalElements, totalPages := svc.doPaging(sorted, opts.Page, opts.Size)
 	mapped, err := svc.orgMapper.mapMany(paged, userID)
 	if err != nil {
 		return nil, err
@@ -155,34 +175,7 @@ func (svc *OrganizationService) List(page uint, size uint, sortBy string, sortOr
 		Data:          mapped,
 		TotalPages:    totalPages,
 		TotalElements: totalElements,
-		Page:          page,
-		Size:          uint(len(mapped)),
-	}, nil
-}
-
-func (svc *OrganizationService) Search(query string, page uint, size uint, userID string) (*OrganizationList, error) {
-	orgs, err := svc.orgSearch.Query(query)
-	if err != nil {
-		return nil, err
-	}
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return nil, err
-	}
-	authorized, err := svc.doAuthorization(orgs, user)
-	if err != nil {
-		return nil, err
-	}
-	paged, totalElements, totalPages := svc.doPaging(authorized, page, size)
-	mapped, err := svc.orgMapper.mapMany(paged, userID)
-	if err != nil {
-		return nil, err
-	}
-	return &OrganizationList{
-		Data:          mapped,
-		TotalElements: totalElements,
-		TotalPages:    totalPages,
-		Page:          page,
+		Page:          opts.Page,
 		Size:          uint(len(mapped)),
 	}, nil
 }
