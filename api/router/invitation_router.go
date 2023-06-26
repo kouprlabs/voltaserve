@@ -2,6 +2,7 @@ package router
 
 import (
 	"net/http"
+	"strconv"
 	"voltaserve/errorpkg"
 	"voltaserve/service"
 
@@ -65,12 +66,43 @@ func (r *InvitationRouter) Create(c *fiber.Ctx) error {
 //	@Tags			Invitations
 //	@Id				invitation_get_incoming
 //	@Produce		json
-//	@Success		200	{array}		core.Invitation
+//	@Success		200	{object}	core.InvitationList
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/invitations/get_incoming [get]
 func (r *InvitationRouter) GetIncoming(c *fiber.Ctx) error {
-	userID := GetUserID(c)
-	res, err := r.invitationSvc.GetIncoming(userID)
+	var err error
+	var page int64
+	if c.Query("page") == "" {
+		page = 1
+	} else {
+		page, err = strconv.ParseInt(c.Query("page"), 10, 32)
+		if err != nil {
+			page = 1
+		}
+	}
+	var size int64
+	if c.Query("size") == "" {
+		size = WorkspaceDefaultPageSize
+	} else {
+		size, err = strconv.ParseInt(c.Query("size"), 10, 32)
+		if err != nil {
+			return err
+		}
+	}
+	sortBy := c.Query("sort_by")
+	if !IsValidSortBy(sortBy) {
+		return errorpkg.NewInvalidQueryParamError("sort_by")
+	}
+	sortOrder := c.Query("sort_order")
+	if !IsValidSortOrder(sortOrder) {
+		return errorpkg.NewInvalidQueryParamError("sort_order")
+	}
+	res, err := r.invitationSvc.GetIncoming(service.InvitationListOptions{
+		Page:      uint(page),
+		Size:      uint(size),
+		SortBy:    sortBy,
+		SortOrder: sortOrder,
+	}, GetUserID(c))
 	if err != nil {
 		return err
 	}
@@ -85,7 +117,7 @@ func (r *InvitationRouter) GetIncoming(c *fiber.Ctx) error {
 //	@Id				invitation_get_outgoing
 //	@Produce		json
 //	@Param			organization_id	query		string	true	"Organization ID"
-//	@Success		200				{array}		core.Invitation
+//	@Success		200				{object}	core.InvitationList
 //	@Failure		500				{object}	errorpkg.ErrorResponse
 //	@Router			/invitations/get_outgoing [get]
 func (r *InvitationRouter) GetOutgoing(c *fiber.Ctx) error {
@@ -93,8 +125,39 @@ func (r *InvitationRouter) GetOutgoing(c *fiber.Ctx) error {
 	if orgID == "" {
 		return errorpkg.NewMissingQueryParamError("organization_id")
 	}
-	userID := GetUserID(c)
-	res, err := r.invitationSvc.GetOutgoing(orgID, userID)
+	var err error
+	var page int64
+	if c.Query("page") == "" {
+		page = 1
+	} else {
+		page, err = strconv.ParseInt(c.Query("page"), 10, 32)
+		if err != nil {
+			page = 1
+		}
+	}
+	var size int64
+	if c.Query("size") == "" {
+		size = WorkspaceDefaultPageSize
+	} else {
+		size, err = strconv.ParseInt(c.Query("size"), 10, 32)
+		if err != nil {
+			return err
+		}
+	}
+	sortBy := c.Query("sort_by")
+	if !IsValidSortBy(sortBy) {
+		return errorpkg.NewInvalidQueryParamError("sort_by")
+	}
+	sortOrder := c.Query("sort_order")
+	if !IsValidSortOrder(sortOrder) {
+		return errorpkg.NewInvalidQueryParamError("sort_order")
+	}
+	res, err := r.invitationSvc.GetOutgoing(orgID, service.InvitationListOptions{
+		Page:      uint(page),
+		Size:      uint(size),
+		SortBy:    sortBy,
+		SortOrder: sortOrder,
+	}, GetUserID(c))
 	if err != nil {
 		return err
 	}

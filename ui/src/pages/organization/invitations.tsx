@@ -65,7 +65,7 @@ const OrganizationInvitationsPage = () => {
     data: invitations,
     error: invitationsError,
     mutate,
-  } = InvitationAPI.useGetOutgoing(id, swrConfig())
+  } = InvitationAPI.useGetOutgoing(id, {}, swrConfig())
   const [isInviteMembersModalOpen, setIsInviteMembersModalOpen] =
     useState(false)
 
@@ -102,7 +102,7 @@ const OrganizationInvitationsPage = () => {
       <Helmet>
         <title>{org.name}</title>
       </Helmet>
-      {invitations && invitations.length === 0 ? (
+      {invitations && invitations.data.length === 0 ? (
         <>
           <Center h="300px">
             <VStack spacing={variables.spacing}>
@@ -126,7 +126,7 @@ const OrganizationInvitationsPage = () => {
           />
         </>
       ) : null}
-      {invitations && invitations.length > 0 ? (
+      {invitations && invitations.data.length > 0 ? (
         <Table variant="simple">
           <Thead>
             <Tr>
@@ -137,7 +137,7 @@ const OrganizationInvitationsPage = () => {
             </Tr>
           </Thead>
           <Tbody>
-            {invitations.map((e: Invitation) => (
+            {invitations.data.map((e: Invitation) => (
               <Tr key={e.id}>
                 <Td>{e.email}</Td>
                 <Td>

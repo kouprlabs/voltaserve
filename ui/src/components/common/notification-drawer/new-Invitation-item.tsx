@@ -55,8 +55,15 @@ const NewInvitationItem = ({ invitation }: NewInvitationProps) => {
   return (
     <Stack direction="column">
       <Text>
-        You have been invited by <b>{invitation.owner.fullName}</b> to join the
-        organization <b>{invitation.organization.name}</b>.<br />
+        You have been invited by{' '}
+        <Text as="span" whiteSpace="nowrap" fontWeight="bold">
+          {invitation.owner.fullName}
+        </Text>{' '}
+        to join the organization{' '}
+        <Text as="span" whiteSpace="nowrap" fontWeight="bold">
+          {invitation.organization.name}
+        </Text>
+        .<br />
       </Text>
       <Stack direction="row" justifyContent="flex-end">
         <Button

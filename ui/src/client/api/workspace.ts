@@ -35,19 +35,19 @@ export type List = {
   size: number
 }
 
+export interface CreateOptions {
+  name: string
+  image?: string
+  organizationId: string
+  storageCapacity: number
+}
+
 export type ListOptions = {
   query?: string
   size?: number
   page?: number
   sortBy?: SortBy
   sortOrder?: SortOrder
-}
-
-export interface CreateOptions {
-  name: string
-  image?: string
-  organizationId: string
-  storageCapacity: number
 }
 
 export interface UpdateNameOptions {

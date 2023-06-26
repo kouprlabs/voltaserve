@@ -29,7 +29,7 @@ const AccountInvitationsPage = () => {
     data: invitations,
     error: invitationsError,
     mutate,
-  } = InvitationAPI.useGetIncoming(swrConfig())
+  } = InvitationAPI.useGetIncoming({}, swrConfig())
 
   const handleAccept = useCallback(
     async (invitationId: string) => {
@@ -69,12 +69,12 @@ const AccountInvitationsPage = () => {
       <Helmet>
         <title>{user.fullName}</title>
       </Helmet>
-      {invitations.length === 0 && (
+      {invitations.data.length === 0 && (
         <Center h="300px">
           <Text>There are no invitations.</Text>
         </Center>
       )}
-      {invitations.length > 0 && (
+      {invitations.data.length > 0 && (
         <Table variant="simple">
           <Thead>
             <Tr>
@@ -85,8 +85,8 @@ const AccountInvitationsPage = () => {
             </Tr>
           </Thead>
           <Tbody>
-            {invitations.length > 0 &&
-              invitations.map((e: Invitation) => (
+            {invitations.data.length > 0 &&
+              invitations.data.map((e: Invitation) => (
                 <Tr key={e.id}>
                   <Td>{e.owner.fullName}</Td>
                   <Td>{e.organization.name}</Td>

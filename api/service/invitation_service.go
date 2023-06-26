@@ -1,7 +1,9 @@
 package service
 
 import (
+	"sort"
 	"strings"
+	"time"
 	"voltaserve/cache"
 	"voltaserve/config"
 	"voltaserve/errorpkg"
@@ -21,9 +23,24 @@ type Invitation struct {
 	UpdateTime   *string       `json:"updateTime"`
 }
 
+type InvitationList struct {
+	Data          []*Invitation `json:"data"`
+	TotalPages    uint          `json:"totalPages"`
+	TotalElements uint          `json:"totalElements"`
+	Page          uint          `json:"page"`
+	Size          uint          `json:"size"`
+}
+
 type InvitationCreateOptions struct {
 	OrganizationID string   `json:"organizationId" validate:"required"`
 	Emails         []string `json:"emails" validate:"required,dive,email"`
+}
+
+type InvitationListOptions struct {
+	Page      uint
+	Size      uint
+	SortBy    string
+	SortOrder string
 }
 
 type InvitationService struct {
@@ -129,7 +146,7 @@ func (svc *InvitationService) Create(opts InvitationCreateOptions, userID string
 	return nil
 }
 
-func (svc *InvitationService) GetIncoming(userID string) ([]*Invitation, error) {
+func (svc *InvitationService) GetIncoming(opts InvitationListOptions, userID string) (*InvitationList, error) {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
@@ -138,27 +155,43 @@ func (svc *InvitationService) GetIncoming(userID string) ([]*Invitation, error) 
 	if err != nil {
 		return nil, err
 	}
-	res, err := svc.invitationMapper.mapMany(invitations, userID)
+	sorted := svc.doSorting(invitations, opts.SortBy, opts.SortOrder, userID)
+	paged, totalElements, totalPages := svc.doPaging(sorted, opts.Page, opts.Size)
+	mapped, err := svc.invitationMapper.mapMany(paged, userID)
 	if err != nil {
 		return nil, err
 	}
-	return res, nil
+	return &InvitationList{
+		Data:          mapped,
+		TotalPages:    totalPages,
+		TotalElements: totalElements,
+		Page:          opts.Page,
+		Size:          uint(len(mapped)),
+	}, nil
 }
 
-func (svc *InvitationService) GetOutgoing(id string, userID string) ([]*Invitation, error) {
+func (svc *InvitationService) GetOutgoing(orgID string, opts InvitationListOptions, userID string) (*InvitationList, error) {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
 	}
-	invitations, err := svc.invitationRepo.GetOutgoing(id, user.GetID())
+	invitations, err := svc.invitationRepo.GetOutgoing(orgID, user.GetID())
 	if err != nil {
 		return nil, err
 	}
-	res, err := svc.invitationMapper.mapMany(invitations, userID)
+	sorted := svc.doSorting(invitations, opts.SortBy, opts.SortOrder, userID)
+	paged, totalElements, totalPages := svc.doPaging(sorted, opts.Page, opts.Size)
+	mapped, err := svc.invitationMapper.mapMany(paged, userID)
 	if err != nil {
 		return nil, err
 	}
-	return res, nil
+	return &InvitationList{
+		Data:          mapped,
+		TotalPages:    totalPages,
+		TotalElements: totalElements,
+		Page:          opts.Page,
+		Size:          uint(len(mapped)),
+	}, nil
 }
 
 func (svc *InvitationService) Accept(id string, userID string) error {
@@ -273,6 +306,76 @@ func (svc *InvitationService) Delete(id string, userID string) error {
 		return err
 	}
 	return nil
+}
+
+func (svc *InvitationService) doSorting(data []model.Invitation, sortBy string, sortOrder string, userID string) []model.Invitation {
+	if sortBy == SortByEmail {
+		sort.Slice(data, func(i, j int) bool {
+			if sortOrder == SortOrderDesc {
+				return data[i].GetEmail() > data[j].GetEmail()
+			} else {
+				return data[i].GetEmail() < data[j].GetEmail()
+			}
+		})
+		return data
+	} else if sortBy == SortByDateCreated {
+		sort.Slice(data, func(i, j int) bool {
+			a, _ := time.Parse(time.RFC3339, data[i].GetCreateTime())
+			b, _ := time.Parse(time.RFC3339, data[j].GetCreateTime())
+			if sortOrder == SortOrderDesc {
+				return a.UnixMilli() > b.UnixMilli()
+			} else {
+				return a.UnixMilli() < b.UnixMilli()
+			}
+		})
+		return data
+	} else if sortBy == SortByDateModified {
+		sort.Slice(data, func(i, j int) bool {
+			if data[i].GetUpdateTime() != nil && data[j].GetUpdateTime() != nil {
+				a, _ := time.Parse(time.RFC3339, *data[i].GetUpdateTime())
+				b, _ := time.Parse(time.RFC3339, *data[j].GetUpdateTime())
+				if sortOrder == SortOrderDesc {
+					return a.UnixMilli() > b.UnixMilli()
+				} else {
+					return a.UnixMilli() < b.UnixMilli()
+				}
+			} else {
+				return false
+			}
+		})
+		return data
+	}
+	return data
+}
+
+func (svc *InvitationService) doPaging(data []model.Invitation, page uint, size uint) (pageData []model.Invitation, totalElements uint, totalPages uint) {
+	page = page - 1
+	low := size * page
+	high := low + size
+	if low >= uint(len(data)) {
+		pageData = []model.Invitation{}
+	} else if high >= uint(len(data)) {
+		high = uint(len(data))
+		pageData = data[low:high]
+	} else {
+		pageData = data[low:high]
+	}
+	totalElements = uint(len(data))
+	if totalElements == 0 {
+		totalPages = 1
+	} else {
+		if size > uint(len(data)) {
+			size = uint(len(data))
+		}
+		totalPages = totalElements / size
+		if totalPages == 0 {
+			totalPages = 1
+		}
+		if totalElements%size > 0 {
+			totalPages = totalPages + 1
+		}
+	}
+	return pageData, totalElements, totalPages
 }
 
 type invitationMapper struct {
