@@ -191,7 +191,7 @@ func (svc *WorkspaceService) List(page uint, size uint, sortBy string, sortOrder
 		TotalPages:    totalPages,
 		TotalElements: totalElements,
 		Page:          page,
-		Size:          size,
+		Size:          uint(len(mapped)),
 	}, nil
 }
 
@@ -218,7 +218,7 @@ func (svc *WorkspaceService) Search(query string, page uint, size uint, userID s
 		TotalElements: totalElements,
 		TotalPages:    totalPages,
 		Page:          page,
-		Size:          size,
+		Size:          uint(len(mapped)),
 	}, nil
 }
 

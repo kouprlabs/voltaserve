@@ -28,12 +28,12 @@ import {
   IconTrash,
   variables,
 } from '@koupr/ui'
-import { File } from '@/api/file'
+import { File } from '@/client/api/file'
 import {
   ltEditorPermission,
   ltOwnerPermission,
   ltViewerPermission,
-} from '@/api/permission'
+} from '@/client/api/permission'
 import downloadFile from '@/helpers/download-file'
 import relativeDate from '@/helpers/relative-date'
 import store from '@/store/configure-store'

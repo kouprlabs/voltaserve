@@ -1,4 +1,4 @@
-import { File } from '@/api/file'
+import { File } from '@/client/api/file'
 import { getAccessTokenOrRedirect } from '@/infra/token'
 
 export default async function downloadFile(file: File) {

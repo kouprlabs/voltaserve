@@ -1,5 +1,7 @@
 package service
 
+const SortByEmail = "email"
+const SortByFullName = "full_name"
 const SortByName = "name"
 const SortByKind = "kind"
 const SortBySize = "size"

@@ -1,8 +1,8 @@
 import useSWR from 'swr'
+import { apiFetch } from '@/client/fetch'
+import { User } from '@/client/idp/user'
 import { getAccessTokenOrRedirect } from '@/infra/token'
-import { apiFetch } from './fetch'
 import { Organization } from './organization'
-import { User } from './user'
 
 export enum SortBy {
   Name = 'name',
@@ -154,49 +154,6 @@ export default class GroupAPI {
         'Content-Type': 'application/json',
       },
     })
-
-  static useGetMembers = (id: string, swrOptions?: any) =>
-    useSWR<User[]>(
-      id ? `/groups/${id}/get_members` : null,
-      () => this.getMembers(id),
-      swrOptions
-    )
-
-  static async getMembers(id: string): Promise<User[]> {
-    return apiFetch(`/groups/${id}/get_members`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
-        'Content-Type': 'application/json',
-      },
-    }).then((result) => result.json())
-  }
-
-  static useSearchMembers = (id: string, query: string, swrOptions?: any) =>
-    useSWR<User[]>(
-      id && query
-        ? `/groups/${id}/search_members?${new URLSearchParams({
-            query,
-          })}`
-        : null,
-      () => this.searchMembers(id, query),
-      swrOptions
-    )
-
-  static async searchMembers(id: string, query: string): Promise<User[]> {
-    return apiFetch(
-      `/groups/${id}/search_members?${new URLSearchParams({
-        query,
-      })}`,
-      {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
-          'Content-Type': 'application/json',
-        },
-      }
-    ).then((result) => result.json())
-  }
 
   static addMember = (id: string, options: AddMemberOptions) =>
     apiFetch(`/groups/${id}/add_member`, {

@@ -29,10 +29,13 @@ import {
   SectionSpinner,
 } from '@koupr/ui'
 import { Helmet } from 'react-helmet-async'
-import InvitationAPI, { Invitation, InvitationStatus } from '@/api/invitation'
-import { swrConfig } from '@/api/options'
-import OrganizationAPI from '@/api/organization'
-import { geEditorPermission } from '@/api/permission'
+import InvitationAPI, {
+  Invitation,
+  InvitationStatus,
+} from '@/client/api/invitation'
+import OrganizationAPI from '@/client/api/organization'
+import { geEditorPermission } from '@/client/api/permission'
+import { swrConfig } from '@/client/options'
 import InviteMembers from '@/components/organization/invite-members'
 import prettyDate from '@/helpers/pretty-date'
 

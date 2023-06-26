@@ -1,7 +1,6 @@
 package service
 
 import (
-	"fmt"
 	"sort"
 	"time"
 	"voltaserve/cache"
@@ -225,7 +224,7 @@ func (svc *GroupService) List(opts GroupListOptions, userID string) (*GroupList,
 		TotalPages:    totalPages,
 		TotalElements: totalElements,
 		Page:          opts.Page,
-		Size:          opts.Size,
+		Size:          uint(len(mapped)),
 	}, nil
 }
 
@@ -376,74 +375,6 @@ func (svc *GroupService) refreshCacheForOrganization(orgID string) error {
 	return nil
 }
 
-func (svc *GroupService) GetMembers(id string, userID string) ([]*User, error) {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return nil, err
-	}
-	group, err := svc.groupCache.Get(id)
-	if err != nil {
-		return nil, err
-	}
-	if err := svc.groupGuard.Authorize(user, group, model.PermissionViewer); err != nil {
-		return nil, err
-	}
-	members, err := svc.groupRepo.GetMembers(id)
-	if err != nil {
-		return nil, err
-	}
-	res, err := svc.userMapper.mapUsers(members)
-	if err != nil {
-		return nil, err
-	}
-	return res, nil
-}
-
-func (svc *GroupService) SearchMembers(id string, query string, userID string) ([]*User, error) {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return nil, err
-	}
-	group, err := svc.groupCache.Get(id)
-	if err != nil {
-		return nil, err
-	}
-	if err := svc.groupGuard.Authorize(user, group, model.PermissionViewer); err != nil {
-		return nil, err
-	}
-	users, err := svc.userSearch.Query(fmt.Sprintf(`
-	{
-		"query": {
-			"query_string": {
-				"fields": ["email"],
-				"query": "%s",
-				"fuzziness": "AUTO"
-			}
-		}
-	}
-	`, query))
-	if err != nil {
-		return nil, err
-	}
-	groupMembers, err := svc.groupRepo.GetMembers(id)
-	if err != nil {
-		return nil, err
-	}
-	var members []model.User
-	for _, m := range groupMembers {
-		for _, u := range users {
-			if u.GetID() == m.GetID() {
-				members = append(members, m)
-			}
-		}
-	}
-	res, err := svc.userMapper.mapUsers(members)
-	if err != nil {
-		return nil, err
-	}
-	return res, nil
-}
-
 func (svc *GroupService) GetAvailableUsers(id string, userID string) ([]*User, error) {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
@@ -474,7 +405,7 @@ func (svc *GroupService) GetAvailableUsers(id string, userID string) ([]*User, e
 			}
 		}
 		if !found {
-			res = append(res, svc.userMapper.mapUser(om))
+			res = append(res, svc.userMapper.mapOne(om))
 		}
 	}
 	return res, nil

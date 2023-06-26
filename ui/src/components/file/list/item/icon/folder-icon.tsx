@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { Box } from '@chakra-ui/react'
 import { FcFolder } from 'react-icons/fc'
-import { File } from '@/api/file'
+import { File } from '@/client/api/file'
 import SharedSign from './shared-sign'
 
 type FolderIconProps = {

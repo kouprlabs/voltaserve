@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react'
 import { Button, Stack, Text, useToast } from '@chakra-ui/react'
 import { useSWRConfig } from 'swr'
-import InvitationAPI, { Invitation } from '@/api/invitation'
+import InvitationAPI, { Invitation } from '@/client/api/invitation'
 
 type NewInvitationProps = {
   invitation: Invitation

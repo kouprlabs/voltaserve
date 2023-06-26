@@ -18,9 +18,9 @@ import {
 } from '@chakra-ui/react'
 import { IconDotsVertical, SectionSpinner } from '@koupr/ui'
 import { Helmet } from 'react-helmet-async'
-import InvitationAPI, { Invitation } from '@/api/invitation'
-import { swrConfig } from '@/api/options'
-import UserAPI from '@/api/user'
+import InvitationAPI, { Invitation } from '@/client/api/invitation'
+import UserAPI from '@/client/idp/user'
+import { swrConfig } from '@/client/options'
 
 const AccountInvitationsPage = () => {
   const toast = useToast()

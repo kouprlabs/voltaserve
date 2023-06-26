@@ -1,10 +1,9 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import useSWR from 'swr'
+import { apiFetch } from '@/client/fetch'
+import { User } from '@/client/idp/user'
 import { getAccessTokenOrRedirect } from '@/infra/token'
-import { apiFetch } from './fetch'
-import { Group } from './group'
 import { PermissionType } from './permission'
-import { User } from './user'
 
 export enum SortBy {
   Name = 'name',
@@ -159,51 +158,6 @@ export default class OrganizationAPI {
         'Content-Type': 'application/json',
       },
     })
-  }
-
-  static useGetMembers(id?: string, swrOptions?: any) {
-    return useSWR<User[]>(
-      id ? `/organizations/${id}/get_members` : null,
-      () => this.getMembers(id as string),
-      swrOptions
-    )
-  }
-
-  static async getMembers(id: string): Promise<User[]> {
-    return apiFetch(`/organizations/${id}/get_members`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
-        'Content-Type': 'application/json',
-      },
-    }).then((result) => result.json())
-  }
-
-  static useSearchMembers(id: string, query: string, swrOptions?: any) {
-    return useSWR<User[]>(
-      id && query
-        ? `/organizations/${id}/search_members?${new URLSearchParams({
-            query,
-          })}`
-        : null,
-      () => this.searchMembers(id, query),
-      swrOptions
-    )
-  }
-
-  static async searchMembers(id: string, query: string): Promise<User[]> {
-    return apiFetch(
-      `/organizations/${id}/search_members?${new URLSearchParams({
-        query,
-      })}`,
-      {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
-          'Content-Type': 'application/json',
-        },
-      }
-    ).then((result) => result.json())
   }
 
   static async removeMember(id: string, options: RemoveMemberOptions) {

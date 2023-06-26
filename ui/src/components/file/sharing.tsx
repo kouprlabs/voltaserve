@@ -33,12 +33,12 @@ import {
 } from '@chakra-ui/react'
 import { Spinner, variables } from '@koupr/ui'
 import { IconAdd, IconCheck, IconTrash, IconUserPlus } from '@koupr/ui'
-import FileAPI, { GroupPermission, UserPermission } from '@/api/file'
-import GroupAPI, { Group } from '@/api/group'
-import OrganizationAPI from '@/api/organization'
-import { geEditorPermission } from '@/api/permission'
-import UserAPI, { User } from '@/api/user'
-import WorkspaceAPI from '@/api/workspace'
+import FileAPI, { GroupPermission, UserPermission } from '@/client/api/file'
+import GroupAPI, { Group } from '@/client/api/group'
+import { geEditorPermission } from '@/client/api/permission'
+import UserAPI, { User } from '@/client/api/user'
+import WorkspaceAPI from '@/client/api/workspace'
+import IdPUserAPI from '@/client/idp/user'
 import userToString from '@/helpers/user-to-string'
 import { filesUpdated } from '@/store/entities/files'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
@@ -60,12 +60,13 @@ const Sharing = () => {
   const [activeUserPermission, setActiveUserPermission] = useState<string>()
   const [activeGroupId, setActiveGroupId] = useState<string>()
   const [activeGroupPermission, setActiveGroupPermission] = useState<string>()
-  const { data: user } = UserAPI.useGet()
+  const { data: user } = IdPUserAPI.useGet()
   const isSingleFileMode = useMemo(() => selection.length === 1, [selection])
 
   const loadUsers = useCallback(async () => {
     if (workspace) {
-      setUsers(await OrganizationAPI.getMembers(workspace.organization.id))
+      const { data } = await UserAPI.list({ org: workspace.organization.id })
+      setUsers(data)
     }
   }, [workspace])
 

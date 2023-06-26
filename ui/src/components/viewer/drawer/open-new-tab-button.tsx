@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { Button, IconButton } from '@chakra-ui/react'
 import { IconExternalLink, variables } from '@koupr/ui'
-import { File } from '@/api/file'
+import { File } from '@/client/api/file'
 
 type OpenNewTabButtonProps = {
   file: File

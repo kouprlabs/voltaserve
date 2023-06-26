@@ -16,9 +16,9 @@ import {
   VStack,
 } from '@chakra-ui/react'
 import { variables, IconEdit } from '@koupr/ui'
-import NotificationAPI from '@/api/notification'
-import { swrConfig } from '@/api/options'
-import UserAPI from '@/api/user'
+import NotificationAPI from '@/client/api/notification'
+import UserAPI from '@/client/idp/user'
+import { swrConfig } from '@/client/options'
 import EditPicture from '@/components/account/edit-picture'
 
 const AccountLayout = () => {

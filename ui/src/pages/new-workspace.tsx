@@ -23,9 +23,9 @@ import {
 } from 'formik'
 import * as Yup from 'yup'
 import { Helmet } from 'react-helmet-async'
-import OrganizationAPI, { Organization } from '@/api/organization'
-import { geEditorPermission } from '@/api/permission'
-import WorkspaceAPI from '@/api/workspace'
+import OrganizationAPI, { Organization } from '@/client/api/organization'
+import { geEditorPermission } from '@/client/api/permission'
+import WorkspaceAPI from '@/client/api/workspace'
 import StorageInput from '@/components/common/storage-input'
 import { gigabyteToByte } from '@/helpers/convert-storage'
 

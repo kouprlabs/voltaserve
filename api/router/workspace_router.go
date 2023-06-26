@@ -113,11 +113,11 @@ func (r *WorkspaceRouter) List(c *fiber.Ctx) error {
 		}
 	}
 	sortBy := c.Query("sort_by")
-	if !service.IsValidSortBy(sortBy) {
+	if !IsValidSortBy(sortBy) {
 		return errorpkg.NewInvalidQueryParamError("sort_by")
 	}
 	sortOrder := c.Query("sort_order")
-	if !service.IsValidSortOrder(sortOrder) {
+	if !IsValidSortOrder(sortOrder) {
 		return errorpkg.NewInvalidQueryParamError("sort_order")
 	}
 	var res *service.WorkspaceList

@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import useSWR from 'swr'
+import { idpFetch, idpFetcher } from '@/client/fetch'
 import { getAccessTokenOrRedirect } from '@/infra/token'
-import { idpFetch, idpFetcher } from './fetch'
 
 export type User = {
   id: string

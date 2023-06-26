@@ -3,7 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { Link as ChakraLink, Text, VStack } from '@chakra-ui/react'
 import { variables, Spinner } from '@koupr/ui'
 import { Helmet } from 'react-helmet-async'
-import AccountAPI from '@/api/account'
+import AccountAPI from '@/client/idp/account'
 import Logo from '@/components/common/logo'
 import FullLayout from '@/components/layout/full'
 

@@ -15,8 +15,8 @@ import { variables } from '@koupr/ui'
 import { IconChevronRight } from '@koupr/ui'
 import { SectionSpinner } from '@koupr/ui'
 import { FcFolder } from 'react-icons/fc'
-import FileAPI, { File, FileType } from '@/api/file'
-import WorkspaceAPI from '@/api/workspace'
+import FileAPI, { File, FileType } from '@/client/api/file'
+import WorkspaceAPI from '@/client/api/workspace'
 
 type BrowseProps = {
   onChange?: (id: string) => void

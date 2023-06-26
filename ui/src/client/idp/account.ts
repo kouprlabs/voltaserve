@@ -1,4 +1,4 @@
-import { idpFetch } from './fetch'
+import { idpFetch } from '@/client/fetch'
 import { User } from './user'
 
 export type CreateOptions = {

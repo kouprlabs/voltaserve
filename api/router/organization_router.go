@@ -27,8 +27,6 @@ func (r *OrganizationRouter) AppendRoutes(g fiber.Router) {
 	g.Delete("/:id", r.Delete)
 	g.Post("/:id/update_name", r.UpdateName)
 	g.Post("/:id/leave", r.Leave)
-	g.Get("/:id/get_members", r.GetMembers)
-	g.Get("/:id/search_members", r.SearchMembers)
 	g.Post("/:id/remove_member", r.RemoveMember)
 }
 
@@ -172,11 +170,11 @@ func (r *OrganizationRouter) List(c *fiber.Ctx) error {
 		}
 	}
 	sortBy := c.Query("sort_by")
-	if !service.IsValidSortBy(sortBy) {
+	if !IsValidSortBy(sortBy) {
 		return errorpkg.NewInvalidQueryParamError("sort_by")
 	}
 	sortOrder := c.Query("sort_order")
-	if !service.IsValidSortOrder(sortOrder) {
+	if !IsValidSortOrder(sortOrder) {
 		return errorpkg.NewInvalidQueryParamError("sort_order")
 	}
 	var res *service.OrganizationList
@@ -192,51 +190,6 @@ func (r *OrganizationRouter) List(c *fiber.Ctx) error {
 		if err != nil {
 			return err
 		}
-	}
-	return c.JSON(res)
-}
-
-// GetMembers godoc
-//
-//	@Summary		Get members
-//	@Description	Get members
-//	@Tags			Organizations
-//	@Id				organizations_get_members
-//	@Produce		json
-//	@Param			id	path		string	true	"ID"
-//	@Success		200	{array}		core.User
-//	@Failure		400	{object}	errorpkg.ErrorResponse
-//	@Failure		500	{object}	errorpkg.ErrorResponse
-//	@Router			/organizations/{id}/get_members [get]
-func (r *OrganizationRouter) GetMembers(c *fiber.Ctx) error {
-	res, err := r.orgSvc.GetMembers(c.Params("id"), GetUserID(c))
-	if err != nil {
-		return err
-	}
-	return c.JSON(res)
-}
-
-// SearchMembers godoc
-//
-//	@Summary		Search members
-//	@Description	Search members
-//	@Tags			Organizations
-//	@Id				organizations_search_members
-//	@Produce		json
-//	@Param			id		path		string	true	"ID"
-//	@Param			query	query		string	true	"Query"
-//	@Success		200		{array}		core.User
-//	@Failure		400		{object}	errorpkg.ErrorResponse
-//	@Failure		500		{object}	errorpkg.ErrorResponse
-//	@Router			/organizations/{id}/search_members [get]
-func (r *OrganizationRouter) SearchMembers(c *fiber.Ctx) error {
-	query := c.Query("query")
-	if query == "" {
-		return errorpkg.NewMissingQueryParamError("query")
-	}
-	res, err := r.orgSvc.SearchMembers(c.Params("id"), query, GetUserID(c))
-	if err != nil {
-		return err
 	}
 	return c.JSON(res)
 }

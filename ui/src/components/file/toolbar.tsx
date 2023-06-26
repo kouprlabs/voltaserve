@@ -36,8 +36,8 @@ import {
   IconSortUp,
   IconSortDown,
 } from '@koupr/ui'
-import FileAPI, { List, SortBy, SortOrder } from '@/api/file'
-import { ltEditorPermission, ltOwnerPermission } from '@/api/permission'
+import FileAPI, { List, SortBy, SortOrder } from '@/client/api/file'
+import { ltEditorPermission, ltOwnerPermission } from '@/client/api/permission'
 import downloadFile from '@/helpers/download-file'
 import mapFileList from '@/helpers/map-file-list'
 import { decodeQuery } from '@/helpers/query'

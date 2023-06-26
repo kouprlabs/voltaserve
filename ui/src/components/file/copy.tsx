@@ -11,7 +11,7 @@ import {
   Button,
 } from '@chakra-ui/react'
 import { variables } from '@koupr/ui'
-import FileAPI from '@/api/file'
+import FileAPI from '@/client/api/file'
 import { listUpdated } from '@/store/entities/files'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { copyModalDidClose, selectionUpdated } from '@/store/ui/files'

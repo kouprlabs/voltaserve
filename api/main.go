@@ -19,9 +19,9 @@ import (
 	"github.com/joho/godotenv"
 )
 
-//	@title		Voltaserve API
-//	@version	1.0.0
-//	@BasePath	/v1
+// @title		Voltaserve API
+// @version	1.0.0
+// @BasePath	/v1
 func main() {
 	if _, err := os.Stat(".env.local"); err == nil {
 		err := godotenv.Load(".env.local")
@@ -87,6 +87,9 @@ func main() {
 
 	groups := router.NewGroupRouter()
 	groups.AppendRoutes(v1.Group("groups"))
+
+	users := router.NewUserRouter()
+	users.AppendRoutes(v1.Group("users"))
 
 	if err := app.Listen(fmt.Sprintf(":%d", cfg.Port)); err != nil {
 		panic(err)

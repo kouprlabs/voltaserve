@@ -1,4 +1,4 @@
-import { File } from '@/api/file'
+import { File } from '@/client/api/file'
 import store from '@/store/configure-store'
 import {
   selectionAdded,

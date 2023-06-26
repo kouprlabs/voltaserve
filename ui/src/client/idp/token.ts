@@ -1,4 +1,4 @@
-import { idpFetch } from './fetch'
+import { idpFetch } from '@/client/fetch'
 
 export type GrantType = 'password' | 'refresh_token'
 

@@ -306,7 +306,7 @@ func (mp *invitationMapper) mapInvitation(m model.Invitation, userID string) (*I
 	}
 	return &Invitation{
 		ID:           m.GetID(),
-		Owner:        mp.userMapper.mapUser(owner),
+		Owner:        mp.userMapper.mapOne(owner),
 		Email:        m.GetEmail(),
 		Organization: v,
 		Status:       m.GetStatus(),

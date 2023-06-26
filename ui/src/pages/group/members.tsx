@@ -23,10 +23,11 @@ import {
 import { variables, IconExit, IconUserPlus, SectionSpinner } from '@koupr/ui'
 import { Helmet } from 'react-helmet-async'
 import { HiDotsVertical } from 'react-icons/hi'
-import GroupAPI from '@/api/group'
-import { swrConfig } from '@/api/options'
-import { geEditorPermission } from '@/api/permission'
-import { User } from '@/api/user'
+import GroupAPI from '@/client/api/group'
+import { geEditorPermission } from '@/client/api/permission'
+import UserAPI from '@/client/api/user'
+import { User as IdPUser } from '@/client/idp/user'
+import { swrConfig } from '@/client/options'
 import AddMember from '@/components/group/add-member'
 import RemoveMember from '@/components/group/remove-member'
 
@@ -41,8 +42,8 @@ const GroupMembersPage = () => {
     data: members,
     error: membersError,
     mutate,
-  } = GroupAPI.useGetMembers(groupId, swrConfig())
-  const [userToRemove, setUserToRemove] = useState<User>()
+  } = UserAPI.useList({ group: groupId }, swrConfig())
+  const [userToRemove, setUserToRemove] = useState<IdPUser>()
   const [isAddMembersModalOpen, setIsAddMembersModalOpen] = useState(false)
   const [isRemoveMemberModalOpen, setIsRemoveMemberModalOpen] =
     useState<boolean>(false)
@@ -60,7 +61,7 @@ const GroupMembersPage = () => {
       <Helmet>
         <title>{group.name}</title>
       </Helmet>
-      {members.length > 0 && (
+      {members.data.length > 0 && (
         <>
           <Table variant="simple">
             <Thead>
@@ -71,7 +72,7 @@ const GroupMembersPage = () => {
               </Tr>
             </Thead>
             <Tbody>
-              {members.map((u: User) => (
+              {members.data.map((u) => (
                 <Tr key={u.id}>
                   <Td>
                     <HStack direction="row" spacing={variables.spacing}>
@@ -121,7 +122,7 @@ const GroupMembersPage = () => {
           )}
         </>
       )}
-      {members.length === 0 && (
+      {members.data.length === 0 && (
         <>
           <Helmet>
             <title>{group.name}</title>

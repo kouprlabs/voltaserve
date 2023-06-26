@@ -1,6 +1,6 @@
 import { Stack } from '@chakra-ui/react'
 import { variables } from '@koupr/ui'
-import { File } from '@/api/file'
+import { File } from '@/client/api/file'
 import CreateTimeInfo from './create-time-info'
 import ExtensionInfo from './extension-info'
 import ImageInfo from './image-info'

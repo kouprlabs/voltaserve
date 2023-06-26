@@ -1,12 +1,12 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import useSWR from 'swr'
+import { apiFetch, apiFetcher } from '@/client/fetch'
+import { User } from '@/client/idp/user'
 import { getConfig } from '@/config/config'
 import { getAccessTokenOrRedirect } from '@/infra/token'
-import { apiFetch, apiFetcher } from './fetch'
 import { Group } from './group'
 import { PermissionType } from './permission'
 import { Download, Snapshot, Thumbnail } from './snapshot'
-import { User } from './user'
 
 export enum FileType {
   File = 'file',

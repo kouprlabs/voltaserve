@@ -12,7 +12,7 @@ import {
   Text,
 } from '@chakra-ui/react'
 import { variables } from '@koupr/ui'
-import OrganizationAPI from '@/api/organization'
+import OrganizationAPI from '@/client/api/organization'
 
 type LeaveProps = {
   open: boolean

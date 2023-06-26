@@ -172,14 +172,6 @@ type SnapshotUpdateOptions struct {
 	Language  *string                  `json:"language,omitempty"`
 }
 
-func IsValidSortBy(value string) bool {
-	return value == "" || value == SortByName || value == SortByKind || value == SortBySize || value == SortByDateCreated || value == SortByDateModified
-}
-
-func IsValidSortOrder(value string) bool {
-	return value == "" || value == SortOrderAsc || value == SortOrderDesc
-}
-
 type FileService struct {
 	fileRepo         repo.FileRepo
 	fileSearch       *search.FileSearch
@@ -1352,7 +1344,7 @@ func (svc *FileService) GetUserPermissions(id string, userID string) ([]*UserPer
 		}
 		res = append(res, &UserPermission{
 			ID:         p.ID,
-			User:       svc.userMapper.mapUser(u),
+			User:       svc.userMapper.mapOne(u),
 			Permission: p.Permission,
 		})
 	}

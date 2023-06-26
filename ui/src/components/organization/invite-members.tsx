@@ -26,7 +26,7 @@ import {
   FormikHelpers,
 } from 'formik'
 import * as Yup from 'yup'
-import InvitationAPI from '@/api/invitation'
+import InvitationAPI from '@/client/api/invitation'
 
 type InviteMembersProps = {
   open: boolean

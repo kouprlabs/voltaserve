@@ -28,8 +28,6 @@ func (r *GroupRouter) AppendRoutes(g fiber.Router) {
 	g.Post("/:id/update_name", r.UpdateName)
 	g.Post("/:id/remove_member", r.RemoveMember)
 	g.Post("/:id/add_member", r.AddMember)
-	g.Get("/:id/get_members", r.GetMembers)
-	g.Get("/:id/search_members", r.SearchMembers)
 	g.Get("/:id/get_available_users", r.GetAvailableUsers)
 }
 
@@ -118,11 +116,11 @@ func (r *GroupRouter) List(c *fiber.Ctx) error {
 		}
 	}
 	sortBy := c.Query("sort_by")
-	if !service.IsValidSortBy(sortBy) {
+	if !IsValidSortBy(sortBy) {
 		return errorpkg.NewInvalidQueryParamError("sort_by")
 	}
 	sortOrder := c.Query("sort_order")
-	if !service.IsValidSortOrder(sortOrder) {
+	if !IsValidSortOrder(sortOrder) {
 		return errorpkg.NewInvalidQueryParamError("sort_order")
 	}
 	res, err := r.groupSvc.List(service.GroupListOptions{
@@ -246,45 +244,6 @@ func (r *GroupRouter) RemoveMember(c *fiber.Ctx) error {
 		return err
 	}
 	return c.SendStatus(http.StatusNoContent)
-}
-
-// GetMembers godoc
-//
-//	@Summary		Get members
-//	@Description	Get members
-//	@Tags			Groups
-//	@Id				groups_get_members
-//	@Produce		json
-//	@Param			id	path		string	true	"ID"
-//	@Success		200	{array}		core.User
-//	@Failure		500	{object}	errorpkg.ErrorResponse
-//	@Router			/groups/{id}/get_members [get]
-func (r *GroupRouter) GetMembers(c *fiber.Ctx) error {
-	res, err := r.groupSvc.GetMembers(c.Params("id"), GetUserID(c))
-	if err != nil {
-		return err
-	}
-	return c.JSON(res)
-}
-
-// SearchMembers godoc
-//
-//	@Summary		Search members
-//	@Description	Search members
-//	@Tags			Groups
-//	@Id				groups_search_members
-//	@Produce		json
-//	@Param			id		path		string	true	"ID"
-//	@Param			query	query		string	true	"Query"
-//	@Success		200		{array}		core.User
-//	@Failure		500		{object}	errorpkg.ErrorResponse
-//	@Router			/groups/{id}/search_members [get]
-func (r *GroupRouter) SearchMembers(c *fiber.Ctx) error {
-	res, err := r.groupSvc.SearchMembers(c.Params("id"), c.Query("query"), GetUserID(c))
-	if err != nil {
-		return err
-	}
-	return c.JSON(res)
 }
 
 // SearchMembers godoc

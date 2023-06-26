@@ -1,9 +1,9 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import useSWR from 'swr'
+import { apiFetch, apiFetcher } from '@/client/fetch'
+import { User } from '@/client/idp/user'
 import { getAccessTokenOrRedirect } from '@/infra/token'
-import { apiFetch, apiFetcher } from './fetch'
 import { Organization } from './organization'
-import { User } from './user'
 
 export type InvitationStatus = 'pending' | 'accepted' | 'declined'
 

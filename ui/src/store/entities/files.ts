@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { File, List } from '@/api/file'
+import { File, List } from '@/client/api/file'
 
 type FilesState = {
   current?: string

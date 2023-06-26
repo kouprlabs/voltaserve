@@ -1,5 +1,5 @@
 import { Box } from '@chakra-ui/react'
-import { File } from '@/api/file'
+import { File } from '@/client/api/file'
 import FontIcon from './font-icon'
 import SharedSign from './shared-sign'
 import Thumbnail from './thumbnail'

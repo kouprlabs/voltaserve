@@ -1,7 +1,6 @@
 package service
 
 import (
-	"fmt"
 	"sort"
 	"time"
 	"voltaserve/cache"
@@ -157,7 +156,7 @@ func (svc *OrganizationService) List(page uint, size uint, sortBy string, sortOr
 		TotalPages:    totalPages,
 		TotalElements: totalElements,
 		Page:          page,
-		Size:          size,
+		Size:          uint(len(mapped)),
 	}, nil
 }
 
@@ -184,53 +183,8 @@ func (svc *OrganizationService) Search(query string, page uint, size uint, userI
 		TotalElements: totalElements,
 		TotalPages:    totalPages,
 		Page:          page,
-		Size:          size,
+		Size:          uint(len(mapped)),
 	}, nil
-}
-
-func (svc *OrganizationService) SearchMembers(id string, query string, userID string) ([]*User, error) {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return nil, err
-	}
-	org, err := svc.orgCache.Get(id)
-	if err != nil {
-		return nil, err
-	}
-	if err := svc.orgGuard.Authorize(user, org, model.PermissionViewer); err != nil {
-		return nil, err
-	}
-	users, err := svc.userSearch.Query(fmt.Sprintf(`
-	{
-		"query": {
-			"query_string": {
-				"fields": ["email"],
-				"query": "%s",
-				"fuzziness": "AUTO"
-			}
-		}
-	}
-	`, query))
-	if err != nil {
-		return nil, err
-	}
-	orgMembers, err := svc.orgRepo.GetMembers(id)
-	if err != nil {
-		return nil, err
-	}
-	var members []model.User
-	for _, m := range orgMembers {
-		for _, u := range users {
-			if u.GetID() == m.GetID() {
-				members = append(members, m)
-			}
-		}
-	}
-	res, err := svc.userMapper.mapUsers(members)
-	if err != nil {
-		return nil, err
-	}
-	return res, nil
 }
 
 func (svc *OrganizationService) UpdateName(id string, name string, userID string) (*Organization, error) {
@@ -337,29 +291,6 @@ func (svc *OrganizationService) RemoveMember(id string, memberID string, userID 
 		return err
 	}
 	return nil
-}
-
-func (svc *OrganizationService) GetMembers(id string, userID string) ([]*User, error) {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return nil, err
-	}
-	org, err := svc.orgCache.Get(id)
-	if err != nil {
-		return nil, err
-	}
-	if err := svc.orgGuard.Authorize(user, org, model.PermissionViewer); err != nil {
-		return nil, err
-	}
-	members, err := svc.orgRepo.GetMembers(id)
-	if err != nil {
-		return nil, err
-	}
-	res, err := svc.userMapper.mapUsers(members)
-	if err != nil {
-		return nil, err
-	}
-	return res, nil
 }
 
 func (svc *OrganizationService) doAuthorization(data []model.Organization, user model.User) ([]model.Organization, error) {
