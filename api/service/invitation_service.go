@@ -138,7 +138,7 @@ func (svc *InvitationService) GetIncoming(userID string) ([]*Invitation, error) 
 	if err != nil {
 		return nil, err
 	}
-	res, err := svc.invitationMapper.mapInvitations(invitations, userID)
+	res, err := svc.invitationMapper.mapMany(invitations, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -154,7 +154,7 @@ func (svc *InvitationService) GetOutgoing(id string, userID string) ([]*Invitati
 	if err != nil {
 		return nil, err
 	}
-	res, err := svc.invitationMapper.mapInvitations(invitations, userID)
+	res, err := svc.invitationMapper.mapMany(invitations, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -291,7 +291,7 @@ func newInvitationMapper() *invitationMapper {
 	}
 }
 
-func (mp *invitationMapper) mapInvitation(m model.Invitation, userID string) (*Invitation, error) {
+func (mp *invitationMapper) mapOne(m model.Invitation, userID string) (*Invitation, error) {
 	owner, err := mp.userRepo.Find(m.GetOwnerID())
 	if err != nil {
 		return nil, err
@@ -315,10 +315,10 @@ func (mp *invitationMapper) mapInvitation(m model.Invitation, userID string) (*I
 	}, nil
 }
 
-func (mp *invitationMapper) mapInvitations(invitations []model.Invitation, userID string) ([]*Invitation, error) {
+func (mp *invitationMapper) mapMany(invitations []model.Invitation, userID string) ([]*Invitation, error) {
 	res := make([]*Invitation, 0)
 	for _, m := range invitations {
-		v, err := mp.mapInvitation(m, userID)
+		v, err := mp.mapOne(m, userID)
 		if err != nil {
 			return nil, err
 		}

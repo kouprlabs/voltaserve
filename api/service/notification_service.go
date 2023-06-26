@@ -32,7 +32,7 @@ func (svc *NotificationService) GetAll(userID string) ([]*Notification, error) {
 	}
 	notifications := make([]*Notification, 0)
 	for _, inv := range invitations {
-		v, err := svc.invitationMapper.mapInvitation(inv, userID)
+		v, err := svc.invitationMapper.mapOne(inv, userID)
 		if err != nil {
 			return nil, err
 		}
