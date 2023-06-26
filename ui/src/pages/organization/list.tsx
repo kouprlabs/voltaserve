@@ -36,7 +36,7 @@ const OrganizationListPage = () => {
 
   useEffect(() => {
     mutate()
-  }, [query])
+  }, [query, mutate])
 
   return (
     <>

@@ -36,7 +36,7 @@ const WorkspaceListPage = () => {
 
   useEffect(() => {
     mutate()
-  }, [query])
+  }, [query, mutate])
 
   return (
     <>

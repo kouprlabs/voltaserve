@@ -32,7 +32,7 @@ const GroupListPage = () => {
 
   useEffect(() => {
     mutate()
-  }, [query])
+  }, [query, mutate])
 
   return (
     <>

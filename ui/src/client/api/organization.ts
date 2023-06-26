@@ -1,7 +1,6 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import useSWR from 'swr'
 import { apiFetch } from '@/client/fetch'
-import { User } from '@/client/idp/user'
 import { getAccessTokenOrRedirect } from '@/infra/token'
 import { PermissionType } from './permission'
 
