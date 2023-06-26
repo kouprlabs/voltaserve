@@ -41,6 +41,15 @@ type GroupCreateOptions struct {
 	OrganizationID string  `json:"organizationId" validate:"required"`
 }
 
+type GroupListOptions struct {
+	Query     string
+	OrgID     string
+	Page      uint
+	Size      uint
+	SortBy    string
+	SortOrder string
+}
+
 type GroupUpdateNameOptions struct {
 	Name string `json:"name" validate:"required,max=255"`
 }
@@ -159,21 +168,54 @@ func (svc *GroupService) Find(id string, userID string) (*Group, error) {
 	return res, nil
 }
 
-func (svc *GroupService) List(page uint, size uint, sortBy string, sortOrder string, userID string) (*GroupList, error) {
+func (svc *GroupService) List(opts GroupListOptions, userID string) (*GroupList, error) {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
 	}
-	ids, err := svc.groupRepo.GetIDs()
-	if err != nil {
-		return nil, err
+	var authorized []model.Group
+	if opts.Query == "" {
+		if opts.OrgID == "" {
+			ids, err := svc.groupRepo.GetIDs()
+			if err != nil {
+				return nil, err
+			}
+			authorized, err = svc.doAuthorizationByIDs(ids, user)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			groups, err := svc.orgRepo.GetGroups(opts.OrgID)
+			if err != nil {
+				return nil, err
+			}
+			authorized, err = svc.doAuthorization(groups, user)
+			if err != nil {
+				return nil, err
+			}
+		}
+	} else {
+		groups, err := svc.groupSearch.Query(opts.Query)
+		if err != nil {
+			return nil, err
+		}
+		var filtered []model.Group
+		if opts.OrgID == "" {
+			filtered = groups
+		} else {
+			for _, g := range groups {
+				if g.GetOrganizationID() == opts.OrgID {
+					filtered = append(filtered, g)
+				}
+			}
+		}
+		authorized, err = svc.doAuthorization(filtered, user)
+		if err != nil {
+			return nil, err
+		}
 	}
-	authorized, err := svc.doAuthorizationByIDs(ids, user)
-	if err != nil {
-		return nil, err
-	}
-	sorted := svc.doSorting(authorized, sortBy, sortOrder, userID)
-	paged, totalElements, totalPages := svc.doPaging(sorted, page, size)
+	sorted := svc.doSorting(authorized, opts.SortBy, opts.SortOrder, userID)
+	paged, totalElements, totalPages := svc.doPaging(sorted, opts.Page, opts.Size)
 	mapped, err := svc.groupMapper.mapMany(paged, userID)
 	if err != nil {
 		return nil, err
@@ -182,35 +224,8 @@ func (svc *GroupService) List(page uint, size uint, sortBy string, sortOrder str
 		Data:          mapped,
 		TotalPages:    totalPages,
 		TotalElements: totalElements,
-		Page:          page,
-		Size:          size,
-	}, nil
-}
-
-func (svc *GroupService) Search(query string, page uint, size uint, userID string) (*GroupList, error) {
-	groups, err := svc.groupSearch.Query(query)
-	if err != nil {
-		return nil, err
-	}
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return nil, err
-	}
-	authorized, err := svc.doAuthorization(groups, user)
-	if err != nil {
-		return nil, err
-	}
-	paged, totalElements, totalPages := svc.doPaging(authorized, page, size)
-	mapped, err := svc.groupMapper.mapMany(paged, userID)
-	if err != nil {
-		return nil, err
-	}
-	return &GroupList{
-		Data:          mapped,
-		TotalElements: totalElements,
-		TotalPages:    totalPages,
-		Page:          page,
-		Size:          size,
+		Page:          opts.Page,
+		Size:          opts.Size,
 	}, nil
 }
 
@@ -339,8 +354,8 @@ func (svc *GroupService) RemoveMemberUnauthorized(id string, memberID string) er
 	return nil
 }
 
-func (svc *GroupService) refreshCacheForOrganization(organizationID string) error {
-	workspaceIDs, err := svc.workspaceRepo.GetIDsByOrganization(organizationID)
+func (svc *GroupService) refreshCacheForOrganization(orgID string) error {
+	workspaceIDs, err := svc.workspaceRepo.GetIDsByOrganization(orgID)
 	if err != nil {
 		return err
 	}

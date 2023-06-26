@@ -362,29 +362,6 @@ func (svc *OrganizationService) GetMembers(id string, userID string) ([]*User, e
 	return res, nil
 }
 
-func (svc *OrganizationService) GetGroups(id string, userID string) ([]*Group, error) {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return nil, err
-	}
-	org, err := svc.orgCache.Get(id)
-	if err != nil {
-		return nil, err
-	}
-	if err := svc.orgGuard.Authorize(user, org, model.PermissionViewer); err != nil {
-		return nil, err
-	}
-	groups, err := svc.orgRepo.GetGroups(id)
-	if err != nil {
-		return nil, err
-	}
-	res, err := svc.groupMapper.mapMany(groups, userID)
-	if err != nil {
-		return nil, err
-	}
-	return res, nil
-}
-
 func (svc *OrganizationService) doAuthorization(data []model.Organization, user model.User) ([]model.Organization, error) {
 	var res []model.Organization
 	for _, o := range data {

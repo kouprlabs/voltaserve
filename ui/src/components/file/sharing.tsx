@@ -34,7 +34,7 @@ import {
 import { Spinner, variables } from '@koupr/ui'
 import { IconAdd, IconCheck, IconTrash, IconUserPlus } from '@koupr/ui'
 import FileAPI, { GroupPermission, UserPermission } from '@/api/file'
-import { Group } from '@/api/group'
+import GroupAPI, { Group } from '@/api/group'
 import OrganizationAPI from '@/api/organization'
 import { geEditorPermission } from '@/api/permission'
 import UserAPI, { User } from '@/api/user'
@@ -71,7 +71,8 @@ const Sharing = () => {
 
   const loadGroups = useCallback(async () => {
     if (workspace) {
-      setGroups(await OrganizationAPI.getGroups(workspace.organization.id))
+      const { data } = await GroupAPI.list({ org: workspace.organization.id })
+      setGroups(data)
     }
   }, [workspace])
 

@@ -125,19 +125,16 @@ func (r *GroupRouter) List(c *fiber.Ctx) error {
 	if !service.IsValidSortOrder(sortOrder) {
 		return errorpkg.NewInvalidQueryParamError("sort_order")
 	}
-	var res *service.GroupList
-	userID := GetUserID(c)
-	query := c.Query("query")
-	if query == "" {
-		res, err = r.groupSvc.List(uint(page), uint(size), sortBy, sortOrder, userID)
-		if err != nil {
-			return err
-		}
-	} else {
-		res, err = r.groupSvc.Search(query, uint(page), uint(size), GetUserID(c))
-		if err != nil {
-			return err
-		}
+	res, err := r.groupSvc.List(service.GroupListOptions{
+		Query:     c.Query("query"),
+		OrgID:     c.Query("org"),
+		Page:      uint(page),
+		Size:      uint(size),
+		SortBy:    sortBy,
+		SortOrder: sortOrder,
+	}, GetUserID(c))
+	if err != nil {
+		return err
 	}
 	return c.JSON(res)
 }

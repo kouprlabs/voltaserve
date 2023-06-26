@@ -21,7 +21,7 @@ type InvitationRepo interface {
 	Insert(opts InvitationInsertOptions) ([]model.Invitation, error)
 	Find(id string) (model.Invitation, error)
 	GetIncoming(email string) ([]model.Invitation, error)
-	GetOutgoing(organizationID string, userID string) ([]model.Invitation, error)
+	GetOutgoing(orgID string, userID string) ([]model.Invitation, error)
 	Save(org model.Invitation) error
 	Delete(id string) error
 }
@@ -157,10 +157,10 @@ func (repo *invitationRepo) GetIncoming(email string) ([]model.Invitation, error
 	return res, nil
 }
 
-func (repo *invitationRepo) GetOutgoing(organizationID string, userID string) ([]model.Invitation, error) {
+func (repo *invitationRepo) GetOutgoing(orgID string, userID string) ([]model.Invitation, error) {
 	var invitations []*invitationEntity
 	db := repo.db.
-		Raw("SELECT * FROM invitation WHERE organization_id = ? and owner_id = ? ORDER BY create_time DESC", organizationID, userID).
+		Raw("SELECT * FROM invitation WHERE organization_id = ? and owner_id = ? ORDER BY create_time DESC", orgID, userID).
 		Scan(&invitations)
 	if db.Error != nil {
 		return nil, db.Error

@@ -89,12 +89,12 @@ func (r *InvitationRouter) GetIncoming(c *fiber.Ctx) error {
 //	@Failure		500				{object}	errorpkg.ErrorResponse
 //	@Router			/invitations/get_outgoing [get]
 func (r *InvitationRouter) GetOutgoing(c *fiber.Ctx) error {
-	organizationID := c.Query("organization_id")
-	if organizationID == "" {
+	orgID := c.Query("organization_id")
+	if orgID == "" {
 		return errorpkg.NewMissingQueryParamError("organization_id")
 	}
 	userID := GetUserID(c)
-	res, err := r.invitationSvc.GetOutgoing(organizationID, userID)
+	res, err := r.invitationSvc.GetOutgoing(orgID, userID)
 	if err != nil {
 		return err
 	}

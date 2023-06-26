@@ -28,7 +28,6 @@ func (r *OrganizationRouter) AppendRoutes(g fiber.Router) {
 	g.Post("/:id/update_name", r.UpdateName)
 	g.Post("/:id/leave", r.Leave)
 	g.Get("/:id/get_members", r.GetMembers)
-	g.Get("/:id/get_groups", r.GetGroups)
 	g.Get("/:id/search_members", r.SearchMembers)
 	g.Post("/:id/remove_member", r.RemoveMember)
 }
@@ -211,26 +210,6 @@ func (r *OrganizationRouter) List(c *fiber.Ctx) error {
 //	@Router			/organizations/{id}/get_members [get]
 func (r *OrganizationRouter) GetMembers(c *fiber.Ctx) error {
 	res, err := r.orgSvc.GetMembers(c.Params("id"), GetUserID(c))
-	if err != nil {
-		return err
-	}
-	return c.JSON(res)
-}
-
-// GetGroups godoc
-//
-//	@Summary		Get groups
-//	@Description	Get groups
-//	@Tags			Groups
-//	@Id				organizations_get_groups
-//	@Produce		json
-//	@Param			id	path		string	true	"ID"
-//	@Success		200	{array}		core.Group
-//	@Failure		400	{object}	errorpkg.ErrorResponse
-//	@Failure		500	{object}	errorpkg.ErrorResponse
-//	@Router			/organizations/{id}/get_groups [get]
-func (r *OrganizationRouter) GetGroups(c *fiber.Ctx) error {
-	res, err := r.orgSvc.GetGroups(c.Params("id"), GetUserID(c))
 	if err != nil {
 		return err
 	}

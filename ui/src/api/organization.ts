@@ -179,24 +179,6 @@ export default class OrganizationAPI {
     }).then((result) => result.json())
   }
 
-  static useGetGroups(id?: string, swrOptions?: any) {
-    return useSWR<Group[]>(
-      id ? `/organizations/${id}/get_groups` : null,
-      () => this.getGroups(id as string),
-      swrOptions
-    )
-  }
-
-  static async getGroups(id: string): Promise<Group[]> {
-    return apiFetch(`/organizations/${id}/get_groups`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
-        'Content-Type': 'application/json',
-      },
-    }).then((result) => result.json())
-  }
-
   static useSearchMembers(id: string, query: string, swrOptions?: any) {
     return useSWR<User[]>(
       id && query
