@@ -165,6 +165,12 @@ func (svc *OrganizationService) List(opts OrganizationListOptions, userID string
 			return nil, err
 		}
 	}
+	if opts.SortBy == "" {
+		opts.SortBy = SortByDateCreated
+	}
+	if opts.SortOrder == "" {
+		opts.SortOrder = SortOrderAsc
+	}
 	sorted := svc.doSorting(authorized, opts.SortBy, opts.SortOrder, userID)
 	paged, totalElements, totalPages := svc.doPaging(sorted, opts.Page, opts.Size)
 	mapped, err := svc.orgMapper.mapMany(paged, userID)

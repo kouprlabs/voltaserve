@@ -29,13 +29,13 @@ type UserList struct {
 }
 
 type UserListOptions struct {
-	Query     string
-	OrgID     string
-	GroupID   string
-	SortBy    string
-	SortOrder string
-	Page      uint
-	Size      uint
+	Query          string
+	OrganizationID string
+	GroupID        string
+	SortBy         string
+	SortOrder      string
+	Page           uint
+	Size           uint
 }
 
 type UserService struct {
@@ -71,7 +71,7 @@ func (svc *UserService) List(opts UserListOptions, userID string) (*UserList, er
 	if err != nil {
 		return nil, err
 	}
-	if opts.OrgID == "" && opts.GroupID == "" {
+	if opts.OrganizationID == "" && opts.GroupID == "" {
 		return &UserList{
 			Data:          []*User{},
 			TotalPages:    1,
@@ -81,8 +81,8 @@ func (svc *UserService) List(opts UserListOptions, userID string) (*UserList, er
 		}, nil
 	}
 	var org model.Organization
-	if opts.OrgID != "" {
-		org, err = svc.orgCache.Get(opts.OrgID)
+	if opts.OrganizationID != "" {
+		org, err = svc.orgCache.Get(opts.OrganizationID)
 		if err != nil {
 			return nil, err
 		}
@@ -102,8 +102,8 @@ func (svc *UserService) List(opts UserListOptions, userID string) (*UserList, er
 	}
 	res := []model.User{}
 	if opts.Query == "" {
-		if opts.OrgID != "" {
-			res, err = svc.orgRepo.GetMembers(opts.OrgID)
+		if opts.OrganizationID != "" {
+			res, err = svc.orgRepo.GetMembers(opts.OrganizationID)
 			if err != nil {
 				return nil, err
 			}
@@ -119,8 +119,8 @@ func (svc *UserService) List(opts UserListOptions, userID string) (*UserList, er
 			return nil, err
 		}
 		var members []model.User
-		if opts.OrgID != "" {
-			members, err = svc.orgRepo.GetMembers(opts.OrgID)
+		if opts.OrganizationID != "" {
+			members, err = svc.orgRepo.GetMembers(opts.OrganizationID)
 			if err != nil {
 				return nil, err
 			}
@@ -137,6 +137,12 @@ func (svc *UserService) List(opts UserListOptions, userID string) (*UserList, er
 				}
 			}
 		}
+	}
+	if opts.SortBy == "" {
+		opts.SortBy = SortByDateCreated
+	}
+	if opts.SortOrder == "" {
+		opts.SortOrder = SortOrderAsc
 	}
 	sorted := svc.doSorting(res, opts.SortBy, opts.SortOrder, userID)
 	paged, totalElements, totalPages := svc.doPaging(sorted, opts.Page, opts.Size)

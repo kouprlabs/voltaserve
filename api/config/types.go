@@ -11,11 +11,16 @@ type Config struct {
 	Limits        LimitsConfig
 	Security      SecurityConfig
 	SMTP          SMTPConfig
+	Defaults      DefaultsConfig
 }
 
 type LimitsConfig struct {
 	ExternalCommandTimeoutSeconds int
 	MultipartBodyLengthLimitMB    int
+}
+
+type DefaultsConfig struct {
+	WorkspaceStorageCapacityBytes int64
 }
 
 type TokenConfig struct {

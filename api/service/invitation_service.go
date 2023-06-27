@@ -155,6 +155,12 @@ func (svc *InvitationService) GetIncoming(opts InvitationListOptions, userID str
 	if err != nil {
 		return nil, err
 	}
+	if opts.SortBy == "" {
+		opts.SortBy = SortByDateCreated
+	}
+	if opts.SortOrder == "" {
+		opts.SortOrder = SortOrderAsc
+	}
 	sorted := svc.doSorting(invitations, opts.SortBy, opts.SortOrder, userID)
 	paged, totalElements, totalPages := svc.doPaging(sorted, opts.Page, opts.Size)
 	mapped, err := svc.invitationMapper.mapMany(paged, userID)
@@ -178,6 +184,12 @@ func (svc *InvitationService) GetOutgoing(orgID string, opts InvitationListOptio
 	invitations, err := svc.invitationRepo.GetOutgoing(orgID, user.GetID())
 	if err != nil {
 		return nil, err
+	}
+	if opts.SortBy == "" {
+		opts.SortBy = SortByDateCreated
+	}
+	if opts.SortOrder == "" {
+		opts.SortOrder = SortOrderAsc
 	}
 	sorted := svc.doSorting(invitations, opts.SortBy, opts.SortOrder, userID)
 	paged, totalElements, totalPages := svc.doPaging(sorted, opts.Page, opts.Size)

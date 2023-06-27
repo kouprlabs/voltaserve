@@ -24,6 +24,7 @@ func GetConfig() Config {
 		readRedis(config)
 		readSMTP(config)
 		readLimits(config)
+		readDefaults(config)
 	}
 	return *config
 }
@@ -106,5 +107,15 @@ func readLimits(config *Config) {
 			panic(err)
 		}
 		config.Limits.MultipartBodyLengthLimitMB = int(v)
+	}
+}
+
+func readDefaults(config *Config) {
+	if len(os.Getenv("DEFAULT_WORKSPACE_STORAGE_CAPACITY_BYTES")) > 0 {
+		v, err := strconv.ParseInt(os.Getenv("DEFAULT_WORKSPACE_STORAGE_CAPACITY_BYTES"), 10, 64)
+		if err != nil {
+			panic(err)
+		}
+		config.Defaults.WorkspaceStorageCapacityBytes = v
 	}
 }

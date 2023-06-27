@@ -41,12 +41,12 @@ type GroupCreateOptions struct {
 }
 
 type GroupListOptions struct {
-	Query     string
-	OrgID     string
-	Page      uint
-	Size      uint
-	SortBy    string
-	SortOrder string
+	Query          string
+	OrganizationID string
+	Page           uint
+	Size           uint
+	SortBy         string
+	SortOrder      string
 }
 
 type GroupUpdateNameOptions struct {
@@ -174,7 +174,7 @@ func (svc *GroupService) List(opts GroupListOptions, userID string) (*GroupList,
 	}
 	var authorized []model.Group
 	if opts.Query == "" {
-		if opts.OrgID == "" {
+		if opts.OrganizationID == "" {
 			ids, err := svc.groupRepo.GetIDs()
 			if err != nil {
 				return nil, err
@@ -184,7 +184,7 @@ func (svc *GroupService) List(opts GroupListOptions, userID string) (*GroupList,
 				return nil, err
 			}
 		} else {
-			groups, err := svc.orgRepo.GetGroups(opts.OrgID)
+			groups, err := svc.orgRepo.GetGroups(opts.OrganizationID)
 			if err != nil {
 				return nil, err
 			}
@@ -199,11 +199,11 @@ func (svc *GroupService) List(opts GroupListOptions, userID string) (*GroupList,
 			return nil, err
 		}
 		var filtered []model.Group
-		if opts.OrgID == "" {
+		if opts.OrganizationID == "" {
 			filtered = groups
 		} else {
 			for _, g := range groups {
-				if g.GetOrganizationID() == opts.OrgID {
+				if g.GetOrganizationID() == opts.OrganizationID {
 					filtered = append(filtered, g)
 				}
 			}
@@ -212,6 +212,12 @@ func (svc *GroupService) List(opts GroupListOptions, userID string) (*GroupList,
 		if err != nil {
 			return nil, err
 		}
+	}
+	if opts.SortBy == "" {
+		opts.SortBy = SortByDateCreated
+	}
+	if opts.SortOrder == "" {
+		opts.SortOrder = SortOrderAsc
 	}
 	sorted := svc.doSorting(authorized, opts.SortBy, opts.SortOrder, userID)
 	paged, totalElements, totalPages := svc.doPaging(sorted, opts.Page, opts.Size)

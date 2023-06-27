@@ -48,7 +48,7 @@ const OrganizationMembersPage = () => {
     data: members,
     error: membersError,
     mutate,
-  } = UserAPI.useList({ org: orgId }, swrConfig())
+  } = UserAPI.useList({ organizationId: orgId }, swrConfig())
   const [userToRemove, setUserToRemove] = useState<IdPUser>()
   const [isInviteMembersModalOpen, setIsInviteMembersModalOpen] =
     useState(false)

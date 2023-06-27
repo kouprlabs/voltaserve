@@ -372,7 +372,13 @@ func (r *FileRouter) ListByID(c *fiber.Ctx) error {
 	if fileType != model.FileTypeFile && fileType != model.FileTypeFolder && fileType != "" {
 		return errorpkg.NewInvalidQueryParamError("type")
 	}
-	res, err := r.fileSvc.ListByID(c.Params("id"), uint(page), uint(size), sortBy, sortOrder, fileType, GetUserID(c))
+	res, err := r.fileSvc.ListByID(c.Params("id"), service.FileListByIDOptions{
+		Page:      uint(page),
+		Size:      uint(size),
+		SortBy:    sortBy,
+		SortOrder: sortOrder,
+		FileType:  fileType,
+	}, GetUserID(c))
 	if err != nil {
 		return err
 	}

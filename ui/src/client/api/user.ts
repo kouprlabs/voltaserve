@@ -30,7 +30,7 @@ export type List = {
 
 export type ListOptions = {
   query?: string
-  org?: string
+  organizationId?: string
   group?: string
   size?: number
   page?: number
@@ -48,8 +48,8 @@ export default class UserAPI {
     if (options?.query) {
       params.query = encodeURIComponent(options.query.toString())
     }
-    if (options?.org) {
-      params.org = options.org.toString()
+    if (options?.organizationId) {
+      params.organization_id = options.organizationId.toString()
     }
     if (options?.group) {
       params.group = options.group.toString()

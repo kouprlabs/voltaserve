@@ -45,7 +45,7 @@ type WorkspaceCreateOptions struct {
 	Name            string  `json:"name" validate:"required,max=255"`
 	Image           *string `json:"image"`
 	OrganizationID  string  `json:"organizationId" validate:"required"`
-	StorageCapacity int64   `json:"storageCapacity" validate:"required,min=1"`
+	StorageCapacity int64   `json:"storageCapacity"`
 }
 
 type WorkspaceListOptions struct {
@@ -101,6 +101,9 @@ func (svc *WorkspaceService) Create(opts WorkspaceCreateOptions, userID string) 
 	bucket := strings.ReplaceAll(uuid.NewString(), "-", "")
 	if err := svc.s3.CreateBucket(bucket); err != nil {
 		return nil, err
+	}
+	if opts.StorageCapacity == 0 {
+		opts.StorageCapacity = svc.config.Defaults.WorkspaceStorageCapacityBytes
 	}
 	workspace, err := svc.workspaceRepo.Insert(repo.WorkspaceInsertOptions{
 		ID:              id,
@@ -199,6 +202,12 @@ func (svc *WorkspaceService) List(opts WorkspaceListOptions, userID string) (*Wo
 		if err != nil {
 			return nil, err
 		}
+	}
+	if opts.SortBy == "" {
+		opts.SortBy = SortByDateCreated
+	}
+	if opts.SortOrder == "" {
+		opts.SortOrder = SortOrderAsc
 	}
 	sorted := svc.doSorting(authorized, opts.SortBy, opts.SortOrder, userID)
 	paged, totalElements, totalPages := svc.doPaging(sorted, opts.Page, opts.Size)

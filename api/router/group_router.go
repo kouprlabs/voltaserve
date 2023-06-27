@@ -88,15 +88,15 @@ func (r *GroupRouter) GetByID(c *fiber.Ctx) error {
 //	@Tags			Groups
 //	@Id				groups_list
 //	@Produce		json
-//	@Param			query		query		string	false	"Query"
-//	@Param			org			query		string	false	"Organization ID"
-//	@Param			page		query		string	false	"Page"
-//	@Param			size		query		string	false	"Size"
-//	@Param			sort_by		query		string	false	"Sort By"
-//	@Param			sort_order	query		string	false	"Sort Order"
-//	@Success		200			{object}	service.GroupList
-//	@Failure		404			{object}	errorpkg.ErrorResponse
-//	@Failure		500			{object}	errorpkg.ErrorResponse
+//	@Param			query			query		string	false	"Query"
+//	@Param			organization_id	query		string	false	"Organization ID"
+//	@Param			page			query		string	false	"Page"
+//	@Param			size			query		string	false	"Size"
+//	@Param			sort_by			query		string	false	"Sort By"
+//	@Param			sort_order		query		string	false	"Sort Order"
+//	@Success		200				{object}	service.GroupList
+//	@Failure		404				{object}	errorpkg.ErrorResponse
+//	@Failure		500				{object}	errorpkg.ErrorResponse
 //	@Router			/groups [get]
 func (r *GroupRouter) List(c *fiber.Ctx) error {
 	var err error
@@ -127,12 +127,12 @@ func (r *GroupRouter) List(c *fiber.Ctx) error {
 		return errorpkg.NewInvalidQueryParamError("sort_order")
 	}
 	res, err := r.groupSvc.List(service.GroupListOptions{
-		Query:     c.Query("query"),
-		OrgID:     c.Query("org"),
-		Page:      uint(page),
-		Size:      uint(size),
-		SortBy:    sortBy,
-		SortOrder: sortOrder,
+		Query:          c.Query("query"),
+		OrganizationID: c.Query("organization_id"),
+		Page:           uint(page),
+		Size:           uint(size),
+		SortBy:         sortBy,
+		SortOrder:      sortOrder,
 	}, GetUserID(c))
 	if err != nil {
 		return err

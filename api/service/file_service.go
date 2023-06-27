@@ -81,6 +81,14 @@ type FileCreateFolderOptions struct {
 	ParentID    *string `json:"parentId"`
 }
 
+type FileListByIDOptions struct {
+	Page      uint
+	Size      uint
+	SortBy    string
+	SortOrder string
+	FileType  string
+}
+
 type FileCopyOptions struct {
 	IDs []string `json:"ids" validate:"required"`
 }
@@ -644,7 +652,7 @@ func (svc *FileService) ListByPath(path string, userID string) ([]*File, error) 
 	}
 }
 
-func (svc *FileService) ListByID(id string, page uint, size uint, sortBy string, sortOrder string, fileType string, userID string) (*FileList, error) {
+func (svc *FileService) ListByID(id string, opts FileListByIDOptions, userID string) (*FileList, error) {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
@@ -656,10 +664,10 @@ func (svc *FileService) ListByID(id string, page uint, size uint, sortBy string,
 	if err = svc.fileGuard.Authorize(user, file, model.PermissionViewer); err != nil {
 		return nil, err
 	}
-	if page < 1 {
+	if opts.Page < 1 {
 		return nil, errorpkg.NewInvalidPageParameterError()
 	}
-	if size < 1 {
+	if opts.Size < 1 {
 		return nil, errorpkg.NewInvalidSizeParameterError()
 	}
 	ids, err := svc.fileRepo.GetChildrenIDs(id)
@@ -672,12 +680,12 @@ func (svc *FileService) ListByID(id string, page uint, size uint, sortBy string,
 	}
 	var filteredFiles []model.File
 	for _, f := range authorized {
-		if fileType == "" || f.GetType() == fileType {
+		if opts.FileType == "" || f.GetType() == opts.FileType {
 			filteredFiles = append(filteredFiles, f)
 		}
 	}
-	sorted := svc.doSorting(filteredFiles, sortBy, sortOrder, userID)
-	paged, totalElements, totalPages := svc.doPaging(sorted, page, size)
+	sorted := svc.doSorting(filteredFiles, opts.SortBy, opts.SortOrder, userID)
+	paged, totalElements, totalPages := svc.doPaging(sorted, opts.Page, opts.Size)
 	mapped, err := svc.fileMapper.mapMany(paged, userID)
 	if err != nil {
 		return nil, err
@@ -686,8 +694,8 @@ func (svc *FileService) ListByID(id string, page uint, size uint, sortBy string,
 		Data:          mapped,
 		TotalElements: totalElements,
 		TotalPages:    totalPages,
-		Page:          page,
-		Size:          size,
+		Page:          opts.Page,
+		Size:          opts.Size,
 	}, nil
 }
 

@@ -29,16 +29,16 @@ func (r *UserRouter) AppendRoutes(g fiber.Router) {
 //	@Tags			Users
 //	@Id				users_list
 //	@Produce		json
-//	@Param			query		query		string	false	"Query"
-//	@Param			org			query		string	false	"Organization ID"
-//	@Param			group		query		string	false	"Group ID"
-//	@Param			page		query		string	false	"Page"
-//	@Param			size		query		string	false	"Size"
-//	@Param			sort_by		query		string	false	"Sort By"
-//	@Param			sort_order	query		string	false	"Sort Order"
-//	@Success		200			{object}	service.UserList
-//	@Failure		404			{object}	errorpkg.ErrorResponse
-//	@Failure		500			{object}	errorpkg.ErrorResponse
+//	@Param			query			query		string	false	"Query"
+//	@Param			organization_id	query		string	false	"Organization ID"
+//	@Param			group			query		string	false	"Group ID"
+//	@Param			page			query		string	false	"Page"
+//	@Param			size			query		string	false	"Size"
+//	@Param			sort_by			query		string	false	"Sort By"
+//	@Param			sort_order		query		string	false	"Sort Order"
+//	@Success		200				{object}	service.UserList
+//	@Failure		404				{object}	errorpkg.ErrorResponse
+//	@Failure		500				{object}	errorpkg.ErrorResponse
 //	@Router			/users [get]
 func (r *UserRouter) List(c *fiber.Ctx) error {
 	var err error
@@ -68,18 +68,18 @@ func (r *UserRouter) List(c *fiber.Ctx) error {
 	if !IsValidSortOrder(sortOrder) {
 		return errorpkg.NewInvalidQueryParamError("sort_order")
 	}
-	if c.Query("org") != "" && c.Query("group") != "" {
+	if c.Query("organization_id") != "" && c.Query("group") != "" {
 		return errorpkg.NewInvalidQueryParamsError("only one of the params 'org' or 'group' should be set, not both")
 	}
 	userID := GetUserID(c)
 	res, err := r.userSvc.List(service.UserListOptions{
-		Query:     c.Query("query"),
-		OrgID:     c.Query("org"),
-		GroupID:   c.Query("group"),
-		SortBy:    sortBy,
-		SortOrder: sortOrder,
-		Page:      uint(page),
-		Size:      uint(size),
+		Query:          c.Query("query"),
+		OrganizationID: c.Query("organization_id"),
+		GroupID:        c.Query("group"),
+		SortBy:         sortBy,
+		SortOrder:      sortOrder,
+		Page:           uint(page),
+		Size:           uint(size),
 	}, userID)
 	if err != nil {
 		return err

@@ -65,14 +65,18 @@ const Sharing = () => {
 
   const loadUsers = useCallback(async () => {
     if (workspace) {
-      const { data } = await UserAPI.list({ org: workspace.organization.id })
+      const { data } = await UserAPI.list({
+        organizationId: workspace.organization.id,
+      })
       setUsers(data)
     }
   }, [workspace])
 
   const loadGroups = useCallback(async () => {
     if (workspace) {
-      const { data } = await GroupAPI.list({ org: workspace.organization.id })
+      const { data } = await GroupAPI.list({
+        organizationId: workspace.organization.id,
+      })
       setGroups(data)
     }
   }, [workspace])

@@ -546,12 +546,10 @@ definitions:
       organizationId:
         type: string
       storageCapacity:
-        minimum: 1
         type: integer
     required:
     - name
     - organizationId
-    - storageCapacity
     type: object
   service.WorkspaceList:
     properties:
@@ -1422,7 +1420,7 @@ paths:
         type: string
       - description: Organization ID
         in: query
-        name: org
+        name: organization_id
         type: string
       - description: Page
         in: query
@@ -1873,7 +1871,7 @@ paths:
       parameters:
       - description: Organization ID
         in: query
-        name: org
+        name: organization_id
         required: true
         type: string
       - description: Page
@@ -2229,7 +2227,7 @@ paths:
         type: string
       - description: Organization ID
         in: query
-        name: org
+        name: organization_id
         type: string
       - description: Group ID
         in: query
