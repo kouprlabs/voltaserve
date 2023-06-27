@@ -8,6 +8,8 @@ Install [Swag](https://github.com/swaggo/swag).
 
 Install [golangci-lint](https://golangci-lint.run/usage/install).
 
+Install [air](https://github.com/cosmtrek/air#installation) (Optional).
+
 ### Build and Run
 
 Run for development:
