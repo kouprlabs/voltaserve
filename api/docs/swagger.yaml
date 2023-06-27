@@ -1410,20 +1410,29 @@ paths:
       description: List
       operationId: groups_list
       parameters:
-      - description: ID
-        in: path
-        name: id
-        required: true
+      - description: Query
+        in: query
+        name: query
+        type: string
+      - description: Organization ID
+        in: query
+        name: org
         type: string
       - description: Page
         in: query
         name: page
-        required: true
         type: string
       - description: Size
         in: query
         name: size
-        required: true
+        type: string
+      - description: Sort By
+        in: query
+        name: sort_by
+        type: string
+      - description: Sort Order
+        in: query
+        name: sort_order
         type: string
       produces:
       - application/json
@@ -1881,20 +1890,25 @@ paths:
       description: List
       operationId: organizations_list
       parameters:
-      - description: ID
-        in: path
-        name: id
-        required: true
+      - description: Query
+        in: query
+        name: query
         type: string
       - description: Page
         in: query
         name: page
-        required: true
         type: string
       - description: Size
         in: query
         name: size
-        required: true
+        type: string
+      - description: Sort By
+        in: query
+        name: sort_by
+        type: string
+      - description: Sort Order
+        in: query
+        name: sort_order
         type: string
       produces:
       - application/json
@@ -2170,20 +2184,33 @@ paths:
       description: List
       operationId: users_list
       parameters:
-      - description: ID
-        in: path
-        name: id
-        required: true
+      - description: Query
+        in: query
+        name: query
+        type: string
+      - description: Organization ID
+        in: query
+        name: org
+        type: string
+      - description: Group ID
+        in: query
+        name: group
         type: string
       - description: Page
         in: query
         name: page
-        required: true
         type: string
       - description: Size
         in: query
         name: size
-        required: true
+        type: string
+      - description: Sort By
+        in: query
+        name: sort_by
+        type: string
+      - description: Sort Order
+        in: query
+        name: sort_order
         type: string
       produces:
       - application/json
@@ -2208,20 +2235,25 @@ paths:
       description: List
       operationId: workspaces_list
       parameters:
-      - description: ID
-        in: path
-        name: id
-        required: true
+      - description: Query
+        in: query
+        name: query
         type: string
       - description: Page
         in: query
         name: page
-        required: true
         type: string
       - description: Size
         in: query
         name: size
-        required: true
+        type: string
+      - description: Sort By
+        in: query
+        name: sort_by
+        type: string
+      - description: Sort Order
+        in: query
+        name: sort_order
         type: string
       produces:
       - application/json

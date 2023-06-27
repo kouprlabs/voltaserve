@@ -88,12 +88,15 @@ func (r *GroupRouter) GetByID(c *fiber.Ctx) error {
 //	@Tags			Groups
 //	@Id				groups_list
 //	@Produce		json
-//	@Param			id		path		string	true	"ID"
-//	@Param			page	query		string	true	"Page"
-//	@Param			size	query		string	true	"Size"
-//	@Success		200		{object}	service.GroupList
-//	@Failure		404		{object}	errorpkg.ErrorResponse
-//	@Failure		500		{object}	errorpkg.ErrorResponse
+//	@Param			query		query		string	false	"Query"
+//	@Param			org			query		string	false	"Organization ID"
+//	@Param			page		query		string	false	"Page"
+//	@Param			size		query		string	false	"Size"
+//	@Param			sort_by		query		string	false	"Sort By"
+//	@Param			sort_order	query		string	false	"Sort Order"
+//	@Success		200			{object}	service.GroupList
+//	@Failure		404			{object}	errorpkg.ErrorResponse
+//	@Failure		500			{object}	errorpkg.ErrorResponse
 //	@Router			/groups [get]
 func (r *GroupRouter) List(c *fiber.Ctx) error {
 	var err error

@@ -142,12 +142,14 @@ func (r *OrganizationRouter) UpdateName(c *fiber.Ctx) error {
 //	@Tags			Organizations
 //	@Id				organizations_list
 //	@Produce		json
-//	@Param			id		path		string	true	"ID"
-//	@Param			page	query		string	true	"Page"
-//	@Param			size	query		string	true	"Size"
-//	@Success		200		{object}	service.WorkspaceList
-//	@Failure		404		{object}	errorpkg.ErrorResponse
-//	@Failure		500		{object}	errorpkg.ErrorResponse
+//	@Param			query		query		string	false	"Query"
+//	@Param			page		query		string	false	"Page"
+//	@Param			size		query		string	false	"Size"
+//	@Param			sort_by		query		string	false	"Sort By"
+//	@Param			sort_order	query		string	false	"Sort Order"
+//	@Success		200			{object}	service.WorkspaceList
+//	@Failure		404			{object}	errorpkg.ErrorResponse
+//	@Failure		500			{object}	errorpkg.ErrorResponse
 //	@Router			/organizations [get]
 func (r *OrganizationRouter) List(c *fiber.Ctx) error {
 	var err error
