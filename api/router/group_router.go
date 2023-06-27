@@ -2,6 +2,7 @@ package router
 
 import (
 	"net/http"
+	"strconv"
 	"voltaserve/errorpkg"
 	"voltaserve/service"
 
@@ -20,16 +21,13 @@ func NewGroupRouter() *GroupRouter {
 }
 
 func (r *GroupRouter) AppendRoutes(g fiber.Router) {
-	g.Get("/", r.GetAll)
-	g.Post("/search", r.Search)
+	g.Get("/", r.List)
 	g.Post("/", r.Create)
 	g.Get("/:id", r.GetByID)
 	g.Delete("/:id", r.Delete)
 	g.Post("/:id/update_name", r.UpdateName)
 	g.Post("/:id/remove_member", r.RemoveMember)
 	g.Post("/:id/add_member", r.AddMember)
-	g.Get("/:id/get_members", r.GetMembers)
-	g.Get("/:id/search_members", r.SearchMembers)
 	g.Get("/:id/get_available_users", r.GetAvailableUsers)
 }
 
@@ -41,8 +39,8 @@ func (r *GroupRouter) AppendRoutes(g fiber.Router) {
 //	@Id				groups_create
 //	@Accept			json
 //	@Produce		json
-//	@Param			body	body		core.GroupCreateOptions	true	"Body"
-//	@Success		200		{object}	core.Group
+//	@Param			body	body		service.GroupCreateOptions	true	"Body"
+//	@Success		200		{object}	service.Group
 //	@Failure		400		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/groups [post]
@@ -70,7 +68,7 @@ func (r *GroupRouter) Create(c *fiber.Ctx) error {
 //	@Id				groups_get_by_id
 //	@Produce		json
 //	@Param			id	path		string	true	"ID"
-//	@Success		200	{object}	core.Group
+//	@Success		200	{object}	service.Group
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/groups/{id} [get]
@@ -83,45 +81,63 @@ func (r *GroupRouter) GetByID(c *fiber.Ctx) error {
 	return c.JSON(res)
 }
 
-// GetAll godoc
+// List godoc
 //
-//	@Summary		Get all
-//	@Description	Get all
+//	@Summary		List
+//	@Description	List
 //	@Tags			Groups
-//	@Id				groups_get_all
+//	@Id				groups_list
 //	@Produce		json
-//	@Success		200	{array}		core.Group
-//	@Failure		500	{object}	errorpkg.ErrorResponse
+//	@Param			query			query		string	false	"Query"
+//	@Param			organization_id	query		string	false	"Organization ID"
+//	@Param			page			query		string	false	"Page"
+//	@Param			size			query		string	false	"Size"
+//	@Param			sort_by			query		string	false	"Sort By"
+//	@Param			sort_order		query		string	false	"Sort Order"
+//	@Success		200				{object}	service.GroupList
+//	@Failure		404				{object}	errorpkg.ErrorResponse
+//	@Failure		500				{object}	errorpkg.ErrorResponse
 //	@Router			/groups [get]
-func (r *GroupRouter) GetAll(c *fiber.Ctx) error {
-	groups, err := r.groupSvc.FindAll(GetUserID(c))
+func (r *GroupRouter) List(c *fiber.Ctx) error {
+	var err error
+	var page int64
+	if c.Query("page") == "" {
+		page = 1
+	} else {
+		page, err = strconv.ParseInt(c.Query("page"), 10, 32)
+		if err != nil {
+			page = 1
+		}
+	}
+	var size int64
+	if c.Query("size") == "" {
+		size = GroupDefaultPageSize
+	} else {
+		size, err = strconv.ParseInt(c.Query("size"), 10, 32)
+		if err != nil {
+			return err
+		}
+	}
+	sortBy := c.Query("sort_by")
+	if !IsValidSortBy(sortBy) {
+		return errorpkg.NewInvalidQueryParamError("sort_by")
+	}
+	sortOrder := c.Query("sort_order")
+	if !IsValidSortOrder(sortOrder) {
+		return errorpkg.NewInvalidQueryParamError("sort_order")
+	}
+	res, err := r.groupSvc.List(service.GroupListOptions{
+		Query:          c.Query("query"),
+		OrganizationID: c.Query("organization_id"),
+		Page:           uint(page),
+		Size:           uint(size),
+		SortBy:         sortBy,
+		SortOrder:      sortOrder,
+	}, GetUserID(c))
 	if err != nil {
 		return err
 	}
-	return c.JSON(groups)
-}
-
-// Search godoc
-//
-//	@Summary		Search
-//	@Description	Search
-//	@Tags			Groups
-//	@Id				groups_search
-//	@Produce		json
-//	@Param			body	body		core.GroupSearchOptions	true	"Body"
-//	@Success		200		{array}		core.Group
-//	@Failure		500		{object}	errorpkg.ErrorResponse
-//	@Router			/groups/search [get]
-func (r *GroupRouter) Search(c *fiber.Ctx) error {
-	req := new(service.GroupSearchOptions)
-	if err := c.BodyParser(req); err != nil {
-		return err
-	}
-	groups, err := r.groupSvc.Search(req.Text, GetUserID(c))
-	if err != nil {
-		return err
-	}
-	return c.JSON(groups)
+	return c.JSON(res)
 }
 
 // UpdateName godoc
@@ -132,9 +148,9 @@ func (r *GroupRouter) Search(c *fiber.Ctx) error {
 //	@Id				groups_update_name
 //	@Accept			json
 //	@Produce		json
-//	@Param			id		path		string						true	"ID"
-//	@Param			body	body		core.GroupUpdateNameOptions	true	"Body"
-//	@Success		200		{object}	core.Group
+//	@Param			id		path		string							true	"ID"
+//	@Param			body	body		service.GroupUpdateNameOptions	true	"Body"
+//	@Success		200		{object}	service.Group
 //	@Failure		404		{object}	errorpkg.ErrorResponse
 //	@Failure		400		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
@@ -212,8 +228,8 @@ func (r *GroupRouter) AddMember(c *fiber.Ctx) error {
 //	@Id				groups_remove_member
 //	@Accept			json
 //	@Produce		json
-//	@Param			id		path		string							true	"ID"
-//	@Param			body	body		core.GroupRemoveMemberOptions	true	"Body"
+//	@Param			id		path		string								true	"ID"
+//	@Param			body	body		service.GroupRemoveMemberOptions	true	"Body"
 //	@Failure		404		{object}	errorpkg.ErrorResponse
 //	@Failure		400		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
@@ -233,45 +249,6 @@ func (r *GroupRouter) RemoveMember(c *fiber.Ctx) error {
 	return c.SendStatus(http.StatusNoContent)
 }
 
-// GetMembers godoc
-//
-//	@Summary		Get members
-//	@Description	Get members
-//	@Tags			Groups
-//	@Id				groups_get_members
-//	@Produce		json
-//	@Param			id	path		string	true	"ID"
-//	@Success		200	{array}		core.User
-//	@Failure		500	{object}	errorpkg.ErrorResponse
-//	@Router			/groups/{id}/get_members [get]
-func (r *GroupRouter) GetMembers(c *fiber.Ctx) error {
-	res, err := r.groupSvc.GetMembers(c.Params("id"), GetUserID(c))
-	if err != nil {
-		return err
-	}
-	return c.JSON(res)
-}
-
-// SearchMembers godoc
-//
-//	@Summary		Search members
-//	@Description	Search members
-//	@Tags			Groups
-//	@Id				groups_search_members
-//	@Produce		json
-//	@Param			id		path		string	true	"ID"
-//	@Param			query	query		string	true	"Query"
-//	@Success		200		{array}		core.User
-//	@Failure		500		{object}	errorpkg.ErrorResponse
-//	@Router			/groups/{id}/search_members [get]
-func (r *GroupRouter) SearchMembers(c *fiber.Ctx) error {
-	res, err := r.groupSvc.SearchMembers(c.Params("id"), c.Query("query"), GetUserID(c))
-	if err != nil {
-		return err
-	}
-	return c.JSON(res)
-}
-
 // SearchMembers godoc
 //
 //	@Summary		Search
@@ -280,7 +257,7 @@ func (r *GroupRouter) SearchMembers(c *fiber.Ctx) error {
 //	@Id				groups_get_available_users
 //	@Produce		json
 //	@Param			id	path		string	true	"ID"
-//	@Success		200	{array}		core.User
+//	@Success		200	{array}		service.User
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/groups/{id}/get_available_users [get]
 func (r *GroupRouter) GetAvailableUsers(c *fiber.Ctx) error {

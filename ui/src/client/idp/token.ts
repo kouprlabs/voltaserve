@@ -1,6 +1,6 @@
-import { idpFetch } from './fetch'
+import { idpFetch } from '@/client/fetch'
 
-export type TokenGrantType = 'password' | 'refresh_token'
+export type GrantType = 'password' | 'refresh_token'
 
 export type Token = {
   access_token: string
@@ -9,8 +9,8 @@ export type Token = {
   refresh_token: string
 }
 
-export type TokenExchangeOptions = {
-  grant_type: TokenGrantType
+export type ExchangeOptions = {
+  grant_type: GrantType
   username?: string
   password?: string
   refresh_token?: string
@@ -18,7 +18,7 @@ export type TokenExchangeOptions = {
 }
 
 export default class TokenAPI {
-  static async exchange(options: TokenExchangeOptions): Promise<Token> {
+  static async exchange(options: ExchangeOptions): Promise<Token> {
     const formBody = []
     formBody.push(`grant_type=${options.grant_type}`)
     if (options.grant_type === 'password') {

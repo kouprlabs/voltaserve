@@ -23,9 +23,9 @@ import {
 } from 'formik'
 import * as Yup from 'yup'
 import { Helmet } from 'react-helmet-async'
-import GroupAPI from '@/api/group'
-import OrganizationAPI, { Organization } from '@/api/organization'
-import { geEditorPermission } from '@/api/permission'
+import GroupAPI from '@/client/api/group'
+import OrganizationAPI, { Organization } from '@/client/api/organization'
+import { geEditorPermission } from '@/client/api/permission'
 
 type FormValues = {
   name: string
@@ -46,8 +46,8 @@ const NewGroupPage = () => {
 
   useEffect(() => {
     ;(async () => {
-      const result = await OrganizationAPI.getAll()
-      setOrgs(result.filter((o) => geEditorPermission(o.permission)))
+      const list = await OrganizationAPI.list()
+      setOrgs(list.data.filter((o) => geEditorPermission(o.permission)))
     })()
   }, [])
 

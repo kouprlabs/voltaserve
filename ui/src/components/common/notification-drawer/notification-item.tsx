@@ -1,5 +1,5 @@
-import { Invitation } from '@/api/invitation'
-import { Notification } from '@/api/notification'
+import { Invitation } from '@/client/api/invitation'
+import { Notification } from '@/client/api/notification'
 import NewInvitationItem from './new-Invitation-item'
 
 type NotificationItemProps = {

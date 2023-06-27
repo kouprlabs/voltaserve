@@ -1,5 +1,5 @@
-import { errorToString } from '@/api/error'
-import FileAPI from '@/api/file'
+import FileAPI from '@/client/api/file'
+import { errorToString } from '@/client/error'
 import store from '@/store/configure-store'
 import { filesAdded } from '@/store/entities/files'
 import {

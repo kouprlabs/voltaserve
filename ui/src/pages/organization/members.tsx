@@ -28,10 +28,11 @@ import {
   SectionSpinner,
 } from '@koupr/ui'
 import { Helmet } from 'react-helmet-async'
-import { swrConfig } from '@/api/options'
-import OrganizationAPI from '@/api/organization'
-import { geEditorPermission } from '@/api/permission'
-import { User } from '@/api/user'
+import OrganizationAPI from '@/client/api/organization'
+import { geEditorPermission } from '@/client/api/permission'
+import UserAPI from '@/client/api/user'
+import { User as IdPUser } from '@/client/idp/user'
+import { swrConfig } from '@/client/options'
 import InviteMembers from '@/components/organization/invite-members'
 import RemoveMember from '@/components/organization/remove-member'
 
@@ -47,8 +48,8 @@ const OrganizationMembersPage = () => {
     data: members,
     error: membersError,
     mutate,
-  } = OrganizationAPI.useGetMembers(orgId, swrConfig())
-  const [userToRemove, setUserToRemove] = useState<User>()
+  } = UserAPI.useList({ organizationId: orgId }, swrConfig())
+  const [userToRemove, setUserToRemove] = useState<IdPUser>()
   const [isInviteMembersModalOpen, setIsInviteMembersModalOpen] =
     useState(false)
   const [isRemoveMemberModalOpen, setIsRemoveMemberModalOpen] =
@@ -73,7 +74,7 @@ const OrganizationMembersPage = () => {
       <Helmet>
         <title>{org.name}</title>
       </Helmet>
-      {members.length > 0 && (
+      {members.data.length > 0 && (
         <>
           <Table variant="simple">
             <Thead>
@@ -84,7 +85,7 @@ const OrganizationMembersPage = () => {
               </Tr>
             </Thead>
             <Tbody>
-              {members.map((u: User) => (
+              {members.data.map((u) => (
                 <Tr key={u.id}>
                   <Td>
                     <HStack direction="row" spacing={variables.spacing}>
@@ -133,7 +134,7 @@ const OrganizationMembersPage = () => {
           )}
         </>
       )}
-      {members.length === 0 && (
+      {members.data.length === 0 && (
         <>
           <Center h="300px">
             <VStack spacing={variables.spacing}>

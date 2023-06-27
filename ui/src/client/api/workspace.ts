@@ -1,9 +1,20 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import useSWR from 'swr'
+import { apiFetch } from '@/client/fetch'
 import { getAccessTokenOrRedirect } from '@/infra/token'
-import { apiFetch } from './fetch'
 import { Organization } from './organization'
 import { PermissionType } from './permission'
+
+export enum SortBy {
+  Name = 'name',
+  DateCreated = 'date_created',
+  DateModified = 'date_modified',
+}
+
+export enum SortOrder {
+  Asc = 'asc',
+  Desc = 'desc',
+}
 
 export type Workspace = {
   id: string
@@ -16,22 +27,34 @@ export type Workspace = {
   updateTime?: string
 }
 
-export interface WorkspaceSearchOptions {
-  text: string
+export type List = {
+  data: Workspace[]
+  totalPages: number
+  totalElements: number
+  page: number
+  size: number
 }
 
-export interface WorkspaceCreateOptions {
+export interface CreateOptions {
   name: string
   image?: string
   organizationId: string
   storageCapacity: number
 }
 
-export interface WorkspaceUpdateNameOptions {
+export type ListOptions = {
+  query?: string
+  size?: number
+  page?: number
+  sortBy?: SortBy
+  sortOrder?: SortOrder
+}
+
+export interface UpdateNameOptions {
   name: string
 }
 
-export interface WorkspaceStorageCapacityOptions {
+export interface StorageCapacityOptions {
   storageCapacity: number
 }
 
@@ -54,23 +77,28 @@ export default class WorkspaceAPI {
     }).then((result) => result.json())
   }
 
-  static useGetAllOrSearch(
-    options?: { search?: WorkspaceSearchOptions },
-    swrOptions?: any
-  ) {
-    if (options?.search) {
-      return this.useSearch(options?.search, swrOptions)
-    } else {
-      return this.useGetAll(swrOptions)
+  static useList(options?: ListOptions, swrOptions?: any) {
+    return useSWR<List>('/workspaces', () => this.list(options), swrOptions)
+  }
+
+  static async list(options?: ListOptions): Promise<List> {
+    const params: any = {}
+    if (options?.query) {
+      params.query = encodeURIComponent(options.query.toString())
     }
-  }
-
-  static useGetAll(swrOptions?: any) {
-    return useSWR<Workspace[]>('/workspaces', () => this.getAll(), swrOptions)
-  }
-
-  static async getAll(): Promise<Workspace[]> {
-    return apiFetch('/workspaces', {
+    if (options?.page) {
+      params.page = options.page.toString()
+    }
+    if (options?.size) {
+      params.size = options.size.toString()
+    }
+    if (options?.sortBy) {
+      params.sort_by = options.sortBy.toString()
+    }
+    if (options?.sortOrder) {
+      params.sort_order = options.sortOrder.toString()
+    }
+    return apiFetch(`/workspaces?${new URLSearchParams(params)}`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
@@ -79,26 +107,7 @@ export default class WorkspaceAPI {
     }).then((result) => result.json())
   }
 
-  static useSearch(options: WorkspaceSearchOptions, swrOptions?: any) {
-    return useSWR<Workspace[]>(
-      '/workspaces/search',
-      () => this.search(options),
-      swrOptions
-    )
-  }
-
-  static async search(options: WorkspaceSearchOptions): Promise<Workspace[]> {
-    return apiFetch('/workspaces/search', {
-      method: 'POST',
-      body: JSON.stringify(options),
-      headers: {
-        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
-        'Content-Type': 'application/json',
-      },
-    }).then((result) => result.json())
-  }
-
-  static async create(options: WorkspaceCreateOptions): Promise<Workspace> {
+  static async create(options: CreateOptions): Promise<Workspace> {
     return apiFetch('/workspaces', {
       method: 'POST',
       body: JSON.stringify(options),
@@ -111,7 +120,7 @@ export default class WorkspaceAPI {
 
   static async updateName(
     id: string,
-    options: WorkspaceUpdateNameOptions
+    options: UpdateNameOptions
   ): Promise<Workspace> {
     return apiFetch(`/workspaces/${id}/update_name`, {
       method: 'POST',
@@ -125,7 +134,7 @@ export default class WorkspaceAPI {
 
   static async updateStorageCapacity(
     id: string,
-    options: WorkspaceStorageCapacityOptions
+    options: StorageCapacityOptions
   ): Promise<Workspace> {
     return apiFetch(`/workspaces/${id}/update_storage_capacity`, {
       method: 'POST',

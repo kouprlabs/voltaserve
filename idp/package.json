@@ -9,7 +9,7 @@
     "tsc": "tsc --noEmit",
     "prettier": "prettier --write .",
     "swagger-autogen": "node ./swagger.js",
-    "eslint": "eslint './src/**/*.ts'"
+    "lint": "eslint './src/**/*.ts'"
   },
   "engines": {
     "node": ">= 18.x"

@@ -1,4 +1,4 @@
-import TokenAPI, { Token } from '@/api/token'
+import TokenAPI, { Token } from '@/client/idp/token'
 
 export const ACCESS_TOKEN = 'voltaserve_access_token'
 export const REFRESH_TOKEN = 'voltaserve_refresh_token'

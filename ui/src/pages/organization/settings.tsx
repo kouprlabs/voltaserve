@@ -10,9 +10,9 @@ import {
   SectionSpinner,
 } from '@koupr/ui'
 import { Helmet } from 'react-helmet-async'
-import { swrConfig } from '@/api/options'
-import OrganizationAPI from '@/api/organization'
-import { geEditorPermission, geOwnerPermission } from '@/api/permission'
+import OrganizationAPI from '@/client/api/organization'
+import { geEditorPermission, geOwnerPermission } from '@/client/api/permission'
+import { swrConfig } from '@/client/options'
 import Delete from '@/components/organization/delete'
 import EditName from '@/components/organization/edit-name'
 import InviteMembers from '@/components/organization/invite-members'

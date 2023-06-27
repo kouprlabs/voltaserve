@@ -23,7 +23,7 @@ import {
   FormikHelpers,
 } from 'formik'
 import * as Yup from 'yup'
-import UserAPI, { User } from '@/api/user'
+import UserAPI, { User } from '@/client/idp/user'
 import ImageUpload from './image-upload'
 
 type EditPictureProps = {

@@ -11,8 +11,8 @@ import {
   Text,
 } from '@chakra-ui/react'
 import { variables } from '@koupr/ui'
-import OrganizationAPI, { Organization } from '@/api/organization'
-import { User } from '@/api/user'
+import OrganizationAPI, { Organization } from '@/client/api/organization'
+import { User } from '@/client/idp/user'
 
 type RemoveMemberProps = {
   organization: Organization

@@ -36,8 +36,8 @@ import {
   IconSortUp,
   IconSortDown,
 } from '@koupr/ui'
-import FileAPI, { FileList, SortBy, SortOrder } from '@/api/file'
-import { ltEditorPermission, ltOwnerPermission } from '@/api/permission'
+import FileAPI, { List, SortBy, SortOrder } from '@/client/api/file'
+import { ltEditorPermission, ltOwnerPermission } from '@/client/api/permission'
 import downloadFile from '@/helpers/download-file'
 import mapFileList from '@/helpers/map-file-list'
 import { decodeQuery } from '@/helpers/query'
@@ -160,7 +160,7 @@ const Toolbar = () => {
     setIsRefreshing(true)
     dispatch(selectionUpdated([]))
     try {
-      let result: FileList
+      let result: List
       if (query) {
         result = await FileAPI.search(
           { text: query, parentId: fileId, workspaceId },
@@ -168,14 +168,12 @@ const Toolbar = () => {
           1
         )
       } else {
-        result = await FileAPI.list(
-          fileId,
-          FileAPI.DEFAULT_PAGE_SIZE,
-          1,
-          undefined,
+        result = await FileAPI.list(fileId, {
+          page: 1,
+          size: FileAPI.DEFAULT_PAGE_SIZE,
           sortBy,
-          sortOrder
-        )
+          sortOrder,
+        })
       }
       dispatch(listUpdated(result))
     } finally {

@@ -23,7 +23,7 @@ import {
   FormikHelpers,
 } from 'formik'
 import * as Yup from 'yup'
-import GroupAPI, { Group } from '@/api/group'
+import GroupAPI, { Group } from '@/client/api/group'
 
 type EditNameProps = {
   open: boolean

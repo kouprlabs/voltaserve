@@ -88,6 +88,9 @@ func main() {
 	groups := router.NewGroupRouter()
 	groups.AppendRoutes(v1.Group("groups"))
 
+	users := router.NewUserRouter()
+	users.AppendRoutes(v1.Group("users"))
+
 	if err := app.Listen(fmt.Sprintf(":%d", cfg.Port)); err != nil {
 		panic(err)
 	}

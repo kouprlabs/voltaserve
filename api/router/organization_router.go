@@ -2,6 +2,7 @@ package router
 
 import (
 	"net/http"
+	"strconv"
 	"voltaserve/errorpkg"
 	"voltaserve/service"
 
@@ -20,16 +21,12 @@ func NewOrganizationRouter() *OrganizationRouter {
 }
 
 func (r *OrganizationRouter) AppendRoutes(g fiber.Router) {
-	g.Get("/", r.GetAll)
-	g.Post("/search", r.Search)
+	g.Get("/", r.List)
 	g.Post("/", r.Create)
 	g.Get("/:id", r.GetByID)
 	g.Delete("/:id", r.Delete)
 	g.Post("/:id/update_name", r.UpdateName)
 	g.Post("/:id/leave", r.Leave)
-	g.Get("/:id/get_members", r.GetMembers)
-	g.Get("/:id/get_groups", r.GetGroups)
-	g.Get("/:id/search_members", r.SearchMembers)
 	g.Post("/:id/remove_member", r.RemoveMember)
 }
 
@@ -41,8 +38,8 @@ func (r *OrganizationRouter) AppendRoutes(g fiber.Router) {
 //	@Id				organizations_create
 //	@Accept			json
 //	@Produce		json
-//	@Param			body	body		core.OrganizationCreateOptions	true	"Body"
-//	@Success		200		{object}	core.Organization
+//	@Param			body	body		service.OrganizationCreateOptions	true	"Body"
+//	@Success		200		{object}	service.Organization
 //	@Failure		400		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/organizations [post]
@@ -73,7 +70,7 @@ func (r *OrganizationRouter) Create(c *fiber.Ctx) error {
 //	@Id				organizations_get_by_id
 //	@Produce		json
 //	@Param			id	path		string	true	"ID"
-//	@Success		200	{object}	core.Organization
+//	@Success		200	{object}	service.Organization
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/organizations/{id} [get]
@@ -115,9 +112,9 @@ func (r *OrganizationRouter) Delete(c *fiber.Ctx) error {
 //	@Id				organizations_update_name
 //	@Accept			json
 //	@Produce		json
-//	@Param			id		path		string								true	"ID"
-//	@Param			body	body		core.OrganizationUpdateNameOptions	true	"Body"
-//	@Success		200		{object}	core.Organization
+//	@Param			id		path		string									true	"ID"
+//	@Param			body	body		service.OrganizationUpdateNameOptions	true	"Body"
+//	@Success		200		{object}	service.Organization
 //	@Failure		404		{object}	errorpkg.ErrorResponse
 //	@Failure		400		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
@@ -138,106 +135,57 @@ func (r *OrganizationRouter) UpdateName(c *fiber.Ctx) error {
 	return c.JSON(res)
 }
 
-// GetAll godoc
+// List godoc
 //
-//	@Summary		Get all
-//	@Description	Get all
+//	@Summary		List
+//	@Description	List
 //	@Tags			Organizations
-//	@Id				organizations_get_all
+//	@Id				organizations_list
 //	@Produce		json
-//	@Success		200	{array}		core.Organization
-//	@Failure		500	{object}	errorpkg.ErrorResponse
+//	@Param			query		query		string	false	"Query"
+//	@Param			page		query		string	false	"Page"
+//	@Param			size		query		string	false	"Size"
+//	@Param			sort_by		query		string	false	"Sort By"
+//	@Param			sort_order	query		string	false	"Sort Order"
+//	@Success		200			{object}	service.WorkspaceList
+//	@Failure		404			{object}	errorpkg.ErrorResponse
+//	@Failure		500			{object}	errorpkg.ErrorResponse
 //	@Router			/organizations [get]
-func (r *OrganizationRouter) GetAll(c *fiber.Ctx) error {
-	orgs, err := r.orgSvc.FindAll(GetUserID(c))
-	if err != nil {
-		return err
+func (r *OrganizationRouter) List(c *fiber.Ctx) error {
+	var err error
+	var page int64
+	if c.Query("page") == "" {
+		page = 1
+	} else {
+		page, err = strconv.ParseInt(c.Query("page"), 10, 32)
+		if err != nil {
+			page = 1
+		}
 	}
-	return c.JSON(orgs)
-}
-
-// Search godoc
-//
-//	@Summary		Search
-//	@Description	Search
-//	@Tags			Organizations
-//	@Id				organizations_search
-//	@Produce		json
-//	@Param			body	body		core.OrganizationSearchOptions	true	"Body"
-//	@Success		200		{array}		core.Organization
-//	@Failure		500		{object}	errorpkg.ErrorResponse
-//	@Router			/organizations/search [get]
-func (r *OrganizationRouter) Search(c *fiber.Ctx) error {
-	req := new(service.OrganizationSearchOptions)
-	if err := c.BodyParser(req); err != nil {
-		return err
+	var size int64
+	if c.Query("size") == "" {
+		size = OrganizationDefaultPageSize
+	} else {
+		size, err = strconv.ParseInt(c.Query("size"), 10, 32)
+		if err != nil {
+			return err
+		}
 	}
-	orgs, err := r.orgSvc.Search(req.Text, GetUserID(c))
-	if err != nil {
-		return err
+	sortBy := c.Query("sort_by")
+	if !IsValidSortBy(sortBy) {
+		return errorpkg.NewInvalidQueryParamError("sort_by")
 	}
-	return c.JSON(orgs)
-}
-
-// GetMembers godoc
-//
-//	@Summary		Get members
-//	@Description	Get members
-//	@Tags			Organizations
-//	@Id				organizations_get_members
-//	@Produce		json
-//	@Param			id	path		string	true	"ID"
-//	@Success		200	{array}		core.User
-//	@Failure		400	{object}	errorpkg.ErrorResponse
-//	@Failure		500	{object}	errorpkg.ErrorResponse
-//	@Router			/organizations/{id}/get_members [get]
-func (r *OrganizationRouter) GetMembers(c *fiber.Ctx) error {
-	res, err := r.orgSvc.GetMembers(c.Params("id"), GetUserID(c))
-	if err != nil {
-		return err
+	sortOrder := c.Query("sort_order")
+	if !IsValidSortOrder(sortOrder) {
+		return errorpkg.NewInvalidQueryParamError("sort_order")
 	}
-	return c.JSON(res)
-}
-
-// GetGroups godoc
-//
-//	@Summary		Get groups
-//	@Description	Get groups
-//	@Tags			Groups
-//	@Id				organizations_get_groups
-//	@Produce		json
-//	@Param			id	path		string	true	"ID"
-//	@Success		200	{array}		core.Group
-//	@Failure		400	{object}	errorpkg.ErrorResponse
-//	@Failure		500	{object}	errorpkg.ErrorResponse
-//	@Router			/organizations/{id}/get_groups [get]
-func (r *OrganizationRouter) GetGroups(c *fiber.Ctx) error {
-	res, err := r.orgSvc.GetGroups(c.Params("id"), GetUserID(c))
-	if err != nil {
-		return err
-	}
-	return c.JSON(res)
-}
-
-// SearchMembers godoc
-//
-//	@Summary		Search members
-//	@Description	Search members
-//	@Tags			Organizations
-//	@Id				organizations_search_members
-//	@Produce		json
-//	@Param			id		path		string	true	"ID"
-//	@Param			query	query		string	true	"Query"
-//	@Success		200		{array}		core.User
-//	@Failure		400		{object}	errorpkg.ErrorResponse
-//	@Failure		500		{object}	errorpkg.ErrorResponse
-//	@Router			/organizations/{id}/search_members [get]
-func (r *OrganizationRouter) SearchMembers(c *fiber.Ctx) error {
-	query := c.Query("query")
-	if query == "" {
-		return errorpkg.NewMissingQueryParamError("query")
-	}
-	res, err := r.orgSvc.SearchMembers(c.Params("id"), query, GetUserID(c))
+	res, err := r.orgSvc.List(service.OrganizationListOptions{
+		Query:     c.Query("query"),
+		Page:      uint(page),
+		Size:      uint(size),
+		SortBy:    sortBy,
+		SortOrder: sortOrder,
+	}, GetUserID(c))
 	if err != nil {
 		return err
 	}
@@ -274,7 +222,7 @@ func (r *OrganizationRouter) Leave(c *fiber.Ctx) error {
 //	@Accept			json
 //	@Produce		json
 //	@Param			id		path		string									true	"ID"
-//	@Param			body	body		core.OrganizationRemoveMemberOptions	true	"Body"
+//	@Param			body	body		service.OrganizationRemoveMemberOptions	true	"Body"
 //	@Failure		404		{object}	errorpkg.ErrorResponse
 //	@Failure		400		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse

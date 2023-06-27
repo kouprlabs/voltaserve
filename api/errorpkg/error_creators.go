@@ -200,6 +200,16 @@ func NewInvalidQueryParamError(param string) *ErrorResponse {
 	)
 }
 
+func NewInvalidQueryParamsError(message string) *ErrorResponse {
+	return NewErrorResponse(
+		"invalid_query_params",
+		http.StatusBadRequest,
+		fmt.Sprintf("Query params invalid: %s.", message),
+		MsgInvalidRequest,
+		nil,
+	)
+}
+
 func NewStorageLimitExceededError() *ErrorResponse {
 	return NewErrorResponse(
 		"storage_limit_exceeded",

@@ -4,9 +4,9 @@ export function encodeQuery(value: string) {
   return encode(value, true)
 }
 
-export function decodeQuery(value: string): string | null {
+export function decodeQuery(value: string): string | undefined {
   if (!value) {
-    return null
+    return undefined
   }
   return decode(value)
 }

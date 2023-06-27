@@ -1,5 +1,5 @@
 import { Avatar, useColorModeValue, useToken } from '@chakra-ui/react'
-import { User } from '@/api/user'
+import { User } from '@/client/idp/user'
 
 type AvatarImageProps = {
   user: User

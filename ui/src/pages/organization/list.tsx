@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import {
   Heading,
@@ -18,8 +19,14 @@ import {
 } from '@chakra-ui/react'
 import { SectionSpinner, variables } from '@koupr/ui'
 import { Helmet } from 'react-helmet-async'
-import { swrConfig } from '@/api/options'
-import OrganizationAPI, { Organization } from '@/api/organization'
+import OrganizationAPI, {
+  Organization,
+  SortOrder,
+} from '@/client/api/organization'
+import { swrConfig } from '@/client/options'
+import PagePagination, {
+  usePagePagination,
+} from '@/components/common/page-pagination'
 import { CreateOrganizationButton } from '@/components/top-bar/buttons'
 import prettyDate from '@/helpers/pretty-date'
 import { decodeQuery } from '@/helpers/query'
@@ -27,26 +34,43 @@ import { decodeQuery } from '@/helpers/query'
 const OrganizationListPage = () => {
   const [searchParams] = useSearchParams()
   const query = decodeQuery(searchParams.get('q') as string)
-  const { data: orgs, error } = OrganizationAPI.useGetAllOrSearch(
-    query ? { search: { text: query } } : undefined,
+  const { page, size, onPageChange, onSizeChange } = usePagePagination({
+    localStoragePrefix: 'voltaserve',
+    localStorageNamespace: 'organization',
+  })
+  const {
+    data: list,
+    error,
+    mutate,
+  } = OrganizationAPI.useList(
+    { query, page, size, sortOrder: SortOrder.Desc },
     swrConfig()
   )
+
+  useEffect(() => {
+    mutate()
+  }, [query, page, size, mutate])
+
   return (
     <>
       <Helmet>
         <title>Organizations</title>
       </Helmet>
-      <Stack direction="column" spacing={variables.spacing2Xl}>
+      <Stack
+        direction="column"
+        spacing={variables.spacing2Xl}
+        pb={variables.spacing2Xl}
+      >
         <Heading size="lg" pl={variables.spacingMd}>
           Organizations
         </Heading>
-        {!orgs && error && (
+        {!list && error && (
           <Center h="300px">
             <Text>Failed to load organizations.</Text>
           </Center>
         )}
-        {!orgs && !error && <SectionSpinner />}
-        {orgs && orgs.length === 0 && (
+        {!list && !error && <SectionSpinner />}
+        {list && list.data.length === 0 && (
           <Center h="300px">
             <VStack spacing={variables.spacing}>
               <Text>There are no organizations.</Text>
@@ -54,7 +78,7 @@ const OrganizationListPage = () => {
             </VStack>
           </Center>
         )}
-        {orgs && orgs.length > 0 && (
+        {list && list.data.length > 0 && (
           <Table variant="simple">
             <Thead>
               <Tr>
@@ -64,7 +88,7 @@ const OrganizationListPage = () => {
               </Tr>
             </Thead>
             <Tbody>
-              {orgs.map((o: Organization) => (
+              {list.data.map((o: Organization) => (
                 <Tr key={o.id}>
                   <Td>
                     <HStack spacing={variables.spacing}>
@@ -91,6 +115,17 @@ const OrganizationListPage = () => {
               ))}
             </Tbody>
           </Table>
+        )}
+        {list && (
+          <HStack alignSelf="end">
+            <PagePagination
+              totalPages={list.totalPages}
+              page={page}
+              size={size}
+              onPageChange={onPageChange}
+              onSizeChange={onSizeChange}
+            />
+          </HStack>
         )}
       </Stack>
     </>

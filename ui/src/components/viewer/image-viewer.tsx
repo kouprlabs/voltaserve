@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Center, Stack } from '@chakra-ui/react'
 import { SectionSpinner, variables } from '@koupr/ui'
-import { File } from '@/api/file'
+import { File } from '@/client/api/file'
 import { getAccessTokenOrRedirect } from '@/infra/token'
 
 type ImageViewerProps = {

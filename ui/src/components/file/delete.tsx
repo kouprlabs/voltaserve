@@ -13,7 +13,7 @@ import {
   Text,
 } from '@chakra-ui/react'
 import { variables } from '@koupr/ui'
-import FileAPI from '@/api/file'
+import FileAPI from '@/client/api/file'
 import { filesRemoved } from '@/store/entities/files'
 import { useAppSelector } from '@/store/hook'
 import { deleteModalDidClose, selectionUpdated } from '@/store/ui/files'

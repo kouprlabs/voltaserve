@@ -23,7 +23,7 @@ import {
   FormikHelpers,
 } from 'formik'
 import * as Yup from 'yup'
-import WorkspaceAPI, { Workspace } from '@/api/workspace'
+import WorkspaceAPI, { Workspace } from '@/client/api/workspace'
 
 type EditNameProps = {
   open: boolean

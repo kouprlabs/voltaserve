@@ -1,5 +1,5 @@
 import { Box, useColorModeValue } from '@chakra-ui/react'
-import { File } from '@/api/file'
+import { File } from '@/client/api/file'
 import FileIcon from './file-icon'
 import FolderIcon from './folder-icon'
 

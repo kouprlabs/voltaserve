@@ -17,8 +17,8 @@ import {
 } from '@chakra-ui/react'
 import { variables } from '@koupr/ui'
 import { IconNotification } from '@koupr/ui'
-import NotificationAPI from '@/api/notification'
-import { swrConfig } from '@/api/options'
+import NotificationAPI from '@/client/api/notification'
+import { swrConfig } from '@/client/options'
 import NotificationItem from './notification-item'
 
 const NotificationDrawer = () => {

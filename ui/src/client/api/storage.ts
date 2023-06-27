@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import useSWR from 'swr'
-import { apiFetcher } from './fetch'
+import { apiFetcher } from '@/client/fetch'
 
 export type StorageUsage = {
   bytes: number

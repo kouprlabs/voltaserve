@@ -10,7 +10,7 @@
     "tsc": "tsc",
     "preview": "vite preview",
     "prettier": "prettier --write .",
-    "eslint": "eslint './src/**/*.{ts,tsx}'"
+    "lint": "eslint './src/**/*.{ts,tsx}'"
   },
   "engines": {
     "node": ">= 18.x"

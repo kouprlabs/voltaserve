@@ -14,7 +14,7 @@ import {
 } from 'formik'
 import * as Yup from 'yup'
 import { Helmet } from 'react-helmet-async'
-import OrganizationAPI from '@/api/organization'
+import OrganizationAPI from '@/client/api/organization'
 
 type FormValues = {
   name: string
