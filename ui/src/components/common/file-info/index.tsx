@@ -4,6 +4,7 @@ import { File } from '@/client/api/file'
 import CreateTimeInfo from './create-time-info'
 import ExtensionInfo from './extension-info'
 import ImageInfo from './image-info'
+import LanguageInfo from './language-info'
 import PermissionInfo from './permission-info'
 import SizeInfo from './size-info'
 import StorageUsageInfo from './storage-usage-info'
@@ -23,6 +24,7 @@ const FileInfo = ({ file }: FileInfoProps) => {
       <SizeInfo file={file} />
       <ExtensionInfo file={file} />
       <StorageUsageInfo file={file} />
+      <LanguageInfo file={file} />
       <PermissionInfo file={file} />
       <CreateTimeInfo file={file} />
       <UpdateTimeInfo file={file} />
