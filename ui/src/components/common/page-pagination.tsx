@@ -1,14 +1,39 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { Select } from '@chakra-ui/react'
 import Pagination from '@/components/common/pagination'
 
-export const usePagePagination = () => {
+type PagePaginationHookOptions = {
+  localStoragePrefix?: string
+  localStorageNamespace?: string
+}
+
+export const usePagePagination = ({
+  localStoragePrefix = 'app',
+  localStorageNamespace = 'main',
+}: PagePaginationHookOptions) => {
   const navigate = useNavigate()
   const location = useLocation()
-  const queryParams = new URLSearchParams(location.search)
+  const queryParams = useMemo(
+    () => new URLSearchParams(location.search),
+    [location.search]
+  )
   const page = Number(queryParams.get('page')) || 1
-  const [size, setSize] = useState(5)
+  const localStorageSizeKey = useMemo(
+    () => `${localStoragePrefix}_${localStorageNamespace}_pagination_size`,
+    [localStoragePrefix, localStorageNamespace]
+  )
+  const [size, setSize] = useState(
+    localStorage.getItem(localStorageSizeKey)
+      ? parseInt(localStorage.getItem(localStorageSizeKey) as string)
+      : 5
+  )
+
+  useEffect(() => {
+    if (size) {
+      localStorage.setItem(localStorageSizeKey, JSON.stringify(size))
+    }
+  }, [size, localStorageSizeKey])
 
   useEffect(() => {
     if (!queryParams.has('page')) {

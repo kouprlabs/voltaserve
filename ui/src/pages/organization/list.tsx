@@ -31,7 +31,10 @@ import { decodeQuery } from '@/helpers/query'
 const OrganizationListPage = () => {
   const [searchParams] = useSearchParams()
   const query = decodeQuery(searchParams.get('q') as string)
-  const { page, size, onPageChange, onSizeChange } = usePagePagination()
+  const { page, size, onPageChange, onSizeChange } = usePagePagination({
+    localStoragePrefix: 'voltaserve',
+    localStorageNamespace: 'organization',
+  })
   const {
     data: list,
     error,
@@ -47,7 +50,11 @@ const OrganizationListPage = () => {
       <Helmet>
         <title>Organizations</title>
       </Helmet>
-      <Stack direction="column" spacing={variables.spacing2Xl}>
+      <Stack
+        direction="column"
+        spacing={variables.spacing2Xl}
+        pb={variables.spacing2Xl}
+      >
         <Heading size="lg" pl={variables.spacingMd}>
           Organizations
         </Heading>

@@ -31,7 +31,10 @@ import { decodeQuery } from '@/helpers/query'
 const WorkspaceListPage = () => {
   const [searchParams] = useSearchParams()
   const query = decodeQuery(searchParams.get('q') as string)
-  const { page, size, onPageChange, onSizeChange } = usePagePagination()
+  const { page, size, onPageChange, onSizeChange } = usePagePagination({
+    localStoragePrefix: 'voltaserve',
+    localStorageNamespace: 'workspace',
+  })
   const {
     data: list,
     error,
