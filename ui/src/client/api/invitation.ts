@@ -86,7 +86,7 @@ export default class InvitationAPI {
     options?: ListOptions,
     swrOptions?: any
   ) {
-    const params: any = { org: organizationId }
+    const params: any = { organization_id: organizationId }
     if (options?.page) {
       params.page = options.page.toString()
     }

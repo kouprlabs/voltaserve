@@ -42,7 +42,7 @@ const GroupMembersPage = () => {
     data: members,
     error: membersError,
     mutate,
-  } = UserAPI.useList({ group: groupId }, swrConfig())
+  } = UserAPI.useList({ groupId: groupId }, swrConfig())
   const [userToRemove, setUserToRemove] = useState<IdPUser>()
   const [isAddMembersModalOpen, setIsAddMembersModalOpen] = useState(false)
   const [isRemoveMemberModalOpen, setIsRemoveMemberModalOpen] =

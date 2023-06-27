@@ -31,7 +31,7 @@ export type List = {
 export type ListOptions = {
   query?: string
   organizationId?: string
-  group?: string
+  groupId?: string
   size?: number
   page?: number
   sortBy?: SortBy
@@ -51,8 +51,8 @@ export default class UserAPI {
     if (options?.organizationId) {
       params.organization_id = options.organizationId.toString()
     }
-    if (options?.group) {
-      params.group = options.group.toString()
+    if (options?.groupId) {
+      params.group_id = options.groupId.toString()
     }
     if (options?.page) {
       params.page = options.page.toString()
