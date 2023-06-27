@@ -27,7 +27,7 @@ func (r *NotificationRouter) AppendRoutes(g fiber.Router) {
 //	@Tags			Notifications
 //	@Id				notification_get_all
 //	@Produce		json
-//	@Success		200	{array}	core.Notification
+//	@Success		200	{array}	service.Notification
 //	@Failure		500
 //	@Router			/notifications [get]
 func (r *NotificationRouter) GetAll(c *fiber.Ctx) error {

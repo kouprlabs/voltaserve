@@ -39,7 +39,7 @@ func (r *InvitationRouter) AppendRoutes(g fiber.Router) {
 //	@Accept			json
 //	@Produce		json
 //	@Param			id		path		string							true	"ID"
-//	@Param			body	body		core.InvitationCreateOptions	true	"Body"
+//	@Param			body	body		service.InvitationCreateOptions	true	"Body"
 //	@Failure		404		{object}	errorpkg.ErrorResponse
 //	@Failure		400		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
@@ -66,7 +66,7 @@ func (r *InvitationRouter) Create(c *fiber.Ctx) error {
 //	@Tags			Invitations
 //	@Id				invitation_get_incoming
 //	@Produce		json
-//	@Success		200	{object}	core.InvitationList
+//	@Success		200	{object}	service.InvitationList
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/invitations/get_incoming [get]
 func (r *InvitationRouter) GetIncoming(c *fiber.Ctx) error {
@@ -117,7 +117,7 @@ func (r *InvitationRouter) GetIncoming(c *fiber.Ctx) error {
 //	@Id				invitation_get_outgoing
 //	@Produce		json
 //	@Param			organization_id	query		string	true	"Organization ID"
-//	@Success		200				{object}	core.InvitationList
+//	@Success		200				{object}	service.InvitationList
 //	@Failure		500				{object}	errorpkg.ErrorResponse
 //	@Router			/invitations/get_outgoing [get]
 func (r *InvitationRouter) GetOutgoing(c *fiber.Ctx) error {

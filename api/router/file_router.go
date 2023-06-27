@@ -69,7 +69,7 @@ func (r *FileRouter) AppendRoutes(g fiber.Router) {
 //	@Produce		json
 //	@Param			workspace_id	query		string	true	"Workspace ID"
 //	@Param			parent_id		query		string	false	"Parent ID"
-//	@Success		200				{object}	core.File
+//	@Success		200				{object}	service.File
 //	@Failure		404				{object}	errorpkg.ErrorResponse
 //	@Failure		400				{object}	errorpkg.ErrorResponse
 //	@Failure		500				{object}	errorpkg.ErrorResponse
@@ -129,7 +129,7 @@ func (r *FileRouter) Upload(c *fiber.Ctx) error {
 //	@Accept			x-www-form-urlencoded
 //	@Produce		json
 //	@Param			id	path		string	true	"ID"
-//	@Success		200	{object}	core.File
+//	@Success		200	{object}	service.File
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		400	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
@@ -172,8 +172,8 @@ func (r *FileRouter) Patch(c *fiber.Ctx) error {
 //	@Id				files_create_folder
 //	@Accept			json
 //	@Produce		json
-//	@Param			body	body		core.FileCreateFolderOptions	true	"Body"
-//	@Success		200		{object}	core.File
+//	@Param			body	body		service.FileCreateFolderOptions	true	"Body"
+//	@Success		200		{object}	service.File
 //	@Failure		400		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/files/create_folder [post]
@@ -213,10 +213,10 @@ func (r *FileRouter) CreateFolder(c *fiber.Ctx) error {
 //	@Tags			Files
 //	@Id				files_search
 //	@Produce		json
-//	@Param			page	query		string					true	"Page"
-//	@Param			size	query		string					true	"Size"
-//	@Param			body	body		core.FileSearchOptions	true	"Body"
-//	@Success		200		{object}	core.FileList
+//	@Param			page	query		string						true	"Page"
+//	@Param			size	query		string						true	"Size"
+//	@Param			body	body		service.FileSearchOptions	true	"Body"
+//	@Success		200		{object}	service.FileList
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/files/search [post]
 func (r *FileRouter) Search(c *fiber.Ctx) error {
@@ -262,7 +262,7 @@ func (r *FileRouter) Search(c *fiber.Ctx) error {
 //	@Id				files_get_by_id
 //	@Produce		json
 //	@Param			id	path		string	true	"ID"
-//	@Success		200	{object}	core.File
+//	@Success		200	{object}	service.File
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/files/{id} [get]
@@ -283,7 +283,7 @@ func (r *FileRouter) GetByID(c *fiber.Ctx) error {
 //	@Id				files_get_by_path
 //	@Produce		json
 //	@Param			id	path		string	true	"ID"
-//	@Success		200	{object}	core.File
+//	@Success		200	{object}	service.File
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/files/get [get]
@@ -307,7 +307,7 @@ func (r *FileRouter) GetByPath(c *fiber.Ctx) error {
 //	@Id				files_list_by_path
 //	@Produce		json
 //	@Param			path	query		string	true	"Path"
-//	@Success		200		{array}		core.File
+//	@Success		200		{array}		service.File
 //	@Failure		404		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/files/list [get]
@@ -334,7 +334,7 @@ func (r *FileRouter) ListByPath(c *fiber.Ctx) error {
 //	@Param			page	query		string	true	"Page"
 //	@Param			size	query		string	true	"Size"
 //	@Param			type	query		string	false	"Type"
-//	@Success		200		{object}	core.FileList
+//	@Success		200		{object}	service.FileList
 //	@Failure		404		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/files/{id}/list [get]
@@ -385,7 +385,7 @@ func (r *FileRouter) ListByID(c *fiber.Ctx) error {
 //	@Id				files_get_path
 //	@Produce		json
 //	@Param			id	path		string	true	"ID"
-//	@Success		200	{array}		core.File
+//	@Success		200	{array}		service.File
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/files/{id}/get_path [get]
@@ -406,7 +406,7 @@ func (r *FileRouter) GetPath(c *fiber.Ctx) error {
 //	@Id				files_copy
 //	@Produce		json
 //	@Param			id		path		string					true	"ID"
-//	@Param			body	body		core.FileCopyOptions	true	"Body"
+//	@Param			body	body		service.FileCopyOptions	true	"Body"
 //	@Failure		404		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/files/{id}/copy [post]
@@ -434,7 +434,7 @@ func (r *FileRouter) Copy(c *fiber.Ctx) error {
 //	@Id				files_move
 //	@Produce		json
 //	@Param			id		path		string					true	"ID"
-//	@Param			body	body		core.FileMoveOptions	true	"Body"
+//	@Param			body	body		service.FileMoveOptions	true	"Body"
 //	@Failure		404		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/files/{id}/move [post]
@@ -460,9 +460,9 @@ func (r *FileRouter) Move(c *fiber.Ctx) error {
 //	@Tags			Files
 //	@Id				files_rename
 //	@Produce		json
-//	@Param			id		path		string					true	"ID"
-//	@Param			body	body		core.FileRenameOptions	true	"Body"
-//	@Success		200		{object}	core.File
+//	@Param			id		path		string						true	"ID"
+//	@Param			body	body		service.FileRenameOptions	true	"Body"
+//	@Success		200		{object}	service.File
 //	@Failure		404		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/files/{id}/rename [post]
@@ -509,8 +509,8 @@ func (r *FileRouter) Delete(c *fiber.Ctx) error {
 //	@Tags			Files
 //	@Id				files_batch_get
 //	@Produce		json
-//	@Param			body	body		core.FileBatchGetOptions	true	"Body"
-//	@Success		200		{array}		core.File
+//	@Param			body	body		service.FileBatchGetOptions	true	"Body"
+//	@Success		200		{array}		service.File
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/files/batch_get [post]
 func (r *FileRouter) BatchGet(c *fiber.Ctx) error {
@@ -536,7 +536,7 @@ func (r *FileRouter) BatchGet(c *fiber.Ctx) error {
 //	@Tags			Files
 //	@Id				files_batch_delete
 //	@Produce		json
-//	@Param			body	body		core.FileBatchDeleteOptions	true	"Body"
+//	@Param			body	body		service.FileBatchDeleteOptions	true	"Body"
 //	@Success		200		{array}		string
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/files/batch_delete [post]
@@ -606,8 +606,8 @@ func (r *FileRouter) GetItemCount(c *fiber.Ctx) error {
 //	@Tags			Files
 //	@Id				files_grant_user_permission
 //	@Produce		json
-//	@Param			id		path		string								true	"ID"
-//	@Param			body	body		core.FileGrantUserPermissionOptions	true	"Body"
+//	@Param			id		path		string									true	"ID"
+//	@Param			body	body		service.FileGrantUserPermissionOptions	true	"Body"
 //	@Failure		404		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/files/grant_user_permission [post]
@@ -634,7 +634,7 @@ func (r *FileRouter) GrantUserPermission(c *fiber.Ctx) error {
 //	@Id				files_revoke_user_permission
 //	@Produce		json
 //	@Param			id		path		string									true	"ID"
-//	@Param			body	body		core.FileRevokeUserPermissionOptions	true	"Body"
+//	@Param			body	body		service.FileRevokeUserPermissionOptions	true	"Body"
 //	@Failure		404		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/files/revoke_user_permission [post]
@@ -661,7 +661,7 @@ func (r *FileRouter) RevokeUserPermission(c *fiber.Ctx) error {
 //	@Id				files_grant_group_permission
 //	@Produce		json
 //	@Param			id		path		string									true	"ID"
-//	@Param			body	body		core.FileGrantGroupPermissionOptions	true	"Body"
+//	@Param			body	body		service.FileGrantGroupPermissionOptions	true	"Body"
 //	@Failure		404		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/files/grant_group_permission [post]
@@ -687,8 +687,8 @@ func (r *FileRouter) GrantGroupPermission(c *fiber.Ctx) error {
 //	@Tags			Files
 //	@Id				files_revoke_group_permission
 //	@Produce		json
-//	@Param			id		path		string									true	"ID"
-//	@Param			body	body		core.FileRevokeGroupPermissionOptions	true	"Body"
+//	@Param			id		path		string										true	"ID"
+//	@Param			body	body		service.FileRevokeGroupPermissionOptions	true	"Body"
 //	@Failure		404		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/files/{id}/revoke_group_permission [post]
@@ -715,7 +715,7 @@ func (r *FileRouter) RevokeGroupPermission(c *fiber.Ctx) error {
 //	@Id				files_get_user_permissions
 //	@Produce		json
 //	@Param			id	path		string	true	"ID"
-//	@Success		200	{array}		core.UserPermission
+//	@Success		200	{array}		service.UserPermission
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/files/{id}/get_user_permissions [get]
@@ -736,7 +736,7 @@ func (r *FileRouter) GetUserPermissions(c *fiber.Ctx) error {
 //	@Id				files_get_group_permissions
 //	@Produce		json
 //	@Param			id	path		string	true	"ID"
-//	@Success		200	{array}		core.GroupPermission
+//	@Success		200	{array}		service.GroupPermission
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/files/{id}/get_group_permissions [get]

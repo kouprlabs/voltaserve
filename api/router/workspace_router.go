@@ -37,8 +37,8 @@ func (r *WorkspaceRouter) AppendRoutes(g fiber.Router) {
 //	@Id				workspaces_create
 //	@Accept			json
 //	@Produce		json
-//	@Param			body	body		core.CreateWorkspaceOptions	true	"Body"
-//	@Success		200		{object}	core.Workspace
+//	@Param			body	body		service.WorkspaceCreateOptions	true	"Body"
+//	@Success		200		{object}	service.Workspace
 //	@Failure		400		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/workspaces [post]
@@ -66,7 +66,7 @@ func (r *WorkspaceRouter) Create(c *fiber.Ctx) error {
 //	@Id				workspaces_get_by_id
 //	@Produce		json
 //	@Param			id	path		string	true	"ID"
-//	@Success		200	{object}	core.Workspace
+//	@Success		200	{object}	service.Workspace
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/workspaces/{id} [get]
@@ -88,7 +88,7 @@ func (r *WorkspaceRouter) GetByID(c *fiber.Ctx) error {
 //	@Param			id		path		string	true	"ID"
 //	@Param			page	query		string	true	"Page"
 //	@Param			size	query		string	true	"Size"
-//	@Success		200		{object}	core.WorkspaceList
+//	@Success		200		{object}	service.WorkspaceList
 //	@Failure		404		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/workspaces [get]
@@ -141,9 +141,9 @@ func (r *WorkspaceRouter) List(c *fiber.Ctx) error {
 //	@Id				workspaces_update_name
 //	@Accept			json
 //	@Produce		json
-//	@Param			id		path		string							true	"ID"
-//	@Param			body	body		core.UpdateWorkspaceNameOptions	true	"Body"
-//	@Success		200		{object}	core.Workspace
+//	@Param			id		path		string								true	"ID"
+//	@Param			body	body		service.WorkspaceUpdateNameOptions	true	"Body"
+//	@Success		200		{object}	service.Workspace
 //	@Failure		400		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/workspaces/{id}/update_name [post]
@@ -167,9 +167,9 @@ func (r *WorkspaceRouter) UpdateName(c *fiber.Ctx) error {
 //	@Id				workspaces_update_storage_capacity
 //	@Accept			json
 //	@Produce		json
-//	@Param			id		path		string										true	"Id"
-//	@Param			body	body		core.UpdateWorkspaceStorageCapacityOptions	true	"Body"
-//	@Success		200		{object}	core.Workspace
+//	@Param			id		path		string											true	"Id"
+//	@Param			body	body		service.WorkspaceUpdateStorageCapacityOptions	true	"Body"
+//	@Success		200		{object}	service.Workspace
 //	@Failure		400		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/workspaces/{id}/update_storage_capacity [post]

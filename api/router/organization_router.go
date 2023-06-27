@@ -38,8 +38,8 @@ func (r *OrganizationRouter) AppendRoutes(g fiber.Router) {
 //	@Id				organizations_create
 //	@Accept			json
 //	@Produce		json
-//	@Param			body	body		core.OrganizationCreateOptions	true	"Body"
-//	@Success		200		{object}	core.Organization
+//	@Param			body	body		service.OrganizationCreateOptions	true	"Body"
+//	@Success		200		{object}	service.Organization
 //	@Failure		400		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/organizations [post]
@@ -70,7 +70,7 @@ func (r *OrganizationRouter) Create(c *fiber.Ctx) error {
 //	@Id				organizations_get_by_id
 //	@Produce		json
 //	@Param			id	path		string	true	"ID"
-//	@Success		200	{object}	core.Organization
+//	@Success		200	{object}	service.Organization
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/organizations/{id} [get]
@@ -112,9 +112,9 @@ func (r *OrganizationRouter) Delete(c *fiber.Ctx) error {
 //	@Id				organizations_update_name
 //	@Accept			json
 //	@Produce		json
-//	@Param			id		path		string								true	"ID"
-//	@Param			body	body		core.OrganizationUpdateNameOptions	true	"Body"
-//	@Success		200		{object}	core.Organization
+//	@Param			id		path		string									true	"ID"
+//	@Param			body	body		service.OrganizationUpdateNameOptions	true	"Body"
+//	@Success		200		{object}	service.Organization
 //	@Failure		404		{object}	errorpkg.ErrorResponse
 //	@Failure		400		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
@@ -145,7 +145,7 @@ func (r *OrganizationRouter) UpdateName(c *fiber.Ctx) error {
 //	@Param			id		path		string	true	"ID"
 //	@Param			page	query		string	true	"Page"
 //	@Param			size	query		string	true	"Size"
-//	@Success		200		{object}	core.WorkspaceList
+//	@Success		200		{object}	service.WorkspaceList
 //	@Failure		404		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/organizations [get]
@@ -220,7 +220,7 @@ func (r *OrganizationRouter) Leave(c *fiber.Ctx) error {
 //	@Accept			json
 //	@Produce		json
 //	@Param			id		path		string									true	"ID"
-//	@Param			body	body		core.OrganizationRemoveMemberOptions	true	"Body"
+//	@Param			body	body		service.OrganizationRemoveMemberOptions	true	"Body"
 //	@Failure		404		{object}	errorpkg.ErrorResponse
 //	@Failure		400		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse

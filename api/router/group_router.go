@@ -39,8 +39,8 @@ func (r *GroupRouter) AppendRoutes(g fiber.Router) {
 //	@Id				groups_create
 //	@Accept			json
 //	@Produce		json
-//	@Param			body	body		core.GroupCreateOptions	true	"Body"
-//	@Success		200		{object}	core.Group
+//	@Param			body	body		service.GroupCreateOptions	true	"Body"
+//	@Success		200		{object}	service.Group
 //	@Failure		400		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/groups [post]
@@ -68,7 +68,7 @@ func (r *GroupRouter) Create(c *fiber.Ctx) error {
 //	@Id				groups_get_by_id
 //	@Produce		json
 //	@Param			id	path		string	true	"ID"
-//	@Success		200	{object}	core.Group
+//	@Success		200	{object}	service.Group
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/groups/{id} [get]
@@ -91,7 +91,7 @@ func (r *GroupRouter) GetByID(c *fiber.Ctx) error {
 //	@Param			id		path		string	true	"ID"
 //	@Param			page	query		string	true	"Page"
 //	@Param			size	query		string	true	"Size"
-//	@Success		200		{object}	core.GroupList
+//	@Success		200		{object}	service.GroupList
 //	@Failure		404		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/groups [get]
@@ -145,9 +145,9 @@ func (r *GroupRouter) List(c *fiber.Ctx) error {
 //	@Id				groups_update_name
 //	@Accept			json
 //	@Produce		json
-//	@Param			id		path		string						true	"ID"
-//	@Param			body	body		core.GroupUpdateNameOptions	true	"Body"
-//	@Success		200		{object}	core.Group
+//	@Param			id		path		string							true	"ID"
+//	@Param			body	body		service.GroupUpdateNameOptions	true	"Body"
+//	@Success		200		{object}	service.Group
 //	@Failure		404		{object}	errorpkg.ErrorResponse
 //	@Failure		400		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
@@ -225,8 +225,8 @@ func (r *GroupRouter) AddMember(c *fiber.Ctx) error {
 //	@Id				groups_remove_member
 //	@Accept			json
 //	@Produce		json
-//	@Param			id		path		string							true	"ID"
-//	@Param			body	body		core.GroupRemoveMemberOptions	true	"Body"
+//	@Param			id		path		string								true	"ID"
+//	@Param			body	body		service.GroupRemoveMemberOptions	true	"Body"
 //	@Failure		404		{object}	errorpkg.ErrorResponse
 //	@Failure		400		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
@@ -254,7 +254,7 @@ func (r *GroupRouter) RemoveMember(c *fiber.Ctx) error {
 //	@Id				groups_get_available_users
 //	@Produce		json
 //	@Param			id	path		string	true	"ID"
-//	@Success		200	{array}		core.User
+//	@Success		200	{array}		service.User
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/groups/{id}/get_available_users [get]
 func (r *GroupRouter) GetAvailableUsers(c *fiber.Ctx) error {

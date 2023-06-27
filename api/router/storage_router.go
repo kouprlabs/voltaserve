@@ -30,7 +30,7 @@ func (r *StorageRouter) AppendRoutes(g fiber.Router) {
 //	@Tags			Storage
 //	@Id				storage_get_account_usage
 //	@Produce		json
-//	@Success		200	{object}	core.StorageUsage
+//	@Success		200	{object}	service.StorageUsage
 //	@Failure		500
 //	@Router			/storage/get_account_usage [get]
 func (r *StorageRouter) GetAccountUsage(c *fiber.Ctx) error {
@@ -49,7 +49,7 @@ func (r *StorageRouter) GetAccountUsage(c *fiber.Ctx) error {
 //	@Id				storage_get_workspace_usage
 //	@Produce		json
 //	@Param			id	query		string	true	"Workspace ID"
-//	@Success		200	{object}	core.StorageUsage
+//	@Success		200	{object}	service.StorageUsage
 //	@Failure		500
 //	@Router			/storage/get_workspace_usage [get]
 func (r *StorageRouter) GetWorkspaceUsage(c *fiber.Ctx) error {
@@ -72,7 +72,7 @@ func (r *StorageRouter) GetWorkspaceUsage(c *fiber.Ctx) error {
 //	@Id				storage_get_file_usage
 //	@Produce		json
 //	@Param			id	query		string	true	"File ID"
-//	@Success		200	{object}	core.StorageUsage
+//	@Success		200	{object}	service.StorageUsage
 //	@Failure		500
 //	@Router			/storage/get_file_usage [get]
 func (r *StorageRouter) GetFileUsage(c *fiber.Ctx) error {

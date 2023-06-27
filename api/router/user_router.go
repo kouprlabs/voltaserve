@@ -32,7 +32,7 @@ func (r *UserRouter) AppendRoutes(g fiber.Router) {
 //	@Param			id		path		string	true	"ID"
 //	@Param			page	query		string	true	"Page"
 //	@Param			size	query		string	true	"Size"
-//	@Success		200		{object}	core.UserList
+//	@Success		200		{object}	service.UserList
 //	@Failure		404		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/users [get]
