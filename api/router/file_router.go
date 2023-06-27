@@ -330,13 +330,15 @@ func (r *FileRouter) ListByPath(c *fiber.Ctx) error {
 //	@Tags			Files
 //	@Id				files_list_by_id
 //	@Produce		json
-//	@Param			id		path		string	true	"ID"
-//	@Param			page	query		string	true	"Page"
-//	@Param			size	query		string	true	"Size"
-//	@Param			type	query		string	false	"Type"
-//	@Success		200		{object}	service.FileList
-//	@Failure		404		{object}	errorpkg.ErrorResponse
-//	@Failure		500		{object}	errorpkg.ErrorResponse
+//	@Param			id			path		string	true	"ID"
+//	@Param			type		query		string	false	"Type"
+//	@Param			page		query		string	false	"Page"
+//	@Param			size		query		string	false	"Size"
+//	@Param			sort_by		query		string	false	"Sort By"
+//	@Param			sort_order	query		string	false	"Sort Order"
+//	@Success		200			{object}	service.FileList
+//	@Failure		404			{object}	errorpkg.ErrorResponse
+//	@Failure		500			{object}	errorpkg.ErrorResponse
 //	@Router			/files/{id}/list [get]
 func (r *FileRouter) ListByID(c *fiber.Ctx) error {
 	var err error
