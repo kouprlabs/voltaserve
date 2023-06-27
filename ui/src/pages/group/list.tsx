@@ -19,7 +19,7 @@ import {
 } from '@chakra-ui/react'
 import { SectionSpinner, variables } from '@koupr/ui'
 import { Helmet } from 'react-helmet-async'
-import GroupAPI, { Group } from '@/client/api/group'
+import GroupAPI, { Group, SortOrder } from '@/client/api/group'
 import { swrConfig } from '@/client/options'
 import PagePagination, {
   usePagePagination,
@@ -39,7 +39,10 @@ const GroupListPage = () => {
     data: list,
     error,
     mutate,
-  } = GroupAPI.useList({ query, page, size }, swrConfig())
+  } = GroupAPI.useList(
+    { query, page, size, sortOrder: SortOrder.Desc },
+    swrConfig()
+  )
 
   useEffect(() => {
     mutate()

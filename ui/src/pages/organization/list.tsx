@@ -19,7 +19,10 @@ import {
 } from '@chakra-ui/react'
 import { SectionSpinner, variables } from '@koupr/ui'
 import { Helmet } from 'react-helmet-async'
-import OrganizationAPI, { Organization } from '@/client/api/organization'
+import OrganizationAPI, {
+  Organization,
+  SortOrder,
+} from '@/client/api/organization'
 import { swrConfig } from '@/client/options'
 import PagePagination, {
   usePagePagination,
@@ -39,7 +42,10 @@ const OrganizationListPage = () => {
     data: list,
     error,
     mutate,
-  } = OrganizationAPI.useList({ query, page, size }, swrConfig())
+  } = OrganizationAPI.useList(
+    { query, page, size, sortOrder: SortOrder.Desc },
+    swrConfig()
+  )
 
   useEffect(() => {
     mutate()

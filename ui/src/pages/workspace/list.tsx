@@ -19,7 +19,7 @@ import {
 } from '@chakra-ui/react'
 import { SectionSpinner, variables } from '@koupr/ui'
 import { Helmet } from 'react-helmet-async'
-import WorkspaceAPI, { Workspace } from '@/client/api/workspace'
+import WorkspaceAPI, { SortOrder, Workspace } from '@/client/api/workspace'
 import { swrConfig } from '@/client/options'
 import PagePagination, {
   usePagePagination,
@@ -39,7 +39,10 @@ const WorkspaceListPage = () => {
     data: list,
     error,
     mutate,
-  } = WorkspaceAPI.useList({ query, page, size }, swrConfig())
+  } = WorkspaceAPI.useList(
+    { query, page, size, sortOrder: SortOrder.Desc },
+    swrConfig()
+  )
 
   useEffect(() => {
     mutate()

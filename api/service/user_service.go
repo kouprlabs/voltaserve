@@ -186,7 +186,7 @@ func (svc *UserService) doPagination(data []model.User, page, size uint) ([]mode
 	totalElements := uint(len(data))
 	totalPages := (totalElements + size - 1) / size
 	if page > totalPages {
-		page = totalPages
+		return nil, totalElements, totalPages
 	}
 	startIndex := (page - 1) * size
 	endIndex := startIndex + size

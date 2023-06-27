@@ -361,7 +361,7 @@ func (svc *OrganizationService) doPagination(data []model.Organization, page, si
 	totalElements := uint(len(data))
 	totalPages := (totalElements + size - 1) / size
 	if page > totalPages {
-		page = totalPages
+		return nil, totalElements, totalPages
 	}
 	startIndex := (page - 1) * size
 	endIndex := startIndex + size
