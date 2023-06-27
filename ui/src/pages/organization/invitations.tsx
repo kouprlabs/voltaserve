@@ -4,12 +4,14 @@ import {
   Badge,
   Button,
   Center,
+  HStack,
   IconButton,
   Menu,
   MenuButton,
   MenuItem,
   MenuList,
   Portal,
+  Stack,
   Table,
   Tbody,
   Td,
@@ -29,10 +31,17 @@ import {
   SectionSpinner,
 } from '@koupr/ui'
 import { Helmet } from 'react-helmet-async'
-import InvitationAPI, { Invitation, InvitationStatus } from '@/api/invitation'
-import { swrConfig } from '@/api/options'
-import OrganizationAPI from '@/api/organization'
-import { geEditorPermission } from '@/api/permission'
+import InvitationAPI, {
+  Invitation,
+  InvitationStatus,
+  SortOrder,
+} from '@/client/api/invitation'
+import OrganizationAPI from '@/client/api/organization'
+import { geEditorPermission } from '@/client/api/permission'
+import { swrConfig } from '@/client/options'
+import PagePagination, {
+  usePagePagination,
+} from '@/components/common/page-pagination'
 import InviteMembers from '@/components/organization/invite-members'
 import prettyDate from '@/helpers/pretty-date'
 
@@ -58,11 +67,19 @@ const OrganizationInvitationsPage = () => {
     id,
     swrConfig()
   )
+  const { page, size, onPageChange, onSizeChange } = usePagePagination({
+    localStoragePrefix: 'voltaserve',
+    localStorageNamespace: 'outgoing_invitation',
+  })
   const {
-    data: invitations,
+    data: list,
     error: invitationsError,
     mutate,
-  } = InvitationAPI.useGetOutgoing(id, swrConfig())
+  } = InvitationAPI.useGetOutgoing(
+    id,
+    { page, size, sortOrder: SortOrder.Desc },
+    swrConfig()
+  )
   const [isInviteMembersModalOpen, setIsInviteMembersModalOpen] =
     useState(false)
 
@@ -90,7 +107,7 @@ const OrganizationInvitationsPage = () => {
     return null
   }
 
-  if (!invitations || !org) {
+  if (!list || !org) {
     return <SectionSpinner />
   }
 
@@ -99,7 +116,7 @@ const OrganizationInvitationsPage = () => {
       <Helmet>
         <title>{org.name}</title>
       </Helmet>
-      {invitations && invitations.length === 0 ? (
+      {list && list.data.length === 0 ? (
         <>
           <Center h="300px">
             <VStack spacing={variables.spacing}>
@@ -123,57 +140,74 @@ const OrganizationInvitationsPage = () => {
           />
         </>
       ) : null}
-      {invitations && invitations.length > 0 ? (
-        <Table variant="simple">
-          <Thead>
-            <Tr>
-              <Th>Email</Th>
-              <Th>Status</Th>
-              <Th>Date</Th>
-              <Th></Th>
-            </Tr>
-          </Thead>
-          <Tbody>
-            {invitations.map((e: Invitation) => (
-              <Tr key={e.id}>
-                <Td>{e.email}</Td>
-                <Td>
-                  <Status value={e.status} />
-                </Td>
-                <Td>{prettyDate(e.updateTime || e.createTime)}</Td>
-                <Td textAlign="right">
-                  <Menu>
-                    <MenuButton
-                      as={IconButton}
-                      icon={<IconDotsVertical />}
-                      variant="ghost"
-                      aria-label=""
-                    />
-                    <Portal>
-                      <MenuList>
-                        {e.status === 'pending' && (
-                          <MenuItem
-                            icon={<IconSend />}
-                            onClick={() => handleResend(e.id)}
-                          >
-                            Resend
-                          </MenuItem>
-                        )}
-                        <MenuItem
-                          icon={<IconTrash />}
-                          color="red"
-                          onClick={() => handleDelete(e.id)}
-                        >
-                          Delete
-                        </MenuItem>
-                      </MenuList>
-                    </Portal>
-                  </Menu>
-                </Td>
+      {list && list.data.length > 0 ? (
+        <Stack
+          direction="column"
+          spacing={variables.spacing2Xl}
+          pb={variables.spacing2Xl}
+        >
+          <Table variant="simple">
+            <Thead>
+              <Tr>
+                <Th>Email</Th>
+                <Th>Status</Th>
+                <Th>Date</Th>
+                <Th></Th>
               </Tr>
-            ))}
-          </Tbody>
-        </Table>
+            </Thead>
+            <Tbody>
+              {list.data.map((e: Invitation) => (
+                <Tr key={e.id}>
+                  <Td>{e.email}</Td>
+                  <Td>
+                    <Status value={e.status} />
+                  </Td>
+                  <Td>{prettyDate(e.updateTime || e.createTime)}</Td>
+                  <Td textAlign="right">
+                    <Menu>
+                      <MenuButton
+                        as={IconButton}
+                        icon={<IconDotsVertical />}
+                        variant="ghost"
+                        aria-label=""
+                      />
+                      <Portal>
+                        <MenuList>
+                          {e.status === 'pending' && (
+                            <MenuItem
+                              icon={<IconSend />}
+                              onClick={() => handleResend(e.id)}
+                            >
+                              Resend
+                            </MenuItem>
+                          )}
+                          <MenuItem
+                            icon={<IconTrash />}
+                            color="red"
+                            onClick={() => handleDelete(e.id)}
+                          >
+                            Delete
+                          </MenuItem>
+                        </MenuList>
+                      </Portal>
+                    </Menu>
+                  </Td>
+                </Tr>
+              ))}
+            </Tbody>
+          </Table>
+          {list && (
+            <HStack alignSelf="end">
+              <PagePagination
+                totalPages={list.totalPages}
+                page={page}
+                size={size}
+                onPageChange={onPageChange}
+                onSizeChange={onSizeChange}
+              />
+            </HStack>
+          )}
+        </Stack>
       ) : null}
     </>
   )

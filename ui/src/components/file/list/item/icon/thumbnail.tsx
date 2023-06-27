@@ -8,7 +8,7 @@ import {
   useToken,
 } from '@chakra-ui/react'
 import { IconPlay, variables } from '@koupr/ui'
-import { File } from '@/api/file'
+import { File } from '@/client/api/file'
 import { getSizeWithAspectRatio } from '@/helpers/aspect-ratio'
 import * as fileExtension from '@/helpers/file-extension'
 import SharedSign from './shared-sign'

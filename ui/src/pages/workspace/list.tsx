@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import {
   Heading,
@@ -18,8 +19,11 @@ import {
 } from '@chakra-ui/react'
 import { SectionSpinner, variables } from '@koupr/ui'
 import { Helmet } from 'react-helmet-async'
-import { swrConfig } from '@/api/options'
-import WorkspaceAPI, { Workspace } from '@/api/workspace'
+import WorkspaceAPI, { SortOrder, Workspace } from '@/client/api/workspace'
+import { swrConfig } from '@/client/options'
+import PagePagination, {
+  usePagePagination,
+} from '@/components/common/page-pagination'
 import { CreateWorkspaceButton } from '@/components/top-bar/buttons'
 import prettyDate from '@/helpers/pretty-date'
 import { decodeQuery } from '@/helpers/query'
@@ -27,26 +31,43 @@ import { decodeQuery } from '@/helpers/query'
 const WorkspaceListPage = () => {
   const [searchParams] = useSearchParams()
   const query = decodeQuery(searchParams.get('q') as string)
-  const { data: workspaces, error } = WorkspaceAPI.useGetAllOrSearch(
-    query ? { search: { text: query } } : undefined,
+  const { page, size, onPageChange, onSizeChange } = usePagePagination({
+    localStoragePrefix: 'voltaserve',
+    localStorageNamespace: 'workspace',
+  })
+  const {
+    data: list,
+    error,
+    mutate,
+  } = WorkspaceAPI.useList(
+    { query, page, size, sortOrder: SortOrder.Desc },
     swrConfig()
   )
+
+  useEffect(() => {
+    mutate()
+  }, [query, page, size, mutate])
+
   return (
     <>
       <Helmet>
         <title>Workspaces</title>
       </Helmet>
-      <Stack direction="column" spacing={variables.spacing2Xl}>
+      <Stack
+        direction="column"
+        spacing={variables.spacing2Xl}
+        pb={variables.spacing2Xl}
+      >
         <Heading size="lg" pl={variables.spacingMd}>
           Workspaces
         </Heading>
-        {!workspaces && error && (
+        {!list && error && (
           <Center h="300px">
             <Text>Failed to load workspaces.</Text>
           </Center>
         )}
-        {!workspaces && !error && <SectionSpinner />}
-        {workspaces && workspaces.length === 0 && !error ? (
+        {!list && !error && <SectionSpinner />}
+        {list && list.data.length === 0 && !error ? (
           <Center h="300px">
             <VStack spacing={variables.spacing}>
               <Text>There are no workspaces.</Text>
@@ -54,7 +75,7 @@ const WorkspaceListPage = () => {
             </VStack>
           </Center>
         ) : null}
-        {workspaces && workspaces.length > 0 && (
+        {list && list.data.length > 0 && (
           <Table variant="simple">
             <Thead>
               <Tr>
@@ -65,7 +86,7 @@ const WorkspaceListPage = () => {
               </Tr>
             </Thead>
             <Tbody>
-              {workspaces.map((w: Workspace) => (
+              {list.data.map((w: Workspace) => (
                 <Tr key={w.id}>
                   <Td>
                     <HStack spacing={variables.spacing}>
@@ -101,6 +122,17 @@ const WorkspaceListPage = () => {
               ))}
             </Tbody>
           </Table>
+        )}
+        {list && (
+          <HStack alignSelf="end">
+            <PagePagination
+              totalPages={list.totalPages}
+              page={page}
+              size={size}
+              onPageChange={onPageChange}
+              onSizeChange={onSizeChange}
+            />
+          </HStack>
         )}
       </Stack>
     </>

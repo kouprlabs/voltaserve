@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { SortBy, SortOrder } from '@/api/file'
+import { SortBy, SortOrder } from '@/client/api/file'
 
 export const SORT_BY_KEY = 'voltaserve_file_sort_by'
 export const SORT_ORDER_KEY = 'voltaserve_file_sort_order'

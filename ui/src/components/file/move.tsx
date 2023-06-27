@@ -11,7 +11,7 @@ import {
   Button,
 } from '@chakra-ui/react'
 import { variables } from '@koupr/ui'
-import FileAPI from '@/api/file'
+import FileAPI from '@/client/api/file'
 import { filesRemoved, filesUpdated } from '@/store/entities/files'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { moveModalDidClose, selectionUpdated } from '@/store/ui/files'
@@ -36,14 +36,12 @@ const Move = () => {
       setLoading(true)
       await FileAPI.move(newFileId, { ids: selection })
       if (fileId === newFileId) {
-        const { data: files } = await FileAPI.list(
-          newFileId,
-          FileAPI.DEFAULT_PAGE_SIZE,
-          1,
-          undefined,
+        const { data: files } = await FileAPI.list(newFileId, {
+          page: 1,
+          size: FileAPI.DEFAULT_PAGE_SIZE,
           sortBy,
-          sortOrder
-        )
+          sortOrder,
+        })
         dispatch(filesUpdated(files))
       } else {
         dispatch(filesRemoved({ id: fileId, files: selection }))

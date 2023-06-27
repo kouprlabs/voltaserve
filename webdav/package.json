@@ -8,7 +8,7 @@
     "dev": "nodemon --exec ts-node -r tsconfig-paths/register src/server.ts",
     "tsc": "tsc --noEmit",
     "prettier": "prettier --write .",
-    "eslint": "eslint './src/**/*.ts'"
+    "lint": "eslint './src/**/*.ts'"
   },
   "engines": {
     "node": ">= 18.x"

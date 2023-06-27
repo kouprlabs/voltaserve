@@ -15,7 +15,7 @@ import {
   FaFileContract,
   FaFileImage,
 } from 'react-icons/fa'
-import { File } from '@/api/file'
+import { File } from '@/client/api/file'
 import * as fileExtension from '@/helpers/file-extension'
 
 type FontIconProps = {

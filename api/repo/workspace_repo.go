@@ -28,7 +28,7 @@ type WorkspaceRepo interface {
 	UpdateStorageCapacity(id string, storageCapacity int64) (model.Workspace, error)
 	Delete(id string) error
 	GetIDs() ([]string, error)
-	GetIDsByOrganization(organizationID string) ([]string, error)
+	GetIDsByOrganization(orgID string) ([]string, error)
 	UpdateRootID(id string, rootNodeID string) error
 	GrantUserPermission(id string, userID string, permission string) error
 }
@@ -254,13 +254,13 @@ func (repo *workspaceRepo) GetIDs() ([]string, error) {
 	return res, nil
 }
 
-func (repo *workspaceRepo) GetIDsByOrganization(organizationID string) ([]string, error) {
+func (repo *workspaceRepo) GetIDsByOrganization(orgID string) ([]string, error) {
 	type IDResult struct {
 		Result string
 	}
 	var ids []IDResult
 	db := repo.db.
-		Raw("SELECT id result FROM workspace WHERE organization_id = ? ORDER BY create_time DESC", organizationID).
+		Raw("SELECT id result FROM workspace WHERE organization_id = ? ORDER BY create_time DESC", orgID).
 		Scan(&ids)
 	if db.Error != nil {
 		return nil, db.Error

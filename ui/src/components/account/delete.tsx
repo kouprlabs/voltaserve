@@ -25,7 +25,7 @@ import {
   FormikHelpers,
 } from 'formik'
 import * as Yup from 'yup'
-import UserAPI from '@/api/user'
+import UserAPI from '@/client/idp/user'
 
 type DeleteProps = {
   open: boolean

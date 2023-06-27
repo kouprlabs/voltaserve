@@ -22,10 +22,10 @@ import {
 } from 'formik'
 import * as Yup from 'yup'
 import { Helmet } from 'react-helmet-async'
-import GroupAPI from '@/api/group'
-import OrganizationAPI from '@/api/organization'
-import TokenAPI from '@/api/token'
-import WorkspaceAPI from '@/api/workspace'
+import GroupAPI from '@/client/api/group'
+import OrganizationAPI from '@/client/api/organization'
+import WorkspaceAPI from '@/client/api/workspace'
+import TokenAPI from '@/client/idp/token'
 import Logo from '@/components/common/logo'
 import FullLayout from '@/components/layout/full'
 import { gigabyteToByte } from '@/helpers/convert-storage'
@@ -57,8 +57,8 @@ const SignInPage = () => {
           grant_type: 'password',
         })
         saveToken(token)
-        const { length: organizationCount } = await OrganizationAPI.getAll()
-        if (organizationCount === 0) {
+        const orgList = await OrganizationAPI.list()
+        if (orgList.totalElements === 0) {
           const { id: organizationId } = await OrganizationAPI.create({
             name: 'My Organization',
           })
@@ -73,9 +73,11 @@ const SignInPage = () => {
           })
           navigate(`/workspace/${workspaceId}/file/${rootId}`)
         } else {
-          const result = await WorkspaceAPI.getAll()
-          if (result.length === 1) {
-            navigate(`/workspace/${result[0].id}/file/${result[0].rootId}`)
+          const workspaceList = await WorkspaceAPI.list()
+          if (workspaceList.totalElements === 1) {
+            navigate(
+              `/workspace/${workspaceList.data[0].id}/file/${workspaceList.data[0].rootId}`
+            )
           } else {
             navigate('/workspace')
           }

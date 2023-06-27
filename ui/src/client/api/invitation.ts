@@ -1,9 +1,20 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import useSWR from 'swr'
+import { apiFetch, apiFetcher } from '@/client/fetch'
+import { User } from '@/client/idp/user'
 import { getAccessTokenOrRedirect } from '@/infra/token'
-import { apiFetch, apiFetcher } from './fetch'
 import { Organization } from './organization'
-import { User } from './user'
+
+export enum SortBy {
+  Email = 'email',
+  DateCreated = 'date_created',
+  DateModified = 'date_modified',
+}
+
+export enum SortOrder {
+  Asc = 'asc',
+  Desc = 'desc',
+}
 
 export type InvitationStatus = 'pending' | 'accepted' | 'declined'
 
@@ -17,13 +28,28 @@ export type Invitation = {
   updateTime?: string
 }
 
-export type InvitationCreateOptions = {
+export type List = {
+  data: Invitation[]
+  totalPages: number
+  totalElements: number
+  page: number
+  size: number
+}
+
+export type CreateOptions = {
   organizationId: string
   emails: string[]
 }
 
+export type ListOptions = {
+  size?: number
+  page?: number
+  sortBy?: SortBy
+  sortOrder?: SortOrder
+}
+
 export default class InvitationAPI {
-  static async create(options: InvitationCreateOptions) {
+  static async create(options: CreateOptions) {
     return apiFetch(`/invitations`, {
       method: 'POST',
       body: JSON.stringify(options),
@@ -34,20 +60,48 @@ export default class InvitationAPI {
     })
   }
 
-  static useGetIncoming(swrOptions?: any) {
-    return useSWR<Invitation[]>(
-      `/invitations/get_incoming`,
+  static useGetIncoming(options?: ListOptions, swrOptions?: any) {
+    const params: any = {}
+    if (options?.page) {
+      params.page = options.page.toString()
+    }
+    if (options?.size) {
+      params.size = options.size.toString()
+    }
+    if (options?.sortBy) {
+      params.sort_by = options.sortBy.toString()
+    }
+    if (options?.sortOrder) {
+      params.sort_order = options.sortOrder.toString()
+    }
+    return useSWR<List>(
+      `/invitations/get_incoming?${new URLSearchParams(params)}`,
       apiFetcher,
       swrOptions
     )
   }
 
-  static useGetOutgoing(organizationId: string, swrOptions?: any) {
-    return useSWR<Invitation[]>(
+  static useGetOutgoing(
+    organizationId: string,
+    options?: ListOptions,
+    swrOptions?: any
+  ) {
+    const params: any = { organization_id: organizationId }
+    if (options?.page) {
+      params.page = options.page.toString()
+    }
+    if (options?.size) {
+      params.size = options.size.toString()
+    }
+    if (options?.sortBy) {
+      params.sort_by = options.sortBy.toString()
+    }
+    if (options?.sortOrder) {
+      params.sort_order = options.sortOrder.toString()
+    }
+    return useSWR<List>(
       organizationId
-        ? `/invitations/get_outgoing?${new URLSearchParams({
-            organization_id: organizationId,
-          })}`
+        ? `/invitations/get_outgoing?${new URLSearchParams(params)}`
         : null,
       apiFetcher,
       swrOptions

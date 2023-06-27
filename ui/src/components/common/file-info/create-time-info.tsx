@@ -1,6 +1,6 @@
 import { Stat, StatLabel, StatNumber } from '@chakra-ui/react'
 import { variables } from '@koupr/ui'
-import { File } from '@/api/file'
+import { File } from '@/client/api/file'
 import prettyDate from '@/helpers/pretty-date'
 
 type CreateTimeInfoProps = {

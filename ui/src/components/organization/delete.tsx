@@ -26,7 +26,7 @@ import {
   FormikHelpers,
 } from 'formik'
 import * as Yup from 'yup'
-import OrganizationAPI, { Organization } from '@/api/organization'
+import OrganizationAPI, { Organization } from '@/client/api/organization'
 
 type DeleteProps = {
   open: boolean

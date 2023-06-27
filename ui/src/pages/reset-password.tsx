@@ -21,7 +21,7 @@ import {
 } from 'formik'
 import * as Yup from 'yup'
 import { Helmet } from 'react-helmet-async'
-import AccountAPI from '@/api/account'
+import AccountAPI from '@/client/idp/account'
 import Logo from '@/components/common/logo'
 import FullLayout from '@/components/layout/full'
 

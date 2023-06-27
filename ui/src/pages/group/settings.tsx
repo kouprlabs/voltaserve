@@ -9,9 +9,9 @@ import {
   variables,
 } from '@koupr/ui'
 import { Helmet } from 'react-helmet-async'
-import GroupAPI from '@/api/group'
-import { swrConfig } from '@/api/options'
-import { geEditorPermission, geOwnerPermission } from '@/api/permission'
+import GroupAPI from '@/client/api/group'
+import { geEditorPermission, geOwnerPermission } from '@/client/api/permission'
+import { swrConfig } from '@/client/options'
 import AddMember from '@/components/group/add-member'
 import Delete from '@/components/group/delete'
 import EditName from '@/components/group/edit-name'

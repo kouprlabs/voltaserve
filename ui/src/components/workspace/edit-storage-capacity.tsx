@@ -23,9 +23,9 @@ import {
   FormikHelpers,
 } from 'formik'
 import * as Yup from 'yup'
-import { swrConfig } from '@/api/options'
-import StorageAPI from '@/api/storage'
-import WorkspaceAPI, { Workspace } from '@/api/workspace'
+import StorageAPI from '@/client/api/storage'
+import WorkspaceAPI, { Workspace } from '@/client/api/workspace'
+import { swrConfig } from '@/client/options'
 import StorageInput from '@/components/common/storage-input'
 
 type EditStorageCapacityProps = {

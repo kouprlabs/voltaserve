@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink } from '@chakra-ui/react'
-import FileAPI, { File } from '@/api/file'
-import WorkspaceAPI from '@/api/workspace'
+import FileAPI, { File } from '@/client/api/file'
+import WorkspaceAPI from '@/client/api/workspace'
 
 const Path = () => {
   const params = useParams()

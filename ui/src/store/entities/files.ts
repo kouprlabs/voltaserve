@@ -1,10 +1,10 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { File, FileList } from '@/api/file'
+import { File, List } from '@/client/api/file'
 
 type FilesState = {
   current?: string
   folder?: File
-  list?: FileList
+  list?: List
 }
 
 const initialState: FilesState = {}
@@ -42,10 +42,10 @@ const slice = createSlice({
         }
       })
     },
-    listUpdated: (state, action: PayloadAction<FileList>) => {
+    listUpdated: (state, action: PayloadAction<List>) => {
       state.list = action.payload
     },
-    listPatched: (state, action: PayloadAction<FileList>) => {
+    listExtended: (state, action: PayloadAction<List>) => {
       if (!state.list) {
         return
       }
@@ -69,7 +69,7 @@ export const {
   filesRemoved,
   filesUpdated,
   listUpdated,
-  listPatched,
+  listExtended,
   folderUpdated,
   currentUpdated,
 } = slice.actions

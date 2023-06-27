@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import {
   Center,
@@ -18,8 +19,11 @@ import {
 } from '@chakra-ui/react'
 import { SectionSpinner, variables } from '@koupr/ui'
 import { Helmet } from 'react-helmet-async'
-import GroupAPI, { Group } from '@/api/group'
-import { swrConfig } from '@/api/options'
+import GroupAPI, { Group, SortOrder } from '@/client/api/group'
+import { swrConfig } from '@/client/options'
+import PagePagination, {
+  usePagePagination,
+} from '@/components/common/page-pagination'
 import { CreateGroupButton } from '@/components/top-bar/buttons'
 import prettyDate from '@/helpers/pretty-date'
 import { decodeQuery } from '@/helpers/query'
@@ -27,16 +31,33 @@ import { decodeQuery } from '@/helpers/query'
 const GroupListPage = () => {
   const [searchParams] = useSearchParams()
   const query = decodeQuery(searchParams.get('q') as string)
-  const { data: groups, error } = GroupAPI.useGetAllOrSearch(
-    query ? { search: { text: query } } : undefined,
+  const { page, size, onPageChange, onSizeChange } = usePagePagination({
+    localStoragePrefix: 'voltaserve',
+    localStorageNamespace: 'group',
+  })
+  const {
+    data: list,
+    error,
+    mutate,
+  } = GroupAPI.useList(
+    { query, page, size, sortOrder: SortOrder.Desc },
     swrConfig()
   )
+
+  useEffect(() => {
+    mutate()
+  }, [query, page, size, mutate])
+
   return (
     <>
       <Helmet>
         <title>Groups</title>
       </Helmet>
-      <Stack direction="column" spacing={variables.spacing2Xl}>
+      <Stack
+        direction="column"
+        spacing={variables.spacing2Xl}
+        pb={variables.spacing2Xl}
+      >
         <Heading size="lg" pl={variables.spacingMd}>
           Groups
         </Heading>
@@ -45,8 +66,8 @@ const GroupListPage = () => {
             <Text>Failed to load groups.</Text>
           </Center>
         )}
-        {!groups && !error && <SectionSpinner />}
-        {groups && groups.length === 0 && (
+        {!list && !error && <SectionSpinner />}
+        {list && list.data.length === 0 && (
           <Center h="300px">
             <VStack spacing={variables.spacing}>
               <Text>There are no groups.</Text>
@@ -54,7 +75,7 @@ const GroupListPage = () => {
             </VStack>
           </Center>
         )}
-        {groups && groups.length > 0 && (
+        {list && list.data.length > 0 && (
           <Table variant="simple">
             <Thead>
               <Tr>
@@ -65,7 +86,7 @@ const GroupListPage = () => {
               </Tr>
             </Thead>
             <Tbody>
-              {groups.map((g: Group) => (
+              {list.data.map((g: Group) => (
                 <Tr key={g.id}>
                   <Td>
                     <HStack spacing={variables.spacing}>
@@ -101,6 +122,17 @@ const GroupListPage = () => {
               ))}
             </Tbody>
           </Table>
+        )}
+        {list && (
+          <HStack alignSelf="end">
+            <PagePagination
+              totalPages={list.totalPages}
+              page={page}
+              size={size}
+              onPageChange={onPageChange}
+              onSizeChange={onSizeChange}
+            />
+          </HStack>
         )}
       </Stack>
     </>

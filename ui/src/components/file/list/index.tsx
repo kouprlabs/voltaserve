@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react'
 import { useParams, useSearchParams } from 'react-router-dom'
 import { Wrap, WrapItem, Text, Center } from '@chakra-ui/react'
 import { Spinner, variables } from '@koupr/ui'
-import FileAPI, { FileList as FileListData } from '@/api/file'
-import { swrConfig } from '@/api/options'
+import FileAPI, { List as FileListData } from '@/client/api/file'
+import { swrConfig } from '@/client/options'
 import { decodeQuery } from '@/helpers/query'
 import { listUpdated, folderUpdated } from '@/store/entities/files'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
@@ -72,14 +72,12 @@ const List = ({ scale }: ListProps) => {
             1
           )
         } else {
-          result = await FileAPI.list(
-            fileId,
-            FileAPI.DEFAULT_PAGE_SIZE,
-            1,
-            undefined,
+          result = await FileAPI.list(fileId, {
+            page: 1,
+            size: FileAPI.DEFAULT_PAGE_SIZE,
             sortBy,
-            sortOrder
-          )
+            sortOrder,
+          })
         }
         dispatch(listUpdated(result))
       } finally {
@@ -97,14 +95,12 @@ const List = ({ scale }: ListProps) => {
           setIsLoading(true)
           dispatch(selectionUpdated([]))
           try {
-            const result = await FileAPI.list(
-              fileId,
-              FileAPI.DEFAULT_PAGE_SIZE,
-              1,
-              undefined,
+            const result = await FileAPI.list(fileId, {
+              page: 1,
+              size: FileAPI.DEFAULT_PAGE_SIZE,
               sortBy,
-              sortOrder
-            )
+              sortOrder,
+            })
             dispatch(listUpdated(result))
           } finally {
             setIsLoading(false)

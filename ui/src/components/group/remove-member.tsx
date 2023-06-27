@@ -11,8 +11,8 @@ import {
   Text,
 } from '@chakra-ui/react'
 import { variables } from '@koupr/ui'
-import GroupAPI, { Group } from '@/api/group'
-import { User } from '@/api/user'
+import GroupAPI, { Group } from '@/client/api/group'
+import { User } from '@/client/idp/user'
 
 type RemoveMemberProps = {
   group: Group

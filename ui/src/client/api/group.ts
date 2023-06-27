@@ -1,8 +1,19 @@
 import useSWR from 'swr'
+import { apiFetch } from '@/client/fetch'
+import { User } from '@/client/idp/user'
 import { getAccessTokenOrRedirect } from '@/infra/token'
-import { apiFetch } from './fetch'
 import { Organization } from './organization'
-import { User } from './user'
+
+export enum SortBy {
+  Name = 'name',
+  DateCreated = 'date_created',
+  DateModified = 'date_modified',
+}
+
+export enum SortOrder {
+  Asc = 'asc',
+  Desc = 'desc',
+}
 
 export type Group = {
   id: string
@@ -13,30 +24,43 @@ export type Group = {
   updateTime?: string
 }
 
-export interface GroupSearchOptions {
-  text: string
+export type List = {
+  data: Group[]
+  totalPages: number
+  totalElements: number
+  page: number
+  size: number
 }
 
-export type GroupCreateOptions = {
+export type ListOptions = {
+  query?: string
+  organizationId?: string
+  size?: number
+  page?: number
+  sortBy?: SortBy
+  sortOrder?: SortOrder
+}
+
+export type CreateOptions = {
   name: string
   image?: string
   organizationId: string
 }
 
-export type GroupUpdateNameOptions = {
+export type UpdateNameOptions = {
   name: string
 }
 
-export type GroupAddMemberOptions = {
+export type AddMemberOptions = {
   userId: string
 }
 
-export type GroupRemoveMemberOptions = {
+export type RemoveMemberOptions = {
   userId: string
 }
 
 export default class GroupAPI {
-  static create = (options: GroupCreateOptions): Promise<Group> =>
+  static create = (options: CreateOptions): Promise<Group> =>
     apiFetch(`/groups`, {
       method: 'POST',
       body: JSON.stringify(options),
@@ -48,7 +72,7 @@ export default class GroupAPI {
 
   static updateName = (
     id: string,
-    options: GroupUpdateNameOptions
+    options: UpdateNameOptions
   ): Promise<Group> =>
     apiFetch(`/groups/${id}/update_name`, {
       method: 'POST',
@@ -89,42 +113,32 @@ export default class GroupAPI {
     }).then((result) => result.json())
   }
 
-  static useGetAllOrSearch(
-    options?: { search?: GroupSearchOptions },
-    swrOptions?: any
-  ) {
-    if (options?.search) {
-      return this.useSearch(options?.search, swrOptions)
-    } else {
-      return this.useGetAll(swrOptions)
+  static useList(options?: ListOptions, swrOptions?: any) {
+    return useSWR<List>('/groups', () => this.list(options), swrOptions)
+  }
+
+  static async list(options?: ListOptions): Promise<List> {
+    const params: any = {}
+    if (options?.query) {
+      params.query = encodeURIComponent(options.query.toString())
     }
-  }
-
-  static useGetAll = (swrOptions?: any) =>
-    useSWR<Group[]>(`/groups`, () => this.getAll(), swrOptions)
-
-  static async getAll(): Promise<Group[]> {
-    return apiFetch('/groups', {
+    if (options?.organizationId) {
+      params.organization_id = options.organizationId.toString()
+    }
+    if (options?.page) {
+      params.page = options.page.toString()
+    }
+    if (options?.size) {
+      params.size = options.size.toString()
+    }
+    if (options?.sortBy) {
+      params.sort_by = options.sortBy.toString()
+    }
+    if (options?.sortOrder) {
+      params.sort_order = options.sortOrder.toString()
+    }
+    return apiFetch(`/groups?${new URLSearchParams(params)}`, {
       method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
-        'Content-Type': 'application/json',
-      },
-    }).then((result) => result.json())
-  }
-
-  static useSearch(options: GroupSearchOptions, swrOptions?: any) {
-    return useSWR<Group[]>(
-      '/groups/search',
-      () => this.search(options),
-      swrOptions
-    )
-  }
-
-  static async search(options: GroupSearchOptions): Promise<Group[]> {
-    return apiFetch('/groups/search', {
-      method: 'POST',
-      body: JSON.stringify(options),
       headers: {
         'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
         'Content-Type': 'application/json',
@@ -141,50 +155,7 @@ export default class GroupAPI {
       },
     })
 
-  static useGetMembers = (id: string, swrOptions?: any) =>
-    useSWR<User[]>(
-      id ? `/groups/${id}/get_members` : null,
-      () => this.getMembers(id),
-      swrOptions
-    )
-
-  static async getMembers(id: string): Promise<User[]> {
-    return apiFetch(`/groups/${id}/get_members`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
-        'Content-Type': 'application/json',
-      },
-    }).then((result) => result.json())
-  }
-
-  static useSearchMembers = (id: string, query: string, swrOptions?: any) =>
-    useSWR<User[]>(
-      id && query
-        ? `/groups/${id}/search_members?${new URLSearchParams({
-            query,
-          })}`
-        : null,
-      () => this.searchMembers(id, query),
-      swrOptions
-    )
-
-  static async searchMembers(id: string, query: string): Promise<User[]> {
-    return apiFetch(
-      `/groups/${id}/search_members?${new URLSearchParams({
-        query,
-      })}`,
-      {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
-          'Content-Type': 'application/json',
-        },
-      }
-    ).then((result) => result.json())
-  }
-
-  static addMember = (id: string, options: GroupAddMemberOptions) =>
+  static addMember = (id: string, options: AddMemberOptions) =>
     apiFetch(`/groups/${id}/add_member`, {
       method: 'POST',
       body: JSON.stringify(options),
@@ -194,7 +165,7 @@ export default class GroupAPI {
       },
     })
 
-  static removeMember = (id: string, options: GroupRemoveMemberOptions) =>
+  static removeMember = (id: string, options: RemoveMemberOptions) =>
     apiFetch(`/groups/${id}/remove_member`, {
       method: 'POST',
       body: JSON.stringify(options),

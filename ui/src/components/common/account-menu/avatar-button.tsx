@@ -1,6 +1,6 @@
 import { Avatar, Box, useColorModeValue, useToken } from '@chakra-ui/react'
 import { forwardRef } from '@chakra-ui/system'
-import { User } from '@/api/user'
+import { User } from '@/client/idp/user'
 import { useAppSelector } from '@/store/hook'
 import { NavType } from '@/store/ui/nav'
 import ActiveCircle from './active-circle'

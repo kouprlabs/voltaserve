@@ -22,7 +22,7 @@ import {
   FormikHelpers,
 } from 'formik'
 import * as Yup from 'yup'
-import FileAPI from '@/api/file'
+import FileAPI from '@/client/api/file'
 import { filesUpdated } from '@/store/entities/files'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { renameModalDidClose } from '@/store/ui/files'

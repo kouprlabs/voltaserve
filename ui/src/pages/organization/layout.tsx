@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react'
 import { Outlet, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { Heading, Stack, Tab, TabList, Tabs } from '@chakra-ui/react'
 import { variables } from '@koupr/ui'
-import { swrConfig } from '@/api/options'
-import OrganizationAPI from '@/api/organization'
-import { geOwnerPermission } from '@/api/permission'
+import OrganizationAPI from '@/client/api/organization'
+import { geOwnerPermission } from '@/client/api/permission'
+import { swrConfig } from '@/client/options'
 
 const OrganizationLayout = () => {
   const location = useLocation()

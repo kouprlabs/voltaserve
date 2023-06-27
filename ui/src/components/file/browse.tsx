@@ -15,8 +15,8 @@ import { variables } from '@koupr/ui'
 import { IconChevronRight } from '@koupr/ui'
 import { SectionSpinner } from '@koupr/ui'
 import { FcFolder } from 'react-icons/fc'
-import FileAPI, { File, FileType } from '@/api/file'
-import WorkspaceAPI from '@/api/workspace'
+import FileAPI, { File, FileType } from '@/client/api/file'
+import WorkspaceAPI from '@/client/api/workspace'
 
 type BrowseProps = {
   onChange?: (id: string) => void
@@ -55,12 +55,11 @@ const Browse = ({ onChange }: BrowseProps) => {
       if (fileId) {
         try {
           const timeoutId = setTimeout(() => setIsSpinnerVisible(true), 250)
-          const result = await FileAPI.list(
-            fileId,
-            FileAPI.DEFAULT_PAGE_SIZE,
-            1,
-            FileType.Folder
-          )
+          const result = await FileAPI.list(fileId, {
+            page: 1,
+            size: FileAPI.DEFAULT_PAGE_SIZE,
+            type: FileType.Folder,
+          })
           clearTimeout(timeoutId)
           setTotalPages(result.totalPages)
           setFolders(result.data)
@@ -80,12 +79,11 @@ const Browse = ({ onChange }: BrowseProps) => {
   const handleLoadMore = useCallback(async (fileId: string, page: number) => {
     try {
       setLoading(true)
-      const result = await FileAPI.list(
-        fileId,
-        FileAPI.DEFAULT_PAGE_SIZE,
+      const result = await FileAPI.list(fileId, {
         page,
-        FileType.Folder
-      )
+        size: FileAPI.DEFAULT_PAGE_SIZE,
+        type: FileType.Folder,
+      })
       setTotalPages(result.totalPages)
       setFolders(result.data)
       setPage(page + 1)
