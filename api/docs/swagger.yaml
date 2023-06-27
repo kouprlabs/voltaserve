@@ -1867,7 +1867,7 @@ paths:
       parameters:
       - description: Organization ID
         in: query
-        name: organization_id
+        name: org
         required: true
         type: string
       - description: Page

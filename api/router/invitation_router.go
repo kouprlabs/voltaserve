@@ -120,18 +120,18 @@ func (r *InvitationRouter) GetIncoming(c *fiber.Ctx) error {
 //	@Tags			Invitations
 //	@Id				invitation_get_outgoing
 //	@Produce		json
-//	@Param			organization_id	query		string	true	"Organization ID"
-//	@Param			page			query		string	false	"Page"
-//	@Param			size			query		string	false	"Size"
-//	@Param			sort_by			query		string	false	"Sort By"
-//	@Param			sort_order		query		string	false	"Sort Order"
-//	@Success		200				{object}	service.InvitationList
-//	@Failure		500				{object}	errorpkg.ErrorResponse
+//	@Param			org			query		string	true	"Organization ID"
+//	@Param			page		query		string	false	"Page"
+//	@Param			size		query		string	false	"Size"
+//	@Param			sort_by		query		string	false	"Sort By"
+//	@Param			sort_order	query		string	false	"Sort Order"
+//	@Success		200			{object}	service.InvitationList
+//	@Failure		500			{object}	errorpkg.ErrorResponse
 //	@Router			/invitations/get_outgoing [get]
 func (r *InvitationRouter) GetOutgoing(c *fiber.Ctx) error {
-	orgID := c.Query("organization_id")
+	orgID := c.Query("org")
 	if orgID == "" {
-		return errorpkg.NewMissingQueryParamError("organization_id")
+		return errorpkg.NewMissingQueryParamError("org")
 	}
 	var err error
 	var page int64
