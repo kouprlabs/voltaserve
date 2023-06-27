@@ -40,15 +40,7 @@ const WorkspaceListPage = () => {
 
   useEffect(() => {
     mutate()
-  }, [page])
-
-  useEffect(() => {
-    mutate()
-  }, [size])
-
-  useEffect(() => {
-    mutate()
-  }, [query, mutate])
+  }, [query, page, size, mutate])
 
   return (
     <>

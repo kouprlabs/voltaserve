@@ -21,6 +21,9 @@ import { SectionSpinner, variables } from '@koupr/ui'
 import { Helmet } from 'react-helmet-async'
 import GroupAPI, { Group } from '@/client/api/group'
 import { swrConfig } from '@/client/options'
+import PagePagination, {
+  usePagePagination,
+} from '@/components/common/page-pagination'
 import { CreateGroupButton } from '@/components/top-bar/buttons'
 import prettyDate from '@/helpers/pretty-date'
 import { decodeQuery } from '@/helpers/query'
@@ -28,22 +31,16 @@ import { decodeQuery } from '@/helpers/query'
 const GroupListPage = () => {
   const [searchParams] = useSearchParams()
   const query = decodeQuery(searchParams.get('q') as string)
+  const { page, size, onPageChange, onSizeChange } = usePagePagination()
   const {
     data: list,
     error,
     mutate,
-  } = GroupAPI.useList(
-    {
-      query,
-      page: 1,
-      size: 5,
-    },
-    swrConfig()
-  )
+  } = GroupAPI.useList({ query, page, size }, swrConfig())
 
   useEffect(() => {
     mutate()
-  }, [query, mutate])
+  }, [query, page, size, mutate])
 
   return (
     <>
@@ -115,6 +112,17 @@ const GroupListPage = () => {
               ))}
             </Tbody>
           </Table>
+        )}
+        {list && (
+          <HStack alignSelf="end">
+            <PagePagination
+              totalPages={list.totalPages}
+              page={page}
+              size={size}
+              onPageChange={onPageChange}
+              onSizeChange={onSizeChange}
+            />
+          </HStack>
         )}
       </Stack>
     </>

@@ -21,6 +21,9 @@ import { SectionSpinner, variables } from '@koupr/ui'
 import { Helmet } from 'react-helmet-async'
 import OrganizationAPI, { Organization } from '@/client/api/organization'
 import { swrConfig } from '@/client/options'
+import PagePagination, {
+  usePagePagination,
+} from '@/components/common/page-pagination'
 import { CreateOrganizationButton } from '@/components/top-bar/buttons'
 import prettyDate from '@/helpers/pretty-date'
 import { decodeQuery } from '@/helpers/query'
@@ -28,22 +31,16 @@ import { decodeQuery } from '@/helpers/query'
 const OrganizationListPage = () => {
   const [searchParams] = useSearchParams()
   const query = decodeQuery(searchParams.get('q') as string)
+  const { page, size, onPageChange, onSizeChange } = usePagePagination()
   const {
     data: list,
     error,
     mutate,
-  } = OrganizationAPI.useList(
-    {
-      query,
-      page: 1,
-      size: 5,
-    },
-    swrConfig()
-  )
+  } = OrganizationAPI.useList({ query, page, size }, swrConfig())
 
   useEffect(() => {
     mutate()
-  }, [query, mutate])
+  }, [query, page, size, mutate])
 
   return (
     <>
@@ -105,6 +102,17 @@ const OrganizationListPage = () => {
               ))}
             </Tbody>
           </Table>
+        )}
+        {list && (
+          <HStack alignSelf="end">
+            <PagePagination
+              totalPages={list.totalPages}
+              page={page}
+              size={size}
+              onPageChange={onPageChange}
+              onSizeChange={onSizeChange}
+            />
+          </HStack>
         )}
       </Stack>
     </>
