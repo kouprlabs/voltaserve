@@ -66,8 +66,12 @@ func (r *InvitationRouter) Create(c *fiber.Ctx) error {
 //	@Tags			Invitations
 //	@Id				invitation_get_incoming
 //	@Produce		json
-//	@Success		200	{object}	service.InvitationList
-//	@Failure		500	{object}	errorpkg.ErrorResponse
+//	@Param			page		query		string	false	"Page"
+//	@Param			size		query		string	false	"Size"
+//	@Param			sort_by		query		string	false	"Sort By"
+//	@Param			sort_order	query		string	false	"Sort Order"
+//	@Success		200			{object}	service.InvitationList
+//	@Failure		500			{object}	errorpkg.ErrorResponse
 //	@Router			/invitations/get_incoming [get]
 func (r *InvitationRouter) GetIncoming(c *fiber.Ctx) error {
 	var err error
@@ -117,6 +121,10 @@ func (r *InvitationRouter) GetIncoming(c *fiber.Ctx) error {
 //	@Id				invitation_get_outgoing
 //	@Produce		json
 //	@Param			organization_id	query		string	true	"Organization ID"
+//	@Param			page			query		string	false	"Page"
+//	@Param			size			query		string	false	"Size"
+//	@Param			sort_by			query		string	false	"Sort By"
+//	@Param			sort_order		query		string	false	"Sort Order"
 //	@Success		200				{object}	service.InvitationList
 //	@Failure		500				{object}	errorpkg.ErrorResponse
 //	@Router			/invitations/get_outgoing [get]

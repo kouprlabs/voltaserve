@@ -1829,6 +1829,23 @@ paths:
     get:
       description: Get incoming
       operationId: invitation_get_incoming
+      parameters:
+      - description: Page
+        in: query
+        name: page
+        type: string
+      - description: Size
+        in: query
+        name: size
+        type: string
+      - description: Sort By
+        in: query
+        name: sort_by
+        type: string
+      - description: Sort Order
+        in: query
+        name: sort_order
+        type: string
       produces:
       - application/json
       responses:
@@ -1852,6 +1869,22 @@ paths:
         in: query
         name: organization_id
         required: true
+        type: string
+      - description: Page
+        in: query
+        name: page
+        type: string
+      - description: Size
+        in: query
+        name: size
+        type: string
+      - description: Sort By
+        in: query
+        name: sort_by
+        type: string
+      - description: Sort Order
+        in: query
+        name: sort_order
         type: string
       produces:
       - application/json
