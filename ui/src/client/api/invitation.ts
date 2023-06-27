@@ -82,11 +82,11 @@ export default class InvitationAPI {
   }
 
   static useGetOutgoing(
-    orgId: string,
+    organizationId: string,
     options?: ListOptions,
     swrOptions?: any
   ) {
-    const params: any = { org: orgId }
+    const params: any = { org: organizationId }
     if (options?.page) {
       params.page = options.page.toString()
     }
@@ -100,7 +100,9 @@ export default class InvitationAPI {
       params.sort_order = options.sortOrder.toString()
     }
     return useSWR<List>(
-      orgId ? `/invitations/get_outgoing?${new URLSearchParams(params)}` : null,
+      organizationId
+        ? `/invitations/get_outgoing?${new URLSearchParams(params)}`
+        : null,
       apiFetcher,
       swrOptions
     )
