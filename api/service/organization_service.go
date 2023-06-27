@@ -172,7 +172,7 @@ func (svc *OrganizationService) List(opts OrganizationListOptions, userID string
 		opts.SortOrder = SortOrderAsc
 	}
 	sorted := svc.doSorting(authorized, opts.SortBy, opts.SortOrder, userID)
-	paged, totalElements, totalPages := svc.doPaging(sorted, opts.Page, opts.Size)
+	paged, totalElements, totalPages := svc.doPagination(sorted, opts.Page, opts.Size)
 	mapped, err := svc.orgMapper.mapMany(paged, userID)
 	if err != nil {
 		return nil, err
@@ -357,33 +357,18 @@ func (svc *OrganizationService) doSorting(data []model.Organization, sortBy stri
 	return data
 }
 
-func (svc *OrganizationService) doPaging(data []model.Organization, page uint, size uint) (pageData []model.Organization, totalElements uint, totalPages uint) {
-	page = page - 1
-	low := size * page
-	high := low + size
-	if low >= uint(len(data)) {
-		pageData = []model.Organization{}
-	} else if high >= uint(len(data)) {
-		high = uint(len(data))
-		pageData = data[low:high]
-	} else {
-		pageData = data[low:high]
+func (svc *OrganizationService) doPagination(data []model.Organization, page, size uint) ([]model.Organization, uint, uint) {
+	totalElements := uint(len(data))
+	totalPages := (totalElements + size - 1) / size
+	if page > totalPages {
+		page = totalPages
 	}
-	totalElements = uint(len(data))
-	if totalElements == 0 {
-		totalPages = 1
-	} else {
-		if size > uint(len(data)) {
-			size = uint(len(data))
-		}
-		totalPages = totalElements / size
-		if totalPages == 0 {
-			totalPages = 1
-		}
-		if totalElements%size > 0 {
-			totalPages = totalPages + 1
-		}
+	startIndex := (page - 1) * size
+	endIndex := startIndex + size
+	if endIndex > totalElements {
+		endIndex = totalElements
 	}
+	pageData := data[startIndex:endIndex]
 	return pageData, totalElements, totalPages
 }
 

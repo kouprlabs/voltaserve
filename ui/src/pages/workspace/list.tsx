@@ -1,10 +1,5 @@
-import { useCallback, useEffect, useState } from 'react'
-import {
-  Link,
-  useSearchParams,
-  useNavigate,
-  useLocation,
-} from 'react-router-dom'
+import { useEffect } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
 import {
   Heading,
   Link as ChakraLink,
@@ -21,13 +16,14 @@ import {
   VStack,
   Avatar,
   Badge,
-  Select,
 } from '@chakra-ui/react'
 import { SectionSpinner, variables } from '@koupr/ui'
 import { Helmet } from 'react-helmet-async'
 import WorkspaceAPI, { Workspace } from '@/client/api/workspace'
 import { swrConfig } from '@/client/options'
-import Pagination from '@/components/common/pagination'
+import PagePagination, {
+  usePagePagination,
+} from '@/components/common/page-pagination'
 import { CreateWorkspaceButton } from '@/components/top-bar/buttons'
 import prettyDate from '@/helpers/pretty-date'
 import { decodeQuery } from '@/helpers/query'
@@ -35,42 +31,20 @@ import { decodeQuery } from '@/helpers/query'
 const WorkspaceListPage = () => {
   const [searchParams] = useSearchParams()
   const query = decodeQuery(searchParams.get('q') as string)
-  const navigate = useNavigate()
-  const location = useLocation()
-  const queryParams = new URLSearchParams(location.search)
-  const currentPage = Number(queryParams.get('page')) || 1
-  const [size, setSize] = useState(5)
+  const { page, size, onPageChange, onSizeChange } = usePagePagination()
   const {
     data: list,
     error,
     mutate,
-  } = WorkspaceAPI.useList(
-    {
-      query,
-      page: currentPage,
-      size,
-    },
-    swrConfig()
-  )
+  } = WorkspaceAPI.useList({ query, page, size }, swrConfig())
 
   useEffect(() => {
     mutate()
-  }, [currentPage])
+  }, [page])
 
   useEffect(() => {
-    if (!queryParams.has('page')) {
-      queryParams.set('page', '1')
-      navigate({ search: `?${queryParams.toString()}` })
-    }
-  }, [queryParams, navigate])
-
-  const handlePageChange = useCallback(
-    (page: number) => {
-      queryParams.set('page', String(page))
-      navigate({ search: `?${queryParams.toString()}` })
-    },
-    [queryParams, navigate]
-  )
+    mutate()
+  }, [size])
 
   useEffect(() => {
     mutate()
@@ -151,29 +125,17 @@ const WorkspaceListPage = () => {
             </Tbody>
           </Table>
         )}
-        <HStack alignSelf="end">
-          {list && list.totalPages > 1 ? (
-            <Pagination
-              page={list.page}
+        {list && (
+          <HStack alignSelf="end">
+            <PagePagination
               totalPages={list.totalPages}
-              onPageChange={handlePageChange}
+              page={page}
+              size={size}
+              onPageChange={onPageChange}
+              onSizeChange={onSizeChange}
             />
-          ) : null}
-          <Select
-            defaultValue={size}
-            onChange={(event) => {
-              setSize(parseInt(event.target.value))
-              mutate()
-            }}
-          >
-            <option value="5">5 items</option>
-            <option value="10">10 items</option>
-            <option value="20">20 items</option>
-            <option value="40">40 items</option>
-            <option value="80">80 items</option>
-            <option value="100">100 items</option>
-          </Select>
-        </HStack>
+          </HStack>
+        )}
       </Stack>
     </>
   )

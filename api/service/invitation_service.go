@@ -162,7 +162,7 @@ func (svc *InvitationService) GetIncoming(opts InvitationListOptions, userID str
 		opts.SortOrder = SortOrderAsc
 	}
 	sorted := svc.doSorting(invitations, opts.SortBy, opts.SortOrder, userID)
-	paged, totalElements, totalPages := svc.doPaging(sorted, opts.Page, opts.Size)
+	paged, totalElements, totalPages := svc.doPagination(sorted, opts.Page, opts.Size)
 	mapped, err := svc.invitationMapper.mapMany(paged, userID)
 	if err != nil {
 		return nil, err
@@ -192,7 +192,7 @@ func (svc *InvitationService) GetOutgoing(orgID string, opts InvitationListOptio
 		opts.SortOrder = SortOrderAsc
 	}
 	sorted := svc.doSorting(invitations, opts.SortBy, opts.SortOrder, userID)
-	paged, totalElements, totalPages := svc.doPaging(sorted, opts.Page, opts.Size)
+	paged, totalElements, totalPages := svc.doPagination(sorted, opts.Page, opts.Size)
 	mapped, err := svc.invitationMapper.mapMany(paged, userID)
 	if err != nil {
 		return nil, err
@@ -360,33 +360,18 @@ func (svc *InvitationService) doSorting(data []model.Invitation, sortBy string, 
 	return data
 }
 
-func (svc *InvitationService) doPaging(data []model.Invitation, page uint, size uint) (pageData []model.Invitation, totalElements uint, totalPages uint) {
-	page = page - 1
-	low := size * page
-	high := low + size
-	if low >= uint(len(data)) {
-		pageData = []model.Invitation{}
-	} else if high >= uint(len(data)) {
-		high = uint(len(data))
-		pageData = data[low:high]
-	} else {
-		pageData = data[low:high]
+func (svc *InvitationService) doPagination(data []model.Invitation, page, size uint) ([]model.Invitation, uint, uint) {
+	totalElements := uint(len(data))
+	totalPages := (totalElements + size - 1) / size
+	if page > totalPages {
+		page = totalPages
 	}
-	totalElements = uint(len(data))
-	if totalElements == 0 {
-		totalPages = 1
-	} else {
-		if size > uint(len(data)) {
-			size = uint(len(data))
-		}
-		totalPages = totalElements / size
-		if totalPages == 0 {
-			totalPages = 1
-		}
-		if totalElements%size > 0 {
-			totalPages = totalPages + 1
-		}
+	startIndex := (page - 1) * size
+	endIndex := startIndex + size
+	if endIndex > totalElements {
+		endIndex = totalElements
 	}
+	pageData := data[startIndex:endIndex]
 	return pageData, totalElements, totalPages
 }
 

@@ -685,7 +685,7 @@ func (svc *FileService) ListByID(id string, opts FileListByIDOptions, userID str
 		}
 	}
 	sorted := svc.doSorting(filteredFiles, opts.SortBy, opts.SortOrder, userID)
-	paged, totalElements, totalPages := svc.doPaging(sorted, opts.Page, opts.Size)
+	paged, totalElements, totalPages := svc.doPagination(sorted, opts.Page, opts.Size)
 	mapped, err := svc.fileMapper.mapMany(paged, userID)
 	if err != nil {
 		return nil, err
@@ -723,7 +723,7 @@ func (svc *FileService) Search(opts FileSearchOptions, page uint, size uint, use
 	if err != nil {
 		return nil, err
 	}
-	paged, totalElements, totalPages := svc.doPaging(authorized, page, size)
+	paged, totalElements, totalPages := svc.doPagination(authorized, page, size)
 	v, err := svc.fileMapper.mapMany(paged, userID)
 	if err != nil {
 		return nil, err
@@ -1647,33 +1647,18 @@ func (svc *FileService) doSorting(data []model.File, sortBy string, sortOrder st
 	return data
 }
 
-func (svc *FileService) doPaging(data []model.File, page uint, size uint) (pageData []model.File, totalElements uint, totalPages uint) {
-	page = page - 1
-	low := size * page
-	high := low + size
-	if low >= uint(len(data)) {
-		pageData = []model.File{}
-	} else if high >= uint(len(data)) {
-		high = uint(len(data))
-		pageData = data[low:high]
-	} else {
-		pageData = data[low:high]
+func (svc *FileService) doPagination(data []model.File, page, size uint) ([]model.File, uint, uint) {
+	totalElements := uint(len(data))
+	totalPages := (totalElements + size - 1) / size
+	if page > totalPages {
+		page = totalPages
 	}
-	totalElements = uint(len(data))
-	if totalElements == 0 {
-		totalPages = 1
-	} else {
-		if size > uint(len(data)) {
-			size = uint(len(data))
-		}
-		totalPages = totalElements / size
-		if totalPages == 0 {
-			totalPages = 1
-		}
-		if totalElements%size > 0 {
-			totalPages = totalPages + 1
-		}
+	startIndex := (page - 1) * size
+	endIndex := startIndex + size
+	if endIndex > totalElements {
+		endIndex = totalElements
 	}
+	pageData := data[startIndex:endIndex]
 	return pageData, totalElements, totalPages
 }
 
