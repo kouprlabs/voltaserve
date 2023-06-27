@@ -3,8 +3,8 @@ import { ButtonGroup, Button } from '@chakra-ui/react'
 type PaginationProps = {
   totalPages: number
   page: number
-  maxButtons: number
-  onPageChange: (page: number) => void
+  maxButtons?: number
+  onPageChange?: (page: number) => void
 }
 
 const Pagination = ({
@@ -31,7 +31,7 @@ const Pagination = ({
 
   const handlePageChange = (pageNumber: number) => {
     if (pageNumber !== page) {
-      onPageChange(pageNumber)
+      onPageChange?.(pageNumber)
     }
   }
 
@@ -41,7 +41,7 @@ const Pagination = ({
     <ButtonGroup>
       {page > 1 && <Button onClick={() => handlePageChange(1)}>First</Button>}
       {page > 1 && (
-        <Button onClick={() => handlePageChange(page - 1)}>Prev</Button>
+        <Button onClick={() => handlePageChange(page - 1)}>Previous</Button>
       )}
       {pageNumbers.map((pageNumber) => (
         <Button
@@ -56,7 +56,9 @@ const Pagination = ({
         <Button onClick={() => handlePageChange(page + 1)}>Next</Button>
       )}
       {page < totalPages && (
-        <Button onClick={() => handlePageChange(totalPages)}>Last</Button>
+        <Button onClick={() => handlePageChange(totalPages)}>
+          Last ({totalPages})
+        </Button>
       )}
     </ButtonGroup>
   )

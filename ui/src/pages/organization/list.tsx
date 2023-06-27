@@ -32,7 +32,14 @@ const OrganizationListPage = () => {
     data: list,
     error,
     mutate,
-  } = OrganizationAPI.useList({ query }, swrConfig())
+  } = OrganizationAPI.useList(
+    {
+      query,
+      page: 1,
+      size: 5,
+    },
+    swrConfig()
+  )
 
   useEffect(() => {
     mutate()

@@ -28,7 +28,18 @@ import { decodeQuery } from '@/helpers/query'
 const GroupListPage = () => {
   const [searchParams] = useSearchParams()
   const query = decodeQuery(searchParams.get('q') as string)
-  const { data: list, error, mutate } = GroupAPI.useList({ query }, swrConfig())
+  const {
+    data: list,
+    error,
+    mutate,
+  } = GroupAPI.useList(
+    {
+      query,
+      page: 1,
+      size: 5,
+    },
+    swrConfig()
+  )
 
   useEffect(() => {
     mutate()
