@@ -53,7 +53,11 @@ const Copy = () => {
   }, [fileId, fileIdQuery, selection, sortBy, sortOrder, dispatch])
 
   return (
-    <Modal isOpen={isModalOpen} onClose={() => dispatch(copyModalDidClose())}>
+    <Modal
+      isOpen={isModalOpen}
+      onClose={() => dispatch(copyModalDidClose())}
+      closeOnOverlayClick={false}
+    >
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>Copy {selection.length} Item(s) to…</ModalHeader>

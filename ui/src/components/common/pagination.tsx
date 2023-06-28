@@ -4,6 +4,7 @@ type PaginationProps = {
   totalPages: number
   page: number
   maxButtons?: number
+  size?: string
   onPageChange?: (page: number) => void
 }
 
@@ -11,6 +12,7 @@ const Pagination = ({
   totalPages,
   page,
   maxButtons = 5,
+  size = 'md',
   onPageChange,
 }: PaginationProps) => {
   const getPageNumbers = () => {
@@ -39,12 +41,19 @@ const Pagination = ({
 
   return (
     <ButtonGroup>
-      {page > 1 && <Button onClick={() => handlePageChange(1)}>First</Button>}
       {page > 1 && (
-        <Button onClick={() => handlePageChange(page - 1)}>Previous</Button>
+        <Button size={size} onClick={() => handlePageChange(1)}>
+          First
+        </Button>
+      )}
+      {page > 1 && (
+        <Button size={size} onClick={() => handlePageChange(page - 1)}>
+          Previous
+        </Button>
       )}
       {pageNumbers.map((pageNumber) => (
         <Button
+          size={size}
           key={pageNumber}
           onClick={() => handlePageChange(pageNumber)}
           colorScheme={pageNumber === page ? 'blue' : undefined}
@@ -53,10 +62,12 @@ const Pagination = ({
         </Button>
       ))}
       {page < totalPages && (
-        <Button onClick={() => handlePageChange(page + 1)}>Next</Button>
+        <Button size={size} onClick={() => handlePageChange(page + 1)}>
+          Next
+        </Button>
       )}
       {page < totalPages && (
-        <Button onClick={() => handlePageChange(totalPages)}>
+        <Button size={size} onClick={() => handlePageChange(totalPages)}>
           Last ({totalPages})
         </Button>
       )}

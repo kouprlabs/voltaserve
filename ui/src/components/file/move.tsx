@@ -54,7 +54,11 @@ const Move = () => {
   }, [newFileId, fileId, selection, sortBy, sortOrder, dispatch])
 
   return (
-    <Modal isOpen={isModalOpen} onClose={() => dispatch(moveModalDidClose())}>
+    <Modal
+      isOpen={isModalOpen}
+      onClose={() => dispatch(moveModalDidClose())}
+      closeOnOverlayClick={false}
+    >
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>Move {selection.length} Item(s) to…</ModalHeader>

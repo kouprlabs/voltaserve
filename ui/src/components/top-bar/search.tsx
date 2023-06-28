@@ -61,7 +61,7 @@ const Search = () => {
     }
   }, [isWorkspaces, isFiles, isGroups, isOrgs])
   const [text, setText] = useState(query || '')
-  const [isFocused, setIsButtonVisible] = useState(false)
+  const [isFocused, setIsFocused] = useState(false)
 
   useEffect(() => {
     if (query) {
@@ -146,8 +146,8 @@ const Search = () => {
           variant="filled"
           onKeyDown={handleKeyDown}
           onChange={handleChange}
-          onFocus={() => setIsButtonVisible(true)}
-          onBlur={() => setIsButtonVisible(false)}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
         />
         {query && (
           <InputRightElement>
