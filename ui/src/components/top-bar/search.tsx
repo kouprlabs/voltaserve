@@ -64,7 +64,7 @@ const Search = () => {
       isOrgs ||
       isOrgMembers ||
       isGroupMembers,
-    [isWorkspaces, isFiles, isGroups, isOrgs]
+    [isWorkspaces, isFiles, isGroups, isOrgs, isOrgMembers, isGroupMembers]
   )
   const placeholder = useMemo(() => {
     if (isWorkspaces) {
@@ -80,7 +80,7 @@ const Search = () => {
     } else if (isGroupMembers) {
       return 'Search Group Members'
     }
-  }, [isWorkspaces, isFiles, isGroups, isOrgs])
+  }, [isWorkspaces, isFiles, isGroups, isOrgs, isOrgMembers, isGroupMembers])
   const [text, setText] = useState(query || '')
   const [isFocused, setIsFocused] = useState(false)
 
@@ -136,7 +136,19 @@ const Search = () => {
         }
       }
     },
-    [workspaceId, fileId, isFiles, isWorkspaces, isGroups, isOrgs, navigation]
+    [
+      workspaceId,
+      fileId,
+      organizationId,
+      groupId,
+      isFiles,
+      isWorkspaces,
+      isGroups,
+      isOrgs,
+      isOrgMembers,
+      isGroupMembers,
+      navigation,
+    ]
   )
 
   const handleClear = useCallback(() => {
@@ -154,7 +166,19 @@ const Search = () => {
     } else if (isGroupMembers) {
       navigation(`/group/${groupId}/member`)
     }
-  }, [workspaceId, fileId, isFiles, isWorkspaces, isGroups, isOrgs, navigation])
+  }, [
+    workspaceId,
+    fileId,
+    organizationId,
+    groupId,
+    isFiles,
+    isWorkspaces,
+    isGroups,
+    isOrgs,
+    isOrgMembers,
+    isGroupMembers,
+    navigation,
+  ])
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent<HTMLInputElement>) => {
