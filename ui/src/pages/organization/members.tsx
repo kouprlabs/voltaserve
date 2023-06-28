@@ -133,7 +133,7 @@ const OrganizationMembersPage = () => {
                               setIsRemoveMemberModalOpen(true)
                             }}
                           >
-                            Remove from organization
+                            Remove From Organization
                           </MenuItem>
                         </MenuList>
                       </Portal>

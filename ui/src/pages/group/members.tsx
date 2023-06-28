@@ -116,7 +116,7 @@ const GroupMembersPage = () => {
                               setIsRemoveMemberModalOpen(true)
                             }}
                           >
-                            Remove from group
+                            Remove From Group
                           </MenuItem>
                         </MenuList>
                       </Portal>
