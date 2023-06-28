@@ -68,8 +68,6 @@ const UserSelector = ({
   const dimmedButtonLabelColor = useColorModeValue('gray.500', 'gray.500')
   const normalButtonLabelColor = useColorModeValue('black', 'white')
 
-  console.log(list)
-
   useEffect(() => {
     mutate()
   }, [page, query, mutate])
