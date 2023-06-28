@@ -7,42 +7,15 @@ import {
 } from 'react'
 import {
   Button,
-  Text,
-  Center,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
-  useDisclosure,
-  VStack,
-  Stack,
-  Table,
-  Tr,
-  Tbody,
-  Td,
   HStack,
-  Avatar,
-  Radio,
-  Box,
   InputGroup,
   InputLeftElement,
   Icon,
   InputRightElement,
   IconButton,
   Input,
-  useColorModeValue,
 } from '@chakra-ui/react'
-import { SectionSpinner, variables } from '@koupr/ui'
 import { IconClose, IconSearch } from '@koupr/ui'
-import OrganizationAPI, {
-  Organization,
-  SortOrder,
-} from '@/client/api/organization'
-import { swrConfig } from '@/client/options'
-import Pagination from '@/components/common/pagination'
 
 type SearchInputProps = {
   query?: string
