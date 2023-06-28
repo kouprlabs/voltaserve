@@ -381,42 +381,6 @@ func (svc *GroupService) refreshCacheForOrganization(orgID string) error {
 	return nil
 }
 
-func (svc *GroupService) GetAvailableUsers(id string, userID string) ([]*User, error) {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return nil, err
-	}
-	group, err := svc.groupCache.Get(id)
-	if err != nil {
-		return nil, err
-	}
-	if err := svc.groupGuard.Authorize(user, group, model.PermissionViewer); err != nil {
-		return nil, err
-	}
-	orgMembers, err := svc.orgRepo.GetMembers(group.GetOrganizationID())
-	if err != nil {
-		return nil, err
-	}
-	groupMembers, err := svc.groupRepo.GetMembers(id)
-	if err != nil {
-		return nil, err
-	}
-	var res []*User
-	for _, om := range orgMembers {
-		found := false
-		for _, tm := range groupMembers {
-			if om.GetID() == tm.GetID() {
-				found = true
-				break
-			}
-		}
-		if !found {
-			res = append(res, svc.userMapper.mapOne(om))
-		}
-	}
-	return res, nil
-}
-
 func (svc *GroupService) doAuthorization(data []model.Group, user model.User) ([]model.Group, error) {
 	var res []model.Group
 	for _, g := range data {

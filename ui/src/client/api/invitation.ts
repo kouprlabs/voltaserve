@@ -42,6 +42,7 @@ export type CreateOptions = {
 }
 
 export type ListOptions = {
+  organizationId?: string
   size?: number
   page?: number
   sortBy?: SortBy
@@ -61,47 +62,17 @@ export default class InvitationAPI {
   }
 
   static useGetIncoming(options?: ListOptions, swrOptions?: any) {
-    const params: any = {}
-    if (options?.page) {
-      params.page = options.page.toString()
-    }
-    if (options?.size) {
-      params.size = options.size.toString()
-    }
-    if (options?.sortBy) {
-      params.sort_by = options.sortBy.toString()
-    }
-    if (options?.sortOrder) {
-      params.sort_order = options.sortOrder.toString()
-    }
     return useSWR<List>(
-      `/invitations/get_incoming?${new URLSearchParams(params)}`,
+      `/invitations/get_incoming?${this.paramsFromListOptions(options)}`,
       apiFetcher,
       swrOptions
     )
   }
 
-  static useGetOutgoing(
-    organizationId: string,
-    options?: ListOptions,
-    swrOptions?: any
-  ) {
-    const params: any = { organization_id: organizationId }
-    if (options?.page) {
-      params.page = options.page.toString()
-    }
-    if (options?.size) {
-      params.size = options.size.toString()
-    }
-    if (options?.sortBy) {
-      params.sort_by = options.sortBy.toString()
-    }
-    if (options?.sortOrder) {
-      params.sort_order = options.sortOrder.toString()
-    }
+  static useGetOutgoing(options?: ListOptions, swrOptions?: any) {
     return useSWR<List>(
-      organizationId
-        ? `/invitations/get_outgoing?${new URLSearchParams(params)}`
+      options?.organizationId
+        ? `/invitations/get_outgoing?${this.paramsFromListOptions(options)}`
         : null,
       apiFetcher,
       swrOptions
@@ -146,5 +117,25 @@ export default class InvitationAPI {
         'Content-Type': 'application/json',
       },
     })
+  }
+
+  static paramsFromListOptions(options?: ListOptions): URLSearchParams {
+    const params: any = {}
+    if (options?.organizationId) {
+      params.organization_id = options.organizationId.toString()
+    }
+    if (options?.page) {
+      params.page = options.page.toString()
+    }
+    if (options?.size) {
+      params.size = options.size.toString()
+    }
+    if (options?.sortBy) {
+      params.sort_by = options.sortBy.toString()
+    }
+    if (options?.sortOrder) {
+      params.sort_order = options.sortOrder.toString()
+    }
+    return new URLSearchParams(params)
   }
 }

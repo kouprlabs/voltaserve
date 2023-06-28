@@ -32,6 +32,7 @@ export type ListOptions = {
   query?: string
   organizationId?: string
   groupId?: string
+  nonGroupMembersOnly?: boolean
   size?: number
   page?: number
   sortBy?: SortBy
@@ -40,10 +41,24 @@ export type ListOptions = {
 
 export default class UserAPI {
   static useList(options?: ListOptions, swrOptions?: any) {
-    return useSWR<List>('/users', () => this.list(options), swrOptions)
+    return useSWR<List>(
+      `/users?${this.paramsFromListOptions(options)}`,
+      () => this.list(options),
+      swrOptions
+    )
   }
 
   static async list(options?: ListOptions): Promise<List> {
+    return apiFetch(`/users?${this.paramsFromListOptions(options)}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
+        'Content-Type': 'application/json',
+      },
+    }).then((result) => result.json())
+  }
+
+  static paramsFromListOptions(options?: ListOptions): URLSearchParams {
     const params: any = {}
     if (options?.query) {
       params.query = encodeURIComponent(options.query.toString())
@@ -53,6 +68,9 @@ export default class UserAPI {
     }
     if (options?.groupId) {
       params.group_id = options.groupId.toString()
+    }
+    if (options?.nonGroupMembersOnly) {
+      params.non_group_members_only = options.nonGroupMembersOnly.toString()
     }
     if (options?.page) {
       params.page = options.page.toString()
@@ -66,12 +84,6 @@ export default class UserAPI {
     if (options?.sortOrder) {
       params.sort_order = options.sortOrder.toString()
     }
-    return apiFetch(`/users?${new URLSearchParams(params)}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
-        'Content-Type': 'application/json',
-      },
-    }).then((result) => result.json())
+    return new URLSearchParams(params)
   }
 }

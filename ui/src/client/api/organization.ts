@@ -72,27 +72,15 @@ export default class OrganizationAPI {
   }
 
   static useList(options?: ListOptions, swrOptions?: any) {
-    return useSWR<List>('/organizations', () => this.list(options), swrOptions)
+    return useSWR<List>(
+      `/organizations?${this.paramsFromListOptions(options)}`,
+      () => this.list(options),
+      swrOptions
+    )
   }
 
   static async list(options?: ListOptions): Promise<List> {
-    const params: any = {}
-    if (options?.query) {
-      params.query = encodeURIComponent(options.query.toString())
-    }
-    if (options?.page) {
-      params.page = options.page.toString()
-    }
-    if (options?.size) {
-      params.size = options.size.toString()
-    }
-    if (options?.sortBy) {
-      params.sort_by = options.sortBy.toString()
-    }
-    if (options?.sortOrder) {
-      params.sort_order = options.sortOrder.toString()
-    }
-    return apiFetch(`/organizations?${new URLSearchParams(params)}`, {
+    return apiFetch(`/organizations?${this.paramsFromListOptions(options)}`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
@@ -168,5 +156,25 @@ export default class OrganizationAPI {
         'Content-Type': 'application/json',
       },
     })
+  }
+
+  static paramsFromListOptions(options?: ListOptions): URLSearchParams {
+    const params: any = {}
+    if (options?.query) {
+      params.query = encodeURIComponent(options.query.toString())
+    }
+    if (options?.page) {
+      params.page = options.page.toString()
+    }
+    if (options?.size) {
+      params.size = options.size.toString()
+    }
+    if (options?.sortBy) {
+      params.sort_by = options.sortBy.toString()
+    }
+    if (options?.sortOrder) {
+      params.sort_order = options.sortOrder.toString()
+    }
+    return new URLSearchParams(params)
   }
 }
