@@ -1571,32 +1571,6 @@ paths:
       summary: Add member
       tags:
       - Groups
-  /groups/{id}/get_available_users:
-    get:
-      description: Search
-      operationId: groups_get_available_users
-      parameters:
-      - description: ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/service.User'
-            type: array
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Search
-      tags:
-      - Groups
   /groups/{id}/remove_member:
     post:
       consumes:

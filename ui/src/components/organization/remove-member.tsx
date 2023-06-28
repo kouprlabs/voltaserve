@@ -13,6 +13,7 @@ import {
 import { variables } from '@koupr/ui'
 import OrganizationAPI, { Organization } from '@/client/api/organization'
 import { User } from '@/client/idp/user'
+import userToString from '@/helpers/user-to-string'
 
 type RemoveMemberProps = {
   organization: Organization
@@ -58,7 +59,7 @@ const RemoveMember = ({
           <Text>
             Are you sure you would like to remove member{' '}
             <Text as="span" fontWeight="bold" whiteSpace="nowrap">
-              {user.fullName}
+              {userToString(user)}
             </Text>{' '}
             from organization{' '}
             <Text as="span" fontWeight="bold" whiteSpace="nowrap">

@@ -1,6 +1,5 @@
 import useSWR from 'swr'
 import { apiFetch } from '@/client/fetch'
-import { User } from '@/client/idp/user'
 import { getAccessTokenOrRedirect } from '@/infra/token'
 import { Organization } from './organization'
 
@@ -114,30 +113,15 @@ export default class GroupAPI {
   }
 
   static useList(options?: ListOptions, swrOptions?: any) {
-    return useSWR<List>('/groups', () => this.list(options), swrOptions)
+    return useSWR<List>(
+      `/groups?${this.paramsFromListOptions(options)}`,
+      () => this.list(options),
+      swrOptions
+    )
   }
 
   static async list(options?: ListOptions): Promise<List> {
-    const params: any = {}
-    if (options?.query) {
-      params.query = encodeURIComponent(options.query.toString())
-    }
-    if (options?.organizationId) {
-      params.organization_id = options.organizationId.toString()
-    }
-    if (options?.page) {
-      params.page = options.page.toString()
-    }
-    if (options?.size) {
-      params.size = options.size.toString()
-    }
-    if (options?.sortBy) {
-      params.sort_by = options.sortBy.toString()
-    }
-    if (options?.sortOrder) {
-      params.sort_order = options.sortOrder.toString()
-    }
-    return apiFetch(`/groups?${new URLSearchParams(params)}`, {
+    return apiFetch(`/groups?${this.paramsFromListOptions(options)}`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
@@ -175,20 +159,26 @@ export default class GroupAPI {
       },
     })
 
-  static useGetAvailableUsers = (id: string, swrOptions?: any) =>
-    useSWR<User[]>(
-      id ? `/groups/${id}/get_available_users` : null,
-      () => this.getAvailableUsers(id),
-      swrOptions
-    )
-
-  static async getAvailableUsers(id: string): Promise<User[]> {
-    return apiFetch(`/groups/${id}/get_available_users`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
-        'Content-Type': 'application/json',
-      },
-    }).then((result) => result.json())
+  static paramsFromListOptions(options?: ListOptions): URLSearchParams {
+    const params: any = {}
+    if (options?.query) {
+      params.query = encodeURIComponent(options.query.toString())
+    }
+    if (options?.organizationId) {
+      params.organization_id = options.organizationId.toString()
+    }
+    if (options?.page) {
+      params.page = options.page.toString()
+    }
+    if (options?.size) {
+      params.size = options.size.toString()
+    }
+    if (options?.sortBy) {
+      params.sort_by = options.sortBy.toString()
+    }
+    if (options?.sortOrder) {
+      params.sort_order = options.sortOrder.toString()
+    }
+    return new URLSearchParams(params)
   }
 }

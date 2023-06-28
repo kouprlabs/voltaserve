@@ -39,7 +39,7 @@ import { geEditorPermission } from '@/client/api/permission'
 import UserAPI, { User } from '@/client/api/user'
 import WorkspaceAPI from '@/client/api/workspace'
 import IdPUserAPI from '@/client/idp/user'
-import userToString from '@/helpers/user-to-string'
+import UserSelector from '@/components/common/user-selector'
 import { filesUpdated } from '@/store/entities/files'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { selectionUpdated, sharingModalDidClose } from '@/store/ui/files'
@@ -286,18 +286,10 @@ const Sharing = () => {
                   ) : null}
                   {users && users.length > 0 ? (
                     <Stack direction="column" spacing={variables.spacing}>
-                      <Select
-                        placeholder="Select user"
-                        value={activeUserId}
-                        isDisabled={isGrantLoading}
-                        onChange={(e) => setActiveUserId(e.target.value)}
-                      >
-                        {users.map((u) => (
-                          <option key={u.id} value={u.id}>
-                            {userToString(u)}
-                          </option>
-                        ))}
-                      </Select>
+                      <UserSelector
+                        organizationId={workspace?.organization.id}
+                        onConfirm={(value) => setActiveUserId(value.id)}
+                      />
                       <Select
                         placeholder="Select Permission"
                         value={activeUserPermission}

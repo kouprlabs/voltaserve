@@ -26,9 +26,8 @@ func (r *GroupRouter) AppendRoutes(g fiber.Router) {
 	g.Get("/:id", r.GetByID)
 	g.Delete("/:id", r.Delete)
 	g.Post("/:id/update_name", r.UpdateName)
-	g.Post("/:id/remove_member", r.RemoveMember)
 	g.Post("/:id/add_member", r.AddMember)
-	g.Get("/:id/get_available_users", r.GetAvailableUsers)
+	g.Post("/:id/remove_member", r.RemoveMember)
 }
 
 // Create godoc
@@ -247,24 +246,4 @@ func (r *GroupRouter) RemoveMember(c *fiber.Ctx) error {
 		return err
 	}
 	return c.SendStatus(http.StatusNoContent)
-}
-
-// SearchMembers godoc
-//
-//	@Summary		Search
-//	@Description	Search
-//	@Tags			Groups
-//	@Id				groups_get_available_users
-//	@Produce		json
-//	@Param			id	path		string	true	"ID"
-//	@Success		200	{array}		service.User
-//	@Failure		500	{object}	errorpkg.ErrorResponse
-//	@Router			/groups/{id}/get_available_users [get]
-func (r *GroupRouter) GetAvailableUsers(c *fiber.Ctx) error {
-	userID := GetUserID(c)
-	res, err := r.groupSvc.GetAvailableUsers(c.Params("id"), userID)
-	if err != nil {
-		return err
-	}
-	return c.JSON(res)
 }

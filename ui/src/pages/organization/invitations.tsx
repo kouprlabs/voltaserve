@@ -76,8 +76,7 @@ const OrganizationInvitationsPage = () => {
     error: invitationsError,
     mutate,
   } = InvitationAPI.useGetOutgoing(
-    id,
-    { page, size, sortOrder: SortOrder.Desc },
+    { organizationId: id, page, size, sortOrder: SortOrder.Desc },
     swrConfig()
   )
   const [isInviteMembersModalOpen, setIsInviteMembersModalOpen] =

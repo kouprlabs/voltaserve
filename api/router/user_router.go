@@ -68,18 +68,23 @@ func (r *UserRouter) List(c *fiber.Ctx) error {
 	if !IsValidSortOrder(sortOrder) {
 		return errorpkg.NewInvalidQueryParamError("sort_order")
 	}
-	if c.Query("organization_id") != "" && c.Query("group_id") != "" {
-		return errorpkg.NewInvalidQueryParamsError("only one of the params 'organization_id' or 'group_id' should be set, not both")
-	}
 	userID := GetUserID(c)
+	var nonGroupMembersOnly bool
+	if c.Query("non_group_members_only") != "" {
+		nonGroupMembersOnly, err = strconv.ParseBool(c.Query("non_group_members_only"))
+		if err != nil {
+			return err
+		}
+	}
 	res, err := r.userSvc.List(service.UserListOptions{
-		Query:          c.Query("query"),
-		OrganizationID: c.Query("organization_id"),
-		GroupID:        c.Query("group_id"),
-		SortBy:         sortBy,
-		SortOrder:      sortOrder,
-		Page:           uint(page),
-		Size:           uint(size),
+		Query:               c.Query("query"),
+		OrganizationID:      c.Query("organization_id"),
+		GroupID:             c.Query("group_id"),
+		NonGroupMembersOnly: nonGroupMembersOnly,
+		SortBy:              sortBy,
+		SortOrder:           sortOrder,
+		Page:                uint(page),
+		Size:                uint(size),
 	}, userID)
 	if err != nil {
 		return err

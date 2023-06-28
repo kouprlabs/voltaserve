@@ -223,29 +223,16 @@ export default class FileAPI {
   }
 
   static async list(id: string, options: ListOptions): Promise<List> {
-    const params: any = {}
-    if (options?.page) {
-      params.page = options.page.toString()
-    }
-    if (options?.size) {
-      params.size = options.size.toString()
-    }
-    if (options.sortBy) {
-      params.sort_by = options.sortBy.toString()
-    }
-    if (options.sortOrder) {
-      params.sort_order = options.sortOrder.toString()
-    }
-    if (options.type) {
-      params.type = options.type
-    }
-    return apiFetch(`/files/${id}/list?${new URLSearchParams(params)}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
-        'Content-Type': 'application/json',
-      },
-    }).then((result) => result.json())
+    return apiFetch(
+      `/files/${id}/list?${this.paramsFromListOptions(options)}`,
+      {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    ).then((result) => result.json())
   }
 
   static async search(
@@ -437,5 +424,25 @@ export default class FileAPI {
         'Content-Type': 'application/json',
       },
     }).then((result) => result.json())
+  }
+
+  static paramsFromListOptions(options?: ListOptions): URLSearchParams {
+    const params: any = {}
+    if (options?.page) {
+      params.page = options.page.toString()
+    }
+    if (options?.size) {
+      params.size = options.size.toString()
+    }
+    if (options?.sortBy) {
+      params.sort_by = options.sortBy.toString()
+    }
+    if (options?.sortOrder) {
+      params.sort_order = options.sortOrder.toString()
+    }
+    if (options?.type) {
+      params.type = options.type
+    }
+    return new URLSearchParams(params)
   }
 }
