@@ -31,3 +31,9 @@ Format code:
 ```shell
 black .
 ```
+
+Build Docker image:
+
+```shell
+docker build -t voltaserve/language .
+```
