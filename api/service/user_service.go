@@ -29,13 +29,14 @@ type UserList struct {
 }
 
 type UserListOptions struct {
-	Query          string
-	OrganizationID string
-	GroupID        string
-	SortBy         string
-	SortOrder      string
-	Page           uint
-	Size           uint
+	Query               string
+	OrganizationID      string
+	GroupID             string
+	NonGroupMembersOnly bool
+	SortBy              string
+	SortOrder           string
+	Page                uint
+	Size                uint
 }
 
 type UserService struct {
@@ -102,7 +103,28 @@ func (svc *UserService) List(opts UserListOptions, userID string) (*UserList, er
 	}
 	res := []model.User{}
 	if opts.Query == "" {
-		if opts.OrganizationID != "" {
+		if opts.OrganizationID != "" && opts.GroupID != "" && opts.NonGroupMembersOnly {
+			orgMembers, err := svc.orgRepo.GetMembers(group.GetOrganizationID())
+			if err != nil {
+				return nil, err
+			}
+			groupMembers, err := svc.groupRepo.GetMembers(opts.GroupID)
+			if err != nil {
+				return nil, err
+			}
+			for _, om := range orgMembers {
+				found := false
+				for _, tm := range groupMembers {
+					if om.GetID() == tm.GetID() {
+						found = true
+						break
+					}
+				}
+				if !found {
+					res = append(res, om)
+				}
+			}
+		} else if opts.OrganizationID != "" {
 			res, err = svc.orgRepo.GetMembers(opts.OrganizationID)
 			if err != nil {
 				return nil, err

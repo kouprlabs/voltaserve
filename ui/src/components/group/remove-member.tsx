@@ -13,6 +13,7 @@ import {
 import { variables } from '@koupr/ui'
 import GroupAPI, { Group } from '@/client/api/group'
 import { User } from '@/client/idp/user'
+import userToString from '@/helpers/user-to-string'
 
 type RemoveMemberProps = {
   group: Group
@@ -58,7 +59,7 @@ const RemoveMember = ({
           <Text>
             Are you sure you would like to remove member{' '}
             <Text as="span" fontWeight="bold" whiteSpace="nowrap">
-              {user.fullName}
+              {userToString(user)}
             </Text>{' '}
             from group{' '}
             <Text as="span" fontWeight="bold" whiteSpace="nowrap">

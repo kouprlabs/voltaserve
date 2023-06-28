@@ -78,27 +78,15 @@ export default class WorkspaceAPI {
   }
 
   static useList(options?: ListOptions, swrOptions?: any) {
-    return useSWR<List>('/workspaces', () => this.list(options), swrOptions)
+    return useSWR<List>(
+      `/workspaces?${this.paramsFromListOptions(options)}`,
+      () => this.list(options),
+      swrOptions
+    )
   }
 
   static async list(options?: ListOptions): Promise<List> {
-    const params: any = {}
-    if (options?.query) {
-      params.query = encodeURIComponent(options.query.toString())
-    }
-    if (options?.page) {
-      params.page = options.page.toString()
-    }
-    if (options?.size) {
-      params.size = options.size.toString()
-    }
-    if (options?.sortBy) {
-      params.sort_by = options.sortBy.toString()
-    }
-    if (options?.sortOrder) {
-      params.sort_order = options.sortOrder.toString()
-    }
-    return apiFetch(`/workspaces?${new URLSearchParams(params)}`, {
+    return apiFetch(`/workspaces?${this.paramsFromListOptions(options)}`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
@@ -167,5 +155,25 @@ export default class WorkspaceAPI {
         'Content-Type': 'application/json',
       },
     })
+  }
+
+  static paramsFromListOptions(options?: ListOptions): URLSearchParams {
+    const params: any = {}
+    if (options?.query) {
+      params.query = encodeURIComponent(options.query.toString())
+    }
+    if (options?.page) {
+      params.page = options.page.toString()
+    }
+    if (options?.size) {
+      params.size = options.size.toString()
+    }
+    if (options?.sortBy) {
+      params.sort_by = options.sortBy.toString()
+    }
+    if (options?.sortOrder) {
+      params.sort_order = options.sortOrder.toString()
+    }
+    return new URLSearchParams(params)
   }
 }

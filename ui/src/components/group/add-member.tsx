@@ -11,7 +11,6 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
-  Select,
   Stack,
 } from '@chakra-ui/react'
 import { variables } from '@koupr/ui'
@@ -26,7 +25,8 @@ import {
 } from 'formik'
 import * as Yup from 'yup'
 import GroupAPI, { Group } from '@/client/api/group'
-import userToString from '@/helpers/user-to-string'
+import UserAPI from '@/client/api/user'
+import UserSelector from '../common/user-selector'
 
 type AddMemberProps = {
   open: boolean
@@ -42,7 +42,6 @@ const AddMember = ({ group, open, onClose }: AddMemberProps) => {
   const navigate = useNavigate()
   const { mutate } = useSWRConfig()
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const { data: users } = GroupAPI.useGetAvailableUsers(group.id)
   const formSchema = Yup.object().shape({
     userId: Yup.string().required('User is required'),
   })
@@ -61,7 +60,12 @@ const AddMember = ({ group, open, onClose }: AddMemberProps) => {
         await GroupAPI.addMember(group.id, {
           userId,
         })
-        mutate(`/groups/${group.id}/get_members`)
+        mutate(
+          `/users?${UserAPI.paramsFromListOptions({
+            groupId: group.id,
+            nonGroupMembersOnly: true,
+          })}`
+        )
         mutate(`/groups/${group.id}/get_available_users`)
         setSubmitting(false)
         onClose?.()
@@ -90,7 +94,7 @@ const AddMember = ({ group, open, onClose }: AddMemberProps) => {
           validateOnBlur={false}
           onSubmit={handleSubmit}
         >
-          {({ errors, touched, isSubmitting }) => (
+          {({ errors, touched, isSubmitting, setFieldValue }) => (
             <Form>
               <ModalBody>
                 <Stack spacing={variables.spacing}>
@@ -101,13 +105,14 @@ const AddMember = ({ group, open, onClose }: AddMemberProps) => {
                           errors.userId && touched.userId ? true : false
                         }
                       >
-                        <Select {...field} placeholder="Select a user">
-                          {users?.map((u) => (
-                            <option key={u.id} value={u.id}>
-                              {userToString(u)}
-                            </option>
-                          ))}
-                        </Select>
+                        <UserSelector
+                          organizationId={group.organization.id}
+                          groupId={group.id}
+                          nonGroupMembersOnly={true}
+                          onConfirm={(value) =>
+                            setFieldValue(field.name, value.id)
+                          }
+                        />
                         <FormErrorMessage>{errors.userId}</FormErrorMessage>
                       </FormControl>
                     )}

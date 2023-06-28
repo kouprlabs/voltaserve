@@ -2,6 +2,7 @@ import { useCallback, useState } from 'react'
 import { Button, Stack, Text, useToast } from '@chakra-ui/react'
 import { useSWRConfig } from 'swr'
 import InvitationAPI, { Invitation } from '@/client/api/invitation'
+import userToString from '@/helpers/user-to-string'
 
 type NewInvitationProps = {
   invitation: Invitation
@@ -57,7 +58,7 @@ const NewInvitationItem = ({ invitation }: NewInvitationProps) => {
       <Text>
         You have been invited by{' '}
         <Text as="span" whiteSpace="nowrap" fontWeight="bold">
-          {invitation.owner.fullName}
+          {userToString(invitation.owner)}
         </Text>{' '}
         to join the organization{' '}
         <Text as="span" whiteSpace="nowrap" fontWeight="bold">
