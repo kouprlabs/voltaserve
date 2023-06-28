@@ -26,6 +26,7 @@ import { Helmet } from 'react-helmet-async'
 import GroupAPI from '@/client/api/group'
 import OrganizationAPI, { Organization } from '@/client/api/organization'
 import { geEditorPermission } from '@/client/api/permission'
+import OrganizationSelector from '@/components/common/organization-selector'
 
 type FormValues = {
   name: string
@@ -90,7 +91,7 @@ const NewGroupPage = () => {
           validateOnBlur={false}
           onSubmit={handleSubmit}
         >
-          {({ errors, touched, isSubmitting }) => (
+          {({ errors, touched, isSubmitting, setFieldValue }) => (
             <Form>
               <Stack spacing={variables.spacing2Xl}>
                 <Stack spacing={variables.spacing}>
@@ -117,13 +118,11 @@ const NewGroupPage = () => {
                         }
                       >
                         <FormLabel>Organization</FormLabel>
-                        <Select {...field} placeholder=" ">
-                          {orgs.map((o) => (
-                            <option key={o.id} value={o.id}>
-                              {o.name}
-                            </option>
-                          ))}
-                        </Select>
+                        <OrganizationSelector
+                          onConfirm={(value) =>
+                            setFieldValue(field.name, value.id)
+                          }
+                        />
                         <FormErrorMessage>
                           {errors.organizationId}
                         </FormErrorMessage>

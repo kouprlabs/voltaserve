@@ -78,6 +78,7 @@ const Create = () => {
       <Modal
         isOpen={isModalOpen}
         onClose={() => dispatch(createModalDidClose())}
+        closeOnOverlayClick={false}
       >
         <ModalOverlay />
         <ModalContent>

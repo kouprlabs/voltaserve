@@ -235,6 +235,7 @@ const Sharing = () => {
         dispatch(selectionUpdated([]))
         dispatch(sharingModalDidClose())
       }}
+      closeOnOverlayClick={false}
     >
       <ModalOverlay />
       <ModalContent>

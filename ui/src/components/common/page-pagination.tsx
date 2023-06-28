@@ -4,11 +4,13 @@ import { Select } from '@chakra-ui/react'
 import Pagination from '@/components/common/pagination'
 
 type PagePaginationHookOptions = {
+  disableLocalStorage?: boolean
   localStoragePrefix?: string
   localStorageNamespace?: string
 }
 
 export const usePagePagination = ({
+  disableLocalStorage = false,
   localStoragePrefix = 'app',
   localStorageNamespace = 'main',
 }: PagePaginationHookOptions) => {
@@ -24,13 +26,13 @@ export const usePagePagination = ({
     [localStoragePrefix, localStorageNamespace]
   )
   const [size, setSize] = useState(
-    localStorage.getItem(localStorageSizeKey)
+    localStorage.getItem(localStorageSizeKey) && !disableLocalStorage
       ? parseInt(localStorage.getItem(localStorageSizeKey) as string)
       : 5
   )
 
   useEffect(() => {
-    if (size) {
+    if (size && !disableLocalStorage) {
       localStorage.setItem(localStorageSizeKey, JSON.stringify(size))
     }
   }, [size, localStorageSizeKey])
@@ -57,6 +59,7 @@ type PagePaginationProps = {
   totalPages: number
   page: number
   size: number
+  paginationSize?: string
   onPageChange: (page: number) => void
   onSizeChange: (size: number) => void
 }
@@ -65,6 +68,7 @@ const PagePagination = ({
   totalPages,
   page,
   size,
+  paginationSize = 'md',
   onPageChange,
   onSizeChange,
 }: PagePaginationProps) => {
@@ -72,6 +76,7 @@ const PagePagination = ({
     <>
       {totalPages > 1 ? (
         <Pagination
+          size={paginationSize}
           page={page}
           totalPages={totalPages}
           onPageChange={onPageChange}

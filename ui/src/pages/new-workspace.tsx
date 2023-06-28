@@ -26,6 +26,7 @@ import { Helmet } from 'react-helmet-async'
 import OrganizationAPI, { Organization } from '@/client/api/organization'
 import { geEditorPermission } from '@/client/api/permission'
 import WorkspaceAPI from '@/client/api/workspace'
+import OrganizationSelector from '@/components/common/organization-selector'
 import StorageInput from '@/components/common/storage-input'
 import { gigabyteToByte } from '@/helpers/convert-storage'
 
@@ -101,7 +102,7 @@ const NewWorkspacePage = () => {
           validateOnBlur={false}
           onSubmit={handleSubmit}
         >
-          {({ errors, touched, isSubmitting }) => (
+          {({ errors, touched, isSubmitting, setFieldValue }) => (
             <Form>
               <Stack spacing={variables.spacing2Xl}>
                 <Stack spacing={variables.spacing}>
@@ -128,17 +129,11 @@ const NewWorkspacePage = () => {
                         }
                       >
                         <FormLabel>Organization</FormLabel>
-                        <Select
-                          {...field}
-                          placeholder=" "
-                          disabled={isSubmitting}
-                        >
-                          {orgs.map((o) => (
-                            <option key={o.id} value={o.id}>
-                              {o.name}
-                            </option>
-                          ))}
-                        </Select>
+                        <OrganizationSelector
+                          onConfirm={(value) =>
+                            setFieldValue(field.name, value.id)
+                          }
+                        />
                         <FormErrorMessage>
                           {errors.organizationId}
                         </FormErrorMessage>
