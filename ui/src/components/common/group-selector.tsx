@@ -24,8 +24,7 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react'
 import { SectionSpinner, variables } from '@koupr/ui'
-import GroupAPI, { Group } from '@/client/api/group'
-import { SortOrder } from '@/client/api/organization'
+import GroupAPI, { Group, SortOrder } from '@/client/api/group'
 import { swrConfig } from '@/client/options'
 import Pagination from '@/components/common/pagination'
 import SearchInput from '@/components/common/search-input'
