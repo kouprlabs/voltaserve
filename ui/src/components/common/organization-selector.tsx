@@ -58,6 +58,8 @@ const OrganizationSelector = ({ onConfirm }: OrganizationSelectorProps) => {
     swrConfig()
   )
   const selectionColor = useColorModeValue('gray.100', 'gray.600')
+  const dimmedButtonLabelColor = useColorModeValue('gray.500', 'gray.500')
+  const normalButtonLabelColor = useColorModeValue('black', 'white')
 
   useEffect(() => {
     mutate()
@@ -89,7 +91,12 @@ const OrganizationSelector = ({ onConfirm }: OrganizationSelectorProps) => {
 
   return (
     <>
-      <Button variant="outline" w="100%" onClick={onOpen}>
+      <Button
+        variant="outline"
+        w="100%"
+        onClick={onOpen}
+        color={confirmed ? normalButtonLabelColor : dimmedButtonLabelColor}
+      >
         {confirmed ? confirmed.name : 'Select Organization'}
       </Button>
       <Modal
