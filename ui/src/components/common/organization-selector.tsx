@@ -33,6 +33,7 @@ import {
   InputRightElement,
   IconButton,
   Input,
+  useColorModeValue,
 } from '@chakra-ui/react'
 import { SectionSpinner, variables } from '@koupr/ui'
 import { IconClose, IconSearch } from '@koupr/ui'
@@ -62,6 +63,7 @@ const OrganizationSelector = ({ onConfirm }: OrganizationSelectorProps) => {
     { query, page, size: 5, sortOrder: SortOrder.Desc },
     swrConfig()
   )
+  const selectionColor = useColorModeValue('gray.100', 'gray.600')
 
   useEffect(() => {
     mutate()
@@ -156,7 +158,7 @@ const OrganizationSelector = ({ onConfirm }: OrganizationSelectorProps) => {
                       <Tr
                         key={o.id}
                         cursor="pointer"
-                        bg={selected?.id === o.id ? 'gray.100' : 'auto'}
+                        bg={selected?.id === o.id ? selectionColor : 'auto'}
                         onClick={() => setSelected(o)}
                       >
                         <Td>
