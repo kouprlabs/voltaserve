@@ -35,7 +35,7 @@ export const usePagePagination = ({
     if (size && !disableLocalStorage) {
       localStorage.setItem(localStorageSizeKey, JSON.stringify(size))
     }
-  }, [size, localStorageSizeKey])
+  }, [size, localStorageSizeKey, disableLocalStorage])
 
   useEffect(() => {
     if (!queryParams.has('page')) {

@@ -1,10 +1,4 @@
-import {
-  useCallback,
-  useEffect,
-  useState,
-  KeyboardEvent,
-  ChangeEvent,
-} from 'react'
+import { useCallback, useEffect, useState, ChangeEvent } from 'react'
 import {
   Button,
   Text,
@@ -67,7 +61,7 @@ const OrganizationSelector = ({ onConfirm }: OrganizationSelectorProps) => {
 
   useEffect(() => {
     mutate()
-  }, [page, query])
+  }, [page, query, mutate])
 
   useEffect(() => {
     if (!isOpen) {
@@ -91,7 +85,7 @@ const OrganizationSelector = ({ onConfirm }: OrganizationSelectorProps) => {
       onConfirm?.(selected)
       onClose()
     }
-  }, [selected, onClose])
+  }, [selected, onConfirm, onClose])
 
   return (
     <>

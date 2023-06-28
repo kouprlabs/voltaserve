@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {
   Button,
@@ -8,7 +8,6 @@ import {
   Heading,
   HStack,
   Input,
-  Select,
   Stack,
 } from '@chakra-ui/react'
 import { variables } from '@koupr/ui'
@@ -23,8 +22,6 @@ import {
 } from 'formik'
 import * as Yup from 'yup'
 import { Helmet } from 'react-helmet-async'
-import OrganizationAPI, { Organization } from '@/client/api/organization'
-import { geEditorPermission } from '@/client/api/permission'
 import WorkspaceAPI from '@/client/api/workspace'
 import OrganizationSelector from '@/components/common/organization-selector'
 import StorageInput from '@/components/common/storage-input'
@@ -39,7 +36,6 @@ type FormValues = {
 const NewWorkspacePage = () => {
   const navigate = useNavigate()
   const { mutate } = useSWRConfig()
-  const [orgs, setOrgs] = useState<Organization[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const formSchema = Yup.object().shape({
     name: Yup.string().required('Name is required').max(255),
@@ -50,13 +46,6 @@ const NewWorkspacePage = () => {
       .integer()
       .min(1, 'Invalid storage usage value'),
   })
-
-  useEffect(() => {
-    ;(async () => {
-      const list = await OrganizationAPI.list()
-      setOrgs(list.data.filter((o) => geEditorPermission(o.permission)))
-    })()
-  }, [])
 
   const handleSubmit = useCallback(
     async (

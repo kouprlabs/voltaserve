@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import {
   Button,
@@ -8,7 +8,6 @@ import {
   Heading,
   HStack,
   Input,
-  Select,
   Stack,
 } from '@chakra-ui/react'
 import { variables } from '@koupr/ui'
@@ -24,8 +23,6 @@ import {
 import * as Yup from 'yup'
 import { Helmet } from 'react-helmet-async'
 import GroupAPI from '@/client/api/group'
-import OrganizationAPI, { Organization } from '@/client/api/organization'
-import { geEditorPermission } from '@/client/api/permission'
 import OrganizationSelector from '@/components/common/organization-selector'
 
 type FormValues = {
@@ -38,19 +35,11 @@ const NewGroupPage = () => {
   const params = useParams()
   const orgId = params.org as string
   const { mutate } = useSWRConfig()
-  const [orgs, setOrgs] = useState<Organization[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const formSchema = Yup.object().shape({
     name: Yup.string().required('Name is required').max(255),
     organizationId: Yup.string().required('Organization is required'),
   })
-
-  useEffect(() => {
-    ;(async () => {
-      const list = await OrganizationAPI.list()
-      setOrgs(list.data.filter((o) => geEditorPermission(o.permission)))
-    })()
-  }, [])
 
   const handleSubmit = useCallback(
     async (
