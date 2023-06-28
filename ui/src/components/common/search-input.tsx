@@ -28,10 +28,8 @@ const SearchInput = ({ query, onChange }: SearchInputProps) => {
   const [isFocused, setIsFocused] = useState(false)
 
   useEffect(() => {
-    if (query !== draft) {
-      setDraft(query || '')
-    }
-  }, [query, draft])
+    setDraft(query || '')
+  }, [query])
 
   useEffect(() => {
     onChange?.(text)
@@ -56,7 +54,7 @@ const SearchInput = ({ query, onChange }: SearchInputProps) => {
         handleSearch(value)
       }
     },
-    [handleSearch]
+    []
   )
 
   return (
