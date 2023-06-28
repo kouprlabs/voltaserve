@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useSearchParams } from 'react-router-dom'
 import {
   IconButton,
   Menu,
@@ -38,6 +38,7 @@ import PagePagination, {
 } from '@/components/common/page-pagination'
 import InviteMembers from '@/components/organization/invite-members'
 import RemoveMember from '@/components/organization/remove-member'
+import { decodeQuery } from '@/helpers/query'
 
 const OrganizationMembersPage = () => {
   const params = useParams()
@@ -51,12 +52,15 @@ const OrganizationMembersPage = () => {
     localStoragePrefix: 'voltaserve',
     localStorageNamespace: 'organization_member',
   })
+  const [searchParams] = useSearchParams()
+  const query = decodeQuery(searchParams.get('q') as string)
   const {
     data: list,
     error: membersError,
     mutate,
   } = UserAPI.useList(
     {
+      query,
       organizationId,
       page,
       size,

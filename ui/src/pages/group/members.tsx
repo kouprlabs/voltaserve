@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useSearchParams } from 'react-router-dom'
 import {
   HStack,
   IconButton,
@@ -34,6 +34,7 @@ import PagePagination, {
 } from '@/components/common/page-pagination'
 import AddMember from '@/components/group/add-member'
 import RemoveMember from '@/components/group/remove-member'
+import { decodeQuery } from '@/helpers/query'
 
 const GroupMembersPage = () => {
   const params = useParams()
@@ -46,12 +47,21 @@ const GroupMembersPage = () => {
     localStoragePrefix: 'voltaserve',
     localStorageNamespace: 'group_member',
   })
+  const [searchParams] = useSearchParams()
+  const query = decodeQuery(searchParams.get('q') as string)
   const {
     data: list,
     error: membersError,
     mutate,
   } = UserAPI.useList(
-    { groupId, page, size, sortBy: SortBy.FullName, sortOrder: SortOrder.Asc },
+    {
+      query,
+      groupId,
+      page,
+      size,
+      sortBy: SortBy.FullName,
+      sortOrder: SortOrder.Asc,
+    },
     swrConfig()
   )
   const [userToRemove, setUserToRemove] = useState<IdPUser>()

@@ -23,6 +23,8 @@ const Search = () => {
   const navigation = useNavigate()
   const location = useLocation()
   const params = useParams()
+  const organizationId = params.id as string
+  const groupId = params.id as string
   const workspaceId = params.id as string
   const fileId = params.fileId as string
   const [searchParams] = useSearchParams()
@@ -42,22 +44,41 @@ const Search = () => {
     () => location.pathname === '/organization',
     [location]
   )
+  const isOrgMembers = useMemo(
+    () =>
+      location.pathname.includes('/organization/') &&
+      location.pathname.includes('/member'),
+    [location]
+  )
+  const isGroupMembers = useMemo(
+    () =>
+      location.pathname.includes('/group/') &&
+      location.pathname.includes('/member'),
+    [location]
+  )
   const isAvailable = useMemo(
-    () => isWorkspaces || isFiles || isGroups || isOrgs,
+    () =>
+      isWorkspaces ||
+      isFiles ||
+      isGroups ||
+      isOrgs ||
+      isOrgMembers ||
+      isGroupMembers,
     [isWorkspaces, isFiles, isGroups, isOrgs]
   )
   const placeholder = useMemo(() => {
     if (isWorkspaces) {
-      return `Search Workspaces`
-    }
-    if (isFiles) {
-      return `Search Files`
-    }
-    if (isGroups) {
-      return `Search Groups`
-    }
-    if (isOrgs) {
-      return `Search Organizations`
+      return 'Search Workspaces'
+    } else if (isFiles) {
+      return 'Search Files'
+    } else if (isGroups) {
+      return 'Search Groups'
+    } else if (isOrgs) {
+      return 'Search Organizations'
+    } else if (isOrgMembers) {
+      return 'Search Organization Members'
+    } else if (isGroupMembers) {
+      return 'Search Group Members'
     }
   }, [isWorkspaces, isFiles, isGroups, isOrgs])
   const [text, setText] = useState(query || '')
@@ -99,6 +120,20 @@ const Search = () => {
         } else {
           navigation(`/organization`)
         }
+      } else if (isOrgMembers) {
+        if (value) {
+          navigation(
+            `/organization/${organizationId}/member?q=${encodeQuery(value)}`
+          )
+        } else {
+          navigation(`/organization/${organizationId}/member`)
+        }
+      } else if (isGroupMembers) {
+        if (value) {
+          navigation(`/group/${groupId}/member?q=${encodeQuery(value)}`)
+        } else {
+          navigation(`/group/${groupId}/member`)
+        }
       }
     },
     [workspaceId, fileId, isFiles, isWorkspaces, isGroups, isOrgs, navigation]
@@ -114,6 +149,10 @@ const Search = () => {
       navigation(`/group`)
     } else if (isOrgs) {
       navigation(`/organization`)
+    } else if (isOrgMembers) {
+      navigation(`/organization/${organizationId}/member`)
+    } else if (isGroupMembers) {
+      navigation(`/group/${groupId}/member`)
     }
   }, [workspaceId, fileId, isFiles, isWorkspaces, isGroups, isOrgs, navigation])
 
