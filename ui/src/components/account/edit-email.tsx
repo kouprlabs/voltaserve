@@ -70,7 +70,11 @@ const EditEmail = ({ open, user, onClose }: EditEmailProps) => {
   )
 
   return (
-    <Modal isOpen={isModalOpen} onClose={() => onClose?.()}>
+    <Modal
+      isOpen={isModalOpen}
+      onClose={() => onClose?.()}
+      closeOnOverlayClick={false}
+    >
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>Edit Email</ModalHeader>

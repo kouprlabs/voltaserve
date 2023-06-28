@@ -68,7 +68,11 @@ const Delete = ({ open, workspace, onClose }: DeleteProps) => {
   )
 
   return (
-    <Modal isOpen={isModalOpen} onClose={() => onClose?.()}>
+    <Modal
+      isOpen={isModalOpen}
+      onClose={() => onClose?.()}
+      closeOnOverlayClick={false}
+    >
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>Delete Workspace</ModalHeader>

@@ -74,7 +74,11 @@ const AddMember = ({ group, open, onClose }: AddMemberProps) => {
   )
 
   return (
-    <Modal isOpen={isModalOpen} onClose={() => onClose?.()}>
+    <Modal
+      isOpen={isModalOpen}
+      onClose={() => onClose?.()}
+      closeOnOverlayClick={false}
+    >
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>Add Member</ModalHeader>

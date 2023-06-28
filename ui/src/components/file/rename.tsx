@@ -67,7 +67,11 @@ const Rename = () => {
   )
 
   return (
-    <Modal isOpen={isModalOpen} onClose={() => dispatch(renameModalDidClose())}>
+    <Modal
+      isOpen={isModalOpen}
+      onClose={() => dispatch(renameModalDidClose())}
+      closeOnOverlayClick={false}
+    >
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>Rename File</ModalHeader>

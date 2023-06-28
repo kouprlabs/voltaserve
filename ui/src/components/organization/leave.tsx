@@ -41,7 +41,11 @@ const Leave = ({ open, id, onClose }: LeaveProps) => {
   }, [id, navigate, onClose])
 
   return (
-    <Modal isOpen={isModalOpen} onClose={() => onClose?.()}>
+    <Modal
+      isOpen={isModalOpen}
+      onClose={() => onClose?.()}
+      closeOnOverlayClick={false}
+    >
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>Leave Organization</ModalHeader>

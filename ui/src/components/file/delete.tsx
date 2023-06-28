@@ -45,7 +45,11 @@ const Delete = () => {
   }, [selection, params, dispatch])
 
   return (
-    <Modal isOpen={isModalOpen} onClose={() => dispatch(deleteModalDidClose())}>
+    <Modal
+      isOpen={isModalOpen}
+      onClose={() => dispatch(deleteModalDidClose())}
+      closeOnOverlayClick={false}
+    >
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>Delete File(s)</ModalHeader>

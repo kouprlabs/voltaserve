@@ -65,7 +65,11 @@ const Delete = ({ open, group, onClose }: DeleteProps) => {
   )
 
   return (
-    <Modal isOpen={isModalOpen} onClose={() => onClose?.()}>
+    <Modal
+      isOpen={isModalOpen}
+      onClose={() => onClose?.()}
+      closeOnOverlayClick={false}
+    >
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>Delete Group</ModalHeader>

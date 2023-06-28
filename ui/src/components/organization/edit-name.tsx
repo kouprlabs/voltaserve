@@ -67,7 +67,11 @@ const EditName = ({ open, organization, onClose }: EditNameProps) => {
   )
 
   return (
-    <Modal isOpen={isModalOpen} onClose={() => onClose?.()}>
+    <Modal
+      isOpen={isModalOpen}
+      onClose={() => onClose?.()}
+      closeOnOverlayClick={false}
+    >
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>Edit Name</ModalHeader>

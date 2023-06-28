@@ -94,7 +94,11 @@ const EditPicture = ({ open, user, onClose }: EditPictureProps) => {
   }, [onClose, mutate])
 
   return (
-    <Modal isOpen={isModalOpen} onClose={() => onClose?.()}>
+    <Modal
+      isOpen={isModalOpen}
+      onClose={() => onClose?.()}
+      closeOnOverlayClick={false}
+    >
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>Edit Picture</ModalHeader>
