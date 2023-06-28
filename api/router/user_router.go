@@ -69,7 +69,7 @@ func (r *UserRouter) List(c *fiber.Ctx) error {
 		return errorpkg.NewInvalidQueryParamError("sort_order")
 	}
 	if c.Query("organization_id") != "" && c.Query("group_id") != "" {
-		return errorpkg.NewInvalidQueryParamsError("only one of the params 'org' or 'group' should be set, not both")
+		return errorpkg.NewInvalidQueryParamsError("only one of the params 'organization_id' or 'group_id' should be set, not both")
 	}
 	userID := GetUserID(c)
 	res, err := r.userSvc.List(service.UserListOptions{
