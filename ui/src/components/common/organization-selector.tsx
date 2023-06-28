@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useState, ChangeEvent } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useState,
+  ChangeEvent,
+  KeyboardEvent,
+} from 'react'
 import {
   Button,
   Text,
@@ -37,7 +43,83 @@ import OrganizationAPI, {
 } from '@/client/api/organization'
 import { swrConfig } from '@/client/options'
 import Pagination from '@/components/common/pagination'
-import { CreateOrganizationButton } from '@/components/top-bar/buttons'
+
+type SearchProps = {
+  query?: string
+  onChange?: (value: string) => void
+}
+
+const Search = ({ query, onChange }: SearchProps) => {
+  const [draft, setDraft] = useState('')
+  const [text, setText] = useState('')
+  const [isFocused, setIsFocused] = useState(false)
+
+  useEffect(() => {
+    if (query !== draft) {
+      setDraft(query || '')
+    }
+  }, [query, draft])
+
+  useEffect(() => {
+    onChange?.(text)
+  }, [text, onChange])
+
+  const handleClear = useCallback(() => {
+    setDraft('')
+    setText('')
+  }, [])
+
+  const handleChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
+    setDraft(event.target.value || '')
+  }, [])
+
+  const handleSearch = useCallback((value: string) => {
+    setText(value)
+  }, [])
+
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLInputElement>, value: string) => {
+      if (event.key === 'Enter') {
+        handleSearch(value)
+      }
+    },
+    [handleSearch]
+  )
+
+  return (
+    <HStack>
+      <InputGroup>
+        <InputLeftElement pointerEvents="none">
+          <Icon as={IconSearch} color="gray.300" />
+        </InputLeftElement>
+        <Input
+          value={draft}
+          placeholder={draft || 'Search'}
+          variant="filled"
+          onKeyDown={(event) => handleKeyDown(event, draft)}
+          onChange={handleChange}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
+        />
+        {draft && (
+          <InputRightElement>
+            <IconButton
+              icon={<IconClose />}
+              onClick={handleClear}
+              size="xs"
+              aria-label="Clear"
+            />
+          </InputRightElement>
+        )}
+      </InputGroup>
+      {draft || (isFocused && draft) ? (
+        <Button onClick={() => handleSearch(draft)} isDisabled={!draft}>
+          Search
+        </Button>
+      ) : null}
+    </HStack>
+  )
+}
 
 type OrganizationSelectorProps = {
   onConfirm?: (organinzation: Organization) => void
@@ -73,14 +155,6 @@ const OrganizationSelector = ({ onConfirm }: OrganizationSelectorProps) => {
     }
   }, [isOpen])
 
-  const handleClear = useCallback(() => {
-    setQuery('')
-  }, [])
-
-  const handleChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
-    setQuery(event.target.value || '')
-  }, [])
-
   const handleConfirm = useCallback(() => {
     if (selected) {
       setConfirmed(selected)
@@ -111,29 +185,7 @@ const OrganizationSelector = ({ onConfirm }: OrganizationSelectorProps) => {
           <ModalCloseButton />
           <ModalBody>
             <Stack direction="column" spacing={variables.spacing}>
-              <HStack>
-                <InputGroup>
-                  <InputLeftElement pointerEvents="none">
-                    <Icon as={IconSearch} color="gray.300" />
-                  </InputLeftElement>
-                  <Input
-                    value={query}
-                    placeholder={query || 'Search'}
-                    variant="filled"
-                    onChange={handleChange}
-                  />
-                  {query && (
-                    <InputRightElement>
-                      <IconButton
-                        icon={<IconClose />}
-                        onClick={handleClear}
-                        size="xs"
-                        aria-label="Clear"
-                      />
-                    </InputRightElement>
-                  )}
-                </InputGroup>
-              </HStack>
+              <Search query={query} onChange={(value) => setQuery(value)} />
               {!list && error && (
                 <Center h="300px">
                   <Text>Failed to load organizations.</Text>
@@ -144,7 +196,6 @@ const OrganizationSelector = ({ onConfirm }: OrganizationSelectorProps) => {
                 <Center h="300px">
                   <VStack spacing={variables.spacing}>
                     <Text>There are no organizations.</Text>
-                    <CreateOrganizationButton />
                   </VStack>
                 </Center>
               )}
