@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useSearchParams } from 'react-router-dom'
 import {
   HStack,
   IconButton,
@@ -19,17 +19,22 @@ import {
   Center,
   Avatar,
   Portal,
+  Stack,
 } from '@chakra-ui/react'
 import { variables, IconExit, IconUserPlus, SectionSpinner } from '@koupr/ui'
 import { Helmet } from 'react-helmet-async'
 import { HiDotsVertical } from 'react-icons/hi'
 import GroupAPI from '@/client/api/group'
 import { geEditorPermission } from '@/client/api/permission'
-import UserAPI from '@/client/api/user'
+import UserAPI, { SortBy, SortOrder } from '@/client/api/user'
 import { User as IdPUser } from '@/client/idp/user'
 import { swrConfig } from '@/client/options'
+import PagePagination, {
+  usePagePagination,
+} from '@/components/common/page-pagination'
 import AddMember from '@/components/group/add-member'
 import RemoveMember from '@/components/group/remove-member'
+import { decodeQuery } from '@/helpers/query'
 
 const GroupMembersPage = () => {
   const params = useParams()
@@ -38,11 +43,27 @@ const GroupMembersPage = () => {
     groupId,
     swrConfig()
   )
+  const { page, size, onPageChange, onSizeChange } = usePagePagination({
+    localStoragePrefix: 'voltaserve',
+    localStorageNamespace: 'group_member',
+  })
+  const [searchParams] = useSearchParams()
+  const query = decodeQuery(searchParams.get('q') as string)
   const {
-    data: members,
+    data: list,
     error: membersError,
     mutate,
-  } = UserAPI.useList({ groupId: groupId }, swrConfig())
+  } = UserAPI.useList(
+    {
+      query,
+      groupId,
+      page,
+      size,
+      sortBy: SortBy.FullName,
+      sortOrder: SortOrder.Asc,
+    },
+    swrConfig()
+  )
   const [userToRemove, setUserToRemove] = useState<IdPUser>()
   const [isAddMembersModalOpen, setIsAddMembersModalOpen] = useState(false)
   const [isRemoveMemberModalOpen, setIsRemoveMemberModalOpen] =
@@ -52,7 +73,7 @@ const GroupMembersPage = () => {
     return null
   }
 
-  if (!group || !members) {
+  if (!group || !list) {
     return <SectionSpinner />
   }
 
@@ -61,8 +82,12 @@ const GroupMembersPage = () => {
       <Helmet>
         <title>{group.name}</title>
       </Helmet>
-      {members.data.length > 0 && (
-        <>
+      {list.data.length > 0 && (
+        <Stack
+          direction="column"
+          spacing={variables.spacing2Xl}
+          pb={variables.spacing2Xl}
+        >
           <Table variant="simple">
             <Thead>
               <Tr>
@@ -72,7 +97,7 @@ const GroupMembersPage = () => {
               </Tr>
             </Thead>
             <Tbody>
-              {members.data.map((u) => (
+              {list.data.map((u) => (
                 <Tr key={u.id}>
                   <Td>
                     <HStack direction="row" spacing={variables.spacing}>
@@ -101,7 +126,7 @@ const GroupMembersPage = () => {
                               setIsRemoveMemberModalOpen(true)
                             }}
                           >
-                            Remove from group
+                            Remove From Group
                           </MenuItem>
                         </MenuList>
                       </Portal>
@@ -111,6 +136,17 @@ const GroupMembersPage = () => {
               ))}
             </Tbody>
           </Table>
+          {list && (
+            <HStack alignSelf="end">
+              <PagePagination
+                totalPages={list.totalPages}
+                page={page}
+                size={size}
+                onPageChange={onPageChange}
+                onSizeChange={onSizeChange}
+              />
+            </HStack>
+          )}
           {userToRemove && (
             <RemoveMember
               isOpen={isRemoveMemberModalOpen}
@@ -120,9 +156,9 @@ const GroupMembersPage = () => {
               onClose={() => setIsRemoveMemberModalOpen(false)}
             />
           )}
-        </>
+        </Stack>
       )}
-      {members.data.length === 0 && (
+      {list.data.length === 0 && (
         <>
           <Helmet>
             <title>{group.name}</title>
