@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useSearchParams } from 'react-router-dom'
 import {
   IconButton,
   Menu,
@@ -19,6 +19,7 @@ import {
   Button,
   Avatar,
   Portal,
+  Stack,
 } from '@chakra-ui/react'
 import {
   variables,
@@ -30,26 +31,45 @@ import {
 import { Helmet } from 'react-helmet-async'
 import OrganizationAPI from '@/client/api/organization'
 import { geEditorPermission } from '@/client/api/permission'
-import UserAPI from '@/client/api/user'
-import { User as IdPUser } from '@/client/idp/user'
+import UserAPI, { SortBy, SortOrder, User } from '@/client/api/user'
 import { swrConfig } from '@/client/options'
+import PagePagination, {
+  usePagePagination,
+} from '@/components/common/page-pagination'
 import InviteMembers from '@/components/organization/invite-members'
 import RemoveMember from '@/components/organization/remove-member'
+import { decodeQuery } from '@/helpers/query'
 
 const OrganizationMembersPage = () => {
   const params = useParams()
-  const orgId = params.id as string
+  const organizationId = params.id as string
   const invite = Boolean(params.invite as string)
   const { data: org, error: orgError } = OrganizationAPI.useGetById(
-    orgId,
+    organizationId,
     swrConfig()
   )
+  const { page, size, onPageChange, onSizeChange } = usePagePagination({
+    localStoragePrefix: 'voltaserve',
+    localStorageNamespace: 'organization_member',
+  })
+  const [searchParams] = useSearchParams()
+  const query = decodeQuery(searchParams.get('q') as string)
   const {
-    data: members,
+    data: list,
     error: membersError,
     mutate,
-  } = UserAPI.useList({ organizationId: orgId }, swrConfig())
-  const [userToRemove, setUserToRemove] = useState<IdPUser>()
+  } = UserAPI.useList(
+    {
+      query,
+      organizationId,
+      page,
+      size,
+      sortBy: SortBy.FullName,
+      sortOrder: SortOrder.Asc,
+    },
+    swrConfig()
+  )
+  const [userToRemove, setUserToRemove] = useState<User>()
   const [isInviteMembersModalOpen, setIsInviteMembersModalOpen] =
     useState(false)
   const [isRemoveMemberModalOpen, setIsRemoveMemberModalOpen] =
@@ -65,7 +85,7 @@ const OrganizationMembersPage = () => {
     return null
   }
 
-  if (!members || !org) {
+  if (!list || !org) {
     return <SectionSpinner />
   }
 
@@ -74,8 +94,12 @@ const OrganizationMembersPage = () => {
       <Helmet>
         <title>{org.name}</title>
       </Helmet>
-      {members.data.length > 0 && (
-        <>
+      {list.data.length > 0 && (
+        <Stack
+          direction="column"
+          spacing={variables.spacing2Xl}
+          pb={variables.spacing2Xl}
+        >
           <Table variant="simple">
             <Thead>
               <Tr>
@@ -85,7 +109,7 @@ const OrganizationMembersPage = () => {
               </Tr>
             </Thead>
             <Tbody>
-              {members.data.map((u) => (
+              {list.data.map((u) => (
                 <Tr key={u.id}>
                   <Td>
                     <HStack direction="row" spacing={variables.spacing}>
@@ -113,7 +137,7 @@ const OrganizationMembersPage = () => {
                               setIsRemoveMemberModalOpen(true)
                             }}
                           >
-                            Remove from organization
+                            Remove From Organization
                           </MenuItem>
                         </MenuList>
                       </Portal>
@@ -123,6 +147,17 @@ const OrganizationMembersPage = () => {
               ))}
             </Tbody>
           </Table>
+          {list && (
+            <HStack alignSelf="end">
+              <PagePagination
+                totalPages={list.totalPages}
+                page={page}
+                size={size}
+                onPageChange={onPageChange}
+                onSizeChange={onSizeChange}
+              />
+            </HStack>
+          )}
           {userToRemove && (
             <RemoveMember
               isOpen={isRemoveMemberModalOpen}
@@ -132,9 +167,9 @@ const OrganizationMembersPage = () => {
               onClose={() => setIsRemoveMemberModalOpen(false)}
             />
           )}
-        </>
+        </Stack>
       )}
-      {members.data.length === 0 && (
+      {list.data.length === 0 && (
         <>
           <Center h="300px">
             <VStack spacing={variables.spacing}>
