@@ -39,6 +39,7 @@ import { geEditorPermission } from '@/client/api/permission'
 import UserAPI, { User } from '@/client/api/user'
 import WorkspaceAPI from '@/client/api/workspace'
 import IdPUserAPI from '@/client/idp/user'
+import GroupSelector from '@/components/common/group-selector'
 import UserSelector from '@/components/common/user-selector'
 import { filesUpdated } from '@/store/entities/files'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
@@ -378,18 +379,10 @@ const Sharing = () => {
                   {!groups ? <FormSkeleton /> : null}
                   {groups && groups.length > 0 ? (
                     <Stack direction="column" spacing={variables.spacing}>
-                      <Select
-                        placeholder="Select Group"
-                        value={activeGroupId}
-                        isDisabled={isGrantLoading}
-                        onChange={(e) => setActiveGroupId(e.target.value)}
-                      >
-                        {groups.map((g) => (
-                          <option key={g.id} value={g.id}>
-                            {g.name}
-                          </option>
-                        ))}
-                      </Select>
+                      <GroupSelector
+                        organizationId={workspace?.organization.id}
+                        onConfirm={(value) => setActiveGroupId(value.id)}
+                      />
                       <Select
                         placeholder="Select Permission"
                         value={activeGroupPermission}

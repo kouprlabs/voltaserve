@@ -24,30 +24,29 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react'
 import { SectionSpinner, variables } from '@koupr/ui'
-import OrganizationAPI, {
-  Organization,
-  SortOrder,
-} from '@/client/api/organization'
+import GroupAPI, { Group } from '@/client/api/group'
+import { SortOrder } from '@/client/api/organization'
 import { swrConfig } from '@/client/options'
 import Pagination from '@/components/common/pagination'
 import SearchInput from '@/components/common/search-input'
 
-type OrganizationSelectorProps = {
-  onConfirm?: (organization: Organization) => void
+type GroupSelectorProps = {
+  organizationId?: string
+  onConfirm?: (group: Group) => void
 }
 
-const OrganizationSelector = ({ onConfirm }: OrganizationSelectorProps) => {
+const GroupSelector = ({ organizationId, onConfirm }: GroupSelectorProps) => {
   const { isOpen, onOpen, onClose } = useDisclosure()
   const [page, setPage] = useState(1)
   const [query, setQuery] = useState('')
-  const [selected, setSelected] = useState<Organization>()
-  const [confirmed, setConfirmed] = useState<Organization>()
+  const [selected, setSelected] = useState<Group>()
+  const [confirmed, setConfirmed] = useState<Group>()
   const {
     data: list,
     error,
     mutate,
-  } = OrganizationAPI.useList(
-    { query, page, size: 5, sortOrder: SortOrder.Desc },
+  } = GroupAPI.useList(
+    { query, organizationId, page, size: 5, sortOrder: SortOrder.Desc },
     swrConfig()
   )
   const selectionColor = useColorModeValue('gray.100', 'gray.600')
@@ -82,7 +81,7 @@ const OrganizationSelector = ({ onConfirm }: OrganizationSelectorProps) => {
         onClick={onOpen}
         color={confirmed ? normalButtonLabelColor : dimmedButtonLabelColor}
       >
-        {confirmed ? confirmed.name : 'Select Organization'}
+        {confirmed ? confirmed.name : 'Select Group'}
       </Button>
       <Modal
         size="xl"
@@ -92,7 +91,7 @@ const OrganizationSelector = ({ onConfirm }: OrganizationSelectorProps) => {
       >
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>Select Organization</ModalHeader>
+          <ModalHeader>Select Group</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
             <Stack direction="column" spacing={variables.spacing}>
@@ -102,7 +101,7 @@ const OrganizationSelector = ({ onConfirm }: OrganizationSelectorProps) => {
               />
               {!list && error && (
                 <Center h="300px">
-                  <Text>Failed to load organizations.</Text>
+                  <Text>Failed to load groups.</Text>
                 </Center>
               )}
               {!list && !error && <SectionSpinner />}
@@ -120,25 +119,25 @@ const OrganizationSelector = ({ onConfirm }: OrganizationSelectorProps) => {
                     <col style={{ width: 'auto' }} />
                   </colgroup>
                   <Tbody>
-                    {list.data.map((o: Organization) => (
+                    {list.data.map((g: Group) => (
                       <Tr
-                        key={o.id}
+                        key={g.id}
                         cursor="pointer"
-                        bg={selected?.id === o.id ? selectionColor : 'auto'}
-                        onClick={() => setSelected(o)}
+                        bg={selected?.id === g.id ? selectionColor : 'auto'}
+                        onClick={() => setSelected(g)}
                       >
                         <Td>
-                          <Radio size="md" isChecked={selected?.id === o.id} />
+                          <Radio size="md" isChecked={selected?.id === g.id} />
                         </Td>
                         <Td>
                           <HStack spacing={variables.spacing}>
                             <Avatar
-                              name={o.name}
+                              name={g.name}
                               size="sm"
                               width="40px"
                               height="40px"
                             />
-                            <Text fontSize="14px">{o.name}</Text>
+                            <Text fontSize="14px">{g.name}</Text>
                           </HStack>
                         </Td>
                       </Tr>
@@ -186,4 +185,4 @@ const OrganizationSelector = ({ onConfirm }: OrganizationSelectorProps) => {
   )
 }
 
-export default OrganizationSelector
+export default GroupSelector
