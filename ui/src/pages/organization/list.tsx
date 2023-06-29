@@ -88,7 +88,7 @@ const OrganizationListPage = () => {
               </Tr>
             </Thead>
             <Tbody>
-              {list.data.map((o: Organization) => (
+              {list.data.map((o) => (
                 <Tr key={o.id}>
                   <Td>
                     <HStack spacing={variables.spacing}>
@@ -110,7 +110,7 @@ const OrganizationListPage = () => {
                   <Td>
                     <Badge>{o.permission}</Badge>
                   </Td>
-                  <Td>{prettyDate(o.updateTime || o.createTime)}</Td>
+                  <Td>{prettyDate(o.createTime)}</Td>
                 </Tr>
               ))}
             </Tbody>

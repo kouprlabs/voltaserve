@@ -86,7 +86,7 @@ const WorkspaceListPage = () => {
               </Tr>
             </Thead>
             <Tbody>
-              {list.data.map((w: Workspace) => (
+              {list.data.map((w) => (
                 <Tr key={w.id}>
                   <Td>
                     <HStack spacing={variables.spacing}>
@@ -117,7 +117,7 @@ const WorkspaceListPage = () => {
                   <Td>
                     <Badge>{w.permission}</Badge>
                   </Td>
-                  <Td>{prettyDate(w.updateTime || w.createTime)}</Td>
+                  <Td>{prettyDate(w.createTime)}</Td>
                 </Tr>
               ))}
             </Tbody>

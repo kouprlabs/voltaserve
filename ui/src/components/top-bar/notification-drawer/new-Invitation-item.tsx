@@ -57,11 +57,11 @@ const NewInvitationItem = ({ invitation }: NewInvitationProps) => {
     <Stack direction="column">
       <Text>
         You have been invited by{' '}
-        <Text as="span" whiteSpace="nowrap" fontWeight="bold">
+        <Text as="span" fontWeight="bold">
           {userToString(invitation.owner)}
         </Text>{' '}
         to join the organization{' '}
-        <Text as="span" whiteSpace="nowrap" fontWeight="bold">
+        <Text as="span" fontWeight="bold">
           {invitation.organization.name}
         </Text>
         .<br />

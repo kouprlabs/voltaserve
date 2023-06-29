@@ -58,11 +58,11 @@ const RemoveMember = ({
         <ModalBody>
           <Text>
             Are you sure you would like to remove member{' '}
-            <Text as="span" fontWeight="bold" whiteSpace="nowrap">
+            <Text as="span" fontWeight="bold">
               {userToString(user)}
             </Text>{' '}
             from group{' '}
-            <Text as="span" fontWeight="bold" whiteSpace="nowrap">
+            <Text as="span" fontWeight="bold">
               {group.name}
             </Text>
             ?

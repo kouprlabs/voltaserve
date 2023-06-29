@@ -118,7 +118,7 @@ const GroupSelector = ({ organizationId, onConfirm }: GroupSelectorProps) => {
                     <col style={{ width: 'auto' }} />
                   </colgroup>
                   <Tbody>
-                    {list.data.map((g: Group) => (
+                    {list.data.map((g) => (
                       <Tr
                         key={g.id}
                         cursor="pointer"

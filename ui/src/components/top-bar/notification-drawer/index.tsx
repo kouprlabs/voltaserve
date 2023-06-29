@@ -60,10 +60,10 @@ const NotificationDrawer = () => {
           <DrawerBody>
             {notfications && notfications.length > 0 ? (
               <Stack spacing={variables.spacing}>
-                {notfications.map((n, i) => (
-                  <Stack key={i} spacing={variables.spacing}>
+                {notfications.map((n, index) => (
+                  <Stack key={index} spacing={variables.spacing}>
                     <NotificationItem notification={n} />
-                    {i !== notfications.length - 1 && <Divider />}
+                    {index !== notfications.length - 1 && <Divider />}
                   </Stack>
                 ))}
               </Stack>
