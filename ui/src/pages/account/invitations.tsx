@@ -30,6 +30,8 @@ import { swrConfig } from '@/client/options'
 import PagePagination, {
   usePagePagination,
 } from '@/components/common/page-pagination'
+import prettyDate from '@/helpers/pretty-date'
+import userToString from '@/helpers/user-to-string'
 
 const AccountInvitationsPage = () => {
   const toast = useToast()
@@ -107,11 +109,11 @@ const AccountInvitationsPage = () => {
             </Thead>
             <Tbody>
               {list.data.length > 0 &&
-                list.data.map((e: Invitation) => (
-                  <Tr key={e.id}>
-                    <Td>{e.owner.email}</Td>
-                    <Td>{e.organization.name}</Td>
-                    <Td>{e.createTime}</Td>
+                list.data.map((i) => (
+                  <Tr key={i.id}>
+                    <Td>{userToString(i.owner)}</Td>
+                    <Td>{i.organization.name}</Td>
+                    <Td>{prettyDate(i.createTime)}</Td>
                     <Td textAlign="right">
                       <Menu>
                         <MenuButton
@@ -122,12 +124,12 @@ const AccountInvitationsPage = () => {
                         />
                         <Portal>
                           <MenuList>
-                            <MenuItem onClick={() => handleAccept(e.id)}>
+                            <MenuItem onClick={() => handleAccept(i.id)}>
                               Accept
                             </MenuItem>
                             <MenuItem
                               color="red"
-                              onClick={() => handleDecline(e.id)}
+                              onClick={() => handleDecline(i.id)}
                             >
                               Decline
                             </MenuItem>

@@ -86,7 +86,7 @@ const GroupListPage = () => {
               </Tr>
             </Thead>
             <Tbody>
-              {list.data.map((g: Group) => (
+              {list.data.map((g) => (
                 <Tr key={g.id}>
                   <Td>
                     <HStack spacing={variables.spacing}>

@@ -162,13 +162,13 @@ const OrganizationInvitationsPage = () => {
               </Tr>
             </Thead>
             <Tbody>
-              {list.data.map((e: Invitation) => (
-                <Tr key={e.id}>
-                  <Td>{e.email}</Td>
+              {list.data.map((i) => (
+                <Tr key={i.id}>
+                  <Td>{i.email}</Td>
                   <Td>
-                    <Status value={e.status} />
+                    <Status value={i.status} />
                   </Td>
-                  <Td>{prettyDate(e.createTime)}</Td>
+                  <Td>{prettyDate(i.createTime)}</Td>
                   <Td textAlign="right">
                     <Menu>
                       <MenuButton
@@ -179,10 +179,10 @@ const OrganizationInvitationsPage = () => {
                       />
                       <Portal>
                         <MenuList>
-                          {e.status === 'pending' && (
+                          {i.status === 'pending' && (
                             <MenuItem
                               icon={<IconSend />}
-                              onClick={() => handleResend(e.id)}
+                              onClick={() => handleResend(i.id)}
                             >
                               Resend
                             </MenuItem>
@@ -190,7 +190,7 @@ const OrganizationInvitationsPage = () => {
                           <MenuItem
                             icon={<IconTrash />}
                             color="red"
-                            onClick={() => handleDelete(e.id)}
+                            onClick={() => handleDelete(i.id)}
                           >
                             Delete
                           </MenuItem>

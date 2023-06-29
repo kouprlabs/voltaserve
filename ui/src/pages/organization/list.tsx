@@ -88,7 +88,7 @@ const OrganizationListPage = () => {
               </Tr>
             </Thead>
             <Tbody>
-              {list.data.map((o: Organization) => (
+              {list.data.map((o) => (
                 <Tr key={o.id}>
                   <Td>
                     <HStack spacing={variables.spacing}>

@@ -86,7 +86,7 @@ const WorkspaceListPage = () => {
               </Tr>
             </Thead>
             <Tbody>
-              {list.data.map((w: Workspace) => (
+              {list.data.map((w) => (
                 <Tr key={w.id}>
                   <Td>
                     <HStack spacing={variables.spacing}>

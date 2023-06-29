@@ -120,7 +120,7 @@ const OrganizationSelector = ({ onConfirm }: OrganizationSelectorProps) => {
                     <col style={{ width: 'auto' }} />
                   </colgroup>
                   <Tbody>
-                    {list.data.map((o: Organization) => (
+                    {list.data.map((o) => (
                       <Tr
                         key={o.id}
                         cursor="pointer"
