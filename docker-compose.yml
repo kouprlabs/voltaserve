@@ -227,13 +227,13 @@ services:
       - PORT=5001
       - API_URL=http://api:5000
       - LANGUAGE_URL=http://language:5002
-      - VOLTASERVE_EXIFTOOL_URL="http://exiftool:6001"
-      - VOLTASERVE_FFMPEG_URL="http://ffmpeg:6002"
-      - VOLTASERVE_IMAGEMAGICK_URL="http://imagemagick:6003"
-      - VOLTASERVE_LIBREOFFICE_URL="http://libreoffice:6004"
-      - VOLTASERVE_OCRMYPDF_URL="http://ocrmypdf:6005"
-      - VOLTASERVE_POPPLER_URL="http://poppler:6006"
-      - VOLTASERVE_TESSERACT_URL="http://tesseract:6007"
+      - VOLTASERVE_EXIFTOOL_URL=http://exiftool:6001
+      - VOLTASERVE_FFMPEG_URL=http://ffmpeg:6002
+      - VOLTASERVE_IMAGEMAGICK_URL=http://imagemagick:6003
+      - VOLTASERVE_LIBREOFFICE_URL=http://libreoffice:6004
+      - VOLTASERVE_OCRMYPDF_URL=http://ocrmypdf:6005
+      - VOLTASERVE_POPPLER_URL=http://poppler:6006
+      - VOLTASERVE_TESSERACT_URL=http://tesseract:6007
       - S3_URL=minio:9000
     healthcheck:
       test: curl --fail http://localhost:5001/v1/health || exit 1
