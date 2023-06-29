@@ -20,7 +20,11 @@ import {
 } from '@chakra-ui/react'
 import { IconDotsVertical, SectionSpinner, variables } from '@koupr/ui'
 import { Helmet } from 'react-helmet-async'
-import InvitationAPI, { Invitation, SortOrder } from '@/client/api/invitation'
+import InvitationAPI, {
+  Invitation,
+  SortBy,
+  SortOrder,
+} from '@/client/api/invitation'
 import UserAPI from '@/client/idp/user'
 import { swrConfig } from '@/client/options'
 import PagePagination, {
@@ -39,7 +43,7 @@ const AccountInvitationsPage = () => {
     error: invitationsError,
     mutate,
   } = InvitationAPI.useGetIncoming(
-    { page, size, sortOrder: SortOrder.Desc },
+    { page, size, sortBy: SortBy.DateCreated, sortOrder: SortOrder.Desc },
     swrConfig()
   )
 
@@ -105,7 +109,7 @@ const AccountInvitationsPage = () => {
               {list.data.length > 0 &&
                 list.data.map((e: Invitation) => (
                   <Tr key={e.id}>
-                    <Td>{e.owner.fullName}</Td>
+                    <Td>{e.owner.email}</Td>
                     <Td>{e.organization.name}</Td>
                     <Td>{e.updateTime || e.createTime}</Td>
                     <Td textAlign="right">

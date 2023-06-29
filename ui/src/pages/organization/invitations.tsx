@@ -34,6 +34,7 @@ import { Helmet } from 'react-helmet-async'
 import InvitationAPI, {
   Invitation,
   InvitationStatus,
+  SortBy,
   SortOrder,
 } from '@/client/api/invitation'
 import OrganizationAPI from '@/client/api/organization'
@@ -76,7 +77,13 @@ const OrganizationInvitationsPage = () => {
     error: invitationsError,
     mutate,
   } = InvitationAPI.useGetOutgoing(
-    { organizationId: id, page, size, sortOrder: SortOrder.Desc },
+    {
+      organizationId: id,
+      page,
+      size,
+      sortBy: SortBy.DateCreated,
+      sortOrder: SortOrder.Desc,
+    },
     swrConfig()
   )
   const [isInviteMembersModalOpen, setIsInviteMembersModalOpen] =
