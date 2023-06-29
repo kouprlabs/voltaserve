@@ -55,8 +55,10 @@ services:
       dockerfile: ./Dockerfile.exiftool
     ports:
       - ${VOLTASERVE_EXIFTOOL_PORT}:6001
+    environment:
+      PORT: 6001
     healthcheck:
-      test: curl --fail http://localhost:5002/v1/health || exit 1
+      test: curl --fail http://localhost:6001/v1/health || exit 1
     restart: on-failure
   ffmpeg:
     image: voltaserve/ffmpeg
@@ -64,9 +66,11 @@ services:
       context: ./tools
       dockerfile: ./Dockerfile.ffmpeg
     ports:
-      - ${VOLTASERVE_FFMPEG_PORT}:6001
+      - ${VOLTASERVE_FFMPEG_PORT}:6002
+    environment:
+      PORT: 6002
     healthcheck:
-      test: curl --fail http://localhost:5002/v1/health || exit 1
+      test: curl --fail http://localhost:6002/v1/health || exit 1
     restart: on-failure
   imagemagick:
     image: voltaserve/imagemagick
@@ -74,9 +78,11 @@ services:
       context: ./tools
       dockerfile: ./Dockerfile.imagemagick
     ports:
-      - ${VOLTASERVE_IMAGEMAGICK_PORT}:6001
+      - ${VOLTASERVE_IMAGEMAGICK_PORT}:6003
+    environment:
+      PORT: 6003
     healthcheck:
-      test: curl --fail http://localhost:5002/v1/health || exit 1
+      test: curl --fail http://localhost:6003/v1/health || exit 1
     restart: on-failure
   libreoffice:
     image: voltaserve/libreoffice
@@ -84,9 +90,11 @@ services:
       context: ./tools
       dockerfile: ./Dockerfile.libreoffice
     ports:
-      - ${VOLTASERVE_LIBREOFFICE_PORT}:6001
+      - ${VOLTASERVE_LIBREOFFICE_PORT}:6004
+    environment:
+      PORT: 6004
     healthcheck:
-      test: curl --fail http://localhost:5002/v1/health || exit 1
+      test: curl --fail http://localhost:6004/v1/health || exit 1
     restart: on-failure
   ocrmypdf:
     image: voltaserve/ocrmypdf
@@ -94,9 +102,11 @@ services:
       context: ./tools
       dockerfile: ./Dockerfile.ocrmypdf
     ports:
-      - ${VOLTASERVE_OCRMYPDF_PORT}:6001
+      - ${VOLTASERVE_OCRMYPDF_PORT}:6005
+    environment:
+      PORT: 6005
     healthcheck:
-      test: curl --fail http://localhost:5002/v1/health || exit 1
+      test: curl --fail http://localhost:6005/v1/health || exit 1
     restart: on-failure
   poppler:
     image: voltaserve/poppler
@@ -104,9 +114,11 @@ services:
       context: ./tools
       dockerfile: ./Dockerfile.poppler
     ports:
-      - ${VOLTASERVE_POPPLER_PORT}:6001
+      - ${VOLTASERVE_POPPLER_PORT}:6006
+    environment:
+      PORT: 6006
     healthcheck:
-      test: curl --fail http://localhost:5002/v1/health || exit 1
+      test: curl --fail http://localhost:6006/v1/health || exit 1
     restart: on-failure
   tesseract:
     image: voltaserve/tesseract
@@ -114,9 +126,11 @@ services:
       context: ./tools
       dockerfile: ./Dockerfile.tesseract
     ports:
-      - ${VOLTASERVE_TESSERACT_PORT}:6001
+      - ${VOLTASERVE_TESSERACT_PORT}:6007
+    environment:
+      PORT: 6007
     healthcheck:
-      test: curl --fail http://localhost:5002/v1/health || exit 1
+      test: curl --fail http://localhost:6007/v1/health || exit 1
     restart: on-failure
   api:
     image: voltaserve/api
@@ -213,6 +227,13 @@ services:
       - PORT=5001
       - API_URL=http://api:5000
       - LANGUAGE_URL=http://language:5002
+      - VOLTASERVE_EXIFTOOL_URL="http://exiftool:6001"
+      - VOLTASERVE_FFMPEG_URL="http://ffmpeg:6002"
+      - VOLTASERVE_IMAGEMAGICK_URL="http://imagemagick:6003"
+      - VOLTASERVE_LIBREOFFICE_URL="http://libreoffice:6004"
+      - VOLTASERVE_OCRMYPDF_URL="http://ocrmypdf:6005"
+      - VOLTASERVE_POPPLER_URL="http://poppler:6006"
+      - VOLTASERVE_TESSERACT_URL="http://tesseract:6007"
       - S3_URL=minio:9000
     healthcheck:
       test: curl --fail http://localhost:5001/v1/health || exit 1
