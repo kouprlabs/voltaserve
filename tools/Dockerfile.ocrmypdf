@@ -7,7 +7,8 @@ COPY . .
 RUN apt-get update
 RUN apt-get install -y ca-certificates
 RUN update-ca-certificates
-RUN apt-get install -y golang-1.20
+RUN apt-get install -y golang-1.20-go
+RUN update-alternatives --install /usr/bin/go go /usr/lib/go-1.20/bin/go 1
 
 RUN go mod download
 RUN go build -o voltaserve-tools
