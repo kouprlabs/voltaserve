@@ -15,23 +15,23 @@ RUN go build -o voltaserve-tools
 FROM ubuntu:23.04 AS runner
 
 RUN apt-get update
-RUN apt-get install -y ocrmypdf \
-    tesseract-ocr-osd \
-    tesseract-ocr-eng \
-    tesseract-ocr-deu \
-    tesseract-ocr-fra \
-    tesseract-ocr-nld \
-    tesseract-ocr-ita \
-    tesseract-ocr-spa \
-    tesseract-ocr-por \
-    tesseract-ocr-swe \
-    tesseract-ocr-fin \
-    tesseract-ocr-jpn \
-    tesseract-ocr-chi-sim \
-    tesseract-ocr-chi-tra \
-    tesseract-ocr-hin \
-    tesseract-ocr-rus \
-    tesseract-ocr-ara
+RUN apt-get install -y ocrmypdf
+RUN apt-get install -y tesseract-ocr-osd
+RUN apt-get install -y tesseract-ocr-eng
+RUN apt-get install -y tesseract-ocr-deu
+RUN apt-get install -y tesseract-ocr-fra
+RUN apt-get install -y tesseract-ocr-nld
+RUN apt-get install -y tesseract-ocr-ita
+RUN apt-get install -y tesseract-ocr-spa
+RUN apt-get install -y tesseract-ocr-por
+RUN apt-get install -y tesseract-ocr-swe
+RUN apt-get install -y tesseract-ocr-fin
+RUN apt-get install -y tesseract-ocr-jpn
+RUN apt-get install -y tesseract-ocr-chi-sim
+RUN apt-get install -y tesseract-ocr-chi-tra
+RUN apt-get install -y tesseract-ocr-hin
+RUN apt-get install -y tesseract-ocr-rus
+RUN apt-get install -y tesseract-ocr-ara
 
 WORKDIR /app
 
