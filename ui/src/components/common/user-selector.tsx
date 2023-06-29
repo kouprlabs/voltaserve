@@ -134,7 +134,7 @@ const UserSelector = ({
                     <col style={{ width: 'auto' }} />
                   </colgroup>
                   <Tbody>
-                    {list.data.map((u: User) => (
+                    {list.data.map((u) => (
                       <Tr
                         key={u.id}
                         cursor="pointer"

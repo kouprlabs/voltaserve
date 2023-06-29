@@ -31,10 +31,10 @@ const List = () => {
 
   return (
     <Stack spacing={variables.spacing}>
-      {items.map((u, i) => (
+      {items.map((u, index) => (
         <Stack key={u.id} spacing={variables.spacing}>
           <Item upload={u} />
-          {i !== items.length - 1 && <Divider />}
+          {index !== items.length - 1 && <Divider />}
         </Stack>
       ))}
     </Stack>

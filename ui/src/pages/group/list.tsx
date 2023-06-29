@@ -86,7 +86,7 @@ const GroupListPage = () => {
               </Tr>
             </Thead>
             <Tbody>
-              {list.data.map((g: Group) => (
+              {list.data.map((g) => (
                 <Tr key={g.id}>
                   <Td>
                     <HStack spacing={variables.spacing}>
@@ -117,7 +117,7 @@ const GroupListPage = () => {
                   <Td>
                     <Badge>{g.permission}</Badge>
                   </Td>
-                  <Td>{prettyDate(g.updateTime || g.createTime)}</Td>
+                  <Td>{prettyDate(g.createTime)}</Td>
                 </Tr>
               ))}
             </Tbody>
