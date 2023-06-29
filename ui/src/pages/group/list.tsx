@@ -117,7 +117,7 @@ const GroupListPage = () => {
                   <Td>
                     <Badge>{g.permission}</Badge>
                   </Td>
-                  <Td>{prettyDate(g.updateTime || g.createTime)}</Td>
+                  <Td>{prettyDate(g.createTime)}</Td>
                 </Tr>
               ))}
             </Tbody>

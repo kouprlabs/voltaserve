@@ -110,7 +110,7 @@ const OrganizationListPage = () => {
                   <Td>
                     <Badge>{o.permission}</Badge>
                   </Td>
-                  <Td>{prettyDate(o.updateTime || o.createTime)}</Td>
+                  <Td>{prettyDate(o.createTime)}</Td>
                 </Tr>
               ))}
             </Tbody>

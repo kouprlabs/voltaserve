@@ -111,7 +111,7 @@ const AccountInvitationsPage = () => {
                   <Tr key={e.id}>
                     <Td>{e.owner.email}</Td>
                     <Td>{e.organization.name}</Td>
-                    <Td>{e.updateTime || e.createTime}</Td>
+                    <Td>{e.createTime}</Td>
                     <Td textAlign="right">
                       <Menu>
                         <MenuButton

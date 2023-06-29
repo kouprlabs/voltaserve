@@ -168,7 +168,7 @@ const OrganizationInvitationsPage = () => {
                   <Td>
                     <Status value={e.status} />
                   </Td>
-                  <Td>{prettyDate(e.updateTime || e.createTime)}</Td>
+                  <Td>{prettyDate(e.createTime)}</Td>
                   <Td textAlign="right">
                     <Menu>
                       <MenuButton
