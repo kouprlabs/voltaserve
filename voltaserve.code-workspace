@@ -23,6 +23,9 @@
     },
     {
       "path": "tools"
+    },
+    {
+      "path": "scripts"
     }
   ],
   "settings": {
