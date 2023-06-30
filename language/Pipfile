@@ -13,4 +13,4 @@ iso639-lang = "==2.1.0"
 black = "==23.3.0"
 
 [requires]
-python_version = "3.9"
+python_version = "3.11"

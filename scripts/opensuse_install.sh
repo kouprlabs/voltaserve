@@ -36,7 +36,7 @@ printf_underlined() {
 is_package_installed() {
   local package_name="$1"
   local result
-  result=$(zypper pa -i | grep "$package_name" | head -n 1 | awk -F "|" '{print $3}' | awk '{$1=$1};1')
+  result=$(zypper pa -i | grep " $package_name " | head -n 1 | awk -F "|" '{print $3}' | awk '{$1=$1};1')
   if [[ "$result" == "$package_name" ]]; then
     return 0
   else
@@ -65,28 +65,13 @@ is_service_running() {
   fi
 }
 
-is_snap_installed() {
-  local snap_name="$1"
-  if snap list | grep -q "$snap_name"; then
+is_brew_package_installed() {
+  local package_name="$1"
+  result=$(brew list --formula | grep -x "$package_name")
+  if [[ "$result" == "$package_name" ]]; then
     return 0
   else
     return 1
-  fi
-}
-
-install_snap() {
-  local snap_name="$1"
-  if ! is_snap_installed "$snap_name"; then
-    printf_bold "📦  Installing snap '${snap_name}'..."
-    sudo snap install "$snap_name"
-    if ! is_snap_installed "$snap_name"; then
-      printf_red "⛈️  Failed to install snap '${snap_name}'. Aborting."
-      exit 1
-    else
-      printf_bold "✅  Snap '${snap_name}' installed successfully."
-    fi
-  else
-    printf_bold "✅  Found snap '${snap_name}'. Skipping."
   fi
 }
 
@@ -103,6 +88,113 @@ install_package() {
     fi
   else
     printf_bold "✅  Found package '${package_name}'. Skipping."
+  fi
+}
+
+install_brew_package() {
+  local package_name="$1"
+  if ! is_brew_package_installed "$package_name"; then
+    printf_bold "📦  Installing brew package '${package_name}'..."
+    brew install "$package_name"
+    if ! is_brew_package_installed "$package_name"; then
+      printf_red "⛈️  Failed to install brew package '${package_name}'. Aborting."
+      exit 1
+    else
+      printf_bold "✅  Brew package '${package_name}' installed successfully."
+    fi
+  else
+    printf_bold "✅  Found brew package '${package_name}'. Skipping."
+  fi
+}
+
+install_pip_package() {
+  local package_name="$1"
+  local package_version="$2"
+  local not_found="! pip show $package_name >/dev/null 2>&1"
+  if eval "$not_found"; then
+    printf_bold "🐍  Installing Python package '${package_name}'..."
+    pip3 install "${package_name}==${package_version}"
+    if eval "$not_found"; then
+      printf_red "⛈️  Failed to install Python package '${package_name}'. Aborting."
+      exit 1
+    else
+      printf_bold "✅  Python package '${package_name}' installed successfully."
+    fi
+  else
+    printf_bold "✅  Found Python package '$package_name'. Skipping."
+  fi
+}
+
+install_corepack() {
+  local not_found="! npm list -g corepack >/dev/null 2>&1"
+  if eval "$not_found"; then
+    printf_bold "💎  Installing NPM package 'corepack'..."
+    sudo npm install -g corepack@0.18.1
+    if eval "$not_found"; then
+      printf_red "⛈️  Failed to install NPM package 'corepack'. Aborting."
+      exit 1
+    else
+      printf_bold "✅  NPM package 'corepack' installed successfully."
+    fi
+  else
+    printf_bold "✅  Found NPM package 'corepack'. Skipping."
+  fi
+}
+
+install_golangci() {
+  local golangci_bin="${HOME}/bin/golangci-lint"
+  local not_found="! (command -v $golangci_bin >/dev/null 2>&1 && $golangci_bin --version >/dev/null 2>&1)"
+  if eval "$not_found"; then
+    printf_bold "🐹  Installing Go binary '${golangci_bin}'..."
+    mkdir -p "$HOME/bin"
+    cd "$HOME" || exit
+    curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.53.2
+    if eval "$not_found"; then
+      printf_red "⛈️  Failed to install Go binary '${golangci_bin}'. Aborting."
+      exit 1
+    else
+      printf_bold "✅  Go binary '${golangci_bin}' installed successfully."
+    fi
+  else
+    printf_bold "✅  Found Go binary '${golangci_bin}'. Skipping."
+  fi
+}
+
+install_swag() {
+  local swag_bin="${HOME}/bin/swag"
+  local not_found="! (command -v $swag_bin >/dev/null 2>&1 && $swag_bin --version >/dev/null 2>&1)"
+  if eval "$not_found"; then
+    printf_bold "🐹  Installing Go binary '${swag_bin}'..."
+    go install github.com/swaggo/swag/cmd/swag@v1.8.12
+    mkdir -p "$HOME/bin"
+    mv "$(go env GOPATH)/bin/swag" "$HOME/bin/swag"
+    if eval "$not_found"; then
+      printf_red "⛈️  Failed to install Go binary '${swag_bin}'. Aborting."
+      exit 1
+    else
+      printf_bold "✅  Go binary '${swag_bin}' installed successfully."
+    fi
+  else
+    printf_bold "✅  Found Go binary '${swag_bin}'. Skipping."
+  fi
+}
+
+install_air() {
+  local air_bin="${HOME}/bin/air"
+  local not_found="! (command -v $air_bin >/dev/null 2>&1 && $air_bin -v >/dev/null 2>&1)"
+  if eval "$not_found"; then
+    printf_bold "🐹  Installing Go binary '${air_bin}'..."
+    go install github.com/cosmtrek/air@v1.44.0
+    mkdir -p "$HOME/bin"
+    mv "$(go env GOPATH)/bin/air" "$HOME/bin/air"
+    if eval "$not_found"; then
+      printf_red "⛈️  Failed to install Go binary '${air_bin}'. Aborting."
+      exit 1
+    else
+      printf_bold "✅  Go binary '${air_bin}' installed successfully."
+    fi
+  else
+    printf_bold "✅  Found Go binary '${air_bin}'. Skipping."
   fi
 }
 
@@ -1164,17 +1256,35 @@ install_fonts() {
   fi
 }
 
+install_package "wget"
+install_package "git"
+
+install_package "python311"
+install_pip_package "pipenv" "2023.6.12"
+
+install_package "nodejs18"
+install_package "npm18"
+install_corepack
+
+install_package "go1.20"
+install_swag
+install_golangci
+install_air
+
 install_postgres
 install_redis
 install_minio
 install_meilisearch
 install_mailhog
+
 install_package "exiftool"
 install_package "ffmpeg-4"
 install_package "poppler-tools"
 install_package "ghostscript"
 install_package "ImageMagick"
-install_snap "ocrmypdf"
+
+install_brew_package "ocrmypdf"
+
 install_tesseract
 install_libreoffice
 install_fonts

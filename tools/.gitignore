@@ -1,5 +1,6 @@
 /.env.local
 /voltaserve
-__debug_bin
+__debug_bin*
 /*.tsv
 /.air
+/tesseract_*.dat

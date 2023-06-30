@@ -4,35 +4,45 @@
 
 Install [Python](https://www.python.org) and [Pipenv](https://pipenv.pypa.io).
 
-Install dependencies:
+### Install Dependencies
 
 ```shell
 pipenv install
 ```
 
-```shell
-python3 -m spacy download xx_ent_wiki_sm
-```
-
-Activate the environment:
+### Activate the Environment
 
 ```shell
 pipenv shell
 ```
 
-Run:
+### Download spaCy Model
+
+On openSUSE:
+
+```shell
+python3.11 -m spacy download xx_ent_wiki_sm
+```
+
+On macOS:
+
+```shell
+python3 -m spacy download xx_ent_wiki_sm
+```
+
+### Run
 
 ```shell
 FLASK_APP=server.py flask run --host=0.0.0.0 --port=5002 --debug
 ```
 
-Format code:
+### Format Code
 
 ```shell
 black .
 ```
 
-Build Docker image:
+### Build Docker Image
 
 ```shell
 docker build -t voltaserve/language .

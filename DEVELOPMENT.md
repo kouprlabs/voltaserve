@@ -24,7 +24,7 @@ docker compose up -d \
 
 ### Using openSUSE
 
-Install [snap](https://snapcraft.io/docs/installing-snap-on-opensuse).
+Install [Homebrew](https://brew.sh).
 
 Run:
 
