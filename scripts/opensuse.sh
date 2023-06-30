@@ -47,9 +47,8 @@ is_package_installed() {
 is_package_pattern_installed() {
   local package_pattern="$1"
   local expected_count="$2"
-  local installed_packages
-  installed_packages="$(sudo zypper search -i -t package "$package_pattern" | awk '/^i/ {print $3}')"
-  local installed_count=${#installed_packages[@]}
+  local installed_count
+  installed_count=$(zypper pa -i | grep -- "-fonts " | awk -F "|" '{print $3}' | awk '{$1=$1};1' | wc -l)
   if [[ "$installed_count" -eq "$expected_count" ]]; then
     return 0
   else
@@ -1125,15 +1124,15 @@ install_fonts() {
   fi
 }
 
-install_postgres
-install_redis
-install_minio
-install_package "exiftool"
-install_package "ffmpeg-4"
-install_package "poppler-tools"
-install_package "ghostscript"
-install_package "ImageMagick"
-install_snap "ocrmypdf"
-install_tesseract
-install_libreoffice
+# install_postgres
+# install_redis
+# install_minio
+# install_package "exiftool"
+# install_package "ffmpeg-4"
+# install_package "poppler-tools"
+# install_package "ghostscript"
+# install_package "ImageMagick"
+# install_snap "ocrmypdf"
+# install_tesseract
+# install_libreoffice
 install_fonts
