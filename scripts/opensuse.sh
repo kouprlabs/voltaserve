@@ -1,5 +1,29 @@
 #!/bin/bash
 
+sudo zypper install -y postgresql15-server
+
+sudo systemctl enable --now postgresql
+
+sudo su postgres <<EOF
+psql -c "CREATE USER voltaserve WITH PASSWORD 'voltaserve';"
+psql -c "CREATE DATABASE voltaserve;"
+psql -c "GRANT ALL ON DATABASE voltaserve TO voltaserve;"
+psql -c "ALTER DATABASE voltaserve OWNER TO voltaserve;"
+exit
+EOF
+
+sudo su postgres <<EOF
+psql -c "ALTER USER postgres WITH PASSWORD 'postgres';"
+exit
+EOF
+
+sudo sed -i 's/peer/md5/g' /var/lib/pgsql/data/pg_hba.conf
+sudo sed -i 's/ident/md5/g' /var/lib/pgsql/data/pg_hba.conf
+
+sudo systemctl restart postgresql
+
+PGPASSWORD="voltaserve" psql -U "voltaserve" -f ./postgres/schema.sql
+
 sudo zypper install -y exiftool ffmpeg-4 poppler-tools ghostscript ImageMagick
 
 # https://www.suse.com/support/kb/doc/?id=000019384
