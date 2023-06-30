@@ -1,6 +1,8 @@
 # Voltaserve Development
 
-## Getting Started
+## Install Dependencies
+
+### Using Docker
 
 Run infrastructure services:
 
@@ -19,6 +21,28 @@ docker compose up -d \
     poppler \
     tesseract
 ```
+
+### openSUSE
+
+Install [snap](https://snapcraft.io/docs/installing-snap-on-opensuse).
+
+Run:
+
+```shell
+./scripts/opensuse.sh
+```
+
+### macOS
+
+Install [Homebrew](https://brew.sh).
+
+Run:
+
+```shell
+./scripts/macos.sh
+```
+
+## Microservices
 
 Start each microservice separately in a new terminal as described here:
 
