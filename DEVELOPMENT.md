@@ -22,7 +22,7 @@ docker compose up -d \
     tesseract
 ```
 
-### openSUSE
+### Using openSUSE
 
 Install [snap](https://snapcraft.io/docs/installing-snap-on-opensuse).
 
@@ -32,7 +32,7 @@ Run:
 ./scripts/opensuse.sh
 ```
 
-### macOS
+### Using macOS
 
 Install [Homebrew](https://brew.sh).
 
