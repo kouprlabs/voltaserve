@@ -5,38 +5,108 @@ mkdir -p $BASE_DIR
 
 printf_bold() {
   local msg="$1"
-  printf "\e[1m${msg}\e[0m"
+  print "\e[1m${msg}\e[0m"
 }
 
 printf_cyan() {
   local msg="$1"
-  printf "\e[36m${msg}\e[0m"
+  print "\e[36m${msg}\e[0m"
 }
 
 printf_grey() {
   local msg="$1"
-  printf "\e[90m${msg}\e[0m"
+  print "\e[90m${msg}\e[0m"
 }
 
 printf_magenta() {
   local msg="$1"
-  printf "\e[35m${msg}\e[0m"
+  print "\e[35m${msg}\e[0m"
 }
 
 printf_red() {
   local msg="$1"
-  printf "\e[31m${msg}\e[0m"
+  print "\e[31m${msg}\e[0m"
 }
 
 printf_underlined() {
   local msg="$1"
-  printf "\e[4m${msg}\e[0m"
+  print "\e[4m${msg}\e[0m"
+}
+
+is_package_installed() {
+  local package_name="$1"
+  sudo zypper se -i "$package_name" | awk -v pkg="$package_name" '$0 ~ "^i | " pkg { found=1; exit } END { if (found) exit 0; exit 1 }'
+  return $?
+}
+
+is_package_pattern_installed() {
+  local package_pattern="$1"
+  local expected_count="$2"
+  local installed_packages
+  installed_packages="$(sudo zypper search -i -t package "$package_pattern" | awk '/^i/ {print $3}')"
+  local installed_count=${#installed_packages[@]}
+  if [[ "$installed_count" -eq "$expected_count" ]]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+is_service_running() {
+  local service_name="$1"
+  if sudo systemctl is-active --quiet "$service_name"; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+is_snap_installed() {
+  local snap_name="$1"
+  if snap list | grep -q "$snap_name"; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+install_snap() {
+  local snap_name="$1"
+  if ! is_snap_installed "$snap_name"; then
+    printf_bold "📦  Installing snap '${snap_name}'...\n"
+    sudo snap install "$snap_name"
+    if ! is_snap_installed "$snap_name"; then
+      printf_red "⛈️  Failed to install snap '${snap_name}'. Aborting.\n"
+      exit 1
+    else
+      printf_bold "✅  Snap '${snap_name}' installed successfully.\n"
+    fi
+  else
+    printf_bold "✅  Found snap '${snap_name}'. Skipping.\n"
+  fi
+}
+
+install_package() {
+  local package_name="$1"
+  if ! is_package_installed "$package_name"; then
+    printf_bold "📦  Installing package '${package_name}'...\n"
+    sudo zypper install -y "$package_name"
+    if ! is_package_installed "$package_name"; then
+      printf_red "⛈️  Failed to install package '${package_name}'. Aborting.\n"
+      exit 1
+    else
+      printf_bold "✅  Package '${package_name}' installed successfully.\n"
+    fi
+  else
+    printf_bold "✅  Found package '${package_name}'. Skipping.\n"
+  fi
 }
 
 install_postgres() {
   local postgres_service="postgresql"
   local not_found='! systemctl list-unit-files | grep -q '"${postgres_service}.service"''
   if eval "$not_found"; then
+    printf_bold "📦  Installing service '${postgres_service}'...\n"
     sudo zypper install -y postgresql15-server
     sudo systemctl enable --now postgresql
     sudo su postgres <<EOF
@@ -66,11 +136,10 @@ EOF
 }
 
 install_redis() {
-  local redis_service="redis"
-  local not_found='! systemctl list-unit-files | grep -q '"${redis_service}.service"''
-  if eval "$not_found"; then
-    printf_bold "📦  Installing service '${redis_service}'...\n"
-    sudo zypper install redis7
+  local package_name="redis7"
+  if ! is_package_installed "$package_name"; then
+    printf_bold "📦  Installing package '${package_name}'...\n"
+    sudo zypper install -y redis7
     echo "[Unit]
 Description=Redis Server
 After=network.target
@@ -83,14 +152,14 @@ Restart=always
 WantedBy=default.target" | sudo tee /etc/systemd/system/redis.service >/dev/null
     sudo systemctl daemon-reload
     sudo systemctl enable --now redis.service
-    if eval "$not_found"; then
-      printf_red "⛈️  Failed to install service '${redis_service}'. Aborting.\n"
+    if ! is_package_installed "$package_name" || ! is_service_running "redis.service"; then
+      printf_red "⛈️  Failed to install package '${package_name}'. Aborting.\n"
       exit 1
     else
-      printf_bold "✅  Service '${redis_service}' installed successfully.\n"
+      printf_bold "✅  Package '${package_name}' installed successfully.\n"
     fi
   else
-    printf_bold "✅  Found service '$redis_service'. Skipping.\n"
+    printf_bold "✅  Found package '$package_name'. Skipping.\n"
   fi
 }
 
@@ -115,133 +184,9 @@ install_minio() {
   fi
 }
 
-install_exiftool() {
-  local package_name="exiftool"
-  local is_installed=$(
-    sudo zypper se -i "$package_name" | grep -q "^i" >/dev/null 2>&1
-    echo $?
-  )
-  if [ "$is_installed" -ne 0 ]; then
-    printf_bold "📦  Installing package '${package_name}'...\n"
-    sudo zypper install -y $package_name
-    if [ "$is_installed" -ne 0 ]; then
-      printf_red "⛈️  Failed to install package '${package_name}'. Aborting.\n"
-      exit 1
-    else
-      printf_bold "✅  Package '${package_name}' installed successfully.\n"
-    fi
-  else
-    printf_bold "✅  Found package '${package_name}'. Skipping.\n"
-  fi
-}
-
-install_ffmpeg() {
-  local package_name="ffmpeg-4"
-  local is_installed=$(
-    sudo zypper se -i "$package_name" | grep -q "^i" >/dev/null 2>&1
-    echo $?
-  )
-  if [ "$is_installed" -ne 0 ]; then
-    printf_bold "📦  Installing package '${package_name}'...\n"
-    sudo zypper install -y $package_name
-    if [ "$is_installed" -ne 0 ]; then
-      printf_red "⛈️  Failed to install package '${package_name}'. Aborting.\n"
-      exit 1
-    else
-      printf_bold "✅  Package '${package_name}' installed successfully.\n"
-    fi
-  else
-    printf_bold "✅  Found package '${package_name}'. Skipping.\n"
-  fi
-}
-
-install_poppler() {
-  local package_name="poppler-tools"
-  local is_installed=$(
-    sudo zypper se -i "$package_name" | grep -q "^i" >/dev/null 2>&1
-    echo $?
-  )
-  if [ "$is_installed" -ne 0 ]; then
-    printf_bold "📦  Installing package '${package_name}'...\n"
-    sudo zypper install -y $package_name
-    if [ "$is_installed" -ne 0 ]; then
-      printf_red "⛈️  Failed to install package '${package_name}'. Aborting.\n"
-      exit 1
-    else
-      printf_bold "✅  Package '${package_name}' installed successfully.\n"
-    fi
-  else
-    printf_bold "✅  Found package '${package_name}'. Skipping.\n"
-  fi
-}
-
-install_ghostscript() {
-  local package_name="ghostscript"
-  local is_installed=$(
-    sudo zypper se -i "$package_name" | grep -q "^i" >/dev/null 2>&1
-    echo $?
-  )
-  if [ "$is_installed" -ne 0 ]; then
-    printf_bold "📦  Installing package '${package_name}'...\n"
-    sudo zypper install -y $package_name
-    if [ "$is_installed" -ne 0 ]; then
-      printf_red "⛈️  Failed to install package '${package_name}'. Aborting.\n"
-      exit 1
-    else
-      printf_bold "✅  Package '${package_name}' installed successfully.\n"
-    fi
-  else
-    printf_bold "✅  Found package '${package_name}'. Skipping.\n"
-  fi
-}
-
-install_imagemagick() {
-  local package_name="ImageMagick"
-  local is_installed=$(
-    sudo zypper se -i "$package_name" | grep -q "^i" >/dev/null 2>&1
-    echo $?
-  )
-  if [ "$is_installed" -ne 0 ]; then
-    printf_bold "📦  Installing package '${package_name}'...\n"
-    sudo zypper install -y $package_name
-    if [ "$is_installed" -ne 0 ]; then
-      printf_red "⛈️  Failed to install package '${package_name}'. Aborting.\n"
-      exit 1
-    else
-      printf_bold "✅  Package '${package_name}' installed successfully.\n"
-    fi
-  else
-    printf_bold "✅  Found package '${package_name}'. Skipping.\n"
-  fi
-}
-
-install_ocrmypdf() {
-  snap_name="ocrmypdf"
-  is_not_installed=$(
-    snap list | grep -q "$snap_name"
-    echo $?
-  )
-  if [ "$is_not_installed" -ne 0 ]; then
-    printf_bold "📦  Installing snap '${snap_name}'...\n"
-    sudo snap install -y "$snap_name"
-    if [ "$is_not_installed" -ne 0 ]; then
-      printf_red "⛈️  Failed to install snap '${snap_name}'. Aborting.\n"
-      exit 1
-    else
-      printf_bold "✅  Snap '${snap_name}' installed successfully.\n"
-    fi
-  else
-    printf_bold "✅  Found snap '${snap_name}'. Skipping.\n"
-  fi
-}
-
 install_tesseract() {
   local package_name="tesseract-ocr"
-  local is_installed=$(
-    sudo zypper se -i "$package_name" | grep -q "^i" >/dev/null 2>&1
-    echo $?
-  )
-  if [ "$is_installed" -ne 0 ]; then
+  if ! is_package_installed "$package_name"; then
     printf_bold "📦  Installing package '${package_name}'...\n"
     sudo zypper install -y \
       tesseract-ocr \
@@ -261,7 +206,7 @@ install_tesseract() {
       tesseract-ocr-traineddata-hin \
       tesseract-ocr-traineddata-rus \
       tesseract-ocr-traineddata-ara
-    if [ "$is_installed" -ne 0 ]; then
+    if ! is_package_installed "$package_name"; then
       printf_red "⛈️  Failed to install package '${package_name}'. Aborting.\n"
       exit 1
     else
@@ -274,11 +219,7 @@ install_tesseract() {
 
 install_libreoffice() {
   local package_name="libreoffice"
-  local is_installed=$(
-    sudo zypper se -i "$package_name" | grep -q "^i" >/dev/null 2>&1
-    echo $?
-  )
-  if [ "$is_installed" -ne 0 ]; then
+  if ! is_package_installed $package_name; then
     printf_bold "📦  Installing package '${package_name}'...\n"
     sudo zypper install -y \
       libreoffice \
@@ -288,7 +229,7 @@ install_libreoffice() {
       libreoffice-draw \
       libreoffice-math \
       libreoffice-base
-    if [ "$is_installed" -ne 0 ]; then
+    if ! is_package_installed "$package_name"; then
       printf_red "⛈️  Failed to install package '${package_name}'. Aborting.\n"
       exit 1
     else
@@ -301,11 +242,9 @@ install_libreoffice() {
 
 install_fonts() {
   local package_pattern="*-fonts"
-  local font_count=863
-  local installed_packages=($(sudo zypper search -i -t package "$package_pattern" | awk '/^i/ {print $3}'))
-  local installed_count=${#installed_packages[@]}
-  if [ "$installed_count" -lt "$font_count" ]; then
-    printf_bold "📦  Installing '${package_name}'...\n"
+  local package_count=863
+  if ! is_package_pattern_installed "$package_pattern" $package_count; then
+    printf_bold "📦  Installing fonts...\n"
     sudo zypper install -y \
       adinatha-fonts \
       adobe-sourcecodepro-fonts \
@@ -1170,26 +1109,26 @@ install_fonts() {
       x11-japanese-bitmap-fonts \
       xano-mincho-fonts \
       xorg-x11-fonts
-    if [ "$installed_count" -lt "$font_count" ]; then
+    if ! is_package_pattern_installed "$package_pattern" $package_count; then
       printf_red "⛈️  Failed to install fonts. Aborting.\n"
       exit 1
     else
       printf_bold "✅  Fonts installed successfully.\n"
     fi
   else
-    printf_bold "✅  Found ${font_count} fonts. Skipping.\n"
+    printf_bold "✅  Found ${package_count} fonts matching the pattern '${package_pattern}'. Skipping.\n"
   fi
 }
 
 install_postgres
 install_redis
 install_minio
-install_exiftool
-install_ffmpeg
-install_poppler
-install_ghostscript
-install_imagemagick
-install_ocrmypdf
+install_package "exiftool"
+install_package "ffmpeg-4"
+install_package "poppler-tools"
+install_package "ghostscript"
+install_package "ImageMagick"
+install_snap "ocrmypdf"
 install_tesseract
 install_libreoffice
 install_fonts
