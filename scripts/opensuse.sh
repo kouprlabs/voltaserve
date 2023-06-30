@@ -1124,15 +1124,15 @@ install_fonts() {
   fi
 }
 
-# install_postgres
-# install_redis
-# install_minio
-# install_package "exiftool"
-# install_package "ffmpeg-4"
-# install_package "poppler-tools"
-# install_package "ghostscript"
-# install_package "ImageMagick"
-# install_snap "ocrmypdf"
-# install_tesseract
-# install_libreoffice
+install_postgres
+install_redis
+install_minio
+install_package "exiftool"
+install_package "ffmpeg-4"
+install_package "poppler-tools"
+install_package "ghostscript"
+install_package "ImageMagick"
+install_snap "ocrmypdf"
+install_tesseract
+install_libreoffice
 install_fonts
