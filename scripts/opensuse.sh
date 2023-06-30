@@ -188,6 +188,46 @@ install_minio() {
   fi
 }
 
+install_meilisearch() {
+  local meilisearch_bin="${BASE_DIR}/meilisearch/meilisearch"
+  local not_found="! (command -v $meilisearch_bin >/dev/null 2>&1 && $meilisearch_bin --version >/dev/null 2>&1)"
+  if eval "$not_found"; then
+    printf_bold "📦  Installing binary '${meilisearch_bin}'..."
+    sudo mkdir -p "${BASE_DIR}/meilisearch"
+    cd "${BASE_DIR}/meilisearch" || exit
+    sudo wget -c "https://github.com/meilisearch/meilisearch/releases/download/v1.2.0/meilisearch-linux-amd64"
+    sudo mv ./meilisearch-linux-amd64 ./meilisearch
+    sudo chmod +x $meilisearch_bin
+    if eval "$not_found"; then
+      printf_red "⛈️  Failed to install binary '${meilisearch_bin}'. Aborting."
+      exit 1
+    else
+      printf_bold "✅  Binary '${meilisearch_bin}' installed successfully."
+    fi
+  else
+    printf_bold "✅  Found binary '${meilisearch_bin}'. Skipping."
+  fi
+}
+
+install_mailhog() {
+  local mailhog_bin="${BASE_DIR}/mailhog/MailHog_linux_amd64"
+  local not_found="! (command -v $mailhog_bin >/dev/null 2>&1 && $mailhog_bin --version >/dev/null 2>&1)"
+  if eval "$not_found"; then
+    printf_bold "📦  Installing binary '${mailhog_bin}'...\n"
+    sudo mkdir -p "${BASE_DIR}/mailhog"
+    sudo wget -c https://github.com/mailhog/MailHog/releases/download/v1.0.1/MailHog_linux_amd64 -P "${BASE_DIR}/mailhog"
+    sudo chmod +x $mailhog_bin
+    if eval "$not_found"; then
+      printf_red "⛈️  Failed to install binary '${mailhog_bin}'. Aborting.\n"
+      exit 1
+    else
+      printf_bold "✅  Binary '${mailhog_bin}' installed successfully.\n"
+    fi
+  else
+    printf_bold "✅  Found binary '${mailhog_bin}'. Skipping.\n"
+  fi
+}
+
 install_tesseract() {
   local package_name="tesseract-ocr"
   if ! is_package_installed "$package_name"; then
@@ -1127,6 +1167,8 @@ install_fonts() {
 install_postgres
 install_redis
 install_minio
+install_meilisearch
+install_mailhog
 install_package "exiftool"
 install_package "ffmpeg-4"
 install_package "poppler-tools"
