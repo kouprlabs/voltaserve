@@ -1285,7 +1285,7 @@ install_package "ghostscript"
 install_package "ImageMagick"
 
 sudo bash -c "ulimit -n 1048576"
-install_brew_package "ocrmypdf"
+install_brew_package "ocrmypdf@14.3.0"
 
 install_tesseract
 install_libreoffice
