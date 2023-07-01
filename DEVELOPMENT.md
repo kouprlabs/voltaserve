@@ -2,7 +2,9 @@
 
 ## Getting Started
 
-Run infrastructure services using Docker:
+### Docker
+
+Run infrastructure services:
 
 ```shell
 docker compose up -d \
@@ -20,17 +22,47 @@ docker compose up -d \
     tesseract
 ```
 
-Install dependencies on SLE 15 or openSUSE Leap 15:
+### SLE 15 or openSUSE Leap 15
+
+Install dependencies:
 
 ```shell
 curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/scripts/sle15/install.sh?t=$(date +%s)" | sh -s
 ```
 
-Install dependencies on RHEL 9:
+Start infrastructure services:
+
+```shell
+curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/scripts/sle15/start.sh?t=$(date +%s)" | sh -s
+```
+
+Stop infrastructure services:
+
+```shell
+curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/scripts/sle15/start.sh?t=$(date +%s)" | sh -s
+```
+
+### RHEL 9
+
+Install dependencies:
 
 ```shell
 curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/scripts/rhel9/install.sh?t=$(date +%s)" | sh -s
 ```
+
+Start infrastructure services:
+
+```shell
+curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/scripts/rhel9/start.sh?t=$(date +%s)" | sh -s
+```
+
+Stop infrastructure services:
+
+```shell
+curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/scripts/rhel9/stop.sh?t=$(date +%s)" | sh -s
+```
+
+### Microservices
 
 Start each microservice separately in a new terminal as described here:
 
