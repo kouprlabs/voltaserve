@@ -65,16 +65,6 @@ is_service_running() {
   fi
 }
 
-is_brew_package_installed() {
-  local package_name="$1"
-  result=$(brew list --formula | grep -x "$package_name")
-  if [[ "$result" == "$package_name" ]]; then
-    return 0
-  else
-    return 1
-  fi
-}
-
 install_package() {
   local package_name="$1"
   if ! is_package_installed "$package_name"; then
@@ -88,22 +78,6 @@ install_package() {
     fi
   else
     printf_bold "✅  Found package '${package_name}'. Skipping."
-  fi
-}
-
-install_brew_package() {
-  local package_name="$1"
-  if ! is_brew_package_installed "$package_name"; then
-    printf_bold "📦  Installing brew package '${package_name}'..."
-    brew install "$package_name"
-    if ! is_brew_package_installed "$package_name"; then
-      printf_red "⛈️  Failed to install brew package '${package_name}'. Aborting."
-      exit 1
-    else
-      printf_bold "✅  Brew package '${package_name}' installed successfully."
-    fi
-  else
-    printf_bold "✅  Found brew package '${package_name}'. Skipping."
   fi
 }
 
@@ -1284,8 +1258,11 @@ install_package "poppler-tools"
 install_package "ghostscript"
 install_package "ImageMagick"
 
-install_brew_package "ocrmypdf"
-
 install_tesseract
+
+install_package "unpaper"
+install_package "pngquant"
+install_pip_package "ocrmypdf" "14.3.0"
+
 install_libreoffice
 install_fonts
