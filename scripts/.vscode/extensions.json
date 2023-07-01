@@ -1,5 +1,8 @@
 {
-    "recommendations": [
-      "foxundermoon.shell-format"
-    ]
-  }
+  "recommendations": [
+    "foxundermoon.shell-format",
+    "timonwong.shellcheck",
+    "mads-hartmann.bash-ide-vscode",
+    "jeff-hykin.better-shellscript-syntax",
+  ]
+}
