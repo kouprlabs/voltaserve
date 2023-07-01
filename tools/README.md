@@ -16,7 +16,9 @@ Build binary:
 go build .
 ```
 
-Build SLE 15 Docker images:
+### Docker Images
+
+#### Build SLE 15 Docker Images
 
 ```shell
 docker build -t voltaserve/exiftool -f ./docker/sle15/Dockerfile.exiftool .
@@ -46,7 +48,7 @@ docker build -t voltaserve/poppler -f ./docker/sle15/Dockerfile.poppler .
 docker build -t voltaserve/tesseract -f D./docker/sle15/ockerfile.tesseract .
 ```
 
-Build RHEL 9 Docker images:
+#### Build RHEL 9 Docker Images
 
 ```shell
 docker build -t voltaserve/exiftool -f ./docker/rhel9/Dockerfile.exiftool .
