@@ -196,7 +196,7 @@ install_postgres() {
   if eval "$not_found"; then
     printf_bold "📦  Installing service '${postgres_service}'..."
     sudo zypper install -y postgresql15-server
-    sudo systemctl enable --now postgresql
+    sudo systemctl enable --now "$postgres_service"
     sudo su postgres <<EOF
 psql -c "CREATE USER voltaserve WITH PASSWORD 'voltaserve';"
 psql -c "CREATE DATABASE voltaserve;"
@@ -1291,6 +1291,7 @@ show_next_steps() {
 
 check_supported_system
 
+install_package "tar"
 install_package "wget"
 install_package "git"
 

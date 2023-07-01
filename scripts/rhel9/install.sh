@@ -52,24 +52,38 @@ check_supported_system() {
   fi
 }
 
-install_cockroach() {
-  local cockroach_bin="${base_dir}/cockroach/cockroach"
-  local not_found="! (command -v $cockroach_bin >/dev/null 2>&1 && $cockroach_bin --version >/dev/null 2>&1)"
+install_postgres() {
+  local postgres_service="postgresql"
+  local not_found='! systemctl list-unit-files | grep -q '"${postgres_service}.service"''
   if eval "$not_found"; then
-    printf_bold "📦  Installing binary '${cockroach_bin}'..."
-    cockroach_filename="cockroach-v23.1.3.linux-amd64"
-    cockroach_tgz="${cockroach_filename}.tgz"
-    sudo wget -c "https://binaries.cockroachdb.com/${cockroach_tgz}" -P $base_dir
-    sudo tar -xzf "${base_dir}/${cockroach_tgz}" -C $base_dir --transform="s/^${cockroach_filename}/cockroach/"
-    sudo rm -f "${base_dir}/${cockroach_tgz}"
+    printf_bold "📦  Installing service '${postgres_service}'..."
+    sudo dnf module -y enable postgresql-server:15.3
+    sudo dnf module -y install postgresql-server:15.3/common
+    sudo systemctl enable --now "$postgres_service"
+    sudo su postgres <<EOF
+psql -c "CREATE USER voltaserve WITH PASSWORD 'voltaserve';"
+psql -c "CREATE DATABASE voltaserve;"
+psql -c "GRANT ALL ON DATABASE voltaserve TO voltaserve;"
+psql -c "ALTER DATABASE voltaserve OWNER TO voltaserve;"
+exit
+EOF
+    sudo su postgres <<EOF
+psql -c "ALTER USER postgres WITH PASSWORD 'postgres';"
+exit
+EOF
+    sudo sed -i 's/peer/md5/g' /var/lib/pgsql/data/pg_hba.conf
+    sudo sed -i 's/ident/md5/g' /var/lib/pgsql/data/pg_hba.conf
+    sudo systemctl restart postgresql
+    git_branch=$(git symbolic-ref --short HEAD 2>/dev/null)
+    curl -fsSL "https://raw.githubusercontent.com/kouprlabs/voltaserve/${git_branch}/postgres/schema.sql" | PGPASSWORD="voltaserve" psql -U "voltaserve"
     if eval "$not_found"; then
-      printf_red "⛈️  Failed to install binary '${cockroach_bin}'. Aborting."
+      printf_red "⛈️  Failed to install service '${postgres_service}'. Aborting."
       exit 1
     else
-      printf_bold "✅  Binary '${cockroach_bin}' installed successfully."
+      printf_bold "✅  Service '${postgres_service}' installed successfully."
     fi
   else
-    printf_bold "✅  Found binary '${cockroach_bin}'. Skipping."
+    printf_bold "✅  Found service '$postgres_service'. Skipping."
   fi
 }
 
@@ -174,7 +188,7 @@ install_dnf_package() {
 download_tesseract_trained_data() {
   local tessdata_dir="/usr/share/tesseract/tessdata"
   local file_path="${tessdata_dir}/$1.traineddata"
-  local url="https://github.com/kouprlabs/tessdata/raw/4.1.0/$1.traineddata"
+  local url="https://github.com/tesseract-ocr/tessdata/raw/4.1.0/$1.traineddata"
   if [[ ! -f "$file_path" ]]; then
     printf_bold "🧠  Downloading Tesseract trained data '${file_path}'..."
     sudo wget -c "$url" -P $tessdata_dir
@@ -442,21 +456,35 @@ install_dnf_package "tar"
 install_dnf_package "wget"
 install_dnf_package "git"
 
-install_cockroach
-install_meilisearch
-install_mailhog
-install_minio
-install_redis
+install_dnf_package "python3"
+install_dnf_package "python3-pip"
+install_pip_package "pipenv" "2023.6.12"
+
+install_nodejs_18
+install_corepack
 
 install_dnf_package "golang"
-install_dnf_package "poppler-utils"
-install_dnf_package "libreoffice"
-install_dnf_package "python3-pip"
-install_dnf_package "python3-devel"
-install_dnf_package "ghostscript"
-install_dnf_package "tesseract"
-install_dnf_package "postgresql"
+install_swag
+install_golangci
+install_air
 
+install_postgres
+install_redis
+install_minio
+install_meilisearch
+install_mailhog
+
+install_rpm_repository "epel" "https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm"
+install_rpm_repository "rpmfusion-free-updates" "https://mirrors.rpmfusion.org/free/el/rpmfusion-free-release-9.noarch.rpm"
+install_rpm_repository "rpmfusion-nonfree-updates" "https://mirrors.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-9.noarch.rpm"
+
+install_dnf_package "perl-Image-ExifTool"
+install_dnf_package "ffmpeg" "--allowerasing"
+install_dnf_package "poppler-utils"
+install_dnf_package "ghostscript"
+install_dnf_package "ImageMagick"
+
+install_dnf_package "tesseract"
 download_tesseract_trained_data "osd"
 download_tesseract_trained_data "eng"
 download_tesseract_trained_data "deu"
@@ -475,46 +503,10 @@ download_tesseract_trained_data "hin"
 download_tesseract_trained_data "rus"
 download_tesseract_trained_data "ara"
 
-install_rpm_repository "epel" "https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm"
-install_rpm_repository "rpmfusion-free-updates" "https://mirrors.rpmfusion.org/free/el/rpmfusion-free-release-9.noarch.rpm"
-install_rpm_repository "rpmfusion-nonfree-updates" "https://mirrors.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-9.noarch.rpm"
-
-install_dnf_package "GraphicsMagick"
-install_dnf_package "pngquant"
 install_dnf_package "unpaper"
-install_dnf_package "perl-Image-ExifTool"
-install_dnf_package "dnf-plugins-core"
-
-install_code_ready_builder_repository
-
-install_dnf_package "ffmpeg" "--allowerasing"
-install_dnf_package "automake"
-install_dnf_package "make"
-install_dnf_package "autoconf"
-install_dnf_package "libtool"
-install_dnf_package "clang"
-install_dnf_package "zlib"
-install_dnf_package "zlib-devel"
-install_dnf_package "libjpeg-turbo"
-install_dnf_package "libjpeg-turbo-devel"
-install_dnf_package "libwebp"
-install_dnf_package "libwebp-devel"
-install_dnf_package "libtiff"
-install_dnf_package "libtiff-devel"
-install_dnf_package "libpng"
-install_dnf_package "libpng-devel"
-install_dnf_package "leptonica-devel"
-
-install_jbig2enc
-
+install_dnf_package "pngquant"
 install_pip_package "ocrmypdf" "14.2.1"
-install_pip_package "pipenv" "2023.6.12"
 
-install_nodejs_18
-install_corepack
-
-install_air
-install_golangci
-install_swag
+install_dnf_package "libreoffice"
 
 show_next_steps
