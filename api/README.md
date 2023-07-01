@@ -44,8 +44,6 @@ Format swag comments:
 swag fmt
 ```
 
-We suppose that the [api-docs](https://github.com/voltaserve/api-docs) repository is cloned locally at: `../../api-docs/`.
-
 Generate `swagger.yml`:
 
 ```shell
@@ -63,5 +61,3 @@ Generate the final static HTML documentation:
 ```shell
 npx @redocly/cli build-docs ./docs/swagger.yaml --output ./docs/index.html
 ```
-
-Now you can open a PR in the [api-docs](https://github.com/voltaserve/api-docs) repository with your current changes.
