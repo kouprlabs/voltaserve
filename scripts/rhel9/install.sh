@@ -411,43 +411,53 @@ install_air() {
 }
 
 show_next_steps() {
+  echo
   printf_bold "🎉 You are ready to develop Voltaserve!"
+  echo
 
   echo "1) Start infrastructure services:"
-  printf_cyan "curl -sSfL \"https://raw.githubusercontent.com/kouprlabs/voltaserve/${git_branch}/scripts/rhel9/start.sh?t=$(date +%s)\" | sh -s"
+  printf_cyan "curl -sSfL \"https://raw.githubusercontent.com/kouprlabs/voltaserve/${git_branch}/scripts/rhel9/start.sh?t=\$(date +%s)\" | sh -s"
+  echo
 
   echo "2) Open a terminal in each microservice's subfolder, then start each one in development mode:"
   echo
 
   printf_grey "cd ./api"
-  printf_magenta "air"
+  printf_magenta "go run ."
+  echo
 
   printf_grey "cd ./conversion"
-  printf_magenta "air"
+  printf_magenta "go run ."
+  echo
 
   printf_grey "cd ./idp"
   printf_magenta "pnpm install"
   printf_magenta "pnpm dev"
+  echo
 
   printf_grey "cd ./webdav"
   printf_magenta "pnpm install"
   printf_magenta "pnpm dev"
+  echo
 
   printf_grey "cd ./ui"
   printf_magenta "pnpm install"
   printf_magenta "pnpm dev"
+  echo
 
   printf_grey "cd ./language"
   printf_magenta "pipenv install"
   printf_magenta "pipenv shell"
   printf_magenta "FLASK_APP=server.py flask run --host=0.0.0.0 --port=5002 --debug"
+  echo
 
   echo "Alternatively, if this is a VM you can use Visual Studio Code's remote development as described here: "
   printf_underlined "https://code.visualstudio.com/docs/remote/remote-overview"
   echo "For this you can find the workspace file (voltaserve.code-workspace) in the repository's root."
+  echo
 
-  echo "3) To stop infrastructure services (if needed):"
-  printf_cyan "curl -sSfL \"https://raw.githubusercontent.com/kouprlabs/voltaserve/${git_branch}/scripts/rhel9/stop.sh?t=$(date +%s)\" | sh -s"
+  echo "3) Stop infrastructure services (if needed):"
+  printf_cyan "curl -sSfL \"https://raw.githubusercontent.com/kouprlabs/voltaserve/${git_branch}/scripts/rhel9/stop.sh?t=\$(date +%s)\" | sh -s"
 }
 
 check_supported_system
