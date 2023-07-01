@@ -1284,7 +1284,7 @@ install_package "poppler-tools"
 install_package "ghostscript"
 install_package "ImageMagick"
 
-sudo ulimit -n 1048576
+sudo bash -c "ulimit -n 1048576"
 install_brew_package "ocrmypdf"
 
 install_tesseract
