@@ -93,10 +93,9 @@ install_package() {
 
 install_brew_package() {
   local package_name="$1"
-  local package_version="$2"
   if ! is_brew_package_installed "$package_name"; then
     printf_bold "📦  Installing brew package '${package_name}'..."
-    brew install "${package_name}@${package_version}"
+    brew install "$package_name"
     if ! is_brew_package_installed "$package_name"; then
       printf_red "⛈️  Failed to install brew package '${package_name}'. Aborting."
       exit 1
@@ -1286,7 +1285,7 @@ install_package "ghostscript"
 install_package "ImageMagick"
 
 sudo bash -c "ulimit -n 1048576"
-install_brew_package "ocrmypdf" "14.3.0"
+install_brew_package "ocrmypdf"
 
 install_tesseract
 install_libreoffice
