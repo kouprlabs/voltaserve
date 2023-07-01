@@ -1257,35 +1257,35 @@ install_fonts() {
   fi
 }
 
-# install_package "wget"
-# install_package "git"
+install_package "wget"
+install_package "git"
 
-# install_package "python311"
-# install_pip_package "pipenv" "2023.6.12"
+install_package "python311"
+install_pip_package "pipenv" "2023.6.12"
 
-# install_package "nodejs18"
-# install_package "npm18"
-# install_corepack
+install_package "nodejs18"
+install_package "npm18"
+install_corepack
 
-# install_package "go1.20"
-# install_swag
-# install_golangci
-# install_air
+install_package "go1.20"
+install_swag
+install_golangci
+install_air
 
 install_postgres
-# install_redis
-# install_minio
-# install_meilisearch
-# install_mailhog
+install_redis
+install_minio
+install_meilisearch
+install_mailhog
 
-# install_package "exiftool"
-# install_package "ffmpeg-4"
-# install_package "poppler-tools"
-# install_package "ghostscript"
-# install_package "ImageMagick"
+install_package "exiftool"
+install_package "ffmpeg-4"
+install_package "poppler-tools"
+install_package "ghostscript"
+install_package "ImageMagick"
 
-# install_brew_package "ocrmypdf"
+install_brew_package "ocrmypdf"
 
-# install_tesseract
-# install_libreoffice
-# install_fonts
+install_tesseract
+install_libreoffice
+install_fonts
