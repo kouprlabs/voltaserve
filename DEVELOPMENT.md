@@ -22,22 +22,20 @@ docker compose up -d \
     tesseract
 ```
 
-### Using openSUSE
+### Using SLE 15 or openSUSE Leap 15
 
 Run:
 
 ```shell
-./scripts/opensuse.sh
+./scripts/sle15_install.sh
 ```
 
-### Using macOS
-
-Install [Homebrew](https://brew.sh).
+### Using RHEL 9
 
 Run:
 
 ```shell
-./scripts/macos.sh
+./scripts/rhel9_install.sh
 ```
 
 ## Microservices

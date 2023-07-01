@@ -1,7 +1,9 @@
 #!/bin/bash
 
-BASE_DIR="/opt"
-mkdir -p $BASE_DIR
+base_dir="/opt"
+mkdir -p $base_dir
+
+git_branch=$(git symbolic-ref --short HEAD 2>/dev/null || echo "main")
 
 printf_bold() {
   local msg="$1"
@@ -31,6 +33,22 @@ printf_red() {
 printf_underlined() {
   local msg="$1"
   printf "\e[4m%s\e[0m\n" "$msg"
+}
+
+check_supported_system() {
+  local cpe_name
+  cpe_name=$(grep -oP '(?<=^CPE_NAME=).+' /etc/os-release)
+  cpe_name="${cpe_name//\"/}"
+  local pretty_name
+  pretty_name=$(grep -oP '(?<=^PRETTY_NAME=").*"' /etc/os-release | tr -d '"')
+  if [[ $cpe_name == "cpe:/o:opensuse:leap:15."* ||
+    "$cpe_name" == "cpe:/o:suse:sles:15:"* ||
+    "$cpe_name" == "cpe:/o:suse:sled:15:"* ]]; then
+    printf_bold "✅  Found supported operating system '$pretty_name'"
+  else
+    printf_red "⛈️  Operating system not supported: ${pretty_name}"
+    exit 1
+  fi
 }
 
 is_package_installed() {
@@ -240,10 +258,10 @@ install_minio() {
   if eval "$not_found"; then
     printf_bold "📦  Installing package '${minio_pkg}'..."
     local minio_rpm="minio-20230629051228.0.0.x86_64.rpm"
-    sudo wget -c "https://dl.min.io/server/minio/release/linux-amd64/${minio_rpm}" -P $BASE_DIR
-    sudo zypper --no-gpg-checks install -y "${BASE_DIR}/${minio_rpm}"
-    sudo rm -f "${BASE_DIR}/${minio_rpm}"
-    sudo mkdir -p "${BASE_DIR}/minio"
+    sudo wget -c "https://dl.min.io/server/minio/release/linux-amd64/${minio_rpm}" -P $base_dir
+    sudo zypper --no-gpg-checks install -y "${base_dir}/${minio_rpm}"
+    sudo rm -f "${base_dir}/${minio_rpm}"
+    sudo mkdir -p "${base_dir}/minio"
     if eval "$not_found"; then
       printf_red "⛈️  Failed to install package '${minio_pkg}'. Aborting."
       exit 1
@@ -256,12 +274,12 @@ install_minio() {
 }
 
 install_meilisearch() {
-  local meilisearch_bin="${BASE_DIR}/meilisearch/meilisearch"
+  local meilisearch_bin="${base_dir}/meilisearch/meilisearch"
   local not_found="! (command -v $meilisearch_bin >/dev/null 2>&1 && $meilisearch_bin --version >/dev/null 2>&1)"
   if eval "$not_found"; then
     printf_bold "📦  Installing binary '${meilisearch_bin}'..."
-    sudo mkdir -p "${BASE_DIR}/meilisearch"
-    cd "${BASE_DIR}/meilisearch" || exit
+    sudo mkdir -p "${base_dir}/meilisearch"
+    cd "${base_dir}/meilisearch" || exit
     sudo wget -c "https://github.com/meilisearch/meilisearch/releases/download/v1.2.0/meilisearch-linux-amd64"
     sudo mv ./meilisearch-linux-amd64 ./meilisearch
     sudo chmod +x $meilisearch_bin
@@ -277,12 +295,12 @@ install_meilisearch() {
 }
 
 install_mailhog() {
-  local mailhog_bin="${BASE_DIR}/mailhog/MailHog_linux_amd64"
+  local mailhog_bin="${base_dir}/mailhog/MailHog_linux_amd64"
   local not_found="! (command -v $mailhog_bin >/dev/null 2>&1 && $mailhog_bin --version >/dev/null 2>&1)"
   if eval "$not_found"; then
     printf_bold "📦  Installing binary '${mailhog_bin}'..."
-    sudo mkdir -p "${BASE_DIR}/mailhog"
-    sudo wget -c https://github.com/mailhog/MailHog/releases/download/v1.0.1/MailHog_linux_amd64 -P "${BASE_DIR}/mailhog"
+    sudo mkdir -p "${base_dir}/mailhog"
+    sudo wget -c https://github.com/mailhog/MailHog/releases/download/v1.0.1/MailHog_linux_amd64 -P "${base_dir}/mailhog"
     sudo chmod +x $mailhog_bin
     if eval "$not_found"; then
       printf_red "⛈️  Failed to install binary '${mailhog_bin}'. Aborting."
@@ -1231,6 +1249,48 @@ install_fonts() {
   fi
 }
 
+show_next_steps() {
+  printf_bold "🎉 You are ready to develop Voltaserve!"
+
+  echo "1) Start infrastructure services:"
+  printf_cyan "curl -sSfL \"https://raw.githubusercontent.com/kouprlabs/voltaserve/${git_branch}/scripts/sle15/start.sh?t=$(date +%s)\" | sh -s"
+
+  echo "2) Open a terminal in each microservice's subfolder, then start each one in development mode:"
+  echo
+
+  printf_grey "cd ./api"
+  printf_magenta "air"
+
+  printf_grey "cd ./conversion"
+  printf_magenta "air"
+
+  printf_grey "cd ./idp"
+  printf_magenta "pnpm install"
+  printf_magenta "pnpm dev"
+
+  printf_grey "cd ./webdav"
+  printf_magenta "pnpm install"
+  printf_magenta "pnpm dev"
+
+  printf_grey "cd ./ui"
+  printf_magenta "pnpm install"
+  printf_magenta "pnpm dev"
+
+  printf_grey "cd ./language"
+  printf_magenta "pipenv install"
+  printf_magenta "pipenv shell"
+  printf_magenta "FLASK_APP=server.py flask run --host=0.0.0.0 --port=5002 --debug"
+
+  echo "Alternatively, if this is a VM you can use Visual Studio Code's remote development as described here: "
+  printf_underlined "https://code.visualstudio.com/docs/remote/remote-overview"
+  echo "For this you can find the workspace file (voltaserve.code-workspace) in the repository's root."
+
+  echo "3) To stop infrastructure services (if needed):"
+  printf_cyan "curl -sSfL \"https://raw.githubusercontent.com/kouprlabs/voltaserve/${git_branch}/scripts/sle15/stop.sh?t=$(date +%s)\" | sh -s"
+}
+
+check_supported_system
+
 install_package "wget"
 install_package "git"
 
@@ -1266,3 +1326,5 @@ install_pip_package "ocrmypdf" "14.3.0"
 
 install_libreoffice
 install_fonts
+
+show_next_steps
