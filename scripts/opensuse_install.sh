@@ -93,9 +93,10 @@ install_package() {
 
 install_brew_package() {
   local package_name="$1"
+  local package_version="$2"
   if ! is_brew_package_installed "$package_name"; then
     printf_bold "📦  Installing brew package '${package_name}'..."
-    brew install "$package_name"
+    brew install "${package_name}@${package_version}"
     if ! is_brew_package_installed "$package_name"; then
       printf_red "⛈️  Failed to install brew package '${package_name}'. Aborting."
       exit 1
@@ -121,7 +122,7 @@ install_pip_package() {
       printf_bold "✅  Python package '${package_name}' installed successfully."
     fi
   else
-    printf_bold "✅  Found Python package '$package_name'. Skipping."
+    printf_bold "✅  Found Python package '${package_name}'. Skipping."
   fi
 }
 
@@ -256,7 +257,7 @@ WantedBy=default.target" | sudo tee /etc/systemd/system/redis.service >/dev/null
       printf_bold "✅  Package '${package_name}' installed successfully."
     fi
   else
-    printf_bold "✅  Found package '$package_name'. Skipping."
+    printf_bold "✅  Found package '${package_name}'. Skipping."
   fi
 }
 
@@ -1285,7 +1286,7 @@ install_package "ghostscript"
 install_package "ImageMagick"
 
 sudo bash -c "ulimit -n 1048576"
-install_brew_package "ocrmypdf@14.3.0"
+install_brew_package "ocrmypdf" "14.3.0"
 
 install_tesseract
 install_libreoffice
