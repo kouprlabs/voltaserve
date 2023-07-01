@@ -4,8 +4,6 @@
 
 Install [Golang](https://go.dev/doc/install).
 
-Install [air](https://github.com/cosmtrek/air#installation) (Optional).
-
 Run for development:
 
 ```shell
