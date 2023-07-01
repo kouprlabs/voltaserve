@@ -487,6 +487,8 @@ install_mailhog
 install_rpm_repository "epel" "https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm"
 install_rpm_repository "rpmfusion-free-updates" "https://mirrors.rpmfusion.org/free/el/rpmfusion-free-release-9.noarch.rpm"
 install_rpm_repository "rpmfusion-nonfree-updates" "https://mirrors.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-9.noarch.rpm"
+install_dnf_package "dnf-plugins-core"
+install_code_ready_builder_repository
 
 install_dnf_package "perl-Image-ExifTool"
 install_dnf_package "ffmpeg" "--allowerasing"

@@ -44,6 +44,14 @@ black .
 
 ### Build Docker Image
 
+Build SLE 15 Docker image:
+
 ```shell
-docker build -t voltaserve/language .
+docker build -t voltaserve/language -f ./Dockerfile.sle15 .
+```
+
+Build RHEL 9 Docker image:
+
+```shell
+docker build -t voltaserve/language -f ./Dockerfile.rhel9 .
 ```

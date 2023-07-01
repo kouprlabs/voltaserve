@@ -30,10 +30,16 @@ Run for production:
 pnpm run start
 ```
 
-Build Docker image:
+Build SLE 15 Docker image:
 
 ```shell
-docker build -t voltaserve/idp .
+docker build -t voltaserve/idp -f ./Dockerfile.sle15 .
+```
+
+Build RHEL 9 Docker image:
+
+```shell
+docker build -t voltaserve/idp -f ./Dockerfile.rhel9 .
 ```
 
 ### Generate and Publish Documentation

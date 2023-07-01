@@ -187,30 +187,62 @@ docker build -t voltaserve/conversion .
 
 ### Build Docker Images
 
+#### SLE 15 Images
+
 ```shell
-docker build -t voltaserve/exiftool -f Dockerfile.exiftool .
+docker build -t voltaserve/exiftool -f ./docker/sle15/Dockerfile.exiftool .
 ```
 
 ```shell
-docker build -t voltaserve/ffmpeg -f Dockerfile.ffmpeg .
+docker build -t voltaserve/ffmpeg -f ./docker/sle15/Dockerfile.ffmpeg .
 ```
 
 ```shell
-docker build -t voltaserve/imagemagick -f Dockerfile.imagemagick .
+docker build -t voltaserve/imagemagick -f ./docker/sle15/Dockerfile.imagemagick .
 ```
 
 ```shell
-docker build -t voltaserve/libreoffice -f Dockerfile.libreoffice .
+docker build -t voltaserve/libreoffice -f ./docker/sle15/Dockerfile.libreoffice .
 ```
 
 ```shell
-docker build -t voltaserve/ocrmypdf -f Dockerfile.ocrmypdf .
+docker build -t voltaserve/ocrmypdf -f ./docker/sle15/Dockerfile.ocrmypdf .
 ```
 
 ```shell
-docker build -t voltaserve/poppler -f Dockerfile.poppler .
+docker build -t voltaserve/poppler -f ./docker/sle15/Dockerfile.poppler .
 ```
 
 ```shell
-docker build -t voltaserve/tesseract -f Dockerfile.tesseract .
+docker build -t voltaserve/tesseract -f D./docker/sle15/ockerfile.tesseract .
+```
+
+#### RHEL 9 Images
+
+```shell
+docker build -t voltaserve/exiftool -f ./docker/rhel9/Dockerfile.exiftool .
+```
+
+```shell
+docker build -t voltaserve/ffmpeg -f ./docker/rhel9/Dockerfile.ffmpeg .
+```
+
+```shell
+docker build -t voltaserve/imagemagick -f ./docker/rhel9/Dockerfile.imagemagick .
+```
+
+```shell
+docker build -t voltaserve/libreoffice -f ./docker/rhel9/Dockerfile.libreoffice .
+```
+
+```shell
+docker build -t voltaserve/ocrmypdf -f ./docker/rhel9/Dockerfile.ocrmypdf .
+```
+
+```shell
+docker build -t voltaserve/poppler -f ./docker/rhel9/Dockerfile.poppler .
+```
+
+```shell
+docker build -t voltaserve/tesseract -f D./docker/rhel9/ockerfile.tesseract .
 ```

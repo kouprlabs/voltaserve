@@ -20,8 +20,14 @@ Build binary:
 go build .
 ```
 
-Build Docker image:
+Build SLE 15 Docker image:
 
 ```shell
-docker build -t voltaserve/conversion .
+docker build -t voltaserve/conversion -f ./Dockerfile.sle15 .
+```
+
+Build RHEL 9 Docker image:
+
+```shell
+docker build -t voltaserve/conversion -f ./Dockerfile.rhel9 .
 ```

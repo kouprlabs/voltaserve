@@ -1,0 +1,30 @@
+FROM opensuse/leap:15.5 as builder
+
+WORKDIR /build
+
+COPY . .
+
+RUN zypper install -y git
+RUN zypper install -y go1.20
+
+RUN go mod download
+RUN go build -o voltaserve-tools
+
+FROM opensuse/leap:15.5 AS runner
+
+RUN zypper install -y libreoffice
+RUN zypper install -y libreoffice-writer
+RUN zypper install -y libreoffice-calc
+RUN zypper install -y libreoffice-impress
+RUN zypper install -y libreoffice-draw
+RUN zypper install -y libreoffice-math
+RUN zypper install -y libreoffice-base
+
+WORKDIR /app
+
+COPY --from=builder /build/voltaserve-tools ./voltaserve-tools
+COPY --from=builder /build/.env ./.env
+
+ENTRYPOINT ["./voltaserve-tools"]
+
+EXPOSE 6004

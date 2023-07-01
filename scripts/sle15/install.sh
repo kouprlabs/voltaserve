@@ -1305,7 +1305,9 @@ install_package "tar"
 install_package "wget"
 install_package "git"
 
+install_package "clang"
 install_package "python311"
+install_package "python311-devel"
 install_pip_package "pipenv" "2023.6.12"
 
 install_package "nodejs18"

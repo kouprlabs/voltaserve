@@ -24,10 +24,16 @@ Build binary:
 go build .
 ```
 
-Build Docker image:
+Build SLE 15 Docker image:
 
 ```shell
-docker build -t voltaserve/api .
+docker build -t voltaserve/api -f ./Dockerfile.sle15 .
+```
+
+Build RHEL 9 Docker image:
+
+```shell
+docker build -t voltaserve/api -f ./Dockerfile.rhel9 .
 ```
 
 ### Setup the Linter
