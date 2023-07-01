@@ -2,11 +2,7 @@
 
 ## Getting Started
 
-Install [Golang](https://go.dev/doc/install).
-
-Install [Swag](https://github.com/swaggo/swag).
-
-Install [golangci-lint](https://golangci-lint.run/usage/install).
+Install [Golang](https://go.dev/doc/install), [Swag](https://github.com/swaggo/swag) and [golangci-lint](https://golangci-lint.run/usage/install).
 
 Run for development:
 
