@@ -24,8 +24,6 @@ docker compose up -d \
 
 ### Using openSUSE
 
-Install [Homebrew](https://brew.sh).
-
 Run:
 
 ```shell
