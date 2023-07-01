@@ -9,7 +9,7 @@ Install [Golang](https://go.dev/doc/install).
 Run for development:
 
 ```shell
-air
+go run .
 ```
 
 Build binary:
@@ -18,10 +18,66 @@ Build binary:
 go build .
 ```
 
-Build Docker image:
+### Build Docker Images
+
+#### SLE 15 Images
 
 ```shell
-docker build -t voltaserve/conversion .
+docker build -t voltaserve/exiftool -f ./docker/sle15/Dockerfile.exiftool .
+```
+
+```shell
+docker build -t voltaserve/ffmpeg -f ./docker/sle15/Dockerfile.ffmpeg .
+```
+
+```shell
+docker build -t voltaserve/imagemagick -f ./docker/sle15/Dockerfile.imagemagick .
+```
+
+```shell
+docker build -t voltaserve/libreoffice -f ./docker/sle15/Dockerfile.libreoffice .
+```
+
+```shell
+docker build -t voltaserve/ocrmypdf -f ./docker/sle15/Dockerfile.ocrmypdf .
+```
+
+```shell
+docker build -t voltaserve/poppler -f ./docker/sle15/Dockerfile.poppler .
+```
+
+```shell
+docker build -t voltaserve/tesseract -f D./docker/sle15/ockerfile.tesseract .
+```
+
+#### RHEL 9 Images
+
+```shell
+docker build -t voltaserve/exiftool -f ./docker/rhel9/Dockerfile.exiftool .
+```
+
+```shell
+docker build -t voltaserve/ffmpeg -f ./docker/rhel9/Dockerfile.ffmpeg .
+```
+
+```shell
+docker build -t voltaserve/imagemagick -f ./docker/rhel9/Dockerfile.imagemagick .
+```
+
+```shell
+docker build -t voltaserve/libreoffice -f ./docker/rhel9/Dockerfile.libreoffice .
+```
+
+```shell
+docker build -t voltaserve/ocrmypdf -f ./docker/rhel9/Dockerfile.ocrmypdf .
+```
+
+```shell
+docker build -t voltaserve/poppler -f ./docker/rhel9/Dockerfile.poppler .
+```
+
+```shell
+docker build -t voltaserve/tesseract -f D./docker/rhel9/ockerfile.tesseract .
 ```
 
 ## Example Requests
@@ -183,66 +239,4 @@ docker build -t voltaserve/conversion .
   ],
   "stdout": true
 }
-```
-
-### Build Docker Images
-
-#### SLE 15 Images
-
-```shell
-docker build -t voltaserve/exiftool -f ./docker/sle15/Dockerfile.exiftool .
-```
-
-```shell
-docker build -t voltaserve/ffmpeg -f ./docker/sle15/Dockerfile.ffmpeg .
-```
-
-```shell
-docker build -t voltaserve/imagemagick -f ./docker/sle15/Dockerfile.imagemagick .
-```
-
-```shell
-docker build -t voltaserve/libreoffice -f ./docker/sle15/Dockerfile.libreoffice .
-```
-
-```shell
-docker build -t voltaserve/ocrmypdf -f ./docker/sle15/Dockerfile.ocrmypdf .
-```
-
-```shell
-docker build -t voltaserve/poppler -f ./docker/sle15/Dockerfile.poppler .
-```
-
-```shell
-docker build -t voltaserve/tesseract -f D./docker/sle15/ockerfile.tesseract .
-```
-
-#### RHEL 9 Images
-
-```shell
-docker build -t voltaserve/exiftool -f ./docker/rhel9/Dockerfile.exiftool .
-```
-
-```shell
-docker build -t voltaserve/ffmpeg -f ./docker/rhel9/Dockerfile.ffmpeg .
-```
-
-```shell
-docker build -t voltaserve/imagemagick -f ./docker/rhel9/Dockerfile.imagemagick .
-```
-
-```shell
-docker build -t voltaserve/libreoffice -f ./docker/rhel9/Dockerfile.libreoffice .
-```
-
-```shell
-docker build -t voltaserve/ocrmypdf -f ./docker/rhel9/Dockerfile.ocrmypdf .
-```
-
-```shell
-docker build -t voltaserve/poppler -f ./docker/rhel9/Dockerfile.poppler .
-```
-
-```shell
-docker build -t voltaserve/tesseract -f D./docker/rhel9/ockerfile.tesseract .
 ```
