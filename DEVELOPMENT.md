@@ -1,10 +1,8 @@
 # Voltaserve Development
 
-## Install Dependencies
+## Getting Started
 
-### Using Docker
-
-Run infrastructure services:
+Run infrastructure services using Docker:
 
 ```shell
 docker compose up -d \
@@ -22,23 +20,17 @@ docker compose up -d \
     tesseract
 ```
 
-### Using SLE 15 or openSUSE Leap 15
-
-Run:
+Install dependencies on SLE 15 or openSUSE Leap 15:
 
 ```shell
-./scripts/sle15_install.sh
+curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/scripts/sle15/install.sh?t=$(date +%s)" | sh -s
 ```
 
-### Using RHEL 9
-
-Run:
+Install dependencies on RHEL 9:
 
 ```shell
-./scripts/rhel9_install.sh
+curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/main/scripts/rhel9/install.sh?t=$(date +%s)" | sh -s
 ```
-
-## Microservices
 
 Start each microservice separately in a new terminal as described here:
 
