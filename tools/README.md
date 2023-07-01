@@ -4,8 +4,6 @@
 
 Install [Golang](https://go.dev/doc/install).
 
-### Build and Run
-
 Run for development:
 
 ```shell
@@ -18,9 +16,7 @@ Build binary:
 go build .
 ```
 
-### Build Docker Images
-
-#### SLE 15 Images
+Build SLE 15 Docker images:
 
 ```shell
 docker build -t voltaserve/exiftool -f ./docker/sle15/Dockerfile.exiftool .
@@ -50,7 +46,7 @@ docker build -t voltaserve/poppler -f ./docker/sle15/Dockerfile.poppler .
 docker build -t voltaserve/tesseract -f D./docker/sle15/ockerfile.tesseract .
 ```
 
-#### RHEL 9 Images
+Build RHEL 9 Docker images:
 
 ```shell
 docker build -t voltaserve/exiftool -f ./docker/rhel9/Dockerfile.exiftool .
@@ -80,9 +76,9 @@ docker build -t voltaserve/poppler -f ./docker/rhel9/Dockerfile.poppler .
 docker build -t voltaserve/tesseract -f D./docker/rhel9/ockerfile.tesseract .
 ```
 
-## Example Requests
+### Example Requests
 
-### Get Image Size using ImageMagick
+#### Get Image Size using ImageMagick
 
 `POST http://localhost:6001/v1/run?api_key=MY_API_KEY`
 
@@ -100,7 +96,7 @@ docker build -t voltaserve/tesseract -f D./docker/rhel9/ockerfile.tesseract .
 }
 ```
 
-### Convert JPEG to PNG using ImageMagick
+#### Convert JPEG to PNG using ImageMagick
 
 `POST http://localhost:6001/v1/run?api_key=MY_API_KEY`
 
@@ -118,7 +114,7 @@ docker build -t voltaserve/tesseract -f D./docker/rhel9/ockerfile.tesseract .
 }
 ```
 
-### Resize an Image using ImageMagick
+#### Resize an Image using ImageMagick
 
 `POST http://localhost:6001/v1/run?api_key=MY_API_KEY`
 
@@ -136,7 +132,7 @@ docker build -t voltaserve/tesseract -f D./docker/rhel9/ockerfile.tesseract .
 }
 ```
 
-### Generate a Thumbnail for a PDF using ImageMagick
+#### Generate a Thumbnail for a PDF using ImageMagick
 
 `POST http://localhost:6001/v1/run?api_key=MY_API_KEY`
 
@@ -154,7 +150,7 @@ docker build -t voltaserve/tesseract -f D./docker/rhel9/ockerfile.tesseract .
 }
 ```
 
-### Convert DOCX to PDF using LibreOffice
+#### Convert DOCX to PDF using LibreOffice
 
 `POST http://localhost:6001/v1/run?api_key=MY_API_KEY`
 
@@ -179,7 +175,7 @@ docker build -t voltaserve/tesseract -f D./docker/rhel9/ockerfile.tesseract .
 }
 ```
 
-### Convert PDF to Text using Poppler
+#### Convert PDF to Text using Poppler
 
 `POST http://localhost:6001/v1/run?api_key=MY_API_KEY`
 
@@ -197,7 +193,7 @@ docker build -t voltaserve/tesseract -f D./docker/rhel9/ockerfile.tesseract .
 }
 ```
 
-### Get TSV Data From an Image Using Tesseract
+#### Get TSV Data From an Image Using Tesseract
 
 `POST http://localhost:6001/v1/run?api_key=MY_API_KEY`
 
@@ -215,7 +211,7 @@ docker build -t voltaserve/tesseract -f D./docker/rhel9/ockerfile.tesseract .
 }
 ```
 
-### Generate PDF with OCR Text Layer From an Image Using OCRmyPDF
+#### Generate PDF with OCR Text Layer From an Image Using OCRmyPDF
 
 `POST http://localhost:6001/v1/run?api_key=MY_API_KEY`
 
