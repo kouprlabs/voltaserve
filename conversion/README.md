@@ -6,8 +6,6 @@ Install [Golang](https://go.dev/doc/install).
 
 Install [air](https://github.com/cosmtrek/air#installation) (Optional).
 
-### Build and Run
-
 Run for development:
 
 ```shell
@@ -19,6 +17,8 @@ Build binary:
 ```shell
 go build .
 ```
+
+### Docker Images
 
 Build SLE 15 Docker image:
 

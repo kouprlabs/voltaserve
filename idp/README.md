@@ -10,8 +10,6 @@ Enable [pnpm](https://pnpm.io):
 corepack enable
 ```
 
-### Build and Run
-
 Install dependencies:
 
 ```shell
@@ -29,6 +27,8 @@ Run for production:
 ```shell
 pnpm run start
 ```
+
+### Docker Images
 
 Build SLE 15 Docker image:
 

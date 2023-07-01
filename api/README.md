@@ -10,8 +10,6 @@ Install [golangci-lint](https://golangci-lint.run/usage/install).
 
 Install [air](https://github.com/cosmtrek/air#installation) (Optional).
 
-### Build and Run
-
 Run for development:
 
 ```shell
@@ -23,6 +21,8 @@ Build binary:
 ```shell
 go build .
 ```
+
+### Docker Images
 
 Build SLE 15 Docker image:
 
@@ -36,9 +36,7 @@ Build RHEL 9 Docker image:
 docker build -t voltaserve/api -f ./Dockerfile.rhel9 .
 ```
 
-### Setup the Linter
-
-Run linter:
+### Code Linter
 
 ```shell
 golangci-lint run
