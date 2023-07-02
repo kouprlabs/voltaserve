@@ -59,6 +59,7 @@ install_postgres() {
     printf_bold "📦  Installing service '${postgres_service}'..."
     sudo dnf module -y enable postgresql:15
     sudo dnf module -y install postgresql:15/server
+    postgresql-setup --initdb
     sudo systemctl enable --now "$postgres_service"
     sudo su postgres <<EOF
 psql -c "CREATE USER voltaserve WITH PASSWORD 'voltaserve';"
