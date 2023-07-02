@@ -59,7 +59,7 @@ install_postgres() {
     printf_bold "📦  Installing service '${postgres_service}'..."
     sudo dnf module -y enable postgresql:15
     sudo dnf module -y install postgresql:15/server
-    postgresql-setup --initdb
+    sudo postgresql-setup --initdb
     sudo systemctl enable --now "$postgres_service"
     sudo su postgres <<EOF
 psql -c "CREATE USER voltaserve WITH PASSWORD 'voltaserve';"
@@ -515,14 +515,13 @@ download_tesseract_trained_data "fin"
 download_tesseract_trained_data "jpn"
 download_tesseract_trained_data "chi_sim"
 download_tesseract_trained_data "chi_tra"
-download_tesseract_trained_data "kor"
 download_tesseract_trained_data "hin"
 download_tesseract_trained_data "rus"
 download_tesseract_trained_data "ara"
 
 install_dnf_package "unpaper"
 install_dnf_package "pngquant"
-install_pip_package "ocrmypdf" "14.2.1"
+install_pip_package "ocrmypdf" "14.3.0"
 
 install_dnf_package "libreoffice"
 
