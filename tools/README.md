@@ -4,12 +4,10 @@
 
 Install [Golang](https://go.dev/doc/install).
 
-### Build and Run
-
 Run for development:
 
 ```shell
-air
+go run .
 ```
 
 Build binary:
@@ -18,15 +16,71 @@ Build binary:
 go build .
 ```
 
-Build Docker image:
+### Docker Images
+
+#### Build SLE / openSUSE Leap Docker Images
 
 ```shell
-docker build -t voltaserve/conversion .
+docker build -t voltaserve/exiftool -f ./docker/sle/Dockerfile.exiftool .
 ```
 
-## Example Requests
+```shell
+docker build -t voltaserve/ffmpeg -f ./docker/sle/Dockerfile.ffmpeg .
+```
 
-### Get Image Size using ImageMagick
+```shell
+docker build -t voltaserve/imagemagick -f ./docker/sle/Dockerfile.imagemagick .
+```
+
+```shell
+docker build -t voltaserve/libreoffice -f ./docker/sle/Dockerfile.libreoffice .
+```
+
+```shell
+docker build -t voltaserve/ocrmypdf -f ./docker/sle/Dockerfile.ocrmypdf .
+```
+
+```shell
+docker build -t voltaserve/poppler -f ./docker/sle/Dockerfile.poppler .
+```
+
+```shell
+docker build -t voltaserve/tesseract -f D./docker/sle/ockerfile.tesseract .
+```
+
+#### Build RHEL Docker Images
+
+```shell
+docker build -t voltaserve/exiftool -f ./docker/rhel/Dockerfile.exiftool .
+```
+
+```shell
+docker build -t voltaserve/ffmpeg -f ./docker/rhel/Dockerfile.ffmpeg .
+```
+
+```shell
+docker build -t voltaserve/imagemagick -f ./docker/rhel/Dockerfile.imagemagick .
+```
+
+```shell
+docker build -t voltaserve/libreoffice -f ./docker/rhel/Dockerfile.libreoffice .
+```
+
+```shell
+docker build -t voltaserve/ocrmypdf -f ./docker/rhel/Dockerfile.ocrmypdf .
+```
+
+```shell
+docker build -t voltaserve/poppler -f ./docker/rhel/Dockerfile.poppler .
+```
+
+```shell
+docker build -t voltaserve/tesseract -f D./docker/rhel/ockerfile.tesseract .
+```
+
+### Example Requests
+
+#### Get Image Size using ImageMagick
 
 `POST http://localhost:6001/v1/run?api_key=MY_API_KEY`
 
@@ -44,7 +98,7 @@ docker build -t voltaserve/conversion .
 }
 ```
 
-### Convert JPEG to PNG using ImageMagick
+#### Convert JPEG to PNG using ImageMagick
 
 `POST http://localhost:6001/v1/run?api_key=MY_API_KEY`
 
@@ -62,7 +116,7 @@ docker build -t voltaserve/conversion .
 }
 ```
 
-### Resize an Image using ImageMagick
+#### Resize an Image using ImageMagick
 
 `POST http://localhost:6001/v1/run?api_key=MY_API_KEY`
 
@@ -80,7 +134,7 @@ docker build -t voltaserve/conversion .
 }
 ```
 
-### Generate a Thumbnail for a PDF using ImageMagick
+#### Generate a Thumbnail for a PDF using ImageMagick
 
 `POST http://localhost:6001/v1/run?api_key=MY_API_KEY`
 
@@ -98,7 +152,7 @@ docker build -t voltaserve/conversion .
 }
 ```
 
-### Convert DOCX to PDF using LibreOffice
+#### Convert DOCX to PDF using LibreOffice
 
 `POST http://localhost:6001/v1/run?api_key=MY_API_KEY`
 
@@ -123,7 +177,7 @@ docker build -t voltaserve/conversion .
 }
 ```
 
-### Convert PDF to Text using Poppler
+#### Convert PDF to Text using Poppler
 
 `POST http://localhost:6001/v1/run?api_key=MY_API_KEY`
 
@@ -141,7 +195,7 @@ docker build -t voltaserve/conversion .
 }
 ```
 
-### Get TSV Data From an Image Using Tesseract
+#### Get TSV Data From an Image Using Tesseract
 
 `POST http://localhost:6001/v1/run?api_key=MY_API_KEY`
 
@@ -159,7 +213,7 @@ docker build -t voltaserve/conversion .
 }
 ```
 
-### Generate PDF with OCR Text Layer From an Image Using OCRmyPDF
+#### Generate PDF with OCR Text Layer From an Image Using OCRmyPDF
 
 `POST http://localhost:6001/v1/run?api_key=MY_API_KEY`
 
@@ -183,34 +237,4 @@ docker build -t voltaserve/conversion .
   ],
   "stdout": true
 }
-```
-
-### Build Docker Images
-
-```shell
-docker build -t voltaserve/exiftool -f Dockerfile.exiftool .
-```
-
-```shell
-docker build -t voltaserve/ffmpeg -f Dockerfile.ffmpeg .
-```
-
-```shell
-docker build -t voltaserve/imagemagick -f Dockerfile.imagemagick .
-```
-
-```shell
-docker build -t voltaserve/libreoffice -f Dockerfile.libreoffice .
-```
-
-```shell
-docker build -t voltaserve/ocrmypdf -f Dockerfile.ocrmypdf .
-```
-
-```shell
-docker build -t voltaserve/poppler -f Dockerfile.poppler .
-```
-
-```shell
-docker build -t voltaserve/tesseract -f Dockerfile.tesseract .
 ```

@@ -1,0 +1,28 @@
+FROM redhat/ubi9 as builder
+
+WORKDIR /build
+
+COPY . .
+
+RUN dnf install -y golang
+
+RUN go mod download
+RUN go build -o voltaserve-tools
+
+FROM redhat/ubi9 AS runner
+
+RUN dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
+RUN dnf install -y https://mirrors.rpmfusion.org/free/el/rpmfusion-free-release-9.noarch.rpm
+RUN dnf install -y https://mirrors.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-9.noarch.rpm
+RUN dnf install -y dnf-plugins-core
+RUN dnf config-manager --set-enabled crb
+RUN dnf install -y ffmpeg --allowerasing
+
+WORKDIR /app
+
+COPY --from=builder /build/voltaserve-tools ./voltaserve-tools
+COPY --from=builder /build/.env ./.env
+
+ENTRYPOINT ["./voltaserve-tools"]
+
+EXPOSE 6001

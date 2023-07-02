@@ -4,10 +4,6 @@
 
 Install [Golang](https://go.dev/doc/install).
 
-Install [air](https://github.com/cosmtrek/air#installation) (Optional).
-
-### Build and Run
-
 Run for development:
 
 ```shell
@@ -20,8 +16,16 @@ Build binary:
 go build .
 ```
 
-Build Docker image:
+### Docker Images
+
+Build SLE / openSUSE Leap Docker image:
 
 ```shell
-docker build -t voltaserve/conversion .
+docker build -t voltaserve/conversion -f ./Dockerfile.sle .
+```
+
+Build RHEL Docker image:
+
+```shell
+docker build -t voltaserve/conversion -f ./Dockerfile.rhel .
 ```
