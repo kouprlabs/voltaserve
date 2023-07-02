@@ -1,4 +1,4 @@
-FROM opensuse/leap:15.5 as builder
+FROM opensuse/leap:15.5 AS builder
 
 WORKDIR /build
 
