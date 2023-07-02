@@ -52,7 +52,7 @@ services:
     image: voltaserve/exiftool
     build:
       context: ./tools
-      dockerfile: ./Dockerfile.exiftool
+      dockerfile: ./docker/${VOLTASERVE_BASE_IMAGE}/Dockerfile.exiftool
     ports:
       - ${VOLTASERVE_EXIFTOOL_PORT}:6001
     environment:
@@ -64,7 +64,7 @@ services:
     image: voltaserve/ffmpeg
     build:
       context: ./tools
-      dockerfile: ./Dockerfile.ffmpeg
+      dockerfile: ./docker/${VOLTASERVE_BASE_IMAGE}/Dockerfile.ffmpeg
     ports:
       - ${VOLTASERVE_FFMPEG_PORT}:6002
     environment:
@@ -76,7 +76,7 @@ services:
     image: voltaserve/imagemagick
     build:
       context: ./tools
-      dockerfile: ./Dockerfile.imagemagick
+      dockerfile: ./docker/${VOLTASERVE_BASE_IMAGE}/Dockerfile.imagemagick
     ports:
       - ${VOLTASERVE_IMAGEMAGICK_PORT}:6003
     environment:
@@ -88,7 +88,7 @@ services:
     image: voltaserve/libreoffice
     build:
       context: ./tools
-      dockerfile: ./Dockerfile.libreoffice
+      dockerfile: ./docker/${VOLTASERVE_BASE_IMAGE}/Dockerfile.libreoffice
     ports:
       - ${VOLTASERVE_LIBREOFFICE_PORT}:6004
     environment:
@@ -100,7 +100,7 @@ services:
     image: voltaserve/ocrmypdf
     build:
       context: ./tools
-      dockerfile: ./Dockerfile.ocrmypdf
+      dockerfile: ./docker/${VOLTASERVE_BASE_IMAGE}/Dockerfile.ocrmypdf
     ports:
       - ${VOLTASERVE_OCRMYPDF_PORT}:6005
     environment:
@@ -112,7 +112,7 @@ services:
     image: voltaserve/poppler
     build:
       context: ./tools
-      dockerfile: ./Dockerfile.poppler
+      dockerfile: ./docker/${VOLTASERVE_BASE_IMAGE}/Dockerfile.poppler
     ports:
       - ${VOLTASERVE_POPPLER_PORT}:6006
     environment:
@@ -124,7 +124,7 @@ services:
     image: voltaserve/tesseract
     build:
       context: ./tools
-      dockerfile: ./Dockerfile.tesseract
+      dockerfile: ./docker/${VOLTASERVE_BASE_IMAGE}/Dockerfile.tesseract
     ports:
       - ${VOLTASERVE_TESSERACT_PORT}:6007
     environment:
@@ -136,6 +136,7 @@ services:
     image: voltaserve/api
     build:
       context: ./api
+      dockerfile: ./Dockerfile.${VOLTASERVE_BASE_IMAGE}
     ports:
       - ${VOLTASERVE_API_PORT}:5000
     environment:
@@ -165,6 +166,7 @@ services:
     image: voltaserve/idp
     build:
       context: ./idp
+      dockerfile: ./Dockerfile.${VOLTASERVE_BASE_IMAGE}
     ports:
       - ${VOLTASERVE_IDP_PORT}:7000
     environment:
@@ -190,6 +192,7 @@ services:
     image: voltaserve/ui
     build:
       context: ./ui
+      dockerfile: ./Dockerfile.${VOLTASERVE_BASE_IMAGE}
     ports:
       - ${VOLTASERVE_UI_PORT}:3000
     environment:
@@ -205,6 +208,7 @@ services:
     image: voltaserve/webdav
     build:
       context: ./webdav
+      dockerfile: ./Dockerfile.${VOLTASERVE_BASE_IMAGE}
     ports:
       - ${VOLTASERVE_WEBDAV_PORT}:6000
     environment:
@@ -221,6 +225,7 @@ services:
     image: voltaserve/conversion
     build:
       context: ./conversion
+      dockerfile: ./Dockerfile.${VOLTASERVE_BASE_IMAGE}
     ports:
       - ${VOLTASERVE_CONVERSION_PORT}:5001
     environment:
@@ -246,6 +251,7 @@ services:
     image: voltaserve/language
     build:
       context: ./language
+      dockerfile: ./Dockerfile.${VOLTASERVE_BASE_IMAGE}
     ports:
       - ${VOLTASERVE_LANGUAGE_PORT}:5002
     healthcheck:

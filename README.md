@@ -52,6 +52,29 @@ Voltaserve supports [WebDAV](https://en.wikipedia.org/wiki/WebDAV), by default i
 
 To connect you can use [WinSCP](https://winscp.net) on Windows, [Cyberduck](https://cyberduck.io) on macOS and [Owlfiles](https://www.skyjos.com/owlfiles/) on mobile.
 
+### Base Images
+
+Voltaserve's Docker images can be built on the following base images:
+
+- `sle`: SUSE Enterprise Linux / openSUSE Leap
+- `rhel`: Red Hat Enterprise Linux
+
+The environment variable `VOLTASERVE_BASE_IMAGE` can be set to one of these values.
+
+The default value is `sle`, if you would like to change it to `rhel`, you can do as follows:
+
+```shell
+export VOLTASERVE_BASE_IMAGE="rhel"
+```
+
+Then build the Docker images:
+
+```shell
+docker compose build
+```
+
+If you containers are already running, you need to do `docker compose down` then `docker compose up -d` to use the new images.
+
 ### Configuration
 
 Update the `VOLTASERVE_HOSTNAME` environment variable in [.env](.env) file to match your hostname (it can optionally be an IP address as well):
