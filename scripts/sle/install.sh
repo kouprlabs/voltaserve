@@ -139,7 +139,7 @@ install_golangci() {
   if eval "$not_found"; then
     printf_bold "🐹  Installing Go binary '${golangci_bin}'..."
     mkdir -p "$HOME/bin"
-    cd "$HOME" || exit
+    cd "$HOME" || exit 1
     curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.53.2
     if eval "$not_found"; then
       printf_red "⛈️  Failed to install Go binary '${golangci_bin}'. Aborting."
@@ -279,7 +279,7 @@ install_meilisearch() {
   if eval "$not_found"; then
     printf_bold "📦  Installing binary '${meilisearch_bin}'..."
     sudo mkdir -p "${base_dir}/meilisearch"
-    cd "${base_dir}/meilisearch" || exit
+    cd "${base_dir}/meilisearch" || exit 1
     sudo wget -c "https://github.com/meilisearch/meilisearch/releases/download/v1.2.0/meilisearch-linux-amd64"
     sudo mv ./meilisearch-linux-amd64 ./meilisearch
     sudo chmod +x $meilisearch_bin
@@ -344,6 +344,16 @@ install_tesseract() {
   else
     printf_bold "✅  Found package '${package_name}'. Skipping."
   fi
+}
+
+install_imagemagick() {
+  install_package "ImageMagick"
+
+  # https://www.suse.com/support/kb/doc/?id=000019384
+  policy_path=$(identify -list policy | awk '/Path:/ {print $2}' | sed 's/\[built-in\]//') &&
+    tmp_file="/tmp/ImageMagick_7_policy_$(uuidgen).xml" &&
+    awk '/pattern="(PS|PS2|PS3|PDF|XPS|EPS|PCL)"/ { sub(/rights="write"/, "rights=\"read|write\"") } { print }' "$policy_path" >"$tmp_file" &&
+    sudo mv "$tmp_file" "$policy_path" || exit 1
 }
 
 install_libreoffice() {
@@ -1329,7 +1339,7 @@ install_package "exiftool"
 install_package "ffmpeg-4"
 install_package "poppler-tools"
 install_package "ghostscript"
-install_package "ImageMagick"
+install_imagemagick
 
 install_tesseract
 

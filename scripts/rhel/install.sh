@@ -133,7 +133,7 @@ install_meilisearch() {
   if eval "$not_found"; then
     printf_bold "📦  Installing binary '${meilisearch_bin}'..."
     sudo mkdir -p "${base_dir}/meilisearch"
-    cd "${base_dir}/meilisearch" || exit
+    cd "${base_dir}/meilisearch" || exit 1
     sudo wget -c "https://github.com/meilisearch/meilisearch/releases/download/v1.2.0/meilisearch-linux-amd64"
     sudo mv ./meilisearch-linux-amd64 ./meilisearch
     sudo chmod +x $meilisearch_bin
@@ -282,14 +282,14 @@ install_jbig2enc() {
   local not_found="! (command -v $jbig2_bin >/dev/null 2>&1 && $jbig2_bin --version >/dev/null 2>&1)"
   if eval "$not_found"; then
     printf_bold "🔨  Building binary '${jbig2_bin}'..."
-    cd "$base_dir" || exit
+    cd "$base_dir" || exit 1
     sudo git clone --branch 0.29 --single-branch https://github.com/kouprlabs/jbig2enc.git
-    cd "${base_dir}/jbig2enc" || exit
+    cd "${base_dir}/jbig2enc" || exit 1
     sudo ./autogen.sh
     sudo ./configure --with-extra-libraries=/usr/local/lib/ --with-extra-includes=/usr/local/include/
     sudo make
     sudo make install
-    cd "$base_dir" || exit
+    cd "$base_dir" || exit 1
     sudo rm -rf "${base_dir}/jbig2enc"
     if eval "$not_found"; then
       printf_red "⛈️  Failed to build binary '${jbig2_bin}'. Aborting."
@@ -359,7 +359,7 @@ install_golangci() {
   if eval "$not_found"; then
     printf_bold "🐹  Installing Go binary '${golangci_bin}'..."
     mkdir -p "$HOME/bin"
-    cd "$HOME" || exit
+    cd "$HOME" || exit 1
     curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s v1.53.2
     if eval "$not_found"; then
       printf_red "⛈️  Failed to install Go binary '${golangci_bin}'. Aborting."
