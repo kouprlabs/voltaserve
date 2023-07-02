@@ -18,7 +18,7 @@ go build .
 
 ### Docker Images
 
-#### Build SLE 15 Docker Images
+#### Build SLE / openSUSE Leap Docker Images
 
 ```shell
 docker build -t voltaserve/exiftool -f ./docker/sle15/Dockerfile.exiftool .
@@ -48,7 +48,7 @@ docker build -t voltaserve/poppler -f ./docker/sle15/Dockerfile.poppler .
 docker build -t voltaserve/tesseract -f D./docker/sle15/ockerfile.tesseract .
 ```
 
-#### Build RHEL 9 Docker Images
+#### Build RHEL Docker Images
 
 ```shell
 docker build -t voltaserve/exiftool -f ./docker/rhel9/Dockerfile.exiftool .

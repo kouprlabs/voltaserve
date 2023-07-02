@@ -30,13 +30,13 @@ pnpm run start
 
 ### Docker Images
 
-Build SLE 15 Docker image:
+Build SLE / openSUSE Leap Docker image:
 
 ```shell
 docker build -t voltaserve/idp -f ./Dockerfile.sle15 .
 ```
 
-Build RHEL 9 Docker image:
+Build RHEL Docker image:
 
 ```shell
 docker build -t voltaserve/idp -f ./Dockerfile.rhel9 .

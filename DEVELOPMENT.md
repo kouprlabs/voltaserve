@@ -22,7 +22,12 @@ docker compose up -d \
     tesseract
 ```
 
-### SLE 15 or openSUSE Leap 15
+### SLE / openSUSE Leap
+
+Supported operating systems:
+
+- [SUSE Linux Enterprise 15](https://www.suse.com/products/server)
+- [openSUSE Leap 15](https://get.opensuse.org/leap)
 
 Install dependencies:
 
@@ -42,7 +47,14 @@ Stop infrastructure services:
 curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/$(git symbolic-ref --short HEAD 2>/dev/null || echo 'main')/scripts/sle15/start.sh?t=$(date +%s)" | sh -s
 ```
 
-### RHEL 9
+### RHEL
+
+Supported operating systems:
+
+- [Red Hat Enterprise Linux 9](https://www.redhat.com/en/technologies/linux-platforms/enterprise-linux)
+- [Rocky Linux 9](https://rockylinux.org)
+- [AlmaLinux 9](https://almalinux.org)
+- [Oracle Linux 9](https://www.oracle.com/linux)
 
 Install dependencies:
 
