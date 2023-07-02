@@ -1,4 +1,4 @@
-FROM opensuse/leap:15.5 as builder
+FROM opensuse/leap:15.5 AS builder
 
 WORKDIR /build
 
@@ -17,8 +17,8 @@ RUN zypper install -y ImageMagick
 
 # https://www.suse.com/support/kb/doc/?id=000019384
 RUN policy_path=$(identify -list policy | awk '/Path:/ {print $2}' | sed 's/\[built-in\]//') \
-    && awk '/pattern="(PS|PS2|PS3|PDF|XPS|EPS|PCL)"/ { sub(/rights="write"/, "rights=\"read|write\"") } { print }' "$policy_path" > "$policy_path.tmp" \
-    && mv "$policy_path.tmp" "$policy_path"
+  && awk '/pattern="(PS|PS2|PS3|PDF|XPS|EPS|PCL)"/ { sub(/rights="write"/, "rights=\"read|write\"") } { print }' "$policy_path" > "$policy_path.tmp" \
+  && mv "$policy_path.tmp" "$policy_path"
 
 WORKDIR /app
 

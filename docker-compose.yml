@@ -49,7 +49,7 @@ services:
       - ${VOLTASERVE_MAILHOG_SMTP_PORT}:1025
       - ${VOLTASERVE_MAILHOG_WEB_PORT}:8025
   exiftool:
-    image: voltaserve/exiftool
+    image: voltaserve/exiftool:${VOLTASERVE_BASE_IMAGE}
     build:
       context: ./tools
       dockerfile: ./docker/${VOLTASERVE_BASE_IMAGE}/Dockerfile.exiftool
@@ -61,7 +61,7 @@ services:
       test: curl --fail http://localhost:6001/v1/health || exit 1
     restart: on-failure
   ffmpeg:
-    image: voltaserve/ffmpeg
+    image: voltaserve/ffmpeg:${VOLTASERVE_BASE_IMAGE}
     build:
       context: ./tools
       dockerfile: ./docker/${VOLTASERVE_BASE_IMAGE}/Dockerfile.ffmpeg
@@ -73,7 +73,7 @@ services:
       test: curl --fail http://localhost:6002/v1/health || exit 1
     restart: on-failure
   imagemagick:
-    image: voltaserve/imagemagick
+    image: voltaserve/imagemagick:${VOLTASERVE_BASE_IMAGE}
     build:
       context: ./tools
       dockerfile: ./docker/${VOLTASERVE_BASE_IMAGE}/Dockerfile.imagemagick
@@ -85,7 +85,7 @@ services:
       test: curl --fail http://localhost:6003/v1/health || exit 1
     restart: on-failure
   libreoffice:
-    image: voltaserve/libreoffice
+    image: voltaserve/libreoffice:${VOLTASERVE_BASE_IMAGE}
     build:
       context: ./tools
       dockerfile: ./docker/${VOLTASERVE_BASE_IMAGE}/Dockerfile.libreoffice
@@ -97,7 +97,7 @@ services:
       test: curl --fail http://localhost:6004/v1/health || exit 1
     restart: on-failure
   ocrmypdf:
-    image: voltaserve/ocrmypdf
+    image: voltaserve/ocrmypdf:${VOLTASERVE_BASE_IMAGE}
     build:
       context: ./tools
       dockerfile: ./docker/${VOLTASERVE_BASE_IMAGE}/Dockerfile.ocrmypdf
@@ -109,7 +109,7 @@ services:
       test: curl --fail http://localhost:6005/v1/health || exit 1
     restart: on-failure
   poppler:
-    image: voltaserve/poppler
+    image: voltaserve/poppler:${VOLTASERVE_BASE_IMAGE}
     build:
       context: ./tools
       dockerfile: ./docker/${VOLTASERVE_BASE_IMAGE}/Dockerfile.poppler
@@ -121,7 +121,7 @@ services:
       test: curl --fail http://localhost:6006/v1/health || exit 1
     restart: on-failure
   tesseract:
-    image: voltaserve/tesseract
+    image: voltaserve/tesseract:${VOLTASERVE_BASE_IMAGE}
     build:
       context: ./tools
       dockerfile: ./docker/${VOLTASERVE_BASE_IMAGE}/Dockerfile.tesseract
@@ -133,7 +133,7 @@ services:
       test: curl --fail http://localhost:6007/v1/health || exit 1
     restart: on-failure
   api:
-    image: voltaserve/api
+    image: voltaserve/api:${VOLTASERVE_BASE_IMAGE}
     build:
       context: ./api
       dockerfile: ./Dockerfile.${VOLTASERVE_BASE_IMAGE}
@@ -163,7 +163,7 @@ services:
       - meilisearch
     restart: on-failure
   idp:
-    image: voltaserve/idp
+    image: voltaserve/idp:${VOLTASERVE_BASE_IMAGE}
     build:
       context: ./idp
       dockerfile: ./Dockerfile.${VOLTASERVE_BASE_IMAGE}
@@ -189,7 +189,7 @@ services:
       - minio
     restart: on-failure
   ui:
-    image: voltaserve/ui
+    image: voltaserve/ui:${VOLTASERVE_BASE_IMAGE}
     build:
       context: ./ui
       dockerfile: ./Dockerfile.${VOLTASERVE_BASE_IMAGE}
@@ -205,7 +205,7 @@ services:
       - api
     restart: on-failure
   webdav:
-    image: voltaserve/webdav
+    image: voltaserve/webdav:${VOLTASERVE_BASE_IMAGE}
     build:
       context: ./webdav
       dockerfile: ./Dockerfile.${VOLTASERVE_BASE_IMAGE}
@@ -222,7 +222,7 @@ services:
       - api
     restart: on-failure
   conversion:
-    image: voltaserve/conversion
+    image: voltaserve/conversion:${VOLTASERVE_BASE_IMAGE}
     build:
       context: ./conversion
       dockerfile: ./Dockerfile.${VOLTASERVE_BASE_IMAGE}
@@ -248,7 +248,7 @@ services:
       - minio
     restart: on-failure
   language:
-    image: voltaserve/language
+    image: voltaserve/language:${VOLTASERVE_BASE_IMAGE}
     build:
       context: ./language
       dockerfile: ./Dockerfile.${VOLTASERVE_BASE_IMAGE}
