@@ -4,6 +4,12 @@
 
 Install [Python](https://www.python.org) and [Pipenv](https://pipenv.pypa.io).
 
+On RHEL, run the following:
+
+```shell
+pipenv --python /usr/bin/python
+```
+
 Install dependencies:
 
 ```shell
@@ -25,7 +31,7 @@ python3.11 -m spacy download xx_ent_wiki_sm
 Download spaCy model on RHEL:
 
 ```shell
-python3 -m spacy download xx_ent_wiki_sm
+python -m spacy download xx_ent_wiki_sm
 ```
 
 Run for development:

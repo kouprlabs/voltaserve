@@ -471,7 +471,9 @@ install_dnf_package "tar"
 install_dnf_package "wget"
 install_dnf_package "git"
 
+install_dnf_package "clang"
 install_dnf_package "python3"
+install_dnf_package "python3-devel"
 install_dnf_package "python3-pip"
 install_pip_package "pipenv" "2023.6.12"
 
