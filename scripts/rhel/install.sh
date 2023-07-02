@@ -54,10 +54,10 @@ check_supported_system() {
 
 is_package_pattern_installed() {
   local package_pattern="$1"
-  local expected_count="$2"
+  local package_count="$2"
   local installed_count
-  installed_count=$(dnf list installed "$package_pattern" | grep -c 'installed')
-  if [[ "$installed_count" -eq "$expected_count" ]]; then
+  installed_count=$(dnf list installed "$package_pattern" | awk 'NF==3 {gsub(/\..*/, "", $1); print $1}' | wc -l)
+  if [[ "$installed_count" -eq "$package_count" ]]; then
     return 0
   else
     return 1
