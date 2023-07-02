@@ -173,7 +173,11 @@ install_dnf_package() {
   local not_found="! dnf list installed $package_name &>/dev/null"
   if eval "$not_found"; then
     printf_bold "📦  Installing package '${package_name}'..."
-    sudo dnf install -y "$package_name" "$extra_args"
+    if [[ -n "$extra_args" ]]; then
+      sudo dnf install -y "$package_name" "$extra_args"
+    else
+      sudo dnf install -y "$package_name"
+    fi
     if eval "$not_found"; then
       printf_red "⛈️  Failed to install package '${package_name}'. Aborting."
       exit 1
