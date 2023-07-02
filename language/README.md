@@ -10,7 +10,7 @@ Install dependencies:
 pipenv install
 ```
 
-Activate the environment:
+Activate environment:
 
 ```shell
 pipenv shell
