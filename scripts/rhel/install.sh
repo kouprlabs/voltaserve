@@ -52,6 +52,18 @@ check_supported_system() {
   fi
 }
 
+is_package_pattern_installed() {
+  local package_pattern="$1"
+  local expected_count="$2"
+  local installed_count
+  installed_count=$(dnf list installed "$package_pattern" | grep -c 'installed')
+  if [[ "$installed_count" -eq "$expected_count" ]]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
 install_postgres() {
   local postgres_service="postgresql"
   local not_found='! systemctl list-unit-files | grep -q '"${postgres_service}.service"''
@@ -415,6 +427,211 @@ install_air() {
   fi
 }
 
+install_fonts() {
+  local package_pattern="*-fonts"
+  local package_count=188
+  if ! is_package_pattern_installed "$package_pattern" $package_count; then
+    printf_bold "📦  Installing fonts..."
+    sudo dnf install -y \
+      google-noto-sans-cjk-ttc-fonts \
+      google-noto-serif-cjk-ttc-fonts \
+      aajohan-comfortaa-fonts \
+      abattis-cantarell-fonts \
+      adobe-source-code-pro-fonts \
+      bitmap-fangsongti-fonts \
+      culmus-aharoni-clm-fonts \
+      culmus-caladings-clm-fonts \
+      culmus-david-clm-fonts \
+      culmus-drugulin-clm-fonts \
+      culmus-ellinia-clm-fonts \
+      culmus-frank-ruehl-clm-fonts \
+      culmus-hadasim-clm-fonts \
+      culmus-miriam-clm-fonts \
+      culmus-miriam-mono-clm-fonts \
+      culmus-nachlieli-clm-fonts \
+      culmus-simple-clm-fonts \
+      culmus-stamashkenaz-clm-fonts \
+      culmus-stamsefarad-clm-fonts \
+      culmus-yehuda-clm-fonts \
+      dejavu-lgc-sans-fonts \
+      dejavu-lgc-sans-mono-fonts \
+      dejavu-lgc-serif-fonts \
+      dejavu-sans-fonts \
+      dejavu-sans-mono-fonts \
+      dejavu-serif-fonts \
+      fontawesome-fonts \
+      ghostscript-tools-fonts \
+      google-carlito-fonts \
+      google-droid-sans-fonts \
+      google-droid-sans-mono-fonts \
+      google-droid-serif-fonts \
+      google-noto-emoji-color-fonts \
+      google-noto-emoji-fonts \
+      google-noto-sans-armenian-fonts \
+      google-noto-sans-avestan-fonts \
+      google-noto-sans-bengali-fonts \
+      google-noto-sans-bengali-ui-fonts \
+      google-noto-sans-brahmi-fonts \
+      google-noto-sans-carian-fonts \
+      google-noto-sans-cherokee-fonts \
+      google-noto-sans-coptic-fonts \
+      google-noto-sans-deseret-fonts \
+      google-noto-sans-devanagari-fonts \
+      google-noto-sans-devanagari-ui-fonts \
+      google-noto-sans-egyptian-hieroglyphs-fonts \
+      google-noto-sans-ethiopic-fonts \
+      google-noto-sans-fonts \
+      google-noto-sans-georgian-fonts \
+      google-noto-sans-glagolitic-fonts \
+      google-noto-sans-gujarati-fonts \
+      google-noto-sans-gujarati-ui-fonts \
+      google-noto-sans-gurmukhi-fonts \
+      google-noto-sans-hebrew-fonts \
+      google-noto-sans-imperial-aramaic-fonts \
+      google-noto-sans-kaithi-fonts \
+      google-noto-sans-kannada-fonts \
+      google-noto-sans-kannada-ui-fonts \
+      google-noto-sans-kayah-li-fonts \
+      google-noto-sans-kharoshthi-fonts \
+      google-noto-sans-khmer-fonts \
+      google-noto-sans-khmer-ui-fonts \
+      google-noto-sans-lao-fonts \
+      google-noto-sans-lao-ui-fonts \
+      google-noto-sans-lycian-fonts \
+      google-noto-sans-lydian-fonts \
+      google-noto-sans-malayalam-fonts \
+      google-noto-sans-malayalam-ui-fonts \
+      google-noto-sans-mono-fonts \
+      google-noto-sans-nko-fonts \
+      google-noto-sans-old-south-arabian-fonts \
+      google-noto-sans-old-turkic-fonts \
+      google-noto-sans-osmanya-fonts \
+      google-noto-sans-phoenician-fonts \
+      google-noto-sans-shavian-fonts \
+      google-noto-sans-sinhala-fonts \
+      google-noto-sans-sinhala-vf-fonts \
+      google-noto-sans-symbols-fonts \
+      google-noto-sans-tamil-fonts \
+      google-noto-sans-tamil-ui-fonts \
+      google-noto-sans-telugu-fonts \
+      google-noto-sans-telugu-ui-fonts \
+      google-noto-sans-thaana-fonts \
+      google-noto-sans-thai-fonts \
+      google-noto-sans-thai-ui-fonts \
+      google-noto-sans-ugaritic-fonts \
+      google-noto-sans-vai-fonts \
+      google-noto-serif-armenian-fonts \
+      google-noto-serif-fonts \
+      google-noto-serif-georgian-fonts \
+      google-noto-serif-gurmukhi-vf-fonts \
+      google-noto-serif-khmer-fonts \
+      google-noto-serif-lao-fonts \
+      google-noto-serif-sinhala-vf-fonts \
+      google-noto-serif-thai-fonts \
+      google-roboto-slab-fonts \
+      gubbi-fonts \
+      ht-caladea-fonts \
+      jomolhari-fonts \
+      julietaula-montserrat-fonts \
+      kacst-art-fonts \
+      kacst-book-fonts \
+      kacst-decorative-fonts \
+      kacst-digital-fonts \
+      kacst-farsi-fonts \
+      kacst-letter-fonts \
+      kacst-naskh-fonts \
+      kacst-office-fonts \
+      kacst-one-fonts \
+      kacst-pen-fonts \
+      kacst-poster-fonts \
+      kacst-qurn-fonts \
+      kacst-screen-fonts \
+      kacst-title-fonts \
+      kacst-titlel-fonts \
+      khmer-os-battambang-fonts \
+      khmer-os-bokor-fonts \
+      khmer-os-content-fonts \
+      khmer-os-fasthand-fonts \
+      khmer-os-freehand-fonts \
+      khmer-os-handwritten-fonts \
+      khmer-os-metal-chrieng-fonts \
+      khmer-os-muol-fonts \
+      khmer-os-muol-pali-fonts \
+      khmer-os-siemreap-fonts \
+      khmer-os-system-fonts \
+      lato-fonts \
+      liberation-fonts \
+      liberation-mono-fonts \
+      liberation-narrow-fonts \
+      liberation-sans-fonts \
+      liberation-serif-fonts \
+      libreoffice-opensymbol-fonts \
+      lklug-fonts \
+      lohit-assamese-fonts \
+      lohit-bengali-fonts \
+      lohit-devanagari-fonts \
+      lohit-gujarati-fonts \
+      lohit-gurmukhi-fonts \
+      lohit-kannada-fonts \
+      lohit-marathi-fonts \
+      lohit-odia-fonts \
+      lohit-tamil-fonts \
+      lohit-telugu-fonts \
+      madan-fonts \
+      navilu-fonts \
+      open-sans-fonts \
+      overpass-fonts \
+      paktype-naqsh-fonts \
+      paktype-naskh-basic-fonts \
+      paktype-tehreer-fonts \
+      pt-sans-fonts \
+      redhat-display-fonts \
+      redhat-mono-fonts \
+      redhat-text-fonts \
+      saab-fonts \
+      sil-abyssinica-fonts \
+      sil-nuosu-fonts \
+      sil-padauk-fonts \
+      sil-scheherazade-fonts \
+      smc-meera-fonts \
+      smc-rachana-fonts \
+      stix-fonts \
+      texlive-latex-fonts \
+      thai-scalable-garuda-fonts \
+      thai-scalable-kinnari-fonts \
+      thai-scalable-loma-fonts \
+      thai-scalable-norasi-fonts \
+      thai-scalable-purisa-fonts \
+      thai-scalable-sawasdee-fonts \
+      thai-scalable-tlwgmono-fonts \
+      thai-scalable-tlwgtypewriter-fonts \
+      thai-scalable-tlwgtypist-fonts \
+      thai-scalable-tlwgtypo-fonts \
+      thai-scalable-umpush-fonts \
+      thai-scalable-waree-fonts \
+      ucs-miscfixed-fonts \
+      urw-base35-bookman-fonts \
+      urw-base35-c059-fonts \
+      urw-base35-d050000l-fonts \
+      urw-base35-fonts \
+      urw-base35-gothic-fonts \
+      urw-base35-nimbus-mono-ps-fonts \
+      urw-base35-nimbus-roman-fonts \
+      urw-base35-nimbus-sans-fonts \
+      urw-base35-p052-fonts \
+      urw-base35-standard-symbols-ps-fonts \
+      urw-base35-z003-fonts
+    if ! is_package_pattern_installed "$package_pattern" $package_count; then
+      printf_red "⛈️  Failed to install fonts. Aborting."
+      exit 1
+    else
+      printf_bold "✅  Fonts installed successfully."
+    fi
+  else
+    printf_bold "✅  Found ${package_count} fonts matching the pattern '${package_pattern}'. Skipping."
+  fi
+}
+
 show_next_steps() {
   echo
   printf_bold "🎉 You are ready to develop Voltaserve!"
@@ -526,5 +743,6 @@ install_dnf_package "pngquant"
 install_pip_package "ocrmypdf" "14.3.0"
 
 install_dnf_package "libreoffice"
+install_fonts
 
 show_next_steps
