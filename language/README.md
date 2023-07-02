@@ -39,13 +39,13 @@ FLASK_APP=server.py flask run --host=0.0.0.0 --port=5002 --debug
 Build SLE / openSUSE Leap Docker image:
 
 ```shell
-docker build -t voltaserve/language -f ./Dockerfile.sle15 .
+docker build -t voltaserve/language -f ./Dockerfile.sle .
 ```
 
 Build RHEL Docker image:
 
 ```shell
-docker build -t voltaserve/language -f ./Dockerfile.rhel9 .
+docker build -t voltaserve/language -f ./Dockerfile.rhel .
 ```
 
 ### Code Formatter

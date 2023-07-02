@@ -416,7 +416,7 @@ show_next_steps() {
   echo
 
   echo "1) Start infrastructure services:"
-  printf_cyan "curl -sSfL \"https://raw.githubusercontent.com/kouprlabs/voltaserve/${git_branch}/scripts/rhel9/start.sh?t=\$(date +%s)\" | sh -s"
+  printf_cyan "curl -sSfL \"https://raw.githubusercontent.com/kouprlabs/voltaserve/${git_branch}/scripts/rhel/start.sh?t=\$(date +%s)\" | sh -s"
   echo
 
   echo "2) Open a terminal in each microservice's subfolder, then start each one in development mode:"
@@ -457,7 +457,7 @@ show_next_steps() {
   echo
 
   echo "3) Stop infrastructure services (if needed):"
-  printf_cyan "curl -sSfL \"https://raw.githubusercontent.com/kouprlabs/voltaserve/${git_branch}/scripts/rhel9/stop.sh?t=\$(date +%s)\" | sh -s"
+  printf_cyan "curl -sSfL \"https://raw.githubusercontent.com/kouprlabs/voltaserve/${git_branch}/scripts/rhel/stop.sh?t=\$(date +%s)\" | sh -s"
 }
 
 check_supported_system
