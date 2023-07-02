@@ -1,0 +1,25 @@
+FROM redhat/ubi9 as builder
+
+WORKDIR /build
+
+COPY . .
+
+RUN dnf install -y golang
+
+RUN go mod download
+RUN go build -o voltaserve-tools
+
+FROM redhat/ubi9 AS runner
+
+RUN dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
+RUN dnf install -y ghostscript
+RUN dnf install -y ImageMagick
+
+WORKDIR /app
+
+COPY --from=builder /build/voltaserve-tools ./voltaserve-tools
+COPY --from=builder /build/.env ./.env
+
+ENTRYPOINT ["./voltaserve-tools"]
+
+EXPOSE 6001

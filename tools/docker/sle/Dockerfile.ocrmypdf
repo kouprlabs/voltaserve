@@ -1,0 +1,48 @@
+FROM opensuse/leap:15.5 as builder
+
+WORKDIR /build
+
+COPY . .
+
+RUN zypper install -y git
+RUN zypper install -y go1.20
+
+RUN go mod download
+RUN go build -o voltaserve-tools
+
+FROM opensuse/leap:15.5 AS runner
+
+RUN zypper install -y python311
+
+RUN zypper install -y tesseract-ocr
+RUN zypper install -y tesseract-ocr-traineddata-osd
+RUN zypper install -y tesseract-ocr-traineddata-eng
+RUN zypper install -y tesseract-ocr-traineddata-deu
+RUN zypper install -y tesseract-ocr-traineddata-fra
+RUN zypper install -y tesseract-ocr-traineddata-nld
+RUN zypper install -y tesseract-ocr-traineddata-ita
+RUN zypper install -y tesseract-ocr-traineddata-spa
+RUN zypper install -y tesseract-ocr-traineddata-por
+RUN zypper install -y tesseract-ocr-traineddata-swe
+RUN zypper install -y tesseract-ocr-traineddata-fin
+RUN zypper install -y tesseract-ocr-traineddata-jpn
+RUN zypper install -y tesseract-ocr-traineddata-chi_sim
+RUN zypper install -y tesseract-ocr-traineddata-chi_tra
+RUN zypper install -y tesseract-ocr-traineddata-hin
+RUN zypper install -y tesseract-ocr-traineddata-rus
+RUN zypper install -y tesseract-ocr-traineddata-ara
+
+RUN zypper install -y ghostscript
+RUN zypper install -y unpaper
+RUN zypper install -y pngquant
+
+RUN pip3 install ocrmypdf==14.3.0
+
+WORKDIR /app
+
+COPY --from=builder /build/voltaserve-tools ./voltaserve-tools
+COPY --from=builder /build/.env ./.env
+
+ENTRYPOINT ["./voltaserve-tools"]
+
+EXPOSE 6005

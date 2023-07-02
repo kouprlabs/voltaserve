@@ -2,6 +2,21 @@
 
 ## Getting Started
 
+### Docker
+
+Duplicate the file `./conversion/.env`, and rename it to `./conversion/.env.local`.
+
+Update the following entries in the file `.env.local`:
+
+```properties
+VOLTASERVE_FFMPEG_URL="http://127.0.0.1:6002"
+VOLTASERVE_IMAGEMAGICK_URL="http://127.0.0.1:6003"
+VOLTASERVE_LIBREOFFICE_URL="http://127.0.0.1:6004"
+VOLTASERVE_OCRMYPDF_URL="http://127.0.0.1:6005"
+VOLTASERVE_POPPLER_URL="http://127.0.0.1:6006"
+VOLTASERVE_TESSERACT_URL="http://127.0.0.1:6007"
+```
+
 Run infrastructure services:
 
 ```shell
@@ -19,6 +34,60 @@ docker compose up -d \
     poppler \
     tesseract
 ```
+
+### SLE / openSUSE Leap
+
+Supported operating systems:
+
+- [SUSE Linux Enterprise 15](https://www.suse.com/products/server)
+- [openSUSE Leap 15](https://get.opensuse.org/leap)
+
+Install dependencies:
+
+```shell
+curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/$(git symbolic-ref --short HEAD 2>/dev/null || echo 'main')/scripts/sle/install.sh?t=$(date +%s)" | sh -s
+```
+
+Start infrastructure services:
+
+```shell
+curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/$(git symbolic-ref --short HEAD 2>/dev/null || echo 'main')/scripts/sle/start.sh?t=$(date +%s)" | sh -s
+```
+
+Stop infrastructure services:
+
+```shell
+curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/$(git symbolic-ref --short HEAD 2>/dev/null || echo 'main')/scripts/sle/start.sh?t=$(date +%s)" | sh -s
+```
+
+### RHEL
+
+Supported operating systems:
+
+- [Red Hat Enterprise Linux 9](https://www.redhat.com/en/technologies/linux-platforms/enterprise-linux)
+- [Rocky Linux 9](https://rockylinux.org)
+- [AlmaLinux 9](https://almalinux.org)
+- [Oracle Linux 9](https://www.oracle.com/linux)
+
+Install dependencies:
+
+```shell
+curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/$(git symbolic-ref --short HEAD 2>/dev/null || echo 'main')/scripts/rhel/install.sh?t=$(date +%s)" | sh -s
+```
+
+Start infrastructure services:
+
+```shell
+curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/$(git symbolic-ref --short HEAD 2>/dev/null || echo 'main')/scripts/rhel/start.sh?t=$(date +%s)" | sh -s
+```
+
+Stop infrastructure services:
+
+```shell
+curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/$(git symbolic-ref --short HEAD 2>/dev/null || echo 'main')/scripts/rhel/stop.sh?t=$(date +%s)" | sh -s
+```
+
+### Microservices
 
 Start each microservice separately in a new terminal as described here:
 

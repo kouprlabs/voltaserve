@@ -10,8 +10,6 @@ Enable [pnpm](https://pnpm.io):
 corepack enable
 ```
 
-### Build and Run
-
 Install dependencies:
 
 ```shell
@@ -30,8 +28,16 @@ Run for production:
 pnpm run start
 ```
 
-Build Docker image:
+### Docker Images
+
+Build SLE / openSUSE Leap Docker image:
 
 ```shell
-docker build -t voltaserve/webdav .
+docker build -t voltaserve/webdav -f ./Dockerfile.sle .
+```
+
+Build RHEL Docker image:
+
+```shell
+docker build -t voltaserve/webdav -f ./Dockerfile.rhel .
 ```

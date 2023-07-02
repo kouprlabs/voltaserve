@@ -2,15 +2,7 @@
 
 ## Getting Started
 
-Install [Golang](https://go.dev/doc/install).
-
-Install [Swag](https://github.com/swaggo/swag).
-
-Install [golangci-lint](https://golangci-lint.run/usage/install).
-
-Install [air](https://github.com/cosmtrek/air#installation) (Optional).
-
-### Build and Run
+Install [Golang](https://go.dev/doc/install), [Swag](https://github.com/swaggo/swag) and [golangci-lint](https://golangci-lint.run/usage/install).
 
 Run for development:
 
@@ -24,15 +16,21 @@ Build binary:
 go build .
 ```
 
-Build Docker image:
+### Docker Images
+
+Build SLE / openSUSE Leap Docker image:
 
 ```shell
-docker build -t voltaserve/api .
+docker build -t voltaserve/api -f ./Dockerfile.sle .
 ```
 
-### Setup the Linter
+Build RHEL Docker image:
 
-Run linter:
+```shell
+docker build -t voltaserve/api -f ./Dockerfile.rhel .
+```
+
+### Code Linter
 
 ```shell
 golangci-lint run
@@ -45,8 +43,6 @@ Format swag comments:
 ```shell
 swag fmt
 ```
-
-We suppose that the [api-docs](https://github.com/voltaserve/api-docs) repository is cloned locally at: `../../api-docs/`.
 
 Generate `swagger.yml`:
 
@@ -65,5 +61,3 @@ Generate the final static HTML documentation:
 ```shell
 npx @redocly/cli build-docs ./docs/swagger.yaml --output ./docs/index.html
 ```
-
-Now you can open a PR in the [api-docs](https://github.com/voltaserve/api-docs) repository with your current changes.

@@ -1,0 +1,23 @@
+FROM redhat/ubi9 as builder
+
+WORKDIR /build
+
+COPY . .
+
+RUN dnf install -y golang
+
+RUN go mod download
+RUN go build -o voltaserve-tools
+
+FROM redhat/ubi9 AS runner
+
+RUN dnf install -y libreoffice
+
+WORKDIR /app
+
+COPY --from=builder /build/voltaserve-tools ./voltaserve-tools
+COPY --from=builder /build/.env ./.env
+
+ENTRYPOINT ["./voltaserve-tools"]
+
+EXPOSE 6001

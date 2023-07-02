@@ -10,8 +10,6 @@ Enable [pnpm](https://pnpm.io):
 corepack enable
 ```
 
-### Build and Run
-
 Install dependencies:
 
 ```shell
@@ -24,8 +22,16 @@ Run for development:
 pnpm run dev
 ```
 
-Build Docker image:
+### Docker Images
+
+Build SLE / openSUSE Leap Docker image:
 
 ```shell
-docker build -t voltaserve/ui .
+docker build -t voltaserve/ui -f ./Dockerfile.sle .
+```
+
+Build RHEL Docker image:
+
+```shell
+docker build -t voltaserve/ui -f ./Dockerfile.rhel .
 ```
