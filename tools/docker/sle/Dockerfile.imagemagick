@@ -4,16 +4,14 @@ WORKDIR /build
 
 COPY . .
 
-RUN zypper install -y git
-RUN zypper install -y go1.20
+RUN zypper install -y git go1.20
 
 RUN go mod download
 RUN go build -o voltaserve-tools
 
 FROM opensuse/leap:15.5 AS runner
 
-RUN zypper install -y ghostscript
-RUN zypper install -y ImageMagick
+RUN zypper install -y ghostscript ImageMagick
 
 # https://www.suse.com/support/kb/doc/?id=000019384
 RUN policy_path=$(identify -list policy | awk '/Path:/ {print $2}' | sed 's/\[built-in\]//') \

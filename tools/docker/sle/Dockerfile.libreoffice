@@ -12,877 +12,879 @@ RUN go build -o voltaserve-tools
 
 FROM opensuse/leap:15.5 AS runner
 
-RUN zypper install -y libreoffice
-RUN zypper install -y libreoffice-writer
-RUN zypper install -y libreoffice-calc
-RUN zypper install -y libreoffice-impress
-RUN zypper install -y libreoffice-draw
-RUN zypper install -y libreoffice-math
-RUN zypper install -y libreoffice-base
+RUN zypper install -y \
+  libreoffice \
+  libreoffice-writer \
+  libreoffice-calc \
+  libreoffice-impress \
+  libreoffice-draw \
+  libreoffice-math \
+  libreoffice-base
 
-RUN zypper install -y adinatha-fonts
-RUN zypper install -y adobe-sourcecodepro-fonts
-RUN zypper install -y adobe-sourcehansans-cn-fonts
-RUN zypper install -y adobe-sourcehansans-hk-fonts
-RUN zypper install -y adobe-sourcehansans-jp-fonts
-RUN zypper install -y adobe-sourcehansans-kr-fonts
-RUN zypper install -y adobe-sourcehansans-tw-fonts
-RUN zypper install -y adobe-sourcehanserif-cn-fonts
-RUN zypper install -y adobe-sourcehanserif-hk-fonts
-RUN zypper install -y adobe-sourcehanserif-jp-fonts
-RUN zypper install -y adobe-sourcehanserif-kr-fonts
-RUN zypper install -y adobe-sourcehanserif-tw-fonts
-RUN zypper install -y adobe-sourcesans3-fonts
-RUN zypper install -y adobe-sourcesanspro-fonts
-RUN zypper install -y adobe-sourceserif4-fonts
-RUN zypper install -y adobe-sourceserifpro-fonts
-RUN zypper install -y aldusleaf-crimson-text-fonts
-RUN zypper install -y alee-fonts
-RUN zypper install -y aliftype-amiri-fonts
-RUN zypper install -y antijingoist-opendyslexic-fonts
-RUN zypper install -y arabic-ae-fonts
-RUN zypper install -y arabic-amiri-fonts
-RUN zypper install -y arabic-bitmap-fonts
-RUN zypper install -y arabic-fonts
-RUN zypper install -y arabic-kacst-fonts
-RUN zypper install -y arabic-kacstone-fonts
-RUN zypper install -y arabic-naqsh-fonts
-RUN zypper install -y arphic-bkai00mp-fonts
-RUN zypper install -y arphic-bsmi00lp-fonts
-RUN zypper install -y arphic-fonts
-RUN zypper install -y arphic-gbsn00lp-fonts
-RUN zypper install -y arphic-gkai00mp-fonts
-RUN zypper install -y arphic-ukai-fonts
-RUN zypper install -y arphic-uming-fonts
-RUN zypper install -y autonym-fonts
-RUN zypper install -y avesta-fonts
-RUN zypper install -y babelstone-han-fonts
-RUN zypper install -y babelstone-marchen-fonts
-RUN zypper install -y babelstone-modern-fonts
-RUN zypper install -y babelstone-ogham-fonts
-RUN zypper install -y babelstone-phags-pa-fonts
-RUN zypper install -y babelstone-runic-fonts
-RUN zypper install -y baekmuk-bitmap-fonts
-RUN zypper install -y baekmuk-ttf-fonts
-RUN zypper install -y bitstream-vera-fonts
-RUN zypper install -y blockzone-fonts
-RUN zypper install -y bpg-fonts
-RUN zypper install -y cadsondemak-fonts
-RUN zypper install -y cantarell-fonts
-RUN zypper install -y caslon-fonts
-RUN zypper install -y cm-unicode-fonts
-RUN zypper install -y consoleet-darwin-fonts
-RUN zypper install -y consoleet-fixedsys-fonts
-RUN zypper install -y consoleet-kbd-fonts
-RUN zypper install -y consoleet-oldschoolpc-fonts
-RUN zypper install -y consoleet-terminus-fonts
-RUN zypper install -y consoleet-xorg-fonts
-RUN zypper install -y courier-prime-fonts
-RUN zypper install -y cozette-fonts
-RUN zypper install -y cpmono_v07-fonts
-RUN zypper install -y culmus-ancient-semitic-fonts
-RUN zypper install -y culmus-fonts
-RUN zypper install -y cyreal-alice-fonts
-RUN zypper install -y cyreal-junge-fonts
-RUN zypper install -y cyreal-lobster-cyrillic-fonts
-RUN zypper install -y cyreal-lora-fonts
-RUN zypper install -y cyreal-marko-horobchyk-fonts
-RUN zypper install -y cyreal-marmelad-fonts
-RUN zypper install -y cyreal-wire-fonts
-RUN zypper install -y dai-banna-fonts
-RUN zypper install -y dejavu-fonts
-RUN zypper install -y delaguardo-inconsolata_lgc-fonts
-RUN zypper install -y dina-bitmap-fonts
-RUN zypper install -y eb-garamond-fonts
-RUN zypper install -y eeyek-fonts
-RUN zypper install -y efont-serif-fonts
-RUN zypper install -y efont-unicode-bitmap-fonts
-RUN zypper install -y farsi-fonts
-RUN zypper install -y finalcut-bitmap-fonts
-RUN zypper install -y fira-code-fonts
-RUN zypper install -y fontawesome-fonts
-RUN zypper install -y free-ttf-fonts
-RUN zypper install -y gdouros-abydos-fonts
-RUN zypper install -y gdouros-aegean-fonts
-RUN zypper install -y gdouros-aegyptus-fonts
-RUN zypper install -y gdouros-akkadian-fonts
-RUN zypper install -y gdouros-alfios-fonts
-RUN zypper install -y gdouros-analecta-fonts
-RUN zypper install -y gdouros-anatolian-fonts
-RUN zypper install -y gdouros-atavyros-fonts
-RUN zypper install -y gdouros-maya-fonts
-RUN zypper install -y gdouros-musica-fonts
-RUN zypper install -y gdouros-symbola-fonts
-RUN zypper install -y gdouros-text-fonts
-RUN zypper install -y gdouros-unidings-fonts
-RUN zypper install -y gnu-free-fonts
-RUN zypper install -y gnu-unifont-bitmap-fonts
-RUN zypper install -y gnu-unifont-legacy-bitmap-fonts
-RUN zypper install -y google-alegreya-fonts
-RUN zypper install -y google-alegreya-sans-fonts
-RUN zypper install -y google-allerta-fonts
-RUN zypper install -y google-anonymouspro-fonts
-RUN zypper install -y google-arimo-fonts
-RUN zypper install -y google-cabin-fonts
-RUN zypper install -y google-caladea-fonts
-RUN zypper install -y google-cardo-fonts
-RUN zypper install -y google-carlito-fonts
-RUN zypper install -y google-cousine-fonts
-RUN zypper install -y google-croscore-fonts
-RUN zypper install -y google-droid-fonts
-RUN zypper install -y google-exo-fonts
-RUN zypper install -y google-inconsolata-fonts
-RUN zypper install -y google-lekton-fonts
-RUN zypper install -y google-merriweather-fonts
-RUN zypper install -y google-nobile-fonts
-RUN zypper install -y google-opensans-fonts
-RUN zypper install -y google-poppins-fonts
-RUN zypper install -y google-roboto-fonts
-RUN zypper install -y google-roboto-mono-fonts
-RUN zypper install -y google-tinos-fonts
-RUN zypper install -y google-worksans-fonts
-RUN zypper install -y hack-fonts
-RUN zypper install -y hartke-aurulentsans-fonts
-RUN zypper install -y indic-fonts
-RUN zypper install -y inter-fonts
-RUN zypper install -y intlfonts-arabic-bitmap-fonts
-RUN zypper install -y intlfonts-asian-bitmap-fonts
-RUN zypper install -y intlfonts-bdf-fonts
-RUN zypper install -y intlfonts-chinese-big-bitmap-fonts
-RUN zypper install -y intlfonts-chinese-bitmap-fonts
-RUN zypper install -y intlfonts-ethiopic-bitmap-fonts
-RUN zypper install -y intlfonts-euro-bitmap-fonts
-RUN zypper install -y intlfonts-japanese-big-bitmap-fonts
-RUN zypper install -y intlfonts-japanese-bitmap-fonts
-RUN zypper install -y intlfonts-phonetic-bitmap-fonts
-RUN zypper install -y intlfonts-ttf-fonts
-RUN zypper install -y intlfonts-type1-fonts
-RUN zypper install -y iosevka-aile-fonts
-RUN zypper install -y iosevka-curly-fonts
-RUN zypper install -y iosevka-curly-slab-fonts
-RUN zypper install -y iosevka-etoile-fonts
-RUN zypper install -y iosevka-fonts
-RUN zypper install -y iosevka-slab-fonts
-RUN zypper install -y iosevka-ss01-fonts
-RUN zypper install -y iosevka-ss02-fonts
-RUN zypper install -y iosevka-ss03-fonts
-RUN zypper install -y iosevka-ss04-fonts
-RUN zypper install -y iosevka-ss05-fonts
-RUN zypper install -y iosevka-ss06-fonts
-RUN zypper install -y iosevka-ss07-fonts
-RUN zypper install -y iosevka-ss08-fonts
-RUN zypper install -y iosevka-ss09-fonts
-RUN zypper install -y iosevka-ss10-fonts
-RUN zypper install -y iosevka-ss11-fonts
-RUN zypper install -y iosevka-ss12-fonts
-RUN zypper install -y iosevka-ss13-fonts
-RUN zypper install -y iosevka-ss14-fonts
-RUN zypper install -y iosevka-ss15-fonts
-RUN zypper install -y iosevka-ss16-fonts
-RUN zypper install -y iosevka-ss17-fonts
-RUN zypper install -y iosevka-ss18-fonts
-RUN zypper install -y ipa-ex-gothic-fonts
-RUN zypper install -y ipa-ex-mincho-fonts
-RUN zypper install -y ipa-gothic-bold-fonts
-RUN zypper install -y ipa-gothic-bolditalic-fonts
-RUN zypper install -y ipa-gothic-fonts
-RUN zypper install -y ipa-gothic-italic-fonts
-RUN zypper install -y ipa-mincho-fonts
-RUN zypper install -y ipa-pgothic-bold-fonts
-RUN zypper install -y ipa-pgothic-bolditalic-fonts
-RUN zypper install -y ipa-pgothic-fonts
-RUN zypper install -y ipa-pgothic-italic-fonts
-RUN zypper install -y ipa-pmincho-fonts
-RUN zypper install -y ipa-uigothic-fonts
-RUN zypper install -y jetbrains-mono-fonts
-RUN zypper install -y jomolhari-fonts
-RUN zypper install -y js-technology-fonts
-RUN zypper install -y kde-oxygen-fonts
-RUN zypper install -y khmeros-fonts
-RUN zypper install -y kika-fixedsys-fonts
-RUN zypper install -y lato-fonts
-RUN zypper install -y liberation-fonts
-RUN zypper install -y libertinus-fonts
-RUN zypper install -y lilypond-emmentaler-fonts
-RUN zypper install -y linux-libertine-fonts
-RUN zypper install -y lklug-fonts
-RUN zypper install -y lomt-blackout-fonts
-RUN zypper install -y lomt-chunk-fonts
-RUN zypper install -y lomt-fanwood-fonts
-RUN zypper install -y lomt-goudybookletter-fonts
-RUN zypper install -y lomt-junction-fonts
-RUN zypper install -y lomt-knewave-fonts
-RUN zypper install -y lomt-leaguegothic-fonts
-RUN zypper install -y lomt-lindenhill-fonts
-RUN zypper install -y lomt-orbitron-fonts
-RUN zypper install -y lomt-ostrichsans-fonts
-RUN zypper install -y lomt-prociono-fonts
-RUN zypper install -y lomt-script1-fonts
-RUN zypper install -y lomt-sniglet-fonts
-RUN zypper install -y lomt-sortsmillgoudy-fonts
-RUN zypper install -y lyx-fonts
-RUN zypper install -y manchu-fonts
-RUN zypper install -y mathgl-fonts
-RUN zypper install -y mathjax-ams-fonts
-RUN zypper install -y mathjax-caligraphic-fonts
-RUN zypper install -y mathjax-fraktur-fonts
-RUN zypper install -y mathjax-main-fonts
-RUN zypper install -y mathjax-math-fonts
-RUN zypper install -y mathjax-sansserif-fonts
-RUN zypper install -y mathjax-script-fonts
-RUN zypper install -y mathjax-size1-fonts
-RUN zypper install -y mathjax-size2-fonts
-RUN zypper install -y mathjax-size3-fonts
-RUN zypper install -y mathjax-size4-fonts
-RUN zypper install -y mathjax-typewriter-fonts
-RUN zypper install -y mathjax-winchrome-fonts
-RUN zypper install -y mathjax-winie6-fonts
-RUN zypper install -y meslo-lg-fonts
-RUN zypper install -y mgopen-fonts
-RUN zypper install -y miao-fonts
-RUN zypper install -y mikachan-fonts
-RUN zypper install -y mingzat-fonts
-RUN zypper install -y monapo-fonts
-RUN zypper install -y mongolian-fonts
-RUN zypper install -y motoya-lcedar-fonts
-RUN zypper install -y motoya-lmaru-fonts
-RUN zypper install -y mplus-code-latin-variable-fonts
-RUN zypper install -y mplus-code-latin50-fonts
-RUN zypper install -y mplus-code-latin60-fonts
-RUN zypper install -y mplus-fonts
-RUN zypper install -y mplus1-code-fonts
-RUN zypper install -y mplus1-code-variable-fonts
-RUN zypper install -y mplus1-fonts
-RUN zypper install -y mplus1-variable-fonts
-RUN zypper install -y mplus2-fonts
-RUN zypper install -y mplus2-variable-fonts
-RUN zypper install -y musescore-fonts
-RUN zypper install -y namdhinggo-fonts
-RUN zypper install -y nanum-fonts
-RUN zypper install -y nanum-gothic-coding-fonts
-RUN zypper install -y noto-coloremoji-fonts
-RUN zypper install -y noto-kufiarabic-fonts
-RUN zypper install -y noto-mono-fonts
-RUN zypper install -y noto-naskharabic-fonts
-RUN zypper install -y noto-naskharabic-ui-fonts
-RUN zypper install -y noto-nastaliqurdu-fonts
-RUN zypper install -y noto-sans-adlam-fonts
-RUN zypper install -y noto-sans-adlamunjoined-fonts
-RUN zypper install -y noto-sans-anatolianhieroglyphs-fonts
-RUN zypper install -y noto-sans-arabic-fonts
-RUN zypper install -y noto-sans-arabic-ui-fonts
-RUN zypper install -y noto-sans-armenian-fonts
-RUN zypper install -y noto-sans-avestan-fonts
-RUN zypper install -y noto-sans-balinese-fonts
-RUN zypper install -y noto-sans-bamum-fonts
-RUN zypper install -y noto-sans-batak-fonts
-RUN zypper install -y noto-sans-bengali-fonts
-RUN zypper install -y noto-sans-bengali-ui-fonts
-RUN zypper install -y noto-sans-brahmi-fonts
-RUN zypper install -y noto-sans-buginese-fonts
-RUN zypper install -y noto-sans-buhid-fonts
-RUN zypper install -y noto-sans-canadianaboriginal-fonts
-RUN zypper install -y noto-sans-carian-fonts
-RUN zypper install -y noto-sans-chakma-fonts
-RUN zypper install -y noto-sans-cham-fonts
-RUN zypper install -y noto-sans-cherokee-fonts
-RUN zypper install -y noto-sans-cjk-fonts
-RUN zypper install -y noto-sans-coptic-fonts
-RUN zypper install -y noto-sans-cuneiform-fonts
-RUN zypper install -y noto-sans-cypriot-fonts
-RUN zypper install -y noto-sans-deseret-fonts
-RUN zypper install -y noto-sans-devanagari-fonts
-RUN zypper install -y noto-sans-devanagari-ui-fonts
-RUN zypper install -y noto-sans-display-fonts
-RUN zypper install -y noto-sans-egyptianhieroglyphs-fonts
-RUN zypper install -y noto-sans-ethiopic-fonts
-RUN zypper install -y noto-sans-fonts
-RUN zypper install -y noto-sans-georgian-fonts
-RUN zypper install -y noto-sans-glagolitic-fonts
-RUN zypper install -y noto-sans-gothic-fonts
-RUN zypper install -y noto-sans-gujarati-fonts
-RUN zypper install -y noto-sans-gujarati-ui-fonts
-RUN zypper install -y noto-sans-gurmukhi-fonts
-RUN zypper install -y noto-sans-gurmukhi-ui-fonts
-RUN zypper install -y noto-sans-hanunoo-fonts
-RUN zypper install -y noto-sans-hebrew-fonts
-RUN zypper install -y noto-sans-imperialaramaic-fonts
-RUN zypper install -y noto-sans-inscriptionalpahlavi-fonts
-RUN zypper install -y noto-sans-inscriptionalparthian-fonts
-RUN zypper install -y noto-sans-javanese-fonts
-RUN zypper install -y noto-sans-jp-black-fonts
-RUN zypper install -y noto-sans-jp-bold-fonts
-RUN zypper install -y noto-sans-jp-demilight-fonts
-RUN zypper install -y noto-sans-jp-fonts
-RUN zypper install -y noto-sans-jp-light-fonts
-RUN zypper install -y noto-sans-jp-medium-fonts
-RUN zypper install -y noto-sans-jp-mono-fonts
-RUN zypper install -y noto-sans-jp-regular-fonts
-RUN zypper install -y noto-sans-jp-thin-fonts
-RUN zypper install -y noto-sans-kaithi-fonts
-RUN zypper install -y noto-sans-kannada-fonts
-RUN zypper install -y noto-sans-kannada-ui-fonts
-RUN zypper install -y noto-sans-kayahli-fonts
-RUN zypper install -y noto-sans-kharoshthi-fonts
-RUN zypper install -y noto-sans-khmer-fonts
-RUN zypper install -y noto-sans-khmer-ui-fonts
-RUN zypper install -y noto-sans-kr-black-fonts
-RUN zypper install -y noto-sans-kr-bold-fonts
-RUN zypper install -y noto-sans-kr-demilight-fonts
-RUN zypper install -y noto-sans-kr-fonts
-RUN zypper install -y noto-sans-kr-light-fonts
-RUN zypper install -y noto-sans-kr-medium-fonts
-RUN zypper install -y noto-sans-kr-mono-fonts
-RUN zypper install -y noto-sans-kr-regular-fonts
-RUN zypper install -y noto-sans-kr-thin-fonts
-RUN zypper install -y noto-sans-lao-fonts
-RUN zypper install -y noto-sans-lao-ui-fonts
-RUN zypper install -y noto-sans-lepcha-fonts
-RUN zypper install -y noto-sans-limbu-fonts
-RUN zypper install -y noto-sans-linearb-fonts
-RUN zypper install -y noto-sans-lisu-fonts
-RUN zypper install -y noto-sans-lycian-fonts
-RUN zypper install -y noto-sans-lydian-fonts
-RUN zypper install -y noto-sans-malayalam-fonts
-RUN zypper install -y noto-sans-malayalam-ui-fonts
-RUN zypper install -y noto-sans-mandaic-fonts
-RUN zypper install -y noto-sans-meeteimayek-fonts
-RUN zypper install -y noto-sans-mongolian-fonts
-RUN zypper install -y noto-sans-mono-fonts
-RUN zypper install -y noto-sans-myanmar-fonts
-RUN zypper install -y noto-sans-myanmar-ui-fonts
-RUN zypper install -y noto-sans-newtailue-fonts
-RUN zypper install -y noto-sans-nko-fonts
-RUN zypper install -y noto-sans-ogham-fonts
-RUN zypper install -y noto-sans-olchiki-fonts
-RUN zypper install -y noto-sans-olditalic-fonts
-RUN zypper install -y noto-sans-oldpersian-fonts
-RUN zypper install -y noto-sans-oldsoutharabian-fonts
-RUN zypper install -y noto-sans-oldturkic-fonts
-RUN zypper install -y noto-sans-oriya-fonts
-RUN zypper install -y noto-sans-oriya-ui-fonts
-RUN zypper install -y noto-sans-osage-fonts
-RUN zypper install -y noto-sans-osmanya-fonts
-RUN zypper install -y noto-sans-phagspa-fonts
-RUN zypper install -y noto-sans-phoenician-fonts
-RUN zypper install -y noto-sans-rejang-fonts
-RUN zypper install -y noto-sans-runic-fonts
-RUN zypper install -y noto-sans-samaritan-fonts
-RUN zypper install -y noto-sans-saurashtra-fonts
-RUN zypper install -y noto-sans-sc-black-fonts
-RUN zypper install -y noto-sans-sc-bold-fonts
-RUN zypper install -y noto-sans-sc-demilight-fonts
-RUN zypper install -y noto-sans-sc-fonts
-RUN zypper install -y noto-sans-sc-light-fonts
-RUN zypper install -y noto-sans-sc-medium-fonts
-RUN zypper install -y noto-sans-sc-mono-fonts
-RUN zypper install -y noto-sans-sc-regular-fonts
-RUN zypper install -y noto-sans-sc-thin-fonts
-RUN zypper install -y noto-sans-shavian-fonts
-RUN zypper install -y noto-sans-sinhala-fonts
-RUN zypper install -y noto-sans-sinhala-ui-fonts
-RUN zypper install -y noto-sans-sundanese-fonts
-RUN zypper install -y noto-sans-sylotinagri-fonts
-RUN zypper install -y noto-sans-symbols-fonts
-RUN zypper install -y noto-sans-symbols2-fonts
-RUN zypper install -y noto-sans-syriaceastern-fonts
-RUN zypper install -y noto-sans-syriacestrangela-fonts
-RUN zypper install -y noto-sans-syriacwestern-fonts
-RUN zypper install -y noto-sans-tagalog-fonts
-RUN zypper install -y noto-sans-tagbanwa-fonts
-RUN zypper install -y noto-sans-taile-fonts
-RUN zypper install -y noto-sans-taitham-fonts
-RUN zypper install -y noto-sans-taiviet-fonts
-RUN zypper install -y noto-sans-tamil-fonts
-RUN zypper install -y noto-sans-tamil-ui-fonts
-RUN zypper install -y noto-sans-tc-black-fonts
-RUN zypper install -y noto-sans-tc-bold-fonts
-RUN zypper install -y noto-sans-tc-demilight-fonts
-RUN zypper install -y noto-sans-tc-fonts
-RUN zypper install -y noto-sans-tc-light-fonts
-RUN zypper install -y noto-sans-tc-medium-fonts
-RUN zypper install -y noto-sans-tc-mono-fonts
-RUN zypper install -y noto-sans-tc-regular-fonts
-RUN zypper install -y noto-sans-tc-thin-fonts
-RUN zypper install -y noto-sans-telugu-fonts
-RUN zypper install -y noto-sans-telugu-ui-fonts
-RUN zypper install -y noto-sans-thaana-fonts
-RUN zypper install -y noto-sans-thai-fonts
-RUN zypper install -y noto-sans-thai-ui-fonts
-RUN zypper install -y noto-sans-tibetan-fonts
-RUN zypper install -y noto-sans-tifinagh-fonts
-RUN zypper install -y noto-sans-ugaritic-fonts
-RUN zypper install -y noto-sans-vai-fonts
-RUN zypper install -y noto-sans-yi-fonts
-RUN zypper install -y noto-serif-armenian-fonts
-RUN zypper install -y noto-serif-bengali-fonts
-RUN zypper install -y noto-serif-devanagari-fonts
-RUN zypper install -y noto-serif-display-fonts
-RUN zypper install -y noto-serif-ethiopic-fonts
-RUN zypper install -y noto-serif-fonts
-RUN zypper install -y noto-serif-georgian-fonts
-RUN zypper install -y noto-serif-gujarati-fonts
-RUN zypper install -y noto-serif-hebrew-fonts
-RUN zypper install -y noto-serif-jp-black-fonts
-RUN zypper install -y noto-serif-jp-bold-fonts
-RUN zypper install -y noto-serif-jp-extralight-fonts
-RUN zypper install -y noto-serif-jp-fonts
-RUN zypper install -y noto-serif-jp-light-fonts
-RUN zypper install -y noto-serif-jp-medium-fonts
-RUN zypper install -y noto-serif-jp-regular-fonts
-RUN zypper install -y noto-serif-jp-semibold-fonts
-RUN zypper install -y noto-serif-kannada-fonts
-RUN zypper install -y noto-serif-khmer-fonts
-RUN zypper install -y noto-serif-kr-black-fonts
-RUN zypper install -y noto-serif-kr-bold-fonts
-RUN zypper install -y noto-serif-kr-extralight-fonts
-RUN zypper install -y noto-serif-kr-fonts
-RUN zypper install -y noto-serif-kr-light-fonts
-RUN zypper install -y noto-serif-kr-medium-fonts
-RUN zypper install -y noto-serif-kr-regular-fonts
-RUN zypper install -y noto-serif-kr-semibold-fonts
-RUN zypper install -y noto-serif-lao-fonts
-RUN zypper install -y noto-serif-malayalam-fonts
-RUN zypper install -y noto-serif-myanmar-fonts
-RUN zypper install -y noto-serif-sc-black-fonts
-RUN zypper install -y noto-serif-sc-bold-fonts
-RUN zypper install -y noto-serif-sc-extralight-fonts
-RUN zypper install -y noto-serif-sc-fonts
-RUN zypper install -y noto-serif-sc-light-fonts
-RUN zypper install -y noto-serif-sc-medium-fonts
-RUN zypper install -y noto-serif-sc-regular-fonts
-RUN zypper install -y noto-serif-sc-semibold-fonts
-RUN zypper install -y noto-serif-sinhala-fonts
-RUN zypper install -y noto-serif-tamil-fonts
-RUN zypper install -y noto-serif-tc-black-fonts
-RUN zypper install -y noto-serif-tc-bold-fonts
-RUN zypper install -y noto-serif-tc-extralight-fonts
-RUN zypper install -y noto-serif-tc-fonts
-RUN zypper install -y noto-serif-tc-light-fonts
-RUN zypper install -y noto-serif-tc-medium-fonts
-RUN zypper install -y noto-serif-tc-regular-fonts
-RUN zypper install -y noto-serif-tc-semibold-fonts
-RUN zypper install -y noto-serif-telugu-fonts
-RUN zypper install -y noto-serif-thai-fonts
-RUN zypper install -y nuosu-fonts
-RUN zypper install -y officecodepro-fonts
-RUN zypper install -y opengost-otf-fonts
-RUN zypper install -y opengost-ttf-fonts
-RUN zypper install -y orkhon-fonts
-RUN zypper install -y paglinawan-quicksand-fonts
-RUN zypper install -y pagul-fonts
-RUN zypper install -y paratype-pt-mono-fonts
-RUN zypper install -y paratype-pt-sans-fonts
-RUN zypper install -y paratype-pt-serif-fonts
-RUN zypper install -y patterns-fonts-fonts
-RUN zypper install -y phetsarath-fonts
-RUN zypper install -y pothana2000-fonts
-RUN zypper install -y powerline-fonts
-RUN zypper install -y raleway-fonts
-RUN zypper install -y rmit-sansforgetica-fonts
-RUN zypper install -y rovasiras-kende-fonts
-RUN zypper install -y rovasiras-roga-fonts
-RUN zypper install -y saja-cascadia-code-fonts
-RUN zypper install -y saweri-fonts
-RUN zypper install -y sazanami-fonts
-RUN zypper install -y sgi-bitmap-fonts
-RUN zypper install -y shannpersand-comicshanns-fonts
-RUN zypper install -y sil-abyssinica-fonts
-RUN zypper install -y sil-andika-fonts
-RUN zypper install -y sil-charis-fonts
-RUN zypper install -y sil-doulos-fonts
-RUN zypper install -y sil-gentium-fonts
-RUN zypper install -y sil-mondulkiri-fonts
-RUN zypper install -y sil-padauk-fonts
-RUN zypper install -y steinberg-bravura-fonts
-RUN zypper install -y stix-fonts
-RUN zypper install -y stix-integrals-fonts
-RUN zypper install -y stix-pua-fonts
-RUN zypper install -y stix-sizes-fonts
-RUN zypper install -y stix-variants-fonts
-RUN zypper install -y sundanese-unicode-fonts
-RUN zypper install -y tagbanwa-fonts
-RUN zypper install -y tai-heritage-pro-fonts
-RUN zypper install -y terminus-bitmap-fonts
-RUN zypper install -y terminus-ttf-fonts
-RUN zypper install -y termsyn-bitmap-fonts
-RUN zypper install -y texlive-academicons-fonts
-RUN zypper install -y texlive-accanthis-fonts
-RUN zypper install -y texlive-adforn-fonts
-RUN zypper install -y texlive-adfsymbols-fonts
-RUN zypper install -y texlive-aesupp-fonts
-RUN zypper install -y texlive-alegreya-fonts
-RUN zypper install -y texlive-alfaslabone-fonts
-RUN zypper install -y texlive-algolrevived-fonts
-RUN zypper install -y texlive-alkalami-fonts
-RUN zypper install -y texlive-allrunes-fonts
-RUN zypper install -y texlive-almendra-fonts
-RUN zypper install -y texlive-almfixed-fonts
-RUN zypper install -y texlive-amiri-fonts
-RUN zypper install -y texlive-amsfonts-fonts
-RUN zypper install -y texlive-anonymouspro-fonts
-RUN zypper install -y texlive-antiqua-fonts
-RUN zypper install -y texlive-antt-fonts
-RUN zypper install -y texlive-arabi-fonts
-RUN zypper install -y texlive-arabtex-fonts
-RUN zypper install -y texlive-aramaic-serto-fonts
-RUN zypper install -y texlive-archaic-fonts
-RUN zypper install -y texlive-archivo-fonts
-RUN zypper install -y texlive-arev-fonts
-RUN zypper install -y texlive-arimo-fonts
-RUN zypper install -y texlive-armtex-fonts
-RUN zypper install -y texlive-arphic-fonts
-RUN zypper install -y texlive-arphic-ttf-fonts
-RUN zypper install -y texlive-arvo-fonts
-RUN zypper install -y texlive-Asana-Math-fonts
-RUN zypper install -y texlive-asapsym-fonts
-RUN zypper install -y texlive-ascii-font-fonts
-RUN zypper install -y texlive-ascmac-fonts
-RUN zypper install -y texlive-aspectratio-fonts
-RUN zypper install -y texlive-atkinson-fonts
-RUN zypper install -y texlive-augie-fonts
-RUN zypper install -y texlive-auncial-new-fonts
-RUN zypper install -y texlive-aurical-fonts
-RUN zypper install -y texlive-avantgar-fonts
-RUN zypper install -y texlive-baekmuk-fonts
-RUN zypper install -y texlive-bartel-chess-fonts
-RUN zypper install -y texlive-baskervald-fonts
-RUN zypper install -y texlive-baskervaldx-fonts
-RUN zypper install -y texlive-baskervillef-fonts
-RUN zypper install -y texlive-bbold-type1-fonts
-RUN zypper install -y texlive-belleek-fonts
-RUN zypper install -y texlive-bera-fonts
-RUN zypper install -y texlive-berenisadf-fonts
-RUN zypper install -y texlive-beuron-fonts
-RUN zypper install -y texlive-bguq-fonts
-RUN zypper install -y texlive-bitter-fonts
-RUN zypper install -y texlive-bookhands-fonts
-RUN zypper install -y texlive-bookman-fonts
-RUN zypper install -y texlive-boondox-fonts
-RUN zypper install -y texlive-brushscr-fonts
-RUN zypper install -y texlive-burmese-fonts
-RUN zypper install -y texlive-cabin-fonts
-RUN zypper install -y texlive-caladea-fonts
-RUN zypper install -y texlive-calligra-type1-fonts
-RUN zypper install -y texlive-cantarell-fonts
-RUN zypper install -y texlive-carlito-fonts
-RUN zypper install -y texlive-carolmin-ps-fonts
-RUN zypper install -y texlive-cascadia-code-fonts
-RUN zypper install -y texlive-cbcoptic-fonts
-RUN zypper install -y texlive-cbfonts-fonts
-RUN zypper install -y texlive-cc-pl-fonts
-RUN zypper install -y texlive-ccicons-fonts
-RUN zypper install -y texlive-charissil-fonts
-RUN zypper install -y texlive-charter-fonts
-RUN zypper install -y texlive-chemarrow-fonts
-RUN zypper install -y texlive-chivo-fonts
-RUN zypper install -y texlive-cinzel-fonts
-RUN zypper install -y texlive-cjhebrew-fonts
-RUN zypper install -y texlive-clara-fonts
-RUN zypper install -y texlive-clearsans-fonts
-RUN zypper install -y texlive-cm-lgc-fonts
-RUN zypper install -y texlive-cm-super-fonts
-RUN zypper install -y texlive-cm-unicode-fonts
-RUN zypper install -y texlive-cmathbb-fonts
-RUN zypper install -y texlive-cmcyr-fonts
-RUN zypper install -y texlive-cmexb-fonts
-RUN zypper install -y texlive-cmll-fonts
-RUN zypper install -y texlive-cmsrb-fonts
-RUN zypper install -y texlive-cmupint-fonts
-RUN zypper install -y texlive-cochineal-fonts
-RUN zypper install -y texlive-coelacanth-fonts
-RUN zypper install -y texlive-comfortaa-fonts
-RUN zypper install -y texlive-comicneue-fonts
-RUN zypper install -y texlive-concmath-fonts
-RUN zypper install -y texlive-context-fonts
-RUN zypper install -y texlive-cormorantgaramond-fonts
-RUN zypper install -y texlive-countriesofeurope-fonts
-RUN zypper install -y texlive-courier-fonts
-RUN zypper install -y texlive-courierten-fonts
-RUN zypper install -y texlive-crimson-fonts
-RUN zypper install -y texlive-crimsonpro-fonts
-RUN zypper install -y texlive-cryst-fonts
-RUN zypper install -y texlive-cs-fonts
-RUN zypper install -y texlive-cuprum-fonts
-RUN zypper install -y texlive-cyklop-fonts
-RUN zypper install -y texlive-dad-fonts
-RUN zypper install -y texlive-dantelogo-fonts
-RUN zypper install -y texlive-dejavu-fonts
-RUN zypper install -y texlive-dictsym-fonts
-RUN zypper install -y texlive-domitian-fonts
-RUN zypper install -y texlive-doublestroke-fonts
-RUN zypper install -y texlive-doulossil-fonts
-RUN zypper install -y texlive-dozenal-fonts
-RUN zypper install -y texlive-drm-fonts
-RUN zypper install -y texlive-droid-fonts
-RUN zypper install -y texlive-dsserif-fonts
-RUN zypper install -y texlive-dutchcal-fonts
-RUN zypper install -y texlive-ebgaramond-fonts
-RUN zypper install -y texlive-eczar-fonts
-RUN zypper install -y texlive-ektype-tanka-fonts
-RUN zypper install -y texlive-electrum-fonts
-RUN zypper install -y texlive-epigrafica-fonts
-RUN zypper install -y texlive-epiolmec-fonts
-RUN zypper install -y texlive-erewhon-fonts
-RUN zypper install -y texlive-erewhon-math-fonts
-RUN zypper install -y texlive-esint-type1-fonts
-RUN zypper install -y texlive-esrelation-fonts
-RUN zypper install -y texlive-esstix-fonts
-RUN zypper install -y texlive-esvect-fonts
-RUN zypper install -y texlive-etbb-fonts
-RUN zypper install -y texlive-ethiop-t1-fonts
-RUN zypper install -y texlive-eurosym-fonts
-RUN zypper install -y texlive-fandol-fonts
-RUN zypper install -y texlive-fbb-fonts
-RUN zypper install -y texlive-fdsymbol-fonts
-RUN zypper install -y texlive-fetamont-fonts
-RUN zypper install -y texlive-fge-fonts
-RUN zypper install -y texlive-figbas-fonts
-RUN zypper install -y texlive-fira-fonts
-RUN zypper install -y texlive-firamath-fonts
-RUN zypper install -y texlive-foekfont-fonts
-RUN zypper install -y texlive-fonetika-fonts
-RUN zypper install -y texlive-fontawesome-fonts
-RUN zypper install -y texlive-fontawesome5-fonts
-RUN zypper install -y texlive-fontmfizz-fonts
-RUN zypper install -y texlive-fonts-churchslavonic-fonts
-RUN zypper install -y texlive-fonts-tlwg-fonts
-RUN zypper install -y texlive-forum-fonts
-RUN zypper install -y texlive-fourier-fonts
-RUN zypper install -y texlive-fpl-fonts
-RUN zypper install -y texlive-frcursive-fonts
-RUN zypper install -y texlive-frederika2016-fonts
-RUN zypper install -y texlive-frimurer-fonts
-RUN zypper install -y texlive-garamond-libre-fonts
-RUN zypper install -y texlive-garamond-math-fonts
-RUN zypper install -y texlive-gentium-tug-fonts
-RUN zypper install -y texlive-gfsartemisia-fonts
-RUN zypper install -y texlive-gfsbaskerville-fonts
-RUN zypper install -y texlive-gfsbodoni-fonts
-RUN zypper install -y texlive-gfscomplutum-fonts
-RUN zypper install -y texlive-gfsdidot-fonts
-RUN zypper install -y texlive-gfsdidotclassic-fonts
-RUN zypper install -y texlive-gfsneohellenic-fonts
-RUN zypper install -y texlive-gfsneohellenicmath-fonts
-RUN zypper install -y texlive-gfsporson-fonts
-RUN zypper install -y texlive-gfssolomos-fonts
-RUN zypper install -y texlive-gillius-fonts
-RUN zypper install -y texlive-gnu-freefont-fonts
-RUN zypper install -y texlive-gofonts-fonts
-RUN zypper install -y texlive-gregoriotex-fonts
-RUN zypper install -y texlive-grotesq-fonts
-RUN zypper install -y texlive-gudea-fonts
-RUN zypper install -y texlive-hacm-fonts
-RUN zypper install -y texlive-haranoaji-extra-fonts
-RUN zypper install -y texlive-haranoaji-fonts
-RUN zypper install -y texlive-helmholtz-ellis-ji-notation-fonts
-RUN zypper install -y texlive-helvetic-fonts
-RUN zypper install -y texlive-heuristica-fonts
-RUN zypper install -y texlive-hfbright-fonts
-RUN zypper install -y texlive-hindmadurai-fonts
-RUN zypper install -y texlive-hmtrump-fonts
-RUN zypper install -y texlive-ibarra-fonts
-RUN zypper install -y texlive-ibygrk-fonts
-RUN zypper install -y texlive-imfellenglish-fonts
-RUN zypper install -y texlive-inconsolata-fonts
-RUN zypper install -y texlive-initials-fonts
-RUN zypper install -y texlive-inriafonts-fonts
-RUN zypper install -y texlive-inter-fonts
-RUN zypper install -y texlive-ipaex-fonts
-RUN zypper install -y texlive-ipaex-type1-fonts
-RUN zypper install -y texlive-iwona-fonts
-RUN zypper install -y texlive-jmn-fonts
-RUN zypper install -y texlive-josefin-fonts
-RUN zypper install -y texlive-junicode-fonts
-RUN zypper install -y texlive-kerkis-fonts
-RUN zypper install -y texlive-knitting-fonts
-RUN zypper install -y texlive-kpfonts-fonts
-RUN zypper install -y texlive-kpfonts-otf-fonts
-RUN zypper install -y texlive-kurier-fonts
-RUN zypper install -y texlive-latex-fonts
-RUN zypper install -y texlive-lato-fonts
-RUN zypper install -y texlive-lexend-fonts
-RUN zypper install -y texlive-libertine-fonts
-RUN zypper install -y texlive-libertinus-fonts
-RUN zypper install -y texlive-libertinus-fonts-fonts
-RUN zypper install -y texlive-libertinus-type1-fonts
-RUN zypper install -y texlive-libertinust1math-fonts
-RUN zypper install -y texlive-librebaskerville-fonts
-RUN zypper install -y texlive-librebodoni-fonts
-RUN zypper install -y texlive-librecaslon-fonts
-RUN zypper install -y texlive-librefranklin-fonts
-RUN zypper install -y texlive-libris-fonts
-RUN zypper install -y texlive-lilyglyphs-fonts
-RUN zypper install -y texlive-linearA-fonts
-RUN zypper install -y texlive-linguisticspro-fonts
-RUN zypper install -y texlive-lm-fonts
-RUN zypper install -y texlive-lm-math-fonts
-RUN zypper install -y texlive-lobster2-fonts
-RUN zypper install -y texlive-logix-fonts
-RUN zypper install -y texlive-lxfonts-fonts
-RUN zypper install -y texlive-magra-fonts
-RUN zypper install -y texlive-manfnt-font-fonts
-RUN zypper install -y texlive-marcellus-fonts
-RUN zypper install -y texlive-marvosym-fonts
-RUN zypper install -y texlive-mathabx-type1-fonts
-RUN zypper install -y texlive-mathdesign-fonts
-RUN zypper install -y texlive-mathpazo-fonts
-RUN zypper install -y texlive-mdsymbol-fonts
-RUN zypper install -y texlive-merriweather-fonts
-RUN zypper install -y texlive-metapost-fonts
-RUN zypper install -y texlive-mflogo-font-fonts
-RUN zypper install -y texlive-miama-fonts
-RUN zypper install -y texlive-mintspirit-fonts
-RUN zypper install -y texlive-missaali-fonts
-RUN zypper install -y texlive-mlmodern-fonts
-RUN zypper install -y texlive-mnsymbol-fonts
-RUN zypper install -y texlive-montex-fonts
-RUN zypper install -y texlive-montserrat-fonts
-RUN zypper install -y texlive-musixtex-fonts
-RUN zypper install -y texlive-musixtex-fonts-fonts
-RUN zypper install -y texlive-mxedruli-fonts
-RUN zypper install -y texlive-nanumtype1-fonts
-RUN zypper install -y texlive-ncntrsbk-fonts
-RUN zypper install -y texlive-newcomputermodern-fonts
-RUN zypper install -y texlive-newpx-fonts
-RUN zypper install -y texlive-newtx-fonts
-RUN zypper install -y texlive-newtxsf-fonts
-RUN zypper install -y texlive-newtxtt-fonts
-RUN zypper install -y texlive-niceframe-type1-fonts
-RUN zypper install -y texlive-nimbus15-fonts
-RUN zypper install -y texlive-noto-emoji-fonts
-RUN zypper install -y texlive-noto-fonts
-RUN zypper install -y texlive-notomath-fonts
-RUN zypper install -y texlive-novel-fonts
-RUN zypper install -y texlive-nunito-fonts
-RUN zypper install -y texlive-ocherokee-fonts
-RUN zypper install -y texlive-ocr-b-outline-fonts
-RUN zypper install -y texlive-oinuit-fonts
-RUN zypper install -y texlive-old-arrows-fonts
-RUN zypper install -y texlive-oldstandard-fonts
-RUN zypper install -y texlive-omega-fonts
-RUN zypper install -y texlive-opensans-fonts
-RUN zypper install -y texlive-oswald-fonts
-RUN zypper install -y texlive-overlock-fonts
-RUN zypper install -y texlive-padauk-fonts
-RUN zypper install -y texlive-palatino-fonts
-RUN zypper install -y texlive-paratype-fonts
-RUN zypper install -y texlive-pdftex-fonts
-RUN zypper install -y texlive-phaistos-fonts
-RUN zypper install -y texlive-philokalia-fonts
-RUN zypper install -y texlive-pigpen-fonts
-RUN zypper install -y texlive-pl-fonts
-RUN zypper install -y texlive-playfair-fonts
-RUN zypper install -y texlive-plex-fonts
-RUN zypper install -y texlive-plimsoll-fonts
-RUN zypper install -y texlive-poiretone-fonts
-RUN zypper install -y texlive-poltawski-fonts
-RUN zypper install -y texlive-prodint-fonts
-RUN zypper install -y texlive-ptex-fonts
-RUN zypper install -y texlive-punknova-fonts
-RUN zypper install -y texlive-pxfonts-fonts
-RUN zypper install -y texlive-qualitype-fonts
-RUN zypper install -y texlive-quattrocento-fonts
-RUN zypper install -y texlive-raleway-fonts
-RUN zypper install -y texlive-recycle-fonts
-RUN zypper install -y texlive-roboto-fonts
-RUN zypper install -y texlive-rojud-fonts
-RUN zypper install -y texlive-romande-fonts
-RUN zypper install -y texlive-rosario-fonts
-RUN zypper install -y texlive-rsfs-fonts
-RUN zypper install -y texlive-sanskrit-t1-fonts
-RUN zypper install -y texlive-sansmathfonts-fonts
-RUN zypper install -y texlive-scanpages-fonts
-RUN zypper install -y texlive-scholax-fonts
-RUN zypper install -y texlive-semaphor-fonts
-RUN zypper install -y texlive-shobhika-fonts
-RUN zypper install -y texlive-skaknew-fonts
-RUN zypper install -y texlive-sourcecodepro-fonts
-RUN zypper install -y texlive-sourcesanspro-fonts
-RUN zypper install -y texlive-sourceserifpro-fonts
-RUN zypper install -y texlive-spectral-fonts
-RUN zypper install -y texlive-starfont-fonts
-RUN zypper install -y texlive-staves-fonts
-RUN zypper install -y texlive-step-fonts
-RUN zypper install -y texlive-stepgreek-fonts
-RUN zypper install -y texlive-stickstoo-fonts
-RUN zypper install -y texlive-stix-fonts
-RUN zypper install -y texlive-stix2-otf-fonts
-RUN zypper install -y texlive-stix2-type1-fonts
-RUN zypper install -y texlive-stmaryrd-fonts
-RUN zypper install -y texlive-superiors-fonts
-RUN zypper install -y texlive-svrsymbols-fonts
-RUN zypper install -y texlive-symbol-fonts
-RUN zypper install -y texlive-tabvar-fonts
-RUN zypper install -y texlive-tapir-fonts
-RUN zypper install -y texlive-tempora-fonts
-RUN zypper install -y texlive-tex-gyre-fonts
-RUN zypper install -y texlive-tex-gyre-math-fonts
-RUN zypper install -y texlive-tfrupee-fonts
-RUN zypper install -y texlive-theanodidot-fonts
-RUN zypper install -y texlive-theanomodern-fonts
-RUN zypper install -y texlive-theanooldstyle-fonts
-RUN zypper install -y texlive-times-fonts
-RUN zypper install -y texlive-tinos-fonts
-RUN zypper install -y texlive-tipa-fonts
-RUN zypper install -y texlive-trajan-fonts
-RUN zypper install -y texlive-twemoji-colr-fonts
-RUN zypper install -y texlive-txfonts-fonts
-RUN zypper install -y texlive-txfontsb-fonts
-RUN zypper install -y texlive-txuprcal-fonts
-RUN zypper install -y texlive-typicons-fonts
-RUN zypper install -y texlive-uhc-fonts
-RUN zypper install -y texlive-umtypewriter-fonts
-RUN zypper install -y texlive-unfonts-core-fonts
-RUN zypper install -y texlive-unfonts-extra-fonts
-RUN zypper install -y texlive-universalis-fonts
-RUN zypper install -y texlive-uptex-fonts
-RUN zypper install -y texlive-utopia-fonts
-RUN zypper install -y texlive-velthuis-fonts
-RUN zypper install -y texlive-venturisadf-fonts
-RUN zypper install -y texlive-vntex-fonts
-RUN zypper install -y texlive-wadalab-fonts
-RUN zypper install -y texlive-wasy-type1-fonts
-RUN zypper install -y texlive-xcharter-fonts
-RUN zypper install -y texlive-xits-fonts
-RUN zypper install -y texlive-xypic-fonts
-RUN zypper install -y texlive-yfonts-t1-fonts
-RUN zypper install -y texlive-yhmath-fonts
-RUN zypper install -y texlive-yinit-otf-fonts
-RUN zypper install -y texlive-zapfchan-fonts
-RUN zypper install -y texlive-zapfding-fonts
-RUN zypper install -y thai-fonts
-RUN zypper install -y thessalonica-oldstandard-otf-fonts
-RUN zypper install -y thessalonica-oldstandard-ttf-fonts
-RUN zypper install -y thessalonica-tempora-lgc-otf-fonts
-RUN zypper install -y thessalonica-tempora-lgc-ttf-fonts
-RUN zypper install -y thessalonica-theano-otf-fonts
-RUN zypper install -y thessalonica-theano-ttf-fonts
-RUN zypper install -y thryomanes-fonts
-RUN zypper install -y tibetan-machine-uni-fonts
-RUN zypper install -y tiro-bangla-fonts
-RUN zypper install -y tiro-devahindi-fonts
-RUN zypper install -y tiro-devamarathi-fonts
-RUN zypper install -y tiro-devasanskrit-fonts
-RUN zypper install -y tiro-gurmukhi-fonts
-RUN zypper install -y tiro-indigo-fonts
-RUN zypper install -y tiro-kannada-fonts
-RUN zypper install -y tiro-tamil-fonts
-RUN zypper install -y tiro-telugu-fonts
-RUN zypper install -y tuladha-jejeg-fonts
-RUN zypper install -y tv-fonts
-RUN zypper install -y ubuntu-fonts
-RUN zypper install -y un-fonts
-RUN zypper install -y unifraktur-fonts
-RUN zypper install -y vlgothic-fonts
-RUN zypper install -y vollkorn-fonts
-RUN zypper install -y wang-fonts
-RUN zypper install -y wqy-bitmap-fonts
-RUN zypper install -y wqy-microhei-fonts
-RUN zypper install -y wqy-zenhei-fonts
-RUN zypper install -y x11-japanese-bitmap-fonts
-RUN zypper install -y xano-mincho-fonts
-RUN zypper install -y xorg-x11-fonts
+RUN zypper install -y \
+  adinatha-fonts \
+  adobe-sourcecodepro-fonts \
+  adobe-sourcehansans-cn-fonts \
+  adobe-sourcehansans-hk-fonts \
+  adobe-sourcehansans-jp-fonts \
+  adobe-sourcehansans-kr-fonts \
+  adobe-sourcehansans-tw-fonts \
+  adobe-sourcehanserif-cn-fonts \
+  adobe-sourcehanserif-hk-fonts \
+  adobe-sourcehanserif-jp-fonts \
+  adobe-sourcehanserif-kr-fonts \
+  adobe-sourcehanserif-tw-fonts \
+  adobe-sourcesans3-fonts \
+  adobe-sourcesanspro-fonts \
+  adobe-sourceserif4-fonts \
+  adobe-sourceserifpro-fonts \
+  aldusleaf-crimson-text-fonts \
+  alee-fonts \
+  aliftype-amiri-fonts \
+  antijingoist-opendyslexic-fonts \
+  arabic-ae-fonts \
+  arabic-amiri-fonts \
+  arabic-bitmap-fonts \
+  arabic-fonts \
+  arabic-kacst-fonts \
+  arabic-kacstone-fonts \
+  arabic-naqsh-fonts \
+  arphic-bkai00mp-fonts \
+  arphic-bsmi00lp-fonts \
+  arphic-fonts \
+  arphic-gbsn00lp-fonts \
+  arphic-gkai00mp-fonts \
+  arphic-ukai-fonts \
+  arphic-uming-fonts \
+  autonym-fonts \
+  avesta-fonts \
+  babelstone-han-fonts \
+  babelstone-marchen-fonts \
+  babelstone-modern-fonts \
+  babelstone-ogham-fonts \
+  babelstone-phags-pa-fonts \
+  babelstone-runic-fonts \
+  baekmuk-bitmap-fonts \
+  baekmuk-ttf-fonts \
+  bitstream-vera-fonts \
+  blockzone-fonts \
+  bpg-fonts \
+  cadsondemak-fonts \
+  cantarell-fonts \
+  caslon-fonts \
+  cm-unicode-fonts \
+  consoleet-darwin-fonts \
+  consoleet-fixedsys-fonts \
+  consoleet-kbd-fonts \
+  consoleet-oldschoolpc-fonts \
+  consoleet-terminus-fonts \
+  consoleet-xorg-fonts \
+  courier-prime-fonts \
+  cozette-fonts \
+  cpmono_v07-fonts \
+  culmus-ancient-semitic-fonts \
+  culmus-fonts \
+  cyreal-alice-fonts \
+  cyreal-junge-fonts \
+  cyreal-lobster-cyrillic-fonts \
+  cyreal-lora-fonts \
+  cyreal-marko-horobchyk-fonts \
+  cyreal-marmelad-fonts \
+  cyreal-wire-fonts \
+  dai-banna-fonts \
+  dejavu-fonts \
+  delaguardo-inconsolata_lgc-fonts \
+  dina-bitmap-fonts \
+  eb-garamond-fonts \
+  eeyek-fonts \
+  efont-serif-fonts \
+  efont-unicode-bitmap-fonts \
+  farsi-fonts \
+  finalcut-bitmap-fonts \
+  fira-code-fonts \
+  fontawesome-fonts \
+  free-ttf-fonts \
+  gdouros-abydos-fonts \
+  gdouros-aegean-fonts \
+  gdouros-aegyptus-fonts \
+  gdouros-akkadian-fonts \
+  gdouros-alfios-fonts \
+  gdouros-analecta-fonts \
+  gdouros-anatolian-fonts \
+  gdouros-atavyros-fonts \
+  gdouros-maya-fonts \
+  gdouros-musica-fonts \
+  gdouros-symbola-fonts \
+  gdouros-text-fonts \
+  gdouros-unidings-fonts \
+  gnu-free-fonts \
+  gnu-unifont-bitmap-fonts \
+  gnu-unifont-legacy-bitmap-fonts \
+  google-alegreya-fonts \
+  google-alegreya-sans-fonts \
+  google-allerta-fonts \
+  google-anonymouspro-fonts \
+  google-arimo-fonts \
+  google-cabin-fonts \
+  google-caladea-fonts \
+  google-cardo-fonts \
+  google-carlito-fonts \
+  google-cousine-fonts \
+  google-croscore-fonts \
+  google-droid-fonts \
+  google-exo-fonts \
+  google-inconsolata-fonts \
+  google-lekton-fonts \
+  google-merriweather-fonts \
+  google-nobile-fonts \
+  google-opensans-fonts \
+  google-poppins-fonts \
+  google-roboto-fonts \
+  google-roboto-mono-fonts \
+  google-tinos-fonts \
+  google-worksans-fonts \
+  hack-fonts \
+  hartke-aurulentsans-fonts \
+  indic-fonts \
+  inter-fonts \
+  intlfonts-arabic-bitmap-fonts \
+  intlfonts-asian-bitmap-fonts \
+  intlfonts-bdf-fonts \
+  intlfonts-chinese-big-bitmap-fonts \
+  intlfonts-chinese-bitmap-fonts \
+  intlfonts-ethiopic-bitmap-fonts \
+  intlfonts-euro-bitmap-fonts \
+  intlfonts-japanese-big-bitmap-fonts \
+  intlfonts-japanese-bitmap-fonts \
+  intlfonts-phonetic-bitmap-fonts \
+  intlfonts-ttf-fonts \
+  intlfonts-type1-fonts \
+  iosevka-aile-fonts \
+  iosevka-curly-fonts \
+  iosevka-curly-slab-fonts \
+  iosevka-etoile-fonts \
+  iosevka-fonts \
+  iosevka-slab-fonts \
+  iosevka-ss01-fonts \
+  iosevka-ss02-fonts \
+  iosevka-ss03-fonts \
+  iosevka-ss04-fonts \
+  iosevka-ss05-fonts \
+  iosevka-ss06-fonts \
+  iosevka-ss07-fonts \
+  iosevka-ss08-fonts \
+  iosevka-ss09-fonts \
+  iosevka-ss10-fonts \
+  iosevka-ss11-fonts \
+  iosevka-ss12-fonts \
+  iosevka-ss13-fonts \
+  iosevka-ss14-fonts \
+  iosevka-ss15-fonts \
+  iosevka-ss16-fonts \
+  iosevka-ss17-fonts \
+  iosevka-ss18-fonts \
+  ipa-ex-gothic-fonts \
+  ipa-ex-mincho-fonts \
+  ipa-gothic-bold-fonts \
+  ipa-gothic-bolditalic-fonts \
+  ipa-gothic-fonts \
+  ipa-gothic-italic-fonts \
+  ipa-mincho-fonts \
+  ipa-pgothic-bold-fonts \
+  ipa-pgothic-bolditalic-fonts \
+  ipa-pgothic-fonts \
+  ipa-pgothic-italic-fonts \
+  ipa-pmincho-fonts \
+  ipa-uigothic-fonts \
+  jetbrains-mono-fonts \
+  jomolhari-fonts \
+  js-technology-fonts \
+  kde-oxygen-fonts \
+  khmeros-fonts \
+  kika-fixedsys-fonts \
+  lato-fonts \
+  liberation-fonts \
+  libertinus-fonts \
+  lilypond-emmentaler-fonts \
+  linux-libertine-fonts \
+  lklug-fonts \
+  lomt-blackout-fonts \
+  lomt-chunk-fonts \
+  lomt-fanwood-fonts \
+  lomt-goudybookletter-fonts \
+  lomt-junction-fonts \
+  lomt-knewave-fonts \
+  lomt-leaguegothic-fonts \
+  lomt-lindenhill-fonts \
+  lomt-orbitron-fonts \
+  lomt-ostrichsans-fonts \
+  lomt-prociono-fonts \
+  lomt-script1-fonts \
+  lomt-sniglet-fonts \
+  lomt-sortsmillgoudy-fonts \
+  lyx-fonts \
+  manchu-fonts \
+  mathgl-fonts \
+  mathjax-ams-fonts \
+  mathjax-caligraphic-fonts \
+  mathjax-fraktur-fonts \
+  mathjax-main-fonts \
+  mathjax-math-fonts \
+  mathjax-sansserif-fonts \
+  mathjax-script-fonts \
+  mathjax-size1-fonts \
+  mathjax-size2-fonts \
+  mathjax-size3-fonts \
+  mathjax-size4-fonts \
+  mathjax-typewriter-fonts \
+  mathjax-winchrome-fonts \
+  mathjax-winie6-fonts \
+  meslo-lg-fonts \
+  mgopen-fonts \
+  miao-fonts \
+  mikachan-fonts \
+  mingzat-fonts \
+  monapo-fonts \
+  mongolian-fonts \
+  motoya-lcedar-fonts \
+  motoya-lmaru-fonts \
+  mplus-code-latin-variable-fonts \
+  mplus-code-latin50-fonts \
+  mplus-code-latin60-fonts \
+  mplus-fonts \
+  mplus1-code-fonts \
+  mplus1-code-variable-fonts \
+  mplus1-fonts \
+  mplus1-variable-fonts \
+  mplus2-fonts \
+  mplus2-variable-fonts \
+  musescore-fonts \
+  namdhinggo-fonts \
+  nanum-fonts \
+  nanum-gothic-coding-fonts \
+  noto-coloremoji-fonts \
+  noto-kufiarabic-fonts \
+  noto-mono-fonts \
+  noto-naskharabic-fonts \
+  noto-naskharabic-ui-fonts \
+  noto-nastaliqurdu-fonts \
+  noto-sans-adlam-fonts \
+  noto-sans-adlamunjoined-fonts \
+  noto-sans-anatolianhieroglyphs-fonts \
+  noto-sans-arabic-fonts \
+  noto-sans-arabic-ui-fonts \
+  noto-sans-armenian-fonts \
+  noto-sans-avestan-fonts \
+  noto-sans-balinese-fonts \
+  noto-sans-bamum-fonts \
+  noto-sans-batak-fonts \
+  noto-sans-bengali-fonts \
+  noto-sans-bengali-ui-fonts \
+  noto-sans-brahmi-fonts \
+  noto-sans-buginese-fonts \
+  noto-sans-buhid-fonts \
+  noto-sans-canadianaboriginal-fonts \
+  noto-sans-carian-fonts \
+  noto-sans-chakma-fonts \
+  noto-sans-cham-fonts \
+  noto-sans-cherokee-fonts \
+  noto-sans-cjk-fonts \
+  noto-sans-coptic-fonts \
+  noto-sans-cuneiform-fonts \
+  noto-sans-cypriot-fonts \
+  noto-sans-deseret-fonts \
+  noto-sans-devanagari-fonts \
+  noto-sans-devanagari-ui-fonts \
+  noto-sans-display-fonts \
+  noto-sans-egyptianhieroglyphs-fonts \
+  noto-sans-ethiopic-fonts \
+  noto-sans-fonts \
+  noto-sans-georgian-fonts \
+  noto-sans-glagolitic-fonts \
+  noto-sans-gothic-fonts \
+  noto-sans-gujarati-fonts \
+  noto-sans-gujarati-ui-fonts \
+  noto-sans-gurmukhi-fonts \
+  noto-sans-gurmukhi-ui-fonts \
+  noto-sans-hanunoo-fonts \
+  noto-sans-hebrew-fonts \
+  noto-sans-imperialaramaic-fonts \
+  noto-sans-inscriptionalpahlavi-fonts \
+  noto-sans-inscriptionalparthian-fonts \
+  noto-sans-javanese-fonts \
+  noto-sans-jp-black-fonts \
+  noto-sans-jp-bold-fonts \
+  noto-sans-jp-demilight-fonts \
+  noto-sans-jp-fonts \
+  noto-sans-jp-light-fonts \
+  noto-sans-jp-medium-fonts \
+  noto-sans-jp-mono-fonts \
+  noto-sans-jp-regular-fonts \
+  noto-sans-jp-thin-fonts \
+  noto-sans-kaithi-fonts \
+  noto-sans-kannada-fonts \
+  noto-sans-kannada-ui-fonts \
+  noto-sans-kayahli-fonts \
+  noto-sans-kharoshthi-fonts \
+  noto-sans-khmer-fonts \
+  noto-sans-khmer-ui-fonts \
+  noto-sans-kr-black-fonts \
+  noto-sans-kr-bold-fonts \
+  noto-sans-kr-demilight-fonts \
+  noto-sans-kr-fonts \
+  noto-sans-kr-light-fonts \
+  noto-sans-kr-medium-fonts \
+  noto-sans-kr-mono-fonts \
+  noto-sans-kr-regular-fonts \
+  noto-sans-kr-thin-fonts \
+  noto-sans-lao-fonts \
+  noto-sans-lao-ui-fonts \
+  noto-sans-lepcha-fonts \
+  noto-sans-limbu-fonts \
+  noto-sans-linearb-fonts \
+  noto-sans-lisu-fonts \
+  noto-sans-lycian-fonts \
+  noto-sans-lydian-fonts \
+  noto-sans-malayalam-fonts \
+  noto-sans-malayalam-ui-fonts \
+  noto-sans-mandaic-fonts \
+  noto-sans-meeteimayek-fonts \
+  noto-sans-mongolian-fonts \
+  noto-sans-mono-fonts \
+  noto-sans-myanmar-fonts \
+  noto-sans-myanmar-ui-fonts \
+  noto-sans-newtailue-fonts \
+  noto-sans-nko-fonts \
+  noto-sans-ogham-fonts \
+  noto-sans-olchiki-fonts \
+  noto-sans-olditalic-fonts \
+  noto-sans-oldpersian-fonts \
+  noto-sans-oldsoutharabian-fonts \
+  noto-sans-oldturkic-fonts \
+  noto-sans-oriya-fonts \
+  noto-sans-oriya-ui-fonts \
+  noto-sans-osage-fonts \
+  noto-sans-osmanya-fonts \
+  noto-sans-phagspa-fonts \
+  noto-sans-phoenician-fonts \
+  noto-sans-rejang-fonts \
+  noto-sans-runic-fonts \
+  noto-sans-samaritan-fonts \
+  noto-sans-saurashtra-fonts \
+  noto-sans-sc-black-fonts \
+  noto-sans-sc-bold-fonts \
+  noto-sans-sc-demilight-fonts \
+  noto-sans-sc-fonts \
+  noto-sans-sc-light-fonts \
+  noto-sans-sc-medium-fonts \
+  noto-sans-sc-mono-fonts \
+  noto-sans-sc-regular-fonts \
+  noto-sans-sc-thin-fonts \
+  noto-sans-shavian-fonts \
+  noto-sans-sinhala-fonts \
+  noto-sans-sinhala-ui-fonts \
+  noto-sans-sundanese-fonts \
+  noto-sans-sylotinagri-fonts \
+  noto-sans-symbols-fonts \
+  noto-sans-symbols2-fonts \
+  noto-sans-syriaceastern-fonts \
+  noto-sans-syriacestrangela-fonts \
+  noto-sans-syriacwestern-fonts \
+  noto-sans-tagalog-fonts \
+  noto-sans-tagbanwa-fonts \
+  noto-sans-taile-fonts \
+  noto-sans-taitham-fonts \
+  noto-sans-taiviet-fonts \
+  noto-sans-tamil-fonts \
+  noto-sans-tamil-ui-fonts \
+  noto-sans-tc-black-fonts \
+  noto-sans-tc-bold-fonts \
+  noto-sans-tc-demilight-fonts \
+  noto-sans-tc-fonts \
+  noto-sans-tc-light-fonts \
+  noto-sans-tc-medium-fonts \
+  noto-sans-tc-mono-fonts \
+  noto-sans-tc-regular-fonts \
+  noto-sans-tc-thin-fonts \
+  noto-sans-telugu-fonts \
+  noto-sans-telugu-ui-fonts \
+  noto-sans-thaana-fonts \
+  noto-sans-thai-fonts \
+  noto-sans-thai-ui-fonts \
+  noto-sans-tibetan-fonts \
+  noto-sans-tifinagh-fonts \
+  noto-sans-ugaritic-fonts \
+  noto-sans-vai-fonts \
+  noto-sans-yi-fonts \
+  noto-serif-armenian-fonts \
+  noto-serif-bengali-fonts \
+  noto-serif-devanagari-fonts \
+  noto-serif-display-fonts \
+  noto-serif-ethiopic-fonts \
+  noto-serif-fonts \
+  noto-serif-georgian-fonts \
+  noto-serif-gujarati-fonts \
+  noto-serif-hebrew-fonts \
+  noto-serif-jp-black-fonts \
+  noto-serif-jp-bold-fonts \
+  noto-serif-jp-extralight-fonts \
+  noto-serif-jp-fonts \
+  noto-serif-jp-light-fonts \
+  noto-serif-jp-medium-fonts \
+  noto-serif-jp-regular-fonts \
+  noto-serif-jp-semibold-fonts \
+  noto-serif-kannada-fonts \
+  noto-serif-khmer-fonts \
+  noto-serif-kr-black-fonts \
+  noto-serif-kr-bold-fonts \
+  noto-serif-kr-extralight-fonts \
+  noto-serif-kr-fonts \
+  noto-serif-kr-light-fonts \
+  noto-serif-kr-medium-fonts \
+  noto-serif-kr-regular-fonts \
+  noto-serif-kr-semibold-fonts \
+  noto-serif-lao-fonts \
+  noto-serif-malayalam-fonts \
+  noto-serif-myanmar-fonts \
+  noto-serif-sc-black-fonts \
+  noto-serif-sc-bold-fonts \
+  noto-serif-sc-extralight-fonts \
+  noto-serif-sc-fonts \
+  noto-serif-sc-light-fonts \
+  noto-serif-sc-medium-fonts \
+  noto-serif-sc-regular-fonts \
+  noto-serif-sc-semibold-fonts \
+  noto-serif-sinhala-fonts \
+  noto-serif-tamil-fonts \
+  noto-serif-tc-black-fonts \
+  noto-serif-tc-bold-fonts \
+  noto-serif-tc-extralight-fonts \
+  noto-serif-tc-fonts \
+  noto-serif-tc-light-fonts \
+  noto-serif-tc-medium-fonts \
+  noto-serif-tc-regular-fonts \
+  noto-serif-tc-semibold-fonts \
+  noto-serif-telugu-fonts \
+  noto-serif-thai-fonts \
+  nuosu-fonts \
+  officecodepro-fonts \
+  opengost-otf-fonts \
+  opengost-ttf-fonts \
+  orkhon-fonts \
+  paglinawan-quicksand-fonts \
+  pagul-fonts \
+  paratype-pt-mono-fonts \
+  paratype-pt-sans-fonts \
+  paratype-pt-serif-fonts \
+  patterns-fonts-fonts \
+  phetsarath-fonts \
+  pothana2000-fonts \
+  powerline-fonts \
+  raleway-fonts \
+  rmit-sansforgetica-fonts \
+  rovasiras-kende-fonts \
+  rovasiras-roga-fonts \
+  saja-cascadia-code-fonts \
+  saweri-fonts \
+  sazanami-fonts \
+  sgi-bitmap-fonts \
+  shannpersand-comicshanns-fonts \
+  sil-abyssinica-fonts \
+  sil-andika-fonts \
+  sil-charis-fonts \
+  sil-doulos-fonts \
+  sil-gentium-fonts \
+  sil-mondulkiri-fonts \
+  sil-padauk-fonts \
+  steinberg-bravura-fonts \
+  stix-fonts \
+  stix-integrals-fonts \
+  stix-pua-fonts \
+  stix-sizes-fonts \
+  stix-variants-fonts \
+  sundanese-unicode-fonts \
+  tagbanwa-fonts \
+  tai-heritage-pro-fonts \
+  terminus-bitmap-fonts \
+  terminus-ttf-fonts \
+  termsyn-bitmap-fonts \
+  texlive-academicons-fonts \
+  texlive-accanthis-fonts \
+  texlive-adforn-fonts \
+  texlive-adfsymbols-fonts \
+  texlive-aesupp-fonts \
+  texlive-alegreya-fonts \
+  texlive-alfaslabone-fonts \
+  texlive-algolrevived-fonts \
+  texlive-alkalami-fonts \
+  texlive-allrunes-fonts \
+  texlive-almendra-fonts \
+  texlive-almfixed-fonts \
+  texlive-amiri-fonts \
+  texlive-amsfonts-fonts \
+  texlive-anonymouspro-fonts \
+  texlive-antiqua-fonts \
+  texlive-antt-fonts \
+  texlive-arabi-fonts \
+  texlive-arabtex-fonts \
+  texlive-aramaic-serto-fonts \
+  texlive-archaic-fonts \
+  texlive-archivo-fonts \
+  texlive-arev-fonts \
+  texlive-arimo-fonts \
+  texlive-armtex-fonts \
+  texlive-arphic-fonts \
+  texlive-arphic-ttf-fonts \
+  texlive-arvo-fonts \
+  texlive-Asana-Math-fonts \
+  texlive-asapsym-fonts \
+  texlive-ascii-font-fonts \
+  texlive-ascmac-fonts \
+  texlive-aspectratio-fonts \
+  texlive-atkinson-fonts \
+  texlive-augie-fonts \
+  texlive-auncial-new-fonts \
+  texlive-aurical-fonts \
+  texlive-avantgar-fonts \
+  texlive-baekmuk-fonts \
+  texlive-bartel-chess-fonts \
+  texlive-baskervald-fonts \
+  texlive-baskervaldx-fonts \
+  texlive-baskervillef-fonts \
+  texlive-bbold-type1-fonts \
+  texlive-belleek-fonts \
+  texlive-bera-fonts \
+  texlive-berenisadf-fonts \
+  texlive-beuron-fonts \
+  texlive-bguq-fonts \
+  texlive-bitter-fonts \
+  texlive-bookhands-fonts \
+  texlive-bookman-fonts \
+  texlive-boondox-fonts \
+  texlive-brushscr-fonts \
+  texlive-burmese-fonts \
+  texlive-cabin-fonts \
+  texlive-caladea-fonts \
+  texlive-calligra-type1-fonts \
+  texlive-cantarell-fonts \
+  texlive-carlito-fonts \
+  texlive-carolmin-ps-fonts \
+  texlive-cascadia-code-fonts \
+  texlive-cbcoptic-fonts \
+  texlive-cbfonts-fonts \
+  texlive-cc-pl-fonts \
+  texlive-ccicons-fonts \
+  texlive-charissil-fonts \
+  texlive-charter-fonts \
+  texlive-chemarrow-fonts \
+  texlive-chivo-fonts \
+  texlive-cinzel-fonts \
+  texlive-cjhebrew-fonts \
+  texlive-clara-fonts \
+  texlive-clearsans-fonts \
+  texlive-cm-lgc-fonts \
+  texlive-cm-super-fonts \
+  texlive-cm-unicode-fonts \
+  texlive-cmathbb-fonts \
+  texlive-cmcyr-fonts \
+  texlive-cmexb-fonts \
+  texlive-cmll-fonts \
+  texlive-cmsrb-fonts \
+  texlive-cmupint-fonts \
+  texlive-cochineal-fonts \
+  texlive-coelacanth-fonts \
+  texlive-comfortaa-fonts \
+  texlive-comicneue-fonts \
+  texlive-concmath-fonts \
+  texlive-context-fonts \
+  texlive-cormorantgaramond-fonts \
+  texlive-countriesofeurope-fonts \
+  texlive-courier-fonts \
+  texlive-courierten-fonts \
+  texlive-crimson-fonts \
+  texlive-crimsonpro-fonts \
+  texlive-cryst-fonts \
+  texlive-cs-fonts \
+  texlive-cuprum-fonts \
+  texlive-cyklop-fonts \
+  texlive-dad-fonts \
+  texlive-dantelogo-fonts \
+  texlive-dejavu-fonts \
+  texlive-dictsym-fonts \
+  texlive-domitian-fonts \
+  texlive-doublestroke-fonts \
+  texlive-doulossil-fonts \
+  texlive-dozenal-fonts \
+  texlive-drm-fonts \
+  texlive-droid-fonts \
+  texlive-dsserif-fonts \
+  texlive-dutchcal-fonts \
+  texlive-ebgaramond-fonts \
+  texlive-eczar-fonts \
+  texlive-ektype-tanka-fonts \
+  texlive-electrum-fonts \
+  texlive-epigrafica-fonts \
+  texlive-epiolmec-fonts \
+  texlive-erewhon-fonts \
+  texlive-erewhon-math-fonts \
+  texlive-esint-type1-fonts \
+  texlive-esrelation-fonts \
+  texlive-esstix-fonts \
+  texlive-esvect-fonts \
+  texlive-etbb-fonts \
+  texlive-ethiop-t1-fonts \
+  texlive-eurosym-fonts \
+  texlive-fandol-fonts \
+  texlive-fbb-fonts \
+  texlive-fdsymbol-fonts \
+  texlive-fetamont-fonts \
+  texlive-fge-fonts \
+  texlive-figbas-fonts \
+  texlive-fira-fonts \
+  texlive-firamath-fonts \
+  texlive-foekfont-fonts \
+  texlive-fonetika-fonts \
+  texlive-fontawesome-fonts \
+  texlive-fontawesome5-fonts \
+  texlive-fontmfizz-fonts \
+  texlive-fonts-churchslavonic-fonts \
+  texlive-fonts-tlwg-fonts \
+  texlive-forum-fonts \
+  texlive-fourier-fonts \
+  texlive-fpl-fonts \
+  texlive-frcursive-fonts \
+  texlive-frederika2016-fonts \
+  texlive-frimurer-fonts \
+  texlive-garamond-libre-fonts \
+  texlive-garamond-math-fonts \
+  texlive-gentium-tug-fonts \
+  texlive-gfsartemisia-fonts \
+  texlive-gfsbaskerville-fonts \
+  texlive-gfsbodoni-fonts \
+  texlive-gfscomplutum-fonts \
+  texlive-gfsdidot-fonts \
+  texlive-gfsdidotclassic-fonts \
+  texlive-gfsneohellenic-fonts \
+  texlive-gfsneohellenicmath-fonts \
+  texlive-gfsporson-fonts \
+  texlive-gfssolomos-fonts \
+  texlive-gillius-fonts \
+  texlive-gnu-freefont-fonts \
+  texlive-gofonts-fonts \
+  texlive-gregoriotex-fonts \
+  texlive-grotesq-fonts \
+  texlive-gudea-fonts \
+  texlive-hacm-fonts \
+  texlive-haranoaji-extra-fonts \
+  texlive-haranoaji-fonts \
+  texlive-helmholtz-ellis-ji-notation-fonts \
+  texlive-helvetic-fonts \
+  texlive-heuristica-fonts \
+  texlive-hfbright-fonts \
+  texlive-hindmadurai-fonts \
+  texlive-hmtrump-fonts \
+  texlive-ibarra-fonts \
+  texlive-ibygrk-fonts \
+  texlive-imfellenglish-fonts \
+  texlive-inconsolata-fonts \
+  texlive-initials-fonts \
+  texlive-inriafonts-fonts \
+  texlive-inter-fonts \
+  texlive-ipaex-fonts \
+  texlive-ipaex-type1-fonts \
+  texlive-iwona-fonts \
+  texlive-jmn-fonts \
+  texlive-josefin-fonts \
+  texlive-junicode-fonts \
+  texlive-kerkis-fonts \
+  texlive-knitting-fonts \
+  texlive-kpfonts-fonts \
+  texlive-kpfonts-otf-fonts \
+  texlive-kurier-fonts \
+  texlive-latex-fonts \
+  texlive-lato-fonts \
+  texlive-lexend-fonts \
+  texlive-libertine-fonts \
+  texlive-libertinus-fonts \
+  texlive-libertinus-fonts-fonts \
+  texlive-libertinus-type1-fonts \
+  texlive-libertinust1math-fonts \
+  texlive-librebaskerville-fonts \
+  texlive-librebodoni-fonts \
+  texlive-librecaslon-fonts \
+  texlive-librefranklin-fonts \
+  texlive-libris-fonts \
+  texlive-lilyglyphs-fonts \
+  texlive-linearA-fonts \
+  texlive-linguisticspro-fonts \
+  texlive-lm-fonts \
+  texlive-lm-math-fonts \
+  texlive-lobster2-fonts \
+  texlive-logix-fonts \
+  texlive-lxfonts-fonts \
+  texlive-magra-fonts \
+  texlive-manfnt-font-fonts \
+  texlive-marcellus-fonts \
+  texlive-marvosym-fonts \
+  texlive-mathabx-type1-fonts \
+  texlive-mathdesign-fonts \
+  texlive-mathpazo-fonts \
+  texlive-mdsymbol-fonts \
+  texlive-merriweather-fonts \
+  texlive-metapost-fonts \
+  texlive-mflogo-font-fonts \
+  texlive-miama-fonts \
+  texlive-mintspirit-fonts \
+  texlive-missaali-fonts \
+  texlive-mlmodern-fonts \
+  texlive-mnsymbol-fonts \
+  texlive-montex-fonts \
+  texlive-montserrat-fonts \
+  texlive-musixtex-fonts \
+  texlive-musixtex-fonts-fonts \
+  texlive-mxedruli-fonts \
+  texlive-nanumtype1-fonts \
+  texlive-ncntrsbk-fonts \
+  texlive-newcomputermodern-fonts \
+  texlive-newpx-fonts \
+  texlive-newtx-fonts \
+  texlive-newtxsf-fonts \
+  texlive-newtxtt-fonts \
+  texlive-niceframe-type1-fonts \
+  texlive-nimbus15-fonts \
+  texlive-noto-emoji-fonts \
+  texlive-noto-fonts \
+  texlive-notomath-fonts \
+  texlive-novel-fonts \
+  texlive-nunito-fonts \
+  texlive-ocherokee-fonts \
+  texlive-ocr-b-outline-fonts \
+  texlive-oinuit-fonts \
+  texlive-old-arrows-fonts \
+  texlive-oldstandard-fonts \
+  texlive-omega-fonts \
+  texlive-opensans-fonts \
+  texlive-oswald-fonts \
+  texlive-overlock-fonts \
+  texlive-padauk-fonts \
+  texlive-palatino-fonts \
+  texlive-paratype-fonts \
+  texlive-pdftex-fonts \
+  texlive-phaistos-fonts \
+  texlive-philokalia-fonts \
+  texlive-pigpen-fonts \
+  texlive-pl-fonts \
+  texlive-playfair-fonts \
+  texlive-plex-fonts \
+  texlive-plimsoll-fonts \
+  texlive-poiretone-fonts \
+  texlive-poltawski-fonts \
+  texlive-prodint-fonts \
+  texlive-ptex-fonts \
+  texlive-punknova-fonts \
+  texlive-pxfonts-fonts \
+  texlive-qualitype-fonts \
+  texlive-quattrocento-fonts \
+  texlive-raleway-fonts \
+  texlive-recycle-fonts \
+  texlive-roboto-fonts \
+  texlive-rojud-fonts \
+  texlive-romande-fonts \
+  texlive-rosario-fonts \
+  texlive-rsfs-fonts \
+  texlive-sanskrit-t1-fonts \
+  texlive-sansmathfonts-fonts \
+  texlive-scanpages-fonts \
+  texlive-scholax-fonts \
+  texlive-semaphor-fonts \
+  texlive-shobhika-fonts \
+  texlive-skaknew-fonts \
+  texlive-sourcecodepro-fonts \
+  texlive-sourcesanspro-fonts \
+  texlive-sourceserifpro-fonts \
+  texlive-spectral-fonts \
+  texlive-starfont-fonts \
+  texlive-staves-fonts \
+  texlive-step-fonts \
+  texlive-stepgreek-fonts \
+  texlive-stickstoo-fonts \
+  texlive-stix-fonts \
+  texlive-stix2-otf-fonts \
+  texlive-stix2-type1-fonts \
+  texlive-stmaryrd-fonts \
+  texlive-superiors-fonts \
+  texlive-svrsymbols-fonts \
+  texlive-symbol-fonts \
+  texlive-tabvar-fonts \
+  texlive-tapir-fonts \
+  texlive-tempora-fonts \
+  texlive-tex-gyre-fonts \
+  texlive-tex-gyre-math-fonts \
+  texlive-tfrupee-fonts \
+  texlive-theanodidot-fonts \
+  texlive-theanomodern-fonts \
+  texlive-theanooldstyle-fonts \
+  texlive-times-fonts \
+  texlive-tinos-fonts \
+  texlive-tipa-fonts \
+  texlive-trajan-fonts \
+  texlive-twemoji-colr-fonts \
+  texlive-txfonts-fonts \
+  texlive-txfontsb-fonts \
+  texlive-txuprcal-fonts \
+  texlive-typicons-fonts \
+  texlive-uhc-fonts \
+  texlive-umtypewriter-fonts \
+  texlive-unfonts-core-fonts \
+  texlive-unfonts-extra-fonts \
+  texlive-universalis-fonts \
+  texlive-uptex-fonts \
+  texlive-utopia-fonts \
+  texlive-velthuis-fonts \
+  texlive-venturisadf-fonts \
+  texlive-vntex-fonts \
+  texlive-wadalab-fonts \
+  texlive-wasy-type1-fonts \
+  texlive-xcharter-fonts \
+  texlive-xits-fonts \
+  texlive-xypic-fonts \
+  texlive-yfonts-t1-fonts \
+  texlive-yhmath-fonts \
+  texlive-yinit-otf-fonts \
+  texlive-zapfchan-fonts \
+  texlive-zapfding-fonts \
+  thai-fonts \
+  thessalonica-oldstandard-otf-fonts \
+  thessalonica-oldstandard-ttf-fonts \
+  thessalonica-tempora-lgc-otf-fonts \
+  thessalonica-tempora-lgc-ttf-fonts \
+  thessalonica-theano-otf-fonts \
+  thessalonica-theano-ttf-fonts \
+  thryomanes-fonts \
+  tibetan-machine-uni-fonts \
+  tiro-bangla-fonts \
+  tiro-devahindi-fonts \
+  tiro-devamarathi-fonts \
+  tiro-devasanskrit-fonts \
+  tiro-gurmukhi-fonts \
+  tiro-indigo-fonts \
+  tiro-kannada-fonts \
+  tiro-tamil-fonts \
+  tiro-telugu-fonts \
+  tuladha-jejeg-fonts \
+  tv-fonts \
+  ubuntu-fonts \
+  un-fonts \
+  unifraktur-fonts \
+  vlgothic-fonts \
+  vollkorn-fonts \
+  wang-fonts \
+  wqy-bitmap-fonts \
+  wqy-microhei-fonts \
+  wqy-zenhei-fonts \
+  x11-japanese-bitmap-fonts \
+  xano-mincho-fonts \
+  xorg-x11-fonts
 
 WORKDIR /app
 

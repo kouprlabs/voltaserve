@@ -11,8 +11,7 @@ RUN go build -o voltaserve-tools
 
 FROM rockylinux:9.2 AS runner
 
-RUN dnf install -y tesseract
-RUN dnf install -y wget
+RUN dnf install -y wget tesseract
 
 WORKDIR /usr/share/tesseract/tessdata
 
