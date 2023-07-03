@@ -42,7 +42,7 @@ WORKDIR /app
 
 RUN dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
 RUN dnf install -y pngquant unpaper
-RUN pip3 install ocrmypdf
+RUN pip3 install ocrmypdf==14.3.0
 
 COPY --from=builder /build/voltaserve-tools ./voltaserve-tools
 COPY --from=builder /build/.env ./.env

@@ -11,7 +11,7 @@ RUN go build -o voltaserve-tools
 
 FROM opensuse/leap:15.5 AS runner
 
-RUN zypper install -y python311
+RUN zypper install -y clang gcc gcc-c++ python311 python311-pip python311-devel
 
 RUN zypper install -y \
   tesseract-ocr \
