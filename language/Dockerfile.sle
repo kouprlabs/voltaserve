@@ -4,7 +4,7 @@ WORKDIR /app
 
 COPY . .
 
-RUN zypper install -y clang python311 python311-devel
+RUN zypper install -y clang gcc gcc-c++ python311 python311-pip python311-devel
 
 RUN pip3 install micropipenv
 
