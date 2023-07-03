@@ -2,7 +2,7 @@
 
 ## Getting Started
 
-### Docker
+### Run Infrastructure Services With Docker
 
 Duplicate the file `./conversion/.env`, and rename it to `./conversion/.env.local`.
 
@@ -35,7 +35,7 @@ docker compose up -d \
     tesseract
 ```
 
-### SLE / openSUSE Leap
+### Run Infrastructure Services With SLE / openSUSE Leap
 
 Supported operating systems:
 
@@ -60,7 +60,7 @@ Stop infrastructure services:
 curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/$(git symbolic-ref --short HEAD 2>/dev/null || echo 'main')/scripts/sle/start.sh?t=$(date +%s)" | sh -s
 ```
 
-### RHEL
+### Run Infrastructure Services With RHEL
 
 Supported operating systems:
 
@@ -87,7 +87,7 @@ Stop infrastructure services:
 curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/$(git symbolic-ref --short HEAD 2>/dev/null || echo 'main')/scripts/rhel/stop.sh?t=$(date +%s)" | sh -s
 ```
 
-### Microservices
+### Run Microservices
 
 Start each microservice separately in a new terminal as described here:
 
