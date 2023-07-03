@@ -6,14 +6,14 @@ COPY . .
 
 RUN zypper install -y clang python311 python311-devel
 
-RUN pip3 install --user --upgrade pipenv
+RUN pip3 install micropipenv
 
-ENV PATH="/root/.local/bin:${PATH}"
+RUN micropipenv install
 
-RUN pipenv install
+RUN python3.11 -m spacy download xx_ent_wiki_sm
 
 ENV FLASK_APP=server.py
 
-ENTRYPOINT ["pipenv", "run", "flask", "run", "--host=0.0.0.0", "--port=5002"]
+ENTRYPOINT ["flask", "run", "--host=0.0.0.0", "--port=5002"]
 
 EXPOSE 5002/tcp

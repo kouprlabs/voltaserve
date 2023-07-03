@@ -4,8 +4,7 @@ WORKDIR /build
 
 COPY . .
 
-RUN zypper install -y git
-RUN zypper install -y go1.20
+RUN zypper install -y git go1.20
 
 RUN go mod download
 RUN go build -o voltaserve-tools
@@ -14,27 +13,26 @@ FROM opensuse/leap:15.5 AS runner
 
 RUN zypper install -y python311
 
-RUN zypper install -y tesseract-ocr
-RUN zypper install -y tesseract-ocr-traineddata-osd
-RUN zypper install -y tesseract-ocr-traineddata-eng
-RUN zypper install -y tesseract-ocr-traineddata-deu
-RUN zypper install -y tesseract-ocr-traineddata-fra
-RUN zypper install -y tesseract-ocr-traineddata-nld
-RUN zypper install -y tesseract-ocr-traineddata-ita
-RUN zypper install -y tesseract-ocr-traineddata-spa
-RUN zypper install -y tesseract-ocr-traineddata-por
-RUN zypper install -y tesseract-ocr-traineddata-swe
-RUN zypper install -y tesseract-ocr-traineddata-fin
-RUN zypper install -y tesseract-ocr-traineddata-jpn
-RUN zypper install -y tesseract-ocr-traineddata-chi_sim
-RUN zypper install -y tesseract-ocr-traineddata-chi_tra
-RUN zypper install -y tesseract-ocr-traineddata-hin
-RUN zypper install -y tesseract-ocr-traineddata-rus
-RUN zypper install -y tesseract-ocr-traineddata-ara
+RUN zypper install -y \
+  tesseract-ocr \
+  tesseract-ocr-traineddata-osd \
+  tesseract-ocr-traineddata-eng \
+  tesseract-ocr-traineddata-deu \
+  tesseract-ocr-traineddata-fra \
+  tesseract-ocr-traineddata-nld \
+  tesseract-ocr-traineddata-ita \
+  tesseract-ocr-traineddata-spa \
+  tesseract-ocr-traineddata-por \
+  tesseract-ocr-traineddata-swe \
+  tesseract-ocr-traineddata-fin \
+  tesseract-ocr-traineddata-jpn \
+  tesseract-ocr-traineddata-chi_sim \
+  tesseract-ocr-traineddata-chi_tra \
+  tesseract-ocr-traineddata-hin \
+  tesseract-ocr-traineddata-rus \
+  tesseract-ocr-traineddata-ara
 
-RUN zypper install -y ghostscript
-RUN zypper install -y unpaper
-RUN zypper install -y pngquant
+RUN zypper install -y ghostscript unpaper pngquant
 
 RUN pip3 install ocrmypdf==14.3.0
 

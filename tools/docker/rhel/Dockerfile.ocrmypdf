@@ -11,11 +11,12 @@ RUN go build -o voltaserve-tools
 
 FROM rockylinux:9.2 AS runner
 
-RUN dnf install -y wget
-RUN dnf install -y python3
-RUN dnf install -y python3-pip
-RUN dnf install -y ghostscript
-RUN dnf install -y tesseract
+RUN dnf install -y \
+  wget \
+  python3 \
+  python3-pip \
+  ghostscript \
+  tesseract
 
 WORKDIR /usr/share/tesseract/tessdata
 
@@ -40,8 +41,7 @@ RUN wget https://github.com/tesseract-ocr/tessdata/raw/4.1.0/ara.traineddata
 WORKDIR /app
 
 RUN dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
-RUN dnf install -y pngquant
-RUN dnf install -y unpaper
+RUN dnf install -y pngquant unpaper
 RUN pip3 install ocrmypdf
 
 COPY --from=builder /build/voltaserve-tools ./voltaserve-tools

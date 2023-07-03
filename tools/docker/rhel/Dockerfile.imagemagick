@@ -12,8 +12,7 @@ RUN go build -o voltaserve-tools
 FROM rockylinux:9.2 AS runner
 
 RUN dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
-RUN dnf install -y ghostscript
-RUN dnf install -y ImageMagick
+RUN dnf install -y ghostscript ImageMagick
 
 WORKDIR /app
 
