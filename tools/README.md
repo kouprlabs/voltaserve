@@ -21,61 +21,61 @@ go build .
 #### Build SLE / openSUSE Leap Docker Images
 
 ```shell
-docker build -t voltaserve/exiftool -f ./docker/sle/Dockerfile.exiftool .
+docker build -t voltaserve/exiftool:sle -f ./docker/sle/Dockerfile.exiftool .
 ```
 
 ```shell
-docker build -t voltaserve/ffmpeg -f ./docker/sle/Dockerfile.ffmpeg .
+docker build -t voltaserve/ffmpeg:sle -f ./docker/sle/Dockerfile.ffmpeg .
 ```
 
 ```shell
-docker build -t voltaserve/imagemagick -f ./docker/sle/Dockerfile.imagemagick .
+docker build -t voltaserve/imagemagick:sle -f ./docker/sle/Dockerfile.imagemagick .
 ```
 
 ```shell
-docker build -t voltaserve/libreoffice -f ./docker/sle/Dockerfile.libreoffice .
+docker build -t voltaserve/libreoffice:sle -f ./docker/sle/Dockerfile.libreoffice .
 ```
 
 ```shell
-docker build -t voltaserve/ocrmypdf -f ./docker/sle/Dockerfile.ocrmypdf .
+docker build -t voltaserve/ocrmypdf:sle -f ./docker/sle/Dockerfile.ocrmypdf .
 ```
 
 ```shell
-docker build -t voltaserve/poppler -f ./docker/sle/Dockerfile.poppler .
+docker build -t voltaserve/poppler:sle -f ./docker/sle/Dockerfile.poppler .
 ```
 
 ```shell
-docker build -t voltaserve/tesseract -f D./docker/sle/ockerfile.tesseract .
+docker build -t voltaserve/tesseract:sle -f D./docker/sle/ockerfile.tesseract .
 ```
 
 #### Build RHEL Docker Images
 
 ```shell
-docker build -t voltaserve/exiftool -f ./docker/rhel/Dockerfile.exiftool .
+docker build -t voltaserve/exiftool:rhel -f ./docker/rhel/Dockerfile.exiftool .
 ```
 
 ```shell
-docker build -t voltaserve/ffmpeg -f ./docker/rhel/Dockerfile.ffmpeg .
+docker build -t voltaserve/ffmpeg:rhel -f ./docker/rhel/Dockerfile.ffmpeg .
 ```
 
 ```shell
-docker build -t voltaserve/imagemagick -f ./docker/rhel/Dockerfile.imagemagick .
+docker build -t voltaserve/imagemagick:rhel -f ./docker/rhel/Dockerfile.imagemagick .
 ```
 
 ```shell
-docker build -t voltaserve/libreoffice -f ./docker/rhel/Dockerfile.libreoffice .
+docker build -t voltaserve/libreoffice:rhel -f ./docker/rhel/Dockerfile.libreoffice .
 ```
 
 ```shell
-docker build -t voltaserve/ocrmypdf -f ./docker/rhel/Dockerfile.ocrmypdf .
+docker build -t voltaserve/ocrmypdf:rhel -f ./docker/rhel/Dockerfile.ocrmypdf .
 ```
 
 ```shell
-docker build -t voltaserve/poppler -f ./docker/rhel/Dockerfile.poppler .
+docker build -t voltaserve/poppler:rhel -f ./docker/rhel/Dockerfile.poppler .
 ```
 
 ```shell
-docker build -t voltaserve/tesseract -f D./docker/rhel/ockerfile.tesseract .
+docker build -t voltaserve/tesseract:rhel -f D./docker/rhel/ockerfile.tesseract .
 ```
 
 ### Example Requests
