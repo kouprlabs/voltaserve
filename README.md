@@ -10,13 +10,7 @@ Install [Docker](https://docs.docker.com/get-docker) and [Docker Compose](https:
 
 Alternatively, you can instead install [Podman](https://podman.io) and [Podman Compose](https://github.com/containers/podman-compose#installation).
 
-1. Build images:
-
-```shell
-docker compose build
-```
-
-2. Run:
+Run:
 
 ```shell
 docker compose up -d
@@ -54,7 +48,7 @@ To connect you can use [WinSCP](https://winscp.net) on Windows, [Cyberduck](http
 
 ### Base Images
 
-Voltaserve's Docker images can be built on the following base images:
+Voltaserve's Docker images supports the following base images:
 
 - `sle`: SUSE Enterprise Linux / openSUSE Leap
 - `rhel`: Red Hat Enterprise Linux
@@ -67,7 +61,13 @@ The default value is `sle`, if you would like to change it to `rhel`, you can do
 export VOLTASERVE_BASE_IMAGE="rhel"
 ```
 
-Then build the Docker images:
+You can now download and run `rhel` based Voltaserve containers:
+
+```shell
+docker compose up -d
+```
+
+Or build the Docker images locally:
 
 ```shell
 docker compose build
