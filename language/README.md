@@ -22,19 +22,27 @@ Activate environment:
 pipenv shell
 ```
 
-Download spaCy model on SLE / openSUSE Leap:
+### Download spaCy
+
+On SLE / openSUSE Leap:
 
 ```shell
 python3.11 -m spacy download xx_ent_wiki_sm
 ```
 
-Download spaCy model on RHEL:
+On RHEL:
 
 ```shell
 python -m spacy download xx_ent_wiki_sm
 ```
 
-Run for development:
+On other systems, including macOS and Windows:
+
+```shell
+python3 -m spacy download xx_ent_wiki_sm
+```
+
+### Run for Development
 
 ```shell
 FLASK_APP=server.py flask run --host=0.0.0.0 --port=5002 --debug
