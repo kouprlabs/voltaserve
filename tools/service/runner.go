@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+	"time"
 	"voltaserve/core"
 	"voltaserve/helper"
 	"voltaserve/infra"
@@ -75,20 +76,25 @@ func (r *Runner) Run(inputPath string, opts core.RunOptions) (outputFile string,
 	}
 	cmd := infra.NewCommand()
 	if opts.Stdout {
+		start := time.Now()
 		stdout, err := cmd.ReadOutput(opts.Bin, opts.Args...)
+		elapsed := time.Since(start)
 		if err != nil {
-			r.logger.Named(StrRunner).Errorw("⛈️  failed", "bin", opts.Bin, "args", opts.Args, "error", "stdout", stdout, err.Error())
+			r.logger.Named(StrRunner).Errorw("⛈️  failed", "bin", opts.Bin, "args", opts.Args, "elapsed", elapsed, "error", "stdout", stdout, err.Error())
 			return "", stdout, err
 		} else {
-			r.logger.Named(StrRunner).Infow("🎉  succeeded", "bin", opts.Bin, "args", opts.Args, "stdout", stdout)
+			r.logger.Named(StrRunner).Infow("🎉  succeeded", "bin", opts.Bin, "args", opts.Args, "elapsed", elapsed, "stdout", stdout)
 			return outputFile, stdout, nil
 		}
 	} else {
-		if err := cmd.Exec(opts.Bin, opts.Args...); err != nil {
-			r.logger.Named(StrRunner).Errorw("⛈️  failed", "bin", opts.Bin, "args", opts.Args, "error", err.Error())
+		start := time.Now()
+		err := cmd.Exec(opts.Bin, opts.Args...)
+		elapsed := time.Since(start)
+		if err != nil {
+			r.logger.Named(StrRunner).Errorw("⛈️  failed", "bin", opts.Bin, "args", opts.Args, "elapsed", elapsed, "error", err.Error())
 			return "", "", err
 		} else {
-			r.logger.Named(StrRunner).Infow("🎉  succeeded", "bin", opts.Bin, "args", opts.Args)
+			r.logger.Named(StrRunner).Infow("🎉  succeeded", "bin", opts.Bin, "args", opts.Args, "elapsed", elapsed)
 			return outputFile, "", err
 		}
 	}
