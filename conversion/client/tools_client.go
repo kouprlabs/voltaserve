@@ -592,24 +592,24 @@ func (c *ToolsClient) OCRFromPDF(inputPath string, language *string, dpi *int) (
 	return outputPath, nil
 }
 
-func (c *ToolsClient) TextFromPDF(inputPath string) (string, int64, error) {
+func (c *ToolsClient) TextFromPDF(inputPath string) (string, error) {
 	file, err := os.Open(inputPath)
 	if err != nil {
-		return "", -1, err
+		return "", err
 	}
 	defer file.Close()
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 	fileField, err := writer.CreateFormFile("file", inputPath)
 	if err != nil {
-		return "", -1, err
+		return "", err
 	}
 	if _, err := io.Copy(fileField, file); err != nil {
-		return "", -1, err
+		return "", err
 	}
 	jsonField, err := writer.CreateFormField("json")
 	if err != nil {
-		return "", -1, err
+		return "", err
 	}
 	jsonData := map[string]interface{}{
 		"bin":    "pdftotext",
@@ -618,48 +618,48 @@ func (c *ToolsClient) TextFromPDF(inputPath string) (string, int64, error) {
 	}
 	jsonBytes, err := json.Marshal(jsonData)
 	if err != nil {
-		return "", -1, err
+		return "", err
 	}
 	if _, err := jsonField.Write(jsonBytes); err != nil {
-		return "", -1, err
+		return "", err
 	}
 	writer.Close()
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", c.config.PopplerURL, c.config.Security.APIKey), body)
 	if err != nil {
-		return "", -1, err
+		return "", err
 	}
 	req.Header.Set("Content-Type", writer.FormDataContentType())
 	client := &http.Client{}
 	res, err := client.Do(req)
 	if err != nil {
-		return "", -1, err
+		return "", err
 	}
 	defer res.Body.Close()
 	if res.StatusCode != http.StatusOK {
-		return "", -1, fmt.Errorf("request failed with status %d", res.StatusCode)
+		return "", fmt.Errorf("request failed with status %d", res.StatusCode)
 	}
 	outputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID())
 	outputFile, err := os.Create(outputPath)
 	if err != nil {
-		return "", -1, err
+		return "", err
 	}
 	defer outputFile.Close()
 	_, err = io.Copy(outputFile, res.Body)
 	if err != nil {
-		return "", -1, err
+		return "", err
 	}
 	text := ""
 	if _, err := os.Stat(outputPath); err == nil {
 		b, err := os.ReadFile(outputPath)
 		if err != nil {
-			return "", 0, err
+			return "", err
 		}
 		if err := os.Remove(outputPath); err != nil {
-			return "", 0, err
+			return "", err
 		}
 		text = strings.TrimSpace(string(b))
-		return text, int64(len(b)), nil
+		return text, nil
 	} else {
-		return "", 0, err
+		return "", err
 	}
 }

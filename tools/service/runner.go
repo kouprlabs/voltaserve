@@ -71,8 +71,9 @@ func (r *Runner) Run(inputPath string, opts core.RunOptions) (outputPath string,
 		}
 	}
 	cmd := infra.NewCommand()
+	r.logger.Named(StrRunner).Infow("🔨  working", "bin", opts.Bin, "args", opts.Args)
+	start := time.Now()
 	if opts.Stdout {
-		start := time.Now()
 		stdout, err := cmd.ReadOutput(opts.Bin, opts.Args...)
 		elapsed := time.Since(start)
 		if err != nil {
@@ -83,7 +84,6 @@ func (r *Runner) Run(inputPath string, opts core.RunOptions) (outputPath string,
 			return outputPath, stdout, nil
 		}
 	} else {
-		start := time.Now()
 		err := cmd.Exec(opts.Bin, opts.Args...)
 		elapsed := time.Since(start)
 		if err != nil {

@@ -7,6 +7,7 @@ type PipelineOptions struct {
 	Key            string  `json:"key"`
 	Language       *string `json:"language,omitempty"`
 	TesseractModel *string `json:"tesseractModel,omitempty"`
+	Text           *string `json:"text,omitempty"`
 }
 
 type PipelineResponse struct {

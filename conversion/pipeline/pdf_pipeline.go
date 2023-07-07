@@ -42,11 +42,14 @@ func (p *pdfPipeline) Run(opts core.PipelineOptions) error {
 		return err
 	}
 	res := core.PipelineResponse{
-		Options: opts,
+		Options:  opts,
+		Language: opts.Language,
 	}
-	var model *string = opts.TesseractModel
-	var lang *string = opts.Language
 	var dpi *int
+	var text string
+	if opts.Text != nil {
+		text = *opts.Text
+	}
 	if p.fileIdentifier.IsImage(inputPath) {
 		newInputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(inputPath))
 		if err := p.toolsClient.RemoveAlphaChannel(inputPath, newInputPath); err != nil {
@@ -63,39 +66,33 @@ func (p *pdfPipeline) Run(opts core.PipelineOptions) error {
 		} else {
 			dpi = &imageDPI
 		}
-	} else if p.fileIdentifier.IsPDF(inputPath) {
-		text, size, err := p.toolsClient.TextFromPDF(inputPath)
-		if err != nil {
+	} else if p.fileIdentifier.IsPDF(inputPath) && text == "" {
+		if pdfText, err := p.toolsClient.TextFromPDF(inputPath); err != nil {
 			return err
-		}
-		if len(text) > 0 {
-			if lang == nil {
-				langDetect, err := p.languageClient.Detect(text)
-				if err == nil {
-					lang = &langDetect.Language
-				}
-			}
-			s3Object := core.S3Object{
-				Bucket: opts.Bucket,
-				Key:    opts.FileID + "/" + opts.SnapshotID + "/text.txt",
-				Size:   size,
-			}
-			if err := p.s3.PutText(s3Object.Key, text, "text/plain", s3Object.Bucket); err != nil {
-				return err
-			}
-			res.Text = &s3Object
-			if err := p.apiClient.UpdateSnapshot(&res); err != nil {
-				return err
-			}
+		} else {
+			text = pdfText
 		}
 	}
-	if lang != nil {
-		res.Language = lang
-		if err := p.apiClient.UpdateSnapshot(&res); err != nil {
+	if text != "" {
+		if res.Language == nil {
+			if langDetect, err := p.languageClient.Detect(text); err == nil {
+				res.Language = &langDetect.Language
+			}
+		}
+		s3Object := core.S3Object{
+			Bucket: opts.Bucket,
+			Key:    opts.FileID + "/" + opts.SnapshotID + "/text.txt",
+			Size:   int64(len(text)),
+		}
+		if err := p.s3.PutText(s3Object.Key, text, "text/plain", s3Object.Bucket); err != nil {
 			return err
 		}
+		res.Text = &s3Object
 	}
-	newInputPath, _ := p.toolsClient.OCRFromPDF(inputPath, model, dpi)
+	if err := p.apiClient.UpdateSnapshot(&res); err != nil {
+		return err
+	}
+	newInputPath, _ := p.toolsClient.OCRFromPDF(inputPath, opts.TesseractModel, dpi)
 	if stat, err := os.Stat(newInputPath); err == nil {
 		if err := os.Remove(inputPath); err != nil {
 			return err

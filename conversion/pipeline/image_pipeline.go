@@ -79,10 +79,7 @@ func (p *imagePipeline) Run(opts core.PipelineOptions) error {
 		/* We treat it as a text image, we convert it to PDF/A */
 		opts.Language = &imageData.Language
 		opts.TesseractModel = &imageData.Model
-		res.Language = &imageData.Language
-		if err := p.apiClient.UpdateSnapshot(&res); err != nil {
-			return err
-		}
+		opts.Text = &imageData.Text
 		if err := p.pdfPipeline.Run(opts); err != nil {
 			/*
 				Here we intentionally ignore the error, here is the explanation why:
