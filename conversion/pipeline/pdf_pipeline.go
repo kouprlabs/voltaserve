@@ -44,6 +44,7 @@ func (p *pdfPipeline) Run(opts core.PipelineOptions) error {
 	res := core.PipelineResponse{
 		Options: opts,
 	}
+	var model *string = opts.TesseractModel
 	var lang *string = opts.Language
 	var dpi *int
 	if p.fileIdentifier.IsImage(inputPath) {
@@ -94,7 +95,7 @@ func (p *pdfPipeline) Run(opts core.PipelineOptions) error {
 			return err
 		}
 	}
-	newInputPath, _ := p.toolsClient.OCRFromPDF(inputPath, lang, dpi)
+	newInputPath, _ := p.toolsClient.OCRFromPDF(inputPath, model, dpi)
 	if stat, err := os.Stat(newInputPath); err == nil {
 		if err := os.Remove(inputPath); err != nil {
 			return err
