@@ -758,12 +758,14 @@ func (r *FileRouter) GetGroupPermissions(c *fiber.Ctx) error {
 }
 
 type FileDownloadRouter struct {
-	fileSvc *service.FileService
+	fileSvc               *service.FileService
+	accessTokenCookieName string
 }
 
 func NewFileDownloadRouter() *FileDownloadRouter {
 	return &FileDownloadRouter{
-		fileSvc: service.NewFileService(),
+		fileSvc:               service.NewFileService(),
+		accessTokenCookieName: "voltaserve_access_token",
 	}
 }
 
@@ -786,9 +788,12 @@ func (r *FileDownloadRouter) AppendRoutes(g fiber.Router) {
 //	@Failure		500				{object}	errorpkg.ErrorResponse
 //	@Router			/files/{id}/original{ext} [get]
 func (r *FileDownloadRouter) DownloadOriginal(c *fiber.Ctx) error {
-	accessToken := c.Query("access_token")
+	accessToken := c.Cookies(r.accessTokenCookieName)
 	if accessToken == "" {
-		return errorpkg.NewFileNotFoundError(nil)
+		accessToken = c.Query("access_token")
+		if accessToken == "" {
+			return errorpkg.NewFileNotFoundError(nil)
+		}
 	}
 	userID, err := r.getUserID(accessToken)
 	if err != nil {
@@ -820,9 +825,12 @@ func (r *FileDownloadRouter) DownloadOriginal(c *fiber.Ctx) error {
 //	@Failure		500				{object}	errorpkg.ErrorResponse
 //	@Router			/files/{id}/preview{ext} [get]
 func (r *FileDownloadRouter) DownloadPreview(c *fiber.Ctx) error {
-	accessToken := c.Query("access_token")
+	accessToken := c.Cookies(r.accessTokenCookieName)
 	if accessToken == "" {
-		return errorpkg.NewFileNotFoundError(nil)
+		accessToken = c.Query("access_token")
+		if accessToken == "" {
+			return errorpkg.NewFileNotFoundError(nil)
+		}
 	}
 	userID, err := r.getUserID(accessToken)
 	if err != nil {
@@ -854,9 +862,12 @@ func (r *FileDownloadRouter) DownloadPreview(c *fiber.Ctx) error {
 //	@Failure		500				{object}	errorpkg.ErrorResponse
 //	@Router			/files/{id}/ocr{ext} [get]
 func (r *FileDownloadRouter) DownloadOCR(c *fiber.Ctx) error {
-	accessToken := c.Query("access_token")
+	accessToken := c.Cookies(r.accessTokenCookieName)
 	if accessToken == "" {
-		return errorpkg.NewFileNotFoundError(nil)
+		accessToken = c.Query("access_token")
+		if accessToken == "" {
+			return errorpkg.NewFileNotFoundError(nil)
+		}
 	}
 	userID, err := r.getUserID(accessToken)
 	if err != nil {
