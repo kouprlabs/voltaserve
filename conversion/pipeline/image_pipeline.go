@@ -10,7 +10,7 @@ import (
 	"voltaserve/infra"
 	"voltaserve/processor"
 
-	log "github.com/sirupsen/logrus"
+	"go.uber.org/zap"
 )
 
 type imagePipeline struct {
@@ -19,16 +19,22 @@ type imagePipeline struct {
 	s3          *infra.S3Manager
 	apiClient   *client.APIClient
 	toolsClient *client.ToolsClient
+	logger      *zap.SugaredLogger
 	config      config.Config
 }
 
 func NewImagePipeline() core.Pipeline {
+	logger, err := infra.GetLogger()
+	if err != nil {
+		panic(err)
+	}
 	return &imagePipeline{
 		pdfPipeline: NewPDFPipeline(),
 		imageProc:   processor.NewImageProcessor(),
 		s3:          infra.NewS3Manager(),
 		apiClient:   client.NewAPIClient(),
 		toolsClient: client.NewToolsClient(),
+		logger:      logger,
 		config:      config.GetConfig(),
 	}
 }
@@ -86,7 +92,7 @@ func (p *imagePipeline) Run(opts core.PipelineOptions) error {
 				does not contain text after all ¯\_(ツ)_/¯
 				So we log the error and move on...
 			*/
-			log.Error(err)
+			p.logger.Named(infra.StrPipeline).Errorw(err.Error())
 		}
 	}
 	if _, err := os.Stat(inputPath); err == nil {

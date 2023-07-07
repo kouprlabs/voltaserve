@@ -12,7 +12,6 @@ import (
 	"voltaserve/infra"
 
 	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
 )
 
 var StrRunner = fmt.Sprintf("%-13s", "runner")
@@ -22,15 +21,12 @@ type Runner struct {
 }
 
 func NewRunner() *Runner {
-	config := zap.NewDevelopmentConfig()
-	config.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
-	config.DisableCaller = true
-	logger, err := config.Build()
+	logger, err := infra.GetLogger()
 	if err != nil {
 		panic(err)
 	}
 	return &Runner{
-		logger: logger.Sugar(),
+		logger: logger,
 	}
 }
 

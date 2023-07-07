@@ -11,8 +11,6 @@ import (
 	"voltaserve/core"
 	"voltaserve/runtime"
 
-	log "github.com/sirupsen/logrus"
-
 	"github.com/gofiber/fiber/v2"
 	"github.com/joho/godotenv"
 )
@@ -29,9 +27,6 @@ func main() {
 			panic(err)
 		}
 	}
-
-	log.SetOutput(os.Stdout)
-	log.SetReportCaller(true)
 
 	cfg := config.GetConfig()
 
