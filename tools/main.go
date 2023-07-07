@@ -77,14 +77,14 @@ func main() {
 			return errorpkg.NewRequestBodyValidationError(err)
 		}
 		runner := service.NewRunner()
-		outputFile, stdout, err := runner.Run(inputPath, opts)
+		outputPath, stdout, err := runner.Run(inputPath, opts)
 		if opts.Stdout {
 			if err != nil {
 				c.Status(500)
 				return c.SendString(err.Error())
 			} else {
-				if outputFile != "" {
-					return c.Download(outputFile)
+				if outputPath != "" {
+					return c.Download(outputPath)
 				} else {
 					return c.SendString(stdout)
 				}
@@ -94,8 +94,8 @@ func main() {
 				c.Status(500)
 				return c.SendString(err.Error())
 			} else {
-				if outputFile != "" {
-					return c.Download(outputFile)
+				if outputPath != "" {
+					return c.Download(outputPath)
 				} else {
 					return c.SendStatus(200)
 				}

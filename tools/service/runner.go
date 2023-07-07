@@ -30,7 +30,7 @@ func NewRunner() *Runner {
 	}
 }
 
-func (r *Runner) Run(inputPath string, opts core.RunOptions) (outputFile string, stdout string, err error) {
+func (r *Runner) Run(inputPath string, opts core.RunOptions) (outputPath string, stdout string, err error) {
 	if inputPath != "" {
 		for index, arg := range opts.Args {
 			re := regexp.MustCompile(`\${input}`)
@@ -47,11 +47,11 @@ func (r *Runner) Run(inputPath string, opts core.RunOptions) (outputFile string,
 			substring = regexp.MustCompile(`\${(.*?)}`).ReplaceAllString(substring, "$1")
 			parts := strings.Split(substring, ".")
 			if len(parts) == 1 {
-				outputFile = filepath.FromSlash(os.TempDir() + "/" + helper.NewID())
-				opts.Args[index] = re.ReplaceAllString(arg, outputFile)
+				outputPath = filepath.FromSlash(os.TempDir() + "/" + helper.NewID())
+				opts.Args[index] = re.ReplaceAllString(arg, outputPath)
 			} else if len(parts) == 2 {
-				outputFile = filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + "." + parts[1])
-				opts.Args[index] = re.ReplaceAllString(arg, outputFile)
+				outputPath = filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + "." + parts[1])
+				opts.Args[index] = re.ReplaceAllString(arg, outputPath)
 			} else if len(parts) == 3 {
 				if parts[1] == "*" {
 					filename := filepath.Base(inputPath)
@@ -59,12 +59,12 @@ func (r *Runner) Run(inputPath string, opts core.RunOptions) (outputFile string,
 					if err := os.MkdirAll(outputDir, 0755); err != nil {
 						return "", "", err
 					}
-					outputFile = filepath.FromSlash(outputDir + "/" + strings.TrimSuffix(filename, filepath.Ext(filename)) + "." + parts[2])
+					outputPath = filepath.FromSlash(outputDir + "/" + strings.TrimSuffix(filename, filepath.Ext(filename)) + "." + parts[2])
 					opts.Args[index] = re.ReplaceAllString(arg, outputDir)
 				} else if parts[1] == "#" {
 					filename := filepath.Base(inputPath)
 					basePath := filepath.FromSlash(os.TempDir() + "/" + strings.TrimSuffix(filename, filepath.Ext(filename)))
-					outputFile = filepath.FromSlash(basePath + "." + parts[2])
+					outputPath = filepath.FromSlash(basePath + "." + parts[2])
 					opts.Args[index] = re.ReplaceAllString(arg, basePath)
 				}
 			}
@@ -80,7 +80,7 @@ func (r *Runner) Run(inputPath string, opts core.RunOptions) (outputFile string,
 			return "", stdout, err
 		} else {
 			r.logger.Named(StrRunner).Infow("🎉  succeeded", "bin", opts.Bin, "args", opts.Args, "elapsed", elapsed, "stdout", stdout)
-			return outputFile, stdout, nil
+			return outputPath, stdout, nil
 		}
 	} else {
 		start := time.Now()
@@ -91,7 +91,7 @@ func (r *Runner) Run(inputPath string, opts core.RunOptions) (outputFile string,
 			return "", "", err
 		} else {
 			r.logger.Named(StrRunner).Infow("🎉  succeeded", "bin", opts.Bin, "args", opts.Args, "elapsed", elapsed)
-			return outputFile, "", err
+			return outputPath, "", err
 		}
 	}
 }
