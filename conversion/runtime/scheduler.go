@@ -8,7 +8,6 @@ import (
 	"voltaserve/builder"
 	"voltaserve/client"
 	"voltaserve/core"
-	"voltaserve/pipeline"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -56,7 +55,6 @@ func NewScheduler(opts SchedulerOptions) *Scheduler {
 	if err != nil {
 		panic(err)
 	}
-	logger.Sync()
 	return &Scheduler{
 		pipelineQueue:       make([][]core.PipelineOptions, opts.PipelineWorkerCount),
 		builderQueue:        make([][]core.PipelineOptions, opts.BuilderWorkerCount),
@@ -109,7 +107,7 @@ func (s *Scheduler) ScheduleBuilder(opts *core.PipelineOptions) {
 }
 
 func (s *Scheduler) pipelineWorker(index int) {
-	dispatcher := pipeline.NewDispatcher()
+	dispatcher := NewDispatcher()
 	s.pipelineQueue[index] = make([]core.PipelineOptions, 0)
 	s.logger.Named(StrPipeline).Infow("⚙️  running", "worker", index)
 	for {

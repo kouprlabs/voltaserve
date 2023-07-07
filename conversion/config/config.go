@@ -83,8 +83,8 @@ func readLimits(config *Config) {
 		}
 		config.Limits.ImagePreviewMaxHeight = int(v)
 	}
-	if len(os.Getenv("LIMITS_LANGUAGE_SCORE_THRESHOLD_PERCENT")) > 0 {
-		v, err := strconv.ParseFloat(os.Getenv("LIMITS_LANGUAGE_SCORE_THRESHOLD_PERCENT"), 64)
+	if len(os.Getenv("LIMITS_LANGUAGE_SCORE_THRESHOLD")) > 0 {
+		v, err := strconv.ParseFloat(os.Getenv("LIMITS_LANGUAGE_SCORE_THRESHOLD"), 64)
 		if err != nil {
 			panic(err)
 		}

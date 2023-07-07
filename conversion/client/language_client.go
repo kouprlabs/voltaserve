@@ -10,9 +10,8 @@ import (
 )
 
 type LanguageDetect struct {
-	Language    string  `json:"language"`
-	Score       float64 `json:"score"`
-	EntityCount int64   `json:"entity_count"`
+	Language string  `json:"language"`
+	Score    float64 `json:"score"`
 }
 
 type LanguageClient struct {

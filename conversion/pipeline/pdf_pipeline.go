@@ -7,27 +7,31 @@ import (
 	"voltaserve/config"
 	"voltaserve/core"
 	"voltaserve/helper"
+	"voltaserve/identifier"
 	"voltaserve/infra"
+	"voltaserve/processor"
 )
 
 type pdfPipeline struct {
-	pdfProc        *infra.PDFProcessor
-	imageProc      *infra.ImageProcessor
+	pdfProc        *processor.PDFProcessor
+	imageProc      *processor.ImageProcessor
 	s3             *infra.S3Manager
 	apiClient      *client.APIClient
 	languageClient *client.LanguageClient
-	fileIdentifier *infra.FileIdentifier
+	toolsClient    *client.ToolsClient
+	fileIdentifier *identifier.FileIdentifier
 	config         config.Config
 }
 
 func NewPDFPipeline() core.Pipeline {
 	return &pdfPipeline{
-		pdfProc:        infra.NewPDFProcessor(),
-		imageProc:      infra.NewImageProcessor(),
+		pdfProc:        processor.NewPDFProcessor(),
+		imageProc:      processor.NewImageProcessor(),
 		s3:             infra.NewS3Manager(),
 		apiClient:      client.NewAPIClient(),
 		languageClient: client.NewLanguageClient(),
-		fileIdentifier: infra.NewFileIdentifier(),
+		toolsClient:    client.NewToolsClient(),
+		fileIdentifier: identifier.NewFileIdentifier(),
 		config:         config.GetConfig(),
 	}
 }
@@ -50,19 +54,19 @@ func (p *pdfPipeline) Run(opts core.PipelineOptions) error {
 			return err
 		}
 		newInputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(inputPath))
-		if err := p.imageProc.RemoveAlphaChannel(inputPath, newInputPath); err != nil {
+		if err := p.toolsClient.RemoveAlphaChannel(inputPath, newInputPath); err != nil {
 			return err
 		}
 		if err := os.Remove(inputPath); err != nil {
 			return err
 		}
 		inputPath = newInputPath
-		dpi, err = p.imageProc.DPI(inputPath)
+		dpi, err = p.toolsClient.DPIFromImage(inputPath)
 		if err != nil {
 			dpi = 72
 		}
 	}
-	newInputPath, _ := p.pdfProc.GenerateOCR(inputPath, opts.TesseractModel, &dpi)
+	newInputPath, _ := p.toolsClient.OCRFromPDF(inputPath, opts.TesseractModel, &dpi)
 	if stat, err := os.Stat(newInputPath); err == nil {
 		if err := os.Remove(inputPath); err != nil {
 			return err
@@ -73,7 +77,7 @@ func (p *pdfPipeline) Run(opts core.PipelineOptions) error {
 			Key:    opts.FileID + "/" + opts.SnapshotID + "/ocr.pdf",
 			Size:   stat.Size(),
 		}
-		if err := p.s3.PutFile(s3Object.Key, inputPath, infra.DetectMimeFromFile(inputPath), s3Object.Bucket); err != nil {
+		if err := p.s3.PutFile(s3Object.Key, inputPath, helper.DetectMimeFromFile(inputPath), s3Object.Bucket); err != nil {
 			return err
 		}
 		res.OCR = &s3Object
@@ -81,7 +85,7 @@ func (p *pdfPipeline) Run(opts core.PipelineOptions) error {
 			return err
 		}
 	}
-	text, size, err := p.pdfProc.ExtractText(inputPath)
+	text, size, err := p.toolsClient.TextFromPDF(inputPath)
 	if err != nil {
 		return err
 	}

@@ -6,20 +6,22 @@ import (
 	"voltaserve/client"
 	"voltaserve/core"
 	"voltaserve/helper"
+	"voltaserve/identifier"
 	"voltaserve/infra"
+	"voltaserve/processor"
 )
 
 type imageBuilder struct {
-	pipelineIdentifier *infra.PipelineIdentifier
-	imageProc          *infra.ImageProcessor
+	pipelineIdentifier *identifier.PipelineIdentifier
+	imageProc          *processor.ImageProcessor
 	s3                 *infra.S3Manager
 	apiClient          *client.APIClient
 }
 
 func NewImageBuilder() core.Builder {
 	return &imageBuilder{
-		pipelineIdentifier: infra.NewPipelineIdentifier(),
-		imageProc:          infra.NewImageProcessor(),
+		pipelineIdentifier: identifier.NewPipelineIdentifier(),
+		imageProc:          processor.NewImageProcessor(),
 		s3:                 infra.NewS3Manager(),
 		apiClient:          client.NewAPIClient(),
 	}
@@ -30,7 +32,7 @@ func (p *imageBuilder) Build(opts core.PipelineOptions) error {
 	if err := p.s3.GetFile(opts.Key, inputPath, opts.Bucket); err != nil {
 		return err
 	}
-	thumbnail, err := p.imageProc.ThumbnailBase64(inputPath)
+	thumbnail, err := p.imageProc.Base64Thumbnail(inputPath)
 	if err != nil {
 		return err
 	}

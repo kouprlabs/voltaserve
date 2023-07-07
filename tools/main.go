@@ -5,14 +5,12 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"regexp"
-	"strings"
 
 	"voltaserve/config"
 	"voltaserve/core"
 	"voltaserve/errorpkg"
 	"voltaserve/helper"
-	"voltaserve/infra"
+	"voltaserve/service"
 
 	"github.com/go-playground/validator/v10"
 	log "github.com/sirupsen/logrus"
@@ -82,50 +80,11 @@ func main() {
 		if err := validator.New().Struct(opts); err != nil {
 			return errorpkg.NewRequestBodyValidationError(err)
 		}
-		if inputPath != "" {
-			for index, arg := range opts.Args {
-				re := regexp.MustCompile(`\${input}`)
-				substring := re.FindString(arg)
-				if substring != "" {
-					opts.Args[index] = re.ReplaceAllString(arg, inputPath)
-				}
-			}
-		}
-		outputFile := ""
-		for index, arg := range opts.Args {
-			re := regexp.MustCompile(`\${output(?:\.[a-zA-Z0-9*#]+)*(?:\.[a-zA-Z0-9*#]+)?}`)
-			substring := re.FindString(arg)
-			if substring != "" {
-				substring = regexp.MustCompile(`\${(.*?)}`).ReplaceAllString(substring, "$1")
-				parts := strings.Split(substring, ".")
-				if len(parts) == 1 {
-					outputFile = filepath.FromSlash(os.TempDir() + "/" + helper.NewID())
-					opts.Args[index] = re.ReplaceAllString(arg, outputFile)
-				} else if len(parts) == 2 {
-					outputFile = filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + "." + parts[1])
-					opts.Args[index] = re.ReplaceAllString(arg, outputFile)
-				} else if len(parts) == 3 {
-					if parts[1] == "*" {
-						filename := filepath.Base(inputPath)
-						outputDir := filepath.FromSlash(os.TempDir() + "/" + helper.NewID())
-						if err := os.MkdirAll(outputDir, 0755); err != nil {
-							return err
-						}
-						outputFile = filepath.FromSlash(outputDir + "/" + strings.TrimSuffix(filename, filepath.Ext(filename)) + "." + parts[2])
-						opts.Args[index] = re.ReplaceAllString(arg, outputDir)
-					} else if parts[1] == "#" {
-						filename := filepath.Base(inputPath)
-						basePath := filepath.FromSlash(os.TempDir() + "/" + strings.TrimSuffix(filename, filepath.Ext(filename)))
-						outputFile = filepath.FromSlash(basePath + "." + parts[2])
-						opts.Args[index] = re.ReplaceAllString(arg, basePath)
-					}
-				}
-			}
-		}
-		cmd := infra.NewCommand()
+		runner := service.NewRunner()
+		outputFile, stdout, err := runner.Run(inputPath, opts)
 		if opts.Stdout {
-			stdout, err := cmd.ReadOutput(opts.Bin, opts.Args...)
 			if err != nil {
+				fmt.Println(err.Error())
 				c.Status(500)
 				return c.SendString(err.Error())
 			} else {
@@ -136,7 +95,8 @@ func main() {
 				}
 			}
 		} else {
-			if err := cmd.Exec(opts.Bin, opts.Args...); err != nil {
+			if err != nil {
+				fmt.Println(err.Error())
 				c.Status(500)
 				return c.SendString(err.Error())
 			} else {

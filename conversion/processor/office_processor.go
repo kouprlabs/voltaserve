@@ -1,4 +1,4 @@
-package infra
+package processor
 
 import (
 	"bytes"
@@ -11,16 +11,17 @@ import (
 	"path/filepath"
 	"strings"
 	"voltaserve/config"
+	"voltaserve/infra"
 )
 
 type OfficeProcessor struct {
-	cmd    *Command
+	cmd    *infra.Command
 	config config.Config
 }
 
 func NewOfficeProcessor() *OfficeProcessor {
 	return &OfficeProcessor{
-		cmd:    NewCommand(),
+		cmd:    infra.NewCommand(),
 		config: config.GetConfig(),
 	}
 }
@@ -37,7 +38,9 @@ func (p *OfficeProcessor) PDF(inputPath string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	io.Copy(fileField, file)
+	if _, err := io.Copy(fileField, file); err != nil {
+		return "", err
+	}
 	jsonField, err := writer.CreateFormField("json")
 	if err != nil {
 		return "", err
@@ -51,7 +54,9 @@ func (p *OfficeProcessor) PDF(inputPath string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	jsonField.Write(jsonBytes)
+	if _, err := jsonField.Write(jsonBytes); err != nil {
+		return "", err
+	}
 	writer.Close()
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", p.config.LibreOfficeURL, p.config.Security.APIKey), body)
 	if err != nil {

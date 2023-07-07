@@ -6,20 +6,22 @@ import (
 	"voltaserve/client"
 	"voltaserve/core"
 	"voltaserve/helper"
+	"voltaserve/identifier"
 	"voltaserve/infra"
+	"voltaserve/processor"
 )
 
 type videoBuilder struct {
-	pipelineIdentifier *infra.PipelineIdentifier
-	videoProc          *infra.VideoProcessor
+	pipelineIdentifier *identifier.PipelineIdentifier
+	videoProc          *processor.VideoProcessor
 	s3                 *infra.S3Manager
 	apiClient          *client.APIClient
 }
 
 func NewVideoBuilder() core.Builder {
 	return &videoBuilder{
-		pipelineIdentifier: infra.NewPipelineIdentifier(),
-		videoProc:          infra.NewVideoProcessor(),
+		pipelineIdentifier: identifier.NewPipelineIdentifier(),
+		videoProc:          processor.NewVideoProcessor(),
 		s3:                 infra.NewS3Manager(),
 		apiClient:          client.NewAPIClient(),
 	}
@@ -30,7 +32,7 @@ func (p *videoBuilder) Build(opts core.PipelineOptions) error {
 	if err := p.s3.GetFile(opts.Key, inputPath, opts.Bucket); err != nil {
 		return err
 	}
-	thumbnail, err := p.videoProc.ThumbnailBase64(inputPath)
+	thumbnail, err := p.videoProc.Base64Thumbnail(inputPath)
 	if err != nil {
 		return err
 	}
