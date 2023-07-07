@@ -34,7 +34,7 @@ type imageData struct {
 	Score    float64
 }
 
-func (p *ImageProcessor) ImageData(inputPath string) (imageData, error) {
+func (p *ImageProcessor) Data(inputPath string) (imageData, error) {
 	results := []imageData{}
 	var jpegPath string
 	if strings.ToLower(filepath.Ext(inputPath)) == ".jpg" || strings.ToLower(filepath.Ext(inputPath)) == ".jpeg" {
@@ -54,7 +54,6 @@ func (p *ImageProcessor) ImageData(inputPath string) (imageData, error) {
 		"spa":     "spa",
 		"por":     "por",
 		"swe":     "swe",
-		"fin":     "fin",
 		"jpn":     "jpn",
 		"chi_sim": "zho",
 		"chi_tra": "zho",

@@ -68,7 +68,7 @@ func (p *imagePipeline) Run(opts core.PipelineOptions) error {
 	if err := p.apiClient.UpdateSnapshot(&res); err != nil {
 		return err
 	}
-	imageData, err := p.imageProc.ImageData(inputPath)
+	imageData, err := p.imageProc.Data(inputPath)
 	if err == nil {
 		/* We treat it as a text image, we convert it to PDF/A */
 		opts.Language = &imageData.Language
