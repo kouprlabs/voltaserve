@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -8,12 +9,28 @@ import (
 	"voltaserve/core"
 	"voltaserve/helper"
 	"voltaserve/infra"
+
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
-type Runner struct{}
+var StrRunner = fmt.Sprintf("%-13s", "runner")
+
+type Runner struct {
+	logger *zap.SugaredLogger
+}
 
 func NewRunner() *Runner {
-	return &Runner{}
+	config := zap.NewDevelopmentConfig()
+	config.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
+	config.DisableCaller = true
+	logger, err := config.Build()
+	if err != nil {
+		panic(err)
+	}
+	return &Runner{
+		logger: logger.Sugar(),
+	}
 }
 
 func (r *Runner) Run(inputPath string, opts core.RunOptions) (outputFile string, stdout string, err error) {
@@ -60,14 +77,18 @@ func (r *Runner) Run(inputPath string, opts core.RunOptions) (outputFile string,
 	if opts.Stdout {
 		stdout, err := cmd.ReadOutput(opts.Bin, opts.Args...)
 		if err != nil {
+			r.logger.Named(StrRunner).Errorw("⛈️  failed", "bin", opts.Bin, "args", opts.Args, "error", "stdout", stdout, err.Error())
 			return "", stdout, err
 		} else {
+			r.logger.Named(StrRunner).Infow("🎉  succeeded", "bin", opts.Bin, "args", opts.Args, "stdout", stdout)
 			return outputFile, stdout, nil
 		}
 	} else {
 		if err := cmd.Exec(opts.Bin, opts.Args...); err != nil {
+			r.logger.Named(StrRunner).Errorw("⛈️  failed", "bin", opts.Bin, "args", opts.Args, "error", err.Error())
 			return "", "", err
 		} else {
+			r.logger.Named(StrRunner).Infow("🎉  succeeded", "bin", opts.Bin, "args", opts.Args)
 			return outputFile, "", err
 		}
 	}

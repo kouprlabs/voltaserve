@@ -121,7 +121,7 @@ func (s *Scheduler) pipelineWorker(index int) {
 			if err == nil {
 				s.logger.Named(StrPipeline).Infow("🎉  succeeded", "worker", index, "elapsed", elapsed, "bucket", opts.Bucket, "key", opts.Key)
 			} else {
-				s.logger.Named(StrPipeline).Errorw("⛈️  failed", "worker", index, "elapsed", elapsed, "bucket", opts.Bucket, "key", opts.Key)
+				s.logger.Named(StrPipeline).Errorw("⛈️  failed", "worker", index, "elapsed", elapsed, "bucket", opts.Bucket, "key", opts.Key, "error", err.Error())
 			}
 			s.pipelineQueue[index] = s.pipelineQueue[index][1:]
 			s.activePipelineCount--
@@ -146,7 +146,7 @@ func (s *Scheduler) builderWorker(index int) {
 			if err == nil {
 				s.logger.Named(StrBuilder).Infow("🎉  succeeded", "worker", index, "elapsed", elapsed, "bucket", opts.Bucket, "key", opts.Key)
 			} else {
-				s.logger.Named(StrBuilder).Errorw("⛈️  failed", "worker", index, "elapsed", elapsed, "bucket", opts.Bucket, "key", opts.Key)
+				s.logger.Named(StrBuilder).Errorw("⛈️  failed", "worker", index, "elapsed", elapsed, "bucket", opts.Bucket, "key", opts.Key, "error", err.Error())
 			}
 			s.builderQueue[index] = s.builderQueue[index][1:]
 			s.activeBuilderCount--

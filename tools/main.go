@@ -13,7 +13,6 @@ import (
 	"voltaserve/service"
 
 	"github.com/go-playground/validator/v10"
-	log "github.com/sirupsen/logrus"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/joho/godotenv"
@@ -31,9 +30,6 @@ func main() {
 			panic(err)
 		}
 	}
-
-	log.SetOutput(os.Stdout)
-	log.SetReportCaller(true)
 
 	cfg := config.GetConfig()
 
@@ -84,7 +80,6 @@ func main() {
 		outputFile, stdout, err := runner.Run(inputPath, opts)
 		if opts.Stdout {
 			if err != nil {
-				fmt.Println(err.Error())
 				c.Status(500)
 				return c.SendString(err.Error())
 			} else {
@@ -96,7 +91,6 @@ func main() {
 			}
 		} else {
 			if err != nil {
-				fmt.Println(err.Error())
 				c.Status(500)
 				return c.SendString(err.Error())
 			} else {

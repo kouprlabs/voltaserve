@@ -44,15 +44,9 @@ func (p *pdfPipeline) Run(opts core.PipelineOptions) error {
 	res := core.PipelineResponse{
 		Options: opts,
 	}
-	var dpi int
-	var err error
+	var lang *string = opts.Language
+	var dpi *int
 	if p.fileIdentifier.IsImage(inputPath) {
-		if opts.Language != nil {
-			res.Language = opts.Language
-		}
-		if err := p.apiClient.UpdateSnapshot(&res); err != nil {
-			return err
-		}
 		newInputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(inputPath))
 		if err := p.toolsClient.RemoveAlphaChannel(inputPath, newInputPath); err != nil {
 			return err
@@ -61,12 +55,46 @@ func (p *pdfPipeline) Run(opts core.PipelineOptions) error {
 			return err
 		}
 		inputPath = newInputPath
-		dpi, err = p.toolsClient.DPIFromImage(inputPath)
+		imageDPI, err := p.toolsClient.DPIFromImage(inputPath)
 		if err != nil {
-			dpi = 72
+			dpi = new(int)
+			*dpi = 72
+		} else {
+			dpi = &imageDPI
+		}
+	} else if p.fileIdentifier.IsPDF(inputPath) {
+		text, size, err := p.toolsClient.TextFromPDF(inputPath)
+		if err != nil {
+			return err
+		}
+		if len(text) > 0 {
+			if lang == nil {
+				langDetect, err := p.languageClient.Detect(text)
+				if err == nil {
+					lang = &langDetect.Language
+				}
+			}
+			s3Object := core.S3Object{
+				Bucket: opts.Bucket,
+				Key:    opts.FileID + "/" + opts.SnapshotID + "/text.txt",
+				Size:   size,
+			}
+			if err := p.s3.PutText(s3Object.Key, text, "text/plain", s3Object.Bucket); err != nil {
+				return err
+			}
+			res.Text = &s3Object
+			if err := p.apiClient.UpdateSnapshot(&res); err != nil {
+				return err
+			}
 		}
 	}
-	newInputPath, _ := p.toolsClient.OCRFromPDF(inputPath, opts.TesseractModel, &dpi)
+	if lang != nil {
+		res.Language = lang
+		if err := p.apiClient.UpdateSnapshot(&res); err != nil {
+			return err
+		}
+	}
+	newInputPath, _ := p.toolsClient.OCRFromPDF(inputPath, lang, dpi)
 	if stat, err := os.Stat(newInputPath); err == nil {
 		if err := os.Remove(inputPath); err != nil {
 			return err
@@ -83,33 +111,6 @@ func (p *pdfPipeline) Run(opts core.PipelineOptions) error {
 		res.OCR = &s3Object
 		if err := p.apiClient.UpdateSnapshot(&res); err != nil {
 			return err
-		}
-	}
-	text, size, err := p.toolsClient.TextFromPDF(inputPath)
-	if err != nil {
-		return err
-	}
-	if len(text) > 0 {
-		s3Object := core.S3Object{
-			Bucket: opts.Bucket,
-			Key:    opts.FileID + "/" + opts.SnapshotID + "/text.txt",
-			Size:   size,
-		}
-		if err := p.s3.PutText(s3Object.Key, text, "text/plain", s3Object.Bucket); err != nil {
-			return err
-		}
-		res.Text = &s3Object
-		if err := p.apiClient.UpdateSnapshot(&res); err != nil {
-			return err
-		}
-		if res.Language == nil {
-			detection, err := p.languageClient.Detect(text)
-			if err == nil {
-				res.Language = &detection.Language
-			}
-			if err := p.apiClient.UpdateSnapshot(&res); err != nil {
-				return err
-			}
 		}
 	}
 	if _, err := os.Stat(inputPath); err == nil {

@@ -521,14 +521,6 @@ func (c *ToolsClient) DPIFromImage(inputPath string) (int, error) {
 }
 
 func (c *ToolsClient) OCRFromPDF(inputPath string, language *string, dpi *int) (string, error) {
-	languageOption := ""
-	if language != nil && *language != "" {
-		languageOption = fmt.Sprintf("--language=%s", *language)
-	}
-	dpiOption := ""
-	if dpi != nil && *dpi != 0 {
-		dpiOption = fmt.Sprintf("--image-dpi=%d", *dpi)
-	}
 	file, err := os.Open(inputPath)
 	if err != nil {
 		return "", err
@@ -547,16 +539,22 @@ func (c *ToolsClient) OCRFromPDF(inputPath string, language *string, dpi *int) (
 	if err != nil {
 		return "", err
 	}
+	args := []string{
+		"--rotate-pages",
+		"--clean",
+		"--deskew",
+	}
+	if language != nil {
+		args = append(args, fmt.Sprintf("--language=%s", *language))
+	}
+	if dpi != nil {
+		args = append(args, fmt.Sprintf("--image-dpi=%d", *dpi))
+	}
+	args = append(args, "${input}")
+	args = append(args, "${output}")
 	jsonData := map[string]interface{}{
-		"bin": "ocrmypdf",
-		"args": []string{
-			"--rotate-pages",
-			"--clean",
-			"--deskew",
-			languageOption,
-			dpiOption,
-			"${input}",
-			"${output}"},
+		"bin":    "ocrmypdf",
+		"args":   args,
 		"stdout": true,
 	}
 	jsonBytes, err := json.Marshal(jsonData)
