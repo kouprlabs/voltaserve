@@ -1,13 +1,14 @@
-package pipeline
+package runtime
 
 import (
 	"errors"
 	"voltaserve/core"
-	"voltaserve/infra"
+	"voltaserve/identifier"
+	"voltaserve/pipeline"
 )
 
 type Dispatcher struct {
-	pipelineIdentifier *infra.PipelineIdentifier
+	pipelineIdentifier *identifier.PipelineIdentifier
 	pdfPipeline        core.Pipeline
 	imagePipeline      core.Pipeline
 	officePipeline     core.Pipeline
@@ -15,10 +16,10 @@ type Dispatcher struct {
 
 func NewDispatcher() *Dispatcher {
 	return &Dispatcher{
-		pipelineIdentifier: infra.NewPipelineIdentifier(),
-		pdfPipeline:        NewPDFPipeline(),
-		imagePipeline:      NewImagePipeline(),
-		officePipeline:     NewOfficePipeline(),
+		pipelineIdentifier: identifier.NewPipelineIdentifier(),
+		pdfPipeline:        pipeline.NewPDFPipeline(),
+		imagePipeline:      pipeline.NewImagePipeline(),
+		officePipeline:     pipeline.NewOfficePipeline(),
 	}
 }
 

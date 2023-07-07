@@ -328,7 +328,6 @@ install_tesseract() {
       tesseract-ocr-traineddata-spa \
       tesseract-ocr-traineddata-por \
       tesseract-ocr-traineddata-swe \
-      tesseract-ocr-traineddata-fin \
       tesseract-ocr-traineddata-jpn \
       tesseract-ocr-traineddata-chi_sim \
       tesseract-ocr-traineddata-chi_tra \

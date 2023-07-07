@@ -22,6 +22,5 @@ def detect():
     result = {
         "language": Lang(doc._.language).pt3,
         "score": doc._.language_score,
-        "entity_count": len(doc.ents),
     }
     return jsonify(result)

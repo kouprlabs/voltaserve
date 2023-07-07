@@ -8,11 +8,12 @@ import (
 	"voltaserve/core"
 	"voltaserve/helper"
 	"voltaserve/infra"
+	"voltaserve/processor"
 )
 
 type officePipeline struct {
 	pdfPipeline core.Pipeline
-	officeProc  *infra.OfficeProcessor
+	officeProc  *processor.OfficeProcessor
 	s3          *infra.S3Manager
 	config      config.Config
 	apiClient   *client.APIClient
@@ -21,7 +22,7 @@ type officePipeline struct {
 func NewOfficePipeline() core.Pipeline {
 	return &officePipeline{
 		pdfPipeline: NewPDFPipeline(),
-		officeProc:  infra.NewOfficeProcessor(),
+		officeProc:  processor.NewOfficeProcessor(),
 		s3:          infra.NewS3Manager(),
 		config:      config.GetConfig(),
 		apiClient:   client.NewAPIClient(),
@@ -46,7 +47,7 @@ func (p *officePipeline) Run(opts core.PipelineOptions) error {
 		Key:    opts.FileID + "/" + opts.SnapshotID + "/preview.pdf",
 		Size:   stat.Size(),
 	}
-	if err := p.s3.PutFile(preview.Key, outputPath, infra.DetectMimeFromFile(outputPath), preview.Bucket); err != nil {
+	if err := p.s3.PutFile(preview.Key, outputPath, helper.DetectMimeFromFile(outputPath), preview.Bucket); err != nil {
 		return err
 	}
 	res := core.PipelineResponse{

@@ -8,24 +8,33 @@ import (
 	"voltaserve/core"
 	"voltaserve/helper"
 	"voltaserve/infra"
+	"voltaserve/processor"
 
-	log "github.com/sirupsen/logrus"
+	"go.uber.org/zap"
 )
 
 type imagePipeline struct {
 	pdfPipeline core.Pipeline
-	imageProc   *infra.ImageProcessor
+	imageProc   *processor.ImageProcessor
 	s3          *infra.S3Manager
 	apiClient   *client.APIClient
+	toolsClient *client.ToolsClient
+	logger      *zap.SugaredLogger
 	config      config.Config
 }
 
 func NewImagePipeline() core.Pipeline {
+	logger, err := infra.GetLogger()
+	if err != nil {
+		panic(err)
+	}
 	return &imagePipeline{
 		pdfPipeline: NewPDFPipeline(),
-		imageProc:   infra.NewImageProcessor(),
+		imageProc:   processor.NewImageProcessor(),
 		s3:          infra.NewS3Manager(),
 		apiClient:   client.NewAPIClient(),
+		toolsClient: client.NewToolsClient(),
+		logger:      logger,
 		config:      config.GetConfig(),
 	}
 }
@@ -41,7 +50,7 @@ func (p *imagePipeline) Run(opts core.PipelineOptions) error {
 	}
 	if filepath.Ext(inputPath) == ".tiff" {
 		newInputFile := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".jpg")
-		if err := p.imageProc.Convert(inputPath, newInputFile); err != nil {
+		if err := p.toolsClient.ConvertImage(inputPath, newInputFile); err != nil {
 			return err
 		}
 		if err := os.Remove(inputPath); err != nil {
@@ -49,7 +58,7 @@ func (p *imagePipeline) Run(opts core.PipelineOptions) error {
 		}
 		inputPath = newInputFile
 	}
-	imageProps, err := p.imageProc.Measure(inputPath)
+	imageProps, err := p.toolsClient.MeasureImage(inputPath)
 	if err != nil {
 		return err
 	}
@@ -65,15 +74,12 @@ func (p *imagePipeline) Run(opts core.PipelineOptions) error {
 	if err := p.apiClient.UpdateSnapshot(&res); err != nil {
 		return err
 	}
-	imageData, err := p.imageProc.ImageData(inputPath)
+	imageData, err := p.imageProc.Data(inputPath)
 	if err == nil {
 		/* We treat it as a text image, we convert it to PDF/A */
-		opts.Language = &imageData.LanguageProps.Language
-		opts.TesseractModel = &imageData.LanguageProps.TesseractModel
-		res.Language = &imageData.LanguageProps.Language
-		if err := p.apiClient.UpdateSnapshot(&res); err != nil {
-			return err
-		}
+		opts.Language = &imageData.Language
+		opts.TesseractModel = &imageData.Model
+		opts.Text = &imageData.Text
 		if err := p.pdfPipeline.Run(opts); err != nil {
 			/*
 				Here we intentionally ignore the error, here is the explanation why:
@@ -83,7 +89,7 @@ func (p *imagePipeline) Run(opts core.PipelineOptions) error {
 				does not contain text after all ¯\_(ツ)_/¯
 				So we log the error and move on...
 			*/
-			log.Error(err)
+			p.logger.Named(infra.StrPipeline).Errorw(err.Error())
 		}
 	}
 	if _, err := os.Stat(inputPath); err == nil {
