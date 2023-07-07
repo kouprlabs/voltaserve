@@ -7,6 +7,7 @@ type PipelineOptions struct {
 	Key            string  `json:"key"`
 	Language       *string `json:"language,omitempty"`
 	TesseractModel *string `json:"tesseractModel,omitempty"`
+	Text           *string `json:"text,omitempty"`
 }
 
 type PipelineResponse struct {
@@ -15,7 +16,7 @@ type PipelineResponse struct {
 	Preview   *S3Object       `json:"preview,omitempty"`
 	Text      *S3Object       `json:"text,omitempty"`
 	OCR       *S3Object       `json:"ocr,omitempty"`
-	Thumbnail *Thumbnail      `json:"thumbnail,omitempty"`
+	Thumbnail *ImageBase64    `json:"thumbnail,omitempty"`
 	Language  *string         `json:"language,omitempty"`
 }
 
@@ -31,7 +32,7 @@ type ImageProps struct {
 	Height int `json:"height"`
 }
 
-type Thumbnail struct {
+type ImageBase64 struct {
 	Base64 string `json:"base64"`
 	Width  int    `json:"width"`
 	Height int    `json:"height"`

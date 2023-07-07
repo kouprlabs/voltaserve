@@ -3,11 +3,11 @@ package builder
 import (
 	"errors"
 	"voltaserve/core"
-	"voltaserve/infra"
+	"voltaserve/identifier"
 )
 
 type Dispatcher struct {
-	pipelineIdentifier *infra.PipelineIdentifier
+	pipelineIdentifier *identifier.PipelineIdentifier
 	pdfBuilder         core.Builder
 	imageBuilder       core.Builder
 	videoBuilder       core.Builder
@@ -16,7 +16,7 @@ type Dispatcher struct {
 
 func NewDispatcher() *Dispatcher {
 	return &Dispatcher{
-		pipelineIdentifier: infra.NewPipelineIdentifier(),
+		pipelineIdentifier: identifier.NewPipelineIdentifier(),
 		pdfBuilder:         NewPDFBuilder(),
 		imageBuilder:       NewImageBuilder(),
 		videoBuilder:       NewVideoBuilder(),

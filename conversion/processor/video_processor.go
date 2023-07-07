@@ -1,4 +1,4 @@
-package infra
+package processor
 
 import (
 	"bytes"
@@ -9,22 +9,26 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"voltaserve/client"
 	"voltaserve/config"
 	"voltaserve/core"
 	"voltaserve/helper"
+	"voltaserve/infra"
 )
 
 type VideoProcessor struct {
-	cmd       *Command
-	imageProc *ImageProcessor
-	config    config.Config
+	cmd         *infra.Command
+	imageProc   *ImageProcessor
+	toolsClient *client.ToolsClient
+	config      config.Config
 }
 
 func NewVideoProcessor() *VideoProcessor {
 	return &VideoProcessor{
-		cmd:       NewCommand(),
-		imageProc: NewImageProcessor(),
-		config:    config.GetConfig(),
+		cmd:         infra.NewCommand(),
+		imageProc:   NewImageProcessor(),
+		toolsClient: client.NewToolsClient(),
+		config:      config.GetConfig(),
 	}
 }
 
@@ -40,7 +44,9 @@ func (p *VideoProcessor) Thumbnail(inputPath string, width int, height int, outp
 	if err != nil {
 		return err
 	}
-	io.Copy(fileField, file)
+	if _, err := io.Copy(fileField, file); err != nil {
+		return err
+	}
 	jsonField, err := writer.CreateFormField("json")
 	if err != nil {
 		return err
@@ -54,7 +60,9 @@ func (p *VideoProcessor) Thumbnail(inputPath string, width int, height int, outp
 	if err != nil {
 		return err
 	}
-	jsonField.Write(jsonBytes)
+	if _, err := jsonField.Write(jsonBytes); err != nil {
+		return err
+	}
 	writer.Close()
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", p.config.FFMPEGURL, p.config.Security.APIKey), body)
 	if err != nil {
@@ -80,7 +88,7 @@ func (p *VideoProcessor) Thumbnail(inputPath string, width int, height int, outp
 	if err != nil {
 		return err
 	}
-	if err := p.imageProc.Resize(tmpPath, width, height, outputPath); err != nil {
+	if err := p.toolsClient.ResizeImage(tmpPath, width, height, outputPath); err != nil {
 		return err
 	}
 	if _, err := os.Stat(tmpPath); err == nil {
@@ -91,25 +99,25 @@ func (p *VideoProcessor) Thumbnail(inputPath string, width int, height int, outp
 	return nil
 }
 
-func (p *VideoProcessor) ThumbnailBase64(inputPath string) (core.Thumbnail, error) {
+func (p *VideoProcessor) Base64Thumbnail(inputPath string) (core.ImageBase64, error) {
 	outputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".png")
 	if err := p.Thumbnail(inputPath, 0, p.config.Limits.ImagePreviewMaxHeight, outputPath); err != nil {
-		return core.Thumbnail{}, err
+		return core.ImageBase64{}, err
 	}
-	b64, err := ImageToBase64(outputPath)
+	b64, err := helper.ImageToBase64(outputPath)
 	if err != nil {
-		return core.Thumbnail{}, err
+		return core.ImageBase64{}, err
 	}
-	imageProps, err := p.imageProc.Measure(outputPath)
+	imageProps, err := p.toolsClient.MeasureImage(outputPath)
 	if err != nil {
-		return core.Thumbnail{}, err
+		return core.ImageBase64{}, err
 	}
 	if _, err := os.Stat(outputPath); err == nil {
 		if err := os.Remove(outputPath); err != nil {
-			return core.Thumbnail{}, err
+			return core.ImageBase64{}, err
 		}
 	}
-	return core.Thumbnail{
+	return core.ImageBase64{
 		Base64: b64,
 		Width:  imageProps.Width,
 		Height: imageProps.Height,

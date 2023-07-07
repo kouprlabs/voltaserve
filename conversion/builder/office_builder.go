@@ -6,22 +6,24 @@ import (
 	"voltaserve/client"
 	"voltaserve/core"
 	"voltaserve/helper"
+	"voltaserve/identifier"
 	"voltaserve/infra"
+	"voltaserve/processor"
 )
 
 type officeBuilder struct {
-	pipelineIdentifier *infra.PipelineIdentifier
-	pdfProc            *infra.PDFProcessor
-	officeProc         *infra.OfficeProcessor
+	pipelineIdentifier *identifier.PipelineIdentifier
+	pdfProc            *processor.PDFProcessor
+	officeProc         *processor.OfficeProcessor
 	s3                 *infra.S3Manager
 	apiClient          *client.APIClient
 }
 
 func NewOfficeBuilder() core.Builder {
 	return &officeBuilder{
-		pipelineIdentifier: infra.NewPipelineIdentifier(),
-		pdfProc:            infra.NewPDFProcessor(),
-		officeProc:         infra.NewOfficeProcessor(),
+		pipelineIdentifier: identifier.NewPipelineIdentifier(),
+		pdfProc:            processor.NewPDFProcessor(),
+		officeProc:         processor.NewOfficeProcessor(),
 		s3:                 infra.NewS3Manager(),
 		apiClient:          client.NewAPIClient(),
 	}
@@ -36,7 +38,7 @@ func (p *officeBuilder) Build(opts core.PipelineOptions) error {
 	if err != nil {
 		return err
 	}
-	thumbnail, err := p.pdfProc.ThumbnailBase64(outputPath)
+	thumbnail, err := p.pdfProc.Base64Thumbnail(outputPath)
 	if err != nil {
 		return err
 	}

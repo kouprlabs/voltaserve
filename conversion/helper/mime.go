@@ -1,4 +1,4 @@
-package infra
+package helper
 
 import "github.com/gabriel-vasile/mimetype"
 

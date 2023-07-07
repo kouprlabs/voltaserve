@@ -6,20 +6,22 @@ import (
 	"voltaserve/client"
 	"voltaserve/core"
 	"voltaserve/helper"
+	"voltaserve/identifier"
 	"voltaserve/infra"
+	"voltaserve/processor"
 )
 
 type pdfBuilder struct {
-	pipelineIdentifier *infra.PipelineIdentifier
-	pdfProc            *infra.PDFProcessor
+	pipelineIdentifier *identifier.PipelineIdentifier
+	pdfProc            *processor.PDFProcessor
 	s3                 *infra.S3Manager
 	apiClient          *client.APIClient
 }
 
 func NewPDFBuilder() core.Builder {
 	return &pdfBuilder{
-		pipelineIdentifier: infra.NewPipelineIdentifier(),
-		pdfProc:            infra.NewPDFProcessor(),
+		pipelineIdentifier: identifier.NewPipelineIdentifier(),
+		pdfProc:            processor.NewPDFProcessor(),
 		s3:                 infra.NewS3Manager(),
 		apiClient:          client.NewAPIClient(),
 	}
@@ -30,7 +32,7 @@ func (p *pdfBuilder) Build(opts core.PipelineOptions) error {
 	if err := p.s3.GetFile(opts.Key, inputPath, opts.Bucket); err != nil {
 		return err
 	}
-	thumbnail, err := p.pdfProc.ThumbnailBase64(inputPath)
+	thumbnail, err := p.pdfProc.Base64Thumbnail(inputPath)
 	if err != nil {
 		return err
 	}

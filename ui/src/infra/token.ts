@@ -3,8 +3,10 @@ import TokenAPI, { Token } from '@/client/idp/token'
 export const ACCESS_TOKEN = 'voltaserve_access_token'
 export const REFRESH_TOKEN = 'voltaserve_refresh_token'
 export const TOKEN_EXPIRY = 'voltaserve_token_expiry'
+export const COOKIE = 'voltaserve_access_token'
 
 export async function saveToken(token: Token) {
+  document.cookie = `${COOKIE}=${token.access_token}; Path=/; Max-Age=${token.expires_in}`
   localStorage.setItem(ACCESS_TOKEN, token.access_token)
   localStorage.setItem(REFRESH_TOKEN, token.refresh_token)
   const tokenExpiry = new Date()
@@ -13,6 +15,7 @@ export async function saveToken(token: Token) {
 }
 
 export async function clearToken() {
+  document.cookie = `${COOKIE}=; Max-Age=-99999999;`
   localStorage.removeItem(ACCESS_TOKEN)
   localStorage.removeItem(REFRESH_TOKEN)
   localStorage.removeItem(TOKEN_EXPIRY)
