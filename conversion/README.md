@@ -4,7 +4,7 @@
 
 Install [Golang](https://go.dev/doc/install).
 
-### When Running Infrastructure Services Without Docker (In SLE, openSUSE Leap or a RHEL compatible OS)
+### When Running Infrastructure Services Without Docker (In SLE, openSUSE Leap or a RHEL Compatible OS)
 
 Duplicate the file `./conversion/.env`, and rename it to `./conversion/.env.local`.
 
