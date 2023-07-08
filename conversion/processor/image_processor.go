@@ -6,16 +6,17 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
-	"strings"
 	"voltaserve/client"
 	"voltaserve/config"
 	"voltaserve/core"
 	"voltaserve/helper"
+	"voltaserve/identifier"
 )
 
 type ImageProcessor struct {
 	toolsClient    *client.ToolsClient
 	languageClient *client.LanguageClient
+	fileIdent      *identifier.FileIdentifier
 	config         config.Config
 }
 
@@ -23,6 +24,7 @@ func NewImageProcessor() *ImageProcessor {
 	return &ImageProcessor{
 		toolsClient:    client.NewToolsClient(),
 		languageClient: client.NewLanguageClient(),
+		fileIdent:      identifier.NewFileIdentifier(),
 		config:         config.GetConfig(),
 	}
 }
@@ -36,12 +38,12 @@ type imageData struct {
 
 func (p *ImageProcessor) Data(inputPath string) (imageData, error) {
 	results := []imageData{}
-	var jpegPath string
-	if strings.ToLower(filepath.Ext(inputPath)) != ".jpg" && strings.ToLower(filepath.Ext(inputPath)) != ".jpeg" {
-		jpegPath = inputPath
+	var noAlphaPath string
+	if p.fileIdent.IsNonAlphaChannelImage(inputPath) {
+		noAlphaPath = inputPath
 	} else {
-		jpegPath = filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".jpg")
-		if err := p.toolsClient.ConvertImage(inputPath, jpegPath); err != nil {
+		noAlphaPath = filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(inputPath))
+		if err := p.toolsClient.RemoveAlphaChannel(inputPath, noAlphaPath); err != nil {
 			return imageData{}, err
 		}
 	}
@@ -62,7 +64,7 @@ func (p *ImageProcessor) Data(inputPath string) (imageData, error) {
 		"ara":     "ara",
 	}
 	for model := range modelToLang {
-		text, err := p.toolsClient.TextFromImage(jpegPath, model)
+		text, err := p.toolsClient.TextFromImage(noAlphaPath, model)
 		if err != nil {
 			continue
 		}
@@ -81,9 +83,9 @@ func (p *ImageProcessor) Data(inputPath string) (imageData, error) {
 			continue
 		}
 	}
-	if jpegPath != inputPath {
-		if _, err := os.Stat(jpegPath); err == nil {
-			if err := os.Remove(jpegPath); err != nil {
+	if noAlphaPath != inputPath {
+		if _, err := os.Stat(noAlphaPath); err == nil {
+			if err := os.Remove(noAlphaPath); err != nil {
 				return imageData{}, err
 			}
 		}

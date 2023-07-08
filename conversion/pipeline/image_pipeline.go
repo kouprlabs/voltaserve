@@ -49,9 +49,36 @@ func (p *imagePipeline) Run(opts core.PipelineOptions) error {
 	if err != nil {
 		return err
 	}
+	imageProps, err := p.toolsClient.MeasureImage(inputPath)
+	if err != nil {
+		return err
+	}
+	res := core.PipelineResponse{
+		Options: opts,
+		Original: &core.S3Object{
+			Bucket: opts.Bucket,
+			Key:    opts.Key,
+			Image:  &imageProps,
+			Size:   stat.Size(),
+		},
+	}
+	if err := p.apiClient.UpdateSnapshot(&res); err != nil {
+		return err
+	}
 	if filepath.Ext(inputPath) == ".tiff" {
 		jpegPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".jpg")
 		if err := p.toolsClient.ConvertImage(inputPath, jpegPath); err != nil {
+			return err
+		}
+		res.Preview = &core.S3Object{
+			Bucket: opts.Bucket,
+			Key:    opts.FileID + "/" + opts.SnapshotID + "/preview.jpg",
+			Size:   stat.Size(),
+		}
+		if err := p.s3.PutFile(res.Preview.Key, jpegPath, helper.DetectMimeFromFile(jpegPath), res.Preview.Bucket); err != nil {
+			return err
+		}
+		if err := p.apiClient.UpdateSnapshot(&res); err != nil {
 			return err
 		}
 		if err := os.Remove(inputPath); err != nil {
@@ -68,22 +95,6 @@ func (p *imagePipeline) Run(opts core.PipelineOptions) error {
 			return err
 		}
 		inputPath = noAlphaPath
-	}
-	imageProps, err := p.toolsClient.MeasureImage(inputPath)
-	if err != nil {
-		return err
-	}
-	res := core.PipelineResponse{
-		Options: opts,
-		Original: &core.S3Object{
-			Bucket: opts.Bucket,
-			Key:    opts.Key,
-			Image:  &imageProps,
-			Size:   stat.Size(),
-		},
-	}
-	if err := p.apiClient.UpdateSnapshot(&res); err != nil {
-		return err
 	}
 	if opts.IsAutomaticOCREnabled {
 		imageData, err := p.imageProc.Data(inputPath)
