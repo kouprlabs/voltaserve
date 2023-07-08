@@ -1,4 +1,4 @@
-FROM rockylinux:9.2 AS builder
+FROM redhat/ubi9:9.2 AS builder
 
 WORKDIR /build
 
@@ -9,13 +9,13 @@ RUN dnf install -y golang
 RUN go mod download
 RUN go build -o voltaserve-tools
 
-FROM rockylinux:9.2 AS runner
+FROM redhat/ubi9:9.2 AS runner
 
 RUN dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
 RUN dnf install -y https://mirrors.rpmfusion.org/free/el/rpmfusion-free-release-9.noarch.rpm
 RUN dnf install -y https://mirrors.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-9.noarch.rpm
 RUN dnf install -y dnf-plugins-core
-RUN dnf config-manager --set-enabled crb
+RUN dnf config-manager --set-enabled ubi-9-codeready-builder-rpms
 RUN dnf install -y ffmpeg --allowerasing
 
 WORKDIR /app

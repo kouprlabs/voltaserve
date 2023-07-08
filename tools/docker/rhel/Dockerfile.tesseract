@@ -1,4 +1,4 @@
-FROM rockylinux:9.2 AS builder
+FROM redhat/ubi9:9.2 AS builder
 
 WORKDIR /build
 

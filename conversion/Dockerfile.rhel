@@ -1,4 +1,4 @@
-FROM rockylinux:9.2 AS builder
+FROM redhat/ubi9:9.2 AS builder
 
 WORKDIR /build
 
@@ -9,7 +9,7 @@ RUN dnf install -y golang
 RUN go mod download
 RUN go build -o voltaserve-conversion
 
-FROM rockylinux:9.2 AS runner
+FROM redhat/ubi9-micro:9.2 AS runner
 
 WORKDIR /app
 
