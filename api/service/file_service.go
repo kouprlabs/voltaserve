@@ -196,7 +196,7 @@ type FileService struct {
 	groupGuard       *guard.GroupGuard
 	groupMapper      *groupMapper
 	permissionRepo   repo.PermissionRepo
-	fileIdentifier   *infra.FileIdentifier
+	fileIdent        *infra.FileIdentifier
 	s3               *infra.S3Manager
 	conversionClient *infra.ConversionClient
 	config           config.Config
@@ -220,7 +220,7 @@ func NewFileService() *FileService {
 		groupGuard:       guard.NewGroupGuard(),
 		groupMapper:      newGroupMapper(),
 		permissionRepo:   repo.NewPermissionRepo(),
-		fileIdentifier:   infra.NewFileIdentifier(),
+		fileIdent:        infra.NewFileIdentifier(),
 		s3:               infra.NewS3Manager(),
 		conversionClient: infra.NewConversionClient(),
 		config:           config.GetConfig(),
@@ -1499,7 +1499,7 @@ func (svc *FileService) doSorting(data []model.File, sortBy string, sortOrder st
 				if f.Original == nil {
 					return false
 				}
-				if svc.fileIdentifier.IsImage(f.Original.Extension) {
+				if svc.fileIdent.IsImage(f.Original.Extension) {
 					return true
 				}
 				return false
@@ -1514,7 +1514,7 @@ func (svc *FileService) doSorting(data []model.File, sortBy string, sortOrder st
 				if f.Original == nil {
 					return false
 				}
-				if svc.fileIdentifier.IsPDF(f.Original.Extension) {
+				if svc.fileIdent.IsPDF(f.Original.Extension) {
 					return true
 				}
 				return false
@@ -1529,7 +1529,7 @@ func (svc *FileService) doSorting(data []model.File, sortBy string, sortOrder st
 				if f.Original == nil {
 					return false
 				}
-				if svc.fileIdentifier.IsOffice(f.Original.Extension) {
+				if svc.fileIdent.IsOffice(f.Original.Extension) {
 					return true
 				}
 				return false
@@ -1544,7 +1544,7 @@ func (svc *FileService) doSorting(data []model.File, sortBy string, sortOrder st
 				if f.Original == nil {
 					return false
 				}
-				if svc.fileIdentifier.IsVideo(f.Original.Extension) {
+				if svc.fileIdent.IsVideo(f.Original.Extension) {
 					return true
 				}
 				return false
@@ -1559,7 +1559,7 @@ func (svc *FileService) doSorting(data []model.File, sortBy string, sortOrder st
 				if f.Original == nil {
 					return false
 				}
-				if svc.fileIdentifier.IsPlainText(f.Original.Extension) {
+				if svc.fileIdent.IsPlainText(f.Original.Extension) {
 					return true
 				}
 				return false
@@ -1574,11 +1574,11 @@ func (svc *FileService) doSorting(data []model.File, sortBy string, sortOrder st
 				if f.Original == nil {
 					return false
 				}
-				if !svc.fileIdentifier.IsImage(f.Original.Extension) &&
-					!svc.fileIdentifier.IsPDF(f.Original.Extension) &&
-					!svc.fileIdentifier.IsOffice(f.Original.Extension) &&
-					!svc.fileIdentifier.IsVideo(f.Original.Extension) &&
-					!svc.fileIdentifier.IsPlainText(f.Original.Extension) {
+				if !svc.fileIdent.IsImage(f.Original.Extension) &&
+					!svc.fileIdent.IsPDF(f.Original.Extension) &&
+					!svc.fileIdent.IsOffice(f.Original.Extension) &&
+					!svc.fileIdent.IsVideo(f.Original.Extension) &&
+					!svc.fileIdent.IsPlainText(f.Original.Extension) {
 					return true
 				}
 				return false

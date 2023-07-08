@@ -7,6 +7,7 @@ import (
 	"voltaserve/config"
 	"voltaserve/core"
 	"voltaserve/helper"
+	"voltaserve/identifier"
 	"voltaserve/infra"
 	"voltaserve/processor"
 
@@ -18,9 +19,9 @@ type imagePipeline struct {
 	s3          *infra.S3Manager
 	apiClient   *client.APIClient
 	toolsClient *client.ToolsClient
-
-	logger *zap.SugaredLogger
-	config config.Config
+	fileIdent   *identifier.FileIdentifier
+	logger      *zap.SugaredLogger
+	config      config.Config
 }
 
 func NewImagePipeline() core.Pipeline {
@@ -33,6 +34,7 @@ func NewImagePipeline() core.Pipeline {
 		s3:          infra.NewS3Manager(),
 		apiClient:   client.NewAPIClient(),
 		toolsClient: client.NewToolsClient(),
+		fileIdent:   identifier.NewFileIdentifier(),
 		logger:      logger,
 		config:      config.GetConfig(),
 	}
@@ -56,6 +58,16 @@ func (p *imagePipeline) Run(opts core.PipelineOptions) error {
 			return err
 		}
 		inputPath = jpegPath
+	}
+	if !p.fileIdent.IsNonAlphaChannelImage(inputPath) {
+		noAlphaPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(inputPath))
+		if err := p.toolsClient.RemoveAlphaChannel(inputPath, noAlphaPath); err != nil {
+			return err
+		}
+		if err := os.Remove(inputPath); err != nil {
+			return err
+		}
+		inputPath = noAlphaPath
 	}
 	imageProps, err := p.toolsClient.MeasureImage(inputPath)
 	if err != nil {

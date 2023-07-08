@@ -5,23 +5,23 @@ import (
 )
 
 type PipelineIdentifier struct {
-	fileIdentifier *FileIdentifier
+	fileIdent *FileIdentifier
 }
 
 func NewPipelineIdentifier() *PipelineIdentifier {
 	return &PipelineIdentifier{
-		fileIdentifier: NewFileIdentifier(),
+		fileIdent: NewFileIdentifier(),
 	}
 }
 
 func (pi *PipelineIdentifier) Identify(opts core.PipelineOptions) string {
-	if pi.fileIdentifier.IsPDF(opts.Key) {
+	if pi.fileIdent.IsPDF(opts.Key) {
 		return core.PipelinePDF
-	} else if pi.fileIdentifier.IsOffice(opts.Key) || pi.fileIdentifier.IsPlainText(opts.Key) {
+	} else if pi.fileIdent.IsOffice(opts.Key) || pi.fileIdent.IsPlainText(opts.Key) {
 		return core.PipelineOffice
-	} else if pi.fileIdentifier.IsImage(opts.Key) {
+	} else if pi.fileIdent.IsImage(opts.Key) {
 		return core.PipelineImage
-	} else if pi.fileIdentifier.IsVideo(opts.Key) {
+	} else if pi.fileIdent.IsVideo(opts.Key) {
 		return core.PipelineVideo
 	}
 	return ""

@@ -21,7 +21,7 @@ type pdfPipeline struct {
 	apiClient      *client.APIClient
 	languageClient *client.LanguageClient
 	toolsClient    *client.ToolsClient
-	fileIdentifier *identifier.FileIdentifier
+	fileIdent      *identifier.FileIdentifier
 	logger         *zap.SugaredLogger
 	config         config.Config
 }
@@ -38,7 +38,7 @@ func NewPDFPipeline() core.Pipeline {
 		apiClient:      client.NewAPIClient(),
 		languageClient: client.NewLanguageClient(),
 		toolsClient:    client.NewToolsClient(),
-		fileIdentifier: identifier.NewFileIdentifier(),
+		fileIdent:      identifier.NewFileIdentifier(),
 		logger:         logger,
 		config:         config.GetConfig(),
 	}
