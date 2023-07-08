@@ -14,13 +14,13 @@ import (
 )
 
 type imagePipeline struct {
-	pdfPipeline core.Pipeline
 	imageProc   *processor.ImageProcessor
 	s3          *infra.S3Manager
 	apiClient   *client.APIClient
 	toolsClient *client.ToolsClient
-	logger      *zap.SugaredLogger
-	config      config.Config
+
+	logger *zap.SugaredLogger
+	config config.Config
 }
 
 func NewImagePipeline() core.Pipeline {
@@ -29,7 +29,6 @@ func NewImagePipeline() core.Pipeline {
 		panic(err)
 	}
 	return &imagePipeline{
-		pdfPipeline: NewPDFPipeline(),
 		imageProc:   processor.NewImageProcessor(),
 		s3:          infra.NewS3Manager(),
 		apiClient:   client.NewAPIClient(),
@@ -49,14 +48,14 @@ func (p *imagePipeline) Run(opts core.PipelineOptions) error {
 		return err
 	}
 	if filepath.Ext(inputPath) == ".tiff" {
-		newInputFile := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".jpg")
-		if err := p.toolsClient.ConvertImage(inputPath, newInputFile); err != nil {
+		jpegPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".jpg")
+		if err := p.toolsClient.ConvertImage(inputPath, jpegPath); err != nil {
 			return err
 		}
 		if err := os.Remove(inputPath); err != nil {
 			return err
 		}
-		inputPath = newInputFile
+		inputPath = jpegPath
 	}
 	imageProps, err := p.toolsClient.MeasureImage(inputPath)
 	if err != nil {
@@ -74,22 +73,35 @@ func (p *imagePipeline) Run(opts core.PipelineOptions) error {
 	if err := p.apiClient.UpdateSnapshot(&res); err != nil {
 		return err
 	}
-	imageData, err := p.imageProc.Data(inputPath)
-	if err == nil {
-		/* We treat it as a text image, we convert it to PDF/A */
-		opts.Language = &imageData.Language
-		opts.TesseractModel = &imageData.Model
-		opts.Text = &imageData.Text
-		if err := p.pdfPipeline.Run(opts); err != nil {
-			/*
-				Here we intentionally ignore the error, here is the explanation why:
-				The reason we came here to begin with is because of
-				this condition: 'ocrData.PositiveConfCount > ocrData.NegativeConfCount',
-				but it turned out that the OCR failed, that means probably the image
-				does not contain text after all ¯\_(ツ)_/¯
-				So we log the error and move on...
-			*/
-			p.logger.Named(infra.StrPipeline).Errorw(err.Error())
+	if opts.IsAutomaticOCREnabled {
+		imageData, err := p.imageProc.Data(inputPath)
+		if err == nil {
+			dpi, err := p.toolsClient.DPIFromImage(inputPath)
+			if err != nil {
+				dpi = 72
+			}
+			pdfPath, err := p.toolsClient.OCRFromPDF(inputPath, &imageData.Model, &dpi)
+			if err != nil {
+				p.logger.Named(infra.StrPipeline).Errorw(err.Error())
+			}
+			if stat, err := os.Stat(pdfPath); err == nil {
+				if err := os.Remove(inputPath); err != nil {
+					return err
+				}
+				inputPath = pdfPath
+				res.OCR = &core.S3Object{
+					Bucket:   opts.Bucket,
+					Key:      opts.FileID + "/" + opts.SnapshotID + "/ocr.pdf",
+					Size:     stat.Size(),
+					Language: &imageData.Language,
+				}
+				if err := p.s3.PutFile(res.OCR.Key, inputPath, helper.DetectMimeFromFile(inputPath), res.OCR.Bucket); err != nil {
+					return err
+				}
+				if err := p.apiClient.UpdateSnapshot(&res); err != nil {
+					return err
+				}
+			}
 		}
 	}
 	if _, err := os.Stat(inputPath); err == nil {

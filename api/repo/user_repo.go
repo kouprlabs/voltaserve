@@ -20,58 +20,58 @@ func NewUserRepo() UserRepo {
 }
 
 func NewUser() model.User {
-	return &postgresUser{}
+	return &userEntity{}
 }
 
-type postgresUser struct {
-	ID                     string  `json:"id"`
-	FullName               string  `json:"fullName"`
-	Username               string  `json:"username"`
-	Email                  string  `json:"email"`
-	Picture                *string `json:"picture"`
-	IsEmailConfirmed       bool    `json:"isEmailConfirmed"`
-	PasswordHash           string  `json:"passwordHash"`
-	RefreshTokenValue      *string `json:"refreshTokenValue"`
-	RefreshTokenValidTo    *int64  `json:"refreshTokenValidTo"`
-	ResetPasswordToken     *string `json:"resetPasswordToken"`
-	EmailConfirmationToken *string `json:"emailConfirmationToken"`
-	CreateTime             string  `json:"createTime"`
-	UpdateTime             *string `json:"updateTime"`
+type userEntity struct {
+	ID                     string  `json:"id" gorm:"column:id"`
+	FullName               string  `json:"fullName" gorm:"column:full_name"`
+	Username               string  `json:"username" gorm:"column:username"`
+	Email                  string  `json:"email" gorm:"column:email"`
+	Picture                *string `json:"picture" gorm:"column:picture"`
+	IsEmailConfirmed       bool    `json:"isEmailConfirmed" gorm:"column:is_email_confirmed"`
+	PasswordHash           string  `json:"passwordHash" gorm:"column:password_hash"`
+	RefreshTokenValue      *string `json:"refreshTokenValue" gorm:"column:refresh_token_value"`
+	RefreshTokenValidTo    *int64  `json:"refreshTokenValidTo" gorm:"column:refresh_token_valid_to"`
+	ResetPasswordToken     *string `json:"resetPasswordToken" gorm:"column:reset_password_token"`
+	EmailConfirmationToken *string `json:"emailConfirmationToken" gorm:"column:email_confirmation_token"`
+	CreateTime             string  `json:"createTime" gorm:"column:create_time"`
+	UpdateTime             *string `json:"updateTime" gorm:"column:update_time"`
 }
 
-func (postgresUser) TableName() string {
+func (userEntity) TableName() string {
 	return "user"
 }
 
-func (u postgresUser) GetID() string {
+func (u userEntity) GetID() string {
 	return u.ID
 }
 
-func (u postgresUser) GetFullName() string {
+func (u userEntity) GetFullName() string {
 	return u.FullName
 }
 
-func (u postgresUser) GetUsername() string {
+func (u userEntity) GetUsername() string {
 	return u.Username
 }
 
-func (u postgresUser) GetEmail() string {
+func (u userEntity) GetEmail() string {
 	return u.Email
 }
 
-func (u postgresUser) GetPicture() *string {
+func (u userEntity) GetPicture() *string {
 	return u.Picture
 }
 
-func (u postgresUser) GetIsEmailConfirmed() bool {
+func (u userEntity) GetIsEmailConfirmed() bool {
 	return u.IsEmailConfirmed
 }
 
-func (u postgresUser) GetCreateTime() string {
+func (u userEntity) GetCreateTime() string {
 	return u.CreateTime
 }
 
-func (u postgresUser) GetUpdateTime() *string {
+func (u userEntity) GetUpdateTime() *string {
 	return u.UpdateTime
 }
 
@@ -86,7 +86,7 @@ func newUserRepo() *userRepo {
 }
 
 func (repo *userRepo) Find(id string) (model.User, error) {
-	var res = postgresUser{}
+	var res = userEntity{}
 	db := repo.db.Where("id = ?", id).First(&res)
 	if db.Error != nil {
 		if errors.Is(db.Error, gorm.ErrRecordNotFound) {
@@ -99,7 +99,7 @@ func (repo *userRepo) Find(id string) (model.User, error) {
 }
 
 func (repo *userRepo) FindByEmail(email string) (model.User, error) {
-	var res = postgresUser{}
+	var res = userEntity{}
 	db := repo.db.Where("email = ?", email).First(&res)
 	if db.Error != nil {
 		return nil, db.Error
@@ -108,7 +108,7 @@ func (repo *userRepo) FindByEmail(email string) (model.User, error) {
 }
 
 func (repo *userRepo) FindAll() ([]model.User, error) {
-	var entities []*postgresUser
+	var entities []*userEntity
 	db := repo.db.Raw(`select * from "user" u`).Scan(&entities)
 	if db.Error != nil {
 		return nil, db.Error

@@ -218,7 +218,7 @@ func (repo *organizationRepo) RemoveMember(id string, userID string) error {
 }
 
 func (repo *organizationRepo) GetMembers(id string) ([]model.User, error) {
-	var entities []*postgresUser
+	var entities []*userEntity
 	db := repo.db.
 		Raw(`SELECT DISTINCT u.* FROM "user" u INNER JOIN organization_user ou ON u.id = ou.user_id WHERE ou.organization_id = ? ORDER BY u.full_name ASC`, id).
 		Scan(&entities)

@@ -2,22 +2,22 @@ import { Badge, Stat, StatLabel, StatNumber } from '@chakra-ui/react'
 import { variables } from '@koupr/ui'
 import { File } from '@/client/api/file'
 
-type LanguageInfoProps = {
+type OcrLanguageInfoProps = {
   file: File
 }
 
-const LanguageInfo = ({ file }: LanguageInfoProps) => {
-  if (!file.language) {
+const OcrLanguageInfo = ({ file }: OcrLanguageInfoProps) => {
+  if (!file.ocr?.language) {
     return null
   }
   return (
     <Stat>
-      <StatLabel>Language</StatLabel>
+      <StatLabel>OCR Language</StatLabel>
       <StatNumber fontSize={variables.bodyFontSize}>
-        <Badge>{file.language}</Badge>
+        <Badge>{file.ocr.language}</Badge>
       </StatNumber>
     </Stat>
   )
 }
 
-export default LanguageInfo
+export default OcrLanguageInfo

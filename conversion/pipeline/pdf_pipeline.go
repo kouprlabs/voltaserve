@@ -10,6 +10,8 @@ import (
 	"voltaserve/identifier"
 	"voltaserve/infra"
 	"voltaserve/processor"
+
+	"go.uber.org/zap"
 )
 
 type pdfPipeline struct {
@@ -20,10 +22,15 @@ type pdfPipeline struct {
 	languageClient *client.LanguageClient
 	toolsClient    *client.ToolsClient
 	fileIdentifier *identifier.FileIdentifier
+	logger         *zap.SugaredLogger
 	config         config.Config
 }
 
 func NewPDFPipeline() core.Pipeline {
+	logger, err := infra.GetLogger()
+	if err != nil {
+		panic(err)
+	}
 	return &pdfPipeline{
 		pdfProc:        processor.NewPDFProcessor(),
 		imageProc:      processor.NewImageProcessor(),
@@ -32,6 +39,7 @@ func NewPDFPipeline() core.Pipeline {
 		languageClient: client.NewLanguageClient(),
 		toolsClient:    client.NewToolsClient(),
 		fileIdentifier: identifier.NewFileIdentifier(),
+		logger:         logger,
 		config:         config.GetConfig(),
 	}
 }
@@ -42,74 +50,24 @@ func (p *pdfPipeline) Run(opts core.PipelineOptions) error {
 		return err
 	}
 	res := core.PipelineResponse{
-		Options:  opts,
-		Language: opts.Language,
+		Options: opts,
 	}
-	var dpi *int
-	var text string
-	if opts.Text != nil {
-		text = *opts.Text
+	text, err := p.toolsClient.TextFromPDF(inputPath)
+	if err != nil {
+		p.logger.Named(infra.StrPipeline).Errorw(err.Error())
 	}
-	if p.fileIdentifier.IsImage(inputPath) {
-		newInputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(inputPath))
-		if err := p.toolsClient.RemoveAlphaChannel(inputPath, newInputPath); err != nil {
-			return err
-		}
-		if err := os.Remove(inputPath); err != nil {
-			return err
-		}
-		inputPath = newInputPath
-		imageDPI, err := p.toolsClient.DPIFromImage(inputPath)
-		if err != nil {
-			dpi = new(int)
-			*dpi = 72
-		} else {
-			dpi = &imageDPI
-		}
-	} else if p.fileIdentifier.IsPDF(inputPath) && text == "" {
-		if pdfText, err := p.toolsClient.TextFromPDF(inputPath); err != nil {
-			return err
-		} else {
-			text = pdfText
-		}
-	}
-	if text != "" {
-		if res.Language == nil {
-			if langDetect, err := p.languageClient.Detect(text); err == nil {
-				res.Language = &langDetect.Language
-			}
-		}
-		s3Object := core.S3Object{
+	if text != "" && err == nil {
+		res.Text = &core.S3Object{
 			Bucket: opts.Bucket,
 			Key:    opts.FileID + "/" + opts.SnapshotID + "/text.txt",
 			Size:   int64(len(text)),
 		}
-		if err := p.s3.PutText(s3Object.Key, text, "text/plain", s3Object.Bucket); err != nil {
+		if err := p.s3.PutText(res.Text.Key, text, "text/plain", res.Text.Bucket); err != nil {
 			return err
 		}
-		res.Text = &s3Object
 	}
 	if err := p.apiClient.UpdateSnapshot(&res); err != nil {
 		return err
-	}
-	newInputPath, _ := p.toolsClient.OCRFromPDF(inputPath, opts.TesseractModel, dpi)
-	if stat, err := os.Stat(newInputPath); err == nil {
-		if err := os.Remove(inputPath); err != nil {
-			return err
-		}
-		inputPath = newInputPath
-		s3Object := core.S3Object{
-			Bucket: opts.Bucket,
-			Key:    opts.FileID + "/" + opts.SnapshotID + "/ocr.pdf",
-			Size:   stat.Size(),
-		}
-		if err := p.s3.PutFile(s3Object.Key, inputPath, helper.DetectMimeFromFile(inputPath), s3Object.Bucket); err != nil {
-			return err
-		}
-		res.OCR = &s3Object
-		if err := p.apiClient.UpdateSnapshot(&res); err != nil {
-			return err
-		}
 	}
 	if _, err := os.Stat(inputPath); err == nil {
 		if err := os.Remove(inputPath); err != nil {

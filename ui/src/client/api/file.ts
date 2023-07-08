@@ -37,7 +37,6 @@ export type File = {
   preview?: Download
   ocr?: Download
   thumbnail?: Thumbnail
-  language?: string
   snapshots: Snapshot[]
   permission: PermissionType
   isShared: boolean

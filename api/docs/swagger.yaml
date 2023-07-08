@@ -523,6 +523,8 @@ definitions:
         type: string
       image:
         type: string
+      isAutomaticOcrEnabled:
+        type: boolean
       name:
         type: string
       organization:
@@ -565,6 +567,13 @@ definitions:
         type: integer
       totalPages:
         type: integer
+    type: object
+  service.WorkspaceUpdateIsAutomaticOCREnabledOptions:
+    properties:
+      isEnabled:
+        type: boolean
+    required:
+    - isEnabled
     type: object
   service.WorkspaceUpdateNameOptions:
     properties:
@@ -2363,6 +2372,42 @@ paths:
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
       summary: Get by ID
+      tags:
+      - Workspaces
+  /workspaces/{id}/update_is_automatic_ocr_enabled:
+    post:
+      consumes:
+      - application/json
+      description: Update is automatic OCR enabled
+      operationId: workspaces_update_is_automatic_ocr_enabled
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/service.WorkspaceUpdateIsAutomaticOCREnabledOptions'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.Workspace'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Update is automatic OCR enabled
       tags:
       - Workspaces
   /workspaces/{id}/update_name:

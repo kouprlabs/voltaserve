@@ -19,7 +19,6 @@ type SnapshotUpdateOptions struct {
 	Text      *model.S3Object
 	OCR       *model.S3Object
 	Thumbnail *model.Thumbnail
-	Language  *string
 }
 
 type SnapshotRepo interface {
@@ -296,9 +295,6 @@ func (repo *snapshotRepo) Update(id string, opts SnapshotUpdateOptions) error {
 	}
 	if opts.Text != nil {
 		snapshot.SetText(opts.Text)
-	}
-	if opts.Language != nil {
-		snapshot.SetLanguage(opts.Language)
 	}
 	if db := repo.db.Save(&snapshot); db.Error != nil {
 		return db.Error

@@ -5,13 +5,13 @@ export type Snapshot = {
   ocr?: Download
   text?: Download
   thumbnail?: Thumbnail
-  language?: string
 }
 
 export type Download = {
   extension: string
   size: number
-  image: ImageProps | undefined
+  image?: ImageProps
+  language?: string
 }
 
 export type ImageProps = {

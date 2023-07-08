@@ -275,7 +275,7 @@ func (repo *groupRepo) GetIDs() ([]string, error) {
 }
 
 func (repo *groupRepo) GetMembers(id string) ([]model.User, error) {
-	var entities []*postgresUser
+	var entities []*userEntity
 	db := repo.db.
 		Raw(`SELECT DISTINCT u.* FROM "user" u INNER JOIN group_user gu ON u.id = gu.user_id WHERE gu.group_id = ?`, id).
 		Scan(&entities)

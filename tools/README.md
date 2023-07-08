@@ -2,7 +2,7 @@
 
 ## Getting Started
 
-Install [Golang](https://go.dev/doc/install).
+Install [Golang](https://go.dev/doc/install) and [golangci-lint](https://golangci-lint.run/usage/install).
 
 Run for development:
 
@@ -14,6 +14,12 @@ Build binary:
 
 ```shell
 go build .
+```
+
+### Code Linter
+
+```shell
+golangci-lint run
 ```
 
 ### Build Docker Images

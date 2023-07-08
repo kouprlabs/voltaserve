@@ -37,7 +37,7 @@ type imageData struct {
 func (p *ImageProcessor) Data(inputPath string) (imageData, error) {
 	results := []imageData{}
 	var jpegPath string
-	if strings.ToLower(filepath.Ext(inputPath)) == ".jpg" || strings.ToLower(filepath.Ext(inputPath)) == ".jpeg" {
+	if strings.ToLower(filepath.Ext(inputPath)) != ".jpg" && strings.ToLower(filepath.Ext(inputPath)) != ".jpeg" {
 		jpegPath = inputPath
 	} else {
 		jpegPath = filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".jpg")
@@ -81,9 +81,11 @@ func (p *ImageProcessor) Data(inputPath string) (imageData, error) {
 			continue
 		}
 	}
-	if _, err := os.Stat(jpegPath); err == nil {
-		if err := os.Remove(jpegPath); err != nil {
-			return imageData{}, err
+	if jpegPath != inputPath {
+		if _, err := os.Stat(jpegPath); err == nil {
+			if err := os.Remove(jpegPath); err != nil {
+				return imageData{}, err
+			}
 		}
 	}
 	if len(results) > 0 {

@@ -1,13 +1,11 @@
 package core
 
 type PipelineOptions struct {
-	FileID         string  `json:"fileId"`
-	SnapshotID     string  `json:"snapshotId"`
-	Bucket         string  `json:"bucket"`
-	Key            string  `json:"key"`
-	Language       *string `json:"language,omitempty"`
-	TesseractModel *string `json:"tesseractModel,omitempty"`
-	Text           *string `json:"text,omitempty"`
+	FileID                string `json:"fileId"`
+	SnapshotID            string `json:"snapshotId"`
+	Bucket                string `json:"bucket"`
+	Key                   string `json:"key"`
+	IsAutomaticOCREnabled bool   `json:"isAutomaticOcrEnabled"`
 }
 
 type PipelineResponse struct {
@@ -17,14 +15,14 @@ type PipelineResponse struct {
 	Text      *S3Object       `json:"text,omitempty"`
 	OCR       *S3Object       `json:"ocr,omitempty"`
 	Thumbnail *ImageBase64    `json:"thumbnail,omitempty"`
-	Language  *string         `json:"language,omitempty"`
 }
 
 type S3Object struct {
-	Bucket string      `json:"bucket"`
-	Key    string      `json:"key"`
-	Size   int64       `json:"size"`
-	Image  *ImageProps `json:"image,omitempty"`
+	Bucket   string      `json:"bucket"`
+	Key      string      `json:"key"`
+	Size     int64       `json:"size"`
+	Image    *ImageProps `json:"image,omitempty"`
+	Language *string     `json:"language,omitempty"`
 }
 
 type ImageProps struct {

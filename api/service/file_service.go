@@ -32,7 +32,6 @@ type File struct {
 	Preview     *Download   `json:"preview,omitempty"`
 	OCR         *Download   `json:"ocr,omitempty"`
 	Thumbnail   *Thumbnail  `json:"thumbnail,omitempty"`
-	Language    *string     `json:"language,omitempty"`
 	Snapshots   []*Snapshot `json:"snapshots,omitempty"`
 	Permission  string      `json:"permission"`
 	IsShared    bool        `json:"isShared"`
@@ -156,6 +155,7 @@ type Download struct {
 	Extension string      `json:"extension"`
 	Size      int64       `json:"size"`
 	Image     *ImageProps `json:"image,omitempty"`
+	Language  *string     `json:"language,omitempty"`
 }
 
 type UserPermission struct {
@@ -171,13 +171,12 @@ type GroupPermission struct {
 }
 
 type SnapshotUpdateOptions struct {
-	Options   infra.RunPipelineOptions `json:"options"`
-	Original  *model.S3Object          `json:"original,omitempty"`
-	Preview   *model.S3Object          `json:"preview,omitempty"`
-	Text      *model.S3Object          `json:"text,omitempty"`
-	OCR       *model.S3Object          `json:"ocr,omitempty"`
-	Thumbnail *model.Thumbnail         `json:"thumbnail,omitempty"`
-	Language  *string                  `json:"language,omitempty"`
+	Options   infra.PipelineOptions `json:"options"`
+	Original  *model.S3Object       `json:"original,omitempty"`
+	Preview   *model.S3Object       `json:"preview,omitempty"`
+	Text      *model.S3Object       `json:"text,omitempty"`
+	OCR       *model.S3Object       `json:"ocr,omitempty"`
+	Thumbnail *model.Thumbnail      `json:"thumbnail,omitempty"`
 }
 
 type FileService struct {
@@ -338,11 +337,12 @@ func (svc *FileService) Store(fileID string, filePath string, userID string) (*F
 	if err != nil {
 		return nil, err
 	}
-	if err := svc.conversionClient.RunPipeline(&infra.RunPipelineOptions{
-		FileID:     file.GetID(),
-		SnapshotID: snapshot.GetID(),
-		Bucket:     original.Bucket,
-		Key:        original.Key,
+	if err := svc.conversionClient.RunPipeline(&infra.PipelineOptions{
+		FileID:                file.GetID(),
+		SnapshotID:            snapshot.GetID(),
+		Bucket:                original.Bucket,
+		Key:                   original.Key,
+		IsAutomaticOCREnabled: workspace.GetIsAutomaticOCREnabled(),
 	}); err != nil {
 		return nil, err
 	}
@@ -359,7 +359,6 @@ func (svc *FileService) UpdateSnapshot(opts SnapshotUpdateOptions, apiKey string
 		Preview:   opts.Preview,
 		Text:      opts.Text,
 		OCR:       opts.OCR,
-		Language:  opts.Language,
 	}); err != nil {
 		return err
 	}
@@ -1777,7 +1776,6 @@ func (mp *FileMapper) mapOne(m model.File, userID string) (*File, error) {
 		res.Preview = latest.Preview
 		res.OCR = latest.OCR
 		res.Thumbnail = latest.Thumbnail
-		res.Language = latest.Language
 	}
 	res.Permission = ""
 	for _, p := range m.GetUserPermissions() {
@@ -1878,6 +1876,7 @@ func (mp *FileMapper) mapOCR(m *model.S3Object) *Download {
 	return &Download{
 		Extension: filepath.Ext(m.Key),
 		Size:      m.Size,
+		Language:  m.Language,
 	}
 }
 

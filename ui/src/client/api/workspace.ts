@@ -23,6 +23,7 @@ export type Workspace = {
   storageCapacity: number
   rootId: string
   organization: Organization
+  isAutomaticOcrEnabled: boolean
   createTime: string
   updateTime?: string
 }
@@ -52,6 +53,10 @@ export type ListOptions = {
 
 export interface UpdateNameOptions {
   name: string
+}
+
+export interface UpdateIsAutomaticOcrEnabledOptions {
+  isEnabled: boolean
 }
 
 export interface StorageCapacityOptions {
@@ -140,6 +145,20 @@ export default class WorkspaceAPI {
     return apiFetch(`/workspaces/${id}/update_image`, {
       method: 'POST',
       body: formData,
+      headers: {
+        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
+        'Content-Type': 'application/json',
+      },
+    }).then((result) => result.json())
+  }
+
+  static async updateIsAutomaticOcrEnabled(
+    id: string,
+    options: UpdateIsAutomaticOcrEnabledOptions
+  ): Promise<Workspace> {
+    return apiFetch(`/workspaces/${id}/update_is_automatic_ocr_enabled`, {
+      method: 'POST',
+      body: JSON.stringify(options),
       headers: {
         'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
         'Content-Type': 'application/json',

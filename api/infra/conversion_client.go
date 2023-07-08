@@ -12,11 +12,12 @@ type ConversionClient struct {
 	config config.Config
 }
 
-type RunPipelineOptions struct {
-	FileID     string `json:"fileId"`
-	SnapshotID string `json:"snapshotId"`
-	Bucket     string `json:"bucket"`
-	Key        string `json:"key"`
+type PipelineOptions struct {
+	FileID                string `json:"fileId"`
+	SnapshotID            string `json:"snapshotId"`
+	Bucket                string `json:"bucket"`
+	Key                   string `json:"key"`
+	IsAutomaticOCREnabled bool   `json:"isAutomaticOcrEnabled"`
 }
 
 func NewConversionClient() *ConversionClient {
@@ -25,7 +26,7 @@ func NewConversionClient() *ConversionClient {
 	}
 }
 
-func (c *ConversionClient) RunPipeline(opts *RunPipelineOptions) error {
+func (c *ConversionClient) RunPipeline(opts *PipelineOptions) error {
 	body, err := json.Marshal(opts)
 	if err != nil {
 		return err
