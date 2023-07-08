@@ -30,14 +30,14 @@ pnpm run start
 
 ### Docker Images
 
-Build SLE / openSUSE Leap Docker image:
+Build SLE Docker image:
 
 ```shell
-docker build -t voltaserve/webdav -f ./Dockerfile.sle .
+docker build -t voltaserve/webdav:sle -f ./Dockerfile.sle .
 ```
 
 Build RHEL Docker image:
 
 ```shell
-docker build -t voltaserve/webdav -f ./Dockerfile.rhel .
+docker build -t voltaserve/webdav:rhel -f ./Dockerfile.rhel .
 ```
