@@ -1,10 +1,12 @@
-FROM rockylinux:9.2
+FROM redhat/ubi9:9.2
 
 WORKDIR /app
 
 COPY . .
 
-RUN dnf install -y clang python3-pip python3-devel micropipenv
+RUN dnf install -y gcc-c++ python3-pip python3-devel
+
+RUN pip3 install micropipenv
 
 RUN micropipenv install
 

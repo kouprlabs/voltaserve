@@ -18,16 +18,16 @@ go build .
 
 ### Docker Images
 
-Build SLE / openSUSE Leap Docker image:
+Build SLE Docker image:
 
 ```shell
-docker build -t voltaserve/api -f ./Dockerfile.sle .
+docker build -t voltaserve/api:sle -f ./Dockerfile.sle .
 ```
 
 Build RHEL Docker image:
 
 ```shell
-docker build -t voltaserve/api -f ./Dockerfile.rhel .
+docker build -t voltaserve/api:rhel -f ./Dockerfile.rhel .
 ```
 
 ### Code Linter

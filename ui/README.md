@@ -24,14 +24,14 @@ pnpm run dev
 
 ### Docker Images
 
-Build SLE / openSUSE Leap Docker image:
+Build SLE Docker image:
 
 ```shell
-docker build -t voltaserve/ui -f ./Dockerfile.sle .
+docker build -t voltaserve/ui:sle -f ./Dockerfile.sle .
 ```
 
 Build RHEL Docker image:
 
 ```shell
-docker build -t voltaserve/ui -f ./Dockerfile.rhel .
+docker build -t voltaserve/ui:rhel -f ./Dockerfile.rhel .
 ```

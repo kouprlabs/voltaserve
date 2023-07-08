@@ -1,4 +1,4 @@
-FROM rockylinux:9.2
+FROM redhat/ubi9:9.2
 
 WORKDIR /app
 
@@ -18,4 +18,4 @@ RUN pnpm install
 
 ENTRYPOINT ["pnpm", "run", "start"]
 
-EXPOSE 7000
+EXPOSE 6000

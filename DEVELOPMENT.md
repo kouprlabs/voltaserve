@@ -60,7 +60,7 @@ Stop infrastructure services:
 curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/$(git symbolic-ref --short HEAD 2>/dev/null || echo 'main')/scripts/sle/start.sh?t=$(date +%s)" | sh -s
 ```
 
-### Run Infrastructure Services With RHEL
+### Run Infrastructure Services With RHEL based Operating Systems
 
 Supported operating systems:
 
