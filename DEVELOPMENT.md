@@ -4,19 +4,6 @@
 
 ### Run Infrastructure Services With Docker
 
-Duplicate the file `./conversion/.env`, and rename it to `./conversion/.env.local`.
-
-Update the following entries in the file `.env.local`:
-
-```properties
-VOLTASERVE_FFMPEG_URL="http://127.0.0.1:6002"
-VOLTASERVE_IMAGEMAGICK_URL="http://127.0.0.1:6003"
-VOLTASERVE_LIBREOFFICE_URL="http://127.0.0.1:6004"
-VOLTASERVE_OCRMYPDF_URL="http://127.0.0.1:6005"
-VOLTASERVE_POPPLER_URL="http://127.0.0.1:6006"
-VOLTASERVE_TESSERACT_URL="http://127.0.0.1:6007"
-```
-
 Run infrastructure services:
 
 ```shell

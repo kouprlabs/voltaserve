@@ -28,7 +28,7 @@ Run for production:
 pnpm run start
 ```
 
-### Docker Images
+### Build Docker Images
 
 Build SLE Docker image:
 
