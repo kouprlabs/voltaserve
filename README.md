@@ -51,7 +51,7 @@ To connect you can use [WinSCP](https://winscp.net) on Windows, [Cyberduck](http
 Voltaserve's Docker images supports the following base images:
 
 - `sle`: SUSE Enterprise Linux / openSUSE Leap
-- `rhel`: Red Hat Enterprise Linux
+- `rhel`: Red Hat Enterprise Linux / Rocky Linux
 
 The environment variable `VOLTASERVE_BASE_IMAGE` can be set to one of these values.
 
