@@ -121,6 +121,20 @@ func (p *imagePipeline) Run(opts core.PipelineOptions) error {
 				if err := p.s3.PutFile(res.OCR.Key, inputPath, helper.DetectMimeFromFile(inputPath), res.OCR.Bucket); err != nil {
 					return err
 				}
+				text, err := p.toolsClient.TextFromPDF(inputPath)
+				if err != nil {
+					p.logger.Named(infra.StrPipeline).Errorw(err.Error())
+				}
+				if text != "" && err == nil {
+					res.Text = &core.S3Object{
+						Bucket: opts.Bucket,
+						Key:    opts.FileID + "/" + opts.SnapshotID + "/text.txt",
+						Size:   int64(len(text)),
+					}
+					if err := p.s3.PutText(res.Text.Key, text, "text/plain", res.Text.Bucket); err != nil {
+						return err
+					}
+				}
 				if err := p.apiClient.UpdateSnapshot(&res); err != nil {
 					return err
 				}
