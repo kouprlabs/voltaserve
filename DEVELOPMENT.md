@@ -4,8 +4,6 @@
 
 ### Run Infrastructure Services With Docker
 
-Run infrastructure services:
-
 ```shell
 docker compose up -d \
     postgres \
@@ -22,7 +20,7 @@ docker compose up -d \
     tesseract
 ```
 
-### Run Infrastructure Services With SLE / openSUSE Leap
+### Run Infrastructure Services With SLE or openSUSE Leap
 
 Supported operating systems:
 
@@ -47,7 +45,7 @@ Stop infrastructure services:
 curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/$(git symbolic-ref --short HEAD 2>/dev/null || echo 'main')/scripts/sle/start.sh?t=$(date +%s)" | sh -s
 ```
 
-### Run Infrastructure Services With RHEL based Operating Systems
+### Run Infrastructure Services With RHEL compatible Operating Systems
 
 Supported operating systems:
 
