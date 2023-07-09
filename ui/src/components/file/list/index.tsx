@@ -30,15 +30,16 @@ setInterval(async () => {
 setInterval(async () => {
   const current = store.getState().entities.files.current
   if (current) {
-    const sortBy = store.getState().ui.files.sortBy
-    const sortOrder = store.getState().ui.files.sortOrder
-    const result = await FileAPI.list(current, {
-      page: 1,
-      size: FileAPI.DEFAULT_PAGE_SIZE,
-      sortBy,
-      sortOrder,
-    })
-    if (result.totalElements > 0) {
+    const itemCount = await FileAPI.getItemCount(current)
+    if (itemCount > 0) {
+      const sortBy = store.getState().ui.files.sortBy
+      const sortOrder = store.getState().ui.files.sortOrder
+      const result = await FileAPI.list(current, {
+        page: 1,
+        size: FileAPI.DEFAULT_PAGE_SIZE,
+        sortBy,
+        sortOrder,
+      })
       store.dispatch(listUpdated(result))
     }
   }
