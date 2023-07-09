@@ -27,6 +27,23 @@ setInterval(async () => {
   }
 }, REFRESH_INTERVAL)
 
+setInterval(async () => {
+  const current = store.getState().entities.files.current
+  if (current) {
+    const sortBy = store.getState().ui.files.sortBy
+    const sortOrder = store.getState().ui.files.sortOrder
+    const result = await FileAPI.list(current, {
+      page: 1,
+      size: FileAPI.DEFAULT_PAGE_SIZE,
+      sortBy,
+      sortOrder,
+    })
+    if (result.totalElements > 0) {
+      store.dispatch(listUpdated(result))
+    }
+  }
+}, REFRESH_INTERVAL)
+
 type ListProps = {
   scale: number
 }
