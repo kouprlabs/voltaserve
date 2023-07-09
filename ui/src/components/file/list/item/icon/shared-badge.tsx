@@ -1,7 +1,7 @@
 import { Circle, Tooltip } from '@chakra-ui/react'
 import { FiUsers } from 'react-icons/fi'
 
-const SharedSign = () => (
+const SharedBadge = () => (
   <Tooltip label="This item is shared">
     <Circle
       color="darkorange"
@@ -15,4 +15,4 @@ const SharedSign = () => (
   </Tooltip>
 )
 
-export default SharedSign
+export default SharedBadge

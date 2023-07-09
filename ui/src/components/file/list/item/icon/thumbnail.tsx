@@ -12,8 +12,8 @@ import { IconPlay, variables } from '@koupr/ui'
 import { File } from '@/client/api/file'
 import { getSizeWithAspectRatio } from '@/helpers/aspect-ratio'
 import * as fileExtension from '@/helpers/file-extension'
-import OcrSign from './ocr-sign'
-import SharedSign from './shared-sign'
+import OcrBadge from './ocr-badge'
+import SharedBadge from './shared-badge'
 
 const MAX_WIDTH = 130
 const MAX_HEIGHT = 130
@@ -101,8 +101,8 @@ const Thumbnail = ({ file, scale }: ThumbnailProps) => {
         </Center>
       )}
       <HStack position="absolute" bottom="-5px" right="-5px" spacing="2px">
-        {file.isShared && <SharedSign />}
-        {file.ocr && <OcrSign />}
+        {file.isShared && <SharedBadge />}
+        {file.ocr && <OcrBadge />}
       </HStack>
     </Box>
   )

@@ -1,8 +1,8 @@
 import { Box, HStack } from '@chakra-ui/react'
 import { File } from '@/client/api/file'
 import FontIcon from './font-icon'
-import OcrSign from './ocr-sign'
-import SharedSign from './shared-sign'
+import OcrBadge from './ocr-badge'
+import SharedBadge from './shared-badge'
 import Thumbnail from './thumbnail'
 
 type FileIconProps = {
@@ -18,8 +18,8 @@ const FileIcon = ({ file, scale }: FileIconProps) => {
       <Box position="relative">
         <FontIcon file={file} scale={scale} />
         <HStack position="absolute" bottom="-5px" right="0px" spacing="2px">
-          {file.isShared && <SharedSign />}
-          {file.ocr && <OcrSign />}
+          {file.isShared && <SharedBadge />}
+          {file.ocr && <OcrBadge />}
         </HStack>
       </Box>
     )

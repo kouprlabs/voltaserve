@@ -1,7 +1,7 @@
 import { Circle, Tooltip } from '@chakra-ui/react'
 import { HiLanguage } from 'react-icons/hi2'
 
-const OcrSign = () => (
+const OcrBadge = () => (
   <Tooltip label="This item has OCR">
     <Circle
       color="MediumSpringGreen"
@@ -15,4 +15,4 @@ const OcrSign = () => (
   </Tooltip>
 )
 
-export default OcrSign
+export default OcrBadge
