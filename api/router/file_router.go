@@ -50,6 +50,7 @@ func (r *FileRouter) AppendRoutes(g fiber.Router) {
 	g.Post("/:id/move", r.Move)
 	g.Post("/:id/rename", r.Rename)
 	g.Post("/:id/update_ocr_language", r.UpdateOCRLanguage)
+	g.Post("/:id/delete_ocr", r.DeleteOCR)
 	g.Post("/:id/copy", r.Copy)
 	g.Get("/:id/get_size", r.GetSize)
 	g.Post("/grant_user_permission", r.GrantUserPermission)
@@ -491,10 +492,10 @@ func (r *FileRouter) Rename(c *fiber.Ctx) error {
 	return c.JSON(res)
 }
 
-// Rename godoc
+// UpdateOCRLanguage godoc
 //
-//	@Summary		UpdateOCRLanguage
-//	@Description	UpdateOCRLanguage
+//	@Summary		Update OCR language
+//	@Description	Update OCR language
 //	@Tags			Files
 //	@Id				files_update_ocr_language
 //	@Produce		json
@@ -513,10 +514,31 @@ func (r *FileRouter) UpdateOCRLanguage(c *fiber.Ctx) error {
 	if err := validator.New().Struct(opts); err != nil {
 		return errorpkg.NewRequestBodyValidationError(err)
 	}
-	if err := r.fileSvc.UpdateOCRLanguage(c.Params("id"), opts.ID, userID); err != nil {
+	res, err := r.fileSvc.UpdateOCRLanguage(c.Params("id"), opts.ID, userID)
+	if err != nil {
 		return err
 	}
-	return c.SendStatus(200)
+	return c.JSON(res)
+}
+
+// DeleteOCR godoc
+//
+//	@Summary		Delete OCR
+//	@Description	Delete OCR
+//	@Tags			Files
+//	@Id				files_delete_ocr
+//	@Produce		json
+//	@Param			id	path		string	true	"ID"
+//	@Success		200	{object}	service.File
+//	@Failure		404	{object}	errorpkg.ErrorResponse
+//	@Failure		500	{object}	errorpkg.ErrorResponse
+//	@Router			/files/{id}/delete_ocr [post]
+func (r *FileRouter) DeleteOCR(c *fiber.Ctx) error {
+	res, err := r.fileSvc.DeleteOCR(c.Params("id"), GetUserID(c))
+	if err != nil {
+		return err
+	}
+	return c.JSON(res)
 }
 
 // Delete godoc

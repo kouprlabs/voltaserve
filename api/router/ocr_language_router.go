@@ -90,9 +90,9 @@ func (r *OCRLanguageRouter) AppendInternalRoutes(g fiber.Router) {
 //	@Tags			OCRLanguages
 //	@Id				ocr_languages_get_all
 //	@Produce		json
-//	@Success		200			{array}	service.OCRLanguage
-//	@Failure		404			{object}	errorpkg.ErrorResponse
-//	@Failure		500			{object}	errorpkg.ErrorResponse
+//	@Success		200	{array}		service.OCRLanguage
+//	@Failure		404	{object}	errorpkg.ErrorResponse
+//	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/ocr_languages/all [get]
 func (r *OCRLanguageRouter) GetAll(c *fiber.Ctx) error {
 	apiKey := c.Query("api_key")

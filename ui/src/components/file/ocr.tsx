@@ -24,6 +24,7 @@ import {
 import * as Yup from 'yup'
 import FileAPI from '@/client/api/file'
 import OcrLanguageSelector from '@/components/common/ocr-language-selector'
+import { filesUpdated } from '@/store/entities/files'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { manageOcrModalDidClose } from '@/store/ui/files'
 
@@ -37,7 +38,7 @@ const OCR = () => {
     (state) => state.ui.files.isManageOcrModalOpen
   )
   const id = useAppSelector((state) => state.ui.files.selection[0])
-  const { data: file } = FileAPI.useGetById(id)
+  const { data: file, mutate } = FileAPI.useGetById(id)
   const formSchema = Yup.object().shape({
     languageId: Yup.string().required('Language is required'),
   })
@@ -53,20 +54,35 @@ const OCR = () => {
       }
       setSubmitting(true)
       try {
-        await FileAPI.updateOcrLanguage(file.id, { id: languageId })
+        const result = await FileAPI.updateOcrLanguage(file.id, {
+          id: languageId,
+        })
+        dispatch(filesUpdated([result]))
+        mutate(result)
         setSubmitting(false)
         dispatch(manageOcrModalDidClose())
       } finally {
         setSubmitting(false)
       }
     },
-    [file, dispatch]
+    [file, mutate, dispatch]
   )
 
-  const handleDelete = useCallback(() => {
+  const handleDelete = useCallback(async () => {
+    if (!file) {
+      return
+    }
     setIsDeleting(true)
-    setTimeout(() => setIsDeleting(false), 1500)
-  }, [])
+    try {
+      const result = await FileAPI.deleteOcr(file.id)
+      dispatch(filesUpdated([result]))
+      mutate(result)
+      setIsDeleting(false)
+      dispatch(manageOcrModalDidClose())
+    } finally {
+      setIsDeleting(false)
+    }
+  }, [file, mutate, dispatch])
 
   return (
     <Modal

@@ -282,7 +282,7 @@ export default class FileAPI {
   static async updateOcrLanguage(
     id: string,
     options: UpdateOcrLanguageOptions
-  ) {
+  ): Promise<File> {
     return apiFetch(`/files/${id}/update_ocr_language`, {
       method: 'POST',
       body: JSON.stringify(options),
@@ -290,7 +290,17 @@ export default class FileAPI {
         'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
         'Content-Type': 'application/json',
       },
-    })
+    }).then((result) => result.json())
+  }
+
+  static async deleteOcr(id: string): Promise<File> {
+    return apiFetch(`/files/${id}/delete_ocr`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
+        'Content-Type': 'application/json',
+      },
+    }).then((result) => result.json())
   }
 
   static async delete(id: string) {

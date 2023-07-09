@@ -1,19 +1,6 @@
 basePath: /v1
 definitions:
-  errorpkg.ErrorResponse:
-    properties:
-      code:
-        type: string
-      message:
-        type: string
-      moreInfo:
-        type: string
-      status:
-        type: integer
-      userMessage:
-        type: string
-    type: object
-  infra.PipelineOptions:
+  client.PipelineRunOptions:
     properties:
       bucket:
         type: string
@@ -26,6 +13,19 @@ definitions:
       ocrLanguageId:
         type: string
       snapshotId:
+        type: string
+    type: object
+  errorpkg.ErrorResponse:
+    properties:
+      code:
+        type: string
+      message:
+        type: string
+      moreInfo:
+        type: string
+      status:
+        type: integer
+      userMessage:
         type: string
     type: object
   model.ImageProps:
@@ -264,10 +264,10 @@ definitions:
     type: object
   service.FileUpdateOCRLanguageOptions:
     properties:
-      ocrLanguageId:
+      id:
         type: string
     required:
-    - ocrLanguageId
+    - id
     type: object
   service.Group:
     properties:
@@ -401,6 +401,8 @@ definitions:
         type: string
       iso639pt3:
         type: string
+      name:
+        type: string
     type: object
   service.OCRLanguageList:
     properties:
@@ -479,7 +481,7 @@ definitions:
       ocr:
         $ref: '#/definitions/model.S3Object'
       options:
-        $ref: '#/definitions/infra.PipelineOptions'
+        $ref: '#/definitions/client.PipelineRunOptions'
       original:
         $ref: '#/definitions/model.S3Object'
       preview:
@@ -779,6 +781,34 @@ paths:
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
       summary: Copy
+      tags:
+      - Files
+  /files/{id}/delete_ocr:
+    post:
+      description: Delete OCR
+      operationId: files_delete_ocr
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.File'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Delete OCR
       tags:
       - Files
   /files/{id}/get_group_permissions:
@@ -1158,7 +1188,7 @@ paths:
       - Files
   /files/{id}/update_ocr_language:
     post:
-      description: UpdateOCRLanguage
+      description: Update OCR language
       operationId: files_update_ocr_language
       parameters:
       - description: ID
@@ -1187,7 +1217,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: UpdateOCRLanguage
+      summary: Update OCR language
       tags:
       - Files
   /files/batch_delete:
@@ -2013,6 +2043,30 @@ paths:
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
       summary: List
+      tags:
+      - OCRLanguages
+  /ocr_languages/all:
+    get:
+      description: GetAll
+      operationId: ocr_languages_get_all
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/service.OCRLanguage'
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: GetAll
       tags:
       - OCRLanguages
   /organizations:
