@@ -36,9 +36,15 @@ import {
   IconSortUp,
   IconSortDown,
 } from '@koupr/ui'
+import { HiLanguage } from 'react-icons/hi2'
 import FileAPI, { List, SortBy, SortOrder } from '@/client/api/file'
-import { ltEditorPermission, ltOwnerPermission } from '@/client/api/permission'
+import {
+  geEditorPermission,
+  ltEditorPermission,
+  ltOwnerPermission,
+} from '@/client/api/permission'
 import downloadFile from '@/helpers/download-file'
+import { isImage } from '@/helpers/file-extension'
 import mapFileList from '@/helpers/map-file-list'
 import { decodeQuery } from '@/helpers/query'
 import { listUpdated } from '@/store/entities/files'
@@ -49,6 +55,7 @@ import {
   sortByUpdated,
   SORT_BY_KEY,
   SORT_ORDER_KEY,
+  manageOcrModalDidOpen,
 } from '@/store/ui/files'
 import {
   copyModalDidOpen,
@@ -279,7 +286,7 @@ const Toolbar = () => {
                     isDisabled={selectionCount === 0 || !hasOwnerPermission}
                     onClick={() => dispatch(sharingModalDidOpen())}
                   >
-                    Share
+                    Sharing
                   </MenuItem>
                   <MenuItem
                     icon={<IconDownload />}
@@ -292,6 +299,16 @@ const Toolbar = () => {
                   >
                     Download
                   </MenuItem>
+                  {singleFile?.type === 'file' &&
+                  isImage(singleFile?.original?.extension ?? '') &&
+                  geEditorPermission(singleFile?.permission) ? (
+                    <MenuItem
+                      icon={<HiLanguage fontSize="14px" />}
+                      onClick={() => dispatch(manageOcrModalDidOpen())}
+                    >
+                      OCR
+                    </MenuItem>
+                  ) : null}
                   <MenuDivider />
                   <MenuItem
                     icon={<IconTrash />}

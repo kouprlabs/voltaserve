@@ -48,7 +48,7 @@ python3 -m spacy download xx_ent_wiki_sm
 FLASK_APP=server.py flask run --host=0.0.0.0 --port=5002 --debug
 ```
 
-### Docker Images
+### Build Docker Images
 
 Build SLE Docker image:
 

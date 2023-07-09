@@ -1,4 +1,4 @@
 /.env.local
 /voltaserve
-/__debug_bin
+/__debug_bin*
 /.air

@@ -18,15 +18,16 @@ import (
 )
 
 type Workspace struct {
-	ID              string       `json:"id"`
-	Image           *string      `json:"image,omitempty"`
-	Name            string       `json:"name"`
-	RootID          string       `json:"rootId,omitempty"`
-	StorageCapacity int64        `json:"storageCapacity"`
-	Permission      string       `json:"permission"`
-	Organization    Organization `json:"organization"`
-	CreateTime      string       `json:"createTime"`
-	UpdateTime      *string      `json:"updateTime,omitempty"`
+	ID                    string       `json:"id"`
+	Image                 *string      `json:"image,omitempty"`
+	Name                  string       `json:"name"`
+	RootID                string       `json:"rootId,omitempty"`
+	StorageCapacity       int64        `json:"storageCapacity"`
+	Permission            string       `json:"permission"`
+	Organization          Organization `json:"organization"`
+	IsAutomaticOCREnabled bool         `json:"isAutomaticOcrEnabled"`
+	CreateTime            string       `json:"createTime"`
+	UpdateTime            *string      `json:"updateTime,omitempty"`
 }
 
 type WorkspaceList struct {
@@ -35,10 +36,6 @@ type WorkspaceList struct {
 	TotalElements uint         `json:"totalElements"`
 	Page          uint         `json:"page"`
 	Size          uint         `json:"size"`
-}
-
-type WorkspaceSearchOptions struct {
-	Text string `json:"text" validate:"required"`
 }
 
 type WorkspaceCreateOptions struct {
@@ -62,6 +59,10 @@ type WorkspaceUpdateNameOptions struct {
 
 type WorkspaceUpdateStorageCapacityOptions struct {
 	StorageCapacity int64 `json:"storageCapacity" validate:"required,min=1"`
+}
+
+type WorkspaceUpdateIsAutomaticOCREnabledOptions struct {
+	IsEnabled bool `json:"isEnabled" validate:"required"`
 }
 
 type WorkspaceService struct {
@@ -209,7 +210,7 @@ func (svc *WorkspaceService) List(opts WorkspaceListOptions, userID string) (*Wo
 	if opts.SortOrder == "" {
 		opts.SortOrder = SortOrderAsc
 	}
-	sorted := svc.doSorting(authorized, opts.SortBy, opts.SortOrder, userID)
+	sorted := svc.doSorting(authorized, opts.SortBy, opts.SortOrder)
 	paged, totalElements, totalPages := svc.doPagination(sorted, opts.Page, opts.Size)
 	mapped, err := svc.workspaceMapper.mapMany(paged, userID)
 	if err != nil {
@@ -272,6 +273,34 @@ func (svc *WorkspaceService) UpdateStorageCapacity(id string, storageCapacity in
 		return nil, errorpkg.NewInsufficientStorageCapacityError()
 	}
 	if workspace, err = svc.workspaceRepo.UpdateStorageCapacity(id, storageCapacity); err != nil {
+		return nil, err
+	}
+	if err = svc.workspaceSearch.Update([]model.Workspace{workspace}); err != nil {
+		return nil, err
+	}
+	if err = svc.workspaceCache.Set(workspace); err != nil {
+		return nil, err
+	}
+	res, err := svc.workspaceMapper.mapOne(workspace, userID)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
+func (svc *WorkspaceService) UpdateIsAutomaticOCREnabled(id string, isEnabled bool, userID string) (*Workspace, error) {
+	user, err := svc.userRepo.Find(userID)
+	if err != nil {
+		return nil, err
+	}
+	workspace, err := svc.workspaceCache.Get(id)
+	if err != nil {
+		return nil, err
+	}
+	if err = svc.workspaceGuard.Authorize(user, workspace, model.PermissionEditor); err != nil {
+		return nil, err
+	}
+	if workspace, err = svc.workspaceRepo.UpdateIsAutomaticOCREnabled(id, isEnabled); err != nil {
 		return nil, err
 	}
 	if err = svc.workspaceSearch.Update([]model.Workspace{workspace}); err != nil {
@@ -382,7 +411,7 @@ func (svc *WorkspaceService) doAuthorizationByIDs(ids []string, user model.User)
 	return res, nil
 }
 
-func (svc *WorkspaceService) doSorting(data []model.Workspace, sortBy string, sortOrder string, userID string) []model.Workspace {
+func (svc *WorkspaceService) doSorting(data []model.Workspace, sortBy string, sortOrder string) []model.Workspace {
 	if sortBy == SortByName {
 		sort.Slice(data, func(i, j int) bool {
 			if sortOrder == SortOrderDesc {
@@ -461,13 +490,14 @@ func (mp *workspaceMapper) mapOne(m model.Workspace, userID string) (*Workspace,
 		return nil, err
 	}
 	res := &Workspace{
-		ID:              m.GetID(),
-		Name:            m.GetName(),
-		RootID:          m.GetRootID(),
-		StorageCapacity: m.GetStorageCapacity(),
-		Organization:    *v,
-		CreateTime:      m.GetCreateTime(),
-		UpdateTime:      m.GetUpdateTime(),
+		ID:                    m.GetID(),
+		Name:                  m.GetName(),
+		RootID:                m.GetRootID(),
+		StorageCapacity:       m.GetStorageCapacity(),
+		Organization:          *v,
+		IsAutomaticOCREnabled: m.GetIsAutomaticOCREnabled(),
+		CreateTime:            m.GetCreateTime(),
+		UpdateTime:            m.GetUpdateTime(),
 	}
 	res.Permission = ""
 	for _, p := range m.GetUserPermissions() {

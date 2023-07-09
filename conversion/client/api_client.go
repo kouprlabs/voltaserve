@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"voltaserve/config"
 	"voltaserve/core"
@@ -19,12 +20,12 @@ func NewAPIClient() *APIClient {
 	}
 }
 
-func (c *APIClient) UpdateSnapshot(pr *core.PipelineResponse) error {
-	body, err := json.Marshal(pr)
+func (cl *APIClient) UpdateSnapshot(opts core.SnapshotUpdateOptions) error {
+	body, err := json.Marshal(opts)
 	if err != nil {
 		return err
 	}
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/files/conversion_webhook/update_snapshot?api_key=%s", c.config.APIURL, c.config.Security.APIKey), bytes.NewBuffer(body))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/files/conversion_webhook/update_snapshot?api_key=%s", cl.config.APIURL, cl.config.Security.APIKey), bytes.NewBuffer(body))
 	if err != nil {
 		return err
 	}
@@ -36,4 +37,22 @@ func (c *APIClient) UpdateSnapshot(pr *core.PipelineResponse) error {
 	}
 	res.Body.Close()
 	return nil
+}
+
+func (cl *APIClient) GetAllOCRLangages() ([]core.OCRLanguage, error) {
+	res, err := http.Get(fmt.Sprintf("%s/v1/ocr_languages/all?api_key=%s", cl.config.APIURL, cl.config.Security.APIKey))
+	if err != nil {
+		return []core.OCRLanguage{}, err
+	}
+	defer res.Body.Close()
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		return []core.OCRLanguage{}, err
+	}
+	var result []core.OCRLanguage
+	err = json.Unmarshal(body, &result)
+	if err != nil {
+		return []core.OCRLanguage{}, err
+	}
+	return result, nil
 }

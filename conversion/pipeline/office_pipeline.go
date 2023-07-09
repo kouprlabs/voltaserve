@@ -29,7 +29,7 @@ func NewOfficePipeline() core.Pipeline {
 	}
 }
 
-func (p *officePipeline) Run(opts core.PipelineOptions) error {
+func (p *officePipeline) Run(opts core.PipelineRunOptions) error {
 	inputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(opts.Key))
 	if err := p.s3.GetFile(opts.Key, inputPath, opts.Bucket); err != nil {
 		return err
@@ -42,24 +42,23 @@ func (p *officePipeline) Run(opts core.PipelineOptions) error {
 	if err != nil {
 		return err
 	}
-	preview := core.S3Object{
-		Bucket: opts.Bucket,
-		Key:    opts.FileID + "/" + opts.SnapshotID + "/preview.pdf",
-		Size:   stat.Size(),
-	}
-	if err := p.s3.PutFile(preview.Key, outputPath, helper.DetectMimeFromFile(outputPath), preview.Bucket); err != nil {
+	previewKey := opts.FileID + "/" + opts.SnapshotID + "/preview.pdf"
+	if err := p.s3.PutFile(previewKey, outputPath, helper.DetectMimeFromFile(outputPath), opts.Bucket); err != nil {
 		return err
 	}
-	res := core.PipelineResponse{
+	if err := p.apiClient.UpdateSnapshot(core.SnapshotUpdateOptions{
 		Options: opts,
-		Preview: &preview,
-	}
-	if err := p.apiClient.UpdateSnapshot(&res); err != nil {
+		Preview: &core.S3Object{
+			Bucket: opts.Bucket,
+			Key:    previewKey,
+			Size:   stat.Size(),
+		},
+	}); err != nil {
 		return err
 	}
-	if err := p.pdfPipeline.Run(core.PipelineOptions{
-		Bucket:     preview.Bucket,
-		Key:        preview.Key,
+	if err := p.pdfPipeline.Run(core.PipelineRunOptions{
+		Bucket:     opts.Bucket,
+		Key:        previewKey,
 		FileID:     opts.FileID,
 		SnapshotID: opts.SnapshotID,
 	}); err != nil {

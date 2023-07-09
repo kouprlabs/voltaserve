@@ -32,13 +32,13 @@ const slice = createSlice({
       }
     },
     filesUpdated: (state, action: PayloadAction<File[]>) => {
-      action.payload.forEach((e) => {
+      action.payload.forEach((updatedFile) => {
         if (!state.list) {
           return
         }
-        const file = state.list.data.find((f) => f.id === e.id)
-        if (file) {
-          Object.assign(file, e)
+        const index = state.list.data.findIndex((f) => f.id === updatedFile.id)
+        if (index !== -1) {
+          state.list.data[index] = updatedFile
         }
       })
     },

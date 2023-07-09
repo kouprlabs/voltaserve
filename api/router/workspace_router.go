@@ -27,6 +27,7 @@ func (r *WorkspaceRouter) AppendRoutes(g fiber.Router) {
 	g.Delete("/:id", r.Delete)
 	g.Post("/:id/update_name", r.UpdateName)
 	g.Post("/:id/update_storage_capacity", r.UpdateStorageCapacity)
+	g.Post("/:id/update_is_automatic_ocr_enabled", r.UpdateIsAutomaticOCREnabled)
 }
 
 // Create godoc
@@ -181,6 +182,32 @@ func (r *WorkspaceRouter) UpdateStorageCapacity(c *fiber.Ctx) error {
 		return err
 	}
 	res, err := r.workspaceSvc.UpdateStorageCapacity(c.Params("id"), opts.StorageCapacity, GetUserID(c))
+	if err != nil {
+		return err
+	}
+	return c.JSON(res)
+}
+
+// UpdateName godoc
+//
+//	@Summary		Update is automatic OCR enabled
+//	@Description	Update is automatic OCR enabled
+//	@Tags			Workspaces
+//	@Id				workspaces_update_is_automatic_ocr_enabled
+//	@Accept			json
+//	@Produce		json
+//	@Param			id		path		string												true	"ID"
+//	@Param			body	body		service.WorkspaceUpdateIsAutomaticOCREnabledOptions	true	"Body"
+//	@Success		200		{object}	service.Workspace
+//	@Failure		400		{object}	errorpkg.ErrorResponse
+//	@Failure		500		{object}	errorpkg.ErrorResponse
+//	@Router			/workspaces/{id}/update_is_automatic_ocr_enabled [post]
+func (r *WorkspaceRouter) UpdateIsAutomaticOCREnabled(c *fiber.Ctx) error {
+	opts := new(service.WorkspaceUpdateIsAutomaticOCREnabledOptions)
+	if err := c.BodyParser(opts); err != nil {
+		return err
+	}
+	res, err := r.workspaceSvc.UpdateIsAutomaticOCREnabled(c.Params("id"), opts.IsEnabled, GetUserID(c))
 	if err != nil {
 		return err
 	}

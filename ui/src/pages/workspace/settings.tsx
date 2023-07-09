@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import {
   Box,
@@ -8,6 +8,7 @@ import {
   IconButtonProps,
   Progress,
   Stack,
+  Switch,
   Text,
 } from '@chakra-ui/react'
 import { variables, IconEdit, IconTrash, SectionSpinner } from '@koupr/ui'
@@ -27,13 +28,17 @@ const EditButton = (props: IconButtonProps) => (
 
 const Spacer = () => <Box flexGrow={1} />
 
+const ROW_HEIGHT = '40px'
+const SECTION_SPACING = variables.spacing
+
 const WorkspaceSettingsPage = () => {
   const params = useParams()
   const workspaceId = params.id as string
-  const { data: workspace, error: workspaceError } = WorkspaceAPI.useGetById(
-    workspaceId,
-    swrConfig()
-  )
+  const {
+    data: workspace,
+    error: workspaceError,
+    mutate,
+  } = WorkspaceAPI.useGetById(workspaceId, swrConfig())
   const { data: storageUsage, error: storageUsageError } =
     StorageAPI.useGetWorkspaceUsage(workspaceId, swrConfig())
   const hasEditPermission = useMemo(
@@ -44,6 +49,19 @@ const WorkspaceSettingsPage = () => {
   const [isStorageCapacityModalOpen, setIsStorageCapacityModalOpen] =
     useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+
+  const handleUpdateIsAutomaticOcrEnabled = useCallback(async () => {
+    if (!workspace) {
+      return
+    }
+    const result = await WorkspaceAPI.updateIsAutomaticOcrEnabled(
+      workspace.id,
+      {
+        isEnabled: !workspace.isAutomaticOcrEnabled,
+      }
+    )
+    mutate(result)
+  }, [workspace, mutate])
 
   if (workspaceError) {
     return null
@@ -104,18 +122,29 @@ const WorkspaceSettingsPage = () => {
           />
         </HStack>
         <Divider />
-        <HStack spacing={variables.spacing}>
-          <Text>Delete permanently</Text>
-          <Spacer />
-          <IconButton
-            icon={<IconTrash />}
-            variant="solid"
-            colorScheme="red"
-            isDisabled={!hasEditPermission}
-            aria-label=""
-            onClick={() => setIsDeleteModalOpen(true)}
-          />
-        </HStack>
+        <Stack direction="column" py={SECTION_SPACING}>
+          <Text fontWeight="bold">Advanced</Text>
+          <HStack spacing={variables.spacing} h={ROW_HEIGHT}>
+            <Text>Automatic OCR</Text>
+            <Spacer />
+            <Switch
+              isChecked={workspace.isAutomaticOcrEnabled}
+              onChange={handleUpdateIsAutomaticOcrEnabled}
+            />
+          </HStack>
+          <HStack spacing={variables.spacing} h={ROW_HEIGHT}>
+            <Text>Delete permanently</Text>
+            <Spacer />
+            <IconButton
+              icon={<IconTrash />}
+              variant="solid"
+              colorScheme="red"
+              isDisabled={!hasEditPermission}
+              aria-label=""
+              onClick={() => setIsDeleteModalOpen(true)}
+            />
+          </HStack>
+        </Stack>
         <EditName
           open={isNameModalOpen}
           workspace={workspace}

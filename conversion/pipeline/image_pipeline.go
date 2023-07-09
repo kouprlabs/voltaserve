@@ -7,6 +7,7 @@ import (
 	"voltaserve/config"
 	"voltaserve/core"
 	"voltaserve/helper"
+	"voltaserve/identifier"
 	"voltaserve/infra"
 	"voltaserve/processor"
 
@@ -14,11 +15,11 @@ import (
 )
 
 type imagePipeline struct {
-	pdfPipeline core.Pipeline
 	imageProc   *processor.ImageProcessor
 	s3          *infra.S3Manager
 	apiClient   *client.APIClient
 	toolsClient *client.ToolsClient
+	fileIdent   *identifier.FileIdentifier
 	logger      *zap.SugaredLogger
 	config      config.Config
 }
@@ -29,17 +30,17 @@ func NewImagePipeline() core.Pipeline {
 		panic(err)
 	}
 	return &imagePipeline{
-		pdfPipeline: NewPDFPipeline(),
 		imageProc:   processor.NewImageProcessor(),
 		s3:          infra.NewS3Manager(),
 		apiClient:   client.NewAPIClient(),
 		toolsClient: client.NewToolsClient(),
+		fileIdent:   identifier.NewFileIdentifier(),
 		logger:      logger,
 		config:      config.GetConfig(),
 	}
 }
 
-func (p *imagePipeline) Run(opts core.PipelineOptions) error {
+func (p *imagePipeline) Run(opts core.PipelineRunOptions) error {
 	inputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(opts.Key))
 	if err := p.s3.GetFile(opts.Key, inputPath, opts.Bucket); err != nil {
 		return err
@@ -48,21 +49,11 @@ func (p *imagePipeline) Run(opts core.PipelineOptions) error {
 	if err != nil {
 		return err
 	}
-	if filepath.Ext(inputPath) == ".tiff" {
-		newInputFile := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".jpg")
-		if err := p.toolsClient.ConvertImage(inputPath, newInputFile); err != nil {
-			return err
-		}
-		if err := os.Remove(inputPath); err != nil {
-			return err
-		}
-		inputPath = newInputFile
-	}
 	imageProps, err := p.toolsClient.MeasureImage(inputPath)
 	if err != nil {
 		return err
 	}
-	res := core.PipelineResponse{
+	updateOpts := core.SnapshotUpdateOptions{
 		Options: opts,
 		Original: &core.S3Object{
 			Bucket: opts.Bucket,
@@ -71,25 +62,92 @@ func (p *imagePipeline) Run(opts core.PipelineOptions) error {
 			Size:   stat.Size(),
 		},
 	}
-	if err := p.apiClient.UpdateSnapshot(&res); err != nil {
+	if err := p.apiClient.UpdateSnapshot(updateOpts); err != nil {
 		return err
 	}
-	imageData, err := p.imageProc.Data(inputPath)
-	if err == nil {
-		/* We treat it as a text image, we convert it to PDF/A */
-		opts.Language = &imageData.Language
-		opts.TesseractModel = &imageData.Model
-		opts.Text = &imageData.Text
-		if err := p.pdfPipeline.Run(opts); err != nil {
-			/*
-				Here we intentionally ignore the error, here is the explanation why:
-				The reason we came here to begin with is because of
-				this condition: 'ocrData.PositiveConfCount > ocrData.NegativeConfCount',
-				but it turned out that the OCR failed, that means probably the image
-				does not contain text after all ¯\_(ツ)_/¯
-				So we log the error and move on...
-			*/
-			p.logger.Named(infra.StrPipeline).Errorw(err.Error())
+	if filepath.Ext(inputPath) == ".tiff" {
+		jpegPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".jpg")
+		if err := p.toolsClient.ConvertImage(inputPath, jpegPath); err != nil {
+			return err
+		}
+		updateOpts.Preview = &core.S3Object{
+			Bucket: opts.Bucket,
+			Key:    opts.FileID + "/" + opts.SnapshotID + "/preview.jpg",
+			Size:   stat.Size(),
+		}
+		if err := p.s3.PutFile(updateOpts.Preview.Key, jpegPath, helper.DetectMimeFromFile(jpegPath), updateOpts.Preview.Bucket); err != nil {
+			return err
+		}
+		if err := p.apiClient.UpdateSnapshot(updateOpts); err != nil {
+			return err
+		}
+		if err := os.Remove(inputPath); err != nil {
+			return err
+		}
+		inputPath = jpegPath
+	}
+	if !p.fileIdent.IsNonAlphaChannelImage(inputPath) {
+		noAlphaPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(inputPath))
+		if err := p.toolsClient.RemoveAlphaChannel(inputPath, noAlphaPath); err != nil {
+			return err
+		}
+		if err := os.Remove(inputPath); err != nil {
+			return err
+		}
+		inputPath = noAlphaPath
+	}
+	if opts.IsAutomaticOCREnabled {
+		var model string
+		if opts.OCRLanguageID == "" {
+			imageData, err := p.imageProc.Data(inputPath)
+			if err != nil {
+				p.logger.Named(infra.StrPipeline).Errorw(err.Error())
+			}
+			model = imageData.Model
+		} else {
+			model = opts.OCRLanguageID
+		}
+		if model != "" {
+			dpi, err := p.toolsClient.DPIFromImage(inputPath)
+			if err != nil {
+				dpi = 72
+			}
+			pdfPath, err := p.toolsClient.OCRFromPDF(inputPath, &model, &dpi)
+			if err != nil {
+				p.logger.Named(infra.StrPipeline).Errorw(err.Error())
+			}
+			if stat, err := os.Stat(pdfPath); err == nil {
+				if err := os.Remove(inputPath); err != nil {
+					return err
+				}
+				inputPath = pdfPath
+				updateOpts.OCR = &core.S3Object{
+					Bucket:   opts.Bucket,
+					Key:      opts.FileID + "/" + opts.SnapshotID + "/ocr.pdf",
+					Size:     stat.Size(),
+					Language: &model,
+				}
+				if err := p.s3.PutFile(updateOpts.OCR.Key, inputPath, helper.DetectMimeFromFile(inputPath), updateOpts.OCR.Bucket); err != nil {
+					return err
+				}
+				text, err := p.toolsClient.TextFromPDF(inputPath)
+				if err != nil {
+					p.logger.Named(infra.StrPipeline).Errorw(err.Error())
+				}
+				if text != "" && err == nil {
+					updateOpts.Text = &core.S3Object{
+						Bucket: opts.Bucket,
+						Key:    opts.FileID + "/" + opts.SnapshotID + "/text.txt",
+						Size:   int64(len(text)),
+					}
+					if err := p.s3.PutText(updateOpts.Text.Key, text, "text/plain", updateOpts.Text.Bucket); err != nil {
+						return err
+					}
+				}
+				if err := p.apiClient.UpdateSnapshot(updateOpts); err != nil {
+					return err
+				}
+			}
 		}
 	}
 	if _, err := os.Stat(inputPath); err == nil {

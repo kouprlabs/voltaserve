@@ -26,10 +26,11 @@ type WorkspaceRepo interface {
 	Find(id string) (model.Workspace, error)
 	UpdateName(id string, name string) (model.Workspace, error)
 	UpdateStorageCapacity(id string, storageCapacity int64) (model.Workspace, error)
+	UpdateRootID(id string, rootNodeID string) error
+	UpdateIsAutomaticOCREnabled(id string, isEnabled bool) (model.Workspace, error)
 	Delete(id string) error
 	GetIDs() ([]string, error)
 	GetIDsByOrganization(orgID string) ([]string, error)
-	UpdateRootID(id string, rootNodeID string) error
 	GrantUserPermission(id string, userID string, permission string) error
 }
 
@@ -42,16 +43,17 @@ func NewWorkspace() model.Workspace {
 }
 
 type workspaceEntity struct {
-	ID               string                  `json:"id," gorm:"column:id;size:36"`
-	Name             string                  `json:"name" gorm:"column:name;size:255"`
-	StorageCapacity  int64                   `json:"storageCapacity" gorm:"column:storage_capacity"`
-	RootID           string                  `json:"rootId" gorm:"column:root_id;size:36"`
-	OrganizationID   string                  `json:"organizationId" gorm:"column:organization_id;size:36"`
-	UserPermissions  []*userPermissionValue  `json:"userPermissions" gorm:"-"`
-	GroupPermissions []*groupPermissionValue `json:"groupPermissions" gorm:"-"`
-	Bucket           string                  `json:"bucket" gorm:"column:bucket;size:255"`
-	CreateTime       string                  `json:"createTime" gorm:"column:create_time"`
-	UpdateTime       *string                 `json:"updateTime,omitempty" gorm:"column:update_time"`
+	ID                    string                  `json:"id," gorm:"column:id;size:36"`
+	Name                  string                  `json:"name" gorm:"column:name;size:255"`
+	StorageCapacity       int64                   `json:"storageCapacity" gorm:"column:storage_capacity"`
+	RootID                string                  `json:"rootId" gorm:"column:root_id;size:36"`
+	OrganizationID        string                  `json:"organizationId" gorm:"column:organization_id;size:36"`
+	UserPermissions       []*userPermissionValue  `json:"userPermissions" gorm:"-"`
+	GroupPermissions      []*groupPermissionValue `json:"groupPermissions" gorm:"-"`
+	Bucket                string                  `json:"bucket" gorm:"column:bucket;size:255"`
+	IsAutomaticOCREnabled bool                    `json:"isAutomaticOcrEnabled" gorm:"column:is_automatic_ocr_enabled"`
+	CreateTime            string                  `json:"createTime" gorm:"column:create_time"`
+	UpdateTime            *string                 `json:"updateTime,omitempty" gorm:"column:update_time"`
 }
 
 func (workspaceEntity) TableName() string {
@@ -117,12 +119,20 @@ func (w workspaceEntity) GetUpdateTime() *string {
 	return w.UpdateTime
 }
 
+func (w workspaceEntity) GetIsAutomaticOCREnabled() bool {
+	return w.IsAutomaticOCREnabled
+}
+
 func (w *workspaceEntity) SetName(name string) {
 	w.Name = name
 }
 
 func (w *workspaceEntity) SetUpdateTime(updateTime *string) {
 	w.UpdateTime = updateTime
+}
+
+func (w *workspaceEntity) SetIsAutomaticOCREnabled(isEnabled bool) {
+	w.IsAutomaticOCREnabled = isEnabled
 }
 
 type workspaceRepo struct {
@@ -222,6 +232,30 @@ func (repo *workspaceRepo) UpdateStorageCapacity(id string, storageCapacity int6
 	return res, nil
 }
 
+func (repo *workspaceRepo) UpdateRootID(id string, rootNodeID string) error {
+	db := repo.db.Exec("UPDATE workspace SET root_id = ? WHERE id = ?", rootNodeID, id)
+	if db.Error != nil {
+		return db.Error
+	}
+	return nil
+}
+
+func (repo *workspaceRepo) UpdateIsAutomaticOCREnabled(id string, isEnabled bool) (model.Workspace, error) {
+	workspace, err := repo.find(id)
+	if err != nil {
+		return &workspaceEntity{}, err
+	}
+	workspace.IsAutomaticOCREnabled = isEnabled
+	if db := repo.db.Save(&workspace); db.Error != nil {
+		return nil, db.Error
+	}
+	res, err := repo.Find(id)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
 func (repo *workspaceRepo) Delete(id string) error {
 	db := repo.db.Exec("DELETE FROM workspace WHERE id = ?", id)
 	if db.Error != nil {
@@ -270,14 +304,6 @@ func (repo *workspaceRepo) GetIDsByOrganization(orgID string) ([]string, error) 
 		res = append(res, id.Result)
 	}
 	return res, nil
-}
-
-func (repo *workspaceRepo) UpdateRootID(id string, rootNodeID string) error {
-	db := repo.db.Exec("UPDATE workspace SET root_id = ? WHERE id = ?", rootNodeID, id)
-	if db.Error != nil {
-		return db.Error
-	}
-	return nil
 }
 
 func (repo *workspaceRepo) GrantUserPermission(id string, userID string, permission string) error {

@@ -45,7 +45,7 @@ func main() {
 		return c.SendStatus(200)
 	})
 
-	app.Post("v1/run_pipeline", func(c *fiber.Ctx) error {
+	app.Post("v1/pipelines/run", func(c *fiber.Ctx) error {
 		apiKey := c.Query("api_key")
 		if apiKey == "" {
 			if err := c.SendStatus(http.StatusBadRequest); err != nil {
@@ -59,7 +59,7 @@ func main() {
 			}
 			return errors.New("invalid api_key")
 		}
-		opts := new(core.PipelineOptions)
+		opts := new(core.PipelineRunOptions)
 		if err := c.BodyParser(opts); err != nil {
 			return err
 		}
