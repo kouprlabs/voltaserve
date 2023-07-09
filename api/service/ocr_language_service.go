@@ -12,6 +12,7 @@ import (
 type OCRLanguage struct {
 	ID        string `json:"id"`
 	ISO639Pt3 string `json:"iso639pt3"`
+	Name      string `json:"name"`
 }
 
 type OCRLanguageList struct {
@@ -109,7 +110,7 @@ func (svc *OCRLanguageService) doFiltering(query string, data []model.OCRLanguag
 		Filter(func(v interface{}) bool {
 			if query != "" {
 				ocrLanguage := v.(model.OCRLanguage)
-				return strings.Contains(strings.ToLower(ocrLanguage.GetID()), strings.ToLower(query)) || strings.Contains(strings.ToLower(ocrLanguage.GetISO639Pt3()), strings.ToLower(query))
+				return strings.Contains(strings.ToLower(ocrLanguage.GetID()), strings.ToLower(query)) || strings.Contains(strings.ToLower(ocrLanguage.GetISO639Pt3()), strings.ToLower(query)) || strings.Contains(strings.ToLower(ocrLanguage.GetName()), strings.ToLower(query))
 			} else {
 				return true
 			}
@@ -133,6 +134,7 @@ func (mp *ocrLanguageMapper) mapOne(ocrLanguage model.OCRLanguage) *OCRLanguage 
 	return &OCRLanguage{
 		ID:        ocrLanguage.GetID(),
 		ISO639Pt3: ocrLanguage.GetISO639Pt3(),
+		Name:      ocrLanguage.GetName(),
 	}
 }
 

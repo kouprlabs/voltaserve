@@ -100,7 +100,7 @@ const ManageOcr = () => {
                     >
                       <FormLabel>OCR Language</FormLabel>
                       <OcrLanguageSelector
-                        defaultId={file?.ocr?.language}
+                        valueId={values.ocrLanguageId}
                         isDisabled={isSubmitting || isDeleting}
                         onConfirm={(value) =>
                           setFieldValue(field.name, value.id)

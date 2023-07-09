@@ -43,14 +43,14 @@ func NewGroup() model.Group {
 }
 
 type groupEntity struct {
-	ID               string                  `json:"id" gorm:"id"`
-	Name             string                  `json:"name" gorm:"name"`
-	OrganizationID   string                  `json:"organizationId" gorm:"organization_id"`
+	ID               string                  `json:"id" gorm:"column:id"`
+	Name             string                  `json:"name" gorm:"column:name"`
+	OrganizationID   string                  `json:"organizationId" gorm:"column:organization_id"`
 	UserPermissions  []*userPermissionValue  `json:"userPermissions" gorm:"-"`
 	GroupPermissions []*groupPermissionValue `json:"groupPermissions" gorm:"-"`
 	Members          []string                `json:"members" gorm:"-"`
-	CreateTime       string                  `json:"createTime" gorm:"create_time"`
-	UpdateTime       *string                 `json:"updateTime" gorm:"update_time"`
+	CreateTime       string                  `json:"createTime" gorm:"column:create_time"`
+	UpdateTime       *string                 `json:"updateTime" gorm:"column:update_time"`
 }
 
 func (groupEntity) TableName() string {

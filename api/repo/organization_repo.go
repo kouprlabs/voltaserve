@@ -40,13 +40,13 @@ func NewOrganization() model.Organization {
 }
 
 type organizationEntity struct {
-	ID               string                  `json:"id" gorm:"id"`
-	Name             string                  `json:"name" gorm:"name"`
+	ID               string                  `json:"id" gorm:"column:id"`
+	Name             string                  `json:"name" gorm:"column:name"`
 	UserPermissions  []*userPermissionValue  `json:"userPermissions" gorm:"-"`
 	GroupPermissions []*groupPermissionValue `json:"groupPermissions" gorm:"-"`
 	Members          []string                `json:"members" gorm:"-"`
-	CreateTime       string                  `json:"createTime" gorm:"create_time"`
-	UpdateTime       *string                 `json:"updateTime,omitempty" gorm:"update_time"`
+	CreateTime       string                  `json:"createTime" gorm:"column:create_time"`
+	UpdateTime       *string                 `json:"updateTime,omitempty" gorm:"column:update_time"`
 }
 
 func (organizationEntity) TableName() string {

@@ -50,17 +50,17 @@ func NewFile() model.File {
 }
 
 type fileEntity struct {
-	ID               string                  `json:"id" gorm:"id"`
-	WorkspaceID      string                  `json:"workspaceId" gorm:"workspace_id"`
-	Name             string                  `json:"name" gorm:"name"`
-	Type             string                  `json:"type" gorm:"type"`
-	ParentID         *string                 `json:"parentId,omitempty" gorm:"parent_id"`
+	ID               string                  `json:"id" gorm:"column:id"`
+	WorkspaceID      string                  `json:"workspaceId" gorm:"column:workspace_id"`
+	Name             string                  `json:"name" gorm:"column:name"`
+	Type             string                  `json:"type" gorm:"column:type"`
+	ParentID         *string                 `json:"parentId,omitempty" gorm:"column:parent_id"`
 	Snapshots        []*snapshotEntity       `json:"snapshots,omitempty" gorm:"-"`
 	UserPermissions  []*userPermissionValue  `json:"userPermissions" gorm:"-"`
 	GroupPermissions []*groupPermissionValue `json:"groupPermissions" gorm:"-"`
 	Text             *string                 `json:"text,omitempty" gorm:"-"`
-	CreateTime       string                  `json:"createTime" gorm:"create_time"`
-	UpdateTime       *string                 `json:"updateTime,omitempty" gorm:"update_time"`
+	CreateTime       string                  `json:"createTime" gorm:"column:create_time"`
+	UpdateTime       *string                 `json:"updateTime,omitempty" gorm:"column:update_time"`
 }
 
 func (fileEntity) TableName() string {

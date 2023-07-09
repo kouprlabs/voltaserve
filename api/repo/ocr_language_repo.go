@@ -17,7 +17,8 @@ func NewOCRLanguageRepo() OCRLanguageRepo {
 
 type ocrLanguageEntity struct {
 	ID        string `json:"id" gorm:"column:id"`
-	ISO639Pt3 string `json:"name" gorm:"column:iso639_3"`
+	ISO639Pt3 string `json:"iso639pt3" gorm:"column:iso639_3"`
+	Name      string `json:"name" gorm:"column:name"`
 }
 
 func (ocrLanguageEntity) TableName() string {
@@ -30,6 +31,10 @@ func (ol ocrLanguageEntity) GetID() string {
 
 func (ol ocrLanguageEntity) GetISO639Pt3() string {
 	return ol.ISO639Pt3
+}
+
+func (ol ocrLanguageEntity) GetName() string {
+	return ol.Name
 }
 
 type ocrLanguageRepo struct {

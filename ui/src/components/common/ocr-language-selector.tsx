@@ -33,13 +33,13 @@ import Pagination from '@/components/common/pagination'
 import SearchInput from '@/components/common/search-input'
 
 type OcrLanguageSelectorProps = {
-  defaultId?: string
+  valueId?: string
   isDisabled?: boolean
   onConfirm?: (ocrLanguage: OcrLanguage) => void
 }
 
 const OcrLanguageSelector = ({
-  defaultId,
+  valueId,
   isDisabled,
   onConfirm,
 }: OcrLanguageSelectorProps) => {
@@ -74,13 +74,13 @@ const OcrLanguageSelector = ({
   }, [isOpen])
 
   useEffect(() => {
-    if (!list || !defaultId) {
+    if (!list || !valueId) {
       return
     }
     async function fetch() {
       setIsFetching(true)
       try {
-        const result = await OcrLanguageAPI.list({ query: defaultId })
+        const result = await OcrLanguageAPI.list({ query: valueId })
         if (result.size > 0) {
           setConfirmed(result.data[0])
         }
@@ -89,7 +89,7 @@ const OcrLanguageSelector = ({
       }
     }
     fetch()
-  }, [list, defaultId])
+  }, [list, valueId])
 
   const handleConfirm = useCallback(() => {
     if (selected) {
@@ -109,7 +109,7 @@ const OcrLanguageSelector = ({
         onClick={onOpen}
         color={confirmed ? normalButtonLabelColor : dimmedButtonLabelColor}
       >
-        {confirmed ? confirmed.id : 'Select OCR Language'}
+        {confirmed ? confirmed.name : 'Select OCR Language'}
       </Button>
       <Modal
         size="xl"
@@ -160,12 +160,12 @@ const OcrLanguageSelector = ({
                         <Td>
                           <HStack spacing={variables.spacing}>
                             <Avatar
-                              name={ol.id}
+                              name={ol.name}
                               size="sm"
                               width="40px"
                               height="40px"
                             />
-                            <Text fontSize="14px">{ol.id}</Text>
+                            <Text fontSize="14px">{ol.name}</Text>
                           </HStack>
                         </Td>
                       </Tr>

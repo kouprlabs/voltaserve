@@ -15,6 +15,7 @@ export enum SortOrder {
 export type OcrLanguage = {
   id: string
   iso639pt3: string
+  name: string
 }
 
 export type List = {
