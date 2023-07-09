@@ -92,7 +92,7 @@ func main() {
 	groups := router.NewGroupRouter()
 	groups.AppendRoutes(v1.Group("groups"))
 
-	users := router.NewOCRLanguageRouter()
+	users := router.NewUserRouter()
 	users.AppendRoutes(v1.Group("users"))
 
 	ocrLanguages.AppendRoutes(ol)
