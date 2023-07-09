@@ -9,7 +9,7 @@ type PipelineOptions struct {
 	OCRLanguageID         string `json:"ocrLanguageId"`
 }
 
-type PipelineResponse struct {
+type SnapshotUpdateOptions struct {
 	Options   PipelineOptions `json:"options,omitempty"`
 	Original  *S3Object       `json:"original,omitempty"`
 	Preview   *S3Object       `json:"preview,omitempty"`

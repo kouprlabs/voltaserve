@@ -47,11 +47,10 @@ func (p *officeBuilder) Build(opts core.PipelineOptions) error {
 			return err
 		}
 	}
-	res := core.PipelineResponse{
+	if err := p.apiClient.UpdateSnapshot(&core.SnapshotUpdateOptions{
 		Options:   opts,
 		Thumbnail: &thumbnail,
-	}
-	if err := p.apiClient.UpdateSnapshot(&res); err != nil {
+	}); err != nil {
 		return err
 	}
 	if _, err := os.Stat(inputPath); err == nil {

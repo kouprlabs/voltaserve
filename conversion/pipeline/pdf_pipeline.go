@@ -49,24 +49,24 @@ func (p *pdfPipeline) Run(opts core.PipelineOptions) error {
 	if err := p.s3.GetFile(opts.Key, inputPath, opts.Bucket); err != nil {
 		return err
 	}
-	res := core.PipelineResponse{
-		Options: opts,
-	}
 	text, err := p.toolsClient.TextFromPDF(inputPath)
 	if err != nil {
 		p.logger.Named(infra.StrPipeline).Errorw(err.Error())
 	}
+	textKey := opts.FileID + "/" + opts.SnapshotID + "/text.txt"
 	if text != "" && err == nil {
-		res.Text = &core.S3Object{
-			Bucket: opts.Bucket,
-			Key:    opts.FileID + "/" + opts.SnapshotID + "/text.txt",
-			Size:   int64(len(text)),
-		}
-		if err := p.s3.PutText(res.Text.Key, text, "text/plain", res.Text.Bucket); err != nil {
+		if err := p.s3.PutText(textKey, text, "text/plain", opts.Bucket); err != nil {
 			return err
 		}
 	}
-	if err := p.apiClient.UpdateSnapshot(&res); err != nil {
+	if err := p.apiClient.UpdateSnapshot(&core.SnapshotUpdateOptions{
+		Options: opts,
+		Text: &core.S3Object{
+			Bucket: opts.Bucket,
+			Key:    textKey,
+			Size:   int64(len(text)),
+		},
+	}); err != nil {
 		return err
 	}
 	if _, err := os.Stat(inputPath); err == nil {

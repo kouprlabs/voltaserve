@@ -42,23 +42,23 @@ func (p *officePipeline) Run(opts core.PipelineOptions) error {
 	if err != nil {
 		return err
 	}
-	res := core.PipelineResponse{
+	previewKey := opts.FileID + "/" + opts.SnapshotID + "/preview.pdf"
+	if err := p.s3.PutFile(previewKey, outputPath, helper.DetectMimeFromFile(outputPath), opts.Bucket); err != nil {
+		return err
+	}
+	if err := p.apiClient.UpdateSnapshot(&core.SnapshotUpdateOptions{
 		Options: opts,
 		Preview: &core.S3Object{
 			Bucket: opts.Bucket,
-			Key:    opts.FileID + "/" + opts.SnapshotID + "/preview.pdf",
+			Key:    previewKey,
 			Size:   stat.Size(),
 		},
-	}
-	if err := p.s3.PutFile(res.Preview.Key, outputPath, helper.DetectMimeFromFile(outputPath), res.Preview.Bucket); err != nil {
-		return err
-	}
-	if err := p.apiClient.UpdateSnapshot(&res); err != nil {
+	}); err != nil {
 		return err
 	}
 	if err := p.pdfPipeline.Run(core.PipelineOptions{
-		Bucket:     res.Preview.Bucket,
-		Key:        res.Preview.Key,
+		Bucket:     opts.Bucket,
+		Key:        previewKey,
 		FileID:     opts.FileID,
 		SnapshotID: opts.SnapshotID,
 	}); err != nil {

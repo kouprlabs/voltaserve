@@ -19,8 +19,8 @@ func NewAPIClient() *APIClient {
 	}
 }
 
-func (c *APIClient) UpdateSnapshot(pr *core.PipelineResponse) error {
-	body, err := json.Marshal(pr)
+func (c *APIClient) UpdateSnapshot(opts *core.SnapshotUpdateOptions) error {
+	body, err := json.Marshal(opts)
 	if err != nil {
 		return err
 	}

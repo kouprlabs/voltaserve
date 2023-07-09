@@ -53,7 +53,7 @@ func (p *imagePipeline) Run(opts core.PipelineOptions) error {
 	if err != nil {
 		return err
 	}
-	res := core.PipelineResponse{
+	snapshotUpdateOpts := core.SnapshotUpdateOptions{
 		Options: opts,
 		Original: &core.S3Object{
 			Bucket: opts.Bucket,
@@ -62,7 +62,7 @@ func (p *imagePipeline) Run(opts core.PipelineOptions) error {
 			Size:   stat.Size(),
 		},
 	}
-	if err := p.apiClient.UpdateSnapshot(&res); err != nil {
+	if err := p.apiClient.UpdateSnapshot(&snapshotUpdateOpts); err != nil {
 		return err
 	}
 	if filepath.Ext(inputPath) == ".tiff" {
@@ -70,15 +70,15 @@ func (p *imagePipeline) Run(opts core.PipelineOptions) error {
 		if err := p.toolsClient.ConvertImage(inputPath, jpegPath); err != nil {
 			return err
 		}
-		res.Preview = &core.S3Object{
+		snapshotUpdateOpts.Preview = &core.S3Object{
 			Bucket: opts.Bucket,
 			Key:    opts.FileID + "/" + opts.SnapshotID + "/preview.jpg",
 			Size:   stat.Size(),
 		}
-		if err := p.s3.PutFile(res.Preview.Key, jpegPath, helper.DetectMimeFromFile(jpegPath), res.Preview.Bucket); err != nil {
+		if err := p.s3.PutFile(snapshotUpdateOpts.Preview.Key, jpegPath, helper.DetectMimeFromFile(jpegPath), snapshotUpdateOpts.Preview.Bucket); err != nil {
 			return err
 		}
-		if err := p.apiClient.UpdateSnapshot(&res); err != nil {
+		if err := p.apiClient.UpdateSnapshot(&snapshotUpdateOpts); err != nil {
 			return err
 		}
 		if err := os.Remove(inputPath); err != nil {
@@ -121,13 +121,13 @@ func (p *imagePipeline) Run(opts core.PipelineOptions) error {
 					return err
 				}
 				inputPath = pdfPath
-				res.OCR = &core.S3Object{
+				snapshotUpdateOpts.OCR = &core.S3Object{
 					Bucket:   opts.Bucket,
 					Key:      opts.FileID + "/" + opts.SnapshotID + "/ocr.pdf",
 					Size:     stat.Size(),
 					Language: &model,
 				}
-				if err := p.s3.PutFile(res.OCR.Key, inputPath, helper.DetectMimeFromFile(inputPath), res.OCR.Bucket); err != nil {
+				if err := p.s3.PutFile(snapshotUpdateOpts.OCR.Key, inputPath, helper.DetectMimeFromFile(inputPath), snapshotUpdateOpts.OCR.Bucket); err != nil {
 					return err
 				}
 				text, err := p.toolsClient.TextFromPDF(inputPath)
@@ -135,16 +135,16 @@ func (p *imagePipeline) Run(opts core.PipelineOptions) error {
 					p.logger.Named(infra.StrPipeline).Errorw(err.Error())
 				}
 				if text != "" && err == nil {
-					res.Text = &core.S3Object{
+					snapshotUpdateOpts.Text = &core.S3Object{
 						Bucket: opts.Bucket,
 						Key:    opts.FileID + "/" + opts.SnapshotID + "/text.txt",
 						Size:   int64(len(text)),
 					}
-					if err := p.s3.PutText(res.Text.Key, text, "text/plain", res.Text.Bucket); err != nil {
+					if err := p.s3.PutText(snapshotUpdateOpts.Text.Key, text, "text/plain", snapshotUpdateOpts.Text.Bucket); err != nil {
 						return err
 					}
 				}
-				if err := p.apiClient.UpdateSnapshot(&res); err != nil {
+				if err := p.apiClient.UpdateSnapshot(&snapshotUpdateOpts); err != nil {
 					return err
 				}
 			}
