@@ -20,11 +20,7 @@ import {
 } from '@chakra-ui/react'
 import { IconDotsVertical, SectionSpinner, variables } from '@koupr/ui'
 import { Helmet } from 'react-helmet-async'
-import InvitationAPI, {
-  Invitation,
-  SortBy,
-  SortOrder,
-} from '@/client/api/invitation'
+import InvitationAPI, { SortBy, SortOrder } from '@/client/api/invitation'
 import UserAPI from '@/client/idp/user'
 import { swrConfig } from '@/client/options'
 import PagePagination, {
