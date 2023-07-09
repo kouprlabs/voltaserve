@@ -29,7 +29,7 @@ func NewOfficeBuilder() core.Builder {
 	}
 }
 
-func (p *officeBuilder) Build(opts core.PipelineOptions) error {
+func (p *officeBuilder) Build(opts core.PipelineRunOptions) error {
 	inputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(opts.Key))
 	if err := p.s3.GetFile(opts.Key, inputPath, opts.Bucket); err != nil {
 		return err
@@ -47,7 +47,7 @@ func (p *officeBuilder) Build(opts core.PipelineOptions) error {
 			return err
 		}
 	}
-	if err := p.apiClient.UpdateSnapshot(&core.SnapshotUpdateOptions{
+	if err := p.apiClient.UpdateSnapshot(core.SnapshotUpdateOptions{
 		Options:   opts,
 		Thumbnail: &thumbnail,
 	}); err != nil {

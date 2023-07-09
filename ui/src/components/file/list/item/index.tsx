@@ -36,6 +36,7 @@ import {
   ltViewerPermission,
 } from '@/client/api/permission'
 import downloadFile from '@/helpers/download-file'
+import { isImage } from '@/helpers/file-extension'
 import relativeDate from '@/helpers/relative-date'
 import store from '@/store/configure-store'
 import { useAppDispatch } from '@/store/hook'
@@ -190,15 +191,16 @@ const Item = ({ file, scale }: ItemProps) => {
               >
                 Download
               </MenuItem>
-              {file.ocr?.language && (
+              {file.type === 'file' &&
+              isImage(file?.original?.extension ?? '') ? (
                 <MenuItem
                   icon={<HiLanguage fontSize="14px" />}
                   isDisabled={ltEditorPermission(file.permission)}
                   onClick={() => dispatch(manageOcrModalDidOpen())}
                 >
-                  Manage OCR
+                  OCR
                 </MenuItem>
-              )}
+              ) : null}
               <MenuDivider />
               <MenuItem
                 icon={<IconTrash />}

@@ -10,8 +10,8 @@ import Copy from '@/components/file/copy'
 import Create from '@/components/file/create'
 import Delete from '@/components/file/delete'
 import List from '@/components/file/list'
-import ManageOcr from '@/components/file/manage-ocr'
 import Move from '@/components/file/move'
+import OCR from '@/components/file/ocr'
 import Path from '@/components/file/path'
 import Rename from '@/components/file/rename'
 import Sharing from '@/components/file/sharing'
@@ -108,7 +108,7 @@ const WorkspaceFilesPage = () => {
         </Box>
       </Stack>
       <Sharing />
-      <ManageOcr />
+      <OCR />
       <Move />
       <Copy />
       <Create />

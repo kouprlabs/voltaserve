@@ -513,7 +513,7 @@ func (r *FileRouter) UpdateOCRLanguage(c *fiber.Ctx) error {
 	if err := validator.New().Struct(opts); err != nil {
 		return errorpkg.NewRequestBodyValidationError(err)
 	}
-	if err := r.fileSvc.UpdateOCRLanguage(c.Params("id"), opts.OCRLanguageID, userID); err != nil {
+	if err := r.fileSvc.UpdateOCRLanguage(c.Params("id"), opts.ID, userID); err != nil {
 		return err
 	}
 	return c.SendStatus(200)
@@ -798,7 +798,7 @@ func NewFileDownloadRouter() *FileDownloadRouter {
 	}
 }
 
-func (r *FileDownloadRouter) AppendRoutes(g fiber.Router) {
+func (r *FileDownloadRouter) AppendNonJWTRoutes(g fiber.Router) {
 	g.Get("/:id/original:ext", r.DownloadOriginal)
 	g.Get("/:id/preview:ext", r.DownloadPreview)
 	g.Get("/:id/ocr:ext", r.DownloadOCR)
@@ -942,7 +942,7 @@ func NewConversionWebhookRouter() *ConversionWebhookRouter {
 	}
 }
 
-func (r *ConversionWebhookRouter) AppendRoutes(g fiber.Router) {
+func (r *ConversionWebhookRouter) AppendInternalRoutes(g fiber.Router) {
 	g.Post("/conversion_webhook/update_snapshot", r.UpdateSnapshot)
 }
 

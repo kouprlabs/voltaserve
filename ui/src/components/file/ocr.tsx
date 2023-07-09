@@ -28,10 +28,10 @@ import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { manageOcrModalDidClose } from '@/store/ui/files'
 
 type FormValues = {
-  ocrLanguageId: string
+  languageId: string
 }
 
-const ManageOcr = () => {
+const OCR = () => {
   const dispatch = useAppDispatch()
   const isModalOpen = useAppSelector(
     (state) => state.ui.files.isManageOcrModalOpen
@@ -39,13 +39,13 @@ const ManageOcr = () => {
   const id = useAppSelector((state) => state.ui.files.selection[0])
   const { data: file } = FileAPI.useGetById(id)
   const formSchema = Yup.object().shape({
-    ocrLanguageId: Yup.string().required('OCR language is required'),
+    languageId: Yup.string().required('Language is required'),
   })
   const [isDeleting, setIsDeleting] = useState(false)
 
   const handleSubmit = useCallback(
     async (
-      { ocrLanguageId }: FormValues,
+      { languageId }: FormValues,
       { setSubmitting }: FormikHelpers<FormValues>
     ) => {
       if (!file) {
@@ -53,7 +53,7 @@ const ManageOcr = () => {
       }
       setSubmitting(true)
       try {
-        await FileAPI.updateOcrLanguage(file.id, { ocrLanguageId })
+        await FileAPI.updateOcrLanguage(file.id, { id: languageId })
         setSubmitting(false)
         dispatch(manageOcrModalDidClose())
       } finally {
@@ -76,39 +76,43 @@ const ManageOcr = () => {
     >
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>Manage OCR</ModalHeader>
+        <ModalHeader>OCR</ModalHeader>
         <ModalCloseButton />
         <Formik
           enableReinitialize={true}
-          initialValues={{ ocrLanguageId: file?.ocr?.language || '' }}
+          initialValues={{ languageId: file?.ocr?.language || '' }}
           validationSchema={formSchema}
           validateOnBlur={false}
           onSubmit={handleSubmit}
         >
-          {({ errors, touched, isSubmitting, values, setFieldValue }) => (
+          {({
+            errors,
+            touched,
+            isSubmitting,
+            values,
+            dirty,
+            setFieldValue,
+          }) => (
             <Form>
               <ModalBody>
-                <Field name="ocrLanguageId">
+                <Field name="languageId">
                   {({ field }: FieldAttributes<FieldProps>) => (
                     <FormControl
                       maxW="400px"
                       isInvalid={
-                        errors.ocrLanguageId && touched.ocrLanguageId
-                          ? true
-                          : false
+                        errors.languageId && touched.languageId ? true : false
                       }
                     >
-                      <FormLabel>OCR Language</FormLabel>
+                      <FormLabel>Language</FormLabel>
                       <OcrLanguageSelector
-                        valueId={values.ocrLanguageId}
+                        buttonLabel="Select Language"
+                        valueId={values.languageId}
                         isDisabled={isSubmitting || isDeleting}
                         onConfirm={(value) =>
                           setFieldValue(field.name, value.id)
                         }
                       />
-                      <FormErrorMessage>
-                        {errors.ocrLanguageId}
-                      </FormErrorMessage>
+                      <FormErrorMessage>{errors.languageId}</FormErrorMessage>
                     </FormControl>
                   )}
                 </Field>
@@ -128,7 +132,9 @@ const ManageOcr = () => {
                   type="button"
                   variant="solid"
                   colorScheme="red"
-                  isDisabled={isSubmitting || isDeleting}
+                  isDisabled={
+                    isSubmitting || isDeleting || !file?.ocr?.language
+                  }
                   isLoading={isDeleting}
                   mr={variables.spacingSm}
                   onClick={handleDelete}
@@ -139,7 +145,7 @@ const ManageOcr = () => {
                   type="submit"
                   variant="solid"
                   colorScheme="blue"
-                  isDisabled={values.ocrLanguageId === file?.ocr?.language}
+                  isDisabled={!dirty}
                   isLoading={isSubmitting}
                 >
                   Save
@@ -153,4 +159,4 @@ const ManageOcr = () => {
   )
 }
 
-export default ManageOcr
+export default OCR

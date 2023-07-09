@@ -23,7 +23,7 @@ func NewDispatcher() *Dispatcher {
 	}
 }
 
-func (d *Dispatcher) Dispatch(opts core.PipelineOptions) error {
+func (d *Dispatcher) Dispatch(opts core.PipelineRunOptions) error {
 	pipeline := d.pipelineIdentifier.Identify(opts)
 	if pipeline == core.PipelinePDF {
 		if err := d.pdfPipeline.Run(opts); err != nil {

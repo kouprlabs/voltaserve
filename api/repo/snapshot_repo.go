@@ -149,57 +149,77 @@ func (s *snapshotEntity) SetVersion(version int64) {
 }
 
 func (s *snapshotEntity) SetOriginal(m *model.S3Object) {
-	b, err := json.Marshal(m)
-	if err != nil {
-		log.Fatal(err)
-		return
-	}
-	if err := s.Original.UnmarshalJSON(b); err != nil {
-		log.Fatal(err)
+	if m == nil {
+		s.Original = nil
+	} else {
+		b, err := json.Marshal(m)
+		if err != nil {
+			log.Fatal(err)
+			return
+		}
+		if err := s.Original.UnmarshalJSON(b); err != nil {
+			log.Fatal(err)
+		}
 	}
 }
 
 func (s *snapshotEntity) SetPreview(m *model.S3Object) {
-	b, err := json.Marshal(m)
-	if err != nil {
-		log.Fatal(err)
-		return
-	}
-	if err := s.Preview.UnmarshalJSON(b); err != nil {
-		log.Fatal(err)
+	if m == nil {
+		s.Preview = nil
+	} else {
+		b, err := json.Marshal(m)
+		if err != nil {
+			log.Fatal(err)
+			return
+		}
+		if err := s.Preview.UnmarshalJSON(b); err != nil {
+			log.Fatal(err)
+		}
 	}
 }
 
 func (s *snapshotEntity) SetText(m *model.S3Object) {
-	b, err := json.Marshal(m)
-	if err != nil {
-		log.Fatal(err)
-		return
-	}
-	if err := s.Text.UnmarshalJSON(b); err != nil {
-		log.Fatal(err)
+	if m == nil {
+		s.Text = nil
+	} else {
+		b, err := json.Marshal(m)
+		if err != nil {
+			log.Fatal(err)
+			return
+		}
+		if err := s.Text.UnmarshalJSON(b); err != nil {
+			log.Fatal(err)
+		}
 	}
 }
 
 func (s *snapshotEntity) SetOCR(m *model.S3Object) {
-	b, err := json.Marshal(m)
-	if err != nil {
-		log.Fatal(err)
-		return
-	}
-	if err := s.OCR.UnmarshalJSON(b); err != nil {
-		log.Fatal(err)
+	if m == nil {
+		s.OCR = nil
+	} else {
+		b, err := json.Marshal(m)
+		if err != nil {
+			log.Fatal(err)
+			return
+		}
+		if err := s.OCR.UnmarshalJSON(b); err != nil {
+			log.Fatal(err)
+		}
 	}
 }
 
 func (s *snapshotEntity) SetThumbnail(m *model.Thumbnail) {
-	b, err := json.Marshal(m)
-	if err != nil {
-		log.Fatal(err)
-		return
-	}
-	if err := s.Thumbnail.UnmarshalJSON(b); err != nil {
-		log.Fatal(err)
+	if m == nil {
+		s.Thumbnail = nil
+	} else {
+		b, err := json.Marshal(m)
+		if err != nil {
+			log.Fatal(err)
+			return
+		}
+		if err := s.Thumbnail.UnmarshalJSON(b); err != nil {
+			log.Fatal(err)
+		}
 	}
 }
 

@@ -14,6 +14,7 @@ import (
 )
 
 type ImageProcessor struct {
+	apiClient      *client.APIClient
 	toolsClient    *client.ToolsClient
 	languageClient *client.LanguageClient
 	fileIdent      *identifier.FileIdentifier
@@ -22,6 +23,7 @@ type ImageProcessor struct {
 
 func NewImageProcessor() *ImageProcessor {
 	return &ImageProcessor{
+		apiClient:      client.NewAPIClient(),
 		toolsClient:    client.NewToolsClient(),
 		languageClient: client.NewLanguageClient(),
 		fileIdent:      identifier.NewFileIdentifier(),
@@ -47,24 +49,12 @@ func (p *ImageProcessor) Data(inputPath string) (imageData, error) {
 			return imageData{}, err
 		}
 	}
-	modelToLang := map[string]string{
-		"eng":     "eng",
-		"deu":     "deu",
-		"fra":     "fra",
-		"nld":     "nld",
-		"ita":     "ita",
-		"spa":     "spa",
-		"por":     "por",
-		"swe":     "swe",
-		"jpn":     "jpn",
-		"chi_sim": "zho",
-		"chi_tra": "zho",
-		"hin":     "hin",
-		"rus":     "rus",
-		"ara":     "ara",
+	ocrLangs, err := p.apiClient.GetAllOCRLangages()
+	if err != nil {
+		return imageData{}, err
 	}
-	for model := range modelToLang {
-		text, err := p.toolsClient.TextFromImage(noAlphaPath, model)
+	for _, lang := range ocrLangs {
+		text, err := p.toolsClient.TextFromImage(noAlphaPath, lang.ID)
 		if err != nil {
 			continue
 		}
@@ -72,10 +62,10 @@ func (p *ImageProcessor) Data(inputPath string) (imageData, error) {
 		if err != nil {
 			continue
 		}
-		if err == nil && langDetect.Language == modelToLang[model] {
+		if err == nil && langDetect.Language == lang.ISO639Pt3 {
 			results = append(results, imageData{
 				Text:     text,
-				Model:    model,
+				Model:    lang.ID,
 				Language: langDetect.Language,
 				Score:    langDetect.Score,
 			})

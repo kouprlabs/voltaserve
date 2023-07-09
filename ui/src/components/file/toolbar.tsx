@@ -44,6 +44,7 @@ import {
   ltOwnerPermission,
 } from '@/client/api/permission'
 import downloadFile from '@/helpers/download-file'
+import { isImage } from '@/helpers/file-extension'
 import mapFileList from '@/helpers/map-file-list'
 import { decodeQuery } from '@/helpers/query'
 import { listUpdated } from '@/store/entities/files'
@@ -299,13 +300,13 @@ const Toolbar = () => {
                     Download
                   </MenuItem>
                   {singleFile?.type === 'file' &&
-                  singleFile?.ocr?.language &&
+                  isImage(singleFile?.original?.extension ?? '') &&
                   geEditorPermission(singleFile?.permission) ? (
                     <MenuItem
                       icon={<HiLanguage fontSize="14px" />}
                       onClick={() => dispatch(manageOcrModalDidOpen())}
                     >
-                      Manage OCR
+                      OCR
                     </MenuItem>
                   ) : null}
                   <MenuDivider />

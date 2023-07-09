@@ -3,6 +3,8 @@ package service
 import (
 	"sort"
 	"strings"
+	"voltaserve/config"
+	"voltaserve/errorpkg"
 	"voltaserve/model"
 	"voltaserve/repo"
 
@@ -34,13 +36,30 @@ type OCRLanguageListOptions struct {
 type OCRLanguageService struct {
 	ocrLanguageRepo   repo.OCRLanguageRepo
 	ocrLanguageMapper *ocrLanguageMapper
+	config            config.Config
 }
 
 func NewOCRLanguageService() *OCRLanguageService {
 	return &OCRLanguageService{
 		ocrLanguageRepo:   repo.NewOCRLanguageRepo(),
 		ocrLanguageMapper: newOCRLanguageMapper(),
+		config:            config.GetConfig(),
 	}
+}
+
+func (svc *OCRLanguageService) GetAll(apiKey string) ([]*OCRLanguage, error) {
+	if apiKey != svc.config.Security.APIKey {
+		return nil, errorpkg.NewInvalidAPIKeyError()
+	}
+	all, err := svc.ocrLanguageRepo.FindAll()
+	if err != nil {
+		return nil, err
+	}
+	mapped, err := svc.ocrLanguageMapper.mapMany(all)
+	if err != nil {
+		return nil, err
+	}
+	return mapped, nil
 }
 
 func (svc *OCRLanguageService) List(opts OCRLanguageListOptions) (*OCRLanguageList, error) {

@@ -14,7 +14,7 @@ func NewPipelineIdentifier() *PipelineIdentifier {
 	}
 }
 
-func (pi *PipelineIdentifier) Identify(opts core.PipelineOptions) string {
+func (pi *PipelineIdentifier) Identify(opts core.PipelineRunOptions) string {
 	if pi.fileIdent.IsPDF(opts.Key) {
 		return core.PipelinePDF
 	} else if pi.fileIdent.IsOffice(opts.Key) || pi.fileIdent.IsPlainText(opts.Key) {

@@ -35,12 +35,14 @@ import SearchInput from '@/components/common/search-input'
 type OcrLanguageSelectorProps = {
   valueId?: string
   isDisabled?: boolean
+  buttonLabel?: string
   onConfirm?: (ocrLanguage: OcrLanguage) => void
 }
 
 const OcrLanguageSelector = ({
   valueId,
   isDisabled,
+  buttonLabel,
   onConfirm,
 }: OcrLanguageSelectorProps) => {
   const { isOpen, onOpen, onClose } = useDisclosure()
@@ -109,7 +111,7 @@ const OcrLanguageSelector = ({
         onClick={onOpen}
         color={confirmed ? normalButtonLabelColor : dimmedButtonLabelColor}
       >
-        {confirmed ? confirmed.name : 'Select OCR Language'}
+        {confirmed ? confirmed.name : buttonLabel ?? 'Select OCR Language'}
       </Button>
       <Modal
         size="xl"
@@ -119,7 +121,7 @@ const OcrLanguageSelector = ({
       >
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>Select OCR Language</ModalHeader>
+          <ModalHeader>{buttonLabel ?? 'Select OCR Language'}</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
             <Stack direction="column" spacing={variables.spacing}>

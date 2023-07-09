@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 	"voltaserve/cache"
+	"voltaserve/client"
 	"voltaserve/config"
 	"voltaserve/errorpkg"
 	"voltaserve/guard"
@@ -131,7 +132,7 @@ type FileRenameOptions struct {
 }
 
 type FileUpdateOCRLanguageOptions struct {
-	OCRLanguageID string `json:"ocrLanguageId" validate:"required"`
+	ID string `json:"id" validate:"required"`
 }
 
 type Snapshot struct {
@@ -175,12 +176,12 @@ type GroupPermission struct {
 }
 
 type SnapshotUpdateOptions struct {
-	Options   infra.PipelineOptions `json:"options"`
-	Original  *model.S3Object       `json:"original,omitempty"`
-	Preview   *model.S3Object       `json:"preview,omitempty"`
-	Text      *model.S3Object       `json:"text,omitempty"`
-	OCR       *model.S3Object       `json:"ocr,omitempty"`
-	Thumbnail *model.Thumbnail      `json:"thumbnail,omitempty"`
+	Options   client.PipelineRunOptions `json:"options"`
+	Original  *model.S3Object           `json:"original,omitempty"`
+	Preview   *model.S3Object           `json:"preview,omitempty"`
+	Text      *model.S3Object           `json:"text,omitempty"`
+	OCR       *model.S3Object           `json:"ocr,omitempty"`
+	Thumbnail *model.Thumbnail          `json:"thumbnail,omitempty"`
 }
 
 type FileService struct {
@@ -202,7 +203,7 @@ type FileService struct {
 	permissionRepo   repo.PermissionRepo
 	fileIdent        *infra.FileIdentifier
 	s3               *infra.S3Manager
-	conversionClient *infra.ConversionClient
+	conversionClient *client.ConversionClient
 	config           config.Config
 }
 
@@ -226,7 +227,7 @@ func NewFileService() *FileService {
 		permissionRepo:   repo.NewPermissionRepo(),
 		fileIdent:        infra.NewFileIdentifier(),
 		s3:               infra.NewS3Manager(),
-		conversionClient: infra.NewConversionClient(),
+		conversionClient: client.NewConversionClient(),
 		config:           config.GetConfig(),
 	}
 }
@@ -341,7 +342,7 @@ func (svc *FileService) Store(fileID string, filePath string, userID string) (*F
 	if err != nil {
 		return nil, err
 	}
-	if err := svc.conversionClient.RunPipeline(&infra.PipelineOptions{
+	if err := svc.conversionClient.RunPipeline(&client.PipelineRunOptions{
 		FileID:                file.GetID(),
 		SnapshotID:            snapshot.GetID(),
 		Bucket:                original.Bucket,
@@ -363,27 +364,26 @@ func (svc *FileService) UpdateOCRLanguage(fileID string, ocrLanguageID string, u
 		return nil
 	}
 
-	/* Delete OCR data from S3 */
 	latestSnapshot := snapshots[0]
 	if latestSnapshot.HasOCR() {
+		/* Delete OCR data from S3 */
 		if err = svc.s3.RemoveObject(latestSnapshot.GetOCR().Key, latestSnapshot.GetOCR().Bucket); err != nil {
+			return err
+		}
+		/* Delete OCR object from database */
+		latestSnapshot.SetOCR(nil)
+		if err := svc.snapshotRepo.Save(latestSnapshot); err != nil {
 			return err
 		}
 	}
 
-	/* Delete OCR object from database */
-	latestSnapshot.SetOCR(nil)
-	if err := svc.snapshotRepo.Save(latestSnapshot); err != nil {
-		return err
-	}
-
 	/* Run the pipeline from scratch using the original file in S3 */
-	if err := svc.conversionClient.RunPipeline(&infra.PipelineOptions{
+	if err := svc.conversionClient.RunPipeline(&client.PipelineRunOptions{
 		FileID:                file.GetID(),
 		SnapshotID:            latestSnapshot.GetID(),
 		Bucket:                latestSnapshot.GetOriginal().Bucket,
 		Key:                   latestSnapshot.GetOriginal().Key,
-		OCRLanguageID:         ocrLanguageID,
+		OCRLanguageID:         &ocrLanguageID,
 		IsAutomaticOCREnabled: true,
 	}); err != nil {
 		return err

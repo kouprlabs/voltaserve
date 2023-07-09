@@ -19,9 +19,9 @@ import (
 	"github.com/joho/godotenv"
 )
 
-//	@title		Voltaserve API
-//	@version	1.0.0
-//	@BasePath	/v1
+// @title		Voltaserve API
+// @version	1.0.0
+// @BasePath	/v1
 func main() {
 	if _, err := os.Stat(".env.local"); err == nil {
 		err := godotenv.Load(".env.local")
@@ -47,6 +47,9 @@ func main() {
 
 	v1 := app.Group("/v1")
 
+	f := v1.Group("files")
+	ol := v1.Group("ocr_languages")
+
 	app.Get("v1/health", func(c *fiber.Ctx) error {
 		return c.SendStatus(200)
 	})
@@ -55,16 +58,14 @@ func main() {
 		AllowOrigins: strings.Join(cfg.Security.CORSOrigins, ","),
 	}))
 
-	ocrLanguages := router.NewOCRLanguageRouter()
-	ocrLanguages.AppendRoutes(v1.Group("ocr_languages"))
-
-	f := v1.Group("files")
-
 	fileDownloads := router.NewFileDownloadRouter()
-	fileDownloads.AppendRoutes(f)
+	fileDownloads.AppendNonJWTRoutes(f)
+
+	ocrLanguages := router.NewOCRLanguageRouter()
+	ocrLanguages.AppendInternalRoutes(ol)
 
 	conversionWebhook := router.NewConversionWebhookRouter()
-	conversionWebhook.AppendRoutes(f)
+	conversionWebhook.AppendInternalRoutes(f)
 
 	app.Use(jwtware.New(jwtware.Config{
 		SigningKey: []byte(cfg.Security.JWTSigningKey),
@@ -93,6 +94,8 @@ func main() {
 
 	users := router.NewOCRLanguageRouter()
 	users.AppendRoutes(v1.Group("users"))
+
+	ocrLanguages.AppendRoutes(ol)
 
 	if err := app.Listen(fmt.Sprintf(":%d", cfg.Port)); err != nil {
 		panic(err)

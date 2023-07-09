@@ -114,7 +114,7 @@ export type RenameOptions = {
 }
 
 export type UpdateOcrLanguageOptions = {
-  ocrLanguageId: string
+  id: string
 }
 
 export type GrantUserPermissionOptions = {

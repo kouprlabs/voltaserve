@@ -1,6 +1,6 @@
 package core
 
-type PipelineOptions struct {
+type PipelineRunOptions struct {
 	FileID                string `json:"fileId"`
 	SnapshotID            string `json:"snapshotId"`
 	Bucket                string `json:"bucket"`
@@ -10,12 +10,12 @@ type PipelineOptions struct {
 }
 
 type SnapshotUpdateOptions struct {
-	Options   PipelineOptions `json:"options,omitempty"`
-	Original  *S3Object       `json:"original,omitempty"`
-	Preview   *S3Object       `json:"preview,omitempty"`
-	Text      *S3Object       `json:"text,omitempty"`
-	OCR       *S3Object       `json:"ocr,omitempty"`
-	Thumbnail *ImageBase64    `json:"thumbnail,omitempty"`
+	Options   PipelineRunOptions `json:"options,omitempty"`
+	Original  *S3Object          `json:"original,omitempty"`
+	Preview   *S3Object          `json:"preview,omitempty"`
+	Text      *S3Object          `json:"text,omitempty"`
+	OCR       *S3Object          `json:"ocr,omitempty"`
+	Thumbnail *ImageBase64       `json:"thumbnail,omitempty"`
 }
 
 type S3Object struct {
@@ -37,10 +37,16 @@ type ImageBase64 struct {
 	Height int    `json:"height"`
 }
 
+type OCRLanguage struct {
+	ID        string `json:"id"`
+	ISO639Pt3 string `json:"iso639pt3"`
+	Name      string `json:"name"`
+}
+
 type Pipeline interface {
-	Run(PipelineOptions) error
+	Run(PipelineRunOptions) error
 }
 
 type Builder interface {
-	Build(PipelineOptions) error
+	Build(PipelineRunOptions) error
 }
