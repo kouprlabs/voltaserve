@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Badge, Stat, StatLabel, StatNumber } from '@chakra-ui/react'
-import { variables } from '@koupr/ui'
+import { Badge, Stat, StatLabel, StatNumber, Text } from '@chakra-ui/react'
+import { Spinner, variables } from '@koupr/ui'
 import { File } from '@/client/api/file'
 import OcrLanguageAPI from '@/client/api/ocr-language'
 
@@ -21,16 +21,20 @@ const OcrLanguageInfo = ({ file }: OcrLanguageInfoProps) => {
     }
   }, [file])
 
-  if (!language) {
+  if (!file.ocr?.language) {
     return null
   }
 
   return (
     <Stat>
       <StatLabel>OCR Language</StatLabel>
-      <StatNumber fontSize={variables.bodyFontSize}>
-        <Badge>{language}</Badge>
-      </StatNumber>
+      {language ? (
+        <StatNumber fontSize={variables.bodyFontSize}>
+          <Badge>{language}</Badge>
+        </StatNumber>
+      ) : (
+        <Spinner />
+      )}
     </Stat>
   )
 }
