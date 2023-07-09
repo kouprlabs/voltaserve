@@ -47,7 +47,7 @@ CREATE TRIGGER user_before_update
     FOR EACH ROW
 EXECUTE PROCEDURE update_time_before_update();
 
-CREATE TABLE IF NOT EXISTS organization
+CREATE TABLE IF NOT EXISTS "organization"
 (
     id          text PRIMARY KEY,
     name        text NOT NULL,
@@ -69,16 +69,17 @@ CREATE TRIGGER organization_before_update
     FOR EACH ROW
 EXECUTE PROCEDURE update_time_before_update();
 
-CREATE TABLE IF NOT EXISTS workspace
+CREATE TABLE IF NOT EXISTS "workspace"
 (
-    id               text PRIMARY KEY,
-    name             text NOT NULL,
-    organization_id  text NOT NULL REFERENCES organization (id) ON DELETE CASCADE,
-    storage_capacity bigint NOT NULL,
-    root_id          text UNIQUE,
-    bucket           text UNIQUE NOT NULL,
-    create_time      text NOT NULL DEFAULT (to_json(now())#>>'{}'),
-    update_time      text
+    id                        text PRIMARY KEY,
+    name                      text NOT NULL,
+    organization_id           text NOT NULL REFERENCES organization (id) ON DELETE CASCADE,
+    storage_capacity          bigint NOT NULL,
+    root_id                   text UNIQUE,
+    bucket                    text UNIQUE NOT NULL,
+    is_automatic_ocr_enabled  boolean NOT NULL DEFAULT TRUE,
+    create_time               text NOT NULL DEFAULT (to_json(now())#>>'{}'),
+    update_time               text
 );
 
 CREATE INDEX IF NOT EXISTS workspace_organization_id_idx ON workspace (organization_id);
@@ -97,7 +98,7 @@ CREATE TRIGGER workspace_before_update
     FOR EACH ROW
 EXECUTE PROCEDURE update_time_before_update();
 
-CREATE TABLE IF NOT EXISTS file
+CREATE TABLE IF NOT EXISTS "file"
 (
     id           text PRIMARY KEY,
     name         text NOT NULL,
@@ -125,7 +126,7 @@ CREATE TRIGGER file_before_update
     FOR EACH ROW
 EXECUTE PROCEDURE update_time_before_update();
 
-CREATE TABLE IF NOT EXISTS snapshot
+CREATE TABLE IF NOT EXISTS "snapshot"
 (
   id          text PRIMARY KEY,
   version     bigint,
@@ -153,7 +154,7 @@ CREATE TRIGGER snapshot_before_update
     FOR EACH ROW
 EXECUTE PROCEDURE update_time_before_update();
 
-CREATE TABLE IF NOT EXISTS snapshot_file
+CREATE TABLE IF NOT EXISTS "snapshot_file"
 (
     snapshot_id text REFERENCES snapshot (id) ON DELETE CASCADE,
     file_id     text REFERENCES file (id) ON DELETE CASCADE,
@@ -196,7 +197,7 @@ CREATE TRIGGER group_before_update
     FOR EACH ROW
 EXECUTE PROCEDURE update_time_before_update();
 
-CREATE TABLE IF NOT EXISTS group_user
+CREATE TABLE IF NOT EXISTS "group_user"
 (
     group_id    text REFERENCES "group" (id) ON DELETE CASCADE,
     user_id     text REFERENCES "user" (id) ON DELETE CASCADE,
@@ -214,7 +215,7 @@ CREATE TRIGGER group_user_before_insert
     FOR EACH ROW
 EXECUTE PROCEDURE create_time_before_insert();
 
-CREATE TABLE IF NOT EXISTS userpermission
+CREATE TABLE IF NOT EXISTS "userpermission"
 (
     id          text PRIMARY KEY,
     user_id     text REFERENCES "user" (id) ON DELETE CASCADE,
@@ -234,7 +235,7 @@ CREATE TRIGGER userpermission_before_insert
     FOR EACH ROW
 EXECUTE PROCEDURE create_time_before_insert();
 
-CREATE TABLE IF NOT EXISTS grouppermission
+CREATE TABLE IF NOT EXISTS "grouppermission"
 (
     id          text PRIMARY KEY,
     group_id    text REFERENCES "group" (id) ON DELETE CASCADE,
@@ -254,7 +255,7 @@ CREATE TRIGGER grouppermission_before_insert
     FOR EACH ROW
 EXECUTE PROCEDURE create_time_before_insert();
 
-CREATE TABLE IF NOT EXISTS invitation
+CREATE TABLE IF NOT EXISTS "invitation"
 (
   id              text PRIMARY KEY,
   organization_id text NOT NULL REFERENCES organization (id) ON DELETE CASCADE,
@@ -282,7 +283,7 @@ CREATE TRIGGER invitation_before_update
     FOR EACH ROW
 EXECUTE PROCEDURE update_time_before_update();
 
-CREATE TABLE IF NOT EXISTS organization_user
+CREATE TABLE IF NOT EXISTS "organization_user"
 (
   organization_id text NOT NULL REFERENCES organization (id) ON DELETE CASCADE,
   user_id         text NOT NULL REFERENCES "user" (id) ON DELETE CASCADE,
@@ -299,3 +300,25 @@ CREATE TRIGGER organization_user_before_insert
     ON snapshot
     FOR EACH ROW
 EXECUTE PROCEDURE create_time_before_insert();
+
+CREATE TABLE IF NOT EXISTS "ocrlanguage"
+(
+    id        text PRIMARY KEY, -- https://github.com/tesseract-ocr/tessdata
+    iso639_3  text NOT NULL, -- https://iso639-3.sil.org/code_tables/639/data
+    name      text NOT NULL
+);
+
+INSERT INTO "ocrlanguage" (id, iso639_3, name) VALUES ('eng',     'eng', 'English');
+INSERT INTO "ocrlanguage" (id, iso639_3, name) VALUES ('deu',     'deu', 'German');
+INSERT INTO "ocrlanguage" (id, iso639_3, name) VALUES ('fra',     'fra', 'French');
+INSERT INTO "ocrlanguage" (id, iso639_3, name) VALUES ('nld',     'nld', 'Dutch');
+INSERT INTO "ocrlanguage" (id, iso639_3, name) VALUES ('ita',     'ita', 'Italian');
+INSERT INTO "ocrlanguage" (id, iso639_3, name) VALUES ('spa',     'spa', 'Spanish');
+INSERT INTO "ocrlanguage" (id, iso639_3, name) VALUES ('por',     'por', 'Portuguese');
+INSERT INTO "ocrlanguage" (id, iso639_3, name) VALUES ('swe',     'swe', 'Swedish');
+INSERT INTO "ocrlanguage" (id, iso639_3, name) VALUES ('jpn',     'jpn', 'Japanese');
+INSERT INTO "ocrlanguage" (id, iso639_3, name) VALUES ('chi_sim', 'zho', 'Chinese Simplified');
+INSERT INTO "ocrlanguage" (id, iso639_3, name) VALUES ('chi_tra', 'zho', 'Chinese Traditional');
+INSERT INTO "ocrlanguage" (id, iso639_3, name) VALUES ('hin',     'hin', 'Hindi');
+INSERT INTO "ocrlanguage" (id, iso639_3, name) VALUES ('rus',     'rus', 'Russian');
+INSERT INTO "ocrlanguage" (id, iso639_3, name) VALUES ('ara',     'ara', 'Arabic');

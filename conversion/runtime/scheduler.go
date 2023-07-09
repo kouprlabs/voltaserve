@@ -13,8 +13,8 @@ import (
 )
 
 type Scheduler struct {
-	pipelineQueue       [][]core.PipelineOptions
-	builderQueue        [][]core.PipelineOptions
+	pipelineQueue       [][]core.PipelineRunOptions
+	builderQueue        [][]core.PipelineRunOptions
 	pipelineWorkerCount int
 	builderWorkerCount  int
 	activePipelineCount int
@@ -46,8 +46,8 @@ func NewScheduler(opts SchedulerOptions) *Scheduler {
 		panic(err)
 	}
 	return &Scheduler{
-		pipelineQueue:       make([][]core.PipelineOptions, opts.PipelineWorkerCount),
-		builderQueue:        make([][]core.PipelineOptions, opts.BuilderWorkerCount),
+		pipelineQueue:       make([][]core.PipelineRunOptions, opts.PipelineWorkerCount),
+		builderQueue:        make([][]core.PipelineRunOptions, opts.BuilderWorkerCount),
 		pipelineWorkerCount: opts.PipelineWorkerCount,
 		builderWorkerCount:  opts.BuilderWorkerCount,
 		apiClient:           client.NewAPIClient(),
@@ -70,7 +70,7 @@ func (s *Scheduler) Start() {
 	go s.builderWorkerStatus()
 }
 
-func (s *Scheduler) SchedulePipeline(opts *core.PipelineOptions) {
+func (s *Scheduler) SchedulePipeline(opts *core.PipelineRunOptions) {
 	index := 0
 	length := len(s.pipelineQueue[0])
 	for i := 0; i < s.pipelineWorkerCount; i++ {
@@ -83,7 +83,7 @@ func (s *Scheduler) SchedulePipeline(opts *core.PipelineOptions) {
 	s.pipelineQueue[index] = append(s.pipelineQueue[index], *opts)
 }
 
-func (s *Scheduler) ScheduleBuilder(opts *core.PipelineOptions) {
+func (s *Scheduler) ScheduleBuilder(opts *core.PipelineRunOptions) {
 	index := 0
 	length := len(s.builderQueue[0])
 	for i := 0; i < s.builderWorkerCount; i++ {
@@ -98,7 +98,7 @@ func (s *Scheduler) ScheduleBuilder(opts *core.PipelineOptions) {
 
 func (s *Scheduler) pipelineWorker(index int) {
 	dispatcher := NewDispatcher()
-	s.pipelineQueue[index] = make([]core.PipelineOptions, 0)
+	s.pipelineQueue[index] = make([]core.PipelineRunOptions, 0)
 	s.logger.Named(infra.StrPipeline).Infow("⚙️  running", "worker", index)
 	for {
 		if len(s.pipelineQueue[index]) > 0 {
@@ -123,7 +123,7 @@ func (s *Scheduler) pipelineWorker(index int) {
 
 func (s *Scheduler) builderWorker(index int) {
 	dispatcher := builder.NewDispatcher()
-	s.builderQueue[index] = make([]core.PipelineOptions, 0)
+	s.builderQueue[index] = make([]core.PipelineRunOptions, 0)
 	s.logger.Named(infra.StrBuilder).Infow("⚙️  running", "worker", index)
 	for {
 		if len(s.builderQueue[index]) > 0 {

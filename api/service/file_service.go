@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 	"voltaserve/cache"
+	"voltaserve/client"
 	"voltaserve/config"
 	"voltaserve/errorpkg"
 	"voltaserve/guard"
@@ -32,7 +33,6 @@ type File struct {
 	Preview     *Download   `json:"preview,omitempty"`
 	OCR         *Download   `json:"ocr,omitempty"`
 	Thumbnail   *Thumbnail  `json:"thumbnail,omitempty"`
-	Language    *string     `json:"language,omitempty"`
 	Snapshots   []*Snapshot `json:"snapshots,omitempty"`
 	Permission  string      `json:"permission"`
 	IsShared    bool        `json:"isShared"`
@@ -131,6 +131,10 @@ type FileRenameOptions struct {
 	Name string `json:"name" validate:"required,max=255"`
 }
 
+type FileUpdateOCRLanguageOptions struct {
+	ID string `json:"id" validate:"required"`
+}
+
 type Snapshot struct {
 	ID        string     `json:"id"`
 	Version   int64      `json:"version"`
@@ -156,6 +160,7 @@ type Download struct {
 	Extension string      `json:"extension"`
 	Size      int64       `json:"size"`
 	Image     *ImageProps `json:"image,omitempty"`
+	Language  *string     `json:"language,omitempty"`
 }
 
 type UserPermission struct {
@@ -171,13 +176,12 @@ type GroupPermission struct {
 }
 
 type SnapshotUpdateOptions struct {
-	Options   infra.RunPipelineOptions `json:"options"`
-	Original  *model.S3Object          `json:"original,omitempty"`
-	Preview   *model.S3Object          `json:"preview,omitempty"`
-	Text      *model.S3Object          `json:"text,omitempty"`
-	OCR       *model.S3Object          `json:"ocr,omitempty"`
-	Thumbnail *model.Thumbnail         `json:"thumbnail,omitempty"`
-	Language  *string                  `json:"language,omitempty"`
+	Options   client.PipelineRunOptions `json:"options"`
+	Original  *model.S3Object           `json:"original,omitempty"`
+	Preview   *model.S3Object           `json:"preview,omitempty"`
+	Text      *model.S3Object           `json:"text,omitempty"`
+	OCR       *model.S3Object           `json:"ocr,omitempty"`
+	Thumbnail *model.Thumbnail          `json:"thumbnail,omitempty"`
 }
 
 type FileService struct {
@@ -197,9 +201,9 @@ type FileService struct {
 	groupGuard       *guard.GroupGuard
 	groupMapper      *groupMapper
 	permissionRepo   repo.PermissionRepo
-	fileIdentifier   *infra.FileIdentifier
+	fileIdent        *infra.FileIdentifier
 	s3               *infra.S3Manager
-	conversionClient *infra.ConversionClient
+	conversionClient *client.ConversionClient
 	config           config.Config
 }
 
@@ -221,9 +225,9 @@ func NewFileService() *FileService {
 		groupGuard:       guard.NewGroupGuard(),
 		groupMapper:      newGroupMapper(),
 		permissionRepo:   repo.NewPermissionRepo(),
-		fileIdentifier:   infra.NewFileIdentifier(),
+		fileIdent:        infra.NewFileIdentifier(),
 		s3:               infra.NewS3Manager(),
-		conversionClient: infra.NewConversionClient(),
+		conversionClient: client.NewConversionClient(),
 		config:           config.GetConfig(),
 	}
 }
@@ -338,15 +342,90 @@ func (svc *FileService) Store(fileID string, filePath string, userID string) (*F
 	if err != nil {
 		return nil, err
 	}
-	if err := svc.conversionClient.RunPipeline(&infra.RunPipelineOptions{
-		FileID:     file.GetID(),
-		SnapshotID: snapshot.GetID(),
-		Bucket:     original.Bucket,
-		Key:        original.Key,
+	if err := svc.conversionClient.RunPipeline(&client.PipelineRunOptions{
+		FileID:                file.GetID(),
+		SnapshotID:            snapshot.GetID(),
+		Bucket:                original.Bucket,
+		Key:                   original.Key,
+		IsAutomaticOCREnabled: workspace.GetIsAutomaticOCREnabled(),
 	}); err != nil {
 		return nil, err
 	}
 	return res, nil
+}
+
+func (svc *FileService) UpdateOCRLanguage(fileID string, languageID string, userID string) (*File, error) {
+	file, snapshot, err := svc.deleteOCRFromLatestSnapshot(fileID)
+	if err != nil {
+		return nil, err
+	}
+	if file == nil || snapshot == nil {
+		return nil, nil
+	}
+	if err := svc.conversionClient.RunPipeline(&client.PipelineRunOptions{
+		FileID:                file.GetID(),
+		SnapshotID:            snapshot.GetID(),
+		Bucket:                snapshot.GetOriginal().Bucket,
+		Key:                   snapshot.GetOriginal().Key,
+		OCRLanguageID:         &languageID,
+		IsAutomaticOCREnabled: true,
+	}); err != nil {
+		return nil, err
+	}
+	res, err := svc.fileMapper.mapOne(file, userID)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
+func (svc *FileService) DeleteOCR(fileID string, userID string) (*File, error) {
+	file, _, err := svc.deleteOCRFromLatestSnapshot(fileID)
+	if err != nil {
+		return nil, err
+	}
+	if file == nil {
+		return nil, nil
+	}
+	res, err := svc.fileMapper.mapOne(file, userID)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
+func (svc *FileService) deleteOCRFromLatestSnapshot(fileID string) (model.File, model.Snapshot, error) {
+	file, err := svc.fileRepo.Find(fileID)
+	if err != nil {
+		return nil, nil, err
+	}
+	snapshots := file.GetSnapshots()
+	if len(snapshots) == 0 {
+		return file, nil, nil
+	}
+	snapshot := snapshots[0]
+	if !snapshot.HasOCR() {
+		return file, snapshot, nil
+	}
+	if err := svc.s3.RemoveObject(snapshot.GetOCR().Key, snapshot.GetOCR().Bucket); err != nil {
+		return file, snapshot, err
+	}
+	snapshot.SetOCR(nil)
+	if err := svc.snapshotRepo.Save(snapshot); err != nil {
+		return file, snapshot, err
+	}
+	file, err = svc.fileRepo.Find(file.GetID())
+	if err != nil {
+		return file, snapshot, err
+	}
+	if err = svc.fileSearch.Update([]model.File{file}); err != nil {
+		return file, snapshot, err
+	}
+	err = svc.fileCache.Set(file)
+	if err != nil {
+		return file, snapshot, err
+	}
+	return file, snapshot, nil
 }
 
 func (svc *FileService) UpdateSnapshot(opts SnapshotUpdateOptions, apiKey string) error {
@@ -359,7 +438,6 @@ func (svc *FileService) UpdateSnapshot(opts SnapshotUpdateOptions, apiKey string
 		Preview:   opts.Preview,
 		Text:      opts.Text,
 		OCR:       opts.OCR,
-		Language:  opts.Language,
 	}); err != nil {
 		return err
 	}
@@ -678,13 +756,13 @@ func (svc *FileService) ListByID(id string, opts FileListByIDOptions, userID str
 	if err != nil {
 		return nil, err
 	}
-	var filteredFiles []model.File
+	var filtered []model.File
 	for _, f := range authorized {
 		if opts.FileType == "" || f.GetType() == opts.FileType {
-			filteredFiles = append(filteredFiles, f)
+			filtered = append(filtered, f)
 		}
 	}
-	sorted := svc.doSorting(filteredFiles, opts.SortBy, opts.SortOrder, userID)
+	sorted := svc.doSorting(filtered, opts.SortBy, opts.SortOrder, userID)
 	paged, totalElements, totalPages := svc.doPagination(sorted, opts.Page, opts.Size)
 	mapped, err := svc.fileMapper.mapMany(paged, userID)
 	if err != nil {
@@ -1500,7 +1578,7 @@ func (svc *FileService) doSorting(data []model.File, sortBy string, sortOrder st
 				if f.Original == nil {
 					return false
 				}
-				if svc.fileIdentifier.IsImage(f.Original.Extension) {
+				if svc.fileIdent.IsImage(f.Original.Extension) {
 					return true
 				}
 				return false
@@ -1515,7 +1593,7 @@ func (svc *FileService) doSorting(data []model.File, sortBy string, sortOrder st
 				if f.Original == nil {
 					return false
 				}
-				if svc.fileIdentifier.IsPDF(f.Original.Extension) {
+				if svc.fileIdent.IsPDF(f.Original.Extension) {
 					return true
 				}
 				return false
@@ -1530,7 +1608,7 @@ func (svc *FileService) doSorting(data []model.File, sortBy string, sortOrder st
 				if f.Original == nil {
 					return false
 				}
-				if svc.fileIdentifier.IsOffice(f.Original.Extension) {
+				if svc.fileIdent.IsOffice(f.Original.Extension) {
 					return true
 				}
 				return false
@@ -1545,7 +1623,7 @@ func (svc *FileService) doSorting(data []model.File, sortBy string, sortOrder st
 				if f.Original == nil {
 					return false
 				}
-				if svc.fileIdentifier.IsVideo(f.Original.Extension) {
+				if svc.fileIdent.IsVideo(f.Original.Extension) {
 					return true
 				}
 				return false
@@ -1560,7 +1638,7 @@ func (svc *FileService) doSorting(data []model.File, sortBy string, sortOrder st
 				if f.Original == nil {
 					return false
 				}
-				if svc.fileIdentifier.IsPlainText(f.Original.Extension) {
+				if svc.fileIdent.IsPlainText(f.Original.Extension) {
 					return true
 				}
 				return false
@@ -1575,11 +1653,11 @@ func (svc *FileService) doSorting(data []model.File, sortBy string, sortOrder st
 				if f.Original == nil {
 					return false
 				}
-				if !svc.fileIdentifier.IsImage(f.Original.Extension) &&
-					!svc.fileIdentifier.IsPDF(f.Original.Extension) &&
-					!svc.fileIdentifier.IsOffice(f.Original.Extension) &&
-					!svc.fileIdentifier.IsVideo(f.Original.Extension) &&
-					!svc.fileIdentifier.IsPlainText(f.Original.Extension) {
+				if !svc.fileIdent.IsImage(f.Original.Extension) &&
+					!svc.fileIdent.IsPDF(f.Original.Extension) &&
+					!svc.fileIdent.IsOffice(f.Original.Extension) &&
+					!svc.fileIdent.IsVideo(f.Original.Extension) &&
+					!svc.fileIdent.IsPlainText(f.Original.Extension) {
 					return true
 				}
 				return false
@@ -1777,7 +1855,6 @@ func (mp *FileMapper) mapOne(m model.File, userID string) (*File, error) {
 		res.Preview = latest.Preview
 		res.OCR = latest.OCR
 		res.Thumbnail = latest.Thumbnail
-		res.Language = latest.Language
 	}
 	res.Permission = ""
 	for _, p := range m.GetUserPermissions() {
@@ -1878,6 +1955,7 @@ func (mp *FileMapper) mapOCR(m *model.S3Object) *Download {
 	return &Download{
 		Extension: filepath.Ext(m.Key),
 		Size:      m.Size,
+		Language:  m.Language,
 	}
 }
 

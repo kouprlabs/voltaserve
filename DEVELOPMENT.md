@@ -4,21 +4,6 @@
 
 ### Run Infrastructure Services With Docker
 
-Duplicate the file `./conversion/.env`, and rename it to `./conversion/.env.local`.
-
-Update the following entries in the file `.env.local`:
-
-```properties
-VOLTASERVE_FFMPEG_URL="http://127.0.0.1:6002"
-VOLTASERVE_IMAGEMAGICK_URL="http://127.0.0.1:6003"
-VOLTASERVE_LIBREOFFICE_URL="http://127.0.0.1:6004"
-VOLTASERVE_OCRMYPDF_URL="http://127.0.0.1:6005"
-VOLTASERVE_POPPLER_URL="http://127.0.0.1:6006"
-VOLTASERVE_TESSERACT_URL="http://127.0.0.1:6007"
-```
-
-Run infrastructure services:
-
 ```shell
 docker compose up -d \
     postgres \
@@ -35,7 +20,7 @@ docker compose up -d \
     tesseract
 ```
 
-### Run Infrastructure Services With SLE / openSUSE Leap
+### Run Infrastructure Services With SLE or openSUSE Leap
 
 Supported operating systems:
 
@@ -60,7 +45,7 @@ Stop infrastructure services:
 curl -sSfL "https://raw.githubusercontent.com/kouprlabs/voltaserve/$(git symbolic-ref --short HEAD 2>/dev/null || echo 'main')/scripts/sle/start.sh?t=$(date +%s)" | sh -s
 ```
 
-### Run Infrastructure Services With RHEL based Operating Systems
+### Run Infrastructure Services With a RHEL Compatible OS
 
 Supported operating systems:
 

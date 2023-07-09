@@ -7,19 +7,19 @@ import (
 )
 
 type UserPermission struct {
-	ID         string `json:"id"`
-	UserID     string `json:"userId"`
-	ResourceID string `json:"resourceId"`
-	Permission string `json:"permission"`
-	CreateTime string `json:"createTime"`
+	ID         string `json:"id" gorm:"column:id"`
+	UserID     string `json:"userId" gorm:"column:user_id"`
+	ResourceID string `json:"resourceId" gorm:"column:resource_id"`
+	Permission string `json:"permission" gorm:"column:permission"`
+	CreateTime string `json:"createTime" gorm:"column:create_time"`
 }
 
 type GroupPermission struct {
-	ID         string `json:"id"`
-	GroupID    string `json:"groupId"`
-	ResourceID string `json:"resourceId"`
-	Permission string `json:"permission"`
-	CreateTime string `json:"createTime"`
+	ID         string `json:"id" gorm:"column:id"`
+	GroupID    string `json:"groupId" gorm:"column:group_id"`
+	ResourceID string `json:"resourceId" gorm:"column:resource_id"`
+	Permission string `json:"permission" gorm:"column:permission"`
+	CreateTime string `json:"createTime" gorm:"column:create_time"`
 }
 
 type PermissionRepo interface {

@@ -27,7 +27,7 @@ func NewImageBuilder() core.Builder {
 	}
 }
 
-func (p *imageBuilder) Build(opts core.PipelineOptions) error {
+func (p *imageBuilder) Build(opts core.PipelineRunOptions) error {
 	inputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(opts.Key))
 	if err := p.s3.GetFile(opts.Key, inputPath, opts.Bucket); err != nil {
 		return err
@@ -36,11 +36,10 @@ func (p *imageBuilder) Build(opts core.PipelineOptions) error {
 	if err != nil {
 		return err
 	}
-	res := core.PipelineResponse{
+	if err := p.apiClient.UpdateSnapshot(core.SnapshotUpdateOptions{
 		Options:   opts,
 		Thumbnail: &thumbnail,
-	}
-	if err := p.apiClient.UpdateSnapshot(&res); err != nil {
+	}); err != nil {
 		return err
 	}
 	if _, err := os.Stat(inputPath); err == nil {

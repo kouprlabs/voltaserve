@@ -37,7 +37,6 @@ export type File = {
   preview?: Download
   ocr?: Download
   thumbnail?: Thumbnail
-  language?: string
   snapshots: Snapshot[]
   permission: PermissionType
   isShared: boolean
@@ -112,6 +111,10 @@ export type BatchGetOptions = {
 
 export type RenameOptions = {
   name: string
+}
+
+export type UpdateOcrLanguageOptions = {
+  id: string
 }
 
 export type GrantUserPermissionOptions = {
@@ -269,6 +272,30 @@ export default class FileAPI {
     return apiFetch(`/files/${id}/rename`, {
       method: 'POST',
       body: JSON.stringify(options),
+      headers: {
+        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
+        'Content-Type': 'application/json',
+      },
+    }).then((result) => result.json())
+  }
+
+  static async updateOcrLanguage(
+    id: string,
+    options: UpdateOcrLanguageOptions
+  ): Promise<File> {
+    return apiFetch(`/files/${id}/update_ocr_language`, {
+      method: 'POST',
+      body: JSON.stringify(options),
+      headers: {
+        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
+        'Content-Type': 'application/json',
+      },
+    }).then((result) => result.json())
+  }
+
+  static async deleteOcr(id: string): Promise<File> {
+    return apiFetch(`/files/${id}/delete_ocr`, {
+      method: 'POST',
       headers: {
         'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
         'Content-Type': 'application/json',

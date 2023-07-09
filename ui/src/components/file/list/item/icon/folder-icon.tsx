@@ -1,8 +1,8 @@
 import { useMemo } from 'react'
-import { Box } from '@chakra-ui/react'
+import { Box, HStack } from '@chakra-ui/react'
 import { FcFolder } from 'react-icons/fc'
 import { File } from '@/client/api/file'
-import SharedSign from './shared-sign'
+import SharedBadge from './shared-badge'
 
 type FolderIconProps = {
   file: File
@@ -16,7 +16,9 @@ const FolderIcon = ({ file, scale }: FolderIconProps) => {
   return (
     <Box position="relative">
       <FcFolder fontSize={fontSize} />
-      {file.isShared && <SharedSign bottom="7px" right="2px" />}
+      <HStack position="absolute" bottom="7px" right="2px" spacing="2px">
+        {file.isShared && <SharedBadge />}
+      </HStack>
     </Box>
   )
 }

@@ -26,7 +26,7 @@ func NewToolsClient() *ToolsClient {
 	}
 }
 
-func (c *ToolsClient) ResizeImage(inputPath string, width int, height int, outputPath string) error {
+func (cl *ToolsClient) ResizeImage(inputPath string, width int, height int, outputPath string) error {
 	var widthStr string
 	if width == 0 {
 		widthStr = ""
@@ -71,7 +71,7 @@ func (c *ToolsClient) ResizeImage(inputPath string, width int, height int, outpu
 		return err
 	}
 	writer.Close()
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", c.config.ImageMagickURL, c.config.Security.APIKey), body)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", cl.config.ImageMagickURL, cl.config.Security.APIKey), body)
 	if err != nil {
 		return err
 	}
@@ -97,7 +97,7 @@ func (c *ToolsClient) ResizeImage(inputPath string, width int, height int, outpu
 	return nil
 }
 
-func (c *ToolsClient) ThumbnailFromImage(inputPath string, width int, height int, outputPath string) error {
+func (cl *ToolsClient) ThumbnailFromImage(inputPath string, width int, height int, outputPath string) error {
 	var widthStr string
 	if width == 0 {
 		widthStr = ""
@@ -142,7 +142,7 @@ func (c *ToolsClient) ThumbnailFromImage(inputPath string, width int, height int
 		return err
 	}
 	writer.Close()
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", c.config.ImageMagickURL, c.config.Security.APIKey), body)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", cl.config.ImageMagickURL, cl.config.Security.APIKey), body)
 	if err != nil {
 		return err
 	}
@@ -168,7 +168,7 @@ func (c *ToolsClient) ThumbnailFromImage(inputPath string, width int, height int
 	return nil
 }
 
-func (c *ToolsClient) ConvertImage(inputPath string, outputPath string) error {
+func (cl *ToolsClient) ConvertImage(inputPath string, outputPath string) error {
 	file, err := os.Open(inputPath)
 	if err != nil {
 		return err
@@ -200,7 +200,7 @@ func (c *ToolsClient) ConvertImage(inputPath string, outputPath string) error {
 		return err
 	}
 	writer.Close()
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", c.config.ImageMagickURL, c.config.Security.APIKey), body)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", cl.config.ImageMagickURL, cl.config.Security.APIKey), body)
 	if err != nil {
 		return err
 	}
@@ -226,7 +226,7 @@ func (c *ToolsClient) ConvertImage(inputPath string, outputPath string) error {
 	return nil
 }
 
-func (c *ToolsClient) RemoveAlphaChannel(inputPath string, outputPath string) error {
+func (cl *ToolsClient) RemoveAlphaChannel(inputPath string, outputPath string) error {
 	file, err := os.Open(inputPath)
 	if err != nil {
 		return err
@@ -258,7 +258,7 @@ func (c *ToolsClient) RemoveAlphaChannel(inputPath string, outputPath string) er
 		return err
 	}
 	writer.Close()
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", c.config.ImageMagickURL, c.config.Security.APIKey), body)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", cl.config.ImageMagickURL, cl.config.Security.APIKey), body)
 	if err != nil {
 		return err
 	}
@@ -284,7 +284,7 @@ func (c *ToolsClient) RemoveAlphaChannel(inputPath string, outputPath string) er
 	return nil
 }
 
-func (c *ToolsClient) MeasureImage(inputPath string) (core.ImageProps, error) {
+func (cl *ToolsClient) MeasureImage(inputPath string) (core.ImageProps, error) {
 	file, err := os.Open(inputPath)
 	if err != nil {
 		return core.ImageProps{}, err
@@ -316,7 +316,7 @@ func (c *ToolsClient) MeasureImage(inputPath string) (core.ImageProps, error) {
 		return core.ImageProps{}, err
 	}
 	writer.Close()
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", c.config.ImageMagickURL, c.config.Security.APIKey), body)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", cl.config.ImageMagickURL, cl.config.Security.APIKey), body)
 	if err != nil {
 		return core.ImageProps{}, err
 	}
@@ -348,7 +348,7 @@ func (c *ToolsClient) MeasureImage(inputPath string) (core.ImageProps, error) {
 	return core.ImageProps{Width: width, Height: height}, nil
 }
 
-func (c *ToolsClient) TSVFromImage(inputPath string, tesseractModel string) (string, error) {
+func (cl *ToolsClient) TSVFromImage(inputPath string, model string) (string, error) {
 	file, err := os.Open(inputPath)
 	if err != nil {
 		return "", err
@@ -369,7 +369,7 @@ func (c *ToolsClient) TSVFromImage(inputPath string, tesseractModel string) (str
 	}
 	jsonData := map[string]interface{}{
 		"bin":    "tesseract",
-		"args":   []string{"${input}", "${output.#.tsv}", "-l", tesseractModel, "tsv"},
+		"args":   []string{"${input}", "${output.#.tsv}", "-l", model, "tsv"},
 		"stdout": true,
 	}
 	jsonBytes, err := json.Marshal(jsonData)
@@ -380,7 +380,7 @@ func (c *ToolsClient) TSVFromImage(inputPath string, tesseractModel string) (str
 		return "", err
 	}
 	writer.Close()
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", c.config.TesseractURL, c.config.Security.APIKey), body)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", cl.config.TesseractURL, cl.config.Security.APIKey), body)
 	if err != nil {
 		return "", err
 	}
@@ -401,7 +401,7 @@ func (c *ToolsClient) TSVFromImage(inputPath string, tesseractModel string) (str
 	return string(output), nil
 }
 
-func (c *ToolsClient) TextFromImage(inputPath string, model string) (string, error) {
+func (cl *ToolsClient) TextFromImage(inputPath string, model string) (string, error) {
 	file, err := os.Open(inputPath)
 	if err != nil {
 		return "", err
@@ -433,7 +433,7 @@ func (c *ToolsClient) TextFromImage(inputPath string, model string) (string, err
 		return "", err
 	}
 	writer.Close()
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", c.config.TesseractURL, c.config.Security.APIKey), body)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", cl.config.TesseractURL, cl.config.Security.APIKey), body)
 	if err != nil {
 		return "", err
 	}
@@ -454,7 +454,7 @@ func (c *ToolsClient) TextFromImage(inputPath string, model string) (string, err
 	return string(output), nil
 }
 
-func (c *ToolsClient) DPIFromImage(inputPath string) (int, error) {
+func (cl *ToolsClient) DPIFromImage(inputPath string) (int, error) {
 	file, err := os.Open(inputPath)
 	if err != nil {
 		return -1, err
@@ -486,7 +486,7 @@ func (c *ToolsClient) DPIFromImage(inputPath string) (int, error) {
 		return -1, err
 	}
 	writer.Close()
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", c.config.ExiftoolURL, c.config.Security.APIKey), body)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", cl.config.ExiftoolURL, cl.config.Security.APIKey), body)
 	if err != nil {
 		return -1, err
 	}
@@ -520,7 +520,7 @@ func (c *ToolsClient) DPIFromImage(inputPath string) (int, error) {
 	return int((xRes + yRes) / 2), nil
 }
 
-func (c *ToolsClient) OCRFromPDF(inputPath string, language *string, dpi *int) (string, error) {
+func (cl *ToolsClient) OCRFromPDF(inputPath string, language *string, dpi *int) (string, error) {
 	file, err := os.Open(inputPath)
 	if err != nil {
 		return "", err
@@ -565,7 +565,7 @@ func (c *ToolsClient) OCRFromPDF(inputPath string, language *string, dpi *int) (
 		return "", err
 	}
 	writer.Close()
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", c.config.OCRMyPDFURL, c.config.Security.APIKey), body)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", cl.config.OCRMyPDFURL, cl.config.Security.APIKey), body)
 	if err != nil {
 		return "", err
 	}
@@ -592,7 +592,7 @@ func (c *ToolsClient) OCRFromPDF(inputPath string, language *string, dpi *int) (
 	return outputPath, nil
 }
 
-func (c *ToolsClient) TextFromPDF(inputPath string) (string, error) {
+func (cl *ToolsClient) TextFromPDF(inputPath string) (string, error) {
 	file, err := os.Open(inputPath)
 	if err != nil {
 		return "", err
@@ -624,7 +624,7 @@ func (c *ToolsClient) TextFromPDF(inputPath string) (string, error) {
 		return "", err
 	}
 	writer.Close()
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", c.config.PopplerURL, c.config.Security.APIKey), body)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", cl.config.PopplerURL, cl.config.Security.APIKey), body)
 	if err != nil {
 		return "", err
 	}

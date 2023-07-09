@@ -166,7 +166,7 @@ func (svc *UserService) List(opts UserListOptions, userID string) (*UserList, er
 	if opts.SortOrder == "" {
 		opts.SortOrder = SortOrderAsc
 	}
-	sorted := svc.doSorting(res, opts.SortBy, opts.SortOrder, userID)
+	sorted := svc.doSorting(res, opts.SortBy, opts.SortOrder)
 	paged, totalElements, totalPages := svc.doPagination(sorted, opts.Page, opts.Size)
 	mapped, err := svc.userMapper.mapMany(paged)
 	if err != nil {
@@ -181,7 +181,7 @@ func (svc *UserService) List(opts UserListOptions, userID string) (*UserList, er
 	}, nil
 }
 
-func (svc *UserService) doSorting(data []model.User, sortBy string, sortOrder string, userID string) []model.User {
+func (svc *UserService) doSorting(data []model.User, sortBy string, sortOrder string) []model.User {
 	if sortBy == SortByEmail {
 		sort.Slice(data, func(i, j int) bool {
 			if sortOrder == SortOrderDesc {

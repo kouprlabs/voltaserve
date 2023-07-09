@@ -43,14 +43,14 @@ func NewGroup() model.Group {
 }
 
 type groupEntity struct {
-	ID               string                  `json:"id"`
-	Name             string                  `json:"name"`
-	OrganizationID   string                  `json:"organizationId"`
+	ID               string                  `json:"id" gorm:"column:id"`
+	Name             string                  `json:"name" gorm:"column:name"`
+	OrganizationID   string                  `json:"organizationId" gorm:"column:organization_id"`
 	UserPermissions  []*userPermissionValue  `json:"userPermissions" gorm:"-"`
 	GroupPermissions []*groupPermissionValue `json:"groupPermissions" gorm:"-"`
 	Members          []string                `json:"members" gorm:"-"`
-	CreateTime       string                  `json:"createTime"`
-	UpdateTime       *string                 `json:"updateTime"`
+	CreateTime       string                  `json:"createTime" gorm:"column:create_time"`
+	UpdateTime       *string                 `json:"updateTime" gorm:"column:update_time"`
 }
 
 func (groupEntity) TableName() string {
@@ -275,7 +275,7 @@ func (repo *groupRepo) GetIDs() ([]string, error) {
 }
 
 func (repo *groupRepo) GetMembers(id string) ([]model.User, error) {
-	var entities []*postgresUser
+	var entities []*userEntity
 	db := repo.db.
 		Raw(`SELECT DISTINCT u.* FROM "user" u INNER JOIN group_user gu ON u.id = gu.user_id WHERE gu.group_id = ?`, id).
 		Scan(&entities)

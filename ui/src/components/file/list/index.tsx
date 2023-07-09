@@ -3,9 +3,14 @@ import { useParams, useSearchParams } from 'react-router-dom'
 import { Wrap, WrapItem, Text, Center } from '@chakra-ui/react'
 import { Spinner, variables } from '@koupr/ui'
 import FileAPI, { List as FileListData } from '@/client/api/file'
-import { swrConfig } from '@/client/options'
+import { REFRESH_INTERVAL, swrConfig } from '@/client/options'
 import { decodeQuery } from '@/helpers/query'
-import { listUpdated, folderUpdated } from '@/store/entities/files'
+import store from '@/store/configure-store'
+import {
+  listUpdated,
+  folderUpdated,
+  filesUpdated,
+} from '@/store/entities/files'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import {
   multiSelectKeyUpdated,
@@ -13,6 +18,32 @@ import {
   selectionUpdated,
 } from '@/store/ui/files'
 import Item from './item'
+
+setInterval(async () => {
+  const ids = store.getState().entities.files.list?.data.map((e) => e.id) || []
+  if (ids.length > 0) {
+    const files = await FileAPI.batchGet({ ids })
+    store.dispatch(filesUpdated(files))
+  }
+}, REFRESH_INTERVAL)
+
+setInterval(async () => {
+  const current = store.getState().entities.files.current
+  if (current) {
+    const itemCount = await FileAPI.getItemCount(current)
+    if (itemCount > 0) {
+      const sortBy = store.getState().ui.files.sortBy
+      const sortOrder = store.getState().ui.files.sortOrder
+      const result = await FileAPI.list(current, {
+        page: 1,
+        size: FileAPI.DEFAULT_PAGE_SIZE,
+        sortBy,
+        sortOrder,
+      })
+      store.dispatch(listUpdated(result))
+    }
+  }
+}, REFRESH_INTERVAL)
 
 type ListProps = {
   scale: number

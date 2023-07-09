@@ -22,7 +22,7 @@ Run for development:
 pnpm run dev
 ```
 
-### Docker Images
+### Build Docker Images
 
 Build SLE Docker image:
 

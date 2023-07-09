@@ -40,13 +40,13 @@ func NewOrganization() model.Organization {
 }
 
 type organizationEntity struct {
-	ID               string                  `json:"id"`
-	Name             string                  `json:"name"`
+	ID               string                  `json:"id" gorm:"column:id"`
+	Name             string                  `json:"name" gorm:"column:name"`
 	UserPermissions  []*userPermissionValue  `json:"userPermissions" gorm:"-"`
 	GroupPermissions []*groupPermissionValue `json:"groupPermissions" gorm:"-"`
 	Members          []string                `json:"members" gorm:"-"`
-	CreateTime       string                  `json:"createTime"`
-	UpdateTime       *string                 `json:"updateTime,omitempty"`
+	CreateTime       string                  `json:"createTime" gorm:"column:create_time"`
+	UpdateTime       *string                 `json:"updateTime,omitempty" gorm:"column:update_time"`
 }
 
 func (organizationEntity) TableName() string {
@@ -218,7 +218,7 @@ func (repo *organizationRepo) RemoveMember(id string, userID string) error {
 }
 
 func (repo *organizationRepo) GetMembers(id string) ([]model.User, error) {
-	var entities []*postgresUser
+	var entities []*userEntity
 	db := repo.db.
 		Raw(`SELECT DISTINCT u.* FROM "user" u INNER JOIN organization_user ou ON u.id = ou.user_id WHERE ou.organization_id = ? ORDER BY u.full_name ASC`, id).
 		Scan(&entities)

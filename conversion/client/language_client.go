@@ -24,7 +24,7 @@ func NewLanguageClient() *LanguageClient {
 	}
 }
 
-func (api *LanguageClient) Detect(text string) (LanguageDetect, error) {
+func (cl *LanguageClient) Detect(text string) (LanguageDetect, error) {
 	requestBody := struct {
 		Text string `json:"text"`
 	}{
@@ -34,7 +34,7 @@ func (api *LanguageClient) Detect(text string) (LanguageDetect, error) {
 	if err != nil {
 		return LanguageDetect{}, err
 	}
-	response, err := http.Post(fmt.Sprintf("%s/v1/detect", api.config.LanguageURL), "application/json", bytes.NewBuffer(jsonBody))
+	response, err := http.Post(fmt.Sprintf("%s/v1/detect", cl.config.LanguageURL), "application/json", bytes.NewBuffer(jsonBody))
 	if err != nil {
 		return LanguageDetect{}, err
 	}

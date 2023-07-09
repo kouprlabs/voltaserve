@@ -19,10 +19,7 @@ import {
 } from '@chakra-ui/react'
 import { SectionSpinner, variables } from '@koupr/ui'
 import { Helmet } from 'react-helmet-async'
-import OrganizationAPI, {
-  Organization,
-  SortOrder,
-} from '@/client/api/organization'
+import OrganizationAPI, { SortOrder } from '@/client/api/organization'
 import { swrConfig } from '@/client/options'
 import PagePagination, {
   usePagePagination,

@@ -32,7 +32,6 @@ import {
 } from '@koupr/ui'
 import { Helmet } from 'react-helmet-async'
 import InvitationAPI, {
-  Invitation,
   InvitationStatus,
   SortBy,
   SortOrder,

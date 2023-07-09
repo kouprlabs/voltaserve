@@ -16,7 +16,7 @@ Build binary:
 go build .
 ```
 
-### Docker Images
+### Build Docker Images
 
 Build SLE Docker image:
 

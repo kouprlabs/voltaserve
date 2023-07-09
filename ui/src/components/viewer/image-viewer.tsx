@@ -10,18 +10,18 @@ type ImageViewerProps = {
 
 const ImageViewer = ({ file }: ImageViewerProps) => {
   const [isLoading, setIsLoading] = useState(true)
-  const download = useMemo(() => file.preview || file.original, [file])
-  const urlPath = useMemo(() => (file.preview ? 'preview' : 'original'), [file])
+  const download = useMemo(() => file.preview ?? file.original, [file])
+  const path = useMemo(() => (file.preview ? 'preview' : 'original'), [file])
   const url = useMemo(() => {
-    if (!download || !download.extension) {
+    if (!download?.extension) {
       return ''
     }
-    return `/proxy/api/v1/files/${file.id}/${urlPath}${
+    return `/proxy/api/v1/files/${file.id}/${path}${
       download.extension
     }?${new URLSearchParams({
       access_token: getAccessTokenOrRedirect(),
     })}`
-  }, [file, download, urlPath])
+  }, [file, download, path])
 
   if (!download) {
     return null
