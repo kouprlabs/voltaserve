@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Badge, Stat, StatLabel, StatNumber, Text } from '@chakra-ui/react'
+import { Badge, Stat, StatLabel, StatNumber } from '@chakra-ui/react'
 import { Spinner, variables } from '@koupr/ui'
 import { File } from '@/client/api/file'
 import OcrLanguageAPI from '@/client/api/ocr-language'
