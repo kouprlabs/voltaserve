@@ -3,9 +3,14 @@ import { useParams, useSearchParams } from 'react-router-dom'
 import { Wrap, WrapItem, Text, Center } from '@chakra-ui/react'
 import { Spinner, variables } from '@koupr/ui'
 import FileAPI, { List as FileListData } from '@/client/api/file'
-import { swrConfig } from '@/client/options'
+import { REFRESH_INTERVAL, swrConfig } from '@/client/options'
 import { decodeQuery } from '@/helpers/query'
-import { listUpdated, folderUpdated } from '@/store/entities/files'
+import store from '@/store/configure-store'
+import {
+  listUpdated,
+  folderUpdated,
+  filesUpdated,
+} from '@/store/entities/files'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import {
   multiSelectKeyUpdated,
@@ -13,6 +18,14 @@ import {
   selectionUpdated,
 } from '@/store/ui/files'
 import Item from './item'
+
+setInterval(async () => {
+  const ids = store.getState().entities.files.list?.data.map((e) => e.id) || []
+  if (ids.length > 0) {
+    const files = await FileAPI.batchGet({ ids })
+    store.dispatch(filesUpdated(files))
+  }
+}, REFRESH_INTERVAL)
 
 type ListProps = {
   scale: number
