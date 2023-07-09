@@ -32,10 +32,6 @@ type OrganizationList struct {
 	Size          uint            `json:"size"`
 }
 
-type OrganizationSearchOptions struct {
-	Text string `json:"text" validate:"required"`
-}
-
 type OrganizationCreateOptions struct {
 	Name  string  `json:"name" validate:"required,max=255"`
 	Image *string `json:"image"`
@@ -171,7 +167,7 @@ func (svc *OrganizationService) List(opts OrganizationListOptions, userID string
 	if opts.SortOrder == "" {
 		opts.SortOrder = SortOrderAsc
 	}
-	sorted := svc.doSorting(authorized, opts.SortBy, opts.SortOrder, userID)
+	sorted := svc.doSorting(authorized, opts.SortBy, opts.SortOrder)
 	paged, totalElements, totalPages := svc.doPagination(sorted, opts.Page, opts.Size)
 	mapped, err := svc.orgMapper.mapMany(paged, userID)
 	if err != nil {
@@ -317,7 +313,7 @@ func (svc *OrganizationService) doAuthorizationByIDs(ids []string, user model.Us
 	return res, nil
 }
 
-func (svc *OrganizationService) doSorting(data []model.Organization, sortBy string, sortOrder string, userID string) []model.Organization {
+func (svc *OrganizationService) doSorting(data []model.Organization, sortBy string, sortOrder string) []model.Organization {
 	if sortBy == SortByName {
 		sort.Slice(data, func(i, j int) bool {
 			if sortOrder == SortOrderDesc {

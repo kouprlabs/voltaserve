@@ -102,7 +102,7 @@ const Thumbnail = ({ file, scale }: ThumbnailProps) => {
       )}
       <HStack position="absolute" bottom="-5px" right="-5px" spacing="2px">
         {file.isShared && <SharedBadge />}
-        {file.ocr && <OcrBadge />}
+        {file.ocr?.language && <OcrBadge />}
       </HStack>
     </Box>
   )

@@ -49,6 +49,7 @@ func (r *FileRouter) AppendRoutes(g fiber.Router) {
 	g.Get("/:id/get_path", r.GetPath)
 	g.Post("/:id/move", r.Move)
 	g.Post("/:id/rename", r.Rename)
+	g.Post("/:id/update_ocr_language", r.UpdateOCRLanguage)
 	g.Post("/:id/copy", r.Copy)
 	g.Get("/:id/get_size", r.GetSize)
 	g.Post("/grant_user_permission", r.GrantUserPermission)
@@ -488,6 +489,34 @@ func (r *FileRouter) Rename(c *fiber.Ctx) error {
 		return err
 	}
 	return c.JSON(res)
+}
+
+// Rename godoc
+//
+//	@Summary		UpdateOCRLanguage
+//	@Description	UpdateOCRLanguage
+//	@Tags			Files
+//	@Id				files_update_ocr_language
+//	@Produce		json
+//	@Param			id		path		string									true	"ID"
+//	@Param			body	body		service.FileUpdateOCRLanguageOptions	true	"Body"
+//	@Success		200		{object}	service.File
+//	@Failure		404		{object}	errorpkg.ErrorResponse
+//	@Failure		500		{object}	errorpkg.ErrorResponse
+//	@Router			/files/{id}/update_ocr_language [post]
+func (r *FileRouter) UpdateOCRLanguage(c *fiber.Ctx) error {
+	userID := GetUserID(c)
+	opts := new(service.FileUpdateOCRLanguageOptions)
+	if err := c.BodyParser(opts); err != nil {
+		return err
+	}
+	if err := validator.New().Struct(opts); err != nil {
+		return errorpkg.NewRequestBodyValidationError(err)
+	}
+	if err := r.fileSvc.UpdateOCRLanguage(c.Params("id"), opts.OCRLanguageID, userID); err != nil {
+		return err
+	}
+	return c.SendStatus(200)
 }
 
 // Delete godoc

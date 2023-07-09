@@ -6,6 +6,7 @@ type PipelineOptions struct {
 	Bucket                string `json:"bucket"`
 	Key                   string `json:"key"`
 	IsAutomaticOCREnabled bool   `json:"isAutomaticOcrEnabled"`
+	OCRLanguageID         string `json:"ocrLanguageId"`
 }
 
 type PipelineResponse struct {

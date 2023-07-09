@@ -109,7 +109,7 @@ func (repo *userRepo) FindByEmail(email string) (model.User, error) {
 
 func (repo *userRepo) FindAll() ([]model.User, error) {
 	var entities []*userEntity
-	db := repo.db.Raw(`select * from "user" u`).Scan(&entities)
+	db := repo.db.Raw(`select * from "user"`).Scan(&entities)
 	if db.Error != nil {
 		return nil, db.Error
 	}

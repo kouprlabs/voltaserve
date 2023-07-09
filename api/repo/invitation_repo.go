@@ -35,13 +35,13 @@ func NewInvitation() model.Invitation {
 }
 
 type invitationEntity struct {
-	ID             string  `json:"id"`
-	OrganizationID string  `json:"organizationId"`
-	OwnerID        string  `json:"ownerId"`
-	Email          string  `json:"email"`
-	Status         string  `json:"status"`
-	CreateTime     string  `json:"createTime"`
-	UpdateTime     *string `json:"updateTime"`
+	ID             string  `json:"id" gorm:"id"`
+	OrganizationID string  `json:"organizationId" gorm:"organization_id"`
+	OwnerID        string  `json:"ownerId" gorm:"owner_id"`
+	Email          string  `json:"email" gorm:"email"`
+	Status         string  `json:"status" gorm:"status"`
+	CreateTime     string  `json:"createTime" gorm:"create_time"`
+	UpdateTime     *string `json:"updateTime" gorm:"update_time"`
 }
 
 func (invitationEntity) TableName() string {

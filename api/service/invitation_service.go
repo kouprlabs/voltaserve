@@ -161,7 +161,7 @@ func (svc *InvitationService) GetIncoming(opts InvitationListOptions, userID str
 	if opts.SortOrder == "" {
 		opts.SortOrder = SortOrderAsc
 	}
-	sorted := svc.doSorting(invitations, opts.SortBy, opts.SortOrder, userID)
+	sorted := svc.doSorting(invitations, opts.SortBy, opts.SortOrder)
 	paged, totalElements, totalPages := svc.doPagination(sorted, opts.Page, opts.Size)
 	mapped, err := svc.invitationMapper.mapMany(paged, userID)
 	if err != nil {
@@ -191,7 +191,7 @@ func (svc *InvitationService) GetOutgoing(orgID string, opts InvitationListOptio
 	if opts.SortOrder == "" {
 		opts.SortOrder = SortOrderAsc
 	}
-	sorted := svc.doSorting(invitations, opts.SortBy, opts.SortOrder, userID)
+	sorted := svc.doSorting(invitations, opts.SortBy, opts.SortOrder)
 	paged, totalElements, totalPages := svc.doPagination(sorted, opts.Page, opts.Size)
 	mapped, err := svc.invitationMapper.mapMany(paged, userID)
 	if err != nil {
@@ -320,7 +320,7 @@ func (svc *InvitationService) Delete(id string, userID string) error {
 	return nil
 }
 
-func (svc *InvitationService) doSorting(data []model.Invitation, sortBy string, sortOrder string, userID string) []model.Invitation {
+func (svc *InvitationService) doSorting(data []model.Invitation, sortBy string, sortOrder string) []model.Invitation {
 	if sortBy == SortByEmail {
 		sort.Slice(data, func(i, j int) bool {
 			if sortOrder == SortOrderDesc {

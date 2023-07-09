@@ -348,7 +348,7 @@ func (c *ToolsClient) MeasureImage(inputPath string) (core.ImageProps, error) {
 	return core.ImageProps{Width: width, Height: height}, nil
 }
 
-func (c *ToolsClient) TSVFromImage(inputPath string, tesseractModel string) (string, error) {
+func (c *ToolsClient) TSVFromImage(inputPath string, model string) (string, error) {
 	file, err := os.Open(inputPath)
 	if err != nil {
 		return "", err
@@ -369,7 +369,7 @@ func (c *ToolsClient) TSVFromImage(inputPath string, tesseractModel string) (str
 	}
 	jsonData := map[string]interface{}{
 		"bin":    "tesseract",
-		"args":   []string{"${input}", "${output.#.tsv}", "-l", tesseractModel, "tsv"},
+		"args":   []string{"${input}", "${output.#.tsv}", "-l", model, "tsv"},
 		"stdout": true,
 	}
 	jsonBytes, err := json.Marshal(jsonData)

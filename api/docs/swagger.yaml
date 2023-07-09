@@ -13,13 +13,17 @@ definitions:
       userMessage:
         type: string
     type: object
-  infra.RunPipelineOptions:
+  infra.PipelineOptions:
     properties:
       bucket:
         type: string
       fileId:
         type: string
+      isAutomaticOcrEnabled:
+        type: boolean
       key:
+        type: string
+      ocrLanguageId:
         type: string
       snapshotId:
         type: string
@@ -39,6 +43,8 @@ definitions:
         $ref: '#/definitions/model.ImageProps'
       key:
         type: string
+      language:
+        type: string
       size:
         type: integer
     type: object
@@ -57,6 +63,8 @@ definitions:
         type: string
       image:
         $ref: '#/definitions/service.ImageProps'
+      language:
+        type: string
       size:
         type: integer
     type: object
@@ -68,8 +76,6 @@ definitions:
         type: string
       isShared:
         type: boolean
-      language:
-        type: string
       name:
         type: string
       ocr:
@@ -256,6 +262,13 @@ definitions:
     - text
     - workspaceId
     type: object
+  service.FileUpdateOCRLanguageOptions:
+    properties:
+      ocrLanguageId:
+        type: string
+    required:
+    - ocrLanguageId
+    type: object
   service.Group:
     properties:
       createTime:
@@ -382,6 +395,28 @@ definitions:
       type:
         type: string
     type: object
+  service.OCRLanguage:
+    properties:
+      id:
+        type: string
+      iso639pt3:
+        type: string
+    type: object
+  service.OCRLanguageList:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/service.OCRLanguage'
+        type: array
+      page:
+        type: integer
+      size:
+        type: integer
+      totalElements:
+        type: integer
+      totalPages:
+        type: integer
+    type: object
   service.Organization:
     properties:
       createTime:
@@ -441,12 +476,10 @@ definitions:
     type: object
   service.SnapshotUpdateOptions:
     properties:
-      language:
-        type: string
       ocr:
         $ref: '#/definitions/model.S3Object'
       options:
-        $ref: '#/definitions/infra.RunPipelineOptions'
+        $ref: '#/definitions/infra.PipelineOptions'
       original:
         $ref: '#/definitions/model.S3Object'
       preview:
@@ -1121,6 +1154,40 @@ paths:
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
       summary: Revoke group permission
+      tags:
+      - Files
+  /files/{id}/update_ocr_language:
+    post:
+      description: UpdateOCRLanguage
+      operationId: files_update_ocr_language
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/service.FileUpdateOCRLanguageOptions'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.File'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: UpdateOCRLanguage
       tags:
       - Files
   /files/batch_delete:
@@ -1905,6 +1972,49 @@ paths:
       summary: Get notifications
       tags:
       - Notifications
+  /ocr_languages:
+    get:
+      description: List
+      operationId: ocr_languages_list
+      parameters:
+      - description: Query
+        in: query
+        name: query
+        type: string
+      - description: Page
+        in: query
+        name: page
+        type: string
+      - description: Size
+        in: query
+        name: size
+        type: string
+      - description: Sort By
+        in: query
+        name: sort_by
+        type: string
+      - description: Sort Order
+        in: query
+        name: sort_order
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.OCRLanguageList'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: List
+      tags:
+      - OCRLanguages
   /organizations:
     get:
       description: List

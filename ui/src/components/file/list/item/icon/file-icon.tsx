@@ -19,7 +19,7 @@ const FileIcon = ({ file, scale }: FileIconProps) => {
         <FontIcon file={file} scale={scale} />
         <HStack position="absolute" bottom="-5px" right="0px" spacing="2px">
           {file.isShared && <SharedBadge />}
-          {file.ocr && <OcrBadge />}
+          {file.ocr?.language && <OcrBadge />}
         </HStack>
       </Box>
     )

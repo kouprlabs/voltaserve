@@ -38,10 +38,6 @@ type WorkspaceList struct {
 	Size          uint         `json:"size"`
 }
 
-type WorkspaceSearchOptions struct {
-	Text string `json:"text" validate:"required"`
-}
-
 type WorkspaceCreateOptions struct {
 	Name            string  `json:"name" validate:"required,max=255"`
 	Image           *string `json:"image"`
@@ -214,7 +210,7 @@ func (svc *WorkspaceService) List(opts WorkspaceListOptions, userID string) (*Wo
 	if opts.SortOrder == "" {
 		opts.SortOrder = SortOrderAsc
 	}
-	sorted := svc.doSorting(authorized, opts.SortBy, opts.SortOrder, userID)
+	sorted := svc.doSorting(authorized, opts.SortBy, opts.SortOrder)
 	paged, totalElements, totalPages := svc.doPagination(sorted, opts.Page, opts.Size)
 	mapped, err := svc.workspaceMapper.mapMany(paged, userID)
 	if err != nil {
@@ -415,7 +411,7 @@ func (svc *WorkspaceService) doAuthorizationByIDs(ids []string, user model.User)
 	return res, nil
 }
 
-func (svc *WorkspaceService) doSorting(data []model.Workspace, sortBy string, sortOrder string, userID string) []model.Workspace {
+func (svc *WorkspaceService) doSorting(data []model.Workspace, sortBy string, sortOrder string) []model.Workspace {
 	if sortBy == SortByName {
 		sort.Slice(data, func(i, j int) bool {
 			if sortOrder == SortOrderDesc {

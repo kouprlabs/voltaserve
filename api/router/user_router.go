@@ -53,7 +53,7 @@ func (r *UserRouter) List(c *fiber.Ctx) error {
 	}
 	var size int64
 	if c.Query("size") == "" {
-		size = WorkspaceDefaultPageSize
+		size = UserDefaultPageSize
 	} else {
 		size, err = strconv.ParseInt(c.Query("size"), 10, 32)
 		if err != nil {

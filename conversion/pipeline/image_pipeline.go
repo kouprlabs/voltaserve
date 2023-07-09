@@ -97,13 +97,22 @@ func (p *imagePipeline) Run(opts core.PipelineOptions) error {
 		inputPath = noAlphaPath
 	}
 	if opts.IsAutomaticOCREnabled {
-		imageData, err := p.imageProc.Data(inputPath)
-		if err == nil {
+		var model string
+		if opts.OCRLanguageID == "" {
+			imageData, err := p.imageProc.Data(inputPath)
+			if err != nil {
+				p.logger.Named(infra.StrPipeline).Errorw(err.Error())
+			}
+			model = imageData.Model
+		} else {
+			model = opts.OCRLanguageID
+		}
+		if model != "" {
 			dpi, err := p.toolsClient.DPIFromImage(inputPath)
 			if err != nil {
 				dpi = 72
 			}
-			pdfPath, err := p.toolsClient.OCRFromPDF(inputPath, &imageData.Model, &dpi)
+			pdfPath, err := p.toolsClient.OCRFromPDF(inputPath, &model, &dpi)
 			if err != nil {
 				p.logger.Named(infra.StrPipeline).Errorw(err.Error())
 			}
@@ -116,7 +125,7 @@ func (p *imagePipeline) Run(opts core.PipelineOptions) error {
 					Bucket:   opts.Bucket,
 					Key:      opts.FileID + "/" + opts.SnapshotID + "/ocr.pdf",
 					Size:     stat.Size(),
-					Language: &imageData.Language,
+					Language: &model,
 				}
 				if err := p.s3.PutFile(res.OCR.Key, inputPath, helper.DetectMimeFromFile(inputPath), res.OCR.Bucket); err != nil {
 					return err

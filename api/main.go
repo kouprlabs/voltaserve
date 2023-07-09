@@ -55,6 +55,9 @@ func main() {
 		AllowOrigins: strings.Join(cfg.Security.CORSOrigins, ","),
 	}))
 
+	ocrLanguages := router.NewOCRLanguageRouter()
+	ocrLanguages.AppendRoutes(v1.Group("ocr_languages"))
+
 	f := v1.Group("files")
 
 	fileDownloads := router.NewFileDownloadRouter()
@@ -88,7 +91,7 @@ func main() {
 	groups := router.NewGroupRouter()
 	groups.AppendRoutes(v1.Group("groups"))
 
-	users := router.NewUserRouter()
+	users := router.NewOCRLanguageRouter()
 	users.AppendRoutes(v1.Group("users"))
 
 	if err := app.Listen(fmt.Sprintf(":%d", cfg.Port)); err != nil {

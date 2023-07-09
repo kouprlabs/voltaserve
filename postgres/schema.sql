@@ -300,3 +300,24 @@ CREATE TRIGGER organization_user_before_insert
     ON snapshot
     FOR EACH ROW
 EXECUTE PROCEDURE create_time_before_insert();
+
+CREATE TABLE IF NOT EXISTS "ocrlanguage"
+(
+    id        text PRIMARY KEY, -- https://github.com/tesseract-ocr/tessdata
+    iso639_3  text NOT NULL -- https://iso639-3.sil.org/code_tables/639/data
+);
+
+INSERT INTO "ocrlanguage" (id, iso639_3) VALUES ('eng',     'eng');
+INSERT INTO "ocrlanguage" (id, iso639_3) VALUES ('deu',     'deu');
+INSERT INTO "ocrlanguage" (id, iso639_3) VALUES ('fra',     'fra');
+INSERT INTO "ocrlanguage" (id, iso639_3) VALUES ('nld',     'nld');
+INSERT INTO "ocrlanguage" (id, iso639_3) VALUES ('ita',     'ita');
+INSERT INTO "ocrlanguage" (id, iso639_3) VALUES ('spa',     'spa');
+INSERT INTO "ocrlanguage" (id, iso639_3) VALUES ('por',     'por');
+INSERT INTO "ocrlanguage" (id, iso639_3) VALUES ('swe',     'swe');
+INSERT INTO "ocrlanguage" (id, iso639_3) VALUES ('jpn',     'jpn');
+INSERT INTO "ocrlanguage" (id, iso639_3) VALUES ('chi_sim', 'zho');
+INSERT INTO "ocrlanguage" (id, iso639_3) VALUES ('chi_tra', 'zho');
+INSERT INTO "ocrlanguage" (id, iso639_3) VALUES ('hin',     'hin');
+INSERT INTO "ocrlanguage" (id, iso639_3) VALUES ('rus',     'rus');
+INSERT INTO "ocrlanguage" (id, iso639_3) VALUES ('ara',     'ara');

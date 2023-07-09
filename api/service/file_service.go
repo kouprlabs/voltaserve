@@ -130,6 +130,10 @@ type FileRenameOptions struct {
 	Name string `json:"name" validate:"required,max=255"`
 }
 
+type FileUpdateOCRLanguageOptions struct {
+	OCRLanguageID string `json:"ocrLanguageId" validate:"required"`
+}
+
 type Snapshot struct {
 	ID        string     `json:"id"`
 	Version   int64      `json:"version"`
@@ -347,6 +351,44 @@ func (svc *FileService) Store(fileID string, filePath string, userID string) (*F
 		return nil, err
 	}
 	return res, nil
+}
+
+func (svc *FileService) UpdateOCRLanguage(fileID string, ocrLanguageID string, userID string) error {
+	file, err := svc.fileRepo.Find(fileID)
+	if err != nil {
+		return err
+	}
+	snapshots := file.GetSnapshots()
+	if len(snapshots) == 0 {
+		return nil
+	}
+
+	/* Delete OCR data from S3 */
+	latestSnapshot := snapshots[0]
+	if latestSnapshot.HasOCR() {
+		if err = svc.s3.RemoveObject(latestSnapshot.GetOCR().Key, latestSnapshot.GetOCR().Bucket); err != nil {
+			return err
+		}
+	}
+
+	/* Delete OCR object from database */
+	latestSnapshot.SetOCR(nil)
+	if err := svc.snapshotRepo.Save(latestSnapshot); err != nil {
+		return err
+	}
+
+	/* Run the pipeline from scratch using the original file in S3 */
+	if err := svc.conversionClient.RunPipeline(&infra.PipelineOptions{
+		FileID:                file.GetID(),
+		SnapshotID:            latestSnapshot.GetID(),
+		Bucket:                latestSnapshot.GetOriginal().Bucket,
+		Key:                   latestSnapshot.GetOriginal().Key,
+		OCRLanguageID:         ocrLanguageID,
+		IsAutomaticOCREnabled: true,
+	}); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (svc *FileService) UpdateSnapshot(opts SnapshotUpdateOptions, apiKey string) error {
@@ -677,13 +719,13 @@ func (svc *FileService) ListByID(id string, opts FileListByIDOptions, userID str
 	if err != nil {
 		return nil, err
 	}
-	var filteredFiles []model.File
+	var filtered []model.File
 	for _, f := range authorized {
 		if opts.FileType == "" || f.GetType() == opts.FileType {
-			filteredFiles = append(filteredFiles, f)
+			filtered = append(filtered, f)
 		}
 	}
-	sorted := svc.doSorting(filteredFiles, opts.SortBy, opts.SortOrder, userID)
+	sorted := svc.doSorting(filtered, opts.SortBy, opts.SortOrder, userID)
 	paged, totalElements, totalPages := svc.doPagination(sorted, opts.Page, opts.Size)
 	mapped, err := svc.fileMapper.mapMany(paged, userID)
 	if err != nil {

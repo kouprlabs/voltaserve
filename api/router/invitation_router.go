@@ -86,7 +86,7 @@ func (r *InvitationRouter) GetIncoming(c *fiber.Ctx) error {
 	}
 	var size int64
 	if c.Query("size") == "" {
-		size = WorkspaceDefaultPageSize
+		size = InvitationDefaultPageSize
 	} else {
 		size, err = strconv.ParseInt(c.Query("size"), 10, 32)
 		if err != nil {
@@ -145,7 +145,7 @@ func (r *InvitationRouter) GetOutgoing(c *fiber.Ctx) error {
 	}
 	var size int64
 	if c.Query("size") == "" {
-		size = WorkspaceDefaultPageSize
+		size = InvitationDefaultPageSize
 	} else {
 		size, err = strconv.ParseInt(c.Query("size"), 10, 32)
 		if err != nil {

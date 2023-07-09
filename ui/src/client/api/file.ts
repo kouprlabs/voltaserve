@@ -113,6 +113,10 @@ export type RenameOptions = {
   name: string
 }
 
+export type UpdateOcrLanguageOptions = {
+  ocrLanguageId: string
+}
+
 export type GrantUserPermissionOptions = {
   ids: string[]
   userId: string
@@ -273,6 +277,20 @@ export default class FileAPI {
         'Content-Type': 'application/json',
       },
     }).then((result) => result.json())
+  }
+
+  static async updateOcrLanguage(
+    id: string,
+    options: UpdateOcrLanguageOptions
+  ) {
+    return apiFetch(`/files/${id}/update_ocr_language`, {
+      method: 'POST',
+      body: JSON.stringify(options),
+      headers: {
+        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
+        'Content-Type': 'application/json',
+      },
+    })
   }
 
   static async delete(id: string) {

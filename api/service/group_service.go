@@ -30,10 +30,6 @@ type GroupList struct {
 	Size          uint     `json:"size"`
 }
 
-type GroupSearchOptions struct {
-	Text string `json:"text" validate:"required"`
-}
-
 type GroupCreateOptions struct {
 	Name           string  `json:"name" validate:"required,max=255"`
 	Image          *string `json:"image"`
@@ -219,7 +215,7 @@ func (svc *GroupService) List(opts GroupListOptions, userID string) (*GroupList,
 	if opts.SortOrder == "" {
 		opts.SortOrder = SortOrderAsc
 	}
-	sorted := svc.doSorting(authorized, opts.SortBy, opts.SortOrder, userID)
+	sorted := svc.doSorting(authorized, opts.SortBy, opts.SortOrder)
 	paged, totalElements, totalPages := svc.doPagination(sorted, opts.Page, opts.Size)
 	mapped, err := svc.groupMapper.mapMany(paged, userID)
 	if err != nil {
@@ -406,7 +402,7 @@ func (svc *GroupService) doAuthorizationByIDs(ids []string, user model.User) ([]
 	return res, nil
 }
 
-func (svc *GroupService) doSorting(data []model.Group, sortBy string, sortOrder string, userID string) []model.Group {
+func (svc *GroupService) doSorting(data []model.Group, sortBy string, sortOrder string) []model.Group {
 	if sortBy == SortByName {
 		sort.Slice(data, func(i, j int) bool {
 			if sortOrder == SortOrderDesc {
