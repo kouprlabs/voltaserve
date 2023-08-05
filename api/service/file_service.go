@@ -547,7 +547,7 @@ func (svc *FileService) FindByID(ids []string, userID string) ([]*File, error) {
 	for _, id := range ids {
 		file, err := svc.fileCache.Get(id)
 		if err != nil {
-			return nil, err
+			continue
 		}
 		if err = svc.fileGuard.Authorize(user, file, model.PermissionViewer); err != nil {
 			return nil, err
