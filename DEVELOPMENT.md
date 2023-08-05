@@ -6,18 +6,18 @@
 
 ```shell
 docker compose up -d \
-    postgres \
-    minio \
-    meilisearch \
-    redis \
-    mailhog \
-    exiftool \
-    ffmpeg \
-    imagemagick \
-    libreoffice \
-    ocrmypdf \
-    poppler \
-    tesseract
+    infra-postgres \
+    infra-minio \
+    infra-meilisearch \
+    infra-redis \
+    infra-mailhog \
+    tools-exiftool \
+    tools-ffmpeg \
+    tools-imagemagick \
+    tools-libreoffice \
+    tools-ocrmypdf \
+    tools-poppler \
+    tools-tesseract
 ```
 
 ### Run Infrastructure Services With SLE or openSUSE Leap

@@ -6,10 +6,9 @@ volumes:
   meilisearch:
   redis:
 
-
 services:
-  postgres:
-    image: voltaserve/postgres
+  infra-postgres:
+    image: voltaserve/infra/postgres
     build:
       context: ./postgres
     ports:
@@ -19,7 +18,7 @@ services:
       POSTGRES_PASSWORD: voltaserve
     volumes:
       - postgres:/var/lib/postgresql/data
-  minio:
+  infra-minio:
     image: minio/minio:RELEASE.2023-06-19T19-52-50Z
     ports:
       - ${VOLTASERVE_MINIO_PORT}:9000
@@ -31,28 +30,28 @@ services:
     volumes:
       - minio:/data
     command: server /data --console-address ":9001"
-  meilisearch:
+  infra-meilisearch:
     image: getmeili/meilisearch:v1.2
     ports:
       - ${VOLTASERVE_MEILISEARCH_PORT}:7700
     volumes:
       - meilisearch:/meili_data
-  redis:
+  infra-redis:
     image: redis:7.0
     ports:
       - ${VOLTASERVE_REDIS_PORT}:6379
     volumes:
       - redis:/data
-  mailhog:
+  infra-mailhog:
     image: mailhog/mailhog:v1.0.1
     ports:
       - ${VOLTASERVE_MAILHOG_SMTP_PORT}:1025
       - ${VOLTASERVE_MAILHOG_WEB_PORT}:8025
-  exiftool:
-    image: voltaserve/exiftool:${VOLTASERVE_BASE_IMAGE}
+  tools-exiftool:
+    image: voltaserve/tools/exiftool
     build:
       context: ./tools
-      dockerfile: ./docker/${VOLTASERVE_BASE_IMAGE}/Dockerfile.exiftool
+      dockerfile: ./Dockerfile.exiftool
     ports:
       - ${VOLTASERVE_EXIFTOOL_PORT}:6001
     environment:
@@ -60,11 +59,11 @@ services:
     healthcheck:
       test: curl --fail http://localhost:6001/v1/health || exit 1
     restart: on-failure
-  ffmpeg:
-    image: voltaserve/ffmpeg:${VOLTASERVE_BASE_IMAGE}
+  tools-ffmpeg:
+    image: voltaserve/tools/ffmpeg
     build:
       context: ./tools
-      dockerfile: ./docker/${VOLTASERVE_BASE_IMAGE}/Dockerfile.ffmpeg
+      dockerfile: ./Dockerfile.ffmpeg
     ports:
       - ${VOLTASERVE_FFMPEG_PORT}:6002
     environment:
@@ -72,11 +71,11 @@ services:
     healthcheck:
       test: curl --fail http://localhost:6002/v1/health || exit 1
     restart: on-failure
-  imagemagick:
-    image: voltaserve/imagemagick:${VOLTASERVE_BASE_IMAGE}
+  tools-imagemagick:
+    image: voltaserve/tools/imagemagick
     build:
       context: ./tools
-      dockerfile: ./docker/${VOLTASERVE_BASE_IMAGE}/Dockerfile.imagemagick
+      dockerfile: ./Dockerfile.imagemagick
     ports:
       - ${VOLTASERVE_IMAGEMAGICK_PORT}:6003
     environment:
@@ -84,11 +83,11 @@ services:
     healthcheck:
       test: curl --fail http://localhost:6003/v1/health || exit 1
     restart: on-failure
-  libreoffice:
-    image: voltaserve/libreoffice:${VOLTASERVE_BASE_IMAGE}
+  tools-libreoffice:
+    image: voltaserve/tools/libreoffice
     build:
       context: ./tools
-      dockerfile: ./docker/${VOLTASERVE_BASE_IMAGE}/Dockerfile.libreoffice
+      dockerfile: ./Dockerfile.libreoffice
     ports:
       - ${VOLTASERVE_LIBREOFFICE_PORT}:6004
     environment:
@@ -96,11 +95,11 @@ services:
     healthcheck:
       test: curl --fail http://localhost:6004/v1/health || exit 1
     restart: on-failure
-  ocrmypdf:
-    image: voltaserve/ocrmypdf:${VOLTASERVE_BASE_IMAGE}
+  tools-ocrmypdf:
+    image: voltaserve/tools/ocrmypdf
     build:
       context: ./tools
-      dockerfile: ./docker/${VOLTASERVE_BASE_IMAGE}/Dockerfile.ocrmypdf
+      dockerfile: ./Dockerfile.ocrmypdf
     ports:
       - ${VOLTASERVE_OCRMYPDF_PORT}:6005
     environment:
@@ -108,11 +107,11 @@ services:
     healthcheck:
       test: curl --fail http://localhost:6005/v1/health || exit 1
     restart: on-failure
-  poppler:
-    image: voltaserve/poppler:${VOLTASERVE_BASE_IMAGE}
+  tools-poppler:
+    image: voltaserve/tools/poppler
     build:
       context: ./tools
-      dockerfile: ./docker/${VOLTASERVE_BASE_IMAGE}/Dockerfile.poppler
+      dockerfile: ./Dockerfile.poppler
     ports:
       - ${VOLTASERVE_POPPLER_PORT}:6006
     environment:
@@ -120,11 +119,11 @@ services:
     healthcheck:
       test: curl --fail http://localhost:6006/v1/health || exit 1
     restart: on-failure
-  tesseract:
-    image: voltaserve/tesseract:${VOLTASERVE_BASE_IMAGE}
+  tools-tesseract:
+    image: voltaserve/tools/tesseract
     build:
       context: ./tools
-      dockerfile: ./docker/${VOLTASERVE_BASE_IMAGE}/Dockerfile.tesseract
+      dockerfile: ./Dockerfile.tesseract
     ports:
       - ${VOLTASERVE_TESSERACT_PORT}:6007
     environment:
@@ -132,21 +131,21 @@ services:
     healthcheck:
       test: curl --fail http://localhost:6007/v1/health || exit 1
     restart: on-failure
-  api:
-    image: voltaserve/api:${VOLTASERVE_BASE_IMAGE}
+  app-api:
+    image: voltaserve/app/api
     build:
       context: ./api
-      dockerfile: ./Dockerfile.${VOLTASERVE_BASE_IMAGE}
+      dockerfile: ./Dockerfile
     ports:
       - ${VOLTASERVE_API_PORT}:5000
     environment:
       - PORT=5000
-      - CONVERSION_URL=http://conversion:5001
-      - POSTGRES_URL=postgresql://voltaserve:voltaserve@postgres:5432/voltaserve
-      - S3_URL=minio:9000
-      - SEARCH_URL=http://meilisearch:7700
+      - CONVERSION_URL=http://app-conversion:5001
+      - POSTGRES_URL=postgresql://voltaserve:voltaserve@infra-postgres:5432/voltaserve
+      - S3_URL=infra-minio:9000
+      - SEARCH_URL=http://infra-meilisearch:7700
       - PUBLIC_UI_URL=http://${VOLTASERVE_HOSTNAME}:${VOLTASERVE_UI_PORT}
-      - REDIS_ADDRESS=redis:6379
+      - REDIS_ADDRESS=infra-redis:6379
       - SMTP_HOST=${VOLTASERVE_SMTP_HOST}
       - SMTP_PORT=${VOLTASERVE_SMTP_PORT}
       - SMTP_SECURE=${VOLTASERVE_SMTP_SECURE}
@@ -157,22 +156,22 @@ services:
     healthcheck:
       test: curl --fail http://localhost:5000/v1/health || exit 1
     depends_on:
-      - postgres
-      - redis
-      - minio
-      - meilisearch
+      - infra-postgres
+      - infra-redis
+      - infra-minio
+      - infra-meilisearch
     restart: on-failure
-  idp:
-    image: voltaserve/idp:${VOLTASERVE_BASE_IMAGE}
+  app-idp:
+    image: voltaserve/app/idp
     build:
       context: ./idp
-      dockerfile: ./Dockerfile.${VOLTASERVE_BASE_IMAGE}
+      dockerfile: ./Dockerfile
     ports:
       - ${VOLTASERVE_IDP_PORT}:7000
     environment:
       - PORT=7000
-      - POSTGRES_URL=postgresql://voltaserve:voltaserve@postgres:5432/voltaserve
-      - SEARCH_URL=http://meilisearch:7700
+      - POSTGRES_URL=postgresql://voltaserve:voltaserve@infra-postgres:5432/voltaserve
+      - SEARCH_URL=http://infra-meilisearch:7700
       - PUBLIC_UI_URL=http://${VOLTASERVE_HOSTNAME}:${VOLTASERVE_UI_PORT}
       - SMTP_HOST=${VOLTASERVE_SMTP_HOST}
       - SMTP_PORT=${VOLTASERVE_SMTP_PORT}
@@ -184,74 +183,74 @@ services:
     healthcheck:
       test: curl --fail http://localhost:7000/v1/health || exit 1
     depends_on:
-      - postgres
-      - meilisearch
-      - minio
+      - infra-postgres
+      - infra-meilisearch
+      - infra-minio
     restart: on-failure
-  ui:
-    image: voltaserve/ui:${VOLTASERVE_BASE_IMAGE}
+  app-ui:
+    image: voltaserve/app/ui
     build:
       context: ./ui
-      dockerfile: ./Dockerfile.${VOLTASERVE_BASE_IMAGE}
+      dockerfile: ./Dockerfile
     ports:
       - ${VOLTASERVE_UI_PORT}:3000
     environment:
-      - API_URL=http://api:5000
-      - IDP_URL=http://idp:7000
+      - API_URL=http://app-api:5000
+      - IDP_URL=http://app-idp:7000
     healthcheck:
       test: curl --fail http://localhost:3000/index.html || exit 1
     depends_on:
-      - idp
-      - api
+      - app-idp
+      - app-api
     restart: on-failure
-  webdav:
-    image: voltaserve/webdav:${VOLTASERVE_BASE_IMAGE}
+  app-webdav:
+    image: voltaserve/app/webdav
     build:
       context: ./webdav
-      dockerfile: ./Dockerfile.${VOLTASERVE_BASE_IMAGE}
+      dockerfile: ./Dockerfile
     ports:
       - ${VOLTASERVE_WEBDAV_PORT}:6000
     environment:
       - PORT=6000
-      - IDP_URL=http://idp:7000
-      - API_URL=http://api:5000
+      - IDP_URL=http://app-idp:7000
+      - API_URL=http://app-api:5000
     healthcheck:
       test: curl --fail http://localhost:6000/v1/health || exit 1
     depends_on:
-      - idp
-      - api
+      - app-idp
+      - app-api
     restart: on-failure
-  conversion:
-    image: voltaserve/conversion:${VOLTASERVE_BASE_IMAGE}
+  app-conversion:
+    image: voltaserve/app/conversion
     build:
       context: ./conversion
-      dockerfile: ./Dockerfile.${VOLTASERVE_BASE_IMAGE}
+      dockerfile: ./Dockerfile
     ports:
       - ${VOLTASERVE_CONVERSION_PORT}:5001
     environment:
       - PORT=5001
-      - API_URL=http://api:5000
-      - LANGUAGE_URL=http://language:5002
-      - VOLTASERVE_EXIFTOOL_URL=http://exiftool:6001
-      - VOLTASERVE_FFMPEG_URL=http://ffmpeg:6002
-      - VOLTASERVE_IMAGEMAGICK_URL=http://imagemagick:6003
-      - VOLTASERVE_LIBREOFFICE_URL=http://libreoffice:6004
-      - VOLTASERVE_OCRMYPDF_URL=http://ocrmypdf:6005
-      - VOLTASERVE_POPPLER_URL=http://poppler:6006
-      - VOLTASERVE_TESSERACT_URL=http://tesseract:6007
-      - S3_URL=minio:9000
+      - API_URL=http://app-api:5000
+      - LANGUAGE_URL=http://app-language:5002
+      - VOLTASERVE_EXIFTOOL_URL=http://tools-exiftool:6001
+      - VOLTASERVE_FFMPEG_URL=http://tools-ffmpeg:6002
+      - VOLTASERVE_IMAGEMAGICK_URL=http://tools-imagemagick:6003
+      - VOLTASERVE_LIBREOFFICE_URL=http://tools-libreoffice:6004
+      - VOLTASERVE_OCRMYPDF_URL=http://tools-ocrmypdf:6005
+      - VOLTASERVE_POPPLER_URL=http://tools-poppler:6006
+      - VOLTASERVE_TESSERACT_URL=http://tools-tesseract:6007
+      - S3_URL=infra-minio:9000
     healthcheck:
       test: curl --fail http://localhost:5001/v1/health || exit 1
     depends_on:
-      - api
-      - language
-      - minio
+      - app-api
+      - app-language
+      - infra-minio
     restart: on-failure
-  language:
-    image: voltaserve/language:${VOLTASERVE_BASE_IMAGE}
+  app-language:
+    image: voltaserve/app/language
     build:
       context: ./language
-      dockerfile: ./Dockerfile.${VOLTASERVE_BASE_IMAGE}
+      dockerfile: ./Dockerfile
     ports:
       - ${VOLTASERVE_LANGUAGE_PORT}:5002
     healthcheck:
