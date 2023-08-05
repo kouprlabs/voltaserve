@@ -31,27 +31,27 @@ func NewImageProcessor() *ImageProcessor {
 	}
 }
 
-type imageData struct {
+type ImageData struct {
 	Text     string
 	Model    string
 	Language string
 	Score    float64
 }
 
-func (p *ImageProcessor) Data(inputPath string) (imageData, error) {
-	results := []imageData{}
+func (p *ImageProcessor) Data(inputPath string) (ImageData, error) {
+	results := []ImageData{}
 	var noAlphaPath string
 	if p.fileIdent.IsNonAlphaChannelImage(inputPath) {
 		noAlphaPath = inputPath
 	} else {
 		noAlphaPath = filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(inputPath))
 		if err := p.toolsClient.RemoveAlphaChannel(inputPath, noAlphaPath); err != nil {
-			return imageData{}, err
+			return ImageData{}, err
 		}
 	}
 	ocrLangs, err := p.apiClient.GetAllOCRLangages()
 	if err != nil {
-		return imageData{}, err
+		return ImageData{}, err
 	}
 	for _, lang := range ocrLangs {
 		text, err := p.toolsClient.TextFromImage(noAlphaPath, lang.ID)
@@ -63,7 +63,7 @@ func (p *ImageProcessor) Data(inputPath string) (imageData, error) {
 			continue
 		}
 		if err == nil && langDetect.Language == lang.ISO639Pt3 {
-			results = append(results, imageData{
+			results = append(results, ImageData{
 				Text:     text,
 				Model:    lang.ID,
 				Language: langDetect.Language,
@@ -76,7 +76,7 @@ func (p *ImageProcessor) Data(inputPath string) (imageData, error) {
 	if noAlphaPath != inputPath {
 		if _, err := os.Stat(noAlphaPath); err == nil {
 			if err := os.Remove(noAlphaPath); err != nil {
-				return imageData{}, err
+				return ImageData{}, err
 			}
 		}
 	}
@@ -86,11 +86,11 @@ func (p *ImageProcessor) Data(inputPath string) (imageData, error) {
 		})
 		var chosen = results[0]
 		if math.Round(chosen.Score*100)/100 < p.config.Limits.LanguageScoreThreshold {
-			return imageData{}, errors.New("could not detect language")
+			return ImageData{}, errors.New("could not detect language")
 		}
 		return chosen, nil
 	} else {
-		return imageData{}, errors.New("could not detect language")
+		return ImageData{}, errors.New("could not detect language")
 	}
 }
 
