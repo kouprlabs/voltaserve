@@ -155,9 +155,7 @@ const Item = ({ file, scale }: ItemProps) => {
             }
           }}
         />
-      ) : (
-        <span />
-      )}
+      ) : null}
       <Box>
         <Menu onOpen={() => handleSelectionClick()}>
           {isCheckboxVisible && (
