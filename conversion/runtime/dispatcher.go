@@ -24,18 +24,18 @@ func NewDispatcher() *Dispatcher {
 }
 
 func (d *Dispatcher) Dispatch(opts core.PipelineRunOptions) error {
-	pipeline := d.pipelineIdentifier.Identify(opts)
-	if pipeline == core.PipelinePDF {
+	p := d.pipelineIdentifier.Identify(opts)
+	if p == core.PipelinePDF {
 		if err := d.pdfPipeline.Run(opts); err != nil {
 			return err
 		}
 		return nil
-	} else if pipeline == core.PipelineOffice {
+	} else if p == core.PipelineOffice {
 		if err := d.officePipeline.Run(opts); err != nil {
 			return err
 		}
 		return nil
-	} else if pipeline == core.PipelineImage {
+	} else if p == core.PipelineImage {
 		if err := d.imagePipeline.Run(opts); err != nil {
 			return err
 		}

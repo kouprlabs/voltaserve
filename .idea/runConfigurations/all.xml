@@ -1,0 +1,7 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="all" type="CompoundRunConfigurationType">
+    <toRun name="api" type="GoApplicationRunConfiguration" />
+    <toRun name="conversion" type="GoApplicationRunConfiguration" />
+    <method v="2" />
+  </configuration>
+</component>
