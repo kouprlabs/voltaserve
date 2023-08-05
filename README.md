@@ -10,6 +10,12 @@ Install [Docker](https://docs.docker.com/get-docker) and [Docker Compose](https:
 
 Alternatively, you can instead install [Podman](https://podman.io) and [Podman Compose](https://github.com/containers/podman-compose#installation).
 
+Build:
+
+```shell
+docker compose build
+```
+
 Run:
 
 ```shell
@@ -18,19 +24,19 @@ docker compose up -d
 
 Wait until the following containers are running:
 
-- `voltaserve-api`
-- `voltaserve-idp`
-- `voltaserve-conversion`
-- `voltaserve-webdav`
-- `voltaserve-language`
-- `voltaserve-ui`
-- `voltaserve-exiftool`
-- `voltaserve-ffmpeg`
-- `voltaserve-graphicsmagick`
-- `voltaserve-libreoffice`
-- `voltaserve-ocrmypdf`
-- `voltaserve-poppler`
-- `voltaserve-tesseract`
+- `voltaserve-app-api`
+- `voltaserve-app-idp`
+- `voltaserve-app-conversion`
+- `voltaserve-app-webdav`
+- `voltaserve-app-language`
+- `voltaserve-app-ui`
+- `voltaserve-tools-exiftool`
+- `voltaserve-tools-ffmpeg`
+- `voltaserve-tools_graphicsmagick`
+- `voltaserve-tools-libreoffice`
+- `voltaserve-tools-ocrmypdf`
+- `voltaserve-tools-poppler`
+- `voltaserve-tools-tesseract`
 
 You can check that by running the command `docker ps` and look at the `STATUS` column.
 
@@ -44,36 +50,7 @@ You can check that by running the command `docker ps` and look at the `STATUS` c
 
 Voltaserve supports [WebDAV](https://en.wikipedia.org/wiki/WebDAV), by default it's using the port `6000`.
 
-To connect you can use [WinSCP](https://winscp.net) on Windows, [Cyberduck](https://cyberduck.io) on macOS and [Owlfiles](https://www.skyjos.com/owlfiles/) on mobile.
-
-### Base Images
-
-Voltaserve's Docker images supports the following base images:
-
-- `sle`: SUSE Enterprise Linux / openSUSE Leap
-- `rhel`: Red Hat Enterprise Linux / Rocky Linux
-
-The environment variable `VOLTASERVE_BASE_IMAGE` can be set to one of these values.
-
-The default value is `sle`, if you would like to change it to `rhel`, you can do as follows:
-
-```shell
-export VOLTASERVE_BASE_IMAGE="rhel"
-```
-
-You can now download and run `rhel` based Voltaserve containers:
-
-```shell
-docker compose up -d
-```
-
-Or build the Docker images locally:
-
-```shell
-docker compose build
-```
-
-If you containers are already running, you need to do `docker compose down` then `docker compose up -d` to use the new images.
+To connect you can use [Mountainduck](https://mountainduck.io/), [Cyberduck](https://cyberduck.io), [WinSCP](https://winscp.net) or [Owlfiles](https://www.skyjos.com/owlfiles/).
 
 ### Configuration
 
