@@ -4,6 +4,7 @@ import { Wrap, WrapItem, Text, Center } from '@chakra-ui/react'
 import { Spinner, variables } from '@koupr/ui'
 import FileAPI, { List as FileListData } from '@/client/api/file'
 import { REFRESH_INTERVAL, swrConfig } from '@/client/options'
+import { stringArraysIdentical } from '@/helpers/array'
 import { decodeQuery } from '@/helpers/query'
 import store from '@/store/configure-store'
 import {
@@ -28,10 +29,18 @@ setInterval(async () => {
 }, REFRESH_INTERVAL)
 
 setInterval(async () => {
+  const url = new URL(window.location.href)
+  const query = url.searchParams.get('q')
+  if (query) {
+    return
+  }
+  const fileId = url.pathname.split('/')[4]
   const current = store.getState().entities.files.current
-  if (current) {
-    const itemCount = await FileAPI.getItemCount(current)
-    if (itemCount > 0) {
+  if (current && current === fileId) {
+    const localIds =
+      store.getState().entities.files.list?.data.map((e) => e.id) || []
+    const remoteIds = await FileAPI.getIds(current)
+    if (!stringArraysIdentical(localIds, remoteIds)) {
       const sortBy = store.getState().ui.files.sortBy
       const sortOrder = store.getState().ui.files.sortOrder
       const result = await FileAPI.list(current, {

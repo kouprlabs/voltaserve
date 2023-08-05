@@ -47,6 +47,7 @@ func (r *FileRouter) AppendRoutes(g fiber.Router) {
 	g.Get("/:id/list", r.ListByID)
 	g.Get("/:id/get_item_count", r.GetItemCount)
 	g.Get("/:id/get_path", r.GetPath)
+	g.Get("/:id/get_ids", r.GetIDs)
 	g.Post("/:id/move", r.Move)
 	g.Post("/:id/rename", r.Rename)
 	g.Post("/:id/update_ocr_language", r.UpdateOCRLanguage)
@@ -166,7 +167,7 @@ func (r *FileRouter) Patch(c *fiber.Ctx) error {
 	return c.JSON(file)
 }
 
-// Create godoc
+// CreateFolder godoc
 //
 //	@Summary		Create
 //	@Description	Create
@@ -381,6 +382,27 @@ func (r *FileRouter) ListByID(c *fiber.Ctx) error {
 		SortOrder: sortOrder,
 		FileType:  fileType,
 	}, GetUserID(c))
+	if err != nil {
+		return err
+	}
+	return c.JSON(res)
+}
+
+// GetIDs godoc
+//
+//	@Summary		Get IDs
+//	@Description	Get IDs
+//	@Tags			Files
+//	@Id				files_get_ids
+//	@Produce		json
+//	@Param			id	path		string	true	"ID"
+//	@Success		200	{array}		string
+//	@Failure		404	{object}	errorpkg.ErrorResponse
+//	@Failure		500	{object}	errorpkg.ErrorResponse
+//	@Router			/files/{id}/get_ids [get]
+func (r *FileRouter) GetIDs(c *fiber.Ctx) error {
+	userID := GetUserID(c)
+	res, err := r.fileSvc.GetIDs(c.Params("id"), userID)
 	if err != nil {
 		return err
 	}
