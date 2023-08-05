@@ -268,6 +268,15 @@ export default class FileAPI {
     }).then(async (result) => await result.json())
   }
 
+  static async getIds(id: string): Promise<string[]> {
+    return apiFetch(`/files/${id}/get_ids`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
+      },
+    }).then(async (result) => await result.json())
+  }
+
   static async rename(id: string, options: RenameOptions): Promise<File> {
     return apiFetch(`/files/${id}/rename`, {
       method: 'POST',

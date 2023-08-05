@@ -844,6 +844,25 @@ func (svc *FileService) GetPath(id string, userID string) ([]*File, error) {
 	return res, nil
 }
 
+func (svc *FileService) GetIDs(id string, userID string) ([]string, error) {
+	user, err := svc.userRepo.Find(userID)
+	if err != nil {
+		return nil, err
+	}
+	file, err := svc.fileCache.Get(id)
+	if err != nil {
+		return nil, err
+	}
+	if err = svc.fileGuard.Authorize(user, file, model.PermissionViewer); err != nil {
+		return nil, err
+	}
+	ids, err := svc.fileRepo.GetChildrenIDs(id)
+	if err != nil {
+		return nil, err
+	}
+	return ids, nil
+}
+
 func (svc *FileService) Copy(targetID string, sourceIDs []string, userID string) (copiedFiles []*File, err error) {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
