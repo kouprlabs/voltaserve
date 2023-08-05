@@ -48,18 +48,10 @@ python3 -m spacy download xx_ent_wiki_sm
 FLASK_APP=server.py flask run --host=0.0.0.0 --port=5002 --debug
 ```
 
-### Build Docker Images
-
-Build SLE Docker image:
+### Build Docker Image
 
 ```shell
-docker build -t voltaserve/language:sle -f ./Dockerfile.sle .
-```
-
-Build RHEL Docker image:
-
-```shell
-docker build -t voltaserve/language:rhel -f ./Dockerfile.rhel .
+docker build -t voltaserve/language .
 ```
 
 ### Code Formatter

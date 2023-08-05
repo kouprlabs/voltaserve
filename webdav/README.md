@@ -28,16 +28,8 @@ Run for production:
 pnpm run start
 ```
 
-### Build Docker Images
-
-Build SLE Docker image:
+### Build Docker Image
 
 ```shell
-docker build -t voltaserve/webdav:sle -f ./Dockerfile.sle .
-```
-
-Build RHEL Docker image:
-
-```shell
-docker build -t voltaserve/webdav:rhel -f ./Dockerfile.rhel .
+docker build -t voltaserve/webdav .
 ```
