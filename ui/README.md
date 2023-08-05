@@ -22,16 +22,8 @@ Run for development:
 pnpm run dev
 ```
 
-### Build Docker Images
-
-Build SLE Docker image:
+Build Docker Image:
 
 ```shell
-docker build -t voltaserve/ui:sle -f ./Dockerfile.sle .
-```
-
-Build RHEL Docker image:
-
-```shell
-docker build -t voltaserve/ui:rhel -f ./Dockerfile.rhel .
+docker build -t voltaserve/ui .
 ```

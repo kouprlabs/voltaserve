@@ -16,18 +16,10 @@ Build binary:
 go build .
 ```
 
-### Build Docker Images
-
-Build SLE Docker image:
+### Build Docker Image
 
 ```shell
-docker build -t voltaserve/api:sle -f ./Dockerfile.sle .
-```
-
-Build RHEL Docker image:
-
-```shell
-docker build -t voltaserve/api:rhel -f ./Dockerfile.rhel .
+docker build -t voltaserve/api .
 ```
 
 ### Code Linter

@@ -40,16 +40,8 @@ go build .
 golangci-lint run
 ```
 
-### Build Docker Images
-
-Build SLE Docker image:
+### Build Docker Image
 
 ```shell
-docker build -t voltaserve/conversion:sle -f ./Dockerfile.sle .
-```
-
-Build RHEL Docker image:
-
-```shell
-docker build -t voltaserve/conversion:rhel -f ./Dockerfile.rhel .
+docker build -t voltaserve/conversion .
 ```
