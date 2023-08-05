@@ -841,6 +841,36 @@ paths:
       summary: Get group permissions
       tags:
       - Files
+  /files/{id}/get_ids:
+    get:
+      description: Get IDs
+      operationId: files_get_ids
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Get IDs
+      tags:
+      - Files
   /files/{id}/get_item_count:
     get:
       description: Get children count
