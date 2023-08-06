@@ -41,7 +41,7 @@ const OrganizationListPage = () => {
     mutate,
   } = OrganizationAPI.useList(
     { query, page, size, sortOrder: SortOrder.Desc },
-    swrConfig()
+    swrConfig(),
   )
 
   useEffect(() => {
@@ -58,7 +58,7 @@ const OrganizationListPage = () => {
         spacing={variables.spacing2Xl}
         pb={variables.spacing2Xl}
       >
-        <Heading size="lg" pl={variables.spacingMd}>
+        <Heading fontSize={variables.headingFontSize} pl={variables.spacingMd}>
           Organizations
         </Heading>
         {!list && error && (

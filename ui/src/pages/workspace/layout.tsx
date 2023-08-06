@@ -29,7 +29,7 @@ const WorkspaceLayout = () => {
 
   return (
     <Stack direction="column" spacing={variables.spacing2Xl} height="100%">
-      <Heading size="lg">{workspace.name}</Heading>
+      <Heading fontSize={variables.headingFontSize}>{workspace.name}</Heading>
       <Tabs variant="solid-rounded" colorScheme="gray" index={tabIndex}>
         <TabList>
           <Tab

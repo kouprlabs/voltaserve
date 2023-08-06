@@ -50,7 +50,7 @@ const NewWorkspacePage = () => {
   const handleSubmit = useCallback(
     async (
       { name, organizationId, storageCapacity }: FormValues,
-      { setSubmitting }: FormikHelpers<FormValues>
+      { setSubmitting }: FormikHelpers<FormValues>,
     ) => {
       setSubmitting(true)
       setIsLoading(true)
@@ -70,7 +70,7 @@ const NewWorkspacePage = () => {
         setSubmitting(false)
       }
     },
-    [navigate, mutate]
+    [navigate, mutate],
   )
 
   return (
@@ -79,7 +79,7 @@ const NewWorkspacePage = () => {
         <title>New Workspace</title>
       </Helmet>
       <Stack spacing={variables.spacing2Xl}>
-        <Heading size="lg">New Workspace</Heading>
+        <Heading fontSize={variables.headingFontSize}>New Workspace</Heading>
         <Formik
           enableReinitialize={true}
           initialValues={{

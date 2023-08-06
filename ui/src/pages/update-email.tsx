@@ -43,7 +43,7 @@ const UpdateEmailPage = () => {
           <Logo className="w-16" isGlossy={true} />
           {!isCompleted && !isFailed ? (
             <VStack spacing={variables.spacing}>
-              <Heading size="lg">
+              <Heading fontSize={variables.headingFontSize}>
                 Confirming your Email…
               </Heading>
               <Spinner />
@@ -51,7 +51,7 @@ const UpdateEmailPage = () => {
           ) : null}
           {isCompleted && !isFailed ? (
             <VStack spacing={variables.spacing}>
-              <Heading size="lg">
+              <Heading fontSize={variables.headingFontSize}>
                 Email confirmed
               </Heading>
               <VStack spacing={variables.spacingXs}>
@@ -63,7 +63,7 @@ const UpdateEmailPage = () => {
             </VStack>
           ) : null}
           {isFailed && (
-            <Heading size="lg">
+            <Heading fontSize={variables.headingFontSize}>
               An error occurred while processing your request.
             </Heading>
           )}

@@ -44,7 +44,7 @@ const NewGroupPage = () => {
   const handleSubmit = useCallback(
     async (
       { name, organizationId }: FormValues,
-      { setSubmitting }: FormikHelpers<FormValues>
+      { setSubmitting }: FormikHelpers<FormValues>,
     ) => {
       setSubmitting(true)
       setIsLoading(true)
@@ -63,7 +63,7 @@ const NewGroupPage = () => {
         setSubmitting(false)
       }
     },
-    [navigate, mutate]
+    [navigate, mutate],
   )
 
   return (
@@ -72,7 +72,7 @@ const NewGroupPage = () => {
         <title>New Group</title>
       </Helmet>
       <Stack spacing={variables.spacing2Xl}>
-        <Heading size="lg">New Group</Heading>
+        <Heading fontSize={variables.headingFontSize}>New Group</Heading>
         <Formik
           enableReinitialize={true}
           initialValues={{ name: '', organizationId: orgId || '' }}

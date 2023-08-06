@@ -29,7 +29,7 @@ const GroupLayout = () => {
 
   return (
     <Stack direction="column" spacing={variables.spacing2Xl}>
-      <Heading size="lg">{group.name}</Heading>
+      <Heading fontSize={variables.headingFontSize}>{group.name}</Heading>
       <Tabs variant="solid-rounded" colorScheme="gray" index={tabIndex}>
         <TabList>
           <Tab onClick={() => navigate(`/group/${groupId}/member`)}>

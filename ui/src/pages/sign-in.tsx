@@ -49,7 +49,7 @@ const SignInPage = () => {
   const handleSignIn = useCallback(
     async (
       { email: username, password }: FormValues,
-      { setSubmitting }: FormikHelpers<FormValues>
+      { setSubmitting }: FormikHelpers<FormValues>,
     ) => {
       try {
         const token = await TokenAPI.exchange({
@@ -77,7 +77,7 @@ const SignInPage = () => {
           const workspaceList = await WorkspaceAPI.list()
           if (workspaceList.totalElements === 1) {
             navigate(
-              `/workspace/${workspaceList.data[0].id}/file/${workspaceList.data[0].rootId}`
+              `/workspace/${workspaceList.data[0].id}/file/${workspaceList.data[0].rootId}`,
             )
           } else {
             navigate('/workspace')
@@ -87,7 +87,7 @@ const SignInPage = () => {
         setSubmitting(false)
       }
     },
-    [navigate]
+    [navigate],
   )
 
   return (
@@ -98,7 +98,7 @@ const SignInPage = () => {
         </Helmet>
         <VStack spacing="25px" w="100%">
           <Logo className="w-16" isGlossy={true} />
-          <Heading size="lg">
+          <Heading fontSize={variables.headingFontSize}>
             Sign In to Voltaserve
           </Heading>
           <Formik

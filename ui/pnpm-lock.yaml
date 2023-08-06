@@ -21,8 +21,8 @@ dependencies:
     specifier: 11.11.0
     version: 11.11.0(@emotion/react@11.11.1)(@types/react@18.2.18)(react@18.2.0)
   '@koupr/ui':
-    specifier: 1.1.5
-    version: 1.1.5(@chakra-ui/react@2.8.0)(@chakra-ui/theme-tools@2.1.0)(@emotion/react@11.11.1)(@emotion/styled@11.11.0)(framer-motion@10.15.0)(react-dom@18.2.0)(react-icons@4.10.1)(react-router-dom@6.14.2)(react@18.2.0)
+    specifier: 1.1.6
+    version: 1.1.6(@chakra-ui/react@2.8.0)(@chakra-ui/theme-tools@2.1.0)(@emotion/react@11.11.1)(@emotion/styled@11.11.0)(framer-motion@10.15.0)(react-dom@18.2.0)(react-icons@4.10.1)(react-router-dom@6.14.2)(react@18.2.0)
   '@reduxjs/toolkit':
     specifier: 1.9.5
     version: 1.9.5(react-redux@8.1.2)(react@18.2.0)
@@ -3321,8 +3321,8 @@ packages:
       '@jridgewell/sourcemap-codec': 1.4.14
     dev: true
 
-  /@koupr/ui@1.1.5(@chakra-ui/react@2.8.0)(@chakra-ui/theme-tools@2.1.0)(@emotion/react@11.11.1)(@emotion/styled@11.11.0)(framer-motion@10.15.0)(react-dom@18.2.0)(react-icons@4.10.1)(react-router-dom@6.14.2)(react@18.2.0):
-    resolution: {integrity: sha512-0MgT3UeHnq06ecsr151zQrnPr9ESkCbC97GrN6c5Xpnqpog/qs5M+R4nA6UGtjur5Rbcj3TZCBcsgaV4AymEcg==}
+  /@koupr/ui@1.1.6(@chakra-ui/react@2.8.0)(@chakra-ui/theme-tools@2.1.0)(@emotion/react@11.11.1)(@emotion/styled@11.11.0)(framer-motion@10.15.0)(react-dom@18.2.0)(react-icons@4.10.1)(react-router-dom@6.14.2)(react@18.2.0):
+    resolution: {integrity: sha512-pwu6deHf6pZESzPgAL7XBAFiMlzNn987z9CxLI7knG9sYVn3vD2brRlYYa5UfVOeSza6YRH7fWXW/+KwENE9/g==}
     engines: {node: '>= 18.x'}
     peerDependencies:
       '@chakra-ui/react': '>= 2.8.0 < 3.0.0'

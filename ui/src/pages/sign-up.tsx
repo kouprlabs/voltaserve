@@ -49,7 +49,7 @@ const SignUpPage = () => {
   const handleSubmit = useCallback(
     async (
       { fullName, email, password }: FormValues,
-      { setSubmitting }: FormikHelpers<FormValues>
+      { setSubmitting }: FormikHelpers<FormValues>,
     ) => {
       try {
         await AccountAPI.create({
@@ -62,7 +62,7 @@ const SignUpPage = () => {
         setSubmitting(false)
       }
     },
-    []
+    [],
   )
 
   return (
@@ -75,7 +75,7 @@ const SignUpPage = () => {
           <VStack spacing="25px" w="100%">
             <VStack spacing={variables.spacing}>
               <Logo className="w-16" isGlossy={true} />
-              <Heading size="lg">
+              <Heading fontSize={variables.headingFontSize}>
                 Thanks! We just sent you a confirmation email
               </Heading>
               <Text align="center">
@@ -88,7 +88,7 @@ const SignUpPage = () => {
         {!isConfirmationVisible && (
           <VStack spacing="25px" w="100%">
             <Logo className="w-16" isGlossy={true} />
-            <Heading size="lg">
+            <Heading fontSize={variables.headingFontSize}>
               Sign Up to Voltaserve
             </Heading>
             <Formik

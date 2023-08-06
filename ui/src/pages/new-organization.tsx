@@ -31,7 +31,7 @@ const NewOrganizationPage = () => {
   const handleSubmit = useCallback(
     async (
       { name }: FormValues,
-      { setSubmitting }: FormikHelpers<FormValues>
+      { setSubmitting }: FormikHelpers<FormValues>,
     ) => {
       setSubmitting(true)
       setIsLoading(true)
@@ -49,7 +49,7 @@ const NewOrganizationPage = () => {
         setSubmitting(false)
       }
     },
-    [navigate, mutate]
+    [navigate, mutate],
   )
 
   return (
@@ -58,7 +58,7 @@ const NewOrganizationPage = () => {
         <title>New Organization</title>
       </Helmet>
       <Stack spacing={variables.spacing2Xl}>
-        <Heading size="lg">New Organization</Heading>
+        <Heading fontSize={variables.headingFontSize}>New Organization</Heading>
         <Formik
           enableReinitialize={true}
           initialValues={{ name: '' }}

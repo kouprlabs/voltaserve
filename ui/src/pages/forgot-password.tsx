@@ -41,7 +41,7 @@ const ForgotPasswordPage = () => {
   const handleSubmit = useCallback(
     async (
       { email }: FormValues,
-      { setSubmitting }: FormikHelpers<FormValues>
+      { setSubmitting }: FormikHelpers<FormValues>,
     ) => {
       try {
         await AccountAPI.sendResetPasswordEmail({
@@ -52,7 +52,7 @@ const ForgotPasswordPage = () => {
         setSubmitting(false)
       }
     },
-    []
+    [],
   )
 
   return (
@@ -63,7 +63,9 @@ const ForgotPasswordPage = () => {
         </Helmet>
         <VStack spacing="25px" w="100%">
           <Logo className="w-16" isGlossy={true} />
-          <Heading size="lg">Forgot Password</Heading>
+          <Heading fontSize={variables.headingFontSize}>
+            Forgot Password
+          </Heading>
           {isCompleted ? (
             <Text align="center">
               If your email belongs to an account, you will receive the recovery

@@ -21,7 +21,7 @@
     "@emotion/css": "11.11.2",
     "@emotion/react": "11.11.1",
     "@emotion/styled": "11.11.0",
-    "@koupr/ui": "1.1.5",
+    "@koupr/ui": "1.1.6",
     "@reduxjs/toolkit": "1.9.5",
     "dateformat": "5.0.3",
     "formik": "2.4.3",

@@ -39,7 +39,7 @@ const ResetPasswordPage = () => {
       .required('Password is required')
       .matches(
         /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{8,})/,
-        'Must contain at least 8 characters, one Uppercase, one Lowercase, one number and one special character'
+        'Must contain at least 8 characters, one Uppercase, one Lowercase, one number and one special character',
       ),
     newPasswordConfirmation: Yup.string()
       .oneOf([Yup.ref('newPassword'), undefined], 'Passwords do not match')
@@ -50,7 +50,7 @@ const ResetPasswordPage = () => {
   const handleSubmit = useCallback(
     async (
       { newPassword }: FormValues,
-      { setSubmitting }: FormikHelpers<FormValues>
+      { setSubmitting }: FormikHelpers<FormValues>,
     ) => {
       try {
         await AccountAPI.resetPassword({
@@ -62,7 +62,7 @@ const ResetPasswordPage = () => {
         setSubmitting(false)
       }
     },
-    [token]
+    [token],
   )
 
   return (
@@ -73,7 +73,7 @@ const ResetPasswordPage = () => {
         </Helmet>
         <VStack spacing="25px" w="100%">
           <Logo className="w-16" isGlossy={true} />
-          <Heading size="lg">Reset Password</Heading>
+          <Heading fontSize={variables.headingFontSize}>Reset Password</Heading>
           {isCompleted ? (
             <VStack spacing={variables.spacingXs}>
               <Text align="center">Password successfully changed.</Text>

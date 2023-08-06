@@ -41,7 +41,7 @@ const GroupListPage = () => {
     mutate,
   } = GroupAPI.useList(
     { query, page, size, sortOrder: SortOrder.Desc },
-    swrConfig()
+    swrConfig(),
   )
 
   useEffect(() => {
@@ -58,7 +58,7 @@ const GroupListPage = () => {
         spacing={variables.spacing2Xl}
         pb={variables.spacing2Xl}
       >
-        <Heading size="lg" pl={variables.spacingMd}>
+        <Heading fontSize={variables.headingFontSize} pl={variables.spacingMd}>
           Groups
         </Heading>
         {error && (
