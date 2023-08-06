@@ -56,7 +56,7 @@ const OcrLanguageSelector = ({
     mutate,
   } = OcrLanguageAPI.useList(
     { query, page, size: 5, sortOrder: SortOrder.Desc },
-    swrConfig()
+    swrConfig(),
   )
   const selectionColor = useColorModeValue('gray.100', 'gray.600')
   const dimmedButtonLabelColor = useColorModeValue('gray.500', 'gray.500')
@@ -145,7 +145,7 @@ const OcrLanguageSelector = ({
               {list && list.data.length > 0 && (
                 <Table variant="simple" size="sm">
                   <colgroup>
-                    <col style={{ width: '50px' }} />
+                    <col style={{ width: '40px' }} />
                     <col style={{ width: 'auto' }} />
                   </colgroup>
                   <Tbody>
@@ -156,10 +156,10 @@ const OcrLanguageSelector = ({
                         bg={selected?.id === ol.id ? selectionColor : 'auto'}
                         onClick={() => setSelected(ol)}
                       >
-                        <Td>
+                        <Td px={variables.spacingXs} textAlign="center">
                           <Radio size="md" isChecked={selected?.id === ol.id} />
                         </Td>
-                        <Td>
+                        <Td px={variables.spacingXs}>
                           <HStack spacing={variables.spacing}>
                             <Avatar
                               name={ol.name}
@@ -167,7 +167,9 @@ const OcrLanguageSelector = ({
                               width="40px"
                               height="40px"
                             />
-                            <Text fontSize={variables.bodyFontSize}>{ol.name}</Text>
+                            <Text fontSize={variables.bodyFontSize}>
+                              {ol.name}
+                            </Text>
                           </HStack>
                         </Td>
                       </Tr>

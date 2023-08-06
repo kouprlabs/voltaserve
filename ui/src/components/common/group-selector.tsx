@@ -46,7 +46,7 @@ const GroupSelector = ({ organizationId, onConfirm }: GroupSelectorProps) => {
     mutate,
   } = GroupAPI.useList(
     { query, organizationId, page, size: 5, sortOrder: SortOrder.Desc },
-    swrConfig()
+    swrConfig(),
   )
   const selectionColor = useColorModeValue('gray.100', 'gray.600')
   const dimmedButtonLabelColor = useColorModeValue('gray.500', 'gray.500')
@@ -114,7 +114,7 @@ const GroupSelector = ({ organizationId, onConfirm }: GroupSelectorProps) => {
               {list && list.data.length > 0 && (
                 <Table variant="simple" size="sm">
                   <colgroup>
-                    <col style={{ width: '50px' }} />
+                    <col style={{ width: '40px' }} />
                     <col style={{ width: 'auto' }} />
                   </colgroup>
                   <Tbody>
@@ -125,10 +125,10 @@ const GroupSelector = ({ organizationId, onConfirm }: GroupSelectorProps) => {
                         bg={selected?.id === g.id ? selectionColor : 'auto'}
                         onClick={() => setSelected(g)}
                       >
-                        <Td>
+                        <Td px={variables.spacingXs} textAlign="center">
                           <Radio size="md" isChecked={selected?.id === g.id} />
                         </Td>
-                        <Td>
+                        <Td px={variables.spacingXs}>
                           <HStack spacing={variables.spacing}>
                             <Avatar
                               name={g.name}
@@ -136,7 +136,9 @@ const GroupSelector = ({ organizationId, onConfirm }: GroupSelectorProps) => {
                               width="40px"
                               height="40px"
                             />
-                            <Text fontSize={variables.bodyFontSize}>{g.name}</Text>
+                            <Text fontSize={variables.bodyFontSize}>
+                              {g.name}
+                            </Text>
                           </HStack>
                         </Td>
                       </Tr>
