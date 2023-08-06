@@ -4,9 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"go.uber.org/zap"
 	"io"
 	"net/http"
 	"voltaserve/config"
+	"voltaserve/infra"
 )
 
 type LanguageDetect struct {
@@ -16,11 +18,17 @@ type LanguageDetect struct {
 
 type LanguageClient struct {
 	config config.Config
+	logger *zap.SugaredLogger
 }
 
 func NewLanguageClient() *LanguageClient {
+	logger, err := infra.GetLogger()
+	if err != nil {
+		panic(err)
+	}
 	return &LanguageClient{
 		config: config.GetConfig(),
+		logger: logger,
 	}
 }
 
@@ -38,7 +46,11 @@ func (cl *LanguageClient) Detect(text string) (LanguageDetect, error) {
 	if err != nil {
 		return LanguageDetect{}, err
 	}
-	defer response.Body.Close()
+	defer func(Body io.ReadCloser) {
+		if err := Body.Close(); err != nil {
+			cl.logger.Error(err)
+		}
+	}(response.Body)
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
 		return LanguageDetect{}, err

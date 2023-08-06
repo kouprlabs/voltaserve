@@ -9,7 +9,3 @@ func DetectMimeFromFile(path string) string {
 	}
 	return mime.String()
 }
-
-func DetectMimeFromBytes(b []byte) string {
-	return mimetype.Detect(b).String()
-}

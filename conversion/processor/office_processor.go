@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"go.uber.org/zap"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -17,12 +18,18 @@ import (
 type OfficeProcessor struct {
 	cmd    *infra.Command
 	config config.Config
+	logger *zap.SugaredLogger
 }
 
 func NewOfficeProcessor() *OfficeProcessor {
+	logger, err := infra.GetLogger()
+	if err != nil {
+		panic(err)
+	}
 	return &OfficeProcessor{
 		cmd:    infra.NewCommand(),
 		config: config.GetConfig(),
+		logger: logger,
 	}
 }
 
@@ -31,7 +38,11 @@ func (p *OfficeProcessor) PDF(inputPath string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	defer file.Close()
+	defer func(file *os.File) {
+		if err := file.Close(); err != nil {
+			p.logger.Error(err)
+		}
+	}(file)
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 	fileField, err := writer.CreateFormFile("file", inputPath)
@@ -57,7 +68,9 @@ func (p *OfficeProcessor) PDF(inputPath string) (string, error) {
 	if _, err := jsonField.Write(jsonBytes); err != nil {
 		return "", err
 	}
-	writer.Close()
+	if err := writer.Close(); err != nil {
+		return "", err
+	}
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", p.config.LibreOfficeURL, p.config.Security.APIKey), body)
 	if err != nil {
 		return "", err
@@ -68,7 +81,11 @@ func (p *OfficeProcessor) PDF(inputPath string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	defer res.Body.Close()
+	defer func(Body io.ReadCloser) {
+		if err := Body.Close(); err != nil {
+			p.logger.Error(err)
+		}
+	}(res.Body)
 	if res.StatusCode != http.StatusOK {
 		return "", fmt.Errorf("request failed with status %d", res.StatusCode)
 	}
@@ -78,7 +95,11 @@ func (p *OfficeProcessor) PDF(inputPath string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	defer outputFile.Close()
+	defer func(outputFile *os.File) {
+		if err := outputFile.Close(); err != nil {
+			p.logger.Error(err)
+		}
+	}(outputFile)
 	_, err = io.Copy(outputFile, res.Body)
 	if err != nil {
 		return "", err
