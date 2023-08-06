@@ -136,7 +136,7 @@ const GroupSelector = ({ organizationId, onConfirm }: GroupSelectorProps) => {
                               width="40px"
                               height="40px"
                             />
-                            <Text fontSize="14px">{g.name}</Text>
+                            <Text fontSize={variables.bodyFontSize}>{g.name}</Text>
                           </HStack>
                         </Td>
                       </Tr>

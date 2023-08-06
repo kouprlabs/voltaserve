@@ -70,7 +70,7 @@ const AccountLayout = () => {
               onClick={() => setIsImageModalOpen(true)}
             />
           </Box>
-          <Heading fontSize="16px" textAlign="center">
+          <Heading fontSize="21px" textAlign="center">
             {user.fullName}
           </Heading>
         </VStack>

@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 import { useParams } from 'react-router-dom'
-import { Button, Center, Heading, Stack, Text } from '@chakra-ui/react'
+import { Button, Center, Stack, Text } from '@chakra-ui/react'
 import { variables, IconDownload, Drawer, Spinner } from '@koupr/ui'
 import { Helmet } from 'react-helmet-async'
 import FileAPI, { File } from '@/client/api/file'
@@ -66,9 +66,7 @@ const FileViewerPage = () => {
         </Drawer>
         <Stack height="100vh" spacing={0} flexGrow={1}>
           <Center w="100%" h="80px">
-            <Heading fontSize="14px" textAlign="center">
-              {file.name}
-            </Heading>
+            <Text fontSize="16px">{file.name}</Text>
           </Center>
           <Center w="100%" h="100%" overflow="hidden">
             {renderViewer(file)}
