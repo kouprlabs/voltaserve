@@ -10,6 +10,7 @@ import {
   Link as ChakraLink,
   Text,
   VStack,
+  Heading,
 } from '@chakra-ui/react'
 import { variables } from '@koupr/ui'
 import {
@@ -97,9 +98,9 @@ const SignInPage = () => {
         </Helmet>
         <VStack spacing="25px" w="100%">
           <Logo className="w-16" isGlossy={true} />
-          <h1 className="font-display text-2xl font-medium">
+          <Heading size="lg">
             Sign In to Voltaserve
-          </h1>
+          </Heading>
           <Formik
             initialValues={{
               email: '',

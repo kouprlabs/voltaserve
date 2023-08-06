@@ -9,6 +9,7 @@ import {
   Link as ChakraLink,
   Text,
   VStack,
+  Heading,
 } from '@chakra-ui/react'
 import { variables } from '@koupr/ui'
 import {
@@ -74,9 +75,9 @@ const SignUpPage = () => {
           <VStack spacing="25px" w="100%">
             <VStack spacing={variables.spacing}>
               <Logo className="w-16" isGlossy={true} />
-              <h1 className="font-display text-2xl font-medium text-center">
+              <Heading size="lg">
                 Thanks! We just sent you a confirmation email
-              </h1>
+              </Heading>
               <Text align="center">
                 Just open your inbox, find the email, and click on the
                 confirmation link.
@@ -87,9 +88,9 @@ const SignUpPage = () => {
         {!isConfirmationVisible && (
           <VStack spacing="25px" w="100%">
             <Logo className="w-16" isGlossy={true} />
-            <h1 className="font-display text-2xl font-medium">
+            <Heading size="lg">
               Sign Up to Voltaserve
-            </h1>
+            </Heading>
             <Formik
               initialValues={{
                 fullName: '',
