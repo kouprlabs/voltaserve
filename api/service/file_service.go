@@ -793,7 +793,7 @@ func (svc *FileService) Search(opts FileSearchOptions, page uint, size uint, use
 	if err != nil {
 		return nil, err
 	}
-	filtered, err := svc.doFiltering(opts, files, userID)
+	filtered, err := svc.doFiltering(opts, files)
 	if err != nil {
 		return nil, err
 	}
@@ -1759,7 +1759,7 @@ func (svc *FileService) doPagination(data []model.File, page, size uint) ([]mode
 	return pageData, totalElements, totalPages
 }
 
-func (svc *FileService) doFiltering(opts FileSearchOptions, data []model.File, userID string) ([]model.File, error) {
+func (svc *FileService) doFiltering(opts FileSearchOptions, data []model.File) ([]model.File, error) {
 	filtered, _ := rxgo.Just(data)().
 		Filter(func(v interface{}) bool {
 			return v.(model.File).GetWorkspaceID() == opts.WorkspaceID
@@ -1863,7 +1863,7 @@ func (mp *FileMapper) mapOne(m model.File, userID string) (*File, error) {
 		Name:        m.GetName(),
 		Type:        m.GetType(),
 		ParentID:    m.GetParentID(),
-		Snapshots:   mp.mapSnapshots(snapshots, m.GetID()),
+		Snapshots:   mp.mapSnapshots(snapshots),
 		CreateTime:  m.GetCreateTime(),
 		UpdateTime:  m.GetUpdateTime(),
 	}
@@ -1986,7 +1986,7 @@ func (mp *FileMapper) mapThumbnail(m *model.Thumbnail) *Thumbnail {
 	}
 }
 
-func (mp *FileMapper) mapSnapshots(snapshots []model.Snapshot, fileID string) []*Snapshot {
+func (mp *FileMapper) mapSnapshots(snapshots []model.Snapshot) []*Snapshot {
 	res := make([]*Snapshot, 0)
 	for _, s := range snapshots {
 		res = append(res, mp.mapSnapshot(s))

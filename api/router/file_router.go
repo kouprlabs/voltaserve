@@ -3,6 +3,7 @@ package router
 import (
 	"errors"
 	"fmt"
+	log "github.com/sirupsen/logrus"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -115,7 +116,11 @@ func (r *FileRouter) Upload(c *fiber.Ctx) error {
 	if err := c.SaveFile(fh, path); err != nil {
 		return err
 	}
-	defer os.Remove(path)
+	defer func(name string) {
+		if err := os.Remove(name); err != nil {
+			log.Error(err)
+		}
+	}(path)
 	file, err = r.fileSvc.Store(file.ID, path, userID)
 	if err != nil {
 		return err
@@ -159,7 +164,11 @@ func (r *FileRouter) Patch(c *fiber.Ctx) error {
 	if err := c.SaveFile(fh, path); err != nil {
 		return err
 	}
-	defer os.Remove(path)
+	defer func(name string) {
+		if err := os.Remove(name); err != nil {
+			log.Error(err)
+		}
+	}(path)
 	file, err = r.fileSvc.Store(file.ID, path, userID)
 	if err != nil {
 		return err
