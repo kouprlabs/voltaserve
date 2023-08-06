@@ -32,7 +32,7 @@ const OrganizationLayout = () => {
 
   return (
     <Stack direction="column" spacing={variables.spacing2Xl}>
-      <Heading size="lg">{org.name}</Heading>
+      <Heading fontSize={variables.headingFontSize}>{org.name}</Heading>
       <Tabs variant="solid-rounded" colorScheme="gray" index={tabIndex}>
         <TabList>
           <Tab onClick={() => navigate(`/organization/${orgId}/member`)}>
