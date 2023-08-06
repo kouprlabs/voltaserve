@@ -51,8 +51,6 @@ func (r *FileRouter) AppendRoutes(g fiber.Router) {
 	g.Get("/:id/get_ids", r.GetIDs)
 	g.Post("/:id/move", r.Move)
 	g.Post("/:id/rename", r.Rename)
-	g.Post("/:id/update_ocr_language", r.UpdateOCRLanguage)
-	g.Post("/:id/delete_ocr", r.DeleteOCR)
 	g.Post("/:id/copy", r.Copy)
 	g.Get("/:id/get_size", r.GetSize)
 	g.Post("/grant_user_permission", r.GrantUserPermission)
@@ -523,55 +521,6 @@ func (r *FileRouter) Rename(c *fiber.Ctx) error {
 	return c.JSON(res)
 }
 
-// UpdateOCRLanguage godoc
-//
-//	@Summary		Update OCR language
-//	@Description	Update OCR language
-//	@Tags			Files
-//	@Id				files_update_ocr_language
-//	@Produce		json
-//	@Param			id		path		string									true	"ID"
-//	@Param			body	body		service.FileUpdateOCRLanguageOptions	true	"Body"
-//	@Success		200		{object}	service.File
-//	@Failure		404		{object}	errorpkg.ErrorResponse
-//	@Failure		500		{object}	errorpkg.ErrorResponse
-//	@Router			/files/{id}/update_ocr_language [post]
-func (r *FileRouter) UpdateOCRLanguage(c *fiber.Ctx) error {
-	userID := GetUserID(c)
-	opts := new(service.FileUpdateOCRLanguageOptions)
-	if err := c.BodyParser(opts); err != nil {
-		return err
-	}
-	if err := validator.New().Struct(opts); err != nil {
-		return errorpkg.NewRequestBodyValidationError(err)
-	}
-	res, err := r.fileSvc.UpdateOCRLanguage(c.Params("id"), opts.ID, userID)
-	if err != nil {
-		return err
-	}
-	return c.JSON(res)
-}
-
-// DeleteOCR godoc
-//
-//	@Summary		Delete OCR
-//	@Description	Delete OCR
-//	@Tags			Files
-//	@Id				files_delete_ocr
-//	@Produce		json
-//	@Param			id	path		string	true	"ID"
-//	@Success		200	{object}	service.File
-//	@Failure		404	{object}	errorpkg.ErrorResponse
-//	@Failure		500	{object}	errorpkg.ErrorResponse
-//	@Router			/files/{id}/delete_ocr [post]
-func (r *FileRouter) DeleteOCR(c *fiber.Ctx) error {
-	res, err := r.fileSvc.DeleteOCR(c.Params("id"), GetUserID(c))
-	if err != nil {
-		return err
-	}
-	return c.JSON(res)
-}
-
 // Delete godoc
 //
 //	@Summary		Delete
@@ -854,7 +803,6 @@ func NewFileDownloadRouter() *FileDownloadRouter {
 func (r *FileDownloadRouter) AppendNonJWTRoutes(g fiber.Router) {
 	g.Get("/:id/original:ext", r.DownloadOriginal)
 	g.Get("/:id/preview:ext", r.DownloadPreview)
-	g.Get("/:id/ocr:ext", r.DownloadOCR)
 }
 
 // DownloadOriginal godoc
@@ -931,43 +879,6 @@ func (r *FileDownloadRouter) DownloadPreview(c *fiber.Ctx) error {
 	return c.Send(bytes)
 }
 
-// DownloadOCR godoc
-//
-//	@Summary		Download OCR
-//	@Description	Download OCR
-//	@Tags			Files
-//	@Id				files_download_ocr
-//	@Produce		json
-//	@Param			id				path		string	true	"ID"
-//	@Param			access_token	query		string	true	"Access Token"
-//	@Failure		404				{object}	errorpkg.ErrorResponse
-//	@Failure		500				{object}	errorpkg.ErrorResponse
-//	@Router			/files/{id}/ocr{ext} [get]
-func (r *FileDownloadRouter) DownloadOCR(c *fiber.Ctx) error {
-	accessToken := c.Cookies(r.accessTokenCookieName)
-	if accessToken == "" {
-		accessToken = c.Query("access_token")
-		if accessToken == "" {
-			return errorpkg.NewFileNotFoundError(nil)
-		}
-	}
-	userID, err := r.getUserID(accessToken)
-	if err != nil {
-		return c.SendStatus(http.StatusNotFound)
-	}
-	buf, file, snapshot, err := r.fileSvc.DownloadOCRBuffer(c.Params("id"), userID)
-	if err != nil {
-		return err
-	}
-	if filepath.Ext(snapshot.GetOCR().Key) != c.Params("ext") {
-		return errorpkg.NewS3ObjectNotFoundError(nil)
-	}
-	bytes := buf.Bytes()
-	c.Set("Content-Type", infra.DetectMimeFromBytes(bytes))
-	c.Set("Content-Disposition", fmt.Sprintf("filename=\"%s\"", file.GetName()))
-	return c.Send(bytes)
-}
-
 func (r *FileDownloadRouter) getUserID(accessToken string) (string, error) {
 	token, err := jwt.Parse(accessToken, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -999,7 +910,7 @@ func (r *ConversionWebhookRouter) AppendInternalRoutes(g fiber.Router) {
 	g.Post("/conversion_webhook/update_snapshot", r.UpdateSnapshot)
 }
 
-// Update snapshot godoc
+// UpdateSnapshot godoc
 //
 //	@Summary		Update snapshot
 //	@Description	Update snapshot

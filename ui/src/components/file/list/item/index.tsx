@@ -28,7 +28,6 @@ import {
   IconTrash,
   variables,
 } from '@koupr/ui'
-import { HiLanguage } from 'react-icons/hi2'
 import { File, SnapshotStatus } from '@/client/api/file'
 import {
   ltEditorPermission,
@@ -36,14 +35,12 @@ import {
   ltViewerPermission,
 } from '@/client/api/permission'
 import downloadFile from '@/helpers/download-file'
-import { isImage } from '@/helpers/file-extension'
 import relativeDate from '@/helpers/relative-date'
 import store from '@/store/configure-store'
 import { useAppDispatch } from '@/store/hook'
 import {
   copyModalDidOpen,
   deleteModalDidOpen,
-  manageOcrModalDidOpen,
   moveModalDidOpen,
   renameModalDidOpen,
   selectionAdded,
@@ -189,16 +186,6 @@ const Item = ({ file, scale }: ItemProps) => {
               >
                 Download
               </MenuItem>
-              {file.type === 'file' &&
-              isImage(file?.original?.extension ?? '') ? (
-                <MenuItem
-                  icon={<HiLanguage fontSize="14px" />}
-                  isDisabled={ltEditorPermission(file.permission)}
-                  onClick={() => dispatch(manageOcrModalDidOpen())}
-                >
-                  OCR
-                </MenuItem>
-              ) : null}
               <MenuDivider />
               <MenuItem
                 icon={<IconTrash />}

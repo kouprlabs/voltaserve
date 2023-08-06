@@ -48,7 +48,6 @@ func main() {
 	v1 := app.Group("/v1")
 
 	f := v1.Group("files")
-	ol := v1.Group("ocr_languages")
 
 	app.Get("v1/health", func(c *fiber.Ctx) error {
 		return c.SendStatus(200)
@@ -60,9 +59,6 @@ func main() {
 
 	fileDownloads := router.NewFileDownloadRouter()
 	fileDownloads.AppendNonJWTRoutes(f)
-
-	ocrLanguages := router.NewOCRLanguageRouter()
-	ocrLanguages.AppendInternalRoutes(ol)
 
 	conversionWebhook := router.NewConversionWebhookRouter()
 	conversionWebhook.AppendInternalRoutes(f)
@@ -94,8 +90,6 @@ func main() {
 
 	users := router.NewUserRouter()
 	users.AppendRoutes(v1.Group("users"))
-
-	ocrLanguages.AppendRoutes(ol)
 
 	if err := app.Listen(fmt.Sprintf(":%d", cfg.Port)); err != nil {
 		panic(err)

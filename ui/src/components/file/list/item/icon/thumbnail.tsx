@@ -14,7 +14,6 @@ import { getSizeWithAspectRatio } from '@/helpers/aspect-ratio'
 import * as fileExtension from '@/helpers/file-extension'
 import ErrorBadge from './error-badge'
 import NewBadge from './new-badge'
-import OcrBadge from './ocr-badge'
 import ProcessingBadge from './processing-badge'
 import SharedBadge from './shared-badge'
 
@@ -105,7 +104,6 @@ const Thumbnail = ({ file, scale }: ThumbnailProps) => {
       )}
       <HStack position="absolute" bottom="-5px" right="-5px" spacing="2px">
         {file.isShared && <SharedBadge />}
-        {file.ocr?.language && <OcrBadge />}
         {file.status === SnapshotStatus.New && <NewBadge />}
         {file.status === SnapshotStatus.Processing && <ProcessingBadge />}
         {file.status === SnapshotStatus.Error && <ErrorBadge />}

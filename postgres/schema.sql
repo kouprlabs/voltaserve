@@ -77,7 +77,6 @@ CREATE TABLE IF NOT EXISTS "workspace"
     storage_capacity          bigint NOT NULL,
     root_id                   text UNIQUE,
     bucket                    text UNIQUE NOT NULL,
-    is_automatic_ocr_enabled  boolean NOT NULL DEFAULT TRUE,
     create_time               text NOT NULL DEFAULT (to_json(now())#>>'{}'),
     update_time               text
 );
@@ -133,7 +132,6 @@ CREATE TABLE IF NOT EXISTS "snapshot"
   original    jsonb,
   preview     jsonb,
   text        jsonb,
-  ocr         jsonb,
   thumbnail   jsonb,
   language    text,
   status      text,
@@ -301,25 +299,3 @@ CREATE TRIGGER organization_user_before_insert
     ON snapshot
     FOR EACH ROW
 EXECUTE PROCEDURE create_time_before_insert();
-
-CREATE TABLE IF NOT EXISTS "ocrlanguage"
-(
-    id        text PRIMARY KEY, -- https://github.com/tesseract-ocr/tessdata
-    iso639_3  text NOT NULL, -- https://iso639-3.sil.org/code_tables/639/data
-    name      text NOT NULL
-);
-
-INSERT INTO "ocrlanguage" (id, iso639_3, name) VALUES ('eng',     'eng', 'English');
-INSERT INTO "ocrlanguage" (id, iso639_3, name) VALUES ('deu',     'deu', 'German');
-INSERT INTO "ocrlanguage" (id, iso639_3, name) VALUES ('fra',     'fra', 'French');
-INSERT INTO "ocrlanguage" (id, iso639_3, name) VALUES ('nld',     'nld', 'Dutch');
-INSERT INTO "ocrlanguage" (id, iso639_3, name) VALUES ('ita',     'ita', 'Italian');
-INSERT INTO "ocrlanguage" (id, iso639_3, name) VALUES ('spa',     'spa', 'Spanish');
-INSERT INTO "ocrlanguage" (id, iso639_3, name) VALUES ('por',     'por', 'Portuguese');
-INSERT INTO "ocrlanguage" (id, iso639_3, name) VALUES ('swe',     'swe', 'Swedish');
-INSERT INTO "ocrlanguage" (id, iso639_3, name) VALUES ('jpn',     'jpn', 'Japanese');
-INSERT INTO "ocrlanguage" (id, iso639_3, name) VALUES ('chi_sim', 'zho', 'Chinese Simplified');
-INSERT INTO "ocrlanguage" (id, iso639_3, name) VALUES ('chi_tra', 'zho', 'Chinese Traditional');
-INSERT INTO "ocrlanguage" (id, iso639_3, name) VALUES ('hin',     'hin', 'Hindi');
-INSERT INTO "ocrlanguage" (id, iso639_3, name) VALUES ('rus',     'rus', 'Russian');
-INSERT INTO "ocrlanguage" (id, iso639_3, name) VALUES ('ara',     'ara', 'Arabic');

@@ -1,7 +1,0 @@
-{
-  "recommendations": [
-    "ms-python.python",
-    "ms-python.black-formatter",
-    "bungcip.better-toml"
-  ]
-}

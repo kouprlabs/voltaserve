@@ -31,7 +31,6 @@ type File struct {
 	Version     *int64      `json:"version,omitempty"`
 	Original    *Download   `json:"original,omitempty"`
 	Preview     *Download   `json:"preview,omitempty"`
-	OCR         *Download   `json:"ocr,omitempty"`
 	Thumbnail   *Thumbnail  `json:"thumbnail,omitempty"`
 	Status      string      `json:"status,omitempty"`
 	Snapshots   []*Snapshot `json:"snapshots,omitempty"`
@@ -347,89 +346,14 @@ func (svc *FileService) Store(fileID string, filePath string, userID string) (*F
 		return nil, err
 	}
 	if err := svc.conversionClient.RunPipeline(&client.PipelineRunOptions{
-		FileID:                file.GetID(),
-		SnapshotID:            snapshot.GetID(),
-		Bucket:                original.Bucket,
-		Key:                   original.Key,
-		IsAutomaticOCREnabled: workspace.GetIsAutomaticOCREnabled(),
+		FileID:     file.GetID(),
+		SnapshotID: snapshot.GetID(),
+		Bucket:     original.Bucket,
+		Key:        original.Key,
 	}); err != nil {
 		return nil, err
 	}
 	return res, nil
-}
-
-func (svc *FileService) UpdateOCRLanguage(fileID string, languageID string, userID string) (*File, error) {
-	file, snapshot, err := svc.deleteOCRFromLatestSnapshot(fileID)
-	if err != nil {
-		return nil, err
-	}
-	if file == nil || snapshot == nil {
-		return nil, nil
-	}
-	if err := svc.conversionClient.RunPipeline(&client.PipelineRunOptions{
-		FileID:                file.GetID(),
-		SnapshotID:            snapshot.GetID(),
-		Bucket:                snapshot.GetOriginal().Bucket,
-		Key:                   snapshot.GetOriginal().Key,
-		OCRLanguageID:         &languageID,
-		IsAutomaticOCREnabled: true,
-	}); err != nil {
-		return nil, err
-	}
-	res, err := svc.fileMapper.mapOne(file, userID)
-	if err != nil {
-		return nil, err
-	}
-	return res, nil
-}
-
-func (svc *FileService) DeleteOCR(fileID string, userID string) (*File, error) {
-	file, _, err := svc.deleteOCRFromLatestSnapshot(fileID)
-	if err != nil {
-		return nil, err
-	}
-	if file == nil {
-		return nil, nil
-	}
-	res, err := svc.fileMapper.mapOne(file, userID)
-	if err != nil {
-		return nil, err
-	}
-	return res, nil
-}
-
-func (svc *FileService) deleteOCRFromLatestSnapshot(fileID string) (model.File, model.Snapshot, error) {
-	file, err := svc.fileRepo.Find(fileID)
-	if err != nil {
-		return nil, nil, err
-	}
-	snapshots := file.GetSnapshots()
-	if len(snapshots) == 0 {
-		return file, nil, nil
-	}
-	snapshot := snapshots[0]
-	if !snapshot.HasOCR() {
-		return file, snapshot, nil
-	}
-	if err := svc.s3.RemoveObject(snapshot.GetOCR().Key, snapshot.GetOCR().Bucket); err != nil {
-		return file, snapshot, err
-	}
-	snapshot.SetOCR(nil)
-	if err := svc.snapshotRepo.Save(snapshot); err != nil {
-		return file, snapshot, err
-	}
-	file, err = svc.fileRepo.Find(file.GetID())
-	if err != nil {
-		return file, snapshot, err
-	}
-	if err = svc.fileSearch.Update([]model.File{file}); err != nil {
-		return file, snapshot, err
-	}
-	err = svc.fileCache.Set(file)
-	if err != nil {
-		return file, snapshot, err
-	}
-	return file, snapshot, nil
 }
 
 func (svc *FileService) UpdateSnapshot(opts SnapshotUpdateOptions, apiKey string) error {
@@ -441,7 +365,6 @@ func (svc *FileService) UpdateSnapshot(opts SnapshotUpdateOptions, apiKey string
 		Original:  opts.Original,
 		Preview:   opts.Preview,
 		Text:      opts.Text,
-		OCR:       opts.OCR,
 		Status:    opts.Status,
 	}); err != nil {
 		return err
@@ -505,35 +428,6 @@ func (svc *FileService) DownloadPreviewBuffer(id string, userID string) (*bytes.
 	if latestSnapshot.HasPreview() {
 		preview := latestSnapshot.GetPreview()
 		buf, err := svc.s3.GetObject(preview.Key, preview.Bucket)
-		if err != nil {
-			return nil, nil, nil, err
-		}
-		return buf, file, latestSnapshot, nil
-	} else {
-		return nil, nil, nil, errorpkg.NewS3ObjectNotFoundError(nil)
-	}
-}
-
-func (svc *FileService) DownloadOCRBuffer(id string, userID string) (*bytes.Buffer, model.File, model.Snapshot, error) {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return nil, nil, nil, err
-	}
-	file, err := svc.fileCache.Get(id)
-	if err != nil {
-		return nil, nil, nil, err
-	}
-	if err = svc.fileGuard.Authorize(user, file, model.PermissionViewer); err != nil {
-		return nil, nil, nil, err
-	}
-	snapshots := file.GetSnapshots()
-	if len(snapshots) == 0 {
-		return nil, nil, nil, errorpkg.NewSnapshotNotFoundError(nil)
-	}
-	latestSnapshot := snapshots[len(snapshots)-1]
-	if latestSnapshot.HasOCR() {
-		ocr := latestSnapshot.GetOCR()
-		buf, err := svc.s3.GetObject(ocr.Key, ocr.Bucket)
 		if err != nil {
 			return nil, nil, nil, err
 		}
@@ -1217,11 +1111,6 @@ func (svc *FileService) Delete(ids []string, userID string) ([]string, error) {
 					return nil, err
 				}
 			}
-			if s.HasOCR() {
-				if err = svc.s3.RemoveObject(s.GetOCR().Key, s.GetOCR().Bucket); err != nil {
-					return nil, err
-				}
-			}
 		}
 		if err = svc.snapshotRepo.DeleteAllDangling(); err != nil {
 			return nil, err
@@ -1880,7 +1769,6 @@ func (mp *FileMapper) mapOne(m model.File, userID string) (*File, error) {
 		res.Version = &latest.Version
 		res.Original = latest.Original
 		res.Preview = latest.Preview
-		res.OCR = latest.OCR
 		res.Thumbnail = latest.Thumbnail
 		res.Status = latest.Status
 	}
@@ -1940,14 +1828,8 @@ func (mp *FileMapper) mapSnapshot(m model.Snapshot) *Snapshot {
 	if m.HasPreview() {
 		s.Preview = mp.mapPreview(m.GetPreview())
 	}
-	if m.HasOCR() {
-		s.OCR = mp.mapOCR(m.GetOCR())
-	}
 	if m.HasThumbnail() {
 		s.Thumbnail = mp.mapThumbnail(m.GetThumbnail())
-	}
-	if m.HasLanguage() {
-		s.Language = m.GetLanguage()
 	}
 	return s
 }
@@ -1978,14 +1860,6 @@ func (mp *FileMapper) mapPreview(m *model.S3Object) *Download {
 		}
 	}
 	return download
-}
-
-func (mp *FileMapper) mapOCR(m *model.S3Object) *Download {
-	return &Download{
-		Extension: filepath.Ext(m.Key),
-		Size:      m.Size,
-		Language:  m.Language,
-	}
 }
 
 func (mp *FileMapper) mapThumbnail(m *model.Thumbnail) *Thumbnail {
