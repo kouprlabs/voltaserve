@@ -66,7 +66,9 @@ const FileViewerPage = () => {
         </Drawer>
         <Stack height="100vh" spacing={0} flexGrow={1}>
           <Center w="100%" h="80px">
-            <Text fontSize="16px">{file.name}</Text>
+            <Text fontSize="16px" fontWeight="500">
+              {file.name}
+            </Text>
           </Center>
           <Center w="100%" h="100%" overflow="hidden">
             {renderViewer(file)}
