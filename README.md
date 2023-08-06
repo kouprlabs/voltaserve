@@ -30,13 +30,6 @@ Wait until the following containers are running:
 - `voltaserve-app-webdav`
 - `voltaserve-app-language`
 - `voltaserve-app-ui`
-- `voltaserve-tools-exiftool`
-- `voltaserve-tools-ffmpeg`
-- `voltaserve-tools_graphicsmagick`
-- `voltaserve-tools-libreoffice`
-- `voltaserve-tools-ocrmypdf`
-- `voltaserve-tools-poppler`
-- `voltaserve-tools-tesseract`
 
 You can check that by running the command `docker ps` and look at the `STATUS` column.
 
