@@ -28,32 +28,6 @@ setInterval(async () => {
   }
 }, REFRESH_INTERVAL)
 
-setInterval(async () => {
-  const url = new URL(window.location.href)
-  const query = url.searchParams.get('q')
-  if (query) {
-    return
-  }
-  const fileId = url.pathname.split('/')[4]
-  const current = store.getState().entities.files.current
-  if (current && current === fileId) {
-    const localIds =
-      store.getState().entities.files.list?.data.map((e) => e.id) || []
-    const remoteIds = await FileAPI.getIds(current)
-    if (!stringArraysIdentical(localIds, remoteIds)) {
-      const sortBy = store.getState().ui.files.sortBy
-      const sortOrder = store.getState().ui.files.sortOrder
-      const result = await FileAPI.list(current, {
-        page: 1,
-        size: FileAPI.DEFAULT_PAGE_SIZE,
-        sortBy,
-        sortOrder,
-      })
-      store.dispatch(listUpdated(result))
-    }
-  }
-}, REFRESH_INTERVAL)
-
 type ListProps = {
   scale: number
 }
@@ -109,7 +83,7 @@ const List = ({ scale }: ListProps) => {
           result = await FileAPI.search(
             { text: query, parentId: fileId, workspaceId },
             FileAPI.DEFAULT_PAGE_SIZE,
-            1
+            1,
           )
         } else {
           result = await FileAPI.list(fileId, {
@@ -125,30 +99,6 @@ const List = ({ scale }: ListProps) => {
       }
     })()
   }, [workspaceId, fileId, query, sortBy, sortOrder, dispatch])
-
-  /* TODO: check if this is really needed */
-  useEffect(() => {
-    if (list) {
-      ;(async () => {
-        const itemCount = await FileAPI.getItemCount(fileId)
-        if (list.data.length === 0 && list.totalPages > 1 && itemCount > 0) {
-          setIsLoading(true)
-          dispatch(selectionUpdated([]))
-          try {
-            const result = await FileAPI.list(fileId, {
-              page: 1,
-              size: FileAPI.DEFAULT_PAGE_SIZE,
-              sortBy,
-              sortOrder,
-            })
-            dispatch(listUpdated(result))
-          } finally {
-            setIsLoading(false)
-          }
-        }
-      })()
-    }
-  }, [fileId, list, sortBy, sortOrder, dispatch])
 
   if (isLoading || !list) {
     return (
