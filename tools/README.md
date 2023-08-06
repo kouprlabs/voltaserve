@@ -25,10 +25,6 @@ golangci-lint run
 ### Build Docker Images
 
 ```shell
-docker build -t voltaserve/exiftoo -f ./docker/sle/Dockerfile.exiftool .
-```
-
-```shell
 docker build -t voltaserve/ffmpeg -f ./docker/sle/Dockerfile.ffmpeg .
 ```
 
@@ -41,15 +37,7 @@ docker build -t voltaserve/libreoffice -f ./docker/sle/Dockerfile.libreoffice .
 ```
 
 ```shell
-docker build -t voltaserve/ocrmypdf -f ./docker/sle/Dockerfile.ocrmypdf .
-```
-
-```shell
 docker build -t voltaserve/poppler -f ./docker/sle/Dockerfile.poppler .
-```
-
-```shell
-docker build -t voltaserve/tesseract -f D./docker/sle/ockerfile.tesseract .
 ```
 
 ### Example Requests
