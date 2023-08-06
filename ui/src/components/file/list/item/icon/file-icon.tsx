@@ -1,7 +1,10 @@
 import { Box, HStack } from '@chakra-ui/react'
-import { File } from '@/client/api/file'
+import { File, SnapshotStatus } from '@/client/api/file'
+import ErrorBadge from './error-badge'
 import FontIcon from './font-icon'
+import NewBadge from './new-badge'
 import OcrBadge from './ocr-badge'
+import ProcessingBadge from './processing-badge'
 import SharedBadge from './shared-badge'
 import Thumbnail from './thumbnail'
 
@@ -20,6 +23,9 @@ const FileIcon = ({ file, scale }: FileIconProps) => {
         <HStack position="absolute" bottom="-5px" right="0px" spacing="2px">
           {file.isShared && <SharedBadge />}
           {file.ocr?.language && <OcrBadge />}
+          {file.status === SnapshotStatus.New && <NewBadge />}
+          {file.status === SnapshotStatus.Processing && <ProcessingBadge />}
+          {file.status === SnapshotStatus.Error && <ErrorBadge />}
         </HStack>
       </Box>
     )

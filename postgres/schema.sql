@@ -136,6 +136,7 @@ CREATE TABLE IF NOT EXISTS "snapshot"
   ocr         jsonb,
   thumbnail   jsonb,
   language    text,
+  status      text,
   create_time text NOT NULL DEFAULT (to_json(now())#>>'{}'),
   update_time text
 );

@@ -1,5 +1,12 @@
 package model
 
+const (
+	SnapshotStatusNew        = "new"
+	SnapshotStatusProcessing = "processing"
+	SnapshotStatusReady      = "ready"
+	SnapshotStatusError      = "error"
+)
+
 type Snapshot interface {
 	GetID() string
 	GetVersion() int64
@@ -15,6 +22,7 @@ type Snapshot interface {
 	HasOCR() bool
 	HasThumbnail() bool
 	HasLanguage() bool
+	GetStatus() string
 	GetCreateTime() string
 	GetUpdateTime() *string
 	SetID(string)
@@ -25,6 +33,7 @@ type Snapshot interface {
 	SetOCR(*S3Object)
 	SetThumbnail(*Thumbnail)
 	SetLanguage(*string)
+	SetStatus(string)
 }
 
 type S3Object struct {

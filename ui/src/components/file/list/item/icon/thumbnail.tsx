@@ -9,10 +9,13 @@ import {
   useToken,
 } from '@chakra-ui/react'
 import { IconPlay, variables } from '@koupr/ui'
-import { File } from '@/client/api/file'
+import { File, SnapshotStatus } from '@/client/api/file'
 import { getSizeWithAspectRatio } from '@/helpers/aspect-ratio'
 import * as fileExtension from '@/helpers/file-extension'
+import ErrorBadge from './error-badge'
+import NewBadge from './new-badge'
 import OcrBadge from './ocr-badge'
+import ProcessingBadge from './processing-badge'
 import SharedBadge from './shared-badge'
 
 const MAX_WIDTH = 130
@@ -24,7 +27,7 @@ export function getThumbnailWidth(file: File, scale: number): string {
       file.thumbnail.width,
       file.thumbnail.height,
       MAX_WIDTH,
-      MAX_HEIGHT
+      MAX_HEIGHT,
     )
     return `${width * scale}px`
   } else {
@@ -38,7 +41,7 @@ export function getThumbnailHeight(file: File, scale: number): string {
       file.thumbnail.width,
       file.thumbnail.height,
       MAX_WIDTH,
-      MAX_HEIGHT
+      MAX_HEIGHT,
     )
     return `${height * scale}px`
   } else {
@@ -61,7 +64,7 @@ const Thumbnail = ({ file, scale }: ThumbnailProps) => {
     () =>
       file.original?.extension &&
       fileExtension.isVideo(file.original.extension),
-    [file.original]
+    [file.original],
   )
   return (
     <Box position="relative" width={width} height={height}>
@@ -103,6 +106,9 @@ const Thumbnail = ({ file, scale }: ThumbnailProps) => {
       <HStack position="absolute" bottom="-5px" right="-5px" spacing="2px">
         {file.isShared && <SharedBadge />}
         {file.ocr?.language && <OcrBadge />}
+        {file.status === SnapshotStatus.New && <NewBadge />}
+        {file.status === SnapshotStatus.Processing && <ProcessingBadge />}
+        {file.status === SnapshotStatus.Error && <ErrorBadge />}
       </HStack>
     </Box>
   )

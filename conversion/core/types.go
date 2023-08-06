@@ -16,6 +16,7 @@ type SnapshotUpdateOptions struct {
 	Text      *S3Object          `json:"text,omitempty"`
 	OCR       *S3Object          `json:"ocr,omitempty"`
 	Thumbnail *ImageBase64       `json:"thumbnail,omitempty"`
+	Status    string             `json:"status,omitempty"`
 }
 
 type S3Object struct {

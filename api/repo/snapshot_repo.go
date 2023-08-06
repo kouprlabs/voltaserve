@@ -19,6 +19,7 @@ type SnapshotUpdateOptions struct {
 	Text      *model.S3Object
 	OCR       *model.S3Object
 	Thumbnail *model.Thumbnail
+	Status    string
 }
 
 type SnapshotRepo interface {
@@ -49,6 +50,7 @@ type snapshotEntity struct {
 	OCR        datatypes.JSON `json:"ocr,omitempty" gorm:"column:ocr"`
 	Thumbnail  datatypes.JSON `json:"thumbnail,omitempty" gorm:"column:thumbnail"`
 	Language   *string        `json:"language,omitempty" gorm:"column:language"`
+	Status     string         `json:"status,omitempty" gorm:"column,status"`
 	CreateTime string         `json:"createTime" gorm:"column:create_time"`
 	UpdateTime *string        `json:"updateTime,omitempty" gorm:"column:update_time"`
 }
@@ -140,6 +142,10 @@ func (s *snapshotEntity) GetLanguage() *string {
 	return s.Language
 }
 
+func (s *snapshotEntity) GetStatus() string {
+	return s.Status
+}
+
 func (s *snapshotEntity) SetID(id string) {
 	s.ID = id
 }
@@ -225,6 +231,10 @@ func (s *snapshotEntity) SetThumbnail(m *model.Thumbnail) {
 
 func (s *snapshotEntity) SetLanguage(language *string) {
 	s.Language = language
+}
+
+func (s *snapshotEntity) SetStatus(status string) {
+	s.Status = status
 }
 
 func (s *snapshotEntity) HasOriginal() bool {
@@ -315,6 +325,9 @@ func (repo *snapshotRepo) Update(id string, opts SnapshotUpdateOptions) error {
 	}
 	if opts.Text != nil {
 		snapshot.SetText(opts.Text)
+	}
+	if opts.Status != "" {
+		snapshot.SetStatus(opts.Status)
 	}
 	if db := repo.db.Save(&snapshot); db.Error != nil {
 		return db.Error

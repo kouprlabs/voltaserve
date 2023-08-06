@@ -33,6 +33,7 @@ type File struct {
 	Preview     *Download   `json:"preview,omitempty"`
 	OCR         *Download   `json:"ocr,omitempty"`
 	Thumbnail   *Thumbnail  `json:"thumbnail,omitempty"`
+	Status      string      `json:"status,omitempty"`
 	Snapshots   []*Snapshot `json:"snapshots,omitempty"`
 	Permission  string      `json:"permission"`
 	IsShared    bool        `json:"isShared"`
@@ -143,6 +144,7 @@ type Snapshot struct {
 	OCR       *Download  `json:"ocr,omitempty"`
 	Thumbnail *Thumbnail `json:"thumbnail,omitempty"`
 	Language  *string    `json:"language,omitempty"`
+	Status    string     `json:"status,omitempty"`
 }
 
 type ImageProps struct {
@@ -182,6 +184,7 @@ type SnapshotUpdateOptions struct {
 	Text      *model.S3Object           `json:"text,omitempty"`
 	OCR       *model.S3Object           `json:"ocr,omitempty"`
 	Thumbnail *model.Thumbnail          `json:"thumbnail,omitempty"`
+	Status    string                    `json:"status,omitempty"`
 }
 
 type FileService struct {
@@ -312,6 +315,7 @@ func (svc *FileService) Store(fileID string, filePath string, userID string) (*F
 	snapshot := repo.NewSnapshot()
 	snapshot.SetID(snapshotID)
 	snapshot.SetVersion(latestVersion)
+	snapshot.SetStatus(model.SnapshotStatusNew)
 	if err = svc.snapshotRepo.Save(snapshot); err != nil {
 		return nil, err
 	}
@@ -438,6 +442,7 @@ func (svc *FileService) UpdateSnapshot(opts SnapshotUpdateOptions, apiKey string
 		Preview:   opts.Preview,
 		Text:      opts.Text,
 		OCR:       opts.OCR,
+		Status:    opts.Status,
 	}); err != nil {
 		return err
 	}
@@ -633,6 +638,9 @@ func (svc *FileService) FindByPath(path string, userID string) (*File, error) {
 	result, err := svc.FindByID([]string{currentID}, userID)
 	if err != nil {
 		return nil, err
+	}
+	if len(result) == 0 {
+		return nil, errorpkg.NewFileNotFoundError(fmt.Errorf("item not found '%s'", currentID))
 	}
 	return result[0], nil
 }
@@ -1874,6 +1882,7 @@ func (mp *FileMapper) mapOne(m model.File, userID string) (*File, error) {
 		res.Preview = latest.Preview
 		res.OCR = latest.OCR
 		res.Thumbnail = latest.Thumbnail
+		res.Status = latest.Status
 	}
 	res.Permission = ""
 	for _, p := range m.GetUserPermissions() {
@@ -1923,6 +1932,7 @@ func (mp *FileMapper) mapSnapshot(m model.Snapshot) *Snapshot {
 	s := &Snapshot{
 		ID:      m.GetID(),
 		Version: m.GetVersion(),
+		Status:  m.GetStatus(),
 	}
 	if m.HasOriginal() {
 		s.Original = mp.mapOriginal(m.GetOriginal())

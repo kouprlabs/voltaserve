@@ -3,6 +3,7 @@ package runtime
 import (
 	"runtime"
 	"time"
+	"voltaserve/pipeline"
 
 	"voltaserve/builder"
 	"voltaserve/client"
@@ -97,7 +98,7 @@ func (s *Scheduler) ScheduleBuilder(opts *core.PipelineRunOptions) {
 }
 
 func (s *Scheduler) pipelineWorker(index int) {
-	dispatcher := NewDispatcher()
+	dispatcher := pipeline.NewDispatcher()
 	s.pipelineQueue[index] = make([]core.PipelineRunOptions, 0)
 	s.logger.Named(infra.StrPipeline).Infow("⚙️  running", "worker", index)
 	for {
