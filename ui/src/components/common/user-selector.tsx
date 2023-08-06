@@ -152,7 +152,7 @@ const UserSelector = ({
                               width="40px"
                               height="40px"
                             />
-                            <Text fontSize="14px">{userToString(u)}</Text>
+                            <Text fontSize={variables.bodyFontSize}>{userToString(u)}</Text>
                           </HStack>
                         </Td>
                       </Tr>

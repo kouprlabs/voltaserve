@@ -167,7 +167,7 @@ const OcrLanguageSelector = ({
                               width="40px"
                               height="40px"
                             />
-                            <Text fontSize="14px">{ol.name}</Text>
+                            <Text fontSize={variables.bodyFontSize}>{ol.name}</Text>
                           </HStack>
                         </Td>
                       </Tr>

@@ -138,7 +138,7 @@ const OrganizationSelector = ({ onConfirm }: OrganizationSelectorProps) => {
                               width="40px"
                               height="40px"
                             />
-                            <Text fontSize="14px">{o.name}</Text>
+                            <Text fontSize={variables.bodyFontSize}>{o.name}</Text>
                           </HStack>
                         </Td>
                       </Tr>
