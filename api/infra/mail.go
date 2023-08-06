@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"voltaserve/config"
 
+	log "github.com/sirupsen/logrus"
 	"gopkg.in/gomail.v2"
 	"sigs.k8s.io/yaml"
 
@@ -60,7 +61,11 @@ func (mt *MailTemplate) GetText(path string, variables map[string]string) (strin
 	if err != nil {
 		return "", err
 	}
-	defer f.Close()
+	defer func(f *os.File) {
+		if err := f.Close(); err != nil {
+			log.Error(err)
+		}
+	}(f)
 	b, _ := io.ReadAll(f)
 	html := string(b)
 	tmpl, err := template.New("").Parse(html)
@@ -80,7 +85,11 @@ func (mt *MailTemplate) GetMessageParams(templateName string) (*MessageParams, e
 	if err != nil {
 		return nil, err
 	}
-	defer f.Close()
+	defer func(f *os.File) {
+		if err := f.Close(); err != nil {
+			log.Error(err)
+		}
+	}(f)
 	b, _ := io.ReadAll(f)
 	res := &MessageParams{}
 	if err := yaml.Unmarshal(b, res); err != nil {

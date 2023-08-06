@@ -30,10 +30,6 @@ func NewInvitationRepo() InvitationRepo {
 	return newInvitationRepo()
 }
 
-func NewInvitation() model.Invitation {
-	return &invitationEntity{}
-}
-
 type invitationEntity struct {
 	ID             string  `json:"id" gorm:"column:id"`
 	OrganizationID string  `json:"organizationId" gorm:"column:organization_id"`
@@ -48,12 +44,12 @@ func (*invitationEntity) TableName() string {
 	return "invitation"
 }
 
-func (i *invitationEntity) BeforeCreate(tx *gorm.DB) (err error) {
+func (i *invitationEntity) BeforeCreate(*gorm.DB) (err error) {
 	i.CreateTime = time.Now().UTC().Format(time.RFC3339)
 	return nil
 }
 
-func (i *invitationEntity) BeforeSave(tx *gorm.DB) (err error) {
+func (i *invitationEntity) BeforeSave(*gorm.DB) (err error) {
 	timeNow := time.Now().UTC().Format(time.RFC3339)
 	i.UpdateTime = &timeNow
 	return nil
