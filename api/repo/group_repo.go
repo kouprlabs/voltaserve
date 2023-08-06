@@ -53,34 +53,34 @@ type groupEntity struct {
 	UpdateTime       *string                 `json:"updateTime" gorm:"column:update_time"`
 }
 
-func (groupEntity) TableName() string {
+func (*groupEntity) TableName() string {
 	return "group"
 }
 
-func (g *groupEntity) BeforeCreate(tx *gorm.DB) (err error) {
+func (g *groupEntity) BeforeCreate(*gorm.DB) (err error) {
 	g.CreateTime = time.Now().UTC().Format(time.RFC3339)
 	return nil
 }
 
-func (g *groupEntity) BeforeSave(tx *gorm.DB) (err error) {
+func (g *groupEntity) BeforeSave(*gorm.DB) (err error) {
 	timeNow := time.Now().UTC().Format(time.RFC3339)
 	g.UpdateTime = &timeNow
 	return nil
 }
 
-func (g groupEntity) GetID() string {
+func (g *groupEntity) GetID() string {
 	return g.ID
 }
 
-func (g groupEntity) GetName() string {
+func (g *groupEntity) GetName() string {
 	return g.Name
 }
 
-func (g groupEntity) GetOrganizationID() string {
+func (g *groupEntity) GetOrganizationID() string {
 	return g.OrganizationID
 }
 
-func (g groupEntity) GetUserPermissions() []model.CoreUserPermission {
+func (g *groupEntity) GetUserPermissions() []model.CoreUserPermission {
 	var res []model.CoreUserPermission
 	for _, p := range g.UserPermissions {
 		res = append(res, p)
@@ -88,7 +88,7 @@ func (g groupEntity) GetUserPermissions() []model.CoreUserPermission {
 	return res
 }
 
-func (g groupEntity) GetGroupPermissions() []model.CoreGroupPermission {
+func (g *groupEntity) GetGroupPermissions() []model.CoreGroupPermission {
 	var res []model.CoreGroupPermission
 	for _, p := range g.GroupPermissions {
 		res = append(res, p)
@@ -96,15 +96,15 @@ func (g groupEntity) GetGroupPermissions() []model.CoreGroupPermission {
 	return res
 }
 
-func (g groupEntity) GetUsers() []string {
+func (g *groupEntity) GetUsers() []string {
 	return g.Members
 }
 
-func (g groupEntity) GetCreateTime() string {
+func (g *groupEntity) GetCreateTime() string {
 	return g.CreateTime
 }
 
-func (g groupEntity) GetUpdateTime() *string {
+func (g *groupEntity) GetUpdateTime() *string {
 	return g.UpdateTime
 }
 
@@ -191,7 +191,7 @@ func (repo *groupRepo) GetIDsForUser(userID string) ([]string, error) {
 		Result string
 	}
 	var results []Result
-	db := repo.db.Raw(`SELECT id from group_user WHERE user_id = ?`, userID).Scan(&results)
+	db := repo.db.Raw(`SELECT group_id from group_user WHERE user_id = ?`, userID).Scan(&results)
 	if db.Error != nil {
 		return []string{}, db.Error
 	}
@@ -291,8 +291,7 @@ func (repo *groupRepo) GetMembers(id string) ([]model.User, error) {
 
 func (repo *groupRepo) GrantUserPermission(id string, userID string, permission string) error {
 	db := repo.db.Exec(
-		"INSERT INTO userpermission (id, user_id, resource_id, permission) "+
-			"VALUES (?, ?, ?, ?) ON CONFLICT (user_id, resource_id) DO UPDATE SET permission = ?",
+		"INSERT INTO userpermission (id, user_id, resource_id, permission) VALUES (?, ?, ?, ?) ON CONFLICT (user_id, resource_id) DO UPDATE SET permission = ?",
 		helper.NewID(), userID, id, permission, permission)
 	if db.Error != nil {
 		return db.Error
