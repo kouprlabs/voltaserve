@@ -23,7 +23,6 @@ export type Workspace = {
   storageCapacity: number
   rootId: string
   organization: Organization
-  isAutomaticOcrEnabled: boolean
   createTime: string
   updateTime?: string
 }
@@ -55,10 +54,6 @@ export interface UpdateNameOptions {
   name: string
 }
 
-export interface UpdateIsAutomaticOcrEnabledOptions {
-  isEnabled: boolean
-}
-
 export interface StorageCapacityOptions {
   storageCapacity: number
 }
@@ -68,7 +63,7 @@ export default class WorkspaceAPI {
     return useSWR<Workspace>(
       id ? `/workspaces/${id}` : null,
       () => this.getById(id),
-      swrOptions
+      swrOptions,
     )
   }
 
@@ -86,7 +81,7 @@ export default class WorkspaceAPI {
     return useSWR<List>(
       `/workspaces?${this.paramsFromListOptions(options)}`,
       () => this.list(options),
-      swrOptions
+      swrOptions,
     )
   }
 
@@ -113,7 +108,7 @@ export default class WorkspaceAPI {
 
   static async updateName(
     id: string,
-    options: UpdateNameOptions
+    options: UpdateNameOptions,
   ): Promise<Workspace> {
     return apiFetch(`/workspaces/${id}/update_name`, {
       method: 'POST',
@@ -127,7 +122,7 @@ export default class WorkspaceAPI {
 
   static async updateStorageCapacity(
     id: string,
-    options: StorageCapacityOptions
+    options: StorageCapacityOptions,
   ): Promise<Workspace> {
     return apiFetch(`/workspaces/${id}/update_storage_capacity`, {
       method: 'POST',
@@ -145,20 +140,6 @@ export default class WorkspaceAPI {
     return apiFetch(`/workspaces/${id}/update_image`, {
       method: 'POST',
       body: formData,
-      headers: {
-        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
-        'Content-Type': 'application/json',
-      },
-    }).then((result) => result.json())
-  }
-
-  static async updateIsAutomaticOcrEnabled(
-    id: string,
-    options: UpdateIsAutomaticOcrEnabledOptions
-  ): Promise<Workspace> {
-    return apiFetch(`/workspaces/${id}/update_is_automatic_ocr_enabled`, {
-      method: 'POST',
-      body: JSON.stringify(options),
       headers: {
         'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
         'Content-Type': 'application/json',

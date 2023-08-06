@@ -36,15 +36,9 @@ import {
   IconSortUp,
   IconSortDown,
 } from '@koupr/ui'
-import { HiLanguage } from 'react-icons/hi2'
 import FileAPI, { List, SortBy, SortOrder } from '@/client/api/file'
-import {
-  geEditorPermission,
-  ltEditorPermission,
-  ltOwnerPermission,
-} from '@/client/api/permission'
+import { ltEditorPermission, ltOwnerPermission } from '@/client/api/permission'
 import downloadFile from '@/helpers/download-file'
-import { isImage } from '@/helpers/file-extension'
 import mapFileList from '@/helpers/map-file-list'
 import { decodeQuery } from '@/helpers/query'
 import { listUpdated } from '@/store/entities/files'
@@ -55,7 +49,6 @@ import {
   sortByUpdated,
   SORT_BY_KEY,
   SORT_ORDER_KEY,
-  manageOcrModalDidOpen,
 } from '@/store/ui/files'
 import {
   copyModalDidOpen,
@@ -81,14 +74,14 @@ const Toolbar = () => {
   const query = decodeQuery(searchParams.get('q') as string)
   const [isRefreshing, setIsRefreshing] = useState(false)
   const selectionCount = useAppSelector(
-    (state) => state.ui.files.selection.length
+    (state) => state.ui.files.selection.length,
   )
   const singleFile = useAppSelector((state) =>
     state.ui.files.selection.length === 1
       ? state.entities.files.list?.data.find(
-          (f) => f.id === state.ui.files.selection[0]
+          (f) => f.id === state.ui.files.selection[0],
         )
-      : null
+      : null,
   )
   const folder = useAppSelector((state) => state.entities.files.folder)
   const files = useAppSelector((state) => state.entities.files.list?.data)
@@ -100,18 +93,18 @@ const Toolbar = () => {
       state.entities.files.list?.data.findIndex(
         (f) =>
           state.ui.files.selection.findIndex(
-            (s) => f.id === s && ltOwnerPermission(f.permission)
-          ) !== -1
-      ) === -1
+            (s) => f.id === s && ltOwnerPermission(f.permission),
+          ) !== -1,
+      ) === -1,
   )
   const hasEditorPermission = useAppSelector(
     (state) =>
       state.entities.files.list?.data.findIndex(
         (f) =>
           state.ui.files.selection.findIndex(
-            (s) => f.id === s && ltEditorPermission(f.permission)
-          ) !== -1
-      ) === -1
+            (s) => f.id === s && ltEditorPermission(f.permission),
+          ) !== -1,
+      ) === -1,
   )
   const uploadHiddenInput = useRef<HTMLInputElement>(null)
 
@@ -143,8 +136,8 @@ const Toolbar = () => {
               workspaceId: workspaceId,
               parentId: fileId,
               file,
-            }).value
-          )
+            }).value,
+          ),
         )
       }
       dispatch(uploadsDrawerOpened())
@@ -152,7 +145,7 @@ const Toolbar = () => {
         uploadHiddenInput.current.value = ''
       }
     },
-    [workspaceId, fileId, dispatch]
+    [workspaceId, fileId, dispatch],
   )
 
   const handleIconScaleChange = useCallback(
@@ -160,7 +153,7 @@ const Toolbar = () => {
       localStorage.setItem(ICON_SCALE_KEY, JSON.stringify(value))
       dispatch(iconScaleUpdated(value))
     },
-    [dispatch]
+    [dispatch],
   )
 
   const handleRefresh = useCallback(async () => {
@@ -172,7 +165,7 @@ const Toolbar = () => {
         result = await FileAPI.search(
           { text: query, parentId: fileId, workspaceId },
           FileAPI.DEFAULT_PAGE_SIZE,
-          1
+          1,
         )
       } else {
         result = await FileAPI.list(fileId, {
@@ -193,7 +186,7 @@ const Toolbar = () => {
       localStorage.setItem(SORT_BY_KEY, value.toString())
       dispatch(sortByUpdated(value))
     },
-    [dispatch]
+    [dispatch],
   )
 
   const handleSortOrderToggle = useCallback(() => {
@@ -211,7 +204,7 @@ const Toolbar = () => {
         return <IconCircle />
       }
     },
-    [sortBy]
+    [sortBy],
   )
 
   const getSortOrderIcon = useCallback(() => {
@@ -299,16 +292,6 @@ const Toolbar = () => {
                   >
                     Download
                   </MenuItem>
-                  {singleFile?.type === 'file' &&
-                  isImage(singleFile?.original?.extension ?? '') &&
-                  geEditorPermission(singleFile?.permission) ? (
-                    <MenuItem
-                      icon={<HiLanguage fontSize="14px" />}
-                      onClick={() => dispatch(manageOcrModalDidOpen())}
-                    >
-                      OCR
-                    </MenuItem>
-                  ) : null}
                   <MenuDivider />
                   <MenuItem
                     icon={<IconTrash />}

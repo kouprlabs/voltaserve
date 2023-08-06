@@ -14,7 +14,6 @@ export type FilesState = {
   isDeleteModalOpen: boolean
   isRenameModalOpen: boolean
   isShareModalOpen: boolean
-  isManageOcrModalOpen: boolean
   iconScale: number
   sortBy: SortBy
   sortOrder: SortOrder
@@ -30,7 +29,6 @@ const initialState: FilesState = {
   isDeleteModalOpen: false,
   isRenameModalOpen: false,
   isShareModalOpen: false,
-  isManageOcrModalOpen: false,
   iconScale: 1,
   sortBy: (localStorage.getItem(SORT_BY_KEY) as SortBy) || SortBy.DateCreated,
   sortOrder:
@@ -68,9 +66,6 @@ const slice = createSlice({
     sharingModalDidOpen: (state) => {
       state.isShareModalOpen = true
     },
-    manageOcrModalDidOpen: (state) => {
-      state.isManageOcrModalOpen = true
-    },
     moveModalDidClose: (state) => {
       state.isMoveModalOpen = false
     },
@@ -88,9 +83,6 @@ const slice = createSlice({
     },
     sharingModalDidClose: (state) => {
       state.isShareModalOpen = false
-    },
-    manageOcrModalDidClose: (state) => {
-      state.isManageOcrModalOpen = false
     },
     multiSelectKeyUpdated: (state, action: PayloadAction<boolean>) => {
       state.isMultiSelectActive = action.payload
@@ -120,14 +112,12 @@ export const {
   deleteModalDidOpen,
   renameModalDidOpen,
   sharingModalDidOpen,
-  manageOcrModalDidOpen,
   moveModalDidClose,
   copyModalDidClose,
   createModalDidClose,
   deleteModalDidClose,
   renameModalDidClose,
   sharingModalDidClose,
-  manageOcrModalDidClose,
   multiSelectKeyUpdated,
   rangeSelectKeyUpdated,
   iconScaleUpdated,

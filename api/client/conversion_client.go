@@ -13,12 +13,10 @@ type ConversionClient struct {
 }
 
 type PipelineRunOptions struct {
-	FileID                string  `json:"fileId"`
-	SnapshotID            string  `json:"snapshotId"`
-	Bucket                string  `json:"bucket"`
-	Key                   string  `json:"key"`
-	IsAutomaticOCREnabled bool    `json:"isAutomaticOcrEnabled"`
-	OCRLanguageID         *string `json:"ocrLanguageId,omitempty"`
+	FileID     string `json:"fileId"`
+	SnapshotID string `json:"snapshotId"`
+	Bucket     string `json:"bucket"`
+	Key        string `json:"key"`
 }
 
 func NewConversionClient() *ConversionClient {

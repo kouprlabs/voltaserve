@@ -18,16 +18,15 @@ import (
 )
 
 type Workspace struct {
-	ID                    string       `json:"id"`
-	Image                 *string      `json:"image,omitempty"`
-	Name                  string       `json:"name"`
-	RootID                string       `json:"rootId,omitempty"`
-	StorageCapacity       int64        `json:"storageCapacity"`
-	Permission            string       `json:"permission"`
-	Organization          Organization `json:"organization"`
-	IsAutomaticOCREnabled bool         `json:"isAutomaticOcrEnabled"`
-	CreateTime            string       `json:"createTime"`
-	UpdateTime            *string      `json:"updateTime,omitempty"`
+	ID              string       `json:"id"`
+	Image           *string      `json:"image,omitempty"`
+	Name            string       `json:"name"`
+	RootID          string       `json:"rootId,omitempty"`
+	StorageCapacity int64        `json:"storageCapacity"`
+	Permission      string       `json:"permission"`
+	Organization    Organization `json:"organization"`
+	CreateTime      string       `json:"createTime"`
+	UpdateTime      *string      `json:"updateTime,omitempty"`
 }
 
 type WorkspaceList struct {
@@ -288,34 +287,6 @@ func (svc *WorkspaceService) UpdateStorageCapacity(id string, storageCapacity in
 	return res, nil
 }
 
-func (svc *WorkspaceService) UpdateIsAutomaticOCREnabled(id string, isEnabled bool, userID string) (*Workspace, error) {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return nil, err
-	}
-	workspace, err := svc.workspaceCache.Get(id)
-	if err != nil {
-		return nil, err
-	}
-	if err = svc.workspaceGuard.Authorize(user, workspace, model.PermissionEditor); err != nil {
-		return nil, err
-	}
-	if workspace, err = svc.workspaceRepo.UpdateIsAutomaticOCREnabled(id, isEnabled); err != nil {
-		return nil, err
-	}
-	if err = svc.workspaceSearch.Update([]model.Workspace{workspace}); err != nil {
-		return nil, err
-	}
-	if err = svc.workspaceCache.Set(workspace); err != nil {
-		return nil, err
-	}
-	res, err := svc.workspaceMapper.mapOne(workspace, userID)
-	if err != nil {
-		return nil, err
-	}
-	return res, nil
-}
-
 func (svc *WorkspaceService) Delete(id string, userID string) error {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
@@ -490,14 +461,13 @@ func (mp *workspaceMapper) mapOne(m model.Workspace, userID string) (*Workspace,
 		return nil, err
 	}
 	res := &Workspace{
-		ID:                    m.GetID(),
-		Name:                  m.GetName(),
-		RootID:                m.GetRootID(),
-		StorageCapacity:       m.GetStorageCapacity(),
-		Organization:          *v,
-		IsAutomaticOCREnabled: m.GetIsAutomaticOCREnabled(),
-		CreateTime:            m.GetCreateTime(),
-		UpdateTime:            m.GetUpdateTime(),
+		ID:              m.GetID(),
+		Name:            m.GetName(),
+		RootID:          m.GetRootID(),
+		StorageCapacity: m.GetStorageCapacity(),
+		Organization:    *v,
+		CreateTime:      m.GetCreateTime(),
+		UpdateTime:      m.GetUpdateTime(),
 	}
 	res.Permission = ""
 	for _, p := range m.GetUserPermissions() {

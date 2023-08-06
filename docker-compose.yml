@@ -230,7 +230,6 @@ services:
     environment:
       - PORT=5001
       - API_URL=http://app-api:5000
-      - LANGUAGE_URL=http://app-language:5002
       - VOLTASERVE_EXIFTOOL_URL=http://tools-exiftool:6001
       - VOLTASERVE_FFMPEG_URL=http://tools-ffmpeg:6002
       - VOLTASERVE_IMAGEMAGICK_URL=http://tools-imagemagick:6003
@@ -243,16 +242,5 @@ services:
       test: curl --fail http://localhost:5001/v1/health || exit 1
     depends_on:
       - app-api
-      - app-language
       - infra-minio
-    restart: on-failure
-  app-language:
-    image: voltaserve/app/language
-    build:
-      context: ./language
-      dockerfile: ./Dockerfile
-    ports:
-      - ${VOLTASERVE_LANGUAGE_PORT}:5002
-    healthcheck:
-      test: curl --fail http://localhost:5002/v1/health || exit 1
     restart: on-failure

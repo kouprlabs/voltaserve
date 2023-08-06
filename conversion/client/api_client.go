@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"go.uber.org/zap"
-	"io"
 	"net/http"
 	"voltaserve/config"
 	"voltaserve/core"
@@ -47,26 +46,4 @@ func (cl *APIClient) UpdateSnapshot(opts core.SnapshotUpdateOptions) error {
 		return err
 	}
 	return nil
-}
-
-func (cl *APIClient) GetAllOCRLangages() ([]core.OCRLanguage, error) {
-	res, err := http.Get(fmt.Sprintf("%s/v1/ocr_languages/all?api_key=%s", cl.config.APIURL, cl.config.Security.APIKey))
-	if err != nil {
-		return []core.OCRLanguage{}, err
-	}
-	defer func(Body io.ReadCloser) {
-		if err := Body.Close(); err != nil {
-			cl.logger.Error(err)
-		}
-	}(res.Body)
-	body, err := io.ReadAll(res.Body)
-	if err != nil {
-		return []core.OCRLanguage{}, err
-	}
-	var result []core.OCRLanguage
-	err = json.Unmarshal(body, &result)
-	if err != nil {
-		return []core.OCRLanguage{}, err
-	}
-	return result, nil
 }

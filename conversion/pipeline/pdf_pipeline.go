@@ -15,15 +15,14 @@ import (
 )
 
 type pdfPipeline struct {
-	pdfProc        *processor.PDFProcessor
-	imageProc      *processor.ImageProcessor
-	s3             *infra.S3Manager
-	apiClient      *client.APIClient
-	languageClient *client.LanguageClient
-	toolsClient    *client.ToolsClient
-	fileIdent      *identifier.FileIdentifier
-	logger         *zap.SugaredLogger
-	config         config.Config
+	pdfProc     *processor.PDFProcessor
+	imageProc   *processor.ImageProcessor
+	s3          *infra.S3Manager
+	apiClient   *client.APIClient
+	toolsClient *client.ToolsClient
+	fileIdent   *identifier.FileIdentifier
+	logger      *zap.SugaredLogger
+	config      config.Config
 }
 
 func NewPDFPipeline() core.Pipeline {
@@ -32,15 +31,14 @@ func NewPDFPipeline() core.Pipeline {
 		panic(err)
 	}
 	return &pdfPipeline{
-		pdfProc:        processor.NewPDFProcessor(),
-		imageProc:      processor.NewImageProcessor(),
-		s3:             infra.NewS3Manager(),
-		apiClient:      client.NewAPIClient(),
-		languageClient: client.NewLanguageClient(),
-		toolsClient:    client.NewToolsClient(),
-		fileIdent:      identifier.NewFileIdentifier(),
-		logger:         logger,
-		config:         config.GetConfig(),
+		pdfProc:     processor.NewPDFProcessor(),
+		imageProc:   processor.NewImageProcessor(),
+		s3:          infra.NewS3Manager(),
+		apiClient:   client.NewAPIClient(),
+		toolsClient: client.NewToolsClient(),
+		fileIdent:   identifier.NewFileIdentifier(),
+		logger:      logger,
+		config:      config.GetConfig(),
 	}
 }
 

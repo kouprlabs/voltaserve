@@ -25,10 +25,6 @@ golangci-lint run
 ### Build Docker Images
 
 ```shell
-docker build -t voltaserve/exiftoo -f ./docker/sle/Dockerfile.exiftool .
-```
-
-```shell
 docker build -t voltaserve/ffmpeg -f ./docker/sle/Dockerfile.ffmpeg .
 ```
 
@@ -41,15 +37,7 @@ docker build -t voltaserve/libreoffice -f ./docker/sle/Dockerfile.libreoffice .
 ```
 
 ```shell
-docker build -t voltaserve/ocrmypdf -f ./docker/sle/Dockerfile.ocrmypdf .
-```
-
-```shell
 docker build -t voltaserve/poppler -f ./docker/sle/Dockerfile.poppler .
-```
-
-```shell
-docker build -t voltaserve/tesseract -f D./docker/sle/ockerfile.tesseract .
 ```
 
 ### Example Requests
@@ -165,50 +153,6 @@ docker build -t voltaserve/tesseract -f D./docker/sle/ockerfile.tesseract .
 {
   "bin": "pdftotext",
   "args": ["${input}", "${output.txt}"],
-  "stdout": true
-}
-```
-
-#### Get TSV Data From an Image Using Tesseract
-
-`POST http://localhost:6001/v1/run?api_key=MY_API_KEY`
-
-**form-data:**
-
-`file`: `image.jpg`
-
-`json`:
-
-```json
-{
-  "bin": "tesseract",
-  "args": ["${input}", "${output.#.tsv}", "-l", "deu", "tsv"],
-  "stdout": true
-}
-```
-
-#### Generate PDF with OCR Text Layer From an Image Using OCRmyPDF
-
-`POST http://localhost:6001/v1/run?api_key=MY_API_KEY`
-
-**form-data:**
-
-`file`: `image.jpg`
-
-`json`:
-
-```json
-{
-  "bin": "ocrmypdf",
-  "args": [
-    "--rotate-pages",
-    "--clean",
-    "--deskew",
-    "--language=kor",
-    "--image-dpi=300",
-    "${input}",
-    "${output}"
-  ],
   "stdout": true
 }
 ```

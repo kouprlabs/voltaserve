@@ -28,22 +28,19 @@ import {
   IconTrash,
   variables,
 } from '@koupr/ui'
-import { HiLanguage } from 'react-icons/hi2'
-import { File } from '@/client/api/file'
+import { File, SnapshotStatus } from '@/client/api/file'
 import {
   ltEditorPermission,
   ltOwnerPermission,
   ltViewerPermission,
 } from '@/client/api/permission'
 import downloadFile from '@/helpers/download-file'
-import { isImage } from '@/helpers/file-extension'
 import relativeDate from '@/helpers/relative-date'
 import store from '@/store/configure-store'
 import { useAppDispatch } from '@/store/hook'
 import {
   copyModalDidOpen,
   deleteModalDidOpen,
-  manageOcrModalDidOpen,
   moveModalDidOpen,
   renameModalDidOpen,
   selectionAdded,
@@ -74,7 +71,7 @@ const Item = ({ file, scale }: ItemProps) => {
   const [isSelected, setIsSelected] = useState(false)
   const date = useMemo(
     () => relativeDate(new Date(file.createTime)),
-    [file.createTime]
+    [file.createTime],
   )
 
   useEffect(() => {
@@ -96,7 +93,7 @@ const Item = ({ file, scale }: ItemProps) => {
     dispatch(selectionUpdated([]))
     if (file.type === 'folder') {
       navigate(`/workspace/${file.workspaceId}/file/${file.id}`)
-    } else if (file.type === 'file') {
+    } else if (file.type === 'file' && file.status === SnapshotStatus.Ready) {
       window.open(`/file/${file.id}`, '_blank')?.focus()
     }
   }, [file, navigate, dispatch])
@@ -112,7 +109,7 @@ const Item = ({ file, scale }: ItemProps) => {
         dispatch(selectionUpdated([file.id]))
       }
     },
-    [file, isSelected, dispatch]
+    [file, isSelected, dispatch],
   )
 
   return (
@@ -189,16 +186,6 @@ const Item = ({ file, scale }: ItemProps) => {
               >
                 Download
               </MenuItem>
-              {file.type === 'file' &&
-              isImage(file?.original?.extension ?? '') ? (
-                <MenuItem
-                  icon={<HiLanguage fontSize="14px" />}
-                  isDisabled={ltEditorPermission(file.permission)}
-                  onClick={() => dispatch(manageOcrModalDidOpen())}
-                >
-                  OCR
-                </MenuItem>
-              ) : null}
               <MenuDivider />
               <MenuItem
                 icon={<IconTrash />}
@@ -254,20 +241,29 @@ const Item = ({ file, scale }: ItemProps) => {
             {file.name}
           </ChakraLink>
         )}
-        {file.type === 'file' && (
+        {file.type === 'file' && file.status === SnapshotStatus.Ready ? (
           <ChakraLink
             textAlign="center"
             noOfLines={3}
             textDecoration="none"
             _hover={{ textDecoration: 'underline' }}
-            onClick={() => window.open(`/file/${file.id}`, '_blank')?.focus()}
+            onClick={(event) => {
+              handleSelectionClick(event)
+              window.open(`/file/${file.id}`, '_blank')?.focus()
+            }}
           >
             {file.name}
           </ChakraLink>
+        ) : (
+          <Text textAlign="center" noOfLines={3} onClick={handleSelectionClick}>
+            {file.name}
+          </Text>
         )}
       </Box>
       <VStack spacing={0}>
-        <Text color="gray.500">{date}</Text>
+        <Text textAlign="center" noOfLines={3} color="gray.500">
+          {date}
+        </Text>
       </VStack>
     </Stack>
   )

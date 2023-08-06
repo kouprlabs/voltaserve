@@ -11,13 +11,10 @@ docker compose up -d \
     infra-meilisearch \
     infra-redis \
     infra-mailhog \
-    tools-exiftool \
     tools-ffmpeg \
     tools-imagemagick \
     tools-libreoffice \
-    tools-ocrmypdf \
-    tools-poppler \
-    tools-tesseract
+    tools-poppler
 ```
 
 ### Run Microservices
@@ -29,5 +26,4 @@ Start each microservice separately in a new terminal as described here:
 - [Voltaserve Identity Provider](idp/README.md)
 - [Voltaserve WebDAV](webdav/README.md)
 - [Voltaserve Conversion](conversion/README.md)
-- [Voltaserve Language](language/README.md)
 - [Voltaserve Tools](tools/README.md)
