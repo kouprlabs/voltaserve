@@ -4,19 +4,27 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"go.uber.org/zap"
 	"io"
 	"net/http"
 	"voltaserve/config"
 	"voltaserve/core"
+	"voltaserve/infra"
 )
 
 type APIClient struct {
 	config config.Config
+	logger *zap.SugaredLogger
 }
 
 func NewAPIClient() *APIClient {
+	logger, err := infra.GetLogger()
+	if err != nil {
+		panic(err)
+	}
 	return &APIClient{
 		config: config.GetConfig(),
+		logger: logger,
 	}
 }
 
@@ -35,7 +43,9 @@ func (cl *APIClient) UpdateSnapshot(opts core.SnapshotUpdateOptions) error {
 	if err != nil {
 		return err
 	}
-	res.Body.Close()
+	if err := res.Body.Close(); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -44,7 +54,11 @@ func (cl *APIClient) GetAllOCRLangages() ([]core.OCRLanguage, error) {
 	if err != nil {
 		return []core.OCRLanguage{}, err
 	}
-	defer res.Body.Close()
+	defer func(Body io.ReadCloser) {
+		if err := Body.Close(); err != nil {
+			cl.logger.Error(err)
+		}
+	}(res.Body)
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		return []core.OCRLanguage{}, err

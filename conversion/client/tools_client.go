@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"go.uber.org/zap"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -14,15 +15,22 @@ import (
 	"voltaserve/config"
 	"voltaserve/core"
 	"voltaserve/helper"
+	"voltaserve/infra"
 )
 
 type ToolsClient struct {
 	config config.Config
+	logger *zap.SugaredLogger
 }
 
 func NewToolsClient() *ToolsClient {
+	logger, err := infra.GetLogger()
+	if err != nil {
+		panic(err)
+	}
 	return &ToolsClient{
 		config: config.GetConfig(),
+		logger: logger,
 	}
 }
 
@@ -44,7 +52,11 @@ func (cl *ToolsClient) ResizeImage(inputPath string, width int, height int, outp
 	if err != nil {
 		return err
 	}
-	defer file.Close()
+	defer func(file *os.File) {
+		if err := file.Close(); err != nil {
+			cl.logger.Error(err)
+		}
+	}(file)
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 	fileField, err := writer.CreateFormFile("file", inputPath)
@@ -70,7 +82,9 @@ func (cl *ToolsClient) ResizeImage(inputPath string, width int, height int, outp
 	if _, err := jsonField.Write(jsonBytes); err != nil {
 		return err
 	}
-	writer.Close()
+	if err := writer.Close(); err != nil {
+		return err
+	}
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", cl.config.ImageMagickURL, cl.config.Security.APIKey), body)
 	if err != nil {
 		return err
@@ -81,7 +95,11 @@ func (cl *ToolsClient) ResizeImage(inputPath string, width int, height int, outp
 	if err != nil {
 		return err
 	}
-	defer res.Body.Close()
+	defer func(Body io.ReadCloser) {
+		if err := Body.Close(); err != nil {
+			cl.logger.Error(err)
+		}
+	}(res.Body)
 	if res.StatusCode != http.StatusOK {
 		return fmt.Errorf("request failed with status %d", res.StatusCode)
 	}
@@ -89,7 +107,11 @@ func (cl *ToolsClient) ResizeImage(inputPath string, width int, height int, outp
 	if err != nil {
 		return err
 	}
-	defer outputFile.Close()
+	defer func(outputFile *os.File) {
+		if err := outputFile.Close(); err != nil {
+			cl.logger.Error(err)
+		}
+	}(outputFile)
 	_, err = io.Copy(outputFile, res.Body)
 	if err != nil {
 		return err
@@ -115,7 +137,11 @@ func (cl *ToolsClient) ThumbnailFromImage(inputPath string, width int, height in
 	if err != nil {
 		return err
 	}
-	defer file.Close()
+	defer func(file *os.File) {
+		if err := file.Close(); err != nil {
+			cl.logger.Error(err)
+		}
+	}(file)
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 	fileField, err := writer.CreateFormFile("file", inputPath)
@@ -141,7 +167,9 @@ func (cl *ToolsClient) ThumbnailFromImage(inputPath string, width int, height in
 	if _, err := jsonField.Write(jsonBytes); err != nil {
 		return err
 	}
-	writer.Close()
+	if err := writer.Close(); err != nil {
+		return err
+	}
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", cl.config.ImageMagickURL, cl.config.Security.APIKey), body)
 	if err != nil {
 		return err
@@ -152,7 +180,11 @@ func (cl *ToolsClient) ThumbnailFromImage(inputPath string, width int, height in
 	if err != nil {
 		return err
 	}
-	defer res.Body.Close()
+	defer func(Body io.ReadCloser) {
+		if err := Body.Close(); err != nil {
+			cl.logger.Error(err)
+		}
+	}(res.Body)
 	if res.StatusCode != http.StatusOK {
 		return fmt.Errorf("request failed with status %d", res.StatusCode)
 	}
@@ -160,7 +192,11 @@ func (cl *ToolsClient) ThumbnailFromImage(inputPath string, width int, height in
 	if err != nil {
 		return err
 	}
-	defer outputFile.Close()
+	defer func(outputFile *os.File) {
+		if err := outputFile.Close(); err != nil {
+			cl.logger.Error(err)
+		}
+	}(outputFile)
 	_, err = io.Copy(outputFile, res.Body)
 	if err != nil {
 		return err
@@ -173,7 +209,11 @@ func (cl *ToolsClient) ConvertImage(inputPath string, outputPath string) error {
 	if err != nil {
 		return err
 	}
-	defer file.Close()
+	defer func(file *os.File) {
+		if err := file.Close(); err != nil {
+			cl.logger.Error(err)
+		}
+	}(file)
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 	fileField, err := writer.CreateFormFile("file", inputPath)
@@ -199,7 +239,9 @@ func (cl *ToolsClient) ConvertImage(inputPath string, outputPath string) error {
 	if _, err := jsonField.Write(jsonBytes); err != nil {
 		return err
 	}
-	writer.Close()
+	if err := writer.Close(); err != nil {
+		return err
+	}
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", cl.config.ImageMagickURL, cl.config.Security.APIKey), body)
 	if err != nil {
 		return err
@@ -210,7 +252,11 @@ func (cl *ToolsClient) ConvertImage(inputPath string, outputPath string) error {
 	if err != nil {
 		return err
 	}
-	defer res.Body.Close()
+	defer func(Body io.ReadCloser) {
+		if err := Body.Close(); err != nil {
+			cl.logger.Error(err)
+		}
+	}(res.Body)
 	if res.StatusCode != http.StatusOK {
 		return fmt.Errorf("request failed with status %d", res.StatusCode)
 	}
@@ -218,7 +264,11 @@ func (cl *ToolsClient) ConvertImage(inputPath string, outputPath string) error {
 	if err != nil {
 		return err
 	}
-	defer outputFile.Close()
+	defer func(outputFile *os.File) {
+		if err := outputFile.Close(); err != nil {
+			cl.logger.Error(err)
+		}
+	}(outputFile)
 	_, err = io.Copy(outputFile, res.Body)
 	if err != nil {
 		return err
@@ -231,7 +281,11 @@ func (cl *ToolsClient) RemoveAlphaChannel(inputPath string, outputPath string) e
 	if err != nil {
 		return err
 	}
-	defer file.Close()
+	defer func(file *os.File) {
+		if err := file.Close(); err != nil {
+			cl.logger.Error(err)
+		}
+	}(file)
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 	fileField, err := writer.CreateFormFile("file", inputPath)
@@ -257,7 +311,9 @@ func (cl *ToolsClient) RemoveAlphaChannel(inputPath string, outputPath string) e
 	if _, err := jsonField.Write(jsonBytes); err != nil {
 		return err
 	}
-	writer.Close()
+	if err := writer.Close(); err != nil {
+		return err
+	}
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", cl.config.ImageMagickURL, cl.config.Security.APIKey), body)
 	if err != nil {
 		return err
@@ -268,7 +324,11 @@ func (cl *ToolsClient) RemoveAlphaChannel(inputPath string, outputPath string) e
 	if err != nil {
 		return err
 	}
-	defer res.Body.Close()
+	defer func(Body io.ReadCloser) {
+		if err := Body.Close(); err != nil {
+			cl.logger.Error(err)
+		}
+	}(res.Body)
 	if res.StatusCode != http.StatusOK {
 		return fmt.Errorf("request failed with status %d", res.StatusCode)
 	}
@@ -276,7 +336,11 @@ func (cl *ToolsClient) RemoveAlphaChannel(inputPath string, outputPath string) e
 	if err != nil {
 		return err
 	}
-	defer outputFile.Close()
+	defer func(outputFile *os.File) {
+		if err := outputFile.Close(); err != nil {
+			cl.logger.Error(err)
+		}
+	}(outputFile)
 	_, err = io.Copy(outputFile, res.Body)
 	if err != nil {
 		return err
@@ -289,7 +353,11 @@ func (cl *ToolsClient) MeasureImage(inputPath string) (core.ImageProps, error) {
 	if err != nil {
 		return core.ImageProps{}, err
 	}
-	defer file.Close()
+	defer func(file *os.File) {
+		if err := file.Close(); err != nil {
+			cl.logger.Error(err)
+		}
+	}(file)
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 	fileField, err := writer.CreateFormFile("file", inputPath)
@@ -315,7 +383,9 @@ func (cl *ToolsClient) MeasureImage(inputPath string) (core.ImageProps, error) {
 	if _, err := jsonField.Write(jsonBytes); err != nil {
 		return core.ImageProps{}, err
 	}
-	writer.Close()
+	if err := writer.Close(); err != nil {
+		return core.ImageProps{}, err
+	}
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", cl.config.ImageMagickURL, cl.config.Security.APIKey), body)
 	if err != nil {
 		return core.ImageProps{}, err
@@ -326,7 +396,11 @@ func (cl *ToolsClient) MeasureImage(inputPath string) (core.ImageProps, error) {
 	if err != nil {
 		return core.ImageProps{}, err
 	}
-	defer res.Body.Close()
+	defer func(Body io.ReadCloser) {
+		if err := Body.Close(); err != nil {
+			cl.logger.Error(err)
+		}
+	}(res.Body)
 	if res.StatusCode != http.StatusOK {
 		return core.ImageProps{}, fmt.Errorf("request failed with status %d", res.StatusCode)
 	}
@@ -353,7 +427,11 @@ func (cl *ToolsClient) TSVFromImage(inputPath string, model string) (string, err
 	if err != nil {
 		return "", err
 	}
-	defer file.Close()
+	defer func(file *os.File) {
+		if err := file.Close(); err != nil {
+			cl.logger.Error(err)
+		}
+	}(file)
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 	fileField, err := writer.CreateFormFile("file", inputPath)
@@ -379,7 +457,9 @@ func (cl *ToolsClient) TSVFromImage(inputPath string, model string) (string, err
 	if _, err := jsonField.Write(jsonBytes); err != nil {
 		return "", err
 	}
-	writer.Close()
+	if err := writer.Close(); err != nil {
+		return "", err
+	}
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", cl.config.TesseractURL, cl.config.Security.APIKey), body)
 	if err != nil {
 		return "", err
@@ -390,7 +470,11 @@ func (cl *ToolsClient) TSVFromImage(inputPath string, model string) (string, err
 	if err != nil {
 		return "", err
 	}
-	defer res.Body.Close()
+	defer func(Body io.ReadCloser) {
+		if err := Body.Close(); err != nil {
+			cl.logger.Error(err)
+		}
+	}(res.Body)
 	if res.StatusCode != http.StatusOK {
 		return "", fmt.Errorf("request failed with status %d", res.StatusCode)
 	}
@@ -406,7 +490,11 @@ func (cl *ToolsClient) TextFromImage(inputPath string, model string) (string, er
 	if err != nil {
 		return "", err
 	}
-	defer file.Close()
+	defer func(file *os.File) {
+		if err := file.Close(); err != nil {
+			cl.logger.Error(err)
+		}
+	}(file)
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 	fileField, err := writer.CreateFormFile("file", inputPath)
@@ -432,7 +520,9 @@ func (cl *ToolsClient) TextFromImage(inputPath string, model string) (string, er
 	if _, err := jsonField.Write(jsonBytes); err != nil {
 		return "", err
 	}
-	writer.Close()
+	if err := writer.Close(); err != nil {
+		return "", err
+	}
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", cl.config.TesseractURL, cl.config.Security.APIKey), body)
 	if err != nil {
 		return "", err
@@ -443,7 +533,11 @@ func (cl *ToolsClient) TextFromImage(inputPath string, model string) (string, er
 	if err != nil {
 		return "", err
 	}
-	defer res.Body.Close()
+	defer func(Body io.ReadCloser) {
+		if err := Body.Close(); err != nil {
+			cl.logger.Error(err)
+		}
+	}(res.Body)
 	if res.StatusCode != http.StatusOK {
 		return "", fmt.Errorf("request failed with status %d", res.StatusCode)
 	}
@@ -459,7 +553,11 @@ func (cl *ToolsClient) DPIFromImage(inputPath string) (int, error) {
 	if err != nil {
 		return -1, err
 	}
-	defer file.Close()
+	defer func(file *os.File) {
+		if err := file.Close(); err != nil {
+			cl.logger.Error(err)
+		}
+	}(file)
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 	fileField, err := writer.CreateFormFile("file", inputPath)
@@ -485,7 +583,9 @@ func (cl *ToolsClient) DPIFromImage(inputPath string) (int, error) {
 	if _, err := jsonField.Write(jsonBytes); err != nil {
 		return -1, err
 	}
-	writer.Close()
+	if err := writer.Close(); err != nil {
+		return 0, err
+	}
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", cl.config.ExiftoolURL, cl.config.Security.APIKey), body)
 	if err != nil {
 		return -1, err
@@ -496,7 +596,11 @@ func (cl *ToolsClient) DPIFromImage(inputPath string) (int, error) {
 	if err != nil {
 		return -1, err
 	}
-	defer res.Body.Close()
+	defer func(Body io.ReadCloser) {
+		if err := Body.Close(); err != nil {
+			cl.logger.Error(err)
+		}
+	}(res.Body)
 	if res.StatusCode != http.StatusOK {
 		return -1, fmt.Errorf("request failed with status %d", res.StatusCode)
 	}
@@ -525,7 +629,11 @@ func (cl *ToolsClient) OCRFromPDF(inputPath string, language *string, dpi *int) 
 	if err != nil {
 		return "", err
 	}
-	defer file.Close()
+	defer func(file *os.File) {
+		if err := file.Close(); err != nil {
+			cl.logger.Error(err)
+		}
+	}(file)
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 	fileField, err := writer.CreateFormFile("file", inputPath)
@@ -564,7 +672,9 @@ func (cl *ToolsClient) OCRFromPDF(inputPath string, language *string, dpi *int) 
 	if _, err := jsonField.Write(jsonBytes); err != nil {
 		return "", err
 	}
-	writer.Close()
+	if err := writer.Close(); err != nil {
+		return "", err
+	}
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", cl.config.OCRMyPDFURL, cl.config.Security.APIKey), body)
 	if err != nil {
 		return "", err
@@ -575,7 +685,11 @@ func (cl *ToolsClient) OCRFromPDF(inputPath string, language *string, dpi *int) 
 	if err != nil {
 		return "", err
 	}
-	defer res.Body.Close()
+	defer func(Body io.ReadCloser) {
+		if err := Body.Close(); err != nil {
+			cl.logger.Error(err)
+		}
+	}(res.Body)
 	if res.StatusCode != http.StatusOK {
 		return "", fmt.Errorf("request failed with status %d", res.StatusCode)
 	}
@@ -584,7 +698,11 @@ func (cl *ToolsClient) OCRFromPDF(inputPath string, language *string, dpi *int) 
 	if err != nil {
 		return "", err
 	}
-	defer outputFile.Close()
+	defer func(outputFile *os.File) {
+		if err := outputFile.Close(); err != nil {
+			cl.logger.Error(err)
+		}
+	}(outputFile)
 	_, err = io.Copy(outputFile, res.Body)
 	if err != nil {
 		return "", err
@@ -597,7 +715,11 @@ func (cl *ToolsClient) TextFromPDF(inputPath string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	defer file.Close()
+	defer func(file *os.File) {
+		if err := file.Close(); err != nil {
+			cl.logger.Error(err)
+		}
+	}(file)
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 	fileField, err := writer.CreateFormFile("file", inputPath)
@@ -623,7 +745,9 @@ func (cl *ToolsClient) TextFromPDF(inputPath string) (string, error) {
 	if _, err := jsonField.Write(jsonBytes); err != nil {
 		return "", err
 	}
-	writer.Close()
+	if err := writer.Close(); err != nil {
+		return "", err
+	}
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", cl.config.PopplerURL, cl.config.Security.APIKey), body)
 	if err != nil {
 		return "", err
@@ -634,7 +758,11 @@ func (cl *ToolsClient) TextFromPDF(inputPath string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	defer res.Body.Close()
+	defer func(Body io.ReadCloser) {
+		if err := Body.Close(); err != nil {
+			cl.logger.Error(err)
+		}
+	}(res.Body)
 	if res.StatusCode != http.StatusOK {
 		return "", fmt.Errorf("request failed with status %d", res.StatusCode)
 	}
@@ -643,7 +771,11 @@ func (cl *ToolsClient) TextFromPDF(inputPath string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	defer outputFile.Close()
+	defer func(outputFile *os.File) {
+		if err := outputFile.Close(); err != nil {
+			cl.logger.Error(err)
+		}
+	}(outputFile)
 	_, err = io.Copy(outputFile, res.Body)
 	if err != nil {
 		return "", err
