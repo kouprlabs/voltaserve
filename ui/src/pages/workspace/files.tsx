@@ -11,7 +11,6 @@ import Create from '@/components/file/create'
 import Delete from '@/components/file/delete'
 import List from '@/components/file/list'
 import Move from '@/components/file/move'
-import OCR from '@/components/file/ocr'
 import Path from '@/components/file/path'
 import Rename from '@/components/file/rename'
 import Sharing from '@/components/file/sharing'
@@ -21,6 +20,7 @@ import { currentUpdated, listExtended } from '@/store/entities/files'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { selectionUpdated } from '@/store/ui/files'
 
+const PADDING_BOTTOM = 100
 let isLoadingMore = false
 
 const WorkspaceFilesPage = () => {
@@ -36,7 +36,7 @@ const WorkspaceFilesPage = () => {
   const listContainer = useRef<HTMLDivElement>(null)
   const { data: workspace } = WorkspaceAPI.useGetById(
     params.id as string,
-    swrConfig()
+    swrConfig(),
   )
 
   useEffect(() => {
@@ -44,10 +44,9 @@ const WorkspaceFilesPage = () => {
   }, [fileId, dispatch])
 
   const loadMore = useCallback(async () => {
-    if (isLoadingMore || !list) {
+    if (!list) {
       return
     }
-    isLoadingMore = true
     setIsSpinnerVisible(true)
     try {
       const result = await FileAPI.list(fileId, {
@@ -64,16 +63,20 @@ const WorkspaceFilesPage = () => {
   }, [fileId, list, sortBy, sortOrder, dispatch])
 
   const handleScroll = useCallback(() => {
-    if (listContainer.current && list) {
-      if (
-        listContainer.current.offsetHeight + listContainer.current.scrollTop >=
-        listContainer.current.scrollHeight -
-          percentageOf(listContainer.current.scrollHeight, 50)
-      ) {
-        if (list.totalPages > list.page) {
-          loadMore()
-        }
-      }
+    if (!list || !listContainer.current) {
+      return
+    }
+    const container = listContainer.current
+    if (
+      !isLoadingMore &&
+      list.totalPages > list.page &&
+      container.offsetHeight + container.scrollTop >=
+        container.scrollHeight -
+          percentageOf(container.offsetHeight, 50) -
+          PADDING_BOTTOM
+    ) {
+      isLoadingMore = true
+      loadMore()
     }
   }, [loadMore, listContainer, list])
 
@@ -100,15 +103,16 @@ const WorkspaceFilesPage = () => {
           onClick={() => dispatch(selectionUpdated([]))}
         >
           <List scale={iconScale} />
-          {isSpinnerVisible && (
-            <Center w="100%" mb={variables.spacing2Xl} justifyContent="center">
+          {isSpinnerVisible ? (
+            <Center w="100%" h={`${PADDING_BOTTOM}px`} justifyContent="center">
               <Spinner />
             </Center>
+          ) : (
+            <Box w="100%" h={`${PADDING_BOTTOM}px`}></Box>
           )}
         </Box>
       </Stack>
       <Sharing />
-      <OCR />
       <Move />
       <Copy />
       <Create />

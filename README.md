@@ -28,7 +28,6 @@ Wait until the following containers are running:
 - `voltaserve-app-idp`
 - `voltaserve-app-conversion`
 - `voltaserve-app-webdav`
-- `voltaserve-app-language`
 - `voltaserve-app-ui`
 
 You can check that by running the command `docker ps` and look at the `STATUS` column.

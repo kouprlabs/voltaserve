@@ -43,25 +43,12 @@ const WorkspaceSettingsPage = () => {
     StorageAPI.useGetWorkspaceUsage(workspaceId, swrConfig())
   const hasEditPermission = useMemo(
     () => workspace && geEditorPermission(workspace.permission),
-    [workspace]
+    [workspace],
   )
   const [isNameModalOpen, setIsNameModalOpen] = useState(false)
   const [isStorageCapacityModalOpen, setIsStorageCapacityModalOpen] =
     useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
-
-  const handleUpdateIsAutomaticOcrEnabled = useCallback(async () => {
-    if (!workspace) {
-      return
-    }
-    const result = await WorkspaceAPI.updateIsAutomaticOcrEnabled(
-      workspace.id,
-      {
-        isEnabled: !workspace.isAutomaticOcrEnabled,
-      }
-    )
-    mutate(result)
-  }, [workspace, mutate])
 
   if (workspaceError) {
     return null
@@ -124,14 +111,6 @@ const WorkspaceSettingsPage = () => {
         <Divider />
         <Stack direction="column" py={SECTION_SPACING}>
           <Text fontWeight="bold">Advanced</Text>
-          <HStack spacing={variables.spacing} h={ROW_HEIGHT}>
-            <Text>Automatic OCR</Text>
-            <Spacer />
-            <Switch
-              isChecked={workspace.isAutomaticOcrEnabled}
-              onChange={handleUpdateIsAutomaticOcrEnabled}
-            />
-          </HStack>
           <HStack spacing={variables.spacing} h={ROW_HEIGHT}>
             <Text>Delete permanently</Text>
             <Spacer />

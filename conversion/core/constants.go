@@ -1,6 +1,15 @@
 package core
 
-const PipelinePDF = "pdf"
-const PipelineOffice = "office"
-const PipelineImage = "image"
-const PipelineVideo = "video"
+const (
+	PipelinePDF    = "pdf"
+	PipelineOffice = "office"
+	PipelineImage  = "image"
+	PipelineVideo  = "video"
+)
+
+const (
+	SnapshotStatusNew        = "new"
+	SnapshotStatusProcessing = "processing"
+	SnapshotStatusReady      = "ready"
+	SnapshotStatusError      = "error"
+)

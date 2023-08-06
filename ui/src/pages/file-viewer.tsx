@@ -7,7 +7,6 @@ import FileAPI, { File } from '@/client/api/file'
 import AudioPlayer from '@/components/viewer/audio-player'
 import DrawerContent from '@/components/viewer/drawer/content'
 import ImageViewer from '@/components/viewer/image-viewer'
-import OCRViewer from '@/components/viewer/ocr-viewer'
 import PDFViewer from '@/components/viewer/pdf-viewer'
 import VideoPlayer from '@/components/viewer/video-player'
 import downloadFile from '@/helpers/download-file'
@@ -23,8 +22,6 @@ const FileViewerPage = () => {
       (file.preview && isPDF(file.preview.extension))
     ) {
       return <PDFViewer file={file} />
-    } else if (file.original && isImage(file.original.extension) && file.ocr) {
-      return <OCRViewer file={file} />
     } else if (file.original && isImage(file.original.extension)) {
       return <ImageViewer file={file} />
     } else if (file.original && isVideo(file.original.extension)) {

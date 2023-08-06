@@ -26,6 +26,13 @@ export enum SortOrder {
   Desc = 'desc',
 }
 
+export enum SnapshotStatus {
+  New = 'new',
+  Processing = 'processing',
+  Ready = 'ready',
+  Error = 'error',
+}
+
 export type File = {
   id: string
   workspaceId: string
@@ -35,8 +42,8 @@ export type File = {
   version: number
   original?: Download
   preview?: Download
-  ocr?: Download
   thumbnail?: Thumbnail
+  status: SnapshotStatus
   snapshots: Snapshot[]
   permission: PermissionType
   isShared: boolean
@@ -113,10 +120,6 @@ export type RenameOptions = {
   name: string
 }
 
-export type UpdateOcrLanguageOptions = {
-  id: string
-}
-
 export type GrantUserPermissionOptions = {
   ids: string[]
   userId: string
@@ -147,7 +150,7 @@ export default class FileAPI {
     parentId: string | null,
     request: XMLHttpRequest,
     file: Blob,
-    onProgress?: (value: number) => void
+    onProgress?: (value: number) => void,
   ): Promise<File> {
     const params = new URLSearchParams({ workspace_id: workspaceId })
     if (parentId) {
@@ -158,7 +161,7 @@ export default class FileAPI {
       'POST',
       request,
       file,
-      onProgress
+      onProgress,
     )
   }
 
@@ -166,14 +169,14 @@ export default class FileAPI {
     id: string,
     request: XMLHttpRequest,
     file: Blob,
-    onProgress?: (value: number) => void
+    onProgress?: (value: number) => void,
   ): Promise<File> {
     return this.doUpload(
       `${getConfig().apiURL}/files/${id}`,
       'PATCH',
       request,
       file,
-      onProgress
+      onProgress,
     )
   }
 
@@ -182,7 +185,7 @@ export default class FileAPI {
     method: string,
     request: XMLHttpRequest,
     file: Blob,
-    onProgress?: (value: number) => void
+    onProgress?: (value: number) => void,
   ) {
     const formData = new FormData()
     formData.append('file', file)
@@ -190,7 +193,7 @@ export default class FileAPI {
       request.open(method, url)
       request.setRequestHeader(
         'Authorization',
-        `Bearer ${getAccessTokenOrRedirect()}`
+        `Bearer ${getAccessTokenOrRedirect()}`,
       )
       request.onloadend = () => {
         if (request.status <= 299) {
@@ -234,14 +237,14 @@ export default class FileAPI {
           'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
           'Content-Type': 'application/json',
         },
-      }
+      },
     ).then((result) => result.json())
   }
 
   static async search(
     options: SearchOptions,
     size: number,
-    page: number
+    page: number,
   ): Promise<List> {
     return apiFetch(
       `/files/search?${new URLSearchParams({
@@ -255,7 +258,7 @@ export default class FileAPI {
           'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
           'Content-Type': 'application/json',
         },
-      }
+      },
     ).then((result) => result.json())
   }
 
@@ -281,30 +284,6 @@ export default class FileAPI {
     return apiFetch(`/files/${id}/rename`, {
       method: 'POST',
       body: JSON.stringify(options),
-      headers: {
-        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
-        'Content-Type': 'application/json',
-      },
-    }).then((result) => result.json())
-  }
-
-  static async updateOcrLanguage(
-    id: string,
-    options: UpdateOcrLanguageOptions
-  ): Promise<File> {
-    return apiFetch(`/files/${id}/update_ocr_language`, {
-      method: 'POST',
-      body: JSON.stringify(options),
-      headers: {
-        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
-        'Content-Type': 'application/json',
-      },
-    }).then((result) => result.json())
-  }
-
-  static async deleteOcr(id: string): Promise<File> {
-    return apiFetch(`/files/${id}/delete_ocr`, {
-      method: 'POST',
       headers: {
         'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
         'Content-Type': 'application/json',
@@ -394,7 +373,7 @@ export default class FileAPI {
     return useSWR<number>(
       id ? `/files/${id}/get_item_count` : null,
       apiFetcher,
-      swrOptions
+      swrOptions,
     )
   }
 

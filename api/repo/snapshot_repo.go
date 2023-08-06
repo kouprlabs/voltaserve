@@ -17,8 +17,8 @@ type SnapshotUpdateOptions struct {
 	Original  *model.S3Object
 	Preview   *model.S3Object
 	Text      *model.S3Object
-	OCR       *model.S3Object
 	Thumbnail *model.Thumbnail
+	Status    string
 }
 
 type SnapshotRepo interface {
@@ -46,9 +46,8 @@ type snapshotEntity struct {
 	Original   datatypes.JSON `json:"original,omitempty" gorm:"column:original"`
 	Preview    datatypes.JSON `json:"preview,omitempty" gorm:"column:preview"`
 	Text       datatypes.JSON `json:"text,omitempty" gorm:"column:text"`
-	OCR        datatypes.JSON `json:"ocr,omitempty" gorm:"column:ocr"`
 	Thumbnail  datatypes.JSON `json:"thumbnail,omitempty" gorm:"column:thumbnail"`
-	Language   *string        `json:"language,omitempty" gorm:"column:language"`
+	Status     string         `json:"status,omitempty" gorm:"column,status"`
 	CreateTime string         `json:"createTime" gorm:"column:create_time"`
 	UpdateTime *string        `json:"updateTime,omitempty" gorm:"column:update_time"`
 }
@@ -112,18 +111,6 @@ func (s *snapshotEntity) GetText() *model.S3Object {
 	return &res
 }
 
-func (s *snapshotEntity) GetOCR() *model.S3Object {
-	if s.OCR.String() == "" {
-		return nil
-	}
-	var res = model.S3Object{}
-	if err := json.Unmarshal([]byte(s.OCR.String()), &res); err != nil {
-		log.Fatal(err)
-		return nil
-	}
-	return &res
-}
-
 func (s *snapshotEntity) GetThumbnail() *model.Thumbnail {
 	if s.Thumbnail.String() == "" {
 		return nil
@@ -136,8 +123,8 @@ func (s *snapshotEntity) GetThumbnail() *model.Thumbnail {
 	return &res
 }
 
-func (s *snapshotEntity) GetLanguage() *string {
-	return s.Language
+func (s *snapshotEntity) GetStatus() string {
+	return s.Status
 }
 
 func (s *snapshotEntity) SetID(id string) {
@@ -193,21 +180,6 @@ func (s *snapshotEntity) SetText(m *model.S3Object) {
 	}
 }
 
-func (s *snapshotEntity) SetOCR(m *model.S3Object) {
-	if m == nil {
-		s.OCR = nil
-	} else {
-		b, err := json.Marshal(m)
-		if err != nil {
-			log.Fatal(err)
-			return
-		}
-		if err := s.OCR.UnmarshalJSON(b); err != nil {
-			log.Fatal(err)
-		}
-	}
-}
-
 func (s *snapshotEntity) SetThumbnail(m *model.Thumbnail) {
 	if m == nil {
 		s.Thumbnail = nil
@@ -223,8 +195,8 @@ func (s *snapshotEntity) SetThumbnail(m *model.Thumbnail) {
 	}
 }
 
-func (s *snapshotEntity) SetLanguage(language *string) {
-	s.Language = language
+func (s *snapshotEntity) SetStatus(status string) {
+	s.Status = status
 }
 
 func (s *snapshotEntity) HasOriginal() bool {
@@ -239,16 +211,8 @@ func (s *snapshotEntity) HasText() bool {
 	return s.Text != nil
 }
 
-func (s *snapshotEntity) HasOCR() bool {
-	return s.OCR != nil
-}
-
 func (s *snapshotEntity) HasThumbnail() bool {
 	return s.Thumbnail != nil
-}
-
-func (s *snapshotEntity) HasLanguage() bool {
-	return s.Language != nil
 }
 
 func (s *snapshotEntity) GetCreateTime() string {
@@ -310,11 +274,11 @@ func (repo *snapshotRepo) Update(id string, opts SnapshotUpdateOptions) error {
 	if opts.Preview != nil {
 		snapshot.SetPreview(opts.Preview)
 	}
-	if opts.OCR != nil {
-		snapshot.SetOCR(opts.OCR)
-	}
 	if opts.Text != nil {
 		snapshot.SetText(opts.Text)
+	}
+	if opts.Status != "" {
+		snapshot.SetStatus(opts.Status)
 	}
 	if db := repo.db.Save(&snapshot); db.Error != nil {
 		return db.Error
