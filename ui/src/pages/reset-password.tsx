@@ -9,6 +9,7 @@ import {
   Link as ChakraLink,
   Text,
   VStack,
+  Heading,
 } from '@chakra-ui/react'
 import { variables } from '@koupr/ui'
 import {
@@ -72,7 +73,7 @@ const ResetPasswordPage = () => {
         </Helmet>
         <VStack spacing="25px" w="100%">
           <Logo className="w-16" isGlossy={true} />
-          <h1 className="font-display text-2xl font-medium">Reset Password</h1>
+          <Heading size="lg">Reset Password</Heading>
           {isCompleted ? (
             <VStack spacing={variables.spacingXs}>
               <Text align="center">Password successfully changed.</Text>

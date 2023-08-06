@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { Link as ChakraLink, Text, VStack } from '@chakra-ui/react'
+import { Link as ChakraLink, Heading, Text, VStack } from '@chakra-ui/react'
 import { variables, Spinner } from '@koupr/ui'
 import { Helmet } from 'react-helmet-async'
 import UserAPI from '@/client/idp/user'
@@ -43,17 +43,17 @@ const UpdateEmailPage = () => {
           <Logo className="w-16" isGlossy={true} />
           {!isCompleted && !isFailed ? (
             <VStack spacing={variables.spacing}>
-              <h1 className="font-display text-2xl font-medium text-center">
+              <Heading size="lg">
                 Confirming your Email…
-              </h1>
+              </Heading>
               <Spinner />
             </VStack>
           ) : null}
           {isCompleted && !isFailed ? (
             <VStack spacing={variables.spacing}>
-              <h1 className="font-display text-2xl font-medium text-center">
+              <Heading size="lg">
                 Email confirmed
-              </h1>
+              </Heading>
               <VStack spacing={variables.spacingXs}>
                 <Text>Click the link below to go back to your account.</Text>
                 <ChakraLink as={Link} to="/account/settings">
@@ -63,9 +63,9 @@ const UpdateEmailPage = () => {
             </VStack>
           ) : null}
           {isFailed && (
-            <h1 className="font-display text-2xl font-medium text-center">
+            <Heading size="lg">
               An error occurred while processing your request.
-            </h1>
+            </Heading>
           )}
         </VStack>
       </>

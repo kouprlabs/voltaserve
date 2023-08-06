@@ -3,8 +3,8 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        display: ['Unbounded'],
-        body: ['Work Sans'],
+        display: ['IBM Plex Serif'],
+        body: ['IBM Plex Sans'],
       },
       borderRadius: {
         sm: '10px',
