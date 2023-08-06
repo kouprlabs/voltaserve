@@ -48,7 +48,7 @@ const OrganizationSelector = ({ onConfirm }: OrganizationSelectorProps) => {
     mutate,
   } = OrganizationAPI.useList(
     { query, page, size: 5, sortOrder: SortOrder.Desc },
-    swrConfig()
+    swrConfig(),
   )
   const selectionColor = useColorModeValue('gray.100', 'gray.600')
   const dimmedButtonLabelColor = useColorModeValue('gray.500', 'gray.500')
@@ -116,7 +116,7 @@ const OrganizationSelector = ({ onConfirm }: OrganizationSelectorProps) => {
               {list && list.data.length > 0 && (
                 <Table variant="simple" size="sm">
                   <colgroup>
-                    <col style={{ width: '50px' }} />
+                    <col style={{ width: '40px' }} />
                     <col style={{ width: 'auto' }} />
                   </colgroup>
                   <Tbody>
@@ -127,10 +127,10 @@ const OrganizationSelector = ({ onConfirm }: OrganizationSelectorProps) => {
                         bg={selected?.id === o.id ? selectionColor : 'auto'}
                         onClick={() => setSelected(o)}
                       >
-                        <Td>
+                        <Td px={variables.spacingXs} textAlign="center">
                           <Radio size="md" isChecked={selected?.id === o.id} />
                         </Td>
-                        <Td>
+                        <Td px={variables.spacingXs}>
                           <HStack spacing={variables.spacing}>
                             <Avatar
                               name={o.name}
@@ -138,7 +138,9 @@ const OrganizationSelector = ({ onConfirm }: OrganizationSelectorProps) => {
                               width="40px"
                               height="40px"
                             />
-                            <Text fontSize={variables.bodyFontSize}>{o.name}</Text>
+                            <Text fontSize={variables.bodyFontSize}>
+                              {o.name}
+                            </Text>
                           </HStack>
                         </Td>
                       </Tr>

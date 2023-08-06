@@ -29,7 +29,7 @@ const AccountLayout = () => {
   const { data: notfications } = NotificationAPI.useGetAll(swrConfig())
   const invitationCount = useMemo(
     () => notfications?.filter((e) => e.type === 'new_invitation').length,
-    [notfications]
+    [notfications],
   )
   const [tabIndex, setTabIndex] = useState(0)
 
@@ -70,7 +70,7 @@ const AccountLayout = () => {
               onClick={() => setIsImageModalOpen(true)}
             />
           </Box>
-          <Heading fontSize="21px" textAlign="center">
+          <Heading fontSize={variables.headingFontSize} textAlign="center">
             {user.fullName}
           </Heading>
         </VStack>
