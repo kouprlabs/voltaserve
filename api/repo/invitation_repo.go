@@ -44,55 +44,55 @@ type invitationEntity struct {
 	UpdateTime     *string `json:"updateTime" gorm:"column:update_time"`
 }
 
-func (invitationEntity) TableName() string {
+func (*invitationEntity) TableName() string {
 	return "invitation"
 }
 
-func (o *invitationEntity) BeforeCreate(tx *gorm.DB) (err error) {
-	o.CreateTime = time.Now().UTC().Format(time.RFC3339)
+func (i *invitationEntity) BeforeCreate(tx *gorm.DB) (err error) {
+	i.CreateTime = time.Now().UTC().Format(time.RFC3339)
 	return nil
 }
 
-func (o *invitationEntity) BeforeSave(tx *gorm.DB) (err error) {
+func (i *invitationEntity) BeforeSave(tx *gorm.DB) (err error) {
 	timeNow := time.Now().UTC().Format(time.RFC3339)
-	o.UpdateTime = &timeNow
+	i.UpdateTime = &timeNow
 	return nil
 }
 
-func (i invitationEntity) GetID() string {
+func (i *invitationEntity) GetID() string {
 	return i.ID
 }
 
-func (i invitationEntity) GetOrganizationID() string {
+func (i *invitationEntity) GetOrganizationID() string {
 	return i.OrganizationID
 }
 
-func (i invitationEntity) GetOwnerID() string {
+func (i *invitationEntity) GetOwnerID() string {
 	return i.OwnerID
 }
 
-func (i invitationEntity) GetEmail() string {
+func (i *invitationEntity) GetEmail() string {
 	return i.Email
 }
 
-func (i invitationEntity) GetStatus() string {
+func (i *invitationEntity) GetStatus() string {
 	return i.Status
 }
 
-func (i invitationEntity) GetCreateTime() string {
+func (i *invitationEntity) GetCreateTime() string {
 	return i.CreateTime
 }
 
-func (i invitationEntity) GetUpdateTime() *string {
+func (i *invitationEntity) GetUpdateTime() *string {
 	return i.UpdateTime
 }
 
-func (w *invitationEntity) SetStatus(status string) {
-	w.Status = status
+func (i *invitationEntity) SetStatus(status string) {
+	i.Status = status
 }
 
-func (w *invitationEntity) SetUpdateTime(updateTime *string) {
-	w.UpdateTime = updateTime
+func (i *invitationEntity) SetUpdateTime(updateTime *string) {
+	i.UpdateTime = updateTime
 }
 
 type invitationRepo struct {

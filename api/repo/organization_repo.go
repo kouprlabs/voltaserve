@@ -49,30 +49,30 @@ type organizationEntity struct {
 	UpdateTime       *string                 `json:"updateTime,omitempty" gorm:"column:update_time"`
 }
 
-func (organizationEntity) TableName() string {
+func (*organizationEntity) TableName() string {
 	return "organization"
 }
 
-func (o *organizationEntity) BeforeCreate(tx *gorm.DB) (err error) {
+func (o *organizationEntity) BeforeCreate(*gorm.DB) (err error) {
 	o.CreateTime = time.Now().UTC().Format(time.RFC3339)
 	return nil
 }
 
-func (o *organizationEntity) BeforeSave(tx *gorm.DB) (err error) {
+func (o *organizationEntity) BeforeSave(*gorm.DB) (err error) {
 	timeNow := time.Now().UTC().Format(time.RFC3339)
 	o.UpdateTime = &timeNow
 	return nil
 }
 
-func (o organizationEntity) GetID() string {
+func (o *organizationEntity) GetID() string {
 	return o.ID
 }
 
-func (o organizationEntity) GetName() string {
+func (o *organizationEntity) GetName() string {
 	return o.Name
 }
 
-func (o organizationEntity) GetUserPermissions() []model.CoreUserPermission {
+func (o *organizationEntity) GetUserPermissions() []model.CoreUserPermission {
 	var res []model.CoreUserPermission
 	for _, p := range o.UserPermissions {
 		res = append(res, p)
@@ -80,7 +80,7 @@ func (o organizationEntity) GetUserPermissions() []model.CoreUserPermission {
 	return res
 }
 
-func (o organizationEntity) GetGroupPermissions() []model.CoreGroupPermission {
+func (o *organizationEntity) GetGroupPermissions() []model.CoreGroupPermission {
 	var res []model.CoreGroupPermission
 	for _, p := range o.GroupPermissions {
 		res = append(res, p)
@@ -88,24 +88,24 @@ func (o organizationEntity) GetGroupPermissions() []model.CoreGroupPermission {
 	return res
 }
 
-func (o organizationEntity) GetUsers() []string {
+func (o *organizationEntity) GetUsers() []string {
 	return o.Members
 }
 
-func (o organizationEntity) GetCreateTime() string {
+func (o *organizationEntity) GetCreateTime() string {
 	return o.CreateTime
 }
 
-func (o organizationEntity) GetUpdateTime() *string {
+func (o *organizationEntity) GetUpdateTime() *string {
 	return o.UpdateTime
 }
 
-func (w *organizationEntity) SetName(name string) {
-	w.Name = name
+func (o *organizationEntity) SetName(name string) {
+	o.Name = name
 }
 
-func (w *organizationEntity) SetUpdateTime(updateTime *string) {
-	w.UpdateTime = updateTime
+func (o *organizationEntity) SetUpdateTime(updateTime *string) {
+	o.UpdateTime = updateTime
 }
 
 type organizationRepo struct {
@@ -220,7 +220,7 @@ func (repo *organizationRepo) RemoveMember(id string, userID string) error {
 func (repo *organizationRepo) GetMembers(id string) ([]model.User, error) {
 	var entities []*userEntity
 	db := repo.db.
-		Raw(`SELECT DISTINCT u.* FROM "user" u INNER JOIN organization_user ou ON u.id = ou.user_id WHERE ou.organization_id = ? ORDER BY u.full_name ASC`, id).
+		Raw(`SELECT DISTINCT u.* FROM "user" u INNER JOIN organization_user ou ON u.id = ou.user_id WHERE ou.organization_id = ? ORDER BY u.full_name`, id).
 		Scan(&entities)
 	if db.Error != nil {
 		return nil, db.Error
@@ -235,7 +235,7 @@ func (repo *organizationRepo) GetMembers(id string) ([]model.User, error) {
 func (repo *organizationRepo) GetGroups(id string) ([]model.Group, error) {
 	var entities []*groupEntity
 	db := repo.db.
-		Raw(`SELECT * FROM "group" g WHERE g.organization_id = ? ORDER BY g.name ASC`, id).
+		Raw(`SELECT * FROM "group" g WHERE g.organization_id = ? ORDER BY g.name`, id).
 		Scan(&entities)
 	if db.Error != nil {
 		return nil, db.Error
@@ -266,8 +266,7 @@ func (repo *organizationRepo) GetOwnerCount(id string) (int64, error) {
 
 func (repo *organizationRepo) GrantUserPermission(id string, userID string, permission string) error {
 	db := repo.db.Exec(
-		"INSERT INTO userpermission (id, user_id, resource_id, permission) "+
-			"VALUES (?, ?, ?, ?) ON CONFLICT (user_id, resource_id) DO UPDATE SET permission = ?",
+		"INSERT INTO userpermission (id, user_id, resource_id, permission) VALUES (?, ?, ?, ?) ON CONFLICT (user_id, resource_id) DO UPDATE SET permission = ?",
 		helper.NewID(), userID, id, permission, permission)
 	if db.Error != nil {
 		return db.Error

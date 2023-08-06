@@ -53,30 +53,30 @@ type snapshotEntity struct {
 	UpdateTime *string        `json:"updateTime,omitempty" gorm:"column:update_time"`
 }
 
-func (snapshotEntity) TableName() string {
+func (*snapshotEntity) TableName() string {
 	return "snapshot"
 }
 
-func (s *snapshotEntity) BeforeCreate(tx *gorm.DB) (err error) {
+func (s *snapshotEntity) BeforeCreate(*gorm.DB) (err error) {
 	s.CreateTime = time.Now().UTC().Format(time.RFC3339)
 	return nil
 }
 
-func (s *snapshotEntity) BeforeSave(tx *gorm.DB) (err error) {
+func (s *snapshotEntity) BeforeSave(*gorm.DB) (err error) {
 	timeNow := time.Now().UTC().Format(time.RFC3339)
 	s.UpdateTime = &timeNow
 	return nil
 }
 
-func (s snapshotEntity) GetID() string {
+func (s *snapshotEntity) GetID() string {
 	return s.ID
 }
 
-func (s snapshotEntity) GetVersion() int64 {
+func (s *snapshotEntity) GetVersion() int64 {
 	return s.Version
 }
 
-func (s snapshotEntity) GetOriginal() *model.S3Object {
+func (s *snapshotEntity) GetOriginal() *model.S3Object {
 	if s.Original.String() == "" {
 		return nil
 	}
@@ -88,7 +88,7 @@ func (s snapshotEntity) GetOriginal() *model.S3Object {
 	return &res
 }
 
-func (s snapshotEntity) GetPreview() *model.S3Object {
+func (s *snapshotEntity) GetPreview() *model.S3Object {
 	if s.Preview.String() == "" {
 		return nil
 	}
@@ -100,7 +100,7 @@ func (s snapshotEntity) GetPreview() *model.S3Object {
 	return &res
 }
 
-func (s snapshotEntity) GetText() *model.S3Object {
+func (s *snapshotEntity) GetText() *model.S3Object {
 	if s.Text.String() == "" {
 		return nil
 	}
@@ -112,7 +112,7 @@ func (s snapshotEntity) GetText() *model.S3Object {
 	return &res
 }
 
-func (s snapshotEntity) GetOCR() *model.S3Object {
+func (s *snapshotEntity) GetOCR() *model.S3Object {
 	if s.OCR.String() == "" {
 		return nil
 	}
@@ -124,7 +124,7 @@ func (s snapshotEntity) GetOCR() *model.S3Object {
 	return &res
 }
 
-func (s snapshotEntity) GetThumbnail() *model.Thumbnail {
+func (s *snapshotEntity) GetThumbnail() *model.Thumbnail {
 	if s.Thumbnail.String() == "" {
 		return nil
 	}
@@ -136,7 +136,7 @@ func (s snapshotEntity) GetThumbnail() *model.Thumbnail {
 	return &res
 }
 
-func (s snapshotEntity) GetLanguage() *string {
+func (s *snapshotEntity) GetLanguage() *string {
 	return s.Language
 }
 
@@ -227,35 +227,35 @@ func (s *snapshotEntity) SetLanguage(language *string) {
 	s.Language = language
 }
 
-func (s snapshotEntity) HasOriginal() bool {
+func (s *snapshotEntity) HasOriginal() bool {
 	return s.Original != nil
 }
 
-func (s snapshotEntity) HasPreview() bool {
+func (s *snapshotEntity) HasPreview() bool {
 	return s.Preview != nil
 }
 
-func (s snapshotEntity) HasText() bool {
+func (s *snapshotEntity) HasText() bool {
 	return s.Text != nil
 }
 
-func (s snapshotEntity) HasOCR() bool {
+func (s *snapshotEntity) HasOCR() bool {
 	return s.OCR != nil
 }
 
-func (s snapshotEntity) HasThumbnail() bool {
+func (s *snapshotEntity) HasThumbnail() bool {
 	return s.Thumbnail != nil
 }
 
-func (s snapshotEntity) HasLanguage() bool {
+func (s *snapshotEntity) HasLanguage() bool {
 	return s.Language != nil
 }
 
-func (s snapshotEntity) GetCreateTime() string {
+func (s *snapshotEntity) GetCreateTime() string {
 	return s.CreateTime
 }
 
-func (s snapshotEntity) GetUpdateTime() *string {
+func (s *snapshotEntity) GetUpdateTime() *string {
 	return s.UpdateTime
 }
 

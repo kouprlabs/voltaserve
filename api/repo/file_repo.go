@@ -63,107 +63,107 @@ type fileEntity struct {
 	UpdateTime       *string                 `json:"updateTime,omitempty" gorm:"column:update_time"`
 }
 
-func (fileEntity) TableName() string {
+func (*fileEntity) TableName() string {
 	return "file"
 }
 
-func (i *fileEntity) BeforeCreate(tx *gorm.DB) (err error) {
-	i.CreateTime = time.Now().UTC().Format(time.RFC3339)
+func (f *fileEntity) BeforeCreate(*gorm.DB) (err error) {
+	f.CreateTime = time.Now().UTC().Format(time.RFC3339)
 	return nil
 }
 
-func (i *fileEntity) BeforeSave(tx *gorm.DB) (err error) {
+func (f *fileEntity) BeforeSave(*gorm.DB) (err error) {
 	timeNow := time.Now().UTC().Format(time.RFC3339)
-	i.UpdateTime = &timeNow
+	f.UpdateTime = &timeNow
 	return nil
 }
 
-func (i fileEntity) GetID() string {
-	return i.ID
+func (f *fileEntity) GetID() string {
+	return f.ID
 }
 
-func (i fileEntity) GetWorkspaceID() string {
-	return i.WorkspaceID
+func (f *fileEntity) GetWorkspaceID() string {
+	return f.WorkspaceID
 }
 
-func (i fileEntity) GetName() string {
-	return i.Name
+func (f *fileEntity) GetName() string {
+	return f.Name
 }
 
-func (i fileEntity) GetType() string {
-	return i.Type
+func (f *fileEntity) GetType() string {
+	return f.Type
 }
 
-func (i fileEntity) GetParentID() *string {
-	return i.ParentID
+func (f *fileEntity) GetParentID() *string {
+	return f.ParentID
 }
 
-func (i fileEntity) GetSnapshots() []model.Snapshot {
+func (f *fileEntity) GetSnapshots() []model.Snapshot {
 	var res []model.Snapshot
-	for _, s := range i.Snapshots {
+	for _, s := range f.Snapshots {
 		res = append(res, s)
 	}
 	return res
 }
 
-func (i fileEntity) GetUserPermissions() []model.CoreUserPermission {
+func (f *fileEntity) GetUserPermissions() []model.CoreUserPermission {
 	var res []model.CoreUserPermission
-	for _, p := range i.UserPermissions {
+	for _, p := range f.UserPermissions {
 		res = append(res, p)
 	}
 	return res
 }
 
-func (i fileEntity) GetGroupPermissions() []model.CoreGroupPermission {
+func (f *fileEntity) GetGroupPermissions() []model.CoreGroupPermission {
 	var res []model.CoreGroupPermission
-	for _, p := range i.GroupPermissions {
+	for _, p := range f.GroupPermissions {
 		res = append(res, p)
 	}
 	return res
 }
 
-func (i fileEntity) GetText() *string {
-	return i.Text
+func (f *fileEntity) GetText() *string {
+	return f.Text
 }
 
-func (i fileEntity) GetCreateTime() string {
-	return i.CreateTime
+func (f *fileEntity) GetCreateTime() string {
+	return f.CreateTime
 }
 
-func (i fileEntity) GetUpdateTime() *string {
-	return i.UpdateTime
+func (f *fileEntity) GetUpdateTime() *string {
+	return f.UpdateTime
 }
 
-func (i *fileEntity) SetID(id string) {
-	i.ID = id
+func (f *fileEntity) SetID(id string) {
+	f.ID = id
 }
 
-func (i *fileEntity) SetParentID(parentID *string) {
-	i.ParentID = parentID
+func (f *fileEntity) SetParentID(parentID *string) {
+	f.ParentID = parentID
 }
 
-func (i *fileEntity) SetWorkspaceID(workspaceID string) {
-	i.WorkspaceID = workspaceID
+func (f *fileEntity) SetWorkspaceID(workspaceID string) {
+	f.WorkspaceID = workspaceID
 }
 
-func (i *fileEntity) SetType(fileType string) {
-	i.Type = fileType
+func (f *fileEntity) SetType(fileType string) {
+	f.Type = fileType
 }
 
-func (i *fileEntity) SetName(name string) {
-	i.Name = name
+func (f *fileEntity) SetName(name string) {
+	f.Name = name
 }
 
-func (i *fileEntity) SetText(text *string) {
-	i.Text = text
+func (f *fileEntity) SetText(text *string) {
+	f.Text = text
 }
 
-func (i *fileEntity) SetCreateTime(createTime string) {
-	i.CreateTime = createTime
+func (f *fileEntity) SetCreateTime(createTime string) {
+	f.CreateTime = createTime
 }
 
-func (i *fileEntity) SetUpdateTime(updateTime *string) {
-	i.UpdateTime = updateTime
+func (f *fileEntity) SetUpdateTime(updateTime *string) {
+	f.UpdateTime = updateTime
 }
 
 type fileRepo struct {

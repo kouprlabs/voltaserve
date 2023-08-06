@@ -56,42 +56,42 @@ type workspaceEntity struct {
 	UpdateTime            *string                 `json:"updateTime,omitempty" gorm:"column:update_time"`
 }
 
-func (workspaceEntity) TableName() string {
+func (*workspaceEntity) TableName() string {
 	return "workspace"
 }
 
-func (w *workspaceEntity) BeforeCreate(tx *gorm.DB) (err error) {
+func (w *workspaceEntity) BeforeCreate(*gorm.DB) (err error) {
 	w.CreateTime = time.Now().UTC().Format(time.RFC3339)
 	return nil
 }
 
-func (w *workspaceEntity) BeforeSave(tx *gorm.DB) (err error) {
+func (w *workspaceEntity) BeforeSave(*gorm.DB) (err error) {
 	timeNow := time.Now().UTC().Format(time.RFC3339)
 	w.UpdateTime = &timeNow
 	return nil
 }
 
-func (w workspaceEntity) GetID() string {
+func (w *workspaceEntity) GetID() string {
 	return w.ID
 }
 
-func (w workspaceEntity) GetName() string {
+func (w *workspaceEntity) GetName() string {
 	return w.Name
 }
 
-func (w workspaceEntity) GetStorageCapacity() int64 {
+func (w *workspaceEntity) GetStorageCapacity() int64 {
 	return w.StorageCapacity
 }
 
-func (w workspaceEntity) GetRootID() string {
+func (w *workspaceEntity) GetRootID() string {
 	return w.RootID
 }
 
-func (w workspaceEntity) GetOrganizationID() string {
+func (w *workspaceEntity) GetOrganizationID() string {
 	return w.OrganizationID
 }
 
-func (w workspaceEntity) GetUserPermissions() []model.CoreUserPermission {
+func (w *workspaceEntity) GetUserPermissions() []model.CoreUserPermission {
 	var res []model.CoreUserPermission
 	for _, p := range w.UserPermissions {
 		res = append(res, p)
@@ -99,7 +99,7 @@ func (w workspaceEntity) GetUserPermissions() []model.CoreUserPermission {
 	return res
 }
 
-func (w workspaceEntity) GetGroupPermissions() []model.CoreGroupPermission {
+func (w *workspaceEntity) GetGroupPermissions() []model.CoreGroupPermission {
 	var res []model.CoreGroupPermission
 	for _, p := range w.GroupPermissions {
 		res = append(res, p)
@@ -107,19 +107,19 @@ func (w workspaceEntity) GetGroupPermissions() []model.CoreGroupPermission {
 	return res
 }
 
-func (w workspaceEntity) GetBucket() string {
+func (w *workspaceEntity) GetBucket() string {
 	return w.Bucket
 }
 
-func (w workspaceEntity) GetCreateTime() string {
+func (w *workspaceEntity) GetCreateTime() string {
 	return w.CreateTime
 }
 
-func (w workspaceEntity) GetUpdateTime() *string {
+func (w *workspaceEntity) GetUpdateTime() *string {
 	return w.UpdateTime
 }
 
-func (w workspaceEntity) GetIsAutomaticOCREnabled() bool {
+func (w *workspaceEntity) GetIsAutomaticOCREnabled() bool {
 	return w.IsAutomaticOCREnabled
 }
 
@@ -308,8 +308,7 @@ func (repo *workspaceRepo) GetIDsByOrganization(orgID string) ([]string, error) 
 
 func (repo *workspaceRepo) GrantUserPermission(id string, userID string, permission string) error {
 	db := repo.db.Exec(
-		"INSERT INTO userpermission (id, user_id, resource_id, permission) "+
-			"VALUES (?, ?, ?, ?) ON CONFLICT (user_id, resource_id) DO UPDATE SET permission = ?",
+		"INSERT INTO userpermission (id, user_id, resource_id, permission) VALUES (?, ?, ?, ?) ON CONFLICT (user_id, resource_id) DO UPDATE SET permission = ?",
 		helper.NewID(), userID, id, permission, permission)
 	if db.Error != nil {
 		return db.Error
