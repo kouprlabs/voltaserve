@@ -230,10 +230,6 @@ services:
     environment:
       - PORT=5001
       - API_URL=http://app-api:5000
-      - VOLTASERVE_FFMPEG_URL=http://tools-ffmpeg:6002
-      - VOLTASERVE_IMAGEMAGICK_URL=http://tools-imagemagick:6003
-      - VOLTASERVE_LIBREOFFICE_URL=http://tools-libreoffice:6004
-      - VOLTASERVE_POPPLER_URL=http://tools-poppler:6006
       - S3_URL=infra-minio:9000
     healthcheck:
       test: curl --fail http://localhost:5001/v1/health || exit 1
