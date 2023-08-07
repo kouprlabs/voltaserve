@@ -12,6 +12,7 @@ type Dispatcher struct {
 	pdfPipeline        core.Pipeline
 	imagePipeline      core.Pipeline
 	officePipeline     core.Pipeline
+	videoPipeline      core.Pipeline
 	apiClient          *client.APIClient
 }
 
@@ -21,6 +22,7 @@ func NewDispatcher() *Dispatcher {
 		pdfPipeline:        NewPDFPipeline(),
 		imagePipeline:      NewImagePipeline(),
 		officePipeline:     NewOfficePipeline(),
+		videoPipeline:      NewVideoPipeline(),
 		apiClient:          client.NewAPIClient(),
 	}
 }
@@ -40,6 +42,11 @@ func (d *Dispatcher) Dispatch(opts core.PipelineRunOptions) error {
 		err = d.officePipeline.Run(opts)
 	} else if p == core.PipelineImage {
 		err = d.imagePipeline.Run(opts)
+	} else if p == core.PipelineVideo {
+		if err := d.videoPipeline.Run(opts); err != nil {
+			return err
+		}
+		return nil
 	} else {
 		if err := d.apiClient.UpdateSnapshot(core.SnapshotUpdateOptions{
 			Options: opts,

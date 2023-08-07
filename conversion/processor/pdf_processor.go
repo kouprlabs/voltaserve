@@ -3,7 +3,7 @@ package processor
 import (
 	"os"
 	"path/filepath"
-	"voltaserve/client"
+	"strings"
 	"voltaserve/config"
 	"voltaserve/core"
 	"voltaserve/helper"
@@ -11,31 +11,29 @@ import (
 )
 
 type PDFProcessor struct {
-	cmd         *infra.Command
-	imageProc   *ImageProcessor
-	toolsClient *client.ToolsClient
-	config      config.Config
+	cmd       *infra.Command
+	imageProc *ImageProcessor
+	config    config.Config
 }
 
 func NewPDFProcessor() *PDFProcessor {
 	return &PDFProcessor{
-		cmd:         infra.NewCommand(),
-		imageProc:   NewImageProcessor(),
-		toolsClient: client.NewToolsClient(),
-		config:      config.GetConfig(),
+		cmd:       infra.NewCommand(),
+		imageProc: NewImageProcessor(),
+		config:    config.GetConfig(),
 	}
 }
 
 func (p *PDFProcessor) Base64Thumbnail(inputPath string) (core.ImageBase64, error) {
 	outputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".png")
-	if err := p.toolsClient.ThumbnailFromImage(inputPath, 0, p.config.Limits.ImagePreviewMaxHeight, outputPath); err != nil {
+	if err := p.imageProc.ThumbnailFromImage(inputPath, 0, p.config.Limits.ImagePreviewMaxHeight, outputPath); err != nil {
 		return core.ImageBase64{}, err
 	}
 	b64, err := helper.ImageToBase64(outputPath)
 	if err != nil {
 		return core.ImageBase64{}, err
 	}
-	imageProps, err := p.toolsClient.MeasureImage(outputPath)
+	imageProps, err := p.imageProc.MeasureImage(outputPath)
 	if err != nil {
 		return core.ImageBase64{}, err
 	}
@@ -49,4 +47,19 @@ func (p *PDFProcessor) Base64Thumbnail(inputPath string) (core.ImageBase64, erro
 		Width:  imageProps.Width,
 		Height: imageProps.Height,
 	}, nil
+}
+
+func (p *PDFProcessor) TextFromPDF(inputPath string) (string, error) {
+	outputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".txt")
+	if err := infra.NewCommand().Exec("pdftotext", inputPath, outputPath); err != nil {
+		return "", err
+	}
+	b, err := os.ReadFile(outputPath)
+	if err != nil {
+		return "", err
+	}
+	if err := os.Remove(outputPath); err != nil {
+		return "", err
+	}
+	return strings.TrimSpace(string(b)), nil
 }

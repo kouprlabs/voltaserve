@@ -15,13 +15,12 @@ import (
 )
 
 type imagePipeline struct {
-	imageProc   *processor.ImageProcessor
-	s3          *infra.S3Manager
-	apiClient   *client.APIClient
-	toolsClient *client.ToolsClient
-	fileIdent   *identifier.FileIdentifier
-	logger      *zap.SugaredLogger
-	config      config.Config
+	imageProc *processor.ImageProcessor
+	s3        *infra.S3Manager
+	apiClient *client.APIClient
+	fileIdent *identifier.FileIdentifier
+	logger    *zap.SugaredLogger
+	config    config.Config
 }
 
 func NewImagePipeline() core.Pipeline {
@@ -30,13 +29,12 @@ func NewImagePipeline() core.Pipeline {
 		panic(err)
 	}
 	return &imagePipeline{
-		imageProc:   processor.NewImageProcessor(),
-		s3:          infra.NewS3Manager(),
-		apiClient:   client.NewAPIClient(),
-		toolsClient: client.NewToolsClient(),
-		fileIdent:   identifier.NewFileIdentifier(),
-		logger:      logger,
-		config:      config.GetConfig(),
+		imageProc: processor.NewImageProcessor(),
+		s3:        infra.NewS3Manager(),
+		apiClient: client.NewAPIClient(),
+		fileIdent: identifier.NewFileIdentifier(),
+		logger:    logger,
+		config:    config.GetConfig(),
 	}
 }
 
@@ -49,7 +47,17 @@ func (p *imagePipeline) Run(opts core.PipelineRunOptions) error {
 	if err != nil {
 		return err
 	}
-	imageProps, err := p.toolsClient.MeasureImage(inputPath)
+	thumbnail, err := p.imageProc.Base64Thumbnail(inputPath)
+	if err != nil {
+		return err
+	}
+	if err := p.apiClient.UpdateSnapshot(core.SnapshotUpdateOptions{
+		Options:   opts,
+		Thumbnail: &thumbnail,
+	}); err != nil {
+		return err
+	}
+	imageProps, err := p.imageProc.MeasureImage(inputPath)
 	if err != nil {
 		return err
 	}
@@ -67,7 +75,7 @@ func (p *imagePipeline) Run(opts core.PipelineRunOptions) error {
 	}
 	if filepath.Ext(inputPath) == ".tiff" {
 		jpegPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".jpg")
-		if err := p.toolsClient.ConvertImage(inputPath, jpegPath); err != nil {
+		if err := p.imageProc.ConvertImage(inputPath, jpegPath); err != nil {
 			return err
 		}
 		updateOpts.Preview = &core.S3Object{
@@ -86,10 +94,8 @@ func (p *imagePipeline) Run(opts core.PipelineRunOptions) error {
 		}
 		inputPath = jpegPath
 	}
-	if _, err := os.Stat(inputPath); err == nil {
-		if err := os.Remove(inputPath); err != nil {
-			return err
-		}
+	if err := os.Remove(inputPath); err != nil {
+		return err
 	}
 	return nil
 }
