@@ -1,4 +1,4 @@
-package builder
+package pipeline
 
 import (
 	"os"
@@ -11,28 +11,28 @@ import (
 	"voltaserve/processor"
 )
 
-type pdfBuilder struct {
+type videoPipeline struct {
 	pipelineIdentifier *identifier.PipelineIdentifier
-	pdfProc            *processor.PDFProcessor
+	videoProc          *processor.VideoProcessor
 	s3                 *infra.S3Manager
 	apiClient          *client.APIClient
 }
 
-func NewPDFBuilder() core.Builder {
-	return &pdfBuilder{
+func NewVideoPipeline() core.Pipeline {
+	return &videoPipeline{
 		pipelineIdentifier: identifier.NewPipelineIdentifier(),
-		pdfProc:            processor.NewPDFProcessor(),
+		videoProc:          processor.NewVideoProcessor(),
 		s3:                 infra.NewS3Manager(),
 		apiClient:          client.NewAPIClient(),
 	}
 }
 
-func (p *pdfBuilder) Build(opts core.PipelineRunOptions) error {
+func (p *videoPipeline) Run(opts core.PipelineRunOptions) error {
 	inputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(opts.Key))
 	if err := p.s3.GetFile(opts.Key, inputPath, opts.Bucket); err != nil {
 		return err
 	}
-	thumbnail, err := p.pdfProc.Base64Thumbnail(inputPath)
+	thumbnail, err := p.videoProc.Base64Thumbnail(inputPath)
 	if err != nil {
 		return err
 	}
@@ -42,10 +42,8 @@ func (p *pdfBuilder) Build(opts core.PipelineRunOptions) error {
 	}); err != nil {
 		return err
 	}
-	if _, err := os.Stat(inputPath); err == nil {
-		if err := os.Remove(inputPath); err != nil {
-			return err
-		}
+	if err := os.Remove(inputPath); err != nil {
+		return err
 	}
 	return nil
 }

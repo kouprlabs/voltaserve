@@ -254,11 +254,12 @@ const Item = ({ file, scale }: ItemProps) => {
           >
             {file.name}
           </ChakraLink>
-        ) : (
+        ) : null}
+        {file.type === 'file' && file.status !== SnapshotStatus.Ready ? (
           <Text textAlign="center" noOfLines={3} onClick={handleSelectionClick}>
             {file.name}
           </Text>
-        )}
+        ) : null}
       </Box>
       <VStack spacing={0}>
         <Text textAlign="center" noOfLines={3} color="gray.500">

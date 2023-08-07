@@ -32,11 +32,9 @@ func main() {
 
 	schedulerOpts := runtime.NewDefaultSchedulerOptions()
 	pipelineWorkers := flag.Int("pipeline-workers", schedulerOpts.PipelineWorkerCount, "Number of pipeline workers")
-	builderWorkers := flag.Int("builder-workers", schedulerOpts.BuilderWorkerCount, "Number of builder workers")
 	flag.Parse()
 	scheduler := runtime.NewScheduler(runtime.SchedulerOptions{
 		PipelineWorkerCount: *pipelineWorkers,
-		BuilderWorkerCount:  *builderWorkers,
 	})
 
 	app := fiber.New()
@@ -64,7 +62,6 @@ func main() {
 			return err
 		}
 		scheduler.SchedulePipeline(opts)
-		scheduler.ScheduleBuilder(opts)
 		return c.SendStatus(200)
 	})
 

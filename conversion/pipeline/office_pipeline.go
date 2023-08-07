@@ -14,6 +14,7 @@ import (
 type officePipeline struct {
 	pdfPipeline core.Pipeline
 	officeProc  *processor.OfficeProcessor
+	pdfProc     *processor.PDFProcessor
 	s3          *infra.S3Manager
 	config      config.Config
 	apiClient   *client.APIClient
@@ -23,6 +24,7 @@ func NewOfficePipeline() core.Pipeline {
 	return &officePipeline{
 		pdfPipeline: NewPDFPipeline(),
 		officeProc:  processor.NewOfficeProcessor(),
+		pdfProc:     processor.NewPDFProcessor(),
 		s3:          infra.NewS3Manager(),
 		config:      config.GetConfig(),
 		apiClient:   client.NewAPIClient(),
@@ -40,6 +42,16 @@ func (p *officePipeline) Run(opts core.PipelineRunOptions) error {
 	}
 	stat, err := os.Stat(outputPath)
 	if err != nil {
+		return err
+	}
+	thumbnail, err := p.pdfProc.Base64Thumbnail(outputPath)
+	if err != nil {
+		return err
+	}
+	if err := p.apiClient.UpdateSnapshot(core.SnapshotUpdateOptions{
+		Options:   opts,
+		Thumbnail: &thumbnail,
+	}); err != nil {
 		return err
 	}
 	previewKey := opts.FileID + "/" + opts.SnapshotID + "/preview.pdf"
@@ -64,15 +76,11 @@ func (p *officePipeline) Run(opts core.PipelineRunOptions) error {
 	}); err != nil {
 		return err
 	}
-	if _, err := os.Stat(inputPath); err == nil {
-		if err := os.Remove(inputPath); err != nil {
-			return err
-		}
+	if err := os.Remove(inputPath); err != nil {
+		return err
 	}
-	if _, err := os.Stat(outputPath); err == nil {
-		if err := os.Remove(outputPath); err != nil {
-			return err
-		}
+	if err := os.Remove(outputPath); err != nil {
+		return err
 	}
 	return nil
 }

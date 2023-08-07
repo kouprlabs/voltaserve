@@ -15,14 +15,13 @@ import (
 )
 
 type pdfPipeline struct {
-	pdfProc     *processor.PDFProcessor
-	imageProc   *processor.ImageProcessor
-	s3          *infra.S3Manager
-	apiClient   *client.APIClient
-	toolsClient *client.ToolsClient
-	fileIdent   *identifier.FileIdentifier
-	logger      *zap.SugaredLogger
-	config      config.Config
+	pdfProc   *processor.PDFProcessor
+	imageProc *processor.ImageProcessor
+	s3        *infra.S3Manager
+	apiClient *client.APIClient
+	fileIdent *identifier.FileIdentifier
+	logger    *zap.SugaredLogger
+	config    config.Config
 }
 
 func NewPDFPipeline() core.Pipeline {
@@ -31,14 +30,13 @@ func NewPDFPipeline() core.Pipeline {
 		panic(err)
 	}
 	return &pdfPipeline{
-		pdfProc:     processor.NewPDFProcessor(),
-		imageProc:   processor.NewImageProcessor(),
-		s3:          infra.NewS3Manager(),
-		apiClient:   client.NewAPIClient(),
-		toolsClient: client.NewToolsClient(),
-		fileIdent:   identifier.NewFileIdentifier(),
-		logger:      logger,
-		config:      config.GetConfig(),
+		pdfProc:   processor.NewPDFProcessor(),
+		imageProc: processor.NewImageProcessor(),
+		s3:        infra.NewS3Manager(),
+		apiClient: client.NewAPIClient(),
+		fileIdent: identifier.NewFileIdentifier(),
+		logger:    logger,
+		config:    config.GetConfig(),
 	}
 }
 
@@ -47,7 +45,17 @@ func (p *pdfPipeline) Run(opts core.PipelineRunOptions) error {
 	if err := p.s3.GetFile(opts.Key, inputPath, opts.Bucket); err != nil {
 		return err
 	}
-	text, err := p.toolsClient.TextFromPDF(inputPath)
+	thumbnail, err := p.pdfProc.Base64Thumbnail(inputPath)
+	if err != nil {
+		return err
+	}
+	if err := p.apiClient.UpdateSnapshot(core.SnapshotUpdateOptions{
+		Options:   opts,
+		Thumbnail: &thumbnail,
+	}); err != nil {
+		return err
+	}
+	text, err := p.pdfProc.TextFromPDF(inputPath)
 	if err != nil {
 		p.logger.Named(infra.StrPipeline).Errorw(err.Error())
 	}
@@ -67,10 +75,8 @@ func (p *pdfPipeline) Run(opts core.PipelineRunOptions) error {
 	}); err != nil {
 		return err
 	}
-	if _, err := os.Stat(inputPath); err == nil {
-		if err := os.Remove(inputPath); err != nil {
-			return err
-		}
+	if err := os.Remove(inputPath); err != nil {
+		return err
 	}
 	return nil
 }
