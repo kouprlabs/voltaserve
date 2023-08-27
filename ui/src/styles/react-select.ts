@@ -8,6 +8,10 @@ const reactSelectStyles = {
     position: 'absolute',
     right: '0px',
   }),
+  menuList: (provided: SystemStyleObject) => ({
+    ...provided,
+    borderRadius: '15px',
+  }),
   indicatorSeparator: (provided: SystemStyleObject) => ({
     ...provided,
     display: 'none',
