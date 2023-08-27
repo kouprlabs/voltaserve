@@ -1,4 +1,11 @@
-import { ChangeEvent, useCallback, useEffect, useRef, useState } from 'react'
+import {
+  ChangeEvent,
+  ReactElement,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
 import { useParams, useSearchParams } from 'react-router-dom'
 import {
   Button,
@@ -35,6 +42,7 @@ import {
   IconGridFill,
   IconSortUp,
   IconSortDown,
+  IconCheck,
 } from '@koupr/ui'
 import FileAPI, { List, SortBy, SortOrder } from '@/client/api/file'
 import { ltEditorPermission, ltOwnerPermission } from '@/client/api/permission'
@@ -197,11 +205,11 @@ const Toolbar = () => {
   }, [sortOrder, dispatch])
 
   const getSortByIcon = useCallback(
-    (value: SortBy) => {
+    (value: SortBy): ReactElement => {
       if (value === sortBy) {
-        return <IconCheckCircle />
+        return <IconCheck />
       } else {
-        return <IconCircle />
+        return <IconCheck color="transparent" />
       }
     },
     [sortBy],
