@@ -10,11 +10,7 @@ docker compose up -d \
     infra-minio \
     infra-meilisearch \
     infra-redis \
-    infra-mailhog \
-    tools-ffmpeg \
-    tools-imagemagick \
-    tools-libreoffice \
-    tools-poppler
+    infra-mailhog
 ```
 
 ### Run Microservices
