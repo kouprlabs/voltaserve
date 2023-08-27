@@ -29,7 +29,6 @@ import {
   Tag,
   Avatar,
   VStack,
-  SystemStyleObject,
 } from '@chakra-ui/react'
 import { Spinner, variables } from '@koupr/ui'
 import { IconAdd, IconCheck, IconTrash, IconUserPlus } from '@koupr/ui'
@@ -45,6 +44,7 @@ import UserSelector from '@/components/common/user-selector'
 import { filesUpdated } from '@/store/entities/files'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { selectionUpdated, sharingModalDidClose } from '@/store/ui/files'
+import reactSelectStyles from '@/styles/react-select'
 
 const Sharing = () => {
   const params = useParams()
@@ -64,29 +64,6 @@ const Sharing = () => {
   const [activeGroupPermission, setActiveGroupPermission] = useState<string>()
   const { data: user } = IdPUserAPI.useGet()
   const isSingleFileMode = useMemo(() => selection.length === 1, [selection])
-  const selectStyles = useMemo(() => {
-    return {
-      dropdownIndicator: (provided: SystemStyleObject) => ({
-        ...provided,
-        bg: 'transparent',
-        cursor: 'inherit',
-        position: 'absolute',
-        right: '0px',
-      }),
-      indicatorSeparator: (provided: SystemStyleObject) => ({
-        ...provided,
-        display: 'none',
-      }),
-      placeholder: (provided: SystemStyleObject) => ({
-        ...provided,
-        textAlign: 'center',
-      }),
-      singleValue: (provided: SystemStyleObject) => ({
-        ...provided,
-        textAlign: 'center',
-      }),
-    }
-  }, [])
 
   const loadUsers = useCallback(async () => {
     if (workspace) {
@@ -325,7 +302,7 @@ const Sharing = () => {
                         ]}
                         placeholder="Select Permission"
                         selectedOptionStyle="check"
-                        chakraStyles={selectStyles}
+                        chakraStyles={reactSelectStyles}
                         onChange={(e) => {
                           if (e) {
                             setActiveUserPermission(e.value)
@@ -420,7 +397,7 @@ const Sharing = () => {
                         ]}
                         placeholder="Select Permission"
                         selectedOptionStyle="check"
-                        chakraStyles={selectStyles}
+                        chakraStyles={reactSelectStyles}
                       />
                       <Button
                         leftIcon={<IconCheck />}
