@@ -15,7 +15,6 @@ import {
   Tab,
   TabPanel,
   Stack,
-  Select,
   Table,
   Thead,
   Tbody,
@@ -30,9 +29,11 @@ import {
   Tag,
   Avatar,
   VStack,
+  SystemStyleObject,
 } from '@chakra-ui/react'
 import { Spinner, variables } from '@koupr/ui'
 import { IconAdd, IconCheck, IconTrash, IconUserPlus } from '@koupr/ui'
+import { Select } from 'chakra-react-select'
 import FileAPI, { GroupPermission, UserPermission } from '@/client/api/file'
 import GroupAPI, { Group } from '@/client/api/group'
 import { geEditorPermission } from '@/client/api/permission'
@@ -63,6 +64,29 @@ const Sharing = () => {
   const [activeGroupPermission, setActiveGroupPermission] = useState<string>()
   const { data: user } = IdPUserAPI.useGet()
   const isSingleFileMode = useMemo(() => selection.length === 1, [selection])
+  const selectStyles = useMemo(() => {
+    return {
+      dropdownIndicator: (provided: SystemStyleObject) => ({
+        ...provided,
+        bg: 'transparent',
+        cursor: 'inherit',
+        position: 'absolute',
+        right: '0px',
+      }),
+      indicatorSeparator: (provided: SystemStyleObject) => ({
+        ...provided,
+        display: 'none',
+      }),
+      placeholder: (provided: SystemStyleObject) => ({
+        ...provided,
+        textAlign: 'center',
+      }),
+      singleValue: (provided: SystemStyleObject) => ({
+        ...provided,
+        textAlign: 'center',
+      }),
+    }
+  }, [])
 
   const loadUsers = useCallback(async () => {
     if (workspace) {
@@ -168,7 +192,7 @@ const Sharing = () => {
         setPermissionBeingRevoked(undefined)
       }
     },
-    [selection, isSingleFileMode, dispatch, loadUserPermissions]
+    [selection, isSingleFileMode, dispatch, loadUserPermissions],
   )
 
   const handleGrantGroupPermission = useCallback(async () => {
@@ -221,7 +245,7 @@ const Sharing = () => {
         setPermissionBeingRevoked(undefined)
       }
     },
-    [selection, isSingleFileMode, dispatch, loadGroupPermissions]
+    [selection, isSingleFileMode, dispatch, loadGroupPermissions],
   )
 
   return (
@@ -231,6 +255,8 @@ const Sharing = () => {
       onClose={() => {
         setUsers(undefined)
         setGroups(undefined)
+        setActiveUserId(undefined)
+        setActiveGroupId(undefined)
         setUserPermissions(undefined)
         setGroupPermissions(undefined)
         dispatch(selectionUpdated([]))
@@ -272,7 +298,7 @@ const Sharing = () => {
                         <Text>This organization has no members.</Text>
                         {workspace &&
                         geEditorPermission(
-                          workspace.organization.permission
+                          workspace.organization.permission,
                         ) ? (
                           <Button
                             as={Link}
@@ -292,17 +318,20 @@ const Sharing = () => {
                         onConfirm={(value) => setActiveUserId(value.id)}
                       />
                       <Select
+                        options={[
+                          { value: 'viewer', label: 'Viewer' },
+                          { value: 'editor', label: 'Editor' },
+                          { value: 'owner', label: 'Owner' },
+                        ]}
                         placeholder="Select Permission"
-                        value={activeUserPermission}
-                        isDisabled={isGrantLoading}
-                        onChange={(e) =>
-                          setActiveUserPermission(e.target.value)
-                        }
-                      >
-                        <option value="viewer">Viewer</option>
-                        <option value="editor">Editor</option>
-                        <option value="owner">Owner</option>
-                      </Select>
+                        selectedOptionStyle="check"
+                        chakraStyles={selectStyles}
+                        onChange={(e) => {
+                          if (e) {
+                            setActiveUserPermission(e.value)
+                          }
+                        }}
+                      />
                       <Button
                         leftIcon={<IconCheck />}
                         colorScheme="blue"
@@ -384,17 +413,15 @@ const Sharing = () => {
                         onConfirm={(value) => setActiveGroupId(value.id)}
                       />
                       <Select
+                        options={[
+                          { value: 'viewer', label: 'Viewer' },
+                          { value: 'editor', label: 'Editor' },
+                          { value: 'owner', label: 'Owner' },
+                        ]}
                         placeholder="Select Permission"
-                        value={activeGroupPermission}
-                        isDisabled={isGrantLoading}
-                        onChange={(e) =>
-                          setActiveGroupPermission(e.target.value)
-                        }
-                      >
-                        <option value="viewer">Viewer</option>
-                        <option value="editor">Editor</option>
-                        <option value="owner">Owner</option>
-                      </Select>
+                        selectedOptionStyle="check"
+                        chakraStyles={selectStyles}
+                      />
                       <Button
                         leftIcon={<IconCheck />}
                         colorScheme="blue"
@@ -412,7 +439,7 @@ const Sharing = () => {
                         <Text>This organization has no groups.</Text>
                         {workspace &&
                         geEditorPermission(
-                          workspace.organization.permission
+                          workspace.organization.permission,
                         ) ? (
                           <Button
                             as={Link}
