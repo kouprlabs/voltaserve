@@ -22,4 +22,3 @@ Start each microservice separately in a new terminal as described here:
 - [Voltaserve Identity Provider](idp/README.md)
 - [Voltaserve WebDAV](webdav/README.md)
 - [Voltaserve Conversion](conversion/README.md)
-- [Voltaserve Tools](tools/README.md)
