@@ -4,6 +4,8 @@
   <h1 align="center">Voltaserve</h1>
 </p>
 
+![](./assets/screencast.gif)
+
 ## Getting Started
 
 Install [Docker](https://docs.docker.com/get-docker) and [Docker Compose](https://docs.docker.com/compose/install).
