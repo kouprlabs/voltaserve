@@ -9,7 +9,7 @@ pnpm install
 Run for development:
 
 ```shell
-pnpm run dev
+pnpm dev
 ```
 
 Build Docker Image:

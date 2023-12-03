@@ -19,13 +19,13 @@ pnpm install
 Run for development:
 
 ```shell
-pnpm run dev
+pnpm dev
 ```
 
 Run for production:
 
 ```shell
-pnpm run start
+pnpm start
 ```
 
 ### Build Docker Image
