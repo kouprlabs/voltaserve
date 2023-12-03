@@ -1,15 +1,5 @@
 # Voltaserve WebDAV
 
-## Getting Started
-
-Install [Node.js 18.x](https://nodejs.org).
-
-Enable [pnpm](https://pnpm.io):
-
-```shell
-corepack enable
-```
-
 Install dependencies:
 
 ```shell
@@ -28,7 +18,7 @@ Run for production:
 pnpm start
 ```
 
-### Build Docker Image
+Build Docker image:
 
 ```shell
 docker build -t voltaserve/webdav .
