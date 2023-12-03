@@ -2,7 +2,7 @@
 
 ## Getting Started
 
-Install [Swag](https://github.com/swaggo/swag) and [golangci-lint](https://golangci-lint.run/usage/install).
+Install [swag](https://github.com/swaggo/swag) and [golangci-lint](https://golangci-lint.run/usage/install).
 
 Run for development:
 
