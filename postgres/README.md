@@ -1,7 +1,5 @@
 # Voltaserve PostgreSQL
 
-## Getting Started
-
 Build Docker image:
 
 ```shell
