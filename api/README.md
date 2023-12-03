@@ -2,7 +2,7 @@
 
 ## Getting Started
 
-Install [Golang](https://go.dev/doc/install), [Swag](https://github.com/swaggo/swag) and [golangci-lint](https://golangci-lint.run/usage/install).
+Install [Swag](https://github.com/swaggo/swag) and [golangci-lint](https://golangci-lint.run/usage/install).
 
 Run for development:
 
@@ -16,19 +16,19 @@ Build binary:
 go build .
 ```
 
-### Build Docker Image
+Build Docker image:
 
 ```shell
 docker build -t voltaserve/api .
 ```
 
-### Code Linter
+Run code linter:
 
 ```shell
 golangci-lint run
 ```
 
-### Generate and Publish Documentation
+## Generate and Publish Documentation
 
 Format swag comments:
 

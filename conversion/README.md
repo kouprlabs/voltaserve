@@ -1,10 +1,6 @@
 # Voltaserve Conversion
 
-## Getting Started
-
-Install [Golang](https://go.dev/doc/install) and [golangci-lint](https://golangci-lint.run/usage/install).
-
-### Build and Run
+Install [golangci-lint](https://golangci-lint.run/usage/install).
 
 Run for development:
 
@@ -18,13 +14,13 @@ Build binary:
 go build .
 ```
 
-### Code Linter
+Run code linter:
 
 ```shell
 golangci-lint run
 ```
 
-### Build Docker Image
+Build Docker image:
 
 ```shell
 docker build -t voltaserve/conversion .
