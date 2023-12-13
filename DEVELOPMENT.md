@@ -6,11 +6,11 @@
 
 ```shell
 docker compose up -d \
-    infra-postgres \
-    infra-minio \
-    infra-meilisearch \
-    infra-redis \
-    infra-mailhog
+    postgres \
+    minio \
+    meilisearch \
+    redis \
+    mailhog
 ```
 
 ### Run Microservices
