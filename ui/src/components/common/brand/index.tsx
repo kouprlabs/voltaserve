@@ -1,9 +1,9 @@
 import { useCallback } from 'react'
 import { Center, CenterProps, useColorMode } from '@chakra-ui/react'
-import { ReactComponent as BrandDarkGlossySvg } from './brand-dark-glossy.svg'
-import { ReactComponent as BrandDarkSvg } from './brand-dark.svg'
-import { ReactComponent as BrandGlossySvg } from './brand-glossy.svg'
-import { ReactComponent as BrandSvg } from './brand.svg'
+import BrandDarkGlossySvg from './brand-dark-glossy.svg?react'
+import BrandDarkSvg from './brand-dark.svg?react'
+import BrandGlossySvg from './brand-glossy.svg?react'
+import BrandSvg from './brand.svg?react'
 
 type LogoProps = CenterProps & {
   isGlossy?: boolean
