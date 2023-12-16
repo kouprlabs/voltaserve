@@ -2,7 +2,6 @@ import { createBrowserRouter } from 'react-router-dom'
 import AccountInvitationsPage from '@/pages/account/invitations'
 import AccountLayout from '@/pages/account/layout'
 import AccountSettingsPage from '@/pages/account/settings'
-import AuthenticatedPage from '@/pages/authenticated'
 import ConfirmEmailPage from '@/pages/confirm-email'
 import FileViewerPage from '@/pages/file-viewer'
 import ForgotPasswordPage from '@/pages/forgot-password'
@@ -27,6 +26,7 @@ import WorkspaceFilesPage from '@/pages/workspace/files'
 import WorkspaceLayout from '@/pages/workspace/layout'
 import WorkspaceListPage from '@/pages/workspace/list'
 import WorkspaceSettingsPage from '@/pages/workspace/settings'
+import ShellLayout from './components/layout/shell'
 import UpdateEmailPage from './pages/update-email'
 
 const router = createBrowserRouter([
@@ -35,7 +35,7 @@ const router = createBrowserRouter([
     element: <Root />,
     children: [
       {
-        element: <AuthenticatedPage />,
+        element: <ShellLayout />,
         children: [
           {
             element: <AccountLayout />,
