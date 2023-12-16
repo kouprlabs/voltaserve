@@ -7,7 +7,7 @@
     "start": "ts-node -r tsconfig-paths/register src/app.ts",
     "dev": "nodemon --exec ts-node -r tsconfig-paths/register src/app.ts",
     "tsc": "tsc --noEmit",
-    "prettier": "prettier --write .",
+    "format": "prettier --write .",
     "swagger-autogen": "node ./swagger.js",
     "lint": "eslint './src/**/*.ts'"
   },
