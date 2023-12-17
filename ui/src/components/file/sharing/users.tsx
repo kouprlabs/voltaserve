@@ -49,20 +49,20 @@ const Users = ({
   const selection = useAppSelector((state) => state.ui.files.selection)
   const [isGrantLoading, setIsGrantLoading] = useState(false)
   const [permissionBeingRevoked, setPermissionBeingRevoked] = useState<string>()
-  const [activeUserId, setActiveUserId] = useState<string>()
+  const [activeUser, setActiveUser] = useState<User>()
   const [activeUserPermission, setActiveUserPermission] = useState<string>()
   const { data: user } = IdPUserAPI.useGet()
   const isSingleSelection = selection.length === 1
 
   const handleGrantUserPermission = useCallback(async () => {
-    if (!activeUserId || !activeUserPermission) {
+    if (!activeUser || !activeUserPermission) {
       return
     }
     try {
       setIsGrantLoading(true)
       await FileAPI.grantUserPermission({
         ids: selection,
-        userId: activeUserId,
+        userId: activeUser.id,
         permission: activeUserPermission,
       })
       const result = await FileAPI.batchGet({ ids: selection })
@@ -70,8 +70,8 @@ const Users = ({
       if (isSingleSelection) {
         await mutateUserPermissions()
       }
-      setActiveUserId('')
-      setActiveUserPermission('')
+      setActiveUser(undefined)
+      setActiveUserPermission(undefined)
       setIsGrantLoading(false)
       if (!isSingleSelection) {
         dispatch(sharingModalDidClose())
@@ -81,7 +81,7 @@ const Users = ({
     }
   }, [
     selection,
-    activeUserId,
+    activeUser,
     activeUserPermission,
     isSingleSelection,
     dispatch,
@@ -130,8 +130,9 @@ const Users = ({
       {users && users.length > 0 ? (
         <Stack direction="column" spacing={variables.spacing}>
           <UserSelector
+            value={activeUser}
             organizationId={workspace?.organization.id}
-            onConfirm={(value) => setActiveUserId(value.id)}
+            onConfirm={(value) => setActiveUser(value)}
           />
           <Select
             options={[
@@ -152,7 +153,7 @@ const Users = ({
             leftIcon={<IconCheck />}
             colorScheme="blue"
             isLoading={isGrantLoading}
-            isDisabled={!activeUserId || !activeUserPermission}
+            isDisabled={!activeUser || !activeUserPermission}
             onClick={() => handleGrantUserPermission()}
           >
             Apply to User
