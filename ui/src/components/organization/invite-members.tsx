@@ -100,7 +100,7 @@ const InviteMembers = ({ open, id, onClose }: InviteMembersProps) => {
           {({ values, errors, touched, isSubmitting }) => (
             <Form>
               <ModalBody>
-                <Stack direction="column">
+                <Stack direction="column" gap={variables.spacing}>
                   <Field name="emails">
                     {({ field }: FieldAttributes<FieldProps>) => (
                       <FormControl
