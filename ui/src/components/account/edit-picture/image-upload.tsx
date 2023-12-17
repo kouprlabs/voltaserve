@@ -49,7 +49,7 @@ const ImageUpload = ({
       reader.readAsDataURL(file)
       onChange?.(changeEvent)
     },
-    [onChange]
+    [onChange],
   )
 
   const handleEdit = useCallback(() => {

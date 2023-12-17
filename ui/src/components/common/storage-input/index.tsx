@@ -6,10 +6,10 @@ import { Unit, getUnit, convertFromByte, normalizeToByte } from './unit'
 
 const StorageInput = ({ id, field, form }: FieldAttributes<FieldProps>) => {
   const [value, setValue] = useState<number | null>(
-    field.value ? convertFromByte(field.value, getUnit(field.value)) : null
+    field.value ? convertFromByte(field.value, getUnit(field.value)) : null,
   )
   const [unit, setUnit] = useState<Unit>(
-    field.value ? getUnit(field.value) : 'b'
+    field.value ? getUnit(field.value) : 'b',
   )
 
   return (
@@ -43,12 +43,12 @@ const StorageInput = ({ id, field, form }: FieldAttributes<FieldProps>) => {
               if (value) {
                 const newValue = convertFromByte(
                   normalizeToByte(value, unit),
-                  newUnit
+                  newUnit,
                 )
                 setValue(newValue)
                 form.setFieldValue(
                   field.name,
-                  normalizeToByte(newValue, newUnit)
+                  normalizeToByte(newValue, newUnit),
                 )
               }
             }}

@@ -104,7 +104,7 @@ export function isAudio(extension: string) {
 export function isArchive(extension: string) {
   return (
     ['.zip', '.tar', '.7z', '.bz2', '.gz', '.rar'].findIndex(
-      (e) => e === extension
+      (e) => e === extension,
     ) !== -1
   )
 }

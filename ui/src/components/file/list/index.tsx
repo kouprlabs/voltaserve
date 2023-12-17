@@ -4,7 +4,6 @@ import { Wrap, WrapItem, Text, Center } from '@chakra-ui/react'
 import { Spinner, variables } from '@koupr/ui'
 import FileAPI, { List as FileListData } from '@/client/api/file'
 import { REFRESH_INTERVAL, swrConfig } from '@/client/options'
-import { stringArraysIdentical } from '@/helpers/array'
 import { decodeQuery } from '@/helpers/query'
 import store from '@/store/configure-store'
 import {

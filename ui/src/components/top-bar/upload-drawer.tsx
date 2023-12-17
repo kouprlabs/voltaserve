@@ -24,12 +24,12 @@ const UploadDrawer = () => {
   const dispatch = useAppDispatch()
   const hasPendingUploads = useAppSelector(
     (state) =>
-      state.entities.uploads.items.filter((e) => !e.completed).length > 0
+      state.entities.uploads.items.filter((e) => !e.completed).length > 0,
   )
   const openDrawer = useAppSelector((state) => state.ui.uploadsDrawer.open)
   const hasCompleted = useAppSelector(
     (state) =>
-      state.entities.uploads.items.filter((e) => e.completed).length > 0
+      state.entities.uploads.items.filter((e) => e.completed).length > 0,
   )
   const { isOpen, onOpen, onClose } = useDisclosure()
   const buttonRef = useRef<HTMLButtonElement>(null)

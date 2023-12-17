@@ -65,7 +65,7 @@ export default class InvitationAPI {
     return useSWR<List>(
       `/invitations/get_incoming?${this.paramsFromListOptions(options)}`,
       apiFetcher,
-      swrOptions
+      swrOptions,
     )
   }
 
@@ -75,7 +75,7 @@ export default class InvitationAPI {
         ? `/invitations/get_outgoing?${this.paramsFromListOptions(options)}`
         : null,
       apiFetcher,
-      swrOptions
+      swrOptions,
     )
   }
 

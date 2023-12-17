@@ -53,7 +53,7 @@ const InviteMembers = ({ open, id, onClose }: InviteMembersProps) => {
   const handleSubmit = useCallback(
     async (
       { emails }: FormValues,
-      { setSubmitting }: FormikHelpers<FormValues>
+      { setSubmitting }: FormikHelpers<FormValues>,
     ) => {
       setSubmitting(true)
       try {
@@ -64,7 +64,7 @@ const InviteMembers = ({ open, id, onClose }: InviteMembersProps) => {
         mutate(
           `/invitations/get_outgoing?${new URLSearchParams({
             organization_id: id,
-          })}`
+          })}`,
         )
         navigate(`/organization/${id}/invitation`)
         setSubmitting(false)
@@ -73,7 +73,7 @@ const InviteMembers = ({ open, id, onClose }: InviteMembersProps) => {
         setSubmitting(false)
       }
     },
-    [id, navigate, onClose, mutate]
+    [id, navigate, onClose, mutate],
   )
 
   return (

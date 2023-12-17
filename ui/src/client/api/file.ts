@@ -431,6 +431,14 @@ export default class FileAPI {
     }).then((result) => result.json())
   }
 
+  static useGetUserPermissions(id: string, swrOptions?: any) {
+    return useSWR<UserPermission[]>(
+      id ? `/files/${id}/get_user_permissions` : null,
+      apiFetcher,
+      swrOptions,
+    )
+  }
+
   static async getGroupPermissions(id: string): Promise<GroupPermission[]> {
     return apiFetch(`/files/${id}/get_group_permissions`, {
       method: 'GET',
@@ -439,6 +447,14 @@ export default class FileAPI {
         'Content-Type': 'application/json',
       },
     }).then((result) => result.json())
+  }
+
+  static useGetGroupPermissions(id: string, swrOptions?: any) {
+    return useSWR<GroupPermission[]>(
+      id ? `/files/${id}/get_group_permissions` : null,
+      apiFetcher,
+      swrOptions,
+    )
   }
 
   static paramsFromListOptions(options?: ListOptions): URLSearchParams {

@@ -13,7 +13,7 @@ export default class StorageAPI {
     return useSWR<StorageUsage>(
       `/storage/get_account_usage`,
       apiFetcher,
-      swrOptions
+      swrOptions,
     )
   }
 
@@ -25,7 +25,7 @@ export default class StorageAPI {
           })}`
         : null,
       apiFetcher,
-      swrOptions
+      swrOptions,
     )
   }
 
@@ -37,7 +37,7 @@ export default class StorageAPI {
           })}`
         : null,
       apiFetcher,
-      swrOptions
+      swrOptions,
     )
   }
 }

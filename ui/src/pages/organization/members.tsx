@@ -46,7 +46,7 @@ const OrganizationMembersPage = () => {
   const invite = Boolean(params.invite as string)
   const { data: org, error: orgError } = OrganizationAPI.useGetById(
     organizationId,
-    swrConfig()
+    swrConfig(),
   )
   const { page, size, onPageChange, onSizeChange } = usePagePagination({
     localStoragePrefix: 'voltaserve',
@@ -67,7 +67,7 @@ const OrganizationMembersPage = () => {
       sortBy: SortBy.FullName,
       sortOrder: SortOrder.Asc,
     },
-    swrConfig()
+    swrConfig(),
   )
   const [userToRemove, setUserToRemove] = useState<User>()
   const [isInviteMembersModalOpen, setIsInviteMembersModalOpen] =

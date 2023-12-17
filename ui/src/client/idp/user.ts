@@ -50,7 +50,7 @@ export default class UserAPI {
   }
 
   static async updateEmailRequest(
-    options: UpdateEmailRequestOptions
+    options: UpdateEmailRequestOptions,
   ): Promise<User> {
     return idpFetch(`/user/update_email_request`, {
       method: 'POST',
@@ -63,7 +63,7 @@ export default class UserAPI {
   }
 
   static async updateEmailConfirmation(
-    options: UpdateEmailConfirmationOptions
+    options: UpdateEmailConfirmationOptions,
   ): Promise<User> {
     return idpFetch(`/user/update_email_confirmation`, {
       method: 'POST',

@@ -22,18 +22,18 @@ const GroupSettingsPage = () => {
   const params = useParams()
   const { data: group, error } = GroupAPI.useGetById(
     params.id as string,
-    swrConfig()
+    swrConfig(),
   )
   const [isNameModalOpen, setIsNameModalOpen] = useState(false)
   const [isAddMembersModalOpen, setIsAddMembersModalOpen] = useState(false)
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
   const hasEditPermission = useMemo(
     () => group && geEditorPermission(group.permission),
-    [group]
+    [group],
   )
   const hasOwnerPermission = useMemo(
     () => group && geOwnerPermission(group.permission),
-    [group]
+    [group],
   )
 
   if (error) {

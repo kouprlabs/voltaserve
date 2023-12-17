@@ -49,7 +49,7 @@ const EditFullName = ({ open, user, onClose }: EditFullNameProps) => {
   const handleSubmit = useCallback(
     async (
       { fullName }: FormValues,
-      { setSubmitting }: FormikHelpers<FormValues>
+      { setSubmitting }: FormikHelpers<FormValues>,
     ) => {
       setSubmitting(true)
       try {
@@ -63,7 +63,7 @@ const EditFullName = ({ open, user, onClose }: EditFullNameProps) => {
         setSubmitting(false)
       }
     },
-    [onClose, mutate]
+    [onClose, mutate],
   )
 
   return (

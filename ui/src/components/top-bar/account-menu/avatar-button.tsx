@@ -32,7 +32,7 @@ const AvatarButton = forwardRef<AvatarButtonProps, 'div'>(
         </ActiveCircle>
       </Box>
     )
-  }
+  },
 )
 
 export default AvatarButton
