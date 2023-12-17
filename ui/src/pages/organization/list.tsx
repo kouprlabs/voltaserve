@@ -21,12 +21,11 @@ import { SectionSpinner, variables } from '@koupr/ui'
 import { Helmet } from 'react-helmet-async'
 import OrganizationAPI, { SortOrder } from '@/client/api/organization'
 import { swrConfig } from '@/client/options'
-import PagePagination, {
-  usePagePagination,
-} from '@/components/common/page-pagination'
+import PagePagination from '@/components/common/page-pagination'
 import { CreateOrganizationButton } from '@/components/top-bar/buttons'
 import prettyDate from '@/helpers/pretty-date'
 import { decodeQuery } from '@/helpers/query'
+import usePagePagination from '@/hooks/page-pagination'
 
 const OrganizationListPage = () => {
   const [searchParams] = useSearchParams()

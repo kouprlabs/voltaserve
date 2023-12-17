@@ -2,9 +2,9 @@ import { useContext } from 'react'
 import { Stack } from '@chakra-ui/react'
 import { DrawerContext, variables, IconInfoCircle } from '@koupr/ui'
 import { File } from '@/client/api/file'
-import FileInfo from '@/components/common/file-info'
 import SwitchCard from '@/components/common/switch-card'
 import DownloadButton from './download-button'
+import FileInfo from './file-info'
 import OpenNewTabButton from './open-new-tab-button'
 
 type DrawerContentProps = {
