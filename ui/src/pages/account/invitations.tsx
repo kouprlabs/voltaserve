@@ -42,7 +42,7 @@ const AccountInvitationsPage = () => {
     mutate,
   } = InvitationAPI.useGetIncoming(
     { page, size, sortBy: SortBy.DateCreated, sortOrder: SortOrder.Desc },
-    swrConfig()
+    swrConfig(),
   )
 
   const handleAccept = useCallback(
@@ -55,7 +55,7 @@ const AccountInvitationsPage = () => {
         isClosable: true,
       })
     },
-    [mutate, toast]
+    [mutate, toast],
   )
 
   const handleDecline = useCallback(
@@ -68,7 +68,7 @@ const AccountInvitationsPage = () => {
         isClosable: true,
       })
     },
-    [mutate, toast]
+    [mutate, toast],
   )
 
   if (userError || invitationsError) {

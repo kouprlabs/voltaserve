@@ -61,7 +61,7 @@ const Delete = ({ open, group, onClose }: DeleteProps) => {
         setSubmitting(false)
       }
     },
-    [group.id, navigate, onClose]
+    [group.id, navigate, onClose],
   )
 
   return (

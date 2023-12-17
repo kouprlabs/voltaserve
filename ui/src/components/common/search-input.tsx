@@ -54,7 +54,7 @@ const SearchInput = ({ query, onChange }: SearchInputProps) => {
         handleSearch(value)
       }
     },
-    [handleSearch]
+    [handleSearch],
   )
 
   return (

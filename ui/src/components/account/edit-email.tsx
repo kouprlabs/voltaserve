@@ -52,7 +52,7 @@ const EditEmail = ({ open, user, onClose }: EditEmailProps) => {
   const handleSubmit = useCallback(
     async (
       { email }: FormValues,
-      { setSubmitting }: FormikHelpers<FormValues>
+      { setSubmitting }: FormikHelpers<FormValues>,
     ) => {
       setSubmitting(true)
       try {
@@ -66,7 +66,7 @@ const EditEmail = ({ open, user, onClose }: EditEmailProps) => {
         setSubmitting(false)
       }
     },
-    [onClose, mutate]
+    [onClose, mutate],
   )
 
   return (

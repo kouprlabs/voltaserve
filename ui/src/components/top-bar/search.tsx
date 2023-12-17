@@ -31,30 +31,30 @@ const Search = () => {
   const query = decodeQuery(searchParams.get('q') as string)
   const isWorkspaces = useMemo(
     () => location.pathname === '/workspace',
-    [location]
+    [location],
   )
   const isFiles = useMemo(
     () =>
       location.pathname.includes('/workspace/') &&
       location.pathname.includes('/file/'),
-    [location]
+    [location],
   )
   const isGroups = useMemo(() => location.pathname === '/group', [location])
   const isOrgs = useMemo(
     () => location.pathname === '/organization',
-    [location]
+    [location],
   )
   const isOrgMembers = useMemo(
     () =>
       location.pathname.includes('/organization/') &&
       location.pathname.includes('/member'),
-    [location]
+    [location],
   )
   const isGroupMembers = useMemo(
     () =>
       location.pathname.includes('/group/') &&
       location.pathname.includes('/member'),
-    [location]
+    [location],
   )
   const isAvailable = useMemo(
     () =>
@@ -64,7 +64,7 @@ const Search = () => {
       isOrgs ||
       isOrgMembers ||
       isGroupMembers,
-    [isWorkspaces, isFiles, isGroups, isOrgs, isOrgMembers, isGroupMembers]
+    [isWorkspaces, isFiles, isGroups, isOrgs, isOrgMembers, isGroupMembers],
   )
   const placeholder = useMemo(() => {
     if (isWorkspaces) {
@@ -97,7 +97,7 @@ const Search = () => {
       if (isFiles) {
         if (value) {
           navigation(
-            `/workspace/${workspaceId}/file/${fileId}?q=${encodeQuery(value)}`
+            `/workspace/${workspaceId}/file/${fileId}?q=${encodeQuery(value)}`,
           )
         } else {
           navigation(`/workspace/${workspaceId}/file/${fileId}`)
@@ -123,7 +123,7 @@ const Search = () => {
       } else if (isOrgMembers) {
         if (value) {
           navigation(
-            `/organization/${organizationId}/member?q=${encodeQuery(value)}`
+            `/organization/${organizationId}/member?q=${encodeQuery(value)}`,
           )
         } else {
           navigation(`/organization/${organizationId}/member`)
@@ -148,7 +148,7 @@ const Search = () => {
       isOrgMembers,
       isGroupMembers,
       navigation,
-    ]
+    ],
   )
 
   const handleClear = useCallback(() => {
@@ -186,7 +186,7 @@ const Search = () => {
         handleSearch(text)
       }
     },
-    [text, handleSearch]
+    [text, handleSearch],
   )
 
   const handleChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {

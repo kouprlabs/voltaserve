@@ -31,7 +31,7 @@ const NewInvitationItem = ({ invitation }: NewInvitationProps) => {
         setIsAcceptLoading(false)
       }
     },
-    [mutate, toast]
+    [mutate, toast],
   )
 
   const handleDecline = useCallback(
@@ -50,7 +50,7 @@ const NewInvitationItem = ({ invitation }: NewInvitationProps) => {
         setIsDeclineLoading(false)
       }
     },
-    [mutate, toast]
+    [mutate, toast],
   )
 
   return (

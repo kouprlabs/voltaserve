@@ -34,7 +34,7 @@ type FormValues = {
 const Rename = () => {
   const dispatch = useAppDispatch()
   const isModalOpen = useAppSelector(
-    (state) => state.ui.files.isRenameModalOpen
+    (state) => state.ui.files.isRenameModalOpen,
   )
   const id = useAppSelector((state) => state.ui.files.selection[0])
   const { data: file, mutate } = FileAPI.useGetById(id)
@@ -45,7 +45,7 @@ const Rename = () => {
   const handleSubmit = useCallback(
     async (
       { name }: FormValues,
-      { setSubmitting }: FormikHelpers<FormValues>
+      { setSubmitting }: FormikHelpers<FormValues>,
     ) => {
       if (!file) {
         return
@@ -63,7 +63,7 @@ const Rename = () => {
         setSubmitting(false)
       }
     },
-    [file, dispatch, mutate]
+    [file, dispatch, mutate],
   )
 
   return (

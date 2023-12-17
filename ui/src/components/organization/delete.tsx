@@ -65,7 +65,7 @@ const Delete = ({ open, organization, onClose }: DeleteProps) => {
         setSubmitting(false)
       }
     },
-    [organization.id, navigate, mutate, onClose]
+    [organization.id, navigate, mutate, onClose],
   )
 
   return (

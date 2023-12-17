@@ -50,7 +50,7 @@ const Delete = ({ open, onClose }: DeleteProps) => {
   const handleSubmit = useCallback(
     async (
       { password }: FormValues,
-      { setSubmitting }: FormikHelpers<FormValues>
+      { setSubmitting }: FormikHelpers<FormValues>,
     ) => {
       setSubmitting(true)
       try {
@@ -61,7 +61,7 @@ const Delete = ({ open, onClose }: DeleteProps) => {
         setSubmitting(false)
       }
     },
-    [navigate, onClose]
+    [navigate, onClose],
   )
 
   return (

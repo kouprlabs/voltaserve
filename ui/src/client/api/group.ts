@@ -71,7 +71,7 @@ export default class GroupAPI {
 
   static updateName = (
     id: string,
-    options: UpdateNameOptions
+    options: UpdateNameOptions,
   ): Promise<Group> =>
     apiFetch(`/groups/${id}/update_name`, {
       method: 'POST',
@@ -99,7 +99,7 @@ export default class GroupAPI {
     useSWR<Group>(
       id ? `/groups/${id}` : null,
       () => this.getById(id),
-      swrOptions
+      swrOptions,
     )
 
   static async getById(id: string): Promise<Group> {
@@ -116,7 +116,7 @@ export default class GroupAPI {
     return useSWR<List>(
       `/groups?${this.paramsFromListOptions(options)}`,
       () => this.list(options),
-      swrOptions
+      swrOptions,
     )
   }
 

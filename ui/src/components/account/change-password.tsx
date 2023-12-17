@@ -53,7 +53,7 @@ const ChangePassword = ({ open, onClose }: ChangePasswordProps) => {
   const handleSubmit = useCallback(
     async (
       { currentPassword, newPassword }: FormValues,
-      { setSubmitting }: FormikHelpers<FormValues>
+      { setSubmitting }: FormikHelpers<FormValues>,
     ) => {
       setSubmitting(true)
       try {
@@ -68,7 +68,7 @@ const ChangePassword = ({ open, onClose }: ChangePasswordProps) => {
         setSubmitting(false)
       }
     },
-    [onClose, mutate]
+    [onClose, mutate],
   )
 
   return (
