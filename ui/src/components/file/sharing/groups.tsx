@@ -48,17 +48,17 @@ const Groups = ({
   const selection = useAppSelector((state) => state.ui.files.selection)
   const [isGrantLoading, setIsGrantLoading] = useState(false)
   const [permissionBeingRevoked, setPermissionBeingRevoked] = useState<string>()
-  const [activeGroupId, setActiveGroupId] = useState<string>()
+  const [activeGroup, setActiveGroup] = useState<Group>()
   const [activeGroupPermission, setActiveGroupPermission] = useState<string>()
   const isSingleSelection = selection.length === 1
 
   const handleGrantGroupPermission = useCallback(async () => {
-    if (activeGroupId && activeGroupPermission) {
+    if (activeGroup && activeGroupPermission) {
       try {
         setIsGrantLoading(true)
         await FileAPI.grantGroupPermission({
           ids: selection,
-          groupId: activeGroupId,
+          groupId: activeGroup.id,
           permission: activeGroupPermission,
         })
         const result = await FileAPI.batchGet({ ids: selection })
@@ -66,8 +66,7 @@ const Groups = ({
         if (isSingleSelection) {
           await mutateGroupPermissions()
         }
-        setActiveGroupId('')
-        setActiveGroupPermission('')
+        setActiveGroup(undefined)
         setIsGrantLoading(false)
         if (!isSingleSelection) {
           dispatch(sharingModalDidClose())
@@ -78,7 +77,7 @@ const Groups = ({
     }
   }, [
     selection,
-    activeGroupId,
+    activeGroup,
     activeGroupPermission,
     isSingleSelection,
     dispatch,
@@ -110,8 +109,9 @@ const Groups = ({
       {groups && groups.length > 0 ? (
         <Stack direction="column" spacing={variables.spacing}>
           <GroupSelector
+            value={activeGroup}
             organizationId={workspace?.organization.id}
-            onConfirm={(value) => setActiveGroupId(value.id)}
+            onConfirm={(value) => setActiveGroup(value)}
           />
           <Select
             options={[
@@ -122,12 +122,17 @@ const Groups = ({
             placeholder="Select Permission"
             selectedOptionStyle="check"
             chakraStyles={reactSelectStyles}
+            onChange={(e) => {
+              if (e) {
+                setActiveGroupPermission(e.value)
+              }
+            }}
           />
           <Button
             leftIcon={<IconCheck />}
             colorScheme="blue"
             isLoading={isGrantLoading}
-            isDisabled={!activeGroupId || !activeGroupPermission}
+            isDisabled={!activeGroup || !activeGroupPermission}
             onClick={() => handleGrantGroupPermission()}
           >
             Apply to Group

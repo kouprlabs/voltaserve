@@ -71,7 +71,6 @@ const Users = ({
         await mutateUserPermissions()
       }
       setActiveUser(undefined)
-      setActiveUserPermission(undefined)
       setIsGrantLoading(false)
       if (!isSingleSelection) {
         dispatch(sharingModalDidClose())
