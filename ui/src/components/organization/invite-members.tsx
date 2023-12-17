@@ -4,7 +4,7 @@ import {
   Button,
   FormControl,
   FormErrorMessage,
-  FormHelperText,
+  FormLabel,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -12,7 +12,7 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
-  Text,
+  Stack,
   Textarea,
 } from '@chakra-ui/react'
 import { variables } from '@koupr/ui'
@@ -27,6 +27,9 @@ import {
 } from 'formik'
 import * as Yup from 'yup'
 import InvitationAPI from '@/client/api/invitation'
+import EmailTokenizer, {
+  parseEmailList,
+} from '@/components/common/email-tokenizer'
 
 type InviteMembersProps = {
   open: boolean
@@ -59,7 +62,7 @@ const InviteMembers = ({ open, id, onClose }: InviteMembersProps) => {
       try {
         await InvitationAPI.create({
           organizationId: id,
-          emails: [...new Set(emails.split(',').map((e: string) => e.trim()))],
+          emails: parseEmailList(emails),
         })
         mutate(
           `/invitations/get_outgoing?${new URLSearchParams({
@@ -94,29 +97,30 @@ const InviteMembers = ({ open, id, onClose }: InviteMembersProps) => {
           validateOnBlur={false}
           onSubmit={handleSubmit}
         >
-          {({ errors, touched, isSubmitting }) => (
+          {({ values, errors, touched, isSubmitting }) => (
             <Form>
               <ModalBody>
-                <Field name="emails">
-                  {({ field }: FieldAttributes<FieldProps>) => (
-                    <FormControl
-                      isInvalid={errors.emails && touched.emails ? true : false}
-                    >
-                      <Textarea
-                        {...field}
-                        placeholder="Comma separated emails"
-                        disabled={isSubmitting}
-                        h="120px"
-                      />
-                      <FormHelperText>
-                        <Text fontSize={variables.bodyFontSize}>
-                          Example: alice@example.com, david@example.com
-                        </Text>
-                      </FormHelperText>
-                      <FormErrorMessage>{errors.emails}</FormErrorMessage>
-                    </FormControl>
-                  )}
-                </Field>
+                <Stack direction="column" gap={variables.spacing}>
+                  <Field name="emails">
+                    {({ field }: FieldAttributes<FieldProps>) => (
+                      <FormControl
+                        isInvalid={
+                          errors.emails && touched.emails ? true : false
+                        }
+                      >
+                        <FormLabel>Comma separated emails:</FormLabel>
+                        <Textarea
+                          {...field}
+                          placeholder="alice@example.com, david@example.com"
+                          disabled={isSubmitting}
+                          h="120px"
+                        />
+                        <FormErrorMessage>{errors.emails}</FormErrorMessage>
+                      </FormControl>
+                    )}
+                  </Field>
+                  <EmailTokenizer value={values.emails} />
+                </Stack>
               </ModalBody>
               <ModalFooter>
                 <Button
