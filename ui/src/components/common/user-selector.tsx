@@ -31,6 +31,7 @@ import SearchInput from '@/components/common/search-input'
 import userToString from '@/helpers/user-to-string'
 
 type UserSelectorProps = {
+  value?: User
   organizationId?: string
   groupId?: string
   nonGroupMembersOnly?: boolean
@@ -38,6 +39,7 @@ type UserSelectorProps = {
 }
 
 const UserSelector = ({
+  value,
   organizationId,
   groupId,
   nonGroupMembersOnly,
@@ -47,7 +49,6 @@ const UserSelector = ({
   const [page, setPage] = useState(1)
   const [query, setQuery] = useState('')
   const [selected, setSelected] = useState<User>()
-  const [confirmed, setConfirmed] = useState<User>()
   const {
     data: list,
     error,
@@ -82,7 +83,6 @@ const UserSelector = ({
 
   const handleConfirm = useCallback(() => {
     if (selected) {
-      setConfirmed(selected)
       onConfirm?.(selected)
       onClose()
     }
@@ -94,9 +94,9 @@ const UserSelector = ({
         variant="outline"
         w="100%"
         onClick={onOpen}
-        color={confirmed ? normalButtonLabelColor : dimmedButtonLabelColor}
+        color={value ? normalButtonLabelColor : dimmedButtonLabelColor}
       >
-        {confirmed ? userToString(confirmed) : 'Select User'}
+        {value ? userToString(value) : 'Select User'}
       </Button>
       <Modal
         size="xl"

@@ -41,7 +41,7 @@ const SwitchCard = ({
   const [isActive, setIsActive] = useState(false)
   const localStorageActiveKey = useMemo(
     () => `voltaserve_${localStorageNamespace}_switch_card_active`,
-    [localStorageNamespace]
+    [localStorageNamespace],
   )
 
   useEffect(() => {
@@ -66,10 +66,10 @@ const SwitchCard = ({
       setIsActive(event.target.checked)
       localStorage.setItem(
         localStorageActiveKey,
-        JSON.stringify(event.target.checked)
+        JSON.stringify(event.target.checked),
       )
     },
-    [localStorageActiveKey]
+    [localStorageActiveKey],
   )
 
   if (isCollapsed) {

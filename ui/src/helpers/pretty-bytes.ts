@@ -2,7 +2,7 @@ export default function prettyBytes(value: number) {
   const UNITS = ['B', 'kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
   if (!Number.isFinite(value)) {
     throw new TypeError(
-      `Expected a finite number, got ${typeof value}: ${value}`
+      `Expected a finite number, got ${typeof value}: ${value}`,
     )
   }
   const isNegative = value < 0

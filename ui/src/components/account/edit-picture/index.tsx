@@ -46,7 +46,7 @@ const EditPicture = ({ open, user, onClose }: EditPictureProps) => {
       .test(
         'fileSize',
         'Image is too big, should be less than 3 MB',
-        (value: any) => value === null || (value && value.size <= 3000000)
+        (value: any) => value === null || (value && value.size <= 3000000),
       )
       .test(
         'fileType',
@@ -55,8 +55,8 @@ const EditPicture = ({ open, user, onClose }: EditPictureProps) => {
           value === null ||
           (value &&
             ['image/jpg', 'image/jpeg', 'image/gif', 'image/png'].includes(
-              value.type
-            ))
+              value.type,
+            )),
       ),
   })
 
@@ -67,7 +67,7 @@ const EditPicture = ({ open, user, onClose }: EditPictureProps) => {
   const handleSubmit = useCallback(
     async (
       { picture }: FormValues,
-      { setSubmitting }: FormikHelpers<FormValues>
+      { setSubmitting }: FormikHelpers<FormValues>,
     ) => {
       setSubmitting(true)
       try {
@@ -79,7 +79,7 @@ const EditPicture = ({ open, user, onClose }: EditPictureProps) => {
         setSubmitting(false)
       }
     },
-    [onClose, mutate]
+    [onClose, mutate],
   )
 
   const handleDelete = useCallback(async () => {

@@ -30,16 +30,20 @@ import Pagination from '@/components/common/pagination'
 import SearchInput from '@/components/common/search-input'
 
 type GroupSelectorProps = {
+  value?: Group
   organizationId?: string
   onConfirm?: (group: Group) => void
 }
 
-const GroupSelector = ({ organizationId, onConfirm }: GroupSelectorProps) => {
+const GroupSelector = ({
+  value,
+  organizationId,
+  onConfirm,
+}: GroupSelectorProps) => {
   const { isOpen, onOpen, onClose } = useDisclosure()
   const [page, setPage] = useState(1)
   const [query, setQuery] = useState('')
   const [selected, setSelected] = useState<Group>()
-  const [confirmed, setConfirmed] = useState<Group>()
   const {
     data: list,
     error,
@@ -66,7 +70,6 @@ const GroupSelector = ({ organizationId, onConfirm }: GroupSelectorProps) => {
 
   const handleConfirm = useCallback(() => {
     if (selected) {
-      setConfirmed(selected)
       onConfirm?.(selected)
       onClose()
     }
@@ -78,9 +81,9 @@ const GroupSelector = ({ organizationId, onConfirm }: GroupSelectorProps) => {
         variant="outline"
         w="100%"
         onClick={onOpen}
-        color={confirmed ? normalButtonLabelColor : dimmedButtonLabelColor}
+        color={value ? normalButtonLabelColor : dimmedButtonLabelColor}
       >
-        {confirmed ? confirmed.name : 'Select Group'}
+        {value ? value.name : 'Select Group'}
       </Button>
       <Modal
         size="xl"

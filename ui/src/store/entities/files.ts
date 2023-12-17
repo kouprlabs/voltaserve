@@ -15,7 +15,7 @@ const slice = createSlice({
   reducers: {
     filesAdded: (
       state,
-      action: PayloadAction<{ id: string; files: File[] }>
+      action: PayloadAction<{ id: string; files: File[] }>,
     ) => {
       if (state.list && state.current === action.payload.id) {
         state.list.data.push(...action.payload.files)
@@ -23,11 +23,11 @@ const slice = createSlice({
     },
     filesRemoved: (
       state,
-      action: PayloadAction<{ id: string; files: string[] }>
+      action: PayloadAction<{ id: string; files: string[] }>,
     ) => {
       if (state.list && state.current === action.payload.id) {
         state.list.data = state.list.data.filter(
-          (e) => action.payload.files.findIndex((id) => e.id === id) === -1
+          (e) => action.payload.files.findIndex((id) => e.id === id) === -1,
         )
       }
     },

@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import {
   Box,
@@ -8,7 +8,6 @@ import {
   IconButtonProps,
   Progress,
   Stack,
-  Switch,
   Text,
 } from '@chakra-ui/react'
 import { variables, IconEdit, IconTrash, SectionSpinner } from '@koupr/ui'
@@ -34,11 +33,10 @@ const SECTION_SPACING = variables.spacing
 const WorkspaceSettingsPage = () => {
   const params = useParams()
   const workspaceId = params.id as string
-  const {
-    data: workspace,
-    error: workspaceError,
-    mutate,
-  } = WorkspaceAPI.useGetById(workspaceId, swrConfig())
+  const { data: workspace, error: workspaceError } = WorkspaceAPI.useGetById(
+    workspaceId,
+    swrConfig(),
+  )
   const { data: storageUsage, error: storageUsageError } =
     StorageAPI.useGetWorkspaceUsage(workspaceId, swrConfig())
   const hasEditPermission = useMemo(

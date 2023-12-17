@@ -64,7 +64,7 @@ const Delete = ({ open, workspace, onClose }: DeleteProps) => {
         setSubmitting(false)
       }
     },
-    [workspace.id, navigate, mutate, onClose]
+    [workspace.id, navigate, mutate, onClose],
   )
 
   return (

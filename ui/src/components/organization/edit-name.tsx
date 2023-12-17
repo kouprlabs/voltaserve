@@ -49,7 +49,7 @@ const EditName = ({ open, organization, onClose }: EditNameProps) => {
   const handleSubmit = useCallback(
     async (
       { name }: FormValues,
-      { setSubmitting }: FormikHelpers<FormValues>
+      { setSubmitting }: FormikHelpers<FormValues>,
     ) => {
       setSubmitting(true)
       try {
@@ -63,7 +63,7 @@ const EditName = ({ open, organization, onClose }: EditNameProps) => {
         setSubmitting(false)
       }
     },
-    [organization.id, onClose, mutate]
+    [organization.id, onClose, mutate],
   )
 
   return (

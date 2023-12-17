@@ -65,7 +65,7 @@ const OrganizationInvitationsPage = () => {
   const toast = useToast()
   const { data: org, error: orgError } = OrganizationAPI.useGetById(
     id,
-    swrConfig()
+    swrConfig(),
   )
   const { page, size, onPageChange, onSizeChange } = usePagePagination({
     localStoragePrefix: 'voltaserve',
@@ -83,7 +83,7 @@ const OrganizationInvitationsPage = () => {
       sortBy: SortBy.DateCreated,
       sortOrder: SortOrder.Desc,
     },
-    swrConfig()
+    swrConfig(),
   )
   const [isInviteMembersModalOpen, setIsInviteMembersModalOpen] =
     useState(false)
@@ -97,7 +97,7 @@ const OrganizationInvitationsPage = () => {
         isClosable: true,
       })
     },
-    [toast]
+    [toast],
   )
 
   const handleDelete = useCallback(
@@ -105,7 +105,7 @@ const OrganizationInvitationsPage = () => {
       await InvitationAPI.delete(invitationId)
       mutate()
     },
-    [mutate]
+    [mutate],
   )
 
   if (invitationsError || orgError) {

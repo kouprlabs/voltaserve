@@ -31,91 +31,91 @@ const FontIcon = ({ file, scale }: FontIconProps) => {
     () =>
       file.original?.extension &&
       fileExtension.isImage(file.original.extension),
-    [file.original]
+    [file.original],
   )
   const isPdf = useMemo(
     () =>
       file.original?.extension && fileExtension.isPDF(file.original.extension),
-    [file.original]
+    [file.original],
   )
   const isText = useMemo(
     () =>
       file.original?.extension && fileExtension.isText(file.original.extension),
-    [file.original]
+    [file.original],
   )
   const isRichText = useMemo(
     () =>
       file.original?.extension &&
       fileExtension.isRichText(file.original.extension),
-    [file.original]
+    [file.original],
   )
   const isWord = useMemo(
     () =>
       file.original?.extension && fileExtension.isWord(file.original.extension),
-    [file.original]
+    [file.original],
   )
   const isPowerPoint = useMemo(
     () =>
       file.original?.extension &&
       fileExtension.isPowerPoint(file.original.extension),
-    [file.original]
+    [file.original],
   )
   const isExcel = useMemo(
     () =>
       file.original?.extension &&
       fileExtension.isExcel(file.original.extension),
-    [file.original]
+    [file.original],
   )
   const isDocument = useMemo(
     () =>
       file.original?.extension &&
       fileExtension.isDocument(file.original.extension),
-    [file.original]
+    [file.original],
   )
   const isSpreadsheet = useMemo(
     () =>
       file.original?.extension &&
       fileExtension.isSpreadsheet(file.original.extension),
-    [file.original]
+    [file.original],
   )
   const isSlides = useMemo(
     () =>
       file.original?.extension &&
       fileExtension.isSlides(file.original.extension),
-    [file.original]
+    [file.original],
   )
   const isVideo = useMemo(
     () =>
       file.original?.extension &&
       fileExtension.isVideo(file.original.extension),
-    [file.original]
+    [file.original],
   )
   const isAudio = useMemo(
     () =>
       file.original?.extension &&
       fileExtension.isAudio(file.original.extension),
-    [file.original]
+    [file.original],
   )
   const isArchive = useMemo(
     () =>
       file.original?.extension &&
       fileExtension.isArchive(file.original.extension),
-    [file.original]
+    [file.original],
   )
   const isFont = useMemo(
     () =>
       file.original?.extension && fileExtension.isFont(file.original.extension),
-    [file.original]
+    [file.original],
   )
   const isCode = useMemo(
     () =>
       file.original?.extension && fileExtension.isCode(file.original.extension),
-    [file.original]
+    [file.original],
   )
   const isCSV = useMemo(
     () =>
       file.original?.extension && fileExtension.isCSV(file.original.extension),
-    [file.original]
+    [file.original],
   )
 
   if (isPdf) {

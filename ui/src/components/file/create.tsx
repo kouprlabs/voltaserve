@@ -38,7 +38,7 @@ const Create = () => {
   const fileId = params.fileId as string
   const dispatch = useAppDispatch()
   const isModalOpen = useAppSelector(
-    (state) => state.ui.files.isCreateModalOpen
+    (state) => state.ui.files.isCreateModalOpen,
   )
   const [inputRef, setInputRef] = useState<HTMLInputElement | null>()
   const formSchema = Yup.object().shape({
@@ -54,7 +54,7 @@ const Create = () => {
   const handleSubmit = useCallback(
     async (
       { name }: FormValues,
-      { setSubmitting }: FormikHelpers<FormValues>
+      { setSubmitting }: FormikHelpers<FormValues>,
     ) => {
       setSubmitting(true)
       try {
@@ -70,7 +70,7 @@ const Create = () => {
         setSubmitting(false)
       }
     },
-    [fileId, workspaceId, dispatch]
+    [fileId, workspaceId, dispatch],
   )
 
   return (

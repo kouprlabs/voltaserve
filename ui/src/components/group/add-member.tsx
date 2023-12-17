@@ -53,7 +53,7 @@ const AddMember = ({ group, open, onClose }: AddMemberProps) => {
   const handleSubmit = useCallback(
     async (
       { userId }: FormValues,
-      { setSubmitting }: FormikHelpers<FormValues>
+      { setSubmitting }: FormikHelpers<FormValues>,
     ) => {
       setSubmitting(true)
       try {
@@ -64,7 +64,7 @@ const AddMember = ({ group, open, onClose }: AddMemberProps) => {
           `/users?${UserAPI.paramsFromListOptions({
             groupId: group.id,
             nonGroupMembersOnly: true,
-          })}`
+          })}`,
         )
         mutate(`/groups/${group.id}/get_available_users`)
         setSubmitting(false)
@@ -74,7 +74,7 @@ const AddMember = ({ group, open, onClose }: AddMemberProps) => {
         setSubmitting(false)
       }
     },
-    [group.id, navigate, onClose, mutate]
+    [group.id, navigate, onClose, mutate],
   )
 
   return (

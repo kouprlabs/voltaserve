@@ -19,5 +19,5 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
         </HelmetProvider>
       </ChakraProvider>
     </Provider>
-  </React.StrictMode>
+  </React.StrictMode>,
 )

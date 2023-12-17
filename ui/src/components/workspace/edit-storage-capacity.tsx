@@ -47,7 +47,7 @@ const EditStorageCapacity = ({
   const [isModalOpen, setIsModalOpen] = useState(false)
   const { data: storageUsage, error } = StorageAPI.useGetWorkspaceUsage(
     workspace.id,
-    swrConfig()
+    swrConfig(),
   )
   const formSchema = useMemo(() => {
     if (storageUsage) {
@@ -69,7 +69,7 @@ const EditStorageCapacity = ({
   const handleSubmit = useCallback(
     async (
       { storageCapacity }: FormValues,
-      { setSubmitting }: FormikHelpers<FormValues>
+      { setSubmitting }: FormikHelpers<FormValues>,
     ) => {
       setSubmitting(true)
       try {
@@ -83,7 +83,7 @@ const EditStorageCapacity = ({
         setSubmitting(false)
       }
     },
-    [workspace.id, onClose, mutate]
+    [workspace.id, onClose, mutate],
   )
 
   return (

@@ -23,7 +23,7 @@ const Delete = () => {
   const dispatch = useDispatch()
   const selection = useAppSelector((state) => state.ui.files.selection)
   const isModalOpen = useAppSelector(
-    (state) => state.ui.files.isDeleteModalOpen
+    (state) => state.ui.files.isDeleteModalOpen,
   )
   const [loading, setLoading] = useState(false)
 
@@ -35,7 +35,7 @@ const Delete = () => {
         filesRemoved({
           id: params.fileId as string,
           files: selection,
-        })
+        }),
       )
       dispatch(selectionUpdated([]))
       dispatch(deleteModalDidClose())

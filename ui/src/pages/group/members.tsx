@@ -41,7 +41,7 @@ const GroupMembersPage = () => {
   const groupId = params.id as string
   const { data: group, error: groupError } = GroupAPI.useGetById(
     groupId,
-    swrConfig()
+    swrConfig(),
   )
   const { page, size, onPageChange, onSizeChange } = usePagePagination({
     localStoragePrefix: 'voltaserve',
@@ -62,7 +62,7 @@ const GroupMembersPage = () => {
       sortBy: SortBy.FullName,
       sortOrder: SortOrder.Asc,
     },
-    swrConfig()
+    swrConfig(),
   )
   const [userToRemove, setUserToRemove] = useState<IdPUser>()
   const [isAddMembersModalOpen, setIsAddMembersModalOpen] = useState(false)

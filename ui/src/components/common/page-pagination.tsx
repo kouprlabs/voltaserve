@@ -18,17 +18,17 @@ export const usePagePagination = ({
   const location = useLocation()
   const queryParams = useMemo(
     () => new URLSearchParams(location.search),
-    [location.search]
+    [location.search],
   )
   const page = Number(queryParams.get('page')) || 1
   const localStorageSizeKey = useMemo(
     () => `${localStoragePrefix}_${localStorageNamespace}_pagination_size`,
-    [localStoragePrefix, localStorageNamespace]
+    [localStoragePrefix, localStorageNamespace],
   )
   const [size, setSize] = useState(
     localStorage.getItem(localStorageSizeKey) && !disableLocalStorage
       ? parseInt(localStorage.getItem(localStorageSizeKey) as string)
-      : 5
+      : 5,
   )
 
   useEffect(() => {
@@ -49,7 +49,7 @@ export const usePagePagination = ({
       queryParams.set('page', String(page))
       navigate({ search: `?${queryParams.toString()}` })
     },
-    [queryParams, navigate]
+    [queryParams, navigate],
   )
 
   return { page, size, onPageChange: handlePageChange, onSizeChange: setSize }
