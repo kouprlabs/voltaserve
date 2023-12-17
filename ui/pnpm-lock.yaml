@@ -22,7 +22,7 @@ dependencies:
     version: 11.11.0(@emotion/react@11.11.1)(@types/react@18.2.45)(react@18.2.0)
   '@koupr/ui':
     specifier: 1.1.6
-    version: 1.1.6(@chakra-ui/react@2.8.2)(@chakra-ui/theme-tools@2.1.2)(@emotion/react@11.11.1)(@emotion/styled@11.11.0)(framer-motion@10.16.16)(react-dom@18.2.0)(react-icons@4.12.0)(react-router-dom@6.21.0)(react@18.2.0)
+    version: link:../../koupr-ui
   '@reduxjs/toolkit':
     specifier: 2.0.1
     version: 2.0.1(react-redux@9.0.4)(react@18.2.0)
@@ -4000,34 +4000,6 @@ packages:
       '@jridgewell/resolve-uri': 3.1.1
       '@jridgewell/sourcemap-codec': 1.4.15
     dev: true
-
-  /@koupr/ui@1.1.6(@chakra-ui/react@2.8.2)(@chakra-ui/theme-tools@2.1.2)(@emotion/react@11.11.1)(@emotion/styled@11.11.0)(framer-motion@10.16.16)(react-dom@18.2.0)(react-icons@4.12.0)(react-router-dom@6.21.0)(react@18.2.0):
-    resolution:
-      {
-        integrity: sha512-pwu6deHf6pZESzPgAL7XBAFiMlzNn987z9CxLI7knG9sYVn3vD2brRlYYa5UfVOeSza6YRH7fWXW/+KwENE9/g==,
-      }
-    engines: { node: '>= 18.x' }
-    peerDependencies:
-      '@chakra-ui/react': '>= 2.8.0 < 3.0.0'
-      '@chakra-ui/theme-tools': '>= 2.1.0 < 3.0.0'
-      '@emotion/react': '>= 11.11.1 < 12.0.0'
-      '@emotion/styled': '>= 11.11.0 < 12.0.0'
-      framer-motion: '>= 10.15.0 < 11.0.0'
-      react: '>= 18.2.0 < 19.0.0'
-      react-dom: '>= 18.2.0 < 19.0.0'
-      react-icons: '>= 4.10.1 < 5.0.0'
-      react-router-dom: '>= 6.14.2 < 7.0.0'
-    dependencies:
-      '@chakra-ui/react': 2.8.2(@emotion/react@11.11.1)(@emotion/styled@11.11.0)(@types/react@18.2.45)(framer-motion@10.16.16)(react-dom@18.2.0)(react@18.2.0)
-      '@chakra-ui/theme-tools': 2.1.2(@chakra-ui/styled-system@2.9.2)
-      '@emotion/react': 11.11.1(@types/react@18.2.45)(react@18.2.0)
-      '@emotion/styled': 11.11.0(@emotion/react@11.11.1)(@types/react@18.2.45)(react@18.2.0)
-      framer-motion: 10.16.16(react-dom@18.2.0)(react@18.2.0)
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-      react-icons: 4.12.0(react@18.2.0)
-      react-router-dom: 6.21.0(react-dom@18.2.0)(react@18.2.0)
-    dev: false
 
   /@nicolo-ribaudo/eslint-scope-5-internals@5.1.1-v1:
     resolution:

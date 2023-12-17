@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import {
   Text,
@@ -50,7 +50,7 @@ const Groups = ({
   const [permissionBeingRevoked, setPermissionBeingRevoked] = useState<string>()
   const [activeGroupId, setActiveGroupId] = useState<string>()
   const [activeGroupPermission, setActiveGroupPermission] = useState<string>()
-  const isSingleFileMode = useMemo(() => selection.length === 1, [selection])
+  const isSingleSelection = selection.length === 1
 
   const handleGrantGroupPermission = useCallback(async () => {
     if (activeGroupId && activeGroupPermission) {
@@ -63,13 +63,13 @@ const Groups = ({
         })
         const result = await FileAPI.batchGet({ ids: selection })
         dispatch(filesUpdated(result))
-        if (isSingleFileMode) {
+        if (isSingleSelection) {
           await mutateGroupPermissions()
         }
         setActiveGroupId('')
         setActiveGroupPermission('')
         setIsGrantLoading(false)
-        if (!isSingleFileMode) {
+        if (!isSingleSelection) {
           dispatch(sharingModalDidClose())
         }
       } catch {
@@ -80,7 +80,7 @@ const Groups = ({
     selection,
     activeGroupId,
     activeGroupPermission,
-    isSingleFileMode,
+    isSingleSelection,
     dispatch,
     mutateGroupPermissions,
   ])
@@ -95,14 +95,14 @@ const Groups = ({
         })
         const result = await FileAPI.batchGet({ ids: selection })
         dispatch(filesUpdated(result))
-        if (isSingleFileMode) {
+        if (isSingleSelection) {
           await mutateGroupPermissions()
         }
       } finally {
         setPermissionBeingRevoked(undefined)
       }
     },
-    [selection, isSingleFileMode, dispatch, mutateGroupPermissions],
+    [selection, isSingleSelection, dispatch, mutateGroupPermissions],
   )
 
   return (
@@ -151,56 +151,60 @@ const Groups = ({
           </VStack>
         </Center>
       ) : null}
-      {isSingleFileMode ? <hr /> : null}
-      {!groupPermissions && isSingleFileMode ? (
-        <Center>
-          <Spinner />
-        </Center>
-      ) : null}
-      {groupPermissions && groupPermissions.length === 0 ? (
-        <Center>
-          <Text>Not shared with any groups.</Text>
-        </Center>
-      ) : null}
-      {groupPermissions && groupPermissions.length > 0 ? (
-        <Table>
-          <Thead>
-            <Tr>
-              <Th>Group</Th>
-              <Th>Permission</Th>
-              <Th />
-            </Tr>
-          </Thead>
-          <Tbody>
-            {groupPermissions.map((p) => (
-              <Tr key={p.id}>
-                <Td p={variables.spacingSm}>
-                  <HStack spacing={variables.spacingSm}>
-                    <Avatar
-                      name={p.group.name}
-                      size="sm"
-                      width="40px"
-                      height="40px"
-                    />
-                    <Text noOfLines={1}>{p.group.name}</Text>
-                  </HStack>
-                </Td>
-                <Td>
-                  <Badge>{p.permission}</Badge>
-                </Td>
-                <Td textAlign="end">
-                  <IconButton
-                    icon={<IconTrash />}
-                    colorScheme="red"
-                    aria-label=""
-                    isLoading={permissionBeingRevoked === p.id}
-                    onClick={() => handleRevokeGroupPermission(p)}
-                  />
-                </Td>
-              </Tr>
-            ))}
-          </Tbody>
-        </Table>
+      {isSingleSelection ? (
+        <>
+          <hr />
+          {!groupPermissions ? (
+            <Center>
+              <Spinner />
+            </Center>
+          ) : null}
+          {groupPermissions && groupPermissions.length === 0 ? (
+            <Center>
+              <Text>Not shared with any groups.</Text>
+            </Center>
+          ) : null}
+          {groupPermissions && groupPermissions.length > 0 ? (
+            <Table>
+              <Thead>
+                <Tr>
+                  <Th>Group</Th>
+                  <Th>Permission</Th>
+                  <Th />
+                </Tr>
+              </Thead>
+              <Tbody>
+                {groupPermissions.map((p) => (
+                  <Tr key={p.id}>
+                    <Td p={variables.spacingSm}>
+                      <HStack spacing={variables.spacingSm}>
+                        <Avatar
+                          name={p.group.name}
+                          size="sm"
+                          width="40px"
+                          height="40px"
+                        />
+                        <Text noOfLines={1}>{p.group.name}</Text>
+                      </HStack>
+                    </Td>
+                    <Td>
+                      <Badge>{p.permission}</Badge>
+                    </Td>
+                    <Td textAlign="end">
+                      <IconButton
+                        icon={<IconTrash />}
+                        colorScheme="red"
+                        aria-label=""
+                        isLoading={permissionBeingRevoked === p.id}
+                        onClick={() => handleRevokeGroupPermission(p)}
+                      />
+                    </Td>
+                  </Tr>
+                ))}
+              </Tbody>
+            </Table>
+          ) : null}
+        </>
       ) : null}
     </Stack>
   )

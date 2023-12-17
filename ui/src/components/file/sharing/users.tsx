@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import {
   Text,
@@ -52,7 +52,7 @@ const Users = ({
   const [activeUserId, setActiveUserId] = useState<string>()
   const [activeUserPermission, setActiveUserPermission] = useState<string>()
   const { data: user } = IdPUserAPI.useGet()
-  const isSingleFileMode = useMemo(() => selection.length === 1, [selection])
+  const isSingleSelection = selection.length === 1
 
   const handleGrantUserPermission = useCallback(async () => {
     if (!activeUserId || !activeUserPermission) {
@@ -67,13 +67,13 @@ const Users = ({
       })
       const result = await FileAPI.batchGet({ ids: selection })
       dispatch(filesUpdated(result))
-      if (isSingleFileMode) {
+      if (isSingleSelection) {
         await mutateUserPermissions()
       }
       setActiveUserId('')
       setActiveUserPermission('')
       setIsGrantLoading(false)
-      if (!isSingleFileMode) {
+      if (!isSingleSelection) {
         dispatch(sharingModalDidClose())
       }
     } catch {
@@ -83,7 +83,7 @@ const Users = ({
     selection,
     activeUserId,
     activeUserPermission,
-    isSingleFileMode,
+    isSingleSelection,
     dispatch,
     mutateUserPermissions,
   ])
@@ -98,14 +98,14 @@ const Users = ({
         })
         const result = await FileAPI.batchGet({ ids: selection })
         dispatch(filesUpdated(result))
-        if (isSingleFileMode) {
+        if (isSingleSelection) {
           await mutateUserPermissions()
         }
       } finally {
         setPermissionBeingRevoked(undefined)
       }
     },
-    [selection, isSingleFileMode, dispatch, mutateUserPermissions],
+    [selection, isSingleSelection, dispatch, mutateUserPermissions],
   )
 
   return (
@@ -159,62 +159,66 @@ const Users = ({
           </Button>
         </Stack>
       ) : null}
-      {isSingleFileMode && <hr />}
-      {!userPermissions && isSingleFileMode ? (
-        <Center>
-          <Spinner />
-        </Center>
-      ) : null}
-      {userPermissions && userPermissions.length === 0 ? (
-        <Center>
-          <Text>Not shared with any users.</Text>
-        </Center>
-      ) : null}
-      {userPermissions && userPermissions.length > 0 ? (
+      {isSingleSelection ? (
         <>
-          <Table>
-            <Thead>
-              <Tr>
-                <Th>User</Th>
-                <Th>Permission</Th>
-                <Th />
-              </Tr>
-            </Thead>
-            <Tbody>
-              {userPermissions.map((p) => (
-                <Tr key={p.id}>
-                  <Td p={variables.spacingSm}>
-                    <HStack spacing={variables.spacingSm}>
-                      <Avatar
-                        name={p.user.fullName}
-                        src={p.user.picture}
-                        size="sm"
-                        width="40px"
-                        height="40px"
-                      />
-                      <Stack spacing={variables.spacingXs}>
-                        <Text noOfLines={1}>{p.user.fullName}</Text>
-                        <Text color="gray">{p.user.email}</Text>
-                      </Stack>
-                    </HStack>
-                  </Td>
-                  <Td>
-                    <Badge>{p.permission}</Badge>
-                  </Td>
-                  <Td textAlign="end">
-                    <IconButton
-                      icon={<IconTrash />}
-                      colorScheme="red"
-                      aria-label=""
-                      isLoading={permissionBeingRevoked === p.id}
-                      isDisabled={user?.id === p.user.id}
-                      onClick={() => handleRevokeUserPermission(p)}
-                    />
-                  </Td>
-                </Tr>
-              ))}
-            </Tbody>
-          </Table>
+          <hr />
+          {!userPermissions ? (
+            <Center>
+              <Spinner />
+            </Center>
+          ) : null}
+          {userPermissions && userPermissions.length === 0 ? (
+            <Center>
+              <Text>Not shared with any users.</Text>
+            </Center>
+          ) : null}
+          {userPermissions && userPermissions.length > 0 ? (
+            <>
+              <Table>
+                <Thead>
+                  <Tr>
+                    <Th>User</Th>
+                    <Th>Permission</Th>
+                    <Th />
+                  </Tr>
+                </Thead>
+                <Tbody>
+                  {userPermissions.map((p) => (
+                    <Tr key={p.id}>
+                      <Td p={variables.spacingSm}>
+                        <HStack spacing={variables.spacingSm}>
+                          <Avatar
+                            name={p.user.fullName}
+                            src={p.user.picture}
+                            size="sm"
+                            width="40px"
+                            height="40px"
+                          />
+                          <Stack spacing={variables.spacingXs}>
+                            <Text noOfLines={1}>{p.user.fullName}</Text>
+                            <Text color="gray">{p.user.email}</Text>
+                          </Stack>
+                        </HStack>
+                      </Td>
+                      <Td>
+                        <Badge>{p.permission}</Badge>
+                      </Td>
+                      <Td textAlign="end">
+                        <IconButton
+                          icon={<IconTrash />}
+                          colorScheme="red"
+                          aria-label=""
+                          isLoading={permissionBeingRevoked === p.id}
+                          isDisabled={user?.id === p.user.id}
+                          onClick={() => handleRevokeUserPermission(p)}
+                        />
+                      </Td>
+                    </Tr>
+                  ))}
+                </Tbody>
+              </Table>
+            </>
+          ) : null}
         </>
       ) : null}
     </Stack>

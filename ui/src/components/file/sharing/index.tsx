@@ -41,6 +41,7 @@ const Sharing = () => {
     FileAPI.useGetUserPermissions(selection[0])
   const { data: groupPermissions, mutate: mutateGroupPermissions } =
     FileAPI.useGetGroupPermissions(selection[0])
+  const isSingleSelection = selection.length === 1
 
   return (
     <Modal
@@ -62,7 +63,9 @@ const Sharing = () => {
               <Tab>
                 <HStack>
                   <Text>People</Text>
-                  {userPermissions && userPermissions.length > 0 ? (
+                  {isSingleSelection &&
+                  userPermissions &&
+                  userPermissions.length > 0 ? (
                     <Tag borderRadius="full">{userPermissions.length}</Tag>
                   ) : null}
                 </HStack>
@@ -70,7 +73,9 @@ const Sharing = () => {
               <Tab>
                 <HStack>
                   <Text>Groups</Text>
-                  {groupPermissions && groupPermissions.length > 0 ? (
+                  {isSingleSelection &&
+                  groupPermissions &&
+                  groupPermissions.length > 0 ? (
                     <Tag borderRadius="full">{groupPermissions.length}</Tag>
                   ) : null}
                 </HStack>
