@@ -29,12 +29,11 @@ import { geEditorPermission } from '@/client/api/permission'
 import UserAPI, { SortBy, SortOrder } from '@/client/api/user'
 import { User as IdPUser } from '@/client/idp/user'
 import { swrConfig } from '@/client/options'
-import PagePagination, {
-  usePagePagination,
-} from '@/components/common/page-pagination'
+import PagePagination from '@/components/common/page-pagination'
 import AddMember from '@/components/group/add-member'
 import RemoveMember from '@/components/group/remove-member'
 import { decodeQuery } from '@/helpers/query'
+import usePagePagination from '@/hooks/page-pagination'
 
 const GroupMembersPage = () => {
   const params = useParams()

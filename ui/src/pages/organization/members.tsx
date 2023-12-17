@@ -33,12 +33,11 @@ import OrganizationAPI from '@/client/api/organization'
 import { geEditorPermission } from '@/client/api/permission'
 import UserAPI, { SortBy, SortOrder, User } from '@/client/api/user'
 import { swrConfig } from '@/client/options'
-import PagePagination, {
-  usePagePagination,
-} from '@/components/common/page-pagination'
+import PagePagination from '@/components/common/page-pagination'
 import InviteMembers from '@/components/organization/invite-members'
 import RemoveMember from '@/components/organization/remove-member'
 import { decodeQuery } from '@/helpers/query'
+import usePagePagination from '@/hooks/page-pagination'
 
 const OrganizationMembersPage = () => {
   const params = useParams()

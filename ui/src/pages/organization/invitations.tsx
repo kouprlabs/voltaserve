@@ -39,11 +39,10 @@ import InvitationAPI, {
 import OrganizationAPI from '@/client/api/organization'
 import { geEditorPermission } from '@/client/api/permission'
 import { swrConfig } from '@/client/options'
-import PagePagination, {
-  usePagePagination,
-} from '@/components/common/page-pagination'
+import PagePagination from '@/components/common/page-pagination'
 import InviteMembers from '@/components/organization/invite-members'
 import prettyDate from '@/helpers/pretty-date'
+import usePagePagination from '@/hooks/page-pagination'
 
 type StatusProps = {
   value: InvitationStatus

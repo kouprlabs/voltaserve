@@ -23,11 +23,10 @@ import { Helmet } from 'react-helmet-async'
 import InvitationAPI, { SortBy, SortOrder } from '@/client/api/invitation'
 import UserAPI from '@/client/idp/user'
 import { swrConfig } from '@/client/options'
-import PagePagination, {
-  usePagePagination,
-} from '@/components/common/page-pagination'
+import PagePagination from '@/components/common/page-pagination'
 import prettyDate from '@/helpers/pretty-date'
 import userToString from '@/helpers/user-to-string'
+import usePagePagination from '@/hooks/page-pagination'
 
 const AccountInvitationsPage = () => {
   const toast = useToast()
