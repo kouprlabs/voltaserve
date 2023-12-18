@@ -27,9 +27,8 @@ import {
 } from 'formik'
 import * as Yup from 'yup'
 import InvitationAPI from '@/client/api/invitation'
-import EmailTokenizer, {
-  parseEmailList,
-} from '@/components/common/email-tokenizer'
+import EmailTokenizer from '@/components/common/email-tokenizer'
+import parseEmailList from '@/helpers/parse-email-list'
 
 type InviteMembersProps = {
   open: boolean
