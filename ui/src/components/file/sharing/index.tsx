@@ -17,6 +17,7 @@ import {
 } from '@chakra-ui/react'
 import FileAPI from '@/client/api/file'
 import GroupAPI from '@/client/api/group'
+import { geOwnerPermission } from '@/client/api/permission'
 import UserAPI from '@/client/api/user'
 import WorkspaceAPI from '@/client/api/workspace'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
@@ -30,6 +31,13 @@ const Sharing = () => {
   const dispatch = useAppDispatch()
   const selection = useAppSelector((state) => state.ui.files.selection)
   const isModalOpen = useAppSelector((state) => state.ui.files.isShareModalOpen)
+  const singleFile = useAppSelector((state) => {
+    if (selection.length === 1) {
+      return state.entities.files.list?.data.find((e) => e.id === selection[0])
+    } else {
+      return undefined
+    }
+  })
   const { data: workspace } = WorkspaceAPI.useGetById(params.id as string)
   const { data: users } = UserAPI.useList({
     organizationId: workspace?.organization.id,
@@ -38,10 +46,17 @@ const Sharing = () => {
     organizationId: workspace?.organization.id,
   })
   const { data: userPermissions, mutate: mutateUserPermissions } =
-    FileAPI.useGetUserPermissions(selection[0])
+    FileAPI.useGetUserPermissions(
+      singleFile && geOwnerPermission(singleFile.permission)
+        ? singleFile.id
+        : undefined,
+    )
   const { data: groupPermissions, mutate: mutateGroupPermissions } =
-    FileAPI.useGetGroupPermissions(selection[0])
-  const isSingleSelection = selection.length === 1
+    FileAPI.useGetGroupPermissions(
+      singleFile && geOwnerPermission(singleFile.permission)
+        ? singleFile.id
+        : undefined,
+    )
 
   return (
     <Modal
@@ -63,7 +78,7 @@ const Sharing = () => {
               <Tab>
                 <HStack>
                   <Text>People</Text>
-                  {isSingleSelection &&
+                  {singleFile &&
                   userPermissions &&
                   userPermissions.length > 0 ? (
                     <Tag borderRadius="full">{userPermissions.length}</Tag>
@@ -73,7 +88,7 @@ const Sharing = () => {
               <Tab>
                 <HStack>
                   <Text>Groups</Text>
-                  {isSingleSelection &&
+                  {singleFile &&
                   groupPermissions &&
                   groupPermissions.length > 0 ? (
                     <Tag borderRadius="full">{groupPermissions.length}</Tag>

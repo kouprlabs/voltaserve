@@ -431,7 +431,7 @@ export default class FileAPI {
     }).then((result) => result.json())
   }
 
-  static useGetUserPermissions(id: string, swrOptions?: any) {
+  static useGetUserPermissions(id?: string, swrOptions?: any) {
     return useSWR<UserPermission[]>(
       id ? `/files/${id}/get_user_permissions` : null,
       apiFetcher,
@@ -449,7 +449,7 @@ export default class FileAPI {
     }).then((result) => result.json())
   }
 
-  static useGetGroupPermissions(id: string, swrOptions?: any) {
+  static useGetGroupPermissions(id?: string, swrOptions?: any) {
     return useSWR<GroupPermission[]>(
       id ? `/files/${id}/get_group_permissions` : null,
       apiFetcher,
