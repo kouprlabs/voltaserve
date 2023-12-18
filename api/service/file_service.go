@@ -35,7 +35,7 @@ type File struct {
 	Status      string      `json:"status,omitempty"`
 	Snapshots   []*Snapshot `json:"snapshots,omitempty"`
 	Permission  string      `json:"permission"`
-	IsShared    bool        `json:"isShared"`
+	IsShared    *bool       `json:"isShared,omitempty"`
 	CreateTime  string      `json:"createTime"`
 	UpdateTime  *string     `json:"updateTime,omitempty"`
 }
@@ -1795,11 +1795,14 @@ func (mp *FileMapper) mapOne(m model.File, userID string) (*File, error) {
 			shareCount++
 		}
 	}
-	shareCount += len(m.GetGroupPermissions())
-	if shareCount > 0 {
-		res.IsShared = true
-	} else {
-		res.IsShared = false
+	if res.Permission == model.PermissionOwner {
+		shareCount += len(m.GetGroupPermissions())
+		res.IsShared = new(bool)
+		if shareCount > 0 {
+			*res.IsShared = true
+		} else {
+			*res.IsShared = false
+		}
 	}
 	return res, nil
 }
