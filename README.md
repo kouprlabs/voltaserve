@@ -40,7 +40,7 @@ You can check that by running the command `docker ps` and look at the `STATUS` c
 
 Voltaserve supports [WebDAV](https://en.wikipedia.org/wiki/WebDAV), by default it's using the port `6000`.
 
-To connect you can use [Mountainduck](https://mountainduck.io/), [Cyberduck](https://cyberduck.io), [WinSCP](https://winscp.net) or [Owlfiles](https://www.skyjos.com/owlfiles/).
+To connect you can use [Mountainduck](https://mountainduck.io), [Cyberduck](https://cyberduck.io), [WinSCP](https://winscp.net), [Owlfiles](https://www.skyjos.com/owlfiles) or [Rclone](https://rclone.org/webdav).
 
 ### Configuration
 
