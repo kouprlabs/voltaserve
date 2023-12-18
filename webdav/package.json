@@ -7,7 +7,7 @@
     "start": "ts-node -r tsconfig-paths/register src/server.ts",
     "dev": "nodemon --exec ts-node -r tsconfig-paths/register src/server.ts",
     "tsc": "tsc --noEmit",
-    "prettier": "prettier --write .",
+    "format": "prettier --write .",
     "lint": "eslint './src/**/*.ts'"
   },
   "engines": {

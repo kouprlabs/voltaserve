@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import {
   Badge,
   Button,
@@ -29,6 +29,8 @@ import {
   IconTrash,
   IconUserPlus,
   SectionSpinner,
+  PagePagination,
+  usePagePagination,
 } from '@koupr/ui'
 import { Helmet } from 'react-helmet-async'
 import InvitationAPI, {
@@ -39,9 +41,6 @@ import InvitationAPI, {
 import OrganizationAPI from '@/client/api/organization'
 import { geEditorPermission } from '@/client/api/permission'
 import { swrConfig } from '@/client/options'
-import PagePagination, {
-  usePagePagination,
-} from '@/components/common/page-pagination'
 import InviteMembers from '@/components/organization/invite-members'
 import prettyDate from '@/helpers/pretty-date'
 
@@ -60,16 +59,22 @@ const Status = ({ value }: StatusProps) => {
 }
 
 const OrganizationInvitationsPage = () => {
+  const navigate = useNavigate()
+  const location = useLocation()
   const params = useParams()
   const id = params.id as string
   const toast = useToast()
   const { data: org, error: orgError } = OrganizationAPI.useGetById(
     id,
-    swrConfig()
+    swrConfig(),
   )
   const { page, size, onPageChange, onSizeChange } = usePagePagination({
-    localStoragePrefix: 'voltaserve',
-    localStorageNamespace: 'outgoing_invitation',
+    navigate,
+    location,
+    storage: {
+      prefix: 'voltaserve',
+      namespace: 'outgoing_invitation',
+    },
   })
   const {
     data: list,
@@ -83,7 +88,7 @@ const OrganizationInvitationsPage = () => {
       sortBy: SortBy.DateCreated,
       sortOrder: SortOrder.Desc,
     },
-    swrConfig()
+    swrConfig(),
   )
   const [isInviteMembersModalOpen, setIsInviteMembersModalOpen] =
     useState(false)
@@ -97,7 +102,7 @@ const OrganizationInvitationsPage = () => {
         isClosable: true,
       })
     },
-    [toast]
+    [toast],
   )
 
   const handleDelete = useCallback(
@@ -105,7 +110,7 @@ const OrganizationInvitationsPage = () => {
       await InvitationAPI.delete(invitationId)
       mutate()
     },
-    [mutate]
+    [mutate],
   )
 
   if (invitationsError || orgError) {

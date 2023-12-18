@@ -1,5 +1,10 @@
 import { useState } from 'react'
-import { useParams, useSearchParams } from 'react-router-dom'
+import {
+  useLocation,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from 'react-router-dom'
 import {
   HStack,
   IconButton,
@@ -21,7 +26,14 @@ import {
   Portal,
   Stack,
 } from '@chakra-ui/react'
-import { variables, IconExit, IconUserPlus, SectionSpinner } from '@koupr/ui'
+import {
+  variables,
+  IconExit,
+  IconUserPlus,
+  SectionSpinner,
+  PagePagination,
+  usePagePagination,
+} from '@koupr/ui'
 import { Helmet } from 'react-helmet-async'
 import { HiDotsVertical } from 'react-icons/hi'
 import GroupAPI from '@/client/api/group'
@@ -29,23 +41,26 @@ import { geEditorPermission } from '@/client/api/permission'
 import UserAPI, { SortBy, SortOrder } from '@/client/api/user'
 import { User as IdPUser } from '@/client/idp/user'
 import { swrConfig } from '@/client/options'
-import PagePagination, {
-  usePagePagination,
-} from '@/components/common/page-pagination'
 import AddMember from '@/components/group/add-member'
 import RemoveMember from '@/components/group/remove-member'
 import { decodeQuery } from '@/helpers/query'
 
 const GroupMembersPage = () => {
+  const navigate = useNavigate()
+  const location = useLocation()
   const params = useParams()
   const groupId = params.id as string
   const { data: group, error: groupError } = GroupAPI.useGetById(
     groupId,
-    swrConfig()
+    swrConfig(),
   )
   const { page, size, onPageChange, onSizeChange } = usePagePagination({
-    localStoragePrefix: 'voltaserve',
-    localStorageNamespace: 'group_member',
+    navigate,
+    location,
+    storage: {
+      prefix: 'voltaserve',
+      namespace: 'group_member',
+    },
   })
   const [searchParams] = useSearchParams()
   const query = decodeQuery(searchParams.get('q') as string)
@@ -62,7 +77,7 @@ const GroupMembersPage = () => {
       sortBy: SortBy.FullName,
       sortOrder: SortOrder.Asc,
     },
-    swrConfig()
+    swrConfig(),
   )
   const [userToRemove, setUserToRemove] = useState<IdPUser>()
   const [isAddMembersModalOpen, setIsAddMembersModalOpen] = useState(false)

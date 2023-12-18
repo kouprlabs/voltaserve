@@ -1,4 +1,5 @@
 import { useCallback } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import {
   Center,
   HStack,
@@ -18,23 +19,32 @@ import {
   Tr,
   useToast,
 } from '@chakra-ui/react'
-import { IconDotsVertical, SectionSpinner, variables } from '@koupr/ui'
+import {
+  IconDotsVertical,
+  SectionSpinner,
+  PagePagination,
+  variables,
+  usePagePagination,
+} from '@koupr/ui'
 import { Helmet } from 'react-helmet-async'
 import InvitationAPI, { SortBy, SortOrder } from '@/client/api/invitation'
 import UserAPI from '@/client/idp/user'
 import { swrConfig } from '@/client/options'
-import PagePagination, {
-  usePagePagination,
-} from '@/components/common/page-pagination'
 import prettyDate from '@/helpers/pretty-date'
 import userToString from '@/helpers/user-to-string'
 
 const AccountInvitationsPage = () => {
+  const navigate = useNavigate()
+  const location = useLocation()
   const toast = useToast()
   const { data: user, error: userError } = UserAPI.useGet()
   const { page, size, onPageChange, onSizeChange } = usePagePagination({
-    localStoragePrefix: 'voltaserve',
-    localStorageNamespace: 'incoming_invitation',
+    navigate,
+    location,
+    storage: {
+      prefix: 'voltaserve',
+      namespace: 'incoming_invitation',
+    },
   })
   const {
     data: list,
@@ -42,7 +52,7 @@ const AccountInvitationsPage = () => {
     mutate,
   } = InvitationAPI.useGetIncoming(
     { page, size, sortBy: SortBy.DateCreated, sortOrder: SortOrder.Desc },
-    swrConfig()
+    swrConfig(),
   )
 
   const handleAccept = useCallback(
@@ -55,7 +65,7 @@ const AccountInvitationsPage = () => {
         isClosable: true,
       })
     },
-    [mutate, toast]
+    [mutate, toast],
   )
 
   const handleDecline = useCallback(
@@ -68,7 +78,7 @@ const AccountInvitationsPage = () => {
         isClosable: true,
       })
     },
-    [mutate, toast]
+    [mutate, toast],
   )
 
   if (userError || invitationsError) {

@@ -44,7 +44,7 @@ export default class UserAPI {
     return useSWR<List>(
       `/users?${this.paramsFromListOptions(options)}`,
       () => this.list(options),
-      swrOptions
+      swrOptions,
     )
   }
 

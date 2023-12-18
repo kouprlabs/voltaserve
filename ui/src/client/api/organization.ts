@@ -57,7 +57,7 @@ export default class OrganizationAPI {
     return useSWR<Organization>(
       id ? `/organizations/${id}` : null,
       () => this.getById(id),
-      swrOptions
+      swrOptions,
     )
   }
 
@@ -75,7 +75,7 @@ export default class OrganizationAPI {
     return useSWR<List>(
       `/organizations?${this.paramsFromListOptions(options)}`,
       () => this.list(options),
-      swrOptions
+      swrOptions,
     )
   }
 
@@ -102,7 +102,7 @@ export default class OrganizationAPI {
 
   static async updateName(
     id: string,
-    options: UpdateNameOptions
+    options: UpdateNameOptions,
   ): Promise<Organization> {
     return apiFetch(`/organizations/${id}/update_name`, {
       method: 'POST',

@@ -32,7 +32,7 @@ setInterval(async () => {
       upload.file,
       (progress) => {
         store.dispatch(uploadUpdated({ id: upload.id, progress }))
-      }
+      },
     )
     const fileId = getFileIdFromPath()
     if (upload.parentId === fileId) {
@@ -45,7 +45,7 @@ setInterval(async () => {
         id: upload.id,
         completed: true,
         error: errorToString(error),
-      })
+      }),
     )
   } finally {
     queue.shift()

@@ -32,7 +32,7 @@ export default class TokenAPI {
     if (options.grant_type === 'refresh_token') {
       if (options.refresh_token) {
         formBody.push(
-          `refresh_token=${encodeURIComponent(options.refresh_token)}`
+          `refresh_token=${encodeURIComponent(options.refresh_token)}`,
         )
       } else {
         throw new Error('Refresh token missing!')
@@ -50,7 +50,7 @@ export default class TokenAPI {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
       },
-      false
+      false,
     ).then((result) => result.json())
   }
 }

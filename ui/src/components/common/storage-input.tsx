@@ -1,15 +1,69 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { Input, Select, Stack } from '@chakra-ui/react'
 import { variables } from '@koupr/ui'
 import { FieldAttributes, FieldProps } from 'formik'
-import { Unit, getUnit, convertFromByte, normalizeToByte } from './unit'
+import {
+  byteToGigabyte,
+  byteToMegabyte,
+  byteToTerabyte,
+  gigabyteToByte,
+  megabyteToByte,
+  terabyteToByte,
+} from '@/helpers/convert-storage'
+
+type Unit = 'b' | 'mb' | 'gb' | 'tb'
+
+function getUnit(value: number): Unit {
+  if (value >= 1e12) {
+    return 'tb'
+  }
+  if (value >= 1e9) {
+    return 'gb'
+  }
+  if (value >= 1e6) {
+    return 'mb'
+  }
+  return 'b'
+}
+
+function convertFromByte(value: number, unit: Unit): number {
+  if (unit === 'b') {
+    return value
+  }
+  if (unit === 'mb') {
+    return byteToMegabyte(value)
+  }
+  if (unit === 'gb') {
+    return byteToGigabyte(value)
+  }
+  if (unit === 'tb') {
+    return byteToTerabyte(value)
+  }
+  throw new Error(`Invalid unit: ${unit}`)
+}
+
+function normalizeToByte(value: number, unit: Unit) {
+  if (unit === 'b') {
+    return value
+  }
+  if (unit === 'mb') {
+    return megabyteToByte(value)
+  }
+  if (unit === 'gb') {
+    return gigabyteToByte(value)
+  }
+  if (unit === 'tb') {
+    return terabyteToByte(value)
+  }
+  throw new Error(`Invalid unit: ${unit}`)
+}
 
 const StorageInput = ({ id, field, form }: FieldAttributes<FieldProps>) => {
   const [value, setValue] = useState<number | null>(
-    field.value ? convertFromByte(field.value, getUnit(field.value)) : null
+    field.value ? convertFromByte(field.value, getUnit(field.value)) : null,
   )
   const [unit, setUnit] = useState<Unit>(
-    field.value ? getUnit(field.value) : 'b'
+    field.value ? getUnit(field.value) : 'b',
   )
 
   return (
@@ -43,12 +97,12 @@ const StorageInput = ({ id, field, form }: FieldAttributes<FieldProps>) => {
               if (value) {
                 const newValue = convertFromByte(
                   normalizeToByte(value, unit),
-                  newUnit
+                  newUnit,
                 )
                 setValue(newValue)
                 form.setFieldValue(
                   field.name,
-                  normalizeToByte(newValue, newUnit)
+                  normalizeToByte(newValue, newUnit),
                 )
               }
             }}

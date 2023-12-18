@@ -116,4 +116,4 @@ To setup a development environment for the purpose of developing and debugging V
 
 ## Licensing
 
-Voltaserve is released under the [The MIT License](./LICENSE.md).
+Voltaserve is released under [The MIT License](./LICENSE.md).

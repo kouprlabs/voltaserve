@@ -24,7 +24,7 @@ const OrganizationSettingsPage = () => {
   const params = useParams()
   const { data: org, error } = OrganizationAPI.useGetById(
     params.id as string,
-    swrConfig()
+    swrConfig(),
   )
   const [isNameModalOpen, setIsNameModalOpen] = useState(false)
   const [isInviteMembersModalOpen, setIsInviteMembersModalOpen] =

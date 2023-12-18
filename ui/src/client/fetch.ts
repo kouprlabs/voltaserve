@@ -10,7 +10,7 @@ export const apiFetch = async (url: string, init?: RequestInit) =>
 export const idpFetch = async (
   url: string,
   init?: RequestInit,
-  redirect = true
+  redirect = true,
 ) => handleFailure(await fetch(`${getConfig().idpURL}${url}`, init), redirect)
 
 export const apiFetcher = (url: string) =>
