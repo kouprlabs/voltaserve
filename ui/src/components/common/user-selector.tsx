@@ -23,11 +23,9 @@ import {
   Box,
   useColorModeValue,
 } from '@chakra-ui/react'
-import { SectionSpinner, variables } from '@koupr/ui'
+import { SectionSpinner, Pagination, SearchInput, variables } from '@koupr/ui'
 import UserAPI, { SortOrder, User } from '@/client/api/user'
 import { swrConfig } from '@/client/options'
-import Pagination from '@/components/common/pagination'
-import SearchInput from '@/components/common/search-input'
 import userToString from '@/helpers/user-to-string'
 
 type UserSelectorProps = {
