@@ -23,14 +23,12 @@ import {
   Box,
   useColorModeValue,
 } from '@chakra-ui/react'
-import { SectionSpinner, variables } from '@koupr/ui'
+import { SectionSpinner, Pagination, SearchInput, variables } from '@koupr/ui'
 import OrganizationAPI, {
   Organization,
   SortOrder,
 } from '@/client/api/organization'
 import { swrConfig } from '@/client/options'
-import Pagination from '@/components/common/pagination'
-import SearchInput from '@/components/common/search-input'
 
 type OrganizationSelectorProps = {
   onConfirm?: (organization: Organization) => void

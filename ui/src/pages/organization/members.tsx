@@ -1,5 +1,10 @@
 import { useEffect, useState } from 'react'
-import { useParams, useSearchParams } from 'react-router-dom'
+import {
+  useLocation,
+  useNavigate,
+  useParams,
+  useSearchParams,
+} from 'react-router-dom'
 import {
   IconButton,
   Menu,
@@ -27,19 +32,21 @@ import {
   IconExit,
   IconUserPlus,
   SectionSpinner,
+  PagePagination,
+  usePagePagination,
 } from '@koupr/ui'
 import { Helmet } from 'react-helmet-async'
 import OrganizationAPI from '@/client/api/organization'
 import { geEditorPermission } from '@/client/api/permission'
 import UserAPI, { SortBy, SortOrder, User } from '@/client/api/user'
 import { swrConfig } from '@/client/options'
-import PagePagination from '@/components/common/page-pagination'
 import InviteMembers from '@/components/organization/invite-members'
 import RemoveMember from '@/components/organization/remove-member'
 import { decodeQuery } from '@/helpers/query'
-import usePagePagination from '@/hooks/page-pagination'
 
 const OrganizationMembersPage = () => {
+  const navigate = useNavigate()
+  const location = useLocation()
   const params = useParams()
   const organizationId = params.id as string
   const invite = Boolean(params.invite as string)
@@ -48,8 +55,12 @@ const OrganizationMembersPage = () => {
     swrConfig(),
   )
   const { page, size, onPageChange, onSizeChange } = usePagePagination({
-    localStoragePrefix: 'voltaserve',
-    localStorageNamespace: 'organization_member',
+    navigate,
+    location,
+    storage: {
+      prefix: 'voltaserve',
+      namespace: 'organization_member',
+    },
   })
   const [searchParams] = useSearchParams()
   const query = decodeQuery(searchParams.get('q') as string)

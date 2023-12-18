@@ -1,5 +1,10 @@
 import { useEffect } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import {
+  Link,
+  useLocation,
+  useNavigate,
+  useSearchParams,
+} from 'react-router-dom'
 import {
   Heading,
   Link as ChakraLink,
@@ -17,22 +22,31 @@ import {
   Avatar,
   Badge,
 } from '@chakra-ui/react'
-import { SectionSpinner, variables } from '@koupr/ui'
+import {
+  SectionSpinner,
+  PagePagination,
+  variables,
+  usePagePagination,
+} from '@koupr/ui'
 import { Helmet } from 'react-helmet-async'
 import WorkspaceAPI, { SortOrder } from '@/client/api/workspace'
 import { swrConfig } from '@/client/options'
-import PagePagination from '@/components/common/page-pagination'
 import { CreateWorkspaceButton } from '@/components/top-bar/buttons'
 import prettyDate from '@/helpers/pretty-date'
 import { decodeQuery } from '@/helpers/query'
-import usePagePagination from '@/hooks/page-pagination'
 
 const WorkspaceListPage = () => {
+  const navigate = useNavigate()
+  const location = useLocation()
   const [searchParams] = useSearchParams()
   const query = decodeQuery(searchParams.get('q') as string)
   const { page, size, onPageChange, onSizeChange } = usePagePagination({
-    localStoragePrefix: 'voltaserve',
-    localStorageNamespace: 'workspace',
+    navigate,
+    location,
+    storage: {
+      prefix: 'voltaserve',
+      namespace: 'workspace',
+    },
   })
   const {
     data: list,
