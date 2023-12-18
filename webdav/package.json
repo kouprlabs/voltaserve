@@ -11,7 +11,7 @@
     "lint": "eslint './src/**/*.ts'"
   },
   "engines": {
-    "node": ">= 18.x"
+    "node": "20.x"
   },
   "dependencies": {
     "dotenv": "16.0.3",
