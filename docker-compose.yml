@@ -56,7 +56,6 @@ services:
     image: voltaserve/api
     build:
       context: ./api
-      dockerfile: ./Dockerfile
     ports:
       - ${VOLTASERVE_API_PORT}:5000
     environment:
@@ -86,7 +85,6 @@ services:
     image: voltaserve/idp
     build:
       context: ./idp
-      dockerfile: ./Dockerfile
     ports:
       - ${VOLTASERVE_IDP_PORT}:7000
     environment:
@@ -112,7 +110,6 @@ services:
     image: voltaserve/ui
     build:
       context: ./ui
-      dockerfile: ./Dockerfile
     ports:
       - ${VOLTASERVE_UI_PORT}:3000
     environment:
@@ -128,7 +125,6 @@ services:
     image: voltaserve/webdav
     build:
       context: ./webdav
-      dockerfile: ./Dockerfile
     ports:
       - ${VOLTASERVE_WEBDAV_PORT}:6000
     environment:
@@ -145,7 +141,6 @@ services:
     image: voltaserve/conversion
     build:
       context: ./conversion
-      dockerfile: ./Dockerfile
     ports:
       - ${VOLTASERVE_CONVERSION_PORT}:5001
     environment:
