@@ -4,6 +4,8 @@
   <h1 align="center">Voltaserve</h1>
 </p>
 
+Upload files, search and preview documents, create groups and organizations, assign permissions and collaborate in real-time with your team.
+
 ![](./assets/screencast.gif)
 
 ## Getting Started
