@@ -24,11 +24,11 @@ docker compose up -d
 
 Wait until the following containers are running:
 
-- `voltaserve-app-api`
-- `voltaserve-app-idp`
-- `voltaserve-app-conversion`
-- `voltaserve-app-webdav`
-- `voltaserve-app-ui`
+- `voltaserve-api`
+- `voltaserve-idp`
+- `voltaserve-conversion`
+- `voltaserve-webdav`
+- `voltaserve-ui`
 
 You can check that by running the command `docker ps` and look at the `STATUS` column.
 
