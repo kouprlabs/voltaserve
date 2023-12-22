@@ -11,6 +11,15 @@ dependencies:
   '@chakra-ui/system':
     specifier: 2.6.2
     version: 2.6.2(@emotion/react@11.11.1)(@emotion/styled@11.11.0)(react@18.2.0)
+  '@dnd-kit/core':
+    specifier: 6.1.0
+    version: 6.1.0(react-dom@18.2.0)(react@18.2.0)
+  '@dnd-kit/modifiers':
+    specifier: 7.0.0
+    version: 7.0.0(@dnd-kit/core@6.1.0)(react@18.2.0)
+  '@dnd-kit/sortable':
+    specifier: 8.0.0
+    version: 8.0.0(@dnd-kit/core@6.1.0)(react@18.2.0)
   '@emotion/css':
     specifier: 11.11.2
     version: 11.11.2
@@ -22,7 +31,7 @@ dependencies:
     version: 11.11.0(@emotion/react@11.11.1)(@types/react@18.2.45)(react@18.2.0)
   '@koupr/ui':
     specifier: 1.2.0
-    version: 1.2.0(@chakra-ui/react@2.8.2)(@chakra-ui/theme-tools@2.1.2)(@emotion/react@11.11.1)(@emotion/styled@11.11.0)(framer-motion@10.16.16)(react-dom@18.2.0)(react-icons@4.12.0)(react-router-dom@6.21.0)(react@18.2.0)
+    version: link:../../koupr-ui
   '@reduxjs/toolkit':
     specifier: 2.0.1
     version: 2.0.1(react-redux@9.0.4)(react@18.2.0)
@@ -2732,6 +2741,61 @@ packages:
       react: 18.2.0
     dev: false
 
+  /@dnd-kit/accessibility@3.1.0(react@18.2.0):
+    resolution: {integrity: sha512-ea7IkhKvlJUv9iSHJOnxinBcoOI3ppGnnL+VDJ75O45Nss6HtZd8IdN8touXPDtASfeI2T2LImb8VOZcL47wjQ==}
+    peerDependencies:
+      react: '>=16.8.0'
+    dependencies:
+      react: 18.2.0
+      tslib: 2.6.2
+    dev: false
+
+  /@dnd-kit/core@6.1.0(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-J3cQBClB4TVxwGo3KEjssGEXNJqGVWx17aRTZ1ob0FliR5IjYgTxl5YJbKTzA6IzrtelotH19v6y7uoIRUZPSg==}
+    peerDependencies:
+      react: '>=16.8.0'
+      react-dom: '>=16.8.0'
+    dependencies:
+      '@dnd-kit/accessibility': 3.1.0(react@18.2.0)
+      '@dnd-kit/utilities': 3.2.2(react@18.2.0)
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+      tslib: 2.6.2
+    dev: false
+
+  /@dnd-kit/modifiers@7.0.0(@dnd-kit/core@6.1.0)(react@18.2.0):
+    resolution: {integrity: sha512-BG/ETy3eBjFap7+zIti53f0PCLGDzNXyTmn6fSdrudORf+OH04MxrW4p5+mPu4mgMk9kM41iYONjc3DOUWTcfg==}
+    peerDependencies:
+      '@dnd-kit/core': ^6.1.0
+      react: '>=16.8.0'
+    dependencies:
+      '@dnd-kit/core': 6.1.0(react-dom@18.2.0)(react@18.2.0)
+      '@dnd-kit/utilities': 3.2.2(react@18.2.0)
+      react: 18.2.0
+      tslib: 2.6.2
+    dev: false
+
+  /@dnd-kit/sortable@8.0.0(@dnd-kit/core@6.1.0)(react@18.2.0):
+    resolution: {integrity: sha512-U3jk5ebVXe1Lr7c2wU7SBZjcWdQP+j7peHJfCspnA81enlu88Mgd7CC8Q+pub9ubP7eKVETzJW+IBAhsqbSu/g==}
+    peerDependencies:
+      '@dnd-kit/core': ^6.1.0
+      react: '>=16.8.0'
+    dependencies:
+      '@dnd-kit/core': 6.1.0(react-dom@18.2.0)(react@18.2.0)
+      '@dnd-kit/utilities': 3.2.2(react@18.2.0)
+      react: 18.2.0
+      tslib: 2.6.2
+    dev: false
+
+  /@dnd-kit/utilities@3.2.2(react@18.2.0):
+    resolution: {integrity: sha512-+MKAJEOfaBe5SmV6t34p80MMKhjvUz0vRrvVJbPT0WElzaOJ/1xs+D+KDv+tD/NE5ujfrChEcshd4fLn0wpiqg==}
+    peerDependencies:
+      react: '>=16.8.0'
+    dependencies:
+      react: 18.2.0
+      tslib: 2.6.2
+    dev: false
+
   /@emotion/babel-plugin@11.11.0:
     resolution: {integrity: sha512-m4HEDZleaaCH+XgDDsPF15Ht6wTLsgDTeR3WYj9Q/k76JtWhrJjcP4+/XlG8LGT/Rol9qUfOIztXeA84ATpqPQ==}
     dependencies:
@@ -3173,31 +3237,6 @@ packages:
       '@jridgewell/resolve-uri': 3.1.1
       '@jridgewell/sourcemap-codec': 1.4.15
     dev: true
-
-  /@koupr/ui@1.2.0(@chakra-ui/react@2.8.2)(@chakra-ui/theme-tools@2.1.2)(@emotion/react@11.11.1)(@emotion/styled@11.11.0)(framer-motion@10.16.16)(react-dom@18.2.0)(react-icons@4.12.0)(react-router-dom@6.21.0)(react@18.2.0):
-    resolution: {integrity: sha512-/Ok9W2AzHGhn4Jkp7IM5i2VdnVhBPI5sWSOR9OUP30M6m9/+UWjHWOP/cBnVgV7mk/vJABwFczS5S8boYEqVfw==}
-    engines: {node: 20.x}
-    peerDependencies:
-      '@chakra-ui/react': '>= 2.8.2 < 3.0.0'
-      '@chakra-ui/theme-tools': '>= 2.1.2 < 3.0.0'
-      '@emotion/react': '>= 11.11.1 < 12.0.0'
-      '@emotion/styled': '>= 11.11.0 < 12.0.0'
-      framer-motion: '>= 10.16.16 < 11.0.0'
-      react: '>= 18.2.0 < 19.0.0'
-      react-dom: '>= 18.2.0 < 19.0.0'
-      react-icons: '>= 4.12.0 < 5.0.0'
-      react-router-dom: '>= 6.21.0 < 7.0.0'
-    dependencies:
-      '@chakra-ui/react': 2.8.2(@emotion/react@11.11.1)(@emotion/styled@11.11.0)(@types/react@18.2.45)(framer-motion@10.16.16)(react-dom@18.2.0)(react@18.2.0)
-      '@chakra-ui/theme-tools': 2.1.2(@chakra-ui/styled-system@2.9.2)
-      '@emotion/react': 11.11.1(@types/react@18.2.45)(react@18.2.0)
-      '@emotion/styled': 11.11.0(@emotion/react@11.11.1)(@types/react@18.2.45)(react@18.2.0)
-      framer-motion: 10.16.16(react-dom@18.2.0)(react@18.2.0)
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-      react-icons: 4.12.0(react@18.2.0)
-      react-router-dom: 6.21.0(react-dom@18.2.0)(react@18.2.0)
-    dev: false
 
   /@nicolo-ribaudo/eslint-scope-5-internals@5.1.1-v1:
     resolution: {integrity: sha512-54/JRvkLIzzDWshCWfuhadfrfZVPiElY8Fcgmg1HroEly/EDSszzhBAsarCux+D/kOslTRquNzuyGSmUSTTHGg==}

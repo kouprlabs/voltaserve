@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useSearchParams } from 'react-router-dom'
 import { Wrap, WrapItem, Text, Center } from '@chakra-ui/react'
 import { Spinner, variables } from '@koupr/ui'
+import { DndContext, useSensors, PointerSensor, useSensor } from '@dnd-kit/core'
 import FileAPI, { List as FileListData } from '@/client/api/file'
 import { REFRESH_INTERVAL, swrConfig } from '@/client/options'
 import { decodeQuery } from '@/helpers/query'
@@ -44,6 +45,14 @@ const List = ({ scale }: ListProps) => {
   const [isLoading, setIsLoading] = useState(false)
   const { data: folder } = FileAPI.useGetById(fileId, swrConfig())
   const { data: itemCount } = FileAPI.useGetItemCount(fileId, swrConfig())
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        delay: 200,
+        tolerance: 0,
+      },
+    }),
+  )
 
   useEffect(() => {
     const handleKeydown = (event: KeyboardEvent) => {
@@ -108,7 +117,7 @@ const List = ({ scale }: ListProps) => {
   }
 
   return (
-    <>
+    <DndContext sensors={sensors}>
       {itemCount === 0 && (
         <Center w="100%" h="300px">
           <Text>There are no items.</Text>
@@ -127,7 +136,7 @@ const List = ({ scale }: ListProps) => {
           ))}
         </Wrap>
       ) : null}
-    </>
+    </DndContext>
   )
 }
 
