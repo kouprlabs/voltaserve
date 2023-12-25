@@ -72,6 +72,9 @@ import { uploadsDrawerOpened } from '@/store/ui/uploads-drawer'
 
 const ICON_SCALE_KEY = 'voltaserve_file_icon_scale'
 const SPACING = variables.spacingXs
+const ICON_SCALE_SLIDER_STEP = 0.25
+const ICON_SCALE_SLIDER_MIN = 1
+const ICON_SCALE_SLIDER_MAX = ICON_SCALE_SLIDER_STEP * 9
 
 const Toolbar = () => {
   const dispatch = useAppDispatch()
@@ -364,9 +367,9 @@ const Toolbar = () => {
           <Slider
             w="120px"
             value={iconScale}
-            min={1}
-            max={2.5}
-            step={0.25}
+            min={ICON_SCALE_SLIDER_MIN}
+            max={ICON_SCALE_SLIDER_MAX}
+            step={ICON_SCALE_SLIDER_STEP}
             onChange={handleIconScaleChange}
           >
             <SliderTrack>
