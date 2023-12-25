@@ -7,20 +7,15 @@ import {
   Link as ChakraLink,
   useColorModeValue,
   Checkbox,
-  IconButton,
-  Menu,
-  MenuButton,
   MenuItem,
   MenuList,
   Box,
   MenuDivider,
-  Portal,
   Text,
   VStack,
 } from '@chakra-ui/react'
 import {
   IconCopy,
-  IconDotsVerticalSm,
   IconDownload,
   IconEdit,
   IconMove,
@@ -28,6 +23,7 @@ import {
   IconTrash,
   variables,
 } from '@koupr/ui'
+import { ContextMenu } from 'chakra-ui-contextmenu'
 import { File, SnapshotStatus } from '@/client/api/file'
 import {
   ltEditorPermission,
@@ -115,164 +111,157 @@ const Item = ({ file, scale }: ItemProps) => {
 
   return (
     <DndContainer file={file}>
-      <Stack
-        position="relative"
-        spacing={variables.spacingXs}
-        pb={variables.spacingXs}
-        _hover={{ bg: hoverColor }}
-        _active={{ bg: activeColor }}
-        transition="background-color 0.4s ease"
-        bg={isChecked ? hoverColor : 'transparent'}
-        borderRadius={variables.borderRadiusSm}
-        userSelect="none"
-        onMouseEnter={() => {
-          setIsCheckboxVisible(true)
+      <ContextMenu<HTMLDivElement>
+        menuProps={{
+          onOpen: () => console.log('menu open'),
+          onClose: () => console.log('menu close'),
         }}
-        onMouseLeave={() => {
-          if (!isChecked) {
-            setIsCheckboxVisible(false)
-          }
-        }}
-        onClick={(e) => e.stopPropagation()}
+        renderMenu={() => (
+          <MenuList zIndex="dropdown">
+            <MenuItem
+              icon={<IconShare />}
+              isDisabled={ltOwnerPermission(file.permission)}
+              onClick={() => dispatch(sharingModalDidOpen())}
+            >
+              Sharing
+            </MenuItem>
+            <MenuItem
+              icon={<IconDownload />}
+              isDisabled={
+                file.type !== 'file' || ltViewerPermission(file.permission)
+              }
+              onClick={() => downloadFile(file)}
+            >
+              Download
+            </MenuItem>
+            <MenuDivider />
+            <MenuItem
+              icon={<IconTrash />}
+              color="red"
+              isDisabled={ltOwnerPermission(file.permission)}
+              onClick={() => dispatch(deleteModalDidOpen())}
+            >
+              Delete
+            </MenuItem>
+            <MenuItem
+              icon={<IconEdit />}
+              isDisabled={ltEditorPermission(file.permission)}
+              onClick={() => dispatch(renameModalDidOpen())}
+            >
+              Rename
+            </MenuItem>
+            <MenuItem
+              icon={<IconMove />}
+              isDisabled={ltEditorPermission(file.permission)}
+              onClick={() => dispatch(moveModalDidOpen())}
+            >
+              Move
+            </MenuItem>
+            <MenuItem
+              icon={<IconCopy />}
+              isDisabled={ltEditorPermission(file.permission)}
+              onClick={() => dispatch(copyModalDidOpen())}
+            >
+              Copy
+            </MenuItem>
+          </MenuList>
+        )}
       >
-        {isCheckboxVisible || isSelected ? (
-          <Checkbox
-            position="absolute"
-            top="10px"
-            left="8px"
-            isChecked={isChecked}
-            zIndex={1}
-            size="lg"
-            onChange={(e) => {
-              e.stopPropagation()
-              if (e.target.checked) {
-                setIsChecked(true)
-                dispatch(selectionAdded(file.id))
-              } else {
-                setIsChecked(false)
-                dispatch(selectionRemoved(file.id))
+        {(ref) => (
+          <Stack
+            ref={ref}
+            position="relative"
+            spacing={variables.spacingXs}
+            pb={variables.spacingXs}
+            _hover={{ bg: hoverColor }}
+            _active={{ bg: activeColor }}
+            transition="background-color 0.4s ease"
+            bg={isChecked ? hoverColor : 'transparent'}
+            borderRadius={variables.borderRadiusSm}
+            userSelect="none"
+            onMouseEnter={() => {
+              setIsCheckboxVisible(true)
+            }}
+            onMouseLeave={() => {
+              if (!isChecked) {
+                setIsCheckboxVisible(false)
               }
             }}
-          />
-        ) : null}
-        <Box>
-          <Menu onOpen={() => handleSelectionClick()}>
-            {isCheckboxVisible && (
-              <MenuButton
-                as={IconButton}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {isCheckboxVisible || isSelected ? (
+              <Checkbox
                 position="absolute"
-                top="7px"
-                right="6px"
-                icon={<IconDotsVerticalSm />}
-                variant="solid"
-                size="xs"
+                top="10px"
+                left="8px"
+                isChecked={isChecked}
                 zIndex={1}
-                aria-label=""
-              />
-            )}
-            <Portal>
-              <MenuList zIndex="dropdown">
-                <MenuItem
-                  icon={<IconShare />}
-                  isDisabled={ltOwnerPermission(file.permission)}
-                  onClick={() => dispatch(sharingModalDidOpen())}
-                >
-                  Sharing
-                </MenuItem>
-                <MenuItem
-                  icon={<IconDownload />}
-                  isDisabled={
-                    file.type !== 'file' || ltViewerPermission(file.permission)
+                size="lg"
+                onChange={(e) => {
+                  e.stopPropagation()
+                  if (e.target.checked) {
+                    setIsChecked(true)
+                    dispatch(selectionAdded(file.id))
+                  } else {
+                    setIsChecked(false)
+                    dispatch(selectionRemoved(file.id))
                   }
-                  onClick={() => downloadFile(file)}
-                >
-                  Download
-                </MenuItem>
-                <MenuDivider />
-                <MenuItem
-                  icon={<IconTrash />}
-                  color="red"
-                  isDisabled={ltOwnerPermission(file.permission)}
-                  onClick={() => dispatch(deleteModalDidOpen())}
-                >
-                  Delete
-                </MenuItem>
-                <MenuItem
-                  icon={<IconEdit />}
-                  isDisabled={ltEditorPermission(file.permission)}
-                  onClick={() => dispatch(renameModalDidOpen())}
-                >
-                  Rename
-                </MenuItem>
-                <MenuItem
-                  icon={<IconMove />}
-                  isDisabled={ltEditorPermission(file.permission)}
-                  onClick={() => dispatch(moveModalDidOpen())}
-                >
-                  Move
-                </MenuItem>
-                <MenuItem
-                  icon={<IconCopy />}
-                  isDisabled={ltEditorPermission(file.permission)}
-                  onClick={() => dispatch(copyModalDidOpen())}
-                >
-                  Copy
-                </MenuItem>
-              </MenuList>
-            </Portal>
-          </Menu>
-        </Box>
-        <Center
-          w={width}
-          minH={minHeight}
-          onDoubleClick={handleDoubleDlick}
-          onClick={handleSelectionClick}
-        >
-          <Icon file={file} scale={scale} />
-        </Center>
-        <Box w={width} title={file.name} px={variables.spacingXs}>
-          {file.type === 'folder' && (
-            <ChakraLink
-              as={Link}
-              to={`/workspace/${file.workspaceId}/file/${file.id}`}
-              textAlign="center"
-              noOfLines={3}
-              textDecoration="none"
-              _hover={{ textDecoration: 'underline' }}
-            >
-              {file.name}
-            </ChakraLink>
-          )}
-          {file.type === 'file' && file.status === SnapshotStatus.Ready ? (
-            <ChakraLink
-              textAlign="center"
-              noOfLines={3}
-              textDecoration="none"
-              _hover={{ textDecoration: 'underline' }}
-              onClick={(event) => {
-                handleSelectionClick(event)
-                window.open(`/file/${file.id}`, '_blank')?.focus()
-              }}
-            >
-              {file.name}
-            </ChakraLink>
-          ) : null}
-          {file.type === 'file' && file.status !== SnapshotStatus.Ready ? (
-            <Text
-              textAlign="center"
-              noOfLines={3}
+                }}
+              />
+            ) : null}
+            <Center
+              w={width}
+              minH={minHeight}
+              onDoubleClick={handleDoubleDlick}
               onClick={handleSelectionClick}
             >
-              {file.name}
-            </Text>
-          ) : null}
-        </Box>
-        <VStack spacing={0}>
-          <Text textAlign="center" noOfLines={3} color="gray.500">
-            {date}
-          </Text>
-        </VStack>
-      </Stack>
+              <Icon file={file} scale={scale} />
+            </Center>
+            <Box w={width} title={file.name} px={variables.spacingXs}>
+              {file.type === 'folder' && (
+                <ChakraLink
+                  as={Link}
+                  to={`/workspace/${file.workspaceId}/file/${file.id}`}
+                  textAlign="center"
+                  noOfLines={3}
+                  textDecoration="none"
+                  _hover={{ textDecoration: 'underline' }}
+                >
+                  {file.name}
+                </ChakraLink>
+              )}
+              {file.type === 'file' && file.status === SnapshotStatus.Ready ? (
+                <ChakraLink
+                  textAlign="center"
+                  noOfLines={3}
+                  textDecoration="none"
+                  _hover={{ textDecoration: 'underline' }}
+                  onClick={(event) => {
+                    handleSelectionClick(event)
+                    window.open(`/file/${file.id}`, '_blank')?.focus()
+                  }}
+                >
+                  {file.name}
+                </ChakraLink>
+              ) : null}
+              {file.type === 'file' && file.status !== SnapshotStatus.Ready ? (
+                <Text
+                  textAlign="center"
+                  noOfLines={3}
+                  onClick={handleSelectionClick}
+                >
+                  {file.name}
+                </Text>
+              ) : null}
+            </Box>
+            <VStack spacing={0}>
+              <Text textAlign="center" noOfLines={3} color="gray.500">
+                {date}
+              </Text>
+            </VStack>
+          </Stack>
+        )}
+      </ContextMenu>
     </DndContainer>
   )
 }

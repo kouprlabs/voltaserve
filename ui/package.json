@@ -27,6 +27,7 @@
     "@koupr/ui": "1.2.0",
     "@reduxjs/toolkit": "2.0.1",
     "chakra-react-select": "4.7.6",
+    "chakra-ui-contextmenu": "1.0.5",
     "dateformat": "5.0.3",
     "formik": "2.4.5",
     "framer-motion": "10.16.16",
