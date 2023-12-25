@@ -80,6 +80,7 @@ const Thumbnail = ({ file, scale }: ThumbnailProps) => {
           borderRadius: variables.borderRadiusSm,
           visibility: isLoading ? 'hidden' : 'visible',
         }}
+        pointerEvents="none"
         alt={file.name}
         onLoad={() => setIsLoading(false)}
       />
