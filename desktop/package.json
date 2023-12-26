@@ -1,0 +1,16 @@
+{
+  "name": "voltaserve-desktop",
+  "version": "1.0.0",
+  "license": "MIT",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "engines": {
+    "node": "20.x"
+  },
+  "devDependencies": {
+    "electron": "28.1.0"
+  }
+}
