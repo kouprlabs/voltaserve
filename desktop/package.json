@@ -10,10 +10,8 @@
   "engines": {
     "node": "20.x"
   },
-  "devDependencies": {
-    "electron": "28.1.0"
-  },
   "dependencies": {
+    "electron": "28.1.0",
     "winreg": "1.2.5"
   }
 }
