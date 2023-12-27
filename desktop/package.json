@@ -12,5 +12,8 @@
   },
   "devDependencies": {
     "electron": "28.1.0"
+  },
+  "dependencies": {
+    "winreg": "1.2.5"
   }
 }
