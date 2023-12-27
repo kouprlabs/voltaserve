@@ -15,7 +15,7 @@ const ffi = require("ffi-napi");
 const isWindows = process.platform === "win32";
 const isMacOS = process.platform === "darwin";
 
-const voltaserveLib = ffi.Library("build/Release/voltaserve", {
+const voltaserve = ffi.Library("build/Release/voltaserve", {
   add: ["int", ["int", "int"]],
 });
 
@@ -23,7 +23,7 @@ let tray;
 let window;
 
 app.whenReady().then(() => {
-  ipcMain.handle("voltaserve:add", () => voltaserveLib.add(1, 1));
+  ipcMain.handle("voltaserve:add", () => voltaserve.add(1, 1));
   createTray();
   createWindow();
   app.on("activate", () => {
