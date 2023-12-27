@@ -5,18 +5,25 @@ const {
   Menu,
   nativeImage,
   nativeTheme,
+  ipcMain,
 } = require("electron");
 const path = require("node:path");
 const Registry = require("winreg");
 const positioner = require("electron-traywindow-positioner");
+const ffi = require("ffi-napi");
 
 const isWindows = process.platform === "win32";
 const isMacOS = process.platform === "darwin";
+
+const voltaserveLib = ffi.Library("build/Release/voltaserve", {
+  add: ["int", ["int", "int"]],
+});
 
 let tray;
 let window;
 
 app.whenReady().then(() => {
+  ipcMain.handle("voltaserve:add", () => voltaserveLib.add(1, 1));
   createTray();
   createWindow();
   app.on("activate", () => {
