@@ -7,31 +7,64 @@ const {
   nativeTheme,
   ipcMain,
 } = require("electron");
-const path = require("node:path");
+const path = require("path");
+const { exec } = require("child_process");
 const Registry = require("winreg");
 const positioner = require("electron-traywindow-positioner");
-const ffi = require("ffi-napi");
 
 const isWindows = process.platform === "win32";
 const isMacOS = process.platform === "darwin";
 const isLinux = process.platform === "linux";
 
-const getLibPath = () => {
-  if (isMacOS || isLinux) {
-    return "build/libvoltaserve";
-  } else if (isWindows) {
-    return "build/Release/voltaserve";
-  }
+const voltaserve = {
+  getFileList: (_) => {
+    return new Promise((resolve, reject) => {
+      exec(
+        `${getCLIName()} --get-file-list`,
+        {
+          encoding: "utf-8",
+          cwd: getCLIDirectory(),
+        },
+        (error, stdout, _) => {
+          if (error) {
+            reject(error);
+          } else {
+            resolve(JSON.parse(stdout));
+          }
+        }
+      );
+    });
+  },
+  uploadFile: (_) => {
+    return new Promise((resolve, reject) => {
+      exec(
+        `${getCLIName()} --upload-file`,
+        {
+          encoding: "utf-8",
+          cwd: getCLIDirectory(),
+        },
+        (error, stdout, _) => {
+          if (error) {
+            reject(error);
+          } else {
+            resolve(JSON.parse(stdout));
+          }
+        }
+      );
+    });
+  },
 };
-const voltaserve = ffi.Library(getLibPath(), {
-  add: ["int", ["int", "int"]],
-});
 
 let tray;
 let window;
 
 app.whenReady().then(() => {
-  ipcMain.handle("voltaserve:add", () => voltaserve.add(1, 1));
+  ipcMain.handle("voltaserve:getFileList", async (_, path) => {
+    return await voltaserve.getFileList(path);
+  });
+  ipcMain.handle("voltaserve:uploadFile", async (_, path) => {
+    return await voltaserve.uploadFile(path);
+  });
 
   createTray();
   createWindow();
@@ -133,5 +166,21 @@ const isWindowsDarkTheme = () => {
     });
   } catch (error) {
     return false;
+  }
+};
+
+const getCLIDirectory = () => {
+  if (isMacOS || isLinux) {
+    return path.join(__dirname, "build");
+  } else if (isWindows) {
+    return path.join(__dirname, "build", "Release");
+  }
+};
+
+const getCLIName = () => {
+  if (isMacOS || isLinux) {
+    return "voltaserve";
+  } else if (isWindows) {
+    return "voltaserve.exe";
   }
 };

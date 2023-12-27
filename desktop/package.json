@@ -8,12 +8,11 @@
     "start": "electron ."
   },
   "engines": {
-    "node": "16.x"
+    "node": "20.x"
   },
   "dependencies": {
-    "electron": "20.3.8",
+    "electron": "28.1.0",
     "electron-traywindow-positioner": "1.2.0",
-    "ffi-napi": "4.0.3",
     "winreg": "1.2.5"
   }
 }

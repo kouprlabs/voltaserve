@@ -2,7 +2,8 @@ const { contextBridge, ipcRenderer } = require("electron/renderer");
 
 contextBridge.exposeInMainWorld("electronAPI", {
   voltaserve: {
-    add: (a, b) => ipcRenderer.invoke("voltaserve:add", a, b),
+    getFileList: (path) => ipcRenderer.invoke("voltaserve:getFileList", path),
+    uploadFile: (path) => ipcRenderer.invoke("voltaserve:uploadFile", path),
   },
 });
 

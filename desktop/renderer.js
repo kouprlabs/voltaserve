@@ -1,4 +1,10 @@
-window.onload = async () => {
-  const result = await window.electronAPI.voltaserve.add(1, 1);
-  document.getElementById("result").innerText = result;
+window.onload = () => {
+  window.electronAPI.voltaserve.getFileList("/example").then((result) => {
+    document.getElementById("get-file-list").innerText = JSON.stringify(result);
+  });
+  window.electronAPI.voltaserve
+    .uploadFile("/example/file.txt")
+    .then((result) => {
+      document.getElementById("upload-file").innerText = JSON.stringify(result);
+    });
 };
