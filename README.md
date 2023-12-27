@@ -118,4 +118,4 @@ To setup a development environment for the purpose of developing and debugging V
 
 ## Licensing
 
-Voltaserve is released under the [GNU Affero General Public License v3.0](./LICENSE.md).
+Voltaserve is released under the [GNU Affero General Public License v3.0](LICENSE.md).
