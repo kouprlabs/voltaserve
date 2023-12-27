@@ -10,6 +10,9 @@ const path = require("node:path");
 const Registry = require("winreg");
 const positioner = require("electron-traywindow-positioner");
 
+const isWindows = process.platform === "win32";
+const isMacOS = process.platform === "darwin";
+
 let tray;
 let window;
 
@@ -25,13 +28,16 @@ app.whenReady().then(() => {
 
 const createTray = async () => {
   tray = new Tray(await getIcon());
-  tray.on("right-click", showWindow);
-  tray.on("double-click", showWindow);
-  tray.on("click", showWindow);
 
-  nativeTheme.on("updated", async () => {
-    tray.setImage(await getIcon());
-  });
+  if (isWindows) {
+    tray.on("right-click", showWindow);
+    tray.on("double-click", showWindow);
+    tray.on("click", showWindow);
+
+    nativeTheme.on("updated", async () => {
+      tray.setImage(await getIcon());
+    });
+  }
 
   const contextMenu = Menu.buildFromTemplate([
     {
@@ -79,12 +85,14 @@ const showWindow = () => {
 const getIcon = async () => {
   const isDark = await isDarkTheme();
   return nativeImage
-    .createFromPath(isDark ? "assets/icon-dark.png" : "assets/icon.png")
+    .createFromPath(
+      isDark || isMacOS ? "assets/icon-dark.png" : "assets/icon.png"
+    )
     .resize({ height: 16, width: 16 });
 };
 
 const isDarkTheme = async () => {
-  if (process.platform === "win32") {
+  if (isWindows) {
     return await isWindowsDarkTheme();
   } else {
     return nativeTheme.shouldUseDarkColors;
