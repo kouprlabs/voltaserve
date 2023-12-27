@@ -103,7 +103,7 @@ const getIcon = async () => {
   const isDark = await isDarkTheme();
   return nativeImage
     .createFromPath(
-      isDark || isMacOS ? "assets/icon-dark.png" : "assets/icon.png"
+      isDark || isMacOS || isLinux ? "assets/icon-dark.png" : "assets/icon.png"
     )
     .resize({ height: 16, width: 16 });
 };
