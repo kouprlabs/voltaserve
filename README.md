@@ -24,11 +24,11 @@ docker compose up -d
 
 Wait until the following containers are running:
 
-- `voltaserve-app-api`
-- `voltaserve-app-idp`
-- `voltaserve-app-conversion`
-- `voltaserve-app-webdav`
-- `voltaserve-app-ui`
+- `voltaserve-api`
+- `voltaserve-idp`
+- `voltaserve-conversion`
+- `voltaserve-webdav`
+- `voltaserve-ui`
 
 You can check that by running the command `docker ps` and look at the `STATUS` column.
 
@@ -118,4 +118,4 @@ To setup a development environment for the purpose of developing and debugging V
 
 ## Licensing
 
-Voltaserve is released under the [GNU Affero General Public License v3.0](./LICENSE.md).
+Voltaserve is released under the [GNU Affero General Public License v3.0](LICENSE.md).
