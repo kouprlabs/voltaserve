@@ -14,8 +14,16 @@ const ffi = require("ffi-napi");
 
 const isWindows = process.platform === "win32";
 const isMacOS = process.platform === "darwin";
+const isLinux = process.platform === "linux";
 
-const voltaserve = ffi.Library("build/Release/voltaserve", {
+const getLibPath = () => {
+  if (isMacOS || isLinux) {
+    return "build/libvoltaserve";
+  } else if (isWindows) {
+    return "build/Release/voltaserve";
+  }
+};
+const voltaserve = ffi.Library(getLibPath(), {
   add: ["int", ["int", "int"]],
 });
 
@@ -24,8 +32,10 @@ let window;
 
 app.whenReady().then(() => {
   ipcMain.handle("voltaserve:add", () => voltaserve.add(1, 1));
+
   createTray();
   createWindow();
+
   app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createTray();
@@ -122,7 +132,6 @@ const isWindowsDarkTheme = () => {
       });
     });
   } catch (error) {
-    console.log(error);
     return false;
   }
 };
