@@ -6,8 +6,9 @@ const {
   nativeImage,
   nativeTheme,
 } = require("electron");
-const Registry = require("winreg");
 const path = require("node:path");
+const Registry = require("winreg");
+const positioner = require("electron-traywindow-positioner");
 
 let tray;
 let window;
@@ -46,15 +47,6 @@ const createTray = async () => {
   tray.setContextMenu(contextMenu);
 };
 
-const getWindowPosition = () => {
-  const windowBounds = window.getBounds();
-  const trayBounds = tray.getBounds();
-  return {
-    x: Math.round(trayBounds.x + trayBounds.width / 2 - windowBounds.width / 2),
-    y: Math.round(trayBounds.y - windowBounds.height),
-  };
-};
-
 const createWindow = () => {
   window = new BrowserWindow({
     width: 450,
@@ -79,8 +71,7 @@ const createWindow = () => {
 };
 
 const showWindow = () => {
-  const position = getWindowPosition();
-  window.setPosition(position.x, position.y, false);
+  positioner.position(window, tray.getBounds());
   window.show();
   window.focus();
 };

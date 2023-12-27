@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "electron": "28.1.0",
+    "electron-traywindow-positioner": "1.2.0",
     "winreg": "1.2.5"
   }
 }
