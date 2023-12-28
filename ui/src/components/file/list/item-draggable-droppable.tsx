@@ -2,6 +2,7 @@ import { ReactNode, useState } from 'react'
 import { Box } from '@chakra-ui/react'
 import { variables } from '@koupr/ui'
 import {
+  DragCancelEvent,
   DragEndEvent,
   DragStartEvent,
   useDndMonitor,
@@ -43,6 +44,11 @@ const ItemDraggableDroppable = ({
         setVisible(true)
       }
     },
+    onDragCancel: (event: DragCancelEvent) => {
+      if (selection.includes(file.id) || event.active.id === file.id) {
+        setVisible(true)
+      }
+    },
   })
 
   return (
@@ -61,7 +67,7 @@ const ItemDraggableDroppable = ({
         <Box
           ref={setDraggableNodeRef}
           border="2px solid"
-          borderColor={isOver ? 'green.300' : 'transparent'}
+          borderColor={isOver ? 'purple.200' : 'transparent'}
           borderRadius={variables.borderRadiusSm}
           visibility={isVisible ? 'visible' : 'hidden'}
           {...listeners}
