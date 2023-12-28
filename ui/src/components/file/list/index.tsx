@@ -1,8 +1,14 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useParams, useSearchParams } from 'react-router-dom'
 import { Wrap, WrapItem, Text, Center } from '@chakra-ui/react'
 import { Spinner, variables } from '@koupr/ui'
-import { DndContext, useSensors, PointerSensor, useSensor } from '@dnd-kit/core'
+import {
+  DndContext,
+  useSensors,
+  PointerSensor,
+  useSensor,
+  DragStartEvent,
+} from '@dnd-kit/core'
 import FileAPI, { List as FileListData } from '@/client/api/file'
 import { REFRESH_INTERVAL, swrConfig } from '@/client/options'
 import { decodeQuery } from '@/helpers/query'
@@ -18,8 +24,9 @@ import {
   rangeSelectKeyUpdated,
   selectionUpdated,
 } from '@/store/ui/files'
-import DraggableDroppable from './draggable-droppable'
 import Item from './item'
+import ItemDragOverlay from './item-drag-overlay'
+import ItemDraggableDroppable from './item-draggable-droppable'
 
 setInterval(async () => {
   const ids = store.getState().entities.files.list?.data.map((e) => e.id) || []
@@ -44,8 +51,13 @@ const List = ({ scale }: ListProps) => {
   const sortBy = useAppSelector((state) => state.ui.files.sortBy)
   const sortOrder = useAppSelector((state) => state.ui.files.sortOrder)
   const [isLoading, setIsLoading] = useState(false)
+  const [activeId, setActiveId] = useState<string | null>(null)
   const { data: folder } = FileAPI.useGetById(fileId, swrConfig())
   const { data: itemCount } = FileAPI.useGetItemCount(fileId, swrConfig())
+  const activeFile = useMemo(
+    () => list?.data.find((e) => e.id === activeId),
+    [list, activeId],
+  )
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -109,6 +121,14 @@ const List = ({ scale }: ListProps) => {
     })()
   }, [workspaceId, fileId, query, sortBy, sortOrder, dispatch])
 
+  const handleDragStart = useCallback((event: DragStartEvent) => {
+    setActiveId(event.active.id as string)
+  }, [])
+
+  const handleDragEnd = useCallback(() => {
+    setActiveId(null)
+  }, [])
+
   if (isLoading || !list) {
     return (
       <Center w="100%" h="300px" p={variables.spacing}>
@@ -118,7 +138,11 @@ const List = ({ scale }: ListProps) => {
   }
 
   return (
-    <DndContext sensors={sensors}>
+    <DndContext
+      sensors={sensors}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+    >
       {itemCount === 0 && (
         <Center w="100%" h="300px">
           <Text>There are no items.</Text>
@@ -132,13 +156,14 @@ const List = ({ scale }: ListProps) => {
         >
           {list.data.map((f) => (
             <WrapItem key={f.id}>
-              <DraggableDroppable file={f}>
+              <ItemDraggableDroppable file={f}>
                 <Item file={f} scale={scale} />
-              </DraggableDroppable>
+              </ItemDraggableDroppable>
             </WrapItem>
           ))}
         </Wrap>
       ) : null}
+      <ItemDragOverlay file={activeFile!} scale={scale} />
     </DndContext>
   )
 }
