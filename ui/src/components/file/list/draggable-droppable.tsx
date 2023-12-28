@@ -4,12 +4,12 @@ import { variables } from '@koupr/ui'
 import { useDraggable, useDroppable } from '@dnd-kit/core'
 import { File, FileType } from '@/client/api/file'
 
-type DndContainerProps = {
+type DraggableDroppableProps = {
   file: File
   children?: ReactNode
 }
 
-const DndContainer = ({ file, children }: DndContainerProps) => {
+const DraggableDroppable = ({ file, children }: DraggableDroppableProps) => {
   const {
     attributes,
     listeners,
@@ -71,4 +71,4 @@ const DndContainer = ({ file, children }: DndContainerProps) => {
   )
 }
 
-export default DndContainer
+export default DraggableDroppable

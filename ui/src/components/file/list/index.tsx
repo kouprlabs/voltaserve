@@ -18,6 +18,7 @@ import {
   rangeSelectKeyUpdated,
   selectionUpdated,
 } from '@/store/ui/files'
+import DraggableDroppable from './draggable-droppable'
 import Item from './item'
 
 setInterval(async () => {
@@ -131,7 +132,9 @@ const List = ({ scale }: ListProps) => {
         >
           {list.data.map((f) => (
             <WrapItem key={f.id}>
-              <Item file={f} scale={scale} />
+              <DraggableDroppable file={f}>
+                <Item file={f} scale={scale} />
+              </DraggableDroppable>
             </WrapItem>
           ))}
         </Wrap>
