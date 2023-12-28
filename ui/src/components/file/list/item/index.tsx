@@ -34,7 +34,7 @@ import {
 import downloadFile from '@/helpers/download-file'
 import relativeDate from '@/helpers/relative-date'
 import store from '@/store/configure-store'
-import { useAppDispatch } from '@/store/hook'
+import { useAppDispatch, useAppSelector } from '@/store/hook'
 import {
   copyModalDidOpen,
   deleteModalDidOpen,
@@ -60,6 +60,9 @@ const MIN_HEIGHT = 110
 const Item = ({ file, scale }: ItemProps) => {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
+  const selectionCount = useAppSelector(
+    (state) => state.ui.files.selection.length,
+  )
   const width = useMemo(() => `${WIDTH * scale}px`, [scale])
   const minHeight = useMemo(() => `${MIN_HEIGHT * scale}px`, [scale])
   const hoverColor = useColorModeValue('gray.100', 'gray.700')
@@ -152,10 +155,12 @@ const Item = ({ file, scale }: ItemProps) => {
         event.preventDefault()
         setMenuPosition({ x: event.pageX, y: event.pageY })
         setIsMenuOpen(true)
-        handleIconClick(event)
+        if (!isSelected) {
+          handleIconClick(event)
+        }
       }
     },
-    [handleIconClick],
+    [isSelected, handleIconClick],
   )
 
   return (
@@ -253,7 +258,9 @@ const Item = ({ file, scale }: ItemProps) => {
               <MenuItem
                 icon={<IconDownload />}
                 isDisabled={
-                  file.type !== 'file' || ltViewerPermission(file.permission)
+                  selectionCount !== 1 ||
+                  file.type !== 'file' ||
+                  ltViewerPermission(file.permission)
                 }
                 onClick={() => downloadFile(file)}
               >
@@ -270,7 +277,9 @@ const Item = ({ file, scale }: ItemProps) => {
               </MenuItem>
               <MenuItem
                 icon={<IconEdit />}
-                isDisabled={ltEditorPermission(file.permission)}
+                isDisabled={
+                  selectionCount !== 1 || ltEditorPermission(file.permission)
+                }
                 onClick={() => dispatch(renameModalDidOpen())}
               >
                 Rename
