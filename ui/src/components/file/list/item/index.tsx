@@ -92,7 +92,10 @@ const Item = ({ file, scale }: ItemProps) => {
     return () => unsubscribe()
   }, [file.id, isHovered])
 
-  const handleClick = useCallback((e: MouseEvent) => e.stopPropagation(), [])
+  const handleClick = useCallback(
+    (event: MouseEvent) => event.stopPropagation(),
+    [],
+  )
 
   const handleMouseEnter = useCallback(() => {
     setIsCheckboxVisible(true)
@@ -107,8 +110,8 @@ const Item = ({ file, scale }: ItemProps) => {
   }, [isChecked])
 
   const handleIconClick = useCallback(
-    (event?: MouseEvent) => {
-      event?.stopPropagation()
+    (event: MouseEvent) => {
+      event.stopPropagation()
       if (store.getState().ui.files.isMultiSelectActive) {
         performMultiSelect(file, isSelected)
       } else if (store.getState().ui.files.isRangeSelectActive) {
@@ -130,9 +133,9 @@ const Item = ({ file, scale }: ItemProps) => {
   }, [file, navigate, dispatch])
 
   const handleCheckboxChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) => {
-      e.stopPropagation()
-      if (e.target.checked) {
+    (event: ChangeEvent<HTMLInputElement>) => {
+      event.stopPropagation()
+      if (event.target.checked) {
         setIsChecked(true)
         dispatch(selectionAdded(file.id))
       } else {
@@ -144,12 +147,12 @@ const Item = ({ file, scale }: ItemProps) => {
   )
 
   const handleContextMenu = useCallback(
-    (event?: MouseEvent) => {
+    (event: MouseEvent) => {
       if (event) {
         event.preventDefault()
         setMenuPosition({ x: event.pageX, y: event.pageY })
         setIsMenuOpen(true)
-        handleIconClick()
+        handleIconClick(event)
       }
     },
     [handleIconClick],
