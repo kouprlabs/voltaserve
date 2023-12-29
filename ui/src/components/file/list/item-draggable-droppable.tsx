@@ -67,7 +67,7 @@ const ItemDraggableDroppable = ({
         <Box
           ref={setDraggableNodeRef}
           border="2px solid"
-          borderColor={isOver ? 'purple.200' : 'transparent'}
+          borderColor={isOver ? 'green.300' : 'transparent'}
           borderRadius={variables.borderRadiusSm}
           visibility={isVisible ? 'visible' : 'hidden'}
           {...listeners}

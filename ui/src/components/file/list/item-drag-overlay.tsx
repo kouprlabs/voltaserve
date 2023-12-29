@@ -24,7 +24,7 @@ const ItemDragOverlay = ({ file, scale }: ItemDragOverlayProps) => {
             position="absolute"
             bottom="-5px"
             right="-5px"
-            colorScheme="purple"
+            colorScheme="green"
             borderRadius="30px"
             minW="30px"
             h="30px"
