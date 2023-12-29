@@ -61,7 +61,7 @@ const List = ({ scale }: ListProps) => {
     useSensor(PointerSensor, {
       activationConstraint: {
         delay: 200,
-        tolerance: 0,
+        tolerance: 5,
       },
     }),
   )
