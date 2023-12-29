@@ -1,4 +1,4 @@
-import { Box, Badge } from '@chakra-ui/react'
+import { Box, Center } from '@chakra-ui/react'
 import { variables } from '@koupr/ui'
 import { DragOverlay } from '@dnd-kit/core'
 import { File } from '@/client/api/file'
@@ -20,11 +20,12 @@ const ItemDragOverlay = ({ file, scale }: ItemDragOverlayProps) => {
       <Box position="relative">
         <Item file={file} scale={scale} isPresentational={true} />
         {selectionCount > 1 ? (
-          <Badge
+          <Center
             position="absolute"
             bottom="-5px"
             right="-5px"
-            colorScheme="green"
+            color="white"
+            bgColor="green.300"
             borderRadius="30px"
             minW="30px"
             h="30px"
@@ -33,8 +34,8 @@ const ItemDragOverlay = ({ file, scale }: ItemDragOverlayProps) => {
             alignItems="center"
             justifyContent="center"
           >
-            {selectionCount}
-          </Badge>
+            1000
+          </Center>
         ) : null}
       </Box>
     </DragOverlay>
