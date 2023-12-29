@@ -19,7 +19,7 @@ const Icon = ({ file, scale, isLoading }: IconProps) => {
     )
   } else if (file.type === 'folder') {
     return (
-      <Box zIndex={0}>
+      <Box color={color} zIndex={0}>
         <FolderIcon file={file} scale={scale} isLoading={isLoading} />
       </Box>
     )
