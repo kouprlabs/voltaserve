@@ -168,6 +168,7 @@ const Item = ({ file, scale, isPresentational, isLoading }: ItemProps) => {
     <Stack
       position="relative"
       spacing={variables.spacingXs}
+      w={width}
       py={variables.spacingSm}
       _hover={{ bg: hoverColor }}
       _active={{ bg: activeColor }}

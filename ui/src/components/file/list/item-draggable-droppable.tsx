@@ -51,7 +51,12 @@ const ItemDraggableDroppable = ({
       if (selection.includes(file.id) || event.active.id === file.id) {
         setVisible(true)
       }
-      if (file.type === FileType.Folder && isOver) {
+      if (
+        file.type === FileType.Folder &&
+        file.id !== event.active.id &&
+        !selection.includes(file.id) &&
+        isOver
+      ) {
         const idsToMove = [
           ...new Set<string>([...selection, event.active.id as string]),
         ]
