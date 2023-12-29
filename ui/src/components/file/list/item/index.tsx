@@ -51,12 +51,13 @@ import { performMultiSelect, performRangeSelect } from './perform-select'
 type ItemProps = {
   file: File
   scale: number
+  isPresentational?: boolean
 }
 
 const WIDTH = 150
 const MIN_HEIGHT = 110
 
-const Item = ({ file, scale }: ItemProps) => {
+const Item = ({ file, scale, isPresentational }: ItemProps) => {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
   const selectionCount = useAppSelector(
@@ -179,7 +180,7 @@ const Item = ({ file, scale }: ItemProps) => {
       onClick={handleClick}
       onContextMenu={handleContextMenu}
     >
-      {isCheckboxVisible || isSelected ? (
+      {(isCheckboxVisible || isSelected) && !isPresentational ? (
         <Checkbox
           position="absolute"
           top={variables.spacingSm}

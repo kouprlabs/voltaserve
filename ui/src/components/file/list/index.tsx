@@ -163,7 +163,9 @@ const List = ({ scale }: ListProps) => {
           ))}
         </Wrap>
       ) : null}
-      <ItemDragOverlay file={activeFile!} scale={scale} />
+      <ItemDragOverlay>
+        <Item file={activeFile!} scale={scale} isPresentational={true} />
+      </ItemDragOverlay>
     </DndContext>
   )
 }

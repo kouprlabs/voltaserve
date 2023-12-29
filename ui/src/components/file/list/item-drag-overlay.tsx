@@ -1,16 +1,14 @@
+import { ReactNode } from 'react'
 import { Box, Badge } from '@chakra-ui/react'
 import { variables } from '@koupr/ui'
 import { DragOverlay } from '@dnd-kit/core'
-import { File } from '@/client/api/file'
 import { useAppSelector } from '@/store/hook'
-import Item from './item'
 
 type ItemDragOverlayProps = {
-  file: File
-  scale: number
+  children?: ReactNode
 }
 
-const ItemDragOverlay = ({ file, scale }: ItemDragOverlayProps) => {
+const ItemDragOverlay = ({ children }: ItemDragOverlayProps) => {
   const selectionCount = useAppSelector(
     (state) => state.ui.files.selection.length,
   )
@@ -18,7 +16,7 @@ const ItemDragOverlay = ({ file, scale }: ItemDragOverlayProps) => {
   return (
     <DragOverlay>
       <Box position="relative">
-        <Item file={file} scale={scale} />
+        {children}
         {selectionCount > 1 ? (
           <Badge
             position="absolute"
