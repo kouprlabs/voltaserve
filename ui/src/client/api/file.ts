@@ -143,7 +143,7 @@ export type RevokeGroupPermissionOptions = {
 }
 
 export default class FileAPI {
-  public static DEFAULT_PAGE_SIZE = 1000
+  public static DEFAULT_PAGE_SIZE = 21
 
   static async upload(
     workspaceId: string,
