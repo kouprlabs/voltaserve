@@ -34,7 +34,7 @@ const ItemDragOverlay = ({ file, scale }: ItemDragOverlayProps) => {
             alignItems="center"
             justifyContent="center"
           >
-            1000
+            {selectionCount}
           </Center>
         ) : null}
       </Box>
