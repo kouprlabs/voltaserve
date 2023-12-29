@@ -105,6 +105,14 @@ const Item = ({
     [file, isSelected, dispatch],
   )
 
+  const handleFileLinkClick = useCallback(
+    (event: MouseEvent) => {
+      handleIconClick(event)
+      window.open(`/file/${file.id}`, '_blank')?.focus()
+    },
+    [file.id, handleIconClick],
+  )
+
   const handleIconDoubleClick = useCallback(() => {
     dispatch(selectionUpdated([]))
     if (file.type === 'folder') {
@@ -197,10 +205,7 @@ const Item = ({
             noOfLines={3}
             textDecoration="none"
             _hover={{ textDecoration: 'underline' }}
-            onClick={(event) => {
-              handleIconClick(event)
-              window.open(`/file/${file.id}`, '_blank')?.focus()
-            }}
+            onClick={handleFileLinkClick}
           >
             {file.name}
           </ChakraLink>
