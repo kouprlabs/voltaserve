@@ -241,6 +241,14 @@ export default class FileAPI {
     ).then((result) => result.json())
   }
 
+  static useList(id: string, options: ListOptions, swrOptions?: any) {
+    return useSWR<List>(
+      id ? `/files/${id}/list?${this.paramsFromListOptions(options)}` : null,
+      apiFetcher,
+      swrOptions,
+    )
+  }
+
   static async search(
     options: SearchOptions,
     size: number,

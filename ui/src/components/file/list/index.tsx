@@ -1,5 +1,5 @@
 import { MouseEvent, useCallback, useEffect, useMemo, useState } from 'react'
-import { useParams, useSearchParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import {
   Wrap,
   WrapItem,
@@ -18,7 +18,6 @@ import {
   IconMove,
   IconShare,
   IconTrash,
-  Spinner,
   variables,
 } from '@koupr/ui'
 import {
@@ -28,7 +27,7 @@ import {
   useSensor,
   DragStartEvent,
 } from '@dnd-kit/core'
-import FileAPI, { List as FileListData } from '@/client/api/file'
+import FileAPI from '@/client/api/file'
 import {
   geEditorPermission,
   ltEditorPermission,
@@ -37,13 +36,8 @@ import {
 } from '@/client/api/permission'
 import { REFRESH_INTERVAL, swrConfig } from '@/client/options'
 import downloadFile from '@/helpers/download-file'
-import { decodeQuery } from '@/helpers/query'
 import store from '@/store/configure-store'
-import {
-  listUpdated,
-  folderUpdated,
-  filesUpdated,
-} from '@/store/entities/files'
+import { folderUpdated, filesUpdated } from '@/store/entities/files'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import {
   copyModalDidOpen,
@@ -52,7 +46,6 @@ import {
   multiSelectKeyUpdated,
   rangeSelectKeyUpdated,
   renameModalDidOpen,
-  selectionUpdated,
   sharingModalDidOpen,
 } from '@/store/ui/files'
 import ItemDragOverlay from './item-drag-overlay'
@@ -73,13 +66,8 @@ type ListProps = {
 const List = ({ scale }: ListProps) => {
   const dispatch = useAppDispatch()
   const params = useParams()
-  const workspaceId = params.id as string
   const fileId = params.fileId as string
-  const [searchParams] = useSearchParams()
-  const query = decodeQuery(searchParams.get('q') as string)
   const list = useAppSelector((state) => state.entities.files.list)
-  const sortBy = useAppSelector((state) => state.ui.files.sortBy)
-  const sortOrder = useAppSelector((state) => state.ui.files.sortOrder)
   const file = useAppSelector((state) =>
     state.ui.files.selection.length === 1
       ? state.entities.files.list?.data.find(
@@ -87,7 +75,6 @@ const List = ({ scale }: ListProps) => {
         )
       : null,
   )
-  const [isLoading, setIsLoading] = useState(false)
   const [activeId, setActiveId] = useState<string | null>(null)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [menuPosition, setMenuPosition] = useState<{ x: number; y: number }>()
@@ -133,33 +120,6 @@ const List = ({ scale }: ListProps) => {
     }
   }, [folder, dispatch])
 
-  useEffect(() => {
-    ;(async () => {
-      setIsLoading(true)
-      dispatch(selectionUpdated([]))
-      try {
-        let result: FileListData
-        if (query) {
-          result = await FileAPI.search(
-            { text: query, parentId: fileId, workspaceId },
-            FileAPI.DEFAULT_PAGE_SIZE,
-            1,
-          )
-        } else {
-          result = await FileAPI.list(fileId, {
-            page: 1,
-            size: FileAPI.DEFAULT_PAGE_SIZE,
-            sortBy,
-            sortOrder,
-          })
-        }
-        dispatch(listUpdated(result))
-      } finally {
-        setIsLoading(false)
-      }
-    })()
-  }, [workspaceId, fileId, query, sortBy, sortOrder, dispatch])
-
   const handleDragStart = useCallback((event: DragStartEvent) => {
     setActiveId(event.active.id as string)
   }, [])
@@ -167,14 +127,6 @@ const List = ({ scale }: ListProps) => {
   const handleDragEnd = useCallback(() => {
     setActiveId(null)
   }, [])
-
-  if (isLoading || !list) {
-    return (
-      <Center w="100%" h="300px" p={variables.spacing}>
-        <Spinner />
-      </Center>
-    )
-  }
 
   return (
     <>
@@ -188,12 +140,8 @@ const List = ({ scale }: ListProps) => {
             <Text>There are no items.</Text>
           </Center>
         )}
-        {itemCount && itemCount > 0 && list.data.length > 0 ? (
-          <Wrap
-            spacing={variables.spacing}
-            overflow="hidden"
-            pb={variables.spacing2Xl}
-          >
+        {itemCount && itemCount > 0 && list && list.data.length > 0 ? (
+          <Wrap spacing={variables.spacing} overflow="hidden">
             {list.data.map((f) => (
               <WrapItem key={f.id}>
                 <ItemDraggableDroppable
