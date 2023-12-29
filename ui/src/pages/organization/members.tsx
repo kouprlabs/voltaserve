@@ -49,7 +49,6 @@ const OrganizationMembersPage = () => {
   const location = useLocation()
   const params = useParams()
   const organizationId = params.id as string
-  const invite = Boolean(params.invite as string)
   const { data: org, error: orgError } = OrganizationAPI.useGetById(
     organizationId,
     swrConfig(),
@@ -63,6 +62,7 @@ const OrganizationMembersPage = () => {
     },
   })
   const [searchParams] = useSearchParams()
+  const invite = Boolean(searchParams.get('invite') as string)
   const query = decodeQuery(searchParams.get('q') as string)
   const {
     data: list,

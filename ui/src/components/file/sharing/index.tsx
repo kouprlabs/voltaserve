@@ -21,8 +21,7 @@ import { geOwnerPermission } from '@/client/api/permission'
 import UserAPI from '@/client/api/user'
 import WorkspaceAPI from '@/client/api/workspace'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
-import { selectionUpdated, sharingModalDidClose } from '@/store/ui/files'
-import FormSkeleton from './form-skeleton'
+import { sharingModalDidClose } from '@/store/ui/files'
 import Groups from './groups'
 import Users from './users'
 
@@ -63,7 +62,6 @@ const Sharing = () => {
       size="xl"
       isOpen={isModalOpen}
       onClose={() => {
-        dispatch(selectionUpdated([]))
         dispatch(sharingModalDidClose())
       }}
       closeOnOverlayClick={false}
@@ -98,26 +96,18 @@ const Sharing = () => {
             </TabList>
             <TabPanels>
               <TabPanel>
-                {users && userPermissions ? (
-                  <Users
-                    users={users.data}
-                    userPermissions={userPermissions}
-                    mutateUserPermissions={mutateUserPermissions}
-                  />
-                ) : (
-                  <FormSkeleton />
-                )}
+                <Users
+                  users={users?.data}
+                  permissions={userPermissions}
+                  mutateUserPermissions={mutateUserPermissions}
+                />
               </TabPanel>
               <TabPanel>
-                {groups && groupPermissions ? (
-                  <Groups
-                    groups={groups.data}
-                    groupPermissions={groupPermissions}
-                    mutateGroupPermissions={mutateGroupPermissions}
-                  />
-                ) : (
-                  <FormSkeleton />
-                )}
+                <Groups
+                  groups={groups?.data}
+                  permissions={groupPermissions}
+                  mutateGroupPermissions={mutateGroupPermissions}
+                />
               </TabPanel>
             </TabPanels>
           </Tabs>

@@ -30,16 +30,17 @@ import { filesUpdated } from '@/store/entities/files'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { sharingModalDidClose } from '@/store/ui/files'
 import reactSelectStyles from '@/styles/react-select'
+import FormSkeleton from './form-skeleton'
 
 type GroupsProps = {
-  groups: Group[]
-  groupPermissions: GroupPermission[]
+  groups?: Group[]
+  permissions?: GroupPermission[]
   mutateGroupPermissions: KeyedMutator<GroupPermission[]>
 }
 
 const Groups = ({
   groups,
-  groupPermissions,
+  permissions,
   mutateGroupPermissions,
 }: GroupsProps) => {
   const params = useParams()
@@ -49,17 +50,17 @@ const Groups = ({
   const [isGrantLoading, setIsGrantLoading] = useState(false)
   const [permissionBeingRevoked, setPermissionBeingRevoked] = useState<string>()
   const [activeGroup, setActiveGroup] = useState<Group>()
-  const [activeGroupPermission, setActiveGroupPermission] = useState<string>()
+  const [activePermission, setActivePermission] = useState<string>()
   const isSingleSelection = selection.length === 1
 
   const handleGrantGroupPermission = useCallback(async () => {
-    if (activeGroup && activeGroupPermission) {
+    if (activeGroup && activePermission) {
       try {
         setIsGrantLoading(true)
         await FileAPI.grantGroupPermission({
           ids: selection,
           groupId: activeGroup.id,
-          permission: activeGroupPermission,
+          permission: activePermission,
         })
         const result = await FileAPI.batchGet({ ids: selection })
         dispatch(filesUpdated(result))
@@ -78,7 +79,7 @@ const Groups = ({
   }, [
     selection,
     activeGroup,
-    activeGroupPermission,
+    activePermission,
     isSingleSelection,
     dispatch,
     mutateGroupPermissions,
@@ -106,6 +107,7 @@ const Groups = ({
 
   return (
     <Stack direction="column" spacing={variables.spacing}>
+      {!groups ? <FormSkeleton /> : null}
       {groups && groups.length > 0 ? (
         <Stack direction="column" spacing={variables.spacing}>
           <GroupSelector
@@ -124,7 +126,7 @@ const Groups = ({
             chakraStyles={reactSelectStyles}
             onChange={(e) => {
               if (e) {
-                setActiveGroupPermission(e.value)
+                setActivePermission(e.value)
               }
             }}
           />
@@ -132,7 +134,7 @@ const Groups = ({
             leftIcon={<IconCheck />}
             colorScheme="blue"
             isLoading={isGrantLoading}
-            isDisabled={!activeGroup || !activeGroupPermission}
+            isDisabled={!activeGroup || !activePermission}
             onClick={() => handleGrantGroupPermission()}
           >
             Apply to Group
@@ -159,17 +161,17 @@ const Groups = ({
       {isSingleSelection ? (
         <>
           <hr />
-          {!groupPermissions ? (
+          {!permissions ? (
             <Center>
               <Spinner />
             </Center>
           ) : null}
-          {groupPermissions && groupPermissions.length === 0 ? (
+          {permissions && permissions.length === 0 ? (
             <Center>
               <Text>Not shared with any groups.</Text>
             </Center>
           ) : null}
-          {groupPermissions && groupPermissions.length > 0 ? (
+          {permissions && permissions.length > 0 ? (
             <Table>
               <Thead>
                 <Tr>
@@ -179,7 +181,7 @@ const Groups = ({
                 </Tr>
               </Thead>
               <Tbody>
-                {groupPermissions.map((p) => (
+                {permissions.map((p) => (
                   <Tr key={p.id}>
                     <Td p={variables.spacingSm}>
                       <HStack spacing={variables.spacingSm}>
