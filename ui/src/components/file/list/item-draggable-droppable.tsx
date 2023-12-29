@@ -1,4 +1,5 @@
-import { ReactNode, useState } from 'react'
+import { useState } from 'react'
+import { useParams } from 'react-router-dom'
 import { Box } from '@chakra-ui/react'
 import { variables } from '@koupr/ui'
 import {
@@ -9,18 +10,23 @@ import {
   useDraggable,
   useDroppable,
 } from '@dnd-kit/core'
-import { File, FileType } from '@/client/api/file'
-import { useAppSelector } from '@/store/hook'
+import FileAPI, { File, FileType } from '@/client/api/file'
+import { filesRemoved } from '@/store/entities/files'
+import { useAppDispatch, useAppSelector } from '@/store/hook'
+import Item from './item'
 
 type ItemDraggableDroppableProps = {
   file: File
-  children?: ReactNode
+  scale: number
 }
 
 const ItemDraggableDroppable = ({
   file,
-  children,
+  scale,
 }: ItemDraggableDroppableProps) => {
+  const dispatch = useAppDispatch()
+  const params = useParams()
+  const fileId = params.fileId as string
   const [isVisible, setVisible] = useState(true)
   const selection = useAppSelector((state) => state.ui.files.selection)
   const {
@@ -33,15 +39,26 @@ const ItemDraggableDroppable = ({
   const { isOver, setNodeRef: setDroppableNodeRef } = useDroppable({
     id: file.id,
   })
+  const [isLoading, setIsLoading] = useState(false)
+
   useDndMonitor({
     onDragStart: (event: DragStartEvent) => {
       if (selection.includes(file.id) || event.active.id === file.id) {
         setVisible(false)
       }
     },
-    onDragEnd: (event: DragEndEvent) => {
+    onDragEnd: async (event: DragEndEvent) => {
       if (selection.includes(file.id) || event.active.id === file.id) {
         setVisible(true)
+      }
+      if (file.type === FileType.Folder && isOver) {
+        const idsToMove = [
+          ...new Set<string>([...selection, event.active.id as string]),
+        ]
+        dispatch(filesRemoved({ id: fileId, files: idsToMove }))
+        setIsLoading(true)
+        await FileAPI.move(file.id, { ids: idsToMove })
+        setIsLoading(false)
       }
     },
     onDragCancel: (event: DragCancelEvent) => {
@@ -56,13 +73,15 @@ const ItemDraggableDroppable = ({
       {file.type === FileType.File ? (
         <Box
           ref={setDraggableNodeRef}
+          border="2px solid"
+          borderColor="transparent"
           visibility={isVisible ? 'visible' : 'hidden'}
           _hover={{ outline: 'none' }}
           _focus={{ outline: 'none' }}
           {...listeners}
           {...attributes}
         >
-          {children}
+          <Item file={file} scale={scale} />
         </Box>
       ) : null}
       {file.type === FileType.Folder ? (
@@ -77,7 +96,14 @@ const ItemDraggableDroppable = ({
           {...listeners}
           {...attributes}
         >
-          <Box ref={setDroppableNodeRef}>{children}</Box>
+          <Box ref={setDroppableNodeRef}>
+            <Item
+              file={file}
+              scale={scale}
+              isPresentational={isOver}
+              isLoading={isLoading}
+            />
+          </Box>
         </Box>
       ) : null}
     </>

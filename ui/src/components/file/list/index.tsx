@@ -24,7 +24,6 @@ import {
   rangeSelectKeyUpdated,
   selectionUpdated,
 } from '@/store/ui/files'
-import Item from './item'
 import ItemDragOverlay from './item-drag-overlay'
 import ItemDraggableDroppable from './item-draggable-droppable'
 
@@ -156,16 +155,12 @@ const List = ({ scale }: ListProps) => {
         >
           {list.data.map((f) => (
             <WrapItem key={f.id}>
-              <ItemDraggableDroppable file={f}>
-                <Item file={f} scale={scale} />
-              </ItemDraggableDroppable>
+              <ItemDraggableDroppable file={f} scale={scale} />
             </WrapItem>
           ))}
         </Wrap>
       ) : null}
-      <ItemDragOverlay>
-        <Item file={activeFile!} scale={scale} isPresentational={true} />
-      </ItemDragOverlay>
+      <ItemDragOverlay file={activeFile!} scale={scale} />
     </DndContext>
   )
 }

@@ -6,9 +6,10 @@ import FolderIcon from './folder-icon'
 type IconProps = {
   file: File
   scale: number
+  isLoading?: boolean
 }
 
-const Icon = ({ file, scale }: IconProps) => {
+const Icon = ({ file, scale, isLoading }: IconProps) => {
   const color = useColorModeValue('gray.500', 'gray.300')
   if (file.type === 'file') {
     return (
@@ -19,7 +20,7 @@ const Icon = ({ file, scale }: IconProps) => {
   } else if (file.type === 'folder') {
     return (
       <Box zIndex={0}>
-        <FolderIcon file={file} scale={scale} />
+        <FolderIcon file={file} scale={scale} isLoading={isLoading} />
       </Box>
     )
   } else {

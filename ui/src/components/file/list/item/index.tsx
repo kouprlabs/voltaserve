@@ -52,12 +52,13 @@ type ItemProps = {
   file: File
   scale: number
   isPresentational?: boolean
+  isLoading?: boolean
 }
 
-const WIDTH = 150
+const WIDTH = 147
 const MIN_HEIGHT = 110
 
-const Item = ({ file, scale, isPresentational }: ItemProps) => {
+const Item = ({ file, scale, isPresentational, isLoading }: ItemProps) => {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
   const selectionCount = useAppSelector(
@@ -197,7 +198,7 @@ const Item = ({ file, scale, isPresentational }: ItemProps) => {
         onDoubleClick={handleIconDoubleClick}
         onClick={handleIconClick}
       >
-        <Icon file={file} scale={scale} />
+        <Icon file={file} scale={scale} isLoading={isLoading} />
       </Center>
       <Box w={width} title={file.name} px={variables.spacingXs}>
         {file.type === 'folder' && (
