@@ -38,7 +38,7 @@ const WorkspaceFilesPage = () => {
   const workspaceId = params.id as string
   const fileId = params.fileId as string
   const [searchParams] = useSearchParams()
-  const query = decodeQuery(searchParams.get('query') as string)
+  const query = decodeQuery(searchParams.get('q') as string)
   const dispatch = useAppDispatch()
   const list = useAppSelector((state) => state.entities.files.list)
   const sortBy = useAppSelector((state) => state.ui.files.sortBy)
