@@ -33,6 +33,8 @@ import { currentUpdated, listUpdated } from '@/store/entities/files'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { selectionUpdated } from '@/store/ui/files'
 
+const PAGINATION_STEP = 21
+
 const WorkspaceFilesPage = () => {
   const navigate = useNavigate()
   const params = useParams()
@@ -129,7 +131,12 @@ const WorkspaceFilesPage = () => {
                 totalPages={list.totalPages}
                 page={page}
                 size={size}
-                steps={[20, 40, 80, 100]}
+                steps={[
+                  PAGINATION_STEP,
+                  PAGINATION_STEP * 2,
+                  PAGINATION_STEP * 4,
+                  PAGINATION_STEP * 5,
+                ]}
                 handlePageChange={handlePageChange}
                 setSize={setSize}
               />

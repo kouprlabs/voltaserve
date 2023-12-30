@@ -34,19 +34,17 @@ import { swrConfig } from '@/client/options'
 import { CreateOrganizationButton } from '@/components/top-bar/buttons'
 import prettyDate from '@/helpers/pretty-date'
 import { decodeQuery } from '@/helpers/query'
+import { organizationPaginationStorage } from '@/infra/pagination'
 
 const OrganizationListPage = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const [searchParams] = useSearchParams()
   const query = decodeQuery(searchParams.get('q') as string)
-  const { page, size, onPageChange, onSizeChange } = usePagePagination({
+  const { page, size, handlePageChange, setSize } = usePagePagination({
     navigate,
     location,
-    storage: {
-      prefix: 'voltaserve',
-      namespace: 'organization',
-    },
+    storage: organizationPaginationStorage(),
   })
   const {
     data: list,
@@ -132,8 +130,8 @@ const OrganizationListPage = () => {
               totalPages={list.totalPages}
               page={page}
               size={size}
-              onPageChange={onPageChange}
-              onSizeChange={onSizeChange}
+              handlePageChange={handlePageChange}
+              setSize={setSize}
             />
           </HStack>
         )}

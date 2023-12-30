@@ -44,6 +44,7 @@ import { swrConfig } from '@/client/options'
 import AddMember from '@/components/group/add-member'
 import RemoveMember from '@/components/group/remove-member'
 import { decodeQuery } from '@/helpers/query'
+import { groupMemberPaginationStorage } from '@/infra/pagination'
 
 const GroupMembersPage = () => {
   const navigate = useNavigate()
@@ -54,13 +55,10 @@ const GroupMembersPage = () => {
     groupId,
     swrConfig(),
   )
-  const { page, size, onPageChange, onSizeChange } = usePagePagination({
+  const { page, size, handlePageChange, setSize } = usePagePagination({
     navigate,
     location,
-    storage: {
-      prefix: 'voltaserve',
-      namespace: 'group_member',
-    },
+    storage: groupMemberPaginationStorage(),
   })
   const [searchParams] = useSearchParams()
   const query = decodeQuery(searchParams.get('q') as string)
@@ -157,8 +155,8 @@ const GroupMembersPage = () => {
                 totalPages={list.totalPages}
                 page={page}
                 size={size}
-                onPageChange={onPageChange}
-                onSizeChange={onSizeChange}
+                handlePageChange={handlePageChange}
+                setSize={setSize}
               />
             </HStack>
           )}
