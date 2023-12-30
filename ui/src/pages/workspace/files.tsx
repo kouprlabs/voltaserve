@@ -64,6 +64,7 @@ const WorkspaceFilesPage = () => {
       PAGINATION_STEP * 5,
     ],
   })
+  const hasPagination = list && list.totalPages > 1
 
   useEffect(() => {
     dispatch(currentUpdated(fileId))
@@ -119,6 +120,8 @@ const WorkspaceFilesPage = () => {
             overflowX="hidden"
             borderTop="1px solid"
             borderTopColor={borderColor}
+            borderBottom={hasPagination ? '1px solid' : undefined}
+            borderBottomColor={hasPagination ? borderColor : undefined}
             pt={variables.spacing}
             flexGrow={1}
             onClick={() => dispatch(selectionUpdated([]))}
@@ -131,7 +134,7 @@ const WorkspaceFilesPage = () => {
               <List scale={iconScale} />
             )}
           </Box>
-          {list && list.totalPages > 1 ? (
+          {hasPagination ? (
             <HStack alignSelf="end" pb={variables.spacing}>
               <PagePagination
                 totalPages={list.totalPages}
