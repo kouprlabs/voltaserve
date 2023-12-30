@@ -43,6 +43,7 @@ import { swrConfig } from '@/client/options'
 import InviteMembers from '@/components/organization/invite-members'
 import RemoveMember from '@/components/organization/remove-member'
 import { decodeQuery } from '@/helpers/query'
+import { organizationMemberPaginationStorage } from '@/infra/pagination'
 
 const OrganizationMembersPage = () => {
   const navigate = useNavigate()
@@ -53,13 +54,10 @@ const OrganizationMembersPage = () => {
     organizationId,
     swrConfig(),
   )
-  const { page, size, onPageChange, onSizeChange } = usePagePagination({
+  const { page, size, steps, handlePageChange, setSize } = usePagePagination({
     navigate,
     location,
-    storage: {
-      prefix: 'voltaserve',
-      namespace: 'organization_member',
-    },
+    storage: organizationMemberPaginationStorage(),
   })
   const [searchParams] = useSearchParams()
   const invite = Boolean(searchParams.get('invite') as string)
@@ -163,8 +161,9 @@ const OrganizationMembersPage = () => {
                 totalPages={list.totalPages}
                 page={page}
                 size={size}
-                onPageChange={onPageChange}
-                onSizeChange={onSizeChange}
+                steps={steps}
+                handlePageChange={handlePageChange}
+                setSize={setSize}
               />
             </HStack>
           )}

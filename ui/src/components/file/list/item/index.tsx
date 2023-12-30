@@ -7,43 +7,19 @@ import {
   Link as ChakraLink,
   useColorModeValue,
   Checkbox,
-  MenuItem,
-  MenuList,
   Box,
-  MenuDivider,
   Text,
   VStack,
-  Menu,
-  Portal,
 } from '@chakra-ui/react'
-import {
-  IconCopy,
-  IconDownload,
-  IconEdit,
-  IconMove,
-  IconShare,
-  IconTrash,
-  variables,
-} from '@koupr/ui'
+import { variables } from '@koupr/ui'
 import { File, SnapshotStatus } from '@/client/api/file'
-import {
-  ltEditorPermission,
-  ltOwnerPermission,
-  ltViewerPermission,
-} from '@/client/api/permission'
-import downloadFile from '@/helpers/download-file'
 import relativeDate from '@/helpers/relative-date'
 import store from '@/store/configure-store'
-import { useAppDispatch, useAppSelector } from '@/store/hook'
+import { useAppDispatch } from '@/store/hook'
 import {
-  copyModalDidOpen,
-  deleteModalDidOpen,
-  moveModalDidOpen,
-  renameModalDidOpen,
   selectionAdded,
   selectionRemoved,
   selectionUpdated,
-  sharingModalDidOpen,
 } from '@/store/ui/files'
 import Icon from './icon'
 import { performMultiSelect, performRangeSelect } from './perform-select'
@@ -53,17 +29,21 @@ type ItemProps = {
   scale: number
   isPresentational?: boolean
   isLoading?: boolean
+  onContextMenu?: (event: MouseEvent) => void
 }
 
 const WIDTH = 147
 const MIN_HEIGHT = 110
 
-const Item = ({ file, scale, isPresentational, isLoading }: ItemProps) => {
+const Item = ({
+  file,
+  scale,
+  isPresentational,
+  isLoading,
+  onContextMenu,
+}: ItemProps) => {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
-  const selectionCount = useAppSelector(
-    (state) => state.ui.files.selection.length,
-  )
   const width = useMemo(() => `${WIDTH * scale}px`, [scale])
   const minHeight = useMemo(() => `${MIN_HEIGHT * scale}px`, [scale])
   const hoverColor = useColorModeValue('gray.100', 'gray.700')
@@ -76,8 +56,6 @@ const Item = ({ file, scale, isPresentational, isLoading }: ItemProps) => {
     () => relativeDate(new Date(file.createTime)),
     [file.createTime],
   )
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [menuPosition, setMenuPosition] = useState<{ x: number; y: number }>()
 
   useEffect(() => {
     const unsubscribe = store.subscribe(() => {
@@ -127,6 +105,14 @@ const Item = ({ file, scale, isPresentational, isLoading }: ItemProps) => {
     [file, isSelected, dispatch],
   )
 
+  const handleFileLinkClick = useCallback(
+    (event: MouseEvent) => {
+      handleIconClick(event)
+      window.open(`/file/${file.id}`, '_blank')?.focus()
+    },
+    [file.id, handleIconClick],
+  )
+
   const handleIconDoubleClick = useCallback(() => {
     dispatch(selectionUpdated([]))
     if (file.type === 'folder') {
@@ -154,14 +140,13 @@ const Item = ({ file, scale, isPresentational, isLoading }: ItemProps) => {
     (event: MouseEvent) => {
       if (event) {
         event.preventDefault()
-        setMenuPosition({ x: event.pageX, y: event.pageY })
-        setIsMenuOpen(true)
+        onContextMenu?.(event)
         if (!isSelected) {
           handleIconClick(event)
         }
       }
     },
-    [isSelected, handleIconClick],
+    [isSelected, handleIconClick, onContextMenu],
   )
 
   return (
@@ -220,10 +205,7 @@ const Item = ({ file, scale, isPresentational, isLoading }: ItemProps) => {
             noOfLines={3}
             textDecoration="none"
             _hover={{ textDecoration: 'underline' }}
-            onClick={(event) => {
-              handleIconClick(event)
-              window.open(`/file/${file.id}`, '_blank')?.focus()
-            }}
+            onClick={handleFileLinkClick}
           >
             {file.name}
           </ChakraLink>
@@ -239,69 +221,6 @@ const Item = ({ file, scale, isPresentational, isLoading }: ItemProps) => {
           {date}
         </Text>
       </VStack>
-      <Portal>
-        <Menu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)}>
-          <MenuList
-            zIndex="dropdown"
-            style={{
-              position: 'absolute',
-              left: menuPosition?.x,
-              top: menuPosition?.y,
-            }}
-          >
-            <MenuItem
-              icon={<IconShare />}
-              isDisabled={ltOwnerPermission(file.permission)}
-              onClick={() => dispatch(sharingModalDidOpen())}
-            >
-              Sharing
-            </MenuItem>
-            <MenuItem
-              icon={<IconDownload />}
-              isDisabled={
-                selectionCount !== 1 ||
-                file.type !== 'file' ||
-                ltViewerPermission(file.permission)
-              }
-              onClick={() => downloadFile(file)}
-            >
-              Download
-            </MenuItem>
-            <MenuDivider />
-            <MenuItem
-              icon={<IconTrash />}
-              color="red"
-              isDisabled={ltOwnerPermission(file.permission)}
-              onClick={() => dispatch(deleteModalDidOpen())}
-            >
-              Delete
-            </MenuItem>
-            <MenuItem
-              icon={<IconEdit />}
-              isDisabled={
-                selectionCount !== 1 || ltEditorPermission(file.permission)
-              }
-              onClick={() => dispatch(renameModalDidOpen())}
-            >
-              Rename
-            </MenuItem>
-            <MenuItem
-              icon={<IconMove />}
-              isDisabled={ltEditorPermission(file.permission)}
-              onClick={() => dispatch(moveModalDidOpen())}
-            >
-              Move
-            </MenuItem>
-            <MenuItem
-              icon={<IconCopy />}
-              isDisabled={ltEditorPermission(file.permission)}
-              onClick={() => dispatch(copyModalDidOpen())}
-            >
-              Copy
-            </MenuItem>
-          </MenuList>
-        </Menu>
-      </Portal>
     </Stack>
   )
 }

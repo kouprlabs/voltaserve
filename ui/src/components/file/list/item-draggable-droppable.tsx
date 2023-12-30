@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, MouseEvent } from 'react'
 import { useParams } from 'react-router-dom'
 import { Box } from '@chakra-ui/react'
 import { variables } from '@koupr/ui'
@@ -18,11 +18,13 @@ import Item from './item'
 type ItemDraggableDroppableProps = {
   file: File
   scale: number
+  onContextMenu?: (event: MouseEvent) => void
 }
 
 const ItemDraggableDroppable = ({
   file,
   scale,
+  onContextMenu,
 }: ItemDraggableDroppableProps) => {
   const dispatch = useAppDispatch()
   const params = useParams()
@@ -86,7 +88,7 @@ const ItemDraggableDroppable = ({
           {...listeners}
           {...attributes}
         >
-          <Item file={file} scale={scale} />
+          <Item file={file} scale={scale} onContextMenu={onContextMenu} />
         </Box>
       ) : null}
       {file.type === FileType.Folder ? (
@@ -107,6 +109,7 @@ const ItemDraggableDroppable = ({
               scale={scale}
               isPresentational={isOver}
               isLoading={isLoading}
+              onContextMenu={onContextMenu}
             />
           </Box>
         </Box>

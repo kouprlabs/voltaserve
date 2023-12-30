@@ -57,7 +57,6 @@ const Browse = ({ onChange }: BrowseProps) => {
           const timeoutId = setTimeout(() => setIsSpinnerVisible(true), 250)
           const result = await FileAPI.list(fileId, {
             page: 1,
-            size: FileAPI.DEFAULT_PAGE_SIZE,
             type: FileType.Folder,
           })
           clearTimeout(timeoutId)
@@ -81,7 +80,6 @@ const Browse = ({ onChange }: BrowseProps) => {
       setLoading(true)
       const result = await FileAPI.list(fileId, {
         page,
-        size: FileAPI.DEFAULT_PAGE_SIZE,
         type: FileType.Folder,
       })
       setTotalPages(result.totalPages)

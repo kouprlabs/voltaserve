@@ -6,7 +6,7 @@ import {
   useRef,
   useState,
 } from 'react'
-import { useParams, useSearchParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import {
   Button,
   Stack,
@@ -43,12 +43,14 @@ import {
   IconSortUp,
   IconSortDown,
   IconCheck,
+  usePagePagination,
 } from '@koupr/ui'
 import FileAPI, { List, SortBy, SortOrder } from '@/client/api/file'
 import { ltEditorPermission, ltOwnerPermission } from '@/client/api/permission'
 import downloadFile from '@/helpers/download-file'
 import mapFileList from '@/helpers/map-file-list'
 import { decodeQuery } from '@/helpers/query'
+import { filesPaginationStorage } from '@/infra/pagination'
 import { listUpdated } from '@/store/entities/files'
 import { uploadAdded, UploadDecorator } from '@/store/entities/uploads'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
@@ -77,6 +79,7 @@ const ICON_SCALE_SLIDER_MIN = 1
 const ICON_SCALE_SLIDER_MAX = ICON_SCALE_SLIDER_STEP * 9
 
 const Toolbar = () => {
+  const navigate = useNavigate()
   const dispatch = useAppDispatch()
   const params = useParams()
   const workspaceId = params.id as string
@@ -118,6 +121,11 @@ const Toolbar = () => {
       ) === -1,
   )
   const uploadHiddenInput = useRef<HTMLInputElement>(null)
+  const { page, size } = usePagePagination({
+    navigate,
+    location,
+    storage: filesPaginationStorage(),
+  })
 
   useEffect(() => {
     const iconScale = localStorage.getItem(ICON_SCALE_KEY)
@@ -175,13 +183,13 @@ const Toolbar = () => {
       if (query) {
         result = await FileAPI.search(
           { text: query, parentId: fileId, workspaceId },
-          FileAPI.DEFAULT_PAGE_SIZE,
-          1,
+          size,
+          page,
         )
       } else {
         result = await FileAPI.list(fileId, {
-          page: 1,
-          size: FileAPI.DEFAULT_PAGE_SIZE,
+          page,
+          size,
           sortBy,
           sortOrder,
         })
@@ -190,7 +198,7 @@ const Toolbar = () => {
     } finally {
       setIsRefreshing(false)
     }
-  }, [dispatch, fileId, workspaceId, query, sortBy, sortOrder])
+  }, [dispatch, fileId, workspaceId, query, page, size, sortBy, sortOrder])
 
   const handleSortByChange = useCallback(
     (value: SortBy) => {

@@ -43,6 +43,7 @@ import { geEditorPermission } from '@/client/api/permission'
 import { swrConfig } from '@/client/options'
 import InviteMembers from '@/components/organization/invite-members'
 import prettyDate from '@/helpers/pretty-date'
+import { outgoingInvitationPaginationStorage } from '@/infra/pagination'
 
 type StatusProps = {
   value: InvitationStatus
@@ -68,13 +69,10 @@ const OrganizationInvitationsPage = () => {
     id,
     swrConfig(),
   )
-  const { page, size, onPageChange, onSizeChange } = usePagePagination({
+  const { page, size, steps, handlePageChange, setSize } = usePagePagination({
     navigate,
     location,
-    storage: {
-      prefix: 'voltaserve',
-      namespace: 'outgoing_invitation',
-    },
+    storage: outgoingInvitationPaginationStorage(),
   })
   const {
     data: list,
@@ -212,8 +210,9 @@ const OrganizationInvitationsPage = () => {
                 totalPages={list.totalPages}
                 page={page}
                 size={size}
-                onPageChange={onPageChange}
-                onSizeChange={onSizeChange}
+                steps={steps}
+                handlePageChange={handlePageChange}
+                setSize={setSize}
               />
             </HStack>
           )}

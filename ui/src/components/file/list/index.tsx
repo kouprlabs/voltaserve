@@ -1,7 +1,25 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
-import { useParams, useSearchParams } from 'react-router-dom'
-import { Wrap, WrapItem, Text, Center } from '@chakra-ui/react'
-import { Spinner, variables } from '@koupr/ui'
+import { MouseEvent, useCallback, useEffect, useMemo, useState } from 'react'
+import { useParams } from 'react-router-dom'
+import {
+  Wrap,
+  WrapItem,
+  Text,
+  Center,
+  Portal,
+  Menu,
+  MenuList,
+  MenuItem,
+  MenuDivider,
+} from '@chakra-ui/react'
+import {
+  IconCopy,
+  IconDownload,
+  IconEdit,
+  IconMove,
+  IconShare,
+  IconTrash,
+  variables,
+} from '@koupr/ui'
 import {
   DndContext,
   useSensors,
@@ -9,20 +27,26 @@ import {
   useSensor,
   DragStartEvent,
 } from '@dnd-kit/core'
-import FileAPI, { List as FileListData } from '@/client/api/file'
-import { REFRESH_INTERVAL, swrConfig } from '@/client/options'
-import { decodeQuery } from '@/helpers/query'
-import store from '@/store/configure-store'
+import FileAPI from '@/client/api/file'
 import {
-  listUpdated,
-  folderUpdated,
-  filesUpdated,
-} from '@/store/entities/files'
+  geEditorPermission,
+  ltEditorPermission,
+  ltOwnerPermission,
+  ltViewerPermission,
+} from '@/client/api/permission'
+import { REFRESH_INTERVAL, swrConfig } from '@/client/options'
+import downloadFile from '@/helpers/download-file'
+import store from '@/store/configure-store'
+import { folderUpdated, filesUpdated } from '@/store/entities/files'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import {
+  copyModalDidOpen,
+  deleteModalDidOpen,
+  moveModalDidOpen,
   multiSelectKeyUpdated,
   rangeSelectKeyUpdated,
-  selectionUpdated,
+  renameModalDidOpen,
+  sharingModalDidOpen,
 } from '@/store/ui/files'
 import ItemDragOverlay from './item-drag-overlay'
 import ItemDraggableDroppable from './item-draggable-droppable'
@@ -42,15 +66,18 @@ type ListProps = {
 const List = ({ scale }: ListProps) => {
   const dispatch = useAppDispatch()
   const params = useParams()
-  const workspaceId = params.id as string
   const fileId = params.fileId as string
-  const [searchParams] = useSearchParams()
-  const query = decodeQuery(searchParams.get('q') as string)
   const list = useAppSelector((state) => state.entities.files.list)
-  const sortBy = useAppSelector((state) => state.ui.files.sortBy)
-  const sortOrder = useAppSelector((state) => state.ui.files.sortOrder)
-  const [isLoading, setIsLoading] = useState(false)
+  const singleFile = useAppSelector((state) =>
+    state.ui.files.selection.length === 1
+      ? state.entities.files.list?.data.find(
+          (f) => f.id === state.ui.files.selection[0],
+        )
+      : null,
+  )
   const [activeId, setActiveId] = useState<string | null>(null)
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [menuPosition, setMenuPosition] = useState<{ x: number; y: number }>()
   const { data: folder } = FileAPI.useGetById(fileId, swrConfig())
   const { data: itemCount } = FileAPI.useGetItemCount(fileId, swrConfig())
   const activeFile = useMemo(
@@ -93,33 +120,6 @@ const List = ({ scale }: ListProps) => {
     }
   }, [folder, dispatch])
 
-  useEffect(() => {
-    ;(async () => {
-      setIsLoading(true)
-      dispatch(selectionUpdated([]))
-      try {
-        let result: FileListData
-        if (query) {
-          result = await FileAPI.search(
-            { text: query, parentId: fileId, workspaceId },
-            FileAPI.DEFAULT_PAGE_SIZE,
-            1,
-          )
-        } else {
-          result = await FileAPI.list(fileId, {
-            page: 1,
-            size: FileAPI.DEFAULT_PAGE_SIZE,
-            sortBy,
-            sortOrder,
-          })
-        }
-        dispatch(listUpdated(result))
-      } finally {
-        setIsLoading(false)
-      }
-    })()
-  }, [workspaceId, fileId, query, sortBy, sortOrder, dispatch])
-
   const handleDragStart = useCallback((event: DragStartEvent) => {
     setActiveId(event.active.id as string)
   }, [])
@@ -128,40 +128,134 @@ const List = ({ scale }: ListProps) => {
     setActiveId(null)
   }, [])
 
-  if (isLoading || !list) {
-    return (
-      <Center w="100%" h="300px" p={variables.spacing}>
-        <Spinner />
-      </Center>
-    )
-  }
-
   return (
-    <DndContext
-      sensors={sensors}
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
-    >
-      {itemCount === 0 && (
-        <Center w="100%" h="300px">
-          <Text>There are no items.</Text>
-        </Center>
-      )}
-      {itemCount && itemCount > 0 && list.data.length > 0 ? (
-        <Wrap
-          spacing={variables.spacing}
-          overflow="hidden"
-          pb={variables.spacing2Xl}
-        >
-          {list.data.map((f) => (
-            <WrapItem key={f.id}>
-              <ItemDraggableDroppable file={f} scale={scale} />
-            </WrapItem>
-          ))}
-        </Wrap>
-      ) : null}
-      <ItemDragOverlay file={activeFile!} scale={scale} />
-    </DndContext>
+    <>
+      <DndContext
+        sensors={sensors}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+      >
+        {itemCount === 0 && (
+          <Center w="100%" h="300px">
+            <Text>There are no items.</Text>
+          </Center>
+        )}
+        {itemCount && itemCount > 0 && list && list.data.length > 0 ? (
+          <Wrap
+            spacing={variables.spacing}
+            overflow="hidden"
+            pb={variables.spacingLg}
+          >
+            {list.data.map((f) => (
+              <WrapItem key={f.id}>
+                <ItemDraggableDroppable
+                  file={f}
+                  scale={scale}
+                  onContextMenu={(event: MouseEvent) => {
+                    setMenuPosition({ x: event.pageX, y: event.pageY })
+                    setIsMenuOpen(true)
+                  }}
+                />
+              </WrapItem>
+            ))}
+          </Wrap>
+        ) : null}
+        <ItemDragOverlay file={activeFile!} scale={scale} />
+      </DndContext>
+      <Portal>
+        <Menu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)}>
+          <MenuList
+            zIndex="dropdown"
+            style={{
+              position: 'absolute',
+              left: menuPosition?.x,
+              top: menuPosition?.y,
+            }}
+          >
+            <MenuItem
+              icon={<IconShare />}
+              isDisabled={
+                singleFile ? ltOwnerPermission(singleFile.permission) : false
+              }
+              onClick={(event: MouseEvent) => {
+                event.stopPropagation()
+                dispatch(sharingModalDidOpen())
+              }}
+            >
+              Sharing
+            </MenuItem>
+            <MenuItem
+              icon={<IconDownload />}
+              isDisabled={
+                !singleFile ||
+                singleFile.type !== 'file' ||
+                ltViewerPermission(singleFile.permission)
+              }
+              onClick={(event: MouseEvent) => {
+                event.stopPropagation()
+                if (singleFile) {
+                  downloadFile(singleFile)
+                }
+              }}
+            >
+              Download
+            </MenuItem>
+            <MenuDivider />
+            <MenuItem
+              icon={<IconTrash />}
+              color="red"
+              isDisabled={
+                singleFile ? ltOwnerPermission(singleFile.permission) : false
+              }
+              onClick={(event: MouseEvent) => {
+                event.stopPropagation()
+                dispatch(deleteModalDidOpen())
+              }}
+            >
+              Delete
+            </MenuItem>
+            <MenuItem
+              icon={<IconEdit />}
+              isDisabled={
+                singleFile && geEditorPermission(singleFile.permission)
+                  ? false
+                  : true
+              }
+              onClick={(event: MouseEvent) => {
+                event.stopPropagation()
+                dispatch(renameModalDidOpen())
+              }}
+            >
+              Rename
+            </MenuItem>
+            <MenuItem
+              icon={<IconMove />}
+              isDisabled={
+                singleFile ? ltEditorPermission(singleFile.permission) : false
+              }
+              onClick={(event: MouseEvent) => {
+                event.stopPropagation()
+                dispatch(moveModalDidOpen())
+              }}
+            >
+              Move
+            </MenuItem>
+            <MenuItem
+              icon={<IconCopy />}
+              isDisabled={
+                singleFile ? ltEditorPermission(singleFile.permission) : false
+              }
+              onClick={(event: MouseEvent) => {
+                event.stopPropagation()
+                dispatch(copyModalDidOpen())
+              }}
+            >
+              Copy
+            </MenuItem>
+          </MenuList>
+        </Menu>
+      </Portal>
+    </>
   )
 }
 

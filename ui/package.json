@@ -24,7 +24,7 @@
     "@emotion/css": "11.11.2",
     "@emotion/react": "11.11.1",
     "@emotion/styled": "11.11.0",
-    "@koupr/ui": "1.2.0",
+    "@koupr/ui": "1.4.0",
     "@reduxjs/toolkit": "2.0.1",
     "chakra-react-select": "4.7.6",
     "dateformat": "5.0.3",

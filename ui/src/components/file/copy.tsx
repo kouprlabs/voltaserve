@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import {
   Modal,
   ModalOverlay,
@@ -10,14 +10,16 @@ import {
   ModalFooter,
   Button,
 } from '@chakra-ui/react'
-import { variables } from '@koupr/ui'
+import { usePagePagination, variables } from '@koupr/ui'
 import FileAPI from '@/client/api/file'
+import { filesPaginationStorage } from '@/infra/pagination'
 import { listUpdated } from '@/store/entities/files'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { copyModalDidClose, selectionUpdated } from '@/store/ui/files'
 import Browse from './browse'
 
 const Copy = () => {
+  const navigate = useNavigate()
   const dispatch = useAppDispatch()
   const { fileId: fileIdQuery } = useParams()
   const isModalOpen = useAppSelector((state) => state.ui.files.isCopyModalOpen)
@@ -26,6 +28,11 @@ const Copy = () => {
   const sortOrder = useAppSelector((state) => state.ui.files.sortOrder)
   const [loading, setLoading] = useState(false)
   const [fileId, setFileId] = useState<string>()
+  const { page, size } = usePagePagination({
+    navigate,
+    location,
+    storage: filesPaginationStorage(),
+  })
 
   const handleMove = useCallback(async () => {
     if (!fileId) {
@@ -38,8 +45,8 @@ const Copy = () => {
       })
       if (fileIdQuery === fileId) {
         const result = await FileAPI.list(fileId, {
-          page: 1,
-          size: FileAPI.DEFAULT_PAGE_SIZE,
+          page,
+          size,
           sortBy,
           sortOrder,
         })
@@ -50,7 +57,7 @@ const Copy = () => {
     } finally {
       setLoading(false)
     }
-  }, [fileId, fileIdQuery, selection, sortBy, sortOrder, dispatch])
+  }, [fileId, fileIdQuery, selection, page, size, sortBy, sortOrder, dispatch])
 
   return (
     <Modal

@@ -34,19 +34,17 @@ import { swrConfig } from '@/client/options'
 import { CreateWorkspaceButton } from '@/components/top-bar/buttons'
 import prettyDate from '@/helpers/pretty-date'
 import { decodeQuery } from '@/helpers/query'
+import { workspacePaginationStorage } from '@/infra/pagination'
 
 const WorkspaceListPage = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const [searchParams] = useSearchParams()
   const query = decodeQuery(searchParams.get('q') as string)
-  const { page, size, onPageChange, onSizeChange } = usePagePagination({
+  const { page, size, steps, handlePageChange, setSize } = usePagePagination({
     navigate,
     location,
-    storage: {
-      prefix: 'voltaserve',
-      namespace: 'workspace',
-    },
+    storage: workspacePaginationStorage(),
   })
   const {
     data: list,
@@ -142,8 +140,9 @@ const WorkspaceListPage = () => {
               totalPages={list.totalPages}
               page={page}
               size={size}
-              onPageChange={onPageChange}
-              onSizeChange={onSizeChange}
+              steps={steps}
+              handlePageChange={handlePageChange}
+              setSize={setSize}
             />
           </HStack>
         )}

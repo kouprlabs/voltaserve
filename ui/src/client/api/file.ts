@@ -143,8 +143,6 @@ export type RevokeGroupPermissionOptions = {
 }
 
 export default class FileAPI {
-  public static DEFAULT_PAGE_SIZE = 1000
-
   static async upload(
     workspaceId: string,
     parentId: string | null,
@@ -239,6 +237,14 @@ export default class FileAPI {
         },
       },
     ).then((result) => result.json())
+  }
+
+  static useList(id: string, options: ListOptions, swrOptions?: any) {
+    return useSWR<List>(
+      id ? `/files/${id}/list?${this.paramsFromListOptions(options)}` : null,
+      apiFetcher,
+      swrOptions,
+    )
   }
 
   static async search(
