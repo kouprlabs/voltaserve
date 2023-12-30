@@ -69,7 +69,7 @@ const OrganizationInvitationsPage = () => {
     id,
     swrConfig(),
   )
-  const { page, size, handlePageChange, setSize } = usePagePagination({
+  const { page, size, steps, handlePageChange, setSize } = usePagePagination({
     navigate,
     location,
     storage: outgoingInvitationPaginationStorage(),
@@ -210,6 +210,7 @@ const OrganizationInvitationsPage = () => {
                 totalPages={list.totalPages}
                 page={page}
                 size={size}
+                steps={steps}
                 handlePageChange={handlePageChange}
                 setSize={setSize}
               />

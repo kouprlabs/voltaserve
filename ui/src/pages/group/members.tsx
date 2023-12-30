@@ -55,7 +55,7 @@ const GroupMembersPage = () => {
     groupId,
     swrConfig(),
   )
-  const { page, size, handlePageChange, setSize } = usePagePagination({
+  const { page, size, steps, handlePageChange, setSize } = usePagePagination({
     navigate,
     location,
     storage: groupMemberPaginationStorage(),
@@ -155,6 +155,7 @@ const GroupMembersPage = () => {
                 totalPages={list.totalPages}
                 page={page}
                 size={size}
+                steps={steps}
                 handlePageChange={handlePageChange}
                 setSize={setSize}
               />

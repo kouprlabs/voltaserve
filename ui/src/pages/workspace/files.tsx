@@ -53,10 +53,16 @@ const WorkspaceFilesPage = () => {
     params.id as string,
     swrConfig(),
   )
-  const { page, size, handlePageChange, setSize } = usePagePagination({
+  const { page, size, steps, handlePageChange, setSize } = usePagePagination({
     navigate,
     location,
     storage: filesPaginationStorage(),
+    steps: [
+      PAGINATION_STEP,
+      PAGINATION_STEP * 2,
+      PAGINATION_STEP * 4,
+      PAGINATION_STEP * 5,
+    ],
   })
 
   useEffect(() => {
@@ -131,12 +137,7 @@ const WorkspaceFilesPage = () => {
                 totalPages={list.totalPages}
                 page={page}
                 size={size}
-                steps={[
-                  PAGINATION_STEP,
-                  PAGINATION_STEP * 2,
-                  PAGINATION_STEP * 4,
-                  PAGINATION_STEP * 5,
-                ]}
+                steps={steps}
                 handlePageChange={handlePageChange}
                 setSize={setSize}
               />

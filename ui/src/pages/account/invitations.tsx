@@ -39,7 +39,7 @@ const AccountInvitationsPage = () => {
   const location = useLocation()
   const toast = useToast()
   const { data: user, error: userError } = UserAPI.useGet()
-  const { page, size, handlePageChange, setSize } = usePagePagination({
+  const { page, size, steps, handlePageChange, setSize } = usePagePagination({
     navigate,
     location,
     storage: incomingInvitationPaginationStorage(),
@@ -151,6 +151,7 @@ const AccountInvitationsPage = () => {
                 totalPages={list.totalPages}
                 page={page}
                 size={size}
+                steps={steps}
                 handlePageChange={handlePageChange}
                 setSize={setSize}
               />
