@@ -1,6 +1,13 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
-import { Box, Center, HStack, Stack, useColorModeValue } from '@chakra-ui/react'
+import {
+  Box,
+  Center,
+  HStack,
+  Stack,
+  VStack,
+  useColorModeValue,
+} from '@chakra-ui/react'
 import {
   PagePagination,
   Spinner,
@@ -39,7 +46,6 @@ const WorkspaceFilesPage = () => {
   const iconScale = useAppSelector((state) => state.ui.files.iconScale)
   const [isLoading, setIsLoading] = useState(false)
   const borderColor = useColorModeValue('gray.300', 'gray.600')
-  const listContainer = useRef<HTMLDivElement>(null)
   const { data: workspace } = WorkspaceAPI.useGetById(
     params.id as string,
     swrConfig(),
@@ -89,43 +95,49 @@ const WorkspaceFilesPage = () => {
       <Helmet>{workspace && <title>{workspace.name}</title>}</Helmet>
       <Stack
         spacing={variables.spacingLg}
-        pb={variables.spacingLg}
         w="100%"
         overflow="hidden"
         flexGrow={1}
       >
         <Path />
         <Toolbar />
-        <Box
-          ref={listContainer}
+        <VStack
+          flexGrow={1}
           overflowY="auto"
           overflowX="hidden"
-          borderTop="1px solid"
-          borderTopColor={borderColor}
-          pt={variables.spacing}
-          flexGrow={1}
-          onClick={() => dispatch(selectionUpdated([]))}
+          spacing={variables.spacing}
         >
-          {isLoading ? (
-            <Center w="100%" h={`100px`} justifyContent="center">
-              <Spinner />
-            </Center>
-          ) : (
-            <List scale={iconScale} />
-          )}
-        </Box>
-        {list ? (
-          <HStack alignSelf="end">
-            <PagePagination
-              totalPages={list.totalPages}
-              page={page}
-              size={size}
-              steps={[20, 40, 80, 100]}
-              handlePageChange={handlePageChange}
-              setSize={setSize}
-            />
-          </HStack>
-        ) : null}
+          <Box
+            w="100%"
+            overflowY="auto"
+            overflowX="hidden"
+            borderTop="1px solid"
+            borderTopColor={borderColor}
+            pt={variables.spacing}
+            flexGrow={1}
+            onClick={() => dispatch(selectionUpdated([]))}
+          >
+            {isLoading ? (
+              <Center h="100%">
+                <Spinner />
+              </Center>
+            ) : (
+              <List scale={iconScale} />
+            )}
+          </Box>
+          {list && list.totalPages > 1 ? (
+            <HStack alignSelf="end" pb={variables.spacing}>
+              <PagePagination
+                totalPages={list.totalPages}
+                page={page}
+                size={size}
+                steps={[20, 40, 80, 100]}
+                handlePageChange={handlePageChange}
+                setSize={setSize}
+              />
+            </HStack>
+          ) : null}
+        </VStack>
       </Stack>
       <Sharing />
       <Move />

@@ -141,7 +141,11 @@ const List = ({ scale }: ListProps) => {
           </Center>
         )}
         {itemCount && itemCount > 0 && list && list.data.length > 0 ? (
-          <Wrap spacing={variables.spacing} overflow="hidden">
+          <Wrap
+            spacing={variables.spacing}
+            overflow="hidden"
+            pb={variables.spacingLg}
+          >
             {list.data.map((f) => (
               <WrapItem key={f.id}>
                 <ItemDraggableDroppable
