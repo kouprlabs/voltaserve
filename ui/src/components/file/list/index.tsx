@@ -68,7 +68,7 @@ const List = ({ scale }: ListProps) => {
   const params = useParams()
   const fileId = params.fileId as string
   const list = useAppSelector((state) => state.entities.files.list)
-  const file = useAppSelector((state) =>
+  const singleFile = useAppSelector((state) =>
     state.ui.files.selection.length === 1
       ? state.entities.files.list?.data.find(
           (f) => f.id === state.ui.files.selection[0],
@@ -174,7 +174,9 @@ const List = ({ scale }: ListProps) => {
           >
             <MenuItem
               icon={<IconShare />}
-              isDisabled={file ? ltOwnerPermission(file.permission) : false}
+              isDisabled={
+                singleFile ? ltOwnerPermission(singleFile.permission) : false
+              }
               onClick={(event: MouseEvent) => {
                 event.stopPropagation()
                 dispatch(sharingModalDidOpen())
@@ -185,14 +187,14 @@ const List = ({ scale }: ListProps) => {
             <MenuItem
               icon={<IconDownload />}
               isDisabled={
-                !file ||
-                file.type !== 'file' ||
-                ltViewerPermission(file.permission)
+                !singleFile ||
+                singleFile.type !== 'file' ||
+                ltViewerPermission(singleFile.permission)
               }
               onClick={(event: MouseEvent) => {
                 event.stopPropagation()
-                if (file) {
-                  downloadFile(file)
+                if (singleFile) {
+                  downloadFile(singleFile)
                 }
               }}
             >
@@ -202,7 +204,9 @@ const List = ({ scale }: ListProps) => {
             <MenuItem
               icon={<IconTrash />}
               color="red"
-              isDisabled={file ? ltOwnerPermission(file.permission) : false}
+              isDisabled={
+                singleFile ? ltOwnerPermission(singleFile.permission) : false
+              }
               onClick={(event: MouseEvent) => {
                 event.stopPropagation()
                 dispatch(deleteModalDidOpen())
@@ -213,7 +217,9 @@ const List = ({ scale }: ListProps) => {
             <MenuItem
               icon={<IconEdit />}
               isDisabled={
-                file && geEditorPermission(file.permission) ? false : true
+                singleFile && geEditorPermission(singleFile.permission)
+                  ? false
+                  : true
               }
               onClick={(event: MouseEvent) => {
                 event.stopPropagation()
@@ -224,7 +230,9 @@ const List = ({ scale }: ListProps) => {
             </MenuItem>
             <MenuItem
               icon={<IconMove />}
-              isDisabled={file ? ltEditorPermission(file.permission) : false}
+              isDisabled={
+                singleFile ? ltEditorPermission(singleFile.permission) : false
+              }
               onClick={(event: MouseEvent) => {
                 event.stopPropagation()
                 dispatch(moveModalDidOpen())
@@ -234,7 +242,9 @@ const List = ({ scale }: ListProps) => {
             </MenuItem>
             <MenuItem
               icon={<IconCopy />}
-              isDisabled={file ? ltEditorPermission(file.permission) : false}
+              isDisabled={
+                singleFile ? ltEditorPermission(singleFile.permission) : false
+              }
               onClick={(event: MouseEvent) => {
                 event.stopPropagation()
                 dispatch(copyModalDidOpen())
