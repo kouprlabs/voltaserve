@@ -28,6 +28,7 @@ import Rename from '@/components/file/rename'
 import Sharing from '@/components/file/sharing'
 import Toolbar from '@/components/file/toolbar'
 import { decodeQuery } from '@/helpers/query'
+import { filesPaginationStorage } from '@/infra/pagination'
 import { currentUpdated, listUpdated } from '@/store/entities/files'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { selectionUpdated } from '@/store/ui/files'
@@ -53,10 +54,7 @@ const WorkspaceFilesPage = () => {
   const { page, size, handlePageChange, setSize } = usePagePagination({
     navigate,
     location,
-    storage: {
-      prefix: 'voltaserve',
-      namespace: 'files',
-    },
+    storage: filesPaginationStorage(),
   })
 
   useEffect(() => {
