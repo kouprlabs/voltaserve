@@ -26,7 +26,6 @@ import {
 import * as Yup from 'yup'
 import FileAPI, { List } from '@/client/api/file'
 import useFileListSearchParams from '@/hooks/use-file-list-params'
-import { filesUpdated, listUpdated } from '@/store/entities/files'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { renameModalDidClose } from '@/store/ui/files'
 
@@ -58,17 +57,9 @@ const Rename = () => {
       }
       setSubmitting(true)
       try {
-        const result = await FileAPI.rename(file.id, {
-          name,
-        })
-        const list = await mutate<List>(
-          `/files/${fileId}/list?${fileListSearchParams}`,
-        )
-        if (list) {
-          dispatch(listUpdated(list))
-        }
+        await FileAPI.rename(file.id, { name })
+        await mutate<List>(`/files/${fileId}/list?${fileListSearchParams}`)
         setSubmitting(false)
-        dispatch(filesUpdated([result]))
         dispatch(renameModalDidClose())
       } finally {
         setSubmitting(false)

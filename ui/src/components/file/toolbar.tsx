@@ -45,7 +45,7 @@ import {
   IconCheck,
 } from '@koupr/ui'
 import { useSWRConfig } from 'swr'
-import { List, SortBy, SortOrder } from '@/client/api/file'
+import FileAPI, { List, SortBy, SortOrder } from '@/client/api/file'
 import { ltEditorPermission, ltOwnerPermission } from '@/client/api/permission'
 import downloadFile from '@/helpers/download-file'
 import mapFileList from '@/helpers/map-file-list'
@@ -76,7 +76,11 @@ const ICON_SCALE_SLIDER_STEP = 0.25
 const ICON_SCALE_SLIDER_MIN = 1
 const ICON_SCALE_SLIDER_MAX = ICON_SCALE_SLIDER_STEP * 9
 
-const Toolbar = () => {
+type ToolbarProps = {
+  list: List
+}
+
+const Toolbar = ({ list }: ToolbarProps) => {
   const dispatch = useAppDispatch()
   const { mutate } = useSWRConfig()
   const { id, fileId } = useParams()
@@ -86,19 +90,15 @@ const Toolbar = () => {
   )
   const singleFile = useAppSelector((state) =>
     state.ui.files.selection.length === 1
-      ? state.entities.files.list?.data.find(
-          (f) => f.id === state.ui.files.selection[0],
-        )
+      ? list.data.find((e) => e.id === state.ui.files.selection[0])
       : null,
   )
-  const folder = useAppSelector((state) => state.entities.files.folder)
-  const files = useAppSelector((state) => state.entities.files.list?.data)
   const iconScale = useAppSelector((state) => state.ui.files.iconScale)
   const sortBy = useAppSelector((state) => state.ui.files.sortBy)
   const sortOrder = useAppSelector((state) => state.ui.files.sortOrder)
   const hasOwnerPermission = useAppSelector(
     (state) =>
-      state.entities.files.list?.data.findIndex(
+      list.data.findIndex(
         (f) =>
           state.ui.files.selection.findIndex(
             (s) => f.id === s && ltOwnerPermission(f.permission),
@@ -107,7 +107,7 @@ const Toolbar = () => {
   )
   const hasEditorPermission = useAppSelector(
     (state) =>
-      state.entities.files.list?.data.findIndex(
+      list.data.findIndex(
         (f) =>
           state.ui.files.selection.findIndex(
             (s) => f.id === s && ltEditorPermission(f.permission),
@@ -116,6 +116,7 @@ const Toolbar = () => {
   )
   const uploadHiddenInput = useRef<HTMLInputElement>(null)
   const fileListSearchParams = useFileListSearchParams()
+  const { data: folder } = FileAPI.useGetById(fileId)
 
   useEffect(() => {
     const iconScale = localStorage.getItem(ICON_SCALE_KEY)
@@ -186,6 +187,12 @@ const Toolbar = () => {
     localStorage.setItem(SORT_ORDER_KEY, value.toString())
     dispatch(sortOrderUpdated(value))
   }, [sortOrder, dispatch])
+
+  const handleSelectAllClick = useCallback(() => {
+    if (list.data) {
+      dispatch(selectionUpdated(list.data.map((f) => f.id)))
+    }
+  }, [list.data, dispatch])
 
   const getSortByIcon = useCallback(
     (value: SortBy): ReactElement => {
@@ -316,11 +323,7 @@ const Toolbar = () => {
                   <MenuDivider />
                   <MenuItem
                     icon={<IconCheckCircle />}
-                    onClick={() => {
-                      if (files) {
-                        dispatch(selectionUpdated(files.map((f) => f.id)))
-                      }
-                    }}
+                    onClick={handleSelectAllClick}
                   >
                     Select All
                   </MenuItem>

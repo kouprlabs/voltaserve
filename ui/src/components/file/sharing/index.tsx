@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { useParams } from 'react-router-dom'
 import {
   Text,
@@ -15,7 +16,7 @@ import {
   HStack,
   Tag,
 } from '@chakra-ui/react'
-import FileAPI from '@/client/api/file'
+import FileAPI, { List } from '@/client/api/file'
 import GroupAPI from '@/client/api/group'
 import { geOwnerPermission } from '@/client/api/permission'
 import UserAPI from '@/client/api/user'
@@ -25,18 +26,22 @@ import { sharingModalDidClose } from '@/store/ui/files'
 import Groups from './groups'
 import Users from './users'
 
-const Sharing = () => {
+type SharingProps = {
+  list: List
+}
+
+const Sharing = ({ list }: SharingProps) => {
   const { id } = useParams()
   const dispatch = useAppDispatch()
   const selection = useAppSelector((state) => state.ui.files.selection)
   const isModalOpen = useAppSelector((state) => state.ui.files.isShareModalOpen)
-  const singleFile = useAppSelector((state) => {
+  const singleFile = useMemo(() => {
     if (selection.length === 1) {
-      return state.entities.files.list?.data.find((e) => e.id === selection[0])
+      return list.data.find((e) => e.id === selection[0])
     } else {
       return undefined
     }
-  })
+  }, [list.data, selection])
   const { data: workspace } = WorkspaceAPI.useGetById(id)
   const { data: users } = UserAPI.useList({
     organizationId: workspace?.organization.id,

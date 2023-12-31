@@ -14,7 +14,6 @@ import { variables } from '@koupr/ui'
 import { useSWRConfig } from 'swr'
 import FileAPI, { List } from '@/client/api/file'
 import useFileListSearchParams from '@/hooks/use-file-list-params'
-import { filesUpdated } from '@/store/entities/files'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { moveModalDidClose, selectionUpdated } from '@/store/ui/files'
 import Browse from './browse'
@@ -36,12 +35,7 @@ const Move = () => {
     try {
       setLoading(true)
       await FileAPI.move(targetId, { ids: selection })
-      const list = await mutate<List>(
-        `/files/${fileId}/list?${fileListSearchParams}`,
-      )
-      if (list) {
-        dispatch(filesUpdated(list.data))
-      }
+      await mutate<List>(`/files/${fileId}/list?${fileListSearchParams}`)
       dispatch(selectionUpdated([]))
       dispatch(moveModalDidClose())
     } finally {

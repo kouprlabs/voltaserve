@@ -14,7 +14,6 @@ import {
 import FileAPI, { File, FileType, List } from '@/client/api/file'
 import useFileListSearchParams from '@/hooks/use-file-list-params'
 import store from '@/store/configure-store'
-import { filesRemoved } from '@/store/entities/files'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { hiddenUpdated, selectionUpdated } from '@/store/ui/files'
 import Item from './item'
@@ -74,7 +73,6 @@ const ItemDraggableDroppable = ({
             data: list.data.filter((e) => !idsToMove.includes(e.id)),
           })
         }
-        dispatch(filesRemoved({ id: fileId!, files: idsToMove }))
         dispatch(hiddenUpdated(idsToMove))
         setIsLoading(true)
         await FileAPI.move(file.id, { ids: idsToMove })

@@ -29,7 +29,7 @@ import Sharing from '@/components/file/sharing'
 import Toolbar from '@/components/file/toolbar'
 import { decodeQuery } from '@/helpers/query'
 import { filesPaginationStorage } from '@/infra/pagination'
-import { currentUpdated, listUpdated } from '@/store/entities/files'
+import { listUpdated } from '@/store/entities/files'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { selectionUpdated } from '@/store/ui/files'
 
@@ -75,11 +75,7 @@ const WorkspaceFilesPage = () => {
   const hasPagination = list && list.totalPages > 1
 
   useEffect(() => {
-    dispatch(currentUpdated(fileId!))
-  }, [fileId, dispatch])
-
-  useEffect(() => {
-    if (list?.data) {
+    if (list) {
       dispatch(listUpdated(list))
     }
   }, [list, dispatch])
@@ -94,7 +90,7 @@ const WorkspaceFilesPage = () => {
         flexGrow={1}
       >
         <Path />
-        <Toolbar />
+        {list ? <Toolbar list={list} /> : null}
         <VStack
           flexGrow={1}
           overflowY="auto"
@@ -134,7 +130,7 @@ const WorkspaceFilesPage = () => {
           ) : null}
         </VStack>
       </Stack>
-      <Sharing />
+      {list ? <Sharing list={list} /> : null}
       <Move />
       <Copy />
       <Create />

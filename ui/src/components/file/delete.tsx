@@ -16,7 +16,6 @@ import { variables } from '@koupr/ui'
 import { useSWRConfig } from 'swr'
 import FileAPI, { List } from '@/client/api/file'
 import useFileListSearchParams from '@/hooks/use-file-list-params'
-import { listUpdated } from '@/store/entities/files'
 import { useAppSelector } from '@/store/hook'
 import { deleteModalDidClose, selectionUpdated } from '@/store/ui/files'
 
@@ -35,12 +34,7 @@ const Delete = () => {
     try {
       setLoading(true)
       await FileAPI.batchDelete({ ids: selection })
-      const list = await mutate<List>(
-        `/files/${fileId}/list?${fileListSearchParams}`,
-      )
-      if (list) {
-        dispatch(listUpdated(list))
-      }
+      await mutate<List>(`/files/${fileId}/list?${fileListSearchParams}`)
       dispatch(selectionUpdated([]))
       dispatch(deleteModalDidClose())
     } finally {

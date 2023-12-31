@@ -26,7 +26,6 @@ import {
 import * as Yup from 'yup'
 import FileAPI, { List } from '@/client/api/file'
 import useFileListSearchParams from '@/hooks/use-file-list-params'
-import { listUpdated } from '@/store/entities/files'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { createModalDidClose } from '@/store/ui/files'
 
@@ -65,12 +64,7 @@ const Create = () => {
           workspaceId: id!,
           parentId: fileId!,
         })
-        const list = await mutate<List>(
-          `/files/${fileId}/list?${fileListSearchParams}`,
-        )
-        if (list) {
-          dispatch(listUpdated(list))
-        }
+        await mutate<List>(`/files/${fileId}/list?${fileListSearchParams}`)
         setSubmitting(false)
         dispatch(createModalDidClose())
       } finally {
