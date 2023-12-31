@@ -427,7 +427,7 @@ func (svc *FileService) DownloadPreviewBuffer(id string, userID string) (*bytes.
 	}
 }
 
-func (svc *FileService) FindManyByID(ids []string, userID string) ([]*File, error) {
+func (svc *FileService) FindByID(ids []string, userID string) ([]*File, error) {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
@@ -519,7 +519,7 @@ func (svc *FileService) FindByPath(path string, userID string) (*File, error) {
 			return nil, errorpkg.NewFileNotFoundError(fmt.Errorf("component not found '%s'", component))
 		}
 	}
-	result, err := svc.FindManyByID([]string{currentID}, userID)
+	result, err := svc.FindByID([]string{currentID}, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -612,7 +612,7 @@ func (svc *FileService) ListByPath(path string, userID string) ([]*File, error) 
 		}
 		return result, nil
 	} else if currentType == model.FileTypeFile {
-		result, err := svc.FindManyByID([]string{currentID}, userID)
+		result, err := svc.FindByID([]string{currentID}, userID)
 		if err != nil {
 			return nil, err
 		}

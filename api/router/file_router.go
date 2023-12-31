@@ -145,7 +145,7 @@ func (r *FileRouter) Upload(c *fiber.Ctx) error {
 //	@Router			/files/{id} [patch]
 func (r *FileRouter) Patch(c *fiber.Ctx) error {
 	userID := GetUserID(c)
-	files, err := r.fileSvc.FindManyByID([]string{c.Params("id")}, userID)
+	files, err := r.fileSvc.FindByID([]string{c.Params("id")}, userID)
 	if err != nil {
 		return err
 	}
@@ -233,7 +233,7 @@ func (r *FileRouter) CreateFolder(c *fiber.Ctx) error {
 //	@Router			/files/{id} [get]
 func (r *FileRouter) GetByID(c *fiber.Ctx) error {
 	userID := GetUserID(c)
-	res, err := r.fileSvc.FindManyByID([]string{c.Params("id")}, userID)
+	res, err := r.fileSvc.FindByID([]string{c.Params("id")}, userID)
 	if err != nil {
 		return err
 	}
@@ -540,7 +540,7 @@ func (r *FileRouter) BatchGet(c *fiber.Ctx) error {
 	if err := validator.New().Struct(opts); err != nil {
 		return errorpkg.NewRequestBodyValidationError(err)
 	}
-	res, err := r.fileSvc.FindManyByID(opts.IDs, userID)
+	res, err := r.fileSvc.FindByID(opts.IDs, userID)
 	if err != nil {
 		return err
 	}
