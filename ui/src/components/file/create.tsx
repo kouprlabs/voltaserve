@@ -36,7 +36,7 @@ type FormValues = {
 
 const Create = () => {
   const { mutate } = useSWRConfig()
-  const { workspaceId, fileId } = useParams()
+  const { id, fileId } = useParams()
   const dispatch = useAppDispatch()
   const isModalOpen = useAppSelector(
     (state) => state.ui.files.isCreateModalOpen,
@@ -62,7 +62,7 @@ const Create = () => {
       try {
         await FileAPI.createFolder({
           name,
-          workspaceId: workspaceId!,
+          workspaceId: id!,
           parentId: fileId!,
         })
         const list = await mutate<List>(
@@ -77,7 +77,7 @@ const Create = () => {
         setSubmitting(false)
       }
     },
-    [fileId, workspaceId, fileListSearchParams, mutate, dispatch],
+    [id, fileId, fileListSearchParams, mutate, dispatch],
   )
 
   return (
