@@ -31,11 +31,7 @@ import { decodeQuery } from '@/helpers/query'
 import { filesPaginationStorage } from '@/infra/pagination'
 import { currentUpdated, listUpdated } from '@/store/entities/files'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
-import {
-  selectedItemsUpdated,
-  spinnerDidHide,
-  spinnerDidShow,
-} from '@/store/ui/files'
+import { selectedItemsUpdated } from '@/store/ui/files'
 
 const PAGINATION_STEP = 21
 
@@ -48,9 +44,6 @@ const WorkspaceFilesPage = () => {
   const sortBy = useAppSelector((state) => state.ui.files.sortBy)
   const sortOrder = useAppSelector((state) => state.ui.files.sortOrder)
   const iconScale = useAppSelector((state) => state.ui.files.iconScale)
-  const isSpinnerVisible = useAppSelector(
-    (state) => state.ui.files.isSpinnerVisible,
-  )
   const borderColor = useColorModeValue('gray.300', 'gray.600')
   const { data: workspace } = WorkspaceAPI.useGetById(id, swrConfig())
   const { page, size, steps, handlePageChange, setSize } = usePagePagination({
@@ -68,7 +61,6 @@ const WorkspaceFilesPage = () => {
     data: list,
     error,
     isLoading,
-    mutate,
   } = FileAPI.useList(
     fileId!,
     {
@@ -85,11 +77,6 @@ const WorkspaceFilesPage = () => {
   useEffect(() => {
     dispatch(currentUpdated(fileId!))
   }, [fileId, dispatch])
-
-  useEffect(() => {
-    dispatch(spinnerDidShow())
-    mutate().finally(() => dispatch(spinnerDidHide()))
-  }, [page, size, sortBy, sortOrder, query, mutate, dispatch])
 
   useEffect(() => {
     if (list?.data) {
@@ -126,7 +113,7 @@ const WorkspaceFilesPage = () => {
             flexGrow={1}
             onClick={() => dispatch(selectedItemsUpdated([]))}
           >
-            {isLoading || isSpinnerVisible ? (
+            {isLoading ? (
               <Center h="100%">
                 <Spinner />
               </Center>
