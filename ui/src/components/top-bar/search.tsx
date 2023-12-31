@@ -22,7 +22,7 @@ import { decodeQuery, encodeQuery } from '@/helpers/query'
 const Search = () => {
   const navigation = useNavigate()
   const location = useLocation()
-  const { organizationId, groupId, workspaceId, fileId } = useParams()
+  const { id, fileId } = useParams()
   const [searchParams] = useSearchParams()
   const query = decodeQuery(searchParams.get('q') as string)
   const isWorkspaces = useMemo(
@@ -92,11 +92,9 @@ const Search = () => {
     (value: string) => {
       if (isFiles) {
         if (value) {
-          navigation(
-            `/workspace/${workspaceId}/file/${fileId}?q=${encodeQuery(value)}`,
-          )
+          navigation(`/workspace/${id}/file/${fileId}?q=${encodeQuery(value)}`)
         } else {
-          navigation(`/workspace/${workspaceId}/file/${fileId}`)
+          navigation(`/workspace/${id}/file/${fileId}`)
         }
       } else if (isWorkspaces) {
         if (value) {
@@ -118,25 +116,21 @@ const Search = () => {
         }
       } else if (isOrgMembers) {
         if (value) {
-          navigation(
-            `/organization/${organizationId}/member?q=${encodeQuery(value)}`,
-          )
+          navigation(`/organization/${id}/member?q=${encodeQuery(value)}`)
         } else {
-          navigation(`/organization/${organizationId}/member`)
+          navigation(`/organization/${id}/member`)
         }
       } else if (isGroupMembers) {
         if (value) {
-          navigation(`/group/${groupId}/member?q=${encodeQuery(value)}`)
+          navigation(`/group/${id}/member?q=${encodeQuery(value)}`)
         } else {
-          navigation(`/group/${groupId}/member`)
+          navigation(`/group/${id}/member`)
         }
       }
     },
     [
-      workspaceId,
+      id,
       fileId,
-      organizationId,
-      groupId,
       isFiles,
       isWorkspaces,
       isGroups,
@@ -150,7 +144,7 @@ const Search = () => {
   const handleClear = useCallback(() => {
     setText('')
     if (isFiles) {
-      navigation(`/workspace/${workspaceId}/file/${fileId}`)
+      navigation(`/workspace/${id}/file/${fileId}`)
     } else if (isWorkspaces) {
       navigation(`/workspace`)
     } else if (isGroups) {
@@ -158,15 +152,13 @@ const Search = () => {
     } else if (isOrgs) {
       navigation(`/organization`)
     } else if (isOrgMembers) {
-      navigation(`/organization/${organizationId}/member`)
+      navigation(`/organization/${id}/member`)
     } else if (isGroupMembers) {
-      navigation(`/group/${groupId}/member`)
+      navigation(`/group/${id}/member`)
     }
   }, [
-    workspaceId,
+    id,
     fileId,
-    organizationId,
-    groupId,
     isFiles,
     isWorkspaces,
     isGroups,
