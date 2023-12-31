@@ -43,13 +43,13 @@ const Users = ({ users, permissions, mutateUserPermissions }: UsersProps) => {
   const params = useParams()
   const dispatch = useAppDispatch()
   const { data: workspace } = WorkspaceAPI.useGetById(params.id as string)
-  const selection = useAppSelector((state) => state.ui.files.selection)
+  const selectedItems = useAppSelector((state) => state.ui.files.selectedItems)
   const [isGrantLoading, setIsGrantLoading] = useState(false)
   const [permissionBeingRevoked, setPermissionBeingRevoked] = useState<string>()
   const [activeUser, setActiveUser] = useState<User>()
   const [activePermission, setActivePermission] = useState<string>()
   const { data: user } = IdPUserAPI.useGet()
-  const isSingleSelection = selection.length === 1
+  const isSingleSelection = selectedItems.length === 1
 
   const handleGrantUserPermission = useCallback(async () => {
     if (!activeUser || !activePermission) {
@@ -58,11 +58,11 @@ const Users = ({ users, permissions, mutateUserPermissions }: UsersProps) => {
     try {
       setIsGrantLoading(true)
       await FileAPI.grantUserPermission({
-        ids: selection,
+        ids: selectedItems,
         userId: activeUser.id,
         permission: activePermission,
       })
-      const result = await FileAPI.batchGet({ ids: selection })
+      const result = await FileAPI.batchGet({ ids: selectedItems })
       dispatch(filesUpdated(result))
       if (isSingleSelection) {
         await mutateUserPermissions()
@@ -76,7 +76,7 @@ const Users = ({ users, permissions, mutateUserPermissions }: UsersProps) => {
       setIsGrantLoading(false)
     }
   }, [
-    selection,
+    selectedItems,
     activeUser,
     activePermission,
     isSingleSelection,
@@ -89,10 +89,10 @@ const Users = ({ users, permissions, mutateUserPermissions }: UsersProps) => {
       try {
         setPermissionBeingRevoked(permission.id)
         await FileAPI.revokeUserPermission({
-          ids: selection,
+          ids: selectedItems,
           userId: permission.user.id,
         })
-        const result = await FileAPI.batchGet({ ids: selection })
+        const result = await FileAPI.batchGet({ ids: selectedItems })
         dispatch(filesUpdated(result))
         if (isSingleSelection) {
           await mutateUserPermissions()
@@ -101,7 +101,7 @@ const Users = ({ users, permissions, mutateUserPermissions }: UsersProps) => {
         setPermissionBeingRevoked(undefined)
       }
     },
-    [selection, isSingleSelection, dispatch, mutateUserPermissions],
+    [selectedItems, isSingleSelection, dispatch, mutateUserPermissions],
   )
 
   return (

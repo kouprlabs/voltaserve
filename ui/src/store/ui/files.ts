@@ -5,7 +5,9 @@ export const SORT_BY_KEY = 'voltaserve_file_sort_by'
 export const SORT_ORDER_KEY = 'voltaserve_file_sort_order'
 
 export type FilesState = {
-  selection: string[]
+  selectedItems: string[]
+  hiddenItems: string[]
+  isSpinnerVisible: boolean
   isMultiSelectActive: boolean
   isRangeSelectActive: boolean
   isMoveModalOpen: boolean
@@ -20,7 +22,9 @@ export type FilesState = {
 }
 
 const initialState: FilesState = {
-  selection: [],
+  selectedItems: [],
+  hiddenItems: [],
+  isSpinnerVisible: false,
   isMultiSelectActive: false,
   isRangeSelectActive: false,
   isMoveModalOpen: false,
@@ -39,14 +43,25 @@ const slice = createSlice({
   name: 'files',
   initialState,
   reducers: {
-    selectionUpdated: (state, action: PayloadAction<string[]>) => {
-      state.selection = action.payload
+    selectedItemsUpdated: (state, action: PayloadAction<string[]>) => {
+      state.selectedItems = action.payload
     },
-    selectionAdded: (state, action: PayloadAction<string>) => {
-      state.selection.push(action.payload)
+    selectedItemAdded: (state, action: PayloadAction<string>) => {
+      state.selectedItems.push(action.payload)
     },
-    selectionRemoved: (state, action: PayloadAction<string>) => {
-      state.selection = state.selection.filter((e) => e !== action.payload)
+    selectedItemRemoved: (state, action: PayloadAction<string>) => {
+      state.selectedItems = state.selectedItems.filter(
+        (e) => e !== action.payload,
+      )
+    },
+    hiddenItemsUpdated: (state, action: PayloadAction<string[]>) => {
+      state.hiddenItems = action.payload
+    },
+    spinnerDidShow: (state) => {
+      state.isSpinnerVisible = true
+    },
+    spinnerDidHide: (state) => {
+      state.isSpinnerVisible = false
     },
     moveModalDidOpen: (state) => {
       state.isMoveModalOpen = true
@@ -103,9 +118,12 @@ const slice = createSlice({
 })
 
 export const {
-  selectionUpdated,
-  selectionAdded,
-  selectionRemoved,
+  selectedItemsUpdated,
+  selectedItemAdded,
+  selectedItemRemoved,
+  hiddenItemsUpdated,
+  spinnerDidShow,
+  spinnerDidHide,
   moveModalDidOpen,
   copyModalDidOpen,
   createModalDidOpen,

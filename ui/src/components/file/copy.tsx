@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import {
   Modal,
   ModalOverlay,
@@ -10,54 +10,44 @@ import {
   ModalFooter,
   Button,
 } from '@chakra-ui/react'
-import { usePagePagination, variables } from '@koupr/ui'
-import FileAPI from '@/client/api/file'
-import { filesPaginationStorage } from '@/infra/pagination'
+import { variables } from '@koupr/ui'
+import { useSWRConfig } from 'swr'
+import FileAPI, { List } from '@/client/api/file'
 import { listUpdated } from '@/store/entities/files'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
-import { copyModalDidClose, selectionUpdated } from '@/store/ui/files'
+import { copyModalDidClose, selectedItemsUpdated } from '@/store/ui/files'
 import Browse from './browse'
 
 const Copy = () => {
-  const navigate = useNavigate()
+  const { mutate } = useSWRConfig()
   const dispatch = useAppDispatch()
-  const { fileId: fileIdQuery } = useParams()
+  const { fileId } = useParams()
   const isModalOpen = useAppSelector((state) => state.ui.files.isCopyModalOpen)
-  const selection = useAppSelector((state) => state.ui.files.selection)
-  const sortBy = useAppSelector((state) => state.ui.files.sortBy)
-  const sortOrder = useAppSelector((state) => state.ui.files.sortOrder)
+  const selectedItems = useAppSelector((state) => state.ui.files.selectedItems)
   const [loading, setLoading] = useState(false)
-  const [fileId, setFileId] = useState<string>()
-  const { page, size } = usePagePagination({
-    navigate,
-    location,
-    storage: filesPaginationStorage(),
-  })
+  const [targetId, setTargetId] = useState<string>()
 
   const handleMove = useCallback(async () => {
-    if (!fileId) {
+    if (!targetId) {
       return
     }
     try {
       setLoading(true)
-      await FileAPI.copy(fileId, {
-        ids: selection,
+      await FileAPI.copy(targetId, {
+        ids: selectedItems,
       })
-      if (fileIdQuery === fileId) {
-        const result = await FileAPI.list(fileId, {
-          page,
-          size,
-          sortBy,
-          sortOrder,
-        })
-        dispatch(listUpdated(result))
+      if (fileId === targetId) {
+        const list = await mutate<List>(`/files/${targetId}/list`)
+        if (list) {
+          dispatch(listUpdated(list))
+        }
       }
-      dispatch(selectionUpdated([]))
+      dispatch(selectedItemsUpdated([]))
       dispatch(copyModalDidClose())
     } finally {
       setLoading(false)
     }
-  }, [fileId, fileIdQuery, selection, page, size, sortBy, sortOrder, dispatch])
+  }, [targetId, fileId, selectedItems, mutate, dispatch])
 
   return (
     <Modal
@@ -67,10 +57,10 @@ const Copy = () => {
     >
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>Copy {selection.length} Item(s) to…</ModalHeader>
+        <ModalHeader>Copy {selectedItems.length} Item(s) to…</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-          <Browse onChange={(id) => setFileId(id)} />
+          <Browse onChange={(id) => setTargetId(id)} />
         </ModalBody>
         <ModalFooter>
           <Button

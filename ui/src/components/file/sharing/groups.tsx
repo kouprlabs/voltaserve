@@ -46,23 +46,23 @@ const Groups = ({
   const params = useParams()
   const dispatch = useAppDispatch()
   const { data: workspace } = WorkspaceAPI.useGetById(params.id as string)
-  const selection = useAppSelector((state) => state.ui.files.selection)
+  const selectedItems = useAppSelector((state) => state.ui.files.selectedItems)
   const [isGrantLoading, setIsGrantLoading] = useState(false)
   const [permissionBeingRevoked, setPermissionBeingRevoked] = useState<string>()
   const [activeGroup, setActiveGroup] = useState<Group>()
   const [activePermission, setActivePermission] = useState<string>()
-  const isSingleSelection = selection.length === 1
+  const isSingleSelection = selectedItems.length === 1
 
   const handleGrantGroupPermission = useCallback(async () => {
     if (activeGroup && activePermission) {
       try {
         setIsGrantLoading(true)
         await FileAPI.grantGroupPermission({
-          ids: selection,
+          ids: selectedItems,
           groupId: activeGroup.id,
           permission: activePermission,
         })
-        const result = await FileAPI.batchGet({ ids: selection })
+        const result = await FileAPI.batchGet({ ids: selectedItems })
         dispatch(filesUpdated(result))
         if (isSingleSelection) {
           await mutateGroupPermissions()
@@ -77,7 +77,7 @@ const Groups = ({
       }
     }
   }, [
-    selection,
+    selectedItems,
     activeGroup,
     activePermission,
     isSingleSelection,
@@ -90,10 +90,10 @@ const Groups = ({
       try {
         setPermissionBeingRevoked(permission.id)
         await FileAPI.revokeGroupPermission({
-          ids: selection,
+          ids: selectedItems,
           groupId: permission.group.id,
         })
-        const result = await FileAPI.batchGet({ ids: selection })
+        const result = await FileAPI.batchGet({ ids: selectedItems })
         dispatch(filesUpdated(result))
         if (isSingleSelection) {
           await mutateGroupPermissions()
@@ -102,7 +102,7 @@ const Groups = ({
         setPermissionBeingRevoked(undefined)
       }
     },
-    [selection, isSingleSelection, dispatch, mutateGroupPermissions],
+    [selectedItems, isSingleSelection, dispatch, mutateGroupPermissions],
   )
 
   return (

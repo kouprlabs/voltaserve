@@ -52,8 +52,8 @@ type FileList struct {
 type FileListOptions struct {
 	Page      uint       `json:"page"`
 	Size      uint       `json:"size"`
-	SortBy    string     `json:"sortBy"`
-	SortOrder string     `json:"sortOrder"`
+	SortBy    string     `json:"sortBy" validate:"omitempty,oneof=name kind size date_created date_modified"`
+	SortOrder string     `json:"sortOrder" validate:"omitempty,oneof=asc desc"`
 	Type      string     `json:"type"`
 	Query     *FileQuery `json:"query,omitempty"`
 }
@@ -451,7 +451,7 @@ func (svc *FileService) FindManyByID(ids []string, userID string) ([]*File, erro
 	return res, nil
 }
 
-func (svc *FileService) FindOneByPath(path string, userID string) (*File, error) {
+func (svc *FileService) FindByPath(path string, userID string) (*File, error) {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
@@ -530,7 +530,7 @@ func (svc *FileService) FindOneByPath(path string, userID string) (*File, error)
 	return result[0], nil
 }
 
-func (svc *FileService) FindManyByPath(path string, userID string) ([]*File, error) {
+func (svc *FileService) ListByPath(path string, userID string) ([]*File, error) {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err

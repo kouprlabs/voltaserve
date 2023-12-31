@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import {
   Box,
@@ -15,7 +15,7 @@ import {
   variables,
 } from '@koupr/ui'
 import { Helmet } from 'react-helmet-async'
-import FileAPI, { ListOptions } from '@/client/api/file'
+import FileAPI from '@/client/api/file'
 import WorkspaceAPI from '@/client/api/workspace'
 import { swrConfig } from '@/client/options'
 import Copy from '@/components/file/copy'
@@ -31,23 +31,27 @@ import { decodeQuery } from '@/helpers/query'
 import { filesPaginationStorage } from '@/infra/pagination'
 import { currentUpdated, listUpdated } from '@/store/entities/files'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
-import { selectionUpdated } from '@/store/ui/files'
+import {
+  selectedItemsUpdated,
+  spinnerDidHide,
+  spinnerDidShow,
+} from '@/store/ui/files'
 
 const PAGINATION_STEP = 21
 
 const WorkspaceFilesPage = () => {
   const navigate = useNavigate()
   const params = useParams()
-  const workspaceId = params.id as string
   const fileId = params.fileId as string
   const [searchParams] = useSearchParams()
   const query = decodeQuery(searchParams.get('q') as string)
   const dispatch = useAppDispatch()
-  const list = useAppSelector((state) => state.entities.files.list)
   const sortBy = useAppSelector((state) => state.ui.files.sortBy)
   const sortOrder = useAppSelector((state) => state.ui.files.sortOrder)
   const iconScale = useAppSelector((state) => state.ui.files.iconScale)
-  const [isLoading, setIsLoading] = useState(false)
+  const isSpinnerVisible = useAppSelector(
+    (state) => state.ui.files.isSpinnerVisible,
+  )
   const borderColor = useColorModeValue('gray.300', 'gray.600')
   const { data: workspace } = WorkspaceAPI.useGetById(
     params.id as string,
@@ -64,6 +68,22 @@ const WorkspaceFilesPage = () => {
       PAGINATION_STEP * 5,
     ],
   })
+  const {
+    data: list,
+    error,
+    isLoading,
+    mutate,
+  } = FileAPI.useList(
+    fileId,
+    {
+      size,
+      page,
+      sortBy,
+      sortOrder,
+      query: query ? { text: query } : undefined,
+    },
+    swrConfig(),
+  )
   const hasPagination = list && list.totalPages > 1
 
   useEffect(() => {
@@ -71,24 +91,15 @@ const WorkspaceFilesPage = () => {
   }, [fileId, dispatch])
 
   useEffect(() => {
-    ;(async () => {
-      setIsLoading(true)
-      dispatch(selectionUpdated([]))
-      try {
-        const options: ListOptions = {
-          size,
-          page,
-          sortBy,
-          sortOrder,
-          query: query ? { text: query } : undefined,
-        }
-        const result = await FileAPI.list(fileId, options)
-        dispatch(listUpdated(result))
-      } finally {
-        setIsLoading(false)
-      }
-    })()
-  }, [workspaceId, fileId, query, page, size, sortBy, sortOrder, dispatch])
+    dispatch(spinnerDidShow())
+    mutate().finally(() => dispatch(spinnerDidHide()))
+  }, [page, size, sortBy, sortOrder, query, mutate, dispatch])
+
+  useEffect(() => {
+    if (list?.data) {
+      dispatch(listUpdated(list))
+    }
+  }, [list, dispatch])
 
   return (
     <>
@@ -117,15 +128,14 @@ const WorkspaceFilesPage = () => {
             borderBottomColor={hasPagination ? borderColor : undefined}
             pt={variables.spacing}
             flexGrow={1}
-            onClick={() => dispatch(selectionUpdated([]))}
+            onClick={() => dispatch(selectedItemsUpdated([]))}
           >
-            {isLoading ? (
+            {isLoading || isSpinnerVisible ? (
               <Center h="100%">
                 <Spinner />
               </Center>
-            ) : (
-              <List scale={iconScale} />
-            )}
+            ) : null}
+            {list && !error ? <List list={list} scale={iconScale} /> : null}
           </Box>
           {hasPagination ? (
             <HStack alignSelf="end" pb={variables.spacing}>

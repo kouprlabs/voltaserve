@@ -30,7 +30,12 @@ export const fetcher = ({ url, method, body, redirect }: FetcherOptions) =>
       credentials: 'include',
     },
     redirect,
-  ).then((result) => result.json())
+  ).then(async (result) => {
+    try {
+      return await result.json()
+      // eslint-disable-next-line
+    } catch {}
+  })
 
 export const baseFetcher = async (
   url: string,

@@ -13,15 +13,17 @@ import {
   Text,
 } from '@chakra-ui/react'
 import { variables } from '@koupr/ui'
-import FileAPI from '@/client/api/file'
-import { filesRemoved } from '@/store/entities/files'
+import { useSWRConfig } from 'swr'
+import FileAPI, { List } from '@/client/api/file'
+import { listUpdated } from '@/store/entities/files'
 import { useAppSelector } from '@/store/hook'
-import { deleteModalDidClose, selectionUpdated } from '@/store/ui/files'
+import { deleteModalDidClose, selectedItemsUpdated } from '@/store/ui/files'
 
 const Delete = () => {
-  const params = useParams()
+  const { mutate } = useSWRConfig()
+  const { fileId } = useParams()
   const dispatch = useDispatch()
-  const selection = useAppSelector((state) => state.ui.files.selection)
+  const selectedItems = useAppSelector((state) => state.ui.files.selectedItems)
   const isModalOpen = useAppSelector(
     (state) => state.ui.files.isDeleteModalOpen,
   )
@@ -30,19 +32,17 @@ const Delete = () => {
   const handleDelete = useCallback(async () => {
     try {
       setLoading(true)
-      await FileAPI.batchDelete({ ids: selection })
-      dispatch(
-        filesRemoved({
-          id: params.fileId as string,
-          files: selection,
-        }),
-      )
-      dispatch(selectionUpdated([]))
+      await FileAPI.batchDelete({ ids: selectedItems })
+      const list = await mutate<List>(`/files/${fileId}/list`)
+      if (list) {
+        dispatch(listUpdated(list))
+      }
+      dispatch(selectedItemsUpdated([]))
       dispatch(deleteModalDidClose())
     } finally {
       setLoading(false)
     }
-  }, [selection, params, dispatch])
+  }, [selectedItems, fileId, mutate, dispatch])
 
   return (
     <Modal
@@ -56,7 +56,8 @@ const Delete = () => {
         <ModalCloseButton />
         <ModalBody>
           <Text>
-            Are you sure you would like to delete ({selection.length}) item(s)?
+            Are you sure you would like to delete ({selectedItems.length})
+            item(s)?
           </Text>
         </ModalBody>
         <ModalFooter>

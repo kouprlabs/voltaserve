@@ -6,7 +6,7 @@ import {
   useRef,
   useState,
 } from 'react'
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import {
   Button,
   Stack,
@@ -43,15 +43,12 @@ import {
   IconSortUp,
   IconSortDown,
   IconCheck,
-  usePagePagination,
 } from '@koupr/ui'
-import FileAPI, { ListOptions, SortBy, SortOrder } from '@/client/api/file'
+import { useSWRConfig } from 'swr'
+import { SortBy, SortOrder } from '@/client/api/file'
 import { ltEditorPermission, ltOwnerPermission } from '@/client/api/permission'
 import downloadFile from '@/helpers/download-file'
 import mapFileList from '@/helpers/map-file-list'
-import { decodeQuery } from '@/helpers/query'
-import { filesPaginationStorage } from '@/infra/pagination'
-import { listUpdated } from '@/store/entities/files'
 import { uploadAdded, UploadDecorator } from '@/store/entities/uploads'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import {
@@ -67,7 +64,7 @@ import {
   iconScaleUpdated,
   moveModalDidOpen,
   renameModalDidOpen,
-  selectionUpdated,
+  selectedItemsUpdated,
   sharingModalDidOpen,
 } from '@/store/ui/files'
 import { uploadsDrawerOpened } from '@/store/ui/uploads-drawer'
@@ -79,21 +76,19 @@ const ICON_SCALE_SLIDER_MIN = 1
 const ICON_SCALE_SLIDER_MAX = ICON_SCALE_SLIDER_STEP * 9
 
 const Toolbar = () => {
-  const navigate = useNavigate()
   const dispatch = useAppDispatch()
+  const { mutate } = useSWRConfig()
   const params = useParams()
   const workspaceId = params.id as string
   const fileId = params.fileId as string
-  const [searchParams] = useSearchParams()
-  const query = decodeQuery(searchParams.get('q') as string)
   const [isRefreshing, setIsRefreshing] = useState(false)
   const selectionCount = useAppSelector(
-    (state) => state.ui.files.selection.length,
+    (state) => state.ui.files.selectedItems.length,
   )
   const singleFile = useAppSelector((state) =>
-    state.ui.files.selection.length === 1
+    state.ui.files.selectedItems.length === 1
       ? state.entities.files.list?.data.find(
-          (f) => f.id === state.ui.files.selection[0],
+          (f) => f.id === state.ui.files.selectedItems[0],
         )
       : null,
   )
@@ -106,7 +101,7 @@ const Toolbar = () => {
     (state) =>
       state.entities.files.list?.data.findIndex(
         (f) =>
-          state.ui.files.selection.findIndex(
+          state.ui.files.selectedItems.findIndex(
             (s) => f.id === s && ltOwnerPermission(f.permission),
           ) !== -1,
       ) === -1,
@@ -115,17 +110,12 @@ const Toolbar = () => {
     (state) =>
       state.entities.files.list?.data.findIndex(
         (f) =>
-          state.ui.files.selection.findIndex(
+          state.ui.files.selectedItems.findIndex(
             (s) => f.id === s && ltEditorPermission(f.permission),
           ) !== -1,
       ) === -1,
   )
   const uploadHiddenInput = useRef<HTMLInputElement>(null)
-  const { page, size } = usePagePagination({
-    navigate,
-    location,
-    storage: filesPaginationStorage(),
-  })
 
   useEffect(() => {
     const iconScale = localStorage.getItem(ICON_SCALE_KEY)
@@ -177,21 +167,10 @@ const Toolbar = () => {
 
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true)
-    dispatch(selectionUpdated([]))
-    try {
-      const options: ListOptions = {
-        size,
-        page,
-        sortBy,
-        sortOrder,
-        query: query ? { text: query } : undefined,
-      }
-      const result = await FileAPI.list(fileId, options)
-      dispatch(listUpdated(result))
-    } finally {
-      setIsRefreshing(false)
-    }
-  }, [dispatch, fileId, query, page, size, sortBy, sortOrder])
+    dispatch(selectedItemsUpdated([]))
+    await mutate(`/files/${fileId}/list`)
+    setIsRefreshing(false)
+  }, [fileId, mutate, dispatch])
 
   const handleSortByChange = useCallback(
     (value: SortBy) => {
@@ -339,7 +318,7 @@ const Toolbar = () => {
                     icon={<IconCheckCircle />}
                     onClick={() => {
                       if (files) {
-                        dispatch(selectionUpdated(files.map((f) => f.id)))
+                        dispatch(selectedItemsUpdated(files.map((f) => f.id)))
                       }
                     }}
                   >
@@ -347,7 +326,7 @@ const Toolbar = () => {
                   </MenuItem>
                   <MenuItem
                     icon={<IconCircle />}
-                    onClick={() => dispatch(selectionUpdated([]))}
+                    onClick={() => dispatch(selectedItemsUpdated([]))}
                   >
                     Unselect All
                   </MenuItem>

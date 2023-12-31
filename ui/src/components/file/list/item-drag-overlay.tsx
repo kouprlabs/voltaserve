@@ -12,7 +12,7 @@ type ItemDragOverlayProps = {
 
 const ItemDragOverlay = ({ file, scale }: ItemDragOverlayProps) => {
   const selectionCount = useAppSelector(
-    (state) => state.ui.files.selection.length,
+    (state) => state.ui.files.selectedItems.length,
   )
 
   return (

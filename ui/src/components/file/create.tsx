@@ -14,6 +14,7 @@ import {
   ModalOverlay,
 } from '@chakra-ui/react'
 import { variables } from '@koupr/ui'
+import { useSWRConfig } from 'swr'
 import {
   Field,
   FieldAttributes,
@@ -23,8 +24,8 @@ import {
   FormikHelpers,
 } from 'formik'
 import * as Yup from 'yup'
-import FileAPI from '@/client/api/file'
-import { filesAdded } from '@/store/entities/files'
+import FileAPI, { List } from '@/client/api/file'
+import { listUpdated } from '@/store/entities/files'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { createModalDidClose } from '@/store/ui/files'
 
@@ -33,6 +34,7 @@ type FormValues = {
 }
 
 const Create = () => {
+  const { mutate } = useSWRConfig()
   const params = useParams()
   const workspaceId = params.id as string
   const fileId = params.fileId as string
@@ -58,19 +60,22 @@ const Create = () => {
     ) => {
       setSubmitting(true)
       try {
-        const result = await FileAPI.createFolder({
+        await FileAPI.createFolder({
           name,
           workspaceId: workspaceId,
           parentId: fileId,
         })
-        dispatch(filesAdded({ id: fileId, files: [result] }))
+        const list = await mutate<List>(`/files/${fileId}/list`)
+        if (list) {
+          dispatch(listUpdated(list))
+        }
         setSubmitting(false)
         dispatch(createModalDidClose())
       } finally {
         setSubmitting(false)
       }
     },
-    [fileId, workspaceId, dispatch],
+    [fileId, workspaceId, mutate, dispatch],
   )
 
   return (

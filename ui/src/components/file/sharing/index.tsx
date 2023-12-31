@@ -28,11 +28,13 @@ import Users from './users'
 const Sharing = () => {
   const params = useParams()
   const dispatch = useAppDispatch()
-  const selection = useAppSelector((state) => state.ui.files.selection)
+  const selectedItems = useAppSelector((state) => state.ui.files.selectedItems)
   const isModalOpen = useAppSelector((state) => state.ui.files.isShareModalOpen)
   const singleFile = useAppSelector((state) => {
-    if (selection.length === 1) {
-      return state.entities.files.list?.data.find((e) => e.id === selection[0])
+    if (selectedItems.length === 1) {
+      return state.entities.files.list?.data.find(
+        (e) => e.id === selectedItems[0],
+      )
     } else {
       return undefined
     }

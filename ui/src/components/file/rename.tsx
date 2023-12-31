@@ -36,7 +36,7 @@ const Rename = () => {
   const isModalOpen = useAppSelector(
     (state) => state.ui.files.isRenameModalOpen,
   )
-  const id = useAppSelector((state) => state.ui.files.selection[0])
+  const id = useAppSelector((state) => state.ui.files.selectedItems[0])
   const { data: file, mutate } = FileAPI.useGetById(id)
   const formSchema = Yup.object().shape({
     name: Yup.string().required('Name is required').max(255),

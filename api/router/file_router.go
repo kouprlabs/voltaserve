@@ -253,7 +253,7 @@ func (r *FileRouter) GetByPath(c *fiber.Ctx) error {
 	if c.Query("path") == "" {
 		return errorpkg.NewMissingQueryParamError("path")
 	}
-	res, err := r.fileSvc.FindOneByPath(c.Query("path"), userID)
+	res, err := r.fileSvc.FindByPath(c.Query("path"), userID)
 	if err != nil {
 		return err
 	}
@@ -262,8 +262,8 @@ func (r *FileRouter) GetByPath(c *fiber.Ctx) error {
 
 // ListByPath godoc
 //
-//	@Summary		ListByPath
-//	@Description	ListByPath
+//	@Summary		List by Path
+//	@Description	List by Path
 //	@Tags			Files
 //	@Id				files_list_by_path
 //	@Produce		json
@@ -277,7 +277,7 @@ func (r *FileRouter) ListByPath(c *fiber.Ctx) error {
 	if c.Query("path") == "" {
 		return errorpkg.NewMissingQueryParamError("path")
 	}
-	res, err := r.fileSvc.FindManyByPath(c.Query("path"), userID)
+	res, err := r.fileSvc.ListByPath(c.Query("path"), userID)
 	if err != nil {
 		return err
 	}
@@ -304,6 +304,12 @@ func (r *FileRouter) List(c *fiber.Ctx) error {
 	}
 	if err := validator.New().Struct(opts); err != nil {
 		return errorpkg.NewRequestBodyValidationError(err)
+	}
+	if opts.Page == 0 {
+		opts.Page = 1
+	}
+	if opts.Size == 0 {
+		opts.Size = FileDefaultPageSize
 	}
 	var err error
 	var res *service.FileList
