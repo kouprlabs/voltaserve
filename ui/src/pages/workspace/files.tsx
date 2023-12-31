@@ -41,8 +41,7 @@ const PAGINATION_STEP = 21
 
 const WorkspaceFilesPage = () => {
   const navigate = useNavigate()
-  const params = useParams()
-  const fileId = params.fileId as string
+  const { id, fileId } = useParams()
   const [searchParams] = useSearchParams()
   const query = decodeQuery(searchParams.get('q') as string)
   const dispatch = useAppDispatch()
@@ -53,10 +52,7 @@ const WorkspaceFilesPage = () => {
     (state) => state.ui.files.isSpinnerVisible,
   )
   const borderColor = useColorModeValue('gray.300', 'gray.600')
-  const { data: workspace } = WorkspaceAPI.useGetById(
-    params.id as string,
-    swrConfig(),
-  )
+  const { data: workspace } = WorkspaceAPI.useGetById(id, swrConfig())
   const { page, size, steps, handlePageChange, setSize } = usePagePagination({
     navigate,
     location,
@@ -74,7 +70,7 @@ const WorkspaceFilesPage = () => {
     isLoading,
     mutate,
   } = FileAPI.useList(
-    fileId,
+    fileId!,
     {
       size,
       page,
@@ -87,7 +83,7 @@ const WorkspaceFilesPage = () => {
   const hasPagination = list && list.totalPages > 1
 
   useEffect(() => {
-    dispatch(currentUpdated(fileId))
+    dispatch(currentUpdated(fileId!))
   }, [fileId, dispatch])
 
   useEffect(() => {

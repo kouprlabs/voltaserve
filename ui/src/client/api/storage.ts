@@ -18,13 +18,15 @@ export default class StorageAPI {
     )
   }
 
-  static useGetWorkspaceUsage(id: string, swrOptions?: any) {
-    const url = `/storage/get_workspace_usage?${new URLSearchParams({
-      id,
-    })}`
+  static useGetWorkspaceUsage(id?: string, swrOptions?: any) {
+    const url = id
+      ? `/storage/get_workspace_usage?${new URLSearchParams({
+          id,
+        })}`
+      : null
     return useSWR<StorageUsage>(
-      id ? url : null,
-      () => apiFetcher({ url, method: 'GET' }),
+      url,
+      () => apiFetcher({ url: url!, method: 'GET' }),
       swrOptions,
     )
   }

@@ -13,6 +13,7 @@ import {
 import { variables } from '@koupr/ui'
 import { useSWRConfig } from 'swr'
 import FileAPI, { List } from '@/client/api/file'
+import useFileListSearchParams from '@/hooks/use-file-list-params'
 import { filesUpdated } from '@/store/entities/files'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { moveModalDidClose, selectedItemsUpdated } from '@/store/ui/files'
@@ -20,13 +21,13 @@ import Browse from './browse'
 
 const Move = () => {
   const { mutate } = useSWRConfig()
-  const params = useParams()
-  const fileId = params.fileId as string
+  const { fileId } = useParams()
   const dispatch = useAppDispatch()
   const selectedItems = useAppSelector((state) => state.ui.files.selectedItems)
   const isModalOpen = useAppSelector((state) => state.ui.files.isMoveModalOpen)
   const [loading, setLoading] = useState(false)
   const [targetId, setTargetId] = useState<string>()
+  const fileListSearchParams = useFileListSearchParams()
 
   const handleMove = useCallback(async () => {
     if (!targetId) {
@@ -35,7 +36,9 @@ const Move = () => {
     try {
       setLoading(true)
       await FileAPI.move(targetId, { ids: selectedItems })
-      const list = await mutate<List>(`/files/${fileId}/list`)
+      const list = await mutate<List>(
+        `/files/${fileId}/list?${fileListSearchParams}`,
+      )
       if (list) {
         dispatch(filesUpdated(list.data))
       }
@@ -44,7 +47,7 @@ const Move = () => {
     } finally {
       setLoading(false)
     }
-  }, [targetId, fileId, selectedItems, mutate, dispatch])
+  }, [targetId, fileId, selectedItems, fileListSearchParams, mutate, dispatch])
 
   return (
     <Modal

@@ -11,7 +11,8 @@ import {
   useDraggable,
   useDroppable,
 } from '@dnd-kit/core'
-import FileAPI, { File, FileType } from '@/client/api/file'
+import FileAPI, { File, FileType, List } from '@/client/api/file'
+import useFileListSearchParams from '@/hooks/use-file-list-params'
 import store from '@/store/configure-store'
 import { filesRemoved } from '@/store/entities/files'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
@@ -31,8 +32,7 @@ const ItemDraggableDroppable = ({
 }: ItemDraggableDroppableProps) => {
   const { mutate } = useSWRConfig()
   const dispatch = useAppDispatch()
-  const params = useParams()
-  const fileId = params.fileId as string
+  const { fileId } = useParams()
   const [isVisible, setVisible] = useState(true)
   const selectedItems = useAppSelector((state) => state.ui.files.selectedItems)
   const {
@@ -46,6 +46,7 @@ const ItemDraggableDroppable = ({
     id: file.id,
   })
   const [isLoading, setIsLoading] = useState(false)
+  const fileListSearchParams = useFileListSearchParams()
 
   useDndMonitor({
     onDragStart: (event: DragStartEvent) => {
@@ -68,16 +69,16 @@ const ItemDraggableDroppable = ({
         ]
         const list = store.getState().entities.files.list
         if (list) {
-          await mutate(`/files/${fileId}/list`, {
+          await mutate<List>(`/files/${fileId}/list?${fileListSearchParams}`, {
             ...list,
             data: list.data.filter((e) => !idsToMove.includes(e.id)),
           })
         }
-        dispatch(filesRemoved({ id: fileId, files: idsToMove }))
+        dispatch(filesRemoved({ id: fileId!, files: idsToMove }))
         dispatch(hiddenItemsUpdated(idsToMove))
         setIsLoading(true)
         await FileAPI.move(file.id, { ids: idsToMove })
-        await mutate(`/files/${fileId}/list`)
+        await mutate<List>(`/files/${fileId}/list?${fileListSearchParams}`)
         setIsLoading(false)
         dispatch(hiddenItemsUpdated([]))
         dispatch(selectedItemsUpdated([]))

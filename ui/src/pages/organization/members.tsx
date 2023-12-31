@@ -48,10 +48,9 @@ import { organizationMemberPaginationStorage } from '@/infra/pagination'
 const OrganizationMembersPage = () => {
   const navigate = useNavigate()
   const location = useLocation()
-  const params = useParams()
-  const organizationId = params.id as string
+  const { id } = useParams()
   const { data: org, error: orgError } = OrganizationAPI.useGetById(
-    organizationId,
+    id,
     swrConfig(),
   )
   const { page, size, steps, handlePageChange, setSize } = usePagePagination({
@@ -69,7 +68,7 @@ const OrganizationMembersPage = () => {
   } = UserAPI.useList(
     {
       query,
-      organizationId,
+      organizationId: id,
       page,
       size,
       sortBy: SortBy.FullName,

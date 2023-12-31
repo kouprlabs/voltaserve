@@ -1,11 +1,15 @@
 package router
 
 import (
+	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
+	"strings"
 	"voltaserve/config"
 	"voltaserve/errorpkg"
 	"voltaserve/helper"
@@ -44,7 +48,7 @@ func (r *FileRouter) AppendRoutes(g fiber.Router) {
 	g.Get("/:id", r.GetByID)
 	g.Patch("/:id", r.Patch)
 	g.Delete("/:id", r.Delete)
-	g.Post("/:id/list", r.List)
+	g.Get("/:id/list", r.List)
 	g.Get("/:id/get_item_count", r.GetItemCount)
 	g.Get("/:id/get_path", r.GetPath)
 	g.Get("/:id/get_ids", r.GetIDs)
@@ -291,37 +295,78 @@ func (r *FileRouter) ListByPath(c *fiber.Ctx) error {
 //	@Tags			Files
 //	@Id				files_list
 //	@Produce		json
-//	@Param			id		path		string					true	"ID"
-//	@Param			body	body		service.FileListOptions	true	"Body"
-//	@Success		200		{object}	service.FileList
-//	@Failure		404		{object}	errorpkg.ErrorResponse
-//	@Failure		500		{object}	errorpkg.ErrorResponse
-//	@Router			/files/{id}/list [post]
+//	@Param			id			path		string	true	"ID"
+//	@Param			type		query		string	false	"Type"
+//	@Param			page		query		string	false	"Page"
+//	@Param			size		query		string	false	"Size"
+//	@Param			sort_by		query		string	false	"Sort By"
+//	@Param			sort_order	query		string	false	"Sort Order"
+//	@Param			query		query		string	false	"Query"
+//	@Success		200			{object}	service.FileList
+//	@Failure		404			{object}	errorpkg.ErrorResponse
+//	@Failure		500			{object}	errorpkg.ErrorResponse
+//	@Router			/files/{id}/list [get]
 func (r *FileRouter) List(c *fiber.Ctx) error {
-	opts := new(service.FileListOptions)
-	if err := c.BodyParser(opts); err != nil {
-		return err
-	}
-	if err := validator.New().Struct(opts); err != nil {
-		return errorpkg.NewRequestBodyValidationError(err)
-	}
-	if opts.Page == 0 {
-		opts.Page = 1
-	}
-	if opts.Size == 0 {
-		opts.Size = FileDefaultPageSize
-	}
 	var err error
 	var res *service.FileList
 	id := c.Params("id")
 	userID := GetUserID(c)
-	if opts.Query == nil {
-		res, err = r.fileSvc.List(id, *opts, userID)
+	var page int64
+	if c.Query("page") == "" {
+		page = 1
+	} else {
+		page, err = strconv.ParseInt(c.Query("page"), 10, 32)
+		if err != nil {
+			page = 1
+		}
+	}
+	var size int64
+	if c.Query("size") == "" {
+		size = FileDefaultPageSize
+	} else {
+		size, err = strconv.ParseInt(c.Query("size"), 10, 32)
+		if err != nil {
+			return err
+		}
+	}
+	sortBy := c.Query("sort_by")
+	if !IsValidSortBy(sortBy) {
+		return errorpkg.NewInvalidQueryParamError("sort_by")
+	}
+	sortOrder := c.Query("sort_order")
+	if !IsValidSortOrder(sortOrder) {
+		return errorpkg.NewInvalidQueryParamError("sort_order")
+	}
+	fileType := c.Query("type")
+	if fileType != model.FileTypeFile && fileType != model.FileTypeFolder && fileType != "" {
+		return errorpkg.NewInvalidQueryParamError("type")
+	}
+	query := c.Query("query")
+	opts := service.FileListOptions{
+		Page:      uint(page),
+		Size:      uint(size),
+		SortBy:    sortBy,
+		SortOrder: sortOrder,
+	}
+	if query != "" {
+		bytes, err := base64.StdEncoding.DecodeString(query + strings.Repeat("=", (4-len(query)%4)%4))
+		if err != nil {
+			return errorpkg.NewInvalidQueryParamError("query")
+		}
+		if err := json.Unmarshal(bytes, &opts.Query); err != nil {
+			return errorpkg.NewInvalidQueryParamError("query")
+		}
+		res, err = r.fileSvc.Search(id, opts, userID)
 		if err != nil {
 			return err
 		}
 	} else {
-		res, err = r.fileSvc.Search(id, *opts, userID)
+		if fileType != "" {
+			opts.Query = &service.FileQuery{
+				Type: &fileType,
+			}
+		}
+		res, err = r.fileSvc.List(id, opts, userID)
 		if err != nil {
 			return err
 		}

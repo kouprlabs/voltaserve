@@ -84,19 +84,20 @@ export default class GroupAPI {
     })
   }
 
-  static useGetById(id: string, swrOptions?: any) {
-    return useSWR<Group>(
-      id ? `/groups/${id}` : null,
-      () => this.getById(id),
-      swrOptions,
-    )
-  }
-
   static async getById(id: string): Promise<Group> {
     return apiFetcher({
       url: `/groups/${id}`,
       method: 'GET',
     })
+  }
+
+  static useGetById(id?: string, swrOptions?: any) {
+    const url = `/groups/${id}`
+    return useSWR<Group>(
+      id ? url : null,
+      () => apiFetcher({ url, method: 'GET' }),
+      swrOptions,
+    )
   }
 
   static async list(options?: ListOptions): Promise<List> {

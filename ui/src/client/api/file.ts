@@ -3,6 +3,7 @@ import useSWR from 'swr'
 import { apiFetcher } from '@/client/fetcher'
 import { User } from '@/client/idp/user'
 import { getConfig } from '@/config/config'
+import { encodeQuery } from '@/helpers/query'
 import { getAccessTokenOrRedirect } from '@/infra/token'
 import { Group } from './group'
 import { PermissionType } from './permission'
@@ -221,17 +222,16 @@ export default class FileAPI {
 
   static async list(id: string, options: ListOptions): Promise<List> {
     return apiFetcher({
-      url: `/files/${id}/list`,
-      method: 'POST',
-      body: JSON.stringify(options),
+      url: `/files/${id}/list?${this.paramsFromListOptions(options)}`,
+      method: 'GET',
     })
   }
 
   static useList(id: string, options: ListOptions, swrOptions?: any) {
-    const url = `/files/${id}/list`
+    const url = `/files/${id}/list?${this.paramsFromListOptions(options)}`
     return useSWR<List>(
       id ? url : null,
-      () => apiFetcher({ url, method: 'POST', body: JSON.stringify(options) }),
+      () => apiFetcher({ url, method: 'GET' }),
       swrOptions,
     )
   }
@@ -289,7 +289,7 @@ export default class FileAPI {
     })
   }
 
-  static useGetById(id: string, swrOptions?: any) {
+  static useGetById(id?: string, swrOptions?: any) {
     const url = `/files/${id}`
     return useSWR<File>(
       id ? url : null,
@@ -391,5 +391,28 @@ export default class FileAPI {
       () => apiFetcher({ url, method: 'GET' }),
       swrOptions,
     )
+  }
+
+  static paramsFromListOptions(options?: ListOptions): URLSearchParams {
+    const params: any = {}
+    if (options?.page) {
+      params.page = options.page.toString()
+    }
+    if (options?.size) {
+      params.size = options.size.toString()
+    }
+    if (options?.sortBy) {
+      params.sort_by = options.sortBy.toString()
+    }
+    if (options?.sortOrder) {
+      params.sort_order = options.sortOrder.toString()
+    }
+    if (options?.type) {
+      params.type = options.type
+    }
+    if (options?.query) {
+      params.query = encodeQuery(JSON.stringify(options.query))
+    }
+    return new URLSearchParams(params)
   }
 }

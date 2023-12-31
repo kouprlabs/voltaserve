@@ -65,7 +65,7 @@ export default class WorkspaceAPI {
     })
   }
 
-  static useGetById(id: string, swrOptions?: any) {
+  static useGetById(id?: string, swrOptions?: any) {
     const url = `/workspaces/${id}`
     return useSWR<Workspace>(
       id ? url : null,

@@ -5,15 +5,13 @@ import FileAPI, { File } from '@/client/api/file'
 import WorkspaceAPI from '@/client/api/workspace'
 
 const Path = () => {
-  const params = useParams()
-  const workspaceId = params.id as string
-  const fileId = params.fileId as string
-  const { data: workspace } = WorkspaceAPI.useGetById(workspaceId)
+  const { id, fileId } = useParams()
+  const { data: workspace } = WorkspaceAPI.useGetById(id)
   const [path, setPath] = useState<File[]>([])
 
   useEffect(() => {
     ;(async () => {
-      setPath(await FileAPI.getPath(fileId))
+      setPath(await FileAPI.getPath(fileId!))
     })()
   }, [fileId])
 
@@ -23,7 +21,7 @@ const Path = () => {
         {workspace && (
           <BreadcrumbLink
             as={Link}
-            to={`/workspace/${workspaceId}/file/${workspace.rootId}`}
+            to={`/workspace/${id}/file/${workspace.rootId}`}
           >
             Home
           </BreadcrumbLink>
@@ -33,7 +31,7 @@ const Path = () => {
         <BreadcrumbItem key={f.id}>
           <BreadcrumbLink
             as={Link}
-            to={`/workspace/${workspaceId}/file/${f.id}`}
+            to={`/workspace/${id}/file/${f.id}`}
             isCurrentPage={fileId === f.id}
           >
             {f.name}

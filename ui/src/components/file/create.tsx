@@ -25,6 +25,7 @@ import {
 } from 'formik'
 import * as Yup from 'yup'
 import FileAPI, { List } from '@/client/api/file'
+import useFileListSearchParams from '@/hooks/use-file-list-params'
 import { listUpdated } from '@/store/entities/files'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { createModalDidClose } from '@/store/ui/files'
@@ -35,9 +36,7 @@ type FormValues = {
 
 const Create = () => {
   const { mutate } = useSWRConfig()
-  const params = useParams()
-  const workspaceId = params.id as string
-  const fileId = params.fileId as string
+  const { workspaceId, fileId } = useParams()
   const dispatch = useAppDispatch()
   const isModalOpen = useAppSelector(
     (state) => state.ui.files.isCreateModalOpen,
@@ -46,6 +45,7 @@ const Create = () => {
   const formSchema = Yup.object().shape({
     name: Yup.string().required('Name is required').max(255),
   })
+  const fileListSearchParams = useFileListSearchParams()
 
   useEffect(() => {
     if (inputRef) {
@@ -62,10 +62,12 @@ const Create = () => {
       try {
         await FileAPI.createFolder({
           name,
-          workspaceId: workspaceId,
-          parentId: fileId,
+          workspaceId: workspaceId!,
+          parentId: fileId!,
         })
-        const list = await mutate<List>(`/files/${fileId}/list`)
+        const list = await mutate<List>(
+          `/files/${fileId}/list?${fileListSearchParams}`,
+        )
         if (list) {
           dispatch(listUpdated(list))
         }
@@ -75,7 +77,7 @@ const Create = () => {
         setSubmitting(false)
       }
     },
-    [fileId, workspaceId, mutate, dispatch],
+    [fileId, workspaceId, fileListSearchParams, mutate, dispatch],
   )
 
   return (

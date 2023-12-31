@@ -22,11 +22,7 @@ import { decodeQuery, encodeQuery } from '@/helpers/query'
 const Search = () => {
   const navigation = useNavigate()
   const location = useLocation()
-  const params = useParams()
-  const organizationId = params.id as string
-  const groupId = params.id as string
-  const workspaceId = params.id as string
-  const fileId = params.fileId as string
+  const { organizationId, groupId, workspaceId, fileId } = useParams()
   const [searchParams] = useSearchParams()
   const query = decodeQuery(searchParams.get('q') as string)
   const isWorkspaces = useMemo(

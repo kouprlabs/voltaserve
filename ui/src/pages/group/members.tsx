@@ -49,10 +49,9 @@ import { groupMemberPaginationStorage } from '@/infra/pagination'
 const GroupMembersPage = () => {
   const navigate = useNavigate()
   const location = useLocation()
-  const params = useParams()
-  const groupId = params.id as string
+  const { id } = useParams()
   const { data: group, error: groupError } = GroupAPI.useGetById(
-    groupId,
+    id,
     swrConfig(),
   )
   const { page, size, steps, handlePageChange, setSize } = usePagePagination({
@@ -69,7 +68,7 @@ const GroupMembersPage = () => {
   } = UserAPI.useList(
     {
       query,
-      groupId,
+      groupId: id,
       page,
       size,
       sortBy: SortBy.FullName,

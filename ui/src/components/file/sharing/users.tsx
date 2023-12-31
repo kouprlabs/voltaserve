@@ -40,9 +40,9 @@ type UsersProps = {
 }
 
 const Users = ({ users, permissions, mutateUserPermissions }: UsersProps) => {
-  const params = useParams()
+  const { id } = useParams()
   const dispatch = useAppDispatch()
-  const { data: workspace } = WorkspaceAPI.useGetById(params.id as string)
+  const { data: workspace } = WorkspaceAPI.useGetById(id)
   const selectedItems = useAppSelector((state) => state.ui.files.selectedItems)
   const [isGrantLoading, setIsGrantLoading] = useState(false)
   const [permissionBeingRevoked, setPermissionBeingRevoked] = useState<string>()

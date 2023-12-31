@@ -50,12 +50,11 @@ type FileList struct {
 }
 
 type FileListOptions struct {
-	Page      uint       `json:"page"`
-	Size      uint       `json:"size"`
-	SortBy    string     `json:"sortBy" validate:"omitempty,oneof=name kind size date_created date_modified"`
-	SortOrder string     `json:"sortOrder" validate:"omitempty,oneof=asc desc"`
-	Type      string     `json:"type"`
-	Query     *FileQuery `json:"query,omitempty"`
+	Page      uint
+	Size      uint
+	SortBy    string
+	SortOrder string
+	Query     *FileQuery
 }
 
 type FileQuery struct {
@@ -656,7 +655,7 @@ func (svc *FileService) List(id string, opts FileListOptions, userID string) (*F
 	}
 	var filtered []model.File
 	for _, f := range data {
-		if opts.Type == "" || f.GetType() == opts.Type {
+		if opts.Query == nil || *opts.Query.Type == "" || f.GetType() == *opts.Query.Type {
 			filtered = append(filtered, f)
 		}
 	}

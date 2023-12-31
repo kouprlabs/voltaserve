@@ -23,8 +23,8 @@ type BrowseProps = {
 }
 
 const Browse = ({ onChange }: BrowseProps) => {
-  const params = useParams()
-  const { data: workspace } = WorkspaceAPI.useGetById(params.id as string)
+  const { id } = useParams()
+  const { data: workspace } = WorkspaceAPI.useGetById(id)
   const [folders, setFolders] = useState<File[]>([])
   const [path, setPath] = useState<File[]>([])
   const [page, setPage] = useState(1)

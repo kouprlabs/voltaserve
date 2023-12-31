@@ -26,7 +26,7 @@ import Groups from './groups'
 import Users from './users'
 
 const Sharing = () => {
-  const params = useParams()
+  const { id } = useParams()
   const dispatch = useAppDispatch()
   const selectedItems = useAppSelector((state) => state.ui.files.selectedItems)
   const isModalOpen = useAppSelector((state) => state.ui.files.isShareModalOpen)
@@ -39,7 +39,7 @@ const Sharing = () => {
       return undefined
     }
   })
-  const { data: workspace } = WorkspaceAPI.useGetById(params.id as string)
+  const { data: workspace } = WorkspaceAPI.useGetById(id)
   const { data: users } = UserAPI.useList({
     organizationId: workspace?.organization.id,
   })

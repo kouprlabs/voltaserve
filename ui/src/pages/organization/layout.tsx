@@ -9,9 +9,8 @@ import { swrConfig } from '@/client/options'
 const OrganizationLayout = () => {
   const location = useLocation()
   const navigate = useNavigate()
-  const params = useParams()
-  const orgId = params.id as string
-  const { data: org } = OrganizationAPI.useGetById(orgId, swrConfig())
+  const { id } = useParams()
+  const { data: org } = OrganizationAPI.useGetById(id, swrConfig())
   const [tabIndex, setTabIndex] = useState(0)
 
   useEffect(() => {
@@ -35,16 +34,16 @@ const OrganizationLayout = () => {
       <Heading fontSize={variables.headingFontSize}>{org.name}</Heading>
       <Tabs variant="solid-rounded" colorScheme="gray" index={tabIndex}>
         <TabList>
-          <Tab onClick={() => navigate(`/organization/${orgId}/member`)}>
+          <Tab onClick={() => navigate(`/organization/${id}/member`)}>
             Members
           </Tab>
           <Tab
-            onClick={() => navigate(`/organization/${orgId}/invitation`)}
+            onClick={() => navigate(`/organization/${id}/invitation`)}
             display={geOwnerPermission(org.permission) ? 'auto' : 'none'}
           >
             Invitations
           </Tab>
-          <Tab onClick={() => navigate(`/organization/${orgId}/settings`)}>
+          <Tab onClick={() => navigate(`/organization/${id}/settings`)}>
             Settings
           </Tab>
         </TabList>

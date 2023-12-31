@@ -13,6 +13,7 @@ import {
 import { variables } from '@koupr/ui'
 import { useSWRConfig } from 'swr'
 import FileAPI, { List } from '@/client/api/file'
+import useFileListSearchParams from '@/hooks/use-file-list-params'
 import { listUpdated } from '@/store/entities/files'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { copyModalDidClose, selectedItemsUpdated } from '@/store/ui/files'
@@ -26,6 +27,7 @@ const Copy = () => {
   const selectedItems = useAppSelector((state) => state.ui.files.selectedItems)
   const [loading, setLoading] = useState(false)
   const [targetId, setTargetId] = useState<string>()
+  const fileListSearchParams = useFileListSearchParams()
 
   const handleMove = useCallback(async () => {
     if (!targetId) {
@@ -37,7 +39,9 @@ const Copy = () => {
         ids: selectedItems,
       })
       if (fileId === targetId) {
-        const list = await mutate<List>(`/files/${targetId}/list`)
+        const list = await mutate<List>(
+          `/files/${targetId}/list?${fileListSearchParams}`,
+        )
         if (list) {
           dispatch(listUpdated(list))
         }
@@ -47,7 +51,7 @@ const Copy = () => {
     } finally {
       setLoading(false)
     }
-  }, [targetId, fileId, selectedItems, mutate, dispatch])
+  }, [targetId, fileId, selectedItems, fileListSearchParams, mutate, dispatch])
 
   return (
     <Modal

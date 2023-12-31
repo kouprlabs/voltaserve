@@ -21,11 +21,8 @@ import Leave from '@/components/organization/leave'
 const Spacer = () => <Box flexGrow={1} />
 
 const OrganizationSettingsPage = () => {
-  const params = useParams()
-  const { data: org, error } = OrganizationAPI.useGetById(
-    params.id as string,
-    swrConfig(),
-  )
+  const { id } = useParams()
+  const { data: org, error } = OrganizationAPI.useGetById(id, swrConfig())
   const [isNameModalOpen, setIsNameModalOpen] = useState(false)
   const [isInviteMembersModalOpen, setIsInviteMembersModalOpen] =
     useState(false)

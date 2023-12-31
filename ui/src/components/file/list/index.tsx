@@ -66,8 +66,7 @@ type ListProps = {
 
 const List = ({ list, scale }: ListProps) => {
   const dispatch = useAppDispatch()
-  const params = useParams()
-  const fileId = params.fileId as string
+  const { fileId } = useParams()
   const singleFile = useAppSelector((state) =>
     state.ui.files.selectedItems.length === 1
       ? state.entities.files.list?.data.find(

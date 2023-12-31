@@ -45,10 +45,11 @@ import {
   IconCheck,
 } from '@koupr/ui'
 import { useSWRConfig } from 'swr'
-import { SortBy, SortOrder } from '@/client/api/file'
+import { List, SortBy, SortOrder } from '@/client/api/file'
 import { ltEditorPermission, ltOwnerPermission } from '@/client/api/permission'
 import downloadFile from '@/helpers/download-file'
 import mapFileList from '@/helpers/map-file-list'
+import useFileListSearchParams from '@/hooks/use-file-list-params'
 import { uploadAdded, UploadDecorator } from '@/store/entities/uploads'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import {
@@ -116,6 +117,7 @@ const Toolbar = () => {
       ) === -1,
   )
   const uploadHiddenInput = useRef<HTMLInputElement>(null)
+  const fileListSearchParams = useFileListSearchParams()
 
   useEffect(() => {
     const iconScale = localStorage.getItem(ICON_SCALE_KEY)
@@ -168,9 +170,9 @@ const Toolbar = () => {
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true)
     dispatch(selectedItemsUpdated([]))
-    await mutate(`/files/${fileId}/list`)
+    await mutate<List>(`/files/${fileId}/list?${fileListSearchParams}`)
     setIsRefreshing(false)
-  }, [fileId, mutate, dispatch])
+  }, [fileId, fileListSearchParams, mutate, dispatch])
 
   const handleSortByChange = useCallback(
     (value: SortBy) => {
