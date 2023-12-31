@@ -1,4 +1,5 @@
 import React, { useCallback } from 'react'
+import { useParams } from 'react-router-dom'
 import {
   Button,
   FormControl,
@@ -13,6 +14,7 @@ import {
   ModalOverlay,
 } from '@chakra-ui/react'
 import { variables } from '@koupr/ui'
+import { useSWRConfig } from 'swr'
 import {
   Field,
   FieldAttributes,
@@ -22,8 +24,9 @@ import {
   FormikHelpers,
 } from 'formik'
 import * as Yup from 'yup'
-import FileAPI from '@/client/api/file'
-import { filesUpdated } from '@/store/entities/files'
+import FileAPI, { List } from '@/client/api/file'
+import useFileListSearchParams from '@/hooks/use-file-list-params'
+import { filesUpdated, listUpdated } from '@/store/entities/files'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { renameModalDidClose } from '@/store/ui/files'
 
@@ -32,15 +35,18 @@ type FormValues = {
 }
 
 const Rename = () => {
+  const { mutate } = useSWRConfig()
   const dispatch = useAppDispatch()
+  const { fileId } = useParams()
   const isModalOpen = useAppSelector(
     (state) => state.ui.files.isRenameModalOpen,
   )
   const id = useAppSelector((state) => state.ui.files.selection[0])
-  const { data: file, mutate } = FileAPI.useGetById(id)
+  const { data: file } = FileAPI.useGetById(id)
   const formSchema = Yup.object().shape({
     name: Yup.string().required('Name is required').max(255),
   })
+  const fileListSearchParams = useFileListSearchParams()
 
   const handleSubmit = useCallback(
     async (
@@ -55,7 +61,12 @@ const Rename = () => {
         const result = await FileAPI.rename(file.id, {
           name,
         })
-        mutate()
+        const list = await mutate<List>(
+          `/files/${fileId}/list?${fileListSearchParams}`,
+        )
+        if (list) {
+          dispatch(listUpdated(list))
+        }
         setSubmitting(false)
         dispatch(filesUpdated([result]))
         dispatch(renameModalDidClose())
@@ -63,7 +74,7 @@ const Rename = () => {
         setSubmitting(false)
       }
     },
-    [file, dispatch, mutate],
+    [file, fileId, fileListSearchParams, dispatch, mutate],
   )
 
   return (
