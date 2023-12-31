@@ -79,9 +79,7 @@ const ICON_SCALE_SLIDER_MAX = ICON_SCALE_SLIDER_STEP * 9
 const Toolbar = () => {
   const dispatch = useAppDispatch()
   const { mutate } = useSWRConfig()
-  const params = useParams()
-  const workspaceId = params.id as string
-  const fileId = params.fileId as string
+  const { id, fileId } = useParams()
   const [isRefreshing, setIsRefreshing] = useState(false)
   const selectionCount = useAppSelector(
     (state) => state.ui.files.selection.length,
@@ -144,8 +142,8 @@ const Toolbar = () => {
         dispatch(
           uploadAdded(
             new UploadDecorator({
-              workspaceId: workspaceId,
-              parentId: fileId,
+              workspaceId: id!,
+              parentId: fileId!,
               file,
             }).value,
           ),
@@ -156,7 +154,7 @@ const Toolbar = () => {
         uploadHiddenInput.current.value = ''
       }
     },
-    [workspaceId, fileId, dispatch],
+    [id, fileId, dispatch],
   )
 
   const handleIconScaleChange = useCallback(
