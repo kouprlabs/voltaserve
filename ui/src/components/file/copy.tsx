@@ -16,7 +16,7 @@ import FileAPI, { List } from '@/client/api/file'
 import useFileListSearchParams from '@/hooks/use-file-list-params'
 import { listUpdated } from '@/store/entities/files'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
-import { copyModalDidClose, selectedItemsUpdated } from '@/store/ui/files'
+import { copyModalDidClose, selectionUpdated } from '@/store/ui/files'
 import Browse from './browse'
 
 const Copy = () => {
@@ -24,7 +24,7 @@ const Copy = () => {
   const dispatch = useAppDispatch()
   const { fileId } = useParams()
   const isModalOpen = useAppSelector((state) => state.ui.files.isCopyModalOpen)
-  const selectedItems = useAppSelector((state) => state.ui.files.selectedItems)
+  const selection = useAppSelector((state) => state.ui.files.selection)
   const [loading, setLoading] = useState(false)
   const [targetId, setTargetId] = useState<string>()
   const fileListSearchParams = useFileListSearchParams()
@@ -36,7 +36,7 @@ const Copy = () => {
     try {
       setLoading(true)
       await FileAPI.copy(targetId, {
-        ids: selectedItems,
+        ids: selection,
       })
       if (fileId === targetId) {
         const list = await mutate<List>(
@@ -46,12 +46,12 @@ const Copy = () => {
           dispatch(listUpdated(list))
         }
       }
-      dispatch(selectedItemsUpdated([]))
+      dispatch(selectionUpdated([]))
       dispatch(copyModalDidClose())
     } finally {
       setLoading(false)
     }
-  }, [targetId, fileId, selectedItems, fileListSearchParams, mutate, dispatch])
+  }, [targetId, fileId, selection, fileListSearchParams, mutate, dispatch])
 
   return (
     <Modal
@@ -61,7 +61,7 @@ const Copy = () => {
     >
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>Copy {selectedItems.length} Item(s) to…</ModalHeader>
+        <ModalHeader>Copy {selection.length} Item(s) to…</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
           <Browse onChange={(id) => setTargetId(id)} />

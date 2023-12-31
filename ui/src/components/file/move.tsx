@@ -16,14 +16,14 @@ import FileAPI, { List } from '@/client/api/file'
 import useFileListSearchParams from '@/hooks/use-file-list-params'
 import { filesUpdated } from '@/store/entities/files'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
-import { moveModalDidClose, selectedItemsUpdated } from '@/store/ui/files'
+import { moveModalDidClose, selectionUpdated } from '@/store/ui/files'
 import Browse from './browse'
 
 const Move = () => {
   const { mutate } = useSWRConfig()
   const { fileId } = useParams()
   const dispatch = useAppDispatch()
-  const selectedItems = useAppSelector((state) => state.ui.files.selectedItems)
+  const selection = useAppSelector((state) => state.ui.files.selection)
   const isModalOpen = useAppSelector((state) => state.ui.files.isMoveModalOpen)
   const [loading, setLoading] = useState(false)
   const [targetId, setTargetId] = useState<string>()
@@ -35,19 +35,19 @@ const Move = () => {
     }
     try {
       setLoading(true)
-      await FileAPI.move(targetId, { ids: selectedItems })
+      await FileAPI.move(targetId, { ids: selection })
       const list = await mutate<List>(
         `/files/${fileId}/list?${fileListSearchParams}`,
       )
       if (list) {
         dispatch(filesUpdated(list.data))
       }
-      dispatch(selectedItemsUpdated([]))
+      dispatch(selectionUpdated([]))
       dispatch(moveModalDidClose())
     } finally {
       setLoading(false)
     }
-  }, [targetId, fileId, selectedItems, fileListSearchParams, mutate, dispatch])
+  }, [targetId, fileId, selection, fileListSearchParams, mutate, dispatch])
 
   return (
     <Modal
@@ -57,7 +57,7 @@ const Move = () => {
     >
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>Move {selectedItems.length} Item(s) to…</ModalHeader>
+        <ModalHeader>Move {selection.length} Item(s) to…</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
           <Browse onChange={(id) => setTargetId(id)} />

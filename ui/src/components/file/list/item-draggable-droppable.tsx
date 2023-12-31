@@ -16,7 +16,7 @@ import useFileListSearchParams from '@/hooks/use-file-list-params'
 import store from '@/store/configure-store'
 import { filesRemoved } from '@/store/entities/files'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
-import { hiddenItemsUpdated, selectedItemsUpdated } from '@/store/ui/files'
+import { hiddenUpdated, selectionUpdated } from '@/store/ui/files'
 import Item from './item'
 
 type ItemDraggableDroppableProps = {
@@ -34,7 +34,7 @@ const ItemDraggableDroppable = ({
   const dispatch = useAppDispatch()
   const { fileId } = useParams()
   const [isVisible, setVisible] = useState(true)
-  const selectedItems = useAppSelector((state) => state.ui.files.selectedItems)
+  const selection = useAppSelector((state) => state.ui.files.selection)
   const {
     attributes,
     listeners,
@@ -50,22 +50,22 @@ const ItemDraggableDroppable = ({
 
   useDndMonitor({
     onDragStart: (event: DragStartEvent) => {
-      if (selectedItems.includes(file.id) || event.active.id === file.id) {
+      if (selection.includes(file.id) || event.active.id === file.id) {
         setVisible(false)
       }
     },
     onDragEnd: async (event: DragEndEvent) => {
-      if (selectedItems.includes(file.id) || event.active.id === file.id) {
+      if (selection.includes(file.id) || event.active.id === file.id) {
         setVisible(true)
       }
       if (
         file.type === FileType.Folder &&
         file.id !== event.active.id &&
-        !selectedItems.includes(file.id) &&
+        !selection.includes(file.id) &&
         isOver
       ) {
         const idsToMove = [
-          ...new Set<string>([...selectedItems, event.active.id as string]),
+          ...new Set<string>([...selection, event.active.id as string]),
         ]
         const list = store.getState().entities.files.list
         if (list) {
@@ -75,17 +75,17 @@ const ItemDraggableDroppable = ({
           })
         }
         dispatch(filesRemoved({ id: fileId!, files: idsToMove }))
-        dispatch(hiddenItemsUpdated(idsToMove))
+        dispatch(hiddenUpdated(idsToMove))
         setIsLoading(true)
         await FileAPI.move(file.id, { ids: idsToMove })
         await mutate<List>(`/files/${fileId}/list?${fileListSearchParams}`)
         setIsLoading(false)
-        dispatch(hiddenItemsUpdated([]))
-        dispatch(selectedItemsUpdated([]))
+        dispatch(hiddenUpdated([]))
+        dispatch(selectionUpdated([]))
       }
     },
     onDragCancel: (event: DragCancelEvent) => {
-      if (selectedItems.includes(file.id) || event.active.id === file.id) {
+      if (selection.includes(file.id) || event.active.id === file.id) {
         setVisible(true)
       }
     },

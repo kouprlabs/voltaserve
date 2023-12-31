@@ -17,9 +17,9 @@ import relativeDate from '@/helpers/relative-date'
 import store from '@/store/configure-store'
 import { useAppDispatch } from '@/store/hook'
 import {
-  selectedItemAdded,
-  selectedItemRemoved,
-  selectedItemsUpdated,
+  selectionAdded,
+  selectionRemoved,
+  selectionUpdated,
 } from '@/store/ui/files'
 import Icon from './icon'
 import { performMultiSelect, performRangeSelect } from './perform-select'
@@ -59,7 +59,7 @@ const Item = ({
 
   useEffect(() => {
     const unsubscribe = store.subscribe(() => {
-      if (store.getState().ui.files.selectedItems.includes(file.id)) {
+      if (store.getState().ui.files.selection.includes(file.id)) {
         setIsSelected(true)
         setIsChecked(true)
         setIsCheckboxVisible(true)
@@ -99,7 +99,7 @@ const Item = ({
       } else if (store.getState().ui.files.isRangeSelectActive) {
         performRangeSelect(file)
       } else {
-        dispatch(selectedItemsUpdated([file.id]))
+        dispatch(selectionUpdated([file.id]))
       }
     },
     [file, isSelected, dispatch],
@@ -114,7 +114,7 @@ const Item = ({
   )
 
   const handleIconDoubleClick = useCallback(() => {
-    dispatch(selectedItemsUpdated([]))
+    dispatch(selectionUpdated([]))
     if (file.type === 'folder') {
       navigate(`/workspace/${file.workspaceId}/file/${file.id}`)
     } else if (file.type === 'file' && file.status === SnapshotStatus.Ready) {
@@ -127,10 +127,10 @@ const Item = ({
       event.stopPropagation()
       if (event.target.checked) {
         setIsChecked(true)
-        dispatch(selectedItemAdded(file.id))
+        dispatch(selectionAdded(file.id))
       } else {
         setIsChecked(false)
-        dispatch(selectedItemRemoved(file.id))
+        dispatch(selectionRemoved(file.id))
       }
     },
     [file.id, dispatch],

@@ -65,7 +65,7 @@ import {
   iconScaleUpdated,
   moveModalDidOpen,
   renameModalDidOpen,
-  selectedItemsUpdated,
+  selectionUpdated,
   sharingModalDidOpen,
 } from '@/store/ui/files'
 import { uploadsDrawerOpened } from '@/store/ui/uploads-drawer'
@@ -84,12 +84,12 @@ const Toolbar = () => {
   const fileId = params.fileId as string
   const [isRefreshing, setIsRefreshing] = useState(false)
   const selectionCount = useAppSelector(
-    (state) => state.ui.files.selectedItems.length,
+    (state) => state.ui.files.selection.length,
   )
   const singleFile = useAppSelector((state) =>
-    state.ui.files.selectedItems.length === 1
+    state.ui.files.selection.length === 1
       ? state.entities.files.list?.data.find(
-          (f) => f.id === state.ui.files.selectedItems[0],
+          (f) => f.id === state.ui.files.selection[0],
         )
       : null,
   )
@@ -102,7 +102,7 @@ const Toolbar = () => {
     (state) =>
       state.entities.files.list?.data.findIndex(
         (f) =>
-          state.ui.files.selectedItems.findIndex(
+          state.ui.files.selection.findIndex(
             (s) => f.id === s && ltOwnerPermission(f.permission),
           ) !== -1,
       ) === -1,
@@ -111,7 +111,7 @@ const Toolbar = () => {
     (state) =>
       state.entities.files.list?.data.findIndex(
         (f) =>
-          state.ui.files.selectedItems.findIndex(
+          state.ui.files.selection.findIndex(
             (s) => f.id === s && ltEditorPermission(f.permission),
           ) !== -1,
       ) === -1,
@@ -169,7 +169,7 @@ const Toolbar = () => {
 
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true)
-    dispatch(selectedItemsUpdated([]))
+    dispatch(selectionUpdated([]))
     await mutate<List>(`/files/${fileId}/list?${fileListSearchParams}`)
     setIsRefreshing(false)
   }, [fileId, fileListSearchParams, mutate, dispatch])
@@ -320,7 +320,7 @@ const Toolbar = () => {
                     icon={<IconCheckCircle />}
                     onClick={() => {
                       if (files) {
-                        dispatch(selectedItemsUpdated(files.map((f) => f.id)))
+                        dispatch(selectionUpdated(files.map((f) => f.id)))
                       }
                     }}
                   >
@@ -328,7 +328,7 @@ const Toolbar = () => {
                   </MenuItem>
                   <MenuItem
                     icon={<IconCircle />}
-                    onClick={() => dispatch(selectedItemsUpdated([]))}
+                    onClick={() => dispatch(selectionUpdated([]))}
                   >
                     Unselect All
                   </MenuItem>

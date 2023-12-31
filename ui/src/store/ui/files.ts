@@ -5,8 +5,8 @@ export const SORT_BY_KEY = 'voltaserve_file_sort_by'
 export const SORT_ORDER_KEY = 'voltaserve_file_sort_order'
 
 export type FilesState = {
-  selectedItems: string[]
-  hiddenItems: string[]
+  selection: string[]
+  hidden: string[]
   isMultiSelectActive: boolean
   isRangeSelectActive: boolean
   isMoveModalOpen: boolean
@@ -21,8 +21,8 @@ export type FilesState = {
 }
 
 const initialState: FilesState = {
-  selectedItems: [],
-  hiddenItems: [],
+  selection: [],
+  hidden: [],
   isMultiSelectActive: false,
   isRangeSelectActive: false,
   isMoveModalOpen: false,
@@ -41,19 +41,17 @@ const slice = createSlice({
   name: 'files',
   initialState,
   reducers: {
-    selectedItemsUpdated: (state, action: PayloadAction<string[]>) => {
-      state.selectedItems = action.payload
+    selectionUpdated: (state, action: PayloadAction<string[]>) => {
+      state.selection = action.payload
     },
-    selectedItemAdded: (state, action: PayloadAction<string>) => {
-      state.selectedItems.push(action.payload)
+    selectionAdded: (state, action: PayloadAction<string>) => {
+      state.selection.push(action.payload)
     },
-    selectedItemRemoved: (state, action: PayloadAction<string>) => {
-      state.selectedItems = state.selectedItems.filter(
-        (e) => e !== action.payload,
-      )
+    selectionRemoved: (state, action: PayloadAction<string>) => {
+      state.selection = state.selection.filter((e) => e !== action.payload)
     },
-    hiddenItemsUpdated: (state, action: PayloadAction<string[]>) => {
-      state.hiddenItems = action.payload
+    hiddenUpdated: (state, action: PayloadAction<string[]>) => {
+      state.hidden = action.payload
     },
     moveModalDidOpen: (state) => {
       state.isMoveModalOpen = true
@@ -110,10 +108,10 @@ const slice = createSlice({
 })
 
 export const {
-  selectedItemsUpdated,
-  selectedItemAdded,
-  selectedItemRemoved,
-  hiddenItemsUpdated,
+  selectionUpdated,
+  selectionAdded,
+  selectionRemoved,
+  hiddenUpdated,
   moveModalDidOpen,
   copyModalDidOpen,
   createModalDidOpen,

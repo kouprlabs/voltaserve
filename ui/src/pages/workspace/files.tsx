@@ -31,7 +31,7 @@ import { decodeQuery } from '@/helpers/query'
 import { filesPaginationStorage } from '@/infra/pagination'
 import { currentUpdated, listUpdated } from '@/store/entities/files'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
-import { selectedItemsUpdated } from '@/store/ui/files'
+import { selectionUpdated } from '@/store/ui/files'
 
 const PAGINATION_STEP = 21
 
@@ -111,7 +111,7 @@ const WorkspaceFilesPage = () => {
             borderBottomColor={hasPagination ? borderColor : undefined}
             pt={variables.spacing}
             flexGrow={1}
-            onClick={() => dispatch(selectedItemsUpdated([]))}
+            onClick={() => dispatch(selectionUpdated([]))}
           >
             {isLoading ? (
               <Center h="100%">

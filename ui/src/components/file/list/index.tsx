@@ -68,13 +68,13 @@ const List = ({ list, scale }: ListProps) => {
   const dispatch = useAppDispatch()
   const { fileId } = useParams()
   const singleFile = useAppSelector((state) =>
-    state.ui.files.selectedItems.length === 1
+    state.ui.files.selection.length === 1
       ? state.entities.files.list?.data.find(
-          (f) => f.id === state.ui.files.selectedItems[0],
+          (f) => f.id === state.ui.files.selection[0],
         )
       : null,
   )
-  const hiddenItems = useAppSelector((state) => state.ui.files.hiddenItems)
+  const hidden = useAppSelector((state) => state.ui.files.hidden)
   const [activeId, setActiveId] = useState<string | null>(null)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [menuPosition, setMenuPosition] = useState<{ x: number; y: number }>()
@@ -146,7 +146,7 @@ const List = ({ list, scale }: ListProps) => {
             pb={variables.spacingLg}
           >
             {list.data
-              .filter((e) => !hiddenItems.includes(e.id))
+              .filter((e) => !hidden.includes(e.id))
               .map((f) => (
                 <WrapItem key={f.id}>
                   <ItemDraggableDroppable

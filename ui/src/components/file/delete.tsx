@@ -18,13 +18,13 @@ import FileAPI, { List } from '@/client/api/file'
 import useFileListSearchParams from '@/hooks/use-file-list-params'
 import { listUpdated } from '@/store/entities/files'
 import { useAppSelector } from '@/store/hook'
-import { deleteModalDidClose, selectedItemsUpdated } from '@/store/ui/files'
+import { deleteModalDidClose, selectionUpdated } from '@/store/ui/files'
 
 const Delete = () => {
   const { mutate } = useSWRConfig()
   const { fileId } = useParams()
   const dispatch = useDispatch()
-  const selectedItems = useAppSelector((state) => state.ui.files.selectedItems)
+  const selection = useAppSelector((state) => state.ui.files.selection)
   const isModalOpen = useAppSelector(
     (state) => state.ui.files.isDeleteModalOpen,
   )
@@ -34,19 +34,19 @@ const Delete = () => {
   const handleDelete = useCallback(async () => {
     try {
       setLoading(true)
-      await FileAPI.batchDelete({ ids: selectedItems })
+      await FileAPI.batchDelete({ ids: selection })
       const list = await mutate<List>(
         `/files/${fileId}/list?${fileListSearchParams}`,
       )
       if (list) {
         dispatch(listUpdated(list))
       }
-      dispatch(selectedItemsUpdated([]))
+      dispatch(selectionUpdated([]))
       dispatch(deleteModalDidClose())
     } finally {
       setLoading(false)
     }
-  }, [selectedItems, fileId, fileListSearchParams, mutate, dispatch])
+  }, [selection, fileId, fileListSearchParams, mutate, dispatch])
 
   return (
     <Modal
@@ -60,8 +60,7 @@ const Delete = () => {
         <ModalCloseButton />
         <ModalBody>
           <Text>
-            Are you sure you would like to delete ({selectedItems.length})
-            item(s)?
+            Are you sure you would like to delete ({selection.length}) item(s)?
           </Text>
         </ModalBody>
         <ModalFooter>
