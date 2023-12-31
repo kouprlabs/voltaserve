@@ -1,6 +1,5 @@
 import useSWR from 'swr'
-import { apiFetch } from '@/client/fetch'
-import { getAccessTokenOrRedirect } from '@/infra/token'
+import { apiFetcher } from '@/client/fetcher'
 import { Organization } from './organization'
 
 export enum SortBy {
@@ -59,105 +58,85 @@ export type RemoveMemberOptions = {
 }
 
 export default class GroupAPI {
-  static create = (options: CreateOptions): Promise<Group> =>
-    apiFetch(`/groups`, {
+  static create(options: CreateOptions): Promise<Group> {
+    return apiFetcher({
+      url: `/groups`,
       method: 'POST',
       body: JSON.stringify(options),
-      headers: {
-        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
-        'Content-Type': 'application/json',
-      },
-    }).then((result) => result.json())
+    })
+  }
 
-  static updateName = (
-    id: string,
-    options: UpdateNameOptions,
-  ): Promise<Group> =>
-    apiFetch(`/groups/${id}/update_name`, {
+  static updateName(id: string, options: UpdateNameOptions): Promise<Group> {
+    return apiFetcher({
+      url: `/groups/${id}/update_name`,
       method: 'POST',
       body: JSON.stringify(options),
-      headers: {
-        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
-        'Content-Type': 'application/json',
-      },
-    }).then((result) => result.json())
+    })
+  }
 
   static async updateImage(id: string, file: any): Promise<Group> {
     const formData = new FormData()
     formData.append('file', file)
-    return apiFetch(`/groups/${id}/update_image`, {
+    return apiFetcher({
+      url: `/groups/${id}/update_image`,
       method: 'POST',
       body: formData,
-      headers: {
-        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
-        'Content-Type': 'application/json',
-      },
-    }).then((result) => result.json())
+    })
   }
 
-  static useGetById = (id: string, swrOptions?: any) =>
-    useSWR<Group>(
+  static useGetById(id: string, swrOptions?: any) {
+    return useSWR<Group>(
       id ? `/groups/${id}` : null,
       () => this.getById(id),
       swrOptions,
     )
+  }
 
   static async getById(id: string): Promise<Group> {
-    return apiFetch(`/groups/${id}`, {
+    return apiFetcher({
+      url: `/groups/${id}`,
       method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
-        'Content-Type': 'application/json',
-      },
-    }).then((result) => result.json())
+    })
+  }
+
+  static async list(options?: ListOptions): Promise<List> {
+    return apiFetcher({
+      url: `/groups?${this.paramsFromListOptions(options)}`,
+      method: 'GET',
+    })
   }
 
   static useList(options?: ListOptions, swrOptions?: any) {
+    const url = `/groups?${this.paramsFromListOptions(options)}`
     return useSWR<List>(
-      `/groups?${this.paramsFromListOptions(options)}`,
-      () => this.list(options),
+      url,
+      () => apiFetcher({ url, method: 'GET' }),
       swrOptions,
     )
   }
 
-  static async list(options?: ListOptions): Promise<List> {
-    return apiFetch(`/groups?${this.paramsFromListOptions(options)}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
-        'Content-Type': 'application/json',
-      },
-    }).then((result) => result.json())
+  static delete(id: string) {
+    return apiFetcher({
+      url: `/groups/${id}`,
+      method: 'DELETE',
+    })
   }
 
-  static delete = (id: string) =>
-    apiFetch(`/groups/${id}`, {
-      method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
-        'Content-Type': 'application/json',
-      },
-    })
-
-  static addMember = (id: string, options: AddMemberOptions) =>
-    apiFetch(`/groups/${id}/add_member`, {
+  static addMember(id: string, options: AddMemberOptions) {
+    return apiFetcher({
+      url: `/groups/${id}/add_member`,
       method: 'POST',
       body: JSON.stringify(options),
-      headers: {
-        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
-        'Content-Type': 'application/json',
-      },
     })
+  }
 
-  static removeMember = (id: string, options: RemoveMemberOptions) =>
-    apiFetch(`/groups/${id}/remove_member`, {
+  static removeMember(id: string, options: RemoveMemberOptions) {
+    return apiFetcher({
+      url: `/groups/${id}/remove_member`,
       method: 'POST',
       body: JSON.stringify(options),
-      headers: {
-        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
-        'Content-Type': 'application/json',
-      },
     })
+  }
 
   static paramsFromListOptions(options?: ListOptions): URLSearchParams {
     const params: any = {}

@@ -1,7 +1,6 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import useSWR from 'swr'
-import { apiFetch } from '@/client/fetch'
-import { getAccessTokenOrRedirect } from '@/infra/token'
+import { apiFetcher } from '@/client/fetcher'
 import { PermissionType } from './permission'
 
 export enum SortBy {
@@ -53,108 +52,86 @@ export type RemoveMemberOptions = {
 }
 
 export default class OrganizationAPI {
-  static useGetById(id: string, swrOptions?: any) {
-    return useSWR<Organization>(
-      id ? `/organizations/${id}` : null,
-      () => this.getById(id),
-      swrOptions,
-    )
-  }
-
   static async getById(id: string): Promise<Organization> {
-    return apiFetch(`/organizations/${id}`, {
+    return apiFetcher({
+      url: `/organizations/${id}`,
       method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
-        'Content-Type': 'application/json',
-      },
-    }).then((result) => result.json())
+    })
   }
 
-  static useList(options?: ListOptions, swrOptions?: any) {
-    return useSWR<List>(
-      `/organizations?${this.paramsFromListOptions(options)}`,
-      () => this.list(options),
+  static useGetById(id: string, swrOptions?: any) {
+    const url = `/organizations/${id}`
+    return useSWR<Organization>(
+      id ? url : null,
+      () => apiFetcher({ url, method: 'GET' }),
       swrOptions,
     )
   }
 
   static async list(options?: ListOptions): Promise<List> {
-    return apiFetch(`/organizations?${this.paramsFromListOptions(options)}`, {
+    return apiFetcher({
+      url: `/organizations?${this.paramsFromListOptions(options)}`,
       method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
-        'Content-Type': 'application/json',
-      },
-    }).then((result) => result.json())
+    })
+  }
+
+  static useList(options?: ListOptions, swrOptions?: any) {
+    const url = `/organizations?${this.paramsFromListOptions(options)}`
+    return useSWR<List>(
+      url,
+      () => apiFetcher({ url, method: 'GET' }),
+      swrOptions,
+    )
   }
 
   static async create(options: CreateOptions): Promise<Organization> {
-    return apiFetch(`/organizations`, {
+    return apiFetcher({
+      url: `/organizations`,
       method: 'POST',
       body: JSON.stringify(options),
-      headers: {
-        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
-        'Content-Type': 'application/json',
-      },
-    }).then((result) => result.json())
+    })
   }
 
   static async updateName(
     id: string,
     options: UpdateNameOptions,
   ): Promise<Organization> {
-    return apiFetch(`/organizations/${id}/update_name`, {
+    return apiFetcher({
+      url: `/organizations/${id}/update_name`,
       method: 'POST',
       body: JSON.stringify(options),
-      headers: {
-        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
-        'Content-Type': 'application/json',
-      },
-    }).then((result) => result.json())
+    })
   }
 
   static async updateImage(id: string, file: any): Promise<Organization> {
     const formData = new FormData()
     formData.append('file', file)
-    return apiFetch(`/organizations/${id}/update_image`, {
+    return apiFetcher({
+      url: `/organizations/${id}/update_image`,
       method: 'POST',
       body: formData,
-      headers: {
-        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
-        'Content-Type': 'application/json',
-      },
-    }).then((result) => result.json())
+    })
   }
 
   static async delete(id: string) {
-    return apiFetch(`/organizations/${id}`, {
+    return apiFetcher({
+      url: `/organizations/${id}`,
       method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
-        'Content-Type': 'application/json',
-      },
     })
   }
 
   static async leave(id: string) {
-    return apiFetch(`/organizations/${id}/leave`, {
+    return apiFetcher({
+      url: `/organizations/${id}/leave`,
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
-        'Content-Type': 'application/json',
-      },
     })
   }
 
   static async removeMember(id: string, options: RemoveMemberOptions) {
-    return apiFetch(`/organizations/${id}/remove_member`, {
+    return apiFetcher({
+      url: `/organizations/${id}/remove_member`,
       method: 'POST',
       body: JSON.stringify(options),
-      headers: {
-        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
-        'Content-Type': 'application/json',
-      },
     })
   }
 

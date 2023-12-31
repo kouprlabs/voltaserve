@@ -1,4 +1,4 @@
-import { idpFetch } from '@/client/fetch'
+import { idpFetcher } from '@/client/fetcher'
 import { User } from './user'
 
 export type CreateOptions = {
@@ -23,42 +23,34 @@ export type ConfirmEmailOptions = {
 
 export default class AccountAPI {
   static async create(options: CreateOptions): Promise<User> {
-    return idpFetch(`/accounts`, {
+    return idpFetcher({
+      url: `/accounts`,
       method: 'POST',
       body: JSON.stringify(options),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    }).then((result) => result.json())
+    })
   }
 
   static async sendResetPasswordEmail(options: SendResetPasswordEmailOptions) {
-    return idpFetch(`/accounts/send_reset_password_email`, {
+    return idpFetcher({
+      url: `/accounts/send_reset_password_email`,
       method: 'POST',
       body: JSON.stringify(options),
-      headers: {
-        'Content-Type': 'application/json',
-      },
     })
   }
 
   static async resetPassword(options: ResetPasswordOptions) {
-    return idpFetch(`/accounts/reset_password`, {
+    return idpFetcher({
+      url: `/accounts/reset_password`,
       method: 'POST',
       body: JSON.stringify(options),
-      headers: {
-        'Content-Type': 'application/json',
-      },
     })
   }
 
   static async confirmEmail(options: ConfirmEmailOptions) {
-    return idpFetch(`/accounts/confirm_email`, {
+    return idpFetcher({
+      url: `/accounts/confirm_email`,
       method: 'POST',
       body: JSON.stringify(options),
-      headers: {
-        'Content-Type': 'application/json',
-      },
     })
   }
 }

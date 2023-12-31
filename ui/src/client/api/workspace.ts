@@ -1,7 +1,6 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import useSWR from 'swr'
-import { apiFetch } from '@/client/fetch'
-import { getAccessTokenOrRedirect } from '@/infra/token'
+import { apiFetcher } from '@/client/fetcher'
 import { Organization } from './organization'
 import { PermissionType } from './permission'
 
@@ -59,101 +58,82 @@ export interface StorageCapacityOptions {
 }
 
 export default class WorkspaceAPI {
+  static async getById(id: string): Promise<Workspace> {
+    return apiFetcher({
+      url: `/workspaces/${id}`,
+      method: 'GET',
+    })
+  }
+
   static useGetById(id: string, swrOptions?: any) {
+    const url = `/workspaces/${id}`
     return useSWR<Workspace>(
-      id ? `/workspaces/${id}` : null,
-      () => this.getById(id),
+      id ? url : null,
+      () => apiFetcher({ url, method: 'GET' }),
       swrOptions,
     )
   }
 
-  static async getById(id: string): Promise<Workspace> {
-    return apiFetch(`/workspaces/${id}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
-        'Content-Type': 'application/json',
-      },
-    }).then((result) => result.json())
-  }
-
   static useList(options?: ListOptions, swrOptions?: any) {
+    const url = `/workspaces?${this.paramsFromListOptions(options)}`
     return useSWR<List>(
-      `/workspaces?${this.paramsFromListOptions(options)}`,
-      () => this.list(options),
+      url,
+      () => apiFetcher({ url, method: 'GET' }),
       swrOptions,
     )
   }
 
   static async list(options?: ListOptions): Promise<List> {
-    return apiFetch(`/workspaces?${this.paramsFromListOptions(options)}`, {
+    return apiFetcher({
+      url: `/workspaces?${this.paramsFromListOptions(options)}`,
       method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
-        'Content-Type': 'application/json',
-      },
-    }).then((result) => result.json())
+    })
   }
 
   static async create(options: CreateOptions): Promise<Workspace> {
-    return apiFetch('/workspaces', {
+    return apiFetcher({
+      url: '/workspaces',
       method: 'POST',
       body: JSON.stringify(options),
-      headers: {
-        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
-        'Content-Type': 'application/json',
-      },
-    }).then((result) => result.json())
+    })
   }
 
   static async updateName(
     id: string,
     options: UpdateNameOptions,
   ): Promise<Workspace> {
-    return apiFetch(`/workspaces/${id}/update_name`, {
+    return apiFetcher({
+      url: `/workspaces/${id}/update_name`,
       method: 'POST',
       body: JSON.stringify(options),
-      headers: {
-        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
-        'Content-Type': 'application/json',
-      },
-    }).then((result) => result.json())
+    })
   }
 
   static async updateStorageCapacity(
     id: string,
     options: StorageCapacityOptions,
   ): Promise<Workspace> {
-    return apiFetch(`/workspaces/${id}/update_storage_capacity`, {
+    return apiFetcher({
+      url: `/workspaces/${id}/update_storage_capacity`,
       method: 'POST',
       body: JSON.stringify(options),
-      headers: {
-        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
-        'Content-Type': 'application/json',
-      },
-    }).then((result) => result.json())
+    })
   }
 
   static async updateImage(id: string, file: any): Promise<Workspace> {
     const formData = new FormData()
     formData.append('file', file)
-    return apiFetch(`/workspaces/${id}/update_image`, {
+    return apiFetcher({
+      url: `/workspaces/${id}/update_image`,
       method: 'POST',
       body: formData,
-      headers: {
-        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
-        'Content-Type': 'application/json',
-      },
-    }).then((result) => result.json())
+    })
   }
 
   static async delete(id: string) {
-    return apiFetch(`/workspaces/${id}`, {
+    return apiFetcher({
+      url: `/workspaces/${id}`,
       method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
-        'Content-Type': 'application/json',
-      },
     })
   }
 

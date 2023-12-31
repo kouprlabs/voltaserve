@@ -1,6 +1,5 @@
 import useSWR from 'swr'
-import { apiFetch } from '@/client/fetch'
-import { getAccessTokenOrRedirect } from '@/infra/token'
+import { apiFetcher } from '@/client/fetcher'
 
 export enum SortBy {
   Email = 'email',
@@ -40,22 +39,20 @@ export type ListOptions = {
 }
 
 export default class UserAPI {
-  static useList(options?: ListOptions, swrOptions?: any) {
-    return useSWR<List>(
-      `/users?${this.paramsFromListOptions(options)}`,
-      () => this.list(options),
-      swrOptions,
-    )
+  static async list(options?: ListOptions): Promise<List> {
+    return apiFetcher({
+      url: `/users?${this.paramsFromListOptions(options)}`,
+      method: 'GET',
+    })
   }
 
-  static async list(options?: ListOptions): Promise<List> {
-    return apiFetch(`/users?${this.paramsFromListOptions(options)}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
-        'Content-Type': 'application/json',
-      },
-    }).then((result) => result.json())
+  static useList(options?: ListOptions, swrOptions?: any) {
+    const url = `/users?${this.paramsFromListOptions(options)}`
+    return useSWR<List>(
+      url,
+      () => apiFetcher({ url, method: 'GET' }),
+      swrOptions,
+    )
   }
 
   static paramsFromListOptions(options?: ListOptions): URLSearchParams {

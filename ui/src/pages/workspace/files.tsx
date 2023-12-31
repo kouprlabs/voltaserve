@@ -15,7 +15,7 @@ import {
   variables,
 } from '@koupr/ui'
 import { Helmet } from 'react-helmet-async'
-import FileAPI, { List as FileList } from '@/client/api/file'
+import FileAPI, { ListOptions } from '@/client/api/file'
 import WorkspaceAPI from '@/client/api/workspace'
 import { swrConfig } from '@/client/options'
 import Copy from '@/components/file/copy'
@@ -75,21 +75,14 @@ const WorkspaceFilesPage = () => {
       setIsLoading(true)
       dispatch(selectionUpdated([]))
       try {
-        let result: FileList
-        if (query) {
-          result = await FileAPI.search(
-            { text: query, parentId: fileId, workspaceId },
-            size,
-            page,
-          )
-        } else {
-          result = await FileAPI.list(fileId, {
-            page,
-            size,
-            sortBy,
-            sortOrder,
-          })
+        const options: ListOptions = {
+          size,
+          page,
+          sortBy,
+          sortOrder,
+          query: query ? { text: query } : undefined,
         }
+        const result = await FileAPI.list(fileId, options)
         dispatch(listUpdated(result))
       } finally {
         setIsLoading(false)

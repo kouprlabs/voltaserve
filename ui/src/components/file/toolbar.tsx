@@ -45,7 +45,7 @@ import {
   IconCheck,
   usePagePagination,
 } from '@koupr/ui'
-import FileAPI, { List, SortBy, SortOrder } from '@/client/api/file'
+import FileAPI, { ListOptions, SortBy, SortOrder } from '@/client/api/file'
 import { ltEditorPermission, ltOwnerPermission } from '@/client/api/permission'
 import downloadFile from '@/helpers/download-file'
 import mapFileList from '@/helpers/map-file-list'
@@ -179,26 +179,19 @@ const Toolbar = () => {
     setIsRefreshing(true)
     dispatch(selectionUpdated([]))
     try {
-      let result: List
-      if (query) {
-        result = await FileAPI.search(
-          { text: query, parentId: fileId, workspaceId },
-          size,
-          page,
-        )
-      } else {
-        result = await FileAPI.list(fileId, {
-          page,
-          size,
-          sortBy,
-          sortOrder,
-        })
+      const options: ListOptions = {
+        size,
+        page,
+        sortBy,
+        sortOrder,
+        query: query ? { text: query } : undefined,
       }
+      const result = await FileAPI.list(fileId, options)
       dispatch(listUpdated(result))
     } finally {
       setIsRefreshing(false)
     }
-  }, [dispatch, fileId, workspaceId, query, page, size, sortBy, sortOrder])
+  }, [dispatch, fileId, query, page, size, sortBy, sortOrder])
 
   const handleSortByChange = useCallback(
     (value: SortBy) => {
