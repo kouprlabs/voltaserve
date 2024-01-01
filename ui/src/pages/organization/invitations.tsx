@@ -62,8 +62,7 @@ const Status = ({ value }: StatusProps) => {
 const OrganizationInvitationsPage = () => {
   const navigate = useNavigate()
   const location = useLocation()
-  const params = useParams()
-  const id = params.id as string
+  const { id } = useParams()
   const toast = useToast()
   const { data: org, error: orgError } = OrganizationAPI.useGetById(
     id,

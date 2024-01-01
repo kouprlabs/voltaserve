@@ -1,7 +1,6 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import useSWR from 'swr'
-import { idpFetch, idpFetcher } from '@/client/fetch'
-import { getAccessTokenOrRedirect } from '@/infra/token'
+import { idpFetcher } from '@/client/fetcher'
 
 export type User = {
   id: string
@@ -35,86 +34,72 @@ export type DeleteOptions = {
 
 export default class UserAPI {
   static useGet(swrOptions?: any) {
-    return useSWR<User>(`/user`, idpFetcher, swrOptions)
+    const url = `/user`
+    return useSWR<User>(
+      url,
+      () => idpFetcher({ url, method: 'GET' }),
+      swrOptions,
+    )
   }
 
   static async updateFullName(options: UpdateFullNameOptions): Promise<User> {
-    return idpFetch(`/user/update_full_name`, {
+    return idpFetcher({
+      url: `/user/update_full_name`,
       method: 'POST',
       body: JSON.stringify(options),
-      headers: {
-        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
-        'Content-Type': 'application/json',
-      },
-    }).then((result) => result.json())
+    })
   }
 
   static async updateEmailRequest(
     options: UpdateEmailRequestOptions,
   ): Promise<User> {
-    return idpFetch(`/user/update_email_request`, {
+    return idpFetcher({
+      url: `/user/update_email_request`,
       method: 'POST',
       body: JSON.stringify(options),
-      headers: {
-        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
-        'Content-Type': 'application/json',
-      },
-    }).then((result) => result.json())
+    })
   }
 
   static async updateEmailConfirmation(
     options: UpdateEmailConfirmationOptions,
   ): Promise<User> {
-    return idpFetch(`/user/update_email_confirmation`, {
+    return idpFetcher({
+      url: `/user/update_email_confirmation`,
       method: 'POST',
       body: JSON.stringify(options),
-      headers: {
-        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
-        'Content-Type': 'application/json',
-      },
-    }).then((result) => result.json())
+    })
   }
 
   static async updatePassword(options: UpdatePasswordOptions): Promise<User> {
-    return idpFetch(`/user/update_password`, {
+    return idpFetcher({
+      url: `/user/update_password`,
       method: 'POST',
       body: JSON.stringify(options),
-      headers: {
-        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
-        'Content-Type': 'application/json',
-      },
-    }).then((result) => result.json())
+    })
   }
 
   static async delete(options: DeleteOptions) {
-    return idpFetch(`/user`, {
+    return idpFetcher({
+      url: `/user`,
       method: 'DELETE',
       body: JSON.stringify(options),
-      headers: {
-        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
-        'Content-Type': 'application/json',
-      },
     })
   }
 
   static async updatePicture(file: File): Promise<User> {
     const body = new FormData()
     body.append('file', file)
-    return idpFetch(`/user/update_picture`, {
+    return idpFetcher({
+      url: `/user/update_picture`,
       method: 'POST',
       body,
-      headers: {
-        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
-      },
-    }).then((result) => result.json())
+    })
   }
 
   static async deletePicture(): Promise<User> {
-    return idpFetch(`/user/delete_picture`, {
+    return idpFetcher({
+      url: `/user/delete_picture`,
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
-      },
-    }).then((result) => result.json())
+    })
   }
 }

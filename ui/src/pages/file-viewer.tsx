@@ -13,8 +13,8 @@ import downloadFile from '@/helpers/download-file'
 import { isAudio, isImage, isPDF, isVideo } from '@/helpers/file-extension'
 
 const FileViewerPage = () => {
-  const params = useParams()
-  const { data: file } = FileAPI.useGetById(params.id as string)
+  const { id } = useParams()
+  const { data: file } = FileAPI.useGetById(id)
 
   const renderViewer = useCallback((file: File) => {
     if (
