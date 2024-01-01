@@ -30,7 +30,7 @@ const Path = ({ rootId, fileId, maxCharacters, onClick }: PathProps) => {
   return (
     <>
       {path && !error ? (
-        <Breadcrumb overflow="hidden">
+        <Breadcrumb overflow="hidden" flexShrink={0}>
           <BreadcrumbItem>
             <BreadcrumbLink
               whiteSpace="nowrap"
