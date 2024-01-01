@@ -77,7 +77,7 @@ const ICON_SCALE_SLIDER_MIN = 1
 const ICON_SCALE_SLIDER_MAX = ICON_SCALE_SLIDER_STEP * 9
 
 type ToolbarProps = {
-  list: List
+  list?: List
 }
 
 const Toolbar = ({ list }: ToolbarProps) => {
@@ -90,7 +90,7 @@ const Toolbar = ({ list }: ToolbarProps) => {
   )
   const singleFile = useAppSelector((state) =>
     state.ui.files.selection.length === 1
-      ? list.data.find((e) => e.id === state.ui.files.selection[0])
+      ? list?.data.find((e) => e.id === state.ui.files.selection[0])
       : null,
   )
   const iconScale = useAppSelector((state) => state.ui.files.iconScale)
@@ -98,7 +98,7 @@ const Toolbar = ({ list }: ToolbarProps) => {
   const sortOrder = useAppSelector((state) => state.ui.files.sortOrder)
   const hasOwnerPermission = useAppSelector(
     (state) =>
-      list.data.findIndex(
+      list?.data.findIndex(
         (f) =>
           state.ui.files.selection.findIndex(
             (s) => f.id === s && ltOwnerPermission(f.permission),
@@ -107,7 +107,7 @@ const Toolbar = ({ list }: ToolbarProps) => {
   )
   const hasEditorPermission = useAppSelector(
     (state) =>
-      list.data.findIndex(
+      list?.data.findIndex(
         (f) =>
           state.ui.files.selection.findIndex(
             (s) => f.id === s && ltEditorPermission(f.permission),
@@ -189,10 +189,10 @@ const Toolbar = ({ list }: ToolbarProps) => {
   }, [sortOrder, dispatch])
 
   const handleSelectAllClick = useCallback(() => {
-    if (list.data) {
-      dispatch(selectionUpdated(list.data.map((f) => f.id)))
+    if (list?.data) {
+      dispatch(selectionUpdated(list?.data.map((f) => f.id)))
     }
-  }, [list.data, dispatch])
+  }, [list?.data, dispatch])
 
   const getSortByIcon = useCallback(
     (value: SortBy): ReactElement => {
@@ -221,7 +221,9 @@ const Toolbar = ({ list }: ToolbarProps) => {
             variant="solid"
             colorScheme="blue"
             leftIcon={<IconUpload />}
-            isDisabled={!folder || ltEditorPermission(folder.permission)}
+            isDisabled={
+              !folder || ltEditorPermission(folder.permission) || !list
+            }
             onClick={() => uploadHiddenInput?.current?.click()}
           >
             Upload File
@@ -230,7 +232,9 @@ const Toolbar = ({ list }: ToolbarProps) => {
             variant="outline"
             colorScheme="blue"
             leftIcon={<IconAdd />}
-            isDisabled={!folder || ltEditorPermission(folder.permission)}
+            isDisabled={
+              !folder || ltEditorPermission(folder.permission) || !list
+            }
             onClick={() => dispatch(createModalDidOpen())}
           >
             New Folder
@@ -269,6 +273,7 @@ const Toolbar = ({ list }: ToolbarProps) => {
                 icon={<IconDotsVertical />}
                 variant="solid"
                 aria-label=""
+                isDisabled={!list}
               />
               <Portal>
                 <MenuList zIndex="dropdown">
@@ -341,6 +346,7 @@ const Toolbar = ({ list }: ToolbarProps) => {
         <IconButton
           icon={<IconRefresh />}
           isLoading={isRefreshing}
+          isDisabled={!list}
           variant="solid"
           aria-label=""
           onClick={handleRefresh}
@@ -353,6 +359,7 @@ const Toolbar = ({ list }: ToolbarProps) => {
             min={ICON_SCALE_SLIDER_MIN}
             max={ICON_SCALE_SLIDER_MAX}
             step={ICON_SCALE_SLIDER_STEP}
+            isDisabled={!list}
             onChange={handleIconScaleChange}
           >
             <SliderTrack>
@@ -369,6 +376,7 @@ const Toolbar = ({ list }: ToolbarProps) => {
               fontSize="16px"
               variant="solid"
               aria-label=""
+              isDisabled={!list}
               onClick={handleSortOrderToggle}
             />
             <Box>
@@ -378,6 +386,7 @@ const Toolbar = ({ list }: ToolbarProps) => {
                   icon={<IconDotsVertical />}
                   variant="solid"
                   aria-label=""
+                  isDisabled={!list}
                 />
                 <Portal>
                   <MenuList zIndex="dropdown">

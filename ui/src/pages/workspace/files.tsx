@@ -99,7 +99,7 @@ const WorkspaceFilesPage = () => {
             }
           />
         ) : null}
-        {list ? <Toolbar list={list} /> : null}
+        <Toolbar list={list} />
         <VStack
           flexGrow={1}
           overflowY="auto"
