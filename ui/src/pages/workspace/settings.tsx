@@ -31,14 +31,13 @@ const ROW_HEIGHT = '40px'
 const SECTION_SPACING = variables.spacing
 
 const WorkspaceSettingsPage = () => {
-  const params = useParams()
-  const workspaceId = params.id as string
+  const { id } = useParams()
   const { data: workspace, error: workspaceError } = WorkspaceAPI.useGetById(
-    workspaceId,
+    id,
     swrConfig(),
   )
   const { data: storageUsage, error: storageUsageError } =
-    StorageAPI.useGetWorkspaceUsage(workspaceId, swrConfig())
+    StorageAPI.useGetWorkspaceUsage(id, swrConfig())
   const hasEditPermission = useMemo(
     () => workspace && geEditorPermission(workspace.permission),
     [workspace],

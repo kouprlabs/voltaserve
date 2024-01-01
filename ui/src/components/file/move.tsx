@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import {
   Modal,
   ModalOverlay,
@@ -10,55 +10,38 @@ import {
   ModalFooter,
   Button,
 } from '@chakra-ui/react'
-import { usePagePagination, variables } from '@koupr/ui'
-import FileAPI from '@/client/api/file'
-import { filesPaginationStorage } from '@/infra/pagination'
-import { filesRemoved, filesUpdated } from '@/store/entities/files'
+import { variables } from '@koupr/ui'
+import { useSWRConfig } from 'swr'
+import FileAPI, { List } from '@/client/api/file'
+import useFileListSearchParams from '@/hooks/use-file-list-params'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { moveModalDidClose, selectionUpdated } from '@/store/ui/files'
 import Browse from './browse'
 
 const Move = () => {
-  const navigate = useNavigate()
-  const params = useParams()
-  const fileId = params.fileId as string
+  const { mutate } = useSWRConfig()
+  const { fileId } = useParams()
   const dispatch = useAppDispatch()
   const selection = useAppSelector((state) => state.ui.files.selection)
   const isModalOpen = useAppSelector((state) => state.ui.files.isMoveModalOpen)
-  const sortBy = useAppSelector((state) => state.ui.files.sortBy)
-  const sortOrder = useAppSelector((state) => state.ui.files.sortOrder)
   const [loading, setLoading] = useState(false)
-  const [newFileId, setNewFileId] = useState<string>()
-  const { page, size } = usePagePagination({
-    navigate,
-    location,
-    storage: filesPaginationStorage(),
-  })
+  const [targetId, setTargetId] = useState<string>()
+  const fileListSearchParams = useFileListSearchParams()
 
   const handleMove = useCallback(async () => {
-    if (!newFileId) {
+    if (!targetId) {
       return
     }
     try {
       setLoading(true)
-      await FileAPI.move(newFileId, { ids: selection })
-      if (fileId === newFileId) {
-        const { data: files } = await FileAPI.list(newFileId, {
-          page,
-          size,
-          sortBy,
-          sortOrder,
-        })
-        dispatch(filesUpdated(files))
-      } else {
-        dispatch(filesRemoved({ id: fileId, files: selection }))
-      }
+      await FileAPI.move(targetId, { ids: selection })
+      await mutate<List>(`/files/${fileId}/list?${fileListSearchParams}`)
       dispatch(selectionUpdated([]))
       dispatch(moveModalDidClose())
     } finally {
       setLoading(false)
     }
-  }, [newFileId, fileId, selection, page, size, sortBy, sortOrder, dispatch])
+  }, [targetId, fileId, selection, fileListSearchParams, mutate, dispatch])
 
   return (
     <Modal
@@ -71,7 +54,7 @@ const Move = () => {
         <ModalHeader>Move {selection.length} Item(s) to…</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-          <Browse onChange={(id) => setNewFileId(id)} />
+          <Browse onChange={(id) => setTargetId(id)} />
         </ModalBody>
         <ModalFooter>
           <Button
@@ -87,7 +70,7 @@ const Move = () => {
           <Button
             variant="solid"
             colorScheme="blue"
-            isDisabled={newFileId === fileId}
+            isDisabled={targetId === fileId}
             isLoading={loading}
             onClick={handleMove}
           >

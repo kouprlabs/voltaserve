@@ -6,7 +6,7 @@ import {
   useRef,
   useState,
 } from 'react'
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import {
   Button,
   Stack,
@@ -43,15 +43,13 @@ import {
   IconSortUp,
   IconSortDown,
   IconCheck,
-  usePagePagination,
 } from '@koupr/ui'
+import { useSWRConfig } from 'swr'
 import FileAPI, { List, SortBy, SortOrder } from '@/client/api/file'
 import { ltEditorPermission, ltOwnerPermission } from '@/client/api/permission'
 import downloadFile from '@/helpers/download-file'
 import mapFileList from '@/helpers/map-file-list'
-import { decodeQuery } from '@/helpers/query'
-import { filesPaginationStorage } from '@/infra/pagination'
-import { listUpdated } from '@/store/entities/files'
+import useFileListSearchParams from '@/hooks/use-file-list-params'
 import { uploadAdded, UploadDecorator } from '@/store/entities/uploads'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import {
@@ -78,33 +76,29 @@ const ICON_SCALE_SLIDER_STEP = 0.25
 const ICON_SCALE_SLIDER_MIN = 1
 const ICON_SCALE_SLIDER_MAX = ICON_SCALE_SLIDER_STEP * 9
 
-const Toolbar = () => {
-  const navigate = useNavigate()
+type ToolbarProps = {
+  list?: List
+}
+
+const Toolbar = ({ list }: ToolbarProps) => {
   const dispatch = useAppDispatch()
-  const params = useParams()
-  const workspaceId = params.id as string
-  const fileId = params.fileId as string
-  const [searchParams] = useSearchParams()
-  const query = decodeQuery(searchParams.get('q') as string)
+  const { mutate } = useSWRConfig()
+  const { id, fileId } = useParams()
   const [isRefreshing, setIsRefreshing] = useState(false)
   const selectionCount = useAppSelector(
     (state) => state.ui.files.selection.length,
   )
   const singleFile = useAppSelector((state) =>
     state.ui.files.selection.length === 1
-      ? state.entities.files.list?.data.find(
-          (f) => f.id === state.ui.files.selection[0],
-        )
+      ? list?.data.find((e) => e.id === state.ui.files.selection[0])
       : null,
   )
-  const folder = useAppSelector((state) => state.entities.files.folder)
-  const files = useAppSelector((state) => state.entities.files.list?.data)
   const iconScale = useAppSelector((state) => state.ui.files.iconScale)
   const sortBy = useAppSelector((state) => state.ui.files.sortBy)
   const sortOrder = useAppSelector((state) => state.ui.files.sortOrder)
   const hasOwnerPermission = useAppSelector(
     (state) =>
-      state.entities.files.list?.data.findIndex(
+      list?.data.findIndex(
         (f) =>
           state.ui.files.selection.findIndex(
             (s) => f.id === s && ltOwnerPermission(f.permission),
@@ -113,7 +107,7 @@ const Toolbar = () => {
   )
   const hasEditorPermission = useAppSelector(
     (state) =>
-      state.entities.files.list?.data.findIndex(
+      list?.data.findIndex(
         (f) =>
           state.ui.files.selection.findIndex(
             (s) => f.id === s && ltEditorPermission(f.permission),
@@ -121,11 +115,8 @@ const Toolbar = () => {
       ) === -1,
   )
   const uploadHiddenInput = useRef<HTMLInputElement>(null)
-  const { page, size } = usePagePagination({
-    navigate,
-    location,
-    storage: filesPaginationStorage(),
-  })
+  const fileListSearchParams = useFileListSearchParams()
+  const { data: folder } = FileAPI.useGetById(fileId)
 
   useEffect(() => {
     const iconScale = localStorage.getItem(ICON_SCALE_KEY)
@@ -152,8 +143,8 @@ const Toolbar = () => {
         dispatch(
           uploadAdded(
             new UploadDecorator({
-              workspaceId: workspaceId,
-              parentId: fileId,
+              workspaceId: id!,
+              parentId: fileId!,
               file,
             }).value,
           ),
@@ -164,7 +155,7 @@ const Toolbar = () => {
         uploadHiddenInput.current.value = ''
       }
     },
-    [workspaceId, fileId, dispatch],
+    [id, fileId, dispatch],
   )
 
   const handleIconScaleChange = useCallback(
@@ -178,27 +169,9 @@ const Toolbar = () => {
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true)
     dispatch(selectionUpdated([]))
-    try {
-      let result: List
-      if (query) {
-        result = await FileAPI.search(
-          { text: query, parentId: fileId, workspaceId },
-          size,
-          page,
-        )
-      } else {
-        result = await FileAPI.list(fileId, {
-          page,
-          size,
-          sortBy,
-          sortOrder,
-        })
-      }
-      dispatch(listUpdated(result))
-    } finally {
-      setIsRefreshing(false)
-    }
-  }, [dispatch, fileId, workspaceId, query, page, size, sortBy, sortOrder])
+    await mutate<List>(`/files/${fileId}/list?${fileListSearchParams}`)
+    setIsRefreshing(false)
+  }, [fileId, fileListSearchParams, mutate, dispatch])
 
   const handleSortByChange = useCallback(
     (value: SortBy) => {
@@ -214,6 +187,12 @@ const Toolbar = () => {
     localStorage.setItem(SORT_ORDER_KEY, value.toString())
     dispatch(sortOrderUpdated(value))
   }, [sortOrder, dispatch])
+
+  const handleSelectAllClick = useCallback(() => {
+    if (list?.data) {
+      dispatch(selectionUpdated(list?.data.map((f) => f.id)))
+    }
+  }, [list?.data, dispatch])
 
   const getSortByIcon = useCallback(
     (value: SortBy): ReactElement => {
@@ -242,7 +221,9 @@ const Toolbar = () => {
             variant="solid"
             colorScheme="blue"
             leftIcon={<IconUpload />}
-            isDisabled={!folder || ltEditorPermission(folder.permission)}
+            isDisabled={
+              !folder || ltEditorPermission(folder.permission) || !list
+            }
             onClick={() => uploadHiddenInput?.current?.click()}
           >
             Upload File
@@ -251,7 +232,9 @@ const Toolbar = () => {
             variant="outline"
             colorScheme="blue"
             leftIcon={<IconAdd />}
-            isDisabled={!folder || ltEditorPermission(folder.permission)}
+            isDisabled={
+              !folder || ltEditorPermission(folder.permission) || !list
+            }
             onClick={() => dispatch(createModalDidOpen())}
           >
             New Folder
@@ -290,6 +273,7 @@ const Toolbar = () => {
                 icon={<IconDotsVertical />}
                 variant="solid"
                 aria-label=""
+                isDisabled={!list}
               />
               <Portal>
                 <MenuList zIndex="dropdown">
@@ -344,11 +328,7 @@ const Toolbar = () => {
                   <MenuDivider />
                   <MenuItem
                     icon={<IconCheckCircle />}
-                    onClick={() => {
-                      if (files) {
-                        dispatch(selectionUpdated(files.map((f) => f.id)))
-                      }
-                    }}
+                    onClick={handleSelectAllClick}
                   >
                     Select All
                   </MenuItem>
@@ -366,6 +346,7 @@ const Toolbar = () => {
         <IconButton
           icon={<IconRefresh />}
           isLoading={isRefreshing}
+          isDisabled={!list}
           variant="solid"
           aria-label=""
           onClick={handleRefresh}
@@ -378,6 +359,7 @@ const Toolbar = () => {
             min={ICON_SCALE_SLIDER_MIN}
             max={ICON_SCALE_SLIDER_MAX}
             step={ICON_SCALE_SLIDER_STEP}
+            isDisabled={!list}
             onChange={handleIconScaleChange}
           >
             <SliderTrack>
@@ -394,6 +376,7 @@ const Toolbar = () => {
               fontSize="16px"
               variant="solid"
               aria-label=""
+              isDisabled={!list}
               onClick={handleSortOrderToggle}
             />
             <Box>
@@ -403,6 +386,7 @@ const Toolbar = () => {
                   icon={<IconDotsVertical />}
                   variant="solid"
                   aria-label=""
+                  isDisabled={!list}
                 />
                 <Portal>
                   <MenuList zIndex="dropdown">

@@ -6,6 +6,7 @@ export const SORT_ORDER_KEY = 'voltaserve_file_sort_order'
 
 export type FilesState = {
   selection: string[]
+  hidden: string[]
   isMultiSelectActive: boolean
   isRangeSelectActive: boolean
   isMoveModalOpen: boolean
@@ -21,6 +22,7 @@ export type FilesState = {
 
 const initialState: FilesState = {
   selection: [],
+  hidden: [],
   isMultiSelectActive: false,
   isRangeSelectActive: false,
   isMoveModalOpen: false,
@@ -47,6 +49,9 @@ const slice = createSlice({
     },
     selectionRemoved: (state, action: PayloadAction<string>) => {
       state.selection = state.selection.filter((e) => e !== action.payload)
+    },
+    hiddenUpdated: (state, action: PayloadAction<string[]>) => {
+      state.hidden = action.payload
     },
     moveModalDidOpen: (state) => {
       state.isMoveModalOpen = true
@@ -106,6 +111,7 @@ export const {
   selectionUpdated,
   selectionAdded,
   selectionRemoved,
+  hiddenUpdated,
   moveModalDidOpen,
   copyModalDidOpen,
   createModalDidOpen,

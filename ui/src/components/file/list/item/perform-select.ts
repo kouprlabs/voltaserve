@@ -8,7 +8,7 @@ import {
 
 export function performRangeSelect(file: File) {
   const ui = store.getState().ui.files
-  const data = store.getState().entities.files.list?.data
+  const data = store.getState().entities.files.list?.data || []
   if (data && ui.isRangeSelectActive && ui.selection.length >= 1) {
     let startIndex = data.findIndex((e) => e.id === ui.selection[0])
     let endIndex = data.findIndex((e) => e.id === file.id)

@@ -19,15 +19,15 @@ import {
 } from '@chakra-ui/react'
 import { Spinner, variables } from '@koupr/ui'
 import { IconCheck, IconTrash, IconUserPlus } from '@koupr/ui'
-import { KeyedMutator } from 'swr'
+import { KeyedMutator, useSWRConfig } from 'swr'
 import { Select } from 'chakra-react-select'
-import FileAPI, { UserPermission } from '@/client/api/file'
+import FileAPI, { List, UserPermission } from '@/client/api/file'
 import { geEditorPermission } from '@/client/api/permission'
 import { User } from '@/client/api/user'
 import WorkspaceAPI from '@/client/api/workspace'
 import IdPUserAPI from '@/client/idp/user'
 import UserSelector from '@/components/common/user-selector'
-import { filesUpdated } from '@/store/entities/files'
+import useFileListSearchParams from '@/hooks/use-file-list-params'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { sharingModalDidClose } from '@/store/ui/files'
 import reactSelectStyles from '@/styles/react-select'
@@ -40,15 +40,17 @@ type UsersProps = {
 }
 
 const Users = ({ users, permissions, mutateUserPermissions }: UsersProps) => {
-  const params = useParams()
+  const { mutate } = useSWRConfig()
+  const { id, fileId } = useParams()
   const dispatch = useAppDispatch()
-  const { data: workspace } = WorkspaceAPI.useGetById(params.id as string)
+  const { data: workspace } = WorkspaceAPI.useGetById(id)
   const selection = useAppSelector((state) => state.ui.files.selection)
   const [isGrantLoading, setIsGrantLoading] = useState(false)
   const [permissionBeingRevoked, setPermissionBeingRevoked] = useState<string>()
   const [activeUser, setActiveUser] = useState<User>()
   const [activePermission, setActivePermission] = useState<string>()
   const { data: user } = IdPUserAPI.useGet()
+  const fileListSearchParams = useFileListSearchParams()
   const isSingleSelection = selection.length === 1
 
   const handleGrantUserPermission = useCallback(async () => {
@@ -62,8 +64,7 @@ const Users = ({ users, permissions, mutateUserPermissions }: UsersProps) => {
         userId: activeUser.id,
         permission: activePermission,
       })
-      const result = await FileAPI.batchGet({ ids: selection })
-      dispatch(filesUpdated(result))
+      await mutate<List>(`/files/${fileId}/list?${fileListSearchParams}`)
       if (isSingleSelection) {
         await mutateUserPermissions()
       }
@@ -76,10 +77,13 @@ const Users = ({ users, permissions, mutateUserPermissions }: UsersProps) => {
       setIsGrantLoading(false)
     }
   }, [
+    fileId,
     selection,
     activeUser,
     activePermission,
     isSingleSelection,
+    fileListSearchParams,
+    mutate,
     dispatch,
     mutateUserPermissions,
   ])
@@ -92,8 +96,7 @@ const Users = ({ users, permissions, mutateUserPermissions }: UsersProps) => {
           ids: selection,
           userId: permission.user.id,
         })
-        const result = await FileAPI.batchGet({ ids: selection })
-        dispatch(filesUpdated(result))
+        await mutate<List>(`/files/${fileId}/list?${fileListSearchParams}`)
         if (isSingleSelection) {
           await mutateUserPermissions()
         }
@@ -101,7 +104,14 @@ const Users = ({ users, permissions, mutateUserPermissions }: UsersProps) => {
         setPermissionBeingRevoked(undefined)
       }
     },
-    [selection, isSingleSelection, dispatch, mutateUserPermissions],
+    [
+      fileId,
+      selection,
+      isSingleSelection,
+      fileListSearchParams,
+      mutate,
+      mutateUserPermissions,
+    ],
   )
 
   return (

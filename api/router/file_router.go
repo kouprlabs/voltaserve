@@ -1,19 +1,23 @@
 package router
 
 import (
+	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
-	log "github.com/sirupsen/logrus"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"voltaserve/config"
 	"voltaserve/errorpkg"
 	"voltaserve/helper"
 	"voltaserve/infra"
 	"voltaserve/model"
 	"voltaserve/service"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
@@ -39,13 +43,12 @@ func (r *FileRouter) AppendRoutes(g fiber.Router) {
 	g.Post("/create_folder", r.CreateFolder)
 	g.Get("/list", r.ListByPath)
 	g.Get("/get", r.GetByPath)
-	g.Post("/search", r.Search)
 	g.Post("/batch_delete", r.BatchDelete)
 	g.Post("/batch_get", r.BatchGet)
 	g.Get("/:id", r.GetByID)
 	g.Patch("/:id", r.Patch)
 	g.Delete("/:id", r.Delete)
-	g.Get("/:id/list", r.ListByID)
+	g.Get("/:id/list", r.List)
 	g.Get("/:id/get_item_count", r.GetItemCount)
 	g.Get("/:id/get_path", r.GetPath)
 	g.Get("/:id/get_ids", r.GetIDs)
@@ -216,54 +219,6 @@ func (r *FileRouter) CreateFolder(c *fiber.Ctx) error {
 	return c.Status(http.StatusCreated).JSON(res)
 }
 
-// Search godoc
-//
-//	@Summary		Search
-//	@Description	Search
-//	@Tags			Files
-//	@Id				files_search
-//	@Produce		json
-//	@Param			page	query		string						true	"Page"
-//	@Param			size	query		string						true	"Size"
-//	@Param			body	body		service.FileSearchOptions	true	"Body"
-//	@Success		200		{object}	service.FileList
-//	@Failure		500		{object}	errorpkg.ErrorResponse
-//	@Router			/files/search [post]
-func (r *FileRouter) Search(c *fiber.Ctx) error {
-	userID := GetUserID(c)
-	opts := new(service.FileSearchOptions)
-	if err := c.BodyParser(opts); err != nil {
-		return err
-	}
-	if err := validator.New().Struct(opts); err != nil {
-		return errorpkg.NewRequestBodyValidationError(err)
-	}
-	var err error
-	var page int64
-	if c.Query("page") == "" {
-		page = 1
-	} else {
-		page, err = strconv.ParseInt(c.Query("page"), 10, 32)
-		if err != nil {
-			page = 1
-		}
-	}
-	var size int64
-	if c.Query("size") == "" {
-		size = FileDefaultPageSize
-	} else {
-		size, err = strconv.ParseInt(c.Query("size"), 10, 32)
-		if err != nil {
-			return err
-		}
-	}
-	res, err := r.fileSvc.Search(*opts, uint(page), uint(size), userID)
-	if err != nil {
-		return err
-	}
-	return c.JSON(res)
-}
-
 // GetByID godoc
 //
 //	@Summary		Get by ID
@@ -311,8 +266,8 @@ func (r *FileRouter) GetByPath(c *fiber.Ctx) error {
 
 // ListByPath godoc
 //
-//	@Summary		ListByPath
-//	@Description	ListByPath
+//	@Summary		List by Path
+//	@Description	List by Path
 //	@Tags			Files
 //	@Id				files_list_by_path
 //	@Produce		json
@@ -333,12 +288,12 @@ func (r *FileRouter) ListByPath(c *fiber.Ctx) error {
 	return c.JSON(res)
 }
 
-// ListByID godoc
+// List godoc
 //
-//	@Summary		ListByID
-//	@Description	ListByID
+//	@Summary		List
+//	@Description	List
 //	@Tags			Files
-//	@Id				files_list_by_id
+//	@Id				files_list
 //	@Produce		json
 //	@Param			id			path		string	true	"ID"
 //	@Param			type		query		string	false	"Type"
@@ -346,12 +301,16 @@ func (r *FileRouter) ListByPath(c *fiber.Ctx) error {
 //	@Param			size		query		string	false	"Size"
 //	@Param			sort_by		query		string	false	"Sort By"
 //	@Param			sort_order	query		string	false	"Sort Order"
+//	@Param			query		query		string	false	"Query"
 //	@Success		200			{object}	service.FileList
 //	@Failure		404			{object}	errorpkg.ErrorResponse
 //	@Failure		500			{object}	errorpkg.ErrorResponse
 //	@Router			/files/{id}/list [get]
-func (r *FileRouter) ListByID(c *fiber.Ctx) error {
+func (r *FileRouter) List(c *fiber.Ctx) error {
 	var err error
+	var res *service.FileList
+	id := c.Params("id")
+	userID := GetUserID(c)
 	var page int64
 	if c.Query("page") == "" {
 		page = 1
@@ -382,15 +341,35 @@ func (r *FileRouter) ListByID(c *fiber.Ctx) error {
 	if fileType != model.FileTypeFile && fileType != model.FileTypeFolder && fileType != "" {
 		return errorpkg.NewInvalidQueryParamError("type")
 	}
-	res, err := r.fileSvc.ListByID(c.Params("id"), service.FileListByIDOptions{
+	query := c.Query("query")
+	opts := service.FileListOptions{
 		Page:      uint(page),
 		Size:      uint(size),
 		SortBy:    sortBy,
 		SortOrder: sortOrder,
-		FileType:  fileType,
-	}, GetUserID(c))
-	if err != nil {
-		return err
+	}
+	if query != "" {
+		bytes, err := base64.StdEncoding.DecodeString(query + strings.Repeat("=", (4-len(query)%4)%4))
+		if err != nil {
+			return errorpkg.NewInvalidQueryParamError("query")
+		}
+		if err := json.Unmarshal(bytes, &opts.Query); err != nil {
+			return errorpkg.NewInvalidQueryParamError("query")
+		}
+		res, err = r.fileSvc.Search(id, opts, userID)
+		if err != nil {
+			return err
+		}
+	} else {
+		if fileType != "" {
+			opts.Query = &service.FileQuery{
+				Type: &fileType,
+			}
+		}
+		res, err = r.fileSvc.List(id, opts, userID)
+		if err != nil {
+			return err
+		}
 	}
 	return c.JSON(res)
 }

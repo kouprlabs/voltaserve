@@ -1,4 +1,5 @@
-import { idpFetch } from '@/client/fetch'
+import { baseFetcher } from '@/client/fetcher'
+import { getConfig } from '@/config/config'
 
 export type GrantType = 'password' | 'refresh_token'
 
@@ -41,8 +42,8 @@ export default class TokenAPI {
     if (options.locale) {
       formBody.push(`&locale=${encodeURIComponent(options.locale)}`)
     }
-    return idpFetch(
-      '/token',
+    return baseFetcher(
+      `${getConfig().idpURL}/token`,
       {
         method: 'POST',
         body: formBody.join('&'),

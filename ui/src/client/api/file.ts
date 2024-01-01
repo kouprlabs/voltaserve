@@ -1,8 +1,9 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import useSWR from 'swr'
-import { apiFetch, apiFetcher } from '@/client/fetch'
+import { apiFetcher } from '@/client/fetcher'
 import { User } from '@/client/idp/user'
 import { getConfig } from '@/config/config'
+import { encodeQuery } from '@/helpers/query'
 import { getAccessTokenOrRedirect } from '@/infra/token'
 import { Group } from './group'
 import { PermissionType } from './permission'
@@ -63,11 +64,8 @@ export type List = {
   totalElements: number
   page: number
   size: number
+  query?: Query
 }
-
-export type SearchResult = {
-  request: SearchOptions
-} & List
 
 export type UserPermission = {
   id: string
@@ -81,10 +79,8 @@ export type GroupPermission = {
   permission: string
 }
 
-export type SearchOptions = {
+export type Query = {
   text: string
-  workspaceId: string
-  parentId?: string
   type?: string
   createTimeAfter?: number
   createTimeBefore?: number
@@ -98,6 +94,7 @@ export type ListOptions = {
   type?: FileType
   sortBy?: SortBy
   sortOrder?: SortOrder
+  query?: Query
 }
 
 export type MoveOptions = {
@@ -216,249 +213,201 @@ export default class FileAPI {
   }
 
   static async createFolder(options: CreateFolderOptions): Promise<File> {
-    return apiFetch('/files/create_folder', {
+    return apiFetcher({
+      url: '/files/create_folder',
       method: 'POST',
       body: JSON.stringify(options),
-      headers: {
-        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
-        'Content-Type': 'application/json',
-      },
-    }).then((result) => result.json())
+    })
   }
 
   static async list(id: string, options: ListOptions): Promise<List> {
-    return apiFetch(
-      `/files/${id}/list?${this.paramsFromListOptions(options)}`,
-      {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
-          'Content-Type': 'application/json',
-        },
-      },
-    ).then((result) => result.json())
+    return apiFetcher({
+      url: `/files/${id}/list?${this.paramsFromListOptions(options)}`,
+      method: 'GET',
+    })
   }
 
-  static useList(id: string, options: ListOptions, swrOptions?: any) {
+  static useList(
+    id: string | undefined,
+    options: ListOptions,
+    swrOptions?: any,
+  ) {
+    const url = `/files/${id}/list?${this.paramsFromListOptions(options)}`
     return useSWR<List>(
-      id ? `/files/${id}/list?${this.paramsFromListOptions(options)}` : null,
-      apiFetcher,
+      id ? url : null,
+      () => apiFetcher({ url, method: 'GET' }),
       swrOptions,
     )
   }
 
-  static async search(
-    options: SearchOptions,
-    size: number,
-    page: number,
-  ): Promise<List> {
-    return apiFetch(
-      `/files/search?${new URLSearchParams({
-        page: page.toString(),
-        size: size.toString(),
-      })}`,
-      {
-        method: 'POST',
-        body: JSON.stringify(options),
-        headers: {
-          'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
-          'Content-Type': 'application/json',
-        },
-      },
-    ).then((result) => result.json())
+  static async getPath(id: string): Promise<File[]> {
+    return apiFetcher({
+      url: `/files/${id}/get_path`,
+      method: 'GET',
+    })
   }
 
-  static async getPath(id: string): Promise<File[]> {
-    return apiFetch(`/files/${id}/get_path`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
-      },
-    }).then(async (result) => await result.json())
+  static useGetPath(id: string | null | undefined, swrOptions?: any) {
+    const url = `/files/${id}/get_path`
+    return useSWR<File[]>(
+      id ? url : null,
+      () => apiFetcher({ url, method: 'GET' }),
+      swrOptions,
+    )
   }
 
   static async getIds(id: string): Promise<string[]> {
-    return apiFetch(`/files/${id}/get_ids`, {
+    return apiFetcher({
+      url: `/files/${id}/get_ids`,
       method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
-      },
-    }).then(async (result) => await result.json())
+    })
   }
 
   static async rename(id: string, options: RenameOptions): Promise<File> {
-    return apiFetch(`/files/${id}/rename`, {
+    return apiFetcher({
+      url: `/files/${id}/rename`,
       method: 'POST',
       body: JSON.stringify(options),
-      headers: {
-        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
-        'Content-Type': 'application/json',
-      },
-    }).then((result) => result.json())
+    })
   }
 
   static async delete(id: string) {
-    return apiFetch(`/files/${id}`, {
+    return apiFetcher({
+      url: `/files/${id}`,
       method: 'DELETE',
-      headers: {
-        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
-        'Content-Type': 'application/json',
-      },
     })
   }
 
   static async batchDelete(options: BatchDeleteOptions) {
-    return apiFetch(`/files/batch_delete`, {
+    return apiFetcher({
+      url: `/files/batch_delete`,
       method: 'POST',
       body: JSON.stringify(options),
-      headers: {
-        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
-        'Content-Type': 'application/json',
-      },
     })
   }
 
   static async move(id: string, options: MoveOptions) {
-    return apiFetch(`/files/${id}/move`, {
+    return apiFetcher({
+      url: `/files/${id}/move`,
       method: 'POST',
       body: JSON.stringify(options),
-      headers: {
-        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
-        'Content-Type': 'application/json',
-      },
     })
   }
 
   static async copy(id: string, options: CopyOptions) {
-    return apiFetch(`/files/${id}/copy`, {
+    return apiFetcher({
+      url: `/files/${id}/copy`,
       method: 'POST',
       body: JSON.stringify(options),
-      headers: {
-        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
-        'Content-Type': 'application/json',
-      },
     })
   }
 
-  static useGetById(id: string, swrOptions?: any) {
-    return useSWR<File>(id ? `/files/${id}` : null, apiFetcher, swrOptions)
+  static useGetById(id: string | null | undefined, swrOptions?: any) {
+    const url = `/files/${id}`
+    return useSWR<File>(
+      id ? url : null,
+      () => apiFetcher({ url, method: 'GET' }),
+      swrOptions,
+    )
   }
 
   static async getById(id: string): Promise<File> {
-    return apiFetch(`/files/${id}`, {
+    return apiFetcher({
+      url: `/files/${id}`,
       method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
-        'Content-Type': 'application/json',
-      },
-    }).then((result) => result.json())
+    })
   }
 
   static async batchGet(options: BatchGetOptions): Promise<File[]> {
-    return apiFetch(`/files/batch_get`, {
+    return apiFetcher({
+      url: `/files/batch_get`,
       method: 'POST',
       body: JSON.stringify(options),
-      headers: {
-        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
-        'Content-Type': 'application/json',
-      },
-    }).then((result) => result.json())
+    })
   }
 
   static async getItemCount(id: string): Promise<number> {
-    return apiFetch(`/files/${id}/get_item_count`, {
+    return apiFetcher({
+      url: `/files/${id}/get_item_count`,
       method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
-        'Content-Type': 'application/json',
-      },
-    }).then((result) => result.json())
+    })
   }
 
-  static useGetItemCount(id: string, swrOptions?: any) {
+  static useGetItemCount(id: string | null | undefined, swrOptions?: any) {
+    const url = `/files/${id}/get_item_count`
     return useSWR<number>(
-      id ? `/files/${id}/get_item_count` : null,
-      apiFetcher,
+      id ? url : null,
+      () => apiFetcher({ url, method: 'GET' }),
       swrOptions,
     )
   }
 
   static async grantUserPermission(options: GrantUserPermissionOptions) {
-    return apiFetch(`/files/grant_user_permission`, {
+    return apiFetcher({
+      url: `/files/grant_user_permission`,
       method: 'POST',
       body: JSON.stringify(options),
-      headers: {
-        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
-        'Content-Type': 'application/json',
-      },
     })
   }
 
   static async revokeUserPermission(options: RevokeUserPermissionOptions) {
-    return apiFetch(`/files/revoke_user_permission`, {
+    return apiFetcher({
+      url: `/files/revoke_user_permission`,
       method: 'POST',
       body: JSON.stringify(options),
-      headers: {
-        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
-        'Content-Type': 'application/json',
-      },
     })
   }
 
   static async grantGroupPermission(options: GrantGroupPermissionOptions) {
-    return apiFetch(`/files/grant_group_permission`, {
+    return apiFetcher({
+      url: `/files/grant_group_permission`,
       method: 'POST',
       body: JSON.stringify(options),
-      headers: {
-        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
-        'Content-Type': 'application/json',
-      },
     })
   }
 
   static async revokeGroupPermission(options: RevokeGroupPermissionOptions) {
-    return apiFetch(`/files/revoke_group_permission`, {
+    return apiFetcher({
+      url: `/files/revoke_group_permission`,
       method: 'POST',
       body: JSON.stringify(options),
-      headers: {
-        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
-        'Content-Type': 'application/json',
-      },
     })
   }
 
   static async getUserPermissions(id: string): Promise<UserPermission[]> {
-    return apiFetch(`/files/${id}/get_user_permissions`, {
+    return apiFetcher({
+      url: `/files/${id}/get_user_permissions`,
       method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
-        'Content-Type': 'application/json',
-      },
-    }).then((result) => result.json())
+    })
   }
 
-  static useGetUserPermissions(id?: string, swrOptions?: any) {
+  static useGetUserPermissions(
+    id: string | null | undefined,
+    swrOptions?: any,
+  ) {
+    const url = `/files/${id}/get_user_permissions`
     return useSWR<UserPermission[]>(
-      id ? `/files/${id}/get_user_permissions` : null,
-      apiFetcher,
+      id ? url : null,
+      () => apiFetcher({ url, method: 'GET' }),
       swrOptions,
     )
   }
 
   static async getGroupPermissions(id: string): Promise<GroupPermission[]> {
-    return apiFetch(`/files/${id}/get_group_permissions`, {
+    return apiFetcher({
+      url: `/files/${id}/get_group_permissions`,
       method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${getAccessTokenOrRedirect()}`,
-        'Content-Type': 'application/json',
-      },
-    }).then((result) => result.json())
+    })
   }
 
-  static useGetGroupPermissions(id?: string, swrOptions?: any) {
+  static useGetGroupPermissions(
+    id: string | null | undefined,
+    swrOptions?: any,
+  ) {
+    const url = `/files/${id}/get_group_permissions`
     return useSWR<GroupPermission[]>(
-      id ? `/files/${id}/get_group_permissions` : null,
-      apiFetcher,
+      id ? url : null,
+      () => apiFetcher({ url, method: 'GET' }),
       swrOptions,
     )
   }
@@ -479,6 +428,9 @@ export default class FileAPI {
     }
     if (options?.type) {
       params.type = options.type
+    }
+    if (options?.query) {
+      params.query = encodeQuery(JSON.stringify(options.query))
     }
     return new URLSearchParams(params)
   }
