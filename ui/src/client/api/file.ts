@@ -227,7 +227,11 @@ export default class FileAPI {
     })
   }
 
-  static useList(id: string, options: ListOptions, swrOptions?: any) {
+  static useList(
+    id: string | undefined,
+    options: ListOptions,
+    swrOptions?: any,
+  ) {
     const url = `/files/${id}/list?${this.paramsFromListOptions(options)}`
     return useSWR<List>(
       id ? url : null,
@@ -241,6 +245,15 @@ export default class FileAPI {
       url: `/files/${id}/get_path`,
       method: 'GET',
     })
+  }
+
+  static useGetPath(id: string | null | undefined, swrOptions?: any) {
+    const url = `/files/${id}/get_path`
+    return useSWR<File[]>(
+      id ? url : null,
+      () => apiFetcher({ url, method: 'GET' }),
+      swrOptions,
+    )
   }
 
   static async getIds(id: string): Promise<string[]> {
@@ -289,7 +302,7 @@ export default class FileAPI {
     })
   }
 
-  static useGetById(id?: string, swrOptions?: any) {
+  static useGetById(id: string | null | undefined, swrOptions?: any) {
     const url = `/files/${id}`
     return useSWR<File>(
       id ? url : null,
@@ -320,7 +333,7 @@ export default class FileAPI {
     })
   }
 
-  static useGetItemCount(id: string, swrOptions?: any) {
+  static useGetItemCount(id: string | null | undefined, swrOptions?: any) {
     const url = `/files/${id}/get_item_count`
     return useSWR<number>(
       id ? url : null,
@@ -368,7 +381,10 @@ export default class FileAPI {
     })
   }
 
-  static useGetUserPermissions(id?: string, swrOptions?: any) {
+  static useGetUserPermissions(
+    id: string | null | undefined,
+    swrOptions?: any,
+  ) {
     const url = `/files/${id}/get_user_permissions`
     return useSWR<UserPermission[]>(
       id ? url : null,
@@ -384,7 +400,10 @@ export default class FileAPI {
     })
   }
 
-  static useGetGroupPermissions(id?: string, swrOptions?: any) {
+  static useGetGroupPermissions(
+    id: string | null | undefined,
+    swrOptions?: any,
+  ) {
     const url = `/files/${id}/get_group_permissions`
     return useSWR<GroupPermission[]>(
       id ? url : null,

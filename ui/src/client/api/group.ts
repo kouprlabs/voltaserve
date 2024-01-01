@@ -91,7 +91,7 @@ export default class GroupAPI {
     })
   }
 
-  static useGetById(id?: string, swrOptions?: any) {
+  static useGetById(id: string | null | undefined, swrOptions?: any) {
     const url = `/groups/${id}`
     return useSWR<Group>(
       id ? url : null,

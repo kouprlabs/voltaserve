@@ -18,12 +18,12 @@ import { Helmet } from 'react-helmet-async'
 import FileAPI from '@/client/api/file'
 import WorkspaceAPI from '@/client/api/workspace'
 import { swrConfig } from '@/client/options'
+import Path from '@/components/common/path'
 import Copy from '@/components/file/copy'
 import Create from '@/components/file/create'
 import Delete from '@/components/file/delete'
 import List from '@/components/file/list'
 import Move from '@/components/file/move'
-import Path from '@/components/file/path'
 import Rename from '@/components/file/rename'
 import Sharing from '@/components/file/sharing'
 import Toolbar from '@/components/file/toolbar'
@@ -89,7 +89,16 @@ const WorkspaceFilesPage = () => {
         overflow="hidden"
         flexGrow={1}
       >
-        <Path />
+        {workspace && fileId ? (
+          <Path
+            rootId={workspace.rootId}
+            fileId={fileId}
+            maxCharacters={30}
+            onClick={(fileId) =>
+              navigate(`/workspace/${workspace.id}/file/${fileId}`)
+            }
+          />
+        ) : null}
         {list ? <Toolbar list={list} /> : null}
         <VStack
           flexGrow={1}

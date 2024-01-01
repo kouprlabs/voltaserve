@@ -2,9 +2,6 @@ import { useCallback, useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import {
   Box,
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
   Button,
   Center,
   Stack,
@@ -17,6 +14,7 @@ import { SectionSpinner } from '@koupr/ui'
 import { FcFolder } from 'react-icons/fc'
 import FileAPI, { File, FileType } from '@/client/api/file'
 import WorkspaceAPI from '@/client/api/workspace'
+import Path from '@/components/common/path'
 
 type BrowseProps = {
   onChange?: (id: string) => void
@@ -26,7 +24,6 @@ const Browse = ({ onChange }: BrowseProps) => {
   const { id } = useParams()
   const { data: workspace } = WorkspaceAPI.useGetById(id)
   const [folders, setFolders] = useState<File[]>([])
-  const [path, setPath] = useState<File[]>([])
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [loading, setLoading] = useState(false)
@@ -41,14 +38,6 @@ const Browse = ({ onChange }: BrowseProps) => {
       setFileId(workspace.rootId)
     }
   }, [workspace])
-
-  useEffect(() => {
-    ;(async () => {
-      if (fileId) {
-        setPath(await FileAPI.getPath(fileId))
-      }
-    })()
-  }, [fileId])
 
   useEffect(() => {
     ;(async () => {
@@ -96,25 +85,14 @@ const Browse = ({ onChange }: BrowseProps) => {
 
   return (
     <Stack spacing={variables.spacingSm}>
-      <Breadcrumb>
-        <BreadcrumbItem>
-          {workspace && (
-            <BreadcrumbLink onClick={() => setFileId(workspace.rootId)}>
-              Home
-            </BreadcrumbLink>
-          )}
-        </BreadcrumbItem>
-        {path.slice(1).map((f) => (
-          <BreadcrumbItem key={f.id}>
-            <BreadcrumbLink
-              isCurrentPage={fileId === f.id}
-              onClick={() => setFileId(f.id)}
-            >
-              {f.name}
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-        ))}
-      </Breadcrumb>
+      {workspace && fileId ? (
+        <Path
+          rootId={workspace.rootId}
+          fileId={fileId}
+          maxCharacters={10}
+          onClick={(fileId) => setFileId(fileId)}
+        />
+      ) : null}
       <Stack
         spacing={0}
         borderTop="1px solid"
@@ -137,8 +115,8 @@ const Browse = ({ onChange }: BrowseProps) => {
               borderRadius={variables.borderRadiusSm}
               onClick={() => setFileId(f.id)}
             >
-              <FcFolder fontSize="36px" />
-              <Text>{f.name}</Text>
+              <FcFolder fontSize="36px" style={{ flexShrink: 0 }} />
+              <Text noOfLines={1}>{f.name}</Text>
               <Box flexGrow={1} />
               <IconChevronRight />
             </Stack>

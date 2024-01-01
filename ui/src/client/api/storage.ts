@@ -18,7 +18,7 @@ export default class StorageAPI {
     )
   }
 
-  static useGetWorkspaceUsage(id?: string, swrOptions?: any) {
+  static useGetWorkspaceUsage(id: string | null | undefined, swrOptions?: any) {
     const url = id
       ? `/storage/get_workspace_usage?${new URLSearchParams({
           id,
@@ -31,9 +31,9 @@ export default class StorageAPI {
     )
   }
 
-  static useGetFileUsage(id: string, swrOptions?: any) {
+  static useGetFileUsage(id: string | null | undefined, swrOptions?: any) {
     const url = `/storage/get_file_usage?${new URLSearchParams({
-      id,
+      id: id!,
     })}`
     return useSWR<StorageUsage>(
       id ? url : null,

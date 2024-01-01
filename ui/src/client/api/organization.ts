@@ -59,7 +59,7 @@ export default class OrganizationAPI {
     })
   }
 
-  static useGetById(id?: string, swrOptions?: any) {
+  static useGetById(id: string | null | undefined, swrOptions?: any) {
     const url = `/organizations/${id}`
     return useSWR<Organization>(
       id ? url : null,
