@@ -64,7 +64,7 @@ const Path = ({ rootId, fileId, maxCharacters, onClick }: PathProps) => {
         </Breadcrumb>
       ) : null}
       {isLoading ? (
-        <HStack>
+        <HStack flexShrink={0}>
           <Skeleton w="100px" h="20px" borderRadius="20px" />
           <Text>/</Text>
           <Skeleton w="100px" h="20px" borderRadius="20px" />
