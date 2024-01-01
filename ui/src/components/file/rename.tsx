@@ -41,7 +41,7 @@ const Rename = () => {
     (state) => state.ui.files.isRenameModalOpen,
   )
   const id = useAppSelector((state) => state.ui.files.selection[0])
-  const { data: file } = FileAPI.useGetById(id)
+  const { data: file, mutate: mutateFile } = FileAPI.useGetById(id)
   const formSchema = Yup.object().shape({
     name: Yup.string().required('Name is required').max(255),
   })
@@ -57,7 +57,7 @@ const Rename = () => {
       }
       setSubmitting(true)
       try {
-        await FileAPI.rename(file.id, { name })
+        await mutateFile(await FileAPI.rename(file.id, { name }))
         await mutate<List>(`/files/${fileId}/list?${fileListSearchParams}`)
         setSubmitting(false)
         dispatch(renameModalDidClose())
@@ -65,7 +65,7 @@ const Rename = () => {
         setSubmitting(false)
       }
     },
-    [file, fileId, fileListSearchParams, dispatch, mutate],
+    [file, fileId, fileListSearchParams, dispatch, mutate, mutateFile],
   )
 
   return (
