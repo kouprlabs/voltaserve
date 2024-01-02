@@ -4,7 +4,6 @@ import {
   Badge,
   Button,
   Center,
-  HStack,
   IconButton,
   Menu,
   MenuButton,
@@ -68,7 +67,7 @@ const OrganizationInvitationsPage = () => {
     id,
     swrConfig(),
   )
-  const { page, size, steps, handlePageChange, setSize } = usePagePagination({
+  const { page, size, steps, setPage, setSize } = usePagePagination({
     navigate,
     location,
     storage: outgoingInvitationPaginationStorage(),
@@ -204,16 +203,16 @@ const OrganizationInvitationsPage = () => {
             </Tbody>
           </Table>
           {list && (
-            <HStack alignSelf="end">
-              <PagePagination
-                totalPages={list.totalPages}
-                page={page}
-                size={size}
-                steps={steps}
-                handlePageChange={handlePageChange}
-                setSize={setSize}
-              />
-            </HStack>
+            <PagePagination
+              style={{ alignSelf: 'end' }}
+              totalElements={list.totalElements}
+              totalPages={list.totalPages}
+              page={page}
+              size={size}
+              steps={steps}
+              setPage={setPage}
+              setSize={setSize}
+            />
           )}
         </Stack>
       ) : null}
