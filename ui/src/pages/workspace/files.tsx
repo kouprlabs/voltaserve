@@ -1,16 +1,10 @@
 import { useEffect } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
-import {
-  Box,
-  Center,
-  HStack,
-  Stack,
-  VStack,
-  useColorModeValue,
-} from '@chakra-ui/react'
+import { Box, Center, Stack, VStack, useColorModeValue } from '@chakra-ui/react'
 import {
   PagePagination,
   Spinner,
+  usePageMonitor,
   usePagePagination,
   variables,
 } from '@koupr/ui'
@@ -46,7 +40,7 @@ const WorkspaceFilesPage = () => {
   const iconScale = useAppSelector((state) => state.ui.files.iconScale)
   const borderColor = useColorModeValue('gray.300', 'gray.600')
   const { data: workspace } = WorkspaceAPI.useGetById(id, swrConfig())
-  const { page, size, steps, handlePageChange, setSize } = usePagePagination({
+  const { page, size, steps, setPage, setSize } = usePagePagination({
     navigate,
     location,
     storage: filesPaginationStorage(),
@@ -72,7 +66,12 @@ const WorkspaceFilesPage = () => {
     },
     swrConfig(),
   )
-  const hasPagination = list && list.totalPages > 1
+  const { hasPageSwitcher, hasSizeSelector } = usePageMonitor({
+    totalElements: list?.totalElements || 0,
+    totalPages: list?.totalPages || 1,
+    steps,
+  })
+  const hasPagination = hasPageSwitcher || hasSizeSelector
 
   useEffect(() => {
     if (list) {
@@ -125,17 +124,17 @@ const WorkspaceFilesPage = () => {
             ) : null}
             {list && !error ? <List list={list} scale={iconScale} /> : null}
           </Box>
-          {hasPagination ? (
-            <HStack alignSelf="end" pb={variables.spacing}>
-              <PagePagination
-                totalPages={list.totalPages}
-                page={page}
-                size={size}
-                steps={steps}
-                handlePageChange={handlePageChange}
-                setSize={setSize}
-              />
-            </HStack>
+          {list ? (
+            <PagePagination
+              style={{ alignSelf: 'end', paddingBottom: variables.spacing }}
+              totalElements={list.totalElements}
+              totalPages={list.totalPages}
+              page={page}
+              size={size}
+              steps={steps}
+              setPage={setPage}
+              setSize={setSize}
+            />
           ) : null}
         </VStack>
       </Stack>

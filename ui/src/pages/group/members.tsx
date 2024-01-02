@@ -54,7 +54,7 @@ const GroupMembersPage = () => {
     id,
     swrConfig(),
   )
-  const { page, size, steps, handlePageChange, setSize } = usePagePagination({
+  const { page, size, steps, setPage, setSize } = usePagePagination({
     navigate,
     location,
     storage: groupMemberPaginationStorage(),
@@ -149,16 +149,16 @@ const GroupMembersPage = () => {
             </Tbody>
           </Table>
           {list && (
-            <HStack alignSelf="end">
-              <PagePagination
-                totalPages={list.totalPages}
-                page={page}
-                size={size}
-                steps={steps}
-                handlePageChange={handlePageChange}
-                setSize={setSize}
-              />
-            </HStack>
+            <PagePagination
+              style={{ alignSelf: 'end' }}
+              totalElements={list.totalElements}
+              totalPages={list.totalPages}
+              page={page}
+              size={size}
+              steps={steps}
+              setPage={setPage}
+              setSize={setSize}
+            />
           )}
           {userToRemove && (
             <RemoveMember
