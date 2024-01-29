@@ -1,4 +1,5 @@
 import { MouseEvent, useCallback, useEffect, useMemo, useState } from 'react'
+import { useParams } from 'react-router-dom'
 import {
   Wrap,
   WrapItem,
@@ -9,6 +10,7 @@ import {
   MenuList,
   MenuItem,
   MenuDivider,
+  Box,
 } from '@chakra-ui/react'
 import {
   IconCopy,
@@ -26,6 +28,7 @@ import {
   useSensor,
   DragStartEvent,
 } from '@dnd-kit/core'
+import { FileWithPath, useDropzone } from 'react-dropzone'
 import { List as FileList } from '@/client/api/file'
 import {
   geEditorPermission,
@@ -34,6 +37,7 @@ import {
   ltViewerPermission,
 } from '@/client/api/permission'
 import downloadFile from '@/helpers/download-file'
+import { UploadDecorator, uploadAdded } from '@/store/entities/uploads'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import {
   copyModalDidOpen,
@@ -44,6 +48,7 @@ import {
   renameModalDidOpen,
   sharingModalDidOpen,
 } from '@/store/ui/files'
+import { uploadsDrawerOpened } from '@/store/ui/uploads-drawer'
 import ItemDragOverlay from './item-drag-overlay'
 import ItemDraggableDroppable from './item-draggable-droppable'
 
@@ -54,6 +59,7 @@ type ListProps = {
 
 const List = ({ list, scale }: ListProps) => {
   const dispatch = useAppDispatch()
+  const { id, fileId } = useParams()
   const singleFile = useAppSelector((state) =>
     state.ui.files.selection.length === 1
       ? list.data.find((e) => e.id === state.ui.files.selection[0])
@@ -75,6 +81,30 @@ const List = ({ list, scale }: ListProps) => {
       },
     }),
   )
+  const onDrop = useCallback(
+    (files: FileWithPath[]) => {
+      if (files.length === 0) {
+        return
+      }
+      for (const file of files) {
+        dispatch(
+          uploadAdded(
+            new UploadDecorator({
+              workspaceId: id!,
+              parentId: fileId!,
+              file,
+            }).value,
+          ),
+        )
+      }
+      dispatch(uploadsDrawerOpened())
+    },
+    [id, fileId, dispatch],
+  )
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    noClick: true,
+  })
 
   useEffect(() => {
     const handleKeydown = (event: KeyboardEvent) => {
@@ -107,40 +137,48 @@ const List = ({ list, scale }: ListProps) => {
 
   return (
     <>
-      <DndContext
-        sensors={sensors}
-        onDragStart={handleDragStart}
-        onDragEnd={handleDragEnd}
+      <Box
+        border="2px solid"
+        borderColor={isDragActive ? 'green.300' : 'transparent'}
+        borderRadius={variables.borderRadiusSm}
+        {...getRootProps()}
       >
-        {list.totalElements === 0 && (
-          <Center w="100%" h="300px">
-            <Text>There are no items.</Text>
-          </Center>
-        )}
-        {list.totalElements > 0 ? (
-          <Wrap
-            spacing={variables.spacing}
-            overflow="hidden"
-            pb={variables.spacingLg}
-          >
-            {list.data
-              .filter((e) => !hidden.includes(e.id))
-              .map((f) => (
-                <WrapItem key={f.id}>
-                  <ItemDraggableDroppable
-                    file={f}
-                    scale={scale}
-                    onContextMenu={(event: MouseEvent) => {
-                      setMenuPosition({ x: event.pageX, y: event.pageY })
-                      setIsMenuOpen(true)
-                    }}
-                  />
-                </WrapItem>
-              ))}
-          </Wrap>
-        ) : null}
-        <ItemDragOverlay file={activeFile!} scale={scale} />
-      </DndContext>
+        <input {...getInputProps()} />
+        <DndContext
+          sensors={sensors}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+        >
+          {list.totalElements === 0 && (
+            <Center w="100%" h="300px">
+              <Text>There are no items.</Text>
+            </Center>
+          )}
+          {list.totalElements > 0 ? (
+            <Wrap
+              spacing={variables.spacing}
+              overflow="hidden"
+              pb={variables.spacingLg}
+            >
+              {list.data
+                .filter((e) => !hidden.includes(e.id))
+                .map((f) => (
+                  <WrapItem key={f.id}>
+                    <ItemDraggableDroppable
+                      file={f}
+                      scale={scale}
+                      onContextMenu={(event: MouseEvent) => {
+                        setMenuPosition({ x: event.pageX, y: event.pageY })
+                        setIsMenuOpen(true)
+                      }}
+                    />
+                  </WrapItem>
+                ))}
+            </Wrap>
+          ) : null}
+          <ItemDragOverlay file={activeFile!} scale={scale} />
+        </DndContext>
+      </Box>
       <Portal>
         <Menu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)}>
           <MenuList
