@@ -74,6 +74,7 @@ func (r *FileRouter) AppendRoutes(g fiber.Router) {
 //	@Produce		json
 //	@Param			workspace_id	query		string	true	"Workspace ID"
 //	@Param			parent_id		query		string	false	"Parent ID"
+//	@Param			name			query		string	false	"Name"
 //	@Success		200				{object}	service.File
 //	@Failure		404				{object}	errorpkg.ErrorResponse
 //	@Failure		400				{object}	errorpkg.ErrorResponse
@@ -104,8 +105,12 @@ func (r *FileRouter) Upload(c *fiber.Ctx) error {
 	if !ok {
 		return errorpkg.NewStorageLimitExceededError()
 	}
+	name := c.Query("name")
+	if name == "" {
+		name = fh.Filename
+	}
 	file, err := r.fileSvc.Create(service.FileCreateOptions{
-		Name:        fh.Filename,
+		Name:        name,
 		Type:        model.FileTypeFile,
 		ParentID:    &parentID,
 		WorkspaceID: workspaceID,

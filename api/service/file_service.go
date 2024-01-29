@@ -225,15 +225,55 @@ func NewFileService() *FileService {
 }
 
 func (svc *FileService) Create(opts FileCreateOptions, userID string) (*File, error) {
+	var components []string
+	for _, component := range strings.Split(opts.Name, "/") {
+		if component != "" {
+			components = append(components, component)
+		}
+	}
+	parentID := opts.ParentID
+	if len(components) > 1 {
+		for _, component := range components[:len(components)-1] {
+			existing, err := svc.getChildWithName(*parentID, component)
+			if err != nil {
+				return nil, err
+			}
+			if existing != nil {
+				parentID = new(string)
+				*parentID = existing.GetID()
+			} else {
+				res, err := svc.create(FileCreateOptions{
+					Name:        component,
+					Type:        model.FileTypeFolder,
+					ParentID:    parentID,
+					WorkspaceID: opts.WorkspaceID,
+				}, userID)
+				if err != nil {
+					return nil, err
+				}
+				parentID = &res.ID
+			}
+		}
+	}
+	name := components[len(components)-1]
+	return svc.create(FileCreateOptions{
+		WorkspaceID: opts.WorkspaceID,
+		Name:        name,
+		Type:        opts.Type,
+		ParentID:    parentID,
+	}, userID)
+}
+
+func (svc *FileService) create(opts FileCreateOptions, userID string) (*File, error) {
 	if len(*opts.ParentID) > 0 {
 		if err := svc.validateParent(*opts.ParentID, userID); err != nil {
 			return nil, err
 		}
-		nameExists, err := svc.hasChildWithName(*opts.ParentID, opts.Name)
+		existing, err := svc.getChildWithName(*opts.ParentID, opts.Name)
 		if err != nil {
 			return nil, err
 		}
-		if nameExists {
+		if existing != nil {
 			return nil, errorpkg.NewFileWithSimilarNameExistsError()
 		}
 	}
@@ -854,11 +894,11 @@ func (svc *FileService) Copy(targetID string, sourceIDs []string, userID string)
 		}
 
 		/* If there is a file with similar name, append a prefix */
-		nameExists, err := svc.hasChildWithName(targetID, rootClone.GetName())
+		existing, err := svc.getChildWithName(targetID, rootClone.GetName())
 		if err != nil {
 			return nil, err
 		}
-		if nameExists {
+		if existing != nil {
 			rootClone.SetName(fmt.Sprintf("Copy of %s", rootClone.GetName()))
 		}
 
@@ -927,11 +967,11 @@ func (svc *FileService) Move(targetID string, sourceIDs []string, userID string)
 			return []string{}, err
 		}
 		if source.GetParentID() != nil {
-			nameExists, err := svc.hasChildWithName(targetID, source.GetName())
+			existing, err := svc.getChildWithName(targetID, source.GetName())
 			if err != nil {
 				return nil, err
 			}
-			if nameExists {
+			if existing != nil {
 				return nil, errorpkg.NewFileWithSimilarNameExistsError()
 			}
 		}
@@ -1013,11 +1053,11 @@ func (svc *FileService) Rename(id string, name string, userID string) (*File, er
 		return nil, err
 	}
 	if file.GetParentID() != nil {
-		nameExists, err := svc.hasChildWithName(*file.GetParentID(), name)
+		existing, err := svc.getChildWithName(*file.GetParentID(), name)
 		if err != nil {
 			return nil, err
 		}
-		if nameExists {
+		if existing != nil {
 			return nil, errorpkg.NewFileWithSimilarNameExistsError()
 		}
 	}
@@ -1727,17 +1767,17 @@ func (svc *FileService) doQueryFiltering(data []model.File, opts FileQuery, pare
 	return res, nil
 }
 
-func (svc *FileService) hasChildWithName(id string, name string) (bool, error) {
+func (svc *FileService) getChildWithName(id string, name string) (model.File, error) {
 	children, err := svc.fileRepo.FindChildren(id)
 	if err != nil {
-		return false, err
+		return nil, err
 	}
 	for _, child := range children {
 		if child.GetName() == name {
-			return true, nil
+			return child, nil
 		}
 	}
-	return false, nil
+	return nil, nil
 }
 
 type FileMapper struct {

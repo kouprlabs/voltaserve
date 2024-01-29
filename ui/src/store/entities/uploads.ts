@@ -1,11 +1,12 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
+import { FileWithPath } from 'react-dropzone'
 import { newHashId } from '@/infra/id'
 
 export type Upload = {
   id: string
   workspaceId: string
   parentId: string
-  file: File
+  file: File | FileWithPath
   request?: any
   progress?: number
   error?: string
@@ -19,7 +20,7 @@ export class UploadDecorator {
     id?: string
     workspaceId: string
     parentId: string
-    file: File
+    file: File | FileWithPath
     request?: any
     progress?: number
     error?: string

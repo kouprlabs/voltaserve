@@ -87,9 +87,6 @@ const List = ({ list, scale }: ListProps) => {
         return
       }
       for (const file of files) {
-        // TODO: create folder if not exists using file.path
-        console.log(file.path)
-        // TODO: set parentId to folder id
         dispatch(
           uploadAdded(
             new UploadDecorator({

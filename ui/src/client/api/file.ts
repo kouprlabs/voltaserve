@@ -139,17 +139,30 @@ export type RevokeGroupPermissionOptions = {
   groupId: string
 }
 
+export type UploadOptions = {
+  workspaceId: string
+  parentId?: string
+  name?: string
+  file: Blob
+  request: XMLHttpRequest
+  onProgress?: (value: number) => void
+}
+
 export default class FileAPI {
-  static async upload(
-    workspaceId: string,
-    parentId: string | null,
-    request: XMLHttpRequest,
-    file: Blob,
-    onProgress?: (value: number) => void,
-  ): Promise<File> {
+  static async upload({
+    workspaceId,
+    parentId,
+    name,
+    request,
+    file,
+    onProgress,
+  }: UploadOptions): Promise<File> {
     const params = new URLSearchParams({ workspace_id: workspaceId })
     if (parentId) {
       params.append('parent_id', parentId)
+    }
+    if (name) {
+      params.append('name', name)
     }
     return this.doUpload(
       `${getConfig().apiURL}/files?${params}`,

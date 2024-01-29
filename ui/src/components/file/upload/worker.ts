@@ -1,3 +1,4 @@
+import { FileWithPath } from 'react-dropzone'
 import FileAPI from '@/client/api/file'
 import { errorToString } from '@/client/error'
 import store from '@/store/configure-store'
@@ -19,15 +20,16 @@ setInterval(async () => {
   try {
     const request = new XMLHttpRequest()
     store.dispatch(uploadUpdated({ id: upload.id, request }))
-    await FileAPI.upload(
-      upload.workspaceId,
-      upload.parentId,
+    await FileAPI.upload({
+      workspaceId: upload.workspaceId,
+      parentId: upload.parentId,
+      name: (upload.file as FileWithPath).path || upload.file.name,
       request,
-      upload.file,
-      (progress) => {
+      file: upload.file,
+      onProgress: (progress) => {
         store.dispatch(uploadUpdated({ id: upload.id, progress }))
       },
-    )
+    })
     store.dispatch(uploadCompleted(upload.id))
   } catch (error) {
     store.dispatch(
