@@ -23,7 +23,10 @@ setInterval(async () => {
     await FileAPI.upload({
       workspaceId: upload.workspaceId,
       parentId: upload.parentId,
-      name: (upload.file as FileWithPath).path || upload.file.name,
+      name:
+        (upload.file as FileWithPath).path ||
+        upload.file.webkitRelativePath ||
+        upload.file.name,
       request,
       file: upload.file,
       onProgress: (progress) => {

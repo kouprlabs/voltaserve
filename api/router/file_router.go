@@ -242,6 +242,9 @@ func (r *FileRouter) GetByID(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
+	if len(res) == 0 {
+		return errorpkg.NewFileNotFoundError(nil)
+	}
 	return c.JSON(res[0])
 }
 
