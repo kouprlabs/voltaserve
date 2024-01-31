@@ -45,6 +45,7 @@ import {
   IconCheck,
 } from '@koupr/ui'
 import { useSWRConfig } from 'swr'
+import { FiChevronDown } from 'react-icons/fi'
 import FileAPI, { List, SortBy, SortOrder } from '@/client/api/file'
 import { ltEditorPermission, ltOwnerPermission } from '@/client/api/permission'
 import downloadFile from '@/helpers/download-file'
@@ -114,7 +115,8 @@ const Toolbar = ({ list }: ToolbarProps) => {
           ) !== -1,
       ) === -1,
   )
-  const uploadHiddenInput = useRef<HTMLInputElement>(null)
+  const fileUploadInput = useRef<HTMLInputElement>(null)
+  const folderUploadInput = useRef<HTMLInputElement>(null)
   const fileListSearchParams = useFileListSearchParams()
   const { data: folder } = FileAPI.useGetById(fileId)
 
@@ -151,8 +153,11 @@ const Toolbar = ({ list }: ToolbarProps) => {
         )
       }
       dispatch(uploadsDrawerOpened())
-      if (uploadHiddenInput && uploadHiddenInput.current) {
-        uploadHiddenInput.current.value = ''
+      if (fileUploadInput && fileUploadInput.current) {
+        fileUploadInput.current.value = ''
+      }
+      if (folderUploadInput && folderUploadInput.current) {
+        folderUploadInput.current.value = ''
       }
     },
     [id, fileId, dispatch],
@@ -217,17 +222,33 @@ const Toolbar = ({ list }: ToolbarProps) => {
     <>
       <Stack direction="row" spacing={SPACING}>
         <ButtonGroup isAttached>
-          <Button
-            variant="solid"
-            colorScheme="blue"
-            leftIcon={<IconUpload />}
-            isDisabled={
-              !folder || ltEditorPermission(folder.permission) || !list
-            }
-            onClick={() => uploadHiddenInput?.current?.click()}
-          >
-            Upload File
-          </Button>
+          <Menu>
+            <MenuButton
+              as={Button}
+              variant="solid"
+              colorScheme="blue"
+              leftIcon={<FiChevronDown fontSize="16px" />}
+              isDisabled={
+                !folder || ltEditorPermission(folder.permission) || !list
+              }
+            >
+              Upload
+            </MenuButton>
+            <MenuList>
+              <MenuItem
+                icon={<IconAdd />}
+                onClick={() => fileUploadInput?.current?.click()}
+              >
+                Upload Files
+              </MenuItem>
+              <MenuItem
+                icon={<IconUpload />}
+                onClick={() => folderUploadInput?.current?.click()}
+              >
+                Upload Folder
+              </MenuItem>
+            </MenuList>
+          </Menu>
           <Button
             variant="outline"
             colorScheme="blue"
@@ -428,10 +449,20 @@ const Toolbar = ({ list }: ToolbarProps) => {
         </Stack>
       </Stack>
       <input
-        ref={uploadHiddenInput}
+        ref={fileUploadInput}
         className="hidden"
         type="file"
         multiple
+        onChange={handleFileChange}
+      />
+      <input
+        ref={folderUploadInput}
+        className="hidden"
+        type="file"
+        /* @ts-expect-error intentionaly ignored */
+        directory=""
+        webkitdirectory=""
+        mozdirectory=""
         onChange={handleFileChange}
       />
     </>
