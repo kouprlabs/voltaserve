@@ -234,20 +234,22 @@ const Toolbar = ({ list }: ToolbarProps) => {
             >
               Upload
             </MenuButton>
-            <MenuList>
-              <MenuItem
-                icon={<IconAdd />}
-                onClick={() => fileUploadInput?.current?.click()}
-              >
-                Upload Files
-              </MenuItem>
-              <MenuItem
-                icon={<IconUpload />}
-                onClick={() => folderUploadInput?.current?.click()}
-              >
-                Upload Folder
-              </MenuItem>
-            </MenuList>
+            <Portal>
+              <MenuList>
+                <MenuItem
+                  icon={<IconAdd />}
+                  onClick={() => fileUploadInput?.current?.click()}
+                >
+                  Upload Files
+                </MenuItem>
+                <MenuItem
+                  icon={<IconUpload />}
+                  onClick={() => folderUploadInput?.current?.click()}
+                >
+                  Upload Folder
+                </MenuItem>
+              </MenuList>
+            </Portal>
           </Menu>
           <Button
             variant="outline"
