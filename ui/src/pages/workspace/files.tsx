@@ -22,12 +22,10 @@ import Rename from '@/components/file/rename'
 import Sharing from '@/components/file/sharing'
 import Toolbar from '@/components/file/toolbar'
 import { decodeQuery } from '@/helpers/query'
-import { filesPaginationStorage } from '@/infra/pagination'
+import { filePaginationSteps, filesPaginationStorage } from '@/infra/pagination'
 import { listUpdated } from '@/store/entities/files'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { selectionUpdated } from '@/store/ui/files'
-
-const PAGINATION_STEP = 21
 
 const WorkspaceFilesPage = () => {
   const navigate = useNavigate()
@@ -44,12 +42,7 @@ const WorkspaceFilesPage = () => {
     navigate,
     location,
     storage: filesPaginationStorage(),
-    steps: [
-      PAGINATION_STEP,
-      PAGINATION_STEP * 2,
-      PAGINATION_STEP * 4,
-      PAGINATION_STEP * 5,
-    ],
+    steps: filePaginationSteps(),
   })
   const {
     data: list,

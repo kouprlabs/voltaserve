@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { usePagePagination } from '@koupr/ui'
-import { filesPaginationStorage } from '@/infra/pagination'
+import { filePaginationSteps, filesPaginationStorage } from '@/infra/pagination'
 import { useAppSelector } from '@/store/hook'
 
 export default function useFileListSearchParams() {
@@ -11,6 +11,7 @@ export default function useFileListSearchParams() {
     navigate,
     location,
     storage: filesPaginationStorage(),
+    steps: filePaginationSteps(),
   })
 
   const params: any = {}
