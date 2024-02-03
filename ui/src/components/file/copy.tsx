@@ -11,46 +11,41 @@ import {
   Button,
 } from '@chakra-ui/react'
 import { variables } from '@koupr/ui'
-import FileAPI from '@/client/api/file'
-import { listUpdated } from '@/store/entities/files'
+import { useSWRConfig } from 'swr'
+import FileAPI, { List } from '@/client/api/file'
+import useFileListSearchParams from '@/hooks/use-file-list-params'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { copyModalDidClose, selectionUpdated } from '@/store/ui/files'
 import Browse from './browse'
 
 const Copy = () => {
+  const { mutate } = useSWRConfig()
   const dispatch = useAppDispatch()
-  const { fileId: fileIdQuery } = useParams()
+  const { fileId } = useParams()
   const isModalOpen = useAppSelector((state) => state.ui.files.isCopyModalOpen)
   const selection = useAppSelector((state) => state.ui.files.selection)
-  const sortBy = useAppSelector((state) => state.ui.files.sortBy)
-  const sortOrder = useAppSelector((state) => state.ui.files.sortOrder)
   const [loading, setLoading] = useState(false)
-  const [fileId, setFileId] = useState<string>()
+  const [targetId, setTargetId] = useState<string>()
+  const fileListSearchParams = useFileListSearchParams()
 
   const handleMove = useCallback(async () => {
-    if (!fileId) {
+    if (!targetId) {
       return
     }
     try {
       setLoading(true)
-      await FileAPI.copy(fileId, {
+      await FileAPI.copy(targetId, {
         ids: selection,
       })
-      if (fileIdQuery === fileId) {
-        const result = await FileAPI.list(fileId, {
-          page: 1,
-          size: FileAPI.DEFAULT_PAGE_SIZE,
-          sortBy,
-          sortOrder,
-        })
-        dispatch(listUpdated(result))
+      if (fileId === targetId) {
+        await mutate<List>(`/files/${targetId}/list?${fileListSearchParams}`)
       }
       dispatch(selectionUpdated([]))
       dispatch(copyModalDidClose())
     } finally {
       setLoading(false)
     }
-  }, [fileId, fileIdQuery, selection, sortBy, sortOrder, dispatch])
+  }, [targetId, fileId, selection, fileListSearchParams, mutate, dispatch])
 
   return (
     <Modal
@@ -63,7 +58,7 @@ const Copy = () => {
         <ModalHeader>Copy {selection.length} Item(s) to…</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-          <Browse onChange={(id) => setFileId(id)} />
+          <Browse onChange={(id) => setTargetId(id)} />
         </ModalBody>
         <ModalFooter>
           <Button

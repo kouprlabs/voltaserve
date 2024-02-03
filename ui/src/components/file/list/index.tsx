@@ -1,49 +1,110 @@
-import { useEffect, useState } from 'react'
-import { useParams, useSearchParams } from 'react-router-dom'
-import { Wrap, WrapItem, Text, Center } from '@chakra-ui/react'
-import { Spinner, variables } from '@koupr/ui'
-import FileAPI, { List as FileListData } from '@/client/api/file'
-import { REFRESH_INTERVAL, swrConfig } from '@/client/options'
-import { decodeQuery } from '@/helpers/query'
-import store from '@/store/configure-store'
+import { MouseEvent, useCallback, useEffect, useMemo, useState } from 'react'
+import { useParams } from 'react-router-dom'
 import {
-  listUpdated,
-  folderUpdated,
-  filesUpdated,
-} from '@/store/entities/files'
+  Wrap,
+  WrapItem,
+  Text,
+  Center,
+  Portal,
+  Menu,
+  MenuList,
+  MenuItem,
+  MenuDivider,
+  Box,
+} from '@chakra-ui/react'
+import {
+  IconCopy,
+  IconDownload,
+  IconEdit,
+  IconMove,
+  IconShare,
+  IconTrash,
+  variables,
+} from '@koupr/ui'
+import {
+  DndContext,
+  useSensors,
+  PointerSensor,
+  useSensor,
+  DragStartEvent,
+} from '@dnd-kit/core'
+import { FileWithPath, useDropzone } from 'react-dropzone'
+import { List as FileList } from '@/client/api/file'
+import {
+  geEditorPermission,
+  ltEditorPermission,
+  ltOwnerPermission,
+  ltViewerPermission,
+} from '@/client/api/permission'
+import downloadFile from '@/helpers/download-file'
+import { UploadDecorator, uploadAdded } from '@/store/entities/uploads'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import {
+  copyModalDidOpen,
+  deleteModalDidOpen,
+  moveModalDidOpen,
   multiSelectKeyUpdated,
   rangeSelectKeyUpdated,
-  selectionUpdated,
+  renameModalDidOpen,
+  sharingModalDidOpen,
 } from '@/store/ui/files'
-import Item from './item'
-
-setInterval(async () => {
-  const ids = store.getState().entities.files.list?.data.map((e) => e.id) || []
-  if (ids.length > 0) {
-    const files = await FileAPI.batchGet({ ids })
-    store.dispatch(filesUpdated(files))
-  }
-}, REFRESH_INTERVAL)
+import { uploadsDrawerOpened } from '@/store/ui/uploads-drawer'
+import ItemDragOverlay from './item-drag-overlay'
+import ItemDraggableDroppable from './item-draggable-droppable'
 
 type ListProps = {
+  list: FileList
   scale: number
 }
 
-const List = ({ scale }: ListProps) => {
+const List = ({ list, scale }: ListProps) => {
   const dispatch = useAppDispatch()
-  const params = useParams()
-  const workspaceId = params.id as string
-  const fileId = params.fileId as string
-  const [searchParams] = useSearchParams()
-  const query = decodeQuery(searchParams.get('q') as string)
-  const list = useAppSelector((state) => state.entities.files.list)
-  const sortBy = useAppSelector((state) => state.ui.files.sortBy)
-  const sortOrder = useAppSelector((state) => state.ui.files.sortOrder)
-  const [isLoading, setIsLoading] = useState(false)
-  const { data: folder } = FileAPI.useGetById(fileId, swrConfig())
-  const { data: itemCount } = FileAPI.useGetItemCount(fileId, swrConfig())
+  const { id, fileId } = useParams()
+  const singleFile = useAppSelector((state) =>
+    state.ui.files.selection.length === 1
+      ? list.data.find((e) => e.id === state.ui.files.selection[0])
+      : null,
+  )
+  const hidden = useAppSelector((state) => state.ui.files.hidden)
+  const [activeId, setActiveId] = useState<string | null>(null)
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [menuPosition, setMenuPosition] = useState<{ x: number; y: number }>()
+  const activeFile = useMemo(
+    () => list.data.find((e) => e.id === activeId),
+    [list, activeId],
+  )
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        delay: 200,
+        tolerance: 5,
+      },
+    }),
+  )
+  const onDrop = useCallback(
+    (files: FileWithPath[]) => {
+      if (files.length === 0) {
+        return
+      }
+      for (const file of files) {
+        dispatch(
+          uploadAdded(
+            new UploadDecorator({
+              workspaceId: id!,
+              parentId: fileId!,
+              file,
+            }).value,
+          ),
+        )
+      }
+      dispatch(uploadsDrawerOpened())
+    },
+    [id, fileId, dispatch],
+  )
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    noClick: true,
+  })
 
   useEffect(() => {
     const handleKeydown = (event: KeyboardEvent) => {
@@ -66,67 +127,151 @@ const List = ({ scale }: ListProps) => {
     }
   }, [dispatch])
 
-  useEffect(() => {
-    if (folder) {
-      dispatch(folderUpdated(folder))
-    }
-  }, [folder, dispatch])
+  const handleDragStart = useCallback((event: DragStartEvent) => {
+    setActiveId(event.active.id as string)
+  }, [])
 
-  useEffect(() => {
-    ;(async () => {
-      setIsLoading(true)
-      dispatch(selectionUpdated([]))
-      try {
-        let result: FileListData
-        if (query) {
-          result = await FileAPI.search(
-            { text: query, parentId: fileId, workspaceId },
-            FileAPI.DEFAULT_PAGE_SIZE,
-            1,
-          )
-        } else {
-          result = await FileAPI.list(fileId, {
-            page: 1,
-            size: FileAPI.DEFAULT_PAGE_SIZE,
-            sortBy,
-            sortOrder,
-          })
-        }
-        dispatch(listUpdated(result))
-      } finally {
-        setIsLoading(false)
-      }
-    })()
-  }, [workspaceId, fileId, query, sortBy, sortOrder, dispatch])
-
-  if (isLoading || !list) {
-    return (
-      <Center w="100%" h="300px" p={variables.spacing}>
-        <Spinner />
-      </Center>
-    )
-  }
+  const handleDragEnd = useCallback(() => {
+    setActiveId(null)
+  }, [])
 
   return (
     <>
-      {itemCount === 0 && (
-        <Center w="100%" h="300px">
-          <Text>There are no items.</Text>
-        </Center>
-      )}
-      {itemCount && itemCount > 0 && list.data.length > 0 ? (
-        <Wrap
-          spacing={variables.spacing}
-          overflow="hidden"
-          pb={variables.spacing2Xl}
+      <Box
+        border="2px solid"
+        borderColor={isDragActive ? 'green.300' : 'transparent'}
+        borderRadius={variables.borderRadiusSm}
+        {...getRootProps()}
+      >
+        <input {...getInputProps()} />
+        <DndContext
+          sensors={sensors}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
         >
-          {list.data.map((f) => (
-            <WrapItem key={f.id}>
-              <Item file={f} scale={scale} />
-            </WrapItem>
-          ))}
-        </Wrap>
-      ) : null}
+          {list.totalElements === 0 && (
+            <Center w="100%" h="300px">
+              <Text>There are no items.</Text>
+            </Center>
+          )}
+          {list.totalElements > 0 ? (
+            <Wrap
+              spacing={variables.spacing}
+              overflow="hidden"
+              pb={variables.spacingLg}
+            >
+              {list.data
+                .filter((e) => !hidden.includes(e.id))
+                .map((f) => (
+                  <WrapItem key={f.id}>
+                    <ItemDraggableDroppable
+                      file={f}
+                      scale={scale}
+                      onContextMenu={(event: MouseEvent) => {
+                        setMenuPosition({ x: event.pageX, y: event.pageY })
+                        setIsMenuOpen(true)
+                      }}
+                    />
+                  </WrapItem>
+                ))}
+            </Wrap>
+          ) : null}
+          <ItemDragOverlay file={activeFile!} scale={scale} />
+        </DndContext>
+      </Box>
+      <Portal>
+        <Menu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)}>
+          <MenuList
+            zIndex="dropdown"
+            style={{
+              position: 'absolute',
+              left: menuPosition?.x,
+              top: menuPosition?.y,
+            }}
+          >
+            <MenuItem
+              icon={<IconShare />}
+              isDisabled={
+                singleFile ? ltOwnerPermission(singleFile.permission) : false
+              }
+              onClick={(event: MouseEvent) => {
+                event.stopPropagation()
+                dispatch(sharingModalDidOpen())
+              }}
+            >
+              Sharing
+            </MenuItem>
+            <MenuItem
+              icon={<IconDownload />}
+              isDisabled={
+                !singleFile ||
+                singleFile.type !== 'file' ||
+                ltViewerPermission(singleFile.permission)
+              }
+              onClick={(event: MouseEvent) => {
+                event.stopPropagation()
+                if (singleFile) {
+                  downloadFile(singleFile)
+                }
+              }}
+            >
+              Download
+            </MenuItem>
+            <MenuDivider />
+            <MenuItem
+              icon={<IconTrash />}
+              color="red"
+              isDisabled={
+                singleFile ? ltOwnerPermission(singleFile.permission) : false
+              }
+              onClick={(event: MouseEvent) => {
+                event.stopPropagation()
+                dispatch(deleteModalDidOpen())
+              }}
+            >
+              Delete
+            </MenuItem>
+            <MenuItem
+              icon={<IconEdit />}
+              isDisabled={
+                singleFile && geEditorPermission(singleFile.permission)
+                  ? false
+                  : true
+              }
+              onClick={(event: MouseEvent) => {
+                event.stopPropagation()
+                dispatch(renameModalDidOpen())
+              }}
+            >
+              Rename
+            </MenuItem>
+            <MenuItem
+              icon={<IconMove />}
+              isDisabled={
+                singleFile ? ltEditorPermission(singleFile.permission) : false
+              }
+              onClick={(event: MouseEvent) => {
+                event.stopPropagation()
+                dispatch(moveModalDidOpen())
+              }}
+            >
+              Move
+            </MenuItem>
+            <MenuItem
+              icon={<IconCopy />}
+              isDisabled={
+                singleFile ? ltEditorPermission(singleFile.permission) : false
+              }
+              onClick={(event: MouseEvent) => {
+                event.stopPropagation()
+                dispatch(copyModalDidOpen())
+              }}
+            >
+              Copy
+            </MenuItem>
+          </MenuList>
+        </Menu>
+      </Portal>
     </>
   )
 }

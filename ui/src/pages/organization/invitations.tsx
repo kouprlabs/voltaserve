@@ -4,7 +4,6 @@ import {
   Badge,
   Button,
   Center,
-  HStack,
   IconButton,
   Menu,
   MenuButton,
@@ -43,6 +42,7 @@ import { geEditorPermission } from '@/client/api/permission'
 import { swrConfig } from '@/client/options'
 import InviteMembers from '@/components/organization/invite-members'
 import prettyDate from '@/helpers/pretty-date'
+import { outgoingInvitationPaginationStorage } from '@/infra/pagination'
 
 type StatusProps = {
   value: InvitationStatus
@@ -61,20 +61,16 @@ const Status = ({ value }: StatusProps) => {
 const OrganizationInvitationsPage = () => {
   const navigate = useNavigate()
   const location = useLocation()
-  const params = useParams()
-  const id = params.id as string
+  const { id } = useParams()
   const toast = useToast()
   const { data: org, error: orgError } = OrganizationAPI.useGetById(
     id,
     swrConfig(),
   )
-  const { page, size, onPageChange, onSizeChange } = usePagePagination({
+  const { page, size, steps, setPage, setSize } = usePagePagination({
     navigate,
     location,
-    storage: {
-      prefix: 'voltaserve',
-      namespace: 'outgoing_invitation',
-    },
+    storage: outgoingInvitationPaginationStorage(),
   })
   const {
     data: list,
@@ -207,15 +203,16 @@ const OrganizationInvitationsPage = () => {
             </Tbody>
           </Table>
           {list && (
-            <HStack alignSelf="end">
-              <PagePagination
-                totalPages={list.totalPages}
-                page={page}
-                size={size}
-                onPageChange={onPageChange}
-                onSizeChange={onSizeChange}
-              />
-            </HStack>
+            <PagePagination
+              style={{ alignSelf: 'end' }}
+              totalElements={list.totalElements}
+              totalPages={list.totalPages}
+              page={page}
+              size={size}
+              steps={steps}
+              setPage={setPage}
+              setSize={setSize}
+            />
           )}
         </Stack>
       ) : null}

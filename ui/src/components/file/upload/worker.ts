@@ -1,7 +1,7 @@
+import { FileWithPath } from 'react-dropzone'
 import FileAPI from '@/client/api/file'
 import { errorToString } from '@/client/error'
 import store from '@/store/configure-store'
-import { filesAdded } from '@/store/entities/files'
 import {
   Upload,
   uploadCompleted,
@@ -10,11 +10,6 @@ import {
 
 export const queue: Upload[] = []
 let working = false
-
-function getFileIdFromPath(): string {
-  const segments = window.location.pathname.split('/')
-  return segments[segments.length - 1]
-}
 
 setInterval(async () => {
   if (queue.length === 0 || working) {
@@ -25,19 +20,19 @@ setInterval(async () => {
   try {
     const request = new XMLHttpRequest()
     store.dispatch(uploadUpdated({ id: upload.id, request }))
-    const result = await FileAPI.upload(
-      upload.workspaceId,
-      upload.parentId,
+    await FileAPI.upload({
+      workspaceId: upload.workspaceId,
+      parentId: upload.parentId,
+      name:
+        (upload.file as FileWithPath).path ||
+        upload.file.webkitRelativePath ||
+        upload.file.name,
       request,
-      upload.file,
-      (progress) => {
+      file: upload.file,
+      onProgress: (progress) => {
         store.dispatch(uploadUpdated({ id: upload.id, progress }))
       },
-    )
-    const fileId = getFileIdFromPath()
-    if (upload.parentId === fileId) {
-      store.dispatch(filesAdded({ id: fileId, files: [result] }))
-    }
+    })
     store.dispatch(uploadCompleted(upload.id))
   } catch (error) {
     store.dispatch(

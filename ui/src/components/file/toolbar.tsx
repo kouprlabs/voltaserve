@@ -6,7 +6,7 @@ import {
   useRef,
   useState,
 } from 'react'
-import { useParams, useSearchParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import {
   Button,
   Stack,
@@ -44,12 +44,13 @@ import {
   IconSortDown,
   IconCheck,
 } from '@koupr/ui'
+import { useSWRConfig } from 'swr'
+import { FiChevronDown } from 'react-icons/fi'
 import FileAPI, { List, SortBy, SortOrder } from '@/client/api/file'
 import { ltEditorPermission, ltOwnerPermission } from '@/client/api/permission'
 import downloadFile from '@/helpers/download-file'
 import mapFileList from '@/helpers/map-file-list'
-import { decodeQuery } from '@/helpers/query'
-import { listUpdated } from '@/store/entities/files'
+import useFileListSearchParams from '@/hooks/use-file-list-params'
 import { uploadAdded, UploadDecorator } from '@/store/entities/uploads'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import {
@@ -72,33 +73,33 @@ import { uploadsDrawerOpened } from '@/store/ui/uploads-drawer'
 
 const ICON_SCALE_KEY = 'voltaserve_file_icon_scale'
 const SPACING = variables.spacingXs
+const ICON_SCALE_SLIDER_STEP = 0.25
+const ICON_SCALE_SLIDER_MIN = 1
+const ICON_SCALE_SLIDER_MAX = ICON_SCALE_SLIDER_STEP * 9
 
-const Toolbar = () => {
+type ToolbarProps = {
+  list?: List
+}
+
+const Toolbar = ({ list }: ToolbarProps) => {
   const dispatch = useAppDispatch()
-  const params = useParams()
-  const workspaceId = params.id as string
-  const fileId = params.fileId as string
-  const [searchParams] = useSearchParams()
-  const query = decodeQuery(searchParams.get('q') as string)
+  const { mutate } = useSWRConfig()
+  const { id, fileId } = useParams()
   const [isRefreshing, setIsRefreshing] = useState(false)
   const selectionCount = useAppSelector(
     (state) => state.ui.files.selection.length,
   )
   const singleFile = useAppSelector((state) =>
     state.ui.files.selection.length === 1
-      ? state.entities.files.list?.data.find(
-          (f) => f.id === state.ui.files.selection[0],
-        )
+      ? list?.data.find((e) => e.id === state.ui.files.selection[0])
       : null,
   )
-  const folder = useAppSelector((state) => state.entities.files.folder)
-  const files = useAppSelector((state) => state.entities.files.list?.data)
   const iconScale = useAppSelector((state) => state.ui.files.iconScale)
   const sortBy = useAppSelector((state) => state.ui.files.sortBy)
   const sortOrder = useAppSelector((state) => state.ui.files.sortOrder)
   const hasOwnerPermission = useAppSelector(
     (state) =>
-      state.entities.files.list?.data.findIndex(
+      list?.data.findIndex(
         (f) =>
           state.ui.files.selection.findIndex(
             (s) => f.id === s && ltOwnerPermission(f.permission),
@@ -107,14 +108,17 @@ const Toolbar = () => {
   )
   const hasEditorPermission = useAppSelector(
     (state) =>
-      state.entities.files.list?.data.findIndex(
+      list?.data.findIndex(
         (f) =>
           state.ui.files.selection.findIndex(
             (s) => f.id === s && ltEditorPermission(f.permission),
           ) !== -1,
       ) === -1,
   )
-  const uploadHiddenInput = useRef<HTMLInputElement>(null)
+  const fileUploadInput = useRef<HTMLInputElement>(null)
+  const folderUploadInput = useRef<HTMLInputElement>(null)
+  const fileListSearchParams = useFileListSearchParams()
+  const { data: folder } = FileAPI.useGetById(fileId)
 
   useEffect(() => {
     const iconScale = localStorage.getItem(ICON_SCALE_KEY)
@@ -141,19 +145,22 @@ const Toolbar = () => {
         dispatch(
           uploadAdded(
             new UploadDecorator({
-              workspaceId: workspaceId,
-              parentId: fileId,
+              workspaceId: id!,
+              parentId: fileId!,
               file,
             }).value,
           ),
         )
       }
       dispatch(uploadsDrawerOpened())
-      if (uploadHiddenInput && uploadHiddenInput.current) {
-        uploadHiddenInput.current.value = ''
+      if (fileUploadInput && fileUploadInput.current) {
+        fileUploadInput.current.value = ''
+      }
+      if (folderUploadInput && folderUploadInput.current) {
+        folderUploadInput.current.value = ''
       }
     },
-    [workspaceId, fileId, dispatch],
+    [id, fileId, dispatch],
   )
 
   const handleIconScaleChange = useCallback(
@@ -167,27 +174,9 @@ const Toolbar = () => {
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true)
     dispatch(selectionUpdated([]))
-    try {
-      let result: List
-      if (query) {
-        result = await FileAPI.search(
-          { text: query, parentId: fileId, workspaceId },
-          FileAPI.DEFAULT_PAGE_SIZE,
-          1,
-        )
-      } else {
-        result = await FileAPI.list(fileId, {
-          page: 1,
-          size: FileAPI.DEFAULT_PAGE_SIZE,
-          sortBy,
-          sortOrder,
-        })
-      }
-      dispatch(listUpdated(result))
-    } finally {
-      setIsRefreshing(false)
-    }
-  }, [dispatch, fileId, workspaceId, query, sortBy, sortOrder])
+    await mutate<List>(`/files/${fileId}/list?${fileListSearchParams}`)
+    setIsRefreshing(false)
+  }, [fileId, fileListSearchParams, mutate, dispatch])
 
   const handleSortByChange = useCallback(
     (value: SortBy) => {
@@ -203,6 +192,12 @@ const Toolbar = () => {
     localStorage.setItem(SORT_ORDER_KEY, value.toString())
     dispatch(sortOrderUpdated(value))
   }, [sortOrder, dispatch])
+
+  const handleSelectAllClick = useCallback(() => {
+    if (list?.data) {
+      dispatch(selectionUpdated(list?.data.map((f) => f.id)))
+    }
+  }, [list?.data, dispatch])
 
   const getSortByIcon = useCallback(
     (value: SortBy): ReactElement => {
@@ -227,20 +222,42 @@ const Toolbar = () => {
     <>
       <Stack direction="row" spacing={SPACING}>
         <ButtonGroup isAttached>
-          <Button
-            variant="solid"
-            colorScheme="blue"
-            leftIcon={<IconUpload />}
-            isDisabled={!folder || ltEditorPermission(folder.permission)}
-            onClick={() => uploadHiddenInput?.current?.click()}
-          >
-            Upload File
-          </Button>
+          <Menu>
+            <MenuButton
+              as={Button}
+              variant="solid"
+              colorScheme="blue"
+              leftIcon={<FiChevronDown fontSize="16px" />}
+              isDisabled={
+                !folder || ltEditorPermission(folder.permission) || !list
+              }
+            >
+              Upload
+            </MenuButton>
+            <Portal>
+              <MenuList>
+                <MenuItem
+                  icon={<IconAdd />}
+                  onClick={() => fileUploadInput?.current?.click()}
+                >
+                  Upload Files
+                </MenuItem>
+                <MenuItem
+                  icon={<IconUpload />}
+                  onClick={() => folderUploadInput?.current?.click()}
+                >
+                  Upload Folder
+                </MenuItem>
+              </MenuList>
+            </Portal>
+          </Menu>
           <Button
             variant="outline"
             colorScheme="blue"
             leftIcon={<IconAdd />}
-            isDisabled={!folder || ltEditorPermission(folder.permission)}
+            isDisabled={
+              !folder || ltEditorPermission(folder.permission) || !list
+            }
             onClick={() => dispatch(createModalDidOpen())}
           >
             New Folder
@@ -279,6 +296,7 @@ const Toolbar = () => {
                 icon={<IconDotsVertical />}
                 variant="solid"
                 aria-label=""
+                isDisabled={!list}
               />
               <Portal>
                 <MenuList zIndex="dropdown">
@@ -333,11 +351,7 @@ const Toolbar = () => {
                   <MenuDivider />
                   <MenuItem
                     icon={<IconCheckCircle />}
-                    onClick={() => {
-                      if (files) {
-                        dispatch(selectionUpdated(files.map((f) => f.id)))
-                      }
-                    }}
+                    onClick={handleSelectAllClick}
                   >
                     Select All
                   </MenuItem>
@@ -355,6 +369,7 @@ const Toolbar = () => {
         <IconButton
           icon={<IconRefresh />}
           isLoading={isRefreshing}
+          isDisabled={!list}
           variant="solid"
           aria-label=""
           onClick={handleRefresh}
@@ -364,9 +379,10 @@ const Toolbar = () => {
           <Slider
             w="120px"
             value={iconScale}
-            min={1}
-            max={2.5}
-            step={0.25}
+            min={ICON_SCALE_SLIDER_MIN}
+            max={ICON_SCALE_SLIDER_MAX}
+            step={ICON_SCALE_SLIDER_STEP}
+            isDisabled={!list}
             onChange={handleIconScaleChange}
           >
             <SliderTrack>
@@ -383,6 +399,7 @@ const Toolbar = () => {
               fontSize="16px"
               variant="solid"
               aria-label=""
+              isDisabled={!list}
               onClick={handleSortOrderToggle}
             />
             <Box>
@@ -392,6 +409,7 @@ const Toolbar = () => {
                   icon={<IconDotsVertical />}
                   variant="solid"
                   aria-label=""
+                  isDisabled={!list}
                 />
                 <Portal>
                   <MenuList zIndex="dropdown">
@@ -433,10 +451,20 @@ const Toolbar = () => {
         </Stack>
       </Stack>
       <input
-        ref={uploadHiddenInput}
+        ref={fileUploadInput}
         className="hidden"
         type="file"
         multiple
+        onChange={handleFileChange}
+      />
+      <input
+        ref={folderUploadInput}
+        className="hidden"
+        type="file"
+        /* @ts-expect-error intentionaly ignored */
+        directory=""
+        webkitdirectory=""
+        mozdirectory=""
         onChange={handleFileChange}
       />
     </>

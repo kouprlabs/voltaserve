@@ -19,11 +19,8 @@ import EditName from '@/components/group/edit-name'
 const Spacer = () => <Box flexGrow={1} />
 
 const GroupSettingsPage = () => {
-  const params = useParams()
-  const { data: group, error } = GroupAPI.useGetById(
-    params.id as string,
-    swrConfig(),
-  )
+  const { id } = useParams()
+  const { data: group, error } = GroupAPI.useGetById(id, swrConfig())
   const [isNameModalOpen, setIsNameModalOpen] = useState(false)
   const [isAddMembersModalOpen, setIsAddMembersModalOpen] = useState(false)
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)

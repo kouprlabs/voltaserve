@@ -43,26 +43,23 @@ import { swrConfig } from '@/client/options'
 import InviteMembers from '@/components/organization/invite-members'
 import RemoveMember from '@/components/organization/remove-member'
 import { decodeQuery } from '@/helpers/query'
+import { organizationMemberPaginationStorage } from '@/infra/pagination'
 
 const OrganizationMembersPage = () => {
   const navigate = useNavigate()
   const location = useLocation()
-  const params = useParams()
-  const organizationId = params.id as string
-  const invite = Boolean(params.invite as string)
+  const { id } = useParams()
   const { data: org, error: orgError } = OrganizationAPI.useGetById(
-    organizationId,
+    id,
     swrConfig(),
   )
-  const { page, size, onPageChange, onSizeChange } = usePagePagination({
+  const { page, size, steps, setPage, setSize } = usePagePagination({
     navigate,
     location,
-    storage: {
-      prefix: 'voltaserve',
-      namespace: 'organization_member',
-    },
+    storage: organizationMemberPaginationStorage(),
   })
   const [searchParams] = useSearchParams()
+  const invite = Boolean(searchParams.get('invite') as string)
   const query = decodeQuery(searchParams.get('q') as string)
   const {
     data: list,
@@ -71,7 +68,7 @@ const OrganizationMembersPage = () => {
   } = UserAPI.useList(
     {
       query,
-      organizationId,
+      organizationId: id,
       page,
       size,
       sortBy: SortBy.FullName,
@@ -158,15 +155,16 @@ const OrganizationMembersPage = () => {
             </Tbody>
           </Table>
           {list && (
-            <HStack alignSelf="end">
-              <PagePagination
-                totalPages={list.totalPages}
-                page={page}
-                size={size}
-                onPageChange={onPageChange}
-                onSizeChange={onSizeChange}
-              />
-            </HStack>
+            <PagePagination
+              style={{ alignSelf: 'end' }}
+              totalElements={list.totalElements}
+              totalPages={list.totalPages}
+              page={page}
+              size={size}
+              steps={steps}
+              setPage={setPage}
+              setSize={setSize}
+            />
           )}
           {userToRemove && (
             <RemoveMember

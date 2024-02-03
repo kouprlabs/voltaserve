@@ -34,19 +34,17 @@ import { swrConfig } from '@/client/options'
 import { CreateGroupButton } from '@/components/top-bar/buttons'
 import prettyDate from '@/helpers/pretty-date'
 import { decodeQuery } from '@/helpers/query'
+import { groupPaginationStorage } from '@/infra/pagination'
 
 const GroupListPage = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const [searchParams] = useSearchParams()
   const query = decodeQuery(searchParams.get('q') as string)
-  const { page, size, onPageChange, onSizeChange } = usePagePagination({
+  const { page, size, steps, setPage, setSize } = usePagePagination({
     navigate,
     location,
-    storage: {
-      prefix: 'voltaserve',
-      namespace: 'group',
-    },
+    storage: groupPaginationStorage(),
   })
   const {
     data: list,
@@ -137,15 +135,16 @@ const GroupListPage = () => {
           </Table>
         )}
         {list && (
-          <HStack alignSelf="end">
-            <PagePagination
-              totalPages={list.totalPages}
-              page={page}
-              size={size}
-              onPageChange={onPageChange}
-              onSizeChange={onSizeChange}
-            />
-          </HStack>
+          <PagePagination
+            style={{ alignSelf: 'end' }}
+            totalElements={list.totalElements}
+            totalPages={list.totalPages}
+            page={page}
+            size={size}
+            steps={steps}
+            setPage={setPage}
+            setSize={setSize}
+          />
         )}
       </Stack>
     </>

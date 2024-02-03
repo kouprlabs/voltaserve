@@ -1,4 +1,4 @@
-import { MouseEvent, useEffect } from 'react'
+import { ChangeEvent, MouseEvent, useEffect } from 'react'
 import { useCallback, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {
@@ -7,46 +7,19 @@ import {
   Link as ChakraLink,
   useColorModeValue,
   Checkbox,
-  IconButton,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
   Box,
-  MenuDivider,
-  Portal,
   Text,
   VStack,
 } from '@chakra-ui/react'
-import {
-  IconCopy,
-  IconDotsVerticalSm,
-  IconDownload,
-  IconEdit,
-  IconMove,
-  IconShare,
-  IconTrash,
-  variables,
-} from '@koupr/ui'
+import { variables } from '@koupr/ui'
 import { File, SnapshotStatus } from '@/client/api/file'
-import {
-  ltEditorPermission,
-  ltOwnerPermission,
-  ltViewerPermission,
-} from '@/client/api/permission'
-import downloadFile from '@/helpers/download-file'
 import relativeDate from '@/helpers/relative-date'
 import store from '@/store/configure-store'
 import { useAppDispatch } from '@/store/hook'
 import {
-  copyModalDidOpen,
-  deleteModalDidOpen,
-  moveModalDidOpen,
-  renameModalDidOpen,
   selectionAdded,
   selectionRemoved,
   selectionUpdated,
-  sharingModalDidOpen,
 } from '@/store/ui/files'
 import Icon from './icon'
 import { performMultiSelect, performRangeSelect } from './perform-select'
@@ -54,12 +27,21 @@ import { performMultiSelect, performRangeSelect } from './perform-select'
 type ItemProps = {
   file: File
   scale: number
+  isPresentational?: boolean
+  isLoading?: boolean
+  onContextMenu?: (event: MouseEvent) => void
 }
 
-const WIDTH = 150
+const WIDTH = 147
 const MIN_HEIGHT = 110
 
-const Item = ({ file, scale }: ItemProps) => {
+const Item = ({
+  file,
+  scale,
+  isPresentational,
+  isLoading,
+  onContextMenu,
+}: ItemProps) => {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
   const width = useMemo(() => `${WIDTH * scale}px`, [scale])
@@ -67,6 +49,7 @@ const Item = ({ file, scale }: ItemProps) => {
   const hoverColor = useColorModeValue('gray.100', 'gray.700')
   const activeColor = useColorModeValue('gray.200', 'gray.600')
   const [isCheckboxVisible, setIsCheckboxVisible] = useState(false)
+  const [isHovered, setIsHovered] = useState(false)
   const [isChecked, setIsChecked] = useState(false)
   const [isSelected, setIsSelected] = useState(false)
   const date = useMemo(
@@ -83,24 +66,34 @@ const Item = ({ file, scale }: ItemProps) => {
       } else {
         setIsSelected(false)
         setIsChecked(false)
-        setIsCheckboxVisible(false)
+        if (!isHovered) {
+          setIsCheckboxVisible(false)
+        }
       }
     })
     return () => unsubscribe()
-  }, [file.id])
+  }, [file.id, isHovered])
 
-  const handleDoubleDlick = useCallback(() => {
-    dispatch(selectionUpdated([]))
-    if (file.type === 'folder') {
-      navigate(`/workspace/${file.workspaceId}/file/${file.id}`)
-    } else if (file.type === 'file' && file.status === SnapshotStatus.Ready) {
-      window.open(`/file/${file.id}`, '_blank')?.focus()
+  const handleClick = useCallback(
+    (event: MouseEvent) => event.stopPropagation(),
+    [],
+  )
+
+  const handleMouseEnter = useCallback(() => {
+    setIsCheckboxVisible(true)
+    setIsHovered(true)
+  }, [])
+
+  const handleMouseLeave = useCallback(() => {
+    if (!isChecked) {
+      setIsCheckboxVisible(false)
     }
-  }, [file, navigate, dispatch])
+    setIsHovered(false)
+  }, [isChecked])
 
-  const handleSelectionClick = useCallback(
-    (event?: MouseEvent) => {
-      event?.stopPropagation()
+  const handleIconClick = useCallback(
+    (event: MouseEvent) => {
+      event.stopPropagation()
       if (store.getState().ui.files.isMultiSelectActive) {
         performMultiSelect(file, isSelected)
       } else if (store.getState().ui.files.isRangeSelectActive) {
@@ -112,121 +105,86 @@ const Item = ({ file, scale }: ItemProps) => {
     [file, isSelected, dispatch],
   )
 
+  const handleFileLinkClick = useCallback(
+    (event: MouseEvent) => {
+      handleIconClick(event)
+      window.open(`/file/${file.id}`, '_blank')?.focus()
+    },
+    [file.id, handleIconClick],
+  )
+
+  const handleIconDoubleClick = useCallback(() => {
+    dispatch(selectionUpdated([]))
+    if (file.type === 'folder') {
+      navigate(`/workspace/${file.workspaceId}/file/${file.id}`)
+    } else if (file.type === 'file' && file.status === SnapshotStatus.Ready) {
+      window.open(`/file/${file.id}`, '_blank')?.focus()
+    }
+  }, [file, navigate, dispatch])
+
+  const handleCheckboxChange = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) => {
+      event.stopPropagation()
+      if (event.target.checked) {
+        setIsChecked(true)
+        dispatch(selectionAdded(file.id))
+      } else {
+        setIsChecked(false)
+        dispatch(selectionRemoved(file.id))
+      }
+    },
+    [file.id, dispatch],
+  )
+
+  const handleContextMenu = useCallback(
+    (event: MouseEvent) => {
+      if (event) {
+        event.preventDefault()
+        onContextMenu?.(event)
+        if (!isSelected) {
+          handleIconClick(event)
+        }
+      }
+    },
+    [isSelected, handleIconClick, onContextMenu],
+  )
+
   return (
     <Stack
       position="relative"
       spacing={variables.spacingXs}
-      pb={variables.spacingXs}
+      w={width}
+      py={variables.spacingSm}
       _hover={{ bg: hoverColor }}
       _active={{ bg: activeColor }}
       transition="background-color 0.4s ease"
       bg={isChecked ? hoverColor : 'transparent'}
       borderRadius={variables.borderRadiusSm}
       userSelect="none"
-      onMouseEnter={() => {
-        setIsCheckboxVisible(true)
-      }}
-      onMouseLeave={() => {
-        if (!isChecked) {
-          setIsCheckboxVisible(false)
-        }
-      }}
-      onClick={(e) => e.stopPropagation()}
+      cursor="default"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      onClick={handleClick}
+      onContextMenu={handleContextMenu}
     >
-      {isCheckboxVisible || isSelected ? (
+      {(isCheckboxVisible || isSelected) && !isPresentational ? (
         <Checkbox
           position="absolute"
-          top="10px"
-          left="8px"
+          top={variables.spacingSm}
+          left={variables.spacingSm}
           isChecked={isChecked}
           zIndex={1}
           size="lg"
-          onChange={(e) => {
-            e.stopPropagation()
-            if (e.target.checked) {
-              setIsChecked(true)
-              dispatch(selectionAdded(file.id))
-            } else {
-              setIsChecked(false)
-              dispatch(selectionRemoved(file.id))
-            }
-          }}
+          onChange={handleCheckboxChange}
         />
       ) : null}
-      <Box>
-        <Menu onOpen={() => handleSelectionClick()}>
-          {isCheckboxVisible && (
-            <MenuButton
-              as={IconButton}
-              position="absolute"
-              top="7px"
-              right="6px"
-              icon={<IconDotsVerticalSm />}
-              variant="solid"
-              size="xs"
-              zIndex={1}
-              aria-label=""
-            />
-          )}
-          <Portal>
-            <MenuList zIndex="dropdown">
-              <MenuItem
-                icon={<IconShare />}
-                isDisabled={ltOwnerPermission(file.permission)}
-                onClick={() => dispatch(sharingModalDidOpen())}
-              >
-                Sharing
-              </MenuItem>
-              <MenuItem
-                icon={<IconDownload />}
-                isDisabled={
-                  file.type !== 'file' || ltViewerPermission(file.permission)
-                }
-                onClick={() => downloadFile(file)}
-              >
-                Download
-              </MenuItem>
-              <MenuDivider />
-              <MenuItem
-                icon={<IconTrash />}
-                color="red"
-                isDisabled={ltOwnerPermission(file.permission)}
-                onClick={() => dispatch(deleteModalDidOpen())}
-              >
-                Delete
-              </MenuItem>
-              <MenuItem
-                icon={<IconEdit />}
-                isDisabled={ltEditorPermission(file.permission)}
-                onClick={() => dispatch(renameModalDidOpen())}
-              >
-                Rename
-              </MenuItem>
-              <MenuItem
-                icon={<IconMove />}
-                isDisabled={ltEditorPermission(file.permission)}
-                onClick={() => dispatch(moveModalDidOpen())}
-              >
-                Move
-              </MenuItem>
-              <MenuItem
-                icon={<IconCopy />}
-                isDisabled={ltEditorPermission(file.permission)}
-                onClick={() => dispatch(copyModalDidOpen())}
-              >
-                Copy
-              </MenuItem>
-            </MenuList>
-          </Portal>
-        </Menu>
-      </Box>
       <Center
         w={width}
         minH={minHeight}
-        onDoubleClick={handleDoubleDlick}
-        onClick={handleSelectionClick}
+        onDoubleClick={handleIconDoubleClick}
+        onClick={handleIconClick}
       >
-        <Icon file={file} scale={scale} />
+        <Icon file={file} scale={scale} isLoading={isLoading} />
       </Center>
       <Box w={width} title={file.name} px={variables.spacingXs}>
         {file.type === 'folder' && (
@@ -247,16 +205,13 @@ const Item = ({ file, scale }: ItemProps) => {
             noOfLines={3}
             textDecoration="none"
             _hover={{ textDecoration: 'underline' }}
-            onClick={(event) => {
-              handleSelectionClick(event)
-              window.open(`/file/${file.id}`, '_blank')?.focus()
-            }}
+            onClick={handleFileLinkClick}
           >
             {file.name}
           </ChakraLink>
         ) : null}
         {file.type === 'file' && file.status !== SnapshotStatus.Ready ? (
-          <Text textAlign="center" noOfLines={3} onClick={handleSelectionClick}>
+          <Text textAlign="center" noOfLines={3} onClick={handleIconClick}>
             {file.name}
           </Text>
         ) : null}

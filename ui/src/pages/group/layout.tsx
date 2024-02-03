@@ -8,9 +8,8 @@ import { swrConfig } from '@/client/options'
 const GroupLayout = () => {
   const location = useLocation()
   const navigate = useNavigate()
-  const params = useParams()
-  const groupId = params.id as string
-  const { data: group } = GroupAPI.useGetById(groupId, swrConfig())
+  const { id } = useParams()
+  const { data: group } = GroupAPI.useGetById(id, swrConfig())
   const [tabIndex, setTabIndex] = useState(0)
 
   useEffect(() => {
@@ -32,12 +31,8 @@ const GroupLayout = () => {
       <Heading fontSize={variables.headingFontSize}>{group.name}</Heading>
       <Tabs variant="solid-rounded" colorScheme="gray" index={tabIndex}>
         <TabList>
-          <Tab onClick={() => navigate(`/group/${groupId}/member`)}>
-            Members
-          </Tab>
-          <Tab onClick={() => navigate(`/group/${groupId}/settings`)}>
-            Settings
-          </Tab>
+          <Tab onClick={() => navigate(`/group/${id}/member`)}>Members</Tab>
+          <Tab onClick={() => navigate(`/group/${id}/settings`)}>Settings</Tab>
         </TabList>
       </Tabs>
       <Outlet />

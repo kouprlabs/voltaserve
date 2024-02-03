@@ -14,6 +14,7 @@ import {
   ModalOverlay,
 } from '@chakra-ui/react'
 import { variables } from '@koupr/ui'
+import { useSWRConfig } from 'swr'
 import {
   Field,
   FieldAttributes,
@@ -23,8 +24,8 @@ import {
   FormikHelpers,
 } from 'formik'
 import * as Yup from 'yup'
-import FileAPI from '@/client/api/file'
-import { filesAdded } from '@/store/entities/files'
+import FileAPI, { List } from '@/client/api/file'
+import useFileListSearchParams from '@/hooks/use-file-list-params'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { createModalDidClose } from '@/store/ui/files'
 
@@ -33,9 +34,8 @@ type FormValues = {
 }
 
 const Create = () => {
-  const params = useParams()
-  const workspaceId = params.id as string
-  const fileId = params.fileId as string
+  const { mutate } = useSWRConfig()
+  const { id, fileId } = useParams()
   const dispatch = useAppDispatch()
   const isModalOpen = useAppSelector(
     (state) => state.ui.files.isCreateModalOpen,
@@ -44,6 +44,7 @@ const Create = () => {
   const formSchema = Yup.object().shape({
     name: Yup.string().required('Name is required').max(255),
   })
+  const fileListSearchParams = useFileListSearchParams()
 
   useEffect(() => {
     if (inputRef) {
@@ -58,19 +59,19 @@ const Create = () => {
     ) => {
       setSubmitting(true)
       try {
-        const result = await FileAPI.createFolder({
+        await FileAPI.createFolder({
           name,
-          workspaceId: workspaceId,
-          parentId: fileId,
+          workspaceId: id!,
+          parentId: fileId!,
         })
-        dispatch(filesAdded({ id: fileId, files: [result] }))
+        await mutate<List>(`/files/${fileId}/list?${fileListSearchParams}`)
         setSubmitting(false)
         dispatch(createModalDidClose())
       } finally {
         setSubmitting(false)
       }
     },
-    [fileId, workspaceId, dispatch],
+    [id, fileId, fileListSearchParams, mutate, dispatch],
   )
 
   return (

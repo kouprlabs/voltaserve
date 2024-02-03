@@ -41,31 +41,29 @@ type File struct {
 }
 
 type FileList struct {
-	Data          []*File `json:"data"`
-	TotalPages    uint    `json:"totalPages"`
-	TotalElements uint    `json:"totalElements"`
-	Page          uint    `json:"page"`
-	Size          uint    `json:"size"`
+	Data          []*File    `json:"data"`
+	TotalPages    uint       `json:"totalPages"`
+	TotalElements uint       `json:"totalElements"`
+	Page          uint       `json:"page"`
+	Size          uint       `json:"size"`
+	Query         *FileQuery `json:"query,omitempty"`
 }
 
-type FileSearchOptions struct {
+type FileListOptions struct {
+	Page      uint
+	Size      uint
+	SortBy    string
+	SortOrder string
+	Query     *FileQuery
+}
+
+type FileQuery struct {
 	Text             string  `json:"text" validate:"required"`
-	WorkspaceID      string  `json:"workspaceId" validate:"required"`
-	ParentID         *string `json:"parentId,omitempty"`
 	Type             *string `json:"type,omitempty" validate:"omitempty,oneof=file folder"`
 	CreateTimeAfter  *int64  `json:"createTimeAfter,omitempty"`
 	CreateTimeBefore *int64  `json:"createTimeBefore,omitempty"`
 	UpdateTimeAfter  *int64  `json:"updateTimeAfter,omitempty"`
 	UpdateTimeBefore *int64  `json:"updateTimeBefore,omitempty"`
-}
-
-type FileSearchResult struct {
-	Query         FileSearchOptions `json:"request"`
-	Data          []*File           `json:"data"`
-	TotalPages    uint              `json:"totalPages"`
-	TotalElements uint              `json:"totalElements"`
-	Page          uint              `json:"page"`
-	Size          uint              `json:"size"`
 }
 
 type FileCreateOptions struct {
@@ -79,14 +77,6 @@ type FileCreateFolderOptions struct {
 	WorkspaceID string  `json:"workspaceId" validate:"required"`
 	Name        string  `json:"name" validate:"required,max=255"`
 	ParentID    *string `json:"parentId"`
-}
-
-type FileListByIDOptions struct {
-	Page      uint
-	Size      uint
-	SortBy    string
-	SortOrder string
-	FileType  string
 }
 
 type FileCopyOptions struct {
@@ -235,15 +225,55 @@ func NewFileService() *FileService {
 }
 
 func (svc *FileService) Create(opts FileCreateOptions, userID string) (*File, error) {
+	var components []string
+	for _, component := range strings.Split(opts.Name, "/") {
+		if component != "" {
+			components = append(components, component)
+		}
+	}
+	parentID := opts.ParentID
+	if len(components) > 1 {
+		for _, component := range components[:len(components)-1] {
+			existing, err := svc.getChildWithName(*parentID, component)
+			if err != nil {
+				return nil, err
+			}
+			if existing != nil {
+				parentID = new(string)
+				*parentID = existing.GetID()
+			} else {
+				res, err := svc.create(FileCreateOptions{
+					Name:        component,
+					Type:        model.FileTypeFolder,
+					ParentID:    parentID,
+					WorkspaceID: opts.WorkspaceID,
+				}, userID)
+				if err != nil {
+					return nil, err
+				}
+				parentID = &res.ID
+			}
+		}
+	}
+	name := components[len(components)-1]
+	return svc.create(FileCreateOptions{
+		WorkspaceID: opts.WorkspaceID,
+		Name:        name,
+		Type:        opts.Type,
+		ParentID:    parentID,
+	}, userID)
+}
+
+func (svc *FileService) create(opts FileCreateOptions, userID string) (*File, error) {
 	if len(*opts.ParentID) > 0 {
 		if err := svc.validateParent(*opts.ParentID, userID); err != nil {
 			return nil, err
 		}
-		nameExists, err := svc.hasChildWithName(*opts.ParentID, opts.Name)
+		existing, err := svc.getChildWithName(*opts.ParentID, opts.Name)
 		if err != nil {
 			return nil, err
 		}
-		if nameExists {
+		if existing != nil {
 			return nil, errorpkg.NewFileWithSimilarNameExistsError()
 		}
 	}
@@ -632,7 +662,7 @@ func (svc *FileService) ListByPath(path string, userID string) ([]*File, error) 
 	}
 }
 
-func (svc *FileService) ListByID(id string, opts FileListByIDOptions, userID string) (*FileList, error) {
+func (svc *FileService) List(id string, opts FileListOptions, userID string) (*FileList, error) {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
@@ -654,17 +684,26 @@ func (svc *FileService) ListByID(id string, opts FileListByIDOptions, userID str
 	if err != nil {
 		return nil, err
 	}
-	authorized, err := svc.doAuthorizationByIDs(ids, user)
-	if err != nil {
-		return nil, err
+	var data []model.File
+	for _, id := range ids {
+		var f model.File
+		f, err := svc.fileCache.Get(id)
+		if err != nil {
+			return nil, err
+		}
+		data = append(data, f)
 	}
 	var filtered []model.File
-	for _, f := range authorized {
-		if opts.FileType == "" || f.GetType() == opts.FileType {
+	for _, f := range data {
+		if opts.Query == nil || *opts.Query.Type == "" || f.GetType() == *opts.Query.Type {
 			filtered = append(filtered, f)
 		}
 	}
-	sorted := svc.doSorting(filtered, opts.SortBy, opts.SortOrder, userID)
+	authorized, err := svc.doAuthorization(filtered, user)
+	if err != nil {
+		return nil, err
+	}
+	sorted := svc.doSorting(authorized, opts.SortBy, opts.SortOrder, userID)
 	paged, totalElements, totalPages := svc.doPagination(sorted, opts.Page, opts.Size)
 	mapped, err := svc.fileMapper.mapMany(paged, userID)
 	if err != nil {
@@ -679,23 +718,27 @@ func (svc *FileService) ListByID(id string, opts FileListByIDOptions, userID str
 	}, nil
 }
 
-func (svc *FileService) Search(opts FileSearchOptions, page uint, size uint, userID string) (*FileSearchResult, error) {
+func (svc *FileService) Search(id string, opts FileListOptions, userID string) (*FileList, error) {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
 	}
-	workspace, err := svc.workspaceRepo.Find(opts.WorkspaceID)
+	parent, err := svc.fileCache.Get(id)
+	if err != nil {
+		return nil, err
+	}
+	workspace, err := svc.workspaceRepo.Find(parent.GetWorkspaceID())
 	if err != nil {
 		return nil, err
 	}
 	if err := svc.workspaceGuard.Authorize(user, workspace, model.PermissionViewer); err != nil {
 		return nil, err
 	}
-	files, err := svc.fileSearch.Query(opts.Text)
+	data, err := svc.fileSearch.Query(opts.Query.Text)
 	if err != nil {
 		return nil, err
 	}
-	filtered, err := svc.doFiltering(opts, files)
+	filtered, err := svc.doQueryFiltering(data, *opts.Query, parent)
 	if err != nil {
 		return nil, err
 	}
@@ -703,18 +746,19 @@ func (svc *FileService) Search(opts FileSearchOptions, page uint, size uint, use
 	if err != nil {
 		return nil, err
 	}
-	paged, totalElements, totalPages := svc.doPagination(authorized, page, size)
+	sorted := svc.doSorting(authorized, opts.SortBy, opts.SortOrder, userID)
+	paged, totalElements, totalPages := svc.doPagination(sorted, opts.Page, opts.Size)
 	v, err := svc.fileMapper.mapMany(paged, userID)
 	if err != nil {
 		return nil, err
 	}
-	res := &FileSearchResult{
+	res := &FileList{
 		Data:          v,
 		TotalElements: totalElements,
 		TotalPages:    totalPages,
-		Page:          page,
-		Size:          size,
-		Query:         opts,
+		Page:          opts.Page,
+		Size:          opts.Size,
+		Query:         opts.Query,
 	}
 	return res, nil
 }
@@ -850,11 +894,11 @@ func (svc *FileService) Copy(targetID string, sourceIDs []string, userID string)
 		}
 
 		/* If there is a file with similar name, append a prefix */
-		nameExists, err := svc.hasChildWithName(targetID, rootClone.GetName())
+		existing, err := svc.getChildWithName(targetID, rootClone.GetName())
 		if err != nil {
 			return nil, err
 		}
-		if nameExists {
+		if existing != nil {
 			rootClone.SetName(fmt.Sprintf("Copy of %s", rootClone.GetName()))
 		}
 
@@ -923,11 +967,11 @@ func (svc *FileService) Move(targetID string, sourceIDs []string, userID string)
 			return []string{}, err
 		}
 		if source.GetParentID() != nil {
-			nameExists, err := svc.hasChildWithName(targetID, source.GetName())
+			existing, err := svc.getChildWithName(targetID, source.GetName())
 			if err != nil {
 				return nil, err
 			}
-			if nameExists {
+			if existing != nil {
 				return nil, errorpkg.NewFileWithSimilarNameExistsError()
 			}
 		}
@@ -1009,11 +1053,11 @@ func (svc *FileService) Rename(id string, name string, userID string) (*File, er
 		return nil, err
 	}
 	if file.GetParentID() != nil {
-		nameExists, err := svc.hasChildWithName(*file.GetParentID(), name)
+		existing, err := svc.getChildWithName(*file.GetParentID(), name)
 		if err != nil {
 			return nil, err
 		}
-		if nameExists {
+		if existing != nil {
 			return nil, errorpkg.NewFileWithSimilarNameExistsError()
 		}
 	}
@@ -1656,10 +1700,10 @@ func (svc *FileService) doPagination(data []model.File, page, size uint) ([]mode
 	return pageData, totalElements, totalPages
 }
 
-func (svc *FileService) doFiltering(opts FileSearchOptions, data []model.File) ([]model.File, error) {
+func (svc *FileService) doQueryFiltering(data []model.File, opts FileQuery, parent model.File) ([]model.File, error) {
 	filtered, _ := rxgo.Just(data)().
 		Filter(func(v interface{}) bool {
-			return v.(model.File).GetWorkspaceID() == opts.WorkspaceID
+			return v.(model.File).GetWorkspaceID() == parent.GetWorkspaceID()
 		}).
 		Filter(func(v interface{}) bool {
 			if opts.Type != nil {
@@ -1670,15 +1714,11 @@ func (svc *FileService) doFiltering(opts FileSearchOptions, data []model.File) (
 		}).
 		Filter(func(v interface{}) bool {
 			file := v.(model.File)
-			if opts.ParentID != nil {
-				res, err := svc.fileRepo.IsGrandChildOf(file.GetID(), *opts.ParentID)
-				if err != nil {
-					return false
-				}
-				return res
-			} else {
-				return true
+			res, err := svc.fileRepo.IsGrandChildOf(file.GetID(), parent.GetID())
+			if err != nil {
+				return false
 			}
+			return res
 		}).
 		Filter(func(v interface{}) bool {
 			if opts.CreateTimeBefore != nil {
@@ -1727,17 +1767,17 @@ func (svc *FileService) doFiltering(opts FileSearchOptions, data []model.File) (
 	return res, nil
 }
 
-func (svc *FileService) hasChildWithName(id string, name string) (bool, error) {
+func (svc *FileService) getChildWithName(id string, name string) (model.File, error) {
 	children, err := svc.fileRepo.FindChildren(id)
 	if err != nil {
-		return false, err
+		return nil, err
 	}
 	for _, child := range children {
 		if child.GetName() == name {
-			return true, nil
+			return child, nil
 		}
 	}
-	return false, nil
+	return nil, nil
 }
 
 type FileMapper struct {
@@ -1807,9 +1847,9 @@ func (mp *FileMapper) mapOne(m model.File, userID string) (*File, error) {
 	return res, nil
 }
 
-func (mp *FileMapper) mapMany(files []model.File, userID string) ([]*File, error) {
+func (mp *FileMapper) mapMany(data []model.File, userID string) ([]*File, error) {
 	res := make([]*File, 0)
-	for _, f := range files {
+	for _, f := range data {
 		v, err := mp.mapOne(f, userID)
 		if err != nil {
 			return nil, err

@@ -32,8 +32,7 @@ type FormValues = {
 
 const NewGroupPage = () => {
   const navigate = useNavigate()
-  const params = useParams()
-  const orgId = params.org as string
+  const { org } = useParams()
   const { mutate } = useSWRConfig()
   const [isLoading, setIsLoading] = useState(false)
   const formSchema = Yup.object().shape({
@@ -75,7 +74,7 @@ const NewGroupPage = () => {
         <Heading fontSize={variables.headingFontSize}>New Group</Heading>
         <Formik
           enableReinitialize={true}
-          initialValues={{ name: '', organizationId: orgId || '' }}
+          initialValues={{ name: '', organizationId: org || '' }}
           validationSchema={formSchema}
           validateOnBlur={false}
           onSubmit={handleSubmit}

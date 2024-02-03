@@ -164,7 +164,7 @@ const UserSelector = ({
                 <Box alignSelf="end">
                   {list.totalPages > 1 ? (
                     <Pagination
-                      size="md"
+                      uiSize="md"
                       maxButtons={3}
                       page={page}
                       totalPages={list.totalPages}

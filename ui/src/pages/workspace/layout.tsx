@@ -7,10 +7,9 @@ import { swrConfig } from '@/client/options'
 
 const WorkspaceLayout = () => {
   const location = useLocation()
-  const params = useParams()
+  const { id } = useParams()
   const navigate = useNavigate()
-  const workspaceId = params.id as string
-  const { data: workspace } = WorkspaceAPI.useGetById(workspaceId, swrConfig())
+  const { data: workspace } = WorkspaceAPI.useGetById(id, swrConfig())
   const [tabIndex, setTabIndex] = useState(0)
 
   useEffect(() => {
@@ -34,12 +33,12 @@ const WorkspaceLayout = () => {
         <TabList>
           <Tab
             onClick={() =>
-              navigate(`/workspace/${workspaceId}/file/${workspace.rootId}`)
+              navigate(`/workspace/${id}/file/${workspace.rootId}`)
             }
           >
             Files
           </Tab>
-          <Tab onClick={() => navigate(`/workspace/${workspaceId}/settings`)}>
+          <Tab onClick={() => navigate(`/workspace/${id}/settings`)}>
             Settings
           </Tab>
         </TabList>

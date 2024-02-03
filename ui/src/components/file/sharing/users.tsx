@@ -19,43 +19,42 @@ import {
 } from '@chakra-ui/react'
 import { Spinner, variables } from '@koupr/ui'
 import { IconCheck, IconTrash, IconUserPlus } from '@koupr/ui'
-import { KeyedMutator } from 'swr'
+import { KeyedMutator, useSWRConfig } from 'swr'
 import { Select } from 'chakra-react-select'
-import FileAPI, { UserPermission } from '@/client/api/file'
+import FileAPI, { List, UserPermission } from '@/client/api/file'
 import { geEditorPermission } from '@/client/api/permission'
 import { User } from '@/client/api/user'
 import WorkspaceAPI from '@/client/api/workspace'
 import IdPUserAPI from '@/client/idp/user'
 import UserSelector from '@/components/common/user-selector'
-import { filesUpdated } from '@/store/entities/files'
+import useFileListSearchParams from '@/hooks/use-file-list-params'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { sharingModalDidClose } from '@/store/ui/files'
 import reactSelectStyles from '@/styles/react-select'
+import FormSkeleton from './form-skeleton'
 
 type UsersProps = {
-  users: User[]
-  userPermissions: UserPermission[]
+  users?: User[]
+  permissions?: UserPermission[]
   mutateUserPermissions: KeyedMutator<UserPermission[]>
 }
 
-const Users = ({
-  users,
-  userPermissions,
-  mutateUserPermissions,
-}: UsersProps) => {
-  const params = useParams()
+const Users = ({ users, permissions, mutateUserPermissions }: UsersProps) => {
+  const { mutate } = useSWRConfig()
+  const { id, fileId } = useParams()
   const dispatch = useAppDispatch()
-  const { data: workspace } = WorkspaceAPI.useGetById(params.id as string)
+  const { data: workspace } = WorkspaceAPI.useGetById(id)
   const selection = useAppSelector((state) => state.ui.files.selection)
   const [isGrantLoading, setIsGrantLoading] = useState(false)
   const [permissionBeingRevoked, setPermissionBeingRevoked] = useState<string>()
   const [activeUser, setActiveUser] = useState<User>()
-  const [activeUserPermission, setActiveUserPermission] = useState<string>()
+  const [activePermission, setActivePermission] = useState<string>()
   const { data: user } = IdPUserAPI.useGet()
+  const fileListSearchParams = useFileListSearchParams()
   const isSingleSelection = selection.length === 1
 
   const handleGrantUserPermission = useCallback(async () => {
-    if (!activeUser || !activeUserPermission) {
+    if (!activeUser || !activePermission) {
       return
     }
     try {
@@ -63,10 +62,9 @@ const Users = ({
       await FileAPI.grantUserPermission({
         ids: selection,
         userId: activeUser.id,
-        permission: activeUserPermission,
+        permission: activePermission,
       })
-      const result = await FileAPI.batchGet({ ids: selection })
-      dispatch(filesUpdated(result))
+      await mutate<List>(`/files/${fileId}/list?${fileListSearchParams}`)
       if (isSingleSelection) {
         await mutateUserPermissions()
       }
@@ -79,10 +77,13 @@ const Users = ({
       setIsGrantLoading(false)
     }
   }, [
+    fileId,
     selection,
     activeUser,
-    activeUserPermission,
+    activePermission,
     isSingleSelection,
+    fileListSearchParams,
+    mutate,
     dispatch,
     mutateUserPermissions,
   ])
@@ -95,8 +96,7 @@ const Users = ({
           ids: selection,
           userId: permission.user.id,
         })
-        const result = await FileAPI.batchGet({ ids: selection })
-        dispatch(filesUpdated(result))
+        await mutate<List>(`/files/${fileId}/list?${fileListSearchParams}`)
         if (isSingleSelection) {
           await mutateUserPermissions()
         }
@@ -104,11 +104,19 @@ const Users = ({
         setPermissionBeingRevoked(undefined)
       }
     },
-    [selection, isSingleSelection, dispatch, mutateUserPermissions],
+    [
+      fileId,
+      selection,
+      isSingleSelection,
+      fileListSearchParams,
+      mutate,
+      mutateUserPermissions,
+    ],
   )
 
   return (
     <Stack direction="column" spacing={variables.spacing}>
+      {!users ? <FormSkeleton /> : null}
       {users && users.length === 0 ? (
         <Center>
           <VStack spacing={variables.spacing}>
@@ -144,7 +152,7 @@ const Users = ({
             chakraStyles={reactSelectStyles}
             onChange={(e) => {
               if (e) {
-                setActiveUserPermission(e.value)
+                setActivePermission(e.value)
               }
             }}
           />
@@ -152,7 +160,7 @@ const Users = ({
             leftIcon={<IconCheck />}
             colorScheme="blue"
             isLoading={isGrantLoading}
-            isDisabled={!activeUser || !activeUserPermission}
+            isDisabled={!activeUser || !activePermission}
             onClick={() => handleGrantUserPermission()}
           >
             Apply to User
@@ -162,17 +170,17 @@ const Users = ({
       {isSingleSelection ? (
         <>
           <hr />
-          {!userPermissions ? (
+          {!permissions ? (
             <Center>
               <Spinner />
             </Center>
           ) : null}
-          {userPermissions && userPermissions.length === 0 ? (
+          {permissions && permissions.length === 0 ? (
             <Center>
               <Text>Not shared with any users.</Text>
             </Center>
           ) : null}
-          {userPermissions && userPermissions.length > 0 ? (
+          {permissions && permissions.length > 0 ? (
             <>
               <Table>
                 <Thead>
@@ -183,7 +191,7 @@ const Users = ({
                   </Tr>
                 </Thead>
                 <Tbody>
-                  {userPermissions.map((p) => (
+                  {permissions.map((p) => (
                     <Tr key={p.id}>
                       <Td p={variables.spacingSm}>
                         <HStack spacing={variables.spacingSm}>

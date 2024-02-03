@@ -13,36 +13,34 @@ import {
   Text,
 } from '@chakra-ui/react'
 import { variables } from '@koupr/ui'
-import FileAPI from '@/client/api/file'
-import { filesRemoved } from '@/store/entities/files'
+import { useSWRConfig } from 'swr'
+import FileAPI, { List } from '@/client/api/file'
+import useFileListSearchParams from '@/hooks/use-file-list-params'
 import { useAppSelector } from '@/store/hook'
 import { deleteModalDidClose, selectionUpdated } from '@/store/ui/files'
 
 const Delete = () => {
-  const params = useParams()
+  const { mutate } = useSWRConfig()
+  const { fileId } = useParams()
   const dispatch = useDispatch()
   const selection = useAppSelector((state) => state.ui.files.selection)
   const isModalOpen = useAppSelector(
     (state) => state.ui.files.isDeleteModalOpen,
   )
   const [loading, setLoading] = useState(false)
+  const fileListSearchParams = useFileListSearchParams()
 
   const handleDelete = useCallback(async () => {
     try {
       setLoading(true)
       await FileAPI.batchDelete({ ids: selection })
-      dispatch(
-        filesRemoved({
-          id: params.fileId as string,
-          files: selection,
-        }),
-      )
+      await mutate<List>(`/files/${fileId}/list?${fileListSearchParams}`)
       dispatch(selectionUpdated([]))
       dispatch(deleteModalDidClose())
     } finally {
       setLoading(false)
     }
-  }, [selection, params, dispatch])
+  }, [selection, fileId, fileListSearchParams, mutate, dispatch])
 
   return (
     <Modal

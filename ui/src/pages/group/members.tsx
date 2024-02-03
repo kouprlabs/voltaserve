@@ -44,23 +44,20 @@ import { swrConfig } from '@/client/options'
 import AddMember from '@/components/group/add-member'
 import RemoveMember from '@/components/group/remove-member'
 import { decodeQuery } from '@/helpers/query'
+import { groupMemberPaginationStorage } from '@/infra/pagination'
 
 const GroupMembersPage = () => {
   const navigate = useNavigate()
   const location = useLocation()
-  const params = useParams()
-  const groupId = params.id as string
+  const { id } = useParams()
   const { data: group, error: groupError } = GroupAPI.useGetById(
-    groupId,
+    id,
     swrConfig(),
   )
-  const { page, size, onPageChange, onSizeChange } = usePagePagination({
+  const { page, size, steps, setPage, setSize } = usePagePagination({
     navigate,
     location,
-    storage: {
-      prefix: 'voltaserve',
-      namespace: 'group_member',
-    },
+    storage: groupMemberPaginationStorage(),
   })
   const [searchParams] = useSearchParams()
   const query = decodeQuery(searchParams.get('q') as string)
@@ -71,7 +68,7 @@ const GroupMembersPage = () => {
   } = UserAPI.useList(
     {
       query,
-      groupId,
+      groupId: id,
       page,
       size,
       sortBy: SortBy.FullName,
@@ -152,15 +149,16 @@ const GroupMembersPage = () => {
             </Tbody>
           </Table>
           {list && (
-            <HStack alignSelf="end">
-              <PagePagination
-                totalPages={list.totalPages}
-                page={page}
-                size={size}
-                onPageChange={onPageChange}
-                onSizeChange={onSizeChange}
-              />
-            </HStack>
+            <PagePagination
+              style={{ alignSelf: 'end' }}
+              totalElements={list.totalElements}
+              totalPages={list.totalPages}
+              page={page}
+              size={size}
+              steps={steps}
+              setPage={setPage}
+              setSize={setSize}
+            />
           )}
           {userToRemove && (
             <RemoveMember

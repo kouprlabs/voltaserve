@@ -2,7 +2,6 @@ import { useCallback } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import {
   Center,
-  HStack,
   IconButton,
   Menu,
   MenuButton,
@@ -32,19 +31,17 @@ import UserAPI from '@/client/idp/user'
 import { swrConfig } from '@/client/options'
 import prettyDate from '@/helpers/pretty-date'
 import userToString from '@/helpers/user-to-string'
+import { incomingInvitationPaginationStorage } from '@/infra/pagination'
 
 const AccountInvitationsPage = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const toast = useToast()
   const { data: user, error: userError } = UserAPI.useGet()
-  const { page, size, onPageChange, onSizeChange } = usePagePagination({
+  const { page, size, steps, setPage, setSize } = usePagePagination({
     navigate,
     location,
-    storage: {
-      prefix: 'voltaserve',
-      namespace: 'incoming_invitation',
-    },
+    storage: incomingInvitationPaginationStorage(),
   })
   const {
     data: list,
@@ -148,15 +145,16 @@ const AccountInvitationsPage = () => {
             </Tbody>
           </Table>
           {list && (
-            <HStack alignSelf="end">
-              <PagePagination
-                totalPages={list.totalPages}
-                page={page}
-                size={size}
-                onPageChange={onPageChange}
-                onSizeChange={onSizeChange}
-              />
-            </HStack>
+            <PagePagination
+              style={{ alignSelf: 'end' }}
+              totalElements={list.totalElements}
+              totalPages={list.totalPages}
+              page={page}
+              size={size}
+              steps={steps}
+              setPage={setPage}
+              setSize={setSize}
+            />
           )}
         </Stack>
       )}

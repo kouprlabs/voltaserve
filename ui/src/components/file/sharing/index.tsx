@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import { useParams } from 'react-router-dom'
 import {
   Text,
@@ -15,30 +16,33 @@ import {
   HStack,
   Tag,
 } from '@chakra-ui/react'
-import FileAPI from '@/client/api/file'
+import FileAPI, { List } from '@/client/api/file'
 import GroupAPI from '@/client/api/group'
 import { geOwnerPermission } from '@/client/api/permission'
 import UserAPI from '@/client/api/user'
 import WorkspaceAPI from '@/client/api/workspace'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
-import { selectionUpdated, sharingModalDidClose } from '@/store/ui/files'
-import FormSkeleton from './form-skeleton'
+import { sharingModalDidClose } from '@/store/ui/files'
 import Groups from './groups'
 import Users from './users'
 
-const Sharing = () => {
-  const params = useParams()
+type SharingProps = {
+  list: List
+}
+
+const Sharing = ({ list }: SharingProps) => {
+  const { id } = useParams()
   const dispatch = useAppDispatch()
   const selection = useAppSelector((state) => state.ui.files.selection)
   const isModalOpen = useAppSelector((state) => state.ui.files.isShareModalOpen)
-  const singleFile = useAppSelector((state) => {
+  const singleFile = useMemo(() => {
     if (selection.length === 1) {
-      return state.entities.files.list?.data.find((e) => e.id === selection[0])
+      return list.data.find((e) => e.id === selection[0])
     } else {
       return undefined
     }
-  })
-  const { data: workspace } = WorkspaceAPI.useGetById(params.id as string)
+  }, [list.data, selection])
+  const { data: workspace } = WorkspaceAPI.useGetById(id)
   const { data: users } = UserAPI.useList({
     organizationId: workspace?.organization.id,
   })
@@ -63,7 +67,6 @@ const Sharing = () => {
       size="xl"
       isOpen={isModalOpen}
       onClose={() => {
-        dispatch(selectionUpdated([]))
         dispatch(sharingModalDidClose())
       }}
       closeOnOverlayClick={false}
@@ -98,26 +101,18 @@ const Sharing = () => {
             </TabList>
             <TabPanels>
               <TabPanel>
-                {users && userPermissions ? (
-                  <Users
-                    users={users.data}
-                    userPermissions={userPermissions}
-                    mutateUserPermissions={mutateUserPermissions}
-                  />
-                ) : (
-                  <FormSkeleton />
-                )}
+                <Users
+                  users={users?.data}
+                  permissions={userPermissions}
+                  mutateUserPermissions={mutateUserPermissions}
+                />
               </TabPanel>
               <TabPanel>
-                {groups && groupPermissions ? (
-                  <Groups
-                    groups={groups.data}
-                    groupPermissions={groupPermissions}
-                    mutateGroupPermissions={mutateGroupPermissions}
-                  />
-                ) : (
-                  <FormSkeleton />
-                )}
+                <Groups
+                  groups={groups?.data}
+                  permissions={groupPermissions}
+                  mutateGroupPermissions={mutateGroupPermissions}
+                />
               </TabPanel>
             </TabPanels>
           </Tabs>
