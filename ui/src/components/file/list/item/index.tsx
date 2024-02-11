@@ -9,7 +9,6 @@ import {
   Checkbox,
   Box,
   Text,
-  VStack,
 } from '@chakra-ui/react'
 import { variables } from '@koupr/ui'
 import { File, SnapshotStatus } from '@/client/api/file'
@@ -21,14 +20,17 @@ import {
   selectionRemoved,
   selectionUpdated,
 } from '@/store/ui/files'
+import { ViewType } from '@/types/file'
 import Icon from './icon'
 import { performMultiSelect, performRangeSelect } from './perform-select'
 
 type ItemProps = {
   file: File
   scale: number
+  viewType: ViewType
   isPresentational?: boolean
   isLoading?: boolean
+  isSelectionMode?: boolean
   onContextMenu?: (event: MouseEvent) => void
 }
 
@@ -38,8 +40,10 @@ const MIN_HEIGHT = 110
 const Item = ({
   file,
   scale,
+  viewType,
   isPresentational,
   isLoading,
+  isSelectionMode,
   onContextMenu,
 }: ItemProps) => {
   const dispatch = useAppDispatch()
@@ -48,8 +52,6 @@ const Item = ({
   const minHeight = useMemo(() => `${MIN_HEIGHT * scale}px`, [scale])
   const hoverColor = useColorModeValue('gray.100', 'gray.700')
   const activeColor = useColorModeValue('gray.200', 'gray.600')
-  const [isCheckboxVisible, setIsCheckboxVisible] = useState(false)
-  const [isHovered, setIsHovered] = useState(false)
   const [isChecked, setIsChecked] = useState(false)
   const [isSelected, setIsSelected] = useState(false)
   const date = useMemo(
@@ -62,47 +64,39 @@ const Item = ({
       if (store.getState().ui.files.selection.includes(file.id)) {
         setIsSelected(true)
         setIsChecked(true)
-        setIsCheckboxVisible(true)
       } else {
-        setIsSelected(false)
-        setIsChecked(false)
-        if (!isHovered) {
-          setIsCheckboxVisible(false)
+        if (isSelected) {
+          setIsSelected(false)
+        }
+        if (isChecked) {
+          setIsChecked(false)
         }
       }
     })
     return () => unsubscribe()
-  }, [file.id, isHovered])
-
-  const handleClick = useCallback(
-    (event: MouseEvent) => event.stopPropagation(),
-    [],
-  )
-
-  const handleMouseEnter = useCallback(() => {
-    setIsCheckboxVisible(true)
-    setIsHovered(true)
-  }, [])
-
-  const handleMouseLeave = useCallback(() => {
-    if (!isChecked) {
-      setIsCheckboxVisible(false)
-    }
-    setIsHovered(false)
-  }, [isChecked])
+  }, [file, isSelected, isChecked])
 
   const handleIconClick = useCallback(
     (event: MouseEvent) => {
       event.stopPropagation()
-      if (store.getState().ui.files.isMultiSelectActive) {
-        performMultiSelect(file, isSelected)
-      } else if (store.getState().ui.files.isRangeSelectActive) {
-        performRangeSelect(file)
+      if (isSelectionMode) {
+        setIsChecked(!isChecked)
+        if (isChecked) {
+          dispatch(selectionRemoved(file.id))
+        } else {
+          dispatch(selectionAdded(file.id))
+        }
       } else {
-        dispatch(selectionUpdated([file.id]))
+        if (store.getState().ui.files.isMultiSelectActive) {
+          performMultiSelect(file, isSelected)
+        } else if (store.getState().ui.files.isRangeSelectActive) {
+          performRangeSelect(file)
+        } else {
+          dispatch(selectionUpdated([file.id]))
+        }
       }
     },
-    [file, isSelected, dispatch],
+    [file, isSelected, isChecked, isSelectionMode, dispatch],
   )
 
   const handleFileLinkClick = useCallback(
@@ -125,7 +119,7 @@ const Item = ({
   const handleCheckboxChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
       event.stopPropagation()
-      if (event.target.checked) {
+      if (!event.target.checked) {
         setIsChecked(true)
         dispatch(selectionAdded(file.id))
       } else {
@@ -151,9 +145,12 @@ const Item = ({
 
   return (
     <Stack
+      direction={viewType === ViewType.List ? 'row' : 'column'}
+      alignItems="center"
       position="relative"
       spacing={variables.spacingXs}
-      w={width}
+      w={viewType === ViewType.List ? '100%' : width}
+      px={viewType === ViewType.List ? variables.spacing : 0}
       py={variables.spacingSm}
       _hover={{ bg: hoverColor }}
       _active={{ bg: activeColor }}
@@ -162,31 +159,31 @@ const Item = ({
       borderRadius={variables.borderRadiusSm}
       userSelect="none"
       cursor="default"
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      onClick={handleClick}
+      onClick={handleIconClick}
+      onDoubleClick={handleIconDoubleClick}
       onContextMenu={handleContextMenu}
     >
-      {(isCheckboxVisible || isSelected) && !isPresentational ? (
+      {isSelectionMode && !isPresentational ? (
         <Checkbox
-          position="absolute"
-          top={variables.spacingSm}
-          left={variables.spacingSm}
+          position={viewType === ViewType.List ? 'relative' : 'absolute'}
+          top={viewType === ViewType.List ? 'auto' : variables.spacingSm}
+          left={viewType === ViewType.List ? 'auto' : variables.spacingSm}
           isChecked={isChecked}
           zIndex={1}
           size="lg"
           onChange={handleCheckboxChange}
         />
       ) : null}
-      <Center
-        w={width}
-        minH={minHeight}
-        onDoubleClick={handleIconDoubleClick}
-        onClick={handleIconClick}
-      >
+      <Center w={width} minH={minHeight}>
         <Icon file={file} scale={scale} isLoading={isLoading} />
       </Center>
-      <Box w={width} title={file.name} px={variables.spacingXs}>
+      <Box
+        w={width}
+        title={file.name}
+        px={variables.spacingXs}
+        display={viewType === ViewType.List ? 'flex' : 'block'}
+        flexGrow={viewType === ViewType.List ? 1 : 0}
+      >
         {file.type === 'folder' && (
           <ChakraLink
             as={Link}
@@ -216,11 +213,9 @@ const Item = ({
           </Text>
         ) : null}
       </Box>
-      <VStack spacing={0}>
-        <Text textAlign="center" noOfLines={3} color="gray.500">
-          {date}
-        </Text>
-      </VStack>
+      <Text textAlign="center" noOfLines={3} color="gray.500">
+        {date}
+      </Text>
     </Stack>
   )
 }

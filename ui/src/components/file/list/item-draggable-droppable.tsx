@@ -16,17 +16,22 @@ import useFileListSearchParams from '@/hooks/use-file-list-params'
 import store from '@/store/configure-store'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { hiddenUpdated, selectionUpdated } from '@/store/ui/files'
+import { ViewType } from '@/types/file'
 import Item from './item'
 
 type ItemDraggableDroppableProps = {
   file: File
   scale: number
+  viewType: ViewType
+  isSelectionMode?: boolean
   onContextMenu?: (event: MouseEvent) => void
 }
 
 const ItemDraggableDroppable = ({
   file,
   scale,
+  viewType,
+  isSelectionMode,
   onContextMenu,
 }: ItemDraggableDroppableProps) => {
   const { mutate } = useSWRConfig()
@@ -102,7 +107,13 @@ const ItemDraggableDroppable = ({
           {...listeners}
           {...attributes}
         >
-          <Item file={file} scale={scale} onContextMenu={onContextMenu} />
+          <Item
+            file={file}
+            scale={scale}
+            viewType={viewType}
+            isSelectionMode={isSelectionMode}
+            onContextMenu={onContextMenu}
+          />
         </Box>
       ) : null}
       {file.type === FileType.Folder ? (
@@ -121,8 +132,10 @@ const ItemDraggableDroppable = ({
             <Item
               file={file}
               scale={scale}
+              viewType={viewType}
               isPresentational={isOver}
               isLoading={isLoading}
+              isSelectionMode={isSelectionMode}
               onContextMenu={onContextMenu}
             />
           </Box>

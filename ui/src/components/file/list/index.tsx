@@ -11,6 +11,7 @@ import {
   MenuItem,
   MenuDivider,
   Box,
+  Stack,
 } from '@chakra-ui/react'
 import {
   IconCopy,
@@ -49,6 +50,7 @@ import {
   sharingModalDidOpen,
 } from '@/store/ui/files'
 import { uploadsDrawerOpened } from '@/store/ui/uploads-drawer'
+import { ViewType } from '@/types/file'
 import ItemDragOverlay from './item-drag-overlay'
 import ItemDraggableDroppable from './item-draggable-droppable'
 
@@ -66,6 +68,10 @@ const List = ({ list, scale }: ListProps) => {
       : null,
   )
   const hidden = useAppSelector((state) => state.ui.files.hidden)
+  const viewType = useAppSelector((state) => state.ui.files.viewType)
+  const isSelectionMode = useAppSelector(
+    (state) => state.ui.files.isSelectionMode,
+  )
   const [activeId, setActiveId] = useState<string | null>(null)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [menuPosition, setMenuPosition] = useState<{ x: number; y: number }>()
@@ -154,7 +160,7 @@ const List = ({ list, scale }: ListProps) => {
               <Text>There are no items.</Text>
             </Center>
           )}
-          {list.totalElements > 0 ? (
+          {viewType === ViewType.Grid && list.totalElements > 0 ? (
             <Wrap
               spacing={variables.spacing}
               overflow="hidden"
@@ -167,6 +173,8 @@ const List = ({ list, scale }: ListProps) => {
                     <ItemDraggableDroppable
                       file={f}
                       scale={scale}
+                      viewType={viewType}
+                      isSelectionMode={isSelectionMode}
                       onContextMenu={(event: MouseEvent) => {
                         setMenuPosition({ x: event.pageX, y: event.pageY })
                         setIsMenuOpen(true)
@@ -175,6 +183,30 @@ const List = ({ list, scale }: ListProps) => {
                   </WrapItem>
                 ))}
             </Wrap>
+          ) : null}
+          {viewType === ViewType.List && list.totalElements > 0 ? (
+            <Stack
+              direction="column"
+              spacing={variables.spacingXs}
+              overflow="hidden"
+              pb={variables.spacingLg}
+            >
+              {list.data
+                .filter((e) => !hidden.includes(e.id))
+                .map((f) => (
+                  <ItemDraggableDroppable
+                    key={f.id}
+                    file={f}
+                    scale={scale * 0.5}
+                    viewType={viewType}
+                    isSelectionMode={isSelectionMode}
+                    onContextMenu={(event: MouseEvent) => {
+                      setMenuPosition({ x: event.pageX, y: event.pageY })
+                      setIsMenuOpen(true)
+                    }}
+                  />
+                ))}
+            </Stack>
           ) : null}
           <ItemDragOverlay file={activeFile!} scale={scale} />
         </DndContext>

@@ -1,7 +1,17 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { SortBy, SortOrder } from '@/client/api/file'
+import {
+  loadFileSortBy,
+  loadFileSortOrder,
+  loadFileViewType,
+  loadIconScale,
+  saveFileSortBy,
+  saveFileSortOrder,
+  saveFileViewType,
+  saveIconScale,
+} from '@/local-storage'
+import { ViewType } from '@/types/file'
 
-export const SORT_BY_KEY = 'voltaserve_file_sort_by'
 export const SORT_ORDER_KEY = 'voltaserve_file_sort_order'
 
 export type FilesState = {
@@ -15,9 +25,11 @@ export type FilesState = {
   isDeleteModalOpen: boolean
   isRenameModalOpen: boolean
   isShareModalOpen: boolean
+  isSelectionMode: boolean
   iconScale: number
   sortBy: SortBy
   sortOrder: SortOrder
+  viewType: ViewType
 }
 
 const initialState: FilesState = {
@@ -31,10 +43,11 @@ const initialState: FilesState = {
   isDeleteModalOpen: false,
   isRenameModalOpen: false,
   isShareModalOpen: false,
-  iconScale: 1,
-  sortBy: (localStorage.getItem(SORT_BY_KEY) as SortBy) || SortBy.DateCreated,
-  sortOrder:
-    (localStorage.getItem(SORT_ORDER_KEY) as SortOrder) || SortOrder.Desc,
+  iconScale: loadIconScale() || 1,
+  sortBy: loadFileSortBy() || SortBy.DateCreated,
+  sortOrder: loadFileSortOrder() || SortOrder.Desc,
+  viewType: loadFileViewType() || ViewType.Grid,
+  isSelectionMode: false,
 }
 
 const slice = createSlice({
@@ -97,12 +110,24 @@ const slice = createSlice({
     },
     iconScaleUpdated: (state, action: PayloadAction<number>) => {
       state.iconScale = action.payload
+      saveIconScale(state.iconScale)
     },
     sortByUpdated: (state, action: PayloadAction<SortBy>) => {
       state.sortBy = action.payload
+      saveFileSortBy(state.sortBy)
     },
-    sortOrderUpdated: (state, action: PayloadAction<SortOrder>) => {
-      state.sortOrder = action.payload
+    sortOrderToggled: (state) => {
+      state.sortOrder =
+        state.sortOrder === SortOrder.Asc ? SortOrder.Desc : SortOrder.Asc
+      saveFileSortOrder(state.sortOrder)
+    },
+    viewTypeToggled: (state) => {
+      state.viewType =
+        state.viewType === ViewType.Grid ? ViewType.List : ViewType.Grid
+      saveFileViewType(state.viewType)
+    },
+    selectionModeToggled: (state) => {
+      state.isSelectionMode = !state.isSelectionMode
     },
   },
 })
@@ -128,7 +153,9 @@ export const {
   rangeSelectKeyUpdated,
   iconScaleUpdated,
   sortByUpdated,
-  sortOrderUpdated,
+  sortOrderToggled,
+  viewTypeToggled,
+  selectionModeToggled,
 } = slice.actions
 
 export default slice.reducer
