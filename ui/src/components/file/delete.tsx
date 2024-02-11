@@ -57,9 +57,14 @@ const Delete = () => {
         )}
         <ModalCloseButton />
         <ModalBody>
-          <Text>
-            Are you sure you would like to delete ({selection.length}) item(s)?
-          </Text>
+          {selection.length > 1 ? (
+            <Text>
+              Are you sure you would like to delete ({selection.length})
+              item(s)?
+            </Text>
+          ) : (
+            <Text>Are you sure you would like to delete this item?</Text>
+          )}
         </ModalBody>
         <ModalFooter>
           <Button
