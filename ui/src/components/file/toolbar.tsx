@@ -182,7 +182,6 @@ const Toolbar = ({ list }: ToolbarProps) => {
   }, [list?.data, dispatch])
 
   const handleToggleSelection = useCallback(() => {
-    dispatch(selectionUpdated([]))
     dispatch(selectionModeToggled())
   }, [dispatch])
 
