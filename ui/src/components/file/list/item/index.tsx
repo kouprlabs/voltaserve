@@ -11,7 +11,7 @@ import {
   Text,
 } from '@chakra-ui/react'
 import { variables } from '@koupr/ui'
-import { File, SnapshotStatus } from '@/client/api/file'
+import { SnapshotStatus } from '@/client/api/file'
 import relativeDate from '@/helpers/relative-date'
 import store from '@/store/configure-store'
 import { useAppDispatch } from '@/store/hook'
@@ -20,19 +20,13 @@ import {
   selectionRemoved,
   selectionUpdated,
 } from '@/store/ui/files'
-import { ViewType } from '@/types/file'
+import { CommonItemProps, ViewType } from '@/types/file'
 import Icon from './icon'
 import { performMultiSelect, performRangeSelect } from './perform-select'
 
 type ItemProps = {
-  file: File
-  scale: number
-  viewType: ViewType
-  isPresentational?: boolean
-  isLoading?: boolean
-  isSelectionMode?: boolean
   onContextMenu?: (event: MouseEvent) => void
-}
+} & CommonItemProps
 
 const WIDTH = 147
 const MIN_HEIGHT = 110
@@ -175,7 +169,12 @@ const Item = ({
         />
       ) : null}
       <Center w={width} minH={minHeight}>
-        <Icon file={file} scale={scale} isLoading={isLoading} />
+        <Icon
+          file={file}
+          scale={scale}
+          viewType={viewType}
+          isLoading={isLoading}
+        />
       </Center>
       <Box
         w={width}

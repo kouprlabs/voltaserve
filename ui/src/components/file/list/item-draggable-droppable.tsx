@@ -11,21 +11,17 @@ import {
   useDraggable,
   useDroppable,
 } from '@dnd-kit/core'
-import FileAPI, { File, FileType, List } from '@/client/api/file'
+import FileAPI, { FileType, List } from '@/client/api/file'
 import useFileListSearchParams from '@/hooks/use-file-list-params'
 import store from '@/store/configure-store'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { hiddenUpdated, selectionUpdated } from '@/store/ui/files'
-import { ViewType } from '@/types/file'
+import { CommonItemProps } from '@/types/file'
 import Item from './item'
 
 type ItemDraggableDroppableProps = {
-  file: File
-  scale: number
-  viewType: ViewType
-  isSelectionMode?: boolean
   onContextMenu?: (event: MouseEvent) => void
-}
+} & CommonItemProps
 
 const ItemDraggableDroppable = ({
   file,

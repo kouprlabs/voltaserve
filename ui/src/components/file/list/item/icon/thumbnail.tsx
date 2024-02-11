@@ -104,10 +104,10 @@ const Thumbnail = ({ file, scale }: ThumbnailProps) => {
         </Center>
       )}
       <HStack position="absolute" bottom="-5px" right="-5px" spacing="2px">
-        {file.isShared && <SharedBadge />}
-        {file.status === SnapshotStatus.New && <NewBadge />}
-        {file.status === SnapshotStatus.Processing && <ProcessingBadge />}
-        {file.status === SnapshotStatus.Error && <ErrorBadge />}
+        {file.isShared ? <SharedBadge /> : null}
+        {file.status === SnapshotStatus.New ? <NewBadge /> : null}
+        {file.status === SnapshotStatus.Processing ? <ProcessingBadge /> : null}
+        {file.status === SnapshotStatus.Error ? <ErrorBadge /> : null}
       </HStack>
     </Box>
   )
