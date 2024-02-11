@@ -50,7 +50,11 @@ const Delete = () => {
     >
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>Delete File(s)</ModalHeader>
+        {selection.length > 1 ? (
+          <ModalHeader>Delete {selection.length} Item(s)</ModalHeader>
+        ) : (
+          <ModalHeader>Delete Item</ModalHeader>
+        )}
         <ModalCloseButton />
         <ModalBody>
           <Text>

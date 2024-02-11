@@ -73,7 +73,11 @@ const Sharing = ({ list }: SharingProps) => {
     >
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>Sharing</ModalHeader>
+        {selection.length > 1 ? (
+          <ModalHeader>Sharing {selection.length} Items(s)</ModalHeader>
+        ) : (
+          <ModalHeader>Sharing</ModalHeader>
+        )}
         <ModalCloseButton />
         <ModalBody>
           <Tabs>

@@ -1,11 +1,4 @@
-import {
-  ChangeEvent,
-  ReactElement,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from 'react'
+import { ChangeEvent, ReactElement, useCallback, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import {
   Button,
@@ -46,6 +39,7 @@ import {
 } from '@koupr/ui'
 import { useSWRConfig } from 'swr'
 import { FiChevronDown } from 'react-icons/fi'
+import { LuGrid, LuList, LuX } from 'react-icons/lu'
 import FileAPI, { List, SortBy, SortOrder } from '@/client/api/file'
 import { ltEditorPermission, ltOwnerPermission } from '@/client/api/permission'
 import downloadFile from '@/helpers/download-file'
@@ -54,10 +48,10 @@ import useFileListSearchParams from '@/hooks/use-file-list-params'
 import { uploadAdded, UploadDecorator } from '@/store/entities/uploads'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import {
-  sortOrderUpdated,
   sortByUpdated,
-  SORT_BY_KEY,
-  SORT_ORDER_KEY,
+  viewTypeToggled,
+  selectionModeToggled,
+  sortOrderToggled,
 } from '@/store/ui/files'
 import {
   copyModalDidOpen,
@@ -70,8 +64,8 @@ import {
   sharingModalDidOpen,
 } from '@/store/ui/files'
 import { uploadsDrawerOpened } from '@/store/ui/uploads-drawer'
+import { ViewType } from '@/types/file'
 
-const ICON_SCALE_KEY = 'voltaserve_file_icon_scale'
 const SPACING = variables.spacingXs
 const ICON_SCALE_SLIDER_STEP = 0.25
 const ICON_SCALE_SLIDER_MIN = 1
@@ -95,6 +89,7 @@ const Toolbar = ({ list }: ToolbarProps) => {
       : null,
   )
   const iconScale = useAppSelector((state) => state.ui.files.iconScale)
+  const viewType = useAppSelector((state) => state.ui.files.viewType)
   const sortBy = useAppSelector((state) => state.ui.files.sortBy)
   const sortOrder = useAppSelector((state) => state.ui.files.sortOrder)
   const hasOwnerPermission = useAppSelector(
@@ -115,25 +110,13 @@ const Toolbar = ({ list }: ToolbarProps) => {
           ) !== -1,
       ) === -1,
   )
+  const isSelectionMode = useAppSelector(
+    (state) => state.ui.files.isSelectionMode,
+  )
   const fileUploadInput = useRef<HTMLInputElement>(null)
   const folderUploadInput = useRef<HTMLInputElement>(null)
   const fileListSearchParams = useFileListSearchParams()
   const { data: folder } = FileAPI.useGetById(fileId)
-
-  useEffect(() => {
-    const iconScale = localStorage.getItem(ICON_SCALE_KEY)
-    if (iconScale) {
-      dispatch(iconScaleUpdated(JSON.parse(iconScale)))
-    }
-    const sortBy = localStorage.getItem(SORT_BY_KEY)
-    if (sortBy) {
-      dispatch(sortByUpdated(sortBy as SortBy))
-    }
-    const sortOrder = localStorage.getItem(SORT_ORDER_KEY)
-    if (sortOrder) {
-      dispatch(sortOrderUpdated(sortOrder as SortOrder))
-    }
-  }, [dispatch])
 
   const handleFileChange = useCallback(
     async (event: ChangeEvent<HTMLInputElement>) => {
@@ -165,7 +148,6 @@ const Toolbar = ({ list }: ToolbarProps) => {
 
   const handleIconScaleChange = useCallback(
     (value: number) => {
-      localStorage.setItem(ICON_SCALE_KEY, JSON.stringify(value))
       dispatch(iconScaleUpdated(value))
     },
     [dispatch],
@@ -180,24 +162,28 @@ const Toolbar = ({ list }: ToolbarProps) => {
 
   const handleSortByChange = useCallback(
     (value: SortBy) => {
-      localStorage.setItem(SORT_BY_KEY, value.toString())
       dispatch(sortByUpdated(value))
     },
     [dispatch],
   )
 
   const handleSortOrderToggle = useCallback(() => {
-    const value: SortOrder =
-      sortOrder === SortOrder.Asc ? SortOrder.Desc : SortOrder.Asc
-    localStorage.setItem(SORT_ORDER_KEY, value.toString())
-    dispatch(sortOrderUpdated(value))
-  }, [sortOrder, dispatch])
+    dispatch(sortOrderToggled())
+  }, [dispatch])
+
+  const handleViewTypeToggle = useCallback(() => {
+    dispatch(viewTypeToggled())
+  }, [dispatch])
 
   const handleSelectAllClick = useCallback(() => {
     if (list?.data) {
       dispatch(selectionUpdated(list?.data.map((f) => f.id)))
     }
   }, [list?.data, dispatch])
+
+  const handleToggleSelection = useCallback(() => {
+    dispatch(selectionModeToggled())
+  }, [dispatch])
 
   const getSortByIcon = useCallback(
     (value: SortBy): ReactElement => {
@@ -217,6 +203,14 @@ const Toolbar = ({ list }: ToolbarProps) => {
       return <IconSortDown />
     }
   }, [sortOrder])
+
+  const getViewTypeIcon = useCallback(() => {
+    if (viewType === ViewType.Grid) {
+      return <LuList fontSize="16px" />
+    } else if (viewType === ViewType.List) {
+      return <LuGrid fontSize="16px" />
+    }
+  }, [viewType])
 
   return (
     <>
@@ -348,24 +342,35 @@ const Toolbar = ({ list }: ToolbarProps) => {
                   >
                     Copy
                   </MenuItem>
-                  <MenuDivider />
-                  <MenuItem
-                    icon={<IconCheckCircle />}
-                    onClick={handleSelectAllClick}
-                  >
-                    Select All
-                  </MenuItem>
-                  <MenuItem
-                    icon={<IconCircle />}
-                    onClick={() => dispatch(selectionUpdated([]))}
-                  >
-                    Unselect All
-                  </MenuItem>
+                  {isSelectionMode ? (
+                    <>
+                      <MenuDivider />
+                      <MenuItem
+                        icon={<IconCheckCircle />}
+                        onClick={handleSelectAllClick}
+                      >
+                        Select All
+                      </MenuItem>
+                      <MenuItem
+                        icon={<IconCircle />}
+                        onClick={() => dispatch(selectionUpdated([]))}
+                      >
+                        Unselect All
+                      </MenuItem>
+                    </>
+                  ) : null}
                 </MenuList>
               </Portal>
             </Menu>
           </Box>
         </Stack>
+        <IconButton
+          icon={isSelectionMode ? <LuX /> : <IconCheckCircle />}
+          isDisabled={!list}
+          variant="solid"
+          aria-label=""
+          onClick={handleToggleSelection}
+        />
         <IconButton
           icon={<IconRefresh />}
           isLoading={isRefreshing}
@@ -401,6 +406,14 @@ const Toolbar = ({ list }: ToolbarProps) => {
               aria-label=""
               isDisabled={!list}
               onClick={handleSortOrderToggle}
+            />
+            <IconButton
+              icon={getViewTypeIcon()}
+              fontSize="16px"
+              variant="solid"
+              aria-label=""
+              isDisabled={!list}
+              onClick={handleViewTypeToggle}
             />
             <Box>
               <Menu>
