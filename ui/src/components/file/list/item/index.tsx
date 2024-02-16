@@ -1,6 +1,6 @@
 import { ChangeEvent, MouseEvent, useEffect } from 'react'
 import { useCallback, useMemo, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import {
   Stack,
   Center,
@@ -93,6 +93,10 @@ const Item = ({
     [file, isSelected, isChecked, isSelectionMode, dispatch],
   )
 
+  const handleFolderLinkClick = useCallback(() => {
+    navigate(`/workspace/${file.workspaceId}/file/${file.id}`)
+  }, [file.id, file.workspaceId, navigate])
+
   const handleFileLinkClick = useCallback(
     (event: MouseEvent) => {
       handleIconClick(event)
@@ -154,8 +158,8 @@ const Item = ({
       userSelect="none"
       cursor="default"
       onClick={handleIconClick}
-      onDoubleClick={handleIconDoubleClick}
-      onContextMenu={handleContextMenu}
+      onDoubleClick={isSelectionMode ? undefined : handleIconDoubleClick}
+      onContextMenu={isSelectionMode ? undefined : handleContextMenu}
     >
       {isSelectionMode && !isPresentational ? (
         <Checkbox
@@ -185,12 +189,12 @@ const Item = ({
       >
         {file.type === 'folder' && (
           <ChakraLink
-            as={Link}
-            to={`/workspace/${file.workspaceId}/file/${file.id}`}
             textAlign="center"
             noOfLines={3}
             textDecoration="none"
-            _hover={{ textDecoration: 'underline' }}
+            cursor={isSelectionMode ? 'default' : 'pointer'}
+            _hover={{ textDecoration: isSelectionMode ? 'none' : 'underline' }}
+            onClick={isSelectionMode ? undefined : handleFolderLinkClick}
           >
             {file.name}
           </ChakraLink>
@@ -200,8 +204,9 @@ const Item = ({
             textAlign="center"
             noOfLines={3}
             textDecoration="none"
-            _hover={{ textDecoration: 'underline' }}
-            onClick={handleFileLinkClick}
+            cursor={isSelectionMode ? 'default' : 'pointer'}
+            _hover={{ textDecoration: isSelectionMode ? 'none' : 'underline' }}
+            onClick={isSelectionMode ? undefined : handleFileLinkClick}
           >
             {file.name}
           </ChakraLink>
