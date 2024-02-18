@@ -4,11 +4,9 @@ import {
   Button,
   FormControl,
   FormErrorMessage,
-  HStack,
   Input,
   Link as ChakraLink,
   Text,
-  VStack,
   Heading,
 } from '@chakra-ui/react'
 import { variables } from '@koupr/ui'
@@ -21,6 +19,7 @@ import {
   FormikHelpers,
 } from 'formik'
 import * as Yup from 'yup'
+import classNames from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import AccountAPI from '@/client/idp/account'
 import Logo from '@/components/common/logo'
@@ -72,8 +71,23 @@ const SignUpPage = () => {
           <title>Sign Up to Voltaserve</title>
         </Helmet>
         {isConfirmationVisible && (
-          <VStack spacing="25px" w="100%">
-            <VStack spacing={variables.spacing}>
+          <div
+            className={classNames(
+              'flex',
+              'flex-col',
+              'items-center',
+              'gap-2.5',
+              'w-full',
+            )}
+          >
+            <div
+              className={classNames(
+                'flex',
+                'flex-col',
+                'items-center',
+                'gap-1.5',
+              )}
+            >
               <Logo className="w-16" isGlossy={true} />
               <Heading fontSize={variables.headingFontSize}>
                 Thanks! We just sent you a confirmation email
@@ -82,11 +96,19 @@ const SignUpPage = () => {
                 Just open your inbox, find the email, and click on the
                 confirmation link.
               </Text>
-            </VStack>
-          </VStack>
+            </div>
+          </div>
         )}
         {!isConfirmationVisible && (
-          <VStack spacing="25px" w="100%">
+          <div
+            className={classNames(
+              'flex',
+              'flex-col',
+              'items-center',
+              'gap-2.5',
+              'w-full',
+            )}
+          >
             <Logo className="w-16" isGlossy={true} />
             <Heading fontSize={variables.headingFontSize}>
               Sign Up to Voltaserve
@@ -104,7 +126,14 @@ const SignUpPage = () => {
             >
               {({ errors, touched, isSubmitting }) => (
                 <Form className="w-full">
-                  <VStack spacing={variables.spacing}>
+                  <div
+                    className={classNames(
+                      'flex',
+                      'flex-col',
+                      'items-center',
+                      'gap-1.5',
+                    )}
+                  >
                     <Field name="fullName">
                       {({ field }: FieldAttributes<FieldProps>) => (
                         <FormControl
@@ -189,17 +218,24 @@ const SignUpPage = () => {
                     >
                       Sign Up
                     </Button>
-                  </VStack>
+                  </div>
                 </Form>
               )}
             </Formik>
-            <HStack spacing={variables.spacingXs}>
+            <div
+              className={classNames(
+                'flex',
+                'flex-row',
+                'items-center',
+                'gap-0.5',
+              )}
+            >
               <Text>Already a member?</Text>
               <ChakraLink as={Link} to="/sign-in">
                 Sign In
               </ChakraLink>
-            </HStack>
-          </VStack>
+            </div>
+          </div>
         )}
       </>
     </FullLayout>

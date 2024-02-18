@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { Link as ChakraLink, Heading, Text, VStack } from '@chakra-ui/react'
+import { Link as ChakraLink, Heading, Text } from '@chakra-ui/react'
 import { variables, Spinner } from '@koupr/ui'
+import classNames from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import UserAPI from '@/client/idp/user'
 import Logo from '@/components/common/logo'
@@ -35,40 +36,59 @@ const UpdateEmailPage = () => {
 
   return (
     <FullLayout>
-      <>
-        <Helmet>
-          <title>Confirm Email</title>
-        </Helmet>
-        <VStack spacing={variables.spacingXl}>
-          <Logo className="w-16" isGlossy={true} />
-          {!isCompleted && !isFailed ? (
-            <VStack spacing={variables.spacing}>
-              <Heading fontSize={variables.headingFontSize}>
-                Confirming your Email…
-              </Heading>
-              <Spinner />
-            </VStack>
-          ) : null}
-          {isCompleted && !isFailed ? (
-            <VStack spacing={variables.spacing}>
-              <Heading fontSize={variables.headingFontSize}>
-                Email confirmed
-              </Heading>
-              <VStack spacing={variables.spacingXs}>
-                <Text>Click the link below to go back to your account.</Text>
-                <ChakraLink as={Link} to="/account/settings">
-                  Back to account
-                </ChakraLink>
-              </VStack>
-            </VStack>
-          ) : null}
-          {isFailed && (
+      <Helmet>
+        <title>Confirm Email</title>
+      </Helmet>
+      <div className={classNames('flex', 'flex-col', 'items-center', 'gap-3')}>
+        <Logo className="w-16" isGlossy={true} />
+        {!isCompleted && !isFailed ? (
+          <div
+            className={classNames(
+              'flex',
+              'flex-col',
+              'items-center',
+              'gap-1.5',
+            )}
+          >
             <Heading fontSize={variables.headingFontSize}>
-              An error occurred while processing your request.
+              Confirming your Email…
             </Heading>
-          )}
-        </VStack>
-      </>
+            <Spinner />
+          </div>
+        ) : null}
+        {isCompleted && !isFailed ? (
+          <div
+            className={classNames(
+              'flex',
+              'flex-col',
+              'items-center',
+              'gap-1.5',
+            )}
+          >
+            <Heading fontSize={variables.headingFontSize}>
+              Email confirmed
+            </Heading>
+            <div
+              className={classNames(
+                'flex',
+                'flex-row',
+                'items-center',
+                'gap-0.5',
+              )}
+            >
+              <Text>Click the link below to go back to your account.</Text>
+              <ChakraLink as={Link} to="/account/settings">
+                Back to account
+              </ChakraLink>
+            </div>
+          </div>
+        ) : null}
+        {isFailed && (
+          <Heading fontSize={variables.headingFontSize}>
+            An error occurred while processing your request.
+          </Heading>
+        )}
+      </div>
     </FullLayout>
   )
 }

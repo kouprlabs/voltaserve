@@ -1,7 +1,8 @@
 import { useCallback } from 'react'
 import { useParams } from 'react-router-dom'
-import { Button, Center, Stack, Text } from '@chakra-ui/react'
-import { variables, IconDownload, Drawer, Spinner } from '@koupr/ui'
+import { Button, Text } from '@chakra-ui/react'
+import { IconDownload, Drawer, Spinner } from '@koupr/ui'
+import classNames from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import FileAPI, { File } from '@/client/api/file'
 import AudioPlayer from '@/components/viewer/audio-player'
@@ -30,7 +31,7 @@ const FileViewerPage = () => {
       return <AudioPlayer file={file} />
     } else {
       return (
-        <Stack direction="column" spacing={variables.spacing}>
+        <div className={classNames('flex', 'flex-col', 'gap-1.5')}>
           <Text fontSize="16px">Cannot preview this file.</Text>
           <Button
             leftIcon={<IconDownload />}
@@ -39,39 +40,71 @@ const FileViewerPage = () => {
           >
             Download
           </Button>
-        </Stack>
+        </div>
       )
     }
   }, [])
 
-  if (!file) {
-    return (
-      <Center height="100vh">
-        <Spinner />
-      </Center>
-    )
-  }
-
   return (
     <>
-      <Helmet>
-        <title>{file.name}</title>
-      </Helmet>
-      <Stack direction="row" spacing={0} h="100%">
-        <Drawer storage={{ prefix: 'voltaserve', namespace: 'viewer' }}>
-          <DrawerContent file={file} />
-        </Drawer>
-        <Stack height="100vh" spacing={0} flexGrow={1}>
-          <Center w="100%" h="80px">
-            <Text fontSize="16px" fontWeight="500">
-              {file.name}
-            </Text>
-          </Center>
-          <Center w="100%" h="100%" overflow="hidden">
-            {renderViewer(file)}
-          </Center>
-        </Stack>
-      </Stack>
+      {file ? (
+        <>
+          <Helmet>
+            <title>{file.name}</title>
+          </Helmet>
+          <div className={classNames('flex', 'flex-row', 'gap-0', 'h-full')}>
+            <Drawer storage={{ prefix: 'voltaserve', namespace: 'viewer' }}>
+              <DrawerContent file={file} />
+            </Drawer>
+            <div
+              className={classNames(
+                'flex',
+                'flex-col',
+                'gap-0',
+                'grow',
+                'h-[100vh]',
+              )}
+            >
+              <div
+                className={classNames(
+                  'flex',
+                  'items-center',
+                  'justify-center',
+                  'w-full',
+                  'h-[80px]',
+                )}
+              >
+                <Text fontSize="16px" fontWeight="500">
+                  {file.name}
+                </Text>
+              </div>
+              <div
+                className={classNames(
+                  'flex',
+                  'items-center',
+                  'justify-center',
+                  'w-full',
+                  'h-full',
+                  'overflow-hidden',
+                )}
+              >
+                {renderViewer(file)}
+              </div>
+            </div>
+          </div>
+        </>
+      ) : (
+        <div
+          className={classNames(
+            'flex',
+            'items-center',
+            'justify-center',
+            'h-[100vh]',
+          )}
+        >
+          <Spinner />
+        </div>
+      )}
     </>
   )
 }

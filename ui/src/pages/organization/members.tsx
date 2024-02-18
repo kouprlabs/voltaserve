@@ -18,7 +18,6 @@ import {
   Thead,
   Tr,
   Text,
-  Center,
   Button,
   Avatar,
   Portal,
@@ -179,7 +178,14 @@ const OrganizationMembersPage = () => {
       )}
       {list.data.length === 0 && (
         <>
-          <Center h="300px">
+          <div
+            className={classNames(
+              'flex',
+              'items-center',
+              'justify-center',
+              'h=[300px]',
+            )}
+          >
             <div
               className={classNames(
                 'flex',
@@ -200,7 +206,7 @@ const OrganizationMembersPage = () => {
                 </Button>
               )}
             </div>
-          </Center>
+          </div>
           <InviteMembers
             open={isInviteMembersModalOpen}
             id={org.id}

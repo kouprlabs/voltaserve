@@ -1,7 +1,6 @@
 import { useCallback } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import {
-  Center,
   IconButton,
   Menu,
   MenuButton,
@@ -90,9 +89,16 @@ const AccountInvitationsPage = () => {
         <title>{user.fullName}</title>
       </Helmet>
       {list.data.length === 0 && (
-        <Center h="300px">
+        <div
+          className={classNames(
+            'flex',
+            'items-center',
+            'justify-center',
+            'h=[300px]',
+          )}
+        >
           <Text>There are no invitations.</Text>
-        </Center>
+        </div>
       )}
       {list.data.length > 0 && (
         <div className={classNames('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>

@@ -6,9 +6,7 @@ import {
   FormErrorMessage,
   FormLabel,
   Heading,
-  HStack,
   Input,
-  Stack,
 } from '@chakra-ui/react'
 import { variables } from '@koupr/ui'
 import { useSWRConfig } from 'swr'
@@ -21,6 +19,7 @@ import {
   FormikHelpers,
 } from 'formik'
 import * as Yup from 'yup'
+import classNames from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import WorkspaceAPI from '@/client/api/workspace'
 import OrganizationSelector from '@/components/common/organization-selector'
@@ -78,7 +77,7 @@ const NewWorkspacePage = () => {
       <Helmet>
         <title>New Workspace</title>
       </Helmet>
-      <Stack spacing={variables.spacing2Xl}>
+      <div className={classNames('flex', 'flex-col', 'gap-3.5')}>
         <Heading fontSize={variables.headingFontSize}>New Workspace</Heading>
         <Formik
           enableReinitialize={true}
@@ -93,8 +92,8 @@ const NewWorkspacePage = () => {
         >
           {({ errors, touched, isSubmitting, setFieldValue }) => (
             <Form>
-              <Stack spacing={variables.spacing2Xl}>
-                <Stack spacing={variables.spacing}>
+              <div className={classNames('flex', 'flex-col', 'gap-3.5')}>
+                <div className={classNames('flex', 'flex-col', 'gap-1.5')}>
                   <Field name="name">
                     {({ field }: FieldAttributes<FieldProps>) => (
                       <FormControl
@@ -147,8 +146,15 @@ const NewWorkspacePage = () => {
                       </FormControl>
                     )}
                   </Field>
-                </Stack>
-                <HStack>
+                </div>
+                <div
+                  className={classNames(
+                    'flex',
+                    'flex-row',
+                    'items-center',
+                    'gap-0.5',
+                  )}
+                >
                   <Button
                     type="submit"
                     variant="solid"
@@ -161,12 +167,12 @@ const NewWorkspacePage = () => {
                   <Button as={Link} to="/workspace" variant="solid">
                     Cancel
                   </Button>
-                </HStack>
-              </Stack>
+                </div>
+              </div>
             </Form>
           )}
         </Formik>
-      </Stack>
+      </div>
     </>
   )
 }

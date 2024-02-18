@@ -6,9 +6,7 @@ import {
   FormErrorMessage,
   FormLabel,
   Heading,
-  HStack,
   Input,
-  Stack,
 } from '@chakra-ui/react'
 import { variables } from '@koupr/ui'
 import { useSWRConfig } from 'swr'
@@ -21,6 +19,7 @@ import {
   FormikHelpers,
 } from 'formik'
 import * as Yup from 'yup'
+import classNames from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import GroupAPI from '@/client/api/group'
 import OrganizationSelector from '@/components/common/organization-selector'
@@ -70,7 +69,7 @@ const NewGroupPage = () => {
       <Helmet>
         <title>New Group</title>
       </Helmet>
-      <Stack spacing={variables.spacing2Xl}>
+      <div className={classNames('flex', 'flex-col', 'gap-3.5')}>
         <Heading fontSize={variables.headingFontSize}>New Group</Heading>
         <Formik
           enableReinitialize={true}
@@ -81,8 +80,8 @@ const NewGroupPage = () => {
         >
           {({ errors, touched, isSubmitting, setFieldValue }) => (
             <Form>
-              <Stack spacing={variables.spacing2Xl}>
-                <Stack spacing={variables.spacing}>
+              <div className={classNames('flex', 'flex-col', 'gap-3.5')}>
+                <div className={classNames('flex', 'flex-col', 'gap-1.5')}>
                   <Field name="name">
                     {({ field }: FieldAttributes<FieldProps>) => (
                       <FormControl
@@ -117,8 +116,15 @@ const NewGroupPage = () => {
                       </FormControl>
                     )}
                   </Field>
-                </Stack>
-                <HStack>
+                </div>
+                <div
+                  className={classNames(
+                    'flex',
+                    'flex-row',
+                    'items-center',
+                    'gap-0.5',
+                  )}
+                >
                   <Button
                     type="submit"
                     variant="solid"
@@ -131,12 +137,12 @@ const NewGroupPage = () => {
                   <Button as={Link} to="/group" variant="solid">
                     Cancel
                   </Button>
-                </HStack>
-              </Stack>
+                </div>
+              </div>
             </Form>
           )}
         </Formik>
-      </Stack>
+      </div>
     </>
   )
 }
