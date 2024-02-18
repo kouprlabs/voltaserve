@@ -2,20 +2,17 @@ import { useEffect, useMemo, useState } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import {
   Avatar,
-  Box,
   Button,
   Heading,
-  HStack,
   IconButton,
-  Stack,
   Tab,
   TabList,
   Tabs,
   Tag,
   Text,
-  VStack,
 } from '@chakra-ui/react'
 import { variables, IconEdit } from '@koupr/ui'
+import classNames from 'classnames'
 import NotificationAPI from '@/client/api/notification'
 import UserAPI from '@/client/idp/user'
 import { swrConfig } from '@/client/options'
@@ -48,10 +45,20 @@ const AccountLayout = () => {
   }
 
   return (
-    <Stack direction="row" spacing={variables.spacingLg}>
-      <VStack spacing={variables.spacingMd} width="250px">
-        <VStack spacing={variables.spacingMd}>
-          <Box position="relative" flexShrink={0}>
+    <div className={classNames('flex', 'flex-row', 'gap-2.5')}>
+      <div
+        className={classNames(
+          'flex',
+          'flex-col',
+          'gap-2',
+          'items-center',
+          'w-[250px]',
+        )}
+      >
+        <div
+          className={classNames('flex', 'flex-col', 'gap-2', 'items-center')}
+        >
+          <div className={classNames('relative', 'shrink-0')}>
             <Avatar
               name={user.fullName}
               src={user.picture}
@@ -69,12 +76,12 @@ const AccountLayout = () => {
               aria-label=""
               onClick={() => setIsImageModalOpen(true)}
             />
-          </Box>
+          </div>
           <Heading fontSize={variables.headingFontSize} textAlign="center">
             {user.fullName}
           </Heading>
-        </VStack>
-        <VStack width="100%" spacing={variables.spacingSm}>
+        </div>
+        <div className={classNames('w-full', 'gap-1')}>
           <Button
             variant="outline"
             colorScheme="red"
@@ -84,9 +91,9 @@ const AccountLayout = () => {
           >
             Sign Out
           </Button>
-        </VStack>
-      </VStack>
-      <Stack w="100%" pb={variables.spacing}>
+        </div>
+      </div>
+      <div className={classNames('w-full', 'pb-1.5')}>
         <Tabs
           variant="solid-rounded"
           colorScheme="gray"
@@ -96,23 +103,30 @@ const AccountLayout = () => {
           <TabList>
             <Tab onClick={() => navigate('/account/settings')}>Settings</Tab>
             <Tab onClick={() => navigate('/account/invitation')}>
-              <HStack>
+              <div
+                className={classNames(
+                  'flex',
+                  'flex-row',
+                  'items-center',
+                  'gap-0.5',
+                )}
+              >
                 <Text>Invitations</Text>
                 {invitationCount && invitationCount > 0 ? (
                   <Tag borderRadius="full">{invitationCount}</Tag>
                 ) : null}
-              </HStack>
+              </div>
             </Tab>
           </TabList>
         </Tabs>
         <Outlet />
-      </Stack>
+      </div>
       <EditPicture
         open={isImageModalOpen}
         user={user}
         onClose={() => setIsImageModalOpen(false)}
       />
-    </Stack>
+    </div>
   )
 }
 

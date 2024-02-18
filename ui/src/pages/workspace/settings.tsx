@@ -1,16 +1,14 @@
 import { useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import {
-  Box,
   Divider,
-  HStack,
   IconButton,
   IconButtonProps,
   Progress,
-  Stack,
   Text,
 } from '@chakra-ui/react'
 import { variables, IconEdit, IconTrash, SectionSpinner } from '@koupr/ui'
+import classNames from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import { geEditorPermission } from '@/client/api/permission'
 import StorageAPI from '@/client/api/storage'
@@ -25,10 +23,7 @@ const EditButton = (props: IconButtonProps) => (
   <IconButton icon={<IconEdit />} {...props} />
 )
 
-const Spacer = () => <Box flexGrow={1} />
-
-const ROW_HEIGHT = '40px'
-const SECTION_SPACING = variables.spacing
+const Spacer = () => <div className={classNames('grow')} />
 
 const WorkspaceSettingsPage = () => {
   const { id } = useParams()
@@ -46,6 +41,14 @@ const WorkspaceSettingsPage = () => {
   const [isStorageCapacityModalOpen, setIsStorageCapacityModalOpen] =
     useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const sectionClassName = classNames('flex', 'flex-col', 'gap-1', 'py-1.5')
+  const rowClassName = classNames(
+    'flex',
+    'flex-row',
+    'items-center',
+    'gap-1',
+    `h-[40px]`,
+  )
 
   if (workspaceError) {
     return null
@@ -60,55 +63,56 @@ const WorkspaceSettingsPage = () => {
       <Helmet>
         <title>{workspace.name}</title>
       </Helmet>
-      <Stack spacing={variables.spacing} w="100%">
-        <Text fontWeight="bold">Storage</Text>
-        {storageUsageError && <Text>Failed to load storage usage.</Text>}
-        {storageUsage && !storageUsageError && (
-          <>
-            <Text>
-              {prettyBytes(storageUsage.bytes)} of{' '}
-              {prettyBytes(storageUsage.maxBytes)} used
-            </Text>
-            <Progress value={storageUsage.percentage} hasStripe />
-          </>
-        )}
-        {!storageUsage && !storageUsageError && (
-          <>
-            <Text>Calculating…</Text>
-            <Progress value={0} hasStripe />
-          </>
-        )}
-        <Divider />
-        <HStack spacing={variables.spacing}>
-          <Text>Storage capacity</Text>
-          <Spacer />
-          <Text>{prettyBytes(workspace.storageCapacity)}</Text>
-          <EditButton
-            aria-label=""
-            isDisabled={!hasEditPermission}
-            onClick={() => {
-              setIsStorageCapacityModalOpen(true)
-            }}
-          />
-        </HStack>
-        <Divider mb={variables.spacing} />
-        <Text fontWeight="bold">Basics</Text>
-        <HStack spacing={variables.spacing}>
-          <Text>Name</Text>
-          <Spacer />
-          <Text>{workspace.name}</Text>
-          <EditButton
-            aria-label=""
-            isDisabled={!hasEditPermission}
-            onClick={() => {
-              setIsNameModalOpen(true)
-            }}
-          />
-        </HStack>
-        <Divider />
-        <Stack direction="column" py={SECTION_SPACING}>
+      <div className={classNames('flex', 'flex-col', 'gap-0')}>
+        <div className={sectionClassName}>
+          <Text fontWeight="bold">Storage</Text>
+          {storageUsageError && <Text>Failed to load storage usage.</Text>}
+          {storageUsage && !storageUsageError && (
+            <>
+              <Text>
+                {prettyBytes(storageUsage.bytes)} of{' '}
+                {prettyBytes(storageUsage.maxBytes)} used
+              </Text>
+              <Progress value={storageUsage.percentage} hasStripe />
+            </>
+          )}
+          {!storageUsage && !storageUsageError && (
+            <>
+              <Text>Calculating…</Text>
+              <Progress value={0} hasStripe />
+            </>
+          )}
+          <Divider />
+          <div className={rowClassName}>
+            <Text>Storage capacity</Text>
+            <Spacer />
+            <Text>{prettyBytes(workspace.storageCapacity)}</Text>
+            <EditButton
+              aria-label=""
+              isDisabled={!hasEditPermission}
+              onClick={() => {
+                setIsStorageCapacityModalOpen(true)
+              }}
+            />
+          </div>
+          <Divider mb={variables.spacing} />
+          <Text fontWeight="bold">Basics</Text>
+          <div className={rowClassName}>
+            <Text>Name</Text>
+            <Spacer />
+            <Text>{workspace.name}</Text>
+            <EditButton
+              aria-label=""
+              isDisabled={!hasEditPermission}
+              onClick={() => {
+                setIsNameModalOpen(true)
+              }}
+            />
+          </div>
+        </div>
+        <div className={sectionClassName}>
           <Text fontWeight="bold">Advanced</Text>
-          <HStack spacing={variables.spacing} h={ROW_HEIGHT}>
+          <div className={rowClassName}>
             <Text>Delete permanently</Text>
             <Spacer />
             <IconButton
@@ -119,24 +123,24 @@ const WorkspaceSettingsPage = () => {
               aria-label=""
               onClick={() => setIsDeleteModalOpen(true)}
             />
-          </HStack>
-        </Stack>
-        <EditName
-          open={isNameModalOpen}
-          workspace={workspace}
-          onClose={() => setIsNameModalOpen(false)}
-        />
-        <EditStorageCapacity
-          open={isStorageCapacityModalOpen}
-          workspace={workspace}
-          onClose={() => setIsStorageCapacityModalOpen(false)}
-        />
-        <Delete
-          open={isDeleteModalOpen}
-          workspace={workspace}
-          onClose={() => setIsDeleteModalOpen(false)}
-        />
-      </Stack>
+          </div>
+        </div>
+      </div>
+      <EditName
+        open={isNameModalOpen}
+        workspace={workspace}
+        onClose={() => setIsNameModalOpen(false)}
+      />
+      <EditStorageCapacity
+        open={isStorageCapacityModalOpen}
+        workspace={workspace}
+        onClose={() => setIsStorageCapacityModalOpen(false)}
+      />
+      <Delete
+        open={isDeleteModalOpen}
+        workspace={workspace}
+        onClose={() => setIsDeleteModalOpen(false)}
+      />
     </>
   )
 }

@@ -6,18 +6,14 @@ import {
   useSearchParams,
 } from 'react-router-dom'
 import {
-  Center,
   Heading,
-  HStack,
   Link as ChakraLink,
-  Stack,
   Table,
   Tbody,
   Td,
   Th,
   Thead,
   Tr,
-  VStack,
   Text,
   Avatar,
   Badge,
@@ -28,6 +24,7 @@ import {
   variables,
   usePagePagination,
 } from '@koupr/ui'
+import classNames from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import GroupAPI, { SortOrder } from '@/client/api/group'
 import { swrConfig } from '@/client/options'
@@ -64,27 +61,37 @@ const GroupListPage = () => {
       <Helmet>
         <title>Groups</title>
       </Helmet>
-      <Stack
-        direction="column"
-        spacing={variables.spacing2Xl}
-        pb={variables.spacing2Xl}
-      >
+      <div className={classNames('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
         <Heading fontSize={variables.headingFontSize} pl={variables.spacingMd}>
           Groups
         </Heading>
         {error && (
-          <Center h="300px">
+          <div
+            className={classNames(
+              'flex',
+              'items-center',
+              'justify-center',
+              'h-[300px]',
+            )}
+          >
             <Text>Failed to load groups.</Text>
-          </Center>
+          </div>
         )}
         {!list && !error && <SectionSpinner />}
         {list && list.data.length === 0 && (
-          <Center h="300px">
-            <VStack spacing={variables.spacing}>
+          <div
+            className={classNames(
+              'flex',
+              'items-center',
+              'justify-center',
+              'h-[300px]',
+            )}
+          >
+            <div className={classNames('flex', 'flex-col', 'gap-1.5')}>
               <Text>There are no groups.</Text>
               <CreateGroupButton />
-            </VStack>
-          </Center>
+            </div>
+          </div>
         )}
         {list && list.data.length > 0 && (
           <Table variant="simple">
@@ -100,7 +107,14 @@ const GroupListPage = () => {
               {list.data.map((g) => (
                 <Tr key={g.id}>
                   <Td>
-                    <HStack spacing={variables.spacing}>
+                    <div
+                      className={classNames(
+                        'flex',
+                        'flex-row',
+                        'items-center',
+                        'gap-1.5',
+                      )}
+                    >
                       <Avatar
                         name={g.name}
                         size="sm"
@@ -114,7 +128,7 @@ const GroupListPage = () => {
                       >
                         {g.name}
                       </ChakraLink>
-                    </HStack>
+                    </div>
                   </Td>
                   <Td>
                     <ChakraLink
@@ -146,7 +160,7 @@ const GroupListPage = () => {
             setSize={setSize}
           />
         )}
-      </Stack>
+      </div>
     </>
   )
 }

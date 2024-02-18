@@ -18,16 +18,12 @@ import {
   Thead,
   Tr,
   Text,
-  HStack,
   Center,
-  VStack,
   Button,
   Avatar,
   Portal,
-  Stack,
 } from '@chakra-ui/react'
 import {
-  variables,
   IconDotsVertical,
   IconExit,
   IconUserPlus,
@@ -35,6 +31,7 @@ import {
   PagePagination,
   usePagePagination,
 } from '@koupr/ui'
+import classNames from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import OrganizationAPI from '@/client/api/organization'
 import { geEditorPermission } from '@/client/api/permission'
@@ -102,11 +99,7 @@ const OrganizationMembersPage = () => {
         <title>{org.name}</title>
       </Helmet>
       {list.data.length > 0 && (
-        <Stack
-          direction="column"
-          spacing={variables.spacing2Xl}
-          pb={variables.spacing2Xl}
-        >
+        <div className={classNames('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
           <Table variant="simple">
             <Thead>
               <Tr>
@@ -119,10 +112,17 @@ const OrganizationMembersPage = () => {
               {list.data.map((u) => (
                 <Tr key={u.id}>
                   <Td>
-                    <HStack direction="row" spacing={variables.spacing}>
+                    <div
+                      className={classNames(
+                        'flex',
+                        'flex-row',
+                        'gap-1.5',
+                        'items-center',
+                      )}
+                    >
                       <Avatar name={u.fullName} src={u.picture} />
                       <Text>{u.fullName}</Text>
-                    </HStack>
+                    </div>
                   </Td>
                   <Td>{u.email}</Td>
                   <Td textAlign="right">
@@ -175,12 +175,19 @@ const OrganizationMembersPage = () => {
               onClose={() => setIsRemoveMemberModalOpen(false)}
             />
           )}
-        </Stack>
+        </div>
       )}
       {list.data.length === 0 && (
         <>
           <Center h="300px">
-            <VStack spacing={variables.spacing}>
+            <div
+              className={classNames(
+                'flex',
+                'flex-col',
+                'gap-1.5',
+                'items-center',
+              )}
+            >
               <Text>This organization has no members.</Text>
               {geEditorPermission(org.permission) && (
                 <Button
@@ -192,7 +199,7 @@ const OrganizationMembersPage = () => {
                   Invite Members
                 </Button>
               )}
-            </VStack>
+            </div>
           </Center>
           <InviteMembers
             open={isInviteMembersModalOpen}

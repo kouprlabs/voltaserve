@@ -1,3 +1,6 @@
+import { variables } from '@koupr/ui'
+
+// eslint-disable-next-line
 module.exports = {
   content: ['./src/**/*.{js,ts,jsx,tsx}'],
   theme: {
@@ -7,9 +10,21 @@ module.exports = {
         body: ['IBM Plex Sans'],
       },
       borderRadius: {
-        sm: '10px',
-        DEFAULT: '20px',
-        md: '30px',
+        'DEFAULT': variables.borderRadius,
+        'sm': variables.borderRadiusXs,
+        'md': variables.borderRadiusSm,
+        'lg': variables.borderRadius,
+        'xl': variables.borderRadiusMd,
+      },
+      spacing: {
+        'DEFAULT': variables.spacing,
+        '0.5': variables.spacingXs,
+        '1': variables.spacingSm,
+        '1.5': variables.spacing,
+        '2': variables.spacingMd,
+        '2.5': variables.spacingLg,
+        '3': variables.spacingXl,
+        '3.5': variables.spacing2Xl,
       },
     },
   },

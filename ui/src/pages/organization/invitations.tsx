@@ -3,14 +3,12 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import {
   Badge,
   Button,
-  Center,
   IconButton,
   Menu,
   MenuButton,
   MenuItem,
   MenuList,
   Portal,
-  Stack,
   Table,
   Tbody,
   Td,
@@ -19,10 +17,8 @@ import {
   Thead,
   Tr,
   useToast,
-  VStack,
 } from '@chakra-ui/react'
 import {
-  variables,
   IconDotsVertical,
   IconSend,
   IconTrash,
@@ -31,6 +27,7 @@ import {
   PagePagination,
   usePagePagination,
 } from '@koupr/ui'
+import classNames from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import InvitationAPI, {
   InvitationStatus,
@@ -124,8 +121,22 @@ const OrganizationInvitationsPage = () => {
       </Helmet>
       {list && list.data.length === 0 ? (
         <>
-          <Center h="300px">
-            <VStack spacing={variables.spacing}>
+          <div
+            className={classNames(
+              'flex',
+              'items-center',
+              'justify-center',
+              'h-[300px]',
+            )}
+          >
+            <div
+              className={classNames(
+                'flex',
+                'flex-col',
+                'gap-1.5',
+                'items-center',
+              )}
+            >
               <Text>This organization has no invitations.</Text>
               {geEditorPermission(org.permission) && (
                 <Button
@@ -137,8 +148,8 @@ const OrganizationInvitationsPage = () => {
                   Invite Members
                 </Button>
               )}
-            </VStack>
-          </Center>
+            </div>
+          </div>
           <InviteMembers
             open={isInviteMembersModalOpen}
             id={org.id}
@@ -147,11 +158,7 @@ const OrganizationInvitationsPage = () => {
         </>
       ) : null}
       {list && list.data.length > 0 ? (
-        <Stack
-          direction="column"
-          spacing={variables.spacing2Xl}
-          pb={variables.spacing2Xl}
-        >
+        <div className={classNames('flex', 'flex-col', 'gap-3.5', 'py-3.5')}>
           <Table variant="simple">
             <Thead>
               <Tr>
@@ -214,7 +221,7 @@ const OrganizationInvitationsPage = () => {
               setSize={setSize}
             />
           )}
-        </Stack>
+        </div>
       ) : null}
     </>
   )

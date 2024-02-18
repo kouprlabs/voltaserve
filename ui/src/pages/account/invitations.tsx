@@ -8,7 +8,6 @@ import {
   MenuItem,
   MenuList,
   Portal,
-  Stack,
   Table,
   Tbody,
   Td,
@@ -22,9 +21,9 @@ import {
   IconDotsVertical,
   SectionSpinner,
   PagePagination,
-  variables,
   usePagePagination,
 } from '@koupr/ui'
+import classNames from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import InvitationAPI, { SortBy, SortOrder } from '@/client/api/invitation'
 import UserAPI from '@/client/idp/user'
@@ -96,11 +95,7 @@ const AccountInvitationsPage = () => {
         </Center>
       )}
       {list.data.length > 0 && (
-        <Stack
-          direction="column"
-          spacing={variables.spacing2Xl}
-          pb={variables.spacing2Xl}
-        >
+        <div className={classNames('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
           <Table variant="simple">
             <Thead>
               <Tr>
@@ -156,7 +151,7 @@ const AccountInvitationsPage = () => {
               setSize={setSize}
             />
           )}
-        </Stack>
+        </div>
       )}
     </>
   )
