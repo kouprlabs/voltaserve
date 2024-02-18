@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
-import { Center, Stack } from '@chakra-ui/react'
-import { SectionSpinner, variables } from '@koupr/ui'
+import { SectionSpinner } from '@koupr/ui'
+import classNames from 'classnames'
 import { File } from '@/client/api/file'
 import { getAccessTokenOrRedirect } from '@/infra/token'
 
@@ -28,13 +28,20 @@ const ImageViewer = ({ file }: ImageViewerProps) => {
   }
 
   return (
-    <Stack direction="column" w="100%" h="100%" spacing={variables.spacing}>
-      <Center
-        flexGrow={1}
-        w="100%"
-        h="100%"
-        overflow="scroll"
-        position="relative"
+    <div
+      className={classNames('flex', 'flex-col', 'w-full', 'h-full', 'gap-1.5')}
+    >
+      <div
+        className={classNames(
+          'relative',
+          'flex',
+          'items-center',
+          'justify-center',
+          'grow',
+          'w-full',
+          'h-full',
+          'overflow-scroll',
+        )}
       >
         {isLoading && <SectionSpinner />}
         <img
@@ -48,8 +55,8 @@ const ImageViewer = ({ file }: ImageViewerProps) => {
           onLoad={() => setIsLoading(false)}
           alt={file.name}
         />
-      </Center>
-    </Stack>
+      </div>
+    </div>
   )
 }
 
