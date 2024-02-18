@@ -2,7 +2,6 @@ import { useCallback } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {
   Button,
-  Container,
   FormControl,
   FormErrorMessage,
   Input,
@@ -173,7 +172,14 @@ const SignInPage = () => {
               </Form>
             )}
           </Formik>
-          <Container centerContent>
+          <div
+            className={classNames(
+              'flex',
+              'flex-col',
+              'items-center',
+              'max-w-[60ch]',
+            )}
+          >
             <div
               className={classNames(
                 'flex',
@@ -200,7 +206,7 @@ const SignInPage = () => {
                 Reset Password
               </ChakraLink>
             </div>
-          </Container>
+          </div>
         </div>
       </>
     </FullLayout>
