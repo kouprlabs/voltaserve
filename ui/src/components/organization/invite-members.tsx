@@ -12,7 +12,6 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
-  Stack,
   Textarea,
 } from '@chakra-ui/react'
 import { variables } from '@koupr/ui'
@@ -26,6 +25,7 @@ import {
   FormikHelpers,
 } from 'formik'
 import * as Yup from 'yup'
+import classNames from 'classnames'
 import InvitationAPI from '@/client/api/invitation'
 import EmailTokenizer from '@/components/common/email-tokenizer'
 import parseEmailList from '@/helpers/parse-email-list'
@@ -99,7 +99,7 @@ const InviteMembers = ({ open, id, onClose }: InviteMembersProps) => {
           {({ values, errors, touched, isSubmitting }) => (
             <Form>
               <ModalBody>
-                <Stack direction="column" gap={variables.spacing}>
+                <div className={classNames('flex', 'flex-col', 'gap-1.5')}>
                   <Field name="emails">
                     {({ field }: FieldAttributes<FieldProps>) => (
                       <FormControl
@@ -119,7 +119,7 @@ const InviteMembers = ({ open, id, onClose }: InviteMembersProps) => {
                     )}
                   </Field>
                   <EmailTokenizer value={values.emails} />
-                </Stack>
+                </div>
               </ModalBody>
               <ModalFooter>
                 <Button
