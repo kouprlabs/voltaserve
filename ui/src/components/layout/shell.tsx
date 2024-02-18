@@ -26,7 +26,11 @@ const ShellLayout = () => {
   return (
     <Shell
       storage={{ prefix: 'voltaserve', namespace: 'main' }}
-      logo={<Logo className="w-4" />}
+      logo={
+        <div className="w-4">
+          <Logo />
+        </div>
+      }
       topBar={<TopBar />}
       items={[
         {

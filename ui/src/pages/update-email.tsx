@@ -40,7 +40,9 @@ const UpdateEmailPage = () => {
         <title>Confirm Email</title>
       </Helmet>
       <div className={classNames('flex', 'flex-col', 'items-center', 'gap-3')}>
-        <Logo className="w-16" isGlossy={true} />
+        <div className="w-16">
+          <Logo isGlossy={true} />
+        </div>
         {!isCompleted && !isFailed ? (
           <div
             className={classNames(

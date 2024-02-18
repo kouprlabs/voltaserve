@@ -103,7 +103,9 @@ const SignInPage = () => {
             'w-full',
           )}
         >
-          <Logo className="w-16" isGlossy={true} />
+          <div className="w-16">
+            <Logo isGlossy={true} />
+          </div>
           <Heading fontSize={variables.headingFontSize}>
             Sign In to Voltaserve
           </Heading>

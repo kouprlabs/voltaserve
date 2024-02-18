@@ -88,7 +88,9 @@ const SignUpPage = () => {
                 'gap-1.5',
               )}
             >
-              <Logo className="w-16" isGlossy={true} />
+              <div className="w-16">
+                <Logo isGlossy={true} />
+              </div>
               <Heading fontSize={variables.headingFontSize}>
                 Thanks! We just sent you a confirmation email
               </Heading>
@@ -109,7 +111,9 @@ const SignUpPage = () => {
               'w-full',
             )}
           >
-            <Logo className="w-16" isGlossy={true} />
+            <div className="w-16">
+              <Logo isGlossy={true} />
+            </div>
             <Heading fontSize={variables.headingFontSize}>
               Sign Up to Voltaserve
             </Heading>

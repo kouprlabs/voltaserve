@@ -79,7 +79,9 @@ const ResetPasswordPage = () => {
             'w-full',
           )}
         >
-          <Logo className="w-16" isGlossy={true} />
+          <div className="w-16">
+            <Logo isGlossy={true} />
+          </div>
           <Heading fontSize={variables.headingFontSize}>Reset Password</Heading>
           {isCompleted ? (
             <div

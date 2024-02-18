@@ -1,5 +1,6 @@
 import { useCallback } from 'react'
-import { Center, CenterProps, useColorMode } from '@chakra-ui/react'
+import { CenterProps, useColorMode } from '@chakra-ui/react'
+import classNames from 'classnames'
 import LogoDarkGlossySvg from './logo-dark-glossy.svg?react'
 import LogoDarkSvg from './logo-dark.svg?react'
 import LogoGlossySvg from './logo-glossy.svg?react'
@@ -9,7 +10,7 @@ type LogoProps = CenterProps & {
   isGlossy?: boolean
 }
 
-const Logo = ({ isGlossy = false, ...props }: LogoProps) => {
+const Logo = ({ isGlossy = false }: LogoProps) => {
   const { colorMode } = useColorMode()
   const renderSvg = useCallback(() => {
     if (isGlossy) {
@@ -18,7 +19,11 @@ const Logo = ({ isGlossy = false, ...props }: LogoProps) => {
       return colorMode === 'dark' ? <LogoDarkSvg /> : <LogoSvg />
     }
   }, [colorMode, isGlossy])
-  return <Center {...props}>{renderSvg()}</Center>
+  return (
+    <div className={classNames('flex', 'items-center', 'justify-center')}>
+      {renderSvg()}
+    </div>
+  )
 }
 
 export default Logo
