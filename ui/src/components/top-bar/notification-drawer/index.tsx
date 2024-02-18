@@ -1,7 +1,5 @@
 import { useRef } from 'react'
 import {
-  Box,
-  Center,
   Divider,
   Drawer as ChakraDrawer,
   DrawerBody,
@@ -9,14 +7,13 @@ import {
   DrawerContent,
   DrawerHeader,
   DrawerOverlay,
-  Stack,
   Text,
   IconButton,
   useDisclosure,
   Circle,
 } from '@chakra-ui/react'
-import { variables } from '@koupr/ui'
 import { IconNotification } from '@koupr/ui'
+import classNames from 'classnames'
 import NotificationAPI from '@/client/api/notification'
 import { swrConfig } from '@/client/options'
 import NotificationItem from './notification-item'
@@ -28,25 +25,24 @@ const NotificationDrawer = () => {
 
   return (
     <>
-      <Box>
-        <Center position="relative">
-          <IconButton
-            ref={buttonRef}
-            icon={<IconNotification />}
-            aria-label=""
-            onClick={onOpen}
-          />
-          {notfications && notfications.length > 0 && (
-            <Circle
-              size="15px"
-              bg="red"
-              position="absolute"
-              top={0}
-              right={0}
-            />
-          )}
-        </Center>
-      </Box>
+      <div
+        className={classNames(
+          'flex',
+          'items-center',
+          'justify-center',
+          'relative',
+        )}
+      >
+        <IconButton
+          ref={buttonRef}
+          icon={<IconNotification />}
+          aria-label=""
+          onClick={onOpen}
+        />
+        {notfications && notfications.length > 0 && (
+          <Circle size="15px" bg="red" position="absolute" top={0} right={0} />
+        )}
+      </div>
       <ChakraDrawer
         isOpen={isOpen}
         placement="right"
@@ -59,14 +55,17 @@ const NotificationDrawer = () => {
           <DrawerHeader>Notifications</DrawerHeader>
           <DrawerBody>
             {notfications && notfications.length > 0 ? (
-              <Stack spacing={variables.spacing}>
+              <div className={classNames('flex', 'flex-col', 'gap-1.5')}>
                 {notfications.map((n, index) => (
-                  <Stack key={index} spacing={variables.spacing}>
+                  <div
+                    key={index}
+                    className={classNames('flex', 'flex-col', 'gap-1.5')}
+                  >
                     <NotificationItem notification={n} />
                     {index !== notfications.length - 1 && <Divider />}
-                  </Stack>
+                  </div>
                 ))}
-              </Stack>
+              </div>
             ) : (
               <Text>There are no notifications.</Text>
             )}

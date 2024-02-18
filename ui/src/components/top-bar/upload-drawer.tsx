@@ -1,7 +1,5 @@
 import { useCallback, useEffect, useRef } from 'react'
 import {
-  Box,
-  Center,
   Circle,
   Drawer as ChakraDrawer,
   DrawerBody,
@@ -15,6 +13,7 @@ import {
   Button,
 } from '@chakra-ui/react'
 import { IconDeleteListItem, IconUpload } from '@koupr/ui'
+import classNames from 'classnames'
 import List from '@/components/file/upload/list'
 import { completedUploadsCleared } from '@/store/entities/uploads'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
@@ -48,25 +47,24 @@ const UploadDrawer = () => {
 
   return (
     <>
-      <Box>
-        <Center position="relative">
-          <IconButton
-            ref={buttonRef}
-            icon={<IconUpload size="14px" />}
-            aria-label=""
-            onClick={onOpen}
-          />
-          {hasPendingUploads && (
-            <Circle
-              size="15px"
-              bg="red"
-              position="absolute"
-              top={0}
-              right={0}
-            />
-          )}
-        </Center>
-      </Box>
+      <div
+        className={classNames(
+          'flex',
+          'items-center',
+          'justify-center',
+          'relative',
+        )}
+      >
+        <IconButton
+          ref={buttonRef}
+          icon={<IconUpload size="14px" />}
+          aria-label=""
+          onClick={onOpen}
+        />
+        {hasPendingUploads && (
+          <Circle size="15px" bg="red" position="absolute" top={0} right={0} />
+        )}
+      </div>
       <ChakraDrawer
         isOpen={isOpen}
         placement="right"

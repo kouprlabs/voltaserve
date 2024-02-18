@@ -1,5 +1,6 @@
-import { Avatar, Box, useColorModeValue, useToken } from '@chakra-ui/react'
+import { Avatar, useColorModeValue, useToken } from '@chakra-ui/react'
 import { forwardRef } from '@chakra-ui/system'
+import classNames from 'classnames'
 import { User } from '@/client/idp/user'
 import { useAppSelector } from '@/store/hook'
 import { NavType } from '@/store/ui/nav'
@@ -15,7 +16,7 @@ const AvatarButton = forwardRef<AvatarButtonProps, 'div'>(
     const [borderColorDecoded] = useToken('colors', [borderColor])
     const activeNav = useAppSelector((state) => state.ui.nav.active)
     return (
-      <Box ref={ref} {...props} cursor="pointer">
+      <div ref={ref} {...props} className={classNames('cursor-pointer')}>
         <ActiveCircle>
           <Avatar
             name={user.fullName}
@@ -30,7 +31,7 @@ const AvatarButton = forwardRef<AvatarButtonProps, 'div'>(
             }
           />
         </ActiveCircle>
-      </Box>
+      </div>
     )
   },
 )
