@@ -11,7 +11,6 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
-  Stack,
 } from '@chakra-ui/react'
 import { variables } from '@koupr/ui'
 import { useSWRConfig } from 'swr'
@@ -24,6 +23,7 @@ import {
   FormikHelpers,
 } from 'formik'
 import * as Yup from 'yup'
+import classNames from 'classnames'
 import GroupAPI, { Group } from '@/client/api/group'
 import UserAPI from '@/client/api/user'
 import UserSelector from '../common/user-selector'
@@ -97,7 +97,7 @@ const AddMember = ({ group, open, onClose }: AddMemberProps) => {
           {({ errors, touched, isSubmitting, setFieldValue }) => (
             <Form>
               <ModalBody>
-                <Stack spacing={variables.spacing}>
+                <div className={classNames('flex', 'flex-col', 'gap-1.5')}>
                   <Field name="userId">
                     {({ field }: FieldAttributes<FieldProps>) => (
                       <FormControl
@@ -117,7 +117,7 @@ const AddMember = ({ group, open, onClose }: AddMemberProps) => {
                       </FormControl>
                     )}
                   </Field>
-                </Stack>
+                </div>
               </ModalBody>
               <ModalFooter>
                 <Button

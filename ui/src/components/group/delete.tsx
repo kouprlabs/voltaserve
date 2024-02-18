@@ -12,7 +12,6 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
-  Stack,
   Text,
 } from '@chakra-ui/react'
 import { variables } from '@koupr/ui'
@@ -25,6 +24,7 @@ import {
   FormikHelpers,
 } from 'formik'
 import * as Yup from 'yup'
+import classNames from 'classnames'
 import GroupAPI, { Group } from '@/client/api/group'
 
 type DeleteProps = {
@@ -83,7 +83,7 @@ const Delete = ({ open, group, onClose }: DeleteProps) => {
           {({ errors, touched, isSubmitting }) => (
             <Form>
               <ModalBody>
-                <Stack direction="column" spacing={variables.spacing}>
+                <div className={classNames('flex', 'flex-col', 'gap-1.5')}>
                   <Text>Are you sure you would like to delete this group?</Text>
                   <Text>
                     Please type <b>{group.name}</b> to confirm.
@@ -98,7 +98,7 @@ const Delete = ({ open, group, onClose }: DeleteProps) => {
                       </FormControl>
                     )}
                   </Field>
-                </Stack>
+                </div>
               </ModalBody>
               <ModalFooter>
                 <Button
