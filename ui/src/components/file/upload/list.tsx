@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
-import { Divider, Stack, Text } from '@chakra-ui/react'
-import { variables } from '@koupr/ui'
+import { Divider, Text } from '@chakra-ui/react'
+import classNames from 'classnames'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { uploadsDrawerClosed } from '@/store/ui/uploads-drawer'
 import Item from './item'
@@ -30,14 +30,14 @@ const List = () => {
   }
 
   return (
-    <Stack spacing={variables.spacing}>
+    <div className={classNames('flex', 'flex-col', 'gap-1.5')}>
       {items.map((u, index) => (
-        <Stack key={u.id} spacing={variables.spacing}>
+        <div key={u.id} className={classNames('flex', 'flex-col', 'gap-1.5')}>
           <Item upload={u} />
           {index !== items.length - 1 && <Divider />}
-        </Stack>
+        </div>
       ))}
-    </Stack>
+    </div>
   )
 }
 

@@ -13,9 +13,9 @@ import {
   TabPanels,
   Tab,
   TabPanel,
-  HStack,
   Tag,
 } from '@chakra-ui/react'
+import classNames from 'classnames'
 import FileAPI, { List } from '@/client/api/file'
 import GroupAPI from '@/client/api/group'
 import { geOwnerPermission } from '@/client/api/permission'
@@ -83,24 +83,38 @@ const Sharing = ({ list }: SharingProps) => {
           <Tabs>
             <TabList h="40px">
               <Tab>
-                <HStack>
+                <div
+                  className={classNames(
+                    'flex',
+                    'flex-row',
+                    'items-center',
+                    'gap-0.5',
+                  )}
+                >
                   <Text>People</Text>
                   {singleFile &&
                   userPermissions &&
                   userPermissions.length > 0 ? (
                     <Tag borderRadius="full">{userPermissions.length}</Tag>
                   ) : null}
-                </HStack>
+                </div>
               </Tab>
               <Tab>
-                <HStack>
+                <div
+                  className={classNames(
+                    'flex',
+                    'flex-row',
+                    'items-center',
+                    'gap-0.5',
+                  )}
+                >
                   <Text>Groups</Text>
                   {singleFile &&
                   groupPermissions &&
                   groupPermissions.length > 0 ? (
                     <Tag borderRadius="full">{groupPermissions.length}</Tag>
                   ) : null}
-                </HStack>
+                </div>
               </Tab>
             </TabList>
             <TabPanels>

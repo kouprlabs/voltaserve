@@ -1,12 +1,13 @@
-import { Skeleton, Stack } from '@chakra-ui/react'
+import { Skeleton } from '@chakra-ui/react'
 import { variables } from '@koupr/ui'
+import classNames from 'classnames'
 
 const FormSkeleton = () => (
-  <Stack spacing={variables.spacing}>
+  <div className={classNames('flex', 'flex-col', 'gap-1.5')}>
     <Skeleton height="40px" borderRadius={variables.borderRadiusMd} />
     <Skeleton height="40px" borderRadius={variables.borderRadiusMd} />
     <Skeleton height="40px" borderRadius={variables.borderRadiusMd} />
-  </Stack>
+  </div>
 )
 
 export default FormSkeleton

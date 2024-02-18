@@ -4,12 +4,10 @@ import {
   AccordionIcon,
   AccordionItem,
   AccordionPanel,
-  Box,
   CircularProgress,
-  HStack,
   IconButton,
-  Stack,
   Text,
+  useToken,
 } from '@chakra-ui/react'
 import {
   IconClose,
@@ -18,6 +16,7 @@ import {
   IconAlertCircleFill,
   variables,
 } from '@koupr/ui'
+import classNames from 'classnames'
 import {
   Upload,
   UploadDecorator,
@@ -32,9 +31,22 @@ type ItemProps = {
 const Item = ({ upload: uploadProp }: ItemProps) => {
   const dispatch = useAppDispatch()
   const upload = new UploadDecorator(uploadProp)
+  const grayColor = useToken('colors', 'gray.500')
+  const greenColor = useToken('colors', 'green')
+  const redColor = useToken('colors', 'red')
+
   return (
-    <Stack spacing={variables.spacingSm}>
-      <HStack justifyContent="space-between" h="25px">
+    <div className={classNames('flex', 'flex-col', 'gap-1')}>
+      <div
+        className={classNames(
+          'flex',
+          'flex-row',
+          'items-center',
+          'gap-0.5',
+          'justify-between',
+          'h-2.5',
+        )}
+      >
         {upload.isProgressing && (
           <CircularProgress
             value={upload.progress}
@@ -45,19 +57,19 @@ const Item = ({ upload: uploadProp }: ItemProps) => {
           />
         )}
         {upload.isPending && (
-          <Box color="gray.500" flexShrink={0}>
+          <div className={classNames(`text-[${grayColor}]`, 'shrink-0')}>
             <IconTime fontSize="21px" />
-          </Box>
+          </div>
         )}
         {upload.isSucceeded && (
-          <Box color="green" flexShrink={0}>
+          <div className={classNames(`text-[${greenColor}]`, 'shrink-0')}>
             <IconCheckCircleFill fontSize="22px" />
-          </Box>
+          </div>
         )}
         {upload.isFailed && (
-          <Box color="red" flexShrink={0}>
+          <div className={classNames(`text-[${redColor}]`, 'shrink-0')}>
             <IconAlertCircleFill fontSize="22px" />
-          </Box>
+          </div>
         )}
         <Text
           flexGrow={1}
@@ -78,17 +90,17 @@ const Item = ({ upload: uploadProp }: ItemProps) => {
             dispatch(uploadRemoved(upload.id))
           }}
         />
-      </HStack>
+      </div>
       {upload.isFailed && (
         <Accordion allowMultiple>
           <AccordionItem border="none">
             <AccordionButton p={variables.spacingXs} _hover={{ bg: 'red.50' }}>
-              <Stack direction="row" w="100%">
+              <div className={classNames('flex', 'flex-row', 'w-full')}>
                 <Text color="red" flexGrow={1} textAlign="left">
                   Upload failed. Click to expand.
                 </Text>
                 <AccordionIcon color="red" />
-              </Stack>
+              </div>
             </AccordionButton>
             <AccordionPanel p={variables.spacingXs}>
               {upload.error}
@@ -96,7 +108,7 @@ const Item = ({ upload: uploadProp }: ItemProps) => {
           </AccordionItem>
         </Accordion>
       )}
-    </Stack>
+    </div>
   )
 }
 

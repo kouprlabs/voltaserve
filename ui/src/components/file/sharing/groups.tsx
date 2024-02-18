@@ -3,7 +3,6 @@ import { Link, useParams } from 'react-router-dom'
 import {
   Text,
   Button,
-  Stack,
   Table,
   Thead,
   Tbody,
@@ -12,15 +11,13 @@ import {
   Td,
   IconButton,
   Badge,
-  Center,
-  HStack,
   Avatar,
-  VStack,
 } from '@chakra-ui/react'
 import { Spinner, variables } from '@koupr/ui'
 import { IconAdd, IconCheck, IconTrash } from '@koupr/ui'
 import { KeyedMutator, useSWRConfig } from 'swr'
 import { Select } from 'chakra-react-select'
+import classNames from 'classnames'
 import FileAPI, { GroupPermission, List } from '@/client/api/file'
 import { Group } from '@/client/api/group'
 import { geEditorPermission } from '@/client/api/permission'
@@ -116,10 +113,10 @@ const Groups = ({
   )
 
   return (
-    <Stack direction="column" spacing={variables.spacing}>
+    <div className={classNames('flex', 'flex-col', 'gap-1.5')}>
       {!groups ? <FormSkeleton /> : null}
       {groups && groups.length > 0 ? (
-        <Stack direction="column" spacing={variables.spacing}>
+        <div className={classNames('flex', 'flex-col', 'gap-1.5')}>
           <GroupSelector
             value={activeGroup}
             organizationId={workspace?.organization.id}
@@ -149,11 +146,18 @@ const Groups = ({
           >
             Apply to Group
           </Button>
-        </Stack>
+        </div>
       ) : null}
       {groups && groups.length === 0 ? (
-        <Center>
-          <VStack spacing={variables.spacing}>
+        <div className={classNames('flex', 'items-center', 'justify-center')}>
+          <div
+            className={classNames(
+              'flex',
+              'flex-col',
+              'items-center',
+              'gap-1.5',
+            )}
+          >
             <Text>This organization has no groups.</Text>
             {workspace &&
             geEditorPermission(workspace.organization.permission) ? (
@@ -165,21 +169,25 @@ const Groups = ({
                 New Group
               </Button>
             ) : null}
-          </VStack>
-        </Center>
+          </div>
+        </div>
       ) : null}
       {isSingleSelection ? (
         <>
           <hr />
           {!permissions ? (
-            <Center>
+            <div
+              className={classNames('flex', 'items-center', 'justify-center')}
+            >
               <Spinner />
-            </Center>
+            </div>
           ) : null}
           {permissions && permissions.length === 0 ? (
-            <Center>
+            <div
+              className={classNames('flex', 'items-center', 'justify-center')}
+            >
               <Text>Not shared with any groups.</Text>
-            </Center>
+            </div>
           ) : null}
           {permissions && permissions.length > 0 ? (
             <Table>
@@ -194,7 +202,14 @@ const Groups = ({
                 {permissions.map((p) => (
                   <Tr key={p.id}>
                     <Td p={variables.spacingSm}>
-                      <HStack spacing={variables.spacingSm}>
+                      <div
+                        className={classNames(
+                          'flex',
+                          'flex-row',
+                          'items-center',
+                          'gap-1',
+                        )}
+                      >
                         <Avatar
                           name={p.group.name}
                           size="sm"
@@ -202,7 +217,7 @@ const Groups = ({
                           height="40px"
                         />
                         <Text noOfLines={1}>{p.group.name}</Text>
-                      </HStack>
+                      </div>
                     </Td>
                     <Td>
                       <Badge>{p.permission}</Badge>
@@ -223,7 +238,7 @@ const Groups = ({
           ) : null}
         </>
       ) : null}
-    </Stack>
+    </div>
   )
 }
 
