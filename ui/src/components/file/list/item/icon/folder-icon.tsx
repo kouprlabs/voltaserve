@@ -1,5 +1,4 @@
-import { useMemo } from 'react'
-import { Box, HStack } from '@chakra-ui/react'
+import classNames from 'classnames'
 import { FcFolder } from 'react-icons/fc'
 import { CommonItemProps } from '@/types/file'
 import ProcessingBadge from './processing-badge'
@@ -11,24 +10,26 @@ type FolderIconProps = {
 
 const ICON_FONT_SIZE = 92
 
-const FolderIcon = ({ file, scale, viewType, isLoading }: FolderIconProps) => {
-  const fontSize = useMemo(() => `${ICON_FONT_SIZE * scale}px`, [scale])
-  const { bottom, right } = useMemo(() => {
-    if (viewType === 'grid') {
-      return { bottom: '7px', right: '2px' }
-    } else {
-      return { bottom: '0px', right: '-2px' }
-    }
-  }, [viewType])
-  return (
-    <Box position="relative">
-      <FcFolder fontSize={fontSize} />
-      <HStack position="absolute" bottom={bottom} right={right} spacing="2px">
-        {file.isShared ? <SharedBadge /> : null}
-        {isLoading ? <ProcessingBadge /> : null}
-      </HStack>
-    </Box>
-  )
-}
+const FolderIcon = ({ file, scale, viewType, isLoading }: FolderIconProps) => (
+  <div className={classNames('relative')}>
+    <FcFolder fontSize={`${ICON_FONT_SIZE * scale}px`} />
+    <div
+      className={classNames(
+        'absolute',
+        'flex',
+        'flex-row',
+        'items-center',
+        'gap-[2px]',
+        { 'bottom-[7px]': viewType === 'grid' },
+        { 'right-[2px]': viewType === 'grid' },
+        { 'bottom-[0px]': viewType === 'list' },
+        { 'right-[-2px]': viewType === 'list' },
+      )}
+    >
+      {file.isShared ? <SharedBadge /> : null}
+      {isLoading ? <ProcessingBadge /> : null}
+    </div>
+  </div>
+)
 
 export default FolderIcon

@@ -1,6 +1,12 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { Button, Text, useColorModeValue, useToken } from '@chakra-ui/react'
+import {
+  Box,
+  Button,
+  Text,
+  useColorModeValue,
+  useToken,
+} from '@chakra-ui/react'
 import { IconChevronRight, SectionSpinner } from '@koupr/ui'
 import classNames from 'classnames'
 import { FcFolder } from 'react-icons/fc'
@@ -21,12 +27,18 @@ const Browse = ({ onChange }: BrowseProps) => {
   const [loading, setLoading] = useState(false)
   const [isSpinnerVisible, setIsSpinnerVisible] = useState(false)
   const [fileId, setFileId] = useState<string>()
-  const hoverColorToken = useColorModeValue('gray.100', 'gray.700')
-  const activeColorToken = useColorModeValue('gray.200', 'gray.600')
-  const borderColorToken = useColorModeValue('gray.300', 'gray.600')
-  const hoverColor = useToken('colors', hoverColorToken)
-  const activeColor = useToken('colors', activeColorToken)
-  const borderColor = useToken('colors', borderColorToken)
+  const hoverColor = useToken(
+    'colors',
+    useColorModeValue('gray.100', 'gray.700'),
+  )
+  const activeColor = useToken(
+    'colors',
+    useColorModeValue('gray.200', 'gray.600'),
+  )
+  const borderColor = useToken(
+    'colors',
+    useColorModeValue('gray.300', 'gray.600'),
+  )
 
   useEffect(() => {
     if (workspace) {
@@ -94,16 +106,16 @@ const Browse = ({ onChange }: BrowseProps) => {
           'flex-col',
           'gap-0',
           'border-t',
-          `border-t-[${borderColor}]`,
           'pt-1.5',
           'h-[250px]',
           'xl:h-[400px]',
           'overflow-y-scroll',
         )}
+        style={{ borderTopColor: borderColor }}
       >
         {folders.length > 0 ? (
           folders.map((f) => (
-            <div
+            <Box
               key={f.id}
               className={classNames(
                 'flex',
@@ -113,16 +125,16 @@ const Browse = ({ onChange }: BrowseProps) => {
                 'cursor-pointer',
                 'p-1',
                 'rounded-md',
-                `hover:bg-[${hoverColor}]`,
-                `active:bg-[${activeColor}]`,
               )}
+              _hover={{ background: hoverColor }}
+              _active={{ background: activeColor }}
               onClick={() => setFileId(f.id)}
             >
               <FcFolder fontSize="36px" style={{ flexShrink: 0 }} />
               <Text noOfLines={1}>{f.name}</Text>
               <div className={classNames('grow')} />
               <IconChevronRight />
-            </div>
+            </Box>
           ))
         ) : (
           <div

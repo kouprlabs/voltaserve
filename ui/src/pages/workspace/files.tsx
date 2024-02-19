@@ -113,12 +113,14 @@ const WorkspaceFilesPage = () => {
               'overflow-y-auto',
               'overflow-x-hidden',
               'border-t',
-              `border-t-[${borderColor}]`,
               { 'border-b': hasPagination },
-              { [`border-b-[${borderColor}]`]: hasPagination },
               'pt-1.5',
               'flex-grow',
             )}
+            style={{
+              borderTopColor: borderColor,
+              borderBottomColor: hasPagination ? borderColor : undefined,
+            }}
             onClick={() => dispatch(selectionUpdated([]))}
           >
             {isLoading ? (

@@ -57,17 +57,17 @@ const Item = ({ upload: uploadProp }: ItemProps) => {
           />
         )}
         {upload.isPending && (
-          <div className={classNames(`text-[${grayColor}]`, 'shrink-0')}>
+          <div className={classNames('shrink-0')} style={{ color: grayColor }}>
             <IconTime fontSize="21px" />
           </div>
         )}
         {upload.isSucceeded && (
-          <div className={classNames(`text-[${greenColor}]`, 'shrink-0')}>
+          <div className={classNames('shrink-0')} style={{ color: greenColor }}>
             <IconCheckCircleFill fontSize="22px" />
           </div>
         )}
         {upload.isFailed && (
-          <div className={classNames(`text-[${redColor}]`, 'shrink-0')}>
+          <div className={classNames('shrink-0')} style={{ color: redColor }}>
             <IconAlertCircleFill fontSize="22px" />
           </div>
         )}

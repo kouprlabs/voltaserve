@@ -1,16 +1,16 @@
 import { ChangeEvent, MouseEvent, useEffect } from 'react'
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-  Stack,
-  Center,
-  Link as ChakraLink,
-  useColorModeValue,
-  Checkbox,
   Box,
+  Link as ChakraLink,
+  Checkbox,
   Text,
+  useColorModeValue,
+  useToken,
 } from '@chakra-ui/react'
 import { variables } from '@koupr/ui'
+import classNames from 'classnames'
 import { SnapshotStatus } from '@/client/api/file'
 import relativeDate from '@/helpers/relative-date'
 import store from '@/store/configure-store'
@@ -42,16 +42,19 @@ const Item = ({
 }: ItemProps) => {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
-  const width = useMemo(() => `${WIDTH * scale}px`, [scale])
-  const minHeight = useMemo(() => `${MIN_HEIGHT * scale}px`, [scale])
-  const hoverColor = useColorModeValue('gray.100', 'gray.700')
-  const activeColor = useColorModeValue('gray.200', 'gray.600')
   const [isChecked, setIsChecked] = useState(false)
   const [isSelected, setIsSelected] = useState(false)
-  const date = useMemo(
-    () => relativeDate(new Date(file.createTime)),
-    [file.createTime],
+  const date = relativeDate(new Date(file.createTime))
+  const hoverColor = useToken(
+    'colors',
+    useColorModeValue('gray.100', 'gray.700'),
   )
+  const activeColor = useToken(
+    'colors',
+    useColorModeValue('gray.200', 'gray.600'),
+  )
+  const width = `${WIDTH * scale}px`
+  const minHeight = `${MIN_HEIGHT * scale}px`
 
   useEffect(() => {
     const unsubscribe = store.subscribe(() => {
@@ -142,21 +145,31 @@ const Item = ({
   )
 
   return (
-    <Stack
-      direction={viewType === ViewType.List ? 'row' : 'column'}
-      alignItems="center"
-      position="relative"
-      spacing={variables.spacingXs}
-      w={viewType === ViewType.List ? '100%' : width}
-      px={viewType === ViewType.List ? variables.spacing : 0}
-      py={variables.spacingSm}
+    <Box
+      className={classNames(
+        'relative',
+        'flex',
+        { 'flex-col': viewType === ViewType.Grid },
+        { 'flex-row': viewType === ViewType.List },
+        'items-center',
+        'gap-0.5',
+        { 'px-1.5': viewType === ViewType.List },
+        { 'px-0': viewType === ViewType.Grid },
+        'py-1',
+        'transition',
+        'duration-400',
+        'ease-in-out',
+        { 'bg-transparent': !isChecked },
+        'rounded-md',
+        'select-none',
+        'cursor-default',
+      )}
       _hover={{ bg: hoverColor }}
       _active={{ bg: activeColor }}
-      transition="background-color 0.4s ease"
-      bg={isChecked ? hoverColor : 'transparent'}
-      borderRadius={variables.borderRadiusSm}
-      userSelect="none"
-      cursor="default"
+      style={{
+        width: viewType === ViewType.List ? '100%' : width,
+        background: isChecked ? hoverColor : undefined,
+      }}
       onClick={handleIconClick}
       onDoubleClick={isSelectionMode ? undefined : handleIconDoubleClick}
       onContextMenu={isSelectionMode ? undefined : handleContextMenu}
@@ -172,20 +185,27 @@ const Item = ({
           onChange={handleCheckboxChange}
         />
       ) : null}
-      <Center w={width} minH={minHeight}>
+      <div
+        className={classNames('flex', 'items-center', 'justify-center')}
+        style={{ width, minHeight }}
+      >
         <Icon
           file={file}
           scale={scale}
           viewType={viewType}
           isLoading={isLoading}
         />
-      </Center>
-      <Box
-        w={width}
+      </div>
+      <div
+        className={classNames(
+          'px-0.5',
+          { 'flex': viewType === ViewType.List },
+          { 'block': viewType === ViewType.Grid },
+          { 'grow': viewType === ViewType.List },
+          { 'grow-0': viewType === ViewType.Grid },
+        )}
+        style={{ width }}
         title={file.name}
-        px={variables.spacingXs}
-        display={viewType === ViewType.List ? 'flex' : 'block'}
-        flexGrow={viewType === ViewType.List ? 1 : 0}
       >
         {file.type === 'folder' && (
           <ChakraLink
@@ -216,11 +236,11 @@ const Item = ({
             {file.name}
           </Text>
         ) : null}
-      </Box>
+      </div>
       <Text textAlign="center" noOfLines={3} color="gray.500">
         {date}
       </Text>
-    </Stack>
+    </Box>
   )
 }
 

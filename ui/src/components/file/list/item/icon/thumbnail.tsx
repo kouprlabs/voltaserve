@@ -1,17 +1,10 @@
-import { useMemo, useState } from 'react'
-import {
-  Box,
-  Center,
-  HStack,
-  Image,
-  Skeleton,
-  useColorModeValue,
-  useToken,
-} from '@chakra-ui/react'
+import { useState } from 'react'
+import { Image, Skeleton, useColorModeValue, useToken } from '@chakra-ui/react'
 import { IconPlay, variables } from '@koupr/ui'
+import classNames from 'classnames'
 import { File, SnapshotStatus } from '@/client/api/file'
 import { getSizeWithAspectRatio } from '@/helpers/aspect-ratio'
-import * as fileExtension from '@/helpers/file-extension'
+import * as fe from '@/helpers/file-extension'
 import ErrorBadge from './error-badge'
 import NewBadge from './new-badge'
 import ProcessingBadge from './processing-badge'
@@ -54,19 +47,16 @@ type ThumbnailProps = {
 }
 
 const Thumbnail = ({ file, scale }: ThumbnailProps) => {
-  const width = useMemo(() => getThumbnailWidth(file, scale), [scale, file])
-  const height = useMemo(() => getThumbnailHeight(file, scale), [scale, file])
+  const { original, isShared, status } = file
+  const width = getThumbnailWidth(file, scale)
+  const height = getThumbnailHeight(file, scale)
   const [isLoading, setIsLoading] = useState(true)
-  const borderColor = useColorModeValue('gray.300', 'gray.700')
-  const [borderColorDecoded] = useToken('colors', [borderColor])
-  const isVideo = useMemo(
-    () =>
-      file.original?.extension &&
-      fileExtension.isVideo(file.original.extension),
-    [file.original],
+  const borderColor = useToken(
+    'colors',
+    useColorModeValue('gray.300', 'gray.700'),
   )
   return (
-    <Box position="relative" width={width} height={height}>
+    <div className={classNames('relative')} style={{ width, height }}>
       <Image
         src={file.thumbnail?.base64}
         width={isLoading ? 0 : width}
@@ -76,7 +66,7 @@ const Thumbnail = ({ file, scale }: ThumbnailProps) => {
           width: isLoading ? 0 : width,
           height: isLoading ? 0 : height,
           border: '1px solid',
-          borderColor: borderColorDecoded,
+          borderColor,
           borderRadius: variables.borderRadiusSm,
           visibility: isLoading ? 'hidden' : undefined,
         }}
@@ -91,25 +81,39 @@ const Thumbnail = ({ file, scale }: ThumbnailProps) => {
           borderRadius={variables.borderRadiusSm}
         />
       )}
-      {isVideo && (
-        <Center
-          position="absolute"
-          top="0px"
-          left="0px"
-          width={width}
-          height={height}
-          opacity={0.5}
+      {fe.isVideo(original?.extension) && (
+        <div
+          className={classNames(
+            'absolute',
+            'top-0',
+            'left-0',
+            'opacity-50',
+            'flex',
+            'items-center',
+            'justify-center',
+          )}
+          style={{ width, height }}
         >
           <IconPlay fontSize="40px" color="white" />
-        </Center>
+        </div>
       )}
-      <HStack position="absolute" bottom="-5px" right="-5px" spacing="2px">
-        {file.isShared ? <SharedBadge /> : null}
-        {file.status === SnapshotStatus.New ? <NewBadge /> : null}
-        {file.status === SnapshotStatus.Processing ? <ProcessingBadge /> : null}
-        {file.status === SnapshotStatus.Error ? <ErrorBadge /> : null}
-      </HStack>
-    </Box>
+      <div
+        className={classNames(
+          'absolute',
+          'flex',
+          'flex-row',
+          'items-center',
+          'gap-[2px]',
+          'bottom-[-5px]',
+          'right-[-5px]',
+        )}
+      >
+        {isShared ? <SharedBadge /> : null}
+        {status === SnapshotStatus.New ? <NewBadge /> : null}
+        {status === SnapshotStatus.Processing ? <ProcessingBadge /> : null}
+        {status === SnapshotStatus.Error ? <ErrorBadge /> : null}
+      </div>
+    </div>
   )
 }
 

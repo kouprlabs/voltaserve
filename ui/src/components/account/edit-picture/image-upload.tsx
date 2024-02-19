@@ -24,8 +24,10 @@ const ImageUpload = ({
 }: ImageUploadProps) => {
   const [src, setSrc] = useState<string>()
   const hiddenInput = useRef<HTMLInputElement>(null)
-  const blueColorToken = useColorModeValue('blue.600', 'blue.200')
-  const blueColor = useToken('colors', blueColorToken)
+  const blueColor = useToken(
+    'colors',
+    useColorModeValue('blue.600', 'blue.200'),
+  )
 
   const handleFileChange = useCallback(
     (changeEvent: ChangeEvent<HTMLInputElement>) => {
@@ -67,8 +69,8 @@ const ImageUpload = ({
           'rounded',
           'border',
           'border-dashed',
-          `border-[${blueColor}]`,
         )}
+        style={{ borderColor: blueColor }}
       >
         {src || initialValue ? (
           <div className={classNames('relative', 'w-[400px]', 'h-[160px]')}>

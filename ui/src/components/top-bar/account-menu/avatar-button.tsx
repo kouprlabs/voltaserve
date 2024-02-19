@@ -12,8 +12,10 @@ type AvatarButtonProps = {
 
 const AvatarButton = forwardRef<AvatarButtonProps, 'div'>(
   ({ user, ...props }, ref) => {
-    const borderColor = useColorModeValue('gray.300', 'gray.700')
-    const [borderColorDecoded] = useToken('colors', [borderColor])
+    const borderColor = useToken(
+      'colors',
+      useColorModeValue('gray.300', 'gray.700'),
+    )
     const activeNav = useAppSelector((state) => state.ui.nav.active)
     return (
       <div ref={ref} {...props} className={classNames('cursor-pointer')}>
@@ -27,7 +29,7 @@ const AvatarButton = forwardRef<AvatarButtonProps, 'div'>(
             border={
               activeNav === NavType.Account
                 ? 'none'
-                : `1px solid ${borderColorDecoded}`
+                : `1px solid ${borderColor}`
             }
           />
         </ActiveCircle>

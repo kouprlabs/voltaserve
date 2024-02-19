@@ -1,4 +1,5 @@
-import { Box, useColorModeValue } from '@chakra-ui/react'
+import { useColorModeValue, useToken } from '@chakra-ui/react'
+import classNames from 'classnames'
 import { CommonItemProps } from '@/types/file'
 import FileIcon from './file-icon'
 import FolderIcon from './folder-icon'
@@ -8,27 +9,25 @@ type IconProps = {
 } & CommonItemProps
 
 const Icon = ({ file, scale, viewType, isLoading }: IconProps) => {
-  const color = useColorModeValue('gray.500', 'gray.300')
-  if (file.type === 'file') {
-    return (
-      <Box color={color} zIndex={0}>
-        <FileIcon file={file} scale={scale} viewType={viewType} />
-      </Box>
-    )
-  } else if (file.type === 'folder') {
-    return (
-      <Box color={color} zIndex={0}>
-        <FolderIcon
-          file={file}
-          scale={scale}
-          viewType={viewType}
-          isLoading={isLoading}
-        />
-      </Box>
-    )
-  } else {
-    return null
-  }
+  const color = useToken('colors', useColorModeValue('gray.500', 'gray.300'))
+  return (
+    <>
+      {file.type === 'file' ? (
+        <div className={classNames('z-0')} style={{ color }}>
+          <FileIcon file={file} scale={scale} viewType={viewType} />
+        </div>
+      ) : file.type === 'folder' ? (
+        <div className={classNames('z-0')} style={{ color }}>
+          <FolderIcon
+            file={file}
+            scale={scale}
+            viewType={viewType}
+            isLoading={isLoading}
+          />
+        </div>
+      ) : null}
+    </>
+  )
 }
 
 export default Icon
