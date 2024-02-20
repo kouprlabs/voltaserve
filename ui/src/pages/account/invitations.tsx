@@ -65,7 +65,7 @@ const AccountInvitationsPage = () => {
 
   const handleDecline = useCallback(
     async (invitationId: string) => {
-      await InvitationAPI.delete(invitationId)
+      await InvitationAPI.decline(invitationId)
       mutate()
       toast({
         title: 'Invitation declined',
