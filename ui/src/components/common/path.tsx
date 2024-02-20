@@ -64,7 +64,15 @@ const Path = ({ rootId, fileId, maxCharacters, onClick }: PathProps) => {
         </Breadcrumb>
       ) : null}
       {isLoading ? (
-        <div className={classNames('flex-shrink-0')}>
+        <div
+          className={classNames(
+            'flex',
+            'flex-row',
+            'items-center',
+            'gap-0.5',
+            'flex-shrink-0',
+          )}
+        >
           <Skeleton w="100px" h="20px" borderRadius="20px" />
           <Text>/</Text>
           <Skeleton w="100px" h="20px" borderRadius="20px" />
