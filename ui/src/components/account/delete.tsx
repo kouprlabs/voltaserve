@@ -12,7 +12,6 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
-  Stack,
   Text,
 } from '@chakra-ui/react'
 import { variables } from '@koupr/ui'
@@ -25,6 +24,7 @@ import {
   FormikHelpers,
 } from 'formik'
 import * as Yup from 'yup'
+import classNames from 'classnames'
 import UserAPI from '@/client/idp/user'
 
 type DeleteProps = {
@@ -83,7 +83,14 @@ const Delete = ({ open, onClose }: DeleteProps) => {
           {({ errors, touched, isSubmitting }) => (
             <Form>
               <ModalBody>
-                <Stack spacing={variables.spacingSm}>
+                <div
+                  className={classNames(
+                    'flex',
+                    'flex-col',
+                    'items-center',
+                    'gap-1',
+                  )}
+                >
                   <Text>
                     Are you sure you would like to delete your account
                     permanently?
@@ -108,7 +115,7 @@ const Delete = ({ open, onClose }: DeleteProps) => {
                       </FormControl>
                     )}
                   </Field>
-                </Stack>
+                </div>
               </ModalBody>
               <ModalFooter>
                 <Button

@@ -1,14 +1,12 @@
 import { useCallback } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import {
-  Center,
   IconButton,
   Menu,
   MenuButton,
   MenuItem,
   MenuList,
   Portal,
-  Stack,
   Table,
   Tbody,
   Td,
@@ -22,9 +20,9 @@ import {
   IconDotsVertical,
   SectionSpinner,
   PagePagination,
-  variables,
   usePagePagination,
 } from '@koupr/ui'
+import classNames from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import InvitationAPI, { SortBy, SortOrder } from '@/client/api/invitation'
 import UserAPI from '@/client/idp/user'
@@ -67,7 +65,7 @@ const AccountInvitationsPage = () => {
 
   const handleDecline = useCallback(
     async (invitationId: string) => {
-      await InvitationAPI.delete(invitationId)
+      await InvitationAPI.decline(invitationId)
       mutate()
       toast({
         title: 'Invitation declined',
@@ -91,16 +89,19 @@ const AccountInvitationsPage = () => {
         <title>{user.fullName}</title>
       </Helmet>
       {list.data.length === 0 && (
-        <Center h="300px">
+        <div
+          className={classNames(
+            'flex',
+            'items-center',
+            'justify-center',
+            'h=[300px]',
+          )}
+        >
           <Text>There are no invitations.</Text>
-        </Center>
+        </div>
       )}
       {list.data.length > 0 && (
-        <Stack
-          direction="column"
-          spacing={variables.spacing2Xl}
-          pb={variables.spacing2Xl}
-        >
+        <div className={classNames('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
           <Table variant="simple">
             <Thead>
               <Tr>
@@ -156,7 +157,7 @@ const AccountInvitationsPage = () => {
               setSize={setSize}
             />
           )}
-        </Stack>
+        </div>
       )}
     </>
   )

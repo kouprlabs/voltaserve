@@ -6,7 +6,6 @@ import {
   useSearchParams,
 } from 'react-router-dom'
 import {
-  HStack,
   IconButton,
   Menu,
   MenuButton,
@@ -19,21 +18,18 @@ import {
   Thead,
   Tr,
   Text,
-  VStack,
   Button,
-  Center,
   Avatar,
   Portal,
-  Stack,
 } from '@chakra-ui/react'
 import {
-  variables,
   IconExit,
   IconUserPlus,
   SectionSpinner,
   PagePagination,
   usePagePagination,
 } from '@koupr/ui'
+import classNames from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import { HiDotsVertical } from 'react-icons/hi'
 import GroupAPI from '@/client/api/group'
@@ -95,11 +91,7 @@ const GroupMembersPage = () => {
         <title>{group.name}</title>
       </Helmet>
       {list.data.length > 0 && (
-        <Stack
-          direction="column"
-          spacing={variables.spacing2Xl}
-          pb={variables.spacing2Xl}
-        >
+        <div className={classNames('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
           <Table variant="simple">
             <Thead>
               <Tr>
@@ -112,10 +104,17 @@ const GroupMembersPage = () => {
               {list.data.map((u) => (
                 <Tr key={u.id}>
                   <Td>
-                    <HStack direction="row" spacing={variables.spacing}>
+                    <div
+                      className={classNames(
+                        'flex',
+                        'flex-row',
+                        'gap-1.5',
+                        'items-center',
+                      )}
+                    >
                       <Avatar name={u.fullName} src={u.picture} />
                       <Text>{u.fullName}</Text>
-                    </HStack>
+                    </div>
                   </Td>
                   <Td>{u.email}</Td>
                   <Td textAlign="right">
@@ -169,15 +168,29 @@ const GroupMembersPage = () => {
               onClose={() => setIsRemoveMemberModalOpen(false)}
             />
           )}
-        </Stack>
+        </div>
       )}
       {list.data.length === 0 && (
         <>
           <Helmet>
             <title>{group.name}</title>
           </Helmet>
-          <Center h="300px">
-            <VStack spacing={variables.spacing}>
+          <div
+            className={classNames(
+              'flex',
+              'items-center',
+              'justify-center',
+              'h-[300px]',
+            )}
+          >
+            <div
+              className={classNames(
+                'flex',
+                'flex-col',
+                'gap-1.5',
+                'items-center',
+              )}
+            >
               <Text>This group has no members.</Text>
               {geEditorPermission(group.permission) && (
                 <Button
@@ -189,8 +202,8 @@ const GroupMembersPage = () => {
                   Add Members
                 </Button>
               )}
-            </VStack>
-          </Center>
+            </div>
+          </div>
           <AddMember
             open={isAddMembersModalOpen}
             group={group}

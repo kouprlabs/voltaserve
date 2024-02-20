@@ -4,14 +4,11 @@ import {
   Wrap,
   WrapItem,
   Text,
-  Center,
   Portal,
   Menu,
   MenuList,
   MenuItem,
   MenuDivider,
-  Box,
-  Stack,
 } from '@chakra-ui/react'
 import {
   IconCopy,
@@ -29,6 +26,7 @@ import {
   useSensor,
   DragStartEvent,
 } from '@dnd-kit/core'
+import classNames from 'classnames'
 import { FileWithPath, useDropzone } from 'react-dropzone'
 import { List as FileList } from '@/client/api/file'
 import {
@@ -143,10 +141,13 @@ const List = ({ list, scale }: ListProps) => {
 
   return (
     <>
-      <Box
-        border="2px solid"
-        borderColor={isDragActive ? 'green.300' : 'transparent'}
-        borderRadius={variables.borderRadiusSm}
+      <div
+        className={classNames(
+          'border-2',
+          { 'border-green-300': isDragActive },
+          { 'border-transparent': !isDragActive },
+          'rounded-md',
+        )}
         {...getRootProps()}
       >
         <input {...getInputProps()} />
@@ -156,9 +157,17 @@ const List = ({ list, scale }: ListProps) => {
           onDragEnd={handleDragEnd}
         >
           {list.totalElements === 0 && (
-            <Center w="100%" h="300px">
+            <div
+              className={classNames(
+                'flex',
+                'items-center',
+                'justify-center',
+                'w-full',
+                'h-[300px]',
+              )}
+            >
               <Text>There are no items.</Text>
-            </Center>
+            </div>
           )}
           {viewType === ViewType.Grid && list.totalElements > 0 ? (
             <Wrap
@@ -185,11 +194,14 @@ const List = ({ list, scale }: ListProps) => {
             </Wrap>
           ) : null}
           {viewType === ViewType.List && list.totalElements > 0 ? (
-            <Stack
-              direction="column"
-              spacing={variables.spacingXs}
-              overflow="hidden"
-              pb={variables.spacingLg}
+            <div
+              className={classNames(
+                'flex',
+                'flex-col',
+                'gap-0.5',
+                'overflow-hidden',
+                'pb-2.5',
+              )}
             >
               {list.data
                 .filter((e) => !hidden.includes(e.id))
@@ -206,11 +218,15 @@ const List = ({ list, scale }: ListProps) => {
                     }}
                   />
                 ))}
-            </Stack>
+            </div>
           ) : null}
-          <ItemDragOverlay file={activeFile!} scale={scale} />
+          <ItemDragOverlay
+            file={activeFile!}
+            scale={scale}
+            viewType={viewType}
+          />
         </DndContext>
-      </Box>
+      </div>
       <Portal>
         <Menu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)}>
           <MenuList

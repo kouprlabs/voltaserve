@@ -8,7 +8,6 @@ import {
 import {
   Heading,
   Link as ChakraLink,
-  Stack,
   Table,
   Tbody,
   Td,
@@ -16,9 +15,6 @@ import {
   Thead,
   Tr,
   Text,
-  HStack,
-  Center,
-  VStack,
   Avatar,
   Badge,
 } from '@chakra-ui/react'
@@ -28,6 +24,7 @@ import {
   variables,
   usePagePagination,
 } from '@koupr/ui'
+import classNames from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import OrganizationAPI, { SortOrder } from '@/client/api/organization'
 import { swrConfig } from '@/client/options'
@@ -64,27 +61,44 @@ const OrganizationListPage = () => {
       <Helmet>
         <title>Organizations</title>
       </Helmet>
-      <Stack
-        direction="column"
-        spacing={variables.spacing2Xl}
-        pb={variables.spacing2Xl}
-      >
+      <div className={classNames('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
         <Heading fontSize={variables.headingFontSize} pl={variables.spacingMd}>
           Organizations
         </Heading>
         {!list && error && (
-          <Center h="300px">
+          <div
+            className={classNames(
+              'flex',
+              'items-center',
+              'justify-center',
+              'h-[300px]',
+            )}
+          >
             <Text>Failed to load organizations.</Text>
-          </Center>
+          </div>
         )}
         {!list && !error && <SectionSpinner />}
         {list && list.data.length === 0 && (
-          <Center h="300px">
-            <VStack spacing={variables.spacing}>
+          <div
+            className={classNames(
+              'flex',
+              'items-center',
+              'justify-center',
+              'h-[300px]',
+            )}
+          >
+            <div
+              className={classNames(
+                'flex',
+                'flex-col',
+                'gap-1.5',
+                'items-center',
+              )}
+            >
               <Text>There are no organizations.</Text>
               <CreateOrganizationButton />
-            </VStack>
-          </Center>
+            </div>
+          </div>
         )}
         {list && list.data.length > 0 && (
           <Table variant="simple">
@@ -99,7 +113,14 @@ const OrganizationListPage = () => {
               {list.data.map((o) => (
                 <Tr key={o.id}>
                   <Td>
-                    <HStack spacing={variables.spacing}>
+                    <div
+                      className={classNames(
+                        'flex',
+                        'flex-row',
+                        'gap-1.5',
+                        'items-center',
+                      )}
+                    >
                       <Avatar
                         name={o.name}
                         size="sm"
@@ -113,7 +134,7 @@ const OrganizationListPage = () => {
                       >
                         <Text>{o.name}</Text>
                       </ChakraLink>
-                    </HStack>
+                    </div>
                   </Td>
                   <Td>
                     <Badge>{o.permission}</Badge>
@@ -136,7 +157,7 @@ const OrganizationListPage = () => {
             setSize={setSize}
           />
         )}
-      </Stack>
+      </div>
     </>
   )
 }

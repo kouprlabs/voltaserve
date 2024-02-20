@@ -1,5 +1,4 @@
-import { Stack } from '@chakra-ui/react'
-import { variables } from '@koupr/ui'
+import classNames from 'classnames'
 import { File } from '@/client/api/file'
 import CreateTimeInfo from './create-time-info'
 import ExtensionInfo from './extension-info'
@@ -18,7 +17,7 @@ const FileInfo = ({ file }: FileInfoProps) => {
     return null
   }
   return (
-    <Stack spacing={variables.spacingSm}>
+    <div className={classNames('flex', 'flex-col', 'gap-1')}>
       <ImageInfo file={file} />
       <SizeInfo file={file} />
       <ExtensionInfo file={file} />
@@ -26,7 +25,7 @@ const FileInfo = ({ file }: FileInfoProps) => {
       <PermissionInfo file={file} />
       <CreateTimeInfo file={file} />
       <UpdateTimeInfo file={file} />
-    </Stack>
+    </div>
   )
 }
 

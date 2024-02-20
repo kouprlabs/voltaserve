@@ -105,7 +105,7 @@ func (svc *InvitationService) Create(opts InvitationCreateOptions, userID string
 			}
 		}
 		for _, i := range outgoingInvitations {
-			if e == i.GetEmail() {
+			if e == i.GetEmail() && i.GetStatus() == model.InvitationStatusPending {
 				existing = true
 				break
 			}

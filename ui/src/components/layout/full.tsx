@@ -1,5 +1,6 @@
 import { ReactNode, useEffect } from 'react'
-import { Center, Container, useToast } from '@chakra-ui/react'
+import { useToast } from '@chakra-ui/react'
+import classNames from 'classnames'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { errorCleared } from '@/store/ui/error'
 
@@ -24,16 +25,31 @@ const FullLayout = ({ children }: FullLayoutProps) => {
   }, [error, toast, dispatch])
 
   return (
-    <Container
-      h="100vh"
-      position="relative"
-      centerContent
-      width={{ base: '100%', md: '400px' }}
+    <div
+      className={classNames(
+        'relative',
+        'flex',
+        'flex-col',
+        'items-center',
+        'w-full',
+        'h-[100vh]',
+      )}
     >
-      <Center h="100%" w="100%">
+      <div
+        className={classNames(
+          'flex',
+          'items-center',
+          'justify-center',
+          'w-full',
+          'md:w-[400px]',
+          'h-full',
+          'p-2',
+          'md:p-0',
+        )}
+      >
         {children}
-      </Center>
-    </Container>
+      </div>
+    </div>
   )
 }
 

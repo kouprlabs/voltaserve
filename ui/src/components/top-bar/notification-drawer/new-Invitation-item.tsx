@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react'
-import { Button, Stack, Text, useToast } from '@chakra-ui/react'
+import { Button, Text, useToast } from '@chakra-ui/react'
 import { useSWRConfig } from 'swr'
+import classNames from 'classnames'
 import InvitationAPI, { Invitation } from '@/client/api/invitation'
 import userToString from '@/helpers/user-to-string'
 
@@ -54,7 +55,7 @@ const NewInvitationItem = ({ invitation }: NewInvitationProps) => {
   )
 
   return (
-    <Stack direction="column">
+    <div className={classNames('flex', 'flex-col', 'gap-0.5')}>
       <Text>
         You have been invited by{' '}
         <Text as="span" fontWeight="bold">
@@ -66,7 +67,7 @@ const NewInvitationItem = ({ invitation }: NewInvitationProps) => {
         </Text>
         .<br />
       </Text>
-      <Stack direction="row" justifyContent="flex-end">
+      <div className={classNames('flex', 'flex-row', 'gap-0.5', 'justify-end')}>
         <Button
           size="sm"
           variant="ghost"
@@ -87,8 +88,8 @@ const NewInvitationItem = ({ invitation }: NewInvitationProps) => {
         >
           Decline
         </Button>
-      </Stack>
-    </Stack>
+      </div>
+    </div>
   )
 }
 

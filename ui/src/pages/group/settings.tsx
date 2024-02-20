@@ -1,13 +1,8 @@
 import { useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { Box, Divider, HStack, IconButton, Stack, Text } from '@chakra-ui/react'
-import {
-  IconEdit,
-  IconTrash,
-  IconUserPlus,
-  SectionSpinner,
-  variables,
-} from '@koupr/ui'
+import { Divider, IconButton, Text } from '@chakra-ui/react'
+import { IconEdit, IconTrash, IconUserPlus, SectionSpinner } from '@koupr/ui'
+import classNames from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import GroupAPI from '@/client/api/group'
 import { geEditorPermission, geOwnerPermission } from '@/client/api/permission'
@@ -16,7 +11,7 @@ import AddMember from '@/components/group/add-member'
 import Delete from '@/components/group/delete'
 import EditName from '@/components/group/edit-name'
 
-const Spacer = () => <Box flexGrow={1} />
+const Spacer = () => <div className={classNames('grow')} />
 
 const GroupSettingsPage = () => {
   const { id } = useParams()
@@ -32,6 +27,14 @@ const GroupSettingsPage = () => {
     () => group && geOwnerPermission(group.permission),
     [group],
   )
+  const sectionClassName = classNames('flex', 'flex-col', 'gap-1', 'py-1.5')
+  const rowClassName = classNames(
+    'flex',
+    'flex-row',
+    'items-center',
+    'gap-1',
+    `h-[40px]`,
+  )
 
   if (error) {
     return null
@@ -45,8 +48,8 @@ const GroupSettingsPage = () => {
       <Helmet>
         <title>{group.name}</title>
       </Helmet>
-      <Stack spacing={variables.spacing} w="100%">
-        <HStack spacing={variables.spacing}>
+      <div className={sectionClassName}>
+        <div className={rowClassName}>
           <Text>Name</Text>
           <Spacer />
           <Text>{group.name}</Text>
@@ -58,9 +61,9 @@ const GroupSettingsPage = () => {
               setIsNameModalOpen(true)
             }}
           />
-        </HStack>
+        </div>
         <Divider />
-        <HStack spacing={variables.spacing}>
+        <div className={rowClassName}>
           <Text>Add members</Text>
           <Spacer />
           <IconButton
@@ -71,9 +74,9 @@ const GroupSettingsPage = () => {
               setIsAddMembersModalOpen(true)
             }}
           />
-        </HStack>
+        </div>
         <Divider />
-        <HStack spacing={variables.spacing}>
+        <div className={rowClassName}>
           <Text>Delete permanently</Text>
           <Spacer />
           <IconButton
@@ -84,7 +87,7 @@ const GroupSettingsPage = () => {
             aria-label=""
             onClick={() => setDeleteModalOpen(true)}
           />
-        </HStack>
+        </div>
         <EditName
           open={isNameModalOpen}
           group={group}
@@ -100,7 +103,7 @@ const GroupSettingsPage = () => {
           group={group}
           onClose={() => setDeleteModalOpen(false)}
         />
-      </Stack>
+      </div>
     </>
   )
 }

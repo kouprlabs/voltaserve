@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Outlet, useLocation, useNavigate, useParams } from 'react-router-dom'
-import { Heading, Stack, Tab, TabList, Tabs } from '@chakra-ui/react'
+import { Heading, Tab, TabList, Tabs } from '@chakra-ui/react'
 import { variables } from '@koupr/ui'
+import classNames from 'classnames'
 import OrganizationAPI from '@/client/api/organization'
 import { geOwnerPermission } from '@/client/api/permission'
 import { swrConfig } from '@/client/options'
@@ -30,7 +31,7 @@ const OrganizationLayout = () => {
   }
 
   return (
-    <Stack direction="column" spacing={variables.spacing2Xl}>
+    <div className={classNames('flex', 'flex-col', 'gap-3.5')}>
       <Heading fontSize={variables.headingFontSize}>{org.name}</Heading>
       <Tabs variant="solid-rounded" colorScheme="gray" index={tabIndex}>
         <TabList>
@@ -49,7 +50,7 @@ const OrganizationLayout = () => {
         </TabList>
       </Tabs>
       <Outlet />
-    </Stack>
+    </div>
   )
 }
 

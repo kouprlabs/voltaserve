@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom'
 import {
-  HStack,
   Menu,
   MenuButton,
   MenuDivider,
@@ -8,10 +7,9 @@ import {
   MenuList,
   Portal,
   SkeletonCircle,
-  Stack,
   Text,
 } from '@chakra-ui/react'
-import { variables } from '@koupr/ui'
+import classNames from 'classnames'
 import UserAPI from '@/client/idp/user'
 import { swrConfig } from '@/client/options'
 import ActiveCircle from './active-circle'
@@ -26,9 +24,17 @@ const AccountMenu = () => {
         <MenuButton as={AvatarButton} user={user} />
         <Portal>
           <MenuList>
-            <HStack spacing={variables.spacingXs} px={variables.spacingSm}>
+            <div
+              className={classNames(
+                'flex',
+                'flex-row',
+                'items-center',
+                'gap-0.5',
+                'px-1',
+              )}
+            >
               <AvatarImage user={user} />
-              <Stack spacing={0}>
+              <div className={classNames('flex', 'flex-col', 'gap-0')}>
                 <Text
                   fontWeight="semibold"
                   flexGrow={1}
@@ -39,8 +45,8 @@ const AccountMenu = () => {
                   {user.fullName}
                 </Text>
                 <Text color="gray.500">{user.email}</Text>
-              </Stack>
-            </HStack>
+              </div>
+            </div>
             <MenuDivider />
             <MenuItem as={Link} to="/account/settings">
               Account

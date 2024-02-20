@@ -2,7 +2,6 @@ import { useCallback, useEffect, useState } from 'react'
 import {
   Button,
   Text,
-  Center,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -11,19 +10,16 @@ import {
   ModalHeader,
   ModalOverlay,
   useDisclosure,
-  VStack,
-  Stack,
   Table,
   Tr,
   Tbody,
   Td,
-  HStack,
   Avatar,
   Radio,
-  Box,
   useColorModeValue,
 } from '@chakra-ui/react'
 import { SectionSpinner, Pagination, SearchInput, variables } from '@koupr/ui'
+import classNames from 'classnames'
 import UserAPI, { SortOrder, User } from '@/client/api/user'
 import { swrConfig } from '@/client/options'
 import userToString from '@/helpers/user-to-string'
@@ -107,23 +103,44 @@ const UserSelector = ({
           <ModalHeader>Select User</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            <Stack direction="column" spacing={variables.spacing}>
+            <div className={classNames('flex', 'flex-col', 'gap-1.5')}>
               <SearchInput
                 query={query}
                 onChange={(value) => setQuery(value)}
               />
               {!list && error && (
-                <Center h="300px">
+                <div
+                  className={classNames(
+                    'flex',
+                    'items-center',
+                    'justify-center',
+                    'h-[300px]',
+                  )}
+                >
                   <Text>Failed to load users.</Text>
-                </Center>
+                </div>
               )}
               {!list && !error && <SectionSpinner />}
               {list && list.data.length === 0 && (
-                <Center h="300px">
-                  <VStack spacing={variables.spacing}>
+                <div
+                  className={classNames(
+                    'flex',
+                    'items-center',
+                    'justify-center',
+                    'h-[300px]',
+                  )}
+                >
+                  <div
+                    className={classNames(
+                      'flex',
+                      'flex-col',
+                      'items-center',
+                      'gap-1.5',
+                    )}
+                  >
                     <Text>There are no users.</Text>
-                  </VStack>
-                </Center>
+                  </div>
+                </div>
               )}
               {list && list.data.length > 0 && (
                 <Table variant="simple" size="sm">
@@ -143,7 +160,14 @@ const UserSelector = ({
                           <Radio size="md" isChecked={selected?.id === u.id} />
                         </Td>
                         <Td px={variables.spacingXs}>
-                          <HStack spacing={variables.spacing}>
+                          <div
+                            className={classNames(
+                              'flex',
+                              'flex-row',
+                              'items-center',
+                              'gap-1.5',
+                            )}
+                          >
                             <Avatar
                               name={u.fullName}
                               size="sm"
@@ -153,7 +177,7 @@ const UserSelector = ({
                             <Text fontSize={variables.bodyFontSize}>
                               {userToString(u)}
                             </Text>
-                          </HStack>
+                          </div>
                         </Td>
                       </Tr>
                     ))}
@@ -161,7 +185,7 @@ const UserSelector = ({
                 </Table>
               )}
               {list && (
-                <Box alignSelf="end">
+                <div className={classNames('self-end')}>
                   {list.totalPages > 1 ? (
                     <Pagination
                       uiSize="md"
@@ -171,9 +195,9 @@ const UserSelector = ({
                       onPageChange={(value) => setPage(value)}
                     />
                   ) : null}
-                </Box>
+                </div>
               )}
-            </Stack>
+            </div>
           </ModalBody>
           <ModalFooter>
             <Button

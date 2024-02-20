@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Outlet, useLocation, useNavigate, useParams } from 'react-router-dom'
-import { Heading, Stack, Tab, TabList, Tabs } from '@chakra-ui/react'
+import { Heading, Tab, TabList, Tabs } from '@chakra-ui/react'
 import { variables } from '@koupr/ui'
+import classNames from 'classnames'
 import GroupAPI from '@/client/api/group'
 import { swrConfig } from '@/client/options'
 
@@ -27,7 +28,7 @@ const GroupLayout = () => {
   }
 
   return (
-    <Stack direction="column" spacing={variables.spacing2Xl}>
+    <div className={classNames('flex', 'flex-col', 'gap-3.5')}>
       <Heading fontSize={variables.headingFontSize}>{group.name}</Heading>
       <Tabs variant="solid-rounded" colorScheme="gray" index={tabIndex}>
         <TabList>
@@ -36,7 +37,7 @@ const GroupLayout = () => {
         </TabList>
       </Tabs>
       <Outlet />
-    </Stack>
+    </div>
   )
 }
 

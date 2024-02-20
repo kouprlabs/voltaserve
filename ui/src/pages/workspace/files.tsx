@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
-import { Box, Center, Stack, VStack, useColorModeValue } from '@chakra-ui/react'
+import { useColorModeValue } from '@chakra-ui/react'
 import {
   PagePagination,
   Spinner,
@@ -8,6 +8,7 @@ import {
   usePagePagination,
   variables,
 } from '@koupr/ui'
+import classNames from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import FileAPI from '@/client/api/file'
 import WorkspaceAPI from '@/client/api/workspace'
@@ -75,48 +76,68 @@ const WorkspaceFilesPage = () => {
   return (
     <>
       <Helmet>{workspace && <title>{workspace.name}</title>}</Helmet>
-      <Stack
-        spacing={variables.spacingLg}
-        w="100%"
-        overflow="hidden"
-        flexGrow={1}
+      <div
+        className={classNames(
+          'flex',
+          'flex-col',
+          'w-full',
+          'gap-2.5',
+          'grow',
+          'overflow-hidden',
+        )}
       >
         {workspace && fileId ? (
           <Path
             rootId={workspace.rootId}
             fileId={fileId}
             maxCharacters={30}
-            onClick={(fileId) =>
+            onClick={(fileId) => {
+              dispatch(selectionUpdated([]))
               navigate(`/workspace/${workspace.id}/file/${fileId}`)
-            }
+            }}
           />
         ) : null}
         <Toolbar list={list} />
-        <VStack
-          flexGrow={1}
-          overflowY="auto"
-          overflowX="hidden"
-          spacing={variables.spacing}
+        <div
+          className={classNames(
+            'flex',
+            'flex-col',
+            'gap-1.5',
+            'grow',
+            'overflow-y-auto',
+            'overflow-x-hidden',
+          )}
         >
-          <Box
-            w="100%"
-            overflowY="auto"
-            overflowX="hidden"
-            borderTop="1px solid"
-            borderTopColor={borderColor}
-            borderBottom={hasPagination ? '1px solid' : undefined}
-            borderBottomColor={hasPagination ? borderColor : undefined}
-            pt={variables.spacing}
-            flexGrow={1}
+          <div
+            className={classNames(
+              'w-full',
+              'overflow-y-auto',
+              'overflow-x-hidden',
+              'border-t',
+              { 'border-b': hasPagination },
+              'pt-1.5',
+              'flex-grow',
+            )}
+            style={{
+              borderTopColor: borderColor,
+              borderBottomColor: hasPagination ? borderColor : undefined,
+            }}
             onClick={() => dispatch(selectionUpdated([]))}
           >
             {isLoading ? (
-              <Center h="100%">
+              <div
+                className={classNames(
+                  'flex',
+                  'items-center',
+                  'justify-center',
+                  'h-full',
+                )}
+              >
                 <Spinner />
-              </Center>
+              </div>
             ) : null}
             {list && !error ? <List list={list} scale={iconScale} /> : null}
-          </Box>
+          </div>
           {list ? (
             <PagePagination
               style={{ alignSelf: 'end', paddingBottom: variables.spacing }}
@@ -129,8 +150,8 @@ const WorkspaceFilesPage = () => {
               setSize={setSize}
             />
           ) : null}
-        </VStack>
-      </Stack>
+        </div>
+      </div>
       {list ? <Sharing list={list} /> : null}
       <Move />
       <Copy />

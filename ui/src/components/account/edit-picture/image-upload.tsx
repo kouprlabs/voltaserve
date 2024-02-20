@@ -1,15 +1,13 @@
-import React, { ChangeEvent, useCallback, useRef, useState } from 'react'
+import { ChangeEvent, useCallback, useRef, useState } from 'react'
 import {
-  Box,
-  Center,
   IconButton,
   Image,
   Text,
   useColorModeValue,
-  VStack,
+  useToken,
 } from '@chakra-ui/react'
-import { variables } from '@koupr/ui'
 import { IconEdit } from '@koupr/ui'
+import classNames from 'classnames'
 
 type ImageUploadProps = {
   name: string
@@ -26,7 +24,10 @@ const ImageUpload = ({
 }: ImageUploadProps) => {
   const [src, setSrc] = useState<string>()
   const hiddenInput = useRef<HTMLInputElement>(null)
-  const blueColor = useColorModeValue('blue.600', 'blue.200')
+  const blueColor = useToken(
+    'colors',
+    useColorModeValue('blue.600', 'blue.200'),
+  )
 
   const handleFileChange = useCallback(
     (changeEvent: ChangeEvent<HTMLInputElement>) => {
@@ -59,10 +60,20 @@ const ImageUpload = ({
   }, [disabled, hiddenInput])
 
   return (
-    <VStack spacing={variables.spacingSm}>
-      <Center className="rounded border border-dashed" borderColor={blueColor}>
+    <div className={classNames('flex', 'flex-col', 'items-center', 'gap-1')}>
+      <div
+        className={classNames(
+          'flex',
+          'items-center',
+          'justify-center',
+          'rounded',
+          'border',
+          'border-dashed',
+        )}
+        style={{ borderColor: blueColor }}
+      >
         {src || initialValue ? (
-          <Box position="relative" width="400px" height="160px">
+          <div className={classNames('relative', 'w-[400px]', 'h-[160px]')}>
             <Image
               w="400px"
               h="160px"
@@ -82,18 +93,23 @@ const ImageUpload = ({
               disabled={disabled}
               onClick={handleEdit}
             />
-          </Box>
+          </div>
         ) : (
-          <Center
-            className="cursor-pointer"
-            width="400px"
-            height="160px"
+          <div
+            className={classNames(
+              'flex',
+              'items-center',
+              'justify-center',
+              'cursor-pointer',
+              'w-[400px]',
+              'h-[160px]',
+            )}
             onClick={handleEdit}
           >
             <Text color={blueColor}>Browse</Text>
-          </Center>
+          </div>
         )}
-      </Center>
+      </div>
       <input
         ref={hiddenInput}
         className="hidden"
@@ -101,7 +117,7 @@ const ImageUpload = ({
         name={name}
         onChange={handleFileChange}
       />
-    </VStack>
+    </div>
   )
 }
 

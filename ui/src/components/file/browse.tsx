@@ -3,14 +3,12 @@ import { useParams } from 'react-router-dom'
 import {
   Box,
   Button,
-  Center,
-  Stack,
   Text,
   useColorModeValue,
+  useToken,
 } from '@chakra-ui/react'
-import { variables } from '@koupr/ui'
-import { IconChevronRight } from '@koupr/ui'
-import { SectionSpinner } from '@koupr/ui'
+import { IconChevronRight, SectionSpinner } from '@koupr/ui'
+import classNames from 'classnames'
 import { FcFolder } from 'react-icons/fc'
 import FileAPI, { File, FileType } from '@/client/api/file'
 import WorkspaceAPI from '@/client/api/workspace'
@@ -29,9 +27,18 @@ const Browse = ({ onChange }: BrowseProps) => {
   const [loading, setLoading] = useState(false)
   const [isSpinnerVisible, setIsSpinnerVisible] = useState(false)
   const [fileId, setFileId] = useState<string>()
-  const hoverColor = useColorModeValue('gray.100', 'gray.700')
-  const activeColor = useColorModeValue('gray.200', 'gray.600')
-  const borderColor = useColorModeValue('gray.300', 'gray.600')
+  const hoverColor = useToken(
+    'colors',
+    useColorModeValue('gray.100', 'gray.700'),
+  )
+  const activeColor = useToken(
+    'colors',
+    useColorModeValue('gray.200', 'gray.600'),
+  )
+  const borderColor = useToken(
+    'colors',
+    useColorModeValue('gray.300', 'gray.600'),
+  )
 
   useEffect(() => {
     if (workspace) {
@@ -84,7 +91,7 @@ const Browse = ({ onChange }: BrowseProps) => {
   }
 
   return (
-    <Stack spacing={variables.spacingSm}>
+    <div className={classNames('flex', 'flex-col', 'gap-1')}>
       {workspace && fileId ? (
         <Path
           rootId={workspace.rootId}
@@ -93,51 +100,74 @@ const Browse = ({ onChange }: BrowseProps) => {
           onClick={(fileId) => setFileId(fileId)}
         />
       ) : null}
-      <Stack
-        spacing={0}
-        borderTop="1px solid"
-        borderTopColor={borderColor}
-        pt={variables.spacing}
-        h={{ base: '250px', xl: '400px' }}
-        overflowY="scroll"
+      <div
+        className={classNames(
+          'flex',
+          'flex-col',
+          'gap-0',
+          'border-t',
+          'pt-1.5',
+          'h-[250px]',
+          'xl:h-[400px]',
+          'overflow-y-scroll',
+        )}
+        style={{ borderTopColor: borderColor }}
       >
         {folders.length > 0 ? (
           folders.map((f) => (
-            <Stack
+            <Box
               key={f.id}
-              direction="row"
-              alignItems="center"
-              spacing={variables.spacing}
-              cursor="pointer"
-              _hover={{ bg: hoverColor }}
-              _active={{ bg: activeColor }}
-              p={variables.spacingSm}
-              borderRadius={variables.borderRadiusSm}
+              className={classNames(
+                'flex',
+                'flex-row',
+                'gap-1.5',
+                'items-center',
+                'cursor-pointer',
+                'p-1',
+                'rounded-md',
+              )}
+              _hover={{ background: hoverColor }}
+              _active={{ background: activeColor }}
               onClick={() => setFileId(f.id)}
             >
               <FcFolder fontSize="36px" style={{ flexShrink: 0 }} />
               <Text noOfLines={1}>{f.name}</Text>
-              <Box flexGrow={1} />
+              <div className={classNames('grow')} />
               <IconChevronRight />
-            </Stack>
+            </Box>
           ))
         ) : (
-          <Center h="100%">
+          <div
+            className={classNames(
+              'flex',
+              'items-center',
+              'justify-center',
+              'h-full',
+            )}
+          >
             <Text>There are no folders.</Text>
-          </Center>
+          </div>
         )}
-      </Stack>
+      </div>
       {totalPages > page && fileId ? (
-        <Center w="100%" p={variables.spacing}>
+        <div
+          className={classNames(
+            'flex',
+            'items-center',
+            'justify-center',
+            'w-full',
+            'p-1.5',
+          )}
+        >
           <Button
             onClick={() => handleLoadMore(fileId, page)}
             isLoading={loading}
           >
             Load More
           </Button>
-        </Center>
+        </div>
       ) : null}
-    </Stack>
+    </div>
   )
 }
 

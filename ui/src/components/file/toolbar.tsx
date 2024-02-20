@@ -2,9 +2,7 @@ import { ChangeEvent, ReactElement, useCallback, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import {
   Button,
-  Stack,
   ButtonGroup,
-  Box,
   IconButton,
   Menu,
   MenuButton,
@@ -17,9 +15,9 @@ import {
   SliderTrack,
   SliderFilledTrack,
   SliderThumb,
+  useToken,
 } from '@chakra-ui/react'
 import {
-  variables,
   IconAdd,
   IconCheckCircle,
   IconCircle,
@@ -38,6 +36,7 @@ import {
   IconCheck,
 } from '@koupr/ui'
 import { useSWRConfig } from 'swr'
+import classNames from 'classnames'
 import { FiChevronDown } from 'react-icons/fi'
 import { LuGrid, LuList, LuX } from 'react-icons/lu'
 import FileAPI, { List, SortBy, SortOrder } from '@/client/api/file'
@@ -66,7 +65,6 @@ import {
 import { uploadsDrawerOpened } from '@/store/ui/uploads-drawer'
 import { ViewType } from '@/types/file'
 
-const SPACING = variables.spacingXs
 const ICON_SCALE_SLIDER_STEP = 0.25
 const ICON_SCALE_SLIDER_MIN = 1
 const ICON_SCALE_SLIDER_MAX = ICON_SCALE_SLIDER_STEP * 9
@@ -117,6 +115,8 @@ const Toolbar = ({ list }: ToolbarProps) => {
   const folderUploadInput = useRef<HTMLInputElement>(null)
   const fileListSearchParams = useFileListSearchParams()
   const { data: folder } = FileAPI.useGetById(fileId)
+  const stackClassName = classNames('flex', 'flex-row', 'gap-0.5')
+  const grayColor = useToken('colors', 'gray.500')
 
   const handleFileChange = useCallback(
     async (event: ChangeEvent<HTMLInputElement>) => {
@@ -215,7 +215,7 @@ const Toolbar = ({ list }: ToolbarProps) => {
 
   return (
     <>
-      <Stack direction="row" spacing={SPACING}>
+      <div className={stackClassName}>
         <ButtonGroup isAttached>
           <Menu>
             <MenuButton
@@ -258,7 +258,7 @@ const Toolbar = ({ list }: ToolbarProps) => {
             New Folder
           </Button>
         </ButtonGroup>
-        <Stack direction="row" spacing={SPACING}>
+        <div className={stackClassName}>
           {selectionCount > 0 && hasOwnerPermission && (
             <Button
               leftIcon={<IconShare />}
@@ -284,7 +284,7 @@ const Toolbar = ({ list }: ToolbarProps) => {
               Delete
             </Button>
           )}
-          <Box>
+          {selectionCount > 0 ? (
             <Menu>
               <MenuButton
                 as={IconButton}
@@ -363,8 +363,8 @@ const Toolbar = ({ list }: ToolbarProps) => {
                 </MenuList>
               </Portal>
             </Menu>
-          </Box>
-        </Stack>
+          ) : null}
+        </div>
         <IconButton
           icon={isSelectionMode ? <LuX /> : <IconCheckCircle />}
           isDisabled={!list}
@@ -381,7 +381,7 @@ const Toolbar = ({ list }: ToolbarProps) => {
           onClick={handleRefresh}
         />
         <Spacer />
-        <Stack direction="row" spacing={variables.spacingLg}>
+        <div className={classNames('flex', 'flex-row', 'gap-2.5')}>
           <Slider
             w="120px"
             value={iconScale}
@@ -392,14 +392,14 @@ const Toolbar = ({ list }: ToolbarProps) => {
             onChange={handleIconScaleChange}
           >
             <SliderTrack>
-              <Box position="relative" />
+              <div className={classNames('relative')} />
               <SliderFilledTrack />
             </SliderTrack>
             <SliderThumb boxSize={8}>
-              <Box color="gray" as={IconGridFill} />
+              <IconGridFill style={{ color: grayColor }} />
             </SliderThumb>
           </Slider>
-          <Stack direction="row" spacing={SPACING}>
+          <div className={stackClassName}>
             <IconButton
               icon={getSortOrderIcon()}
               fontSize="16px"
@@ -416,54 +416,52 @@ const Toolbar = ({ list }: ToolbarProps) => {
               isDisabled={!list}
               onClick={handleViewTypeToggle}
             />
-            <Box>
-              <Menu>
-                <MenuButton
-                  as={IconButton}
-                  icon={<IconDotsVertical />}
-                  variant="solid"
-                  aria-label=""
-                  isDisabled={!list}
-                />
-                <Portal>
-                  <MenuList zIndex="dropdown">
-                    <MenuItem
-                      icon={getSortByIcon(SortBy.Name)}
-                      onClick={() => handleSortByChange(SortBy.Name)}
-                    >
-                      Sort By Name
-                    </MenuItem>
-                    <MenuItem
-                      icon={getSortByIcon(SortBy.Kind)}
-                      onClick={() => handleSortByChange(SortBy.Kind)}
-                    >
-                      Sort By Kind
-                    </MenuItem>
-                    <MenuItem
-                      icon={getSortByIcon(SortBy.Size)}
-                      onClick={() => handleSortByChange(SortBy.Size)}
-                    >
-                      Sort By Size
-                    </MenuItem>
-                    <MenuItem
-                      icon={getSortByIcon(SortBy.DateCreated)}
-                      onClick={() => handleSortByChange(SortBy.DateCreated)}
-                    >
-                      Sort By Date Created
-                    </MenuItem>
-                    <MenuItem
-                      icon={getSortByIcon(SortBy.DateModified)}
-                      onClick={() => handleSortByChange(SortBy.DateModified)}
-                    >
-                      Sort By Date Modified
-                    </MenuItem>
-                  </MenuList>
-                </Portal>
-              </Menu>
-            </Box>
-          </Stack>
-        </Stack>
-      </Stack>
+            <Menu>
+              <MenuButton
+                as={IconButton}
+                icon={<IconDotsVertical />}
+                variant="solid"
+                aria-label=""
+                isDisabled={!list}
+              />
+              <Portal>
+                <MenuList zIndex="dropdown">
+                  <MenuItem
+                    icon={getSortByIcon(SortBy.Name)}
+                    onClick={() => handleSortByChange(SortBy.Name)}
+                  >
+                    Sort By Name
+                  </MenuItem>
+                  <MenuItem
+                    icon={getSortByIcon(SortBy.Kind)}
+                    onClick={() => handleSortByChange(SortBy.Kind)}
+                  >
+                    Sort By Kind
+                  </MenuItem>
+                  <MenuItem
+                    icon={getSortByIcon(SortBy.Size)}
+                    onClick={() => handleSortByChange(SortBy.Size)}
+                  >
+                    Sort By Size
+                  </MenuItem>
+                  <MenuItem
+                    icon={getSortByIcon(SortBy.DateCreated)}
+                    onClick={() => handleSortByChange(SortBy.DateCreated)}
+                  >
+                    Sort By Date Created
+                  </MenuItem>
+                  <MenuItem
+                    icon={getSortByIcon(SortBy.DateModified)}
+                    onClick={() => handleSortByChange(SortBy.DateModified)}
+                  >
+                    Sort By Date Modified
+                  </MenuItem>
+                </MenuList>
+              </Portal>
+            </Menu>
+          </div>
+        </div>
+      </div>
       <input
         ref={fileUploadInput}
         className="hidden"

@@ -1,7 +1,6 @@
 import { useState, MouseEvent } from 'react'
 import { useParams } from 'react-router-dom'
-import { Box } from '@chakra-ui/react'
-import { variables } from '@koupr/ui'
+import { Box, useToken } from '@chakra-ui/react'
 import { useSWRConfig } from 'swr'
 import {
   DragCancelEvent,
@@ -11,6 +10,7 @@ import {
   useDraggable,
   useDroppable,
 } from '@dnd-kit/core'
+import classNames from 'classnames'
 import FileAPI, { FileType, List } from '@/client/api/file'
 import useFileListSearchParams from '@/hooks/use-file-list-params'
 import store from '@/store/configure-store'
@@ -47,6 +47,7 @@ const ItemDraggableDroppable = ({
   })
   const [isLoading, setIsLoading] = useState(false)
   const fileListSearchParams = useFileListSearchParams()
+  const green = useToken('colors', 'green.300')
 
   useDndMonitor({
     onDragStart: (event: DragStartEvent) => {
@@ -95,9 +96,12 @@ const ItemDraggableDroppable = ({
       {file.type === FileType.File ? (
         <Box
           ref={setDraggableNodeRef}
-          border="2px solid"
-          borderColor="transparent"
-          visibility={isVisible ? 'visible' : 'hidden'}
+          className={classNames(
+            'border-2',
+            'border-transparent',
+            { 'visible': isVisible },
+            { 'hidden': !isVisible },
+          )}
           _hover={{ outline: 'none' }}
           _focus={{ outline: 'none' }}
           {...listeners}
@@ -115,16 +119,19 @@ const ItemDraggableDroppable = ({
       {file.type === FileType.Folder ? (
         <Box
           ref={setDraggableNodeRef}
-          border="2px solid"
-          borderColor={isOver ? 'green.300' : 'transparent'}
-          borderRadius={variables.borderRadiusSm}
-          visibility={isVisible ? 'visible' : 'hidden'}
+          className={classNames(
+            'border-2',
+            'rounded-md',
+            { 'visible': isVisible },
+            { 'invisible': !isVisible },
+          )}
+          style={{ borderColor: isOver ? green : 'transparent' }}
           _hover={{ outline: 'none' }}
           _focus={{ outline: 'none' }}
           {...listeners}
           {...attributes}
         >
-          <Box ref={setDroppableNodeRef}>
+          <div ref={setDroppableNodeRef}>
             <Item
               file={file}
               scale={scale}
@@ -134,7 +141,7 @@ const ItemDraggableDroppable = ({
               isSelectionMode={isSelectionMode}
               onContextMenu={onContextMenu}
             />
-          </Box>
+          </div>
         </Box>
       ) : null}
     </>

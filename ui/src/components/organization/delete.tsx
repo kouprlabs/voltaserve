@@ -12,7 +12,6 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
-  Stack,
   Text,
 } from '@chakra-ui/react'
 import { variables } from '@koupr/ui'
@@ -26,6 +25,7 @@ import {
   FormikHelpers,
 } from 'formik'
 import * as Yup from 'yup'
+import classNames from 'classnames'
 import OrganizationAPI, { Organization } from '@/client/api/organization'
 
 type DeleteProps = {
@@ -87,7 +87,7 @@ const Delete = ({ open, organization, onClose }: DeleteProps) => {
           {({ errors, touched, isSubmitting }) => (
             <Form>
               <ModalBody>
-                <Stack direction="column" spacing={variables.spacing}>
+                <div className={classNames('flex', 'flex-col', 'gap-1.5')}>
                   <Text>
                     Are you sure you would like to delete this organization?
                   </Text>
@@ -104,7 +104,7 @@ const Delete = ({ open, organization, onClose }: DeleteProps) => {
                       </FormControl>
                     )}
                   </Field>
-                </Stack>
+                </div>
               </ModalBody>
               <ModalFooter>
                 <Button

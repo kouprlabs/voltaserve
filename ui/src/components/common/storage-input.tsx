@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { Input, Select, Stack } from '@chakra-ui/react'
-import { variables } from '@koupr/ui'
+import { Input, Select } from '@chakra-ui/react'
 import { FieldAttributes, FieldProps } from 'formik'
+import classNames from 'classnames'
 import {
   byteToGigabyte,
   byteToMegabyte,
@@ -69,8 +69,8 @@ const StorageInput = ({ id, field, form }: FieldAttributes<FieldProps>) => {
   return (
     <>
       <input id={id} type="hidden" {...field} />
-      <Stack direction="column" spacing={variables.spacing}>
-        <Stack direction="row">
+      <div className={classNames('flex', 'flex-col', 'gap-1.5')}>
+        <div className={classNames('flex', 'flex-row', 'gap-0.5')}>
           <Input
             type="number"
             disabled={form.isSubmitting}
@@ -112,8 +112,8 @@ const StorageInput = ({ id, field, form }: FieldAttributes<FieldProps>) => {
             <option value="gb">GB</option>
             <option value="tb">TB</option>
           </Select>
-        </Stack>
-      </Stack>
+        </div>
+      </div>
     </>
   )
 }

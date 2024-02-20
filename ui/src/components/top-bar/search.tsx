@@ -8,7 +8,6 @@ import {
 } from 'react-router-dom'
 import {
   Button,
-  HStack,
   Icon,
   IconButton,
   Input,
@@ -17,6 +16,7 @@ import {
   InputRightElement,
 } from '@chakra-ui/react'
 import { IconClose, IconSearch } from '@koupr/ui'
+import classNames from 'classnames'
 import { decodeQuery, encodeQuery } from '@/helpers/query'
 
 const Search = () => {
@@ -186,7 +186,7 @@ const Search = () => {
   }
 
   return (
-    <HStack>
+    <div className={classNames('flex', 'flex-row', 'gap-0.5')}>
       <InputGroup>
         <InputLeftElement pointerEvents="none">
           <Icon as={IconSearch} color="gray.300" />
@@ -216,7 +216,7 @@ const Search = () => {
           Search
         </Button>
       ) : null}
-    </HStack>
+    </div>
   )
 }
 

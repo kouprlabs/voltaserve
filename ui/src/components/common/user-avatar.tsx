@@ -12,16 +12,17 @@ type UserAvatarProps = {
 }
 
 const UserAvatar = ({ user, size }: UserAvatarProps) => {
-  const borderColor = useColorModeValue('gray.300', 'gray.700')
-  const [borderColorDecoded] = useToken('colors', [borderColor])
-
+  const borderColor = useToken(
+    'colors',
+    useColorModeValue('gray.300', 'gray.700'),
+  )
   if (user) {
     return (
       <Avatar
         src={user.picture}
         width={size}
         height={size}
-        border={`1px solid ${borderColorDecoded}`}
+        border={`1px solid ${borderColor}`}
       />
     )
   } else {

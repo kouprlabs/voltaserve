@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import {
   Button,
   FormControl,
@@ -10,7 +10,6 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
-  VStack,
 } from '@chakra-ui/react'
 import { variables } from '@koupr/ui'
 import { useSWRConfig } from 'swr'
@@ -23,6 +22,7 @@ import {
   FormikHelpers,
 } from 'formik'
 import * as Yup from 'yup'
+import classNames from 'classnames'
 import UserAPI, { User } from '@/client/idp/user'
 import ImageUpload from './image-upload'
 
@@ -115,7 +115,14 @@ const EditPicture = ({ open, user, onClose }: EditPictureProps) => {
           {({ errors, touched, isSubmitting, setFieldValue, values }) => (
             <Form>
               <ModalBody>
-                <VStack spacing={variables.spacingSm}>
+                <div
+                  className={classNames(
+                    'flex',
+                    'flex-col',
+                    'items-center',
+                    'gap-1',
+                  )}
+                >
                   <Field name="picture">
                     {({ field }: FieldAttributes<FieldProps>) => (
                       <FormControl
@@ -135,7 +142,7 @@ const EditPicture = ({ open, user, onClose }: EditPictureProps) => {
                       </FormControl>
                     )}
                   </Field>
-                </VStack>
+                </div>
               </ModalBody>
               <ModalFooter>
                 <Button

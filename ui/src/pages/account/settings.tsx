@@ -1,18 +1,16 @@
 import { useState } from 'react'
 import {
-  Box,
   Divider,
-  HStack,
   IconButton,
   IconButtonProps,
   Progress,
-  Stack,
   Switch,
   Text,
   Tooltip,
   useColorMode,
 } from '@chakra-ui/react'
-import { variables, IconEdit, IconTrash, SectionSpinner } from '@koupr/ui'
+import { IconEdit, IconTrash, SectionSpinner } from '@koupr/ui'
+import classNames from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import { IoWarning } from 'react-icons/io5'
 import StorageAPI from '@/client/api/storage'
@@ -28,10 +26,7 @@ const EditButton = (props: IconButtonProps) => (
   <IconButton icon={<IconEdit />} w="40px" h="40px" {...props} />
 )
 
-const Spacer = () => <Box flexGrow={1} />
-
-const ROW_HEIGHT = '40px'
-const SECTION_SPACING = variables.spacing
+const Spacer = () => <div className={classNames('grow')} />
 
 const AccountSettingsPage = () => {
   const { colorMode, toggleColorMode } = useColorMode()
@@ -42,6 +37,14 @@ const AccountSettingsPage = () => {
   const [isEmailModalOpen, setIsEmailModalOpen] = useState(false)
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const sectionClassName = classNames('flex', 'flex-col', 'gap-1', 'py-1.5')
+  const rowClassName = classNames(
+    'flex',
+    'flex-row',
+    'items-center',
+    'gap-1',
+    `h-[40px]`,
+  )
 
   if (userError) {
     return null
@@ -55,8 +58,8 @@ const AccountSettingsPage = () => {
       <Helmet>
         <title>{user.fullName}</title>
       </Helmet>
-      <Stack direction="column" spacing={0}>
-        <Stack direction="column" py={SECTION_SPACING}>
+      <div className={classNames('flex', 'flex-col', 'gap-0')}>
+        <div className={sectionClassName}>
           <Text fontWeight="bold">Storage Usage</Text>
           {storageUsageError && <Text>Failed to load storage usage.</Text>}
           {storageUsage && !storageUsageError && (
@@ -74,11 +77,11 @@ const AccountSettingsPage = () => {
               <Progress value={0} hasStripe />
             </>
           )}
-        </Stack>
+        </div>
         <Divider />
-        <Stack direction="column" py={SECTION_SPACING}>
+        <div className={sectionClassName}>
           <Text fontWeight="bold">Basics</Text>
-          <HStack spacing={variables.spacing} h={ROW_HEIGHT}>
+          <div className={classNames(rowClassName)}>
             <Text>Full name</Text>
             <Spacer />
             <Text>{user.fullName}</Text>
@@ -88,23 +91,23 @@ const AccountSettingsPage = () => {
                 setIsFullNameModalOpen(true)
               }}
             />
-          </HStack>
-        </Stack>
+          </div>
+        </div>
         <Divider />
-        <Stack direction="column" py={SECTION_SPACING}>
+        <div className={sectionClassName}>
           <Text fontWeight="bold">Credentials</Text>
-          <HStack spacing={variables.spacing} h={ROW_HEIGHT}>
+          <div className={classNames(rowClassName)}>
             <Text>Email</Text>
             <Spacer />
             {user.pendingEmail && (
-              <HStack>
+              <div className={classNames('flex', 'flex-row', 'items-center')}>
                 <Tooltip label="Please check your inbox to confirm your email.">
-                  <Box>
+                  <span>
                     <IoWarning fontSize="20px" color="gold" />
-                  </Box>
+                  </span>
                 </Tooltip>
                 <Text>{user.pendingEmail}</Text>
-              </HStack>
+              </div>
             )}
             {!user.pendingEmail && (
               <Text>{user.pendingEmail || user.email}</Text>
@@ -115,8 +118,8 @@ const AccountSettingsPage = () => {
                 setIsEmailModalOpen(true)
               }}
             />
-          </HStack>
-          <HStack spacing={variables.spacing} h={ROW_HEIGHT}>
+          </div>
+          <div className={classNames(rowClassName)}>
             <Text>Password</Text>
             <Spacer />
             <EditButton
@@ -125,24 +128,24 @@ const AccountSettingsPage = () => {
                 setIsPasswordModalOpen(true)
               }}
             />
-          </HStack>
-        </Stack>
+          </div>
+        </div>
         <Divider />
-        <Stack direction="column" py={SECTION_SPACING}>
+        <div className={sectionClassName}>
           <Text fontWeight="bold">Theme</Text>
-          <HStack spacing={variables.spacing} h={ROW_HEIGHT}>
+          <div className={classNames(rowClassName)}>
             <Text>Dark mode</Text>
             <Spacer />
             <Switch
               isChecked={colorMode === 'dark'}
               onChange={() => toggleColorMode()}
             />
-          </HStack>
-        </Stack>
+          </div>
+        </div>
         <Divider />
-        <Stack direction="column" py={SECTION_SPACING}>
+        <div className={sectionClassName}>
           <Text fontWeight="bold">Advanced</Text>
-          <HStack spacing={variables.spacing} h={ROW_HEIGHT}>
+          <div className={classNames(rowClassName)}>
             <Text>Delete account</Text>
             <Spacer />
             <IconButton
@@ -152,8 +155,8 @@ const AccountSettingsPage = () => {
               aria-label=""
               onClick={() => setIsDeleteModalOpen(true)}
             />
-          </HStack>
-        </Stack>
+          </div>
+        </div>
         <EditFullName
           open={isFullNameModalOpen}
           user={user}
@@ -173,7 +176,7 @@ const AccountSettingsPage = () => {
           open={isDeleteModalOpen}
           onClose={() => setIsDeleteModalOpen(false)}
         />
-      </Stack>
+      </div>
     </>
   )
 }

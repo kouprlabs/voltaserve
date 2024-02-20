@@ -1,7 +1,6 @@
 import { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
-import { Box, HStack } from '@chakra-ui/react'
-import { variables } from '@koupr/ui'
+import classNames from 'classnames'
 import AccountMenu from '@/components/top-bar/account-menu'
 import NotificationDrawer from '@/components/top-bar/notification-drawer'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
@@ -35,26 +34,33 @@ const TopBar = () => {
   }, [location, dispatch])
 
   return (
-    <HStack
-      padding={`0 30px`}
-      w="100%"
-      h="80px"
-      align="center"
-      spacing={variables.spacingMd}
-      flexShrink={0}
+    <div
+      className={classNames(
+        'flex',
+        'flex-row',
+        'items-center',
+        'gap-2',
+        'shrink-0',
+        'py-0',
+        'px-3',
+        'w-full',
+        'h-[80px]',
+      )}
     >
-      <Box flexGrow={1}>
+      <div className={classNames('grow')}>
         <Search />
-      </Box>
-      <HStack spacing={variables.spacing}>
+      </div>
+      <div
+        className={classNames('flex', 'flex-row', 'items-center', 'gap-1.5')}
+      >
         {activeNav === NavType.Workspaces && <CreateWorkspaceButton />}
         {activeNav === NavType.Groups && <CreateGroupButton />}
         {activeNav === NavType.Organizations && <CreateOrganizationButton />}
         <UploadDrawer />
         <NotificationDrawer />
         <AccountMenu />
-      </HStack>
-    </HStack>
+      </div>
+    </div>
   )
 }
 

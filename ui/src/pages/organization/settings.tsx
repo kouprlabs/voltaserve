@@ -1,14 +1,14 @@
 import { useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { Box, Divider, HStack, IconButton, Stack, Text } from '@chakra-ui/react'
+import { Divider, IconButton, Text } from '@chakra-ui/react'
 import {
-  variables,
   IconEdit,
   IconExit,
   IconTrash,
   IconUserPlus,
   SectionSpinner,
 } from '@koupr/ui'
+import classNames from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import OrganizationAPI from '@/client/api/organization'
 import { geEditorPermission, geOwnerPermission } from '@/client/api/permission'
@@ -18,7 +18,7 @@ import EditName from '@/components/organization/edit-name'
 import InviteMembers from '@/components/organization/invite-members'
 import Leave from '@/components/organization/leave'
 
-const Spacer = () => <Box flexGrow={1} />
+const Spacer = () => <div className={classNames('grow')} />
 
 const OrganizationSettingsPage = () => {
   const { id } = useParams()
@@ -28,6 +28,14 @@ const OrganizationSettingsPage = () => {
     useState(false)
   const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const sectionClassName = classNames('flex', 'flex-col', 'gap-1', 'py-1.5')
+  const rowClassName = classNames(
+    'flex',
+    'flex-row',
+    'items-center',
+    'gap-1',
+    `h-[40px]`,
+  )
 
   if (error) {
     return null
@@ -42,8 +50,8 @@ const OrganizationSettingsPage = () => {
       <Helmet>
         <title>{org.name}</title>
       </Helmet>
-      <Stack spacing={variables.spacing} w="100%">
-        <HStack spacing={variables.spacing}>
+      <div className={sectionClassName}>
+        <div className={rowClassName}>
           <Text>Name</Text>
           <Spacer />
           <Text>{org.name}</Text>
@@ -55,10 +63,9 @@ const OrganizationSettingsPage = () => {
               setIsNameModalOpen(true)
             }}
           />
-        </HStack>
+        </div>
         <Divider />
-
-        <HStack spacing={variables.spacing}>
+        <div className={rowClassName}>
           <Text>Invite members</Text>
           <Spacer />
           <IconButton
@@ -69,9 +76,8 @@ const OrganizationSettingsPage = () => {
               setIsInviteMembersModalOpen(true)
             }}
           />
-        </HStack>
-
-        <HStack spacing={variables.spacing}>
+        </div>
+        <div className={rowClassName}>
           <Text>Leave</Text>
           <Spacer />
           <IconButton
@@ -81,9 +87,9 @@ const OrganizationSettingsPage = () => {
             aria-label=""
             onClick={() => setIsLeaveModalOpen(true)}
           />
-        </HStack>
+        </div>
         <Divider />
-        <HStack spacing={variables.spacing}>
+        <div className={rowClassName}>
           <Text>Delete permanently</Text>
           <Spacer />
           <IconButton
@@ -94,7 +100,7 @@ const OrganizationSettingsPage = () => {
             aria-label=""
             onClick={() => setIsDeleteModalOpen(true)}
           />
-        </HStack>
+        </div>
         <EditName
           open={isNameModalOpen}
           organization={org}
@@ -115,7 +121,7 @@ const OrganizationSettingsPage = () => {
           organization={org}
           onClose={() => setIsDeleteModalOpen(false)}
         />
-      </Stack>
+      </div>
     </>
   )
 }

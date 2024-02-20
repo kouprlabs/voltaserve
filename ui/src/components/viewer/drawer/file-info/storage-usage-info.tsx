@@ -1,12 +1,6 @@
-import {
-  Progress,
-  Stack,
-  Stat,
-  StatLabel,
-  StatNumber,
-  Text,
-} from '@chakra-ui/react'
+import { Progress, Stat, StatLabel, StatNumber, Text } from '@chakra-ui/react'
 import { variables } from '@koupr/ui'
+import classNames from 'classnames'
 import { File } from '@/client/api/file'
 import StorageAPI from '@/client/api/storage'
 import prettyBytes from '@/helpers/pretty-bytes'
@@ -21,7 +15,7 @@ const StorageUsageInfo = ({ file }: StorageUsageInfoProps) => {
     <Stat>
       <StatLabel>Storage usage</StatLabel>
       <StatNumber fontSize={variables.bodyFontSize}>
-        <Stack spacing={variables.spacingXs}>
+        <div className={classNames('flex', 'flex-col', 'gap-0.5')}>
           {error && <Text color="red">Failed to load.</Text>}
           {data && !error && (
             <>
@@ -37,7 +31,7 @@ const StorageUsageInfo = ({ file }: StorageUsageInfoProps) => {
               <Progress size="sm" value={0} hasStripe />
             </>
           )}
-        </Stack>
+        </div>
       </StatNumber>
     </Stat>
   )

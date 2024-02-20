@@ -1,5 +1,4 @@
-import { useMemo } from 'react'
-import { Box, HStack } from '@chakra-ui/react'
+import classNames from 'classnames'
 import { SnapshotStatus } from '@/client/api/file'
 import { CommonItemProps } from '@/types/file'
 import ErrorBadge from './error-badge'
@@ -11,31 +10,35 @@ import Thumbnail from './thumbnail'
 
 type FileIconProps = CommonItemProps
 
-const FileIcon = ({ file, scale, viewType }: FileIconProps) => {
-  const { bottom, right } = useMemo(() => {
-    if (viewType === 'grid') {
-      return { bottom: '-5px', right: '0px' }
-    } else {
-      return { bottom: '-7px', right: '0px' }
-    }
-  }, [viewType])
-  if (file.thumbnail) {
-    return <Thumbnail file={file} scale={scale} />
-  } else {
-    return (
-      <Box position="relative">
+const FileIcon = ({ file, scale, viewType }: FileIconProps) => (
+  <>
+    {file.thumbnail ? (
+      <Thumbnail file={file} scale={scale} />
+    ) : (
+      <div className={classNames('relative')}>
         <FontIcon file={file} scale={scale} />
-        <HStack position="absolute" bottom={bottom} right={right} spacing="2px">
+        <div
+          className={classNames(
+            'absolute',
+            'flex',
+            'flex-row',
+            'items-center',
+            'gap-[2px]',
+            { 'bottom-[-5px]': viewType === 'grid' },
+            { 'bottom-[-7px]': viewType === 'list' },
+            'right-0',
+          )}
+        >
           {file.isShared ? <SharedBadge /> : null}
           {file.status === SnapshotStatus.New ? <NewBadge /> : null}
           {file.status === SnapshotStatus.Processing ? (
             <ProcessingBadge />
           ) : null}
           {file.status === SnapshotStatus.Error ? <ErrorBadge /> : null}
-        </HStack>
-      </Box>
-    )
-  }
-}
+        </div>
+      </div>
+    )}
+  </>
+)
 
 export default FileIcon

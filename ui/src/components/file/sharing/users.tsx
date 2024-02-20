@@ -3,7 +3,6 @@ import { Link, useParams } from 'react-router-dom'
 import {
   Text,
   Button,
-  Stack,
   Table,
   Thead,
   Tbody,
@@ -12,15 +11,13 @@ import {
   Td,
   IconButton,
   Badge,
-  Center,
-  HStack,
   Avatar,
-  VStack,
 } from '@chakra-ui/react'
 import { Spinner, variables } from '@koupr/ui'
 import { IconCheck, IconTrash, IconUserPlus } from '@koupr/ui'
 import { KeyedMutator, useSWRConfig } from 'swr'
 import { Select } from 'chakra-react-select'
+import classNames from 'classnames'
 import FileAPI, { List, UserPermission } from '@/client/api/file'
 import { geEditorPermission } from '@/client/api/permission'
 import { User } from '@/client/api/user'
@@ -115,11 +112,18 @@ const Users = ({ users, permissions, mutateUserPermissions }: UsersProps) => {
   )
 
   return (
-    <Stack direction="column" spacing={variables.spacing}>
+    <div className={classNames('flex', 'flex-col', 'gap-1.5')}>
       {!users ? <FormSkeleton /> : null}
       {users && users.length === 0 ? (
-        <Center>
-          <VStack spacing={variables.spacing}>
+        <div className={classNames('flex', 'items-center', 'justify-center')}>
+          <div
+            className={classNames(
+              'flex',
+              'flex-col',
+              'items-center',
+              'gap-1.5',
+            )}
+          >
             <Text>This organization has no members.</Text>
             {workspace &&
             geEditorPermission(workspace.organization.permission) ? (
@@ -131,11 +135,11 @@ const Users = ({ users, permissions, mutateUserPermissions }: UsersProps) => {
                 Invite Members
               </Button>
             ) : null}
-          </VStack>
-        </Center>
+          </div>
+        </div>
       ) : null}
       {users && users.length > 0 ? (
-        <Stack direction="column" spacing={variables.spacing}>
+        <div className={classNames('flex', 'flex-col', 'gap-1.5')}>
           <UserSelector
             value={activeUser}
             organizationId={workspace?.organization.id}
@@ -165,20 +169,24 @@ const Users = ({ users, permissions, mutateUserPermissions }: UsersProps) => {
           >
             Apply to User
           </Button>
-        </Stack>
+        </div>
       ) : null}
       {isSingleSelection ? (
         <>
           <hr />
           {!permissions ? (
-            <Center>
+            <div
+              className={classNames('flex', 'items-center', 'justify-center')}
+            >
               <Spinner />
-            </Center>
+            </div>
           ) : null}
           {permissions && permissions.length === 0 ? (
-            <Center>
+            <div
+              className={classNames('flex', 'items-center', 'justify-center')}
+            >
               <Text>Not shared with any users.</Text>
-            </Center>
+            </div>
           ) : null}
           {permissions && permissions.length > 0 ? (
             <>
@@ -194,7 +202,14 @@ const Users = ({ users, permissions, mutateUserPermissions }: UsersProps) => {
                   {permissions.map((p) => (
                     <Tr key={p.id}>
                       <Td p={variables.spacingSm}>
-                        <HStack spacing={variables.spacingSm}>
+                        <div
+                          className={classNames(
+                            'flex',
+                            'flex-row',
+                            'items-center',
+                            'gap-1',
+                          )}
+                        >
                           <Avatar
                             name={p.user.fullName}
                             src={p.user.picture}
@@ -202,11 +217,17 @@ const Users = ({ users, permissions, mutateUserPermissions }: UsersProps) => {
                             width="40px"
                             height="40px"
                           />
-                          <Stack spacing={variables.spacingXs}>
+                          <div
+                            className={classNames(
+                              'flex',
+                              'flex-col',
+                              'gap-0.5',
+                            )}
+                          >
                             <Text noOfLines={1}>{p.user.fullName}</Text>
                             <Text color="gray">{p.user.email}</Text>
-                          </Stack>
-                        </HStack>
+                          </div>
+                        </div>
                       </Td>
                       <Td>
                         <Badge>{p.permission}</Badge>
@@ -229,7 +250,7 @@ const Users = ({ users, permissions, mutateUserPermissions }: UsersProps) => {
           ) : null}
         </>
       ) : null}
-    </Stack>
+    </div>
   )
 }
 

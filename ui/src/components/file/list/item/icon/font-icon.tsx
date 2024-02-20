@@ -1,4 +1,3 @@
-import { useMemo } from 'react'
 import {
   FaFilePdf,
   FaFileExcel,
@@ -16,7 +15,7 @@ import {
   FaFileImage,
 } from 'react-icons/fa'
 import { File } from '@/client/api/file'
-import * as fileExtension from '@/helpers/file-extension'
+import * as fe from '@/helpers/file-extension'
 
 type FontIconProps = {
   file: File
@@ -26,147 +25,44 @@ type FontIconProps = {
 const SIZE = 72
 
 const FontIcon = ({ file, scale }: FontIconProps) => {
-  const size = useMemo(() => `${SIZE * scale}px`, [scale])
-  const isImage = useMemo(
-    () =>
-      file.original?.extension &&
-      fileExtension.isImage(file.original.extension),
-    [file.original],
-  )
-  const isPdf = useMemo(
-    () =>
-      file.original?.extension && fileExtension.isPDF(file.original.extension),
-    [file.original],
-  )
-  const isText = useMemo(
-    () =>
-      file.original?.extension && fileExtension.isText(file.original.extension),
-    [file.original],
-  )
-  const isRichText = useMemo(
-    () =>
-      file.original?.extension &&
-      fileExtension.isRichText(file.original.extension),
-    [file.original],
-  )
-  const isWord = useMemo(
-    () =>
-      file.original?.extension && fileExtension.isWord(file.original.extension),
-    [file.original],
-  )
-  const isPowerPoint = useMemo(
-    () =>
-      file.original?.extension &&
-      fileExtension.isPowerPoint(file.original.extension),
-    [file.original],
-  )
-  const isExcel = useMemo(
-    () =>
-      file.original?.extension &&
-      fileExtension.isExcel(file.original.extension),
-    [file.original],
-  )
-  const isDocument = useMemo(
-    () =>
-      file.original?.extension &&
-      fileExtension.isDocument(file.original.extension),
-    [file.original],
-  )
-  const isSpreadsheet = useMemo(
-    () =>
-      file.original?.extension &&
-      fileExtension.isSpreadsheet(file.original.extension),
-    [file.original],
-  )
-  const isSlides = useMemo(
-    () =>
-      file.original?.extension &&
-      fileExtension.isSlides(file.original.extension),
-    [file.original],
-  )
-  const isVideo = useMemo(
-    () =>
-      file.original?.extension &&
-      fileExtension.isVideo(file.original.extension),
-    [file.original],
-  )
-  const isAudio = useMemo(
-    () =>
-      file.original?.extension &&
-      fileExtension.isAudio(file.original.extension),
-    [file.original],
-  )
-  const isArchive = useMemo(
-    () =>
-      file.original?.extension &&
-      fileExtension.isArchive(file.original.extension),
-    [file.original],
-  )
-  const isFont = useMemo(
-    () =>
-      file.original?.extension && fileExtension.isFont(file.original.extension),
-    [file.original],
-  )
-  const isCode = useMemo(
-    () =>
-      file.original?.extension && fileExtension.isCode(file.original.extension),
-    [file.original],
-  )
-  const isCSV = useMemo(
-    () =>
-      file.original?.extension && fileExtension.isCSV(file.original.extension),
-    [file.original],
-  )
+  const size = `${SIZE * scale}px`
+  const { original } = file
 
-  if (isPdf) {
-    return <FaFilePdf fontSize={size} />
-  }
-  if (isImage) {
+  if (fe.isImage(original?.extension)) {
     return <FaFileImage fontSize={size} />
-  }
-  if (isText) {
+  } else if (fe.isPDF(original?.extension)) {
+    return <FaFilePdf fontSize={size} />
+  } else if (fe.isText(original?.extension)) {
     return <FaFileAlt fontSize={size} />
-  }
-  if (isWord) {
-    return <FaFileWord fontSize={size} />
-  }
-  if (isRichText) {
+  } else if (fe.isRichText(original?.extension)) {
     return <FaFileContract fontSize={size} />
-  }
-  if (isDocument) {
+  } else if (fe.isWord(original?.extension)) {
     return <FaFileWord fontSize={size} />
-  }
-  if (isExcel) {
-    return <FaFileExcel fontSize={size} />
-  }
-  if (isSpreadsheet) {
-    return <FaFileExcel fontSize={size} />
-  }
-  if (isPowerPoint) {
+  } else if (fe.isPowerPoint(original?.extension)) {
     return <FaFilePowerpoint fontSize={size} />
-  }
-  if (isSlides) {
+  } else if (fe.isExcel(original?.extension)) {
+    return <FaFileExcel fontSize={size} />
+  } else if (fe.isDocument(original?.extension)) {
+    return <FaFileWord fontSize={size} />
+  } else if (fe.isSpreadsheet(original?.extension)) {
+    return <FaFileExcel fontSize={size} />
+  } else if (fe.isSlides(original?.extension)) {
     return <FaFilePowerpoint fontSize={size} />
-  }
-  if (isArchive) {
-    return <FaFileArchive fontSize={size} />
-  }
-  if (isFont) {
-    return <FaFont fontSize={size} />
-  }
-  if (isAudio) {
-    return <FaFileAudio fontSize={size} />
-  }
-  if (isVideo) {
+  } else if (fe.isVideo(original?.extension)) {
     return <FaFileVideo fontSize={size} />
-  }
-  if (isCode) {
+  } else if (fe.isAudio(original?.extension)) {
+    return <FaFileAudio fontSize={size} />
+  } else if (fe.isArchive(original?.extension)) {
+    return <FaFileArchive fontSize={size} />
+  } else if (fe.isFont(original?.extension)) {
+    return <FaFont fontSize={size} />
+  } else if (fe.isCode(original?.extension)) {
     return <FaFileCode fontSize={size} />
-  }
-  if (isCSV) {
+  } else if (fe.isCSV(original?.extension)) {
     return <FaFileCsv fontSize={size} />
+  } else {
+    return <FaFile fontSize={size} />
   }
-  return <FaFile fontSize={size} />
 }
 
 export default FontIcon

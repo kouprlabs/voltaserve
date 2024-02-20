@@ -12,7 +12,6 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
-  Stack,
   Text,
 } from '@chakra-ui/react'
 import { variables } from '@koupr/ui'
@@ -26,6 +25,7 @@ import {
   FormikHelpers,
 } from 'formik'
 import * as Yup from 'yup'
+import classNames from 'classnames'
 import WorkspaceAPI, { Workspace } from '@/client/api/workspace'
 
 type DeleteProps = {
@@ -86,7 +86,7 @@ const Delete = ({ open, workspace, onClose }: DeleteProps) => {
           {({ errors, touched, isSubmitting }) => (
             <Form>
               <ModalBody>
-                <Stack direction="column" spacing={variables.spacing}>
+                <div className={classNames('flex', 'flex-col', 'gap-1.5')}>
                   <Text>
                     Are you sure you would like to delete this workspace?
                   </Text>
@@ -103,7 +103,7 @@ const Delete = ({ open, workspace, onClose }: DeleteProps) => {
                       </FormControl>
                     )}
                   </Field>
-                </Stack>
+                </div>
               </ModalBody>
               <ModalFooter>
                 <Button

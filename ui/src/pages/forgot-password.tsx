@@ -4,11 +4,9 @@ import {
   Button,
   FormControl,
   FormErrorMessage,
-  HStack,
   Input,
   Link as ChakraLink,
   Text,
-  VStack,
   Heading,
 } from '@chakra-ui/react'
 import { variables } from '@koupr/ui'
@@ -21,6 +19,7 @@ import {
   FormikHelpers,
 } from 'formik'
 import * as Yup from 'yup'
+import classNames from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import AccountAPI from '@/client/idp/account'
 import Logo from '@/components/common/logo'
@@ -61,8 +60,18 @@ const ForgotPasswordPage = () => {
         <Helmet>
           <title>Forgot Password</title>
         </Helmet>
-        <VStack spacing="25px" w="100%">
-          <Logo className="w-16" isGlossy={true} />
+        <div
+          className={classNames(
+            'flex',
+            'flex-col',
+            'items-center',
+            'gap-2.5',
+            'w-full',
+          )}
+        >
+          <div className="w-16">
+            <Logo isGlossy={true} />
+          </div>
           <Heading fontSize={variables.headingFontSize}>
             Forgot Password
           </Heading>
@@ -87,7 +96,14 @@ const ForgotPasswordPage = () => {
               >
                 {({ errors, touched, isSubmitting }) => (
                   <Form className="w-full">
-                    <VStack spacing={variables.spacing}>
+                    <div
+                      className={classNames(
+                        'flex',
+                        'flex-col',
+                        'items-center',
+                        'gap-1.5',
+                      )}
+                    >
                       <Field name="email">
                         {({ field }: FieldAttributes<FieldProps>) => (
                           <FormControl
@@ -114,19 +130,26 @@ const ForgotPasswordPage = () => {
                       >
                         Send Password Recovery Instructions
                       </Button>
-                    </VStack>
+                    </div>
                   </Form>
                 )}
               </Formik>
-              <HStack spacing={variables.spacingXs}>
+              <div
+                className={classNames(
+                  'flex',
+                  'flex-row',
+                  'items-center',
+                  'gap-0.5',
+                )}
+              >
                 <Text>Password recovered?</Text>
                 <ChakraLink as={Link} to="/sign-in">
                   Sign In
                 </ChakraLink>
-              </HStack>
+              </div>
             </>
           )}
-        </VStack>
+        </div>
       </>
     </FullLayout>
   )

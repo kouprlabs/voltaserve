@@ -3,10 +3,10 @@ import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
-  HStack,
   Skeleton,
   Text,
 } from '@chakra-ui/react'
+import classNames from 'classnames'
 import FileAPI from '@/client/api/file'
 import TruncatedText from './truncated-text'
 
@@ -64,13 +64,21 @@ const Path = ({ rootId, fileId, maxCharacters, onClick }: PathProps) => {
         </Breadcrumb>
       ) : null}
       {isLoading ? (
-        <HStack flexShrink={0}>
+        <div
+          className={classNames(
+            'flex',
+            'flex-row',
+            'items-center',
+            'gap-0.5',
+            'flex-shrink-0',
+          )}
+        >
           <Skeleton w="100px" h="20px" borderRadius="20px" />
           <Text>/</Text>
           <Skeleton w="100px" h="20px" borderRadius="20px" />
           <Text>/</Text>
           <Skeleton w="100px" h="20px" borderRadius="20px" />
-        </HStack>
+        </div>
       ) : null}
     </>
   )

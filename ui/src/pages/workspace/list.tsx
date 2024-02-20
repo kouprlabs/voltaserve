@@ -8,7 +8,6 @@ import {
 import {
   Heading,
   Link as ChakraLink,
-  Stack,
   Table,
   Tbody,
   Td,
@@ -16,9 +15,6 @@ import {
   Thead,
   Tr,
   Text,
-  HStack,
-  Center,
-  VStack,
   Avatar,
   Badge,
 } from '@chakra-ui/react'
@@ -28,6 +24,7 @@ import {
   variables,
   usePagePagination,
 } from '@koupr/ui'
+import classNames from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import WorkspaceAPI, { SortOrder } from '@/client/api/workspace'
 import { swrConfig } from '@/client/options'
@@ -64,27 +61,44 @@ const WorkspaceListPage = () => {
       <Helmet>
         <title>Workspaces</title>
       </Helmet>
-      <Stack
-        direction="column"
-        spacing={variables.spacing2Xl}
-        pb={variables.spacing2Xl}
-      >
+      <div className={classNames('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
         <Heading fontSize={variables.headingFontSize} pl={variables.spacingMd}>
           Workspaces
         </Heading>
         {!list && error && (
-          <Center h="300px">
+          <div
+            className={classNames(
+              'flex',
+              'items-center',
+              'justify-center',
+              'h-[300px]',
+            )}
+          >
             <Text>Failed to load workspaces.</Text>
-          </Center>
+          </div>
         )}
         {!list && !error && <SectionSpinner />}
         {list && list.data.length === 0 && !error ? (
-          <Center h="300px">
-            <VStack spacing={variables.spacing}>
+          <div
+            className={classNames(
+              'flex',
+              'items-center',
+              'justify-center',
+              'h-[300px]',
+            )}
+          >
+            <div
+              className={classNames(
+                'flex',
+                'flex-col',
+                'gap-1.5',
+                'items-center',
+              )}
+            >
               <Text>There are no workspaces.</Text>
               <CreateWorkspaceButton />
-            </VStack>
-          </Center>
+            </div>
+          </div>
         ) : null}
         {list && list.data.length > 0 && (
           <Table variant="simple">
@@ -100,7 +114,14 @@ const WorkspaceListPage = () => {
               {list.data.map((w) => (
                 <Tr key={w.id}>
                   <Td>
-                    <HStack spacing={variables.spacing}>
+                    <div
+                      className={classNames(
+                        'flex',
+                        'flex-row',
+                        'gap-1.5',
+                        'items-center',
+                      )}
+                    >
                       <Avatar
                         name={w.name}
                         size="sm"
@@ -114,7 +135,7 @@ const WorkspaceListPage = () => {
                       >
                         <Text>{w.name}</Text>
                       </ChakraLink>
-                    </HStack>
+                    </div>
                   </Td>
                   <Td>
                     <ChakraLink
@@ -146,7 +167,7 @@ const WorkspaceListPage = () => {
             setSize={setSize}
           />
         )}
-      </Stack>
+      </div>
     </>
   )
 }

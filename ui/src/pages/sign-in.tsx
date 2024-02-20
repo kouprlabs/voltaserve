@@ -2,14 +2,11 @@ import { useCallback } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {
   Button,
-  Container,
   FormControl,
   FormErrorMessage,
-  HStack,
   Input,
   Link as ChakraLink,
   Text,
-  VStack,
   Heading,
 } from '@chakra-ui/react'
 import { variables } from '@koupr/ui'
@@ -22,6 +19,7 @@ import {
   FormikHelpers,
 } from 'formik'
 import * as Yup from 'yup'
+import classNames from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import GroupAPI from '@/client/api/group'
 import OrganizationAPI from '@/client/api/organization'
@@ -96,8 +94,18 @@ const SignInPage = () => {
         <Helmet>
           <title>Sign In to Voltaserve</title>
         </Helmet>
-        <VStack spacing="25px" w="100%">
-          <Logo className="w-16" isGlossy={true} />
+        <div
+          className={classNames(
+            'flex',
+            'flex-col',
+            'items-center',
+            'gap-2.5',
+            'w-full',
+          )}
+        >
+          <div className="w-16">
+            <Logo isGlossy={true} />
+          </div>
           <Heading fontSize={variables.headingFontSize}>
             Sign In to Voltaserve
           </Heading>
@@ -112,7 +120,14 @@ const SignInPage = () => {
           >
             {({ errors, touched, isSubmitting }) => (
               <Form className="w-full">
-                <VStack spacing={variables.spacing}>
+                <div
+                  className={classNames(
+                    'flex',
+                    'flex-col',
+                    'items-center',
+                    'gap-1.5',
+                  )}
+                >
                   <Field name="email">
                     {({ field }: FieldAttributes<FieldProps>) => (
                       <FormControl
@@ -155,25 +170,46 @@ const SignInPage = () => {
                   >
                     Sign In
                   </Button>
-                </VStack>
+                </div>
               </Form>
             )}
           </Formik>
-          <Container centerContent>
-            <HStack spacing={variables.spacingXs}>
+          <div
+            className={classNames(
+              'flex',
+              'flex-col',
+              'items-center',
+              'max-w-[60ch]',
+            )}
+          >
+            <div
+              className={classNames(
+                'flex',
+                'flex-row',
+                'items-center',
+                'gap-0.5',
+              )}
+            >
               <Text>{"Don't have an account yet?"}</Text>
               <ChakraLink as={Link} to="/sign-up">
                 Sign Up
               </ChakraLink>
-            </HStack>
-            <HStack spacing={variables.spacingXs}>
+            </div>
+            <div
+              className={classNames(
+                'flex',
+                'flex-row',
+                'items-center',
+                'gap-0.5',
+              )}
+            >
               <Text>Cannot sign in?</Text>
               <ChakraLink as={Link} to="/forgot-password">
                 Reset Password
               </ChakraLink>
-            </HStack>
-          </Container>
-        </VStack>
+            </div>
+          </div>
+        </div>
       </>
     </FullLayout>
   )

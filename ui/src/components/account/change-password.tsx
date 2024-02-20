@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import {
   Button,
   FormControl,
@@ -11,7 +11,6 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
-  Stack,
 } from '@chakra-ui/react'
 import { variables } from '@koupr/ui'
 import { useSWRConfig } from 'swr'
@@ -24,6 +23,7 @@ import {
   FormikHelpers,
 } from 'formik'
 import * as Yup from 'yup'
+import classNames from 'classnames'
 import UserAPI, { User } from '@/client/idp/user'
 
 type ChangePasswordProps = {
@@ -90,7 +90,7 @@ const ChangePassword = ({ open, onClose }: ChangePasswordProps) => {
           {({ errors, touched, isSubmitting }) => (
             <Form>
               <ModalBody>
-                <Stack spacing={variables.spacing}>
+                <div className={classNames('flex', 'flex-col', 'gap-1.5')}>
                   <Field name="currentPassword">
                     {({ field }: FieldAttributes<FieldProps>) => (
                       <FormControl
@@ -133,7 +133,7 @@ const ChangePassword = ({ open, onClose }: ChangePasswordProps) => {
                       </FormControl>
                     )}
                   </Field>
-                </Stack>
+                </div>
               </ModalBody>
               <ModalFooter>
                 <Button
