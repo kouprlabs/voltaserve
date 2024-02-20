@@ -91,9 +91,10 @@ const WorkspaceFilesPage = () => {
             rootId={workspace.rootId}
             fileId={fileId}
             maxCharacters={30}
-            onClick={(fileId) =>
+            onClick={(fileId) => {
+              dispatch(selectionUpdated([]))
               navigate(`/workspace/${workspace.id}/file/${fileId}`)
-            }
+            }}
           />
         ) : null}
         <Toolbar list={list} />
