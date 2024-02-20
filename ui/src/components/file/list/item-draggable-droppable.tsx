@@ -123,7 +123,7 @@ const ItemDraggableDroppable = ({
             'border-2',
             'rounded-md',
             { 'visible': isVisible },
-            { 'hidden': !isVisible },
+            { 'invisible': !isVisible },
           )}
           style={{ borderColor: isOver ? green : 'transparent' }}
           _hover={{ outline: 'none' }}

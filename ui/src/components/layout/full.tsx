@@ -31,9 +31,7 @@ const FullLayout = ({ children }: FullLayoutProps) => {
         'flex',
         'flex-col',
         'items-center',
-        'max-w-[60ch]',
         'w-full',
-        'md:w-400',
         'h-[100vh]',
       )}
     >
@@ -42,8 +40,11 @@ const FullLayout = ({ children }: FullLayoutProps) => {
           'flex',
           'items-center',
           'justify-center',
-          'h-full',
           'w-full',
+          'md:w-[400px]',
+          'h-full',
+          'p-2',
+          'md:p-0',
         )}
       >
         {children}
