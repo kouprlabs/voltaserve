@@ -25,7 +25,7 @@ import {
 import * as Yup from 'yup'
 import classNames from 'classnames'
 import GroupAPI, { Group } from '@/client/api/group'
-import UserAPI from '@/client/api/user'
+import UserAPI, { User } from '@/client/api/user'
 import UserSelector from '../common/user-selector'
 
 type AddMemberProps = {
@@ -42,6 +42,7 @@ const AddMember = ({ group, open, onClose }: AddMemberProps) => {
   const navigate = useNavigate()
   const { mutate } = useSWRConfig()
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [activeUser, setActiveUser] = useState<User>()
   const formSchema = Yup.object().shape({
     userId: Yup.string().required('User is required'),
   })
@@ -106,12 +107,14 @@ const AddMember = ({ group, open, onClose }: AddMemberProps) => {
                         }
                       >
                         <UserSelector
+                          value={activeUser}
                           organizationId={group.organization.id}
                           groupId={group.id}
                           nonGroupMembersOnly={true}
-                          onConfirm={(value) =>
+                          onConfirm={(value) => {
+                            setActiveUser(value)
                             setFieldValue(field.name, value.id)
-                          }
+                          }}
                         />
                         <FormErrorMessage>{errors.userId}</FormErrorMessage>
                       </FormControl>
