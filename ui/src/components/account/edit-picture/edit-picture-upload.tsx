@@ -75,20 +75,24 @@ const EditPictureUpload = ({
         {src || initialValue ? (
           <div className={classNames('relative', 'w-[400px]', 'h-[160px]')}>
             <Image
-              w="400px"
-              h="160px"
-              objectFit="cover"
               src={src || initialValue || ''}
-              className="rounded"
+              className={classNames(
+                'rounded',
+                'w-[400px]',
+                'h-[160px]',
+                'object-cover',
+              )}
               alt="Account picture"
             />
             <IconButton
               icon={<IconEdit />}
               variant="solid-gray"
-              top="10px"
-              right="5px"
-              position="absolute"
-              zIndex={1000}
+              className={classNames(
+                'top-[10px',
+                'right-[5px]',
+                'absolute',
+                'z-[1000]',
+              )}
               aria-label=""
               disabled={disabled}
               onClick={handleEdit}
