@@ -5,7 +5,7 @@ import classNames from 'classnames'
 import InvitationAPI, { Invitation } from '@/client/api/invitation'
 import userToString from '@/helpers/user-to-string'
 
-type NewInvitationProps = {
+export type NewInvitationProps = {
   invitation: Invitation
 }
 

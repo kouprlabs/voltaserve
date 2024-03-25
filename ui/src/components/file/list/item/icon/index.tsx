@@ -4,7 +4,7 @@ import { FileCommonProps } from '@/types/file'
 import IconFile from './icon-file'
 import IconFolder from './icon-folder'
 
-type ItemIconProps = {
+export type ItemIconProps = {
   isLoading?: boolean
 } & FileCommonProps
 

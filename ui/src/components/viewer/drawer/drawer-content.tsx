@@ -6,7 +6,7 @@ import DrawerDownloadButton from './drawer-download-button'
 import DrawerOpenNewTabButton from './drawer-open-new-tab-button'
 import DrawerFileInfo from './file-info'
 
-type DrawerContentProps = {
+export type DrawerContentProps = {
   file: File
 }
 

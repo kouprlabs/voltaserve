@@ -5,7 +5,7 @@ import { File } from '@/client/api/file'
 import StorageAPI from '@/client/api/storage'
 import prettyBytes from '@/helpers/pretty-bytes'
 
-type FileInfoStorageUsageProps = {
+export type FileInfoStorageUsageProps = {
   file: File
 }
 

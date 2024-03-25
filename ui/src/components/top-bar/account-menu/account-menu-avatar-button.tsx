@@ -6,7 +6,7 @@ import { useAppSelector } from '@/store/hook'
 import { NavType } from '@/store/ui/nav'
 import AccountMenuActiveCircle from './account-menu-active-circle'
 
-type AccountMenuAvatarButtonProps = {
+export type AccountMenuAvatarButtonProps = {
   user: User
 }
 

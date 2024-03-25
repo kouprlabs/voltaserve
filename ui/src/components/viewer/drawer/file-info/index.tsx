@@ -8,7 +8,7 @@ import FileInfoSize from './file-info-size'
 import FileInfoStorageUsage from './file-info-storage-usage'
 import FileInfoUpdateTime from './file-info-update-time'
 
-type DrawerFileInfoProps = {
+export type DrawerFileInfoProps = {
   file: File
 }
 

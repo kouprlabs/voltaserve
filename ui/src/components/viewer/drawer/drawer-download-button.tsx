@@ -4,7 +4,7 @@ import { IconDownload } from '@koupr/ui'
 import { File } from '@/client/api/file'
 import downloadFile from '@/helpers/download-file'
 
-type DrawerDownloadButtonProps = {
+export type DrawerDownloadButtonProps = {
   file: File
   isCollapsed?: boolean
 }

@@ -27,7 +27,7 @@ import * as Yup from 'yup'
 import classNames from 'classnames'
 import GroupAPI, { Group } from '@/client/api/group'
 
-type GroupDeleteProps = {
+export type GroupDeleteProps = {
   open: boolean
   group: Group
   onClose?: () => void

@@ -10,7 +10,7 @@ import classNames from 'classnames'
 import FileAPI from '@/client/api/file'
 import TruncatedText from './truncated-text'
 
-type PathProps = {
+export type PathProps = {
   rootId: string
   fileId: string
   maxCharacters?: number

@@ -26,7 +26,7 @@ import { sharingModalDidClose } from '@/store/ui/files'
 import SharingGroups from './sharing-groups'
 import SharingUsers from './sharing-users'
 
-type FileSharingProps = {
+export type FileSharingProps = {
   list: List
 }
 

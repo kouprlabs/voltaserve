@@ -28,7 +28,7 @@ import * as Yup from 'yup'
 import classNames from 'classnames'
 import OrganizationAPI, { Organization } from '@/client/api/organization'
 
-type OrganizationDeleteProps = {
+export type OrganizationDeleteProps = {
   open: boolean
   organization: Organization
   onClose?: () => void

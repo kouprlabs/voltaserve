@@ -24,7 +24,7 @@ import UserAPI, { SortOrder, User } from '@/client/api/user'
 import { swrConfig } from '@/client/options'
 import userToString from '@/helpers/user-to-string'
 
-type UserSelectorProps = {
+export type UserSelectorProps = {
   value?: User
   organizationId?: string
   groupId?: string

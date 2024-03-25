@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { Link as ChakraLink, useColorModeValue } from '@chakra-ui/react'
 import { variables } from '@koupr/ui'
 
-type TopBarItemProps = {
+export type TopBarItemProps = {
   title: string
   href: string
   isActive: boolean

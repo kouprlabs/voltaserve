@@ -41,7 +41,7 @@ export function getThumbnailHeight(file: File, scale: number): string {
   }
 }
 
-type IconThumbnailProps = {
+export type IconThumbnailProps = {
   file: File
   scale: number
 }

@@ -17,7 +17,7 @@ import {
 import { File } from '@/client/api/file'
 import * as fe from '@/helpers/file-extension'
 
-type IconFontProps = {
+export type IconFontProps = {
   file: File
   scale: number
 }

@@ -28,7 +28,7 @@ import GroupAPI, { Group } from '@/client/api/group'
 import UserAPI, { User } from '@/client/api/user'
 import UserSelector from '../common/user-selector'
 
-type GroupAddMemberProps = {
+export type GroupAddMemberProps = {
   open: boolean
   group: Group
   onClose?: () => void

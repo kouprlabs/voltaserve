@@ -15,7 +15,7 @@ import GroupAPI, { Group } from '@/client/api/group'
 import { User } from '@/client/idp/user'
 import userToString from '@/helpers/user-to-string'
 
-type GroupRemoveMemberProps = {
+export type GroupRemoveMemberProps = {
   group: Group
   user: User
   isOpen: boolean

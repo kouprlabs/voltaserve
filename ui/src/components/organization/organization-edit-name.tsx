@@ -25,7 +25,7 @@ import {
 import * as Yup from 'yup'
 import OrganizationAPI, { Organization } from '@/client/api/organization'
 
-type OrganizationEditNameProps = {
+export type OrganizationEditNameProps = {
   open: boolean
   organization: Organization
   onClose?: () => void

@@ -25,7 +25,7 @@ import {
 import * as Yup from 'yup'
 import WorkspaceAPI, { Workspace } from '@/client/api/workspace'
 
-type WorkspaceEditNameProps = {
+export type WorkspaceEditNameProps = {
   open: boolean
   workspace: Workspace
   onClose?: () => void

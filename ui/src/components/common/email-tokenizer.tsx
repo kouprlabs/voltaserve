@@ -3,7 +3,7 @@ import { Tag, Wrap, WrapItem } from '@chakra-ui/react'
 import { variables } from '@koupr/ui'
 import parseEmailList from '@/helpers/parse-email-list'
 
-type EmailTokenizerProps = {
+export type EmailTokenizerProps = {
   value: string
 }
 

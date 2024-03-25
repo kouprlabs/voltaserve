@@ -28,7 +28,7 @@ import * as Yup from 'yup'
 import classNames from 'classnames'
 import WorkspaceAPI, { Workspace } from '@/client/api/workspace'
 
-type WorkspaceDeleteProps = {
+export type WorkspaceDeleteProps = {
   open: boolean
   workspace: Workspace
   onClose?: () => void

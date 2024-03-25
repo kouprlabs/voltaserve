@@ -6,7 +6,7 @@ import {
 } from '@chakra-ui/react'
 import { User } from '@/client/idp/user'
 
-type UserAvatarProps = {
+export type UserAvatarProps = {
   user?: User
   size: string
 }

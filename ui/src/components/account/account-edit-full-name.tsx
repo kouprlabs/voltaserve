@@ -25,7 +25,7 @@ import {
 import * as Yup from 'yup'
 import UserAPI, { User } from '@/client/idp/user'
 
-type AccountEditFullNameProps = {
+export type AccountEditFullNameProps = {
   open: boolean
   user: User
   onClose?: () => void

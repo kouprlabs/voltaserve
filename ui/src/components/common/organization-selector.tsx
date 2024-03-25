@@ -26,7 +26,7 @@ import OrganizationAPI, {
 } from '@/client/api/organization'
 import { swrConfig } from '@/client/options'
 
-type OrganizationSelectorProps = {
+export type OrganizationSelectorProps = {
   onConfirm?: (organization: Organization) => void
 }
 

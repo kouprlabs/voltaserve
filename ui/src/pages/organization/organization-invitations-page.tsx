@@ -1,7 +1,6 @@
 import { useCallback, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import {
-  Badge,
   Button,
   IconButton,
   Menu,
@@ -29,31 +28,14 @@ import {
 } from '@koupr/ui'
 import classNames from 'classnames'
 import { Helmet } from 'react-helmet-async'
-import InvitationAPI, {
-  InvitationStatus,
-  SortBy,
-  SortOrder,
-} from '@/client/api/invitation'
+import InvitationAPI, { SortBy, SortOrder } from '@/client/api/invitation'
 import OrganizationAPI from '@/client/api/organization'
 import { geEditorPermission } from '@/client/api/permission'
 import { swrConfig } from '@/client/options'
 import OrganizationInviteMembers from '@/components/organization/organization-invite-members'
+import OrganizationStatus from '@/components/organization/organization-status'
 import prettyDate from '@/helpers/pretty-date'
 import { outgoingInvitationPaginationStorage } from '@/infra/pagination'
-
-type StatusProps = {
-  value: InvitationStatus
-}
-
-const Status = ({ value }: StatusProps) => {
-  let colorScheme
-  if (value === 'accepted') {
-    colorScheme = 'green'
-  } else if (value === 'declined') {
-    colorScheme = 'red'
-  }
-  return <Badge colorScheme={colorScheme}>{value}</Badge>
-}
 
 const OrganizationInvitationsPage = () => {
   const navigate = useNavigate()
@@ -173,7 +155,7 @@ const OrganizationInvitationsPage = () => {
                 <Tr key={i.id}>
                   <Td>{i.email}</Td>
                   <Td>
-                    <Status value={i.status} />
+                    <OrganizationStatus value={i.status} />
                   </Td>
                   <Td>{prettyDate(i.createTime)}</Td>
                   <Td textAlign="right">

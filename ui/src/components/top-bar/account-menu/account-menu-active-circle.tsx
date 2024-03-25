@@ -4,7 +4,7 @@ import { variables } from '@koupr/ui'
 import { useAppSelector } from '@/store/hook'
 import { NavType } from '@/store/ui/nav'
 
-type AccountMenuActiveCircleProps = {
+export type AccountMenuActiveCircleProps = {
   children?: ReactNode
 }
 

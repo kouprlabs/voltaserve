@@ -24,7 +24,7 @@ import {
 } from '@/store/entities/uploads'
 import { useAppDispatch } from '@/store/hook'
 
-type UploadItemProps = {
+export type UploadItemProps = {
   upload: Upload
 }
 

@@ -14,7 +14,7 @@ import FileAPI, { File, FileType } from '@/client/api/file'
 import WorkspaceAPI from '@/client/api/workspace'
 import Path from '@/components/common/path'
 
-type FileBrowseProps = {
+export type FileBrowseProps = {
   onChange?: (id: string) => void
 }
 

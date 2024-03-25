@@ -25,7 +25,7 @@ import {
 import * as Yup from 'yup'
 import GroupAPI, { Group } from '@/client/api/group'
 
-type GroupEditNameProps = {
+export type GroupEditNameProps = {
   open: boolean
   group: Group
   onClose?: () => void

@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { File } from '@/client/api/file'
 import { getAccessTokenOrRedirect } from '@/infra/token'
 
-type ViewerPDFProps = {
+export type ViewerPDFProps = {
   file: File
 }
 

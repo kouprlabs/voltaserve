@@ -3,7 +3,7 @@ import { variables } from '@koupr/ui'
 import { File } from '@/client/api/file'
 import prettyDate from '@/helpers/pretty-date'
 
-type FileInfoUpdateTimeProps = {
+export type FileInfoUpdateTimeProps = {
   file: File
 }
 

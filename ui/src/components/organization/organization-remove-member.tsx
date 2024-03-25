@@ -15,7 +15,7 @@ import OrganizationAPI, { Organization } from '@/client/api/organization'
 import { User } from '@/client/idp/user'
 import userToString from '@/helpers/user-to-string'
 
-type OrganizationRemoveMemberProps = {
+export type OrganizationRemoveMemberProps = {
   organization: Organization
   user: User
   isOpen: boolean

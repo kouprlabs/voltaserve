@@ -69,7 +69,7 @@ const ICON_SCALE_SLIDER_STEP = 0.25
 const ICON_SCALE_SLIDER_MIN = 1
 const ICON_SCALE_SLIDER_MAX = ICON_SCALE_SLIDER_STEP * 9
 
-type FileToolbarProps = {
+export type FileToolbarProps = {
   list?: List
 }
 

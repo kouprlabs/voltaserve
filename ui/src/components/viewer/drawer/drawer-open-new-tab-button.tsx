@@ -3,7 +3,7 @@ import { Button, IconButton } from '@chakra-ui/react'
 import { IconExternalLink, variables } from '@koupr/ui'
 import { File } from '@/client/api/file'
 
-type DrawerOpenNewTabButtonProps = {
+export type DrawerOpenNewTabButtonProps = {
   file: File
   isCollapsed?: boolean
 }

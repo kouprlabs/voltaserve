@@ -30,7 +30,7 @@ import InvitationAPI from '@/client/api/invitation'
 import EmailTokenizer from '@/components/common/email-tokenizer'
 import parseEmailList from '@/helpers/parse-email-list'
 
-type OrganizationInviteMembersProps = {
+export type OrganizationInviteMembersProps = {
   open: boolean
   id: string
   onClose?: () => void

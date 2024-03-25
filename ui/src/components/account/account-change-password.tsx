@@ -26,7 +26,7 @@ import * as Yup from 'yup'
 import classNames from 'classnames'
 import UserAPI, { User } from '@/client/idp/user'
 
-type AccountChangePasswordProps = {
+export type AccountChangePasswordProps = {
   open: boolean
   user: User
   onClose?: () => void

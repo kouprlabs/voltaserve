@@ -27,7 +27,7 @@ import * as Yup from 'yup'
 import classNames from 'classnames'
 import UserAPI from '@/client/idp/user'
 
-type AccountDeleteProps = {
+export type AccountDeleteProps = {
   open: boolean
   onClose?: () => void
 }

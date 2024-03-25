@@ -30,7 +30,7 @@ import { sharingModalDidClose } from '@/store/ui/files'
 import reactSelectStyles from '@/styles/react-select'
 import SharingFormSkeleton from './sharing-form-skeleton'
 
-type SharingUsersProps = {
+export type SharingUsersProps = {
   users?: User[]
   permissions?: UserPermission[]
   mutateUserPermissions: KeyedMutator<UserPermission[]>

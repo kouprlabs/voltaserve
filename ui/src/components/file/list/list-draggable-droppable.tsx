@@ -19,7 +19,7 @@ import { hiddenUpdated, selectionUpdated } from '@/store/ui/files'
 import { FileCommonProps } from '@/types/file'
 import ListItem from './item'
 
-type ListDraggableDroppableProps = {
+export type ListDraggableDroppableProps = {
   onContextMenu?: (event: MouseEvent) => void
 } & FileCommonProps
 

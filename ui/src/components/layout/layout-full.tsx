@@ -4,7 +4,7 @@ import classNames from 'classnames'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { errorCleared } from '@/store/ui/error'
 
-type LayoutFullProps = {
+export type LayoutFullProps = {
   children?: ReactNode
 }
 

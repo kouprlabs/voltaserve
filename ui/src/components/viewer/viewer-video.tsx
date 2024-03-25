@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { File } from '@/client/api/file'
 import { getAccessTokenOrRedirect } from '@/infra/token'
 
-type ViewerVideoProps = {
+export type ViewerVideoProps = {
   file: File
 }
 

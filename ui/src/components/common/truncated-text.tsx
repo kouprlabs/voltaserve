@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { Text } from '@chakra-ui/react'
 
-type TruncateTextProps = {
+export type TruncateTextProps = {
   text: string
   maxCharacters: number
 }

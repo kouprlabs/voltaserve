@@ -4,7 +4,7 @@ import classNames from 'classnames'
 import { File } from '@/client/api/file'
 import { getAccessTokenOrRedirect } from '@/infra/token'
 
-type ViewerImageProps = {
+export type ViewerImageProps = {
   file: File
 }
 

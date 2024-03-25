@@ -26,7 +26,7 @@ import classNames from 'classnames'
 import UserAPI, { User } from '@/client/idp/user'
 import EditPictureUpload from './edit-picture-upload'
 
-type AccountEditPictureProps = {
+export type AccountEditPictureProps = {
   open: boolean
   user: User
   onClose?: () => void

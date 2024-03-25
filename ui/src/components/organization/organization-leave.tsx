@@ -14,7 +14,7 @@ import {
 import { variables } from '@koupr/ui'
 import OrganizationAPI from '@/client/api/organization'
 
-type OrganizationLeaveProps = {
+export type OrganizationLeaveProps = {
   open: boolean
   id: string
   onClose?: () => void

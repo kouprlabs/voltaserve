@@ -29,7 +29,7 @@ import { sharingModalDidClose } from '@/store/ui/files'
 import reactSelectStyles from '@/styles/react-select'
 import SharingFormSkeleton from './sharing-form-skeleton'
 
-type SharingGroupsProps = {
+export type SharingGroupsProps = {
   groups?: Group[]
   permissions?: GroupPermission[]
   mutateGroupPermissions: KeyedMutator<GroupPermission[]>

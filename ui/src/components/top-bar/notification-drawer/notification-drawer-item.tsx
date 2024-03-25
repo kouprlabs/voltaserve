@@ -2,7 +2,7 @@ import { Invitation } from '@/client/api/invitation'
 import { Notification } from '@/client/api/notification'
 import NotificationDrawerNewInvitationItem from './notification-drawer-new-Invitation-item'
 
-type NotificationDrawerItemProps = {
+export type NotificationDrawerItemProps = {
   notification: Notification
 }
 

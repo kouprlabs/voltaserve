@@ -9,7 +9,7 @@ import {
 import { IconEdit } from '@koupr/ui'
 import classNames from 'classnames'
 
-type EditPictureUploadProps = {
+export type EditPictureUploadProps = {
   name: string
   initialValue?: string
   disabled: boolean

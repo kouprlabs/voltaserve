@@ -24,7 +24,7 @@ import { FileCommonProps, FileViewType } from '@/types/file'
 import ItemIcon from './icon'
 import { performMultiSelect, performRangeSelect } from './item-perform-select'
 
-type ListItemProps = {
+export type ListItemProps = {
   onContextMenu?: (event: MouseEvent) => void
 } & FileCommonProps
 

@@ -28,7 +28,7 @@ import WorkspaceAPI, { Workspace } from '@/client/api/workspace'
 import { swrConfig } from '@/client/options'
 import StorageInput from '@/components/common/storage-input'
 
-type WorkspaceEditStorageCapacityProps = {
+export type WorkspaceEditStorageCapacityProps = {
   open: boolean
   workspace: Workspace
   onClose?: () => void

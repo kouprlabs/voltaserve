@@ -23,7 +23,7 @@ import classNames from 'classnames'
 import GroupAPI, { Group, SortOrder } from '@/client/api/group'
 import { swrConfig } from '@/client/options'
 
-type GroupSelectorProps = {
+export type GroupSelectorProps = {
   value?: Group
   organizationId?: string
   onConfirm?: (group: Group) => void

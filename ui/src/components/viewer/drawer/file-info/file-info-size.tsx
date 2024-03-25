@@ -3,7 +3,7 @@ import { variables } from '@koupr/ui'
 import { File } from '@/client/api/file'
 import prettyBytes from '@/helpers/pretty-bytes'
 
-type FileInfoSizeProps = {
+export type FileInfoSizeProps = {
   file: File
 }
 
