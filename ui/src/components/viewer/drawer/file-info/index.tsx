@@ -1,32 +1,32 @@
 import classNames from 'classnames'
 import { File } from '@/client/api/file'
-import CreateTimeInfo from './create-time-info'
-import ExtensionInfo from './extension-info'
-import ImageInfo from './image-info'
-import PermissionInfo from './permission-info'
-import SizeInfo from './size-info'
-import StorageUsageInfo from './storage-usage-info'
-import UpdateTimeInfo from './update-time-info'
+import FileInfoCreateTime from './file-info-create-time'
+import FileInfoExtension from './file-info-extension'
+import FileInfoImage from './file-info-image'
+import FileInfoPermission from './file-info-permission'
+import FileInfoSize from './file-info-size'
+import FileInfoStorageUsage from './file-info-storage-usage'
+import FileInfoUpdateTime from './file-info-update-time'
 
-type FileInfoProps = {
+type DrawerFileInfoProps = {
   file: File
 }
 
-const FileInfo = ({ file }: FileInfoProps) => {
+const DrawerFileInfo = ({ file }: DrawerFileInfoProps) => {
   if (!file.original) {
     return null
   }
   return (
     <div className={classNames('flex', 'flex-col', 'gap-1')}>
-      <ImageInfo file={file} />
-      <SizeInfo file={file} />
-      <ExtensionInfo file={file} />
-      <StorageUsageInfo file={file} />
-      <PermissionInfo file={file} />
-      <CreateTimeInfo file={file} />
-      <UpdateTimeInfo file={file} />
+      <FileInfoImage file={file} />
+      <FileInfoSize file={file} />
+      <FileInfoExtension file={file} />
+      <FileInfoStorageUsage file={file} />
+      <FileInfoPermission file={file} />
+      <FileInfoCreateTime file={file} />
+      <FileInfoUpdateTime file={file} />
     </div>
   )
 }
 
-export default FileInfo
+export default DrawerFileInfo

@@ -23,14 +23,14 @@ import UserAPI from '@/client/api/user'
 import WorkspaceAPI from '@/client/api/workspace'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { sharingModalDidClose } from '@/store/ui/files'
-import Groups from './groups'
-import Users from './users'
+import SharingGroups from './sharing-groups'
+import SharingUsers from './sharing-users'
 
-type SharingProps = {
+type FileSharingProps = {
   list: List
 }
 
-const Sharing = ({ list }: SharingProps) => {
+const FileSharing = ({ list }: FileSharingProps) => {
   const { id } = useParams()
   const dispatch = useAppDispatch()
   const selection = useAppSelector((state) => state.ui.files.selection)
@@ -119,14 +119,14 @@ const Sharing = ({ list }: SharingProps) => {
             </TabList>
             <TabPanels>
               <TabPanel>
-                <Users
+                <SharingUsers
                   users={users?.data}
                   permissions={userPermissions}
                   mutateUserPermissions={mutateUserPermissions}
                 />
               </TabPanel>
               <TabPanel>
-                <Groups
+                <SharingGroups
                   groups={groups?.data}
                   permissions={groupPermissions}
                   mutateGroupPermissions={mutateGroupPermissions}
@@ -140,4 +140,4 @@ const Sharing = ({ list }: SharingProps) => {
   )
 }
 
-export default Sharing
+export default FileSharing

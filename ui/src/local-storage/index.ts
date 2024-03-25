@@ -1,5 +1,5 @@
 import { SortBy, SortOrder } from '@/client/api/file'
-import { ViewType } from '@/types/file'
+import { FileViewType } from '@/types/file'
 
 const ICON_SCALE_KEY = 'voltaserve_file_icon_scale'
 
@@ -48,7 +48,7 @@ export function saveFileSortOrder(sortOrder: SortOrder) {
 
 export const VIEW_TYPE_KEY = 'voltaserve_file_view_type'
 
-export function loadFileViewType(): ViewType | null {
+export function loadFileViewType(): FileViewType | null {
   const value = localStorage.getItem(VIEW_TYPE_KEY)
   if (value) {
     return JSON.parse(value)
@@ -57,7 +57,7 @@ export function loadFileViewType(): ViewType | null {
   }
 }
 
-export function saveFileViewType(viewType: ViewType) {
+export function saveFileViewType(viewType: FileViewType) {
   return localStorage.setItem(VIEW_TYPE_KEY, JSON.stringify(viewType))
 }
 

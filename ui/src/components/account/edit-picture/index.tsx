@@ -24,9 +24,9 @@ import {
 import * as Yup from 'yup'
 import classNames from 'classnames'
 import UserAPI, { User } from '@/client/idp/user'
-import ImageUpload from './image-upload'
+import EditPictureUpload from './edit-picture-upload'
 
-type EditPictureProps = {
+type AccountEditPictureProps = {
   open: boolean
   user: User
   onClose?: () => void
@@ -36,7 +36,11 @@ type FormValues = {
   picture: any
 }
 
-const EditPicture = ({ open, user, onClose }: EditPictureProps) => {
+const AccountEditPicture = ({
+  open,
+  user,
+  onClose,
+}: AccountEditPictureProps) => {
   const { mutate } = useSWRConfig()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [deletionInProgress, setDeletionInProgress] = useState(false)
@@ -130,7 +134,7 @@ const EditPicture = ({ open, user, onClose }: EditPictureProps) => {
                           errors.picture && touched.picture ? true : false
                         }
                       >
-                        <ImageUpload
+                        <EditPictureUpload
                           {...field}
                           initialValue={user.picture}
                           disabled={isSubmitting}
@@ -183,4 +187,4 @@ const EditPicture = ({ open, user, onClose }: EditPictureProps) => {
   )
 }
 
-export default EditPicture
+export default AccountEditPicture

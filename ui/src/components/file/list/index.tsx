@@ -28,7 +28,7 @@ import {
 } from '@dnd-kit/core'
 import classNames from 'classnames'
 import { FileWithPath, useDropzone } from 'react-dropzone'
-import { List as FileList } from '@/client/api/file'
+import { List as ApiFileList } from '@/client/api/file'
 import {
   geEditorPermission,
   ltEditorPermission,
@@ -48,16 +48,16 @@ import {
   sharingModalDidOpen,
 } from '@/store/ui/files'
 import { uploadsDrawerOpened } from '@/store/ui/uploads-drawer'
-import { ViewType } from '@/types/file'
-import ItemDragOverlay from './item-drag-overlay'
-import ItemDraggableDroppable from './item-draggable-droppable'
+import { FileViewType } from '@/types/file'
+import ListDragOverlay from './list-drag-overlay'
+import ListDraggableDroppable from './list-draggable-droppable'
 
-type ListProps = {
-  list: FileList
+type FileListProps = {
+  list: ApiFileList
   scale: number
 }
 
-const List = ({ list, scale }: ListProps) => {
+const FileList = ({ list, scale }: FileListProps) => {
   const dispatch = useAppDispatch()
   const { id, fileId } = useParams()
   const singleFile = useAppSelector((state) =>
@@ -169,7 +169,7 @@ const List = ({ list, scale }: ListProps) => {
               <Text>There are no items.</Text>
             </div>
           )}
-          {viewType === ViewType.Grid && list.totalElements > 0 ? (
+          {viewType === FileViewType.Grid && list.totalElements > 0 ? (
             <Wrap
               spacing={variables.spacing}
               overflow="hidden"
@@ -179,7 +179,7 @@ const List = ({ list, scale }: ListProps) => {
                 .filter((e) => !hidden.includes(e.id))
                 .map((f) => (
                   <WrapItem key={f.id}>
-                    <ItemDraggableDroppable
+                    <ListDraggableDroppable
                       file={f}
                       scale={scale}
                       viewType={viewType}
@@ -193,7 +193,7 @@ const List = ({ list, scale }: ListProps) => {
                 ))}
             </Wrap>
           ) : null}
-          {viewType === ViewType.List && list.totalElements > 0 ? (
+          {viewType === FileViewType.List && list.totalElements > 0 ? (
             <div
               className={classNames(
                 'flex',
@@ -206,7 +206,7 @@ const List = ({ list, scale }: ListProps) => {
               {list.data
                 .filter((e) => !hidden.includes(e.id))
                 .map((f) => (
-                  <ItemDraggableDroppable
+                  <ListDraggableDroppable
                     key={f.id}
                     file={f}
                     scale={scale * 0.5}
@@ -220,7 +220,7 @@ const List = ({ list, scale }: ListProps) => {
                 ))}
             </div>
           ) : null}
-          <ItemDragOverlay
+          <ListDragOverlay
             file={activeFile!}
             scale={scale}
             viewType={viewType}
@@ -324,4 +324,4 @@ const List = ({ list, scale }: ListProps) => {
   )
 }
 
-export default List
+export default FileList

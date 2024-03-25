@@ -16,9 +16,9 @@ import { IconNotification } from '@koupr/ui'
 import classNames from 'classnames'
 import NotificationAPI from '@/client/api/notification'
 import { swrConfig } from '@/client/options'
-import NotificationItem from './notification-item'
+import NotificationDrawerItem from './notification-drawer-item'
 
-const NotificationDrawer = () => {
+const TopBarNotificationDrawer = () => {
   const buttonRef = useRef<HTMLButtonElement>(null)
   const { isOpen, onOpen, onClose } = useDisclosure()
   const { data: notfications } = NotificationAPI.useGetAll(swrConfig())
@@ -61,7 +61,7 @@ const NotificationDrawer = () => {
                     key={index}
                     className={classNames('flex', 'flex-col', 'gap-1.5')}
                   >
-                    <NotificationItem notification={n} />
+                    <NotificationDrawerItem notification={n} />
                     {index !== notfications.length - 1 && <Divider />}
                   </div>
                 ))}
@@ -76,4 +76,4 @@ const NotificationDrawer = () => {
   )
 }
 
-export default NotificationDrawer
+export default TopBarNotificationDrawer

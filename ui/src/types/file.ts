@@ -1,14 +1,14 @@
 import { File } from '@/client/api/file'
 
-export enum ViewType {
+export enum FileViewType {
   Grid = 'grid',
   List = 'list',
 }
 
-export type CommonItemProps = {
+export type FileCommonProps = {
   file: File
   scale: number
-  viewType: ViewType
+  viewType: FileViewType
   isPresentational?: boolean
   isLoading?: boolean
   isSelectionMode?: boolean

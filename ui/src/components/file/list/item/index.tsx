@@ -20,18 +20,18 @@ import {
   selectionRemoved,
   selectionUpdated,
 } from '@/store/ui/files'
-import { CommonItemProps, ViewType } from '@/types/file'
-import Icon from './icon'
-import { performMultiSelect, performRangeSelect } from './perform-select'
+import { FileCommonProps, FileViewType } from '@/types/file'
+import ItemIcon from './icon'
+import { performMultiSelect, performRangeSelect } from './item-perform-select'
 
-type ItemProps = {
+type ListItemProps = {
   onContextMenu?: (event: MouseEvent) => void
-} & CommonItemProps
+} & FileCommonProps
 
 const WIDTH = 147
 const MIN_HEIGHT = 110
 
-const Item = ({
+const ListItem = ({
   file,
   scale,
   viewType,
@@ -39,7 +39,7 @@ const Item = ({
   isLoading,
   isSelectionMode,
   onContextMenu,
-}: ItemProps) => {
+}: ListItemProps) => {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
   const [isChecked, setIsChecked] = useState(false)
@@ -149,12 +149,12 @@ const Item = ({
       className={classNames(
         'relative',
         'flex',
-        { 'flex-col': viewType === ViewType.Grid },
-        { 'flex-row': viewType === ViewType.List },
+        { 'flex-col': viewType === FileViewType.Grid },
+        { 'flex-row': viewType === FileViewType.List },
         'items-center',
         'gap-0.5',
-        { 'px-1.5': viewType === ViewType.List },
-        { 'px-0': viewType === ViewType.Grid },
+        { 'px-1.5': viewType === FileViewType.List },
+        { 'px-0': viewType === FileViewType.Grid },
         'py-1',
         'transition',
         'duration-400',
@@ -167,7 +167,7 @@ const Item = ({
       _hover={{ bg: hoverColor }}
       _active={{ bg: activeColor }}
       style={{
-        width: viewType === ViewType.List ? '100%' : width,
+        width: viewType === FileViewType.List ? '100%' : width,
         background: isChecked ? hoverColor : undefined,
       }}
       onClick={handleIconClick}
@@ -176,9 +176,9 @@ const Item = ({
     >
       {isSelectionMode && !isPresentational ? (
         <Checkbox
-          position={viewType === ViewType.List ? 'relative' : 'absolute'}
-          top={viewType === ViewType.List ? 'auto' : variables.spacingSm}
-          left={viewType === ViewType.List ? 'auto' : variables.spacingSm}
+          position={viewType === FileViewType.List ? 'relative' : 'absolute'}
+          top={viewType === FileViewType.List ? 'auto' : variables.spacingSm}
+          left={viewType === FileViewType.List ? 'auto' : variables.spacingSm}
           isChecked={isChecked}
           zIndex={1}
           size="lg"
@@ -189,7 +189,7 @@ const Item = ({
         className={classNames('flex', 'items-center', 'justify-center')}
         style={{ width, minHeight }}
       >
-        <Icon
+        <ItemIcon
           file={file}
           scale={scale}
           viewType={viewType}
@@ -199,10 +199,10 @@ const Item = ({
       <div
         className={classNames(
           'px-0.5',
-          { 'flex': viewType === ViewType.List },
-          { 'block': viewType === ViewType.Grid },
-          { 'grow': viewType === ViewType.List },
-          { 'grow-0': viewType === ViewType.Grid },
+          { 'flex': viewType === FileViewType.List },
+          { 'block': viewType === FileViewType.Grid },
+          { 'grow': viewType === FileViewType.List },
+          { 'grow-0': viewType === FileViewType.Grid },
         )}
         style={{ width }}
         title={file.name}
@@ -244,4 +244,4 @@ const Item = ({
   )
 }
 
-export default Item
+export default ListItem

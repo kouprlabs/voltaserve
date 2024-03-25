@@ -10,7 +10,7 @@ import {
   saveFileViewType,
   saveIconScale,
 } from '@/local-storage'
-import { ViewType } from '@/types/file'
+import { FileViewType } from '@/types/file'
 
 export const SORT_ORDER_KEY = 'voltaserve_file_sort_order'
 
@@ -29,7 +29,7 @@ export type FilesState = {
   iconScale: number
   sortBy: SortBy
   sortOrder: SortOrder
-  viewType: ViewType
+  viewType: FileViewType
 }
 
 const initialState: FilesState = {
@@ -46,7 +46,7 @@ const initialState: FilesState = {
   iconScale: loadIconScale() || 1,
   sortBy: loadFileSortBy() || SortBy.DateCreated,
   sortOrder: loadFileSortOrder() || SortOrder.Desc,
-  viewType: loadFileViewType() || ViewType.Grid,
+  viewType: loadFileViewType() || FileViewType.Grid,
   isSelectionMode: false,
 }
 
@@ -123,7 +123,9 @@ const slice = createSlice({
     },
     viewTypeToggled: (state) => {
       state.viewType =
-        state.viewType === ViewType.Grid ? ViewType.List : ViewType.Grid
+        state.viewType === FileViewType.Grid
+          ? FileViewType.List
+          : FileViewType.Grid
       saveFileViewType(state.viewType)
     },
     selectionModeToggled: (state) => {

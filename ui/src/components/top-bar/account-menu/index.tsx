@@ -12,16 +12,16 @@ import {
 import classNames from 'classnames'
 import UserAPI from '@/client/idp/user'
 import { swrConfig } from '@/client/options'
-import ActiveCircle from './active-circle'
-import AvatarButton from './avatar-button'
-import AvatarImage from './avatar-image'
+import AccountMenuActiveCircle from './account-menu-active-circle'
+import AccountMenuAvatarButton from './account-menu-avatar-button'
+import AccountMenuAvatarImage from './account-menu-avatar-image'
 
-const AccountMenu = () => {
+const TopBarAccountMenu = () => {
   const { data: user } = UserAPI.useGet(swrConfig())
   if (user) {
     return (
       <Menu>
-        <MenuButton as={AvatarButton} user={user} />
+        <MenuButton as={AccountMenuAvatarButton} user={user} />
         <Portal>
           <MenuList>
             <div
@@ -33,7 +33,7 @@ const AccountMenu = () => {
                 'px-1',
               )}
             >
-              <AvatarImage user={user} />
+              <AccountMenuAvatarImage user={user} />
               <div className={classNames('flex', 'flex-col', 'gap-0')}>
                 <Text
                   fontWeight="semibold"
@@ -60,11 +60,11 @@ const AccountMenu = () => {
     )
   } else {
     return (
-      <ActiveCircle>
+      <AccountMenuActiveCircle>
         <SkeletonCircle size="40px" />
-      </ActiveCircle>
+      </AccountMenuActiveCircle>
     )
   }
 }
 
-export default AccountMenu
+export default TopBarAccountMenu

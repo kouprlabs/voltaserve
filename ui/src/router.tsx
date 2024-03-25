@@ -1,41 +1,41 @@
 import { createBrowserRouter } from 'react-router-dom'
-import AccountInvitationsPage from '@/pages/account/invitations'
-import AccountLayout from '@/pages/account/layout'
-import AccountSettingsPage from '@/pages/account/settings'
-import ConfirmEmailPage from '@/pages/confirm-email'
-import FileViewerPage from '@/pages/file-viewer'
-import ForgotPasswordPage from '@/pages/forgot-password'
-import GroupLayout from '@/pages/group/layout'
-import GroupListPage from '@/pages/group/list'
-import GroupMembersPage from '@/pages/group/members'
-import GroupSettingsPage from '@/pages/group/settings'
-import NewGroupPage from '@/pages/new-group'
-import NewOrganizationPage from '@/pages/new-organization'
-import NewWorkspacePage from '@/pages/new-workspace'
-import OrganizationInvitationsPage from '@/pages/organization/invitations'
-import OrganizationLayout from '@/pages/organization/layout'
-import OrganizationListPage from '@/pages/organization/list'
-import OrganizationMembersPage from '@/pages/organization/members'
-import OrganizationSettingsPage from '@/pages/organization/settings'
-import ResetPasswordPage from '@/pages/reset-password'
-import Root from '@/pages/root'
-import SignInPage from '@/pages/sign-in'
-import SignOutPage from '@/pages/sign-out'
-import SignUpPage from '@/pages/sign-up'
-import WorkspaceFilesPage from '@/pages/workspace/files'
-import WorkspaceLayout from '@/pages/workspace/layout'
-import WorkspaceListPage from '@/pages/workspace/list'
-import WorkspaceSettingsPage from '@/pages/workspace/settings'
-import ShellLayout from './components/layout/shell'
-import UpdateEmailPage from './pages/update-email'
+import AccountInvitationsPage from '@/pages/account/account-invitations-page'
+import AccountLayout from '@/pages/account/account-layout'
+import AccountSettingsPage from '@/pages/account/account-settings-page'
+import ConfirmEmailPage from '@/pages/confirm-email-page'
+import FileViewerPage from '@/pages/file-viewer-page'
+import ForgotPasswordPage from '@/pages/forgot-password-page'
+import GroupLayout from '@/pages/group/group-layout'
+import GroupListPage from '@/pages/group/group-list-page'
+import GroupMembersPage from '@/pages/group/group-members-page'
+import GroupSettingsPage from '@/pages/group/group-settings-page'
+import NewGroupPage from '@/pages/new-group-page'
+import NewOrganizationPage from '@/pages/new-organization-page'
+import NewWorkspacePage from '@/pages/new-workspace-page'
+import OrganizationInvitationsPage from '@/pages/organization/organization-invitations-page'
+import OrganizationLayout from '@/pages/organization/organization-layout'
+import OrganizationListPage from '@/pages/organization/organization-list-page'
+import OrganizationMembersPage from '@/pages/organization/organization-members-page'
+import OrganizationSettingsPage from '@/pages/organization/organization-settings-page'
+import ResetPasswordPage from '@/pages/reset-password-page'
+import RootPage from '@/pages/root-page'
+import SignInPage from '@/pages/sign-in-page'
+import SignOutPage from '@/pages/sign-out-page'
+import SignUpPage from '@/pages/sign-up-page'
+import WorkspaceFilesPage from '@/pages/workspace/workspace-files-page'
+import WorkspaceLayout from '@/pages/workspace/workspace-layout'
+import WorkspaceListPage from '@/pages/workspace/workspace-list-page'
+import WorkspaceSettingsPage from '@/pages/workspace/workspace-settings-page'
+import LayoutShell from './components/layout/layout-shell'
+import UpdateEmailPage from './pages/update-email-page'
 
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <Root />,
+    element: <RootPage />,
     children: [
       {
-        element: <ShellLayout />,
+        element: <LayoutShell />,
         children: [
           {
             element: <AccountLayout />,
