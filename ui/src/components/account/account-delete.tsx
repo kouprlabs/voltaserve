@@ -14,7 +14,6 @@ import {
   ModalOverlay,
   Text,
 } from '@chakra-ui/react'
-import { variables } from '@koupr/ui'
 import {
   Field,
   FieldAttributes,
@@ -87,7 +86,7 @@ const AccountDelete = ({ open, onClose }: AccountDeleteProps) => {
                   className={classNames(
                     'flex',
                     'flex-col',
-                    'items-center',
+                    'items-start',
                     'gap-1',
                   )}
                 >
@@ -95,7 +94,7 @@ const AccountDelete = ({ open, onClose }: AccountDeleteProps) => {
                     Are you sure you would like to delete your account
                     permanently?
                   </Text>
-                  <Text fontWeight="semibold">
+                  <Text className={classNames('font-semibold')}>
                     Type your password to confirm:
                   </Text>
                   <Field name="password">
@@ -122,7 +121,7 @@ const AccountDelete = ({ open, onClose }: AccountDeleteProps) => {
                   type="button"
                   variant="outline"
                   colorScheme="blue"
-                  mr={variables.spacingSm}
+                  className={classNames('mr-1')}
                   disabled={isSubmitting}
                   onClick={() => onClose?.()}
                 >

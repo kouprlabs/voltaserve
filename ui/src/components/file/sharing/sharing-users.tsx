@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import {
   Text,
   Button,
@@ -27,6 +27,7 @@ import UserSelector from '@/components/common/user-selector'
 import useFileListSearchParams from '@/hooks/use-file-list-params'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { sharingModalDidClose } from '@/store/ui/files'
+import { inviteModalDidOpen } from '@/store/ui/organizations'
 import reactSelectStyles from '@/styles/react-select'
 import SharingFormSkeleton from './sharing-form-skeleton'
 
@@ -41,6 +42,7 @@ const SharingUsers = ({
   permissions,
   mutateUserPermissions,
 }: SharingUsersProps) => {
+  const navigate = useNavigate()
   const { mutate } = useSWRConfig()
   const { id, fileId } = useParams()
   const dispatch = useAppDispatch()
@@ -115,6 +117,14 @@ const SharingUsers = ({
     ],
   )
 
+  const handleInviteMembersClick = useCallback(async () => {
+    if (workspace) {
+      dispatch(inviteModalDidOpen())
+      dispatch(sharingModalDidClose())
+      navigate(`/organization/${workspace.organization.id}/member`)
+    }
+  }, [workspace, navigate, dispatch])
+
   return (
     <div className={classNames('flex', 'flex-col', 'gap-1.5')}>
       {!users ? <SharingFormSkeleton /> : null}
@@ -132,9 +142,8 @@ const SharingUsers = ({
             {workspace &&
             geEditorPermission(workspace.organization.permission) ? (
               <Button
-                as={Link}
                 leftIcon={<IconUserPlus />}
-                to={`/organization/${workspace.organization.id}/member?invite=true`}
+                onClick={handleInviteMembersClick}
               >
                 Invite Members
               </Button>

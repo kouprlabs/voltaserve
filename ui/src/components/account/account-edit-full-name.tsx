@@ -12,7 +12,6 @@ import {
   ModalHeader,
   ModalOverlay,
 } from '@chakra-ui/react'
-import { variables } from '@koupr/ui'
 import { useSWRConfig } from 'swr'
 import {
   Field,
@@ -23,6 +22,7 @@ import {
   FormikHelpers,
 } from 'formik'
 import * as Yup from 'yup'
+import classNames from 'classnames'
 import UserAPI, { User } from '@/client/idp/user'
 
 export type AccountEditFullNameProps = {
@@ -113,7 +113,7 @@ const AccountEditFullName = ({
                   type="button"
                   variant="outline"
                   colorScheme="blue"
-                  mr={variables.spacingSm}
+                  className={classNames('mr-1')}
                   disabled={isSubmitting}
                   onClick={() => onClose?.()}
                 >

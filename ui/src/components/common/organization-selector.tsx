@@ -17,6 +17,7 @@ import {
   Avatar,
   Radio,
   useColorModeValue,
+  useToken,
 } from '@chakra-ui/react'
 import { SectionSpinner, Pagination, SearchInput, variables } from '@koupr/ui'
 import classNames from 'classnames'
@@ -44,7 +45,10 @@ const OrganizationSelector = ({ onConfirm }: OrganizationSelectorProps) => {
     { query, page, size: 5, sortOrder: SortOrder.Desc },
     swrConfig(),
   )
-  const selectionColor = useColorModeValue('gray.100', 'gray.600')
+  const selectionColor = useToken(
+    'colors',
+    useColorModeValue('gray.100', 'gray.600'),
+  )
   const dimmedButtonLabelColor = useColorModeValue('gray.500', 'gray.500')
   const normalButtonLabelColor = useColorModeValue('black', 'white')
 
@@ -73,8 +77,10 @@ const OrganizationSelector = ({ onConfirm }: OrganizationSelectorProps) => {
       <Button
         variant="outline"
         w="100%"
+        style={{
+          color: confirmed ? normalButtonLabelColor : dimmedButtonLabelColor,
+        }}
         onClick={onOpen}
-        color={confirmed ? normalButtonLabelColor : dimmedButtonLabelColor}
       >
         {confirmed ? confirmed.name : 'Select Organization'}
       </Button>
@@ -139,10 +145,15 @@ const OrganizationSelector = ({ onConfirm }: OrganizationSelectorProps) => {
                       <Tr
                         key={o.id}
                         cursor="pointer"
-                        bg={selected?.id === o.id ? selectionColor : 'auto'}
+                        style={{
+                          backgroundColor:
+                            selected?.id === o.id
+                              ? selectionColor
+                              : 'transparent',
+                        }}
                         onClick={() => setSelected(o)}
                       >
-                        <Td px={variables.spacingXs} textAlign="center">
+                        <Td className={classNames('px-0.5', 'text-center')}>
                           <Radio size="md" isChecked={selected?.id === o.id} />
                         </Td>
                         <Td px={variables.spacingXs}>
@@ -157,8 +168,7 @@ const OrganizationSelector = ({ onConfirm }: OrganizationSelectorProps) => {
                             <Avatar
                               name={o.name}
                               size="sm"
-                              width="40px"
-                              height="40px"
+                              className={classNames('w-[40px]', 'h-[40px]')}
                             />
                             <Text fontSize={variables.bodyFontSize}>
                               {o.name}

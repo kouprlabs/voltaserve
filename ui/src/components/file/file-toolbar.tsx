@@ -78,6 +78,9 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
   const { mutate } = useSWRConfig()
   const { id, fileId } = useParams()
   const [isRefreshing, setIsRefreshing] = useState(false)
+  const fileCount = useAppSelector(
+    (state) => state.entities.files.list?.data.length,
+  )
   const selectionCount = useAppSelector(
     (state) => state.ui.files.selection.length,
   )
@@ -365,13 +368,15 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
             </Menu>
           ) : null}
         </div>
-        <IconButton
-          icon={isSelectionMode ? <LuX /> : <IconCheckCircle />}
-          isDisabled={!list}
-          variant="solid"
-          aria-label=""
-          onClick={handleToggleSelection}
-        />
+        {fileCount ? (
+          <IconButton
+            icon={isSelectionMode ? <LuX /> : <IconCheckCircle />}
+            isDisabled={!list}
+            variant="solid"
+            aria-label=""
+            onClick={handleToggleSelection}
+          />
+        ) : null}
         <IconButton
           icon={<IconRefresh />}
           isLoading={isRefreshing}

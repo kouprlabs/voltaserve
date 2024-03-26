@@ -45,6 +45,7 @@ import {
   multiSelectKeyUpdated,
   rangeSelectKeyUpdated,
   renameModalDidOpen,
+  selectionUpdated,
   sharingModalDidOpen,
 } from '@/store/ui/files'
 import { uploadsDrawerOpened } from '@/store/ui/uploads-drawer'
@@ -126,6 +127,7 @@ const FileList = ({ list, scale }: FileListProps) => {
     window.addEventListener('keydown', handleKeydown)
     window.addEventListener('keyup', handleKeyup)
     return () => {
+      dispatch(selectionUpdated([]))
       window.removeEventListener('keydown', handleKeydown)
       window.removeEventListener('keyup', handleKeyup)
     }

@@ -11,7 +11,6 @@ import {
   ModalHeader,
   ModalOverlay,
 } from '@chakra-ui/react'
-import { variables } from '@koupr/ui'
 import { useSWRConfig } from 'swr'
 import {
   Field,
@@ -153,7 +152,7 @@ const AccountEditPicture = ({
                   type="button"
                   variant="outline"
                   colorScheme="blue"
-                  mr={variables.spacingSm}
+                  className={classNames('mr-1')}
                   disabled={isSubmitting}
                   onClick={() => onClose?.()}
                 >
@@ -162,7 +161,7 @@ const AccountEditPicture = ({
                 <Button
                   variant="outline"
                   colorScheme="red"
-                  mr={variables.spacingSm}
+                  className={classNames('mr-1')}
                   isLoading={deletionInProgress}
                   disabled={!user.picture}
                   onClick={handleDelete}
