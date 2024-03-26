@@ -21,18 +21,18 @@ app.use(express.json({ limit: '3mb' }))
 app.use(express.urlencoded({ extended: true }))
 app.use(bodyParser.json())
 
-const tokenConfig = getConfig().token
+const { jwtSigningKey: secretOrKey, issuer, audience } = getConfig().token
 passport.use(
   new JwtStrategy(
     {
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      secretOrKey: tokenConfig.jwtSigningKey,
-      issuer: tokenConfig.issuer,
-      audience: tokenConfig.audience,
+      secretOrKey,
+      issuer,
+      audience,
     },
-    async (jwt_payload, done) => {
+    async (payload, done) => {
       try {
-        const user = await userRepo.findByID(jwt_payload.sub)
+        const user = await userRepo.findByID(payload.sub)
         return done(null, user)
       } catch {
         return done(null, false)

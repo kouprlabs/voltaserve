@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import {
   useLocation,
   useNavigate,
@@ -40,10 +40,16 @@ import OrganizationInviteMembers from '@/components/organization/organization-in
 import OrganizationRemoveMember from '@/components/organization/organization-remove-member'
 import { decodeQuery } from '@/helpers/query'
 import { organizationMemberPaginationStorage } from '@/infra/pagination'
+import { useAppDispatch, useAppSelector } from '@/store/hook'
+import {
+  inviteModalDidClose,
+  inviteModalDidOpen,
+} from '@/store/ui/organizations'
 
 const OrganizationMembersPage = () => {
   const navigate = useNavigate()
   const location = useLocation()
+  const dispatch = useAppDispatch()
   const { id } = useParams()
   const { data: org, error: orgError } = OrganizationAPI.useGetById(
     id,
@@ -55,7 +61,6 @@ const OrganizationMembersPage = () => {
     storage: organizationMemberPaginationStorage(),
   })
   const [searchParams] = useSearchParams()
-  const invite = Boolean(searchParams.get('invite') as string)
   const query = decodeQuery(searchParams.get('q') as string)
   const {
     data: list,
@@ -72,17 +77,12 @@ const OrganizationMembersPage = () => {
     },
     swrConfig(),
   )
+  const isInviteMembersModalOpen = useAppSelector(
+    (state) => state.ui.organizations.isInviteModalOpen,
+  )
   const [userToRemove, setUserToRemove] = useState<User>()
-  const [isInviteMembersModalOpen, setIsInviteMembersModalOpen] =
-    useState(false)
   const [isRemoveMemberModalOpen, setIsRemoveMemberModalOpen] =
     useState<boolean>(false)
-
-  useEffect(() => {
-    if (invite) {
-      setIsInviteMembersModalOpen(true)
-    }
-  }, [invite])
 
   if (membersError || orgError) {
     return null
@@ -198,9 +198,7 @@ const OrganizationMembersPage = () => {
               {geEditorPermission(org.permission) && (
                 <Button
                   leftIcon={<IconUserPlus />}
-                  onClick={() => {
-                    setIsInviteMembersModalOpen(true)
-                  }}
+                  onClick={() => dispatch(inviteModalDidOpen())}
                 >
                   Invite Members
                 </Button>
@@ -210,7 +208,7 @@ const OrganizationMembersPage = () => {
           <OrganizationInviteMembers
             open={isInviteMembersModalOpen}
             id={org.id}
-            onClose={() => setIsInviteMembersModalOpen(false)}
+            onClose={() => dispatch(inviteModalDidClose())}
           />
         </>
       )}

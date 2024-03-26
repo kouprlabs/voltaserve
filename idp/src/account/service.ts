@@ -32,7 +32,7 @@ export async function createUser(
   options: AccountCreateOptions
 ): Promise<UserDTO> {
   const id = newHashId()
-  if (!userRepo.isUsernameAvailable(options.email)) {
+  if (!(await userRepo.isUsernameAvailable(options.email))) {
     throw newError({ code: ErrorCode.UsernameUnavailable })
   }
   try {
