@@ -7,7 +7,7 @@ import {
   useToken,
 } from '@chakra-ui/react'
 import { IconEdit } from '@koupr/ui'
-import classNames from 'classnames'
+import cx from 'classnames'
 
 export type EditPictureUploadProps = {
   name: string
@@ -60,9 +60,9 @@ const EditPictureUpload = ({
   }, [disabled, hiddenInput])
 
   return (
-    <div className={classNames('flex', 'flex-col', 'items-center', 'gap-1')}>
+    <div className={cx('flex', 'flex-col', 'items-center', 'gap-1')}>
       <div
-        className={classNames(
+        className={cx(
           'flex',
           'items-center',
           'justify-center',
@@ -73,10 +73,10 @@ const EditPictureUpload = ({
         style={{ borderColor: blueColor }}
       >
         {src || initialValue ? (
-          <div className={classNames('relative', 'w-[400px]', 'h-[160px]')}>
+          <div className={cx('relative', 'w-[400px]', 'h-[160px]')}>
             <Image
               src={src || initialValue || ''}
-              className={classNames(
+              className={cx(
                 'rounded',
                 'w-[400px]',
                 'h-[160px]',
@@ -87,12 +87,7 @@ const EditPictureUpload = ({
             <IconButton
               icon={<IconEdit />}
               variant="solid-gray"
-              className={classNames(
-                'top-[10px',
-                'right-[5px]',
-                'absolute',
-                'z-[1000]',
-              )}
+              className={cx('top-[10px', 'right-[5px]', 'absolute', 'z-[1000]')}
               aria-label=""
               disabled={disabled}
               onClick={handleEdit}
@@ -100,7 +95,7 @@ const EditPictureUpload = ({
           </div>
         ) : (
           <div
-            className={classNames(
+            className={cx(
               'flex',
               'items-center',
               'justify-center',

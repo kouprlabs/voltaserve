@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import {
   Text,
   Button,
@@ -17,7 +17,7 @@ import { Spinner, variables } from '@koupr/ui'
 import { IconCheck, IconTrash, IconUserPlus } from '@koupr/ui'
 import { KeyedMutator, useSWRConfig } from 'swr'
 import { Select } from 'chakra-react-select'
-import classNames from 'classnames'
+import cx from 'classnames'
 import FileAPI, { List, UserPermission } from '@/client/api/file'
 import { geEditorPermission } from '@/client/api/permission'
 import { User } from '@/client/api/user'
@@ -27,6 +27,7 @@ import UserSelector from '@/components/common/user-selector'
 import useFileListSearchParams from '@/hooks/use-file-list-params'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { sharingModalDidClose } from '@/store/ui/files'
+import { inviteModalDidOpen } from '@/store/ui/organizations'
 import reactSelectStyles from '@/styles/react-select'
 import SharingFormSkeleton from './sharing-form-skeleton'
 
@@ -41,6 +42,7 @@ const SharingUsers = ({
   permissions,
   mutateUserPermissions,
 }: SharingUsersProps) => {
+  const navigate = useNavigate()
   const { mutate } = useSWRConfig()
   const { id, fileId } = useParams()
   const dispatch = useAppDispatch()
@@ -115,26 +117,26 @@ const SharingUsers = ({
     ],
   )
 
+  const handleInviteMembersClick = useCallback(async () => {
+    if (workspace) {
+      dispatch(inviteModalDidOpen())
+      dispatch(sharingModalDidClose())
+      navigate(`/organization/${workspace.organization.id}/member`)
+    }
+  }, [workspace, navigate, dispatch])
+
   return (
-    <div className={classNames('flex', 'flex-col', 'gap-1.5')}>
+    <div className={cx('flex', 'flex-col', 'gap-1.5')}>
       {!users ? <SharingFormSkeleton /> : null}
       {users && users.length === 0 ? (
-        <div className={classNames('flex', 'items-center', 'justify-center')}>
-          <div
-            className={classNames(
-              'flex',
-              'flex-col',
-              'items-center',
-              'gap-1.5',
-            )}
-          >
+        <div className={cx('flex', 'items-center', 'justify-center')}>
+          <div className={cx('flex', 'flex-col', 'items-center', 'gap-1.5')}>
             <Text>This organization has no members.</Text>
             {workspace &&
             geEditorPermission(workspace.organization.permission) ? (
               <Button
-                as={Link}
                 leftIcon={<IconUserPlus />}
-                to={`/organization/${workspace.organization.id}/member?invite=true`}
+                onClick={handleInviteMembersClick}
               >
                 Invite Members
               </Button>
@@ -143,7 +145,7 @@ const SharingUsers = ({
         </div>
       ) : null}
       {users && users.length > 0 ? (
-        <div className={classNames('flex', 'flex-col', 'gap-1.5')}>
+        <div className={cx('flex', 'flex-col', 'gap-1.5')}>
           <UserSelector
             value={activeUser}
             organizationId={workspace?.organization.id}
@@ -179,16 +181,12 @@ const SharingUsers = ({
         <>
           <hr />
           {!permissions ? (
-            <div
-              className={classNames('flex', 'items-center', 'justify-center')}
-            >
+            <div className={cx('flex', 'items-center', 'justify-center')}>
               <Spinner />
             </div>
           ) : null}
           {permissions && permissions.length === 0 ? (
-            <div
-              className={classNames('flex', 'items-center', 'justify-center')}
-            >
+            <div className={cx('flex', 'items-center', 'justify-center')}>
               <Text>Not shared with any users.</Text>
             </div>
           ) : null}
@@ -207,7 +205,7 @@ const SharingUsers = ({
                     <Tr key={p.id}>
                       <Td p={variables.spacingSm}>
                         <div
-                          className={classNames(
+                          className={cx(
                             'flex',
                             'flex-row',
                             'items-center',
@@ -221,13 +219,7 @@ const SharingUsers = ({
                             width="40px"
                             height="40px"
                           />
-                          <div
-                            className={classNames(
-                              'flex',
-                              'flex-col',
-                              'gap-0.5',
-                            )}
-                          >
+                          <div className={cx('flex', 'flex-col', 'gap-0.5')}>
                             <Text noOfLines={1}>{p.user.fullName}</Text>
                             <Text color="gray">{p.user.email}</Text>
                           </div>

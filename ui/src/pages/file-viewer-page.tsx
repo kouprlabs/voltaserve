@@ -2,7 +2,7 @@ import { useCallback } from 'react'
 import { useParams } from 'react-router-dom'
 import { Button, Text } from '@chakra-ui/react'
 import { IconDownload, Drawer, Spinner } from '@koupr/ui'
-import classNames from 'classnames'
+import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import FileAPI, { File } from '@/client/api/file'
 import DrawerContent from '@/components/viewer/drawer/drawer-content'
@@ -31,7 +31,7 @@ const FileViewerPage = () => {
       return <ViewerAudio file={file} />
     } else {
       return (
-        <div className={classNames('flex', 'flex-col', 'gap-1.5')}>
+        <div className={cx('flex', 'flex-col', 'gap-1.5')}>
           <Text fontSize="16px">Cannot preview this file.</Text>
           <Button
             leftIcon={<IconDownload />}
@@ -52,21 +52,15 @@ const FileViewerPage = () => {
           <Helmet>
             <title>{file.name}</title>
           </Helmet>
-          <div className={classNames('flex', 'flex-row', 'gap-0', 'h-full')}>
+          <div className={cx('flex', 'flex-row', 'gap-0', 'h-full')}>
             <Drawer storage={{ prefix: 'voltaserve', namespace: 'viewer' }}>
               <DrawerContent file={file} />
             </Drawer>
             <div
-              className={classNames(
-                'flex',
-                'flex-col',
-                'gap-0',
-                'grow',
-                'h-[100vh]',
-              )}
+              className={cx('flex', 'flex-col', 'gap-0', 'grow', 'h-[100vh]')}
             >
               <div
-                className={classNames(
+                className={cx(
                   'flex',
                   'items-center',
                   'justify-center',
@@ -79,7 +73,7 @@ const FileViewerPage = () => {
                 </Text>
               </div>
               <div
-                className={classNames(
+                className={cx(
                   'flex',
                   'items-center',
                   'justify-center',
@@ -95,12 +89,7 @@ const FileViewerPage = () => {
         </>
       ) : (
         <div
-          className={classNames(
-            'flex',
-            'items-center',
-            'justify-center',
-            'h-[100vh]',
-          )}
+          className={cx('flex', 'items-center', 'justify-center', 'h-[100vh]')}
         >
           <Spinner />
         </div>

@@ -13,7 +13,7 @@ import {
   Circle,
 } from '@chakra-ui/react'
 import { IconNotification } from '@koupr/ui'
-import classNames from 'classnames'
+import cx from 'classnames'
 import NotificationAPI from '@/client/api/notification'
 import { swrConfig } from '@/client/options'
 import NotificationDrawerItem from './notification-drawer-item'
@@ -25,14 +25,7 @@ const TopBarNotificationDrawer = () => {
 
   return (
     <>
-      <div
-        className={classNames(
-          'flex',
-          'items-center',
-          'justify-center',
-          'relative',
-        )}
-      >
+      <div className={cx('flex', 'items-center', 'justify-center', 'relative')}>
         <IconButton
           ref={buttonRef}
           icon={<IconNotification />}
@@ -55,11 +48,11 @@ const TopBarNotificationDrawer = () => {
           <DrawerHeader>Notifications</DrawerHeader>
           <DrawerBody>
             {notfications && notfications.length > 0 ? (
-              <div className={classNames('flex', 'flex-col', 'gap-1.5')}>
+              <div className={cx('flex', 'flex-col', 'gap-1.5')}>
                 {notfications.map((n, index) => (
                   <div
                     key={index}
-                    className={classNames('flex', 'flex-col', 'gap-1.5')}
+                    className={cx('flex', 'flex-col', 'gap-1.5')}
                   >
                     <NotificationDrawerItem notification={n} />
                     {index !== notfications.length - 1 && <Divider />}

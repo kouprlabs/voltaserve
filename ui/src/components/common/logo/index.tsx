@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 import { CenterProps, useColorMode } from '@chakra-ui/react'
-import classNames from 'classnames'
+import cx from 'classnames'
 import LogoDarkGlossySvg from './logo-dark-glossy.svg?react'
 import LogoDarkSvg from './logo-dark.svg?react'
 import LogoGlossySvg from './logo-glossy.svg?react'
@@ -20,7 +20,7 @@ const Logo = ({ isGlossy = false }: LogoProps) => {
     }
   }, [colorMode, isGlossy])
   return (
-    <div className={classNames('flex', 'items-center', 'justify-center')}>
+    <div className={cx('flex', 'items-center', 'justify-center')}>
       {renderSvg()}
     </div>
   )

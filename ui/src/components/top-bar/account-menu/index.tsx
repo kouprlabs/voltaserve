@@ -9,7 +9,7 @@ import {
   SkeletonCircle,
   Text,
 } from '@chakra-ui/react'
-import classNames from 'classnames'
+import cx from 'classnames'
 import UserAPI from '@/client/idp/user'
 import { swrConfig } from '@/client/options'
 import AccountMenuActiveCircle from './account-menu-active-circle'
@@ -25,7 +25,7 @@ const TopBarAccountMenu = () => {
         <Portal>
           <MenuList>
             <div
-              className={classNames(
+              className={cx(
                 'flex',
                 'flex-row',
                 'items-center',
@@ -34,7 +34,7 @@ const TopBarAccountMenu = () => {
               )}
             >
               <AccountMenuAvatarImage user={user} />
-              <div className={classNames('flex', 'flex-col', 'gap-0')}>
+              <div className={cx('flex', 'flex-col', 'gap-0')}>
                 <Text
                   fontWeight="semibold"
                   flexGrow={1}

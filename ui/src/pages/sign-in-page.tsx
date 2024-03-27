@@ -19,7 +19,7 @@ import {
   FormikHelpers,
 } from 'formik'
 import * as Yup from 'yup'
-import classNames from 'classnames'
+import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import GroupAPI from '@/client/api/group'
 import OrganizationAPI from '@/client/api/organization'
@@ -95,7 +95,7 @@ const SignInPage = () => {
           <title>Sign In to Voltaserve</title>
         </Helmet>
         <div
-          className={classNames(
+          className={cx(
             'flex',
             'flex-col',
             'items-center',
@@ -121,12 +121,7 @@ const SignInPage = () => {
             {({ errors, touched, isSubmitting }) => (
               <Form className="w-full">
                 <div
-                  className={classNames(
-                    'flex',
-                    'flex-col',
-                    'items-center',
-                    'gap-1.5',
-                  )}
+                  className={cx('flex', 'flex-col', 'items-center', 'gap-1.5')}
                 >
                   <Field name="email">
                     {({ field }: FieldAttributes<FieldProps>) => (
@@ -175,34 +170,15 @@ const SignInPage = () => {
             )}
           </Formik>
           <div
-            className={classNames(
-              'flex',
-              'flex-col',
-              'items-center',
-              'max-w-[60ch]',
-            )}
+            className={cx('flex', 'flex-col', 'items-center', 'max-w-[60ch]')}
           >
-            <div
-              className={classNames(
-                'flex',
-                'flex-row',
-                'items-center',
-                'gap-0.5',
-              )}
-            >
+            <div className={cx('flex', 'flex-row', 'items-center', 'gap-0.5')}>
               <Text>{"Don't have an account yet?"}</Text>
               <ChakraLink as={Link} to="/sign-up">
                 Sign Up
               </ChakraLink>
             </div>
-            <div
-              className={classNames(
-                'flex',
-                'flex-row',
-                'items-center',
-                'gap-0.5',
-              )}
-            >
+            <div className={cx('flex', 'flex-row', 'items-center', 'gap-0.5')}>
               <Text>Cannot sign in?</Text>
               <ChakraLink as={Link} to="/forgot-password">
                 Reset Password

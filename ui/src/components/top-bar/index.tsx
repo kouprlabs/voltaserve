@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
-import classNames from 'classnames'
+import cx from 'classnames'
 import TopBarAccountMenu from '@/components/top-bar/account-menu'
 import TopBarNotificationDrawer from '@/components/top-bar/notification-drawer'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
@@ -35,7 +35,7 @@ const TopBar = () => {
 
   return (
     <div
-      className={classNames(
+      className={cx(
         'flex',
         'flex-row',
         'items-center',
@@ -47,12 +47,10 @@ const TopBar = () => {
         'h-[80px]',
       )}
     >
-      <div className={classNames('grow')}>
+      <div className={cx('grow')}>
         <TopBarSearch />
       </div>
-      <div
-        className={classNames('flex', 'flex-row', 'items-center', 'gap-1.5')}
-      >
+      <div className={cx('flex', 'flex-row', 'items-center', 'gap-1.5')}>
         {activeNav === NavType.Workspaces && <CreateWorkspaceButton />}
         {activeNav === NavType.Groups && <CreateGroupButton />}
         {activeNav === NavType.Organizations && <CreateOrganizationButton />}

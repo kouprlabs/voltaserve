@@ -19,7 +19,7 @@ import {
   FormikHelpers,
 } from 'formik'
 import * as Yup from 'yup'
-import classNames from 'classnames'
+import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import AccountAPI from '@/client/idp/account'
 import Logo from '@/components/common/logo'
@@ -61,7 +61,7 @@ const ForgotPasswordPage = () => {
           <title>Forgot Password</title>
         </Helmet>
         <div
-          className={classNames(
+          className={cx(
             'flex',
             'flex-col',
             'items-center',
@@ -97,7 +97,7 @@ const ForgotPasswordPage = () => {
                 {({ errors, touched, isSubmitting }) => (
                   <Form className="w-full">
                     <div
-                      className={classNames(
+                      className={cx(
                         'flex',
                         'flex-col',
                         'items-center',
@@ -135,12 +135,7 @@ const ForgotPasswordPage = () => {
                 )}
               </Formik>
               <div
-                className={classNames(
-                  'flex',
-                  'flex-row',
-                  'items-center',
-                  'gap-0.5',
-                )}
+                className={cx('flex', 'flex-row', 'items-center', 'gap-0.5')}
               >
                 <Text>Password recovered?</Text>
                 <ChakraLink as={Link} to="/sign-in">

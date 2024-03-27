@@ -8,7 +8,7 @@ import {
   IconUserPlus,
   SectionSpinner,
 } from '@koupr/ui'
-import classNames from 'classnames'
+import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import OrganizationAPI from '@/client/api/organization'
 import { geEditorPermission, geOwnerPermission } from '@/client/api/permission'
@@ -18,7 +18,7 @@ import OrganizationEditName from '@/components/organization/organization-edit-na
 import OrganizationInviteMembers from '@/components/organization/organization-invite-members'
 import OrganizationLeave from '@/components/organization/organization-leave'
 
-const Spacer = () => <div className={classNames('grow')} />
+const Spacer = () => <div className={cx('grow')} />
 
 const OrganizationSettingsPage = () => {
   const { id } = useParams()
@@ -28,8 +28,8 @@ const OrganizationSettingsPage = () => {
     useState(false)
   const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
-  const sectionClassName = classNames('flex', 'flex-col', 'gap-1', 'py-1.5')
-  const rowClassName = classNames(
+  const sectionClassName = cx('flex', 'flex-col', 'gap-1', 'py-1.5')
+  const rowClassName = cx(
     'flex',
     'flex-row',
     'items-center',

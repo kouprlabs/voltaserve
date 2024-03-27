@@ -23,7 +23,7 @@ import {
   FormikHelpers,
 } from 'formik'
 import * as Yup from 'yup'
-import classNames from 'classnames'
+import cx from 'classnames'
 import GroupAPI, { Group } from '@/client/api/group'
 import UserAPI, { User } from '@/client/api/user'
 import UserSelector from '../common/user-selector'
@@ -98,7 +98,7 @@ const GroupAddMember = ({ group, open, onClose }: GroupAddMemberProps) => {
           {({ errors, touched, isSubmitting, setFieldValue }) => (
             <Form>
               <ModalBody>
-                <div className={classNames('flex', 'flex-col', 'gap-1.5')}>
+                <div className={cx('flex', 'flex-col', 'gap-1.5')}>
                   <Field name="userId">
                     {({ field }: FieldAttributes<FieldProps>) => (
                       <FormControl

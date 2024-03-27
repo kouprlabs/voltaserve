@@ -24,7 +24,7 @@ import {
   variables,
   usePagePagination,
 } from '@koupr/ui'
-import classNames from 'classnames'
+import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import OrganizationAPI, { SortOrder } from '@/client/api/organization'
 import { swrConfig } from '@/client/options'
@@ -61,13 +61,13 @@ const OrganizationListPage = () => {
       <Helmet>
         <title>Organizations</title>
       </Helmet>
-      <div className={classNames('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
+      <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
         <Heading fontSize={variables.headingFontSize} pl={variables.spacingMd}>
           Organizations
         </Heading>
         {!list && error && (
           <div
-            className={classNames(
+            className={cx(
               'flex',
               'items-center',
               'justify-center',
@@ -80,21 +80,14 @@ const OrganizationListPage = () => {
         {!list && !error && <SectionSpinner />}
         {list && list.data.length === 0 && (
           <div
-            className={classNames(
+            className={cx(
               'flex',
               'items-center',
               'justify-center',
               'h-[300px]',
             )}
           >
-            <div
-              className={classNames(
-                'flex',
-                'flex-col',
-                'gap-1.5',
-                'items-center',
-              )}
-            >
+            <div className={cx('flex', 'flex-col', 'gap-1.5', 'items-center')}>
               <Text>There are no organizations.</Text>
               <CreateOrganizationButton />
             </div>
@@ -114,7 +107,7 @@ const OrganizationListPage = () => {
                 <Tr key={o.id}>
                   <Td>
                     <div
-                      className={classNames(
+                      className={cx(
                         'flex',
                         'flex-row',
                         'gap-1.5',

@@ -19,7 +19,7 @@ import {
   FormikHelpers,
 } from 'formik'
 import * as Yup from 'yup'
-import classNames from 'classnames'
+import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import AccountAPI from '@/client/idp/account'
 import Logo from '@/components/common/logo'
@@ -71,7 +71,7 @@ const ResetPasswordPage = () => {
           <title>Reset Password</title>
         </Helmet>
         <div
-          className={classNames(
+          className={cx(
             'flex',
             'flex-col',
             'items-center',
@@ -84,14 +84,7 @@ const ResetPasswordPage = () => {
           </div>
           <Heading fontSize={variables.headingFontSize}>Reset Password</Heading>
           {isCompleted ? (
-            <div
-              className={classNames(
-                'flex',
-                'flex-row',
-                'items-center',
-                'gap-0.5',
-              )}
-            >
+            <div className={cx('flex', 'flex-row', 'items-center', 'gap-0.5')}>
               <Text align="center">Password successfully changed.</Text>
               <ChakraLink as={Link} to="/sign-in">
                 Sign In
@@ -111,7 +104,7 @@ const ResetPasswordPage = () => {
                 {({ errors, touched, isSubmitting }) => (
                   <Form className="w-full">
                     <div
-                      className={classNames(
+                      className={cx(
                         'flex',
                         'flex-col',
                         'items-center',
@@ -177,12 +170,7 @@ const ResetPasswordPage = () => {
                 )}
               </Formik>
               <div
-                className={classNames(
-                  'flex',
-                  'flex-row',
-                  'items-center',
-                  'gap-0.5',
-                )}
+                className={cx('flex', 'flex-row', 'items-center', 'gap-0.5')}
               >
                 <Text>Password already reset?</Text>
                 <ChakraLink as={Link} to="/sign-in">

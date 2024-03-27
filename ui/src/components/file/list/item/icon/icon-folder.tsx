@@ -1,4 +1,4 @@
-import classNames from 'classnames'
+import cx from 'classnames'
 import { FcFolder } from 'react-icons/fc'
 import { FileCommonProps } from '@/types/file'
 import IconProcessingBadge from './icon-processing-badge'
@@ -11,10 +11,10 @@ type IconFolderProps = {
 const ICON_FONT_SIZE = 92
 
 const IconFolder = ({ file, scale, viewType, isLoading }: IconFolderProps) => (
-  <div className={classNames('relative')}>
+  <div className={cx('relative')}>
     <FcFolder fontSize={`${ICON_FONT_SIZE * scale}px`} />
     <div
-      className={classNames(
+      className={cx(
         'absolute',
         'flex',
         'flex-row',

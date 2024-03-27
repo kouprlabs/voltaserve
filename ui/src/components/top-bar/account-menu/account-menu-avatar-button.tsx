@@ -1,6 +1,6 @@
 import { Avatar, useColorModeValue, useToken } from '@chakra-ui/react'
 import { forwardRef } from '@chakra-ui/system'
-import classNames from 'classnames'
+import cx from 'classnames'
 import { User } from '@/client/idp/user'
 import { useAppSelector } from '@/store/hook'
 import { NavType } from '@/store/ui/nav'
@@ -18,7 +18,7 @@ const AccountMenuAvatarButton = forwardRef<AccountMenuAvatarButtonProps, 'div'>(
     )
     const activeNav = useAppSelector((state) => state.ui.nav.active)
     return (
-      <div ref={ref} {...props} className={classNames('cursor-pointer')}>
+      <div ref={ref} {...props} className={cx('cursor-pointer')}>
         <AccountMenuActiveCircle>
           <Avatar
             name={user.fullName}

@@ -30,14 +30,22 @@ export async function clearToken() {
 }
 
 export function getAccessTokenOrRedirect(): string {
+  const accessToken = getAccessToken()
+  if (accessToken) {
+    return accessToken
+  } else {
+    window.location.href = '/sign-in'
+    return ''
+  }
+}
+
+export function getAccessToken() {
   const accessToken = loadAccessToken()
   const tokenExpiry = loadTokenExpiry()
   if (accessToken && tokenExpiry && new Date() < new Date(tokenExpiry)) {
     return accessToken
   } else {
     clearToken()
-    window.location.href = '/sign-in'
-    return ''
   }
 }
 

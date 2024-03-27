@@ -23,7 +23,7 @@ import {
   FormikHelpers,
 } from 'formik'
 import * as Yup from 'yup'
-import classNames from 'classnames'
+import cx from 'classnames'
 import UserAPI, { User } from '@/client/idp/user'
 
 export type AccountChangePasswordProps = {
@@ -93,7 +93,7 @@ const AccountChangePassword = ({
           {({ errors, touched, isSubmitting }) => (
             <Form>
               <ModalBody>
-                <div className={classNames('flex', 'flex-col', 'gap-1.5')}>
+                <div className={cx('flex', 'flex-col', 'gap-1.5')}>
                   <Field name="currentPassword">
                     {({ field }: FieldAttributes<FieldProps>) => (
                       <FormControl

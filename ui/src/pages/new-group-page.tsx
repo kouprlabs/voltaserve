@@ -19,7 +19,7 @@ import {
   FormikHelpers,
 } from 'formik'
 import * as Yup from 'yup'
-import classNames from 'classnames'
+import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import GroupAPI from '@/client/api/group'
 import OrganizationSelector from '@/components/common/organization-selector'
@@ -69,7 +69,7 @@ const NewGroupPage = () => {
       <Helmet>
         <title>New Group</title>
       </Helmet>
-      <div className={classNames('flex', 'flex-col', 'gap-3.5')}>
+      <div className={cx('flex', 'flex-col', 'gap-3.5')}>
         <Heading fontSize={variables.headingFontSize}>New Group</Heading>
         <Formik
           enableReinitialize={true}
@@ -80,8 +80,8 @@ const NewGroupPage = () => {
         >
           {({ errors, touched, isSubmitting, setFieldValue }) => (
             <Form>
-              <div className={classNames('flex', 'flex-col', 'gap-3.5')}>
-                <div className={classNames('flex', 'flex-col', 'gap-1.5')}>
+              <div className={cx('flex', 'flex-col', 'gap-3.5')}>
+                <div className={cx('flex', 'flex-col', 'gap-1.5')}>
                   <Field name="name">
                     {({ field }: FieldAttributes<FieldProps>) => (
                       <FormControl
@@ -118,12 +118,7 @@ const NewGroupPage = () => {
                   </Field>
                 </div>
                 <div
-                  className={classNames(
-                    'flex',
-                    'flex-row',
-                    'items-center',
-                    'gap-0.5',
-                  )}
+                  className={cx('flex', 'flex-row', 'items-center', 'gap-0.5')}
                 >
                   <Button
                     type="submit"

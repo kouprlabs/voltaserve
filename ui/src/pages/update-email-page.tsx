@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { Link as ChakraLink, Heading, Text } from '@chakra-ui/react'
 import { variables, Spinner } from '@koupr/ui'
-import classNames from 'classnames'
+import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import UserAPI from '@/client/idp/user'
 import Logo from '@/components/common/logo'
@@ -39,19 +39,12 @@ const UpdateEmailPage = () => {
       <Helmet>
         <title>Confirm Email</title>
       </Helmet>
-      <div className={classNames('flex', 'flex-col', 'items-center', 'gap-3')}>
+      <div className={cx('flex', 'flex-col', 'items-center', 'gap-3')}>
         <div className="w-16">
           <Logo isGlossy={true} />
         </div>
         {!isCompleted && !isFailed ? (
-          <div
-            className={classNames(
-              'flex',
-              'flex-col',
-              'items-center',
-              'gap-1.5',
-            )}
-          >
+          <div className={cx('flex', 'flex-col', 'items-center', 'gap-1.5')}>
             <Heading fontSize={variables.headingFontSize}>
               Confirming your Email…
             </Heading>
@@ -59,25 +52,11 @@ const UpdateEmailPage = () => {
           </div>
         ) : null}
         {isCompleted && !isFailed ? (
-          <div
-            className={classNames(
-              'flex',
-              'flex-col',
-              'items-center',
-              'gap-1.5',
-            )}
-          >
+          <div className={cx('flex', 'flex-col', 'items-center', 'gap-1.5')}>
             <Heading fontSize={variables.headingFontSize}>
               Email confirmed
             </Heading>
-            <div
-              className={classNames(
-                'flex',
-                'flex-row',
-                'items-center',
-                'gap-0.5',
-              )}
-            >
+            <div className={cx('flex', 'flex-row', 'items-center', 'gap-0.5')}>
               <Text>Click the link below to go back to your account.</Text>
               <ChakraLink as={Link} to="/account/settings">
                 Back to account

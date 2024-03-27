@@ -1,4 +1,4 @@
-import classNames from 'classnames'
+import cx from 'classnames'
 import { File } from '@/client/api/file'
 import FileInfoCreateTime from './file-info-create-time'
 import FileInfoExtension from './file-info-extension'
@@ -17,7 +17,7 @@ const DrawerFileInfo = ({ file }: DrawerFileInfoProps) => {
     return null
   }
   return (
-    <div className={classNames('flex', 'flex-col', 'gap-1')}>
+    <div className={cx('flex', 'flex-col', 'gap-1')}>
       <FileInfoImage file={file} />
       <FileInfoSize file={file} />
       <FileInfoExtension file={file} />

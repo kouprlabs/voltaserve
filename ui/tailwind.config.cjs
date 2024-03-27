@@ -2,12 +2,16 @@ import { variables } from '@koupr/ui'
 
 // eslint-disable-next-line
 module.exports = {
+  important: true,
   content: ['./src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
       fontFamily: {
         display: ['IBM Plex Serif'],
         body: ['IBM Plex Sans'],
+      },
+      fontSize: {
+        'base': variables.bodyFontSize,
       },
       borderRadius: {
         'DEFAULT': variables.borderRadius,

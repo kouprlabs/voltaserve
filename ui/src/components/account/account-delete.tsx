@@ -14,7 +14,6 @@ import {
   ModalOverlay,
   Text,
 } from '@chakra-ui/react'
-import { variables } from '@koupr/ui'
 import {
   Field,
   FieldAttributes,
@@ -24,7 +23,7 @@ import {
   FormikHelpers,
 } from 'formik'
 import * as Yup from 'yup'
-import classNames from 'classnames'
+import cx from 'classnames'
 import UserAPI from '@/client/idp/user'
 
 export type AccountDeleteProps = {
@@ -83,19 +82,12 @@ const AccountDelete = ({ open, onClose }: AccountDeleteProps) => {
           {({ errors, touched, isSubmitting }) => (
             <Form>
               <ModalBody>
-                <div
-                  className={classNames(
-                    'flex',
-                    'flex-col',
-                    'items-center',
-                    'gap-1',
-                  )}
-                >
+                <div className={cx('flex', 'flex-col', 'items-start', 'gap-1')}>
                   <Text>
                     Are you sure you would like to delete your account
                     permanently?
                   </Text>
-                  <Text fontWeight="semibold">
+                  <Text className={cx('font-semibold')}>
                     Type your password to confirm:
                   </Text>
                   <Field name="password">
@@ -122,7 +114,7 @@ const AccountDelete = ({ open, onClose }: AccountDeleteProps) => {
                   type="button"
                   variant="outline"
                   colorScheme="blue"
-                  mr={variables.spacingSm}
+                  className={cx('mr-1')}
                   disabled={isSubmitting}
                   onClick={() => onClose?.()}
                 >

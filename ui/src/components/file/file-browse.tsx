@@ -8,7 +8,7 @@ import {
   useToken,
 } from '@chakra-ui/react'
 import { IconChevronRight, SectionSpinner } from '@koupr/ui'
-import classNames from 'classnames'
+import cx from 'classnames'
 import { FcFolder } from 'react-icons/fc'
 import FileAPI, { File, FileType } from '@/client/api/file'
 import WorkspaceAPI from '@/client/api/workspace'
@@ -91,7 +91,7 @@ const FileBrowse = ({ onChange }: FileBrowseProps) => {
   }
 
   return (
-    <div className={classNames('flex', 'flex-col', 'gap-1')}>
+    <div className={cx('flex', 'flex-col', 'gap-1')}>
       {workspace && fileId ? (
         <Path
           rootId={workspace.rootId}
@@ -101,7 +101,7 @@ const FileBrowse = ({ onChange }: FileBrowseProps) => {
         />
       ) : null}
       <div
-        className={classNames(
+        className={cx(
           'flex',
           'flex-col',
           'gap-0',
@@ -117,7 +117,7 @@ const FileBrowse = ({ onChange }: FileBrowseProps) => {
           folders.map((f) => (
             <Box
               key={f.id}
-              className={classNames(
+              className={cx(
                 'flex',
                 'flex-row',
                 'gap-1.5',
@@ -132,18 +132,13 @@ const FileBrowse = ({ onChange }: FileBrowseProps) => {
             >
               <FcFolder fontSize="36px" style={{ flexShrink: 0 }} />
               <Text noOfLines={1}>{f.name}</Text>
-              <div className={classNames('grow')} />
+              <div className={cx('grow')} />
               <IconChevronRight />
             </Box>
           ))
         ) : (
           <div
-            className={classNames(
-              'flex',
-              'items-center',
-              'justify-center',
-              'h-full',
-            )}
+            className={cx('flex', 'items-center', 'justify-center', 'h-full')}
           >
             <Text>There are no folders.</Text>
           </div>
@@ -151,7 +146,7 @@ const FileBrowse = ({ onChange }: FileBrowseProps) => {
       </div>
       {totalPages > page && fileId ? (
         <div
-          className={classNames(
+          className={cx(
             'flex',
             'items-center',
             'justify-center',

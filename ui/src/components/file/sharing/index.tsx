@@ -15,7 +15,7 @@ import {
   TabPanel,
   Tag,
 } from '@chakra-ui/react'
-import classNames from 'classnames'
+import cx from 'classnames'
 import FileAPI, { List } from '@/client/api/file'
 import GroupAPI from '@/client/api/group'
 import { geOwnerPermission } from '@/client/api/permission'
@@ -84,12 +84,7 @@ const FileSharing = ({ list }: FileSharingProps) => {
             <TabList h="40px">
               <Tab>
                 <div
-                  className={classNames(
-                    'flex',
-                    'flex-row',
-                    'items-center',
-                    'gap-0.5',
-                  )}
+                  className={cx('flex', 'flex-row', 'items-center', 'gap-0.5')}
                 >
                   <Text>People</Text>
                   {singleFile &&
@@ -101,12 +96,7 @@ const FileSharing = ({ list }: FileSharingProps) => {
               </Tab>
               <Tab>
                 <div
-                  className={classNames(
-                    'flex',
-                    'flex-row',
-                    'items-center',
-                    'gap-0.5',
-                  )}
+                  className={cx('flex', 'flex-row', 'items-center', 'gap-0.5')}
                 >
                   <Text>Groups</Text>
                   {singleFile &&
