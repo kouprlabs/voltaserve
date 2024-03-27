@@ -49,8 +49,14 @@ const OrganizationSelector = ({ onConfirm }: OrganizationSelectorProps) => {
     'colors',
     useColorModeValue('gray.100', 'gray.600'),
   )
-  const dimmedButtonLabelColor = useColorModeValue('gray.500', 'gray.500')
-  const normalButtonLabelColor = useColorModeValue('black', 'white')
+  const dimmedButtonLabelColor = useToken(
+    'colors',
+    useColorModeValue('gray.500', 'gray.500'),
+  )
+  const normalButtonLabelColor = useToken(
+    'colors',
+    useColorModeValue('black', 'white'),
+  )
 
   useEffect(() => {
     mutate()
@@ -76,7 +82,7 @@ const OrganizationSelector = ({ onConfirm }: OrganizationSelectorProps) => {
     <>
       <Button
         variant="outline"
-        w="100%"
+        className={classNames('w-full')}
         style={{
           color: confirmed ? normalButtonLabelColor : dimmedButtonLabelColor,
         }}
@@ -137,14 +143,14 @@ const OrganizationSelector = ({ onConfirm }: OrganizationSelectorProps) => {
               {list && list.data.length > 0 && (
                 <Table variant="simple" size="sm">
                   <colgroup>
-                    <col style={{ width: '40px' }} />
-                    <col style={{ width: 'auto' }} />
+                    <col className={classNames('w-[40px]')} />
+                    <col className={classNames('w-auto')} />
                   </colgroup>
                   <Tbody>
                     {list.data.map((o) => (
                       <Tr
                         key={o.id}
-                        cursor="pointer"
+                        className={classNames('cursor-pointer')}
                         style={{
                           backgroundColor:
                             selected?.id === o.id
@@ -156,7 +162,7 @@ const OrganizationSelector = ({ onConfirm }: OrganizationSelectorProps) => {
                         <Td className={classNames('px-0.5', 'text-center')}>
                           <Radio size="md" isChecked={selected?.id === o.id} />
                         </Td>
-                        <Td px={variables.spacingXs}>
+                        <Td className={classNames('px-0.5')}>
                           <div
                             className={classNames(
                               'flex',
@@ -200,7 +206,7 @@ const OrganizationSelector = ({ onConfirm }: OrganizationSelectorProps) => {
               type="button"
               variant="outline"
               colorScheme="blue"
-              mr={variables.spacingSm}
+              className={classNames('mr-1')}
               onClick={onClose}
             >
               Cancel

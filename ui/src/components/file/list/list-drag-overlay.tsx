@@ -11,7 +11,7 @@ const ListDragOverlay = ({ file, scale, viewType }: ListDragOverlayProps) => {
   const selectionCount = useAppSelector(
     (state) => state.ui.files.selection.length,
   )
-  const green = useToken('colors', 'green.300')
+  const backgroundColor = useToken('colors', 'green.300')
 
   return (
     <DragOverlay>
@@ -37,7 +37,7 @@ const ListDragOverlay = ({ file, scale, viewType }: ListDragOverlayProps) => {
               'h-[30px]',
               'px-1',
             )}
-            style={{ backgroundColor: green }}
+            style={{ backgroundColor }}
           >
             {selectionCount}
           </div>

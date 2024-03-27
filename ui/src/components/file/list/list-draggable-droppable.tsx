@@ -47,7 +47,7 @@ const ListDraggableDroppable = ({
   })
   const [isLoading, setIsLoading] = useState(false)
   const fileListSearchParams = useFileListSearchParams()
-  const green = useToken('colors', 'green.300')
+  const borderColor = useToken('colors', 'green.300')
 
   useDndMonitor({
     onDragStart: (event: DragStartEvent) => {
@@ -125,7 +125,7 @@ const ListDraggableDroppable = ({
             { 'visible': isVisible },
             { 'invisible': !isVisible },
           )}
-          style={{ borderColor: isOver ? green : 'transparent' }}
+          style={{ borderColor: isOver ? borderColor : 'transparent' }}
           _hover={{ outline: 'none' }}
           _focus={{ outline: 'none' }}
           {...listeners}

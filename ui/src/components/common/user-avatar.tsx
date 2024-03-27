@@ -20,8 +20,7 @@ const UserAvatar = ({ user, size }: UserAvatarProps) => {
     return (
       <Avatar
         src={user.picture}
-        width={size}
-        height={size}
+        style={{ width: size, height: size }}
         border={`1px solid ${borderColor}`}
       />
     )

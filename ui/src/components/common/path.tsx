@@ -30,10 +30,10 @@ const Path = ({ rootId, fileId, maxCharacters, onClick }: PathProps) => {
   return (
     <>
       {path && !error ? (
-        <Breadcrumb overflow="hidden" flexShrink={0}>
+        <Breadcrumb className={classNames('overflow-hidden', 'shrink-0')}>
           <BreadcrumbItem>
             <BreadcrumbLink
-              whiteSpace="nowrap"
+              className={classNames('nowrap')}
               onClick={() => onClick?.(rootId)}
             >
               Home
@@ -73,11 +73,17 @@ const Path = ({ rootId, fileId, maxCharacters, onClick }: PathProps) => {
             'flex-shrink-0',
           )}
         >
-          <Skeleton w="100px" h="20px" borderRadius="20px" />
+          <Skeleton
+            className={classNames('w-[100px]', 'h-[20px]', 'rounded-[20px]')}
+          />
           <Text>/</Text>
-          <Skeleton w="100px" h="20px" borderRadius="20px" />
+          <Skeleton
+            className={classNames('w-[100px]', 'h-[20px]', 'rounded-[20px]')}
+          />
           <Text>/</Text>
-          <Skeleton w="100px" h="20px" borderRadius="20px" />
+          <Skeleton
+            className={classNames('w-[100px]', 'h-[20px]', 'rounded-[20px]')}
+          />
         </div>
       ) : null}
     </>

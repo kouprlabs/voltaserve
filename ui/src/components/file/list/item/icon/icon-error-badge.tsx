@@ -1,18 +1,26 @@
-import { Circle, Tooltip } from '@chakra-ui/react'
+import { Circle, Tooltip, useToken } from '@chakra-ui/react'
+import classNames from 'classnames'
 import { IoClose } from 'react-icons/io5'
 
-const IconErrorBadge = () => (
-  <Tooltip label="An error occured while processing this item">
-    <Circle
-      color="darkorange"
-      bg="white"
-      size="23px"
-      border="1px solid"
-      borderColor="gray.200"
-    >
-      <IoClose fontSize="14px" color="red" />
-    </Circle>
-  </Tooltip>
-)
+const IconErrorBadge = () => {
+  const borderColor = useToken('colors', 'gray.200')
+  return (
+    <Tooltip label="An error occured while processing this item">
+      <Circle
+        className={classNames(
+          'text-orange-600',
+          'bg-white',
+          'w-[23px]',
+          'h-[23px]',
+          'border',
+          'border-solid',
+        )}
+        style={{ borderColor }}
+      >
+        <IoClose className={classNames('text-red-600', 'text-[14px]')} />
+      </Circle>
+    </Tooltip>
+  )
+}
 
 export default IconErrorBadge

@@ -17,6 +17,7 @@ import {
   Avatar,
   Radio,
   useColorModeValue,
+  useToken,
 } from '@chakra-ui/react'
 import { SectionSpinner, Pagination, SearchInput, variables } from '@koupr/ui'
 import classNames from 'classnames'
@@ -59,9 +60,18 @@ const UserSelector = ({
     },
     swrConfig(),
   )
-  const selectionColor = useColorModeValue('gray.100', 'gray.600')
-  const dimmedButtonLabelColor = useColorModeValue('gray.500', 'gray.500')
-  const normalButtonLabelColor = useColorModeValue('black', 'white')
+  const selectionColor = useToken(
+    'colors',
+    useColorModeValue('gray.100', 'gray.600'),
+  )
+  const dimmedButtonLabelColor = useToken(
+    'colors',
+    useColorModeValue('gray.500', 'gray.500'),
+  )
+  const normalButtonLabelColor = useToken(
+    'colors',
+    useColorModeValue('black', 'white'),
+  )
 
   useEffect(() => {
     mutate()
@@ -86,9 +96,11 @@ const UserSelector = ({
     <>
       <Button
         variant="outline"
-        w="100%"
+        className={classNames('w-full')}
+        style={{
+          color: value ? normalButtonLabelColor : dimmedButtonLabelColor,
+        }}
         onClick={onOpen}
-        color={value ? normalButtonLabelColor : dimmedButtonLabelColor}
       >
         {value ? userToString(value) : 'Select User'}
       </Button>
@@ -145,18 +157,18 @@ const UserSelector = ({
               {list && list.data.length > 0 && (
                 <Table variant="simple" size="sm">
                   <colgroup>
-                    <col style={{ width: '40px' }} />
-                    <col style={{ width: 'auto' }} />
+                    <col className={classNames('w-[40px]')} />
+                    <col className={classNames('w-[auto]')} />
                   </colgroup>
                   <Tbody>
                     {list.data.map((u) => (
                       <Tr
                         key={u.id}
-                        cursor="pointer"
+                        className={classNames('cursor-pointer')}
                         bg={selected?.id === u.id ? selectionColor : 'auto'}
                         onClick={() => setSelected(u)}
                       >
-                        <Td px={variables.spacingXs} textAlign="center">
+                        <Td className={classNames('px-0.5', 'text-center')}>
                           <Radio size="md" isChecked={selected?.id === u.id} />
                         </Td>
                         <Td px={variables.spacingXs}>
@@ -171,10 +183,9 @@ const UserSelector = ({
                             <Avatar
                               name={u.fullName}
                               size="sm"
-                              width="40px"
-                              height="40px"
+                              className={classNames('w-[40px]', 'h-[40px]')}
                             />
-                            <Text fontSize={variables.bodyFontSize}>
+                            <Text className={classNames('text-base')}>
                               {userToString(u)}
                             </Text>
                           </div>
@@ -204,7 +215,7 @@ const UserSelector = ({
               type="button"
               variant="outline"
               colorScheme="blue"
-              mr={variables.spacingSm}
+              className={classNames('mr-1')}
               onClick={onClose}
             >
               Cancel

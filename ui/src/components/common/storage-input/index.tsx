@@ -2,61 +2,7 @@ import { useState } from 'react'
 import { Input, Select } from '@chakra-ui/react'
 import { FieldAttributes, FieldProps } from 'formik'
 import classNames from 'classnames'
-import {
-  byteToGigabyte,
-  byteToMegabyte,
-  byteToTerabyte,
-  gigabyteToByte,
-  megabyteToByte,
-  terabyteToByte,
-} from '@/helpers/convert-storage'
-
-type Unit = 'b' | 'mb' | 'gb' | 'tb'
-
-function getUnit(value: number): Unit {
-  if (value >= 1e12) {
-    return 'tb'
-  }
-  if (value >= 1e9) {
-    return 'gb'
-  }
-  if (value >= 1e6) {
-    return 'mb'
-  }
-  return 'b'
-}
-
-function convertFromByte(value: number, unit: Unit): number {
-  if (unit === 'b') {
-    return value
-  }
-  if (unit === 'mb') {
-    return byteToMegabyte(value)
-  }
-  if (unit === 'gb') {
-    return byteToGigabyte(value)
-  }
-  if (unit === 'tb') {
-    return byteToTerabyte(value)
-  }
-  throw new Error(`Invalid unit: ${unit}`)
-}
-
-function normalizeToByte(value: number, unit: Unit) {
-  if (unit === 'b') {
-    return value
-  }
-  if (unit === 'mb') {
-    return megabyteToByte(value)
-  }
-  if (unit === 'gb') {
-    return gigabyteToByte(value)
-  }
-  if (unit === 'tb') {
-    return terabyteToByte(value)
-  }
-  throw new Error(`Invalid unit: ${unit}`)
-}
+import { Unit, convertFromByte, getUnit, normalizeToByte } from './convert'
 
 const StorageInput = ({ id, field, form }: FieldAttributes<FieldProps>) => {
   const [value, setValue] = useState<number | null>(
@@ -88,8 +34,7 @@ const StorageInput = ({ id, field, form }: FieldAttributes<FieldProps>) => {
           />
           <Select
             defaultValue={unit}
-            flexShrink={0}
-            w="auto"
+            className={classNames('shrink-0', 'w-auto')}
             disabled={form.isSubmitting}
             onChange={(event) => {
               const newUnit = event.target.value as Unit
