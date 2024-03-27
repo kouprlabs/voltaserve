@@ -1,6 +1,6 @@
 import { useState, MouseEvent } from 'react'
 import { useParams } from 'react-router-dom'
-import { Box, useToken } from '@chakra-ui/react'
+import { useToken } from '@chakra-ui/react'
 import { useSWRConfig } from 'swr'
 import {
   DragCancelEvent,
@@ -94,16 +94,17 @@ const ListDraggableDroppable = ({
   return (
     <>
       {file.type === FileType.File ? (
-        <Box
+        <div
           ref={setDraggableNodeRef}
           className={classNames(
             'border-2',
             'border-transparent',
-            { 'visible': isVisible },
-            { 'hidden': !isVisible },
+            'hover:outline-none',
+            'focus:outline-none',
           )}
-          _hover={{ outline: 'none' }}
-          _focus={{ outline: 'none' }}
+          style={{
+            visibility: isVisible ? 'visible' : 'hidden',
+          }}
           {...listeners}
           {...attributes}
         >
@@ -114,20 +115,20 @@ const ListDraggableDroppable = ({
             isSelectionMode={isSelectionMode}
             onContextMenu={onContextMenu}
           />
-        </Box>
+        </div>
       ) : null}
       {file.type === FileType.Folder ? (
-        <Box
+        <div
           ref={setDraggableNodeRef}
           className={classNames(
             'border-2',
             'rounded-md',
+            'hover:outline-none',
+            'focus:outline-none',
             { 'visible': isVisible },
             { 'invisible': !isVisible },
           )}
           style={{ borderColor: isOver ? borderColor : 'transparent' }}
-          _hover={{ outline: 'none' }}
-          _focus={{ outline: 'none' }}
           {...listeners}
           {...attributes}
         >
@@ -142,7 +143,7 @@ const ListDraggableDroppable = ({
               onContextMenu={onContextMenu}
             />
           </div>
-        </Box>
+        </div>
       ) : null}
     </>
   )
