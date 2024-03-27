@@ -17,7 +17,7 @@ import { Spinner, variables } from '@koupr/ui'
 import { IconAdd, IconCheck, IconTrash } from '@koupr/ui'
 import { KeyedMutator, useSWRConfig } from 'swr'
 import { Select } from 'chakra-react-select'
-import classNames from 'classnames'
+import cx from 'classnames'
 import FileAPI, { GroupPermission, List } from '@/client/api/file'
 import { Group } from '@/client/api/group'
 import { geEditorPermission } from '@/client/api/permission'
@@ -113,10 +113,10 @@ const SharingGroups = ({
   )
 
   return (
-    <div className={classNames('flex', 'flex-col', 'gap-1.5')}>
+    <div className={cx('flex', 'flex-col', 'gap-1.5')}>
       {!groups ? <SharingFormSkeleton /> : null}
       {groups && groups.length > 0 ? (
-        <div className={classNames('flex', 'flex-col', 'gap-1.5')}>
+        <div className={cx('flex', 'flex-col', 'gap-1.5')}>
           <GroupSelector
             value={activeGroup}
             organizationId={workspace?.organization.id}
@@ -149,15 +149,8 @@ const SharingGroups = ({
         </div>
       ) : null}
       {groups && groups.length === 0 ? (
-        <div className={classNames('flex', 'items-center', 'justify-center')}>
-          <div
-            className={classNames(
-              'flex',
-              'flex-col',
-              'items-center',
-              'gap-1.5',
-            )}
-          >
+        <div className={cx('flex', 'items-center', 'justify-center')}>
+          <div className={cx('flex', 'flex-col', 'items-center', 'gap-1.5')}>
             <Text>This organization has no groups.</Text>
             {workspace &&
             geEditorPermission(workspace.organization.permission) ? (
@@ -176,16 +169,12 @@ const SharingGroups = ({
         <>
           <hr />
           {!permissions ? (
-            <div
-              className={classNames('flex', 'items-center', 'justify-center')}
-            >
+            <div className={cx('flex', 'items-center', 'justify-center')}>
               <Spinner />
             </div>
           ) : null}
           {permissions && permissions.length === 0 ? (
-            <div
-              className={classNames('flex', 'items-center', 'justify-center')}
-            >
+            <div className={cx('flex', 'items-center', 'justify-center')}>
               <Text>Not shared with any groups.</Text>
             </div>
           ) : null}
@@ -203,7 +192,7 @@ const SharingGroups = ({
                   <Tr key={p.id}>
                     <Td p={variables.spacingSm}>
                       <div
-                        className={classNames(
+                        className={cx(
                           'flex',
                           'flex-row',
                           'items-center',

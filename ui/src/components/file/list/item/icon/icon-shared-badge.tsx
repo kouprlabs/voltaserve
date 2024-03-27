@@ -1,5 +1,5 @@
 import { Circle, Tooltip, useToken } from '@chakra-ui/react'
-import classNames from 'classnames'
+import cx from 'classnames'
 import { FiUsers } from 'react-icons/fi'
 
 const IconSharedBadge = () => {
@@ -7,7 +7,7 @@ const IconSharedBadge = () => {
   return (
     <Tooltip label="This item is shared">
       <Circle
-        className={classNames(
+        className={cx(
           'text-orange-600',
           'bg-white',
           'w-[23px]',

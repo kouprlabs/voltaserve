@@ -13,7 +13,7 @@ import {
   Button,
 } from '@chakra-ui/react'
 import { IconDeleteListItem, IconUpload } from '@koupr/ui'
-import classNames from 'classnames'
+import cx from 'classnames'
 import UploadList from '@/components/file/upload/upload-list'
 import { completedUploadsCleared } from '@/store/entities/uploads'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
@@ -47,14 +47,7 @@ const TopBarUploadDrawer = () => {
 
   return (
     <>
-      <div
-        className={classNames(
-          'flex',
-          'items-center',
-          'justify-center',
-          'relative',
-        )}
-      >
+      <div className={cx('flex', 'items-center', 'justify-center', 'relative')}>
         <IconButton
           ref={buttonRef}
           icon={<IconUpload size="14px" />}

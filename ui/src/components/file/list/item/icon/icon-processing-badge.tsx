@@ -5,7 +5,7 @@ import {
   useColorModeValue,
   useToken,
 } from '@chakra-ui/react'
-import classNames from 'classnames'
+import cx from 'classnames'
 
 const IconProcessingBadge = () => {
   const spinnerColor = useToken(
@@ -16,7 +16,7 @@ const IconProcessingBadge = () => {
   return (
     <Tooltip label="Processing in progress">
       <Circle
-        className={classNames(
+        className={cx(
           'text-purple-600',
           'bg-white',
           'w-[23px]',

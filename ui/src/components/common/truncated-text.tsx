@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { Text } from '@chakra-ui/react'
-import classNames from 'classnames'
+import cx from 'classnames'
 
 export type TruncateTextProps = {
   text: string
@@ -20,7 +20,7 @@ const TruncatedText = ({ text, maxCharacters }: TruncateTextProps) => {
     <Text
       as="span"
       ref={elementRef}
-      className={classNames('whitespace-nowrap', 'overflow-hidden')}
+      className={cx('whitespace-nowrap', 'overflow-hidden')}
     >
       {text}
     </Text>

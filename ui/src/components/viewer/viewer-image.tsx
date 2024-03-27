@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { SectionSpinner } from '@koupr/ui'
-import classNames from 'classnames'
+import cx from 'classnames'
 import { File } from '@/client/api/file'
 import { getAccessTokenOrRedirect } from '@/infra/token'
 
@@ -28,11 +28,9 @@ const ViewerImage = ({ file }: ViewerImageProps) => {
   }
 
   return (
-    <div
-      className={classNames('flex', 'flex-col', 'w-full', 'h-full', 'gap-1.5')}
-    >
+    <div className={cx('flex', 'flex-col', 'w-full', 'h-full', 'gap-1.5')}>
       <div
-        className={classNames(
+        className={cx(
           'relative',
           'flex',
           'items-center',

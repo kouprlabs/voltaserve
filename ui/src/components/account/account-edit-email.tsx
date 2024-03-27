@@ -22,7 +22,7 @@ import {
   FormikHelpers,
 } from 'formik'
 import * as Yup from 'yup'
-import classNames from 'classnames'
+import cx from 'classnames'
 import UserAPI, { User } from '@/client/idp/user'
 
 export type AccountEditEmailProps = {
@@ -110,7 +110,7 @@ const AccountEditEmail = ({ open, user, onClose }: AccountEditEmailProps) => {
                   type="button"
                   variant="outline"
                   colorScheme="blue"
-                  className={classNames('mr-1')}
+                  className={cx('mr-1')}
                   disabled={isSubmitting}
                   onClick={() => onClose?.()}
                 >

@@ -10,7 +10,7 @@ import {
   useDraggable,
   useDroppable,
 } from '@dnd-kit/core'
-import classNames from 'classnames'
+import cx from 'classnames'
 import FileAPI, { FileType, List } from '@/client/api/file'
 import useFileListSearchParams from '@/hooks/use-file-list-params'
 import store from '@/store/configure-store'
@@ -96,7 +96,7 @@ const ListDraggableDroppable = ({
       {file.type === FileType.File ? (
         <div
           ref={setDraggableNodeRef}
-          className={classNames(
+          className={cx(
             'border-2',
             'border-transparent',
             'hover:outline-none',
@@ -120,7 +120,7 @@ const ListDraggableDroppable = ({
       {file.type === FileType.Folder ? (
         <div
           ref={setDraggableNodeRef}
-          className={classNames(
+          className={cx(
             'border-2',
             'rounded-md',
             'hover:outline-none',

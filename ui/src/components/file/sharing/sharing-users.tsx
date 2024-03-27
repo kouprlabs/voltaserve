@@ -17,7 +17,7 @@ import { Spinner, variables } from '@koupr/ui'
 import { IconCheck, IconTrash, IconUserPlus } from '@koupr/ui'
 import { KeyedMutator, useSWRConfig } from 'swr'
 import { Select } from 'chakra-react-select'
-import classNames from 'classnames'
+import cx from 'classnames'
 import FileAPI, { List, UserPermission } from '@/client/api/file'
 import { geEditorPermission } from '@/client/api/permission'
 import { User } from '@/client/api/user'
@@ -126,18 +126,11 @@ const SharingUsers = ({
   }, [workspace, navigate, dispatch])
 
   return (
-    <div className={classNames('flex', 'flex-col', 'gap-1.5')}>
+    <div className={cx('flex', 'flex-col', 'gap-1.5')}>
       {!users ? <SharingFormSkeleton /> : null}
       {users && users.length === 0 ? (
-        <div className={classNames('flex', 'items-center', 'justify-center')}>
-          <div
-            className={classNames(
-              'flex',
-              'flex-col',
-              'items-center',
-              'gap-1.5',
-            )}
-          >
+        <div className={cx('flex', 'items-center', 'justify-center')}>
+          <div className={cx('flex', 'flex-col', 'items-center', 'gap-1.5')}>
             <Text>This organization has no members.</Text>
             {workspace &&
             geEditorPermission(workspace.organization.permission) ? (
@@ -152,7 +145,7 @@ const SharingUsers = ({
         </div>
       ) : null}
       {users && users.length > 0 ? (
-        <div className={classNames('flex', 'flex-col', 'gap-1.5')}>
+        <div className={cx('flex', 'flex-col', 'gap-1.5')}>
           <UserSelector
             value={activeUser}
             organizationId={workspace?.organization.id}
@@ -188,16 +181,12 @@ const SharingUsers = ({
         <>
           <hr />
           {!permissions ? (
-            <div
-              className={classNames('flex', 'items-center', 'justify-center')}
-            >
+            <div className={cx('flex', 'items-center', 'justify-center')}>
               <Spinner />
             </div>
           ) : null}
           {permissions && permissions.length === 0 ? (
-            <div
-              className={classNames('flex', 'items-center', 'justify-center')}
-            >
+            <div className={cx('flex', 'items-center', 'justify-center')}>
               <Text>Not shared with any users.</Text>
             </div>
           ) : null}
@@ -216,7 +205,7 @@ const SharingUsers = ({
                     <Tr key={p.id}>
                       <Td p={variables.spacingSm}>
                         <div
-                          className={classNames(
+                          className={cx(
                             'flex',
                             'flex-row',
                             'items-center',
@@ -230,13 +219,7 @@ const SharingUsers = ({
                             width="40px"
                             height="40px"
                           />
-                          <div
-                            className={classNames(
-                              'flex',
-                              'flex-col',
-                              'gap-0.5',
-                            )}
-                          >
+                          <div className={cx('flex', 'flex-col', 'gap-0.5')}>
                             <Text noOfLines={1}>{p.user.fullName}</Text>
                             <Text color="gray">{p.user.email}</Text>
                           </div>

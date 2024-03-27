@@ -24,7 +24,7 @@ import {
   FormikHelpers,
 } from 'formik'
 import * as Yup from 'yup'
-import classNames from 'classnames'
+import cx from 'classnames'
 import GroupAPI, { Group } from '@/client/api/group'
 
 export type GroupDeleteProps = {
@@ -83,7 +83,7 @@ const GroupDelete = ({ open, group, onClose }: GroupDeleteProps) => {
           {({ errors, touched, isSubmitting }) => (
             <Form>
               <ModalBody>
-                <div className={classNames('flex', 'flex-col', 'gap-1.5')}>
+                <div className={cx('flex', 'flex-col', 'gap-1.5')}>
                   <Text>Are you sure you would like to delete this group?</Text>
                   <Text>
                     Please type <b>{group.name}</b> to confirm.

@@ -36,7 +36,7 @@ import {
   IconCheck,
 } from '@koupr/ui'
 import { useSWRConfig } from 'swr'
-import classNames from 'classnames'
+import cx from 'classnames'
 import { FiChevronDown } from 'react-icons/fi'
 import { LuGrid, LuList, LuX } from 'react-icons/lu'
 import FileAPI, { List, SortBy, SortOrder } from '@/client/api/file'
@@ -118,7 +118,7 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
   const folderUploadInput = useRef<HTMLInputElement>(null)
   const fileListSearchParams = useFileListSearchParams()
   const { data: folder } = FileAPI.useGetById(fileId)
-  const stackClassName = classNames('flex', 'flex-row', 'gap-0.5')
+  const stackClassName = cx('flex', 'flex-row', 'gap-0.5')
   const grayColor = useToken('colors', 'gray.500')
 
   const handleFileChange = useCallback(
@@ -386,7 +386,7 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
           onClick={handleRefresh}
         />
         <Spacer />
-        <div className={classNames('flex', 'flex-row', 'gap-2.5')}>
+        <div className={cx('flex', 'flex-row', 'gap-2.5')}>
           <Slider
             w="120px"
             value={iconScale}
@@ -397,7 +397,7 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
             onChange={handleIconScaleChange}
           >
             <SliderTrack>
-              <div className={classNames('relative')} />
+              <div className={cx('relative')} />
               <SliderFilledTrack />
             </SliderTrack>
             <SliderThumb boxSize={8}>

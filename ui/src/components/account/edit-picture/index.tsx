@@ -21,7 +21,7 @@ import {
   FormikHelpers,
 } from 'formik'
 import * as Yup from 'yup'
-import classNames from 'classnames'
+import cx from 'classnames'
 import UserAPI, { User } from '@/client/idp/user'
 import EditPictureUpload from './edit-picture-upload'
 
@@ -119,12 +119,7 @@ const AccountEditPicture = ({
             <Form>
               <ModalBody>
                 <div
-                  className={classNames(
-                    'flex',
-                    'flex-col',
-                    'items-center',
-                    'gap-1',
-                  )}
+                  className={cx('flex', 'flex-col', 'items-center', 'gap-1')}
                 >
                   <Field name="picture">
                     {({ field }: FieldAttributes<FieldProps>) => (
@@ -152,7 +147,7 @@ const AccountEditPicture = ({
                   type="button"
                   variant="outline"
                   colorScheme="blue"
-                  className={classNames('mr-1')}
+                  className={cx('mr-1')}
                   disabled={isSubmitting}
                   onClick={() => onClose?.()}
                 >
@@ -161,7 +156,7 @@ const AccountEditPicture = ({
                 <Button
                   variant="outline"
                   colorScheme="red"
-                  className={classNames('mr-1')}
+                  className={cx('mr-1')}
                   isLoading={deletionInProgress}
                   disabled={!user.picture}
                   onClick={handleDelete}

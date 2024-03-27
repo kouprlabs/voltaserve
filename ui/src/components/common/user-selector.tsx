@@ -20,7 +20,7 @@ import {
   useToken,
 } from '@chakra-ui/react'
 import { SectionSpinner, Pagination, SearchInput, variables } from '@koupr/ui'
-import classNames from 'classnames'
+import cx from 'classnames'
 import UserAPI, { SortOrder, User } from '@/client/api/user'
 import { swrConfig } from '@/client/options'
 import userToString from '@/helpers/user-to-string'
@@ -96,7 +96,7 @@ const UserSelector = ({
     <>
       <Button
         variant="outline"
-        className={classNames('w-full')}
+        className={cx('w-full')}
         style={{
           color: value ? normalButtonLabelColor : dimmedButtonLabelColor,
         }}
@@ -115,14 +115,14 @@ const UserSelector = ({
           <ModalHeader>Select User</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            <div className={classNames('flex', 'flex-col', 'gap-1.5')}>
+            <div className={cx('flex', 'flex-col', 'gap-1.5')}>
               <SearchInput
                 query={query}
                 onChange={(value) => setQuery(value)}
               />
               {!list && error && (
                 <div
-                  className={classNames(
+                  className={cx(
                     'flex',
                     'items-center',
                     'justify-center',
@@ -135,7 +135,7 @@ const UserSelector = ({
               {!list && !error && <SectionSpinner />}
               {list && list.data.length === 0 && (
                 <div
-                  className={classNames(
+                  className={cx(
                     'flex',
                     'items-center',
                     'justify-center',
@@ -143,7 +143,7 @@ const UserSelector = ({
                   )}
                 >
                   <div
-                    className={classNames(
+                    className={cx(
                       'flex',
                       'flex-col',
                       'items-center',
@@ -157,23 +157,23 @@ const UserSelector = ({
               {list && list.data.length > 0 && (
                 <Table variant="simple" size="sm">
                   <colgroup>
-                    <col className={classNames('w-[40px]')} />
-                    <col className={classNames('w-[auto]')} />
+                    <col className={cx('w-[40px]')} />
+                    <col className={cx('w-[auto]')} />
                   </colgroup>
                   <Tbody>
                     {list.data.map((u) => (
                       <Tr
                         key={u.id}
-                        className={classNames('cursor-pointer')}
+                        className={cx('cursor-pointer')}
                         bg={selected?.id === u.id ? selectionColor : 'auto'}
                         onClick={() => setSelected(u)}
                       >
-                        <Td className={classNames('px-0.5', 'text-center')}>
+                        <Td className={cx('px-0.5', 'text-center')}>
                           <Radio size="md" isChecked={selected?.id === u.id} />
                         </Td>
                         <Td px={variables.spacingXs}>
                           <div
-                            className={classNames(
+                            className={cx(
                               'flex',
                               'flex-row',
                               'items-center',
@@ -183,9 +183,9 @@ const UserSelector = ({
                             <Avatar
                               name={u.fullName}
                               size="sm"
-                              className={classNames('w-[40px]', 'h-[40px]')}
+                              className={cx('w-[40px]', 'h-[40px]')}
                             />
-                            <Text className={classNames('text-base')}>
+                            <Text className={cx('text-base')}>
                               {userToString(u)}
                             </Text>
                           </div>
@@ -196,7 +196,7 @@ const UserSelector = ({
                 </Table>
               )}
               {list && (
-                <div className={classNames('self-end')}>
+                <div className={cx('self-end')}>
                   {list.totalPages > 1 ? (
                     <Pagination
                       uiSize="md"
@@ -215,7 +215,7 @@ const UserSelector = ({
               type="button"
               variant="outline"
               colorScheme="blue"
-              className={classNames('mr-1')}
+              className={cx('mr-1')}
               onClick={onClose}
             >
               Cancel

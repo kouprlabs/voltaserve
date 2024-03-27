@@ -8,7 +8,7 @@ import {
   usePagePagination,
   variables,
 } from '@koupr/ui'
-import classNames from 'classnames'
+import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import FileAPI from '@/client/api/file'
 import WorkspaceAPI from '@/client/api/workspace'
@@ -77,7 +77,7 @@ const WorkspaceFilesPage = () => {
     <>
       <Helmet>{workspace && <title>{workspace.name}</title>}</Helmet>
       <div
-        className={classNames(
+        className={cx(
           'flex',
           'flex-col',
           'w-full',
@@ -99,7 +99,7 @@ const WorkspaceFilesPage = () => {
         ) : null}
         <FileToolbar list={list} />
         <div
-          className={classNames(
+          className={cx(
             'flex',
             'flex-col',
             'gap-1.5',
@@ -109,7 +109,7 @@ const WorkspaceFilesPage = () => {
           )}
         >
           <div
-            className={classNames(
+            className={cx(
               'w-full',
               'overflow-y-auto',
               'overflow-x-hidden',
@@ -126,7 +126,7 @@ const WorkspaceFilesPage = () => {
           >
             {isLoading ? (
               <div
-                className={classNames(
+                className={cx(
                   'flex',
                   'items-center',
                   'justify-center',

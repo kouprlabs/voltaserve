@@ -10,7 +10,7 @@ import {
   useToken,
 } from '@chakra-ui/react'
 import { variables } from '@koupr/ui'
-import classNames from 'classnames'
+import cx from 'classnames'
 import { SnapshotStatus } from '@/client/api/file'
 import relativeDate from '@/helpers/relative-date'
 import store from '@/store/configure-store'
@@ -146,7 +146,7 @@ const ListItem = ({
 
   return (
     <Box
-      className={classNames(
+      className={cx(
         'relative',
         'flex',
         { 'flex-col': viewType === FileViewType.Grid },
@@ -186,7 +186,7 @@ const ListItem = ({
         />
       ) : null}
       <div
-        className={classNames('flex', 'items-center', 'justify-center')}
+        className={cx('flex', 'items-center', 'justify-center')}
         style={{ width, minHeight }}
       >
         <ItemIcon
@@ -197,7 +197,7 @@ const ListItem = ({
         />
       </div>
       <div
-        className={classNames(
+        className={cx(
           'px-0.5',
           { 'flex': viewType === FileViewType.List },
           { 'block': viewType === FileViewType.Grid },

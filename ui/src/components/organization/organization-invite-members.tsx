@@ -25,7 +25,7 @@ import {
   FormikHelpers,
 } from 'formik'
 import * as Yup from 'yup'
-import classNames from 'classnames'
+import cx from 'classnames'
 import InvitationAPI from '@/client/api/invitation'
 import EmailTokenizer from '@/components/common/email-tokenizer'
 import parseEmailList from '@/helpers/parse-email-list'
@@ -103,7 +103,7 @@ const OrganizationInviteMembers = ({
           {({ values, errors, touched, isSubmitting }) => (
             <Form>
               <ModalBody>
-                <div className={classNames('flex', 'flex-col', 'gap-1.5')}>
+                <div className={cx('flex', 'flex-col', 'gap-1.5')}>
                   <Field name="emails">
                     {({ field }: FieldAttributes<FieldProps>) => (
                       <FormControl

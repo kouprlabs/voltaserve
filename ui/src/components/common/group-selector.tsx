@@ -20,7 +20,7 @@ import {
   useToken,
 } from '@chakra-ui/react'
 import { SectionSpinner, Pagination, SearchInput } from '@koupr/ui'
-import classNames from 'classnames'
+import cx from 'classnames'
 import GroupAPI, { Group, SortOrder } from '@/client/api/group'
 import { swrConfig } from '@/client/options'
 
@@ -83,7 +83,7 @@ const GroupSelector = ({
     <>
       <Button
         variant="outline"
-        className={classNames('w-full')}
+        className={cx('w-full')}
         onClick={onOpen}
         style={{
           color: value ? normalButtonLabelColor : dimmedButtonLabelColor,
@@ -102,14 +102,14 @@ const GroupSelector = ({
           <ModalHeader>Select Group</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            <div className={classNames('flex', 'flex-col', 'gap-1.5')}>
+            <div className={cx('flex', 'flex-col', 'gap-1.5')}>
               <SearchInput
                 query={query}
                 onChange={(value) => setQuery(value)}
               />
               {!list && error && (
                 <div
-                  className={classNames(
+                  className={cx(
                     'flex',
                     'items-center',
                     'justify-center',
@@ -122,7 +122,7 @@ const GroupSelector = ({
               {!list && !error && <SectionSpinner />}
               {list && list.data.length === 0 && (
                 <div
-                  className={classNames(
+                  className={cx(
                     'flex',
                     'items-center',
                     'justify-center',
@@ -130,7 +130,7 @@ const GroupSelector = ({
                   )}
                 >
                   <div
-                    className={classNames(
+                    className={cx(
                       'flex',
                       'flex-col',
                       'items-center',
@@ -151,7 +151,7 @@ const GroupSelector = ({
                     {list.data.map((g) => (
                       <Tr
                         key={g.id}
-                        className={classNames('cursor-pointer')}
+                        className={cx('cursor-pointer')}
                         style={{
                           backgroundColor:
                             selected?.id === g.id
@@ -160,12 +160,12 @@ const GroupSelector = ({
                         }}
                         onClick={() => setSelected(g)}
                       >
-                        <Td className={classNames('px-0.5', 'text-center')}>
+                        <Td className={cx('px-0.5', 'text-center')}>
                           <Radio size="md" isChecked={selected?.id === g.id} />
                         </Td>
-                        <Td className={classNames('px-0.5')}>
+                        <Td className={cx('px-0.5')}>
                           <div
-                            className={classNames(
+                            className={cx(
                               'flex',
                               'flex-row',
                               'items-center',
@@ -175,11 +175,9 @@ const GroupSelector = ({
                             <Avatar
                               name={g.name}
                               size="sm"
-                              className={classNames('w-[40px]', 'h-[40px]')}
+                              className={cx('w-[40px]', 'h-[40px]')}
                             />
-                            <Text className={classNames('text-base')}>
-                              {g.name}
-                            </Text>
+                            <Text className={cx('text-base')}>{g.name}</Text>
                           </div>
                         </Td>
                       </Tr>
@@ -188,7 +186,7 @@ const GroupSelector = ({
                 </Table>
               )}
               {list && (
-                <div className={classNames('self-end')}>
+                <div className={cx('self-end')}>
                   {list.totalPages > 1 ? (
                     <Pagination
                       uiSize="md"
@@ -207,7 +205,7 @@ const GroupSelector = ({
               type="button"
               variant="outline"
               colorScheme="blue"
-              className={classNames('mr-1')}
+              className={cx('mr-1')}
               onClick={onClose}
             >
               Cancel

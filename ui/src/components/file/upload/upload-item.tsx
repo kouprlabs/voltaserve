@@ -16,7 +16,7 @@ import {
   IconAlertCircleFill,
   variables,
 } from '@koupr/ui'
-import classNames from 'classnames'
+import cx from 'classnames'
 import {
   Upload,
   UploadDecorator,
@@ -36,9 +36,9 @@ const UploadItem = ({ upload: uploadProp }: UploadItemProps) => {
   const redColor = useToken('colors', 'red')
 
   return (
-    <div className={classNames('flex', 'flex-col', 'gap-1')}>
+    <div className={cx('flex', 'flex-col', 'gap-1')}>
       <div
-        className={classNames(
+        className={cx(
           'flex',
           'flex-row',
           'items-center',
@@ -57,17 +57,17 @@ const UploadItem = ({ upload: uploadProp }: UploadItemProps) => {
           />
         )}
         {upload.isPending && (
-          <div className={classNames('shrink-0')} style={{ color: grayColor }}>
+          <div className={cx('shrink-0')} style={{ color: grayColor }}>
             <IconTime fontSize="21px" />
           </div>
         )}
         {upload.isSucceeded && (
-          <div className={classNames('shrink-0')} style={{ color: greenColor }}>
+          <div className={cx('shrink-0')} style={{ color: greenColor }}>
             <IconCheckCircleFill fontSize="22px" />
           </div>
         )}
         {upload.isFailed && (
-          <div className={classNames('shrink-0')} style={{ color: redColor }}>
+          <div className={cx('shrink-0')} style={{ color: redColor }}>
             <IconAlertCircleFill fontSize="22px" />
           </div>
         )}
@@ -95,7 +95,7 @@ const UploadItem = ({ upload: uploadProp }: UploadItemProps) => {
         <Accordion allowMultiple>
           <AccordionItem border="none">
             <AccordionButton p={variables.spacingXs} _hover={{ bg: 'red.50' }}>
-              <div className={classNames('flex', 'flex-row', 'w-full')}>
+              <div className={cx('flex', 'flex-row', 'w-full')}>
                 <Text color="red" flexGrow={1} textAlign="left">
                   Upload failed. Click to expand.
                 </Text>

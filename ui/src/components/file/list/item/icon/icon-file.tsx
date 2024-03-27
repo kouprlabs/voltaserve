@@ -1,4 +1,4 @@
-import classNames from 'classnames'
+import cx from 'classnames'
 import { SnapshotStatus } from '@/client/api/file'
 import { FileCommonProps } from '@/types/file'
 import IconErrorBadge from './icon-error-badge'
@@ -15,10 +15,10 @@ const IconFile = ({ file, scale, viewType }: IconFileProps) => (
     {file.thumbnail ? (
       <IconThumbnail file={file} scale={scale} />
     ) : (
-      <div className={classNames('relative')}>
+      <div className={cx('relative')}>
         <IconFont file={file} scale={scale} />
         <div
-          className={classNames(
+          className={cx(
             'absolute',
             'flex',
             'flex-row',

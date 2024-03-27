@@ -26,7 +26,7 @@ import {
   useSensor,
   DragStartEvent,
 } from '@dnd-kit/core'
-import classNames from 'classnames'
+import cx from 'classnames'
 import { FileWithPath, useDropzone } from 'react-dropzone'
 import { List as ApiFileList } from '@/client/api/file'
 import {
@@ -144,7 +144,7 @@ const FileList = ({ list, scale }: FileListProps) => {
   return (
     <>
       <div
-        className={classNames(
+        className={cx(
           'border-2',
           { 'border-green-300': isDragActive },
           { 'border-transparent': !isDragActive },
@@ -160,7 +160,7 @@ const FileList = ({ list, scale }: FileListProps) => {
         >
           {list.totalElements === 0 && (
             <div
-              className={classNames(
+              className={cx(
                 'flex',
                 'items-center',
                 'justify-center',
@@ -197,7 +197,7 @@ const FileList = ({ list, scale }: FileListProps) => {
           ) : null}
           {viewType === FileViewType.List && list.totalElements > 0 ? (
             <div
-              className={classNames(
+              className={cx(
                 'flex',
                 'flex-col',
                 'gap-0.5',

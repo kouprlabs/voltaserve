@@ -10,7 +10,7 @@ import {
   useColorMode,
 } from '@chakra-ui/react'
 import { IconEdit, IconTrash, SectionSpinner } from '@koupr/ui'
-import classNames from 'classnames'
+import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import { IoWarning } from 'react-icons/io5'
 import StorageAPI from '@/client/api/storage'
@@ -26,7 +26,7 @@ const EditButton = (props: IconButtonProps) => (
   <IconButton icon={<IconEdit />} w="40px" h="40px" {...props} />
 )
 
-const Spacer = () => <div className={classNames('grow')} />
+const Spacer = () => <div className={cx('grow')} />
 
 const AccountSettingsPage = () => {
   const { colorMode, toggleColorMode } = useColorMode()
@@ -37,8 +37,8 @@ const AccountSettingsPage = () => {
   const [isEmailModalOpen, setIsEmailModalOpen] = useState(false)
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
-  const sectionClassName = classNames('flex', 'flex-col', 'gap-1', 'py-1.5')
-  const rowClassName = classNames(
+  const sectionClassName = cx('flex', 'flex-col', 'gap-1', 'py-1.5')
+  const rowClassName = cx(
     'flex',
     'flex-row',
     'items-center',
@@ -58,7 +58,7 @@ const AccountSettingsPage = () => {
       <Helmet>
         <title>{user.fullName}</title>
       </Helmet>
-      <div className={classNames('flex', 'flex-col', 'gap-0')}>
+      <div className={cx('flex', 'flex-col', 'gap-0')}>
         <div className={sectionClassName}>
           <Text fontWeight="bold">Storage Usage</Text>
           {storageUsageError && <Text>Failed to load storage usage.</Text>}
@@ -81,7 +81,7 @@ const AccountSettingsPage = () => {
         <Divider />
         <div className={sectionClassName}>
           <Text fontWeight="bold">Basics</Text>
-          <div className={classNames(rowClassName)}>
+          <div className={cx(rowClassName)}>
             <Text>Full name</Text>
             <Spacer />
             <Text>{user.fullName}</Text>
@@ -96,11 +96,11 @@ const AccountSettingsPage = () => {
         <Divider />
         <div className={sectionClassName}>
           <Text fontWeight="bold">Credentials</Text>
-          <div className={classNames(rowClassName)}>
+          <div className={cx(rowClassName)}>
             <Text>Email</Text>
             <Spacer />
             {user.pendingEmail && (
-              <div className={classNames('flex', 'flex-row', 'items-center')}>
+              <div className={cx('flex', 'flex-row', 'items-center')}>
                 <Tooltip label="Please check your inbox to confirm your email.">
                   <span>
                     <IoWarning fontSize="20px" color="gold" />
@@ -119,7 +119,7 @@ const AccountSettingsPage = () => {
               }}
             />
           </div>
-          <div className={classNames(rowClassName)}>
+          <div className={cx(rowClassName)}>
             <Text>Password</Text>
             <Spacer />
             <EditButton
@@ -133,7 +133,7 @@ const AccountSettingsPage = () => {
         <Divider />
         <div className={sectionClassName}>
           <Text fontWeight="bold">Theme</Text>
-          <div className={classNames(rowClassName)}>
+          <div className={cx(rowClassName)}>
             <Text>Dark mode</Text>
             <Spacer />
             <Switch
@@ -145,7 +145,7 @@ const AccountSettingsPage = () => {
         <Divider />
         <div className={sectionClassName}>
           <Text fontWeight="bold">Advanced</Text>
-          <div className={classNames(rowClassName)}>
+          <div className={cx(rowClassName)}>
             <Text>Delete account</Text>
             <Spacer />
             <IconButton

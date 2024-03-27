@@ -1,6 +1,6 @@
 import { useToken } from '@chakra-ui/react'
 import { DragOverlay } from '@dnd-kit/core'
-import classNames from 'classnames'
+import cx from 'classnames'
 import { useAppSelector } from '@/store/hook'
 import { FileCommonProps } from '@/types/file'
 import ListItem from './item'
@@ -15,7 +15,7 @@ const ListDragOverlay = ({ file, scale, viewType }: ListDragOverlayProps) => {
 
   return (
     <DragOverlay>
-      <div className={classNames('relative')}>
+      <div className={cx('relative')}>
         <ListItem
           file={file}
           scale={scale}
@@ -24,7 +24,7 @@ const ListDragOverlay = ({ file, scale, viewType }: ListDragOverlayProps) => {
         />
         {selectionCount > 1 ? (
           <div
-            className={classNames(
+            className={cx(
               'absolute',
               'flex',
               'items-center',

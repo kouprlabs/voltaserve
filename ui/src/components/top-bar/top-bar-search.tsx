@@ -16,7 +16,7 @@ import {
   InputRightElement,
 } from '@chakra-ui/react'
 import { IconClose, IconSearch } from '@koupr/ui'
-import classNames from 'classnames'
+import cx from 'classnames'
 import { decodeQuery, encodeQuery } from '@/helpers/query'
 
 const TopBarSearch = () => {
@@ -186,7 +186,7 @@ const TopBarSearch = () => {
   }
 
   return (
-    <div className={classNames('flex', 'flex-row', 'gap-0.5')}>
+    <div className={cx('flex', 'flex-row', 'gap-0.5')}>
       <InputGroup>
         <InputLeftElement pointerEvents="none">
           <Icon as={IconSearch} color="gray.300" />

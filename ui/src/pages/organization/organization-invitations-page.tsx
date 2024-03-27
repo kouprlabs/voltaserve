@@ -26,7 +26,7 @@ import {
   PagePagination,
   usePagePagination,
 } from '@koupr/ui'
-import classNames from 'classnames'
+import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import InvitationAPI, { SortBy, SortOrder } from '@/client/api/invitation'
 import OrganizationAPI from '@/client/api/organization'
@@ -104,21 +104,14 @@ const OrganizationInvitationsPage = () => {
       {list && list.data.length === 0 ? (
         <>
           <div
-            className={classNames(
+            className={cx(
               'flex',
               'items-center',
               'justify-center',
               'h-[300px]',
             )}
           >
-            <div
-              className={classNames(
-                'flex',
-                'flex-col',
-                'gap-1.5',
-                'items-center',
-              )}
-            >
+            <div className={cx('flex', 'flex-col', 'gap-1.5', 'items-center')}>
               <Text>This organization has no invitations.</Text>
               {geEditorPermission(org.permission) && (
                 <Button
@@ -140,7 +133,7 @@ const OrganizationInvitationsPage = () => {
         </>
       ) : null}
       {list && list.data.length > 0 ? (
-        <div className={classNames('flex', 'flex-col', 'gap-3.5', 'py-3.5')}>
+        <div className={cx('flex', 'flex-col', 'gap-3.5', 'py-3.5')}>
           <Table variant="simple">
             <Thead>
               <Tr>

@@ -29,7 +29,7 @@ import {
   PagePagination,
   usePagePagination,
 } from '@koupr/ui'
-import classNames from 'classnames'
+import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import { HiDotsVertical } from 'react-icons/hi'
 import GroupAPI from '@/client/api/group'
@@ -91,7 +91,7 @@ const GroupMembersPage = () => {
         <title>{group.name}</title>
       </Helmet>
       {list.data.length > 0 && (
-        <div className={classNames('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
+        <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
           <Table variant="simple">
             <Thead>
               <Tr>
@@ -105,7 +105,7 @@ const GroupMembersPage = () => {
                 <Tr key={u.id}>
                   <Td>
                     <div
-                      className={classNames(
+                      className={cx(
                         'flex',
                         'flex-row',
                         'gap-1.5',
@@ -176,21 +176,14 @@ const GroupMembersPage = () => {
             <title>{group.name}</title>
           </Helmet>
           <div
-            className={classNames(
+            className={cx(
               'flex',
               'items-center',
               'justify-center',
               'h-[300px]',
             )}
           >
-            <div
-              className={classNames(
-                'flex',
-                'flex-col',
-                'gap-1.5',
-                'items-center',
-              )}
-            >
+            <div className={cx('flex', 'flex-col', 'gap-1.5', 'items-center')}>
               <Text>This group has no members.</Text>
               {geEditorPermission(group.permission) && (
                 <Button

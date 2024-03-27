@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { Tag, Wrap, WrapItem } from '@chakra-ui/react'
 import { variables } from '@koupr/ui'
-import classNames from 'classnames'
+import cx from 'classnames'
 import parseEmailList from '@/helpers/parse-email-list'
 
 export type EmailTokenizerProps = {
@@ -16,11 +16,7 @@ const EmailTokenizer = ({ value }: EmailTokenizerProps) => {
         <Wrap spacing={variables.spacingXs}>
           {emails.map((email, index) => (
             <WrapItem key={index}>
-              <Tag
-                size="md"
-                variant="solid"
-                className={classNames('rounded-full')}
-              >
+              <Tag size="md" variant="solid" className={cx('rounded-full')}>
                 {email}
               </Tag>
             </WrapItem>

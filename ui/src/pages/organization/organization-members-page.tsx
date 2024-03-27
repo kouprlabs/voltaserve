@@ -30,7 +30,7 @@ import {
   PagePagination,
   usePagePagination,
 } from '@koupr/ui'
-import classNames from 'classnames'
+import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import OrganizationAPI from '@/client/api/organization'
 import { geEditorPermission } from '@/client/api/permission'
@@ -98,7 +98,7 @@ const OrganizationMembersPage = () => {
         <title>{org.name}</title>
       </Helmet>
       {list.data.length > 0 && (
-        <div className={classNames('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
+        <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
           <Table variant="simple">
             <Thead>
               <Tr>
@@ -112,7 +112,7 @@ const OrganizationMembersPage = () => {
                 <Tr key={u.id}>
                   <Td>
                     <div
-                      className={classNames(
+                      className={cx(
                         'flex',
                         'flex-row',
                         'gap-1.5',
@@ -179,21 +179,14 @@ const OrganizationMembersPage = () => {
       {list.data.length === 0 && (
         <>
           <div
-            className={classNames(
+            className={cx(
               'flex',
               'items-center',
               'justify-center',
               'h=[300px]',
             )}
           >
-            <div
-              className={classNames(
-                'flex',
-                'flex-col',
-                'gap-1.5',
-                'items-center',
-              )}
-            >
+            <div className={cx('flex', 'flex-col', 'gap-1.5', 'items-center')}>
               <Text>This organization has no members.</Text>
               {geEditorPermission(org.permission) && (
                 <Button

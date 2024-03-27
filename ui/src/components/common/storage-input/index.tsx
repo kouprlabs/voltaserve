@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Input, Select } from '@chakra-ui/react'
 import { FieldAttributes, FieldProps } from 'formik'
-import classNames from 'classnames'
+import cx from 'classnames'
 import { Unit, convertFromByte, getUnit, normalizeToByte } from './convert'
 
 const StorageInput = ({ id, field, form }: FieldAttributes<FieldProps>) => {
@@ -15,8 +15,8 @@ const StorageInput = ({ id, field, form }: FieldAttributes<FieldProps>) => {
   return (
     <>
       <input id={id} type="hidden" {...field} />
-      <div className={classNames('flex', 'flex-col', 'gap-1.5')}>
-        <div className={classNames('flex', 'flex-row', 'gap-0.5')}>
+      <div className={cx('flex', 'flex-col', 'gap-1.5')}>
+        <div className={cx('flex', 'flex-row', 'gap-0.5')}>
           <Input
             type="number"
             disabled={form.isSubmitting}
@@ -34,7 +34,7 @@ const StorageInput = ({ id, field, form }: FieldAttributes<FieldProps>) => {
           />
           <Select
             defaultValue={unit}
-            className={classNames('shrink-0', 'w-auto')}
+            className={cx('shrink-0', 'w-auto')}
             disabled={form.isSubmitting}
             onChange={(event) => {
               const newUnit = event.target.value as Unit

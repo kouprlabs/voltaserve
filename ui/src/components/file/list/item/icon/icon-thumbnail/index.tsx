@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Image, Skeleton, useColorModeValue, useToken } from '@chakra-ui/react'
 import { IconPlay, variables } from '@koupr/ui'
-import classNames from 'classnames'
+import cx from 'classnames'
 import { File, SnapshotStatus } from '@/client/api/file'
 import * as fe from '@/helpers/file-extension'
 import IconErrorBadge from '../icon-error-badge'
@@ -25,7 +25,7 @@ const IconThumbnail = ({ file, scale }: IconThumbnailProps) => {
     useColorModeValue('gray.300', 'gray.700'),
   )
   return (
-    <div className={classNames('relative')} style={{ width, height }}>
+    <div className={cx('relative')} style={{ width, height }}>
       <Image
         src={file.thumbnail?.base64}
         style={{
@@ -35,7 +35,7 @@ const IconThumbnail = ({ file, scale }: IconThumbnailProps) => {
           borderColor,
           borderRadius: variables.borderRadiusSm,
         }}
-        className={classNames(
+        className={cx(
           'pointer-events-none',
           'object-cover',
           'border',
@@ -56,7 +56,7 @@ const IconThumbnail = ({ file, scale }: IconThumbnailProps) => {
       )}
       {fe.isVideo(original?.extension) && (
         <div
-          className={classNames(
+          className={cx(
             'absolute',
             'top-0',
             'left-0',
@@ -71,7 +71,7 @@ const IconThumbnail = ({ file, scale }: IconThumbnailProps) => {
         </div>
       )}
       <div
-        className={classNames(
+        className={cx(
           'absolute',
           'flex',
           'flex-row',

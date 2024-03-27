@@ -1,6 +1,6 @@
 import { ReactNode, useEffect } from 'react'
 import { useToast } from '@chakra-ui/react'
-import classNames from 'classnames'
+import cx from 'classnames'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { errorCleared } from '@/store/ui/error'
 
@@ -26,7 +26,7 @@ const LayoutFull = ({ children }: LayoutFullProps) => {
 
   return (
     <div
-      className={classNames(
+      className={cx(
         'relative',
         'flex',
         'flex-col',
@@ -36,7 +36,7 @@ const LayoutFull = ({ children }: LayoutFullProps) => {
       )}
     >
       <div
-        className={classNames(
+        className={cx(
           'flex',
           'items-center',
           'justify-center',

@@ -24,7 +24,7 @@ import {
   variables,
   usePagePagination,
 } from '@koupr/ui'
-import classNames from 'classnames'
+import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import WorkspaceAPI, { SortOrder } from '@/client/api/workspace'
 import { swrConfig } from '@/client/options'
@@ -61,13 +61,13 @@ const WorkspaceListPage = () => {
       <Helmet>
         <title>Workspaces</title>
       </Helmet>
-      <div className={classNames('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
+      <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
         <Heading fontSize={variables.headingFontSize} pl={variables.spacingMd}>
           Workspaces
         </Heading>
         {!list && error && (
           <div
-            className={classNames(
+            className={cx(
               'flex',
               'items-center',
               'justify-center',
@@ -80,21 +80,14 @@ const WorkspaceListPage = () => {
         {!list && !error && <SectionSpinner />}
         {list && list.data.length === 0 && !error ? (
           <div
-            className={classNames(
+            className={cx(
               'flex',
               'items-center',
               'justify-center',
               'h-[300px]',
             )}
           >
-            <div
-              className={classNames(
-                'flex',
-                'flex-col',
-                'gap-1.5',
-                'items-center',
-              )}
-            >
+            <div className={cx('flex', 'flex-col', 'gap-1.5', 'items-center')}>
               <Text>There are no workspaces.</Text>
               <CreateWorkspaceButton />
             </div>
@@ -115,7 +108,7 @@ const WorkspaceListPage = () => {
                 <Tr key={w.id}>
                   <Td>
                     <div
-                      className={classNames(
+                      className={cx(
                         'flex',
                         'flex-row',
                         'gap-1.5',

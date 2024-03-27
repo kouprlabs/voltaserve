@@ -25,7 +25,7 @@ import {
   FormikHelpers,
 } from 'formik'
 import * as Yup from 'yup'
-import classNames from 'classnames'
+import cx from 'classnames'
 import WorkspaceAPI, { Workspace } from '@/client/api/workspace'
 
 export type WorkspaceDeleteProps = {
@@ -90,7 +90,7 @@ const WorkspaceDelete = ({
           {({ errors, touched, isSubmitting }) => (
             <Form>
               <ModalBody>
-                <div className={classNames('flex', 'flex-col', 'gap-1.5')}>
+                <div className={cx('flex', 'flex-col', 'gap-1.5')}>
                   <Text>
                     Are you sure you would like to delete this workspace?
                   </Text>

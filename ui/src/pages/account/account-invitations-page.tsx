@@ -22,7 +22,7 @@ import {
   PagePagination,
   usePagePagination,
 } from '@koupr/ui'
-import classNames from 'classnames'
+import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import InvitationAPI, { SortBy, SortOrder } from '@/client/api/invitation'
 import UserAPI from '@/client/idp/user'
@@ -90,18 +90,13 @@ const AccountInvitationsPage = () => {
       </Helmet>
       {list.data.length === 0 && (
         <div
-          className={classNames(
-            'flex',
-            'items-center',
-            'justify-center',
-            'h=[300px]',
-          )}
+          className={cx('flex', 'items-center', 'justify-center', 'h=[300px]')}
         >
           <Text>There are no invitations.</Text>
         </div>
       )}
       {list.data.length > 0 && (
-        <div className={classNames('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
+        <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
           <Table variant="simple">
             <Thead>
               <Tr>

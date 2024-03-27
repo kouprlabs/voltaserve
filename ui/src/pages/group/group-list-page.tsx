@@ -24,7 +24,7 @@ import {
   variables,
   usePagePagination,
 } from '@koupr/ui'
-import classNames from 'classnames'
+import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import GroupAPI, { SortOrder } from '@/client/api/group'
 import { swrConfig } from '@/client/options'
@@ -61,13 +61,13 @@ const GroupListPage = () => {
       <Helmet>
         <title>Groups</title>
       </Helmet>
-      <div className={classNames('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
+      <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
         <Heading fontSize={variables.headingFontSize} pl={variables.spacingMd}>
           Groups
         </Heading>
         {error && (
           <div
-            className={classNames(
+            className={cx(
               'flex',
               'items-center',
               'justify-center',
@@ -80,14 +80,14 @@ const GroupListPage = () => {
         {!list && !error && <SectionSpinner />}
         {list && list.data.length === 0 && (
           <div
-            className={classNames(
+            className={cx(
               'flex',
               'items-center',
               'justify-center',
               'h-[300px]',
             )}
           >
-            <div className={classNames('flex', 'flex-col', 'gap-1.5')}>
+            <div className={cx('flex', 'flex-col', 'gap-1.5')}>
               <Text>There are no groups.</Text>
               <CreateGroupButton />
             </div>
@@ -108,7 +108,7 @@ const GroupListPage = () => {
                 <Tr key={g.id}>
                   <Td>
                     <div
-                      className={classNames(
+                      className={cx(
                         'flex',
                         'flex-row',
                         'items-center',

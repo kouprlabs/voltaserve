@@ -19,7 +19,7 @@ import {
   FormikHelpers,
 } from 'formik'
 import * as Yup from 'yup'
-import classNames from 'classnames'
+import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import AccountAPI from '@/client/idp/account'
 import Logo from '@/components/common/logo'
@@ -72,7 +72,7 @@ const SignUpPage = () => {
         </Helmet>
         {isConfirmationVisible && (
           <div
-            className={classNames(
+            className={cx(
               'flex',
               'flex-col',
               'items-center',
@@ -80,14 +80,7 @@ const SignUpPage = () => {
               'w-full',
             )}
           >
-            <div
-              className={classNames(
-                'flex',
-                'flex-col',
-                'items-center',
-                'gap-1.5',
-              )}
-            >
+            <div className={cx('flex', 'flex-col', 'items-center', 'gap-1.5')}>
               <div className="w-16">
                 <Logo isGlossy={true} />
               </div>
@@ -103,7 +96,7 @@ const SignUpPage = () => {
         )}
         {!isConfirmationVisible && (
           <div
-            className={classNames(
+            className={cx(
               'flex',
               'flex-col',
               'items-center',
@@ -131,7 +124,7 @@ const SignUpPage = () => {
               {({ errors, touched, isSubmitting }) => (
                 <Form className="w-full">
                   <div
-                    className={classNames(
+                    className={cx(
                       'flex',
                       'flex-col',
                       'items-center',
@@ -226,14 +219,7 @@ const SignUpPage = () => {
                 </Form>
               )}
             </Formik>
-            <div
-              className={classNames(
-                'flex',
-                'flex-row',
-                'items-center',
-                'gap-0.5',
-              )}
-            >
+            <div className={cx('flex', 'flex-row', 'items-center', 'gap-0.5')}>
               <Text>Already a member?</Text>
               <ChakraLink as={Link} to="/sign-in">
                 Sign In
