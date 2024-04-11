@@ -36,22 +36,21 @@ const TopBarAccountMenu = () => {
               <AccountMenuAvatarImage user={user} />
               <div className={cx('flex', 'flex-col', 'gap-0')}>
                 <Text
-                  fontWeight="semibold"
-                  flexGrow={1}
                   textOverflow="ellipsis"
                   overflow="hidden"
                   whiteSpace="nowrap"
+                  className={cx('font-semibold', 'grow')}
                 >
                   {user.fullName}
                 </Text>
-                <Text color="gray.500">{user.email}</Text>
+                <Text className={cx('text-gray-500')}>{user.email}</Text>
               </div>
             </div>
             <MenuDivider />
             <MenuItem as={Link} to="/account/settings">
               Account
             </MenuItem>
-            <MenuItem as={Link} to="/sign-out" color="red">
+            <MenuItem as={Link} to="/sign-out" className={cx('text-red-500')}>
               Sign Out
             </MenuItem>
           </MenuList>

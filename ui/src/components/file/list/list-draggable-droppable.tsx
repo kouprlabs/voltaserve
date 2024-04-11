@@ -1,6 +1,5 @@
 import { useState, MouseEvent } from 'react'
 import { useParams } from 'react-router-dom'
-import { useToken } from '@chakra-ui/react'
 import { useSWRConfig } from 'swr'
 import {
   DragCancelEvent,
@@ -47,7 +46,6 @@ const ListDraggableDroppable = ({
   })
   const [isLoading, setIsLoading] = useState(false)
   const fileListSearchParams = useFileListSearchParams()
-  const borderColor = useToken('colors', 'green.300')
 
   useDndMonitor({
     onDragStart: (event: DragStartEvent) => {
@@ -127,8 +125,9 @@ const ListDraggableDroppable = ({
             'focus:outline-none',
             { 'visible': isVisible },
             { 'invisible': !isVisible },
+            { 'border-green-300': isOver },
+            { 'border-transparent': !isOver },
           )}
-          style={{ borderColor: isOver ? borderColor : 'transparent' }}
           {...listeners}
           {...attributes}
         >

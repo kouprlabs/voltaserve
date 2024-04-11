@@ -14,7 +14,6 @@ import {
   IconTime,
   IconCheckCircleFill,
   IconAlertCircleFill,
-  variables,
 } from '@koupr/ui'
 import cx from 'classnames'
 import {
@@ -52,7 +51,7 @@ const UploadItem = ({ upload: uploadProp }: UploadItemProps) => {
             value={upload.progress}
             max={100}
             isIndeterminate={upload.progress === 100 && !upload.error}
-            color="black"
+            className={cx('text-black')}
             size="20px"
           />
         )}
@@ -72,7 +71,7 @@ const UploadItem = ({ upload: uploadProp }: UploadItemProps) => {
           </div>
         )}
         <Text
-          flexGrow={1}
+          className={cx('grow')}
           textOverflow="ellipsis"
           overflow="hidden"
           whiteSpace="nowrap"
@@ -94,15 +93,15 @@ const UploadItem = ({ upload: uploadProp }: UploadItemProps) => {
       {upload.isFailed && (
         <Accordion allowMultiple>
           <AccordionItem border="none">
-            <AccordionButton p={variables.spacingXs} _hover={{ bg: 'red.50' }}>
+            <AccordionButton className={cx('p-0.5')} _hover={{ bg: 'red.50' }}>
               <div className={cx('flex', 'flex-row', 'w-full')}>
-                <Text color="red" flexGrow={1} textAlign="left">
+                <Text className={cx('text-red-500', 'text-left', 'grow')}>
                   Upload failed. Click to expand.
                 </Text>
-                <AccordionIcon color="red" />
+                <AccordionIcon className={cx('text-red-500')} />
               </div>
             </AccordionButton>
-            <AccordionPanel p={variables.spacingXs}>
+            <AccordionPanel className={cx('p-0.5')}>
               {upload.error}
             </AccordionPanel>
           </AccordionItem>

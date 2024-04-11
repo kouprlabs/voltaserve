@@ -69,7 +69,10 @@ const AccountLayout = () => {
               onClick={() => setIsImageModalOpen(true)}
             />
           </div>
-          <Heading fontSize={variables.headingFontSize} textAlign="center">
+          <Heading
+            fontSize={variables.headingFontSize}
+            className={cx('text-center')}
+          >
             {user.fullName}
           </Heading>
         </div>
@@ -100,7 +103,7 @@ const AccountLayout = () => {
               >
                 <Text>Invitations</Text>
                 {invitationCount && invitationCount > 0 ? (
-                  <Tag borderRadius="full">{invitationCount}</Tag>
+                  <Tag className={cx('rounded-full')}>{invitationCount}</Tag>
                 ) : null}
               </div>
             </Tab>

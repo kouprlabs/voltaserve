@@ -157,9 +157,9 @@ const ResetPasswordPage = () => {
                         )}
                       </Field>
                       <Button
+                        className={cx('w-full')}
                         variant="solid"
                         colorScheme="blue"
-                        w="100%"
                         type="submit"
                         isLoading={isSubmitting}
                       >

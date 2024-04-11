@@ -123,7 +123,7 @@ const OrganizationListPage = () => {
                       <ChakraLink
                         as={Link}
                         to={`/organization/${o.id}/member`}
-                        textDecoration="none"
+                        className={cx('no-underline')}
                       >
                         <Text>{o.name}</Text>
                       </ChakraLink>

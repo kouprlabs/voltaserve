@@ -16,8 +16,6 @@ import {
   Td,
   Avatar,
   Radio,
-  useColorModeValue,
-  useToken,
 } from '@chakra-ui/react'
 import { SectionSpinner, Pagination, SearchInput, variables } from '@koupr/ui'
 import cx from 'classnames'
@@ -45,18 +43,6 @@ const OrganizationSelector = ({ onConfirm }: OrganizationSelectorProps) => {
     { query, page, size: 5, sortOrder: SortOrder.Desc },
     swrConfig(),
   )
-  const selectionColor = useToken(
-    'colors',
-    useColorModeValue('gray.100', 'gray.600'),
-  )
-  const dimmedButtonLabelColor = useToken(
-    'colors',
-    useColorModeValue('gray.500', 'gray.500'),
-  )
-  const normalButtonLabelColor = useToken(
-    'colors',
-    useColorModeValue('black', 'white'),
-  )
 
   useEffect(() => {
     mutate()
@@ -82,10 +68,13 @@ const OrganizationSelector = ({ onConfirm }: OrganizationSelectorProps) => {
     <>
       <Button
         variant="outline"
-        className={cx('w-full')}
-        style={{
-          color: confirmed ? normalButtonLabelColor : dimmedButtonLabelColor,
-        }}
+        className={cx(
+          'w-full',
+          { 'text-black': confirmed },
+          { 'dark:text-white': confirmed },
+          { 'text-gray-500': !confirmed },
+          { 'dark:text-gray-500': !confirmed },
+        )}
         onClick={onOpen}
       >
         {confirmed ? confirmed.name : 'Select Organization'}
@@ -150,13 +139,12 @@ const OrganizationSelector = ({ onConfirm }: OrganizationSelectorProps) => {
                     {list.data.map((o) => (
                       <Tr
                         key={o.id}
-                        className={cx('cursor-pointer')}
-                        style={{
-                          backgroundColor:
-                            selected?.id === o.id
-                              ? selectionColor
-                              : 'transparent',
-                        }}
+                        className={cx(
+                          'cursor-pointer',
+                          { 'bg-gray-100': selected?.id === o.id },
+                          { 'dark:bg-gray-600': selected?.id === o.id },
+                          { 'bg-transparent': selected?.id !== o.id },
+                        )}
                         onClick={() => setSelected(o)}
                       >
                         <Td className={cx('px-0.5', 'text-center')}>

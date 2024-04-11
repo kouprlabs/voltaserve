@@ -68,7 +68,7 @@ const FileViewerPage = () => {
                   'h-[80px]',
                 )}
               >
-                <Text fontSize="16px" fontWeight="500">
+                <Text fontSize="16px" className={cx('font-medium')}>
                   {file.name}
                 </Text>
               </div>

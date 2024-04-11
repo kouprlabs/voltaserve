@@ -117,7 +117,7 @@ const GroupMembersPage = () => {
                     </div>
                   </Td>
                   <Td>{u.email}</Td>
-                  <Td textAlign="right">
+                  <Td className={cx('text-right')}>
                     <Menu>
                       <MenuButton
                         as={IconButton}
@@ -130,7 +130,7 @@ const GroupMembersPage = () => {
                         <MenuList>
                           <MenuItem
                             icon={<IconExit />}
-                            color="red"
+                            className={cx('text-red-500')}
                             isDisabled={!geEditorPermission(group.permission)}
                             onClick={() => {
                               setUserToRemove(u)

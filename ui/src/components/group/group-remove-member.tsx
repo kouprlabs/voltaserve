@@ -11,6 +11,7 @@ import {
   Text,
 } from '@chakra-ui/react'
 import { variables } from '@koupr/ui'
+import { cx } from '@emotion/css'
 import GroupAPI, { Group } from '@/client/api/group'
 import { User } from '@/client/idp/user'
 import userToString from '@/helpers/user-to-string'
@@ -58,11 +59,11 @@ const GroupRemoveMember = ({
         <ModalBody>
           <Text>
             Are you sure you would like to remove member{' '}
-            <Text as="span" fontWeight="bold">
+            <Text as="span" className={cx('font-bold')}>
               {userToString(user)}
             </Text>{' '}
             from group{' '}
-            <Text as="span" fontWeight="bold">
+            <Text as="span" className={cx('font-bold')}>
               {group.name}
             </Text>
             ?

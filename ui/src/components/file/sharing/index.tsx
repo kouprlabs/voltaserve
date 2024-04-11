@@ -81,7 +81,7 @@ const FileSharing = ({ list }: FileSharingProps) => {
         <ModalCloseButton />
         <ModalBody>
           <Tabs>
-            <TabList h="40px">
+            <TabList className={cx('h-[40px]')}>
               <Tab>
                 <div
                   className={cx('flex', 'flex-row', 'items-center', 'gap-0.5')}
@@ -90,7 +90,9 @@ const FileSharing = ({ list }: FileSharingProps) => {
                   {singleFile &&
                   userPermissions &&
                   userPermissions.length > 0 ? (
-                    <Tag borderRadius="full">{userPermissions.length}</Tag>
+                    <Tag className={cx('rounded-full')}>
+                      {userPermissions.length}
+                    </Tag>
                   ) : null}
                 </div>
               </Tab>
@@ -102,7 +104,9 @@ const FileSharing = ({ list }: FileSharingProps) => {
                   {singleFile &&
                   groupPermissions &&
                   groupPermissions.length > 0 ? (
-                    <Tag borderRadius="full">{groupPermissions.length}</Tag>
+                    <Tag className={cx('rounded-full')}>
+                      {groupPermissions.length}
+                    </Tag>
                   ) : null}
                 </div>
               </Tab>

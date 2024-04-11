@@ -270,7 +270,7 @@ const FileList = ({ list, scale }: FileListProps) => {
             <MenuDivider />
             <MenuItem
               icon={<IconTrash />}
-              color="red"
+              className={cx('text-red-500')}
               isDisabled={
                 singleFile ? ltOwnerPermission(singleFile.permission) : false
               }

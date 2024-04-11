@@ -16,8 +16,6 @@ import {
   Td,
   Avatar,
   Radio,
-  useColorModeValue,
-  useToken,
 } from '@chakra-ui/react'
 import { SectionSpinner, Pagination, SearchInput } from '@koupr/ui'
 import cx from 'classnames'
@@ -47,18 +45,6 @@ const GroupSelector = ({
     { query, organizationId, page, size: 5, sortOrder: SortOrder.Desc },
     swrConfig(),
   )
-  const selectionColor = useToken(
-    'colors',
-    useColorModeValue('gray.100', 'gray.600'),
-  )
-  const dimmedButtonLabelColor = useToken(
-    'colors',
-    useColorModeValue('gray.500', 'gray.500'),
-  )
-  const normalButtonLabelColor = useToken(
-    'colors',
-    useColorModeValue('black', 'white'),
-  )
 
   useEffect(() => {
     mutate()
@@ -83,11 +69,14 @@ const GroupSelector = ({
     <>
       <Button
         variant="outline"
-        className={cx('w-full')}
+        className={cx(
+          'w-full',
+          { 'text-black': value },
+          { 'dark:text-white': value },
+          { 'text-gray-500': !value },
+          { 'dark:text-gray-500': !value },
+        )}
         onClick={onOpen}
-        style={{
-          color: value ? normalButtonLabelColor : dimmedButtonLabelColor,
-        }}
       >
         {value ? value.name : 'Select Group'}
       </Button>
@@ -144,20 +133,19 @@ const GroupSelector = ({
               {list && list.data.length > 0 && (
                 <Table variant="simple" size="sm">
                   <colgroup>
-                    <col style={{ width: '40px' }} />
-                    <col style={{ width: 'auto' }} />
+                    <col className={cx('w-[40px]')} />
+                    <col className={cx('w-[auto]')} />
                   </colgroup>
                   <Tbody>
                     {list.data.map((g) => (
                       <Tr
                         key={g.id}
-                        className={cx('cursor-pointer')}
-                        style={{
-                          backgroundColor:
-                            selected?.id === g.id
-                              ? selectionColor
-                              : 'transparent',
-                        }}
+                        className={cx(
+                          'cursor-pointer',
+                          { 'bg-gray-100': selected?.id === g.id },
+                          { 'dark:bg-gray-600': selected?.id === g.id },
+                          { 'bg-transparent': selected?.id !== g.id },
+                        )}
                         onClick={() => setSelected(g)}
                       >
                         <Td className={cx('px-0.5', 'text-center')}>

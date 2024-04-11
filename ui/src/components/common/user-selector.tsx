@@ -16,10 +16,8 @@ import {
   Td,
   Avatar,
   Radio,
-  useColorModeValue,
-  useToken,
 } from '@chakra-ui/react'
-import { SectionSpinner, Pagination, SearchInput, variables } from '@koupr/ui'
+import { SectionSpinner, Pagination, SearchInput } from '@koupr/ui'
 import cx from 'classnames'
 import UserAPI, { SortOrder, User } from '@/client/api/user'
 import { swrConfig } from '@/client/options'
@@ -60,18 +58,6 @@ const UserSelector = ({
     },
     swrConfig(),
   )
-  const selectionColor = useToken(
-    'colors',
-    useColorModeValue('gray.100', 'gray.600'),
-  )
-  const dimmedButtonLabelColor = useToken(
-    'colors',
-    useColorModeValue('gray.500', 'gray.500'),
-  )
-  const normalButtonLabelColor = useToken(
-    'colors',
-    useColorModeValue('black', 'white'),
-  )
 
   useEffect(() => {
     mutate()
@@ -96,10 +82,13 @@ const UserSelector = ({
     <>
       <Button
         variant="outline"
-        className={cx('w-full')}
-        style={{
-          color: value ? normalButtonLabelColor : dimmedButtonLabelColor,
-        }}
+        className={cx(
+          'w-full',
+          { 'text-black': value },
+          { 'dark:text-white': value },
+          { 'text-gray-500': !value },
+          { 'dark:text-gray-500': !value },
+        )}
         onClick={onOpen}
       >
         {value ? userToString(value) : 'Select User'}
@@ -164,14 +153,18 @@ const UserSelector = ({
                     {list.data.map((u) => (
                       <Tr
                         key={u.id}
-                        className={cx('cursor-pointer')}
-                        bg={selected?.id === u.id ? selectionColor : 'auto'}
+                        className={cx(
+                          'cursor-pointer',
+                          { 'bg-gray-100': selected?.id === u.id },
+                          { 'dark:bg-gray-600': selected?.id === u.id },
+                          { 'bg-transparent': selected?.id !== u.id },
+                        )}
                         onClick={() => setSelected(u)}
                       >
                         <Td className={cx('px-0.5', 'text-center')}>
                           <Radio size="md" isChecked={selected?.id === u.id} />
                         </Td>
-                        <Td px={variables.spacingXs}>
+                        <Td className={cx('p-0.5')}>
                           <div
                             className={cx(
                               'flex',

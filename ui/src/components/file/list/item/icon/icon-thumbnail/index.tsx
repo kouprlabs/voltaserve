@@ -48,11 +48,7 @@ const IconThumbnail = ({ file, scale }: IconThumbnailProps) => {
         onLoad={() => setIsLoading(false)}
       />
       {isLoading && (
-        <Skeleton
-          width={width}
-          height={height}
-          borderRadius={variables.borderRadiusSm}
-        />
+        <Skeleton width={width} height={height} className={cx('rounded-md')} />
       )}
       {fe.isVideo(original?.extension) && (
         <div
@@ -67,7 +63,7 @@ const IconThumbnail = ({ file, scale }: IconThumbnailProps) => {
           )}
           style={{ width, height }}
         >
-          <IconPlay fontSize="40px" color="white" />
+          <IconPlay fontSize="40px" className={cx('text-white')} />
         </div>
       )}
       <div

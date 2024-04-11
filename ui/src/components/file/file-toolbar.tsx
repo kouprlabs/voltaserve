@@ -15,7 +15,6 @@ import {
   SliderTrack,
   SliderFilledTrack,
   SliderThumb,
-  useToken,
 } from '@chakra-ui/react'
 import {
   IconAdd,
@@ -119,7 +118,6 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
   const fileListSearchParams = useFileListSearchParams()
   const { data: folder } = FileAPI.useGetById(fileId)
   const stackClassName = cx('flex', 'flex-row', 'gap-0.5')
-  const grayColor = useToken('colors', 'gray.500')
 
   const handleFileChange = useCallback(
     async (event: ChangeEvent<HTMLInputElement>) => {
@@ -194,7 +192,7 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
       if (value === sortBy) {
         return <IconCheck />
       } else {
-        return <IconCheck color="transparent" />
+        return <IconCheck className={cx('text-transparent')} />
       }
     },
     [sortBy],
@@ -281,7 +279,7 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
           {selectionCount > 0 && hasOwnerPermission && (
             <Button
               leftIcon={<IconTrash />}
-              color="red"
+              className={cx('text-red-500')}
               onClick={() => dispatch(deleteModalDidOpen())}
             >
               Delete
@@ -319,7 +317,7 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
                   <MenuDivider />
                   <MenuItem
                     icon={<IconTrash />}
-                    color="red"
+                    className={cx('text-red-500')}
                     isDisabled={selectionCount === 0 || !hasOwnerPermission}
                     onClick={() => dispatch(deleteModalDidOpen())}
                   >
@@ -388,7 +386,7 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
         <Spacer />
         <div className={cx('flex', 'flex-row', 'gap-2.5')}>
           <Slider
-            w="120px"
+            className={cx('w-[120px]')}
             value={iconScale}
             min={ICON_SCALE_SLIDER_MIN}
             max={ICON_SCALE_SLIDER_MAX}
@@ -401,7 +399,7 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
               <SliderFilledTrack />
             </SliderTrack>
             <SliderThumb boxSize={8}>
-              <IconGridFill style={{ color: grayColor }} />
+              <IconGridFill className={cx('text-gray-500')} />
             </SliderThumb>
           </Slider>
           <div className={stackClassName}>

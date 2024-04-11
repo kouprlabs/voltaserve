@@ -60,11 +60,11 @@ const NotificationDrawerNewInvitationItem = ({
     <div className={cx('flex', 'flex-col', 'gap-0.5')}>
       <Text>
         You have been invited by{' '}
-        <Text as="span" fontWeight="bold">
+        <Text as="span" className={cx('font-bold')}>
           {userToString(invitation.owner)}
         </Text>{' '}
         to join the organization{' '}
-        <Text as="span" fontWeight="bold">
+        <Text as="span" className={cx('font-bold')}>
           {invitation.organization.name}
         </Text>
         .<br />

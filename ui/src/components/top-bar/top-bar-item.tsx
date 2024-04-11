@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
-import { Link as ChakraLink, useColorModeValue } from '@chakra-ui/react'
-import { variables } from '@koupr/ui'
+import { Link as ChakraLink } from '@chakra-ui/react'
+import cx from 'classnames'
 
 export type TopBarItemProps = {
   title: string
@@ -8,26 +8,33 @@ export type TopBarItemProps = {
   isActive: boolean
 }
 
-const TopBarItem = ({ title, href, isActive }: TopBarItemProps) => {
-  const activeTextColor = useColorModeValue('white', 'gray.800')
-  const activeBgColor = useColorModeValue('black', 'white')
-  return (
-    <ChakraLink
-      as={Link}
-      to={href}
-      padding="0 20px 0 20px"
-      bg={isActive ? activeBgColor : 'transparent'}
-      color={isActive ? activeTextColor : ''}
-      fontWeight="semibold"
-      h="40px"
-      lineHeight="40px"
-      borderRadius={variables.borderRadiusMd}
-      variant="no-underline"
-      className="opacity-100 hover:opacity-80"
-    >
-      {title}
-    </ChakraLink>
-  )
-}
+const TopBarItem = ({ title, href, isActive }: TopBarItemProps) => (
+  <ChakraLink
+    as={Link}
+    to={href}
+    lineHeight="40px"
+    variant="no-underline"
+    className={cx(
+      'opacity-100',
+      'hover:opacity-80',
+      'h-[40px]',
+      'rounded-xl',
+      'pt-0',
+      'pr-[20px]',
+      'pb-0',
+      'pl-[20px]',
+      'font-semibold',
+      {
+        'text-white': isActive,
+        'dark:text-gray-600': isActive,
+        'bg-black': isActive,
+        'dark:bg-white': isActive,
+        'bg-transparent': !isActive,
+      },
+    )}
+  >
+    {title}
+  </ChakraLink>
+)
 
 export default TopBarItem

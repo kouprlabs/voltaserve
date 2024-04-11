@@ -13,7 +13,7 @@ import {
   Badge,
   Avatar,
 } from '@chakra-ui/react'
-import { Spinner, variables } from '@koupr/ui'
+import { Spinner } from '@koupr/ui'
 import { IconAdd, IconCheck, IconTrash } from '@koupr/ui'
 import { KeyedMutator, useSWRConfig } from 'swr'
 import { Select } from 'chakra-react-select'
@@ -190,7 +190,7 @@ const SharingGroups = ({
               <Tbody>
                 {permissions.map((p) => (
                   <Tr key={p.id}>
-                    <Td p={variables.spacingSm}>
+                    <Td className={cx('p-1')}>
                       <div
                         className={cx(
                           'flex',
@@ -211,7 +211,7 @@ const SharingGroups = ({
                     <Td>
                       <Badge>{p.permission}</Badge>
                     </Td>
-                    <Td textAlign="end">
+                    <Td className={cx('text-end')}>
                       <IconButton
                         icon={<IconTrash />}
                         colorScheme="red"

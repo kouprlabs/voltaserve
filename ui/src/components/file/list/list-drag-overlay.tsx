@@ -1,4 +1,3 @@
-import { useToken } from '@chakra-ui/react'
 import { DragOverlay } from '@dnd-kit/core'
 import cx from 'classnames'
 import { useAppSelector } from '@/store/hook'
@@ -11,7 +10,6 @@ const ListDragOverlay = ({ file, scale, viewType }: ListDragOverlayProps) => {
   const selectionCount = useAppSelector(
     (state) => state.ui.files.selection.length,
   )
-  const backgroundColor = useToken('colors', 'green.300')
 
   return (
     <DragOverlay>
@@ -36,8 +34,8 @@ const ListDragOverlay = ({ file, scale, viewType }: ListDragOverlayProps) => {
               'min-w-[30px]',
               'h-[30px]',
               'px-1',
+              'bg-green-300',
             )}
-            style={{ backgroundColor }}
           >
             {selectionCount}
           </div>

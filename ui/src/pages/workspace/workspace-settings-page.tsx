@@ -65,7 +65,7 @@ const WorkspaceSettingsPage = () => {
       </Helmet>
       <div className={cx('flex', 'flex-col', 'gap-0')}>
         <div className={sectionClassName}>
-          <Text fontWeight="bold">Storage</Text>
+          <Text className={cx('font-bold')}>Storage</Text>
           {storageUsageError && <Text>Failed to load storage usage.</Text>}
           {storageUsage && !storageUsageError && (
             <>
@@ -96,7 +96,7 @@ const WorkspaceSettingsPage = () => {
             />
           </div>
           <Divider mb={variables.spacing} />
-          <Text fontWeight="bold">Basics</Text>
+          <Text className={cx('font-bold')}>Basics</Text>
           <div className={rowClassName}>
             <Text>Name</Text>
             <Spacer />
@@ -111,7 +111,7 @@ const WorkspaceSettingsPage = () => {
           </div>
         </div>
         <div className={sectionClassName}>
-          <Text fontWeight="bold">Advanced</Text>
+          <Text className={cx('font-bold')}>Advanced</Text>
           <div className={rowClassName}>
             <Text>Delete permanently</Text>
             <Spacer />

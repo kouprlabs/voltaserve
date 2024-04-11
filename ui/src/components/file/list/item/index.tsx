@@ -209,9 +209,8 @@ const ListItem = ({
       >
         {file.type === 'folder' && (
           <ChakraLink
-            textAlign="center"
+            className={cx('text-center', 'no-underline')}
             noOfLines={3}
-            textDecoration="none"
             cursor={isSelectionMode ? 'default' : 'pointer'}
             _hover={{ textDecoration: isSelectionMode ? 'none' : 'underline' }}
             onClick={isSelectionMode ? undefined : handleFolderLinkClick}
@@ -221,9 +220,8 @@ const ListItem = ({
         )}
         {file.type === 'file' && file.status === SnapshotStatus.Ready ? (
           <ChakraLink
-            textAlign="center"
+            className={cx('text-center', 'no-underline')}
             noOfLines={3}
-            textDecoration="none"
             cursor={isSelectionMode ? 'default' : 'pointer'}
             _hover={{ textDecoration: isSelectionMode ? 'none' : 'underline' }}
             onClick={isSelectionMode ? undefined : handleFileLinkClick}
@@ -232,12 +230,16 @@ const ListItem = ({
           </ChakraLink>
         ) : null}
         {file.type === 'file' && file.status !== SnapshotStatus.Ready ? (
-          <Text textAlign="center" noOfLines={3} onClick={handleIconClick}>
+          <Text
+            className={cx('text-center')}
+            noOfLines={3}
+            onClick={handleIconClick}
+          >
             {file.name}
           </Text>
         ) : null}
       </div>
-      <Text textAlign="center" noOfLines={3} color="gray.500">
+      <Text noOfLines={3} className={cx('text-gray-500', 'text-center')}>
         {date}
       </Text>
     </Box>

@@ -16,7 +16,7 @@ const FileInfoStorageUsage = ({ file }: FileInfoStorageUsageProps) => {
       <StatLabel>Storage usage</StatLabel>
       <StatNumber fontSize={variables.bodyFontSize}>
         <div className={cx('flex', 'flex-col', 'gap-0.5')}>
-          {error && <Text color="red">Failed to load.</Text>}
+          {error && <Text className={cx('text-red-500')}>Failed to load.</Text>}
           {data && !error && (
             <>
               <Text>

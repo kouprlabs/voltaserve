@@ -189,7 +189,7 @@ const TopBarSearch = () => {
     <div className={cx('flex', 'flex-row', 'gap-0.5')}>
       <InputGroup>
         <InputLeftElement pointerEvents="none">
-          <Icon as={IconSearch} color="gray.300" />
+          <Icon as={IconSearch} className={cx('text-gray-300')} />
         </InputLeftElement>
         <Input
           value={text}

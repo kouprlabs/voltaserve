@@ -124,7 +124,7 @@ const GroupListPage = () => {
                       <ChakraLink
                         as={Link}
                         to={`/group/${g.id}/member`}
-                        textDecoration="none"
+                        className={cx('no-underline')}
                       >
                         {g.name}
                       </ChakraLink>
@@ -134,7 +134,7 @@ const GroupListPage = () => {
                     <ChakraLink
                       as={Link}
                       to={`/organization/${g.organization.id}/member`}
-                      textDecoration="none"
+                      className={cx('no-underline')}
                     >
                       {g.organization.name}
                     </ChakraLink>

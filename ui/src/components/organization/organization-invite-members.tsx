@@ -114,9 +114,9 @@ const OrganizationInviteMembers = ({
                         <FormLabel>Comma separated emails:</FormLabel>
                         <Textarea
                           {...field}
+                          className={cx('h-[120px]')}
                           placeholder="alice@example.com, david@example.com"
                           disabled={isSubmitting}
-                          h="120px"
                         />
                         <FormErrorMessage>{errors.emails}</FormErrorMessage>
                       </FormControl>

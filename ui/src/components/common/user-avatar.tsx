@@ -1,9 +1,5 @@
-import {
-  Avatar,
-  SkeletonCircle,
-  useColorModeValue,
-  useToken,
-} from '@chakra-ui/react'
+import { Avatar, SkeletonCircle } from '@chakra-ui/react'
+import cx from 'classnames'
 import { User } from '@/client/idp/user'
 
 export type UserAvatarProps = {
@@ -12,16 +8,17 @@ export type UserAvatarProps = {
 }
 
 const UserAvatar = ({ user, size }: UserAvatarProps) => {
-  const borderColor = useToken(
-    'colors',
-    useColorModeValue('gray.300', 'gray.700'),
-  )
   if (user) {
     return (
       <Avatar
         src={user.picture}
         style={{ width: size, height: size }}
-        border={`1px solid ${borderColor}`}
+        className={cx(
+          'border',
+          'border-solid',
+          'border-gray-300',
+          'dark:border-gray-700',
+        )}
       />
     )
   } else {

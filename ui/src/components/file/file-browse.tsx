@@ -1,12 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import {
-  Box,
-  Button,
-  Text,
-  useColorModeValue,
-  useToken,
-} from '@chakra-ui/react'
+import { Box, Button, Text } from '@chakra-ui/react'
 import { IconChevronRight, SectionSpinner } from '@koupr/ui'
 import cx from 'classnames'
 import { FcFolder } from 'react-icons/fc'
@@ -27,18 +21,6 @@ const FileBrowse = ({ onChange }: FileBrowseProps) => {
   const [loading, setLoading] = useState(false)
   const [isSpinnerVisible, setIsSpinnerVisible] = useState(false)
   const [fileId, setFileId] = useState<string>()
-  const hoverColor = useToken(
-    'colors',
-    useColorModeValue('gray.100', 'gray.700'),
-  )
-  const activeColor = useToken(
-    'colors',
-    useColorModeValue('gray.200', 'gray.600'),
-  )
-  const borderColor = useToken(
-    'colors',
-    useColorModeValue('gray.300', 'gray.600'),
-  )
 
   useEffect(() => {
     if (workspace) {
@@ -110,8 +92,9 @@ const FileBrowse = ({ onChange }: FileBrowseProps) => {
           'h-[250px]',
           'xl:h-[400px]',
           'overflow-y-scroll',
+          'border-t-gray-300',
+          'dark:border-t-gray-600',
         )}
-        style={{ borderTopColor: borderColor }}
       >
         {folders.length > 0 ? (
           folders.map((f) => (
@@ -125,9 +108,11 @@ const FileBrowse = ({ onChange }: FileBrowseProps) => {
                 'cursor-pointer',
                 'p-1',
                 'rounded-md',
+                'hover:bg-gray-100',
+                'hover:dark:bg-gray-700',
+                'active:bg-gray-100',
+                'active:dark:bg-gray-700',
               )}
-              _hover={{ background: hoverColor }}
-              _active={{ background: activeColor }}
               onClick={() => setFileId(f.id)}
             >
               <FcFolder fontSize="36px" style={{ flexShrink: 0 }} />

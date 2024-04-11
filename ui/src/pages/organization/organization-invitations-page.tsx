@@ -151,7 +151,7 @@ const OrganizationInvitationsPage = () => {
                     <OrganizationStatus value={i.status} />
                   </Td>
                   <Td>{prettyDate(i.createTime)}</Td>
-                  <Td textAlign="right">
+                  <Td className={cx('text-right')}>
                     <Menu>
                       <MenuButton
                         as={IconButton}
@@ -171,7 +171,7 @@ const OrganizationInvitationsPage = () => {
                           )}
                           <MenuItem
                             icon={<IconTrash />}
-                            color="red"
+                            className={cx('text-red-500')}
                             onClick={() => handleDelete(i.id)}
                           >
                             Delete

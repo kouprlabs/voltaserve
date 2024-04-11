@@ -124,7 +124,7 @@ const WorkspaceListPage = () => {
                       <ChakraLink
                         as={Link}
                         to={`/workspace/${w.id}/file/${w.rootId}`}
-                        textDecoration="none"
+                        className={cx('no-underline')}
                       >
                         <Text>{w.name}</Text>
                       </ChakraLink>
@@ -134,7 +134,7 @@ const WorkspaceListPage = () => {
                     <ChakraLink
                       as={Link}
                       to={`/organization/${w.organization.id}/member`}
-                      textDecoration="none"
+                      className={cx('no-underline')}
                     >
                       {w.organization.name}
                     </ChakraLink>

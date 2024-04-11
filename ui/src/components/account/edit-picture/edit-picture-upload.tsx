@@ -1,11 +1,5 @@
 import { ChangeEvent, useCallback, useRef, useState } from 'react'
-import {
-  IconButton,
-  Image,
-  Text,
-  useColorModeValue,
-  useToken,
-} from '@chakra-ui/react'
+import { IconButton, Image, Text } from '@chakra-ui/react'
 import { IconEdit } from '@koupr/ui'
 import cx from 'classnames'
 
@@ -24,10 +18,6 @@ const EditPictureUpload = ({
 }: EditPictureUploadProps) => {
   const [src, setSrc] = useState<string>()
   const hiddenInput = useRef<HTMLInputElement>(null)
-  const blueColor = useToken(
-    'colors',
-    useColorModeValue('blue.600', 'blue.200'),
-  )
 
   const handleFileChange = useCallback(
     (changeEvent: ChangeEvent<HTMLInputElement>) => {
@@ -69,8 +59,9 @@ const EditPictureUpload = ({
           'rounded',
           'border',
           'border-dashed',
+          'border-blue-600',
+          'dark:border-blue-200',
         )}
-        style={{ borderColor: blueColor }}
       >
         {src || initialValue ? (
           <div className={cx('relative', 'w-[400px]', 'h-[160px]')}>
@@ -105,7 +96,9 @@ const EditPictureUpload = ({
             )}
             onClick={handleEdit}
           >
-            <Text color={blueColor}>Browse</Text>
+            <Text className={cx('text-blue-600', 'dark:text-blue-200')}>
+              Browse
+            </Text>
           </div>
         )}
       </div>

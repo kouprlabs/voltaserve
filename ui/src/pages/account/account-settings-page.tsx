@@ -23,7 +23,11 @@ import AccountEditFullName from '@/components/account/account-edit-full-name'
 import prettyBytes from '@/helpers/pretty-bytes'
 
 const EditButton = (props: IconButtonProps) => (
-  <IconButton icon={<IconEdit />} w="40px" h="40px" {...props} />
+  <IconButton
+    icon={<IconEdit />}
+    className={cx('h-[40px]', 'w-[40px]')}
+    {...props}
+  />
 )
 
 const Spacer = () => <div className={cx('grow')} />
@@ -60,7 +64,7 @@ const AccountSettingsPage = () => {
       </Helmet>
       <div className={cx('flex', 'flex-col', 'gap-0')}>
         <div className={sectionClassName}>
-          <Text fontWeight="bold">Storage Usage</Text>
+          <Text className={cx('font-bold')}>Storage Usage</Text>
           {storageUsageError && <Text>Failed to load storage usage.</Text>}
           {storageUsage && !storageUsageError && (
             <>
@@ -80,7 +84,7 @@ const AccountSettingsPage = () => {
         </div>
         <Divider />
         <div className={sectionClassName}>
-          <Text fontWeight="bold">Basics</Text>
+          <Text className={cx('font-bold')}>Basics</Text>
           <div className={cx(rowClassName)}>
             <Text>Full name</Text>
             <Spacer />
@@ -95,7 +99,7 @@ const AccountSettingsPage = () => {
         </div>
         <Divider />
         <div className={sectionClassName}>
-          <Text fontWeight="bold">Credentials</Text>
+          <Text className={cx('font-bold')}>Credentials</Text>
           <div className={cx(rowClassName)}>
             <Text>Email</Text>
             <Spacer />
@@ -103,7 +107,10 @@ const AccountSettingsPage = () => {
               <div className={cx('flex', 'flex-row', 'items-center')}>
                 <Tooltip label="Please check your inbox to confirm your email.">
                   <span>
-                    <IoWarning fontSize="20px" color="gold" />
+                    <IoWarning
+                      fontSize="20px"
+                      className={cx('text-yelow-400')}
+                    />
                   </span>
                 </Tooltip>
                 <Text>{user.pendingEmail}</Text>
@@ -132,7 +139,7 @@ const AccountSettingsPage = () => {
         </div>
         <Divider />
         <div className={sectionClassName}>
-          <Text fontWeight="bold">Theme</Text>
+          <Text className={cx('font-bold')}>Theme</Text>
           <div className={cx(rowClassName)}>
             <Text>Dark mode</Text>
             <Spacer />
@@ -144,7 +151,7 @@ const AccountSettingsPage = () => {
         </div>
         <Divider />
         <div className={sectionClassName}>
-          <Text fontWeight="bold">Advanced</Text>
+          <Text className={cx('font-bold')}>Advanced</Text>
           <div className={cx(rowClassName)}>
             <Text>Delete account</Text>
             <Spacer />
