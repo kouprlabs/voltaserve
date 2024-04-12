@@ -183,7 +183,7 @@ const OrganizationMembersPage = () => {
               'flex',
               'items-center',
               'justify-center',
-              'h=[300px]',
+              'h-[300px]',
             )}
           >
             <div className={cx('flex', 'flex-col', 'gap-1.5', 'items-center')}>
