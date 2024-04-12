@@ -9,7 +9,6 @@ import {
   Text,
   Heading,
 } from '@chakra-ui/react'
-import { variables } from '@koupr/ui'
 import {
   Field,
   FieldAttributes,
@@ -106,7 +105,7 @@ const SignInPage = () => {
           <div className="w-16">
             <Logo isGlossy={true} />
           </div>
-          <Heading fontSize={variables.headingFontSize}>
+          <Heading className={cx('text-heading')}>
             Sign In to Voltaserve
           </Heading>
           <Formik

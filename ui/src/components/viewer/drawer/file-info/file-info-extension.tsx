@@ -1,5 +1,5 @@
 import { Badge, Stat, StatLabel, StatNumber } from '@chakra-ui/react'
-import { variables } from '@koupr/ui'
+import cx from 'classnames'
 import { File } from '@/client/api/file'
 
 export type FileInfoExtensionProps = {
@@ -13,7 +13,7 @@ const FileInfoExtension = ({ file }: FileInfoExtensionProps) => {
   return (
     <Stat>
       <StatLabel>File type</StatLabel>
-      <StatNumber fontSize={variables.bodyFontSize}>
+      <StatNumber className={cx('text-base')}>
         <Badge>{file.original.extension}</Badge>
       </StatNumber>
     </Stat>

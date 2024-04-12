@@ -8,7 +8,6 @@ import {
   Heading,
   Input,
 } from '@chakra-ui/react'
-import { variables } from '@koupr/ui'
 import { useSWRConfig } from 'swr'
 import {
   Field,
@@ -70,7 +69,7 @@ const NewGroupPage = () => {
         <title>New Group</title>
       </Helmet>
       <div className={cx('flex', 'flex-col', 'gap-3.5')}>
-        <Heading fontSize={variables.headingFontSize}>New Group</Heading>
+        <Heading className={cx('text-heading')}>New Group</Heading>
         <Formik
           enableReinitialize={true}
           initialValues={{ name: '', organizationId: org || '' }}

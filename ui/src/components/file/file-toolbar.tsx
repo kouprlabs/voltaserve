@@ -405,7 +405,7 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
           <div className={stackClassName}>
             <IconButton
               icon={getSortOrderIcon()}
-              fontSize="16px"
+              className={cx('text-[16px]')}
               variant="solid"
               aria-label=""
               isDisabled={!list}
@@ -413,7 +413,7 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
             />
             <IconButton
               icon={getViewTypeIcon()}
-              fontSize="16px"
+              className={cx('text-[16px]')}
               variant="solid"
               aria-label=""
               isDisabled={!list}

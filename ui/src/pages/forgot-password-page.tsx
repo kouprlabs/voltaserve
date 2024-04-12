@@ -9,7 +9,6 @@ import {
   Text,
   Heading,
 } from '@chakra-ui/react'
-import { variables } from '@koupr/ui'
 import {
   Field,
   FieldAttributes,
@@ -72,9 +71,7 @@ const ForgotPasswordPage = () => {
           <div className="w-16">
             <Logo isGlossy={true} />
           </div>
-          <Heading fontSize={variables.headingFontSize}>
-            Forgot Password
-          </Heading>
+          <Heading className={cx('text-heading')}>Forgot Password</Heading>
           {isCompleted ? (
             <Text align="center">
               If your email belongs to an account, you will receive the recovery

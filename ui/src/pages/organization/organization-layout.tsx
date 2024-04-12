@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Outlet, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { Heading, Tab, TabList, Tabs } from '@chakra-ui/react'
-import { variables } from '@koupr/ui'
 import cx from 'classnames'
 import OrganizationAPI from '@/client/api/organization'
 import { geOwnerPermission } from '@/client/api/permission'
@@ -32,7 +31,7 @@ const OrganizationLayout = () => {
 
   return (
     <div className={cx('flex', 'flex-col', 'gap-3.5')}>
-      <Heading fontSize={variables.headingFontSize}>{org.name}</Heading>
+      <Heading className={cx('text-heading')}>{org.name}</Heading>
       <Tabs variant="solid-rounded" colorScheme="gray" index={tabIndex}>
         <TabList>
           <Tab onClick={() => navigate(`/organization/${id}/member`)}>

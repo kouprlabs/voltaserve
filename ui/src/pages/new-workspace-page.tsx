@@ -8,7 +8,6 @@ import {
   Heading,
   Input,
 } from '@chakra-ui/react'
-import { variables } from '@koupr/ui'
 import { useSWRConfig } from 'swr'
 import {
   Field,
@@ -78,7 +77,7 @@ const NewWorkspacePage = () => {
         <title>New Workspace</title>
       </Helmet>
       <div className={cx('flex', 'flex-col', 'gap-3.5')}>
-        <Heading fontSize={variables.headingFontSize}>New Workspace</Heading>
+        <Heading className={cx('text-heading')}>New Workspace</Heading>
         <Formik
           enableReinitialize={true}
           initialValues={{

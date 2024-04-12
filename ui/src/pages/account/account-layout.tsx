@@ -69,10 +69,7 @@ const AccountLayout = () => {
               onClick={() => setIsImageModalOpen(true)}
             />
           </div>
-          <Heading
-            fontSize={variables.headingFontSize}
-            className={cx('text-center')}
-          >
+          <Heading className={cx('text-center', 'text-heading')}>
             {user.fullName}
           </Heading>
         </div>

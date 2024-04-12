@@ -17,7 +17,7 @@ import {
   Avatar,
   Radio,
 } from '@chakra-ui/react'
-import { SectionSpinner, Pagination, SearchInput, variables } from '@koupr/ui'
+import { SectionSpinner, Pagination, SearchInput } from '@koupr/ui'
 import cx from 'classnames'
 import OrganizationAPI, {
   Organization,
@@ -164,9 +164,7 @@ const OrganizationSelector = ({ onConfirm }: OrganizationSelectorProps) => {
                               size="sm"
                               className={cx('w-[40px]', 'h-[40px]')}
                             />
-                            <Text fontSize={variables.bodyFontSize}>
-                              {o.name}
-                            </Text>
+                            <Text className={cx('text-base')}>{o.name}</Text>
                           </div>
                         </Td>
                       </Tr>

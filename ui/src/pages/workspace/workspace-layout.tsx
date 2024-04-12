@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Outlet, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { Heading, Tab, TabList, Tabs } from '@chakra-ui/react'
-import { variables } from '@koupr/ui'
 import cx from 'classnames'
 import WorkspaceAPI from '@/client/api/workspace'
 import { swrConfig } from '@/client/options'
@@ -29,7 +28,7 @@ const WorkspaceLayout = () => {
 
   return (
     <div className={cx('flex', 'flex-col', 'gap-3.5', 'h-full')}>
-      <Heading fontSize={variables.headingFontSize}>{workspace.name}</Heading>
+      <Heading className={cx('text-heading')}>{workspace.name}</Heading>
       <Tabs variant="solid-rounded" colorScheme="gray" index={tabIndex}>
         <TabList>
           <Tab

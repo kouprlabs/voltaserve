@@ -108,8 +108,7 @@ const AccountSettingsPage = () => {
                 <Tooltip label="Please check your inbox to confirm your email.">
                   <span>
                     <IoWarning
-                      fontSize="20px"
-                      className={cx('text-yelow-400')}
+                      className={cx('text-yelow-400', 'text-[20px]')}
                     />
                   </span>
                 </Tooltip>

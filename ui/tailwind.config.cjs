@@ -12,6 +12,7 @@ module.exports = {
       },
       fontSize: {
         'base': variables.bodyFontSize,
+        'heading': variables.headingFontSize,
       },
       borderRadius: {
         'DEFAULT': variables.borderRadius,

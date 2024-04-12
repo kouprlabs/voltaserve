@@ -18,12 +18,7 @@ import {
   Avatar,
   Badge,
 } from '@chakra-ui/react'
-import {
-  SectionSpinner,
-  PagePagination,
-  variables,
-  usePagePagination,
-} from '@koupr/ui'
+import { SectionSpinner, PagePagination, usePagePagination } from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import OrganizationAPI, { SortOrder } from '@/client/api/organization'
@@ -62,9 +57,7 @@ const OrganizationListPage = () => {
         <title>Organizations</title>
       </Helmet>
       <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
-        <Heading fontSize={variables.headingFontSize} pl={variables.spacingMd}>
-          Organizations
-        </Heading>
+        <Heading className={cx('pl-2', 'text-heading')}>Organizations</Heading>
         {!list && error && (
           <div
             className={cx(

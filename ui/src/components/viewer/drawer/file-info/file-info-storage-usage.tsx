@@ -1,5 +1,4 @@
 import { Progress, Stat, StatLabel, StatNumber, Text } from '@chakra-ui/react'
-import { variables } from '@koupr/ui'
 import cx from 'classnames'
 import { File } from '@/client/api/file'
 import StorageAPI from '@/client/api/storage'
@@ -14,7 +13,7 @@ const FileInfoStorageUsage = ({ file }: FileInfoStorageUsageProps) => {
   return (
     <Stat>
       <StatLabel>Storage usage</StatLabel>
-      <StatNumber fontSize={variables.bodyFontSize}>
+      <StatNumber className={cx('text-base')}>
         <div className={cx('flex', 'flex-col', 'gap-0.5')}>
           {error && <Text className={cx('text-red-500')}>Failed to load.</Text>}
           {data && !error && (

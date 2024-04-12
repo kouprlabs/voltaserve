@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { Link as ChakraLink, Heading, Text } from '@chakra-ui/react'
-import { variables, Spinner } from '@koupr/ui'
+import { Spinner } from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import UserAPI from '@/client/idp/user'
@@ -45,7 +45,7 @@ const UpdateEmailPage = () => {
         </div>
         {!isCompleted && !isFailed ? (
           <div className={cx('flex', 'flex-col', 'items-center', 'gap-1.5')}>
-            <Heading fontSize={variables.headingFontSize}>
+            <Heading className={cx('text-heading')}>
               Confirming your Email…
             </Heading>
             <Spinner />
@@ -53,9 +53,7 @@ const UpdateEmailPage = () => {
         ) : null}
         {isCompleted && !isFailed ? (
           <div className={cx('flex', 'flex-col', 'items-center', 'gap-1.5')}>
-            <Heading fontSize={variables.headingFontSize}>
-              Email confirmed
-            </Heading>
+            <Heading className={cx('text-heading')}>Email confirmed</Heading>
             <div className={cx('flex', 'flex-row', 'items-center', 'gap-0.5')}>
               <Text>Click the link below to go back to your account.</Text>
               <ChakraLink as={Link} to="/account/settings">
@@ -65,7 +63,7 @@ const UpdateEmailPage = () => {
           </div>
         ) : null}
         {isFailed && (
-          <Heading fontSize={variables.headingFontSize}>
+          <Heading className={cx('text-heading')}>
             An error occurred while processing your request.
           </Heading>
         )}

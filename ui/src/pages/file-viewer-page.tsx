@@ -32,7 +32,7 @@ const FileViewerPage = () => {
     } else {
       return (
         <div className={cx('flex', 'flex-col', 'gap-1.5')}>
-          <Text fontSize="16px">Cannot preview this file.</Text>
+          <Text className={cx('text-[16px]')}>Cannot preview this file.</Text>
           <Button
             leftIcon={<IconDownload />}
             colorScheme="blue"
@@ -68,7 +68,7 @@ const FileViewerPage = () => {
                   'h-[80px]',
                 )}
               >
-                <Text fontSize="16px" className={cx('font-medium')}>
+                <Text className={cx('font-medium', 'text-[16px]')}>
                   {file.name}
                 </Text>
               </div>

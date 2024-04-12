@@ -9,7 +9,6 @@ import {
   Text,
   Heading,
 } from '@chakra-ui/react'
-import { variables } from '@koupr/ui'
 import {
   Field,
   FieldAttributes,
@@ -82,7 +81,7 @@ const ResetPasswordPage = () => {
           <div className="w-16">
             <Logo isGlossy={true} />
           </div>
-          <Heading fontSize={variables.headingFontSize}>Reset Password</Heading>
+          <Heading className={cx('text-heading')}>Reset Password</Heading>
           {isCompleted ? (
             <div className={cx('flex', 'flex-row', 'items-center', 'gap-0.5')}>
               <Text align="center">Password successfully changed.</Text>

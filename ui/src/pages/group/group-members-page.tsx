@@ -122,7 +122,7 @@ const GroupMembersPage = () => {
                       <MenuButton
                         as={IconButton}
                         icon={<HiDotsVertical />}
-                        fontSize="18px"
+                        className={cx('text-[18px]')}
                         variant="ghost"
                         aria-label=""
                       />

@@ -9,7 +9,6 @@ import {
   Text,
   Heading,
 } from '@chakra-ui/react'
-import { variables } from '@koupr/ui'
 import {
   Field,
   FieldAttributes,
@@ -84,7 +83,7 @@ const SignUpPage = () => {
               <div className="w-16">
                 <Logo isGlossy={true} />
               </div>
-              <Heading fontSize={variables.headingFontSize}>
+              <Heading className={cx('text-heading')}>
                 Thanks! We just sent you a confirmation email
               </Heading>
               <Text align="center">
@@ -107,7 +106,7 @@ const SignUpPage = () => {
             <div className="w-16">
               <Logo isGlossy={true} />
             </div>
-            <Heading fontSize={variables.headingFontSize}>
+            <Heading className={cx('text-heading')}>
               Sign Up to Voltaserve
             </Heading>
             <Formik

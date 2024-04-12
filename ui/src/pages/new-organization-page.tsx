@@ -2,7 +2,6 @@ import { useCallback, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Heading } from '@chakra-ui/react'
 import { Button, FormControl, FormErrorMessage, Input } from '@chakra-ui/react'
-import { variables } from '@koupr/ui'
 import { useSWRConfig } from 'swr'
 import {
   Field,
@@ -59,7 +58,7 @@ const NewOrganizationPage = () => {
         <title>New Organization</title>
       </Helmet>
       <div className={cx('flex', 'flex-col', 'gap-3.5')}>
-        <Heading fontSize={variables.headingFontSize}>New Organization</Heading>
+        <Heading className={cx('text-heading')}>New Organization</Heading>
         <Formik
           enableReinitialize={true}
           initialValues={{ name: '' }}
