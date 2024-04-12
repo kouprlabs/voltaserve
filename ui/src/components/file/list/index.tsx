@@ -1,8 +1,6 @@
 import { MouseEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import {
-  Wrap,
-  WrapItem,
   Text,
   Portal,
   Menu,
@@ -17,7 +15,6 @@ import {
   IconMove,
   IconShare,
   IconTrash,
-  variables,
 } from '@koupr/ui'
 import {
   DndContext,
@@ -172,27 +169,31 @@ const FileList = ({ list, scale }: FileListProps) => {
             </div>
           )}
           {viewType === FileViewType.Grid && list.totalElements > 0 ? (
-            <Wrap
-              spacing={variables.spacing}
-              className={cx('overflow-hidden', 'pb-2.5')}
+            <div
+              className={cx(
+                'flex',
+                'flex-wrap',
+                'gap-1.5',
+                'overflow-hidden',
+                'pb-2.5',
+              )}
             >
               {list.data
                 .filter((e) => !hidden.includes(e.id))
                 .map((f) => (
-                  <WrapItem key={f.id}>
-                    <ListDraggableDroppable
-                      file={f}
-                      scale={scale}
-                      viewType={viewType}
-                      isSelectionMode={isSelectionMode}
-                      onContextMenu={(event: MouseEvent) => {
-                        setMenuPosition({ x: event.pageX, y: event.pageY })
-                        setIsMenuOpen(true)
-                      }}
-                    />
-                  </WrapItem>
+                  <ListDraggableDroppable
+                    key={f.id}
+                    file={f}
+                    scale={scale}
+                    viewType={viewType}
+                    isSelectionMode={isSelectionMode}
+                    onContextMenu={(event: MouseEvent) => {
+                      setMenuPosition({ x: event.pageX, y: event.pageY })
+                      setIsMenuOpen(true)
+                    }}
+                  />
                 ))}
-            </Wrap>
+            </div>
           ) : null}
           {viewType === FileViewType.List && list.totalElements > 0 ? (
             <div
