@@ -1,14 +1,7 @@
 import { ChangeEvent, MouseEvent, useEffect } from 'react'
 import { useCallback, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import {
-  Box,
-  Link as ChakraLink,
-  Checkbox,
-  Text,
-  useColorModeValue,
-  useToken,
-} from '@chakra-ui/react'
+import { Box, Link as ChakraLink, Checkbox, Text } from '@chakra-ui/react'
 import { variables } from '@koupr/ui'
 import cx from 'classnames'
 import { SnapshotStatus } from '@/client/api/file'
@@ -45,14 +38,6 @@ const ListItem = ({
   const [isChecked, setIsChecked] = useState(false)
   const [isSelected, setIsSelected] = useState(false)
   const date = relativeDate(new Date(file.createTime))
-  const hoverColor = useToken(
-    'colors',
-    useColorModeValue('gray.100', 'gray.700'),
-  )
-  const activeColor = useToken(
-    'colors',
-    useColorModeValue('gray.200', 'gray.600'),
-  )
   const width = `${WIDTH * scale}px`
   const minHeight = `${MIN_HEIGHT * scale}px`
 
@@ -143,7 +128,7 @@ const ListItem = ({
     },
     [isSelected, handleIconClick, onContextMenu],
   )
-
+  // 'gray.100', 'gray.700'
   return (
     <Box
       className={cx(
@@ -163,12 +148,17 @@ const ListItem = ({
         'rounded-md',
         'select-none',
         'cursor-default',
+        'hover:bg-gray-100',
+        'hover:dark:bg-gray-700',
+        'active:gray-200',
+        'active:dark:gray-600',
+        {
+          'bg-gray-100': isChecked,
+          'dark:bg-gray-700': isChecked,
+        },
       )}
-      _hover={{ bg: hoverColor }}
-      _active={{ bg: activeColor }}
       style={{
         width: viewType === FileViewType.List ? '100%' : width,
-        background: isChecked ? hoverColor : undefined,
       }}
       onClick={handleIconClick}
       onDoubleClick={isSelectionMode ? undefined : handleIconDoubleClick}
@@ -209,10 +199,12 @@ const ListItem = ({
       >
         {file.type === 'folder' && (
           <ChakraLink
-            className={cx('text-center', 'no-underline')}
+            className={cx('text-center', 'no-underline', {
+              'hover:no-underline': isSelectionMode,
+              'hover:underline': !isSelectionMode,
+            })}
             noOfLines={3}
             cursor={isSelectionMode ? 'default' : 'pointer'}
-            _hover={{ textDecoration: isSelectionMode ? 'none' : 'underline' }}
             onClick={isSelectionMode ? undefined : handleFolderLinkClick}
           >
             {file.name}
@@ -220,10 +212,12 @@ const ListItem = ({
         )}
         {file.type === 'file' && file.status === SnapshotStatus.Ready ? (
           <ChakraLink
-            className={cx('text-center', 'no-underline')}
+            className={cx('text-center', 'no-underline', {
+              'hover:no-underline': isSelectionMode,
+              'hover:underline': !isSelectionMode,
+            })}
             noOfLines={3}
             cursor={isSelectionMode ? 'default' : 'pointer'}
-            _hover={{ textDecoration: isSelectionMode ? 'none' : 'underline' }}
             onClick={isSelectionMode ? undefined : handleFileLinkClick}
           >
             {file.name}

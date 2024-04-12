@@ -95,7 +95,7 @@ const UploadItem = ({ upload: uploadProp }: UploadItemProps) => {
       {upload.isFailed && (
         <Accordion allowMultiple>
           <AccordionItem border="none">
-            <AccordionButton className={cx('p-0.5')} _hover={{ bg: 'red.50' }}>
+            <AccordionButton className={cx('p-0.5', 'hover:bg-red-50')}>
               <div className={cx('flex', 'flex-row', 'w-full')}>
                 <Text className={cx('text-red-500', 'text-left', 'grow')}>
                   Upload failed. Click to expand.
