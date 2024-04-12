@@ -143,35 +143,37 @@ const AccountEditPicture = ({
                 </div>
               </ModalBody>
               <ModalFooter>
-                <Button
-                  type="button"
-                  variant="outline"
-                  colorScheme="blue"
-                  className={cx('mr-1')}
-                  disabled={isSubmitting}
-                  onClick={() => onClose?.()}
+                <div
+                  className={cx('flex', 'flex-row', 'items-center', 'gap-1')}
                 >
-                  Cancel
-                </Button>
-                <Button
-                  variant="outline"
-                  colorScheme="red"
-                  className={cx('mr-1')}
-                  isLoading={deletionInProgress}
-                  disabled={!user.picture}
-                  onClick={handleDelete}
-                >
-                  Delete
-                </Button>
-                <Button
-                  type="submit"
-                  variant="solid"
-                  colorScheme="blue"
-                  disabled={isSubmitting || values.picture === user.picture}
-                  isLoading={isSubmitting}
-                >
-                  Save
-                </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    colorScheme="blue"
+                    disabled={isSubmitting}
+                    onClick={() => onClose?.()}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    variant="outline"
+                    colorScheme="red"
+                    isLoading={deletionInProgress}
+                    disabled={!user.picture}
+                    onClick={handleDelete}
+                  >
+                    Delete
+                  </Button>
+                  <Button
+                    type="submit"
+                    variant="solid"
+                    colorScheme="blue"
+                    disabled={isSubmitting || values.picture === user.picture}
+                    isLoading={isSubmitting}
+                  >
+                    Save
+                  </Button>
+                </div>
               </ModalFooter>
             </Form>
           )}

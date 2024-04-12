@@ -189,23 +189,24 @@ const GroupSelector = ({
             </div>
           </ModalBody>
           <ModalFooter>
-            <Button
-              type="button"
-              variant="outline"
-              colorScheme="blue"
-              className={cx('mr-1')}
-              onClick={onClose}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="solid"
-              colorScheme="blue"
-              isDisabled={!selected}
-              onClick={handleConfirm}
-            >
-              Confirm
-            </Button>
+            <div className={cx('flex', 'flex-row', 'items-center', 'gap-1')}>
+              <Button
+                type="button"
+                variant="outline"
+                colorScheme="blue"
+                onClick={onClose}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="solid"
+                colorScheme="blue"
+                isDisabled={!selected}
+                onClick={handleConfirm}
+              >
+                Confirm
+              </Button>
+            </div>
           </ModalFooter>
         </ModalContent>
       </Modal>

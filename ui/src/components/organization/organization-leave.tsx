@@ -54,26 +54,27 @@ const OrganizationLeave = ({ open, id, onClose }: OrganizationLeaveProps) => {
           <Text>Are you sure you would like to leave this organization?</Text>
         </ModalBody>
         <ModalFooter>
-          <Button
-            type="button"
-            variant="outline"
-            colorScheme="blue"
-            className={cx('mr-1')}
-            disabled={isLoading}
-            onClick={() => onClose?.()}
-          >
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            variant="solid"
-            colorScheme="red"
-            disabled={isLoading}
-            isLoading={isLoading}
-            onClick={() => handleConfirmation()}
-          >
-            Leave
-          </Button>
+          <div className={cx('flex', 'flex-row', 'items-center', 'gap-1')}>
+            <Button
+              type="button"
+              variant="outline"
+              colorScheme="blue"
+              disabled={isLoading}
+              onClick={() => onClose?.()}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              variant="solid"
+              colorScheme="red"
+              disabled={isLoading}
+              isLoading={isLoading}
+              onClick={() => handleConfirmation()}
+            >
+              Leave
+            </Button>
+          </div>
         </ModalFooter>
       </ModalContent>
     </Modal>

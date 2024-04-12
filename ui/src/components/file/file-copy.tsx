@@ -61,24 +61,25 @@ const FileCopy = () => {
           <FileBrowse onChange={(id) => setTargetId(id)} />
         </ModalBody>
         <ModalFooter>
-          <Button
-            type="button"
-            variant="outline"
-            colorScheme="blue"
-            className={cx('mr-1')}
-            disabled={loading}
-            onClick={() => dispatch(copyModalDidClose())}
-          >
-            Cancel
-          </Button>
-          <Button
-            variant="solid"
-            colorScheme="blue"
-            isLoading={loading}
-            onClick={handleMove}
-          >
-            Copy Here
-          </Button>
+          <div className={cx('flex', 'flex-row', 'items-center', 'gap-1')}>
+            <Button
+              type="button"
+              variant="outline"
+              colorScheme="blue"
+              disabled={loading}
+              onClick={() => dispatch(copyModalDidClose())}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="solid"
+              colorScheme="blue"
+              isLoading={loading}
+              onClick={handleMove}
+            >
+              Copy Here
+            </Button>
+          </div>
         </ModalFooter>
       </ModalContent>
     </Modal>

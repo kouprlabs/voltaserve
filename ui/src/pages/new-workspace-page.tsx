@@ -147,7 +147,7 @@ const NewWorkspacePage = () => {
                   </Field>
                 </div>
                 <div
-                  className={cx('flex', 'flex-row', 'items-center', 'gap-0.5')}
+                  className={cx('flex', 'flex-row', 'items-center', 'gap-1')}
                 >
                   <Button
                     type="submit"

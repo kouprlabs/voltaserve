@@ -57,25 +57,26 @@ const FileMove = () => {
           <FileBrowse onChange={(id) => setTargetId(id)} />
         </ModalBody>
         <ModalFooter>
-          <Button
-            type="button"
-            variant="outline"
-            colorScheme="blue"
-            className={cx('mr-1')}
-            disabled={loading}
-            onClick={() => dispatch(moveModalDidClose())}
-          >
-            Cancel
-          </Button>
-          <Button
-            variant="solid"
-            colorScheme="blue"
-            isDisabled={targetId === fileId}
-            isLoading={loading}
-            onClick={handleMove}
-          >
-            Move Here
-          </Button>
+          <div className={cx('flex', 'flex-row', 'items-center', 'gap-1')}>
+            <Button
+              type="button"
+              variant="outline"
+              colorScheme="blue"
+              disabled={loading}
+              onClick={() => dispatch(moveModalDidClose())}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="solid"
+              colorScheme="blue"
+              isDisabled={targetId === fileId}
+              isLoading={loading}
+              onClick={handleMove}
+            >
+              Move Here
+            </Button>
+          </div>
         </ModalFooter>
       </ModalContent>
     </Modal>

@@ -69,25 +69,26 @@ const OrganizationRemoveMember = ({
           </Text>
         </ModalBody>
         <ModalFooter>
-          <Button
-            type="button"
-            variant="outline"
-            colorScheme="blue"
-            className={cx('mr-1')}
-            disabled={loading}
-            onClick={() => onClose?.()}
-          >
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            variant="solid"
-            colorScheme="red"
-            isLoading={loading}
-            onClick={handleRemoveMember}
-          >
-            Remove
-          </Button>
+          <div className={cx('flex', 'flex-row', 'items-center', 'gap-1')}>
+            <Button
+              type="button"
+              variant="outline"
+              colorScheme="blue"
+              disabled={loading}
+              onClick={() => onClose?.()}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              variant="solid"
+              colorScheme="red"
+              isLoading={loading}
+              onClick={handleRemoveMember}
+            >
+              Remove
+            </Button>
+          </div>
         </ModalFooter>
       </ModalContent>
     </Modal>

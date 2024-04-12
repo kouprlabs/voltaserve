@@ -122,25 +122,28 @@ const GroupAddMember = ({ group, open, onClose }: GroupAddMemberProps) => {
                 </div>
               </ModalBody>
               <ModalFooter>
-                <Button
-                  type="button"
-                  variant="outline"
-                  colorScheme="blue"
-                  className={cx('mr-1')}
-                  disabled={isSubmitting}
-                  onClick={() => onClose?.()}
+                <div
+                  className={cx('flex', 'flex-row', 'items-center', 'gap-1')}
                 >
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  variant="solid"
-                  colorScheme="blue"
-                  disabled={isSubmitting}
-                  isLoading={isSubmitting}
-                >
-                  Add
-                </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    colorScheme="blue"
+                    disabled={isSubmitting}
+                    onClick={() => onClose?.()}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    variant="solid"
+                    colorScheme="blue"
+                    disabled={isSubmitting}
+                    isLoading={isSubmitting}
+                  >
+                    Add
+                  </Button>
+                </div>
               </ModalFooter>
             </Form>
           )}

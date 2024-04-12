@@ -134,24 +134,27 @@ const WorkspaceEditStorageCapacity = ({
                 ) : null}
               </ModalBody>
               <ModalFooter>
-                <Button
-                  type="button"
-                  variant="outline"
-                  colorScheme="blue"
-                  className={cx('mr-1')}
-                  disabled={isSubmitting}
-                  onClick={() => onClose?.()}
+                <div
+                  className={cx('flex', 'flex-row', 'items-center', 'gap-1')}
                 >
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  variant="solid"
-                  colorScheme="blue"
-                  isLoading={isSubmitting}
-                >
-                  Save
-                </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    colorScheme="blue"
+                    disabled={isSubmitting}
+                    onClick={() => onClose?.()}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    variant="solid"
+                    colorScheme="blue"
+                    isLoading={isSubmitting}
+                  >
+                    Save
+                  </Button>
+                </div>
               </ModalFooter>
             </Form>
           )}

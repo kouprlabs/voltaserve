@@ -113,24 +113,27 @@ const FileCreate = () => {
                   </Field>
                 </ModalBody>
                 <ModalFooter>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    colorScheme="blue"
-                    className={cx('mr-1')}
-                    disabled={isSubmitting}
-                    onClick={() => dispatch(createModalDidClose())}
+                  <div
+                    className={cx('flex', 'flex-row', 'items-center', 'gap-1')}
                   >
-                    Cancel
-                  </Button>
-                  <Button
-                    type="submit"
-                    variant="solid"
-                    colorScheme="blue"
-                    isLoading={isSubmitting}
-                  >
-                    Create
-                  </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      colorScheme="blue"
+                      disabled={isSubmitting}
+                      onClick={() => dispatch(createModalDidClose())}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      type="submit"
+                      variant="solid"
+                      colorScheme="blue"
+                      isLoading={isSubmitting}
+                    >
+                      Create
+                    </Button>
+                  </div>
                 </ModalFooter>
               </Form>
             )}
