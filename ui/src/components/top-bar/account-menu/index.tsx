@@ -36,10 +36,13 @@ const TopBarAccountMenu = () => {
               <AccountMenuAvatarImage user={user} />
               <div className={cx('flex', 'flex-col', 'gap-0')}>
                 <Text
-                  textOverflow="ellipsis"
-                  overflow="hidden"
-                  whiteSpace="nowrap"
-                  className={cx('font-semibold', 'grow')}
+                  className={cx(
+                    'font-semibold',
+                    'grow',
+                    'text-ellipsis',
+                    'overflow-hidden',
+                    'whitespace-nowrap',
+                  )}
                 >
                   {user.fullName}
                 </Text>

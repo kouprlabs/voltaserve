@@ -71,10 +71,12 @@ const UploadItem = ({ upload: uploadProp }: UploadItemProps) => {
           </div>
         )}
         <Text
-          className={cx('grow')}
-          textOverflow="ellipsis"
-          overflow="hidden"
-          whiteSpace="nowrap"
+          className={cx(
+            'grow',
+            'text-ellipsis',
+            'overflow-hidden',
+            'whitespace-nowrap',
+          )}
         >
           {upload.file.name}
         </Text>

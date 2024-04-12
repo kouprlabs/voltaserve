@@ -174,8 +174,7 @@ const FileList = ({ list, scale }: FileListProps) => {
           {viewType === FileViewType.Grid && list.totalElements > 0 ? (
             <Wrap
               spacing={variables.spacing}
-              overflow="hidden"
-              pb={variables.spacingLg}
+              className={cx('overflow-hidden', 'pb-2.5')}
             >
               {list.data
                 .filter((e) => !hidden.includes(e.id))

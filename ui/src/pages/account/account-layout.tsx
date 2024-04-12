@@ -11,7 +11,7 @@ import {
   Tag,
   Text,
 } from '@chakra-ui/react'
-import { variables, IconEdit } from '@koupr/ui'
+import { IconEdit } from '@koupr/ui'
 import cx from 'classnames'
 import NotificationAPI from '@/client/api/notification'
 import UserAPI from '@/client/idp/user'
@@ -89,8 +89,8 @@ const AccountLayout = () => {
         <Tabs
           variant="solid-rounded"
           colorScheme="gray"
-          pb={variables.spacingLg}
           index={tabIndex}
+          className={cx('pb-2.5')}
         >
           <TabList>
             <Tab onClick={() => navigate('/account/settings')}>Settings</Tab>
