@@ -12,7 +12,6 @@ import {
   ModalHeader,
   ModalOverlay,
 } from '@chakra-ui/react'
-import { variables } from '@koupr/ui'
 import { useSWRConfig } from 'swr'
 import {
   Field,
@@ -23,6 +22,7 @@ import {
   FormikHelpers,
 } from 'formik'
 import * as Yup from 'yup'
+import cx from 'classnames'
 import GroupAPI, { Group } from '@/client/api/group'
 
 export type GroupEditNameProps = {
@@ -107,7 +107,7 @@ const GroupEditName = ({ open, group, onClose }: GroupEditNameProps) => {
                   type="button"
                   variant="outline"
                   colorScheme="blue"
-                  mr={variables.spacingSm}
+                  className={cx('mr-1')}
                   disabled={isSubmitting}
                   onClick={() => onClose?.()}
                 >

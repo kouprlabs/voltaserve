@@ -13,7 +13,6 @@ import {
   ModalHeader,
   ModalOverlay,
 } from '@chakra-ui/react'
-import { variables } from '@koupr/ui'
 import { useSWRConfig } from 'swr'
 import {
   Field,
@@ -24,6 +23,7 @@ import {
   FormikHelpers,
 } from 'formik'
 import * as Yup from 'yup'
+import cx from 'classnames'
 import FileAPI, { List } from '@/client/api/file'
 import useFileListSearchParams from '@/hooks/use-file-list-params'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
@@ -117,7 +117,7 @@ const FileCreate = () => {
                     type="button"
                     variant="outline"
                     colorScheme="blue"
-                    mr={variables.spacingSm}
+                    className={cx('mr-1')}
                     disabled={isSubmitting}
                     onClick={() => dispatch(createModalDidClose())}
                   >

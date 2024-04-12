@@ -10,8 +10,8 @@ import {
   ModalFooter,
   Button,
 } from '@chakra-ui/react'
-import { variables } from '@koupr/ui'
 import { useSWRConfig } from 'swr'
+import cx from 'classnames'
 import FileAPI, { List } from '@/client/api/file'
 import useFileListSearchParams from '@/hooks/use-file-list-params'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
@@ -65,7 +65,7 @@ const FileCopy = () => {
             type="button"
             variant="outline"
             colorScheme="blue"
-            mr={variables.spacingSm}
+            className={cx('mr-1')}
             disabled={loading}
             onClick={() => dispatch(copyModalDidClose())}
           >

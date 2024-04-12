@@ -12,7 +12,6 @@ import {
   ModalHeader,
   ModalOverlay,
 } from '@chakra-ui/react'
-import { variables } from '@koupr/ui'
 import { useSWRConfig } from 'swr'
 import {
   Field,
@@ -127,7 +126,7 @@ const GroupAddMember = ({ group, open, onClose }: GroupAddMemberProps) => {
                   type="button"
                   variant="outline"
                   colorScheme="blue"
-                  mr={variables.spacingSm}
+                  className={cx('mr-1')}
                   disabled={isSubmitting}
                   onClick={() => onClose?.()}
                 >

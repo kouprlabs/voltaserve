@@ -7,7 +7,7 @@ import {
   Progress,
   Text,
 } from '@chakra-ui/react'
-import { variables, IconEdit, IconTrash, SectionSpinner } from '@koupr/ui'
+import { IconEdit, IconTrash, SectionSpinner } from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import { geEditorPermission } from '@/client/api/permission'
@@ -95,7 +95,7 @@ const WorkspaceSettingsPage = () => {
               }}
             />
           </div>
-          <Divider mb={variables.spacing} />
+          <Divider className={cx('mb-1.5')} />
           <Text className={cx('font-bold')}>Basics</Text>
           <div className={rowClassName}>
             <Text>Name</Text>

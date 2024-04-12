@@ -10,7 +10,6 @@ import {
   ModalOverlay,
   Text,
 } from '@chakra-ui/react'
-import { variables } from '@koupr/ui'
 import { cx } from '@emotion/css'
 import GroupAPI, { Group } from '@/client/api/group'
 import { User } from '@/client/idp/user'
@@ -74,7 +73,7 @@ const GroupRemoveMember = ({
             type="button"
             variant="outline"
             colorScheme="blue"
-            mr={variables.spacingSm}
+            className={cx('mr-1')}
             disabled={loading}
             onClick={() => onClose?.()}
           >

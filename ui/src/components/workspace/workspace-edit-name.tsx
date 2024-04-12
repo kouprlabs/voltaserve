@@ -12,7 +12,6 @@ import {
   ModalHeader,
   ModalOverlay,
 } from '@chakra-ui/react'
-import { variables } from '@koupr/ui'
 import { useSWRConfig } from 'swr'
 import {
   Field,
@@ -23,6 +22,7 @@ import {
   FormikHelpers,
 } from 'formik'
 import * as Yup from 'yup'
+import cx from 'classnames'
 import WorkspaceAPI, { Workspace } from '@/client/api/workspace'
 
 export type WorkspaceEditNameProps = {
@@ -111,7 +111,7 @@ const WorkspaceEditName = ({
                   type="button"
                   variant="outline"
                   colorScheme="blue"
-                  mr={variables.spacingSm}
+                  className={cx('mr-1')}
                   disabled={isSubmitting}
                   onClick={() => onClose?.()}
                 >
