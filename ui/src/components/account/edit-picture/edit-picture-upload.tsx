@@ -104,7 +104,7 @@ const EditPictureUpload = ({
       </div>
       <input
         ref={hiddenInput}
-        className="hidden"
+        className={cx('hidden')}
         type="file"
         name={name}
         onChange={handleFileChange}

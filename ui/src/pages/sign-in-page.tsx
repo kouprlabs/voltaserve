@@ -102,7 +102,7 @@ const SignInPage = () => {
             'w-full',
           )}
         >
-          <div className="w-16">
+          <div className={cx('w-[64px]')}>
             <Logo isGlossy={true} />
           </div>
           <Heading className={cx('text-heading')}>
@@ -118,7 +118,7 @@ const SignInPage = () => {
             onSubmit={handleSignIn}
           >
             {({ errors, touched, isSubmitting }) => (
-              <Form className="w-full">
+              <Form className={cx('w-full')}>
                 <div
                   className={cx('flex', 'flex-col', 'items-center', 'gap-1.5')}
                 >

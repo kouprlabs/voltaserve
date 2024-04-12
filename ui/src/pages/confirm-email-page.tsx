@@ -40,7 +40,7 @@ const ConfirmEmailPage = () => {
         <title>Confirm Email</title>
       </Helmet>
       <div className={cx('flex', 'flex-col', 'items-center', 'gap-3')}>
-        <div className="w-16">
+        <div className={cx('w-[64px]')}>
           <Logo isGlossy={true} />
         </div>
         {!isCompleted && !isFailed ? (

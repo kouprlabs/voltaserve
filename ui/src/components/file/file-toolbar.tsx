@@ -467,14 +467,14 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
       </div>
       <input
         ref={fileUploadInput}
-        className="hidden"
+        className={cx('hidden')}
         type="file"
         multiple
         onChange={handleFileChange}
       />
       <input
         ref={folderUploadInput}
-        className="hidden"
+        className={cx('hidden')}
         type="file"
         /* @ts-expect-error intentionaly ignored */
         directory=""

@@ -68,7 +68,7 @@ const ForgotPasswordPage = () => {
             'w-full',
           )}
         >
-          <div className="w-16">
+          <div className={cx('w-[64px]')}>
             <Logo isGlossy={true} />
           </div>
           <Heading className={cx('text-heading')}>Forgot Password</Heading>
@@ -92,7 +92,7 @@ const ForgotPasswordPage = () => {
                 onSubmit={handleSubmit}
               >
                 {({ errors, touched, isSubmitting }) => (
-                  <Form className="w-full">
+                  <Form className={cx('w-full')}>
                     <div
                       className={cx(
                         'flex',
