@@ -66,13 +66,15 @@ export async function baseFetcher(
 ) {
   try {
     const response = await fetch(url, init)
-    return handleFailure(response, redirect)
+    return handleResponse(response, redirect)
   } catch (error) {
-    console.log('well, shit!')
+    const message = 'Unexpected error occurred.'
+    store.dispatch(errorOccurred(message))
+    throw new Error(message)
   }
 }
 
-async function handleFailure(response: Response, redirect = true) {
+async function handleResponse(response: Response, redirect = true) {
   if (response.status <= 299) {
     return response
   } else {
