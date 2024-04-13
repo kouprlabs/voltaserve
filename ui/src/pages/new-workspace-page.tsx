@@ -8,7 +8,6 @@ import {
   Heading,
   Input,
 } from '@chakra-ui/react'
-import { variables } from '@koupr/ui'
 import { useSWRConfig } from 'swr'
 import {
   Field,
@@ -19,7 +18,7 @@ import {
   FormikHelpers,
 } from 'formik'
 import * as Yup from 'yup'
-import classNames from 'classnames'
+import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import WorkspaceAPI from '@/client/api/workspace'
 import OrganizationSelector from '@/components/common/organization-selector'
@@ -77,8 +76,8 @@ const NewWorkspacePage = () => {
       <Helmet>
         <title>New Workspace</title>
       </Helmet>
-      <div className={classNames('flex', 'flex-col', 'gap-3.5')}>
-        <Heading fontSize={variables.headingFontSize}>New Workspace</Heading>
+      <div className={cx('flex', 'flex-col', 'gap-3.5')}>
+        <Heading className={cx('text-heading')}>New Workspace</Heading>
         <Formik
           enableReinitialize={true}
           initialValues={{
@@ -92,8 +91,8 @@ const NewWorkspacePage = () => {
         >
           {({ errors, touched, isSubmitting, setFieldValue }) => (
             <Form>
-              <div className={classNames('flex', 'flex-col', 'gap-3.5')}>
-                <div className={classNames('flex', 'flex-col', 'gap-1.5')}>
+              <div className={cx('flex', 'flex-col', 'gap-3.5')}>
+                <div className={cx('flex', 'flex-col', 'gap-1.5')}>
                   <Field name="name">
                     {({ field }: FieldAttributes<FieldProps>) => (
                       <FormControl
@@ -148,12 +147,7 @@ const NewWorkspacePage = () => {
                   </Field>
                 </div>
                 <div
-                  className={classNames(
-                    'flex',
-                    'flex-row',
-                    'items-center',
-                    'gap-0.5',
-                  )}
+                  className={cx('flex', 'flex-row', 'items-center', 'gap-1')}
                 >
                   <Button
                     type="submit"

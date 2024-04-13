@@ -8,7 +8,6 @@ import {
   Heading,
   Input,
 } from '@chakra-ui/react'
-import { variables } from '@koupr/ui'
 import { useSWRConfig } from 'swr'
 import {
   Field,
@@ -19,7 +18,7 @@ import {
   FormikHelpers,
 } from 'formik'
 import * as Yup from 'yup'
-import classNames from 'classnames'
+import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import GroupAPI from '@/client/api/group'
 import OrganizationSelector from '@/components/common/organization-selector'
@@ -69,8 +68,8 @@ const NewGroupPage = () => {
       <Helmet>
         <title>New Group</title>
       </Helmet>
-      <div className={classNames('flex', 'flex-col', 'gap-3.5')}>
-        <Heading fontSize={variables.headingFontSize}>New Group</Heading>
+      <div className={cx('flex', 'flex-col', 'gap-3.5')}>
+        <Heading className={cx('text-heading')}>New Group</Heading>
         <Formik
           enableReinitialize={true}
           initialValues={{ name: '', organizationId: org || '' }}
@@ -80,8 +79,8 @@ const NewGroupPage = () => {
         >
           {({ errors, touched, isSubmitting, setFieldValue }) => (
             <Form>
-              <div className={classNames('flex', 'flex-col', 'gap-3.5')}>
-                <div className={classNames('flex', 'flex-col', 'gap-1.5')}>
+              <div className={cx('flex', 'flex-col', 'gap-3.5')}>
+                <div className={cx('flex', 'flex-col', 'gap-1.5')}>
                   <Field name="name">
                     {({ field }: FieldAttributes<FieldProps>) => (
                       <FormControl
@@ -118,12 +117,7 @@ const NewGroupPage = () => {
                   </Field>
                 </div>
                 <div
-                  className={classNames(
-                    'flex',
-                    'flex-row',
-                    'items-center',
-                    'gap-0.5',
-                  )}
+                  className={cx('flex', 'flex-row', 'items-center', 'gap-1')}
                 >
                   <Button
                     type="submit"

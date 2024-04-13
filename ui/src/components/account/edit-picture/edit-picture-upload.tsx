@@ -1,13 +1,7 @@
 import { ChangeEvent, useCallback, useRef, useState } from 'react'
-import {
-  IconButton,
-  Image,
-  Text,
-  useColorModeValue,
-  useToken,
-} from '@chakra-ui/react'
-import { IconEdit } from '@koupr/ui'
-import classNames from 'classnames'
+import { IconButton, Image } from '@chakra-ui/react'
+import cx from 'classnames'
+import { IconEdit } from '@/lib'
 
 export type EditPictureUploadProps = {
   name: string
@@ -24,10 +18,6 @@ const EditPictureUpload = ({
 }: EditPictureUploadProps) => {
   const [src, setSrc] = useState<string>()
   const hiddenInput = useRef<HTMLInputElement>(null)
-  const blueColor = useToken(
-    'colors',
-    useColorModeValue('blue.600', 'blue.200'),
-  )
 
   const handleFileChange = useCallback(
     (changeEvent: ChangeEvent<HTMLInputElement>) => {
@@ -60,23 +50,24 @@ const EditPictureUpload = ({
   }, [disabled, hiddenInput])
 
   return (
-    <div className={classNames('flex', 'flex-col', 'items-center', 'gap-1')}>
+    <div className={cx('flex', 'flex-col', 'items-center', 'gap-1')}>
       <div
-        className={classNames(
+        className={cx(
           'flex',
           'items-center',
           'justify-center',
           'rounded',
           'border',
           'border-dashed',
+          'border-blue-600',
+          'dark:border-blue-200',
         )}
-        style={{ borderColor: blueColor }}
       >
         {src || initialValue ? (
-          <div className={classNames('relative', 'w-[400px]', 'h-[160px]')}>
+          <div className={cx('relative', 'w-[400px]', 'h-[160px]')}>
             <Image
               src={src || initialValue || ''}
-              className={classNames(
+              className={cx(
                 'rounded',
                 'w-[400px]',
                 'h-[160px]',
@@ -87,12 +78,7 @@ const EditPictureUpload = ({
             <IconButton
               icon={<IconEdit />}
               variant="solid-gray"
-              className={classNames(
-                'top-[10px',
-                'right-[5px]',
-                'absolute',
-                'z-[1000]',
-              )}
+              className={cx('top-[10px', 'right-[5px]', 'absolute', 'z-[1000]')}
               aria-label=""
               disabled={disabled}
               onClick={handleEdit}
@@ -100,7 +86,7 @@ const EditPictureUpload = ({
           </div>
         ) : (
           <div
-            className={classNames(
+            className={cx(
               'flex',
               'items-center',
               'justify-center',
@@ -110,13 +96,15 @@ const EditPictureUpload = ({
             )}
             onClick={handleEdit}
           >
-            <Text color={blueColor}>Browse</Text>
+            <span className={cx('text-blue-600', 'dark:text-blue-200')}>
+              Browse
+            </span>
           </div>
         )}
       </div>
       <input
         ref={hiddenInput}
-        className="hidden"
+        className={cx('hidden')}
         type="file"
         name={name}
         onChange={handleFileChange}

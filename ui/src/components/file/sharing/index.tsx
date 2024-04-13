@@ -1,7 +1,6 @@
 import { useMemo } from 'react'
 import { useParams } from 'react-router-dom'
 import {
-  Text,
   Modal,
   ModalOverlay,
   ModalContent,
@@ -15,7 +14,7 @@ import {
   TabPanel,
   Tag,
 } from '@chakra-ui/react'
-import classNames from 'classnames'
+import cx from 'classnames'
 import FileAPI, { List } from '@/client/api/file'
 import GroupAPI from '@/client/api/group'
 import { geOwnerPermission } from '@/client/api/permission'
@@ -81,38 +80,32 @@ const FileSharing = ({ list }: FileSharingProps) => {
         <ModalCloseButton />
         <ModalBody>
           <Tabs>
-            <TabList h="40px">
+            <TabList className={cx('h-[40px]')}>
               <Tab>
                 <div
-                  className={classNames(
-                    'flex',
-                    'flex-row',
-                    'items-center',
-                    'gap-0.5',
-                  )}
+                  className={cx('flex', 'flex-row', 'items-center', 'gap-0.5')}
                 >
-                  <Text>People</Text>
+                  <span>People</span>
                   {singleFile &&
                   userPermissions &&
                   userPermissions.length > 0 ? (
-                    <Tag borderRadius="full">{userPermissions.length}</Tag>
+                    <Tag className={cx('rounded-full')}>
+                      {userPermissions.length}
+                    </Tag>
                   ) : null}
                 </div>
               </Tab>
               <Tab>
                 <div
-                  className={classNames(
-                    'flex',
-                    'flex-row',
-                    'items-center',
-                    'gap-0.5',
-                  )}
+                  className={cx('flex', 'flex-row', 'items-center', 'gap-0.5')}
                 >
-                  <Text>Groups</Text>
+                  <span>Groups</span>
                   {singleFile &&
                   groupPermissions &&
                   groupPermissions.length > 0 ? (
-                    <Tag borderRadius="full">{groupPermissions.length}</Tag>
+                    <Tag className={cx('rounded-full')}>
+                      {groupPermissions.length}
+                    </Tag>
                   ) : null}
                 </div>
               </Tab>

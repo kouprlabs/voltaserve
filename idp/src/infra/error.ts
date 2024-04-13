@@ -112,7 +112,7 @@ export function parseValidationError(result: any): ErrorData {
   let message: string
   if (result.errors) {
     message = result.errors
-      .map((e: any) => `${e.msg} for parameter '${e.param}' in ${e.location}.`)
+      .map((e: any) => `${e.msg} for ${e.type} ${e.path} in ${e.location}.`)
       .join(' ')
   }
   return newError({ code: ErrorCode.RequestValidationError, message })

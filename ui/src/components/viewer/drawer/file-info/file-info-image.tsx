@@ -1,5 +1,5 @@
 import { Stat, StatLabel, StatNumber } from '@chakra-ui/react'
-import { variables } from '@koupr/ui'
+import cx from 'classnames'
 import { File } from '@/client/api/file'
 
 export type FileInfoImageProps = {
@@ -13,7 +13,7 @@ const FileInfoImage = ({ file }: FileInfoImageProps) => {
   return (
     <Stat>
       <StatLabel>Image dimensions</StatLabel>
-      <StatNumber fontSize={variables.bodyFontSize}>
+      <StatNumber className={cx('text-base')}>
         {file.original.image.width}x{file.original.image.height}
       </StatNumber>
     </Stat>

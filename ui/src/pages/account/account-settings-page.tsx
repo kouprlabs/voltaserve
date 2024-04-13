@@ -5,12 +5,10 @@ import {
   IconButtonProps,
   Progress,
   Switch,
-  Text,
   Tooltip,
   useColorMode,
 } from '@chakra-ui/react'
-import { IconEdit, IconTrash, SectionSpinner } from '@koupr/ui'
-import classNames from 'classnames'
+import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import { IoWarning } from 'react-icons/io5'
 import StorageAPI from '@/client/api/storage'
@@ -21,12 +19,17 @@ import AccountDelete from '@/components/account/account-delete'
 import AccountEditEmail from '@/components/account/account-edit-email'
 import AccountEditFullName from '@/components/account/account-edit-full-name'
 import prettyBytes from '@/helpers/pretty-bytes'
+import { IconEdit, IconTrash, SectionSpinner } from '@/lib'
 
 const EditButton = (props: IconButtonProps) => (
-  <IconButton icon={<IconEdit />} w="40px" h="40px" {...props} />
+  <IconButton
+    icon={<IconEdit />}
+    className={cx('h-[40px]', 'w-[40px]')}
+    {...props}
+  />
 )
 
-const Spacer = () => <div className={classNames('grow')} />
+const Spacer = () => <div className={cx('grow')} />
 
 const AccountSettingsPage = () => {
   const { colorMode, toggleColorMode } = useColorMode()
@@ -37,8 +40,8 @@ const AccountSettingsPage = () => {
   const [isEmailModalOpen, setIsEmailModalOpen] = useState(false)
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
-  const sectionClassName = classNames('flex', 'flex-col', 'gap-1', 'py-1.5')
-  const rowClassName = classNames(
+  const sectionClassName = cx('flex', 'flex-col', 'gap-1', 'py-1.5')
+  const rowClassName = cx(
     'flex',
     'flex-row',
     'items-center',
@@ -58,33 +61,33 @@ const AccountSettingsPage = () => {
       <Helmet>
         <title>{user.fullName}</title>
       </Helmet>
-      <div className={classNames('flex', 'flex-col', 'gap-0')}>
+      <div className={cx('flex', 'flex-col', 'gap-0')}>
         <div className={sectionClassName}>
-          <Text fontWeight="bold">Storage Usage</Text>
-          {storageUsageError && <Text>Failed to load storage usage.</Text>}
+          <span className={cx('font-bold')}>Storage Usage</span>
+          {storageUsageError && <span>Failed to load storage usage.</span>}
           {storageUsage && !storageUsageError && (
             <>
-              <Text>
+              <span>
                 {prettyBytes(storageUsage.bytes)} of{' '}
                 {prettyBytes(storageUsage.maxBytes)} used
-              </Text>
+              </span>
               <Progress value={storageUsage.percentage} hasStripe />
             </>
           )}
           {!storageUsage && !storageUsageError && (
             <>
-              <Text>Calculating…</Text>
+              <span>Calculating…</span>
               <Progress value={0} hasStripe />
             </>
           )}
         </div>
         <Divider />
         <div className={sectionClassName}>
-          <Text fontWeight="bold">Basics</Text>
-          <div className={classNames(rowClassName)}>
-            <Text>Full name</Text>
+          <span className={cx('font-bold')}>Basics</span>
+          <div className={cx(rowClassName)}>
+            <span>Full name</span>
             <Spacer />
-            <Text>{user.fullName}</Text>
+            <span>{user.fullName}</span>
             <EditButton
               aria-label=""
               onClick={() => {
@@ -95,22 +98,24 @@ const AccountSettingsPage = () => {
         </div>
         <Divider />
         <div className={sectionClassName}>
-          <Text fontWeight="bold">Credentials</Text>
-          <div className={classNames(rowClassName)}>
-            <Text>Email</Text>
+          <span className={cx('font-bold')}>Credentials</span>
+          <div className={cx(rowClassName)}>
+            <span>Email</span>
             <Spacer />
             {user.pendingEmail && (
-              <div className={classNames('flex', 'flex-row', 'items-center')}>
+              <div className={cx('flex', 'flex-row', 'items-center')}>
                 <Tooltip label="Please check your inbox to confirm your email.">
                   <span>
-                    <IoWarning fontSize="20px" color="gold" />
+                    <IoWarning
+                      className={cx('text-yelow-400', 'text-[20px]')}
+                    />
                   </span>
                 </Tooltip>
-                <Text>{user.pendingEmail}</Text>
+                <span>{user.pendingEmail}</span>
               </div>
             )}
             {!user.pendingEmail && (
-              <Text>{user.pendingEmail || user.email}</Text>
+              <span>{user.pendingEmail || user.email}</span>
             )}
             <EditButton
               aria-label=""
@@ -119,8 +124,8 @@ const AccountSettingsPage = () => {
               }}
             />
           </div>
-          <div className={classNames(rowClassName)}>
-            <Text>Password</Text>
+          <div className={cx(rowClassName)}>
+            <span>Password</span>
             <Spacer />
             <EditButton
               aria-label=""
@@ -132,9 +137,9 @@ const AccountSettingsPage = () => {
         </div>
         <Divider />
         <div className={sectionClassName}>
-          <Text fontWeight="bold">Theme</Text>
-          <div className={classNames(rowClassName)}>
-            <Text>Dark mode</Text>
+          <span className={cx('font-bold')}>Theme</span>
+          <div className={cx(rowClassName)}>
+            <span>Dark mode</span>
             <Spacer />
             <Switch
               isChecked={colorMode === 'dark'}
@@ -144,9 +149,9 @@ const AccountSettingsPage = () => {
         </div>
         <Divider />
         <div className={sectionClassName}>
-          <Text fontWeight="bold">Advanced</Text>
-          <div className={classNames(rowClassName)}>
-            <Text>Delete account</Text>
+          <span className={cx('font-bold')}>Advanced</span>
+          <div className={cx(rowClassName)}>
+            <span>Delete account</span>
             <Spacer />
             <IconButton
               icon={<IconTrash />}

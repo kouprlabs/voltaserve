@@ -1,8 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { Divider, IconButton, Text } from '@chakra-ui/react'
-import { IconEdit, IconTrash, IconUserPlus, SectionSpinner } from '@koupr/ui'
-import classNames from 'classnames'
+import { Divider, IconButton } from '@chakra-ui/react'
+import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import GroupAPI from '@/client/api/group'
 import { geEditorPermission, geOwnerPermission } from '@/client/api/permission'
@@ -10,8 +9,9 @@ import { swrConfig } from '@/client/options'
 import GroupAddMember from '@/components/group/group-add-member'
 import GroupDelete from '@/components/group/group-delete'
 import GroupEditName from '@/components/group/group-edit-name'
+import { IconEdit, IconTrash, IconUserPlus, SectionSpinner } from '@/lib'
 
-const Spacer = () => <div className={classNames('grow')} />
+const Spacer = () => <div className={cx('grow')} />
 
 const GroupSettingsPage = () => {
   const { id } = useParams()
@@ -27,8 +27,8 @@ const GroupSettingsPage = () => {
     () => group && geOwnerPermission(group.permission),
     [group],
   )
-  const sectionClassName = classNames('flex', 'flex-col', 'gap-1', 'py-1.5')
-  const rowClassName = classNames(
+  const sectionClassName = cx('flex', 'flex-col', 'gap-1', 'py-1.5')
+  const rowClassName = cx(
     'flex',
     'flex-row',
     'items-center',
@@ -50,9 +50,9 @@ const GroupSettingsPage = () => {
       </Helmet>
       <div className={sectionClassName}>
         <div className={rowClassName}>
-          <Text>Name</Text>
+          <span>Name</span>
           <Spacer />
-          <Text>{group.name}</Text>
+          <span>{group.name}</span>
           <IconButton
             icon={<IconEdit />}
             isDisabled={!hasEditPermission}
@@ -64,7 +64,7 @@ const GroupSettingsPage = () => {
         </div>
         <Divider />
         <div className={rowClassName}>
-          <Text>Add members</Text>
+          <span>Add members</span>
           <Spacer />
           <IconButton
             icon={<IconUserPlus />}
@@ -77,7 +77,7 @@ const GroupSettingsPage = () => {
         </div>
         <Divider />
         <div className={rowClassName}>
-          <Text>Delete permanently</Text>
+          <span>Delete permanently</span>
           <Spacer />
           <IconButton
             icon={<IconTrash />}

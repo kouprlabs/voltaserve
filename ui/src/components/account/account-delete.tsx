@@ -12,9 +12,7 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
-  Text,
 } from '@chakra-ui/react'
-import { variables } from '@koupr/ui'
 import {
   Field,
   FieldAttributes,
@@ -24,7 +22,7 @@ import {
   FormikHelpers,
 } from 'formik'
 import * as Yup from 'yup'
-import classNames from 'classnames'
+import cx from 'classnames'
 import UserAPI from '@/client/idp/user'
 
 export type AccountDeleteProps = {
@@ -83,21 +81,14 @@ const AccountDelete = ({ open, onClose }: AccountDeleteProps) => {
           {({ errors, touched, isSubmitting }) => (
             <Form>
               <ModalBody>
-                <div
-                  className={classNames(
-                    'flex',
-                    'flex-col',
-                    'items-center',
-                    'gap-1',
-                  )}
-                >
-                  <Text>
+                <div className={cx('flex', 'flex-col', 'items-start', 'gap-1')}>
+                  <span>
                     Are you sure you would like to delete your account
                     permanently?
-                  </Text>
-                  <Text fontWeight="semibold">
+                  </span>
+                  <span className={cx('font-semibold')}>
                     Type your password to confirm:
-                  </Text>
+                  </span>
                   <Field name="password">
                     {({ field }: FieldAttributes<FieldProps>) => (
                       <FormControl
@@ -118,24 +109,27 @@ const AccountDelete = ({ open, onClose }: AccountDeleteProps) => {
                 </div>
               </ModalBody>
               <ModalFooter>
-                <Button
-                  type="button"
-                  variant="outline"
-                  colorScheme="blue"
-                  mr={variables.spacingSm}
-                  disabled={isSubmitting}
-                  onClick={() => onClose?.()}
+                <div
+                  className={cx('flex', 'flex-row', 'items-center', 'gap-1')}
                 >
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  variant="solid"
-                  colorScheme="red"
-                  isLoading={isSubmitting}
-                >
-                  Delete Permanently
-                </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    colorScheme="blue"
+                    disabled={isSubmitting}
+                    onClick={() => onClose?.()}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    variant="solid"
+                    colorScheme="red"
+                    isLoading={isSubmitting}
+                  >
+                    Delete Permanently
+                  </Button>
+                </div>
               </ModalFooter>
             </Form>
           )}

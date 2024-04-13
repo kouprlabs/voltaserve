@@ -14,7 +14,6 @@ import {
   ModalOverlay,
   Textarea,
 } from '@chakra-ui/react'
-import { variables } from '@koupr/ui'
 import { useSWRConfig } from 'swr'
 import {
   Field,
@@ -25,7 +24,7 @@ import {
   FormikHelpers,
 } from 'formik'
 import * as Yup from 'yup'
-import classNames from 'classnames'
+import cx from 'classnames'
 import InvitationAPI from '@/client/api/invitation'
 import EmailTokenizer from '@/components/common/email-tokenizer'
 import parseEmailList from '@/helpers/parse-email-list'
@@ -103,7 +102,7 @@ const OrganizationInviteMembers = ({
           {({ values, errors, touched, isSubmitting }) => (
             <Form>
               <ModalBody>
-                <div className={classNames('flex', 'flex-col', 'gap-1.5')}>
+                <div className={cx('flex', 'flex-col', 'gap-1.5')}>
                   <Field name="emails">
                     {({ field }: FieldAttributes<FieldProps>) => (
                       <FormControl
@@ -114,9 +113,9 @@ const OrganizationInviteMembers = ({
                         <FormLabel>Comma separated emails:</FormLabel>
                         <Textarea
                           {...field}
+                          className={cx('h-[120px]')}
                           placeholder="alice@example.com, david@example.com"
                           disabled={isSubmitting}
-                          h="120px"
                         />
                         <FormErrorMessage>{errors.emails}</FormErrorMessage>
                       </FormControl>
@@ -126,24 +125,27 @@ const OrganizationInviteMembers = ({
                 </div>
               </ModalBody>
               <ModalFooter>
-                <Button
-                  type="button"
-                  variant="outline"
-                  colorScheme="blue"
-                  mr={variables.spacingSm}
-                  disabled={isSubmitting}
-                  onClick={() => onClose?.()}
+                <div
+                  className={cx('flex', 'flex-row', 'items-center', 'gap-1')}
                 >
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  variant="solid"
-                  colorScheme="blue"
-                  isLoading={isSubmitting}
-                >
-                  Invite
-                </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    colorScheme="blue"
+                    disabled={isSubmitting}
+                    onClick={() => onClose?.()}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    variant="solid"
+                    colorScheme="blue"
+                    isLoading={isSubmitting}
+                  >
+                    Invite
+                  </Button>
+                </div>
               </ModalFooter>
             </Form>
           )}

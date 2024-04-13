@@ -6,10 +6,8 @@ import {
   FormErrorMessage,
   Input,
   Link as ChakraLink,
-  Text,
   Heading,
 } from '@chakra-ui/react'
-import { variables } from '@koupr/ui'
 import {
   Field,
   FieldAttributes,
@@ -19,7 +17,7 @@ import {
   FormikHelpers,
 } from 'formik'
 import * as Yup from 'yup'
-import classNames from 'classnames'
+import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import AccountAPI from '@/client/idp/account'
 import Logo from '@/components/common/logo'
@@ -61,7 +59,7 @@ const ForgotPasswordPage = () => {
           <title>Forgot Password</title>
         </Helmet>
         <div
-          className={classNames(
+          className={cx(
             'flex',
             'flex-col',
             'items-center',
@@ -69,23 +67,21 @@ const ForgotPasswordPage = () => {
             'w-full',
           )}
         >
-          <div className="w-16">
+          <div className={cx('w-[64px]')}>
             <Logo isGlossy={true} />
           </div>
-          <Heading fontSize={variables.headingFontSize}>
-            Forgot Password
-          </Heading>
+          <Heading className={cx('text-heading')}>Forgot Password</Heading>
           {isCompleted ? (
-            <Text align="center">
+            <span className={cx('text-center')}>
               If your email belongs to an account, you will receive the recovery
               instructions in your inbox shortly.
-            </Text>
+            </span>
           ) : (
             <>
-              <Text align="center">
+              <span className={cx('text-center')}>
                 Please provide your account Email where we can send you the
                 password recovery instructions.
-              </Text>
+              </span>
               <Formik
                 initialValues={{
                   email: '',
@@ -95,9 +91,9 @@ const ForgotPasswordPage = () => {
                 onSubmit={handleSubmit}
               >
                 {({ errors, touched, isSubmitting }) => (
-                  <Form className="w-full">
+                  <Form className={cx('w-full')}>
                     <div
-                      className={classNames(
+                      className={cx(
                         'flex',
                         'flex-col',
                         'items-center',
@@ -122,9 +118,9 @@ const ForgotPasswordPage = () => {
                         )}
                       </Field>
                       <Button
+                        className={cx('w-full')}
                         variant="solid"
                         colorScheme="blue"
-                        w="100%"
                         type="submit"
                         isLoading={isSubmitting}
                       >
@@ -135,14 +131,9 @@ const ForgotPasswordPage = () => {
                 )}
               </Formik>
               <div
-                className={classNames(
-                  'flex',
-                  'flex-row',
-                  'items-center',
-                  'gap-0.5',
-                )}
+                className={cx('flex', 'flex-row', 'items-center', 'gap-0.5')}
               >
-                <Text>Password recovered?</Text>
+                <span>Password recovered?</span>
                 <ChakraLink as={Link} to="/sign-in">
                   Sign In
                 </ChakraLink>

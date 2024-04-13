@@ -15,8 +15,16 @@ import {
   SliderTrack,
   SliderFilledTrack,
   SliderThumb,
-  useToken,
 } from '@chakra-ui/react'
+import { useSWRConfig } from 'swr'
+import cx from 'classnames'
+import { FiChevronDown } from 'react-icons/fi'
+import { LuGrid, LuList, LuX } from 'react-icons/lu'
+import FileAPI, { List, SortBy, SortOrder } from '@/client/api/file'
+import { ltEditorPermission, ltOwnerPermission } from '@/client/api/permission'
+import downloadFile from '@/helpers/download-file'
+import mapFileList from '@/helpers/map-file-list'
+import useFileListSearchParams from '@/hooks/use-file-list-params'
 import {
   IconAdd,
   IconCheckCircle,
@@ -34,16 +42,7 @@ import {
   IconSortUp,
   IconSortDown,
   IconCheck,
-} from '@koupr/ui'
-import { useSWRConfig } from 'swr'
-import classNames from 'classnames'
-import { FiChevronDown } from 'react-icons/fi'
-import { LuGrid, LuList, LuX } from 'react-icons/lu'
-import FileAPI, { List, SortBy, SortOrder } from '@/client/api/file'
-import { ltEditorPermission, ltOwnerPermission } from '@/client/api/permission'
-import downloadFile from '@/helpers/download-file'
-import mapFileList from '@/helpers/map-file-list'
-import useFileListSearchParams from '@/hooks/use-file-list-params'
+} from '@/lib'
 import { uploadAdded, UploadDecorator } from '@/store/entities/uploads'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import {
@@ -78,6 +77,9 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
   const { mutate } = useSWRConfig()
   const { id, fileId } = useParams()
   const [isRefreshing, setIsRefreshing] = useState(false)
+  const fileCount = useAppSelector(
+    (state) => state.entities.files.list?.data.length,
+  )
   const selectionCount = useAppSelector(
     (state) => state.ui.files.selection.length,
   )
@@ -115,8 +117,7 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
   const folderUploadInput = useRef<HTMLInputElement>(null)
   const fileListSearchParams = useFileListSearchParams()
   const { data: folder } = FileAPI.useGetById(fileId)
-  const stackClassName = classNames('flex', 'flex-row', 'gap-0.5')
-  const grayColor = useToken('colors', 'gray.500')
+  const stackClassName = cx('flex', 'flex-row', 'gap-0.5')
 
   const handleFileChange = useCallback(
     async (event: ChangeEvent<HTMLInputElement>) => {
@@ -191,7 +192,7 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
       if (value === sortBy) {
         return <IconCheck />
       } else {
-        return <IconCheck color="transparent" />
+        return <IconCheck className={cx('text-transparent')} />
       }
     },
     [sortBy],
@@ -278,7 +279,7 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
           {selectionCount > 0 && hasOwnerPermission && (
             <Button
               leftIcon={<IconTrash />}
-              color="red"
+              className={cx('text-red-500')}
               onClick={() => dispatch(deleteModalDidOpen())}
             >
               Delete
@@ -316,7 +317,7 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
                   <MenuDivider />
                   <MenuItem
                     icon={<IconTrash />}
-                    color="red"
+                    className={cx('text-red-500')}
                     isDisabled={selectionCount === 0 || !hasOwnerPermission}
                     onClick={() => dispatch(deleteModalDidOpen())}
                   >
@@ -365,13 +366,15 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
             </Menu>
           ) : null}
         </div>
-        <IconButton
-          icon={isSelectionMode ? <LuX /> : <IconCheckCircle />}
-          isDisabled={!list}
-          variant="solid"
-          aria-label=""
-          onClick={handleToggleSelection}
-        />
+        {fileCount ? (
+          <IconButton
+            icon={isSelectionMode ? <LuX /> : <IconCheckCircle />}
+            isDisabled={!list}
+            variant="solid"
+            aria-label=""
+            onClick={handleToggleSelection}
+          />
+        ) : null}
         <IconButton
           icon={<IconRefresh />}
           isLoading={isRefreshing}
@@ -381,9 +384,9 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
           onClick={handleRefresh}
         />
         <Spacer />
-        <div className={classNames('flex', 'flex-row', 'gap-2.5')}>
+        <div className={cx('flex', 'flex-row', 'gap-2.5')}>
           <Slider
-            w="120px"
+            className={cx('w-[120px]')}
             value={iconScale}
             min={ICON_SCALE_SLIDER_MIN}
             max={ICON_SCALE_SLIDER_MAX}
@@ -392,17 +395,17 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
             onChange={handleIconScaleChange}
           >
             <SliderTrack>
-              <div className={classNames('relative')} />
+              <div className={cx('relative')} />
               <SliderFilledTrack />
             </SliderTrack>
             <SliderThumb boxSize={8}>
-              <IconGridFill style={{ color: grayColor }} />
+              <IconGridFill className={cx('text-gray-500')} />
             </SliderThumb>
           </Slider>
           <div className={stackClassName}>
             <IconButton
               icon={getSortOrderIcon()}
-              fontSize="16px"
+              className={cx('text-[16px]')}
               variant="solid"
               aria-label=""
               isDisabled={!list}
@@ -410,7 +413,7 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
             />
             <IconButton
               icon={getViewTypeIcon()}
-              fontSize="16px"
+              className={cx('text-[16px]')}
               variant="solid"
               aria-label=""
               isDisabled={!list}
@@ -464,14 +467,14 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
       </div>
       <input
         ref={fileUploadInput}
-        className="hidden"
+        className={cx('hidden')}
         type="file"
         multiple
         onChange={handleFileChange}
       />
       <input
         ref={folderUploadInput}
-        className="hidden"
+        className={cx('hidden')}
         type="file"
         /* @ts-expect-error intentionaly ignored */
         directory=""

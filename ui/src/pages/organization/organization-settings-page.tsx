@@ -1,14 +1,7 @@
 import { useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { Divider, IconButton, Text } from '@chakra-ui/react'
-import {
-  IconEdit,
-  IconExit,
-  IconTrash,
-  IconUserPlus,
-  SectionSpinner,
-} from '@koupr/ui'
-import classNames from 'classnames'
+import { Divider, IconButton } from '@chakra-ui/react'
+import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import OrganizationAPI from '@/client/api/organization'
 import { geEditorPermission, geOwnerPermission } from '@/client/api/permission'
@@ -17,8 +10,15 @@ import OrganizationDelete from '@/components/organization/organization-delete'
 import OrganizationEditName from '@/components/organization/organization-edit-name'
 import OrganizationInviteMembers from '@/components/organization/organization-invite-members'
 import OrganizationLeave from '@/components/organization/organization-leave'
+import {
+  IconEdit,
+  IconExit,
+  IconTrash,
+  IconUserPlus,
+  SectionSpinner,
+} from '@/lib'
 
-const Spacer = () => <div className={classNames('grow')} />
+const Spacer = () => <div className={cx('grow')} />
 
 const OrganizationSettingsPage = () => {
   const { id } = useParams()
@@ -28,8 +28,8 @@ const OrganizationSettingsPage = () => {
     useState(false)
   const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
-  const sectionClassName = classNames('flex', 'flex-col', 'gap-1', 'py-1.5')
-  const rowClassName = classNames(
+  const sectionClassName = cx('flex', 'flex-col', 'gap-1', 'py-1.5')
+  const rowClassName = cx(
     'flex',
     'flex-row',
     'items-center',
@@ -52,9 +52,9 @@ const OrganizationSettingsPage = () => {
       </Helmet>
       <div className={sectionClassName}>
         <div className={rowClassName}>
-          <Text>Name</Text>
+          <span>Name</span>
           <Spacer />
-          <Text>{org.name}</Text>
+          <span>{org.name}</span>
           <IconButton
             icon={<IconEdit />}
             isDisabled={!geEditorPermission(org.permission)}
@@ -66,7 +66,7 @@ const OrganizationSettingsPage = () => {
         </div>
         <Divider />
         <div className={rowClassName}>
-          <Text>Invite members</Text>
+          <span>Invite members</span>
           <Spacer />
           <IconButton
             icon={<IconUserPlus />}
@@ -78,7 +78,7 @@ const OrganizationSettingsPage = () => {
           />
         </div>
         <div className={rowClassName}>
-          <Text>Leave</Text>
+          <span>Leave</span>
           <Spacer />
           <IconButton
             icon={<IconExit />}
@@ -90,7 +90,7 @@ const OrganizationSettingsPage = () => {
         </div>
         <Divider />
         <div className={rowClassName}>
-          <Text>Delete permanently</Text>
+          <span>Delete permanently</span>
           <Spacer />
           <IconButton
             icon={<IconTrash />}

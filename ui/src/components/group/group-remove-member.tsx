@@ -8,9 +8,8 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
-  Text,
 } from '@chakra-ui/react'
-import { variables } from '@koupr/ui'
+import { cx } from '@emotion/css'
 import GroupAPI, { Group } from '@/client/api/group'
 import { User } from '@/client/idp/user'
 import userToString from '@/helpers/user-to-string'
@@ -56,38 +55,33 @@ const GroupRemoveMember = ({
         <ModalHeader>Remove Member</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-          <Text>
+          <div>
             Are you sure you would like to remove member{' '}
-            <Text as="span" fontWeight="bold">
-              {userToString(user)}
-            </Text>{' '}
-            from group{' '}
-            <Text as="span" fontWeight="bold">
-              {group.name}
-            </Text>
-            ?
-          </Text>
+            <span className={cx('font-bold')}>{userToString(user)}</span> from
+            group <span className={cx('font-bold')}>{group.name}</span>?
+          </div>
         </ModalBody>
         <ModalFooter>
-          <Button
-            type="button"
-            variant="outline"
-            colorScheme="blue"
-            mr={variables.spacingSm}
-            disabled={loading}
-            onClick={() => onClose?.()}
-          >
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            variant="solid"
-            colorScheme="red"
-            isLoading={loading}
-            onClick={handleRemoveMember}
-          >
-            Remove
-          </Button>
+          <div className={cx('flex', 'flex-row', 'items-center', 'gap-1')}>
+            <Button
+              type="button"
+              variant="outline"
+              colorScheme="blue"
+              disabled={loading}
+              onClick={() => onClose?.()}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              variant="solid"
+              colorScheme="red"
+              isLoading={loading}
+              onClick={handleRemoveMember}
+            >
+              Remove
+            </Button>
+          </div>
         </ModalFooter>
       </ModalContent>
     </Modal>

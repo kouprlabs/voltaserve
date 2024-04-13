@@ -6,10 +6,8 @@ import {
   FormErrorMessage,
   Input,
   Link as ChakraLink,
-  Text,
   Heading,
 } from '@chakra-ui/react'
-import { variables } from '@koupr/ui'
 import {
   Field,
   FieldAttributes,
@@ -19,7 +17,7 @@ import {
   FormikHelpers,
 } from 'formik'
 import * as Yup from 'yup'
-import classNames from 'classnames'
+import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import AccountAPI from '@/client/idp/account'
 import Logo from '@/components/common/logo'
@@ -72,7 +70,7 @@ const SignUpPage = () => {
         </Helmet>
         {isConfirmationVisible && (
           <div
-            className={classNames(
+            className={cx(
               'flex',
               'flex-col',
               'items-center',
@@ -80,30 +78,23 @@ const SignUpPage = () => {
               'w-full',
             )}
           >
-            <div
-              className={classNames(
-                'flex',
-                'flex-col',
-                'items-center',
-                'gap-1.5',
-              )}
-            >
-              <div className="w-16">
+            <div className={cx('flex', 'flex-col', 'items-center', 'gap-1.5')}>
+              <div className={cx('w-[64px]')}>
                 <Logo isGlossy={true} />
               </div>
-              <Heading fontSize={variables.headingFontSize}>
+              <Heading className={cx('text-heading')}>
                 Thanks! We just sent you a confirmation email
               </Heading>
-              <Text align="center">
+              <span className={cx('text-center')}>
                 Just open your inbox, find the email, and click on the
                 confirmation link.
-              </Text>
+              </span>
             </div>
           </div>
         )}
         {!isConfirmationVisible && (
           <div
-            className={classNames(
+            className={cx(
               'flex',
               'flex-col',
               'items-center',
@@ -111,10 +102,10 @@ const SignUpPage = () => {
               'w-full',
             )}
           >
-            <div className="w-16">
+            <div className={cx('w-[64px]')}>
               <Logo isGlossy={true} />
             </div>
-            <Heading fontSize={variables.headingFontSize}>
+            <Heading className={cx('text-heading')}>
               Sign Up to Voltaserve
             </Heading>
             <Formik
@@ -129,9 +120,9 @@ const SignUpPage = () => {
               onSubmit={handleSubmit}
             >
               {({ errors, touched, isSubmitting }) => (
-                <Form className="w-full">
+                <Form className={cx('w-full')}>
                   <div
-                    className={classNames(
+                    className={cx(
                       'flex',
                       'flex-col',
                       'items-center',
@@ -214,9 +205,9 @@ const SignUpPage = () => {
                       )}
                     </Field>
                     <Button
+                      className={cx('w-full')}
                       variant="solid"
                       colorScheme="blue"
-                      w="100%"
                       type="submit"
                       isLoading={isSubmitting}
                     >
@@ -226,15 +217,8 @@ const SignUpPage = () => {
                 </Form>
               )}
             </Formik>
-            <div
-              className={classNames(
-                'flex',
-                'flex-row',
-                'items-center',
-                'gap-0.5',
-              )}
-            >
-              <Text>Already a member?</Text>
+            <div className={cx('flex', 'flex-row', 'items-center', 'gap-0.5')}>
+              <span>Already a member?</span>
               <ChakraLink as={Link} to="/sign-in">
                 Sign In
               </ChakraLink>

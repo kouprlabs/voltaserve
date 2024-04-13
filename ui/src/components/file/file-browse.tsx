@@ -1,18 +1,12 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import {
-  Box,
-  Button,
-  Text,
-  useColorModeValue,
-  useToken,
-} from '@chakra-ui/react'
-import { IconChevronRight, SectionSpinner } from '@koupr/ui'
-import classNames from 'classnames'
+import { Button } from '@chakra-ui/react'
+import cx from 'classnames'
 import { FcFolder } from 'react-icons/fc'
 import FileAPI, { File, FileType } from '@/client/api/file'
 import WorkspaceAPI from '@/client/api/workspace'
 import Path from '@/components/common/path'
+import { IconChevronRight, SectionSpinner, Text } from '@/lib'
 
 export type FileBrowseProps = {
   onChange?: (id: string) => void
@@ -27,18 +21,6 @@ const FileBrowse = ({ onChange }: FileBrowseProps) => {
   const [loading, setLoading] = useState(false)
   const [isSpinnerVisible, setIsSpinnerVisible] = useState(false)
   const [fileId, setFileId] = useState<string>()
-  const hoverColor = useToken(
-    'colors',
-    useColorModeValue('gray.100', 'gray.700'),
-  )
-  const activeColor = useToken(
-    'colors',
-    useColorModeValue('gray.200', 'gray.600'),
-  )
-  const borderColor = useToken(
-    'colors',
-    useColorModeValue('gray.300', 'gray.600'),
-  )
 
   useEffect(() => {
     if (workspace) {
@@ -91,7 +73,7 @@ const FileBrowse = ({ onChange }: FileBrowseProps) => {
   }
 
   return (
-    <div className={classNames('flex', 'flex-col', 'gap-1')}>
+    <div className={cx('flex', 'flex-col', 'gap-1')}>
       {workspace && fileId ? (
         <Path
           rootId={workspace.rootId}
@@ -101,7 +83,7 @@ const FileBrowse = ({ onChange }: FileBrowseProps) => {
         />
       ) : null}
       <div
-        className={classNames(
+        className={cx(
           'flex',
           'flex-col',
           'gap-0',
@@ -110,14 +92,15 @@ const FileBrowse = ({ onChange }: FileBrowseProps) => {
           'h-[250px]',
           'xl:h-[400px]',
           'overflow-y-scroll',
+          'border-t-gray-300',
+          'dark:border-t-gray-600',
         )}
-        style={{ borderTopColor: borderColor }}
       >
         {folders.length > 0 ? (
           folders.map((f) => (
-            <Box
+            <div
               key={f.id}
-              className={classNames(
+              className={cx(
                 'flex',
                 'flex-row',
                 'gap-1.5',
@@ -125,33 +108,30 @@ const FileBrowse = ({ onChange }: FileBrowseProps) => {
                 'cursor-pointer',
                 'p-1',
                 'rounded-md',
+                'hover:bg-gray-100',
+                'hover:dark:bg-gray-700',
+                'active:bg-gray-100',
+                'active:dark:bg-gray-700',
               )}
-              _hover={{ background: hoverColor }}
-              _active={{ background: activeColor }}
               onClick={() => setFileId(f.id)}
             >
-              <FcFolder fontSize="36px" style={{ flexShrink: 0 }} />
+              <FcFolder fontSize="36px" className={cx('shrink-0')} />
               <Text noOfLines={1}>{f.name}</Text>
-              <div className={classNames('grow')} />
+              <div className={cx('grow')} />
               <IconChevronRight />
-            </Box>
+            </div>
           ))
         ) : (
           <div
-            className={classNames(
-              'flex',
-              'items-center',
-              'justify-center',
-              'h-full',
-            )}
+            className={cx('flex', 'items-center', 'justify-center', 'h-full')}
           >
-            <Text>There are no folders.</Text>
+            <span>There are no folders.</span>
           </div>
         )}
       </div>
       {totalPages > page && fileId ? (
         <div
-          className={classNames(
+          className={cx(
             'flex',
             'items-center',
             'justify-center',

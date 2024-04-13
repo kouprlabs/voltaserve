@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { Link as ChakraLink, Heading, Text } from '@chakra-ui/react'
-import { variables, Spinner } from '@koupr/ui'
-import classNames from 'classnames'
+import { Link as ChakraLink, Heading } from '@chakra-ui/react'
+import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import AccountAPI from '@/client/idp/account'
 import Logo from '@/components/common/logo'
 import LayoutFull from '@/components/layout/layout-full'
+import { Spinner } from '@/lib'
 
 const ConfirmEmailPage = () => {
   const params = useParams()
@@ -39,46 +39,23 @@ const ConfirmEmailPage = () => {
       <Helmet>
         <title>Confirm Email</title>
       </Helmet>
-      <div className={classNames('flex', 'flex-col', 'items-center', 'gap-3')}>
-        <div className="w-16">
+      <div className={cx('flex', 'flex-col', 'items-center', 'gap-3')}>
+        <div className={cx('w-[64px]')}>
           <Logo isGlossy={true} />
         </div>
         {!isCompleted && !isFailed ? (
-          <div
-            className={classNames(
-              'flex',
-              'flex-col',
-              'items-center',
-              'gap-1.5',
-            )}
-          >
-            <Heading fontSize={variables.headingFontSize}>
+          <div className={cx('flex', 'flex-col', 'items-center', 'gap-1.5')}>
+            <Heading className={cx('text-heading')}>
               Confirming your Email…
             </Heading>
             <Spinner />
           </div>
         ) : null}
         {isCompleted && !isFailed ? (
-          <div
-            className={classNames(
-              'flex',
-              'flex-col',
-              'items-center',
-              'gap-1.5',
-            )}
-          >
-            <Heading fontSize={variables.headingFontSize}>
-              Email confirmed
-            </Heading>
-            <div
-              className={classNames(
-                'flex',
-                'flex-col',
-                'items-center',
-                'gap-0.5',
-              )}
-            >
-              <Text>Click the link below to sign in.</Text>
+          <div className={cx('flex', 'flex-col', 'items-center', 'gap-1.5')}>
+            <Heading className={cx('text-heading')}>Email confirmed</Heading>
+            <div className={cx('flex', 'flex-col', 'items-center', 'gap-0.5')}>
+              <span>Click the link below to sign in.</span>
               <ChakraLink as={Link} to="/sign-in">
                 Sign In
               </ChakraLink>
@@ -86,7 +63,7 @@ const ConfirmEmailPage = () => {
           </div>
         ) : null}
         {isFailed && (
-          <Heading fontSize={variables.headingFontSize}>
+          <Heading className={cx('text-heading')}>
             An error occurred while processing your request.
           </Heading>
         )}

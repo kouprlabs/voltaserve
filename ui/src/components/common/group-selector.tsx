@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import {
   Button,
-  Text,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -16,12 +15,11 @@ import {
   Td,
   Avatar,
   Radio,
-  useColorModeValue,
 } from '@chakra-ui/react'
-import { SectionSpinner, Pagination, SearchInput, variables } from '@koupr/ui'
-import classNames from 'classnames'
+import cx from 'classnames'
 import GroupAPI, { Group, SortOrder } from '@/client/api/group'
 import { swrConfig } from '@/client/options'
+import { SectionSpinner, Pagination, SearchInput } from '@/lib'
 
 export type GroupSelectorProps = {
   value?: Group
@@ -46,9 +44,6 @@ const GroupSelector = ({
     { query, organizationId, page, size: 5, sortOrder: SortOrder.Desc },
     swrConfig(),
   )
-  const selectionColor = useColorModeValue('gray.100', 'gray.600')
-  const dimmedButtonLabelColor = useColorModeValue('gray.500', 'gray.500')
-  const normalButtonLabelColor = useColorModeValue('black', 'white')
 
   useEffect(() => {
     mutate()
@@ -73,9 +68,14 @@ const GroupSelector = ({
     <>
       <Button
         variant="outline"
-        w="100%"
+        className={cx(
+          'w-full',
+          { 'text-black': value },
+          { 'dark:text-white': value },
+          { 'text-gray-500': !value },
+          { 'dark:text-gray-500': !value },
+        )}
         onClick={onOpen}
-        color={value ? normalButtonLabelColor : dimmedButtonLabelColor}
       >
         {value ? value.name : 'Select Group'}
       </Button>
@@ -90,27 +90,27 @@ const GroupSelector = ({
           <ModalHeader>Select Group</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            <div className={classNames('flex', 'flex-col', 'gap-1.5')}>
+            <div className={cx('flex', 'flex-col', 'gap-1.5')}>
               <SearchInput
                 query={query}
                 onChange={(value) => setQuery(value)}
               />
               {!list && error && (
                 <div
-                  className={classNames(
+                  className={cx(
                     'flex',
                     'items-center',
                     'justify-center',
                     'h-[300px]',
                   )}
                 >
-                  <Text>Failed to load groups.</Text>
+                  <span>Failed to load groups.</span>
                 </div>
               )}
               {!list && !error && <SectionSpinner />}
               {list && list.data.length === 0 && (
                 <div
-                  className={classNames(
+                  className={cx(
                     'flex',
                     'items-center',
                     'justify-center',
@@ -118,37 +118,41 @@ const GroupSelector = ({
                   )}
                 >
                   <div
-                    className={classNames(
+                    className={cx(
                       'flex',
                       'flex-col',
                       'items-center',
                       'gap-1.5',
                     )}
                   >
-                    <Text>There are no organizations.</Text>
+                    <span>There are no organizations.</span>
                   </div>
                 </div>
               )}
               {list && list.data.length > 0 && (
                 <Table variant="simple" size="sm">
                   <colgroup>
-                    <col style={{ width: '40px' }} />
-                    <col style={{ width: 'auto' }} />
+                    <col className={cx('w-[40px]')} />
+                    <col className={cx('w-[auto]')} />
                   </colgroup>
                   <Tbody>
                     {list.data.map((g) => (
                       <Tr
                         key={g.id}
-                        cursor="pointer"
-                        bg={selected?.id === g.id ? selectionColor : 'auto'}
+                        className={cx(
+                          'cursor-pointer',
+                          { 'bg-gray-100': selected?.id === g.id },
+                          { 'dark:bg-gray-600': selected?.id === g.id },
+                          { 'bg-transparent': selected?.id !== g.id },
+                        )}
                         onClick={() => setSelected(g)}
                       >
-                        <Td px={variables.spacingXs} textAlign="center">
+                        <Td className={cx('px-0.5', 'text-center')}>
                           <Radio size="md" isChecked={selected?.id === g.id} />
                         </Td>
-                        <Td px={variables.spacingXs}>
+                        <Td className={cx('px-0.5')}>
                           <div
-                            className={classNames(
+                            className={cx(
                               'flex',
                               'flex-row',
                               'items-center',
@@ -158,12 +162,9 @@ const GroupSelector = ({
                             <Avatar
                               name={g.name}
                               size="sm"
-                              width="40px"
-                              height="40px"
+                              className={cx('w-[40px]', 'h-[40px]')}
                             />
-                            <Text fontSize={variables.bodyFontSize}>
-                              {g.name}
-                            </Text>
+                            <span className={cx('text-base')}>{g.name}</span>
                           </div>
                         </Td>
                       </Tr>
@@ -172,7 +173,7 @@ const GroupSelector = ({
                 </Table>
               )}
               {list && (
-                <div className={classNames('self-end')}>
+                <div className={cx('self-end')}>
                   {list.totalPages > 1 ? (
                     <Pagination
                       uiSize="md"
@@ -187,23 +188,24 @@ const GroupSelector = ({
             </div>
           </ModalBody>
           <ModalFooter>
-            <Button
-              type="button"
-              variant="outline"
-              colorScheme="blue"
-              mr={variables.spacingSm}
-              onClick={onClose}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="solid"
-              colorScheme="blue"
-              isDisabled={!selected}
-              onClick={handleConfirm}
-            >
-              Confirm
-            </Button>
+            <div className={cx('flex', 'flex-row', 'items-center', 'gap-1')}>
+              <Button
+                type="button"
+                variant="outline"
+                colorScheme="blue"
+                onClick={onClose}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="solid"
+                colorScheme="blue"
+                isDisabled={!selected}
+                onClick={handleConfirm}
+              >
+                Confirm
+              </Button>
+            </div>
           </ModalFooter>
         </ModalContent>
       </Modal>

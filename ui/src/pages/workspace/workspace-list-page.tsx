@@ -14,17 +14,10 @@ import {
   Th,
   Thead,
   Tr,
-  Text,
   Avatar,
   Badge,
 } from '@chakra-ui/react'
-import {
-  SectionSpinner,
-  PagePagination,
-  variables,
-  usePagePagination,
-} from '@koupr/ui'
-import classNames from 'classnames'
+import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import WorkspaceAPI, { SortOrder } from '@/client/api/workspace'
 import { swrConfig } from '@/client/options'
@@ -32,6 +25,7 @@ import { CreateWorkspaceButton } from '@/components/top-bar/top-bar-buttons'
 import prettyDate from '@/helpers/pretty-date'
 import { decodeQuery } from '@/helpers/query'
 import { workspacePaginationStorage } from '@/infra/pagination'
+import { SectionSpinner, PagePagination, usePagePagination } from '@/lib'
 
 const WorkspaceListPage = () => {
   const navigate = useNavigate()
@@ -61,41 +55,32 @@ const WorkspaceListPage = () => {
       <Helmet>
         <title>Workspaces</title>
       </Helmet>
-      <div className={classNames('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
-        <Heading fontSize={variables.headingFontSize} pl={variables.spacingMd}>
-          Workspaces
-        </Heading>
+      <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
+        <Heading className={cx('pl-2', 'text-heading')}>Workspaces</Heading>
         {!list && error && (
           <div
-            className={classNames(
+            className={cx(
               'flex',
               'items-center',
               'justify-center',
               'h-[300px]',
             )}
           >
-            <Text>Failed to load workspaces.</Text>
+            <span>Failed to load workspaces.</span>
           </div>
         )}
         {!list && !error && <SectionSpinner />}
         {list && list.data.length === 0 && !error ? (
           <div
-            className={classNames(
+            className={cx(
               'flex',
               'items-center',
               'justify-center',
               'h-[300px]',
             )}
           >
-            <div
-              className={classNames(
-                'flex',
-                'flex-col',
-                'gap-1.5',
-                'items-center',
-              )}
-            >
-              <Text>There are no workspaces.</Text>
+            <div className={cx('flex', 'flex-col', 'gap-1.5', 'items-center')}>
+              <span>There are no workspaces.</span>
               <CreateWorkspaceButton />
             </div>
           </div>
@@ -115,7 +100,7 @@ const WorkspaceListPage = () => {
                 <Tr key={w.id}>
                   <Td>
                     <div
-                      className={classNames(
+                      className={cx(
                         'flex',
                         'flex-row',
                         'gap-1.5',
@@ -131,9 +116,9 @@ const WorkspaceListPage = () => {
                       <ChakraLink
                         as={Link}
                         to={`/workspace/${w.id}/file/${w.rootId}`}
-                        textDecoration="none"
+                        className={cx('no-underline')}
                       >
-                        <Text>{w.name}</Text>
+                        <span>{w.name}</span>
                       </ChakraLink>
                     </div>
                   </Td>
@@ -141,7 +126,7 @@ const WorkspaceListPage = () => {
                     <ChakraLink
                       as={Link}
                       to={`/organization/${w.organization.id}/member`}
-                      textDecoration="none"
+                      className={cx('no-underline')}
                     >
                       {w.organization.name}
                     </ChakraLink>

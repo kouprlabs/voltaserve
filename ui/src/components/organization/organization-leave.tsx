@@ -9,9 +9,8 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
-  Text,
 } from '@chakra-ui/react'
-import { variables } from '@koupr/ui'
+import cx from 'classnames'
 import OrganizationAPI from '@/client/api/organization'
 
 export type OrganizationLeaveProps = {
@@ -51,29 +50,30 @@ const OrganizationLeave = ({ open, id, onClose }: OrganizationLeaveProps) => {
         <ModalHeader>Leave Organization</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-          <Text>Are you sure you would like to leave this organization?</Text>
+          <span>Are you sure you would like to leave this organization?</span>
         </ModalBody>
         <ModalFooter>
-          <Button
-            type="button"
-            variant="outline"
-            colorScheme="blue"
-            mr={variables.spacingSm}
-            disabled={isLoading}
-            onClick={() => onClose?.()}
-          >
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            variant="solid"
-            colorScheme="red"
-            disabled={isLoading}
-            isLoading={isLoading}
-            onClick={() => handleConfirmation()}
-          >
-            Leave
-          </Button>
+          <div className={cx('flex', 'flex-row', 'items-center', 'gap-1')}>
+            <Button
+              type="button"
+              variant="outline"
+              colorScheme="blue"
+              disabled={isLoading}
+              onClick={() => onClose?.()}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              variant="solid"
+              colorScheme="red"
+              disabled={isLoading}
+              isLoading={isLoading}
+              onClick={() => handleConfirmation()}
+            >
+              Leave
+            </Button>
+          </div>
         </ModalFooter>
       </ModalContent>
     </Modal>

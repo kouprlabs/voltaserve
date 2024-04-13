@@ -1,5 +1,5 @@
 import { Badge, Stat, StatLabel, StatNumber } from '@chakra-ui/react'
-import { variables } from '@koupr/ui'
+import cx from 'classnames'
 import { File } from '@/client/api/file'
 
 export type FileInfoPermissionProps = {
@@ -9,7 +9,7 @@ export type FileInfoPermissionProps = {
 const FileInfoPermission = ({ file }: FileInfoPermissionProps) => (
   <Stat>
     <StatLabel>Permission</StatLabel>
-    <StatNumber fontSize={variables.bodyFontSize}>
+    <StatNumber className={cx('text-base')}>
       <Badge>{file.permission}</Badge>
     </StatNumber>
   </Stat>

@@ -10,10 +10,9 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
-  Text,
 } from '@chakra-ui/react'
-import { variables } from '@koupr/ui'
 import { useSWRConfig } from 'swr'
+import cx from 'classnames'
 import FileAPI, { List } from '@/client/api/file'
 import useFileListSearchParams from '@/hooks/use-file-list-params'
 import { useAppSelector } from '@/store/hook'
@@ -58,34 +57,35 @@ const FileDelete = () => {
         <ModalCloseButton />
         <ModalBody>
           {selection.length > 1 ? (
-            <Text>
+            <span>
               Are you sure you would like to delete ({selection.length})
               item(s)?
-            </Text>
+            </span>
           ) : (
-            <Text>Are you sure you would like to delete this item?</Text>
+            <span>Are you sure you would like to delete this item?</span>
           )}
         </ModalBody>
         <ModalFooter>
-          <Button
-            type="button"
-            variant="outline"
-            colorScheme="blue"
-            mr={variables.spacingSm}
-            disabled={loading}
-            onClick={() => dispatch(deleteModalDidClose())}
-          >
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            variant="solid"
-            colorScheme="red"
-            isLoading={loading}
-            onClick={handleDelete}
-          >
-            Delete
-          </Button>
+          <div className={cx('flex', 'flex-row', 'items-center', 'gap-1')}>
+            <Button
+              type="button"
+              variant="outline"
+              colorScheme="blue"
+              disabled={loading}
+              onClick={() => dispatch(deleteModalDidClose())}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              variant="solid"
+              colorScheme="red"
+              isLoading={loading}
+              onClick={handleDelete}
+            >
+              Delete
+            </Button>
+          </div>
         </ModalFooter>
       </ModalContent>
     </Modal>

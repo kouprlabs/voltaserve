@@ -6,17 +6,15 @@ import {
   AccordionPanel,
   CircularProgress,
   IconButton,
-  Text,
   useToken,
 } from '@chakra-ui/react'
+import cx from 'classnames'
 import {
   IconClose,
   IconTime,
   IconCheckCircleFill,
   IconAlertCircleFill,
-  variables,
-} from '@koupr/ui'
-import classNames from 'classnames'
+} from '@/lib'
 import {
   Upload,
   UploadDecorator,
@@ -36,9 +34,9 @@ const UploadItem = ({ upload: uploadProp }: UploadItemProps) => {
   const redColor = useToken('colors', 'red')
 
   return (
-    <div className={classNames('flex', 'flex-col', 'gap-1')}>
+    <div className={cx('flex', 'flex-col', 'gap-1')}>
       <div
-        className={classNames(
+        className={cx(
           'flex',
           'flex-row',
           'items-center',
@@ -52,33 +50,35 @@ const UploadItem = ({ upload: uploadProp }: UploadItemProps) => {
             value={upload.progress}
             max={100}
             isIndeterminate={upload.progress === 100 && !upload.error}
-            color="black"
+            className={cx('text-black')}
             size="20px"
           />
         )}
         {upload.isPending && (
-          <div className={classNames('shrink-0')} style={{ color: grayColor }}>
+          <div className={cx('shrink-0')} style={{ color: grayColor }}>
             <IconTime fontSize="21px" />
           </div>
         )}
         {upload.isSucceeded && (
-          <div className={classNames('shrink-0')} style={{ color: greenColor }}>
+          <div className={cx('shrink-0')} style={{ color: greenColor }}>
             <IconCheckCircleFill fontSize="22px" />
           </div>
         )}
         {upload.isFailed && (
-          <div className={classNames('shrink-0')} style={{ color: redColor }}>
+          <div className={cx('shrink-0')} style={{ color: redColor }}>
             <IconAlertCircleFill fontSize="22px" />
           </div>
         )}
-        <Text
-          flexGrow={1}
-          textOverflow="ellipsis"
-          overflow="hidden"
-          whiteSpace="nowrap"
+        <span
+          className={cx(
+            'grow',
+            'text-ellipsis',
+            'overflow-hidden',
+            'whitespace-nowrap',
+          )}
         >
           {upload.file.name}
-        </Text>
+        </span>
         <IconButton
           icon={<IconClose />}
           size="xs"
@@ -94,15 +94,15 @@ const UploadItem = ({ upload: uploadProp }: UploadItemProps) => {
       {upload.isFailed && (
         <Accordion allowMultiple>
           <AccordionItem border="none">
-            <AccordionButton p={variables.spacingXs} _hover={{ bg: 'red.50' }}>
-              <div className={classNames('flex', 'flex-row', 'w-full')}>
-                <Text color="red" flexGrow={1} textAlign="left">
+            <AccordionButton className={cx('p-0.5', 'hover:bg-red-50')}>
+              <div className={cx('flex', 'flex-row', 'w-full')}>
+                <span className={cx('text-red-500', 'text-left', 'grow')}>
                   Upload failed. Click to expand.
-                </Text>
-                <AccordionIcon color="red" />
+                </span>
+                <AccordionIcon className={cx('text-red-500')} />
               </div>
             </AccordionButton>
-            <AccordionPanel p={variables.spacingXs}>
+            <AccordionPanel className={cx('p-0.5')}>
               {upload.error}
             </AccordionPanel>
           </AccordionItem>

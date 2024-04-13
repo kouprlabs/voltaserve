@@ -14,17 +14,10 @@ import {
   Th,
   Thead,
   Tr,
-  Text,
   Avatar,
   Badge,
 } from '@chakra-ui/react'
-import {
-  SectionSpinner,
-  PagePagination,
-  variables,
-  usePagePagination,
-} from '@koupr/ui'
-import classNames from 'classnames'
+import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import OrganizationAPI, { SortOrder } from '@/client/api/organization'
 import { swrConfig } from '@/client/options'
@@ -32,6 +25,7 @@ import { CreateOrganizationButton } from '@/components/top-bar/top-bar-buttons'
 import prettyDate from '@/helpers/pretty-date'
 import { decodeQuery } from '@/helpers/query'
 import { organizationPaginationStorage } from '@/infra/pagination'
+import { SectionSpinner, PagePagination, usePagePagination } from '@/lib'
 
 const OrganizationListPage = () => {
   const navigate = useNavigate()
@@ -61,41 +55,32 @@ const OrganizationListPage = () => {
       <Helmet>
         <title>Organizations</title>
       </Helmet>
-      <div className={classNames('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
-        <Heading fontSize={variables.headingFontSize} pl={variables.spacingMd}>
-          Organizations
-        </Heading>
+      <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
+        <Heading className={cx('pl-2', 'text-heading')}>Organizations</Heading>
         {!list && error && (
           <div
-            className={classNames(
+            className={cx(
               'flex',
               'items-center',
               'justify-center',
               'h-[300px]',
             )}
           >
-            <Text>Failed to load organizations.</Text>
+            <span>Failed to load organizations.</span>
           </div>
         )}
         {!list && !error && <SectionSpinner />}
         {list && list.data.length === 0 && (
           <div
-            className={classNames(
+            className={cx(
               'flex',
               'items-center',
               'justify-center',
               'h-[300px]',
             )}
           >
-            <div
-              className={classNames(
-                'flex',
-                'flex-col',
-                'gap-1.5',
-                'items-center',
-              )}
-            >
-              <Text>There are no organizations.</Text>
+            <div className={cx('flex', 'flex-col', 'gap-1.5', 'items-center')}>
+              <span>There are no organizations.</span>
               <CreateOrganizationButton />
             </div>
           </div>
@@ -114,7 +99,7 @@ const OrganizationListPage = () => {
                 <Tr key={o.id}>
                   <Td>
                     <div
-                      className={classNames(
+                      className={cx(
                         'flex',
                         'flex-row',
                         'gap-1.5',
@@ -130,9 +115,9 @@ const OrganizationListPage = () => {
                       <ChakraLink
                         as={Link}
                         to={`/organization/${o.id}/member`}
-                        textDecoration="none"
+                        className={cx('no-underline')}
                       >
-                        <Text>{o.name}</Text>
+                        <span>{o.name}</span>
                       </ChakraLink>
                     </div>
                   </Td>

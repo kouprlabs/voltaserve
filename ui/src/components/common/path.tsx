@@ -4,11 +4,10 @@ import {
   BreadcrumbItem,
   BreadcrumbLink,
   Skeleton,
-  Text,
 } from '@chakra-ui/react'
-import classNames from 'classnames'
+import cx from 'classnames'
 import FileAPI from '@/client/api/file'
-import TruncatedText from './truncated-text'
+import { Text } from '@/lib'
 
 export type PathProps = {
   rootId: string
@@ -30,10 +29,10 @@ const Path = ({ rootId, fileId, maxCharacters, onClick }: PathProps) => {
   return (
     <>
       {path && !error ? (
-        <Breadcrumb overflow="hidden" flexShrink={0}>
+        <Breadcrumb className={cx('overflow-hidden', 'shrink-0')}>
           <BreadcrumbItem>
             <BreadcrumbLink
-              whiteSpace="nowrap"
+              className={cx('nowrap')}
               onClick={() => onClick?.(rootId)}
             >
               Home
@@ -51,10 +50,7 @@ const Path = ({ rootId, fileId, maxCharacters, onClick }: PathProps) => {
                 onClick={() => onClick?.(file.id)}
               >
                 {maxCharacters ? (
-                  <TruncatedText
-                    text={file.name}
-                    maxCharacters={maxCharacters}
-                  />
+                  <Text maxCharacters={maxCharacters}>{file.name}</Text>
                 ) : (
                   file.name
                 )}
@@ -65,7 +61,7 @@ const Path = ({ rootId, fileId, maxCharacters, onClick }: PathProps) => {
       ) : null}
       {isLoading ? (
         <div
-          className={classNames(
+          className={cx(
             'flex',
             'flex-row',
             'items-center',
@@ -73,11 +69,11 @@ const Path = ({ rootId, fileId, maxCharacters, onClick }: PathProps) => {
             'flex-shrink-0',
           )}
         >
-          <Skeleton w="100px" h="20px" borderRadius="20px" />
-          <Text>/</Text>
-          <Skeleton w="100px" h="20px" borderRadius="20px" />
-          <Text>/</Text>
-          <Skeleton w="100px" h="20px" borderRadius="20px" />
+          <Skeleton className={cx('w-[100px]', 'h-[20px]', 'rounded-[20px]')} />
+          <span>/</span>
+          <Skeleton className={cx('w-[100px]', 'h-[20px]', 'rounded-[20px]')} />
+          <span>/</span>
+          <Skeleton className={cx('w-[100px]', 'h-[20px]', 'rounded-[20px]')} />
         </div>
       ) : null}
     </>

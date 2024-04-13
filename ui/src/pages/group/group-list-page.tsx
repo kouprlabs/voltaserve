@@ -14,17 +14,10 @@ import {
   Th,
   Thead,
   Tr,
-  Text,
   Avatar,
   Badge,
 } from '@chakra-ui/react'
-import {
-  SectionSpinner,
-  PagePagination,
-  variables,
-  usePagePagination,
-} from '@koupr/ui'
-import classNames from 'classnames'
+import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import GroupAPI, { SortOrder } from '@/client/api/group'
 import { swrConfig } from '@/client/options'
@@ -32,6 +25,7 @@ import { CreateGroupButton } from '@/components/top-bar/top-bar-buttons'
 import prettyDate from '@/helpers/pretty-date'
 import { decodeQuery } from '@/helpers/query'
 import { groupPaginationStorage } from '@/infra/pagination'
+import { SectionSpinner, PagePagination, usePagePagination } from '@/lib'
 
 const GroupListPage = () => {
   const navigate = useNavigate()
@@ -61,34 +55,32 @@ const GroupListPage = () => {
       <Helmet>
         <title>Groups</title>
       </Helmet>
-      <div className={classNames('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
-        <Heading fontSize={variables.headingFontSize} pl={variables.spacingMd}>
-          Groups
-        </Heading>
+      <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
+        <Heading className={cx('pl-2', 'text-heading')}>Groups</Heading>
         {error && (
           <div
-            className={classNames(
+            className={cx(
               'flex',
               'items-center',
               'justify-center',
               'h-[300px]',
             )}
           >
-            <Text>Failed to load groups.</Text>
+            <span>Failed to load groups.</span>
           </div>
         )}
         {!list && !error && <SectionSpinner />}
         {list && list.data.length === 0 && (
           <div
-            className={classNames(
+            className={cx(
               'flex',
               'items-center',
               'justify-center',
               'h-[300px]',
             )}
           >
-            <div className={classNames('flex', 'flex-col', 'gap-1.5')}>
-              <Text>There are no groups.</Text>
+            <div className={cx('flex', 'flex-col', 'gap-1.5')}>
+              <span>There are no groups.</span>
               <CreateGroupButton />
             </div>
           </div>
@@ -108,7 +100,7 @@ const GroupListPage = () => {
                 <Tr key={g.id}>
                   <Td>
                     <div
-                      className={classNames(
+                      className={cx(
                         'flex',
                         'flex-row',
                         'items-center',
@@ -124,7 +116,7 @@ const GroupListPage = () => {
                       <ChakraLink
                         as={Link}
                         to={`/group/${g.id}/member`}
-                        textDecoration="none"
+                        className={cx('no-underline')}
                       >
                         {g.name}
                       </ChakraLink>
@@ -134,7 +126,7 @@ const GroupListPage = () => {
                     <ChakraLink
                       as={Link}
                       to={`/organization/${g.organization.id}/member`}
-                      textDecoration="none"
+                      className={cx('no-underline')}
                     >
                       {g.organization.name}
                     </ChakraLink>

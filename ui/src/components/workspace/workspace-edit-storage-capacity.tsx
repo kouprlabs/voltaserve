@@ -12,7 +12,6 @@ import {
   ModalHeader,
   ModalOverlay,
 } from '@chakra-ui/react'
-import { SectionSpinner, variables } from '@koupr/ui'
 import { useSWRConfig } from 'swr'
 import {
   Field,
@@ -23,10 +22,12 @@ import {
   FormikHelpers,
 } from 'formik'
 import * as Yup from 'yup'
+import cx from 'classnames'
 import StorageAPI from '@/client/api/storage'
 import WorkspaceAPI, { Workspace } from '@/client/api/workspace'
 import { swrConfig } from '@/client/options'
 import StorageInput from '@/components/common/storage-input'
+import { SectionSpinner } from '@/lib'
 
 export type WorkspaceEditStorageCapacityProps = {
   open: boolean
@@ -133,24 +134,27 @@ const WorkspaceEditStorageCapacity = ({
                 ) : null}
               </ModalBody>
               <ModalFooter>
-                <Button
-                  type="button"
-                  variant="outline"
-                  colorScheme="blue"
-                  mr={variables.spacingSm}
-                  disabled={isSubmitting}
-                  onClick={() => onClose?.()}
+                <div
+                  className={cx('flex', 'flex-row', 'items-center', 'gap-1')}
                 >
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  variant="solid"
-                  colorScheme="blue"
-                  isLoading={isSubmitting}
-                >
-                  Save
-                </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    colorScheme="blue"
+                    disabled={isSubmitting}
+                    onClick={() => onClose?.()}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    variant="solid"
+                    colorScheme="blue"
+                    isLoading={isSubmitting}
+                  >
+                    Save
+                  </Button>
+                </div>
               </ModalFooter>
             </Form>
           )}

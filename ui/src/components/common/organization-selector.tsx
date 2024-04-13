@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import {
   Button,
-  Text,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -16,15 +15,14 @@ import {
   Td,
   Avatar,
   Radio,
-  useColorModeValue,
 } from '@chakra-ui/react'
-import { SectionSpinner, Pagination, SearchInput, variables } from '@koupr/ui'
-import classNames from 'classnames'
+import cx from 'classnames'
 import OrganizationAPI, {
   Organization,
   SortOrder,
 } from '@/client/api/organization'
 import { swrConfig } from '@/client/options'
+import { SectionSpinner, Pagination, SearchInput } from '@/lib'
 
 export type OrganizationSelectorProps = {
   onConfirm?: (organization: Organization) => void
@@ -44,9 +42,6 @@ const OrganizationSelector = ({ onConfirm }: OrganizationSelectorProps) => {
     { query, page, size: 5, sortOrder: SortOrder.Desc },
     swrConfig(),
   )
-  const selectionColor = useColorModeValue('gray.100', 'gray.600')
-  const dimmedButtonLabelColor = useColorModeValue('gray.500', 'gray.500')
-  const normalButtonLabelColor = useColorModeValue('black', 'white')
 
   useEffect(() => {
     mutate()
@@ -72,9 +67,14 @@ const OrganizationSelector = ({ onConfirm }: OrganizationSelectorProps) => {
     <>
       <Button
         variant="outline"
-        w="100%"
+        className={cx(
+          'w-full',
+          { 'text-black': confirmed },
+          { 'dark:text-white': confirmed },
+          { 'text-gray-500': !confirmed },
+          { 'dark:text-gray-500': !confirmed },
+        )}
         onClick={onOpen}
-        color={confirmed ? normalButtonLabelColor : dimmedButtonLabelColor}
       >
         {confirmed ? confirmed.name : 'Select Organization'}
       </Button>
@@ -89,27 +89,27 @@ const OrganizationSelector = ({ onConfirm }: OrganizationSelectorProps) => {
           <ModalHeader>Select Organization</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            <div className={classNames('flex', 'flex-col', 'gap-1.5')}>
+            <div className={cx('flex', 'flex-col', 'gap-1.5')}>
               <SearchInput
                 query={query}
                 onChange={(value) => setQuery(value)}
               />
               {!list && error && (
                 <div
-                  className={classNames(
+                  className={cx(
                     'flex',
                     'items-center',
                     'justify-center',
                     'h-[300px]',
                   )}
                 >
-                  <Text>Failed to load organizations.</Text>
+                  <span>Failed to load organizations.</span>
                 </div>
               )}
               {!list && !error && <SectionSpinner />}
               {list && list.data.length === 0 && (
                 <div
-                  className={classNames(
+                  className={cx(
                     'flex',
                     'items-center',
                     'justify-center',
@@ -117,37 +117,41 @@ const OrganizationSelector = ({ onConfirm }: OrganizationSelectorProps) => {
                   )}
                 >
                   <div
-                    className={classNames(
+                    className={cx(
                       'flex',
                       'flex-col',
                       'items-center',
                       'gap-1.5',
                     )}
                   >
-                    <Text>There are no organizations.</Text>
+                    <span>There are no organizations.</span>
                   </div>
                 </div>
               )}
               {list && list.data.length > 0 && (
                 <Table variant="simple" size="sm">
                   <colgroup>
-                    <col style={{ width: '40px' }} />
-                    <col style={{ width: 'auto' }} />
+                    <col className={cx('w-[40px]')} />
+                    <col className={cx('w-auto')} />
                   </colgroup>
                   <Tbody>
                     {list.data.map((o) => (
                       <Tr
                         key={o.id}
-                        cursor="pointer"
-                        bg={selected?.id === o.id ? selectionColor : 'auto'}
+                        className={cx(
+                          'cursor-pointer',
+                          { 'bg-gray-100': selected?.id === o.id },
+                          { 'dark:bg-gray-600': selected?.id === o.id },
+                          { 'bg-transparent': selected?.id !== o.id },
+                        )}
                         onClick={() => setSelected(o)}
                       >
-                        <Td px={variables.spacingXs} textAlign="center">
+                        <Td className={cx('px-0.5', 'text-center')}>
                           <Radio size="md" isChecked={selected?.id === o.id} />
                         </Td>
-                        <Td px={variables.spacingXs}>
+                        <Td className={cx('px-0.5')}>
                           <div
-                            className={classNames(
+                            className={cx(
                               'flex',
                               'flex-row',
                               'items-center',
@@ -157,12 +161,9 @@ const OrganizationSelector = ({ onConfirm }: OrganizationSelectorProps) => {
                             <Avatar
                               name={o.name}
                               size="sm"
-                              width="40px"
-                              height="40px"
+                              className={cx('w-[40px]', 'h-[40px]')}
                             />
-                            <Text fontSize={variables.bodyFontSize}>
-                              {o.name}
-                            </Text>
+                            <span className={cx('text-base')}>{o.name}</span>
                           </div>
                         </Td>
                       </Tr>
@@ -171,7 +172,7 @@ const OrganizationSelector = ({ onConfirm }: OrganizationSelectorProps) => {
                 </Table>
               )}
               {list && (
-                <div className={classNames('self-end')}>
+                <div className={cx('self-end')}>
                   {list.totalPages > 1 ? (
                     <Pagination
                       uiSize="md"
@@ -186,23 +187,24 @@ const OrganizationSelector = ({ onConfirm }: OrganizationSelectorProps) => {
             </div>
           </ModalBody>
           <ModalFooter>
-            <Button
-              type="button"
-              variant="outline"
-              colorScheme="blue"
-              mr={variables.spacingSm}
-              onClick={onClose}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="solid"
-              colorScheme="blue"
-              isDisabled={!selected}
-              onClick={handleConfirm}
-            >
-              Confirm
-            </Button>
+            <div className={cx('flex', 'flex-row', 'items-center', 'gap-1')}>
+              <Button
+                type="button"
+                variant="outline"
+                colorScheme="blue"
+                onClick={onClose}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="solid"
+                colorScheme="blue"
+                isDisabled={!selected}
+                onClick={handleConfirm}
+              >
+                Confirm
+              </Button>
+            </div>
           </ModalFooter>
         </ModalContent>
       </Modal>

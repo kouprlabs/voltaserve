@@ -6,10 +6,8 @@ import {
   FormErrorMessage,
   Input,
   Link as ChakraLink,
-  Text,
   Heading,
 } from '@chakra-ui/react'
-import { variables } from '@koupr/ui'
 import {
   Field,
   FieldAttributes,
@@ -19,7 +17,7 @@ import {
   FormikHelpers,
 } from 'formik'
 import * as Yup from 'yup'
-import classNames from 'classnames'
+import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import AccountAPI from '@/client/idp/account'
 import Logo from '@/components/common/logo'
@@ -71,7 +69,7 @@ const ResetPasswordPage = () => {
           <title>Reset Password</title>
         </Helmet>
         <div
-          className={classNames(
+          className={cx(
             'flex',
             'flex-col',
             'items-center',
@@ -79,20 +77,15 @@ const ResetPasswordPage = () => {
             'w-full',
           )}
         >
-          <div className="w-16">
+          <div className={cx('w-[64px]')}>
             <Logo isGlossy={true} />
           </div>
-          <Heading fontSize={variables.headingFontSize}>Reset Password</Heading>
+          <Heading className={cx('text-heading')}>Reset Password</Heading>
           {isCompleted ? (
-            <div
-              className={classNames(
-                'flex',
-                'flex-row',
-                'items-center',
-                'gap-0.5',
-              )}
-            >
-              <Text align="center">Password successfully changed.</Text>
+            <div className={cx('flex', 'flex-row', 'items-center', 'gap-0.5')}>
+              <span className={cx('text-center')}>
+                Password successfully changed.
+              </span>
               <ChakraLink as={Link} to="/sign-in">
                 Sign In
               </ChakraLink>
@@ -109,9 +102,9 @@ const ResetPasswordPage = () => {
                 onSubmit={handleSubmit}
               >
                 {({ errors, touched, isSubmitting }) => (
-                  <Form className="w-full">
+                  <Form className={cx('w-full')}>
                     <div
-                      className={classNames(
+                      className={cx(
                         'flex',
                         'flex-col',
                         'items-center',
@@ -164,9 +157,9 @@ const ResetPasswordPage = () => {
                         )}
                       </Field>
                       <Button
+                        className={cx('w-full')}
                         variant="solid"
                         colorScheme="blue"
-                        w="100%"
                         type="submit"
                         isLoading={isSubmitting}
                       >
@@ -177,14 +170,9 @@ const ResetPasswordPage = () => {
                 )}
               </Formik>
               <div
-                className={classNames(
-                  'flex',
-                  'flex-row',
-                  'items-center',
-                  'gap-0.5',
-                )}
+                className={cx('flex', 'flex-row', 'items-center', 'gap-0.5')}
               >
-                <Text>Password already reset?</Text>
+                <span>Password already reset?</span>
                 <ChakraLink as={Link} to="/sign-in">
                   Sign In
                 </ChakraLink>

@@ -11,22 +11,12 @@ import {
   Table,
   Tbody,
   Td,
-  Text,
   Th,
   Thead,
   Tr,
   useToast,
 } from '@chakra-ui/react'
-import {
-  IconDotsVertical,
-  IconSend,
-  IconTrash,
-  IconUserPlus,
-  SectionSpinner,
-  PagePagination,
-  usePagePagination,
-} from '@koupr/ui'
-import classNames from 'classnames'
+import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import InvitationAPI, { SortBy, SortOrder } from '@/client/api/invitation'
 import OrganizationAPI from '@/client/api/organization'
@@ -36,6 +26,15 @@ import OrganizationInviteMembers from '@/components/organization/organization-in
 import OrganizationStatus from '@/components/organization/organization-status'
 import prettyDate from '@/helpers/pretty-date'
 import { outgoingInvitationPaginationStorage } from '@/infra/pagination'
+import {
+  IconDotsVertical,
+  IconSend,
+  IconTrash,
+  IconUserPlus,
+  SectionSpinner,
+  PagePagination,
+  usePagePagination,
+} from '@/lib'
 
 const OrganizationInvitationsPage = () => {
   const navigate = useNavigate()
@@ -104,22 +103,15 @@ const OrganizationInvitationsPage = () => {
       {list && list.data.length === 0 ? (
         <>
           <div
-            className={classNames(
+            className={cx(
               'flex',
               'items-center',
               'justify-center',
               'h-[300px]',
             )}
           >
-            <div
-              className={classNames(
-                'flex',
-                'flex-col',
-                'gap-1.5',
-                'items-center',
-              )}
-            >
-              <Text>This organization has no invitations.</Text>
+            <div className={cx('flex', 'flex-col', 'gap-1.5', 'items-center')}>
+              <span>This organization has no invitations.</span>
               {geEditorPermission(org.permission) && (
                 <Button
                   leftIcon={<IconUserPlus />}
@@ -140,7 +132,7 @@ const OrganizationInvitationsPage = () => {
         </>
       ) : null}
       {list && list.data.length > 0 ? (
-        <div className={classNames('flex', 'flex-col', 'gap-3.5', 'py-3.5')}>
+        <div className={cx('flex', 'flex-col', 'gap-3.5', 'py-3.5')}>
           <Table variant="simple">
             <Thead>
               <Tr>
@@ -158,7 +150,7 @@ const OrganizationInvitationsPage = () => {
                     <OrganizationStatus value={i.status} />
                   </Td>
                   <Td>{prettyDate(i.createTime)}</Td>
-                  <Td textAlign="right">
+                  <Td className={cx('text-right')}>
                     <Menu>
                       <MenuButton
                         as={IconButton}
@@ -178,7 +170,7 @@ const OrganizationInvitationsPage = () => {
                           )}
                           <MenuItem
                             icon={<IconTrash />}
-                            color="red"
+                            className={cx('text-red-500')}
                             onClick={() => handleDelete(i.id)}
                           >
                             Delete

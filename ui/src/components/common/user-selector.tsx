@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import {
   Button,
-  Text,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -16,13 +15,12 @@ import {
   Td,
   Avatar,
   Radio,
-  useColorModeValue,
 } from '@chakra-ui/react'
-import { SectionSpinner, Pagination, SearchInput, variables } from '@koupr/ui'
-import classNames from 'classnames'
+import cx from 'classnames'
 import UserAPI, { SortOrder, User } from '@/client/api/user'
 import { swrConfig } from '@/client/options'
 import userToString from '@/helpers/user-to-string'
+import { SectionSpinner, Pagination, SearchInput } from '@/lib'
 
 export type UserSelectorProps = {
   value?: User
@@ -59,9 +57,6 @@ const UserSelector = ({
     },
     swrConfig(),
   )
-  const selectionColor = useColorModeValue('gray.100', 'gray.600')
-  const dimmedButtonLabelColor = useColorModeValue('gray.500', 'gray.500')
-  const normalButtonLabelColor = useColorModeValue('black', 'white')
 
   useEffect(() => {
     mutate()
@@ -86,9 +81,14 @@ const UserSelector = ({
     <>
       <Button
         variant="outline"
-        w="100%"
+        className={cx(
+          'w-full',
+          { 'text-black': value },
+          { 'dark:text-white': value },
+          { 'text-gray-500': !value },
+          { 'dark:text-gray-500': !value },
+        )}
         onClick={onOpen}
-        color={value ? normalButtonLabelColor : dimmedButtonLabelColor}
       >
         {value ? userToString(value) : 'Select User'}
       </Button>
@@ -103,27 +103,27 @@ const UserSelector = ({
           <ModalHeader>Select User</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            <div className={classNames('flex', 'flex-col', 'gap-1.5')}>
+            <div className={cx('flex', 'flex-col', 'gap-1.5')}>
               <SearchInput
                 query={query}
                 onChange={(value) => setQuery(value)}
               />
               {!list && error && (
                 <div
-                  className={classNames(
+                  className={cx(
                     'flex',
                     'items-center',
                     'justify-center',
                     'h-[300px]',
                   )}
                 >
-                  <Text>Failed to load users.</Text>
+                  <span>Failed to load users.</span>
                 </div>
               )}
               {!list && !error && <SectionSpinner />}
               {list && list.data.length === 0 && (
                 <div
-                  className={classNames(
+                  className={cx(
                     'flex',
                     'items-center',
                     'justify-center',
@@ -131,37 +131,41 @@ const UserSelector = ({
                   )}
                 >
                   <div
-                    className={classNames(
+                    className={cx(
                       'flex',
                       'flex-col',
                       'items-center',
                       'gap-1.5',
                     )}
                   >
-                    <Text>There are no users.</Text>
+                    <span>There are no users.</span>
                   </div>
                 </div>
               )}
               {list && list.data.length > 0 && (
                 <Table variant="simple" size="sm">
                   <colgroup>
-                    <col style={{ width: '40px' }} />
-                    <col style={{ width: 'auto' }} />
+                    <col className={cx('w-[40px]')} />
+                    <col className={cx('w-[auto]')} />
                   </colgroup>
                   <Tbody>
                     {list.data.map((u) => (
                       <Tr
                         key={u.id}
-                        cursor="pointer"
-                        bg={selected?.id === u.id ? selectionColor : 'auto'}
+                        className={cx(
+                          'cursor-pointer',
+                          { 'bg-gray-100': selected?.id === u.id },
+                          { 'dark:bg-gray-600': selected?.id === u.id },
+                          { 'bg-transparent': selected?.id !== u.id },
+                        )}
                         onClick={() => setSelected(u)}
                       >
-                        <Td px={variables.spacingXs} textAlign="center">
+                        <Td className={cx('px-0.5', 'text-center')}>
                           <Radio size="md" isChecked={selected?.id === u.id} />
                         </Td>
-                        <Td px={variables.spacingXs}>
+                        <Td className={cx('p-0.5')}>
                           <div
-                            className={classNames(
+                            className={cx(
                               'flex',
                               'flex-row',
                               'items-center',
@@ -171,12 +175,11 @@ const UserSelector = ({
                             <Avatar
                               name={u.fullName}
                               size="sm"
-                              width="40px"
-                              height="40px"
+                              className={cx('w-[40px]', 'h-[40px]')}
                             />
-                            <Text fontSize={variables.bodyFontSize}>
+                            <span className={cx('text-base')}>
                               {userToString(u)}
-                            </Text>
+                            </span>
                           </div>
                         </Td>
                       </Tr>
@@ -185,7 +188,7 @@ const UserSelector = ({
                 </Table>
               )}
               {list && (
-                <div className={classNames('self-end')}>
+                <div className={cx('self-end')}>
                   {list.totalPages > 1 ? (
                     <Pagination
                       uiSize="md"
@@ -200,23 +203,24 @@ const UserSelector = ({
             </div>
           </ModalBody>
           <ModalFooter>
-            <Button
-              type="button"
-              variant="outline"
-              colorScheme="blue"
-              mr={variables.spacingSm}
-              onClick={onClose}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="solid"
-              colorScheme="blue"
-              isDisabled={!selected}
-              onClick={handleConfirm}
-            >
-              Confirm
-            </Button>
+            <div className={cx('flex', 'flex-row', 'items-center', 'gap-1')}>
+              <Button
+                type="button"
+                variant="outline"
+                colorScheme="blue"
+                onClick={onClose}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="solid"
+                colorScheme="blue"
+                isDisabled={!selected}
+                onClick={handleConfirm}
+              >
+                Confirm
+              </Button>
+            </div>
           </ModalFooter>
         </ModalContent>
       </Modal>

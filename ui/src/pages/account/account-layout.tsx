@@ -9,14 +9,13 @@ import {
   TabList,
   Tabs,
   Tag,
-  Text,
 } from '@chakra-ui/react'
-import { variables, IconEdit } from '@koupr/ui'
-import classNames from 'classnames'
+import cx from 'classnames'
 import NotificationAPI from '@/client/api/notification'
 import UserAPI from '@/client/idp/user'
 import { swrConfig } from '@/client/options'
 import AccountEditPicture from '@/components/account/edit-picture'
+import { IconEdit } from '@/lib'
 
 const AccountLayout = () => {
   const location = useLocation()
@@ -45,20 +44,12 @@ const AccountLayout = () => {
   }
 
   return (
-    <div className={classNames('flex', 'flex-row', 'gap-2.5')}>
+    <div className={cx('flex', 'flex-row', 'gap-2.5')}>
       <div
-        className={classNames(
-          'flex',
-          'flex-col',
-          'gap-2',
-          'items-center',
-          'w-[250px]',
-        )}
+        className={cx('flex', 'flex-col', 'gap-2', 'items-center', 'w-[250px]')}
       >
-        <div
-          className={classNames('flex', 'flex-col', 'gap-2', 'items-center')}
-        >
-          <div className={classNames('relative', 'shrink-0')}>
+        <div className={cx('flex', 'flex-col', 'gap-2', 'items-center')}>
+          <div className={cx('relative', 'shrink-0')}>
             <Avatar
               name={user.fullName}
               src={user.picture}
@@ -77,11 +68,11 @@ const AccountLayout = () => {
               onClick={() => setIsImageModalOpen(true)}
             />
           </div>
-          <Heading fontSize={variables.headingFontSize} textAlign="center">
+          <Heading className={cx('text-center', 'text-heading')}>
             {user.fullName}
           </Heading>
         </div>
-        <div className={classNames('w-full', 'gap-1')}>
+        <div className={cx('w-full', 'gap-1')}>
           <Button
             variant="outline"
             colorScheme="red"
@@ -93,27 +84,22 @@ const AccountLayout = () => {
           </Button>
         </div>
       </div>
-      <div className={classNames('w-full', 'pb-1.5')}>
+      <div className={cx('w-full', 'pb-1.5')}>
         <Tabs
           variant="solid-rounded"
           colorScheme="gray"
-          pb={variables.spacingLg}
           index={tabIndex}
+          className={cx('pb-2.5')}
         >
           <TabList>
             <Tab onClick={() => navigate('/account/settings')}>Settings</Tab>
             <Tab onClick={() => navigate('/account/invitation')}>
               <div
-                className={classNames(
-                  'flex',
-                  'flex-row',
-                  'items-center',
-                  'gap-0.5',
-                )}
+                className={cx('flex', 'flex-row', 'items-center', 'gap-0.5')}
               >
-                <Text>Invitations</Text>
+                <span>Invitations</span>
                 {invitationCount && invitationCount > 0 ? (
-                  <Tag borderRadius="full">{invitationCount}</Tag>
+                  <Tag className={cx('rounded-full')}>{invitationCount}</Tag>
                 ) : null}
               </div>
             </Tab>

@@ -1,5 +1,5 @@
 import { Stat, StatLabel, StatNumber } from '@chakra-ui/react'
-import { variables } from '@koupr/ui'
+import cx from 'classnames'
 import { File } from '@/client/api/file'
 import prettyBytes from '@/helpers/pretty-bytes'
 
@@ -14,7 +14,7 @@ const FileInfoSize = ({ file }: FileInfoSizeProps) => {
   return (
     <Stat>
       <StatLabel>File size</StatLabel>
-      <StatNumber fontSize={variables.bodyFontSize}>
+      <StatNumber className={cx('text-base')}>
         {prettyBytes(file.original.size)}
       </StatNumber>
     </Stat>

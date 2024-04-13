@@ -1,24 +1,6 @@
 import { MouseEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import {
-  Wrap,
-  WrapItem,
-  Text,
-  Portal,
-  Menu,
-  MenuList,
-  MenuItem,
-  MenuDivider,
-} from '@chakra-ui/react'
-import {
-  IconCopy,
-  IconDownload,
-  IconEdit,
-  IconMove,
-  IconShare,
-  IconTrash,
-  variables,
-} from '@koupr/ui'
+import { Portal, Menu, MenuList, MenuItem, MenuDivider } from '@chakra-ui/react'
 import {
   DndContext,
   useSensors,
@@ -26,7 +8,7 @@ import {
   useSensor,
   DragStartEvent,
 } from '@dnd-kit/core'
-import classNames from 'classnames'
+import cx from 'classnames'
 import { FileWithPath, useDropzone } from 'react-dropzone'
 import { List as ApiFileList } from '@/client/api/file'
 import {
@@ -36,6 +18,14 @@ import {
   ltViewerPermission,
 } from '@/client/api/permission'
 import downloadFile from '@/helpers/download-file'
+import {
+  IconCopy,
+  IconDownload,
+  IconEdit,
+  IconMove,
+  IconShare,
+  IconTrash,
+} from '@/lib'
 import { UploadDecorator, uploadAdded } from '@/store/entities/uploads'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import {
@@ -45,6 +35,7 @@ import {
   multiSelectKeyUpdated,
   rangeSelectKeyUpdated,
   renameModalDidOpen,
+  selectionUpdated,
   sharingModalDidOpen,
 } from '@/store/ui/files'
 import { uploadsDrawerOpened } from '@/store/ui/uploads-drawer'
@@ -126,6 +117,7 @@ const FileList = ({ list, scale }: FileListProps) => {
     window.addEventListener('keydown', handleKeydown)
     window.addEventListener('keyup', handleKeyup)
     return () => {
+      dispatch(selectionUpdated([]))
       window.removeEventListener('keydown', handleKeydown)
       window.removeEventListener('keyup', handleKeyup)
     }
@@ -142,7 +134,7 @@ const FileList = ({ list, scale }: FileListProps) => {
   return (
     <>
       <div
-        className={classNames(
+        className={cx(
           'border-2',
           { 'border-green-300': isDragActive },
           { 'border-transparent': !isDragActive },
@@ -158,7 +150,7 @@ const FileList = ({ list, scale }: FileListProps) => {
         >
           {list.totalElements === 0 && (
             <div
-              className={classNames(
+              className={cx(
                 'flex',
                 'items-center',
                 'justify-center',
@@ -166,36 +158,39 @@ const FileList = ({ list, scale }: FileListProps) => {
                 'h-[300px]',
               )}
             >
-              <Text>There are no items.</Text>
+              <span>There are no items.</span>
             </div>
           )}
           {viewType === FileViewType.Grid && list.totalElements > 0 ? (
-            <Wrap
-              spacing={variables.spacing}
-              overflow="hidden"
-              pb={variables.spacingLg}
+            <div
+              className={cx(
+                'flex',
+                'flex-wrap',
+                'gap-1.5',
+                'overflow-hidden',
+                'pb-2.5',
+              )}
             >
               {list.data
                 .filter((e) => !hidden.includes(e.id))
                 .map((f) => (
-                  <WrapItem key={f.id}>
-                    <ListDraggableDroppable
-                      file={f}
-                      scale={scale}
-                      viewType={viewType}
-                      isSelectionMode={isSelectionMode}
-                      onContextMenu={(event: MouseEvent) => {
-                        setMenuPosition({ x: event.pageX, y: event.pageY })
-                        setIsMenuOpen(true)
-                      }}
-                    />
-                  </WrapItem>
+                  <ListDraggableDroppable
+                    key={f.id}
+                    file={f}
+                    scale={scale}
+                    viewType={viewType}
+                    isSelectionMode={isSelectionMode}
+                    onContextMenu={(event: MouseEvent) => {
+                      setMenuPosition({ x: event.pageX, y: event.pageY })
+                      setIsMenuOpen(true)
+                    }}
+                  />
                 ))}
-            </Wrap>
+            </div>
           ) : null}
           {viewType === FileViewType.List && list.totalElements > 0 ? (
             <div
-              className={classNames(
+              className={cx(
                 'flex',
                 'flex-col',
                 'gap-0.5',
@@ -268,7 +263,7 @@ const FileList = ({ list, scale }: FileListProps) => {
             <MenuDivider />
             <MenuItem
               icon={<IconTrash />}
-              color="red"
+              className={cx('text-red-500')}
               isDisabled={
                 singleFile ? ltOwnerPermission(singleFile.permission) : false
               }

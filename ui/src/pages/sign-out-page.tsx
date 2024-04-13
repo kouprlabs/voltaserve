@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Heading } from '@chakra-ui/react'
-import { variables } from '@koupr/ui'
+import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import LayoutFull from '@/components/layout/layout-full'
 import { clearToken } from '@/infra/token'
@@ -20,7 +20,7 @@ function SignOutPage() {
         <Helmet>
           <title>Signing Out…</title>
         </Helmet>
-        <Heading fontSize={variables.headingFontSize}>Signing out…</Heading>
+        <Heading className={cx('text-heading')}>Signing out…</Heading>
       </>
     </LayoutFull>
   )

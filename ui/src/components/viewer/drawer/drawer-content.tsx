@@ -1,7 +1,7 @@
 import { useContext } from 'react'
-import { DrawerContext, SwitchCard, IconInfoCircle } from '@koupr/ui'
-import classNames from 'classnames'
+import cx from 'classnames'
 import { File } from '@/client/api/file'
+import { DrawerContext, SwitchCard, IconInfoCircle } from '@/lib'
 import DrawerDownloadButton from './drawer-download-button'
 import DrawerOpenNewTabButton from './drawer-open-new-tab-button'
 import DrawerFileInfo from './file-info'
@@ -13,7 +13,7 @@ export type DrawerContentProps = {
 const DrawerContent = ({ file }: DrawerContentProps) => {
   const { isCollapsed } = useContext(DrawerContext)
   return (
-    <div className={classNames('flex', 'flex-col', 'gap-1')}>
+    <div className={cx('flex', 'flex-col', 'gap-1')}>
       <DrawerDownloadButton file={file} isCollapsed={isCollapsed} />
       <DrawerOpenNewTabButton file={file} isCollapsed={isCollapsed} />
       <SwitchCard

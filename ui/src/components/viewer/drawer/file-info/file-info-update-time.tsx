@@ -1,5 +1,5 @@
 import { Stat, StatLabel, StatNumber } from '@chakra-ui/react'
-import { variables } from '@koupr/ui'
+import cx from 'classnames'
 import { File } from '@/client/api/file'
 import prettyDate from '@/helpers/pretty-date'
 
@@ -18,7 +18,7 @@ const FileInfoUpdateTime = ({ file }: FileInfoUpdateTimeProps) => {
   return (
     <Stat>
       <StatLabel>Update time</StatLabel>
-      <StatNumber fontSize={variables.bodyFontSize}>
+      <StatNumber className={cx('text-base')}>
         {prettyDate(file.updateTime)}
       </StatNumber>
     </Stat>

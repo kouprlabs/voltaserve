@@ -1,7 +1,6 @@
 import { useCallback, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import {
-  Text,
   Button,
   Table,
   Thead,
@@ -13,17 +12,17 @@ import {
   Badge,
   Avatar,
 } from '@chakra-ui/react'
-import { Spinner, variables } from '@koupr/ui'
-import { IconAdd, IconCheck, IconTrash } from '@koupr/ui'
 import { KeyedMutator, useSWRConfig } from 'swr'
 import { Select } from 'chakra-react-select'
-import classNames from 'classnames'
+import cx from 'classnames'
 import FileAPI, { GroupPermission, List } from '@/client/api/file'
 import { Group } from '@/client/api/group'
 import { geEditorPermission } from '@/client/api/permission'
 import WorkspaceAPI from '@/client/api/workspace'
 import GroupSelector from '@/components/common/group-selector'
 import useFileListSearchParams from '@/hooks/use-file-list-params'
+import { Spinner, Text } from '@/lib'
+import { IconAdd, IconCheck, IconTrash } from '@/lib'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { sharingModalDidClose } from '@/store/ui/files'
 import reactSelectStyles from '@/styles/react-select'
@@ -113,10 +112,10 @@ const SharingGroups = ({
   )
 
   return (
-    <div className={classNames('flex', 'flex-col', 'gap-1.5')}>
+    <div className={cx('flex', 'flex-col', 'gap-1.5')}>
       {!groups ? <SharingFormSkeleton /> : null}
       {groups && groups.length > 0 ? (
-        <div className={classNames('flex', 'flex-col', 'gap-1.5')}>
+        <div className={cx('flex', 'flex-col', 'gap-1.5')}>
           <GroupSelector
             value={activeGroup}
             organizationId={workspace?.organization.id}
@@ -149,16 +148,9 @@ const SharingGroups = ({
         </div>
       ) : null}
       {groups && groups.length === 0 ? (
-        <div className={classNames('flex', 'items-center', 'justify-center')}>
-          <div
-            className={classNames(
-              'flex',
-              'flex-col',
-              'items-center',
-              'gap-1.5',
-            )}
-          >
-            <Text>This organization has no groups.</Text>
+        <div className={cx('flex', 'items-center', 'justify-center')}>
+          <div className={cx('flex', 'flex-col', 'items-center', 'gap-1.5')}>
+            <span>This organization has no groups.</span>
             {workspace &&
             geEditorPermission(workspace.organization.permission) ? (
               <Button
@@ -176,17 +168,13 @@ const SharingGroups = ({
         <>
           <hr />
           {!permissions ? (
-            <div
-              className={classNames('flex', 'items-center', 'justify-center')}
-            >
+            <div className={cx('flex', 'items-center', 'justify-center')}>
               <Spinner />
             </div>
           ) : null}
           {permissions && permissions.length === 0 ? (
-            <div
-              className={classNames('flex', 'items-center', 'justify-center')}
-            >
-              <Text>Not shared with any groups.</Text>
+            <div className={cx('flex', 'items-center', 'justify-center')}>
+              <span>Not shared with any groups.</span>
             </div>
           ) : null}
           {permissions && permissions.length > 0 ? (
@@ -201,9 +189,9 @@ const SharingGroups = ({
               <Tbody>
                 {permissions.map((p) => (
                   <Tr key={p.id}>
-                    <Td p={variables.spacingSm}>
+                    <Td className={cx('p-1')}>
                       <div
-                        className={classNames(
+                        className={cx(
                           'flex',
                           'flex-row',
                           'items-center',
@@ -222,7 +210,7 @@ const SharingGroups = ({
                     <Td>
                       <Badge>{p.permission}</Badge>
                     </Td>
-                    <Td textAlign="end">
+                    <Td className={cx('text-end')}>
                       <IconButton
                         icon={<IconTrash />}
                         colorScheme="red"

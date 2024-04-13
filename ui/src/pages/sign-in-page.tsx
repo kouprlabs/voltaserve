@@ -6,10 +6,8 @@ import {
   FormErrorMessage,
   Input,
   Link as ChakraLink,
-  Text,
   Heading,
 } from '@chakra-ui/react'
-import { variables } from '@koupr/ui'
 import {
   Field,
   FieldAttributes,
@@ -19,7 +17,7 @@ import {
   FormikHelpers,
 } from 'formik'
 import * as Yup from 'yup'
-import classNames from 'classnames'
+import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import GroupAPI from '@/client/api/group'
 import OrganizationAPI from '@/client/api/organization'
@@ -95,7 +93,7 @@ const SignInPage = () => {
           <title>Sign In to Voltaserve</title>
         </Helmet>
         <div
-          className={classNames(
+          className={cx(
             'flex',
             'flex-col',
             'items-center',
@@ -103,10 +101,10 @@ const SignInPage = () => {
             'w-full',
           )}
         >
-          <div className="w-16">
+          <div className={cx('w-[64px]')}>
             <Logo isGlossy={true} />
           </div>
-          <Heading fontSize={variables.headingFontSize}>
+          <Heading className={cx('text-heading')}>
             Sign In to Voltaserve
           </Heading>
           <Formik
@@ -119,14 +117,9 @@ const SignInPage = () => {
             onSubmit={handleSignIn}
           >
             {({ errors, touched, isSubmitting }) => (
-              <Form className="w-full">
+              <Form className={cx('w-full')}>
                 <div
-                  className={classNames(
-                    'flex',
-                    'flex-col',
-                    'items-center',
-                    'gap-1.5',
-                  )}
+                  className={cx('flex', 'flex-col', 'items-center', 'gap-1.5')}
                 >
                   <Field name="email">
                     {({ field }: FieldAttributes<FieldProps>) => (
@@ -162,9 +155,9 @@ const SignInPage = () => {
                     )}
                   </Field>
                   <Button
+                    className={cx('w-full')}
                     variant="solid"
                     colorScheme="blue"
-                    w="100%"
                     type="submit"
                     isLoading={isSubmitting}
                   >
@@ -175,35 +168,16 @@ const SignInPage = () => {
             )}
           </Formik>
           <div
-            className={classNames(
-              'flex',
-              'flex-col',
-              'items-center',
-              'max-w-[60ch]',
-            )}
+            className={cx('flex', 'flex-col', 'items-center', 'max-w-[60ch]')}
           >
-            <div
-              className={classNames(
-                'flex',
-                'flex-row',
-                'items-center',
-                'gap-0.5',
-              )}
-            >
-              <Text>{"Don't have an account yet?"}</Text>
+            <div className={cx('flex', 'flex-row', 'items-center', 'gap-0.5')}>
+              <span>{"Don't have an account yet?"}</span>
               <ChakraLink as={Link} to="/sign-up">
                 Sign Up
               </ChakraLink>
             </div>
-            <div
-              className={classNames(
-                'flex',
-                'flex-row',
-                'items-center',
-                'gap-0.5',
-              )}
-            >
-              <Text>Cannot sign in?</Text>
+            <div className={cx('flex', 'flex-row', 'items-center', 'gap-0.5')}>
+              <span>Cannot sign in?</span>
               <ChakraLink as={Link} to="/forgot-password">
                 Reset Password
               </ChakraLink>

@@ -1,45 +1,14 @@
 import { useState } from 'react'
 import { Image, Skeleton, useColorModeValue, useToken } from '@chakra-ui/react'
-import { IconPlay, variables } from '@koupr/ui'
-import classNames from 'classnames'
+import cx from 'classnames'
 import { File, SnapshotStatus } from '@/client/api/file'
-import { getSizeWithAspectRatio } from '@/helpers/aspect-ratio'
 import * as fe from '@/helpers/file-extension'
-import IconErrorBadge from './icon-error-badge'
-import IconNewBadge from './icon-new-badge'
-import IconProcessingBadge from './icon-processing-badge'
-import IconSharedBadge from './icon-shared-badge'
-
-const MAX_WIDTH = 130
-const MAX_HEIGHT = 130
-
-export function getThumbnailWidth(file: File, scale: number): string {
-  if (file.thumbnail) {
-    const { width } = getSizeWithAspectRatio(
-      file.thumbnail.width,
-      file.thumbnail.height,
-      MAX_WIDTH,
-      MAX_HEIGHT,
-    )
-    return `${width * scale}px`
-  } else {
-    return `${MAX_WIDTH * scale}px`
-  }
-}
-
-export function getThumbnailHeight(file: File, scale: number): string {
-  if (file.thumbnail) {
-    const { height } = getSizeWithAspectRatio(
-      file.thumbnail.width,
-      file.thumbnail.height,
-      MAX_WIDTH,
-      MAX_HEIGHT,
-    )
-    return `${height * scale}px`
-  } else {
-    return `${MAX_HEIGHT * scale}px`
-  }
-}
+import { IconPlay, variables } from '@/lib'
+import IconErrorBadge from '../icon-error-badge'
+import IconNewBadge from '../icon-new-badge'
+import IconProcessingBadge from '../icon-processing-badge'
+import IconSharedBadge from '../icon-shared-badge'
+import { getThumbnailHeight, getThumbnailWidth } from './size'
 
 export type IconThumbnailProps = {
   file: File
@@ -56,34 +25,34 @@ const IconThumbnail = ({ file, scale }: IconThumbnailProps) => {
     useColorModeValue('gray.300', 'gray.700'),
   )
   return (
-    <div className={classNames('relative')} style={{ width, height }}>
+    <div className={cx('relative')} style={{ width, height }}>
       <Image
         src={file.thumbnail?.base64}
-        width={isLoading ? 0 : width}
-        height={isLoading ? 0 : height}
         style={{
-          objectFit: 'cover',
           width: isLoading ? 0 : width,
           height: isLoading ? 0 : height,
           border: '1px solid',
           borderColor,
           borderRadius: variables.borderRadiusSm,
-          visibility: isLoading ? 'hidden' : undefined,
         }}
-        pointerEvents="none"
+        className={cx(
+          'pointer-events-none',
+          'object-cover',
+          'border',
+          'border-solid',
+          {
+            'invisible': isLoading,
+          },
+        )}
         alt={file.name}
         onLoad={() => setIsLoading(false)}
       />
       {isLoading && (
-        <Skeleton
-          width={width}
-          height={height}
-          borderRadius={variables.borderRadiusSm}
-        />
+        <Skeleton width={width} height={height} className={cx('rounded-md')} />
       )}
       {fe.isVideo(original?.extension) && (
         <div
-          className={classNames(
+          className={cx(
             'absolute',
             'top-0',
             'left-0',
@@ -94,11 +63,11 @@ const IconThumbnail = ({ file, scale }: IconThumbnailProps) => {
           )}
           style={{ width, height }}
         >
-          <IconPlay fontSize="40px" color="white" />
+          <IconPlay fontSize="40px" className={cx('text-white')} />
         </div>
       )}
       <div
-        className={classNames(
+        className={cx(
           'absolute',
           'flex',
           'flex-row',

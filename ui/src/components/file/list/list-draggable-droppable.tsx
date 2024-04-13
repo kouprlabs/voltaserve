@@ -1,6 +1,5 @@
 import { useState, MouseEvent } from 'react'
 import { useParams } from 'react-router-dom'
-import { Box, useToken } from '@chakra-ui/react'
 import { useSWRConfig } from 'swr'
 import {
   DragCancelEvent,
@@ -10,7 +9,7 @@ import {
   useDraggable,
   useDroppable,
 } from '@dnd-kit/core'
-import classNames from 'classnames'
+import cx from 'classnames'
 import FileAPI, { FileType, List } from '@/client/api/file'
 import useFileListSearchParams from '@/hooks/use-file-list-params'
 import store from '@/store/configure-store'
@@ -47,7 +46,6 @@ const ListDraggableDroppable = ({
   })
   const [isLoading, setIsLoading] = useState(false)
   const fileListSearchParams = useFileListSearchParams()
-  const green = useToken('colors', 'green.300')
 
   useDndMonitor({
     onDragStart: (event: DragStartEvent) => {
@@ -94,16 +92,17 @@ const ListDraggableDroppable = ({
   return (
     <>
       {file.type === FileType.File ? (
-        <Box
+        <div
           ref={setDraggableNodeRef}
-          className={classNames(
+          className={cx(
             'border-2',
             'border-transparent',
-            { 'visible': isVisible },
-            { 'hidden': !isVisible },
+            'hover:outline-none',
+            'focus:outline-none',
           )}
-          _hover={{ outline: 'none' }}
-          _focus={{ outline: 'none' }}
+          style={{
+            visibility: isVisible ? 'visible' : 'hidden',
+          }}
           {...listeners}
           {...attributes}
         >
@@ -114,20 +113,21 @@ const ListDraggableDroppable = ({
             isSelectionMode={isSelectionMode}
             onContextMenu={onContextMenu}
           />
-        </Box>
+        </div>
       ) : null}
       {file.type === FileType.Folder ? (
-        <Box
+        <div
           ref={setDraggableNodeRef}
-          className={classNames(
+          className={cx(
             'border-2',
             'rounded-md',
+            'hover:outline-none',
+            'focus:outline-none',
             { 'visible': isVisible },
             { 'invisible': !isVisible },
+            { 'border-green-300': isOver },
+            { 'border-transparent': !isOver },
           )}
-          style={{ borderColor: isOver ? green : 'transparent' }}
-          _hover={{ outline: 'none' }}
-          _focus={{ outline: 'none' }}
           {...listeners}
           {...attributes}
         >
@@ -142,7 +142,7 @@ const ListDraggableDroppable = ({
               onContextMenu={onContextMenu}
             />
           </div>
-        </Box>
+        </div>
       ) : null}
     </>
   )

@@ -1,18 +1,11 @@
 import { ChangeEvent, MouseEvent, useEffect } from 'react'
 import { useCallback, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import {
-  Box,
-  Link as ChakraLink,
-  Checkbox,
-  Text,
-  useColorModeValue,
-  useToken,
-} from '@chakra-ui/react'
-import { variables } from '@koupr/ui'
-import classNames from 'classnames'
+import { Link as ChakraLink, Checkbox } from '@chakra-ui/react'
+import cx from 'classnames'
 import { SnapshotStatus } from '@/client/api/file'
 import relativeDate from '@/helpers/relative-date'
+import { variables, Text } from '@/lib'
 import store from '@/store/configure-store'
 import { useAppDispatch } from '@/store/hook'
 import {
@@ -45,14 +38,6 @@ const ListItem = ({
   const [isChecked, setIsChecked] = useState(false)
   const [isSelected, setIsSelected] = useState(false)
   const date = relativeDate(new Date(file.createTime))
-  const hoverColor = useToken(
-    'colors',
-    useColorModeValue('gray.100', 'gray.700'),
-  )
-  const activeColor = useToken(
-    'colors',
-    useColorModeValue('gray.200', 'gray.600'),
-  )
   const width = `${WIDTH * scale}px`
   const minHeight = `${MIN_HEIGHT * scale}px`
 
@@ -145,8 +130,8 @@ const ListItem = ({
   )
 
   return (
-    <Box
-      className={classNames(
+    <div
+      className={cx(
         'relative',
         'flex',
         { 'flex-col': viewType === FileViewType.Grid },
@@ -163,12 +148,17 @@ const ListItem = ({
         'rounded-md',
         'select-none',
         'cursor-default',
+        'hover:bg-gray-100',
+        'hover:dark:bg-gray-700',
+        'active:gray-200',
+        'active:dark:gray-600',
+        {
+          'bg-gray-100': isChecked,
+          'dark:bg-gray-700': isChecked,
+        },
       )}
-      _hover={{ bg: hoverColor }}
-      _active={{ bg: activeColor }}
       style={{
         width: viewType === FileViewType.List ? '100%' : width,
-        background: isChecked ? hoverColor : undefined,
       }}
       onClick={handleIconClick}
       onDoubleClick={isSelectionMode ? undefined : handleIconDoubleClick}
@@ -186,7 +176,7 @@ const ListItem = ({
         />
       ) : null}
       <div
-        className={classNames('flex', 'items-center', 'justify-center')}
+        className={cx('flex', 'items-center', 'justify-center')}
         style={{ width, minHeight }}
       >
         <ItemIcon
@@ -197,7 +187,7 @@ const ListItem = ({
         />
       </div>
       <div
-        className={classNames(
+        className={cx(
           'px-0.5',
           { 'flex': viewType === FileViewType.List },
           { 'block': viewType === FileViewType.Grid },
@@ -209,11 +199,12 @@ const ListItem = ({
       >
         {file.type === 'folder' && (
           <ChakraLink
-            textAlign="center"
+            className={cx('text-center', 'no-underline', {
+              'hover:no-underline': isSelectionMode,
+              'hover:underline': !isSelectionMode,
+            })}
             noOfLines={3}
-            textDecoration="none"
             cursor={isSelectionMode ? 'default' : 'pointer'}
-            _hover={{ textDecoration: isSelectionMode ? 'none' : 'underline' }}
             onClick={isSelectionMode ? undefined : handleFolderLinkClick}
           >
             {file.name}
@@ -221,26 +212,31 @@ const ListItem = ({
         )}
         {file.type === 'file' && file.status === SnapshotStatus.Ready ? (
           <ChakraLink
-            textAlign="center"
+            className={cx('text-center', 'no-underline', {
+              'hover:no-underline': isSelectionMode,
+              'hover:underline': !isSelectionMode,
+            })}
             noOfLines={3}
-            textDecoration="none"
             cursor={isSelectionMode ? 'default' : 'pointer'}
-            _hover={{ textDecoration: isSelectionMode ? 'none' : 'underline' }}
             onClick={isSelectionMode ? undefined : handleFileLinkClick}
           >
             {file.name}
           </ChakraLink>
         ) : null}
         {file.type === 'file' && file.status !== SnapshotStatus.Ready ? (
-          <Text textAlign="center" noOfLines={3} onClick={handleIconClick}>
+          <Text
+            className={cx('text-center')}
+            noOfLines={3}
+            onClick={handleIconClick}
+          >
             {file.name}
           </Text>
         ) : null}
       </div>
-      <Text textAlign="center" noOfLines={3} color="gray.500">
+      <Text noOfLines={3} className={cx('text-gray-500', 'text-center')}>
         {date}
       </Text>
-    </Box>
+    </div>
   )
 }
 

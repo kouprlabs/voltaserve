@@ -11,7 +11,6 @@ import {
   ModalHeader,
   ModalOverlay,
 } from '@chakra-ui/react'
-import { variables } from '@koupr/ui'
 import { useSWRConfig } from 'swr'
 import {
   Field,
@@ -22,7 +21,7 @@ import {
   FormikHelpers,
 } from 'formik'
 import * as Yup from 'yup'
-import classNames from 'classnames'
+import cx from 'classnames'
 import UserAPI, { User } from '@/client/idp/user'
 import EditPictureUpload from './edit-picture-upload'
 
@@ -120,12 +119,7 @@ const AccountEditPicture = ({
             <Form>
               <ModalBody>
                 <div
-                  className={classNames(
-                    'flex',
-                    'flex-col',
-                    'items-center',
-                    'gap-1',
-                  )}
+                  className={cx('flex', 'flex-col', 'items-center', 'gap-1')}
                 >
                   <Field name="picture">
                     {({ field }: FieldAttributes<FieldProps>) => (
@@ -149,35 +143,37 @@ const AccountEditPicture = ({
                 </div>
               </ModalBody>
               <ModalFooter>
-                <Button
-                  type="button"
-                  variant="outline"
-                  colorScheme="blue"
-                  mr={variables.spacingSm}
-                  disabled={isSubmitting}
-                  onClick={() => onClose?.()}
+                <div
+                  className={cx('flex', 'flex-row', 'items-center', 'gap-1')}
                 >
-                  Cancel
-                </Button>
-                <Button
-                  variant="outline"
-                  colorScheme="red"
-                  mr={variables.spacingSm}
-                  isLoading={deletionInProgress}
-                  disabled={!user.picture}
-                  onClick={handleDelete}
-                >
-                  Delete
-                </Button>
-                <Button
-                  type="submit"
-                  variant="solid"
-                  colorScheme="blue"
-                  disabled={isSubmitting || values.picture === user.picture}
-                  isLoading={isSubmitting}
-                >
-                  Save
-                </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    colorScheme="blue"
+                    disabled={isSubmitting}
+                    onClick={() => onClose?.()}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    variant="outline"
+                    colorScheme="red"
+                    isLoading={deletionInProgress}
+                    disabled={!user.picture}
+                    onClick={handleDelete}
+                  >
+                    Delete
+                  </Button>
+                  <Button
+                    type="submit"
+                    variant="solid"
+                    colorScheme="blue"
+                    disabled={isSubmitting || values.picture === user.picture}
+                    isLoading={isSubmitting}
+                  >
+                    Save
+                  </Button>
+                </div>
               </ModalFooter>
             </Form>
           )}

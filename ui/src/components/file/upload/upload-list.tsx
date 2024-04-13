@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
-import { Divider, Text } from '@chakra-ui/react'
-import classNames from 'classnames'
+import { Divider } from '@chakra-ui/react'
+import cx from 'classnames'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { uploadsDrawerClosed } from '@/store/ui/uploads-drawer'
 import UploadItem from './upload-item'
@@ -26,13 +26,13 @@ const UploadList = () => {
   }, [items, dispatch])
 
   if (items.length === 0) {
-    return <Text>There are no uploads.</Text>
+    return <span>There are no uploads.</span>
   }
 
   return (
-    <div className={classNames('flex', 'flex-col', 'gap-1.5')}>
+    <div className={cx('flex', 'flex-col', 'gap-1.5')}>
       {items.map((u, index) => (
-        <div key={u.id} className={classNames('flex', 'flex-col', 'gap-1.5')}>
+        <div key={u.id} className={cx('flex', 'flex-col', 'gap-1.5')}>
           <UploadItem upload={u} />
           {index !== items.length - 1 && <Divider />}
         </div>
