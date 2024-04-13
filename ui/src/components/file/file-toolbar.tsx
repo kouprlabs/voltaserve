@@ -27,8 +27,6 @@ import mapFileList from '@/helpers/map-file-list'
 import useFileListSearchParams from '@/hooks/use-file-list-params'
 import {
   IconAdd,
-  IconCheckCircle,
-  IconCircle,
   IconCopy,
   IconDotsVertical,
   IconDownload,
@@ -42,6 +40,9 @@ import {
   IconSortUp,
   IconSortDown,
   IconCheck,
+  IconCheckbox,
+  IconCheckboxBlank,
+  IconCheckboxMultiple,
 } from '@/lib'
 import { uploadAdded, UploadDecorator } from '@/store/entities/uploads'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
@@ -348,13 +349,13 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
                     <>
                       <MenuDivider />
                       <MenuItem
-                        icon={<IconCheckCircle />}
+                        icon={<IconCheckbox />}
                         onClick={handleSelectAllClick}
                       >
                         Select All
                       </MenuItem>
                       <MenuItem
-                        icon={<IconCircle />}
+                        icon={<IconCheckboxBlank />}
                         onClick={() => dispatch(selectionUpdated([]))}
                       >
                         Unselect All
@@ -368,7 +369,13 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
         </div>
         {fileCount ? (
           <IconButton
-            icon={isSelectionMode ? <LuX /> : <IconCheckCircle />}
+            icon={
+              isSelectionMode ? (
+                <LuX />
+              ) : (
+                <IconCheckboxMultiple fontSize="18px" />
+              )
+            }
             isDisabled={!list}
             variant="solid"
             aria-label=""

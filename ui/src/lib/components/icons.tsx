@@ -15,7 +15,6 @@ import {
 import { FaSearch } from 'react-icons/fa'
 import {
   FiBell,
-  FiCheckCircle,
   FiChevronLeft,
   FiChevronRight,
   FiCircle,
@@ -34,7 +33,13 @@ import {
   FiDownload,
 } from 'react-icons/fi'
 import { IoMdAlert } from 'react-icons/io'
-import { IoTimeOutline, IoCheckmarkCircle, IoRefresh } from 'react-icons/io5'
+import { IoMdRefresh } from 'react-icons/io'
+import { IoTimeOutline, IoCheckmarkCircle } from 'react-icons/io5'
+import {
+  MdOutlineCheckBox,
+  MdOutlineCheckBoxOutlineBlank,
+} from 'react-icons/md'
+import { RiCheckboxMultipleLine } from 'react-icons/ri'
 import { TbUsers } from 'react-icons/tb'
 import { TbPlaylistX } from 'react-icons/tb'
 import { VscClose } from 'react-icons/vsc'
@@ -118,8 +123,16 @@ export const IconCheck = ({ fontSize, ...props }: IconBaseProps) => (
   <BsCheck2 fontSize={fontSize || FONT_SIZE} {...props} />
 )
 
-export const IconCheckCircle = ({ fontSize, ...props }: IconBaseProps) => (
-  <FiCheckCircle fontSize={fontSize || FONT_SIZE} {...props} />
+export const IconCheckboxMultiple = ({ fontSize, ...props }: IconBaseProps) => (
+  <RiCheckboxMultipleLine fontSize={fontSize || FONT_SIZE} {...props} />
+)
+
+export const IconCheckbox = ({ fontSize, ...props }: IconBaseProps) => (
+  <MdOutlineCheckBox fontSize={fontSize || FONT_SIZE} {...props} />
+)
+
+export const IconCheckboxBlank = ({ fontSize, ...props }: IconBaseProps) => (
+  <MdOutlineCheckBoxOutlineBlank fontSize={fontSize || FONT_SIZE} {...props} />
 )
 
 export const IconAlertCircle = ({ fontSize, ...props }: IconBaseProps) => (
@@ -179,7 +192,7 @@ export const IconSearchBold = ({ fontSize, ...props }: IconBaseProps) => (
 )
 
 export const IconRefresh = ({ fontSize, ...props }: IconBaseProps) => (
-  <IoRefresh fontSize={fontSize || FONT_SIZE_LG} {...props} {...props} />
+  <IoMdRefresh fontSize={fontSize || FONT_SIZE_LG} {...props} {...props} />
 )
 
 export const IconGridFill = ({ fontSize, ...props }: IconBaseProps) => (

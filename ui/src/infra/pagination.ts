@@ -1,3 +1,5 @@
+import { StorageOptions } from '@/lib/hooks/page-pagination'
+
 export const FILES_PAGINATION_STEP = 21
 
 export function filePaginationSteps() {
@@ -9,10 +11,11 @@ export function filePaginationSteps() {
   ]
 }
 
-export function filesPaginationStorage() {
+export function filesPaginationStorage(): StorageOptions {
   return {
     prefix: 'voltaserve',
     namespace: 'files',
+    enabled: true,
   }
 }
 
