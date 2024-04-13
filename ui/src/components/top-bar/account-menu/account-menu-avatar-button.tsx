@@ -1,4 +1,4 @@
-import { Avatar, useColorModeValue, useToken } from '@chakra-ui/react'
+import { Avatar } from '@chakra-ui/react'
 import { forwardRef } from '@chakra-ui/system'
 import cx from 'classnames'
 import { User } from '@/client/idp/user'
@@ -12,11 +12,8 @@ export type AccountMenuAvatarButtonProps = {
 
 const AccountMenuAvatarButton = forwardRef<AccountMenuAvatarButtonProps, 'div'>(
   ({ user, ...props }, ref) => {
-    const borderColor = useToken(
-      'colors',
-      useColorModeValue('gray.300', 'gray.700'),
-    )
     const activeNav = useAppSelector((state) => state.ui.nav.active)
+    const isActive = activeNav === NavType.Account
     return (
       <div ref={ref} {...props} className={cx('cursor-pointer')}>
         <AccountMenuActiveCircle>
@@ -24,13 +21,11 @@ const AccountMenuAvatarButton = forwardRef<AccountMenuAvatarButtonProps, 'div'>(
             name={user.fullName}
             src={user.picture}
             size="sm"
-            width="40px"
-            height="40px"
-            border={
-              activeNav === NavType.Account
-                ? 'none'
-                : `1px solid ${borderColor}`
-            }
+            className={cx('w-[40px]', 'h-[40px]', {
+              'border': isActive,
+              'border-gray-300': isActive,
+              'dark:border-gray-700': isActive,
+            })}
           />
         </AccountMenuActiveCircle>
       </div>

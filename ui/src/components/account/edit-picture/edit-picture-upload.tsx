@@ -78,7 +78,12 @@ const EditPictureUpload = ({
             <IconButton
               icon={<IconEdit />}
               variant="solid-gray"
-              className={cx('top-[10px', 'right-[5px]', 'absolute', 'z-[1000]')}
+              className={cx(
+                'top-[10px]',
+                'right-[5px]',
+                'absolute',
+                'z-[1000]',
+              )}
               aria-label=""
               disabled={disabled}
               onClick={handleEdit}

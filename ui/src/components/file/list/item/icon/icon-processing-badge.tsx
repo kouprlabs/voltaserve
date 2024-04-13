@@ -1,35 +1,25 @@
-import {
-  Circle,
-  Spinner,
-  Tooltip,
-  useColorModeValue,
-  useToken,
-} from '@chakra-ui/react'
+import { Circle, Spinner, Tooltip } from '@chakra-ui/react'
 import cx from 'classnames'
 
-const IconProcessingBadge = () => {
-  const spinnerColor = useToken(
-    'colors',
-    useColorModeValue('gray.400', 'gray.500'),
-  )
-  const borderColor = useToken('colors', 'gray.200')
-  return (
-    <Tooltip label="Processing in progress">
-      <Circle
-        className={cx(
-          'text-purple-600',
-          'bg-white',
-          'w-[23px]',
-          'h-[23px]',
-          'border',
-          'border-solid',
-        )}
-        style={{ borderColor }}
-      >
-        <Spinner size="sm" thickness="4px" style={{ color: spinnerColor }} />
-      </Circle>
-    </Tooltip>
-  )
-}
+const IconProcessingBadge = () => (
+  <Tooltip label="Processing in progress">
+    <Circle
+      className={cx(
+        'text-purple-600',
+        'bg-white',
+        'w-[23px]',
+        'h-[23px]',
+        'border',
+        'border-gray-200',
+      )}
+    >
+      <Spinner
+        size="sm"
+        thickness="4px"
+        className={cx('text-gray-400', 'dark:text-gray-500')}
+      />
+    </Circle>
+  </Tooltip>
+)
 
 export default IconProcessingBadge

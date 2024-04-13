@@ -39,18 +39,18 @@ export type ListOptions = {
 }
 
 export default class UserAPI {
-  static async list(options?: ListOptions): Promise<List> {
+  static async list(options?: ListOptions) {
     return apiFetcher({
       url: `/users?${this.paramsFromListOptions(options)}`,
       method: 'GET',
-    })
+    }) as Promise<List>
   }
 
   static useList(options?: ListOptions, swrOptions?: any) {
     const url = `/users?${this.paramsFromListOptions(options)}`
     return useSWR<List>(
       url,
-      () => apiFetcher({ url, method: 'GET' }),
+      () => apiFetcher({ url, method: 'GET' }) as Promise<List>,
       swrOptions,
     )
   }

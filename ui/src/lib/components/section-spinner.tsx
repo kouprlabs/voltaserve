@@ -1,7 +1,7 @@
 import cx from 'classnames'
 import { Spinner } from './spinner'
 
-type SectionSpinnerProps = {
+interface SectionSpinnerProps {
   width?: string
   height?: string
 }

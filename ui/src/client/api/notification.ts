@@ -15,7 +15,7 @@ export default class NotificationAPI {
     const url = `/notifications`
     return useSWR<Notification[]>(
       url,
-      () => apiFetcher({ url, method: 'GET' }),
+      () => apiFetcher({ url, method: 'GET' }) as Promise<Notification[]>,
       swrOptions,
     )
   }

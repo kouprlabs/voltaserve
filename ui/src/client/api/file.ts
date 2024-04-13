@@ -225,19 +225,19 @@ export default class FileAPI {
     })
   }
 
-  static async createFolder(options: CreateFolderOptions): Promise<File> {
+  static async createFolder(options: CreateFolderOptions) {
     return apiFetcher({
       url: '/files/create_folder',
       method: 'POST',
       body: JSON.stringify(options),
-    })
+    }) as Promise<File>
   }
 
-  static async list(id: string, options: ListOptions): Promise<List> {
+  static async list(id: string, options: ListOptions) {
     return apiFetcher({
       url: `/files/${id}/list?${this.paramsFromListOptions(options)}`,
       method: 'GET',
-    })
+    }) as Promise<List>
   }
 
   static useList(
@@ -246,42 +246,42 @@ export default class FileAPI {
     swrOptions?: any,
   ) {
     const url = `/files/${id}/list?${this.paramsFromListOptions(options)}`
-    return useSWR<List>(
+    return useSWR<List | undefined>(
       id ? url : null,
       () => apiFetcher({ url, method: 'GET' }),
       swrOptions,
     )
   }
 
-  static async getPath(id: string): Promise<File[]> {
+  static async getPath(id: string) {
     return apiFetcher({
       url: `/files/${id}/get_path`,
       method: 'GET',
-    })
+    }) as Promise<File[]>
   }
 
   static useGetPath(id: string | null | undefined, swrOptions?: any) {
     const url = `/files/${id}/get_path`
     return useSWR<File[]>(
       id ? url : null,
-      () => apiFetcher({ url, method: 'GET' }),
+      () => apiFetcher({ url, method: 'GET' }) as Promise<File[]>,
       swrOptions,
     )
   }
 
-  static async getIds(id: string): Promise<string[]> {
+  static async getIds(id: string) {
     return apiFetcher({
       url: `/files/${id}/get_ids`,
       method: 'GET',
-    })
+    }) as Promise<string[]>
   }
 
-  static async rename(id: string, options: RenameOptions): Promise<File> {
+  static async rename(id: string, options: RenameOptions) {
     return apiFetcher({
       url: `/files/${id}/rename`,
       method: 'POST',
       body: JSON.stringify(options),
-    })
+    }) as Promise<File>
   }
 
   static async delete(id: string) {
@@ -317,40 +317,40 @@ export default class FileAPI {
 
   static useGetById(id: string | null | undefined, swrOptions?: any) {
     const url = `/files/${id}`
-    return useSWR<File>(
+    return useSWR(
       id ? url : null,
-      () => apiFetcher({ url, method: 'GET' }),
+      () => apiFetcher({ url, method: 'GET' }) as Promise<File>,
       swrOptions,
     )
   }
 
-  static async getById(id: string): Promise<File> {
+  static async getById(id: string) {
     return apiFetcher({
       url: `/files/${id}`,
       method: 'GET',
-    })
+    }) as Promise<File>
   }
 
-  static async batchGet(options: BatchGetOptions): Promise<File[]> {
+  static async batchGet(options: BatchGetOptions) {
     return apiFetcher({
       url: `/files/batch_get`,
       method: 'POST',
       body: JSON.stringify(options),
-    })
+    }) as Promise<File[]>
   }
 
-  static async getItemCount(id: string): Promise<number> {
+  static async getItemCount(id: string) {
     return apiFetcher({
       url: `/files/${id}/get_item_count`,
       method: 'GET',
-    })
+    }) as Promise<number>
   }
 
   static useGetItemCount(id: string | null | undefined, swrOptions?: any) {
     const url = `/files/${id}/get_item_count`
     return useSWR<number>(
       id ? url : null,
-      () => apiFetcher({ url, method: 'GET' }),
+      () => apiFetcher({ url, method: 'GET' }) as Promise<number>,
       swrOptions,
     )
   }
@@ -387,11 +387,11 @@ export default class FileAPI {
     })
   }
 
-  static async getUserPermissions(id: string): Promise<UserPermission[]> {
+  static async getUserPermissions(id: string) {
     return apiFetcher({
       url: `/files/${id}/get_user_permissions`,
       method: 'GET',
-    })
+    }) as Promise<UserPermission[]>
   }
 
   static useGetUserPermissions(
@@ -401,13 +401,13 @@ export default class FileAPI {
     const url = `/files/${id}/get_user_permissions`
     return useSWR<UserPermission[]>(
       id ? url : null,
-      () => apiFetcher({ url, method: 'GET' }),
+      () => apiFetcher({ url, method: 'GET' }) as Promise<UserPermission[]>,
       swrOptions,
     )
   }
 
-  static async getGroupPermissions(id: string): Promise<GroupPermission[]> {
-    return apiFetcher({
+  static async getGroupPermissions(id: string) {
+    return apiFetcher<GroupPermission[]>({
       url: `/files/${id}/get_group_permissions`,
       method: 'GET',
     })
@@ -420,7 +420,7 @@ export default class FileAPI {
     const url = `/files/${id}/get_group_permissions`
     return useSWR<GroupPermission[]>(
       id ? url : null,
-      () => apiFetcher({ url, method: 'GET' }),
+      () => apiFetcher({ url, method: 'GET' }) as Promise<GroupPermission[]>,
       swrOptions,
     )
   }

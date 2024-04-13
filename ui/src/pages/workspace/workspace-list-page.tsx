@@ -110,8 +110,7 @@ const WorkspaceListPage = () => {
                       <Avatar
                         name={w.name}
                         size="sm"
-                        width="40px"
-                        height="40px"
+                        className={cx('w-[40px]', 'h-[40px]')}
                       />
                       <ChakraLink
                         as={Link}

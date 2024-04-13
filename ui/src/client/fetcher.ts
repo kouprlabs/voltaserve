@@ -8,6 +8,7 @@ export type FetcherOptions = {
   url: string
   method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'OPTIONS' | 'HEAD'
   body?: BodyInit | null
+  contentType?: string
   redirect?: boolean
   authenticate?: boolean
 }
@@ -27,11 +28,13 @@ export async function fetcher<T>({
   url,
   method,
   body,
+  contentType,
   redirect,
   authenticate = true,
-}: FetcherOptions) {
-  const headers: HeadersInit = {
-    'Content-Type': 'application/json',
+}: FetcherOptions): Promise<T | undefined> {
+  const headers: HeadersInit = {}
+  if (!contentType) {
+    headers['Content-Type'] = 'application/json'
   }
   if (authenticate) {
     headers['Authorization'] = `Bearer ${
@@ -51,11 +54,9 @@ export async function fetcher<T>({
   try {
     if (response) {
       return (await response.json()) as T
-    } else {
-      return null
     }
   } catch {
-    return null
+    // Ignored
   }
 }
 

@@ -77,7 +77,7 @@ const TopBarUploadDrawer = () => {
           <DrawerFooter>
             {hasCompleted && (
               <Button
-                width="100%"
+                className={cx('w-full')}
                 leftIcon={<IconDeleteListItem size="22px" />}
                 onClick={handleClearCompleted}
               >

@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import cx from 'classnames'
 import { File } from '@/client/api/file'
 import { getAccessTokenOrRedirect } from '@/infra/token'
 
@@ -24,7 +25,9 @@ const ViewerPDF = ({ file }: ViewerPDFProps) => {
     return null
   }
 
-  return <iframe width="100%" height="100%" src={url} title={file.name} />
+  return (
+    <iframe className={cx('w-full', 'h-full')} src={url} title={file.name} />
+  )
 }
 
 export default ViewerPDF

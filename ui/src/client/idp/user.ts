@@ -37,45 +37,43 @@ export default class UserAPI {
     const url = `/user`
     return useSWR<User>(
       url,
-      () => idpFetcher({ url, method: 'GET' }),
+      () => idpFetcher({ url, method: 'GET' }) as Promise<User>,
       swrOptions,
     )
   }
 
-  static async updateFullName(options: UpdateFullNameOptions): Promise<User> {
+  static async updateFullName(options: UpdateFullNameOptions) {
     return idpFetcher({
       url: `/user/update_full_name`,
       method: 'POST',
       body: JSON.stringify(options),
-    })
+    }) as Promise<User>
   }
 
-  static async updateEmailRequest(
-    options: UpdateEmailRequestOptions,
-  ): Promise<User> {
+  static async updateEmailRequest(options: UpdateEmailRequestOptions) {
     return idpFetcher({
       url: `/user/update_email_request`,
       method: 'POST',
       body: JSON.stringify(options),
-    })
+    }) as Promise<User>
   }
 
   static async updateEmailConfirmation(
     options: UpdateEmailConfirmationOptions,
-  ): Promise<User> {
+  ) {
     return idpFetcher({
       url: `/user/update_email_confirmation`,
       method: 'POST',
       body: JSON.stringify(options),
-    })
+    }) as Promise<User>
   }
 
-  static async updatePassword(options: UpdatePasswordOptions): Promise<User> {
+  static async updatePassword(options: UpdatePasswordOptions) {
     return idpFetcher({
       url: `/user/update_password`,
       method: 'POST',
       body: JSON.stringify(options),
-    })
+    }) as Promise<User>
   }
 
   static async delete(options: DeleteOptions) {
@@ -86,20 +84,21 @@ export default class UserAPI {
     })
   }
 
-  static async updatePicture(file: File): Promise<User> {
+  static async updatePicture(file: File) {
     const body = new FormData()
     body.append('file', file)
     return idpFetcher({
       url: `/user/update_picture`,
       method: 'POST',
       body,
-    })
+      contentType: 'multipart/form-data',
+    }) as Promise<User>
   }
 
-  static async deletePicture(): Promise<User> {
+  static async deletePicture() {
     return idpFetcher({
       url: `/user/delete_picture`,
       method: 'POST',
-    })
+    }) as Promise<User>
   }
 }
