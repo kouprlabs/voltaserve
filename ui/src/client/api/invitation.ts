@@ -63,7 +63,7 @@ export default class InvitationAPI {
     )}`
     return useSWR<List>(
       url,
-      () => apiFetcher({ url, method: 'GET' }),
+      () => apiFetcher({ url, method: 'GET' }) as Promise<List>,
       swrOptions,
     )
   }
@@ -74,7 +74,7 @@ export default class InvitationAPI {
     )}`
     return useSWR<List>(
       options?.organizationId ? url : null,
-      () => apiFetcher({ url, method: 'GET' }),
+      () => apiFetcher({ url, method: 'GET' }) as Promise<List>,
       swrOptions,
     )
   }

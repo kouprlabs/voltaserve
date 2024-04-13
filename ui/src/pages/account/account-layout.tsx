@@ -53,9 +53,8 @@ const AccountLayout = () => {
             <Avatar
               name={user.fullName}
               src={user.picture}
-              width="165px"
-              height="165px"
               size="2xl"
+              className={cx('w-[165px]', 'h-[165px]')}
             />
             <IconButton
               icon={<IconEdit />}
@@ -76,8 +75,8 @@ const AccountLayout = () => {
           <Button
             variant="outline"
             colorScheme="red"
-            width="100%"
             type="submit"
+            className={cx('w-full')}
             onClick={() => navigate('/sign-out')}
           >
             Sign Out

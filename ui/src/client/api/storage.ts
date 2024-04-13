@@ -13,7 +13,7 @@ export default class StorageAPI {
     const url = `/storage/get_account_usage`
     return useSWR<StorageUsage>(
       url,
-      () => apiFetcher({ url, method: 'GET' }),
+      () => apiFetcher({ url, method: 'GET' }) as Promise<StorageUsage>,
       swrOptions,
     )
   }
@@ -26,7 +26,7 @@ export default class StorageAPI {
       : null
     return useSWR<StorageUsage>(
       url,
-      () => apiFetcher({ url: url!, method: 'GET' }),
+      () => apiFetcher({ url: url!, method: 'GET' }) as Promise<StorageUsage>,
       swrOptions,
     )
   }
@@ -37,7 +37,7 @@ export default class StorageAPI {
     })}`
     return useSWR<StorageUsage>(
       id ? url : null,
-      () => apiFetcher({ url, method: 'GET' }),
+      () => apiFetcher({ url, method: 'GET' }) as Promise<StorageUsage>,
       swrOptions,
     )
   }

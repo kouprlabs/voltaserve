@@ -19,7 +19,7 @@ export type ExchangeOptions = {
 }
 
 export default class TokenAPI {
-  static async exchange(options: ExchangeOptions): Promise<Token> {
+  static async exchange(options: ExchangeOptions) {
     const formBody = []
     formBody.push(`grant_type=${options.grant_type}`)
     if (options.grant_type === 'password') {
@@ -42,7 +42,7 @@ export default class TokenAPI {
     if (options.locale) {
       formBody.push(`&locale=${encodeURIComponent(options.locale)}`)
     }
-    return baseFetcher(
+    const response = await baseFetcher(
       `${getConfig().idpURL}/token`,
       {
         method: 'POST',
@@ -52,6 +52,15 @@ export default class TokenAPI {
         },
       },
       false,
-    ).then((result) => result.json())
+    )
+    try {
+      if (response) {
+        return (await response.json()) as Token
+      } else {
+        throw new Error('No response')
+      }
+    } catch {
+      throw new Error('Failed to parse token')
+    }
   }
 }

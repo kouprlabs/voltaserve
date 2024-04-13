@@ -1,9 +1,9 @@
 import { useState } from 'react'
-import { Image, Skeleton, useColorModeValue, useToken } from '@chakra-ui/react'
+import { Image, Skeleton } from '@chakra-ui/react'
 import cx from 'classnames'
 import { File, SnapshotStatus } from '@/client/api/file'
 import * as fe from '@/helpers/file-extension'
-import { IconPlay, variables } from '@/lib'
+import { IconPlay } from '@/lib'
 import IconErrorBadge from '../icon-error-badge'
 import IconNewBadge from '../icon-new-badge'
 import IconProcessingBadge from '../icon-processing-badge'
@@ -20,10 +20,6 @@ const IconThumbnail = ({ file, scale }: IconThumbnailProps) => {
   const width = getThumbnailWidth(file, scale)
   const height = getThumbnailHeight(file, scale)
   const [isLoading, setIsLoading] = useState(true)
-  const borderColor = useToken(
-    'colors',
-    useColorModeValue('gray.300', 'gray.700'),
-  )
   return (
     <div className={cx('relative')} style={{ width, height }}>
       <Image
@@ -31,24 +27,23 @@ const IconThumbnail = ({ file, scale }: IconThumbnailProps) => {
         style={{
           width: isLoading ? 0 : width,
           height: isLoading ? 0 : height,
-          border: '1px solid',
-          borderColor,
-          borderRadius: variables.borderRadiusSm,
         }}
         className={cx(
           'pointer-events-none',
           'object-cover',
           'border',
           'border-solid',
-          {
-            'invisible': isLoading,
-          },
+          { 'invisible': isLoading },
+          'border',
+          'border-gray-300',
+          'dark:border-gray-700',
+          'rounded-md',
         )}
         alt={file.name}
         onLoad={() => setIsLoading(false)}
       />
       {isLoading && (
-        <Skeleton width={width} height={height} className={cx('rounded-md')} />
+        <Skeleton className={cx('rounded-md')} style={{ width, height }} />
       )}
       {fe.isVideo(original?.extension) && (
         <div

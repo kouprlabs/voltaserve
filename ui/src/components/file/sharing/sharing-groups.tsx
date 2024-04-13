@@ -201,8 +201,7 @@ const SharingGroups = ({
                         <Avatar
                           name={p.group.name}
                           size="sm"
-                          width="40px"
-                          height="40px"
+                          className={cx('w-[40px]', 'h-[40px]')}
                         />
                         <Text noOfLines={1}>{p.group.name}</Text>
                       </div>

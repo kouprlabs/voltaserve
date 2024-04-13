@@ -1,6 +1,5 @@
 import { useEffect } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
-import { useColorModeValue } from '@chakra-ui/react'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import FileAPI from '@/client/api/file'
@@ -37,7 +36,6 @@ const WorkspaceFilesPage = () => {
   const sortBy = useAppSelector((state) => state.ui.files.sortBy)
   const sortOrder = useAppSelector((state) => state.ui.files.sortOrder)
   const iconScale = useAppSelector((state) => state.ui.files.iconScale)
-  const borderColor = useColorModeValue('gray.300', 'gray.600')
   const { data: workspace } = WorkspaceAPI.useGetById(id, swrConfig())
   const { page, size, steps, setPage, setSize } = usePagePagination({
     navigate,
@@ -114,14 +112,16 @@ const WorkspaceFilesPage = () => {
               'overflow-y-auto',
               'overflow-x-hidden',
               'border-t',
-              { 'border-b': hasPagination },
+              'border-t-gray-300',
+              'dark:border-t-gray-600',
+              {
+                'border-b': hasPagination,
+                'border-b-gray-300': hasPagination,
+                'dark:border-b-gray-600': hasPagination,
+              },
               'pt-1.5',
               'flex-grow',
             )}
-            style={{
-              borderTopColor: borderColor,
-              borderBottomColor: hasPagination ? borderColor : undefined,
-            }}
             onClick={() => dispatch(selectionUpdated([]))}
           >
             {isLoading ? (

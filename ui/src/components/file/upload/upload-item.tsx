@@ -6,7 +6,6 @@ import {
   AccordionPanel,
   CircularProgress,
   IconButton,
-  useToken,
 } from '@chakra-ui/react'
 import cx from 'classnames'
 import {
@@ -29,9 +28,6 @@ export type UploadItemProps = {
 const UploadItem = ({ upload: uploadProp }: UploadItemProps) => {
   const dispatch = useAppDispatch()
   const upload = new UploadDecorator(uploadProp)
-  const grayColor = useToken('colors', 'gray.500')
-  const greenColor = useToken('colors', 'green')
-  const redColor = useToken('colors', 'red')
 
   return (
     <div className={cx('flex', 'flex-col', 'gap-1')}>
@@ -55,17 +51,17 @@ const UploadItem = ({ upload: uploadProp }: UploadItemProps) => {
           />
         )}
         {upload.isPending && (
-          <div className={cx('shrink-0')} style={{ color: grayColor }}>
+          <div className={cx('shrink-0', 'text-gray-500')}>
             <IconTime fontSize="21px" />
           </div>
         )}
         {upload.isSucceeded && (
-          <div className={cx('shrink-0')} style={{ color: greenColor }}>
+          <div className={cx('shrink-0', 'text-green-500')}>
             <IconCheckCircleFill fontSize="22px" />
           </div>
         )}
         {upload.isFailed && (
-          <div className={cx('shrink-0')} style={{ color: redColor }}>
+          <div className={cx('shrink-0', 'text-red-500')}>
             <IconAlertCircleFill fontSize="22px" />
           </div>
         )}
@@ -93,7 +89,7 @@ const UploadItem = ({ upload: uploadProp }: UploadItemProps) => {
       </div>
       {upload.isFailed && (
         <Accordion allowMultiple>
-          <AccordionItem border="none">
+          <AccordionItem className={cx('border-none')}>
             <AccordionButton className={cx('p-0.5', 'hover:bg-red-50')}>
               <div className={cx('flex', 'flex-row', 'w-full')}>
                 <span className={cx('text-red-500', 'text-left', 'grow')}>

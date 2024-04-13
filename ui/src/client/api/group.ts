@@ -58,50 +58,50 @@ export type RemoveMemberOptions = {
 }
 
 export default class GroupAPI {
-  static create(options: CreateOptions): Promise<Group> {
+  static create(options: CreateOptions) {
     return apiFetcher({
       url: `/groups`,
       method: 'POST',
       body: JSON.stringify(options),
-    })
+    }) as Promise<Group>
   }
 
-  static updateName(id: string, options: UpdateNameOptions): Promise<Group> {
+  static updateName(id: string, options: UpdateNameOptions) {
     return apiFetcher({
       url: `/groups/${id}/update_name`,
       method: 'POST',
       body: JSON.stringify(options),
-    })
+    }) as Promise<Group>
   }
 
-  static async updateImage(id: string, file: any): Promise<Group> {
+  static async updateImage(id: string, file: any) {
     const formData = new FormData()
     formData.append('file', file)
-    return apiFetcher({
+    return apiFetcher<Group>({
       url: `/groups/${id}/update_image`,
       method: 'POST',
       body: formData,
     })
   }
 
-  static async getById(id: string): Promise<Group> {
+  static async getById(id: string) {
     return apiFetcher({
       url: `/groups/${id}`,
       method: 'GET',
-    })
+    }) as Promise<Group>
   }
 
   static useGetById(id: string | null | undefined, swrOptions?: any) {
     const url = `/groups/${id}`
     return useSWR<Group>(
       id ? url : null,
-      () => apiFetcher({ url, method: 'GET' }),
+      () => apiFetcher({ url, method: 'GET' }) as Promise<Group>,
       swrOptions,
     )
   }
 
-  static async list(options?: ListOptions): Promise<List> {
-    return apiFetcher({
+  static async list(options?: ListOptions) {
+    return apiFetcher<List>({
       url: `/groups?${this.paramsFromListOptions(options)}`,
       method: 'GET',
     })
@@ -111,7 +111,7 @@ export default class GroupAPI {
     const url = `/groups?${this.paramsFromListOptions(options)}`
     return useSWR<List>(
       url,
-      () => apiFetcher({ url, method: 'GET' }),
+      () => apiFetcher({ url, method: 'GET' }) as Promise<List>,
       swrOptions,
     )
   }

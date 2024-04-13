@@ -22,14 +22,14 @@ export type ConfirmEmailOptions = {
 }
 
 export default class AccountAPI {
-  static async create(options: CreateOptions): Promise<User | null> {
+  static async create(options: CreateOptions) {
     return idpFetcher({
       url: `/accounts`,
       method: 'POST',
       body: JSON.stringify(options),
       redirect: false,
       authenticate: false,
-    })
+    }) as Promise<User>
   }
 
   static async sendResetPasswordEmail(options: SendResetPasswordEmailOptions) {

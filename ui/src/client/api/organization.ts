@@ -52,65 +52,62 @@ export type RemoveMemberOptions = {
 }
 
 export default class OrganizationAPI {
-  static async getById(id: string): Promise<Organization> {
+  static async getById(id: string) {
     return apiFetcher({
       url: `/organizations/${id}`,
       method: 'GET',
-    })
+    }) as Promise<Organization>
   }
 
   static useGetById(id: string | null | undefined, swrOptions?: any) {
     const url = `/organizations/${id}`
     return useSWR<Organization>(
       id ? url : null,
-      () => apiFetcher({ url, method: 'GET' }),
+      () => apiFetcher({ url, method: 'GET' }) as Promise<Organization>,
       swrOptions,
     )
   }
 
-  static async list(options?: ListOptions): Promise<List> {
+  static async list(options?: ListOptions) {
     return apiFetcher({
       url: `/organizations?${this.paramsFromListOptions(options)}`,
       method: 'GET',
-    })
+    }) as Promise<List>
   }
 
   static useList(options?: ListOptions, swrOptions?: any) {
     const url = `/organizations?${this.paramsFromListOptions(options)}`
     return useSWR<List>(
       url,
-      () => apiFetcher({ url, method: 'GET' }),
+      () => apiFetcher({ url, method: 'GET' }) as Promise<List>,
       swrOptions,
     )
   }
 
-  static async create(options: CreateOptions): Promise<Organization> {
+  static async create(options: CreateOptions) {
     return apiFetcher({
       url: `/organizations`,
       method: 'POST',
       body: JSON.stringify(options),
-    })
+    }) as Promise<Organization>
   }
 
-  static async updateName(
-    id: string,
-    options: UpdateNameOptions,
-  ): Promise<Organization> {
+  static async updateName(id: string, options: UpdateNameOptions) {
     return apiFetcher({
       url: `/organizations/${id}/update_name`,
       method: 'POST',
       body: JSON.stringify(options),
-    })
+    }) as Promise<Organization>
   }
 
-  static async updateImage(id: string, file: any): Promise<Organization> {
+  static async updateImage(id: string, file: any) {
     const formData = new FormData()
     formData.append('file', file)
     return apiFetcher({
       url: `/organizations/${id}/update_image`,
       method: 'POST',
       body: formData,
-    })
+    }) as Promise<Organization>
   }
 
   static async delete(id: string) {

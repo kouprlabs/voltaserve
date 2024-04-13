@@ -58,18 +58,18 @@ export interface StorageCapacityOptions {
 }
 
 export default class WorkspaceAPI {
-  static async getById(id: string): Promise<Workspace> {
+  static async getById(id: string) {
     return apiFetcher({
       url: `/workspaces/${id}`,
       method: 'GET',
-    })
+    }) as Promise<Workspace>
   }
 
   static useGetById(id: string | null | undefined, swrOptions?: any) {
     const url = `/workspaces/${id}`
     return useSWR<Workspace>(
       id ? url : null,
-      () => apiFetcher({ url, method: 'GET' }),
+      () => apiFetcher({ url, method: 'GET' }) as Promise<Workspace>,
       swrOptions,
     )
   }
@@ -78,56 +78,53 @@ export default class WorkspaceAPI {
     const url = `/workspaces?${this.paramsFromListOptions(options)}`
     return useSWR<List>(
       url,
-      () => apiFetcher({ url, method: 'GET' }),
+      () => apiFetcher({ url, method: 'GET' }) as Promise<List>,
       swrOptions,
     )
   }
 
-  static async list(options?: ListOptions): Promise<List> {
+  static async list(options?: ListOptions) {
     return apiFetcher({
       url: `/workspaces?${this.paramsFromListOptions(options)}`,
       method: 'GET',
-    })
+    }) as Promise<List>
   }
 
-  static async create(options: CreateOptions): Promise<Workspace> {
+  static async create(options: CreateOptions) {
     return apiFetcher({
       url: '/workspaces',
       method: 'POST',
       body: JSON.stringify(options),
-    })
+    }) as Promise<Workspace>
   }
 
-  static async updateName(
-    id: string,
-    options: UpdateNameOptions,
-  ): Promise<Workspace> {
+  static async updateName(id: string, options: UpdateNameOptions) {
     return apiFetcher({
       url: `/workspaces/${id}/update_name`,
       method: 'POST',
       body: JSON.stringify(options),
-    })
+    }) as Promise<Workspace>
   }
 
   static async updateStorageCapacity(
     id: string,
     options: StorageCapacityOptions,
-  ): Promise<Workspace> {
+  ) {
     return apiFetcher({
       url: `/workspaces/${id}/update_storage_capacity`,
       method: 'POST',
       body: JSON.stringify(options),
-    })
+    }) as Promise<Workspace>
   }
 
-  static async updateImage(id: string, file: any): Promise<Workspace> {
+  static async updateImage(id: string, file: any) {
     const formData = new FormData()
     formData.append('file', file)
     return apiFetcher({
       url: `/workspaces/${id}/update_image`,
       method: 'POST',
       body: formData,
-    })
+    }) as Promise<Workspace>
   }
 
   static async delete(id: string) {
