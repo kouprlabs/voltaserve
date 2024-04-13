@@ -1,21 +1,6 @@
 import { MouseEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import {
-  Text,
-  Portal,
-  Menu,
-  MenuList,
-  MenuItem,
-  MenuDivider,
-} from '@chakra-ui/react'
-import {
-  IconCopy,
-  IconDownload,
-  IconEdit,
-  IconMove,
-  IconShare,
-  IconTrash,
-} from '@koupr/ui'
+import { Portal, Menu, MenuList, MenuItem, MenuDivider } from '@chakra-ui/react'
 import {
   DndContext,
   useSensors,
@@ -33,6 +18,14 @@ import {
   ltViewerPermission,
 } from '@/client/api/permission'
 import downloadFile from '@/helpers/download-file'
+import {
+  IconCopy,
+  IconDownload,
+  IconEdit,
+  IconMove,
+  IconShare,
+  IconTrash,
+} from '@/lib'
 import { UploadDecorator, uploadAdded } from '@/store/entities/uploads'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import {
@@ -165,7 +158,7 @@ const FileList = ({ list, scale }: FileListProps) => {
                 'h-[300px]',
               )}
             >
-              <Text>There are no items.</Text>
+              <span>There are no items.</span>
             </div>
           )}
           {viewType === FileViewType.Grid && list.totalElements > 0 ? (

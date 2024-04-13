@@ -12,7 +12,6 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
-  Text,
 } from '@chakra-ui/react'
 import {
   Field,
@@ -83,10 +82,10 @@ const GroupDelete = ({ open, group, onClose }: GroupDeleteProps) => {
             <Form>
               <ModalBody>
                 <div className={cx('flex', 'flex-col', 'gap-1.5')}>
-                  <Text>Are you sure you would like to delete this group?</Text>
-                  <Text>
+                  <span>Are you sure you would like to delete this group?</span>
+                  <span>
                     Please type <b>{group.name}</b> to confirm.
-                  </Text>
+                  </span>
                   <Field name="name">
                     {({ field }: FieldAttributes<FieldProps>) => (
                       <FormControl

@@ -5,11 +5,9 @@ import {
   IconButtonProps,
   Progress,
   Switch,
-  Text,
   Tooltip,
   useColorMode,
 } from '@chakra-ui/react'
-import { IconEdit, IconTrash, SectionSpinner } from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import { IoWarning } from 'react-icons/io5'
@@ -21,6 +19,7 @@ import AccountDelete from '@/components/account/account-delete'
 import AccountEditEmail from '@/components/account/account-edit-email'
 import AccountEditFullName from '@/components/account/account-edit-full-name'
 import prettyBytes from '@/helpers/pretty-bytes'
+import { IconEdit, IconTrash, SectionSpinner } from '@/lib'
 
 const EditButton = (props: IconButtonProps) => (
   <IconButton
@@ -64,31 +63,31 @@ const AccountSettingsPage = () => {
       </Helmet>
       <div className={cx('flex', 'flex-col', 'gap-0')}>
         <div className={sectionClassName}>
-          <Text className={cx('font-bold')}>Storage Usage</Text>
-          {storageUsageError && <Text>Failed to load storage usage.</Text>}
+          <span className={cx('font-bold')}>Storage Usage</span>
+          {storageUsageError && <span>Failed to load storage usage.</span>}
           {storageUsage && !storageUsageError && (
             <>
-              <Text>
+              <span>
                 {prettyBytes(storageUsage.bytes)} of{' '}
                 {prettyBytes(storageUsage.maxBytes)} used
-              </Text>
+              </span>
               <Progress value={storageUsage.percentage} hasStripe />
             </>
           )}
           {!storageUsage && !storageUsageError && (
             <>
-              <Text>Calculating…</Text>
+              <span>Calculating…</span>
               <Progress value={0} hasStripe />
             </>
           )}
         </div>
         <Divider />
         <div className={sectionClassName}>
-          <Text className={cx('font-bold')}>Basics</Text>
+          <span className={cx('font-bold')}>Basics</span>
           <div className={cx(rowClassName)}>
-            <Text>Full name</Text>
+            <span>Full name</span>
             <Spacer />
-            <Text>{user.fullName}</Text>
+            <span>{user.fullName}</span>
             <EditButton
               aria-label=""
               onClick={() => {
@@ -99,9 +98,9 @@ const AccountSettingsPage = () => {
         </div>
         <Divider />
         <div className={sectionClassName}>
-          <Text className={cx('font-bold')}>Credentials</Text>
+          <span className={cx('font-bold')}>Credentials</span>
           <div className={cx(rowClassName)}>
-            <Text>Email</Text>
+            <span>Email</span>
             <Spacer />
             {user.pendingEmail && (
               <div className={cx('flex', 'flex-row', 'items-center')}>
@@ -112,11 +111,11 @@ const AccountSettingsPage = () => {
                     />
                   </span>
                 </Tooltip>
-                <Text>{user.pendingEmail}</Text>
+                <span>{user.pendingEmail}</span>
               </div>
             )}
             {!user.pendingEmail && (
-              <Text>{user.pendingEmail || user.email}</Text>
+              <span>{user.pendingEmail || user.email}</span>
             )}
             <EditButton
               aria-label=""
@@ -126,7 +125,7 @@ const AccountSettingsPage = () => {
             />
           </div>
           <div className={cx(rowClassName)}>
-            <Text>Password</Text>
+            <span>Password</span>
             <Spacer />
             <EditButton
               aria-label=""
@@ -138,9 +137,9 @@ const AccountSettingsPage = () => {
         </div>
         <Divider />
         <div className={sectionClassName}>
-          <Text className={cx('font-bold')}>Theme</Text>
+          <span className={cx('font-bold')}>Theme</span>
           <div className={cx(rowClassName)}>
-            <Text>Dark mode</Text>
+            <span>Dark mode</span>
             <Spacer />
             <Switch
               isChecked={colorMode === 'dark'}
@@ -150,9 +149,9 @@ const AccountSettingsPage = () => {
         </div>
         <Divider />
         <div className={sectionClassName}>
-          <Text className={cx('font-bold')}>Advanced</Text>
+          <span className={cx('font-bold')}>Advanced</span>
           <div className={cx(rowClassName)}>
-            <Text>Delete account</Text>
+            <span>Delete account</span>
             <Spacer />
             <IconButton
               icon={<IconTrash />}

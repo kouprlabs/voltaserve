@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react'
-import { Button, Text, useToast } from '@chakra-ui/react'
+import { Button, useToast } from '@chakra-ui/react'
 import { useSWRConfig } from 'swr'
 import cx from 'classnames'
 import InvitationAPI, { Invitation } from '@/client/api/invitation'
@@ -58,17 +58,15 @@ const NotificationDrawerNewInvitationItem = ({
 
   return (
     <div className={cx('flex', 'flex-col', 'gap-0.5')}>
-      <Text>
+      <div>
         You have been invited by{' '}
-        <Text as="span" className={cx('font-bold')}>
+        <span className={cx('font-bold')}>
           {userToString(invitation.owner)}
-        </Text>{' '}
+        </span>{' '}
         to join the organization{' '}
-        <Text as="span" className={cx('font-bold')}>
-          {invitation.organization.name}
-        </Text>
+        <span className={cx('font-bold')}>{invitation.organization.name}</span>
         .<br />
-      </Text>
+      </div>
       <div className={cx('flex', 'flex-row', 'gap-0.5', 'justify-end')}>
         <Button
           size="sm"

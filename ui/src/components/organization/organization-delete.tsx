@@ -12,7 +12,6 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
-  Text,
 } from '@chakra-ui/react'
 import { useSWRConfig } from 'swr'
 import {
@@ -91,12 +90,12 @@ const OrganizationDelete = ({
             <Form>
               <ModalBody>
                 <div className={cx('flex', 'flex-col', 'gap-1.5')}>
-                  <Text>
+                  <span>
                     Are you sure you would like to delete this organization?
-                  </Text>
-                  <Text>
+                  </span>
+                  <span>
                     Please type <b>{organization.name}</b> to confirm.
-                  </Text>
+                  </span>
                   <Field name="name">
                     {({ field }: FieldAttributes<FieldProps>) => (
                       <FormControl

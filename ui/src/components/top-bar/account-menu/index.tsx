@@ -7,7 +7,6 @@ import {
   MenuList,
   Portal,
   SkeletonCircle,
-  Text,
 } from '@chakra-ui/react'
 import cx from 'classnames'
 import UserAPI from '@/client/idp/user'
@@ -35,7 +34,7 @@ const TopBarAccountMenu = () => {
             >
               <AccountMenuAvatarImage user={user} />
               <div className={cx('flex', 'flex-col', 'gap-0')}>
-                <Text
+                <span
                   className={cx(
                     'font-semibold',
                     'grow',
@@ -45,8 +44,8 @@ const TopBarAccountMenu = () => {
                   )}
                 >
                   {user.fullName}
-                </Text>
-                <Text className={cx('text-gray-500')}>{user.email}</Text>
+                </span>
+                <span className={cx('text-gray-500')}>{user.email}</span>
               </div>
             </div>
             <MenuDivider />

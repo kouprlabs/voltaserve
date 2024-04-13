@@ -15,26 +15,25 @@ const StorageInput = ({ id, field, form }: FieldAttributes<FieldProps>) => {
   return (
     <>
       <input id={id} type="hidden" {...field} />
-      <div className={cx('flex', 'flex-col', 'gap-1.5')}>
-        <div className={cx('flex', 'flex-row', 'gap-0.5')}>
-          <Input
-            type="number"
-            disabled={form.isSubmitting}
-            value={value || ''}
-            onChange={(event) => {
-              if (event.target.value) {
-                const newValue = parseInt(event.target.value)
-                setValue(newValue)
-                form.setFieldValue(field.name, normalizeToByte(newValue, unit))
-              } else {
-                setValue(null)
-                form.setFieldValue(field.name, '')
-              }
-            }}
-          />
+      <div className={cx('flex', 'flex-row', 'gap-0.5')}>
+        <Input
+          type="number"
+          disabled={form.isSubmitting}
+          value={value || ''}
+          onChange={(event) => {
+            if (event.target.value) {
+              const newValue = parseInt(event.target.value)
+              setValue(newValue)
+              form.setFieldValue(field.name, normalizeToByte(newValue, unit))
+            } else {
+              setValue(null)
+              form.setFieldValue(field.name, '')
+            }
+          }}
+        />
+        <div className={cx('min-w-[80px]')}>
           <Select
             defaultValue={unit}
-            className={cx('shrink-0', 'w-auto')}
             disabled={form.isSubmitting}
             onChange={(event) => {
               const newUnit = event.target.value as Unit

@@ -1,11 +1,11 @@
 import { ChangeEvent, MouseEvent, useEffect } from 'react'
 import { useCallback, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Box, Link as ChakraLink, Checkbox, Text } from '@chakra-ui/react'
-import { variables } from '@koupr/ui'
+import { Link as ChakraLink, Checkbox } from '@chakra-ui/react'
 import cx from 'classnames'
 import { SnapshotStatus } from '@/client/api/file'
 import relativeDate from '@/helpers/relative-date'
+import { variables, Text } from '@/lib'
 import store from '@/store/configure-store'
 import { useAppDispatch } from '@/store/hook'
 import {
@@ -128,9 +128,9 @@ const ListItem = ({
     },
     [isSelected, handleIconClick, onContextMenu],
   )
-  // 'gray.100', 'gray.700'
+
   return (
-    <Box
+    <div
       className={cx(
         'relative',
         'flex',
@@ -236,7 +236,7 @@ const ListItem = ({
       <Text noOfLines={3} className={cx('text-gray-500', 'text-center')}>
         {date}
       </Text>
-    </Box>
+    </div>
   )
 }
 

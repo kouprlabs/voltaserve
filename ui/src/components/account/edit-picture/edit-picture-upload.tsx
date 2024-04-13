@@ -1,7 +1,7 @@
 import { ChangeEvent, useCallback, useRef, useState } from 'react'
-import { IconButton, Image, Text } from '@chakra-ui/react'
-import { IconEdit } from '@koupr/ui'
+import { IconButton, Image } from '@chakra-ui/react'
 import cx from 'classnames'
+import { IconEdit } from '@/lib'
 
 export type EditPictureUploadProps = {
   name: string
@@ -96,9 +96,9 @@ const EditPictureUpload = ({
             )}
             onClick={handleEdit}
           >
-            <Text className={cx('text-blue-600', 'dark:text-blue-200')}>
+            <span className={cx('text-blue-600', 'dark:text-blue-200')}>
               Browse
-            </Text>
+            </span>
           </div>
         )}
       </div>

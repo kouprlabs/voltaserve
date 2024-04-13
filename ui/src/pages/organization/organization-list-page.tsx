@@ -14,11 +14,9 @@ import {
   Th,
   Thead,
   Tr,
-  Text,
   Avatar,
   Badge,
 } from '@chakra-ui/react'
-import { SectionSpinner, PagePagination, usePagePagination } from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import OrganizationAPI, { SortOrder } from '@/client/api/organization'
@@ -27,6 +25,7 @@ import { CreateOrganizationButton } from '@/components/top-bar/top-bar-buttons'
 import prettyDate from '@/helpers/pretty-date'
 import { decodeQuery } from '@/helpers/query'
 import { organizationPaginationStorage } from '@/infra/pagination'
+import { SectionSpinner, PagePagination, usePagePagination } from '@/lib'
 
 const OrganizationListPage = () => {
   const navigate = useNavigate()
@@ -67,7 +66,7 @@ const OrganizationListPage = () => {
               'h-[300px]',
             )}
           >
-            <Text>Failed to load organizations.</Text>
+            <span>Failed to load organizations.</span>
           </div>
         )}
         {!list && !error && <SectionSpinner />}
@@ -81,7 +80,7 @@ const OrganizationListPage = () => {
             )}
           >
             <div className={cx('flex', 'flex-col', 'gap-1.5', 'items-center')}>
-              <Text>There are no organizations.</Text>
+              <span>There are no organizations.</span>
               <CreateOrganizationButton />
             </div>
           </div>
@@ -118,7 +117,7 @@ const OrganizationListPage = () => {
                         to={`/organization/${o.id}/member`}
                         className={cx('no-underline')}
                       >
-                        <Text>{o.name}</Text>
+                        <span>{o.name}</span>
                       </ChakraLink>
                     </div>
                   </Td>

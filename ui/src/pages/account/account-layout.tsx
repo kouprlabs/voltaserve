@@ -9,14 +9,13 @@ import {
   TabList,
   Tabs,
   Tag,
-  Text,
 } from '@chakra-ui/react'
-import { IconEdit } from '@koupr/ui'
 import cx from 'classnames'
 import NotificationAPI from '@/client/api/notification'
 import UserAPI from '@/client/idp/user'
 import { swrConfig } from '@/client/options'
 import AccountEditPicture from '@/components/account/edit-picture'
+import { IconEdit } from '@/lib'
 
 const AccountLayout = () => {
   const location = useLocation()
@@ -98,7 +97,7 @@ const AccountLayout = () => {
               <div
                 className={cx('flex', 'flex-row', 'items-center', 'gap-0.5')}
               >
-                <Text>Invitations</Text>
+                <span>Invitations</span>
                 {invitationCount && invitationCount > 0 ? (
                   <Tag className={cx('rounded-full')}>{invitationCount}</Tag>
                 ) : null}

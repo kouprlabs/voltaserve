@@ -1,7 +1,7 @@
 import { useContext } from 'react'
-import { DrawerContext, SwitchCard, IconInfoCircle } from '@koupr/ui'
 import cx from 'classnames'
 import { File } from '@/client/api/file'
+import { DrawerContext, SwitchCard, IconInfoCircle } from '@/lib'
 import DrawerDownloadButton from './drawer-download-button'
 import DrawerOpenNewTabButton from './drawer-open-new-tab-button'
 import DrawerFileInfo from './file-info'

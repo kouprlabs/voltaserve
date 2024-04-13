@@ -14,11 +14,9 @@ import {
   Th,
   Thead,
   Tr,
-  Text,
   Avatar,
   Badge,
 } from '@chakra-ui/react'
-import { SectionSpinner, PagePagination, usePagePagination } from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import GroupAPI, { SortOrder } from '@/client/api/group'
@@ -27,6 +25,7 @@ import { CreateGroupButton } from '@/components/top-bar/top-bar-buttons'
 import prettyDate from '@/helpers/pretty-date'
 import { decodeQuery } from '@/helpers/query'
 import { groupPaginationStorage } from '@/infra/pagination'
+import { SectionSpinner, PagePagination, usePagePagination } from '@/lib'
 
 const GroupListPage = () => {
   const navigate = useNavigate()
@@ -67,7 +66,7 @@ const GroupListPage = () => {
               'h-[300px]',
             )}
           >
-            <Text>Failed to load groups.</Text>
+            <span>Failed to load groups.</span>
           </div>
         )}
         {!list && !error && <SectionSpinner />}
@@ -81,7 +80,7 @@ const GroupListPage = () => {
             )}
           >
             <div className={cx('flex', 'flex-col', 'gap-1.5')}>
-              <Text>There are no groups.</Text>
+              <span>There are no groups.</span>
               <CreateGroupButton />
             </div>
           </div>

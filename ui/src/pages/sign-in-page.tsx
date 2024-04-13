@@ -6,7 +6,6 @@ import {
   FormErrorMessage,
   Input,
   Link as ChakraLink,
-  Text,
   Heading,
 } from '@chakra-ui/react'
 import {
@@ -172,13 +171,13 @@ const SignInPage = () => {
             className={cx('flex', 'flex-col', 'items-center', 'max-w-[60ch]')}
           >
             <div className={cx('flex', 'flex-row', 'items-center', 'gap-0.5')}>
-              <Text>{"Don't have an account yet?"}</Text>
+              <span>{"Don't have an account yet?"}</span>
               <ChakraLink as={Link} to="/sign-up">
                 Sign Up
               </ChakraLink>
             </div>
             <div className={cx('flex', 'flex-row', 'items-center', 'gap-0.5')}>
-              <Text>Cannot sign in?</Text>
+              <span>Cannot sign in?</span>
               <ChakraLink as={Link} to="/forgot-password">
                 Reset Password
               </ChakraLink>

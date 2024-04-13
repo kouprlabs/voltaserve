@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { Box, Button, Text } from '@chakra-ui/react'
-import { IconChevronRight, SectionSpinner } from '@koupr/ui'
+import { Button } from '@chakra-ui/react'
 import cx from 'classnames'
 import { FcFolder } from 'react-icons/fc'
 import FileAPI, { File, FileType } from '@/client/api/file'
 import WorkspaceAPI from '@/client/api/workspace'
 import Path from '@/components/common/path'
+import { IconChevronRight, SectionSpinner, Text } from '@/lib'
 
 export type FileBrowseProps = {
   onChange?: (id: string) => void
@@ -98,7 +98,7 @@ const FileBrowse = ({ onChange }: FileBrowseProps) => {
       >
         {folders.length > 0 ? (
           folders.map((f) => (
-            <Box
+            <div
               key={f.id}
               className={cx(
                 'flex',
@@ -119,13 +119,13 @@ const FileBrowse = ({ onChange }: FileBrowseProps) => {
               <Text noOfLines={1}>{f.name}</Text>
               <div className={cx('grow')} />
               <IconChevronRight />
-            </Box>
+            </div>
           ))
         ) : (
           <div
             className={cx('flex', 'items-center', 'justify-center', 'h-full')}
           >
-            <Text>There are no folders.</Text>
+            <span>There are no folders.</span>
           </div>
         )}
       </div>

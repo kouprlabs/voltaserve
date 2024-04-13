@@ -10,18 +10,11 @@ import {
   Table,
   Tbody,
   Td,
-  Text,
   Th,
   Thead,
   Tr,
   useToast,
 } from '@chakra-ui/react'
-import {
-  IconDotsVertical,
-  SectionSpinner,
-  PagePagination,
-  usePagePagination,
-} from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import InvitationAPI, { SortBy, SortOrder } from '@/client/api/invitation'
@@ -30,6 +23,12 @@ import { swrConfig } from '@/client/options'
 import prettyDate from '@/helpers/pretty-date'
 import userToString from '@/helpers/user-to-string'
 import { incomingInvitationPaginationStorage } from '@/infra/pagination'
+import {
+  IconDotsVertical,
+  SectionSpinner,
+  PagePagination,
+  usePagePagination,
+} from '@/lib'
 
 const AccountInvitationsPage = () => {
   const navigate = useNavigate()
@@ -92,7 +91,7 @@ const AccountInvitationsPage = () => {
         <div
           className={cx('flex', 'items-center', 'justify-center', 'h=[300px]')}
         >
-          <Text>There are no invitations.</Text>
+          <span>There are no invitations.</span>
         </div>
       )}
       {list.data.length > 0 && (

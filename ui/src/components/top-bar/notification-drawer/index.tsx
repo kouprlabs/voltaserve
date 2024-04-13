@@ -7,15 +7,14 @@ import {
   DrawerContent,
   DrawerHeader,
   DrawerOverlay,
-  Text,
   IconButton,
   useDisclosure,
   Circle,
 } from '@chakra-ui/react'
-import { IconNotification } from '@koupr/ui'
 import cx from 'classnames'
 import NotificationAPI from '@/client/api/notification'
 import { swrConfig } from '@/client/options'
+import { IconNotification } from '@/lib'
 import NotificationDrawerItem from './notification-drawer-item'
 
 const TopBarNotificationDrawer = () => {
@@ -60,7 +59,7 @@ const TopBarNotificationDrawer = () => {
                 ))}
               </div>
             ) : (
-              <Text>There are no notifications.</Text>
+              <span>There are no notifications.</span>
             )}
           </DrawerBody>
         </DrawerContent>

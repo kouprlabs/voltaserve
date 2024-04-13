@@ -14,11 +14,9 @@ import {
   Th,
   Thead,
   Tr,
-  Text,
   Avatar,
   Badge,
 } from '@chakra-ui/react'
-import { SectionSpinner, PagePagination, usePagePagination } from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import WorkspaceAPI, { SortOrder } from '@/client/api/workspace'
@@ -27,6 +25,7 @@ import { CreateWorkspaceButton } from '@/components/top-bar/top-bar-buttons'
 import prettyDate from '@/helpers/pretty-date'
 import { decodeQuery } from '@/helpers/query'
 import { workspacePaginationStorage } from '@/infra/pagination'
+import { SectionSpinner, PagePagination, usePagePagination } from '@/lib'
 
 const WorkspaceListPage = () => {
   const navigate = useNavigate()
@@ -67,7 +66,7 @@ const WorkspaceListPage = () => {
               'h-[300px]',
             )}
           >
-            <Text>Failed to load workspaces.</Text>
+            <span>Failed to load workspaces.</span>
           </div>
         )}
         {!list && !error && <SectionSpinner />}
@@ -81,7 +80,7 @@ const WorkspaceListPage = () => {
             )}
           >
             <div className={cx('flex', 'flex-col', 'gap-1.5', 'items-center')}>
-              <Text>There are no workspaces.</Text>
+              <span>There are no workspaces.</span>
               <CreateWorkspaceButton />
             </div>
           </div>
@@ -119,7 +118,7 @@ const WorkspaceListPage = () => {
                         to={`/workspace/${w.id}/file/${w.rootId}`}
                         className={cx('no-underline')}
                       >
-                        <Text>{w.name}</Text>
+                        <span>{w.name}</span>
                       </ChakraLink>
                     </div>
                   </Td>

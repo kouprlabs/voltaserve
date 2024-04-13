@@ -1,4 +1,4 @@
-import { variables } from '@koupr/ui'
+import { variables } from './src/lib/variables'
 
 // eslint-disable-next-line
 module.exports = {

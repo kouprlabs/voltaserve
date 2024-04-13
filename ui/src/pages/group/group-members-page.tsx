@@ -17,18 +17,10 @@ import {
   Th,
   Thead,
   Tr,
-  Text,
   Button,
   Avatar,
   Portal,
 } from '@chakra-ui/react'
-import {
-  IconExit,
-  IconUserPlus,
-  SectionSpinner,
-  PagePagination,
-  usePagePagination,
-} from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import { HiDotsVertical } from 'react-icons/hi'
@@ -41,6 +33,13 @@ import GroupAddMember from '@/components/group/group-add-member'
 import GroupRemoveMember from '@/components/group/group-remove-member'
 import { decodeQuery } from '@/helpers/query'
 import { groupMemberPaginationStorage } from '@/infra/pagination'
+import {
+  IconExit,
+  IconUserPlus,
+  SectionSpinner,
+  PagePagination,
+  usePagePagination,
+} from '@/lib'
 
 const GroupMembersPage = () => {
   const navigate = useNavigate()
@@ -113,7 +112,7 @@ const GroupMembersPage = () => {
                       )}
                     >
                       <Avatar name={u.fullName} src={u.picture} />
-                      <Text>{u.fullName}</Text>
+                      <span>{u.fullName}</span>
                     </div>
                   </Td>
                   <Td>{u.email}</Td>
@@ -184,7 +183,7 @@ const GroupMembersPage = () => {
             )}
           >
             <div className={cx('flex', 'flex-col', 'gap-1.5', 'items-center')}>
-              <Text>This group has no members.</Text>
+              <span>This group has no members.</span>
               {geEditorPermission(group.permission) && (
                 <Button
                   leftIcon={<IconUserPlus />}

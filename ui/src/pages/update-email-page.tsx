@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { Link as ChakraLink, Heading, Text } from '@chakra-ui/react'
-import { Spinner } from '@koupr/ui'
+import { Link as ChakraLink, Heading } from '@chakra-ui/react'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import UserAPI from '@/client/idp/user'
 import Logo from '@/components/common/logo'
 import LayoutFull from '@/components/layout/layout-full'
+import { Spinner } from '@/lib'
 
 const UpdateEmailPage = () => {
   const params = useParams()
@@ -55,7 +55,7 @@ const UpdateEmailPage = () => {
           <div className={cx('flex', 'flex-col', 'items-center', 'gap-1.5')}>
             <Heading className={cx('text-heading')}>Email confirmed</Heading>
             <div className={cx('flex', 'flex-row', 'items-center', 'gap-0.5')}>
-              <Text>Click the link below to go back to your account.</Text>
+              <span>Click the link below to go back to your account.</span>
               <ChakraLink as={Link} to="/account/settings">
                 Back to account
               </ChakraLink>

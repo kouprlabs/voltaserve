@@ -6,7 +6,6 @@ import {
   FormErrorMessage,
   Input,
   Link as ChakraLink,
-  Text,
   Heading,
 } from '@chakra-ui/react'
 import {
@@ -84,7 +83,9 @@ const ResetPasswordPage = () => {
           <Heading className={cx('text-heading')}>Reset Password</Heading>
           {isCompleted ? (
             <div className={cx('flex', 'flex-row', 'items-center', 'gap-0.5')}>
-              <Text align="center">Password successfully changed.</Text>
+              <span className={cx('text-center')}>
+                Password successfully changed.
+              </span>
               <ChakraLink as={Link} to="/sign-in">
                 Sign In
               </ChakraLink>
@@ -171,7 +172,7 @@ const ResetPasswordPage = () => {
               <div
                 className={cx('flex', 'flex-row', 'items-center', 'gap-0.5')}
               >
-                <Text>Password already reset?</Text>
+                <span>Password already reset?</span>
                 <ChakraLink as={Link} to="/sign-in">
                   Sign In
                 </ChakraLink>

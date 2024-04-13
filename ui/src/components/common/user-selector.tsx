@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import {
   Button,
-  Text,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -17,11 +16,11 @@ import {
   Avatar,
   Radio,
 } from '@chakra-ui/react'
-import { SectionSpinner, Pagination, SearchInput } from '@koupr/ui'
 import cx from 'classnames'
 import UserAPI, { SortOrder, User } from '@/client/api/user'
 import { swrConfig } from '@/client/options'
 import userToString from '@/helpers/user-to-string'
+import { SectionSpinner, Pagination, SearchInput } from '@/lib'
 
 export type UserSelectorProps = {
   value?: User
@@ -118,7 +117,7 @@ const UserSelector = ({
                     'h-[300px]',
                   )}
                 >
-                  <Text>Failed to load users.</Text>
+                  <span>Failed to load users.</span>
                 </div>
               )}
               {!list && !error && <SectionSpinner />}
@@ -139,7 +138,7 @@ const UserSelector = ({
                       'gap-1.5',
                     )}
                   >
-                    <Text>There are no users.</Text>
+                    <span>There are no users.</span>
                   </div>
                 </div>
               )}
@@ -178,9 +177,9 @@ const UserSelector = ({
                               size="sm"
                               className={cx('w-[40px]', 'h-[40px]')}
                             />
-                            <Text className={cx('text-base')}>
+                            <span className={cx('text-base')}>
                               {userToString(u)}
-                            </Text>
+                            </span>
                           </div>
                         </Td>
                       </Tr>

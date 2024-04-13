@@ -1,7 +1,6 @@
 import { useCallback, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
-  Text,
   Button,
   Table,
   Thead,
@@ -13,8 +12,6 @@ import {
   Badge,
   Avatar,
 } from '@chakra-ui/react'
-import { Spinner } from '@koupr/ui'
-import { IconCheck, IconTrash, IconUserPlus } from '@koupr/ui'
 import { KeyedMutator, useSWRConfig } from 'swr'
 import { Select } from 'chakra-react-select'
 import cx from 'classnames'
@@ -25,6 +22,8 @@ import WorkspaceAPI from '@/client/api/workspace'
 import IdPUserAPI from '@/client/idp/user'
 import UserSelector from '@/components/common/user-selector'
 import useFileListSearchParams from '@/hooks/use-file-list-params'
+import { Spinner, Text } from '@/lib'
+import { IconCheck, IconTrash, IconUserPlus } from '@/lib'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { sharingModalDidClose } from '@/store/ui/files'
 import { inviteModalDidOpen } from '@/store/ui/organizations'
@@ -131,7 +130,7 @@ const SharingUsers = ({
       {users && users.length === 0 ? (
         <div className={cx('flex', 'items-center', 'justify-center')}>
           <div className={cx('flex', 'flex-col', 'items-center', 'gap-1.5')}>
-            <Text>This organization has no members.</Text>
+            <span>This organization has no members.</span>
             {workspace &&
             geEditorPermission(workspace.organization.permission) ? (
               <Button
@@ -187,7 +186,7 @@ const SharingUsers = ({
           ) : null}
           {permissions && permissions.length === 0 ? (
             <div className={cx('flex', 'items-center', 'justify-center')}>
-              <Text>Not shared with any users.</Text>
+              <span>Not shared with any users.</span>
             </div>
           ) : null}
           {permissions && permissions.length > 0 ? (
@@ -221,9 +220,9 @@ const SharingUsers = ({
                           />
                           <div className={cx('flex', 'flex-col', 'gap-0.5')}>
                             <Text noOfLines={1}>{p.user.fullName}</Text>
-                            <Text className={cx('text-gray-500')}>
+                            <span className={cx('text-gray-500')}>
                               {p.user.email}
-                            </Text>
+                            </span>
                           </div>
                         </div>
                       </Td>

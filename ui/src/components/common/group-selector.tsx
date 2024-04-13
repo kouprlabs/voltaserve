@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import {
   Button,
-  Text,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -17,10 +16,10 @@ import {
   Avatar,
   Radio,
 } from '@chakra-ui/react'
-import { SectionSpinner, Pagination, SearchInput } from '@koupr/ui'
 import cx from 'classnames'
 import GroupAPI, { Group, SortOrder } from '@/client/api/group'
 import { swrConfig } from '@/client/options'
+import { SectionSpinner, Pagination, SearchInput } from '@/lib'
 
 export type GroupSelectorProps = {
   value?: Group
@@ -105,7 +104,7 @@ const GroupSelector = ({
                     'h-[300px]',
                   )}
                 >
-                  <Text>Failed to load groups.</Text>
+                  <span>Failed to load groups.</span>
                 </div>
               )}
               {!list && !error && <SectionSpinner />}
@@ -126,7 +125,7 @@ const GroupSelector = ({
                       'gap-1.5',
                     )}
                   >
-                    <Text>There are no organizations.</Text>
+                    <span>There are no organizations.</span>
                   </div>
                 </div>
               )}
@@ -165,7 +164,7 @@ const GroupSelector = ({
                               size="sm"
                               className={cx('w-[40px]', 'h-[40px]')}
                             />
-                            <Text className={cx('text-base')}>{g.name}</Text>
+                            <span className={cx('text-base')}>{g.name}</span>
                           </div>
                         </Td>
                       </Tr>

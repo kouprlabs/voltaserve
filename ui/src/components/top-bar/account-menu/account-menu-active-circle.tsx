@@ -1,6 +1,6 @@
 import { ReactNode } from 'react'
 import { Circle } from '@chakra-ui/react'
-import { variables } from '@koupr/ui'
+import { variables } from '@/lib'
 import { useAppSelector } from '@/store/hook'
 import { NavType } from '@/store/ui/nav'
 

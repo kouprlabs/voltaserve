@@ -8,7 +8,6 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
-  Text,
 } from '@chakra-ui/react'
 import { cx } from '@emotion/css'
 import GroupAPI, { Group } from '@/client/api/group'
@@ -56,17 +55,11 @@ const GroupRemoveMember = ({
         <ModalHeader>Remove Member</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-          <Text>
+          <div>
             Are you sure you would like to remove member{' '}
-            <Text as="span" className={cx('font-bold')}>
-              {userToString(user)}
-            </Text>{' '}
-            from group{' '}
-            <Text as="span" className={cx('font-bold')}>
-              {group.name}
-            </Text>
-            ?
-          </Text>
+            <span className={cx('font-bold')}>{userToString(user)}</span> from
+            group <span className={cx('font-bold')}>{group.name}</span>?
+          </div>
         </ModalBody>
         <ModalFooter>
           <div className={cx('flex', 'flex-row', 'items-center', 'gap-1')}>

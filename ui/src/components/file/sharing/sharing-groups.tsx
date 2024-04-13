@@ -1,7 +1,6 @@
 import { useCallback, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import {
-  Text,
   Button,
   Table,
   Thead,
@@ -13,8 +12,6 @@ import {
   Badge,
   Avatar,
 } from '@chakra-ui/react'
-import { Spinner } from '@koupr/ui'
-import { IconAdd, IconCheck, IconTrash } from '@koupr/ui'
 import { KeyedMutator, useSWRConfig } from 'swr'
 import { Select } from 'chakra-react-select'
 import cx from 'classnames'
@@ -24,6 +21,8 @@ import { geEditorPermission } from '@/client/api/permission'
 import WorkspaceAPI from '@/client/api/workspace'
 import GroupSelector from '@/components/common/group-selector'
 import useFileListSearchParams from '@/hooks/use-file-list-params'
+import { Spinner, Text } from '@/lib'
+import { IconAdd, IconCheck, IconTrash } from '@/lib'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { sharingModalDidClose } from '@/store/ui/files'
 import reactSelectStyles from '@/styles/react-select'
@@ -151,7 +150,7 @@ const SharingGroups = ({
       {groups && groups.length === 0 ? (
         <div className={cx('flex', 'items-center', 'justify-center')}>
           <div className={cx('flex', 'flex-col', 'items-center', 'gap-1.5')}>
-            <Text>This organization has no groups.</Text>
+            <span>This organization has no groups.</span>
             {workspace &&
             geEditorPermission(workspace.organization.permission) ? (
               <Button
@@ -175,7 +174,7 @@ const SharingGroups = ({
           ) : null}
           {permissions && permissions.length === 0 ? (
             <div className={cx('flex', 'items-center', 'justify-center')}>
-              <Text>Not shared with any groups.</Text>
+              <span>Not shared with any groups.</span>
             </div>
           ) : null}
           {permissions && permissions.length > 0 ? (

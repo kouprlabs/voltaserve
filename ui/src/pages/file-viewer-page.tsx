@@ -1,7 +1,6 @@
 import { useCallback } from 'react'
 import { useParams } from 'react-router-dom'
-import { Button, Text } from '@chakra-ui/react'
-import { IconDownload, Drawer, Spinner } from '@koupr/ui'
+import { Button } from '@chakra-ui/react'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import FileAPI, { File } from '@/client/api/file'
@@ -12,6 +11,7 @@ import ViewerPDF from '@/components/viewer/viewer-pdf'
 import ViewerVideo from '@/components/viewer/viewer-video'
 import downloadFile from '@/helpers/download-file'
 import { isAudio, isImage, isPDF, isVideo } from '@/helpers/file-extension'
+import { IconDownload, Drawer, Spinner } from '@/lib'
 
 const FileViewerPage = () => {
   const { id } = useParams()
@@ -32,7 +32,7 @@ const FileViewerPage = () => {
     } else {
       return (
         <div className={cx('flex', 'flex-col', 'gap-1.5')}>
-          <Text className={cx('text-[16px]')}>Cannot preview this file.</Text>
+          <span className={cx('text-[16px]')}>Cannot preview this file.</span>
           <Button
             leftIcon={<IconDownload />}
             colorScheme="blue"
@@ -68,9 +68,9 @@ const FileViewerPage = () => {
                   'h-[80px]',
                 )}
               >
-                <Text className={cx('font-medium', 'text-[16px]')}>
+                <span className={cx('font-medium', 'text-[16px]')}>
                   {file.name}
-                </Text>
+                </span>
               </div>
               <div
                 className={cx(

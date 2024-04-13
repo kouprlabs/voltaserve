@@ -4,11 +4,10 @@ import {
   BreadcrumbItem,
   BreadcrumbLink,
   Skeleton,
-  Text,
 } from '@chakra-ui/react'
 import cx from 'classnames'
 import FileAPI from '@/client/api/file'
-import TruncatedText from './truncated-text'
+import { Text } from '@/lib'
 
 export type PathProps = {
   rootId: string
@@ -51,10 +50,7 @@ const Path = ({ rootId, fileId, maxCharacters, onClick }: PathProps) => {
                 onClick={() => onClick?.(file.id)}
               >
                 {maxCharacters ? (
-                  <TruncatedText
-                    text={file.name}
-                    maxCharacters={maxCharacters}
-                  />
+                  <Text maxCharacters={maxCharacters}>{file.name}</Text>
                 ) : (
                   file.name
                 )}
@@ -74,9 +70,9 @@ const Path = ({ rootId, fileId, maxCharacters, onClick }: PathProps) => {
           )}
         >
           <Skeleton className={cx('w-[100px]', 'h-[20px]', 'rounded-[20px]')} />
-          <Text>/</Text>
+          <span>/</span>
           <Skeleton className={cx('w-[100px]', 'h-[20px]', 'rounded-[20px]')} />
-          <Text>/</Text>
+          <span>/</span>
           <Skeleton className={cx('w-[100px]', 'h-[20px]', 'rounded-[20px]')} />
         </div>
       ) : null}

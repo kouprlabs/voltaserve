@@ -6,16 +6,15 @@ import {
   AccordionPanel,
   CircularProgress,
   IconButton,
-  Text,
   useToken,
 } from '@chakra-ui/react'
+import cx from 'classnames'
 import {
   IconClose,
   IconTime,
   IconCheckCircleFill,
   IconAlertCircleFill,
-} from '@koupr/ui'
-import cx from 'classnames'
+} from '@/lib'
 import {
   Upload,
   UploadDecorator,
@@ -70,7 +69,7 @@ const UploadItem = ({ upload: uploadProp }: UploadItemProps) => {
             <IconAlertCircleFill fontSize="22px" />
           </div>
         )}
-        <Text
+        <span
           className={cx(
             'grow',
             'text-ellipsis',
@@ -79,7 +78,7 @@ const UploadItem = ({ upload: uploadProp }: UploadItemProps) => {
           )}
         >
           {upload.file.name}
-        </Text>
+        </span>
         <IconButton
           icon={<IconClose />}
           size="xs"
@@ -97,9 +96,9 @@ const UploadItem = ({ upload: uploadProp }: UploadItemProps) => {
           <AccordionItem border="none">
             <AccordionButton className={cx('p-0.5', 'hover:bg-red-50')}>
               <div className={cx('flex', 'flex-row', 'w-full')}>
-                <Text className={cx('text-red-500', 'text-left', 'grow')}>
+                <span className={cx('text-red-500', 'text-left', 'grow')}>
                   Upload failed. Click to expand.
-                </Text>
+                </span>
                 <AccordionIcon className={cx('text-red-500')} />
               </div>
             </AccordionButton>

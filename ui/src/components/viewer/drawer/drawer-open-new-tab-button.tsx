@@ -1,8 +1,8 @@
 import { useMemo } from 'react'
 import { Button, IconButton } from '@chakra-ui/react'
-import { IconExternalLink } from '@koupr/ui'
 import cx from 'classnames'
 import { File } from '@/client/api/file'
+import { IconExternalLink } from '@/lib'
 
 export type DrawerOpenNewTabButtonProps = {
   file: File

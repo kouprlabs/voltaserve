@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { Divider, Text } from '@chakra-ui/react'
+import { Divider } from '@chakra-ui/react'
 import cx from 'classnames'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { uploadsDrawerClosed } from '@/store/ui/uploads-drawer'
@@ -26,7 +26,7 @@ const UploadList = () => {
   }, [items, dispatch])
 
   if (items.length === 0) {
-    return <Text>There are no uploads.</Text>
+    return <span>There are no uploads.</span>
   }
 
   return (

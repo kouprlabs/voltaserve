@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import {
   Button,
-  Text,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -17,13 +16,13 @@ import {
   Avatar,
   Radio,
 } from '@chakra-ui/react'
-import { SectionSpinner, Pagination, SearchInput } from '@koupr/ui'
 import cx from 'classnames'
 import OrganizationAPI, {
   Organization,
   SortOrder,
 } from '@/client/api/organization'
 import { swrConfig } from '@/client/options'
+import { SectionSpinner, Pagination, SearchInput } from '@/lib'
 
 export type OrganizationSelectorProps = {
   onConfirm?: (organization: Organization) => void
@@ -104,7 +103,7 @@ const OrganizationSelector = ({ onConfirm }: OrganizationSelectorProps) => {
                     'h-[300px]',
                   )}
                 >
-                  <Text>Failed to load organizations.</Text>
+                  <span>Failed to load organizations.</span>
                 </div>
               )}
               {!list && !error && <SectionSpinner />}
@@ -125,7 +124,7 @@ const OrganizationSelector = ({ onConfirm }: OrganizationSelectorProps) => {
                       'gap-1.5',
                     )}
                   >
-                    <Text>There are no organizations.</Text>
+                    <span>There are no organizations.</span>
                   </div>
                 </div>
               )}
@@ -164,7 +163,7 @@ const OrganizationSelector = ({ onConfirm }: OrganizationSelectorProps) => {
                               size="sm"
                               className={cx('w-[40px]', 'h-[40px]')}
                             />
-                            <Text className={cx('text-base')}>{o.name}</Text>
+                            <span className={cx('text-base')}>{o.name}</span>
                           </div>
                         </Td>
                       </Tr>

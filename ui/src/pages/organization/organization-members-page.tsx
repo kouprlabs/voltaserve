@@ -17,19 +17,10 @@ import {
   Th,
   Thead,
   Tr,
-  Text,
   Button,
   Avatar,
   Portal,
 } from '@chakra-ui/react'
-import {
-  IconDotsVertical,
-  IconExit,
-  IconUserPlus,
-  SectionSpinner,
-  PagePagination,
-  usePagePagination,
-} from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import OrganizationAPI from '@/client/api/organization'
@@ -40,6 +31,14 @@ import OrganizationInviteMembers from '@/components/organization/organization-in
 import OrganizationRemoveMember from '@/components/organization/organization-remove-member'
 import { decodeQuery } from '@/helpers/query'
 import { organizationMemberPaginationStorage } from '@/infra/pagination'
+import {
+  IconDotsVertical,
+  IconExit,
+  IconUserPlus,
+  SectionSpinner,
+  PagePagination,
+  usePagePagination,
+} from '@/lib'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import {
   inviteModalDidClose,
@@ -120,7 +119,7 @@ const OrganizationMembersPage = () => {
                       )}
                     >
                       <Avatar name={u.fullName} src={u.picture} />
-                      <Text>{u.fullName}</Text>
+                      <span>{u.fullName}</span>
                     </div>
                   </Td>
                   <Td>{u.email}</Td>
@@ -187,7 +186,7 @@ const OrganizationMembersPage = () => {
             )}
           >
             <div className={cx('flex', 'flex-col', 'gap-1.5', 'items-center')}>
-              <Text>This organization has no members.</Text>
+              <span>This organization has no members.</span>
               {geEditorPermission(org.permission) && (
                 <Button
                   leftIcon={<IconUserPlus />}

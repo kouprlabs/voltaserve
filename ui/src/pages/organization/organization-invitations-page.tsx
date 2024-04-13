@@ -11,21 +11,11 @@ import {
   Table,
   Tbody,
   Td,
-  Text,
   Th,
   Thead,
   Tr,
   useToast,
 } from '@chakra-ui/react'
-import {
-  IconDotsVertical,
-  IconSend,
-  IconTrash,
-  IconUserPlus,
-  SectionSpinner,
-  PagePagination,
-  usePagePagination,
-} from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import InvitationAPI, { SortBy, SortOrder } from '@/client/api/invitation'
@@ -36,6 +26,15 @@ import OrganizationInviteMembers from '@/components/organization/organization-in
 import OrganizationStatus from '@/components/organization/organization-status'
 import prettyDate from '@/helpers/pretty-date'
 import { outgoingInvitationPaginationStorage } from '@/infra/pagination'
+import {
+  IconDotsVertical,
+  IconSend,
+  IconTrash,
+  IconUserPlus,
+  SectionSpinner,
+  PagePagination,
+  usePagePagination,
+} from '@/lib'
 
 const OrganizationInvitationsPage = () => {
   const navigate = useNavigate()
@@ -112,7 +111,7 @@ const OrganizationInvitationsPage = () => {
             )}
           >
             <div className={cx('flex', 'flex-col', 'gap-1.5', 'items-center')}>
-              <Text>This organization has no invitations.</Text>
+              <span>This organization has no invitations.</span>
               {geEditorPermission(org.permission) && (
                 <Button
                   leftIcon={<IconUserPlus />}

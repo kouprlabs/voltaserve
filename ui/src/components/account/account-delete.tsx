@@ -12,7 +12,6 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
-  Text,
 } from '@chakra-ui/react'
 import {
   Field,
@@ -83,13 +82,13 @@ const AccountDelete = ({ open, onClose }: AccountDeleteProps) => {
             <Form>
               <ModalBody>
                 <div className={cx('flex', 'flex-col', 'items-start', 'gap-1')}>
-                  <Text>
+                  <span>
                     Are you sure you would like to delete your account
                     permanently?
-                  </Text>
-                  <Text className={cx('font-semibold')}>
+                  </span>
+                  <span className={cx('font-semibold')}>
                     Type your password to confirm:
-                  </Text>
+                  </span>
                   <Field name="password">
                     {({ field }: FieldAttributes<FieldProps>) => (
                       <FormControl

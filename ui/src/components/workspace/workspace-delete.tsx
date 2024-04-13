@@ -12,7 +12,6 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
-  Text,
 } from '@chakra-ui/react'
 import { useSWRConfig } from 'swr'
 import {
@@ -90,12 +89,12 @@ const WorkspaceDelete = ({
             <Form>
               <ModalBody>
                 <div className={cx('flex', 'flex-col', 'gap-1.5')}>
-                  <Text>
+                  <span>
                     Are you sure you would like to delete this workspace?
-                  </Text>
-                  <Text>
+                  </span>
+                  <span>
                     Please type <b>{workspace.name}</b> to confirm.
-                  </Text>
+                  </span>
                   <Field name="name">
                     {({ field }: FieldAttributes<FieldProps>) => (
                       <FormControl

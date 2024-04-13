@@ -12,7 +12,6 @@ import {
   ModalHeader,
   ModalOverlay,
 } from '@chakra-ui/react'
-import { SectionSpinner } from '@koupr/ui'
 import { useSWRConfig } from 'swr'
 import {
   Field,
@@ -28,6 +27,7 @@ import StorageAPI from '@/client/api/storage'
 import WorkspaceAPI, { Workspace } from '@/client/api/workspace'
 import { swrConfig } from '@/client/options'
 import StorageInput from '@/components/common/storage-input'
+import { SectionSpinner } from '@/lib'
 
 export type WorkspaceEditStorageCapacityProps = {
   open: boolean

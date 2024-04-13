@@ -5,9 +5,7 @@ import {
   IconButton,
   IconButtonProps,
   Progress,
-  Text,
 } from '@chakra-ui/react'
-import { IconEdit, IconTrash, SectionSpinner } from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import { geEditorPermission } from '@/client/api/permission'
@@ -18,6 +16,7 @@ import WorkspaceDelete from '@/components/workspace/workspace-delete'
 import WorkspaceEditName from '@/components/workspace/workspace-edit-name'
 import WorkspaceEditStorageCapacity from '@/components/workspace/workspace-edit-storage-capacity'
 import prettyBytes from '@/helpers/pretty-bytes'
+import { IconEdit, IconTrash, SectionSpinner } from '@/lib'
 
 const EditButton = (props: IconButtonProps) => (
   <IconButton icon={<IconEdit />} {...props} />
@@ -65,28 +64,28 @@ const WorkspaceSettingsPage = () => {
       </Helmet>
       <div className={cx('flex', 'flex-col', 'gap-0')}>
         <div className={sectionClassName}>
-          <Text className={cx('font-bold')}>Storage</Text>
-          {storageUsageError && <Text>Failed to load storage usage.</Text>}
+          <span className={cx('font-bold')}>Storage</span>
+          {storageUsageError && <span>Failed to load storage usage.</span>}
           {storageUsage && !storageUsageError && (
             <>
-              <Text>
+              <span>
                 {prettyBytes(storageUsage.bytes)} of{' '}
                 {prettyBytes(storageUsage.maxBytes)} used
-              </Text>
+              </span>
               <Progress value={storageUsage.percentage} hasStripe />
             </>
           )}
           {!storageUsage && !storageUsageError && (
             <>
-              <Text>Calculating…</Text>
+              <span>Calculating…</span>
               <Progress value={0} hasStripe />
             </>
           )}
           <Divider />
           <div className={rowClassName}>
-            <Text>Storage capacity</Text>
+            <span>Storage capacity</span>
             <Spacer />
-            <Text>{prettyBytes(workspace.storageCapacity)}</Text>
+            <span>{prettyBytes(workspace.storageCapacity)}</span>
             <EditButton
               aria-label=""
               isDisabled={!hasEditPermission}
@@ -96,11 +95,11 @@ const WorkspaceSettingsPage = () => {
             />
           </div>
           <Divider className={cx('mb-1.5')} />
-          <Text className={cx('font-bold')}>Basics</Text>
+          <span className={cx('font-bold')}>Basics</span>
           <div className={rowClassName}>
-            <Text>Name</Text>
+            <span>Name</span>
             <Spacer />
-            <Text>{workspace.name}</Text>
+            <span>{workspace.name}</span>
             <EditButton
               aria-label=""
               isDisabled={!hasEditPermission}
@@ -111,9 +110,9 @@ const WorkspaceSettingsPage = () => {
           </div>
         </div>
         <div className={sectionClassName}>
-          <Text className={cx('font-bold')}>Advanced</Text>
+          <span className={cx('font-bold')}>Advanced</span>
           <div className={rowClassName}>
-            <Text>Delete permanently</Text>
+            <span>Delete permanently</span>
             <Spacer />
             <IconButton
               icon={<IconTrash />}

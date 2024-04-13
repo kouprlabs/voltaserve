@@ -6,7 +6,6 @@ import {
   FormErrorMessage,
   Input,
   Link as ChakraLink,
-  Text,
   Heading,
 } from '@chakra-ui/react'
 import {
@@ -86,10 +85,10 @@ const SignUpPage = () => {
               <Heading className={cx('text-heading')}>
                 Thanks! We just sent you a confirmation email
               </Heading>
-              <Text align="center">
+              <span className={cx('text-center')}>
                 Just open your inbox, find the email, and click on the
                 confirmation link.
-              </Text>
+              </span>
             </div>
           </div>
         )}
@@ -219,7 +218,7 @@ const SignUpPage = () => {
               )}
             </Formik>
             <div className={cx('flex', 'flex-row', 'items-center', 'gap-0.5')}>
-              <Text>Already a member?</Text>
+              <span>Already a member?</span>
               <ChakraLink as={Link} to="/sign-in">
                 Sign In
               </ChakraLink>

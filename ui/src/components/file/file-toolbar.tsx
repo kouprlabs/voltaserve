@@ -16,6 +16,15 @@ import {
   SliderFilledTrack,
   SliderThumb,
 } from '@chakra-ui/react'
+import { useSWRConfig } from 'swr'
+import cx from 'classnames'
+import { FiChevronDown } from 'react-icons/fi'
+import { LuGrid, LuList, LuX } from 'react-icons/lu'
+import FileAPI, { List, SortBy, SortOrder } from '@/client/api/file'
+import { ltEditorPermission, ltOwnerPermission } from '@/client/api/permission'
+import downloadFile from '@/helpers/download-file'
+import mapFileList from '@/helpers/map-file-list'
+import useFileListSearchParams from '@/hooks/use-file-list-params'
 import {
   IconAdd,
   IconCheckCircle,
@@ -33,16 +42,7 @@ import {
   IconSortUp,
   IconSortDown,
   IconCheck,
-} from '@koupr/ui'
-import { useSWRConfig } from 'swr'
-import cx from 'classnames'
-import { FiChevronDown } from 'react-icons/fi'
-import { LuGrid, LuList, LuX } from 'react-icons/lu'
-import FileAPI, { List, SortBy, SortOrder } from '@/client/api/file'
-import { ltEditorPermission, ltOwnerPermission } from '@/client/api/permission'
-import downloadFile from '@/helpers/download-file'
-import mapFileList from '@/helpers/map-file-list'
-import useFileListSearchParams from '@/hooks/use-file-list-params'
+} from '@/lib'
 import { uploadAdded, UploadDecorator } from '@/store/entities/uploads'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import {

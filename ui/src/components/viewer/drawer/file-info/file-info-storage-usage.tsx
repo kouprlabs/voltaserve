@@ -1,4 +1,4 @@
-import { Progress, Stat, StatLabel, StatNumber, Text } from '@chakra-ui/react'
+import { Progress, Stat, StatLabel, StatNumber } from '@chakra-ui/react'
 import cx from 'classnames'
 import { File } from '@/client/api/file'
 import StorageAPI from '@/client/api/storage'
@@ -15,18 +15,18 @@ const FileInfoStorageUsage = ({ file }: FileInfoStorageUsageProps) => {
       <StatLabel>Storage usage</StatLabel>
       <StatNumber className={cx('text-base')}>
         <div className={cx('flex', 'flex-col', 'gap-0.5')}>
-          {error && <Text className={cx('text-red-500')}>Failed to load.</Text>}
+          {error && <span className={cx('text-red-500')}>Failed to load.</span>}
           {data && !error && (
             <>
-              <Text>
+              <span>
                 {prettyBytes(data.bytes)} of {prettyBytes(data.maxBytes)} used
-              </Text>
+              </span>
               <Progress size="sm" value={data.percentage} hasStripe />
             </>
           )}
           {!data && !error && (
             <>
-              <Text>Calculating…</Text>
+              <span>Calculating…</span>
               <Progress size="sm" value={0} hasStripe />
             </>
           )}

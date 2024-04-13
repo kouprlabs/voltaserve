@@ -6,7 +6,6 @@ import {
   FormErrorMessage,
   Input,
   Link as ChakraLink,
-  Text,
   Heading,
 } from '@chakra-ui/react'
 import {
@@ -73,16 +72,16 @@ const ForgotPasswordPage = () => {
           </div>
           <Heading className={cx('text-heading')}>Forgot Password</Heading>
           {isCompleted ? (
-            <Text align="center">
+            <span className={cx('text-center')}>
               If your email belongs to an account, you will receive the recovery
               instructions in your inbox shortly.
-            </Text>
+            </span>
           ) : (
             <>
-              <Text align="center">
+              <span className={cx('text-center')}>
                 Please provide your account Email where we can send you the
                 password recovery instructions.
-              </Text>
+              </span>
               <Formik
                 initialValues={{
                   email: '',
@@ -134,7 +133,7 @@ const ForgotPasswordPage = () => {
               <div
                 className={cx('flex', 'flex-row', 'items-center', 'gap-0.5')}
               >
-                <Text>Password recovered?</Text>
+                <span>Password recovered?</span>
                 <ChakraLink as={Link} to="/sign-in">
                   Sign In
                 </ChakraLink>

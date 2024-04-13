@@ -8,7 +8,6 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
-  Text,
 } from '@chakra-ui/react'
 import cx from 'classnames'
 import OrganizationAPI, { Organization } from '@/client/api/organization'
@@ -56,17 +55,12 @@ const OrganizationRemoveMember = ({
         <ModalHeader>Remove Member</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-          <Text>
+          <div>
             Are you sure you would like to remove member{' '}
-            <Text as="span" className={cx('font-bold')}>
-              {userToString(user)}
-            </Text>{' '}
-            from organization{' '}
-            <Text as="span" className={cx('font-bold')}>
-              {organization.name}
-            </Text>
-            ?
-          </Text>
+            <span className={cx('font-bold')}>{userToString(user)}</span> from
+            organization{' '}
+            <span className={cx('font-bold')}>{organization.name}</span>?
+          </div>
         </ModalBody>
         <ModalFooter>
           <div className={cx('flex', 'flex-row', 'items-center', 'gap-1')}>

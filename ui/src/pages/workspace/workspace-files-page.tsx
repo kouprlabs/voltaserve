@@ -1,13 +1,6 @@
 import { useEffect } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useColorModeValue } from '@chakra-ui/react'
-import {
-  PagePagination,
-  Spinner,
-  usePageMonitor,
-  usePagePagination,
-  variables,
-} from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import FileAPI from '@/client/api/file'
@@ -24,6 +17,13 @@ import FileList from '@/components/file/list'
 import FileSharing from '@/components/file/sharing'
 import { decodeQuery } from '@/helpers/query'
 import { filePaginationSteps, filesPaginationStorage } from '@/infra/pagination'
+import {
+  PagePagination,
+  Spinner,
+  usePageMonitor,
+  usePagePagination,
+  variables,
+} from '@/lib'
 import { listUpdated } from '@/store/entities/files'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { selectionUpdated } from '@/store/ui/files'

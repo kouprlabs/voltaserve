@@ -1,7 +1,6 @@
 import { useMemo } from 'react'
 import { useParams } from 'react-router-dom'
 import {
-  Text,
   Modal,
   ModalOverlay,
   ModalContent,
@@ -86,7 +85,7 @@ const FileSharing = ({ list }: FileSharingProps) => {
                 <div
                   className={cx('flex', 'flex-row', 'items-center', 'gap-0.5')}
                 >
-                  <Text>People</Text>
+                  <span>People</span>
                   {singleFile &&
                   userPermissions &&
                   userPermissions.length > 0 ? (
@@ -100,7 +99,7 @@ const FileSharing = ({ list }: FileSharingProps) => {
                 <div
                   className={cx('flex', 'flex-row', 'items-center', 'gap-0.5')}
                 >
-                  <Text>Groups</Text>
+                  <span>Groups</span>
                   {singleFile &&
                   groupPermissions &&
                   groupPermissions.length > 0 ? (

@@ -10,7 +10,6 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
-  Text,
 } from '@chakra-ui/react'
 import { useSWRConfig } from 'swr'
 import cx from 'classnames'
@@ -58,12 +57,12 @@ const FileDelete = () => {
         <ModalCloseButton />
         <ModalBody>
           {selection.length > 1 ? (
-            <Text>
+            <span>
               Are you sure you would like to delete ({selection.length})
               item(s)?
-            </Text>
+            </span>
           ) : (
-            <Text>Are you sure you would like to delete this item?</Text>
+            <span>Are you sure you would like to delete this item?</span>
           )}
         </ModalBody>
         <ModalFooter>

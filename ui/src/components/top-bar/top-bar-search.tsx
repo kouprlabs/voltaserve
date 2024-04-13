@@ -15,9 +15,9 @@ import {
   InputLeftElement,
   InputRightElement,
 } from '@chakra-ui/react'
-import { IconClose, IconSearch } from '@koupr/ui'
 import cx from 'classnames'
 import { decodeQuery, encodeQuery } from '@/helpers/query'
+import { IconClose, IconSearch } from '@/lib'
 
 const TopBarSearch = () => {
   const navigation = useNavigate()

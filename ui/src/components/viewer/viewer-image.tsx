@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react'
-import { SectionSpinner } from '@koupr/ui'
 import cx from 'classnames'
 import { File } from '@/client/api/file'
 import { getAccessTokenOrRedirect } from '@/infra/token'
+import { SectionSpinner } from '@/lib'
 
 export type ViewerImageProps = {
   file: File
