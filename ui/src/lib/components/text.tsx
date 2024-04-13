@@ -11,6 +11,7 @@ export const Text: React.FC<TextProps> = ({
   children,
   noOfLines,
   maxCharacters,
+  className,
   ...props
 }: TextProps) => {
   const ref = useRef<HTMLDivElement>(null)
@@ -37,6 +38,7 @@ export const Text: React.FC<TextProps> = ({
           'overflow-hidden':
             noOfLines !== undefined || maxCharacters !== undefined,
         },
+        className,
       )}
     >
       {children}
