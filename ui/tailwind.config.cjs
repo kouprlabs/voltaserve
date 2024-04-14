@@ -2,7 +2,6 @@ import { variables } from './src/lib/variables'
 
 // eslint-disable-next-line
 module.exports = {
-  important: true,
   content: ['./src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {

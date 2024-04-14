@@ -2,15 +2,15 @@ import { useEffect, useMemo, useState } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import {
   Avatar,
+  SegmentedControl,
+  Badge,
+  Text,
   Button,
   Heading,
   IconButton,
-  Tab,
-  TabList,
-  Tabs,
-  Tag,
-} from '@chakra-ui/react'
+} from '@radix-ui/themes'
 import cx from 'classnames'
+import initials from 'initials'
 import NotificationAPI from '@/client/api/notification'
 import UserAPI from '@/client/idp/user'
 import { swrConfig } from '@/client/options'
@@ -27,16 +27,11 @@ const AccountLayout = () => {
     () => notfications?.filter((e) => e.type === 'new_invitation').length,
     [notfications],
   )
-  const [tabIndex, setTabIndex] = useState(0)
+  const [segment, setSegment] = useState<string>()
 
   useEffect(() => {
     const segments = location.pathname.split('/')
-    const segment = segments[segments.length - 1]
-    if (segment === 'settings') {
-      setTabIndex(0)
-    } else if (segment === 'invitation') {
-      setTabIndex(1)
-    }
+    setSegment(segments[segments.length - 1])
   }, [location])
 
   if (!user) {
@@ -51,30 +46,33 @@ const AccountLayout = () => {
         <div className={cx('flex', 'flex-col', 'gap-2', 'items-center')}>
           <div className={cx('relative', 'shrink-0')}>
             <Avatar
-              name={user.fullName}
+              fallback={initials(user.fullName)}
               src={user.picture}
-              size="2xl"
+              size="8"
+              radius="full"
               className={cx('w-[165px]', 'h-[165px]')}
             />
             <IconButton
-              icon={<IconEdit />}
-              variant="solid-gray"
-              right="5px"
-              bottom="10px"
-              position="absolute"
-              zIndex={1000}
+              className={cx(
+                'absolute',
+                'right-[5px]',
+                'bottom-[10px]',
+                'z-[1000]',
+              )}
+              radius="full"
               aria-label=""
               onClick={() => setIsImageModalOpen(true)}
-            />
+            >
+              <IconEdit />
+            </IconButton>
           </div>
-          <Heading className={cx('text-center', 'text-heading')}>
-            {user.fullName}
-          </Heading>
+          <Heading size="5">{user.fullName}</Heading>
         </div>
         <div className={cx('w-full', 'gap-1')}>
           <Button
             variant="outline"
-            colorScheme="red"
+            color="crimson"
+            radius="full"
             type="submit"
             className={cx('w-full')}
             onClick={() => navigate('/sign-out')}
@@ -83,27 +81,30 @@ const AccountLayout = () => {
           </Button>
         </div>
       </div>
-      <div className={cx('w-full', 'pb-1.5')}>
-        <Tabs
-          variant="solid-rounded"
-          colorScheme="gray"
-          index={tabIndex}
-          className={cx('pb-2.5')}
+      <div className={cx('flex', 'flex-col', 'gap-2.5', 'w-full')}>
+        <SegmentedControl.Root
+          radius="full"
+          defaultValue={segment}
+          className={cx('self-start')}
         >
-          <TabList>
-            <Tab onClick={() => navigate('/account/settings')}>Settings</Tab>
-            <Tab onClick={() => navigate('/account/invitation')}>
-              <div
-                className={cx('flex', 'flex-row', 'items-center', 'gap-0.5')}
-              >
-                <span>Invitations</span>
-                {invitationCount && invitationCount > 0 ? (
-                  <Tag className={cx('rounded-full')}>{invitationCount}</Tag>
-                ) : null}
-              </div>
-            </Tab>
-          </TabList>
-        </Tabs>
+          <SegmentedControl.Item
+            value="settings"
+            onClick={() => navigate('/account/settings')}
+          >
+            Settings
+          </SegmentedControl.Item>
+          <SegmentedControl.Item
+            value="invitation"
+            onClick={() => navigate('/account/invitation')}
+          >
+            <div className={cx('flex', 'items-center', 'gap-0.5')}>
+              <Text>Invitations</Text>
+              {invitationCount && invitationCount > 0 ? (
+                <Badge radius="full">{invitationCount}</Badge>
+              ) : null}
+            </div>
+          </SegmentedControl.Item>
+        </SegmentedControl.Root>
         <Outlet />
       </div>
       <AccountEditPicture
