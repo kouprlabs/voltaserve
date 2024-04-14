@@ -1,10 +1,13 @@
 import { useEffect } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { useColorMode } from '@chakra-ui/react'
+import { cx } from '@emotion/css'
 import { Helmet } from 'react-helmet-async'
 
 const RootPage = () => {
   const location = useLocation()
   const navigate = useNavigate()
+  const { colorMode } = useColorMode()
 
   useEffect(() => {
     if (location.pathname === '/') {
@@ -34,6 +37,15 @@ const RootPage = () => {
       }
     }
   }, [])
+
+  useEffect(() => {
+    const body = document.getElementsByTagName('body')[0]
+    if (colorMode === 'dark') {
+      body.classList.add('dark')
+    } else {
+      body.classList.remove('dark')
+    }
+  }, [colorMode])
 
   return (
     <>
