@@ -47,7 +47,7 @@ CREATE TRIGGER user_before_update
     FOR EACH ROW
 EXECUTE PROCEDURE update_time_before_update();
 
-CREATE TABLE IF NOT EXISTS "organization"
+CREATE TABLE IF NOT EXISTS organization
 (
     id          text PRIMARY KEY,
     name        text NOT NULL,
@@ -69,7 +69,7 @@ CREATE TRIGGER organization_before_update
     FOR EACH ROW
 EXECUTE PROCEDURE update_time_before_update();
 
-CREATE TABLE IF NOT EXISTS "workspace"
+CREATE TABLE IF NOT EXISTS workspace
 (
     id                        text PRIMARY KEY,
     name                      text NOT NULL,
@@ -108,20 +108,20 @@ CREATE TABLE IF NOT EXISTS "file"
     update_time  text
 );
 
-CREATE INDEX IF NOT EXISTS file_parent_id_idx ON file (parent_id);
-CREATE INDEX IF NOT EXISTS file_workspace_id_idx ON file (workspace_id);
+CREATE INDEX IF NOT EXISTS file_parent_id_idx ON "file" (parent_id);
+CREATE INDEX IF NOT EXISTS file_workspace_id_idx ON "file" (workspace_id);
 
-DROP TRIGGER IF EXISTS file_before_insert ON file;
+DROP TRIGGER IF EXISTS file_before_insert ON "file";
 CREATE TRIGGER file_before_insert
     BEFORE INSERT
-    ON file
+    ON "file"
     FOR EACH ROW
 EXECUTE PROCEDURE create_time_before_insert();
 
-DROP TRIGGER IF EXISTS file_before_update ON file;
+DROP TRIGGER IF EXISTS file_before_update ON "file";
 CREATE TRIGGER file_before_update
     BEFORE UPDATE
-    ON file
+    ON "file"
     FOR EACH ROW
 EXECUTE PROCEDURE update_time_before_update();
 
@@ -139,21 +139,21 @@ CREATE TABLE IF NOT EXISTS "snapshot"
   update_time text
 );
 
-DROP TRIGGER IF EXISTS snapshot_before_insert ON snapshot;
+DROP TRIGGER IF EXISTS snapshot_before_insert ON "snapshot";
 CREATE TRIGGER snapshot_before_insert
     BEFORE INSERT
-    ON snapshot
+    ON "snapshot"
     FOR EACH ROW
 EXECUTE PROCEDURE create_time_before_insert();
 
-DROP TRIGGER IF EXISTS snapshot_before_update ON snapshot;
+DROP TRIGGER IF EXISTS snapshot_before_update ON "snapshot";
 CREATE TRIGGER snapshot_before_update
     BEFORE UPDATE
-    ON snapshot
+    ON "snapshot"
     FOR EACH ROW
 EXECUTE PROCEDURE update_time_before_update();
 
-CREATE TABLE IF NOT EXISTS "snapshot_file"
+CREATE TABLE IF NOT EXISTS snapshot_file
 (
     snapshot_id text REFERENCES snapshot (id) ON DELETE CASCADE,
     file_id     text REFERENCES file (id) ON DELETE CASCADE,
@@ -171,7 +171,7 @@ CREATE TRIGGER snapshot_file_before_insert
     FOR EACH ROW
 EXECUTE PROCEDURE create_time_before_insert();
 
-CREATE TABLE IF NOT EXISTS "group"
+CREATE TABLE IF NOT EXISTS group
 (
     id              text PRIMARY KEY,
     name            text NOT NULL,
@@ -180,7 +180,7 @@ CREATE TABLE IF NOT EXISTS "group"
     update_time     text
 );
 
-CREATE INDEX IF NOT EXISTS group_organization_id_idx ON "group" (organization_id);
+CREATE INDEX IF NOT EXISTS group_organization_id_idx ON group (organization_id);
 
 DROP TRIGGER IF EXISTS group_before_insert ON "group";
 CREATE TRIGGER group_before_insert
@@ -196,7 +196,7 @@ CREATE TRIGGER group_before_update
     FOR EACH ROW
 EXECUTE PROCEDURE update_time_before_update();
 
-CREATE TABLE IF NOT EXISTS "group_user"
+CREATE TABLE IF NOT EXISTS group_user
 (
     group_id    text REFERENCES "group" (id) ON DELETE CASCADE,
     user_id     text REFERENCES "user" (id) ON DELETE CASCADE,
@@ -214,7 +214,7 @@ CREATE TRIGGER group_user_before_insert
     FOR EACH ROW
 EXECUTE PROCEDURE create_time_before_insert();
 
-CREATE TABLE IF NOT EXISTS "userpermission"
+CREATE TABLE IF NOT EXISTS userpermission
 (
     id          text PRIMARY KEY,
     user_id     text REFERENCES "user" (id) ON DELETE CASCADE,
@@ -234,7 +234,7 @@ CREATE TRIGGER userpermission_before_insert
     FOR EACH ROW
 EXECUTE PROCEDURE create_time_before_insert();
 
-CREATE TABLE IF NOT EXISTS "grouppermission"
+CREATE TABLE IF NOT EXISTS grouppermission
 (
     id          text PRIMARY KEY,
     group_id    text REFERENCES "group" (id) ON DELETE CASCADE,
@@ -254,7 +254,7 @@ CREATE TRIGGER grouppermission_before_insert
     FOR EACH ROW
 EXECUTE PROCEDURE create_time_before_insert();
 
-CREATE TABLE IF NOT EXISTS "invitation"
+CREATE TABLE IF NOT EXISTS invitation
 (
   id              text PRIMARY KEY,
   organization_id text NOT NULL REFERENCES organization (id) ON DELETE CASCADE,
@@ -268,21 +268,21 @@ CREATE TABLE IF NOT EXISTS "invitation"
 CREATE INDEX invitation_organization_id_idx ON invitation (organization_id);
 CREATE INDEX invitation_user_id_idx ON invitation (owner_id);
 
-DROP TRIGGER IF EXISTS invitation_before_insert ON snapshot;
+DROP TRIGGER IF EXISTS invitation_before_insert ON invitation;
 CREATE TRIGGER invitation_before_insert
     BEFORE INSERT
-    ON snapshot
+    ON invitation
     FOR EACH ROW
 EXECUTE PROCEDURE create_time_before_insert();
 
-DROP TRIGGER IF EXISTS invitation_before_update ON snapshot;
+DROP TRIGGER IF EXISTS invitation_before_update ON invitation;
 CREATE TRIGGER invitation_before_update
     BEFORE UPDATE
-    ON snapshot
+    ON invitation
     FOR EACH ROW
 EXECUTE PROCEDURE update_time_before_update();
 
-CREATE TABLE IF NOT EXISTS "organization_user"
+CREATE TABLE IF NOT EXISTS organization_user
 (
   organization_id text NOT NULL REFERENCES organization (id) ON DELETE CASCADE,
   user_id         text NOT NULL REFERENCES "user" (id) ON DELETE CASCADE,
@@ -293,9 +293,9 @@ CREATE TABLE IF NOT EXISTS "organization_user"
 CREATE INDEX organization_user_organization_id ON organization_user (organization_id);
 CREATE INDEX organization_user_user_id ON organization_user (user_id);
 
-DROP TRIGGER IF EXISTS organization_user_before_insert ON snapshot;
+DROP TRIGGER IF EXISTS organization_user_before_insert ON organization_user;
 CREATE TRIGGER organization_user_before_insert
     BEFORE INSERT
-    ON snapshot
+    ON organization_user
     FOR EACH ROW
 EXECUTE PROCEDURE create_time_before_insert();
