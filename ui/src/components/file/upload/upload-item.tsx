@@ -46,14 +46,13 @@ const UploadItem = ({ upload: uploadProp }: UploadItemProps) => {
           />
         )}
         {upload.isPending && (
-          <div className={cx('shrink-0', 'text-gray-500')}>
-            <IconSchedule />
-          </div>
+          <IconSchedule className={cx('shrink-0', 'text-gray-500')} />
         )}
         {upload.isSucceeded && (
-          <div className={cx('shrink-0', 'text-green-500')}>
-            <IconCheckCircle filled={true} />
-          </div>
+          <IconCheckCircle
+            className={cx('shrink-0', 'text-green-500')}
+            filled={true}
+          />
         )}
         {upload.isFailed && (
           <div className={cx('shrink-0', 'text-red-500')}>
