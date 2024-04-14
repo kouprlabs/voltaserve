@@ -43,10 +43,7 @@ func (d *Dispatcher) Dispatch(opts core.PipelineRunOptions) error {
 	} else if p == core.PipelineImage {
 		err = d.imagePipeline.Run(opts)
 	} else if p == core.PipelineVideo {
-		if err := d.videoPipeline.Run(opts); err != nil {
-			return err
-		}
-		return nil
+		err = d.videoPipeline.Run(opts)
 	} else {
 		if err := d.apiClient.UpdateSnapshot(core.SnapshotUpdateOptions{
 			Options: opts,
