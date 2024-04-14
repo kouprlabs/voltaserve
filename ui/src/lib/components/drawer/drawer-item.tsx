@@ -66,8 +66,8 @@ export const DrawerItem = ({
             'items-center',
             'justify-center',
             'shrink-0',
-            'w-[24px]',
-            'h-[24px]',
+            'w-[21px]',
+            'h-[21px]',
             {
               'text-white': isActive,
               'dark:text-gray-800': isActive,
