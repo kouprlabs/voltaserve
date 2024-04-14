@@ -1,3 +1,3 @@
-FROM postgres:15.3
+FROM postgres:16.2
 
 COPY ./schema.sql /docker-entrypoint-initdb.d/schema.sql
