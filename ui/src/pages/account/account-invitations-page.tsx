@@ -89,7 +89,7 @@ const AccountInvitationsPage = () => {
       </Helmet>
       {list.data.length === 0 && (
         <div
-          className={cx('flex', 'items-center', 'justify-center', 'h=[300px]')}
+          className={cx('flex', 'items-center', 'justify-center', 'h-[300px]')}
         >
           <span>There are no invitations.</span>
         </div>
