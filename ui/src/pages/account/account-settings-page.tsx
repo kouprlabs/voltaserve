@@ -106,9 +106,7 @@ const AccountSettingsPage = () => {
                 className={cx('flex', 'flex-row', 'gap-0.5', 'items-center')}
               >
                 <Tooltip label="Please check your inbox to confirm your email.">
-                  <span>
-                    <IconWarning className={cx('text-yellow-400')} />
-                  </span>
+                  <IconWarning className={cx('text-yellow-400')} />
                 </Tooltip>
                 <span>{user.pendingEmail}</span>
               </div>
