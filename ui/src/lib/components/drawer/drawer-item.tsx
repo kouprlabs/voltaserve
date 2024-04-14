@@ -45,7 +45,6 @@ export const DrawerItem = ({
           'items-center',
           'gap-1.5',
           'p-1.5',
-          'h-[50px]',
           'rounded-md',
           {
             'bg-black': isActive,
