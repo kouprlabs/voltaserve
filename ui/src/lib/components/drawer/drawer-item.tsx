@@ -1,6 +1,6 @@
 import { ReactElement, useContext, useEffect, useState } from 'react'
-import cx from 'classnames'
 import { Link, useLocation } from 'react-router-dom'
+import cx from 'classnames'
 import { DrawerContext } from './drawer-context'
 
 type DrawerItemProps = {
@@ -45,7 +45,6 @@ export const DrawerItem = ({
           'items-center',
           'gap-1.5',
           'p-1.5',
-          'min-w-[50px]',
           'h-[50px]',
           'rounded-md',
           {
@@ -63,10 +62,18 @@ export const DrawerItem = ({
         )}
       >
         <div
-          className={cx('flex', 'items-center', 'justify-center', 'shrink-0', {
-            'text-white': isActive,
-            'dark:text-gray-800': isActive,
-          })}
+          className={cx(
+            'flex',
+            'items-center',
+            'justify-center',
+            'shrink-0',
+            'w-[24px]',
+            'h-[24px]',
+            {
+              'text-white': isActive,
+              'dark:text-gray-800': isActive,
+            },
+          )}
         >
           {icon}
         </div>
