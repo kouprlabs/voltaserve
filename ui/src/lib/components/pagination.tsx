@@ -1,13 +1,13 @@
 import { useCallback, useMemo } from 'react'
 import { ButtonGroup, Button, IconButton } from '@chakra-ui/react'
 import {
-  MdOutlineKeyboardArrowLeft,
-  MdOutlineKeyboardArrowRight,
-  MdOutlineKeyboardDoubleArrowLeft,
-  MdOutlineKeyboardDoubleArrowRight,
-  MdOutlineFirstPage,
-  MdOutlineLastPage,
-} from 'react-icons/md'
+  IconKeyboardArrowLeft,
+  IconKeyboardArrowRight,
+  IconKeyboardDoubleArrowLeft,
+  IconKeyboardDoubleArrowRight,
+  IconFirstPage,
+  IconLastPage,
+} from '@/lib'
 
 type PaginationProps = {
   totalPages: number
@@ -52,7 +52,7 @@ export const Pagination = ({
         variant="outline"
         size={uiSize}
         isDisabled={page === 1}
-        icon={<MdOutlineFirstPage />}
+        icon={<IconFirstPage />}
         aria-label="First"
         onClick={() => handlePageChange(firstPage)}
       />
@@ -60,7 +60,7 @@ export const Pagination = ({
         variant="outline"
         size={uiSize}
         isDisabled={rewindPage < 1}
-        icon={<MdOutlineKeyboardDoubleArrowLeft />}
+        icon={<IconKeyboardDoubleArrowLeft />}
         aria-label="Rewind"
         onClick={() => handlePageChange(rewindPage)}
       />
@@ -68,7 +68,7 @@ export const Pagination = ({
         variant="outline"
         size={uiSize}
         isDisabled={page === 1}
-        icon={<MdOutlineKeyboardArrowLeft />}
+        icon={<IconKeyboardArrowLeft />}
         aria-label="Previous"
         onClick={() => handlePageChange(previousPage)}
       />
@@ -87,7 +87,7 @@ export const Pagination = ({
         variant="outline"
         size={uiSize}
         isDisabled={page === lastPage}
-        icon={<MdOutlineKeyboardArrowRight />}
+        icon={<IconKeyboardArrowRight />}
         aria-label="Next"
         onClick={() => handlePageChange(nextPage)}
       />
@@ -95,7 +95,7 @@ export const Pagination = ({
         variant="outline"
         size={uiSize}
         isDisabled={fastForwardPage > lastPage}
-        icon={<MdOutlineKeyboardDoubleArrowRight />}
+        icon={<IconKeyboardDoubleArrowRight />}
         aria-label="Fast Forward"
         onClick={() => handlePageChange(fastForwardPage)}
       />
@@ -103,7 +103,7 @@ export const Pagination = ({
         variant="outline"
         size={uiSize}
         isDisabled={page === lastPage}
-        icon={<MdOutlineLastPage />}
+        icon={<IconLastPage />}
         aria-label="Last"
         onClick={() => handlePageChange(lastPage)}
       />

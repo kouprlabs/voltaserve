@@ -1,8 +1,8 @@
 import { ReactNode, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import cx from 'classnames'
-import { BsChevronBarLeft, BsChevronBarRight } from 'react-icons/bs'
 import { StorageOptions } from '../../types'
+import { IconChevronLeft, IconChevronRight } from '../icons'
 import { DrawerContext } from './drawer-context'
 
 type DrawerProps = {
@@ -121,11 +121,7 @@ export const Drawer = ({ children, storage, logo }: DrawerProps) => {
             )
           }}
         >
-          {isCollapsed ? (
-            <BsChevronBarRight fontSize="16px" />
-          ) : (
-            <BsChevronBarLeft fontSize="16px" />
-          )}
+          {isCollapsed ? <IconChevronRight /> : <IconChevronLeft />}
         </div>
       </div>
     </DrawerContext.Provider>

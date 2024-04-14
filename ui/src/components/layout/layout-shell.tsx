@@ -4,7 +4,7 @@ import { useToast } from '@chakra-ui/react'
 import { cx } from '@emotion/css'
 import Logo from '@/components/common/logo'
 import TopBar from '@/components/top-bar'
-import { IconGroup, IconOrganization, IconWorkspace, Shell } from '@/lib'
+import { IconGroup, IconFlag, IconWorkspaces, Shell } from '@/lib'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { errorCleared } from '@/store/ui/error'
 
@@ -36,19 +36,19 @@ const LayoutShell = () => {
       items={[
         {
           href: '/workspace',
-          icon: <IconWorkspace fontSize="18px" />,
+          icon: <IconWorkspaces />,
           primaryText: 'Workspaces',
           secondaryText: 'Isolated containers for files and folders.',
         },
         {
           href: '/group',
-          icon: <IconGroup fontSize="16px" />,
+          icon: <IconGroup />,
           primaryText: 'Groups',
           secondaryText: 'Allows assigning permissions to a group of users.',
         },
         {
           href: '/organization',
-          icon: <IconOrganization fontSize="18px" />,
+          icon: <IconFlag />,
           primaryText: 'Organizations',
           secondaryText: 'Umbrellas for workspaces and users.',
         },

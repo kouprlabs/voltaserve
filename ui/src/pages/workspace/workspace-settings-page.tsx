@@ -16,7 +16,7 @@ import WorkspaceDelete from '@/components/workspace/workspace-delete'
 import WorkspaceEditName from '@/components/workspace/workspace-edit-name'
 import WorkspaceEditStorageCapacity from '@/components/workspace/workspace-edit-storage-capacity'
 import prettyBytes from '@/helpers/pretty-bytes'
-import { IconEdit, IconTrash, SectionSpinner } from '@/lib'
+import { IconEdit, IconDelete, SectionSpinner } from '@/lib'
 
 const EditButton = (props: IconButtonProps) => (
   <IconButton icon={<IconEdit />} {...props} />
@@ -115,7 +115,7 @@ const WorkspaceSettingsPage = () => {
             <span>Delete permanently</span>
             <Spacer />
             <IconButton
-              icon={<IconTrash />}
+              icon={<IconDelete />}
               variant="solid"
               colorScheme="red"
               isDisabled={!hasEditPermission}

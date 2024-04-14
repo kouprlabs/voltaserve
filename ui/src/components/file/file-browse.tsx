@@ -115,7 +115,7 @@ const FileBrowse = ({ onChange }: FileBrowseProps) => {
               )}
               onClick={() => setFileId(f.id)}
             >
-              <FcFolder fontSize="36px" className={cx('shrink-0')} />
+              <FcFolder className={cx('shrink-0', 'text-[36px]')} />
               <Text noOfLines={1}>{f.name}</Text>
               <div className={cx('grow')} />
               <IconChevronRight />

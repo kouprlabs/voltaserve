@@ -94,6 +94,7 @@ export const SwitchCard = ({
           'gap-0',
           'border',
           'border-gray-200',
+          'dark:border-gray-600',
           'rounded-md',
         )}
         style={{ minWidth: expandedMinWidth }}

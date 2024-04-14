@@ -24,7 +24,7 @@ import prettyDate from '@/helpers/pretty-date'
 import userToString from '@/helpers/user-to-string'
 import { incomingInvitationPaginationStorage } from '@/infra/pagination'
 import {
-  IconDotsVertical,
+  IconMoreVert,
   SectionSpinner,
   PagePagination,
   usePagePagination,
@@ -116,7 +116,7 @@ const AccountInvitationsPage = () => {
                       <Menu>
                         <MenuButton
                           as={IconButton}
-                          icon={<IconDotsVertical />}
+                          icon={<IconMoreVert />}
                           variant="ghost"
                           aria-label=""
                         />

@@ -22,7 +22,7 @@ import WorkspaceAPI from '@/client/api/workspace'
 import GroupSelector from '@/components/common/group-selector'
 import useFileListSearchParams from '@/hooks/use-file-list-params'
 import { Spinner, Text } from '@/lib'
-import { IconAdd, IconCheck, IconTrash } from '@/lib'
+import { IconAdd, IconCheck, IconDelete } from '@/lib'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { sharingModalDidClose } from '@/store/ui/files'
 import reactSelectStyles from '@/styles/react-select'
@@ -211,7 +211,7 @@ const SharingGroups = ({
                     </Td>
                     <Td className={cx('text-end')}>
                       <IconButton
-                        icon={<IconTrash />}
+                        icon={<IconDelete />}
                         colorScheme="red"
                         aria-label=""
                         isLoading={permissionBeingRevoked === p.id}

@@ -23,7 +23,7 @@ import IdPUserAPI from '@/client/idp/user'
 import UserSelector from '@/components/common/user-selector'
 import useFileListSearchParams from '@/hooks/use-file-list-params'
 import { Spinner, Text } from '@/lib'
-import { IconCheck, IconTrash, IconUserPlus } from '@/lib'
+import { IconCheck, IconDelete, IconPersonAdd } from '@/lib'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { sharingModalDidClose } from '@/store/ui/files'
 import { inviteModalDidOpen } from '@/store/ui/organizations'
@@ -134,7 +134,7 @@ const SharingUsers = ({
             {workspace &&
             geEditorPermission(workspace.organization.permission) ? (
               <Button
-                leftIcon={<IconUserPlus />}
+                leftIcon={<IconPersonAdd />}
                 onClick={handleInviteMembersClick}
               >
                 Invite Members
@@ -230,7 +230,7 @@ const SharingUsers = ({
                       </Td>
                       <Td className={cx('text-end')}>
                         <IconButton
-                          icon={<IconTrash />}
+                          icon={<IconDelete />}
                           colorScheme="red"
                           aria-label=""
                           isLoading={permissionBeingRevoked === p.id}

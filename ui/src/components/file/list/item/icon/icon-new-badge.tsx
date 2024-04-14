@@ -1,6 +1,6 @@
 import { Circle, Tooltip } from '@chakra-ui/react'
 import cx from 'classnames'
-import { BsHourglassSplit } from 'react-icons/bs'
+import { IconHourglass } from '@/lib'
 
 const IconNewBadge = () => (
   <Tooltip label="Waiting for processing">
@@ -14,7 +14,7 @@ const IconNewBadge = () => (
         'border-gray-200',
       )}
     >
-      <BsHourglassSplit className={cx('text-[14px]')} />
+      <IconHourglass />
     </Circle>
   </Tooltip>
 )

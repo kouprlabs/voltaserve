@@ -8,12 +8,7 @@ import {
   IconButton,
 } from '@chakra-ui/react'
 import cx from 'classnames'
-import {
-  IconClose,
-  IconTime,
-  IconCheckCircleFill,
-  IconAlertCircleFill,
-} from '@/lib'
+import { IconClose, IconSchedule, IconCheckCircle, IconError } from '@/lib'
 import {
   Upload,
   UploadDecorator,
@@ -52,17 +47,17 @@ const UploadItem = ({ upload: uploadProp }: UploadItemProps) => {
         )}
         {upload.isPending && (
           <div className={cx('shrink-0', 'text-gray-500')}>
-            <IconTime fontSize="21px" />
+            <IconSchedule />
           </div>
         )}
         {upload.isSucceeded && (
           <div className={cx('shrink-0', 'text-green-500')}>
-            <IconCheckCircleFill fontSize="22px" />
+            <IconCheckCircle filled={true} />
           </div>
         )}
         {upload.isFailed && (
           <div className={cx('shrink-0', 'text-red-500')}>
-            <IconAlertCircleFill fontSize="22px" />
+            <IconError filled={true} />
           </div>
         )}
         <span

@@ -27,10 +27,10 @@ import OrganizationStatus from '@/components/organization/organization-status'
 import prettyDate from '@/helpers/pretty-date'
 import { outgoingInvitationPaginationStorage } from '@/infra/pagination'
 import {
-  IconDotsVertical,
+  IconMoreVert,
   IconSend,
-  IconTrash,
-  IconUserPlus,
+  IconDelete,
+  IconPersonAdd,
   SectionSpinner,
   PagePagination,
   usePagePagination,
@@ -114,7 +114,7 @@ const OrganizationInvitationsPage = () => {
               <span>This organization has no invitations.</span>
               {geEditorPermission(org.permission) && (
                 <Button
-                  leftIcon={<IconUserPlus />}
+                  leftIcon={<IconPersonAdd />}
                   onClick={() => {
                     setIsInviteMembersModalOpen(true)
                   }}
@@ -154,7 +154,7 @@ const OrganizationInvitationsPage = () => {
                     <Menu>
                       <MenuButton
                         as={IconButton}
-                        icon={<IconDotsVertical />}
+                        icon={<IconMoreVert />}
                         variant="ghost"
                         aria-label=""
                       />
@@ -169,7 +169,7 @@ const OrganizationInvitationsPage = () => {
                             </MenuItem>
                           )}
                           <MenuItem
-                            icon={<IconTrash />}
+                            icon={<IconDelete />}
                             className={cx('text-red-500')}
                             onClick={() => handleDelete(i.id)}
                           >

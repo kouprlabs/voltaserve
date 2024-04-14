@@ -1,6 +1,6 @@
 import { Circle, Tooltip } from '@chakra-ui/react'
 import cx from 'classnames'
-import { IoClose } from 'react-icons/io5'
+import { IconClose } from '@/lib'
 
 const IconErrorBadge = () => (
   <Tooltip label="An error occured while processing this item">
@@ -14,7 +14,7 @@ const IconErrorBadge = () => (
         'border-gray-200',
       )}
     >
-      <IoClose className={cx('text-red-600', 'text-[14px]')} />
+      <IconClose className={cx('text-red-600')} />
     </Circle>
   </Tooltip>
 )

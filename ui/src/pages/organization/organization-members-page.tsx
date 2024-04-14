@@ -32,9 +32,9 @@ import OrganizationRemoveMember from '@/components/organization/organization-rem
 import { decodeQuery } from '@/helpers/query'
 import { organizationMemberPaginationStorage } from '@/infra/pagination'
 import {
-  IconDotsVertical,
-  IconExit,
-  IconUserPlus,
+  IconMoreVert,
+  IconLogout,
+  IconPersonAdd,
   SectionSpinner,
   PagePagination,
   usePagePagination,
@@ -127,14 +127,14 @@ const OrganizationMembersPage = () => {
                     <Menu>
                       <MenuButton
                         as={IconButton}
-                        icon={<IconDotsVertical />}
+                        icon={<IconMoreVert />}
                         variant="ghost"
                         aria-label=""
                       />
                       <Portal>
                         <MenuList>
                           <MenuItem
-                            icon={<IconExit />}
+                            icon={<IconLogout />}
                             className={cx('text-red-500')}
                             isDisabled={!geEditorPermission(org.permission)}
                             onClick={() => {
@@ -189,7 +189,7 @@ const OrganizationMembersPage = () => {
               <span>This organization has no members.</span>
               {geEditorPermission(org.permission) && (
                 <Button
-                  leftIcon={<IconUserPlus />}
+                  leftIcon={<IconPersonAdd />}
                   onClick={() => dispatch(inviteModalDidOpen())}
                 >
                   Invite Members

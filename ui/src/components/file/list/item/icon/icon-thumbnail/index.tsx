@@ -3,7 +3,7 @@ import { Image, Skeleton } from '@chakra-ui/react'
 import cx from 'classnames'
 import { File, SnapshotStatus } from '@/client/api/file'
 import * as fe from '@/helpers/file-extension'
-import { IconPlay } from '@/lib'
+import { IconPlayArrow } from '@/lib'
 import IconErrorBadge from '../icon-error-badge'
 import IconNewBadge from '../icon-new-badge'
 import IconProcessingBadge from '../icon-processing-badge'
@@ -58,7 +58,10 @@ const IconThumbnail = ({ file, scale }: IconThumbnailProps) => {
           )}
           style={{ width, height }}
         >
-          <IconPlay fontSize="40px" className={cx('text-white')} />
+          <IconPlayArrow
+            className={cx('text-white', 'text-[40px]')}
+            filled={true}
+          />
         </div>
       )}
       <div

@@ -1,7 +1,7 @@
 import { useContext } from 'react'
 import cx from 'classnames'
 import { File } from '@/client/api/file'
-import { DrawerContext, SwitchCard, IconInfoCircle } from '@/lib'
+import { DrawerContext, SwitchCard, IconInfo } from '@/lib'
 import DrawerDownloadButton from './drawer-download-button'
 import DrawerOpenNewTabButton from './drawer-open-new-tab-button'
 import DrawerFileInfo from './file-info'
@@ -17,7 +17,7 @@ const DrawerContent = ({ file }: DrawerContentProps) => {
       <DrawerDownloadButton file={file} isCollapsed={isCollapsed} />
       <DrawerOpenNewTabButton file={file} isCollapsed={isCollapsed} />
       <SwitchCard
-        icon={<IconInfoCircle fontSize="18px" />}
+        icon={<IconInfo />}
         label="Show info"
         isCollapsed={isCollapsed}
         localStorageNamespace="file_info"

@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { Button, IconButton } from '@chakra-ui/react'
 import cx from 'classnames'
 import { File } from '@/client/api/file'
-import { IconExternalLink } from '@/lib'
+import { IconOpenInNew } from '@/lib'
 
 export type DrawerOpenNewTabButtonProps = {
   file: File
@@ -33,7 +33,7 @@ const DrawerOpenNewTabButton = ({
   if (isCollapsed) {
     return (
       <IconButton
-        icon={<IconExternalLink fontSize="18px" />}
+        icon={<IconOpenInNew />}
         as="a"
         className={cx('h-[50px]', 'w-[50px]', 'p-1.5', 'rounded-md')}
         href={url}
@@ -45,7 +45,7 @@ const DrawerOpenNewTabButton = ({
   } else {
     return (
       <Button
-        leftIcon={<IconExternalLink fontSize="18px" />}
+        leftIcon={<IconOpenInNew />}
         as="a"
         className={cx('h-[50px]', 'w-full', 'p-1.5', 'rounded-md')}
         href={url}

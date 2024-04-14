@@ -10,7 +10,6 @@ import {
 } from '@chakra-ui/react'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
-import { IoWarning } from 'react-icons/io5'
 import StorageAPI from '@/client/api/storage'
 import UserAPI from '@/client/idp/user'
 import { swrConfig } from '@/client/options'
@@ -19,7 +18,7 @@ import AccountDelete from '@/components/account/account-delete'
 import AccountEditEmail from '@/components/account/account-edit-email'
 import AccountEditFullName from '@/components/account/account-edit-full-name'
 import prettyBytes from '@/helpers/pretty-bytes'
-import { IconEdit, IconTrash, SectionSpinner } from '@/lib'
+import { IconEdit, IconDelete, SectionSpinner, IconWarning } from '@/lib'
 
 const EditButton = (props: IconButtonProps) => (
   <IconButton
@@ -103,12 +102,12 @@ const AccountSettingsPage = () => {
             <span>Email</span>
             <Spacer />
             {user.pendingEmail && (
-              <div className={cx('flex', 'flex-row', 'items-center')}>
+              <div
+                className={cx('flex', 'flex-row', 'gap-0.5', 'items-center')}
+              >
                 <Tooltip label="Please check your inbox to confirm your email.">
                   <span>
-                    <IoWarning
-                      className={cx('text-yelow-400', 'text-[20px]')}
-                    />
+                    <IconWarning className={cx('text-yellow-400')} />
                   </span>
                 </Tooltip>
                 <span>{user.pendingEmail}</span>
@@ -154,7 +153,7 @@ const AccountSettingsPage = () => {
             <span>Delete account</span>
             <Spacer />
             <IconButton
-              icon={<IconTrash />}
+              icon={<IconDelete />}
               variant="solid"
               colorScheme="red"
               aria-label=""

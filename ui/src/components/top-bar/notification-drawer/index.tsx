@@ -14,7 +14,7 @@ import {
 import cx from 'classnames'
 import NotificationAPI from '@/client/api/notification'
 import { swrConfig } from '@/client/options'
-import { IconNotification } from '@/lib'
+import { IconNotifications } from '@/lib'
 import NotificationDrawerItem from './notification-drawer-item'
 
 const TopBarNotificationDrawer = () => {
@@ -27,7 +27,7 @@ const TopBarNotificationDrawer = () => {
       <div className={cx('flex', 'items-center', 'justify-center', 'relative')}>
         <IconButton
           ref={buttonRef}
-          icon={<IconNotification />}
+          icon={<IconNotifications />}
           aria-label=""
           onClick={onOpen}
         />

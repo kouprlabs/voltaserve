@@ -19,12 +19,12 @@ import {
 } from '@/client/api/permission'
 import downloadFile from '@/helpers/download-file'
 import {
-  IconCopy,
+  IconFileCopy,
   IconDownload,
   IconEdit,
-  IconMove,
-  IconShare,
-  IconTrash,
+  IconArrowTopRight,
+  IconGroup,
+  IconDelete,
 } from '@/lib'
 import { UploadDecorator, uploadAdded } from '@/store/entities/uploads'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
@@ -233,7 +233,7 @@ const FileList = ({ list, scale }: FileListProps) => {
             }}
           >
             <MenuItem
-              icon={<IconShare />}
+              icon={<IconGroup />}
               isDisabled={
                 singleFile ? ltOwnerPermission(singleFile.permission) : false
               }
@@ -262,7 +262,7 @@ const FileList = ({ list, scale }: FileListProps) => {
             </MenuItem>
             <MenuDivider />
             <MenuItem
-              icon={<IconTrash />}
+              icon={<IconDelete />}
               className={cx('text-red-500')}
               isDisabled={
                 singleFile ? ltOwnerPermission(singleFile.permission) : false
@@ -289,7 +289,7 @@ const FileList = ({ list, scale }: FileListProps) => {
               Rename
             </MenuItem>
             <MenuItem
-              icon={<IconMove />}
+              icon={<IconArrowTopRight />}
               isDisabled={
                 singleFile ? ltEditorPermission(singleFile.permission) : false
               }
@@ -301,7 +301,7 @@ const FileList = ({ list, scale }: FileListProps) => {
               Move
             </MenuItem>
             <MenuItem
-              icon={<IconCopy />}
+              icon={<IconFileCopy />}
               isDisabled={
                 singleFile ? ltEditorPermission(singleFile.permission) : false
               }

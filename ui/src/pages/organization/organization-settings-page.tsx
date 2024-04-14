@@ -12,9 +12,9 @@ import OrganizationInviteMembers from '@/components/organization/organization-in
 import OrganizationLeave from '@/components/organization/organization-leave'
 import {
   IconEdit,
-  IconExit,
-  IconTrash,
-  IconUserPlus,
+  IconLogout,
+  IconDelete,
+  IconPersonAdd,
   SectionSpinner,
 } from '@/lib'
 
@@ -69,7 +69,7 @@ const OrganizationSettingsPage = () => {
           <span>Invite members</span>
           <Spacer />
           <IconButton
-            icon={<IconUserPlus />}
+            icon={<IconPersonAdd />}
             isDisabled={!geOwnerPermission(org.permission)}
             aria-label=""
             onClick={() => {
@@ -81,7 +81,7 @@ const OrganizationSettingsPage = () => {
           <span>Leave</span>
           <Spacer />
           <IconButton
-            icon={<IconExit />}
+            icon={<IconLogout />}
             variant="solid"
             colorScheme="red"
             aria-label=""
@@ -93,7 +93,7 @@ const OrganizationSettingsPage = () => {
           <span>Delete permanently</span>
           <Spacer />
           <IconButton
-            icon={<IconTrash />}
+            icon={<IconDelete />}
             variant="solid"
             colorScheme="red"
             isDisabled={!geEditorPermission(org.permission)}

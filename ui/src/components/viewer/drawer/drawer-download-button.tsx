@@ -16,7 +16,7 @@ const DrawerDownloadButton = ({
   if (isCollapsed) {
     return (
       <IconButton
-        icon={<IconDownload fontSize="18px" />}
+        icon={<IconDownload />}
         variant="solid"
         colorScheme="blue"
         aria-label="Download"
@@ -28,7 +28,7 @@ const DrawerDownloadButton = ({
   } else {
     return (
       <Button
-        leftIcon={<IconDownload fontSize="18px" />}
+        leftIcon={<IconDownload />}
         variant="solid"
         colorScheme="blue"
         className={cx('h-[50px]', 'w-full', 'p-1.5', 'rounded-md')}

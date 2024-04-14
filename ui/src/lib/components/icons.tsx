@@ -1,208 +1,395 @@
-import { IconBaseProps } from 'react-icons'
-import {
-  BsFlag,
-  BsCollection,
-  BsBoxArrowUpRight,
-  BsInfoCircle,
-  BsCheck2,
-  BsSearch,
-  BsFillExclamationCircleFill,
-  BsPlayFill,
-  BsGridFill,
-  BsSortDown,
-  BsSortUp,
-} from 'react-icons/bs'
-import { FaSearch } from 'react-icons/fa'
-import {
-  FiBell,
-  FiChevronLeft,
-  FiChevronRight,
-  FiCircle,
-  FiCopy,
-  FiEdit3,
-  FiLogOut,
-  FiMoreVertical,
-  FiCornerUpRight,
-  FiPlus,
-  FiSend,
-  FiUsers,
-  FiTrash,
-  FiUpload,
-  FiUserPlus,
-  FiAlertCircle,
-  FiDownload,
-} from 'react-icons/fi'
-import { IoMdAlert } from 'react-icons/io'
-import { IoMdRefresh } from 'react-icons/io'
-import { IoTimeOutline, IoCheckmarkCircle } from 'react-icons/io5'
-import {
-  MdOutlineCheckBox,
-  MdOutlineCheckBoxOutlineBlank,
-} from 'react-icons/md'
-import { RiCheckboxMultipleLine } from 'react-icons/ri'
-import { TbUsers } from 'react-icons/tb'
-import { TbPlaylistX } from 'react-icons/tb'
-import { VscClose } from 'react-icons/vsc'
+import { cx } from '@emotion/css'
 
-const FONT_SIZE = '14px'
-const FONT_SIZE_LG = '16px'
+export type IconBaseProps = {
+  filled?: boolean
+} & React.HTMLAttributes<HTMLSpanElement>
 
-export const IconPlay = ({ fontSize, ...props }: IconBaseProps) => (
-  <BsPlayFill fontSize={fontSize || FONT_SIZE} {...props} />
+type GetClassNameOptions = {
+  filled?: boolean
+  className?: string
+}
+
+function getClassName({ filled, className }: GetClassNameOptions) {
+  return cx(
+    'material-symbols-rounded',
+    { 'material-symbols-rounded__filled': filled },
+    'text-[16px]',
+    className,
+  )
+}
+
+export const IconPlayArrow = ({
+  className,
+  filled,
+  ...props
+}: IconBaseProps) => (
+  <span className={getClassName({ filled, className })} {...props}>
+    play_arrow
+  </span>
 )
 
-export const IconError = ({ fontSize, ...props }: IconBaseProps) => (
-  <BsFillExclamationCircleFill fontSize={fontSize || FONT_SIZE} {...props} />
+export const IconUpload = ({ className, filled, ...props }: IconBaseProps) => (
+  <span className={getClassName({ filled, className })} {...props}>
+    upload
+  </span>
 )
 
-export const IconUpload = ({ fontSize, ...props }: IconBaseProps) => (
-  <FiUpload fontSize={fontSize || FONT_SIZE} {...props} />
+export const IconNotifications = ({
+  className,
+  filled,
+  ...props
+}: IconBaseProps) => (
+  <span className={getClassName({ filled, className })} {...props}>
+    notifications
+  </span>
 )
 
-export const IconNotification = ({ fontSize, ...props }: IconBaseProps) => (
-  <FiBell fontSize={fontSize || FONT_SIZE} {...props} />
+export const IconMoreVert = ({
+  className,
+  filled,
+  ...props
+}: IconBaseProps) => (
+  <span className={getClassName({ filled, className })} {...props}>
+    more_vert
+  </span>
 )
 
-export const IconDotsVertical = ({ fontSize, ...props }: IconBaseProps) => (
-  <FiMoreVertical fontSize={fontSize || FONT_SIZE_LG} {...props} />
+export const IconLogout = ({ className, filled, ...props }: IconBaseProps) => (
+  <span className={getClassName({ filled, className })} {...props}>
+    logout
+  </span>
 )
 
-export const IconDotsVerticalSm = ({ fontSize, ...props }: IconBaseProps) => (
-  <FiMoreVertical fontSize={fontSize || FONT_SIZE} {...props} />
+export const IconChevronLeft = ({
+  className,
+  filled,
+  ...props
+}: IconBaseProps) => (
+  <span className={getClassName({ filled, className })} {...props}>
+    chevron_left
+  </span>
 )
 
-export const IconExit = ({ fontSize, ...props }: IconBaseProps) => (
-  <FiLogOut fontSize={fontSize || FONT_SIZE} {...props} />
+export const IconChevronRight = ({
+  className,
+  filled,
+  ...props
+}: IconBaseProps) => (
+  <span className={getClassName({ filled, className })} {...props}>
+    chevron_right
+  </span>
 )
 
-export const IconChevronLeft = ({ fontSize, ...props }: IconBaseProps) => (
-  <FiChevronLeft fontSize={fontSize || FONT_SIZE} {...props} />
+export const IconAdd = ({ className, filled, ...props }: IconBaseProps) => (
+  <span className={getClassName({ filled, className })} {...props}>
+    add
+  </span>
 )
 
-export const IconChevronRight = ({ fontSize, ...props }: IconBaseProps) => (
-  <FiChevronRight fontSize={fontSize || FONT_SIZE} {...props} />
+export const IconEdit = ({ className, filled, ...props }: IconBaseProps) => (
+  <span className={getClassName({ filled, className })} {...props}>
+    edit
+  </span>
 )
 
-export const IconAdd = ({ fontSize, ...props }: IconBaseProps) => (
-  <FiPlus fontSize={fontSize || FONT_SIZE} {...props} />
+export const IconGroup = ({ className, filled, ...props }: IconBaseProps) => (
+  <span className={getClassName({ filled, className })} {...props}>
+    group
+  </span>
 )
 
-export const IconEdit = ({ fontSize, ...props }: IconBaseProps) => (
-  <FiEdit3 fontSize={fontSize || FONT_SIZE} {...props} />
+export const IconDownload = ({
+  className,
+  filled,
+  ...props
+}: IconBaseProps) => (
+  <span className={getClassName({ filled, className })} {...props}>
+    download
+  </span>
 )
 
-export const IconShare = ({ fontSize, ...props }: IconBaseProps) => (
-  <FiUsers fontSize={fontSize || FONT_SIZE} {...props} />
+export const IconArrowTopRight = ({
+  className,
+  filled,
+  ...props
+}: IconBaseProps) => (
+  <span className={getClassName({ filled, className })} {...props}>
+    arrow_top_right
+  </span>
 )
 
-export const IconDownload = ({ fontSize, ...props }: IconBaseProps) => (
-  <FiDownload fontSize={fontSize || FONT_SIZE} {...props} />
+export const IconFileCopy = ({
+  className,
+  filled,
+  ...props
+}: IconBaseProps) => (
+  <span className={getClassName({ filled, className })} {...props}>
+    file_copy
+  </span>
 )
 
-export const IconMove = ({ fontSize, ...props }: IconBaseProps) => (
-  <FiCornerUpRight fontSize={fontSize || FONT_SIZE} {...props} />
+export const IconDelete = ({ className, filled, ...props }: IconBaseProps) => (
+  <span className={getClassName({ filled, className })} {...props}>
+    delete
+  </span>
 )
 
-export const IconCopy = ({ fontSize, ...props }: IconBaseProps) => (
-  <FiCopy fontSize={fontSize || FONT_SIZE} {...props} />
+export const IconSend = ({ className, filled, ...props }: IconBaseProps) => (
+  <span className={getClassName({ filled, className })} {...props}>
+    send
+  </span>
 )
 
-export const IconTrash = ({ fontSize, ...props }: IconBaseProps) => (
-  <FiTrash fontSize={fontSize || FONT_SIZE} {...props} />
+export const IconPersonAdd = ({
+  className,
+  filled,
+  ...props
+}: IconBaseProps) => (
+  <span className={getClassName({ filled, className })} {...props}>
+    person_add
+  </span>
 )
 
-export const IconSend = ({ fontSize, ...props }: IconBaseProps) => (
-  <FiSend fontSize={fontSize || FONT_SIZE} {...props} />
+export const IconCheck = ({ className, filled, ...props }: IconBaseProps) => (
+  <span className={getClassName({ filled, className })} {...props}>
+    check
+  </span>
 )
 
-export const IconUserPlus = ({ fontSize, ...props }: IconBaseProps) => (
-  <FiUserPlus fontSize={fontSize || FONT_SIZE} {...props} />
+export const IconLibraryAddCheck = ({
+  className,
+  filled,
+  ...props
+}: IconBaseProps) => (
+  <span className={getClassName({ filled, className })} {...props}>
+    library_add_check
+  </span>
 )
 
-export const IconCheck = ({ fontSize, ...props }: IconBaseProps) => (
-  <BsCheck2 fontSize={fontSize || FONT_SIZE} {...props} />
+export const IconSelectCheckBox = ({
+  className,
+  filled,
+  ...props
+}: IconBaseProps) => (
+  <span className={getClassName({ filled, className })} {...props}>
+    select_check_box
+  </span>
 )
 
-export const IconCheckboxMultiple = ({ fontSize, ...props }: IconBaseProps) => (
-  <RiCheckboxMultipleLine fontSize={fontSize || FONT_SIZE} {...props} />
+export const IconCheckBoxOutlineBlank = ({
+  className,
+  filled,
+  ...props
+}: IconBaseProps) => (
+  <span className={getClassName({ filled, className })} {...props}>
+    check_box_outline_blank
+  </span>
 )
 
-export const IconCheckbox = ({ fontSize, ...props }: IconBaseProps) => (
-  <MdOutlineCheckBox fontSize={fontSize || FONT_SIZE} {...props} />
+export const IconCheckCircle = ({
+  className,
+  filled,
+  ...props
+}: IconBaseProps) => (
+  <span className={getClassName({ filled: true, className })} {...props}>
+    check_circle
+  </span>
 )
 
-export const IconCheckboxBlank = ({ fontSize, ...props }: IconBaseProps) => (
-  <MdOutlineCheckBoxOutlineBlank fontSize={fontSize || FONT_SIZE} {...props} />
+export const IconError = ({ className, filled, ...props }: IconBaseProps) => (
+  <span className={getClassName({ filled: true, className })} {...props}>
+    error
+  </span>
 )
 
-export const IconAlertCircle = ({ fontSize, ...props }: IconBaseProps) => (
-  <FiAlertCircle fontSize={fontSize || FONT_SIZE} {...props} />
+export const IconWarning = ({ className, filled, ...props }: IconBaseProps) => (
+  <span className={getClassName({ filled, className })} {...props}>
+    warning
+  </span>
 )
 
-export const IconCheckCircleFill = ({ fontSize, ...props }: IconBaseProps) => (
-  <IoCheckmarkCircle fontSize={fontSize || FONT_SIZE} {...props} />
+export const IconWorkspaces = ({
+  className,
+  filled,
+  ...props
+}: IconBaseProps) => (
+  <span className={getClassName({ filled, className })} {...props}>
+    workspaces
+  </span>
 )
 
-export const IconAlertCircleFill = ({ fontSize, ...props }: IconBaseProps) => (
-  <IoMdAlert fontSize={fontSize || FONT_SIZE} {...props} />
+export const IconFlag = ({ className, filled, ...props }: IconBaseProps) => (
+  <span className={getClassName({ filled, className })} {...props}>
+    flag
+  </span>
 )
 
-export const IconCircle = ({ fontSize, ...props }: IconBaseProps) => (
-  <FiCircle fontSize={fontSize || FONT_SIZE} {...props} />
+export const IconClose = ({ className, filled, ...props }: IconBaseProps) => (
+  <span className={getClassName({ filled, className })} {...props}>
+    close
+  </span>
 )
 
-export const IconWorkspace = ({ fontSize, ...props }: IconBaseProps) => (
-  <BsCollection fontSize={fontSize || FONT_SIZE} {...props} />
+export const IconSchedule = ({
+  className,
+  filled,
+  ...props
+}: IconBaseProps) => (
+  <span className={getClassName({ filled, className })} {...props}>
+    schedule
+  </span>
 )
 
-export const IconGroup = ({ fontSize, ...props }: IconBaseProps) => (
-  <TbUsers fontSize={fontSize || FONT_SIZE} {...props} />
+export const IconClearAll = ({
+  className,
+  filled,
+  ...props
+}: IconBaseProps) => (
+  <span className={getClassName({ filled, className })} {...props}>
+    clear_all
+  </span>
 )
 
-export const IconOrganization = ({ fontSize, ...props }: IconBaseProps) => (
-  <BsFlag fontSize={fontSize || FONT_SIZE} {...props} {...props} />
+export const IconOpenInNew = ({
+  className,
+  filled,
+  ...props
+}: IconBaseProps) => (
+  <span className={getClassName({ filled, className })} {...props}>
+    open_in_new
+  </span>
 )
 
-export const IconClose = ({ fontSize, ...props }: IconBaseProps) => (
-  <VscClose fontSize={fontSize || FONT_SIZE} {...props} {...props} />
+export const IconInfo = ({ className, filled, ...props }: IconBaseProps) => (
+  <span className={getClassName({ filled, className })} {...props}>
+    info
+  </span>
 )
 
-export const IconTime = ({ fontSize, ...props }: IconBaseProps) => (
-  <IoTimeOutline fontSize={fontSize || FONT_SIZE} {...props} {...props} />
+export const IconSearch = ({ className, filled, ...props }: IconBaseProps) => (
+  <span className={getClassName({ filled, className })} {...props}>
+    search
+  </span>
 )
 
-export const IconDeleteListItem = ({ fontSize, ...props }: IconBaseProps) => (
-  <TbPlaylistX fontSize={fontSize || FONT_SIZE} {...props} {...props} />
+export const IconRefresh = ({ className, filled, ...props }: IconBaseProps) => (
+  <span className={getClassName({ filled, className })} {...props}>
+    refresh
+  </span>
 )
 
-export const IconExternalLink = ({ fontSize, ...props }: IconBaseProps) => (
-  <BsBoxArrowUpRight fontSize={fontSize || FONT_SIZE} {...props} {...props} />
+export const IconGridView = ({
+  className,
+  filled,
+  ...props
+}: IconBaseProps) => (
+  <span className={getClassName({ filled, className })} {...props}>
+    grid_view
+  </span>
 )
 
-export const IconInfoCircle = ({ fontSize, ...props }: IconBaseProps) => (
-  <BsInfoCircle fontSize={fontSize || FONT_SIZE} {...props} {...props} />
+export const IconArrowUpward = ({
+  className,
+  filled,
+  ...props
+}: IconBaseProps) => (
+  <span className={getClassName({ filled, className })} {...props}>
+    arrow_upward
+  </span>
 )
 
-export const IconSearch = ({ fontSize, ...props }: IconBaseProps) => (
-  <BsSearch fontSize={fontSize || FONT_SIZE} {...props} {...props} />
+export const IconArrowDownward = ({
+  className,
+  filled,
+  ...props
+}: IconBaseProps) => (
+  <span className={getClassName({ filled, className })} {...props}>
+    arrow_downward
+  </span>
 )
 
-export const IconSearchBold = ({ fontSize, ...props }: IconBaseProps) => (
-  <FaSearch fontSize={fontSize || FONT_SIZE} {...props} {...props} />
+export const IconExpandMore = ({
+  className,
+  filled,
+  ...props
+}: IconBaseProps) => (
+  <span className={getClassName({ filled, className })} {...props}>
+    expand_more
+  </span>
 )
 
-export const IconRefresh = ({ fontSize, ...props }: IconBaseProps) => (
-  <IoMdRefresh fontSize={fontSize || FONT_SIZE_LG} {...props} {...props} />
+export const IconList = ({ className, filled, ...props }: IconBaseProps) => (
+  <span className={getClassName({ filled, className })} {...props}>
+    list
+  </span>
 )
 
-export const IconGridFill = ({ fontSize, ...props }: IconBaseProps) => (
-  <BsGridFill fontSize={fontSize || FONT_SIZE} {...props} {...props} />
+export const IconHourglass = ({
+  className,
+  filled,
+  ...props
+}: IconBaseProps) => (
+  <span className={getClassName({ filled, className })} {...props}>
+    hourglass
+  </span>
 )
 
-export const IconSortDown = ({ fontSize, ...props }: IconBaseProps) => (
-  <BsSortDown fontSize={fontSize || FONT_SIZE_LG} {...props} {...props} />
+export const IconKeyboardArrowLeft = ({
+  className,
+  filled,
+  ...props
+}: IconBaseProps) => (
+  <span className={getClassName({ filled, className })} {...props}>
+    keyboard_arrow_left
+  </span>
 )
 
-export const IconSortUp = ({ fontSize, ...props }: IconBaseProps) => (
-  <BsSortUp fontSize={fontSize || FONT_SIZE_LG} {...props} {...props} />
+export const IconKeyboardArrowRight = ({
+  className,
+  filled,
+  ...props
+}: IconBaseProps) => (
+  <span className={getClassName({ filled, className })} {...props}>
+    keyboard_arrow_right
+  </span>
+)
+
+export const IconKeyboardDoubleArrowRight = ({
+  className,
+  filled,
+  ...props
+}: IconBaseProps) => (
+  <span className={getClassName({ filled, className })} {...props}>
+    keyboard_double_arrow_right
+  </span>
+)
+
+export const IconKeyboardDoubleArrowLeft = ({
+  className,
+  filled,
+  ...props
+}: IconBaseProps) => (
+  <span className={getClassName({ filled, className })} {...props}>
+    keyboard_double_arrow_left
+  </span>
+)
+
+export const IconFirstPage = ({
+  className,
+  filled,
+  ...props
+}: IconBaseProps) => (
+  <span className={getClassName({ filled, className })} {...props}>
+    first_page
+  </span>
+)
+
+export const IconLastPage = ({
+  className,
+  filled,
+  ...props
+}: IconBaseProps) => (
+  <span className={getClassName({ filled, className })} {...props}>
+    last_page
+  </span>
 )

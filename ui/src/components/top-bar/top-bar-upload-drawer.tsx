@@ -14,7 +14,7 @@ import {
 } from '@chakra-ui/react'
 import cx from 'classnames'
 import UploadList from '@/components/file/upload/upload-list'
-import { IconDeleteListItem, IconUpload } from '@/lib'
+import { IconClearAll, IconUpload } from '@/lib'
 import { completedUploadsCleared } from '@/store/entities/uploads'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { uploadsDrawerClosed } from '@/store/ui/uploads-drawer'
@@ -78,7 +78,7 @@ const TopBarUploadDrawer = () => {
             {hasCompleted && (
               <Button
                 className={cx('w-full')}
-                leftIcon={<IconDeleteListItem size="22px" />}
+                leftIcon={<IconClearAll size="22px" />}
                 onClick={handleClearCompleted}
               >
                 Clear Completed Items

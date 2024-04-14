@@ -9,7 +9,7 @@ import { swrConfig } from '@/client/options'
 import GroupAddMember from '@/components/group/group-add-member'
 import GroupDelete from '@/components/group/group-delete'
 import GroupEditName from '@/components/group/group-edit-name'
-import { IconEdit, IconTrash, IconUserPlus, SectionSpinner } from '@/lib'
+import { IconEdit, IconDelete, IconPersonAdd, SectionSpinner } from '@/lib'
 
 const Spacer = () => <div className={cx('grow')} />
 
@@ -67,7 +67,7 @@ const GroupSettingsPage = () => {
           <span>Add members</span>
           <Spacer />
           <IconButton
-            icon={<IconUserPlus />}
+            icon={<IconPersonAdd />}
             isDisabled={!hasOwnerPermission}
             aria-label=""
             onClick={() => {
@@ -80,7 +80,7 @@ const GroupSettingsPage = () => {
           <span>Delete permanently</span>
           <Spacer />
           <IconButton
-            icon={<IconTrash />}
+            icon={<IconDelete />}
             variant="solid"
             colorScheme="red"
             isDisabled={!hasOwnerPermission}

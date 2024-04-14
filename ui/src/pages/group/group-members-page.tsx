@@ -23,7 +23,6 @@ import {
 } from '@chakra-ui/react'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
-import { HiDotsVertical } from 'react-icons/hi'
 import GroupAPI from '@/client/api/group'
 import { geEditorPermission } from '@/client/api/permission'
 import UserAPI, { SortBy, SortOrder } from '@/client/api/user'
@@ -34,11 +33,12 @@ import GroupRemoveMember from '@/components/group/group-remove-member'
 import { decodeQuery } from '@/helpers/query'
 import { groupMemberPaginationStorage } from '@/infra/pagination'
 import {
-  IconExit,
-  IconUserPlus,
+  IconLogout,
+  IconPersonAdd,
   SectionSpinner,
   PagePagination,
   usePagePagination,
+  IconMoreVert,
 } from '@/lib'
 
 const GroupMembersPage = () => {
@@ -120,15 +120,14 @@ const GroupMembersPage = () => {
                     <Menu>
                       <MenuButton
                         as={IconButton}
-                        icon={<HiDotsVertical />}
-                        className={cx('text-[18px]')}
+                        icon={<IconMoreVert />}
                         variant="ghost"
                         aria-label=""
                       />
                       <Portal>
                         <MenuList>
                           <MenuItem
-                            icon={<IconExit />}
+                            icon={<IconLogout />}
                             className={cx('text-red-500')}
                             isDisabled={!geEditorPermission(group.permission)}
                             onClick={() => {
@@ -186,7 +185,7 @@ const GroupMembersPage = () => {
               <span>This group has no members.</span>
               {geEditorPermission(group.permission) && (
                 <Button
-                  leftIcon={<IconUserPlus />}
+                  leftIcon={<IconPersonAdd />}
                   onClick={() => {
                     setIsAddMembersModalOpen(true)
                   }}

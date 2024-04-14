@@ -18,8 +18,6 @@ import {
 } from '@chakra-ui/react'
 import { useSWRConfig } from 'swr'
 import cx from 'classnames'
-import { FiChevronDown } from 'react-icons/fi'
-import { LuGrid, LuList, LuX } from 'react-icons/lu'
 import FileAPI, { List, SortBy, SortOrder } from '@/client/api/file'
 import { ltEditorPermission, ltOwnerPermission } from '@/client/api/permission'
 import downloadFile from '@/helpers/download-file'
@@ -27,22 +25,25 @@ import mapFileList from '@/helpers/map-file-list'
 import useFileListSearchParams from '@/hooks/use-file-list-params'
 import {
   IconAdd,
-  IconCopy,
-  IconDotsVertical,
+  IconFileCopy,
+  IconMoreVert,
   IconDownload,
   IconEdit,
-  IconMove,
-  IconShare,
-  IconTrash,
+  IconArrowTopRight,
+  IconGroup,
+  IconDelete,
   IconUpload,
   IconRefresh,
-  IconGridFill,
-  IconSortUp,
-  IconSortDown,
+  IconGridView,
+  IconArrowDownward,
+  IconArrowUpward,
   IconCheck,
-  IconCheckbox,
-  IconCheckboxBlank,
-  IconCheckboxMultiple,
+  IconSelectCheckBox,
+  IconCheckBoxOutlineBlank,
+  IconLibraryAddCheck,
+  IconExpandMore,
+  IconClose,
+  IconList,
 } from '@/lib'
 import { uploadAdded, UploadDecorator } from '@/store/entities/uploads'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
@@ -201,17 +202,17 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
 
   const getSortOrderIcon = useCallback(() => {
     if (sortOrder === SortOrder.Asc) {
-      return <IconSortUp />
+      return <IconArrowDownward />
     } else if (sortOrder === SortOrder.Desc) {
-      return <IconSortDown />
+      return <IconArrowUpward />
     }
   }, [sortOrder])
 
   const getViewTypeIcon = useCallback(() => {
     if (viewType === FileViewType.Grid) {
-      return <LuList fontSize="16px" />
+      return <IconList />
     } else if (viewType === FileViewType.List) {
-      return <LuGrid fontSize="16px" />
+      return <IconGridView />
     }
   }, [viewType])
 
@@ -224,7 +225,7 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
               as={Button}
               variant="solid"
               colorScheme="blue"
-              leftIcon={<FiChevronDown fontSize="16px" />}
+              leftIcon={<IconExpandMore />}
               isDisabled={
                 !folder || ltEditorPermission(folder.permission) || !list
               }
@@ -263,7 +264,7 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
         <div className={stackClassName}>
           {selectionCount > 0 && hasOwnerPermission && (
             <Button
-              leftIcon={<IconShare />}
+              leftIcon={<IconGroup />}
               onClick={() => dispatch(sharingModalDidOpen())}
             >
               Sharing
@@ -279,7 +280,7 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
           )}
           {selectionCount > 0 && hasOwnerPermission && (
             <Button
-              leftIcon={<IconTrash />}
+              leftIcon={<IconDelete />}
               className={cx('text-red-500')}
               onClick={() => dispatch(deleteModalDidOpen())}
             >
@@ -290,7 +291,7 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
             <Menu>
               <MenuButton
                 as={IconButton}
-                icon={<IconDotsVertical />}
+                icon={<IconMoreVert />}
                 variant="solid"
                 aria-label=""
                 isDisabled={!list}
@@ -298,7 +299,7 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
               <Portal>
                 <MenuList zIndex="dropdown">
                   <MenuItem
-                    icon={<IconShare />}
+                    icon={<IconGroup />}
                     isDisabled={selectionCount === 0 || !hasOwnerPermission}
                     onClick={() => dispatch(sharingModalDidOpen())}
                   >
@@ -317,7 +318,7 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
                   </MenuItem>
                   <MenuDivider />
                   <MenuItem
-                    icon={<IconTrash />}
+                    icon={<IconDelete />}
                     className={cx('text-red-500')}
                     isDisabled={selectionCount === 0 || !hasOwnerPermission}
                     onClick={() => dispatch(deleteModalDidOpen())}
@@ -332,14 +333,14 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
                     Rename
                   </MenuItem>
                   <MenuItem
-                    icon={<IconMove />}
+                    icon={<IconArrowTopRight />}
                     isDisabled={selectionCount === 0 || !hasEditorPermission}
                     onClick={() => dispatch(moveModalDidOpen())}
                   >
                     Move
                   </MenuItem>
                   <MenuItem
-                    icon={<IconCopy />}
+                    icon={<IconFileCopy />}
                     isDisabled={selectionCount === 0 || !hasEditorPermission}
                     onClick={() => dispatch(copyModalDidOpen())}
                   >
@@ -349,13 +350,13 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
                     <>
                       <MenuDivider />
                       <MenuItem
-                        icon={<IconCheckbox />}
+                        icon={<IconSelectCheckBox />}
                         onClick={handleSelectAllClick}
                       >
                         Select All
                       </MenuItem>
                       <MenuItem
-                        icon={<IconCheckboxBlank />}
+                        icon={<IconCheckBoxOutlineBlank />}
                         onClick={() => dispatch(selectionUpdated([]))}
                       >
                         Unselect All
@@ -369,13 +370,7 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
         </div>
         {fileCount ? (
           <IconButton
-            icon={
-              isSelectionMode ? (
-                <LuX />
-              ) : (
-                <IconCheckboxMultiple fontSize="18px" />
-              )
-            }
+            icon={isSelectionMode ? <IconClose /> : <IconLibraryAddCheck />}
             isDisabled={!list}
             variant="solid"
             aria-label=""
@@ -406,13 +401,12 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
               <SliderFilledTrack />
             </SliderTrack>
             <SliderThumb boxSize={8}>
-              <IconGridFill className={cx('text-gray-500')} />
+              <IconGridView className={cx('text-gray-500')} />
             </SliderThumb>
           </Slider>
           <div className={stackClassName}>
             <IconButton
               icon={getSortOrderIcon()}
-              className={cx('text-[16px]')}
               variant="solid"
               aria-label=""
               isDisabled={!list}
@@ -420,7 +414,6 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
             />
             <IconButton
               icon={getViewTypeIcon()}
-              className={cx('text-[16px]')}
               variant="solid"
               aria-label=""
               isDisabled={!list}
@@ -429,7 +422,7 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
             <Menu>
               <MenuButton
                 as={IconButton}
-                icon={<IconDotsVertical />}
+                icon={<IconMoreVert />}
                 variant="solid"
                 aria-label=""
                 isDisabled={!list}
