@@ -12,7 +12,7 @@ import (
 	"voltaserve/repo"
 	"voltaserve/search"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/gofiber/fiber/v2/log"
 )
 
 type Organization struct {

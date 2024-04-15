@@ -10,10 +10,7 @@
     "tsc": "tsc",
     "preview": "vite preview",
     "format": "prettier --write .",
-    "lint": "eslint './src/**/*.{ts,tsx}'"
-  },
-  "engines": {
-    "node": "20.x"
+    "lint": "eslint"
   },
   "dependencies": {
     "@chakra-ui/anatomy": "2.2.2",

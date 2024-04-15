@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"voltaserve/config"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/gofiber/fiber/v2/log"
 	"gopkg.in/gomail.v2"
 	"sigs.k8s.io/yaml"
 

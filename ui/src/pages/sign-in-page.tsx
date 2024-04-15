@@ -79,6 +79,8 @@ const SignInPage = () => {
             navigate('/workspace')
           }
         }
+      } catch (error) {
+        console.error(error)
       } finally {
         setSubmitting(false)
       }

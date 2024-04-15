@@ -13,9 +13,7 @@ import (
 	"voltaserve/helper"
 	"voltaserve/router"
 
-	jwtware "github.com/gofiber/jwt/v3"
-	log "github.com/sirupsen/logrus"
-
+	jwtware "github.com/gofiber/contrib/jwt"
 	"github.com/joho/godotenv"
 )
 
@@ -34,9 +32,6 @@ func main() {
 			panic(err)
 		}
 	}
-
-	log.SetOutput(os.Stdout)
-	log.SetReportCaller(true)
 
 	cfg := config.GetConfig()
 
@@ -64,7 +59,7 @@ func main() {
 	conversionWebhook.AppendInternalRoutes(f)
 
 	app.Use(jwtware.New(jwtware.Config{
-		SigningKey: []byte(cfg.Security.JWTSigningKey),
+		SigningKey: jwtware.SigningKey{Key: []byte(cfg.Security.JWTSigningKey)},
 	}))
 
 	files := router.NewFileRouter()

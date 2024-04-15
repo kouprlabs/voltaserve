@@ -5,7 +5,7 @@ import (
 	"voltaserve/errorpkg"
 	"voltaserve/model"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/gofiber/fiber/v2/log"
 )
 
 type FileGuard struct {

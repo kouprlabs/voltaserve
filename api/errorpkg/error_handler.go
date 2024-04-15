@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
-	log "github.com/sirupsen/logrus"
+	"github.com/gofiber/fiber/v2/log"
 )
 
 func ErrorHandler(c *fiber.Ctx, err error) error {

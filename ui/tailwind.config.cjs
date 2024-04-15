@@ -1,6 +1,5 @@
 const { variables } = require('./src/lib/variables.cjs')
 
-// eslint-disable-next-line
 module.exports = {
   important: true,
   darkMode: 'class',

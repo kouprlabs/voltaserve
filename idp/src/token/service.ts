@@ -1,4 +1,4 @@
-import jwt from 'jsonwebtoken'
+import { SignJWT } from 'jose'
 import { getConfig } from '@/config/config'
 import { ErrorCode, newError } from '@/infra/error'
 import { newHyphenlessUuid } from '@/infra/id'
@@ -100,14 +100,17 @@ function validateParemeters(options: TokenExchangeOptions) {
 
 async function newToken(userId: string): Promise<Token> {
   const config = getConfig().token
+  const expiry = newAccessTokenExpiry()
+  const jwt = await new SignJWT({ sub: userId })
+    .setProtectedHeader({ alg: 'HS256' })
+    .setIssuedAt()
+    .setIssuer(config.issuer)
+    .setAudience(config.audience)
+    .setExpirationTime(expiry)
+    .sign(new TextEncoder().encode(config.jwtSigningKey))
   const token: Token = {
-    access_token: jwt.sign({}, config.jwtSigningKey, {
-      expiresIn: config.accessTokenLifetime,
-      audience: config.audience,
-      issuer: config.issuer,
-      subject: userId,
-    }),
-    expires_in: config.accessTokenLifetime,
+    access_token: jwt,
+    expires_in: expiry,
     token_type: 'Bearer',
     refresh_token: newHyphenlessUuid(),
   }
@@ -124,4 +127,10 @@ function newRefreshTokenExpiry(): string {
   const now = new Date()
   now.setSeconds(now.getSeconds() + getConfig().token.refreshTokenLifetime)
   return now.toISOString()
+}
+
+function newAccessTokenExpiry(): number {
+  const now = new Date()
+  now.setSeconds(now.getSeconds() + getConfig().token.refreshTokenLifetime)
+  return Math.floor(now.getTime() / 1000)
 }
