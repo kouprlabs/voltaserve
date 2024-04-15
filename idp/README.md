@@ -5,19 +5,19 @@
 Install dependencies:
 
 ```shell
-pnpm install
+bun i
 ```
 
 Run for development:
 
 ```shell
-pnpm dev
+bun run dev
 ```
 
 Run for production:
 
 ```shell
-pnpm start
+bun run start
 ```
 
 Build Docker image:

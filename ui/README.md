@@ -3,13 +3,13 @@
 Install dependencies:
 
 ```shell
-pnpm install
+bun i
 ```
 
 Run for development:
 
 ```shell
-pnpm dev
+bun run dev
 ```
 
 Build Docker Image:
