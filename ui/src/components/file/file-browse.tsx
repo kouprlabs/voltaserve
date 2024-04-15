@@ -2,10 +2,10 @@ import { useCallback, useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { Button } from '@chakra-ui/react'
 import cx from 'classnames'
-import { FcFolder } from 'react-icons/fc'
 import FileAPI, { File, FileType } from '@/client/api/file'
 import WorkspaceAPI from '@/client/api/workspace'
 import Path from '@/components/common/path'
+import FolderSvg from '@/components/file/list/item/icon/icon-folder/assets/icon-folder.svg'
 import { IconChevronRight, SectionSpinner, Text } from '@/lib'
 
 export type FileBrowseProps = {
@@ -115,7 +115,10 @@ const FileBrowse = ({ onChange }: FileBrowseProps) => {
               )}
               onClick={() => setFileId(f.id)}
             >
-              <FcFolder className={cx('shrink-0', 'text-[36px]')} />
+              <img
+                src={FolderSvg}
+                className={cx('shrink-0', 'w-[36px]', 'h-[28.84px]')}
+              />
               <Text noOfLines={1}>{f.name}</Text>
               <div className={cx('grow')} />
               <IconChevronRight />

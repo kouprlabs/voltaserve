@@ -1,4 +1,4 @@
-import { variables } from './src/lib/variables'
+const { variables } = require('./src/lib/variables.cjs')
 
 // eslint-disable-next-line
 module.exports = {
