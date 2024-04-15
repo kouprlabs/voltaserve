@@ -16,6 +16,7 @@ import {
 import { FileCommonProps, FileViewType } from '@/types/file'
 import ItemIcon from './icon'
 import { performMultiSelect, performRangeSelect } from './item-perform-select'
+import { computeScale } from './scale'
 
 export type ListItemProps = {
   onContextMenu?: (event: MouseEvent) => void
@@ -38,8 +39,9 @@ const ListItem = ({
   const [isChecked, setIsChecked] = useState(false)
   const [isSelected, setIsSelected] = useState(false)
   const date = relativeDate(new Date(file.createTime))
-  const width = `${WIDTH * scale}px`
-  const minHeight = `${MIN_HEIGHT * scale}px`
+  const computedScale = computeScale(scale, viewType)
+  const width = `${WIDTH * computedScale}px`
+  const minHeight = `${MIN_HEIGHT * computedScale}px`
 
   useEffect(() => {
     const unsubscribe = store.subscribe(() => {

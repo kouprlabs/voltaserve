@@ -21,7 +21,7 @@ const IconThumbnail = ({ file, scale }: IconThumbnailProps) => {
   const height = getThumbnailHeight(file, scale)
   const [isLoading, setIsLoading] = useState(true)
   return (
-    <div className={cx('relative')} style={{ width, height }}>
+    <>
       <Image
         src={file.thumbnail?.base64}
         style={{
@@ -80,7 +80,7 @@ const IconThumbnail = ({ file, scale }: IconThumbnailProps) => {
         {status === SnapshotStatus.Processing ? <IconProcessingBadge /> : null}
         {status === SnapshotStatus.Error ? <IconErrorBadge /> : null}
       </div>
-    </div>
+    </>
   )
 }
 

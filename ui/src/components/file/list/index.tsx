@@ -204,7 +204,7 @@ const FileList = ({ list, scale }: FileListProps) => {
                   <ListDraggableDroppable
                     key={f.id}
                     file={f}
-                    scale={scale * 0.5}
+                    scale={scale}
                     viewType={viewType}
                     isSelectionMode={isSelectionMode}
                     onContextMenu={(event: MouseEvent) => {
