@@ -38,45 +38,46 @@ const BASE_HEIGHT = 89
 
 const IconDiverse = ({ file, scale }: IconFontProps) => {
   const { colorMode } = useColorMode()
+  const isDark = colorMode === 'dark'
   const width = Math.max(MIN_WIDTH, BASE_WIDTH * scale)
   const height = Math.max(MIN_HEIGHT, BASE_HEIGHT * scale)
 
   const { original } = file
   let image
   if (fe.isImage(original?.extension)) {
-    image = colorMode === 'dark' ? DarkFileSvg : FileSvg
+    image = isDark ? DarkFileSvg : FileSvg
   } else if (fe.isPDF(original?.extension)) {
-    image = colorMode === 'dark' ? DarkPdfSvg : PdfSvg
+    image = isDark ? DarkPdfSvg : PdfSvg
   } else if (fe.isText(original?.extension)) {
-    image = colorMode === 'dark' ? DarkTextSvg : TextSvg
+    image = isDark ? DarkTextSvg : TextSvg
   } else if (fe.isRichText(original?.extension)) {
-    image = colorMode === 'dark' ? DarkRichTextSvg : RichTextSvg
+    image = isDark ? DarkRichTextSvg : RichTextSvg
   } else if (fe.isWord(original?.extension)) {
-    image = colorMode === 'dark' ? DarkWordSvg : WordSvg
+    image = isDark ? DarkWordSvg : WordSvg
   } else if (fe.isPowerPoint(original?.extension)) {
-    image = colorMode === 'dark' ? DarkPowerPointSvg : PowerPointSvg
+    image = isDark ? DarkPowerPointSvg : PowerPointSvg
   } else if (fe.isExcel(original?.extension)) {
-    image = colorMode === 'dark' ? DarkSpreadsheetSvg : SpreadsheetSvg
+    image = isDark ? DarkSpreadsheetSvg : SpreadsheetSvg
   } else if (fe.isDocument(original?.extension)) {
-    image = colorMode === 'dark' ? DarkWordSvg : WordSvg
+    image = isDark ? DarkWordSvg : WordSvg
   } else if (fe.isSpreadsheet(original?.extension)) {
-    image = colorMode === 'dark' ? DarkSpreadsheetSvg : SpreadsheetSvg
+    image = isDark ? DarkSpreadsheetSvg : SpreadsheetSvg
   } else if (fe.isSlides(original?.extension)) {
-    image = colorMode === 'dark' ? DarkPowerPointSvg : PowerPointSvg
+    image = isDark ? DarkPowerPointSvg : PowerPointSvg
   } else if (fe.isVideo(original?.extension)) {
-    image = colorMode === 'dark' ? DarkVideoSvg : VideoSvg
+    image = isDark ? DarkVideoSvg : VideoSvg
   } else if (fe.isAudio(original?.extension)) {
-    image = colorMode === 'dark' ? DarkAudioSvg : AudioSvg
+    image = isDark ? DarkAudioSvg : AudioSvg
   } else if (fe.isArchive(original?.extension)) {
-    image = colorMode === 'dark' ? DarkArchiveSvg : ArchiveSvg
+    image = isDark ? DarkArchiveSvg : ArchiveSvg
   } else if (fe.isFont(original?.extension)) {
-    image = colorMode === 'dark' ? DarkFileSvg : FileSvg
+    image = isDark ? DarkFileSvg : FileSvg
   } else if (fe.isCode(original?.extension)) {
-    image = colorMode === 'dark' ? DarkCodeSvg : CodeSvg
+    image = isDark ? DarkCodeSvg : CodeSvg
   } else if (fe.isCSV(original?.extension)) {
-    image = colorMode === 'dark' ? DarkCsvSvg : CsvSvg
+    image = isDark ? DarkCsvSvg : CsvSvg
   } else {
-    image = colorMode === 'dark' ? DarkFileSvg : FileSvg
+    image = isDark ? DarkFileSvg : FileSvg
   }
 
   return (
