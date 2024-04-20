@@ -59,7 +59,7 @@ type fileEntity struct {
 	UserPermissions  []*userPermissionValue  `json:"userPermissions" gorm:"-"`
 	GroupPermissions []*groupPermissionValue `json:"groupPermissions" gorm:"-"`
 	Text             *string                 `json:"text,omitempty" gorm:"-"`
-	SnapshotID       *string                 `json:"snapshotId,omitempty" gorm:"-"`
+	SnapshotID       *string                 `json:"snapshotId,omitempty" gorm:"column:snapshot_id"`
 	CreateTime       string                  `json:"createTime" gorm:"column:create_time"`
 	UpdateTime       *string                 `json:"updateTime,omitempty" gorm:"column:update_time"`
 }

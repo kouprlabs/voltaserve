@@ -17,22 +17,22 @@ func NewNotificationRouter() *NotificationRouter {
 }
 
 func (r *NotificationRouter) AppendRoutes(g fiber.Router) {
-	g.Get("/", r.GetAll)
+	g.Get("/", r.List)
 }
 
-// GetAll godoc
+// List godoc
 //
-//	@Summary		Get notifications
-//	@Description	Get notifications
+//	@Summary		List
+//	@Description	List
 //	@Tags			Notifications
-//	@Id				notification_get_all
+//	@Id				notifications_list
 //	@Produce		json
 //	@Success		200	{array}	service.Notification
 //	@Failure		500
 //	@Router			/notifications [get]
-func (r *NotificationRouter) GetAll(c *fiber.Ctx) error {
+func (r *NotificationRouter) List(c *fiber.Ctx) error {
 	userID := GetUserID(c)
-	res, err := r.notificationSvc.GetAll(userID)
+	res, err := r.notificationSvc.List(userID)
 	if err != nil {
 		return err
 	}

@@ -55,7 +55,7 @@ func main() {
 	fileDownloads := router.NewFileDownloadRouter()
 	fileDownloads.AppendNonJWTRoutes(f)
 
-	conversionWebhook := router.NewConversionWebhookRouter()
+	conversionWebhook := router.NewFileConversionWebhookRouter()
 	conversionWebhook.AppendInternalRoutes(f)
 
 	app.Use(jwtware.New(jwtware.Config{

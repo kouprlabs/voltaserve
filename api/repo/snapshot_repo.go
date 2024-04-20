@@ -24,6 +24,7 @@ type SnapshotUpdateOptions struct {
 type SnapshotRepo interface {
 	Find(id string) (model.Snapshot, error)
 	Save(snapshot model.Snapshot) error
+	Delete(id string) error
 	Update(id string, opts SnapshotUpdateOptions) error
 	MapWithFile(id string, fileID string) error
 	DeleteMappingsForFile(fileID string) error
@@ -255,6 +256,17 @@ func (repo *snapshotRepo) Find(id string) (model.Snapshot, error) {
 
 func (repo *snapshotRepo) Save(snapshot model.Snapshot) error {
 	if db := repo.db.Save(snapshot); db.Error != nil {
+		return db.Error
+	}
+	return nil
+}
+
+func (repo *snapshotRepo) Delete(id string) error {
+	snapshot, err := repo.find(id)
+	if err != nil {
+		return err
+	}
+	if db := repo.db.Delete(snapshot); db.Error != nil {
 		return db.Error
 	}
 	return nil

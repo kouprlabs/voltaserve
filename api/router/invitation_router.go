@@ -61,8 +61,8 @@ func (r *InvitationRouter) Create(c *fiber.Ctx) error {
 
 // GetIncoming godoc
 //
-//	@Summary		Get incoming
-//	@Description	Get incoming
+//	@Summary		Get Incoming
+//	@Description	Get Incoming
 //	@Tags			Invitations
 //	@Id				invitation_get_incoming
 //	@Produce		json
@@ -115,8 +115,8 @@ func (r *InvitationRouter) GetIncoming(c *fiber.Ctx) error {
 
 // GetOutgoing godoc
 //
-//	@Summary		Get outgoing
-//	@Description	Get outgoing
+//	@Summary		Get Outgoing
+//	@Description	Get Outgoing
 //	@Tags			Invitations
 //	@Id				invitation_get_outgoing
 //	@Produce		json
@@ -219,7 +219,7 @@ func (r *InvitationRouter) Resend(c *fiber.Ctx) error {
 //	@Summary		Accept
 //	@Description	Accept
 //	@Tags			Invitations
-//	@Id				invitation_accept
+//	@Id				invitations_accept
 //	@Accept			json
 //	@Produce		json
 //	@Param			id	path		string	true	"ID"
@@ -237,8 +237,8 @@ func (r *InvitationRouter) Accept(c *fiber.Ctx) error {
 
 // Decline godoc
 //
-//	@Summary		Delete
-//	@Description	Delete
+//	@Summary		Decline
+//	@Description	Decline
 //	@Tags			Invitations
 //	@Id				invitations_decline
 //	@Accept			json

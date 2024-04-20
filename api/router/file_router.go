@@ -54,7 +54,6 @@ func (r *FileRouter) AppendRoutes(g fiber.Router) {
 	g.Post("/:id/move", r.Move)
 	g.Post("/:id/rename", r.Rename)
 	g.Post("/:id/copy", r.Copy)
-	g.Post("/:id/activate_snapshot", r.ActivateSnapshot)
 	g.Get("/:id/get_size", r.GetSize)
 	g.Post("/grant_user_permission", r.GrantUserPermission)
 	g.Post("/revoke_user_permission", r.RevokeUserPermission)
@@ -62,6 +61,8 @@ func (r *FileRouter) AppendRoutes(g fiber.Router) {
 	g.Post("/revoke_group_permission", r.RevokeGroupPermission)
 	g.Get("/:id/get_user_permissions", r.GetUserPermissions)
 	g.Get("/:id/get_group_permissions", r.GetGroupPermissions)
+	g.Post("/:id/snapshots/:snapshotId/activate", r.ActivateSnapshot)
+	g.Delete("/:id/snapshots/:snapshotId", r.DeleteSnapshot)
 }
 
 // Upload godoc
@@ -405,8 +406,8 @@ func (r *FileRouter) GetIDs(c *fiber.Ctx) error {
 
 // GetPath godoc
 //
-//	@Summary		Get path
-//	@Description	Get path
+//	@Summary		Get Path
+//	@Description	Get Path
 //	@Tags			Files
 //	@Id				files_get_path
 //	@Produce		json
@@ -454,26 +455,38 @@ func (r *FileRouter) Copy(c *fiber.Ctx) error {
 
 // ActivateSnapshot godoc
 //
-//	@Summary		Activate snapshot
-//	@Description	Activate snapshot
+//	@Summary		Activate Snapshot
+//	@Description	Activate Snapshot
 //	@Tags			Files
 //	@Id				files_activate_snapsshot
 //	@Produce		json
-//	@Param			id		path		string								true	"ID"
-//	@Param			body	body		service.FileActivateSnapshotOptions	true	"Body"
-//	@Failure		404		{object}	errorpkg.ErrorResponse
-//	@Failure		500		{object}	errorpkg.ErrorResponse
-//	@Router			/files/{id}/activate_snapshot [post]
+//	@Param			id			path		string	true	"ID"
+//	@Param			snapshotId	path		string	true	"Snapshot ID"
+//	@Failure		404			{object}	errorpkg.ErrorResponse
+//	@Failure		500			{object}	errorpkg.ErrorResponse
+//	@Router			/files/{id}/snapshots/{snapshotId}/activate [post]
 func (r *FileRouter) ActivateSnapshot(c *fiber.Ctx) error {
-	userID := GetUserID(c)
-	opts := new(service.FileActivateSnapshotOptions)
-	if err := c.BodyParser(opts); err != nil {
+	res, err := r.fileSvc.ActivateSnapshot(c.Params("id"), c.Params("snapshotId"), GetUserID(c))
+	if err != nil {
 		return err
 	}
-	if err := validator.New().Struct(opts); err != nil {
-		return errorpkg.NewRequestBodyValidationError(err)
-	}
-	res, err := r.fileSvc.ActivateSnapshot(c.Params("id"), opts.SnapshotID, userID)
+	return c.JSON(res)
+}
+
+// DeleteSnapshot godoc
+//
+//	@Summary		Delete Snapshot
+//	@Description	Delete Snapshot
+//	@Tags			Files
+//	@Id				files_delete_snapsshot
+//	@Produce		json
+//	@Param			id			path		string	true	"ID"
+//	@Param			snapshotId	path		string	true	"Snapshot ID"
+//	@Failure		404			{object}	errorpkg.ErrorResponse
+//	@Failure		500			{object}	errorpkg.ErrorResponse
+//	@Router			/files/{id}/snapshots/{snapshotId} [delete]
+func (r *FileRouter) DeleteSnapshot(c *fiber.Ctx) error {
+	res, err := r.fileSvc.DeleteSnapshot(c.Params("id"), c.Params("snapshotId"), GetUserID(c))
 	if err != nil {
 		return err
 	}
@@ -558,8 +571,8 @@ func (r *FileRouter) Delete(c *fiber.Ctx) error {
 
 // BatchGet godoc
 //
-//	@Summary		Batch get
-//	@Description	Batch get
+//	@Summary		Batch Get
+//	@Description	Batch Get
 //	@Tags			Files
 //	@Id				files_batch_get
 //	@Produce		json
@@ -585,8 +598,8 @@ func (r *FileRouter) BatchGet(c *fiber.Ctx) error {
 
 // BatchDelete godoc
 //
-//	@Summary		Batch delete
-//	@Description	Batch delete
+//	@Summary		Batch Delete
+//	@Description	Batch Delete
 //	@Tags			Files
 //	@Id				files_batch_delete
 //	@Produce		json
@@ -612,8 +625,8 @@ func (r *FileRouter) BatchDelete(c *fiber.Ctx) error {
 
 // GetSize godoc
 //
-//	@Summary		Get size
-//	@Description	Get size
+//	@Summary		Get Size
+//	@Description	Get Size
 //	@Tags			Files
 //	@Id				files_get_size
 //	@Produce		json
@@ -634,8 +647,8 @@ func (r *FileRouter) GetSize(c *fiber.Ctx) error {
 
 // GetItemCount godoc
 //
-//	@Summary		Get children count
-//	@Description	Get children count
+//	@Summary		Get Children Count
+//	@Description	Get Children Count
 //	@Tags			Files
 //	@Id				files_get_children_count
 //	@Produce		json
@@ -655,8 +668,8 @@ func (r *FileRouter) GetItemCount(c *fiber.Ctx) error {
 
 // GrantUserPermission godoc
 //
-//	@Summary		Grant user permission
-//	@Description	Grant user permission
+//	@Summary		Grant User Permission
+//	@Description	Grant User Permission
 //	@Tags			Files
 //	@Id				files_grant_user_permission
 //	@Produce		json
@@ -682,8 +695,8 @@ func (r *FileRouter) GrantUserPermission(c *fiber.Ctx) error {
 
 // RevokeUserPermission godoc
 //
-//	@Summary		Revoke user permission
-//	@Description	Revoke user permission
+//	@Summary		Revoke User Permission
+//	@Description	Revoke User Permission
 //	@Tags			Files
 //	@Id				files_revoke_user_permission
 //	@Produce		json
@@ -709,8 +722,8 @@ func (r *FileRouter) RevokeUserPermission(c *fiber.Ctx) error {
 
 // GrantGroupPermission godoc
 //
-//	@Summary		Grant group permission
-//	@Description	Grant group permission
+//	@Summary		Grant Group Permission
+//	@Description	Grant Group Permission
 //	@Tags			Files
 //	@Id				files_grant_group_permission
 //	@Produce		json
@@ -736,8 +749,8 @@ func (r *FileRouter) GrantGroupPermission(c *fiber.Ctx) error {
 
 // RevokeGroupPermission godoc
 //
-//	@Summary		Revoke group permission
-//	@Description	Revoke group permission
+//	@Summary		Revoke Group Permission
+//	@Description	Revoke Group Permission
 //	@Tags			Files
 //	@Id				files_revoke_group_permission
 //	@Produce		json
@@ -763,8 +776,8 @@ func (r *FileRouter) RevokeGroupPermission(c *fiber.Ctx) error {
 
 // GetUserPermissions godoc
 //
-//	@Summary		Get user permissions
-//	@Description	Get user permissions
+//	@Summary		Get User Permissions
+//	@Description	Get User Permissions
 //	@Tags			Files
 //	@Id				files_get_user_permissions
 //	@Produce		json
@@ -784,8 +797,8 @@ func (r *FileRouter) GetUserPermissions(c *fiber.Ctx) error {
 
 // GetGroupPermissions godoc
 //
-//	@Summary		Get group permissions
-//	@Description	Get group permissions
+//	@Summary		Get Group Permissions
+//	@Description	Get Group Permissions
 //	@Tags			Files
 //	@Id				files_get_group_permissions
 //	@Produce		json
@@ -822,8 +835,8 @@ func (r *FileDownloadRouter) AppendNonJWTRoutes(g fiber.Router) {
 
 // DownloadOriginal godoc
 //
-//	@Summary		Download original
-//	@Description	Download original
+//	@Summary		Download Original
+//	@Description	Download Original
 //	@Tags			Files
 //	@Id				files_download_original
 //	@Produce		json
@@ -859,8 +872,8 @@ func (r *FileDownloadRouter) DownloadOriginal(c *fiber.Ctx) error {
 
 // DownloadPreview godoc
 //
-//	@Summary		Download preview
-//	@Description	Download preview
+//	@Summary		Download Preview
+//	@Description	Download Preview
 //	@Tags			Files
 //	@Id				files_download_preview
 //	@Produce		json
@@ -911,45 +924,45 @@ func (r *FileDownloadRouter) getUserID(accessToken string) (string, error) {
 	}
 }
 
-type ConversionWebhookRouter struct {
+type FileConversionWebhookRouter struct {
 	fileSvc *service.FileService
 }
 
-func NewConversionWebhookRouter() *ConversionWebhookRouter {
-	return &ConversionWebhookRouter{
+func NewFileConversionWebhookRouter() *FileConversionWebhookRouter {
+	return &FileConversionWebhookRouter{
 		fileSvc: service.NewFileService(),
 	}
 }
 
-func (r *ConversionWebhookRouter) AppendInternalRoutes(g fiber.Router) {
-	g.Post("/conversion_webhook/update_snapshot", r.UpdateSnapshot)
+func (r *FileConversionWebhookRouter) AppendInternalRoutes(g fiber.Router) {
+	g.Patch("/:id/snapshots/:snapshotId", r.UpdateSnapshot)
 }
 
 // UpdateSnapshot godoc
 //
-//	@Summary		Update snapshot
-//	@Description	Update snapshot
+//	@Summary		Update Snapshot
+//	@Description	Update Snapshot
 //	@Tags			Files
-//	@Id				files_conversion_webhook_update_snapshot
+//	@Id				files_update_snapshot
 //	@Produce		json
-//	@Param			body	body	service.SnapshotUpdateOptions	true	"Body"
+//	@Param			body	body	service.FileUpdateSnapshotOptions	true	"Body"
 //	@Success		201
 //	@Failure		401	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
-//	@Router			/files/conversion_webhook/update_snapshot [post]
-func (r *ConversionWebhookRouter) UpdateSnapshot(c *fiber.Ctx) error {
+//	@Router			/files/{id}/snapshots/{snapshotId} [patch]
+func (r *FileConversionWebhookRouter) UpdateSnapshot(c *fiber.Ctx) error {
 	apiKey := c.Query("api_key")
 	if apiKey == "" {
 		return errorpkg.NewMissingQueryParamError("api_key")
 	}
-	opts := new(service.SnapshotUpdateOptions)
+	opts := new(service.FileUpdateSnapshotOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
 	}
 	if err := validator.New().Struct(opts); err != nil {
 		return errorpkg.NewRequestBodyValidationError(err)
 	}
-	if err := r.fileSvc.UpdateSnapshot(*opts, apiKey); err != nil {
+	if err := r.fileSvc.UpdateSnapshot(c.Params("id"), c.Params("snapshotId"), *opts, apiKey); err != nil {
 		return err
 	}
 	return c.SendStatus(204)
