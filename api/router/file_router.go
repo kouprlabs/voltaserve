@@ -54,6 +54,7 @@ func (r *FileRouter) AppendRoutes(g fiber.Router) {
 	g.Post("/:id/move", r.Move)
 	g.Post("/:id/rename", r.Rename)
 	g.Post("/:id/copy", r.Copy)
+	g.Post("/:id/activate_snapshot", r.ActivateSnapshot)
 	g.Get("/:id/get_size", r.GetSize)
 	g.Post("/grant_user_permission", r.GrantUserPermission)
 	g.Post("/revoke_user_permission", r.RevokeUserPermission)
@@ -445,6 +446,34 @@ func (r *FileRouter) Copy(c *fiber.Ctx) error {
 		return errorpkg.NewRequestBodyValidationError(err)
 	}
 	res, err := r.fileSvc.Copy(c.Params("id"), opts.IDs, userID)
+	if err != nil {
+		return err
+	}
+	return c.JSON(res)
+}
+
+// ActivateSnapshot godoc
+//
+//	@Summary		Activate snapshot
+//	@Description	Activate snapshot
+//	@Tags			Files
+//	@Id				files_activate_snapsshot
+//	@Produce		json
+//	@Param			id		path		string								true	"ID"
+//	@Param			body	body		service.FileActivateSnapshotOptions	true	"Body"
+//	@Failure		404		{object}	errorpkg.ErrorResponse
+//	@Failure		500		{object}	errorpkg.ErrorResponse
+//	@Router			/files/{id}/activate_snapshot [post]
+func (r *FileRouter) ActivateSnapshot(c *fiber.Ctx) error {
+	userID := GetUserID(c)
+	opts := new(service.FileActivateSnapshotOptions)
+	if err := c.BodyParser(opts); err != nil {
+		return err
+	}
+	if err := validator.New().Struct(opts); err != nil {
+		return errorpkg.NewRequestBodyValidationError(err)
+	}
+	res, err := r.fileSvc.ActivateSnapshot(c.Params("id"), opts.SnapshotID, userID)
 	if err != nil {
 		return err
 	}

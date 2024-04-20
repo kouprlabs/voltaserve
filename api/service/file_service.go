@@ -83,6 +83,10 @@ type FileCopyOptions struct {
 	IDs []string `json:"ids" validate:"required"`
 }
 
+type FileActivateSnapshotOptions struct {
+	SnapshotID string `json:"snapshotId" validate:"required"`
+}
+
 type FileBatchDeleteOptions struct {
 	IDs []string `json:"ids" validate:"required"`
 }
@@ -1163,6 +1167,39 @@ func (svc *FileService) Delete(ids []string, userID string) ([]string, error) {
 	return res, nil
 }
 
+func (svc *FileService) ActivateSnapshot(id string, snapshotID string, userID string) (*File, error) {
+	user, err := svc.userRepo.Find(userID)
+	if err != nil {
+		return nil, err
+	}
+	file, err := svc.fileCache.Get(id)
+	if err != nil {
+		return nil, err
+	}
+	if err = svc.fileGuard.Authorize(user, file, model.PermissionEditor); err != nil {
+		return nil, err
+	}
+	if _, err := svc.snapshotRepo.Find(snapshotID); err != nil {
+		return nil, err
+	}
+	file.SetSnapshotID(&snapshotID)
+	if err = svc.fileRepo.Save(file); err != nil {
+		return nil, err
+	}
+	if err = svc.fileSearch.Update([]model.File{file}); err != nil {
+		return nil, err
+	}
+	err = svc.fileCache.Set(file)
+	if err != nil {
+		return nil, err
+	}
+	res, err := svc.fileMapper.mapOne(file, userID)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
 func (svc *FileService) GetSize(id string, userID string) (int64, error) {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
@@ -1805,12 +1842,30 @@ func (mp *FileMapper) mapOne(m model.File, userID string) (*File, error) {
 		UpdateTime:  m.GetUpdateTime(),
 	}
 	if len(snapshots) > 0 {
-		latest := mp.mapSnapshot(snapshots[len(snapshots)-1])
-		res.Version = &latest.Version
-		res.Original = latest.Original
-		res.Preview = latest.Preview
-		res.Thumbnail = latest.Thumbnail
-		res.Status = latest.Status
+		var activeSnapshot *Snapshot
+		if m.GetSnapshotID() != nil {
+			for _, s := range snapshots {
+				if s.GetID() == *m.GetSnapshotID() {
+					activeSnapshot = mp.mapSnapshot(s)
+					break
+				}
+			}
+		} else {
+			latestSnapshot := snapshots[0]
+			for _, s := range snapshots {
+				if s.GetVersion() > latestSnapshot.GetVersion() {
+					latestSnapshot = s
+				}
+			}
+			activeSnapshot = mp.mapSnapshot(latestSnapshot)
+		}
+		if activeSnapshot != nil {
+			res.Version = &activeSnapshot.Version
+			res.Original = activeSnapshot.Original
+			res.Preview = activeSnapshot.Preview
+			res.Thumbnail = activeSnapshot.Thumbnail
+			res.Status = activeSnapshot.Status
+		}
 	}
 	res.Permission = ""
 	for _, p := range m.GetUserPermissions() {
