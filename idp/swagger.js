@@ -1,5 +1,6 @@
 const swaggerAutogen = require('swagger-autogen')()
 
+// https://swagger-autogen.github.io/docs/
 const doc = {
   info: {
     version: '2.0.0',
