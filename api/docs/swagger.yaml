@@ -97,6 +97,13 @@ definitions:
       workspaceId:
         type: string
     type: object
+  service.FileActivateSnapshotOptions:
+    properties:
+      snapshotId:
+        type: string
+    required:
+    - snapshotId
+    type: object
   service.FileBatchDeleteOptions:
     properties:
       ids:
@@ -710,6 +717,36 @@ paths:
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
       summary: Patch
+      tags:
+      - Files
+  /files/{id}/activate_snapshot:
+    post:
+      description: Activate snapshot
+      operationId: files_activate_snapsshot
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/service.FileActivateSnapshotOptions'
+      produces:
+      - application/json
+      responses:
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Activate snapshot
       tags:
       - Files
   /files/{id}/copy:
