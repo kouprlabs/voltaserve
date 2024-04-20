@@ -1821,29 +1821,6 @@ func (svc *FileService) getChildWithName(id string, name string) (model.File, er
 	return nil, nil
 }
 
-func findActiveSnapshot(m model.File) (model.Snapshot, error) {
-	snapshots := m.GetSnapshots()
-	if len(snapshots) == 0 {
-		return nil, nil
-	}
-	if m.GetSnapshotID() != nil {
-		for _, s := range snapshots {
-			if s.GetID() == *m.GetSnapshotID() {
-				return s, nil
-			}
-		}
-	} else {
-		latest := snapshots[0]
-		for _, s := range snapshots {
-			if s.GetVersion() > latest.GetVersion() {
-				latest = s
-			}
-		}
-		return latest, nil
-	}
-	return nil, nil
-}
-
 type FileMapper struct {
 	groupCache *cache.GroupCache
 	config     config.Config
@@ -1986,4 +1963,27 @@ func (mp *FileMapper) mapSnapshots(snapshots []model.Snapshot) []*Snapshot {
 		res = append(res, mp.mapSnapshot(s))
 	}
 	return res
+}
+
+func findActiveSnapshot(m model.File) (model.Snapshot, error) {
+	snapshots := m.GetSnapshots()
+	if len(snapshots) == 0 {
+		return nil, nil
+	}
+	if m.GetSnapshotID() != nil {
+		for _, s := range snapshots {
+			if s.GetID() == *m.GetSnapshotID() {
+				return s, nil
+			}
+		}
+	} else {
+		latest := snapshots[0]
+		for _, s := range snapshots {
+			if s.GetVersion() > latest.GetVersion() {
+				latest = s
+			}
+		}
+		return latest, nil
+	}
+	return nil, nil
 }
