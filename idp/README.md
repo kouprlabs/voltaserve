@@ -31,17 +31,17 @@ docker build -t voltaserve/idp .
 Generate `swagger.json`:
 
 ```shell
-pnpm swagger-autogen && mv ./swagger.json ./docs
+bun run swagger-autogen && mv ./swagger.json ./docs
 ```
 
 Preview (will be served at [http://127.0.0.1:7777](http://127.0.0.1:7777)):
 
 ```shell
-npx @redocly/cli preview-docs --port 7777 ./docs/swagger.json
+bunx @redocly/cli preview-docs --port 7777 ./docs/swagger.json
 ```
 
 Generate the final static HTML documentation:
 
 ```shell
-npx @redocly/cli build-docs ./docs/swagger.json --output ./docs/index.html
+bunx @redocly/cli build-docs ./docs/swagger.json --output ./docs/index.html
 ```

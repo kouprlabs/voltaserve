@@ -2,6 +2,7 @@ const swaggerAutogen = require('swagger-autogen')()
 
 const doc = {
   info: {
+    version: '2.0.0',
     title: 'Voltaserve Identity Provider',
   },
 }
