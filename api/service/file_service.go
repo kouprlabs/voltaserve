@@ -425,18 +425,20 @@ func (svc *FileService) DownloadOriginalBuffer(id string, userID string) (*bytes
 	if err = svc.fileGuard.Authorize(user, file, model.PermissionViewer); err != nil {
 		return nil, nil, nil, err
 	}
-	snapshots := file.GetSnapshots()
-	if len(snapshots) == 0 {
+	snapshot, err := findActiveSnapshot(file)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	if snapshot == nil {
 		return nil, nil, nil, errorpkg.NewSnapshotNotFoundError(nil)
 	}
-	latestSnapshot := snapshots[len(snapshots)-1]
-	if latestSnapshot.HasOriginal() {
-		original := latestSnapshot.GetOriginal()
+	if snapshot.HasOriginal() {
+		original := snapshot.GetOriginal()
 		buf, err := svc.s3.GetObject(original.Key, original.Bucket)
 		if err != nil {
 			return nil, nil, nil, err
 		}
-		return buf, file, latestSnapshot, nil
+		return buf, file, snapshot, nil
 	} else {
 		return nil, nil, nil, errorpkg.NewS3ObjectNotFoundError(nil)
 	}
@@ -454,18 +456,20 @@ func (svc *FileService) DownloadPreviewBuffer(id string, userID string) (*bytes.
 	if err = svc.fileGuard.Authorize(user, file, model.PermissionViewer); err != nil {
 		return nil, nil, nil, err
 	}
-	snapshots := file.GetSnapshots()
-	if len(snapshots) == 0 {
+	snapshot, err := findActiveSnapshot(file)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	if snapshot == nil {
 		return nil, nil, nil, errorpkg.NewSnapshotNotFoundError(nil)
 	}
-	latestSnapshot := snapshots[len(snapshots)-1]
-	if latestSnapshot.HasPreview() {
-		preview := latestSnapshot.GetPreview()
+	if snapshot.HasPreview() {
+		preview := snapshot.GetPreview()
 		buf, err := svc.s3.GetObject(preview.Key, preview.Bucket)
 		if err != nil {
 			return nil, nil, nil, err
 		}
-		return buf, file, latestSnapshot, nil
+		return buf, file, snapshot, nil
 	} else {
 		return nil, nil, nil, errorpkg.NewS3ObjectNotFoundError(nil)
 	}
@@ -1817,6 +1821,29 @@ func (svc *FileService) getChildWithName(id string, name string) (model.File, er
 	return nil, nil
 }
 
+func findActiveSnapshot(m model.File) (model.Snapshot, error) {
+	snapshots := m.GetSnapshots()
+	if len(snapshots) == 0 {
+		return nil, nil
+	}
+	if m.GetSnapshotID() != nil {
+		for _, s := range snapshots {
+			if s.GetID() == *m.GetSnapshotID() {
+				return s, nil
+			}
+		}
+	} else {
+		latest := snapshots[0]
+		for _, s := range snapshots {
+			if s.GetVersion() > latest.GetVersion() {
+				latest = s
+			}
+		}
+		return latest, nil
+	}
+	return nil, nil
+}
+
 type FileMapper struct {
 	groupCache *cache.GroupCache
 	config     config.Config
@@ -1830,42 +1857,27 @@ func NewFileMapper() *FileMapper {
 }
 
 func (mp *FileMapper) mapOne(m model.File, userID string) (*File, error) {
-	snapshots := m.GetSnapshots()
 	res := &File{
 		ID:          m.GetID(),
 		WorkspaceID: m.GetWorkspaceID(),
 		Name:        m.GetName(),
 		Type:        m.GetType(),
 		ParentID:    m.GetParentID(),
-		Snapshots:   mp.mapSnapshots(snapshots),
+		Snapshots:   mp.mapSnapshots(m.GetSnapshots()),
 		CreateTime:  m.GetCreateTime(),
 		UpdateTime:  m.GetUpdateTime(),
 	}
-	if len(snapshots) > 0 {
-		var activeSnapshot *Snapshot
-		if m.GetSnapshotID() != nil {
-			for _, s := range snapshots {
-				if s.GetID() == *m.GetSnapshotID() {
-					activeSnapshot = mp.mapSnapshot(s)
-					break
-				}
-			}
-		} else {
-			latestSnapshot := snapshots[0]
-			for _, s := range snapshots {
-				if s.GetVersion() > latestSnapshot.GetVersion() {
-					latestSnapshot = s
-				}
-			}
-			activeSnapshot = mp.mapSnapshot(latestSnapshot)
-		}
-		if activeSnapshot != nil {
-			res.Version = &activeSnapshot.Version
-			res.Original = activeSnapshot.Original
-			res.Preview = activeSnapshot.Preview
-			res.Thumbnail = activeSnapshot.Thumbnail
-			res.Status = activeSnapshot.Status
-		}
+	snapshot, err := findActiveSnapshot(m)
+	if err != nil {
+		return nil, err
+	}
+	if snapshot != nil {
+		s := mp.mapSnapshot(snapshot)
+		res.Version = &s.Version
+		res.Original = s.Original
+		res.Preview = s.Preview
+		res.Thumbnail = s.Thumbnail
+		res.Status = s.Status
 	}
 	res.Permission = ""
 	for _, p := range m.GetUserPermissions() {
