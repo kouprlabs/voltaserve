@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
@@ -14,6 +14,7 @@ import FileToolbar from '@/components/file/file-toolbar'
 import FileDelete from '@/components/file/fle-idelete'
 import FileList from '@/components/file/list'
 import FileSharing from '@/components/file/sharing'
+import FileSnapshots from '@/components/file/snapshots'
 import { decodeQuery } from '@/helpers/query'
 import { filePaginationSteps, filesPaginationStorage } from '@/infra/pagination'
 import {
@@ -36,6 +37,7 @@ const WorkspaceFilesPage = () => {
   const sortBy = useAppSelector((state) => state.ui.files.sortBy)
   const sortOrder = useAppSelector((state) => state.ui.files.sortOrder)
   const iconScale = useAppSelector((state) => state.ui.files.iconScale)
+  const selection = useAppSelector((state) => state.ui.files.selection)
   const { data: workspace } = WorkspaceAPI.useGetById(id, swrConfig())
   const { page, size, steps, setPage, setSize } = usePagePagination({
     navigate,
@@ -64,6 +66,13 @@ const WorkspaceFilesPage = () => {
     steps,
   })
   const hasPagination = hasPageSwitcher || hasSizeSelector
+  const singleFile = useMemo(() => {
+    if (list && selection.length === 1) {
+      return list.data.find((e) => e.id === selection[0])
+    } else {
+      return undefined
+    }
+  }, [list?.data, selection])
 
   useEffect(() => {
     if (list) {
@@ -153,6 +162,7 @@ const WorkspaceFilesPage = () => {
         </div>
       </div>
       {list ? <FileSharing list={list} /> : null}
+      {singleFile ? <FileSnapshots file={singleFile} /> : null}
       <FileMove />
       <FileCopy />
       <FileCreate />

@@ -25,6 +25,7 @@ import {
   IconArrowTopRight,
   IconGroup,
   IconDelete,
+  IconHistory,
 } from '@/lib'
 import { UploadDecorator, uploadAdded } from '@/store/entities/uploads'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
@@ -37,6 +38,7 @@ import {
   renameModalDidOpen,
   selectionUpdated,
   sharingModalDidOpen,
+  snapshotsModalDidOpen,
 } from '@/store/ui/files'
 import { uploadsDrawerOpened } from '@/store/ui/uploads-drawer'
 import { FileViewType } from '@/types/file'
@@ -243,6 +245,18 @@ const FileList = ({ list, scale }: FileListProps) => {
               }}
             >
               Sharing
+            </MenuItem>
+            <MenuItem
+              icon={<IconHistory />}
+              isDisabled={
+                singleFile ? ltOwnerPermission(singleFile.permission) : false
+              }
+              onClick={(event: MouseEvent) => {
+                event.stopPropagation()
+                dispatch(snapshotsModalDidOpen())
+              }}
+            >
+              Snapshots
             </MenuItem>
             <MenuItem
               icon={<IconDownload />}

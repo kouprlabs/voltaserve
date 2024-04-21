@@ -393,3 +393,9 @@ export const IconLastPage = ({
     last_page
   </span>
 )
+
+export const IconHistory = ({ className, filled, ...props }: IconBaseProps) => (
+  <span className={getClassName({ filled, className })} {...props}>
+    history
+  </span>
+)
