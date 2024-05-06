@@ -56,7 +56,7 @@ const GroupListPage = () => {
         <title>Groups</title>
       </Helmet>
       <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
-        <Heading className={cx('pl-2', 'text-heading')}>Groups</Heading>
+        <Heading className={cx('text-heading')}>Groups</Heading>
         {error && (
           <div
             className={cx(
