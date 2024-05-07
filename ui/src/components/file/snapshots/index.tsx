@@ -21,6 +21,7 @@ const FileSnapshots = ({ file }: FileSharingProps) => {
   const isModalOpen = useAppSelector(
     (state) => state.ui.files.isSnapshotModalOpen,
   )
+  console.log(file.snapshots)
   return (
     <Modal
       size="xl"

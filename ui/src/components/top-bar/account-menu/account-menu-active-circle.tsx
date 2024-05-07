@@ -14,7 +14,6 @@ const AccountMenuActiveCircle = ({
   const activeNav = useAppSelector((state) => state.ui.nav.active)
   return (
     <Circle
-      size="50px"
       bg={activeNav === NavType.Account ? variables.gradiant : 'transparent'}
     >
       {children}
