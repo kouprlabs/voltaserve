@@ -137,15 +137,17 @@ type FileUpdateSnapshotOptions struct {
 }
 
 type Snapshot struct {
-	ID        string     `json:"id"`
-	Version   int64      `json:"version"`
-	Original  *Download  `json:"original,omitempty"`
-	Preview   *Download  `json:"preview,omitempty"`
-	OCR       *Download  `json:"ocr,omitempty"`
-	Thumbnail *Thumbnail `json:"thumbnail,omitempty"`
-	Language  *string    `json:"language,omitempty"`
-	Status    string     `json:"status,omitempty"`
-	IsActive  bool       `json:"isActive"`
+	ID         string     `json:"id"`
+	Version    int64      `json:"version"`
+	Original   *Download  `json:"original,omitempty"`
+	Preview    *Download  `json:"preview,omitempty"`
+	OCR        *Download  `json:"ocr,omitempty"`
+	Thumbnail  *Thumbnail `json:"thumbnail,omitempty"`
+	Language   *string    `json:"language,omitempty"`
+	Status     string     `json:"status,omitempty"`
+	IsActive   bool       `json:"isActive"`
+	CreateTime string     `json:"createTime"`
+	UpdateTime *string    `json:"updateTime,omitempty"`
 }
 
 type ImageProps struct {
@@ -348,6 +350,10 @@ func (svc *FileService) Store(fileID string, filePath string, userID string) (*F
 	snapshot.SetVersion(latestVersion)
 	snapshot.SetStatus(model.SnapshotStatusNew)
 	if err = svc.snapshotRepo.Save(snapshot); err != nil {
+		return nil, err
+	}
+	snapshot, err = svc.snapshotRepo.Find(snapshotID)
+	if err != nil {
 		return nil, err
 	}
 	if err = svc.snapshotRepo.MapWithFile(snapshotID, fileID); err != nil {
@@ -1975,10 +1981,12 @@ func (mp *FileMapper) mapMany(data []model.File, userID string) ([]*File, error)
 
 func (mp *FileMapper) mapSnapshot(m model.Snapshot, isActive bool) *Snapshot {
 	s := &Snapshot{
-		ID:       m.GetID(),
-		Version:  m.GetVersion(),
-		Status:   m.GetStatus(),
-		IsActive: isActive,
+		ID:         m.GetID(),
+		Version:    m.GetVersion(),
+		Status:     m.GetStatus(),
+		IsActive:   isActive,
+		CreateTime: m.GetCreateTime(),
+		UpdateTime: m.GetUpdateTime(),
 	}
 	if m.HasOriginal() {
 		s.Original = mp.mapOriginal(m.GetOriginal())

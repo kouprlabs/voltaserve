@@ -162,7 +162,9 @@ const WorkspaceFilesPage = () => {
         </div>
       </div>
       {list ? <FileSharing list={list} /> : null}
-      {singleFile ? <FileSnapshots file={singleFile} /> : null}
+      {singleFile && singleFile.type === 'file' ? (
+        <FileSnapshots file={singleFile} />
+      ) : null}
       <FileMove />
       <FileCopy />
       <FileCreate />

@@ -246,18 +246,20 @@ const FileList = ({ list, scale }: FileListProps) => {
             >
               Sharing
             </MenuItem>
-            <MenuItem
-              icon={<IconHistory />}
-              isDisabled={
-                singleFile ? ltOwnerPermission(singleFile.permission) : false
-              }
-              onClick={(event: MouseEvent) => {
-                event.stopPropagation()
-                dispatch(snapshotsModalDidOpen())
-              }}
-            >
-              Snapshots
-            </MenuItem>
+            {singleFile?.type === 'file' ? (
+              <MenuItem
+                icon={<IconHistory />}
+                isDisabled={
+                  singleFile ? ltOwnerPermission(singleFile.permission) : false
+                }
+                onClick={(event: MouseEvent) => {
+                  event.stopPropagation()
+                  dispatch(snapshotsModalDidOpen())
+                }}
+              >
+                Snapshots
+              </MenuItem>
+            ) : null}
             <MenuItem
               icon={<IconDownload />}
               isDisabled={

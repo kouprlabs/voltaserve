@@ -141,6 +141,7 @@ const GroupSelector = ({
                         key={g.id}
                         className={cx(
                           'cursor-pointer',
+                          'h-[52px]',
                           { 'bg-gray-100': selected?.id === g.id },
                           { 'dark:bg-gray-600': selected?.id === g.id },
                           { 'bg-transparent': selected?.id !== g.id },

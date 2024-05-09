@@ -1,9 +1,13 @@
 export type Snapshot = {
+  id: string
   version: number
   original: Download
   preview?: Download
   text?: Download
   thumbnail?: Thumbnail
+  isActive: boolean
+  createTime: string
+  updateTime?: string
 }
 
 export type Download = {
