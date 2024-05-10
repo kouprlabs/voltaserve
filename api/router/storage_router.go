@@ -25,8 +25,8 @@ func (r *StorageRouter) AppendRoutes(g fiber.Router) {
 
 // GetAccountUsage godoc
 //
-//	@Summary		Get account usage
-//	@Description	Get account usage
+//	@Summary		Get Account Usage
+//	@Description	Get Account Usage
 //	@Tags			Storage
 //	@Id				storage_get_account_usage
 //	@Produce		json

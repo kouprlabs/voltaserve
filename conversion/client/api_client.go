@@ -4,11 +4,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"go.uber.org/zap"
 	"net/http"
 	"voltaserve/config"
 	"voltaserve/core"
 	"voltaserve/infra"
+
+	"go.uber.org/zap"
 )
 
 type APIClient struct {
@@ -32,7 +33,7 @@ func (cl *APIClient) UpdateSnapshot(opts core.SnapshotUpdateOptions) error {
 	if err != nil {
 		return err
 	}
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/files/conversion_webhook/update_snapshot?api_key=%s", cl.config.APIURL, cl.config.Security.APIKey), bytes.NewBuffer(body))
+	req, err := http.NewRequest("PATCH", fmt.Sprintf("%s/v1/files/%s/snapshots/%s?api_key=%s", cl.config.APIURL, opts.Options.FileID, opts.Options.SnapshotID, cl.config.Security.APIKey), bytes.NewBuffer(body))
 	if err != nil {
 		return err
 	}

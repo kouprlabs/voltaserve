@@ -264,6 +264,16 @@ func NewFileIsNotAFolderError(file model.File) *ErrorResponse {
 	)
 }
 
+func NewFileIsNotAFileError(file model.File) *ErrorResponse {
+	return NewErrorResponse(
+		"file_is_not_a_file",
+		http.StatusForbidden,
+		fmt.Sprintf("File '%s' (%s) is not a file.", file.GetName(), file.GetID()),
+		fmt.Sprintf("Item '%s' is not a file.", file.GetName()),
+		nil,
+	)
+}
+
 func NewTargetIsGrandChildOfSourceError(file model.File) *ErrorResponse {
 	return NewErrorResponse(
 		"target_is_grant_child_of_source",
@@ -410,6 +420,16 @@ func NewInvalidAPIKeyError() *ErrorResponse {
 		http.StatusUnauthorized,
 		"Invalid API key.",
 		"The API key is either missing or invalid.",
+		nil,
+	)
+}
+
+func NewPathVariablesAndBodyParametersNotConsistent() *ErrorResponse {
+	return NewErrorResponse(
+		"path_variables_and_body_parameters_not_consistent",
+		http.StatusUnauthorized,
+		"Path variables and body parameters are not consistent.",
+		"Path variables and body parameters are not consistent.",
 		nil,
 	)
 }

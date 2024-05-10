@@ -24,9 +24,11 @@ type SnapshotUpdateOptions struct {
 type SnapshotRepo interface {
 	Find(id string) (model.Snapshot, error)
 	Save(snapshot model.Snapshot) error
+	Delete(id string) error
 	Update(id string, opts SnapshotUpdateOptions) error
 	MapWithFile(id string, fileID string) error
 	DeleteMappingsForFile(fileID string) error
+	FindAllForFile(fileID string) ([]model.Snapshot, error)
 	FindAllDangling() ([]model.Snapshot, error)
 	DeleteAllDangling() error
 	GetLatestVersionForFile(fileID string) (int64, error)
@@ -260,6 +262,17 @@ func (repo *snapshotRepo) Save(snapshot model.Snapshot) error {
 	return nil
 }
 
+func (repo *snapshotRepo) Delete(id string) error {
+	snapshot, err := repo.find(id)
+	if err != nil {
+		return err
+	}
+	if db := repo.db.Delete(snapshot); db.Error != nil {
+		return db.Error
+	}
+	return nil
+}
+
 func (repo *snapshotRepo) Update(id string, opts SnapshotUpdateOptions) error {
 	snapshot, err := repo.find(id)
 	if err != nil {
@@ -307,6 +320,18 @@ func (repo *snapshotRepo) findAllForFile(fileID string) ([]*snapshotEntity, erro
 		Scan(&res)
 	if db.Error != nil {
 		return nil, db.Error
+	}
+	return res, nil
+}
+
+func (repo *snapshotRepo) FindAllForFile(fileID string) ([]model.Snapshot, error) {
+	snapshots, err := repo.findAllForFile(fileID)
+	if err != nil {
+		return nil, err
+	}
+	var res []model.Snapshot
+	for _, s := range snapshots {
+		res = append(res, s)
 	}
 	return res, nil
 }

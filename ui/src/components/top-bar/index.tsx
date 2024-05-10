@@ -41,10 +41,8 @@ const TopBar = () => {
         'items-center',
         'gap-2',
         'shrink-0',
-        'py-0',
-        'px-3',
+        'p-1.5',
         'w-full',
-        'h-[80px]',
       )}
     >
       <div className={cx('grow')}>

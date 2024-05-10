@@ -23,21 +23,21 @@ import (
 )
 
 type File struct {
-	ID          string      `json:"id"`
-	WorkspaceID string      `json:"workspaceId"`
-	Name        string      `json:"name"`
-	Type        string      `json:"type"`
-	ParentID    *string     `json:"parentId,omitempty"`
-	Version     *int64      `json:"version,omitempty"`
-	Original    *Download   `json:"original,omitempty"`
-	Preview     *Download   `json:"preview,omitempty"`
-	Thumbnail   *Thumbnail  `json:"thumbnail,omitempty"`
-	Status      string      `json:"status,omitempty"`
-	Snapshots   []*Snapshot `json:"snapshots,omitempty"`
-	Permission  string      `json:"permission"`
-	IsShared    *bool       `json:"isShared,omitempty"`
-	CreateTime  string      `json:"createTime"`
-	UpdateTime  *string     `json:"updateTime,omitempty"`
+	ID          string     `json:"id"`
+	WorkspaceID string     `json:"workspaceId"`
+	Name        string     `json:"name"`
+	Type        string     `json:"type"`
+	ParentID    *string    `json:"parentId,omitempty"`
+	Version     *int64     `json:"version,omitempty"`
+	Original    *Download  `json:"original,omitempty"`
+	Preview     *Download  `json:"preview,omitempty"`
+	Thumbnail   *Thumbnail `json:"thumbnail,omitempty"`
+	Status      string     `json:"status,omitempty"`
+	Permission  string     `json:"permission"`
+	IsShared    *bool      `json:"isShared,omitempty"`
+	SnapshotID  *string    `json:"snapshotId,omitempty"`
+	CreateTime  string     `json:"createTime"`
+	UpdateTime  *string    `json:"updateTime,omitempty"`
 }
 
 type FileList struct {
@@ -125,35 +125,6 @@ type FileUpdateOCRLanguageOptions struct {
 	ID string `json:"id" validate:"required"`
 }
 
-type Snapshot struct {
-	ID        string     `json:"id"`
-	Version   int64      `json:"version"`
-	Original  *Download  `json:"original,omitempty"`
-	Preview   *Download  `json:"preview,omitempty"`
-	OCR       *Download  `json:"ocr,omitempty"`
-	Thumbnail *Thumbnail `json:"thumbnail,omitempty"`
-	Language  *string    `json:"language,omitempty"`
-	Status    string     `json:"status,omitempty"`
-}
-
-type ImageProps struct {
-	Width  int `json:"width"`
-	Height int `json:"height"`
-}
-
-type Thumbnail struct {
-	Base64 string `json:"base64"`
-	Width  int    `json:"width"`
-	Height int    `json:"height"`
-}
-
-type Download struct {
-	Extension string      `json:"extension"`
-	Size      int64       `json:"size"`
-	Image     *ImageProps `json:"image,omitempty"`
-	Language  *string     `json:"language,omitempty"`
-}
-
 type UserPermission struct {
 	ID         string `json:"id"`
 	User       *User  `json:"user"`
@@ -164,16 +135,6 @@ type GroupPermission struct {
 	ID         string `json:"id"`
 	Group      *Group `json:"group"`
 	Permission string `json:"permission"`
-}
-
-type SnapshotUpdateOptions struct {
-	Options   client.PipelineRunOptions `json:"options"`
-	Original  *model.S3Object           `json:"original,omitempty"`
-	Preview   *model.S3Object           `json:"preview,omitempty"`
-	Text      *model.S3Object           `json:"text,omitempty"`
-	OCR       *model.S3Object           `json:"ocr,omitempty"`
-	Thumbnail *model.Thumbnail          `json:"thumbnail,omitempty"`
-	Status    string                    `json:"status,omitempty"`
 }
 
 type FileService struct {
@@ -187,6 +148,7 @@ type FileService struct {
 	workspaceGuard   *guard.WorkspaceGuard
 	workspaceSvc     *WorkspaceService
 	snapshotRepo     repo.SnapshotRepo
+	snapshotSvc      *SnapshotService
 	userRepo         repo.UserRepo
 	userMapper       *userMapper
 	groupCache       *cache.GroupCache
@@ -211,6 +173,7 @@ func NewFileService() *FileService {
 		workspaceRepo:    repo.NewWorkspaceRepo(),
 		workspaceSvc:     NewWorkspaceService(),
 		snapshotRepo:     repo.NewSnapshotRepo(),
+		snapshotSvc:      NewSnapshotService(),
 		userRepo:         repo.NewUserRepo(),
 		userMapper:       newUserMapper(),
 		groupCache:       cache.NewGroupCache(),
@@ -348,6 +311,10 @@ func (svc *FileService) Store(fileID string, filePath string, userID string) (*F
 	if err = svc.snapshotRepo.Save(snapshot); err != nil {
 		return nil, err
 	}
+	snapshot, err = svc.snapshotRepo.Find(snapshotID)
+	if err != nil {
+		return nil, err
+	}
 	if err = svc.snapshotRepo.MapWithFile(snapshotID, fileID); err != nil {
 		return nil, err
 	}
@@ -365,6 +332,10 @@ func (svc *FileService) Store(fileID string, filePath string, userID string) (*F
 	}
 	snapshot.SetOriginal(&original)
 	if err := svc.snapshotRepo.Save(snapshot); err != nil {
+		return nil, err
+	}
+	file.SetSnapshotID(&snapshotID)
+	if err := svc.fileRepo.Save(file); err != nil {
 		return nil, err
 	}
 	file, err = svc.fileCache.Refresh(file.GetID())
@@ -386,29 +357,6 @@ func (svc *FileService) Store(fileID string, filePath string, userID string) (*F
 	return res, nil
 }
 
-func (svc *FileService) UpdateSnapshot(opts SnapshotUpdateOptions, apiKey string) error {
-	if apiKey != svc.config.Security.APIKey {
-		return errorpkg.NewInvalidAPIKeyError()
-	}
-	if err := svc.snapshotRepo.Update(opts.Options.SnapshotID, repo.SnapshotUpdateOptions{
-		Thumbnail: opts.Thumbnail,
-		Original:  opts.Original,
-		Preview:   opts.Preview,
-		Text:      opts.Text,
-		Status:    opts.Status,
-	}); err != nil {
-		return err
-	}
-	file, err := svc.fileCache.Refresh(opts.Options.FileID)
-	if err != nil {
-		return err
-	}
-	if err = svc.fileSearch.Update([]model.File{file}); err != nil {
-		return err
-	}
-	return nil
-}
-
 func (svc *FileService) DownloadOriginalBuffer(id string, userID string) (*bytes.Buffer, model.File, model.Snapshot, error) {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
@@ -421,18 +369,23 @@ func (svc *FileService) DownloadOriginalBuffer(id string, userID string) (*bytes
 	if err = svc.fileGuard.Authorize(user, file, model.PermissionViewer); err != nil {
 		return nil, nil, nil, err
 	}
-	snapshots := file.GetSnapshots()
-	if len(snapshots) == 0 {
+	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
+		return nil, nil, nil, errorpkg.NewFileIsNotAFileError(file)
+	}
+	snapshot, err := svc.snapshotRepo.Find(*file.GetSnapshotID())
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	if snapshot == nil {
 		return nil, nil, nil, errorpkg.NewSnapshotNotFoundError(nil)
 	}
-	latestSnapshot := snapshots[len(snapshots)-1]
-	if latestSnapshot.HasOriginal() {
-		original := latestSnapshot.GetOriginal()
+	if snapshot.HasOriginal() {
+		original := snapshot.GetOriginal()
 		buf, err := svc.s3.GetObject(original.Key, original.Bucket)
 		if err != nil {
 			return nil, nil, nil, err
 		}
-		return buf, file, latestSnapshot, nil
+		return buf, file, snapshot, nil
 	} else {
 		return nil, nil, nil, errorpkg.NewS3ObjectNotFoundError(nil)
 	}
@@ -450,18 +403,23 @@ func (svc *FileService) DownloadPreviewBuffer(id string, userID string) (*bytes.
 	if err = svc.fileGuard.Authorize(user, file, model.PermissionViewer); err != nil {
 		return nil, nil, nil, err
 	}
-	snapshots := file.GetSnapshots()
-	if len(snapshots) == 0 {
+	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
+		return nil, nil, nil, errorpkg.NewFileIsNotAFileError(file)
+	}
+	snapshot, err := svc.snapshotRepo.Find(*file.GetSnapshotID())
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	if snapshot == nil {
 		return nil, nil, nil, errorpkg.NewSnapshotNotFoundError(nil)
 	}
-	latestSnapshot := snapshots[len(snapshots)-1]
-	if latestSnapshot.HasPreview() {
-		preview := latestSnapshot.GetPreview()
+	if snapshot.HasPreview() {
+		preview := snapshot.GetPreview()
 		buf, err := svc.s3.GetObject(preview.Key, preview.Bucket)
 		if err != nil {
 			return nil, nil, nil, err
 		}
-		return buf, file, latestSnapshot, nil
+		return buf, file, snapshot, nil
 	} else {
 		return nil, nil, nil, errorpkg.NewS3ObjectNotFoundError(nil)
 	}
@@ -1781,36 +1739,44 @@ func (svc *FileService) getChildWithName(id string, name string) (model.File, er
 }
 
 type FileMapper struct {
-	groupCache *cache.GroupCache
-	config     config.Config
+	groupCache     *cache.GroupCache
+	snapshotMapper *SnapshotMapper
+	snapshotRepo   repo.SnapshotRepo
+	config         config.Config
 }
 
 func NewFileMapper() *FileMapper {
 	return &FileMapper{
-		groupCache: cache.NewGroupCache(),
-		config:     config.GetConfig(),
+		groupCache:     cache.NewGroupCache(),
+		snapshotMapper: NewSnapshotMapper(),
+		snapshotRepo:   repo.NewSnapshotRepo(),
+		config:         config.GetConfig(),
 	}
 }
 
 func (mp *FileMapper) mapOne(m model.File, userID string) (*File, error) {
-	snapshots := m.GetSnapshots()
 	res := &File{
 		ID:          m.GetID(),
 		WorkspaceID: m.GetWorkspaceID(),
 		Name:        m.GetName(),
 		Type:        m.GetType(),
 		ParentID:    m.GetParentID(),
-		Snapshots:   mp.mapSnapshots(snapshots),
+		SnapshotID:  m.GetSnapshotID(),
 		CreateTime:  m.GetCreateTime(),
 		UpdateTime:  m.GetUpdateTime(),
 	}
-	if len(snapshots) > 0 {
-		latest := mp.mapSnapshot(snapshots[len(snapshots)-1])
-		res.Version = &latest.Version
-		res.Original = latest.Original
-		res.Preview = latest.Preview
-		res.Thumbnail = latest.Thumbnail
-		res.Status = latest.Status
+	if m.GetSnapshotID() != nil {
+		snapshot, err := mp.snapshotRepo.Find(*m.GetSnapshotID())
+		if err != nil {
+			return nil, err
+		}
+		s := mp.snapshotMapper.mapOne(snapshot, true)
+		res.SnapshotID = &s.ID
+		res.Version = &s.Version
+		res.Original = s.Original
+		res.Preview = s.Preview
+		res.Thumbnail = s.Thumbnail
+		res.Status = s.Status
 	}
 	res.Permission = ""
 	for _, p := range m.GetUserPermissions() {
@@ -1857,66 +1823,4 @@ func (mp *FileMapper) mapMany(data []model.File, userID string) ([]*File, error)
 		res = append(res, v)
 	}
 	return res, nil
-}
-
-func (mp *FileMapper) mapSnapshot(m model.Snapshot) *Snapshot {
-	s := &Snapshot{
-		ID:      m.GetID(),
-		Version: m.GetVersion(),
-		Status:  m.GetStatus(),
-	}
-	if m.HasOriginal() {
-		s.Original = mp.mapOriginal(m.GetOriginal())
-	}
-	if m.HasPreview() {
-		s.Preview = mp.mapPreview(m.GetPreview())
-	}
-	if m.HasThumbnail() {
-		s.Thumbnail = mp.mapThumbnail(m.GetThumbnail())
-	}
-	return s
-}
-
-func (mp *FileMapper) mapOriginal(m *model.S3Object) *Download {
-	download := &Download{
-		Extension: filepath.Ext(m.Key),
-		Size:      m.Size,
-	}
-	if m.Image != nil {
-		download.Image = &ImageProps{
-			Width:  m.Image.Width,
-			Height: m.Image.Height,
-		}
-	}
-	return download
-}
-
-func (mp *FileMapper) mapPreview(m *model.S3Object) *Download {
-	download := &Download{
-		Extension: filepath.Ext(m.Key),
-		Size:      m.Size,
-	}
-	if m.Image != nil {
-		download.Image = &ImageProps{
-			Width:  m.Image.Width,
-			Height: m.Image.Height,
-		}
-	}
-	return download
-}
-
-func (mp *FileMapper) mapThumbnail(m *model.Thumbnail) *Thumbnail {
-	return &Thumbnail{
-		Base64: m.Base64,
-		Width:  m.Width,
-		Height: m.Height,
-	}
-}
-
-func (mp *FileMapper) mapSnapshots(snapshots []model.Snapshot) []*Snapshot {
-	res := make([]*Snapshot, 0)
-	for _, s := range snapshots {
-		res = append(res, mp.mapSnapshot(s))
-	}
-	return res
 }

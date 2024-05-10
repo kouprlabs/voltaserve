@@ -141,8 +141,8 @@ func (r *GroupRouter) List(c *fiber.Ctx) error {
 
 // UpdateName godoc
 //
-//	@Summary		Update name
-//	@Description	Update name
+//	@Summary		Update Name
+//	@Description	Update Name
 //	@Tags			Groups
 //	@Id				groups_update_name
 //	@Accept			json
@@ -193,8 +193,8 @@ func (r *GroupRouter) Delete(c *fiber.Ctx) error {
 
 // AddMember godoc
 //
-//	@Summary		Add member
-//	@Description	Add member
+//	@Summary		Add Member
+//	@Description	Add Member
 //	@Tags			Groups
 //	@Id				groups_add_member
 //	@Accept			json
@@ -221,8 +221,8 @@ func (r *GroupRouter) AddMember(c *fiber.Ctx) error {
 
 // RemoveMember godoc
 //
-//	@Summary		Remove member
-//	@Description	Remove member
+//	@Summary		Remove Member
+//	@Description	Remove Member
 //	@Tags			Groups
 //	@Id				groups_remove_member
 //	@Accept			json

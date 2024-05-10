@@ -52,8 +52,8 @@ func main() {
 		AllowOrigins: strings.Join(cfg.Security.CORSOrigins, ","),
 	}))
 
-	fileDownloads := router.NewFileDownloadRouter()
-	fileDownloads.AppendNonJWTRoutes(f)
+	downloads := router.NewDownloadsRouter()
+	downloads.AppendNonJWTRoutes(f)
 
 	conversionWebhook := router.NewConversionWebhookRouter()
 	conversionWebhook.AppendInternalRoutes(f)
@@ -64,6 +64,9 @@ func main() {
 
 	files := router.NewFileRouter()
 	files.AppendRoutes(f)
+
+	snapshots := router.NewSnapshotRouter()
+	snapshots.AppendRoutes(f)
 
 	invitations := router.NewInvitationRouter()
 	invitations.AppendRoutes(v1.Group("invitations"))

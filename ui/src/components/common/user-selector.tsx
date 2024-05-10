@@ -154,6 +154,7 @@ const UserSelector = ({
                         key={u.id}
                         className={cx(
                           'cursor-pointer',
+                          'h-[52px]',
                           { 'bg-gray-100': selected?.id === u.id },
                           { 'dark:bg-gray-600': selected?.id === u.id },
                           { 'bg-transparent': selected?.id !== u.id },

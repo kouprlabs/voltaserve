@@ -56,7 +56,7 @@ const WorkspaceListPage = () => {
         <title>Workspaces</title>
       </Helmet>
       <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
-        <Heading className={cx('pl-2', 'text-heading')}>Workspaces</Heading>
+        <Heading className={cx('text-heading')}>Workspaces</Heading>
         {!list && error && (
           <div
             className={cx(

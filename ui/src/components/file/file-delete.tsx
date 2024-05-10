@@ -1,60 +1,69 @@
 import { useCallback, useState } from 'react'
 import { useParams } from 'react-router-dom'
+import { useDispatch } from 'react-redux'
 import {
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalCloseButton,
-  ModalBody,
-  ModalFooter,
   Button,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
 } from '@chakra-ui/react'
 import { useSWRConfig } from 'swr'
 import cx from 'classnames'
 import FileAPI, { List } from '@/client/api/file'
 import useFileListSearchParams from '@/hooks/use-file-list-params'
-import { useAppDispatch, useAppSelector } from '@/store/hook'
-import { moveModalDidClose, selectionUpdated } from '@/store/ui/files'
-import FileBrowse from './file-browse'
+import { useAppSelector } from '@/store/hook'
+import { deleteModalDidClose, selectionUpdated } from '@/store/ui/files'
 
-const FileMove = () => {
+const FileDelete = () => {
   const { mutate } = useSWRConfig()
   const { fileId } = useParams()
-  const dispatch = useAppDispatch()
+  const dispatch = useDispatch()
   const selection = useAppSelector((state) => state.ui.files.selection)
-  const isModalOpen = useAppSelector((state) => state.ui.files.isMoveModalOpen)
+  const isModalOpen = useAppSelector(
+    (state) => state.ui.files.isDeleteModalOpen,
+  )
   const [isLoading, setIsLoading] = useState(false)
-  const [targetId, setTargetId] = useState<string>()
   const fileListSearchParams = useFileListSearchParams()
 
-  const handleMove = useCallback(async () => {
-    if (!targetId) {
-      return
-    }
+  const handleDelete = useCallback(async () => {
     try {
       setIsLoading(true)
-      await FileAPI.move(targetId, { ids: selection })
+      await FileAPI.batchDelete({ ids: selection })
       await mutate<List>(`/files/${fileId}/list?${fileListSearchParams}`)
       dispatch(selectionUpdated([]))
-      dispatch(moveModalDidClose())
+      dispatch(deleteModalDidClose())
     } finally {
       setIsLoading(false)
     }
-  }, [targetId, fileId, selection, fileListSearchParams, mutate, dispatch])
+  }, [selection, fileId, fileListSearchParams, mutate, dispatch])
 
   return (
     <Modal
       isOpen={isModalOpen}
-      onClose={() => dispatch(moveModalDidClose())}
+      onClose={() => dispatch(deleteModalDidClose())}
       closeOnOverlayClick={false}
     >
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>Move {selection.length} Item(s) to…</ModalHeader>
+        {selection.length > 1 ? (
+          <ModalHeader>Delete {selection.length} Item(s)</ModalHeader>
+        ) : (
+          <ModalHeader>Delete Item</ModalHeader>
+        )}
         <ModalCloseButton />
         <ModalBody>
-          <FileBrowse onChange={(id) => setTargetId(id)} />
+          {selection.length > 1 ? (
+            <span>
+              Are you sure you would like to delete ({selection.length})
+              item(s)?
+            </span>
+          ) : (
+            <span>Are you sure you would like to delete this item?</span>
+          )}
         </ModalBody>
         <ModalFooter>
           <div className={cx('flex', 'flex-row', 'items-center', 'gap-1')}>
@@ -63,18 +72,18 @@ const FileMove = () => {
               variant="outline"
               colorScheme="blue"
               disabled={isLoading}
-              onClick={() => dispatch(moveModalDidClose())}
+              onClick={() => dispatch(deleteModalDidClose())}
             >
               Cancel
             </Button>
             <Button
+              type="submit"
               variant="solid"
-              colorScheme="blue"
-              isDisabled={targetId === fileId}
+              colorScheme="red"
               isLoading={isLoading}
-              onClick={handleMove}
+              onClick={handleDelete}
             >
-              Move Here
+              Delete
             </Button>
           </div>
         </ModalFooter>
@@ -83,4 +92,4 @@ const FileMove = () => {
   )
 }
 
-export default FileMove
+export default FileDelete

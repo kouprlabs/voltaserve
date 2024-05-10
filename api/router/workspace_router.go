@@ -137,8 +137,8 @@ func (r *WorkspaceRouter) List(c *fiber.Ctx) error {
 
 // UpdateName godoc
 //
-//	@Summary		Update name
-//	@Description	Update name
+//	@Summary		Update Name
+//	@Description	Update Name
 //	@Tags			Workspaces
 //	@Id				workspaces_update_name
 //	@Accept			json
@@ -163,8 +163,8 @@ func (r *WorkspaceRouter) UpdateName(c *fiber.Ctx) error {
 
 // UpdateStorageCapacity godoc
 //
-//	@Summary		Update storage capacity
-//	@Description	Update storage capacity
+//	@Summary		Update Storage Capacity
+//	@Description	Update Storage Capacity
 //	@Tags			Workspaces
 //	@Id				workspaces_update_storage_capacity
 //	@Accept			json

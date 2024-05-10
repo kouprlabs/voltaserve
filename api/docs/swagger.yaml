@@ -80,10 +80,8 @@ definitions:
         type: string
       preview:
         $ref: '#/definitions/service.Download'
-      snapshots:
-        items:
-          $ref: '#/definitions/service.Snapshot'
-        type: array
+      snapshotId:
+        type: string
       status:
         type: string
       thumbnail:
@@ -253,6 +251,23 @@ definitions:
     - ids
     - userId
     type: object
+  service.FileUpdateSnapshotOptions:
+    properties:
+      ocr:
+        $ref: '#/definitions/model.S3Object'
+      options:
+        $ref: '#/definitions/client.PipelineRunOptions'
+      original:
+        $ref: '#/definitions/model.S3Object'
+      preview:
+        $ref: '#/definitions/model.S3Object'
+      status:
+        type: string
+      text:
+        $ref: '#/definitions/model.S3Object'
+      thumbnail:
+        $ref: '#/definitions/model.Thumbnail'
+    type: object
   service.Group:
     properties:
       createTime:
@@ -421,8 +436,12 @@ definitions:
     type: object
   service.Snapshot:
     properties:
+      createTime:
+        type: string
       id:
         type: string
+      isActive:
+        type: boolean
       language:
         type: string
       ocr:
@@ -435,25 +454,25 @@ definitions:
         type: string
       thumbnail:
         $ref: '#/definitions/service.Thumbnail'
+      updateTime:
+        type: string
       version:
         type: integer
     type: object
-  service.SnapshotUpdateOptions:
+  service.SnapshotList:
     properties:
-      ocr:
-        $ref: '#/definitions/model.S3Object'
-      options:
-        $ref: '#/definitions/client.PipelineRunOptions'
-      original:
-        $ref: '#/definitions/model.S3Object'
-      preview:
-        $ref: '#/definitions/model.S3Object'
-      status:
-        type: string
-      text:
-        $ref: '#/definitions/model.S3Object'
-      thumbnail:
-        $ref: '#/definitions/model.Thumbnail'
+      data:
+        items:
+          $ref: '#/definitions/service.Snapshot'
+        type: array
+      page:
+        type: integer
+      size:
+        type: integer
+      totalElements:
+        type: integer
+      totalPages:
+        type: integer
     type: object
   service.StorageUsage:
     properties:
@@ -744,7 +763,7 @@ paths:
       - Files
   /files/{id}/get_group_permissions:
     get:
-      description: Get group permissions
+      description: Get Group Permissions
       operationId: files_get_group_permissions
       parameters:
       - description: ID
@@ -769,7 +788,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Get group permissions
+      summary: Get Group Permissions
       tags:
       - Files
   /files/{id}/get_ids:
@@ -804,7 +823,7 @@ paths:
       - Files
   /files/{id}/get_item_count:
     get:
-      description: Get children count
+      description: Get Children Count
       operationId: files_get_children_count
       parameters:
       - description: ID
@@ -827,12 +846,12 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Get children count
+      summary: Get Children Count
       tags:
       - Files
   /files/{id}/get_path:
     get:
-      description: Get path
+      description: Get Path
       operationId: files_get_path
       parameters:
       - description: ID
@@ -857,12 +876,12 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Get path
+      summary: Get Path
       tags:
       - Files
   /files/{id}/get_size:
     get:
-      description: Get size
+      description: Get Size
       operationId: files_get_size
       parameters:
       - description: ID
@@ -885,12 +904,12 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Get size
+      summary: Get Size
       tags:
       - Files
   /files/{id}/get_user_permissions:
     get:
-      description: Get user permissions
+      description: Get User Permissions
       operationId: files_get_user_permissions
       parameters:
       - description: ID
@@ -915,7 +934,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Get user permissions
+      summary: Get User Permissions
       tags:
       - Files
   /files/{id}/list:
@@ -1002,7 +1021,7 @@ paths:
       - Files
   /files/{id}/original{ext}:
     get:
-      description: Download original
+      description: Download Original
       operationId: files_download_original
       parameters:
       - description: ID
@@ -1026,12 +1045,12 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Download original
+      summary: Download Original
       tags:
       - Files
   /files/{id}/preview{ext}:
     get:
-      description: Download preview
+      description: Download Preview
       operationId: files_download_preview
       parameters:
       - description: ID
@@ -1055,7 +1074,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Download preview
+      summary: Download Preview
       tags:
       - Files
   /files/{id}/rename:
@@ -1094,7 +1113,7 @@ paths:
       - Files
   /files/{id}/revoke_group_permission:
     post:
-      description: Revoke group permission
+      description: Revoke Group Permission
       operationId: files_revoke_group_permission
       parameters:
       - description: ID
@@ -1119,12 +1138,139 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Revoke group permission
+      summary: Revoke Group Permission
       tags:
       - Files
+  /files/{id}/snapshots:
+    get:
+      description: List
+      operationId: snapshots_list
+      parameters:
+      - description: Query
+        in: query
+        name: query
+        type: string
+      - description: Page
+        in: query
+        name: page
+        type: string
+      - description: Size
+        in: query
+        name: size
+        type: string
+      - description: Sort By
+        in: query
+        name: sort_by
+        type: string
+      - description: Sort Order
+        in: query
+        name: sort_order
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.SnapshotList'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: List
+      tags:
+      - Snapshots
+  /files/{id}/snapshots/{snapshotId}:
+    delete:
+      description: Delete Snapshot
+      operationId: snapshots_delete_snapsshot
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Snapshot ID
+        in: path
+        name: snapshotId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Delete Snapshot
+      tags:
+      - Snapshots
+    patch:
+      description: Update Snapshot
+      operationId: files_update_snapshot
+      parameters:
+      - description: Body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/service.FileUpdateSnapshotOptions'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Update Snapshot
+      tags:
+      - Files
+  /files/{id}/snapshots/{snapshotId}/activate:
+    post:
+      description: Activate Snapshot
+      operationId: snapshots_activate_snapsshot
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Snapshot ID
+        in: path
+        name: snapshotId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Activate Snapshot
+      tags:
+      - Snapshots
   /files/batch_delete:
     post:
-      description: Batch delete
+      description: Batch Delete
       operationId: files_batch_delete
       parameters:
       - description: Body
@@ -1146,12 +1292,12 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Batch delete
+      summary: Batch Delete
       tags:
       - Files
   /files/batch_get:
     post:
-      description: Batch get
+      description: Batch Get
       operationId: files_batch_get
       parameters:
       - description: Body
@@ -1173,34 +1319,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Batch get
-      tags:
-      - Files
-  /files/conversion_webhook/update_snapshot:
-    post:
-      description: Update snapshot
-      operationId: files_conversion_webhook_update_snapshot
-      parameters:
-      - description: Body
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/service.SnapshotUpdateOptions'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Update snapshot
+      summary: Batch Get
       tags:
       - Files
   /files/create_folder:
@@ -1264,7 +1383,7 @@ paths:
       - Files
   /files/grant_group_permission:
     post:
-      description: Grant group permission
+      description: Grant Group Permission
       operationId: files_grant_group_permission
       parameters:
       - description: ID
@@ -1289,12 +1408,12 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Grant group permission
+      summary: Grant Group Permission
       tags:
       - Files
   /files/grant_user_permission:
     post:
-      description: Grant user permission
+      description: Grant User Permission
       operationId: files_grant_user_permission
       parameters:
       - description: ID
@@ -1319,7 +1438,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Grant user permission
+      summary: Grant User Permission
       tags:
       - Files
   /files/list:
@@ -1354,7 +1473,7 @@ paths:
       - Files
   /files/revoke_user_permission:
     post:
-      description: Revoke user permission
+      description: Revoke User Permission
       operationId: files_revoke_user_permission
       parameters:
       - description: ID
@@ -1379,7 +1498,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Revoke user permission
+      summary: Revoke User Permission
       tags:
       - Files
   /groups:
@@ -1518,7 +1637,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: Add member
+      description: Add Member
       operationId: groups_add_member
       parameters:
       - description: ID
@@ -1541,14 +1660,14 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Add member
+      summary: Add Member
       tags:
       - Groups
   /groups/{id}/remove_member:
     post:
       consumes:
       - application/json
-      description: Remove member
+      description: Remove Member
       operationId: groups_remove_member
       parameters:
       - description: ID
@@ -1577,14 +1696,14 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Remove member
+      summary: Remove Member
       tags:
       - Groups
   /groups/{id}/update_name:
     post:
       consumes:
       - application/json
-      description: Update name
+      description: Update Name
       operationId: groups_update_name
       parameters:
       - description: ID
@@ -1617,7 +1736,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Update name
+      summary: Update Name
       tags:
       - Groups
   /invitations:
@@ -1691,7 +1810,7 @@ paths:
       consumes:
       - application/json
       description: Accept
-      operationId: invitation_accept
+      operationId: invitations_accept
       parameters:
       - description: ID
         in: path
@@ -1720,7 +1839,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: Delete
+      description: Decline
       operationId: invitations_decline
       parameters:
       - description: ID
@@ -1743,7 +1862,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Delete
+      summary: Decline
       tags:
       - Invitations
   /invitations/{id}/resend:
@@ -1778,7 +1897,7 @@ paths:
       - Invitations
   /invitations/get_incoming:
     get:
-      description: Get incoming
+      description: Get Incoming
       operationId: invitation_get_incoming
       parameters:
       - description: Page
@@ -1808,12 +1927,12 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Get incoming
+      summary: Get Incoming
       tags:
       - Invitations
   /invitations/get_outgoing:
     get:
-      description: Get outgoing
+      description: Get Outgoing
       operationId: invitation_get_outgoing
       parameters:
       - description: Organization ID
@@ -1848,13 +1967,13 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Get outgoing
+      summary: Get Outgoing
       tags:
       - Invitations
   /notifications:
     get:
-      description: Get notifications
-      operationId: notification_get_all
+      description: List
+      operationId: notifications_list
       produces:
       - application/json
       responses:
@@ -1866,7 +1985,7 @@ paths:
             type: array
         "500":
           description: Internal Server Error
-      summary: Get notifications
+      summary: List
       tags:
       - Notifications
   /organizations:
@@ -2002,7 +2121,7 @@ paths:
       consumes:
       - application/json
       description: Leave
-      operationId: organizations_leave\
+      operationId: organizations_leave
       parameters:
       - description: ID
         in: path
@@ -2031,7 +2150,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: Remove member
+      description: Remove Member
       operationId: organizations_remove_member
       parameters:
       - description: ID
@@ -2060,14 +2179,14 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Remove member
+      summary: Remove Member
       tags:
       - Organizations
   /organizations/{id}/update_name:
     post:
       consumes:
       - application/json
-      description: Update name
+      description: Update Name
       operationId: organizations_update_name
       parameters:
       - description: ID
@@ -2100,12 +2219,12 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Update name
+      summary: Update Name
       tags:
       - Organizations
   /storage/get_account_usage:
     get:
-      description: Get account usage
+      description: Get Account Usage
       operationId: storage_get_account_usage
       produces:
       - application/json
@@ -2116,7 +2235,7 @@ paths:
             $ref: '#/definitions/service.StorageUsage'
         "500":
           description: Internal Server Error
-      summary: Get account usage
+      summary: Get Account Usage
       tags:
       - Storage
   /storage/get_file_usage:
@@ -2342,7 +2461,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: Update name
+      description: Update Name
       operationId: workspaces_update_name
       parameters:
       - description: ID
@@ -2371,14 +2490,14 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Update name
+      summary: Update Name
       tags:
       - Workspaces
   /workspaces/{id}/update_storage_capacity:
     post:
       consumes:
       - application/json
-      description: Update storage capacity
+      description: Update Storage Capacity
       operationId: workspaces_update_storage_capacity
       parameters:
       - description: Id
@@ -2407,7 +2526,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Update storage capacity
+      summary: Update Storage Capacity
       tags:
       - Workspaces
 swagger: "2.0"

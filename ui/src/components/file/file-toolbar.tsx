@@ -44,6 +44,7 @@ import {
   IconExpandMore,
   IconClose,
   IconList,
+  IconHistory,
 } from '@/lib'
 import { uploadAdded, UploadDecorator } from '@/store/entities/uploads'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
@@ -52,6 +53,7 @@ import {
   viewTypeToggled,
   selectionModeToggled,
   sortOrderToggled,
+  snapshotListModalDidOpen,
 } from '@/store/ui/files'
 import {
   copyModalDidOpen,
@@ -270,6 +272,14 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
               Sharing
             </Button>
           )}
+          {singleFile?.type === 'file' && hasEditorPermission && (
+            <Button
+              leftIcon={<IconHistory />}
+              onClick={() => dispatch(snapshotListModalDidOpen())}
+            >
+              Snapshots
+            </Button>
+          )}
           {singleFile?.type === 'file' && (
             <Button
               leftIcon={<IconDownload />}
@@ -304,6 +314,15 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
                     onClick={() => dispatch(sharingModalDidOpen())}
                   >
                     Sharing
+                  </MenuItem>
+                  <MenuItem
+                    icon={<IconHistory />}
+                    isDisabled={
+                      singleFile?.type !== 'file' || !hasOwnerPermission
+                    }
+                    onClick={() => dispatch(snapshotListModalDidOpen())}
+                  >
+                    Snapshots
                   </MenuItem>
                   <MenuItem
                     icon={<IconDownload />}

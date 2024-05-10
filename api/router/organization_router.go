@@ -106,8 +106,8 @@ func (r *OrganizationRouter) Delete(c *fiber.Ctx) error {
 
 // UpdateName godoc
 //
-//	@Summary		Update name
-//	@Description	Update name
+//	@Summary		Update Name
+//	@Description	Update Name
 //	@Tags			Organizations
 //	@Id				organizations_update_name
 //	@Accept			json
@@ -197,7 +197,7 @@ func (r *OrganizationRouter) List(c *fiber.Ctx) error {
 //	@Summary		Leave
 //	@Description	Leave
 //	@Tags			Organizations
-//	@Id				organizations_leave\
+//	@Id				organizations_leave
 //	@Accept			json
 //	@Produce		json
 //	@Param			id	path		string	true	"ID"
@@ -215,8 +215,8 @@ func (r *OrganizationRouter) Leave(c *fiber.Ctx) error {
 
 // RemoveMember godoc
 //
-//	@Summary		Remove member
-//	@Description	Remove member
+//	@Summary		Remove Member
+//	@Description	Remove Member
 //	@Tags			Organizations
 //	@Id				organizations_remove_member
 //	@Accept			json

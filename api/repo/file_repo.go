@@ -55,10 +55,10 @@ type fileEntity struct {
 	Name             string                  `json:"name" gorm:"column:name"`
 	Type             string                  `json:"type" gorm:"column:type"`
 	ParentID         *string                 `json:"parentId,omitempty" gorm:"column:parent_id"`
-	Snapshots        []*snapshotEntity       `json:"snapshots,omitempty" gorm:"-"`
 	UserPermissions  []*userPermissionValue  `json:"userPermissions" gorm:"-"`
 	GroupPermissions []*groupPermissionValue `json:"groupPermissions" gorm:"-"`
 	Text             *string                 `json:"text,omitempty" gorm:"-"`
+	SnapshotID       *string                 `json:"snapshotId,omitempty" gorm:"column:snapshot_id"`
 	CreateTime       string                  `json:"createTime" gorm:"column:create_time"`
 	UpdateTime       *string                 `json:"updateTime,omitempty" gorm:"column:update_time"`
 }
@@ -98,14 +98,6 @@ func (f *fileEntity) GetParentID() *string {
 	return f.ParentID
 }
 
-func (f *fileEntity) GetSnapshots() []model.Snapshot {
-	var res []model.Snapshot
-	for _, s := range f.Snapshots {
-		res = append(res, s)
-	}
-	return res
-}
-
 func (f *fileEntity) GetUserPermissions() []model.CoreUserPermission {
 	var res []model.CoreUserPermission
 	for _, p := range f.UserPermissions {
@@ -124,6 +116,10 @@ func (f *fileEntity) GetGroupPermissions() []model.CoreGroupPermission {
 
 func (f *fileEntity) GetText() *string {
 	return f.Text
+}
+
+func (f *fileEntity) GetSnapshotID() *string {
+	return f.SnapshotID
 }
 
 func (f *fileEntity) GetCreateTime() string {
@@ -158,6 +154,10 @@ func (f *fileEntity) SetText(text *string) {
 	f.Text = text
 }
 
+func (f *fileEntity) SetSnapshotID(snapshotID *string) {
+	f.SnapshotID = snapshotID
+}
+
 func (f *fileEntity) SetCreateTime(createTime string) {
 	f.CreateTime = createTime
 }
@@ -168,14 +168,12 @@ func (f *fileEntity) SetUpdateTime(updateTime *string) {
 
 type fileRepo struct {
 	db             *gorm.DB
-	snapshotRepo   *snapshotRepo
 	permissionRepo *permissionRepo
 }
 
 func newFileRepo() *fileRepo {
 	return &fileRepo{
 		db:             infra.GetDb(),
-		snapshotRepo:   newSnapshotRepo(),
 		permissionRepo: newPermissionRepo(),
 	}
 }
@@ -562,11 +560,6 @@ func (repo *fileRepo) populateModelFields(entities []*fileEntity) error {
 				Value:   p.Permission,
 			})
 		}
-		snapshots, err := repo.snapshotRepo.findAllForFile(f.ID)
-		if err != nil {
-			return nil
-		}
-		f.Snapshots = snapshots
 	}
 	return nil
 }

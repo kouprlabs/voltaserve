@@ -13,16 +13,17 @@ type File interface {
 	GetParentID() *string
 	GetCreateTime() string
 	GetUpdateTime() *string
-	GetSnapshots() []Snapshot
 	GetUserPermissions() []CoreUserPermission
 	GetGroupPermissions() []CoreGroupPermission
 	GetText() *string
+	GetSnapshotID() *string
 	SetID(string)
 	SetParentID(*string)
 	SetWorkspaceID(string)
 	SetType(string)
 	SetName(string)
 	SetText(*string)
+	SetSnapshotID(*string)
 	SetCreateTime(string)
 	SetUpdateTime(*string)
 }

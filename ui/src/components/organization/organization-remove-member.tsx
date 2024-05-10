@@ -29,18 +29,18 @@ const OrganizationRemoveMember = ({
   onCompleted,
   onClose,
 }: OrganizationRemoveMemberProps) => {
-  const [loading, setLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
 
   const handleRemoveMember = useCallback(async () => {
     try {
-      setLoading(true)
+      setIsLoading(true)
       await OrganizationAPI.removeMember(organization.id, {
         userId: user.id,
       })
       onCompleted?.()
       onClose?.()
     } finally {
-      setLoading(false)
+      setIsLoading(false)
     }
   }, [organization, user, onClose, onCompleted])
 
@@ -68,7 +68,7 @@ const OrganizationRemoveMember = ({
               type="button"
               variant="outline"
               colorScheme="blue"
-              disabled={loading}
+              disabled={isLoading}
               onClick={() => onClose?.()}
             >
               Cancel
@@ -77,7 +77,7 @@ const OrganizationRemoveMember = ({
               type="submit"
               variant="solid"
               colorScheme="red"
-              isLoading={loading}
+              isLoading={isLoading}
               onClick={handleRemoveMember}
             >
               Remove

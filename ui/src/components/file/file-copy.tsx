@@ -24,7 +24,7 @@ const FileCopy = () => {
   const { fileId } = useParams()
   const isModalOpen = useAppSelector((state) => state.ui.files.isCopyModalOpen)
   const selection = useAppSelector((state) => state.ui.files.selection)
-  const [loading, setLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
   const [targetId, setTargetId] = useState<string>()
   const fileListSearchParams = useFileListSearchParams()
 
@@ -33,7 +33,7 @@ const FileCopy = () => {
       return
     }
     try {
-      setLoading(true)
+      setIsLoading(true)
       await FileAPI.copy(targetId, {
         ids: selection,
       })
@@ -43,7 +43,7 @@ const FileCopy = () => {
       dispatch(selectionUpdated([]))
       dispatch(copyModalDidClose())
     } finally {
-      setLoading(false)
+      setIsLoading(false)
     }
   }, [targetId, fileId, selection, fileListSearchParams, mutate, dispatch])
 
@@ -66,7 +66,7 @@ const FileCopy = () => {
               type="button"
               variant="outline"
               colorScheme="blue"
-              disabled={loading}
+              disabled={isLoading}
               onClick={() => dispatch(copyModalDidClose())}
             >
               Cancel
@@ -74,7 +74,7 @@ const FileCopy = () => {
             <Button
               variant="solid"
               colorScheme="blue"
-              isLoading={loading}
+              isLoading={isLoading}
               onClick={handleMove}
             >
               Copy Here

@@ -104,6 +104,7 @@ CREATE TABLE IF NOT EXISTS "file"
     type         text NOT NULL,
     parent_id    text,
     workspace_id text REFERENCES workspace (id) ON DELETE CASCADE,
+    snapshot_id  text,
     create_time  text NOT NULL DEFAULT (to_json(now())#>>'{}'),
     update_time  text
 );

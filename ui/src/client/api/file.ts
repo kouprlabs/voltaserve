@@ -45,7 +45,6 @@ export type File = {
   preview?: Download
   thumbnail?: Thumbnail
   status: SnapshotStatus
-  snapshots: Snapshot[]
   permission: PermissionType
   isShared: boolean
   createTime: string

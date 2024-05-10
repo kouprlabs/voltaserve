@@ -21,7 +21,7 @@ func NewNotificationService() *NotificationService {
 	}
 }
 
-func (svc *NotificationService) GetAll(userID string) ([]*Notification, error) {
+func (svc *NotificationService) List(userID string) ([]*Notification, error) {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
