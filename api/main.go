@@ -17,9 +17,9 @@ import (
 	"github.com/joho/godotenv"
 )
 
-//	@title		Voltaserve API
-//	@version	2.0.0
-//	@BasePath	/v1
+// @title		Voltaserve API
+// @version	2.0.0
+// @BasePath	/v1
 func main() {
 	if _, err := os.Stat(".env.local"); err == nil {
 		err := godotenv.Load(".env.local")
@@ -52,10 +52,10 @@ func main() {
 		AllowOrigins: strings.Join(cfg.Security.CORSOrigins, ","),
 	}))
 
-	fileDownloads := router.NewFileDownloadRouter()
-	fileDownloads.AppendNonJWTRoutes(f)
+	downloads := router.NewDownloadsRouter()
+	downloads.AppendNonJWTRoutes(f)
 
-	conversionWebhook := router.NewFileConversionWebhookRouter()
+	conversionWebhook := router.NewConversionWebhookRouter()
 	conversionWebhook.AppendInternalRoutes(f)
 
 	app.Use(jwtware.New(jwtware.Config{
@@ -64,6 +64,9 @@ func main() {
 
 	files := router.NewFileRouter()
 	files.AppendRoutes(f)
+
+	snapshots := router.NewSnapshotRouter()
+	snapshots.AppendRoutes(f)
 
 	invitations := router.NewInvitationRouter()
 	invitations.AppendRoutes(v1.Group("invitations"))

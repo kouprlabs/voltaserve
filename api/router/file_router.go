@@ -3,8 +3,6 @@ package router
 import (
 	"encoding/base64"
 	"encoding/json"
-	"errors"
-	"fmt"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -13,14 +11,12 @@ import (
 	"voltaserve/config"
 	"voltaserve/errorpkg"
 	"voltaserve/helper"
-	"voltaserve/infra"
 	"voltaserve/model"
 	"voltaserve/service"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/log"
-	"github.com/golang-jwt/jwt/v5"
 )
 
 type FileRouter struct {
@@ -61,8 +57,6 @@ func (r *FileRouter) AppendRoutes(g fiber.Router) {
 	g.Post("/revoke_group_permission", r.RevokeGroupPermission)
 	g.Get("/:id/get_user_permissions", r.GetUserPermissions)
 	g.Get("/:id/get_group_permissions", r.GetGroupPermissions)
-	g.Post("/:id/snapshots/:snapshotId/activate", r.ActivateSnapshot)
-	g.Delete("/:id/snapshots/:snapshotId", r.DeleteSnapshot)
 }
 
 // Upload godoc
@@ -453,46 +447,6 @@ func (r *FileRouter) Copy(c *fiber.Ctx) error {
 	return c.JSON(res)
 }
 
-// ActivateSnapshot godoc
-//
-//	@Summary		Activate Snapshot
-//	@Description	Activate Snapshot
-//	@Tags			Files
-//	@Id				files_activate_snapsshot
-//	@Produce		json
-//	@Param			id			path		string	true	"ID"
-//	@Param			snapshotId	path		string	true	"Snapshot ID"
-//	@Failure		404			{object}	errorpkg.ErrorResponse
-//	@Failure		500			{object}	errorpkg.ErrorResponse
-//	@Router			/files/{id}/snapshots/{snapshotId}/activate [post]
-func (r *FileRouter) ActivateSnapshot(c *fiber.Ctx) error {
-	res, err := r.fileSvc.ActivateSnapshot(c.Params("id"), c.Params("snapshotId"), GetUserID(c))
-	if err != nil {
-		return err
-	}
-	return c.JSON(res)
-}
-
-// DeleteSnapshot godoc
-//
-//	@Summary		Delete Snapshot
-//	@Description	Delete Snapshot
-//	@Tags			Files
-//	@Id				files_delete_snapsshot
-//	@Produce		json
-//	@Param			id			path		string	true	"ID"
-//	@Param			snapshotId	path		string	true	"Snapshot ID"
-//	@Failure		404			{object}	errorpkg.ErrorResponse
-//	@Failure		500			{object}	errorpkg.ErrorResponse
-//	@Router			/files/{id}/snapshots/{snapshotId} [delete]
-func (r *FileRouter) DeleteSnapshot(c *fiber.Ctx) error {
-	res, err := r.fileSvc.DeleteSnapshot(c.Params("id"), c.Params("snapshotId"), GetUserID(c))
-	if err != nil {
-		return err
-	}
-	return c.JSON(res)
-}
-
 // Move godoc
 //
 //	@Summary		Move
@@ -814,156 +768,4 @@ func (r *FileRouter) GetGroupPermissions(c *fiber.Ctx) error {
 		return err
 	}
 	return c.JSON(res)
-}
-
-type FileDownloadRouter struct {
-	fileSvc               *service.FileService
-	accessTokenCookieName string
-}
-
-func NewFileDownloadRouter() *FileDownloadRouter {
-	return &FileDownloadRouter{
-		fileSvc:               service.NewFileService(),
-		accessTokenCookieName: "voltaserve_access_token",
-	}
-}
-
-func (r *FileDownloadRouter) AppendNonJWTRoutes(g fiber.Router) {
-	g.Get("/:id/original:ext", r.DownloadOriginal)
-	g.Get("/:id/preview:ext", r.DownloadPreview)
-}
-
-// DownloadOriginal godoc
-//
-//	@Summary		Download Original
-//	@Description	Download Original
-//	@Tags			Files
-//	@Id				files_download_original
-//	@Produce		json
-//	@Param			id				path		string	true	"ID"
-//	@Param			access_token	query		string	true	"Access Token"
-//	@Failure		404				{object}	errorpkg.ErrorResponse
-//	@Failure		500				{object}	errorpkg.ErrorResponse
-//	@Router			/files/{id}/original{ext} [get]
-func (r *FileDownloadRouter) DownloadOriginal(c *fiber.Ctx) error {
-	accessToken := c.Cookies(r.accessTokenCookieName)
-	if accessToken == "" {
-		accessToken = c.Query("access_token")
-		if accessToken == "" {
-			return errorpkg.NewFileNotFoundError(nil)
-		}
-	}
-	userID, err := r.getUserID(accessToken)
-	if err != nil {
-		return c.SendStatus(http.StatusNotFound)
-	}
-	buf, file, snapshot, err := r.fileSvc.DownloadOriginalBuffer(c.Params("id"), userID)
-	if err != nil {
-		return err
-	}
-	if filepath.Ext(snapshot.GetOriginal().Key) != c.Params("ext") {
-		return errorpkg.NewS3ObjectNotFoundError(nil)
-	}
-	bytes := buf.Bytes()
-	c.Set("Content-Type", infra.DetectMimeFromBytes(bytes))
-	c.Set("Content-Disposition", fmt.Sprintf("filename=\"%s\"", file.GetName()))
-	return c.Send(bytes)
-}
-
-// DownloadPreview godoc
-//
-//	@Summary		Download Preview
-//	@Description	Download Preview
-//	@Tags			Files
-//	@Id				files_download_preview
-//	@Produce		json
-//	@Param			id				path		string	true	"ID"
-//	@Param			access_token	query		string	true	"Access Token"
-//	@Failure		404				{object}	errorpkg.ErrorResponse
-//	@Failure		500				{object}	errorpkg.ErrorResponse
-//	@Router			/files/{id}/preview{ext} [get]
-func (r *FileDownloadRouter) DownloadPreview(c *fiber.Ctx) error {
-	accessToken := c.Cookies(r.accessTokenCookieName)
-	if accessToken == "" {
-		accessToken = c.Query("access_token")
-		if accessToken == "" {
-			return errorpkg.NewFileNotFoundError(nil)
-		}
-	}
-	userID, err := r.getUserID(accessToken)
-	if err != nil {
-		return c.SendStatus(http.StatusNotFound)
-	}
-	buf, file, snapshot, err := r.fileSvc.DownloadPreviewBuffer(c.Params("id"), userID)
-	if err != nil {
-		return err
-	}
-	if filepath.Ext(snapshot.GetPreview().Key) != c.Params("ext") {
-		return errorpkg.NewS3ObjectNotFoundError(nil)
-	}
-	bytes := buf.Bytes()
-	c.Set("Content-Type", infra.DetectMimeFromBytes(bytes))
-	c.Set("Content-Disposition", fmt.Sprintf("filename=\"%s\"", file.GetName()))
-	return c.Send(bytes)
-}
-
-func (r *FileDownloadRouter) getUserID(accessToken string) (string, error) {
-	token, err := jwt.Parse(accessToken, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-		}
-		return []byte(config.GetConfig().Security.JWTSigningKey), nil
-	})
-	if err != nil {
-		return "", err
-	}
-	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		return claims["sub"].(string), nil
-	} else {
-		return "", errors.New("cannot find sub claim")
-	}
-}
-
-type FileConversionWebhookRouter struct {
-	fileSvc *service.FileService
-}
-
-func NewFileConversionWebhookRouter() *FileConversionWebhookRouter {
-	return &FileConversionWebhookRouter{
-		fileSvc: service.NewFileService(),
-	}
-}
-
-func (r *FileConversionWebhookRouter) AppendInternalRoutes(g fiber.Router) {
-	g.Patch("/:id/snapshots/:snapshotId", r.UpdateSnapshot)
-}
-
-// UpdateSnapshot godoc
-//
-//	@Summary		Update Snapshot
-//	@Description	Update Snapshot
-//	@Tags			Files
-//	@Id				files_update_snapshot
-//	@Produce		json
-//	@Param			body	body	service.FileUpdateSnapshotOptions	true	"Body"
-//	@Success		201
-//	@Failure		401	{object}	errorpkg.ErrorResponse
-//	@Failure		500	{object}	errorpkg.ErrorResponse
-//	@Router			/files/{id}/snapshots/{snapshotId} [patch]
-func (r *FileConversionWebhookRouter) UpdateSnapshot(c *fiber.Ctx) error {
-	apiKey := c.Query("api_key")
-	if apiKey == "" {
-		return errorpkg.NewMissingQueryParamError("api_key")
-	}
-	opts := new(service.FileUpdateSnapshotOptions)
-	if err := c.BodyParser(opts); err != nil {
-		return err
-	}
-	if err := validator.New().Struct(opts); err != nil {
-		return errorpkg.NewRequestBodyValidationError(err)
-	}
-	if err := r.fileSvc.UpdateSnapshot(c.Params("id"), c.Params("snapshotId"), *opts, apiKey); err != nil {
-		return err
-	}
-	return c.SendStatus(204)
 }

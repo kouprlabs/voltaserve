@@ -126,48 +126,6 @@ type FileUpdateOCRLanguageOptions struct {
 	ID string `json:"id" validate:"required"`
 }
 
-type FileUpdateSnapshotOptions struct {
-	Options   client.PipelineRunOptions `json:"options"`
-	Original  *model.S3Object           `json:"original,omitempty"`
-	Preview   *model.S3Object           `json:"preview,omitempty"`
-	Text      *model.S3Object           `json:"text,omitempty"`
-	OCR       *model.S3Object           `json:"ocr,omitempty"`
-	Thumbnail *model.Thumbnail          `json:"thumbnail,omitempty"`
-	Status    string                    `json:"status,omitempty"`
-}
-
-type Snapshot struct {
-	ID         string     `json:"id"`
-	Version    int64      `json:"version"`
-	Original   *Download  `json:"original,omitempty"`
-	Preview    *Download  `json:"preview,omitempty"`
-	OCR        *Download  `json:"ocr,omitempty"`
-	Thumbnail  *Thumbnail `json:"thumbnail,omitempty"`
-	Language   *string    `json:"language,omitempty"`
-	Status     string     `json:"status,omitempty"`
-	IsActive   bool       `json:"isActive"`
-	CreateTime string     `json:"createTime"`
-	UpdateTime *string    `json:"updateTime,omitempty"`
-}
-
-type ImageProps struct {
-	Width  int `json:"width"`
-	Height int `json:"height"`
-}
-
-type Thumbnail struct {
-	Base64 string `json:"base64"`
-	Width  int    `json:"width"`
-	Height int    `json:"height"`
-}
-
-type Download struct {
-	Extension string      `json:"extension"`
-	Size      int64       `json:"size"`
-	Image     *ImageProps `json:"image,omitempty"`
-	Language  *string     `json:"language,omitempty"`
-}
-
 type UserPermission struct {
 	ID         string `json:"id"`
 	User       *User  `json:"user"`
@@ -191,6 +149,7 @@ type FileService struct {
 	workspaceGuard   *guard.WorkspaceGuard
 	workspaceSvc     *WorkspaceService
 	snapshotRepo     repo.SnapshotRepo
+	snapshotSvc      *SnapshotService
 	userRepo         repo.UserRepo
 	userMapper       *userMapper
 	groupCache       *cache.GroupCache
@@ -215,6 +174,7 @@ func NewFileService() *FileService {
 		workspaceRepo:    repo.NewWorkspaceRepo(),
 		workspaceSvc:     NewWorkspaceService(),
 		snapshotRepo:     repo.NewSnapshotRepo(),
+		snapshotSvc:      NewSnapshotService(),
 		userRepo:         repo.NewUserRepo(),
 		userMapper:       newUserMapper(),
 		groupCache:       cache.NewGroupCache(),
@@ -398,32 +358,6 @@ func (svc *FileService) Store(fileID string, filePath string, userID string) (*F
 	return res, nil
 }
 
-func (svc *FileService) UpdateSnapshot(id string, snapshotID string, opts FileUpdateSnapshotOptions, apiKey string) error {
-	if id != opts.Options.FileID || snapshotID != opts.Options.SnapshotID {
-		return errorpkg.NewPathVariablesAndBodyParametersNotConsistent()
-	}
-	if apiKey != svc.config.Security.APIKey {
-		return errorpkg.NewInvalidAPIKeyError()
-	}
-	if err := svc.snapshotRepo.Update(snapshotID, repo.SnapshotUpdateOptions{
-		Thumbnail: opts.Thumbnail,
-		Original:  opts.Original,
-		Preview:   opts.Preview,
-		Text:      opts.Text,
-		Status:    opts.Status,
-	}); err != nil {
-		return err
-	}
-	file, err := svc.fileCache.Refresh(id)
-	if err != nil {
-		return err
-	}
-	if err = svc.fileSearch.Update([]model.File{file}); err != nil {
-		return err
-	}
-	return nil
-}
-
 func (svc *FileService) DownloadOriginalBuffer(id string, userID string) (*bytes.Buffer, model.File, model.Snapshot, error) {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
@@ -436,7 +370,7 @@ func (svc *FileService) DownloadOriginalBuffer(id string, userID string) (*bytes
 	if err = svc.fileGuard.Authorize(user, file, model.PermissionViewer); err != nil {
 		return nil, nil, nil, err
 	}
-	snapshot, err := findActiveSnapshot(file)
+	snapshot, err := FindActiveSnapshot(file)
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -467,7 +401,7 @@ func (svc *FileService) DownloadPreviewBuffer(id string, userID string) (*bytes.
 	if err = svc.fileGuard.Authorize(user, file, model.PermissionViewer); err != nil {
 		return nil, nil, nil, err
 	}
-	snapshot, err := findActiveSnapshot(file)
+	snapshot, err := FindActiveSnapshot(file)
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -1182,103 +1116,6 @@ func (svc *FileService) Delete(ids []string, userID string) ([]string, error) {
 	return res, nil
 }
 
-func (svc *FileService) ActivateSnapshot(id string, snapshotID string, userID string) (*File, error) {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return nil, err
-	}
-	file, err := svc.fileCache.Get(id)
-	if err != nil {
-		return nil, err
-	}
-	if err = svc.fileGuard.Authorize(user, file, model.PermissionEditor); err != nil {
-		return nil, err
-	}
-	if _, err := svc.snapshotRepo.Find(snapshotID); err != nil {
-		return nil, err
-	}
-	file.SetSnapshotID(&snapshotID)
-	if err = svc.fileRepo.Save(file); err != nil {
-		return nil, err
-	}
-	if err = svc.fileSearch.Update([]model.File{file}); err != nil {
-		return nil, err
-	}
-	err = svc.fileCache.Set(file)
-	if err != nil {
-		return nil, err
-	}
-	res, err := svc.fileMapper.mapOne(file, userID)
-	if err != nil {
-		return nil, err
-	}
-	return res, nil
-}
-
-func (svc *FileService) DeleteSnapshot(id string, snapshotID string, userID string) (*File, error) {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return nil, err
-	}
-	file, err := svc.fileCache.Get(id)
-	if err != nil {
-		return nil, err
-	}
-	if err = svc.fileGuard.Authorize(user, file, model.PermissionEditor); err != nil {
-		return nil, err
-	}
-	if _, err := svc.snapshotRepo.Find(snapshotID); err != nil {
-		return nil, err
-	}
-	requiresRefresh := false
-	if file.GetSnapshotID() != nil && *file.GetSnapshotID() == snapshotID {
-		snapshots := file.GetSnapshots()
-		if len(snapshots) == 0 {
-			file.SetSnapshotID(nil)
-		} else if len(snapshots) == 1 {
-			newSnapshotID := snapshots[0].GetID()
-			file.SetSnapshotID(&newSnapshotID)
-			if err := svc.fileRepo.Save(file); err != nil {
-				return nil, err
-			}
-			requiresRefresh = true
-		} else if len(snapshots) > 1 {
-			currentSnapshot, err := svc.snapshotRepo.Find(*file.GetSnapshotID())
-			if err != nil {
-				return nil, err
-			}
-			for _, s := range snapshots {
-				if s.GetVersion() == currentSnapshot.GetVersion()-1 {
-					newSnapshotID := s.GetID()
-					file.SetSnapshotID(&newSnapshotID)
-					if err := svc.fileRepo.Save(file); err != nil {
-						return nil, err
-					}
-					requiresRefresh = true
-					break
-				}
-			}
-		}
-	}
-	if err := svc.snapshotRepo.Delete(snapshotID); err != nil {
-		return nil, err
-	}
-	if requiresRefresh {
-		file, err = svc.fileCache.Refresh(file.GetID())
-		if err != nil {
-			return nil, err
-		}
-		if err = svc.fileSearch.Update([]model.File{file}); err != nil {
-			return nil, err
-		}
-	}
-	res, err := svc.fileMapper.mapOne(file, userID)
-	if err != nil {
-		return nil, err
-	}
-	return res, nil
-}
-
 func (svc *FileService) GetSize(id string, userID string) (int64, error) {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
@@ -1897,14 +1734,16 @@ func (svc *FileService) getChildWithName(id string, name string) (model.File, er
 }
 
 type FileMapper struct {
-	groupCache *cache.GroupCache
-	config     config.Config
+	groupCache     *cache.GroupCache
+	snapshotMapper *SnapshotMapper
+	config         config.Config
 }
 
 func NewFileMapper() *FileMapper {
 	return &FileMapper{
-		groupCache: cache.NewGroupCache(),
-		config:     config.GetConfig(),
+		groupCache:     cache.NewGroupCache(),
+		snapshotMapper: NewSnapshotMapper(),
+		config:         config.GetConfig(),
 	}
 }
 
@@ -1919,13 +1758,13 @@ func (mp *FileMapper) mapOne(m model.File, userID string) (*File, error) {
 		CreateTime:  m.GetCreateTime(),
 		UpdateTime:  m.GetUpdateTime(),
 	}
-	snapshot, err := findActiveSnapshot(m)
+	snapshot, err := FindActiveSnapshot(m)
 	if err != nil {
 		return nil, err
 	}
 	if snapshot != nil {
-		res.Snapshots = mp.mapSnapshots(m.GetSnapshots(), snapshot.GetID())
-		s := mp.mapSnapshot(snapshot, true)
+		res.Snapshots = mp.snapshotMapper.MapSnapshots(m.GetSnapshots(), snapshot.GetID())
+		s := mp.snapshotMapper.MapSnapshot(snapshot, true)
 		res.Version = &s.Version
 		res.Original = s.Original
 		res.Preview = s.Preview
@@ -1977,92 +1816,4 @@ func (mp *FileMapper) mapMany(data []model.File, userID string) ([]*File, error)
 		res = append(res, v)
 	}
 	return res, nil
-}
-
-func (mp *FileMapper) mapSnapshot(m model.Snapshot, isActive bool) *Snapshot {
-	s := &Snapshot{
-		ID:         m.GetID(),
-		Version:    m.GetVersion(),
-		Status:     m.GetStatus(),
-		IsActive:   isActive,
-		CreateTime: m.GetCreateTime(),
-		UpdateTime: m.GetUpdateTime(),
-	}
-	if m.HasOriginal() {
-		s.Original = mp.mapOriginal(m.GetOriginal())
-	}
-	if m.HasPreview() {
-		s.Preview = mp.mapPreview(m.GetPreview())
-	}
-	if m.HasThumbnail() {
-		s.Thumbnail = mp.mapThumbnail(m.GetThumbnail())
-	}
-	return s
-}
-
-func (mp *FileMapper) mapOriginal(m *model.S3Object) *Download {
-	download := &Download{
-		Extension: filepath.Ext(m.Key),
-		Size:      m.Size,
-	}
-	if m.Image != nil {
-		download.Image = &ImageProps{
-			Width:  m.Image.Width,
-			Height: m.Image.Height,
-		}
-	}
-	return download
-}
-
-func (mp *FileMapper) mapPreview(m *model.S3Object) *Download {
-	download := &Download{
-		Extension: filepath.Ext(m.Key),
-		Size:      m.Size,
-	}
-	if m.Image != nil {
-		download.Image = &ImageProps{
-			Width:  m.Image.Width,
-			Height: m.Image.Height,
-		}
-	}
-	return download
-}
-
-func (mp *FileMapper) mapThumbnail(m *model.Thumbnail) *Thumbnail {
-	return &Thumbnail{
-		Base64: m.Base64,
-		Width:  m.Width,
-		Height: m.Height,
-	}
-}
-
-func (mp *FileMapper) mapSnapshots(snapshots []model.Snapshot, activeID string) []*Snapshot {
-	res := make([]*Snapshot, 0)
-	for _, s := range snapshots {
-		res = append(res, mp.mapSnapshot(s, activeID == s.GetID()))
-	}
-	return res
-}
-
-func findActiveSnapshot(m model.File) (model.Snapshot, error) {
-	snapshots := m.GetSnapshots()
-	if len(snapshots) == 0 {
-		return nil, nil
-	}
-	if m.GetSnapshotID() != nil {
-		for _, s := range snapshots {
-			if s.GetID() == *m.GetSnapshotID() {
-				return s, nil
-			}
-		}
-	} else {
-		latest := snapshots[0]
-		for _, s := range snapshots {
-			if s.GetVersion() > latest.GetVersion() {
-				latest = s
-			}
-		}
-		return latest, nil
-	}
-	return nil, nil
 }
