@@ -8,16 +8,18 @@ import (
 )
 
 type FileSearch struct {
-	search *infra.SearchManager
-	index  string
-	s3     *infra.S3Manager
+	search       *infra.SearchManager
+	index        string
+	s3           *infra.S3Manager
+	snapshotRepo repo.SnapshotRepo
 }
 
 func NewFileSearch() *FileSearch {
 	return &FileSearch{
-		index:  infra.FileSearchIndex,
-		search: infra.NewSearchManager(),
-		s3:     infra.NewS3Manager(),
+		index:        infra.FileSearchIndex,
+		search:       infra.NewSearchManager(),
+		s3:           infra.NewS3Manager(),
+		snapshotRepo: repo.NewSnapshotRepo(),
 	}
 }
 
@@ -88,15 +90,18 @@ func (s *FileSearch) Query(query string) ([]model.File, error) {
 
 func (s *FileSearch) populateTextField(files []model.File) error {
 	for _, f := range files {
-		if f.GetSnapshots() != nil &&
-			len(f.GetSnapshots()) > 0 &&
-			f.GetSnapshots()[0].HasText() {
-			var text string
-			text, err := s.s3.GetText(f.GetSnapshots()[0].GetText().Key, f.GetSnapshots()[0].GetText().Bucket)
+		if f.GetType() == model.FileTypeFile && f.GetSnapshotID() != nil {
+			snapshot, err := s.snapshotRepo.Find(*f.GetSnapshotID())
 			if err != nil {
 				return err
 			}
-			f.SetText(&text)
+			if snapshot.HasText() {
+				text, err := s.s3.GetText(snapshot.GetText().Key, snapshot.GetText().Bucket)
+				if err != nil {
+					return err
+				}
+				f.SetText(&text)
+			}
 		}
 	}
 	return nil

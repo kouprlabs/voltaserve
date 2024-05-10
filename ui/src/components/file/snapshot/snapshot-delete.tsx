@@ -13,56 +13,59 @@ import {
 } from '@chakra-ui/react'
 import { useSWRConfig } from 'swr'
 import cx from 'classnames'
-import FileAPI, { List } from '@/client/api/file'
-import useFileListSearchParams from '@/hooks/use-file-list-params'
+import SnapshotAPI from '@/client/api/snapshot'
 import { useAppSelector } from '@/store/hook'
-import { deleteModalDidClose, selectionUpdated } from '@/store/ui/files'
+import { snapshotDeleteModalDidClose } from '@/store/ui/files'
 
-const FileDelete = () => {
+const FileSnapshotDelete = () => {
   const { mutate } = useSWRConfig()
-  const { fileId } = useParams()
   const dispatch = useDispatch()
   const selection = useAppSelector((state) => state.ui.files.selection)
-  const isModalOpen = useAppSelector(
-    (state) => state.ui.files.isDeleteModalOpen,
+  const snapshotSelection = useAppSelector(
+    (state) => state.ui.files.snapshotSelection,
   )
-  const [loading, setLoading] = useState(false)
-  const fileListSearchParams = useFileListSearchParams()
+  const isModalOpen = useAppSelector(
+    (state) => state.ui.files.isSnapshotDeleteModalOpen,
+  )
+  const [isLoading, setIsLoading] = useState(false)
 
   const handleDelete = useCallback(async () => {
-    try {
-      setLoading(true)
-      await FileAPI.batchDelete({ ids: selection })
-      await mutate<List>(`/files/${fileId}/list?${fileListSearchParams}`)
-      dispatch(selectionUpdated([]))
-      dispatch(deleteModalDidClose())
-    } finally {
-      setLoading(false)
+    if (selection.length === 1 && snapshotSelection.length === 1) {
+      try {
+        setIsLoading(true)
+        await SnapshotAPI.delete(selection[0], snapshotSelection[0])
+        mutate(`/files/${selection[0]}/snapshots`)
+        dispatch(snapshotDeleteModalDidClose())
+      } finally {
+        setIsLoading(false)
+      }
     }
-  }, [selection, fileId, fileListSearchParams, mutate, dispatch])
+  }, [snapshotSelection, mutate, dispatch])
 
   return (
     <Modal
       isOpen={isModalOpen}
-      onClose={() => dispatch(deleteModalDidClose())}
+      onClose={() => dispatch(snapshotDeleteModalDidClose())}
       closeOnOverlayClick={false}
     >
       <ModalOverlay />
       <ModalContent>
-        {selection.length > 1 ? (
-          <ModalHeader>Delete {selection.length} Item(s)</ModalHeader>
+        {snapshotSelection.length > 1 ? (
+          <ModalHeader>
+            Delete {snapshotSelection.length} Snapshot(s)
+          </ModalHeader>
         ) : (
-          <ModalHeader>Delete Item</ModalHeader>
+          <ModalHeader>Delete Snapshot</ModalHeader>
         )}
         <ModalCloseButton />
         <ModalBody>
-          {selection.length > 1 ? (
+          {snapshotSelection.length > 1 ? (
             <span>
-              Are you sure you would like to delete ({selection.length})
-              item(s)?
+              Are you sure you would like to delete ({snapshotSelection.length})
+              snapshot(s)?
             </span>
           ) : (
-            <span>Are you sure you would like to delete this item?</span>
+            <span>Are you sure you would like to delete this snapshot?</span>
           )}
         </ModalBody>
         <ModalFooter>
@@ -71,8 +74,8 @@ const FileDelete = () => {
               type="button"
               variant="outline"
               colorScheme="blue"
-              disabled={loading}
-              onClick={() => dispatch(deleteModalDidClose())}
+              disabled={isLoading}
+              onClick={() => dispatch(snapshotDeleteModalDidClose())}
             >
               Cancel
             </Button>
@@ -80,7 +83,7 @@ const FileDelete = () => {
               type="submit"
               variant="solid"
               colorScheme="red"
-              isLoading={loading}
+              isLoading={isLoading}
               onClick={handleDelete}
             >
               Delete
@@ -92,4 +95,4 @@ const FileDelete = () => {
   )
 }
 
-export default FileDelete
+export default FileSnapshotDelete

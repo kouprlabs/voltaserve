@@ -18,7 +18,7 @@ const FileBrowse = ({ onChange }: FileBrowseProps) => {
   const [folders, setFolders] = useState<File[]>([])
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
-  const [loading, setLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
   const [isSpinnerVisible, setIsSpinnerVisible] = useState(false)
   const [fileId, setFileId] = useState<string>()
 
@@ -55,7 +55,7 @@ const FileBrowse = ({ onChange }: FileBrowseProps) => {
 
   const handleLoadMore = useCallback(async (fileId: string, page: number) => {
     try {
-      setLoading(true)
+      setIsLoading(true)
       const result = await FileAPI.list(fileId, {
         page,
         type: FileType.Folder,
@@ -64,7 +64,7 @@ const FileBrowse = ({ onChange }: FileBrowseProps) => {
       setFolders(result.data)
       setPage(page + 1)
     } finally {
-      setLoading(false)
+      setIsLoading(false)
     }
   }, [])
 
@@ -144,7 +144,7 @@ const FileBrowse = ({ onChange }: FileBrowseProps) => {
         >
           <Button
             onClick={() => handleLoadMore(fileId, page)}
-            isLoading={loading}
+            isLoading={isLoading}
           >
             Load More
           </Button>

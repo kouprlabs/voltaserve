@@ -23,22 +23,21 @@ import (
 )
 
 type File struct {
-	ID          string      `json:"id"`
-	WorkspaceID string      `json:"workspaceId"`
-	Name        string      `json:"name"`
-	Type        string      `json:"type"`
-	ParentID    *string     `json:"parentId,omitempty"`
-	Version     *int64      `json:"version,omitempty"`
-	Original    *Download   `json:"original,omitempty"`
-	Preview     *Download   `json:"preview,omitempty"`
-	Thumbnail   *Thumbnail  `json:"thumbnail,omitempty"`
-	Status      string      `json:"status,omitempty"`
-	Snapshots   []*Snapshot `json:"snapshots,omitempty"`
-	Permission  string      `json:"permission"`
-	IsShared    *bool       `json:"isShared,omitempty"`
-	SnapshotID  *string     `json:"snapshotId,omitempty"`
-	CreateTime  string      `json:"createTime"`
-	UpdateTime  *string     `json:"updateTime,omitempty"`
+	ID          string     `json:"id"`
+	WorkspaceID string     `json:"workspaceId"`
+	Name        string     `json:"name"`
+	Type        string     `json:"type"`
+	ParentID    *string    `json:"parentId,omitempty"`
+	Version     *int64     `json:"version,omitempty"`
+	Original    *Download  `json:"original,omitempty"`
+	Preview     *Download  `json:"preview,omitempty"`
+	Thumbnail   *Thumbnail `json:"thumbnail,omitempty"`
+	Status      string     `json:"status,omitempty"`
+	Permission  string     `json:"permission"`
+	IsShared    *bool      `json:"isShared,omitempty"`
+	SnapshotID  *string    `json:"snapshotId,omitempty"`
+	CreateTime  string     `json:"createTime"`
+	UpdateTime  *string    `json:"updateTime,omitempty"`
 }
 
 type FileList struct {
@@ -370,7 +369,10 @@ func (svc *FileService) DownloadOriginalBuffer(id string, userID string) (*bytes
 	if err = svc.fileGuard.Authorize(user, file, model.PermissionViewer); err != nil {
 		return nil, nil, nil, err
 	}
-	snapshot, err := FindActiveSnapshot(file)
+	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
+		return nil, nil, nil, errorpkg.NewFileIsNotAFileError(file)
+	}
+	snapshot, err := svc.snapshotRepo.Find(*file.GetSnapshotID())
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -401,7 +403,10 @@ func (svc *FileService) DownloadPreviewBuffer(id string, userID string) (*bytes.
 	if err = svc.fileGuard.Authorize(user, file, model.PermissionViewer); err != nil {
 		return nil, nil, nil, err
 	}
-	snapshot, err := FindActiveSnapshot(file)
+	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
+		return nil, nil, nil, errorpkg.NewFileIsNotAFileError(file)
+	}
+	snapshot, err := svc.snapshotRepo.Find(*file.GetSnapshotID())
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -1736,6 +1741,7 @@ func (svc *FileService) getChildWithName(id string, name string) (model.File, er
 type FileMapper struct {
 	groupCache     *cache.GroupCache
 	snapshotMapper *SnapshotMapper
+	snapshotRepo   repo.SnapshotRepo
 	config         config.Config
 }
 
@@ -1743,6 +1749,7 @@ func NewFileMapper() *FileMapper {
 	return &FileMapper{
 		groupCache:     cache.NewGroupCache(),
 		snapshotMapper: NewSnapshotMapper(),
+		snapshotRepo:   repo.NewSnapshotRepo(),
 		config:         config.GetConfig(),
 	}
 }
@@ -1758,13 +1765,13 @@ func (mp *FileMapper) mapOne(m model.File, userID string) (*File, error) {
 		CreateTime:  m.GetCreateTime(),
 		UpdateTime:  m.GetUpdateTime(),
 	}
-	snapshot, err := FindActiveSnapshot(m)
-	if err != nil {
-		return nil, err
-	}
-	if snapshot != nil {
-		res.Snapshots = mp.snapshotMapper.MapSnapshots(m.GetSnapshots(), snapshot.GetID())
-		s := mp.snapshotMapper.MapSnapshot(snapshot, true)
+	if m.GetSnapshotID() != nil {
+		snapshot, err := mp.snapshotRepo.Find(*m.GetSnapshotID())
+		if err != nil {
+			return nil, err
+		}
+		s := mp.snapshotMapper.mapOne(snapshot, true)
+		res.SnapshotID = &s.ID
 		res.Version = &s.Version
 		res.Original = s.Original
 		res.Preview = s.Preview

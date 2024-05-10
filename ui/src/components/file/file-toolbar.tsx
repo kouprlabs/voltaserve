@@ -53,7 +53,7 @@ import {
   viewTypeToggled,
   selectionModeToggled,
   sortOrderToggled,
-  snapshotsModalDidOpen,
+  snapshotListModalDidOpen,
 } from '@/store/ui/files'
 import {
   copyModalDidOpen,
@@ -275,7 +275,7 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
           {singleFile?.type === 'file' && hasEditorPermission && (
             <Button
               leftIcon={<IconHistory />}
-              onClick={() => dispatch(snapshotsModalDidOpen())}
+              onClick={() => dispatch(snapshotListModalDidOpen())}
             >
               Snapshots
             </Button>
@@ -320,7 +320,7 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
                     isDisabled={
                       singleFile?.type !== 'file' || !hasOwnerPermission
                     }
-                    onClick={() => dispatch(snapshotsModalDidOpen())}
+                    onClick={() => dispatch(snapshotListModalDidOpen())}
                   >
                     Snapshots
                   </MenuItem>

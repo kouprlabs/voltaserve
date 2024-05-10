@@ -28,6 +28,7 @@ type SnapshotRepo interface {
 	Update(id string, opts SnapshotUpdateOptions) error
 	MapWithFile(id string, fileID string) error
 	DeleteMappingsForFile(fileID string) error
+	FindAllForFile(fileID string) ([]model.Snapshot, error)
 	FindAllDangling() ([]model.Snapshot, error)
 	DeleteAllDangling() error
 	GetLatestVersionForFile(fileID string) (int64, error)
@@ -319,6 +320,18 @@ func (repo *snapshotRepo) findAllForFile(fileID string) ([]*snapshotEntity, erro
 		Scan(&res)
 	if db.Error != nil {
 		return nil, db.Error
+	}
+	return res, nil
+}
+
+func (repo *snapshotRepo) FindAllForFile(fileID string) ([]model.Snapshot, error) {
+	snapshots, err := repo.findAllForFile(fileID)
+	if err != nil {
+		return nil, err
+	}
+	var res []model.Snapshot
+	for _, s := range snapshots {
+		res = append(res, s)
 	}
 	return res, nil
 }

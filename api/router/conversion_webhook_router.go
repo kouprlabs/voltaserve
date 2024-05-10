@@ -46,7 +46,7 @@ func (r *ConversionWebhookRouter) UpdateSnapshot(c *fiber.Ctx) error {
 	if err := validator.New().Struct(opts); err != nil {
 		return errorpkg.NewRequestBodyValidationError(err)
 	}
-	if err := r.snapshotSvc.UpdateSnapshot(c.Params("id"), c.Params("snapshotId"), *opts, apiKey); err != nil {
+	if err := r.snapshotSvc.Update(c.Params("id"), c.Params("snapshotId"), *opts, apiKey); err != nil {
 		return err
 	}
 	return c.SendStatus(204)

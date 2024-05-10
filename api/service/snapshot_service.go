@@ -2,6 +2,8 @@ package service
 
 import (
 	"path/filepath"
+	"sort"
+	"time"
 	"voltaserve/cache"
 	"voltaserve/client"
 	"voltaserve/config"
@@ -24,6 +26,21 @@ type Snapshot struct {
 	IsActive   bool       `json:"isActive"`
 	CreateTime string     `json:"createTime"`
 	UpdateTime *string    `json:"updateTime,omitempty"`
+}
+
+type SnapshotList struct {
+	Data          []*Snapshot `json:"data"`
+	TotalPages    uint        `json:"totalPages"`
+	TotalElements uint        `json:"totalElements"`
+	Page          uint        `json:"page"`
+	Size          uint        `json:"size"`
+}
+
+type SnapshotListOptions struct {
+	Page      uint
+	Size      uint
+	SortBy    string
+	SortOrder string
 }
 
 type ImageProps struct {
@@ -78,7 +95,99 @@ func NewSnapshotService() *SnapshotService {
 	}
 }
 
-func (svc *SnapshotService) ActivateSnapshot(id string, snapshotID string, userID string) (*File, error) {
+func (svc *SnapshotService) List(id string, opts SnapshotListOptions, userID string) (*SnapshotList, error) {
+	user, err := svc.userRepo.Find(userID)
+	if err != nil {
+		return nil, err
+	}
+	file, err := svc.fileCache.Get(id)
+	if err != nil {
+		return nil, err
+	}
+	if err = svc.fileGuard.Authorize(user, file, model.PermissionViewer); err != nil {
+		return nil, err
+	}
+	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
+		return nil, errorpkg.NewFileIsNotAFileError(file)
+	}
+	snapshots, err := svc.snapshotRepo.FindAllForFile(id)
+	if err != nil {
+		return nil, err
+	}
+	if opts.SortBy == "" {
+		opts.SortBy = SortByDateCreated
+	}
+	if opts.SortOrder == "" {
+		opts.SortOrder = SortOrderAsc
+	}
+	sorted := svc.doSorting(snapshots, opts.SortBy, opts.SortOrder)
+	paged, totalElements, totalPages := svc.doPagination(sorted, opts.Page, opts.Size)
+	mapped := NewSnapshotMapper().mapMany(paged, *file.GetSnapshotID())
+	return &SnapshotList{
+		Data:          mapped,
+		TotalPages:    totalPages,
+		TotalElements: totalElements,
+		Page:          opts.Page,
+		Size:          uint(len(mapped)),
+	}, nil
+}
+
+func (svc *SnapshotService) doSorting(data []model.Snapshot, sortBy string, sortOrder string) []model.Snapshot {
+	if sortBy == SortByVersion {
+		sort.Slice(data, func(i, j int) bool {
+			if sortOrder == SortOrderDesc {
+				return data[i].GetVersion() > data[j].GetVersion()
+			} else {
+				return data[i].GetVersion() < data[j].GetVersion()
+			}
+		})
+		return data
+	} else if sortBy == SortByDateCreated {
+		sort.Slice(data, func(i, j int) bool {
+			a, _ := time.Parse(time.RFC3339, data[i].GetCreateTime())
+			b, _ := time.Parse(time.RFC3339, data[j].GetCreateTime())
+			if sortOrder == SortOrderDesc {
+				return a.UnixMilli() > b.UnixMilli()
+			} else {
+				return a.UnixMilli() < b.UnixMilli()
+			}
+		})
+		return data
+	} else if sortBy == SortByDateModified {
+		sort.Slice(data, func(i, j int) bool {
+			if data[i].GetUpdateTime() != nil && data[j].GetUpdateTime() != nil {
+				a, _ := time.Parse(time.RFC3339, *data[i].GetUpdateTime())
+				b, _ := time.Parse(time.RFC3339, *data[j].GetUpdateTime())
+				if sortOrder == SortOrderDesc {
+					return a.UnixMilli() > b.UnixMilli()
+				} else {
+					return a.UnixMilli() < b.UnixMilli()
+				}
+			} else {
+				return false
+			}
+		})
+		return data
+	}
+	return data
+}
+
+func (svc *SnapshotService) doPagination(data []model.Snapshot, page, size uint) ([]model.Snapshot, uint, uint) {
+	totalElements := uint(len(data))
+	totalPages := (totalElements + size - 1) / size
+	if page > totalPages {
+		return nil, totalElements, totalPages
+	}
+	startIndex := (page - 1) * size
+	endIndex := startIndex + size
+	if endIndex > totalElements {
+		endIndex = totalElements
+	}
+	pageData := data[startIndex:endIndex]
+	return pageData, totalElements, totalPages
+}
+
+func (svc *SnapshotService) Activate(id string, snapshotID string, userID string) (*File, error) {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
@@ -111,7 +220,7 @@ func (svc *SnapshotService) ActivateSnapshot(id string, snapshotID string, userI
 	return res, nil
 }
 
-func (svc *SnapshotService) DeleteSnapshot(id string, snapshotID string, userID string) (*File, error) {
+func (svc *SnapshotService) Delete(id string, snapshotID string, userID string) (*File, error) {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
@@ -128,7 +237,10 @@ func (svc *SnapshotService) DeleteSnapshot(id string, snapshotID string, userID 
 	}
 	requiresRefresh := false
 	if file.GetSnapshotID() != nil && *file.GetSnapshotID() == snapshotID {
-		snapshots := file.GetSnapshots()
+		snapshots, err := svc.snapshotRepo.FindAllForFile(file.GetID())
+		if err != nil {
+			return nil, err
+		}
 		if len(snapshots) == 0 {
 			file.SetSnapshotID(nil)
 		} else if len(snapshots) == 1 {
@@ -175,7 +287,7 @@ func (svc *SnapshotService) DeleteSnapshot(id string, snapshotID string, userID 
 	return res, nil
 }
 
-func (svc *SnapshotService) UpdateSnapshot(id string, snapshotID string, opts FileUpdateSnapshotOptions, apiKey string) error {
+func (svc *SnapshotService) Update(id string, snapshotID string, opts FileUpdateSnapshotOptions, apiKey string) error {
 	if id != opts.Options.FileID || snapshotID != opts.Options.SnapshotID {
 		return errorpkg.NewPathVariablesAndBodyParametersNotConsistent()
 	}
@@ -201,29 +313,6 @@ func (svc *SnapshotService) UpdateSnapshot(id string, snapshotID string, opts Fi
 	return nil
 }
 
-func FindActiveSnapshot(m model.File) (model.Snapshot, error) {
-	snapshots := m.GetSnapshots()
-	if len(snapshots) == 0 {
-		return nil, nil
-	}
-	if m.GetSnapshotID() != nil {
-		for _, s := range snapshots {
-			if s.GetID() == *m.GetSnapshotID() {
-				return s, nil
-			}
-		}
-	} else {
-		latest := snapshots[0]
-		for _, s := range snapshots {
-			if s.GetVersion() > latest.GetVersion() {
-				latest = s
-			}
-		}
-		return latest, nil
-	}
-	return nil, nil
-}
-
 type SnapshotMapper struct {
 }
 
@@ -231,7 +320,7 @@ func NewSnapshotMapper() *SnapshotMapper {
 	return &SnapshotMapper{}
 }
 
-func (mp *SnapshotMapper) MapSnapshot(m model.Snapshot, isActive bool) *Snapshot {
+func (mp *SnapshotMapper) mapOne(m model.Snapshot, isActive bool) *Snapshot {
 	s := &Snapshot{
 		ID:         m.GetID(),
 		Version:    m.GetVersion(),
@@ -252,10 +341,10 @@ func (mp *SnapshotMapper) MapSnapshot(m model.Snapshot, isActive bool) *Snapshot
 	return s
 }
 
-func (mp *SnapshotMapper) MapSnapshots(snapshots []model.Snapshot, activeID string) []*Snapshot {
+func (mp *SnapshotMapper) mapMany(snapshots []model.Snapshot, activeID string) []*Snapshot {
 	res := make([]*Snapshot, 0)
 	for _, s := range snapshots {
-		res = append(res, mp.MapSnapshot(s, activeID == s.GetID()))
+		res = append(res, mp.mapOne(s, activeID == s.GetID()))
 	}
 	return res
 }
