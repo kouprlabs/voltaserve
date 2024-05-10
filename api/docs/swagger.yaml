@@ -82,10 +82,6 @@ definitions:
         $ref: '#/definitions/service.Download'
       snapshotId:
         type: string
-      snapshots:
-        items:
-          $ref: '#/definitions/service.Snapshot'
-        type: array
       status:
         type: string
       thumbnail:
@@ -440,6 +436,8 @@ definitions:
     type: object
   service.Snapshot:
     properties:
+      createTime:
+        type: string
       id:
         type: string
       isActive:
@@ -456,7 +454,24 @@ definitions:
         type: string
       thumbnail:
         $ref: '#/definitions/service.Thumbnail'
+      updateTime:
+        type: string
       version:
+        type: integer
+    type: object
+  service.SnapshotList:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/service.Snapshot'
+        type: array
+      page:
+        type: integer
+      size:
+        type: integer
+      totalElements:
+        type: integer
+      totalPages:
         type: integer
     type: object
   service.StorageUsage:
@@ -1126,10 +1141,53 @@ paths:
       summary: Revoke Group Permission
       tags:
       - Files
+  /files/{id}/snapshots:
+    get:
+      description: List
+      operationId: snapshots_list
+      parameters:
+      - description: Query
+        in: query
+        name: query
+        type: string
+      - description: Page
+        in: query
+        name: page
+        type: string
+      - description: Size
+        in: query
+        name: size
+        type: string
+      - description: Sort By
+        in: query
+        name: sort_by
+        type: string
+      - description: Sort Order
+        in: query
+        name: sort_order
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.SnapshotList'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: List
+      tags:
+      - Snapshots
   /files/{id}/snapshots/{snapshotId}:
     delete:
       description: Delete Snapshot
-      operationId: files_delete_snapsshot
+      operationId: snapshots_delete_snapsshot
       parameters:
       - description: ID
         in: path
@@ -1154,7 +1212,7 @@ paths:
             $ref: '#/definitions/errorpkg.ErrorResponse'
       summary: Delete Snapshot
       tags:
-      - Files
+      - Snapshots
     patch:
       description: Update Snapshot
       operationId: files_update_snapshot
@@ -1184,7 +1242,7 @@ paths:
   /files/{id}/snapshots/{snapshotId}/activate:
     post:
       description: Activate Snapshot
-      operationId: files_activate_snapsshot
+      operationId: snapshots_activate_snapsshot
       parameters:
       - description: ID
         in: path
@@ -1209,7 +1267,7 @@ paths:
             $ref: '#/definitions/errorpkg.ErrorResponse'
       summary: Activate Snapshot
       tags:
-      - Files
+      - Snapshots
   /files/batch_delete:
     post:
       description: Batch Delete
