@@ -1,4 +1,12 @@
-import { MouseEvent, useCallback, useEffect, useMemo, useState } from 'react'
+import {
+  ChangeEvent,
+  MouseEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 import { useParams } from 'react-router-dom'
 import { Portal, Menu, MenuList, MenuItem, MenuDivider } from '@chakra-ui/react'
 import {
@@ -18,6 +26,7 @@ import {
   ltViewerPermission,
 } from '@/client/api/permission'
 import downloadFile from '@/helpers/download-file'
+import mapFileList from '@/helpers/map-file-list'
 import {
   IconFileCopy,
   IconDownload,
@@ -26,6 +35,7 @@ import {
   IconGroup,
   IconDelete,
   IconHistory,
+  IconUpload,
 } from '@/lib'
 import { UploadDecorator, uploadAdded } from '@/store/entities/uploads'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
@@ -70,6 +80,7 @@ const FileList = ({ list, scale }: FileListProps) => {
     () => list.data.find((e) => e.id === activeId),
     [list, activeId],
   )
+  const fileUploadInput = useRef<HTMLInputElement>(null)
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -89,7 +100,7 @@ const FileList = ({ list, scale }: FileListProps) => {
             new UploadDecorator({
               workspaceId: id!,
               parentId: fileId!,
-              file,
+              blob: file,
             }).value,
           ),
         )
@@ -132,6 +143,27 @@ const FileList = ({ list, scale }: FileListProps) => {
   const handleDragEnd = useCallback(() => {
     setActiveId(null)
   }, [])
+
+  const handleFileChange = useCallback(
+    async (event: ChangeEvent<HTMLInputElement>) => {
+      const files = mapFileList(event.target.files)
+      if (files.length === 1 && singleFile) {
+        dispatch(
+          uploadAdded(
+            new UploadDecorator({
+              fileId: singleFile.id,
+              blob: files[0],
+            }).value,
+          ),
+        )
+        dispatch(uploadsDrawerOpened())
+        if (fileUploadInput && fileUploadInput.current) {
+          fileUploadInput.current.value = ''
+        }
+      }
+    },
+    [id, fileId, singleFile, dispatch],
+  )
 
   return (
     <>
@@ -261,6 +293,24 @@ const FileList = ({ list, scale }: FileListProps) => {
               </MenuItem>
             ) : null}
             <MenuItem
+              icon={<IconUpload />}
+              isDisabled={
+                !singleFile ||
+                singleFile.type !== 'file' ||
+                ltViewerPermission(singleFile.permission)
+              }
+              onClick={(event: MouseEvent) => {
+                event.stopPropagation()
+                const singleId = singleFile?.id
+                fileUploadInput?.current?.click()
+                if (singleId) {
+                  dispatch(selectionUpdated([singleId]))
+                }
+              }}
+            >
+              Upload
+            </MenuItem>
+            <MenuItem
               icon={<IconDownload />}
               isDisabled={
                 !singleFile ||
@@ -331,6 +381,13 @@ const FileList = ({ list, scale }: FileListProps) => {
           </MenuList>
         </Menu>
       </Portal>
+      <input
+        ref={fileUploadInput}
+        className={cx('hidden')}
+        type="file"
+        multiple
+        onChange={handleFileChange}
+      />
     </>
   )
 }

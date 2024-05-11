@@ -67,7 +67,7 @@ const UploadItem = ({ upload: uploadProp }: UploadItemProps) => {
             'whitespace-nowrap',
           )}
         >
-          {upload.file.name}
+          {upload.blob.name}
         </span>
         <IconButton
           icon={<IconClose />}

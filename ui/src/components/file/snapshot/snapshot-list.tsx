@@ -48,7 +48,7 @@ const FileSnapshotList = () => {
     swrConfig(),
   )
 
-  const handleClose = useCallback(() => {
+  const handleCancel = useCallback(() => {
     dispatch(snapshotListModalDidClose())
     dispatch(snapshotSelectionUpdated([]))
     setSelected(undefined)
@@ -60,6 +60,7 @@ const FileSnapshotList = () => {
         setIsActivating(true)
         await SnapshotAPI.activate(id, selected.id)
         mutate()
+        handleCancel()
       } finally {
         setIsActivating(false)
       }
@@ -83,7 +84,7 @@ const FileSnapshotList = () => {
     <Modal
       size="xl"
       isOpen={isModalOpen}
-      onClose={handleClose}
+      onClose={handleCancel}
       closeOnOverlayClick={false}
     >
       <ModalOverlay />
@@ -156,7 +157,7 @@ const FileSnapshotList = () => {
                             {prettyDate(s.createTime)}
                           </span>
                           {s.isActive ? (
-                            <Badge colorScheme="green">Active</Badge>
+                            <Badge colorScheme="blue">Active</Badge>
                           ) : null}
                         </div>
                       </Td>
@@ -187,9 +188,9 @@ const FileSnapshotList = () => {
               variant="outline"
               colorScheme="blue"
               isDisabled={isActivating}
-              onClick={handleClose}
+              onClick={handleCancel}
             >
-              Close
+              Cancel
             </Button>
             <Button
               variant="outline"
@@ -200,8 +201,8 @@ const FileSnapshotList = () => {
               Delete
             </Button>
             <Button
-              variant="outline"
-              colorScheme="green"
+              variant="solid"
+              colorScheme="blue"
               isLoading={isActivating}
               isDisabled={!selected || selected.isActive || isActivating}
               onClick={handleActivate}

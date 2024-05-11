@@ -20,19 +20,30 @@ setInterval(async () => {
   try {
     const request = new XMLHttpRequest()
     store.dispatch(uploadUpdated({ id: upload.id, request }))
-    await FileAPI.upload({
-      workspaceId: upload.workspaceId,
-      parentId: upload.parentId,
-      name:
-        (upload.file as FileWithPath).path ||
-        upload.file.webkitRelativePath ||
-        upload.file.name,
-      request,
-      file: upload.file,
-      onProgress: (progress) => {
-        store.dispatch(uploadUpdated({ id: upload.id, progress }))
-      },
-    })
+    if (upload.fileId) {
+      await FileAPI.patch({
+        id: upload.fileId,
+        request,
+        blob: upload.blob,
+        onProgress: (progress) => {
+          store.dispatch(uploadUpdated({ id: upload.id, progress }))
+        },
+      })
+    } else if (upload.workspaceId && upload.parentId) {
+      await FileAPI.upload({
+        workspaceId: upload.workspaceId,
+        parentId: upload.parentId,
+        name:
+          (upload.blob as FileWithPath).path ||
+          upload.blob.webkitRelativePath ||
+          upload.blob.name,
+        request,
+        blob: upload.blob,
+        onProgress: (progress) => {
+          store.dispatch(uploadUpdated({ id: upload.id, progress }))
+        },
+      })
+    }
     store.dispatch(uploadCompleted(upload.id))
   } catch (error) {
     store.dispatch(

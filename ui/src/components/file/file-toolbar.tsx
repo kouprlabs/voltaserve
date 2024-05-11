@@ -135,7 +135,7 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
             new UploadDecorator({
               workspaceId: id!,
               parentId: fileId!,
-              file,
+              blob: file,
             }).value,
           ),
         )

@@ -4,9 +4,10 @@ import { newHashId } from '@/infra/id'
 
 export type Upload = {
   id: string
-  workspaceId: string
-  parentId: string
-  file: File | FileWithPath
+  fileId?: string
+  workspaceId?: string
+  parentId?: string
+  blob: File | FileWithPath
   request?: any
   progress?: number
   error?: string
@@ -18,9 +19,10 @@ export class UploadDecorator {
 
   constructor(options: {
     id?: string
-    workspaceId: string
-    parentId: string
-    file: File | FileWithPath
+    fileId?: string
+    workspaceId?: string
+    parentId?: string
+    blob: File | FileWithPath
     request?: any
     progress?: number
     error?: string
@@ -37,16 +39,20 @@ export class UploadDecorator {
     return this.value.id
   }
 
-  get workspaceId(): string {
+  get fileId(): string | undefined {
+    return this.value.fileId
+  }
+
+  get workspaceId(): string | undefined {
     return this.value.workspaceId
   }
 
-  get parentId(): string {
+  get parentId(): string | undefined {
     return this.value.parentId
   }
 
-  get file(): File {
-    return this.value.file
+  get blob(): File {
+    return this.value.blob
   }
 
   get request(): any {
