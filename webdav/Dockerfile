@@ -1,18 +1,15 @@
-FROM registry.suse.com/bci/nodejs:18
+FROM oven/bun:1
 
 WORKDIR /app
 
 COPY src ./src
 COPY .env .
 COPY package.json .
-COPY pnpm-lock.yaml .
+COPY bun.lockb .
 COPY tsconfig.json .
 
-RUN npm install -g corepack
-RUN corepack enable
+RUN bun install --frozen-lockfile
 
-RUN pnpm install
-
-ENTRYPOINT ["pnpm", "run", "start"]
+ENTRYPOINT ["bun", "run", "dev"]
 
 EXPOSE 6000
