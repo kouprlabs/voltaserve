@@ -172,7 +172,7 @@ CREATE TRIGGER snapshot_file_before_insert
     FOR EACH ROW
 EXECUTE PROCEDURE create_time_before_insert();
 
-CREATE TABLE IF NOT EXISTS group
+CREATE TABLE IF NOT EXISTS "group"
 (
     id              text PRIMARY KEY,
     name            text NOT NULL,
@@ -181,7 +181,7 @@ CREATE TABLE IF NOT EXISTS group
     update_time     text
 );
 
-CREATE INDEX IF NOT EXISTS group_organization_id_idx ON group (organization_id);
+CREATE INDEX IF NOT EXISTS group_organization_id_idx ON "group" (organization_id);
 
 DROP TRIGGER IF EXISTS group_before_insert ON "group";
 CREATE TRIGGER group_before_insert
