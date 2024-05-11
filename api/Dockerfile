@@ -1,4 +1,4 @@
-FROM registry.suse.com/bci/golang:1.22 AS builder
+FROM golang:1.22 AS builder
 
 WORKDIR /build
 
@@ -7,7 +7,7 @@ COPY . .
 RUN go mod download
 RUN go build -o voltaserve-api
 
-FROM registry.suse.com/bci/bci-micro:15.5 AS runner
+FROM ubuntu:noble AS runner
 
 WORKDIR /app
 
