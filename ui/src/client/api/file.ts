@@ -142,8 +142,15 @@ export type UploadOptions = {
   workspaceId: string
   parentId?: string
   name?: string
-  file: Blob
+  blob: Blob
   request: XMLHttpRequest
+  onProgress?: (value: number) => void
+}
+
+export type PatchOptions = {
+  id: string
+  request: XMLHttpRequest
+  blob: Blob
   onProgress?: (value: number) => void
 }
 
@@ -153,7 +160,7 @@ export default class FileAPI {
     parentId,
     name,
     request,
-    file,
+    blob,
     onProgress,
   }: UploadOptions): Promise<File> {
     const params = new URLSearchParams({ workspace_id: workspaceId })
@@ -167,22 +174,22 @@ export default class FileAPI {
       `${getConfig().apiURL}/files?${params}`,
       'POST',
       request,
-      file,
+      blob,
       onProgress,
     )
   }
 
-  static async patch(
-    id: string,
-    request: XMLHttpRequest,
-    file: Blob,
-    onProgress?: (value: number) => void,
-  ): Promise<File> {
+  static async patch({
+    id,
+    request,
+    blob,
+    onProgress,
+  }: PatchOptions): Promise<File> {
     return this.doUpload(
       `${getConfig().apiURL}/files/${id}`,
       'PATCH',
       request,
-      file,
+      blob,
       onProgress,
     )
   }

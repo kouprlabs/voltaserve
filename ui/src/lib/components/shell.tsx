@@ -1,4 +1,4 @@
-import { ReactElement } from 'react'
+import { MouseEvent, ReactElement } from 'react'
 import cx from 'classnames'
 import { StorageOptions } from '../types'
 import { Drawer, DrawerItem } from './drawer'
@@ -16,6 +16,7 @@ type ShellProps = {
   topBar: ReactElement
   items: ShellItem[]
   children?: ReactElement
+  onContentClick?: (event: MouseEvent) => void
 }
 
 export const Shell = ({
@@ -24,6 +25,7 @@ export const Shell = ({
   items,
   storage,
   children,
+  onContentClick,
 }: ShellProps) => (
   <div className={cx('flex', 'flex-row', 'items-center', 'gap-0', 'h-full')}>
     <Drawer storage={storage} logo={logo}>
@@ -37,7 +39,10 @@ export const Shell = ({
         />
       ))}
     </Drawer>
-    <div className={cx('flex', 'flex-col', 'items-center', 'h-full', 'w-full')}>
+    <div
+      className={cx('flex', 'flex-col', 'items-center', 'h-full', 'w-full')}
+      onClick={onContentClick}
+    >
       {topBar}
       <div
         className={cx(

@@ -54,7 +54,7 @@ passport.use(
     } catch (err) {
       return done(err, false)
     }
-  })
+  }),
 )
 
 const server = createServer((req: IncomingMessage, res: ServerResponse) => {
@@ -72,7 +72,7 @@ const server = createServer((req: IncomingMessage, res: ServerResponse) => {
         res.setHeader('WWW-Authenticate', 'Basic realm="WebDAV Server"')
         res.end()
       } else {
-        const method = req.method
+        const method = req.method.toUpperCase()
         switch (method) {
           case 'OPTIONS':
             await handleOptions(req, res)
@@ -105,11 +105,12 @@ const server = createServer((req: IncomingMessage, res: ServerResponse) => {
             await handleProppatch(req, res)
             break
           default:
+            debugger
             res.statusCode = 501
             res.end()
         }
       }
-    }
+    },
   )(req, res)
 })
 
