@@ -16,6 +16,9 @@ services:
       POSTGRES_PASSWORD: voltaserve
     volumes:
       - postgres:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        ["CMD", "pg_isready -U voltaserve -d voltaserve -h localhost -p 5432"]
   minio:
     image: minio/minio:RELEASE.2024-04-06T05-26-02Z
     ports:
@@ -28,12 +31,16 @@ services:
     volumes:
       - minio:/data
     command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/health/ready"]
   meilisearch:
     image: getmeili/meilisearch:v1.7
     ports:
       - ${VOLTASERVE_MEILISEARCH_PORT}:7700
     volumes:
       - meilisearch:/meili_data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7700/health"]
   redis:
     image: redis:7.2
     ports:
@@ -45,6 +52,8 @@ services:
     ports:
       - ${VOLTASERVE_MAILHOG_SMTP_PORT}:1025
       - ${VOLTASERVE_MAILHOG_WEB_PORT}:8025
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
   api:
     image: voltaserve/api
     build:
