@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 
+	"voltaserve/client"
 	"voltaserve/config"
 	"voltaserve/core"
 	"voltaserve/runtime"
@@ -41,6 +42,9 @@ func main() {
 	v1 := app.Group("v1")
 
 	v1.Get("health", func(c *fiber.Ctx) error {
+		if ok, err := client.NewAPIClient().GetHealth(); err != nil || ok != "OK" {
+			return c.SendStatus(http.StatusServiceUnavailable)
+		}
 		return c.SendString("OK")
 	})
 

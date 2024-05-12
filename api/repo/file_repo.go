@@ -173,7 +173,7 @@ type fileRepo struct {
 
 func newFileRepo() *fileRepo {
 	return &fileRepo{
-		db:             infra.GetDb(),
+		db:             infra.NewPostgresManager().GetDBOrPanic(),
 		permissionRepo: newPermissionRepo(),
 	}
 }

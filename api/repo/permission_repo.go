@@ -69,7 +69,7 @@ type permissionRepo struct {
 
 func newPermissionRepo() *permissionRepo {
 	return &permissionRepo{
-		db: infra.GetDb(),
+		db: infra.NewPostgresManager().GetDBOrPanic(),
 	}
 }
 

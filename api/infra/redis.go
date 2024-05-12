@@ -15,16 +15,14 @@ type RedisManager struct {
 }
 
 func NewRedisManager() *RedisManager {
-	mgr := new(RedisManager)
-	mgr.config = config.GetConfig().Redis
-	return mgr
+	return &RedisManager{
+		config: config.GetConfig().Redis,
+	}
 }
 
 func (mgr *RedisManager) Set(key string, value interface{}) error {
-	if mgr.client == nil && mgr.clusterClient == nil {
-		if err := mgr.connect(); err != nil {
-			return err
-		}
+	if err := mgr.Connect(); err != nil {
+		return err
 	}
 	if mgr.clusterClient != nil {
 		if _, err := mgr.clusterClient.Set(context.Background(), key, value, 0).Result(); err != nil {
@@ -39,10 +37,8 @@ func (mgr *RedisManager) Set(key string, value interface{}) error {
 }
 
 func (mgr *RedisManager) Get(key string) (string, error) {
-	if mgr.client == nil && mgr.clusterClient == nil {
-		if err := mgr.connect(); err != nil {
-			return "", err
-		}
+	if err := mgr.Connect(); err != nil {
+		return "", err
 	}
 	if mgr.clusterClient != nil {
 		value, err := mgr.clusterClient.Get(context.Background(), key).Result()
@@ -60,10 +56,8 @@ func (mgr *RedisManager) Get(key string) (string, error) {
 }
 
 func (mgr *RedisManager) Delete(key string) error {
-	if mgr.client == nil && mgr.clusterClient == nil {
-		if err := mgr.connect(); err != nil {
-			return err
-		}
+	if err := mgr.Connect(); err != nil {
+		return err
 	}
 	if mgr.clusterClient != nil {
 		if _, err := mgr.clusterClient.Del(context.Background(), key).Result(); err != nil {
@@ -86,7 +80,7 @@ func (mgr *RedisManager) Close() error {
 	return nil
 }
 
-func (mgr *RedisManager) connect() error {
+func (mgr *RedisManager) Connect() error {
 	if mgr.client != nil || mgr.clusterClient != nil {
 		return nil
 	}

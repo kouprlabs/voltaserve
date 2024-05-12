@@ -123,7 +123,7 @@ type groupRepo struct {
 
 func newGroupRepo() *groupRepo {
 	return &groupRepo{
-		db:             infra.GetDb(),
+		db:             infra.NewPostgresManager().GetDBOrPanic(),
 		permissionRepo: newPermissionRepo(),
 	}
 }

@@ -116,7 +116,7 @@ type organizationRepo struct {
 
 func newOrganizationRepo() *organizationRepo {
 	return &organizationRepo{
-		db:             infra.GetDb(),
+		db:             infra.NewPostgresManager().GetDBOrPanic(),
 		groupRepo:      newGroupRepo(),
 		permissionRepo: newPermissionRepo(),
 	}

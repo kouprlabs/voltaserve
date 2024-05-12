@@ -1,6 +1,11 @@
 package router
 
-import "github.com/gofiber/fiber/v2"
+import (
+	"net/http"
+	"voltaserve/infra"
+
+	"github.com/gofiber/fiber/v2"
+)
 
 type HealthRouter struct {
 }
@@ -24,5 +29,14 @@ func (r *HealthRouter) AppendRoutes(g fiber.Router) {
 //	@Failure		503	{object}	errorpkg.ErrorResponse
 //	@Router			/health [get]
 func (r *HealthRouter) GetHealth(c *fiber.Ctx) error {
+	if err := infra.NewPostgresManager().Connect(true); err != nil {
+		return c.SendStatus(http.StatusServiceUnavailable)
+	}
+	if err := infra.NewRedisManager().Connect(); err != nil {
+		return c.SendStatus(http.StatusServiceUnavailable)
+	}
+	if err := infra.NewS3Manager().Connect(); err != nil {
+		return c.SendStatus(http.StatusServiceUnavailable)
+	}
 	return c.SendString("OK")
 }

@@ -31,6 +31,13 @@ export type TokenExchangeOptions = {
   locale?: string
 }
 
+export class HealthAPI {
+  async get(): Promise<string> {
+    const response = await fetch(`${IDP_URL}/v1/health`, { method: 'GET' })
+    return response.text()
+  }
+}
+
 export class TokenAPI {
   async exchange(options: TokenExchangeOptions): Promise<Token> {
     const formBody = []

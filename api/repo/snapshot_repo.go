@@ -231,7 +231,7 @@ type snapshotRepo struct {
 
 func newSnapshotRepo() *snapshotRepo {
 	return &snapshotRepo{
-		db: infra.GetDb(),
+		db: infra.NewPostgresManager().GetDBOrPanic(),
 	}
 }
 

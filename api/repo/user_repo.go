@@ -81,7 +81,7 @@ type userRepo struct {
 
 func newUserRepo() *userRepo {
 	return &userRepo{
-		db: infra.GetDb(),
+		db: infra.NewPostgresManager().GetDBOrPanic(),
 	}
 }
 

@@ -26,7 +26,7 @@ func NewS3Manager() *S3Manager {
 
 func (mgr *S3Manager) GetFile(objectName string, filePath string, bucketName string) error {
 	if mgr.client == nil {
-		if err := mgr.connect(); err != nil {
+		if err := mgr.Connect(); err != nil {
 			return err
 		}
 	}
@@ -37,10 +37,8 @@ func (mgr *S3Manager) GetFile(objectName string, filePath string, bucketName str
 }
 
 func (mgr *S3Manager) PutFile(objectName string, filePath string, contentType string, bucketName string) error {
-	if mgr.client == nil {
-		if err := mgr.connect(); err != nil {
-			return err
-		}
+	if err := mgr.Connect(); err != nil {
+		return err
 	}
 	if contentType == "" {
 		contentType = "application/octet-stream"
@@ -60,10 +58,8 @@ func (mgr *S3Manager) PutText(objectName string, text string, contentType string
 	if contentType == "" {
 		contentType = "text/plain"
 	}
-	if mgr.client == nil {
-		if err := mgr.connect(); err != nil {
-			return err
-		}
+	if err := mgr.Connect(); err != nil {
+		return err
 	}
 	if _, err := mgr.client.PutObject(context.Background(), bucketName, objectName, strings.NewReader(text), int64(len(text)), minio.PutObjectOptions{
 		ContentType: contentType,
@@ -74,10 +70,8 @@ func (mgr *S3Manager) PutText(objectName string, text string, contentType string
 }
 
 func (mgr *S3Manager) GetObject(objectName string, bucketName string) (*bytes.Buffer, error) {
-	if mgr.client == nil {
-		if err := mgr.connect(); err != nil {
-			return nil, err
-		}
+	if err := mgr.Connect(); err != nil {
+		return nil, err
 	}
 	reader, err := mgr.client.GetObject(context.Background(), bucketName, objectName, minio.GetObjectOptions{})
 	if err != nil {
@@ -92,10 +86,8 @@ func (mgr *S3Manager) GetObject(objectName string, bucketName string) (*bytes.Bu
 }
 
 func (mgr *S3Manager) GetText(objectName string, bucketName string) (string, error) {
-	if mgr.client == nil {
-		if err := mgr.connect(); err != nil {
-			return "", err
-		}
+	if err := mgr.Connect(); err != nil {
+		return "", err
 	}
 	reader, err := mgr.client.GetObject(context.Background(), bucketName, objectName, minio.GetObjectOptions{})
 	if err != nil {
@@ -110,10 +102,8 @@ func (mgr *S3Manager) GetText(objectName string, bucketName string) (string, err
 }
 
 func (mgr *S3Manager) RemoveObject(objectName string, bucketName string) error {
-	if mgr.client == nil {
-		if err := mgr.connect(); err != nil {
-			return err
-		}
+	if err := mgr.Connect(); err != nil {
+		return err
 	}
 	err := mgr.client.RemoveObject(context.Background(), bucketName, objectName, minio.RemoveObjectOptions{})
 	if err != nil {
@@ -123,10 +113,8 @@ func (mgr *S3Manager) RemoveObject(objectName string, bucketName string) error {
 }
 
 func (mgr *S3Manager) CreateBucket(bucketName string) error {
-	if mgr.client == nil {
-		if err := mgr.connect(); err != nil {
-			return err
-		}
+	if err := mgr.Connect(); err != nil {
+		return err
 	}
 	found, err := mgr.client.BucketExists(context.Background(), bucketName)
 	if err != nil {
@@ -143,10 +131,8 @@ func (mgr *S3Manager) CreateBucket(bucketName string) error {
 }
 
 func (mgr *S3Manager) RemoveBucket(bucketName string) error {
-	if mgr.client == nil {
-		if err := mgr.connect(); err != nil {
-			return err
-		}
+	if err := mgr.Connect(); err != nil {
+		return err
 	}
 	found, err := mgr.client.BucketExists(context.Background(), bucketName)
 	if err != nil {
@@ -167,10 +153,8 @@ func (mgr *S3Manager) RemoveBucket(bucketName string) error {
 }
 
 func (mgr *S3Manager) EnableBucketEncryption(bucketName string) error {
-	if mgr.client == nil {
-		if err := mgr.connect(); err != nil {
-			return err
-		}
+	if err := mgr.Connect(); err != nil {
+		return err
 	}
 	err := mgr.client.SetBucketEncryption(context.Background(), bucketName, sse.NewConfigurationSSES3())
 	if err != nil {
@@ -180,10 +164,8 @@ func (mgr *S3Manager) EnableBucketEncryption(bucketName string) error {
 }
 
 func (mgr *S3Manager) DisableBucketEncryption(bucketName string) error {
-	if mgr.client == nil {
-		if err := mgr.connect(); err != nil {
-			return err
-		}
+	if err := mgr.Connect(); err != nil {
+		return err
 	}
 	err := mgr.client.RemoveBucketEncryption(context.Background(), bucketName)
 	if err != nil {
@@ -192,7 +174,7 @@ func (mgr *S3Manager) DisableBucketEncryption(bucketName string) error {
 	return nil
 }
 
-func (mgr *S3Manager) connect() error {
+func (mgr *S3Manager) Connect() error {
 	client, err := minio.New(mgr.config.URL, &minio.Options{
 		Creds:  credentials.NewStaticV4(mgr.config.AccessKey, mgr.config.SecretKey, ""),
 		Secure: mgr.config.Secure,

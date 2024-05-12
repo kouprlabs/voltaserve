@@ -98,7 +98,7 @@ type invitationRepo struct {
 
 func newInvitationRepo() *invitationRepo {
 	return &invitationRepo{
-		db:       infra.GetDb(),
+		db:       infra.NewPostgresManager().GetDBOrPanic(),
 		userRepo: newUserRepo(),
 	}
 }

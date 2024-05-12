@@ -92,6 +92,13 @@ export type FileMoveOptions = {
   ids: string[]
 }
 
+export class HealthAPI {
+  async get(): Promise<string> {
+    const response = await fetch(`${API_URL}/v1/health`, { method: 'GET' })
+    return response.text()
+  }
+}
+
 export class FileAPI {
   constructor(private token: Token) {}
 
@@ -137,7 +144,7 @@ export class FileAPI {
           'Authorization': `Bearer ${this.token.access_token}`,
           'Content-Type': 'application/json',
         },
-      }
+      },
     )
     return this.jsonResponseOrThrow(response)
   }
@@ -151,7 +158,7 @@ export class FileAPI {
           'Authorization': `Bearer ${this.token.access_token}`,
           'Content-Type': 'application/json',
         },
-      }
+      },
     )
     return this.jsonResponseOrThrow(response)
   }
@@ -236,7 +243,7 @@ export class FileAPI {
             ws.close()
             resolve()
           })
-        }
+        },
       )
       request.on('error', (error) => {
         unlink(outputPath, () => {

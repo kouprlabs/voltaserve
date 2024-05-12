@@ -132,7 +132,7 @@ type workspaceRepo struct {
 
 func newWorkspaceRepo() *workspaceRepo {
 	return &workspaceRepo{
-		db:             infra.GetDb(),
+		db:             infra.NewPostgresManager().GetDBOrPanic(),
 		permissionRepo: newPermissionRepo(),
 	}
 }

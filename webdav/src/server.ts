@@ -15,6 +15,8 @@ import handlePropfind from '@/handler/handle-propfind'
 import handleProppatch from '@/handler/handle-proppatch'
 import handlePut from '@/handler/handle-put'
 import { newExpiry } from '@/helper/token'
+import { HealthAPI as IDPHealthAPI } from '@/client/idp'
+import { HealthAPI as APIHealthAPI } from '@/client/api'
 
 const tokens = new Map<string, Token>()
 const expiries = new Map<string, Date>()
@@ -111,8 +113,22 @@ function handleRequest(req: IncomingMessage, res: ServerResponse) {
 
 const server = createServer((req: IncomingMessage, res: ServerResponse) => {
   if (req.url === '/v1/health' && req.method === 'GET') {
-    res.statusCode = 200
-    res.end('OK')
+    const apiHealth = new APIHealthAPI().get()
+    const idpHealth = new IDPHealthAPI().get()
+    Promise.all([apiHealth, idpHealth])
+      .then((results) => {
+        if (results.every((result) => result === 'OK')) {
+          res.statusCode = 200
+          res.end('OK')
+        } else {
+          res.statusCode = 503
+          res.end()
+        }
+      })
+      .catch(() => {
+        res.statusCode = 503
+        res.end()
+      })
   } else {
     handleRequest(req, res)
   }
