@@ -15,7 +15,10 @@ import { useSWRConfig } from 'swr'
 import cx from 'classnames'
 import SnapshotAPI from '@/client/api/snapshot'
 import { useAppSelector } from '@/store/hook'
-import { snapshotDeleteModalDidClose } from '@/store/ui/files'
+import {
+  snapshotDeleteModalDidClose,
+  snapshotDeletionUpdated,
+} from '@/store/ui/files'
 
 const FileSnapshotDelete = () => {
   const { mutate } = useSWRConfig()
@@ -33,8 +36,7 @@ const FileSnapshotDelete = () => {
     if (selection.length === 1 && snapshotSelection.length === 1) {
       try {
         setIsLoading(true)
-        await SnapshotAPI.delete(selection[0], snapshotSelection[0])
-        mutate(`/files/${selection[0]}/snapshots`)
+        dispatch(snapshotDeletionUpdated([snapshotSelection[0]]))
         dispatch(snapshotDeleteModalDidClose())
       } finally {
         setIsLoading(false)

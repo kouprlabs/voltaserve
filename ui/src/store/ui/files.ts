@@ -18,6 +18,7 @@ export type FilesState = {
   selection: string[]
   hidden: string[]
   snapshotSelection: string[]
+  snapshotDeletion: string[]
   isMultiSelectActive: boolean
   isRangeSelectActive: boolean
   isMoveModalOpen: boolean
@@ -39,6 +40,7 @@ const initialState: FilesState = {
   selection: [],
   hidden: [],
   snapshotSelection: [],
+  snapshotDeletion: [],
   isMultiSelectActive: false,
   isRangeSelectActive: false,
   isMoveModalOpen: false,
@@ -74,6 +76,9 @@ const slice = createSlice({
     },
     snapshotSelectionUpdated: (state, action: PayloadAction<string[]>) => {
       state.snapshotSelection = action.payload
+    },
+    snapshotDeletionUpdated: (state, action: PayloadAction<string[]>) => {
+      state.snapshotDeletion = action.payload
     },
     moveModalDidOpen: (state) => {
       state.isMoveModalOpen = true
@@ -161,6 +166,7 @@ export const {
   selectionRemoved,
   hiddenUpdated,
   snapshotSelectionUpdated,
+  snapshotDeletionUpdated,
   moveModalDidOpen,
   copyModalDidOpen,
   createModalDidOpen,

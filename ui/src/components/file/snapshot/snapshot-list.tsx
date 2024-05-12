@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   Avatar,
   Badge,
@@ -25,6 +25,7 @@ import { Pagination, SectionSpinner } from '@/lib'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import {
   snapshotDeleteModalDidOpen,
+  snapshotDeletionUpdated,
   snapshotListModalDidClose,
   snapshotSelectionUpdated,
 } from '@/store/ui/files'
@@ -35,6 +36,7 @@ const FileSnapshotList = () => {
     (state) => state.ui.files.isSnapshotListModalOpen,
   )
   const id = useAppSelector((state) => state.ui.files.selection[0])
+  const deletion = useAppSelector((state) => state.ui.files.snapshotDeletion)
   const [isActivating, setIsActivating] = useState(false)
   const [page, setPage] = useState(1)
   const [selected, setSelected] = useState<Snapshot>()
@@ -48,7 +50,20 @@ const FileSnapshotList = () => {
     swrConfig(),
   )
 
-  const handleCancel = useCallback(() => {
+  useEffect(() => {
+    async function deleteSnapshots() {
+      deletion.forEach(async (snapshotId) => {
+        await SnapshotAPI.delete(id, snapshotId)
+        await mutate()
+      })
+      dispatch(snapshotDeletionUpdated([]))
+    }
+    if (deletion.length > 0) {
+      deleteSnapshots()
+    }
+  }, [deletion])
+
+  const handleClose = useCallback(() => {
     dispatch(snapshotListModalDidClose())
     dispatch(snapshotSelectionUpdated([]))
     setSelected(undefined)
@@ -60,7 +75,6 @@ const FileSnapshotList = () => {
         setIsActivating(true)
         await SnapshotAPI.activate(id, selected.id)
         mutate()
-        handleCancel()
       } finally {
         setIsActivating(false)
       }
@@ -84,7 +98,7 @@ const FileSnapshotList = () => {
     <Modal
       size="xl"
       isOpen={isModalOpen}
-      onClose={handleCancel}
+      onClose={handleClose}
       closeOnOverlayClick={false}
     >
       <ModalOverlay />
@@ -157,7 +171,7 @@ const FileSnapshotList = () => {
                             {prettyDate(s.createTime)}
                           </span>
                           {s.isActive ? (
-                            <Badge colorScheme="blue">Active</Badge>
+                            <Badge colorScheme="green">Active</Badge>
                           ) : null}
                         </div>
                       </Td>
@@ -188,9 +202,9 @@ const FileSnapshotList = () => {
               variant="outline"
               colorScheme="blue"
               isDisabled={isActivating}
-              onClick={handleCancel}
+              onClick={handleClose}
             >
-              Cancel
+              Close
             </Button>
             <Button
               variant="outline"
