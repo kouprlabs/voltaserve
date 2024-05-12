@@ -50,7 +50,7 @@ const TopBarUploadDrawer = () => {
       <div className={cx('flex', 'items-center', 'justify-center', 'relative')}>
         <IconButton
           ref={buttonRef}
-          icon={<IconUpload size="14px" />}
+          icon={<IconUpload />}
           aria-label=""
           onClick={onOpen}
         />
@@ -78,7 +78,7 @@ const TopBarUploadDrawer = () => {
             {hasCompleted && (
               <Button
                 className={cx('w-full')}
-                leftIcon={<IconClearAll size="22px" />}
+                leftIcon={<IconClearAll />}
                 onClick={handleClearCompleted}
               >
                 Clear Completed Items

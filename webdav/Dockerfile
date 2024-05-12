@@ -13,6 +13,6 @@ COPY tsconfig.json .
 
 RUN bun install --frozen-lockfile
 
-ENTRYPOINT ["bun", "run", "dev"]
+ENTRYPOINT ["bun", "run", "start"]
 
 EXPOSE 6000

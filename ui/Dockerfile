@@ -1,9 +1,6 @@
-FROM oven/bun:1-debian
+FROM oven/bun:1-debian AS ui-builder
 
-RUN apt-get update
-RUN apt-get install -y curl
-
-WORKDIR /app
+WORKDIR /build
 
 COPY src ./src
 COPY public ./public
@@ -11,14 +8,37 @@ COPY index.html .
 COPY postcss.config.cjs .
 COPY tailwind.config.cjs .
 COPY vite.config.ts .
-COPY .env .
 COPY package.json .
 COPY bun.lockb .
 COPY tsconfig.json .
 COPY tsconfig.node.json .
 
 RUN bun install --frozen-lockfile
+RUN bun run build
 
-ENTRYPOINT ["bun", "run", "dev"]
+FROM golang:1.22 AS go-builder
+
+WORKDIR /build
+
+COPY --from=ui-builder /build/dist ./dist
+COPY config ./config
+COPY main.go .
+COPY go.mod .
+COPY go.sum .
+
+RUN go mod download
+RUN go build -o voltaserve-ui
+
+FROM ubuntu:noble AS runner
+
+RUN apt-get update
+RUN apt-get install -y curl
+
+WORKDIR /app
+
+COPY --from=go-builder /build/voltaserve-ui ./voltaserve-ui
+COPY .env .
+
+ENTRYPOINT ["./voltaserve-ui"]
 
 EXPOSE 3000

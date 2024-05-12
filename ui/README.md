@@ -17,3 +17,9 @@ Build Docker Image:
 ```shell
 docker build -t voltaserve/ui .
 ```
+
+Run code linter:
+
+```shell
+golangci-lint run
+```
