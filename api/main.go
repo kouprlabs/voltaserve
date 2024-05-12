@@ -17,9 +17,9 @@ import (
 	"github.com/joho/godotenv"
 )
 
-//	@title		Voltaserve API
-//	@version	2.0.0
-//	@BasePath	/v1
+// @title		Voltaserve API
+// @version	2.0.0
+// @BasePath	/v1
 func main() {
 	if _, err := os.Stat(".env.local"); err == nil {
 		err := godotenv.Load(".env.local")
@@ -40,17 +40,16 @@ func main() {
 		BodyLimit:    int(helper.MegabyteToByte(cfg.Limits.MultipartBodyLengthLimitMB)),
 	})
 
-	v1 := app.Group("/v1")
-
-	f := v1.Group("files")
-
-	app.Get("v1/health", func(c *fiber.Ctx) error {
-		return c.SendStatus(200)
-	})
-
 	app.Use(cors.New(cors.Config{
 		AllowOrigins: strings.Join(cfg.Security.CORSOrigins, ","),
 	}))
+
+	v1 := app.Group("v1")
+
+	health := router.NewHealthRouter()
+	health.AppendRoutes(v1)
+
+	f := v1.Group("files")
 
 	downloads := router.NewDownloadsRouter()
 	downloads.AppendNonJWTRoutes(f)

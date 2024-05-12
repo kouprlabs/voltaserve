@@ -38,12 +38,13 @@ func main() {
 	})
 
 	app := fiber.New()
+	v1 := app.Group("v1")
 
-	app.Get("v1/health", func(c *fiber.Ctx) error {
-		return c.SendStatus(200)
+	v1.Get("health", func(c *fiber.Ctx) error {
+		return c.SendString("OK")
 	})
 
-	app.Post("v1/pipelines/run", func(c *fiber.Ctx) error {
+	v1.Post("pipelines/run", func(c *fiber.Ctx) error {
 		apiKey := c.Query("api_key")
 		if apiKey == "" {
 			if err := c.SendStatus(http.StatusBadRequest); err != nil {

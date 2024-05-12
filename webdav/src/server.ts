@@ -57,12 +57,7 @@ passport.use(
   }),
 )
 
-const server = createServer((req: IncomingMessage, res: ServerResponse) => {
-  if (req.url === '/v1/health' && req.method === 'GET') {
-    res.statusCode = 200
-    res.end('OK')
-    return
-  }
+function handleRequest(req: IncomingMessage, res: ServerResponse) {
   passport.authenticate(
     'basic',
     { session: false },
@@ -112,6 +107,15 @@ const server = createServer((req: IncomingMessage, res: ServerResponse) => {
       }
     },
   )(req, res)
+}
+
+const server = createServer((req: IncomingMessage, res: ServerResponse) => {
+  if (req.url === '/v1/health' && req.method === 'GET') {
+    res.statusCode = 200
+    res.end('OK')
+  } else {
+    handleRequest(req, res)
+  }
 })
 
 server.listen(PORT, () => {

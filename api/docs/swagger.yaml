@@ -1739,6 +1739,24 @@ paths:
       summary: Update Name
       tags:
       - Groups
+  /health:
+    get:
+      description: Get Health
+      operationId: get_health
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Get Health
+      tags:
+      - Health
   /invitations:
     post:
       consumes:

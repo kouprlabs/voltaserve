@@ -11,6 +11,7 @@ import { errorHandler } from '@/infra/error'
 import tokenRouter from '@/token/router'
 import userRepo from '@/user/repo'
 import userRouter from '@/user/router'
+import healthRouter from '@/health/router'
 import { client as postgres } from './infra/postgres'
 
 const app = express()
@@ -37,14 +38,11 @@ passport.use(
       } catch {
         return done(null, false)
       }
-    }
-  )
+    },
+  ),
 )
 
-app.get('/v1/health', (_: Request, res: Response) => {
-  res.sendStatus(200)
-})
-
+app.use('/v1/health', healthRouter)
 app.use('/v1/user', userRouter)
 app.use('/v1/accounts', accountRouter)
 app.use('/v1/token', tokenRouter)
