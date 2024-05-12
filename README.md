@@ -10,13 +10,19 @@ Upload files, search and preview documents, create groups and organizations, ass
 
 ## Getting Started
 
-Build:
+Pull images: (_recommended for first time users_)
+
+```shell
+docker compose pull
+```
+
+Or, alternatively you can build them from the source:
 
 ```shell
 docker compose build
 ```
 
-Run:
+Run containers:
 
 ```shell
 docker compose up -d
