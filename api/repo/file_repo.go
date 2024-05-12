@@ -266,9 +266,9 @@ func (repo *fileRepo) FindPath(id string) ([]model.File, error) {
 func (repo *fileRepo) FindTree(id string) ([]model.File, error) {
 	var entities []*fileEntity
 	db := repo.db.
-		Raw("WITH RECURSIVE rec (id, name, type, parent_id, workspace_id, create_time, update_time) AS "+
-			"(SELECT f.id, f.name, f.type, f.parent_id, f.workspace_id, f.create_time, f.update_time FROM file f WHERE f.id = ? "+
-			"UNION SELECT f.id, f.name, f.type, f.parent_id, f.workspace_id, f.create_time, f.update_time FROM rec, file f WHERE f.parent_id = rec.id) "+
+		Raw("WITH RECURSIVE rec (id, name, type, parent_id, workspace_id, snapshot_id, create_time, update_time) AS "+
+			"(SELECT f.id, f.name, f.type, f.parent_id, f.workspace_id, f.snapshot_id, f.create_time, f.update_time FROM file f WHERE f.id = ? "+
+			"UNION SELECT f.id, f.name, f.type, f.parent_id, f.workspace_id, f.snapshot_id, f.create_time, f.update_time FROM rec, file f WHERE f.parent_id = rec.id) "+
 			"SELECT rec.* FROM rec ORDER BY create_time ASC", id).
 		Scan(&entities)
 	if db.Error != nil {
