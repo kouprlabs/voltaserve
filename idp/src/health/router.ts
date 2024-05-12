@@ -15,7 +15,9 @@ router.get('/', async (_: Request, res: Response, next: NextFunction) => {
     res.sendStatus(503)
     next(err)
   } finally {
-    pg.end()
+    if (pg) {
+      pg.end()
+    }
   }
 })
 

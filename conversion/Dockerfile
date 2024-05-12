@@ -12,6 +12,7 @@ FROM ubuntu:noble AS runner
 RUN apt-get update
 
 RUN apt-get install -y \
+  curl \
   ffmpeg \
   gawk \
   ghostscript \

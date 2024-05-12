@@ -1,4 +1,7 @@
-FROM oven/bun:1
+FROM oven/bun:1-debian
+
+RUN apt-get update
+RUN apt-get install -y curl
 
 WORKDIR /app
 

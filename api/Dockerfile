@@ -9,6 +9,9 @@ RUN go build -o voltaserve-api
 
 FROM ubuntu:noble AS runner
 
+RUN apt-get update
+RUN apt-get install -y curl
+
 WORKDIR /app
 
 COPY --from=builder /build/voltaserve-api ./voltaserve-api

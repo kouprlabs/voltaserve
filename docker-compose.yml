@@ -17,8 +17,7 @@ services:
     volumes:
       - postgres:/var/lib/postgresql/data
     healthcheck:
-      test:
-        ["CMD", "pg_isready -U voltaserve -d voltaserve -h localhost -p 5432"]
+      test: pg_isready -U voltaserve -d voltaserve -h localhost -p 5432 || exit 1
   minio:
     image: minio/minio:RELEASE.2024-04-06T05-26-02Z
     ports:
@@ -32,7 +31,7 @@ services:
       - minio:/data
     command: server /data --console-address ":9001"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/health/ready"]
+      test: curl --fail http://localhost:9000/health/ready || exit 1
   meilisearch:
     image: getmeili/meilisearch:v1.7
     ports:
@@ -40,20 +39,20 @@ services:
     volumes:
       - meilisearch:/meili_data
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:7700/health"]
+      test: curl --fail http://localhost:7700/health || exit 1
   redis:
     image: redis:7.2
     ports:
       - ${VOLTASERVE_REDIS_PORT}:6379
     volumes:
       - redis:/data
+    healthcheck:
+      test: redis-cli ping || exit 1
   mailhog:
     image: mailhog/mailhog:v1.0.1
     ports:
       - ${VOLTASERVE_MAILHOG_SMTP_PORT}:1025
       - ${VOLTASERVE_MAILHOG_WEB_PORT}:8025
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
   api:
     image: voltaserve/api
     build:

@@ -51,8 +51,14 @@ app.use(errorHandler)
 
 const port = getConfig().port
 
-postgres.connect().then(() => {
-  app.listen(port, () => {
-    console.log(`Listening on port ${port}`)
+postgres
+  .connect()
+  .then(() => {
+    app.listen(port, () => {
+      console.log(`Listening on port ${port}`)
+    })
   })
-})
+  .catch((err) => {
+    console.error(err)
+    process.exit(1)
+  })
