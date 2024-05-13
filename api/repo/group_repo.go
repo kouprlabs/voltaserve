@@ -134,7 +134,7 @@ func (repo *groupRepo) Insert(opts GroupInsertOptions) (model.Group, error) {
 		Name:           opts.Name,
 		OrganizationID: opts.OrganizationID,
 	}
-	if db := repo.db.Save(&group); db.Error != nil {
+	if db := repo.db.Create(&group); db.Error != nil {
 		return nil, db.Error
 	}
 	res, err := repo.Find(opts.ID)

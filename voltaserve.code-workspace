@@ -17,12 +17,6 @@
     },
     {
       "path": "postgres"
-    },
-    {
-      "path": "tools"
-    },
-    {
-      "path": "scripts"
     }
   ],
   "settings": {
@@ -40,6 +34,6 @@
     },
     "[dockerfile]": {
       "editor.defaultFormatter": "ms-azuretools.vscode-docker"
-    },
+    }
   }
 }

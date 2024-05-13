@@ -152,7 +152,7 @@ func (repo *workspaceRepo) Insert(opts WorkspaceInsertOptions) (model.Workspace,
 		OrganizationID:  opts.OrganizationID,
 		Bucket:          opts.Bucket,
 	}
-	if db := repo.db.Save(&workspace); db.Error != nil {
+	if db := repo.db.Create(&workspace); db.Error != nil {
 		return nil, db.Error
 	}
 	res, err := repo.find(id)

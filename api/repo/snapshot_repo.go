@@ -23,6 +23,7 @@ type SnapshotUpdateOptions struct {
 
 type SnapshotRepo interface {
 	Find(id string) (model.Snapshot, error)
+	Insert(snapshot model.Snapshot) error
 	Save(snapshot model.Snapshot) error
 	Delete(id string) error
 	Update(id string, opts SnapshotUpdateOptions) error
@@ -253,6 +254,13 @@ func (repo *snapshotRepo) Find(id string) (model.Snapshot, error) {
 		return nil, err
 	}
 	return res, nil
+}
+
+func (repo *snapshotRepo) Insert(snapshot model.Snapshot) error {
+	if db := repo.db.Create(snapshot); db.Error != nil {
+		return db.Error
+	}
+	return nil
 }
 
 func (repo *snapshotRepo) Save(snapshot model.Snapshot) error {

@@ -127,7 +127,7 @@ func (repo *organizationRepo) Insert(opts OrganizationInsertOptions) (model.Orga
 		ID:   opts.ID,
 		Name: opts.Name,
 	}
-	if db := repo.db.Save(&org); db.Error != nil {
+	if db := repo.db.Create(&org); db.Error != nil {
 		return nil, db.Error
 	}
 	res, err := repo.Find(opts.ID)

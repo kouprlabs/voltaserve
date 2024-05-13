@@ -308,7 +308,7 @@ func (svc *FileService) Store(fileID string, filePath string, userID string) (*F
 	snapshot.SetID(snapshotID)
 	snapshot.SetVersion(latestVersion)
 	snapshot.SetStatus(model.SnapshotStatusNew)
-	if err = svc.snapshotRepo.Save(snapshot); err != nil {
+	if err = svc.snapshotRepo.Insert(snapshot); err != nil {
 		return nil, err
 	}
 	snapshot, err = svc.snapshotRepo.Find(snapshotID)

@@ -34,7 +34,7 @@ Generate `swagger.json`:
 bun run swagger-autogen && mv ./swagger.json ./docs
 ```
 
-Preview (will be served at [http://127.0.0.1:7777](http://127.0.0.1:7777)):
+Preview (will be served at [http://localhost:7777](http://localhost:7777)):
 
 ```shell
 bunx @redocly/cli preview-docs --port 7777 ./docs/swagger.json
