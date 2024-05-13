@@ -17,6 +17,8 @@ services:
       - cockroach:/cockroach/cockroach-data
       - ./postgres/schema.sql:/docker-entrypoint-initdb.d/schema.sql
     command: start-single-node --insecure
+    healthcheck:
+      test: cockroach sql --insecure --execute='SELECT 1;' || exit 1
   minio:
     image: minio/minio:RELEASE.2024-04-06T05-26-02Z
     ports:
@@ -52,6 +54,8 @@ services:
     ports:
       - ${VOLTASERVE_MAILHOG_SMTP_PORT}:1025
       - ${VOLTASERVE_MAILHOG_WEB_PORT}:8025
+    healthcheck:
+      test: wget -q --spider http://localhost:8025/api/v2/messages || exit 1
   api:
     image: voltaserve/api
     build:
