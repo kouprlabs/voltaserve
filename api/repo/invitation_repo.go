@@ -113,7 +113,7 @@ func (repo *invitationRepo) Insert(opts InvitationInsertOptions) ([]model.Invita
 			Email:          e,
 			Status:         model.InvitationStatusPending,
 		}
-		if db := repo.db.Save(&invitation); db.Error != nil {
+		if db := repo.db.Create(&invitation); db.Error != nil {
 			return nil, db.Error
 		}
 		i, err := repo.Find(invitation.ID)

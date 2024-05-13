@@ -42,7 +42,7 @@ Generate `swagger.yml`:
 swag init --output ./docs --outputTypes yaml
 ```
 
-Preview (will be served at [http://127.0.0.1:5555](http://127.0.0.1:5555)):
+Preview (will be served at [http://localhost:5555](http://localhost:5555)):
 
 ```shell
 bunx @redocly/cli preview-docs --port 5555 ./docs/swagger.yaml

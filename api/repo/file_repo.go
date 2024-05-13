@@ -187,7 +187,7 @@ func (repo *fileRepo) Insert(opts FileInsertOptions) (model.File, error) {
 		Type:        opts.Type,
 		ParentID:    opts.ParentID,
 	}
-	if db := repo.db.Save(&file); db.Error != nil {
+	if db := repo.db.Create(&file); db.Error != nil {
 		return nil, db.Error
 	}
 	res, err := repo.find(id)
