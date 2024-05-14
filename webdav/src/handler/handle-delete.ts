@@ -16,7 +16,7 @@ import { handleError } from '@/infra/error'
 async function handleDelete(
   req: IncomingMessage,
   res: ServerResponse,
-  token: Token
+  token: Token,
 ) {
   try {
     const api = new FileAPI(token)

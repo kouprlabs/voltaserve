@@ -13,7 +13,7 @@ async function handleOptions(_: IncomingMessage, res: ServerResponse) {
   res.statusCode = 200
   res.setHeader(
     'Allow',
-    'OPTIONS, GET, HEAD, PUT, DELETE, MKCOL, COPY, MOVE, PROPFIND, PROPPATCH'
+    'OPTIONS, GET, HEAD, PUT, DELETE, MKCOL, COPY, MOVE, PROPFIND, PROPPATCH',
   )
   res.end()
 }

@@ -18,7 +18,7 @@ import { handleError } from '@/infra/error'
 async function handlePropfind(
   req: IncomingMessage,
   res: ServerResponse,
-  token: Token
+  token: Token,
 ) {
   try {
     const api = new FileAPI(token)
@@ -37,10 +37,10 @@ async function handlePropfind(
                     : ''
                 }
                 <D:creationdate>${new Date(
-                  file.createTime
+                  file.createTime,
                 ).toUTCString()}</D:creationdate>
                 <D:getlastmodified>${new Date(
-                  file.updateTime
+                  file.updateTime,
                 ).toUTCString()}</D:getlastmodified>
               </D:prop>
               <D:status>HTTP/1.1 200 OK</D:status>
@@ -61,10 +61,10 @@ async function handlePropfind(
                 <D:resourcetype><D:collection/></D:resourcetype>
                 <D:getcontentlength>0</D:getcontentlength>
                 <D:getlastmodified>${new Date(
-                  file.updateTime
+                  file.updateTime,
                 ).toUTCString()}</D:getlastmodified>
                 <D:creationdate>${new Date(
-                  file.createTime
+                  file.createTime,
                 ).toUTCString()}</D:creationdate>
               </D:prop>
               <D:status>HTTP/1.1 200 OK</D:status>
@@ -86,10 +86,10 @@ async function handlePropfind(
                           : ''
                       }
                       <D:getlastmodified>${new Date(
-                        item.updateTime
+                        item.updateTime,
                       ).toUTCString()}</D:getlastmodified>
                       <D:creationdate>${new Date(
-                        item.createTime
+                        item.createTime,
                       ).toUTCString()}</D:creationdate>
                     </D:prop>
                     <D:status>HTTP/1.1 200 OK</D:status>

@@ -10,6 +10,7 @@ export type FileCommonProps = {
   scale: number
   viewType: FileViewType
   isPresentational?: boolean
+  isDragging?: boolean
   isLoading?: boolean
   isSelectionMode?: boolean
 }

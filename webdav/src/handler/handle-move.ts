@@ -18,7 +18,7 @@ import { handleError } from '@/infra/error'
 async function handleMove(
   req: IncomingMessage,
   res: ServerResponse,
-  token: Token
+  token: Token,
 ) {
   try {
     const sourcePath = decodeURIComponent(req.url)
@@ -27,7 +27,7 @@ async function handleMove(
     const api = new FileAPI(token)
     const sourceFile = await api.getByPath(decodeURIComponent(req.url))
     const targetFile = await api.getByPath(
-      decodeURIComponent(path.dirname(getTargetPath(req)))
+      decodeURIComponent(path.dirname(getTargetPath(req))),
     )
 
     if (sourceFile.workspaceId !== targetFile.workspaceId) {

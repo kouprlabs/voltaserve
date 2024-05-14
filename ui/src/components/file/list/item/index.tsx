@@ -30,6 +30,7 @@ const ListItem = ({
   scale,
   viewType,
   isPresentational,
+  isDragging,
   isLoading,
   isSelectionMode,
   onContextMenu,
@@ -158,6 +159,11 @@ const ListItem = ({
           'bg-gray-100': isChecked,
           'dark:bg-gray-700': isChecked,
         },
+        'border-2',
+        {
+          'border-gray-400': isChecked || isDragging,
+          'border-transparent': !isChecked,
+        },
       )}
       style={{
         width: viewType === FileViewType.List ? '100%' : width,
@@ -167,15 +173,57 @@ const ListItem = ({
       onContextMenu={isSelectionMode ? undefined : handleContextMenu}
     >
       {isSelectionMode && !isPresentational ? (
-        <Checkbox
-          position={viewType === FileViewType.List ? 'relative' : 'absolute'}
-          top={viewType === FileViewType.List ? 'auto' : variables.spacingSm}
-          left={viewType === FileViewType.List ? 'auto' : variables.spacingSm}
-          isChecked={isChecked}
-          zIndex={1}
-          size="lg"
-          onChange={handleCheckboxChange}
-        />
+        <div
+          className={cx('w-[20px]', 'h-[20px]', {
+            'relative': viewType === FileViewType.List,
+            'absolute': viewType === FileViewType.Grid,
+            'top-1': viewType === FileViewType.Grid,
+            'left-1': viewType === FileViewType.Grid,
+          })}
+        >
+          <div
+            className={cx(
+              'absolute',
+              'top-0',
+              'left-0',
+              'flex',
+              'items-center',
+              'justify-center',
+              'w-[20px]',
+              'h-[20px]',
+            )}
+          >
+            <span
+              className={cx(
+                'z-10',
+                'bg-white',
+                'w-[16px]',
+                'h-[16px]',
+                'rounded-full',
+              )}
+            ></span>
+          </div>
+          <span
+            className={cx(
+              'absolute',
+              'top-0',
+              'left-0',
+              'z-20',
+              'text-[20px]',
+              'leading-[20px]',
+              {
+                'material-symbols-rounded': !isChecked,
+                'material-symbols-rounded__filled': isChecked,
+              },
+              {
+                'text-blue-500': isChecked,
+                'text-gray-500': !isChecked,
+              },
+            )}
+          >
+            {isChecked ? 'check_circle' : 'radio_button_unchecked'}
+          </span>
+        </div>
       ) : null}
       <div
         className={cx('flex', 'items-center', 'justify-center')}

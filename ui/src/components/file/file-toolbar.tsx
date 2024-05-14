@@ -173,10 +173,12 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
   )
 
   const handleSortOrderToggle = useCallback(() => {
+    dispatch(selectionUpdated([]))
     dispatch(sortOrderToggled())
   }, [dispatch])
 
   const handleViewTypeToggle = useCallback(() => {
+    dispatch(selectionUpdated([]))
     dispatch(viewTypeToggled())
   }, [dispatch])
 

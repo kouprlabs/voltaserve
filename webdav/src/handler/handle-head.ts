@@ -17,7 +17,7 @@ import { handleError } from '@/infra/error'
 async function handleHead(
   req: IncomingMessage,
   res: ServerResponse,
-  token: Token
+  token: Token,
 ) {
   try {
     const file = await new FileAPI(token).getByPath(decodeURIComponent(req.url))

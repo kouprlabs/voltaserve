@@ -83,7 +83,13 @@ export type FileCreateFolderOptions = {
 
 export type FileUploadOptions = {
   workspaceId: string
-  parentId: string | null
+  parentId?: string
+  blob: Blob
+  name: string
+}
+
+export type FilePatchOptions = {
+  id: string
   blob: Blob
   name: string
 }
@@ -116,23 +122,42 @@ export class FileAPI {
     }
   }
 
-  async upload(options: FileUploadOptions): Promise<void> {
-    const params = new URLSearchParams({
-      workspace_id: options.workspaceId,
-    })
-    if (options.parentId) {
-      params.append('parent_id', options.parentId)
+  async upload({
+    workspaceId,
+    parentId,
+    name,
+    blob,
+  }: FileUploadOptions): Promise<File> {
+    const params = new URLSearchParams({ workspace_id: workspaceId })
+    if (parentId) {
+      params.append('parent_id', parentId)
     }
+    if (name) {
+      params.append('name', name)
+    }
+    return this.doUpload(`${API_URL}/v1/files?${params}`, 'POST', blob, name)
+  }
+
+  async patch({ id, blob, name }: FilePatchOptions): Promise<File> {
+    return this.doUpload(`${API_URL}/v1/files/${id}`, 'PATCH', blob, name)
+  }
+
+  private async doUpload<T>(
+    url: string,
+    method: string,
+    blob: Blob,
+    name: string,
+  ) {
     const formData = new FormData()
-    formData.set('file', options.blob, options.name)
-    const response = await fetch(`${API_URL}/v1/files?${params}`, {
-      method: 'POST',
+    formData.set('file', blob, name)
+    const response = await fetch(url, {
+      method,
       headers: {
         'Authorization': `Bearer ${this.token.access_token}`,
       },
       body: formData,
     })
-    return this.jsonResponseOrThrow(response)
+    return this.jsonResponseOrThrow<T>(response)
   }
 
   async getByPath(path: string): Promise<File> {

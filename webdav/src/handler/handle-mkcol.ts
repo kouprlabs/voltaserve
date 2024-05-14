@@ -17,7 +17,7 @@ import { handleError } from '@/infra/error'
 async function handleMkcol(
   req: IncomingMessage,
   res: ServerResponse,
-  token: Token
+  token: Token,
 ) {
   let directory: File
   try {

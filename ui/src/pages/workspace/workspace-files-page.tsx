@@ -143,7 +143,7 @@ const WorkspaceFilesPage = () => {
                 'border-b-gray-300': hasPagination,
                 'dark:border-b-gray-600': hasPagination,
               },
-              'pt-1.5',
+              'py-1.5',
               'flex-grow',
             )}
             onClick={() => dispatch(selectionUpdated([]))}

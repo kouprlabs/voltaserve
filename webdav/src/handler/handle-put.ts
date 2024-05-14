@@ -1,4 +1,5 @@
 import fs from 'fs'
+import fsPromises from 'node:fs/promises'
 import { readFile } from 'fs/promises'
 import { IncomingMessage, ServerResponse } from 'http'
 import os from 'os'
@@ -23,12 +24,12 @@ import { handleError } from '@/infra/error'
 async function handlePut(
   req: IncomingMessage,
   res: ServerResponse,
-  token: Token
+  token: Token,
 ) {
   const api = new FileAPI(token)
   try {
     const directory = await api.getByPath(
-      decodeURIComponent(path.dirname(req.url))
+      decodeURIComponent(path.dirname(req.url)),
     )
     const outputPath = path.join(os.tmpdir(), uuidv4())
     const ws = fs.createWriteStream(outputPath)
@@ -43,24 +44,26 @@ async function handlePut(
         res.statusCode = 201
         res.end()
         const blob = new Blob([await readFile(outputPath)])
-        let existingFile: File | null = null
+        const name = decodeURIComponent(path.basename(req.url))
         try {
-          existingFile = await api.getByPath(decodeURIComponent(req.url))
-          // Delete existing file to simulate an overwrite
-          await api.delete(existingFile.id)
+          let existingFile = await api.getByPath(decodeURIComponent(req.url))
+          await api.patch({
+            id: existingFile.id,
+            blob,
+            name,
+          })
         } catch {
-          // Ignored
+          await api.upload({
+            workspaceId: directory.workspaceId,
+            parentId: directory.id,
+            blob,
+            name,
+          })
         }
-        await api.upload({
-          workspaceId: directory.workspaceId,
-          parentId: directory.id,
-          name: decodeURIComponent(path.basename(req.url)),
-          blob,
-        })
       } catch (err) {
         handleError(err, res)
       } finally {
-        fs.rmSync(outputPath)
+        await fsPromises.rm(outputPath)
       }
     })
   } catch (err) {

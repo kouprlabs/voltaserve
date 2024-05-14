@@ -18,6 +18,7 @@ const ListDragOverlay = ({ file, scale, viewType }: ListDragOverlayProps) => {
           file={file}
           scale={scale}
           isPresentational={true}
+          isDragging={true}
           viewType={viewType}
         />
         {selectionCount > 1 ? (
@@ -34,7 +35,7 @@ const ListDragOverlay = ({ file, scale, viewType }: ListDragOverlayProps) => {
               'min-w-[30px]',
               'h-[30px]',
               'px-1',
-              'bg-green-300',
+              'bg-blue-500',
             )}
           >
             {selectionCount}
