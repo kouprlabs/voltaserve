@@ -81,26 +81,55 @@ type GroupService struct {
 	config         config.Config
 }
 
-func NewGroupService() *GroupService {
-	return &GroupService{
-		groupRepo:      repo.NewGroupRepo(),
+type NewGroupServiceOptions struct {
+	GroupRepo        repo.GroupRepo
+	UserRepo         repo.UserRepo
+	WorkspaceRepo    repo.WorkspaceRepo
+	FileRepo         repo.FileRepo
+	OrganizationRepo repo.OrganizationRepo
+}
+
+func NewGroupService(opts NewGroupServiceOptions) *GroupService {
+	svc := &GroupService{
 		groupGuard:     guard.NewGroupGuard(),
 		groupCache:     cache.NewGroupCache(),
 		groupSearch:    search.NewGroupSearch(),
 		groupMapper:    newGroupMapper(),
-		userRepo:       repo.NewUserRepo(),
 		userSearch:     search.NewUserSearch(),
 		userMapper:     newUserMapper(),
-		workspaceRepo:  repo.NewWorkspaceRepo(),
 		workspaceCache: cache.NewWorkspaceCache(),
-		fileRepo:       repo.NewFileRepo(),
 		fileCache:      cache.NewFileCache(),
-		orgRepo:        repo.NewOrganizationRepo(),
 		orgGuard:       guard.NewOrganizationGuard(),
 		orgCache:       cache.NewOrganizationCache(),
 		fileGuard:      guard.NewFileGuard(),
 		config:         config.GetConfig(),
 	}
+	if opts.GroupRepo != nil {
+		svc.groupRepo = opts.GroupRepo
+	} else {
+		svc.groupRepo = repo.NewGroupRepo()
+	}
+	if opts.UserRepo != nil {
+		svc.userRepo = opts.UserRepo
+	} else {
+		svc.userRepo = repo.NewUserRepo()
+	}
+	if opts.WorkspaceRepo != nil {
+		svc.workspaceRepo = opts.WorkspaceRepo
+	} else {
+		svc.workspaceRepo = repo.NewWorkspaceRepo()
+	}
+	if opts.FileRepo != nil {
+		svc.fileRepo = opts.FileRepo
+	} else {
+		svc.fileRepo = repo.NewFileRepo()
+	}
+	if opts.OrganizationRepo != nil {
+		svc.orgRepo = opts.OrganizationRepo
+	} else {
+		svc.orgRepo = repo.NewOrganizationRepo()
+	}
+	return svc
 }
 
 func (svc *GroupService) Create(opts GroupCreateOptions, userID string) (*Group, error) {

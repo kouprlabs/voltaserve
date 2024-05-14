@@ -19,11 +19,20 @@ type DownloadsRouter struct {
 	accessTokenCookieName string
 }
 
-func NewDownloadsRouter() *DownloadsRouter {
-	return &DownloadsRouter{
-		fileSvc:               service.NewFileService(),
+type NewDownloadsRouterOptions struct {
+	FileService *service.FileService
+}
+
+func NewDownloadsRouter(opts NewDownloadsRouterOptions) *DownloadsRouter {
+	r := &DownloadsRouter{
 		accessTokenCookieName: "voltaserve_access_token",
 	}
+	if opts.FileService != nil {
+		r.fileSvc = opts.FileService
+	} else {
+		r.fileSvc = service.NewFileService(service.NewFileServiceOptions{})
+	}
+	return r
 }
 
 func (r *DownloadsRouter) AppendNonJWTRoutes(g fiber.Router) {

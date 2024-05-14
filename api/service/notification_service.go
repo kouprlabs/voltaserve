@@ -13,12 +13,21 @@ type NotificationService struct {
 	invitationMapper *invitationMapper
 }
 
-func NewNotificationService() *NotificationService {
-	return &NotificationService{
-		userRepo:         repo.NewUserRepo(),
+type NewNotificationServiceOptions struct {
+	UserRepo repo.UserRepo
+}
+
+func NewNotificationService(opts NewNotificationServiceOptions) *NotificationService {
+	svc := &NotificationService{
 		invitationRepo:   repo.NewInvitationRepo(),
 		invitationMapper: newInvitationMapper(),
 	}
+	if opts.UserRepo != nil {
+		svc.userRepo = opts.UserRepo
+	} else {
+		svc.userRepo = repo.NewUserRepo()
+	}
+	return svc
 }
 
 func (svc *NotificationService) List(userID string) ([]*Notification, error) {

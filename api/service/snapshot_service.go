@@ -82,17 +82,36 @@ type SnapshotService struct {
 	config       config.Config
 }
 
-func NewSnapshotService() *SnapshotService {
-	return &SnapshotService{
-		snapshotRepo: repo.NewSnapshotRepo(),
-		userRepo:     repo.NewUserRepo(),
-		fileCache:    cache.NewFileCache(),
-		fileGuard:    guard.NewFileGuard(),
-		fileRepo:     repo.NewFileRepo(),
-		fileSearch:   search.NewFileSearch(),
-		fileMapper:   NewFileMapper(),
-		config:       config.GetConfig(),
+type NewSnapshotServiceOptions struct {
+	SnapshotRepo repo.SnapshotRepo
+	UserRepo     repo.UserRepo
+	FileRepo     repo.FileRepo
+}
+
+func NewSnapshotService(opts NewSnapshotServiceOptions) *SnapshotService {
+	svc := &SnapshotService{
+		fileCache:  cache.NewFileCache(),
+		fileGuard:  guard.NewFileGuard(),
+		fileSearch: search.NewFileSearch(),
+		fileMapper: NewFileMapper(),
+		config:     config.GetConfig(),
 	}
+	if opts.SnapshotRepo != nil {
+		svc.snapshotRepo = opts.SnapshotRepo
+	} else {
+		svc.snapshotRepo = repo.NewSnapshotRepo()
+	}
+	if opts.UserRepo != nil {
+		svc.userRepo = opts.UserRepo
+	} else {
+		svc.userRepo = repo.NewUserRepo()
+	}
+	if opts.FileRepo != nil {
+		svc.fileRepo = opts.FileRepo
+	} else {
+		svc.fileRepo = repo.NewFileRepo()
+	}
+	return svc
 }
 
 func (svc *SnapshotService) List(id string, opts SnapshotListOptions, userID string) (*SnapshotList, error) {

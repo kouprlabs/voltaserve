@@ -12,10 +12,18 @@ type SnapshotRouter struct {
 	snapshotSvc *service.SnapshotService
 }
 
-func NewSnapshotRouter() *SnapshotRouter {
-	return &SnapshotRouter{
-		snapshotSvc: service.NewSnapshotService(),
+type NewSnapshotRouterOptions struct {
+	SnapshotService *service.SnapshotService
+}
+
+func NewSnapshotRouter(opts NewSnapshotRouterOptions) *SnapshotRouter {
+	r := &SnapshotRouter{}
+	if opts.SnapshotService != nil {
+		r.snapshotSvc = opts.SnapshotService
+	} else {
+		r.snapshotSvc = service.NewSnapshotService(service.NewSnapshotServiceOptions{})
 	}
+	return r
 }
 
 func (r *SnapshotRouter) AppendRoutes(g fiber.Router) {

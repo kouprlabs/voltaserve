@@ -52,19 +52,38 @@ type UserService struct {
 	config     config.Config
 }
 
-func NewUserService() *UserService {
-	return &UserService{
-		userRepo:   repo.NewUserRepo(),
+type NewUserServiceOptions struct {
+	UserRepo         repo.UserRepo
+	OrganizationRepo repo.OrganizationRepo
+	GroupRepo        repo.GroupRepo
+}
+
+func NewUserService(opts NewUserServiceOptions) *UserService {
+	svc := &UserService{
 		userMapper: newUserMapper(),
 		userSearch: search.NewUserSearch(),
-		orgRepo:    repo.NewOrganizationRepo(),
 		orgCache:   cache.NewOrganizationCache(),
 		orgGuard:   guard.NewOrganizationGuard(),
-		groupRepo:  repo.NewGroupRepo(),
 		groupGuard: guard.NewGroupGuard(),
 		groupCache: cache.NewGroupCache(),
 		config:     config.GetConfig(),
 	}
+	if opts.UserRepo != nil {
+		svc.userRepo = opts.UserRepo
+	} else {
+		svc.userRepo = repo.NewUserRepo()
+	}
+	if opts.OrganizationRepo != nil {
+		svc.orgRepo = opts.OrganizationRepo
+	} else {
+		svc.orgRepo = repo.NewOrganizationRepo()
+	}
+	if opts.GroupRepo != nil {
+		svc.groupRepo = opts.GroupRepo
+	} else {
+		svc.groupRepo = repo.NewGroupRepo()
+	}
+	return svc
 }
 
 func (svc *UserService) List(opts UserListOptions, userID string) (*UserList, error) {

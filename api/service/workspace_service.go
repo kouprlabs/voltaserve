@@ -79,21 +79,40 @@ type WorkspaceService struct {
 	config          config.Config
 }
 
-func NewWorkspaceService() *WorkspaceService {
-	return &WorkspaceService{
-		workspaceRepo:   repo.NewWorkspaceRepo(),
+type NewWorkspaceServiceOptions struct {
+	WorkspaceRepo repo.WorkspaceRepo
+	FileRepo      repo.FileRepo
+	UserRepo      repo.UserRepo
+}
+
+func NewWorkspaceService(opts NewWorkspaceServiceOptions) *WorkspaceService {
+	svc := &WorkspaceService{
 		workspaceCache:  cache.NewWorkspaceCache(),
 		workspaceSearch: search.NewWorkspaceSearch(),
 		workspaceGuard:  guard.NewWorkspaceGuard(),
 		workspaceMapper: newWorkspaceMapper(),
-		fileRepo:        repo.NewFileRepo(),
 		fileCache:       cache.NewFileCache(),
 		fileGuard:       guard.NewFileGuard(),
 		fileMapper:      NewFileMapper(),
-		userRepo:        repo.NewUserRepo(),
 		s3:              infra.NewS3Manager(),
 		config:          config.GetConfig(),
 	}
+	if opts.WorkspaceRepo != nil {
+		svc.workspaceRepo = opts.WorkspaceRepo
+	} else {
+		svc.workspaceRepo = repo.NewWorkspaceRepo()
+	}
+	if opts.FileRepo != nil {
+		svc.fileRepo = opts.FileRepo
+	} else {
+		svc.fileRepo = repo.NewFileRepo()
+	}
+	if opts.UserRepo != nil {
+		svc.userRepo = opts.UserRepo
+	} else {
+		svc.userRepo = repo.NewUserRepo()
+	}
+	return svc
 }
 
 func (svc *WorkspaceService) Create(opts WorkspaceCreateOptions, userID string) (*Workspace, error) {

@@ -14,10 +14,18 @@ type InvitationRouter struct {
 	invitationSvc *service.InvitationService
 }
 
-func NewInvitationRouter() *InvitationRouter {
-	return &InvitationRouter{
-		invitationSvc: service.NewInvitationService(),
+type NewInvitationRouterOptions struct {
+	InvitationService *service.InvitationService
+}
+
+func NewInvitationRouter(opts NewInvitationRouterOptions) *InvitationRouter {
+	r := &InvitationRouter{}
+	if opts.InvitationService != nil {
+		r.invitationSvc = opts.InvitationService
+	} else {
+		r.invitationSvc = service.NewInvitationService(service.NewInvitationServiceOptions{})
 	}
+	return r
 }
 
 func (r *InvitationRouter) AppendRoutes(g fiber.Router) {

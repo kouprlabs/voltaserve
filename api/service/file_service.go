@@ -161,30 +161,69 @@ type FileService struct {
 	config           config.Config
 }
 
-func NewFileService() *FileService {
-	return &FileService{
-		fileRepo:         repo.NewFileRepo(),
+type NewFileServiceOptions struct {
+	FileRepo         repo.FileRepo
+	WorkspaceRepo    repo.WorkspaceRepo
+	SnapshotRepo     repo.SnapshotRepo
+	UserRepo         repo.UserRepo
+	PermissionRepo   repo.PermissionRepo
+	WorkspaceService *WorkspaceService
+	SnapshotService  *SnapshotService
+}
+
+func NewFileService(opts NewFileServiceOptions) *FileService {
+	svc := &FileService{
 		fileCache:        cache.NewFileCache(),
 		fileSearch:       search.NewFileSearch(),
 		fileGuard:        guard.NewFileGuard(),
 		fileMapper:       NewFileMapper(),
 		workspaceGuard:   guard.NewWorkspaceGuard(),
 		workspaceCache:   cache.NewWorkspaceCache(),
-		workspaceRepo:    repo.NewWorkspaceRepo(),
-		workspaceSvc:     NewWorkspaceService(),
-		snapshotRepo:     repo.NewSnapshotRepo(),
-		snapshotSvc:      NewSnapshotService(),
-		userRepo:         repo.NewUserRepo(),
 		userMapper:       newUserMapper(),
 		groupCache:       cache.NewGroupCache(),
 		groupGuard:       guard.NewGroupGuard(),
 		groupMapper:      newGroupMapper(),
-		permissionRepo:   repo.NewPermissionRepo(),
 		fileIdent:        infra.NewFileIdentifier(),
 		s3:               infra.NewS3Manager(),
 		conversionClient: client.NewConversionClient(),
 		config:           config.GetConfig(),
 	}
+	if opts.FileRepo != nil {
+		svc.fileRepo = opts.FileRepo
+	} else {
+		svc.fileRepo = repo.NewFileRepo()
+	}
+	if opts.WorkspaceRepo != nil {
+		svc.workspaceRepo = opts.WorkspaceRepo
+	} else {
+		svc.workspaceRepo = repo.NewWorkspaceRepo()
+	}
+	if opts.SnapshotRepo != nil {
+		svc.snapshotRepo = opts.SnapshotRepo
+	} else {
+		svc.snapshotRepo = repo.NewSnapshotRepo()
+	}
+	if opts.UserRepo != nil {
+		svc.userRepo = opts.UserRepo
+	} else {
+		svc.userRepo = repo.NewUserRepo()
+	}
+	if opts.PermissionRepo != nil {
+		svc.permissionRepo = opts.PermissionRepo
+	} else {
+		svc.permissionRepo = repo.NewPermissionRepo()
+	}
+	if opts.WorkspaceService != nil {
+		svc.workspaceSvc = opts.WorkspaceService
+	} else {
+		svc.workspaceSvc = NewWorkspaceService(NewWorkspaceServiceOptions{})
+	}
+	if opts.SnapshotService != nil {
+		svc.snapshotSvc = opts.SnapshotService
+	} else {
+		svc.snapshotSvc = NewSnapshotService(NewSnapshotServiceOptions{})
+	}
+	return svc
 }
 
 func (svc *FileService) Create(opts FileCreateOptions, userID string) (*File, error) {

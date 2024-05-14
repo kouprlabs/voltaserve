@@ -14,10 +14,18 @@ type WorkspaceRouter struct {
 	workspaceSvc *service.WorkspaceService
 }
 
-func NewWorkspaceRouter() *WorkspaceRouter {
-	return &WorkspaceRouter{
-		workspaceSvc: service.NewWorkspaceService(),
+type NewWorkspaceRouterOptions struct {
+	WorkspaceService *service.WorkspaceService
+}
+
+func NewWorkspaceRouter(opts NewWorkspaceRouterOptions) *WorkspaceRouter {
+	r := &WorkspaceRouter{}
+	if opts.WorkspaceService != nil {
+		r.workspaceSvc = opts.WorkspaceService
+	} else {
+		r.workspaceSvc = service.NewWorkspaceService(service.NewWorkspaceServiceOptions{})
 	}
+	return r
 }
 
 func (r *WorkspaceRouter) AppendRoutes(g fiber.Router) {

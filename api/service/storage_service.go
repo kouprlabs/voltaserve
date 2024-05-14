@@ -24,17 +24,36 @@ type StorageService struct {
 	userRepo       repo.UserRepo
 }
 
-func NewStorageService() *StorageService {
-	return &StorageService{
-		workspaceRepo:  repo.NewWorkspaceRepo(),
+type NewStorageServiceOptions struct {
+	WorkspaceRepo repo.WorkspaceRepo
+	FileRepo      repo.FileRepo
+	UserRepo      repo.UserRepo
+}
+
+func NewStorageService(opts NewStorageServiceOptions) *StorageService {
+	svc := &StorageService{
 		workspaceCache: cache.NewWorkspaceCache(),
 		workspaceGuard: guard.NewWorkspaceGuard(),
-		fileRepo:       repo.NewFileRepo(),
 		fileCache:      cache.NewFileCache(),
 		fileGuard:      guard.NewFileGuard(),
 		storageMapper:  newStorageMapper(),
-		userRepo:       repo.NewUserRepo(),
 	}
+	if opts.WorkspaceRepo != nil {
+		svc.workspaceRepo = opts.WorkspaceRepo
+	} else {
+		svc.workspaceRepo = repo.NewWorkspaceRepo()
+	}
+	if opts.FileRepo != nil {
+		svc.fileRepo = opts.FileRepo
+	} else {
+		svc.fileRepo = repo.NewFileRepo()
+	}
+	if opts.UserRepo != nil {
+		svc.userRepo = opts.UserRepo
+	} else {
+		svc.userRepo = repo.NewUserRepo()
+	}
+	return svc
 }
 
 func (svc *StorageService) GetAccountUsage(userID string) (*StorageUsage, error) {

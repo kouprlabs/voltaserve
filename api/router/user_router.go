@@ -12,10 +12,18 @@ type UserRouter struct {
 	userSvc *service.UserService
 }
 
-func NewUserRouter() *UserRouter {
-	return &UserRouter{
-		userSvc: service.NewUserService(),
+type NewUserRouterOptions struct {
+	UserService *service.UserService
+}
+
+func NewUserRouter(opts NewUserRouterOptions) *UserRouter {
+	r := &UserRouter{}
+	if opts.UserService != nil {
+		r.userSvc = opts.UserService
+	} else {
+		r.userSvc = service.NewUserService(service.NewUserServiceOptions{})
 	}
+	return r
 }
 
 func (r *UserRouter) AppendRoutes(g fiber.Router) {

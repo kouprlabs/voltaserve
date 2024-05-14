@@ -14,10 +14,18 @@ type OrganizationRouter struct {
 	orgSvc *service.OrganizationService
 }
 
-func NewOrganizationRouter() *OrganizationRouter {
-	return &OrganizationRouter{
-		orgSvc: service.NewOrganizationService(),
+type NewOrganizationRouterOptions struct {
+	OrganizationService *service.OrganizationService
+}
+
+func NewOrganizationRouter(opts NewOrganizationRouterOptions) *OrganizationRouter {
+	r := &OrganizationRouter{}
+	if opts.OrganizationService != nil {
+		r.orgSvc = opts.OrganizationService
+	} else {
+		r.orgSvc = service.NewOrganizationService(service.NewOrganizationServiceOptions{})
 	}
+	return r
 }
 
 func (r *OrganizationRouter) AppendRoutes(g fiber.Router) {

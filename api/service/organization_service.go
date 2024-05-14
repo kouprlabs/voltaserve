@@ -72,21 +72,45 @@ type OrganizationService struct {
 	config       config.Config
 }
 
-func NewOrganizationService() *OrganizationService {
-	return &OrganizationService{
-		orgRepo:      repo.NewOrganizationRepo(),
-		orgCache:     cache.NewOrganizationCache(),
-		orgGuard:     guard.NewOrganizationGuard(),
-		orgSearch:    search.NewOrganizationSearch(),
-		orgMapper:    newOrganizationMapper(),
-		userRepo:     repo.NewUserRepo(),
-		userSearch:   search.NewUserSearch(),
-		groupRepo:    repo.NewGroupRepo(),
-		groupService: NewGroupService(),
-		groupMapper:  newGroupMapper(),
-		userMapper:   newUserMapper(),
-		config:       config.GetConfig(),
+type NewOrganizationServiceOptions struct {
+	OrganizationRepo repo.OrganizationRepo
+	UserRepo         repo.UserRepo
+	GroupRepo        repo.GroupRepo
+	GroupService     *GroupService
+}
+
+func NewOrganizationService(opts NewOrganizationServiceOptions) *OrganizationService {
+	svc := &OrganizationService{
+		orgCache:    cache.NewOrganizationCache(),
+		orgGuard:    guard.NewOrganizationGuard(),
+		orgSearch:   search.NewOrganizationSearch(),
+		orgMapper:   newOrganizationMapper(),
+		userSearch:  search.NewUserSearch(),
+		groupMapper: newGroupMapper(),
+		userMapper:  newUserMapper(),
+		config:      config.GetConfig(),
 	}
+	if opts.OrganizationRepo != nil {
+		svc.orgRepo = opts.OrganizationRepo
+	} else {
+		svc.orgRepo = repo.NewOrganizationRepo()
+	}
+	if opts.UserRepo != nil {
+		svc.userRepo = opts.UserRepo
+	} else {
+		svc.userRepo = repo.NewUserRepo()
+	}
+	if opts.GroupRepo != nil {
+		svc.groupRepo = opts.GroupRepo
+	} else {
+		svc.groupRepo = repo.NewGroupRepo()
+	}
+	if opts.GroupService != nil {
+		svc.groupService = opts.GroupService
+	} else {
+		svc.groupService = NewGroupService(NewGroupServiceOptions{})
+	}
+	return svc
 }
 
 func (svc *OrganizationService) Create(opts OrganizationCreateOptions, userID string) (*Organization, error) {

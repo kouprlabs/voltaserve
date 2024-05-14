@@ -11,10 +11,18 @@ type StorageRouter struct {
 	storageSvc *service.StorageService
 }
 
-func NewStorageRouter() *StorageRouter {
-	return &StorageRouter{
-		storageSvc: service.NewStorageService(),
+type NewStorageRouterOptions struct {
+	StorageService *service.StorageService
+}
+
+func NewStorageRouter(opts NewStorageRouterOptions) *StorageRouter {
+	r := &StorageRouter{}
+	if opts.StorageService != nil {
+		r.storageSvc = opts.StorageService
+	} else {
+		r.storageSvc = service.NewStorageService(service.NewStorageServiceOptions{})
 	}
+	return r
 }
 
 func (r *StorageRouter) AppendRoutes(g fiber.Router) {

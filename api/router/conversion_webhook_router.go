@@ -12,10 +12,18 @@ type ConversionWebhookRouter struct {
 	snapshotSvc *service.SnapshotService
 }
 
-func NewConversionWebhookRouter() *ConversionWebhookRouter {
-	return &ConversionWebhookRouter{
-		snapshotSvc: service.NewSnapshotService(),
+type NewConversionWebhookRouterOptions struct {
+	SnapshotService *service.SnapshotService
+}
+
+func NewConversionWebhookRouter(opts NewConversionWebhookRouterOptions) *ConversionWebhookRouter {
+	r := &ConversionWebhookRouter{}
+	if opts.SnapshotService != nil {
+		r.snapshotSvc = opts.SnapshotService
+	} else {
+		r.snapshotSvc = service.NewSnapshotService(service.NewSnapshotServiceOptions{})
 	}
+	return r
 }
 
 func (r *ConversionWebhookRouter) AppendInternalRoutes(g fiber.Router) {

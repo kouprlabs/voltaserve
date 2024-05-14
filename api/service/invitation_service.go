@@ -55,18 +55,37 @@ type InvitationService struct {
 	config           config.Config
 }
 
-func NewInvitationService() *InvitationService {
-	return &InvitationService{
-		orgRepo:          repo.NewOrganizationRepo(),
+type NewInvitationServiceOptions struct {
+	OrganizationRepo repo.OrganizationRepo
+	InvitationRepo   repo.InvitationRepo
+	UserRepo         repo.UserRepo
+}
+
+func NewInvitationService(opts NewInvitationServiceOptions) *InvitationService {
+	svc := &InvitationService{
 		orgCache:         cache.NewOrganizationCache(),
 		orgGuard:         guard.NewOrganizationGuard(),
-		invitationRepo:   repo.NewInvitationRepo(),
 		invitationMapper: newInvitationMapper(),
-		userRepo:         repo.NewUserRepo(),
 		mailTmpl:         infra.NewMailTemplate(),
 		orgMapper:        newOrganizationMapper(),
 		config:           config.GetConfig(),
 	}
+	if opts.OrganizationRepo != nil {
+		svc.orgRepo = opts.OrganizationRepo
+	} else {
+		svc.orgRepo = repo.NewOrganizationRepo()
+	}
+	if opts.InvitationRepo != nil {
+		svc.invitationRepo = opts.InvitationRepo
+	} else {
+		svc.invitationRepo = repo.NewInvitationRepo()
+	}
+	if opts.UserRepo != nil {
+		svc.userRepo = opts.UserRepo
+	} else {
+		svc.userRepo = repo.NewUserRepo()
+	}
+	return svc
 }
 
 func (svc *InvitationService) Create(opts InvitationCreateOptions, userID string) error {

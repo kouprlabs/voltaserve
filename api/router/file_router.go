@@ -25,12 +25,26 @@ type FileRouter struct {
 	config       config.Config
 }
 
-func NewFileRouter() *FileRouter {
-	return &FileRouter{
-		fileSvc:      service.NewFileService(),
-		workspaceSvc: service.NewWorkspaceService(),
-		config:       config.GetConfig(),
+type NewFileRouterOptions struct {
+	FileService      *service.FileService
+	WorkspaceService *service.WorkspaceService
+}
+
+func NewFileRouter(opts NewFileRouterOptions) *FileRouter {
+	r := &FileRouter{
+		config: config.GetConfig(),
 	}
+	if opts.FileService != nil {
+		r.fileSvc = opts.FileService
+	} else {
+		r.fileSvc = service.NewFileService(service.NewFileServiceOptions{})
+	}
+	if opts.WorkspaceService != nil {
+		r.workspaceSvc = opts.WorkspaceService
+	} else {
+		r.workspaceSvc = service.NewWorkspaceService(service.NewWorkspaceServiceOptions{})
+	}
+	return r
 }
 
 func (r *FileRouter) AppendRoutes(g fiber.Router) {

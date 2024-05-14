@@ -14,10 +14,18 @@ type GroupRouter struct {
 	groupSvc *service.GroupService
 }
 
-func NewGroupRouter() *GroupRouter {
-	return &GroupRouter{
-		groupSvc: service.NewGroupService(),
+type NewGroupRouterOptions struct {
+	GroupService *service.GroupService
+}
+
+func NewGroupRouter(opts NewGroupRouterOptions) *GroupRouter {
+	r := &GroupRouter{}
+	if opts.GroupService != nil {
+		r.groupSvc = opts.GroupService
+	} else {
+		r.groupSvc = service.NewGroupService(service.NewGroupServiceOptions{})
 	}
+	return r
 }
 
 func (r *GroupRouter) AppendRoutes(g fiber.Router) {

@@ -17,9 +17,9 @@ import (
 	"github.com/joho/godotenv"
 )
 
-//	@title		Voltaserve API
-//	@version	2.0.0
-//	@BasePath	/v1
+// @title		Voltaserve API
+// @version	2.0.0
+// @BasePath	/v1
 func main() {
 	if _, err := os.Stat(".env.local"); err == nil {
 		err := godotenv.Load(".env.local")
@@ -51,41 +51,41 @@ func main() {
 
 	f := v1.Group("files")
 
-	downloads := router.NewDownloadsRouter()
+	downloads := router.NewDownloadsRouter(router.NewDownloadsRouterOptions{})
 	downloads.AppendNonJWTRoutes(f)
 
-	conversionWebhook := router.NewConversionWebhookRouter()
+	conversionWebhook := router.NewConversionWebhookRouter(router.NewConversionWebhookRouterOptions{})
 	conversionWebhook.AppendInternalRoutes(f)
 
 	app.Use(jwtware.New(jwtware.Config{
 		SigningKey: jwtware.SigningKey{Key: []byte(cfg.Security.JWTSigningKey)},
 	}))
 
-	files := router.NewFileRouter()
+	files := router.NewFileRouter(router.NewFileRouterOptions{})
 	files.AppendRoutes(f)
 
-	snapshots := router.NewSnapshotRouter()
+	snapshots := router.NewSnapshotRouter(router.NewSnapshotRouterOptions{})
 	snapshots.AppendRoutes(f)
 
-	invitations := router.NewInvitationRouter()
+	invitations := router.NewInvitationRouter(router.NewInvitationRouterOptions{})
 	invitations.AppendRoutes(v1.Group("invitations"))
 
-	notifications := router.NewNotificationRouter()
+	notifications := router.NewNotificationRouter(router.NewNotificationRouterOptions{})
 	notifications.AppendRoutes(v1.Group("notifications"))
 
-	organizations := router.NewOrganizationRouter()
+	organizations := router.NewOrganizationRouter(router.NewOrganizationRouterOptions{})
 	organizations.AppendRoutes(v1.Group("organizations"))
 
-	storage := router.NewStorageRouter()
+	storage := router.NewStorageRouter(router.NewStorageRouterOptions{})
 	storage.AppendRoutes(v1.Group("storage"))
 
-	workspaces := router.NewWorkspaceRouter()
+	workspaces := router.NewWorkspaceRouter(router.NewWorkspaceRouterOptions{})
 	workspaces.AppendRoutes(v1.Group("workspaces"))
 
-	groups := router.NewGroupRouter()
+	groups := router.NewGroupRouter(router.NewGroupRouterOptions{})
 	groups.AppendRoutes(v1.Group("groups"))
 
-	users := router.NewUserRouter()
+	users := router.NewUserRouter(router.NewUserRouterOptions{})
 	users.AppendRoutes(v1.Group("users"))
 
 	if err := app.Listen(fmt.Sprintf(":%d", cfg.Port)); err != nil {
