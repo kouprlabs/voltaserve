@@ -42,8 +42,8 @@ func NewOrganization() model.Organization {
 type organizationEntity struct {
 	ID               string                  `json:"id" gorm:"column:id"`
 	Name             string                  `json:"name" gorm:"column:name"`
-	UserPermissions  []*userPermissionValue  `json:"userPermissions" gorm:"-"`
-	GroupPermissions []*groupPermissionValue `json:"groupPermissions" gorm:"-"`
+	UserPermissions  []*UserPermissionValue  `json:"userPermissions" gorm:"-"`
+	GroupPermissions []*GroupPermissionValue `json:"groupPermissions" gorm:"-"`
 	Members          []string                `json:"members" gorm:"-"`
 	CreateTime       string                  `json:"createTime" gorm:"column:create_time"`
 	UpdateTime       *string                 `json:"updateTime,omitempty" gorm:"column:update_time"`
@@ -284,24 +284,24 @@ func (repo *organizationRepo) RevokeUserPermission(id string, userID string) err
 
 func (repo *organizationRepo) populateModelFields(organizations []*organizationEntity) error {
 	for _, o := range organizations {
-		o.UserPermissions = make([]*userPermissionValue, 0)
+		o.UserPermissions = make([]*UserPermissionValue, 0)
 		userPermissions, err := repo.permissionRepo.GetUserPermissions(o.ID)
 		if err != nil {
 			return err
 		}
 		for _, p := range userPermissions {
-			o.UserPermissions = append(o.UserPermissions, &userPermissionValue{
+			o.UserPermissions = append(o.UserPermissions, &UserPermissionValue{
 				UserID: p.UserID,
 				Value:  p.Permission,
 			})
 		}
-		o.GroupPermissions = make([]*groupPermissionValue, 0)
+		o.GroupPermissions = make([]*GroupPermissionValue, 0)
 		groupPermissions, err := repo.permissionRepo.GetGroupPermissions(o.ID)
 		if err != nil {
 			return err
 		}
 		for _, p := range groupPermissions {
-			o.GroupPermissions = append(o.GroupPermissions, &groupPermissionValue{
+			o.GroupPermissions = append(o.GroupPermissions, &GroupPermissionValue{
 				GroupID: p.GroupID,
 				Value:   p.Permission,
 			})

@@ -39,27 +39,27 @@ func (GroupPermission) TableName() string {
 	return "grouppermission"
 }
 
-type userPermissionValue struct {
+type UserPermissionValue struct {
 	UserID string `json:"userId,omitempty"`
 	Value  string `json:"value,omitempty"`
 }
 
-func (p userPermissionValue) GetUserID() string {
+func (p UserPermissionValue) GetUserID() string {
 	return p.UserID
 }
-func (p userPermissionValue) GetValue() string {
+func (p UserPermissionValue) GetValue() string {
 	return p.Value
 }
 
-type groupPermissionValue struct {
+type GroupPermissionValue struct {
 	GroupID string `json:"groupId,omitempty"`
 	Value   string `json:"value,omitempty"`
 }
 
-func (p groupPermissionValue) GetGroupID() string {
+func (p GroupPermissionValue) GetGroupID() string {
 	return p.GroupID
 }
-func (p groupPermissionValue) GetValue() string {
+func (p GroupPermissionValue) GetValue() string {
 	return p.Value
 }
 

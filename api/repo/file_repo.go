@@ -55,8 +55,8 @@ type fileEntity struct {
 	Name             string                  `json:"name" gorm:"column:name"`
 	Type             string                  `json:"type" gorm:"column:type"`
 	ParentID         *string                 `json:"parentId,omitempty" gorm:"column:parent_id"`
-	UserPermissions  []*userPermissionValue  `json:"userPermissions" gorm:"-"`
-	GroupPermissions []*groupPermissionValue `json:"groupPermissions" gorm:"-"`
+	UserPermissions  []*UserPermissionValue  `json:"userPermissions" gorm:"-"`
+	GroupPermissions []*GroupPermissionValue `json:"groupPermissions" gorm:"-"`
 	Text             *string                 `json:"text,omitempty" gorm:"-"`
 	SnapshotID       *string                 `json:"snapshotId,omitempty" gorm:"column:snapshot_id"`
 	CreateTime       string                  `json:"createTime" gorm:"column:create_time"`
@@ -538,24 +538,24 @@ func (repo *fileRepo) RevokeGroupPermission(id string, groupID string) error {
 
 func (repo *fileRepo) populateModelFields(entities []*fileEntity) error {
 	for _, f := range entities {
-		f.UserPermissions = make([]*userPermissionValue, 0)
+		f.UserPermissions = make([]*UserPermissionValue, 0)
 		userPermissions, err := repo.permissionRepo.GetUserPermissions(f.ID)
 		if err != nil {
 			return err
 		}
 		for _, p := range userPermissions {
-			f.UserPermissions = append(f.UserPermissions, &userPermissionValue{
+			f.UserPermissions = append(f.UserPermissions, &UserPermissionValue{
 				UserID: p.UserID,
 				Value:  p.Permission,
 			})
 		}
-		f.GroupPermissions = make([]*groupPermissionValue, 0)
+		f.GroupPermissions = make([]*GroupPermissionValue, 0)
 		groupPermissions, err := repo.permissionRepo.GetGroupPermissions(f.ID)
 		if err != nil {
 			return err
 		}
 		for _, p := range groupPermissions {
-			f.GroupPermissions = append(f.GroupPermissions, &groupPermissionValue{
+			f.GroupPermissions = append(f.GroupPermissions, &GroupPermissionValue{
 				GroupID: p.GroupID,
 				Value:   p.Permission,
 			})

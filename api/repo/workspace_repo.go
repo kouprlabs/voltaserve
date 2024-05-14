@@ -47,8 +47,8 @@ type workspaceEntity struct {
 	StorageCapacity  int64                   `json:"storageCapacity" gorm:"column:storage_capacity"`
 	RootID           string                  `json:"rootId" gorm:"column:root_id;size:36"`
 	OrganizationID   string                  `json:"organizationId" gorm:"column:organization_id;size:36"`
-	UserPermissions  []*userPermissionValue  `json:"userPermissions" gorm:"-"`
-	GroupPermissions []*groupPermissionValue `json:"groupPermissions" gorm:"-"`
+	UserPermissions  []*UserPermissionValue  `json:"userPermissions" gorm:"-"`
+	GroupPermissions []*GroupPermissionValue `json:"groupPermissions" gorm:"-"`
 	Bucket           string                  `json:"bucket" gorm:"column:bucket;size:255"`
 	CreateTime       string                  `json:"createTime" gorm:"column:create_time"`
 	UpdateTime       *string                 `json:"updateTime,omitempty" gorm:"column:update_time"`
@@ -292,24 +292,24 @@ func (repo *workspaceRepo) GrantUserPermission(id string, userID string, permiss
 
 func (repo *workspaceRepo) populateModelFields(workspaces []*workspaceEntity) error {
 	for _, w := range workspaces {
-		w.UserPermissions = make([]*userPermissionValue, 0)
+		w.UserPermissions = make([]*UserPermissionValue, 0)
 		userPermissions, err := repo.permissionRepo.GetUserPermissions(w.ID)
 		if err != nil {
 			return err
 		}
 		for _, p := range userPermissions {
-			w.UserPermissions = append(w.UserPermissions, &userPermissionValue{
+			w.UserPermissions = append(w.UserPermissions, &UserPermissionValue{
 				UserID: p.UserID,
 				Value:  p.Permission,
 			})
 		}
-		w.GroupPermissions = make([]*groupPermissionValue, 0)
+		w.GroupPermissions = make([]*GroupPermissionValue, 0)
 		groupPermissions, err := repo.permissionRepo.GetGroupPermissions(w.ID)
 		if err != nil {
 			return err
 		}
 		for _, p := range groupPermissions {
-			w.GroupPermissions = append(w.GroupPermissions, &groupPermissionValue{
+			w.GroupPermissions = append(w.GroupPermissions, &GroupPermissionValue{
 				GroupID: p.GroupID,
 				Value:   p.Permission,
 			})
