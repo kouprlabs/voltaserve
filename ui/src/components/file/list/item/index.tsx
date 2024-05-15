@@ -105,20 +105,6 @@ const ListItem = ({
     }
   }, [file, navigate, dispatch])
 
-  const handleCheckboxChange = useCallback(
-    (event: ChangeEvent<HTMLInputElement>) => {
-      event.stopPropagation()
-      if (!event.target.checked) {
-        setIsChecked(true)
-        dispatch(selectionAdded(file.id))
-      } else {
-        setIsChecked(false)
-        dispatch(selectionRemoved(file.id))
-      }
-    },
-    [file.id, dispatch],
-  )
-
   const handleContextMenu = useCallback(
     (event: MouseEvent) => {
       if (event) {
@@ -162,7 +148,7 @@ const ListItem = ({
         'border-2',
         {
           'border-gray-400': isChecked || isDragging,
-          'border-transparent': !isChecked,
+          'border-transparent': !isChecked && !isDragging,
         },
       )}
       style={{

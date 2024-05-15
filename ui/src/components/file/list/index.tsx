@@ -171,7 +171,10 @@ const FileList = ({ list, scale }: FileListProps) => {
         className={cx(
           'border-2',
           { 'border-blue-500': isDragActive },
-          { 'bg-blue-100': isDragActive },
+          {
+            'bg-blue-100': isDragActive,
+            'bg-blue-950': isDragActive,
+          },
           { 'border-transparent': !isDragActive },
           'rounded-md',
           'h-full',

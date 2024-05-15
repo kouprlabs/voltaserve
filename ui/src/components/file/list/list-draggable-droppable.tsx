@@ -37,7 +37,6 @@ const ListDraggableDroppable = ({
   const {
     attributes,
     listeners,
-    isDragging,
     setNodeRef: setDraggableNodeRef,
   } = useDraggable({
     id: file.id,
@@ -127,7 +126,10 @@ const ListDraggableDroppable = ({
             { 'visible': isVisible },
             { 'invisible': !isVisible },
             { 'border-blue-500': isOver },
-            { 'bg-blue-100': isOver },
+            {
+              'bg-blue-100': isOver,
+              'dark:bg-blue-950': isOver,
+            },
             { 'border-transparent': !isOver },
           )}
           {...listeners}
