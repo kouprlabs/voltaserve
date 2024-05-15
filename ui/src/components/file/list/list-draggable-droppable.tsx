@@ -99,6 +99,7 @@ const ListDraggableDroppable = ({
             'border-transparent',
             'hover:outline-none',
             'focus:outline-none',
+            'cursor-default',
             { 'visible': isVisible },
             { 'invisible': !isVisible },
           )}
