@@ -16,6 +16,7 @@ import {
 import { FileCommonProps, FileViewType } from '@/types/file'
 import ItemIcon from './icon'
 import { performMultiSelect, performRangeSelect } from './item-perform-select'
+import MultiSelectCheckbox from './multi-select-checkbox'
 import { computeScale } from './scale'
 
 export type ListItemProps = {
@@ -91,7 +92,7 @@ const ListItem = ({
         dispatch(selectionAdded(file.id))
       }
     },
-    [dispatch, file.id],
+    [dispatch, file.id, isSelectionMode],
   )
 
   const handleFolderLinkClick = useCallback(() => {
@@ -170,57 +171,7 @@ const ListItem = ({
       onContextMenu={isSelectionMode ? undefined : handleContextMenu}
     >
       {isSelectionMode && !isPresentational ? (
-        <div
-          className={cx('w-[20px]', 'h-[20px]', {
-            'relative': viewType === FileViewType.List,
-            'absolute': viewType === FileViewType.Grid,
-            'top-1': viewType === FileViewType.Grid,
-            'left-1': viewType === FileViewType.Grid,
-          })}
-        >
-          <div
-            className={cx(
-              'absolute',
-              'top-0',
-              'left-0',
-              'flex',
-              'items-center',
-              'justify-center',
-              'w-[20px]',
-              'h-[20px]',
-            )}
-          >
-            <span
-              className={cx(
-                'z-10',
-                'bg-white',
-                'w-[16px]',
-                'h-[16px]',
-                'rounded-full',
-              )}
-            ></span>
-          </div>
-          <span
-            className={cx(
-              'absolute',
-              'top-0',
-              'left-0',
-              'z-20',
-              'text-[20px]',
-              'leading-[20px]',
-              {
-                'material-symbols-rounded': !isChecked,
-                'material-symbols-rounded__filled': isChecked,
-              },
-              {
-                'text-blue-500': isChecked,
-                'text-gray-500': !isChecked,
-              },
-            )}
-          >
-            {isChecked ? 'check_circle' : 'radio_button_unchecked'}
-          </span>
-        </div>
+        <MultiSelectCheckbox isChecked={isChecked} viewType={viewType} />
       ) : null}
       <div
         className={cx('flex', 'items-center', 'justify-center')}
