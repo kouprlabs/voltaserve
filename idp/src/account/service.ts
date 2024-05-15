@@ -5,7 +5,8 @@ import { newHashId, newHyphenlessUuid } from '@/infra/id'
 import { sendTemplateMail } from '@/infra/mail'
 import { hashPassword } from '@/infra/password'
 import search, { USER_SEARCH_INDEX } from '@/infra/search'
-import userRepo, { User } from '@/user/repo'
+import userRepo from '@/user/repo'
+import { User } from '@/user/model'
 import { mapEntity, UserDTO } from '@/user/service'
 
 export type AccountCreateOptions = {
@@ -29,7 +30,7 @@ export type AccountSendResetPasswordEmailOptions = {
 }
 
 export async function createUser(
-  options: AccountCreateOptions
+  options: AccountCreateOptions,
 ): Promise<UserDTO> {
   const id = newHashId()
   if (!(await userRepo.isUsernameAvailable(options.email))) {
@@ -93,7 +94,7 @@ export async function confirmEmail(options: AccountConfirmEmailOptions) {
 }
 
 export async function sendResetPasswordEmail(
-  options: AccountSendResetPasswordEmailOptions
+  options: AccountSendResetPasswordEmailOptions,
 ) {
   let user: User
   try {
