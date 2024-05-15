@@ -35,7 +35,8 @@ const MultiSelectCheckbox = ({
           className={cx(
             'z-10',
             {
-              'dark:bg-gray-300': !isChecked,
+              'bg-gray-300': !isChecked,
+              'dark:bg-gray-400': !isChecked,
               'w-[15px]': !isChecked,
               'h-[15px]': !isChecked,
             },

@@ -46,6 +46,7 @@ import {
   multiSelectKeyUpdated,
   rangeSelectKeyUpdated,
   renameModalDidOpen,
+  selectionAdded,
   selectionUpdated,
   sharingModalDidOpen,
   snapshotListModalDidOpen,
@@ -137,6 +138,7 @@ const FileList = ({ list, scale }: FileListProps) => {
   }, [dispatch])
 
   const handleDragStart = useCallback((event: DragStartEvent) => {
+    dispatch(selectionAdded(event.active.id as string))
     setActiveId(event.active.id as string)
   }, [])
 

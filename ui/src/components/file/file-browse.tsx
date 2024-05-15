@@ -106,6 +106,7 @@ const FileBrowse = ({ onChange }: FileBrowseProps) => {
                 'gap-1.5',
                 'items-center',
                 'cursor-pointer',
+                'select-none',
                 'p-1',
                 'rounded-md',
                 'hover:bg-gray-100',

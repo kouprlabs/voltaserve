@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { useParams } from 'react-router-dom'
 import {
   Button,
@@ -46,6 +46,16 @@ const FileRename = () => {
     name: Yup.string().required('Name is required').max(255),
   })
   const fileListSearchParams = useFileListSearchParams()
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    setTimeout(() => {
+      if (isModalOpen) {
+        inputRef.current?.focus()
+        setTimeout(() => inputRef.current?.select(), 100)
+      }
+    }, 100)
+  }, [inputRef, isModalOpen])
 
   const handleSubmit = useCallback(
     async (
@@ -94,10 +104,10 @@ const FileRename = () => {
                       isInvalid={errors.name && touched.name ? true : false}
                     >
                       <Input
+                        ref={inputRef}
                         {...field}
                         placeholder="Name"
                         disabled={isSubmitting}
-                        autoFocus
                       />
                       <FormErrorMessage>{errors.name}</FormErrorMessage>
                     </FormControl>

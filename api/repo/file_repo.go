@@ -335,7 +335,11 @@ func (repo *fileRepo) BulkInsert(values []model.File, chunkSize int) error {
 }
 
 func (repo *fileRepo) BulkInsertPermissions(values []model.UserPermission, chunkSize int) error {
-	if db := repo.db.CreateInBatches(values, chunkSize); db.Error != nil {
+	var entities []*userPermissionEntity
+	for _, p := range values {
+		entities = append(entities, p.(*userPermissionEntity))
+	}
+	if db := repo.db.CreateInBatches(entities, chunkSize); db.Error != nil {
 		return db.Error
 	}
 	return nil
