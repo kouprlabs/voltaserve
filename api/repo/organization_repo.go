@@ -291,8 +291,8 @@ func (repo *organizationRepo) populateModelFields(organizations []*organizationE
 		}
 		for _, p := range userPermissions {
 			o.UserPermissions = append(o.UserPermissions, &UserPermissionValue{
-				UserID: p.UserID,
-				Value:  p.Permission,
+				UserID: p.GetUserID(),
+				Value:  p.GetPermission(),
 			})
 		}
 		o.GroupPermissions = make([]*GroupPermissionValue, 0)
@@ -302,8 +302,8 @@ func (repo *organizationRepo) populateModelFields(organizations []*organizationE
 		}
 		for _, p := range groupPermissions {
 			o.GroupPermissions = append(o.GroupPermissions, &GroupPermissionValue{
-				GroupID: p.GroupID,
-				Value:   p.Permission,
+				GroupID: p.GetGroupID(),
+				Value:   p.GetPermission(),
 			})
 		}
 		members, err := repo.GetMembers(o.ID)

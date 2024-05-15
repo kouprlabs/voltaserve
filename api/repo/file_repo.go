@@ -29,7 +29,7 @@ type FileRepo interface {
 	MoveSourceIntoTarget(targetID string, sourceID string) error
 	Save(file model.File) error
 	BulkInsert(values []model.File, chunkSize int) error
-	BulkInsertPermissions(values []*UserPermission, chunkSize int) error
+	BulkInsertPermissions(values []model.UserPermission, chunkSize int) error
 	Delete(id string) error
 	GetChildrenIDs(id string) ([]string, error)
 	GetItemCount(id string) (int64, error)
@@ -334,7 +334,7 @@ func (repo *fileRepo) BulkInsert(values []model.File, chunkSize int) error {
 	return nil
 }
 
-func (repo *fileRepo) BulkInsertPermissions(values []*UserPermission, chunkSize int) error {
+func (repo *fileRepo) BulkInsertPermissions(values []model.UserPermission, chunkSize int) error {
 	if db := repo.db.CreateInBatches(values, chunkSize); db.Error != nil {
 		return db.Error
 	}
@@ -545,8 +545,8 @@ func (repo *fileRepo) populateModelFields(entities []*fileEntity) error {
 		}
 		for _, p := range userPermissions {
 			f.UserPermissions = append(f.UserPermissions, &UserPermissionValue{
-				UserID: p.UserID,
-				Value:  p.Permission,
+				UserID: p.GetUserID(),
+				Value:  p.GetPermission(),
 			})
 		}
 		f.GroupPermissions = make([]*GroupPermissionValue, 0)
@@ -556,8 +556,8 @@ func (repo *fileRepo) populateModelFields(entities []*fileEntity) error {
 		}
 		for _, p := range groupPermissions {
 			f.GroupPermissions = append(f.GroupPermissions, &GroupPermissionValue{
-				GroupID: p.GroupID,
-				Value:   p.Permission,
+				GroupID: p.GetGroupID(),
+				Value:   p.GetPermission(),
 			})
 		}
 	}

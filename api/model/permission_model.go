@@ -6,6 +6,32 @@ const (
 	PermissionOwner  = "owner"
 )
 
+type UserPermission interface {
+	GetID() string
+	GetUserID() string
+	GetResourceID() string
+	GetPermission() string
+	GetCreateTime() string
+	SetID(string)
+	SetUserID(string)
+	SetResourceID(string)
+	SetPermission(string)
+	SetCreateTime(string)
+}
+
+type GroupPermission interface {
+	GetID() string
+	GetGroupID() string
+	GetResourceID() string
+	GetPermission() string
+	GetCreateTime() string
+	SetID(string)
+	SetGroupID(string)
+	SetResourceID(string)
+	SetPermission(string)
+	SetCreateTime(string)
+}
+
 type CoreUserPermission interface {
 	GetUserID() string
 	GetValue() string

@@ -299,8 +299,8 @@ func (repo *workspaceRepo) populateModelFields(workspaces []*workspaceEntity) er
 		}
 		for _, p := range userPermissions {
 			w.UserPermissions = append(w.UserPermissions, &UserPermissionValue{
-				UserID: p.UserID,
-				Value:  p.Permission,
+				UserID: p.GetUserID(),
+				Value:  p.GetPermission(),
 			})
 		}
 		w.GroupPermissions = make([]*GroupPermissionValue, 0)
@@ -310,8 +310,8 @@ func (repo *workspaceRepo) populateModelFields(workspaces []*workspaceEntity) er
 		}
 		for _, p := range groupPermissions {
 			w.GroupPermissions = append(w.GroupPermissions, &GroupPermissionValue{
-				GroupID: p.GroupID,
-				Value:   p.Permission,
+				GroupID: p.GetGroupID(),
+				Value:   p.GetPermission(),
 			})
 		}
 	}

@@ -316,8 +316,8 @@ func (repo *groupRepo) populateModelFields(groups []*groupEntity) error {
 		}
 		for _, p := range userPermissions {
 			g.UserPermissions = append(g.UserPermissions, &UserPermissionValue{
-				UserID: p.UserID,
-				Value:  p.Permission,
+				UserID: p.GetUserID(),
+				Value:  p.GetPermission(),
 			})
 		}
 		g.GroupPermissions = make([]*GroupPermissionValue, 0)
@@ -327,8 +327,8 @@ func (repo *groupRepo) populateModelFields(groups []*groupEntity) error {
 		}
 		for _, p := range groupPermissions {
 			g.GroupPermissions = append(g.GroupPermissions, &GroupPermissionValue{
-				GroupID: p.GroupID,
-				Value:   p.Permission,
+				GroupID: p.GetGroupID(),
+				Value:   p.GetPermission(),
 			})
 		}
 		members, err := repo.GetMembers(g.ID)
