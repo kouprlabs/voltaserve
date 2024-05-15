@@ -2,7 +2,8 @@ import fs from 'fs/promises'
 import { ErrorCode, newError } from '@/infra/error'
 import { hashPassword, verifyPassword } from '@/infra/password'
 import search, { USER_SEARCH_INDEX } from '@/infra/search'
-import userRepo, { User } from '@/user/repo'
+import userRepo from '@/user/repo'
+import { User } from '@/user/model'
 import { newHyphenlessUuid } from '@/infra/id'
 import { sendTemplateMail } from '@/infra/mail'
 import { getConfig } from '@/config/config'
@@ -47,7 +48,7 @@ export async function getByPicture(picture: string): Promise<UserDTO> {
 
 export async function updateFullName(
   id: string,
-  options: UserUpdateFullNameOptions
+  options: UserUpdateFullNameOptions,
 ): Promise<UserDTO> {
   let user = await userRepo.findByID(id)
   user = await userRepo.update({ id: user.id, fullName: options.fullName })
@@ -62,7 +63,7 @@ export async function updateFullName(
 
 export async function updateEmailRequest(
   id: string,
-  options: UserUpdateEmailRequestOptions
+  options: UserUpdateEmailRequestOptions,
 ): Promise<UserDTO> {
   let user = await userRepo.findByID(id)
   if (options.email === user.email) {
@@ -107,7 +108,7 @@ export async function updateEmailRequest(
 }
 
 export async function updateEmailConfirmation(
-  options: UserUpdateEmailConfirmationOptions
+  options: UserUpdateEmailConfirmationOptions,
 ) {
   let user = await userRepo.findByEmailUpdateToken(options.token)
   user = await userRepo.update({
@@ -131,7 +132,7 @@ export async function updateEmailConfirmation(
 
 export async function updatePassword(
   id: string,
-  options: UserUpdatePasswordOptions
+  options: UserUpdatePasswordOptions,
 ): Promise<UserDTO> {
   let user = await userRepo.findByID(id)
   if (verifyPassword(options.currentPassword, user.passwordHash)) {
@@ -148,7 +149,7 @@ export async function updatePassword(
 export async function updatePicture(
   id: string,
   path: string,
-  contentType: string
+  contentType: string,
 ): Promise<UserDTO> {
   const picture = await fs.readFile(path, { encoding: 'base64' })
   const { id: userId } = await userRepo.findByID(id)
@@ -185,7 +186,7 @@ export function mapEntity(entity: User): UserDTO {
     pendingEmail: entity.emailUpdateValue,
   }
   Object.keys(user).forEach(
-    (index) => !user[index] && user[index] !== undefined && delete user[index]
+    (index) => !user[index] && user[index] !== undefined && delete user[index],
   )
   return user
 }

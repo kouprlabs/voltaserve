@@ -1,78 +1,12 @@
 import { ErrorCode, newError } from '@/infra/error'
 import { client } from '@/infra/postgres'
-
-export type User = {
-  id: string
-  fullName: string
-  username: string
-  email: string
-  passwordHash: string
-  refreshTokenValue?: string
-  refreshTokenExpiry?: string
-  resetPasswordToken?: string
-  emailConfirmationToken?: string
-  isEmailConfirmed: boolean
-  emailUpdateToken?: string
-  emailUpdateValue?: string
-  picture?: string
-  createTime: string
-  updateTime?: string
-}
-
-export type InsertOptions = {
-  id: string
-  fullName?: string
-  username?: string
-  email?: string
-  passwordHash?: string
-  refreshTokenValue?: string
-  refreshTokenExpiry?: string
-  resetPasswordToken?: string
-  emailConfirmationToken?: string
-  isEmailConfirmed?: boolean
-  picture?: string
-  createTime?: string
-  updateTime?: string
-}
-
-export type UpdateOptions = {
-  id: string
-  fullName?: string
-  username?: string
-  email?: string
-  passwordHash?: string
-  refreshTokenValue?: string
-  refreshTokenExpiry?: string
-  resetPasswordToken?: string
-  emailConfirmationToken?: string
-  isEmailConfirmed?: boolean
-  emailUpdateToken?: string
-  emailUpdateValue?: string
-  picture?: string
-  createTime?: string
-  updateTime?: string
-}
-
-export interface UserRepo {
-  findByID(id: string): Promise<User>
-  findByUsername(username: string): Promise<User>
-  findByEmail(email: string): Promise<User>
-  findByRefreshTokenValue(refreshTokenValue: string): Promise<User>
-  findByResetPasswordToken(resetPasswordToken: string): Promise<User>
-  findByEmailConfirmationToken(emailConfirmationToken: string): Promise<User>
-  findByEmailUpdateToken(emailUpdateToken: string): Promise<User>
-  findByPicture(picture: string): Promise<User>
-  isUsernameAvailable(username: string): Promise<boolean>
-  insert(data: InsertOptions): Promise<User>
-  update(data: UpdateOptions): Promise<User>
-  delete(id: string): Promise<void>
-}
+import { InsertOptions, UpdateOptions, User, UserRepo } from './model'
 
 class UserRepoImpl {
   async findByID(id: string): Promise<User> {
     const { rowCount, rows } = await client.query(
       `SELECT * FROM "user" WHERE id = $1`,
-      [id]
+      [id],
     )
     if (rowCount < 1) {
       throw newError({
@@ -86,7 +20,7 @@ class UserRepoImpl {
   async findByUsername(username: string): Promise<User> {
     const { rowCount, rows } = await client.query(
       `SELECT * FROM "user" WHERE username = $1`,
-      [username]
+      [username],
     )
     if (rowCount < 1) {
       throw newError({
@@ -100,7 +34,7 @@ class UserRepoImpl {
   async findByEmail(email: string): Promise<User> {
     const { rowCount, rows } = await client.query(
       `SELECT * FROM "user" WHERE email = $1`,
-      [email]
+      [email],
     )
     if (rowCount < 1) {
       throw newError({
@@ -114,7 +48,7 @@ class UserRepoImpl {
   async findByRefreshTokenValue(refreshTokenValue: string): Promise<User> {
     const { rowCount, rows } = await client.query(
       `SELECT * FROM "user" WHERE refresh_token_value = $1`,
-      [refreshTokenValue]
+      [refreshTokenValue],
     )
     if (rowCount < 1) {
       throw newError({
@@ -128,7 +62,7 @@ class UserRepoImpl {
   async findByResetPasswordToken(resetPasswordToken: string): Promise<User> {
     const { rowCount, rows } = await client.query(
       `SELECT * FROM "user" WHERE reset_password_token = $1`,
-      [resetPasswordToken]
+      [resetPasswordToken],
     )
     if (rowCount < 1) {
       throw newError({
@@ -140,11 +74,11 @@ class UserRepoImpl {
   }
 
   async findByEmailConfirmationToken(
-    emailConfirmationToken: string
+    emailConfirmationToken: string,
   ): Promise<User> {
     const { rowCount, rows } = await client.query(
       `SELECT * FROM "user" WHERE email_confirmation_token = $1`,
-      [emailConfirmationToken]
+      [emailConfirmationToken],
     )
     if (rowCount < 1) {
       throw newError({
@@ -158,7 +92,7 @@ class UserRepoImpl {
   async findByEmailUpdateToken(emailUpdateToken: string): Promise<User> {
     const { rowCount, rows } = await client.query(
       `SELECT * FROM "user" WHERE email_update_token = $1`,
-      [emailUpdateToken]
+      [emailUpdateToken],
     )
     if (rowCount < 1) {
       throw newError({
@@ -172,7 +106,7 @@ class UserRepoImpl {
   async findByPicture(picture: string): Promise<User> {
     const { rowCount, rows } = await client.query(
       `SELECT * FROM "user" WHERE picture = $1`,
-      [picture]
+      [picture],
     )
     if (rowCount < 1) {
       throw newError({
@@ -186,7 +120,7 @@ class UserRepoImpl {
   async isUsernameAvailable(username: string): Promise<boolean> {
     const { rowCount } = await client.query(
       `SELECT * FROM "user" WHERE username = $1`,
-      [username]
+      [username],
     )
     return rowCount === 0
   }
@@ -220,7 +154,7 @@ class UserRepoImpl {
         data.isEmailConfirmed || false,
         data.picture,
         new Date().toISOString(),
-      ]
+      ],
     )
     if (rowCount < 1) {
       throw newError({
@@ -274,7 +208,7 @@ class UserRepoImpl {
         entity.picture,
         new Date().toISOString(),
         entity.id,
-      ]
+      ],
     )
     if (rowCount < 1) {
       throw newError({
