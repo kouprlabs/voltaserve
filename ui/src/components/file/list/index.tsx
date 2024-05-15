@@ -173,7 +173,7 @@ const FileList = ({ list, scale }: FileListProps) => {
           { 'border-blue-500': isDragActive },
           {
             'bg-blue-100': isDragActive,
-            'bg-blue-950': isDragActive,
+            'dark:bg-blue-950': isDragActive,
           },
           { 'border-transparent': !isDragActive },
           'rounded-md',
