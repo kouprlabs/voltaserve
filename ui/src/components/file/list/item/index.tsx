@@ -84,6 +84,16 @@ const ListItem = ({
     [file, isSelected, isChecked, isSelectionMode, dispatch],
   )
 
+  const handleIconMouseDown = useCallback(
+    (event: MouseEvent) => {
+      if (!isSelectionMode) {
+        event.stopPropagation()
+        dispatch(selectionAdded(file.id))
+      }
+    },
+    [dispatch, file.id],
+  )
+
   const handleFolderLinkClick = useCallback(() => {
     navigate(`/workspace/${file.workspaceId}/file/${file.id}`)
   }, [file.id, file.workspaceId, navigate])
@@ -155,6 +165,7 @@ const ListItem = ({
         width: viewType === FileViewType.List ? '100%' : width,
       }}
       onClick={handleIconClick}
+      onMouseDown={handleIconMouseDown}
       onDoubleClick={isSelectionMode ? undefined : handleIconDoubleClick}
       onContextMenu={isSelectionMode ? undefined : handleContextMenu}
     >

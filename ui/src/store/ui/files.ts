@@ -66,7 +66,9 @@ const slice = createSlice({
       state.selection = action.payload
     },
     selectionAdded: (state, action: PayloadAction<string>) => {
-      state.selection.push(action.payload)
+      if (!state.selection.includes(action.payload)) {
+        state.selection.push(action.payload)
+      }
     },
     selectionRemoved: (state, action: PayloadAction<string>) => {
       state.selection = state.selection.filter((e) => e !== action.payload)
