@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   Button,
   FormControl,
@@ -24,6 +24,7 @@ import {
 import * as Yup from 'yup'
 import cx from 'classnames'
 import GroupAPI, { Group } from '@/client/api/group'
+import useFocusAndSelectAll from '@/hooks/use-focus-and-select-all'
 
 export type GroupEditNameProps = {
   open: boolean
@@ -41,6 +42,8 @@ const GroupEditName = ({ open, group, onClose }: GroupEditNameProps) => {
   const formSchema = Yup.object().shape({
     name: Yup.string().required('Name is required').max(255),
   })
+  const inputRef = useRef<HTMLInputElement>(null)
+  useFocusAndSelectAll(inputRef, isModalOpen)
 
   useEffect(() => {
     setIsModalOpen(open)
@@ -92,6 +95,7 @@ const GroupEditName = ({ open, group, onClose }: GroupEditNameProps) => {
                       isInvalid={errors.name && touched.name ? true : false}
                     >
                       <Input
+                        ref={inputRef}
                         {...field}
                         placeholder="Name"
                         disabled={isSubmitting}
