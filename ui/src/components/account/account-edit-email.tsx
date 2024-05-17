@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   Button,
   FormControl,
@@ -24,6 +24,7 @@ import {
 import * as Yup from 'yup'
 import cx from 'classnames'
 import UserAPI, { User } from '@/client/idp/user'
+import useFocusAndSelectAll from '@/hooks/use-focus-and-select-all'
 
 export type AccountEditEmailProps = {
   open: boolean
@@ -44,6 +45,8 @@ const AccountEditEmail = ({ open, user, onClose }: AccountEditEmailProps) => {
       .email('Must be a valid email')
       .max(255),
   })
+  const inputRef = useRef<HTMLInputElement>(null)
+  useFocusAndSelectAll(inputRef, isModalOpen)
 
   useEffect(() => {
     setIsModalOpen(open)
@@ -95,6 +98,7 @@ const AccountEditEmail = ({ open, user, onClose }: AccountEditEmailProps) => {
                       isInvalid={errors.email && touched.email ? true : false}
                     >
                       <Input
+                        ref={inputRef}
                         {...field}
                         placeholder="Email"
                         disabled={isSubmitting}

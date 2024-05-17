@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   Button,
   FormControl,
@@ -24,6 +24,7 @@ import {
 import * as Yup from 'yup'
 import cx from 'classnames'
 import UserAPI, { User } from '@/client/idp/user'
+import useFocusAndSelectAll from '@/hooks/use-focus-and-select-all'
 
 export type AccountEditFullNameProps = {
   open: boolean
@@ -45,6 +46,8 @@ const AccountEditFullName = ({
   const formSchema = Yup.object().shape({
     fullName: Yup.string().required('Full name is required').max(255),
   })
+  const inputRef = useRef<HTMLInputElement>(null)
+  useFocusAndSelectAll(inputRef, isModalOpen)
 
   useEffect(() => {
     setIsModalOpen(open)
@@ -98,6 +101,7 @@ const AccountEditFullName = ({
                       }
                     >
                       <Input
+                        ref={inputRef}
                         {...field}
                         placeholder="Full name"
                         disabled={isSubmitting}
