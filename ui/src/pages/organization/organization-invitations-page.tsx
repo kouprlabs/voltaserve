@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import {
   Button,
@@ -35,9 +35,12 @@ import {
   PagePagination,
   usePagePagination,
 } from '@/lib'
+import { useAppDispatch } from '@/store/hook'
+import { mutateUpdated } from '@/store/ui/outgoing-invitations'
 
 const OrganizationInvitationsPage = () => {
   const navigate = useNavigate()
+  const dispatch = useAppDispatch()
   const location = useLocation()
   const { id } = useParams()
   const toast = useToast()
@@ -86,6 +89,12 @@ const OrganizationInvitationsPage = () => {
     },
     [mutate],
   )
+
+  useEffect(() => {
+    if (mutate) {
+      dispatch(mutateUpdated(mutate))
+    }
+  }, [mutate])
 
   if (invitationsError || orgError) {
     return null

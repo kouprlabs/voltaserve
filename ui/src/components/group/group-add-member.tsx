@@ -12,7 +12,6 @@ import {
   ModalHeader,
   ModalOverlay,
 } from '@chakra-ui/react'
-import { useSWRConfig } from 'swr'
 import {
   Field,
   FieldAttributes,
@@ -26,6 +25,7 @@ import cx from 'classnames'
 import GroupAPI, { Group } from '@/client/api/group'
 import UserAPI, { User } from '@/client/api/user'
 import UserSelector from '../common/user-selector'
+import { useAppSelector } from '@/store/hook'
 
 export type GroupAddMemberProps = {
   open: boolean
@@ -39,7 +39,7 @@ type FormValues = {
 
 const GroupAddMember = ({ group, open, onClose }: GroupAddMemberProps) => {
   const navigate = useNavigate()
-  const { mutate } = useSWRConfig()
+  const mutateList = useAppSelector((state) => state.ui.groupMembers.mutate)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [activeUser, setActiveUser] = useState<User>()
   const formSchema = Yup.object().shape({
@@ -60,13 +60,7 @@ const GroupAddMember = ({ group, open, onClose }: GroupAddMemberProps) => {
         await GroupAPI.addMember(group.id, {
           userId,
         })
-        mutate(
-          `/users?${UserAPI.paramsFromListOptions({
-            groupId: group.id,
-            nonGroupMembersOnly: true,
-          })}`,
-        )
-        mutate(`/groups/${group.id}/get_available_users`)
+        mutateList?.()
         setSubmitting(false)
         onClose?.()
         navigate(`/group/${group.id}/member`)
@@ -74,7 +68,7 @@ const GroupAddMember = ({ group, open, onClose }: GroupAddMemberProps) => {
         setSubmitting(false)
       }
     },
-    [group.id, navigate, onClose, mutate],
+    [group.id, navigate, onClose, mutateList],
   )
 
   return (
