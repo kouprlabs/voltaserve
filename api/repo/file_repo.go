@@ -36,9 +36,9 @@ type FileRepo interface {
 	IsGrandChildOf(id string, ancestorID string) (bool, error)
 	GetSize(id string) (int64, error)
 	GrantUserPermission(id string, userID string, permission string) error
-	RevokeUserPermission(id string, userID string) error
+	RevokeUserPermission(tree []model.File, userID string) error
 	GrantGroupPermission(id string, groupID string, permission string) error
-	RevokeGroupPermission(id string, groupID string) error
+	RevokeGroupPermission(tree []model.File, groupID string) error
 }
 
 func NewFileRepo() FileRepo {
@@ -470,11 +470,7 @@ func (repo *fileRepo) GrantUserPermission(id string, userID string, permission s
 	return nil
 }
 
-func (repo *fileRepo) RevokeUserPermission(id string, userID string) error {
-	tree, err := repo.FindTree(id)
-	if err != nil {
-		return err
-	}
+func (repo *fileRepo) RevokeUserPermission(tree []model.File, userID string) error {
 	for _, f := range tree {
 		db := repo.db.Exec("DELETE FROM userpermission WHERE user_id = ? AND resource_id = ?", userID, f.GetID())
 		if db.Error != nil {
@@ -526,11 +522,7 @@ func (repo *fileRepo) GrantGroupPermission(id string, groupID string, permission
 	return nil
 }
 
-func (repo *fileRepo) RevokeGroupPermission(id string, groupID string) error {
-	tree, err := repo.FindTree(id)
-	if err != nil {
-		return err
-	}
+func (repo *fileRepo) RevokeGroupPermission(tree []model.File, groupID string) error {
 	for _, f := range tree {
 		db := repo.db.Exec("DELETE FROM grouppermission WHERE group_id = ? AND resource_id = ?", groupID, f.GetID())
 		if db.Error != nil {

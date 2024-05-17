@@ -1267,11 +1267,20 @@ func (svc *FileService) RevokeUserPermission(ids []string, assigneeID string, us
 		if _, err := svc.userRepo.Find(assigneeID); err != nil {
 			return err
 		}
-		if err := svc.fileRepo.RevokeUserPermission(id, assigneeID); err != nil {
+		tree, err := svc.fileRepo.FindTree(id)
+		if err != nil {
+			return err
+		}
+		if err := svc.fileRepo.RevokeUserPermission(tree, assigneeID); err != nil {
 			return err
 		}
 		if _, err := svc.fileCache.Refresh(file.GetID()); err != nil {
 			return err
+		}
+		for _, f := range tree {
+			if _, err := svc.fileCache.Refresh(f.GetID()); err != nil {
+				return err
+			}
 		}
 	}
 	return nil
@@ -1352,11 +1361,20 @@ func (svc *FileService) RevokeGroupPermission(ids []string, groupID string, user
 		if err := svc.groupGuard.Authorize(user, group, model.PermissionViewer); err != nil {
 			return err
 		}
-		if err := svc.fileRepo.RevokeGroupPermission(id, groupID); err != nil {
+		tree, err := svc.fileRepo.FindTree(id)
+		if err != nil {
+			return err
+		}
+		if err := svc.fileRepo.RevokeGroupPermission(tree, groupID); err != nil {
 			return err
 		}
 		if _, err := svc.fileCache.Refresh(file.GetID()); err != nil {
 			return err
+		}
+		for _, f := range tree {
+			if _, err := svc.fileCache.Refresh(f.GetID()); err != nil {
+				return err
+			}
 		}
 	}
 	return nil
