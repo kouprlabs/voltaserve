@@ -14,7 +14,6 @@ import {
   ModalOverlay,
   Textarea,
 } from '@chakra-ui/react'
-import { useSWRConfig } from 'swr'
 import {
   Field,
   FieldAttributes,
@@ -28,6 +27,7 @@ import cx from 'classnames'
 import InvitationAPI from '@/client/api/invitation'
 import EmailTokenizer from '@/components/common/email-tokenizer'
 import parseEmailList from '@/helpers/parse-email-list'
+import { useAppSelector } from '@/store/hook'
 
 export type OrganizationInviteMembersProps = {
   open: boolean
@@ -45,7 +45,7 @@ const OrganizationInviteMembers = ({
   onClose,
 }: OrganizationInviteMembersProps) => {
   const navigate = useNavigate()
-  const { mutate } = useSWRConfig()
+  const mutateList = useAppSelector((state) => state.ui.outgoingInvitations.mutate)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const formSchema = Yup.object().shape({
     emails: Yup.string().required('Email(s) are required'),
@@ -66,11 +66,7 @@ const OrganizationInviteMembers = ({
           organizationId: id,
           emails: parseEmailList(emails),
         })
-        mutate(
-          `/invitations/get_outgoing?${new URLSearchParams({
-            organization_id: id,
-          })}`,
-        )
+        mutateList?.()
         navigate(`/organization/${id}/invitation`)
         setSubmitting(false)
         onClose?.()
@@ -78,7 +74,7 @@ const OrganizationInviteMembers = ({
         setSubmitting(false)
       }
     },
-    [id, navigate, onClose, mutate],
+    [id, navigate, onClose, mutateList],
   )
 
   return (

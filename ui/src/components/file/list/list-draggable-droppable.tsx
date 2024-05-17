@@ -1,6 +1,5 @@
 import { useState, MouseEvent } from 'react'
 import { useParams } from 'react-router-dom'
-import { useSWRConfig } from 'swr'
 import {
   DragCancelEvent,
   DragEndEvent,
@@ -11,7 +10,6 @@ import {
 } from '@dnd-kit/core'
 import cx from 'classnames'
 import FileAPI, { FileType, List } from '@/client/api/file'
-import useFileListSearchParams from '@/hooks/use-file-list-params'
 import store from '@/store/configure-store'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { hiddenUpdated, selectionUpdated } from '@/store/ui/files'
@@ -29,7 +27,6 @@ const ListDraggableDroppable = ({
   isSelectionMode,
   onContextMenu,
 }: ListDraggableDroppableProps) => {
-  const { mutate } = useSWRConfig()
   const dispatch = useAppDispatch()
   const { fileId } = useParams()
   const [isVisible, setVisible] = useState(true)
@@ -41,11 +38,11 @@ const ListDraggableDroppable = ({
   } = useDraggable({
     id: file.id,
   })
+  const mutateList = useAppSelector((state) => state.ui.files.mutate)
   const { isOver, setNodeRef: setDroppableNodeRef } = useDroppable({
     id: file.id,
   })
   const [isLoading, setIsLoading] = useState(false)
-  const fileListSearchParams = useFileListSearchParams()
 
   useDndMonitor({
     onDragStart: (event: DragStartEvent) => {
@@ -68,7 +65,7 @@ const ListDraggableDroppable = ({
         ]
         const list = store.getState().entities.files.list
         if (list) {
-          await mutate<List>(`/files/${fileId}/list?${fileListSearchParams}`, {
+          mutateList?.({
             ...list,
             data: list.data.filter((e) => !idsToMove.includes(e.id)),
           })
@@ -76,7 +73,7 @@ const ListDraggableDroppable = ({
         dispatch(hiddenUpdated(idsToMove))
         setIsLoading(true)
         await FileAPI.move(file.id, { ids: idsToMove })
-        await mutate<List>(`/files/${fileId}/list?${fileListSearchParams}`)
+        mutateList?.()
         setIsLoading(false)
         dispatch(hiddenUpdated([]))
         dispatch(selectionUpdated([]))

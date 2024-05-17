@@ -5,14 +5,7 @@ const store = configureStore({
   reducer,
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
-      serializableCheck: {
-        ignoredActions: [
-          'uploads/uploadAdded',
-          'uploads/uploadUpdated',
-          'uploads/uploadDeleted',
-        ],
-        ignoredPaths: ['entities.uploads.items'],
-      },
+      serializableCheck: false,
     }),
 })
 

@@ -45,6 +45,7 @@ setInterval(async () => {
       })
     }
     store.dispatch(uploadCompleted(upload.id))
+    store.getState().ui.files.mutate?.()
   } catch (error) {
     store.dispatch(
       uploadUpdated({

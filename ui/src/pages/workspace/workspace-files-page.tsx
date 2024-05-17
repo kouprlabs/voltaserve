@@ -27,7 +27,7 @@ import {
 } from '@/lib'
 import { listUpdated } from '@/store/entities/files'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
-import { selectionUpdated } from '@/store/ui/files'
+import { mutateUpdated, selectionUpdated } from '@/store/ui/files'
 
 const WorkspaceFilesPage = () => {
   const navigate = useNavigate()
@@ -38,7 +38,6 @@ const WorkspaceFilesPage = () => {
   const sortBy = useAppSelector((state) => state.ui.files.sortBy)
   const sortOrder = useAppSelector((state) => state.ui.files.sortOrder)
   const iconScale = useAppSelector((state) => state.ui.files.iconScale)
-  const selection = useAppSelector((state) => state.ui.files.selection)
   const isSnapshotListModalOpen = useAppSelector(
     (state) => state.ui.files.isSnapshotListModalOpen,
   )
@@ -71,6 +70,7 @@ const WorkspaceFilesPage = () => {
     data: list,
     error,
     isLoading,
+    mutate
   } = FileAPI.useList(
     fileId!,
     {
@@ -94,6 +94,12 @@ const WorkspaceFilesPage = () => {
       dispatch(listUpdated(list))
     }
   }, [list, dispatch])
+
+  useEffect(() => {
+    if (mutate) {
+      dispatch(mutateUpdated(mutate))
+    }
+  }, [mutate])
 
   return (
     <>

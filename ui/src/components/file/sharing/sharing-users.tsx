@@ -21,7 +21,6 @@ import { User } from '@/client/api/user'
 import WorkspaceAPI from '@/client/api/workspace'
 import IdPUserAPI from '@/client/idp/user'
 import UserSelector from '@/components/common/user-selector'
-import useFileListSearchParams from '@/hooks/use-file-list-params'
 import { Spinner, Text } from '@/lib'
 import { IconCheck, IconDelete, IconPersonAdd } from '@/lib'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
@@ -42,17 +41,16 @@ const SharingUsers = ({
   mutateUserPermissions,
 }: SharingUsersProps) => {
   const navigate = useNavigate()
-  const { mutate } = useSWRConfig()
   const { id, fileId } = useParams()
   const dispatch = useAppDispatch()
   const { data: workspace } = WorkspaceAPI.useGetById(id)
   const selection = useAppSelector((state) => state.ui.files.selection)
+  const mutateList = useAppSelector((state) => state.ui.files.mutate)
   const [isGrantLoading, setIsGrantLoading] = useState(false)
   const [permissionBeingRevoked, setPermissionBeingRevoked] = useState<string>()
   const [activeUser, setActiveUser] = useState<User>()
   const [activePermission, setActivePermission] = useState<string>()
   const { data: user } = IdPUserAPI.useGet()
-  const fileListSearchParams = useFileListSearchParams()
   const isSingleSelection = selection.length === 1
 
   const handleGrantUserPermission = useCallback(async () => {
@@ -66,7 +64,7 @@ const SharingUsers = ({
         userId: activeUser.id,
         permission: activePermission,
       })
-      await mutate<List>(`/files/${fileId}/list?${fileListSearchParams}`)
+      mutateList?.()
       if (isSingleSelection) {
         await mutateUserPermissions()
       }
@@ -84,8 +82,7 @@ const SharingUsers = ({
     activeUser,
     activePermission,
     isSingleSelection,
-    fileListSearchParams,
-    mutate,
+    mutateList,
     dispatch,
     mutateUserPermissions,
   ])
@@ -98,7 +95,7 @@ const SharingUsers = ({
           ids: selection,
           userId: permission.user.id,
         })
-        await mutate<List>(`/files/${fileId}/list?${fileListSearchParams}`)
+        mutateList?.()
         if (isSingleSelection) {
           await mutateUserPermissions()
         }
@@ -110,8 +107,7 @@ const SharingUsers = ({
       fileId,
       selection,
       isSingleSelection,
-      fileListSearchParams,
-      mutate,
+      mutateList,
       mutateUserPermissions,
     ],
   )

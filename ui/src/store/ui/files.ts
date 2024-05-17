@@ -1,5 +1,6 @@
+import { KeyedMutator } from 'swr'
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { SortBy, SortOrder } from '@/client/api/file'
+import { List, SortBy, SortOrder } from '@/client/api/file'
 import {
   loadFileSortBy,
   loadFileSortOrder,
@@ -34,6 +35,7 @@ export type FilesState = {
   sortBy: SortBy
   sortOrder: SortOrder
   viewType: FileViewType
+  mutate?: KeyedMutator<List | undefined>
 }
 
 const initialState: FilesState = {
@@ -159,6 +161,12 @@ const slice = createSlice({
     selectionModeToggled: (state) => {
       state.isSelectionMode = !state.isSelectionMode
     },
+    mutateUpdated: (
+      state,
+      action: PayloadAction<KeyedMutator<List | undefined>>,
+    ) => {
+      state.mutate = action.payload
+    },
   },
 })
 
@@ -192,6 +200,7 @@ export const {
   sortOrderToggled,
   viewTypeToggled,
   selectionModeToggled,
+  mutateUpdated,
 } = slice.actions
 
 export default slice.reducer

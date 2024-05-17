@@ -12,7 +12,7 @@ import {
   Badge,
   Avatar,
 } from '@chakra-ui/react'
-import { KeyedMutator, useSWRConfig } from 'swr'
+import { KeyedMutator } from 'swr'
 import { Select } from 'chakra-react-select'
 import cx from 'classnames'
 import FileAPI, { GroupPermission, List } from '@/client/api/file'
@@ -20,7 +20,6 @@ import { Group } from '@/client/api/group'
 import { geEditorPermission } from '@/client/api/permission'
 import WorkspaceAPI from '@/client/api/workspace'
 import GroupSelector from '@/components/common/group-selector'
-import useFileListSearchParams from '@/hooks/use-file-list-params'
 import { Spinner, Text } from '@/lib'
 import { IconAdd, IconCheck, IconDelete } from '@/lib'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
@@ -39,16 +38,15 @@ const SharingGroups = ({
   permissions,
   mutateGroupPermissions,
 }: SharingGroupsProps) => {
-  const { mutate } = useSWRConfig()
   const { id, fileId } = useParams()
   const dispatch = useAppDispatch()
   const { data: workspace } = WorkspaceAPI.useGetById(id)
   const selection = useAppSelector((state) => state.ui.files.selection)
+  const mutateList = useAppSelector((state) => state.ui.files.mutate)
   const [isGrantLoading, setIsGrantLoading] = useState(false)
   const [permissionBeingRevoked, setPermissionBeingRevoked] = useState<string>()
   const [activeGroup, setActiveGroup] = useState<Group>()
   const [activePermission, setActivePermission] = useState<string>()
-  const fileListSearchParams = useFileListSearchParams()
   const isSingleSelection = selection.length === 1
 
   const handleGrantGroupPermission = useCallback(async () => {
@@ -60,7 +58,7 @@ const SharingGroups = ({
           groupId: activeGroup.id,
           permission: activePermission,
         })
-        await mutate<List>(`/files/${fileId}/list?${fileListSearchParams}`)
+        mutateList?.()
         if (isSingleSelection) {
           await mutateGroupPermissions()
         }
@@ -79,8 +77,7 @@ const SharingGroups = ({
     activeGroup,
     activePermission,
     isSingleSelection,
-    fileListSearchParams,
-    mutate,
+    mutateList,
     dispatch,
     mutateGroupPermissions,
   ])
@@ -93,7 +90,7 @@ const SharingGroups = ({
           ids: selection,
           groupId: permission.group.id,
         })
-        await mutate<List>(`/files/${fileId}/list?${fileListSearchParams}`)
+        mutateList?.()
         if (isSingleSelection) {
           await mutateGroupPermissions()
         }
@@ -105,8 +102,7 @@ const SharingGroups = ({
       fileId,
       selection,
       isSingleSelection,
-      fileListSearchParams,
-      mutate,
+      mutateList,
       mutateGroupPermissions,
     ],
   )

@@ -11,35 +11,32 @@ import {
   ModalHeader,
   ModalOverlay,
 } from '@chakra-ui/react'
-import { useSWRConfig } from 'swr'
 import cx from 'classnames'
-import FileAPI, { List } from '@/client/api/file'
-import useFileListSearchParams from '@/hooks/use-file-list-params'
+import FileAPI from '@/client/api/file'
 import { useAppSelector } from '@/store/hook'
 import { deleteModalDidClose, selectionUpdated } from '@/store/ui/files'
 
 const FileDelete = () => {
-  const { mutate } = useSWRConfig()
   const { fileId } = useParams()
   const dispatch = useDispatch()
   const selection = useAppSelector((state) => state.ui.files.selection)
   const isModalOpen = useAppSelector(
     (state) => state.ui.files.isDeleteModalOpen,
   )
+  const mutateList = useAppSelector((state) => state.ui.files.mutate)
   const [isLoading, setIsLoading] = useState(false)
-  const fileListSearchParams = useFileListSearchParams()
 
   const handleDelete = useCallback(async () => {
     try {
       setIsLoading(true)
       await FileAPI.batchDelete({ ids: selection })
-      await mutate<List>(`/files/${fileId}/list?${fileListSearchParams}`)
+      mutateList?.()
       dispatch(selectionUpdated([]))
       dispatch(deleteModalDidClose())
     } finally {
       setIsLoading(false)
     }
-  }, [selection, fileId, fileListSearchParams, mutate, dispatch])
+  }, [selection, fileId, dispatch, mutateList])
 
   return (
     <Modal

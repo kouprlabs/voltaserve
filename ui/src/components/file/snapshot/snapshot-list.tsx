@@ -29,6 +29,7 @@ import {
   snapshotListModalDidClose,
   snapshotSelectionUpdated,
 } from '@/store/ui/files'
+import { mutate } from 'swr'
 
 const FileSnapshotList = () => {
   const dispatch = useAppDispatch()
@@ -37,13 +38,14 @@ const FileSnapshotList = () => {
   )
   const id = useAppSelector((state) => state.ui.files.selection[0])
   const deletion = useAppSelector((state) => state.ui.files.snapshotDeletion)
+  const mutateFileList = useAppSelector((state) => state.ui.files.mutate)
   const [isActivating, setIsActivating] = useState(false)
   const [page, setPage] = useState(1)
   const [selected, setSelected] = useState<Snapshot>()
   const {
     data: list,
     error,
-    mutate,
+    mutate: mutateSnapshotList,
   } = SnapshotAPI.useList(
     id,
     { page, size: 5, sortOrder: SortOrder.Desc },
@@ -54,7 +56,7 @@ const FileSnapshotList = () => {
     async function deleteSnapshots() {
       deletion.forEach(async (snapshotId) => {
         await SnapshotAPI.delete(id, snapshotId)
-        await mutate()
+        await mutateSnapshotList()
       })
       dispatch(snapshotDeletionUpdated([]))
     }
@@ -74,13 +76,14 @@ const FileSnapshotList = () => {
       try {
         setIsActivating(true)
         await SnapshotAPI.activate(id, selected.id)
-        mutate()
+        mutateSnapshotList()
+        mutateFileList?.()
       } finally {
         setIsActivating(false)
       }
       await SnapshotAPI.activate(id, selected.id)
     }
-  }, [selected, dispatch])
+  }, [selected, dispatch, mutateSnapshotList, mutateFileList])
 
   const handleDelete = useCallback(() => {
     if (selected) {

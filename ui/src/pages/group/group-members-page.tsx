@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   useLocation,
   useNavigate,
@@ -40,9 +40,12 @@ import {
   usePagePagination,
   IconMoreVert,
 } from '@/lib'
+import { useAppDispatch } from '@/store/hook'
+import { mutateUpdated } from '@/store/ui/group-members'
 
 const GroupMembersPage = () => {
   const navigate = useNavigate()
+  const dispatch = useAppDispatch()
   const location = useLocation()
   const { id } = useParams()
   const { data: group, error: groupError } = GroupAPI.useGetById(
@@ -75,6 +78,12 @@ const GroupMembersPage = () => {
   const [isAddMembersModalOpen, setIsAddMembersModalOpen] = useState(false)
   const [isRemoveMemberModalOpen, setIsRemoveMemberModalOpen] =
     useState<boolean>(false)
+
+  useEffect(() => {
+    if (mutate) {
+      dispatch(mutateUpdated(mutate))
+    }
+  }, [mutate])
 
   if (groupError || membersError) {
     return null

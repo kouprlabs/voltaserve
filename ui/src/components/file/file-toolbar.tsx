@@ -16,13 +16,11 @@ import {
   SliderFilledTrack,
   SliderThumb,
 } from '@chakra-ui/react'
-import { useSWRConfig } from 'swr'
 import cx from 'classnames'
 import FileAPI, { List, SortBy, SortOrder } from '@/client/api/file'
 import { ltEditorPermission, ltOwnerPermission } from '@/client/api/permission'
 import downloadFile from '@/helpers/download-file'
 import mapFileList from '@/helpers/map-file-list'
-import useFileListSearchParams from '@/hooks/use-file-list-params'
 import {
   IconAdd,
   IconFileCopy,
@@ -78,7 +76,6 @@ export type FileToolbarProps = {
 
 const FileToolbar = ({ list }: FileToolbarProps) => {
   const dispatch = useAppDispatch()
-  const { mutate } = useSWRConfig()
   const { id, fileId } = useParams()
   const [isRefreshing, setIsRefreshing] = useState(false)
   const fileCount = useAppSelector(
@@ -117,9 +114,9 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
   const isSelectionMode = useAppSelector(
     (state) => state.ui.files.isSelectionMode,
   )
+  const mutateList = useAppSelector((state) => state.ui.files.mutate)
   const fileUploadInput = useRef<HTMLInputElement>(null)
   const folderUploadInput = useRef<HTMLInputElement>(null)
-  const fileListSearchParams = useFileListSearchParams()
   const { data: folder } = FileAPI.useGetById(fileId)
   const stackClassName = cx('flex', 'flex-row', 'gap-0.5')
 
@@ -161,9 +158,9 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true)
     dispatch(selectionUpdated([]))
-    await mutate<List>(`/files/${fileId}/list?${fileListSearchParams}`)
+    mutateList?.()
     setIsRefreshing(false)
-  }, [fileId, fileListSearchParams, mutate, dispatch])
+  }, [fileId, dispatch, mutateList])
 
   const handleSortByChange = useCallback(
     (value: SortBy) => {
