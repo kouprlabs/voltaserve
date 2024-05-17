@@ -13,7 +13,6 @@ import {
   ModalHeader,
   ModalOverlay,
 } from '@chakra-ui/react'
-import { useSWRConfig } from 'swr'
 import {
   Field,
   FieldAttributes,
@@ -25,7 +24,6 @@ import {
 import * as Yup from 'yup'
 import cx from 'classnames'
 import FileAPI, { List } from '@/client/api/file'
-import useFileListSearchParams from '@/hooks/use-file-list-params'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { createModalDidClose } from '@/store/ui/files'
 
@@ -34,17 +32,16 @@ type FormValues = {
 }
 
 const FileCreate = () => {
-  const { mutate } = useSWRConfig()
   const { id, fileId } = useParams()
   const dispatch = useAppDispatch()
   const isModalOpen = useAppSelector(
     (state) => state.ui.files.isCreateModalOpen,
   )
+  const mutateList = useAppSelector((state) => state.ui.files.mutate)
   const [inputRef, setInputRef] = useState<HTMLInputElement | null>()
   const formSchema = Yup.object().shape({
     name: Yup.string().required('Name is required').max(255),
   })
-  const fileListSearchParams = useFileListSearchParams()
 
   useEffect(() => {
     if (inputRef) {
@@ -64,14 +61,14 @@ const FileCreate = () => {
           workspaceId: id!,
           parentId: fileId!,
         })
-        await mutate<List>(`/files/${fileId}/list?${fileListSearchParams}`)
+        mutateList?.()
         setSubmitting(false)
         dispatch(createModalDidClose())
       } finally {
         setSubmitting(false)
       }
     },
-    [id, fileId, fileListSearchParams, mutate, dispatch],
+    [id, fileId, dispatch, mutateList],
   )
 
   return (

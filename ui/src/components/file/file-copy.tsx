@@ -10,23 +10,20 @@ import {
   ModalFooter,
   Button,
 } from '@chakra-ui/react'
-import { useSWRConfig } from 'swr'
 import cx from 'classnames'
-import FileAPI, { List } from '@/client/api/file'
-import useFileListSearchParams from '@/hooks/use-file-list-params'
+import FileAPI from '@/client/api/file'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { copyModalDidClose, selectionUpdated } from '@/store/ui/files'
 import FileBrowse from './file-browse'
 
 const FileCopy = () => {
-  const { mutate } = useSWRConfig()
   const dispatch = useAppDispatch()
   const { fileId } = useParams()
   const isModalOpen = useAppSelector((state) => state.ui.files.isCopyModalOpen)
   const selection = useAppSelector((state) => state.ui.files.selection)
+  const mutateList = useAppSelector((state) => state.ui.files.mutate)
   const [isLoading, setIsLoading] = useState(false)
   const [targetId, setTargetId] = useState<string>()
-  const fileListSearchParams = useFileListSearchParams()
 
   const handleMove = useCallback(async () => {
     if (!targetId) {
@@ -38,14 +35,14 @@ const FileCopy = () => {
         ids: selection,
       })
       if (fileId === targetId) {
-        await mutate<List>(`/files/${targetId}/list?${fileListSearchParams}`)
+        mutateList?.()
       }
       dispatch(selectionUpdated([]))
       dispatch(copyModalDidClose())
     } finally {
       setIsLoading(false)
     }
-  }, [targetId, fileId, selection, fileListSearchParams, mutate, dispatch])
+  }, [targetId, fileId, selection, dispatch, mutateList])
 
   return (
     <Modal

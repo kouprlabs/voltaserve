@@ -13,7 +13,6 @@ import {
   ModalHeader,
   ModalOverlay,
 } from '@chakra-ui/react'
-import { useSWRConfig } from 'swr'
 import {
   Field,
   FieldAttributes,
@@ -24,8 +23,7 @@ import {
 } from 'formik'
 import * as Yup from 'yup'
 import cx from 'classnames'
-import FileAPI, { List } from '@/client/api/file'
-import useFileListSearchParams from '@/hooks/use-file-list-params'
+import FileAPI from '@/client/api/file'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { renameModalDidClose } from '@/store/ui/files'
 
@@ -34,18 +32,17 @@ type FormValues = {
 }
 
 const FileRename = () => {
-  const { mutate } = useSWRConfig()
   const dispatch = useAppDispatch()
   const { fileId } = useParams()
   const isModalOpen = useAppSelector(
     (state) => state.ui.files.isRenameModalOpen,
   )
   const id = useAppSelector((state) => state.ui.files.selection[0])
+  const mutateList = useAppSelector(state => state.ui.files.mutate)
   const { data: file, mutate: mutateFile } = FileAPI.useGetById(id)
   const formSchema = Yup.object().shape({
     name: Yup.string().required('Name is required').max(255),
   })
-  const fileListSearchParams = useFileListSearchParams()
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -68,14 +65,14 @@ const FileRename = () => {
       setSubmitting(true)
       try {
         await mutateFile(await FileAPI.rename(file.id, { name }))
-        await mutate<List>(`/files/${fileId}/list?${fileListSearchParams}`)
+        mutateList?.()
         setSubmitting(false)
         dispatch(renameModalDidClose())
       } finally {
         setSubmitting(false)
       }
     },
-    [file, fileId, fileListSearchParams, dispatch, mutate, mutateFile],
+    [file, fileId, dispatch, mutateFile, mutateList],
   )
 
   return (
