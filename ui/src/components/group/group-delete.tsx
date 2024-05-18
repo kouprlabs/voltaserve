@@ -24,6 +24,7 @@ import {
 import * as Yup from 'yup'
 import cx from 'classnames'
 import GroupAPI, { Group } from '@/client/api/group'
+import { useAppSelector } from '@/store/hook'
 
 export type GroupDeleteProps = {
   open: boolean
@@ -37,6 +38,7 @@ type FormValues = {
 
 const GroupDelete = ({ open, group, onClose }: GroupDeleteProps) => {
   const navigate = useNavigate()
+  const mutate = useAppSelector((state) => state.ui.groups.mutate)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const formSchema = Yup.object().shape({
     name: Yup.string()
@@ -52,14 +54,15 @@ const GroupDelete = ({ open, group, onClose }: GroupDeleteProps) => {
     async (_: FormValues, { setSubmitting }: FormikHelpers<FormValues>) => {
       setSubmitting(true)
       try {
-        await GroupAPI.delete(group.id)
         navigate('/group')
+        await GroupAPI.delete(group.id)
+        mutate?.()
         onClose?.()
       } finally {
         setSubmitting(false)
       }
     },
-    [group.id, navigate, onClose],
+    [group.id, navigate, mutate, onClose],
   )
 
   return (

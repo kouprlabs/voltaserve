@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import {
   IconButton,
@@ -29,10 +29,13 @@ import {
   PagePagination,
   usePagePagination,
 } from '@/lib'
+import { useAppDispatch } from '@/store/hook'
+import { mutateUpdated } from '@/store/ui/incoming-invitations'
 
 const AccountInvitationsPage = () => {
   const navigate = useNavigate()
   const location = useLocation()
+  const dispatch = useAppDispatch()
   const toast = useToast()
   const { data: user, error: userError } = UserAPI.useGet()
   const { page, size, steps, setPage, setSize } = usePagePagination({
@@ -48,6 +51,12 @@ const AccountInvitationsPage = () => {
     { page, size, sortBy: SortBy.DateCreated, sortOrder: SortOrder.Desc },
     swrConfig(),
   )
+
+  useEffect(() => {
+    if (mutate) {
+      dispatch(mutateUpdated(mutate))
+    }
+  }, [dispatch, mutate])
 
   const handleAccept = useCallback(
     async (invitationId: string) => {

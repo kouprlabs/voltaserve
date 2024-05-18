@@ -25,6 +25,7 @@ import * as Yup from 'yup'
 import cx from 'classnames'
 import OrganizationAPI, { Organization } from '@/client/api/organization'
 import useFocusAndSelectAll from '@/hooks/use-focus-and-select-all'
+import { useAppSelector } from '@/store/hook'
 
 export type OrganizationEditNameProps = {
   open: boolean
@@ -41,7 +42,7 @@ const OrganizationEditName = ({
   organization,
   onClose,
 }: OrganizationEditNameProps) => {
-  const { mutate } = useSWRConfig()
+  const mutate = useAppSelector((state) => state.ui.organization.mutate)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const formSchema = Yup.object().shape({
     name: Yup.string().required('Name is required').max(255),
@@ -63,7 +64,7 @@ const OrganizationEditName = ({
         const result = await OrganizationAPI.updateName(organization.id, {
           name,
         })
-        mutate(`/organizations/${organization.id}`, result)
+        mutate?.(result)
         setSubmitting(false)
         onClose?.()
       } finally {

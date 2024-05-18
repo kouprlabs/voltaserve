@@ -5,12 +5,15 @@ import cx from 'classnames'
 import OrganizationAPI from '@/client/api/organization'
 import { geOwnerPermission } from '@/client/api/permission'
 import { swrConfig } from '@/client/options'
+import { useAppDispatch } from '@/store/hook'
+import { mutateUpdated } from '@/store/ui/organization'
 
 const OrganizationLayout = () => {
   const location = useLocation()
   const navigate = useNavigate()
+  const dispatch = useAppDispatch()
   const { id } = useParams()
-  const { data: org } = OrganizationAPI.useGetById(id, swrConfig())
+  const { data: org, mutate } = OrganizationAPI.useGetById(id, swrConfig())
   const [tabIndex, setTabIndex] = useState(0)
 
   useEffect(() => {
@@ -24,6 +27,12 @@ const OrganizationLayout = () => {
       setTabIndex(2)
     }
   }, [location])
+
+  useEffect(() => {
+    if (mutate) {
+      dispatch(mutateUpdated(mutate))
+    }
+  }, [mutate, dispatch])
 
   if (!org) {
     return null

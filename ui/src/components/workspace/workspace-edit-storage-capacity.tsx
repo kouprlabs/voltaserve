@@ -28,6 +28,7 @@ import WorkspaceAPI, { Workspace } from '@/client/api/workspace'
 import { swrConfig } from '@/client/options'
 import StorageInput from '@/components/common/storage-input'
 import { SectionSpinner } from '@/lib'
+import { useAppSelector } from '@/store/hook'
 
 export type WorkspaceEditStorageCapacityProps = {
   open: boolean
@@ -44,7 +45,7 @@ const WorkspaceEditStorageCapacity = ({
   workspace,
   onClose,
 }: WorkspaceEditStorageCapacityProps) => {
-  const { mutate } = useSWRConfig()
+  const mutate = useAppSelector((state) => state.ui.workspace.mutate)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const { data: storageUsage, error } = StorageAPI.useGetWorkspaceUsage(
     workspace.id,
@@ -77,7 +78,7 @@ const WorkspaceEditStorageCapacity = ({
         const result = await WorkspaceAPI.updateStorageCapacity(workspace.id, {
           storageCapacity,
         })
-        mutate(`/workspaces/${workspace.id}`, result)
+        mutate?.(result)
         setSubmitting(false)
         onClose?.()
       } finally {

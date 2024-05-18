@@ -12,7 +12,6 @@ import {
   ModalHeader,
   ModalOverlay,
 } from '@chakra-ui/react'
-import { useSWRConfig } from 'swr'
 import {
   Field,
   FieldAttributes,
@@ -25,6 +24,7 @@ import * as Yup from 'yup'
 import cx from 'classnames'
 import UserAPI, { User } from '@/client/idp/user'
 import useFocusAndSelectAll from '@/hooks/use-focus-and-select-all'
+import { useAppSelector } from '@/store/hook'
 
 export type AccountEditFullNameProps = {
   open: boolean
@@ -41,7 +41,7 @@ const AccountEditFullName = ({
   user,
   onClose,
 }: AccountEditFullNameProps) => {
-  const { mutate } = useSWRConfig()
+  const mutate = useAppSelector((state) => state.ui.account.mutate)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const formSchema = Yup.object().shape({
     fullName: Yup.string().required('Full name is required').max(255),
@@ -63,7 +63,7 @@ const AccountEditFullName = ({
         const result = await UserAPI.updateFullName({
           fullName,
         })
-        mutate(`/user`, result)
+        mutate?.(result)
         setSubmitting(false)
         onClose?.()
       } finally {

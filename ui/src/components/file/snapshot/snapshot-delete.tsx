@@ -1,5 +1,4 @@
 import { useCallback, useState } from 'react'
-import { useParams } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
 import {
   Button,
@@ -11,9 +10,7 @@ import {
   ModalHeader,
   ModalOverlay,
 } from '@chakra-ui/react'
-import { useSWRConfig } from 'swr'
 import cx from 'classnames'
-import SnapshotAPI from '@/client/api/snapshot'
 import { useAppSelector } from '@/store/hook'
 import {
   snapshotDeleteModalDidClose,
@@ -21,7 +18,6 @@ import {
 } from '@/store/ui/files'
 
 const FileSnapshotDelete = () => {
-  const { mutate } = useSWRConfig()
   const dispatch = useDispatch()
   const selection = useAppSelector((state) => state.ui.files.selection)
   const snapshotSelection = useAppSelector(
@@ -42,7 +38,7 @@ const FileSnapshotDelete = () => {
         setIsLoading(false)
       }
     }
-  }, [snapshotSelection, mutate, dispatch])
+  }, [snapshotSelection, dispatch])
 
   return (
     <Modal

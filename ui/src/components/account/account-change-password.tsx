@@ -12,7 +12,6 @@ import {
   ModalHeader,
   ModalOverlay,
 } from '@chakra-ui/react'
-import { useSWRConfig } from 'swr'
 import {
   Field,
   FieldAttributes,
@@ -24,6 +23,7 @@ import {
 import * as Yup from 'yup'
 import cx from 'classnames'
 import UserAPI, { User } from '@/client/idp/user'
+import { useAppSelector } from '@/store/hook'
 
 export type AccountChangePasswordProps = {
   open: boolean
@@ -40,7 +40,7 @@ const AccountChangePassword = ({
   open,
   onClose,
 }: AccountChangePasswordProps) => {
-  const { mutate } = useSWRConfig()
+  const mutate = useAppSelector((state) => state.ui.account.mutate)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const initialValues: FormValues = { currentPassword: '', newPassword: '' }
   const formSchema = Yup.object().shape({
@@ -63,7 +63,7 @@ const AccountChangePassword = ({
           currentPassword,
           newPassword,
         })
-        mutate(`/user`, result)
+        mutate?.(result)
         setSubmitting(false)
         onClose?.()
       } finally {
