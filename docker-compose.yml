@@ -61,10 +61,10 @@ services:
     build:
       context: ./api
     ports:
-      - ${VOLTASERVE_API_PORT}:5000
+      - ${VOLTASERVE_API_PORT}:8080
     environment:
-      - PORT=5000
-      - CONVERSION_URL=http://conversion:5001
+      - PORT=8080
+      - CONVERSION_URL=http://conversion:8083
       - POSTGRES_URL=postgresql://voltaserve@cockroach:26257/voltaserve
       - S3_URL=minio:9000
       - SEARCH_URL=http://meilisearch:7700
@@ -78,7 +78,7 @@ services:
       - SMTP_SENDER_ADDRESS=${VOLTASERVE_SMTP_SENDER_ADDRESS}
       - SMTP_SENDER_NAME=${VOLTASERVE_SMTP_SENDER_NAME}
     healthcheck:
-      test: curl --fail http://127.0.0.1:5000/v1/health || exit 1
+      test: curl --fail http://127.0.0.1:8080/v1/health || exit 1
     depends_on:
       - cockroach
       - redis
@@ -90,9 +90,9 @@ services:
     build:
       context: ./idp
     ports:
-      - ${VOLTASERVE_IDP_PORT}:7000
+      - ${VOLTASERVE_IDP_PORT}:8081
     environment:
-      - PORT=7000
+      - PORT=8081
       - POSTGRES_URL=postgresql://voltaserve@cockroach:26257/voltaserve
       - SEARCH_URL=http://meilisearch:7700
       - PUBLIC_UI_URL=http://${VOLTASERVE_HOSTNAME}:${VOLTASERVE_UI_PORT}
@@ -104,7 +104,7 @@ services:
       - SMTP_SENDER_ADDRESS=${VOLTASERVE_SMTP_SENDER_ADDRESS}
       - SMTP_SENDER_NAME=${VOLTASERVE_SMTP_SENDER_NAME}
     healthcheck:
-      test: curl --fail http://127.0.0.1:7000/v1/health || exit 1
+      test: curl --fail http://127.0.0.1:8081/v1/health || exit 1
     depends_on:
       - cockroach
       - meilisearch
@@ -117,8 +117,8 @@ services:
     ports:
       - ${VOLTASERVE_UI_PORT}:3000
     environment:
-      - API_URL=http://api:5000
-      - IDP_URL=http://idp:7000
+      - API_URL=http://api:8080
+      - IDP_URL=http://idp:8081
     healthcheck:
       test: curl --fail http://127.0.0.1:3000/index.html || exit 1
     depends_on:
@@ -130,13 +130,13 @@ services:
     build:
       context: ./webdav
     ports:
-      - ${VOLTASERVE_WEBDAV_PORT}:6000
+      - ${VOLTASERVE_WEBDAV_PORT}:8082
     environment:
-      - PORT=6000
-      - IDP_URL=http://idp:7000
-      - API_URL=http://api:5000
+      - PORT=8082
+      - IDP_URL=http://idp:8081
+      - API_URL=http://api:8080
     healthcheck:
-      test: curl --fail http://127.0.0.1:6000/v1/health || exit 1
+      test: curl --fail http://127.0.0.1:8082/v1/health || exit 1
     depends_on:
       - idp
       - api
@@ -146,13 +146,13 @@ services:
     build:
       context: ./conversion
     ports:
-      - ${VOLTASERVE_CONVERSION_PORT}:5001
+      - ${VOLTASERVE_CONVERSION_PORT}:8083
     environment:
-      - PORT=5001
-      - API_URL=http://api:5000
+      - PORT=8083
+      - API_URL=http://api:8080
       - S3_URL=minio:9000
     healthcheck:
-      test: curl --fail http://127.0.0.1:5001/v1/health || exit 1
+      test: curl --fail http://127.0.0.1:8083/v1/health || exit 1
     depends_on:
       - api
       - minio

@@ -20,4 +20,4 @@ COPY --from=builder /build/templates ./templates
 
 ENTRYPOINT ["./voltaserve-api"]
 
-EXPOSE 5000
+EXPOSE 8080

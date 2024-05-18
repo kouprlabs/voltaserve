@@ -15,4 +15,4 @@ RUN bun install --frozen-lockfile
 
 ENTRYPOINT ["bun", "run", "start"]
 
-EXPOSE 6000
+EXPOSE 8082
