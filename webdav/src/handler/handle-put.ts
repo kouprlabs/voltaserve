@@ -6,7 +6,7 @@ import os from 'os'
 import path from 'path'
 import { v4 as uuidv4 } from 'uuid'
 import { Token } from '@/client/idp'
-import { File, FileAPI } from '@/client/api'
+import { FileAPI } from '@/client/api'
 import { handleError } from '@/infra/error'
 import {
   isMicrosoftOfficeLockFile,
@@ -50,8 +50,6 @@ async function handlePut(
       })
       ws.on('finish', async () => {
         try {
-          res.statusCode = 201
-          res.end()
           const blob = new Blob([await readFile(outputPath)])
           const name = decodeURIComponent(path.basename(req.url))
           try {
@@ -61,6 +59,8 @@ async function handlePut(
               blob,
               name,
             })
+            res.statusCode = 201
+            res.end()
           } catch {
             await api.upload({
               workspaceId: directory.workspaceId,
@@ -68,6 +68,8 @@ async function handlePut(
               blob,
               name,
             })
+            res.statusCode = 201
+            res.end()
           }
         } catch (err) {
           handleError(err, res)

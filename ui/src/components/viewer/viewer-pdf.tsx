@@ -8,20 +8,18 @@ export type ViewerPDFProps = {
 }
 
 const ViewerPDF = ({ file }: ViewerPDFProps) => {
-  const download = useMemo(() => file.preview || file.original, [file])
-  const urlPath = useMemo(() => (file.preview ? 'preview' : 'original'), [file])
   const url = useMemo(() => {
-    if (!download || !download.extension) {
+    if (!file.preview || !file.preview.extension) {
       return ''
     }
-    return `/proxy/api/v1/files/${file.id}/${urlPath}${
-      download.extension
+    return `/proxy/api/v1/files/${file.id}/preview${
+      file.preview.extension
     }?${new URLSearchParams({
       access_token: getAccessTokenOrRedirect(),
     })}`
-  }, [file, download, urlPath])
+  }, [file])
 
-  if (!download) {
+  if (!file.preview) {
     return null
   }
 

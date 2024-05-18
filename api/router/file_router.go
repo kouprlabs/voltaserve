@@ -271,10 +271,11 @@ func (r *FileRouter) GetByID(c *fiber.Ctx) error {
 //	@Router			/files/get [get]
 func (r *FileRouter) GetByPath(c *fiber.Ctx) error {
 	userID := GetUserID(c)
-	if c.Query("path") == "" {
+	path := c.Query("path")
+	if path == "" {
 		return errorpkg.NewMissingQueryParamError("path")
 	}
-	res, err := r.fileSvc.FindByPath(c.Query("path"), userID)
+	res, err := r.fileSvc.FindByPath(path, userID)
 	if err != nil {
 		return err
 	}

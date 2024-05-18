@@ -346,7 +346,6 @@ func (svc *FileService) Store(fileID string, filePath string, userID string) (*F
 	snapshot := repo.NewSnapshot()
 	snapshot.SetID(snapshotID)
 	snapshot.SetVersion(latestVersion)
-	snapshot.SetStatus(model.SnapshotStatusNew)
 	if err = svc.snapshotRepo.Insert(snapshot); err != nil {
 		return nil, err
 	}
@@ -361,6 +360,7 @@ func (svc *FileService) Store(fileID string, filePath string, userID string) (*F
 	if err != nil {
 		return nil, err
 	}
+	exceedsProcessingLimit := stat.Size() > helper.MegabyteToByte(svc.config.Limits.FileProcessingMaxSizeMB)
 	original := model.S3Object{
 		Bucket: workspace.GetBucket(),
 		Key:    fileID + "/" + snapshotID + "/original" + strings.ToLower(filepath.Ext(filePath)),
@@ -370,6 +370,11 @@ func (svc *FileService) Store(fileID string, filePath string, userID string) (*F
 		return nil, err
 	}
 	snapshot.SetOriginal(&original)
+	if exceedsProcessingLimit {
+		snapshot.SetStatus(model.SnapshotStatusReady)
+	} else {
+		snapshot.SetStatus(model.SnapshotStatusNew)
+	}
 	if err := svc.snapshotRepo.Save(snapshot); err != nil {
 		return nil, err
 	}
@@ -381,16 +386,19 @@ func (svc *FileService) Store(fileID string, filePath string, userID string) (*F
 	if err != nil {
 		return nil, err
 	}
+	if !exceedsProcessingLimit {
+		if err := svc.conversionClient.RunPipeline(&client.PipelineRunOptions{
+			FileID:     file.GetID(),
+			SnapshotID: snapshot.GetID(),
+			Bucket:     original.Bucket,
+			Key:        original.Key,
+			Size:       original.Size,
+		}); err != nil {
+			return nil, err
+		}
+	}
 	res, err := svc.fileMapper.mapOne(file, userID)
 	if err != nil {
-		return nil, err
-	}
-	if err := svc.conversionClient.RunPipeline(&client.PipelineRunOptions{
-		FileID:     file.GetID(),
-		SnapshotID: snapshot.GetID(),
-		Bucket:     original.Bucket,
-		Key:        original.Key,
-	}); err != nil {
 		return nil, err
 	}
 	return res, nil

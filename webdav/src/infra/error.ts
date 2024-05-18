@@ -3,7 +3,6 @@ import { IdPError } from '@/client/idp'
 import { ServerResponse } from 'http'
 
 export function handleError(err: any, res: ServerResponse) {
-  console.error(err)
   if (err instanceof APIError) {
     res.statusCode = err.error.status
     res.statusMessage = err.error.userMessage
@@ -12,7 +11,7 @@ export function handleError(err: any, res: ServerResponse) {
     res.statusCode = err.error.status
     res.statusMessage = err.error.userMessage
     res.end()
-  } else if (err instanceof Error) {
+  } else {
     res.statusCode = 500
     res.end()
   }

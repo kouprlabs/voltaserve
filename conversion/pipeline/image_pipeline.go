@@ -43,10 +43,14 @@ func (p *imagePipeline) Run(opts core.PipelineRunOptions) error {
 	if err := p.s3.GetFile(opts.Key, inputPath, opts.Bucket); err != nil {
 		return err
 	}
-	stat, err := os.Stat(inputPath)
-	if err != nil {
-		return err
-	}
+	defer func() {
+		_, err := os.Stat(inputPath)
+		if os.IsExist(err) {
+			if err := os.Remove(inputPath); err != nil {
+				p.logger.Error(err)
+			}
+		}
+	}()
 	imageProps, err := p.imageProc.MeasureImage(inputPath)
 	if err != nil {
 		return err
@@ -56,13 +60,25 @@ func (p *imagePipeline) Run(opts core.PipelineRunOptions) error {
 		Original: &core.S3Object{
 			Bucket: opts.Bucket,
 			Key:    opts.Key,
+			Size:   opts.Size,
 			Image:  &imageProps,
-			Size:   stat.Size(),
 		},
 	}
 	if filepath.Ext(inputPath) == ".tiff" {
 		jpegPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".jpg")
 		if err := p.imageProc.ConvertImage(inputPath, jpegPath); err != nil {
+			return err
+		}
+		defer func() {
+			_, err := os.Stat(jpegPath)
+			if os.IsExist(err) {
+				if err := os.Remove(jpegPath); err != nil {
+					p.logger.Error(err)
+				}
+			}
+		}()
+		stat, err := os.Stat(jpegPath)
+		if err != nil {
 			return err
 		}
 		thumbnail, err := p.imageProc.Base64Thumbnail(jpegPath)
@@ -74,15 +90,13 @@ func (p *imagePipeline) Run(opts core.PipelineRunOptions) error {
 			Bucket: opts.Bucket,
 			Key:    opts.FileID + "/" + opts.SnapshotID + "/preview.jpg",
 			Size:   stat.Size(),
+			Image:  &imageProps,
 		}
 		if err := p.s3.PutFile(updateOpts.Preview.Key, jpegPath, helper.DetectMimeFromFile(jpegPath), updateOpts.Preview.Bucket); err != nil {
 			return err
 		}
-		if err := os.Remove(inputPath); err != nil {
-			return err
-		}
-		inputPath = jpegPath
 	} else {
+		updateOpts.Preview = updateOpts.Original
 		thumbnail, err := p.imageProc.Base64Thumbnail(inputPath)
 		if err != nil {
 			return err
@@ -90,9 +104,6 @@ func (p *imagePipeline) Run(opts core.PipelineRunOptions) error {
 		updateOpts.Thumbnail = &thumbnail
 	}
 	if err := p.apiClient.UpdateSnapshot(updateOpts); err != nil {
-		return err
-	}
-	if err := os.Remove(inputPath); err != nil {
 		return err
 	}
 	return nil

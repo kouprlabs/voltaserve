@@ -6,6 +6,7 @@ import DarkAudioSvg from './assets/dark-icon-audio.svg'
 import DarkCodeSvg from './assets/dark-icon-code.svg'
 import DarkCsvSvg from './assets/dark-icon-csv.svg'
 import DarkFileSvg from './assets/dark-icon-file.svg'
+import DarkImageSvg from './assets/dark-icon-image.svg'
 import DarkPdfSvg from './assets/dark-icon-pdf.svg'
 import DarkPowerPointSvg from './assets/dark-icon-power-point.svg'
 import DarkRichTextSvg from './assets/dark-icon-rich-text.svg'
@@ -18,6 +19,7 @@ import AudioSvg from './assets/icon-audio.svg'
 import CodeSvg from './assets/icon-code.svg'
 import CsvSvg from './assets/icon-csv.svg'
 import FileSvg from './assets/icon-file.svg'
+import ImageSvg from './assets/icon-image.svg'
 import PdfSvg from './assets/icon-pdf.svg'
 import PowerPointSvg from './assets/icon-power-point.svg'
 import RichTextSvg from './assets/icon-rich-text.svg'
@@ -45,7 +47,7 @@ const IconDiverse = ({ file, scale }: IconFontProps) => {
   const { original } = file
   let image
   if (fe.isImage(original?.extension)) {
-    image = isDark ? DarkFileSvg : FileSvg
+    image = isDark ? DarkImageSvg : ImageSvg
   } else if (fe.isPDF(original?.extension)) {
     image = isDark ? DarkPdfSvg : PdfSvg
   } else if (fe.isText(original?.extension)) {

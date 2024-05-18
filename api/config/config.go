@@ -108,6 +108,13 @@ func readLimits(config *Config) {
 		}
 		config.Limits.MultipartBodyLengthLimitMB = int(v)
 	}
+	if len(os.Getenv("LIMITS_FILE_PROCESSING_MAX_SIZE_MB")) > 0 {
+		v, err := strconv.ParseInt(os.Getenv("LIMITS_FILE_PROCESSING_MAX_SIZE_MB"), 10, 32)
+		if err != nil {
+			panic(err)
+		}
+		config.Limits.FileProcessingMaxSizeMB = int(v)
+	}
 }
 
 func readDefaults(config *Config) {

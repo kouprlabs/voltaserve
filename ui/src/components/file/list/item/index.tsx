@@ -101,7 +101,11 @@ const ListItem = ({
     dispatch(selectionUpdated([]))
     if (file.type === 'folder') {
       navigate(`/workspace/${file.workspaceId}/file/${file.id}`)
-    } else if (file.type === 'file' && file.status === SnapshotStatus.Ready) {
+    } else if (
+      file.type === 'file' &&
+      file.preview &&
+      file.status === SnapshotStatus.Ready
+    ) {
       window.open(`/file/${file.id}`, '_blank')?.focus()
     }
   }, [file, navigate, dispatch])
@@ -197,7 +201,9 @@ const ListItem = ({
             {file.name}
           </ChakraLink>
         )}
-        {file.type === 'file' && file.status === SnapshotStatus.Ready ? (
+        {file.type === 'file' &&
+        file.preview &&
+        file.status === SnapshotStatus.Ready ? (
           <ChakraLink
             className={cx('text-center', 'no-underline', {
               'hover:no-underline': isSelectionMode,
@@ -210,7 +216,8 @@ const ListItem = ({
             {file.name}
           </ChakraLink>
         ) : null}
-        {file.type === 'file' && file.status !== SnapshotStatus.Ready ? (
+        {file.type === 'file' &&
+        (!file.preview || file.status !== SnapshotStatus.Ready) ? (
           <Text
             className={cx('text-center')}
             noOfLines={3}

@@ -23,32 +23,28 @@ async function handleMove(
   try {
     const sourcePath = decodeURIComponent(req.url)
     const targetPath = decodeURIComponent(getTargetPath(req))
-
     const api = new FileAPI(token)
     const sourceFile = await api.getByPath(decodeURIComponent(req.url))
     const targetFile = await api.getByPath(
       decodeURIComponent(path.dirname(getTargetPath(req))),
     )
-
     if (sourceFile.workspaceId !== targetFile.workspaceId) {
       res.statusCode = 400
       res.end()
-      return
-    }
-
-    if (
-      sourcePath.split('/').length === targetPath.split('/').length &&
-      path.dirname(sourcePath) === path.dirname(targetPath)
-    ) {
-      await api.rename(sourceFile.id, {
-        name: decodeURIComponent(path.basename(targetPath)),
-      })
     } else {
-      await api.move(targetFile.id, { ids: [sourceFile.id] })
+      if (
+        sourcePath.split('/').length === targetPath.split('/').length &&
+        path.dirname(sourcePath) === path.dirname(targetPath)
+      ) {
+        await api.rename(sourceFile.id, {
+          name: decodeURIComponent(path.basename(targetPath)),
+        })
+      } else {
+        await api.move(targetFile.id, { ids: [sourceFile.id] })
+      }
+      res.statusCode = 204
+      res.end()
     }
-
-    res.statusCode = 204
-    res.end()
   } catch (err) {
     handleError(err, res)
   }
