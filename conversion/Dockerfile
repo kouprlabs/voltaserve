@@ -579,4 +579,4 @@ COPY --from=builder /build/.env ./.env
 
 ENTRYPOINT ["./voltaserve-conversion"]
 
-EXPOSE 5001
+EXPOSE 8083
