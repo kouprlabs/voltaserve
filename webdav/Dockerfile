@@ -1,4 +1,4 @@
-FROM oven/bun:1-debian
+FROM node:22-bookworm
 
 RUN apt-get update
 RUN apt-get install -y curl
@@ -8,11 +8,11 @@ WORKDIR /app
 COPY src ./src
 COPY .env .
 COPY package.json .
-COPY bun.lockb .
+COPY package-lock.json .
 COPY tsconfig.json .
 
-RUN bun install --frozen-lockfile
+RUN npm ci
 
-ENTRYPOINT ["bun", "run", "start"]
+ENTRYPOINT ["npm", "run", "start"]
 
 EXPOSE 8082

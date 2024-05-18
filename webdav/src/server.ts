@@ -102,7 +102,6 @@ function handleRequest(req: IncomingMessage, res: ServerResponse) {
             await handleProppatch(req, res)
             break
           default:
-            debugger
             res.statusCode = 501
             res.end()
         }

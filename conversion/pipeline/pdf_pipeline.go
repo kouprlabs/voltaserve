@@ -45,6 +45,14 @@ func (p *pdfPipeline) Run(opts core.PipelineRunOptions) error {
 	if err := p.s3.GetFile(opts.Key, inputPath, opts.Bucket); err != nil {
 		return err
 	}
+	defer func() {
+		_, err := os.Stat(inputPath)
+		if os.IsExist(err) {
+			if err := os.Remove(inputPath); err != nil {
+				p.logger.Error(err)
+			}
+		}
+	}()
 	thumbnail, err := p.pdfProc.Base64Thumbnail(inputPath)
 	if err != nil {
 		return err
@@ -67,15 +75,17 @@ func (p *pdfPipeline) Run(opts core.PipelineRunOptions) error {
 	}
 	if err := p.apiClient.UpdateSnapshot(core.SnapshotUpdateOptions{
 		Options: opts,
+		Preview: &core.S3Object{
+			Bucket: opts.Bucket,
+			Key:    opts.Key,
+			Size:   opts.Size,
+		},
 		Text: &core.S3Object{
 			Bucket: opts.Bucket,
 			Key:    textKey,
 			Size:   int64(len(text)),
 		},
 	}); err != nil {
-		return err
-	}
-	if err := os.Remove(inputPath); err != nil {
 		return err
 	}
 	return nil

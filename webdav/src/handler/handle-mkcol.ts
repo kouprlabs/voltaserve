@@ -28,7 +28,6 @@ async function handleMkcol(
       parentId: directory.id,
       name: decodeURIComponent(path.basename(req.url)),
     })
-
     res.statusCode = 201
     res.end()
   } catch (err) {

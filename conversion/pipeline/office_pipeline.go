@@ -9,6 +9,8 @@ import (
 	"voltaserve/helper"
 	"voltaserve/infra"
 	"voltaserve/processor"
+
+	"go.uber.org/zap"
 )
 
 type officePipeline struct {
@@ -18,9 +20,14 @@ type officePipeline struct {
 	s3          *infra.S3Manager
 	config      config.Config
 	apiClient   *client.APIClient
+	logger      *zap.SugaredLogger
 }
 
 func NewOfficePipeline() core.Pipeline {
+	logger, err := infra.GetLogger()
+	if err != nil {
+		panic(err)
+	}
 	return &officePipeline{
 		pdfPipeline: NewPDFPipeline(),
 		officeProc:  processor.NewOfficeProcessor(),
@@ -28,6 +35,7 @@ func NewOfficePipeline() core.Pipeline {
 		s3:          infra.NewS3Manager(),
 		config:      config.GetConfig(),
 		apiClient:   client.NewAPIClient(),
+		logger:      logger,
 	}
 }
 
@@ -36,10 +44,26 @@ func (p *officePipeline) Run(opts core.PipelineRunOptions) error {
 	if err := p.s3.GetFile(opts.Key, inputPath, opts.Bucket); err != nil {
 		return err
 	}
+	defer func() {
+		_, err := os.Stat(inputPath)
+		if os.IsExist(err) {
+			if err := os.Remove(inputPath); err != nil {
+				p.logger.Error(err)
+			}
+		}
+	}()
 	outputPath, err := p.officeProc.PDF(inputPath)
 	if err != nil {
 		return err
 	}
+	defer func() {
+		_, err := os.Stat(outputPath)
+		if os.IsExist(err) {
+			if err := os.Remove(outputPath); err != nil {
+				p.logger.Error(err)
+			}
+		}
+	}()
 	stat, err := os.Stat(outputPath)
 	if err != nil {
 		return err
@@ -74,12 +98,6 @@ func (p *officePipeline) Run(opts core.PipelineRunOptions) error {
 		FileID:     opts.FileID,
 		SnapshotID: opts.SnapshotID,
 	}); err != nil {
-		return err
-	}
-	if err := os.Remove(inputPath); err != nil {
-		return err
-	}
-	if err := os.Remove(outputPath); err != nil {
 		return err
 	}
 	return nil

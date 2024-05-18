@@ -17,6 +17,7 @@ type PipelineRunOptions struct {
 	SnapshotID string `json:"snapshotId"`
 	Bucket     string `json:"bucket"`
 	Key        string `json:"key"`
+	Size       int64  `json:"size"`
 }
 
 func NewConversionClient() *ConversionClient {

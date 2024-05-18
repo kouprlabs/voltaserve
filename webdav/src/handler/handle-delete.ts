@@ -21,9 +21,7 @@ async function handleDelete(
   try {
     const api = new FileAPI(token)
     const file = await api.getByPath(decodeURIComponent(req.url))
-
     await api.delete(file.id)
-
     res.statusCode = 204
     res.end()
   } catch (err) {

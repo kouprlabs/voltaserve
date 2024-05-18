@@ -10,20 +10,18 @@ export type ViewerImageProps = {
 
 const ViewerImage = ({ file }: ViewerImageProps) => {
   const [isLoading, setIsLoading] = useState(true)
-  const download = useMemo(() => file.preview ?? file.original, [file])
-  const path = useMemo(() => (file.preview ? 'preview' : 'original'), [file])
   const url = useMemo(() => {
-    if (!download?.extension) {
+    if (!file.preview?.extension) {
       return ''
     }
-    return `/proxy/api/v1/files/${file.id}/${path}${
-      download.extension
+    return `/proxy/api/v1/files/${file.id}/preview${
+      file.preview.extension
     }?${new URLSearchParams({
       access_token: getAccessTokenOrRedirect(),
     })}`
-  }, [file, download, path])
+  }, [file])
 
-  if (!download) {
+  if (!file.preview) {
     return null
   }
 
