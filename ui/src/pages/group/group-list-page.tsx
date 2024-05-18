@@ -26,9 +26,12 @@ import prettyDate from '@/helpers/pretty-date'
 import { decodeQuery } from '@/helpers/query'
 import { groupPaginationStorage } from '@/infra/pagination'
 import { SectionSpinner, PagePagination, usePagePagination } from '@/lib'
+import { useAppDispatch } from '@/store/hook'
+import { mutateUpdated } from '@/store/ui/groups'
 
 const GroupListPage = () => {
   const navigate = useNavigate()
+  const dispatch = useAppDispatch()
   const location = useLocation()
   const [searchParams] = useSearchParams()
   const query = decodeQuery(searchParams.get('q') as string)
@@ -49,6 +52,12 @@ const GroupListPage = () => {
   useEffect(() => {
     mutate()
   }, [query, page, size, mutate])
+
+  useEffect(() => {
+    if (mutate) {
+      dispatch(mutateUpdated(mutate))
+    }
+  }, [mutate, dispatch])
 
   return (
     <>

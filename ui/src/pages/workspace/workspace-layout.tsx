@@ -4,12 +4,15 @@ import { Heading, Tab, TabList, Tabs } from '@chakra-ui/react'
 import cx from 'classnames'
 import WorkspaceAPI from '@/client/api/workspace'
 import { swrConfig } from '@/client/options'
+import { useAppDispatch } from '@/store/hook'
+import { mutateUpdated } from '@/store/ui/workspace'
 
 const WorkspaceLayout = () => {
   const location = useLocation()
   const { id } = useParams()
   const navigate = useNavigate()
-  const { data: workspace } = WorkspaceAPI.useGetById(id, swrConfig())
+  const dispatch = useAppDispatch()
+  const { data: workspace, mutate } = WorkspaceAPI.useGetById(id, swrConfig())
   const [tabIndex, setTabIndex] = useState(0)
 
   useEffect(() => {
@@ -21,6 +24,12 @@ const WorkspaceLayout = () => {
       setTabIndex(0)
     }
   }, [location])
+
+  useEffect(() => {
+    if (mutate) {
+      dispatch(mutateUpdated(mutate))
+    }
+  }, [mutate, dispatch])
 
   if (!workspace) {
     return null

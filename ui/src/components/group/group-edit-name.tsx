@@ -12,7 +12,6 @@ import {
   ModalHeader,
   ModalOverlay,
 } from '@chakra-ui/react'
-import { useSWRConfig } from 'swr'
 import {
   Field,
   FieldAttributes,
@@ -25,6 +24,7 @@ import * as Yup from 'yup'
 import cx from 'classnames'
 import GroupAPI, { Group } from '@/client/api/group'
 import useFocusAndSelectAll from '@/hooks/use-focus-and-select-all'
+import { useAppSelector } from '@/store/hook'
 
 export type GroupEditNameProps = {
   open: boolean
@@ -37,7 +37,7 @@ type FormValues = {
 }
 
 const GroupEditName = ({ open, group, onClose }: GroupEditNameProps) => {
-  const { mutate } = useSWRConfig()
+  const mutate = useAppSelector((state) => state.ui.group.mutate)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const formSchema = Yup.object().shape({
     name: Yup.string().required('Name is required').max(255),
@@ -59,7 +59,7 @@ const GroupEditName = ({ open, group, onClose }: GroupEditNameProps) => {
         const result = await GroupAPI.updateName(group.id, {
           name,
         })
-        mutate(`/groups/${group.id}`, result)
+        mutate?.(result)
         setSubmitting(false)
         onClose?.()
       } finally {

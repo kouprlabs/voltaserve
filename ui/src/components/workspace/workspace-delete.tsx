@@ -25,6 +25,7 @@ import {
 import * as Yup from 'yup'
 import cx from 'classnames'
 import WorkspaceAPI, { Workspace } from '@/client/api/workspace'
+import { useAppSelector } from '@/store/hook'
 
 export type WorkspaceDeleteProps = {
   open: boolean
@@ -42,7 +43,7 @@ const WorkspaceDelete = ({
   onClose,
 }: WorkspaceDeleteProps) => {
   const navigate = useNavigate()
-  const { mutate } = useSWRConfig()
+  const mutate = useAppSelector((state) => state.ui.workspace.mutate)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const formSchema = Yup.object().shape({
     name: Yup.string()
@@ -58,9 +59,9 @@ const WorkspaceDelete = ({
     async (_: FormValues, { setSubmitting }: FormikHelpers<FormValues>) => {
       setSubmitting(true)
       try {
-        await WorkspaceAPI.delete(workspace.id)
-        mutate('/workspaces')
         navigate('/workspace')
+        await WorkspaceAPI.delete(workspace.id)
+        mutate?.()
         onClose?.()
       } finally {
         setSubmitting(false)

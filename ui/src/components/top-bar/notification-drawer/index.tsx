@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import {
   Divider,
   Drawer as ChakraDrawer,
@@ -15,12 +15,21 @@ import cx from 'classnames'
 import NotificationAPI from '@/client/api/notification'
 import { swrConfig } from '@/client/options'
 import { IconNotifications } from '@/lib'
+import { useAppDispatch } from '@/store/hook'
+import { mutateUpdated } from '@/store/ui/notifications'
 import NotificationDrawerItem from './notification-drawer-item'
 
 const TopBarNotificationDrawer = () => {
+  const dispatch = useAppDispatch()
   const buttonRef = useRef<HTMLButtonElement>(null)
   const { isOpen, onOpen, onClose } = useDisclosure()
-  const { data: notfications } = NotificationAPI.useGetAll(swrConfig())
+  const { data: notfications, mutate } = NotificationAPI.useGetAll(swrConfig())
+
+  useEffect(() => {
+    if (mutate) {
+      dispatch(mutateUpdated(mutate))
+    }
+  }, [mutate])
 
   return (
     <>

@@ -25,6 +25,7 @@ import * as Yup from 'yup'
 import cx from 'classnames'
 import WorkspaceAPI, { Workspace } from '@/client/api/workspace'
 import useFocusAndSelectAll from '@/hooks/use-focus-and-select-all'
+import { useAppSelector } from '@/store/hook'
 
 export type WorkspaceEditNameProps = {
   open: boolean
@@ -41,7 +42,7 @@ const WorkspaceEditName = ({
   workspace,
   onClose,
 }: WorkspaceEditNameProps) => {
-  const { mutate } = useSWRConfig()
+  const mutate = useAppSelector((state) => state.ui.workspace.mutate)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const formSchema = Yup.object().shape({
     name: Yup.string().required('Name is required').max(255),
@@ -63,7 +64,7 @@ const WorkspaceEditName = ({
         const result = await WorkspaceAPI.updateName(workspace.id, {
           name,
         })
-        mutate(`/workspaces/${workspace.id}`, result)
+        mutate?.(result)
         setSubmitting(false)
         onClose?.()
       } finally {

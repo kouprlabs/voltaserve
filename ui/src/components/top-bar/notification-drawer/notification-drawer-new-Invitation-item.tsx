@@ -1,9 +1,9 @@
 import { useCallback, useState } from 'react'
 import { Button, useToast } from '@chakra-ui/react'
-import { useSWRConfig } from 'swr'
 import cx from 'classnames'
 import InvitationAPI, { Invitation } from '@/client/api/invitation'
 import userToString from '@/helpers/user-to-string'
+import { useAppSelector } from '@/store/hook'
 
 export type NewInvitationProps = {
   invitation: Invitation
@@ -12,8 +12,16 @@ export type NewInvitationProps = {
 const NotificationDrawerNewInvitationItem = ({
   invitation,
 }: NewInvitationProps) => {
-  const { mutate } = useSWRConfig()
   const toast = useToast()
+  const mutateNotifications = useAppSelector(
+    (state) => state.ui.notifications.mutate,
+  )
+  const mutateOrganizations = useAppSelector(
+    (state) => state.ui.organizations.mutate,
+  )
+  const mutateIncomingInvitations = useAppSelector(
+    (state) => state.ui.incomingInvitations.mutate,
+  )
   const [isAcceptLoading, setIsAcceptLoading] = useState(false)
   const [isDeclineLoading, setIsDeclineLoading] = useState(false)
 
@@ -22,9 +30,9 @@ const NotificationDrawerNewInvitationItem = ({
       try {
         setIsAcceptLoading(true)
         await InvitationAPI.accept(invitationId)
-        mutate('/notifications')
-        mutate('/invitations/get_incoming')
-        mutate('/organizations')
+        mutateNotifications?.()
+        mutateIncomingInvitations?.()
+        mutateOrganizations?.()
         toast({
           title: 'Invitation accepted',
           status: 'success',
@@ -34,7 +42,12 @@ const NotificationDrawerNewInvitationItem = ({
         setIsAcceptLoading(false)
       }
     },
-    [mutate, toast],
+    [
+      mutateNotifications,
+      mutateOrganizations,
+      mutateIncomingInvitations,
+      toast,
+    ],
   )
 
   const handleDecline = useCallback(
@@ -42,8 +55,8 @@ const NotificationDrawerNewInvitationItem = ({
       try {
         setIsDeclineLoading(true)
         await InvitationAPI.decline(invitationId)
-        mutate('/notifications')
-        mutate('/invitations/get_incoming')
+        mutateNotifications?.()
+        mutateIncomingInvitations?.()
         toast({
           title: 'Invitation declined',
           status: 'info',
@@ -53,7 +66,7 @@ const NotificationDrawerNewInvitationItem = ({
         setIsDeclineLoading(false)
       }
     },
-    [mutate, toast],
+    [mutateNotifications, mutateIncomingInvitations, toast],
   )
 
   return (

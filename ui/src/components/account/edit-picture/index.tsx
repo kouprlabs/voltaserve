@@ -11,7 +11,6 @@ import {
   ModalHeader,
   ModalOverlay,
 } from '@chakra-ui/react'
-import { useSWRConfig } from 'swr'
 import {
   Field,
   FieldAttributes,
@@ -23,6 +22,7 @@ import {
 import * as Yup from 'yup'
 import cx from 'classnames'
 import UserAPI, { User } from '@/client/idp/user'
+import { useAppSelector } from '@/store/hook'
 import EditPictureUpload from './edit-picture-upload'
 
 export type AccountEditPictureProps = {
@@ -40,7 +40,7 @@ const AccountEditPicture = ({
   user,
   onClose,
 }: AccountEditPictureProps) => {
-  const { mutate } = useSWRConfig()
+  const mutate = useAppSelector((state) => state.ui.account.mutate)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [deletionInProgress, setDeletionInProgress] = useState(false)
   const formSchema = Yup.object().shape({
@@ -75,7 +75,7 @@ const AccountEditPicture = ({
       setSubmitting(true)
       try {
         const result = await UserAPI.updatePicture(picture)
-        mutate(`/user`, result)
+        mutate?.(result)
         setSubmitting(false)
         onClose?.()
       } finally {
@@ -89,7 +89,7 @@ const AccountEditPicture = ({
     try {
       setDeletionInProgress(true)
       const result = await UserAPI.deletePicture()
-      mutate(`/user`, result)
+      mutate?.(result)
       onClose?.()
     } finally {
       setDeletionInProgress(false)

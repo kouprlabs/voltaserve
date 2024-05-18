@@ -12,7 +12,6 @@ import {
   ModalHeader,
   ModalOverlay,
 } from '@chakra-ui/react'
-import { useSWRConfig } from 'swr'
 import {
   Field,
   FieldAttributes,
@@ -25,6 +24,7 @@ import * as Yup from 'yup'
 import cx from 'classnames'
 import UserAPI, { User } from '@/client/idp/user'
 import useFocusAndSelectAll from '@/hooks/use-focus-and-select-all'
+import { useAppSelector } from '@/store/hook'
 
 export type AccountEditEmailProps = {
   open: boolean
@@ -37,7 +37,7 @@ type FormValues = {
 }
 
 const AccountEditEmail = ({ open, user, onClose }: AccountEditEmailProps) => {
-  const { mutate } = useSWRConfig()
+  const mutate = useAppSelector((state) => state.ui.account.mutate)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const formSchema = Yup.object().shape({
     email: Yup.string()
@@ -62,7 +62,7 @@ const AccountEditEmail = ({ open, user, onClose }: AccountEditEmailProps) => {
         const result = await UserAPI.updateEmailRequest({
           email,
         })
-        mutate(`/user`, result)
+        mutate?.(result)
         setSubmitting(false)
         onClose?.()
       } finally {

@@ -22,6 +22,7 @@ import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import GroupAPI from '@/client/api/group'
 import OrganizationSelector from '@/components/common/organization-selector'
+import { useAppSelector } from '@/store/hook'
 
 type FormValues = {
   name: string
@@ -31,7 +32,7 @@ type FormValues = {
 const NewGroupPage = () => {
   const navigate = useNavigate()
   const { org } = useParams()
-  const { mutate } = useSWRConfig()
+  const mutate = useAppSelector((state) => state.ui.groups.mutate)
   const [isLoading, setIsLoading] = useState(false)
   const formSchema = Yup.object().shape({
     name: Yup.string().required('Name is required').max(255),
@@ -50,8 +51,7 @@ const NewGroupPage = () => {
           name,
           organizationId,
         })
-        mutate(`/groups/${result.id}`, result)
-        mutate(`/groups`)
+        mutate?.()
         setSubmitting(false)
         navigate(`/group/${result.id}/member`)
       } catch {

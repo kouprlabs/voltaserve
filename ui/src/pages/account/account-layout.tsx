@@ -16,12 +16,15 @@ import UserAPI from '@/client/idp/user'
 import { swrConfig } from '@/client/options'
 import AccountEditPicture from '@/components/account/edit-picture'
 import { IconEdit } from '@/lib'
+import { useAppDispatch } from '@/store/hook'
+import { mutateUpdated } from '@/store/ui/account'
 
 const AccountLayout = () => {
   const location = useLocation()
   const navigate = useNavigate()
+  const dispatch = useAppDispatch()
   const [isImageModalOpen, setIsImageModalOpen] = useState(false)
-  const { data: user } = UserAPI.useGet(swrConfig())
+  const { data: user, mutate } = UserAPI.useGet(swrConfig())
   const { data: notfications } = NotificationAPI.useGetAll(swrConfig())
   const invitationCount = useMemo(
     () => notfications?.filter((e) => e.type === 'new_invitation').length,
@@ -38,6 +41,12 @@ const AccountLayout = () => {
       setTabIndex(1)
     }
   }, [location])
+
+  useEffect(() => {
+    if (mutate) {
+      dispatch(mutateUpdated(mutate))
+    }
+  }, [mutate, dispatch])
 
   if (!user) {
     return null

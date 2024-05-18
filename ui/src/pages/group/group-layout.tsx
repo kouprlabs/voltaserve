@@ -4,12 +4,15 @@ import { Heading, Tab, TabList, Tabs } from '@chakra-ui/react'
 import cx from 'classnames'
 import GroupAPI from '@/client/api/group'
 import { swrConfig } from '@/client/options'
+import { useAppDispatch } from '@/store/hook'
+import { mutateUpdated } from '@/store/ui/group'
 
 const GroupLayout = () => {
   const location = useLocation()
   const navigate = useNavigate()
+  const dispatch = useAppDispatch()
   const { id } = useParams()
-  const { data: group } = GroupAPI.useGetById(id, swrConfig())
+  const { data: group, mutate } = GroupAPI.useGetById(id, swrConfig())
   const [tabIndex, setTabIndex] = useState(0)
 
   useEffect(() => {
@@ -21,6 +24,12 @@ const GroupLayout = () => {
       setTabIndex(1)
     }
   }, [location])
+
+  useEffect(() => {
+    if (mutate) {
+      dispatch(mutateUpdated(mutate))
+    }
+  }, [mutate, dispatch])
 
   if (!group) {
     return null

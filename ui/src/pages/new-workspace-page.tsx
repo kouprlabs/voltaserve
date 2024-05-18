@@ -24,6 +24,7 @@ import WorkspaceAPI from '@/client/api/workspace'
 import OrganizationSelector from '@/components/common/organization-selector'
 import StorageInput from '@/components/common/storage-input'
 import { gigabyteToByte } from '@/helpers/convert-storage'
+import { useAppDispatch, useAppSelector } from '@/store/hook'
 
 type FormValues = {
   name: string
@@ -33,7 +34,7 @@ type FormValues = {
 
 const NewWorkspacePage = () => {
   const navigate = useNavigate()
-  const { mutate } = useSWRConfig()
+  const mutate = useAppSelector((state) => state.ui.workspaces.mutate)
   const [isLoading, setIsLoading] = useState(false)
   const formSchema = Yup.object().shape({
     name: Yup.string().required('Name is required').max(255),
@@ -58,8 +59,7 @@ const NewWorkspacePage = () => {
           organizationId,
           storageCapacity,
         })
-        mutate(`/workspaces/${result.id}`, result)
-        mutate(`/workspaces`)
+        mutate?.()
         setSubmitting(false)
         navigate(`/workspace/${result.id}/file/${result.rootId}`)
       } catch (e) {

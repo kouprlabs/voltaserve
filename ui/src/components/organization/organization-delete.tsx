@@ -13,7 +13,6 @@ import {
   ModalHeader,
   ModalOverlay,
 } from '@chakra-ui/react'
-import { useSWRConfig } from 'swr'
 import {
   Field,
   FieldAttributes,
@@ -25,6 +24,7 @@ import {
 import * as Yup from 'yup'
 import cx from 'classnames'
 import OrganizationAPI, { Organization } from '@/client/api/organization'
+import { useAppSelector } from '@/store/hook'
 
 export type OrganizationDeleteProps = {
   open: boolean
@@ -42,7 +42,7 @@ const OrganizationDelete = ({
   onClose,
 }: OrganizationDeleteProps) => {
   const navigate = useNavigate()
-  const { mutate } = useSWRConfig()
+  const mutate = useAppSelector((state) => state.ui.organizations.mutate)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const formSchema = Yup.object().shape({
     name: Yup.string()
@@ -58,10 +58,9 @@ const OrganizationDelete = ({
     async (_: FormValues, { setSubmitting }: FormikHelpers<FormValues>) => {
       setSubmitting(true)
       try {
-        await OrganizationAPI.delete(organization.id)
-
         navigate('/organization')
-        mutate('/organizations')
+        await OrganizationAPI.delete(organization.id)
+        mutate?.()
         onClose?.()
       } finally {
         setSubmitting(false)

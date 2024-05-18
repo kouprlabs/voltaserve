@@ -26,10 +26,13 @@ import prettyDate from '@/helpers/pretty-date'
 import { decodeQuery } from '@/helpers/query'
 import { organizationPaginationStorage } from '@/infra/pagination'
 import { SectionSpinner, PagePagination, usePagePagination } from '@/lib'
+import { useAppDispatch } from '@/store/hook'
+import { mutateUpdated } from '@/store/ui/organizations'
 
 const OrganizationListPage = () => {
   const navigate = useNavigate()
   const location = useLocation()
+  const dispatch = useAppDispatch()
   const [searchParams] = useSearchParams()
   const query = decodeQuery(searchParams.get('q') as string)
   const { page, size, steps, setPage, setSize } = usePagePagination({
@@ -49,6 +52,13 @@ const OrganizationListPage = () => {
   useEffect(() => {
     mutate()
   }, [query, page, size, mutate])
+
+  useEffect(() => {
+    if (mutate) {
+      const dispatch = useAppDispatch()
+      dispatch(mutateUpdated(mutate))
+    }
+  }, [mutate, dispatch])
 
   return (
     <>

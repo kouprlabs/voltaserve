@@ -15,6 +15,7 @@ import * as Yup from 'yup'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import OrganizationAPI from '@/client/api/organization'
+import { useAppSelector } from '@/store/hook'
 
 type FormValues = {
   name: string
@@ -22,7 +23,7 @@ type FormValues = {
 
 const NewOrganizationPage = () => {
   const navigate = useNavigate()
-  const { mutate } = useSWRConfig()
+  const mutate = useAppSelector((state) => state.ui.organizations.mutate)
   const [isLoading, setIsLoading] = useState(false)
   const formSchema = Yup.object().shape({
     name: Yup.string().required('Name is required').max(255),
@@ -39,8 +40,7 @@ const NewOrganizationPage = () => {
         const result = await OrganizationAPI.create({
           name,
         })
-        mutate(`/organizations/${result.id}`, result)
-        mutate(`/organizations`)
+        mutate?.()
         setSubmitting(false)
         navigate(`/organization/${result.id}/member`)
       } catch {
