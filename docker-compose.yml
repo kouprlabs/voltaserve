@@ -157,3 +157,12 @@ services:
       - api
       - minio
     restart: on-failure
+  language:
+    image: voltaserve/language
+    build:
+      context: ./language
+    ports:
+      - ${VOLTASERVE_LANGUAGE_PORT}:8084
+    healthcheck:
+      test: curl --fail http://127.0.0.1:8084/v1/health || exit 1
+    restart: on-failure

@@ -1,4 +1,4 @@
-const AiWizardNamedEntities = () => {
+const AiWizardEntities = () => {
   return (
     <div>
       Named entities, lorem ipsum dolor sit amet, consectetur adipiscing elit,
@@ -9,4 +9,4 @@ const AiWizardNamedEntities = () => {
   )
 }
 
-export default AiWizardNamedEntities
+export default AiWizardEntities

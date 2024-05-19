@@ -45,14 +45,14 @@ func (p *pdfPipeline) Run(opts core.PipelineRunOptions) error {
 	if err := p.s3.GetFile(opts.Key, inputPath, opts.Bucket); err != nil {
 		return err
 	}
-	defer func() {
+	defer func(inputPath string, logger *zap.SugaredLogger) {
 		_, err := os.Stat(inputPath)
 		if os.IsExist(err) {
 			if err := os.Remove(inputPath); err != nil {
-				p.logger.Error(err)
+				logger.Error(err)
 			}
 		}
-	}()
+	}(inputPath, p.logger)
 	thumbnail, err := p.pdfProc.Base64Thumbnail(inputPath)
 	if err != nil {
 		return err

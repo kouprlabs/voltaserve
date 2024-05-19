@@ -17,14 +17,14 @@ import {
 import cx from 'classnames'
 import { useAppDispatch } from '@/store/hook'
 import { modalDidClose, wizardDidComplete } from '@/store/ui/ai'
+import AiWizardEntities from './ai-wizard-entities'
 import AiWizardLanguage from './ai-wizard-language'
-import AiWizardNamedEntities from './ai-wizard-named-entities'
 import AiWizardText from './ai-wizard-text'
 
 const steps = [
-  { title: 'Text', description: 'Extract with OCR' },
-  { title: 'Language', description: 'Detect with NLP' },
-  { title: 'Named Entities', description: 'Scan with NER' },
+  { title: 'Set Language', description: 'Matching the text' },
+  { title: 'Extract Text', description: 'Using OCR' },
+  { title: 'Scan Entities', description: 'Using NER' },
 ]
 
 const AiWizard = () => {
@@ -65,9 +65,9 @@ const AiWizard = () => {
               </Step>
             ))}
           </Stepper>
-          {activeStep === 0 ? <AiWizardText /> : null}
-          {activeStep === 1 ? <AiWizardLanguage /> : null}
-          {activeStep === 2 ? <AiWizardNamedEntities /> : null}
+          {activeStep === 0 ? <AiWizardLanguage /> : null}
+          {activeStep === 1 ? <AiWizardText /> : null}
+          {activeStep === 2 ? <AiWizardEntities /> : null}
           {activeStep === steps.length ? (
             <div
               className={cx(

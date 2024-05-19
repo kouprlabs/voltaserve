@@ -44,26 +44,26 @@ func (p *officePipeline) Run(opts core.PipelineRunOptions) error {
 	if err := p.s3.GetFile(opts.Key, inputPath, opts.Bucket); err != nil {
 		return err
 	}
-	defer func() {
+	defer func(inputPath string, logger *zap.SugaredLogger) {
 		_, err := os.Stat(inputPath)
 		if os.IsExist(err) {
 			if err := os.Remove(inputPath); err != nil {
 				p.logger.Error(err)
 			}
 		}
-	}()
+	}(inputPath, p.logger)
 	outputPath, err := p.officeProc.PDF(inputPath)
 	if err != nil {
 		return err
 	}
-	defer func() {
+	defer func(outputPath string, logger *zap.SugaredLogger) {
 		_, err := os.Stat(outputPath)
 		if os.IsExist(err) {
 			if err := os.Remove(outputPath); err != nil {
 				p.logger.Error(err)
 			}
 		}
-	}()
+	}(outputPath, p.logger)
 	stat, err := os.Stat(outputPath)
 	if err != nil {
 		return err

@@ -10,8 +10,9 @@ import {
 import cx from 'classnames'
 import { useAppDispatch } from '@/store/hook'
 import { modalDidClose } from '@/store/ui/ai'
+import AiOverviewEntities from './ai-overview-entities'
 import AiOverviewLanguage from './ai-overview-language'
-import AiOverviewNamedEntities from './ai-overview-named-entities'
+import AiOverviewSettings from './ai-overview-settings'
 import AiOverviewText from './ai-overview-text'
 
 const AiOverview = () => {
@@ -29,14 +30,16 @@ const AiOverview = () => {
             className={cx('pb-2.5')}
           >
             <TabList>
-              <Tab onClick={() => setActiveTab(0)}>Text</Tab>
-              <Tab onClick={() => setActiveTab(1)}>Language</Tab>
-              <Tab onClick={() => setActiveTab(2)}>Named Entities</Tab>
+              <Tab onClick={() => setActiveTab(0)}>Language</Tab>
+              <Tab onClick={() => setActiveTab(1)}>Text</Tab>
+              <Tab onClick={() => setActiveTab(2)}>Entities</Tab>
+              <Tab onClick={() => setActiveTab(3)}>Settings</Tab>
             </TabList>
           </Tabs>
-          {activeTab === 0 ? <AiOverviewText /> : null}
-          {activeTab === 1 ? <AiOverviewLanguage /> : null}
-          {activeTab === 2 ? <AiOverviewNamedEntities /> : null}
+          {activeTab === 0 ? <AiOverviewLanguage /> : null}
+          {activeTab === 1 ? <AiOverviewText /> : null}
+          {activeTab === 2 ? <AiOverviewEntities /> : null}
+          {activeTab === 2 ? <AiOverviewSettings /> : null}
         </div>
       </ModalBody>
       <ModalFooter>
