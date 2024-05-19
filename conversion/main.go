@@ -1,21 +1,21 @@
 package main
 
 import (
-	"errors"
 	"flag"
 	"fmt"
-	"net/http"
 	"os"
 
-	"voltaserve/client"
 	"voltaserve/config"
-	"voltaserve/core"
+	"voltaserve/router"
 	"voltaserve/runtime"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/joho/godotenv"
 )
 
+// @title		Voltaserve Conversion
+// @version	2.0.0
+// @BasePath	/v1
 func main() {
 	if _, err := os.Stat(".env.local"); err == nil {
 		err := godotenv.Load(".env.local")
@@ -41,34 +41,16 @@ func main() {
 	app := fiber.New()
 	v1 := app.Group("v1")
 
-	v1.Get("health", func(c *fiber.Ctx) error {
-		if ok, err := client.NewAPIClient().GetHealth(); err != nil || ok != "OK" {
-			return c.SendStatus(http.StatusServiceUnavailable)
-		}
-		return c.SendString("OK")
-	})
+	healthRouter := router.NewHealthRouter()
+	healthRouter.AppendRoutes(v1)
 
-	v1.Post("pipelines/run", func(c *fiber.Ctx) error {
-		apiKey := c.Query("api_key")
-		if apiKey == "" {
-			if err := c.SendStatus(http.StatusBadRequest); err != nil {
-				return err
-			}
-			return errors.New("missing query param api_key")
-		}
-		if apiKey != cfg.Security.APIKey {
-			if err := c.SendStatus(http.StatusUnauthorized); err != nil {
-				return err
-			}
-			return errors.New("invalid api_key")
-		}
-		opts := new(core.PipelineRunOptions)
-		if err := c.BodyParser(opts); err != nil {
-			return err
-		}
-		scheduler.SchedulePipeline(opts)
-		return c.SendStatus(200)
+	pipelineRouter := router.NewPipelineRouter(router.NewPipelineRouterOptions{
+		Scheduler: scheduler,
 	})
+	pipelineRouter.AppendRoutes(v1)
+
+	toolsRouter := router.NewToolRouter()
+	toolsRouter.AppendRoutes(v1)
 
 	scheduler.Start()
 

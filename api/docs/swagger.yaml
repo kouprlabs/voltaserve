@@ -8,6 +8,8 @@ definitions:
         type: string
       key:
         type: string
+      size:
+        type: integer
       snapshotId:
         type: string
     type: object

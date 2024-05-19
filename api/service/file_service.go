@@ -157,7 +157,7 @@ type FileService struct {
 	permissionRepo   repo.PermissionRepo
 	fileIdent        *infra.FileIdentifier
 	s3               *infra.S3Manager
-	conversionClient *client.ConversionClient
+	conversionClient *client.ConversionPipelineClient
 	config           config.Config
 }
 
@@ -185,7 +185,7 @@ func NewFileService(opts NewFileServiceOptions) *FileService {
 		groupMapper:      newGroupMapper(),
 		fileIdent:        infra.NewFileIdentifier(),
 		s3:               infra.NewS3Manager(),
-		conversionClient: client.NewConversionClient(),
+		conversionClient: client.NewConversionPipelineClient(),
 		config:           config.GetConfig(),
 	}
 	if opts.FileRepo != nil {
@@ -387,7 +387,7 @@ func (svc *FileService) Store(fileID string, filePath string, userID string) (*F
 		return nil, err
 	}
 	if !exceedsProcessingLimit {
-		if err := svc.conversionClient.RunPipeline(&client.PipelineRunOptions{
+		if err := svc.conversionClient.Run(&client.PipelineRunOptions{
 			FileID:     file.GetID(),
 			SnapshotID: snapshot.GetID(),
 			Bucket:     original.Bucket,

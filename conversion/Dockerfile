@@ -17,7 +17,9 @@ RUN apt-get install -y \
   gawk \
   ghostscript \
   imagemagick \
-  poppler-utils
+  poppler-utils \
+  libimage-exiftool-perl \
+  ocrmypdf
 
 RUN apt-get install -y \
   libreoffice-base-nogui \

@@ -1,18 +1,9 @@
 package infra
 
 import (
-	"fmt"
-
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
-
-var StrScheduler = fmt.Sprintf("%-13s", "scheduler")
-var StrPipeline = fmt.Sprintf("%-13s", "pipeline")
-var StrBuilder = fmt.Sprintf("%-13s", "builder")
-var StrWorkerStatus = fmt.Sprintf("%-13s", "worker_status")
-var StrQueueStatus = fmt.Sprintf("%-13s", "queue_status")
-var StrToolRunner = fmt.Sprintf("%-13s", "tool_runner")
 
 var logger *zap.SugaredLogger
 

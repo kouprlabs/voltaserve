@@ -2,7 +2,9 @@
 
 ## Getting Started
 
-Install [swag](https://github.com/swaggo/swag) and [golangci-lint](https://golangci-lint.run/usage/install).
+Install [golangci-lint](https://github.com/golangci/golangci-lint).
+
+Install [swag](https://github.com/swaggo/swag).
 
 Run for development:
 
@@ -42,14 +44,14 @@ Generate `swagger.yml`:
 swag init --output ./docs --outputTypes yaml
 ```
 
-Preview (will be served at [http://localhost:5555](http://localhost:5555)):
+Preview (will be served at [http://localhost:18080](http://localhost:18080)):
 
 ```shell
-bunx @redocly/cli preview-docs --port 5555 ./docs/swagger.yaml
+npx @redocly/cli preview-docs --port 18080 ./docs/swagger.yaml
 ```
 
 Generate the final static HTML documentation:
 
 ```shell
-bunx @redocly/cli build-docs ./docs/swagger.yaml --output ./docs/index.html
+npx @redocly/cli build-docs ./docs/swagger.yaml --output ./docs/index.html
 ```

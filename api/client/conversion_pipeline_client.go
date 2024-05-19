@@ -8,7 +8,7 @@ import (
 	"voltaserve/config"
 )
 
-type ConversionClient struct {
+type ConversionPipelineClient struct {
 	config config.Config
 }
 
@@ -20,18 +20,18 @@ type PipelineRunOptions struct {
 	Size       int64  `json:"size"`
 }
 
-func NewConversionClient() *ConversionClient {
-	return &ConversionClient{
+func NewConversionPipelineClient() *ConversionPipelineClient {
+	return &ConversionPipelineClient{
 		config: config.GetConfig(),
 	}
 }
 
-func (c *ConversionClient) RunPipeline(opts *PipelineRunOptions) error {
+func (cl *ConversionPipelineClient) Run(opts *PipelineRunOptions) error {
 	body, err := json.Marshal(opts)
 	if err != nil {
 		return err
 	}
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/pipelines/run?api_key=%s", c.config.ConversionURL, c.config.Security.APIKey), bytes.NewBuffer(body))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/pipelines/run?api_key=%s", cl.config.ConversionURL, cl.config.Security.APIKey), bytes.NewBuffer(body))
 	if err != nil {
 		return err
 	}
