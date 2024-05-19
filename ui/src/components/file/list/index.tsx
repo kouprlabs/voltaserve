@@ -25,6 +25,7 @@ import {
   ltOwnerPermission,
   ltViewerPermission,
 } from '@/client/api/permission'
+import AiOrb from '@/components/common/ai-orb'
 import downloadFile from '@/helpers/download-file'
 import mapFileList from '@/helpers/map-file-list'
 import {
@@ -333,6 +334,8 @@ const FileList = ({ list, scale }: FileListProps) => {
             >
               Download
             </MenuItem>
+            <MenuDivider />
+            <MenuItem icon={<AiOrb />}>AI</MenuItem>
             <MenuDivider />
             <MenuItem
               icon={<IconDelete />}

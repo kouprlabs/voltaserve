@@ -153,3 +153,25 @@ CREATE TABLE IF NOT EXISTS organization_user
 
 CREATE INDEX organization_user_organization_id ON organization_user (organization_id);
 CREATE INDEX organization_user_user_id ON organization_user (user_id);
+
+CREATE TABLE IF NOT EXISTS "language"
+(
+    id        text PRIMARY KEY, -- https://github.com/tesseract-ocr/tessdata
+    iso639_3  text NOT NULL, -- https://iso639-3.sil.org/code_tables/639/data
+    name      text NOT NULL
+);
+
+INSERT INTO "language" (id, iso639_3, name) VALUES ('ara',     'ara', 'Arabic');
+INSERT INTO "language" (id, iso639_3, name) VALUES ('chi_sim', 'zho', 'Chinese Simplified');
+INSERT INTO "language" (id, iso639_3, name) VALUES ('chi_tra', 'zho', 'Chinese Traditional');
+INSERT INTO "language" (id, iso639_3, name) VALUES ('nld',     'nld', 'Dutch');
+INSERT INTO "language" (id, iso639_3, name) VALUES ('eng',     'eng', 'English');
+INSERT INTO "language" (id, iso639_3, name) VALUES ('fra',     'fra', 'French');
+INSERT INTO "language" (id, iso639_3, name) VALUES ('deu',     'deu', 'German');
+INSERT INTO "language" (id, iso639_3, name) VALUES ('hin',     'hin', 'Hindi');
+INSERT INTO "language" (id, iso639_3, name) VALUES ('ita',     'ita', 'Italian');
+INSERT INTO "language" (id, iso639_3, name) VALUES ('jpn',     'jpn', 'Japanese');
+INSERT INTO "language" (id, iso639_3, name) VALUES ('por',     'por', 'Portuguese');   
+INSERT INTO "language" (id, iso639_3, name) VALUES ('rus',     'rus', 'Russian');
+INSERT INTO "language" (id, iso639_3, name) VALUES ('spa',     'spa', 'Spanish');
+INSERT INTO "language" (id, iso639_3, name) VALUES ('swe',     'swe', 'Swedish');

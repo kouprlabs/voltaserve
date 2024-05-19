@@ -572,6 +572,24 @@ RUN apt-get install -y \
   fonts-xfree86-nonfree \
   fonts-xfree86-nonfree-syriac
 
+RUN apt-get install -y \
+  tesseract-ocr \
+  tesseract-ocr-osd \
+  tesseract-ocr-ara \
+  tesseract-ocr-chi-sim \
+  tesseract-ocr-chi-tra \
+  tesseract-ocr-nld \
+  tesseract-ocr-eng \
+  tesseract-ocr-fra \
+  tesseract-ocr-deu \
+  tesseract-ocr-hin \
+  tesseract-ocr-ita \
+  tesseract-ocr-jpn \
+  tesseract-ocr-por \
+  tesseract-ocr-rus \
+  tesseract-ocr-spa \
+  tesseract-ocr-swe
+
 WORKDIR /app
 
 COPY --from=builder /build/voltaserve-conversion ./voltaserve-conversion
