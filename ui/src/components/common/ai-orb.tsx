@@ -12,9 +12,9 @@ const animate = keyframes`
   100% { transform: scale(1) rotate(360deg); }
 `
 
-const orbStyle = css`
-  width: 20px;
-  height: 20px;
+const getOrbStyle = (width: string, height: string) => css`
+  width: ${width};
+  height: ${height};
   border-radius: 50%;
   background: radial-gradient(
     circle,
@@ -48,8 +48,13 @@ const orbStyle = css`
   }
 `
 
-const AiOrb = () => {
-  return <div css={orbStyle}></div>
+export type AiOrbProps = {
+  width: string
+  height: string
+}
+
+const AiOrb = ({ width, height }: AiOrbProps) => {
+  return <div css={getOrbStyle(width, height)}></div>
 }
 
 export default AiOrb

@@ -335,7 +335,7 @@ const FileList = ({ list, scale }: FileListProps) => {
               Download
             </MenuItem>
             <MenuDivider />
-            <MenuItem icon={<AiOrb />}>AI</MenuItem>
+            <MenuItem icon={<AiOrb width="20px" height="20px" />}>AI</MenuItem>
             <MenuDivider />
             <MenuItem
               icon={<IconDelete />}
