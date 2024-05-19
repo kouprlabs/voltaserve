@@ -40,6 +40,7 @@ import {
 } from '@/lib'
 import { UploadDecorator, uploadAdded } from '@/store/entities/uploads'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
+import { modalDidOpen as aiModalDidOpen } from '@/store/ui/ai'
 import {
   copyModalDidOpen,
   deleteModalDidOpen,
@@ -335,8 +336,21 @@ const FileList = ({ list, scale }: FileListProps) => {
               Download
             </MenuItem>
             <MenuDivider />
-            <MenuItem icon={<AiOrb width="20px" height="20px" />}>AI</MenuItem>
-            <MenuDivider />
+            {singleFile && singleFile.type === 'file' ? (
+              <>
+                <MenuItem
+                  icon={<AiOrb width="20px" height="20px" />}
+                  isDisabled={ltEditorPermission(singleFile.permission)}
+                  onClick={(event: MouseEvent) => {
+                    event.stopPropagation()
+                    dispatch(aiModalDidOpen())
+                  }}
+                >
+                  AI
+                </MenuItem>
+                <MenuDivider />
+              </>
+            ) : null}
             <MenuItem
               icon={<IconDelete />}
               className={cx('text-red-500')}
