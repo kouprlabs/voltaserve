@@ -147,7 +147,7 @@ type WorkspaceUpdateNameOptions struct {
 //	@Id				workspaces_update_name
 //	@Accept			json
 //	@Produce		json
-//	@Param			id		path		string								true	"ID"
+//	@Param			id		path		string						true	"ID"
 //	@Param			body	body		WorkspaceUpdateNameOptions	true	"Body"
 //	@Success		200		{object}	service.Workspace
 //	@Failure		400		{object}	errorpkg.ErrorResponse
@@ -177,7 +177,7 @@ type WorkspaceUpdateStorageCapacityOptions struct {
 //	@Id				workspaces_update_storage_capacity
 //	@Accept			json
 //	@Produce		json
-//	@Param			id		path		string											true	"Id"
+//	@Param			id		path		string									true	"Id"
 //	@Param			body	body		WorkspaceUpdateStorageCapacityOptions	true	"Body"
 //	@Success		200		{object}	service.Workspace
 //	@Failure		400		{object}	errorpkg.ErrorResponse

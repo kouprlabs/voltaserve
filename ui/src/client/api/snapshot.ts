@@ -33,6 +33,7 @@ export type List = {
 }
 
 export type ListOptions = {
+  fileId: string
   query?: string
   organizationId?: string
   size?: number
@@ -59,6 +60,7 @@ export type Thumbnail = {
 }
 
 type ListQueryParams = {
+  file_id: string
   page?: string
   size?: string
   sort_by?: string
@@ -66,43 +68,49 @@ type ListQueryParams = {
   query?: string
 }
 
+export type ActivateOptions = {
+  fileId: string
+}
+
+export type UnlinkOptions = {
+  fileId: string
+}
+
 export default class SnapshotAPI {
-  static async list(fileId: string, options?: ListOptions) {
+  static async list(options: ListOptions) {
     return apiFetcher({
-      url: `/files/${fileId}/snapshots?${this.paramsFromListOptions(options)}`,
+      url: `/snapshots?${this.paramsFromListOptions(options)}`,
       method: 'GET',
     }) as Promise<List>
   }
 
-  static useList(
-    fileId: string | undefined,
-    options?: ListOptions,
-    swrOptions?: SWRConfiguration,
-  ) {
-    const url = `/files/${fileId}/snapshots?${this.paramsFromListOptions(options)}`
+  static useList(options: ListOptions, swrOptions?: SWRConfiguration) {
+    const url = `/snapshots?${this.paramsFromListOptions(options)}`
     return useSWR<List | undefined>(
-      fileId ? url : null,
+      url,
       () => apiFetcher({ url, method: 'GET' }),
       swrOptions,
     )
   }
 
-  static async activate(fileId: string, snapshotId: string) {
+  static async activate(id: string, options: ActivateOptions) {
     return apiFetcher({
-      url: `/files/${fileId}/snapshots/${snapshotId}/activate`,
+      url: `/snapshots/${id}/activate`,
       method: 'POST',
+      body: JSON.stringify(options),
     }) as Promise<File>
   }
 
-  static async delete(fileId: string, snapshotId: string) {
+  static async unlink(id: string, options: UnlinkOptions) {
     return apiFetcher({
-      url: `/files/${fileId}/snapshots/${snapshotId}`,
-      method: 'DELETE',
+      url: `/snapshots/${id}/unlink`,
+      method: 'POST',
+      body: JSON.stringify(options),
     })
   }
 
-  static paramsFromListOptions(options?: ListOptions): URLSearchParams {
-    const params: ListQueryParams = {}
+  static paramsFromListOptions(options: ListOptions): URLSearchParams {
+    const params: ListQueryParams = { file_id: options.fileId }
     if (options?.query) {
       params.query = encodeURIComponent(options.query.toString())
     }

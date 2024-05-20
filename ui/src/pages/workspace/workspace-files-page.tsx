@@ -15,8 +15,8 @@ import FileRename from '@/components/file/file-rename'
 import FileToolbar from '@/components/file/file-toolbar'
 import FileList from '@/components/file/list'
 import FileSharing from '@/components/file/sharing'
-import FileSnapshotDelete from '@/components/file/snapshot/snapshot-delete'
 import FileSnapshotList from '@/components/file/snapshot/snapshot-list'
+import FileSnapshotUnlink from '@/components/file/snapshot/snapshot-unlink'
 import { decodeQuery } from '@/helpers/query'
 import { filePaginationSteps, filesPaginationStorage } from '@/infra/pagination'
 import {
@@ -186,7 +186,7 @@ const WorkspaceFilesPage = () => {
       </div>
       {list ? <FileSharing list={list} /> : null}
       {isSnapshotListModalOpen ? <FileSnapshotList /> : null}
-      {isSnapshotDeleteModalOpen ? <FileSnapshotDelete /> : null}
+      {isSnapshotDeleteModalOpen ? <FileSnapshotUnlink /> : null}
       {isMoveModalOpen ? <FileMove /> : null}
       {isCopyModalOpen ? <FileCopy /> : null}
       {isCreateModalOpen ? <FileCreate /> : null}

@@ -78,17 +78,17 @@ type AIExtractTextOptions struct {
 }
 
 func (svc *AIService) ExtractText(opts AIExtractTextOptions) error {
-	s, err := svc.snapshotRepo.Find(opts.SnapshotID)
+	snapshot, err := svc.snapshotRepo.Find(opts.SnapshotID)
 	if err != nil {
 		return err
 	}
-	if s.GetOriginal() == nil {
+	if snapshot.GetOriginal() == nil {
 		return errorpkg.NewS3ObjectNotFoundError(err)
 	}
-	if s.GetLanguage() == nil {
+	if snapshot.GetLanguage() == nil {
 		return errorpkg.NewSnapshotLanguageNotSet(err)
 	}
-	original := s.GetOriginal()
+	original := snapshot.GetOriginal()
 
 	/* Download original */
 	inputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(original.Key))
@@ -111,7 +111,7 @@ func (svc *AIService) ExtractText(opts AIExtractTextOptions) error {
 	}
 
 	/* Convert to PDF/A */
-	pdfPath, err := svc.toolClient.OCRFromPDF(inputPath, s.GetLanguage(), &dpi)
+	pdfPath, err := svc.toolClient.OCRFromPDF(inputPath, snapshot.GetLanguage(), &dpi)
 	if err != nil {
 		svc.logger.Errorw(err.Error())
 	}
@@ -137,8 +137,8 @@ func (svc *AIService) ExtractText(opts AIExtractTextOptions) error {
 	if err := svc.s3.PutFile(s3Object.Key, pdfPath, helper.DetectMimeFromFile(pdfPath), s3Object.Bucket); err != nil {
 		return err
 	}
-	s.SetOCR(&s3Object)
-	if err := svc.snapshotRepo.Save(s); err != nil {
+	snapshot.SetOCR(&s3Object)
+	if err := svc.snapshotRepo.Save(snapshot); err != nil {
 		return err
 	}
 
@@ -160,8 +160,8 @@ func (svc *AIService) ExtractText(opts AIExtractTextOptions) error {
 	if err := svc.s3.PutText(s3Object.Key, text, "text/plain", s3Object.Bucket); err != nil {
 		return err
 	}
-	s.SetText(&s3Object)
-	if err := svc.snapshotRepo.Save(s); err != nil {
+	snapshot.SetText(&s3Object)
+	if err := svc.snapshotRepo.Save(snapshot); err != nil {
 		return err
 	}
 

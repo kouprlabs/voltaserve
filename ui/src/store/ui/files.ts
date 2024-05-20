@@ -1,6 +1,7 @@
 import { KeyedMutator } from 'swr'
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { List, SortBy, SortOrder } from '@/client/api/file'
+import { List as SnapshotList } from '@/client/api/snapshot'
 import {
   loadFileSortBy,
   loadFileSortOrder,
@@ -19,7 +20,6 @@ export type FilesState = {
   selection: string[]
   hidden: string[]
   snapshotSelection: string[]
-  snapshotDeletion: string[]
   isMultiSelectActive: boolean
   isRangeSelectActive: boolean
   isMoveModalOpen: boolean
@@ -36,13 +36,13 @@ export type FilesState = {
   sortOrder: SortOrder
   viewType: FileViewType
   mutate?: KeyedMutator<List | undefined>
+  snapshotMutate?: KeyedMutator<SnapshotList | undefined>
 }
 
 const initialState: FilesState = {
   selection: [],
   hidden: [],
   snapshotSelection: [],
-  snapshotDeletion: [],
   isMultiSelectActive: false,
   isRangeSelectActive: false,
   isMoveModalOpen: false,
@@ -81,8 +81,11 @@ const slice = createSlice({
     snapshotSelectionUpdated: (state, action: PayloadAction<string[]>) => {
       state.snapshotSelection = action.payload
     },
-    snapshotDeletionUpdated: (state, action: PayloadAction<string[]>) => {
-      state.snapshotDeletion = action.payload
+    snapshotMutateUpdated: (
+      state,
+      action: PayloadAction<KeyedMutator<SnapshotList | undefined>>,
+    ) => {
+      state.snapshotMutate = action.payload
     },
     moveModalDidOpen: (state) => {
       state.isMoveModalOpen = true
@@ -176,7 +179,7 @@ export const {
   selectionRemoved,
   hiddenUpdated,
   snapshotSelectionUpdated,
-  snapshotDeletionUpdated,
+  snapshotMutateUpdated,
   moveModalDidOpen,
   copyModalDidOpen,
   createModalDidOpen,

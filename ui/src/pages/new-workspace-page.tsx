@@ -61,7 +61,7 @@ const NewWorkspacePage = () => {
         mutate?.()
         setSubmitting(false)
         navigate(`/workspace/${result.id}/file/${result.rootId}`)
-      } catch (e) {
+      } catch (error) {
         setIsLoading(false)
       } finally {
         setSubmitting(false)

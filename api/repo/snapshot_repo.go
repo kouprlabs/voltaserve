@@ -34,6 +34,8 @@ type SnapshotRepo interface {
 	FindAllDangling() ([]model.Snapshot, error)
 	DeleteAllDangling() error
 	GetLatestVersionForFile(fileID string) (int64, error)
+	CountAssociations(id string) (int, error)
+	Unlink(id string, fileID string) error
 }
 
 func NewSnapshotRepo() SnapshotRepo {
@@ -416,4 +418,22 @@ func (repo *snapshotRepo) GetLatestVersionForFile(fileID string) (int64, error) 
 		return 0, db.Error
 	}
 	return res.Result, nil
+}
+
+func (repo *snapshotRepo) CountAssociations(id string) (int, error) {
+	type Result struct {
+		Count int
+	}
+	var res Result
+	if db := repo.db.Raw("SELECT COUNT(*) count FROM snapshot_file WHERE snapshot_id = ?", id).Scan(&res); db.Error != nil {
+		return 0, db.Error
+	}
+	return res.Count, nil
+}
+
+func (repo *snapshotRepo) Unlink(id string, fileID string) error {
+	if db := repo.db.Exec("DELETE FROM snapshot_file WHERE snapshot_id = ? AND file_id = ?", id, fileID); db.Error != nil {
+		return db.Error
+	}
+	return nil
 }

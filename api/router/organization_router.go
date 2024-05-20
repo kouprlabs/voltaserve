@@ -116,7 +116,7 @@ type OrganizationUpdateNameOptions struct {
 //	@Id				organizations_update_name
 //	@Accept			json
 //	@Produce		json
-//	@Param			id		path		string									true	"ID"
+//	@Param			id		path		string							true	"ID"
 //	@Param			body	body		OrganizationUpdateNameOptions	true	"Body"
 //	@Success		200		{object}	service.Organization
 //	@Failure		404		{object}	errorpkg.ErrorResponse
@@ -229,7 +229,7 @@ type OrganizationRemoveMemberOptions struct {
 //	@Id				organizations_remove_member
 //	@Accept			json
 //	@Produce		json
-//	@Param			id		path		string									true	"ID"
+//	@Param			id		path		string							true	"ID"
 //	@Param			body	body		OrganizationRemoveMemberOptions	true	"Body"
 //	@Failure		404		{object}	errorpkg.ErrorResponse
 //	@Failure		400		{object}	errorpkg.ErrorResponse

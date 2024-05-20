@@ -36,7 +36,7 @@ func (r *ToolRouter) AppendRoutes(g fiber.Router) {
 //	@Id				tools_run
 //	@Accept			json
 //	@Produce		json
-//	@Param			body	body	core.RunOptions	true	"Body"
+//	@Param			body	body	core.ToolRunOptions	true	"Body"
 //	@Success		200
 //	@Failure		400	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse

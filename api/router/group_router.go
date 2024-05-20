@@ -151,7 +151,7 @@ type GroupUpdateNameOptions struct {
 //	@Id				groups_update_name
 //	@Accept			json
 //	@Produce		json
-//	@Param			id		path		string							true	"ID"
+//	@Param			id		path		string					true	"ID"
 //	@Param			body	body		GroupUpdateNameOptions	true	"Body"
 //	@Success		200		{object}	service.Group
 //	@Failure		404		{object}	errorpkg.ErrorResponse
@@ -239,7 +239,7 @@ type GroupRemoveMemberOptions struct {
 //	@Id				groups_remove_member
 //	@Accept			json
 //	@Produce		json
-//	@Param			id		path		string								true	"ID"
+//	@Param			id		path		string						true	"ID"
 //	@Param			body	body		GroupRemoveMemberOptions	true	"Body"
 //	@Failure		404		{object}	errorpkg.ErrorResponse
 //	@Failure		400		{object}	errorpkg.ErrorResponse

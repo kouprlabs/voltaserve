@@ -19,7 +19,6 @@ func NewPipelineClient() *PipelineClient {
 }
 
 type PipelineRunOptions struct {
-	FileID     string `json:"fileId"`
 	SnapshotID string `json:"snapshotId"`
 	Bucket     string `json:"bucket"`
 	Key        string `json:"key"`

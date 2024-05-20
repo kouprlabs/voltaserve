@@ -88,7 +88,7 @@ func (p *imagePipeline) Run(opts core.PipelineRunOptions) error {
 		updateOpts.Thumbnail = &thumbnail
 		updateOpts.Preview = &core.S3Object{
 			Bucket: opts.Bucket,
-			Key:    opts.FileID + "/" + opts.SnapshotID + "/preview.jpg",
+			Key:    opts.SnapshotID + "/preview.jpg",
 			Size:   stat.Size(),
 			Image:  &imageProps,
 		}

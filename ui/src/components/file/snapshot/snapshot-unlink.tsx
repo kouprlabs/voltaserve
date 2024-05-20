@@ -11,34 +11,49 @@ import {
   ModalOverlay,
 } from '@chakra-ui/react'
 import cx from 'classnames'
+import SnapshotAPI from '@/client/api/snapshot'
 import { useAppSelector } from '@/store/hook'
 import {
   snapshotDeleteModalDidClose,
-  snapshotDeletionUpdated,
+  snapshotSelectionUpdated,
 } from '@/store/ui/files'
 
-const FileSnapshotDelete = () => {
+const FileSnapshotUnlink = () => {
   const dispatch = useDispatch()
-  const selection = useAppSelector((state) => state.ui.files.selection)
-  const snapshotSelection = useAppSelector(
-    (state) => state.ui.files.snapshotSelection,
+  const id = useAppSelector((state) =>
+    state.ui.files.snapshotSelection.length > 0
+      ? state.ui.files.snapshotSelection[0]
+      : undefined,
   )
+  const fileId = useAppSelector((state) =>
+    state.ui.files.selection.length > 0
+      ? state.ui.files.selection[0]
+      : undefined,
+  )
+  const mutate = useAppSelector((state) => state.ui.files.snapshotMutate)
   const isModalOpen = useAppSelector(
     (state) => state.ui.files.isSnapshotDeleteModalOpen,
   )
   const [isLoading, setIsLoading] = useState(false)
 
-  const handleDelete = useCallback(async () => {
-    if (selection.length === 1 && snapshotSelection.length === 1) {
+  const handleUnlink = useCallback(async () => {
+    async function unlink(id: string, fileId: string) {
+      setIsLoading(true)
       try {
-        setIsLoading(true)
-        dispatch(snapshotDeletionUpdated([snapshotSelection[0]]))
+        await SnapshotAPI.unlink(id, { fileId })
+        await mutate?.()
+        dispatch(snapshotSelectionUpdated([]))
         dispatch(snapshotDeleteModalDidClose())
+      } catch (error) {
+        setIsLoading(false)
       } finally {
         setIsLoading(false)
       }
     }
-  }, [snapshotSelection, dispatch])
+    if (id && fileId) {
+      unlink(id, fileId)
+    }
+  }, [id, fileId, dispatch, mutate])
 
   return (
     <Modal
@@ -48,23 +63,10 @@ const FileSnapshotDelete = () => {
     >
       <ModalOverlay />
       <ModalContent>
-        {snapshotSelection.length > 1 ? (
-          <ModalHeader>
-            Delete {snapshotSelection.length} Snapshot(s)
-          </ModalHeader>
-        ) : (
-          <ModalHeader>Delete Snapshot</ModalHeader>
-        )}
+        <ModalHeader>Unlink Snapshot</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-          {snapshotSelection.length > 1 ? (
-            <span>
-              Are you sure you would like to delete ({snapshotSelection.length})
-              snapshot(s)?
-            </span>
-          ) : (
-            <span>Are you sure you would like to delete this snapshot?</span>
-          )}
+          <span>Are you sure you would like to unkink this snapshot?</span>
         </ModalBody>
         <ModalFooter>
           <div className={cx('flex', 'flex-row', 'items-center', 'gap-1')}>
@@ -82,9 +84,9 @@ const FileSnapshotDelete = () => {
               variant="solid"
               colorScheme="red"
               isLoading={isLoading}
-              onClick={handleDelete}
+              onClick={handleUnlink}
             >
-              Delete
+              Unlink
             </Button>
           </div>
         </ModalFooter>
@@ -93,4 +95,4 @@ const FileSnapshotDelete = () => {
   )
 }
 
-export default FileSnapshotDelete
+export default FileSnapshotUnlink

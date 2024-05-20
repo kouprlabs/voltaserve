@@ -4,8 +4,6 @@ definitions:
     properties:
       bucket:
         type: string
-      fileId:
-        type: string
       key:
         type: string
       size:
@@ -13,7 +11,7 @@ definitions:
       snapshotId:
         type: string
     type: object
-  core.RunOptions:
+  core.ToolRunOptions:
     properties:
       args:
         items:
@@ -101,7 +99,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/core.RunOptions'
+          $ref: '#/definitions/core.ToolRunOptions'
       produces:
       - application/json
       responses:

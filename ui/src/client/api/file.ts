@@ -221,8 +221,8 @@ export default class FileAPI {
         if (request.status <= 299) {
           try {
             resolve(JSON.parse(request.responseText))
-          } catch (e) {
-            reject(e)
+          } catch (error) {
+            reject(error)
           }
         } else {
           try {

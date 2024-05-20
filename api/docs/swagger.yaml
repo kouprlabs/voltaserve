@@ -4,8 +4,6 @@ definitions:
     properties:
       bucket:
         type: string
-      fileId:
-        type: string
       key:
         type: string
       size:
@@ -489,6 +487,13 @@ definitions:
       version:
         type: integer
     type: object
+  service.SnapshotActivateOptions:
+    properties:
+      fileId:
+        type: string
+    required:
+    - fileId
+    type: object
   service.SnapshotList:
     properties:
       data:
@@ -503,6 +508,13 @@ definitions:
         type: integer
       totalPages:
         type: integer
+    type: object
+  service.SnapshotUnlinkOptions:
+    properties:
+      fileID:
+        type: string
+    required:
+    - fileID
     type: object
   service.SnapshotUpdateOptions:
     properties:
@@ -1258,133 +1270,6 @@ paths:
       summary: Revoke Group Permission
       tags:
       - Files
-  /files/{id}/snapshots:
-    get:
-      description: List
-      operationId: snapshots_list
-      parameters:
-      - description: Query
-        in: query
-        name: query
-        type: string
-      - description: Page
-        in: query
-        name: page
-        type: string
-      - description: Size
-        in: query
-        name: size
-        type: string
-      - description: Sort By
-        in: query
-        name: sort_by
-        type: string
-      - description: Sort Order
-        in: query
-        name: sort_order
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/service.SnapshotList'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: List
-      tags:
-      - Snapshots
-  /files/{id}/snapshots/{snapshotId}:
-    delete:
-      description: Delete Snapshot
-      operationId: snapshots_delete_snapsshot
-      parameters:
-      - description: ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: Snapshot ID
-        in: path
-        name: snapshotId
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Delete Snapshot
-      tags:
-      - Snapshots
-    patch:
-      description: Update Snapshot
-      operationId: files_update_snapshot
-      parameters:
-      - description: Body
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/service.SnapshotUpdateOptions'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Update Snapshot
-      tags:
-      - Files
-  /files/{id}/snapshots/{snapshotId}/activate:
-    post:
-      description: Activate Snapshot
-      operationId: snapshots_activate_snapsshot
-      parameters:
-      - description: ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: Snapshot ID
-        in: path
-        name: snapshotId
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Activate Snapshot
-      tags:
-      - Snapshots
   /files/batch_delete:
     post:
       description: Batch Delete
@@ -2357,6 +2242,149 @@ paths:
       summary: Update Name
       tags:
       - Organizations
+  /snapshots:
+    get:
+      description: List
+      operationId: snapshots_list
+      parameters:
+      - description: File ID
+        in: query
+        name: file_id
+        required: true
+        type: string
+      - description: Page
+        in: query
+        name: page
+        type: string
+      - description: Size
+        in: query
+        name: size
+        type: string
+      - description: Sort By
+        in: query
+        name: sort_by
+        type: string
+      - description: Sort Order
+        in: query
+        name: sort_order
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.SnapshotList'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: List
+      tags:
+      - Snapshots
+  /snapshots/{id}:
+    patch:
+      description: Update
+      operationId: snapshots_update
+      parameters:
+      - description: API Key
+        in: query
+        name: api_key
+        required: true
+        type: string
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/service.SnapshotUpdateOptions'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Update
+      tags:
+      - Snapshots
+  /snapshots/{id}/activate:
+    post:
+      description: Activate
+      operationId: snapshots_activate
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/service.SnapshotActivateOptions'
+      produces:
+      - application/json
+      responses:
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Activate
+      tags:
+      - Snapshots
+  /snapshots/{id}/unlink:
+    post:
+      description: Unlink
+      operationId: snapshots_unlink
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/service.SnapshotUnlinkOptions'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Unlink
+      tags:
+      - Snapshots
   /storage/get_account_usage:
     get:
       description: Get Account Usage

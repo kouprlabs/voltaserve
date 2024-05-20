@@ -50,22 +50,19 @@ func main() {
 	health.AppendRoutes(v1)
 
 	f := v1.Group("files")
+	files := router.NewFileRouter()
+	files.AppendInternalRoutes(f)
 
-	downloads := router.NewDownloadsRouter()
-	downloads.AppendNonJWTRoutes(f)
-
-	conversionWebhook := router.NewConversionWebhookRouter()
-	conversionWebhook.AppendInternalRoutes(f)
+	s := v1.Group("snapshots")
+	snapshots := router.NewSnapshotRouter()
+	snapshots.AppendInternalRoutes(s)
 
 	app.Use(jwtware.New(jwtware.Config{
 		SigningKey: jwtware.SigningKey{Key: []byte(cfg.Security.JWTSigningKey)},
 	}))
 
-	files := router.NewFileRouter()
 	files.AppendRoutes(f)
-
-	snapshots := router.NewSnapshotRouter()
-	snapshots.AppendRoutes(f)
+	snapshots.AppendRoutes(s)
 
 	invitations := router.NewInvitationRouter()
 	invitations.AppendRoutes(v1.Group("invitations"))

@@ -67,7 +67,7 @@ func (p *pdfPipeline) Run(opts core.PipelineRunOptions) error {
 	if err != nil {
 		p.logger.Named(infra.StrPipeline).Errorw(err.Error())
 	}
-	textKey := opts.FileID + "/" + opts.SnapshotID + "/text.txt"
+	textKey := opts.SnapshotID + "/text.txt"
 	if text != "" && err == nil {
 		if err := p.s3.PutText(textKey, text, "text/plain", opts.Bucket); err != nil {
 			return err

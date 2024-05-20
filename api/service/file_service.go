@@ -197,8 +197,8 @@ func (svc *FileService) validateParent(id string, userID string) error {
 	return nil
 }
 
-func (svc *FileService) Store(fileID string, filePath string, userID string) (*File, error) {
-	file, err := svc.fileRepo.Find(fileID)
+func (svc *FileService) Store(id string, path string, userID string) (*File, error) {
+	file, err := svc.fileRepo.Find(id)
 	if err != nil {
 		return nil, err
 	}
@@ -209,7 +209,7 @@ func (svc *FileService) Store(fileID string, filePath string, userID string) (*F
 	if err != nil {
 		return nil, err
 	}
-	latestVersion, err := svc.snapshotRepo.GetLatestVersionForFile(fileID)
+	latestVersion, err := svc.snapshotRepo.GetLatestVersionForFile(id)
 	if err != nil {
 		return nil, err
 	}
@@ -224,20 +224,20 @@ func (svc *FileService) Store(fileID string, filePath string, userID string) (*F
 	if err != nil {
 		return nil, err
 	}
-	if err = svc.snapshotRepo.MapWithFile(snapshotID, fileID); err != nil {
+	if err = svc.snapshotRepo.MapWithFile(snapshotID, id); err != nil {
 		return nil, err
 	}
-	stat, err := os.Stat(filePath)
+	stat, err := os.Stat(path)
 	if err != nil {
 		return nil, err
 	}
 	exceedsProcessingLimit := stat.Size() > helper.MegabyteToByte(svc.config.Limits.FileProcessingMaxSizeMB)
 	original := model.S3Object{
 		Bucket: workspace.GetBucket(),
-		Key:    fileID + "/" + snapshotID + "/original" + strings.ToLower(filepath.Ext(filePath)),
+		Key:    snapshotID + "/original" + strings.ToLower(filepath.Ext(path)),
 		Size:   stat.Size(),
 	}
-	if err = svc.s3.PutFile(original.Key, filePath, infra.DetectMimeFromFile(filePath), workspace.GetBucket()); err != nil {
+	if err = svc.s3.PutFile(original.Key, path, infra.DetectMimeFromFile(path), workspace.GetBucket()); err != nil {
 		return nil, err
 	}
 	snapshot.SetOriginal(&original)
@@ -259,7 +259,6 @@ func (svc *FileService) Store(fileID string, filePath string, userID string) (*F
 	}
 	if !exceedsProcessingLimit {
 		if err := svc.pipelineClient.Run(&client.PipelineRunOptions{
-			FileID:     file.GetID(),
 			SnapshotID: snapshot.GetID(),
 			Bucket:     original.Bucket,
 			Key:        original.Key,

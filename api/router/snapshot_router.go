@@ -1,10 +1,12 @@
 package router
 
 import (
+	"net/http"
 	"strconv"
 	"voltaserve/errorpkg"
 	"voltaserve/service"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -19,9 +21,13 @@ func NewSnapshotRouter() *SnapshotRouter {
 }
 
 func (r *SnapshotRouter) AppendRoutes(g fiber.Router) {
-	g.Get("/:id/snapshots", r.ListSnapshots)
-	g.Post("/:id/snapshots/:snapshotId/activate", r.ActivateSnapshot)
-	g.Delete("/:id/snapshots/:snapshotId", r.DeleteSnapshot)
+	g.Get("/", r.List)
+	g.Post("/:id/activate", r.Activate)
+	g.Post("/:id/unlink", r.Unlink)
+}
+
+func (r *SnapshotRouter) AppendInternalRoutes(g fiber.Router) {
+	g.Patch("/:id", r.Update)
 }
 
 // List godoc
@@ -31,7 +37,7 @@ func (r *SnapshotRouter) AppendRoutes(g fiber.Router) {
 //	@Tags			Snapshots
 //	@Id				snapshots_list
 //	@Produce		json
-//	@Param			query		query		string	false	"Query"
+//	@Param			file_id		query		string	true	"File ID"
 //	@Param			page		query		string	false	"Page"
 //	@Param			size		query		string	false	"Size"
 //	@Param			sort_by		query		string	false	"Sort By"
@@ -39,9 +45,13 @@ func (r *SnapshotRouter) AppendRoutes(g fiber.Router) {
 //	@Success		200			{object}	service.SnapshotList
 //	@Failure		404			{object}	errorpkg.ErrorResponse
 //	@Failure		500			{object}	errorpkg.ErrorResponse
-//	@Router			/files/{id}/snapshots [get]
-func (r *SnapshotRouter) ListSnapshots(c *fiber.Ctx) error {
+//	@Router			/snapshots [get]
+func (r *SnapshotRouter) List(c *fiber.Ctx) error {
 	var err error
+	fileId := c.Query("file_id")
+	if fileId == "" {
+		return errorpkg.NewMissingQueryParamError("file_id")
+	}
 	var page int64
 	if c.Query("page") == "" {
 		page = 1
@@ -68,7 +78,7 @@ func (r *SnapshotRouter) ListSnapshots(c *fiber.Ctx) error {
 	if !IsValidSortOrder(sortOrder) {
 		return errorpkg.NewInvalidQueryParamError("sort_order")
 	}
-	res, err := r.snapshotSvc.List(c.Params("id"), service.SnapshotListOptions{
+	res, err := r.snapshotSvc.List(fileId, service.SnapshotListOptions{
 		Page:      uint(page),
 		Size:      uint(size),
 		SortBy:    sortBy,
@@ -80,42 +90,88 @@ func (r *SnapshotRouter) ListSnapshots(c *fiber.Ctx) error {
 	return c.JSON(res)
 }
 
-// ActivateSnapshot godoc
+// Activate godoc
 //
-//	@Summary		Activate Snapshot
-//	@Description	Activate Snapshot
+//	@Summary		Activate
+//	@Description	Activate
 //	@Tags			Snapshots
-//	@Id				snapshots_activate_snapsshot
+//	@Id				snapshots_activate
 //	@Produce		json
-//	@Param			id			path		string	true	"ID"
-//	@Param			snapshotId	path		string	true	"Snapshot ID"
-//	@Failure		404			{object}	errorpkg.ErrorResponse
-//	@Failure		500			{object}	errorpkg.ErrorResponse
-//	@Router			/files/{id}/snapshots/{snapshotId}/activate [post]
-func (r *SnapshotRouter) ActivateSnapshot(c *fiber.Ctx) error {
-	res, err := r.snapshotSvc.Activate(c.Params("id"), c.Params("snapshotId"), GetUserID(c))
+//	@Param			id		path		string							true	"ID"
+//	@Param			body	body		service.SnapshotActivateOptions	true	"Body"
+//	@Failure		404		{object}	errorpkg.ErrorResponse
+//	@Failure		500		{object}	errorpkg.ErrorResponse
+//	@Router			/snapshots/{id}/activate [post]
+func (r *SnapshotRouter) Activate(c *fiber.Ctx) error {
+	opts := new(service.SnapshotActivateOptions)
+	if err := c.BodyParser(opts); err != nil {
+		return err
+	}
+	if err := validator.New().Struct(opts); err != nil {
+		return errorpkg.NewRequestBodyValidationError(err)
+	}
+	res, err := r.snapshotSvc.Activate(c.Params("id"), *opts, GetUserID(c))
 	if err != nil {
 		return err
 	}
 	return c.JSON(res)
 }
 
-// DeleteSnapshot godoc
+// Unlink godoc
 //
-//	@Summary		Delete Snapshot
-//	@Description	Delete Snapshot
+//	@Summary		Unlink
+//	@Description	Unlink
 //	@Tags			Snapshots
-//	@Id				snapshots_delete_snapsshot
+//	@Id				snapshots_unlink
 //	@Produce		json
-//	@Param			id			path		string	true	"ID"
-//	@Param			snapshotId	path		string	true	"Snapshot ID"
-//	@Failure		404			{object}	errorpkg.ErrorResponse
-//	@Failure		500			{object}	errorpkg.ErrorResponse
-//	@Router			/files/{id}/snapshots/{snapshotId} [delete]
-func (r *SnapshotRouter) DeleteSnapshot(c *fiber.Ctx) error {
-	res, err := r.snapshotSvc.Delete(c.Params("id"), c.Params("snapshotId"), GetUserID(c))
-	if err != nil {
+//	@Param			id		path	string							true	"ID"
+//	@Param			body	body	service.SnapshotUnlinkOptions	true	"Body"
+//	@Success		204
+//	@Failure		404	{object}	errorpkg.ErrorResponse
+//	@Failure		500	{object}	errorpkg.ErrorResponse
+//	@Router			/snapshots/{id}/unlink [post]
+func (r *SnapshotRouter) Unlink(c *fiber.Ctx) error {
+	opts := new(service.SnapshotUnlinkOptions)
+	if err := c.BodyParser(opts); err != nil {
 		return err
 	}
-	return c.JSON(res)
+	if err := validator.New().Struct(opts); err != nil {
+		return errorpkg.NewRequestBodyValidationError(err)
+	}
+	if err := r.snapshotSvc.Unlink(c.Params("id"), *opts, GetUserID(c)); err != nil {
+		return err
+	}
+	return c.SendStatus(http.StatusNoContent)
+}
+
+// Update godoc
+//
+//	@Summary		Update
+//	@Description	Update
+//	@Tags			Snapshots
+//	@Id				snapshots_update
+//	@Produce		json
+//	@Param			api_key	query	string							true	"API Key"
+//	@Param			id		path	string							true	"ID"
+//	@Param			body	body	service.SnapshotUpdateOptions	true	"Body"
+//	@Success		204
+//	@Failure		401	{object}	errorpkg.ErrorResponse
+//	@Failure		500	{object}	errorpkg.ErrorResponse
+//	@Router			/snapshots/{id} [patch]
+func (r *SnapshotRouter) Update(c *fiber.Ctx) error {
+	apiKey := c.Query("api_key")
+	if apiKey == "" {
+		return errorpkg.NewMissingQueryParamError("api_key")
+	}
+	opts := new(service.SnapshotUpdateOptions)
+	if err := c.BodyParser(opts); err != nil {
+		return err
+	}
+	if err := validator.New().Struct(opts); err != nil {
+		return errorpkg.NewRequestBodyValidationError(err)
+	}
+	if err := r.snapshotSvc.Update(c.Params("id"), *opts, apiKey); err != nil {
+		return err
+	}
+	return c.SendStatus(http.StatusNoContent)
 }

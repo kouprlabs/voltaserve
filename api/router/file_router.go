@@ -3,6 +3,8 @@ package router
 import (
 	"encoding/base64"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -11,25 +13,29 @@ import (
 	"voltaserve/config"
 	"voltaserve/errorpkg"
 	"voltaserve/helper"
+	"voltaserve/infra"
 	"voltaserve/model"
 	"voltaserve/service"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/log"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 type FileRouter struct {
-	fileSvc      *service.FileService
-	workspaceSvc *service.WorkspaceService
-	config       config.Config
+	fileSvc               *service.FileService
+	workspaceSvc          *service.WorkspaceService
+	config                config.Config
+	accessTokenCookieName string
 }
 
 func NewFileRouter() *FileRouter {
 	return &FileRouter{
-		fileSvc:      service.NewFileService(),
-		workspaceSvc: service.NewWorkspaceService(),
-		config:       config.GetConfig(),
+		fileSvc:               service.NewFileService(),
+		workspaceSvc:          service.NewWorkspaceService(),
+		config:                config.GetConfig(),
+		accessTokenCookieName: "voltaserve_access_token",
 	}
 }
 
@@ -57,6 +63,11 @@ func (r *FileRouter) AppendRoutes(g fiber.Router) {
 	g.Post("/revoke_group_permission", r.RevokeGroupPermission)
 	g.Get("/:id/get_user_permissions", r.GetUserPermissions)
 	g.Get("/:id/get_group_permissions", r.GetGroupPermissions)
+}
+
+func (r *FileRouter) AppendInternalRoutes(g fiber.Router) {
+	g.Get("/:id/original:ext", r.DownloadOriginal)
+	g.Get("/:id/preview:ext", r.DownloadPreview)
 }
 
 // Upload godoc
@@ -437,7 +448,7 @@ type FileCopyOptions struct {
 //	@Tags			Files
 //	@Id				files_copy
 //	@Produce		json
-//	@Param			id		path		string					true	"ID"
+//	@Param			id		path		string			true	"ID"
 //	@Param			body	body		FileCopyOptions	true	"Body"
 //	@Failure		404		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
@@ -469,7 +480,7 @@ type FileMoveOptions struct {
 //	@Tags			Files
 //	@Id				files_move
 //	@Produce		json
-//	@Param			id		path		string					true	"ID"
+//	@Param			id		path		string			true	"ID"
 //	@Param			body	body		FileMoveOptions	true	"Body"
 //	@Failure		404		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
@@ -500,7 +511,7 @@ type FileRenameOptions struct {
 //	@Tags			Files
 //	@Id				files_rename
 //	@Produce		json
-//	@Param			id		path		string						true	"ID"
+//	@Param			id		path		string				true	"ID"
 //	@Param			body	body		FileRenameOptions	true	"Body"
 //	@Success		200		{object}	service.File
 //	@Failure		404		{object}	errorpkg.ErrorResponse
@@ -660,7 +671,7 @@ type FileGrantUserPermissionOptions struct {
 //	@Tags			Files
 //	@Id				files_grant_user_permission
 //	@Produce		json
-//	@Param			id		path		string									true	"ID"
+//	@Param			id		path		string							true	"ID"
 //	@Param			body	body		FileGrantUserPermissionOptions	true	"Body"
 //	@Failure		404		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
@@ -692,7 +703,7 @@ type FileRevokeUserPermissionOptions struct {
 //	@Tags			Files
 //	@Id				files_revoke_user_permission
 //	@Produce		json
-//	@Param			id		path		string									true	"ID"
+//	@Param			id		path		string							true	"ID"
 //	@Param			body	body		FileRevokeUserPermissionOptions	true	"Body"
 //	@Failure		404		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
@@ -725,7 +736,7 @@ type FileGrantGroupPermissionOptions struct {
 //	@Tags			Files
 //	@Id				files_grant_group_permission
 //	@Produce		json
-//	@Param			id		path		string									true	"ID"
+//	@Param			id		path		string							true	"ID"
 //	@Param			body	body		FileGrantGroupPermissionOptions	true	"Body"
 //	@Failure		404		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
@@ -757,7 +768,7 @@ type FileRevokeGroupPermissionOptions struct {
 //	@Tags			Files
 //	@Id				files_revoke_group_permission
 //	@Produce		json
-//	@Param			id		path		string										true	"ID"
+//	@Param			id		path		string								true	"ID"
 //	@Param			body	body		FileRevokeGroupPermissionOptions	true	"Body"
 //	@Failure		404		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
@@ -817,4 +828,95 @@ func (r *FileRouter) GetGroupPermissions(c *fiber.Ctx) error {
 		return err
 	}
 	return c.JSON(res)
+}
+
+// DownloadOriginal godoc
+//
+//	@Summary		Download Original
+//	@Description	Download Original
+//	@Tags			Files
+//	@Id				files_download_original
+//	@Produce		json
+//	@Param			id				path		string	true	"ID"
+//	@Param			access_token	query		string	true	"Access Token"
+//	@Failure		404				{object}	errorpkg.ErrorResponse
+//	@Failure		500				{object}	errorpkg.ErrorResponse
+//	@Router			/files/{id}/original{ext} [get]
+func (r *FileRouter) DownloadOriginal(c *fiber.Ctx) error {
+	accessToken := c.Cookies(r.accessTokenCookieName)
+	if accessToken == "" {
+		accessToken = c.Query("access_token")
+		if accessToken == "" {
+			return errorpkg.NewFileNotFoundError(nil)
+		}
+	}
+	userID, err := r.getUserIDFromAccessToken(accessToken)
+	if err != nil {
+		return c.SendStatus(http.StatusNotFound)
+	}
+	buf, file, snapshot, err := r.fileSvc.DownloadOriginalBuffer(c.Params("id"), userID)
+	if err != nil {
+		return err
+	}
+	if filepath.Ext(snapshot.GetOriginal().Key) != c.Params("ext") {
+		return errorpkg.NewS3ObjectNotFoundError(nil)
+	}
+	bytes := buf.Bytes()
+	c.Set("Content-Type", infra.DetectMimeFromBytes(bytes))
+	c.Set("Content-Disposition", fmt.Sprintf("filename=\"%s\"", file.GetName()))
+	return c.Send(bytes)
+}
+
+// DownloadPreview godoc
+//
+//	@Summary		Download Preview
+//	@Description	Download Preview
+//	@Tags			Files
+//	@Id				files_download_preview
+//	@Produce		json
+//	@Param			id				path		string	true	"ID"
+//	@Param			access_token	query		string	true	"Access Token"
+//	@Failure		404				{object}	errorpkg.ErrorResponse
+//	@Failure		500				{object}	errorpkg.ErrorResponse
+//	@Router			/files/{id}/preview{ext} [get]
+func (r *FileRouter) DownloadPreview(c *fiber.Ctx) error {
+	accessToken := c.Cookies(r.accessTokenCookieName)
+	if accessToken == "" {
+		accessToken = c.Query("access_token")
+		if accessToken == "" {
+			return errorpkg.NewFileNotFoundError(nil)
+		}
+	}
+	userID, err := r.getUserIDFromAccessToken(accessToken)
+	if err != nil {
+		return c.SendStatus(http.StatusNotFound)
+	}
+	buf, file, snapshot, err := r.fileSvc.DownloadPreviewBuffer(c.Params("id"), userID)
+	if err != nil {
+		return err
+	}
+	if filepath.Ext(snapshot.GetPreview().Key) != c.Params("ext") {
+		return errorpkg.NewS3ObjectNotFoundError(nil)
+	}
+	bytes := buf.Bytes()
+	c.Set("Content-Type", infra.DetectMimeFromBytes(bytes))
+	c.Set("Content-Disposition", fmt.Sprintf("filename=\"%s\"", file.GetName()))
+	return c.Send(bytes)
+}
+
+func (r *FileRouter) getUserIDFromAccessToken(accessToken string) (string, error) {
+	token, err := jwt.Parse(accessToken, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		return []byte(config.GetConfig().Security.JWTSigningKey), nil
+	})
+	if err != nil {
+		return "", err
+	}
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		return claims["sub"].(string), nil
+	} else {
+		return "", errors.New("cannot find sub claim")
+	}
 }

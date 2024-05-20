@@ -23,8 +23,8 @@ import { Pagination, SectionSpinner } from '@/lib'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import {
   snapshotDeleteModalDidOpen,
-  snapshotDeletionUpdated,
   snapshotListModalDidClose,
+  snapshotMutateUpdated,
   snapshotSelectionUpdated,
 } from '@/store/ui/files'
 
@@ -33,8 +33,7 @@ const FileSnapshotList = () => {
   const isModalOpen = useAppSelector(
     (state) => state.ui.files.isSnapshotListModalOpen,
   )
-  const id = useAppSelector((state) => state.ui.files.selection[0])
-  const deletion = useAppSelector((state) => state.ui.files.snapshotDeletion)
+  const fileId = useAppSelector((state) => state.ui.files.selection[0])
   const mutateFileList = useAppSelector((state) => state.ui.files.mutate)
   const [isActivating, setIsActivating] = useState(false)
   const [page, setPage] = useState(1)
@@ -42,25 +41,17 @@ const FileSnapshotList = () => {
   const {
     data: list,
     error,
-    mutate: mutateSnapshotList,
+    mutate: snapshotMutate,
   } = SnapshotAPI.useList(
-    id,
-    { page, size: 5, sortOrder: SortOrder.Desc },
+    { fileId, page, size: 5, sortOrder: SortOrder.Desc },
     swrConfig(),
   )
 
   useEffect(() => {
-    async function deleteSnapshots() {
-      deletion.forEach(async (snapshotId) => {
-        await SnapshotAPI.delete(id, snapshotId)
-        await mutateSnapshotList()
-      })
-      dispatch(snapshotDeletionUpdated([]))
+    if (snapshotMutate) {
+      dispatch(snapshotMutateUpdated(snapshotMutate))
     }
-    if (deletion.length > 0) {
-      deleteSnapshots()
-    }
-  }, [deletion])
+  }, [snapshotMutate])
 
   const handleClose = useCallback(() => {
     dispatch(snapshotListModalDidClose())
@@ -72,17 +63,16 @@ const FileSnapshotList = () => {
     if (selected) {
       try {
         setIsActivating(true)
-        await SnapshotAPI.activate(id, selected.id)
-        mutateSnapshotList()
+        await SnapshotAPI.activate(selected.id, { fileId })
+        snapshotMutate()
         mutateFileList?.()
       } finally {
         setIsActivating(false)
       }
-      await SnapshotAPI.activate(id, selected.id)
     }
-  }, [selected, dispatch, mutateSnapshotList, mutateFileList])
+  }, [selected, dispatch, snapshotMutate, mutateFileList])
 
-  const handleDelete = useCallback(() => {
+  const handleUnlink = useCallback(() => {
     if (selected) {
       dispatch(snapshotSelectionUpdated([selected.id]))
       dispatch(snapshotDeleteModalDidOpen())
@@ -210,9 +200,9 @@ const FileSnapshotList = () => {
               variant="outline"
               colorScheme="red"
               isDisabled={!selected || selected.isActive || isActivating}
-              onClick={handleDelete}
+              onClick={handleUnlink}
             >
-              Delete
+              Unlink
             </Button>
             <Button
               variant="solid"

@@ -78,7 +78,7 @@ func (p *officePipeline) Run(opts core.PipelineRunOptions) error {
 	}); err != nil {
 		return err
 	}
-	previewKey := opts.FileID + "/" + opts.SnapshotID + "/preview.pdf"
+	previewKey := opts.SnapshotID + "/preview.pdf"
 	if err := p.s3.PutFile(previewKey, outputPath, helper.DetectMimeFromFile(outputPath), opts.Bucket); err != nil {
 		return err
 	}
@@ -95,7 +95,6 @@ func (p *officePipeline) Run(opts core.PipelineRunOptions) error {
 	if err := p.pdfPipeline.Run(core.PipelineRunOptions{
 		Bucket:     opts.Bucket,
 		Key:        previewKey,
-		FileID:     opts.FileID,
 		SnapshotID: opts.SnapshotID,
 	}); err != nil {
 		return err

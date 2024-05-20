@@ -1,4 +1,4 @@
-FROM oven/bun:1-debian AS ui-builder
+FROM node:22-bookworm AS ui-builder
 
 WORKDIR /build
 
@@ -9,12 +9,12 @@ COPY postcss.config.cjs .
 COPY tailwind.config.cjs .
 COPY vite.config.ts .
 COPY package.json .
-COPY bun.lockb .
+COPY package-lock.json .
 COPY tsconfig.json .
 COPY tsconfig.node.json .
 
-RUN bun install --frozen-lockfile
-RUN bun run build
+RUN npm ci --legacy-peer-deps
+RUN npm run build
 
 FROM golang:1.22 AS go-builder
 
