@@ -22,7 +22,7 @@ const AiOverview = () => {
   return (
     <>
       <ModalBody>
-        <div className={cx('w-full', 'pb-1.5')}>
+        <div className={cx('w-full')}>
           <Tabs
             variant="solid-rounded"
             colorScheme="gray"

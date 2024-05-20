@@ -135,9 +135,12 @@ const AccountEditPicture = ({
                           {...field}
                           initialValue={user.picture}
                           disabled={isSubmitting}
-                          onChange={(e) => {
-                            if (e.target.files && e.target.files.length > 0) {
-                              setFieldValue('picture', e.target.files[0])
+                          onChange={(event) => {
+                            if (
+                              event.target.files &&
+                              event.target.files.length > 0
+                            ) {
+                              setFieldValue('picture', event.target.files[0])
                             }
                           }}
                         />

@@ -120,9 +120,9 @@ const SharingGroups = ({
             placeholder="Select Permission"
             selectedOptionStyle="check"
             chakraStyles={reactSelectStyles}
-            onChange={(e) => {
-              if (e) {
-                setActivePermission(e.value)
+            onChange={(event) => {
+              if (event) {
+                setActivePermission(event.value)
               }
             }}
           />

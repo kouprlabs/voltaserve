@@ -14,18 +14,10 @@ type InvitationRouter struct {
 	invitationSvc *service.InvitationService
 }
 
-type NewInvitationRouterOptions struct {
-	InvitationService *service.InvitationService
-}
-
-func NewInvitationRouter(opts NewInvitationRouterOptions) *InvitationRouter {
-	r := &InvitationRouter{}
-	if opts.InvitationService != nil {
-		r.invitationSvc = opts.InvitationService
-	} else {
-		r.invitationSvc = service.NewInvitationService(service.NewInvitationServiceOptions{})
+func NewInvitationRouter() *InvitationRouter {
+	return &InvitationRouter{
+		invitationSvc: service.NewInvitationService(),
 	}
-	return r
 }
 
 func (r *InvitationRouter) AppendRoutes(g fiber.Router) {
@@ -54,14 +46,14 @@ func (r *InvitationRouter) AppendRoutes(g fiber.Router) {
 //	@Router			/invitations [post]
 func (r *InvitationRouter) Create(c *fiber.Ctx) error {
 	userID := GetUserID(c)
-	req := new(service.InvitationCreateOptions)
-	if err := c.BodyParser(req); err != nil {
+	opts := new(service.InvitationCreateOptions)
+	if err := c.BodyParser(opts); err != nil {
 		return err
 	}
-	if err := validator.New().Struct(req); err != nil {
+	if err := validator.New().Struct(opts); err != nil {
 		return errorpkg.NewRequestBodyValidationError(err)
 	}
-	if err := r.invitationSvc.Create(*req, userID); err != nil {
+	if err := r.invitationSvc.Create(*opts, userID); err != nil {
 		return err
 	}
 	return c.SendStatus(http.StatusNoContent)

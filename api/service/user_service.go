@@ -10,6 +10,45 @@ import (
 	"voltaserve/search"
 )
 
+type UserService struct {
+	userRepo   repo.UserRepo
+	userMapper *userMapper
+	userSearch *search.UserSearch
+	orgRepo    repo.OrganizationRepo
+	orgCache   *cache.OrganizationCache
+	orgGuard   *guard.OrganizationGuard
+	groupRepo  repo.GroupRepo
+	groupGuard *guard.GroupGuard
+	groupCache *cache.GroupCache
+	config     config.Config
+}
+
+func NewUserService() *UserService {
+	return &UserService{
+		userRepo:   repo.NewUserRepo(),
+		userMapper: newUserMapper(),
+		userSearch: search.NewUserSearch(),
+		orgRepo:    repo.NewOrganizationRepo(),
+		orgCache:   cache.NewOrganizationCache(),
+		orgGuard:   guard.NewOrganizationGuard(),
+		groupRepo:  repo.NewGroupRepo(),
+		groupGuard: guard.NewGroupGuard(),
+		groupCache: cache.NewGroupCache(),
+		config:     config.GetConfig(),
+	}
+}
+
+type UserListOptions struct {
+	Query               string
+	OrganizationID      string
+	GroupID             string
+	NonGroupMembersOnly bool
+	SortBy              string
+	SortOrder           string
+	Page                uint
+	Size                uint
+}
+
 type User struct {
 	ID         string  `json:"id"`
 	FullName   string  `json:"fullName"`
@@ -26,64 +65,6 @@ type UserList struct {
 	TotalElements uint    `json:"totalElements"`
 	Page          uint    `json:"page"`
 	Size          uint    `json:"size"`
-}
-
-type UserListOptions struct {
-	Query               string
-	OrganizationID      string
-	GroupID             string
-	NonGroupMembersOnly bool
-	SortBy              string
-	SortOrder           string
-	Page                uint
-	Size                uint
-}
-
-type UserService struct {
-	userRepo   repo.UserRepo
-	userMapper *userMapper
-	userSearch *search.UserSearch
-	orgRepo    repo.OrganizationRepo
-	orgCache   *cache.OrganizationCache
-	orgGuard   *guard.OrganizationGuard
-	groupRepo  repo.GroupRepo
-	groupGuard *guard.GroupGuard
-	groupCache *cache.GroupCache
-	config     config.Config
-}
-
-type NewUserServiceOptions struct {
-	UserRepo         repo.UserRepo
-	OrganizationRepo repo.OrganizationRepo
-	GroupRepo        repo.GroupRepo
-}
-
-func NewUserService(opts NewUserServiceOptions) *UserService {
-	svc := &UserService{
-		userMapper: newUserMapper(),
-		userSearch: search.NewUserSearch(),
-		orgCache:   cache.NewOrganizationCache(),
-		orgGuard:   guard.NewOrganizationGuard(),
-		groupGuard: guard.NewGroupGuard(),
-		groupCache: cache.NewGroupCache(),
-		config:     config.GetConfig(),
-	}
-	if opts.UserRepo != nil {
-		svc.userRepo = opts.UserRepo
-	} else {
-		svc.userRepo = repo.NewUserRepo()
-	}
-	if opts.OrganizationRepo != nil {
-		svc.orgRepo = opts.OrganizationRepo
-	} else {
-		svc.orgRepo = repo.NewOrganizationRepo()
-	}
-	if opts.GroupRepo != nil {
-		svc.groupRepo = opts.GroupRepo
-	} else {
-		svc.groupRepo = repo.NewGroupRepo()
-	}
-	return svc
 }
 
 func (svc *UserService) List(opts UserListOptions, userID string) (*UserList, error) {

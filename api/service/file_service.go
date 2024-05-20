@@ -22,6 +22,63 @@ import (
 	"github.com/reactivex/rxgo/v2"
 )
 
+type FileService struct {
+	fileRepo       repo.FileRepo
+	fileSearch     *search.FileSearch
+	fileGuard      *guard.FileGuard
+	fileMapper     *FileMapper
+	fileCache      *cache.FileCache
+	workspaceCache *cache.WorkspaceCache
+	workspaceRepo  repo.WorkspaceRepo
+	workspaceGuard *guard.WorkspaceGuard
+	workspaceSvc   *WorkspaceService
+	snapshotRepo   repo.SnapshotRepo
+	snapshotSvc    *SnapshotService
+	userRepo       repo.UserRepo
+	userMapper     *userMapper
+	groupCache     *cache.GroupCache
+	groupGuard     *guard.GroupGuard
+	groupMapper    *groupMapper
+	permissionRepo repo.PermissionRepo
+	fileIdent      *infra.FileIdentifier
+	s3             *infra.S3Manager
+	pipelineClient *client.PipelineClient
+	config         config.Config
+}
+
+func NewFileService() *FileService {
+	return &FileService{
+		fileRepo:       repo.NewFileRepo(),
+		fileCache:      cache.NewFileCache(),
+		fileSearch:     search.NewFileSearch(),
+		fileGuard:      guard.NewFileGuard(),
+		fileMapper:     NewFileMapper(),
+		workspaceGuard: guard.NewWorkspaceGuard(),
+		workspaceCache: cache.NewWorkspaceCache(),
+		workspaceRepo:  repo.NewWorkspaceRepo(),
+		workspaceSvc:   NewWorkspaceService(),
+		snapshotRepo:   repo.NewSnapshotRepo(),
+		snapshotSvc:    NewSnapshotService(),
+		userRepo:       repo.NewUserRepo(),
+		userMapper:     newUserMapper(),
+		groupCache:     cache.NewGroupCache(),
+		groupGuard:     guard.NewGroupGuard(),
+		groupMapper:    newGroupMapper(),
+		permissionRepo: repo.NewPermissionRepo(),
+		fileIdent:      infra.NewFileIdentifier(),
+		s3:             infra.NewS3Manager(),
+		pipelineClient: client.NewPipelineClient(),
+		config:         config.GetConfig(),
+	}
+}
+
+type FileCreateOptions struct {
+	WorkspaceID string  `json:"workspaceId" validate:"required"`
+	Name        string  `json:"name" validate:"required,max=255"`
+	Type        string  `json:"type" validate:"required,oneof=file folder"`
+	ParentID    *string `json:"parentId" validate:"required"`
+}
+
 type File struct {
 	ID          string     `json:"id"`
 	WorkspaceID string     `json:"workspaceId"`
@@ -38,192 +95,6 @@ type File struct {
 	SnapshotID  *string    `json:"snapshotId,omitempty"`
 	CreateTime  string     `json:"createTime"`
 	UpdateTime  *string    `json:"updateTime,omitempty"`
-}
-
-type FileList struct {
-	Data          []*File    `json:"data"`
-	TotalPages    uint       `json:"totalPages"`
-	TotalElements uint       `json:"totalElements"`
-	Page          uint       `json:"page"`
-	Size          uint       `json:"size"`
-	Query         *FileQuery `json:"query,omitempty"`
-}
-
-type FileListOptions struct {
-	Page      uint
-	Size      uint
-	SortBy    string
-	SortOrder string
-	Query     *FileQuery
-}
-
-type FileQuery struct {
-	Text             string  `json:"text" validate:"required"`
-	Type             *string `json:"type,omitempty" validate:"omitempty,oneof=file folder"`
-	CreateTimeAfter  *int64  `json:"createTimeAfter,omitempty"`
-	CreateTimeBefore *int64  `json:"createTimeBefore,omitempty"`
-	UpdateTimeAfter  *int64  `json:"updateTimeAfter,omitempty"`
-	UpdateTimeBefore *int64  `json:"updateTimeBefore,omitempty"`
-}
-
-type FileCreateOptions struct {
-	WorkspaceID string  `json:"workspaceId" validate:"required"`
-	Name        string  `json:"name" validate:"required,max=255"`
-	Type        string  `json:"type" validate:"required,oneof=file folder"`
-	ParentID    *string `json:"parentId" validate:"required"`
-}
-
-type FileCreateFolderOptions struct {
-	WorkspaceID string  `json:"workspaceId" validate:"required"`
-	Name        string  `json:"name" validate:"required,max=255"`
-	ParentID    *string `json:"parentId"`
-}
-
-type FileCopyOptions struct {
-	IDs []string `json:"ids" validate:"required"`
-}
-
-type FileBatchDeleteOptions struct {
-	IDs []string `json:"ids" validate:"required"`
-}
-
-type FileBatchGetOptions struct {
-	IDs []string `json:"ids" validate:"required"`
-}
-
-type FileGrantUserPermissionOptions struct {
-	UserID     string   `json:"userId" validate:"required"`
-	IDs        []string `json:"ids" validate:"required"`
-	Permission string   `json:"permission" validate:"required,oneof=viewer editor owner"`
-}
-
-type FileRevokeUserPermissionOptions struct {
-	IDs    []string `json:"ids" validate:"required"`
-	UserID string   `json:"userId" validate:"required"`
-}
-
-type FileGrantGroupPermissionOptions struct {
-	GroupID    string   `json:"groupId" validate:"required"`
-	IDs        []string `json:"ids" validate:"required"`
-	Permission string   `json:"permission" validate:"required,oneof=viewer editor owner"`
-}
-
-type FileRevokeGroupPermissionOptions struct {
-	IDs     []string `json:"ids" validate:"required"`
-	GroupID string   `json:"groupId" validate:"required"`
-}
-
-type FileMoveOptions struct {
-	IDs []string `json:"ids" validate:"required"`
-}
-
-type FileRenameOptions struct {
-	Name string `json:"name" validate:"required,max=255"`
-}
-
-type FileUpdateOCRLanguageOptions struct {
-	ID string `json:"id" validate:"required"`
-}
-
-type UserPermission struct {
-	ID         string `json:"id"`
-	User       *User  `json:"user"`
-	Permission string `json:"permission"`
-}
-
-type GroupPermission struct {
-	ID         string `json:"id"`
-	Group      *Group `json:"group"`
-	Permission string `json:"permission"`
-}
-
-type FileService struct {
-	fileRepo         repo.FileRepo
-	fileSearch       *search.FileSearch
-	fileGuard        *guard.FileGuard
-	fileMapper       *FileMapper
-	fileCache        *cache.FileCache
-	workspaceCache   *cache.WorkspaceCache
-	workspaceRepo    repo.WorkspaceRepo
-	workspaceGuard   *guard.WorkspaceGuard
-	workspaceSvc     *WorkspaceService
-	snapshotRepo     repo.SnapshotRepo
-	snapshotSvc      *SnapshotService
-	userRepo         repo.UserRepo
-	userMapper       *userMapper
-	groupCache       *cache.GroupCache
-	groupGuard       *guard.GroupGuard
-	groupMapper      *groupMapper
-	permissionRepo   repo.PermissionRepo
-	fileIdent        *infra.FileIdentifier
-	s3               *infra.S3Manager
-	conversionClient *client.ConversionPipelineClient
-	config           config.Config
-}
-
-type NewFileServiceOptions struct {
-	FileRepo         repo.FileRepo
-	WorkspaceRepo    repo.WorkspaceRepo
-	SnapshotRepo     repo.SnapshotRepo
-	UserRepo         repo.UserRepo
-	PermissionRepo   repo.PermissionRepo
-	WorkspaceService *WorkspaceService
-	SnapshotService  *SnapshotService
-}
-
-func NewFileService(opts NewFileServiceOptions) *FileService {
-	svc := &FileService{
-		fileCache:        cache.NewFileCache(),
-		fileSearch:       search.NewFileSearch(),
-		fileGuard:        guard.NewFileGuard(),
-		fileMapper:       NewFileMapper(),
-		workspaceGuard:   guard.NewWorkspaceGuard(),
-		workspaceCache:   cache.NewWorkspaceCache(),
-		userMapper:       newUserMapper(),
-		groupCache:       cache.NewGroupCache(),
-		groupGuard:       guard.NewGroupGuard(),
-		groupMapper:      newGroupMapper(),
-		fileIdent:        infra.NewFileIdentifier(),
-		s3:               infra.NewS3Manager(),
-		conversionClient: client.NewConversionPipelineClient(),
-		config:           config.GetConfig(),
-	}
-	if opts.FileRepo != nil {
-		svc.fileRepo = opts.FileRepo
-	} else {
-		svc.fileRepo = repo.NewFileRepo()
-	}
-	if opts.WorkspaceRepo != nil {
-		svc.workspaceRepo = opts.WorkspaceRepo
-	} else {
-		svc.workspaceRepo = repo.NewWorkspaceRepo()
-	}
-	if opts.SnapshotRepo != nil {
-		svc.snapshotRepo = opts.SnapshotRepo
-	} else {
-		svc.snapshotRepo = repo.NewSnapshotRepo()
-	}
-	if opts.UserRepo != nil {
-		svc.userRepo = opts.UserRepo
-	} else {
-		svc.userRepo = repo.NewUserRepo()
-	}
-	if opts.PermissionRepo != nil {
-		svc.permissionRepo = opts.PermissionRepo
-	} else {
-		svc.permissionRepo = repo.NewPermissionRepo()
-	}
-	if opts.WorkspaceService != nil {
-		svc.workspaceSvc = opts.WorkspaceService
-	} else {
-		svc.workspaceSvc = NewWorkspaceService(NewWorkspaceServiceOptions{})
-	}
-	if opts.SnapshotService != nil {
-		svc.snapshotSvc = opts.SnapshotService
-	} else {
-		svc.snapshotSvc = NewSnapshotService(NewSnapshotServiceOptions{})
-	}
-	return svc
 }
 
 func (svc *FileService) Create(opts FileCreateOptions, userID string) (*File, error) {
@@ -387,7 +258,7 @@ func (svc *FileService) Store(fileID string, filePath string, userID string) (*F
 		return nil, err
 	}
 	if !exceedsProcessingLimit {
-		if err := svc.conversionClient.Run(&client.PipelineRunOptions{
+		if err := svc.pipelineClient.Run(&client.PipelineRunOptions{
 			FileID:     file.GetID(),
 			SnapshotID: snapshot.GetID(),
 			Bucket:     original.Bucket,
@@ -665,6 +536,32 @@ func (svc *FileService) ListByPath(path string, userID string) ([]*File, error) 
 	} else {
 		return nil, errorpkg.NewInternalServerError(fmt.Errorf("invalid file type %s", currentType))
 	}
+}
+
+type FileQuery struct {
+	Text             string  `json:"text" validate:"required"`
+	Type             *string `json:"type,omitempty" validate:"omitempty,oneof=file folder"`
+	CreateTimeAfter  *int64  `json:"createTimeAfter,omitempty"`
+	CreateTimeBefore *int64  `json:"createTimeBefore,omitempty"`
+	UpdateTimeAfter  *int64  `json:"updateTimeAfter,omitempty"`
+	UpdateTimeBefore *int64  `json:"updateTimeBefore,omitempty"`
+}
+
+type FileList struct {
+	Data          []*File    `json:"data"`
+	TotalPages    uint       `json:"totalPages"`
+	TotalElements uint       `json:"totalElements"`
+	Page          uint       `json:"page"`
+	Size          uint       `json:"size"`
+	Query         *FileQuery `json:"query,omitempty"`
+}
+
+type FileListOptions struct {
+	Page      uint
+	Size      uint
+	SortBy    string
+	SortOrder string
+	Query     *FileQuery
 }
 
 func (svc *FileService) List(id string, opts FileListOptions, userID string) (*FileList, error) {
@@ -1388,6 +1285,12 @@ func (svc *FileService) RevokeGroupPermission(ids []string, groupID string, user
 	return nil
 }
 
+type UserPermission struct {
+	ID         string `json:"id"`
+	User       *User  `json:"user"`
+	Permission string `json:"permission"`
+}
+
 func (svc *FileService) GetUserPermissions(id string, userID string) ([]*UserPermission, error) {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
@@ -1420,6 +1323,12 @@ func (svc *FileService) GetUserPermissions(id string, userID string) ([]*UserPer
 		})
 	}
 	return res, nil
+}
+
+type GroupPermission struct {
+	ID         string `json:"id"`
+	Group      *Group `json:"group"`
+	Permission string `json:"permission"`
 }
 
 func (svc *FileService) GetGroupPermissions(id string, userID string) ([]*GroupPermission, error) {

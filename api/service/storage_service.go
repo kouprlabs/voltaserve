@@ -7,12 +7,6 @@ import (
 	"voltaserve/repo"
 )
 
-type StorageUsage struct {
-	Bytes      int64 `json:"bytes"`
-	MaxBytes   int64 `json:"maxBytes"`
-	Percentage int   `json:"percentage"`
-}
-
 type StorageService struct {
 	workspaceRepo  repo.WorkspaceRepo
 	workspaceCache *cache.WorkspaceCache
@@ -24,36 +18,23 @@ type StorageService struct {
 	userRepo       repo.UserRepo
 }
 
-type NewStorageServiceOptions struct {
-	WorkspaceRepo repo.WorkspaceRepo
-	FileRepo      repo.FileRepo
-	UserRepo      repo.UserRepo
-}
-
-func NewStorageService(opts NewStorageServiceOptions) *StorageService {
-	svc := &StorageService{
+func NewStorageService() *StorageService {
+	return &StorageService{
+		workspaceRepo:  repo.NewWorkspaceRepo(),
 		workspaceCache: cache.NewWorkspaceCache(),
 		workspaceGuard: guard.NewWorkspaceGuard(),
+		fileRepo:       repo.NewFileRepo(),
 		fileCache:      cache.NewFileCache(),
 		fileGuard:      guard.NewFileGuard(),
 		storageMapper:  newStorageMapper(),
+		userRepo:       repo.NewUserRepo(),
 	}
-	if opts.WorkspaceRepo != nil {
-		svc.workspaceRepo = opts.WorkspaceRepo
-	} else {
-		svc.workspaceRepo = repo.NewWorkspaceRepo()
-	}
-	if opts.FileRepo != nil {
-		svc.fileRepo = opts.FileRepo
-	} else {
-		svc.fileRepo = repo.NewFileRepo()
-	}
-	if opts.UserRepo != nil {
-		svc.userRepo = opts.UserRepo
-	} else {
-		svc.userRepo = repo.NewUserRepo()
-	}
-	return svc
+}
+
+type StorageUsage struct {
+	Bytes      int64 `json:"bytes"`
+	MaxBytes   int64 `json:"maxBytes"`
+	Percentage int   `json:"percentage"`
 }
 
 func (svc *StorageService) GetAccountUsage(userID string) (*StorageUsage, error) {

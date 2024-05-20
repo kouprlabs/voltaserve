@@ -12,18 +12,10 @@ type ConversionWebhookRouter struct {
 	snapshotSvc *service.SnapshotService
 }
 
-type NewConversionWebhookRouterOptions struct {
-	SnapshotService *service.SnapshotService
-}
-
-func NewConversionWebhookRouter(opts NewConversionWebhookRouterOptions) *ConversionWebhookRouter {
-	r := &ConversionWebhookRouter{}
-	if opts.SnapshotService != nil {
-		r.snapshotSvc = opts.SnapshotService
-	} else {
-		r.snapshotSvc = service.NewSnapshotService(service.NewSnapshotServiceOptions{})
+func NewConversionWebhookRouter() *ConversionWebhookRouter {
+	return &ConversionWebhookRouter{
+		snapshotSvc: service.NewSnapshotService(),
 	}
-	return r
 }
 
 func (r *ConversionWebhookRouter) AppendInternalRoutes(g fiber.Router) {
@@ -37,7 +29,7 @@ func (r *ConversionWebhookRouter) AppendInternalRoutes(g fiber.Router) {
 //	@Tags			Files
 //	@Id				files_update_snapshot
 //	@Produce		json
-//	@Param			body	body	service.FileUpdateSnapshotOptions	true	"Body"
+//	@Param			body	body	service.SnapshotUpdateOptions	true	"Body"
 //	@Success		201
 //	@Failure		401	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
@@ -47,7 +39,7 @@ func (r *ConversionWebhookRouter) UpdateSnapshot(c *fiber.Ctx) error {
 	if apiKey == "" {
 		return errorpkg.NewMissingQueryParamError("api_key")
 	}
-	opts := new(service.FileUpdateSnapshotOptions)
+	opts := new(service.SnapshotUpdateOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
 	}

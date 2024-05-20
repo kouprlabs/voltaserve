@@ -51,42 +51,45 @@ func main() {
 
 	f := v1.Group("files")
 
-	downloads := router.NewDownloadsRouter(router.NewDownloadsRouterOptions{})
+	downloads := router.NewDownloadsRouter()
 	downloads.AppendNonJWTRoutes(f)
 
-	conversionWebhook := router.NewConversionWebhookRouter(router.NewConversionWebhookRouterOptions{})
+	conversionWebhook := router.NewConversionWebhookRouter()
 	conversionWebhook.AppendInternalRoutes(f)
 
 	app.Use(jwtware.New(jwtware.Config{
 		SigningKey: jwtware.SigningKey{Key: []byte(cfg.Security.JWTSigningKey)},
 	}))
 
-	files := router.NewFileRouter(router.NewFileRouterOptions{})
+	files := router.NewFileRouter()
 	files.AppendRoutes(f)
 
-	snapshots := router.NewSnapshotRouter(router.NewSnapshotRouterOptions{})
+	snapshots := router.NewSnapshotRouter()
 	snapshots.AppendRoutes(f)
 
-	invitations := router.NewInvitationRouter(router.NewInvitationRouterOptions{})
+	invitations := router.NewInvitationRouter()
 	invitations.AppendRoutes(v1.Group("invitations"))
 
-	notifications := router.NewNotificationRouter(router.NewNotificationRouterOptions{})
+	notifications := router.NewNotificationRouter()
 	notifications.AppendRoutes(v1.Group("notifications"))
 
-	organizations := router.NewOrganizationRouter(router.NewOrganizationRouterOptions{})
+	organizations := router.NewOrganizationRouter()
 	organizations.AppendRoutes(v1.Group("organizations"))
 
-	storage := router.NewStorageRouter(router.NewStorageRouterOptions{})
+	storage := router.NewStorageRouter()
 	storage.AppendRoutes(v1.Group("storage"))
 
-	workspaces := router.NewWorkspaceRouter(router.NewWorkspaceRouterOptions{})
+	workspaces := router.NewWorkspaceRouter()
 	workspaces.AppendRoutes(v1.Group("workspaces"))
 
-	groups := router.NewGroupRouter(router.NewGroupRouterOptions{})
+	groups := router.NewGroupRouter()
 	groups.AppendRoutes(v1.Group("groups"))
 
-	users := router.NewUserRouter(router.NewUserRouterOptions{})
+	users := router.NewUserRouter()
 	users.AppendRoutes(v1.Group("users"))
+
+	ai := router.NewAIRouter()
+	ai.AppendRoutes(v1.Group("ai"))
 
 	if err := app.Listen(fmt.Sprintf(":%d", cfg.Port)); err != nil {
 		panic(err)

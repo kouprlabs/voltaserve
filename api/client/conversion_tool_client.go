@@ -19,23 +19,23 @@ import (
 	"go.uber.org/zap"
 )
 
-type ToolsClient struct {
+type ToolClient struct {
 	config config.Config
 	logger *zap.SugaredLogger
 }
 
-func NewToolsClient() *ToolsClient {
+func NewToolClient() *ToolClient {
 	logger, err := infra.GetLogger()
 	if err != nil {
 		panic(err)
 	}
-	return &ToolsClient{
+	return &ToolClient{
 		config: config.GetConfig(),
 		logger: logger,
 	}
 }
 
-func (cl *ToolsClient) ResizeImage(inputPath string, width int, height int, outputPath string) error {
+func (cl *ToolClient) ResizeImage(inputPath string, width int, height int, outputPath string) error {
 	var widthStr string
 	if width == 0 {
 		widthStr = ""
@@ -120,7 +120,7 @@ func (cl *ToolsClient) ResizeImage(inputPath string, width int, height int, outp
 	return nil
 }
 
-func (cl *ToolsClient) ThumbnailFromImage(inputPath string, width int, height int, outputPath string) error {
+func (cl *ToolClient) ThumbnailFromImage(inputPath string, width int, height int, outputPath string) error {
 	var widthStr string
 	if width == 0 {
 		widthStr = ""
@@ -205,7 +205,7 @@ func (cl *ToolsClient) ThumbnailFromImage(inputPath string, width int, height in
 	return nil
 }
 
-func (cl *ToolsClient) ConvertImage(inputPath string, outputPath string) error {
+func (cl *ToolClient) ConvertImage(inputPath string, outputPath string) error {
 	file, err := os.Open(inputPath)
 	if err != nil {
 		return err
@@ -277,7 +277,7 @@ func (cl *ToolsClient) ConvertImage(inputPath string, outputPath string) error {
 	return nil
 }
 
-func (cl *ToolsClient) RemoveAlphaChannel(inputPath string, outputPath string) error {
+func (cl *ToolClient) RemoveAlphaChannel(inputPath string, outputPath string) error {
 	file, err := os.Open(inputPath)
 	if err != nil {
 		return err
@@ -354,7 +354,7 @@ type ImageProps struct {
 	Height int `json:"height"`
 }
 
-func (cl *ToolsClient) MeasureImage(inputPath string) (model.ImageProps, error) {
+func (cl *ToolClient) MeasureImage(inputPath string) (model.ImageProps, error) {
 	file, err := os.Open(inputPath)
 	if err != nil {
 		return model.ImageProps{}, err
@@ -428,7 +428,7 @@ func (cl *ToolsClient) MeasureImage(inputPath string) (model.ImageProps, error) 
 	return model.ImageProps{Width: width, Height: height}, nil
 }
 
-func (cl *ToolsClient) TSVFromImage(inputPath string, model string) (string, error) {
+func (cl *ToolClient) TSVFromImage(inputPath string, model string) (string, error) {
 	file, err := os.Open(inputPath)
 	if err != nil {
 		return "", err
@@ -491,7 +491,7 @@ func (cl *ToolsClient) TSVFromImage(inputPath string, model string) (string, err
 	return string(output), nil
 }
 
-func (cl *ToolsClient) TextFromImage(inputPath string, model string) (string, error) {
+func (cl *ToolClient) TextFromImage(inputPath string, model string) (string, error) {
 	file, err := os.Open(inputPath)
 	if err != nil {
 		return "", err
@@ -554,7 +554,7 @@ func (cl *ToolsClient) TextFromImage(inputPath string, model string) (string, er
 	return string(output), nil
 }
 
-func (cl *ToolsClient) DPIFromImage(inputPath string) (int, error) {
+func (cl *ToolClient) DPIFromImage(inputPath string) (int, error) {
 	file, err := os.Open(inputPath)
 	if err != nil {
 		return -1, err
@@ -630,7 +630,7 @@ func (cl *ToolsClient) DPIFromImage(inputPath string) (int, error) {
 	return int((xRes + yRes) / 2), nil
 }
 
-func (cl *ToolsClient) OCRFromPDF(inputPath string, language *string, dpi *int) (string, error) {
+func (cl *ToolClient) OCRFromPDF(inputPath string, language *string, dpi *int) (string, error) {
 	file, err := os.Open(inputPath)
 	if err != nil {
 		return "", err
@@ -716,7 +716,7 @@ func (cl *ToolsClient) OCRFromPDF(inputPath string, language *string, dpi *int) 
 	return outputPath, nil
 }
 
-func (cl *ToolsClient) TextFromPDF(inputPath string) (string, error) {
+func (cl *ToolClient) TextFromPDF(inputPath string) (string, error) {
 	file, err := os.Open(inputPath)
 	if err != nil {
 		return "", err

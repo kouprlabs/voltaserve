@@ -1,10 +1,24 @@
+import { Button } from '@chakra-ui/react'
+import cx from 'classnames'
+import { IconDownload } from '@/lib'
+
 const AIText = () => {
   return (
-    <div>
-      Text, lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-      eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
-      minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex
-      ea commodo consequat.
+    <div
+      className={cx(
+        'flex',
+        'flex-col',
+        'items-center',
+        'justify-center',
+        'gap-1',
+      )}
+    >
+      <Button type="button" leftIcon={<IconDownload />}>
+        Download Text
+      </Button>
+      <Button type="button" leftIcon={<IconDownload />}>
+        Download PDF
+      </Button>
     </div>
   )
 }

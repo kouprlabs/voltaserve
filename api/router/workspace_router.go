@@ -14,18 +14,10 @@ type WorkspaceRouter struct {
 	workspaceSvc *service.WorkspaceService
 }
 
-type NewWorkspaceRouterOptions struct {
-	WorkspaceService *service.WorkspaceService
-}
-
-func NewWorkspaceRouter(opts NewWorkspaceRouterOptions) *WorkspaceRouter {
-	r := &WorkspaceRouter{}
-	if opts.WorkspaceService != nil {
-		r.workspaceSvc = opts.WorkspaceService
-	} else {
-		r.workspaceSvc = service.NewWorkspaceService(service.NewWorkspaceServiceOptions{})
+func NewWorkspaceRouter() *WorkspaceRouter {
+	return &WorkspaceRouter{
+		workspaceSvc: service.NewWorkspaceService(),
 	}
-	return r
 }
 
 func (r *WorkspaceRouter) AppendRoutes(g fiber.Router) {
@@ -143,6 +135,10 @@ func (r *WorkspaceRouter) List(c *fiber.Ctx) error {
 	return c.JSON(res)
 }
 
+type WorkspaceUpdateNameOptions struct {
+	Name string `json:"name" validate:"required,max=255"`
+}
+
 // UpdateName godoc
 //
 //	@Summary		Update Name
@@ -152,13 +148,13 @@ func (r *WorkspaceRouter) List(c *fiber.Ctx) error {
 //	@Accept			json
 //	@Produce		json
 //	@Param			id		path		string								true	"ID"
-//	@Param			body	body		service.WorkspaceUpdateNameOptions	true	"Body"
+//	@Param			body	body		WorkspaceUpdateNameOptions	true	"Body"
 //	@Success		200		{object}	service.Workspace
 //	@Failure		400		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/workspaces/{id}/update_name [post]
 func (r *WorkspaceRouter) UpdateName(c *fiber.Ctx) error {
-	opts := new(service.WorkspaceUpdateNameOptions)
+	opts := new(WorkspaceUpdateNameOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
 	}
@@ -167,6 +163,10 @@ func (r *WorkspaceRouter) UpdateName(c *fiber.Ctx) error {
 		return err
 	}
 	return c.JSON(res)
+}
+
+type WorkspaceUpdateStorageCapacityOptions struct {
+	StorageCapacity int64 `json:"storageCapacity" validate:"required,min=1"`
 }
 
 // UpdateStorageCapacity godoc
@@ -178,13 +178,13 @@ func (r *WorkspaceRouter) UpdateName(c *fiber.Ctx) error {
 //	@Accept			json
 //	@Produce		json
 //	@Param			id		path		string											true	"Id"
-//	@Param			body	body		service.WorkspaceUpdateStorageCapacityOptions	true	"Body"
+//	@Param			body	body		WorkspaceUpdateStorageCapacityOptions	true	"Body"
 //	@Success		200		{object}	service.Workspace
 //	@Failure		400		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/workspaces/{id}/update_storage_capacity [post]
 func (r *WorkspaceRouter) UpdateStorageCapacity(c *fiber.Ctx) error {
-	opts := new(service.WorkspaceUpdateStorageCapacityOptions)
+	opts := new(WorkspaceUpdateStorageCapacityOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
 	}

@@ -44,10 +44,10 @@ Generate `swagger.yml`:
 swag init --output ./docs --outputTypes yaml
 ```
 
-Preview (will be served at [http://localhost:18080](http://localhost:18080)):
+Preview (will be served at [http://localhost:19090](http://localhost:19090)):
 
 ```shell
-npx @redocly/cli preview-docs --port 18080 ./docs/swagger.yaml
+npx @redocly/cli preview-docs --port 19090 ./docs/swagger.yaml
 ```
 
 Generate the final static HTML documentation:

@@ -13,36 +13,6 @@ import (
 	"voltaserve/repo"
 )
 
-type Invitation struct {
-	ID           string        `json:"id"`
-	Owner        *User         `json:"owner,omitempty"`
-	Email        string        `json:"email"`
-	Organization *Organization `json:"organization,omitempty"`
-	Status       string        `json:"status"`
-	CreateTime   string        `json:"createTime"`
-	UpdateTime   *string       `json:"updateTime"`
-}
-
-type InvitationList struct {
-	Data          []*Invitation `json:"data"`
-	TotalPages    uint          `json:"totalPages"`
-	TotalElements uint          `json:"totalElements"`
-	Page          uint          `json:"page"`
-	Size          uint          `json:"size"`
-}
-
-type InvitationCreateOptions struct {
-	OrganizationID string   `json:"organizationId" validate:"required"`
-	Emails         []string `json:"emails" validate:"required,dive,email"`
-}
-
-type InvitationListOptions struct {
-	Page      uint
-	Size      uint
-	SortBy    string
-	SortOrder string
-}
-
 type InvitationService struct {
 	orgRepo          repo.OrganizationRepo
 	orgMapper        *organizationMapper
@@ -55,37 +25,23 @@ type InvitationService struct {
 	config           config.Config
 }
 
-type NewInvitationServiceOptions struct {
-	OrganizationRepo repo.OrganizationRepo
-	InvitationRepo   repo.InvitationRepo
-	UserRepo         repo.UserRepo
-}
-
-func NewInvitationService(opts NewInvitationServiceOptions) *InvitationService {
-	svc := &InvitationService{
+func NewInvitationService() *InvitationService {
+	return &InvitationService{
+		orgRepo:          repo.NewOrganizationRepo(),
 		orgCache:         cache.NewOrganizationCache(),
 		orgGuard:         guard.NewOrganizationGuard(),
+		invitationRepo:   repo.NewInvitationRepo(),
 		invitationMapper: newInvitationMapper(),
+		userRepo:         repo.NewUserRepo(),
 		mailTmpl:         infra.NewMailTemplate(),
 		orgMapper:        newOrganizationMapper(),
 		config:           config.GetConfig(),
 	}
-	if opts.OrganizationRepo != nil {
-		svc.orgRepo = opts.OrganizationRepo
-	} else {
-		svc.orgRepo = repo.NewOrganizationRepo()
-	}
-	if opts.InvitationRepo != nil {
-		svc.invitationRepo = opts.InvitationRepo
-	} else {
-		svc.invitationRepo = repo.NewInvitationRepo()
-	}
-	if opts.UserRepo != nil {
-		svc.userRepo = opts.UserRepo
-	} else {
-		svc.userRepo = repo.NewUserRepo()
-	}
-	return svc
+}
+
+type InvitationCreateOptions struct {
+	OrganizationID string   `json:"organizationId" validate:"required"`
+	Emails         []string `json:"emails" validate:"required,dive,email"`
 }
 
 func (svc *InvitationService) Create(opts InvitationCreateOptions, userID string) error {
@@ -163,6 +119,31 @@ func (svc *InvitationService) Create(opts InvitationCreateOptions, userID string
 		}
 	}
 	return nil
+}
+
+type InvitationListOptions struct {
+	Page      uint
+	Size      uint
+	SortBy    string
+	SortOrder string
+}
+
+type Invitation struct {
+	ID           string        `json:"id"`
+	Owner        *User         `json:"owner,omitempty"`
+	Email        string        `json:"email"`
+	Organization *Organization `json:"organization,omitempty"`
+	Status       string        `json:"status"`
+	CreateTime   string        `json:"createTime"`
+	UpdateTime   *string       `json:"updateTime"`
+}
+
+type InvitationList struct {
+	Data          []*Invitation `json:"data"`
+	TotalPages    uint          `json:"totalPages"`
+	TotalElements uint          `json:"totalElements"`
+	Page          uint          `json:"page"`
+	Size          uint          `json:"size"`
 }
 
 func (svc *InvitationService) GetIncoming(opts InvitationListOptions, userID string) (*InvitationList, error) {

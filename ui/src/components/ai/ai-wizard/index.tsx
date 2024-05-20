@@ -43,10 +43,16 @@ const AiWizard = () => {
     }
   }, [activeStep, setActiveStep, dispatch])
 
+  const handlePreviousStep = useCallback(() => {
+    if (activeStep > 0) {
+      setActiveStep(activeStep - 1)
+    }
+  }, [activeStep, setActiveStep, dispatch])
+
   return (
     <>
       <ModalBody>
-        <div className={cx('flex', 'flex-col', 'gap-1.5')}>
+        <div className={cx('flex', 'flex-col', 'gap-2.5')}>
           <Stepper index={activeStep}>
             {steps.map((step, index) => (
               <Step key={index}>
@@ -91,6 +97,15 @@ const AiWizard = () => {
             onClick={() => dispatch(modalDidClose())}
           >
             Cancel
+          </Button>
+          <Button
+            type="submit"
+            variant="outline"
+            colorScheme={'blue'}
+            isDisabled={activeStep === 0}
+            onClick={handlePreviousStep}
+          >
+            Previous
           </Button>
           <Button
             type="submit"

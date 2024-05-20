@@ -12,55 +12,6 @@ import (
 	"voltaserve/search"
 )
 
-type Group struct {
-	ID           string       `json:"id"`
-	Name         string       `json:"name"`
-	Image        *string      `json:"image,omitempty"`
-	Organization Organization `json:"organization"`
-	Permission   string       `json:"permission"`
-	CreateTime   string       `json:"createTime,omitempty"`
-	UpdateTime   *string      `json:"updateTime"`
-}
-
-type GroupList struct {
-	Data          []*Group `json:"data"`
-	TotalPages    uint     `json:"totalPages"`
-	TotalElements uint     `json:"totalElements"`
-	Page          uint     `json:"page"`
-	Size          uint     `json:"size"`
-}
-
-type GroupCreateOptions struct {
-	Name           string  `json:"name" validate:"required,max=255"`
-	Image          *string `json:"image"`
-	OrganizationID string  `json:"organizationId" validate:"required"`
-}
-
-type GroupListOptions struct {
-	Query          string
-	OrganizationID string
-	Page           uint
-	Size           uint
-	SortBy         string
-	SortOrder      string
-}
-
-type GroupUpdateNameOptions struct {
-	Name string `json:"name" validate:"required,max=255"`
-}
-
-type GroupUpdateImageOptions struct {
-	Image string `json:"image" validate:"required,base64"`
-}
-
-type GroupAddMemberOptions struct {
-	UserID string `json:"userId" validate:"required"`
-}
-
-type GroupRemoveMemberOptions struct {
-	UserID string `json:"userId" validate:"required"`
-}
-
 type GroupService struct {
 	groupRepo      repo.GroupRepo
 	groupGuard     *guard.GroupGuard
@@ -81,55 +32,42 @@ type GroupService struct {
 	config         config.Config
 }
 
-type NewGroupServiceOptions struct {
-	GroupRepo        repo.GroupRepo
-	UserRepo         repo.UserRepo
-	WorkspaceRepo    repo.WorkspaceRepo
-	FileRepo         repo.FileRepo
-	OrganizationRepo repo.OrganizationRepo
-}
-
-func NewGroupService(opts NewGroupServiceOptions) *GroupService {
-	svc := &GroupService{
+func NewGroupService() *GroupService {
+	return &GroupService{
+		groupRepo:      repo.NewGroupRepo(),
 		groupGuard:     guard.NewGroupGuard(),
 		groupCache:     cache.NewGroupCache(),
 		groupSearch:    search.NewGroupSearch(),
 		groupMapper:    newGroupMapper(),
+		userRepo:       repo.NewUserRepo(),
 		userSearch:     search.NewUserSearch(),
 		userMapper:     newUserMapper(),
+		workspaceRepo:  repo.NewWorkspaceRepo(),
 		workspaceCache: cache.NewWorkspaceCache(),
+		fileRepo:       repo.NewFileRepo(),
 		fileCache:      cache.NewFileCache(),
+		orgRepo:        repo.NewOrganizationRepo(),
 		orgGuard:       guard.NewOrganizationGuard(),
 		orgCache:       cache.NewOrganizationCache(),
 		fileGuard:      guard.NewFileGuard(),
 		config:         config.GetConfig(),
 	}
-	if opts.GroupRepo != nil {
-		svc.groupRepo = opts.GroupRepo
-	} else {
-		svc.groupRepo = repo.NewGroupRepo()
-	}
-	if opts.UserRepo != nil {
-		svc.userRepo = opts.UserRepo
-	} else {
-		svc.userRepo = repo.NewUserRepo()
-	}
-	if opts.WorkspaceRepo != nil {
-		svc.workspaceRepo = opts.WorkspaceRepo
-	} else {
-		svc.workspaceRepo = repo.NewWorkspaceRepo()
-	}
-	if opts.FileRepo != nil {
-		svc.fileRepo = opts.FileRepo
-	} else {
-		svc.fileRepo = repo.NewFileRepo()
-	}
-	if opts.OrganizationRepo != nil {
-		svc.orgRepo = opts.OrganizationRepo
-	} else {
-		svc.orgRepo = repo.NewOrganizationRepo()
-	}
-	return svc
+}
+
+type GroupCreateOptions struct {
+	Name           string  `json:"name" validate:"required,max=255"`
+	Image          *string `json:"image"`
+	OrganizationID string  `json:"organizationId" validate:"required"`
+}
+
+type Group struct {
+	ID           string       `json:"id"`
+	Name         string       `json:"name"`
+	Image        *string      `json:"image,omitempty"`
+	Organization Organization `json:"organization"`
+	Permission   string       `json:"permission"`
+	CreateTime   string       `json:"createTime,omitempty"`
+	UpdateTime   *string      `json:"updateTime"`
 }
 
 func (svc *GroupService) Create(opts GroupCreateOptions, userID string) (*Group, error) {
@@ -190,6 +128,23 @@ func (svc *GroupService) Find(id string, userID string) (*Group, error) {
 		return nil, err
 	}
 	return res, nil
+}
+
+type GroupListOptions struct {
+	Query          string
+	OrganizationID string
+	Page           uint
+	Size           uint
+	SortBy         string
+	SortOrder      string
+}
+
+type GroupList struct {
+	Data          []*Group `json:"data"`
+	TotalPages    uint     `json:"totalPages"`
+	TotalElements uint     `json:"totalElements"`
+	Page          uint     `json:"page"`
+	Size          uint     `json:"size"`
 }
 
 func (svc *GroupService) List(opts GroupListOptions, userID string) (*GroupList, error) {

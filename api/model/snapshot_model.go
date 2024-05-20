@@ -13,12 +13,14 @@ type Snapshot interface {
 	GetOriginal() *S3Object
 	GetPreview() *S3Object
 	GetText() *S3Object
+	GetOCR() *S3Object
 	GetThumbnail() *Thumbnail
 	HasOriginal() bool
 	HasPreview() bool
 	HasText() bool
 	HasThumbnail() bool
 	GetStatus() string
+	GetLanguage() *string
 	GetCreateTime() string
 	GetUpdateTime() *string
 	SetID(string)
@@ -26,8 +28,10 @@ type Snapshot interface {
 	SetOriginal(*S3Object)
 	SetPreview(*S3Object)
 	SetText(*S3Object)
+	SetOCR(*S3Object)
 	SetThumbnail(*Thumbnail)
 	SetStatus(string)
+	SetLanguage(string)
 }
 
 type S3Object struct {

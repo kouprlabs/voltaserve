@@ -17,53 +17,6 @@ import (
 	"github.com/google/uuid"
 )
 
-type Workspace struct {
-	ID              string       `json:"id"`
-	Image           *string      `json:"image,omitempty"`
-	Name            string       `json:"name"`
-	RootID          string       `json:"rootId,omitempty"`
-	StorageCapacity int64        `json:"storageCapacity"`
-	Permission      string       `json:"permission"`
-	Organization    Organization `json:"organization"`
-	CreateTime      string       `json:"createTime"`
-	UpdateTime      *string      `json:"updateTime,omitempty"`
-}
-
-type WorkspaceList struct {
-	Data          []*Workspace `json:"data"`
-	TotalPages    uint         `json:"totalPages"`
-	TotalElements uint         `json:"totalElements"`
-	Page          uint         `json:"page"`
-	Size          uint         `json:"size"`
-}
-
-type WorkspaceCreateOptions struct {
-	Name            string  `json:"name" validate:"required,max=255"`
-	Image           *string `json:"image"`
-	OrganizationID  string  `json:"organizationId" validate:"required"`
-	StorageCapacity int64   `json:"storageCapacity"`
-}
-
-type WorkspaceListOptions struct {
-	Query     string
-	Page      uint
-	Size      uint
-	SortBy    string
-	SortOrder string
-}
-
-type WorkspaceUpdateNameOptions struct {
-	Name string `json:"name" validate:"required,max=255"`
-}
-
-type WorkspaceUpdateStorageCapacityOptions struct {
-	StorageCapacity int64 `json:"storageCapacity" validate:"required,min=1"`
-}
-
-type WorkspaceUpdateIsAutomaticOCREnabledOptions struct {
-	IsEnabled bool `json:"isEnabled" validate:"required"`
-}
-
 type WorkspaceService struct {
 	workspaceRepo   repo.WorkspaceRepo
 	workspaceCache  *cache.WorkspaceCache
@@ -79,40 +32,40 @@ type WorkspaceService struct {
 	config          config.Config
 }
 
-type NewWorkspaceServiceOptions struct {
-	WorkspaceRepo repo.WorkspaceRepo
-	FileRepo      repo.FileRepo
-	UserRepo      repo.UserRepo
-}
-
-func NewWorkspaceService(opts NewWorkspaceServiceOptions) *WorkspaceService {
-	svc := &WorkspaceService{
+func NewWorkspaceService() *WorkspaceService {
+	return &WorkspaceService{
+		workspaceRepo:   repo.NewWorkspaceRepo(),
 		workspaceCache:  cache.NewWorkspaceCache(),
 		workspaceSearch: search.NewWorkspaceSearch(),
 		workspaceGuard:  guard.NewWorkspaceGuard(),
 		workspaceMapper: newWorkspaceMapper(),
+		fileRepo:        repo.NewFileRepo(),
 		fileCache:       cache.NewFileCache(),
 		fileGuard:       guard.NewFileGuard(),
 		fileMapper:      NewFileMapper(),
+		userRepo:        repo.NewUserRepo(),
 		s3:              infra.NewS3Manager(),
 		config:          config.GetConfig(),
 	}
-	if opts.WorkspaceRepo != nil {
-		svc.workspaceRepo = opts.WorkspaceRepo
-	} else {
-		svc.workspaceRepo = repo.NewWorkspaceRepo()
-	}
-	if opts.FileRepo != nil {
-		svc.fileRepo = opts.FileRepo
-	} else {
-		svc.fileRepo = repo.NewFileRepo()
-	}
-	if opts.UserRepo != nil {
-		svc.userRepo = opts.UserRepo
-	} else {
-		svc.userRepo = repo.NewUserRepo()
-	}
-	return svc
+}
+
+type Workspace struct {
+	ID              string       `json:"id"`
+	Image           *string      `json:"image,omitempty"`
+	Name            string       `json:"name"`
+	RootID          string       `json:"rootId,omitempty"`
+	StorageCapacity int64        `json:"storageCapacity"`
+	Permission      string       `json:"permission"`
+	Organization    Organization `json:"organization"`
+	CreateTime      string       `json:"createTime"`
+	UpdateTime      *string      `json:"updateTime,omitempty"`
+}
+
+type WorkspaceCreateOptions struct {
+	Name            string  `json:"name" validate:"required,max=255"`
+	Image           *string `json:"image"`
+	OrganizationID  string  `json:"organizationId" validate:"required"`
+	StorageCapacity int64   `json:"storageCapacity"`
 }
 
 func (svc *WorkspaceService) Create(opts WorkspaceCreateOptions, userID string) (*Workspace, error) {
@@ -195,6 +148,22 @@ func (svc *WorkspaceService) Find(id string, userID string) (*Workspace, error) 
 		return nil, err
 	}
 	return res, nil
+}
+
+type WorkspaceListOptions struct {
+	Query     string
+	Page      uint
+	Size      uint
+	SortBy    string
+	SortOrder string
+}
+
+type WorkspaceList struct {
+	Data          []*Workspace `json:"data"`
+	TotalPages    uint         `json:"totalPages"`
+	TotalElements uint         `json:"totalElements"`
+	Page          uint         `json:"page"`
+	Size          uint         `json:"size"`
 }
 
 func (svc *WorkspaceService) List(opts WorkspaceListOptions, userID string) (*WorkspaceList, error) {

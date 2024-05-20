@@ -79,6 +79,16 @@ func NewS3ObjectNotFoundError(err error) *ErrorResponse {
 	)
 }
 
+func NewSnapshotLanguageNotSet(err error) *ErrorResponse {
+	return NewErrorResponse(
+		"snapshot_language_not_set",
+		http.StatusNotFound,
+		"Snapshot language is not set.",
+		"Snapshot language is not set.",
+		err,
+	)
+}
+
 func NewInvitationNotFoundError(err error) *ErrorResponse {
 	return NewErrorResponse(
 		"invitation_not_found",

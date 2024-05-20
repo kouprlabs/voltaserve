@@ -53,6 +53,191 @@ definitions:
       width:
         type: integer
     type: object
+  router.FileBatchDeleteOptions:
+    properties:
+      ids:
+        items:
+          type: string
+        type: array
+    required:
+    - ids
+    type: object
+  router.FileBatchGetOptions:
+    properties:
+      ids:
+        items:
+          type: string
+        type: array
+    required:
+    - ids
+    type: object
+  router.FileCopyOptions:
+    properties:
+      ids:
+        items:
+          type: string
+        type: array
+    required:
+    - ids
+    type: object
+  router.FileCreateFolderOptions:
+    properties:
+      name:
+        maxLength: 255
+        type: string
+      parentId:
+        type: string
+      workspaceId:
+        type: string
+    required:
+    - name
+    - workspaceId
+    type: object
+  router.FileGrantGroupPermissionOptions:
+    properties:
+      groupId:
+        type: string
+      ids:
+        items:
+          type: string
+        type: array
+      permission:
+        enum:
+        - viewer
+        - editor
+        - owner
+        type: string
+    required:
+    - groupId
+    - ids
+    - permission
+    type: object
+  router.FileGrantUserPermissionOptions:
+    properties:
+      ids:
+        items:
+          type: string
+        type: array
+      permission:
+        enum:
+        - viewer
+        - editor
+        - owner
+        type: string
+      userId:
+        type: string
+    required:
+    - ids
+    - permission
+    - userId
+    type: object
+  router.FileMoveOptions:
+    properties:
+      ids:
+        items:
+          type: string
+        type: array
+    required:
+    - ids
+    type: object
+  router.FileRenameOptions:
+    properties:
+      name:
+        maxLength: 255
+        type: string
+    required:
+    - name
+    type: object
+  router.FileRevokeGroupPermissionOptions:
+    properties:
+      groupId:
+        type: string
+      ids:
+        items:
+          type: string
+        type: array
+    required:
+    - groupId
+    - ids
+    type: object
+  router.FileRevokeUserPermissionOptions:
+    properties:
+      ids:
+        items:
+          type: string
+        type: array
+      userId:
+        type: string
+    required:
+    - ids
+    - userId
+    type: object
+  router.GroupRemoveMemberOptions:
+    properties:
+      userId:
+        type: string
+    required:
+    - userId
+    type: object
+  router.GroupUpdateNameOptions:
+    properties:
+      name:
+        maxLength: 255
+        type: string
+    required:
+    - name
+    type: object
+  router.OrganizationRemoveMemberOptions:
+    properties:
+      userId:
+        type: string
+    required:
+    - userId
+    type: object
+  router.OrganizationUpdateNameOptions:
+    properties:
+      name:
+        maxLength: 255
+        type: string
+    required:
+    - name
+    type: object
+  router.WorkspaceUpdateNameOptions:
+    properties:
+      name:
+        maxLength: 255
+        type: string
+    required:
+    - name
+    type: object
+  router.WorkspaceUpdateStorageCapacityOptions:
+    properties:
+      storageCapacity:
+        minimum: 1
+        type: integer
+    required:
+    - storageCapacity
+    type: object
+  service.AIExtractTextOptions:
+    properties:
+      fileId:
+        type: string
+      snapshotId:
+        type: string
+    required:
+    - fileId
+    - snapshotId
+    type: object
+  service.AIUpdateLanguageOptions:
+    properties:
+      languageId:
+        type: string
+      snapshotId:
+        type: string
+    required:
+    - languageId
+    - snapshotId
+    type: object
   service.Download:
     properties:
       extension:
@@ -97,84 +282,6 @@ definitions:
       workspaceId:
         type: string
     type: object
-  service.FileBatchDeleteOptions:
-    properties:
-      ids:
-        items:
-          type: string
-        type: array
-    required:
-    - ids
-    type: object
-  service.FileBatchGetOptions:
-    properties:
-      ids:
-        items:
-          type: string
-        type: array
-    required:
-    - ids
-    type: object
-  service.FileCopyOptions:
-    properties:
-      ids:
-        items:
-          type: string
-        type: array
-    required:
-    - ids
-    type: object
-  service.FileCreateFolderOptions:
-    properties:
-      name:
-        maxLength: 255
-        type: string
-      parentId:
-        type: string
-      workspaceId:
-        type: string
-    required:
-    - name
-    - workspaceId
-    type: object
-  service.FileGrantGroupPermissionOptions:
-    properties:
-      groupId:
-        type: string
-      ids:
-        items:
-          type: string
-        type: array
-      permission:
-        enum:
-        - viewer
-        - editor
-        - owner
-        type: string
-    required:
-    - groupId
-    - ids
-    - permission
-    type: object
-  service.FileGrantUserPermissionOptions:
-    properties:
-      ids:
-        items:
-          type: string
-        type: array
-      permission:
-        enum:
-        - viewer
-        - editor
-        - owner
-        type: string
-      userId:
-        type: string
-    required:
-    - ids
-    - permission
-    - userId
-    type: object
   service.FileList:
     properties:
       data:
@@ -191,15 +298,6 @@ definitions:
         type: integer
       totalPages:
         type: integer
-    type: object
-  service.FileMoveOptions:
-    properties:
-      ids:
-        items:
-          type: string
-        type: array
-    required:
-    - ids
     type: object
   service.FileQuery:
     properties:
@@ -220,55 +318,6 @@ definitions:
         type: integer
     required:
     - text
-    type: object
-  service.FileRenameOptions:
-    properties:
-      name:
-        maxLength: 255
-        type: string
-    required:
-    - name
-    type: object
-  service.FileRevokeGroupPermissionOptions:
-    properties:
-      groupId:
-        type: string
-      ids:
-        items:
-          type: string
-        type: array
-    required:
-    - groupId
-    - ids
-    type: object
-  service.FileRevokeUserPermissionOptions:
-    properties:
-      ids:
-        items:
-          type: string
-        type: array
-      userId:
-        type: string
-    required:
-    - ids
-    - userId
-    type: object
-  service.FileUpdateSnapshotOptions:
-    properties:
-      ocr:
-        $ref: '#/definitions/model.S3Object'
-      options:
-        $ref: '#/definitions/client.PipelineRunOptions'
-      original:
-        $ref: '#/definitions/model.S3Object'
-      preview:
-        $ref: '#/definitions/model.S3Object'
-      status:
-        type: string
-      text:
-        $ref: '#/definitions/model.S3Object'
-      thumbnail:
-        $ref: '#/definitions/model.Thumbnail'
     type: object
   service.Group:
     properties:
@@ -324,21 +373,6 @@ definitions:
       permission:
         type: string
     type: object
-  service.GroupRemoveMemberOptions:
-    properties:
-      userId:
-        type: string
-    required:
-    - userId
-    type: object
-  service.GroupUpdateNameOptions:
-    properties:
-      name:
-        maxLength: 255
-        type: string
-    required:
-    - name
-    type: object
   service.ImageProps:
     properties:
       height:
@@ -390,6 +424,15 @@ definitions:
       totalPages:
         type: integer
     type: object
+  service.Language:
+    properties:
+      id:
+        type: string
+      iso6393:
+        type: string
+      name:
+        type: string
+    type: object
   service.Notification:
     properties:
       body: {}
@@ -415,21 +458,6 @@ definitions:
     properties:
       image:
         type: string
-      name:
-        maxLength: 255
-        type: string
-    required:
-    - name
-    type: object
-  service.OrganizationRemoveMemberOptions:
-    properties:
-      userId:
-        type: string
-    required:
-    - userId
-    type: object
-  service.OrganizationUpdateNameOptions:
-    properties:
       name:
         maxLength: 255
         type: string
@@ -475,6 +503,23 @@ definitions:
         type: integer
       totalPages:
         type: integer
+    type: object
+  service.SnapshotUpdateOptions:
+    properties:
+      ocr:
+        $ref: '#/definitions/model.S3Object'
+      options:
+        $ref: '#/definitions/client.PipelineRunOptions'
+      original:
+        $ref: '#/definitions/model.S3Object'
+      preview:
+        $ref: '#/definitions/model.S3Object'
+      status:
+        type: string
+      text:
+        $ref: '#/definitions/model.S3Object'
+      thumbnail:
+        $ref: '#/definitions/model.Thumbnail'
     type: object
   service.StorageUsage:
     properties:
@@ -586,27 +631,97 @@ definitions:
       totalPages:
         type: integer
     type: object
-  service.WorkspaceUpdateNameOptions:
-    properties:
-      name:
-        maxLength: 255
-        type: string
-    required:
-    - name
-    type: object
-  service.WorkspaceUpdateStorageCapacityOptions:
-    properties:
-      storageCapacity:
-        minimum: 1
-        type: integer
-    required:
-    - storageCapacity
-    type: object
 info:
   contact: {}
   title: Voltaserve API
   version: 2.0.0
 paths:
+  /ai/available_languages:
+    get:
+      description: Available Languages
+      operationId: ai_available_languages
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/service.Language'
+            type: array
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Available Languages
+      tags:
+      - AI
+  /ai/extract_text:
+    post:
+      consumes:
+      - application/json
+      description: Extract Text
+      operationId: ai_extract_text
+      parameters:
+      - description: Body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/service.AIExtractTextOptions'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Extract Text
+      tags:
+      - AI
+  /ai/update_language:
+    post:
+      consumes:
+      - application/json
+      description: Update Language
+      operationId: ai_update_language
+      parameters:
+      - description: Body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/service.AIUpdateLanguageOptions'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Update Language
+      tags:
+      - AI
   /files:
     post:
       consumes:
@@ -748,7 +863,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/service.FileCopyOptions'
+          $ref: '#/definitions/router.FileCopyOptions'
       produces:
       - application/json
       responses:
@@ -1006,7 +1121,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/service.FileMoveOptions'
+          $ref: '#/definitions/router.FileMoveOptions'
       produces:
       - application/json
       responses:
@@ -1094,7 +1209,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/service.FileRenameOptions'
+          $ref: '#/definitions/router.FileRenameOptions'
       produces:
       - application/json
       responses:
@@ -1128,7 +1243,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/service.FileRevokeGroupPermissionOptions'
+          $ref: '#/definitions/router.FileRevokeGroupPermissionOptions'
       produces:
       - application/json
       responses:
@@ -1224,7 +1339,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/service.FileUpdateSnapshotOptions'
+          $ref: '#/definitions/service.SnapshotUpdateOptions'
       produces:
       - application/json
       responses:
@@ -1280,7 +1395,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/service.FileBatchDeleteOptions'
+          $ref: '#/definitions/router.FileBatchDeleteOptions'
       produces:
       - application/json
       responses:
@@ -1307,7 +1422,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/service.FileBatchGetOptions'
+          $ref: '#/definitions/router.FileBatchGetOptions'
       produces:
       - application/json
       responses:
@@ -1336,7 +1451,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/service.FileCreateFolderOptions'
+          $ref: '#/definitions/router.FileCreateFolderOptions'
       produces:
       - application/json
       responses:
@@ -1398,7 +1513,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/service.FileGrantGroupPermissionOptions'
+          $ref: '#/definitions/router.FileGrantGroupPermissionOptions'
       produces:
       - application/json
       responses:
@@ -1428,7 +1543,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/service.FileGrantUserPermissionOptions'
+          $ref: '#/definitions/router.FileGrantUserPermissionOptions'
       produces:
       - application/json
       responses:
@@ -1488,7 +1603,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/service.FileRevokeUserPermissionOptions'
+          $ref: '#/definitions/router.FileRevokeUserPermissionOptions'
       produces:
       - application/json
       responses:
@@ -1682,7 +1797,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/service.GroupRemoveMemberOptions'
+          $ref: '#/definitions/router.GroupRemoveMemberOptions'
       produces:
       - application/json
       responses:
@@ -1718,7 +1833,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/service.GroupUpdateNameOptions'
+          $ref: '#/definitions/router.GroupUpdateNameOptions'
       produces:
       - application/json
       responses:
@@ -2183,7 +2298,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/service.OrganizationRemoveMemberOptions'
+          $ref: '#/definitions/router.OrganizationRemoveMemberOptions'
       produces:
       - application/json
       responses:
@@ -2219,7 +2334,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/service.OrganizationUpdateNameOptions'
+          $ref: '#/definitions/router.OrganizationUpdateNameOptions'
       produces:
       - application/json
       responses:
@@ -2494,7 +2609,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/service.WorkspaceUpdateNameOptions'
+          $ref: '#/definitions/router.WorkspaceUpdateNameOptions'
       produces:
       - application/json
       responses:
@@ -2530,7 +2645,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/service.WorkspaceUpdateStorageCapacityOptions'
+          $ref: '#/definitions/router.WorkspaceUpdateStorageCapacityOptions'
       produces:
       - application/json
       responses:
