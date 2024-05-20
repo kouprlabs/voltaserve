@@ -1,5 +1,4 @@
-/* eslint-disable react-hooks/rules-of-hooks */
-import useSWR from 'swr'
+import useSWR, { SWRConfiguration } from 'swr'
 import { apiFetcher } from '@/client/fetcher'
 import { User } from '@/client/idp/user'
 import { Organization } from './organization'
@@ -48,6 +47,15 @@ export type ListOptions = {
   sortOrder?: SortOrder
 }
 
+type ListQueryParams = {
+  page?: string
+  size?: string
+  sort_by?: string
+  sort_order?: string
+  query?: string
+  organization_id?: string
+}
+
 export default class InvitationAPI {
   static async create(options: CreateOptions) {
     return apiFetcher({
@@ -57,7 +65,7 @@ export default class InvitationAPI {
     })
   }
 
-  static useGetIncoming(options?: ListOptions, swrOptions?: any) {
+  static useGetIncoming(options?: ListOptions, swrOptions?: SWRConfiguration) {
     const url = `/invitations/get_incoming?${this.paramsFromListOptions(
       options,
     )}`
@@ -68,7 +76,7 @@ export default class InvitationAPI {
     )
   }
 
-  static useGetOutgoing(options?: ListOptions, swrOptions?: any) {
+  static useGetOutgoing(options?: ListOptions, swrOptions?: SWRConfiguration) {
     const url = `/invitations/get_outgoing?${this.paramsFromListOptions(
       options,
     )}`
@@ -108,7 +116,7 @@ export default class InvitationAPI {
   }
 
   static paramsFromListOptions(options?: ListOptions): URLSearchParams {
-    const params: any = {}
+    const params: ListQueryParams = {}
     if (options?.organizationId) {
       params.organization_id = options.organizationId.toString()
     }

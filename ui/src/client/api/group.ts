@@ -1,4 +1,4 @@
-import useSWR from 'swr'
+import useSWR, { SWRConfiguration } from 'swr'
 import { apiFetcher } from '@/client/fetcher'
 import { Organization } from './organization'
 
@@ -57,6 +57,15 @@ export type RemoveMemberOptions = {
   userId: string
 }
 
+type ListQueryParams = {
+  page?: string
+  size?: string
+  sort_by?: string
+  sort_order?: string
+  query?: string
+  organization_id?: string
+}
+
 export default class GroupAPI {
   static create(options: CreateOptions) {
     return apiFetcher({
@@ -74,7 +83,7 @@ export default class GroupAPI {
     }) as Promise<Group>
   }
 
-  static async updateImage(id: string, file: any) {
+  static async updateImage(id: string, file: File) {
     const formData = new FormData()
     formData.append('file', file)
     return apiFetcher<Group>({
@@ -91,7 +100,10 @@ export default class GroupAPI {
     }) as Promise<Group>
   }
 
-  static useGetById(id: string | null | undefined, swrOptions?: any) {
+  static useGetById(
+    id: string | null | undefined,
+    swrOptions?: SWRConfiguration,
+  ) {
     const url = `/groups/${id}`
     return useSWR<Group>(
       id ? url : null,
@@ -107,7 +119,7 @@ export default class GroupAPI {
     })
   }
 
-  static useList(options?: ListOptions, swrOptions?: any) {
+  static useList(options?: ListOptions, swrOptions?: SWRConfiguration) {
     const url = `/groups?${this.paramsFromListOptions(options)}`
     return useSWR<List>(
       url,
@@ -140,7 +152,7 @@ export default class GroupAPI {
   }
 
   static paramsFromListOptions(options?: ListOptions): URLSearchParams {
-    const params: any = {}
+    const params: ListQueryParams = {}
     if (options?.query) {
       params.query = encodeURIComponent(options.query.toString())
     }

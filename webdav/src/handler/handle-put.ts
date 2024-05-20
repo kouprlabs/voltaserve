@@ -1,17 +1,17 @@
 import fs from 'fs'
-import fsPromises from 'node:fs/promises'
 import { readFile } from 'fs/promises'
 import { IncomingMessage, ServerResponse } from 'http'
+import fsPromises from 'node:fs/promises'
 import os from 'os'
 import path from 'path'
 import { v4 as uuidv4 } from 'uuid'
-import { Token } from '@/client/idp'
 import { FileAPI } from '@/client/api'
-import { handleError } from '@/infra/error'
+import { Token } from '@/client/idp'
 import {
   isMicrosoftOfficeLockFile,
   isOpenOfficeOfficeLockFile,
 } from '@/helper/office-lock-files'
+import { handleError } from '@/infra/error'
 
 /*
   This method creates or updates a resource with the provided content.
@@ -53,7 +53,9 @@ async function handlePut(
           const blob = new Blob([await readFile(outputPath)])
           const name = decodeURIComponent(path.basename(req.url))
           try {
-            let existingFile = await api.getByPath(decodeURIComponent(req.url))
+            const existingFile = await api.getByPath(
+              decodeURIComponent(req.url),
+            )
             await api.patch({
               id: existingFile.id,
               blob,

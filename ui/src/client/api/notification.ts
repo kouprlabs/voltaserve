@@ -1,17 +1,15 @@
-/* eslint-disable react-hooks/rules-of-hooks */
-import useSWR from 'swr'
+import useSWR, { SWRConfiguration } from 'swr'
 import { apiFetcher } from '@/client/fetcher'
-import { Invitation } from './invitation'
 
 export type NotificationType = 'new_invitation'
 
 export type Notification = {
   type: NotificationType
-  body: Invitation | any
+  body: unknown
 }
 
 export default class NotificationAPI {
-  static useGetAll(swrOptions?: any) {
+  static useGetAll(swrOptions?: SWRConfiguration) {
     const url = `/notifications`
     return useSWR<Notification[]>(
       url,

@@ -1,5 +1,4 @@
-/* eslint-disable react-hooks/rules-of-hooks */
-import useSWR from 'swr'
+import useSWR, { SWRConfiguration } from 'swr'
 import { apiFetcher } from '@/client/fetcher'
 import { User } from '@/client/idp/user'
 import { getConfig } from '@/config/config'
@@ -7,7 +6,7 @@ import { encodeQuery } from '@/helpers/query'
 import { getAccessTokenOrRedirect } from '@/infra/token'
 import { Group } from './group'
 import { PermissionType } from './permission'
-import { Download, Snapshot, Thumbnail } from './snapshot'
+import { Download, Thumbnail } from './snapshot'
 
 export enum FileType {
   File = 'file',
@@ -154,6 +153,15 @@ export type PatchOptions = {
   onProgress?: (value: number) => void
 }
 
+type ListQueryParams = {
+  page?: string
+  size?: string
+  sort_by?: string
+  sort_order?: string
+  type?: string
+  query?: string
+}
+
 export default class FileAPI {
   static async upload({
     workspaceId,
@@ -249,7 +257,7 @@ export default class FileAPI {
   static useList(
     id: string | undefined,
     options: ListOptions,
-    swrOptions?: any,
+    swrOptions?: SWRConfiguration,
   ) {
     const url = `/files/${id}/list?${this.paramsFromListOptions(options)}`
     return useSWR<List | undefined>(
@@ -266,7 +274,10 @@ export default class FileAPI {
     }) as Promise<File[]>
   }
 
-  static useGetPath(id: string | null | undefined, swrOptions?: any) {
+  static useGetPath(
+    id: string | null | undefined,
+    swrOptions?: SWRConfiguration,
+  ) {
     const url = `/files/${id}/get_path`
     return useSWR<File[]>(
       id ? url : null,
@@ -321,7 +332,10 @@ export default class FileAPI {
     })
   }
 
-  static useGetById(id: string | null | undefined, swrOptions?: any) {
+  static useGetById(
+    id: string | null | undefined,
+    swrOptions?: SWRConfiguration,
+  ) {
     const url = `/files/${id}`
     return useSWR(
       id ? url : null,
@@ -352,7 +366,10 @@ export default class FileAPI {
     }) as Promise<number>
   }
 
-  static useGetItemCount(id: string | null | undefined, swrOptions?: any) {
+  static useGetItemCount(
+    id: string | null | undefined,
+    swrOptions?: SWRConfiguration,
+  ) {
     const url = `/files/${id}/get_item_count`
     return useSWR<number>(
       id ? url : null,
@@ -402,7 +419,7 @@ export default class FileAPI {
 
   static useGetUserPermissions(
     id: string | null | undefined,
-    swrOptions?: any,
+    swrOptions?: SWRConfiguration,
   ) {
     const url = `/files/${id}/get_user_permissions`
     return useSWR<UserPermission[]>(
@@ -421,7 +438,7 @@ export default class FileAPI {
 
   static useGetGroupPermissions(
     id: string | null | undefined,
-    swrOptions?: any,
+    swrOptions?: SWRConfiguration,
   ) {
     const url = `/files/${id}/get_group_permissions`
     return useSWR<GroupPermission[]>(
@@ -432,7 +449,7 @@ export default class FileAPI {
   }
 
   static paramsFromListOptions(options?: ListOptions): URLSearchParams {
-    const params: any = {}
+    const params: ListQueryParams = {}
     if (options?.page) {
       params.page = options.page.toString()
     }

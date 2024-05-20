@@ -1,6 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import {
-  Avatar,
   Badge,
   Button,
   Modal,
@@ -17,7 +16,6 @@ import {
   Tr,
 } from '@chakra-ui/react'
 import cx from 'classnames'
-import { File } from '@/client/api/file'
 import SnapshotAPI, { Snapshot, SortOrder } from '@/client/api/snapshot'
 import { swrConfig } from '@/client/options'
 import prettyDate from '@/helpers/pretty-date'
@@ -29,7 +27,6 @@ import {
   snapshotListModalDidClose,
   snapshotSelectionUpdated,
 } from '@/store/ui/files'
-import { mutate } from 'swr'
 
 const FileSnapshotList = () => {
   const dispatch = useAppDispatch()

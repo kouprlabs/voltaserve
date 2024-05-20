@@ -1,7 +1,7 @@
+import { createWriteStream, unlink } from 'fs'
+import { get } from 'http'
 import { API_URL } from '@/config'
 import { Token } from './idp'
-import { get } from 'http'
-import { createWriteStream, unlink } from 'fs'
 
 export type APIErrorResponse = {
   code: string

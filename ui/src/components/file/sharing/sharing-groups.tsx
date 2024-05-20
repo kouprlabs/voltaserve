@@ -15,7 +15,7 @@ import {
 import { KeyedMutator } from 'swr'
 import { Select } from 'chakra-react-select'
 import cx from 'classnames'
-import FileAPI, { GroupPermission, List } from '@/client/api/file'
+import FileAPI, { GroupPermission } from '@/client/api/file'
 import { Group } from '@/client/api/group'
 import { geEditorPermission } from '@/client/api/permission'
 import WorkspaceAPI from '@/client/api/workspace'
@@ -98,13 +98,7 @@ const SharingGroups = ({
         setPermissionBeingRevoked(undefined)
       }
     },
-    [
-      fileId,
-      selection,
-      isSingleSelection,
-      mutateList,
-      mutateGroupPermissions,
-    ],
+    [fileId, selection, isSingleSelection, mutateList, mutateGroupPermissions],
   )
 
   return (

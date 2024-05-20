@@ -8,6 +8,7 @@ export type Upload = {
   workspaceId?: string
   parentId?: string
   blob: File | FileWithPath
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   request?: any
   progress?: number
   error?: string
@@ -23,6 +24,7 @@ export class UploadDecorator {
     workspaceId?: string
     parentId?: string
     blob: File | FileWithPath
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     request?: any
     progress?: number
     error?: string
@@ -55,6 +57,7 @@ export class UploadDecorator {
     return this.value.blob
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   get request(): any {
     return this.value.request
   }
@@ -97,6 +100,7 @@ type UploadUpdateOptions = {
   workspaceId?: string
   parentId?: string
   file?: File
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   request?: any
   progress?: number
   error?: string

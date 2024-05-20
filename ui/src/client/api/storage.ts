@@ -1,5 +1,4 @@
-/* eslint-disable react-hooks/rules-of-hooks */
-import useSWR from 'swr'
+import useSWR, { SWRConfiguration } from 'swr'
 import { apiFetcher } from '@/client/fetcher'
 
 export type StorageUsage = {
@@ -9,7 +8,7 @@ export type StorageUsage = {
 }
 
 export default class StorageAPI {
-  static useGetAccountUsage(swrOptions?: any) {
+  static useGetAccountUsage(swrOptions?: SWRConfiguration) {
     const url = `/storage/get_account_usage`
     return useSWR<StorageUsage>(
       url,
@@ -18,7 +17,10 @@ export default class StorageAPI {
     )
   }
 
-  static useGetWorkspaceUsage(id: string | null | undefined, swrOptions?: any) {
+  static useGetWorkspaceUsage(
+    id: string | null | undefined,
+    swrOptions?: SWRConfiguration,
+  ) {
     const url = id
       ? `/storage/get_workspace_usage?${new URLSearchParams({
           id,
@@ -31,7 +33,10 @@ export default class StorageAPI {
     )
   }
 
-  static useGetFileUsage(id: string | null | undefined, swrOptions?: any) {
+  static useGetFileUsage(
+    id: string | null | undefined,
+    swrOptions?: SWRConfiguration,
+  ) {
     const url = `/storage/get_file_usage?${new URLSearchParams({
       id: id!,
     })}`

@@ -27,16 +27,17 @@ const transporter = nodemailer.createTransport({
 export function sendTemplateMail(
   template: string,
   address: string,
-  variables: Record<string, any>
+  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+  variables: Record<string, any>,
 ) {
   const params = yaml.load(
-    fs.readFileSync(path.join('templates', template, 'params.yml'), 'utf8')
+    fs.readFileSync(path.join('templates', template, 'params.yml'), 'utf8'),
   ) as MessageParams
   const html = Handlebars.compile(
-    fs.readFileSync(path.join('templates', template, 'template.hbs'), 'utf8')
+    fs.readFileSync(path.join('templates', template, 'template.hbs'), 'utf8'),
   )(variables)
   const text = Handlebars.compile(
-    fs.readFileSync(path.join('templates', template, 'template.txt'), 'utf8')
+    fs.readFileSync(path.join('templates', template, 'template.txt'), 'utf8'),
   )(variables)
   return new Promise<void>((resolve, reject) => {
     transporter.sendMail(
@@ -53,7 +54,7 @@ export function sendTemplateMail(
         } else {
           resolve()
         }
-      }
+      },
     )
   })
 }

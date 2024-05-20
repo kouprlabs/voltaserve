@@ -12,10 +12,10 @@ import {
   Badge,
   Avatar,
 } from '@chakra-ui/react'
-import { KeyedMutator, useSWRConfig } from 'swr'
+import { KeyedMutator } from 'swr'
 import { Select } from 'chakra-react-select'
 import cx from 'classnames'
-import FileAPI, { List, UserPermission } from '@/client/api/file'
+import FileAPI, { UserPermission } from '@/client/api/file'
 import { geEditorPermission } from '@/client/api/permission'
 import { User } from '@/client/api/user'
 import WorkspaceAPI from '@/client/api/workspace'
@@ -103,13 +103,7 @@ const SharingUsers = ({
         setPermissionBeingRevoked(undefined)
       }
     },
-    [
-      fileId,
-      selection,
-      isSingleSelection,
-      mutateList,
-      mutateUserPermissions,
-    ],
+    [fileId, selection, isSingleSelection, mutateList, mutateUserPermissions],
   )
 
   const handleInviteMembersClick = useCallback(async () => {

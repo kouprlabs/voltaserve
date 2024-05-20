@@ -223,6 +223,7 @@ class UserRepoImpl {
     await client.query('DELETE FROM "user" WHERE id = $1', [id])
   }
 
+  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
   private mapRow(row: any): User {
     return {
       id: row.id,

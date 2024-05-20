@@ -1,4 +1,4 @@
-import useSWR from 'swr'
+import useSWR, { SWRConfiguration } from 'swr'
 import { apiFetcher } from '@/client/fetcher'
 
 export enum SortBy {
@@ -38,6 +38,17 @@ export type ListOptions = {
   sortOrder?: SortOrder
 }
 
+type ListQueryParams = {
+  page?: string
+  size?: string
+  sort_by?: string
+  sort_order?: string
+  query?: string
+  organization_id?: string
+  group_id?: string
+  non_group_members_only?: string
+}
+
 export default class UserAPI {
   static async list(options?: ListOptions) {
     return apiFetcher({
@@ -46,7 +57,7 @@ export default class UserAPI {
     }) as Promise<List>
   }
 
-  static useList(options?: ListOptions, swrOptions?: any) {
+  static useList(options?: ListOptions, swrOptions?: SWRConfiguration) {
     const url = `/users?${this.paramsFromListOptions(options)}`
     return useSWR<List>(
       url,
@@ -56,7 +67,7 @@ export default class UserAPI {
   }
 
   static paramsFromListOptions(options?: ListOptions): URLSearchParams {
-    const params: any = {}
+    const params: ListQueryParams = {}
     if (options?.query) {
       params.query = encodeURIComponent(options.query.toString())
     }

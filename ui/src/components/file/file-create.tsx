@@ -23,7 +23,7 @@ import {
 } from 'formik'
 import * as Yup from 'yup'
 import cx from 'classnames'
-import FileAPI, { List } from '@/client/api/file'
+import FileAPI from '@/client/api/file'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { createModalDidClose } from '@/store/ui/files'
 

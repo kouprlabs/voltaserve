@@ -2,7 +2,9 @@ import '@/infra/env'
 import { createServer, IncomingMessage, ServerResponse } from 'http'
 import passport from 'passport'
 import { BasicStrategy } from 'passport-http'
+import { HealthAPI as APIHealthAPI } from '@/client/api'
 import { TokenAPI, Token } from '@/client/idp'
+import { HealthAPI as IDPHealthAPI } from '@/client/idp'
 import { PORT } from '@/config'
 import handleCopy from '@/handler/handle-copy'
 import handleDelete from '@/handler/handle-delete'
@@ -15,8 +17,6 @@ import handlePropfind from '@/handler/handle-propfind'
 import handleProppatch from '@/handler/handle-proppatch'
 import handlePut from '@/handler/handle-put'
 import { newExpiry } from '@/helper/token'
-import { HealthAPI as IDPHealthAPI } from '@/client/idp'
-import { HealthAPI as APIHealthAPI } from '@/client/api'
 
 const tokens = new Map<string, Token>()
 const expiries = new Map<string, Date>()

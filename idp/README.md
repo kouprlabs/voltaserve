@@ -5,19 +5,19 @@
 Install dependencies:
 
 ```shell
-bun i
+npm i --legacy-peer-deps
 ```
 
 Run for development:
 
 ```shell
-bun run dev
+npm run dev
 ```
 
 Run for production:
 
 ```shell
-bun run start
+npm run start
 ```
 
 Build Docker image:
@@ -31,17 +31,17 @@ docker build -t voltaserve/idp .
 Generate `swagger.json`:
 
 ```shell
-bun run swagger-autogen && mv ./swagger.json ./docs
+npm run swagger-autogen && mv ./swagger.json ./docs
 ```
 
 Preview (will be served at [http://localhost:7777](http://localhost:7777)):
 
 ```shell
-bunx @redocly/cli preview-docs --port 7777 ./docs/swagger.json
+npmx @redocly/cli preview-docs --port 7777 ./docs/swagger.json
 ```
 
 Generate the final static HTML documentation:
 
 ```shell
-bunx @redocly/cli build-docs ./docs/swagger.json --output ./docs/index.html
+npmx @redocly/cli build-docs ./docs/swagger.json --output ./docs/index.html
 ```

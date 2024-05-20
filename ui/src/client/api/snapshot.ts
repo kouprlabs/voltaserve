@@ -1,4 +1,4 @@
-import useSWR from 'swr'
+import useSWR, { SWRConfiguration } from 'swr'
 import { apiFetcher } from '../fetcher'
 
 export enum SortBy {
@@ -58,6 +58,14 @@ export type Thumbnail = {
   height: number
 }
 
+type ListQueryParams = {
+  page?: string
+  size?: string
+  sort_by?: string
+  sort_order?: string
+  query?: string
+}
+
 export default class SnapshotAPI {
   static async list(fileId: string, options?: ListOptions) {
     return apiFetcher({
@@ -69,7 +77,7 @@ export default class SnapshotAPI {
   static useList(
     fileId: string | undefined,
     options?: ListOptions,
-    swrOptions?: any,
+    swrOptions?: SWRConfiguration,
   ) {
     const url = `/files/${fileId}/snapshots?${this.paramsFromListOptions(options)}`
     return useSWR<List | undefined>(
@@ -94,7 +102,7 @@ export default class SnapshotAPI {
   }
 
   static paramsFromListOptions(options?: ListOptions): URLSearchParams {
-    const params: any = {}
+    const params: ListQueryParams = {}
     if (options?.query) {
       params.query = encodeURIComponent(options.query.toString())
     }

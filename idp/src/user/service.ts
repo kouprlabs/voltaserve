@@ -1,12 +1,12 @@
 import fs from 'fs/promises'
+import { getConfig } from '@/config/config'
 import { ErrorCode, newError } from '@/infra/error'
-import { hashPassword, verifyPassword } from '@/infra/password'
-import search, { USER_SEARCH_INDEX } from '@/infra/search'
-import userRepo from '@/user/repo'
-import { User } from '@/user/model'
 import { newHyphenlessUuid } from '@/infra/id'
 import { sendTemplateMail } from '@/infra/mail'
-import { getConfig } from '@/config/config'
+import { hashPassword, verifyPassword } from '@/infra/password'
+import search, { USER_SEARCH_INDEX } from '@/infra/search'
+import { User } from '@/user/model'
+import userRepo from '@/user/repo'
 
 export type UserDTO = {
   id: string

@@ -1,8 +1,8 @@
-import fs from 'fs/promises'
-import os from 'os'
 import { NextFunction, Router, Response } from 'express'
 import { body, validationResult } from 'express-validator'
+import fs from 'fs/promises'
 import multer from 'multer'
+import os from 'os'
 import passport from 'passport'
 import { parseValidationError } from '@/infra/error'
 import { PassportRequest } from '@/infra/passport-request'
@@ -33,7 +33,7 @@ router.get(
     } catch (err) {
       next(err)
     }
-  }
+  },
 )
 
 router.post(
@@ -47,12 +47,15 @@ router.post(
         throw parseValidationError(result)
       }
       res.json(
-        await updateFullName(req.user.id, req.body as UserUpdateFullNameOptions)
+        await updateFullName(
+          req.user.id,
+          req.body as UserUpdateFullNameOptions,
+        ),
       )
     } catch (err) {
       next(err)
     }
-  }
+  },
 )
 
 router.post(
@@ -68,13 +71,13 @@ router.post(
       res.json(
         await updateEmailRequest(
           req.user.id,
-          req.body as UserUpdateEmailRequestOptions
-        )
+          req.body as UserUpdateEmailRequestOptions,
+        ),
       )
     } catch (err) {
       next(err)
     }
-  }
+  },
 )
 
 router.post(
@@ -89,13 +92,13 @@ router.post(
       }
       res.json(
         await updateEmailConfirmation(
-          req.body as UserUpdateEmailConfirmationOptions
-        )
+          req.body as UserUpdateEmailConfirmationOptions,
+        ),
       )
     } catch (err) {
       next(err)
     }
-  }
+  },
 )
 
 router.post(
@@ -110,7 +113,10 @@ router.post(
         throw parseValidationError(result)
       }
       res.json(
-        await updatePassword(req.user.id, req.body as UserUpdatePasswordOptions)
+        await updatePassword(
+          req.user.id,
+          req.body as UserUpdatePasswordOptions,
+        ),
       )
     } catch (err) {
       if (err === 'invalid_password') {
@@ -120,7 +126,7 @@ router.post(
         next(err)
       }
     }
-  }
+  },
 )
 
 router.post(
@@ -135,14 +141,14 @@ router.post(
       const user = await updatePicture(
         req.user.id,
         req.file.path,
-        req.file.mimetype
+        req.file.mimetype,
       )
       await fs.rm(req.file.path)
       res.json(user)
     } catch (err) {
       next(err)
     }
-  }
+  },
 )
 
 router.post(
@@ -154,7 +160,7 @@ router.post(
     } catch (err) {
       next(err)
     }
-  }
+  },
 )
 
 router.delete(
@@ -177,7 +183,7 @@ router.delete(
         next(err)
       }
     }
-  }
+  },
 )
 
 export default router

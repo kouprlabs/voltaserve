@@ -45,7 +45,9 @@ const OrganizationInviteMembers = ({
   onClose,
 }: OrganizationInviteMembersProps) => {
   const navigate = useNavigate()
-  const mutateList = useAppSelector((state) => state.ui.outgoingInvitations.mutate)
+  const mutateList = useAppSelector(
+    (state) => state.ui.outgoingInvitations.mutate,
+  )
   const [isModalOpen, setIsModalOpen] = useState(false)
   const formSchema = Yup.object().shape({
     emails: Yup.string().required('Email(s) are required'),

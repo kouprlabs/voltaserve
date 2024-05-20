@@ -1,4 +1,5 @@
 {
+  "plugins": ["@trivago/prettier-plugin-sort-imports"],
   "singleQuote": true,
   "semi": false,
   "quoteProps": "preserve",

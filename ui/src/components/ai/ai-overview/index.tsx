@@ -10,10 +10,10 @@ import {
 import cx from 'classnames'
 import { useAppDispatch } from '@/store/hook'
 import { modalDidClose } from '@/store/ui/ai'
-import AiOverviewEntities from './ai-overview-entities'
-import AiOverviewLanguage from './ai-overview-language'
-import AiOverviewSettings from './ai-overview-settings'
-import AiOverviewText from './ai-overview-text'
+import AIOverviewEntities from './ai-overview-entities'
+import AIOverviewLanguage from './ai-overview-language'
+import AIOverviewSettings from './ai-overview-settings'
+import AIOverviewText from './ai-overview-text'
 
 const AiOverview = () => {
   const dispatch = useAppDispatch()
@@ -36,10 +36,10 @@ const AiOverview = () => {
               <Tab onClick={() => setActiveTab(3)}>Settings</Tab>
             </TabList>
           </Tabs>
-          {activeTab === 0 ? <AiOverviewLanguage /> : null}
-          {activeTab === 1 ? <AiOverviewText /> : null}
-          {activeTab === 2 ? <AiOverviewEntities /> : null}
-          {activeTab === 2 ? <AiOverviewSettings /> : null}
+          {activeTab === 0 ? <AIOverviewLanguage /> : null}
+          {activeTab === 1 ? <AIOverviewText /> : null}
+          {activeTab === 2 ? <AIOverviewEntities /> : null}
+          {activeTab === 3 ? <AIOverviewSettings /> : null}
         </div>
       </ModalBody>
       <ModalFooter>

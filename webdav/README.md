@@ -3,19 +3,19 @@
 Install dependencies:
 
 ```shell
-bun i
+npm i --legacy-peer-deps
 ```
 
 Run for development:
 
 ```shell
-bun run dev
+npm run dev
 ```
 
 Run for production:
 
 ```shell
-bun run start
+npm run start
 ```
 
 Build Docker image:
