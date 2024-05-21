@@ -65,7 +65,7 @@ func (r *FileRouter) AppendRoutes(g fiber.Router) {
 	g.Get("/:id/get_group_permissions", r.GetGroupPermissions)
 }
 
-func (r *FileRouter) AppendInternalRoutes(g fiber.Router) {
+func (r *FileRouter) AppendNonJWTRoutes(g fiber.Router) {
 	g.Get("/:id/original:ext", r.DownloadOriginal)
 	g.Get("/:id/preview:ext", r.DownloadPreview)
 }

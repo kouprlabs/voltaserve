@@ -49,20 +49,25 @@ func main() {
 	health := router.NewHealthRouter()
 	health.AppendRoutes(v1)
 
-	f := v1.Group("files")
+	filesGroup := v1.Group("files")
 	files := router.NewFileRouter()
-	files.AppendInternalRoutes(f)
+	files.AppendNonJWTRoutes(filesGroup)
 
-	s := v1.Group("snapshots")
+	snapshotsGroup := v1.Group("snapshots")
 	snapshots := router.NewSnapshotRouter()
-	snapshots.AppendInternalRoutes(s)
+	snapshots.AppendNonJWTRoutes(snapshotsGroup)
+
+	aiGroup := v1.Group("ai")
+	ai := router.NewAIRouter()
+	ai.AppendNonJWTRoutes(aiGroup)
 
 	app.Use(jwtware.New(jwtware.Config{
 		SigningKey: jwtware.SigningKey{Key: []byte(cfg.Security.JWTSigningKey)},
 	}))
 
-	files.AppendRoutes(f)
-	snapshots.AppendRoutes(s)
+	files.AppendRoutes(filesGroup)
+	snapshots.AppendRoutes(snapshotsGroup)
+	ai.AppendRoutes(aiGroup)
 
 	invitations := router.NewInvitationRouter()
 	invitations.AppendRoutes(v1.Group("invitations"))
@@ -84,9 +89,6 @@ func main() {
 
 	users := router.NewUserRouter()
 	users.AppendRoutes(v1.Group("users"))
-
-	ai := router.NewAIRouter()
-	ai.AppendRoutes(v1.Group("ai"))
 
 	if err := app.Listen(fmt.Sprintf(":%d", cfg.Port)); err != nil {
 		panic(err)

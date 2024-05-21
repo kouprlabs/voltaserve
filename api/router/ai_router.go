@@ -1,16 +1,19 @@
 package router
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"path/filepath"
 	"strconv"
+	"voltaserve/config"
 	"voltaserve/errorpkg"
 	"voltaserve/infra"
 	"voltaserve/service"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 type AIRouter struct {
@@ -31,9 +34,12 @@ func (r *AIRouter) AppendRoutes(g fiber.Router) {
 	g.Post("/:id/extract_text", r.ExtractText)
 	g.Post("/:id/scan_entities", r.ScanEntities)
 	g.Post("/:id/get_summary", r.GetSummary)
+	g.Get("/:id/list_entities", r.ListEntities)
+}
+
+func (r *AIRouter) AppendNonJWTRoutes(g fiber.Router) {
 	g.Get("/:id/text:ext", r.DownloadText)
 	g.Get("/:id/ocr:ext", r.DownloadOCR)
-	g.Get("/:id/list_entities", r.ListEntities)
 }
 
 // GetAvailableLanguages godoc
@@ -147,56 +153,6 @@ func (r *AIRouter) GetSummary(c *fiber.Ctx) error {
 	return c.JSON(res)
 }
 
-// DownloadText godoc
-//
-//	@Summary		Download Text
-//	@Description	Download Text
-//	@Tags			AI
-//	@Id				ai_download_text
-//	@Produce		json
-//	@Param			id	path		string	true	"ID"
-//	@Failure		404	{object}	errorpkg.ErrorResponse
-//	@Failure		500	{object}	errorpkg.ErrorResponse
-//	@Router			/ai/{id}/text{ext} [get]
-func (r *AIRouter) DownloadText(c *fiber.Ctx) error {
-	buf, file, snapshot, err := r.aiSvc.DownloadTextBuffer(c.Params("id"), GetUserID(c))
-	if err != nil {
-		return err
-	}
-	if filepath.Ext(snapshot.GetText().Key) != c.Params("ext") {
-		return errorpkg.NewS3ObjectNotFoundError(nil)
-	}
-	bytes := buf.Bytes()
-	c.Set("Content-Type", infra.DetectMimeFromBytes(bytes))
-	c.Set("Content-Disposition", fmt.Sprintf("filename=\"%s\"", file.GetName()))
-	return c.Send(bytes)
-}
-
-// DownloadOCR godoc
-//
-//	@Summary		Download OCR
-//	@Description	Download OCR
-//	@Tags			AI
-//	@Id				ai_download_ocr
-//	@Produce		json
-//	@Param			id	path		string	true	"ID"
-//	@Failure		404	{object}	errorpkg.ErrorResponse
-//	@Failure		500	{object}	errorpkg.ErrorResponse
-//	@Router			/ai/{id}/ocr{ext} [get]
-func (r *AIRouter) DownloadOCR(c *fiber.Ctx) error {
-	buf, file, snapshot, err := r.aiSvc.DownloadOCRBuffer(c.Params("id"), GetUserID(c))
-	if err != nil {
-		return err
-	}
-	if filepath.Ext(snapshot.GetOCR().Key) != c.Params("ext") {
-		return errorpkg.NewS3ObjectNotFoundError(nil)
-	}
-	bytes := buf.Bytes()
-	c.Set("Content-Type", infra.DetectMimeFromBytes(bytes))
-	c.Set("Content-Disposition", fmt.Sprintf("filename=\"%s\"", file.GetName()))
-	return c.Send(bytes)
-}
-
 // ListEntities godoc
 //
 //	@Summary		List Entities
@@ -253,4 +209,95 @@ func (r *AIRouter) ListEntities(c *fiber.Ctx) error {
 		return err
 	}
 	return c.JSON(res)
+}
+
+// DownloadText godoc
+//
+//	@Summary		Download Text
+//	@Description	Download Text
+//	@Tags			AI
+//	@Id				ai_download_text
+//	@Produce		json
+//	@Param			id				path		string	true	"ID"
+//	@Param			access_token	query		string	true	"Access Token"
+//	@Failure		404				{object}	errorpkg.ErrorResponse
+//	@Failure		500				{object}	errorpkg.ErrorResponse
+//	@Router			/ai/{id}/text{ext} [get]
+func (r *AIRouter) DownloadText(c *fiber.Ctx) error {
+	accessToken := c.Cookies(r.accessTokenCookieName)
+	if accessToken == "" {
+		accessToken = c.Query("access_token")
+		if accessToken == "" {
+			return errorpkg.NewFileNotFoundError(nil)
+		}
+	}
+	userID, err := r.getUserIDFromAccessToken(accessToken)
+	if err != nil {
+		return c.SendStatus(http.StatusNotFound)
+	}
+	buf, file, snapshot, err := r.aiSvc.DownloadTextBuffer(c.Params("id"), userID)
+	if err != nil {
+		return err
+	}
+	if filepath.Ext(snapshot.GetText().Key) != c.Params("ext") {
+		return errorpkg.NewS3ObjectNotFoundError(nil)
+	}
+	bytes := buf.Bytes()
+	c.Set("Content-Type", infra.DetectMimeFromBytes(bytes))
+	c.Set("Content-Disposition", fmt.Sprintf("filename=\"%s\"", file.GetName()))
+	return c.Send(bytes)
+}
+
+// DownloadOCR godoc
+//
+//	@Summary		Download OCR
+//	@Description	Download OCR
+//	@Tags			AI
+//	@Id				ai_download_ocr
+//	@Produce		json
+//	@Param			id				path		string	true	"ID"
+//	@Param			access_token	query		string	true	"Access Token"
+//	@Failure		404				{object}	errorpkg.ErrorResponse
+//	@Failure		500				{object}	errorpkg.ErrorResponse
+//	@Router			/ai/{id}/ocr{ext} [get]
+func (r *AIRouter) DownloadOCR(c *fiber.Ctx) error {
+	accessToken := c.Cookies(r.accessTokenCookieName)
+	if accessToken == "" {
+		accessToken = c.Query("access_token")
+		if accessToken == "" {
+			return errorpkg.NewFileNotFoundError(nil)
+		}
+	}
+	userID, err := r.getUserIDFromAccessToken(accessToken)
+	if err != nil {
+		return c.SendStatus(http.StatusNotFound)
+	}
+	buf, file, snapshot, err := r.aiSvc.DownloadOCRBuffer(c.Params("id"), userID)
+	if err != nil {
+		return err
+	}
+	if filepath.Ext(snapshot.GetOCR().Key) != c.Params("ext") {
+		return errorpkg.NewS3ObjectNotFoundError(nil)
+	}
+	bytes := buf.Bytes()
+	c.Set("Content-Type", infra.DetectMimeFromBytes(bytes))
+	c.Set("Content-Disposition", fmt.Sprintf("filename=\"%s\"", file.GetName()))
+	return c.Send(bytes)
+}
+
+func (r *AIRouter) getUserIDFromAccessToken(accessToken string) (string, error) {
+	token, err := jwt.Parse(accessToken, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		return []byte(config.GetConfig().Security.JWTSigningKey), nil
+	})
+	if err != nil {
+		return "", err
+	}
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		return claims["sub"].(string), nil
+	} else {
+		return "", errors.New("cannot find sub claim")
+	}
 }

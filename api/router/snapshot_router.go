@@ -26,7 +26,7 @@ func (r *SnapshotRouter) AppendRoutes(g fiber.Router) {
 	g.Post("/:id/unlink", r.Unlink)
 }
 
-func (r *SnapshotRouter) AppendInternalRoutes(g fiber.Router) {
+func (r *SnapshotRouter) AppendNonJWTRoutes(g fiber.Router) {
 	g.Patch("/:id", r.Update)
 }
 

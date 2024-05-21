@@ -794,6 +794,11 @@ paths:
         name: id
         required: true
         type: string
+      - description: Access Token
+        in: query
+        name: access_token
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -848,6 +853,11 @@ paths:
       - description: ID
         in: path
         name: id
+        required: true
+        type: string
+      - description: Access Token
+        in: query
+        name: access_token
         required: true
         type: string
       produces:
