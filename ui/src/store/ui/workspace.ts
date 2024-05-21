@@ -2,11 +2,11 @@ import { KeyedMutator } from 'swr'
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
 import { Workspace } from '@/client/api/workspace'
 
-type AccountState = {
+type WorkspaceState = {
   mutate?: KeyedMutator<Workspace>
 }
 
-const initialState: AccountState = {}
+const initialState: WorkspaceState = {}
 
 const slice = createSlice({
   name: 'workspace',

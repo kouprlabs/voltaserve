@@ -9,7 +9,7 @@ const initialState: UploadsDrawerState = {
 }
 
 const slice = createSlice({
-  name: 'ui',
+  name: 'uploads-drawer',
   initialState,
   reducers: {
     uploadsDrawerOpened: (state) => {

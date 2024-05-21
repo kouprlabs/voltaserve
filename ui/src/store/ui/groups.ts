@@ -2,11 +2,11 @@ import { KeyedMutator } from 'swr'
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
 import { List } from '@/client/api/group'
 
-type AccountState = {
+type GroupsState = {
   mutate?: KeyedMutator<List>
 }
 
-const initialState: AccountState = {}
+const initialState: GroupsState = {}
 
 const slice = createSlice({
   name: 'groups',
