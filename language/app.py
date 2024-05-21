@@ -10,7 +10,7 @@ def health():
     return "OK", 200
 
 
-@app.route("/v1/named_entities", methods=["POST"])
+@app.route("/v1/entities", methods=["POST"])
 def ner_entities():
     global nlp
     content = request.json

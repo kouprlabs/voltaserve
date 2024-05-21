@@ -53,6 +53,7 @@ type snapshotEntity struct {
 	Preview    datatypes.JSON `json:"preview,omitempty" gorm:"column:preview"`
 	Text       datatypes.JSON `json:"text,omitempty" gorm:"column:text"`
 	OCR        datatypes.JSON `json:"ocr,omitempty" gorm:"column:ocr"`
+	Entities   datatypes.JSON `json:"entities,omitempty" gorm:"column:entities"`
 	Thumbnail  datatypes.JSON `json:"thumbnail,omitempty" gorm:"column:thumbnail"`
 	Status     string         `json:"status,omitempty" gorm:"column,status"`
 	Language   *string        `json:"language,omitempty" gorm:"column:language"`
@@ -125,6 +126,18 @@ func (s *snapshotEntity) GetOCR() *model.S3Object {
 	}
 	var res = model.S3Object{}
 	if err := json.Unmarshal([]byte(s.OCR.String()), &res); err != nil {
+		log.Fatal(err)
+		return nil
+	}
+	return &res
+}
+
+func (s *snapshotEntity) GetEntities() *model.S3Object {
+	if s.Entities.String() == "" {
+		return nil
+	}
+	var res = model.S3Object{}
+	if err := json.Unmarshal([]byte(s.Entities.String()), &res); err != nil {
 		log.Fatal(err)
 		return nil
 	}
@@ -213,7 +226,22 @@ func (s *snapshotEntity) SetOCR(m *model.S3Object) {
 			log.Fatal(err)
 			return
 		}
-		if err := s.Text.UnmarshalJSON(b); err != nil {
+		if err := s.OCR.UnmarshalJSON(b); err != nil {
+			log.Fatal(err)
+		}
+	}
+}
+
+func (s *snapshotEntity) SetEntities(m *model.S3Object) {
+	if m == nil {
+		s.Entities = nil
+	} else {
+		b, err := json.Marshal(m)
+		if err != nil {
+			log.Fatal(err)
+			return
+		}
+		if err := s.Entities.UnmarshalJSON(b); err != nil {
 			log.Fatal(err)
 		}
 	}
@@ -252,6 +280,14 @@ func (s *snapshotEntity) HasPreview() bool {
 
 func (s *snapshotEntity) HasText() bool {
 	return s.Text != nil
+}
+
+func (s *snapshotEntity) HasOCR() bool {
+	return s.OCR != nil
+}
+
+func (s *snapshotEntity) HasEntities() bool {
+	return s.Entities != nil
 }
 
 func (s *snapshotEntity) HasThumbnail() bool {

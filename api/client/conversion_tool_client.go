@@ -86,7 +86,7 @@ func (cl *ToolClient) ResizeImage(inputPath string, width int, height int, outpu
 	if err := writer.Close(); err != nil {
 		return err
 	}
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", cl.config.ConversionURL, cl.config.Security.APIKey), body)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/tools/run?api_key=%s", cl.config.ConversionURL, cl.config.Security.APIKey), body)
 	if err != nil {
 		return err
 	}
@@ -171,7 +171,7 @@ func (cl *ToolClient) ThumbnailFromImage(inputPath string, width int, height int
 	if err := writer.Close(); err != nil {
 		return err
 	}
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", cl.config.ConversionURL, cl.config.Security.APIKey), body)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/tools/run?api_key=%s", cl.config.ConversionURL, cl.config.Security.APIKey), body)
 	if err != nil {
 		return err
 	}
@@ -243,7 +243,7 @@ func (cl *ToolClient) ConvertImage(inputPath string, outputPath string) error {
 	if err := writer.Close(); err != nil {
 		return err
 	}
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", cl.config.ConversionURL, cl.config.Security.APIKey), body)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/tools/run?api_key=%s", cl.config.ConversionURL, cl.config.Security.APIKey), body)
 	if err != nil {
 		return err
 	}
@@ -315,7 +315,7 @@ func (cl *ToolClient) RemoveAlphaChannel(inputPath string, outputPath string) er
 	if err := writer.Close(); err != nil {
 		return err
 	}
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", cl.config.ConversionURL, cl.config.Security.APIKey), body)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/tools/run?api_key=%s", cl.config.ConversionURL, cl.config.Security.APIKey), body)
 	if err != nil {
 		return err
 	}
@@ -392,7 +392,7 @@ func (cl *ToolClient) MeasureImage(inputPath string) (model.ImageProps, error) {
 	if err := writer.Close(); err != nil {
 		return model.ImageProps{}, err
 	}
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", cl.config.ConversionURL, cl.config.Security.APIKey), body)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/tools/run?api_key=%s", cl.config.ConversionURL, cl.config.Security.APIKey), body)
 	if err != nil {
 		return model.ImageProps{}, err
 	}
@@ -466,7 +466,7 @@ func (cl *ToolClient) TSVFromImage(inputPath string, model string) (string, erro
 	if err := writer.Close(); err != nil {
 		return "", err
 	}
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", cl.config.ConversionURL, cl.config.Security.APIKey), body)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/tools/run?api_key=%s", cl.config.ConversionURL, cl.config.Security.APIKey), body)
 	if err != nil {
 		return "", err
 	}
@@ -529,7 +529,7 @@ func (cl *ToolClient) TextFromImage(inputPath string, model string) (string, err
 	if err := writer.Close(); err != nil {
 		return "", err
 	}
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", cl.config.ConversionURL, cl.config.Security.APIKey), body)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/tools/run?api_key=%s", cl.config.ConversionURL, cl.config.Security.APIKey), body)
 	if err != nil {
 		return "", err
 	}
@@ -592,7 +592,7 @@ func (cl *ToolClient) DPIFromImage(inputPath string) (int, error) {
 	if err := writer.Close(); err != nil {
 		return 0, err
 	}
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", cl.config.ConversionURL, cl.config.Security.APIKey), body)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/tools/run?api_key=%s", cl.config.ConversionURL, cl.config.Security.APIKey), body)
 	if err != nil {
 		return -1, err
 	}
@@ -681,7 +681,7 @@ func (cl *ToolClient) OCRFromPDF(inputPath string, language *string, dpi *int) (
 	if err := writer.Close(); err != nil {
 		return "", err
 	}
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", cl.config.ConversionURL, cl.config.Security.APIKey), body)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/tools/run?api_key=%s", cl.config.ConversionURL, cl.config.Security.APIKey), body)
 	if err != nil {
 		return "", err
 	}
@@ -754,7 +754,7 @@ func (cl *ToolClient) TextFromPDF(inputPath string) (string, error) {
 	if err := writer.Close(); err != nil {
 		return "", err
 	}
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/run?api_key=%s", cl.config.ConversionURL, cl.config.Security.APIKey), body)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v1/tools/run?api_key=%s", cl.config.ConversionURL, cl.config.Security.APIKey), body)
 	if err != nil {
 		return "", err
 	}

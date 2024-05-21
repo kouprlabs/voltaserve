@@ -29,18 +29,18 @@ func NewLanguageClient() *LanguageClient {
 	}
 }
 
-type GetNamedEntitiesOptions struct {
-	Text float64 `json:"text"`
+type GetEntitiesOptions struct {
+	Text string `json:"text"`
 }
 
-func (cl *LanguageClient) GetNamedEntities(opts GetNamedEntitiesOptions) ([]model.NamedEntity, error) {
+func (cl *LanguageClient) GetEntities(opts GetEntitiesOptions) ([]model.AIEntity, error) {
 	reqBody, err := json.Marshal(opts)
 	if err != nil {
-		return []model.NamedEntity{}, err
+		return []model.AIEntity{}, err
 	}
-	response, err := http.Post(fmt.Sprintf("%s/v1/named_entities", cl.config.LanguageURL), "application/json", bytes.NewBuffer(reqBody))
+	response, err := http.Post(fmt.Sprintf("%s/v1/entities", cl.config.LanguageURL), "application/json", bytes.NewBuffer(reqBody))
 	if err != nil {
-		return []model.NamedEntity{}, err
+		return []model.AIEntity{}, err
 	}
 	defer func(Body io.ReadCloser) {
 		if err := Body.Close(); err != nil {
@@ -49,12 +49,12 @@ func (cl *LanguageClient) GetNamedEntities(opts GetNamedEntitiesOptions) ([]mode
 	}(response.Body)
 	resBody, err := io.ReadAll(response.Body)
 	if err != nil {
-		return []model.NamedEntity{}, err
+		return []model.AIEntity{}, err
 	}
-	var result []model.NamedEntity
+	var result []model.AIEntity
 	err = json.Unmarshal(resBody, &result)
 	if err != nil {
-		return []model.NamedEntity{}, err
+		return []model.AIEntity{}, err
 	}
 	return result, nil
 }

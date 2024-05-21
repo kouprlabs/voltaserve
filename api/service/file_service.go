@@ -297,8 +297,7 @@ func (svc *FileService) DownloadOriginalBuffer(id string, userID string) (*bytes
 		return nil, nil, nil, errorpkg.NewSnapshotNotFoundError(nil)
 	}
 	if snapshot.HasOriginal() {
-		original := snapshot.GetOriginal()
-		buf, err := svc.s3.GetObject(original.Key, original.Bucket)
+		buf, err := svc.s3.GetObject(snapshot.GetOriginal().Key, snapshot.GetOriginal().Bucket)
 		if err != nil {
 			return nil, nil, nil, err
 		}
@@ -331,8 +330,7 @@ func (svc *FileService) DownloadPreviewBuffer(id string, userID string) (*bytes.
 		return nil, nil, nil, errorpkg.NewSnapshotNotFoundError(nil)
 	}
 	if snapshot.HasPreview() {
-		preview := snapshot.GetPreview()
-		buf, err := svc.s3.GetObject(preview.Key, preview.Bucket)
+		buf, err := svc.s3.GetObject(snapshot.GetPreview().Key, snapshot.GetPreview().Bucket)
 		if err != nil {
 			return nil, nil, nil, err
 		}
