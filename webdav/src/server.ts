@@ -111,7 +111,7 @@ function handleRequest(req: IncomingMessage, res: ServerResponse) {
 }
 
 const server = createServer((req: IncomingMessage, res: ServerResponse) => {
-  if (req.url === '/v1/health' && req.method === 'GET') {
+  if (req.url === '/v2/health' && req.method === 'GET') {
     const apiHealth = new APIHealthAPI().get()
     const idpHealth = new IDPHealthAPI().get()
     Promise.all([apiHealth, idpHealth])

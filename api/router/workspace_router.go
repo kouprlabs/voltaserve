@@ -23,10 +23,10 @@ func NewWorkspaceRouter() *WorkspaceRouter {
 func (r *WorkspaceRouter) AppendRoutes(g fiber.Router) {
 	g.Get("/", r.List)
 	g.Post("/", r.Create)
-	g.Get("/:id", r.GetByID)
+	g.Get("/:id", r.Get)
 	g.Delete("/:id", r.Delete)
-	g.Post("/:id/update_name", r.UpdateName)
-	g.Post("/:id/update_storage_capacity", r.UpdateStorageCapacity)
+	g.Patch("/:id/name", r.PatchName)
+	g.Patch("/:id/storage_capacity", r.PatchStorageCapacity)
 }
 
 // Create godoc
@@ -58,19 +58,19 @@ func (r *WorkspaceRouter) Create(c *fiber.Ctx) error {
 	return c.Status(http.StatusCreated).JSON(res)
 }
 
-// GetByID godoc
+// Get godoc
 //
-//	@Summary		Get by ID
-//	@Description	Get by ID
+//	@Summary		Get
+//	@Description	Get
 //	@Tags			Workspaces
-//	@Id				workspaces_get_by_id
+//	@Id				workspaces_get
 //	@Produce		json
 //	@Param			id	path		string	true	"ID"
 //	@Success		200	{object}	service.Workspace
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/workspaces/{id} [get]
-func (r *WorkspaceRouter) GetByID(c *fiber.Ctx) error {
+func (r *WorkspaceRouter) Get(c *fiber.Ctx) error {
 	res, err := r.workspaceSvc.Find(c.Params("id"), GetUserID(c))
 	if err != nil {
 		return err
@@ -135,60 +135,60 @@ func (r *WorkspaceRouter) List(c *fiber.Ctx) error {
 	return c.JSON(res)
 }
 
-type WorkspaceUpdateNameOptions struct {
+type WorkspacePatchNameOptions struct {
 	Name string `json:"name" validate:"required,max=255"`
 }
 
-// UpdateName godoc
+// PatchName godoc
 //
-//	@Summary		Update Name
-//	@Description	Update Name
+//	@Summary		Patch Name
+//	@Description	Patch Name
 //	@Tags			Workspaces
-//	@Id				workspaces_update_name
+//	@Id				workspaces_patch_name
 //	@Accept			json
 //	@Produce		json
 //	@Param			id		path		string						true	"ID"
-//	@Param			body	body		WorkspaceUpdateNameOptions	true	"Body"
+//	@Param			body	body		WorkspacePatchNameOptions	true	"Body"
 //	@Success		200		{object}	service.Workspace
 //	@Failure		400		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
-//	@Router			/workspaces/{id}/update_name [post]
-func (r *WorkspaceRouter) UpdateName(c *fiber.Ctx) error {
-	opts := new(WorkspaceUpdateNameOptions)
+//	@Router			/workspaces/{id}/update_name [patch]
+func (r *WorkspaceRouter) PatchName(c *fiber.Ctx) error {
+	opts := new(WorkspacePatchNameOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
 	}
-	res, err := r.workspaceSvc.UpdateName(c.Params("id"), opts.Name, GetUserID(c))
+	res, err := r.workspaceSvc.PatchName(c.Params("id"), opts.Name, GetUserID(c))
 	if err != nil {
 		return err
 	}
 	return c.JSON(res)
 }
 
-type WorkspaceUpdateStorageCapacityOptions struct {
+type WorkspacePatchStorageCapacityOptions struct {
 	StorageCapacity int64 `json:"storageCapacity" validate:"required,min=1"`
 }
 
-// UpdateStorageCapacity godoc
+// PatchStorageCapacity godoc
 //
-//	@Summary		Update Storage Capacity
-//	@Description	Update Storage Capacity
+//	@Summary		Patch Storage Capacity
+//	@Description	Patch Storage Capacity
 //	@Tags			Workspaces
-//	@Id				workspaces_update_storage_capacity
+//	@Id				workspaces_patch_storage_capacity
 //	@Accept			json
 //	@Produce		json
 //	@Param			id		path		string									true	"Id"
-//	@Param			body	body		WorkspaceUpdateStorageCapacityOptions	true	"Body"
+//	@Param			body	body		WorkspacePatchStorageCapacityOptions	true	"Body"
 //	@Success		200		{object}	service.Workspace
 //	@Failure		400		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
-//	@Router			/workspaces/{id}/update_storage_capacity [post]
-func (r *WorkspaceRouter) UpdateStorageCapacity(c *fiber.Ctx) error {
-	opts := new(WorkspaceUpdateStorageCapacityOptions)
+//	@Router			/workspaces/{id}/storage_capacity [patch]
+func (r *WorkspaceRouter) PatchStorageCapacity(c *fiber.Ctx) error {
+	opts := new(WorkspacePatchStorageCapacityOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
 	}
-	res, err := r.workspaceSvc.UpdateStorageCapacity(c.Params("id"), opts.StorageCapacity, GetUserID(c))
+	res, err := r.workspaceSvc.PatchStorageCapacity(c.Params("id"), opts.StorageCapacity, GetUserID(c))
 	if err != nil {
 		return err
 	}

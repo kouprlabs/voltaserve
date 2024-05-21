@@ -74,7 +74,7 @@ const WorkspaceEditStorageCapacity = ({
     ) => {
       setSubmitting(true)
       try {
-        const result = await WorkspaceAPI.updateStorageCapacity(workspace.id, {
+        const result = await WorkspaceAPI.patchStorageCapacity(workspace.id, {
           storageCapacity,
         })
         mutate?.(result)

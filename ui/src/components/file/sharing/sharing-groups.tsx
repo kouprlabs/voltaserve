@@ -40,7 +40,7 @@ const SharingGroups = ({
 }: SharingGroupsProps) => {
   const { id, fileId } = useParams()
   const dispatch = useAppDispatch()
-  const { data: workspace } = WorkspaceAPI.useGetById(id)
+  const { data: workspace } = WorkspaceAPI.useGet(id)
   const selection = useAppSelector((state) => state.ui.files.selection)
   const mutateList = useAppSelector((state) => state.ui.files.mutate)
   const [isGrantLoading, setIsGrantLoading] = useState(false)

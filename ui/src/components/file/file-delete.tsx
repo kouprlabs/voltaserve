@@ -29,7 +29,7 @@ const FileDelete = () => {
   const handleDelete = useCallback(async () => {
     try {
       setIsLoading(true)
-      await FileAPI.batchDelete({ ids: selection })
+      await FileAPI.delete({ ids: selection })
       mutateList?.()
       dispatch(selectionUpdated([]))
       dispatch(deleteModalDidClose())

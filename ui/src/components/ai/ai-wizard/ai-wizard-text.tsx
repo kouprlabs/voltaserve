@@ -1,7 +1,11 @@
 import AIText from '../ai-text'
 
-const AIWizardText = () => {
-  return <AIText />
+export type AIWizardTextProps = {
+  id: string
+}
+
+const AIWizardText = ({ id }: AIWizardTextProps) => {
+  return <AIText id={id} />
 }
 
 export default AIWizardText

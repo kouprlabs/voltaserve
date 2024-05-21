@@ -5,12 +5,12 @@ app = Flask(__name__)
 nlp = None
 
 
-@app.route("/v1/health", methods=["GET"])
+@app.route("/v2/health", methods=["GET"])
 def health():
     return "OK", 200
 
 
-@app.route("/v1/entities", methods=["POST"])
+@app.route("/v2/entities", methods=["POST"])
 def ner_entities():
     global nlp
     content = request.json

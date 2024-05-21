@@ -9,12 +9,11 @@ export type DrawerOpenNewTabButtonProps = {
   isCollapsed?: boolean
 }
 
-const LABEL = 'Open file'
-
 const DrawerOpenNewTabButton = ({
   file,
   isCollapsed,
 }: DrawerOpenNewTabButtonProps) => {
+  const label = 'Open file'
   const download = useMemo(() => file.preview ?? file.original, [file])
   const path = useMemo(() => (file.preview ? 'preview' : 'original'), [file])
   const url = useMemo(() => {
@@ -22,7 +21,7 @@ const DrawerOpenNewTabButton = ({
       return ''
     }
     if (file.original?.extension) {
-      return `/proxy/api/v1/files/${file.id}/${path}${download.extension}`
+      return `/proxy/api/v2/files/${file.id}/${path}${download.extension}`
     } else {
       return ''
     }
@@ -38,8 +37,8 @@ const DrawerOpenNewTabButton = ({
         className={cx('h-[50px]', 'w-[50px]', 'p-1.5', 'rounded-md')}
         href={url}
         target="_blank"
-        title={LABEL}
-        aria-label={LABEL}
+        title={label}
+        aria-label={label}
       />
     )
   } else {
@@ -51,7 +50,7 @@ const DrawerOpenNewTabButton = ({
         href={url}
         target="_blank"
       >
-        {LABEL}
+        {label}
       </Button>
     )
   }

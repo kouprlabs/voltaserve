@@ -14,7 +14,7 @@ const ViewerImage = ({ file }: ViewerImageProps) => {
     if (!file.preview?.extension) {
       return ''
     }
-    return `/proxy/api/v1/files/${file.id}/preview${
+    return `/proxy/api/v2/files/${file.id}/preview${
       file.preview.extension
     }?${new URLSearchParams({
       access_token: getAccessTokenOrRedirect(),

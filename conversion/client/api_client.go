@@ -30,7 +30,7 @@ func NewAPIClient() *APIClient {
 }
 
 func (cl *APIClient) GetHealth() (string, error) {
-	req, err := http.NewRequest("GET", fmt.Sprintf("%s/v1/health", cl.config.APIURL), nil)
+	req, err := http.NewRequest("GET", fmt.Sprintf("%s/v2/health", cl.config.APIURL), nil)
 	if err != nil {
 		return "", err
 	}
@@ -52,7 +52,7 @@ func (cl *APIClient) UpdateSnapshot(opts core.SnapshotUpdateOptions) error {
 	if err != nil {
 		return err
 	}
-	req, err := http.NewRequest("PATCH", fmt.Sprintf("%s/v1/snapshots/%s?api_key=%s", cl.config.APIURL, opts.Options.SnapshotID, cl.config.Security.APIKey), bytes.NewBuffer(body))
+	req, err := http.NewRequest("PATCH", fmt.Sprintf("%s/v2/snapshots/%s?api_key=%s", cl.config.APIURL, opts.Options.SnapshotID, cl.config.Security.APIKey), bytes.NewBuffer(body))
 	if err != nil {
 		return err
 	}

@@ -7,19 +7,24 @@
   },
   "host": "localhost:3000",
   "basePath": "/",
-  "schemes": ["http"],
+  "schemes": [
+    "http"
+  ],
   "paths": {
-    "/v1/health": {
+    "/v2/health/": {
       "get": {
         "description": "",
         "responses": {
           "200": {
             "description": "OK"
+          },
+          "503": {
+            "description": "Service Unavailable"
           }
         }
       }
     },
-    "/v1/user/": {
+    "/v2/user/": {
       "get": {
         "description": "",
         "responses": {
@@ -40,7 +45,7 @@
         }
       }
     },
-    "/v1/user/update_full_name": {
+    "/v2/user/update_full_name": {
       "post": {
         "description": "",
         "responses": {
@@ -50,7 +55,7 @@
         }
       }
     },
-    "/v1/user/update_email_request": {
+    "/v2/user/update_email_request": {
       "post": {
         "description": "",
         "responses": {
@@ -60,7 +65,7 @@
         }
       }
     },
-    "/v1/user/update_email_confirmation": {
+    "/v2/user/update_email_confirmation": {
       "post": {
         "description": "",
         "responses": {
@@ -70,7 +75,7 @@
         }
       }
     },
-    "/v1/user/update_password": {
+    "/v2/user/update_password": {
       "post": {
         "description": "",
         "responses": {
@@ -83,7 +88,7 @@
         }
       }
     },
-    "/v1/user/update_picture": {
+    "/v2/user/update_picture": {
       "post": {
         "description": "",
         "responses": {
@@ -93,7 +98,7 @@
         }
       }
     },
-    "/v1/user/delete_picture": {
+    "/v2/user/delete_picture": {
       "post": {
         "description": "",
         "responses": {
@@ -103,7 +108,7 @@
         }
       }
     },
-    "/v1/accounts/": {
+    "/v2/accounts/": {
       "post": {
         "description": "",
         "responses": {
@@ -113,7 +118,7 @@
         }
       }
     },
-    "/v1/accounts/reset_password": {
+    "/v2/accounts/reset_password": {
       "post": {
         "description": "",
         "responses": {
@@ -123,7 +128,7 @@
         }
       }
     },
-    "/v1/accounts/confirm_email": {
+    "/v2/accounts/confirm_email": {
       "post": {
         "description": "",
         "responses": {
@@ -133,7 +138,7 @@
         }
       }
     },
-    "/v1/accounts/send_reset_password_email": {
+    "/v2/accounts/send_reset_password_email": {
       "post": {
         "description": "",
         "responses": {
@@ -143,7 +148,7 @@
         }
       }
     },
-    "/v1/token/": {
+    "/v2/token/": {
       "post": {
         "description": "",
         "responses": {

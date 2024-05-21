@@ -61,7 +61,7 @@ const WorkspaceFilesPage = () => {
     (state) => state.ui.files.isRenameModalOpen,
   )
   const isAiModalOpen = useAppSelector((state) => state.ui.ai.isModalOpen)
-  const { data: workspace } = WorkspaceAPI.useGetById(id, swrConfig())
+  const { data: workspace } = WorkspaceAPI.useGet(id, swrConfig())
   const { page, size, steps, setPage, setSize } = usePagePagination({
     navigate,
     location,

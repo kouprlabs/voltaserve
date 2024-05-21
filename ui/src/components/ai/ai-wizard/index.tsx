@@ -15,20 +15,25 @@ import {
   useSteps,
 } from '@chakra-ui/react'
 import cx from 'classnames'
-import { useAppDispatch } from '@/store/hook'
+import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { modalDidClose, wizardDidComplete } from '@/store/ui/ai'
 import AIWizardEntities from './ai-wizard-entities'
 import AIWizardLanguage from './ai-wizard-language'
 import AIWizardText from './ai-wizard-text'
 
 const steps = [
-  { title: 'Set Language', description: 'Matching the text' },
+  { title: 'Choose Language', description: 'From the list' },
   { title: 'Extract Text', description: 'Using OCR' },
   { title: 'Scan Entities', description: 'Using NER' },
 ]
 
 const AiWizard = () => {
   const dispatch = useAppDispatch()
+  const id = useAppSelector((state) =>
+    state.ui.files.selection.length > 0
+      ? state.ui.files.selection[0]
+      : undefined,
+  )
   const { activeStep, setActiveStep } = useSteps({
     index: 0,
     count: steps.length,
@@ -48,6 +53,10 @@ const AiWizard = () => {
       setActiveStep(activeStep - 1)
     }
   }, [activeStep, setActiveStep, dispatch])
+
+  if (!id) {
+    return null
+  }
 
   return (
     <>
@@ -72,7 +81,7 @@ const AiWizard = () => {
             ))}
           </Stepper>
           {activeStep === 0 ? <AIWizardLanguage /> : null}
-          {activeStep === 1 ? <AIWizardText /> : null}
+          {activeStep === 1 ? <AIWizardText id={id} /> : null}
           {activeStep === 2 ? <AIWizardEntities /> : null}
           {activeStep === steps.length ? (
             <div

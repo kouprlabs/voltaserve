@@ -60,7 +60,7 @@ const OrganizationEditName = ({
     ) => {
       setSubmitting(true)
       try {
-        const result = await OrganizationAPI.updateName(organization.id, {
+        const result = await OrganizationAPI.patchName(organization.id, {
           name,
         })
         mutate?.(result)

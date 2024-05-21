@@ -56,7 +56,7 @@ const GroupEditName = ({ open, group, onClose }: GroupEditNameProps) => {
     ) => {
       setSubmitting(true)
       try {
-        const result = await GroupAPI.updateName(group.id, {
+        const result = await GroupAPI.patchName(group.id, {
           name,
         })
         mutate?.(result)

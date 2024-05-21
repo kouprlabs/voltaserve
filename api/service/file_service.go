@@ -340,7 +340,73 @@ func (svc *FileService) DownloadPreviewBuffer(id string, userID string) (*bytes.
 	}
 }
 
-func (svc *FileService) FindByID(ids []string, userID string) ([]*File, error) {
+func (svc *FileService) DownloadTextBuffer(id string, userID string) (*bytes.Buffer, model.File, model.Snapshot, error) {
+	user, err := svc.userRepo.Find(userID)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	file, err := svc.fileCache.Get(id)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	if err = svc.fileGuard.Authorize(user, file, model.PermissionViewer); err != nil {
+		return nil, nil, nil, err
+	}
+	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
+		return nil, nil, nil, errorpkg.NewFileIsNotAFileError(file)
+	}
+	snapshot, err := svc.snapshotRepo.Find(*file.GetSnapshotID())
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	if snapshot == nil {
+		return nil, nil, nil, errorpkg.NewSnapshotNotFoundError(nil)
+	}
+	if snapshot.HasText() {
+		buf, err := svc.s3.GetObject(snapshot.GetText().Key, snapshot.GetText().Bucket)
+		if err != nil {
+			return nil, nil, nil, err
+		}
+		return buf, file, snapshot, nil
+	} else {
+		return nil, nil, nil, errorpkg.NewS3ObjectNotFoundError(nil)
+	}
+}
+
+func (svc *FileService) DownloadOCRBuffer(id string, userID string) (*bytes.Buffer, model.File, model.Snapshot, error) {
+	user, err := svc.userRepo.Find(userID)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	file, err := svc.fileCache.Get(id)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	if err = svc.fileGuard.Authorize(user, file, model.PermissionViewer); err != nil {
+		return nil, nil, nil, err
+	}
+	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
+		return nil, nil, nil, errorpkg.NewFileIsNotAFileError(file)
+	}
+	snapshot, err := svc.snapshotRepo.Find(*file.GetSnapshotID())
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	if snapshot == nil {
+		return nil, nil, nil, errorpkg.NewSnapshotNotFoundError(nil)
+	}
+	if snapshot.HasOCR() {
+		buf, err := svc.s3.GetObject(snapshot.GetOCR().Key, snapshot.GetOCR().Bucket)
+		if err != nil {
+			return nil, nil, nil, err
+		}
+		return buf, file, snapshot, nil
+	} else {
+		return nil, nil, nil, errorpkg.NewS3ObjectNotFoundError(nil)
+	}
+}
+
+func (svc *FileService) Find(ids []string, userID string) ([]*File, error) {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
@@ -432,7 +498,7 @@ func (svc *FileService) FindByPath(path string, userID string) (*File, error) {
 			return nil, errorpkg.NewFileNotFoundError(fmt.Errorf("component not found '%s'", component))
 		}
 	}
-	result, err := svc.FindByID([]string{currentID}, userID)
+	result, err := svc.Find([]string{currentID}, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -525,7 +591,7 @@ func (svc *FileService) ListByPath(path string, userID string) ([]*File, error) 
 		}
 		return result, nil
 	} else if currentType == model.FileTypeFile {
-		result, err := svc.FindByID([]string{currentID}, userID)
+		result, err := svc.Find([]string{currentID}, userID)
 		if err != nil {
 			return nil, err
 		}
@@ -687,25 +753,6 @@ func (svc *FileService) GetPath(id string, userID string) ([]*File, error) {
 		res = append([]*File{v}, res...)
 	}
 	return res, nil
-}
-
-func (svc *FileService) GetIDs(id string, userID string) ([]string, error) {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return nil, err
-	}
-	file, err := svc.fileCache.Get(id)
-	if err != nil {
-		return nil, err
-	}
-	if err = svc.fileGuard.Authorize(user, file, model.PermissionViewer); err != nil {
-		return nil, err
-	}
-	ids, err := svc.fileRepo.GetChildrenIDs(id)
-	if err != nil {
-		return nil, err
-	}
-	return ids, nil
 }
 
 func (svc *FileService) Copy(targetID string, sourceIDs []string, userID string) (copiedFiles []*File, err error) {
@@ -944,7 +991,7 @@ func (svc *FileService) Move(targetID string, sourceIDs []string, userID string)
 	return parentIDs, nil
 }
 
-func (svc *FileService) Rename(id string, name string, userID string) (*File, error) {
+func (svc *FileService) PatchName(id string, name string, userID string) (*File, error) {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
@@ -1083,7 +1130,7 @@ func (svc *FileService) GetSize(id string, userID string) (int64, error) {
 	return res, nil
 }
 
-func (svc *FileService) GetItemCount(id string, userID string) (int64, error) {
+func (svc *FileService) GetCount(id string, userID string) (int64, error) {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return 0, err

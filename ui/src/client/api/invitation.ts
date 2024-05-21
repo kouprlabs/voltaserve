@@ -66,9 +66,7 @@ export default class InvitationAPI {
   }
 
   static useGetIncoming(options?: ListOptions, swrOptions?: SWRConfiguration) {
-    const url = `/invitations/get_incoming?${this.paramsFromListOptions(
-      options,
-    )}`
+    const url = `/invitations/incoming?${this.paramsFromListOptions(options)}`
     return useSWR<List>(
       url,
       () => apiFetcher({ url, method: 'GET' }) as Promise<List>,
@@ -77,9 +75,7 @@ export default class InvitationAPI {
   }
 
   static useGetOutgoing(options?: ListOptions, swrOptions?: SWRConfiguration) {
-    const url = `/invitations/get_outgoing?${this.paramsFromListOptions(
-      options,
-    )}`
+    const url = `/invitations/outgoing?${this.paramsFromListOptions(options)}`
     return useSWR<List>(
       options?.organizationId ? url : null,
       () => apiFetcher({ url, method: 'GET' }) as Promise<List>,

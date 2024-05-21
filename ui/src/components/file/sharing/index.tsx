@@ -41,7 +41,7 @@ const FileSharing = ({ list }: FileSharingProps) => {
       return undefined
     }
   }, [list.data, selection])
-  const { data: workspace } = WorkspaceAPI.useGetById(id)
+  const { data: workspace } = WorkspaceAPI.useGet(id)
   const { data: users } = UserAPI.useList({
     organizationId: workspace?.organization.id,
   })

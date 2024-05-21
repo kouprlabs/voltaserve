@@ -1,8 +1,20 @@
 import { Button } from '@chakra-ui/react'
 import cx from 'classnames'
-import { IconDownload } from '@/lib'
+import AIAPI from '@/client/api/analysis'
+import { getAccessTokenOrRedirect } from '@/infra/token'
+import { IconOpenInNew } from '@/lib'
 
-const AIText = () => {
+export type AITextProps = {
+  id: string
+}
+
+const AIText = ({ id }: AITextProps) => {
+  const { data: summary } = AIAPI.useGetSummary(id)
+
+  if (!summary) {
+    return null
+  }
+
   return (
     <div
       className={cx(
@@ -13,12 +25,32 @@ const AIText = () => {
         'gap-1',
       )}
     >
-      <Button type="button" leftIcon={<IconDownload />}>
-        Download Text
-      </Button>
-      <Button type="button" leftIcon={<IconDownload />}>
-        Download PDF
-      </Button>
+      {summary.hasText ? (
+        <Button
+          as="a"
+          type="button"
+          leftIcon={<IconOpenInNew />}
+          href={`/proxy/api/v2/files/${id}/text.txt?${new URLSearchParams({
+            access_token: getAccessTokenOrRedirect(),
+          })}`}
+          target="_blank"
+        >
+          Open Text
+        </Button>
+      ) : null}
+      {summary.hasOcr ? (
+        <Button
+          as="a"
+          type="button"
+          leftIcon={<IconOpenInNew />}
+          href={`/proxy/api/v2/files/${id}/ocr.pdf?${new URLSearchParams({
+            access_token: getAccessTokenOrRedirect(),
+          })}`}
+          target="_blank"
+        >
+          Open Searchable PDF
+        </Button>
+      ) : null}
     </div>
   )
 }

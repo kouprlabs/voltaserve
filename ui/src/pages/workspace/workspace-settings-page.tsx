@@ -26,7 +26,7 @@ const Spacer = () => <div className={cx('grow')} />
 
 const WorkspaceSettingsPage = () => {
   const { id } = useParams()
-  const { data: workspace, error: workspaceError } = WorkspaceAPI.useGetById(
+  const { data: workspace, error: workspaceError } = WorkspaceAPI.useGet(
     id,
     swrConfig(),
   )

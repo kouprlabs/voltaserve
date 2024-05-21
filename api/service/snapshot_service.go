@@ -253,7 +253,7 @@ type SnapshotUpdateOptions struct {
 	Status    string                    `json:"status,omitempty"`
 }
 
-func (svc *SnapshotService) Update(id string, opts SnapshotUpdateOptions, apiKey string) error {
+func (svc *SnapshotService) Patch(id string, opts SnapshotUpdateOptions, apiKey string) error {
 	if id != opts.Options.SnapshotID {
 		return errorpkg.NewPathVariablesAndBodyParametersNotConsistent()
 	}

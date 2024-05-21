@@ -48,11 +48,11 @@ export type ListOptions = {
   sortOrder?: SortOrder
 }
 
-export interface UpdateNameOptions {
+export interface PatchNameOptions {
   name: string
 }
 
-export interface StorageCapacityOptions {
+export interface PatchStorageCapacityOptions {
   storageCapacity: number
 }
 
@@ -65,17 +65,7 @@ type ListQueryParams = {
 }
 
 export default class WorkspaceAPI {
-  static async getById(id: string) {
-    return apiFetcher({
-      url: `/workspaces/${id}`,
-      method: 'GET',
-    }) as Promise<Workspace>
-  }
-
-  static useGetById(
-    id: string | null | undefined,
-    swrOptions?: SWRConfiguration,
-  ) {
+  static useGet(id: string | null | undefined, swrOptions?: SWRConfiguration) {
     const url = `/workspaces/${id}`
     return useSWR<Workspace>(
       id ? url : null,
@@ -108,32 +98,22 @@ export default class WorkspaceAPI {
     }) as Promise<Workspace>
   }
 
-  static async updateName(id: string, options: UpdateNameOptions) {
+  static async patchName(id: string, options: PatchNameOptions) {
     return apiFetcher({
-      url: `/workspaces/${id}/update_name`,
-      method: 'POST',
+      url: `/workspaces/${id}/name`,
+      method: 'PATCH',
       body: JSON.stringify(options),
     }) as Promise<Workspace>
   }
 
-  static async updateStorageCapacity(
+  static async patchStorageCapacity(
     id: string,
-    options: StorageCapacityOptions,
+    options: PatchStorageCapacityOptions,
   ) {
     return apiFetcher({
-      url: `/workspaces/${id}/update_storage_capacity`,
-      method: 'POST',
+      url: `/workspaces/${id}/storage_capacity`,
+      method: 'PATCH',
       body: JSON.stringify(options),
-    }) as Promise<Workspace>
-  }
-
-  static async updateImage(id: string, file: File) {
-    const formData = new FormData()
-    formData.append('file', file)
-    return apiFetcher({
-      url: `/workspaces/${id}/update_image`,
-      method: 'POST',
-      body: formData,
     }) as Promise<Workspace>
   }
 

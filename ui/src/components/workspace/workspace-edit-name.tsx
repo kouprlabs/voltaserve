@@ -60,7 +60,7 @@ const WorkspaceEditName = ({
     ) => {
       setSubmitting(true)
       try {
-        const result = await WorkspaceAPI.updateName(workspace.id, {
+        const result = await WorkspaceAPI.patchName(workspace.id, {
           name,
         })
         mutate?.(result)

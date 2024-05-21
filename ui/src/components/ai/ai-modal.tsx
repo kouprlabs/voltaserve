@@ -31,7 +31,7 @@ const AiModal = () => {
     >
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>AI</ModalHeader>
+        <ModalHeader>Analyze</ModalHeader>
         <ModalCloseButton />
         {!isWizardComplete ? <AiWizard /> : null}
         {isWizardComplete ? <AiOverview /> : null}

@@ -1,6 +1,6 @@
 package model
 
-type AIEntity struct {
+type AnalysisEntity struct {
 	Text  string `json:"text"`
 	Label string `json:"label"`
 }

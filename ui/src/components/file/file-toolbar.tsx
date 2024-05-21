@@ -117,7 +117,7 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
   const mutateList = useAppSelector((state) => state.ui.files.mutate)
   const fileUploadInput = useRef<HTMLInputElement>(null)
   const folderUploadInput = useRef<HTMLInputElement>(null)
-  const { data: folder } = FileAPI.useGetById(fileId)
+  const { data: folder } = FileAPI.useGet(fileId)
   const stackClassName = cx('flex', 'flex-row', 'gap-0.5')
 
   const handleFileChange = useCallback(

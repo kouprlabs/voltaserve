@@ -42,7 +42,7 @@ export type CreateOptions = {
   image?: string
 }
 
-export type UpdateNameOptions = {
+export type PatchNameOptions = {
   name: string
 }
 
@@ -59,17 +59,7 @@ type ListQueryParams = {
 }
 
 export default class OrganizationAPI {
-  static async getById(id: string) {
-    return apiFetcher({
-      url: `/organizations/${id}`,
-      method: 'GET',
-    }) as Promise<Organization>
-  }
-
-  static useGetById(
-    id: string | null | undefined,
-    swrOptions?: SWRConfiguration,
-  ) {
+  static useGet(id: string | null | undefined, swrOptions?: SWRConfiguration) {
     const url = `/organizations/${id}`
     return useSWR<Organization>(
       id ? url : null,
@@ -102,21 +92,11 @@ export default class OrganizationAPI {
     }) as Promise<Organization>
   }
 
-  static async updateName(id: string, options: UpdateNameOptions) {
+  static async patchName(id: string, options: PatchNameOptions) {
     return apiFetcher({
-      url: `/organizations/${id}/update_name`,
-      method: 'POST',
+      url: `/organizations/${id}/name`,
+      method: 'PATCH',
       body: JSON.stringify(options),
-    }) as Promise<Organization>
-  }
-
-  static async updateImage(id: string, file: File) {
-    const formData = new FormData()
-    formData.append('file', file)
-    return apiFetcher({
-      url: `/organizations/${id}/update_image`,
-      method: 'POST',
-      body: formData,
     }) as Promise<Organization>
   }
 
@@ -136,8 +116,8 @@ export default class OrganizationAPI {
 
   static async removeMember(id: string, options: RemoveMemberOptions) {
     return apiFetcher({
-      url: `/organizations/${id}/remove_member`,
-      method: 'POST',
+      url: `/organizations/${id}/members`,
+      method: 'DELETE',
       body: JSON.stringify(options),
     })
   }

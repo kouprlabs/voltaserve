@@ -1,4 +1,4 @@
-basePath: /v1
+basePath: /v2
 definitions:
   core.PipelineRunOptions:
     properties:

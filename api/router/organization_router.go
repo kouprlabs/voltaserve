@@ -23,11 +23,11 @@ func NewOrganizationRouter() *OrganizationRouter {
 func (r *OrganizationRouter) AppendRoutes(g fiber.Router) {
 	g.Get("/", r.List)
 	g.Post("/", r.Create)
-	g.Get("/:id", r.GetByID)
+	g.Get("/:id", r.Get)
 	g.Delete("/:id", r.Delete)
-	g.Post("/:id/update_name", r.UpdateName)
+	g.Patch("/:id/name", r.PatchName)
 	g.Post("/:id/leave", r.Leave)
-	g.Post("/:id/remove_member", r.RemoveMember)
+	g.Delete("/:id/members", r.RemoveMember)
 }
 
 // Create godoc
@@ -62,19 +62,19 @@ func (r *OrganizationRouter) Create(c *fiber.Ctx) error {
 	return c.Status(http.StatusCreated).JSON(res)
 }
 
-// GetByID godoc
+// Get godoc
 //
-//	@Summary		Get by ID
-//	@Description	Get by ID
+//	@Summary		Get
+//	@Description	Get
 //	@Tags			Organizations
-//	@Id				organizations_get_by_id
+//	@Id				organizations_get
 //	@Produce		json
 //	@Param			id	path		string	true	"ID"
 //	@Success		200	{object}	service.Organization
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/organizations/{id} [get]
-func (r *OrganizationRouter) GetByID(c *fiber.Ctx) error {
+func (r *OrganizationRouter) Get(c *fiber.Ctx) error {
 	userID := GetUserID(c)
 	res, err := r.orgSvc.Find(c.Params("id"), userID)
 	if err != nil {
@@ -104,35 +104,35 @@ func (r *OrganizationRouter) Delete(c *fiber.Ctx) error {
 	return c.SendStatus(http.StatusNoContent)
 }
 
-type OrganizationUpdateNameOptions struct {
+type OrganizationPatchNameOptions struct {
 	Name string `json:"name" validate:"required,max=255"`
 }
 
-// UpdateName godoc
+// PatchName godoc
 //
-//	@Summary		Update Name
-//	@Description	Update Name
+//	@Summary		Patch Name
+//	@Description	Patch Name
 //	@Tags			Organizations
-//	@Id				organizations_update_name
+//	@Id				organizations_patch_name
 //	@Accept			json
 //	@Produce		json
 //	@Param			id		path		string							true	"ID"
-//	@Param			body	body		OrganizationUpdateNameOptions	true	"Body"
+//	@Param			body	body		OrganizationPatchNameOptions	true	"Body"
 //	@Success		200		{object}	service.Organization
 //	@Failure		404		{object}	errorpkg.ErrorResponse
 //	@Failure		400		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
-//	@Router			/organizations/{id}/update_name [post]
-func (r *OrganizationRouter) UpdateName(c *fiber.Ctx) error {
+//	@Router			/organizations/{id}/name [patch]
+func (r *OrganizationRouter) PatchName(c *fiber.Ctx) error {
 	userID := GetUserID(c)
-	opts := new(OrganizationUpdateNameOptions)
+	opts := new(OrganizationPatchNameOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
 	}
 	if err := validator.New().Struct(opts); err != nil {
 		return errorpkg.NewRequestBodyValidationError(err)
 	}
-	res, err := r.orgSvc.UpdateName(c.Params("id"), opts.Name, userID)
+	res, err := r.orgSvc.PatchName(c.Params("id"), opts.Name, userID)
 	if err != nil {
 		return err
 	}
@@ -234,7 +234,7 @@ type OrganizationRemoveMemberOptions struct {
 //	@Failure		404		{object}	errorpkg.ErrorResponse
 //	@Failure		400		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
-//	@Router			/organizations/{id}/remove_member [post]
+//	@Router			/organizations/{id}/members [delete]
 func (r *OrganizationRouter) RemoveMember(c *fiber.Ctx) error {
 	userID := GetUserID(c)
 	opts := new(OrganizationRemoveMemberOptions)

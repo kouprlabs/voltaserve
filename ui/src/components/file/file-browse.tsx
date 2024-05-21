@@ -14,7 +14,7 @@ export type FileBrowseProps = {
 
 const FileBrowse = ({ onChange }: FileBrowseProps) => {
   const { id } = useParams()
-  const { data: workspace } = WorkspaceAPI.useGetById(id)
+  const { data: workspace } = WorkspaceAPI.useGet(id)
   const [folders, setFolders] = useState<File[]>([])
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)

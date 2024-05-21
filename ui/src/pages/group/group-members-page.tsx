@@ -48,10 +48,7 @@ const GroupMembersPage = () => {
   const dispatch = useAppDispatch()
   const location = useLocation()
   const { id } = useParams()
-  const { data: group, error: groupError } = GroupAPI.useGetById(
-    id,
-    swrConfig(),
-  )
+  const { data: group, error: groupError } = GroupAPI.useGet(id, swrConfig())
   const { page, size, steps, setPage, setSize } = usePagePagination({
     navigate,
     location,

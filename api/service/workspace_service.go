@@ -212,7 +212,7 @@ func (svc *WorkspaceService) List(opts WorkspaceListOptions, userID string) (*Wo
 	}, nil
 }
 
-func (svc *WorkspaceService) UpdateName(id string, name string, userID string) (*Workspace, error) {
+func (svc *WorkspaceService) PatchName(id string, name string, userID string) (*Workspace, error) {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
@@ -240,7 +240,7 @@ func (svc *WorkspaceService) UpdateName(id string, name string, userID string) (
 	return res, nil
 }
 
-func (svc *WorkspaceService) UpdateStorageCapacity(id string, storageCapacity int64, userID string) (*Workspace, error) {
+func (svc *WorkspaceService) PatchStorageCapacity(id string, storageCapacity int64, userID string) (*Workspace, error) {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err

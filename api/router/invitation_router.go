@@ -22,8 +22,8 @@ func NewInvitationRouter() *InvitationRouter {
 
 func (r *InvitationRouter) AppendRoutes(g fiber.Router) {
 	g.Post("/", r.Create)
-	g.Get("/get_incoming", r.GetIncoming)
-	g.Get("/get_outgoing", r.GetOutgoing)
+	g.Get("/incoming", r.GetIncoming)
+	g.Get("/outgoing", r.GetOutgoing)
 	g.Post("/:id/accept", r.Accept)
 	g.Post("/:id/resend", r.Resend)
 	g.Post("/:id/decline", r.Decline)
@@ -72,7 +72,7 @@ func (r *InvitationRouter) Create(c *fiber.Ctx) error {
 //	@Param			sort_order	query		string	false	"Sort Order"
 //	@Success		200			{object}	service.InvitationList
 //	@Failure		500			{object}	errorpkg.ErrorResponse
-//	@Router			/invitations/get_incoming [get]
+//	@Router			/invitations/incoming [get]
 func (r *InvitationRouter) GetIncoming(c *fiber.Ctx) error {
 	var err error
 	var page int64
@@ -127,7 +127,7 @@ func (r *InvitationRouter) GetIncoming(c *fiber.Ctx) error {
 //	@Param			sort_order		query		string	false	"Sort Order"
 //	@Success		200				{object}	service.InvitationList
 //	@Failure		500				{object}	errorpkg.ErrorResponse
-//	@Router			/invitations/get_outgoing [get]
+//	@Router			/invitations/outgoing [get]
 func (r *InvitationRouter) GetOutgoing(c *fiber.Ctx) error {
 	orgID := c.Query("organization_id")
 	if orgID == "" {

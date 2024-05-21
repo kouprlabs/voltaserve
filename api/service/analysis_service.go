@@ -1,7 +1,6 @@
 package service
 
 import (
-	"bytes"
 	"encoding/json"
 	"os"
 	"path/filepath"
@@ -19,14 +18,8 @@ import (
 	"go.uber.org/zap"
 )
 
-type AILanguage struct {
-	ID      string `json:"id"`
-	ISO6393 string `json:"iso6393"`
-	Name    string `json:"name"`
-}
-
-type AIService struct {
-	languages      []*AILanguage
+type AnalysisService struct {
+	languages      []*AnalysisLanguage
 	snapshotRepo   repo.SnapshotRepo
 	userRepo       repo.UserRepo
 	fileCache      *cache.FileCache
@@ -37,9 +30,9 @@ type AIService struct {
 	logger         *zap.SugaredLogger
 }
 
-func NewAIService() *AIService {
-	return &AIService{
-		languages: []*AILanguage{
+func NewAnalysisService() *AnalysisService {
+	return &AnalysisService{
+		languages: []*AnalysisLanguage{
 			{ID: "ara", ISO6393: "ara", Name: "Arabic"},
 			{ID: "chi_sim", ISO6393: "zho", Name: "Chinese Simplified"},
 			{ID: "chi_tra", ISO6393: "zho", Name: "Chinese Traditional"},
@@ -65,15 +58,21 @@ func NewAIService() *AIService {
 	}
 }
 
-func (svc *AIService) GetAvailableLanguages() ([]*AILanguage, error) {
+type AnalysisLanguage struct {
+	ID      string `json:"id"`
+	ISO6393 string `json:"iso6393"`
+	Name    string `json:"name"`
+}
+
+func (svc *AnalysisService) GetLanguages() ([]*AnalysisLanguage, error) {
 	return svc.languages, nil
 }
 
-type AIUpdateLanguageOptions struct {
+type AnalysisPatchLanguageOptions struct {
 	LanguageID string `json:"languageId" validate:"required"`
 }
 
-func (svc *AIService) UpdateLanguage(id string, opts AIUpdateLanguageOptions, userID string) error {
+func (svc *AnalysisService) PatchLanguage(id string, opts AnalysisPatchLanguageOptions, userID string) error {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return err
@@ -99,7 +98,7 @@ func (svc *AIService) UpdateLanguage(id string, opts AIUpdateLanguageOptions, us
 	return nil
 }
 
-func (svc *AIService) ExtractText(id string, userID string) error {
+func (svc *AnalysisService) CreateText(id string, userID string) error {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return err
@@ -203,7 +202,7 @@ func (svc *AIService) ExtractText(id string, userID string) error {
 	return nil
 }
 
-func (svc *AIService) ScanEntities(id string, userID string) error {
+func (svc *AnalysisService) CreateEntities(id string, userID string) error {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return err
@@ -253,14 +252,14 @@ func (svc *AIService) ScanEntities(id string, userID string) error {
 	return nil
 }
 
-type AISummary struct {
-	HasLanguage bool
-	HasOCR      bool
-	HasText     bool
-	HasEntities bool
+type AnalysisSummary struct {
+	HasLanguage bool `json:"hasLanguage"`
+	HasOCR      bool `json:"hasOcr"`
+	HasText     bool `json:"hasText"`
+	HasEntities bool `json:"hasEntities"`
 }
 
-func (svc *AIService) GetSummary(id string, userID string) (*AISummary, error) {
+func (svc *AnalysisService) GetSummary(id string, userID string) (*AnalysisSummary, error) {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
@@ -279,7 +278,7 @@ func (svc *AIService) GetSummary(id string, userID string) (*AISummary, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &AISummary{
+	return &AnalysisSummary{
 		HasLanguage: snapshot.GetLanguage() != nil,
 		HasOCR:      snapshot.HasOCR(),
 		HasText:     snapshot.HasText(),
@@ -287,89 +286,23 @@ func (svc *AIService) GetSummary(id string, userID string) (*AISummary, error) {
 	}, nil
 }
 
-func (svc *AIService) DownloadTextBuffer(id string, userID string) (*bytes.Buffer, model.File, model.Snapshot, error) {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return nil, nil, nil, err
-	}
-	file, err := svc.fileCache.Get(id)
-	if err != nil {
-		return nil, nil, nil, err
-	}
-	if err = svc.fileGuard.Authorize(user, file, model.PermissionViewer); err != nil {
-		return nil, nil, nil, err
-	}
-	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
-		return nil, nil, nil, errorpkg.NewFileIsNotAFileError(file)
-	}
-	snapshot, err := svc.snapshotRepo.Find(*file.GetSnapshotID())
-	if err != nil {
-		return nil, nil, nil, err
-	}
-	if snapshot == nil {
-		return nil, nil, nil, errorpkg.NewSnapshotNotFoundError(nil)
-	}
-	if snapshot.HasText() {
-		buf, err := svc.s3.GetObject(snapshot.GetText().Key, snapshot.GetText().Bucket)
-		if err != nil {
-			return nil, nil, nil, err
-		}
-		return buf, file, snapshot, nil
-	} else {
-		return nil, nil, nil, errorpkg.NewS3ObjectNotFoundError(nil)
-	}
+type AnalysisListEntitiesOptions struct {
+	Query     string `json:"query"`
+	Page      uint   `json:"page"`
+	Size      uint   `json:"size"`
+	SortBy    string `json:"sortBy"`
+	SortOrder string `json:"sortOrder"`
 }
 
-func (svc *AIService) DownloadOCRBuffer(id string, userID string) (*bytes.Buffer, model.File, model.Snapshot, error) {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return nil, nil, nil, err
-	}
-	file, err := svc.fileCache.Get(id)
-	if err != nil {
-		return nil, nil, nil, err
-	}
-	if err = svc.fileGuard.Authorize(user, file, model.PermissionViewer); err != nil {
-		return nil, nil, nil, err
-	}
-	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
-		return nil, nil, nil, errorpkg.NewFileIsNotAFileError(file)
-	}
-	snapshot, err := svc.snapshotRepo.Find(*file.GetSnapshotID())
-	if err != nil {
-		return nil, nil, nil, err
-	}
-	if snapshot == nil {
-		return nil, nil, nil, errorpkg.NewSnapshotNotFoundError(nil)
-	}
-	if snapshot.HasOCR() {
-		buf, err := svc.s3.GetObject(snapshot.GetOCR().Key, snapshot.GetOCR().Bucket)
-		if err != nil {
-			return nil, nil, nil, err
-		}
-		return buf, file, snapshot, nil
-	} else {
-		return nil, nil, nil, errorpkg.NewS3ObjectNotFoundError(nil)
-	}
+type AnalysisEntityList struct {
+	Data          []*model.AnalysisEntity `json:"data"`
+	TotalPages    uint                    `json:"totalPages"`
+	TotalElements uint                    `json:"totalElements"`
+	Page          uint                    `json:"page"`
+	Size          uint                    `json:"size"`
 }
 
-type AIEntitiesListOptions struct {
-	Query     string
-	Page      uint
-	Size      uint
-	SortBy    string
-	SortOrder string
-}
-
-type AIEntitiesList struct {
-	Data          []*model.AIEntity `json:"data"`
-	TotalPages    uint              `json:"totalPages"`
-	TotalElements uint              `json:"totalElements"`
-	Page          uint              `json:"page"`
-	Size          uint              `json:"size"`
-}
-
-func (svc *AIService) ListEntities(id string, opts AIEntitiesListOptions, userID string) (*AIEntitiesList, error) {
+func (svc *AnalysisService) ListEntities(id string, opts AnalysisListEntitiesOptions, userID string) (*AnalysisEntityList, error) {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
@@ -396,7 +329,7 @@ func (svc *AIService) ListEntities(id string, opts AIEntitiesListOptions, userID
 		if err != nil {
 			return nil, err
 		}
-		var entities []*model.AIEntity
+		var entities []*model.AnalysisEntity
 		if err := json.Unmarshal([]byte(text), &entities); err != nil {
 			return nil, err
 		}
@@ -406,7 +339,7 @@ func (svc *AIService) ListEntities(id string, opts AIEntitiesListOptions, userID
 		filtered := svc.doFiltering(entities, opts.Query)
 		sorted := svc.doSorting(filtered, opts.SortBy, opts.SortOrder)
 		data, totalElements, totalPages := svc.doPagination(sorted, opts.Page, opts.Size)
-		return &AIEntitiesList{
+		return &AnalysisEntityList{
 			Data:          data,
 			TotalPages:    totalPages,
 			TotalElements: totalElements,
@@ -418,11 +351,11 @@ func (svc *AIService) ListEntities(id string, opts AIEntitiesListOptions, userID
 	}
 }
 
-func (svc *AIService) doFiltering(data []*model.AIEntity, query string) []*model.AIEntity {
+func (svc *AnalysisService) doFiltering(data []*model.AnalysisEntity, query string) []*model.AnalysisEntity {
 	if query == "" {
 		return data
 	}
-	var filtered []*model.AIEntity
+	var filtered []*model.AnalysisEntity
 	for _, entity := range data {
 		if strings.Contains(strings.ToLower(entity.Text), strings.ToLower(query)) {
 			filtered = append(filtered, entity)
@@ -431,7 +364,7 @@ func (svc *AIService) doFiltering(data []*model.AIEntity, query string) []*model
 	return filtered
 }
 
-func (svc *AIService) doSorting(data []*model.AIEntity, sortBy string, sortOrder string) []*model.AIEntity {
+func (svc *AnalysisService) doSorting(data []*model.AnalysisEntity, sortBy string, sortOrder string) []*model.AnalysisEntity {
 	if sortBy == SortByName {
 		sort.Slice(data, func(i, j int) bool {
 			if sortOrder == SortOrderDesc {
@@ -445,7 +378,7 @@ func (svc *AIService) doSorting(data []*model.AIEntity, sortBy string, sortOrder
 	return data
 }
 
-func (svc *AIService) doPagination(data []*model.AIEntity, page, size uint) ([]*model.AIEntity, uint, uint) {
+func (svc *AnalysisService) doPagination(data []*model.AnalysisEntity, page, size uint) ([]*model.AnalysisEntity, uint, uint) {
 	totalElements := uint(len(data))
 	totalPages := (totalElements + size - 1) / size
 	if page > totalPages {

@@ -37,11 +37,11 @@ npm run swagger-autogen && mv ./swagger.json ./docs
 Preview (will be served at [http://localhost:7777](http://localhost:7777)):
 
 ```shell
-npmx @redocly/cli preview-docs --port 7777 ./docs/swagger.json
+npx @redocly/cli preview-docs --port 7777 ./docs/swagger.json
 ```
 
 Generate the final static HTML documentation:
 
 ```shell
-npmx @redocly/cli build-docs ./docs/swagger.json --output ./docs/index.html
+npx @redocly/cli build-docs ./docs/swagger.json --output ./docs/index.html
 ```

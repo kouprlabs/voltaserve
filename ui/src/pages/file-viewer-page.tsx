@@ -15,7 +15,7 @@ import { IconDownload, Drawer, Spinner } from '@/lib'
 
 const FileViewerPage = () => {
   const { id } = useParams()
-  const { data: file } = FileAPI.useGetById(id)
+  const { data: file } = FileAPI.useGet(id)
 
   const renderViewer = useCallback((file: File) => {
     if (

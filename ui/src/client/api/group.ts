@@ -45,7 +45,7 @@ export type CreateOptions = {
   organizationId: string
 }
 
-export type UpdateNameOptions = {
+export type PatchNameOptions = {
   name: string
 }
 
@@ -75,48 +75,21 @@ export default class GroupAPI {
     }) as Promise<Group>
   }
 
-  static updateName(id: string, options: UpdateNameOptions) {
+  static patchName(id: string, options: PatchNameOptions) {
     return apiFetcher({
-      url: `/groups/${id}/update_name`,
-      method: 'POST',
+      url: `/groups/${id}/name`,
+      method: 'PATCH',
       body: JSON.stringify(options),
     }) as Promise<Group>
   }
 
-  static async updateImage(id: string, file: File) {
-    const formData = new FormData()
-    formData.append('file', file)
-    return apiFetcher<Group>({
-      url: `/groups/${id}/update_image`,
-      method: 'POST',
-      body: formData,
-    })
-  }
-
-  static async getById(id: string) {
-    return apiFetcher({
-      url: `/groups/${id}`,
-      method: 'GET',
-    }) as Promise<Group>
-  }
-
-  static useGetById(
-    id: string | null | undefined,
-    swrOptions?: SWRConfiguration,
-  ) {
+  static useGet(id: string | null | undefined, swrOptions?: SWRConfiguration) {
     const url = `/groups/${id}`
     return useSWR<Group>(
       id ? url : null,
       () => apiFetcher({ url, method: 'GET' }) as Promise<Group>,
       swrOptions,
     )
-  }
-
-  static async list(options?: ListOptions) {
-    return apiFetcher<List>({
-      url: `/groups?${this.paramsFromListOptions(options)}`,
-      method: 'GET',
-    })
   }
 
   static useList(options?: ListOptions, swrOptions?: SWRConfiguration) {
@@ -137,7 +110,7 @@ export default class GroupAPI {
 
   static addMember(id: string, options: AddMemberOptions) {
     return apiFetcher({
-      url: `/groups/${id}/add_member`,
+      url: `/groups/${id}/members`,
       method: 'POST',
       body: JSON.stringify(options),
     })
@@ -145,8 +118,8 @@ export default class GroupAPI {
 
   static removeMember(id: string, options: RemoveMemberOptions) {
     return apiFetcher({
-      url: `/groups/${id}/remove_member`,
-      method: 'POST',
+      url: `/groups/${id}/members`,
+      method: 'DELETE',
       body: JSON.stringify(options),
     })
   }

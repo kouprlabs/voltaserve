@@ -1,4 +1,4 @@
-basePath: /v1
+basePath: /v2
 definitions:
   client.PipelineRunOptions:
     properties:
@@ -24,7 +24,7 @@ definitions:
       userMessage:
         type: string
     type: object
-  model.AIEntity:
+  model.AnalysisEntity:
     properties:
       label:
         type: string
@@ -58,24 +58,6 @@ definitions:
       width:
         type: integer
     type: object
-  router.FileBatchDeleteOptions:
-    properties:
-      ids:
-        items:
-          type: string
-        type: array
-    required:
-    - ids
-    type: object
-  router.FileBatchGetOptions:
-    properties:
-      ids:
-        items:
-          type: string
-        type: array
-    required:
-    - ids
-    type: object
   router.FileCopyOptions:
     properties:
       ids:
@@ -85,18 +67,14 @@ definitions:
     required:
     - ids
     type: object
-  router.FileCreateFolderOptions:
+  router.FileDeleteOptions:
     properties:
-      name:
-        maxLength: 255
-        type: string
-      parentId:
-        type: string
-      workspaceId:
-        type: string
+      ids:
+        items:
+          type: string
+        type: array
     required:
-    - name
-    - workspaceId
+    - ids
     type: object
   router.FileGrantGroupPermissionOptions:
     properties:
@@ -145,7 +123,7 @@ definitions:
     required:
     - ids
     type: object
-  router.FileRenameOptions:
+  router.FilePatchNameOptions:
     properties:
       name:
         maxLength: 255
@@ -177,6 +155,14 @@ definitions:
     - ids
     - userId
     type: object
+  router.GroupPatchNameOptions:
+    properties:
+      name:
+        maxLength: 255
+        type: string
+    required:
+    - name
+    type: object
   router.GroupRemoveMemberOptions:
     properties:
       userId:
@@ -184,7 +170,7 @@ definitions:
     required:
     - userId
     type: object
-  router.GroupUpdateNameOptions:
+  router.OrganizationPatchNameOptions:
     properties:
       name:
         maxLength: 255
@@ -199,7 +185,7 @@ definitions:
     required:
     - userId
     type: object
-  router.OrganizationUpdateNameOptions:
+  router.WorkspacePatchNameOptions:
     properties:
       name:
         maxLength: 255
@@ -207,15 +193,7 @@ definitions:
     required:
     - name
     type: object
-  router.WorkspaceUpdateNameOptions:
-    properties:
-      name:
-        maxLength: 255
-        type: string
-    required:
-    - name
-    type: object
-  router.WorkspaceUpdateStorageCapacityOptions:
+  router.WorkspacePatchStorageCapacityOptions:
     properties:
       storageCapacity:
         minimum: 1
@@ -223,11 +201,11 @@ definitions:
     required:
     - storageCapacity
     type: object
-  service.AIEntitiesList:
+  service.AnalysisEntityList:
     properties:
       data:
         items:
-          $ref: '#/definitions/model.AIEntity'
+          $ref: '#/definitions/model.AnalysisEntity'
         type: array
       page:
         type: integer
@@ -238,7 +216,7 @@ definitions:
       totalPages:
         type: integer
     type: object
-  service.AILanguage:
+  service.AnalysisLanguage:
     properties:
       id:
         type: string
@@ -247,23 +225,23 @@ definitions:
       name:
         type: string
     type: object
-  service.AISummary:
-    properties:
-      hasEntities:
-        type: boolean
-      hasLanguage:
-        type: boolean
-      hasOCR:
-        type: boolean
-      hasText:
-        type: boolean
-    type: object
-  service.AIUpdateLanguageOptions:
+  service.AnalysisPatchLanguageOptions:
     properties:
       languageId:
         type: string
     required:
     - languageId
+    type: object
+  service.AnalysisSummary:
+    properties:
+      hasEntities:
+        type: boolean
+      hasLanguage:
+        type: boolean
+      hasOcr:
+        type: boolean
+      hasText:
+        type: boolean
     type: object
   service.Download:
     properties:
@@ -668,76 +646,10 @@ info:
   title: Voltaserve API
   version: 2.0.0
 paths:
-  /ai/{id}/extract_text:
-    post:
-      consumes:
-      - application/json
-      description: Extract Text
-      operationId: ai_extract_text
-      parameters:
-      - description: ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Extract Text
-      tags:
-      - AI
-  /ai/{id}/get_summary:
-    post:
-      consumes:
-      - application/json
-      description: Get Summary
-      operationId: ai_get_summary
-      parameters:
-      - description: ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/service.AISummary'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Get Summary
-      tags:
-      - AI
-  /ai/{id}/list_entities:
+  /analysis/{id}/entities:
     get:
       description: List Entities
-      operationId: ai_list_entities
+      operationId: analysis_list_entities
       parameters:
       - description: ID
         in: path
@@ -771,7 +683,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/service.AIEntitiesList'
+              $ref: '#/definitions/service.AnalysisEntityList'
             type: array
         "404":
           description: Not Found
@@ -783,42 +695,12 @@ paths:
             $ref: '#/definitions/errorpkg.ErrorResponse'
       summary: List Entities
       tags:
-      - AI
-  /ai/{id}/ocr{ext}:
-    get:
-      description: Download OCR
-      operationId: ai_download_ocr
-      parameters:
-      - description: ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: Access Token
-        in: query
-        name: access_token
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Download OCR
-      tags:
-      - AI
-  /ai/{id}/scan_entities:
+      - Analysis
     post:
       consumes:
       - application/json
-      description: Scan Entities
-      operationId: ai_scan_entities
+      description: Create Entities
+      operationId: analysis_create_entities
       parameters:
       - description: ID
         in: path
@@ -842,44 +724,15 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Scan Entities
+      summary: Create Entities
       tags:
-      - AI
-  /ai/{id}/text{ext}:
-    get:
-      description: Download Text
-      operationId: ai_download_text
-      parameters:
-      - description: ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: Access Token
-        in: query
-        name: access_token
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Download Text
-      tags:
-      - AI
-  /ai/{id}/update_language:
-    post:
+      - Analysis
+  /analysis/{id}/language:
+    patch:
       consumes:
       - application/json
-      description: Update Language
-      operationId: ai_update_language
+      description: Patch Language
+      operationId: analysis_patch_language
       parameters:
       - description: ID
         in: path
@@ -891,7 +744,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/service.AIUpdateLanguageOptions'
+          $ref: '#/definitions/service.AnalysisPatchLanguageOptions'
       produces:
       - application/json
       responses:
@@ -909,13 +762,79 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Update Language
+      summary: Patch Language
       tags:
-      - AI
-  /ai/get_available_languages:
+      - Analysis
+  /analysis/{id}/summary:
     get:
-      description: Get Available Languages
-      operationId: ai_get_available_languages
+      consumes:
+      - application/json
+      description: Get Summary
+      operationId: analysis_get_summary
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.AnalysisSummary'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Get Summary
+      tags:
+      - Analysis
+  /analysis/{id}/text:
+    post:
+      consumes:
+      - application/json
+      description: Create Text
+      operationId: analysis_create_text
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Create Text
+      tags:
+      - Analysis
+  /analysis/languages:
+    get:
+      description: Get Languages
+      operationId: analysis_get_languages
       produces:
       - application/json
       responses:
@@ -923,22 +842,85 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/service.AILanguage'
+              $ref: '#/definitions/service.AnalysisLanguage'
             type: array
         "503":
           description: Service Unavailable
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Get Available Languages
+      summary: Get Languages
       tags:
-      - AI
+      - Analysis
   /files:
+    delete:
+      description: Delete
+      operationId: files_delete
+      parameters:
+      - description: Body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/router.FileDeleteOptions'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Delete
+      tags:
+      - Files
+    get:
+      description: Get by Path
+      operationId: files_get_by_path
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Path
+        in: query
+        name: path
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.File'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Get by Path
+      tags:
+      - Files
     post:
       consumes:
       - application/x-www-form-urlencoded
-      description: Upload
-      operationId: files_upload
+      description: Create
+      operationId: files_create
       parameters:
+      - description: Type
+        in: query
+        name: type
+        required: true
+        type: string
       - description: Workspace ID
         in: query
         name: workspace_id
@@ -971,36 +953,13 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Upload
+      summary: Create
       tags:
       - Files
   /files/{id}:
-    delete:
-      description: Delete
-      operationId: files_delete
-      parameters:
-      - description: ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Delete
-      tags:
-      - Files
     get:
-      description: Get by ID
-      operationId: files_get_by_id
+      description: Get
+      operationId: files_get
       parameters:
       - description: ID
         in: path
@@ -1022,7 +981,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Get by ID
+      summary: Get
       tags:
       - Files
     patch:
@@ -1088,7 +1047,35 @@ paths:
       summary: Copy
       tags:
       - Files
-  /files/{id}/get_group_permissions:
+  /files/{id}/count:
+    get:
+      description: Count
+      operationId: files_get_count
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: integer
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Count
+      tags:
+      - Files
+  /files/{id}/group_permissions:
     get:
       description: Get Group Permissions
       operationId: files_get_group_permissions
@@ -1116,152 +1103,6 @@ paths:
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
       summary: Get Group Permissions
-      tags:
-      - Files
-  /files/{id}/get_ids:
-    get:
-      description: Get IDs
-      operationId: files_get_ids
-      parameters:
-      - description: ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              type: string
-            type: array
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Get IDs
-      tags:
-      - Files
-  /files/{id}/get_item_count:
-    get:
-      description: Get Children Count
-      operationId: files_get_children_count
-      parameters:
-      - description: ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: integer
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Get Children Count
-      tags:
-      - Files
-  /files/{id}/get_path:
-    get:
-      description: Get Path
-      operationId: files_get_path
-      parameters:
-      - description: ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/service.File'
-            type: array
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Get Path
-      tags:
-      - Files
-  /files/{id}/get_size:
-    get:
-      description: Get Size
-      operationId: files_get_size
-      parameters:
-      - description: ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: integer
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Get Size
-      tags:
-      - Files
-  /files/{id}/get_user_permissions:
-    get:
-      description: Get User Permissions
-      operationId: files_get_user_permissions
-      parameters:
-      - description: ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/service.UserPermission'
-            type: array
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Get User Permissions
       tags:
       - Files
   /files/{id}/list:
@@ -1346,6 +1187,69 @@ paths:
       summary: Move
       tags:
       - Files
+  /files/{id}/name:
+    patch:
+      description: Patch Name
+      operationId: files_patch_name
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/router.FilePatchNameOptions'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.File'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Patch Name
+      tags:
+      - Files
+  /files/{id}/ocr{ext}:
+    get:
+      description: Download OCR
+      operationId: files_download_ocr
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Access Token
+        in: query
+        name: access_token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Download OCR
+      tags:
+      - Files
   /files/{id}/original{ext}:
     get:
       description: Download Original
@@ -1375,6 +1279,36 @@ paths:
       summary: Download Original
       tags:
       - Files
+  /files/{id}/path:
+    get:
+      description: Get Path
+      operationId: files_get_path
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/service.File'
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Get Path
+      tags:
+      - Files
   /files/{id}/preview{ext}:
     get:
       description: Download Preview
@@ -1402,40 +1336,6 @@ paths:
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
       summary: Download Preview
-      tags:
-      - Files
-  /files/{id}/rename:
-    post:
-      description: Rename
-      operationId: files_rename
-      parameters:
-      - description: ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: Body
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/router.FileRenameOptions'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/service.File'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Rename
       tags:
       - Files
   /files/{id}/revoke_group_permission:
@@ -1468,95 +1368,10 @@ paths:
       summary: Revoke Group Permission
       tags:
       - Files
-  /files/batch_delete:
-    post:
-      description: Batch Delete
-      operationId: files_batch_delete
-      parameters:
-      - description: Body
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/router.FileBatchDeleteOptions'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              type: string
-            type: array
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Batch Delete
-      tags:
-      - Files
-  /files/batch_get:
-    post:
-      description: Batch Get
-      operationId: files_batch_get
-      parameters:
-      - description: Body
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/router.FileBatchGetOptions'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/service.File'
-            type: array
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Batch Get
-      tags:
-      - Files
-  /files/create_folder:
-    post:
-      consumes:
-      - application/json
-      description: Create
-      operationId: files_create_folder
-      parameters:
-      - description: Body
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/router.FileCreateFolderOptions'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/service.File'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Create
-      tags:
-      - Files
-  /files/get:
+  /files/{id}/size:
     get:
-      description: Get by Path
-      operationId: files_get_by_path
+      description: Get Size
+      operationId: files_get_size
       parameters:
       - description: ID
         in: path
@@ -1569,7 +1384,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/service.File'
+            type: integer
         "404":
           description: Not Found
           schema:
@@ -1578,7 +1393,66 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Get by Path
+      summary: Get Size
+      tags:
+      - Files
+  /files/{id}/text{ext}:
+    get:
+      description: Download Text
+      operationId: files_download_text
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Access Token
+        in: query
+        name: access_token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Download Text
+      tags:
+      - Files
+  /files/{id}/user_permissions:
+    get:
+      description: Get User Permissions
+      operationId: files_get_user_permissions
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/service.UserPermission'
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Get User Permissions
       tags:
       - Files
   /files/grant_group_permission:
@@ -1807,8 +1681,8 @@ paths:
       tags:
       - Groups
     get:
-      description: Get by ID
-      operationId: groups_get_by_id
+      description: Get
+      operationId: groups_get
       parameters:
       - description: ID
         in: path
@@ -1830,41 +1704,11 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Get by ID
+      summary: Get
       tags:
       - Groups
-  /groups/{id}/add_member:
-    post:
-      consumes:
-      - application/json
-      description: Add Member
-      operationId: groups_add_member
-      parameters:
-      - description: ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Add Member
-      tags:
-      - Groups
-  /groups/{id}/remove_member:
-    post:
+  /groups/{id}/members:
+    delete:
       consumes:
       - application/json
       description: Remove Member
@@ -1899,12 +1743,41 @@ paths:
       summary: Remove Member
       tags:
       - Groups
-  /groups/{id}/update_name:
     post:
       consumes:
       - application/json
-      description: Update Name
-      operationId: groups_update_name
+      description: Add Member
+      operationId: groups_add_member
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Add Member
+      tags:
+      - Groups
+  /groups/{id}/name:
+    patch:
+      consumes:
+      - application/json
+      description: Patch Name
+      operationId: groups_patch_name
       parameters:
       - description: ID
         in: path
@@ -1916,7 +1789,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/router.GroupUpdateNameOptions'
+          $ref: '#/definitions/router.GroupPatchNameOptions'
       produces:
       - application/json
       responses:
@@ -1936,12 +1809,12 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Update Name
+      summary: Patch Name
       tags:
       - Groups
   /health:
     get:
-      description: Get Health
+      description: Get
       operationId: get_health
       produces:
       - application/json
@@ -1954,7 +1827,7 @@ paths:
           description: Service Unavailable
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Get Health
+      summary: Get
       tags:
       - Health
   /invitations:
@@ -2113,7 +1986,7 @@ paths:
       summary: Resend
       tags:
       - Invitations
-  /invitations/get_incoming:
+  /invitations/incoming:
     get:
       description: Get Incoming
       operationId: invitation_get_incoming
@@ -2148,7 +2021,7 @@ paths:
       summary: Get Incoming
       tags:
       - Invitations
-  /invitations/get_outgoing:
+  /invitations/outgoing:
     get:
       description: Get Outgoing
       operationId: invitation_get_outgoing
@@ -2308,8 +2181,8 @@ paths:
       tags:
       - Organizations
     get:
-      description: Get by ID
-      operationId: organizations_get_by_id
+      description: Get
+      operationId: organizations_get
       parameters:
       - description: ID
         in: path
@@ -2331,7 +2204,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Get by ID
+      summary: Get
       tags:
       - Organizations
   /organizations/{id}/leave:
@@ -2364,8 +2237,8 @@ paths:
       summary: Leave
       tags:
       - Organizations
-  /organizations/{id}/remove_member:
-    post:
+  /organizations/{id}/members:
+    delete:
       consumes:
       - application/json
       description: Remove Member
@@ -2400,12 +2273,12 @@ paths:
       summary: Remove Member
       tags:
       - Organizations
-  /organizations/{id}/update_name:
-    post:
+  /organizations/{id}/name:
+    patch:
       consumes:
       - application/json
-      description: Update Name
-      operationId: organizations_update_name
+      description: Patch Name
+      operationId: organizations_patch_name
       parameters:
       - description: ID
         in: path
@@ -2417,7 +2290,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/router.OrganizationUpdateNameOptions'
+          $ref: '#/definitions/router.OrganizationPatchNameOptions'
       produces:
       - application/json
       responses:
@@ -2437,7 +2310,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Update Name
+      summary: Patch Name
       tags:
       - Organizations
   /snapshots:
@@ -2486,8 +2359,8 @@ paths:
       - Snapshots
   /snapshots/{id}:
     patch:
-      description: Update
-      operationId: snapshots_update
+      description: Patch
+      operationId: snapshots_patch
       parameters:
       - description: API Key
         in: query
@@ -2518,7 +2391,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Update
+      summary: Patch
       tags:
       - Snapshots
   /snapshots/{id}/activate:
@@ -2583,7 +2456,7 @@ paths:
       summary: Unlink
       tags:
       - Snapshots
-  /storage/get_account_usage:
+  /storage/account_usage:
     get:
       description: Get Account Usage
       operationId: storage_get_account_usage
@@ -2599,7 +2472,7 @@ paths:
       summary: Get Account Usage
       tags:
       - Storage
-  /storage/get_file_usage:
+  /storage/file_usage:
     get:
       description: Get file usage
       operationId: storage_get_file_usage
@@ -2621,7 +2494,7 @@ paths:
       summary: Get file usage
       tags:
       - Storage
-  /storage/get_workspace_usage:
+  /storage/workspace_usage:
     get:
       description: Get workspace usage
       operationId: storage_get_workspace_usage
@@ -2792,8 +2665,8 @@ paths:
       tags:
       - Workspaces
     get:
-      description: Get by ID
-      operationId: workspaces_get_by_id
+      description: Get
+      operationId: workspaces_get
       parameters:
       - description: ID
         in: path
@@ -2815,51 +2688,15 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Get by ID
+      summary: Get
       tags:
       - Workspaces
-  /workspaces/{id}/update_name:
-    post:
+  /workspaces/{id}/storage_capacity:
+    patch:
       consumes:
       - application/json
-      description: Update Name
-      operationId: workspaces_update_name
-      parameters:
-      - description: ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: Body
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/router.WorkspaceUpdateNameOptions'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/service.Workspace'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Update Name
-      tags:
-      - Workspaces
-  /workspaces/{id}/update_storage_capacity:
-    post:
-      consumes:
-      - application/json
-      description: Update Storage Capacity
-      operationId: workspaces_update_storage_capacity
+      description: Patch Storage Capacity
+      operationId: workspaces_patch_storage_capacity
       parameters:
       - description: Id
         in: path
@@ -2871,7 +2708,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/router.WorkspaceUpdateStorageCapacityOptions'
+          $ref: '#/definitions/router.WorkspacePatchStorageCapacityOptions'
       produces:
       - application/json
       responses:
@@ -2887,7 +2724,43 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Update Storage Capacity
+      summary: Patch Storage Capacity
+      tags:
+      - Workspaces
+  /workspaces/{id}/update_name:
+    patch:
+      consumes:
+      - application/json
+      description: Patch Name
+      operationId: workspaces_patch_name
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/router.WorkspacePatchNameOptions'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.Workspace'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Patch Name
       tags:
       - Workspaces
 swagger: "2.0"

@@ -214,7 +214,7 @@ func (svc *GroupService) List(opts GroupListOptions, userID string) (*GroupList,
 	}, nil
 }
 
-func (svc *GroupService) UpdateName(id string, name string, userID string) (*Group, error) {
+func (svc *GroupService) PatchName(id string, name string, userID string) (*Group, error) {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err

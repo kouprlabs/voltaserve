@@ -27,7 +27,7 @@ func (r *SnapshotRouter) AppendRoutes(g fiber.Router) {
 }
 
 func (r *SnapshotRouter) AppendNonJWTRoutes(g fiber.Router) {
-	g.Patch("/:id", r.Update)
+	g.Patch("/:id", r.Patch)
 }
 
 // List godoc
@@ -144,12 +144,12 @@ func (r *SnapshotRouter) Unlink(c *fiber.Ctx) error {
 	return c.SendStatus(http.StatusNoContent)
 }
 
-// Update godoc
+// Patch godoc
 //
-//	@Summary		Update
-//	@Description	Update
+//	@Summary		Patch
+//	@Description	Patch
 //	@Tags			Snapshots
-//	@Id				snapshots_update
+//	@Id				snapshots_patch
 //	@Produce		json
 //	@Param			api_key	query	string							true	"API Key"
 //	@Param			id		path	string							true	"ID"
@@ -158,7 +158,7 @@ func (r *SnapshotRouter) Unlink(c *fiber.Ctx) error {
 //	@Failure		401	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/snapshots/{id} [patch]
-func (r *SnapshotRouter) Update(c *fiber.Ctx) error {
+func (r *SnapshotRouter) Patch(c *fiber.Ctx) error {
 	apiKey := c.Query("api_key")
 	if apiKey == "" {
 		return errorpkg.NewMissingQueryParamError("api_key")
@@ -170,7 +170,7 @@ func (r *SnapshotRouter) Update(c *fiber.Ctx) error {
 	if err := validator.New().Struct(opts); err != nil {
 		return errorpkg.NewRequestBodyValidationError(err)
 	}
-	if err := r.snapshotSvc.Update(c.Params("id"), *opts, apiKey); err != nil {
+	if err := r.snapshotSvc.Patch(c.Params("id"), *opts, apiKey); err != nil {
 		return err
 	}
 	return c.SendStatus(http.StatusNoContent)

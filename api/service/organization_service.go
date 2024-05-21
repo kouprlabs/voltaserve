@@ -170,7 +170,7 @@ func (svc *OrganizationService) List(opts OrganizationListOptions, userID string
 	}, nil
 }
 
-func (svc *OrganizationService) UpdateName(id string, name string, userID string) (*Organization, error) {
+func (svc *OrganizationService) PatchName(id string, name string, userID string) (*Organization, error) {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err

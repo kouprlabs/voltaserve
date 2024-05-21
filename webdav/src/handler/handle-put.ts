@@ -5,7 +5,7 @@ import fsPromises from 'node:fs/promises'
 import os from 'os'
 import path from 'path'
 import { v4 as uuidv4 } from 'uuid'
-import { FileAPI } from '@/client/api'
+import { FileAPI, FileType } from '@/client/api'
 import { Token } from '@/client/idp'
 import {
   isMicrosoftOfficeLockFile,
@@ -64,7 +64,8 @@ async function handlePut(
             res.statusCode = 201
             res.end()
           } catch {
-            await api.upload({
+            await api.create({
+              type: FileType.File,
               workspaceId: directory.workspaceId,
               parentId: directory.id,
               blob,

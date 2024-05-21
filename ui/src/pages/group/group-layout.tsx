@@ -12,7 +12,7 @@ const GroupLayout = () => {
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
   const { id } = useParams()
-  const { data: group, mutate } = GroupAPI.useGetById(id, swrConfig())
+  const { data: group, mutate } = GroupAPI.useGet(id, swrConfig())
   const [tabIndex, setTabIndex] = useState(0)
 
   useEffect(() => {

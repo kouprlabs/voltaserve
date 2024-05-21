@@ -13,7 +13,7 @@ const OrganizationLayout = () => {
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
   const { id } = useParams()
-  const { data: org, mutate } = OrganizationAPI.useGetById(id, swrConfig())
+  const { data: org, mutate } = OrganizationAPI.useGet(id, swrConfig())
   const [tabIndex, setTabIndex] = useState(0)
 
   useEffect(() => {

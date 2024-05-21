@@ -15,7 +15,7 @@ import (
 
 // @title		Voltaserve Conversion
 // @version	2.0.0
-// @BasePath	/v1
+// @BasePath	/v2
 func main() {
 	if _, err := os.Stat(".env.local"); err == nil {
 		err := godotenv.Load(".env.local")
@@ -39,18 +39,18 @@ func main() {
 	})
 
 	app := fiber.New()
-	v1 := app.Group("v1")
+	v2 := app.Group("v2")
 
 	healthRouter := router.NewHealthRouter()
-	healthRouter.AppendRoutes(v1)
+	healthRouter.AppendRoutes(v2)
 
 	pipelineRouter := router.NewPipelineRouter(router.NewPipelineRouterOptions{
 		Scheduler: scheduler,
 	})
-	pipelineRouter.AppendRoutes(v1)
+	pipelineRouter.AppendRoutes(v2)
 
 	toolsRouter := router.NewToolRouter()
-	toolsRouter.AppendRoutes(v1)
+	toolsRouter.AppendRoutes(v2)
 
 	scheduler.Start()
 

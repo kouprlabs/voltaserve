@@ -23,7 +23,7 @@ import {
 } from 'formik'
 import * as Yup from 'yup'
 import cx from 'classnames'
-import FileAPI from '@/client/api/file'
+import FileAPI, { FileType } from '@/client/api/file'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { createModalDidClose } from '@/store/ui/files'
 
@@ -56,7 +56,8 @@ const FileCreate = () => {
     ) => {
       setSubmitting(true)
       try {
-        await FileAPI.createFolder({
+        await FileAPI.create({
+          type: FileType.Folder,
           name,
           workspaceId: id!,
           parentId: fileId!,

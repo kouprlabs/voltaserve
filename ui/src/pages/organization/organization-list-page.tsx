@@ -55,7 +55,6 @@ const OrganizationListPage = () => {
 
   useEffect(() => {
     if (mutate) {
-      const dispatch = useAppDispatch()
       dispatch(mutateUpdated(mutate))
     }
   }, [mutate, dispatch])

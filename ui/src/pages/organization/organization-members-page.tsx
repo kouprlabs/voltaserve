@@ -50,10 +50,7 @@ const OrganizationMembersPage = () => {
   const location = useLocation()
   const dispatch = useAppDispatch()
   const { id } = useParams()
-  const { data: org, error: orgError } = OrganizationAPI.useGetById(
-    id,
-    swrConfig(),
-  )
+  const { data: org, error: orgError } = OrganizationAPI.useGet(id, swrConfig())
   const { page, size, steps, setPage, setSize } = usePagePagination({
     navigate,
     location,

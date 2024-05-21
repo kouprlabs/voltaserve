@@ -50,12 +50,6 @@ export type File = {
   updateTime?: string
 }
 
-export type CreateFolderOptions = {
-  workspaceId: string
-  name: string
-  parentId: string
-}
-
 export type List = {
   data: File[]
   totalPages: number
@@ -103,15 +97,11 @@ export type CopyOptions = {
   ids: string[]
 }
 
-export type BatchDeleteOptions = {
+export type DeleteOptions = {
   ids: string[]
 }
 
-export type BatchGetOptions = {
-  ids: string[]
-}
-
-export type RenameOptions = {
+export type PatchNameOptions = {
   name: string
 }
 
@@ -137,12 +127,13 @@ export type RevokeGroupPermissionOptions = {
   groupId: string
 }
 
-export type UploadOptions = {
+export type CreateOptions = {
+  type: FileType
   workspaceId: string
   parentId?: string
   name?: string
-  blob: Blob
-  request: XMLHttpRequest
+  blob?: Blob
+  request?: XMLHttpRequest
   onProgress?: (value: number) => void
 }
 
@@ -163,28 +154,37 @@ type ListQueryParams = {
 }
 
 export default class FileAPI {
-  static async upload({
+  static async create({
+    type,
     workspaceId,
     parentId,
     name,
     request,
     blob,
     onProgress,
-  }: UploadOptions): Promise<File> {
-    const params = new URLSearchParams({ workspace_id: workspaceId })
+  }: CreateOptions): Promise<File> {
+    const params = new URLSearchParams({ type, workspace_id: workspaceId })
     if (parentId) {
       params.append('parent_id', parentId)
     }
     if (name) {
       params.append('name', name)
     }
-    return this.doUpload(
-      `${getConfig().apiURL}/files?${params}`,
-      'POST',
-      request,
-      blob,
-      onProgress,
-    )
+    if (type === FileType.File && request && blob) {
+      return this.upload(
+        `${getConfig().apiURL}/files?${params}`,
+        'POST',
+        request,
+        blob,
+        onProgress,
+      )
+    } else if (type === FileType.Folder) {
+      return apiFetcher({
+        url: `/files?${params}`,
+        method: 'POST',
+      }) as Promise<File>
+    }
+    throw new Error('Invalid parameters')
   }
 
   static async patch({
@@ -193,7 +193,7 @@ export default class FileAPI {
     blob,
     onProgress,
   }: PatchOptions): Promise<File> {
-    return this.doUpload(
+    return this.upload(
       `${getConfig().apiURL}/files/${id}`,
       'PATCH',
       request,
@@ -202,7 +202,7 @@ export default class FileAPI {
     )
   }
 
-  private static async doUpload(
+  private static async upload(
     url: string,
     method: string,
     request: XMLHttpRequest,
@@ -239,14 +239,6 @@ export default class FileAPI {
     })
   }
 
-  static async createFolder(options: CreateFolderOptions) {
-    return apiFetcher({
-      url: '/files/create_folder',
-      method: 'POST',
-      body: JSON.stringify(options),
-    }) as Promise<File>
-  }
-
   static async list(id: string, options: ListOptions) {
     return apiFetcher({
       url: `/files/${id}/list?${this.paramsFromListOptions(options)}`,
@@ -267,18 +259,11 @@ export default class FileAPI {
     )
   }
 
-  static async getPath(id: string) {
-    return apiFetcher({
-      url: `/files/${id}/get_path`,
-      method: 'GET',
-    }) as Promise<File[]>
-  }
-
   static useGetPath(
     id: string | null | undefined,
     swrOptions?: SWRConfiguration,
   ) {
-    const url = `/files/${id}/get_path`
+    const url = `/files/${id}/path`
     return useSWR<File[]>(
       id ? url : null,
       () => apiFetcher({ url, method: 'GET' }) as Promise<File[]>,
@@ -286,32 +271,18 @@ export default class FileAPI {
     )
   }
 
-  static async getIds(id: string) {
+  static async patchName(id: string, options: PatchNameOptions) {
     return apiFetcher({
-      url: `/files/${id}/get_ids`,
-      method: 'GET',
-    }) as Promise<string[]>
-  }
-
-  static async rename(id: string, options: RenameOptions) {
-    return apiFetcher({
-      url: `/files/${id}/rename`,
-      method: 'POST',
+      url: `/files/${id}/name`,
+      method: 'PATCH',
       body: JSON.stringify(options),
     }) as Promise<File>
   }
 
-  static async delete(id: string) {
+  static async delete(options: DeleteOptions) {
     return apiFetcher({
-      url: `/files/${id}`,
+      url: `/files`,
       method: 'DELETE',
-    })
-  }
-
-  static async batchDelete(options: BatchDeleteOptions) {
-    return apiFetcher({
-      url: `/files/batch_delete`,
-      method: 'POST',
       body: JSON.stringify(options),
     })
   }
@@ -332,10 +303,7 @@ export default class FileAPI {
     })
   }
 
-  static useGetById(
-    id: string | null | undefined,
-    swrOptions?: SWRConfiguration,
-  ) {
+  static useGet(id: string | null | undefined, swrOptions?: SWRConfiguration) {
     const url = `/files/${id}`
     return useSWR(
       id ? url : null,
@@ -344,33 +312,11 @@ export default class FileAPI {
     )
   }
 
-  static async getById(id: string) {
-    return apiFetcher({
-      url: `/files/${id}`,
-      method: 'GET',
-    }) as Promise<File>
-  }
-
-  static async batchGet(options: BatchGetOptions) {
-    return apiFetcher({
-      url: `/files/batch_get`,
-      method: 'POST',
-      body: JSON.stringify(options),
-    }) as Promise<File[]>
-  }
-
-  static async getItemCount(id: string) {
-    return apiFetcher({
-      url: `/files/${id}/get_item_count`,
-      method: 'GET',
-    }) as Promise<number>
-  }
-
-  static useGetItemCount(
+  static useGetCount(
     id: string | null | undefined,
     swrOptions?: SWRConfiguration,
   ) {
-    const url = `/files/${id}/get_item_count`
+    const url = `/files/${id}/count`
     return useSWR<number>(
       id ? url : null,
       () => apiFetcher({ url, method: 'GET' }) as Promise<number>,
@@ -410,18 +356,11 @@ export default class FileAPI {
     })
   }
 
-  static async getUserPermissions(id: string) {
-    return apiFetcher({
-      url: `/files/${id}/get_user_permissions`,
-      method: 'GET',
-    }) as Promise<UserPermission[]>
-  }
-
   static useGetUserPermissions(
     id: string | null | undefined,
     swrOptions?: SWRConfiguration,
   ) {
-    const url = `/files/${id}/get_user_permissions`
+    const url = `/files/${id}/user_permissions`
     return useSWR<UserPermission[]>(
       id ? url : null,
       () => apiFetcher({ url, method: 'GET' }) as Promise<UserPermission[]>,
@@ -429,18 +368,11 @@ export default class FileAPI {
     )
   }
 
-  static async getGroupPermissions(id: string) {
-    return apiFetcher<GroupPermission[]>({
-      url: `/files/${id}/get_group_permissions`,
-      method: 'GET',
-    })
-  }
-
   static useGetGroupPermissions(
     id: string | null | undefined,
     swrOptions?: SWRConfiguration,
   ) {
-    const url = `/files/${id}/get_group_permissions`
+    const url = `/files/${id}/group_permissions`
     return useSWR<GroupPermission[]>(
       id ? url : null,
       () => apiFetcher({ url, method: 'GET' }) as Promise<GroupPermission[]>,

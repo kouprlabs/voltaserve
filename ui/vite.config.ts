@@ -10,12 +10,12 @@ const config = ({ mode }) => {
     server: {
       port: 3000,
       proxy: {
-        '/proxy/api/v1': {
+        '/proxy/api/v2': {
           target: process.env.API_URL,
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/proxy\/api/, ''),
         },
-        '/proxy/idp/v1': {
+        '/proxy/idp/v2': {
           target: process.env.IDP_URL,
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/proxy\/idp/, ''),
