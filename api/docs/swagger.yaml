@@ -223,6 +223,21 @@ definitions:
     required:
     - storageCapacity
     type: object
+  service.AIEntitiesList:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/model.AIEntity'
+        type: array
+      page:
+        type: integer
+      size:
+        type: integer
+      totalElements:
+        type: integer
+      totalPages:
+        type: integer
+    type: object
   service.AILanguage:
     properties:
       id:
@@ -685,36 +700,6 @@ paths:
       summary: Extract Text
       tags:
       - AI
-  /ai/{id}/get_entities:
-    get:
-      description: Get Entities
-      operationId: ai_get_entities
-      parameters:
-      - description: ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/model.AIEntity'
-            type: array
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Get Entities
-      tags:
-      - AI
   /ai/{id}/get_summary:
     post:
       consumes:
@@ -747,6 +732,56 @@ paths:
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
       summary: Get Summary
+      tags:
+      - AI
+  /ai/{id}/list_entities:
+    get:
+      description: List Entities
+      operationId: ai_list_entities
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Query
+        in: query
+        name: query
+        type: string
+      - description: Page
+        in: query
+        name: page
+        type: string
+      - description: Size
+        in: query
+        name: size
+        type: string
+      - description: Sort By
+        in: query
+        name: sort_by
+        type: string
+      - description: Sort Order
+        in: query
+        name: sort_order
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/service.AIEntitiesList'
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: List Entities
       tags:
       - AI
   /ai/{id}/ocr{ext}:

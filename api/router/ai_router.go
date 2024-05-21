@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"path/filepath"
+	"strconv"
 	"voltaserve/errorpkg"
 	"voltaserve/infra"
 	"voltaserve/service"
@@ -32,7 +33,7 @@ func (r *AIRouter) AppendRoutes(g fiber.Router) {
 	g.Post("/:id/get_summary", r.GetSummary)
 	g.Get("/:id/text:ext", r.DownloadText)
 	g.Get("/:id/ocr:ext", r.DownloadOCR)
-	g.Get("/:id/get_entities", r.GetEntities)
+	g.Get("/:id/list_entities", r.ListEntities)
 }
 
 // GetAvailableLanguages godoc
@@ -196,20 +197,58 @@ func (r *AIRouter) DownloadOCR(c *fiber.Ctx) error {
 	return c.Send(bytes)
 }
 
-// GetEntities godoc
+// ListEntities godoc
 //
-//	@Summary		Get Entities
-//	@Description	Get Entities
+//	@Summary		List Entities
+//	@Description	List Entities
 //	@Tags			AI
-//	@Id				ai_get_entities
+//	@Id				ai_list_entities
 //	@Produce		json
-//	@Param			id	path		string	true	"ID"
-//	@Success		200	{array}		model.AIEntity
-//	@Failure		404	{object}	errorpkg.ErrorResponse
-//	@Failure		500	{object}	errorpkg.ErrorResponse
-//	@Router			/ai/{id}/get_entities [get]
-func (r *AIRouter) GetEntities(c *fiber.Ctx) error {
-	res, err := r.aiSvc.GetEntities(c.Params("id"), GetUserID(c))
+//	@Param			id			path		string	true	"ID"
+//	@Param			query		query		string	false	"Query"
+//	@Param			page		query		string	false	"Page"
+//	@Param			size		query		string	false	"Size"
+//	@Param			sort_by		query		string	false	"Sort By"
+//	@Param			sort_order	query		string	false	"Sort Order"
+//	@Success		200			{array}		service.AIEntitiesList
+//	@Failure		404			{object}	errorpkg.ErrorResponse
+//	@Failure		500			{object}	errorpkg.ErrorResponse
+//	@Router			/ai/{id}/list_entities [get]
+func (r *AIRouter) ListEntities(c *fiber.Ctx) error {
+	var err error
+	var page int64
+	if c.Query("page") == "" {
+		page = 1
+	} else {
+		page, err = strconv.ParseInt(c.Query("page"), 10, 32)
+		if err != nil {
+			page = 1
+		}
+	}
+	var size int64
+	if c.Query("size") == "" {
+		size = AIEntitiesDefaultPageSize
+	} else {
+		size, err = strconv.ParseInt(c.Query("size"), 10, 32)
+		if err != nil {
+			return err
+		}
+	}
+	sortBy := c.Query("sort_by")
+	if !IsValidSortBy(sortBy) {
+		return errorpkg.NewInvalidQueryParamError("sort_by")
+	}
+	sortOrder := c.Query("sort_order")
+	if !IsValidSortOrder(sortOrder) {
+		return errorpkg.NewInvalidQueryParamError("sort_order")
+	}
+	res, err := r.aiSvc.ListEntities(c.Params("id"), service.AIEntitiesListOptions{
+		Query:     c.Query("query"),
+		Page:      uint(page),
+		Size:      uint(size),
+		SortBy:    sortBy,
+		SortOrder: sortOrder,
+	}, GetUserID(c))
 	if err != nil {
 		return err
 	}

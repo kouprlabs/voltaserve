@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"sort"
+	"strings"
 	"voltaserve/cache"
 	"voltaserve/client"
 	"voltaserve/errorpkg"
@@ -351,7 +353,23 @@ func (svc *AIService) DownloadOCRBuffer(id string, userID string) (*bytes.Buffer
 	}
 }
 
-func (svc *AIService) GetEntities(id string, userID string) ([]*model.AIEntity, error) {
+type AIEntitiesListOptions struct {
+	Query     string
+	Page      uint
+	Size      uint
+	SortBy    string
+	SortOrder string
+}
+
+type AIEntitiesList struct {
+	Data          []*model.AIEntity `json:"data"`
+	TotalPages    uint              `json:"totalPages"`
+	TotalElements uint              `json:"totalElements"`
+	Page          uint              `json:"page"`
+	Size          uint              `json:"size"`
+}
+
+func (svc *AIService) ListEntities(id string, opts AIEntitiesListOptions, userID string) (*AIEntitiesList, error) {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
@@ -382,8 +400,62 @@ func (svc *AIService) GetEntities(id string, userID string) ([]*model.AIEntity, 
 		if err := json.Unmarshal([]byte(text), &entities); err != nil {
 			return nil, err
 		}
-		return entities, nil
+		if opts.SortBy == "" {
+			opts.SortBy = SortByName
+		}
+		filtered := svc.doFiltering(entities, opts.Query)
+		sorted := svc.doSorting(filtered, opts.SortBy, opts.SortOrder)
+		data, totalElements, totalPages := svc.doPagination(sorted, opts.Page, opts.Size)
+		return &AIEntitiesList{
+			Data:          data,
+			TotalPages:    totalPages,
+			TotalElements: totalElements,
+			Page:          opts.Page,
+			Size:          uint(len(data)),
+		}, nil
 	} else {
 		return nil, errorpkg.NewS3ObjectNotFoundError(nil)
 	}
+}
+
+func (svc *AIService) doFiltering(data []*model.AIEntity, query string) []*model.AIEntity {
+	if query == "" {
+		return data
+	}
+	var filtered []*model.AIEntity
+	for _, entity := range data {
+		if strings.Contains(strings.ToLower(entity.Text), strings.ToLower(query)) {
+			filtered = append(filtered, entity)
+		}
+	}
+	return filtered
+}
+
+func (svc *AIService) doSorting(data []*model.AIEntity, sortBy string, sortOrder string) []*model.AIEntity {
+	if sortBy == SortByName {
+		sort.Slice(data, func(i, j int) bool {
+			if sortOrder == SortOrderDesc {
+				return data[i].Text > data[j].Text
+			} else {
+				return data[i].Text < data[j].Text
+			}
+		})
+		return data
+	}
+	return data
+}
+
+func (svc *AIService) doPagination(data []*model.AIEntity, page, size uint) ([]*model.AIEntity, uint, uint) {
+	totalElements := uint(len(data))
+	totalPages := (totalElements + size - 1) / size
+	if page > totalPages {
+		return nil, totalElements, totalPages
+	}
+	startIndex := (page - 1) * size
+	endIndex := startIndex + size
+	if endIndex > totalElements {
+		endIndex = totalElements
+	}
+	pageData := data[startIndex:endIndex]
+	return pageData, totalElements, totalPages
 }
