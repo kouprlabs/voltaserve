@@ -51,8 +51,8 @@ import {
   selectionAdded,
   selectionUpdated,
   sharingModalDidOpen,
-  snapshotListModalDidOpen,
 } from '@/store/ui/files'
+import { listModalDidOpen } from '@/store/ui/snapshots'
 import { uploadsDrawerOpened } from '@/store/ui/uploads-drawer'
 import { FileViewType } from '@/types/file'
 import ListDragOverlay from './list-drag-overlay'
@@ -295,7 +295,7 @@ const FileList = ({ list, scale }: FileListProps) => {
                 }
                 onClick={(event: MouseEvent) => {
                   event.stopPropagation()
-                  dispatch(snapshotListModalDidOpen())
+                  dispatch(listModalDidOpen())
                 }}
               >
                 Snapshots

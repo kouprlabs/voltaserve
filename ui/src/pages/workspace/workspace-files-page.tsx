@@ -40,10 +40,10 @@ const WorkspaceFilesPage = () => {
   const sortOrder = useAppSelector((state) => state.ui.files.sortOrder)
   const iconScale = useAppSelector((state) => state.ui.files.iconScale)
   const isSnapshotListModalOpen = useAppSelector(
-    (state) => state.ui.files.isSnapshotListModalOpen,
+    (state) => state.ui.snapshots.isListModalOpen,
   )
   const isSnapshotDeleteModalOpen = useAppSelector(
-    (state) => state.ui.files.isSnapshotDeleteModalOpen,
+    (state) => state.ui.snapshots.isDeleteModalOpen,
   )
   const isMoveModalOpen = useAppSelector(
     (state) => state.ui.files.isMoveModalOpen,

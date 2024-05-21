@@ -1,7 +1,6 @@
 import { KeyedMutator } from 'swr'
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { List, SortBy, SortOrder } from '@/client/api/file'
-import { List as SnapshotList } from '@/client/api/snapshot'
 import {
   loadFileSortBy,
   loadFileSortOrder,
@@ -19,7 +18,6 @@ export const SORT_ORDER_KEY = 'voltaserve_file_sort_order'
 export type FilesState = {
   selection: string[]
   hidden: string[]
-  snapshotSelection: string[]
   isMultiSelectActive: boolean
   isRangeSelectActive: boolean
   isMoveModalOpen: boolean
@@ -28,21 +26,17 @@ export type FilesState = {
   isDeleteModalOpen: boolean
   isRenameModalOpen: boolean
   isShareModalOpen: boolean
-  isSnapshotListModalOpen: boolean
-  isSnapshotDeleteModalOpen: boolean
   isSelectionMode: boolean
   iconScale: number
   sortBy: SortBy
   sortOrder: SortOrder
   viewType: FileViewType
   mutate?: KeyedMutator<List | undefined>
-  snapshotMutate?: KeyedMutator<SnapshotList | undefined>
 }
 
 const initialState: FilesState = {
   selection: [],
   hidden: [],
-  snapshotSelection: [],
   isMultiSelectActive: false,
   isRangeSelectActive: false,
   isMoveModalOpen: false,
@@ -51,8 +45,6 @@ const initialState: FilesState = {
   isDeleteModalOpen: false,
   isRenameModalOpen: false,
   isShareModalOpen: false,
-  isSnapshotListModalOpen: false,
-  isSnapshotDeleteModalOpen: false,
   iconScale: loadIconScale() || 1,
   sortBy: loadFileSortBy() || SortBy.DateCreated,
   sortOrder: loadFileSortOrder() || SortOrder.Desc,
@@ -78,15 +70,6 @@ const slice = createSlice({
     hiddenUpdated: (state, action: PayloadAction<string[]>) => {
       state.hidden = action.payload
     },
-    snapshotSelectionUpdated: (state, action: PayloadAction<string[]>) => {
-      state.snapshotSelection = action.payload
-    },
-    snapshotMutateUpdated: (
-      state,
-      action: PayloadAction<KeyedMutator<SnapshotList | undefined>>,
-    ) => {
-      state.snapshotMutate = action.payload
-    },
     moveModalDidOpen: (state) => {
       state.isMoveModalOpen = true
     },
@@ -105,12 +88,6 @@ const slice = createSlice({
     sharingModalDidOpen: (state) => {
       state.isShareModalOpen = true
     },
-    snapshotListModalDidOpen: (state) => {
-      state.isSnapshotListModalOpen = true
-    },
-    snapshotDeleteModalDidOpen: (state) => {
-      state.isSnapshotDeleteModalOpen = true
-    },
     moveModalDidClose: (state) => {
       state.isMoveModalOpen = false
     },
@@ -128,12 +105,6 @@ const slice = createSlice({
     },
     sharingModalDidClose: (state) => {
       state.isShareModalOpen = false
-    },
-    snapshotListModalDidClose: (state) => {
-      state.isSnapshotListModalOpen = false
-    },
-    snapshotDeleteModalDidClose: (state) => {
-      state.isSnapshotDeleteModalOpen = false
     },
     multiSelectKeyUpdated: (state, action: PayloadAction<boolean>) => {
       state.isMultiSelectActive = action.payload
@@ -178,24 +149,18 @@ export const {
   selectionAdded,
   selectionRemoved,
   hiddenUpdated,
-  snapshotSelectionUpdated,
-  snapshotMutateUpdated,
   moveModalDidOpen,
   copyModalDidOpen,
   createModalDidOpen,
   deleteModalDidOpen,
   renameModalDidOpen,
   sharingModalDidOpen,
-  snapshotListModalDidOpen,
-  snapshotDeleteModalDidOpen,
   moveModalDidClose,
   copyModalDidClose,
   createModalDidClose,
   deleteModalDidClose,
   renameModalDidClose,
   sharingModalDidClose,
-  snapshotListModalDidClose,
-  snapshotDeleteModalDidClose,
   multiSelectKeyUpdated,
   rangeSelectKeyUpdated,
   iconScaleUpdated,

@@ -12,6 +12,7 @@ import notifications from './notifications'
 import organization from './organization'
 import organizations from './organizations'
 import outgoingInvitations from './outgoing-invitations'
+import snapshots from './snapshots'
 import uploadsDrawer from './uploads-drawer'
 import workspace from './workspace'
 import workspaces from './workspaces'
@@ -20,6 +21,7 @@ export default combineReducers({
   analysis,
   uploadsDrawer,
   files,
+  snapshots,
   nav,
   error,
   organization,

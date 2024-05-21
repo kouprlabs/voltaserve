@@ -13,16 +13,13 @@ import {
 import cx from 'classnames'
 import SnapshotAPI from '@/client/api/snapshot'
 import { useAppSelector } from '@/store/hook'
-import {
-  snapshotDeleteModalDidClose,
-  snapshotSelectionUpdated,
-} from '@/store/ui/files'
+import { deleteModalDidClose, selectionUpdated } from '@/store/ui/snapshots'
 
 const FileSnapshotUnlink = () => {
   const dispatch = useDispatch()
   const id = useAppSelector((state) =>
-    state.ui.files.snapshotSelection.length > 0
-      ? state.ui.files.snapshotSelection[0]
+    state.ui.snapshots.selection.length > 0
+      ? state.ui.snapshots.selection[0]
       : undefined,
   )
   const fileId = useAppSelector((state) =>
@@ -30,9 +27,9 @@ const FileSnapshotUnlink = () => {
       ? state.ui.files.selection[0]
       : undefined,
   )
-  const mutate = useAppSelector((state) => state.ui.files.snapshotMutate)
+  const mutate = useAppSelector((state) => state.ui.snapshots.snapshotMutate)
   const isModalOpen = useAppSelector(
-    (state) => state.ui.files.isSnapshotDeleteModalOpen,
+    (state) => state.ui.snapshots.isDeleteModalOpen,
   )
   const [isLoading, setIsLoading] = useState(false)
 
@@ -42,8 +39,8 @@ const FileSnapshotUnlink = () => {
       try {
         await SnapshotAPI.unlink(id, { fileId })
         await mutate?.()
-        dispatch(snapshotSelectionUpdated([]))
-        dispatch(snapshotDeleteModalDidClose())
+        dispatch(selectionUpdated([]))
+        dispatch(deleteModalDidClose())
       } catch (error) {
         setIsLoading(false)
       } finally {
@@ -58,7 +55,7 @@ const FileSnapshotUnlink = () => {
   return (
     <Modal
       isOpen={isModalOpen}
-      onClose={() => dispatch(snapshotDeleteModalDidClose())}
+      onClose={() => dispatch(deleteModalDidClose())}
       closeOnOverlayClick={false}
     >
       <ModalOverlay />
@@ -75,7 +72,7 @@ const FileSnapshotUnlink = () => {
               variant="outline"
               colorScheme="blue"
               disabled={isLoading}
-              onClick={() => dispatch(snapshotDeleteModalDidClose())}
+              onClick={() => dispatch(deleteModalDidClose())}
             >
               Cancel
             </Button>

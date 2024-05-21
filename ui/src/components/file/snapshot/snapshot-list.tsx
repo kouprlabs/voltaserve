@@ -22,16 +22,16 @@ import prettyDate from '@/helpers/pretty-date'
 import { Pagination, SectionSpinner } from '@/lib'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import {
-  snapshotDeleteModalDidOpen,
-  snapshotListModalDidClose,
-  snapshotMutateUpdated,
-  snapshotSelectionUpdated,
-} from '@/store/ui/files'
+  deleteModalDidOpen,
+  listModalDidClose,
+  mutateUpdated,
+  selectionUpdated,
+} from '@/store/ui/snapshots'
 
 const FileSnapshotList = () => {
   const dispatch = useAppDispatch()
   const isModalOpen = useAppSelector(
-    (state) => state.ui.files.isSnapshotListModalOpen,
+    (state) => state.ui.snapshots.isListModalOpen,
   )
   const fileId = useAppSelector((state) => state.ui.files.selection[0])
   const mutateFileList = useAppSelector((state) => state.ui.files.mutate)
@@ -49,13 +49,13 @@ const FileSnapshotList = () => {
 
   useEffect(() => {
     if (snapshotMutate) {
-      dispatch(snapshotMutateUpdated(snapshotMutate))
+      dispatch(mutateUpdated(snapshotMutate))
     }
   }, [snapshotMutate])
 
   const handleClose = useCallback(() => {
-    dispatch(snapshotListModalDidClose())
-    dispatch(snapshotSelectionUpdated([]))
+    dispatch(listModalDidClose())
+    dispatch(selectionUpdated([]))
     setSelected(undefined)
   }, [dispatch])
 
@@ -74,14 +74,14 @@ const FileSnapshotList = () => {
 
   const handleUnlink = useCallback(() => {
     if (selected) {
-      dispatch(snapshotSelectionUpdated([selected.id]))
-      dispatch(snapshotDeleteModalDidOpen())
+      dispatch(selectionUpdated([selected.id]))
+      dispatch(deleteModalDidOpen())
     }
   }, [selected, dispatch])
 
   const handleSelect = useCallback((snapshot: Snapshot) => {
     setSelected(snapshot)
-    dispatch(snapshotSelectionUpdated([snapshot.id]))
+    dispatch(selectionUpdated([snapshot.id]))
   }, [])
 
   return (

@@ -51,7 +51,6 @@ import {
   viewTypeToggled,
   selectionModeToggled,
   sortOrderToggled,
-  snapshotListModalDidOpen,
 } from '@/store/ui/files'
 import {
   copyModalDidOpen,
@@ -63,6 +62,7 @@ import {
   selectionUpdated,
   sharingModalDidOpen,
 } from '@/store/ui/files'
+import { listModalDidOpen } from '@/store/ui/snapshots'
 import { uploadsDrawerOpened } from '@/store/ui/uploads-drawer'
 import { FileViewType } from '@/types/file'
 
@@ -274,7 +274,7 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
           {singleFile?.type === 'file' && hasEditorPermission && (
             <Button
               leftIcon={<IconHistory />}
-              onClick={() => dispatch(snapshotListModalDidOpen())}
+              onClick={() => dispatch(listModalDidOpen())}
             >
               Snapshots
             </Button>
@@ -319,7 +319,7 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
                     isDisabled={
                       singleFile?.type !== 'file' || !hasOwnerPermission
                     }
-                    onClick={() => dispatch(snapshotListModalDidOpen())}
+                    onClick={() => dispatch(listModalDidOpen())}
                   >
                     Snapshots
                   </MenuItem>
