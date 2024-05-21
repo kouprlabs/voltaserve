@@ -1,17 +1,17 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
 
-type AiState = {
+type AnalysisState = {
   isModalOpen: boolean
   isWizardComplete: boolean
 }
 
-const initialState: AiState = {
+const initialState: AnalysisState = {
   isModalOpen: false,
   isWizardComplete: false,
 }
 
 const slice = createSlice({
-  name: 'account',
+  name: 'analysis',
   initialState,
   reducers: {
     wizardDidComplete: (state, action: PayloadAction<boolean>) => {

@@ -25,7 +25,7 @@ import {
   ltOwnerPermission,
   ltViewerPermission,
 } from '@/client/api/permission'
-import AiOrb from '@/components/common/ai-orb'
+import AnalysisOrb from '@/components/common/analysis-orb'
 import downloadFile from '@/helpers/download-file'
 import mapFileList from '@/helpers/map-file-list'
 import {
@@ -40,7 +40,7 @@ import {
 } from '@/lib'
 import { UploadDecorator, uploadAdded } from '@/store/entities/uploads'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
-import { modalDidOpen as aiModalDidOpen } from '@/store/ui/ai'
+import { modalDidOpen as aiModalDidOpen } from '@/store/ui/analysis'
 import {
   copyModalDidOpen,
   deleteModalDidOpen,
@@ -339,7 +339,7 @@ const FileList = ({ list, scale }: FileListProps) => {
             {singleFile && singleFile.type === 'file' ? (
               <>
                 <MenuItem
-                  icon={<AiOrb width="20px" height="20px" />}
+                  icon={<AnalysisOrb width="20px" height="20px" />}
                   isDisabled={ltEditorPermission(singleFile.permission)}
                   onClick={(event: MouseEvent) => {
                     event.stopPropagation()

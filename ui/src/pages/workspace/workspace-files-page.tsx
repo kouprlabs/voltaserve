@@ -5,7 +5,7 @@ import { Helmet } from 'react-helmet-async'
 import FileAPI from '@/client/api/file'
 import WorkspaceAPI from '@/client/api/workspace'
 import { swrConfig } from '@/client/options'
-import AiModal from '@/components/ai/ai-modal'
+import AnalysisModal from '@/components/analysis/analysis-modal'
 import Path from '@/components/common/path'
 import FileCopy from '@/components/file/file-copy'
 import FileCreate from '@/components/file/file-create'
@@ -60,7 +60,9 @@ const WorkspaceFilesPage = () => {
   const isRenameModalOpen = useAppSelector(
     (state) => state.ui.files.isRenameModalOpen,
   )
-  const isAiModalOpen = useAppSelector((state) => state.ui.ai.isModalOpen)
+  const isAnalysisModalOpen = useAppSelector(
+    (state) => state.ui.analysis.isModalOpen,
+  )
   const { data: workspace } = WorkspaceAPI.useGet(id, swrConfig())
   const { page, size, steps, setPage, setSize } = usePagePagination({
     navigate,
@@ -192,7 +194,7 @@ const WorkspaceFilesPage = () => {
       {isCreateModalOpen ? <FileCreate /> : null}
       {isDeleteModalOpen ? <FileDelete /> : null}
       {isRenameModalOpen ? <FileRename /> : null}
-      {isAiModalOpen ? <AiModal /> : null}
+      {isAnalysisModalOpen ? <AnalysisModal /> : null}
     </>
   )
 }

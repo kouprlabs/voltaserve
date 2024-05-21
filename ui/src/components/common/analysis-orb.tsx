@@ -53,8 +53,8 @@ export type AiOrbProps = {
   height: string
 }
 
-const AiOrb = ({ width, height }: AiOrbProps) => {
+const AnalysisOrb = ({ width, height }: AiOrbProps) => {
   return <div css={getOrbStyle(width, height)}></div>
 }
 
-export default AiOrb
+export default AnalysisOrb

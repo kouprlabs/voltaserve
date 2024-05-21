@@ -1,15 +1,15 @@
 import { Button } from '@chakra-ui/react'
 import cx from 'classnames'
-import AIAPI from '@/client/api/analysis'
+import AnalysisAPI from '@/client/api/analysis'
 import { getAccessTokenOrRedirect } from '@/infra/token'
 import { IconOpenInNew } from '@/lib'
 
-export type AITextProps = {
+export type AnalysisTextProps = {
   id: string
 }
 
-const AIText = ({ id }: AITextProps) => {
-  const { data: summary } = AIAPI.useGetSummary(id)
+const AnalysisText = ({ id }: AnalysisTextProps) => {
+  const { data: summary } = AnalysisAPI.useGetSummary(id)
 
   if (!summary) {
     return null
@@ -55,4 +55,4 @@ const AIText = ({ id }: AITextProps) => {
   )
 }
 
-export default AIText
+export default AnalysisText

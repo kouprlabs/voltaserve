@@ -1,6 +1,6 @@
 import { combineReducers } from 'redux'
 import account from './account'
-import ai from './ai'
+import analysis from './analysis'
 import error from './error'
 import files from './files'
 import group from './group'
@@ -17,7 +17,7 @@ import workspace from './workspace'
 import workspaces from './workspaces'
 
 export default combineReducers({
-  ai,
+  analysis,
   uploadsDrawer,
   files,
   nav,

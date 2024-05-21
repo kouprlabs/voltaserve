@@ -4,11 +4,11 @@ import cx from 'classnames'
 import AnalysisAPI from '@/client/api/analysis'
 import reactSelectStyles from '@/styles/react-select'
 
-export type AILanguageProps = {
+export type AnalysisLanguageProps = {
   isReadOnly?: boolean
 }
 
-const AILanguage = ({}: AILanguageProps) => {
+const AnalysisLanguage = ({}: AnalysisLanguageProps) => {
   const [value, setValue] = useState<string>()
   const { data: languages } = AnalysisAPI.useGetLanguages()
 
@@ -52,4 +52,4 @@ const AILanguage = ({}: AILanguageProps) => {
   )
 }
 
-export default AILanguage
+export default AnalysisLanguage

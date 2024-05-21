@@ -1,4 +1,4 @@
-const AIEntities = () => {
+const AnalysisEntities = () => {
   return (
     <div>
       Entities, lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
@@ -9,4 +9,4 @@ const AIEntities = () => {
   )
 }
 
-export default AIEntities
+export default AnalysisEntities

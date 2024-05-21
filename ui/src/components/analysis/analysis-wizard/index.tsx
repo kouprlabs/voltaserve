@@ -16,10 +16,10 @@ import {
 } from '@chakra-ui/react'
 import cx from 'classnames'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
-import { modalDidClose, wizardDidComplete } from '@/store/ui/ai'
-import AIWizardEntities from './ai-wizard-entities'
-import AIWizardLanguage from './ai-wizard-language'
-import AIWizardText from './ai-wizard-text'
+import { modalDidClose, wizardDidComplete } from '@/store/ui/analysis'
+import AnalysisWizardEntities from './analysis-wizard-entities'
+import AnalysisWizardLanguage from './analysis-wizard-language'
+import AnalysisWizardText from './analysis-wizard-text'
 
 const steps = [
   { title: 'Choose Language', description: 'From the list' },
@@ -27,7 +27,7 @@ const steps = [
   { title: 'Scan Entities', description: 'Using NER' },
 ]
 
-const AiWizard = () => {
+const AnalysisWizard = () => {
   const dispatch = useAppDispatch()
   const id = useAppSelector((state) =>
     state.ui.files.selection.length > 0
@@ -80,9 +80,9 @@ const AiWizard = () => {
               </Step>
             ))}
           </Stepper>
-          {activeStep === 0 ? <AIWizardLanguage /> : null}
-          {activeStep === 1 ? <AIWizardText id={id} /> : null}
-          {activeStep === 2 ? <AIWizardEntities /> : null}
+          {activeStep === 0 ? <AnalysisWizardLanguage /> : null}
+          {activeStep === 1 ? <AnalysisWizardText id={id} /> : null}
+          {activeStep === 2 ? <AnalysisWizardEntities /> : null}
           {activeStep === steps.length ? (
             <div
               className={cx(
@@ -130,4 +130,4 @@ const AiWizard = () => {
   )
 }
 
-export default AiWizard
+export default AnalysisWizard
