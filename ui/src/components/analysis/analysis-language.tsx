@@ -27,7 +27,7 @@ const AnalysisLanguage = ({}: AnalysisLanguageProps) => {
       )}
     >
       <p>
-        Specify the language to use for extracting text using OCR (optical
+        Select the language to use for extracting text using OCR (optical
         character recognition), and for scanning entities using NER (named
         entity recognition).
       </p>
