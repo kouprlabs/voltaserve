@@ -1,11 +1,11 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
 
-type AnalysisState = {
+type InsightsState = {
   isModalOpen: boolean
   isWizardComplete: boolean
 }
 
-const initialState: AnalysisState = {
+const initialState: InsightsState = {
   isModalOpen: false,
   isWizardComplete: false,
 }

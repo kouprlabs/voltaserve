@@ -5,7 +5,6 @@ import { Helmet } from 'react-helmet-async'
 import FileAPI from '@/client/api/file'
 import WorkspaceAPI from '@/client/api/workspace'
 import { swrConfig } from '@/client/options'
-import Analysis from '@/components/analysis'
 import Path from '@/components/common/path'
 import FileCopy from '@/components/file/file-copy'
 import FileCreate from '@/components/file/file-create'
@@ -17,6 +16,7 @@ import FileList from '@/components/file/list'
 import FileSharing from '@/components/file/sharing'
 import FileSnapshotList from '@/components/file/snapshot/snapshot-list'
 import FileSnapshotUnlink from '@/components/file/snapshot/snapshot-unlink'
+import Insights from '@/components/insights'
 import { decodeQuery } from '@/helpers/query'
 import { filePaginationSteps, filesPaginationStorage } from '@/infra/pagination'
 import {
@@ -60,8 +60,8 @@ const WorkspaceFilesPage = () => {
   const isRenameModalOpen = useAppSelector(
     (state) => state.ui.files.isRenameModalOpen,
   )
-  const isAnalysisModalOpen = useAppSelector(
-    (state) => state.ui.analysis.isModalOpen,
+  const isInsightsModalOpen = useAppSelector(
+    (state) => state.ui.insights.isModalOpen,
   )
   const { data: workspace } = WorkspaceAPI.useGet(id, swrConfig())
   const { page, size, steps, setPage, setSize } = usePagePagination({
@@ -194,7 +194,7 @@ const WorkspaceFilesPage = () => {
       {isCreateModalOpen ? <FileCreate /> : null}
       {isDeleteModalOpen ? <FileDelete /> : null}
       {isRenameModalOpen ? <FileRename /> : null}
-      {isAnalysisModalOpen ? <Analysis /> : null}
+      {isInsightsModalOpen ? <Insights /> : null}
     </>
   )
 }

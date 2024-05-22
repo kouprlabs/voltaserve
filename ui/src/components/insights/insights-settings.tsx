@@ -1,4 +1,4 @@
-const AnalysisSettings = () => {
+const InsightsSettings = () => {
   return (
     <div>
       Settings, lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
@@ -9,4 +9,4 @@ const AnalysisSettings = () => {
   )
 }
 
-export default AnalysisSettings
+export default InsightsSettings

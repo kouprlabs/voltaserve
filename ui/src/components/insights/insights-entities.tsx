@@ -1,21 +1,12 @@
 import { useCallback, useEffect, useState } from 'react'
-import {
-  Avatar,
-  Badge,
-  Radio,
-  Table,
-  Tbody,
-  Td,
-  Tooltip,
-  Tr,
-} from '@chakra-ui/react'
+import { Badge, Table, Tbody, Td, Tooltip, Tr } from '@chakra-ui/react'
 import cx from 'classnames'
-import AnalysisAPI, { SortBy, SortOrder } from '@/client/api/analysis'
+import InsightsAPI, { SortBy, SortOrder } from '@/client/api/insights'
 import { swrConfig } from '@/client/options'
 import { Pagination, SearchInput, SectionSpinner } from '@/lib'
 import { useAppSelector } from '@/store/hook'
 
-const AnalysisEntities = () => {
+const InsightsEntities = () => {
   const id = useAppSelector((state) =>
     state.ui.files.selection.length > 0
       ? state.ui.files.selection[0]
@@ -23,12 +14,12 @@ const AnalysisEntities = () => {
   )
   const [page, setPage] = useState(1)
   const [query, setQuery] = useState('')
-  const { data: summary } = AnalysisAPI.useGetSummary(id, swrConfig())
+  const { data: summary } = InsightsAPI.useGetSummary(id, swrConfig())
   const {
     data: list,
     error,
     mutate,
-  } = AnalysisAPI.useListEntities(
+  } = InsightsAPI.useListEntities(
     summary?.hasEntities ? id : undefined,
     {
       query,
@@ -177,4 +168,4 @@ function getEntityDescription(label: string) {
   }
 }
 
-export default AnalysisEntities
+export default InsightsEntities

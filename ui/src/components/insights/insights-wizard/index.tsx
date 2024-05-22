@@ -16,10 +16,10 @@ import {
 } from '@chakra-ui/react'
 import cx from 'classnames'
 import { useAppDispatch } from '@/store/hook'
-import { modalDidClose, wizardDidComplete } from '@/store/ui/analysis'
-import AnalysisWizardEntities from './analysis-wizard-entities'
-import AnalysisWizardLanguage from './analysis-wizard-language'
-import AnalysisWizardText from './analysis-wizard-text'
+import { modalDidClose, wizardDidComplete } from '@/store/ui/insights'
+import InsightsWizardEntities from './insights-wizard-entities'
+import InsightsWizardLanguage from './insights-wizard-language'
+import InsightsWizardText from './insights-wizard-text'
 
 const steps = [
   { title: 'Choose Language', description: 'From the list' },
@@ -27,7 +27,7 @@ const steps = [
   { title: 'Scan Entities', description: 'Using NER' },
 ]
 
-const AnalysisWizard = () => {
+const InsightsWizard = () => {
   const dispatch = useAppDispatch()
   const { activeStep, setActiveStep } = useSteps({
     index: 0,
@@ -71,9 +71,9 @@ const AnalysisWizard = () => {
               </Step>
             ))}
           </Stepper>
-          {activeStep === 0 ? <AnalysisWizardLanguage /> : null}
-          {activeStep === 1 ? <AnalysisWizardText /> : null}
-          {activeStep === 2 ? <AnalysisWizardEntities /> : null}
+          {activeStep === 0 ? <InsightsWizardLanguage /> : null}
+          {activeStep === 1 ? <InsightsWizardText /> : null}
+          {activeStep === 2 ? <InsightsWizardEntities /> : null}
           {activeStep === steps.length ? (
             <div
               className={cx(
@@ -121,4 +121,4 @@ const AnalysisWizard = () => {
   )
 }
 
-export default AnalysisWizard
+export default InsightsWizard

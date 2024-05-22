@@ -34,14 +34,14 @@ type GetEntitiesOptions struct {
 	Language string `json:"language"`
 }
 
-func (cl *LanguageClient) GetEntities(opts GetEntitiesOptions) ([]model.AnalysisEntity, error) {
+func (cl *LanguageClient) GetEntities(opts GetEntitiesOptions) ([]model.InsightsEntity, error) {
 	reqBody, err := json.Marshal(opts)
 	if err != nil {
-		return []model.AnalysisEntity{}, err
+		return []model.InsightsEntity{}, err
 	}
 	response, err := http.Post(fmt.Sprintf("%s/v2/entities", cl.config.LanguageURL), "application/json", bytes.NewBuffer(reqBody))
 	if err != nil {
-		return []model.AnalysisEntity{}, err
+		return []model.InsightsEntity{}, err
 	}
 	defer func(Body io.ReadCloser) {
 		if err := Body.Close(); err != nil {
@@ -50,12 +50,12 @@ func (cl *LanguageClient) GetEntities(opts GetEntitiesOptions) ([]model.Analysis
 	}(response.Body)
 	resBody, err := io.ReadAll(response.Body)
 	if err != nil {
-		return []model.AnalysisEntity{}, err
+		return []model.InsightsEntity{}, err
 	}
-	var result []model.AnalysisEntity
+	var result []model.InsightsEntity
 	err = json.Unmarshal(resBody, &result)
 	if err != nil {
-		return []model.AnalysisEntity{}, err
+		return []model.InsightsEntity{}, err
 	}
 	return result, nil
 }

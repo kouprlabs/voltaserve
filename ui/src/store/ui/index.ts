@@ -1,12 +1,12 @@
 import { combineReducers } from 'redux'
 import account from './account'
-import analysis from './analysis'
 import error from './error'
 import files from './files'
 import group from './group'
 import groupMembers from './group-members'
 import groups from './groups'
 import incomingInvitations from './incoming-invitations'
+import insights from './insights'
 import nav from './nav'
 import notifications from './notifications'
 import organization from './organization'
@@ -18,7 +18,7 @@ import workspace from './workspace'
 import workspaces from './workspaces'
 
 export default combineReducers({
-  analysis,
+  insights,
   uploadsDrawer,
   files,
   snapshots,

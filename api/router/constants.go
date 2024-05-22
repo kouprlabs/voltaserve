@@ -7,5 +7,5 @@ const (
 	InvitationDefaultPageSize     = 100
 	GroupDefaultPageSize          = 100
 	UserDefaultPageSize           = 100
-	AnalysisEntityDefaultPageSize = 100
+	InsightsEntityDefaultPageSize = 100
 )

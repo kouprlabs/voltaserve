@@ -11,19 +11,19 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-type AnalysisRouter struct {
-	analysisSvc           *service.AnalysisService
+type InsightsRouter struct {
+	insightsSvc           *service.InsightsService
 	accessTokenCookieName string
 }
 
-func NewAnalysisRouter() *AnalysisRouter {
-	return &AnalysisRouter{
-		analysisSvc:           service.NewAnalysisService(),
+func NewInsightsRouter() *InsightsRouter {
+	return &InsightsRouter{
+		insightsSvc:           service.NewInsightsService(),
 		accessTokenCookieName: "voltaserve_access_token",
 	}
 }
 
-func (r *AnalysisRouter) AppendRoutes(g fiber.Router) {
+func (r *InsightsRouter) AppendRoutes(g fiber.Router) {
 	g.Get("/languages", r.GetLanguages)
 	g.Patch("/:id/language", r.PatchLanguage)
 	g.Post("/:id", r.Create)
@@ -36,14 +36,14 @@ func (r *AnalysisRouter) AppendRoutes(g fiber.Router) {
 //
 //	@Summary		Get Languages
 //	@Description	Get Languages
-//	@Tags			Analysis
-//	@Id				analysis_get_languages
+//	@Tags			Insights
+//	@Id				insights_get_languages
 //	@Produce		json
-//	@Success		200	{array}		service.AnalysisLanguage
+//	@Success		200	{array}		service.InsightsLanguage
 //	@Failure		503	{object}	errorpkg.ErrorResponse
-//	@Router			/analysis/languages [get]
-func (r *AnalysisRouter) GetLanguages(c *fiber.Ctx) error {
-	res, err := r.analysisSvc.GetLanguages()
+//	@Router			/insights/languages [get]
+func (r *InsightsRouter) GetLanguages(c *fiber.Ctx) error {
+	res, err := r.insightsSvc.GetLanguages()
 	if err != nil {
 		return err
 	}
@@ -54,26 +54,26 @@ func (r *AnalysisRouter) GetLanguages(c *fiber.Ctx) error {
 //
 //	@Summary		Patch Language
 //	@Description	Patch Language
-//	@Tags			Analysis
-//	@Id				analysis_patch_language
+//	@Tags			Insights
+//	@Id				insights_patch_language
 //	@Accept			json
 //	@Produce		json
 //	@Param			id		path	string									true	"ID"
-//	@Param			body	body	service.AnalysisPatchLanguageOptions	true	"Body"
+//	@Param			body	body	service.InsightsPatchLanguageOptions	true	"Body"
 //	@Success		200
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		400	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
-//	@Router			/analysis/{id}/language [patch]
-func (r *AnalysisRouter) PatchLanguage(c *fiber.Ctx) error {
-	opts := new(service.AnalysisPatchLanguageOptions)
+//	@Router			/insights/{id}/language [patch]
+func (r *InsightsRouter) PatchLanguage(c *fiber.Ctx) error {
+	opts := new(service.InsightsPatchLanguageOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
 	}
 	if err := validator.New().Struct(opts); err != nil {
 		return errorpkg.NewRequestBodyValidationError(err)
 	}
-	if err := r.analysisSvc.PatchLanguage(c.Params("id"), *opts, GetUserID(c)); err != nil {
+	if err := r.insightsSvc.PatchLanguage(c.Params("id"), *opts, GetUserID(c)); err != nil {
 		return err
 	}
 	return c.SendStatus(http.StatusNoContent)
@@ -83,8 +83,8 @@ func (r *AnalysisRouter) PatchLanguage(c *fiber.Ctx) error {
 //
 //	@Summary		Create
 //	@Description	Create
-//	@Tags			Analysis
-//	@Id				analysis_create
+//	@Tags			Insights
+//	@Id				insights_create
 //	@Accept			json
 //	@Produce		json
 //	@Param			id	path	string	true	"ID"
@@ -92,9 +92,9 @@ func (r *AnalysisRouter) PatchLanguage(c *fiber.Ctx) error {
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		400	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
-//	@Router			/analysis/{id} [post]
-func (r *AnalysisRouter) Create(c *fiber.Ctx) error {
-	if err := r.analysisSvc.Create(c.Params("id"), GetUserID(c)); err != nil {
+//	@Router			/insights/{id} [post]
+func (r *InsightsRouter) Create(c *fiber.Ctx) error {
+	if err := r.insightsSvc.Create(c.Params("id"), GetUserID(c)); err != nil {
 		return err
 	}
 	return c.SendStatus(http.StatusNoContent)
@@ -104,8 +104,8 @@ func (r *AnalysisRouter) Create(c *fiber.Ctx) error {
 //
 //	@Summary		Delete
 //	@Description	Delete
-//	@Tags			Analysis
-//	@Id				analysis_delete
+//	@Tags			Insights
+//	@Id				insights_delete
 //	@Accept			json
 //	@Produce		json
 //	@Param			id	path	string	true	"ID"
@@ -113,9 +113,9 @@ func (r *AnalysisRouter) Create(c *fiber.Ctx) error {
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		400	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
-//	@Router			/analysis/{id} [delete]
-func (r *AnalysisRouter) Delete(c *fiber.Ctx) error {
-	if err := r.analysisSvc.Delete(c.Params("id"), GetUserID(c)); err != nil {
+//	@Router			/insights/{id} [delete]
+func (r *InsightsRouter) Delete(c *fiber.Ctx) error {
+	if err := r.insightsSvc.Delete(c.Params("id"), GetUserID(c)); err != nil {
 		return err
 	}
 	return c.SendStatus(http.StatusNoContent)
@@ -125,8 +125,8 @@ func (r *AnalysisRouter) Delete(c *fiber.Ctx) error {
 //
 //	@Summary		List Entities
 //	@Description	List Entities
-//	@Tags			Analysis
-//	@Id				analysis_list_entities
+//	@Tags			Insights
+//	@Id				insights_list_entities
 //	@Produce		json
 //	@Param			id			path		string	true	"ID"
 //	@Param			query		query		string	false	"Query"
@@ -134,11 +134,11 @@ func (r *AnalysisRouter) Delete(c *fiber.Ctx) error {
 //	@Param			size		query		string	false	"Size"
 //	@Param			sort_by		query		string	false	"Sort By"
 //	@Param			sort_order	query		string	false	"Sort Order"
-//	@Success		200			{array}		service.AnalysisEntityList
+//	@Success		200			{array}		service.InsightsEntityList
 //	@Failure		404			{object}	errorpkg.ErrorResponse
 //	@Failure		500			{object}	errorpkg.ErrorResponse
-//	@Router			/analysis/{id}/entities [get]
-func (r *AnalysisRouter) ListEntities(c *fiber.Ctx) error {
+//	@Router			/insights/{id}/entities [get]
+func (r *InsightsRouter) ListEntities(c *fiber.Ctx) error {
 	var err error
 	var page int64
 	if c.Query("page") == "" {
@@ -151,7 +151,7 @@ func (r *AnalysisRouter) ListEntities(c *fiber.Ctx) error {
 	}
 	var size int64
 	if c.Query("size") == "" {
-		size = AnalysisEntityDefaultPageSize
+		size = InsightsEntityDefaultPageSize
 	} else {
 		size, err = strconv.ParseInt(c.Query("size"), 10, 32)
 		if err != nil {
@@ -170,7 +170,7 @@ func (r *AnalysisRouter) ListEntities(c *fiber.Ctx) error {
 	if err != nil {
 		return errorpkg.NewInvalidQueryParamError("query")
 	}
-	res, err := r.analysisSvc.ListEntities(c.Params("id"), service.AnalysisListEntitiesOptions{
+	res, err := r.insightsSvc.ListEntities(c.Params("id"), service.InsightsListEntitiesOptions{
 		Query:     query,
 		Page:      uint(page),
 		Size:      uint(size),
@@ -187,18 +187,18 @@ func (r *AnalysisRouter) ListEntities(c *fiber.Ctx) error {
 //
 //	@Summary		Get Summary
 //	@Description	Get Summary
-//	@Tags			Analysis
-//	@Id				analysis_get_summary
+//	@Tags			Insights
+//	@Id				insights_get_summary
 //	@Accept			json
 //	@Produce		json
 //	@Param			id	path		string	true	"ID"
-//	@Success		200	{object}	service.AnalysisSummary
+//	@Success		200	{object}	service.InsightsSummary
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		400	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
-//	@Router			/analysis/{id}/summary [get]
-func (r *AnalysisRouter) GetSummary(c *fiber.Ctx) error {
-	res, err := r.analysisSvc.GetSummary(c.Params("id"), GetUserID(c))
+//	@Router			/insights/{id}/summary [get]
+func (r *InsightsRouter) GetSummary(c *fiber.Ctx) error {
+	res, err := r.insightsSvc.GetSummary(c.Params("id"), GetUserID(c))
 	if err != nil {
 		return err
 	}

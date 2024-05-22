@@ -18,8 +18,8 @@ import (
 	"go.uber.org/zap"
 )
 
-type AnalysisService struct {
-	languages      []*AnalysisLanguage
+type InsightsService struct {
+	languages      []*InsightsLanguage
 	snapshotRepo   repo.SnapshotRepo
 	userRepo       repo.UserRepo
 	fileCache      *cache.FileCache
@@ -31,13 +31,13 @@ type AnalysisService struct {
 	logger         *zap.SugaredLogger
 }
 
-func NewAnalysisService() *AnalysisService {
+func NewInsightsService() *InsightsService {
 	logger, err := infra.GetLogger()
 	if err != nil {
 		panic(err)
 	}
-	return &AnalysisService{
-		languages: []*AnalysisLanguage{
+	return &InsightsService{
+		languages: []*InsightsLanguage{
 			{ID: "ara", ISO6393: "ara", Name: "Arabic"},
 			{ID: "chi_sim", ISO6393: "zho", Name: "Chinese Simplified"},
 			{ID: "chi_tra", ISO6393: "zho", Name: "Chinese Traditional"},
@@ -65,21 +65,21 @@ func NewAnalysisService() *AnalysisService {
 	}
 }
 
-type AnalysisLanguage struct {
+type InsightsLanguage struct {
 	ID      string `json:"id"`
 	ISO6393 string `json:"iso6393"`
 	Name    string `json:"name"`
 }
 
-func (svc *AnalysisService) GetLanguages() ([]*AnalysisLanguage, error) {
+func (svc *InsightsService) GetLanguages() ([]*InsightsLanguage, error) {
 	return svc.languages, nil
 }
 
-type AnalysisPatchLanguageOptions struct {
+type InsightsPatchLanguageOptions struct {
 	LanguageID string `json:"languageId" validate:"required"`
 }
 
-func (svc *AnalysisService) PatchLanguage(id string, opts AnalysisPatchLanguageOptions, userID string) error {
+func (svc *InsightsService) PatchLanguage(id string, opts InsightsPatchLanguageOptions, userID string) error {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return err
@@ -105,7 +105,7 @@ func (svc *AnalysisService) PatchLanguage(id string, opts AnalysisPatchLanguageO
 	return nil
 }
 
-func (svc *AnalysisService) Create(id string, userID string) error {
+func (svc *InsightsService) Create(id string, userID string) error {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return err
@@ -133,7 +133,7 @@ func (svc *AnalysisService) Create(id string, userID string) error {
 	return nil
 }
 
-func (svc *AnalysisService) createText(snapshot model.Snapshot) error {
+func (svc *InsightsService) createText(snapshot model.Snapshot) error {
 	if snapshot.HasText() {
 		return nil
 	}
@@ -227,7 +227,7 @@ func (svc *AnalysisService) createText(snapshot model.Snapshot) error {
 	return nil
 }
 
-func (svc *AnalysisService) createEntities(snapshot model.Snapshot) error {
+func (svc *InsightsService) createEntities(snapshot model.Snapshot) error {
 	if snapshot.HasEntities() {
 		return nil
 	}
@@ -271,7 +271,7 @@ func (svc *AnalysisService) createEntities(snapshot model.Snapshot) error {
 	return nil
 }
 
-func (svc *AnalysisService) Delete(id string, userID string) error {
+func (svc *InsightsService) Delete(id string, userID string) error {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return err
@@ -299,7 +299,7 @@ func (svc *AnalysisService) Delete(id string, userID string) error {
 	return nil
 }
 
-func (svc *AnalysisService) deleteText(snapshot model.Snapshot) error {
+func (svc *InsightsService) deleteText(snapshot model.Snapshot) error {
 	if !snapshot.HasText() {
 		return nil
 	}
@@ -314,7 +314,7 @@ func (svc *AnalysisService) deleteText(snapshot model.Snapshot) error {
 	return nil
 }
 
-func (svc *AnalysisService) deleteEntities(snapshot model.Snapshot) error {
+func (svc *InsightsService) deleteEntities(snapshot model.Snapshot) error {
 	if !snapshot.HasEntities() {
 		return nil
 	}
@@ -329,7 +329,7 @@ func (svc *AnalysisService) deleteEntities(snapshot model.Snapshot) error {
 	return nil
 }
 
-type AnalysisListEntitiesOptions struct {
+type InsightsListEntitiesOptions struct {
 	Query     string `json:"query"`
 	Page      uint   `json:"page"`
 	Size      uint   `json:"size"`
@@ -337,15 +337,15 @@ type AnalysisListEntitiesOptions struct {
 	SortOrder string `json:"sortOrder"`
 }
 
-type AnalysisEntityList struct {
-	Data          []*model.AnalysisEntity `json:"data"`
+type InsightsEntityList struct {
+	Data          []*model.InsightsEntity `json:"data"`
 	TotalPages    uint                    `json:"totalPages"`
 	TotalElements uint                    `json:"totalElements"`
 	Page          uint                    `json:"page"`
 	Size          uint                    `json:"size"`
 }
 
-func (svc *AnalysisService) ListEntities(id string, opts AnalysisListEntitiesOptions, userID string) (*AnalysisEntityList, error) {
+func (svc *InsightsService) ListEntities(id string, opts InsightsListEntitiesOptions, userID string) (*InsightsEntityList, error) {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
@@ -372,7 +372,7 @@ func (svc *AnalysisService) ListEntities(id string, opts AnalysisListEntitiesOpt
 		if err != nil {
 			return nil, err
 		}
-		var entities []*model.AnalysisEntity
+		var entities []*model.InsightsEntity
 		if err := json.Unmarshal([]byte(text), &entities); err != nil {
 			return nil, err
 		}
@@ -382,7 +382,7 @@ func (svc *AnalysisService) ListEntities(id string, opts AnalysisListEntitiesOpt
 		filtered := svc.doFiltering(entities, opts.Query)
 		sorted := svc.doSorting(filtered, opts.SortBy, opts.SortOrder)
 		data, totalElements, totalPages := svc.doPagination(sorted, opts.Page, opts.Size)
-		return &AnalysisEntityList{
+		return &InsightsEntityList{
 			Data:          data,
 			TotalPages:    totalPages,
 			TotalElements: totalElements,
@@ -394,11 +394,11 @@ func (svc *AnalysisService) ListEntities(id string, opts AnalysisListEntitiesOpt
 	}
 }
 
-func (svc *AnalysisService) doFiltering(data []*model.AnalysisEntity, query string) []*model.AnalysisEntity {
+func (svc *InsightsService) doFiltering(data []*model.InsightsEntity, query string) []*model.InsightsEntity {
 	if query == "" {
 		return data
 	}
-	filtered := []*model.AnalysisEntity{}
+	filtered := []*model.InsightsEntity{}
 	for _, entity := range data {
 		if strings.Contains(strings.ToLower(entity.Text), strings.ToLower(query)) {
 			filtered = append(filtered, entity)
@@ -407,7 +407,7 @@ func (svc *AnalysisService) doFiltering(data []*model.AnalysisEntity, query stri
 	return filtered
 }
 
-func (svc *AnalysisService) doSorting(data []*model.AnalysisEntity, sortBy string, sortOrder string) []*model.AnalysisEntity {
+func (svc *InsightsService) doSorting(data []*model.InsightsEntity, sortBy string, sortOrder string) []*model.InsightsEntity {
 	if sortBy == SortByName {
 		sort.Slice(data, func(i, j int) bool {
 			if sortOrder == SortOrderDesc {
@@ -425,11 +425,11 @@ func (svc *AnalysisService) doSorting(data []*model.AnalysisEntity, sortBy strin
 	return data
 }
 
-func (svc *AnalysisService) doPagination(data []*model.AnalysisEntity, page, size uint) ([]*model.AnalysisEntity, uint, uint) {
+func (svc *InsightsService) doPagination(data []*model.InsightsEntity, page, size uint) ([]*model.InsightsEntity, uint, uint) {
 	totalElements := uint(len(data))
 	totalPages := (totalElements + size - 1) / size
 	if page > totalPages {
-		return []*model.AnalysisEntity{}, totalElements, totalPages
+		return []*model.InsightsEntity{}, totalElements, totalPages
 	}
 	startIndex := (page - 1) * size
 	endIndex := startIndex + size
@@ -440,14 +440,14 @@ func (svc *AnalysisService) doPagination(data []*model.AnalysisEntity, page, siz
 	return pageData, totalElements, totalPages
 }
 
-type AnalysisSummary struct {
+type InsightsSummary struct {
 	HasLanguage bool `json:"hasLanguage"`
 	HasOCR      bool `json:"hasOcr"`
 	HasText     bool `json:"hasText"`
 	HasEntities bool `json:"hasEntities"`
 }
 
-func (svc *AnalysisService) GetSummary(id string, userID string) (*AnalysisSummary, error) {
+func (svc *InsightsService) GetSummary(id string, userID string) (*InsightsSummary, error) {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
@@ -466,7 +466,7 @@ func (svc *AnalysisService) GetSummary(id string, userID string) (*AnalysisSumma
 	if err != nil {
 		return nil, err
 	}
-	return &AnalysisSummary{
+	return &InsightsSummary{
 		HasLanguage: snapshot.GetLanguage() != nil,
 		HasOCR:      snapshot.HasOCR(),
 		HasText:     snapshot.HasText(),

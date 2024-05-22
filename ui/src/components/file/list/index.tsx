@@ -25,7 +25,7 @@ import {
   ltOwnerPermission,
   ltViewerPermission,
 } from '@/client/api/permission'
-import AnalysisOrb from '@/components/common/analysis-orb'
+import Orb from '@/components/common/orb'
 import downloadFile from '@/helpers/download-file'
 import mapFileList from '@/helpers/map-file-list'
 import {
@@ -40,7 +40,6 @@ import {
 } from '@/lib'
 import { UploadDecorator, uploadAdded } from '@/store/entities/uploads'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
-import { modalDidOpen as aiModalDidOpen } from '@/store/ui/analysis'
 import {
   copyModalDidOpen,
   deleteModalDidOpen,
@@ -52,6 +51,7 @@ import {
   selectionUpdated,
   sharingModalDidOpen,
 } from '@/store/ui/files'
+import { modalDidOpen as aiModalDidOpen } from '@/store/ui/insights'
 import { listModalDidOpen } from '@/store/ui/snapshots'
 import { uploadsDrawerOpened } from '@/store/ui/uploads-drawer'
 import { FileViewType } from '@/types/file'
@@ -339,14 +339,14 @@ const FileList = ({ list, scale }: FileListProps) => {
             {singleFile && singleFile.type === 'file' ? (
               <>
                 <MenuItem
-                  icon={<AnalysisOrb width="20px" height="20px" />}
+                  icon={<Orb width="20px" height="20px" />}
                   isDisabled={ltEditorPermission(singleFile.permission)}
                   onClick={(event: MouseEvent) => {
                     event.stopPropagation()
                     dispatch(aiModalDidOpen())
                   }}
                 >
-                  Analysis
+                  Insights
                 </MenuItem>
                 <MenuDivider />
               </>

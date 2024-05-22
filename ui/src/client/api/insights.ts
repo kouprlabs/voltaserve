@@ -54,12 +54,12 @@ type ListEntitiesQueryParams = {
   query?: string
 }
 
-export default class AnalysisAPI {
+export default class InsightsAPI {
   static useGetSummary(
     id: string | null | undefined,
     swrOptions?: SWRConfiguration,
   ) {
-    const url = `/analysis/${id}/summary`
+    const url = `/insights/${id}/summary`
     return useSWR<Summary>(
       id ? url : null,
       () => apiFetcher({ url, method: 'GET' }) as Promise<Summary>,
@@ -68,7 +68,7 @@ export default class AnalysisAPI {
   }
 
   static useGetLanguages(swrOptions?: SWRConfiguration) {
-    const url = `/analysis/languages`
+    const url = `/insights/languages`
     return useSWR<Language[]>(
       url,
       () => apiFetcher({ url, method: 'GET' }) as Promise<Language[]>,
@@ -81,7 +81,7 @@ export default class AnalysisAPI {
     options?: ListEntitiesOptions,
     swrOptions?: SWRConfiguration,
   ) {
-    const url = `/analysis/${id}/entities?${this.paramsFromListOptions(options)}`
+    const url = `/insights/${id}/entities?${this.paramsFromListOptions(options)}`
     return useSWR<EntityList>(
       id ? url : null,
       () => apiFetcher({ url, method: 'GET' }) as Promise<EntityList>,

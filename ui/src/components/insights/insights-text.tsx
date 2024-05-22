@@ -1,17 +1,17 @@
 import { Button } from '@chakra-ui/react'
 import cx from 'classnames'
-import AnalysisAPI from '@/client/api/analysis'
+import InsightsAPI from '@/client/api/insights'
 import { getAccessTokenOrRedirect } from '@/infra/token'
 import { IconOpenInNew } from '@/lib'
 import { useAppSelector } from '@/store/hook'
 
-const AnalysisText = () => {
+const InsightsText = () => {
   const id = useAppSelector((state) =>
     state.ui.files.selection.length > 0
       ? state.ui.files.selection[0]
       : undefined,
   )
-  const { data: summary } = AnalysisAPI.useGetSummary(id)
+  const { data: summary } = InsightsAPI.useGetSummary(id)
 
   if (!id || !summary) {
     return null
@@ -57,4 +57,4 @@ const AnalysisText = () => {
   )
 }
 
-export default AnalysisText
+export default InsightsText

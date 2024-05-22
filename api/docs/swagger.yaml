@@ -24,7 +24,14 @@ definitions:
       userMessage:
         type: string
     type: object
-  model.AnalysisEntity:
+  model.ImageProps:
+    properties:
+      height:
+        type: integer
+      width:
+        type: integer
+    type: object
+  model.InsightsEntity:
     properties:
       frequency:
         type: integer
@@ -32,13 +39,6 @@ definitions:
         type: string
       text:
         type: string
-    type: object
-  model.ImageProps:
-    properties:
-      height:
-        type: integer
-      width:
-        type: integer
     type: object
   model.S3Object:
     properties:
@@ -203,48 +203,6 @@ definitions:
     required:
     - storageCapacity
     type: object
-  service.AnalysisEntityList:
-    properties:
-      data:
-        items:
-          $ref: '#/definitions/model.AnalysisEntity'
-        type: array
-      page:
-        type: integer
-      size:
-        type: integer
-      totalElements:
-        type: integer
-      totalPages:
-        type: integer
-    type: object
-  service.AnalysisLanguage:
-    properties:
-      id:
-        type: string
-      iso6393:
-        type: string
-      name:
-        type: string
-    type: object
-  service.AnalysisPatchLanguageOptions:
-    properties:
-      languageId:
-        type: string
-    required:
-    - languageId
-    type: object
-  service.AnalysisSummary:
-    properties:
-      hasEntities:
-        type: boolean
-      hasLanguage:
-        type: boolean
-      hasOcr:
-        type: boolean
-      hasText:
-        type: boolean
-    type: object
   service.Download:
     properties:
       extension:
@@ -376,6 +334,48 @@ definitions:
         type: integer
       width:
         type: integer
+    type: object
+  service.InsightsEntityList:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/model.InsightsEntity'
+        type: array
+      page:
+        type: integer
+      size:
+        type: integer
+      totalElements:
+        type: integer
+      totalPages:
+        type: integer
+    type: object
+  service.InsightsLanguage:
+    properties:
+      id:
+        type: string
+      iso6393:
+        type: string
+      name:
+        type: string
+    type: object
+  service.InsightsPatchLanguageOptions:
+    properties:
+      languageId:
+        type: string
+    required:
+    - languageId
+    type: object
+  service.InsightsSummary:
+    properties:
+      hasEntities:
+        type: boolean
+      hasLanguage:
+        type: boolean
+      hasOcr:
+        type: boolean
+      hasText:
+        type: boolean
     type: object
   service.Invitation:
     properties:
@@ -638,211 +638,6 @@ info:
   title: Voltaserve API
   version: 2.0.0
 paths:
-  /analysis/{id}:
-    delete:
-      consumes:
-      - application/json
-      description: Delete
-      operationId: analysis_delete
-      parameters:
-      - description: ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Delete
-      tags:
-      - Analysis
-    post:
-      consumes:
-      - application/json
-      description: Create
-      operationId: analysis_create
-      parameters:
-      - description: ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Create
-      tags:
-      - Analysis
-  /analysis/{id}/entities:
-    get:
-      description: List Entities
-      operationId: analysis_list_entities
-      parameters:
-      - description: ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: Query
-        in: query
-        name: query
-        type: string
-      - description: Page
-        in: query
-        name: page
-        type: string
-      - description: Size
-        in: query
-        name: size
-        type: string
-      - description: Sort By
-        in: query
-        name: sort_by
-        type: string
-      - description: Sort Order
-        in: query
-        name: sort_order
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/service.AnalysisEntityList'
-            type: array
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: List Entities
-      tags:
-      - Analysis
-  /analysis/{id}/language:
-    patch:
-      consumes:
-      - application/json
-      description: Patch Language
-      operationId: analysis_patch_language
-      parameters:
-      - description: ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: Body
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/service.AnalysisPatchLanguageOptions'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Patch Language
-      tags:
-      - Analysis
-  /analysis/{id}/summary:
-    get:
-      consumes:
-      - application/json
-      description: Get Summary
-      operationId: analysis_get_summary
-      parameters:
-      - description: ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/service.AnalysisSummary'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Get Summary
-      tags:
-      - Analysis
-  /analysis/languages:
-    get:
-      description: Get Languages
-      operationId: analysis_get_languages
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/service.AnalysisLanguage'
-            type: array
-        "503":
-          description: Service Unavailable
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Get Languages
-      tags:
-      - Analysis
   /files:
     delete:
       description: Delete
@@ -1822,6 +1617,211 @@ paths:
       summary: Get
       tags:
       - Health
+  /insights/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete
+      operationId: insights_delete
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Delete
+      tags:
+      - Insights
+    post:
+      consumes:
+      - application/json
+      description: Create
+      operationId: insights_create
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Create
+      tags:
+      - Insights
+  /insights/{id}/entities:
+    get:
+      description: List Entities
+      operationId: insights_list_entities
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Query
+        in: query
+        name: query
+        type: string
+      - description: Page
+        in: query
+        name: page
+        type: string
+      - description: Size
+        in: query
+        name: size
+        type: string
+      - description: Sort By
+        in: query
+        name: sort_by
+        type: string
+      - description: Sort Order
+        in: query
+        name: sort_order
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/service.InsightsEntityList'
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: List Entities
+      tags:
+      - Insights
+  /insights/{id}/language:
+    patch:
+      consumes:
+      - application/json
+      description: Patch Language
+      operationId: insights_patch_language
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/service.InsightsPatchLanguageOptions'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Patch Language
+      tags:
+      - Insights
+  /insights/{id}/summary:
+    get:
+      consumes:
+      - application/json
+      description: Get Summary
+      operationId: insights_get_summary
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.InsightsSummary'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Get Summary
+      tags:
+      - Insights
+  /insights/languages:
+    get:
+      description: Get Languages
+      operationId: insights_get_languages
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/service.InsightsLanguage'
+            type: array
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Get Languages
+      tags:
+      - Insights
   /invitations:
     post:
       consumes:

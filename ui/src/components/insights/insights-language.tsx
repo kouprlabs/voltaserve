@@ -1,13 +1,13 @@
 import { useCallback, useMemo, useState } from 'react'
 import { OptionBase, Select, SingleValue } from 'chakra-react-select'
 import cx from 'classnames'
-import AnalysisAPI, { Language } from '@/client/api/analysis'
 import FileAPI from '@/client/api/file'
+import InsightsAPI, { Language } from '@/client/api/insights'
 import { swrConfig } from '@/client/options'
 import { useAppSelector } from '@/store/hook'
 import reactSelectStyles from '@/styles/react-select'
 
-export type AnalysisLanguageProps = {
+export type InsightsLanguageProps = {
   isReadOnly?: boolean
 }
 
@@ -16,15 +16,15 @@ interface LanguageOption extends OptionBase {
   value: string
 }
 
-const AnalysisLanguage = ({}: AnalysisLanguageProps) => {
+const InsightsLanguage = ({}: InsightsLanguageProps) => {
   const id = useAppSelector((state) =>
     state.ui.files.selection.length > 0
       ? state.ui.files.selection[0]
       : undefined,
   )
   const [_, setValue] = useState<Language>()
-  const { data: languages } = AnalysisAPI.useGetLanguages(swrConfig())
-  const { data: summary } = AnalysisAPI.useGetSummary(id, swrConfig())
+  const { data: languages } = InsightsAPI.useGetLanguages(swrConfig())
+  const { data: summary } = InsightsAPI.useGetSummary(id, swrConfig())
   const { data: file } = FileAPI.useGet(id, swrConfig())
   const defaultValue = useMemo<LanguageOption | undefined>(() => {
     if (file && summary && languages && file.snapshot?.language) {
@@ -83,4 +83,4 @@ const AnalysisLanguage = ({}: AnalysisLanguageProps) => {
   )
 }
 
-export default AnalysisLanguage
+export default InsightsLanguage

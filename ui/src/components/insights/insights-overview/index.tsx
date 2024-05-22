@@ -9,13 +9,13 @@ import {
 } from '@chakra-ui/react'
 import cx from 'classnames'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
-import { modalDidClose } from '@/store/ui/analysis'
-import AnalysisOverviewEntities from './analysis-overview-entities'
-import AnalysisOverviewLanguage from './analysis-overview-language'
-import AnalysisOverviewSettings from './analysis-overview-settings'
-import AnalysisOverviewText from './analysis-overview-text'
+import { modalDidClose } from '@/store/ui/insights'
+import InsightsOverviewEntities from './insights-overview-entities'
+import InsightsOverviewLanguage from './insights-overview-language'
+import InsightsOverviewSettings from './insights-overview-settings'
+import InsightsOverviewText from './insights-overview-text'
 
-const AnalysisOverview = () => {
+const InsightsOverview = () => {
   const dispatch = useAppDispatch()
   const id = useAppSelector((state) =>
     state.ui.files.selection.length > 0
@@ -45,10 +45,10 @@ const AnalysisOverview = () => {
               <Tab onClick={() => setActiveTab(3)}>Settings</Tab>
             </TabList>
           </Tabs>
-          {activeTab === 0 ? <AnalysisOverviewLanguage /> : null}
-          {activeTab === 1 ? <AnalysisOverviewText /> : null}
-          {activeTab === 2 ? <AnalysisOverviewEntities /> : null}
-          {activeTab === 3 ? <AnalysisOverviewSettings /> : null}
+          {activeTab === 0 ? <InsightsOverviewLanguage /> : null}
+          {activeTab === 1 ? <InsightsOverviewText /> : null}
+          {activeTab === 2 ? <InsightsOverviewEntities /> : null}
+          {activeTab === 3 ? <InsightsOverviewSettings /> : null}
         </div>
       </ModalBody>
       <ModalFooter>
@@ -65,4 +65,4 @@ const AnalysisOverview = () => {
   )
 }
 
-export default AnalysisOverview
+export default InsightsOverview

@@ -7,15 +7,15 @@ import {
   ModalOverlay,
 } from '@chakra-ui/react'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
-import { modalDidClose, wizardDidComplete } from '@/store/ui/analysis'
-import AnalysisOverview from './analysis-overview'
-import AnalysisWizard from './analysis-wizard'
+import { modalDidClose, wizardDidComplete } from '@/store/ui/insights'
+import InsightsOverview from './insights-overview'
+import InsightsWizard from './insights-wizard'
 
-const Analysis = () => {
+const Insights = () => {
   const dispatch = useAppDispatch()
-  const isModalOpen = useAppSelector((state) => state.ui.analysis.isModalOpen)
+  const isModalOpen = useAppSelector((state) => state.ui.insights.isModalOpen)
   const isWizardComplete = useAppSelector(
-    (state) => state.ui.analysis.isWizardComplete,
+    (state) => state.ui.insights.isWizardComplete,
   )
 
   useEffect(() => {
@@ -31,13 +31,13 @@ const Analysis = () => {
     >
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>Analysis</ModalHeader>
+        <ModalHeader>Insights</ModalHeader>
         <ModalCloseButton />
-        {!isWizardComplete ? <AnalysisWizard /> : null}
-        {isWizardComplete ? <AnalysisOverview /> : null}
+        {!isWizardComplete ? <InsightsWizard /> : null}
+        {isWizardComplete ? <InsightsOverview /> : null}
       </ModalContent>
     </Modal>
   )
 }
 
-export default Analysis
+export default Insights

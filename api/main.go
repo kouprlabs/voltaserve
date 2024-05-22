@@ -64,8 +64,8 @@ func main() {
 	files.AppendRoutes(filesGroup)
 	snapshots.AppendRoutes(snapshotsGroup)
 
-	analysis := router.NewAnalysisRouter()
-	analysis.AppendRoutes(v2.Group("analysis"))
+	insights := router.NewInsightsRouter()
+	insights.AppendRoutes(v2.Group("insights"))
 
 	invitations := router.NewInvitationRouter()
 	invitations.AppendRoutes(v2.Group("invitations"))
