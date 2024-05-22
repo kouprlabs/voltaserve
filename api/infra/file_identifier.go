@@ -1,6 +1,9 @@
 package infra
 
-import "strings"
+import (
+	"path/filepath"
+	"strings"
+)
 
 type FileIdentifier struct {
 }
@@ -9,11 +12,11 @@ func NewFileIdentifier() *FileIdentifier {
 	return &FileIdentifier{}
 }
 
-func (fi *FileIdentifier) IsPDF(extension string) bool {
-	return strings.ToLower(extension) == ".pdf"
+func (fi *FileIdentifier) IsPDF(path string) bool {
+	return strings.ToLower(filepath.Ext(path)) == ".pdf"
 }
 
-func (fi *FileIdentifier) IsOffice(extension string) bool {
+func (fi *FileIdentifier) IsOffice(path string) bool {
 	extensions := []string{
 		".xls",
 		".doc",
@@ -33,6 +36,7 @@ func (fi *FileIdentifier) IsOffice(extension string) bool {
 		".odc",
 		".rtf",
 	}
+	extension := filepath.Ext(path)
 	for _, v := range extensions {
 		if strings.ToLower(extension) == v {
 			return true
@@ -41,7 +45,7 @@ func (fi *FileIdentifier) IsOffice(extension string) bool {
 	return false
 }
 
-func (fi *FileIdentifier) IsPlainText(extension string) bool {
+func (fi *FileIdentifier) IsPlainText(path string) bool {
 	extensions := []string{
 		".txt",
 		".html",
@@ -66,6 +70,7 @@ func (fi *FileIdentifier) IsPlainText(extension string) bool {
 		".toml",
 		".md",
 	}
+	extension := filepath.Ext(path)
 	for _, v := range extensions {
 		if strings.ToLower(extension) == v {
 			return true
@@ -74,7 +79,7 @@ func (fi *FileIdentifier) IsPlainText(extension string) bool {
 	return false
 }
 
-func (fi *FileIdentifier) IsImage(extension string) bool {
+func (fi *FileIdentifier) IsImage(path string) bool {
 	extensions := []string{
 		".xpm",
 		".png",
@@ -90,6 +95,7 @@ func (fi *FileIdentifier) IsImage(extension string) bool {
 		".xcf",
 		".svg",
 	}
+	extension := filepath.Ext(path)
 	for _, v := range extensions {
 		if strings.ToLower(extension) == v {
 			return true
@@ -98,7 +104,24 @@ func (fi *FileIdentifier) IsImage(extension string) bool {
 	return false
 }
 
-func (fi *FileIdentifier) IsVideo(extension string) bool {
+func (fi *FileIdentifier) IsNonAlphaChannelImage(path string) bool {
+	extensions := []string{
+		".jpg",
+		".jpeg",
+		".gif",
+		".tiff",
+		".bmp",
+	}
+	extension := filepath.Ext(path)
+	for _, v := range extensions {
+		if strings.ToLower(extension) == v {
+			return true
+		}
+	}
+	return false
+}
+
+func (fi *FileIdentifier) IsVideo(path string) bool {
 	extensions := []string{
 		".ogv",
 		".mpeg",
@@ -114,6 +137,7 @@ func (fi *FileIdentifier) IsVideo(extension string) bool {
 		".asf",
 		".m4v",
 	}
+	extension := filepath.Ext(path)
 	for _, v := range extensions {
 		if strings.ToLower(extension) == v {
 			return true

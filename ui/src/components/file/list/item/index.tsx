@@ -3,7 +3,7 @@ import { useCallback, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Link as ChakraLink } from '@chakra-ui/react'
 import cx from 'classnames'
-import { SnapshotStatus } from '@/client/api/file'
+import { Status } from '@/client/api/snapshot'
 import relativeDate from '@/helpers/relative-date'
 import { Text } from '@/lib'
 import store from '@/store/configure-store'
@@ -103,8 +103,8 @@ const ListItem = ({
       navigate(`/workspace/${file.workspaceId}/file/${file.id}`)
     } else if (
       file.type === 'file' &&
-      file.preview &&
-      file.status === SnapshotStatus.Ready
+      file.snapshot?.preview &&
+      file.snapshot?.status === Status.Ready
     ) {
       window.open(`/file/${file.id}`, '_blank')?.focus()
     }
@@ -202,8 +202,8 @@ const ListItem = ({
           </ChakraLink>
         )}
         {file.type === 'file' &&
-        file.preview &&
-        file.status === SnapshotStatus.Ready ? (
+        file.snapshot?.preview &&
+        file.snapshot?.status === Status.Ready ? (
           <ChakraLink
             className={cx('text-center', 'no-underline', {
               'hover:no-underline': isSelectionMode,
@@ -217,7 +217,7 @@ const ListItem = ({
           </ChakraLink>
         ) : null}
         {file.type === 'file' &&
-        (!file.preview || file.status !== SnapshotStatus.Ready) ? (
+        (!file.snapshot?.preview || file.snapshot?.status !== Status.Ready) ? (
           <Text
             className={cx('text-center')}
             noOfLines={3}

@@ -14,19 +14,25 @@ const DrawerOpenNewTabButton = ({
   isCollapsed,
 }: DrawerOpenNewTabButtonProps) => {
   const label = 'Open file'
-  const download = useMemo(() => file.preview ?? file.original, [file])
-  const path = useMemo(() => (file.preview ? 'preview' : 'original'), [file])
+  const download = useMemo(
+    () => file.snapshot?.preview ?? file.snapshot?.original,
+    [file],
+  )
+  const path = useMemo(
+    () => (file.snapshot?.preview ? 'preview' : 'original'),
+    [file],
+  )
   const url = useMemo(() => {
     if (!download?.extension) {
       return ''
     }
-    if (file.original?.extension) {
+    if (file.snapshot?.original?.extension) {
       return `/proxy/api/v2/files/${file.id}/${path}${download.extension}`
     } else {
       return ''
     }
   }, [file, download, path])
-  if (!file.original) {
+  if (!file.snapshot?.original) {
     return null
   }
   if (isCollapsed) {

@@ -30,7 +30,8 @@ func NewLanguageClient() *LanguageClient {
 }
 
 type GetEntitiesOptions struct {
-	Text string `json:"text"`
+	Text     string `json:"text"`
+	Language string `json:"language"`
 }
 
 func (cl *LanguageClient) GetEntities(opts GetEntitiesOptions) ([]model.AnalysisEntity, error) {

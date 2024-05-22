@@ -7,7 +7,7 @@ export type ViewerAudioProps = {
 }
 
 const ViewerAudio = ({ file }: ViewerAudioProps) => {
-  const download = useMemo(() => file.original, [file])
+  const download = useMemo(() => file.snapshot?.original, [file])
   const url = useMemo(() => {
     if (!download || !download.extension) {
       return ''

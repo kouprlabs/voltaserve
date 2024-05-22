@@ -63,6 +63,11 @@ const OrganizationSelector = ({ onConfirm }: OrganizationSelectorProps) => {
     }
   }, [selected, onConfirm, onClose])
 
+  const handleSearchInputChange = useCallback((value: string) => {
+    setPage(1)
+    setQuery(value)
+  }, [])
+
   return (
     <>
       <Button
@@ -91,8 +96,9 @@ const OrganizationSelector = ({ onConfirm }: OrganizationSelectorProps) => {
           <ModalBody>
             <div className={cx('flex', 'flex-col', 'gap-1.5')}>
               <SearchInput
+                placeholder="Search Organizations"
                 query={query}
-                onChange={(value) => setQuery(value)}
+                onChange={handleSearchInputChange}
               />
               {!list && error && (
                 <div

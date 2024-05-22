@@ -414,7 +414,7 @@ func (svc *WorkspaceService) doPagination(data []model.Workspace, page, size uin
 	totalElements := uint(len(data))
 	totalPages := (totalElements + size - 1) / size
 	if page > totalPages {
-		return nil, totalElements, totalPages
+		return []model.Workspace{}, totalElements, totalPages
 	}
 	startIndex := (page - 1) * size
 	endIndex := startIndex + size

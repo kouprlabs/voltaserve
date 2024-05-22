@@ -19,7 +19,18 @@ poetry shell
 Install spaCy model:
 
 ```shell:
-python3 -m spacy download xx_ent_wiki_sm
+poetry run spacy download xx_ent_wiki_sm
+poetry run spacy download zh_core_web_trf
+poetry run spacy download de_dep_news_trf
+poetry run spacy download en_core_web_trf
+poetry run spacy download fr_dep_news_trf
+poetry run spacy download it_core_news_lg
+poetry run spacy download ja_core_news_trf
+poetry run spacy download nl_core_news_lg
+poetry run spacy download pt_core_news_lg
+poetry run spacy download ru_core_news_lg
+poetry run spacy download es_dep_news_trf
+poetry run spacy download sv_core_news_lg
 ```
 
 Run for development:

@@ -46,7 +46,7 @@ const AnalysisOverview = () => {
             </TabList>
           </Tabs>
           {activeTab === 0 ? <AnalysisOverviewLanguage /> : null}
-          {activeTab === 1 ? <AnalysisOverviewText id={id} /> : null}
+          {activeTab === 1 ? <AnalysisOverviewText /> : null}
           {activeTab === 2 ? <AnalysisOverviewEntities /> : null}
           {activeTab === 3 ? <AnalysisOverviewSettings /> : null}
         </div>

@@ -2,6 +2,7 @@ package router
 
 import (
 	"net/http"
+	"net/url"
 	"strconv"
 	"voltaserve/errorpkg"
 	"voltaserve/service"
@@ -25,10 +26,10 @@ func NewAnalysisRouter() *AnalysisRouter {
 func (r *AnalysisRouter) AppendRoutes(g fiber.Router) {
 	g.Get("/languages", r.GetLanguages)
 	g.Patch("/:id/language", r.PatchLanguage)
-	g.Post("/:id/text", r.CreateText)
+	g.Post("/:id", r.Create)
 	g.Get("/:id/summary", r.GetSummary)
-	g.Post("/:id/entities", r.CreateEntities)
 	g.Get("/:id/entities", r.ListEntities)
+	g.Delete("/:id", r.Delete)
 }
 
 // GetLanguages godoc
@@ -75,15 +76,15 @@ func (r *AnalysisRouter) PatchLanguage(c *fiber.Ctx) error {
 	if err := r.analysisSvc.PatchLanguage(c.Params("id"), *opts, GetUserID(c)); err != nil {
 		return err
 	}
-	return c.SendStatus(http.StatusOK)
+	return c.SendStatus(http.StatusNoContent)
 }
 
-// CreateText godoc
+// Create godoc
 //
-//	@Summary		Create Text
-//	@Description	Create Text
+//	@Summary		Create
+//	@Description	Create
 //	@Tags			Analysis
-//	@Id				analysis_create_text
+//	@Id				analysis_create
 //	@Accept			json
 //	@Produce		json
 //	@Param			id	path	string	true	"ID"
@@ -91,20 +92,20 @@ func (r *AnalysisRouter) PatchLanguage(c *fiber.Ctx) error {
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		400	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
-//	@Router			/analysis/{id}/text [post]
-func (r *AnalysisRouter) CreateText(c *fiber.Ctx) error {
-	if err := r.analysisSvc.CreateText(c.Params("id"), GetUserID(c)); err != nil {
+//	@Router			/analysis/{id} [post]
+func (r *AnalysisRouter) Create(c *fiber.Ctx) error {
+	if err := r.analysisSvc.Create(c.Params("id"), GetUserID(c)); err != nil {
 		return err
 	}
-	return c.SendStatus(http.StatusOK)
+	return c.SendStatus(http.StatusNoContent)
 }
 
-// CreateEntities godoc
+// Delete godoc
 //
-//	@Summary		Create Entities
-//	@Description	Create Entities
+//	@Summary		Delete
+//	@Description	Delete
 //	@Tags			Analysis
-//	@Id				analysis_create_entities
+//	@Id				analysis_delete
 //	@Accept			json
 //	@Produce		json
 //	@Param			id	path	string	true	"ID"
@@ -112,34 +113,12 @@ func (r *AnalysisRouter) CreateText(c *fiber.Ctx) error {
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		400	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
-//	@Router			/analysis/{id}/entities [post]
-func (r *AnalysisRouter) CreateEntities(c *fiber.Ctx) error {
-	if err := r.analysisSvc.CreateEntities(c.Params("id"), GetUserID(c)); err != nil {
+//	@Router			/analysis/{id} [delete]
+func (r *AnalysisRouter) Delete(c *fiber.Ctx) error {
+	if err := r.analysisSvc.Delete(c.Params("id"), GetUserID(c)); err != nil {
 		return err
 	}
-	return c.SendStatus(http.StatusOK)
-}
-
-// GetSummary godoc
-//
-//	@Summary		Get Summary
-//	@Description	Get Summary
-//	@Tags			Analysis
-//	@Id				analysis_get_summary
-//	@Accept			json
-//	@Produce		json
-//	@Param			id	path		string	true	"ID"
-//	@Success		200	{object}	service.AnalysisSummary
-//	@Failure		404	{object}	errorpkg.ErrorResponse
-//	@Failure		400	{object}	errorpkg.ErrorResponse
-//	@Failure		500	{object}	errorpkg.ErrorResponse
-//	@Router			/analysis/{id}/summary [get]
-func (r *AnalysisRouter) GetSummary(c *fiber.Ctx) error {
-	res, err := r.analysisSvc.GetSummary(c.Params("id"), GetUserID(c))
-	if err != nil {
-		return err
-	}
-	return c.JSON(res)
+	return c.SendStatus(http.StatusNoContent)
 }
 
 // ListEntities godoc
@@ -187,13 +166,39 @@ func (r *AnalysisRouter) ListEntities(c *fiber.Ctx) error {
 	if !IsValidSortOrder(sortOrder) {
 		return errorpkg.NewInvalidQueryParamError("sort_order")
 	}
+	query, err := url.QueryUnescape(c.Query("query"))
+	if err != nil {
+		return errorpkg.NewInvalidQueryParamError("query")
+	}
 	res, err := r.analysisSvc.ListEntities(c.Params("id"), service.AnalysisListEntitiesOptions{
-		Query:     c.Query("query"),
+		Query:     query,
 		Page:      uint(page),
 		Size:      uint(size),
 		SortBy:    sortBy,
 		SortOrder: sortOrder,
 	}, GetUserID(c))
+	if err != nil {
+		return err
+	}
+	return c.JSON(res)
+}
+
+// GetSummary godoc
+//
+//	@Summary		Get Summary
+//	@Description	Get Summary
+//	@Tags			Analysis
+//	@Id				analysis_get_summary
+//	@Accept			json
+//	@Produce		json
+//	@Param			id	path		string	true	"ID"
+//	@Success		200	{object}	service.AnalysisSummary
+//	@Failure		404	{object}	errorpkg.ErrorResponse
+//	@Failure		400	{object}	errorpkg.ErrorResponse
+//	@Failure		500	{object}	errorpkg.ErrorResponse
+//	@Router			/analysis/{id}/summary [get]
+func (r *AnalysisRouter) GetSummary(c *fiber.Ctx) error {
+	res, err := r.analysisSvc.GetSummary(c.Params("id"), GetUserID(c))
 	if err != nil {
 		return err
 	}

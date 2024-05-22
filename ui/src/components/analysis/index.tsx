@@ -11,7 +11,7 @@ import { modalDidClose, wizardDidComplete } from '@/store/ui/analysis'
 import AnalysisOverview from './analysis-overview'
 import AnalysisWizard from './analysis-wizard'
 
-const AnalysisModal = () => {
+const Analysis = () => {
   const dispatch = useAppDispatch()
   const isModalOpen = useAppSelector((state) => state.ui.analysis.isModalOpen)
   const isWizardComplete = useAppSelector(
@@ -31,7 +31,7 @@ const AnalysisModal = () => {
     >
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>Analyze</ModalHeader>
+        <ModalHeader>Analysis</ModalHeader>
         <ModalCloseButton />
         {!isWizardComplete ? <AnalysisWizard /> : null}
         {isWizardComplete ? <AnalysisOverview /> : null}
@@ -40,4 +40,4 @@ const AnalysisModal = () => {
   )
 }
 
-export default AnalysisModal
+export default Analysis

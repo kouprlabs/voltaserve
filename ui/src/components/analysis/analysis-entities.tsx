@@ -1,12 +1,180 @@
+import { useCallback, useEffect, useState } from 'react'
+import {
+  Avatar,
+  Badge,
+  Radio,
+  Table,
+  Tbody,
+  Td,
+  Tooltip,
+  Tr,
+} from '@chakra-ui/react'
+import cx from 'classnames'
+import AnalysisAPI, { SortBy, SortOrder } from '@/client/api/analysis'
+import { swrConfig } from '@/client/options'
+import { Pagination, SearchInput, SectionSpinner } from '@/lib'
+import { useAppSelector } from '@/store/hook'
+
 const AnalysisEntities = () => {
+  const id = useAppSelector((state) =>
+    state.ui.files.selection.length > 0
+      ? state.ui.files.selection[0]
+      : undefined,
+  )
+  const [page, setPage] = useState(1)
+  const [query, setQuery] = useState('')
+  const { data: summary } = AnalysisAPI.useGetSummary(id, swrConfig())
+  const {
+    data: list,
+    error,
+    mutate,
+  } = AnalysisAPI.useListEntities(
+    summary?.hasEntities ? id : undefined,
+    {
+      query,
+      page,
+      size: 5,
+      sortBy: SortBy.Frequency,
+      sortOrder: SortOrder.Desc,
+    },
+    swrConfig(),
+  )
+
+  useEffect(() => {
+    mutate()
+  }, [page, query, mutate])
+
+  const handleSearchInputChange = useCallback((value: string) => {
+    setPage(1)
+    setQuery(value)
+  }, [])
+
+  if (!id || !summary?.hasEntities) {
+    return null
+  }
+
   return (
-    <div>
-      Entities, lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-      eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
-      minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex
-      ea commodo consequat.
+    <div className={cx('flex', 'flex-col', 'gap-1.5')}>
+      <SearchInput
+        placeholder="Search Entities"
+        query={query}
+        onChange={handleSearchInputChange}
+      />
+      {!list && error && (
+        <div
+          className={cx('flex', 'items-center', 'justify-center', 'h-[300px]')}
+        >
+          <span>Failed to load entities.</span>
+        </div>
+      )}
+      {!list && !error && <SectionSpinner />}
+      {list && list.data.length === 0 && (
+        <div
+          className={cx('flex', 'items-center', 'justify-center', 'h-[300px]')}
+        >
+          <div className={cx('flex', 'flex-col', 'items-center', 'gap-1.5')}>
+            <span>There are no entities.</span>
+          </div>
+        </div>
+      )}
+      {list && list.data.length > 0 && (
+        <Table variant="simple" size="sm">
+          <colgroup>
+            <col className={cx('w-[40px]')} />
+            <col className={cx('w-[auto]')} />
+          </colgroup>
+          <Tbody>
+            {list.data.map((entity, index) => (
+              <Tr key={index} className={cx('h-[52px]')}>
+                <Td className={cx('px-0.5')}>
+                  <div
+                    className={cx(
+                      'flex',
+                      'flex-row',
+                      'items-center',
+                      'gap-1.5',
+                    )}
+                  >
+                    <span className={cx('text-base')}>{entity.text}</span>
+                    {getEntityDescription(entity.label) ? (
+                      <Tooltip label={getEntityDescription(entity.label)}>
+                        <Badge className={cx('cursor-default')}>
+                          {entity.label}
+                        </Badge>
+                      </Tooltip>
+                    ) : (
+                      <Badge className={cx('cursor-default')}>
+                        {entity.label}
+                      </Badge>
+                    )}
+                    <Badge>{entity.frequency}</Badge>
+                  </div>
+                </Td>
+              </Tr>
+            ))}
+          </Tbody>
+        </Table>
+      )}
+      {list && (
+        <div className={cx('self-end')}>
+          {list.totalPages > 1 ? (
+            <Pagination
+              uiSize="md"
+              maxButtons={3}
+              page={page}
+              totalPages={list.totalPages}
+              onPageChange={(value) => setPage(value)}
+            />
+          ) : null}
+        </div>
+      )}
     </div>
   )
+}
+
+function getEntityDescription(label: string) {
+  switch (label) {
+    case 'PER':
+      return 'People, including fictional characters.'
+    case 'NORP':
+      return 'Nationalities or religious or political groups.'
+    case 'FAC':
+      return 'Buildings, airports, highways, bridges, etc.'
+    case 'ORG':
+      return 'Companies, agencies, institutions, etc.'
+    case 'GPE':
+      return 'Countries, cities, states.'
+    case 'LOC':
+      return 'Non-GPE locations, such as mountain ranges, bodies of water.'
+    case 'PRODUCT':
+      return 'Objects, vehicles, foods, etc. (not services).'
+    case 'EVENT':
+      return 'Named hurricanes, battles, wars, sports events, etc.'
+    case 'WORK_OF_ART':
+      return 'Titles of books, songs, etc.'
+    case 'LAW':
+      return 'Named legal documents.'
+    case 'LANGUAGE':
+      return 'Any named language.'
+    case 'DATE':
+      return 'Absolute or relative dates or periods.'
+    case 'TIME':
+      return 'Times smaller than a day.'
+    case 'PERCENT':
+      return 'Percentages, including the symbol "%".'
+    case 'MONEY':
+      return 'Monetary values, including units.'
+    case 'QUANTITY':
+      return 'Measurements of weight, distance, etc.'
+    case 'ORDINAL':
+      return '“First”, “second”, etc.'
+    case 'CARDINAL':
+      return 'Numerals that do not fall under another type.'
+    case 'MISC':
+      return 'Miscellaneous entities, e.g., events, nationalities, products, etc.'
+    default:
+      return undefined
+  }
 }
 
 export default AnalysisEntities

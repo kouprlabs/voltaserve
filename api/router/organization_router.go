@@ -2,6 +2,7 @@ package router
 
 import (
 	"net/http"
+	"net/url"
 	"strconv"
 	"voltaserve/errorpkg"
 	"voltaserve/service"
@@ -183,8 +184,12 @@ func (r *OrganizationRouter) List(c *fiber.Ctx) error {
 	if !IsValidSortOrder(sortOrder) {
 		return errorpkg.NewInvalidQueryParamError("sort_order")
 	}
+	query, err := url.QueryUnescape(c.Query("query"))
+	if err != nil {
+		return errorpkg.NewInvalidQueryParamError("query")
+	}
 	res, err := r.orgSvc.List(service.OrganizationListOptions{
-		Query:     c.Query("query"),
+		Query:     query,
 		Page:      uint(page),
 		Size:      uint(size),
 		SortBy:    sortBy,

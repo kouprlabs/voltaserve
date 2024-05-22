@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -341,7 +342,10 @@ func (r *FileRouter) List(c *fiber.Ctx) error {
 	if fileType != model.FileTypeFile && fileType != model.FileTypeFolder && fileType != "" {
 		return errorpkg.NewInvalidQueryParamError("type")
 	}
-	query := c.Query("query")
+	query, err := url.QueryUnescape(c.Query("query"))
+	if err != nil {
+		return errorpkg.NewInvalidQueryParamError("query")
+	}
 	opts := service.FileListOptions{
 		Page:      uint(page),
 		Size:      uint(size),

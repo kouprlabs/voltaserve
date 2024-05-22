@@ -77,6 +77,11 @@ const UserSelector = ({
     }
   }, [selected, onConfirm, onClose])
 
+  const handleSearchInputChange = useCallback((value: string) => {
+    setPage(1)
+    setQuery(value)
+  }, [])
+
   return (
     <>
       <Button
@@ -105,8 +110,9 @@ const UserSelector = ({
           <ModalBody>
             <div className={cx('flex', 'flex-col', 'gap-1.5')}>
               <SearchInput
+                placeholder="Search Users"
                 query={query}
-                onChange={(value) => setQuery(value)}
+                onChange={handleSearchInputChange}
               />
               {!list && error && (
                 <div

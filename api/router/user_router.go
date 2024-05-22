@@ -1,6 +1,7 @@
 package router
 
 import (
+	"net/url"
 	"strconv"
 	"voltaserve/errorpkg"
 	"voltaserve/service"
@@ -76,8 +77,12 @@ func (r *UserRouter) List(c *fiber.Ctx) error {
 			return err
 		}
 	}
+	query, err := url.QueryUnescape(c.Query("query"))
+	if err != nil {
+		return errorpkg.NewInvalidQueryParamError("query")
+	}
 	res, err := r.userSvc.List(service.UserListOptions{
-		Query:               c.Query("query"),
+		Query:               query,
 		OrganizationID:      c.Query("organization_id"),
 		GroupID:             c.Query("group_id"),
 		NonGroupMembersOnly: nonGroupMembersOnly,

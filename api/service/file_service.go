@@ -80,21 +80,16 @@ type FileCreateOptions struct {
 }
 
 type File struct {
-	ID          string     `json:"id"`
-	WorkspaceID string     `json:"workspaceId"`
-	Name        string     `json:"name"`
-	Type        string     `json:"type"`
-	ParentID    *string    `json:"parentId,omitempty"`
-	Version     *int64     `json:"version,omitempty"`
-	Original    *Download  `json:"original,omitempty"`
-	Preview     *Download  `json:"preview,omitempty"`
-	Thumbnail   *Thumbnail `json:"thumbnail,omitempty"`
-	Status      string     `json:"status,omitempty"`
-	Permission  string     `json:"permission"`
-	IsShared    *bool      `json:"isShared,omitempty"`
-	SnapshotID  *string    `json:"snapshotId,omitempty"`
-	CreateTime  string     `json:"createTime"`
-	UpdateTime  *string    `json:"updateTime,omitempty"`
+	ID          string    `json:"id"`
+	WorkspaceID string    `json:"workspaceId"`
+	Name        string    `json:"name"`
+	Type        string    `json:"type"`
+	ParentID    *string   `json:"parentId,omitempty"`
+	Permission  string    `json:"permission"`
+	IsShared    *bool     `json:"isShared,omitempty"`
+	Snapshot    *Snapshot `json:"snapshot,omitempty"`
+	CreateTime  string    `json:"createTime"`
+	UpdateTime  *string   `json:"updateTime,omitempty"`
 }
 
 func (svc *FileService) Create(opts FileCreateOptions, userID string) (*File, error) {
@@ -1456,12 +1451,12 @@ func (svc *FileService) doSorting(data []model.File, sortBy string, sortOrder st
 				return false
 			}
 			var sizeA int64 = 0
-			if fileA.Original != nil {
-				sizeA = int64(fileA.Original.Size)
+			if fileA.Snapshot.Original != nil {
+				sizeA = int64(fileA.Snapshot.Original.Size)
 			}
 			var sizeB int64 = 0
-			if fileB.Original != nil {
-				sizeB = int64(fileB.Original.Size)
+			if fileB.Snapshot.Original != nil {
+				sizeB = int64(fileB.Snapshot.Original.Size)
 			}
 			if sortOrder == SortOrderDesc {
 				return sizeA > sizeB
@@ -1513,10 +1508,10 @@ func (svc *FileService) doSorting(data []model.File, sortBy string, sortOrder st
 				if err != nil {
 					return false
 				}
-				if f.Original == nil {
+				if f.Snapshot.Original == nil {
 					return false
 				}
-				if svc.fileIdent.IsImage(f.Original.Extension) {
+				if svc.fileIdent.IsImage(f.Snapshot.Original.Extension) {
 					return true
 				}
 				return false
@@ -1528,10 +1523,10 @@ func (svc *FileService) doSorting(data []model.File, sortBy string, sortOrder st
 				if err != nil {
 					return false
 				}
-				if f.Original == nil {
+				if f.Snapshot.Original == nil {
 					return false
 				}
-				if svc.fileIdent.IsPDF(f.Original.Extension) {
+				if svc.fileIdent.IsPDF(f.Snapshot.Original.Extension) {
 					return true
 				}
 				return false
@@ -1543,10 +1538,10 @@ func (svc *FileService) doSorting(data []model.File, sortBy string, sortOrder st
 				if err != nil {
 					return false
 				}
-				if f.Original == nil {
+				if f.Snapshot.Original == nil {
 					return false
 				}
-				if svc.fileIdent.IsOffice(f.Original.Extension) {
+				if svc.fileIdent.IsOffice(f.Snapshot.Original.Extension) {
 					return true
 				}
 				return false
@@ -1558,10 +1553,10 @@ func (svc *FileService) doSorting(data []model.File, sortBy string, sortOrder st
 				if err != nil {
 					return false
 				}
-				if f.Original == nil {
+				if f.Snapshot.Original == nil {
 					return false
 				}
-				if svc.fileIdent.IsVideo(f.Original.Extension) {
+				if svc.fileIdent.IsVideo(f.Snapshot.Original.Extension) {
 					return true
 				}
 				return false
@@ -1573,10 +1568,10 @@ func (svc *FileService) doSorting(data []model.File, sortBy string, sortOrder st
 				if err != nil {
 					return false
 				}
-				if f.Original == nil {
+				if f.Snapshot.Original == nil {
 					return false
 				}
-				if svc.fileIdent.IsPlainText(f.Original.Extension) {
+				if svc.fileIdent.IsPlainText(f.Snapshot.Original.Extension) {
 					return true
 				}
 				return false
@@ -1588,14 +1583,14 @@ func (svc *FileService) doSorting(data []model.File, sortBy string, sortOrder st
 				if err != nil {
 					return false
 				}
-				if f.Original == nil {
+				if f.Snapshot.Original == nil {
 					return false
 				}
-				if !svc.fileIdent.IsImage(f.Original.Extension) &&
-					!svc.fileIdent.IsPDF(f.Original.Extension) &&
-					!svc.fileIdent.IsOffice(f.Original.Extension) &&
-					!svc.fileIdent.IsVideo(f.Original.Extension) &&
-					!svc.fileIdent.IsPlainText(f.Original.Extension) {
+				if !svc.fileIdent.IsImage(f.Snapshot.Original.Extension) &&
+					!svc.fileIdent.IsPDF(f.Snapshot.Original.Extension) &&
+					!svc.fileIdent.IsOffice(f.Snapshot.Original.Extension) &&
+					!svc.fileIdent.IsVideo(f.Snapshot.Original.Extension) &&
+					!svc.fileIdent.IsPlainText(f.Snapshot.Original.Extension) {
 					return true
 				}
 				return false
@@ -1667,7 +1662,7 @@ func (svc *FileService) doPagination(data []model.File, page, size uint) ([]mode
 	totalElements := uint(len(data))
 	totalPages := (totalElements + size - 1) / size
 	if page > totalPages {
-		return nil, totalElements, totalPages
+		return []model.File{}, totalElements, totalPages
 	}
 	startIndex := (page - 1) * size
 	endIndex := startIndex + size
@@ -1781,7 +1776,6 @@ func (mp *FileMapper) mapOne(m model.File, userID string) (*File, error) {
 		Name:        m.GetName(),
 		Type:        m.GetType(),
 		ParentID:    m.GetParentID(),
-		SnapshotID:  m.GetSnapshotID(),
 		CreateTime:  m.GetCreateTime(),
 		UpdateTime:  m.GetUpdateTime(),
 	}
@@ -1790,13 +1784,7 @@ func (mp *FileMapper) mapOne(m model.File, userID string) (*File, error) {
 		if err != nil {
 			return nil, err
 		}
-		s := mp.snapshotMapper.mapOne(snapshot, true)
-		res.SnapshotID = &s.ID
-		res.Version = &s.Version
-		res.Original = s.Original
-		res.Preview = s.Preview
-		res.Thumbnail = s.Thumbnail
-		res.Status = s.Status
+		res.Snapshot = mp.snapshotMapper.mapOne(snapshot, true)
 	}
 	res.Permission = ""
 	for _, p := range m.GetUserPermissions() {

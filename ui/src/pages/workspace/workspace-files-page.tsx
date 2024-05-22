@@ -5,7 +5,7 @@ import { Helmet } from 'react-helmet-async'
 import FileAPI from '@/client/api/file'
 import WorkspaceAPI from '@/client/api/workspace'
 import { swrConfig } from '@/client/options'
-import AnalysisModal from '@/components/analysis/analysis-modal'
+import Analysis from '@/components/analysis'
 import Path from '@/components/common/path'
 import FileCopy from '@/components/file/file-copy'
 import FileCreate from '@/components/file/file-create'
@@ -194,7 +194,7 @@ const WorkspaceFilesPage = () => {
       {isCreateModalOpen ? <FileCreate /> : null}
       {isDeleteModalOpen ? <FileDelete /> : null}
       {isRenameModalOpen ? <FileRename /> : null}
-      {isAnalysisModalOpen ? <AnalysisModal /> : null}
+      {isAnalysisModalOpen ? <Analysis /> : null}
     </>
   )
 }

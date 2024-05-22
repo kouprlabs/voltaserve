@@ -15,7 +15,7 @@ import {
   useSteps,
 } from '@chakra-ui/react'
 import cx from 'classnames'
-import { useAppDispatch, useAppSelector } from '@/store/hook'
+import { useAppDispatch } from '@/store/hook'
 import { modalDidClose, wizardDidComplete } from '@/store/ui/analysis'
 import AnalysisWizardEntities from './analysis-wizard-entities'
 import AnalysisWizardLanguage from './analysis-wizard-language'
@@ -29,11 +29,6 @@ const steps = [
 
 const AnalysisWizard = () => {
   const dispatch = useAppDispatch()
-  const id = useAppSelector((state) =>
-    state.ui.files.selection.length > 0
-      ? state.ui.files.selection[0]
-      : undefined,
-  )
   const { activeStep, setActiveStep } = useSteps({
     index: 0,
     count: steps.length,
@@ -53,10 +48,6 @@ const AnalysisWizard = () => {
       setActiveStep(activeStep - 1)
     }
   }, [activeStep, setActiveStep, dispatch])
-
-  if (!id) {
-    return null
-  }
 
   return (
     <>
@@ -81,7 +72,7 @@ const AnalysisWizard = () => {
             ))}
           </Stepper>
           {activeStep === 0 ? <AnalysisWizardLanguage /> : null}
-          {activeStep === 1 ? <AnalysisWizardText id={id} /> : null}
+          {activeStep === 1 ? <AnalysisWizardText /> : null}
           {activeStep === 2 ? <AnalysisWizardEntities /> : null}
           {activeStep === steps.length ? (
             <div

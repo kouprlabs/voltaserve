@@ -161,7 +161,7 @@ func (svc *SnapshotService) doPagination(data []model.Snapshot, page, size uint)
 	totalElements := uint(len(data))
 	totalPages := (totalElements + size - 1) / size
 	if page > totalPages {
-		return nil, totalElements, totalPages
+		return []model.Snapshot{}, totalElements, totalPages
 	}
 	startIndex := (page - 1) * size
 	endIndex := startIndex + size
@@ -284,6 +284,7 @@ func (mp *SnapshotMapper) mapOne(m model.Snapshot, isActive bool) *Snapshot {
 		ID:         m.GetID(),
 		Version:    m.GetVersion(),
 		Status:     m.GetStatus(),
+		Language:   m.GetLanguage(),
 		IsActive:   isActive,
 		CreateTime: m.GetCreateTime(),
 		UpdateTime: m.GetUpdateTime(),

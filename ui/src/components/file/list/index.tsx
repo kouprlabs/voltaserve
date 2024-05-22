@@ -346,7 +346,7 @@ const FileList = ({ list, scale }: FileListProps) => {
                     dispatch(aiModalDidOpen())
                   }}
                 >
-                  Analyze
+                  Analysis
                 </MenuItem>
                 <MenuDivider />
               </>

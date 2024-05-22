@@ -6,6 +6,7 @@ const SortByName = "name"
 const SortByKind = "kind"
 const SortBySize = "size"
 const SortByVersion = "version"
+const SortByFrequency = "frequency"
 const SortByDateCreated = "date_created"
 const SortByDateModified = "date_modified"
 

@@ -2,12 +2,12 @@ import { File } from '@/client/api/file'
 import { getAccessTokenOrRedirect } from '@/infra/token'
 
 export default async function downloadFile(file: File) {
-  if (!file.original || file.type !== 'file') {
+  if (!file.snapshot?.original || file.type !== 'file') {
     return
   }
   const a: HTMLAnchorElement = document.createElement('a')
   a.href = `/proxy/api/v2/files/${file.id}/original${
-    file.original.extension
+    file.snapshot?.original.extension
   }?${new URLSearchParams({
     access_token: getAccessTokenOrRedirect(),
     download: 'true',

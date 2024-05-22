@@ -1,27 +1,25 @@
 import useSWR, { SWRConfiguration } from 'swr'
 import { apiFetcher } from '../fetcher'
 
-export enum SortBy {
-  Version = 'version',
-  DateCreated = 'date_created',
-  DateModified = 'date_modified',
-}
-
-export enum SortOrder {
-  Asc = 'asc',
-  Desc = 'desc',
-}
-
 export type Snapshot = {
   id: string
   version: number
+  status: Status
   original: Download
   preview?: Download
   text?: Download
   thumbnail?: Thumbnail
+  language?: string
   isActive: boolean
   createTime: string
   updateTime?: string
+}
+
+export enum Status {
+  New = 'new',
+  Processing = 'processing',
+  Ready = 'ready',
+  Error = 'error',
 }
 
 export type List = {
@@ -40,6 +38,17 @@ export type ListOptions = {
   page?: number
   sortBy?: SortBy
   sortOrder?: SortOrder
+}
+
+export enum SortBy {
+  Version = 'version',
+  DateCreated = 'date_created',
+  DateModified = 'date_modified',
+}
+
+export enum SortOrder {
+  Asc = 'asc',
+  Desc = 'desc',
 }
 
 export type Download = {

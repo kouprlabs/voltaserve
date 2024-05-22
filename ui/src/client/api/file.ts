@@ -6,7 +6,7 @@ import { encodeQuery } from '@/helpers/query'
 import { getAccessTokenOrRedirect } from '@/infra/token'
 import { Group } from './group'
 import { PermissionType } from './permission'
-import { Download, Thumbnail } from './snapshot'
+import { Download, Snapshot, Thumbnail } from './snapshot'
 
 export enum FileType {
   File = 'file',
@@ -26,26 +26,15 @@ export enum SortOrder {
   Desc = 'desc',
 }
 
-export enum SnapshotStatus {
-  New = 'new',
-  Processing = 'processing',
-  Ready = 'ready',
-  Error = 'error',
-}
-
 export type File = {
   id: string
   workspaceId: string
   name: string
   type: FileType
   parentId: string
-  version: number
-  original?: Download
-  preview?: Download
-  thumbnail?: Thumbnail
-  status: SnapshotStatus
   permission: PermissionType
   isShared: boolean
+  snapshot?: Snapshot
   createTime: string
   updateTime?: string
 }

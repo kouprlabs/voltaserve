@@ -1,11 +1,7 @@
 import AnalysisText from '../analysis-text'
 
-export type AnalysisOverviewTextProps = {
-  id: string
-}
-
-const AnalysisOverviewText = ({ id }: AnalysisOverviewTextProps) => {
-  return <AnalysisText id={id} />
+const AnalysisOverviewText = () => {
+  return <AnalysisText />
 }
 
 export default AnalysisOverviewText

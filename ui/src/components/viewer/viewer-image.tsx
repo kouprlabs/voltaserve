@@ -11,17 +11,17 @@ export type ViewerImageProps = {
 const ViewerImage = ({ file }: ViewerImageProps) => {
   const [isLoading, setIsLoading] = useState(true)
   const url = useMemo(() => {
-    if (!file.preview?.extension) {
+    if (!file.snapshot?.preview?.extension) {
       return ''
     }
     return `/proxy/api/v2/files/${file.id}/preview${
-      file.preview.extension
+      file.snapshot?.preview.extension
     }?${new URLSearchParams({
       access_token: getAccessTokenOrRedirect(),
     })}`
   }, [file])
 
-  if (!file.preview) {
+  if (!file.snapshot?.preview) {
     return null
   }
 

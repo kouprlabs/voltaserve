@@ -6,6 +6,8 @@ import (
 	"os"
 
 	"voltaserve/config"
+	"voltaserve/errorpkg"
+	"voltaserve/helper"
 	"voltaserve/router"
 	"voltaserve/runtime"
 
@@ -38,7 +40,11 @@ func main() {
 		PipelineWorkerCount: *pipelineWorkers,
 	})
 
-	app := fiber.New()
+	app := fiber.New(fiber.Config{
+		ErrorHandler: errorpkg.ErrorHandler,
+		BodyLimit:    int(helper.MegabyteToByte(cfg.Limits.MultipartBodyLengthLimitMB)),
+	})
+
 	v2 := app.Group("v2")
 
 	healthRouter := router.NewHealthRouter()
@@ -49,8 +55,8 @@ func main() {
 	})
 	pipelineRouter.AppendRoutes(v2)
 
-	toolsRouter := router.NewToolRouter()
-	toolsRouter.AppendRoutes(v2)
+	toolRouter := router.NewToolRouter()
+	toolRouter.AppendRoutes(v2)
 
 	scheduler.Start()
 

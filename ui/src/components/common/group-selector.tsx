@@ -64,6 +64,11 @@ const GroupSelector = ({
     }
   }, [selected, onConfirm, onClose])
 
+  const handleSearchInputChange = useCallback((value: string) => {
+    setPage(1)
+    setQuery(value)
+  }, [])
+
   return (
     <>
       <Button
@@ -92,8 +97,9 @@ const GroupSelector = ({
           <ModalBody>
             <div className={cx('flex', 'flex-col', 'gap-1.5')}>
               <SearchInput
+                placeholder="Search Groups"
                 query={query}
-                onChange={(value) => setQuery(value)}
+                onChange={handleSearchInputChange}
               />
               {!list && error && (
                 <div
@@ -125,7 +131,7 @@ const GroupSelector = ({
                       'gap-1.5',
                     )}
                   >
-                    <span>There are no organizations.</span>
+                    <span>There are no groups.</span>
                   </div>
                 </div>
               )}

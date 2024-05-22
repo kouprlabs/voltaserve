@@ -17,6 +17,7 @@ export type Summary = {
 export type Entity = {
   text: string
   label: string
+  frequency: number
 }
 
 export type EntityList = {
@@ -28,15 +29,16 @@ export type EntityList = {
 }
 
 export type ListEntitiesOptions = {
-  query: string
-  page: number
-  size: number
-  sortBy: SortBy
-  sortOrder: SortOrder
+  query?: string
+  size?: number
+  page?: number
+  sortBy?: SortBy
+  sortOrder?: SortOrder
 }
 
 export enum SortBy {
   Name = 'name',
+  Frequency = 'frequency',
 }
 
 export enum SortOrder {
@@ -53,13 +55,6 @@ type ListEntitiesQueryParams = {
 }
 
 export default class AnalysisAPI {
-  static async getSummary(id: string) {
-    return apiFetcher({
-      url: `/analysis/${id}/summary`,
-      method: 'GET',
-    }) as Promise<Summary>
-  }
-
   static useGetSummary(
     id: string | null | undefined,
     swrOptions?: SWRConfiguration,
@@ -72,13 +67,6 @@ export default class AnalysisAPI {
     )
   }
 
-  static async getLanguages() {
-    return apiFetcher({
-      url: `/analysis/languages`,
-      method: 'GET',
-    }) as Promise<Language[]>
-  }
-
   static useGetLanguages(swrOptions?: SWRConfiguration) {
     const url = `/analysis/languages`
     return useSWR<Language[]>(
@@ -88,13 +76,6 @@ export default class AnalysisAPI {
     )
   }
 
-  static async listEntities(id: string, options?: ListEntitiesOptions) {
-    return apiFetcher({
-      url: `/analysis/${id}/entities?${this.paramsFromListOptions(options)}`,
-      method: 'GET',
-    }) as Promise<EntityList>
-  }
-
   static useListEntities(
     id: string | null | undefined,
     options?: ListEntitiesOptions,
@@ -102,7 +83,7 @@ export default class AnalysisAPI {
   ) {
     const url = `/analysis/${id}/entities?${this.paramsFromListOptions(options)}`
     return useSWR<EntityList>(
-      url,
+      id ? url : null,
       () => apiFetcher({ url, method: 'GET' }) as Promise<EntityList>,
       swrOptions,
     )

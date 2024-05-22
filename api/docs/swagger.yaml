@@ -26,6 +26,8 @@ definitions:
     type: object
   model.AnalysisEntity:
     properties:
+      frequency:
+        type: integer
       label:
         type: string
       text:
@@ -264,26 +266,16 @@ definitions:
         type: boolean
       name:
         type: string
-      original:
-        $ref: '#/definitions/service.Download'
       parentId:
         type: string
       permission:
         type: string
-      preview:
-        $ref: '#/definitions/service.Download'
-      snapshotId:
-        type: string
-      status:
-        type: string
-      thumbnail:
-        $ref: '#/definitions/service.Thumbnail'
+      snapshot:
+        $ref: '#/definitions/service.Snapshot'
       type:
         type: string
       updateTime:
         type: string
-      version:
-        type: integer
       workspaceId:
         type: string
     type: object
@@ -646,6 +638,69 @@ info:
   title: Voltaserve API
   version: 2.0.0
 paths:
+  /analysis/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete
+      operationId: analysis_delete
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Delete
+      tags:
+      - Analysis
+    post:
+      consumes:
+      - application/json
+      description: Create
+      operationId: analysis_create
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Create
+      tags:
+      - Analysis
   /analysis/{id}/entities:
     get:
       description: List Entities
@@ -694,37 +749,6 @@ paths:
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
       summary: List Entities
-      tags:
-      - Analysis
-    post:
-      consumes:
-      - application/json
-      description: Create Entities
-      operationId: analysis_create_entities
-      parameters:
-      - description: ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Create Entities
       tags:
       - Analysis
   /analysis/{id}/language:
@@ -797,38 +821,6 @@ paths:
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
       summary: Get Summary
-      tags:
-      - Analysis
-  /analysis/{id}/text:
-    post:
-      consumes:
-      - application/json
-      description: Create Text
-      operationId: analysis_create_text
-      parameters:
-      - description: ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Create Text
       tags:
       - Analysis
   /analysis/languages:

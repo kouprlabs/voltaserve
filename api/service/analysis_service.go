@@ -27,10 +27,15 @@ type AnalysisService struct {
 	s3             *infra.S3Manager
 	toolClient     *client.ToolClient
 	languageClient *client.LanguageClient
+	fileIdent      *infra.FileIdentifier
 	logger         *zap.SugaredLogger
 }
 
 func NewAnalysisService() *AnalysisService {
+	logger, err := infra.GetLogger()
+	if err != nil {
+		panic(err)
+	}
 	return &AnalysisService{
 		languages: []*AnalysisLanguage{
 			{ID: "ara", ISO6393: "ara", Name: "Arabic"},
@@ -55,6 +60,8 @@ func NewAnalysisService() *AnalysisService {
 		s3:             infra.NewS3Manager(),
 		toolClient:     client.NewToolClient(),
 		languageClient: client.NewLanguageClient(),
+		fileIdent:      infra.NewFileIdentifier(),
+		logger:         logger,
 	}
 }
 
@@ -98,7 +105,7 @@ func (svc *AnalysisService) PatchLanguage(id string, opts AnalysisPatchLanguageO
 	return nil
 }
 
-func (svc *AnalysisService) CreateText(id string, userID string) error {
+func (svc *AnalysisService) Create(id string, userID string) error {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return err
@@ -117,16 +124,30 @@ func (svc *AnalysisService) CreateText(id string, userID string) error {
 	if err != nil {
 		return err
 	}
+	if err := svc.createText(snapshot); err != nil {
+		return err
+	}
+	if err := svc.createEntities(snapshot); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (svc *AnalysisService) createText(snapshot model.Snapshot) error {
+	if snapshot.HasText() {
+		return nil
+	}
 	if !snapshot.HasOriginal() {
-		return errorpkg.NewS3ObjectNotFoundError(err)
+		return errorpkg.NewS3ObjectNotFoundError(nil)
 	}
 	if snapshot.GetLanguage() == nil {
-		return errorpkg.NewSnapshotLanguageNotSet(err)
+		return errorpkg.NewSnapshotLanguageNotSet(nil)
 	}
 
-	/* Download original */
-	originalPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(snapshot.GetOriginal().Key))
-	if err := svc.s3.GetFile(snapshot.GetOriginal().Key, originalPath, snapshot.GetOriginal().Bucket); err != nil {
+	/* Download originalS3 */
+	originalS3 := snapshot.GetOriginal()
+	originalPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(originalS3.Key))
+	if err := svc.s3.GetFile(originalS3.Key, originalPath, originalS3.Bucket); err != nil {
 		return err
 	}
 	defer func(inputPath string, logger *zap.SugaredLogger) {
@@ -138,55 +159,59 @@ func (svc *AnalysisService) CreateText(id string, userID string) error {
 		}
 	}(originalPath, svc.logger)
 
-	/* Get DPI */
-	dpi, err := svc.toolClient.DPIFromImage(originalPath)
-	if err != nil {
-		dpi = 72
-	}
-
-	/* Convert to PDF/A */
-	pdfPath, err := svc.toolClient.OCRFromPDF(originalPath, snapshot.GetLanguage(), &dpi)
-	if err != nil {
-		svc.logger.Errorw(err.Error())
-	}
-	defer func(pdfPath string, logger *zap.SugaredLogger) {
-		_, err := os.Stat(pdfPath)
-		if os.IsExist(err) {
-			if err := os.Remove(pdfPath); err != nil {
-				logger.Error(err)
-			}
+	var pdfPath string
+	if svc.fileIdent.IsImage(originalS3.Key) {
+		/* Get DPI */
+		dpi, err := svc.toolClient.DPIFromImage(originalPath)
+		if err != nil {
+			dpi = 72
 		}
-	}(pdfPath, svc.logger)
 
-	/* Set OCR S3 object */
-	stat, err := os.Stat(pdfPath)
-	if err != nil {
-		return err
-	}
-	s3Object := model.S3Object{
-		Bucket: snapshot.GetOriginal().Bucket,
-		Key:    snapshot.GetID() + "/ocr.pdf",
-		Size:   stat.Size(),
-	}
-	if err := svc.s3.PutFile(s3Object.Key, pdfPath, helper.DetectMimeFromFile(pdfPath), s3Object.Bucket); err != nil {
-		return err
-	}
-	snapshot.SetOCR(&s3Object)
-	if err := svc.snapshotRepo.Save(snapshot); err != nil {
-		return err
+		/* Convert to PDF/A */
+		pdfPath, err = svc.toolClient.OCRFromPDF(originalPath, snapshot.GetLanguage(), &dpi)
+		if err != nil {
+			return err
+		}
+		defer func(pdfPath string, logger *zap.SugaredLogger) {
+			_, err := os.Stat(pdfPath)
+			if os.IsExist(err) {
+				if err := os.Remove(pdfPath); err != nil {
+					logger.Error(err)
+				}
+			}
+		}(pdfPath, svc.logger)
+
+		/* Set OCR S3 object */
+		stat, err := os.Stat(pdfPath)
+		if err != nil {
+			return err
+		}
+		s3Object := model.S3Object{
+			Bucket: snapshot.GetOriginal().Bucket,
+			Key:    snapshot.GetID() + "/ocr.pdf",
+			Size:   stat.Size(),
+		}
+		if err := svc.s3.PutFile(s3Object.Key, pdfPath, helper.DetectMimeFromFile(pdfPath), s3Object.Bucket); err != nil {
+			return err
+		}
+		snapshot.SetOCR(&s3Object)
+		if err := svc.snapshotRepo.Save(snapshot); err != nil {
+			return err
+		}
+	} else if svc.fileIdent.IsPDF(originalS3.Key) || svc.fileIdent.IsOffice(originalS3.Key) || svc.fileIdent.IsPlainText(originalS3.Key) {
+		pdfPath = originalPath
+	} else {
+		return errorpkg.NewUnsupportedFileTypeError(nil)
 	}
 
 	/* Extract text */
 	text, err := svc.toolClient.TextFromPDF(pdfPath)
-	if err != nil {
-		svc.logger.Errorw(err.Error())
-	}
 	if text == "" || err != nil {
 		return err
 	}
 
 	/* Set text S3 object */
-	s3Object = model.S3Object{
+	s3Object := model.S3Object{
 		Bucket: snapshot.GetOriginal().Bucket,
 		Key:    snapshot.GetID() + "/text.txt",
 		Size:   int64(len(text)),
@@ -202,33 +227,27 @@ func (svc *AnalysisService) CreateText(id string, userID string) error {
 	return nil
 }
 
-func (svc *AnalysisService) CreateEntities(id string, userID string) error {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return err
-	}
-	file, err := svc.fileCache.Get(id)
-	if err != nil {
-		return err
-	}
-	if err = svc.fileGuard.Authorize(user, file, model.PermissionEditor); err != nil {
-		return err
-	}
-	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
-		return errorpkg.NewFileIsNotAFileError(file)
-	}
-	snapshot, err := svc.snapshotRepo.Find(*file.GetSnapshotID())
-	if err != nil {
-		return err
+func (svc *AnalysisService) createEntities(snapshot model.Snapshot) error {
+	if snapshot.HasEntities() {
+		return nil
 	}
 	if !snapshot.HasText() {
-		return errorpkg.NewS3ObjectNotFoundError(err)
+		return errorpkg.NewS3ObjectNotFoundError(nil)
+	}
+	if snapshot.GetLanguage() == nil {
+		return errorpkg.NewSnapshotLanguageNotSet(nil)
 	}
 	text, err := svc.s3.GetText(snapshot.GetText().Key, snapshot.GetText().Bucket)
 	if err != nil {
 		return err
 	}
-	res, err := svc.languageClient.GetEntities(client.GetEntitiesOptions{Text: text})
+	if len(text) > 1000000 {
+		return errorpkg.NewSnapshotTextLengthExceedsLimit(err)
+	}
+	res, err := svc.languageClient.GetEntities(client.GetEntitiesOptions{
+		Text:     text,
+		Language: *snapshot.GetLanguage(),
+	})
 	if err != nil {
 		return err
 	}
@@ -252,38 +271,62 @@ func (svc *AnalysisService) CreateEntities(id string, userID string) error {
 	return nil
 }
 
-type AnalysisSummary struct {
-	HasLanguage bool `json:"hasLanguage"`
-	HasOCR      bool `json:"hasOcr"`
-	HasText     bool `json:"hasText"`
-	HasEntities bool `json:"hasEntities"`
-}
-
-func (svc *AnalysisService) GetSummary(id string, userID string) (*AnalysisSummary, error) {
+func (svc *AnalysisService) Delete(id string, userID string) error {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	if err = svc.fileGuard.Authorize(user, file, model.PermissionViewer); err != nil {
-		return nil, err
+	if err = svc.fileGuard.Authorize(user, file, model.PermissionEditor); err != nil {
+		return err
 	}
 	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
-		return nil, errorpkg.NewFileIsNotAFileError(file)
+		return errorpkg.NewFileIsNotAFileError(file)
 	}
 	snapshot, err := svc.snapshotRepo.Find(*file.GetSnapshotID())
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return &AnalysisSummary{
-		HasLanguage: snapshot.GetLanguage() != nil,
-		HasOCR:      snapshot.HasOCR(),
-		HasText:     snapshot.HasText(),
-		HasEntities: snapshot.HasEntities(),
-	}, nil
+	if err := svc.deleteEntities(snapshot); err != nil {
+		return err
+	}
+	if err := svc.deleteText(snapshot); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (svc *AnalysisService) deleteText(snapshot model.Snapshot) error {
+	if !snapshot.HasText() {
+		return nil
+	}
+	s3Object := snapshot.GetText()
+	if err := svc.s3.RemoveObject(s3Object.Key, s3Object.Bucket); err != nil {
+		return err
+	}
+	snapshot.SetText(nil)
+	if err := svc.snapshotRepo.Save(snapshot); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (svc *AnalysisService) deleteEntities(snapshot model.Snapshot) error {
+	if !snapshot.HasEntities() {
+		return nil
+	}
+	s3Object := snapshot.GetEntities()
+	if err := svc.s3.RemoveObject(s3Object.Key, s3Object.Bucket); err != nil {
+		return err
+	}
+	snapshot.SetEntities(nil)
+	if err := svc.snapshotRepo.Save(snapshot); err != nil {
+		return err
+	}
+	return nil
 }
 
 type AnalysisListEntitiesOptions struct {
@@ -355,7 +398,7 @@ func (svc *AnalysisService) doFiltering(data []*model.AnalysisEntity, query stri
 	if query == "" {
 		return data
 	}
-	var filtered []*model.AnalysisEntity
+	filtered := []*model.AnalysisEntity{}
 	for _, entity := range data {
 		if strings.Contains(strings.ToLower(entity.Text), strings.ToLower(query)) {
 			filtered = append(filtered, entity)
@@ -374,6 +417,10 @@ func (svc *AnalysisService) doSorting(data []*model.AnalysisEntity, sortBy strin
 			}
 		})
 		return data
+	} else if sortBy == SortByFrequency {
+		sort.Slice(data, func(i, j int) bool {
+			return data[i].Frequency > data[j].Frequency
+		})
 	}
 	return data
 }
@@ -382,7 +429,7 @@ func (svc *AnalysisService) doPagination(data []*model.AnalysisEntity, page, siz
 	totalElements := uint(len(data))
 	totalPages := (totalElements + size - 1) / size
 	if page > totalPages {
-		return nil, totalElements, totalPages
+		return []*model.AnalysisEntity{}, totalElements, totalPages
 	}
 	startIndex := (page - 1) * size
 	endIndex := startIndex + size
@@ -391,4 +438,38 @@ func (svc *AnalysisService) doPagination(data []*model.AnalysisEntity, page, siz
 	}
 	pageData := data[startIndex:endIndex]
 	return pageData, totalElements, totalPages
+}
+
+type AnalysisSummary struct {
+	HasLanguage bool `json:"hasLanguage"`
+	HasOCR      bool `json:"hasOcr"`
+	HasText     bool `json:"hasText"`
+	HasEntities bool `json:"hasEntities"`
+}
+
+func (svc *AnalysisService) GetSummary(id string, userID string) (*AnalysisSummary, error) {
+	user, err := svc.userRepo.Find(userID)
+	if err != nil {
+		return nil, err
+	}
+	file, err := svc.fileCache.Get(id)
+	if err != nil {
+		return nil, err
+	}
+	if err = svc.fileGuard.Authorize(user, file, model.PermissionViewer); err != nil {
+		return nil, err
+	}
+	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
+		return nil, errorpkg.NewFileIsNotAFileError(file)
+	}
+	snapshot, err := svc.snapshotRepo.Find(*file.GetSnapshotID())
+	if err != nil {
+		return nil, err
+	}
+	return &AnalysisSummary{
+		HasLanguage: snapshot.GetLanguage() != nil,
+		HasOCR:      snapshot.HasOCR(),
+		HasText:     snapshot.HasText(),
+		HasEntities: snapshot.HasEntities(),
+	}, nil
 }

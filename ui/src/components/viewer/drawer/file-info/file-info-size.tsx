@@ -8,14 +8,14 @@ export type FileInfoSizeProps = {
 }
 
 const FileInfoSize = ({ file }: FileInfoSizeProps) => {
-  if (!file.original) {
+  if (!file.snapshot?.original) {
     return null
   }
   return (
     <Stat>
       <StatLabel>File size</StatLabel>
       <StatNumber className={cx('text-base')}>
-        {prettyBytes(file.original.size)}
+        {prettyBytes(file.snapshot?.original.size)}
       </StatNumber>
     </Stat>
   )

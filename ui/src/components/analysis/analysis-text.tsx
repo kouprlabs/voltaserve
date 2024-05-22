@@ -3,15 +3,17 @@ import cx from 'classnames'
 import AnalysisAPI from '@/client/api/analysis'
 import { getAccessTokenOrRedirect } from '@/infra/token'
 import { IconOpenInNew } from '@/lib'
+import { useAppSelector } from '@/store/hook'
 
-export type AnalysisTextProps = {
-  id: string
-}
-
-const AnalysisText = ({ id }: AnalysisTextProps) => {
+const AnalysisText = () => {
+  const id = useAppSelector((state) =>
+    state.ui.files.selection.length > 0
+      ? state.ui.files.selection[0]
+      : undefined,
+  )
   const { data: summary } = AnalysisAPI.useGetSummary(id)
 
-  if (!summary) {
+  if (!id || !summary) {
     return null
   }
 

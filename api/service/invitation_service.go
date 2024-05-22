@@ -364,7 +364,7 @@ func (svc *InvitationService) doPagination(data []model.Invitation, page, size u
 	totalElements := uint(len(data))
 	totalPages := (totalElements + size - 1) / size
 	if page > totalPages {
-		return nil, totalElements, totalPages
+		return []model.Invitation{}, totalElements, totalPages
 	}
 	startIndex := (page - 1) * size
 	endIndex := startIndex + size

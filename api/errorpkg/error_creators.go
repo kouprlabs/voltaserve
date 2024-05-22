@@ -82,9 +82,29 @@ func NewS3ObjectNotFoundError(err error) *ErrorResponse {
 func NewSnapshotLanguageNotSet(err error) *ErrorResponse {
 	return NewErrorResponse(
 		"snapshot_language_not_set",
-		http.StatusNotFound,
+		http.StatusBadRequest,
 		"Snapshot language is not set.",
 		"Snapshot language is not set.",
+		err,
+	)
+}
+
+func NewSnapshotTextLengthExceedsLimit(err error) *ErrorResponse {
+	return NewErrorResponse(
+		"snapshot_text_length_exceeds_limit",
+		http.StatusBadRequest,
+		"Snapshot text length exceeds limit.",
+		"Snapshot text length exceeds limit.",
+		err,
+	)
+}
+
+func NewUnsupportedFileTypeError(err error) *ErrorResponse {
+	return NewErrorResponse(
+		"unsupported_file_type",
+		http.StatusBadRequest,
+		"File type is not supported.",
+		"File type is not supported.",
 		err,
 	)
 }

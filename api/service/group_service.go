@@ -430,7 +430,7 @@ func (svc *GroupService) doPagination(data []model.Group, page, size uint) ([]mo
 	totalElements := uint(len(data))
 	totalPages := (totalElements + size - 1) / size
 	if page > totalPages {
-		return nil, totalElements, totalPages
+		return []model.Group{}, totalElements, totalPages
 	}
 	startIndex := (page - 1) * size
 	endIndex := startIndex + size

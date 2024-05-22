@@ -7,14 +7,15 @@ export type FileInfoImageProps = {
 }
 
 const FileInfoImage = ({ file }: FileInfoImageProps) => {
-  if (!file.original?.image) {
+  if (!file.snapshot?.original?.image) {
     return null
   }
   return (
     <Stat>
       <StatLabel>Image dimensions</StatLabel>
       <StatNumber className={cx('text-base')}>
-        {file.original.image.width}x{file.original.image.height}
+        {file.snapshot?.original.image.width}x
+        {file.snapshot?.original.image.height}
       </StatNumber>
     </Stat>
   )
