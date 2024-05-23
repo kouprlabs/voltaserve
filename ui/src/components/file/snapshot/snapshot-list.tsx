@@ -22,13 +22,13 @@ import prettyDate from '@/helpers/pretty-date'
 import { Pagination, SectionSpinner } from '@/lib'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import {
-  deleteModalDidOpen,
+  detachModalDidOpen,
   listModalDidClose,
   mutateUpdated,
   selectionUpdated,
 } from '@/store/ui/snapshots'
 
-const FileSnapshotList = () => {
+const SnapshotList = () => {
   const dispatch = useAppDispatch()
   const isModalOpen = useAppSelector(
     (state) => state.ui.snapshots.isListModalOpen,
@@ -72,10 +72,10 @@ const FileSnapshotList = () => {
     }
   }, [selected, dispatch, snapshotMutate, mutateFileList])
 
-  const handleUnlink = useCallback(() => {
+  const handleDetach = useCallback(() => {
     if (selected) {
       dispatch(selectionUpdated([selected.id]))
-      dispatch(deleteModalDidOpen())
+      dispatch(detachModalDidOpen())
     }
   }, [selected, dispatch])
 
@@ -200,9 +200,9 @@ const FileSnapshotList = () => {
               variant="outline"
               colorScheme="red"
               isDisabled={!selected || selected.isActive || isActivating}
-              onClick={handleUnlink}
+              onClick={handleDetach}
             >
-              Unlink
+              Detach
             </Button>
             <Button
               variant="solid"
@@ -220,4 +220,4 @@ const FileSnapshotList = () => {
   )
 }
 
-export default FileSnapshotList
+export default SnapshotList

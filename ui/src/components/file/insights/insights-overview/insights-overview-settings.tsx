@@ -5,27 +5,26 @@ import { IconDelete, IconSync } from '@/lib'
 const InsightsOverviewSettings = () => {
   return (
     <div className={cx('flex', 'flex-row', 'items-stretch', 'gap-1.5')}>
-      <Card size="md" variant="outline">
+      <Card size="md" variant="outline" className={cx('w-[50%]')}>
         <CardBody>
           <Text>
-            Recollect insights data using the active snapshot, the defined
-            language is kept unchanged.
+            Creates new insights for the active snapshot, uses the existing
+            language.
           </Text>
         </CardBody>
         <CardFooter>
-          <Button leftIcon={<IconSync />}>Recollect Insights</Button>
+          <Button leftIcon={<IconSync />}>Update</Button>
         </CardFooter>
       </Card>
-      <Card size="md" variant="outline">
+      <Card size="md" variant="outline" className={cx('w-[50%]')}>
         <CardBody>
           <Text>
-            Delete insights data from all snapshots, the defined language is
-            reset to an empty value.
+            Deletes insights from the active snapshot, can be recreated later.
           </Text>
         </CardBody>
         <CardFooter>
           <Button colorScheme="red" leftIcon={<IconDelete />}>
-            Delete Insights
+            Delete
           </Button>
         </CardFooter>
       </Card>

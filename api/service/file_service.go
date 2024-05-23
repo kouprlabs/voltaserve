@@ -211,7 +211,7 @@ func (svc *FileService) Store(id string, path string, userID string) (*File, err
 	snapshotID := helper.NewID()
 	snapshot := repo.NewSnapshot()
 	snapshot.SetID(snapshotID)
-	snapshot.SetVersion(latestVersion)
+	snapshot.SetVersion(latestVersion + 1)
 	if err = svc.snapshotRepo.Insert(snapshot); err != nil {
 		return nil, err
 	}
@@ -326,72 +326,6 @@ func (svc *FileService) DownloadPreviewBuffer(id string, userID string) (*bytes.
 	}
 	if snapshot.HasPreview() {
 		buf, err := svc.s3.GetObject(snapshot.GetPreview().Key, snapshot.GetPreview().Bucket)
-		if err != nil {
-			return nil, nil, nil, err
-		}
-		return buf, file, snapshot, nil
-	} else {
-		return nil, nil, nil, errorpkg.NewS3ObjectNotFoundError(nil)
-	}
-}
-
-func (svc *FileService) DownloadTextBuffer(id string, userID string) (*bytes.Buffer, model.File, model.Snapshot, error) {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return nil, nil, nil, err
-	}
-	file, err := svc.fileCache.Get(id)
-	if err != nil {
-		return nil, nil, nil, err
-	}
-	if err = svc.fileGuard.Authorize(user, file, model.PermissionViewer); err != nil {
-		return nil, nil, nil, err
-	}
-	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
-		return nil, nil, nil, errorpkg.NewFileIsNotAFileError(file)
-	}
-	snapshot, err := svc.snapshotRepo.Find(*file.GetSnapshotID())
-	if err != nil {
-		return nil, nil, nil, err
-	}
-	if snapshot == nil {
-		return nil, nil, nil, errorpkg.NewSnapshotNotFoundError(nil)
-	}
-	if snapshot.HasText() {
-		buf, err := svc.s3.GetObject(snapshot.GetText().Key, snapshot.GetText().Bucket)
-		if err != nil {
-			return nil, nil, nil, err
-		}
-		return buf, file, snapshot, nil
-	} else {
-		return nil, nil, nil, errorpkg.NewS3ObjectNotFoundError(nil)
-	}
-}
-
-func (svc *FileService) DownloadOCRBuffer(id string, userID string) (*bytes.Buffer, model.File, model.Snapshot, error) {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return nil, nil, nil, err
-	}
-	file, err := svc.fileCache.Get(id)
-	if err != nil {
-		return nil, nil, nil, err
-	}
-	if err = svc.fileGuard.Authorize(user, file, model.PermissionViewer); err != nil {
-		return nil, nil, nil, err
-	}
-	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
-		return nil, nil, nil, errorpkg.NewFileIsNotAFileError(file)
-	}
-	snapshot, err := svc.snapshotRepo.Find(*file.GetSnapshotID())
-	if err != nil {
-		return nil, nil, nil, err
-	}
-	if snapshot == nil {
-		return nil, nil, nil, errorpkg.NewSnapshotNotFoundError(nil)
-	}
-	if snapshot.HasOCR() {
-		buf, err := svc.s3.GetObject(snapshot.GetOCR().Key, snapshot.GetOCR().Bucket)
 		if err != nil {
 			return nil, nil, nil, err
 		}
@@ -855,9 +789,9 @@ func (svc *FileService) Copy(targetID string, sourceIDs []string, userID string)
 			return nil, err
 		}
 
-		/* Assign snapshots to clones */
+		/* Attach latest snapshot to clones */
 		for _, c := range clones {
-			if err := svc.fileRepo.AssignSnapshots(c.GetID(), originalIDs[c.GetID()]); err != nil {
+			if err := svc.snapshotRepo.Attach(originalIDs[c.GetID()], c.GetID()); err != nil {
 				return nil, err
 			}
 		}

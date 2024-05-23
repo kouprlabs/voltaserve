@@ -5,14 +5,14 @@ import { List } from '@/client/api/snapshot'
 export type SnapshotsState = {
   selection: string[]
   isListModalOpen: boolean
-  isDeleteModalOpen: boolean
+  isDetachModalOpen: boolean
   snapshotMutate?: KeyedMutator<List | undefined>
 }
 
 const initialState: SnapshotsState = {
   selection: [],
   isListModalOpen: false,
-  isDeleteModalOpen: false,
+  isDetachModalOpen: false,
 }
 
 const slice = createSlice({
@@ -31,14 +31,14 @@ const slice = createSlice({
     listModalDidOpen: (state) => {
       state.isListModalOpen = true
     },
-    deleteModalDidOpen: (state) => {
-      state.isDeleteModalOpen = true
+    detachModalDidOpen: (state) => {
+      state.isDetachModalOpen = true
     },
     listModalDidClose: (state) => {
       state.isListModalOpen = false
     },
-    deleteModalDidClose: (state) => {
-      state.isDeleteModalOpen = false
+    detachModalDidClose: (state) => {
+      state.isDetachModalOpen = false
     },
   },
 })
@@ -47,9 +47,9 @@ export const {
   selectionUpdated,
   mutateUpdated,
   listModalDidOpen,
-  deleteModalDidOpen,
+  detachModalDidOpen,
   listModalDidClose,
-  deleteModalDidClose,
+  detachModalDidClose,
 } = slice.actions
 
 export default slice.reducer

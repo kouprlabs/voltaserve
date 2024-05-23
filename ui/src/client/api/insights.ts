@@ -12,6 +12,7 @@ export type Language = {
 }
 
 export type Summary = {
+  isOutdated: boolean
   hasLanguage: boolean
   hasOcr: boolean
   hasText: boolean

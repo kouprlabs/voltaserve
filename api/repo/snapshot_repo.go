@@ -24,18 +24,20 @@ type SnapshotUpdateOptions struct {
 
 type SnapshotRepo interface {
 	Find(id string) (model.Snapshot, error)
+	FindByVersion(version int64) (model.Snapshot, error)
+	FindAllForFile(fileID string) ([]model.Snapshot, error)
+	FindAllDangling() ([]model.Snapshot, error)
 	Insert(snapshot model.Snapshot) error
 	Save(snapshot model.Snapshot) error
 	Delete(id string) error
 	Update(id string, opts SnapshotUpdateOptions) error
 	MapWithFile(id string, fileID string) error
 	DeleteMappingsForFile(fileID string) error
-	FindAllForFile(fileID string) ([]model.Snapshot, error)
-	FindAllDangling() ([]model.Snapshot, error)
 	DeleteAllDangling() error
 	GetLatestVersionForFile(fileID string) (int64, error)
 	CountAssociations(id string) (int, error)
-	Unlink(id string, fileID string) error
+	Attach(sourceFileID string, targetFileID string) error
+	Detach(id string, fileID string) error
 }
 
 func NewSnapshotRepo() SnapshotRepo {
@@ -332,6 +334,19 @@ func (repo *snapshotRepo) Find(id string) (model.Snapshot, error) {
 	return res, nil
 }
 
+func (repo *snapshotRepo) FindByVersion(version int64) (model.Snapshot, error) {
+	var res = snapshotEntity{}
+	db := repo.db.Where("version = ?", version).First(&res)
+	if db.Error != nil {
+		if errors.Is(db.Error, gorm.ErrRecordNotFound) {
+			return nil, errorpkg.NewSnapshotNotFoundError(db.Error)
+		} else {
+			return nil, errorpkg.NewInternalServerError(db.Error)
+		}
+	}
+	return &res, nil
+}
+
 func (repo *snapshotRepo) Insert(snapshot model.Snapshot) error {
 	if db := repo.db.Create(snapshot); db.Error != nil {
 		return db.Error
@@ -449,7 +464,7 @@ func (repo *snapshotRepo) GetLatestVersionForFile(fileID string) (int64, error) 
 	}
 	var res Result
 	if db := repo.db.
-		Raw("SELECT coalesce(max(s.version), 0) + 1 result FROM snapshot s LEFT JOIN snapshot_file map ON s.id = map.snapshot_id WHERE map.file_id = ?", fileID).
+		Raw("SELECT coalesce(max(s.version), 0) result FROM snapshot s LEFT JOIN snapshot_file map ON s.id = map.snapshot_id WHERE map.file_id = ?", fileID).
 		Scan(&res); db.Error != nil {
 		return 0, db.Error
 	}
@@ -467,7 +482,16 @@ func (repo *snapshotRepo) CountAssociations(id string) (int, error) {
 	return res.Count, nil
 }
 
-func (repo *snapshotRepo) Unlink(id string, fileID string) error {
+func (repo *snapshotRepo) Attach(sourceFileID string, targetFileID string) error {
+	if db := repo.db.Exec("INSERT INTO snapshot_file (snapshot_id, file_id) SELECT s.id, ? "+
+		"FROM snapshot s LEFT JOIN snapshot_file map ON s.id = map.snapshot_id "+
+		"WHERE map.file_id = ? ORDER BY s.version DESC LIMIT 1", targetFileID, sourceFileID); db.Error != nil {
+		return db.Error
+	}
+	return nil
+}
+
+func (repo *snapshotRepo) Detach(id string, fileID string) error {
 	if db := repo.db.Exec("DELETE FROM snapshot_file WHERE snapshot_id = ? AND file_id = ?", id, fileID); db.Error != nil {
 		return db.Error
 	}

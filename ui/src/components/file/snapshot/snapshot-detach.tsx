@@ -13,9 +13,9 @@ import {
 import cx from 'classnames'
 import SnapshotAPI from '@/client/api/snapshot'
 import { useAppSelector } from '@/store/hook'
-import { deleteModalDidClose, selectionUpdated } from '@/store/ui/snapshots'
+import { detachModalDidClose, selectionUpdated } from '@/store/ui/snapshots'
 
-const FileSnapshotUnlink = () => {
+const SnapshotDetach = () => {
   const dispatch = useDispatch()
   const id = useAppSelector((state) =>
     state.ui.snapshots.selection.length > 0
@@ -29,18 +29,18 @@ const FileSnapshotUnlink = () => {
   )
   const mutate = useAppSelector((state) => state.ui.snapshots.snapshotMutate)
   const isModalOpen = useAppSelector(
-    (state) => state.ui.snapshots.isDeleteModalOpen,
+    (state) => state.ui.snapshots.isDetachModalOpen,
   )
   const [isLoading, setIsLoading] = useState(false)
 
-  const handleUnlink = useCallback(async () => {
+  const handleDetach = useCallback(async () => {
     async function unlink(id: string, fileId: string) {
       setIsLoading(true)
       try {
-        await SnapshotAPI.unlink(id, { fileId })
+        await SnapshotAPI.detach(id, { fileId })
         await mutate?.()
         dispatch(selectionUpdated([]))
-        dispatch(deleteModalDidClose())
+        dispatch(detachModalDidClose())
       } catch (error) {
         setIsLoading(false)
       } finally {
@@ -55,15 +55,15 @@ const FileSnapshotUnlink = () => {
   return (
     <Modal
       isOpen={isModalOpen}
-      onClose={() => dispatch(deleteModalDidClose())}
+      onClose={() => dispatch(detachModalDidClose())}
       closeOnOverlayClick={false}
     >
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>Unlink Snapshot</ModalHeader>
+        <ModalHeader>Detach Snapshot</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-          <span>Are you sure you would like to unkink this snapshot?</span>
+          <span>Are you sure you want to detach this snapshot?</span>
         </ModalBody>
         <ModalFooter>
           <div className={cx('flex', 'flex-row', 'items-center', 'gap-1')}>
@@ -72,7 +72,7 @@ const FileSnapshotUnlink = () => {
               variant="outline"
               colorScheme="blue"
               disabled={isLoading}
-              onClick={() => dispatch(deleteModalDidClose())}
+              onClick={() => dispatch(detachModalDidClose())}
             >
               Cancel
             </Button>
@@ -81,9 +81,9 @@ const FileSnapshotUnlink = () => {
               variant="solid"
               colorScheme="red"
               isLoading={isLoading}
-              onClick={handleUnlink}
+              onClick={handleDetach}
             >
-              Unlink
+              Detach
             </Button>
           </div>
         </ModalFooter>
@@ -92,4 +92,4 @@ const FileSnapshotUnlink = () => {
   )
 }
 
-export default FileSnapshotUnlink
+export default SnapshotDetach

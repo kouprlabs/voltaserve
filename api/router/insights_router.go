@@ -1,14 +1,20 @@
 package router
 
 import (
+	"errors"
+	"fmt"
 	"net/http"
 	"net/url"
+	"path/filepath"
 	"strconv"
+	"voltaserve/config"
 	"voltaserve/errorpkg"
+	"voltaserve/infra"
 	"voltaserve/service"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 type InsightsRouter struct {
@@ -26,9 +32,15 @@ func NewInsightsRouter() *InsightsRouter {
 func (r *InsightsRouter) AppendRoutes(g fiber.Router) {
 	g.Get("/languages", r.GetLanguages)
 	g.Post("/:id", r.Create)
+	g.Patch("/:id", r.Patch)
 	g.Get("/:id/summary", r.GetSummary)
 	g.Get("/:id/entities", r.ListEntities)
 	g.Delete("/:id", r.Delete)
+}
+
+func (r *InsightsRouter) AppendNonJWTRoutes(g fiber.Router) {
+	g.Get("/:id/text:ext", r.DownloadText)
+	g.Get("/:id/ocr:ext", r.DownloadOCR)
 }
 
 // GetLanguages godoc
@@ -73,6 +85,35 @@ func (r *InsightsRouter) Create(c *fiber.Ctx) error {
 		return errorpkg.NewRequestBodyValidationError(err)
 	}
 	if err := r.insightsSvc.Create(c.Params("id"), *opts, GetUserID(c)); err != nil {
+		return err
+	}
+	return c.SendStatus(http.StatusNoContent)
+}
+
+// Patch godoc
+//
+//	@Summary		Patch
+//	@Description	Patch
+//	@Tags			Insights
+//	@Id				insights_patch
+//	@Accept			json
+//	@Produce		json
+//	@Param			id		path	string							true	"ID"
+//	@Param			body	body	service.InsightsPatchOptions	true	"Body"
+//	@Success		200
+//	@Failure		404	{object}	errorpkg.ErrorResponse
+//	@Failure		400	{object}	errorpkg.ErrorResponse
+//	@Failure		500	{object}	errorpkg.ErrorResponse
+//	@Router			/insights/{id} [patch]
+func (r *InsightsRouter) Patch(c *fiber.Ctx) error {
+	opts := new(service.InsightsPatchOptions)
+	if err := c.BodyParser(opts); err != nil {
+		return err
+	}
+	if err := validator.New().Struct(opts); err != nil {
+		return errorpkg.NewRequestBodyValidationError(err)
+	}
+	if err := r.insightsSvc.Patch(c.Params("id"), *opts, GetUserID(c)); err != nil {
 		return err
 	}
 	return c.SendStatus(http.StatusNoContent)
@@ -181,4 +222,113 @@ func (r *InsightsRouter) GetSummary(c *fiber.Ctx) error {
 		return err
 	}
 	return c.JSON(res)
+}
+
+// DownloadText godoc
+//
+//	@Summary		Download Text
+//	@Description	Download Text
+//	@Tags			Insights
+//	@Id				insights_download_text
+//	@Produce		json
+//	@Param			id				path		string	true	"ID"
+//	@Param			access_token	query		string	true	"Access Token"
+//	@Param			ext				query		string	true	"Extension"
+//	@Failure		404				{object}	errorpkg.ErrorResponse
+//	@Failure		500				{object}	errorpkg.ErrorResponse
+//	@Router			/insights/{id}/text{ext} [get]
+func (r *InsightsRouter) DownloadText(c *fiber.Ctx) error {
+	accessToken := c.Cookies(r.accessTokenCookieName)
+	if accessToken == "" {
+		accessToken = c.Query("access_token")
+		if accessToken == "" {
+			return errorpkg.NewFileNotFoundError(nil)
+		}
+	}
+	userID, err := r.getUserIDFromAccessToken(accessToken)
+	if err != nil {
+		return c.SendStatus(http.StatusNotFound)
+	}
+	id := c.Params("id")
+	if id == "" {
+		return errorpkg.NewMissingQueryParamError("id")
+	}
+	ext := c.Params("ext")
+	if ext == "" {
+		return errorpkg.NewMissingQueryParamError("ext")
+	}
+	buf, file, snapshot, err := r.insightsSvc.DownloadTextBuffer(id, userID)
+	if err != nil {
+		return err
+	}
+	if filepath.Ext(snapshot.GetText().Key) != ext {
+		return errorpkg.NewS3ObjectNotFoundError(nil)
+	}
+	bytes := buf.Bytes()
+	c.Set("Content-Type", infra.DetectMimeFromBytes(bytes))
+	c.Set("Content-Disposition", fmt.Sprintf("filename=\"%s\"", filepath.Base(file.GetName())+ext))
+	return c.Send(bytes)
+}
+
+// DownloadOCR godoc
+//
+//	@Summary		Download OCR
+//	@Description	Download OCR
+//	@Tags			Insights
+//	@Id				insights_download_ocr
+//	@Produce		json
+//	@Param			id				path		string	true	"ID"
+//	@Param			access_token	query		string	true	"Access Token"
+//	@Param			ext				query		string	true	"Extension"
+//	@Failure		404				{object}	errorpkg.ErrorResponse
+//	@Failure		500				{object}	errorpkg.ErrorResponse
+//	@Router			/insights/{id}/ocr{ext} [get]
+func (r *InsightsRouter) DownloadOCR(c *fiber.Ctx) error {
+	accessToken := c.Cookies(r.accessTokenCookieName)
+	if accessToken == "" {
+		accessToken = c.Query("access_token")
+		if accessToken == "" {
+			return errorpkg.NewFileNotFoundError(nil)
+		}
+	}
+	userID, err := r.getUserIDFromAccessToken(accessToken)
+	if err != nil {
+		return c.SendStatus(http.StatusNotFound)
+	}
+	id := c.Params("id")
+	if id == "" {
+		return errorpkg.NewMissingQueryParamError("id")
+	}
+	ext := c.Params("ext")
+	if ext == "" {
+		return errorpkg.NewMissingQueryParamError("ext")
+	}
+	buf, file, snapshot, err := r.insightsSvc.DownloadOCRBuffer(id, userID)
+	if err != nil {
+		return err
+	}
+	if filepath.Ext(snapshot.GetOCR().Key) != ext {
+		return errorpkg.NewS3ObjectNotFoundError(nil)
+	}
+	bytes := buf.Bytes()
+	c.Set("Content-Type", infra.DetectMimeFromBytes(bytes))
+	c.Set("Content-Disposition", fmt.Sprintf("filename=\"%s\"", filepath.Base(file.GetName())+ext))
+	return c.Send(bytes)
+}
+
+func (r *InsightsRouter) getUserIDFromAccessToken(accessToken string) (string, error) {
+	token, err := jwt.Parse(accessToken, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		return []byte(config.GetConfig().Security.JWTSigningKey), nil
+	})
+	if err != nil {
+		return "", err
+	}
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		return claims["sub"].(string), nil
+	} else {
+		return "", errors.New("cannot find sub claim")
+	}
 }

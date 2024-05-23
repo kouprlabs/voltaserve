@@ -81,7 +81,7 @@ export type ActivateOptions = {
   fileId: string
 }
 
-export type UnlinkOptions = {
+export type DetachOptions = {
   fileId: string
 }
 
@@ -110,9 +110,9 @@ export default class SnapshotAPI {
     }) as Promise<File>
   }
 
-  static async unlink(id: string, options: UnlinkOptions) {
+  static async detach(id: string, options: DetachOptions) {
     return apiFetcher({
-      url: `/snapshots/${id}/unlink`,
+      url: `/snapshots/${id}/detach`,
       method: 'POST',
       body: JSON.stringify(options),
     })

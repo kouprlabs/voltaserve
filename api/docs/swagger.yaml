@@ -366,6 +366,13 @@ definitions:
       name:
         type: string
     type: object
+  service.InsightsPatchOptions:
+    properties:
+      languageId:
+        type: string
+    required:
+    - languageId
+    type: object
   service.InsightsSummary:
     properties:
       hasEntities:
@@ -375,6 +382,8 @@ definitions:
       hasOcr:
         type: boolean
       hasText:
+        type: boolean
+      isOutdated:
         type: boolean
     type: object
   service.Invitation:
@@ -484,6 +493,13 @@ definitions:
     required:
     - fileId
     type: object
+  service.SnapshotDetachOptions:
+    properties:
+      fileID:
+        type: string
+    required:
+    - fileID
+    type: object
   service.SnapshotList:
     properties:
       data:
@@ -498,13 +514,6 @@ definitions:
         type: integer
       totalPages:
         type: integer
-    type: object
-  service.SnapshotUnlinkOptions:
-    properties:
-      fileID:
-        type: string
-    required:
-    - fileID
     type: object
   service.SnapshotUpdateOptions:
     properties:
@@ -1008,40 +1017,6 @@ paths:
       summary: Patch Name
       tags:
       - Files
-  /files/{id}/ocr{ext}:
-    get:
-      description: Download OCR
-      operationId: files_download_ocr
-      parameters:
-      - description: ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: Access Token
-        in: query
-        name: access_token
-        required: true
-        type: string
-      - description: Extension
-        in: query
-        name: ext
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Download OCR
-      tags:
-      - Files
   /files/{id}/original{ext}:
     get:
       description: Download Original
@@ -1196,40 +1171,6 @@ paths:
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
       summary: Get Size
-      tags:
-      - Files
-  /files/{id}/text{ext}:
-    get:
-      description: Download Text
-      operationId: files_download_text
-      parameters:
-      - description: ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: Access Token
-        in: query
-        name: access_token
-        required: true
-        type: string
-      - description: Extension
-        in: query
-        name: ext
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Download Text
       tags:
       - Files
   /files/{id}/user_permissions:
@@ -1669,6 +1610,43 @@ paths:
       summary: Delete
       tags:
       - Insights
+    patch:
+      consumes:
+      - application/json
+      description: Patch
+      operationId: insights_patch
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/service.InsightsPatchOptions'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Patch
+      tags:
+      - Insights
     post:
       consumes:
       - application/json
@@ -1756,6 +1734,40 @@ paths:
       summary: List Entities
       tags:
       - Insights
+  /insights/{id}/ocr{ext}:
+    get:
+      description: Download OCR
+      operationId: insights_download_ocr
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Access Token
+        in: query
+        name: access_token
+        required: true
+        type: string
+      - description: Extension
+        in: query
+        name: ext
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Download OCR
+      tags:
+      - Insights
   /insights/{id}/summary:
     get:
       consumes:
@@ -1788,6 +1800,40 @@ paths:
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
       summary: Get Summary
+      tags:
+      - Insights
+  /insights/{id}/text{ext}:
+    get:
+      description: Download Text
+      operationId: insights_download_text
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Access Token
+        in: query
+        name: access_token
+        required: true
+        type: string
+      - description: Extension
+        in: query
+        name: ext
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Download Text
       tags:
       - Insights
   /insights/languages:
@@ -2404,10 +2450,10 @@ paths:
       summary: Activate
       tags:
       - Snapshots
-  /snapshots/{id}/unlink:
+  /snapshots/{id}/detach:
     post:
-      description: Unlink
-      operationId: snapshots_unlink
+      description: Detach
+      operationId: snapshots_detach
       parameters:
       - description: ID
         in: path
@@ -2419,7 +2465,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/service.SnapshotUnlinkOptions'
+          $ref: '#/definitions/service.SnapshotDetachOptions'
       produces:
       - application/json
       responses:
@@ -2433,7 +2479,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Unlink
+      summary: Detach
       tags:
       - Snapshots
   /storage/account_usage:

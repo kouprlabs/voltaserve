@@ -1,6 +1,7 @@
 package service
 
 import (
+	"bytes"
 	"encoding/json"
 	"os"
 	"path/filepath"
@@ -102,6 +103,10 @@ func (svc *InsightsService) Create(id string, opts InsightsCreateOptions, userID
 	if err := svc.snapshotRepo.Save(snapshot); err != nil {
 		return err
 	}
+	return svc.create(snapshot)
+}
+
+func (svc *InsightsService) create(snapshot model.Snapshot) error {
 	if err := svc.createText(snapshot); err != nil {
 		return err
 	}
@@ -109,6 +114,36 @@ func (svc *InsightsService) Create(id string, opts InsightsCreateOptions, userID
 		return err
 	}
 	return nil
+}
+
+type InsightsPatchOptions struct {
+	LanguageID string `json:"languageId" validate:"required"`
+}
+
+func (svc *InsightsService) Patch(id string, opts InsightsPatchOptions, userID string) error {
+	user, err := svc.userRepo.Find(userID)
+	if err != nil {
+		return err
+	}
+	file, err := svc.fileCache.Get(id)
+	if err != nil {
+		return err
+	}
+	if err = svc.fileGuard.Authorize(user, file, model.PermissionEditor); err != nil {
+		return err
+	}
+	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
+		return errorpkg.NewFileIsNotAFileError(file)
+	}
+	snapshot, err := svc.snapshotRepo.Find(*file.GetSnapshotID())
+	if err != nil {
+		return err
+	}
+	snapshot.SetLanguage(opts.LanguageID)
+	if err := svc.snapshotRepo.Save(snapshot); err != nil {
+		return err
+	}
+	return svc.create(snapshot)
 }
 
 func (svc *InsightsService) createText(snapshot model.Snapshot) error {
@@ -119,7 +154,7 @@ func (svc *InsightsService) createText(snapshot model.Snapshot) error {
 		return errorpkg.NewS3ObjectNotFoundError(nil)
 	}
 	if snapshot.GetLanguage() == nil {
-		return errorpkg.NewSnapshotLanguageNotSet(nil)
+		return errorpkg.NewSnapshotLanguageNotSetError(nil)
 	}
 
 	/* Download originalS3 */
@@ -213,14 +248,14 @@ func (svc *InsightsService) createEntities(snapshot model.Snapshot) error {
 		return errorpkg.NewS3ObjectNotFoundError(nil)
 	}
 	if snapshot.GetLanguage() == nil {
-		return errorpkg.NewSnapshotLanguageNotSet(nil)
+		return errorpkg.NewSnapshotLanguageNotSetError(nil)
 	}
 	text, err := svc.s3.GetText(snapshot.GetText().Key, snapshot.GetText().Bucket)
 	if err != nil {
 		return err
 	}
 	if len(text) > 1000000 {
-		return errorpkg.NewSnapshotTextLengthExceedsLimit(err)
+		return errorpkg.NewSnapshotTextLengthExceedsLimitError(err)
 	}
 	res, err := svc.languageClient.GetEntities(client.GetEntitiesOptions{
 		Text:     text,
@@ -419,6 +454,7 @@ func (svc *InsightsService) doPagination(data []*model.InsightsEntity, page, siz
 }
 
 type InsightsSummary struct {
+	IsOutdated  bool `json:"isOutdated"`
 	HasLanguage bool `json:"hasLanguage"`
 	HasOCR      bool `json:"hasOcr"`
 	HasText     bool `json:"hasText"`
@@ -449,5 +485,72 @@ func (svc *InsightsService) GetSummary(id string, userID string) (*InsightsSumma
 		HasOCR:      snapshot.HasOCR(),
 		HasText:     snapshot.HasText(),
 		HasEntities: snapshot.HasEntities(),
+		IsOutdated:  false,
 	}, nil
+}
+
+func (svc *InsightsService) DownloadTextBuffer(id string, userID string) (*bytes.Buffer, model.File, model.Snapshot, error) {
+	user, err := svc.userRepo.Find(userID)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	file, err := svc.fileCache.Get(id)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	if err = svc.fileGuard.Authorize(user, file, model.PermissionViewer); err != nil {
+		return nil, nil, nil, err
+	}
+	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
+		return nil, nil, nil, errorpkg.NewFileIsNotAFileError(file)
+	}
+	snapshot, err := svc.snapshotRepo.Find(*file.GetSnapshotID())
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	if snapshot == nil {
+		return nil, nil, nil, errorpkg.NewSnapshotNotFoundError(nil)
+	}
+	if snapshot.HasText() {
+		buf, err := svc.s3.GetObject(snapshot.GetText().Key, snapshot.GetText().Bucket)
+		if err != nil {
+			return nil, nil, nil, err
+		}
+		return buf, file, snapshot, nil
+	} else {
+		return nil, nil, nil, errorpkg.NewS3ObjectNotFoundError(nil)
+	}
+}
+
+func (svc *InsightsService) DownloadOCRBuffer(id string, userID string) (*bytes.Buffer, model.File, model.Snapshot, error) {
+	user, err := svc.userRepo.Find(userID)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	file, err := svc.fileCache.Get(id)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	if err = svc.fileGuard.Authorize(user, file, model.PermissionViewer); err != nil {
+		return nil, nil, nil, err
+	}
+	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
+		return nil, nil, nil, errorpkg.NewFileIsNotAFileError(file)
+	}
+	snapshot, err := svc.snapshotRepo.Find(*file.GetSnapshotID())
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	if snapshot == nil {
+		return nil, nil, nil, errorpkg.NewSnapshotNotFoundError(nil)
+	}
+	if snapshot.HasOCR() {
+		buf, err := svc.s3.GetObject(snapshot.GetOCR().Key, snapshot.GetOCR().Bucket)
+		if err != nil {
+			return nil, nil, nil, err
+		}
+		return buf, file, snapshot, nil
+	} else {
+		return nil, nil, nil, errorpkg.NewS3ObjectNotFoundError(nil)
+	}
 }

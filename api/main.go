@@ -57,15 +57,17 @@ func main() {
 	snapshots := router.NewSnapshotRouter()
 	snapshots.AppendNonJWTRoutes(snapshotsGroup)
 
+	insightsGroup := v2.Group("insights")
+	insights := router.NewInsightsRouter()
+	insights.AppendNonJWTRoutes(insightsGroup)
+
 	app.Use(jwtware.New(jwtware.Config{
 		SigningKey: jwtware.SigningKey{Key: []byte(cfg.Security.JWTSigningKey)},
 	}))
 
 	files.AppendRoutes(filesGroup)
 	snapshots.AppendRoutes(snapshotsGroup)
-
-	insights := router.NewInsightsRouter()
-	insights.AppendRoutes(v2.Group("insights"))
+	insights.AppendRoutes(insightsGroup)
 
 	invitations := router.NewInvitationRouter()
 	invitations.AppendRoutes(v2.Group("invitations"))

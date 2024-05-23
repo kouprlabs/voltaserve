@@ -23,7 +23,7 @@ func NewSnapshotRouter() *SnapshotRouter {
 func (r *SnapshotRouter) AppendRoutes(g fiber.Router) {
 	g.Get("/", r.List)
 	g.Post("/:id/activate", r.Activate)
-	g.Post("/:id/unlink", r.Unlink)
+	g.Post("/:id/detach", r.Detach)
 }
 
 func (r *SnapshotRouter) AppendNonJWTRoutes(g fiber.Router) {
@@ -117,28 +117,28 @@ func (r *SnapshotRouter) Activate(c *fiber.Ctx) error {
 	return c.JSON(res)
 }
 
-// Unlink godoc
+// Detach godoc
 //
-//	@Summary		Unlink
-//	@Description	Unlink
+//	@Summary		Detach
+//	@Description	Detach
 //	@Tags			Snapshots
-//	@Id				snapshots_unlink
+//	@Id				snapshots_detach
 //	@Produce		json
 //	@Param			id		path	string							true	"ID"
-//	@Param			body	body	service.SnapshotUnlinkOptions	true	"Body"
+//	@Param			body	body	service.SnapshotDetachOptions	true	"Body"
 //	@Success		204
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
-//	@Router			/snapshots/{id}/unlink [post]
-func (r *SnapshotRouter) Unlink(c *fiber.Ctx) error {
-	opts := new(service.SnapshotUnlinkOptions)
+//	@Router			/snapshots/{id}/detach [post]
+func (r *SnapshotRouter) Detach(c *fiber.Ctx) error {
+	opts := new(service.SnapshotDetachOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
 	}
 	if err := validator.New().Struct(opts); err != nil {
 		return errorpkg.NewRequestBodyValidationError(err)
 	}
-	if err := r.snapshotSvc.Unlink(c.Params("id"), *opts, GetUserID(c)); err != nil {
+	if err := r.snapshotSvc.Detach(c.Params("id"), *opts, GetUserID(c)); err != nil {
 		return err
 	}
 	return c.SendStatus(http.StatusNoContent)

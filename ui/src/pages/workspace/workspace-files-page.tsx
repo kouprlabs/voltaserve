@@ -12,11 +12,11 @@ import FileDelete from '@/components/file/file-delete'
 import FileMove from '@/components/file/file-move'
 import FileRename from '@/components/file/file-rename'
 import FileToolbar from '@/components/file/file-toolbar'
+import Insights from '@/components/file/insights'
 import FileList from '@/components/file/list'
-import FileSharing from '@/components/file/sharing'
-import FileSnapshotList from '@/components/file/snapshot/snapshot-list'
-import FileSnapshotUnlink from '@/components/file/snapshot/snapshot-unlink'
-import Insights from '@/components/insights'
+import Sharing from '@/components/file/sharing'
+import SnapshotDetach from '@/components/file/snapshot/snapshot-detach'
+import SnapshotList from '@/components/file/snapshot/snapshot-list'
 import { decodeQuery } from '@/helpers/query'
 import { filePaginationSteps, filesPaginationStorage } from '@/infra/pagination'
 import {
@@ -42,8 +42,8 @@ const WorkspaceFilesPage = () => {
   const isSnapshotListModalOpen = useAppSelector(
     (state) => state.ui.snapshots.isListModalOpen,
   )
-  const isSnapshotDeleteModalOpen = useAppSelector(
-    (state) => state.ui.snapshots.isDeleteModalOpen,
+  const isSnapshotDetachModalOpen = useAppSelector(
+    (state) => state.ui.snapshots.isDetachModalOpen,
   )
   const isMoveModalOpen = useAppSelector(
     (state) => state.ui.files.isMoveModalOpen,
@@ -186,9 +186,9 @@ const WorkspaceFilesPage = () => {
           ) : null}
         </div>
       </div>
-      {list ? <FileSharing list={list} /> : null}
-      {isSnapshotListModalOpen ? <FileSnapshotList /> : null}
-      {isSnapshotDeleteModalOpen ? <FileSnapshotUnlink /> : null}
+      {list ? <Sharing list={list} /> : null}
+      {isSnapshotListModalOpen ? <SnapshotList /> : null}
+      {isSnapshotDetachModalOpen ? <SnapshotDetach /> : null}
       {isMoveModalOpen ? <FileMove /> : null}
       {isCopyModalOpen ? <FileCopy /> : null}
       {isCreateModalOpen ? <FileCreate /> : null}

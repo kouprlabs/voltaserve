@@ -209,11 +209,11 @@ func (svc *SnapshotService) Activate(id string, opts SnapshotActivateOptions, us
 	return res, nil
 }
 
-type SnapshotUnlinkOptions struct {
+type SnapshotDetachOptions struct {
 	FileID string `json:"fileID" validate:"required"`
 }
 
-func (svc *SnapshotService) Unlink(id string, opts SnapshotUnlinkOptions, userID string) error {
+func (svc *SnapshotService) Detach(id string, opts SnapshotDetachOptions, userID string) error {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return err
@@ -228,7 +228,7 @@ func (svc *SnapshotService) Unlink(id string, opts SnapshotUnlinkOptions, userID
 	if _, err := svc.snapshotRepo.Find(id); err != nil {
 		return err
 	}
-	if err := svc.snapshotRepo.Unlink(id, file.GetID()); err != nil {
+	if err := svc.snapshotRepo.Detach(id, file.GetID()); err != nil {
 		return err
 	}
 	associationCount, err := svc.snapshotRepo.CountAssociations(id)

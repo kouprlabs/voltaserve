@@ -102,7 +102,11 @@ func (repo *userRepo) FindByEmail(email string) (model.User, error) {
 	var res = userEntity{}
 	db := repo.db.Where("email = ?", email).First(&res)
 	if db.Error != nil {
-		return nil, db.Error
+		if errors.Is(db.Error, gorm.ErrRecordNotFound) {
+			return nil, errorpkg.NewUserNotFoundError(db.Error)
+		} else {
+			return nil, errorpkg.NewInternalServerError(db.Error)
+		}
 	}
 	return &res, nil
 }

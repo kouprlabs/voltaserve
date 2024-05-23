@@ -32,7 +32,7 @@ const InsightsOverviewText = () => {
           as="a"
           type="button"
           leftIcon={<IconOpenInNew />}
-          href={`/proxy/api/v2/files/${id}/text.txt?${new URLSearchParams({
+          href={`/proxy/api/v2/insights/${id}/text.txt?${new URLSearchParams({
             access_token: getAccessTokenOrRedirect(),
           })}`}
           target="_blank"
@@ -45,7 +45,7 @@ const InsightsOverviewText = () => {
           as="a"
           type="button"
           leftIcon={<IconOpenInNew />}
-          href={`/proxy/api/v2/files/${id}/ocr.pdf?${new URLSearchParams({
+          href={`/proxy/api/v2/insights/${id}/ocr.pdf?${new URLSearchParams({
             access_token: getAccessTokenOrRedirect(),
           })}`}
           target="_blank"
