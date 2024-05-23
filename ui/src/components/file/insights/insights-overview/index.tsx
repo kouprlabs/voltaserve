@@ -1,4 +1,11 @@
+import { useState } from 'react'
 import {
+  Alert,
+  AlertDescription,
+  AlertIcon,
+  AlertTitle,
+  Box,
+  CloseButton,
   ModalBody,
   Tab,
   TabList,
@@ -7,6 +14,7 @@ import {
   Tabs,
 } from '@chakra-ui/react'
 import cx from 'classnames'
+import InsightsAPI from '@/client/api/insights'
 import { useAppSelector } from '@/store/hook'
 import InsightsOverviewChart from './insights-overview-chart'
 import InsightsOverviewEntities from './insights-overview-entities'
@@ -19,15 +27,31 @@ const InsightsOverview = () => {
       ? state.ui.files.selection[0]
       : undefined,
   )
-
-  if (!id) {
-    return null
-  }
+  const [isWarningVisible, setIsWarningVisible] = useState(true)
+  const { data: summary } = InsightsAPI.useGetSummary(id)
 
   return (
     <>
       <ModalBody>
-        <div className={cx('w-full')}>
+        <div className={cx('flex', 'flex-col', 'gap-1.5', 'w-full')}>
+          {summary?.isOutdated && isWarningVisible ? (
+            <Alert status="warning">
+              <AlertIcon />
+              <Box>
+                <AlertDescription>
+                  These insights are outdated, they originate from an older
+                  snapshot. Please navigate to the settings tab to update.
+                </AlertDescription>
+              </Box>
+              <CloseButton
+                alignSelf="flex-start"
+                position="relative"
+                right={-1}
+                top={-1}
+                onClick={() => setIsWarningVisible(false)}
+              />
+            </Alert>
+          ) : null}
           <Tabs colorScheme="gray">
             <TabList>
               <Tab>Chart</Tab>
