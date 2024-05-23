@@ -144,7 +144,7 @@ function getEntityDescription(label: string) {
     case 'LOC':
       return 'Non-GPE locations, such as mountain ranges, bodies of water.'
     case 'PRODUCT':
-      return 'Objects, vehicles, foods, etc. (not services).'
+      return 'Objects, vehicles, foods, etc.'
     case 'EVENT':
       return 'Named hurricanes, battles, wars, sports events, etc.'
     case 'WORK_OF_ART':
