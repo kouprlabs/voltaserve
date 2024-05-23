@@ -267,6 +267,14 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
         </ButtonGroup>
         {!isMenuOpen ? (
           <div className={stackClassName}>
+            {singleFile?.type === 'file' && (
+              <Button
+                leftIcon={<Orb width="20px" height="20px" />}
+                onClick={() => dispatch(insightsModalDidOpen())}
+              >
+                Insights
+              </Button>
+            )}
             {selectionCount > 0 && hasOwnerPermission && (
               <Button
                 leftIcon={<IconGroup />}
@@ -281,14 +289,6 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
                 onClick={() => dispatch(listModalDidOpen())}
               >
                 Snapshots
-              </Button>
-            )}
-            {singleFile?.type === 'file' && (
-              <Button
-                leftIcon={<Orb width="20px" height="20px" />}
-                onClick={() => dispatch(insightsModalDidOpen())}
-              >
-                Insights
               </Button>
             )}
             {selectionCount > 0 && hasOwnerPermission && (

@@ -335,6 +335,13 @@ definitions:
       width:
         type: integer
     type: object
+  service.InsightsCreateOptions:
+    properties:
+      languageId:
+        type: string
+    required:
+    - languageId
+    type: object
   service.InsightsEntityList:
     properties:
       data:
@@ -358,13 +365,6 @@ definitions:
         type: string
       name:
         type: string
-    type: object
-  service.InsightsPatchLanguageOptions:
-    properties:
-      languageId:
-        type: string
-    required:
-    - languageId
     type: object
   service.InsightsSummary:
     properties:
@@ -1023,6 +1023,11 @@ paths:
         name: access_token
         required: true
         type: string
+      - description: Extension
+        in: query
+        name: ext
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -1050,6 +1055,11 @@ paths:
       - description: Access Token
         in: query
         name: access_token
+        required: true
+        type: string
+      - description: Extension
+        in: query
+        name: ext
         required: true
         type: string
       produces:
@@ -1109,6 +1119,11 @@ paths:
       - description: Access Token
         in: query
         name: access_token
+        required: true
+        type: string
+      - description: Extension
+        in: query
+        name: ext
         required: true
         type: string
       produces:
@@ -1196,6 +1211,11 @@ paths:
       - description: Access Token
         in: query
         name: access_token
+        required: true
+        type: string
+      - description: Extension
+        in: query
+        name: ext
         required: true
         type: string
       produces:
@@ -1660,6 +1680,12 @@ paths:
         name: id
         required: true
         type: string
+      - description: Body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/service.InsightsCreateOptions'
       produces:
       - application/json
       responses:
@@ -1728,44 +1754,6 @@ paths:
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
       summary: List Entities
-      tags:
-      - Insights
-  /insights/{id}/language:
-    patch:
-      consumes:
-      - application/json
-      description: Patch Language
-      operationId: insights_patch_language
-      parameters:
-      - description: ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: Body
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/service.InsightsPatchLanguageOptions'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Patch Language
       tags:
       - Insights
   /insights/{id}/summary:

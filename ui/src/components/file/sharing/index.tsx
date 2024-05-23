@@ -79,7 +79,7 @@ const FileSharing = ({ list }: FileSharingProps) => {
         )}
         <ModalCloseButton />
         <ModalBody>
-          <Tabs>
+          <Tabs colorScheme="gray">
             <TabList className={cx('h-[40px]')}>
               <Tab>
                 <div

@@ -750,6 +750,7 @@ func (r *FileRouter) GetGroupPermissions(c *fiber.Ctx) error {
 //	@Produce		json
 //	@Param			id				path		string	true	"ID"
 //	@Param			access_token	query		string	true	"Access Token"
+//	@Param			ext				query		string	true	"Extension"
 //	@Failure		404				{object}	errorpkg.ErrorResponse
 //	@Failure		500				{object}	errorpkg.ErrorResponse
 //	@Router			/files/{id}/original{ext} [get]
@@ -765,16 +766,24 @@ func (r *FileRouter) DownloadOriginal(c *fiber.Ctx) error {
 	if err != nil {
 		return c.SendStatus(http.StatusNotFound)
 	}
-	buf, file, snapshot, err := r.fileSvc.DownloadOriginalBuffer(c.Params("id"), userID)
+	id := c.Params("id")
+	if id == "" {
+		return errorpkg.NewMissingQueryParamError("id")
+	}
+	ext := c.Params("ext")
+	if ext == "" {
+		return errorpkg.NewMissingQueryParamError("ext")
+	}
+	buf, file, snapshot, err := r.fileSvc.DownloadOriginalBuffer(id, userID)
 	if err != nil {
 		return err
 	}
-	if filepath.Ext(snapshot.GetOriginal().Key) != c.Params("ext") {
+	if filepath.Ext(snapshot.GetOriginal().Key) != ext {
 		return errorpkg.NewS3ObjectNotFoundError(nil)
 	}
 	bytes := buf.Bytes()
 	c.Set("Content-Type", infra.DetectMimeFromBytes(bytes))
-	c.Set("Content-Disposition", fmt.Sprintf("filename=\"%s\"", file.GetName()))
+	c.Set("Content-Disposition", fmt.Sprintf("filename=\"%s\"", filepath.Base(file.GetName())+ext))
 	return c.Send(bytes)
 }
 
@@ -787,6 +796,7 @@ func (r *FileRouter) DownloadOriginal(c *fiber.Ctx) error {
 //	@Produce		json
 //	@Param			id				path		string	true	"ID"
 //	@Param			access_token	query		string	true	"Access Token"
+//	@Param			ext				query		string	true	"Extension"
 //	@Failure		404				{object}	errorpkg.ErrorResponse
 //	@Failure		500				{object}	errorpkg.ErrorResponse
 //	@Router			/files/{id}/preview{ext} [get]
@@ -802,16 +812,24 @@ func (r *FileRouter) DownloadPreview(c *fiber.Ctx) error {
 	if err != nil {
 		return c.SendStatus(http.StatusNotFound)
 	}
-	buf, file, snapshot, err := r.fileSvc.DownloadPreviewBuffer(c.Params("id"), userID)
+	id := c.Params("id")
+	if id == "" {
+		return errorpkg.NewMissingQueryParamError("id")
+	}
+	ext := c.Params("ext")
+	if ext == "" {
+		return errorpkg.NewMissingQueryParamError("ext")
+	}
+	buf, file, snapshot, err := r.fileSvc.DownloadPreviewBuffer(id, userID)
 	if err != nil {
 		return err
 	}
-	if filepath.Ext(snapshot.GetPreview().Key) != c.Params("ext") {
+	if filepath.Ext(snapshot.GetPreview().Key) != ext {
 		return errorpkg.NewS3ObjectNotFoundError(nil)
 	}
 	bytes := buf.Bytes()
 	c.Set("Content-Type", infra.DetectMimeFromBytes(bytes))
-	c.Set("Content-Disposition", fmt.Sprintf("filename=\"%s\"", file.GetName()))
+	c.Set("Content-Disposition", fmt.Sprintf("filename=\"%s\"", filepath.Base(file.GetName())+ext))
 	return c.Send(bytes)
 }
 
@@ -824,6 +842,7 @@ func (r *FileRouter) DownloadPreview(c *fiber.Ctx) error {
 //	@Produce		json
 //	@Param			id				path		string	true	"ID"
 //	@Param			access_token	query		string	true	"Access Token"
+//	@Param			ext				query		string	true	"Extension"
 //	@Failure		404				{object}	errorpkg.ErrorResponse
 //	@Failure		500				{object}	errorpkg.ErrorResponse
 //	@Router			/files/{id}/text{ext} [get]
@@ -839,16 +858,24 @@ func (r *FileRouter) DownloadText(c *fiber.Ctx) error {
 	if err != nil {
 		return c.SendStatus(http.StatusNotFound)
 	}
-	buf, file, snapshot, err := r.fileSvc.DownloadTextBuffer(c.Params("id"), userID)
+	id := c.Params("id")
+	if id == "" {
+		return errorpkg.NewMissingQueryParamError("id")
+	}
+	ext := c.Params("ext")
+	if ext == "" {
+		return errorpkg.NewMissingQueryParamError("ext")
+	}
+	buf, file, snapshot, err := r.fileSvc.DownloadTextBuffer(id, userID)
 	if err != nil {
 		return err
 	}
-	if filepath.Ext(snapshot.GetText().Key) != c.Params("ext") {
+	if filepath.Ext(snapshot.GetText().Key) != ext {
 		return errorpkg.NewS3ObjectNotFoundError(nil)
 	}
 	bytes := buf.Bytes()
 	c.Set("Content-Type", infra.DetectMimeFromBytes(bytes))
-	c.Set("Content-Disposition", fmt.Sprintf("filename=\"%s\"", file.GetName()))
+	c.Set("Content-Disposition", fmt.Sprintf("filename=\"%s\"", filepath.Base(file.GetName())+ext))
 	return c.Send(bytes)
 }
 
@@ -861,6 +888,7 @@ func (r *FileRouter) DownloadText(c *fiber.Ctx) error {
 //	@Produce		json
 //	@Param			id				path		string	true	"ID"
 //	@Param			access_token	query		string	true	"Access Token"
+//	@Param			ext				query		string	true	"Extension"
 //	@Failure		404				{object}	errorpkg.ErrorResponse
 //	@Failure		500				{object}	errorpkg.ErrorResponse
 //	@Router			/files/{id}/ocr{ext} [get]
@@ -876,16 +904,24 @@ func (r *FileRouter) DownloadOCR(c *fiber.Ctx) error {
 	if err != nil {
 		return c.SendStatus(http.StatusNotFound)
 	}
-	buf, file, snapshot, err := r.fileSvc.DownloadOCRBuffer(c.Params("id"), userID)
+	id := c.Params("id")
+	if id == "" {
+		return errorpkg.NewMissingQueryParamError("id")
+	}
+	ext := c.Params("ext")
+	if ext == "" {
+		return errorpkg.NewMissingQueryParamError("ext")
+	}
+	buf, file, snapshot, err := r.fileSvc.DownloadOCRBuffer(id, userID)
 	if err != nil {
 		return err
 	}
-	if filepath.Ext(snapshot.GetOCR().Key) != c.Params("ext") {
+	if filepath.Ext(snapshot.GetOCR().Key) != ext {
 		return errorpkg.NewS3ObjectNotFoundError(nil)
 	}
 	bytes := buf.Bytes()
 	c.Set("Content-Type", infra.DetectMimeFromBytes(bytes))
-	c.Set("Content-Disposition", fmt.Sprintf("filename=\"%s\"", file.GetName()))
+	c.Set("Content-Disposition", fmt.Sprintf("filename=\"%s\"", filepath.Base(file.GetName())+ext))
 	return c.Send(bytes)
 }
 

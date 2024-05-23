@@ -1,31 +1,36 @@
+import { KeyedMutator } from 'swr'
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
+import { Summary } from '@/client/api/insights'
 
 type InsightsState = {
   isModalOpen: boolean
-  isWizardComplete: boolean
+  mutateSummary?: KeyedMutator<Summary>
 }
 
 const initialState: InsightsState = {
   isModalOpen: false,
-  isWizardComplete: false,
 }
 
 const slice = createSlice({
   name: 'analysis',
   initialState,
   reducers: {
-    wizardDidComplete: (state, action: PayloadAction<boolean>) => {
-      state.isWizardComplete = action.payload
-    },
     modalDidOpen: (state) => {
       state.isModalOpen = true
     },
     modalDidClose: (state) => {
       state.isModalOpen = false
     },
+    mutateSummaryUpdated: (
+      state,
+      action: PayloadAction<KeyedMutator<Summary>>,
+    ) => {
+      state.mutateSummary = action.payload
+    },
   },
 })
 
-export const { wizardDidComplete, modalDidOpen, modalDidClose } = slice.actions
+export const { modalDidOpen, modalDidClose, mutateSummaryUpdated } =
+  slice.actions
 
 export default slice.reducer

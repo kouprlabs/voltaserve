@@ -75,11 +75,11 @@ func (svc *InsightsService) GetLanguages() ([]*InsightsLanguage, error) {
 	return svc.languages, nil
 }
 
-type InsightsPatchLanguageOptions struct {
+type InsightsCreateOptions struct {
 	LanguageID string `json:"languageId" validate:"required"`
 }
 
-func (svc *InsightsService) PatchLanguage(id string, opts InsightsPatchLanguageOptions, userID string) error {
+func (svc *InsightsService) Create(id string, opts InsightsCreateOptions, userID string) error {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return err
@@ -100,28 +100,6 @@ func (svc *InsightsService) PatchLanguage(id string, opts InsightsPatchLanguageO
 	}
 	snapshot.SetLanguage(opts.LanguageID)
 	if err := svc.snapshotRepo.Save(snapshot); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (svc *InsightsService) Create(id string, userID string) error {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return err
-	}
-	file, err := svc.fileCache.Get(id)
-	if err != nil {
-		return err
-	}
-	if err = svc.fileGuard.Authorize(user, file, model.PermissionEditor); err != nil {
-		return err
-	}
-	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
-		return errorpkg.NewFileIsNotAFileError(file)
-	}
-	snapshot, err := svc.snapshotRepo.Find(*file.GetSnapshotID())
-	if err != nil {
 		return err
 	}
 	if err := svc.createText(snapshot); err != nil {

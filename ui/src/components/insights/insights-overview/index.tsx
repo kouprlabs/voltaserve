@@ -1,28 +1,24 @@
-import { useState } from 'react'
 import {
-  Button,
   ModalBody,
-  ModalFooter,
   Tab,
   TabList,
+  TabPanel,
+  TabPanels,
   Tabs,
 } from '@chakra-ui/react'
 import cx from 'classnames'
-import { useAppDispatch, useAppSelector } from '@/store/hook'
-import { modalDidClose } from '@/store/ui/insights'
+import { useAppSelector } from '@/store/hook'
+import InsightsOverviewChart from './insights-overview-chart'
 import InsightsOverviewEntities from './insights-overview-entities'
-import InsightsOverviewLanguage from './insights-overview-language'
 import InsightsOverviewSettings from './insights-overview-settings'
 import InsightsOverviewText from './insights-overview-text'
 
 const InsightsOverview = () => {
-  const dispatch = useAppDispatch()
   const id = useAppSelector((state) =>
     state.ui.files.selection.length > 0
       ? state.ui.files.selection[0]
       : undefined,
   )
-  const [activeTab, setActiveTab] = useState(0)
 
   if (!id) {
     return null
@@ -32,35 +28,30 @@ const InsightsOverview = () => {
     <>
       <ModalBody>
         <div className={cx('w-full')}>
-          <Tabs
-            variant="solid-rounded"
-            colorScheme="gray"
-            index={activeTab}
-            className={cx('pb-2.5')}
-          >
+          <Tabs colorScheme="gray">
             <TabList>
-              <Tab onClick={() => setActiveTab(0)}>Language</Tab>
-              <Tab onClick={() => setActiveTab(1)}>Text</Tab>
-              <Tab onClick={() => setActiveTab(2)}>Entities</Tab>
-              <Tab onClick={() => setActiveTab(3)}>Settings</Tab>
+              <Tab>Chart</Tab>
+              <Tab>Entities</Tab>
+              <Tab>Text</Tab>
+              <Tab>Settings</Tab>
             </TabList>
+            <TabPanels>
+              <TabPanel>
+                <InsightsOverviewChart />
+              </TabPanel>
+              <TabPanel>
+                <InsightsOverviewEntities />
+              </TabPanel>
+              <TabPanel>
+                <InsightsOverviewText />
+              </TabPanel>
+              <TabPanel>
+                <InsightsOverviewSettings />
+              </TabPanel>
+            </TabPanels>
           </Tabs>
-          {activeTab === 0 ? <InsightsOverviewLanguage /> : null}
-          {activeTab === 1 ? <InsightsOverviewText /> : null}
-          {activeTab === 2 ? <InsightsOverviewEntities /> : null}
-          {activeTab === 3 ? <InsightsOverviewSettings /> : null}
         </div>
       </ModalBody>
-      <ModalFooter>
-        <Button
-          type="button"
-          variant="outline"
-          colorScheme="blue"
-          onClick={() => dispatch(modalDidClose())}
-        >
-          Close
-        </Button>
-      </ModalFooter>
     </>
   )
 }

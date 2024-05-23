@@ -25,7 +25,6 @@ func NewInsightsRouter() *InsightsRouter {
 
 func (r *InsightsRouter) AppendRoutes(g fiber.Router) {
 	g.Get("/languages", r.GetLanguages)
-	g.Patch("/:id/language", r.PatchLanguage)
 	g.Post("/:id", r.Create)
 	g.Get("/:id/summary", r.GetSummary)
 	g.Get("/:id/entities", r.ListEntities)
@@ -50,35 +49,6 @@ func (r *InsightsRouter) GetLanguages(c *fiber.Ctx) error {
 	return c.JSON(res)
 }
 
-// PatchLanguage godoc
-//
-//	@Summary		Patch Language
-//	@Description	Patch Language
-//	@Tags			Insights
-//	@Id				insights_patch_language
-//	@Accept			json
-//	@Produce		json
-//	@Param			id		path	string									true	"ID"
-//	@Param			body	body	service.InsightsPatchLanguageOptions	true	"Body"
-//	@Success		200
-//	@Failure		404	{object}	errorpkg.ErrorResponse
-//	@Failure		400	{object}	errorpkg.ErrorResponse
-//	@Failure		500	{object}	errorpkg.ErrorResponse
-//	@Router			/insights/{id}/language [patch]
-func (r *InsightsRouter) PatchLanguage(c *fiber.Ctx) error {
-	opts := new(service.InsightsPatchLanguageOptions)
-	if err := c.BodyParser(opts); err != nil {
-		return err
-	}
-	if err := validator.New().Struct(opts); err != nil {
-		return errorpkg.NewRequestBodyValidationError(err)
-	}
-	if err := r.insightsSvc.PatchLanguage(c.Params("id"), *opts, GetUserID(c)); err != nil {
-		return err
-	}
-	return c.SendStatus(http.StatusNoContent)
-}
-
 // Create godoc
 //
 //	@Summary		Create
@@ -87,14 +57,22 @@ func (r *InsightsRouter) PatchLanguage(c *fiber.Ctx) error {
 //	@Id				insights_create
 //	@Accept			json
 //	@Produce		json
-//	@Param			id	path	string	true	"ID"
+//	@Param			id		path	string							true	"ID"
+//	@Param			body	body	service.InsightsCreateOptions	true	"Body"
 //	@Success		200
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		400	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/insights/{id} [post]
 func (r *InsightsRouter) Create(c *fiber.Ctx) error {
-	if err := r.insightsSvc.Create(c.Params("id"), GetUserID(c)); err != nil {
+	opts := new(service.InsightsCreateOptions)
+	if err := c.BodyParser(opts); err != nil {
+		return err
+	}
+	if err := validator.New().Struct(opts); err != nil {
+		return errorpkg.NewRequestBodyValidationError(err)
+	}
+	if err := r.insightsSvc.Create(c.Params("id"), *opts, GetUserID(c)); err != nil {
 		return err
 	}
 	return c.SendStatus(http.StatusNoContent)

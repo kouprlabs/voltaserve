@@ -278,6 +278,12 @@ export const IconRefresh = ({ className, filled, ...props }: IconBaseProps) => (
   </span>
 )
 
+export const IconSync = ({ className, filled, ...props }: IconBaseProps) => (
+  <span className={getClassName({ filled, className })} {...props}>
+    sync
+  </span>
+)
+
 export const IconGridView = ({
   className,
   filled,
