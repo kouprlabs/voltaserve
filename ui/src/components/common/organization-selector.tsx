@@ -22,7 +22,7 @@ import OrganizationAPI, {
   SortOrder,
 } from '@/client/api/organization'
 import { swrConfig } from '@/client/options'
-import { SectionSpinner, Pagination, SearchInput } from '@/lib'
+import { SectionSpinner, Pagination, SearchInput, Spinner } from '@/lib'
 
 export type OrganizationSelectorProps = {
   onConfirm?: (organization: Organization) => void
@@ -106,20 +106,31 @@ const OrganizationSelector = ({ onConfirm }: OrganizationSelectorProps) => {
                     'flex',
                     'items-center',
                     'justify-center',
-                    'h-[300px]',
+                    'h-[320px]',
                   )}
                 >
                   <span>Failed to load organizations.</span>
                 </div>
               )}
-              {!list && !error && <SectionSpinner />}
+              {!list && !error ? (
+                <div
+                  className={cx(
+                    'flex',
+                    'items-center',
+                    'justify-center',
+                    'h-[320px]',
+                  )}
+                >
+                  <Spinner />
+                </div>
+              ) : null}
               {list && list.data.length === 0 && (
                 <div
                   className={cx(
                     'flex',
                     'items-center',
                     'justify-center',
-                    'h-[300px]',
+                    'h-[320px]',
                   )}
                 >
                   <div
@@ -134,62 +145,72 @@ const OrganizationSelector = ({ onConfirm }: OrganizationSelectorProps) => {
                   </div>
                 </div>
               )}
-              {list && list.data.length > 0 && (
-                <Table variant="simple" size="sm">
-                  <colgroup>
-                    <col className={cx('w-[40px]')} />
-                    <col className={cx('w-auto')} />
-                  </colgroup>
-                  <Tbody>
-                    {list.data.map((o) => (
-                      <Tr
-                        key={o.id}
-                        className={cx(
-                          'cursor-pointer',
-                          { 'bg-gray-100': selected?.id === o.id },
-                          { 'dark:bg-gray-600': selected?.id === o.id },
-                          { 'bg-transparent': selected?.id !== o.id },
-                        )}
-                        onClick={() => setSelected(o)}
-                      >
-                        <Td className={cx('px-0.5', 'text-center')}>
-                          <Radio size="md" isChecked={selected?.id === o.id} />
-                        </Td>
-                        <Td className={cx('px-0.5')}>
-                          <div
-                            className={cx(
-                              'flex',
-                              'flex-row',
-                              'items-center',
-                              'gap-1.5',
-                            )}
-                          >
-                            <Avatar
-                              name={o.name}
-                              size="sm"
-                              className={cx('w-[40px]', 'h-[40px]')}
+              {list && list.data.length > 0 ? (
+                <div
+                  className={cx(
+                    'flex',
+                    'flex-col',
+                    'justify-between',
+                    'h-[320px]',
+                  )}
+                >
+                  <Table variant="simple" size="sm">
+                    <colgroup>
+                      <col className={cx('w-[40px]')} />
+                      <col className={cx('w-auto')} />
+                    </colgroup>
+                    <Tbody>
+                      {list.data.map((o) => (
+                        <Tr
+                          key={o.id}
+                          className={cx(
+                            'cursor-pointer',
+                            { 'bg-gray-100': selected?.id === o.id },
+                            { 'dark:bg-gray-600': selected?.id === o.id },
+                            { 'bg-transparent': selected?.id !== o.id },
+                          )}
+                          onClick={() => setSelected(o)}
+                        >
+                          <Td className={cx('px-0.5', 'text-center')}>
+                            <Radio
+                              size="md"
+                              isChecked={selected?.id === o.id}
                             />
-                            <span className={cx('text-base')}>{o.name}</span>
-                          </div>
-                        </Td>
-                      </Tr>
-                    ))}
-                  </Tbody>
-                </Table>
-              )}
-              {list && (
-                <div className={cx('self-end')}>
-                  {list.totalPages > 1 ? (
-                    <Pagination
-                      uiSize="md"
-                      maxButtons={3}
-                      page={page}
-                      totalPages={list.totalPages}
-                      onPageChange={(value) => setPage(value)}
-                    />
-                  ) : null}
+                          </Td>
+                          <Td className={cx('p-0.5')}>
+                            <div
+                              className={cx(
+                                'flex',
+                                'flex-row',
+                                'items-center',
+                                'gap-1.5',
+                              )}
+                            >
+                              <Avatar
+                                name={o.name}
+                                size="sm"
+                                className={cx('w-[40px]', 'h-[40px]')}
+                              />
+                              <span className={cx('text-base')}>{o.name}</span>
+                            </div>
+                          </Td>
+                        </Tr>
+                      ))}
+                    </Tbody>
+                  </Table>
+                  <div className={cx('self-end')}>
+                    {list.totalPages > 1 ? (
+                      <Pagination
+                        uiSize="md"
+                        maxButtons={3}
+                        page={page}
+                        totalPages={list.totalPages}
+                        onPageChange={(value) => setPage(value)}
+                      />
+                    ) : null}
+                  </div>
                 </div>
-              )}
+              ) : null}
             </div>
           </ModalBody>
           <ModalFooter>

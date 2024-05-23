@@ -62,9 +62,11 @@ import {
   selectionUpdated,
   sharingModalDidOpen,
 } from '@/store/ui/files'
+import { modalDidOpen as insightsModalDidOpen } from '@/store/ui/insights'
 import { listModalDidOpen } from '@/store/ui/snapshots'
 import { uploadsDrawerOpened } from '@/store/ui/uploads-drawer'
 import { FileViewType } from '@/types/file'
+import Orb from '../common/orb'
 
 const ICON_SCALE_SLIDER_STEP = 0.25
 const ICON_SCALE_SLIDER_MIN = 1
@@ -115,6 +117,7 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
     (state) => state.ui.files.isSelectionMode,
   )
   const mutateList = useAppSelector((state) => state.ui.files.mutate)
+  const isMenuOpen = useAppSelector((state) => state.ui.files.isMenuOpen)
   const fileUploadInput = useRef<HTMLInputElement>(null)
   const folderUploadInput = useRef<HTMLInputElement>(null)
   const { data: folder } = FileAPI.useGet(fileId)
@@ -262,130 +265,134 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
             New Folder
           </Button>
         </ButtonGroup>
-        <div className={stackClassName}>
-          {selectionCount > 0 && hasOwnerPermission && (
-            <Button
-              leftIcon={<IconGroup />}
-              onClick={() => dispatch(sharingModalDidOpen())}
-            >
-              Sharing
-            </Button>
-          )}
-          {singleFile?.type === 'file' && hasEditorPermission && (
-            <Button
-              leftIcon={<IconHistory />}
-              onClick={() => dispatch(listModalDidOpen())}
-            >
-              Snapshots
-            </Button>
-          )}
-          {singleFile?.type === 'file' && (
-            <Button
-              leftIcon={<IconDownload />}
-              onClick={() => downloadFile(singleFile)}
-            >
-              Download
-            </Button>
-          )}
-          {selectionCount > 0 && hasOwnerPermission && (
-            <Button
-              leftIcon={<IconDelete />}
-              className={cx('text-red-500')}
-              onClick={() => dispatch(deleteModalDidOpen())}
-            >
-              Delete
-            </Button>
-          )}
-          {selectionCount > 0 ? (
-            <Menu>
-              <MenuButton
-                as={IconButton}
-                icon={<IconMoreVert />}
-                variant="solid"
-                aria-label=""
-                isDisabled={!list}
-              />
-              <Portal>
-                <MenuList zIndex="dropdown">
-                  <MenuItem
-                    icon={<IconGroup />}
-                    isDisabled={selectionCount === 0 || !hasOwnerPermission}
-                    onClick={() => dispatch(sharingModalDidOpen())}
-                  >
-                    Sharing
-                  </MenuItem>
-                  <MenuItem
-                    icon={<IconHistory />}
-                    isDisabled={
-                      singleFile?.type !== 'file' || !hasOwnerPermission
-                    }
-                    onClick={() => dispatch(listModalDidOpen())}
-                  >
-                    Snapshots
-                  </MenuItem>
-                  <MenuItem
-                    icon={<IconDownload />}
-                    isDisabled={singleFile?.type !== 'file'}
-                    onClick={() => {
-                      if (singleFile) {
-                        downloadFile(singleFile)
+        {!isMenuOpen ? (
+          <div className={stackClassName}>
+            {selectionCount > 0 && hasOwnerPermission && (
+              <Button
+                leftIcon={<IconGroup />}
+                onClick={() => dispatch(sharingModalDidOpen())}
+              >
+                Sharing
+              </Button>
+            )}
+            {singleFile?.type === 'file' && hasEditorPermission && (
+              <Button
+                leftIcon={<IconHistory />}
+                onClick={() => dispatch(listModalDidOpen())}
+              >
+                Snapshots
+              </Button>
+            )}
+            {singleFile?.type === 'file' && (
+              <Button
+                leftIcon={<Orb width="20px" height="20px" />}
+                onClick={() => dispatch(insightsModalDidOpen())}
+              >
+                Insights
+              </Button>
+            )}
+            {selectionCount > 0 && hasOwnerPermission && (
+              <Button
+                leftIcon={<IconDelete />}
+                className={cx('text-red-500')}
+                onClick={() => dispatch(deleteModalDidOpen())}
+              >
+                Delete
+              </Button>
+            )}
+            {selectionCount > 0 ? (
+              <Menu>
+                <MenuButton
+                  as={IconButton}
+                  icon={<IconMoreVert />}
+                  variant="solid"
+                  aria-label=""
+                  isDisabled={!list}
+                />
+                <Portal>
+                  <MenuList zIndex="dropdown">
+                    <MenuItem
+                      icon={<IconGroup />}
+                      isDisabled={selectionCount === 0 || !hasOwnerPermission}
+                      onClick={() => dispatch(sharingModalDidOpen())}
+                    >
+                      Sharing
+                    </MenuItem>
+                    <MenuItem
+                      icon={<IconHistory />}
+                      isDisabled={
+                        singleFile?.type !== 'file' || !hasOwnerPermission
                       }
-                    }}
-                  >
-                    Download
-                  </MenuItem>
-                  <MenuDivider />
-                  <MenuItem
-                    icon={<IconDelete />}
-                    className={cx('text-red-500')}
-                    isDisabled={selectionCount === 0 || !hasOwnerPermission}
-                    onClick={() => dispatch(deleteModalDidOpen())}
-                  >
-                    Delete
-                  </MenuItem>
-                  <MenuItem
-                    icon={<IconEdit />}
-                    isDisabled={selectionCount !== 1 || !hasEditorPermission}
-                    onClick={() => dispatch(renameModalDidOpen())}
-                  >
-                    Rename
-                  </MenuItem>
-                  <MenuItem
-                    icon={<IconArrowTopRight />}
-                    isDisabled={selectionCount === 0 || !hasEditorPermission}
-                    onClick={() => dispatch(moveModalDidOpen())}
-                  >
-                    Move
-                  </MenuItem>
-                  <MenuItem
-                    icon={<IconFileCopy />}
-                    isDisabled={selectionCount === 0 || !hasEditorPermission}
-                    onClick={() => dispatch(copyModalDidOpen())}
-                  >
-                    Copy
-                  </MenuItem>
-                  {isSelectionMode ? (
-                    <>
-                      <MenuDivider />
-                      <MenuItem
-                        icon={<IconSelectCheckBox />}
-                        onClick={handleSelectAllClick}
-                      >
-                        Select All
-                      </MenuItem>
-                      <MenuItem
-                        icon={<IconCheckBoxOutlineBlank />}
-                        onClick={() => dispatch(selectionUpdated([]))}
-                      >
-                        Unselect All
-                      </MenuItem>
-                    </>
-                  ) : null}
-                </MenuList>
-              </Portal>
-            </Menu>
-          ) : null}
-        </div>
+                      onClick={() => dispatch(listModalDidOpen())}
+                    >
+                      Snapshots
+                    </MenuItem>
+                    <MenuItem
+                      icon={<IconDownload />}
+                      isDisabled={singleFile?.type !== 'file'}
+                      onClick={() => {
+                        if (singleFile) {
+                          downloadFile(singleFile)
+                        }
+                      }}
+                    >
+                      Download
+                    </MenuItem>
+                    <MenuDivider />
+                    <MenuItem
+                      icon={<IconDelete />}
+                      className={cx('text-red-500')}
+                      isDisabled={selectionCount === 0 || !hasOwnerPermission}
+                      onClick={() => dispatch(deleteModalDidOpen())}
+                    >
+                      Delete
+                    </MenuItem>
+                    <MenuItem
+                      icon={<IconEdit />}
+                      isDisabled={selectionCount !== 1 || !hasEditorPermission}
+                      onClick={() => dispatch(renameModalDidOpen())}
+                    >
+                      Rename
+                    </MenuItem>
+                    <MenuItem
+                      icon={<IconArrowTopRight />}
+                      isDisabled={selectionCount === 0 || !hasEditorPermission}
+                      onClick={() => dispatch(moveModalDidOpen())}
+                    >
+                      Move
+                    </MenuItem>
+                    <MenuItem
+                      icon={<IconFileCopy />}
+                      isDisabled={selectionCount === 0 || !hasEditorPermission}
+                      onClick={() => dispatch(copyModalDidOpen())}
+                    >
+                      Copy
+                    </MenuItem>
+                    {isSelectionMode ? (
+                      <>
+                        <MenuDivider />
+                        <MenuItem
+                          icon={<IconSelectCheckBox />}
+                          onClick={handleSelectAllClick}
+                        >
+                          Select All
+                        </MenuItem>
+                        <MenuItem
+                          icon={<IconCheckBoxOutlineBlank />}
+                          onClick={() => dispatch(selectionUpdated([]))}
+                        >
+                          Unselect All
+                        </MenuItem>
+                      </>
+                    ) : null}
+                  </MenuList>
+                </Portal>
+              </Menu>
+            ) : null}
+          </div>
+        ) : (
+          <div className={stackClassName}></div>
+        )}
         {fileCount ? (
           <IconButton
             icon={isSelectionMode ? <IconClose /> : <IconLibraryAddCheck />}

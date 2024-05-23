@@ -43,6 +43,8 @@ import { useAppDispatch, useAppSelector } from '@/store/hook'
 import {
   copyModalDidOpen,
   deleteModalDidOpen,
+  menuDidClose,
+  menuDidOpen,
   moveModalDidOpen,
   multiSelectKeyUpdated,
   rangeSelectKeyUpdated,
@@ -138,6 +140,14 @@ const FileList = ({ list, scale }: FileListProps) => {
       window.removeEventListener('keyup', handleKeyup)
     }
   }, [dispatch])
+
+  useEffect(() => {
+    if (isMenuOpen) {
+      dispatch(menuDidOpen())
+    } else {
+      dispatch(menuDidClose())
+    }
+  }, [isMenuOpen, dispatch])
 
   const handleDragStart = useCallback((event: DragStartEvent) => {
     dispatch(selectionAdded(event.active.id as string))

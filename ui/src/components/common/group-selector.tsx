@@ -19,7 +19,7 @@ import {
 import cx from 'classnames'
 import GroupAPI, { Group, SortOrder } from '@/client/api/group'
 import { swrConfig } from '@/client/options'
-import { SectionSpinner, Pagination, SearchInput } from '@/lib'
+import { SectionSpinner, Pagination, SearchInput, Spinner } from '@/lib'
 
 export type GroupSelectorProps = {
   value?: Group
@@ -107,20 +107,31 @@ const GroupSelector = ({
                     'flex',
                     'items-center',
                     'justify-center',
-                    'h-[300px]',
+                    'h-[320px]',
                   )}
                 >
                   <span>Failed to load groups.</span>
                 </div>
               )}
-              {!list && !error && <SectionSpinner />}
+              {!list && !error ? (
+                <div
+                  className={cx(
+                    'flex',
+                    'items-center',
+                    'justify-center',
+                    'h-[320px]',
+                  )}
+                >
+                  <Spinner />
+                </div>
+              ) : null}
               {list && list.data.length === 0 && (
                 <div
                   className={cx(
                     'flex',
                     'items-center',
                     'justify-center',
-                    'h-[300px]',
+                    'h-[320px]',
                   )}
                 >
                   <div
@@ -135,63 +146,73 @@ const GroupSelector = ({
                   </div>
                 </div>
               )}
-              {list && list.data.length > 0 && (
-                <Table variant="simple" size="sm">
-                  <colgroup>
-                    <col className={cx('w-[40px]')} />
-                    <col className={cx('w-[auto]')} />
-                  </colgroup>
-                  <Tbody>
-                    {list.data.map((g) => (
-                      <Tr
-                        key={g.id}
-                        className={cx(
-                          'cursor-pointer',
-                          'h-[52px]',
-                          { 'bg-gray-100': selected?.id === g.id },
-                          { 'dark:bg-gray-600': selected?.id === g.id },
-                          { 'bg-transparent': selected?.id !== g.id },
-                        )}
-                        onClick={() => setSelected(g)}
-                      >
-                        <Td className={cx('px-0.5', 'text-center')}>
-                          <Radio size="md" isChecked={selected?.id === g.id} />
-                        </Td>
-                        <Td className={cx('px-0.5')}>
-                          <div
-                            className={cx(
-                              'flex',
-                              'flex-row',
-                              'items-center',
-                              'gap-1.5',
-                            )}
-                          >
-                            <Avatar
-                              name={g.name}
-                              size="sm"
-                              className={cx('w-[40px]', 'h-[40px]')}
+              {list && list.data.length > 0 ? (
+                <div
+                  className={cx(
+                    'flex',
+                    'flex-col',
+                    'justify-between',
+                    'h-[320px]',
+                  )}
+                >
+                  <Table variant="simple" size="sm">
+                    <colgroup>
+                      <col className={cx('w-[40px]')} />
+                      <col className={cx('w-[auto]')} />
+                    </colgroup>
+                    <Tbody>
+                      {list.data.map((g) => (
+                        <Tr
+                          key={g.id}
+                          className={cx(
+                            'cursor-pointer',
+                            'h-[52px]',
+                            { 'bg-gray-100': selected?.id === g.id },
+                            { 'dark:bg-gray-600': selected?.id === g.id },
+                            { 'bg-transparent': selected?.id !== g.id },
+                          )}
+                          onClick={() => setSelected(g)}
+                        >
+                          <Td className={cx('px-0.5', 'text-center')}>
+                            <Radio
+                              size="md"
+                              isChecked={selected?.id === g.id}
                             />
-                            <span className={cx('text-base')}>{g.name}</span>
-                          </div>
-                        </Td>
-                      </Tr>
-                    ))}
-                  </Tbody>
-                </Table>
-              )}
-              {list && (
-                <div className={cx('self-end')}>
-                  {list.totalPages > 1 ? (
-                    <Pagination
-                      uiSize="md"
-                      maxButtons={3}
-                      page={page}
-                      totalPages={list.totalPages}
-                      onPageChange={(value) => setPage(value)}
-                    />
-                  ) : null}
+                          </Td>
+                          <Td className={cx('p-0.5')}>
+                            <div
+                              className={cx(
+                                'flex',
+                                'flex-row',
+                                'items-center',
+                                'gap-1.5',
+                              )}
+                            >
+                              <Avatar
+                                name={g.name}
+                                size="sm"
+                                className={cx('w-[40px]', 'h-[40px]')}
+                              />
+                              <span className={cx('text-base')}>{g.name}</span>
+                            </div>
+                          </Td>
+                        </Tr>
+                      ))}
+                    </Tbody>
+                  </Table>
+                  <div className={cx('self-end')}>
+                    {list.totalPages > 1 ? (
+                      <Pagination
+                        uiSize="md"
+                        maxButtons={3}
+                        page={page}
+                        totalPages={list.totalPages}
+                        onPageChange={(value) => setPage(value)}
+                      />
+                    ) : null}
+                  </div>
                 </div>
-              )}
+              ) : null}
             </div>
           </ModalBody>
           <ModalFooter>

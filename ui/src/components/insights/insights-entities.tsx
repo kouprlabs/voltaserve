@@ -3,7 +3,7 @@ import { Badge, Table, Tbody, Td, Tooltip, Tr } from '@chakra-ui/react'
 import cx from 'classnames'
 import InsightsAPI, { SortBy, SortOrder } from '@/client/api/insights'
 import { swrConfig } from '@/client/options'
-import { Pagination, SearchInput, SectionSpinner } from '@/lib'
+import { Pagination, SearchInput, Spinner } from '@/lib'
 import { useAppSelector } from '@/store/hook'
 
 const InsightsEntities = () => {
@@ -51,74 +51,80 @@ const InsightsEntities = () => {
         query={query}
         onChange={handleSearchInputChange}
       />
-      {!list && error && (
+      {!list && error ? (
         <div
-          className={cx('flex', 'items-center', 'justify-center', 'h-[300px]')}
+          className={cx('flex', 'items-center', 'justify-center', 'h-[320px]')}
         >
           <span>Failed to load entities.</span>
         </div>
-      )}
-      {!list && !error && <SectionSpinner />}
-      {list && list.data.length === 0 && (
+      ) : null}
+      {!list && !error ? (
         <div
-          className={cx('flex', 'items-center', 'justify-center', 'h-[300px]')}
+          className={cx('flex', 'items-center', 'justify-center', 'h-[320px]')}
+        >
+          <Spinner />
+        </div>
+      ) : null}
+      {list && list.data.length === 0 ? (
+        <div
+          className={cx('flex', 'items-center', 'justify-center', 'h-[320px]')}
         >
           <div className={cx('flex', 'flex-col', 'items-center', 'gap-1.5')}>
             <span>There are no entities.</span>
           </div>
         </div>
-      )}
-      {list && list.data.length > 0 && (
-        <Table variant="simple" size="sm">
-          <colgroup>
-            <col className={cx('w-[40px]')} />
-            <col className={cx('w-[auto]')} />
-          </colgroup>
-          <Tbody>
-            {list.data.map((entity, index) => (
-              <Tr key={index} className={cx('h-[52px]')}>
-                <Td className={cx('px-0.5')}>
-                  <div
-                    className={cx(
-                      'flex',
-                      'flex-row',
-                      'items-center',
-                      'gap-1.5',
-                    )}
-                  >
-                    <span className={cx('text-base')}>{entity.text}</span>
-                    {getEntityDescription(entity.label) ? (
-                      <Tooltip label={getEntityDescription(entity.label)}>
+      ) : null}
+      {list && list.data.length > 0 ? (
+        <div className={cx('flex', 'flex-col', 'justify-between', 'h-[320px]')}>
+          <Table variant="simple" size="sm">
+            <colgroup>
+              <col className={cx('w-[40px]')} />
+              <col className={cx('w-[auto]')} />
+            </colgroup>
+            <Tbody>
+              {list.data.map((entity, index) => (
+                <Tr key={index} className={cx('h-[52px]')}>
+                  <Td className={cx('px-0.5')}>
+                    <div
+                      className={cx(
+                        'flex',
+                        'flex-row',
+                        'items-center',
+                        'gap-1.5',
+                      )}
+                    >
+                      <span className={cx('text-base')}>{entity.text}</span>
+                      {getEntityDescription(entity.label) ? (
+                        <Tooltip label={getEntityDescription(entity.label)}>
+                          <Badge className={cx('cursor-default')}>
+                            {entity.label}
+                          </Badge>
+                        </Tooltip>
+                      ) : (
                         <Badge className={cx('cursor-default')}>
                           {entity.label}
                         </Badge>
-                      </Tooltip>
-                    ) : (
-                      <Badge className={cx('cursor-default')}>
-                        {entity.label}
-                      </Badge>
-                    )}
-                    <Badge>{entity.frequency}</Badge>
-                  </div>
-                </Td>
-              </Tr>
-            ))}
-          </Tbody>
-        </Table>
-      )}
-      {list && (
-        <div className={cx('self-end')}>
-          {list.totalPages > 1 ? (
-            <Pagination
-              uiSize="md"
-              maxButtons={3}
-              page={page}
-              totalPages={list.totalPages}
-              onPageChange={(value) => setPage(value)}
-            />
-          ) : null}
+                      )}
+                      <Badge>{entity.frequency}</Badge>
+                    </div>
+                  </Td>
+                </Tr>
+              ))}
+            </Tbody>
+          </Table>
+          <div className={cx('self-end')}>
+            {list.totalPages > 1 ? (
+              <Pagination
+                uiSize="md"
+                maxButtons={3}
+                page={page}
+                totalPages={list.totalPages}
+                onPageChange={(value) => setPage(value)}
+              />
+            ) : null}
+          </div>
         </div>
-      )}
+      ) : null}
     </div>
   )
 }
