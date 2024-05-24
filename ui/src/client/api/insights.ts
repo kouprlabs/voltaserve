@@ -68,6 +68,20 @@ export default class InsightsAPI {
     })
   }
 
+  static patch(id: string) {
+    return apiFetcher({
+      url: `/insights/${id}`,
+      method: 'PATCH',
+    })
+  }
+
+  static delete(id: string) {
+    return apiFetcher({
+      url: `/insights/${id}`,
+      method: 'DELETE',
+    })
+  }
+
   static useGetSummary(
     id: string | null | undefined,
     swrOptions?: SWRConfiguration,

@@ -206,9 +206,9 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
 
   const getSortOrderIcon = useCallback(() => {
     if (sortOrder === SortOrder.Asc) {
-      return <IconArrowDownward />
-    } else if (sortOrder === SortOrder.Desc) {
       return <IconArrowUpward />
+    } else if (sortOrder === SortOrder.Desc) {
+      return <IconArrowDownward />
     }
   }, [sortOrder])
 

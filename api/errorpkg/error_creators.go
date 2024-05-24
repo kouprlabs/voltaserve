@@ -99,6 +99,16 @@ func NewSnapshotTextLengthExceedsLimitError(err error) *ErrorResponse {
 	)
 }
 
+func NewSnapshotCannotBePatchedError(err error) *ErrorResponse {
+	return NewErrorResponse(
+		"snapshot_cannot_be_patched",
+		http.StatusBadRequest,
+		"Snapshot cannot be patched.",
+		"Snapshot cannot be patched.",
+		err,
+	)
+}
+
 func NewUnsupportedFileTypeError(err error) *ErrorResponse {
 	return NewErrorResponse(
 		"unsupported_file_type",

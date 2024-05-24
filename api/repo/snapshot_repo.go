@@ -27,6 +27,7 @@ type SnapshotRepo interface {
 	FindByVersion(version int64) (model.Snapshot, error)
 	FindAllForFile(fileID string) ([]model.Snapshot, error)
 	FindAllDangling() ([]model.Snapshot, error)
+	FindAllPrevious(fileID string, version int64) ([]model.Snapshot, error)
 	Insert(snapshot model.Snapshot) error
 	Save(snapshot model.Snapshot) error
 	Delete(id string) error
@@ -439,13 +440,26 @@ func (repo *snapshotRepo) FindAllForFile(fileID string) ([]model.Snapshot, error
 }
 
 func (repo *snapshotRepo) FindAllDangling() ([]model.Snapshot, error) {
-	var snapshots []*snapshotEntity
-	db := repo.db.Raw("SELECT * FROM snapshot s LEFT JOIN snapshot_file sf ON s.id = sf.snapshot_id WHERE sf.snapshot_id IS NULL").Scan(&snapshots)
+	var entities []*snapshotEntity
+	db := repo.db.Raw("SELECT * FROM snapshot s LEFT JOIN snapshot_file sf ON s.id = sf.snapshot_id WHERE sf.snapshot_id IS NULL").Scan(&entities)
 	if db.Error != nil {
 		return nil, db.Error
 	}
 	var res []model.Snapshot
-	for _, s := range snapshots {
+	for _, s := range entities {
+		res = append(res, s)
+	}
+	return res, nil
+}
+
+func (repo *snapshotRepo) FindAllPrevious(fileID string, version int64) ([]model.Snapshot, error) {
+	var entities []*snapshotEntity
+	db := repo.db.Raw("SELECT * FROM snapshot s LEFT JOIN snapshot_file sf ON s.id = sf.snapshot_id WHERE sf.file_id = ? AND s.version < ? ORDER BY s.version DESC LIMIT 1", fileID, version).Scan(&entities)
+	if db.Error != nil {
+		return nil, db.Error
+	}
+	var res []model.Snapshot
+	for _, s := range entities {
 		res = append(res, s)
 	}
 	return res, nil

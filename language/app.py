@@ -38,22 +38,22 @@ def ner_entities():
 
     entities = []
     if nlp is None:
-        if nlp is None:
-            nlp = {
-                "xx": spacy.load("xx_ent_wiki_sm"),
-                "zh": spacy.load("zh_core_web_trf"),
-                "de": spacy.load("de_dep_news_trf"),
-                "en": spacy.load("en_core_web_trf"),
-                "fr": spacy.load("fr_dep_news_trf"),
-                "it": spacy.load("it_core_news_lg"),
-                "ja": spacy.load("ja_core_news_trf"),
-                "nl": spacy.load("nl_core_news_lg"),
-                "pt": spacy.load("pt_core_news_lg"),
-                "ru": spacy.load("ru_core_news_lg"),
-                "es": spacy.load("es_dep_news_trf"),
-                "sv": spacy.load("sv_core_news_lg"),
-            }
-        nlp[iso6393_to_model[language]].add_pipe("sentencizer")
+        nlp = {
+            "xx": spacy.load("xx_ent_wiki_sm"),
+            "zh": spacy.load("zh_core_web_trf"),
+            "de": spacy.load("de_core_news_lg"),
+            "en": spacy.load("en_core_web_trf"),
+            "fr": spacy.load("fr_core_news_lg"),
+            "it": spacy.load("it_core_news_lg"),
+            "ja": spacy.load("ja_core_news_trf"),
+            "nl": spacy.load("nl_core_news_lg"),
+            "pt": spacy.load("pt_core_news_lg"),
+            "ru": spacy.load("ru_core_news_lg"),
+            "es": spacy.load("es_core_news_lg"),
+            "sv": spacy.load("sv_core_news_lg"),
+        }
+        for key in nlp:
+            nlp[key].add_pipe("sentencizer")
 
     for doc in nlp[iso6393_to_model[language]].pipe([text], disable=["tagger"]):
         for sent in doc.sents:

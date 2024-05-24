@@ -33,9 +33,9 @@ func (r *InsightsRouter) AppendRoutes(g fiber.Router) {
 	g.Get("/languages", r.GetLanguages)
 	g.Post("/:id", r.Create)
 	g.Patch("/:id", r.Patch)
+	g.Delete("/:id", r.Delete)
 	g.Get("/:id/summary", r.GetSummary)
 	g.Get("/:id/entities", r.ListEntities)
-	g.Delete("/:id", r.Delete)
 }
 
 func (r *InsightsRouter) AppendNonJWTRoutes(g fiber.Router) {
@@ -98,22 +98,14 @@ func (r *InsightsRouter) Create(c *fiber.Ctx) error {
 //	@Id				insights_patch
 //	@Accept			json
 //	@Produce		json
-//	@Param			id		path	string							true	"ID"
-//	@Param			body	body	service.InsightsPatchOptions	true	"Body"
+//	@Param			id	path	string	true	"ID"
 //	@Success		200
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		400	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/insights/{id} [patch]
 func (r *InsightsRouter) Patch(c *fiber.Ctx) error {
-	opts := new(service.InsightsPatchOptions)
-	if err := c.BodyParser(opts); err != nil {
-		return err
-	}
-	if err := validator.New().Struct(opts); err != nil {
-		return errorpkg.NewRequestBodyValidationError(err)
-	}
-	if err := r.insightsSvc.Patch(c.Params("id"), *opts, GetUserID(c)); err != nil {
+	if err := r.insightsSvc.Patch(c.Params("id"), GetUserID(c)); err != nil {
 		return err
 	}
 	return c.SendStatus(http.StatusNoContent)

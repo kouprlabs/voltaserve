@@ -366,13 +366,6 @@ definitions:
       name:
         type: string
     type: object
-  service.InsightsPatchOptions:
-    properties:
-      languageId:
-        type: string
-    required:
-    - languageId
-    type: object
   service.InsightsSummary:
     properties:
       hasEntities:
@@ -1621,12 +1614,6 @@ paths:
         name: id
         required: true
         type: string
-      - description: Body
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/service.InsightsPatchOptions'
       produces:
       - application/json
       responses:

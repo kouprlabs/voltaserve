@@ -228,9 +228,9 @@ export class FileAPI {
     return this.jsonResponseOrThrow(response)
   }
 
-  async rename(id: string, options: FileRenameOptions): Promise<File> {
-    const response = await fetch(`${API_URL}/v2/files/${id}/rename`, {
-      method: 'POST',
+  async patchName(id: string, options: FileRenameOptions): Promise<File> {
+    const response = await fetch(`${API_URL}/v2/files/${id}/name`, {
+      method: 'PATCH',
       headers: {
         'Authorization': `Bearer ${this.token.access_token}`,
         'Content-Type': 'application/json',

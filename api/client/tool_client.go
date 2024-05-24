@@ -71,12 +71,11 @@ func (cl *ToolClient) ResizeImage(inputPath string, width int, height int, outpu
 	if err != nil {
 		return err
 	}
-	jsonData := map[string]interface{}{
+	jsonBytes, err := json.Marshal(map[string]interface{}{
 		"bin":    "convert",
 		"args":   []string{"-resize", size, "${input}", "${output.png}"},
 		"stdout": true,
-	}
-	jsonBytes, err := json.Marshal(jsonData)
+	})
 	if err != nil {
 		return err
 	}
@@ -156,12 +155,11 @@ func (cl *ToolClient) ThumbnailFromImage(inputPath string, width int, height int
 	if err != nil {
 		return err
 	}
-	jsonData := map[string]interface{}{
+	jsonBytes, err := json.Marshal(map[string]interface{}{
 		"bin":    "convert",
 		"args":   []string{"-thumbnail", size, "-background", "white", "-alpha", "remove", "-flatten", "${input}[0]", fmt.Sprintf("${output%s}", filepath.Ext(outputPath))},
 		"stdout": true,
-	}
-	jsonBytes, err := json.Marshal(jsonData)
+	})
 	if err != nil {
 		return err
 	}
@@ -228,12 +226,11 @@ func (cl *ToolClient) ConvertImage(inputPath string, outputPath string) error {
 	if err != nil {
 		return err
 	}
-	jsonData := map[string]interface{}{
+	jsonBytes, err := json.Marshal(map[string]interface{}{
 		"bin":    "convert",
 		"args":   []string{"${input}", fmt.Sprintf("${output%s}", filepath.Ext(outputPath))},
 		"stdout": true,
-	}
-	jsonBytes, err := json.Marshal(jsonData)
+	})
 	if err != nil {
 		return err
 	}
@@ -300,12 +297,11 @@ func (cl *ToolClient) RemoveAlphaChannel(inputPath string, outputPath string) er
 	if err != nil {
 		return err
 	}
-	jsonData := map[string]interface{}{
+	jsonBytes, err := json.Marshal(map[string]interface{}{
 		"bin":    "convert",
 		"args":   []string{"${input}", "-alpha", "off", fmt.Sprintf("${output%s}", filepath.Ext(outputPath))},
 		"stdout": true,
-	}
-	jsonBytes, err := json.Marshal(jsonData)
+	})
 	if err != nil {
 		return err
 	}
@@ -377,16 +373,15 @@ func (cl *ToolClient) MeasureImage(inputPath string) (model.ImageProps, error) {
 	if err != nil {
 		return model.ImageProps{}, err
 	}
-	jsonData := map[string]interface{}{
+	b, err := json.Marshal(map[string]interface{}{
 		"bin":    "identify",
 		"args":   []string{"-format", "%w,%h", "${input}"},
 		"stdout": true,
-	}
-	jsonBytes, err := json.Marshal(jsonData)
+	})
 	if err != nil {
 		return model.ImageProps{}, err
 	}
-	if _, err := jsonField.Write(jsonBytes); err != nil {
+	if _, err := jsonField.Write(b); err != nil {
 		return model.ImageProps{}, err
 	}
 	if err := writer.Close(); err != nil {
@@ -451,12 +446,11 @@ func (cl *ToolClient) TSVFromImage(inputPath string, model string) (string, erro
 	if err != nil {
 		return "", err
 	}
-	jsonData := map[string]interface{}{
+	jsonBytes, err := json.Marshal(map[string]interface{}{
 		"bin":    "tesseract",
 		"args":   []string{"${input}", "${output.#.tsv}", "-l", model, "tsv"},
 		"stdout": true,
-	}
-	jsonBytes, err := json.Marshal(jsonData)
+	})
 	if err != nil {
 		return "", err
 	}
@@ -514,12 +508,11 @@ func (cl *ToolClient) TextFromImage(inputPath string, model string) (string, err
 	if err != nil {
 		return "", err
 	}
-	jsonData := map[string]interface{}{
+	jsonBytes, err := json.Marshal(map[string]interface{}{
 		"bin":    "tesseract",
 		"args":   []string{"${input}", "${output.#.txt}", "-l", model, "txt"},
 		"stdout": true,
-	}
-	jsonBytes, err := json.Marshal(jsonData)
+	})
 	if err != nil {
 		return "", err
 	}
@@ -577,12 +570,11 @@ func (cl *ToolClient) DPIFromImage(inputPath string) (int, error) {
 	if err != nil {
 		return -1, err
 	}
-	jsonData := map[string]interface{}{
+	jsonBytes, err := json.Marshal(map[string]interface{}{
 		"bin":    "exiftool",
 		"args":   []string{"-S", "-s", "-ImageWidth", "-ImageHeight", "-XResolution", "-YResolution", "-ResolutionUnit", "${input}"},
 		"stdout": true,
-	}
-	jsonBytes, err := json.Marshal(jsonData)
+	})
 	if err != nil {
 		return -1, err
 	}
@@ -666,12 +658,11 @@ func (cl *ToolClient) OCRFromPDF(inputPath string, language *string, dpi *int) (
 	}
 	args = append(args, "${input}")
 	args = append(args, "${output}")
-	jsonData := map[string]interface{}{
+	jsonBytes, err := json.Marshal(map[string]interface{}{
 		"bin":    "ocrmypdf",
 		"args":   args,
 		"stdout": true,
-	}
-	jsonBytes, err := json.Marshal(jsonData)
+	})
 	if err != nil {
 		return "", err
 	}
@@ -739,12 +730,11 @@ func (cl *ToolClient) TextFromPDF(inputPath string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	jsonData := map[string]interface{}{
+	jsonBytes, err := json.Marshal(map[string]interface{}{
 		"bin":    "pdftotext",
 		"args":   []string{"${input}", "${output.txt}"},
 		"stdout": true,
-	}
-	jsonBytes, err := json.Marshal(jsonData)
+	})
 	if err != nil {
 		return "", err
 	}

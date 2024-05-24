@@ -31,7 +31,7 @@ async function handleCopy(
       res.end()
     } else {
       const clones = await api.copy(targetFile.id, { ids: [sourceFile.id] })
-      await api.rename(clones[0].id, {
+      await api.patchName(clones[0].id, {
         name: decodeURIComponent(path.basename(getTargetPath(req))),
       })
       res.statusCode = 204

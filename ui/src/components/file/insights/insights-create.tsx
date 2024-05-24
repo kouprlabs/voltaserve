@@ -35,6 +35,7 @@ const InsightsCreate = () => {
         ? languages.filter((e) => e.id === file.snapshot?.language)[0]
         : undefined
       if (value) {
+        setLanguage(value)
         return { value: value.id, label: value.name }
       }
     }

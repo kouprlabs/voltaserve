@@ -36,7 +36,7 @@ async function handleMove(
         sourcePath.split('/').length === targetPath.split('/').length &&
         path.dirname(sourcePath) === path.dirname(targetPath)
       ) {
-        await api.rename(sourceFile.id, {
+        await api.patchName(sourceFile.id, {
           name: decodeURIComponent(path.basename(targetPath)),
         })
       } else {
