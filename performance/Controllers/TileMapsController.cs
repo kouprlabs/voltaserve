@@ -7,14 +7,9 @@ namespace Defyle.WebApi.Inode.Controllers
   using Microsoft.AspNetCore.Mvc;
 
   [Route("{path}/tileMaps")]
-  public class TileMapsController : Controller
+  public class TileMapsController(TileMapService tileMapService) : Controller
   {
-    private readonly TileMapService _tileMapService;
-
-    public TileMapsController(TileMapService authorizedTileMapService)
-    {
-      _tileMapService = authorizedTileMapService;
-    }
+    private readonly TileMapService _tileMapService = tileMapService;
 
     [HttpGet("zoomLevels")]
     [ProducesResponseType(typeof(IEnumerable<ZoomLevel>), 200)]
