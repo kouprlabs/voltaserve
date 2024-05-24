@@ -1,0 +1,5 @@
+bin/
+obj/
+config/system_user_password.txt
+config/admin_user_password.txt
+config/appsettings.json

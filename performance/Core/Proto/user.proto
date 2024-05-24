@@ -1,0 +1,98 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "defyle.server.user.proto";
+option java_outer_classname = "UserServiceProto";
+
+package proto;
+
+import "shared.proto";
+
+service UserServiceProto {
+  rpc InsertInsecure (UserProto) returns (UserProto) {}
+  rpc Insert (UserInsertRequestProto) returns (UserProto) {}
+  rpc Find (UserFindRequestProto) returns (UserProto) {}
+  rpc FindByField(UserFindByFieldRequestProto) returns (UserProto) {}
+  rpc FindAll (UserFindAllRequestProto) returns (UserFindAllResponseProto) {}
+  rpc FindAllPaged (UserFindAllPagedRequestProto) returns (UserFindAllPagedResponseProto) {}
+  rpc Update (UserUpdateRequestProto) returns (UserProto) {}
+  rpc Delete (UserDeleteRequestProto) returns (Empty) {}
+  rpc FindSystemUser(UserFindSystemUserRequestProto) returns (UserProto) {}
+  rpc FindAdminUser(UserFindAdminUserRequestProto) returns (UserProto) {}
+}
+
+message UserInsertRequestProto {
+  string userId = 1;
+  UserProto user = 2;
+}
+
+message UserFindRequestProto {
+  string userId = 1;
+  string id = 2;
+}
+
+message UserFindByFieldRequestProto {
+  string userId = 1;
+  string field = 2;
+  string value = 3;
+}
+
+message UserFindAllRequestProto {
+  string userId = 1;
+  string nodeId = 2;
+}
+
+message UserFindAllResponseProto {
+  repeated UserProto users = 1;
+}
+
+message UserFindAllPagedRequestProto {
+  string userId = 1;
+  string nodeId = 2;
+  int64 page = 3;
+  int64 size = 4;
+}
+
+message UserFindAllPagedResponseProto {
+  repeated UserProto data = 1;
+  int64 totalPages = 2;
+  int64 totalElements = 3;
+  int64 page = 4;
+  int64 size = 5;
+}
+
+message UserUpdateRequestProto {
+  string userId = 1;
+  UserProto user = 2;
+}
+
+message UserDeleteRequestProto {
+  string userId = 1;
+  UserProto user = 2;
+}
+
+message UserProto {
+  string id = 1;
+  string fullName = 2;
+  string username = 3;
+  string email = 4;
+  string image = 5;
+  string passwordHash = 6;
+  string refreshTokenValue = 7;
+  int64 refreshTokenValidTo = 8;
+  string resetPasswordToken = 9;
+  string emailConfirmationToken = 10;
+  bool isEmailConfirmed = 11;
+  bool isSuperuser = 12;
+  bool isSystem = 13;
+  bool isLdap = 14;
+  string roleId = 15;
+  int64 createTime = 16;
+	int64 updateTime = 17;
+}
+
+message UserFindSystemUserRequestProto {
+}
+
+message UserFindAdminUserRequestProto {
+}

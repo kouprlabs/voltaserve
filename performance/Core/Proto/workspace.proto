@@ -1,0 +1,84 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "defyle.server.workspace.proto";
+option java_outer_classname = "WorkspaceServiceProto";
+
+package proto;
+
+import "shared.proto";
+
+service WorkspaceServiceProto {
+  rpc Insert (WorkspaceInsertRequestProto) returns (WorkspaceProto) {}
+  rpc Find (WorkspaceFindRequestProto) returns (WorkspaceProto) {}
+  rpc FindByField(WorkspaceFindByFieldRequestProto) returns (WorkspaceProto) {}
+  rpc FindAll (WorkspaceFindAllRequestProto) returns (WorkspaceFindAllResponseProto) {}
+  rpc FindAllPaged (WorkspaceFindAllPagedRequestProto) returns (WorkspaceFindAllPagedResponseProto) {}
+  rpc Update (WorkspaceUpdateRequestProto) returns (WorkspaceProto) {}
+  rpc Delete (WorkspaceDeleteRequestProto) returns (Empty) {}
+}
+
+message WorkspaceInsertRequestProto {
+  string userId = 1;
+  WorkspaceProto workspace = 2;
+}
+
+message WorkspaceFindRequestProto {
+  string userId = 1;
+  string id = 2;
+}
+
+message WorkspaceFindByFieldRequestProto {
+  string userId = 1;
+  string field = 2;
+  string value = 3;
+}
+
+message WorkspaceFindAllRequestProto {
+  string userId = 1;
+}
+
+message WorkspaceFindAllResponseProto {
+  repeated WorkspaceProto workspaces = 1;
+}
+
+message WorkspaceFindAllPagedRequestProto {
+  string userId = 1;
+  int64 page = 2;
+  int64 size = 3;
+}
+
+message WorkspaceFindAllPagedResponseProto {
+  repeated WorkspaceProto data = 1;
+  int64 totalPages = 2;
+  int64 totalElements = 3;
+  int64 page = 4;
+  int64 size = 5;
+}
+
+message WorkspaceUpdateRequestProto {
+  string userId = 1;
+  WorkspaceProto workspace = 2;
+}
+
+message WorkspaceDeleteRequestProto {
+  string userId = 1;
+  WorkspaceProto workspace = 2;
+}
+
+message WorkspaceProto {
+  string Id = 1;
+  string Name = 2;
+  int64 storageCapacity = 3;
+  string rootInodeId = 4;
+  string partitionId = 5;
+  string image = 6;
+  bool encrypted = 7;
+  string passwordHash = 8;
+  string cipherKey = 9;
+  string transitKey = 10;
+  string transitIv = 11;
+  string salt = 12;
+  int64 createTime = 13;
+  int64 updateTime = 14;
+}

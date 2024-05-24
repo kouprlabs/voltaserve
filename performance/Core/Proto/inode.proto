@@ -1,0 +1,180 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "defyle.server.inode.proto";
+option java_outer_classname = "InodeServiceProto";
+
+package proto;
+
+import "shared.proto";
+import "file.proto";
+
+service InodeServiceProto {
+  rpc Insert (InodeInsertRequestProto) returns (InodeFacetProto) {}
+  rpc Find (InodeFindRequestProto) returns (InodeFacetProto) {}
+  rpc FindMany (InodeFindManyRequestProto) returns (InodeFindManyResponseProto) {}
+  rpc FindRoot (InodeFindRootRequestProto) returns (InodeFacetProto) {}
+  rpc GetChildren (InodeGetChildrenRequestProto) returns (InodeGetChildrenResponseProto) {}
+  rpc GetChildrenPaged (InodeGetChildrenPagedRequestProto) returns (InodeGetChildrenPagedResponseProto) {}
+  rpc GetTree (InodeGetTreeRequestProto) returns (InodeGetTreeResponseProto) {}
+  rpc Copy (InodeCopyRequestProto) returns (InodeFacetProto) {}
+  rpc Move (InodeMoveRequestProto) returns (Empty) {}
+  rpc MoveChildren (InodeMoveChildrenRequestProto) returns (Empty) {}
+  rpc Update (InodeUpdateRequestProto) returns (InodeFacetProto) {}
+  rpc Delete (InodeDeleteRequestProto) returns (Empty) {}
+  rpc GetPath (InodeGetPathRequestProto) returns (InodeGetPathResponseProto) {}
+  rpc GetStorageUsage (InodeGetStorageUsageRequestProto) returns (InodeGetStorageUsageResponseProto) {}
+  rpc CountChildren (InodeCountChildrenRequestProto) returns (InodeCountChildrenResponseProto) {}
+}
+
+message InodeInsertRequestProto {
+  string userId = 1;
+  InodeProto inode = 2;
+}
+
+message InodeFindRequestProto {
+  string userId = 1;
+  string id = 2;
+}
+
+message InodeFindManyRequestProto {
+  string userId = 1;
+  repeated string ids = 2;
+}
+
+message InodeFindManyResponseProto {
+  repeated InodeFacetProto inodes = 1;
+}
+
+message InodeFindRootRequestProto {
+  string userId = 1;
+  string workspaceId = 2;
+}
+
+message InodeGetChildrenRequestProto {
+  string userId = 1;
+  string id = 2;
+}
+
+message InodeGetChildrenResponseProto {
+  repeated InodeFacetProto inodes = 1;
+}
+
+message InodeGetChildrenPagedRequestProto {
+  string userId = 1;
+  string id = 2;
+  int64 page = 3;
+  int64 size = 4;
+}
+
+message InodeGetChildrenPagedResponseProto {
+  repeated InodeFacetProto data = 1;
+  int64 totalPages = 2;
+  int64 totalElements = 3;
+  int64 page = 4;
+  int64 size = 5;
+}
+
+message InodeGetTreeRequestProto {
+  string userId = 1;
+  string id = 2;
+}
+
+message InodeGetTreeResponseProto {
+  repeated InodeFacetProto inodes = 1;
+}
+
+message InodeCopyRequestProto {
+  string userId = 1;
+  string id = 2;
+  string sourceId = 3;
+}
+
+message InodeMoveRequestProto {
+  string userId = 1;
+  string id = 2;
+  string sourceId = 3;
+}
+
+message InodeMoveChildrenRequestProto {
+  string userId = 1;
+  string id = 2;
+  string sourceId = 3;
+}
+
+message InodeUpdateRequestProto {
+  string userId = 1;
+  InodeProto inode = 2;
+}
+
+message InodeDeleteRequestProto {
+  string userId = 1;
+  string id = 2;
+}
+
+message InodeGetPathRequestProto {
+  string userId = 1;
+  string id = 2;
+}
+
+message InodeGetPathResponseProto {
+  repeated InodeProto inodes = 1;
+}
+
+message InodeGetStorageUsageRequestProto {
+  string userId = 1;
+  string id = 2;
+}
+
+message InodeGetStorageUsageResponseProto {
+  int64 storageUsage = 1;
+}
+
+message InodeCountChildrenRequestProto {
+  string userId = 1;
+  string id = 2;
+}
+
+message InodeCountChildrenResponseProto {
+  int64 count = 1;
+}
+
+message InodeProto {
+  string id = 1;
+  string workspaceId = 2;
+  string name = 3;
+  string type = 4;
+  int64 sortOrder = 5;
+  string parentId = 6;
+  string text = 7;
+  int64 createTime = 8;
+  int64 updateTime = 9;
+}
+
+message FileFacetProto {
+  string mime = 1;
+  string category = 2;
+  string type = 3;
+  int64 size = 4;
+  int64 version = 5;
+  repeated FilePropertyProto properties = 6;
+}
+
+message DirectoryFacetProto {
+}
+
+message InodeFacetProto {
+  string id = 1;
+  string workspaceId = 2;
+  string name = 3;
+  string type = 4;
+  int64 sortOrder = 5;
+  string parentId = 6;
+  string text = 7;
+  int64 createTime = 8;
+  int64 updateTime = 9;
+  FileFacetProto file = 10;
+  DirectoryFacetProto directory = 11;
+  repeated InodeProto path = 12;
+  repeated string permissions = 13; 
+}

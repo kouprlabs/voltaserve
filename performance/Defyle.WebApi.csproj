@@ -1,0 +1,50 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <Compile Remove="uploads\**" />
+    <Content Remove="uploads\**" />
+    <EmbeddedResource Remove="uploads\**" />
+    <None Remove="uploads\**" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="RabbitMQ.Client" Version="5.1.2" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="5.0.0-rc5" />
+    <PackageReference Include="Swashbuckle.AspNetCore.ReDoc" Version="5.0.0-rc5" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="5.0.0-rc5" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.0" />
+    <PackageReference Include="AutoMapper" Version="9.0.0" />
+    <PackageReference Include="Google.Protobuf" Version="3.11.2" />
+    <PackageReference Include="Grpc" Version="2.26.0" />
+    <PackageReference Include="Grpc.Tools" Version="2.26.0" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.1.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="3.0.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
+		<PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.1.0" />
+    <PackageReference Include="Novell.Directory.Ldap.NETStandard" Version="3.0.0-beta6" />
+		<PackageReference Include="RabbitMQ.Client" Version="5.1.2" />
+		<PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.0.0" />
+		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="5.6.0" />
+		<PackageReference Include="Jdenticon-net" Version="2.2.1" />
+		<PackageReference Include="Npgsql" Version="4.1.2" />
+		<PackageReference Include="Magick.NET-Q8-x64" Version="7.14.5" />
+		<PackageReference Include="SemanticVersioning" Version="1.2.2" />
+    <PackageReference Include="NEST" Version="7.2.0" />
+    <PackageReference Include="ValueInjecter" Version="3.2.0" />
+    <PackageReference Include="AWSSDK.S3" Version="3.3.110.30" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <None Include="$(ProjectDir)config\**" CopyToOutputDirectory="PreserveNewest" LinkBase="config\" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\corelib\Defyle.Core.csproj" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,148 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "defyle.server.policy.proto";
+option java_outer_classname = "PolicyServiceProto";
+
+package proto;
+
+import "shared.proto";
+
+service PolicyServiceProto {
+  rpc Insert (PolicyInsertRequestProto) returns (PolicyProto) {}
+  rpc Delete (PolicyDeleteRequestProto) returns (Empty) {}
+  rpc Grant (PolicyGrantRequestProto) returns (Empty) {}
+  rpc Revoke (PolicyRevokeRequestProto) returns (Empty) {}
+  rpc Find (PolicyFindRequestProto) returns (PolicyProto) {}
+  rpc FindAll (PolicyFindAllRequestProto) returns (PolicyFindAllResponseProto) {}
+  rpc FindAllPaged (PolicyFindAllPagedRequestProto) returns (PolicyFindAllPagedResponseProto) {}
+  rpc EnforcePermission (PolicyEnforcePermissionRequestProto) returns (Empty) {}
+  rpc FindAllForRole (PolicyFindAllForRoleRequestProto) returns (PolicyFindAllForRoleResponseProto) {}
+  rpc FindAllForUser (PolicyFindAllForUserRequestProto) returns (PolicyFindAllForUserResponseProto) {}
+  rpc GetModelPermissionsForUser (PolicyGetModelPermissionsForUserRequestProto) returns (PolicyGetModelPermissionsForUserResponseProto) {}
+  rpc GetObjectPermissionsForUser (PolicyGetObjectPermissionsForUserRequestProto) returns (PolicyGetObjectPermissionsForUserResponseProto) {}
+  rpc GetObjectPermissionsForRole (PolicyGetObjectPermissionsForRoleRequestProto) returns (PolicyGetObjectPermissionsForRoleResponseProto) {}
+}
+
+message PolicyInsertRequestProto {
+  string userId = 1;
+  PolicyProto policy = 2;
+}
+
+message PolicyFindRequestProto {
+  string userId = 1;
+  string id = 2;
+}
+
+message PolicyDeleteRequestProto {
+  string userId = 1;
+  PolicyProto policy = 2;
+}
+
+message PolicyFindAllRequestProto {
+  string userId = 1;
+}
+
+message PolicyFindAllResponseProto {
+  repeated PolicyProto policies = 1;
+}
+
+message PolicyFindAllPagedRequestProto {
+  string userId = 1;
+  int64 page = 3;
+  int64 size = 4;
+}
+
+message PolicyFindAllPagedResponseProto {
+  repeated PolicyProto data = 1;
+  int64 totalPages = 2;
+  int64 totalElements = 3;
+  int64 page = 4;
+  int64 size = 5;
+}
+
+message PolicyGrantRequestProto {
+  string userId = 1;
+  string subject = 2;
+  string object = 3;
+  string permission = 4;
+}
+
+message PolicyRevokeRequestProto {
+  string userId = 1;
+  string subject = 2;
+  string object = 3;
+  string permission = 4;
+}
+
+message PolicyEnforcePermissionRequestProto {
+  string userId = 1;
+  string subject = 2;
+  string object = 3;
+  string permission = 4;
+}
+
+message PolicyEnforceOperationRequestProto {
+  string userId = 1;
+  string subject = 2;
+  string object = 3;
+  string permission = 4;
+}
+
+message PolicyFindAllForRoleRequestProto {
+  string userId = 1;
+  string roleId = 2;
+  string object = 3;
+}
+
+message PolicyFindAllForRoleResponseProto {
+  repeated PolicyProto policies = 1;
+}
+
+message PolicyFindAllForUserRequestProto {
+  string userId = 1;
+  string subjectId = 2;
+  string object = 3;
+}
+
+message PolicyFindAllForUserResponseProto {
+  repeated PolicyProto policies = 1;
+}
+
+message PolicyGetObjectPermissionsForUserRequestProto {
+  string userId = 1;
+  string subjectId = 2;
+  string object = 3;
+}
+
+message PolicyGetObjectPermissionsForUserResponseProto {
+  repeated string permissions = 1;
+}
+
+message PolicyGetModelPermissionsForUserRequestProto {
+  string userId = 1;
+  string subjectId = 2;
+  string model = 3;
+}
+
+message PolicyGetModelPermissionsForUserResponseProto {
+  repeated string permissions = 1;
+}
+
+message PolicyGetObjectPermissionsForRoleRequestProto {
+  string userId = 1;
+  string roleId = 2;
+  string object = 3;
+}
+
+message PolicyGetObjectPermissionsForRoleResponseProto {
+  repeated string permissions = 1;
+}
+
+message PolicyProto {
+  string id = 1;
+  string subject = 2;
+  string object = 3;
+  string permission = 4;
+  int64 createTime = 5;
+}

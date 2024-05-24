@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "defyle.server.model.proto";
+option java_outer_classname = "ModelServiceProto";
+
+package proto;
+
+service ModelServiceProto {
+  rpc GetPermissions (ModelGetPermissionsRequestProto) returns (ModelGetPermissionsResponseProto) {}
+  rpc GetProperty (ModelGetPropertyRequestProto) returns (ModelGetPropertyResponseProto) {}
+}
+
+message ModelGetPermissionsRequestProto {
+  string name = 1;
+}
+
+message ModelGetPermissionsResponseProto {
+  repeated string permissions = 1;
+}
+
+message ModelGetPropertyRequestProto {
+  string userId = 1;
+  string modelName = 2;
+  string propertyName = 3;
+}
+
+message ModelGetPropertyResponseProto {
+  string value = 1;
+}

@@ -1,0 +1,87 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "defyle.server.role.proto";
+option java_outer_classname = "RoleServiceProto";
+
+package proto;
+
+import "shared.proto";
+
+service RoleServiceProto {
+  rpc Insert (RoleInsertRequestProto) returns (RoleProto) {}
+  rpc Find (RoleFindRequestProto) returns (RoleProto) {}
+  rpc FindAll (RoleFindAllRequestProto) returns (RoleFindAllResponseProto) {}
+  rpc FindAllPaged (RoleFindAllPagedRequestProto) returns (RoleFindAllPagedResponseProto) {}
+  rpc FindAllForObject (RoleFindAllForObjectRequestProto) returns (RoleFindAllForObjectResponseProto) {}
+  rpc FindAllWithoutPermissionsForObject (RoleFindAllWithoutPermissionsForObjectRequestProto) returns (RoleFindAllWithoutPermissionsForObjectResponseProto) {}
+  rpc Update (RoleUpdateRequestProto) returns (RoleProto) {}
+  rpc Delete (RoleDeleteRequestProto) returns (Empty) {}
+}
+
+message RoleInsertRequestProto {
+  string userId = 1;
+  RoleProto role = 2;
+}
+
+message RoleFindRequestProto {
+  string userId = 1;
+  string id = 2;
+}
+
+message RoleFindAllRequestProto {
+  string userId = 1;
+}
+
+message RoleFindAllResponseProto {
+  repeated RoleProto roles = 1;
+}
+
+message RoleFindAllPagedRequestProto {
+  string userId = 1;
+  int64 page = 3;
+  int64 size = 4;
+}
+
+message RoleFindAllPagedResponseProto {
+  repeated RoleProto data = 1;
+  int64 totalPages = 2;
+  int64 totalElements = 3;
+  int64 page = 4;
+  int64 size = 5;
+}
+
+message RoleUpdateRequestProto {
+  string userId = 1;
+  RoleProto role = 2;
+}
+
+message RoleDeleteRequestProto {
+  string userId = 1;
+  RoleProto role = 2;
+}
+
+message RoleFindAllForObjectRequestProto {
+  string userId = 1;
+  string object = 3;
+}
+
+message RoleFindAllForObjectResponseProto {
+  repeated RoleProto roles = 1;
+}
+
+message RoleFindAllWithoutPermissionsForObjectRequestProto {
+  string userId = 1;
+  string object = 3;
+}
+
+message RoleFindAllWithoutPermissionsForObjectResponseProto {
+  repeated RoleProto roles = 1;
+}
+
+message RoleProto {
+  string id = 1;
+  string name = 2;
+  int64 createTime = 3;
+	int64 updateTime = 4;
+}
