@@ -22,7 +22,6 @@
                 {
                     throw new Exception(GetAcceptanceCriteria());
                 }
-
                 _value = value;
             }
         }

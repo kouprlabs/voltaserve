@@ -180,7 +180,7 @@
                         Row = r,
                         Col = c
                     };
-                    Rectangle clippingRect = new Rectangle
+                    var clippingRect = new Rectangle
                     {
                         X = tileMetadata.X,
                         Y = tileMetadata.Y,
@@ -198,7 +198,7 @@
             {
                 for (int c = 0; c < cols; c++)
                 {
-                    Rectangle clippingRect = new Rectangle
+                    var clippingRect = new Rectangle
                     {
                         X = c * _tileSize.Width,
                         Y = imageToDecompose.Height - remainingHeight,
@@ -217,7 +217,7 @@
             {
                 for (int r = 0; r < rows; r++)
                 {
-                    Rectangle clippingRect = new Rectangle
+                    var clippingRect = new Rectangle
                     {
                         X = imageToDecompose.Width - remainingWidth,
                         Y = r * _tileSize.Height,
@@ -306,19 +306,16 @@
         {
             var levels = new List<int>();
             int zoomLevelCount = 0;
-            Size imageSize = new Size(_image.Width, _image.Height);
+            var imageSize = new Size(_image.Width, _image.Height);
             do
             {
                 imageSize.Width = (int)(imageSize.Width * ScaleDownPercentage.Factor);
                 imageSize.Height = (int)(imageSize.Height * ScaleDownPercentage.Factor);
-
                 if (imageSize.Width < MinimumScaleSize.Width && imageSize.Height < MinimumScaleSize.Height)
                 {
                     break;
                 }
-
                 levels.Add(zoomLevelCount);
-
                 zoomLevelCount += 1;
             } while (true);
             return levels;
@@ -341,7 +338,6 @@
             {
                 extension = _image.Extension;
             }
-            /* Remove leading dot */
             if (extension.StartsWith('.'))
             {
                 extension = extension[1..];
