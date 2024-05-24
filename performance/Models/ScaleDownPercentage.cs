@@ -1,44 +1,42 @@
 ﻿namespace Defyle.Core.Preview.Models
 {
-  using System;
+    using System;
 
-  public class ScaleDownPercentage
-  {
-    private double? _factor;
-
-    public ScaleDownPercentage(ushort value)
+    public class ScaleDownPercentage
     {
-      if (!IsValid(value))
-      {
-        throw new Exception(GetAcceptanceCriteria());
-      }
+        private double? _factor;
 
-      Value = value;
-    }
-
-    public ushort Value { get; }
-
-    public double Factor
-    {
-      get
-      {
-        if (!_factor.HasValue)
+        public ScaleDownPercentage(ushort value)
         {
-          _factor = Value * 0.01;
+            if (!IsValid(value))
+            {
+                throw new Exception(GetAcceptanceCriteria());
+            }
+            Value = value;
         }
 
-        return _factor.Value;
-      }
-    }
+        public ushort Value { get; }
 
-    private static bool IsValid(ushort value)
-    {
-      return value > 0 && value < 100;
-    }
+        public double Factor
+        {
+            get
+            {
+                if (!_factor.HasValue)
+                {
+                    _factor = Value * 0.01;
+                }
+                return _factor.Value;
+            }
+        }
 
-    private static string GetAcceptanceCriteria()
-    {
-      return $"{nameof(ScaleDownPercentage)} should be exclusively more than 0, and exclusively less then 100.";
+        private static bool IsValid(ushort value)
+        {
+            return value > 0 && value < 100;
+        }
+
+        private static string GetAcceptanceCriteria()
+        {
+            return $"{nameof(ScaleDownPercentage)} should be exclusively more than 0, and exclusively less then 100.";
+        }
     }
-  }
 }

@@ -1,26 +1,26 @@
 ﻿namespace Defyle.Core.Preview.Models
 {
-  using System.Drawing;
-  using System.IO;
+    using System.Drawing;
+    using System.IO;
 
-  public interface IImage
-  {
-    int Width { get; }
+    public interface IImage
+    {
+        int Width { get; }
 
-    int Height { get; }
+        int Height { get; }
 
-    string Extension { get; }
+        string Extension { get; }
 
-    void Load(string file);
+        void Load(string file);
 
-    void Crop(int x, int y, int width, int height);
+        void Crop(int x, int y, int width, int height);
 
-    void Crop(Rectangle rectangle);
+        void Crop(Rectangle rectangle);
 
-    void ScaleWithAspectRatio(int width, int height);
+        void ScaleWithAspectRatio(int width, int height);
 
-    void Save(string file);
+        void Save(string file);
 
-    void SaveAsPngToStream(Stream stream);
-  }
+        void SaveAsPngToStream(Stream stream);
+    }
 }
