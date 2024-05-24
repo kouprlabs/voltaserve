@@ -52,15 +52,14 @@
     "@types/passport-jwt": "4.0.1",
     "@types/pg": "8.11.6",
     "@types/uuid": "9.0.8",
-    "@typescript-eslint/eslint-plugin": "7.9.0",
-    "@typescript-eslint/parser": "7.9.0",
-    "eslint": "8.57.0",
-    "eslint-config-prettier": "9.1.0",
+    "eslint": "9.3.0",
+    "globals": "15.3.0",
     "nodemon": "3.1.0",
     "prettier": "3.2.5",
     "swagger-autogen": "2.23.7",
     "ts-node": "10.9.2",
     "tsconfig-paths": "4.2.0",
-    "typescript": "5.4.5"
+    "typescript": "5.4.5",
+    "typescript-eslint": "7.9.0"
   }
 }

@@ -44,7 +44,8 @@ const IconDiverse = ({ file, scale }: IconFontProps) => {
   const width = Math.max(MIN_WIDTH, BASE_WIDTH * scale)
   const height = Math.max(MIN_HEIGHT, BASE_HEIGHT * scale)
 
-  const { original } = file
+  const { snapshot } = file
+  const { original } = snapshot || {}
   let image
   if (fe.isImage(original?.extension)) {
     image = isDark ? DarkImageSvg : ImageSvg

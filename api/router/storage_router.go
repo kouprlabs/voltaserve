@@ -11,24 +11,16 @@ type StorageRouter struct {
 	storageSvc *service.StorageService
 }
 
-type NewStorageRouterOptions struct {
-	StorageService *service.StorageService
-}
-
-func NewStorageRouter(opts NewStorageRouterOptions) *StorageRouter {
-	r := &StorageRouter{}
-	if opts.StorageService != nil {
-		r.storageSvc = opts.StorageService
-	} else {
-		r.storageSvc = service.NewStorageService(service.NewStorageServiceOptions{})
+func NewStorageRouter() *StorageRouter {
+	return &StorageRouter{
+		storageSvc: service.NewStorageService(),
 	}
-	return r
 }
 
 func (r *StorageRouter) AppendRoutes(g fiber.Router) {
-	g.Get("/get_account_usage", r.GetAccountUsage)
-	g.Get("/get_workspace_usage", r.GetWorkspaceUsage)
-	g.Get("/get_file_usage", r.GetFileUsage)
+	g.Get("/account_usage", r.GetAccountUsage)
+	g.Get("/workspace_usage", r.GetWorkspaceUsage)
+	g.Get("/file_usage", r.GetFileUsage)
 }
 
 // GetAccountUsage godoc
@@ -40,7 +32,7 @@ func (r *StorageRouter) AppendRoutes(g fiber.Router) {
 //	@Produce		json
 //	@Success		200	{object}	service.StorageUsage
 //	@Failure		500
-//	@Router			/storage/get_account_usage [get]
+//	@Router			/storage/account_usage [get]
 func (r *StorageRouter) GetAccountUsage(c *fiber.Ctx) error {
 	res, err := r.storageSvc.GetAccountUsage(GetUserID(c))
 	if err != nil {
@@ -59,7 +51,7 @@ func (r *StorageRouter) GetAccountUsage(c *fiber.Ctx) error {
 //	@Param			id	query		string	true	"Workspace ID"
 //	@Success		200	{object}	service.StorageUsage
 //	@Failure		500
-//	@Router			/storage/get_workspace_usage [get]
+//	@Router			/storage/workspace_usage [get]
 func (r *StorageRouter) GetWorkspaceUsage(c *fiber.Ctx) error {
 	id := c.Query("id")
 	if id == "" {
@@ -82,7 +74,7 @@ func (r *StorageRouter) GetWorkspaceUsage(c *fiber.Ctx) error {
 //	@Param			id	query		string	true	"File ID"
 //	@Success		200	{object}	service.StorageUsage
 //	@Failure		500
-//	@Router			/storage/get_file_usage [get]
+//	@Router			/storage/file_usage [get]
 func (r *StorageRouter) GetFileUsage(c *fiber.Ctx) error {
 	id := c.Query("id")
 	if id == "" {

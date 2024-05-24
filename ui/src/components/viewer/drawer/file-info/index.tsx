@@ -13,7 +13,7 @@ export type DrawerFileInfoProps = {
 }
 
 const DrawerFileInfo = ({ file }: DrawerFileInfoProps) => {
-  if (!file.original) {
+  if (!file.snapshot?.original) {
     return null
   }
   return (

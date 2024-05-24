@@ -19,7 +19,7 @@ import (
 
 // @title		Voltaserve API
 // @version	2.0.0
-// @BasePath	/v1
+// @BasePath	/v2
 func main() {
 	if _, err := os.Stat(".env.local"); err == nil {
 		err := godotenv.Load(".env.local")
@@ -44,49 +44,51 @@ func main() {
 		AllowOrigins: strings.Join(cfg.Security.CORSOrigins, ","),
 	}))
 
-	v1 := app.Group("v1")
+	v2 := app.Group("v2")
 
 	health := router.NewHealthRouter()
-	health.AppendRoutes(v1)
+	health.AppendRoutes(v2)
 
-	f := v1.Group("files")
+	filesGroup := v2.Group("files")
+	files := router.NewFileRouter()
+	files.AppendNonJWTRoutes(filesGroup)
 
-	downloads := router.NewDownloadsRouter(router.NewDownloadsRouterOptions{})
-	downloads.AppendNonJWTRoutes(f)
+	snapshotsGroup := v2.Group("snapshots")
+	snapshots := router.NewSnapshotRouter()
+	snapshots.AppendNonJWTRoutes(snapshotsGroup)
 
-	conversionWebhook := router.NewConversionWebhookRouter(router.NewConversionWebhookRouterOptions{})
-	conversionWebhook.AppendInternalRoutes(f)
+	insightsGroup := v2.Group("insights")
+	insights := router.NewInsightsRouter()
+	insights.AppendNonJWTRoutes(insightsGroup)
 
 	app.Use(jwtware.New(jwtware.Config{
 		SigningKey: jwtware.SigningKey{Key: []byte(cfg.Security.JWTSigningKey)},
 	}))
 
-	files := router.NewFileRouter(router.NewFileRouterOptions{})
-	files.AppendRoutes(f)
+	files.AppendRoutes(filesGroup)
+	snapshots.AppendRoutes(snapshotsGroup)
+	insights.AppendRoutes(insightsGroup)
 
-	snapshots := router.NewSnapshotRouter(router.NewSnapshotRouterOptions{})
-	snapshots.AppendRoutes(f)
+	invitations := router.NewInvitationRouter()
+	invitations.AppendRoutes(v2.Group("invitations"))
 
-	invitations := router.NewInvitationRouter(router.NewInvitationRouterOptions{})
-	invitations.AppendRoutes(v1.Group("invitations"))
+	notifications := router.NewNotificationRouter()
+	notifications.AppendRoutes(v2.Group("notifications"))
 
-	notifications := router.NewNotificationRouter(router.NewNotificationRouterOptions{})
-	notifications.AppendRoutes(v1.Group("notifications"))
+	organizations := router.NewOrganizationRouter()
+	organizations.AppendRoutes(v2.Group("organizations"))
 
-	organizations := router.NewOrganizationRouter(router.NewOrganizationRouterOptions{})
-	organizations.AppendRoutes(v1.Group("organizations"))
+	storage := router.NewStorageRouter()
+	storage.AppendRoutes(v2.Group("storage"))
 
-	storage := router.NewStorageRouter(router.NewStorageRouterOptions{})
-	storage.AppendRoutes(v1.Group("storage"))
+	workspaces := router.NewWorkspaceRouter()
+	workspaces.AppendRoutes(v2.Group("workspaces"))
 
-	workspaces := router.NewWorkspaceRouter(router.NewWorkspaceRouterOptions{})
-	workspaces.AppendRoutes(v1.Group("workspaces"))
+	groups := router.NewGroupRouter()
+	groups.AppendRoutes(v2.Group("groups"))
 
-	groups := router.NewGroupRouter(router.NewGroupRouterOptions{})
-	groups.AppendRoutes(v1.Group("groups"))
-
-	users := router.NewUserRouter(router.NewUserRouterOptions{})
-	users.AppendRoutes(v1.Group("users"))
+	users := router.NewUserRouter()
+	users.AppendRoutes(v2.Group("users"))
 
 	if err := app.Listen(fmt.Sprintf(":%d", cfg.Port)); err != nil {
 		panic(err)

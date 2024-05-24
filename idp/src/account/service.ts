@@ -5,8 +5,8 @@ import { newHashId, newHyphenlessUuid } from '@/infra/id'
 import { sendTemplateMail } from '@/infra/mail'
 import { hashPassword } from '@/infra/password'
 import search, { USER_SEARCH_INDEX } from '@/infra/search'
-import userRepo from '@/user/repo'
 import { User } from '@/user/model'
+import userRepo from '@/user/repo'
 import { mapEntity, UserDTO } from '@/user/service'
 
 export type AccountCreateOptions = {

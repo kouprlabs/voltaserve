@@ -22,48 +22,54 @@ import (
 	"github.com/reactivex/rxgo/v2"
 )
 
-type File struct {
-	ID          string     `json:"id"`
-	WorkspaceID string     `json:"workspaceId"`
-	Name        string     `json:"name"`
-	Type        string     `json:"type"`
-	ParentID    *string    `json:"parentId,omitempty"`
-	Version     *int64     `json:"version,omitempty"`
-	Original    *Download  `json:"original,omitempty"`
-	Preview     *Download  `json:"preview,omitempty"`
-	Thumbnail   *Thumbnail `json:"thumbnail,omitempty"`
-	Status      string     `json:"status,omitempty"`
-	Permission  string     `json:"permission"`
-	IsShared    *bool      `json:"isShared,omitempty"`
-	SnapshotID  *string    `json:"snapshotId,omitempty"`
-	CreateTime  string     `json:"createTime"`
-	UpdateTime  *string    `json:"updateTime,omitempty"`
+type FileService struct {
+	fileRepo       repo.FileRepo
+	fileSearch     *search.FileSearch
+	fileGuard      *guard.FileGuard
+	fileMapper     *FileMapper
+	fileCache      *cache.FileCache
+	workspaceCache *cache.WorkspaceCache
+	workspaceRepo  repo.WorkspaceRepo
+	workspaceGuard *guard.WorkspaceGuard
+	workspaceSvc   *WorkspaceService
+	snapshotRepo   repo.SnapshotRepo
+	snapshotSvc    *SnapshotService
+	userRepo       repo.UserRepo
+	userMapper     *userMapper
+	groupCache     *cache.GroupCache
+	groupGuard     *guard.GroupGuard
+	groupMapper    *groupMapper
+	permissionRepo repo.PermissionRepo
+	fileIdent      *infra.FileIdentifier
+	s3             *infra.S3Manager
+	pipelineClient *client.PipelineClient
+	config         config.Config
 }
 
-type FileList struct {
-	Data          []*File    `json:"data"`
-	TotalPages    uint       `json:"totalPages"`
-	TotalElements uint       `json:"totalElements"`
-	Page          uint       `json:"page"`
-	Size          uint       `json:"size"`
-	Query         *FileQuery `json:"query,omitempty"`
-}
-
-type FileListOptions struct {
-	Page      uint
-	Size      uint
-	SortBy    string
-	SortOrder string
-	Query     *FileQuery
-}
-
-type FileQuery struct {
-	Text             string  `json:"text" validate:"required"`
-	Type             *string `json:"type,omitempty" validate:"omitempty,oneof=file folder"`
-	CreateTimeAfter  *int64  `json:"createTimeAfter,omitempty"`
-	CreateTimeBefore *int64  `json:"createTimeBefore,omitempty"`
-	UpdateTimeAfter  *int64  `json:"updateTimeAfter,omitempty"`
-	UpdateTimeBefore *int64  `json:"updateTimeBefore,omitempty"`
+func NewFileService() *FileService {
+	return &FileService{
+		fileRepo:       repo.NewFileRepo(),
+		fileCache:      cache.NewFileCache(),
+		fileSearch:     search.NewFileSearch(),
+		fileGuard:      guard.NewFileGuard(),
+		fileMapper:     NewFileMapper(),
+		workspaceGuard: guard.NewWorkspaceGuard(),
+		workspaceCache: cache.NewWorkspaceCache(),
+		workspaceRepo:  repo.NewWorkspaceRepo(),
+		workspaceSvc:   NewWorkspaceService(),
+		snapshotRepo:   repo.NewSnapshotRepo(),
+		snapshotSvc:    NewSnapshotService(),
+		userRepo:       repo.NewUserRepo(),
+		userMapper:     newUserMapper(),
+		groupCache:     cache.NewGroupCache(),
+		groupGuard:     guard.NewGroupGuard(),
+		groupMapper:    newGroupMapper(),
+		permissionRepo: repo.NewPermissionRepo(),
+		fileIdent:      infra.NewFileIdentifier(),
+		s3:             infra.NewS3Manager(),
+		pipelineClient: client.NewPipelineClient(),
+		config:         config.GetConfig(),
+	}
 }
 
 type FileCreateOptions struct {
@@ -73,157 +79,17 @@ type FileCreateOptions struct {
 	ParentID    *string `json:"parentId" validate:"required"`
 }
 
-type FileCreateFolderOptions struct {
-	WorkspaceID string  `json:"workspaceId" validate:"required"`
-	Name        string  `json:"name" validate:"required,max=255"`
-	ParentID    *string `json:"parentId"`
-}
-
-type FileCopyOptions struct {
-	IDs []string `json:"ids" validate:"required"`
-}
-
-type FileBatchDeleteOptions struct {
-	IDs []string `json:"ids" validate:"required"`
-}
-
-type FileBatchGetOptions struct {
-	IDs []string `json:"ids" validate:"required"`
-}
-
-type FileGrantUserPermissionOptions struct {
-	UserID     string   `json:"userId" validate:"required"`
-	IDs        []string `json:"ids" validate:"required"`
-	Permission string   `json:"permission" validate:"required,oneof=viewer editor owner"`
-}
-
-type FileRevokeUserPermissionOptions struct {
-	IDs    []string `json:"ids" validate:"required"`
-	UserID string   `json:"userId" validate:"required"`
-}
-
-type FileGrantGroupPermissionOptions struct {
-	GroupID    string   `json:"groupId" validate:"required"`
-	IDs        []string `json:"ids" validate:"required"`
-	Permission string   `json:"permission" validate:"required,oneof=viewer editor owner"`
-}
-
-type FileRevokeGroupPermissionOptions struct {
-	IDs     []string `json:"ids" validate:"required"`
-	GroupID string   `json:"groupId" validate:"required"`
-}
-
-type FileMoveOptions struct {
-	IDs []string `json:"ids" validate:"required"`
-}
-
-type FileRenameOptions struct {
-	Name string `json:"name" validate:"required,max=255"`
-}
-
-type FileUpdateOCRLanguageOptions struct {
-	ID string `json:"id" validate:"required"`
-}
-
-type UserPermission struct {
-	ID         string `json:"id"`
-	User       *User  `json:"user"`
-	Permission string `json:"permission"`
-}
-
-type GroupPermission struct {
-	ID         string `json:"id"`
-	Group      *Group `json:"group"`
-	Permission string `json:"permission"`
-}
-
-type FileService struct {
-	fileRepo         repo.FileRepo
-	fileSearch       *search.FileSearch
-	fileGuard        *guard.FileGuard
-	fileMapper       *FileMapper
-	fileCache        *cache.FileCache
-	workspaceCache   *cache.WorkspaceCache
-	workspaceRepo    repo.WorkspaceRepo
-	workspaceGuard   *guard.WorkspaceGuard
-	workspaceSvc     *WorkspaceService
-	snapshotRepo     repo.SnapshotRepo
-	snapshotSvc      *SnapshotService
-	userRepo         repo.UserRepo
-	userMapper       *userMapper
-	groupCache       *cache.GroupCache
-	groupGuard       *guard.GroupGuard
-	groupMapper      *groupMapper
-	permissionRepo   repo.PermissionRepo
-	fileIdent        *infra.FileIdentifier
-	s3               *infra.S3Manager
-	conversionClient *client.ConversionClient
-	config           config.Config
-}
-
-type NewFileServiceOptions struct {
-	FileRepo         repo.FileRepo
-	WorkspaceRepo    repo.WorkspaceRepo
-	SnapshotRepo     repo.SnapshotRepo
-	UserRepo         repo.UserRepo
-	PermissionRepo   repo.PermissionRepo
-	WorkspaceService *WorkspaceService
-	SnapshotService  *SnapshotService
-}
-
-func NewFileService(opts NewFileServiceOptions) *FileService {
-	svc := &FileService{
-		fileCache:        cache.NewFileCache(),
-		fileSearch:       search.NewFileSearch(),
-		fileGuard:        guard.NewFileGuard(),
-		fileMapper:       NewFileMapper(),
-		workspaceGuard:   guard.NewWorkspaceGuard(),
-		workspaceCache:   cache.NewWorkspaceCache(),
-		userMapper:       newUserMapper(),
-		groupCache:       cache.NewGroupCache(),
-		groupGuard:       guard.NewGroupGuard(),
-		groupMapper:      newGroupMapper(),
-		fileIdent:        infra.NewFileIdentifier(),
-		s3:               infra.NewS3Manager(),
-		conversionClient: client.NewConversionClient(),
-		config:           config.GetConfig(),
-	}
-	if opts.FileRepo != nil {
-		svc.fileRepo = opts.FileRepo
-	} else {
-		svc.fileRepo = repo.NewFileRepo()
-	}
-	if opts.WorkspaceRepo != nil {
-		svc.workspaceRepo = opts.WorkspaceRepo
-	} else {
-		svc.workspaceRepo = repo.NewWorkspaceRepo()
-	}
-	if opts.SnapshotRepo != nil {
-		svc.snapshotRepo = opts.SnapshotRepo
-	} else {
-		svc.snapshotRepo = repo.NewSnapshotRepo()
-	}
-	if opts.UserRepo != nil {
-		svc.userRepo = opts.UserRepo
-	} else {
-		svc.userRepo = repo.NewUserRepo()
-	}
-	if opts.PermissionRepo != nil {
-		svc.permissionRepo = opts.PermissionRepo
-	} else {
-		svc.permissionRepo = repo.NewPermissionRepo()
-	}
-	if opts.WorkspaceService != nil {
-		svc.workspaceSvc = opts.WorkspaceService
-	} else {
-		svc.workspaceSvc = NewWorkspaceService(NewWorkspaceServiceOptions{})
-	}
-	if opts.SnapshotService != nil {
-		svc.snapshotSvc = opts.SnapshotService
-	} else {
-		svc.snapshotSvc = NewSnapshotService(NewSnapshotServiceOptions{})
-	}
-	return svc
+type File struct {
+	ID          string    `json:"id"`
+	WorkspaceID string    `json:"workspaceId"`
+	Name        string    `json:"name"`
+	Type        string    `json:"type"`
+	ParentID    *string   `json:"parentId,omitempty"`
+	Permission  string    `json:"permission"`
+	IsShared    *bool     `json:"isShared,omitempty"`
+	Snapshot    *Snapshot `json:"snapshot,omitempty"`
+	CreateTime  string    `json:"createTime"`
+	UpdateTime  *string   `json:"updateTime,omitempty"`
 }
 
 func (svc *FileService) Create(opts FileCreateOptions, userID string) (*File, error) {
@@ -326,8 +192,8 @@ func (svc *FileService) validateParent(id string, userID string) error {
 	return nil
 }
 
-func (svc *FileService) Store(fileID string, filePath string, userID string) (*File, error) {
-	file, err := svc.fileRepo.Find(fileID)
+func (svc *FileService) Store(id string, path string, userID string) (*File, error) {
+	file, err := svc.fileRepo.Find(id)
 	if err != nil {
 		return nil, err
 	}
@@ -338,14 +204,14 @@ func (svc *FileService) Store(fileID string, filePath string, userID string) (*F
 	if err != nil {
 		return nil, err
 	}
-	latestVersion, err := svc.snapshotRepo.GetLatestVersionForFile(fileID)
+	latestVersion, err := svc.snapshotRepo.GetLatestVersionForFile(id)
 	if err != nil {
 		return nil, err
 	}
 	snapshotID := helper.NewID()
 	snapshot := repo.NewSnapshot()
 	snapshot.SetID(snapshotID)
-	snapshot.SetVersion(latestVersion)
+	snapshot.SetVersion(latestVersion + 1)
 	if err = svc.snapshotRepo.Insert(snapshot); err != nil {
 		return nil, err
 	}
@@ -353,20 +219,20 @@ func (svc *FileService) Store(fileID string, filePath string, userID string) (*F
 	if err != nil {
 		return nil, err
 	}
-	if err = svc.snapshotRepo.MapWithFile(snapshotID, fileID); err != nil {
+	if err = svc.snapshotRepo.MapWithFile(snapshotID, id); err != nil {
 		return nil, err
 	}
-	stat, err := os.Stat(filePath)
+	stat, err := os.Stat(path)
 	if err != nil {
 		return nil, err
 	}
 	exceedsProcessingLimit := stat.Size() > helper.MegabyteToByte(svc.config.Limits.FileProcessingMaxSizeMB)
 	original := model.S3Object{
 		Bucket: workspace.GetBucket(),
-		Key:    fileID + "/" + snapshotID + "/original" + strings.ToLower(filepath.Ext(filePath)),
+		Key:    snapshotID + "/original" + strings.ToLower(filepath.Ext(path)),
 		Size:   stat.Size(),
 	}
-	if err = svc.s3.PutFile(original.Key, filePath, infra.DetectMimeFromFile(filePath), workspace.GetBucket()); err != nil {
+	if err = svc.s3.PutFile(original.Key, path, infra.DetectMimeFromFile(path), workspace.GetBucket()); err != nil {
 		return nil, err
 	}
 	snapshot.SetOriginal(&original)
@@ -387,8 +253,7 @@ func (svc *FileService) Store(fileID string, filePath string, userID string) (*F
 		return nil, err
 	}
 	if !exceedsProcessingLimit {
-		if err := svc.conversionClient.RunPipeline(&client.PipelineRunOptions{
-			FileID:     file.GetID(),
+		if err := svc.pipelineClient.Run(&client.PipelineRunOptions{
 			SnapshotID: snapshot.GetID(),
 			Bucket:     original.Bucket,
 			Key:        original.Key,
@@ -427,8 +292,7 @@ func (svc *FileService) DownloadOriginalBuffer(id string, userID string) (*bytes
 		return nil, nil, nil, errorpkg.NewSnapshotNotFoundError(nil)
 	}
 	if snapshot.HasOriginal() {
-		original := snapshot.GetOriginal()
-		buf, err := svc.s3.GetObject(original.Key, original.Bucket)
+		buf, err := svc.s3.GetObject(snapshot.GetOriginal().Key, snapshot.GetOriginal().Bucket)
 		if err != nil {
 			return nil, nil, nil, err
 		}
@@ -461,8 +325,7 @@ func (svc *FileService) DownloadPreviewBuffer(id string, userID string) (*bytes.
 		return nil, nil, nil, errorpkg.NewSnapshotNotFoundError(nil)
 	}
 	if snapshot.HasPreview() {
-		preview := snapshot.GetPreview()
-		buf, err := svc.s3.GetObject(preview.Key, preview.Bucket)
+		buf, err := svc.s3.GetObject(snapshot.GetPreview().Key, snapshot.GetPreview().Bucket)
 		if err != nil {
 			return nil, nil, nil, err
 		}
@@ -472,7 +335,7 @@ func (svc *FileService) DownloadPreviewBuffer(id string, userID string) (*bytes.
 	}
 }
 
-func (svc *FileService) FindByID(ids []string, userID string) ([]*File, error) {
+func (svc *FileService) Find(ids []string, userID string) ([]*File, error) {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
@@ -564,7 +427,7 @@ func (svc *FileService) FindByPath(path string, userID string) (*File, error) {
 			return nil, errorpkg.NewFileNotFoundError(fmt.Errorf("component not found '%s'", component))
 		}
 	}
-	result, err := svc.FindByID([]string{currentID}, userID)
+	result, err := svc.Find([]string{currentID}, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -657,7 +520,7 @@ func (svc *FileService) ListByPath(path string, userID string) ([]*File, error) 
 		}
 		return result, nil
 	} else if currentType == model.FileTypeFile {
-		result, err := svc.FindByID([]string{currentID}, userID)
+		result, err := svc.Find([]string{currentID}, userID)
 		if err != nil {
 			return nil, err
 		}
@@ -665,6 +528,32 @@ func (svc *FileService) ListByPath(path string, userID string) ([]*File, error) 
 	} else {
 		return nil, errorpkg.NewInternalServerError(fmt.Errorf("invalid file type %s", currentType))
 	}
+}
+
+type FileQuery struct {
+	Text             string  `json:"text" validate:"required"`
+	Type             *string `json:"type,omitempty" validate:"omitempty,oneof=file folder"`
+	CreateTimeAfter  *int64  `json:"createTimeAfter,omitempty"`
+	CreateTimeBefore *int64  `json:"createTimeBefore,omitempty"`
+	UpdateTimeAfter  *int64  `json:"updateTimeAfter,omitempty"`
+	UpdateTimeBefore *int64  `json:"updateTimeBefore,omitempty"`
+}
+
+type FileList struct {
+	Data          []*File    `json:"data"`
+	TotalPages    uint       `json:"totalPages"`
+	TotalElements uint       `json:"totalElements"`
+	Page          uint       `json:"page"`
+	Size          uint       `json:"size"`
+	Query         *FileQuery `json:"query,omitempty"`
+}
+
+type FileListOptions struct {
+	Page      uint
+	Size      uint
+	SortBy    string
+	SortOrder string
+	Query     *FileQuery
 }
 
 func (svc *FileService) List(id string, opts FileListOptions, userID string) (*FileList, error) {
@@ -795,25 +684,6 @@ func (svc *FileService) GetPath(id string, userID string) ([]*File, error) {
 	return res, nil
 }
 
-func (svc *FileService) GetIDs(id string, userID string) ([]string, error) {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return nil, err
-	}
-	file, err := svc.fileCache.Get(id)
-	if err != nil {
-		return nil, err
-	}
-	if err = svc.fileGuard.Authorize(user, file, model.PermissionViewer); err != nil {
-		return nil, err
-	}
-	ids, err := svc.fileRepo.GetChildrenIDs(id)
-	if err != nil {
-		return nil, err
-	}
-	return ids, nil
-}
-
 func (svc *FileService) Copy(targetID string, sourceIDs []string, userID string) (copiedFiles []*File, err error) {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
@@ -919,9 +789,9 @@ func (svc *FileService) Copy(targetID string, sourceIDs []string, userID string)
 			return nil, err
 		}
 
-		/* Assign snapshots to clones */
+		/* Attach latest snapshot to clones */
 		for _, c := range clones {
-			if err := svc.fileRepo.AssignSnapshots(c.GetID(), originalIDs[c.GetID()]); err != nil {
+			if err := svc.snapshotRepo.Attach(originalIDs[c.GetID()], c.GetID()); err != nil {
 				return nil, err
 			}
 		}
@@ -1050,7 +920,7 @@ func (svc *FileService) Move(targetID string, sourceIDs []string, userID string)
 	return parentIDs, nil
 }
 
-func (svc *FileService) Rename(id string, name string, userID string) (*File, error) {
+func (svc *FileService) PatchName(id string, name string, userID string) (*File, error) {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
@@ -1189,7 +1059,7 @@ func (svc *FileService) GetSize(id string, userID string) (int64, error) {
 	return res, nil
 }
 
-func (svc *FileService) GetItemCount(id string, userID string) (int64, error) {
+func (svc *FileService) GetCount(id string, userID string) (int64, error) {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return 0, err
@@ -1388,6 +1258,12 @@ func (svc *FileService) RevokeGroupPermission(ids []string, groupID string, user
 	return nil
 }
 
+type UserPermission struct {
+	ID         string `json:"id"`
+	User       *User  `json:"user"`
+	Permission string `json:"permission"`
+}
+
 func (svc *FileService) GetUserPermissions(id string, userID string) ([]*UserPermission, error) {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
@@ -1420,6 +1296,12 @@ func (svc *FileService) GetUserPermissions(id string, userID string) ([]*UserPer
 		})
 	}
 	return res, nil
+}
+
+type GroupPermission struct {
+	ID         string `json:"id"`
+	Group      *Group `json:"group"`
+	Permission string `json:"permission"`
 }
 
 func (svc *FileService) GetGroupPermissions(id string, userID string) ([]*GroupPermission, error) {
@@ -1503,12 +1385,12 @@ func (svc *FileService) doSorting(data []model.File, sortBy string, sortOrder st
 				return false
 			}
 			var sizeA int64 = 0
-			if fileA.Original != nil {
-				sizeA = int64(fileA.Original.Size)
+			if fileA.Snapshot.Original != nil {
+				sizeA = int64(fileA.Snapshot.Original.Size)
 			}
 			var sizeB int64 = 0
-			if fileB.Original != nil {
-				sizeB = int64(fileB.Original.Size)
+			if fileB.Snapshot.Original != nil {
+				sizeB = int64(fileB.Snapshot.Original.Size)
 			}
 			if sortOrder == SortOrderDesc {
 				return sizeA > sizeB
@@ -1560,10 +1442,10 @@ func (svc *FileService) doSorting(data []model.File, sortBy string, sortOrder st
 				if err != nil {
 					return false
 				}
-				if f.Original == nil {
+				if f.Snapshot.Original == nil {
 					return false
 				}
-				if svc.fileIdent.IsImage(f.Original.Extension) {
+				if svc.fileIdent.IsImage(f.Snapshot.Original.Extension) {
 					return true
 				}
 				return false
@@ -1575,10 +1457,10 @@ func (svc *FileService) doSorting(data []model.File, sortBy string, sortOrder st
 				if err != nil {
 					return false
 				}
-				if f.Original == nil {
+				if f.Snapshot.Original == nil {
 					return false
 				}
-				if svc.fileIdent.IsPDF(f.Original.Extension) {
+				if svc.fileIdent.IsPDF(f.Snapshot.Original.Extension) {
 					return true
 				}
 				return false
@@ -1590,10 +1472,10 @@ func (svc *FileService) doSorting(data []model.File, sortBy string, sortOrder st
 				if err != nil {
 					return false
 				}
-				if f.Original == nil {
+				if f.Snapshot.Original == nil {
 					return false
 				}
-				if svc.fileIdent.IsOffice(f.Original.Extension) {
+				if svc.fileIdent.IsOffice(f.Snapshot.Original.Extension) {
 					return true
 				}
 				return false
@@ -1605,10 +1487,10 @@ func (svc *FileService) doSorting(data []model.File, sortBy string, sortOrder st
 				if err != nil {
 					return false
 				}
-				if f.Original == nil {
+				if f.Snapshot.Original == nil {
 					return false
 				}
-				if svc.fileIdent.IsVideo(f.Original.Extension) {
+				if svc.fileIdent.IsVideo(f.Snapshot.Original.Extension) {
 					return true
 				}
 				return false
@@ -1620,10 +1502,10 @@ func (svc *FileService) doSorting(data []model.File, sortBy string, sortOrder st
 				if err != nil {
 					return false
 				}
-				if f.Original == nil {
+				if f.Snapshot.Original == nil {
 					return false
 				}
-				if svc.fileIdent.IsPlainText(f.Original.Extension) {
+				if svc.fileIdent.IsPlainText(f.Snapshot.Original.Extension) {
 					return true
 				}
 				return false
@@ -1635,14 +1517,14 @@ func (svc *FileService) doSorting(data []model.File, sortBy string, sortOrder st
 				if err != nil {
 					return false
 				}
-				if f.Original == nil {
+				if f.Snapshot.Original == nil {
 					return false
 				}
-				if !svc.fileIdent.IsImage(f.Original.Extension) &&
-					!svc.fileIdent.IsPDF(f.Original.Extension) &&
-					!svc.fileIdent.IsOffice(f.Original.Extension) &&
-					!svc.fileIdent.IsVideo(f.Original.Extension) &&
-					!svc.fileIdent.IsPlainText(f.Original.Extension) {
+				if !svc.fileIdent.IsImage(f.Snapshot.Original.Extension) &&
+					!svc.fileIdent.IsPDF(f.Snapshot.Original.Extension) &&
+					!svc.fileIdent.IsOffice(f.Snapshot.Original.Extension) &&
+					!svc.fileIdent.IsVideo(f.Snapshot.Original.Extension) &&
+					!svc.fileIdent.IsPlainText(f.Snapshot.Original.Extension) {
 					return true
 				}
 				return false
@@ -1714,7 +1596,7 @@ func (svc *FileService) doPagination(data []model.File, page, size uint) ([]mode
 	totalElements := uint(len(data))
 	totalPages := (totalElements + size - 1) / size
 	if page > totalPages {
-		return nil, totalElements, totalPages
+		return []model.File{}, totalElements, totalPages
 	}
 	startIndex := (page - 1) * size
 	endIndex := startIndex + size
@@ -1828,7 +1710,6 @@ func (mp *FileMapper) mapOne(m model.File, userID string) (*File, error) {
 		Name:        m.GetName(),
 		Type:        m.GetType(),
 		ParentID:    m.GetParentID(),
-		SnapshotID:  m.GetSnapshotID(),
 		CreateTime:  m.GetCreateTime(),
 		UpdateTime:  m.GetUpdateTime(),
 	}
@@ -1837,13 +1718,7 @@ func (mp *FileMapper) mapOne(m model.File, userID string) (*File, error) {
 		if err != nil {
 			return nil, err
 		}
-		s := mp.snapshotMapper.mapOne(snapshot, true)
-		res.SnapshotID = &s.ID
-		res.Version = &s.Version
-		res.Original = s.Original
-		res.Preview = s.Preview
-		res.Thumbnail = s.Thumbnail
-		res.Status = s.Status
+		res.Snapshot = mp.snapshotMapper.mapOne(snapshot, true)
 	}
 	res.Permission = ""
 	for _, p := range m.GetUserPermissions() {

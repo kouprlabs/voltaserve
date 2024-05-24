@@ -1,6 +1,6 @@
 import { IncomingMessage, ServerResponse } from 'http'
 import path from 'path'
-import { File, FileAPI } from '@/client/api'
+import { File, FileAPI, FileType } from '@/client/api'
 import { Token } from '@/client/idp'
 import { handleError } from '@/infra/error'
 
@@ -23,7 +23,8 @@ async function handleMkcol(
   try {
     const api = new FileAPI(token)
     directory = await api.getByPath(decodeURIComponent(path.dirname(req.url)))
-    await api.createFolder({
+    await api.create({
+      type: FileType.Folder,
       workspaceId: directory.workspaceId,
       parentId: directory.id,
       name: decodeURIComponent(path.basename(req.url)),

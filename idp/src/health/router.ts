@@ -1,6 +1,6 @@
-import { getConfig } from '@/config/config'
 import { Router, Request, Response, NextFunction } from 'express'
 import { Client as PgClient } from 'pg'
+import { getConfig } from '@/config/config'
 
 const router = Router()
 

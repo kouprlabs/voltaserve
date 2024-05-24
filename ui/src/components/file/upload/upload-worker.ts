@@ -1,5 +1,5 @@
 import { FileWithPath } from 'react-dropzone'
-import FileAPI from '@/client/api/file'
+import FileAPI, { FileType } from '@/client/api/file'
 import { errorToString } from '@/client/error'
 import store from '@/store/configure-store'
 import {
@@ -30,7 +30,8 @@ setInterval(async () => {
         },
       })
     } else if (upload.workspaceId && upload.parentId) {
-      await FileAPI.upload({
+      await FileAPI.create({
+        type: FileType.File,
         workspaceId: upload.workspaceId,
         parentId: upload.parentId,
         name:

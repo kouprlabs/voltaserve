@@ -26,12 +26,12 @@ export function readToken(config: Config) {
   config.token.issuer = process.env.TOKEN_ISSUER
   if (process.env.TOKEN_ACCESS_TOKEN_LIFETIME) {
     config.token.accessTokenLifetime = parseInt(
-      process.env.TOKEN_ACCESS_TOKEN_LIFETIME
+      process.env.TOKEN_ACCESS_TOKEN_LIFETIME,
     )
   }
   if (process.env.TOKEN_REFRESH_TOKEN_LIFETIME) {
     config.token.refreshTokenLifetime = parseInt(
-      process.env.TOKEN_REFRESH_TOKEN_LIFETIME
+      process.env.TOKEN_REFRESH_TOKEN_LIFETIME,
     )
   }
 }

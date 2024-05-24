@@ -1,7 +1,12 @@
 package core
 
+type ToolRunOptions struct {
+	Bin    string   `json:"bin"`
+	Args   []string `json:"args"`
+	Stdout bool     `json:"stdout"`
+}
+
 type PipelineRunOptions struct {
-	FileID     string `json:"fileId"`
 	SnapshotID string `json:"snapshotId"`
 	Bucket     string `json:"bucket"`
 	Key        string `json:"key"`

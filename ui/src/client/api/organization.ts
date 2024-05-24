@@ -1,5 +1,4 @@
-/* eslint-disable react-hooks/rules-of-hooks */
-import useSWR from 'swr'
+import useSWR, { SWRConfiguration } from 'swr'
 import { apiFetcher } from '@/client/fetcher'
 import { PermissionType } from './permission'
 
@@ -43,7 +42,7 @@ export type CreateOptions = {
   image?: string
 }
 
-export type UpdateNameOptions = {
+export type PatchNameOptions = {
   name: string
 }
 
@@ -51,15 +50,16 @@ export type RemoveMemberOptions = {
   userId: string
 }
 
-export default class OrganizationAPI {
-  static async getById(id: string) {
-    return apiFetcher({
-      url: `/organizations/${id}`,
-      method: 'GET',
-    }) as Promise<Organization>
-  }
+type ListQueryParams = {
+  page?: string
+  size?: string
+  sort_by?: string
+  sort_order?: string
+  query?: string
+}
 
-  static useGetById(id: string | null | undefined, swrOptions?: any) {
+export default class OrganizationAPI {
+  static useGet(id: string | null | undefined, swrOptions?: SWRConfiguration) {
     const url = `/organizations/${id}`
     return useSWR<Organization>(
       id ? url : null,
@@ -75,7 +75,7 @@ export default class OrganizationAPI {
     }) as Promise<List>
   }
 
-  static useList(options?: ListOptions, swrOptions?: any) {
+  static useList(options?: ListOptions, swrOptions?: SWRConfiguration) {
     const url = `/organizations?${this.paramsFromListOptions(options)}`
     return useSWR<List>(
       url,
@@ -92,21 +92,11 @@ export default class OrganizationAPI {
     }) as Promise<Organization>
   }
 
-  static async updateName(id: string, options: UpdateNameOptions) {
+  static async patchName(id: string, options: PatchNameOptions) {
     return apiFetcher({
-      url: `/organizations/${id}/update_name`,
-      method: 'POST',
+      url: `/organizations/${id}/name`,
+      method: 'PATCH',
       body: JSON.stringify(options),
-    }) as Promise<Organization>
-  }
-
-  static async updateImage(id: string, file: any) {
-    const formData = new FormData()
-    formData.append('file', file)
-    return apiFetcher({
-      url: `/organizations/${id}/update_image`,
-      method: 'POST',
-      body: formData,
     }) as Promise<Organization>
   }
 
@@ -126,14 +116,14 @@ export default class OrganizationAPI {
 
   static async removeMember(id: string, options: RemoveMemberOptions) {
     return apiFetcher({
-      url: `/organizations/${id}/remove_member`,
-      method: 'POST',
+      url: `/organizations/${id}/members`,
+      method: 'DELETE',
       body: JSON.stringify(options),
     })
   }
 
   static paramsFromListOptions(options?: ListOptions): URLSearchParams {
-    const params: any = {}
+    const params: ListQueryParams = {}
     if (options?.query) {
       params.query = encodeURIComponent(options.query.toString())
     }

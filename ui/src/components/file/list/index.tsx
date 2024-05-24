@@ -25,6 +25,7 @@ import {
   ltOwnerPermission,
   ltViewerPermission,
 } from '@/client/api/permission'
+import Orb from '@/components/common/orb'
 import downloadFile from '@/helpers/download-file'
 import mapFileList from '@/helpers/map-file-list'
 import {
@@ -42,6 +43,8 @@ import { useAppDispatch, useAppSelector } from '@/store/hook'
 import {
   copyModalDidOpen,
   deleteModalDidOpen,
+  menuDidClose,
+  menuDidOpen,
   moveModalDidOpen,
   multiSelectKeyUpdated,
   rangeSelectKeyUpdated,
@@ -49,8 +52,9 @@ import {
   selectionAdded,
   selectionUpdated,
   sharingModalDidOpen,
-  snapshotListModalDidOpen,
 } from '@/store/ui/files'
+import { modalDidOpen as aiModalDidOpen } from '@/store/ui/insights'
+import { listModalDidOpen } from '@/store/ui/snapshots'
 import { uploadsDrawerOpened } from '@/store/ui/uploads-drawer'
 import { FileViewType } from '@/types/file'
 import ListDragOverlay from './list-drag-overlay'
@@ -136,6 +140,14 @@ const FileList = ({ list, scale }: FileListProps) => {
       window.removeEventListener('keyup', handleKeyup)
     }
   }, [dispatch])
+
+  useEffect(() => {
+    if (isMenuOpen) {
+      dispatch(menuDidOpen())
+    } else {
+      dispatch(menuDidClose())
+    }
+  }, [isMenuOpen, dispatch])
 
   const handleDragStart = useCallback((event: DragStartEvent) => {
     dispatch(selectionAdded(event.active.id as string))
@@ -293,7 +305,7 @@ const FileList = ({ list, scale }: FileListProps) => {
                 }
                 onClick={(event: MouseEvent) => {
                   event.stopPropagation()
-                  dispatch(snapshotListModalDidOpen())
+                  dispatch(listModalDidOpen())
                 }}
               >
                 Snapshots
@@ -334,6 +346,21 @@ const FileList = ({ list, scale }: FileListProps) => {
               Download
             </MenuItem>
             <MenuDivider />
+            {singleFile && singleFile.type === 'file' ? (
+              <>
+                <MenuItem
+                  icon={<Orb width="20px" height="20px" />}
+                  isDisabled={ltEditorPermission(singleFile.permission)}
+                  onClick={(event: MouseEvent) => {
+                    event.stopPropagation()
+                    dispatch(aiModalDidOpen())
+                  }}
+                >
+                  Insights
+                </MenuItem>
+                <MenuDivider />
+              </>
+            ) : null}
             <MenuItem
               icon={<IconDelete />}
               className={cx('text-red-500')}

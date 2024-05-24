@@ -12,7 +12,7 @@ const WorkspaceLayout = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
-  const { data: workspace, mutate } = WorkspaceAPI.useGetById(id, swrConfig())
+  const { data: workspace, mutate } = WorkspaceAPI.useGet(id, swrConfig())
   const [tabIndex, setTabIndex] = useState(0)
 
   useEffect(() => {

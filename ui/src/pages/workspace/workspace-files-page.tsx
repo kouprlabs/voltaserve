@@ -12,10 +12,11 @@ import FileDelete from '@/components/file/file-delete'
 import FileMove from '@/components/file/file-move'
 import FileRename from '@/components/file/file-rename'
 import FileToolbar from '@/components/file/file-toolbar'
+import Insights from '@/components/file/insights'
 import FileList from '@/components/file/list'
-import FileSharing from '@/components/file/sharing'
-import FileSnapshotDelete from '@/components/file/snapshot/snapshot-delete'
-import FileSnapshotList from '@/components/file/snapshot/snapshot-list'
+import Sharing from '@/components/file/sharing'
+import SnapshotDetach from '@/components/file/snapshot/snapshot-detach'
+import SnapshotList from '@/components/file/snapshot/snapshot-list'
 import { decodeQuery } from '@/helpers/query'
 import { filePaginationSteps, filesPaginationStorage } from '@/infra/pagination'
 import {
@@ -39,10 +40,10 @@ const WorkspaceFilesPage = () => {
   const sortOrder = useAppSelector((state) => state.ui.files.sortOrder)
   const iconScale = useAppSelector((state) => state.ui.files.iconScale)
   const isSnapshotListModalOpen = useAppSelector(
-    (state) => state.ui.files.isSnapshotListModalOpen,
+    (state) => state.ui.snapshots.isListModalOpen,
   )
-  const isSnapshotDeleteModalOpen = useAppSelector(
-    (state) => state.ui.files.isSnapshotDeleteModalOpen,
+  const isSnapshotDetachModalOpen = useAppSelector(
+    (state) => state.ui.snapshots.isDetachModalOpen,
   )
   const isMoveModalOpen = useAppSelector(
     (state) => state.ui.files.isMoveModalOpen,
@@ -59,7 +60,10 @@ const WorkspaceFilesPage = () => {
   const isRenameModalOpen = useAppSelector(
     (state) => state.ui.files.isRenameModalOpen,
   )
-  const { data: workspace } = WorkspaceAPI.useGetById(id, swrConfig())
+  const isInsightsModalOpen = useAppSelector(
+    (state) => state.ui.insights.isModalOpen,
+  )
+  const { data: workspace } = WorkspaceAPI.useGet(id, swrConfig())
   const { page, size, steps, setPage, setSize } = usePagePagination({
     navigate,
     location,
@@ -70,7 +74,7 @@ const WorkspaceFilesPage = () => {
     data: list,
     error,
     isLoading,
-    mutate
+    mutate,
   } = FileAPI.useList(
     fileId!,
     {
@@ -182,14 +186,15 @@ const WorkspaceFilesPage = () => {
           ) : null}
         </div>
       </div>
-      {list ? <FileSharing list={list} /> : null}
-      {isSnapshotListModalOpen ? <FileSnapshotList /> : null}
-      {isSnapshotDeleteModalOpen ? <FileSnapshotDelete /> : null}
+      {list ? <Sharing list={list} /> : null}
+      {isSnapshotListModalOpen ? <SnapshotList /> : null}
+      {isSnapshotDetachModalOpen ? <SnapshotDetach /> : null}
       {isMoveModalOpen ? <FileMove /> : null}
       {isCopyModalOpen ? <FileCopy /> : null}
       {isCreateModalOpen ? <FileCreate /> : null}
       {isDeleteModalOpen ? <FileDelete /> : null}
       {isRenameModalOpen ? <FileRename /> : null}
+      {isInsightsModalOpen ? <Insights /> : null}
     </>
   )
 }

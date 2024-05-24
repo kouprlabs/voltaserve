@@ -33,7 +33,7 @@ export type TokenExchangeOptions = {
 
 export class HealthAPI {
   async get(): Promise<string> {
-    const response = await fetch(`${IDP_URL}/v1/health`, { method: 'GET' })
+    const response = await fetch(`${IDP_URL}/v2/health`, { method: 'GET' })
     return response.text()
   }
 }
@@ -47,7 +47,7 @@ export class TokenAPI {
     if (options.refresh_token) {
       formBody.push(`refresh_token=${options.refresh_token}`)
     }
-    const response = await fetch(`${IDP_URL}/v1/token`, {
+    const response = await fetch(`${IDP_URL}/v2/token`, {
       method: 'POST',
       body: formBody.join('&'),
       headers: {

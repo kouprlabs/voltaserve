@@ -43,6 +43,7 @@ export type ErrorData = {
   message: string
   userMessage: string
   moreInfo: string
+  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
   error?: any
 }
 
@@ -58,6 +59,7 @@ export type ErrorOptions = {
   code: ErrorCode
   message?: string
   userMessage?: string
+  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
   error?: any
 }
 
@@ -87,10 +89,11 @@ export function newResponse(data: ErrorData): ErrorResponse {
 }
 
 export function errorHandler(
+  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
   error: any,
   _: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   if (error.code && Object.values(ErrorCode).includes(error.code)) {
     const data = error as ErrorData
@@ -108,10 +111,12 @@ export function errorHandler(
   return
 }
 
+/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
 export function parseValidationError(result: any): ErrorData {
   let message: string
   if (result.errors) {
     message = result.errors
+      /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
       .map((e: any) => `${e.msg} for ${e.type} ${e.path} in ${e.location}.`)
       .join(' ')
   }

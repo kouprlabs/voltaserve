@@ -22,7 +22,7 @@ const Spacer = () => <div className={cx('grow')} />
 
 const OrganizationSettingsPage = () => {
   const { id } = useParams()
-  const { data: org, error } = OrganizationAPI.useGetById(id, swrConfig())
+  const { data: org, error } = OrganizationAPI.useGet(id, swrConfig())
   const [isNameModalOpen, setIsNameModalOpen] = useState(false)
   const [isInviteMembersModalOpen, setIsInviteMembersModalOpen] =
     useState(false)

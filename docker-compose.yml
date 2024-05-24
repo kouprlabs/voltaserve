@@ -78,7 +78,7 @@ services:
       - SMTP_SENDER_ADDRESS=${VOLTASERVE_SMTP_SENDER_ADDRESS}
       - SMTP_SENDER_NAME=${VOLTASERVE_SMTP_SENDER_NAME}
     healthcheck:
-      test: curl --fail http://127.0.0.1:8080/v1/health || exit 1
+      test: curl --fail http://127.0.0.1:8080/v2/health || exit 1
     depends_on:
       - cockroach
       - redis
@@ -104,7 +104,7 @@ services:
       - SMTP_SENDER_ADDRESS=${VOLTASERVE_SMTP_SENDER_ADDRESS}
       - SMTP_SENDER_NAME=${VOLTASERVE_SMTP_SENDER_NAME}
     healthcheck:
-      test: curl --fail http://127.0.0.1:8081/v1/health || exit 1
+      test: curl --fail http://127.0.0.1:8081/v2/health || exit 1
     depends_on:
       - cockroach
       - meilisearch
@@ -136,7 +136,7 @@ services:
       - IDP_URL=http://idp:8081
       - API_URL=http://api:8080
     healthcheck:
-      test: curl --fail http://127.0.0.1:8082/v1/health || exit 1
+      test: curl --fail http://127.0.0.1:8082/v2/health || exit 1
     depends_on:
       - idp
       - api
@@ -152,8 +152,17 @@ services:
       - API_URL=http://api:8080
       - S3_URL=minio:9000
     healthcheck:
-      test: curl --fail http://127.0.0.1:8083/v1/health || exit 1
+      test: curl --fail http://127.0.0.1:8083/v2/health || exit 1
     depends_on:
       - api
       - minio
+    restart: on-failure
+  language:
+    image: voltaserve/language
+    build:
+      context: ./language
+    ports:
+      - ${VOLTASERVE_LANGUAGE_PORT}:8084
+    healthcheck:
+      test: curl --fail http://127.0.0.1:8084/v2/health || exit 1
     restart: on-failure

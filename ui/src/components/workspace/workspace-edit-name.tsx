@@ -12,7 +12,6 @@ import {
   ModalHeader,
   ModalOverlay,
 } from '@chakra-ui/react'
-import { useSWRConfig } from 'swr'
 import {
   Field,
   FieldAttributes,
@@ -61,7 +60,7 @@ const WorkspaceEditName = ({
     ) => {
       setSubmitting(true)
       try {
-        const result = await WorkspaceAPI.updateName(workspace.id, {
+        const result = await WorkspaceAPI.patchName(workspace.id, {
           name,
         })
         mutate?.(result)

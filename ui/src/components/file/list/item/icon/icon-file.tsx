@@ -1,5 +1,5 @@
 import cx from 'classnames'
-import { SnapshotStatus } from '@/client/api/file'
+import { Status } from '@/client/api/snapshot'
 import { FileCommonProps } from '@/types/file'
 import IconDiverse from './icon-diverse'
 import IconErrorBadge from './icon-error-badge'
@@ -12,7 +12,7 @@ type IconFileProps = FileCommonProps
 
 const IconFile = ({ file, scale }: IconFileProps) => (
   <>
-    {file.thumbnail ? (
+    {file.snapshot?.thumbnail ? (
       <IconThumbnail file={file} scale={scale} />
     ) : (
       <>
@@ -28,11 +28,11 @@ const IconFile = ({ file, scale }: IconFileProps) => (
             'right-[-5px]',
           )}
         >
-          {file.status === SnapshotStatus.New ? <IconNewBadge /> : null}
-          {file.status === SnapshotStatus.Processing ? (
+          {file.snapshot?.status === Status.New ? <IconNewBadge /> : null}
+          {file.snapshot?.status === Status.Processing ? (
             <IconProcessingBadge />
           ) : null}
-          {file.status === SnapshotStatus.Error ? <IconErrorBadge /> : null}
+          {file.snapshot?.status === Status.Error ? <IconErrorBadge /> : null}
           {file.isShared ? <IconSharedBadge /> : null}
         </div>
       </>

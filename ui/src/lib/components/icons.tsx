@@ -191,13 +191,13 @@ export const IconCheckCircle = ({
   filled,
   ...props
 }: IconBaseProps) => (
-  <span className={getClassName({ filled: true, className })} {...props}>
+  <span className={getClassName({ filled, className })} {...props}>
     check_circle
   </span>
 )
 
 export const IconError = ({ className, filled, ...props }: IconBaseProps) => (
-  <span className={getClassName({ filled: true, className })} {...props}>
+  <span className={getClassName({ filled, className })} {...props}>
     error
   </span>
 )
@@ -275,6 +275,12 @@ export const IconSearch = ({ className, filled, ...props }: IconBaseProps) => (
 export const IconRefresh = ({ className, filled, ...props }: IconBaseProps) => (
   <span className={getClassName({ filled, className })} {...props}>
     refresh
+  </span>
+)
+
+export const IconSync = ({ className, filled, ...props }: IconBaseProps) => (
+  <span className={getClassName({ filled, className })} {...props}>
+    sync
   </span>
 )
 

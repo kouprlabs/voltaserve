@@ -1,6 +1,7 @@
 package router
 
 import (
+	"net/url"
 	"strconv"
 	"voltaserve/errorpkg"
 	"voltaserve/service"
@@ -12,18 +13,10 @@ type UserRouter struct {
 	userSvc *service.UserService
 }
 
-type NewUserRouterOptions struct {
-	UserService *service.UserService
-}
-
-func NewUserRouter(opts NewUserRouterOptions) *UserRouter {
-	r := &UserRouter{}
-	if opts.UserService != nil {
-		r.userSvc = opts.UserService
-	} else {
-		r.userSvc = service.NewUserService(service.NewUserServiceOptions{})
+func NewUserRouter() *UserRouter {
+	return &UserRouter{
+		userSvc: service.NewUserService(),
 	}
-	return r
 }
 
 func (r *UserRouter) AppendRoutes(g fiber.Router) {
@@ -84,8 +77,12 @@ func (r *UserRouter) List(c *fiber.Ctx) error {
 			return err
 		}
 	}
+	query, err := url.QueryUnescape(c.Query("query"))
+	if err != nil {
+		return errorpkg.NewInvalidQueryParamError("query")
+	}
 	res, err := r.userSvc.List(service.UserListOptions{
-		Query:               c.Query("query"),
+		Query:               query,
 		OrganizationID:      c.Query("organization_id"),
 		GroupID:             c.Query("group_id"),
 		NonGroupMembersOnly: nonGroupMembersOnly,

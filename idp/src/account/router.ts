@@ -30,7 +30,7 @@ router.post(
     } catch (err) {
       next(err)
     }
-  }
+  },
 )
 
 router.post(
@@ -48,7 +48,7 @@ router.post(
     } catch (err) {
       next(err)
     }
-  }
+  },
 )
 
 router.post(
@@ -65,7 +65,7 @@ router.post(
     } catch (err) {
       next(err)
     }
-  }
+  },
 )
 
 router.post(
@@ -79,13 +79,13 @@ router.post(
       }
       res.json(
         await sendResetPasswordEmail(
-          req.body as AccountSendResetPasswordEmailOptions
-        )
+          req.body as AccountSendResetPasswordEmailOptions,
+        ),
       )
     } catch (err) {
       next(err)
     }
-  }
+  },
 )
 
 export default router

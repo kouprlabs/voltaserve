@@ -20,7 +20,7 @@ import cx from 'classnames'
 import UserAPI, { SortOrder, User } from '@/client/api/user'
 import { swrConfig } from '@/client/options'
 import userToString from '@/helpers/user-to-string'
-import { SectionSpinner, Pagination, SearchInput } from '@/lib'
+import { SectionSpinner, Pagination, SearchInput, Spinner } from '@/lib'
 
 export type UserSelectorProps = {
   value?: User
@@ -77,6 +77,11 @@ const UserSelector = ({
     }
   }, [selected, onConfirm, onClose])
 
+  const handleSearchInputChange = useCallback((value: string) => {
+    setPage(1)
+    setQuery(value)
+  }, [])
+
   return (
     <>
       <Button
@@ -105,8 +110,9 @@ const UserSelector = ({
           <ModalBody>
             <div className={cx('flex', 'flex-col', 'gap-1.5')}>
               <SearchInput
+                placeholder="Search Users"
                 query={query}
-                onChange={(value) => setQuery(value)}
+                onChange={handleSearchInputChange}
               />
               {!list && error && (
                 <div
@@ -114,20 +120,31 @@ const UserSelector = ({
                     'flex',
                     'items-center',
                     'justify-center',
-                    'h-[300px]',
+                    'h-[320px]',
                   )}
                 >
                   <span>Failed to load users.</span>
                 </div>
               )}
-              {!list && !error && <SectionSpinner />}
+              {!list && !error ? (
+                <div
+                  className={cx(
+                    'flex',
+                    'items-center',
+                    'justify-center',
+                    'h-[320px]',
+                  )}
+                >
+                  <Spinner />
+                </div>
+              ) : null}
               {list && list.data.length === 0 && (
                 <div
                   className={cx(
                     'flex',
                     'items-center',
                     'justify-center',
-                    'h-[300px]',
+                    'h-[320px]',
                   )}
                 >
                   <div
@@ -142,65 +159,75 @@ const UserSelector = ({
                   </div>
                 </div>
               )}
-              {list && list.data.length > 0 && (
-                <Table variant="simple" size="sm">
-                  <colgroup>
-                    <col className={cx('w-[40px]')} />
-                    <col className={cx('w-[auto]')} />
-                  </colgroup>
-                  <Tbody>
-                    {list.data.map((u) => (
-                      <Tr
-                        key={u.id}
-                        className={cx(
-                          'cursor-pointer',
-                          'h-[52px]',
-                          { 'bg-gray-100': selected?.id === u.id },
-                          { 'dark:bg-gray-600': selected?.id === u.id },
-                          { 'bg-transparent': selected?.id !== u.id },
-                        )}
-                        onClick={() => setSelected(u)}
-                      >
-                        <Td className={cx('px-0.5', 'text-center')}>
-                          <Radio size="md" isChecked={selected?.id === u.id} />
-                        </Td>
-                        <Td className={cx('p-0.5')}>
-                          <div
-                            className={cx(
-                              'flex',
-                              'flex-row',
-                              'items-center',
-                              'gap-1.5',
-                            )}
-                          >
-                            <Avatar
-                              name={u.fullName}
-                              size="sm"
-                              className={cx('w-[40px]', 'h-[40px]')}
+              {list && list.data.length > 0 ? (
+                <div
+                  className={cx(
+                    'flex',
+                    'flex-col',
+                    'justify-between',
+                    'h-[320px]',
+                  )}
+                >
+                  <Table variant="simple" size="sm">
+                    <colgroup>
+                      <col className={cx('w-[40px]')} />
+                      <col className={cx('w-[auto]')} />
+                    </colgroup>
+                    <Tbody>
+                      {list.data.map((u) => (
+                        <Tr
+                          key={u.id}
+                          className={cx(
+                            'cursor-pointer',
+                            'h-[52px]',
+                            { 'bg-gray-100': selected?.id === u.id },
+                            { 'dark:bg-gray-600': selected?.id === u.id },
+                            { 'bg-transparent': selected?.id !== u.id },
+                          )}
+                          onClick={() => setSelected(u)}
+                        >
+                          <Td className={cx('px-0.5', 'text-center')}>
+                            <Radio
+                              size="md"
+                              isChecked={selected?.id === u.id}
                             />
-                            <span className={cx('text-base')}>
-                              {userToString(u)}
-                            </span>
-                          </div>
-                        </Td>
-                      </Tr>
-                    ))}
-                  </Tbody>
-                </Table>
-              )}
-              {list && (
-                <div className={cx('self-end')}>
-                  {list.totalPages > 1 ? (
-                    <Pagination
-                      uiSize="md"
-                      maxButtons={3}
-                      page={page}
-                      totalPages={list.totalPages}
-                      onPageChange={(value) => setPage(value)}
-                    />
-                  ) : null}
+                          </Td>
+                          <Td className={cx('p-0.5')}>
+                            <div
+                              className={cx(
+                                'flex',
+                                'flex-row',
+                                'items-center',
+                                'gap-1.5',
+                              )}
+                            >
+                              <Avatar
+                                name={u.fullName}
+                                size="sm"
+                                className={cx('w-[40px]', 'h-[40px]')}
+                              />
+                              <span className={cx('text-base')}>
+                                {userToString(u)}
+                              </span>
+                            </div>
+                          </Td>
+                        </Tr>
+                      ))}
+                    </Tbody>
+                  </Table>
+                  <div className={cx('self-end')}>
+                    {list.totalPages > 1 ? (
+                      <Pagination
+                        uiSize="md"
+                        maxButtons={3}
+                        page={page}
+                        totalPages={list.totalPages}
+                        onPageChange={(value) => setPage(value)}
+                      />
+                    ) : null}
+                  </div>
                 </div>
-              )}
+              ) : null}
             </div>
           </ModalBody>
           <ModalFooter>

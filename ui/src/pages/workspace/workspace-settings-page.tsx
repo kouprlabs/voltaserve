@@ -26,12 +26,16 @@ const Spacer = () => <div className={cx('grow')} />
 
 const WorkspaceSettingsPage = () => {
   const { id } = useParams()
-  const { data: workspace, error: workspaceError } = WorkspaceAPI.useGetById(
-    id,
-    swrConfig(),
-  )
-  const { data: storageUsage, error: storageUsageError } =
-    StorageAPI.useGetWorkspaceUsage(id, swrConfig())
+  const {
+    data: workspace,
+    error: workspaceError,
+    mutate,
+  } = WorkspaceAPI.useGet(id, swrConfig())
+  const {
+    data: storageUsage,
+    error: storageUsageError,
+    mutate: mutateStorageUsage,
+  } = StorageAPI.useGetWorkspaceUsage(id, swrConfig())
   const hasEditPermission = useMemo(
     () => workspace && geEditorPermission(workspace.permission),
     [workspace],
@@ -128,12 +132,18 @@ const WorkspaceSettingsPage = () => {
       <WorkspaceEditName
         open={isNameModalOpen}
         workspace={workspace}
-        onClose={() => setIsNameModalOpen(false)}
+        onClose={() => {
+          setIsNameModalOpen(false)
+          mutate()
+        }}
       />
       <WorkspaceEditStorageCapacity
         open={isStorageCapacityModalOpen}
         workspace={workspace}
-        onClose={() => setIsStorageCapacityModalOpen(false)}
+        onClose={() => {
+          setIsStorageCapacityModalOpen(false)
+          mutateStorageUsage()
+        }}
       />
       <WorkspaceDelete
         open={isDeleteModalOpen}

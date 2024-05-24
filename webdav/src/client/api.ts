@@ -1,7 +1,7 @@
+import { createWriteStream, unlink } from 'fs'
+import { get } from 'http'
 import { API_URL } from '@/config'
 import { Token } from './idp'
-import { get } from 'http'
-import { createWriteStream, unlink } from 'fs'
 
 export type APIErrorResponse = {
   code: string
@@ -81,11 +81,12 @@ export type FileCreateFolderOptions = {
   parentId: string
 }
 
-export type FileUploadOptions = {
+export type FileCreateOptions = {
+  type: FileType
   workspaceId: string
   parentId?: string
-  blob: Blob
-  name: string
+  blob?: Blob
+  name?: string
 }
 
 export type FilePatchOptions = {
@@ -100,7 +101,7 @@ export type FileMoveOptions = {
 
 export class HealthAPI {
   async get(): Promise<string> {
-    const response = await fetch(`${API_URL}/v1/health`, { method: 'GET' })
+    const response = await fetch(`${API_URL}/v2/health`, { method: 'GET' })
     return response.text()
   }
 }
@@ -122,27 +123,38 @@ export class FileAPI {
     }
   }
 
-  async upload({
+  async create({
+    type,
     workspaceId,
     parentId,
     name,
     blob,
-  }: FileUploadOptions): Promise<File> {
-    const params = new URLSearchParams({ workspace_id: workspaceId })
+  }: FileCreateOptions): Promise<File> {
+    const params = new URLSearchParams({ type, workspace_id: workspaceId })
     if (parentId) {
       params.append('parent_id', parentId)
     }
     if (name) {
       params.append('name', name)
     }
-    return this.doUpload(`${API_URL}/v1/files?${params}`, 'POST', blob, name)
+    if (type === FileType.File && blob) {
+      return this.upload(`${API_URL}/v2/files?${params}`, 'POST', blob, name)
+    } else if (type === FileType.Folder) {
+      const response = await fetch(`${API_URL}/v2/files?${params}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${this.token.access_token}`,
+        },
+      })
+      return this.jsonResponseOrThrow(response)
+    }
   }
 
   async patch({ id, blob, name }: FilePatchOptions): Promise<File> {
-    return this.doUpload(`${API_URL}/v1/files/${id}`, 'PATCH', blob, name)
+    return this.upload(`${API_URL}/v2/files/${id}`, 'PATCH', blob, name)
   }
 
-  private async doUpload<T>(
+  private async upload<T>(
     url: string,
     method: string,
     blob: Blob,
@@ -162,7 +174,7 @@ export class FileAPI {
 
   async getByPath(path: string): Promise<File> {
     const response = await fetch(
-      `${API_URL}/v1/files/get?path=${encodeURIComponent(path)}`,
+      `${API_URL}/v2/files?path=${encodeURIComponent(path)}`,
       {
         method: 'GET',
         headers: {
@@ -176,7 +188,7 @@ export class FileAPI {
 
   async listByPath(path: string): Promise<File[]> {
     const response = await fetch(
-      `${API_URL}/v1/files/list?path=${encodeURIComponent(path)}`,
+      `${API_URL}/v2/files/list?path=${encodeURIComponent(path)}`,
       {
         method: 'GET',
         headers: {
@@ -188,24 +200,8 @@ export class FileAPI {
     return this.jsonResponseOrThrow(response)
   }
 
-  async createFolder(options: FileCreateFolderOptions): Promise<void> {
-    const response = await fetch(`${API_URL}/v1/files/create_folder`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${this.token.access_token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        workspaceId: options.workspaceId,
-        parentId: options.parentId,
-        name: options.name,
-      }),
-    })
-    return this.jsonResponseOrThrow(response)
-  }
-
   async copy(id: string, options: FileCopyOptions): Promise<File[]> {
-    const response = await fetch(`${API_URL}/v1/files/${id}/copy`, {
+    const response = await fetch(`${API_URL}/v2/files/${id}/copy`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${this.token.access_token}`,
@@ -219,7 +215,7 @@ export class FileAPI {
   }
 
   async move(id: string, options: FileMoveOptions): Promise<void> {
-    const response = await fetch(`${API_URL}/v1/files/${id}/move`, {
+    const response = await fetch(`${API_URL}/v2/files/${id}/move`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${this.token.access_token}`,
@@ -232,9 +228,9 @@ export class FileAPI {
     return this.jsonResponseOrThrow(response)
   }
 
-  async rename(id: string, options: FileRenameOptions): Promise<File> {
-    const response = await fetch(`${API_URL}/v1/files/${id}/rename`, {
-      method: 'POST',
+  async patchName(id: string, options: FileRenameOptions): Promise<File> {
+    const response = await fetch(`${API_URL}/v2/files/${id}/name`, {
+      method: 'PATCH',
       headers: {
         'Authorization': `Bearer ${this.token.access_token}`,
         'Content-Type': 'application/json',
@@ -247,12 +243,13 @@ export class FileAPI {
   }
 
   async delete(id: string): Promise<void> {
-    const response = await fetch(`${API_URL}/v1/files/${id}`, {
+    const response = await fetch(`${API_URL}/v2/files`, {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${this.token.access_token}`,
         'Content-Type': 'application/json',
       },
+      body: JSON.stringify({ ids: [id] }),
     })
     return this.jsonResponseOrThrow(response)
   }
@@ -261,7 +258,7 @@ export class FileAPI {
     return new Promise<void>((resolve, reject) => {
       const ws = createWriteStream(outputPath)
       const request = get(
-        `${API_URL}/v1/files/${file.id}/original${file.original.extension}?access_token=${this.token.access_token}`,
+        `${API_URL}/v2/files/${file.id}/original${file.original.extension}?access_token=${this.token.access_token}`,
         (response) => {
           response.pipe(ws)
           ws.on('finish', () => {

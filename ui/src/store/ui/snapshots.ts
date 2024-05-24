@@ -1,0 +1,55 @@
+import { KeyedMutator } from 'swr'
+import { createSlice, PayloadAction } from '@reduxjs/toolkit'
+import { List } from '@/client/api/snapshot'
+
+export type SnapshotsState = {
+  selection: string[]
+  isListModalOpen: boolean
+  isDetachModalOpen: boolean
+  snapshotMutate?: KeyedMutator<List | undefined>
+}
+
+const initialState: SnapshotsState = {
+  selection: [],
+  isListModalOpen: false,
+  isDetachModalOpen: false,
+}
+
+const slice = createSlice({
+  name: 'snapshots',
+  initialState,
+  reducers: {
+    selectionUpdated: (state, action: PayloadAction<string[]>) => {
+      state.selection = action.payload
+    },
+    mutateUpdated: (
+      state,
+      action: PayloadAction<KeyedMutator<List | undefined>>,
+    ) => {
+      state.snapshotMutate = action.payload
+    },
+    listModalDidOpen: (state) => {
+      state.isListModalOpen = true
+    },
+    detachModalDidOpen: (state) => {
+      state.isDetachModalOpen = true
+    },
+    listModalDidClose: (state) => {
+      state.isListModalOpen = false
+    },
+    detachModalDidClose: (state) => {
+      state.isDetachModalOpen = false
+    },
+  },
+})
+
+export const {
+  selectionUpdated,
+  mutateUpdated,
+  listModalDidOpen,
+  detachModalDidOpen,
+  listModalDidClose,
+  detachModalDidClose,
+} = slice.actions
+
+export default slice.reducer

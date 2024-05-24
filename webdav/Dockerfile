@@ -11,7 +11,7 @@ COPY package.json .
 COPY package-lock.json .
 COPY tsconfig.json .
 
-RUN npm ci
+RUN npm ci --legacy-peer-deps
 
 ENTRYPOINT ["npm", "run", "start"]
 

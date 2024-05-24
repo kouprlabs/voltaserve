@@ -14,6 +14,37 @@ import (
 	"voltaserve/search"
 )
 
+type SnapshotService struct {
+	snapshotRepo repo.SnapshotRepo
+	userRepo     repo.UserRepo
+	fileCache    *cache.FileCache
+	fileGuard    *guard.FileGuard
+	fileRepo     repo.FileRepo
+	fileSearch   *search.FileSearch
+	fileMapper   *FileMapper
+	config       config.Config
+}
+
+func NewSnapshotService() *SnapshotService {
+	return &SnapshotService{
+		fileCache:    cache.NewFileCache(),
+		fileGuard:    guard.NewFileGuard(),
+		fileSearch:   search.NewFileSearch(),
+		fileMapper:   NewFileMapper(),
+		snapshotRepo: repo.NewSnapshotRepo(),
+		userRepo:     repo.NewUserRepo(),
+		fileRepo:     repo.NewFileRepo(),
+		config:       config.GetConfig(),
+	}
+}
+
+type SnapshotListOptions struct {
+	Page      uint
+	Size      uint
+	SortBy    string
+	SortOrder string
+}
+
 type Snapshot struct {
 	ID         string     `json:"id"`
 	Version    int64      `json:"version"`
@@ -28,24 +59,11 @@ type Snapshot struct {
 	UpdateTime *string    `json:"updateTime,omitempty"`
 }
 
-type SnapshotList struct {
-	Data          []*Snapshot `json:"data"`
-	TotalPages    uint        `json:"totalPages"`
-	TotalElements uint        `json:"totalElements"`
-	Page          uint        `json:"page"`
-	Size          uint        `json:"size"`
-}
-
-type SnapshotListOptions struct {
-	Page      uint
-	Size      uint
-	SortBy    string
-	SortOrder string
-}
-
-type ImageProps struct {
-	Width  int `json:"width"`
-	Height int `json:"height"`
+type Download struct {
+	Extension string      `json:"extension"`
+	Size      int64       `json:"size"`
+	Image     *ImageProps `json:"image,omitempty"`
+	Language  *string     `json:"language,omitempty"`
 }
 
 type Thumbnail struct {
@@ -54,72 +72,20 @@ type Thumbnail struct {
 	Height int    `json:"height"`
 }
 
-type Download struct {
-	Extension string      `json:"extension"`
-	Size      int64       `json:"size"`
-	Image     *ImageProps `json:"image,omitempty"`
-	Language  *string     `json:"language,omitempty"`
+type SnapshotList struct {
+	Data          []*Snapshot `json:"data"`
+	TotalPages    uint        `json:"totalPages"`
+	TotalElements uint        `json:"totalElements"`
+	Page          uint        `json:"page"`
+	Size          uint        `json:"size"`
 }
 
-type FileUpdateSnapshotOptions struct {
-	Options   client.PipelineRunOptions `json:"options"`
-	Original  *model.S3Object           `json:"original,omitempty"`
-	Preview   *model.S3Object           `json:"preview,omitempty"`
-	Text      *model.S3Object           `json:"text,omitempty"`
-	OCR       *model.S3Object           `json:"ocr,omitempty"`
-	Thumbnail *model.Thumbnail          `json:"thumbnail,omitempty"`
-	Status    string                    `json:"status,omitempty"`
-}
-
-type SnapshotService struct {
-	snapshotRepo repo.SnapshotRepo
-	userRepo     repo.UserRepo
-	fileCache    *cache.FileCache
-	fileGuard    *guard.FileGuard
-	fileRepo     repo.FileRepo
-	fileSearch   *search.FileSearch
-	fileMapper   *FileMapper
-	config       config.Config
-}
-
-type NewSnapshotServiceOptions struct {
-	SnapshotRepo repo.SnapshotRepo
-	UserRepo     repo.UserRepo
-	FileRepo     repo.FileRepo
-}
-
-func NewSnapshotService(opts NewSnapshotServiceOptions) *SnapshotService {
-	svc := &SnapshotService{
-		fileCache:  cache.NewFileCache(),
-		fileGuard:  guard.NewFileGuard(),
-		fileSearch: search.NewFileSearch(),
-		fileMapper: NewFileMapper(),
-		config:     config.GetConfig(),
-	}
-	if opts.SnapshotRepo != nil {
-		svc.snapshotRepo = opts.SnapshotRepo
-	} else {
-		svc.snapshotRepo = repo.NewSnapshotRepo()
-	}
-	if opts.UserRepo != nil {
-		svc.userRepo = opts.UserRepo
-	} else {
-		svc.userRepo = repo.NewUserRepo()
-	}
-	if opts.FileRepo != nil {
-		svc.fileRepo = opts.FileRepo
-	} else {
-		svc.fileRepo = repo.NewFileRepo()
-	}
-	return svc
-}
-
-func (svc *SnapshotService) List(id string, opts SnapshotListOptions, userID string) (*SnapshotList, error) {
+func (svc *SnapshotService) List(fileID string, opts SnapshotListOptions, userID string) (*SnapshotList, error) {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
 	}
-	file, err := svc.fileCache.Get(id)
+	file, err := svc.fileCache.Get(fileID)
 	if err != nil {
 		return nil, err
 	}
@@ -129,7 +95,7 @@ func (svc *SnapshotService) List(id string, opts SnapshotListOptions, userID str
 	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
 		return nil, errorpkg.NewFileIsNotAFileError(file)
 	}
-	snapshots, err := svc.snapshotRepo.FindAllForFile(id)
+	snapshots, err := svc.snapshotRepo.FindAllForFile(fileID)
 	if err != nil {
 		return nil, err
 	}
@@ -195,7 +161,7 @@ func (svc *SnapshotService) doPagination(data []model.Snapshot, page, size uint)
 	totalElements := uint(len(data))
 	totalPages := (totalElements + size - 1) / size
 	if page > totalPages {
-		return nil, totalElements, totalPages
+		return []model.Snapshot{}, totalElements, totalPages
 	}
 	startIndex := (page - 1) * size
 	endIndex := startIndex + size
@@ -206,22 +172,26 @@ func (svc *SnapshotService) doPagination(data []model.Snapshot, page, size uint)
 	return pageData, totalElements, totalPages
 }
 
-func (svc *SnapshotService) Activate(id string, snapshotID string, userID string) (*File, error) {
+type SnapshotActivateOptions struct {
+	FileID string `json:"fileId" validate:"required"`
+}
+
+func (svc *SnapshotService) Activate(id string, opts SnapshotActivateOptions, userID string) (*File, error) {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
 	}
-	file, err := svc.fileCache.Get(id)
+	file, err := svc.fileCache.Get(opts.FileID)
 	if err != nil {
 		return nil, err
 	}
 	if err = svc.fileGuard.Authorize(user, file, model.PermissionEditor); err != nil {
 		return nil, err
 	}
-	if _, err := svc.snapshotRepo.Find(snapshotID); err != nil {
+	if _, err := svc.snapshotRepo.Find(id); err != nil {
 		return nil, err
 	}
-	file.SetSnapshotID(&snapshotID)
+	file.SetSnapshotID(&id)
 	if err = svc.fileRepo.Save(file); err != nil {
 		return nil, err
 	}
@@ -239,94 +209,64 @@ func (svc *SnapshotService) Activate(id string, snapshotID string, userID string
 	return res, nil
 }
 
-func (svc *SnapshotService) Delete(id string, snapshotID string, userID string) (*File, error) {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return nil, err
-	}
-	file, err := svc.fileCache.Get(id)
-	if err != nil {
-		return nil, err
-	}
-	if err = svc.fileGuard.Authorize(user, file, model.PermissionEditor); err != nil {
-		return nil, err
-	}
-	if _, err := svc.snapshotRepo.Find(snapshotID); err != nil {
-		return nil, err
-	}
-	requiresRefresh := false
-	if file.GetSnapshotID() != nil && *file.GetSnapshotID() == snapshotID {
-		snapshots, err := svc.snapshotRepo.FindAllForFile(file.GetID())
-		if err != nil {
-			return nil, err
-		}
-		if len(snapshots) == 0 {
-			file.SetSnapshotID(nil)
-		} else if len(snapshots) == 1 {
-			newSnapshotID := snapshots[0].GetID()
-			file.SetSnapshotID(&newSnapshotID)
-			if err := svc.fileRepo.Save(file); err != nil {
-				return nil, err
-			}
-			requiresRefresh = true
-		} else if len(snapshots) > 1 {
-			currentSnapshot, err := svc.snapshotRepo.Find(*file.GetSnapshotID())
-			if err != nil {
-				return nil, err
-			}
-			for _, s := range snapshots {
-				if s.GetVersion() == currentSnapshot.GetVersion()-1 {
-					newSnapshotID := s.GetID()
-					file.SetSnapshotID(&newSnapshotID)
-					if err := svc.fileRepo.Save(file); err != nil {
-						return nil, err
-					}
-					requiresRefresh = true
-					break
-				}
-			}
-		}
-	}
-	if err := svc.snapshotRepo.Delete(snapshotID); err != nil {
-		return nil, err
-	}
-	if requiresRefresh {
-		file, err = svc.fileCache.Refresh(file.GetID())
-		if err != nil {
-			return nil, err
-		}
-		if err = svc.fileSearch.Update([]model.File{file}); err != nil {
-			return nil, err
-		}
-	}
-	res, err := svc.fileMapper.mapOne(file, userID)
-	if err != nil {
-		return nil, err
-	}
-	return res, nil
+type SnapshotDetachOptions struct {
+	FileID string `json:"fileID" validate:"required"`
 }
 
-func (svc *SnapshotService) Update(id string, snapshotID string, opts FileUpdateSnapshotOptions, apiKey string) error {
-	if id != opts.Options.FileID || snapshotID != opts.Options.SnapshotID {
+func (svc *SnapshotService) Detach(id string, opts SnapshotDetachOptions, userID string) error {
+	user, err := svc.userRepo.Find(userID)
+	if err != nil {
+		return err
+	}
+	file, err := svc.fileCache.Get(opts.FileID)
+	if err != nil {
+		return err
+	}
+	if err = svc.fileGuard.Authorize(user, file, model.PermissionEditor); err != nil {
+		return err
+	}
+	if _, err := svc.snapshotRepo.Find(id); err != nil {
+		return err
+	}
+	if err := svc.snapshotRepo.Detach(id, file.GetID()); err != nil {
+		return err
+	}
+	associationCount, err := svc.snapshotRepo.CountAssociations(id)
+	if err != nil {
+		return err
+	}
+	if associationCount == 0 {
+		if err := svc.snapshotRepo.Delete(id); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+type SnapshotUpdateOptions struct {
+	Options   client.PipelineRunOptions `json:"options"`
+	Original  *model.S3Object           `json:"original,omitempty"`
+	Preview   *model.S3Object           `json:"preview,omitempty"`
+	Text      *model.S3Object           `json:"text,omitempty"`
+	OCR       *model.S3Object           `json:"ocr,omitempty"`
+	Thumbnail *model.Thumbnail          `json:"thumbnail,omitempty"`
+	Status    string                    `json:"status,omitempty"`
+}
+
+func (svc *SnapshotService) Patch(id string, opts SnapshotUpdateOptions, apiKey string) error {
+	if id != opts.Options.SnapshotID {
 		return errorpkg.NewPathVariablesAndBodyParametersNotConsistent()
 	}
 	if apiKey != svc.config.Security.APIKey {
 		return errorpkg.NewInvalidAPIKeyError()
 	}
-	if err := svc.snapshotRepo.Update(snapshotID, repo.SnapshotUpdateOptions{
+	if err := svc.snapshotRepo.Update(id, repo.SnapshotUpdateOptions{
 		Thumbnail: opts.Thumbnail,
 		Original:  opts.Original,
 		Preview:   opts.Preview,
 		Text:      opts.Text,
 		Status:    opts.Status,
 	}); err != nil {
-		return err
-	}
-	file, err := svc.fileCache.Refresh(id)
-	if err != nil {
-		return err
-	}
-	if err = svc.fileSearch.Update([]model.File{file}); err != nil {
 		return err
 	}
 	return nil
@@ -344,6 +284,7 @@ func (mp *SnapshotMapper) mapOne(m model.Snapshot, isActive bool) *Snapshot {
 		ID:         m.GetID(),
 		Version:    m.GetVersion(),
 		Status:     m.GetStatus(),
+		Language:   m.GetLanguage(),
 		IsActive:   isActive,
 		CreateTime: m.GetCreateTime(),
 		UpdateTime: m.GetUpdateTime(),
@@ -366,6 +307,11 @@ func (mp *SnapshotMapper) mapMany(snapshots []model.Snapshot, activeID string) [
 		res = append(res, mp.mapOne(s, activeID == s.GetID()))
 	}
 	return res
+}
+
+type ImageProps struct {
+	Width  int `json:"width"`
+	Height int `json:"height"`
 }
 
 func (mp *SnapshotMapper) mapOriginal(m *model.S3Object) *Download {

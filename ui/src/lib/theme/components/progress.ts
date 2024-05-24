@@ -17,12 +17,14 @@ function filledStyle(props: StyleFunctionProps): SystemStyleObject {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const baseStyleFilledTrack: SystemStyleFunction = (props: any) => {
   return {
     ...filledStyle(props),
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const baseStyle: PartsStyleFunction<typeof parts> = (props: any) => ({
   filledTrack: baseStyleFilledTrack(props),
   track: {

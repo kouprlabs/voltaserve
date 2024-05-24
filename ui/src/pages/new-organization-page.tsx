@@ -2,7 +2,6 @@ import { useCallback, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Heading } from '@chakra-ui/react'
 import { Button, FormControl, FormErrorMessage, Input } from '@chakra-ui/react'
-import { useSWRConfig } from 'swr'
 import {
   Field,
   FieldAttributes,

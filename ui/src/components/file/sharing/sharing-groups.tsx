@@ -15,7 +15,7 @@ import {
 import { KeyedMutator } from 'swr'
 import { Select } from 'chakra-react-select'
 import cx from 'classnames'
-import FileAPI, { GroupPermission, List } from '@/client/api/file'
+import FileAPI, { GroupPermission } from '@/client/api/file'
 import { Group } from '@/client/api/group'
 import { geEditorPermission } from '@/client/api/permission'
 import WorkspaceAPI from '@/client/api/workspace'
@@ -40,7 +40,7 @@ const SharingGroups = ({
 }: SharingGroupsProps) => {
   const { id, fileId } = useParams()
   const dispatch = useAppDispatch()
-  const { data: workspace } = WorkspaceAPI.useGetById(id)
+  const { data: workspace } = WorkspaceAPI.useGet(id)
   const selection = useAppSelector((state) => state.ui.files.selection)
   const mutateList = useAppSelector((state) => state.ui.files.mutate)
   const [isGrantLoading, setIsGrantLoading] = useState(false)
@@ -98,13 +98,7 @@ const SharingGroups = ({
         setPermissionBeingRevoked(undefined)
       }
     },
-    [
-      fileId,
-      selection,
-      isSingleSelection,
-      mutateList,
-      mutateGroupPermissions,
-    ],
+    [fileId, selection, isSingleSelection, mutateList, mutateGroupPermissions],
   )
 
   return (
@@ -126,9 +120,9 @@ const SharingGroups = ({
             placeholder="Select Permission"
             selectedOptionStyle="check"
             chakraStyles={reactSelectStyles}
-            onChange={(e) => {
-              if (e) {
-                setActivePermission(e.value)
+            onChange={(event) => {
+              if (event) {
+                setActivePermission(event.value)
               }
             }}
           />

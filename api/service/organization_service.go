@@ -15,48 +15,6 @@ import (
 	"github.com/gofiber/fiber/v2/log"
 )
 
-type Organization struct {
-	ID         string  `json:"id"`
-	Name       string  `json:"name"`
-	Image      *string `json:"image,omitempty"`
-	Permission string  `json:"permission"`
-	CreateTime string  `json:"createTime"`
-	UpdateTime *string `json:"updateTime,omitempty"`
-}
-
-type OrganizationList struct {
-	Data          []*Organization `json:"data"`
-	TotalPages    uint            `json:"totalPages"`
-	TotalElements uint            `json:"totalElements"`
-	Page          uint            `json:"page"`
-	Size          uint            `json:"size"`
-}
-
-type OrganizationCreateOptions struct {
-	Name  string  `json:"name" validate:"required,max=255"`
-	Image *string `json:"image"`
-}
-
-type OrganizationListOptions struct {
-	Query     string
-	Page      uint
-	Size      uint
-	SortBy    string
-	SortOrder string
-}
-
-type OrganizationUpdateNameOptions struct {
-	Name string `json:"name" validate:"required,max=255"`
-}
-
-type OrganizationUpdateImageOptions struct {
-	Image string `json:"image" validate:"required,base64"`
-}
-
-type OrganizationRemoveMemberOptions struct {
-	UserID string `json:"userId" validate:"required"`
-}
-
 type OrganizationService struct {
 	orgRepo      repo.OrganizationRepo
 	orgCache     *cache.OrganizationCache
@@ -72,45 +30,35 @@ type OrganizationService struct {
 	config       config.Config
 }
 
-type NewOrganizationServiceOptions struct {
-	OrganizationRepo repo.OrganizationRepo
-	UserRepo         repo.UserRepo
-	GroupRepo        repo.GroupRepo
-	GroupService     *GroupService
+func NewOrganizationService() *OrganizationService {
+	return &OrganizationService{
+		orgRepo:      repo.NewOrganizationRepo(),
+		orgCache:     cache.NewOrganizationCache(),
+		orgGuard:     guard.NewOrganizationGuard(),
+		orgSearch:    search.NewOrganizationSearch(),
+		orgMapper:    newOrganizationMapper(),
+		userRepo:     repo.NewUserRepo(),
+		userSearch:   search.NewUserSearch(),
+		groupRepo:    repo.NewGroupRepo(),
+		groupService: NewGroupService(),
+		groupMapper:  newGroupMapper(),
+		userMapper:   newUserMapper(),
+		config:       config.GetConfig(),
+	}
 }
 
-func NewOrganizationService(opts NewOrganizationServiceOptions) *OrganizationService {
-	svc := &OrganizationService{
-		orgCache:    cache.NewOrganizationCache(),
-		orgGuard:    guard.NewOrganizationGuard(),
-		orgSearch:   search.NewOrganizationSearch(),
-		orgMapper:   newOrganizationMapper(),
-		userSearch:  search.NewUserSearch(),
-		groupMapper: newGroupMapper(),
-		userMapper:  newUserMapper(),
-		config:      config.GetConfig(),
-	}
-	if opts.OrganizationRepo != nil {
-		svc.orgRepo = opts.OrganizationRepo
-	} else {
-		svc.orgRepo = repo.NewOrganizationRepo()
-	}
-	if opts.UserRepo != nil {
-		svc.userRepo = opts.UserRepo
-	} else {
-		svc.userRepo = repo.NewUserRepo()
-	}
-	if opts.GroupRepo != nil {
-		svc.groupRepo = opts.GroupRepo
-	} else {
-		svc.groupRepo = repo.NewGroupRepo()
-	}
-	if opts.GroupService != nil {
-		svc.groupService = opts.GroupService
-	} else {
-		svc.groupService = NewGroupService(NewGroupServiceOptions{})
-	}
-	return svc
+type OrganizationCreateOptions struct {
+	Name  string  `json:"name" validate:"required,max=255"`
+	Image *string `json:"image"`
+}
+
+type Organization struct {
+	ID         string  `json:"id"`
+	Name       string  `json:"name"`
+	Image      *string `json:"image,omitempty"`
+	Permission string  `json:"permission"`
+	CreateTime string  `json:"createTime"`
+	UpdateTime *string `json:"updateTime,omitempty"`
 }
 
 func (svc *OrganizationService) Create(opts OrganizationCreateOptions, userID string) (*Organization, error) {
@@ -160,6 +108,22 @@ func (svc *OrganizationService) Find(id string, userID string) (*Organization, e
 	return res, nil
 }
 
+type OrganizationListOptions struct {
+	Query     string
+	Page      uint
+	Size      uint
+	SortBy    string
+	SortOrder string
+}
+
+type OrganizationList struct {
+	Data          []*Organization `json:"data"`
+	TotalPages    uint            `json:"totalPages"`
+	TotalElements uint            `json:"totalElements"`
+	Page          uint            `json:"page"`
+	Size          uint            `json:"size"`
+}
+
 func (svc *OrganizationService) List(opts OrganizationListOptions, userID string) (*OrganizationList, error) {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
@@ -206,7 +170,7 @@ func (svc *OrganizationService) List(opts OrganizationListOptions, userID string
 	}, nil
 }
 
-func (svc *OrganizationService) UpdateName(id string, name string, userID string) (*Organization, error) {
+func (svc *OrganizationService) PatchName(id string, name string, userID string) (*Organization, error) {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
@@ -381,7 +345,7 @@ func (svc *OrganizationService) doPagination(data []model.Organization, page, si
 	totalElements := uint(len(data))
 	totalPages := (totalElements + size - 1) / size
 	if page > totalPages {
-		return nil, totalElements, totalPages
+		return []model.Organization{}, totalElements, totalPages
 	}
 	startIndex := (page - 1) * size
 	endIndex := startIndex + size

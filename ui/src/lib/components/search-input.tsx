@@ -18,11 +18,16 @@ import cx from 'classnames'
 import { IconClose, IconSearch } from './icons'
 
 type SearchInputProps = {
+  placeholder?: string
   query?: string
   onChange?: (value: string) => void
 }
 
-export const SearchInput = ({ query, onChange }: SearchInputProps) => {
+export const SearchInput = ({
+  placeholder,
+  query,
+  onChange,
+}: SearchInputProps) => {
   const [draft, setDraft] = useState('')
   const [text, setText] = useState('')
   const [isFocused, setIsFocused] = useState(false)
@@ -65,7 +70,7 @@ export const SearchInput = ({ query, onChange }: SearchInputProps) => {
         </InputLeftElement>
         <Input
           value={draft}
-          placeholder={draft || 'Search'}
+          placeholder={draft || placeholder || 'Search'}
           variant="filled"
           onKeyDown={(event) => handleKeyDown(event, draft)}
           onChange={handleChange}

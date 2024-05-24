@@ -7,14 +7,14 @@ export type FileInfoExtensionProps = {
 }
 
 const FileInfoExtension = ({ file }: FileInfoExtensionProps) => {
-  if (!file.original) {
+  if (!file.snapshot?.original) {
     return null
   }
   return (
     <Stat>
       <StatLabel>File type</StatLabel>
       <StatNumber className={cx('text-base')}>
-        <Badge>{file.original.extension}</Badge>
+        <Badge>{file.snapshot?.original.extension}</Badge>
       </StatNumber>
     </Stat>
   )

@@ -10,18 +10,10 @@ type NotificationRouter struct {
 	notificationSvc *service.NotificationService
 }
 
-type NewNotificationRouterOptions struct {
-	NotificationService *service.NotificationService
-}
-
-func NewNotificationRouter(opts NewNotificationRouterOptions) *NotificationRouter {
-	r := &NotificationRouter{}
-	if opts.NotificationService != nil {
-		r.notificationSvc = opts.NotificationService
-	} else {
-		r.notificationSvc = service.NewNotificationService(service.NewNotificationServiceOptions{})
+func NewNotificationRouter() *NotificationRouter {
+	return &NotificationRouter{
+		notificationSvc: service.NewNotificationService(),
 	}
-	return r
 }
 
 func (r *NotificationRouter) AppendRoutes(g fiber.Router) {

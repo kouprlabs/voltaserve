@@ -79,6 +79,46 @@ func NewS3ObjectNotFoundError(err error) *ErrorResponse {
 	)
 }
 
+func NewSnapshotLanguageNotSetError(err error) *ErrorResponse {
+	return NewErrorResponse(
+		"snapshot_language_not_set",
+		http.StatusBadRequest,
+		"Snapshot language is not set.",
+		"Snapshot language is not set.",
+		err,
+	)
+}
+
+func NewSnapshotTextLengthExceedsLimitError(err error) *ErrorResponse {
+	return NewErrorResponse(
+		"snapshot_text_length_exceeds_limit",
+		http.StatusBadRequest,
+		"Snapshot text length exceeds limit.",
+		"Snapshot text length exceeds limit.",
+		err,
+	)
+}
+
+func NewSnapshotCannotBePatchedError(err error) *ErrorResponse {
+	return NewErrorResponse(
+		"snapshot_cannot_be_patched",
+		http.StatusBadRequest,
+		"Snapshot cannot be patched.",
+		"Snapshot cannot be patched.",
+		err,
+	)
+}
+
+func NewUnsupportedFileTypeError(err error) *ErrorResponse {
+	return NewErrorResponse(
+		"unsupported_file_type",
+		http.StatusBadRequest,
+		"File type is not supported.",
+		"File type is not supported.",
+		err,
+	)
+}
+
 func NewInvitationNotFoundError(err error) *ErrorResponse {
 	return NewErrorResponse(
 		"invitation_not_found",

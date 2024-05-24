@@ -5,10 +5,10 @@ const MAX_WIDTH = 130
 const MAX_HEIGHT = 130
 
 export function getThumbnailWidth(file: File, scale: number): string {
-  if (file.thumbnail) {
+  if (file.snapshot?.thumbnail) {
     const { width } = getSizeWithAspectRatio(
-      file.thumbnail.width,
-      file.thumbnail.height,
+      file.snapshot?.thumbnail.width,
+      file.snapshot?.thumbnail.height,
       MAX_WIDTH,
       MAX_HEIGHT,
     )
@@ -19,10 +19,10 @@ export function getThumbnailWidth(file: File, scale: number): string {
 }
 
 export function getThumbnailHeight(file: File, scale: number): string {
-  if (file.thumbnail) {
+  if (file.snapshot?.thumbnail) {
     const { height } = getSizeWithAspectRatio(
-      file.thumbnail.width,
-      file.thumbnail.height,
+      file.snapshot?.thumbnail.width,
+      file.snapshot?.thumbnail.height,
       MAX_WIDTH,
       MAX_HEIGHT,
     )

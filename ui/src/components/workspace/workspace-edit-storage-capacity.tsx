@@ -12,7 +12,6 @@ import {
   ModalHeader,
   ModalOverlay,
 } from '@chakra-ui/react'
-import { useSWRConfig } from 'swr'
 import {
   Field,
   FieldAttributes,
@@ -75,7 +74,7 @@ const WorkspaceEditStorageCapacity = ({
     ) => {
       setSubmitting(true)
       try {
-        const result = await WorkspaceAPI.updateStorageCapacity(workspace.id, {
+        const result = await WorkspaceAPI.patchStorageCapacity(workspace.id, {
           storageCapacity,
         })
         mutate?.(result)

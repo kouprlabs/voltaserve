@@ -8,7 +8,6 @@ import {
   Heading,
   Input,
 } from '@chakra-ui/react'
-import { useSWRConfig } from 'swr'
 import {
   Field,
   FieldAttributes,
@@ -24,7 +23,7 @@ import WorkspaceAPI from '@/client/api/workspace'
 import OrganizationSelector from '@/components/common/organization-selector'
 import StorageInput from '@/components/common/storage-input'
 import { gigabyteToByte } from '@/helpers/convert-storage'
-import { useAppDispatch, useAppSelector } from '@/store/hook'
+import { useAppSelector } from '@/store/hook'
 
 type FormValues = {
   name: string
@@ -62,7 +61,7 @@ const NewWorkspacePage = () => {
         mutate?.()
         setSubmitting(false)
         navigate(`/workspace/${result.id}/file/${result.rootId}`)
-      } catch (e) {
+      } catch (error) {
         setIsLoading(false)
       } finally {
         setSubmitting(false)

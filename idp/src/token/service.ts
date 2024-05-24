@@ -3,8 +3,8 @@ import { getConfig } from '@/config/config'
 import { ErrorCode, newError } from '@/infra/error'
 import { newHyphenlessUuid } from '@/infra/id'
 import { verifyPassword } from '@/infra/password'
-import userRepo from '@/user/repo'
 import { User } from '@/user/model'
+import userRepo from '@/user/repo'
 
 export type TokenGrantType = 'password' | 'refresh_token'
 

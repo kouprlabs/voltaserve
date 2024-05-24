@@ -1,6 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import {
-  Avatar,
   Badge,
   Button,
   Modal,
@@ -17,27 +16,24 @@ import {
   Tr,
 } from '@chakra-ui/react'
 import cx from 'classnames'
-import { File } from '@/client/api/file'
 import SnapshotAPI, { Snapshot, SortOrder } from '@/client/api/snapshot'
 import { swrConfig } from '@/client/options'
 import prettyDate from '@/helpers/pretty-date'
 import { Pagination, SectionSpinner } from '@/lib'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import {
-  snapshotDeleteModalDidOpen,
-  snapshotDeletionUpdated,
-  snapshotListModalDidClose,
-  snapshotSelectionUpdated,
-} from '@/store/ui/files'
-import { mutate } from 'swr'
+  detachModalDidOpen,
+  listModalDidClose,
+  mutateUpdated,
+  selectionUpdated,
+} from '@/store/ui/snapshots'
 
-const FileSnapshotList = () => {
+const SnapshotList = () => {
   const dispatch = useAppDispatch()
   const isModalOpen = useAppSelector(
-    (state) => state.ui.files.isSnapshotListModalOpen,
+    (state) => state.ui.snapshots.isListModalOpen,
   )
-  const id = useAppSelector((state) => state.ui.files.selection[0])
-  const deletion = useAppSelector((state) => state.ui.files.snapshotDeletion)
+  const fileId = useAppSelector((state) => state.ui.files.selection[0])
   const mutateFileList = useAppSelector((state) => state.ui.files.mutate)
   const [isActivating, setIsActivating] = useState(false)
   const [page, setPage] = useState(1)
@@ -45,29 +41,21 @@ const FileSnapshotList = () => {
   const {
     data: list,
     error,
-    mutate: mutateSnapshotList,
+    mutate: snapshotMutate,
   } = SnapshotAPI.useList(
-    id,
-    { page, size: 5, sortOrder: SortOrder.Desc },
+    { fileId, page, size: 5, sortOrder: SortOrder.Desc },
     swrConfig(),
   )
 
   useEffect(() => {
-    async function deleteSnapshots() {
-      deletion.forEach(async (snapshotId) => {
-        await SnapshotAPI.delete(id, snapshotId)
-        await mutateSnapshotList()
-      })
-      dispatch(snapshotDeletionUpdated([]))
+    if (snapshotMutate) {
+      dispatch(mutateUpdated(snapshotMutate))
     }
-    if (deletion.length > 0) {
-      deleteSnapshots()
-    }
-  }, [deletion])
+  }, [snapshotMutate])
 
   const handleClose = useCallback(() => {
-    dispatch(snapshotListModalDidClose())
-    dispatch(snapshotSelectionUpdated([]))
+    dispatch(listModalDidClose())
+    dispatch(selectionUpdated([]))
     setSelected(undefined)
   }, [dispatch])
 
@@ -75,26 +63,25 @@ const FileSnapshotList = () => {
     if (selected) {
       try {
         setIsActivating(true)
-        await SnapshotAPI.activate(id, selected.id)
-        mutateSnapshotList()
+        await SnapshotAPI.activate(selected.id, { fileId })
+        snapshotMutate()
         mutateFileList?.()
       } finally {
         setIsActivating(false)
       }
-      await SnapshotAPI.activate(id, selected.id)
     }
-  }, [selected, dispatch, mutateSnapshotList, mutateFileList])
+  }, [selected, dispatch, snapshotMutate, mutateFileList])
 
-  const handleDelete = useCallback(() => {
+  const handleDetach = useCallback(() => {
     if (selected) {
-      dispatch(snapshotSelectionUpdated([selected.id]))
-      dispatch(snapshotDeleteModalDidOpen())
+      dispatch(selectionUpdated([selected.id]))
+      dispatch(detachModalDidOpen())
     }
   }, [selected, dispatch])
 
   const handleSelect = useCallback((snapshot: Snapshot) => {
     setSelected(snapshot)
-    dispatch(snapshotSelectionUpdated([snapshot.id]))
+    dispatch(selectionUpdated([snapshot.id]))
   }, [])
 
   return (
@@ -213,9 +200,9 @@ const FileSnapshotList = () => {
               variant="outline"
               colorScheme="red"
               isDisabled={!selected || selected.isActive || isActivating}
-              onClick={handleDelete}
+              onClick={handleDetach}
             >
-              Delete
+              Detach
             </Button>
             <Button
               variant="solid"
@@ -233,4 +220,4 @@ const FileSnapshotList = () => {
   )
 }
 
-export default FileSnapshotList
+export default SnapshotList

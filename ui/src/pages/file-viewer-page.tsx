@@ -15,19 +15,28 @@ import { IconDownload, Drawer, Spinner } from '@/lib'
 
 const FileViewerPage = () => {
   const { id } = useParams()
-  const { data: file } = FileAPI.useGetById(id)
+  const { data: file } = FileAPI.useGet(id)
 
   const renderViewer = useCallback((file: File) => {
     if (
-      (file.original && isPDF(file.original.extension)) ||
-      (file.preview && isPDF(file.preview.extension))
+      (file.snapshot?.original && isPDF(file.snapshot?.original.extension)) ||
+      (file.snapshot?.preview && isPDF(file.snapshot?.preview.extension))
     ) {
       return <ViewerPDF file={file} />
-    } else if (file.original && isImage(file.original.extension)) {
+    } else if (
+      file.snapshot?.original &&
+      isImage(file.snapshot?.original.extension)
+    ) {
       return <ViewerImage file={file} />
-    } else if (file.original && isVideo(file.original.extension)) {
+    } else if (
+      file.snapshot?.original &&
+      isVideo(file.snapshot?.original.extension)
+    ) {
       return <ViewerVideo file={file} />
-    } else if (file.original && isAudio(file.original.extension)) {
+    } else if (
+      file.snapshot?.original &&
+      isAudio(file.snapshot?.original.extension)
+    ) {
       return <ViewerAudio file={file} />
     } else {
       return (

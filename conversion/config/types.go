@@ -16,6 +16,7 @@ type LimitsConfig struct {
 	ExternalCommandTimeoutSeconds int
 	ImagePreviewMaxWidth          int
 	ImagePreviewMaxHeight         int
+	MultipartBodyLengthLimitMB    int
 }
 
 type S3Config struct {

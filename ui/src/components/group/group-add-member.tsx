@@ -23,9 +23,9 @@ import {
 import * as Yup from 'yup'
 import cx from 'classnames'
 import GroupAPI, { Group } from '@/client/api/group'
-import UserAPI, { User } from '@/client/api/user'
-import UserSelector from '../common/user-selector'
+import { User } from '@/client/api/user'
 import { useAppSelector } from '@/store/hook'
+import UserSelector from '../common/user-selector'
 
 export type GroupAddMemberProps = {
   open: boolean

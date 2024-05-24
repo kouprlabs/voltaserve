@@ -44,10 +44,7 @@ const OrganizationInvitationsPage = () => {
   const location = useLocation()
   const { id } = useParams()
   const toast = useToast()
-  const { data: org, error: orgError } = OrganizationAPI.useGetById(
-    id,
-    swrConfig(),
-  )
+  const { data: org, error: orgError } = OrganizationAPI.useGet(id, swrConfig())
   const { page, size, steps, setPage, setSize } = usePagePagination({
     navigate,
     location,

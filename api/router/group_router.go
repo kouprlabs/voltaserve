@@ -2,6 +2,7 @@ package router
 
 import (
 	"net/http"
+	"net/url"
 	"strconv"
 	"voltaserve/errorpkg"
 	"voltaserve/service"
@@ -14,28 +15,20 @@ type GroupRouter struct {
 	groupSvc *service.GroupService
 }
 
-type NewGroupRouterOptions struct {
-	GroupService *service.GroupService
-}
-
-func NewGroupRouter(opts NewGroupRouterOptions) *GroupRouter {
-	r := &GroupRouter{}
-	if opts.GroupService != nil {
-		r.groupSvc = opts.GroupService
-	} else {
-		r.groupSvc = service.NewGroupService(service.NewGroupServiceOptions{})
+func NewGroupRouter() *GroupRouter {
+	return &GroupRouter{
+		groupSvc: service.NewGroupService(),
 	}
-	return r
 }
 
 func (r *GroupRouter) AppendRoutes(g fiber.Router) {
 	g.Get("/", r.List)
 	g.Post("/", r.Create)
-	g.Get("/:id", r.GetByID)
+	g.Get("/:id", r.Get)
 	g.Delete("/:id", r.Delete)
-	g.Post("/:id/update_name", r.UpdateName)
-	g.Post("/:id/add_member", r.AddMember)
-	g.Post("/:id/remove_member", r.RemoveMember)
+	g.Patch("/:id/name", r.PatchName)
+	g.Post("/:id/members", r.AddMember)
+	g.Delete("/:id/members", r.RemoveMember)
 }
 
 // Create godoc
@@ -53,33 +46,33 @@ func (r *GroupRouter) AppendRoutes(g fiber.Router) {
 //	@Router			/groups [post]
 func (r *GroupRouter) Create(c *fiber.Ctx) error {
 	userID := GetUserID(c)
-	req := new(service.GroupCreateOptions)
-	if err := c.BodyParser(req); err != nil {
+	opts := new(service.GroupCreateOptions)
+	if err := c.BodyParser(opts); err != nil {
 		return err
 	}
-	if err := validator.New().Struct(req); err != nil {
+	if err := validator.New().Struct(opts); err != nil {
 		return errorpkg.NewRequestBodyValidationError(err)
 	}
-	res, err := r.groupSvc.Create(*req, userID)
+	res, err := r.groupSvc.Create(*opts, userID)
 	if err != nil {
 		return err
 	}
 	return c.Status(http.StatusCreated).JSON(res)
 }
 
-// GetByID godoc
+// Get godoc
 //
-//	@Summary		Get by ID
-//	@Description	Get by ID
+//	@Summary		Get
+//	@Description	Get
 //	@Tags			Groups
-//	@Id				groups_get_by_id
+//	@Id				groups_get
 //	@Produce		json
 //	@Param			id	path		string	true	"ID"
 //	@Success		200	{object}	service.Group
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/groups/{id} [get]
-func (r *GroupRouter) GetByID(c *fiber.Ctx) error {
+func (r *GroupRouter) Get(c *fiber.Ctx) error {
 	userID := GetUserID(c)
 	res, err := r.groupSvc.Find(c.Params("id"), userID)
 	if err != nil {
@@ -133,8 +126,12 @@ func (r *GroupRouter) List(c *fiber.Ctx) error {
 	if !IsValidSortOrder(sortOrder) {
 		return errorpkg.NewInvalidQueryParamError("sort_order")
 	}
+	query, err := url.QueryUnescape(c.Query("query"))
+	if err != nil {
+		return errorpkg.NewInvalidQueryParamError("query")
+	}
 	res, err := r.groupSvc.List(service.GroupListOptions{
-		Query:          c.Query("query"),
+		Query:          query,
 		OrganizationID: c.Query("organization_id"),
 		Page:           uint(page),
 		Size:           uint(size),
@@ -147,31 +144,35 @@ func (r *GroupRouter) List(c *fiber.Ctx) error {
 	return c.JSON(res)
 }
 
-// UpdateName godoc
+type GroupPatchNameOptions struct {
+	Name string `json:"name" validate:"required,max=255"`
+}
+
+// PatchName godoc
 //
-//	@Summary		Update Name
-//	@Description	Update Name
+//	@Summary		Patch Name
+//	@Description	Patch Name
 //	@Tags			Groups
-//	@Id				groups_update_name
+//	@Id				groups_patch_name
 //	@Accept			json
 //	@Produce		json
-//	@Param			id		path		string							true	"ID"
-//	@Param			body	body		service.GroupUpdateNameOptions	true	"Body"
+//	@Param			id		path		string					true	"ID"
+//	@Param			body	body		GroupPatchNameOptions	true	"Body"
 //	@Success		200		{object}	service.Group
 //	@Failure		404		{object}	errorpkg.ErrorResponse
 //	@Failure		400		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
-//	@Router			/groups/{id}/update_name [post]
-func (r *GroupRouter) UpdateName(c *fiber.Ctx) error {
+//	@Router			/groups/{id}/name [patch]
+func (r *GroupRouter) PatchName(c *fiber.Ctx) error {
 	userID := GetUserID(c)
-	req := new(service.GroupUpdateNameOptions)
-	if err := c.BodyParser(req); err != nil {
+	opts := new(GroupPatchNameOptions)
+	if err := c.BodyParser(opts); err != nil {
 		return err
 	}
-	if err := validator.New().Struct(req); err != nil {
+	if err := validator.New().Struct(opts); err != nil {
 		return errorpkg.NewRequestBodyValidationError(err)
 	}
-	res, err := r.groupSvc.UpdateName(c.Params("id"), req.Name, userID)
+	res, err := r.groupSvc.PatchName(c.Params("id"), opts.Name, userID)
 	if err != nil {
 		return err
 	}
@@ -199,6 +200,10 @@ func (r *GroupRouter) Delete(c *fiber.Ctx) error {
 	return c.SendStatus(http.StatusNoContent)
 }
 
+type GroupAddMemberOptions struct {
+	UserID string `json:"userId" validate:"required"`
+}
+
 // AddMember godoc
 //
 //	@Summary		Add Member
@@ -211,20 +216,24 @@ func (r *GroupRouter) Delete(c *fiber.Ctx) error {
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		400	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
-//	@Router			/groups/{id}/add_member [post]
+//	@Router			/groups/{id}/members [post]
 func (r *GroupRouter) AddMember(c *fiber.Ctx) error {
 	userID := GetUserID(c)
-	req := new(service.GroupAddMemberOptions)
-	if err := c.BodyParser(req); err != nil {
+	opts := new(GroupAddMemberOptions)
+	if err := c.BodyParser(opts); err != nil {
 		return err
 	}
-	if err := validator.New().Struct(req); err != nil {
+	if err := validator.New().Struct(opts); err != nil {
 		return errorpkg.NewRequestBodyValidationError(err)
 	}
-	if err := r.groupSvc.AddMember(c.Params("id"), req.UserID, userID); err != nil {
+	if err := r.groupSvc.AddMember(c.Params("id"), opts.UserID, userID); err != nil {
 		return err
 	}
 	return c.SendStatus(http.StatusNoContent)
+}
+
+type GroupRemoveMemberOptions struct {
+	UserID string `json:"userId" validate:"required"`
 }
 
 // RemoveMember godoc
@@ -235,22 +244,22 @@ func (r *GroupRouter) AddMember(c *fiber.Ctx) error {
 //	@Id				groups_remove_member
 //	@Accept			json
 //	@Produce		json
-//	@Param			id		path		string								true	"ID"
-//	@Param			body	body		service.GroupRemoveMemberOptions	true	"Body"
+//	@Param			id		path		string						true	"ID"
+//	@Param			body	body		GroupRemoveMemberOptions	true	"Body"
 //	@Failure		404		{object}	errorpkg.ErrorResponse
 //	@Failure		400		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
-//	@Router			/groups/{id}/remove_member [post]
+//	@Router			/groups/{id}/members [delete]
 func (r *GroupRouter) RemoveMember(c *fiber.Ctx) error {
 	userID := GetUserID(c)
-	req := new(service.GroupRemoveMemberOptions)
-	if err := c.BodyParser(req); err != nil {
+	opts := new(GroupRemoveMemberOptions)
+	if err := c.BodyParser(opts); err != nil {
 		return err
 	}
-	if err := validator.New().Struct(req); err != nil {
+	if err := validator.New().Struct(opts); err != nil {
 		return errorpkg.NewRequestBodyValidationError(err)
 	}
-	if err := r.groupSvc.RemoveMember(c.Params("id"), req.UserID, userID); err != nil {
+	if err := r.groupSvc.RemoveMember(c.Params("id"), opts.UserID, userID); err != nil {
 		return err
 	}
 	return c.SendStatus(http.StatusNoContent)

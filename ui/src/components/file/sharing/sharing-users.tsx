@@ -12,10 +12,10 @@ import {
   Badge,
   Avatar,
 } from '@chakra-ui/react'
-import { KeyedMutator, useSWRConfig } from 'swr'
+import { KeyedMutator } from 'swr'
 import { Select } from 'chakra-react-select'
 import cx from 'classnames'
-import FileAPI, { List, UserPermission } from '@/client/api/file'
+import FileAPI, { UserPermission } from '@/client/api/file'
 import { geEditorPermission } from '@/client/api/permission'
 import { User } from '@/client/api/user'
 import WorkspaceAPI from '@/client/api/workspace'
@@ -43,7 +43,7 @@ const SharingUsers = ({
   const navigate = useNavigate()
   const { id, fileId } = useParams()
   const dispatch = useAppDispatch()
-  const { data: workspace } = WorkspaceAPI.useGetById(id)
+  const { data: workspace } = WorkspaceAPI.useGet(id)
   const selection = useAppSelector((state) => state.ui.files.selection)
   const mutateList = useAppSelector((state) => state.ui.files.mutate)
   const [isGrantLoading, setIsGrantLoading] = useState(false)
@@ -103,13 +103,7 @@ const SharingUsers = ({
         setPermissionBeingRevoked(undefined)
       }
     },
-    [
-      fileId,
-      selection,
-      isSingleSelection,
-      mutateList,
-      mutateUserPermissions,
-    ],
+    [fileId, selection, isSingleSelection, mutateList, mutateUserPermissions],
   )
 
   const handleInviteMembersClick = useCallback(async () => {
@@ -155,9 +149,9 @@ const SharingUsers = ({
             placeholder="Select Permission"
             selectedOptionStyle="check"
             chakraStyles={reactSelectStyles}
-            onChange={(e) => {
-              if (e) {
-                setActivePermission(e.value)
+            onChange={(event) => {
+              if (event) {
+                setActivePermission(event.value)
               }
             }}
           />

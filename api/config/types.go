@@ -4,6 +4,7 @@ type Config struct {
 	Port          int
 	PublicUIURL   string
 	ConversionURL string
+	LanguageURL   string
 	DatabaseURL   string
 	Search        SearchConfig
 	Redis         RedisConfig

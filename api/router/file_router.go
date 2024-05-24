@@ -3,7 +3,10 @@ package router
 import (
 	"encoding/base64"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -11,76 +14,68 @@ import (
 	"voltaserve/config"
 	"voltaserve/errorpkg"
 	"voltaserve/helper"
+	"voltaserve/infra"
 	"voltaserve/model"
 	"voltaserve/service"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/log"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 type FileRouter struct {
-	fileSvc      *service.FileService
-	workspaceSvc *service.WorkspaceService
-	config       config.Config
+	fileSvc               *service.FileService
+	workspaceSvc          *service.WorkspaceService
+	config                config.Config
+	accessTokenCookieName string
 }
 
-type NewFileRouterOptions struct {
-	FileService      *service.FileService
-	WorkspaceService *service.WorkspaceService
-}
-
-func NewFileRouter(opts NewFileRouterOptions) *FileRouter {
-	r := &FileRouter{
-		config: config.GetConfig(),
+func NewFileRouter() *FileRouter {
+	return &FileRouter{
+		fileSvc:               service.NewFileService(),
+		workspaceSvc:          service.NewWorkspaceService(),
+		config:                config.GetConfig(),
+		accessTokenCookieName: "voltaserve_access_token",
 	}
-	if opts.FileService != nil {
-		r.fileSvc = opts.FileService
-	} else {
-		r.fileSvc = service.NewFileService(service.NewFileServiceOptions{})
-	}
-	if opts.WorkspaceService != nil {
-		r.workspaceSvc = opts.WorkspaceService
-	} else {
-		r.workspaceSvc = service.NewWorkspaceService(service.NewWorkspaceServiceOptions{})
-	}
-	return r
 }
 
 func (r *FileRouter) AppendRoutes(g fiber.Router) {
-	g.Post("/", r.Upload)
-	g.Post("/create_folder", r.CreateFolder)
+	g.Post("/", r.Create)
 	g.Get("/list", r.ListByPath)
-	g.Get("/get", r.GetByPath)
-	g.Post("/batch_delete", r.BatchDelete)
-	g.Post("/batch_get", r.BatchGet)
-	g.Get("/:id", r.GetByID)
+	g.Get("/", r.GetByPath)
+	g.Delete("/", r.Delete)
+	g.Get("/:id", r.Get)
 	g.Patch("/:id", r.Patch)
-	g.Delete("/:id", r.Delete)
 	g.Get("/:id/list", r.List)
-	g.Get("/:id/get_item_count", r.GetItemCount)
-	g.Get("/:id/get_path", r.GetPath)
-	g.Get("/:id/get_ids", r.GetIDs)
+	g.Get("/:id/count", r.GetCount)
+	g.Get("/:id/path", r.GetPath)
 	g.Post("/:id/move", r.Move)
-	g.Post("/:id/rename", r.Rename)
+	g.Patch("/:id/name", r.PatchName)
 	g.Post("/:id/copy", r.Copy)
-	g.Get("/:id/get_size", r.GetSize)
+	g.Get("/:id/size", r.GetSize)
 	g.Post("/grant_user_permission", r.GrantUserPermission)
 	g.Post("/revoke_user_permission", r.RevokeUserPermission)
 	g.Post("/grant_group_permission", r.GrantGroupPermission)
 	g.Post("/revoke_group_permission", r.RevokeGroupPermission)
-	g.Get("/:id/get_user_permissions", r.GetUserPermissions)
-	g.Get("/:id/get_group_permissions", r.GetGroupPermissions)
+	g.Get("/:id/user_permissions", r.GetUserPermissions)
+	g.Get("/:id/group_permissions", r.GetGroupPermissions)
 }
 
-// Upload godoc
+func (r *FileRouter) AppendNonJWTRoutes(g fiber.Router) {
+	g.Get("/:id/original:ext", r.DownloadOriginal)
+	g.Get("/:id/preview:ext", r.DownloadPreview)
+}
+
+// Create godoc
 //
-//	@Summary		Upload
-//	@Description	Upload
+//	@Summary		Create
+//	@Description	Create
 //	@Tags			Files
-//	@Id				files_upload
+//	@Id				files_create
 //	@Accept			x-www-form-urlencoded
 //	@Produce		json
+//	@Param			type			query		string	true	"Type"
 //	@Param			workspace_id	query		string	true	"Workspace ID"
 //	@Param			parent_id		query		string	false	"Parent ID"
 //	@Param			name			query		string	false	"Name"
@@ -89,7 +84,7 @@ func (r *FileRouter) AppendRoutes(g fiber.Router) {
 //	@Failure		400				{object}	errorpkg.ErrorResponse
 //	@Failure		500				{object}	errorpkg.ErrorResponse
 //	@Router			/files [post]
-func (r *FileRouter) Upload(c *fiber.Ctx) error {
+func (r *FileRouter) Create(c *fiber.Ctx) error {
 	userID := GetUserID(c)
 	workspaceID := c.Query("workspace_id")
 	if workspaceID == "" {
@@ -103,44 +98,65 @@ func (r *FileRouter) Upload(c *fiber.Ctx) error {
 		}
 		parentID = workspace.RootID
 	}
-	fh, err := c.FormFile("file")
-	if err != nil {
-		return err
-	}
-	ok, err := r.workspaceSvc.HasEnoughSpaceForByteSize(workspaceID, fh.Size)
-	if err != nil {
-		return err
-	}
-	if !ok {
-		return errorpkg.NewStorageLimitExceededError()
+	fileType := c.Query("type")
+	if fileType == "" {
+		return errorpkg.NewMissingQueryParamError("type")
 	}
 	name := c.Query("name")
-	if name == "" {
-		name = fh.Filename
-	}
-	file, err := r.fileSvc.Create(service.FileCreateOptions{
-		Name:        name,
-		Type:        model.FileTypeFile,
-		ParentID:    &parentID,
-		WorkspaceID: workspaceID,
-	}, userID)
-	if err != nil {
-		return err
-	}
-	path := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(fh.Filename))
-	if err := c.SaveFile(fh, path); err != nil {
-		return err
-	}
-	defer func(name string) {
-		if err := os.Remove(name); err != nil {
-			log.Error(err)
+	if fileType == model.FileTypeFile {
+		fh, err := c.FormFile("file")
+		if err != nil {
+			return err
 		}
-	}(path)
-	file, err = r.fileSvc.Store(file.ID, path, userID)
-	if err != nil {
-		return err
+		ok, err := r.workspaceSvc.HasEnoughSpaceForByteSize(workspaceID, fh.Size)
+		if err != nil {
+			return err
+		}
+		if !ok {
+			return errorpkg.NewStorageLimitExceededError()
+		}
+		if name == "" {
+			name = fh.Filename
+		}
+		file, err := r.fileSvc.Create(service.FileCreateOptions{
+			Name:        name,
+			Type:        model.FileTypeFile,
+			ParentID:    &parentID,
+			WorkspaceID: workspaceID,
+		}, userID)
+		if err != nil {
+			return err
+		}
+		path := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(fh.Filename))
+		if err := c.SaveFile(fh, path); err != nil {
+			return err
+		}
+		defer func(name string) {
+			if err := os.Remove(name); err != nil {
+				log.Error(err)
+			}
+		}(path)
+		file, err = r.fileSvc.Store(file.ID, path, userID)
+		if err != nil {
+			return err
+		}
+		return c.Status(http.StatusCreated).JSON(file)
+	} else if fileType == model.FileTypeFolder {
+		if name == "" {
+			return errorpkg.NewMissingQueryParamError("name")
+		}
+		res, err := r.fileSvc.Create(service.FileCreateOptions{
+			Name:        name,
+			Type:        model.FileTypeFolder,
+			ParentID:    &parentID,
+			WorkspaceID: workspaceID,
+		}, userID)
+		if err != nil {
+			return err
+		}
+		return c.Status(http.StatusCreated).JSON(res)
 	}
-	return c.Status(http.StatusCreated).JSON(file)
+	return errorpkg.NewInvalidQueryParamError("type")
 }
 
 // Patch godoc
@@ -159,7 +175,7 @@ func (r *FileRouter) Upload(c *fiber.Ctx) error {
 //	@Router			/files/{id} [patch]
 func (r *FileRouter) Patch(c *fiber.Ctx) error {
 	userID := GetUserID(c)
-	files, err := r.fileSvc.FindByID([]string{c.Params("id")}, userID)
+	files, err := r.fileSvc.Find([]string{c.Params("id")}, userID)
 	if err != nil {
 		return err
 	}
@@ -191,63 +207,27 @@ func (r *FileRouter) Patch(c *fiber.Ctx) error {
 	return c.JSON(file)
 }
 
-// CreateFolder godoc
-//
-//	@Summary		Create
-//	@Description	Create
-//	@Tags			Files
-//	@Id				files_create_folder
-//	@Accept			json
-//	@Produce		json
-//	@Param			body	body		service.FileCreateFolderOptions	true	"Body"
-//	@Success		200		{object}	service.File
-//	@Failure		400		{object}	errorpkg.ErrorResponse
-//	@Failure		500		{object}	errorpkg.ErrorResponse
-//	@Router			/files/create_folder [post]
-func (r *FileRouter) CreateFolder(c *fiber.Ctx) error {
-	userID := GetUserID(c)
-	opts := new(service.FileCreateFolderOptions)
-	if err := c.BodyParser(opts); err != nil {
-		return err
-	}
-	if err := validator.New().Struct(opts); err != nil {
-		return errorpkg.NewRequestBodyValidationError(err)
-	}
-	parentID := opts.ParentID
-	if parentID == nil {
-		workspace, err := r.workspaceSvc.Find(opts.WorkspaceID, userID)
-		if err != nil {
-			return err
-		}
-		parentID = &workspace.RootID
-	}
-	res, err := r.fileSvc.Create(service.FileCreateOptions{
-		Name:        opts.Name,
-		Type:        model.FileTypeFolder,
-		ParentID:    parentID,
-		WorkspaceID: opts.WorkspaceID,
-	}, userID)
-	if err != nil {
-		return err
-	}
-	return c.Status(http.StatusCreated).JSON(res)
+type FileCreateFolderOptions struct {
+	WorkspaceID string  `json:"workspaceId" validate:"required"`
+	Name        string  `json:"name" validate:"required,max=255"`
+	ParentID    *string `json:"parentId"`
 }
 
-// GetByID godoc
+// Get godoc
 //
-//	@Summary		Get by ID
-//	@Description	Get by ID
+//	@Summary		Get
+//	@Description	Get
 //	@Tags			Files
-//	@Id				files_get_by_id
+//	@Id				files_get
 //	@Produce		json
 //	@Param			id	path		string	true	"ID"
 //	@Success		200	{object}	service.File
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/files/{id} [get]
-func (r *FileRouter) GetByID(c *fiber.Ctx) error {
+func (r *FileRouter) Get(c *fiber.Ctx) error {
 	userID := GetUserID(c)
-	res, err := r.fileSvc.FindByID([]string{c.Params("id")}, userID)
+	res, err := r.fileSvc.Find([]string{c.Params("id")}, userID)
 	if err != nil {
 		return err
 	}
@@ -264,11 +244,12 @@ func (r *FileRouter) GetByID(c *fiber.Ctx) error {
 //	@Tags			Files
 //	@Id				files_get_by_path
 //	@Produce		json
-//	@Param			id	path		string	true	"ID"
-//	@Success		200	{object}	service.File
-//	@Failure		404	{object}	errorpkg.ErrorResponse
-//	@Failure		500	{object}	errorpkg.ErrorResponse
-//	@Router			/files/get [get]
+//	@Param			id		path		string	true	"ID"
+//	@Param			path	query		string	true	"Path"
+//	@Success		200		{object}	service.File
+//	@Failure		404		{object}	errorpkg.ErrorResponse
+//	@Failure		500		{object}	errorpkg.ErrorResponse
+//	@Router			/files [get]
 func (r *FileRouter) GetByPath(c *fiber.Ctx) error {
 	userID := GetUserID(c)
 	path := c.Query("path")
@@ -359,7 +340,10 @@ func (r *FileRouter) List(c *fiber.Ctx) error {
 	if fileType != model.FileTypeFile && fileType != model.FileTypeFolder && fileType != "" {
 		return errorpkg.NewInvalidQueryParamError("type")
 	}
-	query := c.Query("query")
+	query, err := url.QueryUnescape(c.Query("query"))
+	if err != nil {
+		return errorpkg.NewInvalidQueryParamError("query")
+	}
 	opts := service.FileListOptions{
 		Page:      uint(page),
 		Size:      uint(size),
@@ -392,27 +376,6 @@ func (r *FileRouter) List(c *fiber.Ctx) error {
 	return c.JSON(res)
 }
 
-// GetIDs godoc
-//
-//	@Summary		Get IDs
-//	@Description	Get IDs
-//	@Tags			Files
-//	@Id				files_get_ids
-//	@Produce		json
-//	@Param			id	path		string	true	"ID"
-//	@Success		200	{array}		string
-//	@Failure		404	{object}	errorpkg.ErrorResponse
-//	@Failure		500	{object}	errorpkg.ErrorResponse
-//	@Router			/files/{id}/get_ids [get]
-func (r *FileRouter) GetIDs(c *fiber.Ctx) error {
-	userID := GetUserID(c)
-	res, err := r.fileSvc.GetIDs(c.Params("id"), userID)
-	if err != nil {
-		return err
-	}
-	return c.JSON(res)
-}
-
 // GetPath godoc
 //
 //	@Summary		Get Path
@@ -424,7 +387,7 @@ func (r *FileRouter) GetIDs(c *fiber.Ctx) error {
 //	@Success		200	{array}		service.File
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
-//	@Router			/files/{id}/get_path [get]
+//	@Router			/files/{id}/path [get]
 func (r *FileRouter) GetPath(c *fiber.Ctx) error {
 	userID := GetUserID(c)
 	res, err := r.fileSvc.GetPath(c.Params("id"), userID)
@@ -434,6 +397,10 @@ func (r *FileRouter) GetPath(c *fiber.Ctx) error {
 	return c.JSON(res)
 }
 
+type FileCopyOptions struct {
+	IDs []string `json:"ids" validate:"required"`
+}
+
 // Copy godoc
 //
 //	@Summary		Copy
@@ -441,14 +408,14 @@ func (r *FileRouter) GetPath(c *fiber.Ctx) error {
 //	@Tags			Files
 //	@Id				files_copy
 //	@Produce		json
-//	@Param			id		path		string					true	"ID"
-//	@Param			body	body		service.FileCopyOptions	true	"Body"
+//	@Param			id		path		string			true	"ID"
+//	@Param			body	body		FileCopyOptions	true	"Body"
 //	@Failure		404		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/files/{id}/copy [post]
 func (r *FileRouter) Copy(c *fiber.Ctx) error {
 	userID := GetUserID(c)
-	opts := new(service.FileCopyOptions)
+	opts := new(FileCopyOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
 	}
@@ -462,6 +429,10 @@ func (r *FileRouter) Copy(c *fiber.Ctx) error {
 	return c.JSON(res)
 }
 
+type FileMoveOptions struct {
+	IDs []string `json:"ids" validate:"required"`
+}
+
 // Move godoc
 //
 //	@Summary		Move
@@ -469,14 +440,14 @@ func (r *FileRouter) Copy(c *fiber.Ctx) error {
 //	@Tags			Files
 //	@Id				files_move
 //	@Produce		json
-//	@Param			id		path		string					true	"ID"
-//	@Param			body	body		service.FileMoveOptions	true	"Body"
+//	@Param			id		path		string			true	"ID"
+//	@Param			body	body		FileMoveOptions	true	"Body"
 //	@Failure		404		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/files/{id}/move [post]
 func (r *FileRouter) Move(c *fiber.Ctx) error {
 	userID := GetUserID(c)
-	opts := new(service.FileMoveOptions)
+	opts := new(FileMoveOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
 	}
@@ -489,33 +460,41 @@ func (r *FileRouter) Move(c *fiber.Ctx) error {
 	return c.SendStatus(http.StatusNoContent)
 }
 
-// Rename godoc
+type FilePatchNameOptions struct {
+	Name string `json:"name" validate:"required,max=255"`
+}
+
+// PatchName godoc
 //
-//	@Summary		Rename
-//	@Description	Rename
+//	@Summary		Patch Name
+//	@Description	Patch Name
 //	@Tags			Files
-//	@Id				files_rename
+//	@Id				files_patch_name
 //	@Produce		json
-//	@Param			id		path		string						true	"ID"
-//	@Param			body	body		service.FileRenameOptions	true	"Body"
+//	@Param			id		path		string					true	"ID"
+//	@Param			body	body		FilePatchNameOptions	true	"Body"
 //	@Success		200		{object}	service.File
 //	@Failure		404		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
-//	@Router			/files/{id}/rename [post]
-func (r *FileRouter) Rename(c *fiber.Ctx) error {
+//	@Router			/files/{id}/name [patch]
+func (r *FileRouter) PatchName(c *fiber.Ctx) error {
 	userID := GetUserID(c)
-	opts := new(service.FileRenameOptions)
+	opts := new(FilePatchNameOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
 	}
 	if err := validator.New().Struct(opts); err != nil {
 		return errorpkg.NewRequestBodyValidationError(err)
 	}
-	res, err := r.fileSvc.Rename(c.Params("id"), opts.Name, userID)
+	res, err := r.fileSvc.PatchName(c.Params("id"), opts.Name, userID)
 	if err != nil {
 		return err
 	}
 	return c.JSON(res)
+}
+
+type FileDeleteOptions struct {
+	IDs []string `json:"ids" validate:"required"`
 }
 
 // Delete godoc
@@ -525,60 +504,13 @@ func (r *FileRouter) Rename(c *fiber.Ctx) error {
 //	@Tags			Files
 //	@Id				files_delete
 //	@Produce		json
-//	@Param			id	path		string	true	"ID"
-//	@Failure		404	{object}	errorpkg.ErrorResponse
-//	@Failure		500	{object}	errorpkg.ErrorResponse
-//	@Router			/files/{id} [delete]
-func (r *FileRouter) Delete(c *fiber.Ctx) error {
-	userID := GetUserID(c)
-	_, err := r.fileSvc.Delete([]string{c.Params("id")}, userID)
-	if err != nil {
-		return err
-	}
-	return c.SendStatus(http.StatusNoContent)
-}
-
-// BatchGet godoc
-//
-//	@Summary		Batch Get
-//	@Description	Batch Get
-//	@Tags			Files
-//	@Id				files_batch_get
-//	@Produce		json
-//	@Param			body	body		service.FileBatchGetOptions	true	"Body"
-//	@Success		200		{array}		service.File
-//	@Failure		500		{object}	errorpkg.ErrorResponse
-//	@Router			/files/batch_get [post]
-func (r *FileRouter) BatchGet(c *fiber.Ctx) error {
-	userID := GetUserID(c)
-	opts := new(service.FileBatchGetOptions)
-	if err := c.BodyParser(opts); err != nil {
-		return err
-	}
-	if err := validator.New().Struct(opts); err != nil {
-		return errorpkg.NewRequestBodyValidationError(err)
-	}
-	res, err := r.fileSvc.FindByID(opts.IDs, userID)
-	if err != nil {
-		return err
-	}
-	return c.JSON(res)
-}
-
-// BatchDelete godoc
-//
-//	@Summary		Batch Delete
-//	@Description	Batch Delete
-//	@Tags			Files
-//	@Id				files_batch_delete
-//	@Produce		json
-//	@Param			body	body		service.FileBatchDeleteOptions	true	"Body"
+//	@Param			body	body		FileDeleteOptions	true	"Body"
 //	@Success		200		{array}		string
 //	@Failure		500		{object}	errorpkg.ErrorResponse
-//	@Router			/files/batch_delete [post]
-func (r *FileRouter) BatchDelete(c *fiber.Ctx) error {
+//	@Router			/files [delete]
+func (r *FileRouter) Delete(c *fiber.Ctx) error {
 	userID := GetUserID(c)
-	opts := new(service.FileBatchDeleteOptions)
+	opts := new(FileDeleteOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
 	}
@@ -603,7 +535,7 @@ func (r *FileRouter) BatchDelete(c *fiber.Ctx) error {
 //	@Success		200	{object}	int
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
-//	@Router			/files/{id}/get_size [get]
+//	@Router			/files/{id}/size [get]
 func (r *FileRouter) GetSize(c *fiber.Ctx) error {
 	userID := GetUserID(c)
 	id := c.Params("id")
@@ -614,25 +546,31 @@ func (r *FileRouter) GetSize(c *fiber.Ctx) error {
 	return c.JSON(res)
 }
 
-// GetItemCount godoc
+// GetCount godoc
 //
-//	@Summary		Get Children Count
-//	@Description	Get Children Count
+//	@Summary		Count
+//	@Description	Count
 //	@Tags			Files
-//	@Id				files_get_children_count
+//	@Id				files_get_count
 //	@Produce		json
 //	@Param			id	path		string	true	"ID"
 //	@Success		200	{object}	int
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
-//	@Router			/files/{id}/get_item_count [get]
-func (r *FileRouter) GetItemCount(c *fiber.Ctx) error {
+//	@Router			/files/{id}/count [get]
+func (r *FileRouter) GetCount(c *fiber.Ctx) error {
 	userID := GetUserID(c)
-	res, err := r.fileSvc.GetItemCount(c.Params("id"), userID)
+	res, err := r.fileSvc.GetCount(c.Params("id"), userID)
 	if err != nil {
 		return err
 	}
 	return c.JSON(res)
+}
+
+type FileGrantUserPermissionOptions struct {
+	UserID     string   `json:"userId" validate:"required"`
+	IDs        []string `json:"ids" validate:"required"`
+	Permission string   `json:"permission" validate:"required,oneof=viewer editor owner"`
 }
 
 // GrantUserPermission godoc
@@ -642,14 +580,14 @@ func (r *FileRouter) GetItemCount(c *fiber.Ctx) error {
 //	@Tags			Files
 //	@Id				files_grant_user_permission
 //	@Produce		json
-//	@Param			id		path		string									true	"ID"
-//	@Param			body	body		service.FileGrantUserPermissionOptions	true	"Body"
+//	@Param			id		path		string							true	"ID"
+//	@Param			body	body		FileGrantUserPermissionOptions	true	"Body"
 //	@Failure		404		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/files/grant_user_permission [post]
 func (r *FileRouter) GrantUserPermission(c *fiber.Ctx) error {
 	userID := GetUserID(c)
-	opts := new(service.FileGrantUserPermissionOptions)
+	opts := new(FileGrantUserPermissionOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
 	}
@@ -662,6 +600,11 @@ func (r *FileRouter) GrantUserPermission(c *fiber.Ctx) error {
 	return c.SendStatus(http.StatusNoContent)
 }
 
+type FileRevokeUserPermissionOptions struct {
+	IDs    []string `json:"ids" validate:"required"`
+	UserID string   `json:"userId" validate:"required"`
+}
+
 // RevokeUserPermission godoc
 //
 //	@Summary		Revoke User Permission
@@ -669,14 +612,14 @@ func (r *FileRouter) GrantUserPermission(c *fiber.Ctx) error {
 //	@Tags			Files
 //	@Id				files_revoke_user_permission
 //	@Produce		json
-//	@Param			id		path		string									true	"ID"
-//	@Param			body	body		service.FileRevokeUserPermissionOptions	true	"Body"
+//	@Param			id		path		string							true	"ID"
+//	@Param			body	body		FileRevokeUserPermissionOptions	true	"Body"
 //	@Failure		404		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/files/revoke_user_permission [post]
 func (r *FileRouter) RevokeUserPermission(c *fiber.Ctx) error {
 	userID := GetUserID(c)
-	opts := new(service.FileRevokeUserPermissionOptions)
+	opts := new(FileRevokeUserPermissionOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
 	}
@@ -689,6 +632,12 @@ func (r *FileRouter) RevokeUserPermission(c *fiber.Ctx) error {
 	return c.SendStatus(http.StatusNoContent)
 }
 
+type FileGrantGroupPermissionOptions struct {
+	GroupID    string   `json:"groupId" validate:"required"`
+	IDs        []string `json:"ids" validate:"required"`
+	Permission string   `json:"permission" validate:"required,oneof=viewer editor owner"`
+}
+
 // GrantGroupPermission godoc
 //
 //	@Summary		Grant Group Permission
@@ -696,14 +645,14 @@ func (r *FileRouter) RevokeUserPermission(c *fiber.Ctx) error {
 //	@Tags			Files
 //	@Id				files_grant_group_permission
 //	@Produce		json
-//	@Param			id		path		string									true	"ID"
-//	@Param			body	body		service.FileGrantGroupPermissionOptions	true	"Body"
+//	@Param			id		path		string							true	"ID"
+//	@Param			body	body		FileGrantGroupPermissionOptions	true	"Body"
 //	@Failure		404		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/files/grant_group_permission [post]
 func (r *FileRouter) GrantGroupPermission(c *fiber.Ctx) error {
 	userID := GetUserID(c)
-	opts := new(service.FileGrantGroupPermissionOptions)
+	opts := new(FileGrantGroupPermissionOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
 	}
@@ -716,6 +665,11 @@ func (r *FileRouter) GrantGroupPermission(c *fiber.Ctx) error {
 	return c.SendStatus(http.StatusNoContent)
 }
 
+type FileRevokeGroupPermissionOptions struct {
+	IDs     []string `json:"ids" validate:"required"`
+	GroupID string   `json:"groupId" validate:"required"`
+}
+
 // RevokeGroupPermission godoc
 //
 //	@Summary		Revoke Group Permission
@@ -723,14 +677,14 @@ func (r *FileRouter) GrantGroupPermission(c *fiber.Ctx) error {
 //	@Tags			Files
 //	@Id				files_revoke_group_permission
 //	@Produce		json
-//	@Param			id		path		string										true	"ID"
-//	@Param			body	body		service.FileRevokeGroupPermissionOptions	true	"Body"
+//	@Param			id		path		string								true	"ID"
+//	@Param			body	body		FileRevokeGroupPermissionOptions	true	"Body"
 //	@Failure		404		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/files/{id}/revoke_group_permission [post]
 func (r *FileRouter) RevokeGroupPermission(c *fiber.Ctx) error {
 	userID := GetUserID(c)
-	opts := new(service.FileRevokeGroupPermissionOptions)
+	opts := new(FileRevokeGroupPermissionOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
 	}
@@ -754,7 +708,7 @@ func (r *FileRouter) RevokeGroupPermission(c *fiber.Ctx) error {
 //	@Success		200	{array}		service.UserPermission
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
-//	@Router			/files/{id}/get_user_permissions [get]
+//	@Router			/files/{id}/user_permissions [get]
 func (r *FileRouter) GetUserPermissions(c *fiber.Ctx) error {
 	userID := GetUserID(c)
 	res, err := r.fileSvc.GetUserPermissions(c.Params("id"), userID)
@@ -775,7 +729,7 @@ func (r *FileRouter) GetUserPermissions(c *fiber.Ctx) error {
 //	@Success		200	{array}		service.GroupPermission
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
-//	@Router			/files/{id}/get_group_permissions [get]
+//	@Router			/files/{id}/group_permissions [get]
 func (r *FileRouter) GetGroupPermissions(c *fiber.Ctx) error {
 	userID := GetUserID(c)
 	res, err := r.fileSvc.GetGroupPermissions(c.Params("id"), userID)
@@ -783,4 +737,113 @@ func (r *FileRouter) GetGroupPermissions(c *fiber.Ctx) error {
 		return err
 	}
 	return c.JSON(res)
+}
+
+// DownloadOriginal godoc
+//
+//	@Summary		Download Original
+//	@Description	Download Original
+//	@Tags			Files
+//	@Id				files_download_original
+//	@Produce		json
+//	@Param			id				path		string	true	"ID"
+//	@Param			access_token	query		string	true	"Access Token"
+//	@Param			ext				query		string	true	"Extension"
+//	@Failure		404				{object}	errorpkg.ErrorResponse
+//	@Failure		500				{object}	errorpkg.ErrorResponse
+//	@Router			/files/{id}/original{ext} [get]
+func (r *FileRouter) DownloadOriginal(c *fiber.Ctx) error {
+	accessToken := c.Cookies(r.accessTokenCookieName)
+	if accessToken == "" {
+		accessToken = c.Query("access_token")
+		if accessToken == "" {
+			return errorpkg.NewFileNotFoundError(nil)
+		}
+	}
+	userID, err := r.getUserIDFromAccessToken(accessToken)
+	if err != nil {
+		return c.SendStatus(http.StatusNotFound)
+	}
+	id := c.Params("id")
+	if id == "" {
+		return errorpkg.NewMissingQueryParamError("id")
+	}
+	ext := c.Params("ext")
+	if ext == "" {
+		return errorpkg.NewMissingQueryParamError("ext")
+	}
+	buf, file, snapshot, err := r.fileSvc.DownloadOriginalBuffer(id, userID)
+	if err != nil {
+		return err
+	}
+	if filepath.Ext(snapshot.GetOriginal().Key) != ext {
+		return errorpkg.NewS3ObjectNotFoundError(nil)
+	}
+	bytes := buf.Bytes()
+	c.Set("Content-Type", infra.DetectMimeFromBytes(bytes))
+	c.Set("Content-Disposition", fmt.Sprintf("filename=\"%s\"", filepath.Base(file.GetName())+ext))
+	return c.Send(bytes)
+}
+
+// DownloadPreview godoc
+//
+//	@Summary		Download Preview
+//	@Description	Download Preview
+//	@Tags			Files
+//	@Id				files_download_preview
+//	@Produce		json
+//	@Param			id				path		string	true	"ID"
+//	@Param			access_token	query		string	true	"Access Token"
+//	@Param			ext				query		string	true	"Extension"
+//	@Failure		404				{object}	errorpkg.ErrorResponse
+//	@Failure		500				{object}	errorpkg.ErrorResponse
+//	@Router			/files/{id}/preview{ext} [get]
+func (r *FileRouter) DownloadPreview(c *fiber.Ctx) error {
+	accessToken := c.Cookies(r.accessTokenCookieName)
+	if accessToken == "" {
+		accessToken = c.Query("access_token")
+		if accessToken == "" {
+			return errorpkg.NewFileNotFoundError(nil)
+		}
+	}
+	userID, err := r.getUserIDFromAccessToken(accessToken)
+	if err != nil {
+		return c.SendStatus(http.StatusNotFound)
+	}
+	id := c.Params("id")
+	if id == "" {
+		return errorpkg.NewMissingQueryParamError("id")
+	}
+	ext := c.Params("ext")
+	if ext == "" {
+		return errorpkg.NewMissingQueryParamError("ext")
+	}
+	buf, file, snapshot, err := r.fileSvc.DownloadPreviewBuffer(id, userID)
+	if err != nil {
+		return err
+	}
+	if filepath.Ext(snapshot.GetPreview().Key) != ext {
+		return errorpkg.NewS3ObjectNotFoundError(nil)
+	}
+	bytes := buf.Bytes()
+	c.Set("Content-Type", infra.DetectMimeFromBytes(bytes))
+	c.Set("Content-Disposition", fmt.Sprintf("filename=\"%s\"", filepath.Base(file.GetName())+ext))
+	return c.Send(bytes)
+}
+
+func (r *FileRouter) getUserIDFromAccessToken(accessToken string) (string, error) {
+	token, err := jwt.Parse(accessToken, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		return []byte(config.GetConfig().Security.JWTSigningKey), nil
+	})
+	if err != nil {
+		return "", err
+	}
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		return claims["sub"].(string), nil
+	} else {
+		return "", errors.New("cannot find sub claim")
+	}
 }

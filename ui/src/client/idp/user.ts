@@ -1,5 +1,4 @@
-/* eslint-disable react-hooks/rules-of-hooks */
-import useSWR from 'swr'
+import useSWR, { SWRConfiguration } from 'swr'
 import { idpFetcher } from '@/client/fetcher'
 
 export type User = {
@@ -33,7 +32,7 @@ export type DeleteOptions = {
 }
 
 export default class UserAPI {
-  static useGet(swrOptions?: any) {
+  static useGet(swrOptions?: SWRConfiguration) {
     const url = `/user`
     return useSWR<User>(
       url,

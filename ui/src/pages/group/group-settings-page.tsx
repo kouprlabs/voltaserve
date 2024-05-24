@@ -15,7 +15,7 @@ const Spacer = () => <div className={cx('grow')} />
 
 const GroupSettingsPage = () => {
   const { id } = useParams()
-  const { data: group, error } = GroupAPI.useGetById(id, swrConfig())
+  const { data: group, error } = GroupAPI.useGet(id, swrConfig())
   const [isNameModalOpen, setIsNameModalOpen] = useState(false)
   const [isAddMembersModalOpen, setIsAddMembersModalOpen] = useState(false)
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)

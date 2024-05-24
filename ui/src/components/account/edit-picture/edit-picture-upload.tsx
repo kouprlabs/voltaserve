@@ -7,7 +7,7 @@ export type EditPictureUploadProps = {
   name: string
   initialValue?: string
   disabled: boolean
-  onChange: (event: any) => void
+  onChange: (event: ChangeEvent<HTMLInputElement>) => void
 }
 
 const EditPictureUpload = ({

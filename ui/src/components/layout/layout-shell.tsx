@@ -7,12 +7,10 @@ import TopBar from '@/components/top-bar'
 import { IconGroup, IconFlag, IconWorkspaces, Shell } from '@/lib'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { errorCleared } from '@/store/ui/error'
-import { selectionUpdated } from '@/store/ui/files'
 
 const LayoutShell = () => {
   const toast = useToast()
   const error = useAppSelector((state) => state.ui.error.value)
-  const selection = useAppSelector((state) => state.ui.files.selection)
   const dispatch = useAppDispatch()
 
   useEffect(() => {

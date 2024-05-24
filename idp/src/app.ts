@@ -1,17 +1,17 @@
 import '@/infra/env'
 import bodyParser from 'body-parser'
 import cors from 'cors'
-import express, { Request, Response } from 'express'
+import express from 'express'
 import logger from 'morgan'
 import passport from 'passport'
 import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt'
 import accountRouter from '@/account/router'
 import { getConfig } from '@/config/config'
+import healthRouter from '@/health/router'
 import { errorHandler } from '@/infra/error'
 import tokenRouter from '@/token/router'
 import userRepo from '@/user/repo'
 import userRouter from '@/user/router'
-import healthRouter from '@/health/router'
 import { client as postgres } from './infra/postgres'
 
 const app = express()
@@ -42,10 +42,10 @@ passport.use(
   ),
 )
 
-app.use('/v1/health', healthRouter)
-app.use('/v1/user', userRouter)
-app.use('/v1/accounts', accountRouter)
-app.use('/v1/token', tokenRouter)
+app.use('/v2/health', healthRouter)
+app.use('/v2/user', userRouter)
+app.use('/v2/accounts', accountRouter)
+app.use('/v2/token', tokenRouter)
 
 app.use(errorHandler)
 

@@ -25,7 +25,6 @@ type FileRepo interface {
 	FindPath(id string) ([]model.File, error)
 	FindTree(id string) ([]model.File, error)
 	GetIDsByWorkspace(workspaceID string) ([]string, error)
-	AssignSnapshots(cloneID string, originalID string) error
 	MoveSourceIntoTarget(targetID string, sourceID string) error
 	Save(file model.File) error
 	BulkInsert(values []model.File, chunkSize int) error
@@ -298,15 +297,6 @@ func (repo *fileRepo) GetIDsByWorkspace(workspaceID string) ([]string, error) {
 		res = append(res, id.Result)
 	}
 	return res, nil
-}
-
-func (repo *fileRepo) AssignSnapshots(cloneID string, originalID string) error {
-	if db := repo.db.Exec("INSERT INTO snapshot_file (snapshot_id, file_id) SELECT s.id, ? "+
-		"FROM snapshot s LEFT JOIN snapshot_file map ON s.id = map.snapshot_id "+
-		"WHERE map.file_id = ? ORDER BY s.version DESC LIMIT 1", cloneID, originalID); db.Error != nil {
-		return db.Error
-	}
-	return nil
 }
 
 func (repo *fileRepo) MoveSourceIntoTarget(targetID string, sourceID string) error {

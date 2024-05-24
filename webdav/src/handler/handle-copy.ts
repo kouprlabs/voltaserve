@@ -1,8 +1,8 @@
 import { IncomingMessage, ServerResponse } from 'http'
 import path from 'path'
-import { getTargetPath } from '@/helper/path'
 import { FileAPI } from '@/client/api'
 import { Token } from '@/client/idp'
+import { getTargetPath } from '@/helper/path'
 import { handleError } from '@/infra/error'
 
 /*
@@ -31,7 +31,7 @@ async function handleCopy(
       res.end()
     } else {
       const clones = await api.copy(targetFile.id, { ids: [sourceFile.id] })
-      await api.rename(clones[0].id, {
+      await api.patchName(clones[0].id, {
         name: decodeURIComponent(path.basename(getTargetPath(req))),
       })
       res.statusCode = 204

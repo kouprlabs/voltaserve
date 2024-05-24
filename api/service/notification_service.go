@@ -2,32 +2,23 @@ package service
 
 import "voltaserve/repo"
 
-type Notification struct {
-	Type string      `json:"type"`
-	Body interface{} `json:"body"`
-}
-
 type NotificationService struct {
 	userRepo         repo.UserRepo
 	invitationRepo   repo.InvitationRepo
 	invitationMapper *invitationMapper
 }
 
-type NewNotificationServiceOptions struct {
-	UserRepo repo.UserRepo
-}
-
-func NewNotificationService(opts NewNotificationServiceOptions) *NotificationService {
-	svc := &NotificationService{
+func NewNotificationService() *NotificationService {
+	return &NotificationService{
+		userRepo:         repo.NewUserRepo(),
 		invitationRepo:   repo.NewInvitationRepo(),
 		invitationMapper: newInvitationMapper(),
 	}
-	if opts.UserRepo != nil {
-		svc.userRepo = opts.UserRepo
-	} else {
-		svc.userRepo = repo.NewUserRepo()
-	}
-	return svc
+}
+
+type Notification struct {
+	Type string      `json:"type"`
+	Body interface{} `json:"body"`
 }
 
 func (svc *NotificationService) List(userID string) ([]*Notification, error) {

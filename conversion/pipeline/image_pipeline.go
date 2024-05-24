@@ -43,14 +43,14 @@ func (p *imagePipeline) Run(opts core.PipelineRunOptions) error {
 	if err := p.s3.GetFile(opts.Key, inputPath, opts.Bucket); err != nil {
 		return err
 	}
-	defer func() {
+	defer func(inputPath string, logger *zap.SugaredLogger) {
 		_, err := os.Stat(inputPath)
 		if os.IsExist(err) {
 			if err := os.Remove(inputPath); err != nil {
-				p.logger.Error(err)
+				logger.Error(err)
 			}
 		}
-	}()
+	}(inputPath, p.logger)
 	imageProps, err := p.imageProc.MeasureImage(inputPath)
 	if err != nil {
 		return err
@@ -69,14 +69,14 @@ func (p *imagePipeline) Run(opts core.PipelineRunOptions) error {
 		if err := p.imageProc.ConvertImage(inputPath, jpegPath); err != nil {
 			return err
 		}
-		defer func() {
+		defer func(jpegPath string, logger *zap.SugaredLogger) {
 			_, err := os.Stat(jpegPath)
 			if os.IsExist(err) {
 				if err := os.Remove(jpegPath); err != nil {
-					p.logger.Error(err)
+					logger.Error(err)
 				}
 			}
-		}()
+		}(jpegPath, p.logger)
 		stat, err := os.Stat(jpegPath)
 		if err != nil {
 			return err
@@ -88,7 +88,7 @@ func (p *imagePipeline) Run(opts core.PipelineRunOptions) error {
 		updateOpts.Thumbnail = &thumbnail
 		updateOpts.Preview = &core.S3Object{
 			Bucket: opts.Bucket,
-			Key:    opts.FileID + "/" + opts.SnapshotID + "/preview.jpg",
+			Key:    opts.SnapshotID + "/preview.jpg",
 			Size:   stat.Size(),
 			Image:  &imageProps,
 		}

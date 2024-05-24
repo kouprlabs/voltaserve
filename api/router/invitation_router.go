@@ -14,24 +14,16 @@ type InvitationRouter struct {
 	invitationSvc *service.InvitationService
 }
 
-type NewInvitationRouterOptions struct {
-	InvitationService *service.InvitationService
-}
-
-func NewInvitationRouter(opts NewInvitationRouterOptions) *InvitationRouter {
-	r := &InvitationRouter{}
-	if opts.InvitationService != nil {
-		r.invitationSvc = opts.InvitationService
-	} else {
-		r.invitationSvc = service.NewInvitationService(service.NewInvitationServiceOptions{})
+func NewInvitationRouter() *InvitationRouter {
+	return &InvitationRouter{
+		invitationSvc: service.NewInvitationService(),
 	}
-	return r
 }
 
 func (r *InvitationRouter) AppendRoutes(g fiber.Router) {
 	g.Post("/", r.Create)
-	g.Get("/get_incoming", r.GetIncoming)
-	g.Get("/get_outgoing", r.GetOutgoing)
+	g.Get("/incoming", r.GetIncoming)
+	g.Get("/outgoing", r.GetOutgoing)
 	g.Post("/:id/accept", r.Accept)
 	g.Post("/:id/resend", r.Resend)
 	g.Post("/:id/decline", r.Decline)
@@ -54,14 +46,14 @@ func (r *InvitationRouter) AppendRoutes(g fiber.Router) {
 //	@Router			/invitations [post]
 func (r *InvitationRouter) Create(c *fiber.Ctx) error {
 	userID := GetUserID(c)
-	req := new(service.InvitationCreateOptions)
-	if err := c.BodyParser(req); err != nil {
+	opts := new(service.InvitationCreateOptions)
+	if err := c.BodyParser(opts); err != nil {
 		return err
 	}
-	if err := validator.New().Struct(req); err != nil {
+	if err := validator.New().Struct(opts); err != nil {
 		return errorpkg.NewRequestBodyValidationError(err)
 	}
-	if err := r.invitationSvc.Create(*req, userID); err != nil {
+	if err := r.invitationSvc.Create(*opts, userID); err != nil {
 		return err
 	}
 	return c.SendStatus(http.StatusNoContent)
@@ -80,7 +72,7 @@ func (r *InvitationRouter) Create(c *fiber.Ctx) error {
 //	@Param			sort_order	query		string	false	"Sort Order"
 //	@Success		200			{object}	service.InvitationList
 //	@Failure		500			{object}	errorpkg.ErrorResponse
-//	@Router			/invitations/get_incoming [get]
+//	@Router			/invitations/incoming [get]
 func (r *InvitationRouter) GetIncoming(c *fiber.Ctx) error {
 	var err error
 	var page int64
@@ -135,7 +127,7 @@ func (r *InvitationRouter) GetIncoming(c *fiber.Ctx) error {
 //	@Param			sort_order		query		string	false	"Sort Order"
 //	@Success		200				{object}	service.InvitationList
 //	@Failure		500				{object}	errorpkg.ErrorResponse
-//	@Router			/invitations/get_outgoing [get]
+//	@Router			/invitations/outgoing [get]
 func (r *InvitationRouter) GetOutgoing(c *fiber.Ctx) error {
 	orgID := c.Query("organization_id")
 	if orgID == "" {

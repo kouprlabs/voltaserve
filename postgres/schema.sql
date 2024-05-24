@@ -63,6 +63,8 @@ CREATE TABLE IF NOT EXISTS "snapshot"
   original    jsonb,
   preview     jsonb,
   text        jsonb,
+  ocr         jsonb,
+  entities    jsonb,
   thumbnail   jsonb,
   language    text,
   status      text,

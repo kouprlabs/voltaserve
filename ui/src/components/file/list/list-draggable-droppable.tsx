@@ -1,5 +1,4 @@
 import { useState, MouseEvent } from 'react'
-import { useParams } from 'react-router-dom'
 import {
   DragCancelEvent,
   DragEndEvent,
@@ -9,7 +8,7 @@ import {
   useDroppable,
 } from '@dnd-kit/core'
 import cx from 'classnames'
-import FileAPI, { FileType, List } from '@/client/api/file'
+import FileAPI, { FileType } from '@/client/api/file'
 import store from '@/store/configure-store'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { hiddenUpdated, selectionUpdated } from '@/store/ui/files'
@@ -28,7 +27,6 @@ const ListDraggableDroppable = ({
   onContextMenu,
 }: ListDraggableDroppableProps) => {
   const dispatch = useAppDispatch()
-  const { fileId } = useParams()
   const [isVisible, setVisible] = useState(true)
   const selection = useAppSelector((state) => state.ui.files.selection)
   const {

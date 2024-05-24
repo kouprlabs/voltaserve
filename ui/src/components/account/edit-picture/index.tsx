@@ -32,6 +32,7 @@ export type AccountEditPictureProps = {
 }
 
 type FormValues = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   picture: any
 }
 
@@ -49,11 +50,13 @@ const AccountEditPicture = ({
       .test(
         'fileSize',
         'Image is too big, should be less than 3 MB',
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (value: any) => value === null || (value && value.size <= 3000000),
       )
       .test(
         'fileType',
         'Unsupported file format',
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (value: any) =>
           value === null ||
           (value &&
@@ -132,9 +135,14 @@ const AccountEditPicture = ({
                           {...field}
                           initialValue={user.picture}
                           disabled={isSubmitting}
-                          onChange={(e) =>
-                            setFieldValue('picture', e.target.files[0])
-                          }
+                          onChange={(event) => {
+                            if (
+                              event.target.files &&
+                              event.target.files.length > 0
+                            ) {
+                              setFieldValue('picture', event.target.files[0])
+                            }
+                          }}
                         />
                         <FormErrorMessage>{errors.picture}</FormErrorMessage>
                       </FormControl>
