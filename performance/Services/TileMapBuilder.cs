@@ -49,11 +49,7 @@
 		{
 			get
 			{
-				if (_minimumScaleSize == null)
-				{
-					_minimumScaleSize = new MinimumScaleSize(new Size(500, 500));
-				}
-
+				_minimumScaleSize ??= new MinimumScaleSize(new Size(500, 500));
 				return _minimumScaleSize;
 			}
 
@@ -87,7 +83,7 @@
 			{
 				_image = new Image(_options.File);
 
-				List<int> zoomLevelsIndexes = RequiredZoomLevelIndexes();
+				var zoomLevelsIndexes = RequiredZoomLevelIndexes();
 				if (zoomLevelsIndexes.Count == 0)
 				{
 					throw new Exception("Creating zoom levels is not required for this image.");
@@ -153,10 +149,14 @@
 			TileSize adaptedTileSize = TileSize;
 
 			if (!tileWidthExceeded)
+			{
 				adaptedTileSize.Width = imageToDecompose.Width;
+			}
 
 			if (!tileHeightExceeded)
+			{
 				adaptedTileSize.Height = imageToDecompose.Height;
+			}
 
 			int colStart, colEnd, rowStart, rowEnd;
 			bool includesRemainingTiles;
@@ -309,7 +309,9 @@
 			do
 			{
 				if (counter == zoomLevel)
+				{
 					break;
+				}
 
 				size.Width = (int)(size.Width * ScaleDownPercentage.Factor);
 				size.Height = (int)(size.Height * ScaleDownPercentage.Factor);
@@ -360,11 +362,15 @@
 			string extension = _options.Extension;
 
 			if (string.IsNullOrWhiteSpace(extension))
+			{
 				extension = _image.Extension;
+			}
 
 			// Delete leading dot
 			if (extension.StartsWith(".", StringComparison.InvariantCulture))
+			{
 				extension = extension.Substring(1);
+			}
 
 			return Path.Combine(_options.OutputDirectory, zoomLevel.ToString(), $"{row}x{col}.{extension}");
 		}
@@ -384,9 +390,13 @@
 			if (Directory.Exists(directory))
 			{
 				if (ActionOnExistingDirectory == ActionOnExistingDirectory.Delete)
+				{
 					DeleteDirectoryWithContent(directory);
+				}
 				else if (ActionOnExistingDirectory == ActionOnExistingDirectory.Skip)
+				{
 					return;
+				}
 			}
 
 			Directory.CreateDirectory(directory);

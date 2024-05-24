@@ -39,7 +39,7 @@ namespace Defyle.Core.Preview.Services
 
 		private string GetTileImage(string path, int zoomLevel, int row, int col)
 		{
-			string directory = Path.Combine(GetOutputDirectory(path), zoomLevel.ToString());
+			var directory = Path.Combine(GetOutputDirectory(path), zoomLevel.ToString());
 			var files = new DirectoryInfo(directory).GetFiles($"{row}x{col}.*");
 
 			if (files.Length > 0)
@@ -57,7 +57,7 @@ namespace Defyle.Core.Preview.Services
 
 		public IEnumerable<ZoomLevel> GetZoomLevels(string path)
 		{
-			string globalMetaFile = Path.Combine(GetOutputDirectory(path), MetadataFilename);
+			var globalMetaFile = Path.Combine(GetOutputDirectory(path), MetadataFilename);
 
 			if (!File.Exists(globalMetaFile))
 			{
@@ -71,7 +71,7 @@ namespace Defyle.Core.Preview.Services
 
 			for (int i = 0; i < zoomLevels; i++)
 			{
-				string zoomLevelMetaFile = Path.Combine(
+				var zoomLevelMetaFile = Path.Combine(
 					GetOutputDirectory(path), i.ToString(),
 					MetadataFilename);
 
