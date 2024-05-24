@@ -13,7 +13,7 @@
 		Skip
 	}
 
-	public class TileMapBuilterOptions
+	public class TileBuilterOptions
 	{
 		public string File { get; set; }
 
@@ -22,7 +22,7 @@
 		public string Extension { get; set; }
 	}
 
-	public class TileMapBuilder(TileMapBuilterOptions options)
+	public class TileBuilder(TileBuilterOptions options)
 	{
 		private IImage _image;
 
@@ -32,7 +32,7 @@
 
 		private TileSize _tileSize;
 
-		private readonly TileMapBuilterOptions _options = options;
+		private readonly TileBuilterOptions _options = options;
 
 		public ScaleDownPercentage ScaleDownPercentage
 		{
@@ -71,43 +71,37 @@
 
 		public void Build()
 		{
-			bool requiresCleanup = false;
-
+			bool cleanupIfFails = false;
 			if (!Directory.Exists(_options.OutputDirectory))
 			{
 				Directory.CreateDirectory(_options.OutputDirectory);
-				requiresCleanup = true;
+				cleanupIfFails = true;
 			}
-
 			try
 			{
 				_image = new Image(_options.File);
-
 				var zoomLevelsIndexes = RequiredZoomLevelIndexes();
 				if (zoomLevelsIndexes.Count == 0)
 				{
-					throw new Exception("Creating zoom levels is not required for this image.");
+					throw new Exception("creating zoom levels is not required for this image.");
 				}
-
 				foreach (int index in zoomLevelsIndexes)
 				{
 					CreateZoomLevelDirectory(index);
 					Image scaled = Scale(index);
 					Decompose(scaled, index, new Region());
 				}
-
 				var metadata = new
 				{
 					width = _image.Width,
 					height = _image.Height,
 					zoomLevels = zoomLevelsIndexes.Count
 				};
-
 				File.WriteAllText(GetMetadataFilePath(), JsonConvert.SerializeObject(metadata, Formatting.Indented));
 			}
 			catch (Exception)
 			{
-				if (requiresCleanup)
+				if (cleanupIfFails)
 				{
 					Directory.Delete(_options.OutputDirectory, true);
 				}
@@ -119,18 +113,15 @@
 		{
 			string[] files = Directory.GetFiles(directory);
 			string[] dirs = Directory.GetDirectories(directory);
-
 			foreach (string file in files)
 			{
 				File.SetAttributes(file, FileAttributes.Normal);
 				File.Delete(file);
 			}
-
 			foreach (string dir in dirs)
 			{
 				DeleteDirectoryWithContent(dir);
 			}
-
 			Directory.Delete(directory, true);
 		}
 
@@ -147,12 +138,10 @@
 			int totalRows = remainingHeight != 0 ? rows + 1 : rows;
 
 			TileSize adaptedTileSize = TileSize;
-
 			if (!tileWidthExceeded)
 			{
 				adaptedTileSize.Width = imageToDecompose.Width;
 			}
-
 			if (!tileHeightExceeded)
 			{
 				adaptedTileSize.Height = imageToDecompose.Height;
@@ -182,7 +171,7 @@
 			{
 				for (int r = rowStart; r <= rowEnd; r++)
 				{
-					TileMetadata tileMetadata = new TileMetadata
+					var tileMetadata = new TileMetadata
 					{
 						X = c * _tileSize.Width,
 						Y = r * _tileSize.Height,
@@ -191,7 +180,6 @@
 						Row = r,
 						Col = c
 					};
-
 					Rectangle clippingRect = new Rectangle
 					{
 						X = tileMetadata.X,
@@ -199,14 +187,13 @@
 						Width = tileMetadata.Width,
 						Height = tileMetadata.Height
 					};
-
-					IImage cropped = new Image(imageToDecompose);
+					var cropped = new Image(imageToDecompose);
 					cropped.Crop(clippingRect);
 					cropped.Save(GetTileOutputPath(zoomLevelIndex, tileMetadata.Row, tileMetadata.Col));
 				}
 			}
 
-			// Remaining height
+			/* Remaining height */
 			if (includesRemainingTiles && remainingHeight > 0)
 			{
 				for (int c = 0; c < cols; c++)
@@ -225,7 +212,7 @@
 				}
 			}
 
-			// Remaining width
+			/* Remaining width */
 			if (includesRemainingTiles && remainingWidth > 0)
 			{
 				for (int r = 0; r < rows; r++)
@@ -244,7 +231,7 @@
 				}
 			}
 
-			// Remaining bottom right corner
+			/* Remaining bottom right corner */
 			if (includesRemainingTiles && remainingWidth > 0 && remainingHeight > 0)
 			{
 				var clippingRect = new Rectangle
@@ -276,28 +263,25 @@
 					LastRowHeight = remainingHeight
 				}
 			};
-
 			File.WriteAllText(GetZoomLevelMetadataFilePath(zoomLevelIndex),
 				JsonConvert.SerializeObject(metadata, Formatting.Indented));
 		}
 
-		private float GetScaleDownPercentage(int zoomLevel)
+		private static float GetScaleDownPercentage(int zoomLevel)
 		{
 			float value = 100.0f;
 			for (int i = 0; i < zoomLevel; i++)
 			{
 				value *= 0.70f;
 			}
-
 			return value;
 		}
 
 		private Image Scale(int zoomLevel)
 		{
 			Size imageSizeForZoomLevel = GetImageSizeForZoomLevel(zoomLevel);
-			Image scaled = new Image(_image);
+			var scaled = new Image(_image);
 			scaled.ScaleWithAspectRatio(imageSizeForZoomLevel.Width, imageSizeForZoomLevel.Height);
-
 			return scaled;
 		}
 
@@ -305,30 +289,24 @@
 		{
 			var size = new Size(_image.Width, _image.Height);
 			int counter = 0;
-
 			do
 			{
 				if (counter == zoomLevel)
 				{
 					break;
 				}
-
 				size.Width = (int)(size.Width * ScaleDownPercentage.Factor);
 				size.Height = (int)(size.Height * ScaleDownPercentage.Factor);
-
 				counter += 1;
 			} while (true);
-
 			return size;
 		}
 
-		/// <returns>Zoom level indexes</returns>
 		private List<int> RequiredZoomLevelIndexes()
 		{
 			var levels = new List<int>();
 			int zoomLevelCount = 0;
 			Size imageSize = new Size(_image.Width, _image.Height);
-
 			do
 			{
 				imageSize.Width = (int)(imageSize.Width * ScaleDownPercentage.Factor);
@@ -343,7 +321,6 @@
 
 				zoomLevelCount += 1;
 			} while (true);
-
 			return levels;
 		}
 
@@ -360,18 +337,15 @@
 		private string GetTileOutputPath(int zoomLevel, int row, int col)
 		{
 			string extension = _options.Extension;
-
 			if (string.IsNullOrWhiteSpace(extension))
 			{
 				extension = _image.Extension;
 			}
-
-			// Delete leading dot
-			if (extension.StartsWith(".", StringComparison.InvariantCulture))
+			/* Remove leading dot */
+			if (extension.StartsWith('.'))
 			{
-				extension = extension.Substring(1);
+				extension = extension[1..];
 			}
-
 			return Path.Combine(_options.OutputDirectory, zoomLevel.ToString(), $"{row}x{col}.{extension}");
 		}
 
@@ -398,7 +372,6 @@
 					return;
 				}
 			}
-
 			Directory.CreateDirectory(directory);
 		}
 	}

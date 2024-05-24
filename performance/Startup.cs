@@ -45,7 +45,7 @@ namespace Defyle.WebApi
 
       services.AddWebEncoders();
 
-      services.AddTransient<TileMapService>();
+      services.AddTransient<TileService>();
     }
 
     public void Configure(IApplicationBuilder app)
