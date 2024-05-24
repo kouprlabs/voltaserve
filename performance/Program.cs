@@ -1,13 +1,12 @@
 ﻿namespace Defyle.WebApi
 {
 	using System.IO;
-  using Core.Infrastructure.Poco;
-  using Microsoft.AspNetCore;
+	using Microsoft.AspNetCore;
 	using Microsoft.AspNetCore.Hosting;
 	using Microsoft.Extensions.Configuration;
 	using Microsoft.Extensions.Logging;
 
-  public class Program
+	public class Program
 	{
 		private static IConfiguration _configuration;
 
@@ -15,37 +14,34 @@
 		{
 			get
 			{
-				if (_configuration == null)
-				{
-					_configuration = new ConfigurationBuilder()
+				_configuration ??= new ConfigurationBuilder()
 						.SetBasePath(Directory.GetCurrentDirectory())
-						.AddJsonFile(Path.Combine("config","appsettings.json"))
+						.AddJsonFile("appsettings.json")
 						.Build();
-				}
-
 				return _configuration;
 			}
 		}
 
 		public static void Main(string[] args)
-    {
-      BuildWebHost(args).Run();
+		{
+			BuildWebHost(args).Run();
 		}
 
 		public static IWebHost BuildWebHost(string[] args)
 		{
-			CoreSettings coreSettings = Configuration.Get<CoreSettings>();
-      
+			var url = Configuration.GetValue<string>("url");
+			var multipartBodyLengthLimit = _configuration.GetValue<int>("multipartBodyLengthLimit");
+
 			return WebHost.CreateDefaultBuilder(args)
-				.UseKestrel(options => { options.Limits.MaxRequestBodySize = coreSettings.MultipartBodyLengthLimit; })
+				.UseKestrel(options => { options.Limits.MaxRequestBodySize = multipartBodyLengthLimit; })
 				.UseStartup<Startup>()
-				.UseUrls(coreSettings.Url)
+				.UseUrls(url)
 				.ConfigureLogging((webHostBuilderContext, loggingBuilder) =>
 				{
 					loggingBuilder.ClearProviders();
-          loggingBuilder.AddConsole();
-        })
-        .Build();
+					loggingBuilder.AddConsole();
+				})
+				.Build();
 		}
 	}
 }
