@@ -22,7 +22,7 @@
 		public string Extension { get; set; }
 	}
 
-	public class TileMapBuilder
+	public class TileMapBuilder(TileMapBuilterOptions options)
 	{
 		private IImage _image;
 
@@ -32,22 +32,13 @@
 
 		private TileSize _tileSize;
 
-		private readonly TileMapBuilterOptions _options;
-
-		public TileMapBuilder(TileMapBuilterOptions options)
-		{
-			_options = options;
-		}
+		private readonly TileMapBuilterOptions _options = options;
 
 		public ScaleDownPercentage ScaleDownPercentage
 		{
 			get
 			{
-				if (_scaleDownPercentage == null)
-				{
-					_scaleDownPercentage = new ScaleDownPercentage(70);
-				}
-
+				_scaleDownPercentage ??= new ScaleDownPercentage(70);
 				return _scaleDownPercentage;
 			}
 
@@ -73,11 +64,7 @@
 		{
 			get
 			{
-				if (_tileSize == null)
-				{
-					_tileSize = new TileSize(new Size(300, 300));
-				}
-
+				_tileSize ??= new TileSize(new Size(300, 300));
 				return _tileSize;
 			}
 
@@ -232,7 +219,7 @@
 						Height = remainingHeight
 					};
 
-					IImage cropped = new Image(imageToDecompose);
+					var cropped = new Image(imageToDecompose);
 					cropped.Crop(clippingRect);
 					cropped.Save(GetTileOutputPath(zoomLevelIndex, totalRows - 1, c));
 				}
@@ -260,7 +247,7 @@
 			// Remaining bottom right corner
 			if (includesRemainingTiles && remainingWidth > 0 && remainingHeight > 0)
 			{
-				Rectangle clippingRect = new Rectangle
+				var clippingRect = new Rectangle
 				{
 					X = imageToDecompose.Width - remainingWidth,
 					Y = imageToDecompose.Height - remainingHeight,
@@ -268,12 +255,12 @@
 					Height = remainingHeight
 				};
 
-				IImage cropped = new Image(imageToDecompose);
+				var cropped = new Image(imageToDecompose);
 				cropped.Crop(clippingRect);
 				cropped.Save(GetTileOutputPath(zoomLevelIndex, totalRows - 1, totalCols - 1));
 			}
 
-			ZoomLevel metadata = new ZoomLevel
+			var metadata = new ZoomLevel
 			{
 				Index = zoomLevelIndex,
 				Width = imageToDecompose.Width,
@@ -299,7 +286,7 @@
 			float value = 100.0f;
 			for (int i = 0; i < zoomLevel; i++)
 			{
-				value = value * 0.70f;
+				value *= 0.70f;
 			}
 
 			return value;
@@ -316,7 +303,7 @@
 
 		private Size GetImageSizeForZoomLevel(int zoomLevel)
 		{
-			Size size = new Size(_image.Width, _image.Height);
+			var size = new Size(_image.Width, _image.Height);
 			int counter = 0;
 
 			do
