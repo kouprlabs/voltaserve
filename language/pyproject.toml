@@ -9,6 +9,7 @@ readme = "README.md"
 python = "^3.12"
 flask = "3.0.3"
 spacy = "3.7.4"
+requests = "2.32.0"
 
 
 [tool.poetry.group.dev.dependencies]
