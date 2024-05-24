@@ -1,10 +1,10 @@
 ﻿namespace Defyle.Core.Preview.Models
 {
-  using System.Drawing;
-  using System.IO;
-  using ImageMagick;
+	using System.Drawing;
+	using System.IO;
+	using ImageMagick;
 
-  public class Image : IImage
+	public class Image : IImage
 	{
 		private readonly MagickImage _magickImage;
 		private readonly string _file;
@@ -12,7 +12,7 @@
 		public Image(string file)
 		{
 			_magickImage = new MagickImage();
-      _file = file;
+			_file = file;
 			Load(file);
 		}
 
@@ -23,7 +23,7 @@
 				if (source is Image concreteSource)
 				{
 					_magickImage = new MagickImage(concreteSource._magickImage);
-        }
+				}
 			}
 		}
 
@@ -36,12 +36,12 @@
 		public void Load(string file)
 		{
 			_magickImage.Read(file);
-      _magickImage.AutoOrient();
+			_magickImage.AutoOrient();
 		}
 
 		public void Crop(int x, int y, int width, int height)
 		{
-      _magickImage.Crop(new MagickGeometry(x, y, width, height));
+			_magickImage.Crop(new MagickGeometry(x, y, width, height));
 		}
 
 		public void Crop(Rectangle rectangle)
@@ -51,8 +51,10 @@
 
 		public void ScaleWithAspectRatio(int width, int height)
 		{
-			var geometry = new MagickGeometry();
-			geometry.IgnoreAspectRatio = false;
+			var geometry = new MagickGeometry
+			{
+				IgnoreAspectRatio = false
+			};
 
 			if (width != 0)
 			{
