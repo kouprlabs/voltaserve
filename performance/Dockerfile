@@ -1,10 +1,22 @@
-FROM mcr.microsoft.com/dotnet/core/aspnet:3.1
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+
+WORKDIR /src
+
+COPY ./performance.csproj .
+
+RUN dotnet restore "./performance.csproj"
+
+COPY . .
+
+RUN dotnet build "performance.csproj" -c Release -o /build
+RUN dotnet publish "performance.csproj" -c Release -o /publish
+
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
 
 WORKDIR /app
 
-COPY ./webapi/bin/Release/netcoreapp3.1/linux-x64/publish .
-RUN rm -rf ./config
+COPY --from=build /publish .
 
-ENTRYPOINT ["dotnet", "./Defyle.WebApi.dll"]
+ENTRYPOINT ["dotnet", "performance.dll"]
 
-EXPOSE 8080/tcp
+EXPOSE 8085

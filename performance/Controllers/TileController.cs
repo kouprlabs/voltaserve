@@ -22,7 +22,7 @@ namespace Defyle.WebApi.Inode.Controllers
       {
         if (file == null || file.Length == 0)
         {
-          return BadRequest("No file uploaded");
+          return BadRequest("no file uploaded");
         }
         path = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + Path.GetExtension(file.FileName));
         using (var stream = new FileStream(path, FileMode.Create))
