@@ -15,9 +15,9 @@
 		public bool IsNull()
 		{
 			if (ColStart == 0 &&
-			    ColEnd == 0 &&
-			    RowStart == 0 &&
-			    RowEnd == 0)
+					ColEnd == 0 &&
+					RowStart == 0 &&
+					RowEnd == 0)
 			{
 				return true;
 			}

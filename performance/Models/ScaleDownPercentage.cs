@@ -1,8 +1,8 @@
 ﻿namespace Defyle.Core.Preview.Models
 {
-  using System;
+	using System;
 
-  public class ScaleDownPercentage
+	public class ScaleDownPercentage
 	{
 		private double? _factor;
 

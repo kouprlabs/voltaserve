@@ -1,9 +1,9 @@
 ﻿namespace Defyle.Core.Preview.Models
 {
-  using System;
-  using System.Drawing;
+	using System;
+	using System.Drawing;
 
-  public class MinimumScaleSize
+	public class MinimumScaleSize
 	{
 		public MinimumScaleSize(Size value)
 		{
@@ -11,7 +11,6 @@
 			{
 				throw new Exception(GetAcceptanceCriteria());
 			}
-
 			Value = value;
 		}
 

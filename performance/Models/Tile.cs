@@ -1,6 +1,6 @@
 ﻿namespace Defyle.Core.Preview.Models
 {
-  public class Tile
+	public class Tile
 	{
 		public int Width { get; set; }
 

@@ -1,9 +1,9 @@
 ﻿namespace Defyle.Core.Preview.Models
 {
-  using System.Drawing;
-  using System.IO;
+	using System.Drawing;
+	using System.IO;
 
-  public interface IImage
+	public interface IImage
 	{
 		int Width { get; }
 

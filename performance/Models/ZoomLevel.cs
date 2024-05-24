@@ -1,6 +1,6 @@
 ﻿namespace Defyle.Core.Preview.Models
 {
-  public class ZoomLevel
+	public class ZoomLevel
 	{
 		public int Index { get; set; }
 
