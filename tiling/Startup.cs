@@ -1,7 +1,7 @@
-namespace Defyle.Performance
+namespace Voltaserve.Tiling
 {
     using System.IO;
-    using Defyle.Performance.Services;
+    using Voltaserve.Tiling.Services;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Http.Features;
     using Microsoft.Extensions.Configuration;
@@ -45,7 +45,7 @@ namespace Defyle.Performance
 
             services.AddWebEncoders();
 
-            services.AddTransient<TileService>();
+            services.AddTransient<TilesService>();
         }
 
         public void Configure(IApplicationBuilder app)

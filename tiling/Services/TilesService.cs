@@ -1,9 +1,9 @@
-namespace Defyle.Performance.Services
+namespace Voltaserve.Tiling.Services
 {
     using System;
     using System.Collections.Generic;
     using System.IO;
-    using Defyle.Performance.Infra;
+    using Voltaserve.Tiling.Infra;
     using Microsoft.AspNetCore.StaticFiles;
     using Models;
     using Newtonsoft.Json;
@@ -11,12 +11,12 @@ namespace Defyle.Performance.Services
 
     public class ResourceNotFoundException(string message) : Exception(message) { }
 
-    public class TileService
+    public class TilesService
     {
         private const string MetaFilename = "meta.json";
         private readonly FileExtensionContentTypeProvider _fileExtensionContentTypeProvider;
 
-        public TileService()
+        public TilesService()
         {
             _fileExtensionContentTypeProvider = new FileExtensionContentTypeProvider();
         }
@@ -24,7 +24,7 @@ namespace Defyle.Performance.Services
         public string Create(string path)
         {
             var id = Ids.New();
-            new TileBuilder(new TileBuilterOptions
+            new TilesBuilder(new TilesBuilterOptions
             {
                 File = path,
                 OutputDirectory = GetOutputDirectory(id),

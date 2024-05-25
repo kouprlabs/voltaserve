@@ -1,4 +1,4 @@
-﻿namespace Defyle.Performance.Models
+﻿namespace Voltaserve.Tiling.Models
 {
     using System;
     using System.Drawing;

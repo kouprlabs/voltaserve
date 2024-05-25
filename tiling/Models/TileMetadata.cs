@@ -1,4 +1,4 @@
-﻿namespace Defyle.Performance.Models
+﻿namespace Voltaserve.Tiling.Models
 {
     public class TileMetadata
     {

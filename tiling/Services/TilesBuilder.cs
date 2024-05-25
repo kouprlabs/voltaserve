@@ -1,4 +1,4 @@
-﻿namespace Defyle.Performance.Services
+﻿namespace Voltaserve.Tiling.Services
 {
     using System;
     using System.Collections.Generic;
@@ -13,7 +13,7 @@
         Skip
     }
 
-    public class TileBuilterOptions
+    public class TilesBuilterOptions
     {
         public string File { get; set; }
 
@@ -22,7 +22,7 @@
         public string Extension { get; set; }
     }
 
-    public class TileBuilder(TileBuilterOptions options)
+    public class TilesBuilder(TilesBuilterOptions options)
     {
         private IImage _image;
 
@@ -32,7 +32,7 @@
 
         private TileSize _tileSize;
 
-        private readonly TileBuilterOptions _options = options;
+        private readonly TilesBuilterOptions _options = options;
 
         public ScaleDownPercentage ScaleDownPercentage
         {

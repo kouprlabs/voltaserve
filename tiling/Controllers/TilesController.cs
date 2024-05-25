@@ -1,19 +1,18 @@
-namespace Voltaserve.Performance.Controllers
+namespace Voltaserve.Tiling.Controllers
 {
-    using System;
     using System.Collections.Generic;
     using System.IO;
     using System.Threading.Tasks;
-    using Defyle.Performance.Infra;
-    using Defyle.Performance.Models;
-    using Defyle.Performance.Services;
+    using Voltaserve.Tiling.Infra;
+    using Voltaserve.Tiling.Models;
+    using Voltaserve.Tiling.Services;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
 
-    [Route("v2/performance/tiles")]
-    public class TileController(TileService tileService) : Controller
+    [Route("v2/tiles")]
+    public class TilesController(TilesService tilesService) : Controller
     {
-        private readonly TileService _tileService = tileService;
+        private readonly TilesService _tilesService = tilesService;
 
         [HttpPost()]
         public async Task<IActionResult> Create(IFormFile file)
@@ -30,7 +29,7 @@ namespace Voltaserve.Performance.Controllers
                 {
                     await file.CopyToAsync(stream);
                 }
-                var id = _tileService.Create(path);
+                var id = _tilesService.Create(path);
                 return Ok(id);
             }
             catch
@@ -52,7 +51,7 @@ namespace Voltaserve.Performance.Controllers
         {
             try
             {
-                IEnumerable<ZoomLevel> zoomLevels = _tileService.GetZoomLevels(path);
+                IEnumerable<ZoomLevel> zoomLevels = _tilesService.GetZoomLevels(path);
                 return Ok(zoomLevels);
             }
             catch (ResourceNotFoundException)
@@ -71,7 +70,7 @@ namespace Voltaserve.Performance.Controllers
         {
             try
             {
-                (Stream stream, string extension) = _tileService.GetTileStream(path, zoomLevel, row, col);
+                (Stream stream, string extension) = _tilesService.GetTileStream(path, zoomLevel, row, col);
                 return File(stream, extension);
             }
             catch (ResourceNotFoundException)

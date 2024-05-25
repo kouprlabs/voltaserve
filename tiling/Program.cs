@@ -1,4 +1,4 @@
-﻿namespace Defyle.Performance
+﻿namespace Voltaserve.Tiling
 {
     using System.IO;
     using Microsoft.AspNetCore;
