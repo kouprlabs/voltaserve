@@ -5,10 +5,10 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "performance",
+      "name": "tiling",
       "type": "dotnet",
       "request": "launch",
-      "projectPath": "${workspaceFolder}/performance.csproj",
+      "projectPath": "${workspaceFolder}/tiling.csproj",
     }
 
   ]
