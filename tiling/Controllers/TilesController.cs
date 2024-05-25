@@ -15,11 +15,12 @@ namespace Voltaserve.Tiling.Controllers
         private readonly TilesService _tilesService = tilesService;
 
         [HttpPost()]
-        public async Task<IActionResult> Create(IFormFile file)
+        public async Task<IActionResult> CreateAsync([FromForm] IFormCollection form)
         {
             string path = null;
             try
             {
+                var file = form.Files["file"];
                 if (file == null || file.Length == 0)
                 {
                     return BadRequest("no file uploaded");
@@ -29,8 +30,8 @@ namespace Voltaserve.Tiling.Controllers
                 {
                     await file.CopyToAsync(stream);
                 }
-                var id = _tilesService.Create(path);
-                return Ok(id);
+                var metadata = await _tilesService.CreateAsync(path, form["s3_key"], form["s3_bucket"]);
+                return Ok(metadata);
             }
             catch
             {
@@ -45,14 +46,14 @@ namespace Voltaserve.Tiling.Controllers
             }
         }
 
-        [HttpGet("{path}/zoom_levels")]
+        [HttpGet("{s3Bucket}/{s3Key}/metadata")]
         [ProducesResponseType(typeof(IEnumerable<ZoomLevel>), 200)]
-        public IActionResult GetZoomLevels(string path)
+        public async Task<IActionResult> GetMetadataAsync(string s3Bucket, string s3Key)
         {
             try
             {
-                IEnumerable<ZoomLevel> zoomLevels = _tilesService.GetZoomLevels(path);
-                return Ok(zoomLevels);
+                Metadata metadata = await _tilesService.GetMetadataAsync(s3Bucket, s3Key);
+                return Ok(metadata);
             }
             catch (ResourceNotFoundException)
             {
@@ -64,14 +65,14 @@ namespace Voltaserve.Tiling.Controllers
             }
         }
 
-        [HttpGet("{path}/zoom_level/{zoomLevel}/row/{row}/col/{col}")]
+        [HttpGet("{s3Bucket}/{s3Key}/zoom_level/{zoomLevel}/row/{row}/col/{col}/ext/{ext}")]
         [ProducesResponseType(typeof(FileResult), 200)]
-        public IActionResult DownloadTile(string path, int zoomLevel, int row, int col)
+        public async Task<IActionResult> DownloadTileAsync(string s3Bucket, string s3Key, int zoomLevel, int row, int col, string ext)
         {
             try
             {
-                (Stream stream, string extension) = _tilesService.GetTileStream(path, zoomLevel, row, col);
-                return File(stream, extension);
+                (Stream stream, string contentType) = await _tilesService.GetTileStreamAsync(s3Bucket, s3Key, zoomLevel, row, col, ext);
+                return File(stream, contentType);
             }
             catch (ResourceNotFoundException)
             {

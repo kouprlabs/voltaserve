@@ -4,8 +4,8 @@
     using System.Collections.Generic;
     using System.Drawing;
     using System.IO;
+    using System.Text.Json;
     using Models;
-    using Newtonsoft.Json;
 
     public enum ActionOnExistingDirectory
     {
@@ -18,8 +18,6 @@
         public string File { get; set; }
 
         public string OutputDirectory { get; set; }
-
-        public string Extension { get; set; }
     }
 
     public class TilesBuilder(TilesBuilterOptions options)
@@ -69,7 +67,7 @@
 
         public ActionOnExistingDirectory ActionOnExistingDirectory { get; set; }
 
-        public void Build()
+        public Metadata Build()
         {
             bool cleanupIfFails = false;
             if (!Directory.Exists(_options.OutputDirectory))
@@ -85,21 +83,27 @@
                 {
                     throw new Exception("creating zoom levels is not required for this image.");
                 }
+                var zoomLevels = new List<ZoomLevel>();
                 foreach (int index in zoomLevelsIndexes)
                 {
                     CreateZoomLevelDirectory(index);
                     Image scaled = Scale(index);
-                    Decompose(scaled, index, new Region());
+                    var zoomLevel = Decompose(scaled, index, new Region());
+                    zoomLevels.Add(zoomLevel);
                 }
-                var metadata = new
+                var metadata = new Metadata
                 {
-                    width = _image.Width,
-                    height = _image.Height,
-                    zoomLevels = zoomLevelsIndexes.Count
+                    Width = _image.Width,
+                    Height = _image.Height,
+                    Extension = Path.GetExtension(_options.File),
+                    ZoomLevels = zoomLevels,
                 };
-                File.WriteAllText(GetMetadataFilePath(), JsonConvert.SerializeObject(metadata, Formatting.Indented));
+                File.WriteAllText(
+                    GetMetadataFilePath(),
+                    JsonSerializer.Serialize(metadata, new JsonSerializerOptions() { WriteIndented = true }));
+                return metadata;
             }
-            catch (Exception)
+            catch
             {
                 if (cleanupIfFails)
                 {
@@ -125,7 +129,7 @@
             Directory.Delete(directory, true);
         }
 
-        private void Decompose(Image image, int zoomLevel, Region region)
+        private ZoomLevel Decompose(Image image, int zoomLevel, Region region)
         {
             bool tileWidthExceeded = image.Width > TileSize.Width;
             bool tileHeightExceeded = image.Height > TileSize.Height;
@@ -225,7 +229,7 @@
                         Height = _tileSize.Height
                     };
 
-                    IImage cropped = new Image(image);
+                    var cropped = new Image(image);
                     cropped.Crop(clippingRect);
                     cropped.Save(GetTileOutputPath(zoomLevel, r, totalCols - 1));
                 }
@@ -247,7 +251,7 @@
                 cropped.Save(GetTileOutputPath(zoomLevel, totalRows - 1, totalCols - 1));
             }
 
-            var metadata = new ZoomLevel
+            return new ZoomLevel
             {
                 Index = zoomLevel,
                 Width = image.Width,
@@ -263,8 +267,6 @@
                     LastRowHeight = remainingHeight
                 }
             };
-            File.WriteAllText(GetZoomLevelMetadataFilePath(zoomLevel),
-              JsonConvert.SerializeObject(metadata, Formatting.Indented));
         }
 
         private static float GetScaleDownPercentage(int zoomLevel)
@@ -321,19 +323,11 @@
             return levels;
         }
 
-        private string GetMetadataFilePath()
-        {
-            return Path.Combine(_options.OutputDirectory, "meta.json");
-        }
-
-        private string GetZoomLevelMetadataFilePath(int zoomLevel)
-        {
-            return Path.Combine(_options.OutputDirectory, zoomLevel.ToString(), "meta.json");
-        }
+        private string GetMetadataFilePath() => Path.Combine(_options.OutputDirectory, "meta.json");
 
         private string GetTileOutputPath(int zoomLevel, int row, int col)
         {
-            string extension = _options.Extension;
+            string extension = Path.GetExtension(_options.File);
             if (string.IsNullOrWhiteSpace(extension))
             {
                 extension = _image.Extension;
@@ -345,10 +339,7 @@
             return Path.Combine(_options.OutputDirectory, zoomLevel.ToString(), $"{row}x{col}.{extension}");
         }
 
-        private string GetZoomLevelDirectoryPath(int zoomLevel)
-        {
-            return Path.Combine(_options.OutputDirectory, zoomLevel.ToString());
-        }
+        private string GetZoomLevelDirectoryPath(int zoomLevel) => Path.Combine(_options.OutputDirectory, zoomLevel.ToString());
 
         private void CreateZoomLevelDirectory(int zoomLevel)
         {

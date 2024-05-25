@@ -1,93 +1,95 @@
 namespace Voltaserve.Tiling.Services
 {
     using System;
-    using System.Collections.Generic;
     using System.IO;
     using Voltaserve.Tiling.Infra;
     using Microsoft.AspNetCore.StaticFiles;
     using Models;
-    using Newtonsoft.Json;
-    using Newtonsoft.Json.Linq;
+    using Minio;
+    using Minio.DataModel.Args;
+    using System.Threading.Tasks;
+    using System.Text.Json;
+    using Minio.Exceptions;
 
     public class ResourceNotFoundException(string message) : Exception(message) { }
 
-    public class TilesService
+
+    public class TilesService(IMinioClient _minioClient)
     {
-        private const string MetaFilename = "meta.json";
-        private readonly FileExtensionContentTypeProvider _fileExtensionContentTypeProvider;
+        private readonly FileExtensionContentTypeProvider _fileExtensionContentTypeProvider = new();
 
-        public TilesService()
-        {
-            _fileExtensionContentTypeProvider = new FileExtensionContentTypeProvider();
-        }
-
-        public string Create(string path)
+        public async Task<Metadata> CreateAsync(string path, string s3Key, string s3Bucket)
         {
             var id = Ids.New();
-            new TilesBuilder(new TilesBuilterOptions
+            var outputDirectory = Path.Combine(Path.GetTempPath(), id);
+            try
             {
-                File = path,
-                OutputDirectory = GetOutputDirectory(id),
-                Extension = Path.GetExtension(path)
-            }).Build();
-            return id;
-        }
-
-        public (Stream stream, string extension) GetTileStream(string path, int zoomLevel, int row, int col)
-        {
-            string tilePath = GetTileImage(path, zoomLevel, row, col);
-            string extension = Path.GetExtension(tilePath);
-            string mime = _fileExtensionContentTypeProvider.Mappings[extension];
-            return (new FileStream(tilePath, FileMode.Open), mime);
-        }
-
-        private static string GetOutputDirectory(string path)
-        {
-            return Path.Combine("out", path);
-        }
-
-        private static string GetTileImage(string path, int zoomLevel, int row, int col)
-        {
-            var directory = Path.Combine(GetOutputDirectory(path), zoomLevel.ToString());
-            if (!Directory.Exists(directory))
-            {
-                throw new ResourceNotFoundException(directory);
-            }
-            var files = new DirectoryInfo(directory).GetFiles($"{row}x{col}.*");
-            string tilePath = Path.Combine(directory, files[0].Name);
-            if (files.Length > 0)
-            {
-                if (File.Exists(tilePath))
+                var metadata = new TilesBuilder(new TilesBuilterOptions
                 {
-                    return tilePath;
+                    File = path,
+                    OutputDirectory = outputDirectory,
+                }).Build();
+
+                var files = Directory.GetFiles(outputDirectory, "*.*", SearchOption.AllDirectories);
+                foreach (var file in files)
+                {
+                    using var stream = new FileStream(file, FileMode.Open, FileAccess.Read);
+                    await _minioClient.PutObjectAsync(new PutObjectArgs()
+                        .WithBucket(s3Bucket)
+                        .WithObject(Path.Combine(s3Key, Path.GetRelativePath(outputDirectory, file)))
+                        .WithStreamData(stream)
+                        .WithObjectSize(new FileInfo(file).Length)
+                        .WithContentType(_fileExtensionContentTypeProvider.Mappings[Path.GetExtension(file)]));
+                }
+                return metadata;
+            }
+            catch
+            {
+                throw;
+            }
+            finally
+            {
+                if (Directory.Exists(outputDirectory))
+                {
+                    Directory.Delete(outputDirectory, true);
                 }
             }
-            throw new ResourceNotFoundException(tilePath);
         }
 
-        public IEnumerable<ZoomLevel> GetZoomLevels(string path)
+        public async Task<(Stream stream, string contentType)> GetTileStreamAsync(string s3Bucket, string s3Key, int zoomLevel, int row, int col, string ext)
         {
-            var metaPath = Path.Combine(GetOutputDirectory(path), MetaFilename);
-            if (!File.Exists(metaPath))
+            try
             {
-                throw new ResourceNotFoundException(metaPath);
+                var memoryStream = new MemoryStream();
+                await _minioClient.GetObjectAsync(new GetObjectArgs()
+                    .WithBucket(s3Bucket)
+                    .WithObject(Path.Combine(s3Key, zoomLevel.ToString(), $"{row}x{col}.{ext}"))
+                    .WithCallbackStream((stream) => stream.CopyTo(memoryStream)));
+                memoryStream.Seek(0, SeekOrigin.Begin);
+                return (memoryStream, _fileExtensionContentTypeProvider.Mappings[$".{ext}"]);
             }
-
-            var metaJson = JObject.Parse(File.ReadAllText(metaPath));
-            var images = new List<ZoomLevel>();
-            int zoomLevels = metaJson.Value<int>("zoomLevels");
-
-            for (int i = 0; i < zoomLevels; i++)
+            catch (MinioException)
             {
-                var zoomLevelPath = Path.Combine(GetOutputDirectory(path), i.ToString(), MetaFilename);
-                if (!File.Exists(zoomLevelPath))
-                {
-                    throw new ResourceNotFoundException(zoomLevelPath);
-                }
-                var zoomLevel = JsonConvert.DeserializeObject<ZoomLevel>(File.ReadAllText(zoomLevelPath));
-                images.Add(zoomLevel);
+                throw new ResourceNotFoundException(null);
             }
-            return images;
+        }
+
+        public async Task<Metadata> GetMetadataAsync(string s3Bucket, string s3Key)
+        {
+            try
+            {
+                var memoryStream = new MemoryStream();
+                await _minioClient.GetObjectAsync(new GetObjectArgs()
+                    .WithBucket(s3Bucket)
+                    .WithObject(Path.Combine(s3Key, "meta.json"))
+                    .WithCallbackStream((stream) => stream.CopyTo(memoryStream)));
+                memoryStream.Seek(0, SeekOrigin.Begin);
+                return await JsonSerializer.DeserializeAsync<Metadata>(memoryStream);
+            }
+            catch (MinioException)
+            {
+                throw new ResourceNotFoundException(null);
+            }
         }
     }
 }

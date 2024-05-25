@@ -1,27 +1,17 @@
 namespace Voltaserve.Tiling
 {
-    using System.IO;
     using Voltaserve.Tiling.Services;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Http.Features;
     using Microsoft.Extensions.DependencyInjection;
     using dotenv.net.Utilities;
+    using Minio;
 
     public class Startup
     {
-        public Startup()
-        {
-            var outputDirectory = "out";
-            if (!Directory.Exists(outputDirectory))
-            {
-                Directory.CreateDirectory(outputDirectory);
-            }
-        }
-
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers()
-              .AddNewtonsoftJson();
+            services.AddControllers();
 
             services.Configure<FormOptions>(options =>
             {
@@ -29,6 +19,13 @@ namespace Voltaserve.Tiling
             });
 
             services.AddWebEncoders();
+
+            services.AddMinio(configureClient => configureClient
+                .WithEndpoint(EnvReader.GetStringValue("S3_URL"))
+                .WithCredentials(EnvReader.GetStringValue("S3_ACCESS_KEY"), EnvReader.GetStringValue("S3_SECRET_KEY"))
+                .WithRegion(EnvReader.GetStringValue("S3_REGION"))
+                .WithSSL(EnvReader.GetBooleanValue("S3_SECURE"))
+              );
 
             services.AddTransient<TilesService>();
         }
