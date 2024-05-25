@@ -4,32 +4,17 @@ namespace Voltaserve.Tiling
     using Voltaserve.Tiling.Services;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Http.Features;
-    using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
+    using dotenv.net.Utilities;
 
     public class Startup
     {
-        private IConfiguration _configuration;
-
         public Startup()
         {
             var outputDirectory = "out";
             if (!Directory.Exists(outputDirectory))
             {
                 Directory.CreateDirectory(outputDirectory);
-            }
-        }
-
-        private IConfiguration Configuration
-        {
-            get
-            {
-                _configuration ??= new ConfigurationBuilder()
-                    .SetBasePath(Directory.GetCurrentDirectory())
-                    .AddJsonFile("appsettings.json")
-                    .Build();
-
-                return _configuration;
             }
         }
 
@@ -40,7 +25,7 @@ namespace Voltaserve.Tiling
 
             services.Configure<FormOptions>(options =>
             {
-                options.MultipartBodyLengthLimit = Configuration.GetValue<int>("multipartBodyLengthLimit");
+                options.MultipartBodyLengthLimit = EnvReader.GetIntValue("MULTIPART_BODY_LENGTH_LIMIT");
             });
 
             services.AddWebEncoders();

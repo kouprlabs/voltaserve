@@ -1,36 +1,23 @@
 ﻿namespace Voltaserve.Tiling
 {
-    using System.IO;
     using Microsoft.AspNetCore;
     using Microsoft.AspNetCore.Hosting;
-    using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.Logging;
+    using dotenv.net.Utilities;
+    using dotenv.net;
 
     public class Program
     {
-        private static IConfiguration _configuration;
-
-        private static IConfiguration Configuration
-        {
-            get
-            {
-                _configuration ??= new ConfigurationBuilder()
-                    .SetBasePath(Directory.GetCurrentDirectory())
-                    .AddJsonFile("appsettings.json")
-                    .Build();
-                return _configuration;
-            }
-        }
-
         public static void Main(string[] args)
         {
+            DotEnv.Load();
             BuildWebHost(args).Run();
         }
 
         public static IWebHost BuildWebHost(string[] args)
         {
-            var url = Configuration.GetValue<string>("url");
-            var multipartBodyLengthLimit = _configuration.GetValue<int>("multipartBodyLengthLimit");
+            var url = EnvReader.GetStringValue("URL");
+            var multipartBodyLengthLimit = EnvReader.GetIntValue("MULTIPART_BODY_LENGTH_LIMIT");
 
             return WebHost.CreateDefaultBuilder(args)
               .UseKestrel(options => { options.Limits.MaxRequestBodySize = multipartBodyLengthLimit; })
