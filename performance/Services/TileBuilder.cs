@@ -1,4 +1,4 @@
-﻿namespace Defyle.Core.Preview.Services
+﻿namespace Defyle.Performance.Services
 {
     using System;
     using System.Collections.Generic;
@@ -125,26 +125,26 @@
             Directory.Delete(directory, true);
         }
 
-        private void Decompose(Image imageToDecompose, int zoomLevelIndex, Region region)
+        private void Decompose(Image image, int zoomLevel, Region region)
         {
-            bool tileWidthExceeded = imageToDecompose.Width > TileSize.Width;
-            bool tileHeightExceeded = imageToDecompose.Height > TileSize.Height;
+            bool tileWidthExceeded = image.Width > TileSize.Width;
+            bool tileHeightExceeded = image.Height > TileSize.Height;
 
-            int cols = tileWidthExceeded ? imageToDecompose.Width / TileSize.Width : 1;
-            int rows = tileHeightExceeded ? imageToDecompose.Height / TileSize.Height : 1;
-            int remainingWidth = tileWidthExceeded ? imageToDecompose.Width - (TileSize.Width * cols) : 0;
-            int remainingHeight = tileHeightExceeded ? imageToDecompose.Height - (TileSize.Height * rows) : 0;
+            int cols = tileWidthExceeded ? image.Width / TileSize.Width : 1;
+            int rows = tileHeightExceeded ? image.Height / TileSize.Height : 1;
+            int remainingWidth = tileWidthExceeded ? image.Width - (TileSize.Width * cols) : 0;
+            int remainingHeight = tileHeightExceeded ? image.Height - (TileSize.Height * rows) : 0;
             int totalCols = remainingWidth != 0 ? cols + 1 : cols;
             int totalRows = remainingHeight != 0 ? rows + 1 : rows;
 
             TileSize adaptedTileSize = TileSize;
             if (!tileWidthExceeded)
             {
-                adaptedTileSize.Width = imageToDecompose.Width;
+                adaptedTileSize.Width = image.Width;
             }
             if (!tileHeightExceeded)
             {
-                adaptedTileSize.Height = imageToDecompose.Height;
+                adaptedTileSize.Height = image.Height;
             }
 
             int colStart, colEnd, rowStart, rowEnd;
@@ -187,9 +187,9 @@
                         Width = tileMetadata.Width,
                         Height = tileMetadata.Height
                     };
-                    var cropped = new Image(imageToDecompose);
+                    var cropped = new Image(image);
                     cropped.Crop(clippingRect);
-                    cropped.Save(GetTileOutputPath(zoomLevelIndex, tileMetadata.Row, tileMetadata.Col));
+                    cropped.Save(GetTileOutputPath(zoomLevel, tileMetadata.Row, tileMetadata.Col));
                 }
             }
 
@@ -201,14 +201,14 @@
                     var clippingRect = new Rectangle
                     {
                         X = c * _tileSize.Width,
-                        Y = imageToDecompose.Height - remainingHeight,
+                        Y = image.Height - remainingHeight,
                         Width = _tileSize.Width,
                         Height = remainingHeight
                     };
 
-                    var cropped = new Image(imageToDecompose);
+                    var cropped = new Image(image);
                     cropped.Crop(clippingRect);
-                    cropped.Save(GetTileOutputPath(zoomLevelIndex, totalRows - 1, c));
+                    cropped.Save(GetTileOutputPath(zoomLevel, totalRows - 1, c));
                 }
             }
 
@@ -219,15 +219,15 @@
                 {
                     var clippingRect = new Rectangle
                     {
-                        X = imageToDecompose.Width - remainingWidth,
+                        X = image.Width - remainingWidth,
                         Y = r * _tileSize.Height,
                         Width = remainingWidth,
                         Height = _tileSize.Height
                     };
 
-                    IImage cropped = new Image(imageToDecompose);
+                    IImage cropped = new Image(image);
                     cropped.Crop(clippingRect);
-                    cropped.Save(GetTileOutputPath(zoomLevelIndex, r, totalCols - 1));
+                    cropped.Save(GetTileOutputPath(zoomLevel, r, totalCols - 1));
                 }
             }
 
@@ -236,25 +236,25 @@
             {
                 var clippingRect = new Rectangle
                 {
-                    X = imageToDecompose.Width - remainingWidth,
-                    Y = imageToDecompose.Height - remainingHeight,
+                    X = image.Width - remainingWidth,
+                    Y = image.Height - remainingHeight,
                     Width = remainingWidth,
                     Height = remainingHeight
                 };
 
-                var cropped = new Image(imageToDecompose);
+                var cropped = new Image(image);
                 cropped.Crop(clippingRect);
-                cropped.Save(GetTileOutputPath(zoomLevelIndex, totalRows - 1, totalCols - 1));
+                cropped.Save(GetTileOutputPath(zoomLevel, totalRows - 1, totalCols - 1));
             }
 
             var metadata = new ZoomLevel
             {
-                Index = zoomLevelIndex,
-                Width = imageToDecompose.Width,
-                Height = imageToDecompose.Height,
+                Index = zoomLevel,
+                Width = image.Width,
+                Height = image.Height,
                 Rows = totalRows,
                 Cols = totalCols,
-                ScaleDownPercentage = GetScaleDownPercentage(zoomLevelIndex),
+                ScaleDownPercentage = GetScaleDownPercentage(zoomLevel),
                 Tile = new Tile
                 {
                     Width = adaptedTileSize.Width,
@@ -263,7 +263,7 @@
                     LastRowHeight = remainingHeight
                 }
             };
-            File.WriteAllText(GetZoomLevelMetadataFilePath(zoomLevelIndex),
+            File.WriteAllText(GetZoomLevelMetadataFilePath(zoomLevel),
               JsonConvert.SerializeObject(metadata, Formatting.Indented));
         }
 

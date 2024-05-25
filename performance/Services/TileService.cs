@@ -1,16 +1,19 @@
-namespace Defyle.Core.Preview.Services
+namespace Defyle.Performance.Services
 {
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using Defyle.Performance.Infra;
     using Microsoft.AspNetCore.StaticFiles;
     using Models;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
 
+    public class ResourceNotFoundException(string message) : Exception(message) { }
+
     public class TileService
     {
-        private const string MetadataFilename = "meta.json";
+        private const string MetaFilename = "meta.json";
         private readonly FileExtensionContentTypeProvider _fileExtensionContentTypeProvider;
 
         public TileService()
@@ -20,14 +23,14 @@ namespace Defyle.Core.Preview.Services
 
         public string Create(string path)
         {
-            var outputDirectory = GetOutputDirectory(Guid.NewGuid().ToString());
+            var id = Ids.New();
             new TileBuilder(new TileBuilterOptions
             {
                 File = path,
-                OutputDirectory = outputDirectory,
+                OutputDirectory = GetOutputDirectory(id),
                 Extension = Path.GetExtension(path)
             }).Build();
-            return outputDirectory;
+            return id;
         }
 
         public (Stream stream, string extension) GetTileStream(string path, int zoomLevel, int row, int col)
@@ -35,10 +38,6 @@ namespace Defyle.Core.Preview.Services
             string tilePath = GetTileImage(path, zoomLevel, row, col);
             string extension = Path.GetExtension(tilePath);
             string mime = _fileExtensionContentTypeProvider.Mappings[extension];
-            if (!File.Exists(tilePath))
-            {
-                throw new Exception("tile file not found");
-            }
             return (new FileStream(tilePath, FileMode.Open), mime);
         }
 
@@ -50,39 +49,42 @@ namespace Defyle.Core.Preview.Services
         private static string GetTileImage(string path, int zoomLevel, int row, int col)
         {
             var directory = Path.Combine(GetOutputDirectory(path), zoomLevel.ToString());
+            if (!Directory.Exists(directory))
+            {
+                throw new ResourceNotFoundException(directory);
+            }
             var files = new DirectoryInfo(directory).GetFiles($"{row}x{col}.*");
+            string tilePath = Path.Combine(directory, files[0].Name);
             if (files.Length > 0)
             {
-                string tilePath = Path.Combine(directory, files[0].Name);
-
                 if (File.Exists(tilePath))
                 {
                     return tilePath;
                 }
             }
-            throw new Exception("tile file not found");
+            throw new ResourceNotFoundException(tilePath);
         }
 
         public IEnumerable<ZoomLevel> GetZoomLevels(string path)
         {
-            var globalMetaFile = Path.Combine(GetOutputDirectory(path), MetadataFilename);
-            if (!File.Exists(globalMetaFile))
+            var metaPath = Path.Combine(GetOutputDirectory(path), MetaFilename);
+            if (!File.Exists(metaPath))
             {
-                throw new Exception($"global meta file not found in '{globalMetaFile}'");
+                throw new ResourceNotFoundException(metaPath);
             }
 
-            var globalMetaJson = JObject.Parse(File.ReadAllText(globalMetaFile));
+            var metaJson = JObject.Parse(File.ReadAllText(metaPath));
             var images = new List<ZoomLevel>();
-            int zoomLevels = globalMetaJson.Value<int>("zoomLevels");
+            int zoomLevels = metaJson.Value<int>("zoomLevels");
 
             for (int i = 0; i < zoomLevels; i++)
             {
-                var zoomLevelMetaFile = Path.Combine(GetOutputDirectory(path), i.ToString(), MetadataFilename);
-                if (!File.Exists(zoomLevelMetaFile))
+                var zoomLevelPath = Path.Combine(GetOutputDirectory(path), i.ToString(), MetaFilename);
+                if (!File.Exists(zoomLevelPath))
                 {
-                    throw new Exception($"zoom level meta file not found in '{zoomLevelMetaFile}'");
+                    throw new ResourceNotFoundException(zoomLevelPath);
                 }
-                ZoomLevel zoomLevel = JsonConvert.DeserializeObject<ZoomLevel>(File.ReadAllText(zoomLevelMetaFile));
+                var zoomLevel = JsonConvert.DeserializeObject<ZoomLevel>(File.ReadAllText(zoomLevelPath));
                 images.Add(zoomLevel);
             }
             return images;

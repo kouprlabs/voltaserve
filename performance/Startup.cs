@@ -1,7 +1,7 @@
-namespace Defyle.WebApi
+namespace Defyle.Performance
 {
     using System.IO;
-    using Defyle.Core.Preview.Services;
+    using Defyle.Performance.Services;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Http.Features;
     using Microsoft.Extensions.Configuration;

@@ -1,4 +1,4 @@
-﻿namespace Defyle.WebApi
+﻿namespace Defyle.Performance
 {
     using System.IO;
     using Microsoft.AspNetCore;

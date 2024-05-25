@@ -1,4 +1,4 @@
-﻿namespace Defyle.Core.Preview.Models
+﻿namespace Defyle.Performance.Models
 {
     using System;
 

@@ -1,4 +1,4 @@
-﻿namespace Defyle.Core.Preview.Models
+﻿namespace Defyle.Performance.Models
 {
     using System;
     using System.Drawing;
@@ -57,7 +57,7 @@
 
         private string GetAcceptanceCriteria()
         {
-            return $"{nameof(Value.Width)} and {nameof(Value.Height)} of {nameof(TileSize)} should be bigger than zero.";
+            return $"{nameof(Value.Width)} and {nameof(Value.Height)} of {nameof(TileSize)} should be greater than zero.";
         }
     }
 }

@@ -1,11 +1,12 @@
-namespace Defyle.WebApi.Inode.Controllers
+namespace Voltaserve.Performance.Controllers
 {
     using System;
     using System.Collections.Generic;
     using System.IO;
     using System.Threading.Tasks;
-    using Core.Preview.Models;
-    using Core.Preview.Services;
+    using Defyle.Performance.Infra;
+    using Defyle.Performance.Models;
+    using Defyle.Performance.Services;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
 
@@ -24,13 +25,13 @@ namespace Defyle.WebApi.Inode.Controllers
                 {
                     return BadRequest("no file uploaded");
                 }
-                path = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + Path.GetExtension(file.FileName));
+                path = Path.Combine(Path.GetTempPath(), Ids.New() + Path.GetExtension(file.FileName));
                 using (var stream = new FileStream(path, FileMode.Create))
                 {
                     await file.CopyToAsync(stream);
                 }
-                var outputDirectory = _tileService.Create(path);
-                return Ok(outputDirectory);
+                var id = _tileService.Create(path);
+                return Ok(id);
             }
             catch
             {
@@ -38,12 +39,9 @@ namespace Defyle.WebApi.Inode.Controllers
             }
             finally
             {
-                if (path != null)
+                if (path != null && System.IO.File.Exists(path))
                 {
-                    if (System.IO.File.Exists(path))
-                    {
-                        System.IO.File.Delete(path);
-                    }
+                    System.IO.File.Delete(path);
                 }
             }
         }
@@ -52,16 +50,38 @@ namespace Defyle.WebApi.Inode.Controllers
         [ProducesResponseType(typeof(IEnumerable<ZoomLevel>), 200)]
         public IActionResult GetZoomLevels(string path)
         {
-            IEnumerable<ZoomLevel> zoomLevels = _tileService.GetZoomLevels(path);
-            return Ok(zoomLevels);
+            try
+            {
+                IEnumerable<ZoomLevel> zoomLevels = _tileService.GetZoomLevels(path);
+                return Ok(zoomLevels);
+            }
+            catch (ResourceNotFoundException)
+            {
+                return NotFound();
+            }
+            catch
+            {
+                return StatusCode(500);
+            }
         }
 
-        [HttpGet("{path}/{zoomLevel}/{row}/{col}")]
+        [HttpGet("{path}/zoom_level/{zoomLevel}/row/{row}/col/{col}")]
         [ProducesResponseType(typeof(FileResult), 200)]
         public IActionResult DownloadTile(string path, int zoomLevel, int row, int col)
         {
-            (Stream stream, string extension) = _tileService.GetTileStream(path, zoomLevel, row, col);
-            return File(stream, extension);
+            try
+            {
+                (Stream stream, string extension) = _tileService.GetTileStream(path, zoomLevel, row, col);
+                return File(stream, extension);
+            }
+            catch (ResourceNotFoundException)
+            {
+                return NotFound();
+            }
+            catch
+            {
+                return StatusCode(500);
+            }
         }
     }
 }
