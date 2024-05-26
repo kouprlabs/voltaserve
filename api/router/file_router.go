@@ -314,7 +314,7 @@ func (r *FileRouter) List(c *fiber.Ctx) error {
 	if c.Query("page") == "" {
 		page = 1
 	} else {
-		page, err = strconv.ParseInt(c.Query("page"), 10, 32)
+		page, err = strconv.ParseInt(c.Query("page"), 10, 64)
 		if err != nil {
 			page = 1
 		}
@@ -323,7 +323,7 @@ func (r *FileRouter) List(c *fiber.Ctx) error {
 	if c.Query("size") == "" {
 		size = FileDefaultPageSize
 	} else {
-		size, err = strconv.ParseInt(c.Query("size"), 10, 32)
+		size, err = strconv.ParseInt(c.Query("size"), 10, 64)
 		if err != nil {
 			return err
 		}
@@ -779,10 +779,10 @@ func (r *FileRouter) DownloadOriginal(c *fiber.Ctx) error {
 	if filepath.Ext(snapshot.GetOriginal().Key) != ext {
 		return errorpkg.NewS3ObjectNotFoundError(nil)
 	}
-	bytes := buf.Bytes()
-	c.Set("Content-Type", infra.DetectMimeFromBytes(bytes))
+	b := buf.Bytes()
+	c.Set("Content-Type", infra.DetectMimeFromBytes(b))
 	c.Set("Content-Disposition", fmt.Sprintf("filename=\"%s\"", filepath.Base(file.GetName())+ext))
-	return c.Send(bytes)
+	return c.Send(b)
 }
 
 // DownloadPreview godoc
@@ -825,10 +825,10 @@ func (r *FileRouter) DownloadPreview(c *fiber.Ctx) error {
 	if filepath.Ext(snapshot.GetPreview().Key) != ext {
 		return errorpkg.NewS3ObjectNotFoundError(nil)
 	}
-	bytes := buf.Bytes()
-	c.Set("Content-Type", infra.DetectMimeFromBytes(bytes))
+	b := buf.Bytes()
+	c.Set("Content-Type", infra.DetectMimeFromBytes(b))
 	c.Set("Content-Disposition", fmt.Sprintf("filename=\"%s\"", filepath.Base(file.GetName())+ext))
-	return c.Send(bytes)
+	return c.Send(b)
 }
 
 func (r *FileRouter) getUserIDFromAccessToken(accessToken string) (string, error) {

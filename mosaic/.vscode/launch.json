@@ -5,10 +5,10 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "tiling",
+      "name": "mosaic",
       "type": "dotnet",
       "request": "launch",
-      "projectPath": "${workspaceFolder}/tiling.csproj",
+      "projectPath": "${workspaceFolder}/mosaic.csproj",
     }
 
   ]

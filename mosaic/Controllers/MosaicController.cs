@@ -9,11 +9,9 @@ namespace Voltaserve.Mosaic.Controllers
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
 
-    [Route("v2/tiles")]
-    public class TilesController(TilesService tilesService) : Controller
+    [Route("v2/mosaics")]
+    public class MosaicController(MosaicService _mosaicService) : Controller
     {
-        private readonly TilesService _tilesService = tilesService;
-
         [HttpPost()]
         public async Task<IActionResult> CreateAsync([FromForm] IFormCollection form)
         {
@@ -30,7 +28,7 @@ namespace Voltaserve.Mosaic.Controllers
                 {
                     await file.CopyToAsync(stream);
                 }
-                var metadata = await _tilesService.CreateAsync(path, form["s3_key"], form["s3_bucket"]);
+                var metadata = await _mosaicService.CreateAsync(path, form["s3_key"], form["s3_bucket"]);
                 return Ok(metadata);
             }
             catch
@@ -46,13 +44,31 @@ namespace Voltaserve.Mosaic.Controllers
             }
         }
 
+        [HttpDelete("{s3Bucket}/{s3Key}")]
+        public async Task<IActionResult> DeleteAsync(string s3Bucket, string s3Key)
+        {
+            try
+            {
+                await _mosaicService.DeleteAsync(s3Bucket, s3Key);
+                return NoContent();
+            }
+            catch (ResourceNotFoundException)
+            {
+                return NotFound();
+            }
+            catch
+            {
+                return StatusCode(500);
+            }
+        }
+
         [HttpGet("{s3Bucket}/{s3Key}/metadata")]
         [ProducesResponseType(typeof(IEnumerable<ZoomLevel>), 200)]
         public async Task<IActionResult> GetMetadataAsync(string s3Bucket, string s3Key)
         {
             try
             {
-                Metadata metadata = await _tilesService.GetMetadataAsync(s3Bucket, s3Key);
+                Metadata metadata = await _mosaicService.GetMetadataAsync(s3Bucket, s3Key);
                 return Ok(metadata);
             }
             catch (ResourceNotFoundException)
@@ -71,7 +87,7 @@ namespace Voltaserve.Mosaic.Controllers
         {
             try
             {
-                (Stream stream, string contentType) = await _tilesService.GetTileStreamAsync(s3Bucket, s3Key, zoomLevel, row, col, ext);
+                (Stream stream, string contentType) = await _mosaicService.GetTileStreamAsync(s3Bucket, s3Key, zoomLevel, row, col, ext);
                 return File(stream, contentType);
             }
             catch (ResourceNotFoundException)

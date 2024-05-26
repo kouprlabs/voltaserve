@@ -48,6 +48,9 @@ func (cl *LanguageClient) GetEntities(opts GetEntitiesOptions) ([]model.Insights
 			cl.logger.Error(err)
 		}
 	}(resp.Body)
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("request failed with status %d", resp.StatusCode)
+	}
 	b, err = io.ReadAll(resp.Body)
 	if err != nil {
 		return []model.InsightsEntity{}, err

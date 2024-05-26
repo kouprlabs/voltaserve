@@ -61,6 +61,10 @@ func main() {
 	insights := router.NewInsightsRouter()
 	insights.AppendNonJWTRoutes(insightsGroup)
 
+	mosaicGroup := v2.Group("mosaics")
+	mosaic := router.NewMosaicRouter()
+	mosaic.AppendNonJWTRoutes(mosaicGroup)
+
 	app.Use(jwtware.New(jwtware.Config{
 		SigningKey: jwtware.SigningKey{Key: []byte(cfg.Security.JWTSigningKey)},
 	}))
@@ -68,6 +72,7 @@ func main() {
 	files.AppendRoutes(filesGroup)
 	snapshots.AppendRoutes(snapshotsGroup)
 	insights.AppendRoutes(insightsGroup)
+	mosaic.AppendRoutes(mosaicGroup)
 
 	invitations := router.NewInvitationRouter()
 	invitations.AppendRoutes(v2.Group("invitations"))

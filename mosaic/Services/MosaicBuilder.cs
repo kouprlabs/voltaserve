@@ -20,7 +20,7 @@
         public string OutputDirectory { get; set; }
     }
 
-    public class TilesBuilder(TilesBuilterOptions options)
+    public class MosaicBuilder(TilesBuilterOptions options)
     {
         private IImage _image;
 

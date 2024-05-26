@@ -119,6 +119,16 @@ func NewUnsupportedFileTypeError(err error) *ErrorResponse {
 	)
 }
 
+func NewMosaicNotFoundError(err error) *ErrorResponse {
+	return NewErrorResponse(
+		"mosaic_not_found",
+		http.StatusNotFound,
+		"Mosaic not found.",
+		"Mosaic not found.",
+		err,
+	)
+}
+
 func NewInvitationNotFoundError(err error) *ErrorResponse {
 	return NewErrorResponse(
 		"invitation_not_found",

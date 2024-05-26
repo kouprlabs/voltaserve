@@ -155,7 +155,7 @@ func (r *InsightsRouter) ListEntities(c *fiber.Ctx) error {
 	if c.Query("page") == "" {
 		page = 1
 	} else {
-		page, err = strconv.ParseInt(c.Query("page"), 10, 32)
+		page, err = strconv.ParseInt(c.Query("page"), 10, 64)
 		if err != nil {
 			page = 1
 		}
@@ -164,7 +164,7 @@ func (r *InsightsRouter) ListEntities(c *fiber.Ctx) error {
 	if c.Query("size") == "" {
 		size = InsightsEntityDefaultPageSize
 	} else {
-		size, err = strconv.ParseInt(c.Query("size"), 10, 32)
+		size, err = strconv.ParseInt(c.Query("size"), 10, 64)
 		if err != nil {
 			return err
 		}
@@ -205,7 +205,6 @@ func (r *InsightsRouter) ListEntities(c *fiber.Ctx) error {
 //	@Param			id	path		string	true	"ID"
 //	@Success		200	{object}	service.InsightsSummary
 //	@Failure		404	{object}	errorpkg.ErrorResponse
-//	@Failure		400	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/insights/{id}/summary [get]
 func (r *InsightsRouter) GetSummary(c *fiber.Ctx) error {
@@ -256,10 +255,10 @@ func (r *InsightsRouter) DownloadText(c *fiber.Ctx) error {
 	if filepath.Ext(snapshot.GetText().Key) != ext {
 		return errorpkg.NewS3ObjectNotFoundError(nil)
 	}
-	bytes := buf.Bytes()
-	c.Set("Content-Type", infra.DetectMimeFromBytes(bytes))
+	b := buf.Bytes()
+	c.Set("Content-Type", infra.DetectMimeFromBytes(b))
 	c.Set("Content-Disposition", fmt.Sprintf("filename=\"%s\"", filepath.Base(file.GetName())+ext))
-	return c.Send(bytes)
+	return c.Send(b)
 }
 
 // DownloadOCR godoc
@@ -302,10 +301,10 @@ func (r *InsightsRouter) DownloadOCR(c *fiber.Ctx) error {
 	if filepath.Ext(snapshot.GetOCR().Key) != ext {
 		return errorpkg.NewS3ObjectNotFoundError(nil)
 	}
-	bytes := buf.Bytes()
-	c.Set("Content-Type", infra.DetectMimeFromBytes(bytes))
+	b := buf.Bytes()
+	c.Set("Content-Type", infra.DetectMimeFromBytes(b))
 	c.Set("Content-Disposition", fmt.Sprintf("filename=\"%s\"", filepath.Base(file.GetName())+ext))
-	return c.Send(bytes)
+	return c.Send(b)
 }
 
 func (r *InsightsRouter) getUserIDFromAccessToken(accessToken string) (string, error) {

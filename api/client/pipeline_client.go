@@ -40,6 +40,9 @@ func (cl *PipelineClient) Run(opts *PipelineRunOptions) error {
 	if err != nil {
 		return err
 	}
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("request failed with status %d", resp.StatusCode)
+	}
 	if err := resp.Body.Close(); err != nil {
 		return err
 	}

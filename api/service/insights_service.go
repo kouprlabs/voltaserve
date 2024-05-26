@@ -160,10 +160,10 @@ func (svc *InsightsService) createText(snapshot model.Snapshot) error {
 		return errorpkg.NewSnapshotLanguageNotSetError(nil)
 	}
 
-	/* Download originalS3 */
-	originalS3 := snapshot.GetOriginal()
-	originalPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(originalS3.Key))
-	if err := svc.s3.GetFile(originalS3.Key, originalPath, originalS3.Bucket); err != nil {
+	/* Download original S3 object */
+	original := snapshot.GetOriginal()
+	path := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(original.Key))
+	if err := svc.s3.GetFile(original.Key, path, original.Bucket); err != nil {
 		return err
 	}
 	defer func(inputPath string, logger *zap.SugaredLogger) {
@@ -173,19 +173,19 @@ func (svc *InsightsService) createText(snapshot model.Snapshot) error {
 				logger.Error(err)
 			}
 		}
-	}(originalPath, svc.logger)
+	}(path, svc.logger)
 
 	var pdfPath string
-	if svc.fileIdent.IsImage(originalS3.Key) {
+	if svc.fileIdent.IsImage(original.Key) {
 		/* Get DPI */
-		dpi, err := svc.toolClient.DPIFromImage(originalPath)
+		dpi, err := svc.toolClient.DPIFromImage(path)
 		if err != nil {
 			dpi = 72
 		}
 
 		/* Remove alpha channel */
-		noAlphaImagePath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(originalS3.Key))
-		if err := svc.toolClient.RemoveAlphaChannel(originalPath, noAlphaImagePath); err != nil {
+		noAlphaImagePath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(original.Key))
+		if err := svc.toolClient.RemoveAlphaChannel(path, noAlphaImagePath); err != nil {
 			return err
 		}
 		defer func(inputPath string, logger *zap.SugaredLogger) {
@@ -228,8 +228,8 @@ func (svc *InsightsService) createText(snapshot model.Snapshot) error {
 		if err := svc.snapshotRepo.Save(snapshot); err != nil {
 			return err
 		}
-	} else if svc.fileIdent.IsPDF(originalS3.Key) || svc.fileIdent.IsOffice(originalS3.Key) || svc.fileIdent.IsPlainText(originalS3.Key) {
-		pdfPath = originalPath
+	} else if svc.fileIdent.IsPDF(original.Key) || svc.fileIdent.IsOffice(original.Key) || svc.fileIdent.IsPlainText(original.Key) {
+		pdfPath = path
 	} else {
 		return errorpkg.NewUnsupportedFileTypeError(nil)
 	}
@@ -253,7 +253,6 @@ func (svc *InsightsService) createText(snapshot model.Snapshot) error {
 	if err := svc.snapshotRepo.Save(snapshot); err != nil {
 		return err
 	}
-
 	return nil
 }
 
@@ -281,17 +280,17 @@ func (svc *InsightsService) createEntities(snapshot model.Snapshot) error {
 	if err != nil {
 		return err
 	}
-	data, err := json.Marshal(res)
+	b, err := json.Marshal(res)
 	if err != nil {
 		return err
 	}
-	entities := string(data)
+	content := string(b)
 	s3Object := model.S3Object{
 		Bucket: snapshot.GetOriginal().Bucket,
 		Key:    snapshot.GetID() + "/entities.json",
-		Size:   int64(len(entities)),
+		Size:   int64(len(content)),
 	}
-	if err := svc.s3.PutText(s3Object.Key, entities, "application/json", s3Object.Bucket); err != nil {
+	if err := svc.s3.PutText(s3Object.Key, content, "application/json", s3Object.Bucket); err != nil {
 		return err
 	}
 	snapshot.SetEntities(&s3Object)

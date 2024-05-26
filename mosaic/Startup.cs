@@ -27,7 +27,7 @@ namespace Voltaserve.Mosaic
                 .WithSSL(EnvReader.GetBooleanValue("S3_SECURE"))
               );
 
-            services.AddTransient<TilesService>();
+            services.AddTransient<MosaicService>();
         }
 
         public void Configure(IApplicationBuilder app)
