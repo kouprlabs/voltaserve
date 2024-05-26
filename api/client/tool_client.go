@@ -58,20 +58,20 @@ func (cl *ToolClient) ResizeImage(inputPath string, width int, height int, outpu
 			cl.logger.Error(err)
 		}
 	}(file)
-	body := &bytes.Buffer{}
-	writer := multipart.NewWriter(body)
-	fileField, err := writer.CreateFormFile("file", inputPath)
+	buf := &bytes.Buffer{}
+	mw := multipart.NewWriter(buf)
+	w, err := mw.CreateFormFile("file", inputPath)
 	if err != nil {
 		return err
 	}
-	if _, err := io.Copy(fileField, file); err != nil {
+	if _, err := io.Copy(w, file); err != nil {
 		return err
 	}
-	jsonField, err := writer.CreateFormField("json")
+	w, err = mw.CreateFormField("json")
 	if err != nil {
 		return err
 	}
-	jsonBytes, err := json.Marshal(map[string]interface{}{
+	b, err := json.Marshal(map[string]interface{}{
 		"bin":    "convert",
 		"args":   []string{"-resize", size, "${input}", "${output.png}"},
 		"stdout": true,
@@ -79,19 +79,19 @@ func (cl *ToolClient) ResizeImage(inputPath string, width int, height int, outpu
 	if err != nil {
 		return err
 	}
-	if _, err := jsonField.Write(jsonBytes); err != nil {
+	if _, err := w.Write(b); err != nil {
 		return err
 	}
-	if err := writer.Close(); err != nil {
+	if err := mw.Close(); err != nil {
 		return err
 	}
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v2/tools/run?api_key=%s", cl.config.ConversionURL, cl.config.Security.APIKey), body)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v2/tools/run?api_key=%s", cl.config.ConversionURL, cl.config.Security.APIKey), buf)
 	if err != nil {
 		return err
 	}
-	req.Header.Set("Content-Type", writer.FormDataContentType())
+	req.Header.Set("Content-Type", mw.FormDataContentType())
 	client := &http.Client{}
-	res, err := client.Do(req)
+	resp, err := client.Do(req)
 	if err != nil {
 		return err
 	}
@@ -99,9 +99,9 @@ func (cl *ToolClient) ResizeImage(inputPath string, width int, height int, outpu
 		if err := Body.Close(); err != nil {
 			cl.logger.Error(err)
 		}
-	}(res.Body)
-	if res.StatusCode != http.StatusOK {
-		return fmt.Errorf("request failed with status %d", res.StatusCode)
+	}(resp.Body)
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("request failed with status %d", resp.StatusCode)
 	}
 	outputFile, err := os.Create(outputPath)
 	if err != nil {
@@ -112,7 +112,7 @@ func (cl *ToolClient) ResizeImage(inputPath string, width int, height int, outpu
 			cl.logger.Error(err)
 		}
 	}(outputFile)
-	_, err = io.Copy(outputFile, res.Body)
+	_, err = io.Copy(outputFile, resp.Body)
 	if err != nil {
 		return err
 	}
@@ -142,20 +142,20 @@ func (cl *ToolClient) ThumbnailFromImage(inputPath string, width int, height int
 			cl.logger.Error(err)
 		}
 	}(file)
-	body := &bytes.Buffer{}
-	writer := multipart.NewWriter(body)
-	fileField, err := writer.CreateFormFile("file", inputPath)
+	buf := &bytes.Buffer{}
+	mw := multipart.NewWriter(buf)
+	w, err := mw.CreateFormFile("file", inputPath)
 	if err != nil {
 		return err
 	}
-	if _, err := io.Copy(fileField, file); err != nil {
+	if _, err := io.Copy(w, file); err != nil {
 		return err
 	}
-	jsonField, err := writer.CreateFormField("json")
+	w, err = mw.CreateFormField("json")
 	if err != nil {
 		return err
 	}
-	jsonBytes, err := json.Marshal(map[string]interface{}{
+	b, err := json.Marshal(map[string]interface{}{
 		"bin":    "convert",
 		"args":   []string{"-thumbnail", size, "-background", "white", "-alpha", "remove", "-flatten", "${input}[0]", fmt.Sprintf("${output%s}", filepath.Ext(outputPath))},
 		"stdout": true,
@@ -163,19 +163,19 @@ func (cl *ToolClient) ThumbnailFromImage(inputPath string, width int, height int
 	if err != nil {
 		return err
 	}
-	if _, err := jsonField.Write(jsonBytes); err != nil {
+	if _, err := w.Write(b); err != nil {
 		return err
 	}
-	if err := writer.Close(); err != nil {
+	if err := mw.Close(); err != nil {
 		return err
 	}
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v2/tools/run?api_key=%s", cl.config.ConversionURL, cl.config.Security.APIKey), body)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v2/tools/run?api_key=%s", cl.config.ConversionURL, cl.config.Security.APIKey), buf)
 	if err != nil {
 		return err
 	}
-	req.Header.Set("Content-Type", writer.FormDataContentType())
+	req.Header.Set("Content-Type", mw.FormDataContentType())
 	client := &http.Client{}
-	res, err := client.Do(req)
+	resp, err := client.Do(req)
 	if err != nil {
 		return err
 	}
@@ -183,9 +183,9 @@ func (cl *ToolClient) ThumbnailFromImage(inputPath string, width int, height int
 		if err := Body.Close(); err != nil {
 			cl.logger.Error(err)
 		}
-	}(res.Body)
-	if res.StatusCode != http.StatusOK {
-		return fmt.Errorf("request failed with status %d", res.StatusCode)
+	}(resp.Body)
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("request failed with status %d", resp.StatusCode)
 	}
 	outputFile, err := os.Create(outputPath)
 	if err != nil {
@@ -196,7 +196,7 @@ func (cl *ToolClient) ThumbnailFromImage(inputPath string, width int, height int
 			cl.logger.Error(err)
 		}
 	}(outputFile)
-	_, err = io.Copy(outputFile, res.Body)
+	_, err = io.Copy(outputFile, resp.Body)
 	if err != nil {
 		return err
 	}
@@ -213,20 +213,20 @@ func (cl *ToolClient) ConvertImage(inputPath string, outputPath string) error {
 			cl.logger.Error(err)
 		}
 	}(file)
-	body := &bytes.Buffer{}
-	writer := multipart.NewWriter(body)
-	fileField, err := writer.CreateFormFile("file", inputPath)
+	buf := &bytes.Buffer{}
+	mw := multipart.NewWriter(buf)
+	w, err := mw.CreateFormFile("file", inputPath)
 	if err != nil {
 		return err
 	}
-	if _, err := io.Copy(fileField, file); err != nil {
+	if _, err := io.Copy(w, file); err != nil {
 		return err
 	}
-	jsonField, err := writer.CreateFormField("json")
+	w, err = mw.CreateFormField("json")
 	if err != nil {
 		return err
 	}
-	jsonBytes, err := json.Marshal(map[string]interface{}{
+	b, err := json.Marshal(map[string]interface{}{
 		"bin":    "convert",
 		"args":   []string{"${input}", fmt.Sprintf("${output%s}", filepath.Ext(outputPath))},
 		"stdout": true,
@@ -234,19 +234,19 @@ func (cl *ToolClient) ConvertImage(inputPath string, outputPath string) error {
 	if err != nil {
 		return err
 	}
-	if _, err := jsonField.Write(jsonBytes); err != nil {
+	if _, err := w.Write(b); err != nil {
 		return err
 	}
-	if err := writer.Close(); err != nil {
+	if err := mw.Close(); err != nil {
 		return err
 	}
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v2/tools/run?api_key=%s", cl.config.ConversionURL, cl.config.Security.APIKey), body)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v2/tools/run?api_key=%s", cl.config.ConversionURL, cl.config.Security.APIKey), buf)
 	if err != nil {
 		return err
 	}
-	req.Header.Set("Content-Type", writer.FormDataContentType())
+	req.Header.Set("Content-Type", mw.FormDataContentType())
 	client := &http.Client{}
-	res, err := client.Do(req)
+	resp, err := client.Do(req)
 	if err != nil {
 		return err
 	}
@@ -254,9 +254,9 @@ func (cl *ToolClient) ConvertImage(inputPath string, outputPath string) error {
 		if err := Body.Close(); err != nil {
 			cl.logger.Error(err)
 		}
-	}(res.Body)
-	if res.StatusCode != http.StatusOK {
-		return fmt.Errorf("request failed with status %d", res.StatusCode)
+	}(resp.Body)
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("request failed with status %d", resp.StatusCode)
 	}
 	outputFile, err := os.Create(outputPath)
 	if err != nil {
@@ -267,7 +267,7 @@ func (cl *ToolClient) ConvertImage(inputPath string, outputPath string) error {
 			cl.logger.Error(err)
 		}
 	}(outputFile)
-	_, err = io.Copy(outputFile, res.Body)
+	_, err = io.Copy(outputFile, resp.Body)
 	if err != nil {
 		return err
 	}
@@ -284,20 +284,20 @@ func (cl *ToolClient) RemoveAlphaChannel(inputPath string, outputPath string) er
 			cl.logger.Error(err)
 		}
 	}(file)
-	body := &bytes.Buffer{}
-	writer := multipart.NewWriter(body)
-	fileField, err := writer.CreateFormFile("file", inputPath)
+	buf := &bytes.Buffer{}
+	mw := multipart.NewWriter(buf)
+	w, err := mw.CreateFormFile("file", inputPath)
 	if err != nil {
 		return err
 	}
-	if _, err := io.Copy(fileField, file); err != nil {
+	if _, err := io.Copy(w, file); err != nil {
 		return err
 	}
-	jsonField, err := writer.CreateFormField("json")
+	w, err = mw.CreateFormField("json")
 	if err != nil {
 		return err
 	}
-	jsonBytes, err := json.Marshal(map[string]interface{}{
+	b, err := json.Marshal(map[string]interface{}{
 		"bin":    "convert",
 		"args":   []string{"${input}", "-alpha", "off", fmt.Sprintf("${output%s}", filepath.Ext(outputPath))},
 		"stdout": true,
@@ -305,19 +305,19 @@ func (cl *ToolClient) RemoveAlphaChannel(inputPath string, outputPath string) er
 	if err != nil {
 		return err
 	}
-	if _, err := jsonField.Write(jsonBytes); err != nil {
+	if _, err := w.Write(b); err != nil {
 		return err
 	}
-	if err := writer.Close(); err != nil {
+	if err := mw.Close(); err != nil {
 		return err
 	}
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v2/tools/run?api_key=%s", cl.config.ConversionURL, cl.config.Security.APIKey), body)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v2/tools/run?api_key=%s", cl.config.ConversionURL, cl.config.Security.APIKey), buf)
 	if err != nil {
 		return err
 	}
-	req.Header.Set("Content-Type", writer.FormDataContentType())
+	req.Header.Set("Content-Type", mw.FormDataContentType())
 	client := &http.Client{}
-	res, err := client.Do(req)
+	resp, err := client.Do(req)
 	if err != nil {
 		return err
 	}
@@ -325,9 +325,9 @@ func (cl *ToolClient) RemoveAlphaChannel(inputPath string, outputPath string) er
 		if err := Body.Close(); err != nil {
 			cl.logger.Error(err)
 		}
-	}(res.Body)
-	if res.StatusCode != http.StatusOK {
-		return fmt.Errorf("request failed with status %d", res.StatusCode)
+	}(resp.Body)
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("request failed with status %d", resp.StatusCode)
 	}
 	outputFile, err := os.Create(outputPath)
 	if err != nil {
@@ -338,7 +338,7 @@ func (cl *ToolClient) RemoveAlphaChannel(inputPath string, outputPath string) er
 			cl.logger.Error(err)
 		}
 	}(outputFile)
-	_, err = io.Copy(outputFile, res.Body)
+	_, err = io.Copy(outputFile, resp.Body)
 	if err != nil {
 		return err
 	}
@@ -350,28 +350,28 @@ type ImageProps struct {
 	Height int `json:"height"`
 }
 
-func (cl *ToolClient) MeasureImage(inputPath string) (model.ImageProps, error) {
+func (cl *ToolClient) MeasureImage(inputPath string) (*model.ImageProps, error) {
 	file, err := os.Open(inputPath)
 	if err != nil {
-		return model.ImageProps{}, err
+		return nil, err
 	}
 	defer func(file *os.File) {
 		if err := file.Close(); err != nil {
 			cl.logger.Error(err)
 		}
 	}(file)
-	body := &bytes.Buffer{}
-	writer := multipart.NewWriter(body)
-	fileField, err := writer.CreateFormFile("file", inputPath)
+	buf := &bytes.Buffer{}
+	mw := multipart.NewWriter(buf)
+	w, err := mw.CreateFormFile("file", inputPath)
 	if err != nil {
-		return model.ImageProps{}, err
+		return nil, err
 	}
-	if _, err := io.Copy(fileField, file); err != nil {
-		return model.ImageProps{}, err
+	if _, err := io.Copy(w, file); err != nil {
+		return nil, err
 	}
-	jsonField, err := writer.CreateFormField("json")
+	w, err = mw.CreateFormField("json")
 	if err != nil {
-		return model.ImageProps{}, err
+		return nil, err
 	}
 	b, err := json.Marshal(map[string]interface{}{
 		"bin":    "identify",
@@ -379,48 +379,48 @@ func (cl *ToolClient) MeasureImage(inputPath string) (model.ImageProps, error) {
 		"stdout": true,
 	})
 	if err != nil {
-		return model.ImageProps{}, err
+		return nil, err
 	}
-	if _, err := jsonField.Write(b); err != nil {
-		return model.ImageProps{}, err
+	if _, err := w.Write(b); err != nil {
+		return nil, err
 	}
-	if err := writer.Close(); err != nil {
-		return model.ImageProps{}, err
+	if err := mw.Close(); err != nil {
+		return nil, err
 	}
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v2/tools/run?api_key=%s", cl.config.ConversionURL, cl.config.Security.APIKey), body)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v2/tools/run?api_key=%s", cl.config.ConversionURL, cl.config.Security.APIKey), buf)
 	if err != nil {
-		return model.ImageProps{}, err
+		return nil, err
 	}
-	req.Header.Set("Content-Type", writer.FormDataContentType())
+	req.Header.Set("Content-Type", mw.FormDataContentType())
 	client := &http.Client{}
-	res, err := client.Do(req)
+	resp, err := client.Do(req)
 	if err != nil {
-		return model.ImageProps{}, err
+		return nil, err
 	}
 	defer func(Body io.ReadCloser) {
 		if err := Body.Close(); err != nil {
 			cl.logger.Error(err)
 		}
-	}(res.Body)
-	if res.StatusCode != http.StatusOK {
-		return model.ImageProps{}, fmt.Errorf("request failed with status %d", res.StatusCode)
+	}(resp.Body)
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("request failed with status %d", resp.StatusCode)
 	}
-	var buf bytes.Buffer
-	_, err = io.Copy(&buf, res.Body)
+	buf = &bytes.Buffer{}
+	_, err = io.Copy(buf, resp.Body)
 	if err != nil {
-		return model.ImageProps{}, err
+		return nil, err
 	}
 	size := buf.String()
 	values := strings.Split(size, ",")
 	width, err := strconv.Atoi(helper.RemoveNonNumeric(values[0]))
 	if err != nil {
-		return model.ImageProps{}, err
+		return nil, err
 	}
 	height, err := strconv.Atoi(helper.RemoveNonNumeric(values[1]))
 	if err != nil {
-		return model.ImageProps{}, err
+		return nil, err
 	}
-	return model.ImageProps{Width: width, Height: height}, nil
+	return &model.ImageProps{Width: width, Height: height}, nil
 }
 
 func (cl *ToolClient) TSVFromImage(inputPath string, model string) (string, error) {
@@ -433,20 +433,20 @@ func (cl *ToolClient) TSVFromImage(inputPath string, model string) (string, erro
 			cl.logger.Error(err)
 		}
 	}(file)
-	body := &bytes.Buffer{}
-	writer := multipart.NewWriter(body)
-	fileField, err := writer.CreateFormFile("file", inputPath)
+	buf := &bytes.Buffer{}
+	mw := multipart.NewWriter(buf)
+	w, err := mw.CreateFormFile("file", inputPath)
 	if err != nil {
 		return "", err
 	}
-	if _, err := io.Copy(fileField, file); err != nil {
+	if _, err := io.Copy(w, file); err != nil {
 		return "", err
 	}
-	jsonField, err := writer.CreateFormField("json")
+	w, err = mw.CreateFormField("json")
 	if err != nil {
 		return "", err
 	}
-	jsonBytes, err := json.Marshal(map[string]interface{}{
+	b, err := json.Marshal(map[string]interface{}{
 		"bin":    "tesseract",
 		"args":   []string{"${input}", "${output.#.tsv}", "-l", model, "tsv"},
 		"stdout": true,
@@ -454,19 +454,19 @@ func (cl *ToolClient) TSVFromImage(inputPath string, model string) (string, erro
 	if err != nil {
 		return "", err
 	}
-	if _, err := jsonField.Write(jsonBytes); err != nil {
+	if _, err := w.Write(b); err != nil {
 		return "", err
 	}
-	if err := writer.Close(); err != nil {
+	if err := mw.Close(); err != nil {
 		return "", err
 	}
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v2/tools/run?api_key=%s", cl.config.ConversionURL, cl.config.Security.APIKey), body)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v2/tools/run?api_key=%s", cl.config.ConversionURL, cl.config.Security.APIKey), buf)
 	if err != nil {
 		return "", err
 	}
-	req.Header.Set("Content-Type", writer.FormDataContentType())
+	req.Header.Set("Content-Type", mw.FormDataContentType())
 	client := &http.Client{}
-	res, err := client.Do(req)
+	resp, err := client.Do(req)
 	if err != nil {
 		return "", err
 	}
@@ -474,11 +474,11 @@ func (cl *ToolClient) TSVFromImage(inputPath string, model string) (string, erro
 		if err := Body.Close(); err != nil {
 			cl.logger.Error(err)
 		}
-	}(res.Body)
-	if res.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("request failed with status %d", res.StatusCode)
+	}(resp.Body)
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("request failed with status %d", resp.StatusCode)
 	}
-	output, err := io.ReadAll(res.Body)
+	output, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return "", err
 	}
@@ -495,16 +495,16 @@ func (cl *ToolClient) TextFromImage(inputPath string, model string) (string, err
 			cl.logger.Error(err)
 		}
 	}(file)
-	body := &bytes.Buffer{}
-	writer := multipart.NewWriter(body)
-	fileField, err := writer.CreateFormFile("file", inputPath)
+	buf := &bytes.Buffer{}
+	mw := multipart.NewWriter(buf)
+	w, err := mw.CreateFormFile("file", inputPath)
 	if err != nil {
 		return "", err
 	}
-	if _, err := io.Copy(fileField, file); err != nil {
+	if _, err := io.Copy(w, file); err != nil {
 		return "", err
 	}
-	jsonField, err := writer.CreateFormField("json")
+	w, err = mw.CreateFormField("json")
 	if err != nil {
 		return "", err
 	}
@@ -516,19 +516,19 @@ func (cl *ToolClient) TextFromImage(inputPath string, model string) (string, err
 	if err != nil {
 		return "", err
 	}
-	if _, err := jsonField.Write(jsonBytes); err != nil {
+	if _, err := w.Write(jsonBytes); err != nil {
 		return "", err
 	}
-	if err := writer.Close(); err != nil {
+	if err := mw.Close(); err != nil {
 		return "", err
 	}
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v2/tools/run?api_key=%s", cl.config.ConversionURL, cl.config.Security.APIKey), body)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v2/tools/run?api_key=%s", cl.config.ConversionURL, cl.config.Security.APIKey), buf)
 	if err != nil {
 		return "", err
 	}
-	req.Header.Set("Content-Type", writer.FormDataContentType())
+	req.Header.Set("Content-Type", mw.FormDataContentType())
 	client := &http.Client{}
-	res, err := client.Do(req)
+	resp, err := client.Do(req)
 	if err != nil {
 		return "", err
 	}
@@ -536,11 +536,11 @@ func (cl *ToolClient) TextFromImage(inputPath string, model string) (string, err
 		if err := Body.Close(); err != nil {
 			cl.logger.Error(err)
 		}
-	}(res.Body)
-	if res.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("request failed with status %d", res.StatusCode)
+	}(resp.Body)
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("request failed with status %d", resp.StatusCode)
 	}
-	output, err := io.ReadAll(res.Body)
+	output, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return "", err
 	}
@@ -557,20 +557,20 @@ func (cl *ToolClient) DPIFromImage(inputPath string) (int, error) {
 			cl.logger.Error(err)
 		}
 	}(file)
-	body := &bytes.Buffer{}
-	writer := multipart.NewWriter(body)
-	fileField, err := writer.CreateFormFile("file", inputPath)
+	reqBuf := &bytes.Buffer{}
+	mw := multipart.NewWriter(reqBuf)
+	w, err := mw.CreateFormFile("file", inputPath)
 	if err != nil {
 		return -1, err
 	}
-	if _, err := io.Copy(fileField, file); err != nil {
+	if _, err := io.Copy(w, file); err != nil {
 		return -1, err
 	}
-	jsonField, err := writer.CreateFormField("json")
+	w, err = mw.CreateFormField("json")
 	if err != nil {
 		return -1, err
 	}
-	jsonBytes, err := json.Marshal(map[string]interface{}{
+	b, err := json.Marshal(map[string]interface{}{
 		"bin":    "exiftool",
 		"args":   []string{"-S", "-s", "-ImageWidth", "-ImageHeight", "-XResolution", "-YResolution", "-ResolutionUnit", "${input}"},
 		"stdout": true,
@@ -578,19 +578,19 @@ func (cl *ToolClient) DPIFromImage(inputPath string) (int, error) {
 	if err != nil {
 		return -1, err
 	}
-	if _, err := jsonField.Write(jsonBytes); err != nil {
+	if _, err := w.Write(b); err != nil {
 		return -1, err
 	}
-	if err := writer.Close(); err != nil {
+	if err := mw.Close(); err != nil {
 		return 0, err
 	}
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v2/tools/run?api_key=%s", cl.config.ConversionURL, cl.config.Security.APIKey), body)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v2/tools/run?api_key=%s", cl.config.ConversionURL, cl.config.Security.APIKey), reqBuf)
 	if err != nil {
 		return -1, err
 	}
-	req.Header.Set("Content-Type", writer.FormDataContentType())
+	req.Header.Set("Content-Type", mw.FormDataContentType())
 	client := &http.Client{}
-	res, err := client.Do(req)
+	resp, err := client.Do(req)
 	if err != nil {
 		return -1, err
 	}
@@ -598,16 +598,16 @@ func (cl *ToolClient) DPIFromImage(inputPath string) (int, error) {
 		if err := Body.Close(); err != nil {
 			cl.logger.Error(err)
 		}
-	}(res.Body)
-	if res.StatusCode != http.StatusOK {
-		return -1, fmt.Errorf("request failed with status %d", res.StatusCode)
+	}(resp.Body)
+	if resp.StatusCode != http.StatusOK {
+		return -1, fmt.Errorf("request failed with status %d", resp.StatusCode)
 	}
-	var buf bytes.Buffer
-	_, err = io.Copy(&buf, res.Body)
+	var respBuf bytes.Buffer
+	_, err = io.Copy(&respBuf, resp.Body)
 	if err != nil {
 		return -1, err
 	}
-	lines := strings.Split(buf.String(), "\n")
+	lines := strings.Split(respBuf.String(), "\n")
 	if len(lines) < 5 || lines[4] != "inches" {
 		return 72, nil
 	}
@@ -632,16 +632,16 @@ func (cl *ToolClient) OCRFromPDF(inputPath string, language *string, dpi *int) (
 			cl.logger.Error(err)
 		}
 	}(file)
-	body := &bytes.Buffer{}
-	writer := multipart.NewWriter(body)
-	fileField, err := writer.CreateFormFile("file", inputPath)
+	buf := &bytes.Buffer{}
+	mw := multipart.NewWriter(buf)
+	w, err := mw.CreateFormFile("file", inputPath)
 	if err != nil {
 		return "", err
 	}
-	if _, err := io.Copy(fileField, file); err != nil {
+	if _, err := io.Copy(w, file); err != nil {
 		return "", err
 	}
-	jsonField, err := writer.CreateFormField("json")
+	w, err = mw.CreateFormField("json")
 	if err != nil {
 		return "", err
 	}
@@ -658,7 +658,7 @@ func (cl *ToolClient) OCRFromPDF(inputPath string, language *string, dpi *int) (
 	}
 	args = append(args, "${input}")
 	args = append(args, "${output}")
-	jsonBytes, err := json.Marshal(map[string]interface{}{
+	b, err := json.Marshal(map[string]interface{}{
 		"bin":    "ocrmypdf",
 		"args":   args,
 		"stdout": true,
@@ -666,19 +666,19 @@ func (cl *ToolClient) OCRFromPDF(inputPath string, language *string, dpi *int) (
 	if err != nil {
 		return "", err
 	}
-	if _, err := jsonField.Write(jsonBytes); err != nil {
+	if _, err := w.Write(b); err != nil {
 		return "", err
 	}
-	if err := writer.Close(); err != nil {
+	if err := mw.Close(); err != nil {
 		return "", err
 	}
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v2/tools/run?api_key=%s", cl.config.ConversionURL, cl.config.Security.APIKey), body)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v2/tools/run?api_key=%s", cl.config.ConversionURL, cl.config.Security.APIKey), buf)
 	if err != nil {
 		return "", err
 	}
-	req.Header.Set("Content-Type", writer.FormDataContentType())
+	req.Header.Set("Content-Type", mw.FormDataContentType())
 	client := &http.Client{}
-	res, err := client.Do(req)
+	resp, err := client.Do(req)
 	if err != nil {
 		return "", err
 	}
@@ -686,9 +686,9 @@ func (cl *ToolClient) OCRFromPDF(inputPath string, language *string, dpi *int) (
 		if err := Body.Close(); err != nil {
 			cl.logger.Error(err)
 		}
-	}(res.Body)
-	if res.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("request failed with status %d", res.StatusCode)
+	}(resp.Body)
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("request failed with status %d", resp.StatusCode)
 	}
 	outputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".pdf")
 	outputFile, err := os.Create(outputPath)
@@ -700,7 +700,7 @@ func (cl *ToolClient) OCRFromPDF(inputPath string, language *string, dpi *int) (
 			cl.logger.Error(err)
 		}
 	}(outputFile)
-	_, err = io.Copy(outputFile, res.Body)
+	_, err = io.Copy(outputFile, resp.Body)
 	if err != nil {
 		return "", err
 	}
@@ -717,20 +717,20 @@ func (cl *ToolClient) TextFromPDF(inputPath string) (string, error) {
 			cl.logger.Error(err)
 		}
 	}(file)
-	body := &bytes.Buffer{}
-	writer := multipart.NewWriter(body)
-	fileField, err := writer.CreateFormFile("file", inputPath)
+	buf := &bytes.Buffer{}
+	mw := multipart.NewWriter(buf)
+	w, err := mw.CreateFormFile("file", inputPath)
 	if err != nil {
 		return "", err
 	}
-	if _, err := io.Copy(fileField, file); err != nil {
+	if _, err := io.Copy(w, file); err != nil {
 		return "", err
 	}
-	jsonField, err := writer.CreateFormField("json")
+	w, err = mw.CreateFormField("json")
 	if err != nil {
 		return "", err
 	}
-	jsonBytes, err := json.Marshal(map[string]interface{}{
+	b, err := json.Marshal(map[string]interface{}{
 		"bin":    "pdftotext",
 		"args":   []string{"${input}", "${output.txt}"},
 		"stdout": true,
@@ -738,19 +738,19 @@ func (cl *ToolClient) TextFromPDF(inputPath string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	if _, err := jsonField.Write(jsonBytes); err != nil {
+	if _, err := w.Write(b); err != nil {
 		return "", err
 	}
-	if err := writer.Close(); err != nil {
+	if err := mw.Close(); err != nil {
 		return "", err
 	}
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v2/tools/run?api_key=%s", cl.config.ConversionURL, cl.config.Security.APIKey), body)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v2/tools/run?api_key=%s", cl.config.ConversionURL, cl.config.Security.APIKey), buf)
 	if err != nil {
 		return "", err
 	}
-	req.Header.Set("Content-Type", writer.FormDataContentType())
+	req.Header.Set("Content-Type", mw.FormDataContentType())
 	client := &http.Client{}
-	res, err := client.Do(req)
+	resp, err := client.Do(req)
 	if err != nil {
 		return "", err
 	}
@@ -758,9 +758,9 @@ func (cl *ToolClient) TextFromPDF(inputPath string) (string, error) {
 		if err := Body.Close(); err != nil {
 			cl.logger.Error(err)
 		}
-	}(res.Body)
-	if res.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("request failed with status %d", res.StatusCode)
+	}(resp.Body)
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("request failed with status %d", resp.StatusCode)
 	}
 	outputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID())
 	outputFile, err := os.Create(outputPath)
@@ -772,7 +772,7 @@ func (cl *ToolClient) TextFromPDF(inputPath string) (string, error) {
 			cl.logger.Error(err)
 		}
 	}(outputFile)
-	_, err = io.Copy(outputFile, res.Body)
+	_, err = io.Copy(outputFile, resp.Body)
 	if err != nil {
 		return "", err
 	}

@@ -1,4 +1,4 @@
-namespace Voltaserve.Tiling.Infra
+namespace Voltaserve.Mosaic.Infra
 {
     using System;
 

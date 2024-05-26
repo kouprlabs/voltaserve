@@ -1,4 +1,4 @@
-﻿namespace Voltaserve.Tiling
+﻿namespace Voltaserve.Mosaic
 {
     using Microsoft.AspNetCore;
     using Microsoft.AspNetCore.Hosting;

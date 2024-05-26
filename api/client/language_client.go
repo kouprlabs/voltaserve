@@ -35,11 +35,11 @@ type GetEntitiesOptions struct {
 }
 
 func (cl *LanguageClient) GetEntities(opts GetEntitiesOptions) ([]model.InsightsEntity, error) {
-	reqBody, err := json.Marshal(opts)
+	b, err := json.Marshal(opts)
 	if err != nil {
 		return []model.InsightsEntity{}, err
 	}
-	response, err := http.Post(fmt.Sprintf("%s/v2/entities", cl.config.LanguageURL), "application/json", bytes.NewBuffer(reqBody))
+	resp, err := http.Post(fmt.Sprintf("%s/v2/entities", cl.config.LanguageURL), "application/json", bytes.NewBuffer(b))
 	if err != nil {
 		return []model.InsightsEntity{}, err
 	}
@@ -47,15 +47,15 @@ func (cl *LanguageClient) GetEntities(opts GetEntitiesOptions) ([]model.Insights
 		if err := Body.Close(); err != nil {
 			cl.logger.Error(err)
 		}
-	}(response.Body)
-	resBody, err := io.ReadAll(response.Body)
+	}(resp.Body)
+	b, err = io.ReadAll(resp.Body)
 	if err != nil {
 		return []model.InsightsEntity{}, err
 	}
-	var result []model.InsightsEntity
-	err = json.Unmarshal(resBody, &result)
+	var res []model.InsightsEntity
+	err = json.Unmarshal(b, &res)
 	if err != nil {
 		return []model.InsightsEntity{}, err
 	}
-	return result, nil
+	return res, nil
 }

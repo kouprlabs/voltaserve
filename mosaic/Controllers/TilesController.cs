@@ -1,11 +1,11 @@
-namespace Voltaserve.Tiling.Controllers
+namespace Voltaserve.Mosaic.Controllers
 {
     using System.Collections.Generic;
     using System.IO;
     using System.Threading.Tasks;
-    using Voltaserve.Tiling.Infra;
-    using Voltaserve.Tiling.Models;
-    using Voltaserve.Tiling.Services;
+    using Voltaserve.Mosaic.Infra;
+    using Voltaserve.Mosaic.Models;
+    using Voltaserve.Mosaic.Services;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
 

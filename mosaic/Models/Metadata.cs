@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace Voltaserve.Tiling.Models
+namespace Voltaserve.Mosaic.Models
 {
     public class Metadata
     {

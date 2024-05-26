@@ -352,16 +352,16 @@ func (repo *fileRepo) Delete(id string) error {
 }
 
 func (repo *fileRepo) GetChildrenIDs(id string) ([]string, error) {
-	type Result struct {
+	type Value struct {
 		Result string
 	}
-	var results []Result
-	db := repo.db.Raw("SELECT id result FROM file WHERE parent_id = ? ORDER BY create_time ASC", id).Scan(&results)
+	var values []Value
+	db := repo.db.Raw("SELECT id result FROM file WHERE parent_id = ? ORDER BY create_time ASC", id).Scan(&values)
 	if db.Error != nil {
 		return []string{}, db.Error
 	}
 	res := []string{}
-	for _, v := range results {
+	for _, v := range values {
 		res = append(res, v.Result)
 	}
 	return res, nil

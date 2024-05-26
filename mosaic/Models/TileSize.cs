@@ -1,4 +1,4 @@
-﻿namespace Voltaserve.Tiling.Models
+﻿namespace Voltaserve.Mosaic.Models
 {
     using System;
     using System.Drawing;

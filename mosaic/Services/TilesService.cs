@@ -1,8 +1,8 @@
-namespace Voltaserve.Tiling.Services
+namespace Voltaserve.Mosaic.Services
 {
     using System;
     using System.IO;
-    using Voltaserve.Tiling.Infra;
+    using Voltaserve.Mosaic.Infra;
     using Microsoft.AspNetCore.StaticFiles;
     using Models;
     using Minio;

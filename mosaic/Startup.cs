@@ -1,6 +1,6 @@
-namespace Voltaserve.Tiling
+namespace Voltaserve.Mosaic
 {
-    using Voltaserve.Tiling.Services;
+    using Voltaserve.Mosaic.Services;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Http.Features;
     using Microsoft.Extensions.DependencyInjection;

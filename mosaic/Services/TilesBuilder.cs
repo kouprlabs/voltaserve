@@ -1,4 +1,4 @@
-﻿namespace Voltaserve.Tiling.Services
+﻿namespace Voltaserve.Mosaic.Services
 {
     using System;
     using System.Collections.Generic;
