@@ -77,7 +77,10 @@ const ViewerMosaic = ({ file }: ViewerImageProps) => {
               ? currentZoomLevel.tile.lastRowHeight
               : currentZoomLevel.tile.height
           const img = new Image()
-          img.src = `${getConfig().apiURL}/mosaics/${file.id}/zoom_level/${zoomLevel}/row/${row}/col/${col}/ext/${file.snapshot?.preview?.extension.replaceAll('.', '')}?access_token=${accessToken}`
+          const extension =
+            file.snapshot?.preview?.extension ||
+            file.snapshot?.original?.extension
+          img.src = `${getConfig().apiURL}/mosaics/${file.id}/zoom_level/${zoomLevel}/row/${row}/col/${col}/ext/${extension?.replaceAll('.', '')}?access_token=${accessToken}`
 
           const promise = new Promise<void>((resolve) => {
             img.onload = () => {
