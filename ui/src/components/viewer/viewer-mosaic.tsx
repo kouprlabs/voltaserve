@@ -69,10 +69,11 @@ const ViewerMosaic = ({ file }: ViewerImageProps) => {
           drawTile(ctx, cachedTile, currentZoomLevel, row, col)
         } else {
           const img = new Image()
-          const extension =
+          let extension =
             file.snapshot?.preview?.extension ||
             file.snapshot?.original?.extension
-          img.src = `${getConfig().apiURL}/mosaics/${file.id}/zoom_level/${zoomLevel}/row/${row}/col/${col}/ext/${extension?.replaceAll('.', '')}?access_token=${accessToken}`
+          extension = extension?.replaceAll('.', '')
+          img.src = `${getConfig().apiURL}/mosaics/${file.id}/zoom_level/${zoomLevel}/row/${row}/col/${col}/ext/${extension}?access_token=${accessToken}`
 
           img.onload = () => {
             tileCache.current.set(tileKey, img)
