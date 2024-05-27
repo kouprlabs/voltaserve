@@ -3,7 +3,7 @@ import { useColorMode } from '@chakra-ui/system'
 import { Select } from 'chakra-react-select'
 import cx from 'classnames'
 import { File } from '@/client/api/file'
-import { Metadata } from '@/client/api/mosaic'
+import { Metadata, ZoomLevel } from '@/client/api/mosaic'
 import { getConfig } from '@/config/config'
 import { getAccessTokenOrRedirect } from '@/infra/token'
 import reactSelectStyles from '@/styles/react-select'
@@ -20,9 +20,7 @@ const ViewerMosaic = ({ file }: ViewerImageProps) => {
   const [dragging, setDragging] = useState<boolean>(false)
   const [offset, setOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 })
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const offscreenCanvasRef = useRef<HTMLCanvasElement>(
-    document.createElement('canvas'),
-  )
+  const tileCache = useRef<Map<string, HTMLImageElement>>(new Map())
 
   useEffect(() => {
     const fetchMetadata = async () => {
@@ -42,72 +40,100 @@ const ViewerMosaic = ({ file }: ViewerImageProps) => {
 
   useEffect(() => {
     const renderCanvas = async () => {
-      if (!metadata || !canvasRef.current || !offscreenCanvasRef.current) return
+      if (!metadata || !canvasRef.current) return
 
       const canvas = canvasRef.current
       const ctx = canvas.getContext('2d')
-      const offscreenCanvas = offscreenCanvasRef.current
-      const offscreenCtx = offscreenCanvas.getContext('2d')
 
-      if (!ctx || !offscreenCtx) return
+      if (!ctx) return
 
       const currentZoomLevel = metadata.zoomLevels[zoomLevel]
+      canvas.width = window.innerWidth
+      canvas.height = window.innerHeight
 
-      offscreenCanvas.width = currentZoomLevel.width
-      offscreenCanvas.height = currentZoomLevel.height
+      // Clear the visible canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-      // Clear the offscreen canvas
-      offscreenCtx.clearRect(
-        0,
-        0,
-        offscreenCanvas.width,
-        offscreenCanvas.height,
+      const visibleTiles = getVisibleTiles(
+        currentZoomLevel,
+        canvas.width,
+        canvas.height,
+        offset,
       )
 
-      const tilePromises = []
+      visibleTiles.forEach(({ row, col }) => {
+        const tileKey = `${zoomLevel}-${row}-${col}`
+        const cachedTile = tileCache.current.get(tileKey)
 
-      for (let row = 0; row < currentZoomLevel.rows; row++) {
-        for (let col = 0; col < currentZoomLevel.cols; col++) {
-          const tileWidth =
-            col === currentZoomLevel.cols - 1
-              ? currentZoomLevel.tile.lastColWidth
-              : currentZoomLevel.tile.width
-          const tileHeight =
-            row === currentZoomLevel.rows - 1
-              ? currentZoomLevel.tile.lastRowHeight
-              : currentZoomLevel.tile.height
+        if (cachedTile) {
+          drawTile(ctx, cachedTile, currentZoomLevel, row, col)
+        } else {
           const img = new Image()
           const extension =
             file.snapshot?.preview?.extension ||
             file.snapshot?.original?.extension
           img.src = `${getConfig().apiURL}/mosaics/${file.id}/zoom_level/${zoomLevel}/row/${row}/col/${col}/ext/${extension?.replaceAll('.', '')}?access_token=${accessToken}`
 
-          const promise = new Promise<void>((resolve) => {
-            img.onload = () => {
-              offscreenCtx.drawImage(
-                img,
-                col * currentZoomLevel.tile.width,
-                row * currentZoomLevel.tile.height,
-                tileWidth,
-                tileHeight,
-              )
-              resolve()
-            }
-          })
-
-          tilePromises.push(promise)
+          img.onload = () => {
+            tileCache.current.set(tileKey, img)
+            drawTile(ctx, img, currentZoomLevel, row, col)
+          }
         }
-      }
-
-      await Promise.all(tilePromises)
-
-      /* Clear the visible canvas */
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
-      ctx.drawImage(offscreenCanvas, offset.x, offset.y)
+      })
     }
 
     renderCanvas()
   }, [metadata, zoomLevel, offset, file, accessToken])
+
+  const drawTile = (
+    ctx: CanvasRenderingContext2D,
+    img: HTMLImageElement,
+    zoomLevel: ZoomLevel,
+    row: number,
+    col: number,
+  ) => {
+    const tileWidth =
+      col === zoomLevel.cols - 1
+        ? zoomLevel.tile.lastColWidth
+        : zoomLevel.tile.width
+    const tileHeight =
+      row === zoomLevel.rows - 1
+        ? zoomLevel.tile.lastRowHeight
+        : zoomLevel.tile.height
+    ctx.drawImage(
+      img,
+      col * zoomLevel.tile.width + offset.x,
+      row * zoomLevel.tile.height + offset.y,
+      tileWidth,
+      tileHeight,
+    )
+  }
+
+  const getVisibleTiles = (
+    zoomLevel: ZoomLevel,
+    viewportWidth: number,
+    viewportHeight: number,
+    offset: { x: number; y: number },
+  ) => {
+    const tiles: { row: number; col: number }[] = []
+    const startX = Math.max(0, Math.floor(-offset.x / zoomLevel.tile.width))
+    const startY = Math.max(0, Math.floor(-offset.y / zoomLevel.tile.height))
+    const endX = Math.min(
+      zoomLevel.cols,
+      Math.ceil((viewportWidth - offset.x) / zoomLevel.tile.width),
+    )
+    const endY = Math.min(
+      zoomLevel.rows,
+      Math.ceil((viewportHeight - offset.y) / zoomLevel.tile.height),
+    )
+
+    for (let row = startY; row < endY; row++) {
+      for (let col = startX; col < endX; col++) {
+        tiles.push({ row, col })
+      }
+    }
+    return tiles
+  }
 
   const handleMouseDown = () => {
     setDragging(true)
