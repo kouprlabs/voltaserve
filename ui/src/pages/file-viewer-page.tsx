@@ -7,6 +7,7 @@ import FileAPI, { File } from '@/client/api/file'
 import DrawerContent from '@/components/viewer/drawer/drawer-content'
 import ViewerAudio from '@/components/viewer/viewer-audio'
 import ViewerImage from '@/components/viewer/viewer-image'
+import ViewerMosaic from '@/components/viewer/viewer-mosaic'
 import ViewerPDF from '@/components/viewer/viewer-pdf'
 import ViewerVideo from '@/components/viewer/viewer-video'
 import downloadFile from '@/helpers/download-file'
@@ -27,7 +28,11 @@ const FileViewerPage = () => {
       file.snapshot?.original &&
       isImage(file.snapshot?.original.extension)
     ) {
-      return <ViewerImage file={file} />
+      if (file.snapshot?.mosaic) {
+        return <ViewerMosaic file={file} />
+      } else {
+        return <ViewerImage file={file} />
+      }
     } else if (
       file.snapshot?.original &&
       isVideo(file.snapshot?.original.extension)
@@ -75,6 +80,7 @@ const FileViewerPage = () => {
                   'justify-center',
                   'w-full',
                   'h-[80px]',
+                  'min-h-[80px]',
                 )}
               >
                 <span className={cx('font-medium', 'text-[16px]')}>
@@ -89,6 +95,7 @@ const FileViewerPage = () => {
                   'w-full',
                   'h-full',
                   'overflow-hidden',
+                  'relative',
                 )}
               >
                 {renderViewer(file)}

@@ -34,7 +34,7 @@ func (r *InsightsRouter) AppendRoutes(g fiber.Router) {
 	g.Post("/:id", r.Create)
 	g.Patch("/:id", r.Patch)
 	g.Delete("/:id", r.Delete)
-	g.Get("/:id/summary", r.GetSummary)
+	g.Get("/:id/metadata", r.GetMetadata)
 	g.Get("/:id/entities", r.ListEntities)
 }
 
@@ -194,21 +194,21 @@ func (r *InsightsRouter) ListEntities(c *fiber.Ctx) error {
 	return c.JSON(res)
 }
 
-// GetSummary godoc
+// GetMetadata godoc
 //
-//	@Summary		Get Summary
-//	@Description	Get Summary
+//	@Summary		Get Metadata
+//	@Description	Get Metadata
 //	@Tags			Insights
-//	@Id				insights_get_summary
+//	@Id				insights_get_metadata
 //	@Accept			json
 //	@Produce		json
 //	@Param			id	path		string	true	"ID"
-//	@Success		200	{object}	service.InsightsSummary
+//	@Success		200	{object}	service.InsightsMetadata
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
-//	@Router			/insights/{id}/summary [get]
-func (r *InsightsRouter) GetSummary(c *fiber.Ctx) error {
-	res, err := r.insightsSvc.GetSummary(c.Params("id"), GetUserID(c))
+//	@Router			/insights/{id}/metadata [get]
+func (r *InsightsRouter) GetMetadata(c *fiber.Ctx) error {
+	res, err := r.insightsSvc.GetMetadata(c.Params("id"), GetUserID(c))
 	if err != nil {
 		return err
 	}

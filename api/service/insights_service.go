@@ -477,15 +477,11 @@ func (svc *InsightsService) doPagination(data []*model.InsightsEntity, page, siz
 	return pageData, totalElements, totalPages
 }
 
-type InsightsSummary struct {
-	IsOutdated  bool `json:"isOutdated"`
-	HasLanguage bool `json:"hasLanguage"`
-	HasOCR      bool `json:"hasOcr"`
-	HasText     bool `json:"hasText"`
-	HasEntities bool `json:"hasEntities"`
+type InsightsMetadata struct {
+	IsOutdated bool `json:"isOutdated"`
 }
 
-func (svc *InsightsService) GetSummary(id string, userID string) (*InsightsSummary, error) {
+func (svc *InsightsService) GetMetadata(id string, userID string) (*InsightsMetadata, error) {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
@@ -511,16 +507,11 @@ func (svc *InsightsService) GetSummary(id string, userID string) (*InsightsSumma
 			return nil, err
 		}
 		if previous != nil {
-			snapshot = previous
 			isOutdated = true
 		}
 	}
-	return &InsightsSummary{
-		HasLanguage: snapshot.GetLanguage() != nil,
-		HasOCR:      snapshot.HasOCR(),
-		HasText:     snapshot.HasText(),
-		HasEntities: snapshot.HasEntities(),
-		IsOutdated:  isOutdated,
+	return &InsightsMetadata{
+		IsOutdated: isOutdated,
 	}, nil
 }
 

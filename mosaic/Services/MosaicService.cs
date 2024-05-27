@@ -110,7 +110,7 @@ namespace Voltaserve.Mosaic.Services
                 var memoryStream = new MemoryStream();
                 await _minioClient.GetObjectAsync(new GetObjectArgs()
                     .WithBucket(s3Bucket)
-                    .WithObject(Path.Combine(s3Key, "mosaic", "meta.json"))
+                    .WithObject(Path.Combine(s3Key, "mosaic", "mosaic.json"))
                     .WithCallbackStream((stream) => stream.CopyTo(memoryStream)));
                 memoryStream.Seek(0, SeekOrigin.Begin);
                 return await JsonSerializer.DeserializeAsync<Metadata>(memoryStream);

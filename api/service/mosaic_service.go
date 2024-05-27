@@ -44,37 +44,37 @@ func NewMosaicService() *MosaicService {
 	}
 }
 
-func (svc *MosaicService) Create(id string, userID string) (*model.MosaicMetadata, error) {
+func (svc *MosaicService) Create(id string, userID string) error {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	if err = svc.fileGuard.Authorize(user, file, model.PermissionEditor); err != nil {
-		return nil, err
+		return err
 	}
 	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
-		return nil, errorpkg.NewFileIsNotAFileError(file)
+		return errorpkg.NewFileIsNotAFileError(file)
 	}
 	snapshot, err := svc.snapshotRepo.Find(*file.GetSnapshotID())
 	if err != nil {
-		return nil, err
+		return err
 	}
 	return svc.create(snapshot)
 }
 
-func (svc *MosaicService) create(snapshot model.Snapshot) (*model.MosaicMetadata, error) {
+func (svc *MosaicService) create(snapshot model.Snapshot) error {
 	if !snapshot.HasOriginal() {
-		return nil, errorpkg.NewS3ObjectNotFoundError(nil)
+		return errorpkg.NewS3ObjectNotFoundError(nil)
 	}
 	/* Download original S3 object */
 	original := snapshot.GetOriginal()
 	path := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(original.Key))
 	if err := svc.s3.GetFile(original.Key, path, original.Bucket); err != nil {
-		return nil, err
+		return err
 	}
 	defer func(inputPath string, logger *zap.SugaredLogger) {
 		_, err := os.Stat(inputPath)
@@ -86,16 +86,22 @@ func (svc *MosaicService) create(snapshot model.Snapshot) (*model.MosaicMetadata
 	}(path, svc.logger)
 	/* Create mosaic if image */
 	if svc.fileIdent.IsImage(original.Key) {
-		res, err := svc.mosaicClient.Create(path, client.MosaicCreateOptions{
+		if _, err := svc.mosaicClient.Create(path, client.MosaicCreateOptions{
 			S3Key:    filepath.FromSlash(snapshot.GetID()),
 			S3Bucket: snapshot.GetOriginal().Bucket,
-		})
-		if err != nil {
-			return nil, err
+		}); err != nil {
+			return err
 		}
-		return res, nil
+		snapshot.SetMosaic(&model.S3Object{
+			Key:    filepath.FromSlash(snapshot.GetID() + "/mosaic.json"),
+			Bucket: snapshot.GetOriginal().Bucket,
+		})
+		if err := svc.snapshotRepo.Save(snapshot); err != nil {
+			return err
+		}
+		return nil
 	}
-	return nil, errorpkg.NewUnsupportedFileTypeError(nil)
+	return errorpkg.NewUnsupportedFileTypeError(nil)
 }
 
 func (svc *MosaicService) Delete(id string, userID string) error {
@@ -122,6 +128,10 @@ func (svc *MosaicService) Delete(id string, userID string) error {
 			S3Key:    filepath.FromSlash(snapshot.GetID()),
 			S3Bucket: snapshot.GetOriginal().Bucket,
 		}); err != nil {
+			return err
+		}
+		snapshot.SetMosaic(nil)
+		if err := svc.snapshotRepo.Save(snapshot); err != nil {
 			return err
 		}
 	}

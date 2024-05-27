@@ -44,17 +44,16 @@ func (r *MosaicRouter) AppendNonJWTRoutes(g fiber.Router) {
 //	@Id				mosaic_create
 //	@Accept			json
 //	@Produce		json
-//	@Param			id	path		string	true	"ID"
-//	@Success		200	{object}	model.MosaicMetadata
+//	@Param			id	path	string	true	"ID"
+//	@Success		201
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/mosaics/{id} [post]
 func (r *MosaicRouter) Create(c *fiber.Ctx) error {
-	res, err := r.mosaicSvc.Create(c.Params("id"), GetUserID(c))
-	if err != nil {
+	if err := r.mosaicSvc.Create(c.Params("id"), GetUserID(c)); err != nil {
 		return err
 	}
-	return c.JSON(res)
+	return c.SendStatus(http.StatusCreated)
 }
 
 // Delete godoc

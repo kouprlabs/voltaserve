@@ -323,7 +323,7 @@
             return levels;
         }
 
-        private string GetMetadataFilePath() => Path.Combine(_options.OutputDirectory, "meta.json");
+        private string GetMetadataFilePath() => Path.Combine(_options.OutputDirectory, "mosaic.json");
 
         private string GetTileOutputPath(int zoomLevel, int row, int col)
         {

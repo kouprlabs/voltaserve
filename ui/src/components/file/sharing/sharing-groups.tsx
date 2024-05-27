@@ -24,7 +24,7 @@ import { Spinner, Text } from '@/lib'
 import { IconAdd, IconCheck, IconDelete } from '@/lib'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { sharingModalDidClose } from '@/store/ui/files'
-import reactSelectStyles from '@/styles/react-select'
+import { reactSelectStyles } from '@/styles/react-select'
 import SharingFormSkeleton from './sharing-form-skeleton'
 
 export type SharingGroupsProps = {
@@ -119,7 +119,7 @@ const SharingGroups = ({
             ]}
             placeholder="Select Permission"
             selectedOptionStyle="check"
-            chakraStyles={reactSelectStyles}
+            chakraStyles={reactSelectStyles()}
             onChange={(event) => {
               if (event) {
                 setActivePermission(event.value)

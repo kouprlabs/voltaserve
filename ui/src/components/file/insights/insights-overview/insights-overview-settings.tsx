@@ -19,7 +19,7 @@ const InsightsOverviewSettings = () => {
   )
   const [isUpdating, setIsUpdating] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
-  const { data: summary } = InsightsAPI.useGetSummary(id, swrConfig())
+  const { data: summary } = InsightsAPI.useGetMetadata(id, swrConfig())
 
   const handleUpdate = useCallback(async () => {
     if (!id) {

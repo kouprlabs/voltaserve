@@ -1,5 +1,6 @@
 import { Button } from '@chakra-ui/react'
 import cx from 'classnames'
+import FileAPI from '@/client/api/file'
 import InsightsAPI from '@/client/api/insights'
 import { getAccessTokenOrRedirect } from '@/infra/token'
 import { IconOpenInNew } from '@/lib'
@@ -11,9 +12,9 @@ const InsightsOverviewText = () => {
       ? state.ui.files.selection[0]
       : undefined,
   )
-  const { data: summary } = InsightsAPI.useGetSummary(id)
+  const { data: file } = FileAPI.useGet(id)
 
-  if (!id || !summary) {
+  if (!id || !file) {
     return null
   }
 
@@ -27,7 +28,7 @@ const InsightsOverviewText = () => {
         'gap-1',
       )}
     >
-      {summary.hasText ? (
+      {file.snapshot?.text ? (
         <Button
           as="a"
           type="button"
@@ -40,7 +41,7 @@ const InsightsOverviewText = () => {
           Open Text
         </Button>
       ) : null}
-      {summary.hasOcr ? (
+      {file.snapshot?.ocr ? (
         <Button
           as="a"
           type="button"

@@ -250,8 +250,6 @@ definitions:
         type: string
       image:
         $ref: '#/definitions/service.ImageProps'
-      language:
-        type: string
       size:
         type: integer
     type: object
@@ -407,16 +405,8 @@ definitions:
       name:
         type: string
     type: object
-  service.InsightsSummary:
+  service.InsightsMetadata:
     properties:
-      hasEntities:
-        type: boolean
-      hasLanguage:
-        type: boolean
-      hasOcr:
-        type: boolean
-      hasText:
-        type: boolean
       isOutdated:
         type: boolean
     type: object
@@ -499,12 +489,16 @@ definitions:
     properties:
       createTime:
         type: string
+      entities:
+        $ref: '#/definitions/service.Download'
       id:
         type: string
       isActive:
         type: boolean
       language:
         type: string
+      mosaic:
+        $ref: '#/definitions/service.Download'
       ocr:
         $ref: '#/definitions/service.Download'
       original:
@@ -513,6 +507,8 @@ definitions:
         $ref: '#/definitions/service.Download'
       status:
         type: string
+      text:
+        $ref: '#/definitions/service.Download'
       thumbnail:
         $ref: '#/definitions/service.Thumbnail'
       updateTime:
@@ -1762,6 +1758,36 @@ paths:
       summary: List Entities
       tags:
       - Insights
+  /insights/{id}/metadata:
+    get:
+      consumes:
+      - application/json
+      description: Get Metadata
+      operationId: insights_get_metadata
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.InsightsMetadata'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Get Metadata
+      tags:
+      - Insights
   /insights/{id}/ocr{ext}:
     get:
       description: Download OCR
@@ -1794,36 +1820,6 @@ paths:
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
       summary: Download OCR
-      tags:
-      - Insights
-  /insights/{id}/summary:
-    get:
-      consumes:
-      - application/json
-      description: Get Summary
-      operationId: insights_get_summary
-      parameters:
-      - description: ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/service.InsightsSummary'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Get Summary
       tags:
       - Insights
   /insights/{id}/text{ext}:
@@ -2153,10 +2149,8 @@ paths:
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/model.MosaicMetadata'
+        "201":
+          description: Created
         "404":
           description: Not Found
           schema:

@@ -28,7 +28,7 @@ const InsightsOverview = () => {
       : undefined,
   )
   const [isWarningVisible, setIsWarningVisible] = useState(true)
-  const { data: summary } = InsightsAPI.useGetSummary(id)
+  const { data: summary } = InsightsAPI.useGetMetadata(id)
 
   return (
     <>

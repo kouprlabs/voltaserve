@@ -6,10 +6,10 @@ import {
   ModalHeader,
   ModalOverlay,
 } from '@chakra-ui/react'
-import InsightsAPI from '@/client/api/insights'
+import FileAPI from '@/client/api/file'
 import { swrConfig } from '@/client/options'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
-import { modalDidClose, mutateSummaryUpdated } from '@/store/ui/insights'
+import { modalDidClose, mutateFileUpdated } from '@/store/ui/insights'
 import InsightsCreate from './insights-create'
 import InsightsOverview from './insights-overview'
 
@@ -21,16 +21,13 @@ const Insights = () => {
       : undefined,
   )
   const isModalOpen = useAppSelector((state) => state.ui.insights.isModalOpen)
-  const { data: summary, mutate: mutateSummary } = InsightsAPI.useGetSummary(
-    id,
-    swrConfig(),
-  )
+  const { data: file, mutate: mutateFile } = FileAPI.useGet(id, swrConfig())
 
   useEffect(() => {
     if (id) {
-      dispatch(mutateSummaryUpdated(mutateSummary))
+      dispatch(mutateFileUpdated(mutateFile))
     }
-  }, [mutateSummary])
+  }, [mutateFile])
 
   return (
     <Modal
@@ -43,8 +40,8 @@ const Insights = () => {
       <ModalContent>
         <ModalHeader>Insights</ModalHeader>
         <ModalCloseButton />
-        {!summary?.hasEntities ? <InsightsCreate /> : null}
-        {summary?.hasEntities ? <InsightsOverview /> : null}
+        {!file?.snapshot?.entities ? <InsightsCreate /> : null}
+        {file?.snapshot?.entities ? <InsightsOverview /> : null}
       </ModalContent>
     </Modal>
   )

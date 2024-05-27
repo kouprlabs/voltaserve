@@ -51,6 +51,9 @@ type Snapshot struct {
 	Original   *Download  `json:"original,omitempty"`
 	Preview    *Download  `json:"preview,omitempty"`
 	OCR        *Download  `json:"ocr,omitempty"`
+	Text       *Download  `json:"text,omitempty"`
+	Entities   *Download  `json:"entities,omitempty"`
+	Mosaic     *Download  `json:"mosaic,omitempty"`
 	Thumbnail  *Thumbnail `json:"thumbnail,omitempty"`
 	Language   *string    `json:"language,omitempty"`
 	Status     string     `json:"status,omitempty"`
@@ -63,7 +66,6 @@ type Download struct {
 	Extension string      `json:"extension"`
 	Size      int64       `json:"size"`
 	Image     *ImageProps `json:"image,omitempty"`
-	Language  *string     `json:"language,omitempty"`
 }
 
 type Thumbnail struct {
@@ -290,10 +292,22 @@ func (mp *SnapshotMapper) mapOne(m model.Snapshot, isActive bool) *Snapshot {
 		UpdateTime: m.GetUpdateTime(),
 	}
 	if m.HasOriginal() {
-		s.Original = mp.mapOriginal(m.GetOriginal())
+		s.Original = mp.mapS3Object(m.GetOriginal())
 	}
 	if m.HasPreview() {
-		s.Preview = mp.mapPreview(m.GetPreview())
+		s.Preview = mp.mapS3Object(m.GetPreview())
+	}
+	if m.HasOCR() {
+		s.OCR = mp.mapS3Object(m.GetOCR())
+	}
+	if m.HasText() {
+		s.Text = mp.mapS3Object(m.GetText())
+	}
+	if m.HasEntities() {
+		s.Entities = mp.mapS3Object(m.GetEntities())
+	}
+	if m.HasMosaic() {
+		s.Mosaic = mp.mapS3Object(m.GetMosaic())
 	}
 	if m.HasThumbnail() {
 		s.Thumbnail = mp.mapThumbnail(m.GetThumbnail())
@@ -314,21 +328,7 @@ type ImageProps struct {
 	Height int `json:"height"`
 }
 
-func (mp *SnapshotMapper) mapOriginal(m *model.S3Object) *Download {
-	download := &Download{
-		Extension: filepath.Ext(m.Key),
-		Size:      m.Size,
-	}
-	if m.Image != nil {
-		download.Image = &ImageProps{
-			Width:  m.Image.Width,
-			Height: m.Image.Height,
-		}
-	}
-	return download
-}
-
-func (mp *SnapshotMapper) mapPreview(m *model.S3Object) *Download {
+func (mp *SnapshotMapper) mapS3Object(m *model.S3Object) *Download {
 	download := &Download{
 		Extension: filepath.Ext(m.Key),
 		Size:      m.Size,

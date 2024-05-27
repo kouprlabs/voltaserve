@@ -57,6 +57,7 @@ type snapshotEntity struct {
 	Text       datatypes.JSON `json:"text,omitempty" gorm:"column:text"`
 	OCR        datatypes.JSON `json:"ocr,omitempty" gorm:"column:ocr"`
 	Entities   datatypes.JSON `json:"entities,omitempty" gorm:"column:entities"`
+	Mosaic     datatypes.JSON `json:"mosaic,omitempty" gorm:"column:mosaic"`
 	Thumbnail  datatypes.JSON `json:"thumbnail,omitempty" gorm:"column:thumbnail"`
 	Status     string         `json:"status,omitempty" gorm:"column,status"`
 	Language   *string        `json:"language,omitempty" gorm:"column:language"`
@@ -141,6 +142,18 @@ func (s *snapshotEntity) GetEntities() *model.S3Object {
 	}
 	var res = model.S3Object{}
 	if err := json.Unmarshal([]byte(s.Entities.String()), &res); err != nil {
+		log.Fatal(err)
+		return nil
+	}
+	return &res
+}
+
+func (s *snapshotEntity) GetMosaic() *model.S3Object {
+	if s.Mosaic.String() == "" {
+		return nil
+	}
+	var res = model.S3Object{}
+	if err := json.Unmarshal([]byte(s.Mosaic.String()), &res); err != nil {
 		log.Fatal(err)
 		return nil
 	}
@@ -250,6 +263,21 @@ func (s *snapshotEntity) SetEntities(m *model.S3Object) {
 	}
 }
 
+func (s *snapshotEntity) SetMosaic(m *model.S3Object) {
+	if m == nil {
+		s.Mosaic = nil
+	} else {
+		b, err := json.Marshal(m)
+		if err != nil {
+			log.Fatal(err)
+			return
+		}
+		if err := s.Mosaic.UnmarshalJSON(b); err != nil {
+			log.Fatal(err)
+		}
+	}
+}
+
 func (s *snapshotEntity) SetThumbnail(m *model.Thumbnail) {
 	if m == nil {
 		s.Thumbnail = nil
@@ -291,6 +319,10 @@ func (s *snapshotEntity) HasOCR() bool {
 
 func (s *snapshotEntity) HasEntities() bool {
 	return s.Entities != nil
+}
+
+func (s *snapshotEntity) HasMosaic() bool {
+	return s.Mosaic != nil
 }
 
 func (s *snapshotEntity) HasThumbnail() bool {

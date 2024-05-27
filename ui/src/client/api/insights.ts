@@ -11,12 +11,8 @@ export type Language = {
   name: string
 }
 
-export type Summary = {
+export type Metadata = {
   isOutdated: boolean
-  hasLanguage: boolean
-  hasOcr: boolean
-  hasText: boolean
-  hasEntities: boolean
 }
 
 export type Entity = {
@@ -82,14 +78,14 @@ export default class InsightsAPI {
     })
   }
 
-  static useGetSummary(
+  static useGetMetadata(
     id: string | null | undefined,
     swrOptions?: SWRConfiguration,
   ) {
-    const url = `/insights/${id}/summary`
-    return useSWR<Summary>(
+    const url = `/insights/${id}/metadata`
+    return useSWR<Metadata>(
       id ? url : null,
-      () => apiFetcher({ url, method: 'GET' }) as Promise<Summary>,
+      () => apiFetcher({ url, method: 'GET' }) as Promise<Metadata>,
       swrOptions,
     )
   }

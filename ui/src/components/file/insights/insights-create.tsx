@@ -7,7 +7,7 @@ import InsightsAPI, { Language } from '@/client/api/insights'
 import { swrConfig } from '@/client/options'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { modalDidClose } from '@/store/ui/insights'
-import reactSelectStyles from '@/styles/react-select'
+import { reactSelectStyles } from '@/styles/react-select'
 
 interface LanguageOption extends OptionBase {
   label: string
@@ -21,17 +21,15 @@ const InsightsCreate = () => {
       ? state.ui.files.selection[0]
       : undefined,
   )
-  const mutateSummary = useAppSelector(
-    (state) => state.ui.insights.mutateSummary,
-  )
+  const mutateFile = useAppSelector((state) => state.ui.insights.mutateFile)
   const [language, setLanguage] = useState<Language>()
   const [isLoading, setIsLoading] = useState(false)
   const { data: languages } = InsightsAPI.useGetLanguages(swrConfig())
-  const { data: summary } = InsightsAPI.useGetSummary(id, swrConfig())
+  const { data: summary } = InsightsAPI.useGetMetadata(id, swrConfig())
   const { data: file } = FileAPI.useGet(id, swrConfig())
   const existingLanguage = useMemo<LanguageOption | undefined>(() => {
-    if (file && summary && languages && file.snapshot?.language) {
-      const value = summary.hasLanguage
+    if (file && languages && file.snapshot?.language) {
+      const value = file.snapshot.language
         ? languages.filter((e) => e.id === file.snapshot?.language)[0]
         : undefined
       if (value) {
@@ -39,14 +37,14 @@ const InsightsCreate = () => {
         return { value: value.id, label: value.name }
       }
     }
-  }, [file, summary, languages])
+  }, [file, languages])
 
   const handleCreate = useCallback(async () => {
     if (id && language) {
       try {
         setIsLoading(true)
         await InsightsAPI.create(id, { languageId: language.id })
-        mutateSummary?.()
+        mutateFile?.()
         setIsLoading(false)
       } catch (error) {
         setIsLoading(false)
@@ -54,7 +52,7 @@ const InsightsCreate = () => {
         setIsLoading(false)
       }
     }
-  }, [language, id, mutateSummary])
+  }, [language, id, mutateFile])
 
   const handleLanguageChange = useCallback(
     (value: SingleValue<LanguageOption>) => {
@@ -98,7 +96,7 @@ const InsightsCreate = () => {
               }))}
               placeholder="Select Language"
               selectedOptionStyle="check"
-              chakraStyles={reactSelectStyles}
+              chakraStyles={reactSelectStyles()}
               isDisabled={isLoading}
               onChange={handleLanguageChange}
             />

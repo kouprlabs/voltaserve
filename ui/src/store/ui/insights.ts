@@ -1,10 +1,10 @@
 import { KeyedMutator } from 'swr'
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
-import { Summary } from '@/client/api/insights'
+import { File } from '@/client/api/file'
 
 type InsightsState = {
   isModalOpen: boolean
-  mutateSummary?: KeyedMutator<Summary>
+  mutateFile?: KeyedMutator<File>
 }
 
 const initialState: InsightsState = {
@@ -21,16 +21,12 @@ const slice = createSlice({
     modalDidClose: (state) => {
       state.isModalOpen = false
     },
-    mutateSummaryUpdated: (
-      state,
-      action: PayloadAction<KeyedMutator<Summary>>,
-    ) => {
-      state.mutateSummary = action.payload
+    mutateFileUpdated: (state, action: PayloadAction<KeyedMutator<File>>) => {
+      state.mutateFile = action.payload
     },
   },
 })
 
-export const { modalDidOpen, modalDidClose, mutateSummaryUpdated } =
-  slice.actions
+export const { modalDidOpen, modalDidClose, mutateFileUpdated } = slice.actions
 
 export default slice.reducer
