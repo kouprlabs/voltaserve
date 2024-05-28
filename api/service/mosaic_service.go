@@ -45,15 +45,11 @@ func NewMosaicService() *MosaicService {
 }
 
 func (svc *MosaicService) Create(id string, userID string) error {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return err
-	}
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return err
 	}
-	if err = svc.fileGuard.Authorize(user, file, model.PermissionEditor); err != nil {
+	if err = svc.fileGuard.Authorize(userID, file, model.PermissionEditor); err != nil {
 		return err
 	}
 	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
@@ -105,15 +101,11 @@ func (svc *MosaicService) create(snapshot model.Snapshot) error {
 }
 
 func (svc *MosaicService) Delete(id string, userID string) error {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return err
-	}
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return err
 	}
-	if err = svc.fileGuard.Authorize(user, file, model.PermissionEditor); err != nil {
+	if err = svc.fileGuard.Authorize(userID, file, model.PermissionEditor); err != nil {
 		return err
 	}
 	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
@@ -142,15 +134,11 @@ func (svc *MosaicService) Delete(id string, userID string) error {
 }
 
 func (svc *MosaicService) GetMetadata(id string, userID string) (*model.MosaicMetadata, error) {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return nil, err
-	}
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return nil, err
 	}
-	if err = svc.fileGuard.Authorize(user, file, model.PermissionViewer); err != nil {
+	if err = svc.fileGuard.Authorize(userID, file, model.PermissionViewer); err != nil {
 		return nil, err
 	}
 	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
@@ -192,15 +180,11 @@ type MosaicDownloadTileOptions struct {
 }
 
 func (svc *MosaicService) DownloadTileBuffer(id string, opts MosaicDownloadTileOptions, userID string) (*bytes.Buffer, error) {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return nil, err
-	}
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return nil, err
 	}
-	if err = svc.fileGuard.Authorize(user, file, model.PermissionViewer); err != nil {
+	if err = svc.fileGuard.Authorize(userID, file, model.PermissionViewer); err != nil {
 		return nil, err
 	}
 	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {

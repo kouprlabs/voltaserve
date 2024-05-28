@@ -175,15 +175,11 @@ func (svc *FileService) create(opts FileCreateOptions, userID string) (*File, er
 }
 
 func (svc *FileService) validateParent(id string, userID string) error {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return err
-	}
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return err
 	}
-	if err = svc.fileGuard.Authorize(user, file, model.PermissionEditor); err != nil {
+	if err = svc.fileGuard.Authorize(userID, file, model.PermissionEditor); err != nil {
 		return err
 	}
 	if file.GetType() != model.FileTypeFolder {
@@ -270,15 +266,11 @@ func (svc *FileService) Store(id string, path string, userID string) (*File, err
 }
 
 func (svc *FileService) DownloadOriginalBuffer(id string, userID string) (*bytes.Buffer, model.File, model.Snapshot, error) {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return nil, nil, nil, err
-	}
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return nil, nil, nil, err
 	}
-	if err = svc.fileGuard.Authorize(user, file, model.PermissionViewer); err != nil {
+	if err = svc.fileGuard.Authorize(userID, file, model.PermissionViewer); err != nil {
 		return nil, nil, nil, err
 	}
 	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
@@ -303,15 +295,11 @@ func (svc *FileService) DownloadOriginalBuffer(id string, userID string) (*bytes
 }
 
 func (svc *FileService) DownloadPreviewBuffer(id string, userID string) (*bytes.Buffer, model.File, model.Snapshot, error) {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return nil, nil, nil, err
-	}
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return nil, nil, nil, err
 	}
-	if err = svc.fileGuard.Authorize(user, file, model.PermissionViewer); err != nil {
+	if err = svc.fileGuard.Authorize(userID, file, model.PermissionViewer); err != nil {
 		return nil, nil, nil, err
 	}
 	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
@@ -336,17 +324,13 @@ func (svc *FileService) DownloadPreviewBuffer(id string, userID string) (*bytes.
 }
 
 func (svc *FileService) Find(ids []string, userID string) ([]*File, error) {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return nil, err
-	}
 	var res []*File
 	for _, id := range ids {
 		file, err := svc.fileCache.Get(id)
 		if err != nil {
 			continue
 		}
-		if err = svc.fileGuard.Authorize(user, file, model.PermissionViewer); err != nil {
+		if err = svc.fileGuard.Authorize(userID, file, model.PermissionViewer); err != nil {
 			return nil, err
 		}
 		f, err := svc.fileMapper.mapOne(file, userID)
@@ -405,7 +389,7 @@ func (svc *FileService) FindByPath(path string, userID string) (*File, error) {
 		if err != nil {
 			return nil, err
 		}
-		authorized, err := svc.doAuthorizationByIDs(ids, user)
+		authorized, err := svc.doAuthorizationByIDs(ids, userID)
 		if err != nil {
 			return nil, err
 		}
@@ -438,10 +422,6 @@ func (svc *FileService) FindByPath(path string, userID string) (*File, error) {
 }
 
 func (svc *FileService) ListByPath(path string, userID string) ([]*File, error) {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return nil, err
-	}
 	if path == "/" {
 		workspaces, err := svc.workspaceSvc.findAll(userID)
 		if err != nil {
@@ -482,7 +462,7 @@ func (svc *FileService) ListByPath(path string, userID string) ([]*File, error) 
 		if err != nil {
 			return nil, err
 		}
-		authorized, err := svc.doAuthorizationByIDs(ids, user)
+		authorized, err := svc.doAuthorizationByIDs(ids, userID)
 		if err != nil {
 			return nil, err
 		}
@@ -510,7 +490,7 @@ func (svc *FileService) ListByPath(path string, userID string) ([]*File, error) 
 		if err != nil {
 			return nil, err
 		}
-		authorized, err := svc.doAuthorizationByIDs(ids, user)
+		authorized, err := svc.doAuthorizationByIDs(ids, userID)
 		if err != nil {
 			return nil, err
 		}
@@ -557,15 +537,11 @@ type FileListOptions struct {
 }
 
 func (svc *FileService) List(id string, opts FileListOptions, userID string) (*FileList, error) {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return nil, err
-	}
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return nil, err
 	}
-	if err = svc.fileGuard.Authorize(user, file, model.PermissionViewer); err != nil {
+	if err = svc.fileGuard.Authorize(userID, file, model.PermissionViewer); err != nil {
 		return nil, err
 	}
 	if opts.Page < 1 {
@@ -593,7 +569,7 @@ func (svc *FileService) List(id string, opts FileListOptions, userID string) (*F
 			filtered = append(filtered, f)
 		}
 	}
-	authorized, err := svc.doAuthorization(filtered, user)
+	authorized, err := svc.doAuthorization(filtered, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -613,10 +589,6 @@ func (svc *FileService) List(id string, opts FileListOptions, userID string) (*F
 }
 
 func (svc *FileService) Search(id string, opts FileListOptions, userID string) (*FileList, error) {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return nil, err
-	}
 	parent, err := svc.fileCache.Get(id)
 	if err != nil {
 		return nil, err
@@ -625,7 +597,7 @@ func (svc *FileService) Search(id string, opts FileListOptions, userID string) (
 	if err != nil {
 		return nil, err
 	}
-	if err := svc.workspaceGuard.Authorize(user, workspace, model.PermissionViewer); err != nil {
+	if err := svc.workspaceGuard.Authorize(userID, workspace, model.PermissionViewer); err != nil {
 		return nil, err
 	}
 	data, err := svc.fileSearch.Query(opts.Query.Text)
@@ -636,7 +608,7 @@ func (svc *FileService) Search(id string, opts FileListOptions, userID string) (
 	if err != nil {
 		return nil, err
 	}
-	authorized, err := svc.doAuthorization(filtered, user)
+	authorized, err := svc.doAuthorization(filtered, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -658,15 +630,11 @@ func (svc *FileService) Search(id string, opts FileListOptions, userID string) (
 }
 
 func (svc *FileService) GetPath(id string, userID string) ([]*File, error) {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return nil, err
-	}
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return nil, err
 	}
-	if err = svc.fileGuard.Authorize(user, file, model.PermissionViewer); err != nil {
+	if err = svc.fileGuard.Authorize(userID, file, model.PermissionViewer); err != nil {
 		return nil, err
 	}
 	path, err := svc.fileRepo.FindPath(id)
@@ -685,10 +653,6 @@ func (svc *FileService) GetPath(id string, userID string) ([]*File, error) {
 }
 
 func (svc *FileService) Copy(targetID string, sourceIDs []string, userID string) (copiedFiles []*File, err error) {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return nil, err
-	}
 	target, err := svc.fileCache.Get(targetID)
 	if err != nil {
 		return nil, err
@@ -700,10 +664,10 @@ func (svc *FileService) Copy(targetID string, sourceIDs []string, userID string)
 		if source, err = svc.fileCache.Get(sourceID); err != nil {
 			return nil, err
 		}
-		if err = svc.fileGuard.Authorize(user, target, model.PermissionEditor); err != nil {
+		if err = svc.fileGuard.Authorize(userID, target, model.PermissionEditor); err != nil {
 			return nil, err
 		}
-		if err = svc.fileGuard.Authorize(user, source, model.PermissionEditor); err != nil {
+		if err = svc.fileGuard.Authorize(userID, source, model.PermissionEditor); err != nil {
 			return nil, err
 		}
 		if source.GetID() == target.GetID() {
@@ -828,10 +792,6 @@ func (svc *FileService) Copy(targetID string, sourceIDs []string, userID string)
 
 func (svc *FileService) Move(targetID string, sourceIDs []string, userID string) (parentIDs []string, err error) {
 	parentIDs = []string{}
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return []string{}, err
-	}
 	target, err := svc.fileCache.Get(targetID)
 	if err != nil {
 		return []string{}, err
@@ -852,10 +812,10 @@ func (svc *FileService) Move(targetID string, sourceIDs []string, userID string)
 				return nil, errorpkg.NewFileWithSimilarNameExistsError()
 			}
 		}
-		if err := svc.fileGuard.Authorize(user, target, model.PermissionEditor); err != nil {
+		if err := svc.fileGuard.Authorize(userID, target, model.PermissionEditor); err != nil {
 			return []string{}, err
 		}
-		if err := svc.fileGuard.Authorize(user, source, model.PermissionEditor); err != nil {
+		if err := svc.fileGuard.Authorize(userID, source, model.PermissionEditor); err != nil {
 			return []string{}, err
 		}
 		if source.GetParentID() != nil && *source.GetParentID() == target.GetID() {
@@ -921,10 +881,6 @@ func (svc *FileService) Move(targetID string, sourceIDs []string, userID string)
 }
 
 func (svc *FileService) PatchName(id string, name string, userID string) (*File, error) {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return nil, err
-	}
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return nil, err
@@ -938,7 +894,7 @@ func (svc *FileService) PatchName(id string, name string, userID string) (*File,
 			return nil, errorpkg.NewFileWithSimilarNameExistsError()
 		}
 	}
-	if err = svc.fileGuard.Authorize(user, file, model.PermissionEditor); err != nil {
+	if err = svc.fileGuard.Authorize(userID, file, model.PermissionEditor); err != nil {
 		return nil, err
 	}
 	file.SetName(name)
@@ -962,11 +918,6 @@ func (svc *FileService) PatchName(id string, name string, userID string) (*File,
 func (svc *FileService) Delete(ids []string, userID string) ([]string, error) {
 	var res []string
 	for _, id := range ids {
-		var user model.User
-		user, err := svc.userRepo.Find(userID)
-		if err != nil {
-			return nil, err
-		}
 		file, err := svc.fileCache.Get(id)
 		if err != nil {
 			return nil, err
@@ -978,7 +929,7 @@ func (svc *FileService) Delete(ids []string, userID string) ([]string, error) {
 			}
 			return nil, errorpkg.NewCannotDeleteWorkspaceRootError(file, workspace)
 		}
-		if err = svc.fileGuard.Authorize(user, file, model.PermissionOwner); err != nil {
+		if err = svc.fileGuard.Authorize(userID, file, model.PermissionOwner); err != nil {
 			return nil, err
 		}
 
@@ -1041,15 +992,11 @@ func (svc *FileService) Delete(ids []string, userID string) ([]string, error) {
 }
 
 func (svc *FileService) GetSize(id string, userID string) (int64, error) {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return -1, err
-	}
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return -1, err
 	}
-	if err := svc.fileGuard.Authorize(user, file, model.PermissionViewer); err != nil {
+	if err := svc.fileGuard.Authorize(userID, file, model.PermissionViewer); err != nil {
 		return -1, err
 	}
 	res, err := svc.fileRepo.GetSize(id)
@@ -1060,15 +1007,11 @@ func (svc *FileService) GetSize(id string, userID string) (int64, error) {
 }
 
 func (svc *FileService) GetCount(id string, userID string) (int64, error) {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return 0, err
-	}
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return 0, err
 	}
-	if err := svc.fileGuard.Authorize(user, file, model.PermissionViewer); err != nil {
+	if err := svc.fileGuard.Authorize(userID, file, model.PermissionViewer); err != nil {
 		return 0, err
 	}
 	res, err := svc.fileRepo.GetItemCount(id)
@@ -1079,16 +1022,12 @@ func (svc *FileService) GetCount(id string, userID string) (int64, error) {
 }
 
 func (svc *FileService) GrantUserPermission(ids []string, assigneeID string, permission string, userID string) error {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return err
-	}
 	for _, id := range ids {
 		file, err := svc.fileCache.Get(id)
 		if err != nil {
 			return err
 		}
-		if err = svc.fileGuard.Authorize(user, file, model.PermissionOwner); err != nil {
+		if err = svc.fileGuard.Authorize(userID, file, model.PermissionOwner); err != nil {
 			return err
 		}
 		if _, err := svc.userRepo.Find(assigneeID); err != nil {
@@ -1130,16 +1069,12 @@ func (svc *FileService) GrantUserPermission(ids []string, assigneeID string, per
 }
 
 func (svc *FileService) RevokeUserPermission(ids []string, assigneeID string, userID string) error {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return err
-	}
 	for _, id := range ids {
 		file, err := svc.fileCache.Get(id)
 		if err != nil {
 			return err
 		}
-		if err := svc.fileGuard.Authorize(user, file, model.PermissionOwner); err != nil {
+		if err := svc.fileGuard.Authorize(userID, file, model.PermissionOwner); err != nil {
 			return err
 		}
 		if _, err := svc.userRepo.Find(assigneeID); err != nil {
@@ -1165,23 +1100,19 @@ func (svc *FileService) RevokeUserPermission(ids []string, assigneeID string, us
 }
 
 func (svc *FileService) GrantGroupPermission(ids []string, groupID string, permission string, userID string) error {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return err
-	}
 	for _, id := range ids {
 		file, err := svc.fileCache.Get(id)
 		if err != nil {
 			return err
 		}
-		if err = svc.fileGuard.Authorize(user, file, model.PermissionOwner); err != nil {
+		if err = svc.fileGuard.Authorize(userID, file, model.PermissionOwner); err != nil {
 			return err
 		}
 		group, err := svc.groupCache.Get(groupID)
 		if err != nil {
 			return err
 		}
-		if err := svc.groupGuard.Authorize(user, group, model.PermissionViewer); err != nil {
+		if err := svc.groupGuard.Authorize(userID, group, model.PermissionViewer); err != nil {
 			return err
 		}
 		if err = svc.fileRepo.GrantGroupPermission(id, groupID, permission); err != nil {
@@ -1220,23 +1151,19 @@ func (svc *FileService) GrantGroupPermission(ids []string, groupID string, permi
 }
 
 func (svc *FileService) RevokeGroupPermission(ids []string, groupID string, userID string) error {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return err
-	}
 	for _, id := range ids {
 		file, err := svc.fileCache.Get(id)
 		if err != nil {
 			return err
 		}
-		if err := svc.fileGuard.Authorize(user, file, model.PermissionOwner); err != nil {
+		if err := svc.fileGuard.Authorize(userID, file, model.PermissionOwner); err != nil {
 			return err
 		}
 		group, err := svc.groupCache.Get(groupID)
 		if err != nil {
 			return err
 		}
-		if err := svc.groupGuard.Authorize(user, group, model.PermissionViewer); err != nil {
+		if err := svc.groupGuard.Authorize(userID, group, model.PermissionViewer); err != nil {
 			return err
 		}
 		tree, err := svc.fileRepo.FindTree(id)
@@ -1265,15 +1192,11 @@ type UserPermission struct {
 }
 
 func (svc *FileService) GetUserPermissions(id string, userID string) ([]*UserPermission, error) {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return nil, err
-	}
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return nil, err
 	}
-	if err := svc.fileGuard.Authorize(user, file, model.PermissionOwner); err != nil {
+	if err := svc.fileGuard.Authorize(userID, file, model.PermissionOwner); err != nil {
 		return nil, err
 	}
 	permissions, err := svc.permissionRepo.GetUserPermissions(id)
@@ -1305,15 +1228,11 @@ type GroupPermission struct {
 }
 
 func (svc *FileService) GetGroupPermissions(id string, userID string) ([]*GroupPermission, error) {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return nil, err
-	}
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return nil, err
 	}
-	if err := svc.fileGuard.Authorize(user, file, model.PermissionOwner); err != nil {
+	if err := svc.fileGuard.Authorize(userID, file, model.PermissionOwner); err != nil {
 		return nil, err
 	}
 	permissions, err := svc.permissionRepo.GetGroupPermissions(id)
@@ -1339,17 +1258,17 @@ func (svc *FileService) GetGroupPermissions(id string, userID string) ([]*GroupP
 	return res, nil
 }
 
-func (svc *FileService) doAuthorization(data []model.File, user model.User) ([]model.File, error) {
+func (svc *FileService) doAuthorization(data []model.File, userID string) ([]model.File, error) {
 	var res []model.File
 	for _, f := range data {
-		if svc.fileGuard.IsAuthorized(user, f, model.PermissionViewer) {
+		if svc.fileGuard.IsAuthorized(userID, f, model.PermissionViewer) {
 			res = append(res, f)
 		}
 	}
 	return res, nil
 }
 
-func (svc *FileService) doAuthorizationByIDs(ids []string, user model.User) ([]model.File, error) {
+func (svc *FileService) doAuthorizationByIDs(ids []string, userID string) ([]model.File, error) {
 	var res []model.File
 	for _, id := range ids {
 		var f model.File
@@ -1357,7 +1276,7 @@ func (svc *FileService) doAuthorizationByIDs(ids []string, user model.User) ([]m
 		if err != nil {
 			return nil, err
 		}
-		if svc.fileGuard.IsAuthorized(user, f, model.PermissionViewer) {
+		if svc.fileGuard.IsAuthorized(userID, f, model.PermissionViewer) {
 			res = append(res, f)
 		}
 	}

@@ -18,9 +18,9 @@ func NewWorkspaceGuard() *WorkspaceGuard {
 	}
 }
 
-func (g *WorkspaceGuard) IsAuthorized(user model.User, workspace model.Workspace, permission string) bool {
+func (g *WorkspaceGuard) IsAuthorized(userID string, workspace model.Workspace, permission string) bool {
 	for _, p := range workspace.GetUserPermissions() {
-		if p.GetUserID() == user.GetID() && model.IsEquivalentPermission(p.GetValue(), permission) {
+		if p.GetUserID() == userID && model.IsEquivalentPermission(p.GetValue(), permission) {
 			return true
 		}
 	}
@@ -31,7 +31,7 @@ func (g *WorkspaceGuard) IsAuthorized(user model.User, workspace model.Workspace
 			return false
 		}
 		for _, u := range g.GetUsers() {
-			if u == user.GetID() && model.IsEquivalentPermission(p.GetValue(), permission) {
+			if u == userID && model.IsEquivalentPermission(p.GetValue(), permission) {
 				return true
 			}
 		}
@@ -39,10 +39,10 @@ func (g *WorkspaceGuard) IsAuthorized(user model.User, workspace model.Workspace
 	return false
 }
 
-func (g *WorkspaceGuard) Authorize(user model.User, workspace model.Workspace, permission string) error {
-	if !g.IsAuthorized(user, workspace, permission) {
-		err := errorpkg.NewWorkspacePermissionError(user, workspace, permission)
-		if g.IsAuthorized(user, workspace, model.PermissionViewer) {
+func (g *WorkspaceGuard) Authorize(userID string, workspace model.Workspace, permission string) error {
+	if !g.IsAuthorized(userID, workspace, permission) {
+		err := errorpkg.NewWorkspacePermissionError(userID, workspace, permission)
+		if g.IsAuthorized(userID, workspace, model.PermissionViewer) {
 			return err
 		} else {
 			return errorpkg.NewWorkspaceNotFoundError(err)

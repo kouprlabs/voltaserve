@@ -38,10 +38,6 @@ type StorageUsage struct {
 }
 
 func (svc *StorageService) GetAccountUsage(userID string) (*StorageUsage, error) {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return nil, err
-	}
 	ids, err := svc.workspaceRepo.GetIDs()
 	if err != nil {
 		return nil, err
@@ -53,7 +49,7 @@ func (svc *StorageService) GetAccountUsage(userID string) (*StorageUsage, error)
 		if err != nil {
 			return nil, err
 		}
-		if svc.workspaceGuard.IsAuthorized(user, workspace, model.PermissionOwner) {
+		if svc.workspaceGuard.IsAuthorized(userID, workspace, model.PermissionOwner) {
 			workspaces = append(workspaces, workspace)
 		}
 	}
@@ -75,22 +71,18 @@ func (svc *StorageService) GetAccountUsage(userID string) (*StorageUsage, error)
 }
 
 func (svc *StorageService) GetWorkspaceUsage(workspaceID string, userID string) (*StorageUsage, error) {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return nil, err
-	}
 	workspace, err := svc.workspaceCache.Get(workspaceID)
 	if err != nil {
 		return nil, err
 	}
-	if err = svc.workspaceGuard.Authorize(user, workspace, model.PermissionViewer); err != nil {
+	if err = svc.workspaceGuard.Authorize(userID, workspace, model.PermissionViewer); err != nil {
 		return nil, err
 	}
 	root, err := svc.fileCache.Get(workspace.GetRootID())
 	if err != nil {
 		return nil, err
 	}
-	if err = svc.fileGuard.Authorize(user, root, model.PermissionViewer); err != nil {
+	if err = svc.fileGuard.Authorize(userID, root, model.PermissionViewer); err != nil {
 		return nil, err
 	}
 	size, err := svc.fileRepo.GetSize(root.GetID())
@@ -101,15 +93,11 @@ func (svc *StorageService) GetWorkspaceUsage(workspaceID string, userID string) 
 }
 
 func (svc *StorageService) GetFileUsage(fileID string, userID string) (*StorageUsage, error) {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return nil, err
-	}
 	file, err := svc.fileCache.Get(fileID)
 	if err != nil {
 		return nil, err
 	}
-	if err = svc.fileGuard.Authorize(user, file, model.PermissionViewer); err != nil {
+	if err = svc.fileGuard.Authorize(userID, file, model.PermissionViewer); err != nil {
 		return nil, err
 	}
 	size, err := svc.fileRepo.GetSize(file.GetID())

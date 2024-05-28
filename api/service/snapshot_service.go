@@ -83,15 +83,11 @@ type SnapshotList struct {
 }
 
 func (svc *SnapshotService) List(fileID string, opts SnapshotListOptions, userID string) (*SnapshotList, error) {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return nil, err
-	}
 	file, err := svc.fileCache.Get(fileID)
 	if err != nil {
 		return nil, err
 	}
-	if err = svc.fileGuard.Authorize(user, file, model.PermissionViewer); err != nil {
+	if err = svc.fileGuard.Authorize(userID, file, model.PermissionViewer); err != nil {
 		return nil, err
 	}
 	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
@@ -179,15 +175,11 @@ type SnapshotActivateOptions struct {
 }
 
 func (svc *SnapshotService) Activate(id string, opts SnapshotActivateOptions, userID string) (*File, error) {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return nil, err
-	}
 	file, err := svc.fileCache.Get(opts.FileID)
 	if err != nil {
 		return nil, err
 	}
-	if err = svc.fileGuard.Authorize(user, file, model.PermissionEditor); err != nil {
+	if err = svc.fileGuard.Authorize(userID, file, model.PermissionEditor); err != nil {
 		return nil, err
 	}
 	if _, err := svc.snapshotRepo.Find(id); err != nil {
@@ -216,15 +208,11 @@ type SnapshotDetachOptions struct {
 }
 
 func (svc *SnapshotService) Detach(id string, opts SnapshotDetachOptions, userID string) error {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return err
-	}
 	file, err := svc.fileCache.Get(opts.FileID)
 	if err != nil {
 		return err
 	}
-	if err = svc.fileGuard.Authorize(user, file, model.PermissionEditor); err != nil {
+	if err = svc.fileGuard.Authorize(userID, file, model.PermissionEditor); err != nil {
 		return err
 	}
 	if _, err := svc.snapshotRepo.Find(id); err != nil {

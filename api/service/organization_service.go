@@ -90,15 +90,11 @@ func (svc *OrganizationService) Create(opts OrganizationCreateOptions, userID st
 }
 
 func (svc *OrganizationService) Find(id string, userID string) (*Organization, error) {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return nil, err
-	}
 	org, err := svc.orgCache.Get(id)
 	if err != nil {
 		return nil, err
 	}
-	if err := svc.orgGuard.Authorize(user, org, model.PermissionViewer); err != nil {
+	if err := svc.orgGuard.Authorize(userID, org, model.PermissionViewer); err != nil {
 		return nil, err
 	}
 	res, err := svc.orgMapper.mapOne(org, userID)
@@ -125,17 +121,13 @@ type OrganizationList struct {
 }
 
 func (svc *OrganizationService) List(opts OrganizationListOptions, userID string) (*OrganizationList, error) {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return nil, err
-	}
 	var authorized []model.Organization
 	if opts.Query == "" {
 		ids, err := svc.orgRepo.GetIDs()
 		if err != nil {
 			return nil, err
 		}
-		authorized, err = svc.doAuthorizationByIDs(ids, user)
+		authorized, err = svc.doAuthorizationByIDs(ids, userID)
 		if err != nil {
 			return nil, err
 		}
@@ -144,7 +136,7 @@ func (svc *OrganizationService) List(opts OrganizationListOptions, userID string
 		if err != nil {
 			return nil, err
 		}
-		authorized, err = svc.doAuthorization(orgs, user)
+		authorized, err = svc.doAuthorization(orgs, userID)
 		if err != nil {
 			return nil, err
 		}
@@ -171,15 +163,11 @@ func (svc *OrganizationService) List(opts OrganizationListOptions, userID string
 }
 
 func (svc *OrganizationService) PatchName(id string, name string, userID string) (*Organization, error) {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return nil, err
-	}
 	org, err := svc.orgCache.Get(id)
 	if err != nil {
 		return nil, err
 	}
-	if err := svc.orgGuard.Authorize(user, org, model.PermissionEditor); err != nil {
+	if err := svc.orgGuard.Authorize(userID, org, model.PermissionEditor); err != nil {
 		return nil, err
 	}
 	org.SetName(name)
@@ -201,15 +189,11 @@ func (svc *OrganizationService) PatchName(id string, name string, userID string)
 }
 
 func (svc *OrganizationService) Delete(id string, userID string) error {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return err
-	}
 	org, err := svc.orgCache.Get(id)
 	if err != nil {
 		return err
 	}
-	if err := svc.orgGuard.Authorize(user, org, model.PermissionOwner); err != nil {
+	if err := svc.orgGuard.Authorize(userID, org, model.PermissionOwner); err != nil {
 		return err
 	}
 	if err := svc.orgRepo.Delete(id); err != nil {
@@ -225,14 +209,6 @@ func (svc *OrganizationService) Delete(id string, userID string) error {
 }
 
 func (svc *OrganizationService) RemoveMember(id string, memberID string, userID string) error {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return err
-	}
-	member, err := svc.userRepo.Find(memberID)
-	if err != nil {
-		return err
-	}
 	org, err := svc.orgCache.Get(id)
 	if err != nil {
 		return err
@@ -243,12 +219,12 @@ func (svc *OrganizationService) RemoveMember(id string, memberID string, userID 
 	if err != nil {
 		return err
 	}
-	if svc.orgGuard.IsAuthorized(member, org, model.PermissionOwner) && ownerCount == 1 {
+	if svc.orgGuard.IsAuthorized(memberID, org, model.PermissionOwner) && ownerCount == 1 {
 		return errorpkg.NewCannotRemoveLastRemainingOwnerOfOrganizationError(org.GetID())
 	}
 
-	if userID != member.GetID() {
-		if err := svc.orgGuard.Authorize(user, org, model.PermissionOwner); err != nil {
+	if userID != memberID {
+		if err := svc.orgGuard.Authorize(userID, org, model.PermissionOwner); err != nil {
 			return err
 		}
 	}
@@ -259,15 +235,15 @@ func (svc *OrganizationService) RemoveMember(id string, memberID string, userID 
 		return err
 	}
 	for _, groupID := range groupsIDs {
-		if err := svc.groupService.RemoveMemberUnauthorized(groupID, member.GetID()); err != nil {
+		if err := svc.groupService.RemoveMemberUnauthorized(groupID, memberID); err != nil {
 			log.Error(err)
 		}
 	}
 
-	if err := svc.orgRepo.RevokeUserPermission(id, member.GetID()); err != nil {
+	if err := svc.orgRepo.RevokeUserPermission(id, memberID); err != nil {
 		return err
 	}
-	if err := svc.orgRepo.RemoveMember(id, member.GetID()); err != nil {
+	if err := svc.orgRepo.RemoveMember(id, memberID); err != nil {
 		return err
 	}
 	if _, err := svc.orgCache.Refresh(org.GetID()); err != nil {
@@ -276,17 +252,17 @@ func (svc *OrganizationService) RemoveMember(id string, memberID string, userID 
 	return nil
 }
 
-func (svc *OrganizationService) doAuthorization(data []model.Organization, user model.User) ([]model.Organization, error) {
+func (svc *OrganizationService) doAuthorization(data []model.Organization, userID string) ([]model.Organization, error) {
 	var res []model.Organization
 	for _, o := range data {
-		if svc.orgGuard.IsAuthorized(user, o, model.PermissionViewer) {
+		if svc.orgGuard.IsAuthorized(userID, o, model.PermissionViewer) {
 			res = append(res, o)
 		}
 	}
 	return res, nil
 }
 
-func (svc *OrganizationService) doAuthorizationByIDs(ids []string, user model.User) ([]model.Organization, error) {
+func (svc *OrganizationService) doAuthorizationByIDs(ids []string, userID string) ([]model.Organization, error) {
 	var res []model.Organization
 	for _, id := range ids {
 		var o model.Organization
@@ -294,7 +270,7 @@ func (svc *OrganizationService) doAuthorizationByIDs(ids []string, user model.Us
 		if err != nil {
 			return nil, err
 		}
-		if svc.orgGuard.IsAuthorized(user, o, model.PermissionViewer) {
+		if svc.orgGuard.IsAuthorized(userID, o, model.PermissionViewer) {
 			res = append(res, o)
 		}
 	}

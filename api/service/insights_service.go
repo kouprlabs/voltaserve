@@ -81,15 +81,11 @@ type InsightsCreateOptions struct {
 }
 
 func (svc *InsightsService) Create(id string, opts InsightsCreateOptions, userID string) error {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return err
-	}
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return err
 	}
-	if err = svc.fileGuard.Authorize(user, file, model.PermissionEditor); err != nil {
+	if err = svc.fileGuard.Authorize(userID, file, model.PermissionEditor); err != nil {
 		return err
 	}
 	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
@@ -117,15 +113,11 @@ func (svc *InsightsService) create(snapshot model.Snapshot) error {
 }
 
 func (svc *InsightsService) Patch(id string, userID string) error {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return err
-	}
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return err
 	}
-	if err = svc.fileGuard.Authorize(user, file, model.PermissionEditor); err != nil {
+	if err = svc.fileGuard.Authorize(userID, file, model.PermissionEditor); err != nil {
 		return err
 	}
 	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
@@ -301,15 +293,11 @@ func (svc *InsightsService) createEntities(snapshot model.Snapshot) error {
 }
 
 func (svc *InsightsService) Delete(id string, userID string) error {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return err
-	}
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return err
 	}
-	if err = svc.fileGuard.Authorize(user, file, model.PermissionEditor); err != nil {
+	if err = svc.fileGuard.Authorize(userID, file, model.PermissionEditor); err != nil {
 		return err
 	}
 	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
@@ -380,15 +368,11 @@ type InsightsEntityList struct {
 }
 
 func (svc *InsightsService) ListEntities(id string, opts InsightsListEntitiesOptions, userID string) (*InsightsEntityList, error) {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return nil, err
-	}
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return nil, err
 	}
-	if err = svc.fileGuard.Authorize(user, file, model.PermissionViewer); err != nil {
+	if err = svc.fileGuard.Authorize(userID, file, model.PermissionViewer); err != nil {
 		return nil, err
 	}
 	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
@@ -483,15 +467,11 @@ type InsightsMetadata struct {
 }
 
 func (svc *InsightsService) GetMetadata(id string, userID string) (*InsightsMetadata, error) {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return nil, err
-	}
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return nil, err
 	}
-	if err = svc.fileGuard.Authorize(user, file, model.PermissionViewer); err != nil {
+	if err = svc.fileGuard.Authorize(userID, file, model.PermissionViewer); err != nil {
 		return nil, err
 	}
 	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
@@ -519,15 +499,11 @@ func (svc *InsightsService) GetMetadata(id string, userID string) (*InsightsMeta
 }
 
 func (svc *InsightsService) DownloadTextBuffer(id string, userID string) (*bytes.Buffer, model.File, model.Snapshot, error) {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return nil, nil, nil, err
-	}
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return nil, nil, nil, err
 	}
-	if err = svc.fileGuard.Authorize(user, file, model.PermissionViewer); err != nil {
+	if err = svc.fileGuard.Authorize(userID, file, model.PermissionViewer); err != nil {
 		return nil, nil, nil, err
 	}
 	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
@@ -560,15 +536,11 @@ func (svc *InsightsService) DownloadTextBuffer(id string, userID string) (*bytes
 }
 
 func (svc *InsightsService) DownloadOCRBuffer(id string, userID string) (*bytes.Buffer, model.File, model.Snapshot, error) {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return nil, nil, nil, err
-	}
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return nil, nil, nil, err
 	}
-	if err = svc.fileGuard.Authorize(user, file, model.PermissionViewer); err != nil {
+	if err = svc.fileGuard.Authorize(userID, file, model.PermissionViewer); err != nil {
 		return nil, nil, nil, err
 	}
 	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
