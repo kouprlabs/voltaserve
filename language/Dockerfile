@@ -7,6 +7,12 @@ COPY . .
 RUN curl -sSL https://install.python-poetry.org | python3 -
 ENV PATH="/root/.local/bin:${PATH}"
 
+RUN apt-get update && \
+  apt-get install -y curl && \
+  curl https://sh.rustup.rs -sSf | sh -s -- -y && \
+  /root/.cargo/bin/rustup default stable
+ENV PATH="/root/.cargo/bin:${PATH}"
+
 RUN poetry install
 
 RUN poetry run spacy download xx_ent_wiki_sm
