@@ -40,9 +40,9 @@ const TopBarNotificationDrawer = () => {
           aria-label=""
           onClick={onOpen}
         />
-        {notfications && notfications.length > 0 && (
+        {notfications && notfications.length > 0 ? (
           <Circle size="15px" bg="red" position="absolute" top={0} right={0} />
-        )}
+        ) : null}
       </div>
       <ChakraDrawer
         isOpen={isOpen}

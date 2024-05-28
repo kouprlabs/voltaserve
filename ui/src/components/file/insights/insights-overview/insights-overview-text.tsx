@@ -1,7 +1,7 @@
 import { Button } from '@chakra-ui/react'
 import cx from 'classnames'
 import FileAPI from '@/client/api/file'
-import InsightsAPI from '@/client/api/insights'
+import { swrConfig } from '@/client/options'
 import { getAccessTokenOrRedirect } from '@/infra/token'
 import { IconOpenInNew } from '@/lib'
 import { useAppSelector } from '@/store/hook'
@@ -12,7 +12,10 @@ const InsightsOverviewText = () => {
       ? state.ui.files.selection[0]
       : undefined,
   )
-  const { data: file } = FileAPI.useGet(id)
+  const { data: file } = FileAPI.useGet(id, swrConfig())
+  const searchParams = new URLSearchParams({
+    access_token: getAccessTokenOrRedirect(),
+  })
 
   if (!id || !file) {
     return null
@@ -33,9 +36,7 @@ const InsightsOverviewText = () => {
           as="a"
           type="button"
           leftIcon={<IconOpenInNew />}
-          href={`/proxy/api/v2/insights/${id}/text.txt?${new URLSearchParams({
-            access_token: getAccessTokenOrRedirect(),
-          })}`}
+          href={`/proxy/api/v2/insights/${id}/text${file.snapshot?.text.extension}?${searchParams}`}
           target="_blank"
         >
           Open Text
@@ -46,9 +47,7 @@ const InsightsOverviewText = () => {
           as="a"
           type="button"
           leftIcon={<IconOpenInNew />}
-          href={`/proxy/api/v2/insights/${id}/ocr.pdf?${new URLSearchParams({
-            access_token: getAccessTokenOrRedirect(),
-          })}`}
+          href={`/proxy/api/v2/insights/${id}/ocr${file.snapshot?.ocr.extension}?${searchParams}`}
           target="_blank"
         >
           Open Searchable PDF

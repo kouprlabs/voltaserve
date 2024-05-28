@@ -63,8 +63,8 @@ type Snapshot struct {
 }
 
 type Download struct {
-	Extension string      `json:"extension"`
-	Size      int64       `json:"size"`
+	Extension string      `json:"extension,omitempty"`
+	Size      int64       `json:"size,omitempty"`
 	Image     *ImageProps `json:"image,omitempty"`
 }
 

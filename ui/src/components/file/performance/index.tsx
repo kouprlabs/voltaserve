@@ -6,22 +6,22 @@ import {
   ModalHeader,
   ModalOverlay,
 } from '@chakra-ui/react'
-import InsightsAPI from '@/client/api/insights'
+import MosaicAPI from '@/client/api/mosaic'
 import { swrConfig } from '@/client/options'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
-import { modalDidClose, mutateMetadataUpdated } from '@/store/ui/insights'
-import InsightsCreate from './insights-create'
-import InsightsOverview from './insights-overview'
+import { modalDidClose, mutateMetadataUpdated } from '@/store/ui/mosaic'
+import PerformanceCreate from './performance-create'
+import PerformanceOverview from './performance-overview'
 
-const Insights = () => {
+const Mosaic = () => {
   const dispatch = useAppDispatch()
   const id = useAppSelector((state) =>
     state.ui.files.selection.length > 0
       ? state.ui.files.selection[0]
       : undefined,
   )
-  const isModalOpen = useAppSelector((state) => state.ui.insights.isModalOpen)
-  const { data: metadata, mutate: mutateMetadata } = InsightsAPI.useGetMetadata(
+  const isModalOpen = useAppSelector((state) => state.ui.mosaic.isModalOpen)
+  const { data: metadata, mutate: mutateMetadata } = MosaicAPI.useGetMetadata(
     id,
     swrConfig(),
   )
@@ -41,13 +41,13 @@ const Insights = () => {
     >
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>Insights</ModalHeader>
+        <ModalHeader>Performance</ModalHeader>
         <ModalCloseButton />
-        {!metadata ? <InsightsCreate /> : null}
-        {metadata ? <InsightsOverview /> : null}
+        {!metadata ? <PerformanceCreate /> : null}
+        {metadata ? <PerformanceOverview /> : null}
       </ModalContent>
     </Modal>
   )
 }
 
-export default Insights
+export default Mosaic

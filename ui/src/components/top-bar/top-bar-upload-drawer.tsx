@@ -54,9 +54,9 @@ const TopBarUploadDrawer = () => {
           aria-label=""
           onClick={onOpen}
         />
-        {hasPendingUploads && (
+        {hasPendingUploads ? (
           <Circle size="15px" bg="red" position="absolute" top={0} right={0} />
-        )}
+        ) : null}
       </div>
       <ChakraDrawer
         isOpen={isOpen}
@@ -75,7 +75,7 @@ const TopBarUploadDrawer = () => {
             <UploadList />
           </DrawerBody>
           <DrawerFooter>
-            {hasCompleted && (
+            {hasCompleted ? (
               <Button
                 className={cx('w-full')}
                 leftIcon={<IconClearAll />}
@@ -83,7 +83,7 @@ const TopBarUploadDrawer = () => {
               >
                 Clear Completed Items
               </Button>
-            )}
+            ) : null}
           </DrawerFooter>
         </DrawerContent>
       </ChakraDrawer>

@@ -62,11 +62,11 @@ const UpdateEmailPage = () => {
             </div>
           </div>
         ) : null}
-        {isFailed && (
+        {isFailed ? (
           <Heading className={cx('text-heading')}>
             An error occurred while processing your request.
           </Heading>
-        )}
+        ) : null}
       </div>
     </LayoutFull>
   )

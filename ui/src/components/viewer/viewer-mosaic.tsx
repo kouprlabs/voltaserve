@@ -3,7 +3,7 @@ import { useColorMode } from '@chakra-ui/system'
 import { Select } from 'chakra-react-select'
 import cx from 'classnames'
 import { File } from '@/client/api/file'
-import { Metadata, ZoomLevel } from '@/client/api/mosaic'
+import MosaicAPI, { Metadata, ZoomLevel } from '@/client/api/mosaic'
 import { getConfig } from '@/config/config'
 import { getAccessTokenOrRedirect } from '@/infra/token'
 import reactSelectStyles from '@/styles/react-select'
@@ -24,15 +24,7 @@ const ViewerMosaic = ({ file }: ViewerImageProps) => {
 
   useEffect(() => {
     const fetchMetadata = async () => {
-      const response = await fetch(
-        `${getConfig().apiURL}/mosaics/${file.id}/metadata`,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        },
-      )
-      const data: Metadata = await response.json()
+      const data: Metadata = await MosaicAPI.getMetadata(file.id)
       setMetadata(data)
     }
     fetchMetadata()
@@ -174,11 +166,11 @@ const ViewerMosaic = ({ file }: ViewerImageProps) => {
         )}
         defaultValue={{
           value: metadata.zoomLevels[0].index,
-          label: `Zoom ${metadata.zoomLevels[0].scaleDownPercentage}%`,
+          label: `Zoom ${Math.round(metadata.zoomLevels[0].scaleDownPercentage)}%`,
         }}
         options={metadata.zoomLevels.map((zoomLevel) => ({
           value: zoomLevel.index,
-          label: `Zoom ${zoomLevel.scaleDownPercentage}%`,
+          label: `Zoom ${Math.round(zoomLevel.scaleDownPercentage)}%`,
         }))}
         placeholder="Zoom Level"
         selectedOptionStyle="check"

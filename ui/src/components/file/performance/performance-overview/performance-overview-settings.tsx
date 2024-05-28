@@ -1,13 +1,13 @@
 import { useCallback, useState } from 'react'
 import { Button, Card, CardBody, CardFooter, Text } from '@chakra-ui/react'
 import cx from 'classnames'
-import InsightsAPI from '@/client/api/insights'
+import MosaicAPI from '@/client/api/mosaic'
 import { swrConfig } from '@/client/options'
 import { IconDelete, IconSync } from '@/lib'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
-import { modalDidClose } from '@/store/ui/insights'
+import { modalDidClose } from '@/store/ui/mosaic'
 
-const InsightsOverviewSettings = () => {
+const PeformanceOverviewSettings = () => {
   const dispatch = useAppDispatch()
   const id = useAppSelector((state) =>
     state.ui.files.selection.length > 0
@@ -15,11 +15,11 @@ const InsightsOverviewSettings = () => {
       : undefined,
   )
   const mutateMetadata = useAppSelector(
-    (state) => state.ui.insights.mutateMetadata,
+    (state) => state.ui.mosaic.mutateMetadata,
   )
   const [isUpdating, setIsUpdating] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
-  const { data: metadata } = InsightsAPI.useGetMetadata(id, swrConfig())
+  const { data: metadata } = MosaicAPI.useGetMetadata(id, swrConfig())
 
   const handleUpdate = useCallback(async () => {
     if (!id) {
@@ -27,7 +27,7 @@ const InsightsOverviewSettings = () => {
     }
     setIsUpdating(true)
     try {
-      await InsightsAPI.patch(id)
+      await MosaicAPI.create(id)
       mutateMetadata?.()
     } catch {
       setIsUpdating(false)
@@ -42,7 +42,7 @@ const InsightsOverviewSettings = () => {
     }
     setIsDeleting(true)
     try {
-      await InsightsAPI.delete(id)
+      await MosaicAPI.delete(id)
       mutateMetadata?.()
       dispatch(modalDidClose())
     } catch {
@@ -60,10 +60,7 @@ const InsightsOverviewSettings = () => {
     <div className={cx('flex', 'flex-row', 'items-stretch', 'gap-1.5')}>
       <Card size="md" variant="outline" className={cx('w-[50%]')}>
         <CardBody>
-          <Text>
-            Updates the insights using the active snapshot, uses the previously
-            set language.
-          </Text>
+          <Text>Updates to a new mosaic using the active snapshot.</Text>
         </CardBody>
         <CardFooter>
           <Button
@@ -79,7 +76,7 @@ const InsightsOverviewSettings = () => {
       <Card size="md" variant="outline" className={cx('w-[50%]')}>
         <CardBody>
           <Text>
-            Deletes insights from the active snapshot, can be recreated later.
+            Deletes the mosaic from the active snapshot, can be recreated later.
           </Text>
         </CardBody>
         <CardFooter>
@@ -98,4 +95,4 @@ const InsightsOverviewSettings = () => {
   )
 }
 
-export default InsightsOverviewSettings
+export default PeformanceOverviewSettings

@@ -119,6 +119,16 @@ func NewUnsupportedFileTypeError(err error) *ErrorResponse {
 	)
 }
 
+func NewInsightsNotFoundError(err error) *ErrorResponse {
+	return NewErrorResponse(
+		"insights_not_found",
+		http.StatusNotFound,
+		"Insights not found.",
+		"Insights not found.",
+		err,
+	)
+}
+
 func NewMosaicNotFoundError(err error) *ErrorResponse {
 	return NewErrorResponse(
 		"mosaic_not_found",

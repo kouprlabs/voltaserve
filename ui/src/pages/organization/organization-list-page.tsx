@@ -66,7 +66,7 @@ const OrganizationListPage = () => {
       </Helmet>
       <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
         <Heading className={cx('text-heading')}>Organizations</Heading>
-        {!list && error && (
+        {!list && error ? (
           <div
             className={cx(
               'flex',
@@ -77,9 +77,9 @@ const OrganizationListPage = () => {
           >
             <span>Failed to load organizations.</span>
           </div>
-        )}
+        ) : null}
         {!list && !error && <SectionSpinner />}
-        {list && list.data.length === 0 && (
+        {list && list.data.length === 0 ? (
           <div
             className={cx(
               'flex',
@@ -93,8 +93,8 @@ const OrganizationListPage = () => {
               <CreateOrganizationButton />
             </div>
           </div>
-        )}
-        {list && list.data.length > 0 && (
+        ) : null}
+        {list && list.data.length > 0 ? (
           <Table variant="simple">
             <Thead>
               <Tr>
@@ -137,8 +137,8 @@ const OrganizationListPage = () => {
               ))}
             </Tbody>
           </Table>
-        )}
-        {list && (
+        ) : null}
+        {list ? (
           <PagePagination
             style={{ alignSelf: 'end' }}
             totalElements={list.totalElements}
@@ -149,7 +149,7 @@ const OrganizationListPage = () => {
             setPage={setPage}
             setSize={setSize}
           />
-        )}
+        ) : null}
       </div>
     </>
   )

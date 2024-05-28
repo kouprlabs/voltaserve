@@ -85,7 +85,12 @@ export default class InsightsAPI {
     const url = `/insights/${id}/metadata`
     return useSWR<Metadata>(
       id ? url : null,
-      () => apiFetcher({ url, method: 'GET' }) as Promise<Metadata>,
+      () =>
+        apiFetcher({
+          url,
+          method: 'GET',
+          showError: false,
+        }) as Promise<Metadata>,
       swrOptions,
     )
   }

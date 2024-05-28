@@ -123,6 +123,9 @@ func (svc *MosaicService) Delete(id string, userID string) error {
 	if err != nil {
 		return err
 	}
+	if !snapshot.HasMosaic() {
+		return errorpkg.NewMosaicNotFoundError(nil)
+	}
 	if svc.fileIdent.IsImage(snapshot.GetOriginal().Key) {
 		if err := svc.mosaicClient.Delete(client.MosaicDeleteOptions{
 			S3Key:    filepath.FromSlash(snapshot.GetID()),
@@ -157,6 +160,19 @@ func (svc *MosaicService) GetMetadata(id string, userID string) (*model.MosaicMe
 	if err != nil {
 		return nil, err
 	}
+	isOutdated := false
+	if !snapshot.HasMosaic() {
+		previous, err := svc.getPreviousSnapshot(file.GetID(), snapshot.GetVersion())
+		if err != nil {
+			return nil, err
+		}
+		if previous == nil {
+			return nil, errorpkg.NewMosaicNotFoundError(nil)
+		} else {
+			snapshot = previous
+			isOutdated = true
+		}
+	}
 	res, err := svc.mosaicClient.GetMetadata(client.MosaicGetMetadataOptions{
 		S3Key:    filepath.FromSlash(snapshot.GetID()),
 		S3Bucket: snapshot.GetOriginal().Bucket,
@@ -164,6 +180,7 @@ func (svc *MosaicService) GetMetadata(id string, userID string) (*model.MosaicMe
 	if err != nil {
 		return nil, err
 	}
+	res.IsOutdated = isOutdated
 	return res, nil
 }
 
@@ -193,6 +210,17 @@ func (svc *MosaicService) DownloadTileBuffer(id string, opts MosaicDownloadTileO
 	if err != nil {
 		return nil, err
 	}
+	if !snapshot.HasMosaic() {
+		previous, err := svc.getPreviousSnapshot(file.GetID(), snapshot.GetVersion())
+		if err != nil {
+			return nil, err
+		}
+		if previous == nil {
+			return nil, errorpkg.NewMosaicNotFoundError(nil)
+		} else {
+			snapshot = previous
+		}
+	}
 	res, err := svc.mosaicClient.DownloadTileBuffer(client.MosaicDownloadTileOptions{
 		S3Key:     filepath.FromSlash(snapshot.GetID()),
 		S3Bucket:  snapshot.GetOriginal().Bucket,
@@ -205,4 +233,17 @@ func (svc *MosaicService) DownloadTileBuffer(id string, opts MosaicDownloadTileO
 		return nil, err
 	}
 	return res, err
+}
+
+func (svc *MosaicService) getPreviousSnapshot(fileID string, version int64) (model.Snapshot, error) {
+	snaphots, err := svc.snapshotRepo.FindAllPrevious(fileID, version)
+	if err != nil {
+		return nil, err
+	}
+	for _, snapshot := range snaphots {
+		if snapshot.HasMosaic() {
+			return snapshot, nil
+		}
+	}
+	return nil, nil
 }

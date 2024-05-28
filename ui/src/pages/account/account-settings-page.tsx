@@ -64,7 +64,7 @@ const AccountSettingsPage = () => {
         <div className={sectionClassName}>
           <span className={cx('font-bold')}>Storage Usage</span>
           {storageUsageError && <span>Failed to load storage usage.</span>}
-          {storageUsage && !storageUsageError && (
+          {storageUsage && !storageUsageError ? (
             <>
               <span>
                 {prettyBytes(storageUsage.bytes)} of{' '}
@@ -72,13 +72,13 @@ const AccountSettingsPage = () => {
               </span>
               <Progress value={storageUsage.percentage} hasStripe />
             </>
-          )}
-          {!storageUsage && !storageUsageError && (
+          ) : null}
+          {!storageUsage && !storageUsageError ? (
             <>
               <span>Calculating…</span>
               <Progress value={0} hasStripe />
             </>
-          )}
+          ) : null}
         </div>
         <Divider />
         <div className={sectionClassName}>
@@ -101,7 +101,7 @@ const AccountSettingsPage = () => {
           <div className={cx(rowClassName)}>
             <span>Email</span>
             <Spacer />
-            {user.pendingEmail && (
+            {user.pendingEmail ? (
               <div
                 className={cx('flex', 'flex-row', 'gap-0.5', 'items-center')}
               >
@@ -119,10 +119,10 @@ const AccountSettingsPage = () => {
                 </Tooltip>
                 <span>{user.pendingEmail}</span>
               </div>
-            )}
-            {!user.pendingEmail && (
+            ) : null}
+            {!user.pendingEmail ? (
               <span>{user.pendingEmail || user.email}</span>
-            )}
+            ) : null}
             <EditButton
               aria-label=""
               onClick={() => {

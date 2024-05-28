@@ -21,11 +21,12 @@ const InsightsCreate = () => {
       ? state.ui.files.selection[0]
       : undefined,
   )
-  const mutateFile = useAppSelector((state) => state.ui.insights.mutateFile)
+  const mutateMetadata = useAppSelector(
+    (state) => state.ui.insights.mutateMetadata,
+  )
   const [language, setLanguage] = useState<Language>()
   const [isLoading, setIsLoading] = useState(false)
   const { data: languages } = InsightsAPI.useGetLanguages(swrConfig())
-  const { data: summary } = InsightsAPI.useGetMetadata(id, swrConfig())
   const { data: file } = FileAPI.useGet(id, swrConfig())
   const existingLanguage = useMemo<LanguageOption | undefined>(() => {
     if (file && languages && file.snapshot?.language) {
@@ -44,7 +45,7 @@ const InsightsCreate = () => {
       try {
         setIsLoading(true)
         await InsightsAPI.create(id, { languageId: language.id })
-        mutateFile?.()
+        mutateMetadata?.()
         setIsLoading(false)
       } catch (error) {
         setIsLoading(false)
@@ -52,7 +53,7 @@ const InsightsCreate = () => {
         setIsLoading(false)
       }
     }
-  }, [language, id, mutateFile])
+  }, [language, id, mutateMetadata])
 
   const handleLanguageChange = useCallback(
     (value: SingleValue<LanguageOption>) => {
@@ -63,7 +64,7 @@ const InsightsCreate = () => {
     [languages],
   )
 
-  if (!id || !file || !summary || !languages) {
+  if (!id || !file || !languages) {
     return null
   }
 
@@ -80,7 +81,7 @@ const InsightsCreate = () => {
           )}
         >
           <p>
-            Select the language to use for creating insights.
+            Select the language to use for collecting insights.
             <br />
             During the process, text will be extracted using OCR (optical
             character recognition), and entities will be scanned using NER
@@ -122,7 +123,7 @@ const InsightsCreate = () => {
             isDisabled={!language}
             onClick={handleCreate}
           >
-            Create
+            Collect Insights
           </Button>
         </div>
       </ModalFooter>

@@ -135,14 +135,14 @@ func (svc *InsightsService) Patch(id string, userID string) error {
 	if err != nil {
 		return err
 	}
-	previousSnapshot, err := svc.getPreviousSnapshot(file.GetID(), snapshot.GetVersion())
+	previous, err := svc.getPreviousSnapshot(file.GetID(), snapshot.GetVersion())
 	if err != nil {
 		return err
 	}
-	if previousSnapshot == nil || previousSnapshot.GetLanguage() == nil {
+	if previous == nil || previous.GetLanguage() == nil {
 		return errorpkg.NewSnapshotCannotBePatchedError(nil)
 	}
-	snapshot.SetLanguage(*previousSnapshot.GetLanguage())
+	snapshot.SetLanguage(*previous.GetLanguage())
 	if err := svc.snapshotRepo.Save(snapshot); err != nil {
 		return err
 	}
@@ -319,6 +319,9 @@ func (svc *InsightsService) Delete(id string, userID string) error {
 	if err != nil {
 		return err
 	}
+	if !snapshot.HasEntities() {
+		return errorpkg.NewInsightsNotFoundError(nil)
+	}
 	if svc.fileIdent.IsImage(snapshot.GetOriginal().Key) {
 		if err := svc.deleteText(snapshot); err != nil {
 			return err
@@ -400,35 +403,33 @@ func (svc *InsightsService) ListEntities(id string, opts InsightsListEntitiesOpt
 		if err != nil {
 			return nil, err
 		}
-		if previous != nil {
+		if previous == nil {
+			return nil, errorpkg.NewInsightsNotFoundError(nil)
+		} else {
 			snapshot = previous
 		}
 	}
-	if snapshot.HasEntities() {
-		text, err := svc.s3.GetText(snapshot.GetEntities().Key, snapshot.GetEntities().Bucket)
-		if err != nil {
-			return nil, err
-		}
-		var entities []*model.InsightsEntity
-		if err := json.Unmarshal([]byte(text), &entities); err != nil {
-			return nil, err
-		}
-		if opts.SortBy == "" {
-			opts.SortBy = SortByName
-		}
-		filtered := svc.doFiltering(entities, opts.Query)
-		sorted := svc.doSorting(filtered, opts.SortBy, opts.SortOrder)
-		data, totalElements, totalPages := svc.doPagination(sorted, opts.Page, opts.Size)
-		return &InsightsEntityList{
-			Data:          data,
-			TotalPages:    totalPages,
-			TotalElements: totalElements,
-			Page:          opts.Page,
-			Size:          uint(len(data)),
-		}, nil
-	} else {
-		return nil, errorpkg.NewS3ObjectNotFoundError(nil)
+	text, err := svc.s3.GetText(snapshot.GetEntities().Key, snapshot.GetEntities().Bucket)
+	if err != nil {
+		return nil, err
 	}
+	var entities []*model.InsightsEntity
+	if err := json.Unmarshal([]byte(text), &entities); err != nil {
+		return nil, err
+	}
+	if opts.SortBy == "" {
+		opts.SortBy = SortByName
+	}
+	filtered := svc.doFiltering(entities, opts.Query)
+	sorted := svc.doSorting(filtered, opts.SortBy, opts.SortOrder)
+	data, totalElements, totalPages := svc.doPagination(sorted, opts.Page, opts.Size)
+	return &InsightsEntityList{
+		Data:          data,
+		TotalPages:    totalPages,
+		TotalElements: totalElements,
+		Page:          opts.Page,
+		Size:          uint(len(data)),
+	}, nil
 }
 
 func (svc *InsightsService) doFiltering(data []*model.InsightsEntity, query string) []*model.InsightsEntity {
@@ -506,7 +507,9 @@ func (svc *InsightsService) GetMetadata(id string, userID string) (*InsightsMeta
 		if err != nil {
 			return nil, err
 		}
-		if previous != nil {
+		if previous == nil {
+			return nil, errorpkg.NewInsightsNotFoundError(nil)
+		} else {
 			isOutdated = true
 		}
 	}
@@ -539,7 +542,9 @@ func (svc *InsightsService) DownloadTextBuffer(id string, userID string) (*bytes
 		if err != nil {
 			return nil, nil, nil, err
 		}
-		if previous != nil {
+		if previous == nil {
+			return nil, nil, nil, errorpkg.NewInsightsNotFoundError(nil)
+		} else {
 			snapshot = previous
 		}
 	}
@@ -578,7 +583,9 @@ func (svc *InsightsService) DownloadOCRBuffer(id string, userID string) (*bytes.
 		if err != nil {
 			return nil, nil, nil, err
 		}
-		if previous != nil {
+		if previous == nil {
+			return nil, nil, nil, errorpkg.NewInsightsNotFoundError(nil)
+		} else {
 			snapshot = previous
 		}
 	}

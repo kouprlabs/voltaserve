@@ -63,6 +63,14 @@ export function isExcel(ext?: string | null) {
   return ['.xlsx', '.xls'].findIndex((e) => e === ext) !== -1
 }
 
+export function isMicrosoftOffice(ext?: string | null) {
+  return isWord(ext) || isPowerPoint(ext) || isExcel(ext)
+}
+
+export function isOpenOffice(ext?: string | null) {
+  return isDocument(ext) || isSpreadsheet(ext) || isSlides(ext)
+}
+
 export function isDocument(ext?: string | null) {
   if (!ext) {
     return false

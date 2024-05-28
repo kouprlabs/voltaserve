@@ -46,6 +46,8 @@ definitions:
         type: string
       height:
         type: integer
+      isOutdated:
+        type: boolean
       width:
         type: integer
       zoomLevels:

@@ -76,7 +76,7 @@ export const DrawerItem = ({
         >
           {icon}
         </div>
-        {!isCollapsed && (
+        {!isCollapsed ? (
           <span
             className={cx({
               'text-white': isActive,
@@ -85,7 +85,7 @@ export const DrawerItem = ({
           >
             {primaryText}
           </span>
-        )}
+        ) : null}
       </div>
     </Link>
   )

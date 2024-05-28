@@ -124,6 +124,10 @@ const router = createBrowserRouter([
         element: <FileViewerPage />,
       },
       {
+        path: '/file/:id/mosaic',
+        element: <FileViewerPage />,
+      },
+      {
         path: '/sign-up',
         element: <SignUpPage />,
       },

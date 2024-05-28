@@ -1,5 +1,5 @@
-import { useCallback } from 'react'
-import { useParams } from 'react-router-dom'
+import { useCallback, useMemo } from 'react'
+import { useLocation, useParams } from 'react-router-dom'
 import { Button } from '@chakra-ui/react'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
@@ -16,48 +16,63 @@ import { IconDownload, Drawer, Spinner } from '@/lib'
 
 const FileViewerPage = () => {
   const { id } = useParams()
+  const location = useLocation()
+  const isMosaic = useMemo(
+    () => location.pathname.endsWith('/mosaic'),
+    [location],
+  )
   const { data: file } = FileAPI.useGet(id)
 
-  const renderViewer = useCallback((file: File) => {
-    if (
-      (file.snapshot?.original && isPDF(file.snapshot?.original.extension)) ||
-      (file.snapshot?.preview && isPDF(file.snapshot?.preview.extension))
-    ) {
-      return <ViewerPDF file={file} />
-    } else if (
-      file.snapshot?.original &&
-      isImage(file.snapshot?.original.extension)
-    ) {
-      if (file.snapshot?.mosaic) {
+  const renderViewer = useCallback(
+    (file: File) => {
+      if (isMosaic) {
         return <ViewerMosaic file={file} />
       } else {
-        return <ViewerImage file={file} />
+        if (
+          (file.snapshot?.original &&
+            isPDF(file.snapshot?.original.extension)) ||
+          (file.snapshot?.preview && isPDF(file.snapshot?.preview.extension))
+        ) {
+          return <ViewerPDF file={file} />
+        } else if (
+          file.snapshot?.original &&
+          isImage(file.snapshot?.original.extension)
+        ) {
+          if (file.snapshot?.mosaic) {
+            return <ViewerMosaic file={file} />
+          } else {
+            return <ViewerImage file={file} />
+          }
+        } else if (
+          file.snapshot?.original &&
+          isVideo(file.snapshot?.original.extension)
+        ) {
+          return <ViewerVideo file={file} />
+        } else if (
+          file.snapshot?.original &&
+          isAudio(file.snapshot?.original.extension)
+        ) {
+          return <ViewerAudio file={file} />
+        } else {
+          return (
+            <div className={cx('flex', 'flex-col', 'gap-1.5')}>
+              <span className={cx('text-[16px]')}>
+                Cannot preview this file.
+              </span>
+              <Button
+                leftIcon={<IconDownload />}
+                colorScheme="blue"
+                onClick={() => downloadFile(file)}
+              >
+                Download
+              </Button>
+            </div>
+          )
+        }
       }
-    } else if (
-      file.snapshot?.original &&
-      isVideo(file.snapshot?.original.extension)
-    ) {
-      return <ViewerVideo file={file} />
-    } else if (
-      file.snapshot?.original &&
-      isAudio(file.snapshot?.original.extension)
-    ) {
-      return <ViewerAudio file={file} />
-    } else {
-      return (
-        <div className={cx('flex', 'flex-col', 'gap-1.5')}>
-          <span className={cx('text-[16px]')}>Cannot preview this file.</span>
-          <Button
-            leftIcon={<IconDownload />}
-            colorScheme="blue"
-            onClick={() => downloadFile(file)}
-          >
-            Download
-          </Button>
-        </div>
-      )
-    }
-  }, [])
+    },
+    [isMosaic],
+  )
 
   return (
     <>

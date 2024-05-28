@@ -68,7 +68,7 @@ const SignUpPage = () => {
         <Helmet>
           <title>Sign Up to Voltaserve</title>
         </Helmet>
-        {isConfirmationVisible && (
+        {isConfirmationVisible ? (
           <div
             className={cx(
               'flex',
@@ -91,8 +91,8 @@ const SignUpPage = () => {
               </span>
             </div>
           </div>
-        )}
-        {!isConfirmationVisible && (
+        ) : null}
+        {!isConfirmationVisible ? (
           <div
             className={cx(
               'flex',
@@ -224,7 +224,7 @@ const SignUpPage = () => {
               </ChakraLink>
             </div>
           </div>
-        )}
+        ) : null}
       </>
     </LayoutFull>
   )

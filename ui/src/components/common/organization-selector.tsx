@@ -100,7 +100,7 @@ const OrganizationSelector = ({ onConfirm }: OrganizationSelectorProps) => {
                 query={query}
                 onChange={handleSearchInputChange}
               />
-              {!list && error && (
+              {!list && error ? (
                 <div
                   className={cx(
                     'flex',
@@ -111,7 +111,7 @@ const OrganizationSelector = ({ onConfirm }: OrganizationSelectorProps) => {
                 >
                   <span>Failed to load organizations.</span>
                 </div>
-              )}
+              ) : null}
               {!list && !error ? (
                 <div
                   className={cx(
@@ -124,7 +124,7 @@ const OrganizationSelector = ({ onConfirm }: OrganizationSelectorProps) => {
                   <Spinner />
                 </div>
               ) : null}
-              {list && list.data.length === 0 && (
+              {list && list.data.length === 0 ? (
                 <div
                   className={cx(
                     'flex',
@@ -144,7 +144,7 @@ const OrganizationSelector = ({ onConfirm }: OrganizationSelectorProps) => {
                     <span>There are no organizations.</span>
                   </div>
                 </div>
-              )}
+              ) : null}
               {list && list.data.length > 0 ? (
                 <div
                   className={cx(

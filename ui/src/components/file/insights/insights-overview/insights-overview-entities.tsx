@@ -15,13 +15,13 @@ const InsightsOverviewEntities = () => {
   )
   const [page, setPage] = useState(1)
   const [query, setQuery] = useState('')
-  const { data: file } = FileAPI.useGet(id, swrConfig())
+  const { data: metadata } = InsightsAPI.useGetMetadata(id, swrConfig())
   const {
     data: list,
     error,
     mutate,
   } = InsightsAPI.useListEntities(
-    file?.snapshot?.entities ? id : undefined,
+    metadata ? id : undefined,
     {
       query,
       page,
@@ -41,7 +41,7 @@ const InsightsOverviewEntities = () => {
     setQuery(value)
   }, [])
 
-  if (!id || !file?.snapshot?.entities) {
+  if (!list) {
     return null
   }
 

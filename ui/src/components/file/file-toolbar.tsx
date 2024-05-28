@@ -20,6 +20,7 @@ import cx from 'classnames'
 import FileAPI, { List, SortBy, SortOrder } from '@/client/api/file'
 import { ltEditorPermission, ltOwnerPermission } from '@/client/api/permission'
 import downloadFile from '@/helpers/download-file'
+import { isImage } from '@/helpers/file-extension'
 import mapFileList from '@/helpers/map-file-list'
 import {
   IconAdd,
@@ -43,6 +44,7 @@ import {
   IconClose,
   IconList,
   IconHistory,
+  IconModeHeat,
 } from '@/lib'
 import { uploadAdded, UploadDecorator } from '@/store/entities/uploads'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
@@ -63,6 +65,7 @@ import {
   sharingModalDidOpen,
 } from '@/store/ui/files'
 import { modalDidOpen as insightsModalDidOpen } from '@/store/ui/insights'
+import { modalDidOpen as mosaicModalDidOpen } from '@/store/ui/mosaic'
 import { listModalDidOpen } from '@/store/ui/snapshots'
 import { uploadsDrawerOpened } from '@/store/ui/uploads-drawer'
 import { FileViewType } from '@/types/file'
@@ -267,39 +270,39 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
         </ButtonGroup>
         {!isMenuOpen ? (
           <div className={stackClassName}>
-            {singleFile?.type === 'file' && (
+            {singleFile?.type === 'file' ? (
               <Button
                 leftIcon={<Orb width="20px" height="20px" />}
                 onClick={() => dispatch(insightsModalDidOpen())}
               >
                 Insights
               </Button>
-            )}
-            {selectionCount > 0 && hasOwnerPermission && (
+            ) : null}
+            {singleFile?.type === 'file' &&
+            isImage(singleFile.snapshot?.original.extension) ? (
+              <Button
+                leftIcon={<IconModeHeat />}
+                onClick={() => dispatch(mosaicModalDidOpen())}
+              >
+                Performance
+              </Button>
+            ) : null}
+            {selectionCount > 0 && hasOwnerPermission ? (
               <Button
                 leftIcon={<IconGroup />}
                 onClick={() => dispatch(sharingModalDidOpen())}
               >
                 Sharing
               </Button>
-            )}
-            {singleFile?.type === 'file' && hasEditorPermission && (
+            ) : null}
+            {singleFile?.type === 'file' && hasEditorPermission ? (
               <Button
                 leftIcon={<IconHistory />}
                 onClick={() => dispatch(listModalDidOpen())}
               >
                 Snapshots
               </Button>
-            )}
-            {selectionCount > 0 && hasOwnerPermission && (
-              <Button
-                leftIcon={<IconDelete />}
-                className={cx('text-red-500')}
-                onClick={() => dispatch(deleteModalDidOpen())}
-              >
-                Delete
-              </Button>
-            )}
+            ) : null}
             {selectionCount > 0 ? (
               <Menu>
                 <MenuButton

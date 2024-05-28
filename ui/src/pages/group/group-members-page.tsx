@@ -95,7 +95,7 @@ const GroupMembersPage = () => {
       <Helmet>
         <title>{group.name}</title>
       </Helmet>
-      {list.data.length > 0 && (
+      {list.data.length > 0 ? (
         <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
           <Table variant="simple">
             <Thead>
@@ -151,7 +151,7 @@ const GroupMembersPage = () => {
               ))}
             </Tbody>
           </Table>
-          {list && (
+          {list ? (
             <PagePagination
               style={{ alignSelf: 'end' }}
               totalElements={list.totalElements}
@@ -162,8 +162,8 @@ const GroupMembersPage = () => {
               setPage={setPage}
               setSize={setSize}
             />
-          )}
-          {userToRemove && (
+          ) : null}
+          {userToRemove ? (
             <GroupRemoveMember
               isOpen={isRemoveMemberModalOpen}
               user={userToRemove}
@@ -171,10 +171,10 @@ const GroupMembersPage = () => {
               onCompleted={() => mutate()}
               onClose={() => setIsRemoveMemberModalOpen(false)}
             />
-          )}
+          ) : null}
         </div>
-      )}
-      {list.data.length === 0 && (
+      ) : null}
+      {list.data.length === 0 ? (
         <>
           <Helmet>
             <title>{group.name}</title>
@@ -189,7 +189,7 @@ const GroupMembersPage = () => {
           >
             <div className={cx('flex', 'flex-col', 'gap-1.5', 'items-center')}>
               <span>This group has no members.</span>
-              {geEditorPermission(group.permission) && (
+              {geEditorPermission(group.permission) ? (
                 <Button
                   leftIcon={<IconPersonAdd />}
                   onClick={() => {
@@ -198,7 +198,7 @@ const GroupMembersPage = () => {
                 >
                   Add Members
                 </Button>
-              )}
+              ) : null}
             </div>
           </div>
           <GroupAddMember
@@ -207,7 +207,7 @@ const GroupMembersPage = () => {
             onClose={() => setIsAddMembersModalOpen(false)}
           />
         </>
-      )}
+      ) : null}
     </>
   )
 }

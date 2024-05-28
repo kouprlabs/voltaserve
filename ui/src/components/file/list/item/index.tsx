@@ -188,7 +188,7 @@ const ListItem = ({
         style={{ width }}
         title={file.name}
       >
-        {file.type === 'folder' && (
+        {file.type === 'folder' ? (
           <ChakraLink
             className={cx('text-center', 'no-underline', {
               'hover:no-underline': isSelectionMode,
@@ -200,7 +200,7 @@ const ListItem = ({
           >
             {file.name}
           </ChakraLink>
-        )}
+        ) : null}
         {file.type === 'file' &&
         ((file.snapshot?.preview && file.snapshot?.status === Status.Ready) ||
           file.snapshot?.mosaic) ? (

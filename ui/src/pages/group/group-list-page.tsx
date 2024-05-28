@@ -66,7 +66,7 @@ const GroupListPage = () => {
       </Helmet>
       <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
         <Heading className={cx('text-heading')}>Groups</Heading>
-        {error && (
+        {error ? (
           <div
             className={cx(
               'flex',
@@ -77,9 +77,9 @@ const GroupListPage = () => {
           >
             <span>Failed to load groups.</span>
           </div>
-        )}
+        ) : null}
         {!list && !error && <SectionSpinner />}
-        {list && list.data.length === 0 && (
+        {list && list.data.length === 0 ? (
           <div
             className={cx(
               'flex',
@@ -93,8 +93,8 @@ const GroupListPage = () => {
               <CreateGroupButton />
             </div>
           </div>
-        )}
-        {list && list.data.length > 0 && (
+        ) : null}
+        {list && list.data.length > 0 ? (
           <Table variant="simple">
             <Thead>
               <Tr>
@@ -147,8 +147,8 @@ const GroupListPage = () => {
               ))}
             </Tbody>
           </Table>
-        )}
-        {list && (
+        ) : null}
+        {list ? (
           <PagePagination
             style={{ alignSelf: 'end' }}
             totalElements={list.totalElements}
@@ -159,7 +159,7 @@ const GroupListPage = () => {
             setPage={setPage}
             setSize={setSize}
           />
-        )}
+        ) : null}
       </div>
     </>
   )

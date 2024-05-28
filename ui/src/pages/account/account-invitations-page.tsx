@@ -96,14 +96,14 @@ const AccountInvitationsPage = () => {
       <Helmet>
         <title>{user.fullName}</title>
       </Helmet>
-      {list.data.length === 0 && (
+      {list.data.length === 0 ? (
         <div
           className={cx('flex', 'items-center', 'justify-center', 'h-[300px]')}
         >
           <span>There are no invitations.</span>
         </div>
-      )}
-      {list.data.length > 0 && (
+      ) : null}
+      {list.data.length > 0 ? (
         <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
           <Table variant="simple">
             <Thead>
@@ -148,7 +148,7 @@ const AccountInvitationsPage = () => {
                 ))}
             </Tbody>
           </Table>
-          {list && (
+          {list ? (
             <PagePagination
               style={{ alignSelf: 'end' }}
               totalElements={list.totalElements}
@@ -159,9 +159,9 @@ const AccountInvitationsPage = () => {
               setPage={setPage}
               setSize={setSize}
             />
-          )}
+          ) : null}
         </div>
-      )}
+      ) : null}
     </>
   )
 }

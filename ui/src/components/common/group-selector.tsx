@@ -101,7 +101,7 @@ const GroupSelector = ({
                 query={query}
                 onChange={handleSearchInputChange}
               />
-              {!list && error && (
+              {!list && error ? (
                 <div
                   className={cx(
                     'flex',
@@ -112,7 +112,7 @@ const GroupSelector = ({
                 >
                   <span>Failed to load groups.</span>
                 </div>
-              )}
+              ) : null}
               {!list && !error ? (
                 <div
                   className={cx(
@@ -125,7 +125,7 @@ const GroupSelector = ({
                   <Spinner />
                 </div>
               ) : null}
-              {list && list.data.length === 0 && (
+              {list && list.data.length === 0 ? (
                 <div
                   className={cx(
                     'flex',
@@ -145,7 +145,7 @@ const GroupSelector = ({
                     <span>There are no groups.</span>
                   </div>
                 </div>
-              )}
+              ) : null}
               {list && list.data.length > 0 ? (
                 <div
                   className={cx(

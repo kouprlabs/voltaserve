@@ -1,18 +1,18 @@
 import { KeyedMutator } from 'swr'
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
-import { Metadata } from '@/client/api/insights'
+import { Metadata } from '@/client/api/mosaic'
 
-type InsightsState = {
+type MosaicState = {
   isModalOpen: boolean
   mutateMetadata?: KeyedMutator<Metadata>
 }
 
-const initialState: InsightsState = {
+const initialState: MosaicState = {
   isModalOpen: false,
 }
 
 const slice = createSlice({
-  name: 'insights',
+  name: 'mosaic',
   initialState,
   reducers: {
     modalDidOpen: (state) => {

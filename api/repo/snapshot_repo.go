@@ -486,7 +486,7 @@ func (repo *snapshotRepo) FindAllDangling() ([]model.Snapshot, error) {
 
 func (repo *snapshotRepo) FindAllPrevious(fileID string, version int64) ([]model.Snapshot, error) {
 	var entities []*snapshotEntity
-	db := repo.db.Raw("SELECT * FROM snapshot s LEFT JOIN snapshot_file sf ON s.id = sf.snapshot_id WHERE sf.file_id = ? AND s.version < ? ORDER BY s.version DESC LIMIT 1", fileID, version).Scan(&entities)
+	db := repo.db.Raw("SELECT * FROM snapshot s LEFT JOIN snapshot_file sf ON s.id = sf.snapshot_id WHERE sf.file_id = ? AND s.version < ? ORDER BY s.version DESC", fileID, version).Scan(&entities)
 	if db.Error != nil {
 		return nil, db.Error
 	}

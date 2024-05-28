@@ -70,7 +70,7 @@ const WorkspaceSettingsPage = () => {
         <div className={sectionClassName}>
           <span className={cx('font-bold')}>Storage</span>
           {storageUsageError && <span>Failed to load storage usage.</span>}
-          {storageUsage && !storageUsageError && (
+          {storageUsage && !storageUsageError ? (
             <>
               <span>
                 {prettyBytes(storageUsage.bytes)} of{' '}
@@ -78,13 +78,13 @@ const WorkspaceSettingsPage = () => {
               </span>
               <Progress value={storageUsage.percentage} hasStripe />
             </>
-          )}
-          {!storageUsage && !storageUsageError && (
+          ) : null}
+          {!storageUsage && !storageUsageError ? (
             <>
               <span>Calculating…</span>
               <Progress value={0} hasStripe />
             </>
-          )}
+          ) : null}
           <Divider />
           <div className={rowClassName}>
             <span>Storage capacity</span>
