@@ -171,7 +171,7 @@ services:
   mosaic:
     image: voltaserve/mosaic
     build:
-      context: ./language
+      context: ./mosaic
     ports:
       - ${VOLTASERVE_MOSAIC_PORT}:8085
     environment:
