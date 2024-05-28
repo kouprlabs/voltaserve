@@ -28,6 +28,7 @@ type SnapshotRepo interface {
 	FindAllForFile(fileID string) ([]model.Snapshot, error)
 	FindAllDangling() ([]model.Snapshot, error)
 	FindAllPrevious(fileID string, version int64) ([]model.Snapshot, error)
+	GetIDsForFile(fileID string) ([]string, error)
 	Insert(snapshot model.Snapshot) error
 	Save(snapshot model.Snapshot) error
 	Delete(id string) error
@@ -493,6 +494,24 @@ func (repo *snapshotRepo) FindAllPrevious(fileID string, version int64) ([]model
 	var res []model.Snapshot
 	for _, s := range entities {
 		res = append(res, s)
+	}
+	return res, nil
+}
+
+func (repo *snapshotRepo) GetIDsForFile(fileID string) ([]string, error) {
+	type Value struct {
+		Result string
+	}
+	var values []Value
+	db := repo.db.
+		Raw("SELECT id result FROM snapshot_file WHERE file_id = ? ORDER BY s.version", fileID).
+		Scan(&values)
+	if db.Error != nil {
+		return nil, db.Error
+	}
+	res := []string{}
+	for _, v := range values {
+		res = append(res, v.Result)
 	}
 	return res, nil
 }

@@ -33,6 +33,7 @@ type FileService struct {
 	workspaceGuard *guard.WorkspaceGuard
 	workspaceSvc   *WorkspaceService
 	snapshotRepo   repo.SnapshotRepo
+	snapshotCache  *cache.SnapshotCache
 	snapshotSvc    *SnapshotService
 	userRepo       repo.UserRepo
 	userMapper     *userMapper
@@ -58,6 +59,7 @@ func NewFileService() *FileService {
 		workspaceRepo:  repo.NewWorkspaceRepo(),
 		workspaceSvc:   NewWorkspaceService(),
 		snapshotRepo:   repo.NewSnapshotRepo(),
+		snapshotCache:  cache.NewSnapshotCache(),
 		snapshotSvc:    NewSnapshotService(),
 		userRepo:       repo.NewUserRepo(),
 		userMapper:     newUserMapper(),
@@ -211,7 +213,7 @@ func (svc *FileService) Store(id string, path string, userID string) (*File, err
 	if err = svc.snapshotRepo.Insert(snapshot); err != nil {
 		return nil, err
 	}
-	snapshot, err = svc.snapshotRepo.Find(snapshotID)
+	snapshot, err = svc.snapshotCache.Get(snapshotID)
 	if err != nil {
 		return nil, err
 	}
@@ -238,6 +240,9 @@ func (svc *FileService) Store(id string, path string, userID string) (*File, err
 		snapshot.SetStatus(model.SnapshotStatusNew)
 	}
 	if err := svc.snapshotRepo.Save(snapshot); err != nil {
+		return nil, err
+	}
+	if err := svc.snapshotCache.Set(snapshot); err != nil {
 		return nil, err
 	}
 	file.SetSnapshotID(&snapshotID)
@@ -276,7 +281,7 @@ func (svc *FileService) DownloadOriginalBuffer(id string, userID string) (*bytes
 	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
 		return nil, nil, nil, errorpkg.NewFileIsNotAFileError(file)
 	}
-	snapshot, err := svc.snapshotRepo.Find(*file.GetSnapshotID())
+	snapshot, err := svc.snapshotCache.Get(*file.GetSnapshotID())
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -305,7 +310,7 @@ func (svc *FileService) DownloadPreviewBuffer(id string, userID string) (*bytes.
 	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
 		return nil, nil, nil, errorpkg.NewFileIsNotAFileError(file)
 	}
-	snapshot, err := svc.snapshotRepo.Find(*file.GetSnapshotID())
+	snapshot, err := svc.snapshotCache.Get(*file.GetSnapshotID())
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -1609,6 +1614,7 @@ func (svc *FileService) getChildWithName(id string, name string) (model.File, er
 type FileMapper struct {
 	groupCache     *cache.GroupCache
 	snapshotMapper *SnapshotMapper
+	snapshotCache  *cache.SnapshotCache
 	snapshotRepo   repo.SnapshotRepo
 	config         config.Config
 }
@@ -1617,6 +1623,7 @@ func NewFileMapper() *FileMapper {
 	return &FileMapper{
 		groupCache:     cache.NewGroupCache(),
 		snapshotMapper: NewSnapshotMapper(),
+		snapshotCache:  cache.NewSnapshotCache(),
 		snapshotRepo:   repo.NewSnapshotRepo(),
 		config:         config.GetConfig(),
 	}
@@ -1633,7 +1640,7 @@ func (mp *FileMapper) mapOne(m model.File, userID string) (*File, error) {
 		UpdateTime:  m.GetUpdateTime(),
 	}
 	if m.GetSnapshotID() != nil {
-		snapshot, err := mp.snapshotRepo.Find(*m.GetSnapshotID())
+		snapshot, err := mp.snapshotCache.Get(*m.GetSnapshotID())
 		if err != nil {
 			return nil, err
 		}

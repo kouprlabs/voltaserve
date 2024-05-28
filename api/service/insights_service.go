@@ -21,6 +21,7 @@ import (
 
 type InsightsService struct {
 	languages      []*InsightsLanguage
+	snapshotCache  *cache.SnapshotCache
 	snapshotRepo   repo.SnapshotRepo
 	userRepo       repo.UserRepo
 	fileCache      *cache.FileCache
@@ -54,6 +55,7 @@ func NewInsightsService() *InsightsService {
 			{ID: "spa", ISO6393: "spa", Name: "Spanish"},
 			{ID: "swe", ISO6393: "swe", Name: "Swedish"},
 		},
+		snapshotCache:  cache.NewSnapshotCache(),
 		snapshotRepo:   repo.NewSnapshotRepo(),
 		userRepo:       repo.NewUserRepo(),
 		fileCache:      cache.NewFileCache(),
@@ -91,12 +93,15 @@ func (svc *InsightsService) Create(id string, opts InsightsCreateOptions, userID
 	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
 		return errorpkg.NewFileIsNotAFileError(file)
 	}
-	snapshot, err := svc.snapshotRepo.Find(*file.GetSnapshotID())
+	snapshot, err := svc.snapshotCache.Get(*file.GetSnapshotID())
 	if err != nil {
 		return err
 	}
 	snapshot.SetLanguage(opts.LanguageID)
 	if err := svc.snapshotRepo.Save(snapshot); err != nil {
+		return err
+	}
+	if err := svc.snapshotCache.Set(snapshot); err != nil {
 		return err
 	}
 	return svc.create(snapshot)
@@ -123,7 +128,7 @@ func (svc *InsightsService) Patch(id string, userID string) error {
 	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
 		return errorpkg.NewFileIsNotAFileError(file)
 	}
-	snapshot, err := svc.snapshotRepo.Find(*file.GetSnapshotID())
+	snapshot, err := svc.snapshotCache.Get(*file.GetSnapshotID())
 	if err != nil {
 		return err
 	}
@@ -136,6 +141,9 @@ func (svc *InsightsService) Patch(id string, userID string) error {
 	}
 	snapshot.SetLanguage(*previous.GetLanguage())
 	if err := svc.snapshotRepo.Save(snapshot); err != nil {
+		return err
+	}
+	if err := svc.snapshotCache.Set(snapshot); err != nil {
 		return err
 	}
 	return svc.create(snapshot)
@@ -220,6 +228,9 @@ func (svc *InsightsService) createText(snapshot model.Snapshot) error {
 		if err := svc.snapshotRepo.Save(snapshot); err != nil {
 			return err
 		}
+		if err := svc.snapshotCache.Set(snapshot); err != nil {
+			return err
+		}
 	} else if svc.fileIdent.IsPDF(original.Key) || svc.fileIdent.IsOffice(original.Key) || svc.fileIdent.IsPlainText(original.Key) {
 		pdfPath = path
 	} else {
@@ -243,6 +254,9 @@ func (svc *InsightsService) createText(snapshot model.Snapshot) error {
 	}
 	snapshot.SetText(&s3Object)
 	if err := svc.snapshotRepo.Save(snapshot); err != nil {
+		return err
+	}
+	if err := svc.snapshotCache.Set(snapshot); err != nil {
 		return err
 	}
 	return nil
@@ -289,6 +303,9 @@ func (svc *InsightsService) createEntities(snapshot model.Snapshot) error {
 	if err := svc.snapshotRepo.Save(snapshot); err != nil {
 		return err
 	}
+	if err := svc.snapshotCache.Set(snapshot); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -303,7 +320,7 @@ func (svc *InsightsService) Delete(id string, userID string) error {
 	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
 		return errorpkg.NewFileIsNotAFileError(file)
 	}
-	snapshot, err := svc.snapshotRepo.Find(*file.GetSnapshotID())
+	snapshot, err := svc.snapshotCache.Get(*file.GetSnapshotID())
 	if err != nil {
 		return err
 	}
@@ -333,6 +350,9 @@ func (svc *InsightsService) deleteText(snapshot model.Snapshot) error {
 	if err := svc.snapshotRepo.Save(snapshot); err != nil {
 		return err
 	}
+	if err := svc.snapshotCache.Set(snapshot); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -346,6 +366,9 @@ func (svc *InsightsService) deleteEntities(snapshot model.Snapshot) error {
 	}
 	snapshot.SetEntities(nil)
 	if err := svc.snapshotRepo.Save(snapshot); err != nil {
+		return err
+	}
+	if err := svc.snapshotCache.Set(snapshot); err != nil {
 		return err
 	}
 	return nil
@@ -378,7 +401,7 @@ func (svc *InsightsService) ListEntities(id string, opts InsightsListEntitiesOpt
 	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
 		return nil, errorpkg.NewFileIsNotAFileError(file)
 	}
-	snapshot, err := svc.snapshotRepo.Find(*file.GetSnapshotID())
+	snapshot, err := svc.snapshotCache.Get(*file.GetSnapshotID())
 	if err != nil {
 		return nil, err
 	}
@@ -477,7 +500,7 @@ func (svc *InsightsService) GetMetadata(id string, userID string) (*InsightsMeta
 	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
 		return nil, errorpkg.NewFileIsNotAFileError(file)
 	}
-	snapshot, err := svc.snapshotRepo.Find(*file.GetSnapshotID())
+	snapshot, err := svc.snapshotCache.Get(*file.GetSnapshotID())
 	if err != nil {
 		return nil, err
 	}
@@ -509,7 +532,7 @@ func (svc *InsightsService) DownloadTextBuffer(id string, userID string) (*bytes
 	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
 		return nil, nil, nil, errorpkg.NewFileIsNotAFileError(file)
 	}
-	snapshot, err := svc.snapshotRepo.Find(*file.GetSnapshotID())
+	snapshot, err := svc.snapshotCache.Get(*file.GetSnapshotID())
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -546,7 +569,7 @@ func (svc *InsightsService) DownloadOCRBuffer(id string, userID string) (*bytes.
 	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
 		return nil, nil, nil, errorpkg.NewFileIsNotAFileError(file)
 	}
-	snapshot, err := svc.snapshotRepo.Find(*file.GetSnapshotID())
+	snapshot, err := svc.snapshotCache.Get(*file.GetSnapshotID())
 	if err != nil {
 		return nil, nil, nil, err
 	}

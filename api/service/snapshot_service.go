@@ -15,26 +15,28 @@ import (
 )
 
 type SnapshotService struct {
-	snapshotRepo repo.SnapshotRepo
-	userRepo     repo.UserRepo
-	fileCache    *cache.FileCache
-	fileGuard    *guard.FileGuard
-	fileRepo     repo.FileRepo
-	fileSearch   *search.FileSearch
-	fileMapper   *FileMapper
-	config       config.Config
+	snapshotRepo  repo.SnapshotRepo
+	snapshotCache *cache.SnapshotCache
+	userRepo      repo.UserRepo
+	fileCache     *cache.FileCache
+	fileGuard     *guard.FileGuard
+	fileRepo      repo.FileRepo
+	fileSearch    *search.FileSearch
+	fileMapper    *FileMapper
+	config        config.Config
 }
 
 func NewSnapshotService() *SnapshotService {
 	return &SnapshotService{
-		fileCache:    cache.NewFileCache(),
-		fileGuard:    guard.NewFileGuard(),
-		fileSearch:   search.NewFileSearch(),
-		fileMapper:   NewFileMapper(),
-		snapshotRepo: repo.NewSnapshotRepo(),
-		userRepo:     repo.NewUserRepo(),
-		fileRepo:     repo.NewFileRepo(),
-		config:       config.GetConfig(),
+		fileCache:     cache.NewFileCache(),
+		fileGuard:     guard.NewFileGuard(),
+		fileSearch:    search.NewFileSearch(),
+		fileMapper:    NewFileMapper(),
+		snapshotRepo:  repo.NewSnapshotRepo(),
+		snapshotCache: cache.NewSnapshotCache(),
+		userRepo:      repo.NewUserRepo(),
+		fileRepo:      repo.NewFileRepo(),
+		config:        config.GetConfig(),
 	}
 }
 
@@ -93,15 +95,24 @@ func (svc *SnapshotService) List(fileID string, opts SnapshotListOptions, userID
 	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
 		return nil, errorpkg.NewFileIsNotAFileError(file)
 	}
-	snapshots, err := svc.snapshotRepo.FindAllForFile(fileID)
-	if err != nil {
-		return nil, err
-	}
 	if opts.SortBy == "" {
 		opts.SortBy = SortByDateCreated
 	}
 	if opts.SortOrder == "" {
 		opts.SortOrder = SortOrderAsc
+	}
+	ids, err := svc.snapshotRepo.GetIDsForFile(fileID)
+	if err != nil {
+		return nil, err
+	}
+	var snapshots []model.Snapshot
+	for _, id := range ids {
+		var s model.Snapshot
+		s, err := svc.snapshotCache.Get(id)
+		if err != nil {
+			return nil, err
+		}
+		snapshots = append(snapshots, s)
 	}
 	sorted := svc.doSorting(snapshots, opts.SortBy, opts.SortOrder)
 	paged, totalElements, totalPages := svc.doPagination(sorted, opts.Page, opts.Size)
@@ -182,7 +193,7 @@ func (svc *SnapshotService) Activate(id string, opts SnapshotActivateOptions, us
 	if err = svc.fileGuard.Authorize(userID, file, model.PermissionEditor); err != nil {
 		return nil, err
 	}
-	if _, err := svc.snapshotRepo.Find(id); err != nil {
+	if _, err := svc.snapshotCache.Get(id); err != nil {
 		return nil, err
 	}
 	file.SetSnapshotID(&id)
@@ -215,7 +226,7 @@ func (svc *SnapshotService) Detach(id string, opts SnapshotDetachOptions, userID
 	if err = svc.fileGuard.Authorize(userID, file, model.PermissionEditor); err != nil {
 		return err
 	}
-	if _, err := svc.snapshotRepo.Find(id); err != nil {
+	if _, err := svc.snapshotCache.Get(id); err != nil {
 		return err
 	}
 	if err := svc.snapshotRepo.Detach(id, file.GetID()); err != nil {
@@ -227,6 +238,9 @@ func (svc *SnapshotService) Detach(id string, opts SnapshotDetachOptions, userID
 	}
 	if associationCount == 0 {
 		if err := svc.snapshotRepo.Delete(id); err != nil {
+			return err
+		}
+		if err := svc.snapshotCache.Delete(id); err != nil {
 			return err
 		}
 	}
@@ -257,6 +271,13 @@ func (svc *SnapshotService) Patch(id string, opts SnapshotUpdateOptions, apiKey 
 		Text:      opts.Text,
 		Status:    opts.Status,
 	}); err != nil {
+		return err
+	}
+	snapshot, err := svc.snapshotRepo.Find(id)
+	if err != nil {
+		return err
+	}
+	if err := svc.snapshotCache.Set(snapshot); err != nil {
 		return err
 	}
 	return nil
