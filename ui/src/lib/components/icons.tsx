@@ -405,3 +405,23 @@ export const IconHistory = ({ className, filled, ...props }: IconBaseProps) => (
     history
   </span>
 )
+
+export const IconModeHeat = ({
+  className,
+  filled,
+  ...props
+}: IconBaseProps) => (
+  <span className={getClassName({ filled, className })} {...props}>
+    mode_heat
+  </span>
+)
+
+export const IconSecurity = ({
+  className,
+  filled,
+  ...props
+}: IconBaseProps) => (
+  <span className={getClassName({ filled, className })} {...props}>
+    security
+  </span>
+)

@@ -200,7 +200,7 @@ const TopBarSearch = () => {
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
         />
-        {query && (
+        {query ? (
           <InputRightElement>
             <IconButton
               icon={<IconClose />}
@@ -209,7 +209,7 @@ const TopBarSearch = () => {
               aria-label="Clear"
             />
           </InputRightElement>
-        )}
+        ) : null}
       </InputGroup>
       {text || (isFocused && text) ? (
         <Button onClick={() => handleSearch(text)} isDisabled={!text}>

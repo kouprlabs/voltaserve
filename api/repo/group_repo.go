@@ -169,50 +169,50 @@ func (repo *groupRepo) Find(id string) (model.Group, error) {
 }
 
 func (repo *groupRepo) GetIDsForFile(fileID string) ([]string, error) {
-	type Result struct {
+	type Value struct {
 		Result string
 	}
-	var results []Result
+	var values []Value
 	db := repo.db.
 		Raw(`SELECT DISTINCT g.id as result FROM "group" g INNER JOIN grouppermission p ON p.resource_id = ? WHERE p.group_id = g.id`, fileID).
-		Scan(&results)
+		Scan(&values)
 	if db.Error != nil {
 		return []string{}, db.Error
 	}
 	res := []string{}
-	for _, v := range results {
+	for _, v := range values {
 		res = append(res, v.Result)
 	}
 	return res, nil
 }
 
 func (repo *groupRepo) GetIDsForUser(userID string) ([]string, error) {
-	type Result struct {
+	type Value struct {
 		Result string
 	}
-	var results []Result
-	db := repo.db.Raw(`SELECT group_id from group_user WHERE user_id = ?`, userID).Scan(&results)
+	var values []Value
+	db := repo.db.Raw(`SELECT group_id from group_user WHERE user_id = ?`, userID).Scan(&values)
 	if db.Error != nil {
 		return []string{}, db.Error
 	}
 	res := []string{}
-	for _, v := range results {
+	for _, v := range values {
 		res = append(res, v.Result)
 	}
 	return res, nil
 }
 
 func (repo *groupRepo) GetIDsForOrganization(id string) ([]string, error) {
-	type Result struct {
+	type Value struct {
 		Result string
 	}
-	var results []Result
-	db := repo.db.Raw(`SELECT id as result from "group" WHERE organization_id = ?`, id).Scan(&results)
+	var values []Value
+	db := repo.db.Raw(`SELECT id as result from "group" WHERE organization_id = ?`, id).Scan(&values)
 	if db.Error != nil {
 		return []string{}, db.Error
 	}
 	res := []string{}
-	for _, v := range results {
+	for _, v := range values {
 		res = append(res, v.Result)
 	}
 	return res, nil
@@ -259,16 +259,16 @@ func (repo *groupRepo) RemoveMember(id string, userID string) error {
 }
 
 func (repo *groupRepo) GetIDs() ([]string, error) {
-	type Result struct {
+	type Value struct {
 		Result string
 	}
-	var results []Result
-	db := repo.db.Raw(`SELECT id result FROM "group" ORDER BY create_time DESC`).Scan(&results)
+	var values []Value
+	db := repo.db.Raw(`SELECT id result FROM "group" ORDER BY create_time DESC`).Scan(&values)
 	if db.Error != nil {
 		return []string{}, db.Error
 	}
 	res := []string{}
-	for _, v := range results {
+	for _, v := range values {
 		res = append(res, v.Result)
 	}
 	return res, nil

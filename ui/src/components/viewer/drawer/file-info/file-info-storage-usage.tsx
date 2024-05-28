@@ -16,20 +16,20 @@ const FileInfoStorageUsage = ({ file }: FileInfoStorageUsageProps) => {
       <StatNumber className={cx('text-base')}>
         <div className={cx('flex', 'flex-col', 'gap-0.5')}>
           {error && <span className={cx('text-red-500')}>Failed to load.</span>}
-          {data && !error && (
+          {data && !error ? (
             <>
               <span>
                 {prettyBytes(data.bytes)} of {prettyBytes(data.maxBytes)} used
               </span>
               <Progress size="sm" value={data.percentage} hasStripe />
             </>
-          )}
-          {!data && !error && (
+          ) : null}
+          {!data && !error ? (
             <>
               <span>Calculating…</span>
               <Progress size="sm" value={0} hasStripe />
             </>
-          )}
+          ) : null}
         </div>
       </StatNumber>
     </Stat>

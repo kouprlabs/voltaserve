@@ -11,6 +11,7 @@ export type FetcherOptions = {
   contentType?: string
   redirect?: boolean
   authenticate?: boolean
+  showError?: boolean
 }
 
 export function apiFetcher<T>(options: FetcherOptions) {
@@ -31,6 +32,7 @@ export async function fetcher<T>({
   contentType,
   redirect,
   authenticate = true,
+  showError = true,
 }: FetcherOptions): Promise<T | undefined> {
   const headers: HeadersInit = {}
   if (!contentType) {
@@ -50,6 +52,7 @@ export async function fetcher<T>({
       credentials: authenticate ? 'include' : undefined,
     },
     redirect,
+    showError,
   )
   try {
     if (response) {
@@ -62,33 +65,42 @@ export async function fetcher<T>({
 
 export async function baseFetcher(
   url: string,
-  init?: RequestInit,
+  init: RequestInit,
   redirect = true,
+  showError = true,
 ) {
   try {
     const response = await fetch(url, init)
-    return handleResponse(response, redirect)
+    return handleResponse(response, redirect, showError)
   } catch (error) {
-    const message = 'Unexpected error occurred.'
-    store.dispatch(errorOccurred(message))
-    throw new Error(message)
+    if (showError) {
+      const message = 'Unexpected error occurred.'
+      store.dispatch(errorOccurred(message))
+      throw new Error(message)
+    }
   }
 }
 
-async function handleResponse(response: Response, redirect = true) {
+async function handleResponse(
+  response: Response,
+  redirect = true,
+  showError = true,
+) {
   if (response.status <= 299) {
     return response
   } else {
     if (response.status === 401 && redirect) {
       window.location.href = '/sign-in'
     }
-    let message
-    try {
-      message = errorToString(await response.json())
-    } catch {
-      message = 'Oops! something went wrong.'
+    if (showError) {
+      let message
+      try {
+        message = errorToString(await response.json())
+      } catch {
+        message = 'Oops! something went wrong.'
+      }
+      store.dispatch(errorOccurred(message))
+      throw new Error(message)
     }
-    store.dispatch(errorOccurred(message))
-    throw new Error(message)
   }
 }

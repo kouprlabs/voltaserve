@@ -114,7 +114,7 @@ const UserSelector = ({
                 query={query}
                 onChange={handleSearchInputChange}
               />
-              {!list && error && (
+              {!list && error ? (
                 <div
                   className={cx(
                     'flex',
@@ -125,7 +125,7 @@ const UserSelector = ({
                 >
                   <span>Failed to load users.</span>
                 </div>
-              )}
+              ) : null}
               {!list && !error ? (
                 <div
                   className={cx(
@@ -138,7 +138,7 @@ const UserSelector = ({
                   <Spinner />
                 </div>
               ) : null}
-              {list && list.data.length === 0 && (
+              {list && list.data.length === 0 ? (
                 <div
                   className={cx(
                     'flex',
@@ -158,7 +158,7 @@ const UserSelector = ({
                     <span>There are no users.</span>
                   </div>
                 </div>
-              )}
+              ) : null}
               {list && list.data.length > 0 ? (
                 <div
                   className={cx(

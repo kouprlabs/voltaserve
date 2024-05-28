@@ -7,6 +7,7 @@ import groupMembers from './group-members'
 import groups from './groups'
 import incomingInvitations from './incoming-invitations'
 import insights from './insights'
+import mosaic from './mosaic'
 import nav from './nav'
 import notifications from './notifications'
 import organization from './organization'
@@ -19,6 +20,7 @@ import workspaces from './workspaces'
 
 export default combineReducers({
   insights,
+  mosaic,
   uploadsDrawer,
   files,
   snapshots,

@@ -47,7 +47,7 @@ func (r *UserRouter) List(c *fiber.Ctx) error {
 	if c.Query("page") == "" {
 		page = 1
 	} else {
-		page, err = strconv.ParseInt(c.Query("page"), 10, 32)
+		page, err = strconv.ParseInt(c.Query("page"), 10, 64)
 		if err != nil {
 			page = 1
 		}
@@ -56,7 +56,7 @@ func (r *UserRouter) List(c *fiber.Ctx) error {
 	if c.Query("size") == "" {
 		size = UserDefaultPageSize
 	} else {
-		size, err = strconv.ParseInt(c.Query("size"), 10, 32)
+		size, err = strconv.ParseInt(c.Query("size"), 10, 64)
 		if err != nil {
 			return err
 		}

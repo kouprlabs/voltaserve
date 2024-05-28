@@ -77,7 +77,7 @@ export const SearchInput = ({
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
         />
-        {draft && (
+        {draft ? (
           <InputRightElement>
             <IconButton
               icon={<IconClose />}
@@ -86,7 +86,7 @@ export const SearchInput = ({
               aria-label="Clear"
             />
           </InputRightElement>
-        )}
+        ) : null}
       </InputGroup>
       {draft || (isFocused && draft) ? (
         <Button onClick={() => handleSearch(draft)} isDisabled={!draft}>

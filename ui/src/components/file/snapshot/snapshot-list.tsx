@@ -97,7 +97,7 @@ const SnapshotList = () => {
         <ModalCloseButton />
         <ModalBody>
           <div className={cx('flex', 'flex-col', 'gap-1.5')}>
-            {!list && error && (
+            {!list && error ? (
               <div
                 className={cx(
                   'flex',
@@ -108,9 +108,9 @@ const SnapshotList = () => {
               >
                 <span>Failed to load snapshots.</span>
               </div>
-            )}
-            {!list && !error && <SectionSpinner />}
-            {list && list.data.length === 0 && (
+            ) : null}
+            {!list && !error ? <SectionSpinner /> : null}
+            {list && list.data.length === 0 ? (
               <div
                 className={cx(
                   'flex',
@@ -125,8 +125,8 @@ const SnapshotList = () => {
                   <span>There are no snapshots.</span>
                 </div>
               </div>
-            )}
-            {list && list.data.length > 0 && (
+            ) : null}
+            {list && list.data.length > 0 ? (
               <Table variant="simple" size="sm">
                 <colgroup>
                   <col className={cx('w-[40px]')} />
@@ -169,8 +169,8 @@ const SnapshotList = () => {
                   ))}
                 </Tbody>
               </Table>
-            )}
-            {list && (
+            ) : null}
+            {list ? (
               <div className={cx('self-end')}>
                 {list.totalPages > 1 ? (
                   <Pagination
@@ -182,7 +182,7 @@ const SnapshotList = () => {
                   />
                 ) : null}
               </div>
-            )}
+            ) : null}
           </div>
         </ModalBody>
         <ModalFooter>
@@ -202,7 +202,7 @@ const SnapshotList = () => {
               isDisabled={!selected || selected.isActive || isActivating}
               onClick={handleDetach}
             >
-              Detach
+              Detach Snapshot
             </Button>
             <Button
               variant="solid"
@@ -211,7 +211,7 @@ const SnapshotList = () => {
               isDisabled={!selected || selected.isActive || isActivating}
               onClick={handleActivate}
             >
-              Activate
+              Activate Snapshot
             </Button>
           </div>
         </ModalFooter>

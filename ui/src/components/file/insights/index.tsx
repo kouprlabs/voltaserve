@@ -9,7 +9,7 @@ import {
 import InsightsAPI from '@/client/api/insights'
 import { swrConfig } from '@/client/options'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
-import { modalDidClose, mutateSummaryUpdated } from '@/store/ui/insights'
+import { modalDidClose, mutateMetadataUpdated } from '@/store/ui/insights'
 import InsightsCreate from './insights-create'
 import InsightsOverview from './insights-overview'
 
@@ -21,16 +21,16 @@ const Insights = () => {
       : undefined,
   )
   const isModalOpen = useAppSelector((state) => state.ui.insights.isModalOpen)
-  const { data: summary, mutate: mutateSummary } = InsightsAPI.useGetSummary(
+  const { data: metadata, mutate: mutateMetadata } = InsightsAPI.useGetMetadata(
     id,
     swrConfig(),
   )
 
   useEffect(() => {
     if (id) {
-      dispatch(mutateSummaryUpdated(mutateSummary))
+      dispatch(mutateMetadataUpdated(mutateMetadata))
     }
-  }, [mutateSummary])
+  }, [mutateMetadata])
 
   return (
     <Modal
@@ -43,8 +43,8 @@ const Insights = () => {
       <ModalContent>
         <ModalHeader>Insights</ModalHeader>
         <ModalCloseButton />
-        {!summary?.hasEntities ? <InsightsCreate /> : null}
-        {summary?.hasEntities ? <InsightsOverview /> : null}
+        {!metadata ? <InsightsCreate /> : null}
+        {metadata ? <InsightsOverview /> : null}
       </ModalContent>
     </Modal>
   )

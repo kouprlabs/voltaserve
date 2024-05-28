@@ -15,12 +15,14 @@ type Snapshot interface {
 	GetText() *S3Object
 	GetOCR() *S3Object
 	GetEntities() *S3Object
+	GetMosaic() *S3Object
 	GetThumbnail() *Thumbnail
 	HasOriginal() bool
 	HasPreview() bool
 	HasText() bool
 	HasOCR() bool
 	HasEntities() bool
+	HasMosaic() bool
 	HasThumbnail() bool
 	GetStatus() string
 	GetLanguage() *string
@@ -33,6 +35,7 @@ type Snapshot interface {
 	SetText(*S3Object)
 	SetOCR(*S3Object)
 	SetEntities(*S3Object)
+	SetMosaic(*S3Object)
 	SetThumbnail(*Thumbnail)
 	SetStatus(string)
 	SetLanguage(string)

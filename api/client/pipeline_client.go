@@ -36,11 +36,14 @@ func (cl *PipelineClient) Run(opts *PipelineRunOptions) error {
 	}
 	req.Header.Set("Content-Type", "application/json; charset=UTF-8")
 	client := &http.Client{}
-	res, err := client.Do(req)
+	resp, err := client.Do(req)
 	if err != nil {
 		return err
 	}
-	if err := res.Body.Close(); err != nil {
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("request failed with status %d", resp.StatusCode)
+	}
+	if err := resp.Body.Close(); err != nil {
 		return err
 	}
 	return nil

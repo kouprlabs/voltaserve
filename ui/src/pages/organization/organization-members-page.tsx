@@ -93,7 +93,7 @@ const OrganizationMembersPage = () => {
       <Helmet>
         <title>{org.name}</title>
       </Helmet>
-      {list.data.length > 0 && (
+      {list.data.length > 0 ? (
         <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
           <Table variant="simple">
             <Thead>
@@ -149,7 +149,7 @@ const OrganizationMembersPage = () => {
               ))}
             </Tbody>
           </Table>
-          {list && (
+          {list ? (
             <PagePagination
               style={{ alignSelf: 'end' }}
               totalElements={list.totalElements}
@@ -160,8 +160,8 @@ const OrganizationMembersPage = () => {
               setPage={setPage}
               setSize={setSize}
             />
-          )}
-          {userToRemove && (
+          ) : null}
+          {userToRemove ? (
             <OrganizationRemoveMember
               isOpen={isRemoveMemberModalOpen}
               user={userToRemove}
@@ -169,10 +169,10 @@ const OrganizationMembersPage = () => {
               onCompleted={() => mutate()}
               onClose={() => setIsRemoveMemberModalOpen(false)}
             />
-          )}
+          ) : null}
         </div>
-      )}
-      {list.data.length === 0 && (
+      ) : null}
+      {list.data.length === 0 ? (
         <>
           <div
             className={cx(
@@ -184,14 +184,14 @@ const OrganizationMembersPage = () => {
           >
             <div className={cx('flex', 'flex-col', 'gap-1.5', 'items-center')}>
               <span>This organization has no members.</span>
-              {geEditorPermission(org.permission) && (
+              {geEditorPermission(org.permission) ? (
                 <Button
                   leftIcon={<IconPersonAdd />}
                   onClick={() => dispatch(inviteModalDidOpen())}
                 >
                   Invite Members
                 </Button>
-              )}
+              ) : null}
             </div>
           </div>
           <OrganizationInviteMembers
@@ -200,7 +200,7 @@ const OrganizationMembersPage = () => {
             onClose={() => dispatch(inviteModalDidClose())}
           />
         </>
-      )}
+      ) : null}
     </>
   )
 }

@@ -66,7 +66,7 @@ const WorkspaceListPage = () => {
       </Helmet>
       <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
         <Heading className={cx('text-heading')}>Workspaces</Heading>
-        {!list && error && (
+        {!list && error ? (
           <div
             className={cx(
               'flex',
@@ -77,7 +77,7 @@ const WorkspaceListPage = () => {
           >
             <span>Failed to load workspaces.</span>
           </div>
-        )}
+        ) : null}
         {!list && !error && <SectionSpinner />}
         {list && list.data.length === 0 && !error ? (
           <div
@@ -94,7 +94,7 @@ const WorkspaceListPage = () => {
             </div>
           </div>
         ) : null}
-        {list && list.data.length > 0 && (
+        {list && list.data.length > 0 ? (
           <Table variant="simple">
             <Thead>
               <Tr>
@@ -147,8 +147,8 @@ const WorkspaceListPage = () => {
               ))}
             </Tbody>
           </Table>
-        )}
-        {list && (
+        ) : null}
+        {list ? (
           <PagePagination
             style={{ alignSelf: 'end' }}
             totalElements={list.totalElements}
@@ -159,7 +159,7 @@ const WorkspaceListPage = () => {
             setPage={setPage}
             setSize={setSize}
           />
-        )}
+        ) : null}
       </div>
     </>
   )

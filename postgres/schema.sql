@@ -65,6 +65,7 @@ CREATE TABLE IF NOT EXISTS "snapshot"
   text        jsonb,
   ocr         jsonb,
   entities    jsonb,
+  mosaic      jsonb,
   thumbnail   jsonb,
   language    text,
   status      text,

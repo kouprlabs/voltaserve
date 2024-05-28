@@ -118,7 +118,7 @@ const OrganizationInvitationsPage = () => {
           >
             <div className={cx('flex', 'flex-col', 'gap-1.5', 'items-center')}>
               <span>This organization has no invitations.</span>
-              {geEditorPermission(org.permission) && (
+              {geEditorPermission(org.permission) ? (
                 <Button
                   leftIcon={<IconPersonAdd />}
                   onClick={() => {
@@ -127,7 +127,7 @@ const OrganizationInvitationsPage = () => {
                 >
                   Invite Members
                 </Button>
-              )}
+              ) : null}
             </div>
           </div>
           <OrganizationInviteMembers
@@ -166,14 +166,14 @@ const OrganizationInvitationsPage = () => {
                       />
                       <Portal>
                         <MenuList>
-                          {i.status === 'pending' && (
+                          {i.status === 'pending' ? (
                             <MenuItem
                               icon={<IconSend />}
                               onClick={() => handleResend(i.id)}
                             >
                               Resend
                             </MenuItem>
-                          )}
+                          ) : null}
                           <MenuItem
                             icon={<IconDelete />}
                             className={cx('text-red-500')}
@@ -189,7 +189,7 @@ const OrganizationInvitationsPage = () => {
               ))}
             </Tbody>
           </Table>
-          {list && (
+          {list ? (
             <PagePagination
               style={{ alignSelf: 'end' }}
               totalElements={list.totalElements}
@@ -200,7 +200,7 @@ const OrganizationInvitationsPage = () => {
               setPage={setPage}
               setSize={setSize}
             />
-          )}
+          ) : null}
         </div>
       ) : null}
     </>

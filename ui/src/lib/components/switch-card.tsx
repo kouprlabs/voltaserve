@@ -114,9 +114,9 @@ export const SwitchCard = ({
           <span className={cx('grow')}>{label}</span>
           <Switch isChecked={isActive} onChange={handleChange} />
         </div>
-        {isActive && (
+        {isActive ? (
           <div className={cx('pt-0', 'pr-1', 'pb-1', 'pl-1')}>{children}</div>
-        )}
+        ) : null}
       </div>
     )
   }

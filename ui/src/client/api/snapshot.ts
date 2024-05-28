@@ -7,7 +7,10 @@ export type Snapshot = {
   status: Status
   original: Download
   preview?: Download
+  ocr?: Download
   text?: Download
+  entities?: Download
+  mosaic?: Download
   thumbnail?: Thumbnail
   language?: string
   isActive: boolean
@@ -68,7 +71,7 @@ export type Thumbnail = {
   height: number
 }
 
-type ListQueryParams = {
+export type ListQueryParams = {
   file_id: string
   page?: string
   size?: string

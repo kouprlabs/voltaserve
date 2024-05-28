@@ -40,6 +40,49 @@ definitions:
       text:
         type: string
     type: object
+  model.MosaicMetadata:
+    properties:
+      extension:
+        type: string
+      height:
+        type: integer
+      isOutdated:
+        type: boolean
+      width:
+        type: integer
+      zoomLevels:
+        items:
+          $ref: '#/definitions/model.MosaicZoomLevel'
+        type: array
+    type: object
+  model.MosaicTile:
+    properties:
+      height:
+        type: integer
+      lastColWidth:
+        type: integer
+      lastRowHeight:
+        type: integer
+      width:
+        type: integer
+    type: object
+  model.MosaicZoomLevel:
+    properties:
+      cols:
+        type: integer
+      height:
+        type: integer
+      index:
+        type: integer
+      rows:
+        type: integer
+      scaleDownPercentage:
+        type: number
+      tile:
+        $ref: '#/definitions/model.MosaicTile'
+      width:
+        type: integer
+    type: object
   model.S3Object:
     properties:
       bucket:
@@ -209,8 +252,6 @@ definitions:
         type: string
       image:
         $ref: '#/definitions/service.ImageProps'
-      language:
-        type: string
       size:
         type: integer
     type: object
@@ -366,16 +407,8 @@ definitions:
       name:
         type: string
     type: object
-  service.InsightsSummary:
+  service.InsightsMetadata:
     properties:
-      hasEntities:
-        type: boolean
-      hasLanguage:
-        type: boolean
-      hasOcr:
-        type: boolean
-      hasText:
-        type: boolean
       isOutdated:
         type: boolean
     type: object
@@ -458,12 +491,16 @@ definitions:
     properties:
       createTime:
         type: string
+      entities:
+        $ref: '#/definitions/service.Download'
       id:
         type: string
       isActive:
         type: boolean
       language:
         type: string
+      mosaic:
+        $ref: '#/definitions/service.Download'
       ocr:
         $ref: '#/definitions/service.Download'
       original:
@@ -472,6 +509,8 @@ definitions:
         $ref: '#/definitions/service.Download'
       status:
         type: string
+      text:
+        $ref: '#/definitions/service.Download'
       thumbnail:
         $ref: '#/definitions/service.Thumbnail'
       updateTime:
@@ -1721,6 +1760,36 @@ paths:
       summary: List Entities
       tags:
       - Insights
+  /insights/{id}/metadata:
+    get:
+      consumes:
+      - application/json
+      description: Get Metadata
+      operationId: insights_get_metadata
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.InsightsMetadata'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Get Metadata
+      tags:
+      - Insights
   /insights/{id}/ocr{ext}:
     get:
       description: Download OCR
@@ -1753,40 +1822,6 @@ paths:
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
       summary: Download OCR
-      tags:
-      - Insights
-  /insights/{id}/summary:
-    get:
-      consumes:
-      - application/json
-      description: Get Summary
-      operationId: insights_get_summary
-      parameters:
-      - description: ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/service.InsightsSummary'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Get Summary
       tags:
       - Insights
   /insights/{id}/text{ext}:
@@ -2074,6 +2109,130 @@ paths:
       summary: Get Outgoing
       tags:
       - Invitations
+  /mosaics/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete
+      operationId: mosaic_delete
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Delete
+      tags:
+      - Mosaic
+    post:
+      consumes:
+      - application/json
+      description: Create
+      operationId: mosaic_create
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Create
+      tags:
+      - Mosaic
+  /mosaics/{id}/metadata:
+    get:
+      consumes:
+      - application/json
+      description: Get Metadata
+      operationId: mosaic_get_summary
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.MosaicMetadata'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Get Metadata
+      tags:
+      - Mosaic
+  /mosaics/{id}/zoom_level/{zoom_level}/row/{row}/col/{col}/ext/{ext}:
+    get:
+      description: Download Tile
+      operationId: mosaic_download_tile
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Zoom Level
+        in: path
+        name: zoom_level
+        required: true
+        type: string
+      - description: Row
+        in: path
+        name: row
+        required: true
+        type: string
+      - description: Col
+        in: path
+        name: col
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Download Tile
+      tags:
+      - Mosaic
   /notifications:
     get:
       description: List

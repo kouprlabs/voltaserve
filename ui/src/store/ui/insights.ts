@@ -1,10 +1,10 @@
 import { KeyedMutator } from 'swr'
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
-import { Summary } from '@/client/api/insights'
+import { Metadata } from '@/client/api/insights'
 
 type InsightsState = {
   isModalOpen: boolean
-  mutateSummary?: KeyedMutator<Summary>
+  mutateMetadata?: KeyedMutator<Metadata>
 }
 
 const initialState: InsightsState = {
@@ -12,7 +12,7 @@ const initialState: InsightsState = {
 }
 
 const slice = createSlice({
-  name: 'analysis',
+  name: 'insights',
   initialState,
   reducers: {
     modalDidOpen: (state) => {
@@ -21,16 +21,16 @@ const slice = createSlice({
     modalDidClose: (state) => {
       state.isModalOpen = false
     },
-    mutateSummaryUpdated: (
+    mutateMetadataUpdated: (
       state,
-      action: PayloadAction<KeyedMutator<Summary>>,
+      action: PayloadAction<KeyedMutator<Metadata>>,
     ) => {
-      state.mutateSummary = action.payload
+      state.mutateMetadata = action.payload
     },
   },
 })
 
-export const { modalDidOpen, modalDidClose, mutateSummaryUpdated } =
+export const { modalDidOpen, modalDidClose, mutateMetadataUpdated } =
   slice.actions
 
 export default slice.reducer

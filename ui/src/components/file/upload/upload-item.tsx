@@ -36,7 +36,7 @@ const UploadItem = ({ upload: uploadProp }: UploadItemProps) => {
           'h-2.5',
         )}
       >
-        {upload.isProgressing && (
+        {upload.isProgressing ? (
           <CircularProgress
             value={upload.progress}
             max={100}
@@ -44,21 +44,21 @@ const UploadItem = ({ upload: uploadProp }: UploadItemProps) => {
             className={cx('text-black')}
             size="20px"
           />
-        )}
-        {upload.isPending && (
+        ) : null}
+        {upload.isPending ? (
           <IconSchedule className={cx('shrink-0', 'text-gray-500')} />
-        )}
-        {upload.isSucceeded && (
+        ) : null}
+        {upload.isSucceeded ? (
           <IconCheckCircle
             className={cx('shrink-0', 'text-green-500')}
             filled={true}
           />
-        )}
-        {upload.isFailed && (
+        ) : null}
+        {upload.isFailed ? (
           <div className={cx('shrink-0', 'text-red-500')}>
             <IconError filled={true} />
           </div>
-        )}
+        ) : null}
         <span
           className={cx(
             'grow',
@@ -81,7 +81,7 @@ const UploadItem = ({ upload: uploadProp }: UploadItemProps) => {
           }}
         />
       </div>
-      {upload.isFailed && (
+      {upload.isFailed ? (
         <Accordion allowMultiple>
           <AccordionItem className={cx('border-none')}>
             <AccordionButton className={cx('p-0.5', 'hover:bg-red-50')}>
@@ -97,7 +97,7 @@ const UploadItem = ({ upload: uploadProp }: UploadItemProps) => {
             </AccordionPanel>
           </AccordionItem>
         </Accordion>
-      )}
+      ) : null}
     </div>
   )
 }

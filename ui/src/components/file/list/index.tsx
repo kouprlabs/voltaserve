@@ -27,6 +27,14 @@ import {
 } from '@/client/api/permission'
 import Orb from '@/components/common/orb'
 import downloadFile from '@/helpers/download-file'
+import {
+  isDocument,
+  isImage,
+  isMicrosoftOffice,
+  isOpenOffice,
+  isPDF,
+  isWord,
+} from '@/helpers/file-extension'
 import mapFileList from '@/helpers/map-file-list'
 import {
   IconFileCopy,
@@ -37,6 +45,8 @@ import {
   IconDelete,
   IconHistory,
   IconUpload,
+  IconModeHeat,
+  IconSecurity,
 } from '@/lib'
 import { UploadDecorator, uploadAdded } from '@/store/entities/uploads'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
@@ -53,7 +63,8 @@ import {
   selectionUpdated,
   sharingModalDidOpen,
 } from '@/store/ui/files'
-import { modalDidOpen as aiModalDidOpen } from '@/store/ui/insights'
+import { modalDidOpen as insightsModalDidOpen } from '@/store/ui/insights'
+import { modalDidOpen as mosaicModalDidOpen } from '@/store/ui/mosaic'
 import { listModalDidOpen } from '@/store/ui/snapshots'
 import { uploadsDrawerOpened } from '@/store/ui/uploads-drawer'
 import { FileViewType } from '@/types/file'
@@ -201,7 +212,7 @@ const FileList = ({ list, scale }: FileListProps) => {
           onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
         >
-          {list.totalElements === 0 && (
+          {list.totalElements === 0 ? (
             <div
               className={cx(
                 'flex',
@@ -213,7 +224,7 @@ const FileList = ({ list, scale }: FileListProps) => {
             >
               <span>There are no items.</span>
             </div>
-          )}
+          ) : null}
           {viewType === FileViewType.Grid && list.totalElements > 0 ? (
             <div
               className={cx(
@@ -311,6 +322,32 @@ const FileList = ({ list, scale }: FileListProps) => {
                 Snapshots
               </MenuItem>
             ) : null}
+            {singleFile &&
+            singleFile.type === 'file' &&
+            isImage(singleFile.snapshot?.original.extension) ? (
+              <MenuItem
+                icon={<IconModeHeat />}
+                isDisabled={ltEditorPermission(singleFile.permission)}
+                onClick={(event: MouseEvent) => {
+                  event.stopPropagation()
+                  dispatch(mosaicModalDidOpen())
+                }}
+              >
+                Performance
+              </MenuItem>
+            ) : null}
+            {singleFile &&
+            singleFile.type === 'file' &&
+            (isPDF(singleFile.snapshot?.original.extension) ||
+              isMicrosoftOffice(singleFile.snapshot?.original.extension) ||
+              isOpenOffice(singleFile.snapshot?.original.extension)) ? (
+              <MenuItem
+                icon={<IconSecurity />}
+                isDisabled={ltEditorPermission(singleFile.permission)}
+              >
+                Security
+              </MenuItem>
+            ) : null}
             <MenuItem
               icon={<IconUpload />}
               isDisabled={
@@ -353,7 +390,7 @@ const FileList = ({ list, scale }: FileListProps) => {
                   isDisabled={ltEditorPermission(singleFile.permission)}
                   onClick={(event: MouseEvent) => {
                     event.stopPropagation()
-                    dispatch(aiModalDidOpen())
+                    dispatch(insightsModalDidOpen())
                   }}
                 >
                   Insights

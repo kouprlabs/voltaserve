@@ -44,10 +44,10 @@ const IconThumbnail = ({ file, scale }: IconThumbnailProps) => {
         alt={file.name}
         onLoad={() => setIsLoading(false)}
       />
-      {isLoading && (
+      {isLoading ? (
         <Skeleton className={cx('rounded-md')} style={{ width, height }} />
-      )}
-      {fe.isVideo(original?.extension) && (
+      ) : null}
+      {fe.isVideo(original?.extension) ? (
         <div
           className={cx(
             'absolute',
@@ -65,7 +65,7 @@ const IconThumbnail = ({ file, scale }: IconThumbnailProps) => {
             filled={true}
           />
         </div>
-      )}
+      ) : null}
       <div
         className={cx(
           'absolute',

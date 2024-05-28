@@ -14,12 +14,12 @@ const InsightsOverviewSettings = () => {
       ? state.ui.files.selection[0]
       : undefined,
   )
-  const mutateSummary = useAppSelector(
-    (state) => state.ui.insights.mutateSummary,
+  const mutateMetadata = useAppSelector(
+    (state) => state.ui.insights.mutateMetadata,
   )
   const [isUpdating, setIsUpdating] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
-  const { data: summary } = InsightsAPI.useGetSummary(id, swrConfig())
+  const { data: metadata } = InsightsAPI.useGetMetadata(id, swrConfig())
 
   const handleUpdate = useCallback(async () => {
     if (!id) {
@@ -28,13 +28,13 @@ const InsightsOverviewSettings = () => {
     setIsUpdating(true)
     try {
       await InsightsAPI.patch(id)
-      mutateSummary?.()
+      mutateMetadata?.()
     } catch {
       setIsUpdating(false)
     } finally {
       setIsUpdating(false)
     }
-  }, [id, mutateSummary])
+  }, [id, mutateMetadata])
 
   const handleDelete = useCallback(async () => {
     if (!id) {
@@ -43,16 +43,16 @@ const InsightsOverviewSettings = () => {
     setIsDeleting(true)
     try {
       await InsightsAPI.delete(id)
-      mutateSummary?.()
+      mutateMetadata?.()
       dispatch(modalDidClose())
     } catch {
       setIsDeleting(false)
     } finally {
       setIsDeleting(false)
     }
-  }, [id, mutateSummary, dispatch])
+  }, [id, mutateMetadata, dispatch])
 
-  if (!id || !summary) {
+  if (!id || !metadata) {
     return null
   }
 
@@ -61,7 +61,7 @@ const InsightsOverviewSettings = () => {
       <Card size="md" variant="outline" className={cx('w-[50%]')}>
         <CardBody>
           <Text>
-            Creates new insights for the active snapshot, uses the previously
+            Updates the insights using the active snapshot, uses the previously
             set language.
           </Text>
         </CardBody>
@@ -69,7 +69,7 @@ const InsightsOverviewSettings = () => {
           <Button
             leftIcon={<IconSync />}
             isLoading={isUpdating}
-            isDisabled={!summary.isOutdated || isDeleting || isUpdating}
+            isDisabled={!metadata.isOutdated || isDeleting || isUpdating}
             onClick={handleUpdate}
           >
             Update

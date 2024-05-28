@@ -5,6 +5,7 @@ type Config struct {
 	PublicUIURL   string
 	ConversionURL string
 	LanguageURL   string
+	MosaicURL     string
 	DatabaseURL   string
 	Search        SearchConfig
 	Redis         RedisConfig

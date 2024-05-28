@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Badge, Table, Tbody, Td, Tooltip, Tr } from '@chakra-ui/react'
 import cx from 'classnames'
+import FileAPI from '@/client/api/file'
 import InsightsAPI, { SortBy, SortOrder } from '@/client/api/insights'
 import { swrConfig } from '@/client/options'
 import { Pagination, SearchInput, Spinner } from '@/lib'
@@ -14,13 +15,13 @@ const InsightsOverviewEntities = () => {
   )
   const [page, setPage] = useState(1)
   const [query, setQuery] = useState('')
-  const { data: summary } = InsightsAPI.useGetSummary(id, swrConfig())
+  const { data: metadata } = InsightsAPI.useGetMetadata(id, swrConfig())
   const {
     data: list,
     error,
     mutate,
   } = InsightsAPI.useListEntities(
-    summary?.hasEntities ? id : undefined,
+    metadata ? id : undefined,
     {
       query,
       page,
@@ -40,7 +41,7 @@ const InsightsOverviewEntities = () => {
     setQuery(value)
   }, [])
 
-  if (!id || !summary?.hasEntities) {
+  if (!list) {
     return null
   }
 
