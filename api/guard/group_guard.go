@@ -18,9 +18,9 @@ func NewGroupGuard() *GroupGuard {
 	}
 }
 
-func (g *GroupGuard) IsAuthorized(user model.User, group model.Group, permission string) bool {
+func (g *GroupGuard) IsAuthorized(userID string, group model.Group, permission string) bool {
 	for _, p := range group.GetUserPermissions() {
-		if p.GetUserID() == user.GetID() && model.IsEquivalentPermission(p.GetValue(), permission) {
+		if p.GetUserID() == userID && model.IsEquivalentPermission(p.GetValue(), permission) {
 			return true
 		}
 	}
@@ -31,7 +31,7 @@ func (g *GroupGuard) IsAuthorized(user model.User, group model.Group, permission
 			return false
 		}
 		for _, u := range g.GetUsers() {
-			if u == user.GetID() && model.IsEquivalentPermission(p.GetValue(), permission) {
+			if u == userID && model.IsEquivalentPermission(p.GetValue(), permission) {
 				return true
 			}
 		}
@@ -39,10 +39,10 @@ func (g *GroupGuard) IsAuthorized(user model.User, group model.Group, permission
 	return false
 }
 
-func (g *GroupGuard) Authorize(user model.User, group model.Group, permission string) error {
-	if !g.IsAuthorized(user, group, permission) {
-		err := errorpkg.NewGroupPermissionError(user, group, permission)
-		if g.IsAuthorized(user, group, model.PermissionViewer) {
+func (g *GroupGuard) Authorize(userID string, group model.Group, permission string) error {
+	if !g.IsAuthorized(userID, group, permission) {
+		err := errorpkg.NewGroupPermissionError(userID, group, permission)
+		if g.IsAuthorized(userID, group, model.PermissionViewer) {
 			return err
 		} else {
 			return errorpkg.NewGroupNotFoundError(err)

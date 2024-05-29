@@ -1,13 +1,23 @@
-FROM python:3.12-bookworm
+FROM python:3.12-slim-bookworm
 
 WORKDIR /app
 
 COPY . .
 
-RUN curl -sSL https://install.python-poetry.org | python3 -
-ENV PATH="/root/.local/bin:${PATH}"
+RUN apt-get update
 
-RUN poetry install
+RUN apt-get install -y curl build-essential
+
+RUN apt-get update && \
+  apt-get install -y curl && \
+  curl https://sh.rustup.rs -sSf | sh -s -- -y && \
+  /root/.cargo/bin/rustup default stable
+
+RUN curl -sSL https://install.python-poetry.org | python3 -
+
+ENV PATH="/root/.cargo/bin:/root/.local/bin:${PATH}"
+
+RUN poetry install --no-root
 
 RUN poetry run spacy download xx_ent_wiki_sm
 RUN poetry run spacy download zh_core_web_trf

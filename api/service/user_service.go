@@ -68,10 +68,6 @@ type UserList struct {
 }
 
 func (svc *UserService) List(opts UserListOptions, userID string) (*UserList, error) {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return nil, err
-	}
 	if opts.OrganizationID == "" && opts.GroupID == "" {
 		return &UserList{
 			Data:          []*User{},
@@ -81,23 +77,23 @@ func (svc *UserService) List(opts UserListOptions, userID string) (*UserList, er
 			Size:          0,
 		}, nil
 	}
-	var org model.Organization
 	if opts.OrganizationID != "" {
-		org, err = svc.orgCache.Get(opts.OrganizationID)
+		org, err := svc.orgCache.Get(opts.OrganizationID)
 		if err != nil {
 			return nil, err
 		}
-		if err := svc.orgGuard.Authorize(user, org, model.PermissionViewer); err != nil {
+		if err := svc.orgGuard.Authorize(userID, org, model.PermissionViewer); err != nil {
 			return nil, err
 		}
 	}
 	var group model.Group
+	var err error
 	if opts.GroupID != "" {
 		group, err = svc.groupCache.Get(opts.GroupID)
 		if err != nil {
 			return nil, err
 		}
-		if err := svc.groupGuard.Authorize(user, group, model.PermissionViewer); err != nil {
+		if err := svc.groupGuard.Authorize(userID, group, model.PermissionViewer); err != nil {
 			return nil, err
 		}
 	}
@@ -125,13 +121,11 @@ func (svc *UserService) List(opts UserListOptions, userID string) (*UserList, er
 				}
 			}
 		} else if opts.OrganizationID != "" {
-			res, err = svc.orgRepo.GetMembers(opts.OrganizationID)
-			if err != nil {
+			if _, err := svc.orgRepo.GetMembers(opts.OrganizationID); err != nil {
 				return nil, err
 			}
 		} else if opts.GroupID != "" {
-			res, err = svc.groupRepo.GetMembers(opts.GroupID)
-			if err != nil {
+			if _, err := svc.groupRepo.GetMembers(opts.GroupID); err != nil {
 				return nil, err
 			}
 		}

@@ -1,6 +1,14 @@
 from flask import Flask, request, jsonify
 import string
 import spacy
+import torch
+
+if torch.backends.mps.is_available():
+    mps_device = torch.device("mps")
+    x = torch.ones(1, device=mps_device)
+    print(f"🔥 MPS device is available: {x}")
+else:
+    print ("MPS device not found.")
 
 app = Flask(__name__)
 nlp = None
@@ -60,26 +68,28 @@ def ner_entities():
             for ent in sent.ents:
                 entities.append({"text": ent.text, "label": ent.label_})
 
-    grouped_entities = {}
-    for entity in entities:
-        entity["text"] = entity["text"].strip(
-            string.whitespace + "".join(chr(i) for i in range(32))
-        )
-        key = (entity["text"], entity["label"])
-        if key in grouped_entities:
-            grouped_entities[key] += 1
-        else:
-            grouped_entities[key] = 1
-
-    result = [
-        {"text": text, "label": label, "frequency": frequency}
-        for (text, label), frequency in grouped_entities.items()
-    ]
-
-    filtered_result = [
+    # Filter out entities with less than 3 characters and CARDINAL
+    entities = [
         entity
-        for entity in result
+        for entity in entities
         if len(entity["text"]) >= 3 and entity["label"] != "CARDINAL"
     ]
 
-    return jsonify(filtered_result)
+    # Group by text and count frequency
+    result = {}
+    whitespace_and_nonprintable = string.whitespace + "".join(chr(i) for i in range(32))
+    for entity in entities:
+        entity["text"] = entity["text"].strip(whitespace_and_nonprintable)
+        key = entity["text"].lower()
+        if key in result:
+            result[key]["frequency"] += 1
+        else:
+            result[key] = {"text": entity["text"], "frequency": 1}
+    
+    # Convert the dictionary back to a list of entities with the "frequency" field
+    result = [{"text": value["text"], "frequency": value["frequency"]} for value in result.values()]
+
+    # Sort by descending order of frequency
+    result.sort(key=lambda x: x["frequency"], reverse=True)
+
+    return jsonify(result)

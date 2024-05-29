@@ -33,8 +33,16 @@ poetry run spacy download es_core_news_lg
 poetry run spacy download sv_core_news_lg
 ```
 
+On Apple Silicon or Intel Macs with supported AMD GPUs, do the following to install a hardware accelerated version of PyTorch:
+
+https://developer.apple.com/metal/pytorch
+
+```shell
+pip3 install --pre torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/nightly/cpu
+```
+
 Run for development:
 
 ```shell
-flask run --host=0.0.0.0 --port=8084 --debug
+poetry run flask run --host=0.0.0.0 --port=8084 --debug
 ```

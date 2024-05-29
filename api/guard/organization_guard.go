@@ -18,9 +18,9 @@ func NewOrganizationGuard() *OrganizationGuard {
 	}
 }
 
-func (g *OrganizationGuard) IsAuthorized(user model.User, org model.Organization, permission string) bool {
+func (g *OrganizationGuard) IsAuthorized(userID string, org model.Organization, permission string) bool {
 	for _, p := range org.GetUserPermissions() {
-		if p.GetUserID() == user.GetID() && model.IsEquivalentPermission(p.GetValue(), permission) {
+		if p.GetUserID() == userID && model.IsEquivalentPermission(p.GetValue(), permission) {
 			return true
 		}
 	}
@@ -31,7 +31,7 @@ func (g *OrganizationGuard) IsAuthorized(user model.User, org model.Organization
 			return false
 		}
 		for _, u := range g.GetUsers() {
-			if u == user.GetID() && model.IsEquivalentPermission(p.GetValue(), permission) {
+			if u == userID && model.IsEquivalentPermission(p.GetValue(), permission) {
 				return true
 			}
 		}
@@ -39,10 +39,10 @@ func (g *OrganizationGuard) IsAuthorized(user model.User, org model.Organization
 	return false
 }
 
-func (g *OrganizationGuard) Authorize(user model.User, org model.Organization, permission string) error {
-	if !g.IsAuthorized(user, org, permission) {
-		err := errorpkg.NewOrganizationPermissionError(user, org, permission)
-		if g.IsAuthorized(user, org, model.PermissionViewer) {
+func (g *OrganizationGuard) Authorize(userID string, org model.Organization, permission string) error {
+	if !g.IsAuthorized(userID, org, permission) {
+		err := errorpkg.NewOrganizationPermissionError(userID, org, permission)
+		if g.IsAuthorized(userID, org, model.PermissionViewer) {
 			return err
 		} else {
 			return errorpkg.NewOrganizationNotFoundError(err)

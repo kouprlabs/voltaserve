@@ -18,9 +18,9 @@ func NewFileGuard() *FileGuard {
 	}
 }
 
-func (g *FileGuard) IsAuthorized(user model.User, file model.File, permission string) bool {
+func (g *FileGuard) IsAuthorized(userID string, file model.File, permission string) bool {
 	for _, p := range file.GetUserPermissions() {
-		if p.GetUserID() == user.GetID() && model.IsEquivalentPermission(p.GetValue(), permission) {
+		if p.GetUserID() == userID && model.IsEquivalentPermission(p.GetValue(), permission) {
 			return true
 		}
 	}
@@ -31,7 +31,7 @@ func (g *FileGuard) IsAuthorized(user model.User, file model.File, permission st
 			return false
 		}
 		for _, u := range g.GetUsers() {
-			if u == user.GetID() && model.IsEquivalentPermission(p.GetValue(), permission) {
+			if u == userID && model.IsEquivalentPermission(p.GetValue(), permission) {
 				return true
 			}
 		}
@@ -39,10 +39,10 @@ func (g *FileGuard) IsAuthorized(user model.User, file model.File, permission st
 	return false
 }
 
-func (g *FileGuard) Authorize(user model.User, file model.File, permission string) error {
-	if !g.IsAuthorized(user, file, permission) {
-		err := errorpkg.NewFilePermissionError(user, file, permission)
-		if g.IsAuthorized(user, file, model.PermissionViewer) {
+func (g *FileGuard) Authorize(userID string, file model.File, permission string) error {
+	if !g.IsAuthorized(userID, file, permission) {
+		err := errorpkg.NewFilePermissionError(userID, file, permission)
+		if g.IsAuthorized(userID, file, model.PermissionViewer) {
 			return err
 		} else {
 			return errorpkg.NewOrganizationNotFoundError(err)

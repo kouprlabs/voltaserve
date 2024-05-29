@@ -48,15 +48,11 @@ func (svc *InvitationService) Create(opts InvitationCreateOptions, userID string
 	for i := range opts.Emails {
 		opts.Emails[i] = strings.ToLower(opts.Emails[i])
 	}
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return err
-	}
 	org, err := svc.orgCache.Get(opts.OrganizationID)
 	if err != nil {
 		return err
 	}
-	if err := svc.orgGuard.Authorize(user, org, model.PermissionOwner); err != nil {
+	if err := svc.orgGuard.Authorize(userID, org, model.PermissionOwner); err != nil {
 		return err
 	}
 	orgMembers, err := svc.orgRepo.GetMembers(opts.OrganizationID)
@@ -101,6 +97,10 @@ func (svc *InvitationService) Create(opts InvitationCreateOptions, userID string
 	}
 
 	/* Send emails */
+	user, err := svc.userRepo.Find(userID)
+	if err != nil {
+		return err
+	}
 	for _, inv := range invitations {
 		variables := map[string]string{
 			"USER_FULL_NAME":    user.GetFullName(),
@@ -177,11 +177,7 @@ func (svc *InvitationService) GetIncoming(opts InvitationListOptions, userID str
 }
 
 func (svc *InvitationService) GetOutgoing(orgID string, opts InvitationListOptions, userID string) (*InvitationList, error) {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return nil, err
-	}
-	invitations, err := svc.invitationRepo.GetOutgoing(orgID, user.GetID())
+	invitations, err := svc.invitationRepo.GetOutgoing(orgID, userID)
 	if err != nil {
 		return nil, err
 	}

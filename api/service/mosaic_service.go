@@ -17,14 +17,15 @@ import (
 )
 
 type MosaicService struct {
-	snapshotRepo repo.SnapshotRepo
-	userRepo     repo.UserRepo
-	fileCache    *cache.FileCache
-	fileGuard    *guard.FileGuard
-	s3           *infra.S3Manager
-	mosaicClient *client.MosaicClient
-	fileIdent    *infra.FileIdentifier
-	logger       *zap.SugaredLogger
+	snapshotCache *cache.SnapshotCache
+	snapshotRepo  repo.SnapshotRepo
+	userRepo      repo.UserRepo
+	fileCache     *cache.FileCache
+	fileGuard     *guard.FileGuard
+	s3            *infra.S3Manager
+	mosaicClient  *client.MosaicClient
+	fileIdent     *infra.FileIdentifier
+	logger        *zap.SugaredLogger
 }
 
 func NewMosaicService() *MosaicService {
@@ -33,33 +34,30 @@ func NewMosaicService() *MosaicService {
 		panic(err)
 	}
 	return &MosaicService{
-		snapshotRepo: repo.NewSnapshotRepo(),
-		userRepo:     repo.NewUserRepo(),
-		fileCache:    cache.NewFileCache(),
-		fileGuard:    guard.NewFileGuard(),
-		s3:           infra.NewS3Manager(),
-		mosaicClient: client.NewMosaicClient(),
-		fileIdent:    infra.NewFileIdentifier(),
-		logger:       logger,
+		snapshotCache: cache.NewSnapshotCache(),
+		snapshotRepo:  repo.NewSnapshotRepo(),
+		userRepo:      repo.NewUserRepo(),
+		fileCache:     cache.NewFileCache(),
+		fileGuard:     guard.NewFileGuard(),
+		s3:            infra.NewS3Manager(),
+		mosaicClient:  client.NewMosaicClient(),
+		fileIdent:     infra.NewFileIdentifier(),
+		logger:        logger,
 	}
 }
 
 func (svc *MosaicService) Create(id string, userID string) error {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return err
-	}
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return err
 	}
-	if err = svc.fileGuard.Authorize(user, file, model.PermissionEditor); err != nil {
+	if err = svc.fileGuard.Authorize(userID, file, model.PermissionEditor); err != nil {
 		return err
 	}
 	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
 		return errorpkg.NewFileIsNotAFileError(file)
 	}
-	snapshot, err := svc.snapshotRepo.Find(*file.GetSnapshotID())
+	snapshot, err := svc.snapshotCache.Get(*file.GetSnapshotID())
 	if err != nil {
 		return err
 	}
@@ -99,27 +97,26 @@ func (svc *MosaicService) create(snapshot model.Snapshot) error {
 		if err := svc.snapshotRepo.Save(snapshot); err != nil {
 			return err
 		}
+		if err := svc.snapshotCache.Set(snapshot); err != nil {
+			return err
+		}
 		return nil
 	}
 	return errorpkg.NewUnsupportedFileTypeError(nil)
 }
 
 func (svc *MosaicService) Delete(id string, userID string) error {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return err
-	}
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return err
 	}
-	if err = svc.fileGuard.Authorize(user, file, model.PermissionEditor); err != nil {
+	if err = svc.fileGuard.Authorize(userID, file, model.PermissionEditor); err != nil {
 		return err
 	}
 	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
 		return errorpkg.NewFileIsNotAFileError(file)
 	}
-	snapshot, err := svc.snapshotRepo.Find(*file.GetSnapshotID())
+	snapshot, err := svc.snapshotCache.Get(*file.GetSnapshotID())
 	if err != nil {
 		return err
 	}
@@ -137,26 +134,25 @@ func (svc *MosaicService) Delete(id string, userID string) error {
 		if err := svc.snapshotRepo.Save(snapshot); err != nil {
 			return err
 		}
+		if err := svc.snapshotCache.Set(snapshot); err != nil {
+			return err
+		}
 	}
 	return nil
 }
 
 func (svc *MosaicService) GetMetadata(id string, userID string) (*model.MosaicMetadata, error) {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return nil, err
-	}
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return nil, err
 	}
-	if err = svc.fileGuard.Authorize(user, file, model.PermissionViewer); err != nil {
+	if err = svc.fileGuard.Authorize(userID, file, model.PermissionViewer); err != nil {
 		return nil, err
 	}
 	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
 		return nil, errorpkg.NewFileIsNotAFileError(file)
 	}
-	snapshot, err := svc.snapshotRepo.Find(*file.GetSnapshotID())
+	snapshot, err := svc.snapshotCache.Get(*file.GetSnapshotID())
 	if err != nil {
 		return nil, err
 	}
@@ -192,21 +188,17 @@ type MosaicDownloadTileOptions struct {
 }
 
 func (svc *MosaicService) DownloadTileBuffer(id string, opts MosaicDownloadTileOptions, userID string) (*bytes.Buffer, error) {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return nil, err
-	}
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return nil, err
 	}
-	if err = svc.fileGuard.Authorize(user, file, model.PermissionViewer); err != nil {
+	if err = svc.fileGuard.Authorize(userID, file, model.PermissionViewer); err != nil {
 		return nil, err
 	}
 	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
 		return nil, errorpkg.NewFileIsNotAFileError(file)
 	}
-	snapshot, err := svc.snapshotRepo.Find(*file.GetSnapshotID())
+	snapshot, err := svc.snapshotCache.Get(*file.GetSnapshotID())
 	if err != nil {
 		return nil, err
 	}

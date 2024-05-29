@@ -29,7 +29,7 @@ const InsightsOverviewEntities = () => {
       sortBy: SortBy.Frequency,
       sortOrder: SortOrder.Desc,
     },
-    swrConfig(),
+    query ? undefined : swrConfig(),
   )
 
   useEffect(() => {

@@ -169,13 +169,13 @@ func NewInternalServerError(err error) *ErrorResponse {
 	)
 }
 
-func NewOrganizationPermissionError(user model.User, org model.Organization, permission string) *ErrorResponse {
+func NewOrganizationPermissionError(userID string, org model.Organization, permission string) *ErrorResponse {
 	return NewErrorResponse(
 		"missing_organization_permission",
 		http.StatusForbidden,
 		fmt.Sprintf(
-			"User '%s' (%s) is missing the permission '%s' for organization '%s' (%s).",
-			user.GetUsername(), user.GetID(), permission, org.GetName(), org.GetID(),
+			"User '%s' is missing the permission '%s' for organization '%s' (%s).",
+			userID, permission, org.GetName(), org.GetID(),
 		),
 		fmt.Sprintf("Sorry, you don't have enough permissions for organization '%s'.", org.GetName()),
 		nil,
@@ -191,39 +191,39 @@ func NewCannotRemoveLastRemainingOwnerOfOrganizationError(id string) *ErrorRespo
 	)
 }
 
-func NewGroupPermissionError(user model.User, org model.Organization, permission string) *ErrorResponse {
+func NewGroupPermissionError(userID string, org model.Organization, permission string) *ErrorResponse {
 	return NewErrorResponse(
 		"missing_group_permission",
 		http.StatusForbidden,
 		fmt.Sprintf(
-			"User '%s' (%s) is missing the permission '%s' for the group '%s' (%s).",
-			user.GetUsername(), user.GetID(), permission, org.GetName(), org.GetID(),
+			"User '%s' is missing the permission '%s' for the group '%s' (%s).",
+			userID, permission, org.GetName(), org.GetID(),
 		),
 		fmt.Sprintf("Sorry, you don't have enough permissions for the group '%s'.", org.GetName()),
 		nil,
 	)
 }
 
-func NewWorkspacePermissionError(user model.User, workspace model.Workspace, permission string) *ErrorResponse {
+func NewWorkspacePermissionError(userID string, workspace model.Workspace, permission string) *ErrorResponse {
 	return NewErrorResponse(
 		"missing_workspace_permission",
 		http.StatusForbidden,
 		fmt.Sprintf(
-			"User '%s' (%s) is missing the permission '%s' for the workspace '%s' (%s).",
-			user.GetUsername(), user.GetID(), permission, workspace.GetName(), workspace.GetID(),
+			"User '%s' is missing the permission '%s' for the workspace '%s' (%s).",
+			userID, permission, workspace.GetName(), workspace.GetID(),
 		),
 		fmt.Sprintf("Sorry, you don't have enough permissions for the workspace '%s'.", workspace.GetName()),
 		nil,
 	)
 }
 
-func NewFilePermissionError(user model.User, file model.File, permission string) *ErrorResponse {
+func NewFilePermissionError(userID string, file model.File, permission string) *ErrorResponse {
 	return NewErrorResponse(
 		"missing_file_permission",
 		http.StatusForbidden,
 		fmt.Sprintf(
-			"User '%s' (%s) is missing the permission '%s' for the file '%s' (%s).",
-			user.GetUsername(), user.GetID(), permission, file.GetName(), file.GetID(),
+			"User '%s' is missing the permission '%s' for the file '%s' (%s).",
+			userID, permission, file.GetName(), file.GetID(),
 		),
 		fmt.Sprintf("Sorry, you don't have enough permissions for the item '%s'.", file.GetName()),
 		nil,

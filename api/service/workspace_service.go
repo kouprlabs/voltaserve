@@ -132,15 +132,11 @@ func (svc *WorkspaceService) Create(opts WorkspaceCreateOptions, userID string) 
 }
 
 func (svc *WorkspaceService) Find(id string, userID string) (*Workspace, error) {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return nil, err
-	}
 	workspace, err := svc.workspaceCache.Get(id)
 	if err != nil {
 		return nil, err
 	}
-	if err = svc.workspaceGuard.Authorize(user, workspace, model.PermissionViewer); err != nil {
+	if err = svc.workspaceGuard.Authorize(userID, workspace, model.PermissionViewer); err != nil {
 		return nil, err
 	}
 	res, err := svc.workspaceMapper.mapOne(workspace, userID)
@@ -167,17 +163,13 @@ type WorkspaceList struct {
 }
 
 func (svc *WorkspaceService) List(opts WorkspaceListOptions, userID string) (*WorkspaceList, error) {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return nil, err
-	}
 	var authorized []model.Workspace
 	if opts.Query == "" {
 		ids, err := svc.workspaceRepo.GetIDs()
 		if err != nil {
 			return nil, err
 		}
-		authorized, err = svc.doAuthorizationByIDs(ids, user)
+		authorized, err = svc.doAuthorizationByIDs(ids, userID)
 		if err != nil {
 			return nil, err
 		}
@@ -186,7 +178,7 @@ func (svc *WorkspaceService) List(opts WorkspaceListOptions, userID string) (*Wo
 		if err != nil {
 			return nil, err
 		}
-		authorized, err = svc.doAuthorization(workspaces, user)
+		authorized, err = svc.doAuthorization(workspaces, userID)
 		if err != nil {
 			return nil, err
 		}
@@ -213,15 +205,11 @@ func (svc *WorkspaceService) List(opts WorkspaceListOptions, userID string) (*Wo
 }
 
 func (svc *WorkspaceService) PatchName(id string, name string, userID string) (*Workspace, error) {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return nil, err
-	}
 	workspace, err := svc.workspaceCache.Get(id)
 	if err != nil {
 		return nil, err
 	}
-	if err = svc.workspaceGuard.Authorize(user, workspace, model.PermissionEditor); err != nil {
+	if err = svc.workspaceGuard.Authorize(userID, workspace, model.PermissionEditor); err != nil {
 		return nil, err
 	}
 	if workspace, err = svc.workspaceRepo.UpdateName(id, name); err != nil {
@@ -241,15 +229,11 @@ func (svc *WorkspaceService) PatchName(id string, name string, userID string) (*
 }
 
 func (svc *WorkspaceService) PatchStorageCapacity(id string, storageCapacity int64, userID string) (*Workspace, error) {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return nil, err
-	}
 	workspace, err := svc.workspaceCache.Get(id)
 	if err != nil {
 		return nil, err
 	}
-	if err = svc.workspaceGuard.Authorize(user, workspace, model.PermissionEditor); err != nil {
+	if err = svc.workspaceGuard.Authorize(userID, workspace, model.PermissionEditor); err != nil {
 		return nil, err
 	}
 	size, err := svc.fileRepo.GetSize(workspace.GetRootID())
@@ -276,15 +260,11 @@ func (svc *WorkspaceService) PatchStorageCapacity(id string, storageCapacity int
 }
 
 func (svc *WorkspaceService) Delete(id string, userID string) error {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return err
-	}
 	workspace, err := svc.workspaceCache.Get(id)
 	if err != nil {
 		return err
 	}
-	if err = svc.workspaceGuard.Authorize(user, workspace, model.PermissionOwner); err != nil {
+	if err = svc.workspaceGuard.Authorize(userID, workspace, model.PermissionOwner); err != nil {
 		return err
 	}
 	if workspace, err = svc.workspaceRepo.Find(id); err != nil {
@@ -326,15 +306,11 @@ func (svc *WorkspaceService) HasEnoughSpaceForByteSize(id string, byteSize int64
 }
 
 func (svc *WorkspaceService) findAll(userID string) ([]*Workspace, error) {
-	user, err := svc.userRepo.Find(userID)
-	if err != nil {
-		return nil, err
-	}
 	ids, err := svc.workspaceRepo.GetIDs()
 	if err != nil {
 		return nil, err
 	}
-	authorized, err := svc.doAuthorizationByIDs(ids, user)
+	authorized, err := svc.doAuthorizationByIDs(ids, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -345,17 +321,17 @@ func (svc *WorkspaceService) findAll(userID string) ([]*Workspace, error) {
 	return mapped, nil
 }
 
-func (svc *WorkspaceService) doAuthorization(data []model.Workspace, user model.User) ([]model.Workspace, error) {
+func (svc *WorkspaceService) doAuthorization(data []model.Workspace, userID string) ([]model.Workspace, error) {
 	var res []model.Workspace
 	for _, w := range data {
-		if svc.workspaceGuard.IsAuthorized(user, w, model.PermissionViewer) {
+		if svc.workspaceGuard.IsAuthorized(userID, w, model.PermissionViewer) {
 			res = append(res, w)
 		}
 	}
 	return res, nil
 }
 
-func (svc *WorkspaceService) doAuthorizationByIDs(ids []string, user model.User) ([]model.Workspace, error) {
+func (svc *WorkspaceService) doAuthorizationByIDs(ids []string, userID string) ([]model.Workspace, error) {
 	var res []model.Workspace
 	for _, id := range ids {
 		var w model.Workspace
@@ -363,7 +339,7 @@ func (svc *WorkspaceService) doAuthorizationByIDs(ids []string, user model.User)
 		if err != nil {
 			return nil, err
 		}
-		if svc.workspaceGuard.IsAuthorized(user, w, model.PermissionViewer) {
+		if svc.workspaceGuard.IsAuthorized(userID, w, model.PermissionViewer) {
 			res = append(res, w)
 		}
 	}
