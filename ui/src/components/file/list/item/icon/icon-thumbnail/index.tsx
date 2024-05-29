@@ -5,10 +5,10 @@ import { File } from '@/client/api/file'
 import { Status } from '@/client/api/snapshot'
 import * as fe from '@/helpers/file-extension'
 import { IconPlayArrow } from '@/lib'
-import IconErrorBadge from '../icon-error-badge'
-import IconNewBadge from '../icon-new-badge'
-import IconProcessingBadge from '../icon-processing-badge'
-import IconSharedBadge from '../icon-shared-badge'
+import IconBadgeError from '../icon-badge/icon-badge-error'
+import IconBadgeNew from '../icon-badge/icon-badge-new'
+import IconBadgeProcessing from '../icon-badge/icon-badge-processing'
+import IconBadgeShared from '../icon-badge/icon-badge-shared'
 import { getThumbnailHeight, getThumbnailWidth } from './size'
 
 export type IconThumbnailProps = {
@@ -77,10 +77,10 @@ const IconThumbnail = ({ file, scale }: IconThumbnailProps) => {
           'right-[-5px]',
         )}
       >
-        {isShared ? <IconSharedBadge /> : null}
-        {status === Status.New ? <IconNewBadge /> : null}
-        {status === Status.Processing ? <IconProcessingBadge /> : null}
-        {status === Status.Error ? <IconErrorBadge /> : null}
+        {isShared ? <IconBadgeShared /> : null}
+        {status === Status.New ? <IconBadgeNew /> : null}
+        {status === Status.Processing ? <IconBadgeProcessing /> : null}
+        {status === Status.Error ? <IconBadgeError /> : null}
       </div>
     </>
   )

@@ -1,12 +1,12 @@
 import { Circle, Tooltip } from '@chakra-ui/react'
 import cx from 'classnames'
-import { IconGroup } from '@/lib'
+import { IconHourglass } from '@/lib'
 
-const IconSharedBadge = () => (
-  <Tooltip label="This item is shared">
+const IconBadgeNew = () => (
+  <Tooltip label="Waiting for processing">
     <Circle
       className={cx(
-        'text-orange-600',
+        'text-purple-600',
         'bg-white',
         'w-[23px]',
         'h-[23px]',
@@ -14,9 +14,9 @@ const IconSharedBadge = () => (
         'border-gray-200',
       )}
     >
-      <IconGroup className={cx('text-[12px]')} />
+      <IconHourglass />
     </Circle>
   </Tooltip>
 )
 
-export default IconSharedBadge
+export default IconBadgeNew

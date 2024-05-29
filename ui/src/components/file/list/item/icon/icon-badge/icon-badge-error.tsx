@@ -1,12 +1,12 @@
 import { Circle, Tooltip } from '@chakra-ui/react'
 import cx from 'classnames'
-import { IconHourglass } from '@/lib'
+import { IconClose } from '@/lib'
 
-const IconNewBadge = () => (
-  <Tooltip label="Waiting for processing">
+const IconBadgeError = () => (
+  <Tooltip label="An error occured while processing this item">
     <Circle
       className={cx(
-        'text-purple-600',
+        'text-orange-600',
         'bg-white',
         'w-[23px]',
         'h-[23px]',
@@ -14,9 +14,9 @@ const IconNewBadge = () => (
         'border-gray-200',
       )}
     >
-      <IconHourglass />
+      <IconClose className={cx('text-red-600')} />
     </Circle>
   </Tooltip>
 )
 
-export default IconNewBadge
+export default IconBadgeError
