@@ -1,6 +1,14 @@
 from flask import Flask, request, jsonify
 import string
 import spacy
+import torch
+
+if torch.backends.mps.is_available():
+    mps_device = torch.device("mps")
+    x = torch.ones(1, device=mps_device)
+    print(f"🔥 MPS device is available: {x}")
+else:
+    print ("MPS device not found.")
 
 app = Flask(__name__)
 nlp = None
