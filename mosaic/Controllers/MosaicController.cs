@@ -8,9 +8,11 @@ namespace Voltaserve.Mosaic.Controllers
     using Voltaserve.Mosaic.Services;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Mvc;
+    using Microsoft.Extensions.Logging;
+    using System;
 
     [Route("v2/mosaics")]
-    public class MosaicController(MosaicService _mosaicService) : Controller
+    public class MosaicController(MosaicService _mosaicService, ILogger<MosaicController> _logger) : Controller
     {
         [HttpPost()]
         public async Task<IActionResult> CreateAsync([FromForm] IFormCollection form)
@@ -31,8 +33,9 @@ namespace Voltaserve.Mosaic.Controllers
                 var metadata = await _mosaicService.CreateAsync(path, form["s3_key"], form["s3_bucket"]);
                 return Ok(metadata);
             }
-            catch
+            catch (Exception e)
             {
+                _logger.LogError(e, "Failed to create mosaic.");
                 return StatusCode(500);
             }
             finally
@@ -56,8 +59,9 @@ namespace Voltaserve.Mosaic.Controllers
             {
                 return NotFound();
             }
-            catch
+            catch (Exception e)
             {
+                _logger.LogError(e, "Failed to delete mosaic.");
                 return StatusCode(500);
             }
         }
@@ -75,8 +79,9 @@ namespace Voltaserve.Mosaic.Controllers
             {
                 return NotFound();
             }
-            catch
+            catch (Exception e)
             {
+                _logger.LogError(e, "Failed to get mosaic metadata.");
                 return StatusCode(500);
             }
         }
@@ -94,8 +99,9 @@ namespace Voltaserve.Mosaic.Controllers
             {
                 return NotFound();
             }
-            catch
+            catch (Exception e)
             {
+                _logger.LogError(e, "Failed to get mosaic.");
                 return StatusCode(500);
             }
         }

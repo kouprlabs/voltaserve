@@ -504,7 +504,7 @@ func (repo *snapshotRepo) GetIDsForFile(fileID string) ([]string, error) {
 	}
 	var values []Value
 	db := repo.db.
-		Raw("SELECT id result FROM snapshot_file WHERE file_id = ? ORDER BY s.version", fileID).
+		Raw("SELECT snapshot_id result FROM snapshot_file WHERE file_id = ?", fileID).
 		Scan(&values)
 	if db.Error != nil {
 		return nil, db.Error

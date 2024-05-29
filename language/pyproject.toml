@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "language"
-version = "1.0.0"
-description = ""
+version = "2.0.0"
+description = "Voltaserve Language"
 authors = ["Elias Bouassaba <ebouassaba@gmail.com>"]
 readme = "README.md"
 
@@ -9,8 +9,7 @@ readme = "README.md"
 python = "^3.12"
 flask = "3.0.3"
 spacy = "3.7.4"
-requests = "2.32.0"
-
+requests = "2.32.2"
 
 [tool.poetry.group.dev.dependencies]
 black = "24.4.2"
