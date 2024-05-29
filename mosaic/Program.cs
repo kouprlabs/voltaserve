@@ -10,7 +10,7 @@
     {
         public static void Main(string[] args)
         {
-            DotEnv.Load();
+            DotEnv.Load(new(overwriteExistingVars: false));
             BuildWebHost(args).Run();
         }
 
