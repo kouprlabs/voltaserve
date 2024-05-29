@@ -9,7 +9,7 @@ type GetClassNameOptions = {
   className?: string
 }
 
-function getClassName({ filled, className }: GetClassNameOptions) {
+export function getClassName({ filled, className }: GetClassNameOptions) {
   return cx(
     'material-symbols-rounded',
     { 'material-symbols-rounded__filled': filled },

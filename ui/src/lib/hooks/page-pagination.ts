@@ -23,7 +23,7 @@ export type UsePagePaginationOptions = {
   steps?: number[]
 }
 
-export const usePagePagination = ({
+const usePagePagination = ({
   navigate,
   location,
   storage = {
@@ -75,3 +75,5 @@ export const usePagePagination = ({
 
   return { page, size, steps, setPage, setSize: _setSize }
 }
+
+export default usePagePagination

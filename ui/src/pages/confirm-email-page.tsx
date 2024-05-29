@@ -6,7 +6,7 @@ import { Helmet } from 'react-helmet-async'
 import AccountAPI from '@/client/idp/account'
 import Logo from '@/components/common/logo'
 import LayoutFull from '@/components/layout/layout-full'
-import { Spinner } from '@/lib'
+import Spinner from '@/lib/components/spinner'
 
 const ConfirmEmailPage = () => {
   const params = useParams()

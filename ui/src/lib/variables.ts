@@ -1,4 +1,4 @@
-export const variables = {
+const variables = {
   headingFontFamily:
     "'Unbounded', Almarai, 'Noto Sans JP', 'Noto Sans TC', 'Noto Sans SC', 'Noto Sans KR', Poppins, 'Noto Sans Bengali'",
   headingFontSize: '24px',
@@ -19,3 +19,5 @@ export const variables = {
   borderRadiusXs: '5px',
   gradiant: 'linear-gradient(90deg, #00c9ff 0%, #92fe9d 100%)',
 }
+
+export default variables

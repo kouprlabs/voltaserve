@@ -14,7 +14,7 @@ import {
 } from '@chakra-ui/react'
 import cx from 'classnames'
 import UploadList from '@/components/file/upload/upload-list'
-import { IconClearAll, IconUpload } from '@/lib'
+import { IconClearAll, IconUpload } from '@/lib/components/icons'
 import { completedUploadsCleared } from '@/store/entities/uploads'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { uploadsDrawerClosed } from '@/store/ui/uploads-drawer'

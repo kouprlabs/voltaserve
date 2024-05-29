@@ -1,7 +1,7 @@
 import { MouseEvent, ReactElement } from 'react'
 import cx from 'classnames'
 import { StorageOptions } from '../types'
-import { Drawer, DrawerItem } from './drawer'
+import Drawer, { DrawerItem } from './drawer'
 
 type ShellItem = {
   href: string
@@ -19,7 +19,7 @@ type ShellProps = {
   onContentClick?: (event: MouseEvent) => void
 }
 
-export const Shell = ({
+const Shell = ({
   logo,
   topBar,
   items,
@@ -62,3 +62,5 @@ export const Shell = ({
     </div>
   </div>
 )
+
+export default Shell

@@ -11,7 +11,7 @@ type DrawerProps = {
   storage?: StorageOptions
 }
 
-export const Drawer = ({ children, storage, logo }: DrawerProps) => {
+const Drawer = ({ children, storage, logo }: DrawerProps) => {
   const [isCollapsed, setIsCollapsed] = useState<boolean | undefined>(undefined)
   const [isTouched, setIsTouched] = useState(false)
   const localStorageCollapsedKey = useMemo(
@@ -127,3 +127,7 @@ export const Drawer = ({ children, storage, logo }: DrawerProps) => {
     </DrawerContext.Provider>
   )
 }
+
+export default Drawer
+export { DrawerContext } from './drawer-context'
+export { DrawerItem } from './drawer-item'

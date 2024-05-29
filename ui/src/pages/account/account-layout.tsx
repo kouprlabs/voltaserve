@@ -15,7 +15,7 @@ import NotificationAPI from '@/client/api/notification'
 import UserAPI from '@/client/idp/user'
 import { swrConfig } from '@/client/options'
 import AccountEditPicture from '@/components/account/edit-picture'
-import { IconEdit } from '@/lib'
+import { IconEdit } from '@/lib/components/icons'
 import { useAppDispatch } from '@/store/hook'
 import { mutateUpdated } from '@/store/ui/account'
 

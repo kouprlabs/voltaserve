@@ -16,7 +16,8 @@ import WorkspaceDelete from '@/components/workspace/workspace-delete'
 import WorkspaceEditName from '@/components/workspace/workspace-edit-name'
 import WorkspaceEditStorageCapacity from '@/components/workspace/workspace-edit-storage-capacity'
 import prettyBytes from '@/helpers/pretty-bytes'
-import { IconEdit, IconDelete, SectionSpinner } from '@/lib'
+import { IconDelete, IconEdit } from '@/lib/components/icons'
+import SectionSpinner from '@/lib/components/section-spinner'
 
 const EditButton = (props: IconButtonProps) => (
   <IconButton icon={<IconEdit />} {...props} />

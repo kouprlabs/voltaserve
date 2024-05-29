@@ -8,7 +8,12 @@ import {
   IconButton,
 } from '@chakra-ui/react'
 import cx from 'classnames'
-import { IconClose, IconSchedule, IconCheckCircle, IconError } from '@/lib'
+import {
+  IconClose,
+  IconSchedule,
+  IconCheckCircle,
+  IconError,
+} from '@/lib/components/icons'
 import {
   Upload,
   UploadDecorator,

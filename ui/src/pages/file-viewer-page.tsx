@@ -12,7 +12,9 @@ import ViewerPDF from '@/components/viewer/viewer-pdf'
 import ViewerVideo from '@/components/viewer/viewer-video'
 import downloadFile from '@/helpers/download-file'
 import { isAudio, isImage, isPDF, isVideo } from '@/helpers/file-extension'
-import { IconDownload, Drawer, Spinner } from '@/lib'
+import Drawer from '@/lib/components/drawer'
+import { IconDownload } from '@/lib/components/icons'
+import Spinner from '@/lib/components/spinner'
 
 const FileViewerPage = () => {
   const { id } = useParams()

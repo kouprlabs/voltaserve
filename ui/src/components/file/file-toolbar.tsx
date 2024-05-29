@@ -45,7 +45,7 @@ import {
   IconList,
   IconHistory,
   IconModeHeat,
-} from '@/lib'
+} from '@/lib/components/icons'
 import { uploadAdded, UploadDecorator } from '@/store/entities/uploads'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import {

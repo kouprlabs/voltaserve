@@ -1,5 +1,4 @@
-import { size } from 'polished'
-import { variables } from '../../variables'
+import variables from '../../variables'
 
 const card = {
   baseStyle: {

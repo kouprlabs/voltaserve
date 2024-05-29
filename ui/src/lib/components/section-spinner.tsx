@@ -1,5 +1,5 @@
 import cx from 'classnames'
-import { Spinner } from './spinner'
+import Spinner from './spinner'
 
 type SectionSpinnerProps = {
   width?: string
@@ -9,7 +9,7 @@ type SectionSpinnerProps = {
 const DEFAULT_WIDTH = '100%'
 const DEFAULT_HEIGHT = '300px'
 
-export const SectionSpinner = ({ width, height }: SectionSpinnerProps) => (
+const SectionSpinner = ({ width, height }: SectionSpinnerProps) => (
   <div
     className={cx('flex', 'items-center', 'justify-center')}
     style={{ width: width || DEFAULT_WIDTH, height: height || DEFAULT_HEIGHT }}
@@ -17,3 +17,5 @@ export const SectionSpinner = ({ width, height }: SectionSpinnerProps) => (
     <Spinner />
   </div>
 )
+
+export default SectionSpinner

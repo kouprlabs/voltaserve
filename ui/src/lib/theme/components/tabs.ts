@@ -1,5 +1,5 @@
 import { mode, StyleFunctionProps } from '@chakra-ui/theme-tools'
-import { variables } from '../../variables'
+import variables from '../../variables'
 
 const tab = {
   variants: {

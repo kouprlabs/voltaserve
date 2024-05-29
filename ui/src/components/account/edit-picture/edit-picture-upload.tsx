@@ -1,7 +1,7 @@
 import { ChangeEvent, useCallback, useRef, useState } from 'react'
 import { IconButton, Image } from '@chakra-ui/react'
 import cx from 'classnames'
-import { IconEdit } from '@/lib'
+import { IconEdit } from '@/lib/components/icons'
 
 export type EditPictureUploadProps = {
   name: string

@@ -7,7 +7,7 @@ import {
   IconKeyboardDoubleArrowRight,
   IconFirstPage,
   IconLastPage,
-} from '@/lib'
+} from '@/lib/components/icons'
 
 type PaginationProps = {
   totalPages: number
@@ -17,7 +17,7 @@ type PaginationProps = {
   onPageChange?: (page: number) => void
 }
 
-export const Pagination = ({
+const Pagination = ({
   totalPages,
   page,
   maxButtons: maxButtonsProp = 5,
@@ -110,3 +110,5 @@ export const Pagination = ({
     </ButtonGroup>
   )
 }
+
+export default Pagination

@@ -1,8 +1,8 @@
 import React, { ChangeEvent, useCallback } from 'react'
 import { Select } from '@chakra-ui/react'
 import cx from 'classnames'
-import { usePageMonitor } from '../hooks/page-monitor'
-import { Pagination } from './pagination'
+import usePageMonitor from '../hooks/page-monitor'
+import Pagination from './pagination'
 
 type PagePaginationProps = {
   totalPages: number
@@ -16,7 +16,7 @@ type PagePaginationProps = {
   setSize: (size: number) => void
 }
 
-export const PagePagination = ({
+const PagePagination = ({
   totalElements,
   totalPages,
   page,
@@ -70,3 +70,5 @@ export const PagePagination = ({
     </>
   )
 }
+
+export default PagePagination

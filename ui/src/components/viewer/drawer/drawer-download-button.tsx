@@ -2,7 +2,7 @@ import { Button, IconButton } from '@chakra-ui/react'
 import cx from 'classnames'
 import { File } from '@/client/api/file'
 import downloadFile from '@/helpers/download-file'
-import { IconDownload } from '@/lib'
+import { IconDownload } from '@/lib/components/icons'
 
 export type DrawerDownloadButtonProps = {
   file: File

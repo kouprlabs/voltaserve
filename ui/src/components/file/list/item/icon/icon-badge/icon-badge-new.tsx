@@ -1,6 +1,6 @@
 import { Circle, Tooltip } from '@chakra-ui/react'
 import cx from 'classnames'
-import { IconHourglass } from '@/lib'
+import { IconHourglass } from '@/lib/components/icons'
 
 const IconBadgeNew = () => (
   <Tooltip label="Waiting for processing">

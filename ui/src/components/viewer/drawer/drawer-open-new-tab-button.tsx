@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { Button, IconButton } from '@chakra-ui/react'
 import cx from 'classnames'
 import { File } from '@/client/api/file'
-import { IconOpenInNew } from '@/lib'
+import { IconOpenInNew } from '@/lib/components/icons'
 
 export type DrawerOpenNewTabButtonProps = {
   file: File

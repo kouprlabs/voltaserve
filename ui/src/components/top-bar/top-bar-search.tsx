@@ -17,7 +17,7 @@ import {
 } from '@chakra-ui/react'
 import cx from 'classnames'
 import { decodeQuery, encodeQuery } from '@/helpers/query'
-import { IconClose, IconSearch } from '@/lib'
+import { IconClose, IconSearch } from '@/lib/components/icons'
 
 const TopBarSearch = () => {
   const navigation = useNavigate()

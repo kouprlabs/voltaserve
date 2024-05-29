@@ -6,7 +6,7 @@ import { Helmet } from 'react-helmet-async'
 import UserAPI from '@/client/idp/user'
 import Logo from '@/components/common/logo'
 import LayoutFull from '@/components/layout/layout-full'
-import { Spinner } from '@/lib'
+import Spinner from '@/lib/components/spinner'
 
 const UpdateEmailPage = () => {
   const params = useParams()

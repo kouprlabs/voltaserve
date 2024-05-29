@@ -27,14 +27,14 @@ import OrganizationStatus from '@/components/organization/organization-status'
 import prettyDate from '@/helpers/pretty-date'
 import { outgoingInvitationPaginationStorage } from '@/infra/pagination'
 import {
-  IconMoreVert,
-  IconSend,
   IconDelete,
+  IconMoreVert,
   IconPersonAdd,
-  SectionSpinner,
-  PagePagination,
-  usePagePagination,
-} from '@/lib'
+  IconSend,
+} from '@/lib/components/icons'
+import PagePagination from '@/lib/components/page-pagination'
+import SectionSpinner from '@/lib/components/section-spinner'
+import usePagePagination from '@/lib/hooks/page-pagination'
 import { useAppDispatch } from '@/store/hook'
 import { mutateUpdated } from '@/store/ui/outgoing-invitations'
 

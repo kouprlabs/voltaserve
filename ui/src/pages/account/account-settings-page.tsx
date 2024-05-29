@@ -18,7 +18,8 @@ import AccountDelete from '@/components/account/account-delete'
 import AccountEditEmail from '@/components/account/account-edit-email'
 import AccountEditFullName from '@/components/account/account-edit-full-name'
 import prettyBytes from '@/helpers/pretty-bytes'
-import { IconEdit, IconDelete, SectionSpinner, IconWarning } from '@/lib'
+import { IconEdit, IconDelete, IconWarning } from '@/lib/components/icons'
+import SectionSpinner from '@/lib/components/section-spinner'
 
 const EditButton = (props: IconButtonProps) => (
   <IconButton

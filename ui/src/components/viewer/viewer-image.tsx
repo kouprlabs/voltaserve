@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import cx from 'classnames'
 import { File } from '@/client/api/file'
 import { getAccessTokenOrRedirect } from '@/infra/token'
-import { SectionSpinner } from '@/lib'
+import SectionSpinner from '@/lib/components/section-spinner'
 
 export type ViewerImageProps = {
   file: File
