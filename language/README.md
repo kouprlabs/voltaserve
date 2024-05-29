@@ -44,5 +44,5 @@ pip3 install --pre torch torchvision torchaudio --extra-index-url https://downlo
 Run for development:
 
 ```shell
-flask run --host=0.0.0.0 --port=8084 --debug
+poetry run flask run --host=0.0.0.0 --port=8084 --debug
 ```
