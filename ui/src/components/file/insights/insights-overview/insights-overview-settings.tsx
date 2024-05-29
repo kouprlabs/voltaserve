@@ -1,11 +1,17 @@
-import { useCallback, useState } from 'react'
+import { useCallback } from 'react'
 import { Button, Card, CardBody, CardFooter, Text } from '@chakra-ui/react'
 import cx from 'classnames'
 import InsightsAPI from '@/client/api/insights'
 import { swrConfig } from '@/client/options'
 import { IconDelete, IconSync } from '@/lib/components/icons'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
-import { modalDidClose } from '@/store/ui/insights'
+import {
+  deletingDidStart,
+  deletingDidStop,
+  modalDidClose,
+  updatingDidStop,
+  updatingDidStart,
+} from '@/store/ui/insights'
 
 const InsightsOverviewSettings = () => {
   const dispatch = useAppDispatch()
@@ -17,40 +23,43 @@ const InsightsOverviewSettings = () => {
   const mutateMetadata = useAppSelector(
     (state) => state.ui.insights.mutateMetadata,
   )
-  const [isUpdating, setIsUpdating] = useState(false)
-  const [isDeleting, setIsDeleting] = useState(false)
+  const mutateList = useAppSelector((state) => state.ui.files.mutate)
+  const isUpdating = useAppSelector((state) => state.ui.insights.isUpdating)
+  const isDeleting = useAppSelector((state) => state.ui.insights.isDeleting)
   const { data: metadata } = InsightsAPI.useGetMetadata(id, swrConfig())
 
   const handleUpdate = useCallback(async () => {
     if (!id) {
       return
     }
-    setIsUpdating(true)
     try {
+      dispatch(updatingDidStart())
       await InsightsAPI.patch(id)
       mutateMetadata?.()
+      mutateList?.()
     } catch {
-      setIsUpdating(false)
+      dispatch(updatingDidStop())
     } finally {
-      setIsUpdating(false)
+      dispatch(updatingDidStop())
     }
-  }, [id, mutateMetadata])
+  }, [id, mutateMetadata, mutateList, dispatch])
 
   const handleDelete = useCallback(async () => {
     if (!id) {
       return
     }
-    setIsDeleting(true)
     try {
+      dispatch(deletingDidStart())
       await InsightsAPI.delete(id)
       mutateMetadata?.()
+      mutateList?.()
       dispatch(modalDidClose())
     } catch {
-      setIsDeleting(false)
+      dispatch(deletingDidStop())
     } finally {
-      setIsDeleting(false)
+      dispatch(deletingDidStop())
     }
-  }, [id, mutateMetadata, dispatch])
+  }, [id, mutateMetadata, mutateList, dispatch])
 
   if (!id || !metadata) {
     return null

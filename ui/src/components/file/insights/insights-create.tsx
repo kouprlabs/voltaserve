@@ -6,7 +6,11 @@ import FileAPI from '@/client/api/file'
 import InsightsAPI, { Language } from '@/client/api/insights'
 import { swrConfig } from '@/client/options'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
-import { modalDidClose } from '@/store/ui/insights'
+import {
+  creatingDidStart,
+  creatingDidStop,
+  modalDidClose,
+} from '@/store/ui/insights'
 import { reactSelectStyles } from '@/styles/react-select'
 
 interface LanguageOption extends OptionBase {
@@ -24,8 +28,9 @@ const InsightsCreate = () => {
   const mutateMetadata = useAppSelector(
     (state) => state.ui.insights.mutateMetadata,
   )
+  const mutateList = useAppSelector((state) => state.ui.files.mutate)
+  const isCreating = useAppSelector((state) => state.ui.insights.isCreating)
   const [language, setLanguage] = useState<Language>()
-  const [isLoading, setIsLoading] = useState(false)
   const { data: languages } = InsightsAPI.useGetLanguages(swrConfig())
   const { data: file } = FileAPI.useGet(id, swrConfig())
   const existingLanguage = useMemo<LanguageOption | undefined>(() => {
@@ -43,17 +48,17 @@ const InsightsCreate = () => {
   const handleCreate = useCallback(async () => {
     if (id && language) {
       try {
-        setIsLoading(true)
+        dispatch(creatingDidStart())
         await InsightsAPI.create(id, { languageId: language.id })
         mutateMetadata?.()
-        setIsLoading(false)
+        mutateList?.()
       } catch (error) {
-        setIsLoading(false)
+        dispatch(creatingDidStop())
       } finally {
-        setIsLoading(false)
+        dispatch(creatingDidStop())
       }
     }
-  }, [language, id, mutateMetadata])
+  }, [language, id, mutateMetadata, mutateList, dispatch])
 
   const handleLanguageChange = useCallback(
     (value: SingleValue<LanguageOption>) => {
@@ -98,7 +103,7 @@ const InsightsCreate = () => {
               placeholder="Select Language"
               selectedOptionStyle="check"
               chakraStyles={reactSelectStyles()}
-              isDisabled={isLoading}
+              isDisabled={isCreating}
               onChange={handleLanguageChange}
             />
           ) : null}
@@ -110,7 +115,7 @@ const InsightsCreate = () => {
             type="button"
             variant="outline"
             colorScheme="blue"
-            isDisabled={isLoading}
+            isDisabled={isCreating}
             onClick={() => dispatch(modalDidClose())}
           >
             Cancel
@@ -119,7 +124,7 @@ const InsightsCreate = () => {
             type="button"
             variant="solid"
             colorScheme="blue"
-            isLoading={isLoading}
+            isLoading={isCreating}
             isDisabled={!language}
             onClick={handleCreate}
           >

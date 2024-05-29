@@ -425,3 +425,13 @@ export const IconSecurity = ({
     security
   </span>
 )
+
+export const IconVisibility = ({
+  className,
+  filled,
+  ...props
+}: IconBaseProps) => (
+  <span className={getClassName({ filled, className })} {...props}>
+    visibility
+  </span>
+)

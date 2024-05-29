@@ -2,13 +2,9 @@ import { useState } from 'react'
 import { Image, Skeleton } from '@chakra-ui/react'
 import cx from 'classnames'
 import { File } from '@/client/api/file'
-import { Status } from '@/client/api/snapshot'
 import * as fe from '@/helpers/file-extension'
 import { IconPlayArrow } from '@/lib/components/icons'
-import IconBadgeError from '../icon-badge/icon-badge-error'
-import IconBadgeNew from '../icon-badge/icon-badge-new'
-import IconBadgeProcessing from '../icon-badge/icon-badge-processing'
-import IconBadgeShared from '../icon-badge/icon-badge-shared'
+import IconBadge from '../icon-badge'
 import { getThumbnailHeight, getThumbnailWidth } from './size'
 
 export type IconThumbnailProps = {
@@ -17,8 +13,7 @@ export type IconThumbnailProps = {
 }
 
 const IconThumbnail = ({ file, scale }: IconThumbnailProps) => {
-  const { isShared } = file
-  const { original, status } = file.snapshot || {}
+  const { original } = file.snapshot || {}
   const width = getThumbnailWidth(file, scale)
   const height = getThumbnailHeight(file, scale)
   const [isLoading, setIsLoading] = useState(true)
@@ -77,10 +72,7 @@ const IconThumbnail = ({ file, scale }: IconThumbnailProps) => {
           'right-[-5px]',
         )}
       >
-        {isShared ? <IconBadgeShared /> : null}
-        {status === Status.New ? <IconBadgeNew /> : null}
-        {status === Status.Processing ? <IconBadgeProcessing /> : null}
-        {status === Status.Error ? <IconBadgeError /> : null}
+        <IconBadge file={file} />
       </div>
     </>
   )

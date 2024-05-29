@@ -20,6 +20,12 @@ const Mosaic = () => {
       ? state.ui.files.selection[0]
       : undefined,
   )
+  const isLoading = useAppSelector(
+    (state) =>
+      state.ui.mosaic.isCreating ||
+      state.ui.mosaic.isUpdating ||
+      state.ui.mosaic.isDeleting,
+  )
   const isModalOpen = useAppSelector((state) => state.ui.mosaic.isModalOpen)
   const { data: metadata, mutate: mutateMetadata } = MosaicAPI.useGetMetadata(
     id,
@@ -38,11 +44,12 @@ const Mosaic = () => {
       isOpen={isModalOpen}
       onClose={() => dispatch(modalDidClose())}
       closeOnOverlayClick={false}
+      closeOnEsc={!isLoading}
     >
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>Performance</ModalHeader>
-        <ModalCloseButton />
+        <ModalCloseButton isDisabled={isLoading} />
         {!metadata ? <PerformanceCreate /> : null}
         {metadata ? <PerformanceOverview /> : null}
       </ModalContent>

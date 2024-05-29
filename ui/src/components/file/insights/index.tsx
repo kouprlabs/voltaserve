@@ -20,6 +20,12 @@ const Insights = () => {
       ? state.ui.files.selection[0]
       : undefined,
   )
+  const isLoading = useAppSelector(
+    (state) =>
+      state.ui.insights.isCreating ||
+      state.ui.insights.isUpdating ||
+      state.ui.insights.isDeleting,
+  )
   const isModalOpen = useAppSelector((state) => state.ui.insights.isModalOpen)
   const { data: metadata, mutate: mutateMetadata } = InsightsAPI.useGetMetadata(
     id,
@@ -38,11 +44,12 @@ const Insights = () => {
       isOpen={isModalOpen}
       onClose={() => dispatch(modalDidClose())}
       closeOnOverlayClick={false}
+      closeOnEsc={!isLoading}
     >
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>Insights</ModalHeader>
-        <ModalCloseButton />
+        <ModalCloseButton isDisabled={isLoading} />
         {!metadata ? <InsightsCreate /> : null}
         {metadata ? <InsightsOverview /> : null}
       </ModalContent>

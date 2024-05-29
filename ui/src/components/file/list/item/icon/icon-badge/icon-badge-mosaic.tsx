@@ -1,9 +1,9 @@
 import { Circle, Tooltip } from '@chakra-ui/react'
 import cx from 'classnames'
-import { IconVisibility } from '@/lib/components/icons'
+import { IconModeHeat } from '@/lib/components/icons'
 
-const IconBadgeInsights = () => (
-  <Tooltip label="This item has insights">
+const IconBadgeMosaic = () => (
+  <Tooltip label="This item has a mosaic">
     <Circle
       className={cx(
         'text-orange-600',
@@ -14,9 +14,9 @@ const IconBadgeInsights = () => (
         'border-gray-200',
       )}
     >
-      <IconVisibility className={cx('text-[12px]')} />
+      <IconModeHeat className={cx('text-[12px]')} />
     </Circle>
   </Tooltip>
 )
 
-export default IconBadgeInsights
+export default IconBadgeMosaic
