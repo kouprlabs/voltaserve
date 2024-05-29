@@ -59,27 +59,32 @@ def ner_entities():
         for sent in doc.sents:
             for ent in sent.ents:
                 entities.append({"text": ent.text, "label": ent.label_})
-
-    grouped_entities = {}
-    for entity in entities:
-        entity["text"] = entity["text"].strip(
-            string.whitespace + "".join(chr(i) for i in range(32))
-        )
-        key = (entity["text"], entity["label"])
-        if key in grouped_entities:
-            grouped_entities[key] += 1
-        else:
-            grouped_entities[key] = 1
-
-    result = [
-        {"text": text, "label": label, "frequency": frequency}
-        for (text, label), frequency in grouped_entities.items()
-    ]
-
-    filtered_result = [
+    
+    # Filter out entities with less than 3 characters and CARDINAL entities
+    entities = [
         entity
-        for entity in result
+        for entity in entities
         if len(entity["text"]) >= 3 and entity["label"] != "CARDINAL"
     ]
 
-    return jsonify(filtered_result)
+    # Group by text
+    result = {}
+    whitespace_and_nonprintable = string.whitespace + "".join(chr(i) for i in range(32))
+    for entity in entities:
+        entity["text"] = entity["text"].strip(whitespace_and_nonprintable)
+        key = entity["text"]
+        if key in result:
+            result[key] += 1
+        else:
+            result[key] = 1
+
+    # Count frequency
+    result = [
+        {"text": text, "frequency": frequency}
+        for text, frequency in result.items()
+    ]
+
+    # Sort by frequency
+    result.sort(key=lambda x: x["frequency"], reverse=True)
+    
+    return jsonify(result)
