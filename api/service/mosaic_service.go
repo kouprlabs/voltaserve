@@ -61,7 +61,26 @@ func (svc *MosaicService) Create(id string, userID string) error {
 	if err != nil {
 		return err
 	}
-	return svc.create(snapshot)
+	snapshot.SetStatus(model.SnapshotStatusProcessing)
+	if err := svc.snapshotRepo.Save(snapshot); err != nil {
+		return err
+	}
+	if err := svc.snapshotCache.Set(snapshot); err != nil {
+		return err
+	}
+	err = svc.create(snapshot)
+	if err != nil {
+		snapshot.SetStatus(model.SnapshotStatusError)
+	} else {
+		snapshot.SetStatus(model.SnapshotStatusReady)
+	}
+	if err := svc.snapshotRepo.Save(snapshot); err != nil {
+		return err
+	}
+	if err := svc.snapshotCache.Set(snapshot); err != nil {
+		return err
+	}
+	return err
 }
 
 func (svc *MosaicService) create(snapshot model.Snapshot) error {
