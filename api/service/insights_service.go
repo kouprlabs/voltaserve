@@ -98,13 +98,26 @@ func (svc *InsightsService) Create(id string, opts InsightsCreateOptions, userID
 		return err
 	}
 	snapshot.SetLanguage(opts.LanguageID)
+	snapshot.SetStatus(model.SnapshotStatusProcessing)
 	if err := svc.snapshotRepo.Save(snapshot); err != nil {
 		return err
 	}
 	if err := svc.snapshotCache.Set(snapshot); err != nil {
 		return err
 	}
-	return svc.create(snapshot)
+	err = svc.create(snapshot)
+	if err != nil {
+		snapshot.SetStatus(model.SnapshotStatusError)
+	} else {
+		snapshot.SetStatus(model.SnapshotStatusReady)
+	}
+	if err := svc.snapshotRepo.Save(snapshot); err != nil {
+		return err
+	}
+	if err := svc.snapshotCache.Set(snapshot); err != nil {
+		return err
+	}
+	return err
 }
 
 func (svc *InsightsService) create(snapshot model.Snapshot) error {
@@ -140,13 +153,26 @@ func (svc *InsightsService) Patch(id string, userID string) error {
 		return errorpkg.NewSnapshotCannotBePatchedError(nil)
 	}
 	snapshot.SetLanguage(*previous.GetLanguage())
+	snapshot.SetStatus(model.SnapshotStatusProcessing)
 	if err := svc.snapshotRepo.Save(snapshot); err != nil {
 		return err
 	}
 	if err := svc.snapshotCache.Set(snapshot); err != nil {
 		return err
 	}
-	return svc.create(snapshot)
+	err = svc.create(snapshot)
+	if err != nil {
+		snapshot.SetStatus(model.SnapshotStatusError)
+	} else {
+		snapshot.SetStatus(model.SnapshotStatusReady)
+	}
+	if err := svc.snapshotRepo.Save(snapshot); err != nil {
+		return err
+	}
+	if err := svc.snapshotCache.Set(snapshot); err != nil {
+		return err
+	}
+	return err
 }
 
 func (svc *InsightsService) createText(snapshot model.Snapshot) error {

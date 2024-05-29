@@ -7,7 +7,7 @@ interface TextProps extends React.HTMLAttributes<HTMLSpanElement> {
   maxCharacters?: number
 }
 
-export const Text: React.FC<TextProps> = ({
+const Text: React.FC<TextProps> = ({
   children,
   noOfLines,
   maxCharacters,
@@ -45,3 +45,5 @@ export const Text: React.FC<TextProps> = ({
     </span>
   )
 }
+
+export default Text

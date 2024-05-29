@@ -23,11 +23,7 @@ type SearchInputProps = {
   onChange?: (value: string) => void
 }
 
-export const SearchInput = ({
-  placeholder,
-  query,
-  onChange,
-}: SearchInputProps) => {
+const SearchInput = ({ placeholder, query, onChange }: SearchInputProps) => {
   const [draft, setDraft] = useState('')
   const [text, setText] = useState('')
   const [isFocused, setIsFocused] = useState(false)
@@ -96,3 +92,5 @@ export const SearchInput = ({
     </HStack>
   )
 }
+
+export default SearchInput

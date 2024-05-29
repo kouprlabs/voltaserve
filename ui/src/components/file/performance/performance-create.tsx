@@ -1,11 +1,12 @@
-import { useCallback, useState } from 'react'
+import { useCallback } from 'react'
 import { Button, ModalBody, ModalFooter } from '@chakra-ui/react'
 import cx from 'classnames'
 import FileAPI from '@/client/api/file'
 import MosaicAPI from '@/client/api/mosaic'
 import { swrConfig } from '@/client/options'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
-import { modalDidClose } from '@/store/ui/mosaic'
+import { creatingDidStop, modalDidClose } from '@/store/ui/mosaic'
+import { creatingDidStart } from '@/store/ui/mosaic'
 
 const PerformanceCreate = () => {
   const dispatch = useAppDispatch()
@@ -17,24 +18,25 @@ const PerformanceCreate = () => {
   const mutateMetadata = useAppSelector(
     (state) => state.ui.mosaic.mutateMetadata,
   )
-  const [isLoading, setIsLoading] = useState(false)
+  const mutateList = useAppSelector((state) => state.ui.files.mutate)
+  const isCreating = useAppSelector((state) => state.ui.mosaic.isCreating)
   const metadata = { isOutdated: true }
   const { data: file } = FileAPI.useGet(id, swrConfig())
 
   const handleCreate = useCallback(async () => {
     if (id) {
       try {
-        setIsLoading(true)
+        dispatch(creatingDidStart())
         await MosaicAPI.create(id)
         mutateMetadata?.()
-        setIsLoading(false)
+        mutateList?.()
       } catch (error) {
-        setIsLoading(false)
+        dispatch(creatingDidStop())
       } finally {
-        setIsLoading(false)
+        dispatch(creatingDidStop())
       }
     }
-  }, [id, mutateMetadata])
+  }, [id, mutateMetadata, mutateList, dispatch])
 
   if (!id || !file || !metadata) {
     return null
@@ -67,7 +69,7 @@ const PerformanceCreate = () => {
             type="button"
             variant="outline"
             colorScheme="blue"
-            isDisabled={isLoading}
+            isDisabled={isCreating}
             onClick={() => dispatch(modalDidClose())}
           >
             Cancel
@@ -76,7 +78,7 @@ const PerformanceCreate = () => {
             type="button"
             variant="solid"
             colorScheme="blue"
-            isLoading={isLoading}
+            isLoading={isCreating}
             onClick={handleCreate}
           >
             Optimize Image

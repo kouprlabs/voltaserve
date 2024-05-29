@@ -23,12 +23,10 @@ import { swrConfig } from '@/client/options'
 import prettyDate from '@/helpers/pretty-date'
 import userToString from '@/helpers/user-to-string'
 import { incomingInvitationPaginationStorage } from '@/infra/pagination'
-import {
-  IconMoreVert,
-  SectionSpinner,
-  PagePagination,
-  usePagePagination,
-} from '@/lib'
+import { IconMoreVert } from '@/lib/components/icons'
+import PagePagination from '@/lib/components/page-pagination'
+import SectionSpinner from '@/lib/components/section-spinner'
+import usePagePagination from '@/lib/hooks/page-pagination'
 import { useAppDispatch } from '@/store/hook'
 import { mutateUpdated } from '@/store/ui/incoming-invitations'
 

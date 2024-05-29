@@ -5,7 +5,7 @@ import { Link as ChakraLink } from '@chakra-ui/react'
 import cx from 'classnames'
 import { Status } from '@/client/api/snapshot'
 import relativeDate from '@/helpers/relative-date'
-import { Text } from '@/lib'
+import Text from '@/lib/components/text'
 import store from '@/store/configure-store'
 import { useAppDispatch } from '@/store/hook'
 import {

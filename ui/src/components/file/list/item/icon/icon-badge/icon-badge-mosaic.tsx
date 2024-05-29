@@ -1,12 +1,12 @@
 import { Circle, Tooltip } from '@chakra-ui/react'
 import cx from 'classnames'
-import { IconHourglass } from '@/lib'
+import { IconModeHeat } from '@/lib/components/icons'
 
-const IconNewBadge = () => (
-  <Tooltip label="Waiting for processing">
+const IconBadgeMosaic = () => (
+  <Tooltip label="This item has a mosaic">
     <Circle
       className={cx(
-        'text-purple-600',
+        'text-orange-600',
         'bg-white',
         'w-[23px]',
         'h-[23px]',
@@ -14,9 +14,9 @@ const IconNewBadge = () => (
         'border-gray-200',
       )}
     >
-      <IconHourglass />
+      <IconModeHeat className={cx('text-[12px]')} />
     </Circle>
   </Tooltip>
 )
 
-export default IconNewBadge
+export default IconBadgeMosaic

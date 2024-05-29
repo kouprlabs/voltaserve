@@ -6,7 +6,7 @@ import { encodeQuery } from '@/helpers/query'
 import { getAccessTokenOrRedirect } from '@/infra/token'
 import { Group } from './group'
 import { PermissionType } from './permission'
-import { Download, Snapshot, Thumbnail } from './snapshot'
+import { Snapshot } from './snapshot'
 
 export enum FileType {
   File = 'file',

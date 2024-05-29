@@ -1,8 +1,8 @@
 import { Circle, Tooltip } from '@chakra-ui/react'
 import cx from 'classnames'
-import { IconGroup } from '@/lib'
+import { IconGroup } from '@/lib/components/icons'
 
-const IconSharedBadge = () => (
+const IconBadgeShared = () => (
   <Tooltip label="This item is shared">
     <Circle
       className={cx(
@@ -19,4 +19,4 @@ const IconSharedBadge = () => (
   </Tooltip>
 )
 
-export default IconSharedBadge
+export default IconBadgeShared

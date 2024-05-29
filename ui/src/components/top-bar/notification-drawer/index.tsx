@@ -14,7 +14,7 @@ import {
 import cx from 'classnames'
 import NotificationAPI from '@/client/api/notification'
 import { swrConfig } from '@/client/options'
-import { IconNotifications } from '@/lib'
+import { IconNotifications } from '@/lib/components/icons'
 import { useAppDispatch } from '@/store/hook'
 import { mutateUpdated } from '@/store/ui/notifications'
 import NotificationDrawerItem from './notification-drawer-item'

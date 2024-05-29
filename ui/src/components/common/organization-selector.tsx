@@ -22,7 +22,9 @@ import OrganizationAPI, {
   SortOrder,
 } from '@/client/api/organization'
 import { swrConfig } from '@/client/options'
-import { SectionSpinner, Pagination, SearchInput, Spinner } from '@/lib'
+import Pagination from '@/lib/components/pagination'
+import SearchInput from '@/lib/components/search-input'
+import Spinner from '@/lib/components/spinner'
 
 export type OrganizationSelectorProps = {
   onConfirm?: (organization: Organization) => void

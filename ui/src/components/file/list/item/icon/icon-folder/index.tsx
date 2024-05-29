@@ -1,7 +1,6 @@
 import cx from 'classnames'
 import { FileCommonProps } from '@/types/file'
-import IconProcessingBadge from '../icon-processing-badge'
-import IconSharedBadge from '../icon-shared-badge'
+import IconBadge from '../icon-badge'
 import FolderSvg from './assets/icon-folder.svg'
 
 type IconFolderProps = {
@@ -34,8 +33,7 @@ const IconFolder = ({ file, scale, isLoading }: IconFolderProps) => {
           'right-[-5px]',
         )}
       >
-        {file.isShared ? <IconSharedBadge /> : null}
-        {isLoading ? <IconProcessingBadge /> : null}
+        <IconBadge file={file} isLoading={isLoading} />
       </div>
     </>
   )

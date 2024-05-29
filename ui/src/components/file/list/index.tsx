@@ -28,12 +28,10 @@ import {
 import Orb from '@/components/common/orb'
 import downloadFile from '@/helpers/download-file'
 import {
-  isDocument,
   isImage,
   isMicrosoftOffice,
   isOpenOffice,
   isPDF,
-  isWord,
 } from '@/helpers/file-extension'
 import mapFileList from '@/helpers/map-file-list'
 import {
@@ -47,7 +45,7 @@ import {
   IconUpload,
   IconModeHeat,
   IconSecurity,
-} from '@/lib'
+} from '@/lib/components/icons'
 import { UploadDecorator, uploadAdded } from '@/store/entities/uploads'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import {

@@ -15,8 +15,8 @@ import {
   IconLogout,
   IconDelete,
   IconPersonAdd,
-  SectionSpinner,
-} from '@/lib'
+} from '@/lib/components/icons'
+import SectionSpinner from '@/lib/components/section-spinner'
 
 const Spacer = () => <div className={cx('grow')} />
 

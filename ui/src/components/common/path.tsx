@@ -7,7 +7,7 @@ import {
 } from '@chakra-ui/react'
 import cx from 'classnames'
 import FileAPI from '@/client/api/file'
-import { Text } from '@/lib'
+import Text from '@/lib/components/text'
 
 export type PathProps = {
   rootId: string

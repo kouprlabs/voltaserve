@@ -6,7 +6,7 @@ import {
   SystemStyleFunction,
   SystemStyleObject,
 } from '@chakra-ui/theme-tools'
-import { variables } from '../../variables'
+import variables from '../../variables'
 
 function filledStyle(props: StyleFunctionProps): SystemStyleObject {
   const { colorScheme, hasStripe } = props

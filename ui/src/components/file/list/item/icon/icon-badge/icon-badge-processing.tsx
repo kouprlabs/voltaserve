@@ -1,7 +1,7 @@
 import { Circle, Spinner, Tooltip } from '@chakra-ui/react'
 import cx from 'classnames'
 
-const IconProcessingBadge = () => (
+const IconBadgeProcessing = () => (
   <Tooltip label="Processing in progress">
     <Circle
       className={cx(
@@ -22,4 +22,4 @@ const IconProcessingBadge = () => (
   </Tooltip>
 )
 
-export default IconProcessingBadge
+export default IconBadgeProcessing

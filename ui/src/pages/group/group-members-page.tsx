@@ -32,14 +32,10 @@ import GroupAddMember from '@/components/group/group-add-member'
 import GroupRemoveMember from '@/components/group/group-remove-member'
 import { decodeQuery } from '@/helpers/query'
 import { groupMemberPaginationStorage } from '@/infra/pagination'
-import {
-  IconLogout,
-  IconPersonAdd,
-  SectionSpinner,
-  PagePagination,
-  usePagePagination,
-  IconMoreVert,
-} from '@/lib'
+import { IconLogout, IconMoreVert, IconPersonAdd } from '@/lib/components/icons'
+import PagePagination from '@/lib/components/page-pagination'
+import SectionSpinner from '@/lib/components/section-spinner'
+import usePagePagination from '@/lib/hooks/page-pagination'
 import { useAppDispatch } from '@/store/hook'
 import { mutateUpdated } from '@/store/ui/group-members'
 

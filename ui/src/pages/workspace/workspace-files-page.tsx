@@ -20,13 +20,11 @@ import SnapshotDetach from '@/components/file/snapshot/snapshot-detach'
 import SnapshotList from '@/components/file/snapshot/snapshot-list'
 import { decodeQuery } from '@/helpers/query'
 import { filePaginationSteps, filesPaginationStorage } from '@/infra/pagination'
-import {
-  PagePagination,
-  Spinner,
-  usePageMonitor,
-  usePagePagination,
-  variables,
-} from '@/lib'
+import PagePagination from '@/lib/components/page-pagination'
+import Spinner from '@/lib/components/spinner'
+import usePageMonitor from '@/lib/hooks/page-monitor'
+import usePagePagination from '@/lib/hooks/page-pagination'
+import variables from '@/lib/variables'
 import { listUpdated } from '@/store/entities/files'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { mutateUpdated, selectionUpdated } from '@/store/ui/files'

@@ -26,7 +26,7 @@ type SwitchCardProps = {
   expandedMinWidth?: string
 }
 
-export const SwitchCard = ({
+const SwitchCard = ({
   children,
   icon,
   label,
@@ -121,3 +121,5 @@ export const SwitchCard = ({
     )
   }
 }
+
+export default SwitchCard

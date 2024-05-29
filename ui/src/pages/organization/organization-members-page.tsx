@@ -31,14 +31,10 @@ import OrganizationInviteMembers from '@/components/organization/organization-in
 import OrganizationRemoveMember from '@/components/organization/organization-remove-member'
 import { decodeQuery } from '@/helpers/query'
 import { organizationMemberPaginationStorage } from '@/infra/pagination'
-import {
-  IconMoreVert,
-  IconLogout,
-  IconPersonAdd,
-  SectionSpinner,
-  PagePagination,
-  usePagePagination,
-} from '@/lib'
+import { IconLogout, IconMoreVert, IconPersonAdd } from '@/lib/components/icons'
+import PagePagination from '@/lib/components/page-pagination'
+import SectionSpinner from '@/lib/components/section-spinner'
+import usePagePagination from '@/lib/hooks/page-pagination'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import {
   inviteModalDidClose,

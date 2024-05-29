@@ -9,7 +9,8 @@ import { swrConfig } from '@/client/options'
 import GroupAddMember from '@/components/group/group-add-member'
 import GroupDelete from '@/components/group/group-delete'
 import GroupEditName from '@/components/group/group-edit-name'
-import { IconEdit, IconDelete, IconPersonAdd, SectionSpinner } from '@/lib'
+import { IconEdit, IconDelete, IconPersonAdd } from '@/lib/components/icons'
+import SectionSpinner from '@/lib/components/section-spinner'
 
 const Spacer = () => <div className={cx('grow')} />
 

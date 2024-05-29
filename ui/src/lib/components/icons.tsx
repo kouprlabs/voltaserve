@@ -9,7 +9,7 @@ type GetClassNameOptions = {
   className?: string
 }
 
-function getClassName({ filled, className }: GetClassNameOptions) {
+export function getClassName({ filled, className }: GetClassNameOptions) {
   return cx(
     'material-symbols-rounded',
     { 'material-symbols-rounded__filled': filled },
@@ -423,5 +423,15 @@ export const IconSecurity = ({
 }: IconBaseProps) => (
   <span className={getClassName({ filled, className })} {...props}>
     security
+  </span>
+)
+
+export const IconVisibility = ({
+  className,
+  filled,
+  ...props
+}: IconBaseProps) => (
+  <span className={getClassName({ filled, className })} {...props}>
+    visibility
   </span>
 )
