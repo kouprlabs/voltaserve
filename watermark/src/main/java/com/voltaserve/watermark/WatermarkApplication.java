@@ -1,12 +1,12 @@
-package io.defyle.watermarkapi;
+package com.voltaserve.watermark;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class WatermarkApiApplication {
+public class WatermarkApplication {
 
   public static void main(String[] args) {
-    SpringApplication.run(WatermarkApiApplication.class, args);
+    SpringApplication.run(WatermarkApplication.class, args);
   }
 }

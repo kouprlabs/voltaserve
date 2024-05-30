@@ -1,9 +1,8 @@
-package io.defyle.watermarkapi.controllers;
+package com.voltaserve.watermark.controllers;
 
-import io.defyle.watermarkapi.dtos.WatermarkRequest;
-import io.defyle.watermarkapi.services.ImageWatermarkService;
-import io.defyle.watermarkapi.services.PdfWatermarkService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.voltaserve.watermark.dtos.WatermarkRequest;
+import com.voltaserve.watermark.services.ImageWatermarkService;
+import com.voltaserve.watermark.services.PdfWatermarkService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -13,13 +12,12 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.IOException;
 
 @RestController
-@RequestMapping("/watermark")
+@RequestMapping("/v2/watermarks")
 public class WatermarkController {
 
   private final PdfWatermarkService pdfWatermarkService;
   private final ImageWatermarkService imageWatermarkService;
 
-  @Autowired
   public WatermarkController(PdfWatermarkService pdfWatermarkService, ImageWatermarkService imageWatermarkService) {
     this.pdfWatermarkService = pdfWatermarkService;
     this.imageWatermarkService = imageWatermarkService;

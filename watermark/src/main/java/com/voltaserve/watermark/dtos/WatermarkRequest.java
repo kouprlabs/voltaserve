@@ -1,8 +1,8 @@
-package io.defyle.watermarkapi.dtos;
+package com.voltaserve.watermark.dtos;
 
 import lombok.Data;
 
-import javax.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotBlank;
 
 @Data
 public class WatermarkRequest {

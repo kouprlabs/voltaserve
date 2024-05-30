@@ -781,7 +781,7 @@ func (r *FileRouter) DownloadOriginal(c *fiber.Ctx) error {
 	}
 	b := buf.Bytes()
 	c.Set("Content-Type", infra.DetectMimeFromBytes(b))
-	c.Set("Content-Disposition", fmt.Sprintf("filename=\"%s\"", filepath.Base(file.GetName())+ext))
+	c.Set("Content-Disposition", fmt.Sprintf("filename=\"%s\"", filepath.Base(file.GetName())))
 	return c.Send(b)
 }
 
@@ -827,7 +827,7 @@ func (r *FileRouter) DownloadPreview(c *fiber.Ctx) error {
 	}
 	b := buf.Bytes()
 	c.Set("Content-Type", infra.DetectMimeFromBytes(b))
-	c.Set("Content-Disposition", fmt.Sprintf("filename=\"%s\"", filepath.Base(file.GetName())+ext))
+	c.Set("Content-Disposition", fmt.Sprintf("filename=\"%s\"", filepath.Base(file.GetName())))
 	return c.Send(b)
 }
 

@@ -1,4 +1,4 @@
-package io.defyle.watermarkapi.pojos;
+package com.voltaserve.watermark.pojos;
 
 import lombok.Data;
 

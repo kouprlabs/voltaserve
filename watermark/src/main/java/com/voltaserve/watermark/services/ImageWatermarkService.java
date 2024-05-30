@@ -1,6 +1,6 @@
-package io.defyle.watermarkapi.services;
+package com.voltaserve.watermark.services;
 
-import io.defyle.watermarkapi.dtos.WatermarkRequest;
+import com.voltaserve.watermark.dtos.WatermarkRequest;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.ResourcePatternUtils;
 import org.springframework.stereotype.Service;
@@ -24,8 +24,9 @@ public class ImageWatermarkService {
 
   public ImageWatermarkService(ResourceLoader resourceLoader) throws IOException, FontFormatException {
     GraphicsEnvironment graphicsEnvironment = GraphicsEnvironment.getLocalGraphicsEnvironment();
-    graphicsEnvironment.registerFont(Font.createFont(Font.TRUETYPE_FONT, ResourcePatternUtils.getResourcePatternResolver(resourceLoader)
-        .getResource("classpath:Montserrat-Bold.ttf").getInputStream()));
+    graphicsEnvironment.registerFont(
+        Font.createFont(Font.TRUETYPE_FONT, ResourcePatternUtils.getResourcePatternResolver(resourceLoader)
+            .getResource("classpath:Unbounded-Medium.ttf").getInputStream()));
   }
 
   public void generate(WatermarkRequest watermarkRequest) throws IOException {
@@ -39,7 +40,7 @@ public class ImageWatermarkService {
     g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.2f));
     g2d.setColor(Color.RED);
     g2d.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-    g2d.setFont(new Font("Montserrat", Font.BOLD, 120));
+    g2d.setFont(new Font("Unbounded", Font.BOLD, 120));
 
     Rectangle2D dateTimeStringBounds = g2d.getFontMetrics().getStringBounds(watermarkRequest.getDateTime(), g2d);
     Rectangle2D workspaceStringBounds = g2d.getFontMetrics().getStringBounds(watermarkRequest.getWorkspace(), g2d);
@@ -48,7 +49,8 @@ public class ImageWatermarkService {
     // Move our origin to the center
     g2d.translate(width / 2.0f, height / 2.0f);
 
-    // Create a rotation transform to rotate the text based on the diagonal angle of the picture aspect ratio
+    // Create a rotation transform to rotate the text based on the diagonal angle of
+    // the picture aspect ratio
     AffineTransform affineTransform = new AffineTransform();
     affineTransform.rotate(Math.atan2(height, width));
     g2d.transform(affineTransform);

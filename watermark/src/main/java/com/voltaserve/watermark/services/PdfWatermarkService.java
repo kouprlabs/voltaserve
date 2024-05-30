@@ -1,8 +1,10 @@
-package io.defyle.watermarkapi.services;
+package com.voltaserve.watermark.services;
 
-import io.defyle.watermarkapi.dtos.WatermarkRequest;
-import io.defyle.watermarkapi.pojos.StrokeProperties;
+import com.voltaserve.watermark.dtos.WatermarkRequest;
+import com.voltaserve.watermark.pojos.StrokeProperties;
+import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.cos.COSName;
+import org.apache.pdfbox.io.RandomAccessReadBufferedFile;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -29,14 +31,16 @@ public class PdfWatermarkService {
   }
 
   public void generate(WatermarkRequest watermarkRequest) throws IOException {
-    PDDocument pdDocument = PDDocument.load(new File(watermarkRequest.getInputFile()));
+    PDDocument pdDocument = Loader.loadPDF(new RandomAccessReadBufferedFile(new File(watermarkRequest.getInputFile())));
     pdDocument.setAllSecurityToBeRemoved(true);
 
     PDFont font = PDTrueTypeFont.load(pdDocument, ResourcePatternUtils.getResourcePatternResolver(resourceLoader)
-        .getResource("classpath:Montserrat-Bold.ttf").getInputStream(), Encoding.getInstance(COSName.WIN_ANSI_ENCODING));
+        .getResource("classpath:Unbounded-Medium.ttf").getInputStream(),
+        Encoding.getInstance(COSName.WIN_ANSI_ENCODING));
 
     for (PDPage page : pdDocument.getPages()) {
-      try (PDPageContentStream pdPageContentStream = new PDPageContentStream(pdDocument, page, PDPageContentStream.AppendMode.APPEND, true, true)) {
+      try (PDPageContentStream pdPageContentStream = new PDPageContentStream(pdDocument, page,
+          PDPageContentStream.AppendMode.APPEND, true, true)) {
         strokeDateTime(watermarkRequest.getDateTime(), page, pdPageContentStream, font);
         strokeUsername(watermarkRequest.getUsername(), page, pdPageContentStream, font);
         strokeWorkspace(watermarkRequest.getWorkspace(), page, pdPageContentStream, font);
@@ -51,11 +55,13 @@ public class PdfWatermarkService {
     pdDocument.save(watermarkRequest.getOutputFile());
   }
 
-  private void strokeDateTime(String text, PDPage page, PDPageContentStream pdPageContentStream, PDFont font) throws IOException {
+  private void strokeDateTime(String text, PDPage page, PDPageContentStream pdPageContentStream, PDFont font)
+      throws IOException {
     StrokeProperties strokeProperties = getStrokeProperties(page, font, text);
 
     pdPageContentStream.transform(Matrix.getRotateInstance(Math.toRadians(270), 0, strokeProperties.getWidth()));
-    pdPageContentStream.transform(Matrix.getRotateInstance((float) Math.atan2(strokeProperties.getHeight(), strokeProperties.getWidth()), 0, 0));
+    pdPageContentStream.transform(
+        Matrix.getRotateInstance((float) Math.atan2(strokeProperties.getHeight(), strokeProperties.getWidth()), 0, 0));
 
     pdPageContentStream.setFont(font, strokeProperties.getFontHeight());
     pdPageContentStream.setGraphicsStateParameters(getPDExtendedGraphicsState(pdPageContentStream));
@@ -68,7 +74,8 @@ public class PdfWatermarkService {
     pdPageContentStream.endText();
   }
 
-  private void strokeUsername(String text, PDPage page, PDPageContentStream pdPageContentStream, PDFont font) throws IOException {
+  private void strokeUsername(String text, PDPage page, PDPageContentStream pdPageContentStream, PDFont font)
+      throws IOException {
     StrokeProperties strokeProperties = getStrokeProperties(page, font, text);
 
     pdPageContentStream.setFont(font, strokeProperties.getFontHeight());
@@ -81,7 +88,8 @@ public class PdfWatermarkService {
     pdPageContentStream.endText();
   }
 
-  private void strokeWorkspace(String text, PDPage page, PDPageContentStream pdPageContentStream, PDFont font) throws IOException {
+  private void strokeWorkspace(String text, PDPage page, PDPageContentStream pdPageContentStream, PDFont font)
+      throws IOException {
     StrokeProperties strokeProperties = getStrokeProperties(page, font, text);
 
     pdPageContentStream.setFont(font, strokeProperties.getFontHeight());
@@ -95,7 +103,8 @@ public class PdfWatermarkService {
     pdPageContentStream.endText();
   }
 
-  private PDExtendedGraphicsState getPDExtendedGraphicsState(PDPageContentStream pdPageContentStream) throws IOException {
+  private PDExtendedGraphicsState getPDExtendedGraphicsState(PDPageContentStream pdPageContentStream)
+      throws IOException {
     PDExtendedGraphicsState pdExtendedGraphicsState = new PDExtendedGraphicsState();
     pdExtendedGraphicsState.setNonStrokingAlphaConstant(0.2f);
     pdExtendedGraphicsState.setStrokingAlphaConstant(0.2f);
@@ -109,8 +118,8 @@ public class PdfWatermarkService {
   private void setStrokingColor(PDPageContentStream pdPageContentStream) throws IOException {
     // Some API weirdness here. When int, range is 0..255
     // When float, this would be 0..1f
-    pdPageContentStream.setNonStrokingColor(255, 0, 0);
-    pdPageContentStream.setStrokingColor(255, 0, 0);
+    pdPageContentStream.setNonStrokingColor(1, 0, 0);
+    pdPageContentStream.setStrokingColor(1, 0, 0);
   }
 
   private StrokeProperties getStrokeProperties(PDPage page, PDFont font, String text) throws IOException {
