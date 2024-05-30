@@ -103,8 +103,8 @@ const FileMenu = ({
     () =>
       file?.type === 'file' &&
       file.snapshot?.status !== Status.Processing &&
-      file.snapshot?.entities &&
-      geViewerPermission(file.permission),
+      ((geViewerPermission(file.permission) && file.snapshot?.entities) ||
+        geEditorPermission(file.permission)),
     [file],
   )
   const isPerformanceAuthorized = useMemo(
