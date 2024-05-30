@@ -103,7 +103,8 @@ const FileMenu = ({
     () =>
       file?.type === 'file' &&
       file.snapshot?.status !== Status.Processing &&
-      geEditorPermission(file.permission),
+      file.snapshot?.entities &&
+      geViewerPermission(file.permission),
     [file],
   )
   const isPerformanceAuthorized = useMemo(
@@ -154,6 +155,15 @@ const FileMenu = ({
   const isRenameAuthorized = useMemo(
     () => file !== undefined && geEditorPermission(file.permission),
     [file],
+  )
+  const isAnyFeatureIsAuthorized = useMemo(
+    () =>
+      isInsightsAuthorized ||
+      isSharingAuthorized ||
+      isSnapshotsAuthorized ||
+      isPerformanceAuthorized ||
+      isSecurityAuthorized,
+    [],
   )
   const uploadInputRef = useRef<HTMLInputElement>(null)
 
@@ -250,7 +260,7 @@ const FileMenu = ({
             {!isToolbarMode && isInsightsAuthorized ? (
               <>
                 <MenuItem
-                  icon={<Orb width="20px" height="20px" />}
+                  icon={<Orb width="16px" height="16px" />}
                   onClick={(event: MouseEvent) => {
                     event.stopPropagation()
                     dispatch(insightsModalDidOpen())
@@ -258,7 +268,6 @@ const FileMenu = ({
                 >
                   Insights
                 </MenuItem>
-                <MenuDivider />
               </>
             ) : null}
             {!isToolbarMode && isSharingAuthorized ? (
@@ -297,83 +306,75 @@ const FileMenu = ({
             {!isToolbarMode && isSecurityAuthorized ? (
               <MenuItem icon={<IconSecurity />}>Security</MenuItem>
             ) : null}
+            {isAnyFeatureIsAuthorized ? <MenuDivider /> : null}
+            <MenuItem
+              icon={<IconUpload />}
+              isDisabled={!isUploadAuthorized}
+              onClick={(event: MouseEvent) => {
+                event.stopPropagation()
+                const singleId = file?.id
+                uploadInputRef?.current?.click()
+                if (singleId) {
+                  dispatch(selectionUpdated([singleId]))
+                }
+              }}
+            >
+              Upload
+            </MenuItem>
+            <MenuItem
+              icon={<IconDownload />}
+              isDisabled={!isDownloadAuthorized}
+              onClick={(event: MouseEvent) => {
+                event.stopPropagation()
+                if (file) {
+                  downloadFile(file)
+                }
+              }}
+            >
+              Download
+            </MenuItem>
             <MenuDivider />
-            {isUploadAuthorized ? (
-              <MenuItem
-                icon={<IconUpload />}
-                onClick={(event: MouseEvent) => {
-                  event.stopPropagation()
-                  const singleId = file?.id
-                  uploadInputRef?.current?.click()
-                  if (singleId) {
-                    dispatch(selectionUpdated([singleId]))
-                  }
-                }}
-              >
-                Upload
-              </MenuItem>
-            ) : null}
-            {isDownloadAuthorized ? (
-              <MenuItem
-                icon={<IconDownload />}
-                isDisabled={!isDownloadAuthorized}
-                onClick={(event: MouseEvent) => {
-                  event.stopPropagation()
-                  if (file) {
-                    downloadFile(file)
-                  }
-                }}
-              >
-                Download
-              </MenuItem>
-            ) : null}
-            <MenuDivider />
-            {isDeleteAuthorized ? (
-              <MenuItem
-                icon={<IconDelete />}
-                className={cx('text-red-500')}
-                isDisabled={!isDeleteAuthorized}
-                onClick={(event: MouseEvent) => {
-                  event.stopPropagation()
-                  dispatch(deleteModalDidOpen())
-                }}
-              >
-                Delete
-              </MenuItem>
-            ) : null}
-            {isRenameAuthorized ? (
-              <MenuItem
-                icon={<IconEdit />}
-                onClick={(event: MouseEvent) => {
-                  event.stopPropagation()
-                  dispatch(renameModalDidOpen())
-                }}
-              >
-                Rename
-              </MenuItem>
-            ) : null}
-            {isMoveAuthorized ? (
-              <MenuItem
-                icon={<IconArrowTopRight />}
-                onClick={(event: MouseEvent) => {
-                  event.stopPropagation()
-                  dispatch(moveModalDidOpen())
-                }}
-              >
-                Move
-              </MenuItem>
-            ) : null}
-            {isCopyAuthorized ? (
-              <MenuItem
-                icon={<IconFileCopy />}
-                onClick={(event: MouseEvent) => {
-                  event.stopPropagation()
-                  dispatch(copyModalDidOpen())
-                }}
-              >
-                Copy
-              </MenuItem>
-            ) : null}
+            <MenuItem
+              icon={<IconDelete />}
+              className={cx('text-red-500')}
+              isDisabled={!isDeleteAuthorized}
+              onClick={(event: MouseEvent) => {
+                event.stopPropagation()
+                dispatch(deleteModalDidOpen())
+              }}
+            >
+              Delete
+            </MenuItem>
+            <MenuItem
+              icon={<IconEdit />}
+              isDisabled={!isRenameAuthorized}
+              onClick={(event: MouseEvent) => {
+                event.stopPropagation()
+                dispatch(renameModalDidOpen())
+              }}
+            >
+              Rename
+            </MenuItem>
+            <MenuItem
+              icon={<IconArrowTopRight />}
+              isDisabled={!isMoveAuthorized}
+              onClick={(event: MouseEvent) => {
+                event.stopPropagation()
+                dispatch(moveModalDidOpen())
+              }}
+            >
+              Move
+            </MenuItem>
+            <MenuItem
+              icon={<IconFileCopy />}
+              isDisabled={!isCopyAuthorized}
+              onClick={(event: MouseEvent) => {
+                event.stopPropagation()
+                dispatch(copyModalDidOpen())
+              }}
+            >
+              Copy
+            </MenuItem>
             {isToolbarMode ? (
               <>
                 <MenuDivider />
