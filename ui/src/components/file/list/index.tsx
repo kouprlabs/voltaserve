@@ -40,7 +40,7 @@ const FileList = ({ list, scale }: FileListProps) => {
     (state) => state.ui.files.isSelectionMode,
   )
   const [activeId, setActiveId] = useState<string | null>(null)
-  const [isContextMenuOpen, setIsContextMenuOpen] = useState(false)
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [menuPosition, setMenuPosition] = useState<FileMenuPosition>()
   const activeFile = useMemo(
     () => list.data.find((e) => e.id === activeId),
@@ -102,12 +102,12 @@ const FileList = ({ list, scale }: FileListProps) => {
   }, [dispatch])
 
   useEffect(() => {
-    if (isContextMenuOpen) {
+    if (isMenuOpen) {
       dispatch(contextMenuDidOpen())
     } else {
       dispatch(contextMenuDidClose())
     }
-  }, [isContextMenuOpen, dispatch])
+  }, [isMenuOpen, dispatch])
 
   const handleDragStart = useCallback((event: DragStartEvent) => {
     dispatch(selectionAdded(event.active.id as string))
@@ -174,7 +174,7 @@ const FileList = ({ list, scale }: FileListProps) => {
                     isSelectionMode={isSelectionMode}
                     onContextMenu={(event: MouseEvent) => {
                       setMenuPosition({ x: event.pageX, y: event.pageY })
-                      setIsContextMenuOpen(true)
+                      setIsMenuOpen(true)
                     }}
                   />
                 ))}
@@ -201,7 +201,7 @@ const FileList = ({ list, scale }: FileListProps) => {
                     isSelectionMode={isSelectionMode}
                     onContextMenu={(event: MouseEvent) => {
                       setMenuPosition({ x: event.pageX, y: event.pageY })
-                      setIsContextMenuOpen(true)
+                      setIsMenuOpen(true)
                     }}
                   />
                 ))}
@@ -215,9 +215,9 @@ const FileList = ({ list, scale }: FileListProps) => {
         </DndContext>
       </div>
       <FileMenu
-        isOpen={isContextMenuOpen}
+        isOpen={isMenuOpen}
         position={menuPosition}
-        onClose={() => setIsContextMenuOpen(false)}
+        onClose={() => setIsMenuOpen(false)}
       />
     </>
   )
