@@ -1,0 +1,10 @@
+server:
+  port: 8086
+
+app:
+  s3:
+    url: ${S3_URL:localhost:9000}
+    access-key: ${S3_ACCESS_KEY:voltaserve}
+    secret-key: ${S3_SECRET_KEY:voltaserve}
+    region: ${S3_REGION:us-east-1}
+    secure: ${S3_SECURE:false}
