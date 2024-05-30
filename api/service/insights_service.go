@@ -145,6 +145,9 @@ func (svc *InsightsService) Patch(id string, userID string) error {
 	if err != nil {
 		return err
 	}
+	if snapshot.GetStatus() == model.SnapshotStatusProcessing {
+		return errorpkg.NewSnapshotIsProcessingError(nil)
+	}
 	previous, err := svc.getPreviousSnapshot(file.GetID(), snapshot.GetVersion())
 	if err != nil {
 		return err

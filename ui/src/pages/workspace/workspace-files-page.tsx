@@ -31,7 +31,7 @@ import { mutateUpdated, selectionUpdated } from '@/store/ui/files'
 
 const WorkspaceFilesPage = () => {
   const navigate = useNavigate()
-  const { id, fileId } = useParams()
+  const { id: workspaceId, fileId } = useParams()
   const [searchParams] = useSearchParams()
   const query = decodeQuery(searchParams.get('q') as string)
   const dispatch = useAppDispatch()
@@ -65,7 +65,7 @@ const WorkspaceFilesPage = () => {
   const isMosaicModalOpen = useAppSelector(
     (state) => state.ui.mosaic.isModalOpen,
   )
-  const { data: workspace } = WorkspaceAPI.useGet(id, swrConfig())
+  const { data: workspace } = WorkspaceAPI.useGet(workspaceId, swrConfig())
   const { page, size, steps, setPage, setSize } = usePagePagination({
     navigate,
     location,

@@ -6,7 +6,6 @@ import {
   IconButton,
   Menu,
   MenuButton,
-  MenuDivider,
   MenuItem,
   MenuList,
   Portal,
@@ -18,33 +17,21 @@ import {
 } from '@chakra-ui/react'
 import cx from 'classnames'
 import FileAPI, { List, SortBy, SortOrder } from '@/client/api/file'
-import { ltEditorPermission, ltOwnerPermission } from '@/client/api/permission'
-import downloadFile from '@/helpers/download-file'
-import { isImage } from '@/helpers/file-extension'
+import { ltEditorPermission } from '@/client/api/permission'
 import mapFileList from '@/helpers/map-file-list'
 import {
   IconAdd,
-  IconFileCopy,
   IconMoreVert,
-  IconDownload,
-  IconEdit,
-  IconArrowTopRight,
-  IconGroup,
-  IconDelete,
   IconUpload,
   IconRefresh,
   IconGridView,
   IconArrowDownward,
   IconArrowUpward,
   IconCheck,
-  IconSelectCheckBox,
-  IconCheckBoxOutlineBlank,
   IconLibraryAddCheck,
   IconExpandMore,
   IconClose,
   IconList,
-  IconHistory,
-  IconModeHeat,
 } from '@/lib/components/icons'
 import { uploadAdded, UploadDecorator } from '@/store/entities/uploads'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
@@ -55,21 +42,13 @@ import {
   sortOrderToggled,
 } from '@/store/ui/files'
 import {
-  copyModalDidOpen,
   createModalDidOpen,
-  deleteModalDidOpen,
   iconScaleUpdated,
-  moveModalDidOpen,
-  renameModalDidOpen,
   selectionUpdated,
-  sharingModalDidOpen,
 } from '@/store/ui/files'
-import { modalDidOpen as insightsModalDidOpen } from '@/store/ui/insights'
-import { modalDidOpen as mosaicModalDidOpen } from '@/store/ui/mosaic'
-import { listModalDidOpen } from '@/store/ui/snapshots'
 import { uploadsDrawerOpened } from '@/store/ui/uploads-drawer'
 import { FileViewType } from '@/types/file'
-import Orb from '../common/orb'
+import FileMenu from './file-menu'
 
 const ICON_SCALE_SLIDER_STEP = 0.25
 const ICON_SCALE_SLIDER_MIN = 1
@@ -81,52 +60,27 @@ export type FileToolbarProps = {
 
 const FileToolbar = ({ list }: FileToolbarProps) => {
   const dispatch = useAppDispatch()
-  const { id, fileId } = useParams()
+  const { id: workspaceId, fileId } = useParams()
   const [isRefreshing, setIsRefreshing] = useState(false)
-  const fileCount = useAppSelector(
+  const count = useAppSelector(
     (state) => state.entities.files.list?.data.length,
-  )
-  const selectionCount = useAppSelector(
-    (state) => state.ui.files.selection.length,
-  )
-  const singleFile = useAppSelector((state) =>
-    state.ui.files.selection.length === 1
-      ? list?.data.find((e) => e.id === state.ui.files.selection[0])
-      : null,
   )
   const iconScale = useAppSelector((state) => state.ui.files.iconScale)
   const viewType = useAppSelector((state) => state.ui.files.viewType)
   const sortBy = useAppSelector((state) => state.ui.files.sortBy)
   const sortOrder = useAppSelector((state) => state.ui.files.sortOrder)
-  const hasOwnerPermission = useAppSelector(
-    (state) =>
-      list?.data.findIndex(
-        (f) =>
-          state.ui.files.selection.findIndex(
-            (s) => f.id === s && ltOwnerPermission(f.permission),
-          ) !== -1,
-      ) === -1,
-  )
-  const hasEditorPermission = useAppSelector(
-    (state) =>
-      list?.data.findIndex(
-        (f) =>
-          state.ui.files.selection.findIndex(
-            (s) => f.id === s && ltEditorPermission(f.permission),
-          ) !== -1,
-      ) === -1,
-  )
   const isSelectionMode = useAppSelector(
     (state) => state.ui.files.isSelectionMode,
   )
   const mutateList = useAppSelector((state) => state.ui.files.mutate)
-  const isMenuOpen = useAppSelector((state) => state.ui.files.isMenuOpen)
+  const isContextMenuOpen = useAppSelector(
+    (state) => state.ui.files.isContextMenuOpen,
+  )
   const fileUploadInput = useRef<HTMLInputElement>(null)
   const folderUploadInput = useRef<HTMLInputElement>(null)
   const { data: folder } = FileAPI.useGet(fileId)
-  const stackClassName = cx('flex', 'flex-row', 'gap-0.5')
 
-  const handleFileChange = useCallback(
+  const handleUploadChange = useCallback(
     async (event: ChangeEvent<HTMLInputElement>) => {
       const files = mapFileList(event.target.files)
       if (files.length === 0) {
@@ -136,7 +90,7 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
         dispatch(
           uploadAdded(
             new UploadDecorator({
-              workspaceId: id!,
+              workspaceId: workspaceId!,
               parentId: fileId!,
               blob: file,
             }).value,
@@ -151,7 +105,7 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
         folderUploadInput.current.value = ''
       }
     },
-    [id, fileId, dispatch],
+    [workspaceId, fileId, dispatch],
   )
 
   const handleIconScaleChange = useCallback(
@@ -184,12 +138,6 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
     dispatch(selectionUpdated([]))
     dispatch(viewTypeToggled())
   }, [dispatch])
-
-  const handleSelectAllClick = useCallback(() => {
-    if (list?.data) {
-      dispatch(selectionUpdated(list?.data.map((f) => f.id)))
-    }
-  }, [list?.data, dispatch])
 
   const handleToggleSelection = useCallback(() => {
     dispatch(selectionUpdated([]))
@@ -225,7 +173,7 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
 
   return (
     <>
-      <div className={stackClassName}>
+      <div className={cx('flex', 'flex-row', 'gap-0.5')}>
         <ButtonGroup isAttached>
           <Menu>
             <MenuButton
@@ -268,135 +216,12 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
             New Folder
           </Button>
         </ButtonGroup>
-        {!isMenuOpen ? (
-          <div className={stackClassName}>
-            {singleFile?.type === 'file' ? (
-              <Button
-                leftIcon={<Orb width="20px" height="20px" />}
-                onClick={() => dispatch(insightsModalDidOpen())}
-              >
-                Insights
-              </Button>
-            ) : null}
-            {singleFile?.type === 'file' &&
-            isImage(singleFile.snapshot?.original.extension) ? (
-              <Button
-                leftIcon={<IconModeHeat />}
-                onClick={() => dispatch(mosaicModalDidOpen())}
-              >
-                Performance
-              </Button>
-            ) : null}
-            {selectionCount > 0 && hasOwnerPermission ? (
-              <Button
-                leftIcon={<IconGroup />}
-                onClick={() => dispatch(sharingModalDidOpen())}
-              >
-                Sharing
-              </Button>
-            ) : null}
-            {singleFile?.type === 'file' && hasEditorPermission ? (
-              <Button
-                leftIcon={<IconHistory />}
-                onClick={() => dispatch(listModalDidOpen())}
-              >
-                Snapshots
-              </Button>
-            ) : null}
-            {selectionCount > 0 ? (
-              <Menu>
-                <MenuButton
-                  as={IconButton}
-                  icon={<IconMoreVert />}
-                  variant="solid"
-                  aria-label=""
-                  isDisabled={!list}
-                />
-                <Portal>
-                  <MenuList zIndex="dropdown">
-                    <MenuItem
-                      icon={<IconGroup />}
-                      isDisabled={selectionCount === 0 || !hasOwnerPermission}
-                      onClick={() => dispatch(sharingModalDidOpen())}
-                    >
-                      Sharing
-                    </MenuItem>
-                    <MenuItem
-                      icon={<IconHistory />}
-                      isDisabled={
-                        singleFile?.type !== 'file' || !hasOwnerPermission
-                      }
-                      onClick={() => dispatch(listModalDidOpen())}
-                    >
-                      Snapshots
-                    </MenuItem>
-                    <MenuItem
-                      icon={<IconDownload />}
-                      isDisabled={singleFile?.type !== 'file'}
-                      onClick={() => {
-                        if (singleFile) {
-                          downloadFile(singleFile)
-                        }
-                      }}
-                    >
-                      Download
-                    </MenuItem>
-                    <MenuDivider />
-                    <MenuItem
-                      icon={<IconDelete />}
-                      className={cx('text-red-500')}
-                      isDisabled={selectionCount === 0 || !hasOwnerPermission}
-                      onClick={() => dispatch(deleteModalDidOpen())}
-                    >
-                      Delete
-                    </MenuItem>
-                    <MenuItem
-                      icon={<IconEdit />}
-                      isDisabled={selectionCount !== 1 || !hasEditorPermission}
-                      onClick={() => dispatch(renameModalDidOpen())}
-                    >
-                      Rename
-                    </MenuItem>
-                    <MenuItem
-                      icon={<IconArrowTopRight />}
-                      isDisabled={selectionCount === 0 || !hasEditorPermission}
-                      onClick={() => dispatch(moveModalDidOpen())}
-                    >
-                      Move
-                    </MenuItem>
-                    <MenuItem
-                      icon={<IconFileCopy />}
-                      isDisabled={selectionCount === 0 || !hasEditorPermission}
-                      onClick={() => dispatch(copyModalDidOpen())}
-                    >
-                      Copy
-                    </MenuItem>
-                    {isSelectionMode ? (
-                      <>
-                        <MenuDivider />
-                        <MenuItem
-                          icon={<IconSelectCheckBox />}
-                          onClick={handleSelectAllClick}
-                        >
-                          Select All
-                        </MenuItem>
-                        <MenuItem
-                          icon={<IconCheckBoxOutlineBlank />}
-                          onClick={() => dispatch(selectionUpdated([]))}
-                        >
-                          Unselect All
-                        </MenuItem>
-                      </>
-                    ) : null}
-                  </MenuList>
-                </Portal>
-              </Menu>
-            ) : null}
+        {!isContextMenuOpen ? (
+          <div className={cx('flex', 'flex-row', 'gap-0.5')}>
+            <FileMenu isToolbarMode={true} />
           </div>
-        ) : (
-          <div className={stackClassName}></div>
-        )}
-        {fileCount ? (
+        ) : null}
+        {count ? (
           <IconButton
             icon={isSelectionMode ? <IconClose /> : <IconLibraryAddCheck />}
             isDisabled={!list}
@@ -432,7 +257,7 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
               <IconGridView className={cx('text-gray-500')} />
             </SliderThumb>
           </Slider>
-          <div className={stackClassName}>
+          <div className={cx('flex', 'flex-row', 'gap-0.5')}>
             <IconButton
               icon={getSortOrderIcon()}
               variant="solid"
@@ -498,7 +323,7 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
         className={cx('hidden')}
         type="file"
         multiple
-        onChange={handleFileChange}
+        onChange={handleUploadChange}
       />
       <input
         ref={folderUploadInput}
@@ -508,7 +333,7 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
         directory=""
         webkitdirectory=""
         mozdirectory=""
-        onChange={handleFileChange}
+        onChange={handleUploadChange}
       />
     </>
   )

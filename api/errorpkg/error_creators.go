@@ -109,6 +109,16 @@ func NewSnapshotCannotBePatchedError(err error) *ErrorResponse {
 	)
 }
 
+func NewSnapshotIsProcessingError(err error) *ErrorResponse {
+	return NewErrorResponse(
+		"snapshot_is_processing",
+		http.StatusBadRequest,
+		"Snapshot is processing.",
+		"Snapshot is processing.",
+		err,
+	)
+}
+
 func NewUnsupportedFileTypeError(err error) *ErrorResponse {
 	return NewErrorResponse(
 		"unsupported_file_type",

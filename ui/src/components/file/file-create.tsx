@@ -32,7 +32,7 @@ type FormValues = {
 }
 
 const FileCreate = () => {
-  const { id, fileId } = useParams()
+  const { id: workspaceId, fileId } = useParams()
   const dispatch = useAppDispatch()
   const isModalOpen = useAppSelector(
     (state) => state.ui.files.isCreateModalOpen,
@@ -59,7 +59,7 @@ const FileCreate = () => {
         await FileAPI.create({
           type: FileType.Folder,
           name,
-          workspaceId: id!,
+          workspaceId: workspaceId!,
           parentId: fileId!,
         })
         mutateList?.()
@@ -69,7 +69,7 @@ const FileCreate = () => {
         setSubmitting(false)
       }
     },
-    [id, fileId, dispatch, mutateList],
+    [workspaceId, fileId, dispatch, mutateList],
   )
 
   return (

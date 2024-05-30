@@ -61,6 +61,9 @@ func (svc *MosaicService) Create(id string, userID string) error {
 	if err != nil {
 		return err
 	}
+	if snapshot.GetStatus() == model.SnapshotStatusProcessing {
+		return errorpkg.NewSnapshotIsProcessingError(nil)
+	}
 	snapshot.SetStatus(model.SnapshotStatusProcessing)
 	if err := svc.snapshotRepo.Save(snapshot); err != nil {
 		return err
