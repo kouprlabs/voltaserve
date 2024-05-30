@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { useColorMode } from '@chakra-ui/react'
 import { ResponsivePie } from '@nivo/pie'
 import cx from 'classnames'
 import InsightsAPI, { SortBy, SortOrder } from '@/client/api/insights'
@@ -6,6 +7,7 @@ import { swrConfig } from '@/client/options'
 import { useAppSelector } from '@/store/hook'
 
 const InsightsOverviewChart = () => {
+  const { colorMode } = useColorMode()
   const id = useAppSelector((state) =>
     state.ui.files.selection.length > 0
       ? state.ui.files.selection[0]
@@ -39,7 +41,7 @@ const InsightsOverviewChart = () => {
       {data ? (
         <ResponsivePie
           data={data}
-          colors={{ scheme: 'greys' }}
+          colors={{ scheme: colorMode === 'light' ? 'greys' : 'nivo' }}
           margin={{ top: 40, right: 40, bottom: 40, left: 40 }}
           innerRadius={0.6}
           padAngle={3}
@@ -51,7 +53,9 @@ const InsightsOverviewChart = () => {
             modifiers: [['darker', 0.2]],
           }}
           arcLinkLabelsSkipAngle={10}
-          arcLinkLabelsTextColor="rgb(26, 32, 44)"
+          arcLinkLabelsTextColor={
+            colorMode === 'light' ? 'rgb(26, 32, 44)' : 'white'
+          }
           arcLinkLabelsThickness={2}
           arcLinkLabelsColor={{
             from: 'color',
