@@ -343,7 +343,7 @@ func (svc *InsightsService) Delete(id string, userID string) error {
 	if err != nil {
 		return err
 	}
-	if err = svc.fileGuard.Authorize(userID, file, model.PermissionEditor); err != nil {
+	if err = svc.fileGuard.Authorize(userID, file, model.PermissionOwner); err != nil {
 		return err
 	}
 	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
