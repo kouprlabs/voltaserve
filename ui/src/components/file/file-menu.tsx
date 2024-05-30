@@ -196,22 +196,6 @@ const FileMenu = ({
               Insights
             </Button>
           ) : null}
-          {isPerformanceAuthorized ? (
-            <Button
-              leftIcon={<IconModeHeat />}
-              onClick={() => dispatch(mosaicModalDidOpen())}
-            >
-              Performance
-            </Button>
-          ) : null}
-          {isSecurityAuthorized ? (
-            <Button
-              leftIcon={<IconSecurity />}
-              onClick={() => dispatch(mosaicModalDidOpen())}
-            >
-              Security
-            </Button>
-          ) : null}
           {isSharingAuthorized ? (
             <Button
               leftIcon={<IconGroup />}
@@ -227,6 +211,17 @@ const FileMenu = ({
             >
               Snapshots
             </Button>
+          ) : null}
+          {isPerformanceAuthorized ? (
+            <Button
+              leftIcon={<IconModeHeat />}
+              onClick={() => dispatch(mosaicModalDidOpen())}
+            >
+              Performance
+            </Button>
+          ) : null}
+          {isSecurityAuthorized ? (
+            <Button leftIcon={<IconSecurity />}>Security</Button>
           ) : null}
         </>
       ) : null}
@@ -252,6 +247,20 @@ const FileMenu = ({
                 : undefined
             }
           >
+            {!isToolbarMode && isInsightsAuthorized ? (
+              <>
+                <MenuItem
+                  icon={<Orb width="20px" height="20px" />}
+                  onClick={(event: MouseEvent) => {
+                    event.stopPropagation()
+                    dispatch(insightsModalDidOpen())
+                  }}
+                >
+                  Insights
+                </MenuItem>
+                <MenuDivider />
+              </>
+            ) : null}
             {!isToolbarMode && isSharingAuthorized ? (
               <MenuItem
                 icon={<IconGroup />}
@@ -288,6 +297,7 @@ const FileMenu = ({
             {!isToolbarMode && isSecurityAuthorized ? (
               <MenuItem icon={<IconSecurity />}>Security</MenuItem>
             ) : null}
+            {file?.type === 'file' && !isToolbarMode ? <MenuDivider /> : null}
             {isUploadAuthorized ? (
               <MenuItem
                 icon={<IconUpload />}
@@ -318,20 +328,6 @@ const FileMenu = ({
               </MenuItem>
             ) : null}
             {file?.type === 'file' ? <MenuDivider /> : null}
-            {!isToolbarMode && isInsightsAuthorized ? (
-              <>
-                <MenuItem
-                  icon={<Orb width="20px" height="20px" />}
-                  onClick={(event: MouseEvent) => {
-                    event.stopPropagation()
-                    dispatch(insightsModalDidOpen())
-                  }}
-                >
-                  Insights
-                </MenuItem>
-                <MenuDivider />
-              </>
-            ) : null}
             {isDeleteAuthorized ? (
               <MenuItem
                 icon={<IconDelete />}
