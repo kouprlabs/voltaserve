@@ -97,6 +97,9 @@ func (svc *InsightsService) Create(id string, opts InsightsCreateOptions, userID
 	if err != nil {
 		return err
 	}
+	if snapshot.GetStatus() == model.SnapshotStatusProcessing {
+		return errorpkg.NewSnapshotIsProcessingError(nil)
+	}
 	snapshot.SetLanguage(opts.LanguageID)
 	snapshot.SetStatus(model.SnapshotStatusProcessing)
 	if err := svc.snapshotRepo.Save(snapshot); err != nil {
