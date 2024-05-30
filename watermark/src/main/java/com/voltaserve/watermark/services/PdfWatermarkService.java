@@ -116,8 +116,6 @@ public class PdfWatermarkService {
   }
 
   private void setStrokingColor(PDPageContentStream pdPageContentStream) throws IOException {
-    // Some API weirdness here. When int, range is 0..255
-    // When float, this would be 0..1f
     pdPageContentStream.setNonStrokingColor(1, 0, 0);
     pdPageContentStream.setStrokingColor(1, 0, 0);
   }
