@@ -297,7 +297,7 @@ const FileMenu = ({
             {!isToolbarMode && isSecurityAuthorized ? (
               <MenuItem icon={<IconSecurity />}>Security</MenuItem>
             ) : null}
-            {file?.type === 'file' && !isToolbarMode ? <MenuDivider /> : null}
+            <MenuDivider />
             {isUploadAuthorized ? (
               <MenuItem
                 icon={<IconUpload />}
@@ -327,7 +327,7 @@ const FileMenu = ({
                 Download
               </MenuItem>
             ) : null}
-            {file?.type === 'file' ? <MenuDivider /> : null}
+            <MenuDivider />
             {isDeleteAuthorized ? (
               <MenuItem
                 icon={<IconDelete />}
