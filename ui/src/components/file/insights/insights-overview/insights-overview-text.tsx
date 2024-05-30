@@ -39,7 +39,7 @@ const InsightsOverviewText = () => {
           href={`/proxy/api/v2/insights/${id}/text${file.snapshot?.text.extension}?${searchParams}`}
           target="_blank"
         >
-          Open Text
+          Open Text File
         </Button>
       ) : null}
       {file.snapshot?.ocr ? (

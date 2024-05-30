@@ -11,6 +11,7 @@ export type Snapshot = {
   text?: Download
   entities?: Download
   mosaic?: Download
+  watermark?: Download
   thumbnail?: Thumbnail
   language?: string
   isActive: boolean

@@ -1,6 +1,12 @@
 server:
   port: 8086
 
+spring:
+  servlet:
+    multipart:
+      max-file-size: ${MULTIPART_BODY_LENGTH_LIMIT:1000MB}
+      max-request-size: ${MULTIPART_BODY_LENGTH_LIMIT:1000MB}
+
 app:
   s3:
     url: ${S3_URL:localhost:9000}

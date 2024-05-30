@@ -4,7 +4,6 @@ import com.voltaserve.watermark.dtos.WatermarkRequest;
 import com.voltaserve.watermark.pojos.StrokeProperties;
 import io.minio.MinioClient;
 import io.minio.UploadObjectArgs;
-import io.minio.errors.MinioException;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.cos.COSName;
@@ -88,7 +87,7 @@ public class PdfWatermarkService {
       minioClient.uploadObject(
               UploadObjectArgs.builder()
                       .bucket(request.getS3Bucket())
-                      .object(request.getS3Key() + "/watermark." + FilenameUtils.getExtension(request.getPath()))
+                      .object(request.getS3Key())
                       .filename(output.toString())
                       .build());
     } catch (Exception e) {

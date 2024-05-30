@@ -14,7 +14,8 @@ import FileRename from '@/components/file/file-rename'
 import FileToolbar from '@/components/file/file-toolbar'
 import Insights from '@/components/file/insights'
 import FileList from '@/components/file/list'
-import Mosaic from '@/components/file/performance'
+import Performance from '@/components/file/performance'
+import Security from '@/components/file/security'
 import Sharing from '@/components/file/sharing'
 import SnapshotDetach from '@/components/file/snapshot/snapshot-detach'
 import SnapshotList from '@/components/file/snapshot/snapshot-list'
@@ -62,8 +63,11 @@ const WorkspaceFilesPage = () => {
   const isInsightsModalOpen = useAppSelector(
     (state) => state.ui.insights.isModalOpen,
   )
-  const isMosaicModalOpen = useAppSelector(
+  const isPerformanceModalOpen = useAppSelector(
     (state) => state.ui.mosaic.isModalOpen,
+  )
+  const isSecurityModalOpen = useAppSelector(
+    (state) => state.ui.watermark.isModalOpen,
   )
   const { data: workspace } = WorkspaceAPI.useGet(workspaceId, swrConfig())
   const { page, size, steps, setPage, setSize } = usePagePagination({
@@ -197,7 +201,8 @@ const WorkspaceFilesPage = () => {
       {isDeleteModalOpen ? <FileDelete /> : null}
       {isRenameModalOpen ? <FileRename /> : null}
       {isInsightsModalOpen ? <Insights /> : null}
-      {isMosaicModalOpen ? <Mosaic /> : null}
+      {isPerformanceModalOpen ? <Performance /> : null}
+      {isSecurityModalOpen ? <Security /> : null}
     </>
   )
 }

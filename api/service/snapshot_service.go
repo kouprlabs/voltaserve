@@ -56,6 +56,7 @@ type Snapshot struct {
 	Text       *Download  `json:"text,omitempty"`
 	Entities   *Download  `json:"entities,omitempty"`
 	Mosaic     *Download  `json:"mosaic,omitempty"`
+	Watermark  *Download  `json:"watermark,omitempty"`
 	Thumbnail  *Thumbnail `json:"thumbnail,omitempty"`
 	Language   *string    `json:"language,omitempty"`
 	Status     string     `json:"status,omitempty"`
@@ -317,6 +318,9 @@ func (mp *SnapshotMapper) mapOne(m model.Snapshot, isActive bool) *Snapshot {
 	}
 	if m.HasMosaic() {
 		s.Mosaic = mp.mapS3Object(m.GetMosaic())
+	}
+	if m.HasWatermark() {
+		s.Watermark = mp.mapS3Object(m.GetWatermark())
 	}
 	if m.HasThumbnail() {
 		s.Thumbnail = mp.mapThumbnail(m.GetThumbnail())

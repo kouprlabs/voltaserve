@@ -116,7 +116,7 @@ public class ImageWatermarkService {
       minioClient.uploadObject(
               UploadObjectArgs.builder()
                       .bucket(request.getS3Bucket())
-                      .object(request.getS3Key() + "/watermark." + FilenameUtils.getExtension(request.getPath()))
+                      .object(request.getS3Key())
                       .filename(output.toString())
                       .build());
     } catch (Exception e) {

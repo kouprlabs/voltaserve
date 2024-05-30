@@ -275,9 +275,6 @@ func (svc *FileService) DownloadOriginalBuffer(id string, userID string) (*bytes
 	if err != nil {
 		return nil, nil, nil, err
 	}
-	if err = svc.fileGuard.Authorize(userID, file, model.PermissionViewer); err != nil {
-		return nil, nil, nil, err
-	}
 	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
 		return nil, nil, nil, errorpkg.NewFileIsNotAFileError(file)
 	}
@@ -285,8 +282,14 @@ func (svc *FileService) DownloadOriginalBuffer(id string, userID string) (*bytes
 	if err != nil {
 		return nil, nil, nil, err
 	}
-	if snapshot == nil {
-		return nil, nil, nil, errorpkg.NewSnapshotNotFoundError(nil)
+	if snapshot.HasWatermark() {
+		if err = svc.fileGuard.Authorize(userID, file, model.PermissionEditor); err != nil {
+			return nil, nil, nil, err
+		}
+	} else {
+		if err = svc.fileGuard.Authorize(userID, file, model.PermissionViewer); err != nil {
+			return nil, nil, nil, err
+		}
 	}
 	if snapshot.HasOriginal() {
 		buf, err := svc.s3.GetObject(snapshot.GetOriginal().Key, snapshot.GetOriginal().Bucket)
@@ -304,9 +307,6 @@ func (svc *FileService) DownloadPreviewBuffer(id string, userID string) (*bytes.
 	if err != nil {
 		return nil, nil, nil, err
 	}
-	if err = svc.fileGuard.Authorize(userID, file, model.PermissionViewer); err != nil {
-		return nil, nil, nil, err
-	}
 	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
 		return nil, nil, nil, errorpkg.NewFileIsNotAFileError(file)
 	}
@@ -314,8 +314,14 @@ func (svc *FileService) DownloadPreviewBuffer(id string, userID string) (*bytes.
 	if err != nil {
 		return nil, nil, nil, err
 	}
-	if snapshot == nil {
-		return nil, nil, nil, errorpkg.NewSnapshotNotFoundError(nil)
+	if snapshot.HasWatermark() {
+		if err = svc.fileGuard.Authorize(userID, file, model.PermissionEditor); err != nil {
+			return nil, nil, nil, err
+		}
+	} else {
+		if err = svc.fileGuard.Authorize(userID, file, model.PermissionViewer); err != nil {
+			return nil, nil, nil, err
+		}
 	}
 	if snapshot.HasPreview() {
 		buf, err := svc.s3.GetObject(snapshot.GetPreview().Key, snapshot.GetPreview().Bucket)

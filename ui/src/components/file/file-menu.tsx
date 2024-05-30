@@ -53,6 +53,7 @@ import { modalDidOpen as insightsModalDidOpen } from '@/store/ui/insights'
 import { modalDidOpen as mosaicModalDidOpen } from '@/store/ui/mosaic'
 import { listModalDidOpen } from '@/store/ui/snapshots'
 import { uploadsDrawerOpened } from '@/store/ui/uploads-drawer'
+import { modalDidOpen as watermarkModalDidOpen } from '@/store/ui/watermark'
 import Orb from '../common/orb'
 
 export type FileMenuProps = {
@@ -231,7 +232,12 @@ const FileMenu = ({
             </Button>
           ) : null}
           {isSecurityAuthorized ? (
-            <Button leftIcon={<IconSecurity />}>Security</Button>
+            <Button
+              leftIcon={<IconSecurity />}
+              onClick={() => dispatch(watermarkModalDidOpen())}
+            >
+              Security
+            </Button>
           ) : null}
         </>
       ) : null}
@@ -304,9 +310,19 @@ const FileMenu = ({
               </MenuItem>
             ) : null}
             {!isToolbarMode && isSecurityAuthorized ? (
-              <MenuItem icon={<IconSecurity />}>Security</MenuItem>
+              <MenuItem
+                icon={<IconSecurity />}
+                onClick={(event: MouseEvent) => {
+                  event.stopPropagation()
+                  dispatch(watermarkModalDidOpen())
+                }}
+              >
+                Security
+              </MenuItem>
             ) : null}
-            {isAnyFeatureIsAuthorized ? <MenuDivider /> : null}
+            {isAnyFeatureIsAuthorized && !isToolbarMode ? (
+              <MenuDivider />
+            ) : null}
             <MenuItem
               icon={<IconUpload />}
               isDisabled={!isUploadAuthorized}

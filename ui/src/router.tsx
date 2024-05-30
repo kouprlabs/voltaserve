@@ -128,6 +128,10 @@ const router = createBrowserRouter([
         element: <FileViewerPage />,
       },
       {
+        path: '/file/:id/watermark',
+        element: <FileViewerPage />,
+      },
+      {
         path: '/sign-up',
         element: <SignUpPage />,
       },

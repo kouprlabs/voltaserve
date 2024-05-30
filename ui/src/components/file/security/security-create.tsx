@@ -1,30 +1,31 @@
 import { useCallback } from 'react'
 import { Button, ModalBody, ModalFooter } from '@chakra-ui/react'
 import cx from 'classnames'
-import MosaicAPI from '@/client/api/mosaic'
+import WatermarkAPI from '@/client/api/watermark'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
-import { creatingDidStop, modalDidClose } from '@/store/ui/mosaic'
-import { creatingDidStart } from '@/store/ui/mosaic'
+import {
+  creatingDidStop,
+  modalDidClose,
+  creatingDidStart,
+} from '@/store/ui/watermark'
 
-const PerformanceCreate = () => {
+const SecurityCreate = () => {
   const dispatch = useAppDispatch()
   const id = useAppSelector((state) =>
     state.ui.files.selection.length > 0
       ? state.ui.files.selection[0]
       : undefined,
   )
-  const mutateMetadata = useAppSelector(
-    (state) => state.ui.mosaic.mutateMetadata,
-  )
+  const mutateFile = useAppSelector((state) => state.ui.watermark.mutateFile)
   const mutateList = useAppSelector((state) => state.ui.files.mutate)
-  const isCreating = useAppSelector((state) => state.ui.mosaic.isCreating)
+  const isCreating = useAppSelector((state) => state.ui.watermark.isCreating)
 
   const handleCreate = useCallback(async () => {
     if (id) {
       try {
         dispatch(creatingDidStart())
-        await MosaicAPI.create(id)
-        mutateMetadata?.()
+        await WatermarkAPI.create(id)
+        mutateFile?.()
         mutateList?.()
       } catch (error) {
         dispatch(creatingDidStop())
@@ -32,7 +33,7 @@ const PerformanceCreate = () => {
         dispatch(creatingDidStop())
       }
     }
-  }, [id, mutateMetadata, mutateList, dispatch])
+  }, [id, mutateFile, mutateList, dispatch])
 
   if (!id) {
     return null
@@ -51,11 +52,9 @@ const PerformanceCreate = () => {
           )}
         >
           <p>
-            Optimize your image for better performance by creating a mosaic.
-            <br />
-            The mosaic enhances view performance of large images by splitting
-            them into smaller, manageable tiles. This makes browsing
-            high-resolution images faster and more efficient.
+            Create a watermark for your document or image to enhance its
+            security by clearly marking it as confidential or proprietary, thus
+            deterring unauthorized use or distribution.
           </p>
         </div>
       </ModalBody>
@@ -77,7 +76,7 @@ const PerformanceCreate = () => {
             isLoading={isCreating}
             onClick={handleCreate}
           >
-            Optimize Image
+            Protect With Watermark
           </Button>
         </div>
       </ModalFooter>
@@ -85,4 +84,4 @@ const PerformanceCreate = () => {
   )
 }
 
-export default PerformanceCreate
+export default SecurityCreate

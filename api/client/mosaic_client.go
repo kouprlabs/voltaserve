@@ -33,12 +33,13 @@ func NewMosaicClient() *MosaicClient {
 }
 
 type MosaicCreateOptions struct {
-	S3Key    string `json:"s3Key"`
-	S3Bucket string `json:"s3Bucket"`
+	Path     string
+	S3Key    string
+	S3Bucket string
 }
 
-func (cl *MosaicClient) Create(path string, opts MosaicCreateOptions) (*model.MosaicMetadata, error) {
-	file, err := os.Open(path)
+func (cl *MosaicClient) Create(opts MosaicCreateOptions) (*model.MosaicMetadata, error) {
+	file, err := os.Open(opts.Path)
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +50,7 @@ func (cl *MosaicClient) Create(path string, opts MosaicCreateOptions) (*model.Mo
 	}(file)
 	buf := &bytes.Buffer{}
 	mw := multipart.NewWriter(buf)
-	w, err := mw.CreateFormFile("file", path)
+	w, err := mw.CreateFormFile("file", opts.Path)
 	if err != nil {
 		return nil, err
 	}

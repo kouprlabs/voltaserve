@@ -81,7 +81,7 @@ func (r *MosaicRouter) Delete(c *fiber.Ctx) error {
 //	@Summary		Get Metadata
 //	@Description	Get Metadata
 //	@Tags			Mosaic
-//	@Id				mosaic_get_summary
+//	@Id				mosaic_get_metadata
 //	@Accept			json
 //	@Produce		json
 //	@Param			id	path		string	true	"ID"
