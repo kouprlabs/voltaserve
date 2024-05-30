@@ -1,7 +1,9 @@
 import { useCallback } from 'react'
 import { Button, Card, CardBody, CardFooter, Text } from '@chakra-ui/react'
 import cx from 'classnames'
+import FileAPI from '@/client/api/file'
 import InsightsAPI from '@/client/api/insights'
+import { ltOwnerPermission } from '@/client/api/permission'
 import { swrConfig } from '@/client/options'
 import { IconDelete, IconSync } from '@/lib/components/icons'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
@@ -27,6 +29,7 @@ const InsightsOverviewSettings = () => {
   const isUpdating = useAppSelector((state) => state.ui.insights.isUpdating)
   const isDeleting = useAppSelector((state) => state.ui.insights.isDeleting)
   const { data: metadata } = InsightsAPI.useGetMetadata(id, swrConfig())
+  const { data: file } = FileAPI.useGet(id, swrConfig())
 
   const handleUpdate = useCallback(async () => {
     if (!id) {
@@ -96,7 +99,12 @@ const InsightsOverviewSettings = () => {
             colorScheme="red"
             leftIcon={<IconDelete />}
             isLoading={isDeleting}
-            isDisabled={isDeleting || isUpdating}
+            isDisabled={
+              isDeleting ||
+              isUpdating ||
+              !file ||
+              ltOwnerPermission(file.permission)
+            }
             onClick={handleDelete}
           >
             Delete

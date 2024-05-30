@@ -22,7 +22,7 @@ import { IconClose, IconSearch } from '@/lib/components/icons'
 const TopBarSearch = () => {
   const navigation = useNavigate()
   const location = useLocation()
-  const { id, fileId } = useParams()
+  const { id: workspaceId, fileId } = useParams()
   const [searchParams] = useSearchParams()
   const query = decodeQuery(searchParams.get('q') as string)
   const isWorkspaces = useMemo(
@@ -92,9 +92,11 @@ const TopBarSearch = () => {
     (value: string) => {
       if (isFiles) {
         if (value) {
-          navigation(`/workspace/${id}/file/${fileId}?q=${encodeQuery(value)}`)
+          navigation(
+            `/workspace/${workspaceId}/file/${fileId}?q=${encodeQuery(value)}`,
+          )
         } else {
-          navigation(`/workspace/${id}/file/${fileId}`)
+          navigation(`/workspace/${workspaceId}/file/${fileId}`)
         }
       } else if (isWorkspaces) {
         if (value) {
@@ -116,20 +118,22 @@ const TopBarSearch = () => {
         }
       } else if (isOrgMembers) {
         if (value) {
-          navigation(`/organization/${id}/member?q=${encodeQuery(value)}`)
+          navigation(
+            `/organization/${workspaceId}/member?q=${encodeQuery(value)}`,
+          )
         } else {
-          navigation(`/organization/${id}/member`)
+          navigation(`/organization/${workspaceId}/member`)
         }
       } else if (isGroupMembers) {
         if (value) {
-          navigation(`/group/${id}/member?q=${encodeQuery(value)}`)
+          navigation(`/group/${workspaceId}/member?q=${encodeQuery(value)}`)
         } else {
-          navigation(`/group/${id}/member`)
+          navigation(`/group/${workspaceId}/member`)
         }
       }
     },
     [
-      id,
+      workspaceId,
       fileId,
       isFiles,
       isWorkspaces,
@@ -144,7 +148,7 @@ const TopBarSearch = () => {
   const handleClear = useCallback(() => {
     setText('')
     if (isFiles) {
-      navigation(`/workspace/${id}/file/${fileId}`)
+      navigation(`/workspace/${workspaceId}/file/${fileId}`)
     } else if (isWorkspaces) {
       navigation(`/workspace`)
     } else if (isGroups) {
@@ -152,12 +156,12 @@ const TopBarSearch = () => {
     } else if (isOrgs) {
       navigation(`/organization`)
     } else if (isOrgMembers) {
-      navigation(`/organization/${id}/member`)
+      navigation(`/organization/${workspaceId}/member`)
     } else if (isGroupMembers) {
-      navigation(`/group/${id}/member`)
+      navigation(`/group/${workspaceId}/member`)
     }
   }, [
-    id,
+    workspaceId,
     fileId,
     isFiles,
     isWorkspaces,

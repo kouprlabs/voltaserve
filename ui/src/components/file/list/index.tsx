@@ -1,14 +1,5 @@
-import {
-  ChangeEvent,
-  MouseEvent,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
+import { MouseEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { Portal, Menu, MenuList, MenuItem, MenuDivider } from '@chakra-ui/react'
 import {
   DndContext,
   useSensors,
@@ -19,53 +10,19 @@ import {
 import cx from 'classnames'
 import { FileWithPath, useDropzone } from 'react-dropzone'
 import { List as ApiFileList } from '@/client/api/file'
-import {
-  geEditorPermission,
-  ltEditorPermission,
-  ltOwnerPermission,
-  ltViewerPermission,
-} from '@/client/api/permission'
-import Orb from '@/components/common/orb'
-import downloadFile from '@/helpers/download-file'
-import {
-  isImage,
-  isMicrosoftOffice,
-  isOpenOffice,
-  isPDF,
-} from '@/helpers/file-extension'
-import mapFileList from '@/helpers/map-file-list'
-import {
-  IconFileCopy,
-  IconDownload,
-  IconEdit,
-  IconArrowTopRight,
-  IconGroup,
-  IconDelete,
-  IconHistory,
-  IconUpload,
-  IconModeHeat,
-  IconSecurity,
-} from '@/lib/components/icons'
 import { UploadDecorator, uploadAdded } from '@/store/entities/uploads'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import {
-  copyModalDidOpen,
-  deleteModalDidOpen,
-  menuDidClose,
-  menuDidOpen,
-  moveModalDidOpen,
+  contextMenuDidClose,
+  contextMenuDidOpen,
   multiSelectKeyUpdated,
   rangeSelectKeyUpdated,
-  renameModalDidOpen,
   selectionAdded,
   selectionUpdated,
-  sharingModalDidOpen,
 } from '@/store/ui/files'
-import { modalDidOpen as insightsModalDidOpen } from '@/store/ui/insights'
-import { modalDidOpen as mosaicModalDidOpen } from '@/store/ui/mosaic'
-import { listModalDidOpen } from '@/store/ui/snapshots'
 import { uploadsDrawerOpened } from '@/store/ui/uploads-drawer'
 import { FileViewType } from '@/types/file'
+import FileMenu, { FileMenuPosition } from '../file-menu'
 import ListDragOverlay from './list-drag-overlay'
 import ListDraggableDroppable from './list-draggable-droppable'
 
@@ -76,25 +33,19 @@ type FileListProps = {
 
 const FileList = ({ list, scale }: FileListProps) => {
   const dispatch = useAppDispatch()
-  const { id, fileId } = useParams()
-  const singleFile = useAppSelector((state) =>
-    state.ui.files.selection.length === 1
-      ? list.data.find((e) => e.id === state.ui.files.selection[0])
-      : null,
-  )
+  const { id: workspaceId, fileId } = useParams()
   const hidden = useAppSelector((state) => state.ui.files.hidden)
   const viewType = useAppSelector((state) => state.ui.files.viewType)
   const isSelectionMode = useAppSelector(
     (state) => state.ui.files.isSelectionMode,
   )
   const [activeId, setActiveId] = useState<string | null>(null)
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [menuPosition, setMenuPosition] = useState<{ x: number; y: number }>()
+  const [isContextMenuOpen, setIsContextMenuOpen] = useState(false)
+  const [menuPosition, setMenuPosition] = useState<FileMenuPosition>()
   const activeFile = useMemo(
     () => list.data.find((e) => e.id === activeId),
     [list, activeId],
   )
-  const fileUploadInput = useRef<HTMLInputElement>(null)
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -112,7 +63,7 @@ const FileList = ({ list, scale }: FileListProps) => {
         dispatch(
           uploadAdded(
             new UploadDecorator({
-              workspaceId: id!,
+              workspaceId: workspaceId!,
               parentId: fileId!,
               blob: file,
             }).value,
@@ -121,7 +72,7 @@ const FileList = ({ list, scale }: FileListProps) => {
       }
       dispatch(uploadsDrawerOpened())
     },
-    [id, fileId, dispatch],
+    [workspaceId, fileId, dispatch],
   )
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -151,12 +102,12 @@ const FileList = ({ list, scale }: FileListProps) => {
   }, [dispatch])
 
   useEffect(() => {
-    if (isMenuOpen) {
-      dispatch(menuDidOpen())
+    if (isContextMenuOpen) {
+      dispatch(contextMenuDidOpen())
     } else {
-      dispatch(menuDidClose())
+      dispatch(contextMenuDidClose())
     }
-  }, [isMenuOpen, dispatch])
+  }, [isContextMenuOpen, dispatch])
 
   const handleDragStart = useCallback((event: DragStartEvent) => {
     dispatch(selectionAdded(event.active.id as string))
@@ -166,27 +117,6 @@ const FileList = ({ list, scale }: FileListProps) => {
   const handleDragEnd = useCallback(() => {
     setActiveId(null)
   }, [])
-
-  const handleFileChange = useCallback(
-    async (event: ChangeEvent<HTMLInputElement>) => {
-      const files = mapFileList(event.target.files)
-      if (files.length === 1 && singleFile) {
-        dispatch(
-          uploadAdded(
-            new UploadDecorator({
-              fileId: singleFile.id,
-              blob: files[0],
-            }).value,
-          ),
-        )
-        dispatch(uploadsDrawerOpened())
-        if (fileUploadInput && fileUploadInput.current) {
-          fileUploadInput.current.value = ''
-        }
-      }
-    },
-    [id, fileId, singleFile, dispatch],
-  )
 
   return (
     <>
@@ -244,7 +174,7 @@ const FileList = ({ list, scale }: FileListProps) => {
                     isSelectionMode={isSelectionMode}
                     onContextMenu={(event: MouseEvent) => {
                       setMenuPosition({ x: event.pageX, y: event.pageY })
-                      setIsMenuOpen(true)
+                      setIsContextMenuOpen(true)
                     }}
                   />
                 ))}
@@ -271,7 +201,7 @@ const FileList = ({ list, scale }: FileListProps) => {
                     isSelectionMode={isSelectionMode}
                     onContextMenu={(event: MouseEvent) => {
                       setMenuPosition({ x: event.pageX, y: event.pageY })
-                      setIsMenuOpen(true)
+                      setIsContextMenuOpen(true)
                     }}
                   />
                 ))}
@@ -284,178 +214,10 @@ const FileList = ({ list, scale }: FileListProps) => {
           />
         </DndContext>
       </div>
-      <Portal>
-        <Menu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)}>
-          <MenuList
-            zIndex="dropdown"
-            style={{
-              position: 'absolute',
-              left: menuPosition?.x,
-              top: menuPosition?.y,
-            }}
-          >
-            <MenuItem
-              icon={<IconGroup />}
-              isDisabled={
-                singleFile ? ltOwnerPermission(singleFile.permission) : false
-              }
-              onClick={(event: MouseEvent) => {
-                event.stopPropagation()
-                dispatch(sharingModalDidOpen())
-              }}
-            >
-              Sharing
-            </MenuItem>
-            {singleFile?.type === 'file' ? (
-              <MenuItem
-                icon={<IconHistory />}
-                isDisabled={
-                  singleFile ? ltOwnerPermission(singleFile.permission) : false
-                }
-                onClick={(event: MouseEvent) => {
-                  event.stopPropagation()
-                  dispatch(listModalDidOpen())
-                }}
-              >
-                Snapshots
-              </MenuItem>
-            ) : null}
-            {singleFile &&
-            singleFile.type === 'file' &&
-            isImage(singleFile.snapshot?.original.extension) ? (
-              <MenuItem
-                icon={<IconModeHeat />}
-                isDisabled={ltEditorPermission(singleFile.permission)}
-                onClick={(event: MouseEvent) => {
-                  event.stopPropagation()
-                  dispatch(mosaicModalDidOpen())
-                }}
-              >
-                Performance
-              </MenuItem>
-            ) : null}
-            {singleFile &&
-            singleFile.type === 'file' &&
-            (isPDF(singleFile.snapshot?.original.extension) ||
-              isMicrosoftOffice(singleFile.snapshot?.original.extension) ||
-              isOpenOffice(singleFile.snapshot?.original.extension)) ? (
-              <MenuItem
-                icon={<IconSecurity />}
-                isDisabled={ltEditorPermission(singleFile.permission)}
-              >
-                Security
-              </MenuItem>
-            ) : null}
-            <MenuItem
-              icon={<IconUpload />}
-              isDisabled={
-                !singleFile ||
-                singleFile.type !== 'file' ||
-                ltViewerPermission(singleFile.permission)
-              }
-              onClick={(event: MouseEvent) => {
-                event.stopPropagation()
-                const singleId = singleFile?.id
-                fileUploadInput?.current?.click()
-                if (singleId) {
-                  dispatch(selectionUpdated([singleId]))
-                }
-              }}
-            >
-              Upload
-            </MenuItem>
-            <MenuItem
-              icon={<IconDownload />}
-              isDisabled={
-                !singleFile ||
-                singleFile.type !== 'file' ||
-                ltViewerPermission(singleFile.permission)
-              }
-              onClick={(event: MouseEvent) => {
-                event.stopPropagation()
-                if (singleFile) {
-                  downloadFile(singleFile)
-                }
-              }}
-            >
-              Download
-            </MenuItem>
-            <MenuDivider />
-            {singleFile && singleFile.type === 'file' ? (
-              <>
-                <MenuItem
-                  icon={<Orb width="20px" height="20px" />}
-                  isDisabled={ltEditorPermission(singleFile.permission)}
-                  onClick={(event: MouseEvent) => {
-                    event.stopPropagation()
-                    dispatch(insightsModalDidOpen())
-                  }}
-                >
-                  Insights
-                </MenuItem>
-                <MenuDivider />
-              </>
-            ) : null}
-            <MenuItem
-              icon={<IconDelete />}
-              className={cx('text-red-500')}
-              isDisabled={
-                singleFile ? ltOwnerPermission(singleFile.permission) : false
-              }
-              onClick={(event: MouseEvent) => {
-                event.stopPropagation()
-                dispatch(deleteModalDidOpen())
-              }}
-            >
-              Delete
-            </MenuItem>
-            <MenuItem
-              icon={<IconEdit />}
-              isDisabled={
-                singleFile && geEditorPermission(singleFile.permission)
-                  ? false
-                  : true
-              }
-              onClick={(event: MouseEvent) => {
-                event.stopPropagation()
-                dispatch(renameModalDidOpen())
-              }}
-            >
-              Rename
-            </MenuItem>
-            <MenuItem
-              icon={<IconArrowTopRight />}
-              isDisabled={
-                singleFile ? ltEditorPermission(singleFile.permission) : false
-              }
-              onClick={(event: MouseEvent) => {
-                event.stopPropagation()
-                dispatch(moveModalDidOpen())
-              }}
-            >
-              Move
-            </MenuItem>
-            <MenuItem
-              icon={<IconFileCopy />}
-              isDisabled={
-                singleFile ? ltEditorPermission(singleFile.permission) : false
-              }
-              onClick={(event: MouseEvent) => {
-                event.stopPropagation()
-                dispatch(copyModalDidOpen())
-              }}
-            >
-              Copy
-            </MenuItem>
-          </MenuList>
-        </Menu>
-      </Portal>
-      <input
-        ref={fileUploadInput}
-        className={cx('hidden')}
-        type="file"
-        multiple
-        onChange={handleFileChange}
+      <FileMenu
+        isOpen={isContextMenuOpen}
+        position={menuPosition}
+        onClose={() => setIsContextMenuOpen(false)}
       />
     </>
   )

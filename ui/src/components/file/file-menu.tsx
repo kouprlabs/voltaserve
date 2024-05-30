@@ -1,0 +1,408 @@
+import { ChangeEvent, MouseEvent, useCallback, useMemo, useRef } from 'react'
+import {
+  Button,
+  IconButton,
+  Menu,
+  MenuButton,
+  MenuDivider,
+  MenuItem,
+  MenuList,
+  Portal,
+} from '@chakra-ui/react'
+import cx from 'classnames'
+import {
+  geEditorPermission,
+  geOwnerPermission,
+  geViewerPermission,
+} from '@/client/api/permission'
+import { Status } from '@/client/api/snapshot'
+import downloadFile from '@/helpers/download-file'
+import {
+  isImage,
+  isMicrosoftOffice,
+  isOpenOffice,
+  isPDF,
+} from '@/helpers/file-extension'
+import mapFileList from '@/helpers/map-file-list'
+import {
+  IconFileCopy,
+  IconDownload,
+  IconEdit,
+  IconArrowTopRight,
+  IconGroup,
+  IconDelete,
+  IconUpload,
+  IconHistory,
+  IconModeHeat,
+  IconSecurity,
+  IconSelectCheckBox,
+  IconCheckBoxOutlineBlank,
+  IconMoreVert,
+} from '@/lib/components/icons'
+import { UploadDecorator, uploadAdded } from '@/store/entities/uploads'
+import { useAppDispatch, useAppSelector } from '@/store/hook'
+import {
+  copyModalDidOpen,
+  deleteModalDidOpen,
+  moveModalDidOpen,
+  renameModalDidOpen,
+  selectionUpdated,
+  sharingModalDidOpen,
+} from '@/store/ui/files'
+import { modalDidOpen as insightsModalDidOpen } from '@/store/ui/insights'
+import { modalDidOpen as mosaicModalDidOpen } from '@/store/ui/mosaic'
+import { listModalDidOpen } from '@/store/ui/snapshots'
+import { uploadsDrawerOpened } from '@/store/ui/uploads-drawer'
+import Orb from '../common/orb'
+
+export type FileMenuProps = {
+  isOpen?: boolean
+  position?: FileMenuPosition
+  isToolbarMode?: boolean
+  onClose?: () => void
+}
+
+export type FileMenuPosition = {
+  x: number
+  y: number
+}
+
+const FileMenu = ({
+  position,
+  isOpen,
+  isToolbarMode,
+  onClose,
+}: FileMenuProps) => {
+  const dispatch = useAppDispatch()
+  const list = useAppSelector((state) => state.entities.files.list)
+  const selection = useAppSelector((state) => state.ui.files.selection)
+  const file = useAppSelector((state) =>
+    state.ui.files.selection.length === 1
+      ? list?.data.find((e) => e.id === state.ui.files.selection[0])
+      : undefined,
+  )
+  const isOwnerInSelection = useMemo(
+    () =>
+      list?.data
+        .filter((item) => selection.includes(item.id))
+        .every((item) => geOwnerPermission(item.permission))
+        ? true
+        : false,
+    [list, selection],
+  )
+  const isEditorInSelection = useMemo(
+    () =>
+      list?.data
+        .filter((item) => selection.includes(item.id))
+        .every((item) => geEditorPermission(item.permission))
+        ? true
+        : false,
+    [list, selection],
+  )
+  const isInsightsAuthorized = useMemo(
+    () =>
+      file?.type === 'file' &&
+      file.snapshot?.status !== Status.Processing &&
+      geEditorPermission(file.permission),
+    [file],
+  )
+  const isPerformanceAuthorized = useMemo(
+    () =>
+      file?.type === 'file' &&
+      file.snapshot?.status !== Status.Processing &&
+      isImage(file.snapshot?.original.extension),
+    [file],
+  )
+  const isSecurityAuthorized = useMemo(
+    () =>
+      file?.type === 'file' &&
+      file.snapshot?.status !== Status.Processing &&
+      (isPDF(file.snapshot?.original.extension) ||
+        isMicrosoftOffice(file.snapshot?.original.extension) ||
+        isOpenOffice(file.snapshot?.original.extension)) &&
+      geEditorPermission(file.permission),
+    [file],
+  )
+  const isSharingAuthorized = useMemo(
+    () => selection.length > 0 && isOwnerInSelection,
+    [selection, isOwnerInSelection],
+  )
+  const isDeleteAuthorized = useMemo(
+    () => selection.length > 0 && isOwnerInSelection,
+    [selection, isOwnerInSelection],
+  )
+  const isMoveAuthorized = useMemo(
+    () => selection.length > 0 && isEditorInSelection,
+    [selection, isEditorInSelection],
+  )
+  const isCopyAuthorized = useMemo(
+    () => selection.length > 0 && isEditorInSelection,
+    [selection, isEditorInSelection],
+  )
+  const isSnapshotsAuthorized = useMemo(
+    () => file?.type === 'file' && geOwnerPermission(file.permission),
+    [file],
+  )
+  const isUploadAuthorized = useMemo(
+    () => file?.type === 'file' && geEditorPermission(file.permission),
+    [file],
+  )
+  const isDownloadAuthorized = useMemo(
+    () => file?.type === 'file' && geViewerPermission(file.permission),
+    [file],
+  )
+  const isRenameAuthorized = useMemo(
+    () => file !== undefined && geEditorPermission(file.permission),
+    [file],
+  )
+  const uploadInputRef = useRef<HTMLInputElement>(null)
+
+  const handleUploadInputChange = useCallback(
+    async (event: ChangeEvent<HTMLInputElement>) => {
+      const files = mapFileList(event.target.files)
+      if (files.length === 1 && file) {
+        dispatch(
+          uploadAdded(
+            new UploadDecorator({
+              fileId: file.id,
+              blob: files[0],
+            }).value,
+          ),
+        )
+        dispatch(uploadsDrawerOpened())
+        if (uploadInputRef && uploadInputRef.current) {
+          uploadInputRef.current.value = ''
+        }
+      }
+    },
+    [file, uploadInputRef, dispatch],
+  )
+
+  const handleSelectAllClick = useCallback(() => {
+    if (list?.data) {
+      dispatch(selectionUpdated(list?.data.map((f) => f.id)))
+    }
+  }, [list?.data, dispatch])
+
+  return (
+    <>
+      {isToolbarMode ? (
+        <>
+          {isInsightsAuthorized ? (
+            <Button
+              leftIcon={<Orb width="20px" height="20px" />}
+              onClick={() => dispatch(insightsModalDidOpen())}
+            >
+              Insights
+            </Button>
+          ) : null}
+          {isSharingAuthorized ? (
+            <Button
+              leftIcon={<IconGroup />}
+              onClick={() => dispatch(sharingModalDidOpen())}
+            >
+              Sharing
+            </Button>
+          ) : null}
+          {isSnapshotsAuthorized ? (
+            <Button
+              leftIcon={<IconHistory />}
+              onClick={() => dispatch(listModalDidOpen())}
+            >
+              Snapshots
+            </Button>
+          ) : null}
+          {isPerformanceAuthorized ? (
+            <Button
+              leftIcon={<IconModeHeat />}
+              onClick={() => dispatch(mosaicModalDidOpen())}
+            >
+              Performance
+            </Button>
+          ) : null}
+          {isSecurityAuthorized ? (
+            <Button leftIcon={<IconSecurity />}>Security</Button>
+          ) : null}
+        </>
+      ) : null}
+      <Menu isOpen={isOpen} onClose={onClose}>
+        {isToolbarMode ? (
+          <MenuButton
+            as={IconButton}
+            icon={<IconMoreVert />}
+            variant="solid"
+            aria-label=""
+          />
+        ) : null}
+        <Portal>
+          <MenuList
+            zIndex="dropdown"
+            style={
+              position
+                ? {
+                    position: 'absolute',
+                    left: position?.x,
+                    top: position?.y,
+                  }
+                : undefined
+            }
+          >
+            {!isToolbarMode && isInsightsAuthorized ? (
+              <>
+                <MenuItem
+                  icon={<Orb width="20px" height="20px" />}
+                  onClick={(event: MouseEvent) => {
+                    event.stopPropagation()
+                    dispatch(insightsModalDidOpen())
+                  }}
+                >
+                  Insights
+                </MenuItem>
+                <MenuDivider />
+              </>
+            ) : null}
+            {!isToolbarMode && isSharingAuthorized ? (
+              <MenuItem
+                icon={<IconGroup />}
+                onClick={(event: MouseEvent) => {
+                  event.stopPropagation()
+                  dispatch(sharingModalDidOpen())
+                }}
+              >
+                Sharing
+              </MenuItem>
+            ) : null}
+            {!isToolbarMode && isSnapshotsAuthorized ? (
+              <MenuItem
+                icon={<IconHistory />}
+                onClick={(event: MouseEvent) => {
+                  event.stopPropagation()
+                  dispatch(listModalDidOpen())
+                }}
+              >
+                Snapshots
+              </MenuItem>
+            ) : null}
+            {!isToolbarMode && isPerformanceAuthorized ? (
+              <MenuItem
+                icon={<IconModeHeat />}
+                onClick={(event: MouseEvent) => {
+                  event.stopPropagation()
+                  dispatch(mosaicModalDidOpen())
+                }}
+              >
+                Performance
+              </MenuItem>
+            ) : null}
+            {!isToolbarMode && isSecurityAuthorized ? (
+              <MenuItem icon={<IconSecurity />}>Security</MenuItem>
+            ) : null}
+            <MenuDivider />
+            {isUploadAuthorized ? (
+              <MenuItem
+                icon={<IconUpload />}
+                onClick={(event: MouseEvent) => {
+                  event.stopPropagation()
+                  const singleId = file?.id
+                  uploadInputRef?.current?.click()
+                  if (singleId) {
+                    dispatch(selectionUpdated([singleId]))
+                  }
+                }}
+              >
+                Upload
+              </MenuItem>
+            ) : null}
+            {isDownloadAuthorized ? (
+              <MenuItem
+                icon={<IconDownload />}
+                isDisabled={!isDownloadAuthorized}
+                onClick={(event: MouseEvent) => {
+                  event.stopPropagation()
+                  if (file) {
+                    downloadFile(file)
+                  }
+                }}
+              >
+                Download
+              </MenuItem>
+            ) : null}
+            <MenuDivider />
+            {isDeleteAuthorized ? (
+              <MenuItem
+                icon={<IconDelete />}
+                className={cx('text-red-500')}
+                isDisabled={!isDeleteAuthorized}
+                onClick={(event: MouseEvent) => {
+                  event.stopPropagation()
+                  dispatch(deleteModalDidOpen())
+                }}
+              >
+                Delete
+              </MenuItem>
+            ) : null}
+            {isRenameAuthorized ? (
+              <MenuItem
+                icon={<IconEdit />}
+                onClick={(event: MouseEvent) => {
+                  event.stopPropagation()
+                  dispatch(renameModalDidOpen())
+                }}
+              >
+                Rename
+              </MenuItem>
+            ) : null}
+            {isMoveAuthorized ? (
+              <MenuItem
+                icon={<IconArrowTopRight />}
+                onClick={(event: MouseEvent) => {
+                  event.stopPropagation()
+                  dispatch(moveModalDidOpen())
+                }}
+              >
+                Move
+              </MenuItem>
+            ) : null}
+            {isCopyAuthorized ? (
+              <MenuItem
+                icon={<IconFileCopy />}
+                onClick={(event: MouseEvent) => {
+                  event.stopPropagation()
+                  dispatch(copyModalDidOpen())
+                }}
+              >
+                Copy
+              </MenuItem>
+            ) : null}
+            {isToolbarMode ? (
+              <>
+                <MenuDivider />
+                <MenuItem
+                  icon={<IconSelectCheckBox />}
+                  onClick={handleSelectAllClick}
+                >
+                  Select All
+                </MenuItem>
+                <MenuItem
+                  icon={<IconCheckBoxOutlineBlank />}
+                  onClick={() => dispatch(selectionUpdated([]))}
+                >
+                  Unselect All
+                </MenuItem>
+              </>
+            ) : null}
+          </MenuList>
+        </Portal>
+      </Menu>
+      <input
+        ref={uploadInputRef}
+        className={cx('hidden')}
+        type="file"
+        multiple
+        onChange={handleUploadInputChange}
+      />
+    </>
+  )
+}
+
+export default FileMenu

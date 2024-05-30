@@ -97,6 +97,9 @@ func (svc *InsightsService) Create(id string, opts InsightsCreateOptions, userID
 	if err != nil {
 		return err
 	}
+	if snapshot.GetStatus() == model.SnapshotStatusProcessing {
+		return errorpkg.NewSnapshotIsProcessingError(nil)
+	}
 	snapshot.SetLanguage(opts.LanguageID)
 	snapshot.SetStatus(model.SnapshotStatusProcessing)
 	if err := svc.snapshotRepo.Save(snapshot); err != nil {
@@ -144,6 +147,9 @@ func (svc *InsightsService) Patch(id string, userID string) error {
 	snapshot, err := svc.snapshotCache.Get(*file.GetSnapshotID())
 	if err != nil {
 		return err
+	}
+	if snapshot.GetStatus() == model.SnapshotStatusProcessing {
+		return errorpkg.NewSnapshotIsProcessingError(nil)
 	}
 	previous, err := svc.getPreviousSnapshot(file.GetID(), snapshot.GetVersion())
 	if err != nil {
@@ -340,7 +346,7 @@ func (svc *InsightsService) Delete(id string, userID string) error {
 	if err != nil {
 		return err
 	}
-	if err = svc.fileGuard.Authorize(userID, file, model.PermissionEditor); err != nil {
+	if err = svc.fileGuard.Authorize(userID, file, model.PermissionOwner); err != nil {
 		return err
 	}
 	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {

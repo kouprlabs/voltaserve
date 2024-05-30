@@ -89,7 +89,7 @@ func (svc *SnapshotService) List(fileID string, opts SnapshotListOptions, userID
 	if err != nil {
 		return nil, err
 	}
-	if err = svc.fileGuard.Authorize(userID, file, model.PermissionViewer); err != nil {
+	if err = svc.fileGuard.Authorize(userID, file, model.PermissionOwner); err != nil {
 		return nil, err
 	}
 	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
@@ -190,7 +190,7 @@ func (svc *SnapshotService) Activate(id string, opts SnapshotActivateOptions, us
 	if err != nil {
 		return nil, err
 	}
-	if err = svc.fileGuard.Authorize(userID, file, model.PermissionEditor); err != nil {
+	if err = svc.fileGuard.Authorize(userID, file, model.PermissionOwner); err != nil {
 		return nil, err
 	}
 	if _, err := svc.snapshotCache.Get(id); err != nil {
@@ -223,7 +223,7 @@ func (svc *SnapshotService) Detach(id string, opts SnapshotDetachOptions, userID
 	if err != nil {
 		return err
 	}
-	if err = svc.fileGuard.Authorize(userID, file, model.PermissionEditor); err != nil {
+	if err = svc.fileGuard.Authorize(userID, file, model.PermissionOwner); err != nil {
 		return err
 	}
 	if _, err := svc.snapshotCache.Get(id); err != nil {

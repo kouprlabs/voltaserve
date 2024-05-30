@@ -1,7 +1,9 @@
 import { useCallback } from 'react'
 import { Button, Card, CardBody, CardFooter, Text } from '@chakra-ui/react'
 import cx from 'classnames'
+import FileAPI from '@/client/api/file'
 import MosaicAPI from '@/client/api/mosaic'
+import { ltOwnerPermission } from '@/client/api/permission'
 import { swrConfig } from '@/client/options'
 import { IconDelete, IconSync } from '@/lib/components/icons'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
@@ -27,6 +29,7 @@ const PeformanceOverviewSettings = () => {
   const isUpdating = useAppSelector((state) => state.ui.mosaic.isUpdating)
   const isDeleting = useAppSelector((state) => state.ui.mosaic.isDeleting)
   const { data: metadata } = MosaicAPI.useGetMetadata(id, swrConfig())
+  const { data: file } = FileAPI.useGet(id, swrConfig())
 
   const handleUpdate = useCallback(async () => {
     if (!id) {
@@ -93,7 +96,12 @@ const PeformanceOverviewSettings = () => {
             colorScheme="red"
             leftIcon={<IconDelete />}
             isLoading={isDeleting}
-            isDisabled={isDeleting || isUpdating}
+            isDisabled={
+              isDeleting ||
+              isUpdating ||
+              !file ||
+              ltOwnerPermission(file.permission)
+            }
             onClick={handleDelete}
           >
             Delete

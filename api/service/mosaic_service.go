@@ -61,6 +61,9 @@ func (svc *MosaicService) Create(id string, userID string) error {
 	if err != nil {
 		return err
 	}
+	if snapshot.GetStatus() == model.SnapshotStatusProcessing {
+		return errorpkg.NewSnapshotIsProcessingError(nil)
+	}
 	snapshot.SetStatus(model.SnapshotStatusProcessing)
 	if err := svc.snapshotRepo.Save(snapshot); err != nil {
 		return err
@@ -129,7 +132,7 @@ func (svc *MosaicService) Delete(id string, userID string) error {
 	if err != nil {
 		return err
 	}
-	if err = svc.fileGuard.Authorize(userID, file, model.PermissionEditor); err != nil {
+	if err = svc.fileGuard.Authorize(userID, file, model.PermissionOwner); err != nil {
 		return err
 	}
 	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
