@@ -1,0 +1,25 @@
+plugins {
+    id 'org.springframework.boot' version '2.5.0'
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+    id 'java'
+}
+
+group = 'io.defyle'
+version = '1.0.0'
+sourceCompatibility = '16'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.apache.pdfbox:pdfbox:2.0.19'
+    implementation 'org.apache.commons:commons-lang3:3.9'
+    implementation 'commons-io:commons-io:2.6'
+    compileOnly 'org.projectlombok:lombok:1.18.20'
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    annotationProcessor 'org.projectlombok:lombok:1.18.20'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
