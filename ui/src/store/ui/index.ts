@@ -13,6 +13,7 @@ import notifications from './notifications'
 import organization from './organization'
 import organizations from './organizations'
 import outgoingInvitations from './outgoing-invitations'
+import searchFilter from './search-filter'
 import snapshots from './snapshots'
 import uploadsDrawer from './uploads-drawer'
 import watermark from './watermark'
@@ -23,6 +24,7 @@ export default combineReducers({
   insights,
   mosaic,
   watermark,
+  searchFilter,
   uploadsDrawer,
   files,
   snapshots,

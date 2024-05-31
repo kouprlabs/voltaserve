@@ -15,6 +15,7 @@ import FileToolbar from '@/components/file/file-toolbar'
 import Insights from '@/components/file/insights'
 import FileList from '@/components/file/list'
 import Mosaic from '@/components/file/mosaic'
+import SearchFilter from '@/components/file/search-filter'
 import Sharing from '@/components/file/sharing'
 import SnapshotDetach from '@/components/file/snapshot/snapshot-detach'
 import SnapshotList from '@/components/file/snapshot/snapshot-list'
@@ -68,6 +69,9 @@ const WorkspaceFilesPage = () => {
   )
   const isWatermarkModalOpen = useAppSelector(
     (state) => state.ui.watermark.isModalOpen,
+  )
+  const isSearchFilterModalOpen = useAppSelector(
+    (state) => state.ui.searchFilter.isModalOpen,
   )
   const { data: workspace } = WorkspaceAPI.useGet(workspaceId, swrConfig())
   const { page, size, steps, setPage, setSize } = usePagePagination({
@@ -203,6 +207,7 @@ const WorkspaceFilesPage = () => {
       {isInsightsModalOpen ? <Insights /> : null}
       {isMosaicModalOpen ? <Mosaic /> : null}
       {isWatermarkModalOpen ? <Watermark /> : null}
+      {isSearchFilterModalOpen ? <SearchFilter /> : null}
     </>
   )
 }

@@ -41,7 +41,7 @@ const TopBarNotificationDrawer = () => {
           onClick={onOpen}
         />
         {notfications && notfications.length > 0 ? (
-          <Circle size="15px" bg="red" position="absolute" top={0} right={0} />
+          <Circle size="10px" bg="red" position="absolute" top={0} right={0} />
         ) : null}
       </div>
       <ChakraDrawer

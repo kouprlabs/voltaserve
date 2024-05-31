@@ -8,6 +8,7 @@ import {
 } from 'react-router-dom'
 import {
   Button,
+  Circle,
   Icon,
   IconButton,
   Input,
@@ -17,9 +18,12 @@ import {
 } from '@chakra-ui/react'
 import cx from 'classnames'
 import { decodeQuery, encodeQuery } from '@/helpers/query'
-import { IconClose, IconSearch } from '@/lib/components/icons'
+import { IconClose, IconSearch, IconTune } from '@/lib/components/icons'
+import { useAppDispatch } from '@/store/hook'
+import { modalDidOpen as searchFilterModalDidOpen } from '@/store/ui/search-filter'
 
 const TopBarSearch = () => {
+  const dispatch = useAppDispatch()
   const navigation = useNavigate()
   const location = useLocation()
   const { id: workspaceId, fileId } = useParams()
@@ -185,6 +189,10 @@ const TopBarSearch = () => {
     setText(event.target.value || '')
   }, [])
 
+  const handleFilterClick = useCallback(() => {
+    dispatch(searchFilterModalDidOpen())
+  }, [dispatch])
+
   if (!isAvailable) {
     return null
   }
@@ -215,8 +223,20 @@ const TopBarSearch = () => {
           </InputRightElement>
         ) : null}
       </InputGroup>
+      <div className={cx('flex', 'items-center', 'justify-center', 'relative')}>
+        <IconButton
+          icon={<IconTune />}
+          aria-label="Filters"
+          onClick={handleFilterClick}
+        />
+        <Circle size="10px" bg="red" position="absolute" top={0} right={0} />
+      </div>
       {text || (isFocused && text) ? (
-        <Button onClick={() => handleSearch(text)} isDisabled={!text}>
+        <Button
+          leftIcon={<IconSearch />}
+          onClick={() => handleSearch(text)}
+          isDisabled={!text}
+        >
           Search
         </Button>
       ) : null}
