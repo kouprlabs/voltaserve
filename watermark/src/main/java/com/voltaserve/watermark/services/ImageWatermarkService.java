@@ -76,14 +76,14 @@ public class ImageWatermarkService {
     // Move our origin to the center
     g2d.translate(width / 2.0f, height / 2.0f);
 
-    // Create a rotation transform to rotate the text based on the diagonal angle of
-    // the picture aspect ratio
+    /* Create a rotation transform to rotate the text based on
+       the diagonal angle of the picture aspect ratio */
     AffineTransform affineTransform = new AffineTransform();
     affineTransform.rotate(Math.atan2(height, width));
     g2d.transform(affineTransform);
 
-    // Reposition our coordinates based on size (same as we would normally
-    // do to center on straight line but based on starting at center
+    /* Reposition our coordinates based on size (same as we would normally
+       do to center on straight line but based on starting at center */
     float x1 = (int) workspaceBounds.getWidth() / 2.0f * -1;
     float y1 = (int) dateTimeBounds.getHeight() / 2.0f;
     y1 -= 240;
