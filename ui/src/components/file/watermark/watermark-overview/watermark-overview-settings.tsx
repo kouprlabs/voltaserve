@@ -15,7 +15,7 @@ import {
   updatingDidStop,
 } from '@/store/ui/watermark'
 
-const SecurityOverviewSettings = () => {
+const WatermarkOverviewSettings = () => {
   const dispatch = useAppDispatch()
   const id = useAppSelector((state) =>
     state.ui.files.selection.length > 0
@@ -70,9 +70,7 @@ const SecurityOverviewSettings = () => {
     <div className={cx('flex', 'flex-row', 'items-stretch', 'gap-1.5')}>
       <Card size="md" variant="outline" className={cx('w-[50%]')}>
         <CardBody>
-          <Text>
-            Updates the watermark protected file using the active snapshot.
-          </Text>
+          <Text>Updates the watermark using the active snapshot.</Text>
         </CardBody>
         <CardFooter>
           <Button
@@ -88,8 +86,8 @@ const SecurityOverviewSettings = () => {
       <Card size="md" variant="outline" className={cx('w-[50%]')}>
         <CardBody>
           <Text>
-            Deletes the watermark protected file from the active snapshot, can
-            be recreated later.
+            Deletes the watermark from the active snapshot, can be recreated
+            later.
           </Text>
         </CardBody>
         <CardFooter>
@@ -113,4 +111,4 @@ const SecurityOverviewSettings = () => {
   )
 }
 
-export default SecurityOverviewSettings
+export default WatermarkOverviewSettings

@@ -108,14 +108,14 @@ const FileMenu = ({
         geEditorPermission(file.permission)),
     [file],
   )
-  const isPerformanceAuthorized = useMemo(
+  const isMosaicAuthorized = useMemo(
     () =>
       file?.type === 'file' &&
       file.snapshot?.status !== Status.Processing &&
       isImage(file.snapshot?.original.extension),
     [file],
   )
-  const isSecurityAuthorized = useMemo(
+  const isWatermarkAuthorized = useMemo(
     () =>
       file?.type === 'file' &&
       file.snapshot?.status !== Status.Processing &&
@@ -162,8 +162,8 @@ const FileMenu = ({
       isInsightsAuthorized ||
       isSharingAuthorized ||
       isSnapshotsAuthorized ||
-      isPerformanceAuthorized ||
-      isSecurityAuthorized,
+      isMosaicAuthorized ||
+      isWatermarkAuthorized,
     [],
   )
   const uploadInputRef = useRef<HTMLInputElement>(null)
@@ -223,20 +223,20 @@ const FileMenu = ({
               Snapshots
             </Button>
           ) : null}
-          {isPerformanceAuthorized ? (
+          {isMosaicAuthorized ? (
             <Button
               leftIcon={<IconModeHeat />}
               onClick={() => dispatch(mosaicModalDidOpen())}
             >
-              Performance
+              Mosaic
             </Button>
           ) : null}
-          {isSecurityAuthorized ? (
+          {isWatermarkAuthorized ? (
             <Button
               leftIcon={<IconSecurity />}
               onClick={() => dispatch(watermarkModalDidOpen())}
             >
-              Security
+              Watermark
             </Button>
           ) : null}
         </>
@@ -298,7 +298,7 @@ const FileMenu = ({
                 Snapshots
               </MenuItem>
             ) : null}
-            {!isToolbarMode && isPerformanceAuthorized ? (
+            {!isToolbarMode && isMosaicAuthorized ? (
               <MenuItem
                 icon={<IconModeHeat />}
                 onClick={(event: MouseEvent) => {
@@ -306,10 +306,10 @@ const FileMenu = ({
                   dispatch(mosaicModalDidOpen())
                 }}
               >
-                Performance
+                Mosaic
               </MenuItem>
             ) : null}
-            {!isToolbarMode && isSecurityAuthorized ? (
+            {!isToolbarMode && isWatermarkAuthorized ? (
               <MenuItem
                 icon={<IconSecurity />}
                 onClick={(event: MouseEvent) => {
@@ -317,7 +317,7 @@ const FileMenu = ({
                   dispatch(watermarkModalDidOpen())
                 }}
               >
-                Security
+                Watermark
               </MenuItem>
             ) : null}
             {isAnyFeatureIsAuthorized && !isToolbarMode ? (

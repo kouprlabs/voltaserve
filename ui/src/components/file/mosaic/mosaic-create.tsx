@@ -6,7 +6,7 @@ import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { creatingDidStop, modalDidClose } from '@/store/ui/mosaic'
 import { creatingDidStart } from '@/store/ui/mosaic'
 
-const PerformanceCreate = () => {
+const MosaicCreate = () => {
   const dispatch = useAppDispatch()
   const id = useAppSelector((state) =>
     state.ui.files.selection.length > 0
@@ -85,4 +85,4 @@ const PerformanceCreate = () => {
   )
 }
 
-export default PerformanceCreate
+export default MosaicCreate

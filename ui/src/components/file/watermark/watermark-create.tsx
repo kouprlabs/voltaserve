@@ -9,7 +9,7 @@ import {
   creatingDidStart,
 } from '@/store/ui/watermark'
 
-const SecurityCreate = () => {
+const WatermarkCreate = () => {
   const dispatch = useAppDispatch()
   const id = useAppSelector((state) =>
     state.ui.files.selection.length > 0
@@ -52,7 +52,7 @@ const SecurityCreate = () => {
           )}
         >
           <p>
-            Create a watermark for your document or image to enhance its
+            Protect your document or image with a watermark to enhance its
             security by clearly marking it as confidential or proprietary, thus
             deterring unauthorized use or distribution.
           </p>
@@ -84,4 +84,4 @@ const SecurityCreate = () => {
   )
 }
 
-export default SecurityCreate
+export default WatermarkCreate

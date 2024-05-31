@@ -13,20 +13,20 @@ import {
   Tabs,
 } from '@chakra-ui/react'
 import cx from 'classnames'
-import WatermarkAPI from '@/client/api/watermark'
+import MosaicAPI from '@/client/api/mosaic'
 import { swrConfig } from '@/client/options'
 import { useAppSelector } from '@/store/hook'
-import SecurityOverviewSettings from './security-overview-settings'
-import SecurityOverviewWatermark from './security-overview-watermark'
+import MosaicOverviewFile from './mosaic-overview-file'
+import MosaicOverviewSettings from './mosaic-overview-settings'
 
-const SecurityOverview = () => {
+const MosaicOverview = () => {
   const id = useAppSelector((state) =>
     state.ui.files.selection.length > 0
       ? state.ui.files.selection[0]
       : undefined,
   )
   const [isWarningVisible, setIsWarningVisible] = useState(true)
-  const { data: metadata } = WatermarkAPI.useGetMetadata(id, swrConfig())
+  const { data: metadata } = MosaicAPI.useGetMetadata(id, swrConfig())
 
   return (
     <>
@@ -37,9 +37,8 @@ const SecurityOverview = () => {
               <AlertIcon />
               <Box>
                 <AlertDescription>
-                  This watermark protected file is outdated, it originates from
-                  an older snapshot. Please navigate to the settings tab to
-                  update.
+                  This mosaic is outdated, it originates from an older snapshot.
+                  Please navigate to the settings tab to update.
                 </AlertDescription>
               </Box>
               <CloseButton
@@ -53,15 +52,15 @@ const SecurityOverview = () => {
           ) : null}
           <Tabs colorScheme="gray">
             <TabList>
-              <Tab>Watermark</Tab>
+              <Tab>File</Tab>
               <Tab>Settings</Tab>
             </TabList>
             <TabPanels>
               <TabPanel>
-                <SecurityOverviewWatermark />
+                <MosaicOverviewFile />
               </TabPanel>
               <TabPanel>
-                <SecurityOverviewSettings />
+                <MosaicOverviewSettings />
               </TabPanel>
             </TabPanels>
           </Tabs>
@@ -71,4 +70,4 @@ const SecurityOverview = () => {
   )
 }
 
-export default SecurityOverview
+export default MosaicOverview

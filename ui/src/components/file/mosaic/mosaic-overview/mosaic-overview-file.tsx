@@ -5,7 +5,7 @@ import { swrConfig } from '@/client/options'
 import { IconOpenInNew } from '@/lib/components/icons'
 import { useAppSelector } from '@/store/hook'
 
-const PerformanceOverviewMosaic = () => {
+const MosaicOverviewFile = () => {
   const id = useAppSelector((state) =>
     state.ui.files.selection.length > 0
       ? state.ui.files.selection[0]
@@ -34,10 +34,10 @@ const PerformanceOverviewMosaic = () => {
         target="_blank"
         href={`/file/${file.id}/mosaic`}
       >
-        Open Mosaic
+        Open
       </Button>
     </div>
   )
 }
 
-export default PerformanceOverviewMosaic
+export default MosaicOverviewFile

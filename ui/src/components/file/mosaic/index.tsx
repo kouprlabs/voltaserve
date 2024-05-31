@@ -6,14 +6,14 @@ import {
   ModalHeader,
   ModalOverlay,
 } from '@chakra-ui/react'
-import FileAPI from '@/client/api/file'
+import MosaicAPI from '@/client/api/mosaic'
 import { swrConfig } from '@/client/options'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
-import { modalDidClose, mutateFileUpdated } from '@/store/ui/watermark'
-import SecurityCreate from './security-create'
-import SecurityOverview from './security-overview'
+import { modalDidClose, mutateMetadataUpdated } from '@/store/ui/mosaic'
+import MosaicCreate from './mosaic-create'
+import MosaicOverview from './mosaic-overview'
 
-const Security = () => {
+const Mosaic = () => {
   const dispatch = useAppDispatch()
   const id = useAppSelector((state) =>
     state.ui.files.selection.length > 0
@@ -22,18 +22,21 @@ const Security = () => {
   )
   const isLoading = useAppSelector(
     (state) =>
-      state.ui.watermark.isCreating ||
-      state.ui.watermark.isUpdating ||
-      state.ui.watermark.isDeleting,
+      state.ui.mosaic.isCreating ||
+      state.ui.mosaic.isUpdating ||
+      state.ui.mosaic.isDeleting,
   )
-  const isModalOpen = useAppSelector((state) => state.ui.watermark.isModalOpen)
-  const { data: file, mutate: mutateFile } = FileAPI.useGet(id, swrConfig())
+  const isModalOpen = useAppSelector((state) => state.ui.mosaic.isModalOpen)
+  const { data: metadata, mutate: mutateMetadata } = MosaicAPI.useGetMetadata(
+    id,
+    swrConfig(),
+  )
 
   useEffect(() => {
     if (id) {
-      dispatch(mutateFileUpdated(mutateFile))
+      dispatch(mutateMetadataUpdated(mutateMetadata))
     }
-  }, [mutateFile])
+  }, [mutateMetadata])
 
   return (
     <Modal
@@ -45,13 +48,13 @@ const Security = () => {
     >
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>Security</ModalHeader>
+        <ModalHeader>Mosaic</ModalHeader>
         <ModalCloseButton isDisabled={isLoading} />
-        {!file?.snapshot?.watermark ? <SecurityCreate /> : null}
-        {file?.snapshot?.watermark ? <SecurityOverview /> : null}
+        {!metadata ? <MosaicCreate /> : null}
+        {metadata ? <MosaicOverview /> : null}
       </ModalContent>
     </Modal>
   )
 }
 
-export default Security
+export default Mosaic

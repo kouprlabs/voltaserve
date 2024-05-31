@@ -13,20 +13,20 @@ import {
   Tabs,
 } from '@chakra-ui/react'
 import cx from 'classnames'
-import MosaicAPI from '@/client/api/mosaic'
+import WatermarkAPI from '@/client/api/watermark'
 import { swrConfig } from '@/client/options'
 import { useAppSelector } from '@/store/hook'
-import PerformanceOverviewMosaic from './performance-overview-mosaic'
-import PeformanceOverviewSettings from './performance-overview-settings'
+import WatermarkOverviewFile from './watermark-overview-file'
+import WatermarkOverviewSettings from './watermark-overview-settings'
 
-const PerformanceOverview = () => {
+const WatermarkOverview = () => {
   const id = useAppSelector((state) =>
     state.ui.files.selection.length > 0
       ? state.ui.files.selection[0]
       : undefined,
   )
   const [isWarningVisible, setIsWarningVisible] = useState(true)
-  const { data: metadata } = MosaicAPI.useGetMetadata(id, swrConfig())
+  const { data: metadata } = WatermarkAPI.useGetMetadata(id, swrConfig())
 
   return (
     <>
@@ -37,8 +37,9 @@ const PerformanceOverview = () => {
               <AlertIcon />
               <Box>
                 <AlertDescription>
-                  This mosaic is outdated, it originates from an older snapshot.
-                  Please navigate to the settings tab to update.
+                  This watermark protected file is outdated, it originates from
+                  an older snapshot. Please navigate to the settings tab to
+                  update.
                 </AlertDescription>
               </Box>
               <CloseButton
@@ -52,15 +53,15 @@ const PerformanceOverview = () => {
           ) : null}
           <Tabs colorScheme="gray">
             <TabList>
-              <Tab>Mosaic</Tab>
+              <Tab>File</Tab>
               <Tab>Settings</Tab>
             </TabList>
             <TabPanels>
               <TabPanel>
-                <PerformanceOverviewMosaic />
+                <WatermarkOverviewFile />
               </TabPanel>
               <TabPanel>
-                <PeformanceOverviewSettings />
+                <WatermarkOverviewSettings />
               </TabPanel>
             </TabPanels>
           </Tabs>
@@ -70,4 +71,4 @@ const PerformanceOverview = () => {
   )
 }
 
-export default PerformanceOverview
+export default WatermarkOverview
