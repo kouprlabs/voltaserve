@@ -21,7 +21,6 @@ type OrganizationService struct {
 	orgGuard     *guard.OrganizationGuard
 	orgMapper    *organizationMapper
 	orgSearch    *search.OrganizationSearch
-	userRepo     repo.UserRepo
 	userSearch   *search.UserSearch
 	userMapper   *userMapper
 	groupRepo    repo.GroupRepo
@@ -37,7 +36,6 @@ func NewOrganizationService() *OrganizationService {
 		orgGuard:     guard.NewOrganizationGuard(),
 		orgSearch:    search.NewOrganizationSearch(),
 		orgMapper:    newOrganizationMapper(),
-		userRepo:     repo.NewUserRepo(),
 		userSearch:   search.NewUserSearch(),
 		groupRepo:    repo.NewGroupRepo(),
 		groupService: NewGroupService(),

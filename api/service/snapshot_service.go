@@ -17,7 +17,6 @@ import (
 type SnapshotService struct {
 	snapshotRepo  repo.SnapshotRepo
 	snapshotCache *cache.SnapshotCache
-	userRepo      repo.UserRepo
 	fileCache     *cache.FileCache
 	fileGuard     *guard.FileGuard
 	fileRepo      repo.FileRepo
@@ -34,7 +33,6 @@ func NewSnapshotService() *SnapshotService {
 		fileMapper:    NewFileMapper(),
 		snapshotRepo:  repo.NewSnapshotRepo(),
 		snapshotCache: cache.NewSnapshotCache(),
-		userRepo:      repo.NewUserRepo(),
 		fileRepo:      repo.NewFileRepo(),
 		config:        config.GetConfig(),
 	}

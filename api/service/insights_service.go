@@ -23,7 +23,6 @@ type InsightsService struct {
 	languages      []*InsightsLanguage
 	snapshotCache  *cache.SnapshotCache
 	snapshotRepo   repo.SnapshotRepo
-	userRepo       repo.UserRepo
 	fileCache      *cache.FileCache
 	fileGuard      *guard.FileGuard
 	s3             *infra.S3Manager
@@ -57,7 +56,6 @@ func NewInsightsService() *InsightsService {
 		},
 		snapshotCache:  cache.NewSnapshotCache(),
 		snapshotRepo:   repo.NewSnapshotRepo(),
-		userRepo:       repo.NewUserRepo(),
 		fileCache:      cache.NewFileCache(),
 		fileGuard:      guard.NewFileGuard(),
 		s3:             infra.NewS3Manager(),

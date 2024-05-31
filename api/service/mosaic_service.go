@@ -19,7 +19,6 @@ import (
 type MosaicService struct {
 	snapshotCache *cache.SnapshotCache
 	snapshotRepo  repo.SnapshotRepo
-	userRepo      repo.UserRepo
 	fileCache     *cache.FileCache
 	fileGuard     *guard.FileGuard
 	s3            *infra.S3Manager
@@ -36,7 +35,6 @@ func NewMosaicService() *MosaicService {
 	return &MosaicService{
 		snapshotCache: cache.NewSnapshotCache(),
 		snapshotRepo:  repo.NewSnapshotRepo(),
-		userRepo:      repo.NewUserRepo(),
 		fileCache:     cache.NewFileCache(),
 		fileGuard:     guard.NewFileGuard(),
 		s3:            infra.NewS3Manager(),

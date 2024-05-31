@@ -11,7 +11,6 @@ import (
 )
 
 type UserService struct {
-	userRepo   repo.UserRepo
 	userMapper *userMapper
 	userSearch *search.UserSearch
 	orgRepo    repo.OrganizationRepo
@@ -25,7 +24,6 @@ type UserService struct {
 
 func NewUserService() *UserService {
 	return &UserService{
-		userRepo:   repo.NewUserRepo(),
 		userMapper: newUserMapper(),
 		userSearch: search.NewUserSearch(),
 		orgRepo:    repo.NewOrganizationRepo(),

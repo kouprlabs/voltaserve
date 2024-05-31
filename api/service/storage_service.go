@@ -15,7 +15,6 @@ type StorageService struct {
 	fileCache      *cache.FileCache
 	fileGuard      *guard.FileGuard
 	storageMapper  *storageMapper
-	userRepo       repo.UserRepo
 }
 
 func NewStorageService() *StorageService {
@@ -27,7 +26,6 @@ func NewStorageService() *StorageService {
 		fileCache:      cache.NewFileCache(),
 		fileGuard:      guard.NewFileGuard(),
 		storageMapper:  newStorageMapper(),
-		userRepo:       repo.NewUserRepo(),
 	}
 }
 
