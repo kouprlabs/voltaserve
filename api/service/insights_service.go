@@ -357,15 +357,26 @@ func (svc *InsightsService) Delete(id string, userID string) error {
 	if !snapshot.HasEntities() {
 		return errorpkg.NewInsightsNotFoundError(nil)
 	}
-	if svc.fileIdent.IsImage(snapshot.GetOriginal().Key) {
-		if err := svc.deleteText(snapshot); err != nil {
-			return err
-		}
+	if snapshot.GetStatus() == model.SnapshotStatusProcessing {
+		return errorpkg.NewSnapshotIsProcessingError(nil)
 	}
-	if err := svc.deleteEntities(snapshot); err != nil {
+	snapshot.SetStatus(model.SnapshotStatusProcessing)
+	if svc.fileIdent.IsImage(snapshot.GetOriginal().Key) {
+		err = svc.deleteText(snapshot)
+	}
+	err = svc.deleteEntities(snapshot)
+	if err != nil {
+		snapshot.SetStatus(model.SnapshotStatusError)
+	} else {
+		snapshot.SetStatus(model.SnapshotStatusReady)
+	}
+	if err := svc.snapshotRepo.Save(snapshot); err != nil {
 		return err
 	}
-	return nil
+	if err := svc.snapshotCache.Set(snapshot); err != nil {
+		return err
+	}
+	return err
 }
 
 func (svc *InsightsService) deleteText(snapshot model.Snapshot) error {

@@ -150,19 +150,33 @@ func (svc *MosaicService) Delete(id string, userID string) error {
 		return errorpkg.NewMosaicNotFoundError(nil)
 	}
 	if svc.fileIdent.IsImage(snapshot.GetOriginal().Key) {
-		if err := svc.mosaicClient.Delete(client.MosaicDeleteOptions{
-			S3Key:    filepath.FromSlash(snapshot.GetID()),
-			S3Bucket: snapshot.GetOriginal().Bucket,
-		}); err != nil {
-			return err
+		if snapshot.GetStatus() == model.SnapshotStatusProcessing {
+			return errorpkg.NewSnapshotIsProcessingError(nil)
 		}
-		snapshot.SetMosaic(nil)
+		snapshot.SetStatus(model.SnapshotStatusProcessing)
 		if err := svc.snapshotRepo.Save(snapshot); err != nil {
 			return err
 		}
 		if err := svc.snapshotCache.Set(snapshot); err != nil {
 			return err
 		}
+		err = svc.mosaicClient.Delete(client.MosaicDeleteOptions{
+			S3Key:    filepath.FromSlash(snapshot.GetID()),
+			S3Bucket: snapshot.GetOriginal().Bucket,
+		})
+		snapshot.SetMosaic(nil)
+		if err != nil {
+			snapshot.SetStatus(model.SnapshotStatusError)
+		} else {
+			snapshot.SetStatus(model.SnapshotStatusReady)
+		}
+		if err := svc.snapshotRepo.Save(snapshot); err != nil {
+			return err
+		}
+		if err := svc.snapshotCache.Set(snapshot); err != nil {
+			return err
+		}
+		return err
 	}
 	return nil
 }

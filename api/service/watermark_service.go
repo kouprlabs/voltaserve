@@ -177,17 +177,30 @@ func (svc *WatermarkService) Delete(id string, userID string) error {
 	if !snapshot.HasWatermark() {
 		return errorpkg.NewWatermarkNotFoundError(nil)
 	}
-	if err = svc.s3.RemoveObject(snapshot.GetWatermark().Key, snapshot.GetWatermark().Bucket); err != nil {
-		return err
+	if snapshot.GetStatus() == model.SnapshotStatusProcessing {
+		return errorpkg.NewSnapshotIsProcessingError(nil)
 	}
-	snapshot.SetWatermark(nil)
+	snapshot.SetStatus(model.SnapshotStatusProcessing)
 	if err := svc.snapshotRepo.Save(snapshot); err != nil {
 		return err
 	}
 	if err := svc.snapshotCache.Set(snapshot); err != nil {
 		return err
 	}
-	return nil
+	err = svc.s3.RemoveObject(snapshot.GetWatermark().Key, snapshot.GetWatermark().Bucket)
+	snapshot.SetWatermark(nil)
+	if err != nil {
+		snapshot.SetStatus(model.SnapshotStatusError)
+	} else {
+		snapshot.SetStatus(model.SnapshotStatusReady)
+	}
+	if err := svc.snapshotRepo.Save(snapshot); err != nil {
+		return err
+	}
+	if err := svc.snapshotCache.Set(snapshot); err != nil {
+		return err
+	}
+	return err
 }
 
 func (svc *WatermarkService) GetMetadata(id string, userID string) (*model.WatermarkMetadata, error) {
