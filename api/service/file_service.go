@@ -1315,11 +1315,11 @@ func (svc *FileService) doSorting(data []model.File, sortBy string, sortOrder st
 				return false
 			}
 			var sizeA int64 = 0
-			if fileA.Snapshot.Original != nil {
+			if fileA.Snapshot != nil && fileA.Snapshot.Original != nil {
 				sizeA = int64(fileA.Snapshot.Original.Size)
 			}
 			var sizeB int64 = 0
-			if fileB.Snapshot.Original != nil {
+			if fileB.Snapshot != nil && fileB.Snapshot.Original != nil {
 				sizeB = int64(fileB.Snapshot.Original.Size)
 			}
 			if sortOrder == SortOrderDesc {

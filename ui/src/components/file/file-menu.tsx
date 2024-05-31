@@ -121,7 +121,8 @@ const FileMenu = ({
       file.snapshot?.status !== Status.Processing &&
       (isPDF(file.snapshot?.original.extension) ||
         isMicrosoftOffice(file.snapshot?.original.extension) ||
-        isOpenOffice(file.snapshot?.original.extension)) &&
+        isOpenOffice(file.snapshot?.original.extension) ||
+        isImage(file.snapshot?.original.extension)) &&
       geEditorPermission(file.permission),
     [file],
   )
