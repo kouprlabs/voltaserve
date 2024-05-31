@@ -7,11 +7,11 @@ import lombok.Data;
 @Builder
 public class WatermarkRequest {
 
-  private String category;
-  private String path;
-  private String s3Key;
-  private String s3Bucket;
-  private String dateTime;
-  private String username;
-  private String workspace;
+    private String category;
+    private String path;
+    private String s3Key;
+    private String s3Bucket;
+    private String dateTime;
+    private String username;
+    private String workspace;
 }

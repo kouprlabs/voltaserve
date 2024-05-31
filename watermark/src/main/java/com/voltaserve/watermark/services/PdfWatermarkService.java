@@ -2,8 +2,10 @@ package com.voltaserve.watermark.services;
 
 import com.voltaserve.watermark.dtos.WatermarkRequest;
 import com.voltaserve.watermark.pojos.StrokeProperties;
+
 import io.minio.MinioClient;
 import io.minio.UploadObjectArgs;
+
 import org.apache.commons.io.FilenameUtils;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.cos.COSName;

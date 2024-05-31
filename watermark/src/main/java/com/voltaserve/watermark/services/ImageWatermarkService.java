@@ -1,8 +1,10 @@
 package com.voltaserve.watermark.services;
 
 import com.voltaserve.watermark.dtos.WatermarkRequest;
+
 import io.minio.MinioClient;
 import io.minio.UploadObjectArgs;
+
 import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,9 +13,6 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.ResourcePatternUtils;
 import org.springframework.stereotype.Service;
 
-import javax.imageio.ImageIO;
-import javax.imageio.ImageReader;
-import javax.imageio.stream.ImageInputStream;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
@@ -28,6 +27,10 @@ import java.nio.file.Paths;
 import java.util.Iterator;
 import java.util.Objects;
 import java.util.UUID;
+
+import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
+import javax.imageio.stream.ImageInputStream;
 
 @Service
 public class ImageWatermarkService {
