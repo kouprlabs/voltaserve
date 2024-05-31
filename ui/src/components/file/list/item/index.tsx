@@ -1,4 +1,4 @@
-import { MouseEvent, useEffect } from 'react'
+import { MouseEvent, useEffect, useMemo } from 'react'
 import { useCallback, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Link as ChakraLink } from '@chakra-ui/react'
@@ -40,6 +40,13 @@ const ListItem = ({
   const navigate = useNavigate()
   const [isChecked, setIsChecked] = useState(false)
   const [isSelected, setIsSelected] = useState(false)
+  const noOfLines = useMemo(() => {
+    if (viewType === FileViewType.Grid) {
+      return 3
+    } else if (viewType === FileViewType.List) {
+      return 1
+    }
+  }, [viewType])
   const date = relativeDate(new Date(file.createTime))
   const computedScale = computeScale(scale, viewType)
   const width = `${WIDTH * computedScale}px`
@@ -194,7 +201,7 @@ const ListItem = ({
               'hover:no-underline': isSelectionMode,
               'hover:underline': !isSelectionMode,
             })}
-            noOfLines={3}
+            noOfLines={noOfLines}
             cursor={isSelectionMode ? 'default' : 'pointer'}
             onClick={isSelectionMode ? undefined : handleFolderLinkClick}
           >
@@ -209,7 +216,7 @@ const ListItem = ({
               'hover:no-underline': isSelectionMode,
               'hover:underline': !isSelectionMode,
             })}
-            noOfLines={3}
+            noOfLines={noOfLines}
             cursor={isSelectionMode ? 'default' : 'pointer'}
             onClick={isSelectionMode ? undefined : handleFileLinkClick}
           >
@@ -221,14 +228,17 @@ const ListItem = ({
         !file.snapshot?.mosaic ? (
           <Text
             className={cx('text-center')}
-            noOfLines={3}
+            noOfLines={noOfLines}
             onClick={handleIconClick}
           >
             {file.name}
           </Text>
         ) : null}
       </div>
-      <Text noOfLines={3} className={cx('text-gray-500', 'text-center')}>
+      <Text
+        noOfLines={noOfLines}
+        className={cx('text-gray-500', 'text-center')}
+      >
         {date}
       </Text>
     </div>
