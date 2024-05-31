@@ -157,7 +157,7 @@ const FileMenu = ({
     () => file !== undefined && geEditorPermission(file.permission),
     [file],
   )
-  const isAnyFeatureIsAuthorized = useMemo(
+  const isAnyFeatureAuthorized = useMemo(
     () =>
       isInsightsAuthorized ||
       isSharingAuthorized ||
@@ -320,9 +320,7 @@ const FileMenu = ({
                 Watermark
               </MenuItem>
             ) : null}
-            {isAnyFeatureIsAuthorized && !isToolbarMode ? (
-              <MenuDivider />
-            ) : null}
+            {isAnyFeatureAuthorized && !isToolbarMode ? <MenuDivider /> : null}
             <MenuItem
               icon={<IconUpload />}
               isDisabled={!isUploadAuthorized}
