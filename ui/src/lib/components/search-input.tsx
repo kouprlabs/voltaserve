@@ -4,6 +4,7 @@ import {
   useState,
   ChangeEvent,
   KeyboardEvent,
+  useRef,
 } from 'react'
 import {
   Button,
@@ -21,9 +22,18 @@ type SearchInputProps = {
   placeholder?: string
   query?: string
   onChange?: (value: string) => void
+  onValue?: (value: string) => void
+  onClear?: () => void
 }
 
-const SearchInput = ({ placeholder, query, onChange }: SearchInputProps) => {
+const SearchInput = ({
+  placeholder,
+  query,
+  onChange,
+  onValue,
+  onClear,
+}: SearchInputProps) => {
+  const inputRef = useRef<HTMLInputElement>(null)
   const [draft, setDraft] = useState('')
   const [text, setText] = useState('')
   const [isFocused, setIsFocused] = useState(false)
@@ -39,15 +49,20 @@ const SearchInput = ({ placeholder, query, onChange }: SearchInputProps) => {
   const handleClear = useCallback(() => {
     setDraft('')
     setText('')
-  }, [])
+    onClear?.()
+  }, [onClear])
 
   const handleChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
     setDraft(event.target.value || '')
   }, [])
 
-  const handleSearch = useCallback((value: string) => {
-    setText(value)
-  }, [])
+  const handleSearch = useCallback(
+    (value: string) => {
+      setText(value)
+      onValue?.(value)
+    },
+    [onValue],
+  )
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent<HTMLInputElement>, value: string) => {
@@ -65,6 +80,7 @@ const SearchInput = ({ placeholder, query, onChange }: SearchInputProps) => {
           <IconSearch className={cx('text-gray-300')} />
         </InputLeftElement>
         <Input
+          ref={inputRef}
           value={draft}
           placeholder={draft || placeholder || 'Search'}
           variant="filled"
@@ -72,6 +88,7 @@ const SearchInput = ({ placeholder, query, onChange }: SearchInputProps) => {
           onChange={handleChange}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
+          autoFocus
         />
         {draft ? (
           <InputRightElement>

@@ -301,8 +301,9 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
                     Sort By Date Modified
                   </MenuItem>
                   <MenuDivider />
-                  {iconScales.map((scale) => (
+                  {iconScales.map((scale, index) => (
                     <MenuItem
+                      key={index}
                       icon={getScaleIcon(scale)}
                       onClick={() => handleIconScaleChange(scale)}
                     >

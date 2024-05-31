@@ -15,7 +15,7 @@ const InsightsOverviewEntities = () => {
       : undefined,
   )
   const [page, setPage] = useState(1)
-  const [query, setQuery] = useState('')
+  const [query, setQuery] = useState<string | undefined>(undefined)
   const { data: metadata } = InsightsAPI.useGetMetadata(id, swrConfig())
   const {
     data: list,
@@ -37,9 +37,14 @@ const InsightsOverviewEntities = () => {
     mutate()
   }, [page, query, mutate])
 
-  const handleSearchInputChange = useCallback((value: string) => {
+  const handleSearchInputValue = useCallback((value: string) => {
     setPage(1)
     setQuery(value)
+  }, [])
+
+  const handleSearchInputClear = useCallback(() => {
+    setPage(1)
+    setQuery(undefined)
   }, [])
 
   if (!list) {
@@ -51,7 +56,8 @@ const InsightsOverviewEntities = () => {
       <SearchInput
         placeholder="Search Entities"
         query={query}
-        onChange={handleSearchInputChange}
+        onValue={handleSearchInputValue}
+        onClear={handleSearchInputClear}
       />
       {!list && error ? (
         <div
