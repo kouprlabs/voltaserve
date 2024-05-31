@@ -14,10 +14,11 @@ import FileRename from '@/components/file/file-rename'
 import FileToolbar from '@/components/file/file-toolbar'
 import Insights from '@/components/file/insights'
 import FileList from '@/components/file/list'
-import Mosaic from '@/components/file/performance'
+import Mosaic from '@/components/file/mosaic'
 import Sharing from '@/components/file/sharing'
 import SnapshotDetach from '@/components/file/snapshot/snapshot-detach'
 import SnapshotList from '@/components/file/snapshot/snapshot-list'
+import Watermark from '@/components/file/watermark'
 import { decodeQuery } from '@/helpers/query'
 import { filePaginationSteps, filesPaginationStorage } from '@/infra/pagination'
 import PagePagination from '@/lib/components/page-pagination'
@@ -64,6 +65,9 @@ const WorkspaceFilesPage = () => {
   )
   const isMosaicModalOpen = useAppSelector(
     (state) => state.ui.mosaic.isModalOpen,
+  )
+  const isWatermarkModalOpen = useAppSelector(
+    (state) => state.ui.watermark.isModalOpen,
   )
   const { data: workspace } = WorkspaceAPI.useGet(workspaceId, swrConfig())
   const { page, size, steps, setPage, setSize } = usePagePagination({
@@ -198,6 +202,7 @@ const WorkspaceFilesPage = () => {
       {isRenameModalOpen ? <FileRename /> : null}
       {isInsightsModalOpen ? <Insights /> : null}
       {isMosaicModalOpen ? <Mosaic /> : null}
+      {isWatermarkModalOpen ? <Watermark /> : null}
     </>
   )
 }

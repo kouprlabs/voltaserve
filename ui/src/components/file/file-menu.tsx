@@ -53,6 +53,7 @@ import { modalDidOpen as insightsModalDidOpen } from '@/store/ui/insights'
 import { modalDidOpen as mosaicModalDidOpen } from '@/store/ui/mosaic'
 import { listModalDidOpen } from '@/store/ui/snapshots'
 import { uploadsDrawerOpened } from '@/store/ui/uploads-drawer'
+import { modalDidOpen as watermarkModalDidOpen } from '@/store/ui/watermark'
 import Orb from '../common/orb'
 
 export type FileMenuProps = {
@@ -107,20 +108,21 @@ const FileMenu = ({
         geEditorPermission(file.permission)),
     [file],
   )
-  const isPerformanceAuthorized = useMemo(
+  const isMosaicAuthorized = useMemo(
     () =>
       file?.type === 'file' &&
       file.snapshot?.status !== Status.Processing &&
       isImage(file.snapshot?.original.extension),
     [file],
   )
-  const isSecurityAuthorized = useMemo(
+  const isWatermarkAuthorized = useMemo(
     () =>
       file?.type === 'file' &&
       file.snapshot?.status !== Status.Processing &&
       (isPDF(file.snapshot?.original.extension) ||
         isMicrosoftOffice(file.snapshot?.original.extension) ||
-        isOpenOffice(file.snapshot?.original.extension)) &&
+        isOpenOffice(file.snapshot?.original.extension) ||
+        isImage(file.snapshot?.original.extension)) &&
       geEditorPermission(file.permission),
     [file],
   )
@@ -156,13 +158,13 @@ const FileMenu = ({
     () => file !== undefined && geEditorPermission(file.permission),
     [file],
   )
-  const isAnyFeatureIsAuthorized = useMemo(
+  const isAnyFeatureAuthorized = useMemo(
     () =>
       isInsightsAuthorized ||
       isSharingAuthorized ||
       isSnapshotsAuthorized ||
-      isPerformanceAuthorized ||
-      isSecurityAuthorized,
+      isMosaicAuthorized ||
+      isWatermarkAuthorized,
     [],
   )
   const uploadInputRef = useRef<HTMLInputElement>(null)
@@ -222,16 +224,21 @@ const FileMenu = ({
               Snapshots
             </Button>
           ) : null}
-          {isPerformanceAuthorized ? (
+          {isMosaicAuthorized ? (
             <Button
               leftIcon={<IconModeHeat />}
               onClick={() => dispatch(mosaicModalDidOpen())}
             >
-              Performance
+              Mosaic
             </Button>
           ) : null}
-          {isSecurityAuthorized ? (
-            <Button leftIcon={<IconSecurity />}>Security</Button>
+          {isWatermarkAuthorized ? (
+            <Button
+              leftIcon={<IconSecurity />}
+              onClick={() => dispatch(watermarkModalDidOpen())}
+            >
+              Watermark
+            </Button>
           ) : null}
         </>
       ) : null}
@@ -292,7 +299,7 @@ const FileMenu = ({
                 Snapshots
               </MenuItem>
             ) : null}
-            {!isToolbarMode && isPerformanceAuthorized ? (
+            {!isToolbarMode && isMosaicAuthorized ? (
               <MenuItem
                 icon={<IconModeHeat />}
                 onClick={(event: MouseEvent) => {
@@ -300,13 +307,21 @@ const FileMenu = ({
                   dispatch(mosaicModalDidOpen())
                 }}
               >
-                Performance
+                Mosaic
               </MenuItem>
             ) : null}
-            {!isToolbarMode && isSecurityAuthorized ? (
-              <MenuItem icon={<IconSecurity />}>Security</MenuItem>
+            {!isToolbarMode && isWatermarkAuthorized ? (
+              <MenuItem
+                icon={<IconSecurity />}
+                onClick={(event: MouseEvent) => {
+                  event.stopPropagation()
+                  dispatch(watermarkModalDidOpen())
+                }}
+              >
+                Watermark
+              </MenuItem>
             ) : null}
-            {isAnyFeatureIsAuthorized ? <MenuDivider /> : null}
+            {isAnyFeatureAuthorized && !isToolbarMode ? <MenuDivider /> : null}
             <MenuItem
               icon={<IconUpload />}
               isDisabled={!isUploadAuthorized}

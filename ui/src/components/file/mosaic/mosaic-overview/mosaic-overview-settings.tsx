@@ -15,7 +15,7 @@ import {
   updatingDidStop,
 } from '@/store/ui/mosaic'
 
-const PeformanceOverviewSettings = () => {
+const MosaicOverviewSettings = () => {
   const dispatch = useAppDispatch()
   const id = useAppSelector((state) =>
     state.ui.files.selection.length > 0
@@ -112,4 +112,4 @@ const PeformanceOverviewSettings = () => {
   )
 }
 
-export default PeformanceOverviewSettings
+export default MosaicOverviewSettings

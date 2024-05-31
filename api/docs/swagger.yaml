@@ -103,6 +103,11 @@ definitions:
       width:
         type: integer
     type: object
+  model.WatermarkMetadata:
+    properties:
+      isOutdated:
+        type: boolean
+    type: object
   router.FileCopyOptions:
     properties:
       ids:
@@ -517,6 +522,8 @@ definitions:
         type: string
       version:
         type: integer
+      watermark:
+        $ref: '#/definitions/service.Download'
     type: object
   service.SnapshotActivateOptions:
     properties:
@@ -2169,7 +2176,7 @@ paths:
       consumes:
       - application/json
       description: Get Metadata
-      operationId: mosaic_get_summary
+      operationId: mosaic_get_metadata
       parameters:
       - description: ID
         in: path
@@ -2739,6 +2746,115 @@ paths:
       summary: List
       tags:
       - Users
+  /watermarks/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete
+      operationId: watermark_delete
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Delete
+      tags:
+      - Watermark
+    post:
+      consumes:
+      - application/json
+      description: Create
+      operationId: watermark_create
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Create
+      tags:
+      - Watermark
+  /watermarks/{id}/metadata:
+    get:
+      consumes:
+      - application/json
+      description: Get Metadata
+      operationId: watermark_get_metadata
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.WatermarkMetadata'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Get Metadata
+      tags:
+      - Watermark
+  /watermarks/{id}/watermark{ext}:
+    get:
+      description: Download
+      operationId: watermark_download
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Download
+      tags:
+      - Watermark
   /workspaces:
     get:
       description: List

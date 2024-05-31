@@ -149,6 +149,16 @@ func NewMosaicNotFoundError(err error) *ErrorResponse {
 	)
 }
 
+func NewWatermarkNotFoundError(err error) *ErrorResponse {
+	return NewErrorResponse(
+		"watermark_not_found",
+		http.StatusNotFound,
+		"Watermark not found.",
+		"Watermark not found.",
+		err,
+	)
+}
+
 func NewInvitationNotFoundError(err error) *ErrorResponse {
 	return NewErrorResponse(
 		"invitation_not_found",

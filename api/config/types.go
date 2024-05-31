@@ -6,6 +6,7 @@ type Config struct {
 	ConversionURL string
 	LanguageURL   string
 	MosaicURL     string
+	WatermarkURL  string
 	DatabaseURL   string
 	Search        SearchConfig
 	Redis         RedisConfig

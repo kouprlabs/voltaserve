@@ -6,6 +6,7 @@ import IconBadgeMosaic from './icon-badge-mosaic'
 import IconBadgeNew from './icon-badge-new'
 import IconBadgeProcessing from './icon-badge-processing'
 import IconBadgeShared from './icon-badge-shared'
+import IconBadgeWatermark from './icon-badge-watermark'
 
 export type IconBadgeProps = {
   file: File
@@ -25,6 +26,7 @@ const IconBadge = ({ file, isLoading }: IconBadgeProps) => {
           {file.isShared ? <IconBadgeShared /> : null}
           {file.snapshot?.entities ? <IconBadgeInsights /> : null}
           {file.snapshot?.mosaic ? <IconBadgeMosaic /> : null}
+          {file.snapshot?.watermark ? <IconBadgeWatermark /> : null}
         </>
       ) : null}
       {file.type === 'folder' ? (

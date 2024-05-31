@@ -59,6 +59,7 @@ type snapshotEntity struct {
 	OCR        datatypes.JSON `json:"ocr,omitempty" gorm:"column:ocr"`
 	Entities   datatypes.JSON `json:"entities,omitempty" gorm:"column:entities"`
 	Mosaic     datatypes.JSON `json:"mosaic,omitempty" gorm:"column:mosaic"`
+	Watermark  datatypes.JSON `json:"watermark,omitempty" gorm:"column:watermark"`
 	Thumbnail  datatypes.JSON `json:"thumbnail,omitempty" gorm:"column:thumbnail"`
 	Status     string         `json:"status,omitempty" gorm:"column,status"`
 	Language   *string        `json:"language,omitempty" gorm:"column:language"`
@@ -155,6 +156,18 @@ func (s *snapshotEntity) GetMosaic() *model.S3Object {
 	}
 	var res = model.S3Object{}
 	if err := json.Unmarshal([]byte(s.Mosaic.String()), &res); err != nil {
+		log.Fatal(err)
+		return nil
+	}
+	return &res
+}
+
+func (s *snapshotEntity) GetWatermark() *model.S3Object {
+	if s.Watermark.String() == "" {
+		return nil
+	}
+	var res = model.S3Object{}
+	if err := json.Unmarshal([]byte(s.Watermark.String()), &res); err != nil {
 		log.Fatal(err)
 		return nil
 	}
@@ -279,6 +292,21 @@ func (s *snapshotEntity) SetMosaic(m *model.S3Object) {
 	}
 }
 
+func (s *snapshotEntity) SetWatermark(m *model.S3Object) {
+	if m == nil {
+		s.Watermark = nil
+	} else {
+		b, err := json.Marshal(m)
+		if err != nil {
+			log.Fatal(err)
+			return
+		}
+		if err := s.Watermark.UnmarshalJSON(b); err != nil {
+			log.Fatal(err)
+		}
+	}
+}
+
 func (s *snapshotEntity) SetThumbnail(m *model.Thumbnail) {
 	if m == nil {
 		s.Thumbnail = nil
@@ -324,6 +352,10 @@ func (s *snapshotEntity) HasEntities() bool {
 
 func (s *snapshotEntity) HasMosaic() bool {
 	return s.Mosaic != nil
+}
+
+func (s *snapshotEntity) HasWatermark() bool {
+	return s.Watermark != nil
 }
 
 func (s *snapshotEntity) HasThumbnail() bool {

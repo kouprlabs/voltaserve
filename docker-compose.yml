@@ -67,6 +67,7 @@ services:
       - CONVERSION_URL=http://conversion:8083
       - LANGUAGE_URL=http://language:8084
       - MOSAIC_URL=http://mosaic:8085
+      - WATERMARK_URL=http://mosaic:8086
       - POSTGRES_URL=postgresql://voltaserve@cockroach:26257/voltaserve
       - S3_URL=minio:9000
       - SEARCH_URL=http://meilisearch:7700
@@ -178,4 +179,15 @@ services:
       - S3_URL=minio:9000
     healthcheck:
       test: curl --fail http://127.0.0.1:8085/v2/health || exit 1
+    restart: on-failure
+  watermark:
+    image: voltaserve/watermark
+    build:
+      context: ./watermark
+    ports:
+      - ${VOLTASERVE_WATERMARK_PORT}:8086
+    environment:
+      - S3_URL=minio:9000
+    healthcheck:
+      test: curl --fail http://127.0.0.1:8086/v2/health || exit 1
     restart: on-failure

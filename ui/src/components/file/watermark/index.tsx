@@ -6,14 +6,14 @@ import {
   ModalHeader,
   ModalOverlay,
 } from '@chakra-ui/react'
-import MosaicAPI from '@/client/api/mosaic'
+import FileAPI from '@/client/api/file'
 import { swrConfig } from '@/client/options'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
-import { modalDidClose, mutateMetadataUpdated } from '@/store/ui/mosaic'
-import PerformanceCreate from './performance-create'
-import PerformanceOverview from './performance-overview'
+import { modalDidClose, mutateFileUpdated } from '@/store/ui/watermark'
+import WatermarkCreate from './watermark-create'
+import WatermarkOverview from './watermark-overview'
 
-const Mosaic = () => {
+const Watermark = () => {
   const dispatch = useAppDispatch()
   const id = useAppSelector((state) =>
     state.ui.files.selection.length > 0
@@ -22,21 +22,18 @@ const Mosaic = () => {
   )
   const isLoading = useAppSelector(
     (state) =>
-      state.ui.mosaic.isCreating ||
-      state.ui.mosaic.isUpdating ||
-      state.ui.mosaic.isDeleting,
+      state.ui.watermark.isCreating ||
+      state.ui.watermark.isUpdating ||
+      state.ui.watermark.isDeleting,
   )
-  const isModalOpen = useAppSelector((state) => state.ui.mosaic.isModalOpen)
-  const { data: metadata, mutate: mutateMetadata } = MosaicAPI.useGetMetadata(
-    id,
-    swrConfig(),
-  )
+  const isModalOpen = useAppSelector((state) => state.ui.watermark.isModalOpen)
+  const { data: file, mutate: mutateFile } = FileAPI.useGet(id, swrConfig())
 
   useEffect(() => {
     if (id) {
-      dispatch(mutateMetadataUpdated(mutateMetadata))
+      dispatch(mutateFileUpdated(mutateFile))
     }
-  }, [mutateMetadata])
+  }, [mutateFile])
 
   return (
     <Modal
@@ -48,13 +45,13 @@ const Mosaic = () => {
     >
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>Performance</ModalHeader>
+        <ModalHeader>Watermark</ModalHeader>
         <ModalCloseButton isDisabled={isLoading} />
-        {!metadata ? <PerformanceCreate /> : null}
-        {metadata ? <PerformanceOverview /> : null}
+        {!file?.snapshot?.watermark ? <WatermarkCreate /> : null}
+        {file?.snapshot?.watermark ? <WatermarkOverview /> : null}
       </ModalContent>
     </Modal>
   )
 }
 
-export default Mosaic
+export default Watermark

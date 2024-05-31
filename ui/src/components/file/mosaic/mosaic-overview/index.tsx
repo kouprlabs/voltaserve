@@ -16,10 +16,10 @@ import cx from 'classnames'
 import MosaicAPI from '@/client/api/mosaic'
 import { swrConfig } from '@/client/options'
 import { useAppSelector } from '@/store/hook'
-import PerformanceOverviewMosaic from './performance-overview-mosaic'
-import PeformanceOverviewSettings from './performance-overview-settings'
+import MosaicOverviewFile from './mosaic-overview-file'
+import MosaicOverviewSettings from './mosaic-overview-settings'
 
-const PerformanceOverview = () => {
+const MosaicOverview = () => {
   const id = useAppSelector((state) =>
     state.ui.files.selection.length > 0
       ? state.ui.files.selection[0]
@@ -52,15 +52,15 @@ const PerformanceOverview = () => {
           ) : null}
           <Tabs colorScheme="gray">
             <TabList>
-              <Tab>Mosaic</Tab>
+              <Tab>File</Tab>
               <Tab>Settings</Tab>
             </TabList>
             <TabPanels>
               <TabPanel>
-                <PerformanceOverviewMosaic />
+                <MosaicOverviewFile />
               </TabPanel>
               <TabPanel>
-                <PeformanceOverviewSettings />
+                <MosaicOverviewSettings />
               </TabPanel>
             </TabPanels>
           </Tabs>
@@ -70,4 +70,4 @@ const PerformanceOverview = () => {
   )
 }
 
-export default PerformanceOverview
+export default MosaicOverview

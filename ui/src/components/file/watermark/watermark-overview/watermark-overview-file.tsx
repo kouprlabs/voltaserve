@@ -5,7 +5,7 @@ import { swrConfig } from '@/client/options'
 import { IconOpenInNew } from '@/lib/components/icons'
 import { useAppSelector } from '@/store/hook'
 
-const PerformanceOverviewMosaic = () => {
+const WatermarkOverviewFile = () => {
   const id = useAppSelector((state) =>
     state.ui.files.selection.length > 0
       ? state.ui.files.selection[0]
@@ -32,12 +32,12 @@ const PerformanceOverviewMosaic = () => {
         type="button"
         leftIcon={<IconOpenInNew />}
         target="_blank"
-        href={`/file/${file.id}/mosaic`}
+        href={`/file/${file.id}/watermark`}
       >
-        Open Mosaic
+        Open
       </Button>
     </div>
   )
 }
 
-export default PerformanceOverviewMosaic
+export default WatermarkOverviewFile

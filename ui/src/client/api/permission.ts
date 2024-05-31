@@ -38,6 +38,24 @@ export function ltOwnerPermission(permission: string) {
   return getPermissionWeight(permission) < getPermissionWeight(OWNER_PERMISSION)
 }
 
+export function leViewerPermission(permission: string): boolean {
+  return (
+    getPermissionWeight(permission) <= getPermissionWeight(VIEWER_PERMISSION)
+  )
+}
+
+export function leEditorPermission(permission: string) {
+  return (
+    getPermissionWeight(permission) <= getPermissionWeight(EDITOR_PERMISSION)
+  )
+}
+
+export function leOwnerPermission(permission: string) {
+  return (
+    getPermissionWeight(permission) <= getPermissionWeight(OWNER_PERMISSION)
+  )
+}
+
 export function getPermissionWeight(permission: string) {
   switch (permission) {
     case VIEWER_PERMISSION:

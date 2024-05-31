@@ -10,10 +10,7 @@ import {
   MenuList,
   Portal,
   Spacer,
-  Slider,
-  SliderTrack,
-  SliderFilledTrack,
-  SliderThumb,
+  MenuDivider,
 } from '@chakra-ui/react'
 import cx from 'classnames'
 import FileAPI, { List, SortBy, SortOrder } from '@/client/api/file'
@@ -50,10 +47,6 @@ import { uploadsDrawerOpened } from '@/store/ui/uploads-drawer'
 import { FileViewType } from '@/types/file'
 import FileMenu from './file-menu'
 
-const ICON_SCALE_SLIDER_STEP = 0.25
-const ICON_SCALE_SLIDER_MIN = 1
-const ICON_SCALE_SLIDER_MAX = ICON_SCALE_SLIDER_STEP * 9
-
 export type FileToolbarProps = {
   list?: List
 }
@@ -76,6 +69,7 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
   const isContextMenuOpen = useAppSelector(
     (state) => state.ui.files.isContextMenuOpen,
   )
+  const iconScales = [1, 1.25, 1.5, 1.75, 2.5]
   const fileUploadInput = useRef<HTMLInputElement>(null)
   const folderUploadInput = useRef<HTMLInputElement>(null)
   const { data: folder } = FileAPI.useGet(fileId)
@@ -144,7 +138,7 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
     dispatch(selectionModeToggled())
   }, [dispatch])
 
-  const getSortByIcon = useCallback(
+  const getSortIcon = useCallback(
     (value: SortBy): ReactElement => {
       if (value === sortBy) {
         return <IconCheck />
@@ -153,6 +147,17 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
       }
     },
     [sortBy],
+  )
+
+  const getScaleIcon = useCallback(
+    (value: number): ReactElement => {
+      if (value === iconScale) {
+        return <IconCheck />
+      } else {
+        return <IconCheck className={cx('text-transparent')} />
+      }
+    },
+    [iconScale],
   )
 
   const getSortOrderIcon = useCallback(() => {
@@ -240,23 +245,6 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
         />
         <Spacer />
         <div className={cx('flex', 'flex-row', 'gap-2.5')}>
-          <Slider
-            className={cx('w-[120px]')}
-            value={iconScale}
-            min={ICON_SCALE_SLIDER_MIN}
-            max={ICON_SCALE_SLIDER_MAX}
-            step={ICON_SCALE_SLIDER_STEP}
-            isDisabled={!list}
-            onChange={handleIconScaleChange}
-          >
-            <SliderTrack>
-              <div className={cx('relative')} />
-              <SliderFilledTrack />
-            </SliderTrack>
-            <SliderThumb boxSize={8}>
-              <IconGridView className={cx('text-gray-500')} />
-            </SliderThumb>
-          </Slider>
           <div className={cx('flex', 'flex-row', 'gap-0.5')}>
             <IconButton
               icon={getSortOrderIcon()}
@@ -283,35 +271,44 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
               <Portal>
                 <MenuList zIndex="dropdown">
                   <MenuItem
-                    icon={getSortByIcon(SortBy.Name)}
+                    icon={getSortIcon(SortBy.Name)}
                     onClick={() => handleSortByChange(SortBy.Name)}
                   >
                     Sort By Name
                   </MenuItem>
                   <MenuItem
-                    icon={getSortByIcon(SortBy.Kind)}
+                    icon={getSortIcon(SortBy.Kind)}
                     onClick={() => handleSortByChange(SortBy.Kind)}
                   >
                     Sort By Kind
                   </MenuItem>
                   <MenuItem
-                    icon={getSortByIcon(SortBy.Size)}
+                    icon={getSortIcon(SortBy.Size)}
                     onClick={() => handleSortByChange(SortBy.Size)}
                   >
                     Sort By Size
                   </MenuItem>
                   <MenuItem
-                    icon={getSortByIcon(SortBy.DateCreated)}
+                    icon={getSortIcon(SortBy.DateCreated)}
                     onClick={() => handleSortByChange(SortBy.DateCreated)}
                   >
                     Sort By Date Created
                   </MenuItem>
                   <MenuItem
-                    icon={getSortByIcon(SortBy.DateModified)}
+                    icon={getSortIcon(SortBy.DateModified)}
                     onClick={() => handleSortByChange(SortBy.DateModified)}
                   >
                     Sort By Date Modified
                   </MenuItem>
+                  <MenuDivider />
+                  {iconScales.map((scale) => (
+                    <MenuItem
+                      icon={getScaleIcon(scale)}
+                      onClick={() => handleIconScaleChange(scale)}
+                    >
+                      {scale}x
+                    </MenuItem>
+                  ))}
                 </MenuList>
               </Portal>
             </Menu>

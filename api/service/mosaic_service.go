@@ -90,23 +90,28 @@ func (svc *MosaicService) create(snapshot model.Snapshot) error {
 	if !snapshot.HasOriginal() {
 		return errorpkg.NewS3ObjectNotFoundError(nil)
 	}
-	/* Download original S3 object */
 	original := snapshot.GetOriginal()
-	path := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(original.Key))
-	if err := svc.s3.GetFile(original.Key, path, original.Bucket); err != nil {
-		return err
-	}
-	defer func(inputPath string, logger *zap.SugaredLogger) {
-		_, err := os.Stat(inputPath)
-		if os.IsExist(err) {
-			if err := os.Remove(inputPath); err != nil {
-				logger.Error(err)
-			}
-		}
-	}(path, svc.logger)
 	/* Create mosaic if image */
 	if svc.fileIdent.IsImage(original.Key) {
-		if _, err := svc.mosaicClient.Create(path, client.MosaicCreateOptions{
+		/* Download original S3 object */
+		path := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(original.Key))
+		if err := svc.s3.GetFile(original.Key, path, original.Bucket); err != nil {
+			return err
+		}
+		defer func(inputPath string, logger *zap.SugaredLogger) {
+			_, err := os.Stat(inputPath)
+			if os.IsExist(err) {
+				if err := os.Remove(inputPath); err != nil {
+					logger.Error(err)
+				}
+			}
+		}(path, svc.logger)
+		stat, err := os.Stat(path)
+		if err != nil {
+			return err
+		}
+		if _, err := svc.mosaicClient.Create(client.MosaicCreateOptions{
+			Path:     path,
 			S3Key:    filepath.FromSlash(snapshot.GetID()),
 			S3Bucket: snapshot.GetOriginal().Bucket,
 		}); err != nil {
@@ -115,6 +120,7 @@ func (svc *MosaicService) create(snapshot model.Snapshot) error {
 		snapshot.SetMosaic(&model.S3Object{
 			Key:    filepath.FromSlash(snapshot.GetID() + "/mosaic.json"),
 			Bucket: snapshot.GetOriginal().Bucket,
+			Size:   stat.Size(),
 		})
 		if err := svc.snapshotRepo.Save(snapshot); err != nil {
 			return err
@@ -250,11 +256,11 @@ func (svc *MosaicService) DownloadTileBuffer(id string, opts MosaicDownloadTileO
 }
 
 func (svc *MosaicService) getPreviousSnapshot(fileID string, version int64) (model.Snapshot, error) {
-	snaphots, err := svc.snapshotRepo.FindAllPrevious(fileID, version)
+	snapshots, err := svc.snapshotRepo.FindAllPrevious(fileID, version)
 	if err != nil {
 		return nil, err
 	}
-	for _, snapshot := range snaphots {
+	for _, snapshot := range snapshots {
 		if snapshot.HasMosaic() {
 			return snapshot, nil
 		}
