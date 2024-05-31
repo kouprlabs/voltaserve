@@ -17,7 +17,12 @@ import {
   InputRightElement,
 } from '@chakra-ui/react'
 import cx from 'classnames'
-import { decodeQuery, encodeQuery } from '@/helpers/query'
+import {
+  decodeFileQuery,
+  decodeQuery,
+  encodeFileQuery,
+  encodeQuery,
+} from '@/helpers/query'
 import { IconClose, IconSearch, IconTune } from '@/lib/components/icons'
 import { useAppDispatch } from '@/store/hook'
 import { modalDidOpen as searchFilterModalDidOpen } from '@/store/ui/search-filter'
@@ -28,7 +33,6 @@ const TopBarSearch = () => {
   const location = useLocation()
   const { id: workspaceId, fileId } = useParams()
   const [searchParams] = useSearchParams()
-  const query = decodeQuery(searchParams.get('q') as string)
   const isWorkspaces = useMemo(
     () => location.pathname === '/workspace',
     [location],
@@ -56,6 +60,9 @@ const TopBarSearch = () => {
       location.pathname.includes('/member'),
     [location],
   )
+  const query = isFiles
+    ? decodeFileQuery(searchParams.get('q') as string)?.text
+    : decodeQuery(searchParams.get('q') as string)
   const isAvailable = useMemo(
     () =>
       isWorkspaces ||
@@ -97,7 +104,7 @@ const TopBarSearch = () => {
       if (isFiles) {
         if (value) {
           navigation(
-            `/workspace/${workspaceId}/file/${fileId}?q=${encodeQuery(value)}`,
+            `/workspace/${workspaceId}/file/${fileId}?q=${encodeFileQuery({ text: value })}`,
           )
         } else {
           navigation(`/workspace/${workspaceId}/file/${fileId}`)

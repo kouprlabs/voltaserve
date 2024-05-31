@@ -1,4 +1,5 @@
 import { useCallback } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import {
   Button,
   FormControl,
@@ -25,6 +26,7 @@ import * as Yup from 'yup'
 import { Select } from 'chakra-react-select'
 import cx from 'classnames'
 import { FileType } from '@/client/api/file'
+import { decodeFileQuery } from '@/helpers/query'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { modalDidClose } from '@/store/ui/search-filter'
 import { reactSelectStyles } from '@/styles/react-select'
@@ -39,6 +41,8 @@ type FormValues = {
 
 const SearchFilter = () => {
   const dispatch = useAppDispatch()
+  const [searchParams] = useSearchParams()
+  const query = decodeFileQuery(searchParams.get('q') as string)
   const isModalOpen = useAppSelector(
     (state) => state.ui.searchFilter.isModalOpen,
   )
@@ -66,10 +70,10 @@ const SearchFilter = () => {
       try {
         // TODO: Implement search filter
         console.log('type', type)
-        console.log('createTimeBefore', createTimeBefore)
-        console.log('createTimeAfter', createTimeAfter)
-        console.log('updateTimeBefore', updateTimeBefore)
-        console.log('updateTimeAfter', updateTimeAfter)
+        console.log('createTimeBefore', new Date(createTimeBefore).getTime())
+        console.log('createTimeAfter', new Date(createTimeAfter).getTime())
+        console.log('updateTimeBefore', new Date(updateTimeBefore).getTime())
+        console.log('updateTimeAfter', new Date(updateTimeAfter).getTime())
         mutateList?.()
         setSubmitting(false)
       } finally {

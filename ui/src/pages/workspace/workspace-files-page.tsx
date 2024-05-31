@@ -20,7 +20,7 @@ import Sharing from '@/components/file/sharing'
 import SnapshotDetach from '@/components/file/snapshot/snapshot-detach'
 import SnapshotList from '@/components/file/snapshot/snapshot-list'
 import Watermark from '@/components/file/watermark'
-import { decodeQuery } from '@/helpers/query'
+import { decodeFileQuery } from '@/helpers/query'
 import { filePaginationSteps, filesPaginationStorage } from '@/infra/pagination'
 import PagePagination from '@/lib/components/page-pagination'
 import Spinner from '@/lib/components/spinner'
@@ -35,7 +35,7 @@ const WorkspaceFilesPage = () => {
   const navigate = useNavigate()
   const { id: workspaceId, fileId } = useParams()
   const [searchParams] = useSearchParams()
-  const query = decodeQuery(searchParams.get('q') as string)
+  const query = decodeFileQuery(searchParams.get('q') as string)
   const dispatch = useAppDispatch()
   const sortBy = useAppSelector((state) => state.ui.files.sortBy)
   const sortOrder = useAppSelector((state) => state.ui.files.sortOrder)
@@ -92,7 +92,7 @@ const WorkspaceFilesPage = () => {
       page,
       sortBy,
       sortOrder,
-      query: query ? { text: query } : undefined,
+      query,
     },
     swrConfig(),
   )
