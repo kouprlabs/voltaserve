@@ -8,6 +8,7 @@ import {
 } from 'react-router-dom'
 import {
   Button,
+  Circle,
   Icon,
   IconButton,
   Input,
@@ -16,15 +17,23 @@ import {
   InputRightElement,
 } from '@chakra-ui/react'
 import cx from 'classnames'
-import { decodeQuery, encodeQuery } from '@/helpers/query'
-import { IconClose, IconSearch } from '@/lib/components/icons'
+import { Query as FileQuery } from '@/client/api/file'
+import {
+  decodeFileQuery,
+  decodeQuery,
+  encodeFileQuery,
+  encodeQuery,
+} from '@/helpers/query'
+import { IconClose, IconSearch, IconTune } from '@/lib/components/icons'
+import { useAppDispatch } from '@/store/hook'
+import { modalDidOpen as searchFilterModalDidOpen } from '@/store/ui/search-filter'
 
 const TopBarSearch = () => {
-  const navigation = useNavigate()
+  const dispatch = useAppDispatch()
+  const navigate = useNavigate()
   const location = useLocation()
   const { id: workspaceId, fileId } = useParams()
   const [searchParams] = useSearchParams()
-  const query = decodeQuery(searchParams.get('q') as string)
   const isWorkspaces = useMemo(
     () => location.pathname === '/workspace',
     [location],
@@ -52,6 +61,14 @@ const TopBarSearch = () => {
       location.pathname.includes('/member'),
     [location],
   )
+  const query: string | FileQuery | undefined = isFiles
+    ? decodeFileQuery(searchParams.get('q') as string)
+    : decodeQuery(searchParams.get('q') as string)
+  const parsedQuery = useMemo(
+    () =>
+      (isFiles && query ? (query as FileQuery).text : (query as string)) || '',
+    [isFiles, query],
+  )
   const isAvailable = useMemo(
     () =>
       isWorkspaces ||
@@ -62,6 +79,18 @@ const TopBarSearch = () => {
       isGroupMembers,
     [isWorkspaces, isFiles, isGroups, isOrgs, isOrgMembers, isGroupMembers],
   )
+  const hasFileQuery = useMemo(() => {
+    const fileQuery = query as FileQuery
+    return (
+      isFiles &&
+      fileQuery &&
+      (fileQuery.type ||
+        fileQuery.createTimeAfter ||
+        fileQuery.createTimeBefore ||
+        fileQuery.updateTimeAfter ||
+        fileQuery.updateTimeBefore)
+    )
+  }, [isFiles, query])
   const placeholder = useMemo(() => {
     if (isWorkspaces) {
       return 'Search Workspaces'
@@ -77,58 +106,60 @@ const TopBarSearch = () => {
       return 'Search Group Members'
     }
   }, [isWorkspaces, isFiles, isGroups, isOrgs, isOrgMembers, isGroupMembers])
-  const [text, setText] = useState(query || '')
+  const [buffer, setBuffer] = useState(parsedQuery)
   const [isFocused, setIsFocused] = useState(false)
 
   useEffect(() => {
     if (query) {
-      setText(query || '')
+      setBuffer(parsedQuery)
     } else {
-      setText('')
+      setBuffer('')
     }
-  }, [query])
+  }, [parsedQuery, isFiles])
 
   const handleSearch = useCallback(
     (value: string) => {
       if (isFiles) {
         if (value) {
-          navigation(
-            `/workspace/${workspaceId}/file/${fileId}?q=${encodeQuery(value)}`,
-          )
+          const encodedQuery = encodeFileQuery({
+            ...(query as FileQuery),
+            text: value,
+          })
+          navigate(`/workspace/${workspaceId}/file/${fileId}?q=${encodedQuery}`)
         } else {
-          navigation(`/workspace/${workspaceId}/file/${fileId}`)
+          navigate(`/workspace/${workspaceId}/file/${fileId}`)
         }
       } else if (isWorkspaces) {
         if (value) {
-          navigation(`/workspace?q=${encodeQuery(value)}`)
+          navigate(`/workspace?q=${encodeQuery(value)}`)
         } else {
-          navigation(`/workspace`)
+          navigate(`/workspace`)
         }
       } else if (isGroups) {
         if (value) {
-          navigation(`/group?q=${encodeQuery(value)}`)
+          navigate(`/group?q=${encodeQuery(value)}`)
         } else {
-          navigation(`/group`)
+          navigate(`/group`)
         }
       } else if (isOrgs) {
         if (value) {
-          navigation(`/organization?q=${encodeQuery(value)}`)
+          navigate(`/organization?q=${encodeQuery(value)}`)
         } else {
-          navigation(`/organization`)
+          navigate(`/organization`)
         }
       } else if (isOrgMembers) {
         if (value) {
-          navigation(
+          navigate(
             `/organization/${workspaceId}/member?q=${encodeQuery(value)}`,
           )
         } else {
-          navigation(`/organization/${workspaceId}/member`)
+          navigate(`/organization/${workspaceId}/member`)
         }
       } else if (isGroupMembers) {
         if (value) {
-          navigation(`/group/${workspaceId}/member?q=${encodeQuery(value)}`)
+          navigate(`/group/${workspaceId}/member?q=${encodeQuery(value)}`)
         } else {
-          navigation(`/group/${workspaceId}/member`)
+          navigate(`/group/${workspaceId}/member`)
         }
       }
     },
@@ -141,24 +172,24 @@ const TopBarSearch = () => {
       isOrgs,
       isOrgMembers,
       isGroupMembers,
-      navigation,
+      navigate,
     ],
   )
 
   const handleClear = useCallback(() => {
-    setText('')
+    setBuffer('')
     if (isFiles) {
-      navigation(`/workspace/${workspaceId}/file/${fileId}`)
+      navigate(`/workspace/${workspaceId}/file/${fileId}`)
     } else if (isWorkspaces) {
-      navigation(`/workspace`)
+      navigate(`/workspace`)
     } else if (isGroups) {
-      navigation(`/group`)
+      navigate(`/group`)
     } else if (isOrgs) {
-      navigation(`/organization`)
+      navigate(`/organization`)
     } else if (isOrgMembers) {
-      navigation(`/organization/${workspaceId}/member`)
+      navigate(`/organization/${workspaceId}/member`)
     } else if (isGroupMembers) {
-      navigation(`/group/${workspaceId}/member`)
+      navigate(`/group/${workspaceId}/member`)
     }
   }, [
     workspaceId,
@@ -169,21 +200,25 @@ const TopBarSearch = () => {
     isOrgs,
     isOrgMembers,
     isGroupMembers,
-    navigation,
+    navigate,
   ])
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent<HTMLInputElement>) => {
       if (event.key === 'Enter') {
-        handleSearch(text)
+        handleSearch(buffer)
       }
     },
-    [text, handleSearch],
+    [buffer, handleSearch],
   )
 
   const handleChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
-    setText(event.target.value || '')
+    setBuffer(event.target.value || '')
   }, [])
+
+  const handleFilterClick = useCallback(() => {
+    dispatch(searchFilterModalDidOpen())
+  }, [dispatch])
 
   if (!isAvailable) {
     return null
@@ -196,8 +231,8 @@ const TopBarSearch = () => {
           <Icon as={IconSearch} className={cx('text-gray-300')} />
         </InputLeftElement>
         <Input
-          value={text}
-          placeholder={query || placeholder}
+          value={buffer}
+          placeholder={parsedQuery || placeholder}
           variant="filled"
           onKeyDown={handleKeyDown}
           onChange={handleChange}
@@ -215,8 +250,22 @@ const TopBarSearch = () => {
           </InputRightElement>
         ) : null}
       </InputGroup>
-      {text || (isFocused && text) ? (
-        <Button onClick={() => handleSearch(text)} isDisabled={!text}>
+      <div className={cx('flex', 'items-center', 'justify-center', 'relative')}>
+        <IconButton
+          icon={<IconTune />}
+          aria-label="Filters"
+          onClick={handleFilterClick}
+        />
+        {hasFileQuery ? (
+          <Circle size="10px" bg="red" position="absolute" top={0} right={0} />
+        ) : null}
+      </div>
+      {buffer || (isFocused && buffer) ? (
+        <Button
+          leftIcon={<IconSearch />}
+          onClick={() => handleSearch(buffer)}
+          isDisabled={!buffer}
+        >
           Search
         </Button>
       ) : null}

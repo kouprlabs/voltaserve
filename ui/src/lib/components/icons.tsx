@@ -435,3 +435,9 @@ export const IconVisibility = ({
     visibility
   </span>
 )
+
+export const IconTune = ({ className, filled, ...props }: IconBaseProps) => (
+  <span className={getClassName({ filled, className })} {...props}>
+    tune
+  </span>
+)

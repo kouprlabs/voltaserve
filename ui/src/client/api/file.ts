@@ -62,7 +62,7 @@ export type GroupPermission = {
 
 export type Query = {
   text: string
-  type?: string
+  type?: FileType
   createTimeAfter?: number
   createTimeBefore?: number
   updateTimeAfter?: number
