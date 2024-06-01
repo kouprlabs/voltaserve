@@ -146,7 +146,7 @@ const SearchFilter = () => {
           validateOnBlur={false}
           onSubmit={handleSubmit}
         >
-          {({ isSubmitting, setFieldValue }) => (
+          {({ isSubmitting, setFieldValue, values }) => (
             <Form>
               <ModalBody>
                 <div className={cx('flex', 'flex-col', 'gap-1.5')}>
@@ -234,11 +234,29 @@ const SearchFilter = () => {
                   <Button
                     variant="outline"
                     colorScheme="red"
+                    isDisabled={
+                      !values.type &&
+                      !values.createTimeAfter &&
+                      !values.createTimeBefore &&
+                      !values.updateTimeAfter &&
+                      !values.updateTimeBefore
+                    }
                     onClick={handleClear}
                   >
                     Clear Filter
                   </Button>
-                  <Button type="submit" variant="solid" colorScheme="blue">
+                  <Button
+                    type="submit"
+                    variant="solid"
+                    colorScheme="blue"
+                    isDisabled={
+                      !values.type &&
+                      !values.createTimeAfter &&
+                      !values.createTimeBefore &&
+                      !values.updateTimeAfter &&
+                      !values.updateTimeBefore
+                    }
+                  >
                     Apply Filter
                   </Button>
                 </div>
