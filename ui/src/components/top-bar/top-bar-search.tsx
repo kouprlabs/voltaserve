@@ -79,6 +79,18 @@ const TopBarSearch = () => {
       isGroupMembers,
     [isWorkspaces, isFiles, isGroups, isOrgs, isOrgMembers, isGroupMembers],
   )
+  const hasFileQuery = useMemo(() => {
+    const fileQuery = query as FileQuery
+    return (
+      isFiles &&
+      fileQuery &&
+      (fileQuery.type ||
+        fileQuery.createTimeAfter ||
+        fileQuery.createTimeBefore ||
+        fileQuery.updateTimeAfter ||
+        fileQuery.updateTimeBefore)
+    )
+  }, [isFiles, query])
   const placeholder = useMemo(() => {
     if (isWorkspaces) {
       return 'Search Workspaces'
@@ -244,7 +256,9 @@ const TopBarSearch = () => {
           aria-label="Filters"
           onClick={handleFilterClick}
         />
-        <Circle size="10px" bg="red" position="absolute" top={0} right={0} />
+        {hasFileQuery ? (
+          <Circle size="10px" bg="red" position="absolute" top={0} right={0} />
+        ) : null}
       </div>
       {buffer || (isFocused && buffer) ? (
         <Button

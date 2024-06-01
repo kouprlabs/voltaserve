@@ -611,7 +611,23 @@ func (svc *FileService) Search(id string, opts FileListOptions, userID string) (
 	if err := svc.workspaceGuard.Authorize(userID, workspace, model.PermissionViewer); err != nil {
 		return nil, err
 	}
-	data, err := svc.fileSearch.Query(opts.Query.Text)
+	var data []model.File
+	if opts.Query.Text != "" {
+		data, err = svc.fileSearch.Query(opts.Query.Text)
+	} else {
+		ids, err := svc.fileRepo.GetChildrenIDs(id)
+		if err != nil {
+			return nil, err
+		}
+		for _, id := range ids {
+			var f model.File
+			f, err := svc.fileCache.Get(id)
+			if err != nil {
+				return nil, err
+			}
+			data = append(data, f)
+		}
+	}
 	if err != nil {
 		return nil, err
 	}
