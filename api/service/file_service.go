@@ -669,12 +669,12 @@ func (svc *FileService) GetPath(id string, userID string) ([]*File, error) {
 		return nil, err
 	}
 	res := []*File{}
-	for _, f := range path {
-		v, err := svc.fileMapper.mapOne(f, userID)
+	for _, file := range path {
+		f, err := svc.fileMapper.mapOne(file, userID)
 		if err != nil {
 			return nil, err
 		}
-		res = append([]*File{v}, res...)
+		res = append([]*File{f}, res...)
 	}
 	return res, nil
 }
@@ -1383,8 +1383,8 @@ func (svc *FileService) doSorting(data []model.File, sortBy string, sortOrder st
 			}).
 			ToSlice(0)
 		images, _ := rxgo.Just(files)().
-			Filter(func(v interface{}) bool {
-				f, err := svc.fileMapper.mapOne(v.(model.File), userID)
+			Filter(func(file interface{}) bool {
+				f, err := svc.fileMapper.mapOne(file.(model.File), userID)
 				if err != nil {
 					return false
 				}
@@ -1398,8 +1398,8 @@ func (svc *FileService) doSorting(data []model.File, sortBy string, sortOrder st
 			}).
 			ToSlice(0)
 		pdfs, _ := rxgo.Just(files)().
-			Filter(func(v interface{}) bool {
-				f, err := svc.fileMapper.mapOne(v.(model.File), userID)
+			Filter(func(file interface{}) bool {
+				f, err := svc.fileMapper.mapOne(file.(model.File), userID)
 				if err != nil {
 					return false
 				}
@@ -1413,8 +1413,8 @@ func (svc *FileService) doSorting(data []model.File, sortBy string, sortOrder st
 			}).
 			ToSlice(0)
 		documents, _ := rxgo.Just(files)().
-			Filter(func(v interface{}) bool {
-				f, err := svc.fileMapper.mapOne(v.(model.File), userID)
+			Filter(func(file interface{}) bool {
+				f, err := svc.fileMapper.mapOne(file.(model.File), userID)
 				if err != nil {
 					return false
 				}
@@ -1428,8 +1428,8 @@ func (svc *FileService) doSorting(data []model.File, sortBy string, sortOrder st
 			}).
 			ToSlice(0)
 		videos, _ := rxgo.Just(files)().
-			Filter(func(v interface{}) bool {
-				f, err := svc.fileMapper.mapOne(v.(model.File), userID)
+			Filter(func(file interface{}) bool {
+				f, err := svc.fileMapper.mapOne(file.(model.File), userID)
 				if err != nil {
 					return false
 				}
@@ -1443,8 +1443,8 @@ func (svc *FileService) doSorting(data []model.File, sortBy string, sortOrder st
 			}).
 			ToSlice(0)
 		texts, _ := rxgo.Just(files)().
-			Filter(func(v interface{}) bool {
-				f, err := svc.fileMapper.mapOne(v.(model.File), userID)
+			Filter(func(file interface{}) bool {
+				f, err := svc.fileMapper.mapOne(file.(model.File), userID)
 				if err != nil {
 					return false
 				}
@@ -1458,8 +1458,8 @@ func (svc *FileService) doSorting(data []model.File, sortBy string, sortOrder st
 			}).
 			ToSlice(0)
 		others, _ := rxgo.Just(files)().
-			Filter(func(v interface{}) bool {
-				f, err := svc.fileMapper.mapOne(v.(model.File), userID)
+			Filter(func(file interface{}) bool {
+				f, err := svc.fileMapper.mapOne(file.(model.File), userID)
 				if err != nil {
 					return false
 				}
@@ -1705,12 +1705,12 @@ func (mp *FileMapper) mapOne(m model.File, userID string) (*File, error) {
 
 func (mp *FileMapper) mapMany(data []model.File, userID string) ([]*File, error) {
 	res := make([]*File, 0)
-	for _, f := range data {
-		v, err := mp.mapOne(f, userID)
+	for _, file := range data {
+		f, err := mp.mapOne(file, userID)
 		if err != nil {
 			return nil, err
 		}
-		res = append(res, v)
+		res = append(res, f)
 	}
 	return res, nil
 }

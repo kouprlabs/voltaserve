@@ -233,8 +233,8 @@ func (mp *userMapper) mapOne(user model.User) *User {
 
 func (mp *userMapper) mapMany(users []model.User) ([]*User, error) {
 	res := []*User{}
-	for _, u := range users {
-		res = append(res, mp.mapOne(u))
+	for _, user := range users {
+		res = append(res, mp.mapOne(user))
 	}
 	return res, nil
 }

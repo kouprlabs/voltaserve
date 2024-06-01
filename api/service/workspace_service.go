@@ -418,7 +418,7 @@ func (mp *workspaceMapper) mapOne(m model.Workspace, userID string) (*Workspace,
 	if err != nil {
 		return nil, err
 	}
-	v, err := mp.orgMapper.mapOne(org, userID)
+	o, err := mp.orgMapper.mapOne(org, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -427,7 +427,7 @@ func (mp *workspaceMapper) mapOne(m model.Workspace, userID string) (*Workspace,
 		Name:            m.GetName(),
 		RootID:          m.GetRootID(),
 		StorageCapacity: m.GetStorageCapacity(),
-		Organization:    *v,
+		Organization:    *o,
 		CreateTime:      m.GetCreateTime(),
 		UpdateTime:      m.GetUpdateTime(),
 	}
@@ -453,12 +453,12 @@ func (mp *workspaceMapper) mapOne(m model.Workspace, userID string) (*Workspace,
 
 func (mp *workspaceMapper) mapMany(workspaces []model.Workspace, userID string) ([]*Workspace, error) {
 	res := make([]*Workspace, 0)
-	for _, f := range workspaces {
-		v, err := mp.mapOne(f, userID)
+	for _, workspace := range workspaces {
+		w, err := mp.mapOne(workspace, userID)
 		if err != nil {
 			return nil, err
 		}
-		res = append(res, v)
+		res = append(res, w)
 	}
 	return res, nil
 }

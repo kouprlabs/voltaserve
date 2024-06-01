@@ -369,12 +369,12 @@ func (mp *organizationMapper) mapOne(m model.Organization, userID string) (*Orga
 
 func (mp *organizationMapper) mapMany(orgs []model.Organization, userID string) ([]*Organization, error) {
 	res := make([]*Organization, 0)
-	for _, f := range orgs {
-		v, err := mp.mapOne(f, userID)
+	for _, org := range orgs {
+		o, err := mp.mapOne(org, userID)
 		if err != nil {
 			return nil, err
 		}
-		res = append(res, v)
+		res = append(res, o)
 	}
 	return res, nil
 }

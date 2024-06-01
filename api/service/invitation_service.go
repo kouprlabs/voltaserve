@@ -396,7 +396,7 @@ func (mp *invitationMapper) mapOne(m model.Invitation, userID string) (*Invitati
 	if err != nil {
 		return nil, err
 	}
-	v, err := mp.orgMapper.mapOne(org, userID)
+	o, err := mp.orgMapper.mapOne(org, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -404,7 +404,7 @@ func (mp *invitationMapper) mapOne(m model.Invitation, userID string) (*Invitati
 		ID:           m.GetID(),
 		Owner:        mp.userMapper.mapOne(owner),
 		Email:        m.GetEmail(),
-		Organization: v,
+		Organization: o,
 		Status:       m.GetStatus(),
 		CreateTime:   m.GetCreateTime(),
 		UpdateTime:   m.GetUpdateTime(),
@@ -413,12 +413,12 @@ func (mp *invitationMapper) mapOne(m model.Invitation, userID string) (*Invitati
 
 func (mp *invitationMapper) mapMany(invitations []model.Invitation, userID string) ([]*Invitation, error) {
 	res := make([]*Invitation, 0)
-	for _, m := range invitations {
-		v, err := mp.mapOne(m, userID)
+	for _, invitation := range invitations {
+		i, err := mp.mapOne(invitation, userID)
 		if err != nil {
 			return nil, err
 		}
-		res = append(res, v)
+		res = append(res, i)
 	}
 	return res, nil
 }

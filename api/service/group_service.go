@@ -432,14 +432,14 @@ func (mp *groupMapper) mapOne(m model.Group, userID string) (*Group, error) {
 	if err != nil {
 		return nil, err
 	}
-	v, err := mp.orgMapper.mapOne(org, userID)
+	o, err := mp.orgMapper.mapOne(org, userID)
 	if err != nil {
 		return nil, err
 	}
 	res := &Group{
 		ID:           m.GetID(),
 		Name:         m.GetName(),
-		Organization: *v,
+		Organization: *o,
 		CreateTime:   m.GetCreateTime(),
 		UpdateTime:   m.GetUpdateTime(),
 	}
@@ -465,12 +465,12 @@ func (mp *groupMapper) mapOne(m model.Group, userID string) (*Group, error) {
 
 func (mp *groupMapper) mapMany(groups []model.Group, userID string) ([]*Group, error) {
 	res := []*Group{}
-	for _, g := range groups {
-		v, err := mp.mapOne(g, userID)
+	for _, group := range groups {
+		g, err := mp.mapOne(group, userID)
 		if err != nil {
 			return nil, err
 		}
-		res = append(res, v)
+		res = append(res, g)
 	}
 	return res, nil
 }

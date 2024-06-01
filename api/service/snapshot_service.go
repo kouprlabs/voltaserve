@@ -328,8 +328,8 @@ func (mp *SnapshotMapper) mapOne(m model.Snapshot, isActive bool) *Snapshot {
 
 func (mp *SnapshotMapper) mapMany(snapshots []model.Snapshot, activeID string) []*Snapshot {
 	res := make([]*Snapshot, 0)
-	for _, s := range snapshots {
-		res = append(res, mp.mapOne(s, activeID == s.GetID()))
+	for _, snapshot := range snapshots {
+		res = append(res, mp.mapOne(snapshot, activeID == snapshot.GetID()))
 	}
 	return res
 }

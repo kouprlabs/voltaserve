@@ -57,12 +57,12 @@ const TopBarNotificationDrawer = () => {
           <DrawerBody>
             {notfications && notfications.length > 0 ? (
               <div className={cx('flex', 'flex-col', 'gap-1.5')}>
-                {notfications.map((n, index) => (
+                {notfications.map((nofitication, index) => (
                   <div
                     key={index}
                     className={cx('flex', 'flex-col', 'gap-1.5')}
                   >
-                    <NotificationDrawerItem notification={n} />
+                    <NotificationDrawerItem notification={nofitication} />
                     {index !== notfications.length - 1 && <Divider />}
                   </div>
                 ))}
