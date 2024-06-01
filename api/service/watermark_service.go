@@ -227,7 +227,6 @@ func (svc *WatermarkService) GetMetadata(id string, userID string) (*model.Water
 		if previous == nil {
 			return nil, errorpkg.NewMosaicNotFoundError(nil)
 		} else {
-			snapshot = previous
 			isOutdated = true
 		}
 	}

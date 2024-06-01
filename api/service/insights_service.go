@@ -361,11 +361,18 @@ func (svc *InsightsService) Delete(id string, userID string) error {
 		return errorpkg.NewSnapshotIsProcessingError(nil)
 	}
 	snapshot.SetStatus(model.SnapshotStatusProcessing)
+	failed := false
 	if svc.fileIdent.IsImage(snapshot.GetOriginal().Key) {
 		err = svc.deleteText(snapshot)
+		if err != nil {
+			failed = true
+		}
 	}
 	err = svc.deleteEntities(snapshot)
 	if err != nil {
+		failed = true
+	}
+	if failed {
 		snapshot.SetStatus(model.SnapshotStatusError)
 	} else {
 		snapshot.SetStatus(model.SnapshotStatusReady)
