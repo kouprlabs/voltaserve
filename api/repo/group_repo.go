@@ -11,13 +11,6 @@ import (
 	"gorm.io/gorm"
 )
 
-type GroupInsertOptions struct {
-	ID             string
-	Name           string
-	OrganizationID string
-	OwnerID        string
-}
-
 type GroupRepo interface {
 	Insert(opts GroupInsertOptions) (model.Group, error)
 	Find(id string) (model.Group, error)
@@ -126,6 +119,13 @@ func newGroupRepo() *groupRepo {
 		db:             infra.NewPostgresManager().GetDBOrPanic(),
 		permissionRepo: newPermissionRepo(),
 	}
+}
+
+type GroupInsertOptions struct {
+	ID             string
+	Name           string
+	OrganizationID string
+	OwnerID        string
 }
 
 func (repo *groupRepo) Insert(opts GroupInsertOptions) (model.Group, error) {

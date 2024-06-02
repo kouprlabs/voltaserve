@@ -7,8 +7,10 @@ import {
   MenuList,
   Portal,
   SkeletonCircle,
+  Tag,
 } from '@chakra-ui/react'
 import cx from 'classnames'
+import InvitationAPI from '@/client/api/invitation'
 import UserAPI from '@/client/idp/user'
 import { swrConfig } from '@/client/options'
 import AccountMenuActiveCircle from './account-menu-active-circle'
@@ -17,6 +19,9 @@ import AccountMenuAvatarImage from './account-menu-avatar-image'
 
 const TopBarAccountMenu = () => {
   const { data: user } = UserAPI.useGet(swrConfig())
+  const { data: invitationCount } =
+    InvitationAPI.useGetIncomingCount(swrConfig())
+
   if (user) {
     return (
       <Menu>
@@ -50,7 +55,19 @@ const TopBarAccountMenu = () => {
             </div>
             <MenuDivider />
             <MenuItem as={Link} to="/account/settings">
-              Account
+              Settings
+            </MenuItem>
+            <MenuItem as={Link} to="/account/invitation">
+              <div
+                className={cx('flex', 'flex-row', 'items-center', 'gap-0.5')}
+              >
+                <span>Invitations</span>
+                {invitationCount && invitationCount > 0 ? (
+                  <Tag className={cx('rounded-full')} colorScheme="red">
+                    {invitationCount}
+                  </Tag>
+                ) : null}
+              </div>
             </MenuItem>
             <MenuItem as={Link} to="/sign-out" className={cx('text-red-500')}>
               Sign Out

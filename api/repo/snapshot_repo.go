@@ -13,15 +13,6 @@ import (
 	"gorm.io/gorm"
 )
 
-type SnapshotUpdateOptions struct {
-	Original  *model.S3Object
-	Preview   *model.S3Object
-	Text      *model.S3Object
-	Thumbnail *model.Thumbnail
-	Status    string
-	Language  *string
-}
-
 type SnapshotRepo interface {
 	Find(id string) (model.Snapshot, error)
 	FindByVersion(version int64) (model.Snapshot, error)
@@ -436,6 +427,15 @@ func (repo *snapshotRepo) Delete(id string) error {
 		return db.Error
 	}
 	return nil
+}
+
+type SnapshotUpdateOptions struct {
+	Original  *model.S3Object
+	Preview   *model.S3Object
+	Text      *model.S3Object
+	Thumbnail *model.Thumbnail
+	Status    string
+	Language  *string
 }
 
 func (repo *snapshotRepo) Update(id string, opts SnapshotUpdateOptions) error {

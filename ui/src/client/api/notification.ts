@@ -1,7 +1,9 @@
 import useSWR, { SWRConfiguration } from 'swr'
 import { apiFetcher } from '@/client/fetcher'
 
-export type NotificationType = 'new_invitation'
+export enum NotificationType {
+  Invitation = 'invitation',
+}
 
 export type Notification = {
   type: NotificationType

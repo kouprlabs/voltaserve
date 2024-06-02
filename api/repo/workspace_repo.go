@@ -11,16 +11,6 @@ import (
 	"gorm.io/gorm"
 )
 
-type WorkspaceInsertOptions struct {
-	ID              string
-	Name            string
-	StorageCapacity int64
-	Image           *string
-	OrganizationID  string
-	RootID          string
-	Bucket          string
-}
-
 type WorkspaceRepo interface {
 	Insert(opts WorkspaceInsertOptions) (model.Workspace, error)
 	Find(id string) (model.Workspace, error)
@@ -135,6 +125,16 @@ func newWorkspaceRepo() *workspaceRepo {
 		db:             infra.NewPostgresManager().GetDBOrPanic(),
 		permissionRepo: newPermissionRepo(),
 	}
+}
+
+type WorkspaceInsertOptions struct {
+	ID              string
+	Name            string
+	StorageCapacity int64
+	Image           *string
+	OrganizationID  string
+	RootID          string
+	Bucket          string
 }
 
 func (repo *workspaceRepo) Insert(opts WorkspaceInsertOptions) (model.Workspace, error) {

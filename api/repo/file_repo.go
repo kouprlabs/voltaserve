@@ -11,13 +11,6 @@ import (
 	"gorm.io/gorm"
 )
 
-type FileInsertOptions struct {
-	Name        string
-	WorkspaceID string
-	ParentID    *string
-	Type        string
-}
-
 type FileRepo interface {
 	Insert(opts FileInsertOptions) (model.File, error)
 	Find(id string) (model.File, error)
@@ -175,6 +168,13 @@ func newFileRepo() *fileRepo {
 		db:             infra.NewPostgresManager().GetDBOrPanic(),
 		permissionRepo: newPermissionRepo(),
 	}
+}
+
+type FileInsertOptions struct {
+	Name        string
+	WorkspaceID string
+	ParentID    *string
+	Type        string
 }
 
 func (repo *fileRepo) Insert(opts FileInsertOptions) (model.File, error) {

@@ -8,6 +8,23 @@ import (
 	"gorm.io/gorm"
 )
 
+type PermissionRepo interface {
+	GetUserPermissions(id string) ([]model.UserPermission, error)
+	GetGroupPermissions(id string) ([]model.GroupPermission, error)
+}
+
+func NewPermissionRepo() PermissionRepo {
+	return newPermissionRepo()
+}
+
+func NewUserPermission() model.UserPermission {
+	return &userPermissionEntity{}
+}
+
+func NewGroupPermission() model.GroupPermission {
+	return &groupPermissionEntity{}
+}
+
 type userPermissionEntity struct {
 	ID         string `json:"id" gorm:"column:id"`
 	UserID     string `json:"userId" gorm:"column:user_id"`
@@ -120,23 +137,6 @@ func (g *groupPermissionEntity) SetPermission(permission string) {
 
 func (g *groupPermissionEntity) SetCreateTime(createTime string) {
 	g.CreateTime = createTime
-}
-
-type PermissionRepo interface {
-	GetUserPermissions(id string) ([]model.UserPermission, error)
-	GetGroupPermissions(id string) ([]model.GroupPermission, error)
-}
-
-func NewPermissionRepo() PermissionRepo {
-	return newPermissionRepo()
-}
-
-func NewUserPermission() model.UserPermission {
-	return &userPermissionEntity{}
-}
-
-func NewGroupPermission() model.GroupPermission {
-	return &groupPermissionEntity{}
 }
 
 type UserPermissionValue struct {

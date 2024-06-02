@@ -59,6 +59,16 @@ func NewOrganizationNotFoundError(err error) *ErrorResponse {
 	)
 }
 
+func NewProcessNotFoundError(err error) *ErrorResponse {
+	return NewErrorResponse(
+		"process_not_found",
+		http.StatusNotFound,
+		"Process not found.",
+		MsgResourceNotFound,
+		err,
+	)
+}
+
 func NewSnapshotNotFoundError(err error) *ErrorResponse {
 	return NewErrorResponse(
 		"snapshot_not_found",

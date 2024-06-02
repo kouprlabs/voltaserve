@@ -2076,6 +2076,24 @@ paths:
       summary: Get Incoming
       tags:
       - Invitations
+  /invitations/incoming/count:
+    get:
+      description: Get Incoming Count
+      operationId: invitation_get_incoming_count
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: integer
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Get Incoming Count
+      tags:
+      - Invitations
   /invitations/outgoing:
     get:
       description: Get Outgoing

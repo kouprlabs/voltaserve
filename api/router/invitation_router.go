@@ -23,6 +23,7 @@ func NewInvitationRouter() *InvitationRouter {
 func (r *InvitationRouter) AppendRoutes(g fiber.Router) {
 	g.Post("/", r.Create)
 	g.Get("/incoming", r.GetIncoming)
+	g.Get("/incoming/count", r.GetIncomingCount)
 	g.Get("/outgoing", r.GetOutgoing)
 	g.Post("/:id/accept", r.Accept)
 	g.Post("/:id/resend", r.Resend)
@@ -107,6 +108,24 @@ func (r *InvitationRouter) GetIncoming(c *fiber.Ctx) error {
 		SortBy:    sortBy,
 		SortOrder: sortOrder,
 	}, GetUserID(c))
+	if err != nil {
+		return err
+	}
+	return c.JSON(res)
+}
+
+// GetIncomingCount godoc
+//
+//	@Summary		Get Incoming Count
+//	@Description	Get Incoming Count
+//	@Tags			Invitations
+//	@Id				invitation_get_incoming_count
+//	@Produce		json
+//	@Success		200	{object}	int
+//	@Failure		500	{object}	errorpkg.ErrorResponse
+//	@Router			/invitations/incoming/count [get]
+func (r *InvitationRouter) GetIncomingCount(c *fiber.Ctx) error {
+	res, err := r.invitationSvc.GetIncomingCount(GetUserID(c))
 	if err != nil {
 		return err
 	}

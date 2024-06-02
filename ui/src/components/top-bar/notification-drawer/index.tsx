@@ -9,12 +9,12 @@ import {
   DrawerOverlay,
   IconButton,
   useDisclosure,
-  Circle,
 } from '@chakra-ui/react'
 import cx from 'classnames'
 import NotificationAPI from '@/client/api/notification'
 import { swrConfig } from '@/client/options'
 import { IconNotifications } from '@/lib/components/icons'
+import NotificationBadge from '@/lib/components/notification-badge'
 import { useAppDispatch } from '@/store/hook'
 import { mutateUpdated } from '@/store/ui/notifications'
 import NotificationDrawerItem from './notification-drawer-item'
@@ -33,17 +33,14 @@ const TopBarNotificationDrawer = () => {
 
   return (
     <>
-      <div className={cx('flex', 'items-center', 'justify-center', 'relative')}>
+      <NotificationBadge hasBadge={notfications && notfications.length > 0}>
         <IconButton
           ref={buttonRef}
           icon={<IconNotifications />}
           aria-label=""
           onClick={onOpen}
         />
-        {notfications && notfications.length > 0 ? (
-          <Circle size="10px" bg="red" position="absolute" top={0} right={0} />
-        ) : null}
-      </div>
+      </NotificationBadge>
       <ChakraDrawer
         isOpen={isOpen}
         placement="right"

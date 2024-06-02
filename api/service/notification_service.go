@@ -30,16 +30,16 @@ func (svc *NotificationService) List(userID string) ([]*Notification, error) {
 	if err != nil {
 		return nil, err
 	}
-	notifications := make([]*Notification, 0)
+	res := make([]*Notification, 0)
 	for _, invitation := range invitations {
 		i, err := svc.invitationMapper.mapOne(invitation, userID)
 		if err != nil {
 			return nil, err
 		}
-		notifications = append(notifications, &Notification{
-			Type: "new_invitation",
+		res = append(res, &Notification{
+			Type: "invitation",
 			Body: &i,
 		})
 	}
-	return notifications, nil
+	return res, nil
 }

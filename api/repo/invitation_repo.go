@@ -11,16 +11,11 @@ import (
 	"gorm.io/gorm"
 )
 
-type InvitationInsertOptions struct {
-	UserID         string
-	OrganizationID string
-	Emails         []string
-}
-
 type InvitationRepo interface {
 	Insert(opts InvitationInsertOptions) ([]model.Invitation, error)
 	Find(id string) (model.Invitation, error)
 	GetIncoming(email string) ([]model.Invitation, error)
+	GetIncomingCount(email string) (int64, error)
 	GetOutgoing(orgID string, userID string) ([]model.Invitation, error)
 	Save(org model.Invitation) error
 	Delete(id string) error
@@ -103,6 +98,12 @@ func newInvitationRepo() *invitationRepo {
 	}
 }
 
+type InvitationInsertOptions struct {
+	UserID         string
+	OrganizationID string
+	Emails         []string
+}
+
 func (repo *invitationRepo) Insert(opts InvitationInsertOptions) ([]model.Invitation, error) {
 	var res []model.Invitation
 	for _, e := range opts.Emails {
@@ -151,6 +152,18 @@ func (repo *invitationRepo) GetIncoming(email string) ([]model.Invitation, error
 		res = append(res, inv)
 	}
 	return res, nil
+}
+
+func (repo *invitationRepo) GetIncomingCount(email string) (int64, error) {
+	var count int64
+	db := repo.db.
+		Model(&invitationEntity{}).
+		Where("email = ? and status = 'pending'", email).
+		Count(&count)
+	if db.Error != nil {
+		return 0, db.Error
+	}
+	return count, nil
 }
 
 func (repo *invitationRepo) GetOutgoing(orgID string, userID string) ([]model.Invitation, error) {

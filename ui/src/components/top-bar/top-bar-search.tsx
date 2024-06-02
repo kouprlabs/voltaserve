@@ -8,7 +8,6 @@ import {
 } from 'react-router-dom'
 import {
   Button,
-  Circle,
   Icon,
   IconButton,
   Input,
@@ -25,6 +24,7 @@ import {
   encodeQuery,
 } from '@/helpers/query'
 import { IconClose, IconSearch, IconTune } from '@/lib/components/icons'
+import NotificationBadge from '@/lib/components/notification-badge'
 import { useAppDispatch } from '@/store/hook'
 import { modalDidOpen as searchFilterModalDidOpen } from '@/store/ui/search-filter'
 
@@ -81,15 +81,15 @@ const TopBarSearch = () => {
   )
   const hasFileQuery = useMemo(() => {
     const fileQuery = query as FileQuery
-    return (
-      isFiles &&
+    return isFiles &&
       fileQuery &&
       (fileQuery.type ||
         fileQuery.createTimeAfter ||
         fileQuery.createTimeBefore ||
         fileQuery.updateTimeAfter ||
         fileQuery.updateTimeBefore)
-    )
+      ? true
+      : false
   }, [isFiles, query])
   const placeholder = useMemo(() => {
     if (isWorkspaces) {
@@ -250,16 +250,13 @@ const TopBarSearch = () => {
           </InputRightElement>
         ) : null}
       </InputGroup>
-      <div className={cx('flex', 'items-center', 'justify-center', 'relative')}>
+      <NotificationBadge hasBadge={hasFileQuery}>
         <IconButton
           icon={<IconTune />}
           aria-label="Filters"
           onClick={handleFilterClick}
         />
-        {hasFileQuery ? (
-          <Circle size="10px" bg="red" position="absolute" top={0} right={0} />
-        ) : null}
-      </div>
+      </NotificationBadge>
       {buffer || (isFocused && buffer) ? (
         <Button
           leftIcon={<IconSearch />}

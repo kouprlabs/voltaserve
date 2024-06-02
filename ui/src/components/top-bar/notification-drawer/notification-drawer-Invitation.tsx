@@ -1,17 +1,17 @@
 import { useCallback, useState } from 'react'
-import { Button, useToast } from '@chakra-ui/react'
+import { Button, Card, CardBody, CardFooter, useToast } from '@chakra-ui/react'
 import cx from 'classnames'
 import InvitationAPI, { Invitation } from '@/client/api/invitation'
 import userToString from '@/helpers/user-to-string'
 import { useAppSelector } from '@/store/hook'
 
-export type NewInvitationProps = {
+export type NotificationDrawerInvitationProps = {
   invitation: Invitation
 }
 
-const NotificationDrawerNewInvitationItem = ({
+const NotificationDrawerInvitation = ({
   invitation,
-}: NewInvitationProps) => {
+}: NotificationDrawerInvitationProps) => {
   const toast = useToast()
   const mutateNotifications = useAppSelector(
     (state) => state.ui.notifications.mutate,
@@ -70,40 +70,48 @@ const NotificationDrawerNewInvitationItem = ({
   )
 
   return (
-    <div className={cx('flex', 'flex-col', 'gap-0.5')}>
-      <div>
-        You have been invited by{' '}
-        <span className={cx('font-bold')}>
-          {userToString(invitation.owner)}
-        </span>{' '}
-        to join the organization{' '}
-        <span className={cx('font-bold')}>{invitation.organization.name}</span>
-        .<br />
-      </div>
-      <div className={cx('flex', 'flex-row', 'gap-0.5', 'justify-end')}>
-        <Button
-          size="sm"
-          variant="ghost"
-          colorScheme="blue"
-          disabled={isAcceptLoading || isDeclineLoading}
-          isLoading={isAcceptLoading}
-          onClick={() => handleAccept(invitation.id)}
-        >
-          Accept
-        </Button>
-        <Button
-          size="sm"
-          variant="ghost"
-          colorScheme="red"
-          disabled={isDeclineLoading || isAcceptLoading}
-          isLoading={isDeclineLoading}
-          onClick={() => handleDecline(invitation.id)}
-        >
-          Decline
-        </Button>
-      </div>
-    </div>
+    <Card variant="outline">
+      <CardBody>
+        <div className={cx('flex', 'flex-col', 'gap-0.5')}>
+          <div>
+            You have been invited by{' '}
+            <span className={cx('font-bold')}>
+              {userToString(invitation.owner)}
+            </span>{' '}
+            to join the organization{' '}
+            <span className={cx('font-bold')}>
+              {invitation.organization.name}
+            </span>
+            .<br />
+          </div>
+        </div>
+      </CardBody>
+      <CardFooter>
+        <div className={cx('flex', 'flex-row', 'gap-0.5', 'justify-end')}>
+          <Button
+            size="sm"
+            variant="ghost"
+            colorScheme="blue"
+            disabled={isAcceptLoading || isDeclineLoading}
+            isLoading={isAcceptLoading}
+            onClick={() => handleAccept(invitation.id)}
+          >
+            Accept
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            colorScheme="red"
+            disabled={isDeclineLoading || isAcceptLoading}
+            isLoading={isDeclineLoading}
+            onClick={() => handleDecline(invitation.id)}
+          >
+            Decline
+          </Button>
+        </div>
+      </CardFooter>
+    </Card>
   )
 }
 
-export default NotificationDrawerNewInvitationItem
+export default NotificationDrawerInvitation

@@ -1,6 +1,6 @@
 import { Invitation } from '@/client/api/invitation'
-import { Notification } from '@/client/api/notification'
-import NotificationDrawerNewInvitationItem from './notification-drawer-new-Invitation-item'
+import { Notification, NotificationType } from '@/client/api/notification'
+import NotificationDrawerInvitation from './notification-drawer-Invitation'
 
 export type NotificationDrawerItemProps = {
   notification: Notification
@@ -9,9 +9,9 @@ export type NotificationDrawerItemProps = {
 const NotificationDrawerItem = ({
   notification,
 }: NotificationDrawerItemProps) => {
-  if (notification.type === 'new_invitation') {
+  if (notification.type === NotificationType.Invitation) {
     const body: Invitation = notification.body as Invitation
-    return <NotificationDrawerNewInvitationItem invitation={body} />
+    return <NotificationDrawerInvitation invitation={body} />
   }
   return null
 }

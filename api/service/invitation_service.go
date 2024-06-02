@@ -176,6 +176,18 @@ func (svc *InvitationService) GetIncoming(opts InvitationListOptions, userID str
 	}, nil
 }
 
+func (svc *InvitationService) GetIncomingCount(userID string) (int64, error) {
+	user, err := svc.userRepo.Find(userID)
+	if err != nil {
+		return -1, err
+	}
+	var res int64
+	if res, err = svc.invitationRepo.GetIncomingCount(user.GetEmail()); err != nil {
+		return -1, err
+	}
+	return res, nil
+}
+
 func (svc *InvitationService) GetOutgoing(orgID string, opts InvitationListOptions, userID string) (*InvitationList, error) {
 	invitations, err := svc.invitationRepo.GetOutgoing(orgID, userID)
 	if err != nil {
