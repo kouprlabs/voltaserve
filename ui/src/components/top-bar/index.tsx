@@ -1,8 +1,8 @@
 import { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 import cx from 'classnames'
-import TopBarAccountMenu from '@/components/top-bar/account-menu'
-import TopBarNotificationDrawer from '@/components/top-bar/notification-drawer'
+import AccountMenu from '@/components/top-bar/account-menu'
+import TaskDrawer from '@/components/top-bar/task-drawer'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { activeNavChanged, NavType } from '@/store/ui/nav'
 import {
@@ -11,7 +11,7 @@ import {
   CreateWorkspaceButton,
 } from './top-bar-buttons'
 import TopBarSearch from './top-bar-search'
-import TopBarUploadDrawer from './top-bar-upload-drawer'
+import UploadDrawer from './upload-drawer'
 
 const TopBar = () => {
   const dispatch = useAppDispatch()
@@ -52,9 +52,9 @@ const TopBar = () => {
         {activeNav === NavType.Workspaces && <CreateWorkspaceButton />}
         {activeNav === NavType.Groups && <CreateGroupButton />}
         {activeNav === NavType.Organizations && <CreateOrganizationButton />}
-        <TopBarUploadDrawer />
-        <TopBarNotificationDrawer />
-        <TopBarAccountMenu />
+        <UploadDrawer />
+        <TaskDrawer />
+        <AccountMenu />
       </div>
     </div>
   )

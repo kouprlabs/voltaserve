@@ -47,7 +47,7 @@ type ListQueryParams = {
   query?: string
 }
 
-export default class OrganizationAPI {
+export default class TaskAPI {
   static useGet(id: string | null | undefined, swrOptions?: SWRConfiguration) {
     const url = `/tasks/${id}`
     return useSWR<Task>(

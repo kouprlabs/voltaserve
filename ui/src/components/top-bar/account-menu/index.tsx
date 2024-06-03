@@ -17,7 +17,7 @@ import AccountMenuActiveCircle from './account-menu-active-circle'
 import AccountMenuAvatarButton from './account-menu-avatar-button'
 import AccountMenuAvatarImage from './account-menu-avatar-image'
 
-const TopBarAccountMenu = () => {
+const AccountMenu = () => {
   const { data: user } = UserAPI.useGet(swrConfig())
   const { data: invitationCount } =
     InvitationAPI.useGetIncomingCount(swrConfig())
@@ -85,4 +85,4 @@ const TopBarAccountMenu = () => {
   }
 }
 
-export default TopBarAccountMenu
+export default AccountMenu

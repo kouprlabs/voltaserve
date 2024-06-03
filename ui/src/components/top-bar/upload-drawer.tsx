@@ -19,7 +19,7 @@ import { completedUploadsCleared } from '@/store/entities/uploads'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { uploadsDrawerClosed } from '@/store/ui/uploads-drawer'
 
-const TopBarUploadDrawer = () => {
+const UploadDrawer = () => {
   const dispatch = useAppDispatch()
   const hasPendingUploads = useAppSelector(
     (state) =>
@@ -91,4 +91,4 @@ const TopBarUploadDrawer = () => {
   )
 }
 
-export default TopBarUploadDrawer
+export default UploadDrawer

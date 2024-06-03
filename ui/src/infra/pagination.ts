@@ -54,6 +54,13 @@ export function organizationPaginationStorage() {
   }
 }
 
+export function taskPaginationStorage() {
+  return {
+    prefix: 'voltaserve',
+    namespace: 'task',
+  }
+}
+
 export function organizationMemberPaginationStorage() {
   return {
     prefix: 'voltaserve',
