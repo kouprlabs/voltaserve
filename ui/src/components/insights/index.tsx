@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import {
   Modal,
   ModalCloseButton,
@@ -8,7 +9,7 @@ import {
 import InsightsAPI from '@/client/api/insights'
 import { swrConfig } from '@/client/options'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
-import { modalDidClose } from '@/store/ui/insights'
+import { modalDidClose, mutateMetadataUpdated } from '@/store/ui/insights'
 import InsightsCreate from './insights-create'
 import InsightsOverview from './insights-overview'
 
@@ -20,7 +21,16 @@ const Insights = () => {
       : undefined,
   )
   const isModalOpen = useAppSelector((state) => state.ui.insights.isModalOpen)
-  const { data: metadata } = InsightsAPI.useGetMetadata(id, swrConfig())
+  const { data: metadata, mutate: mutateMetadata } = InsightsAPI.useGetMetadata(
+    id,
+    swrConfig(),
+  )
+
+  useEffect(() => {
+    if (id) {
+      dispatch(mutateMetadataUpdated(mutateMetadata))
+    }
+  }, [mutateMetadata])
 
   return (
     <Modal

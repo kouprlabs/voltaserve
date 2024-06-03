@@ -20,30 +20,31 @@ const WatermarkOverviewSettings = () => {
   )
   const mutateFiles = useAppSelector((state) => state.ui.files.mutate)
   const mutateTasks = useAppSelector((state) => state.ui.tasks.mutate)
+  const mutateFile = useAppSelector((state) => state.ui.watermark.mutateFile)
   const { data: metadata } = WatermarkAPI.useGetMetadata(id, swrConfig())
   const { data: file } = FileAPI.useGet(id, swrConfig())
 
   const handleUpdate = useCallback(async () => {
     if (id) {
-      WatermarkAPI.create(id)
-      const tasks = await TaskAPI.list()
+      await WatermarkAPI.create(id)
+      mutateFile?.()
       mutateFiles?.()
-      mutateTasks?.(tasks)
+      mutateTasks?.(await TaskAPI.list())
       dispatch(modalDidClose())
       dispatch(tasksDrawerDidOpen())
     }
-  }, [id, mutateFiles, mutateTasks, dispatch])
+  }, [id, mutateFiles, mutateTasks, mutateFile, dispatch])
 
   const handleDelete = useCallback(async () => {
     if (id) {
-      WatermarkAPI.delete(id)
-      const tasks = await TaskAPI.list()
+      await WatermarkAPI.delete(id)
+      mutateFile?.()
       mutateFiles?.()
-      mutateTasks?.(tasks)
+      mutateTasks?.(await TaskAPI.list())
       dispatch(modalDidClose())
       dispatch(tasksDrawerDidOpen())
     }
-  }, [id, mutateFiles, mutateTasks, dispatch])
+  }, [id, mutateFiles, mutateTasks, mutateFile, dispatch])
 
   if (!id || !metadata) {
     return null

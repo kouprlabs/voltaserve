@@ -20,30 +20,33 @@ const MosaicOverviewSettings = () => {
   )
   const mutateFiles = useAppSelector((state) => state.ui.files.mutate)
   const mutateTasks = useAppSelector((state) => state.ui.tasks.mutate)
+  const mutateMetadata = useAppSelector(
+    (state) => state.ui.mosaic.mutateMetadata,
+  )
   const { data: metadata } = MosaicAPI.useGetMetadata(id, swrConfig())
   const { data: file } = FileAPI.useGet(id, swrConfig())
 
   const handleUpdate = useCallback(async () => {
     if (id) {
-      MosaicAPI.create(id)
-      const tasks = await TaskAPI.list()
+      await MosaicAPI.create(id)
+      mutateMetadata?.()
       mutateFiles?.()
-      mutateTasks?.(tasks)
+      mutateTasks?.(await TaskAPI.list())
       dispatch(modalDidClose())
       dispatch(tasksDrawerDidOpen())
     }
-  }, [id, mutateFiles, mutateTasks, dispatch])
+  }, [id, mutateFiles, mutateTasks, mutateMetadata, dispatch])
 
   const handleDelete = useCallback(async () => {
     if (id) {
-      MosaicAPI.delete(id)
-      const tasks = await TaskAPI.list()
+      await MosaicAPI.delete(id)
+      mutateMetadata?.()
       mutateFiles?.()
-      mutateTasks?.(tasks)
+      mutateTasks?.(await TaskAPI.list())
       dispatch(modalDidClose())
       dispatch(tasksDrawerDidOpen())
     }
-  }, [id, mutateFiles, mutateTasks, dispatch])
+  }, [id, mutateFiles, mutateTasks, mutateMetadata, dispatch])
 
   if (!id || !metadata) {
     return null

@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import {
   Modal,
   ModalCloseButton,
@@ -8,6 +9,7 @@ import {
 import MosaicAPI from '@/client/api/mosaic'
 import { swrConfig } from '@/client/options'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
+import { mutateMetadataUpdated } from '@/store/ui/mosaic'
 import { modalDidClose } from '@/store/ui/mosaic'
 import MosaicCreate from './mosaic-create'
 import MosaicOverview from './mosaic-overview'
@@ -20,7 +22,16 @@ const Mosaic = () => {
       : undefined,
   )
   const isModalOpen = useAppSelector((state) => state.ui.mosaic.isModalOpen)
-  const { data: metadata } = MosaicAPI.useGetMetadata(id, swrConfig())
+  const { data: metadata, mutate: mutateMetadata } = MosaicAPI.useGetMetadata(
+    id,
+    swrConfig(),
+  )
+
+  useEffect(() => {
+    if (id) {
+      dispatch(mutateMetadataUpdated(mutateMetadata))
+    }
+  }, [mutateMetadata])
 
   return (
     <Modal

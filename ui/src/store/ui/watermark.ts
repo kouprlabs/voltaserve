@@ -1,7 +1,10 @@
-import { createSlice } from '@reduxjs/toolkit'
+import { KeyedMutator } from 'swr'
+import { PayloadAction, createSlice } from '@reduxjs/toolkit'
+import { File } from '@/client/api/file'
 
 type WatermarkState = {
   isModalOpen: boolean
+  mutateFile?: KeyedMutator<File>
 }
 
 const initialState: WatermarkState = {
@@ -18,9 +21,12 @@ const slice = createSlice({
     modalDidClose: (state) => {
       state.isModalOpen = false
     },
+    mutateFileUpdated: (state, action: PayloadAction<KeyedMutator<File>>) => {
+      state.mutateFile = action.payload
+    },
   },
 })
 
-export const { modalDidOpen, modalDidClose } = slice.actions
+export const { modalDidOpen, modalDidClose, mutateFileUpdated } = slice.actions
 
 export default slice.reducer

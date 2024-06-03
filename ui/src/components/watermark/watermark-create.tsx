@@ -16,17 +16,18 @@ const WatermarkCreate = () => {
   )
   const mutateFiles = useAppSelector((state) => state.ui.files.mutate)
   const mutateTasks = useAppSelector((state) => state.ui.tasks.mutate)
+  const mutateFile = useAppSelector((state) => state.ui.watermark.mutateFile)
 
   const handleCreate = useCallback(async () => {
     if (id) {
-      WatermarkAPI.create(id, false)
-      const tasks = await TaskAPI.list()
+      await WatermarkAPI.create(id, false)
+      mutateFile?.()
       mutateFiles?.()
-      mutateTasks?.(tasks)
+      mutateTasks?.(await TaskAPI.list())
       dispatch(modalDidClose())
       dispatch(tasksDrawerDidOpen())
     }
-  }, [id, mutateFiles, mutateTasks, dispatch])
+  }, [id, mutateFiles, mutateTasks, mutateFile, dispatch])
 
   if (!id) {
     return null

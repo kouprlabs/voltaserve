@@ -105,33 +105,41 @@ func (svc *WatermarkService) Create(id string, userID string) error {
 	if err := svc.taskSearch.Index([]model.Task{task}); err != nil {
 		return err
 	}
-	err = svc.create(snapshot, workspace.GetName(), user.GetEmail())
-	if err != nil {
-		value := err.Error()
-		task.SetError(&value)
-		if err := svc.taskCache.Set(task); err != nil {
-			return err
+	go func() {
+		err = svc.create(snapshot, workspace.GetName(), user.GetEmail())
+		if err != nil {
+			value := err.Error()
+			task.SetError(&value)
+			if err := svc.taskCache.Set(task); err != nil {
+				svc.logger.Error(err)
+				return
+			}
+			if err := svc.taskSearch.Update([]model.Task{task}); err != nil {
+				svc.logger.Error(err)
+				return
+			}
+		} else {
+			svc.taskRepo.Delete(task.GetID())
+			if err := svc.taskCache.Delete(task.GetID()); err != nil {
+				svc.logger.Error(err)
+				return
+			}
+			if err := svc.taskSearch.Delete([]string{task.GetID()}); err != nil {
+				svc.logger.Error(err)
+				return
+			}
 		}
-		if err := svc.taskSearch.Update([]model.Task{task}); err != nil {
-			return err
+		snapshot.SetStatus(model.SnapshotStatusReady)
+		if err := svc.snapshotRepo.Save(snapshot); err != nil {
+			svc.logger.Error(err)
+			return
 		}
-	} else {
-		svc.taskRepo.Delete(task.GetID())
-		if err := svc.taskCache.Delete(task.GetID()); err != nil {
-			return err
+		if err := svc.snapshotCache.Set(snapshot); err != nil {
+			svc.logger.Error(err)
+			return
 		}
-		if err := svc.taskSearch.Delete([]string{task.GetID()}); err != nil {
-			return err
-		}
-	}
-	snapshot.SetStatus(model.SnapshotStatusReady)
-	if err := svc.snapshotRepo.Save(snapshot); err != nil {
-		return err
-	}
-	if err := svc.snapshotCache.Set(snapshot); err != nil {
-		return err
-	}
-	return err
+	}()
+	return nil
 }
 
 func (svc *WatermarkService) create(snapshot model.Snapshot, workspaceName string, email string) error {
@@ -239,34 +247,42 @@ func (svc *WatermarkService) Delete(id string, userID string) error {
 	if err := svc.taskSearch.Index([]model.Task{task}); err != nil {
 		return err
 	}
-	err = svc.s3.RemoveObject(snapshot.GetWatermark().Key, snapshot.GetWatermark().Bucket)
-	if err != nil {
-		value := err.Error()
-		task.SetError(&value)
-		if err := svc.taskCache.Set(task); err != nil {
-			return err
+	go func() {
+		err = svc.s3.RemoveObject(snapshot.GetWatermark().Key, snapshot.GetWatermark().Bucket)
+		if err != nil {
+			value := err.Error()
+			task.SetError(&value)
+			if err := svc.taskCache.Set(task); err != nil {
+				svc.logger.Error(err)
+				return
+			}
+			if err := svc.taskSearch.Update([]model.Task{task}); err != nil {
+				svc.logger.Error(err)
+				return
+			}
+		} else {
+			svc.taskRepo.Delete(task.GetID())
+			if err := svc.taskCache.Delete(task.GetID()); err != nil {
+				svc.logger.Error(err)
+				return
+			}
+			if err := svc.taskSearch.Delete([]string{task.GetID()}); err != nil {
+				svc.logger.Error(err)
+				return
+			}
 		}
-		if err := svc.taskSearch.Update([]model.Task{task}); err != nil {
-			return err
+		snapshot.SetWatermark(nil)
+		snapshot.SetStatus(model.SnapshotStatusReady)
+		if err := svc.snapshotRepo.Save(snapshot); err != nil {
+			svc.logger.Error(err)
+			return
 		}
-	} else {
-		svc.taskRepo.Delete(task.GetID())
-		if err := svc.taskCache.Delete(task.GetID()); err != nil {
-			return err
+		if err := svc.snapshotCache.Set(snapshot); err != nil {
+			svc.logger.Error(err)
+			return
 		}
-		if err := svc.taskSearch.Delete([]string{task.GetID()}); err != nil {
-			return err
-		}
-	}
-	snapshot.SetWatermark(nil)
-	snapshot.SetStatus(model.SnapshotStatusReady)
-	if err := svc.snapshotRepo.Save(snapshot); err != nil {
-		return err
-	}
-	if err := svc.snapshotCache.Set(snapshot); err != nil {
-		return err
-	}
-	return err
+	}()
+	return nil
 }
 
 func (svc *WatermarkService) GetMetadata(id string, userID string) (*model.WatermarkMetadata, error) {

@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import {
   Modal,
   ModalCloseButton,
@@ -8,7 +9,7 @@ import {
 import FileAPI from '@/client/api/file'
 import { swrConfig } from '@/client/options'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
-import { modalDidClose } from '@/store/ui/watermark'
+import { modalDidClose, mutateFileUpdated } from '@/store/ui/watermark'
 import WatermarkCreate from './watermark-create'
 import WatermarkOverview from './watermark-overview'
 
@@ -20,7 +21,13 @@ const Watermark = () => {
       : undefined,
   )
   const isModalOpen = useAppSelector((state) => state.ui.watermark.isModalOpen)
-  const { data: file } = FileAPI.useGet(id, swrConfig())
+  const { data: file, mutate: mutateFile } = FileAPI.useGet(id, swrConfig())
+
+  useEffect(() => {
+    if (id) {
+      dispatch(mutateFileUpdated(mutateFile))
+    }
+  }, [mutateFile])
 
   return (
     <Modal

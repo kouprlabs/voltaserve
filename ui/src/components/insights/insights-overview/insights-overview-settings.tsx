@@ -20,28 +20,33 @@ const InsightsOverviewSettings = () => {
   )
   const mutateFiles = useAppSelector((state) => state.ui.files.mutate)
   const mutateTasks = useAppSelector((state) => state.ui.tasks.mutate)
+  const mutateMetadata = useAppSelector(
+    (state) => state.ui.insights.mutateMetadata,
+  )
   const { data: metadata } = InsightsAPI.useGetMetadata(id, swrConfig())
   const { data: file } = FileAPI.useGet(id, swrConfig())
 
   const handleUpdate = useCallback(async () => {
     if (id) {
-      InsightsAPI.patch(id)
-      const tasks = await TaskAPI.list()
+      await InsightsAPI.patch(id)
+      mutateMetadata?.()
       mutateFiles?.()
-      mutateTasks?.(tasks)
-    }
-  }, [id, mutateFiles, mutateTasks, dispatch])
-
-  const handleDelete = useCallback(async () => {
-    if (id) {
-      InsightsAPI.delete(id)
-      const tasks = await TaskAPI.list()
-      mutateFiles?.()
-      mutateTasks?.(tasks)
+      mutateTasks?.(await TaskAPI.list())
       dispatch(modalDidClose())
       dispatch(tasksDrawerDidOpen())
     }
-  }, [id, mutateFiles, mutateTasks, dispatch])
+  }, [id, mutateFiles, mutateTasks, mutateMetadata, dispatch])
+
+  const handleDelete = useCallback(async () => {
+    if (id) {
+      await InsightsAPI.delete(id)
+      mutateMetadata?.()
+      mutateFiles?.()
+      mutateTasks?.(await TaskAPI.list())
+      dispatch(modalDidClose())
+      dispatch(tasksDrawerDidOpen())
+    }
+  }, [id, mutateFiles, mutateTasks, mutateMetadata, dispatch])
 
   if (!id || !metadata) {
     return null
