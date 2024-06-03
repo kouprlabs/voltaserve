@@ -1,5 +1,5 @@
 import useSWR, { SWRConfiguration } from 'swr'
-import { apiFetcher } from '@/client/fetcher'
+import { FetcherOptions, apiFetcher } from '@/client/fetcher'
 
 export type CreateOptions = {
   languageId: string
@@ -56,11 +56,12 @@ type ListEntitiesQueryParams = {
 }
 
 export default class InsightsAPI {
-  static create(id: string, options: CreateOptions) {
+  static create(id: string, options: CreateOptions, showError = true) {
     return apiFetcher({
       url: `/insights/${id}`,
       method: 'POST',
       body: JSON.stringify(options),
+      showError,
     })
   }
 

@@ -226,7 +226,7 @@ func (svc *WatermarkService) Delete(id string, userID string) error {
 	}
 	task, err := svc.taskRepo.Insert(repo.TaskInsertOptions{
 		ID:              helper.NewID(),
-		Name:            fmt.Sprintf("Delete watermark for <b>%s</b>", file.GetName()),
+		Name:            fmt.Sprintf("Delete watermark from <b>%s</b>", file.GetName()),
 		UserID:          userID,
 		IsIndeterminate: true,
 	})

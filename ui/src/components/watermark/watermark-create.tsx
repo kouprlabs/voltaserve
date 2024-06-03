@@ -1,6 +1,7 @@
 import { useCallback } from 'react'
 import { Button, ModalBody, ModalFooter } from '@chakra-ui/react'
 import cx from 'classnames'
+import TaskAPI from '@/client/api/task'
 import WatermarkAPI from '@/client/api/watermark'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { drawerDidOpen as tasksDrawerDidOpen } from '@/store/ui/tasks'
@@ -16,11 +17,12 @@ const WatermarkCreate = () => {
   const mutateFiles = useAppSelector((state) => state.ui.files.mutate)
   const mutateTasks = useAppSelector((state) => state.ui.tasks.mutate)
 
-  const handleCreate = useCallback(() => {
+  const handleCreate = useCallback(async () => {
     if (id) {
-      WatermarkAPI.create(id)
+      WatermarkAPI.create(id, false)
+      const tasks = await TaskAPI.list()
       mutateFiles?.()
-      mutateTasks?.()
+      mutateTasks?.(tasks)
       dispatch(modalDidClose())
       dispatch(tasksDrawerDidOpen())
     }

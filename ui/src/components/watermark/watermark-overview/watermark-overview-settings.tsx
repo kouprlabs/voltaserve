@@ -3,6 +3,7 @@ import { Button, Card, CardBody, CardFooter, Text } from '@chakra-ui/react'
 import cx from 'classnames'
 import FileAPI from '@/client/api/file'
 import { ltOwnerPermission } from '@/client/api/permission'
+import TaskAPI from '@/client/api/task'
 import WatermarkAPI from '@/client/api/watermark'
 import { swrConfig } from '@/client/options'
 import { IconDelete, IconSync } from '@/lib/components/icons'
@@ -22,21 +23,23 @@ const WatermarkOverviewSettings = () => {
   const { data: metadata } = WatermarkAPI.useGetMetadata(id, swrConfig())
   const { data: file } = FileAPI.useGet(id, swrConfig())
 
-  const handleUpdate = useCallback(() => {
+  const handleUpdate = useCallback(async () => {
     if (id) {
       WatermarkAPI.create(id)
+      const tasks = await TaskAPI.list()
       mutateFiles?.()
-      mutateTasks?.()
+      mutateTasks?.(tasks)
       dispatch(modalDidClose())
       dispatch(tasksDrawerDidOpen())
     }
   }, [id, mutateFiles, mutateTasks, dispatch])
 
-  const handleDelete = useCallback(() => {
+  const handleDelete = useCallback(async () => {
     if (id) {
       WatermarkAPI.delete(id)
+      const tasks = await TaskAPI.list()
       mutateFiles?.()
-      mutateTasks?.()
+      mutateTasks?.(tasks)
       dispatch(modalDidClose())
       dispatch(tasksDrawerDidOpen())
     }

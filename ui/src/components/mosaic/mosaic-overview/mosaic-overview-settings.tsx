@@ -4,6 +4,7 @@ import cx from 'classnames'
 import FileAPI from '@/client/api/file'
 import MosaicAPI from '@/client/api/mosaic'
 import { ltOwnerPermission } from '@/client/api/permission'
+import TaskAPI from '@/client/api/task'
 import { swrConfig } from '@/client/options'
 import { IconDelete, IconSync } from '@/lib/components/icons'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
@@ -22,21 +23,23 @@ const MosaicOverviewSettings = () => {
   const { data: metadata } = MosaicAPI.useGetMetadata(id, swrConfig())
   const { data: file } = FileAPI.useGet(id, swrConfig())
 
-  const handleUpdate = useCallback(() => {
+  const handleUpdate = useCallback(async () => {
     if (id) {
       MosaicAPI.create(id)
+      const tasks = await TaskAPI.list()
       mutateFiles?.()
-      mutateTasks?.()
+      mutateTasks?.(tasks)
       dispatch(modalDidClose())
       dispatch(tasksDrawerDidOpen())
     }
   }, [id, mutateFiles, mutateTasks, dispatch])
 
-  const handleDelete = useCallback(() => {
+  const handleDelete = useCallback(async () => {
     if (id) {
       MosaicAPI.delete(id)
+      const tasks = await TaskAPI.list()
       mutateFiles?.()
-      mutateTasks?.()
+      mutateTasks?.(tasks)
       dispatch(modalDidClose())
       dispatch(tasksDrawerDidOpen())
     }

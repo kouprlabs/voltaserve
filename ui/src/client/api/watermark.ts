@@ -6,10 +6,11 @@ export type Metadata = {
 }
 
 export default class WatermarkAPI {
-  static create(id: string) {
+  static create(id: string, showError = true) {
     return apiFetcher({
       url: `/watermarks/${id}`,
       method: 'POST',
+      showError,
     })
   }
 

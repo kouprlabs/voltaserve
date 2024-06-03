@@ -27,10 +27,11 @@ export type Metadata = {
 }
 
 export default class MosaicAPI {
-  static create(id: string) {
+  static create(id: string, showError = true) {
     return apiFetcher({
       url: `/mosaics/${id}`,
       method: 'POST',
+      showError,
     })
   }
 

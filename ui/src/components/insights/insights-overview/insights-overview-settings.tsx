@@ -4,6 +4,7 @@ import cx from 'classnames'
 import FileAPI from '@/client/api/file'
 import InsightsAPI from '@/client/api/insights'
 import { ltOwnerPermission } from '@/client/api/permission'
+import TaskAPI from '@/client/api/task'
 import { swrConfig } from '@/client/options'
 import { IconDelete, IconSync } from '@/lib/components/icons'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
@@ -22,19 +23,21 @@ const InsightsOverviewSettings = () => {
   const { data: metadata } = InsightsAPI.useGetMetadata(id, swrConfig())
   const { data: file } = FileAPI.useGet(id, swrConfig())
 
-  const handleUpdate = useCallback(() => {
+  const handleUpdate = useCallback(async () => {
     if (id) {
       InsightsAPI.patch(id)
+      const tasks = await TaskAPI.list()
       mutateFiles?.()
-      mutateTasks?.()
+      mutateTasks?.(tasks)
     }
   }, [id, mutateFiles, mutateTasks, dispatch])
 
-  const handleDelete = useCallback(() => {
+  const handleDelete = useCallback(async () => {
     if (id) {
       InsightsAPI.delete(id)
+      const tasks = await TaskAPI.list()
       mutateFiles?.()
-      mutateTasks?.()
+      mutateTasks?.(tasks)
       dispatch(modalDidClose())
       dispatch(tasksDrawerDidOpen())
     }

@@ -4,6 +4,7 @@ import { OptionBase, Select, SingleValue } from 'chakra-react-select'
 import cx from 'classnames'
 import FileAPI from '@/client/api/file'
 import InsightsAPI, { Language } from '@/client/api/insights'
+import TaskAPI from '@/client/api/task'
 import { swrConfig } from '@/client/options'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { modalDidClose } from '@/store/ui/insights'
@@ -39,11 +40,12 @@ const InsightsCreate = () => {
     }
   }, [file, languages])
 
-  const handleCreate = useCallback(() => {
+  const handleCreate = useCallback(async () => {
     if (id && language) {
-      InsightsAPI.create(id, { languageId: language.id })
+      InsightsAPI.create(id, { languageId: language.id }, false)
+      const tasks = await TaskAPI.list()
       mutateFiles?.()
-      mutateTasks?.()
+      mutateTasks?.(tasks)
       dispatch(modalDidClose())
       dispatch(tasksDrawerDidOpen())
     }
