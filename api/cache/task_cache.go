@@ -7,21 +7,21 @@ import (
 	"voltaserve/repo"
 )
 
-type ProcessCache struct {
+type TaskCache struct {
 	redis       *infra.RedisManager
 	processRepo repo.SnapshotRepo
 	keyPrefix   string
 }
 
-func NewProcessCacheCache() *ProcessCache {
-	return &ProcessCache{
+func NewTaskCacheCache() *TaskCache {
+	return &TaskCache{
 		processRepo: repo.NewSnapshotRepo(),
 		redis:       infra.NewRedisManager(),
-		keyPrefix:   "process:",
+		keyPrefix:   "task:",
 	}
 }
 
-func (c *ProcessCache) Set(file model.Snapshot) error {
+func (c *TaskCache) Set(file model.Snapshot) error {
 	b, err := json.Marshal(file)
 	if err != nil {
 		return err
@@ -33,7 +33,7 @@ func (c *ProcessCache) Set(file model.Snapshot) error {
 	return nil
 }
 
-func (c *ProcessCache) Get(id string) (model.Snapshot, error) {
+func (c *TaskCache) Get(id string) (model.Snapshot, error) {
 	value, err := c.redis.Get(c.keyPrefix + id)
 	if err != nil {
 		return c.Refresh(id)
@@ -45,7 +45,7 @@ func (c *ProcessCache) Get(id string) (model.Snapshot, error) {
 	return snapshot, nil
 }
 
-func (c *ProcessCache) Refresh(id string) (model.Snapshot, error) {
+func (c *TaskCache) Refresh(id string) (model.Snapshot, error) {
 	res, err := c.processRepo.Find(id)
 	if err != nil {
 		return nil, err
@@ -56,7 +56,7 @@ func (c *ProcessCache) Refresh(id string) (model.Snapshot, error) {
 	return res, nil
 }
 
-func (c *ProcessCache) Delete(id string) error {
+func (c *TaskCache) Delete(id string) error {
 	if err := c.redis.Delete(c.keyPrefix + id); err != nil {
 		return nil
 	}

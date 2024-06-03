@@ -1,6 +1,6 @@
 package model
 
-type Process interface {
+type Task interface {
 	GetID() string
 	GetDescription() string
 	GetError() *string

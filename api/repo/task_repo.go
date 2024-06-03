@@ -9,7 +9,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type processEntity struct {
+type taskEntity struct {
 	ID              string  `json:"id" gorm:"column:id"`
 	Description     string  `json:"description" gorm:"column:description"`
 	Error           *string `json:"error" gorm:"column:error"`
@@ -18,80 +18,80 @@ type processEntity struct {
 	IsIndeterminate bool    `json:"isIndeterminate" gorm:"column:is_indeterminate"`
 }
 
-func (*processEntity) TableName() string {
-	return "process"
+func (*taskEntity) TableName() string {
+	return "task"
 }
 
-func (p *processEntity) GetID() string {
+func (p *taskEntity) GetID() string {
 	return p.ID
 }
 
-func (p *processEntity) GetDescription() string {
+func (p *taskEntity) GetDescription() string {
 	return p.Description
 }
 
-func (p *processEntity) GetError() *string {
+func (p *taskEntity) GetError() *string {
 	return p.Error
 }
 
-func (p *processEntity) GetPercentage() *int {
+func (p *taskEntity) GetPercentage() *int {
 	return p.Percentage
 }
 
-func (p *processEntity) GetIsComplete() bool {
+func (p *taskEntity) GetIsComplete() bool {
 	return p.IsComplete
 }
 
-func (p *processEntity) GetIsIndeterminate() bool {
+func (p *taskEntity) GetIsIndeterminate() bool {
 	return p.IsIndeterminate
 }
 
-func (p *processEntity) SetDescription(description string) {
+func (p *taskEntity) SetDescription(description string) {
 	p.Description = description
 }
 
-func (p *processEntity) SetError(error *string) {
+func (p *taskEntity) SetError(error *string) {
 	p.Error = error
 }
 
-func (p *processEntity) SetPercentage(percentage *int) {
+func (p *taskEntity) SetPercentage(percentage *int) {
 	p.Percentage = percentage
 }
 
-func (p *processEntity) SetIsComplete(isComplete bool) {
+func (p *taskEntity) SetIsComplete(isComplete bool) {
 	p.IsComplete = isComplete
 }
 
-func (p *processEntity) SetIsIndeterminate(isIndeterminate bool) {
+func (p *taskEntity) SetIsIndeterminate(isIndeterminate bool) {
 	p.IsIndeterminate = isIndeterminate
 }
 
-type ProcessRepo interface {
-	Insert(opts ProcessInsertOptions) (model.Process, error)
-	Find(id string) (model.Process, error)
-	Save(org model.Process) error
+type TaskRepo interface {
+	Insert(opts TaskInsertOptions) (model.Task, error)
+	Find(id string) (model.Task, error)
+	Save(org model.Task) error
 	Delete(id string) error
 }
 
-func NewProcessRepo() ProcessRepo {
-	return newProcessRepo()
+func NewTaskRepo() TaskRepo {
+	return newTaskRepo()
 }
 
-func NewProcess() model.Process {
-	return &processEntity{}
+func NewTask() model.Task {
+	return &taskEntity{}
 }
 
-type processRepo struct {
+type taskRepo struct {
 	db *gorm.DB
 }
 
-func newProcessRepo() *processRepo {
-	return &processRepo{
+func newTaskRepo() *taskRepo {
+	return &taskRepo{
 		db: infra.NewPostgresManager().GetDBOrPanic(),
 	}
 }
 
-type ProcessInsertOptions struct {
+type TaskInsertOptions struct {
 	ID              string
 	Name            string
 	Description     string
@@ -101,8 +101,8 @@ type ProcessInsertOptions struct {
 	IsIndeterminate bool
 }
 
-func (repo *processRepo) Insert(opts ProcessInsertOptions) (model.Process, error) {
-	org := processEntity{
+func (repo *taskRepo) Insert(opts TaskInsertOptions) (model.Task, error) {
+	org := taskEntity{
 		ID:              opts.ID,
 		Description:     opts.Description,
 		Error:           opts.Error,
@@ -120,12 +120,12 @@ func (repo *processRepo) Insert(opts ProcessInsertOptions) (model.Process, error
 	return res, nil
 }
 
-func (repo *processRepo) find(id string) (*processEntity, error) {
-	var res = processEntity{}
+func (repo *taskRepo) find(id string) (*taskEntity, error) {
+	var res = taskEntity{}
 	db := repo.db.Where("id = ?", id).First(&res)
 	if db.Error != nil {
 		if errors.Is(db.Error, gorm.ErrRecordNotFound) {
-			return nil, errorpkg.NewProcessNotFoundError(db.Error)
+			return nil, errorpkg.NewTaskNotFoundError(db.Error)
 		} else {
 			return nil, errorpkg.NewInternalServerError(db.Error)
 		}
@@ -133,15 +133,15 @@ func (repo *processRepo) find(id string) (*processEntity, error) {
 	return &res, nil
 }
 
-func (repo *processRepo) Find(id string) (model.Process, error) {
-	process, err := repo.find(id)
+func (repo *taskRepo) Find(id string) (model.Task, error) {
+	res, err := repo.find(id)
 	if err != nil {
 		return nil, err
 	}
-	return process, nil
+	return res, nil
 }
 
-func (repo *processRepo) Save(org model.Process) error {
+func (repo *taskRepo) Save(org model.Task) error {
 	db := repo.db.Save(org)
 	if db.Error != nil {
 		return db.Error
@@ -149,8 +149,8 @@ func (repo *processRepo) Save(org model.Process) error {
 	return nil
 }
 
-func (repo *processRepo) Delete(id string) error {
-	db := repo.db.Exec("DELETE FROM process WHERE id = ?", id)
+func (repo *taskRepo) Delete(id string) error {
+	db := repo.db.Exec("DELETE FROM task WHERE id = ?", id)
 	if db.Error != nil {
 		return db.Error
 	}

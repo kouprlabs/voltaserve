@@ -1,6 +1,6 @@
 package service
 
-type Process struct {
+type Task struct {
 	ID              string  `json:"id"`
 	Description     string  `json:"description"`
 	Error           *string `json:"error,omitempty"`
@@ -9,9 +9,9 @@ type Process struct {
 	IsIndeterminate bool    `json:"isIndeterminate"`
 }
 
-type ProcessService struct {
+type TaskService struct {
 }
 
-func NewProcessService() *ProcessService {
-	return &ProcessService{}
+func NewProcessService() *TaskService {
+	return &TaskService{}
 }

@@ -59,11 +59,11 @@ func NewOrganizationNotFoundError(err error) *ErrorResponse {
 	)
 }
 
-func NewProcessNotFoundError(err error) *ErrorResponse {
+func NewTaskNotFoundError(err error) *ErrorResponse {
 	return NewErrorResponse(
-		"process_not_found",
+		"task_not_found",
 		http.StatusNotFound,
-		"Process not found.",
+		"Task not found.",
 		MsgResourceNotFound,
 		err,
 	)
