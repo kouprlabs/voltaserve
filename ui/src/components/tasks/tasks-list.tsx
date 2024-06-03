@@ -22,39 +22,6 @@ const TasksList = () => {
     swrConfig(),
   )
 
-  if (list) {
-    list.data = [
-      {
-        id: '3pyj9BN1XxddX',
-        name: 'Create mosaic for <b>In_the_Conservatory.jpg</b>',
-        isIndeterminate: true,
-        userId: 'nZLpqR6M5',
-      },
-      {
-        id: '4pyj9BN1XxddX',
-        name: 'Delete mosaic for <b>In_the_Conservatory.jpg</b>',
-        isIndeterminate: false,
-        percentage: 40,
-        userId: 'nZLpqR6M5',
-      },
-      {
-        id: '5pyj9BN1XxddX',
-        name: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua <b>In_the_Conservatory.jpg</b>',
-        isIndeterminate: false,
-        percentage: 40,
-        userId: 'nZLpqR6M5',
-      },
-      {
-        id: '6pyj9BN1XxddX',
-        name: 'Delete mosaic for <b>In_the_Conservatory.jpg</b>',
-        error:
-          'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua <b>In_the_Conservatory.jpg</b>. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
-        isIndeterminate: false,
-        userId: 'nZLpqR6M5',
-      },
-    ]
-  }
-
   return (
     <>
       {list && list.data.length > 0 ? (

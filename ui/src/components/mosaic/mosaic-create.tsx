@@ -3,8 +3,8 @@ import { Button, ModalBody, ModalFooter } from '@chakra-ui/react'
 import cx from 'classnames'
 import MosaicAPI from '@/client/api/mosaic'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
-import { creatingDidStop, modalDidClose } from '@/store/ui/mosaic'
-import { creatingDidStart } from '@/store/ui/mosaic'
+import { modalDidClose } from '@/store/ui/mosaic'
+import { drawerDidOpen } from '@/store/ui/tasks'
 
 const MosaicCreate = () => {
   const dispatch = useAppDispatch()
@@ -13,26 +13,19 @@ const MosaicCreate = () => {
       ? state.ui.files.selection[0]
       : undefined,
   )
-  const mutateMetadata = useAppSelector(
-    (state) => state.ui.mosaic.mutateMetadata,
-  )
   const mutateList = useAppSelector((state) => state.ui.files.mutate)
+  const mutateTasks = useAppSelector((state) => state.ui.tasks.mutate)
   const isCreating = useAppSelector((state) => state.ui.mosaic.isCreating)
 
   const handleCreate = useCallback(async () => {
     if (id) {
-      try {
-        dispatch(creatingDidStart())
-        await MosaicAPI.create(id)
-        mutateMetadata?.()
-        mutateList?.()
-      } catch (error) {
-        dispatch(creatingDidStop())
-      } finally {
-        dispatch(creatingDidStop())
-      }
+      MosaicAPI.create(id)
+      mutateList?.()
+      mutateTasks?.()
+      dispatch(modalDidClose())
+      dispatch(drawerDidOpen())
     }
-  }, [id, mutateMetadata, mutateList, dispatch])
+  }, [id, mutateList, mutateTasks, dispatch])
 
   if (!id) {
     return null
