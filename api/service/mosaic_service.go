@@ -2,6 +2,7 @@ package service
 
 import (
 	"bytes"
+	"fmt"
 	"os"
 	"path/filepath"
 	"voltaserve/cache"
@@ -21,6 +22,8 @@ type MosaicService struct {
 	snapshotRepo  repo.SnapshotRepo
 	fileCache     *cache.FileCache
 	fileGuard     *guard.FileGuard
+	taskCache     *cache.TaskCache
+	taskRepo      repo.TaskRepo
 	s3            *infra.S3Manager
 	mosaicClient  *client.MosaicClient
 	fileIdent     *infra.FileIdentifier
@@ -37,6 +40,8 @@ func NewMosaicService() *MosaicService {
 		snapshotRepo:  repo.NewSnapshotRepo(),
 		fileCache:     cache.NewFileCache(),
 		fileGuard:     guard.NewFileGuard(),
+		taskCache:     cache.NewTaskCache(),
+		taskRepo:      repo.NewTaskRepo(),
 		s3:            infra.NewS3Manager(),
 		mosaicClient:  client.NewMosaicClient(),
 		fileIdent:     infra.NewFileIdentifier(),
@@ -62,23 +67,25 @@ func (svc *MosaicService) Create(id string, userID string) error {
 	if snapshot.GetStatus() == model.SnapshotStatusProcessing {
 		return errorpkg.NewSnapshotIsProcessingError(nil)
 	}
-	snapshot.SetStatus(model.SnapshotStatusProcessing)
-	if err := svc.snapshotRepo.Save(snapshot); err != nil {
-		return err
-	}
-	if err := svc.snapshotCache.Set(snapshot); err != nil {
-		return err
-	}
-	err = svc.create(snapshot)
+	task, err := svc.taskRepo.Insert(repo.TaskInsertOptions{
+		ID:              helper.NewID(),
+		Name:            fmt.Sprintf("Creating mosaic %s", file.GetName()),
+		UserID:          userID,
+		IsIndeterminate: true,
+	})
 	if err != nil {
-		snapshot.SetStatus(model.SnapshotStatusError)
-	} else {
-		snapshot.SetStatus(model.SnapshotStatusReady)
-	}
-	if err := svc.snapshotRepo.Save(snapshot); err != nil {
 		return err
 	}
-	if err := svc.snapshotCache.Set(snapshot); err != nil {
+	if err := svc.taskCache.Set(task); err != nil {
+		return err
+	}
+	if err = svc.create(snapshot); err != nil {
+		value := err.Error()
+		task.SetError(&value)
+	}
+	task.SetIsComplete(true)
+	svc.taskRepo.Save(task)
+	if err := svc.taskCache.Set(task); err != nil {
 		return err
 	}
 	return err

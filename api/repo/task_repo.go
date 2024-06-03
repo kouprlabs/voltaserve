@@ -114,11 +114,11 @@ func newTaskRepo() *taskRepo {
 type TaskInsertOptions struct {
 	ID              string
 	Name            string
-	Description     string
 	Error           *string
 	Percentage      *int
 	IsComplete      bool
 	IsIndeterminate bool
+	UserID          string
 }
 
 func (repo *taskRepo) Insert(opts TaskInsertOptions) (model.Task, error) {
@@ -129,6 +129,7 @@ func (repo *taskRepo) Insert(opts TaskInsertOptions) (model.Task, error) {
 		Percentage:      opts.Percentage,
 		IsComplete:      opts.IsComplete,
 		IsIndeterminate: opts.IsIndeterminate,
+		UserID:          opts.UserID,
 	}
 	if db := repo.db.Create(&org); db.Error != nil {
 		return nil, db.Error
