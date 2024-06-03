@@ -24,7 +24,7 @@ const Watermark = () => {
   const { data: file, mutate: mutateFile } = FileAPI.useGet(id, swrConfig())
 
   useEffect(() => {
-    if (id) {
+    if (mutateFile) {
       dispatch(mutateFileUpdated(mutateFile))
     }
   }, [mutateFile])

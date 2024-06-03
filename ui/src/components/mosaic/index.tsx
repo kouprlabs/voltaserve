@@ -28,7 +28,7 @@ const Mosaic = () => {
   )
 
   useEffect(() => {
-    if (id) {
+    if (mutateMetadata) {
       dispatch(mutateMetadataUpdated(mutateMetadata))
     }
   }, [mutateMetadata])

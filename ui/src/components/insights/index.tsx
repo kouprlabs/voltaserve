@@ -27,7 +27,7 @@ const Insights = () => {
   )
 
   useEffect(() => {
-    if (id) {
+    if (mutateMetadata) {
       dispatch(mutateMetadataUpdated(mutateMetadata))
     }
   }, [mutateMetadata])
