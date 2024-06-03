@@ -1,6 +1,5 @@
 import useSWR, { SWRConfiguration } from 'swr'
 import { apiFetcher } from '@/client/fetcher'
-import { PermissionType } from './permission'
 
 export enum SortBy {
   Name = 'name',

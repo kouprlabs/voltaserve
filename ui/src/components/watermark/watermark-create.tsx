@@ -3,11 +3,8 @@ import { Button, ModalBody, ModalFooter } from '@chakra-ui/react'
 import cx from 'classnames'
 import WatermarkAPI from '@/client/api/watermark'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
-import {
-  creatingDidStop,
-  modalDidClose,
-  creatingDidStart,
-} from '@/store/ui/watermark'
+import { drawerDidOpen as tasksDrawerDidOpen } from '@/store/ui/tasks'
+import { modalDidClose } from '@/store/ui/watermark'
 
 const WatermarkCreate = () => {
   const dispatch = useAppDispatch()
@@ -16,24 +13,18 @@ const WatermarkCreate = () => {
       ? state.ui.files.selection[0]
       : undefined,
   )
-  const mutateFile = useAppSelector((state) => state.ui.watermark.mutateFile)
-  const mutateList = useAppSelector((state) => state.ui.files.mutate)
-  const isCreating = useAppSelector((state) => state.ui.watermark.isCreating)
+  const mutateFiles = useAppSelector((state) => state.ui.files.mutate)
+  const mutateTasks = useAppSelector((state) => state.ui.tasks.mutate)
 
-  const handleCreate = useCallback(async () => {
+  const handleCreate = useCallback(() => {
     if (id) {
-      try {
-        dispatch(creatingDidStart())
-        await WatermarkAPI.create(id)
-        mutateFile?.()
-        mutateList?.()
-      } catch (error) {
-        dispatch(creatingDidStop())
-      } finally {
-        dispatch(creatingDidStop())
-      }
+      WatermarkAPI.create(id)
+      mutateFiles?.()
+      mutateTasks?.()
+      dispatch(modalDidClose())
+      dispatch(tasksDrawerDidOpen())
     }
-  }, [id, mutateFile, mutateList, dispatch])
+  }, [id, mutateFiles, mutateTasks, dispatch])
 
   if (!id) {
     return null
@@ -64,7 +55,6 @@ const WatermarkCreate = () => {
             type="button"
             variant="outline"
             colorScheme="blue"
-            isDisabled={isCreating}
             onClick={() => dispatch(modalDidClose())}
           >
             Cancel
@@ -73,10 +63,9 @@ const WatermarkCreate = () => {
             type="button"
             variant="solid"
             colorScheme="blue"
-            isLoading={isCreating}
             onClick={handleCreate}
           >
-            Protect With Watermark
+            Create Watermark
           </Button>
         </div>
       </ModalFooter>

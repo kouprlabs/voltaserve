@@ -4,7 +4,7 @@ import cx from 'classnames'
 import MosaicAPI from '@/client/api/mosaic'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { modalDidClose } from '@/store/ui/mosaic'
-import { drawerDidOpen } from '@/store/ui/tasks'
+import { drawerDidOpen as tasksDrawerDidOpen } from '@/store/ui/tasks'
 
 const MosaicCreate = () => {
   const dispatch = useAppDispatch()
@@ -13,19 +13,18 @@ const MosaicCreate = () => {
       ? state.ui.files.selection[0]
       : undefined,
   )
-  const mutateList = useAppSelector((state) => state.ui.files.mutate)
+  const mutateFiles = useAppSelector((state) => state.ui.files.mutate)
   const mutateTasks = useAppSelector((state) => state.ui.tasks.mutate)
-  const isCreating = useAppSelector((state) => state.ui.mosaic.isCreating)
 
-  const handleCreate = useCallback(async () => {
+  const handleCreate = useCallback(() => {
     if (id) {
       MosaicAPI.create(id)
-      mutateList?.()
+      mutateFiles?.()
       mutateTasks?.()
       dispatch(modalDidClose())
-      dispatch(drawerDidOpen())
+      dispatch(tasksDrawerDidOpen())
     }
-  }, [id, mutateList, mutateTasks, dispatch])
+  }, [id, mutateFiles, mutateTasks, dispatch])
 
   if (!id) {
     return null
@@ -58,7 +57,6 @@ const MosaicCreate = () => {
             type="button"
             variant="outline"
             colorScheme="blue"
-            isDisabled={isCreating}
             onClick={() => dispatch(modalDidClose())}
           >
             Cancel
@@ -67,10 +65,9 @@ const MosaicCreate = () => {
             type="button"
             variant="solid"
             colorScheme="blue"
-            isLoading={isCreating}
             onClick={handleCreate}
           >
-            Optimize Image
+            Create Mosaic
           </Button>
         </div>
       </ModalFooter>

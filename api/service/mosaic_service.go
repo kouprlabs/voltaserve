@@ -79,7 +79,7 @@ func (svc *MosaicService) Create(id string, userID string) error {
 	}
 	task, err := svc.taskRepo.Insert(repo.TaskInsertOptions{
 		ID:              helper.NewID(),
-		Name:            fmt.Sprintf("Creating mosaic for <b>%s</b>", file.GetName()),
+		Name:            fmt.Sprintf("Create mosaic for <b>%s</b>", file.GetName()),
 		UserID:          userID,
 		IsIndeterminate: true,
 	})
@@ -197,16 +197,45 @@ func (svc *MosaicService) Delete(id string, userID string) error {
 		if err := svc.snapshotCache.Set(snapshot); err != nil {
 			return err
 		}
+		task, err := svc.taskRepo.Insert(repo.TaskInsertOptions{
+			ID:              helper.NewID(),
+			Name:            fmt.Sprintf("Delete mosaic for <b>%s</b>", file.GetName()),
+			UserID:          userID,
+			IsIndeterminate: true,
+		})
+		if err != nil {
+			return err
+		}
+		if err := svc.taskCache.Set(task); err != nil {
+			return err
+		}
+		if err := svc.taskSearch.Index([]model.Task{task}); err != nil {
+			return err
+		}
 		err = svc.mosaicClient.Delete(client.MosaicDeleteOptions{
 			S3Key:    filepath.FromSlash(snapshot.GetID()),
 			S3Bucket: snapshot.GetOriginal().Bucket,
 		})
-		snapshot.SetMosaic(nil)
 		if err != nil {
-			snapshot.SetStatus(model.SnapshotStatusError)
+			value := err.Error()
+			task.SetError(&value)
+			if err := svc.taskCache.Set(task); err != nil {
+				return err
+			}
+			if err := svc.taskSearch.Update([]model.Task{task}); err != nil {
+				return err
+			}
 		} else {
-			snapshot.SetStatus(model.SnapshotStatusReady)
+			svc.taskRepo.Delete(task.GetID())
+			if err := svc.taskCache.Delete(task.GetID()); err != nil {
+				return err
+			}
+			if err := svc.taskSearch.Delete([]string{task.GetID()}); err != nil {
+				return err
+			}
 		}
+		snapshot.SetMosaic(nil)
+		snapshot.SetStatus(model.SnapshotStatusReady)
 		if err := svc.snapshotRepo.Save(snapshot); err != nil {
 			return err
 		}

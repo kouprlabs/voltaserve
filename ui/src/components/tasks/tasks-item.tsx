@@ -14,6 +14,7 @@ import {
 import cx from 'classnames'
 import TaskAPI, { Task } from '@/client/api/task'
 import { IconError } from '@/lib/components/icons'
+import { useAppSelector } from '@/store/hook'
 
 export type TaskDrawerItemProps = {
   task: Task
@@ -21,15 +22,17 @@ export type TaskDrawerItemProps = {
 
 const TasksDrawerItem = ({ task }: TaskDrawerItemProps) => {
   const [isDismissing, setIsDismissing] = useState(false)
+  const mutateTasks = useAppSelector((state) => state.ui.tasks.mutate)
 
   const handleDismiss = useCallback(async () => {
     try {
       setIsDismissing(true)
       await TaskAPI.delete(task.id)
+      mutateTasks?.()
     } finally {
       setIsDismissing(false)
     }
-  }, [task])
+  }, [task, mutateTasks])
 
   return (
     <Card variant="outline">

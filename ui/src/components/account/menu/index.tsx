@@ -7,12 +7,12 @@ import {
   MenuList,
   Portal,
   SkeletonCircle,
-  Tag,
 } from '@chakra-ui/react'
 import cx from 'classnames'
 import InvitationAPI from '@/client/api/invitation'
 import UserAPI from '@/client/idp/user'
 import { swrConfig } from '@/client/options'
+import NumberTag from '@/lib/components/number-tag'
 import AccountMenuActiveCircle from './account-menu-active-circle'
 import AccountMenuAvatarButton from './account-menu-avatar-button'
 import AccountMenuAvatarImage from './account-menu-avatar-image'
@@ -58,14 +58,10 @@ const AccountMenu = () => {
               Settings
             </MenuItem>
             <MenuItem as={Link} to="/account/invitation">
-              <div
-                className={cx('flex', 'flex-row', 'items-center', 'gap-0.5')}
-              >
+              <div className={cx('flex', 'flex-row', 'items-center', 'gap-1')}>
                 <span>Invitations</span>
                 {invitationCount && invitationCount > 0 ? (
-                  <Tag className={cx('rounded-full')} colorScheme="red">
-                    {invitationCount}
-                  </Tag>
+                  <NumberTag>{invitationCount}</NumberTag>
                 ) : null}
               </div>
             </MenuItem>

@@ -1,4 +1,3 @@
-import { useEffect } from 'react'
 import {
   Modal,
   ModalCloseButton,
@@ -9,7 +8,7 @@ import {
 import FileAPI from '@/client/api/file'
 import { swrConfig } from '@/client/options'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
-import { modalDidClose, mutateFileUpdated } from '@/store/ui/watermark'
+import { modalDidClose } from '@/store/ui/watermark'
 import WatermarkCreate from './watermark-create'
 import WatermarkOverview from './watermark-overview'
 
@@ -20,20 +19,8 @@ const Watermark = () => {
       ? state.ui.files.selection[0]
       : undefined,
   )
-  const isLoading = useAppSelector(
-    (state) =>
-      state.ui.watermark.isCreating ||
-      state.ui.watermark.isUpdating ||
-      state.ui.watermark.isDeleting,
-  )
   const isModalOpen = useAppSelector((state) => state.ui.watermark.isModalOpen)
-  const { data: file, mutate: mutateFile } = FileAPI.useGet(id, swrConfig())
-
-  useEffect(() => {
-    if (id) {
-      dispatch(mutateFileUpdated(mutateFile))
-    }
-  }, [mutateFile])
+  const { data: file } = FileAPI.useGet(id, swrConfig())
 
   return (
     <Modal
@@ -41,12 +28,11 @@ const Watermark = () => {
       isOpen={isModalOpen}
       onClose={() => dispatch(modalDidClose())}
       closeOnOverlayClick={false}
-      closeOnEsc={!isLoading}
     >
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>Watermark</ModalHeader>
-        <ModalCloseButton isDisabled={isLoading} />
+        <ModalCloseButton />
         {!file?.snapshot?.watermark ? <WatermarkCreate /> : null}
         {file?.snapshot?.watermark ? <WatermarkOverview /> : null}
       </ModalContent>

@@ -7,13 +7,8 @@ import WatermarkAPI from '@/client/api/watermark'
 import { swrConfig } from '@/client/options'
 import { IconDelete, IconSync } from '@/lib/components/icons'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
-import {
-  updatingDidStart,
-  deletingDidStart,
-  deletingDidStop,
-  modalDidClose,
-  updatingDidStop,
-} from '@/store/ui/watermark'
+import { drawerDidOpen as tasksDrawerDidOpen } from '@/store/ui/tasks'
+import { modalDidClose } from '@/store/ui/watermark'
 
 const WatermarkOverviewSettings = () => {
   const dispatch = useAppDispatch()
@@ -22,45 +17,30 @@ const WatermarkOverviewSettings = () => {
       ? state.ui.files.selection[0]
       : undefined,
   )
-  const mutateFile = useAppSelector((state) => state.ui.watermark.mutateFile)
-  const mutateList = useAppSelector((state) => state.ui.files.mutate)
-  const isUpdating = useAppSelector((state) => state.ui.watermark.isUpdating)
-  const isDeleting = useAppSelector((state) => state.ui.watermark.isDeleting)
+  const mutateFiles = useAppSelector((state) => state.ui.files.mutate)
+  const mutateTasks = useAppSelector((state) => state.ui.tasks.mutate)
   const { data: metadata } = WatermarkAPI.useGetMetadata(id, swrConfig())
   const { data: file } = FileAPI.useGet(id, swrConfig())
 
-  const handleUpdate = useCallback(async () => {
-    if (!id) {
-      return
-    }
-    try {
-      dispatch(updatingDidStart())
-      await WatermarkAPI.create(id)
-      mutateFile?.()
-      mutateList?.()
-    } catch {
-      dispatch(updatingDidStop())
-    } finally {
-      dispatch(updatingDidStop())
-    }
-  }, [id, mutateFile, mutateList, dispatch])
-
-  const handleDelete = useCallback(async () => {
-    if (!id) {
-      return
-    }
-    try {
-      dispatch(deletingDidStart())
-      await WatermarkAPI.delete(id)
-      mutateFile?.()
-      mutateList?.()
+  const handleUpdate = useCallback(() => {
+    if (id) {
+      WatermarkAPI.create(id)
+      mutateFiles?.()
+      mutateTasks?.()
       dispatch(modalDidClose())
-    } catch {
-      dispatch(deletingDidStop())
-    } finally {
-      dispatch(deletingDidStop())
+      dispatch(tasksDrawerDidOpen())
     }
-  }, [id, mutateFile, mutateList, dispatch])
+  }, [id, mutateFiles, mutateTasks, dispatch])
+
+  const handleDelete = useCallback(() => {
+    if (id) {
+      WatermarkAPI.delete(id)
+      mutateFiles?.()
+      mutateTasks?.()
+      dispatch(modalDidClose())
+      dispatch(tasksDrawerDidOpen())
+    }
+  }, [id, mutateFiles, mutateTasks, dispatch])
 
   if (!id || !metadata) {
     return null
@@ -75,8 +55,7 @@ const WatermarkOverviewSettings = () => {
         <CardFooter>
           <Button
             leftIcon={<IconSync />}
-            isLoading={isUpdating}
-            isDisabled={!metadata.isOutdated || isDeleting || isUpdating}
+            isDisabled={!metadata.isOutdated}
             onClick={handleUpdate}
           >
             Update
@@ -94,13 +73,7 @@ const WatermarkOverviewSettings = () => {
           <Button
             colorScheme="red"
             leftIcon={<IconDelete />}
-            isLoading={isDeleting}
-            isDisabled={
-              isDeleting ||
-              isUpdating ||
-              !file ||
-              ltOwnerPermission(file.permission)
-            }
+            isDisabled={!file || ltOwnerPermission(file.permission)}
             onClick={handleDelete}
           >
             Delete

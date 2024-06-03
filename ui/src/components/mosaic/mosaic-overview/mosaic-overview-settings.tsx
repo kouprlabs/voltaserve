@@ -7,13 +7,8 @@ import { ltOwnerPermission } from '@/client/api/permission'
 import { swrConfig } from '@/client/options'
 import { IconDelete, IconSync } from '@/lib/components/icons'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
-import { updatingDidStart } from '@/store/ui/insights'
-import {
-  deletingDidStart,
-  deletingDidStop,
-  modalDidClose,
-  updatingDidStop,
-} from '@/store/ui/mosaic'
+import { modalDidClose } from '@/store/ui/mosaic'
+import { drawerDidOpen as tasksDrawerDidOpen } from '@/store/ui/tasks'
 
 const MosaicOverviewSettings = () => {
   const dispatch = useAppDispatch()
@@ -22,47 +17,30 @@ const MosaicOverviewSettings = () => {
       ? state.ui.files.selection[0]
       : undefined,
   )
-  const mutateMetadata = useAppSelector(
-    (state) => state.ui.mosaic.mutateMetadata,
-  )
-  const mutateList = useAppSelector((state) => state.ui.files.mutate)
-  const isUpdating = useAppSelector((state) => state.ui.mosaic.isUpdating)
-  const isDeleting = useAppSelector((state) => state.ui.mosaic.isDeleting)
+  const mutateFiles = useAppSelector((state) => state.ui.files.mutate)
+  const mutateTasks = useAppSelector((state) => state.ui.tasks.mutate)
   const { data: metadata } = MosaicAPI.useGetMetadata(id, swrConfig())
   const { data: file } = FileAPI.useGet(id, swrConfig())
 
-  const handleUpdate = useCallback(async () => {
-    if (!id) {
-      return
-    }
-    try {
-      dispatch(updatingDidStart())
-      await MosaicAPI.create(id)
-      mutateMetadata?.()
-      mutateList?.()
-    } catch {
-      dispatch(updatingDidStop())
-    } finally {
-      dispatch(updatingDidStop())
-    }
-  }, [id, mutateMetadata, mutateList, dispatch])
-
-  const handleDelete = useCallback(async () => {
-    if (!id) {
-      return
-    }
-    try {
-      dispatch(deletingDidStart())
-      await MosaicAPI.delete(id)
-      mutateMetadata?.()
-      mutateList?.()
+  const handleUpdate = useCallback(() => {
+    if (id) {
+      MosaicAPI.create(id)
+      mutateFiles?.()
+      mutateTasks?.()
       dispatch(modalDidClose())
-    } catch {
-      dispatch(deletingDidStop())
-    } finally {
-      dispatch(deletingDidStop())
+      dispatch(tasksDrawerDidOpen())
     }
-  }, [id, mutateMetadata, mutateList, dispatch])
+  }, [id, mutateFiles, mutateTasks, dispatch])
+
+  const handleDelete = useCallback(() => {
+    if (id) {
+      MosaicAPI.delete(id)
+      mutateFiles?.()
+      mutateTasks?.()
+      dispatch(modalDidClose())
+      dispatch(tasksDrawerDidOpen())
+    }
+  }, [id, mutateFiles, mutateTasks, dispatch])
 
   if (!id || !metadata) {
     return null
@@ -77,8 +55,7 @@ const MosaicOverviewSettings = () => {
         <CardFooter>
           <Button
             leftIcon={<IconSync />}
-            isLoading={isUpdating}
-            isDisabled={!metadata.isOutdated || isDeleting || isUpdating}
+            isDisabled={!metadata.isOutdated}
             onClick={handleUpdate}
           >
             Update
@@ -95,13 +72,7 @@ const MosaicOverviewSettings = () => {
           <Button
             colorScheme="red"
             leftIcon={<IconDelete />}
-            isLoading={isDeleting}
-            isDisabled={
-              isDeleting ||
-              isUpdating ||
-              !file ||
-              ltOwnerPermission(file.permission)
-            }
+            isDisabled={!file || ltOwnerPermission(file.permission)}
             onClick={handleDelete}
           >
             Delete

@@ -7,13 +7,8 @@ import { ltOwnerPermission } from '@/client/api/permission'
 import { swrConfig } from '@/client/options'
 import { IconDelete, IconSync } from '@/lib/components/icons'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
-import {
-  deletingDidStart,
-  deletingDidStop,
-  modalDidClose,
-  updatingDidStop,
-  updatingDidStart,
-} from '@/store/ui/insights'
+import { modalDidClose } from '@/store/ui/insights'
+import { drawerDidOpen as tasksDrawerDidOpen } from '@/store/ui/tasks'
 
 const InsightsOverviewSettings = () => {
   const dispatch = useAppDispatch()
@@ -22,47 +17,28 @@ const InsightsOverviewSettings = () => {
       ? state.ui.files.selection[0]
       : undefined,
   )
-  const mutateMetadata = useAppSelector(
-    (state) => state.ui.insights.mutateMetadata,
-  )
-  const mutateList = useAppSelector((state) => state.ui.files.mutate)
-  const isUpdating = useAppSelector((state) => state.ui.insights.isUpdating)
-  const isDeleting = useAppSelector((state) => state.ui.insights.isDeleting)
+  const mutateFiles = useAppSelector((state) => state.ui.files.mutate)
+  const mutateTasks = useAppSelector((state) => state.ui.tasks.mutate)
   const { data: metadata } = InsightsAPI.useGetMetadata(id, swrConfig())
   const { data: file } = FileAPI.useGet(id, swrConfig())
 
-  const handleUpdate = useCallback(async () => {
-    if (!id) {
-      return
+  const handleUpdate = useCallback(() => {
+    if (id) {
+      InsightsAPI.patch(id)
+      mutateFiles?.()
+      mutateTasks?.()
     }
-    try {
-      dispatch(updatingDidStart())
-      await InsightsAPI.patch(id)
-      mutateMetadata?.()
-      mutateList?.()
-    } catch {
-      dispatch(updatingDidStop())
-    } finally {
-      dispatch(updatingDidStop())
-    }
-  }, [id, mutateMetadata, mutateList, dispatch])
+  }, [id, mutateFiles, mutateTasks, dispatch])
 
-  const handleDelete = useCallback(async () => {
-    if (!id) {
-      return
-    }
-    try {
-      dispatch(deletingDidStart())
-      await InsightsAPI.delete(id)
-      mutateMetadata?.()
-      mutateList?.()
+  const handleDelete = useCallback(() => {
+    if (id) {
+      InsightsAPI.delete(id)
+      mutateFiles?.()
+      mutateTasks?.()
       dispatch(modalDidClose())
-    } catch {
-      dispatch(deletingDidStop())
-    } finally {
-      dispatch(deletingDidStop())
+      dispatch(tasksDrawerDidOpen())
     }
-  }, [id, mutateMetadata, mutateList, dispatch])
+  }, [id, mutateFiles, mutateTasks, dispatch])
 
   if (!id || !metadata) {
     return null
@@ -80,8 +56,7 @@ const InsightsOverviewSettings = () => {
         <CardFooter>
           <Button
             leftIcon={<IconSync />}
-            isLoading={isUpdating}
-            isDisabled={!metadata.isOutdated || isDeleting || isUpdating}
+            isDisabled={!metadata.isOutdated}
             onClick={handleUpdate}
           >
             Update
@@ -98,13 +73,7 @@ const InsightsOverviewSettings = () => {
           <Button
             colorScheme="red"
             leftIcon={<IconDelete />}
-            isLoading={isDeleting}
-            isDisabled={
-              isDeleting ||
-              isUpdating ||
-              !file ||
-              ltOwnerPermission(file.permission)
-            }
+            isDisabled={!file || ltOwnerPermission(file.permission)}
             onClick={handleDelete}
           >
             Delete

@@ -6,11 +6,8 @@ import FileAPI from '@/client/api/file'
 import InsightsAPI, { Language } from '@/client/api/insights'
 import { swrConfig } from '@/client/options'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
-import {
-  creatingDidStart,
-  creatingDidStop,
-  modalDidClose,
-} from '@/store/ui/insights'
+import { modalDidClose } from '@/store/ui/insights'
+import { drawerDidOpen as tasksDrawerDidOpen } from '@/store/ui/tasks'
 import { reactSelectStyles } from '@/styles/react-select'
 
 interface LanguageOption extends OptionBase {
@@ -25,11 +22,8 @@ const InsightsCreate = () => {
       ? state.ui.files.selection[0]
       : undefined,
   )
-  const mutateMetadata = useAppSelector(
-    (state) => state.ui.insights.mutateMetadata,
-  )
-  const mutateList = useAppSelector((state) => state.ui.files.mutate)
-  const isCreating = useAppSelector((state) => state.ui.insights.isCreating)
+  const mutateFiles = useAppSelector((state) => state.ui.files.mutate)
+  const mutateTasks = useAppSelector((state) => state.ui.tasks.mutate)
   const [language, setLanguage] = useState<Language>()
   const { data: languages } = InsightsAPI.useGetLanguages(swrConfig())
   const { data: file } = FileAPI.useGet(id, swrConfig())
@@ -45,20 +39,15 @@ const InsightsCreate = () => {
     }
   }, [file, languages])
 
-  const handleCreate = useCallback(async () => {
+  const handleCreate = useCallback(() => {
     if (id && language) {
-      try {
-        dispatch(creatingDidStart())
-        await InsightsAPI.create(id, { languageId: language.id })
-        mutateMetadata?.()
-        mutateList?.()
-      } catch (error) {
-        dispatch(creatingDidStop())
-      } finally {
-        dispatch(creatingDidStop())
-      }
+      InsightsAPI.create(id, { languageId: language.id })
+      mutateFiles?.()
+      mutateTasks?.()
+      dispatch(modalDidClose())
+      dispatch(tasksDrawerDidOpen())
     }
-  }, [language, id, mutateMetadata, mutateList, dispatch])
+  }, [language, id, mutateFiles, mutateTasks, dispatch])
 
   const handleLanguageChange = useCallback(
     (value: SingleValue<LanguageOption>) => {
@@ -103,7 +92,6 @@ const InsightsCreate = () => {
               placeholder="Select Language"
               selectedOptionStyle="check"
               chakraStyles={reactSelectStyles()}
-              isDisabled={isCreating}
               onChange={handleLanguageChange}
             />
           ) : null}
@@ -115,7 +103,6 @@ const InsightsCreate = () => {
             type="button"
             variant="outline"
             colorScheme="blue"
-            isDisabled={isCreating}
             onClick={() => dispatch(modalDidClose())}
           >
             Cancel
@@ -124,7 +111,6 @@ const InsightsCreate = () => {
             type="button"
             variant="solid"
             colorScheme="blue"
-            isLoading={isCreating}
             isDisabled={!language}
             onClick={handleCreate}
           >

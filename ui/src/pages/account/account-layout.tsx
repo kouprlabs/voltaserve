@@ -8,8 +8,6 @@ import {
   Tab,
   TabList,
   Tabs,
-  Tag,
-  useColorMode,
 } from '@chakra-ui/react'
 import cx from 'classnames'
 import InvitationAPI from '@/client/api/invitation'
@@ -17,7 +15,7 @@ import UserAPI from '@/client/idp/user'
 import { swrConfig } from '@/client/options'
 import AccountEditPicture from '@/components/account/edit-picture'
 import { IconEdit } from '@/lib/components/icons'
-import TabTag from '@/lib/components/tab-tag'
+import NumberTag from '@/lib/components/number-tag'
 import { useAppDispatch } from '@/store/hook'
 import { mutateUpdated } from '@/store/ui/account'
 
@@ -25,7 +23,6 @@ const AccountLayout = () => {
   const location = useLocation()
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
-  const colorMode = useColorMode()
   const [isImageModalOpen, setIsImageModalOpen] = useState(false)
   const { data: user, mutate } = UserAPI.useGet(swrConfig())
   const { data: invitationCount } =
@@ -107,7 +104,9 @@ const AccountLayout = () => {
               >
                 <span>Invitations</span>
                 {invitationCount && invitationCount > 0 ? (
-                  <TabTag isActive={tabIndex === 1}>{invitationCount}</TabTag>
+                  <NumberTag isActive={tabIndex === 1}>
+                    {invitationCount}
+                  </NumberTag>
                 ) : null}
               </div>
             </Tab>

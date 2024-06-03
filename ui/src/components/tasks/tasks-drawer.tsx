@@ -1,5 +1,4 @@
 import { useEffect, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
 import {
   Drawer as ChakraDrawer,
   DrawerBody,
@@ -10,20 +9,16 @@ import {
   IconButton,
   useDisclosure,
 } from '@chakra-ui/react'
-import cx from 'classnames'
-import TaskAPI, { SortOrder } from '@/client/api/task'
+import TaskAPI from '@/client/api/task'
 import { swrConfig } from '@/client/options'
-import { taskPaginationStorage } from '@/infra/pagination'
 import { IconStacks } from '@/lib/components/icons'
 import NotificationBadge from '@/lib/components/notification-badge'
-import PagePagination from '@/lib/components/page-pagination'
-import usePagePagination from '@/lib/hooks/page-pagination'
-import { useAppSelector } from '@/store/hook'
-import TasksDrawerItem from './tasks-item'
+import { useAppDispatch, useAppSelector } from '@/store/hook'
+import { drawerDidClose } from '@/store/ui/tasks'
 import TasksList from './tasks-list'
 
 const TasksDrawer = () => {
-  const navigate = useNavigate()
+  const dispatch = useAppDispatch()
   const buttonRef = useRef<HTMLButtonElement>(null)
   const { isOpen, onOpen, onClose } = useDisclosure()
   const isDrawerOpen = useAppSelector((state) => state.ui.tasks.isDrawerOpen)
@@ -50,7 +45,10 @@ const TasksDrawer = () => {
       <ChakraDrawer
         isOpen={isOpen}
         placement="right"
-        onClose={onClose}
+        onClose={() => {
+          onClose()
+          dispatch(drawerDidClose())
+        }}
         finalFocusRef={buttonRef}
       >
         <DrawerOverlay />

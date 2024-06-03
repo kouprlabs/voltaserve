@@ -2,6 +2,7 @@ package service
 
 import (
 	"bytes"
+	"fmt"
 	"os"
 	"path/filepath"
 	"time"
@@ -13,6 +14,7 @@ import (
 	"voltaserve/infra"
 	"voltaserve/model"
 	"voltaserve/repo"
+	"voltaserve/search"
 
 	"go.uber.org/zap"
 )
@@ -24,6 +26,9 @@ type WatermarkService struct {
 	userRepo        repo.UserRepo
 	fileCache       *cache.FileCache
 	fileGuard       *guard.FileGuard
+	taskCache       *cache.TaskCache
+	taskSearch      *search.TaskSearch
+	taskRepo        repo.TaskRepo
 	s3              *infra.S3Manager
 	watermarkClient *client.WatermarkClient
 	fileIdent       *infra.FileIdentifier
@@ -42,6 +47,9 @@ func NewWatermarkService() *WatermarkService {
 		userRepo:        repo.NewUserRepo(),
 		fileCache:       cache.NewFileCache(),
 		fileGuard:       guard.NewFileGuard(),
+		taskCache:       cache.NewTaskCache(),
+		taskSearch:      search.NewTaskSearch(),
+		taskRepo:        repo.NewTaskRepo(),
 		s3:              infra.NewS3Manager(),
 		watermarkClient: client.NewWatermarkClient(),
 		fileIdent:       infra.NewFileIdentifier(),
@@ -82,12 +90,41 @@ func (svc *WatermarkService) Create(id string, userID string) error {
 	if err != nil {
 		return err
 	}
+	task, err := svc.taskRepo.Insert(repo.TaskInsertOptions{
+		ID:              helper.NewID(),
+		Name:            fmt.Sprintf("Create watermark for <b>%s</b>", file.GetName()),
+		UserID:          userID,
+		IsIndeterminate: true,
+	})
+	if err != nil {
+		return err
+	}
+	if err := svc.taskCache.Set(task); err != nil {
+		return err
+	}
+	if err := svc.taskSearch.Index([]model.Task{task}); err != nil {
+		return err
+	}
 	err = svc.create(snapshot, workspace.GetName(), user.GetEmail())
 	if err != nil {
-		snapshot.SetStatus(model.SnapshotStatusError)
+		value := err.Error()
+		task.SetError(&value)
+		if err := svc.taskCache.Set(task); err != nil {
+			return err
+		}
+		if err := svc.taskSearch.Update([]model.Task{task}); err != nil {
+			return err
+		}
 	} else {
-		snapshot.SetStatus(model.SnapshotStatusReady)
+		svc.taskRepo.Delete(task.GetID())
+		if err := svc.taskCache.Delete(task.GetID()); err != nil {
+			return err
+		}
+		if err := svc.taskSearch.Delete([]string{task.GetID()}); err != nil {
+			return err
+		}
 	}
+	snapshot.SetStatus(model.SnapshotStatusReady)
 	if err := svc.snapshotRepo.Save(snapshot); err != nil {
 		return err
 	}
@@ -187,13 +224,42 @@ func (svc *WatermarkService) Delete(id string, userID string) error {
 	if err := svc.snapshotCache.Set(snapshot); err != nil {
 		return err
 	}
-	err = svc.s3.RemoveObject(snapshot.GetWatermark().Key, snapshot.GetWatermark().Bucket)
-	snapshot.SetWatermark(nil)
+	task, err := svc.taskRepo.Insert(repo.TaskInsertOptions{
+		ID:              helper.NewID(),
+		Name:            fmt.Sprintf("Delete watermark for <b>%s</b>", file.GetName()),
+		UserID:          userID,
+		IsIndeterminate: true,
+	})
 	if err != nil {
-		snapshot.SetStatus(model.SnapshotStatusError)
-	} else {
-		snapshot.SetStatus(model.SnapshotStatusReady)
+		return err
 	}
+	if err := svc.taskCache.Set(task); err != nil {
+		return err
+	}
+	if err := svc.taskSearch.Index([]model.Task{task}); err != nil {
+		return err
+	}
+	err = svc.s3.RemoveObject(snapshot.GetWatermark().Key, snapshot.GetWatermark().Bucket)
+	if err != nil {
+		value := err.Error()
+		task.SetError(&value)
+		if err := svc.taskCache.Set(task); err != nil {
+			return err
+		}
+		if err := svc.taskSearch.Update([]model.Task{task}); err != nil {
+			return err
+		}
+	} else {
+		svc.taskRepo.Delete(task.GetID())
+		if err := svc.taskCache.Delete(task.GetID()); err != nil {
+			return err
+		}
+		if err := svc.taskSearch.Delete([]string{task.GetID()}); err != nil {
+			return err
+		}
+	}
+	snapshot.SetWatermark(nil)
+	snapshot.SetStatus(model.SnapshotStatusReady)
 	if err := svc.snapshotRepo.Save(snapshot); err != nil {
 		return err
 	}
