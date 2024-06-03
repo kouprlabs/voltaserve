@@ -23,7 +23,7 @@ import * as Yup from 'yup'
 import cx from 'classnames'
 import UserAPI, { User } from '@/client/idp/user'
 import { useAppSelector } from '@/store/hook'
-import EditPictureUpload from './edit-picture-upload'
+import AccountUploadPicture from './account-upload-picture'
 
 export type AccountEditPictureProps = {
   open: boolean
@@ -131,7 +131,7 @@ const AccountEditPicture = ({
                           errors.picture && touched.picture ? true : false
                         }
                       >
-                        <EditPictureUpload
+                        <AccountUploadPicture
                           {...field}
                           initialValue={user.picture}
                           disabled={isSubmitting}

@@ -9,13 +9,14 @@ import incomingInvitations from './incoming-invitations'
 import insights from './insights'
 import mosaic from './mosaic'
 import nav from './nav'
-import notifications from './notifications'
 import organization from './organization'
 import organizations from './organizations'
 import outgoingInvitations from './outgoing-invitations'
 import searchFilter from './search-filter'
 import snapshots from './snapshots'
-import uploadsDrawer from './uploads-drawer'
+import notifications from './tasks'
+import tasks from './tasks'
+import uploads from './uploads'
 import watermark from './watermark'
 import workspace from './workspace'
 import workspaces from './workspaces'
@@ -25,7 +26,8 @@ export default combineReducers({
   mosaic,
   watermark,
   searchFilter,
-  uploadsDrawer,
+  uploads,
+  tasks,
   files,
   snapshots,
   nav,

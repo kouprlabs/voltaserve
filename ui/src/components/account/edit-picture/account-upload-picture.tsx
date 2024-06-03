@@ -3,19 +3,19 @@ import { IconButton, Image } from '@chakra-ui/react'
 import cx from 'classnames'
 import { IconEdit } from '@/lib/components/icons'
 
-export type EditPictureUploadProps = {
+export type AccountUploadPictureProps = {
   name: string
   initialValue?: string
   disabled: boolean
   onChange: (event: ChangeEvent<HTMLInputElement>) => void
 }
 
-const EditPictureUpload = ({
+const AccountUploadPicture = ({
   name,
   initialValue,
   onChange,
   disabled,
-}: EditPictureUploadProps) => {
+}: AccountUploadPictureProps) => {
   const [src, setSrc] = useState<string>()
   const hiddenInput = useRef<HTMLInputElement>(null)
 
@@ -118,4 +118,4 @@ const EditPictureUpload = ({
   )
 }
 
-export default EditPictureUpload
+export default AccountUploadPicture

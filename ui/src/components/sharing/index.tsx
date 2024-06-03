@@ -29,7 +29,7 @@ export type FileSharingProps = {
   list: List
 }
 
-const FileSharing = ({ list }: FileSharingProps) => {
+const Sharing = ({ list }: FileSharingProps) => {
   const { id } = useParams()
   const dispatch = useAppDispatch()
   const selection = useAppSelector((state) => state.ui.files.selection)
@@ -133,4 +133,4 @@ const FileSharing = ({ list }: FileSharingProps) => {
   )
 }
 
-export default FileSharing
+export default Sharing

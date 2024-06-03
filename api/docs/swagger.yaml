@@ -461,12 +461,6 @@ definitions:
       totalPages:
         type: integer
     type: object
-  service.Notification:
-    properties:
-      body: {}
-      type:
-        type: string
-    type: object
   service.Organization:
     properties:
       createTime:
@@ -2305,24 +2299,6 @@ paths:
       summary: Download Tile
       tags:
       - Mosaic
-  /notifications:
-    get:
-      description: List
-      operationId: notifications_list
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/service.Notification'
-            type: array
-        "500":
-          description: Internal Server Error
-      summary: List
-      tags:
-      - Notifications
   /organizations:
     get:
       description: List
@@ -2763,7 +2739,7 @@ paths:
   /tasks:
     get:
       description: List
-      operationId: tasks_list
+      operationId: task_list
       parameters:
       - description: Query
         in: query
@@ -2802,11 +2778,38 @@ paths:
             $ref: '#/definitions/errorpkg.ErrorResponse'
       summary: List
       tags:
-      - Tasks
+      - Task
   /tasks/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete
+      operationId: task_delete
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Delete
+      tags:
+      - Task
     get:
       description: Get
-      operationId: tasks_get
+      operationId: task_get
       parameters:
       - description: ID
         in: path
@@ -2830,7 +2833,25 @@ paths:
             $ref: '#/definitions/errorpkg.ErrorResponse'
       summary: Get
       tags:
-      - Tasks
+      - Task
+  /tasks/count:
+    get:
+      description: Get Count
+      operationId: task_get_count
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: integer
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Get Count
+      tags:
+      - Task
   /users:
     get:
       description: List

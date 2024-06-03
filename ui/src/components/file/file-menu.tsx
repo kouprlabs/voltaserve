@@ -52,7 +52,7 @@ import {
 import { modalDidOpen as insightsModalDidOpen } from '@/store/ui/insights'
 import { modalDidOpen as mosaicModalDidOpen } from '@/store/ui/mosaic'
 import { listModalDidOpen } from '@/store/ui/snapshots'
-import { uploadsDrawerOpened } from '@/store/ui/uploads-drawer'
+import { drawerDidOpen } from '@/store/ui/uploads'
 import { modalDidOpen as watermarkModalDidOpen } from '@/store/ui/watermark'
 import Orb from '../common/orb'
 
@@ -181,7 +181,7 @@ const FileMenu = ({
             }).value,
           ),
         )
-        dispatch(uploadsDrawerOpened())
+        dispatch(drawerDidOpen())
         if (uploadInputRef && uploadInputRef.current) {
           uploadInputRef.current.value = ''
         }

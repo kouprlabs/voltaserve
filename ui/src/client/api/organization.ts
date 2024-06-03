@@ -84,6 +84,26 @@ export default class OrganizationAPI {
     )
   }
 
+  static paramsFromListOptions(options?: ListOptions): URLSearchParams {
+    const params: ListQueryParams = {}
+    if (options?.query) {
+      params.query = encodeURIComponent(options.query.toString())
+    }
+    if (options?.page) {
+      params.page = options.page.toString()
+    }
+    if (options?.size) {
+      params.size = options.size.toString()
+    }
+    if (options?.sortBy) {
+      params.sort_by = options.sortBy.toString()
+    }
+    if (options?.sortOrder) {
+      params.sort_order = options.sortOrder.toString()
+    }
+    return new URLSearchParams(params)
+  }
+
   static async create(options: CreateOptions) {
     return apiFetcher({
       url: `/organizations`,
@@ -120,25 +140,5 @@ export default class OrganizationAPI {
       method: 'DELETE',
       body: JSON.stringify(options),
     })
-  }
-
-  static paramsFromListOptions(options?: ListOptions): URLSearchParams {
-    const params: ListQueryParams = {}
-    if (options?.query) {
-      params.query = encodeURIComponent(options.query.toString())
-    }
-    if (options?.page) {
-      params.page = options.page.toString()
-    }
-    if (options?.size) {
-      params.size = options.size.toString()
-    }
-    if (options?.sortBy) {
-      params.sort_by = options.sortBy.toString()
-    }
-    if (options?.sortOrder) {
-      params.sort_order = options.sortOrder.toString()
-    }
-    return new URLSearchParams(params)
   }
 }

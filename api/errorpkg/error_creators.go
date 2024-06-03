@@ -89,6 +89,56 @@ func NewS3ObjectNotFoundError(err error) *ErrorResponse {
 	)
 }
 
+func NewUserNotFoundError(err error) *ErrorResponse {
+	return NewErrorResponse(
+		"user_not_found",
+		http.StatusNotFound,
+		"User not found.",
+		MsgResourceNotFound,
+		err,
+	)
+}
+
+func NewInsightsNotFoundError(err error) *ErrorResponse {
+	return NewErrorResponse(
+		"insights_not_found",
+		http.StatusNotFound,
+		"Insights not found.",
+		"Insights not found.",
+		err,
+	)
+}
+
+func NewMosaicNotFoundError(err error) *ErrorResponse {
+	return NewErrorResponse(
+		"mosaic_not_found",
+		http.StatusNotFound,
+		"Mosaic not found.",
+		"Mosaic not found.",
+		err,
+	)
+}
+
+func NewWatermarkNotFoundError(err error) *ErrorResponse {
+	return NewErrorResponse(
+		"watermark_not_found",
+		http.StatusNotFound,
+		"Watermark not found.",
+		"Watermark not found.",
+		err,
+	)
+}
+
+func NewInvitationNotFoundError(err error) *ErrorResponse {
+	return NewErrorResponse(
+		"invitation_not_found",
+		http.StatusNotFound,
+		"Invitation not found.",
+		MsgResourceNotFound,
+		err,
+	)
+}
+
 func NewSnapshotLanguageNotSetError(err error) *ErrorResponse {
 	return NewErrorResponse(
 		"snapshot_language_not_set",
@@ -139,52 +189,32 @@ func NewUnsupportedFileTypeError(err error) *ErrorResponse {
 	)
 }
 
-func NewInsightsNotFoundError(err error) *ErrorResponse {
+func NewTaskIsRunningError(err error) *ErrorResponse {
 	return NewErrorResponse(
-		"insights_not_found",
-		http.StatusNotFound,
-		"Insights not found.",
-		"Insights not found.",
+		"task_is_running",
+		http.StatusBadRequest,
+		"Task is running.",
+		"Task is running.",
 		err,
 	)
 }
 
-func NewMosaicNotFoundError(err error) *ErrorResponse {
+func NewTaskBelongsToAnotherUserError(err error) *ErrorResponse {
 	return NewErrorResponse(
-		"mosaic_not_found",
-		http.StatusNotFound,
-		"Mosaic not found.",
-		"Mosaic not found.",
+		"task_belongs_to_another_user",
+		http.StatusBadRequest,
+		"Task belongs to another user.",
+		"Task belongs to another user.",
 		err,
 	)
 }
 
-func NewWatermarkNotFoundError(err error) *ErrorResponse {
+func NewCannotDeletePendingTaskError(err error) *ErrorResponse {
 	return NewErrorResponse(
-		"watermark_not_found",
-		http.StatusNotFound,
-		"Watermark not found.",
-		"Watermark not found.",
-		err,
-	)
-}
-
-func NewInvitationNotFoundError(err error) *ErrorResponse {
-	return NewErrorResponse(
-		"invitation_not_found",
-		http.StatusNotFound,
-		"Invitation not found.",
-		MsgResourceNotFound,
-		err,
-	)
-}
-
-func NewUserNotFoundError(err error) *ErrorResponse {
-	return NewErrorResponse(
-		"user_not_found",
-		http.StatusNotFound,
-		"User not found.",
-		MsgResourceNotFound,
+		"cannot_delete_pending_task",
+		http.StatusBadRequest,
+		"Cannot delete a pending task.",
+		"Cannot delete a pending task.",
 		err,
 	)
 }

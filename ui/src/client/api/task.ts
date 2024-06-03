@@ -17,8 +17,7 @@ export type Task = {
   id: string
   name: string
   error?: string
-  percentage: number
-  isComplete: boolean
+  percentage?: number
   isIndeterminate: boolean
   userId: string
 }
@@ -91,5 +90,21 @@ export default class TaskAPI {
       params.sort_order = options.sortOrder.toString()
     }
     return new URLSearchParams(params)
+  }
+
+  static useGetCount(swrOptions?: SWRConfiguration) {
+    const url = '/tasks/count'
+    return useSWR<number>(
+      url,
+      () => apiFetcher({ url, method: 'GET' }) as Promise<number>,
+      swrOptions,
+    )
+  }
+
+  static async delete(id: string) {
+    return apiFetcher({
+      url: `/tasks/${id}`,
+      method: 'DELETE',
+    })
   }
 }

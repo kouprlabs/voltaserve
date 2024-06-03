@@ -14,7 +14,6 @@ type taskEntity struct {
 	Name            string  `json:"name" gorm:"column:name"`
 	Error           *string `json:"error" gorm:"column:error"`
 	Percentage      *int    `json:"percentage" gorm:"column:percentage"`
-	IsComplete      bool    `json:"isComplete" gorm:"column:is_complete"`
 	IsIndeterminate bool    `json:"isIndeterminate" gorm:"column:is_indeterminate"`
 	UserID          string  `json:"userId" gorm:"column:user_id"`
 	CreateTime      string  `json:"createTime" gorm:"column:create_time"`
@@ -41,10 +40,6 @@ func (p *taskEntity) GetPercentage() *int {
 	return p.Percentage
 }
 
-func (p *taskEntity) GetIsComplete() bool {
-	return p.IsComplete
-}
-
 func (p *taskEntity) GetIsIndeterminate() bool {
 	return p.IsIndeterminate
 }
@@ -61,6 +56,10 @@ func (o *taskEntity) GetUpdateTime() *string {
 	return o.UpdateTime
 }
 
+func (p *taskEntity) HasError() bool {
+	return p.Error != nil
+}
+
 func (p *taskEntity) SetName(name string) {
 	p.Name = name
 }
@@ -71,10 +70,6 @@ func (p *taskEntity) SetError(error *string) {
 
 func (p *taskEntity) SetPercentage(percentage *int) {
 	p.Percentage = percentage
-}
-
-func (p *taskEntity) SetIsComplete(isComplete bool) {
-	p.IsComplete = isComplete
 }
 
 func (p *taskEntity) SetIsIndeterminate(isIndeterminate bool) {
@@ -89,6 +84,7 @@ type TaskRepo interface {
 	Insert(opts TaskInsertOptions) (model.Task, error)
 	Find(id string) (model.Task, error)
 	GetIDs() ([]string, error)
+	GetCount(email string) (int64, error)
 	Save(org model.Task) error
 	Delete(id string) error
 }
@@ -127,7 +123,6 @@ func (repo *taskRepo) Insert(opts TaskInsertOptions) (model.Task, error) {
 		Name:            opts.Name,
 		Error:           opts.Error,
 		Percentage:      opts.Percentage,
-		IsComplete:      opts.IsComplete,
 		IsIndeterminate: opts.IsIndeterminate,
 		UserID:          opts.UserID,
 	}
@@ -176,6 +171,18 @@ func (repo *taskRepo) GetIDs() ([]string, error) {
 		res = append(res, v.Result)
 	}
 	return res, nil
+}
+
+func (repo *taskRepo) GetCount(userID string) (int64, error) {
+	var count int64
+	db := repo.db.
+		Model(&taskEntity{}).
+		Where("user_id = ?", userID).
+		Count(&count)
+	if db.Error != nil {
+		return 0, db.Error
+	}
+	return count, nil
 }
 
 func (repo *taskRepo) Save(org model.Task) error {

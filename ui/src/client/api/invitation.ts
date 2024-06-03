@@ -92,6 +92,26 @@ export default class InvitationAPI {
     )
   }
 
+  static paramsFromListOptions(options?: ListOptions): URLSearchParams {
+    const params: ListQueryParams = {}
+    if (options?.organizationId) {
+      params.organization_id = options.organizationId.toString()
+    }
+    if (options?.page) {
+      params.page = options.page.toString()
+    }
+    if (options?.size) {
+      params.size = options.size.toString()
+    }
+    if (options?.sortBy) {
+      params.sort_by = options.sortBy.toString()
+    }
+    if (options?.sortOrder) {
+      params.sort_order = options.sortOrder.toString()
+    }
+    return new URLSearchParams(params)
+  }
+
   static async delete(id: string) {
     return apiFetcher({
       url: `/invitations/${id}`,
@@ -118,25 +138,5 @@ export default class InvitationAPI {
       url: `/invitations/${id}/decline`,
       method: 'POST',
     })
-  }
-
-  static paramsFromListOptions(options?: ListOptions): URLSearchParams {
-    const params: ListQueryParams = {}
-    if (options?.organizationId) {
-      params.organization_id = options.organizationId.toString()
-    }
-    if (options?.page) {
-      params.page = options.page.toString()
-    }
-    if (options?.size) {
-      params.size = options.size.toString()
-    }
-    if (options?.sortBy) {
-      params.sort_by = options.sortBy.toString()
-    }
-    if (options?.sortOrder) {
-      params.sort_order = options.sortOrder.toString()
-    }
-    return new URLSearchParams(params)
   }
 }

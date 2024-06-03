@@ -21,12 +21,12 @@ func NewTaskSearch() *TaskSearch {
 	}
 }
 
-func (s *TaskSearch) Index(orgs []model.Task) error {
-	if len(orgs) == 0 {
+func (s *TaskSearch) Index(tasks []model.Task) error {
+	if len(tasks) == 0 {
 		return nil
 	}
 	var res []infra.SearchModel
-	for _, o := range orgs {
+	for _, o := range tasks {
 		res = append(res, o)
 	}
 	if err := s.search.Index(s.index, res); err != nil {

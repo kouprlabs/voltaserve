@@ -101,29 +101,6 @@ export default class GroupAPI {
     )
   }
 
-  static delete(id: string) {
-    return apiFetcher({
-      url: `/groups/${id}`,
-      method: 'DELETE',
-    })
-  }
-
-  static addMember(id: string, options: AddMemberOptions) {
-    return apiFetcher({
-      url: `/groups/${id}/members`,
-      method: 'POST',
-      body: JSON.stringify(options),
-    })
-  }
-
-  static removeMember(id: string, options: RemoveMemberOptions) {
-    return apiFetcher({
-      url: `/groups/${id}/members`,
-      method: 'DELETE',
-      body: JSON.stringify(options),
-    })
-  }
-
   static paramsFromListOptions(options?: ListOptions): URLSearchParams {
     const params: ListQueryParams = {}
     if (options?.query) {
@@ -145,5 +122,28 @@ export default class GroupAPI {
       params.sort_order = options.sortOrder.toString()
     }
     return new URLSearchParams(params)
+  }
+
+  static delete(id: string) {
+    return apiFetcher({
+      url: `/groups/${id}`,
+      method: 'DELETE',
+    })
+  }
+
+  static addMember(id: string, options: AddMemberOptions) {
+    return apiFetcher({
+      url: `/groups/${id}/members`,
+      method: 'POST',
+      body: JSON.stringify(options),
+    })
+  }
+
+  static removeMember(id: string, options: RemoveMemberOptions) {
+    return apiFetcher({
+      url: `/groups/${id}/members`,
+      method: 'DELETE',
+      body: JSON.stringify(options),
+    })
   }
 }

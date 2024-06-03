@@ -4,6 +4,7 @@ import (
 	"sort"
 	"time"
 	"voltaserve/cache"
+	"voltaserve/errorpkg"
 	"voltaserve/model"
 	"voltaserve/repo"
 	"voltaserve/search"
@@ -170,6 +171,15 @@ func (svc *TaskService) doSorting(data []model.Task, sortBy string, sortOrder st
 	return data
 }
 
+func (svc *TaskService) GetCount(userID string) (int64, error) {
+	var res int64
+	var err error
+	if res, err = svc.taskRepo.GetCount(userID); err != nil {
+		return -1, err
+	}
+	return res, nil
+}
+
 func (svc *TaskService) doPagination(data []model.Task, page, size uint) ([]model.Task, uint, uint) {
 	totalElements := uint(len(data))
 	totalPages := (totalElements + size - 1) / size
@@ -183,6 +193,29 @@ func (svc *TaskService) doPagination(data []model.Task, page, size uint) ([]mode
 	}
 	pageData := data[startIndex:endIndex]
 	return pageData, totalElements, totalPages
+}
+
+func (svc *TaskService) Delete(id string, userID string) error {
+	task, err := svc.taskCache.Get(id)
+	if err != nil {
+		return err
+	}
+	if task.GetUserID() != userID {
+		return errorpkg.NewTaskBelongsToAnotherUserError(nil)
+	}
+	if !task.HasError() {
+		return errorpkg.NewTaskIsRunningError(nil)
+	}
+	if err := svc.taskRepo.Delete(id); err != nil {
+		return err
+	}
+	if err := svc.taskCache.Delete(task.GetID()); err != nil {
+		return err
+	}
+	if err := svc.taskSearch.Delete([]string{task.GetID()}); err != nil {
+		return err
+	}
+	return nil
 }
 
 type taskMapper struct {
@@ -201,7 +234,6 @@ func (mp *taskMapper) mapOne(m model.Task) (*Task, error) {
 		Name:            m.GetName(),
 		Error:           m.GetError(),
 		Percentage:      m.GetPercentage(),
-		IsComplete:      m.GetIsComplete(),
 		IsIndeterminate: m.GetIsIndeterminate(),
 		UserID:          m.GetUserID(),
 	}, nil

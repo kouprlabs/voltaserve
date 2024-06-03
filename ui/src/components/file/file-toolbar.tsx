@@ -43,7 +43,7 @@ import {
   iconScaleUpdated,
   selectionUpdated,
 } from '@/store/ui/files'
-import { uploadsDrawerOpened } from '@/store/ui/uploads-drawer'
+import { drawerDidOpen } from '@/store/ui/uploads'
 import { FileViewType } from '@/types/file'
 import FileMenu from './file-menu'
 
@@ -91,7 +91,7 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
           ),
         )
       }
-      dispatch(uploadsDrawerOpened())
+      dispatch(drawerDidOpen())
       if (fileUploadInput && fileUploadInput.current) {
         fileUploadInput.current.value = ''
       }

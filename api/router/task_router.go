@@ -1,6 +1,7 @@
 package router
 
 import (
+	"net/http"
 	"net/url"
 	"strconv"
 	"voltaserve/errorpkg"
@@ -21,15 +22,17 @@ func NewTaskRouter() *TaskRouter {
 
 func (r *TaskRouter) AppendRoutes(g fiber.Router) {
 	g.Get("/", r.List)
+	g.Get("/count", r.GetCount)
 	g.Get("/:id", r.Get)
+	g.Delete("/:id", r.Delete)
 }
 
 // Get godoc
 //
 //	@Summary		Get
 //	@Description	Get
-//	@Tags			Tasks
-//	@Id				tasks_get
+//	@Tags			Task
+//	@Id				task_get
 //	@Produce		json
 //	@Param			id	path		string	true	"ID"
 //	@Success		200	{object}	service.Task
@@ -49,8 +52,8 @@ func (r *TaskRouter) Get(c *fiber.Ctx) error {
 //
 //	@Summary		List
 //	@Description	List
-//	@Tags			Tasks
-//	@Id				tasks_list
+//	@Tags			Task
+//	@Id				task_list
 //	@Produce		json
 //	@Param			query		query		string	false	"Query"
 //	@Param			page		query		string	false	"Page"
@@ -104,4 +107,43 @@ func (r *TaskRouter) List(c *fiber.Ctx) error {
 		return err
 	}
 	return c.JSON(res)
+}
+
+// GetCount godoc
+//
+//	@Summary		Get Count
+//	@Description	Get Count
+//	@Tags			Task
+//	@Id				task_get_count
+//	@Produce		json
+//	@Success		200	{object}	int
+//	@Failure		500	{object}	errorpkg.ErrorResponse
+//	@Router			/tasks/count [get]
+func (r *TaskRouter) GetCount(c *fiber.Ctx) error {
+	res, err := r.taskSvc.GetCount(GetUserID(c))
+	if err != nil {
+		return err
+	}
+	return c.JSON(res)
+}
+
+// Delete godoc
+//
+//	@Summary		Delete
+//	@Description	Delete
+//	@Tags			Task
+//	@Id				task_delete
+//	@Accept			json
+//	@Produce		json
+//	@Param			id	path	string	true	"ID"
+//	@Success		200
+//	@Failure		404	{object}	errorpkg.ErrorResponse
+//	@Failure		500	{object}	errorpkg.ErrorResponse
+//	@Router			/tasks/{id} [delete]
+func (r *TaskRouter) Delete(c *fiber.Ctx) error {
+	userID := GetUserID(c)
+	if err := r.taskSvc.Delete(c.Params("id"), userID); err != nil {
+		return err
+	}
+	return c.SendStatus(http.StatusNoContent)
 }

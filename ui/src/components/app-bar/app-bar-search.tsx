@@ -28,7 +28,7 @@ import NotificationBadge from '@/lib/components/notification-badge'
 import { useAppDispatch } from '@/store/hook'
 import { modalDidOpen as searchFilterModalDidOpen } from '@/store/ui/search-filter'
 
-const TopBarSearch = () => {
+const AppBarSearch = () => {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
   const location = useLocation()
@@ -270,4 +270,4 @@ const TopBarSearch = () => {
   )
 }
 
-export default TopBarSearch
+export default AppBarSearch

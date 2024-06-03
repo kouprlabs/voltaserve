@@ -13,6 +13,7 @@ import (
 	"voltaserve/infra"
 	"voltaserve/model"
 	"voltaserve/repo"
+	"voltaserve/search"
 
 	"go.uber.org/zap"
 )
@@ -23,6 +24,7 @@ type MosaicService struct {
 	fileCache     *cache.FileCache
 	fileGuard     *guard.FileGuard
 	taskCache     *cache.TaskCache
+	taskSearch    *search.TaskSearch
 	taskRepo      repo.TaskRepo
 	s3            *infra.S3Manager
 	mosaicClient  *client.MosaicClient
@@ -41,6 +43,7 @@ func NewMosaicService() *MosaicService {
 		fileCache:     cache.NewFileCache(),
 		fileGuard:     guard.NewFileGuard(),
 		taskCache:     cache.NewTaskCache(),
+		taskSearch:    search.NewTaskSearch(),
 		taskRepo:      repo.NewTaskRepo(),
 		s3:            infra.NewS3Manager(),
 		mosaicClient:  client.NewMosaicClient(),
@@ -67,9 +70,16 @@ func (svc *MosaicService) Create(id string, userID string) error {
 	if snapshot.GetStatus() == model.SnapshotStatusProcessing {
 		return errorpkg.NewSnapshotIsProcessingError(nil)
 	}
+	snapshot.SetStatus(model.SnapshotStatusProcessing)
+	if err := svc.snapshotRepo.Save(snapshot); err != nil {
+		return err
+	}
+	if err := svc.snapshotCache.Set(snapshot); err != nil {
+		return err
+	}
 	task, err := svc.taskRepo.Insert(repo.TaskInsertOptions{
 		ID:              helper.NewID(),
-		Name:            fmt.Sprintf("Creating mosaic %s", file.GetName()),
+		Name:            fmt.Sprintf("Creating mosaic for <b>%s</b>", file.GetName()),
 		UserID:          userID,
 		IsIndeterminate: true,
 	})
@@ -79,13 +89,33 @@ func (svc *MosaicService) Create(id string, userID string) error {
 	if err := svc.taskCache.Set(task); err != nil {
 		return err
 	}
-	if err = svc.create(snapshot); err != nil {
+	if err := svc.taskSearch.Index([]model.Task{task}); err != nil {
+		return err
+	}
+	err = svc.create(snapshot)
+	if err != nil {
 		value := err.Error()
 		task.SetError(&value)
+		if err := svc.taskCache.Set(task); err != nil {
+			return err
+		}
+		if err := svc.taskSearch.Update([]model.Task{task}); err != nil {
+			return err
+		}
+	} else {
+		svc.taskRepo.Delete(task.GetID())
+		if err := svc.taskCache.Delete(task.GetID()); err != nil {
+			return err
+		}
+		if err := svc.taskSearch.Delete([]string{task.GetID()}); err != nil {
+			return err
+		}
 	}
-	task.SetIsComplete(true)
-	svc.taskRepo.Save(task)
-	if err := svc.taskCache.Set(task); err != nil {
+	snapshot.SetStatus(model.SnapshotStatusReady)
+	if err := svc.snapshotRepo.Save(snapshot); err != nil {
+		return err
+	}
+	if err := svc.snapshotCache.Set(snapshot); err != nil {
 		return err
 	}
 	return err

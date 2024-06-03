@@ -82,9 +82,6 @@ func main() {
 	invitations := router.NewInvitationRouter()
 	invitations.AppendRoutes(v2.Group("invitations"))
 
-	notifications := router.NewNotificationRouter()
-	notifications.AppendRoutes(v2.Group("notifications"))
-
 	organizations := router.NewOrganizationRouter()
 	organizations.AppendRoutes(v2.Group("organizations"))
 

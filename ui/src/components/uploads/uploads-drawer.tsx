@@ -13,19 +13,19 @@ import {
   Button,
 } from '@chakra-ui/react'
 import cx from 'classnames'
-import UploadList from '@/components/file/upload/upload-list'
+import UploadsList from '@/components/uploads/uploads-list'
 import { IconClearAll, IconUpload } from '@/lib/components/icons'
 import { completedUploadsCleared } from '@/store/entities/uploads'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
-import { uploadsDrawerClosed } from '@/store/ui/uploads-drawer'
+import { drawerDidClose } from '@/store/ui/uploads'
 
-const UploadDrawer = () => {
+const UploadsDrawer = () => {
   const dispatch = useAppDispatch()
   const hasPendingUploads = useAppSelector(
     (state) =>
       state.entities.uploads.items.filter((e) => !e.completed).length > 0,
   )
-  const openDrawer = useAppSelector((state) => state.ui.uploadsDrawer.open)
+  const isDrawerOpen = useAppSelector((state) => state.ui.uploads.isDrawerOpen)
   const hasCompleted = useAppSelector(
     (state) =>
       state.entities.uploads.items.filter((e) => e.completed).length > 0,
@@ -34,12 +34,12 @@ const UploadDrawer = () => {
   const buttonRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
-    if (openDrawer) {
+    if (isDrawerOpen) {
       onOpen()
     } else {
       onClose()
     }
-  }, [openDrawer, onOpen, onClose])
+  }, [isDrawerOpen, onOpen, onClose])
 
   const handleClearCompleted = useCallback(() => {
     dispatch(completedUploadsCleared())
@@ -63,7 +63,7 @@ const UploadDrawer = () => {
         placement="right"
         onClose={() => {
           onClose()
-          dispatch(uploadsDrawerClosed())
+          dispatch(drawerDidClose())
         }}
         finalFocusRef={buttonRef}
       >
@@ -72,7 +72,7 @@ const UploadDrawer = () => {
           <DrawerCloseButton />
           <DrawerHeader>Uploads</DrawerHeader>
           <DrawerBody>
-            <UploadList />
+            <UploadsList />
           </DrawerBody>
           <DrawerFooter>
             {hasCompleted ? (
@@ -91,4 +91,4 @@ const UploadDrawer = () => {
   )
 }
 
-export default UploadDrawer
+export default UploadsDrawer

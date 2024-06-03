@@ -1,19 +1,19 @@
 import { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 import cx from 'classnames'
-import AccountMenu from '@/components/top-bar/account-menu'
-import TaskDrawer from '@/components/top-bar/task-drawer'
+import AccountMenu from '@/components/account/menu'
+import TaskDrawer from '@/components/tasks/tasks-drawer'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { activeNavChanged, NavType } from '@/store/ui/nav'
+import UploadsDrawer from '../uploads/uploads-drawer'
 import {
   CreateGroupButton,
   CreateOrganizationButton,
   CreateWorkspaceButton,
-} from './top-bar-buttons'
-import TopBarSearch from './top-bar-search'
-import UploadDrawer from './upload-drawer'
+} from './app-bar-buttons'
+import AppBarSearch from './app-bar-search'
 
-const TopBar = () => {
+const AppBar = () => {
   const dispatch = useAppDispatch()
   const location = useLocation()
   const activeNav = useAppSelector((state) => state.ui.nav.active)
@@ -46,13 +46,13 @@ const TopBar = () => {
       )}
     >
       <div className={cx('grow')}>
-        <TopBarSearch />
+        <AppBarSearch />
       </div>
       <div className={cx('flex', 'flex-row', 'items-center', 'gap-1.5')}>
         {activeNav === NavType.Workspaces && <CreateWorkspaceButton />}
         {activeNav === NavType.Groups && <CreateGroupButton />}
         {activeNav === NavType.Organizations && <CreateOrganizationButton />}
-        <UploadDrawer />
+        <UploadsDrawer />
         <TaskDrawer />
         <AccountMenu />
       </div>
@@ -60,4 +60,4 @@ const TopBar = () => {
   )
 }
 
-export default TopBar
+export default AppBar

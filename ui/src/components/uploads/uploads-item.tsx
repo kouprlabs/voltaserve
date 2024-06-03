@@ -21,11 +21,11 @@ import {
 } from '@/store/entities/uploads'
 import { useAppDispatch } from '@/store/hook'
 
-export type UploadItemProps = {
+export type UploadsItemProps = {
   upload: Upload
 }
 
-const UploadItem = ({ upload: uploadProp }: UploadItemProps) => {
+const UploadsItem = ({ upload: uploadProp }: UploadsItemProps) => {
   const dispatch = useAppDispatch()
   const upload = new UploadDecorator(uploadProp)
 
@@ -92,7 +92,7 @@ const UploadItem = ({ upload: uploadProp }: UploadItemProps) => {
             <AccordionButton className={cx('p-0.5', 'hover:bg-red-50')}>
               <div className={cx('flex', 'flex-row', 'w-full')}>
                 <span className={cx('text-red-500', 'text-left', 'grow')}>
-                  Upload failed. Click to expand.
+                  Upload failed, click to expand
                 </span>
                 <AccordionIcon className={cx('text-red-500')} />
               </div>
@@ -107,4 +107,4 @@ const UploadItem = ({ upload: uploadProp }: UploadItemProps) => {
   )
 }
 
-export default UploadItem
+export default UploadsItem

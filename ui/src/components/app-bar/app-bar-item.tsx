@@ -2,13 +2,13 @@ import { Link } from 'react-router-dom'
 import { Link as ChakraLink } from '@chakra-ui/react'
 import cx from 'classnames'
 
-export type TopBarItemProps = {
+export type AppBarItemProps = {
   title: string
   href: string
   isActive: boolean
 }
 
-const TopBarItem = ({ title, href, isActive }: TopBarItemProps) => (
+const AppBarItem = ({ title, href, isActive }: AppBarItemProps) => (
   <ChakraLink
     as={Link}
     to={href}
@@ -37,4 +37,4 @@ const TopBarItem = ({ title, href, isActive }: TopBarItemProps) => (
   </ChakraLink>
 )
 
-export default TopBarItem
+export default AppBarItem

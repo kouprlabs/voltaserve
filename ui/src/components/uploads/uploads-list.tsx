@@ -2,11 +2,11 @@ import { useEffect } from 'react'
 import { Divider } from '@chakra-ui/react'
 import cx from 'classnames'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
-import { uploadsDrawerClosed } from '@/store/ui/uploads-drawer'
-import UploadItem from './upload-item'
-import { queue } from './upload-worker'
+import { drawerDidClose } from '@/store/ui/uploads'
+import UploadsItem from './uploads-item'
+import { queue } from './uploads-worker'
 
-const UploadList = () => {
+const UploadsList = () => {
   const items = useAppSelector((state) => state.entities.uploads.items)
   const dispatch = useAppDispatch()
 
@@ -21,7 +21,7 @@ const UploadList = () => {
       queue.push(upload)
     }
     if (items.length === 0) {
-      dispatch(uploadsDrawerClosed())
+      dispatch(drawerDidClose())
     }
   }, [items, dispatch])
 
@@ -33,7 +33,7 @@ const UploadList = () => {
     <div className={cx('flex', 'flex-col', 'gap-1.5')}>
       {items.map((u, index) => (
         <div key={u.id} className={cx('flex', 'flex-col', 'gap-1.5')}>
-          <UploadItem upload={u} />
+          <UploadsItem upload={u} />
           {index !== items.length - 1 && <Divider />}
         </div>
       ))}
@@ -41,4 +41,4 @@ const UploadList = () => {
   )
 }
 
-export default UploadList
+export default UploadsList

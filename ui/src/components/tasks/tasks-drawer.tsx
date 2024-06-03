@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Drawer as ChakraDrawer,
@@ -18,25 +18,28 @@ import { IconStacks } from '@/lib/components/icons'
 import NotificationBadge from '@/lib/components/notification-badge'
 import PagePagination from '@/lib/components/page-pagination'
 import usePagePagination from '@/lib/hooks/page-pagination'
-import TaskDrawerItem from './task-drawer-item'
+import { useAppSelector } from '@/store/hook'
+import TasksDrawerItem from './tasks-item'
+import TasksList from './tasks-list'
 
-const TaskDrawer = () => {
+const TasksDrawer = () => {
   const navigate = useNavigate()
   const buttonRef = useRef<HTMLButtonElement>(null)
   const { isOpen, onOpen, onClose } = useDisclosure()
-  const { page, size, steps, setPage, setSize } = usePagePagination({
-    navigate,
-    location,
-    storage: taskPaginationStorage(),
-  })
-  const { data: list } = TaskAPI.useList(
-    { page, size, sortOrder: SortOrder.Desc },
-    swrConfig(),
-  )
+  const isDrawerOpen = useAppSelector((state) => state.ui.tasks.isDrawerOpen)
+  const { data: count } = TaskAPI.useGetCount(swrConfig())
+
+  useEffect(() => {
+    if (isDrawerOpen) {
+      onOpen()
+    } else {
+      onClose()
+    }
+  }, [isDrawerOpen, onOpen, onClose])
 
   return (
     <>
-      <NotificationBadge hasBadge={list && list.totalElements > 0}>
+      <NotificationBadge hasBadge={count !== undefined && count > 0}>
         <IconButton
           ref={buttonRef}
           icon={<IconStacks />}
@@ -55,32 +58,7 @@ const TaskDrawer = () => {
           <DrawerCloseButton />
           <DrawerHeader>Tasks</DrawerHeader>
           <DrawerBody>
-            {list && list.data.length > 0 ? (
-              <div className={cx('flex', 'flex-col', 'gap-1.5')}>
-                {list.data.map((task, index) => (
-                  <div
-                    key={index}
-                    className={cx('flex', 'flex-col', 'gap-1.5')}
-                  >
-                    <TaskDrawerItem task={task} />
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <span>There are no tasks.</span>
-            )}
-            {list ? (
-              <PagePagination
-                style={{ alignSelf: 'end' }}
-                totalElements={list.totalElements}
-                totalPages={list.totalPages}
-                page={page}
-                size={size}
-                steps={steps}
-                setPage={setPage}
-                setSize={setSize}
-              />
-            ) : null}
+            <TasksList />
           </DrawerBody>
         </DrawerContent>
       </ChakraDrawer>
@@ -88,4 +66,4 @@ const TaskDrawer = () => {
   )
 }
 
-export default TaskDrawer
+export default TasksDrawer
