@@ -99,10 +99,6 @@ func (o *organizationEntity) SetName(name string) {
 	o.Name = name
 }
 
-func (o *organizationEntity) SetUpdateTime(updateTime *string) {
-	o.UpdateTime = updateTime
-}
-
 type organizationRepo struct {
 	db             *gorm.DB
 	groupRepo      *groupRepo

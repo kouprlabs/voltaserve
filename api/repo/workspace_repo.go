@@ -111,10 +111,6 @@ func (w *workspaceEntity) SetName(name string) {
 	w.Name = name
 }
 
-func (w *workspaceEntity) SetUpdateTime(updateTime *string) {
-	w.UpdateTime = updateTime
-}
-
 type workspaceRepo struct {
 	db             *gorm.DB
 	permissionRepo *permissionRepo

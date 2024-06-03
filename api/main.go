@@ -88,6 +88,9 @@ func main() {
 	organizations := router.NewOrganizationRouter()
 	organizations.AppendRoutes(v2.Group("organizations"))
 
+	tasks := router.NewTaskRouter()
+	tasks.AppendRoutes(v2.Group("tasks"))
+
 	storage := router.NewStorageRouter()
 	storage.AppendRoutes(v2.Group("storage"))
 

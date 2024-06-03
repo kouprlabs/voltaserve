@@ -11,11 +11,14 @@ import (
 
 type taskEntity struct {
 	ID              string  `json:"id" gorm:"column:id"`
-	Description     string  `json:"description" gorm:"column:description"`
+	Name            string  `json:"name" gorm:"column:name"`
 	Error           *string `json:"error" gorm:"column:error"`
 	Percentage      *int    `json:"percentage" gorm:"column:percentage"`
 	IsComplete      bool    `json:"isComplete" gorm:"column:is_complete"`
 	IsIndeterminate bool    `json:"isIndeterminate" gorm:"column:is_indeterminate"`
+	UserID          string  `json:"userId" gorm:"column:user_id"`
+	CreateTime      string  `json:"createTime" gorm:"column:create_time"`
+	UpdateTime      *string `json:"updateTime,omitempty" gorm:"column:update_time"`
 }
 
 func (*taskEntity) TableName() string {
@@ -26,8 +29,8 @@ func (p *taskEntity) GetID() string {
 	return p.ID
 }
 
-func (p *taskEntity) GetDescription() string {
-	return p.Description
+func (p *taskEntity) GetName() string {
+	return p.Name
 }
 
 func (p *taskEntity) GetError() *string {
@@ -46,8 +49,20 @@ func (p *taskEntity) GetIsIndeterminate() bool {
 	return p.IsIndeterminate
 }
 
-func (p *taskEntity) SetDescription(description string) {
-	p.Description = description
+func (p *taskEntity) GetUserID() string {
+	return p.UserID
+}
+
+func (o *taskEntity) GetCreateTime() string {
+	return o.CreateTime
+}
+
+func (o *taskEntity) GetUpdateTime() *string {
+	return o.UpdateTime
+}
+
+func (p *taskEntity) SetName(name string) {
+	p.Name = name
 }
 
 func (p *taskEntity) SetError(error *string) {
@@ -66,9 +81,14 @@ func (p *taskEntity) SetIsIndeterminate(isIndeterminate bool) {
 	p.IsIndeterminate = isIndeterminate
 }
 
+func (p *taskEntity) SetUserID(userID string) {
+	p.UserID = userID
+}
+
 type TaskRepo interface {
 	Insert(opts TaskInsertOptions) (model.Task, error)
 	Find(id string) (model.Task, error)
+	GetIDs() ([]string, error)
 	Save(org model.Task) error
 	Delete(id string) error
 }
@@ -104,7 +124,7 @@ type TaskInsertOptions struct {
 func (repo *taskRepo) Insert(opts TaskInsertOptions) (model.Task, error) {
 	org := taskEntity{
 		ID:              opts.ID,
-		Description:     opts.Description,
+		Name:            opts.Name,
 		Error:           opts.Error,
 		Percentage:      opts.Percentage,
 		IsComplete:      opts.IsComplete,
@@ -137,6 +157,22 @@ func (repo *taskRepo) Find(id string) (model.Task, error) {
 	res, err := repo.find(id)
 	if err != nil {
 		return nil, err
+	}
+	return res, nil
+}
+
+func (repo *taskRepo) GetIDs() ([]string, error) {
+	type Value struct {
+		Result string
+	}
+	var values []Value
+	db := repo.db.Raw("SELECT id result FROM task ORDER BY create_time DESC").Scan(&values)
+	if db.Error != nil {
+		return []string{}, db.Error
+	}
+	res := []string{}
+	for _, v := range values {
+		res = append(res, v.Result)
 	}
 	return res, nil
 }

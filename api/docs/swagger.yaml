@@ -492,6 +492,21 @@ definitions:
     required:
     - name
     type: object
+  service.OrganizationList:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/service.Organization'
+        type: array
+      page:
+        type: integer
+      size:
+        type: integer
+      totalElements:
+        type: integer
+      totalPages:
+        type: integer
+    type: object
   service.Snapshot:
     properties:
       createTime:
@@ -578,6 +593,38 @@ definitions:
       maxBytes:
         type: integer
       percentage:
+        type: integer
+    type: object
+  service.Task:
+    properties:
+      error:
+        type: string
+      id:
+        type: string
+      isComplete:
+        type: boolean
+      isIndeterminate:
+        type: boolean
+      name:
+        type: string
+      percentage:
+        type: integer
+      userId:
+        type: string
+    type: object
+  service.TaskList:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/service.Task'
+        type: array
+      page:
+        type: integer
+      size:
+        type: integer
+      totalElements:
+        type: integer
+      totalPages:
         type: integer
     type: object
   service.Thumbnail:
@@ -2307,7 +2354,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/service.WorkspaceList'
+            $ref: '#/definitions/service.OrganizationList'
         "404":
           description: Not Found
           schema:
@@ -2713,6 +2760,77 @@ paths:
       summary: Get workspace usage
       tags:
       - Storage
+  /tasks:
+    get:
+      description: List
+      operationId: tasks_list
+      parameters:
+      - description: Query
+        in: query
+        name: query
+        type: string
+      - description: Page
+        in: query
+        name: page
+        type: string
+      - description: Size
+        in: query
+        name: size
+        type: string
+      - description: Sort By
+        in: query
+        name: sort_by
+        type: string
+      - description: Sort Order
+        in: query
+        name: sort_order
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.TaskList'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: List
+      tags:
+      - Tasks
+  /tasks/{id}:
+    get:
+      description: Get
+      operationId: tasks_get
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.Task'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Get
+      tags:
+      - Tasks
   /users:
     get:
       description: List

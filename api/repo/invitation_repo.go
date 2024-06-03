@@ -82,10 +82,6 @@ func (i *invitationEntity) SetStatus(status string) {
 	i.Status = status
 }
 
-func (i *invitationEntity) SetUpdateTime(updateTime *string) {
-	i.UpdateTime = updateTime
-}
-
 type invitationRepo struct {
 	db       *gorm.DB
 	userRepo *userRepo

@@ -13,6 +13,7 @@ const (
 	GroupSearchIndex        = "group"
 	WorkspaceSearchIndex    = "workspace"
 	OrganizationSearchIndex = "organization"
+	TaskSearchIndex         = "task"
 	UserSearchIndex         = "user"
 )
 

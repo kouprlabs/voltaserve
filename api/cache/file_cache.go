@@ -38,11 +38,11 @@ func (c *FileCache) Get(id string) (model.File, error) {
 	if err != nil {
 		return c.Refresh(id)
 	}
-	file := repo.NewFile()
-	if err = json.Unmarshal([]byte(value), &file); err != nil {
+	res := repo.NewFile()
+	if err = json.Unmarshal([]byte(value), &res); err != nil {
 		return nil, err
 	}
-	return file, nil
+	return res, nil
 }
 
 func (c *FileCache) Refresh(id string) (model.File, error) {

@@ -8,20 +8,20 @@ import (
 )
 
 type TaskCache struct {
-	redis       *infra.RedisManager
-	processRepo repo.SnapshotRepo
-	keyPrefix   string
+	redis     *infra.RedisManager
+	taskRepo  repo.TaskRepo
+	keyPrefix string
 }
 
-func NewTaskCacheCache() *TaskCache {
+func NewTaskCache() *TaskCache {
 	return &TaskCache{
-		processRepo: repo.NewSnapshotRepo(),
-		redis:       infra.NewRedisManager(),
-		keyPrefix:   "task:",
+		taskRepo:  repo.NewTaskRepo(),
+		redis:     infra.NewRedisManager(),
+		keyPrefix: "task:",
 	}
 }
 
-func (c *TaskCache) Set(file model.Snapshot) error {
+func (c *TaskCache) Set(file model.Task) error {
 	b, err := json.Marshal(file)
 	if err != nil {
 		return err
@@ -33,20 +33,20 @@ func (c *TaskCache) Set(file model.Snapshot) error {
 	return nil
 }
 
-func (c *TaskCache) Get(id string) (model.Snapshot, error) {
+func (c *TaskCache) Get(id string) (model.Task, error) {
 	value, err := c.redis.Get(c.keyPrefix + id)
 	if err != nil {
 		return c.Refresh(id)
 	}
-	snapshot := repo.NewSnapshot()
-	if err = json.Unmarshal([]byte(value), &snapshot); err != nil {
+	task := repo.NewTask()
+	if err = json.Unmarshal([]byte(value), &task); err != nil {
 		return nil, err
 	}
-	return snapshot, nil
+	return task, nil
 }
 
-func (c *TaskCache) Refresh(id string) (model.Snapshot, error) {
-	res, err := c.processRepo.Find(id)
+func (c *TaskCache) Refresh(id string) (model.Task, error) {
+	res, err := c.taskRepo.Find(id)
 	if err != nil {
 		return nil, err
 	}

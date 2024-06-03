@@ -15,5 +15,4 @@ type Invitation interface {
 	GetCreateTime() string
 	GetUpdateTime() *string
 	SetStatus(string)
-	SetUpdateTime(*string)
 }

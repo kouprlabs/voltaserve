@@ -38,11 +38,11 @@ func (c *GroupCache) Get(id string) (model.Group, error) {
 	if err != nil {
 		return c.Refresh(id)
 	}
-	group := repo.NewGroup()
-	if err = json.Unmarshal([]byte(value), &group); err != nil {
+	res := repo.NewGroup()
+	if err = json.Unmarshal([]byte(value), &res); err != nil {
 		return nil, err
 	}
-	return group, nil
+	return res, nil
 }
 
 func (c *GroupCache) Refresh(id string) (model.Group, error) {
