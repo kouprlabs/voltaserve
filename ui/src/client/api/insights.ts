@@ -1,5 +1,5 @@
 import useSWR, { SWRConfiguration } from 'swr'
-import { FetcherOptions, apiFetcher } from '@/client/fetcher'
+import { apiFetcher } from '@/client/fetcher'
 
 export type CreateOptions = {
   languageId: string

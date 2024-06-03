@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import {
   Alert,
   AlertDescription,
@@ -15,12 +15,11 @@ import {
 import cx from 'classnames'
 import MosaicAPI from '@/client/api/mosaic'
 import { swrConfig } from '@/client/options'
-import { useAppDispatch, useAppSelector } from '@/store/hook'
+import { useAppSelector } from '@/store/hook'
 import MosaicOverviewFile from './mosaic-overview-file'
 import MosaicOverviewSettings from './mosaic-overview-settings'
 
 const MosaicOverview = () => {
-  const dispatch = useAppDispatch()
   const id = useAppSelector((state) =>
     state.ui.files.selection.length > 0
       ? state.ui.files.selection[0]
