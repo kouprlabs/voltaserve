@@ -83,6 +83,16 @@ type SnapshotList struct {
 	Size          uint        `json:"size"`
 }
 
+func (svc *SnapshotService) SaveAndSync(snapshot model.Snapshot) error {
+	if err := svc.snapshotRepo.Save(snapshot); err != nil {
+		return err
+	}
+	if err := svc.snapshotCache.Set(snapshot); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (svc *SnapshotService) List(fileID string, opts SnapshotListOptions, userID string) (*SnapshotList, error) {
 	file, err := svc.fileCache.Get(fileID)
 	if err != nil {

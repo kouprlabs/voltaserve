@@ -159,14 +159,11 @@ func (svc *FileService) create(opts FileCreateOptions, userID string) (*File, er
 	if err := svc.fileRepo.GrantUserPermission(file.GetID(), userID, model.PermissionOwner); err != nil {
 		return nil, err
 	}
-	file, err = svc.fileRepo.Find(file.GetID())
+	file, err = svc.fileCache.Refresh(file.GetID())
 	if err != nil {
 		return nil, err
 	}
 	if err = svc.fileSearch.Index([]model.File{file}); err != nil {
-		return nil, err
-	}
-	if err = svc.fileCache.Set(file); err != nil {
 		return nil, err
 	}
 	res, err := svc.fileMapper.mapOne(file, userID)
@@ -193,9 +190,6 @@ func (svc *FileService) validateParent(id string, userID string) error {
 func (svc *FileService) Store(id string, path string, userID string) (*File, error) {
 	file, err := svc.fileRepo.Find(id)
 	if err != nil {
-		return nil, err
-	}
-	if err = svc.fileCache.Set(file); err != nil {
 		return nil, err
 	}
 	workspace, err := svc.workspaceCache.Get(file.GetWorkspaceID())
@@ -887,11 +881,14 @@ func (svc *FileService) Move(targetID string, sourceIDs []string, userID string)
 		if err := svc.fileRepo.Save(source); err != nil {
 			return []string{}, err
 		}
+		if err := svc.sync(source); err != nil {
+			return []string{}, err
+		}
 		target.SetUpdateTime(&timeNow)
 		if err := svc.fileRepo.Save(target); err != nil {
 			return []string{}, err
 		}
-		if err := svc.fileSearch.Update([]model.File{source}); err != nil {
+		if err := svc.sync(target); err != nil {
 			return []string{}, err
 		}
 		sourceTree, err := svc.fileRepo.FindTree(source.GetID())
@@ -899,7 +896,7 @@ func (svc *FileService) Move(targetID string, sourceIDs []string, userID string)
 			return []string{}, err
 		}
 		for _, f := range sourceTree {
-			if err := svc.fileCache.Set(f); err != nil {
+			if err := svc.sync(f); err != nil {
 				return []string{}, err
 			}
 		}
@@ -928,11 +925,7 @@ func (svc *FileService) PatchName(id string, name string, userID string) (*File,
 	if err = svc.fileRepo.Save(file); err != nil {
 		return nil, err
 	}
-	if err = svc.fileSearch.Update([]model.File{file}); err != nil {
-		return nil, err
-	}
-	err = svc.fileCache.Set(file)
-	if err != nil {
+	if err := svc.sync(file); err != nil {
 		return nil, err
 	}
 	res, err := svc.fileMapper.mapOne(file, userID)
@@ -972,15 +965,21 @@ func (svc *FileService) Delete(ids []string, userID string) ([]string, error) {
 		for _, f := range tree {
 			treeIDs = append(treeIDs, f.GetID())
 		}
+		/* Delete from search */
 		if err := svc.fileSearch.Delete(treeIDs); err != nil {
-			// Here we don't return an error or panic but we just print the error
+			/* Here we intentionally don't return an error or panic, we just print the error,
+			that's because we still want to delete the file in the repo afterwards even
+			if we fail to delete it from the search. */
 			fmt.Println(err)
 		}
+		/* Delete from cache */
 		for _, f := range tree {
 			if err = svc.fileCache.Delete(f.GetID()); err != nil {
-				return nil, err
+				// Same thing as above for the search
+				fmt.Println(err)
 			}
 		}
+		/* Delete from repo */
 		for _, f := range tree {
 			if err = svc.fileRepo.Delete(f.GetID()); err != nil {
 				return nil, err
@@ -1009,6 +1008,9 @@ func (svc *FileService) Delete(ids []string, userID string) ([]string, error) {
 				if err = svc.s3.RemoveObject(s.GetText().Key, s.GetText().Bucket); err != nil {
 					return nil, err
 				}
+			}
+			if err := svc.snapshotCache.Delete(s.GetID()); err != nil {
+				return nil, err
 			}
 		}
 		if err = svc.snapshotRepo.DeleteAllDangling(); err != nil {
@@ -1078,7 +1080,7 @@ func (svc *FileService) GrantUserPermission(ids []string, assigneeID string, per
 			return err
 		}
 		for _, f := range path {
-			if err := svc.fileCache.Set(f); err != nil {
+			if err := svc.sync(f); err != nil {
 				return err
 			}
 		}
@@ -1087,7 +1089,7 @@ func (svc *FileService) GrantUserPermission(ids []string, assigneeID string, per
 			return err
 		}
 		for _, f := range tree {
-			if err := svc.fileCache.Set(f); err != nil {
+			if err := svc.sync(f); err != nil {
 				return err
 			}
 		}
@@ -1160,7 +1162,7 @@ func (svc *FileService) GrantGroupPermission(ids []string, groupID string, permi
 			return err
 		}
 		for _, f := range path {
-			if err := svc.fileCache.Set(f); err != nil {
+			if err := svc.sync(f); err != nil {
 				return err
 			}
 		}
@@ -1169,7 +1171,7 @@ func (svc *FileService) GrantGroupPermission(ids []string, groupID string, permi
 			return err
 		}
 		for _, f := range tree {
-			if err := svc.fileCache.Set(f); err != nil {
+			if err := svc.sync(f); err != nil {
 				return err
 			}
 		}
@@ -1631,6 +1633,16 @@ func (svc *FileService) getChildWithName(id string, name string) (model.File, er
 		}
 	}
 	return nil, nil
+}
+
+func (svc *FileService) sync(file model.File) error {
+	if err := svc.fileSearch.Update([]model.File{file}); err != nil {
+		return err
+	}
+	if err := svc.fileCache.Set(file); err != nil {
+		return err
+	}
+	return nil
 }
 
 type FileMapper struct {

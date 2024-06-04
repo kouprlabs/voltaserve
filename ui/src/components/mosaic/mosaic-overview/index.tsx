@@ -41,7 +41,7 @@ const MosaicOverview = () => {
               <AlertIcon />
               <Box className={cx('grow')}>
                 <AlertDescription>
-                  This mosaic is outdated, and can be updated in the settings.
+                  This mosaic is outdated, it can be updated in the settings.
                 </AlertDescription>
               </Box>
               <CloseButton

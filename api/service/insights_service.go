@@ -16,7 +16,6 @@ import (
 	"voltaserve/infra"
 	"voltaserve/model"
 	"voltaserve/repo"
-	"voltaserve/search"
 
 	"go.uber.org/zap"
 )
@@ -25,11 +24,10 @@ type InsightsService struct {
 	languages      []*InsightsLanguage
 	snapshotCache  *cache.SnapshotCache
 	snapshotRepo   repo.SnapshotRepo
+	snapshotSvc    *SnapshotService
 	fileCache      *cache.FileCache
 	fileGuard      *guard.FileGuard
-	taskCache      *cache.TaskCache
-	taskSearch     *search.TaskSearch
-	taskRepo       repo.TaskRepo
+	taskSvc        *TaskService
 	s3             *infra.S3Manager
 	toolClient     *client.ToolClient
 	languageClient *client.LanguageClient
@@ -61,11 +59,10 @@ func NewInsightsService() *InsightsService {
 		},
 		snapshotCache:  cache.NewSnapshotCache(),
 		snapshotRepo:   repo.NewSnapshotRepo(),
+		snapshotSvc:    NewSnapshotService(),
 		fileCache:      cache.NewFileCache(),
 		fileGuard:      guard.NewFileGuard(),
-		taskCache:      cache.NewTaskCache(),
-		taskSearch:     search.NewTaskSearch(),
-		taskRepo:       repo.NewTaskRepo(),
+		taskSvc:        NewTaskService(),
 		s3:             infra.NewS3Manager(),
 		toolClient:     client.NewToolClient(),
 		languageClient: client.NewLanguageClient(),
@@ -108,13 +105,10 @@ func (svc *InsightsService) Create(id string, opts InsightsCreateOptions, userID
 	}
 	snapshot.SetLanguage(opts.LanguageID)
 	snapshot.SetStatus(model.SnapshotStatusProcessing)
-	if err := svc.snapshotRepo.Save(snapshot); err != nil {
+	if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
 		return err
 	}
-	if err := svc.snapshotCache.Set(snapshot); err != nil {
-		return err
-	}
-	task, err := svc.taskRepo.Insert(repo.TaskInsertOptions{
+	task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
 		ID:              helper.NewID(),
 		Name:            fmt.Sprintf("Enable insights for <b>%s</b>", file.GetName()),
 		UserID:          userID,
@@ -123,42 +117,22 @@ func (svc *InsightsService) Create(id string, opts InsightsCreateOptions, userID
 	if err != nil {
 		return err
 	}
-	if err := svc.taskCache.Set(task); err != nil {
-		return err
-	}
-	if err := svc.taskSearch.Index([]model.Task{task}); err != nil {
-		return err
-	}
 	go func() {
-		err = svc.create(snapshot)
-		if err != nil {
+		if err := svc.create(snapshot); err != nil {
 			value := err.Error()
 			task.SetError(&value)
-			if err := svc.taskCache.Set(task); err != nil {
-				svc.logger.Error(err)
-				return
-			}
-			if err := svc.taskSearch.Update([]model.Task{task}); err != nil {
+			if err := svc.taskSvc.saveAndSync(task); err != nil {
 				svc.logger.Error(err)
 				return
 			}
 		} else {
-			svc.taskRepo.Delete(task.GetID())
-			if err := svc.taskCache.Delete(task.GetID()); err != nil {
-				svc.logger.Error(err)
-				return
-			}
-			if err := svc.taskSearch.Delete([]string{task.GetID()}); err != nil {
+			if err := svc.taskSvc.deleteAndSync(task.GetID()); err != nil {
 				svc.logger.Error(err)
 				return
 			}
 		}
 		snapshot.SetStatus(model.SnapshotStatusReady)
-		if err := svc.snapshotRepo.Save(snapshot); err != nil {
-			svc.logger.Error(err)
-			return
-		}
-		if err := svc.snapshotCache.Set(snapshot); err != nil {
+		if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
 			svc.logger.Error(err)
 			return
 		}
@@ -203,13 +177,10 @@ func (svc *InsightsService) Patch(id string, userID string) error {
 	}
 	snapshot.SetLanguage(*previous.GetLanguage())
 	snapshot.SetStatus(model.SnapshotStatusProcessing)
-	if err := svc.snapshotRepo.Save(snapshot); err != nil {
+	if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
 		return err
 	}
-	if err := svc.snapshotCache.Set(snapshot); err != nil {
-		return err
-	}
-	task, err := svc.taskRepo.Insert(repo.TaskInsertOptions{
+	task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
 		ID:              helper.NewID(),
 		Name:            fmt.Sprintf("Update insights for <b>%s</b>", file.GetName()),
 		UserID:          userID,
@@ -218,42 +189,22 @@ func (svc *InsightsService) Patch(id string, userID string) error {
 	if err != nil {
 		return err
 	}
-	if err := svc.taskCache.Set(task); err != nil {
-		return err
-	}
-	if err := svc.taskSearch.Index([]model.Task{task}); err != nil {
-		return err
-	}
 	go func() {
-		err = svc.create(snapshot)
-		if err != nil {
+		if err := svc.create(snapshot); err != nil {
 			value := err.Error()
 			task.SetError(&value)
-			if err := svc.taskCache.Set(task); err != nil {
-				svc.logger.Error(err)
-				return
-			}
-			if err := svc.taskSearch.Update([]model.Task{task}); err != nil {
+			if err := svc.taskSvc.saveAndSync(task); err != nil {
 				svc.logger.Error(err)
 				return
 			}
 		} else {
-			svc.taskRepo.Delete(task.GetID())
-			if err := svc.taskCache.Delete(task.GetID()); err != nil {
-				svc.logger.Error(err)
-				return
-			}
-			if err := svc.taskSearch.Delete([]string{task.GetID()}); err != nil {
+			if err := svc.taskSvc.deleteAndSync(task.GetID()); err != nil {
 				svc.logger.Error(err)
 				return
 			}
 		}
 		snapshot.SetStatus(model.SnapshotStatusReady)
-		if err := svc.snapshotRepo.Save(snapshot); err != nil {
-			svc.logger.Error(err)
-			return
-		}
-		if err := svc.snapshotCache.Set(snapshot); err != nil {
+		if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
 			svc.logger.Error(err)
 			return
 		}
@@ -337,10 +288,7 @@ func (svc *InsightsService) createText(snapshot model.Snapshot) error {
 			return err
 		}
 		snapshot.SetOCR(&s3Object)
-		if err := svc.snapshotRepo.Save(snapshot); err != nil {
-			return err
-		}
-		if err := svc.snapshotCache.Set(snapshot); err != nil {
+		if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
 			return err
 		}
 	} else if svc.fileIdent.IsPDF(original.Key) || svc.fileIdent.IsOffice(original.Key) || svc.fileIdent.IsPlainText(original.Key) {
@@ -365,10 +313,7 @@ func (svc *InsightsService) createText(snapshot model.Snapshot) error {
 		return err
 	}
 	snapshot.SetText(&s3Object)
-	if err := svc.snapshotRepo.Save(snapshot); err != nil {
-		return err
-	}
-	if err := svc.snapshotCache.Set(snapshot); err != nil {
+	if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
 		return err
 	}
 	return nil
@@ -412,10 +357,7 @@ func (svc *InsightsService) createEntities(snapshot model.Snapshot) error {
 		return err
 	}
 	snapshot.SetEntities(&s3Object)
-	if err := svc.snapshotRepo.Save(snapshot); err != nil {
-		return err
-	}
-	if err := svc.snapshotCache.Set(snapshot); err != nil {
+	if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
 		return err
 	}
 	return nil
@@ -443,7 +385,7 @@ func (svc *InsightsService) Delete(id string, userID string) error {
 		return errorpkg.NewSnapshotIsProcessingError(nil)
 	}
 	snapshot.SetStatus(model.SnapshotStatusProcessing)
-	task, err := svc.taskRepo.Insert(repo.TaskInsertOptions{
+	task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
 		ID:              helper.NewID(),
 		Name:            fmt.Sprintf("Disable insights from <b>%s</b>", file.GetName()),
 		UserID:          userID,
@@ -452,52 +394,33 @@ func (svc *InsightsService) Delete(id string, userID string) error {
 	if err != nil {
 		return err
 	}
-	if err := svc.taskCache.Set(task); err != nil {
-		return err
-	}
-	if err := svc.taskSearch.Index([]model.Task{task}); err != nil {
-		return err
-	}
 	go func() {
 		failed := false
+		combinedErrMsg := ""
 		if svc.fileIdent.IsImage(snapshot.GetOriginal().Key) {
-			err = svc.deleteText(snapshot)
-			if err != nil {
+			if err := svc.deleteText(snapshot); err != nil {
+				combinedErrMsg = err.Error()
 				failed = true
 			}
 		}
-		err = svc.deleteEntities(snapshot)
-		if err != nil {
+		if err := svc.deleteEntities(snapshot); err != nil {
+			combinedErrMsg = fmt.Sprintf("%s\n%s", combinedErrMsg, err.Error())
 			failed = true
 		}
 		if failed {
-			value := err.Error()
-			task.SetError(&value)
-			if err := svc.taskCache.Set(task); err != nil {
-				svc.logger.Error(err)
-				return
-			}
-			if err := svc.taskSearch.Update([]model.Task{task}); err != nil {
+			task.SetError(&combinedErrMsg)
+			if err := svc.taskSvc.saveAndSync(repo.NewTask()); err != nil {
 				svc.logger.Error(err)
 				return
 			}
 		} else {
-			svc.taskRepo.Delete(task.GetID())
-			if err := svc.taskCache.Delete(task.GetID()); err != nil {
-				svc.logger.Error(err)
-				return
-			}
-			if err := svc.taskSearch.Delete([]string{task.GetID()}); err != nil {
+			if err := svc.taskSvc.deleteAndSync(task.GetID()); err != nil {
 				svc.logger.Error(err)
 				return
 			}
 		}
 		snapshot.SetStatus(model.SnapshotStatusReady)
-		if err := svc.snapshotRepo.Save(snapshot); err != nil {
-			svc.logger.Error(err)
-			return
-		}
-		if err := svc.snapshotCache.Set(snapshot); err != nil {
+		if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
 			svc.logger.Error(err)
 			return
 		}
@@ -514,10 +437,7 @@ func (svc *InsightsService) deleteText(snapshot model.Snapshot) error {
 		return err
 	}
 	snapshot.SetText(nil)
-	if err := svc.snapshotRepo.Save(snapshot); err != nil {
-		return err
-	}
-	if err := svc.snapshotCache.Set(snapshot); err != nil {
+	if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
 		return err
 	}
 	return nil
@@ -532,10 +452,7 @@ func (svc *InsightsService) deleteEntities(snapshot model.Snapshot) error {
 		return err
 	}
 	snapshot.SetEntities(nil)
-	if err := svc.snapshotRepo.Save(snapshot); err != nil {
-		return err
-	}
-	if err := svc.snapshotCache.Set(snapshot); err != nil {
+	if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
 		return err
 	}
 	return nil

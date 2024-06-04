@@ -41,8 +41,7 @@ const WatermarkOverview = () => {
               <AlertIcon />
               <Box className={cx('grow')}>
                 <AlertDescription>
-                  This watermark is outdated, and can be updated in the
-                  settings.
+                  This watermark is outdated, it can be updated in the settings.
                 </AlertDescription>
               </Box>
               <CloseButton

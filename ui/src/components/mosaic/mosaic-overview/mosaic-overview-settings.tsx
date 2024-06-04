@@ -51,7 +51,7 @@ const MosaicOverviewSettings = () => {
     <div className={cx('flex', 'flex-row', 'items-stretch', 'gap-1.5')}>
       <Card size="md" variant="outline" className={cx('w-[50%]')}>
         <CardBody>
-          <Text>Updates the mosaic if outdated.</Text>
+          <Text>Update the mosaic if outdated.</Text>
         </CardBody>
         <CardFooter>
           <Button
@@ -65,7 +65,7 @@ const MosaicOverviewSettings = () => {
       </Card>
       <Card size="md" variant="outline" className={cx('w-[50%]')}>
         <CardBody>
-          <Text>Disables the mosaic, can be re-enabled later.</Text>
+          <Text>Disable the mosaic, can be re-enabled later.</Text>
         </CardBody>
         <CardFooter>
           <Button

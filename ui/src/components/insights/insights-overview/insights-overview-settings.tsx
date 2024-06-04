@@ -51,7 +51,7 @@ const InsightsOverviewSettings = () => {
     <div className={cx('flex', 'flex-row', 'items-stretch', 'gap-1.5')}>
       <Card size="md" variant="outline" className={cx('w-[50%]')}>
         <CardBody>
-          <Text>Updates the insights if outdated.</Text>
+          <Text>Update the insights if outdated.</Text>
         </CardBody>
         <CardFooter>
           <Button
@@ -65,7 +65,7 @@ const InsightsOverviewSettings = () => {
       </Card>
       <Card size="md" variant="outline" className={cx('w-[50%]')}>
         <CardBody>
-          <Text>Disables the insights, can be re-enabled later.</Text>
+          <Text>Disable the insights, can be re-enabled later.</Text>
         </CardBody>
         <CardFooter>
           <Button

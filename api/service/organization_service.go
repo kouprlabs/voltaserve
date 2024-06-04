@@ -70,15 +70,12 @@ func (svc *OrganizationService) Create(opts OrganizationCreateOptions, userID st
 	if err := svc.orgRepo.GrantUserPermission(org.GetID(), userID, model.PermissionOwner); err != nil {
 		return nil, err
 	}
-	org, err = svc.orgRepo.Find(org.GetID())
+	org, err = svc.orgCache.Refresh(org.GetID())
 	if err != nil {
 		return nil, err
 	}
 	if err := svc.orgSearch.Index([]model.Organization{org}); err != nil {
 		return nil, err
-	}
-	if err := svc.orgCache.Set(org); err != nil {
-		return nil, nil
 	}
 	res, err := svc.orgMapper.mapOne(org, userID)
 	if err != nil {
@@ -172,11 +169,7 @@ func (svc *OrganizationService) PatchName(id string, name string, userID string)
 	if err := svc.orgRepo.Save(org); err != nil {
 		return nil, err
 	}
-	if err := svc.orgSearch.Update([]model.Organization{org}); err != nil {
-		return nil, err
-	}
-	err = svc.orgCache.Set(org)
-	if err != nil {
+	if err := svc.sync(org); err != nil {
 		return nil, err
 	}
 	res, err := svc.orgMapper.mapOne(org, userID)
@@ -328,6 +321,16 @@ func (svc *OrganizationService) doPagination(data []model.Organization, page, si
 	}
 	pageData := data[startIndex:endIndex]
 	return pageData, totalElements, totalPages
+}
+
+func (svc *OrganizationService) sync(org model.Organization) error {
+	if err := svc.orgCache.Set(org); err != nil {
+		return err
+	}
+	if err := svc.orgSearch.Update([]model.Organization{org}); err != nil {
+		return err
+	}
+	return nil
 }
 
 type organizationMapper struct {

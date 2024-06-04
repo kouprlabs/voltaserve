@@ -42,7 +42,7 @@ const InsightsOverview = () => {
               <AlertIcon />
               <Box className={cx('grow')}>
                 <AlertDescription>
-                  These insights are outdated, and can be updated in the
+                  These insights are outdated, it can be updated in the
                   settings.
                 </AlertDescription>
               </Box>

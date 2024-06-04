@@ -13,7 +13,6 @@ import (
 	"voltaserve/infra"
 	"voltaserve/model"
 	"voltaserve/repo"
-	"voltaserve/search"
 
 	"go.uber.org/zap"
 )
@@ -21,11 +20,10 @@ import (
 type MosaicService struct {
 	snapshotCache *cache.SnapshotCache
 	snapshotRepo  repo.SnapshotRepo
+	snapshotSvc   *SnapshotService
 	fileCache     *cache.FileCache
 	fileGuard     *guard.FileGuard
-	taskCache     *cache.TaskCache
-	taskSearch    *search.TaskSearch
-	taskRepo      repo.TaskRepo
+	taskSvc       *TaskService
 	s3            *infra.S3Manager
 	mosaicClient  *client.MosaicClient
 	fileIdent     *infra.FileIdentifier
@@ -40,11 +38,9 @@ func NewMosaicService() *MosaicService {
 	return &MosaicService{
 		snapshotCache: cache.NewSnapshotCache(),
 		snapshotRepo:  repo.NewSnapshotRepo(),
+		snapshotSvc:   NewSnapshotService(),
 		fileCache:     cache.NewFileCache(),
 		fileGuard:     guard.NewFileGuard(),
-		taskCache:     cache.NewTaskCache(),
-		taskSearch:    search.NewTaskSearch(),
-		taskRepo:      repo.NewTaskRepo(),
 		s3:            infra.NewS3Manager(),
 		mosaicClient:  client.NewMosaicClient(),
 		fileIdent:     infra.NewFileIdentifier(),
@@ -71,13 +67,10 @@ func (svc *MosaicService) Create(id string, userID string) error {
 		return errorpkg.NewSnapshotIsProcessingError(nil)
 	}
 	snapshot.SetStatus(model.SnapshotStatusProcessing)
-	if err := svc.snapshotRepo.Save(snapshot); err != nil {
+	if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
 		return err
 	}
-	if err := svc.snapshotCache.Set(snapshot); err != nil {
-		return err
-	}
-	task, err := svc.taskRepo.Insert(repo.TaskInsertOptions{
+	task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
 		ID:              helper.NewID(),
 		Name:            fmt.Sprintf("Enable mosaic for <b>%s</b>", file.GetName()),
 		UserID:          userID,
@@ -86,42 +79,22 @@ func (svc *MosaicService) Create(id string, userID string) error {
 	if err != nil {
 		return err
 	}
-	if err := svc.taskCache.Set(task); err != nil {
-		return err
-	}
-	if err := svc.taskSearch.Index([]model.Task{task}); err != nil {
-		return err
-	}
 	go func() {
-		err = svc.create(snapshot)
-		if err != nil {
+		if err := svc.create(snapshot); err != nil {
 			value := err.Error()
 			task.SetError(&value)
-			if err := svc.taskCache.Set(task); err != nil {
-				svc.logger.Error(err)
-				return
-			}
-			if err := svc.taskSearch.Update([]model.Task{task}); err != nil {
+			if err := svc.taskSvc.saveAndSync(task); err != nil {
 				svc.logger.Error(err)
 				return
 			}
 		} else {
-			svc.taskRepo.Delete(task.GetID())
-			if err := svc.taskCache.Delete(task.GetID()); err != nil {
-				svc.logger.Error(err)
-				return
-			}
-			if err := svc.taskSearch.Delete([]string{task.GetID()}); err != nil {
+			if err := svc.taskSvc.deleteAndSync(task.GetID()); err != nil {
 				svc.logger.Error(err)
 				return
 			}
 		}
 		snapshot.SetStatus(model.SnapshotStatusReady)
-		if err := svc.snapshotRepo.Save(snapshot); err != nil {
-			svc.logger.Error(err)
-			return
-		}
-		if err := svc.snapshotCache.Set(snapshot); err != nil {
+		if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
 			svc.logger.Error(err)
 			return
 		}
@@ -165,10 +138,7 @@ func (svc *MosaicService) create(snapshot model.Snapshot) error {
 			Bucket: snapshot.GetOriginal().Bucket,
 			Size:   stat.Size(),
 		})
-		if err := svc.snapshotRepo.Save(snapshot); err != nil {
-			return err
-		}
-		if err := svc.snapshotCache.Set(snapshot); err != nil {
+		if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
 			return err
 		}
 		return nil
@@ -199,25 +169,16 @@ func (svc *MosaicService) Delete(id string, userID string) error {
 			return errorpkg.NewSnapshotIsProcessingError(nil)
 		}
 		snapshot.SetStatus(model.SnapshotStatusProcessing)
-		if err := svc.snapshotRepo.Save(snapshot); err != nil {
+		if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
 			return err
 		}
-		if err := svc.snapshotCache.Set(snapshot); err != nil {
-			return err
-		}
-		task, err := svc.taskRepo.Insert(repo.TaskInsertOptions{
+		task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
 			ID:              helper.NewID(),
 			Name:            fmt.Sprintf("Disable mosaic from <b>%s</b>", file.GetName()),
 			UserID:          userID,
 			IsIndeterminate: true,
 		})
 		if err != nil {
-			return err
-		}
-		if err := svc.taskCache.Set(task); err != nil {
-			return err
-		}
-		if err := svc.taskSearch.Index([]model.Task{task}); err != nil {
 			return err
 		}
 		go func() {
@@ -228,32 +189,19 @@ func (svc *MosaicService) Delete(id string, userID string) error {
 			if err != nil {
 				value := err.Error()
 				task.SetError(&value)
-				if err := svc.taskCache.Set(task); err != nil {
-					svc.logger.Error(err)
-					return
-				}
-				if err := svc.taskSearch.Update([]model.Task{task}); err != nil {
+				if err := svc.taskSvc.saveAndSync(task); err != nil {
 					svc.logger.Error(err)
 					return
 				}
 			} else {
-				svc.taskRepo.Delete(task.GetID())
-				if err := svc.taskCache.Delete(task.GetID()); err != nil {
-					svc.logger.Error(err)
-					return
-				}
-				if err := svc.taskSearch.Delete([]string{task.GetID()}); err != nil {
+				if err := svc.taskSvc.deleteAndSync(task.GetID()); err != nil {
 					svc.logger.Error(err)
 					return
 				}
 			}
 			snapshot.SetMosaic(nil)
 			snapshot.SetStatus(model.SnapshotStatusReady)
-			if err := svc.snapshotRepo.Save(snapshot); err != nil {
-				svc.logger.Error(err)
-				return
-			}
-			if err := svc.snapshotCache.Set(snapshot); err != nil {
+			if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
 				svc.logger.Error(err)
 				return
 			}

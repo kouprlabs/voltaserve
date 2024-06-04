@@ -218,6 +218,46 @@ func (svc *TaskService) Delete(id string, userID string) error {
 	return nil
 }
 
+func (svc *TaskService) insertAndSync(opts repo.TaskInsertOptions) (model.Task, error) {
+	task, err := svc.taskRepo.Insert(opts)
+	if err != nil {
+		return nil, err
+	}
+	if err := svc.taskCache.Set(task); err != nil {
+		return nil, err
+	}
+	if err := svc.taskSearch.Index([]model.Task{task}); err != nil {
+		return nil, err
+	}
+	return task, nil
+}
+
+func (svc *TaskService) saveAndSync(task model.Task) error {
+	if err := svc.taskRepo.Save(task); err != nil {
+		return nil
+	}
+	if err := svc.taskCache.Set(task); err != nil {
+		return nil
+	}
+	if err := svc.taskSearch.Update([]model.Task{task}); err != nil {
+		return nil
+	}
+	return nil
+}
+
+func (svc *TaskService) deleteAndSync(id string) error {
+	if err := svc.taskRepo.Delete(id); err != nil {
+		return err
+	}
+	if err := svc.taskCache.Delete(id); err != nil {
+		return err
+	}
+	if err := svc.taskSearch.Delete([]string{id}); err != nil {
+		return err
+	}
+	return nil
+}
+
 type taskMapper struct {
 	groupCache *cache.TaskCache
 }
