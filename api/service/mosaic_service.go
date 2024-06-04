@@ -79,7 +79,7 @@ func (svc *MosaicService) Create(id string, userID string) error {
 	}
 	task, err := svc.taskRepo.Insert(repo.TaskInsertOptions{
 		ID:              helper.NewID(),
-		Name:            fmt.Sprintf("Create mosaic for <b>%s</b>", file.GetName()),
+		Name:            fmt.Sprintf("Enable mosaic for <b>%s</b>", file.GetName()),
 		UserID:          userID,
 		IsIndeterminate: true,
 	})
@@ -207,7 +207,7 @@ func (svc *MosaicService) Delete(id string, userID string) error {
 		}
 		task, err := svc.taskRepo.Insert(repo.TaskInsertOptions{
 			ID:              helper.NewID(),
-			Name:            fmt.Sprintf("Delete mosaic from <b>%s</b>", file.GetName()),
+			Name:            fmt.Sprintf("Disable mosaic from <b>%s</b>", file.GetName()),
 			UserID:          userID,
 			IsIndeterminate: true,
 		})
@@ -262,7 +262,7 @@ func (svc *MosaicService) Delete(id string, userID string) error {
 	return nil
 }
 
-func (svc *MosaicService) GetMetadata(id string, userID string) (*model.MosaicMetadata, error) {
+func (svc *MosaicService) GetInfo(id string, userID string) (*model.MosaicInfo, error) {
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return nil, err
@@ -284,7 +284,7 @@ func (svc *MosaicService) GetMetadata(id string, userID string) (*model.MosaicMe
 			return nil, err
 		}
 		if previous == nil {
-			return nil, errorpkg.NewMosaicNotFoundError(nil)
+			return &model.MosaicInfo{IsAvailable: false}, nil
 		} else {
 			snapshot = previous
 			isOutdated = true
@@ -298,7 +298,10 @@ func (svc *MosaicService) GetMetadata(id string, userID string) (*model.MosaicMe
 		return nil, err
 	}
 	res.IsOutdated = isOutdated
-	return res, nil
+	return &model.MosaicInfo{
+		IsAvailable: true,
+		Metadata:    res,
+	}, nil
 }
 
 type MosaicDownloadTileOptions struct {

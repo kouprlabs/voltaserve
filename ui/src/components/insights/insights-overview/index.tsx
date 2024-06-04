@@ -15,10 +15,10 @@ import {
 import cx from 'classnames'
 import InsightsAPI from '@/client/api/insights'
 import { useAppSelector } from '@/store/hook'
+import InsightsOverviewArtifacts from './insights-overview-artifacts'
 import InsightsOverviewChart from './insights-overview-chart'
 import InsightsOverviewEntities from './insights-overview-entities'
 import InsightsOverviewSettings from './insights-overview-settings'
-import InsightsOverviewText from './insights-overview-text'
 
 const InsightsOverview = () => {
   const id = useAppSelector((state) =>
@@ -27,19 +27,23 @@ const InsightsOverview = () => {
       : undefined,
   )
   const [isWarningVisible, setIsWarningVisible] = useState(true)
-  const { data: summary } = InsightsAPI.useGetMetadata(id)
+  const { data: info } = InsightsAPI.useGetInfo(id)
+
+  if (!info) {
+    return null
+  }
 
   return (
     <>
       <ModalBody>
         <div className={cx('flex', 'flex-col', 'gap-1.5', 'w-full')}>
-          {summary?.isOutdated && isWarningVisible ? (
-            <Alert status="warning">
+          {info.metadata?.isOutdated && isWarningVisible ? (
+            <Alert status="warning" className={cx('flex')}>
               <AlertIcon />
-              <Box>
+              <Box className={cx('grow')}>
                 <AlertDescription>
-                  These insights are outdated, they originate from an older
-                  snapshot. Please navigate to the settings tab to update.
+                  These insights are outdated, and can be updated in the
+                  settings.
                 </AlertDescription>
               </Box>
               <CloseButton
@@ -55,7 +59,7 @@ const InsightsOverview = () => {
             <TabList>
               <Tab>Chart</Tab>
               <Tab>Entities</Tab>
-              <Tab>Text</Tab>
+              <Tab>Artifacts</Tab>
               <Tab>Settings</Tab>
             </TabList>
             <TabPanels>
@@ -66,7 +70,7 @@ const InsightsOverview = () => {
                 <InsightsOverviewEntities />
               </TabPanel>
               <TabPanel>
-                <InsightsOverviewText />
+                <InsightsOverviewArtifacts />
               </TabPanel>
               <TabPanel>
                 <InsightsOverviewSettings />

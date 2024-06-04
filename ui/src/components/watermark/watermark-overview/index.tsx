@@ -16,7 +16,7 @@ import cx from 'classnames'
 import WatermarkAPI from '@/client/api/watermark'
 import { swrConfig } from '@/client/options'
 import { useAppSelector } from '@/store/hook'
-import WatermarkOverviewFile from './watermark-overview-file'
+import WatermarkOverviewArtifacts from './watermark-overview-file'
 import WatermarkOverviewSettings from './watermark-overview-settings'
 
 const WatermarkOverview = () => {
@@ -26,20 +26,23 @@ const WatermarkOverview = () => {
       : undefined,
   )
   const [isWarningVisible, setIsWarningVisible] = useState(true)
-  const { data: metadata } = WatermarkAPI.useGetMetadata(id, swrConfig())
+  const { data: info } = WatermarkAPI.useGetInfo(id, swrConfig())
+
+  if (!info) {
+    return null
+  }
 
   return (
     <>
       <ModalBody>
         <div className={cx('flex', 'flex-col', 'gap-1.5', 'w-full')}>
-          {metadata?.isOutdated && isWarningVisible ? (
-            <Alert status="warning">
+          {info.metadata?.isOutdated && isWarningVisible ? (
+            <Alert status="warning" className={cx('flex')}>
               <AlertIcon />
-              <Box>
+              <Box className={cx('grow')}>
                 <AlertDescription>
-                  This watermark protected file is outdated, it originates from
-                  an older snapshot. Please navigate to the settings tab to
-                  update.
+                  This watermark is outdated, and can be updated in the
+                  settings.
                 </AlertDescription>
               </Box>
               <CloseButton
@@ -53,12 +56,12 @@ const WatermarkOverview = () => {
           ) : null}
           <Tabs colorScheme="gray">
             <TabList>
-              <Tab>File</Tab>
+              <Tab>Artifacts</Tab>
               <Tab>Settings</Tab>
             </TabList>
             <TabPanels>
               <TabPanel>
-                <WatermarkOverviewFile />
+                <WatermarkOverviewArtifacts />
               </TabPanel>
               <TabPanel>
                 <WatermarkOverviewSettings />

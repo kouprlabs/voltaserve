@@ -6,10 +6,9 @@ import InsightsAPI from '@/client/api/insights'
 import { ltOwnerPermission } from '@/client/api/permission'
 import TaskAPI from '@/client/api/task'
 import { swrConfig } from '@/client/options'
-import { IconDelete, IconSync } from '@/lib/components/icons'
+import { IconClose, IconSync } from '@/lib/components/icons'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { modalDidClose } from '@/store/ui/insights'
-import { drawerDidOpen as tasksDrawerDidOpen } from '@/store/ui/tasks'
 
 const InsightsOverviewSettings = () => {
   const dispatch = useAppDispatch()
@@ -19,11 +18,9 @@ const InsightsOverviewSettings = () => {
       : undefined,
   )
   const mutateFiles = useAppSelector((state) => state.ui.files.mutate)
-  const mutateTasks = useAppSelector((state) => state.ui.tasks.mutate)
-  const mutateMetadata = useAppSelector(
-    (state) => state.ui.insights.mutateMetadata,
-  )
-  const { data: metadata } = InsightsAPI.useGetMetadata(id, swrConfig())
+  const mutateTaskCount = useAppSelector((state) => state.ui.tasks.mutateCount)
+  const mutateMetadata = useAppSelector((state) => state.ui.insights.mutateInfo)
+  const { data: info } = InsightsAPI.useGetInfo(id, swrConfig())
   const { data: file } = FileAPI.useGet(id, swrConfig())
 
   const handleUpdate = useCallback(async () => {
@@ -31,24 +28,22 @@ const InsightsOverviewSettings = () => {
       await InsightsAPI.patch(id)
       mutateMetadata?.()
       mutateFiles?.()
-      mutateTasks?.(await TaskAPI.list())
+      mutateTaskCount?.(await TaskAPI.getCount())
       dispatch(modalDidClose())
-      dispatch(tasksDrawerDidOpen())
     }
-  }, [id, mutateFiles, mutateTasks, mutateMetadata, dispatch])
+  }, [id, mutateFiles, mutateTaskCount, mutateMetadata, dispatch])
 
   const handleDelete = useCallback(async () => {
     if (id) {
       await InsightsAPI.delete(id)
       mutateMetadata?.()
       mutateFiles?.()
-      mutateTasks?.(await TaskAPI.list())
+      mutateTaskCount?.(await TaskAPI.getCount())
       dispatch(modalDidClose())
-      dispatch(tasksDrawerDidOpen())
     }
-  }, [id, mutateFiles, mutateTasks, mutateMetadata, dispatch])
+  }, [id, mutateFiles, mutateTaskCount, mutateMetadata, dispatch])
 
-  if (!id || !metadata) {
+  if (!id || !info) {
     return null
   }
 
@@ -56,15 +51,12 @@ const InsightsOverviewSettings = () => {
     <div className={cx('flex', 'flex-row', 'items-stretch', 'gap-1.5')}>
       <Card size="md" variant="outline" className={cx('w-[50%]')}>
         <CardBody>
-          <Text>
-            Updates the insights using the active snapshot, uses the previously
-            set language.
-          </Text>
+          <Text>Updates the insights if outdated.</Text>
         </CardBody>
         <CardFooter>
           <Button
             leftIcon={<IconSync />}
-            isDisabled={!metadata.isOutdated}
+            isDisabled={!info.metadata?.isOutdated}
             onClick={handleUpdate}
           >
             Update
@@ -73,18 +65,16 @@ const InsightsOverviewSettings = () => {
       </Card>
       <Card size="md" variant="outline" className={cx('w-[50%]')}>
         <CardBody>
-          <Text>
-            Deletes insights from the active snapshot, can be recreated later.
-          </Text>
+          <Text>Disables the insights, can be re-enabled later.</Text>
         </CardBody>
         <CardFooter>
           <Button
             colorScheme="red"
-            leftIcon={<IconDelete />}
+            leftIcon={<IconClose />}
             isDisabled={!file || ltOwnerPermission(file.permission)}
             onClick={handleDelete}
           >
-            Delete
+            Disable
           </Button>
         </CardFooter>
       </Card>

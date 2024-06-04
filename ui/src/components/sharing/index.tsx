@@ -85,7 +85,7 @@ const Sharing = ({ list }: FileSharingProps) => {
                 <div
                   className={cx('flex', 'flex-row', 'items-center', 'gap-0.5')}
                 >
-                  <span>People</span>
+                  <span>Users</span>
                   {singleFile &&
                   userPermissions &&
                   userPermissions.length > 0 ? (

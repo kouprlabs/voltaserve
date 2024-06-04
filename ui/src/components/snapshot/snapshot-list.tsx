@@ -35,7 +35,7 @@ const SnapshotList = () => {
     (state) => state.ui.snapshots.isListModalOpen,
   )
   const fileId = useAppSelector((state) => state.ui.files.selection[0])
-  const mutateFileList = useAppSelector((state) => state.ui.files.mutate)
+  const mutateFiles = useAppSelector((state) => state.ui.files.mutate)
   const [isActivating, setIsActivating] = useState(false)
   const [page, setPage] = useState(1)
   const [selected, setSelected] = useState<Snapshot>()
@@ -66,12 +66,12 @@ const SnapshotList = () => {
         setIsActivating(true)
         await SnapshotAPI.activate(selected.id, { fileId })
         snapshotMutate()
-        mutateFileList?.()
+        mutateFiles?.()
       } finally {
         setIsActivating(false)
       }
     }
-  }, [selected, dispatch, snapshotMutate, mutateFileList])
+  }, [selected, dispatch, snapshotMutate, mutateFiles])
 
   const handleDetach = useCallback(() => {
     if (selected) {

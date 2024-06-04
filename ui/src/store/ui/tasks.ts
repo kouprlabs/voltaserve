@@ -4,7 +4,8 @@ import { List } from '@/client/api/task'
 
 type TaskaState = {
   isDrawerOpen: boolean
-  mutate?: KeyedMutator<List>
+  mutateList?: KeyedMutator<List>
+  mutateCount?: KeyedMutator<number>
 }
 
 const initialState: TaskaState = {
@@ -15,18 +16,29 @@ const slice = createSlice({
   name: 'tasks',
   initialState,
   reducers: {
-    mutateUpdated: (state, action: PayloadAction<KeyedMutator<List>>) => {
-      state.mutate = action.payload
-    },
     drawerDidOpen: (state) => {
       state.isDrawerOpen = true
     },
     drawerDidClose: (state) => {
       state.isDrawerOpen = false
     },
+    mutateListUpdated: (state, action: PayloadAction<KeyedMutator<List>>) => {
+      state.mutateList = action.payload
+    },
+    mutateCountUpdated: (
+      state,
+      action: PayloadAction<KeyedMutator<number>>,
+    ) => {
+      state.mutateCount = action.payload
+    },
   },
 })
 
-export const { mutateUpdated, drawerDidOpen, drawerDidClose } = slice.actions
+export const {
+  drawerDidOpen,
+  drawerDidClose,
+  mutateListUpdated,
+  mutateCountUpdated,
+} = slice.actions
 
 export default slice.reducer

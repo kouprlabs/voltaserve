@@ -29,7 +29,7 @@ func NewWatermarkRouter() *WatermarkRouter {
 func (r *WatermarkRouter) AppendRoutes(g fiber.Router) {
 	g.Post("/:id", r.Create)
 	g.Delete("/:id", r.Delete)
-	g.Get("/:id/metadata", r.GetMetadata)
+	g.Get("/:id/info", r.GetInfo)
 }
 
 func (r *WatermarkRouter) AppendNonJWTRoutes(g fiber.Router) {
@@ -76,21 +76,21 @@ func (r *WatermarkRouter) Delete(c *fiber.Ctx) error {
 	return c.SendStatus(http.StatusNoContent)
 }
 
-// GetMetadata godoc
+// GetInfo godoc
 //
-//	@Summary		Get Metadata
-//	@Description	Get Metadata
+//	@Summary		Get Info
+//	@Description	Get Info
 //	@Tags			Watermark
-//	@Id				watermark_get_metadata
+//	@Id				watermark_get_info
 //	@Accept			json
 //	@Produce		json
 //	@Param			id	path		string	true	"ID"
-//	@Success		200	{object}	model.WatermarkMetadata
+//	@Success		200	{object}	model.WatermarkInfo
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
-//	@Router			/watermarks/{id}/metadata [get]
-func (r *WatermarkRouter) GetMetadata(c *fiber.Ctx) error {
-	res, err := r.watermarkSvc.GetMetadata(c.Params("id"), GetUserID(c))
+//	@Router			/watermarks/{id}/info [get]
+func (r *WatermarkRouter) GetInfo(c *fiber.Ctx) error {
+	res, err := r.watermarkSvc.GetInfo(c.Params("id"), GetUserID(c))
 	if err != nil {
 		return err
 	}

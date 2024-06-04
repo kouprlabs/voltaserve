@@ -5,7 +5,6 @@ import MosaicAPI from '@/client/api/mosaic'
 import TaskAPI from '@/client/api/task'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { modalDidClose } from '@/store/ui/mosaic'
-import { drawerDidOpen as tasksDrawerDidOpen } from '@/store/ui/tasks'
 
 const MosaicCreate = () => {
   const dispatch = useAppDispatch()
@@ -15,10 +14,8 @@ const MosaicCreate = () => {
       : undefined,
   )
   const mutateFiles = useAppSelector((state) => state.ui.files.mutate)
-  const mutateTasks = useAppSelector((state) => state.ui.tasks.mutate)
-  const mutateMetadata = useAppSelector(
-    (state) => state.ui.mosaic.mutateMetadata,
-  )
+  const mutateTasks = useAppSelector((state) => state.ui.tasks.mutateList)
+  const mutateMetadata = useAppSelector((state) => state.ui.mosaic.mutateInfo)
 
   const handleCreate = useCallback(async () => {
     if (id) {
@@ -27,7 +24,6 @@ const MosaicCreate = () => {
       mutateFiles?.()
       mutateTasks?.(await TaskAPI.list())
       dispatch(modalDidClose())
-      dispatch(tasksDrawerDidOpen())
     }
   }, [id, mutateFiles, mutateTasks, mutateMetadata, dispatch])
 
@@ -48,8 +44,6 @@ const MosaicCreate = () => {
           )}
         >
           <p>
-            Optimize your image for better performance by creating a mosaic.
-            <br />
             The mosaic enhances view performance of large images by splitting
             them into smaller, manageable tiles. This makes browsing
             high-resolution images faster and more efficient.
@@ -72,7 +66,7 @@ const MosaicCreate = () => {
             colorScheme="blue"
             onClick={handleCreate}
           >
-            Create Mosaic
+            Enable
           </Button>
         </div>
       </ModalFooter>

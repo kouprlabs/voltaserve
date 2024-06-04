@@ -13,13 +13,13 @@ import {
   Button,
 } from '@chakra-ui/react'
 import cx from 'classnames'
-import UploadsList from '@/components/uploads/uploads-list'
+import UploadList from '@/components/upload/upload-list'
 import { IconClearAll, IconUpload } from '@/lib/components/icons'
 import { completedUploadsCleared } from '@/store/entities/uploads'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { drawerDidClose } from '@/store/ui/uploads'
 
-const UploadsDrawer = () => {
+const UploadDrawer = () => {
   const dispatch = useAppDispatch()
   const hasPendingUploads = useAppSelector(
     (state) =>
@@ -72,7 +72,7 @@ const UploadsDrawer = () => {
           <DrawerCloseButton />
           <DrawerHeader>Uploads</DrawerHeader>
           <DrawerBody>
-            <UploadsList />
+            <UploadList />
           </DrawerBody>
           <DrawerFooter>
             {hasCompleted ? (
@@ -91,4 +91,4 @@ const UploadsDrawer = () => {
   )
 }
 
-export default UploadsDrawer
+export default UploadDrawer

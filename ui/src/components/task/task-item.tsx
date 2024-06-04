@@ -20,19 +20,19 @@ export type TaskDrawerItemProps = {
   task: Task
 }
 
-const TasksDrawerItem = ({ task }: TaskDrawerItemProps) => {
+const TaskDrawerItem = ({ task }: TaskDrawerItemProps) => {
   const [isDismissing, setIsDismissing] = useState(false)
-  const mutateTasks = useAppSelector((state) => state.ui.tasks.mutate)
+  const mutateList = useAppSelector((state) => state.ui.tasks.mutateList)
 
   const handleDismiss = useCallback(async () => {
     try {
       setIsDismissing(true)
       await TaskAPI.delete(task.id)
-      mutateTasks?.()
+      mutateList?.()
     } finally {
       setIsDismissing(false)
     }
-  }, [task, mutateTasks])
+  }, [task, mutateList])
 
   return (
     <Card variant="outline">
@@ -103,4 +103,4 @@ const TasksDrawerItem = ({ task }: TaskDrawerItemProps) => {
   )
 }
 
-export default TasksDrawerItem
+export default TaskDrawerItem

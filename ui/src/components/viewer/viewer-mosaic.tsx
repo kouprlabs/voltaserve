@@ -24,8 +24,10 @@ const ViewerMosaic = ({ file }: ViewerImageProps) => {
 
   useEffect(() => {
     const fetchMetadata = async () => {
-      const data: Metadata = await MosaicAPI.getMetadata(file.id)
-      setMetadata(data)
+      const { metadata } = await MosaicAPI.getInfo(file.id)
+      if (metadata) {
+        setMetadata(metadata)
+      }
     }
     fetchMetadata()
   }, [file, accessToken])

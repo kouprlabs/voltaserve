@@ -16,7 +16,7 @@ const InsightsOverviewEntities = () => {
   )
   const [page, setPage] = useState(1)
   const [query, setQuery] = useState<string | undefined>(undefined)
-  const { data: metadata } = InsightsAPI.useGetMetadata(id, swrConfig())
+  const { data: metadata } = InsightsAPI.useGetInfo(id, swrConfig())
   const {
     data: list,
     error,

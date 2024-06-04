@@ -2,10 +2,10 @@ import { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 import cx from 'classnames'
 import AccountMenu from '@/components/account/menu'
-import TaskDrawer from '@/components/tasks/tasks-drawer'
+import TaskDrawer from '@/components/task/task-drawer'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { activeNavChanged, NavType } from '@/store/ui/nav'
-import UploadsDrawer from '../uploads/uploads-drawer'
+import UploadDrawer from '../upload/upload-drawer'
 import {
   CreateGroupButton,
   CreateOrganizationButton,
@@ -52,7 +52,7 @@ const AppBar = () => {
         {activeNav === NavType.Workspaces && <CreateWorkspaceButton />}
         {activeNav === NavType.Groups && <CreateGroupButton />}
         {activeNav === NavType.Organizations && <CreateOrganizationButton />}
-        <UploadsDrawer />
+        <UploadDrawer />
         <TaskDrawer />
         <AccountMenu />
       </div>

@@ -40,6 +40,25 @@ definitions:
       text:
         type: string
     type: object
+  model.InsightsInfo:
+    properties:
+      isAvailable:
+        type: boolean
+      metadata:
+        $ref: '#/definitions/model.InsightsMetadata'
+    type: object
+  model.InsightsMetadata:
+    properties:
+      isOutdated:
+        type: boolean
+    type: object
+  model.MosaicInfo:
+    properties:
+      isAvailable:
+        type: boolean
+      metadata:
+        $ref: '#/definitions/model.MosaicMetadata'
+    type: object
   model.MosaicMetadata:
     properties:
       extension:
@@ -102,6 +121,13 @@ definitions:
         type: integer
       width:
         type: integer
+    type: object
+  model.WatermarkInfo:
+    properties:
+      isAvailable:
+        type: boolean
+      metadata:
+        $ref: '#/definitions/model.WatermarkMetadata'
     type: object
   model.WatermarkMetadata:
     properties:
@@ -411,11 +437,6 @@ definitions:
         type: string
       name:
         type: string
-    type: object
-  service.InsightsMetadata:
-    properties:
-      isOutdated:
-        type: boolean
     type: object
   service.Invitation:
     properties:
@@ -1808,12 +1829,12 @@ paths:
       summary: List Entities
       tags:
       - Insights
-  /insights/{id}/metadata:
+  /insights/{id}/info:
     get:
       consumes:
       - application/json
-      description: Get Metadata
-      operationId: insights_get_metadata
+      description: Get Info
+      operationId: insights_get_info
       parameters:
       - description: ID
         in: path
@@ -1826,7 +1847,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/service.InsightsMetadata'
+            $ref: '#/definitions/model.InsightsInfo'
         "404":
           description: Not Found
           schema:
@@ -1835,7 +1856,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Get Metadata
+      summary: Get Info
       tags:
       - Insights
   /insights/{id}/ocr{ext}:
@@ -2230,12 +2251,12 @@ paths:
       summary: Create
       tags:
       - Mosaic
-  /mosaics/{id}/metadata:
+  /mosaics/{id}/info:
     get:
       consumes:
       - application/json
-      description: Get Metadata
-      operationId: mosaic_get_metadata
+      description: Get Info
+      operationId: mosaic_get_info
       parameters:
       - description: ID
         in: path
@@ -2248,7 +2269,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.MosaicMetadata'
+            $ref: '#/definitions/model.MosaicInfo'
         "404":
           description: Not Found
           schema:
@@ -2257,7 +2278,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Get Metadata
+      summary: Get Info
       tags:
       - Mosaic
   /mosaics/{id}/zoom_level/{zoom_level}/row/{row}/col/{col}/ext/{ext}:
@@ -2958,12 +2979,12 @@ paths:
       summary: Create
       tags:
       - Watermark
-  /watermarks/{id}/metadata:
+  /watermarks/{id}/info:
     get:
       consumes:
       - application/json
-      description: Get Metadata
-      operationId: watermark_get_metadata
+      description: Get Info
+      operationId: watermark_get_info
       parameters:
       - description: ID
         in: path
@@ -2976,7 +2997,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.WatermarkMetadata'
+            $ref: '#/definitions/model.WatermarkInfo'
         "404":
           description: Not Found
           schema:
@@ -2985,7 +3006,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Get Metadata
+      summary: Get Info
       tags:
       - Watermark
   /watermarks/{id}/watermark{ext}:

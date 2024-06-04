@@ -6,10 +6,9 @@ import MosaicAPI from '@/client/api/mosaic'
 import { ltOwnerPermission } from '@/client/api/permission'
 import TaskAPI from '@/client/api/task'
 import { swrConfig } from '@/client/options'
-import { IconDelete, IconSync } from '@/lib/components/icons'
+import { IconClose, IconSync } from '@/lib/components/icons'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { modalDidClose } from '@/store/ui/mosaic'
-import { drawerDidOpen as tasksDrawerDidOpen } from '@/store/ui/tasks'
 
 const MosaicOverviewSettings = () => {
   const dispatch = useAppDispatch()
@@ -19,11 +18,9 @@ const MosaicOverviewSettings = () => {
       : undefined,
   )
   const mutateFiles = useAppSelector((state) => state.ui.files.mutate)
-  const mutateTasks = useAppSelector((state) => state.ui.tasks.mutate)
-  const mutateMetadata = useAppSelector(
-    (state) => state.ui.mosaic.mutateMetadata,
-  )
-  const { data: metadata } = MosaicAPI.useGetMetadata(id, swrConfig())
+  const mutateTaskCount = useAppSelector((state) => state.ui.tasks.mutateCount)
+  const mutateMetadata = useAppSelector((state) => state.ui.mosaic.mutateInfo)
+  const { data: info } = MosaicAPI.useGetInfo(id, swrConfig())
   const { data: file } = FileAPI.useGet(id, swrConfig())
 
   const handleUpdate = useCallback(async () => {
@@ -31,24 +28,22 @@ const MosaicOverviewSettings = () => {
       await MosaicAPI.create(id)
       mutateMetadata?.()
       mutateFiles?.()
-      mutateTasks?.(await TaskAPI.list())
+      mutateTaskCount?.(await TaskAPI.getCount())
       dispatch(modalDidClose())
-      dispatch(tasksDrawerDidOpen())
     }
-  }, [id, mutateFiles, mutateTasks, mutateMetadata, dispatch])
+  }, [id, mutateFiles, mutateTaskCount, mutateMetadata, dispatch])
 
   const handleDelete = useCallback(async () => {
     if (id) {
       await MosaicAPI.delete(id)
       mutateMetadata?.()
       mutateFiles?.()
-      mutateTasks?.(await TaskAPI.list())
+      mutateTaskCount?.(await TaskAPI.getCount())
       dispatch(modalDidClose())
-      dispatch(tasksDrawerDidOpen())
     }
-  }, [id, mutateFiles, mutateTasks, mutateMetadata, dispatch])
+  }, [id, mutateFiles, mutateTaskCount, mutateMetadata, dispatch])
 
-  if (!id || !metadata) {
+  if (!file || !info) {
     return null
   }
 
@@ -56,12 +51,12 @@ const MosaicOverviewSettings = () => {
     <div className={cx('flex', 'flex-row', 'items-stretch', 'gap-1.5')}>
       <Card size="md" variant="outline" className={cx('w-[50%]')}>
         <CardBody>
-          <Text>Updates to a new mosaic using the active snapshot.</Text>
+          <Text>Updates the mosaic if outdated.</Text>
         </CardBody>
         <CardFooter>
           <Button
             leftIcon={<IconSync />}
-            isDisabled={!metadata.isOutdated}
+            isDisabled={!info.metadata?.isOutdated}
             onClick={handleUpdate}
           >
             Update
@@ -70,18 +65,16 @@ const MosaicOverviewSettings = () => {
       </Card>
       <Card size="md" variant="outline" className={cx('w-[50%]')}>
         <CardBody>
-          <Text>
-            Deletes the mosaic from the active snapshot, can be recreated later.
-          </Text>
+          <Text>Disables the mosaic, can be re-enabled later.</Text>
         </CardBody>
         <CardFooter>
           <Button
             colorScheme="red"
-            leftIcon={<IconDelete />}
+            leftIcon={<IconClose />}
             isDisabled={!file || ltOwnerPermission(file.permission)}
             onClick={handleDelete}
           >
-            Delete
+            Disable
           </Button>
         </CardFooter>
       </Card>

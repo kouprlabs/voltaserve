@@ -4,7 +4,6 @@ import cx from 'classnames'
 import TaskAPI from '@/client/api/task'
 import WatermarkAPI from '@/client/api/watermark'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
-import { drawerDidOpen as tasksDrawerDidOpen } from '@/store/ui/tasks'
 import { modalDidClose } from '@/store/ui/watermark'
 
 const WatermarkCreate = () => {
@@ -15,19 +14,18 @@ const WatermarkCreate = () => {
       : undefined,
   )
   const mutateFiles = useAppSelector((state) => state.ui.files.mutate)
-  const mutateTasks = useAppSelector((state) => state.ui.tasks.mutate)
-  const mutateFile = useAppSelector((state) => state.ui.watermark.mutateFile)
+  const mutateTasks = useAppSelector((state) => state.ui.tasks.mutateList)
+  const mutateInfo = useAppSelector((state) => state.ui.watermark.mutateInfo)
 
   const handleCreate = useCallback(async () => {
     if (id) {
       await WatermarkAPI.create(id, false)
-      mutateFile?.()
+      mutateInfo?.()
       mutateFiles?.()
       mutateTasks?.(await TaskAPI.list())
       dispatch(modalDidClose())
-      dispatch(tasksDrawerDidOpen())
     }
-  }, [id, mutateFiles, mutateTasks, mutateFile, dispatch])
+  }, [id, mutateFiles, mutateTasks, mutateInfo, dispatch])
 
   if (!id) {
     return null
@@ -68,7 +66,7 @@ const WatermarkCreate = () => {
             colorScheme="blue"
             onClick={handleCreate}
           >
-            Create Watermark
+            Enable
           </Button>
         </div>
       </ModalFooter>

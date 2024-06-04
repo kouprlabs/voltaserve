@@ -116,7 +116,7 @@ func (svc *InsightsService) Create(id string, opts InsightsCreateOptions, userID
 	}
 	task, err := svc.taskRepo.Insert(repo.TaskInsertOptions{
 		ID:              helper.NewID(),
-		Name:            fmt.Sprintf("Collect insights for <b>%s</b>", file.GetName()),
+		Name:            fmt.Sprintf("Enable insights for <b>%s</b>", file.GetName()),
 		UserID:          userID,
 		IsIndeterminate: true,
 	})
@@ -445,7 +445,7 @@ func (svc *InsightsService) Delete(id string, userID string) error {
 	snapshot.SetStatus(model.SnapshotStatusProcessing)
 	task, err := svc.taskRepo.Insert(repo.TaskInsertOptions{
 		ID:              helper.NewID(),
-		Name:            fmt.Sprintf("Delete insights from <b>%s</b>", file.GetName()),
+		Name:            fmt.Sprintf("Disable insights from <b>%s</b>", file.GetName()),
 		UserID:          userID,
 		IsIndeterminate: true,
 	})
@@ -652,11 +652,7 @@ func (svc *InsightsService) doPagination(data []*model.InsightsEntity, page, siz
 	return pageData, totalElements, totalPages
 }
 
-type InsightsMetadata struct {
-	IsOutdated bool `json:"isOutdated"`
-}
-
-func (svc *InsightsService) GetMetadata(id string, userID string) (*InsightsMetadata, error) {
+func (svc *InsightsService) GetInfo(id string, userID string) (*model.InsightsInfo, error) {
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return nil, err
@@ -678,13 +674,16 @@ func (svc *InsightsService) GetMetadata(id string, userID string) (*InsightsMeta
 			return nil, err
 		}
 		if previous == nil {
-			return nil, errorpkg.NewInsightsNotFoundError(nil)
+			return &model.InsightsInfo{IsAvailable: false}, nil
 		} else {
 			isOutdated = true
 		}
 	}
-	return &InsightsMetadata{
-		IsOutdated: isOutdated,
+	return &model.InsightsInfo{
+		IsAvailable: true,
+		Metadata: &model.InsightsMetadata{
+			IsOutdated: isOutdated,
+		},
 	}, nil
 }
 

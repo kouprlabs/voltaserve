@@ -1,6 +1,11 @@
 import useSWR, { SWRConfiguration } from 'swr'
 import { apiFetcher } from '@/client/fetcher'
 
+export type Info = {
+  isAvailable: boolean
+  metadata?: Metadata
+}
+
 export type Metadata = {
   isOutdated: boolean
 }
@@ -21,19 +26,19 @@ export default class WatermarkAPI {
     })
   }
 
-  static useGetMetadata(
+  static useGetInfo(
     id: string | null | undefined,
     swrOptions?: SWRConfiguration,
   ) {
-    const url = `/watermarks/${id}/metadata`
-    return useSWR<Metadata>(
+    const url = `/watermarks/${id}/info`
+    return useSWR<Info>(
       id ? url : null,
       () =>
         apiFetcher({
           url,
           method: 'GET',
           showError: false,
-        }) as Promise<Metadata>,
+        }) as Promise<Info>,
       swrOptions,
     )
   }

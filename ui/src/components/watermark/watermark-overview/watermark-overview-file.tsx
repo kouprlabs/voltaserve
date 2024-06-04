@@ -5,7 +5,7 @@ import { swrConfig } from '@/client/options'
 import { IconOpenInNew } from '@/lib/components/icons'
 import { useAppSelector } from '@/store/hook'
 
-const WatermarkOverviewFile = () => {
+const WatermarkOverviewArtifacts = () => {
   const id = useAppSelector((state) =>
     state.ui.files.selection.length > 0
       ? state.ui.files.selection[0]
@@ -34,10 +34,10 @@ const WatermarkOverviewFile = () => {
         target="_blank"
         href={`/file/${file.id}/watermark`}
       >
-        Open
+        Open Watermark Protected File
       </Button>
     </div>
   )
 }
 
-export default WatermarkOverviewFile
+export default WatermarkOverviewArtifacts

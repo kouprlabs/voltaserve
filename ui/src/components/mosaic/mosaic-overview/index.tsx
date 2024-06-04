@@ -16,7 +16,7 @@ import cx from 'classnames'
 import MosaicAPI from '@/client/api/mosaic'
 import { swrConfig } from '@/client/options'
 import { useAppSelector } from '@/store/hook'
-import MosaicOverviewFile from './mosaic-overview-file'
+import MosaicOverviewArtifacts from './mosaic-overview-artifacts'
 import MosaicOverviewSettings from './mosaic-overview-settings'
 
 const MosaicOverview = () => {
@@ -26,19 +26,22 @@ const MosaicOverview = () => {
       : undefined,
   )
   const [isWarningVisible, setIsWarningVisible] = useState(true)
-  const { data: metadata } = MosaicAPI.useGetMetadata(id, swrConfig())
+  const { data: info } = MosaicAPI.useGetInfo(id, swrConfig())
+
+  if (!info) {
+    return null
+  }
 
   return (
     <>
       <ModalBody>
         <div className={cx('flex', 'flex-col', 'gap-1.5', 'w-full')}>
-          {metadata?.isOutdated && isWarningVisible ? (
-            <Alert status="warning">
+          {info.metadata?.isOutdated && isWarningVisible ? (
+            <Alert status="warning" className={cx('flex')}>
               <AlertIcon />
-              <Box>
+              <Box className={cx('grow')}>
                 <AlertDescription>
-                  This mosaic is outdated, it originates from an older snapshot.
-                  Please navigate to the settings tab to update.
+                  This mosaic is outdated, and can be updated in the settings.
                 </AlertDescription>
               </Box>
               <CloseButton
@@ -52,12 +55,12 @@ const MosaicOverview = () => {
           ) : null}
           <Tabs colorScheme="gray">
             <TabList>
-              <Tab>File</Tab>
+              <Tab>Artifacts</Tab>
               <Tab>Settings</Tab>
             </TabList>
             <TabPanels>
               <TabPanel>
-                <MosaicOverviewFile />
+                <MosaicOverviewArtifacts />
               </TabPanel>
               <TabPanel>
                 <MosaicOverviewSettings />

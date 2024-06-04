@@ -6,10 +6,10 @@ import {
   ModalHeader,
   ModalOverlay,
 } from '@chakra-ui/react'
-import FileAPI from '@/client/api/file'
+import WatermarkAPI from '@/client/api/watermark'
 import { swrConfig } from '@/client/options'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
-import { modalDidClose, mutateFileUpdated } from '@/store/ui/watermark'
+import { modalDidClose, mutateInfoUpdated } from '@/store/ui/watermark'
 import WatermarkCreate from './watermark-create'
 import WatermarkOverview from './watermark-overview'
 
@@ -21,13 +21,20 @@ const Watermark = () => {
       : undefined,
   )
   const isModalOpen = useAppSelector((state) => state.ui.watermark.isModalOpen)
-  const { data: file, mutate: mutateFile } = FileAPI.useGet(id, swrConfig())
+  const { data: info, mutate: mutateInfo } = WatermarkAPI.useGetInfo(
+    id,
+    swrConfig(),
+  )
 
   useEffect(() => {
-    if (mutateFile) {
-      dispatch(mutateFileUpdated(mutateFile))
+    if (mutateInfo) {
+      dispatch(mutateInfoUpdated(mutateInfo))
     }
-  }, [mutateFile])
+  }, [mutateInfo])
+
+  if (!info) {
+    return null
+  }
 
   return (
     <Modal
@@ -40,8 +47,7 @@ const Watermark = () => {
       <ModalContent>
         <ModalHeader>Watermark</ModalHeader>
         <ModalCloseButton />
-        {!file?.snapshot?.watermark ? <WatermarkCreate /> : null}
-        {file?.snapshot?.watermark ? <WatermarkOverview /> : null}
+        {info.isAvailable ? <WatermarkOverview /> : <WatermarkCreate />}
       </ModalContent>
     </Modal>
   )

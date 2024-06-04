@@ -6,7 +6,7 @@ import { getAccessTokenOrRedirect } from '@/infra/token'
 import { IconOpenInNew } from '@/lib/components/icons'
 import { useAppSelector } from '@/store/hook'
 
-const InsightsOverviewText = () => {
+const InsightsOverviewArtifacts = () => {
   const id = useAppSelector((state) =>
     state.ui.files.selection.length > 0
       ? state.ui.files.selection[0]
@@ -39,7 +39,7 @@ const InsightsOverviewText = () => {
           href={`/proxy/api/v2/insights/${id}/text${file.snapshot?.text.extension}?${searchParams}`}
           target="_blank"
         >
-          Open Text File
+          Open Plain Text File
         </Button>
       ) : null}
       {file.snapshot?.ocr ? (
@@ -57,4 +57,4 @@ const InsightsOverviewText = () => {
   )
 }
 
-export default InsightsOverviewText
+export default InsightsOverviewArtifacts

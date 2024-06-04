@@ -1,5 +1,10 @@
 package model
 
+type MosaicInfo struct {
+	IsAvailable bool            `json:"isAvailable"`
+	Metadata    *MosaicMetadata `json:"metadata,omitempty"`
+}
+
 type MosaicMetadata struct {
 	IsOutdated bool              `json:"isOutdated"`
 	Width      int               `json:"width"`

@@ -14,15 +14,15 @@ import { swrConfig } from '@/client/options'
 import { IconStacks } from '@/lib/components/icons'
 import NotificationBadge from '@/lib/components/notification-badge'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
-import { drawerDidClose } from '@/store/ui/tasks'
-import TasksList from './tasks-list'
+import { drawerDidClose, mutateCountUpdated } from '@/store/ui/tasks'
+import TasksList from './task-list'
 
-const TasksDrawer = () => {
+const TaskDrawer = () => {
   const dispatch = useAppDispatch()
   const buttonRef = useRef<HTMLButtonElement>(null)
   const { isOpen, onOpen, onClose } = useDisclosure()
   const isDrawerOpen = useAppSelector((state) => state.ui.tasks.isDrawerOpen)
-  const { data: count } = TaskAPI.useGetCount(swrConfig())
+  const { data: count, mutate: mutateCount } = TaskAPI.useGetCount(swrConfig())
 
   useEffect(() => {
     if (isDrawerOpen) {
@@ -31,6 +31,12 @@ const TasksDrawer = () => {
       onClose()
     }
   }, [isDrawerOpen, onOpen, onClose])
+
+  useEffect(() => {
+    if (mutateCount) {
+      dispatch(mutateCountUpdated(mutateCount))
+    }
+  }, [mutateCount, dispatch])
 
   return (
     <>
@@ -64,4 +70,4 @@ const TasksDrawer = () => {
   )
 }
 
-export default TasksDrawer
+export default TaskDrawer

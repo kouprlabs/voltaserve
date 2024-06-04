@@ -6,9 +6,8 @@ import { ltOwnerPermission } from '@/client/api/permission'
 import TaskAPI from '@/client/api/task'
 import WatermarkAPI from '@/client/api/watermark'
 import { swrConfig } from '@/client/options'
-import { IconDelete, IconSync } from '@/lib/components/icons'
+import { IconClose, IconSync } from '@/lib/components/icons'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
-import { drawerDidOpen as tasksDrawerDidOpen } from '@/store/ui/tasks'
 import { modalDidClose } from '@/store/ui/watermark'
 
 const WatermarkOverviewSettings = () => {
@@ -19,34 +18,32 @@ const WatermarkOverviewSettings = () => {
       : undefined,
   )
   const mutateFiles = useAppSelector((state) => state.ui.files.mutate)
-  const mutateTasks = useAppSelector((state) => state.ui.tasks.mutate)
-  const mutateFile = useAppSelector((state) => state.ui.watermark.mutateFile)
-  const { data: metadata } = WatermarkAPI.useGetMetadata(id, swrConfig())
+  const mutateTaskCount = useAppSelector((state) => state.ui.tasks.mutateCount)
+  const mutateInfo = useAppSelector((state) => state.ui.watermark.mutateInfo)
+  const { data: info } = WatermarkAPI.useGetInfo(id, swrConfig())
   const { data: file } = FileAPI.useGet(id, swrConfig())
 
   const handleUpdate = useCallback(async () => {
     if (id) {
       await WatermarkAPI.create(id)
-      mutateFile?.()
+      mutateInfo?.()
       mutateFiles?.()
-      mutateTasks?.(await TaskAPI.list())
+      mutateTaskCount?.(await TaskAPI.getCount())
       dispatch(modalDidClose())
-      dispatch(tasksDrawerDidOpen())
     }
-  }, [id, mutateFiles, mutateTasks, mutateFile, dispatch])
+  }, [id, mutateFiles, mutateTaskCount, mutateInfo, dispatch])
 
   const handleDelete = useCallback(async () => {
     if (id) {
       await WatermarkAPI.delete(id)
-      mutateFile?.()
+      mutateInfo?.()
       mutateFiles?.()
-      mutateTasks?.(await TaskAPI.list())
+      mutateTaskCount?.(await TaskAPI.getCount())
       dispatch(modalDidClose())
-      dispatch(tasksDrawerDidOpen())
     }
-  }, [id, mutateFiles, mutateTasks, mutateFile, dispatch])
+  }, [id, mutateFiles, mutateTaskCount, mutateInfo, dispatch])
 
-  if (!id || !metadata) {
+  if (!file || !info) {
     return null
   }
 
@@ -54,12 +51,12 @@ const WatermarkOverviewSettings = () => {
     <div className={cx('flex', 'flex-row', 'items-stretch', 'gap-1.5')}>
       <Card size="md" variant="outline" className={cx('w-[50%]')}>
         <CardBody>
-          <Text>Updates the watermark using the active snapshot.</Text>
+          <Text>Updates the watermark if outdated.</Text>
         </CardBody>
         <CardFooter>
           <Button
             leftIcon={<IconSync />}
-            isDisabled={!metadata.isOutdated}
+            isDisabled={!info.metadata?.isOutdated}
             onClick={handleUpdate}
           >
             Update
@@ -68,19 +65,16 @@ const WatermarkOverviewSettings = () => {
       </Card>
       <Card size="md" variant="outline" className={cx('w-[50%]')}>
         <CardBody>
-          <Text>
-            Deletes the watermark from the active snapshot, can be recreated
-            later.
-          </Text>
+          <Text>Disables the watermark, can be re-enabled later.</Text>
         </CardBody>
         <CardFooter>
           <Button
             colorScheme="red"
-            leftIcon={<IconDelete />}
+            leftIcon={<IconClose />}
             isDisabled={!file || ltOwnerPermission(file.permission)}
             onClick={handleDelete}
           >
-            Delete
+            Disable
           </Button>
         </CardFooter>
       </Card>

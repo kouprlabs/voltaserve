@@ -100,6 +100,13 @@ export default class TaskAPI {
     )
   }
 
+  static async getCount() {
+    return apiFetcher({
+      url: `/tasks/count`,
+      method: 'GET',
+    }) as Promise<number>
+  }
+
   static async delete(id: string) {
     return apiFetcher({
       url: `/tasks/${id}`,

@@ -92,7 +92,7 @@ func (svc *WatermarkService) Create(id string, userID string) error {
 	}
 	task, err := svc.taskRepo.Insert(repo.TaskInsertOptions{
 		ID:              helper.NewID(),
-		Name:            fmt.Sprintf("Create watermark for <b>%s</b>", file.GetName()),
+		Name:            fmt.Sprintf("Enable watermark for <b>%s</b>", file.GetName()),
 		UserID:          userID,
 		IsIndeterminate: true,
 	})
@@ -234,7 +234,7 @@ func (svc *WatermarkService) Delete(id string, userID string) error {
 	}
 	task, err := svc.taskRepo.Insert(repo.TaskInsertOptions{
 		ID:              helper.NewID(),
-		Name:            fmt.Sprintf("Delete watermark from <b>%s</b>", file.GetName()),
+		Name:            fmt.Sprintf("Disable watermark from <b>%s</b>", file.GetName()),
 		UserID:          userID,
 		IsIndeterminate: true,
 	})
@@ -285,7 +285,7 @@ func (svc *WatermarkService) Delete(id string, userID string) error {
 	return nil
 }
 
-func (svc *WatermarkService) GetMetadata(id string, userID string) (*model.WatermarkMetadata, error) {
+func (svc *WatermarkService) GetInfo(id string, userID string) (*model.WatermarkInfo, error) {
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return nil, err
@@ -307,12 +307,15 @@ func (svc *WatermarkService) GetMetadata(id string, userID string) (*model.Water
 			return nil, err
 		}
 		if previous == nil {
-			return nil, errorpkg.NewMosaicNotFoundError(nil)
+			return &model.WatermarkInfo{IsAvailable: false}, nil
 		} else {
 			isOutdated = true
 		}
 	}
-	return &model.WatermarkMetadata{IsOutdated: isOutdated}, nil
+	return &model.WatermarkInfo{
+		IsAvailable: true,
+		Metadata:    &model.WatermarkMetadata{IsOutdated: isOutdated},
+	}, nil
 }
 
 func (svc *WatermarkService) DownloadWatermarkBuffer(id string, userID string) (*bytes.Buffer, model.File, model.Snapshot, error) {

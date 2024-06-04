@@ -8,7 +8,6 @@ import TaskAPI from '@/client/api/task'
 import { swrConfig } from '@/client/options'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { modalDidClose } from '@/store/ui/insights'
-import { drawerDidOpen as tasksDrawerDidOpen } from '@/store/ui/tasks'
 import { reactSelectStyles } from '@/styles/react-select'
 
 interface LanguageOption extends OptionBase {
@@ -24,10 +23,8 @@ const InsightsCreate = () => {
       : undefined,
   )
   const mutateFiles = useAppSelector((state) => state.ui.files.mutate)
-  const mutateTasks = useAppSelector((state) => state.ui.tasks.mutate)
-  const mutateMetadata = useAppSelector(
-    (state) => state.ui.insights.mutateMetadata,
-  )
+  const mutateTasks = useAppSelector((state) => state.ui.tasks.mutateList)
+  const mutateMetadata = useAppSelector((state) => state.ui.insights.mutateInfo)
   const [language, setLanguage] = useState<Language>()
   const { data: languages } = InsightsAPI.useGetLanguages(swrConfig())
   const { data: file } = FileAPI.useGet(id, swrConfig())
@@ -50,7 +47,6 @@ const InsightsCreate = () => {
       mutateFiles?.()
       mutateTasks?.(await TaskAPI.list())
       dispatch(modalDidClose())
-      dispatch(tasksDrawerDidOpen())
     }
   }, [language, id, mutateFiles, mutateTasks, mutateMetadata, dispatch])
 
@@ -119,7 +115,7 @@ const InsightsCreate = () => {
             isDisabled={!language}
             onClick={handleCreate}
           >
-            Collect Insights
+            Enable
           </Button>
         </div>
       </ModalFooter>

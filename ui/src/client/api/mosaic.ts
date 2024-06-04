@@ -18,6 +18,11 @@ export type ZoomLevel = {
   tile: Tile
 }
 
+export type Info = {
+  isAvailable: boolean
+  metadata?: Metadata
+}
+
 export type Metadata = {
   isOutdated: boolean
   width: number
@@ -42,27 +47,27 @@ export default class MosaicAPI {
     })
   }
 
-  static useGetMetadata(
+  static useGetInfo(
     id: string | null | undefined,
     swrOptions?: SWRConfiguration,
   ) {
-    const url = `/mosaics/${id}/metadata`
-    return useSWR<Metadata>(
+    const url = `/mosaics/${id}/info`
+    return useSWR<Info>(
       id ? url : null,
       () =>
         apiFetcher({
           url,
           method: 'GET',
           showError: false,
-        }) as Promise<Metadata>,
+        }) as Promise<Info>,
       swrOptions,
     )
   }
 
-  static async getMetadata(id: string) {
+  static async getInfo(id: string) {
     return apiFetcher({
-      url: `/mosaics/${id}/metadata`,
+      url: `/mosaics/${id}/info`,
       method: 'GET',
-    }) as Promise<Metadata>
+    }) as Promise<Info>
   }
 }

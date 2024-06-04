@@ -11,6 +11,11 @@ export type Language = {
   name: string
 }
 
+export type Info = {
+  isAvailable: boolean
+  metadata?: Metadata
+}
+
 export type Metadata = {
   isOutdated: boolean
 }
@@ -79,19 +84,19 @@ export default class InsightsAPI {
     })
   }
 
-  static useGetMetadata(
+  static useGetInfo(
     id: string | null | undefined,
     swrOptions?: SWRConfiguration,
   ) {
-    const url = `/insights/${id}/metadata`
-    return useSWR<Metadata>(
+    const url = `/insights/${id}/info`
+    return useSWR<Info>(
       id ? url : null,
       () =>
         apiFetcher({
           url,
           method: 'GET',
           showError: false,
-        }) as Promise<Metadata>,
+        }) as Promise<Info>,
       swrOptions,
     )
   }

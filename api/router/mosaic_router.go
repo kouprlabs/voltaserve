@@ -29,7 +29,7 @@ func NewMosaicRouter() *MosaicRouter {
 func (r *MosaicRouter) AppendRoutes(g fiber.Router) {
 	g.Post("/:id", r.Create)
 	g.Delete("/:id", r.Delete)
-	g.Get("/:id/metadata", r.GetMetadata)
+	g.Get("/:id/info", r.GetInfo)
 }
 
 func (r *MosaicRouter) AppendNonJWTRoutes(g fiber.Router) {
@@ -76,21 +76,21 @@ func (r *MosaicRouter) Delete(c *fiber.Ctx) error {
 	return c.SendStatus(http.StatusNoContent)
 }
 
-// GetMetadata godoc
+// GetInfo godoc
 //
-//	@Summary		Get Metadata
-//	@Description	Get Metadata
+//	@Summary		Get Info
+//	@Description	Get Info
 //	@Tags			Mosaic
-//	@Id				mosaic_get_metadata
+//	@Id				mosaic_get_info
 //	@Accept			json
 //	@Produce		json
 //	@Param			id	path		string	true	"ID"
-//	@Success		200	{object}	model.MosaicMetadata
+//	@Success		200	{object}	model.MosaicInfo
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
-//	@Router			/mosaics/{id}/metadata [get]
-func (r *MosaicRouter) GetMetadata(c *fiber.Ctx) error {
-	res, err := r.mosaicSvc.GetMetadata(c.Params("id"), GetUserID(c))
+//	@Router			/mosaics/{id}/info [get]
+func (r *MosaicRouter) GetInfo(c *fiber.Ctx) error {
+	res, err := r.mosaicSvc.GetInfo(c.Params("id"), GetUserID(c))
 	if err != nil {
 		return err
 	}
