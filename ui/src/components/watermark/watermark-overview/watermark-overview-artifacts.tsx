@@ -34,7 +34,7 @@ const WatermarkOverviewArtifacts = () => {
         target="_blank"
         href={`/file/${file.id}/watermark`}
       >
-        Open Watermark Protected File
+        Open Watermark-Protected File
       </Button>
     </div>
   )

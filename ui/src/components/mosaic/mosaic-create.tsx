@@ -44,9 +44,9 @@ const MosaicCreate = () => {
           )}
         >
           <p>
-            The mosaic enhances view performance of large images by splitting
-            them into smaller, manageable tiles. This makes browsing
-            high-resolution images faster and more efficient.
+            Create a mosaic to enhance view performance of a large image by
+            splitting it into smaller, manageable tiles. This makes browsing a
+            high-resolution image faster and more efficient.
           </p>
         </div>
       </ModalBody>
@@ -66,7 +66,7 @@ const MosaicCreate = () => {
             colorScheme="blue"
             onClick={handleCreate}
           >
-            Enable
+            Create
           </Button>
         </div>
       </ModalFooter>

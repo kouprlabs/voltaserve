@@ -34,7 +34,7 @@ const MosaicOverviewArtifacts = () => {
         target="_blank"
         href={`/file/${file.id}/mosaic`}
       >
-        Open Mosaic Enhanced Image
+        View Mosaic
       </Button>
     </div>
   )

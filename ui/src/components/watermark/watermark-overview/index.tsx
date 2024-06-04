@@ -16,7 +16,7 @@ import cx from 'classnames'
 import WatermarkAPI from '@/client/api/watermark'
 import { swrConfig } from '@/client/options'
 import { useAppSelector } from '@/store/hook'
-import WatermarkOverviewArtifacts from './watermark-overview-file'
+import WatermarkOverviewArtifacts from './watermark-overview-artifacts'
 import WatermarkOverviewSettings from './watermark-overview-settings'
 
 const WatermarkOverview = () => {
@@ -41,7 +41,8 @@ const WatermarkOverview = () => {
               <AlertIcon />
               <Box className={cx('grow')}>
                 <AlertDescription>
-                  This watermark is outdated, it can be updated in the settings.
+                  The watermark is applied on an older snapshot. You can apply
+                  it on the active snapshot from the settings.
                 </AlertDescription>
               </Box>
               <CloseButton

@@ -6,7 +6,7 @@ import MosaicAPI from '@/client/api/mosaic'
 import { ltOwnerPermission } from '@/client/api/permission'
 import TaskAPI from '@/client/api/task'
 import { swrConfig } from '@/client/options'
-import { IconClose, IconSync } from '@/lib/components/icons'
+import { IconDelete, IconSync } from '@/lib/components/icons'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { modalDidClose } from '@/store/ui/mosaic'
 
@@ -51,7 +51,7 @@ const MosaicOverviewSettings = () => {
     <div className={cx('flex', 'flex-row', 'items-stretch', 'gap-1.5')}>
       <Card size="md" variant="outline" className={cx('w-[50%]')}>
         <CardBody>
-          <Text>Update the mosaic if outdated.</Text>
+          <Text>Create a mosaic for the active snapshot.</Text>
         </CardBody>
         <CardFooter>
           <Button
@@ -59,22 +59,22 @@ const MosaicOverviewSettings = () => {
             isDisabled={!info.metadata?.isOutdated}
             onClick={handleUpdate}
           >
-            Update
+            Create
           </Button>
         </CardFooter>
       </Card>
       <Card size="md" variant="outline" className={cx('w-[50%]')}>
         <CardBody>
-          <Text>Disable the mosaic, can be re-enabled later.</Text>
+          <Text>Delete mosaic from the active snapshot.</Text>
         </CardBody>
         <CardFooter>
           <Button
             colorScheme="red"
-            leftIcon={<IconClose />}
+            leftIcon={<IconDelete />}
             isDisabled={!file || ltOwnerPermission(file.permission)}
             onClick={handleDelete}
           >
-            Disable
+            Delete
           </Button>
         </CardFooter>
       </Card>

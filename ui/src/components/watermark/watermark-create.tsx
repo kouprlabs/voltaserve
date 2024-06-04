@@ -44,9 +44,10 @@ const WatermarkCreate = () => {
           )}
         >
           <p>
-            Protect your document or image with a watermark to enhance its
-            security by clearly marking it as confidential or proprietary, thus
-            deterring unauthorized use or distribution.
+            Apply a watermark on your file to label it as confidential or
+            proprietary, thus deterring unauthorized use or distribution. The
+            watermark will be visible by default to users with view only
+            permission.
           </p>
         </div>
       </ModalBody>
@@ -66,7 +67,7 @@ const WatermarkCreate = () => {
             colorScheme="blue"
             onClick={handleCreate}
           >
-            Enable
+            Apply
           </Button>
         </div>
       </ModalFooter>

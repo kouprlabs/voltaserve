@@ -72,7 +72,7 @@ func (svc *MosaicService) Create(id string, userID string) error {
 	}
 	task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
 		ID:              helper.NewID(),
-		Name:            fmt.Sprintf("Enable mosaic for <b>%s</b>", file.GetName()),
+		Name:            fmt.Sprintf("Create mosaic for <b>%s</b>", file.GetName()),
 		UserID:          userID,
 		IsIndeterminate: true,
 	})
@@ -174,7 +174,7 @@ func (svc *MosaicService) Delete(id string, userID string) error {
 		}
 		task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
 			ID:              helper.NewID(),
-			Name:            fmt.Sprintf("Disable mosaic from <b>%s</b>", file.GetName()),
+			Name:            fmt.Sprintf("Delete mosaic from <b>%s</b>", file.GetName()),
 			UserID:          userID,
 			IsIndeterminate: true,
 		})

@@ -42,8 +42,8 @@ const InsightsOverview = () => {
               <AlertIcon />
               <Box className={cx('grow')}>
                 <AlertDescription>
-                  These insights are outdated, it can be updated in the
-                  settings.
+                  These insights come from an older snapshot. You can collect
+                  new ones for the active snapshot from the settings.
                 </AlertDescription>
               </Box>
               <CloseButton

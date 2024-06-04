@@ -76,11 +76,10 @@ const InsightsCreate = () => {
           )}
         >
           <p>
-            Select the language to use for collecting insights.
-            <br />
-            During the process, text will be extracted using OCR (optical
-            character recognition), and entities will be scanned using NER
-            (named entity recognition).
+            Select the language to use for collecting insights. During the
+            process, text will be extracted using OCR (optical character
+            recognition), and entities will be scanned using NER (named entity
+            recognition).
           </p>
           {languages ? (
             <Select<LanguageOption, false>
@@ -115,7 +114,7 @@ const InsightsCreate = () => {
             isDisabled={!language}
             onClick={handleCreate}
           >
-            Enable
+            Collect
           </Button>
         </div>
       </ModalFooter>

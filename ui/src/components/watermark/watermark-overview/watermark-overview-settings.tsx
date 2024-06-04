@@ -6,7 +6,7 @@ import { ltOwnerPermission } from '@/client/api/permission'
 import TaskAPI from '@/client/api/task'
 import WatermarkAPI from '@/client/api/watermark'
 import { swrConfig } from '@/client/options'
-import { IconClose, IconSync } from '@/lib/components/icons'
+import { IconDelete, IconSync } from '@/lib/components/icons'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { modalDidClose } from '@/store/ui/watermark'
 
@@ -51,7 +51,7 @@ const WatermarkOverviewSettings = () => {
     <div className={cx('flex', 'flex-row', 'items-stretch', 'gap-1.5')}>
       <Card size="md" variant="outline" className={cx('w-[50%]')}>
         <CardBody>
-          <Text>Update the watermark if outdated.</Text>
+          <Text>Apply watermark on the active snapshot.</Text>
         </CardBody>
         <CardFooter>
           <Button
@@ -59,22 +59,22 @@ const WatermarkOverviewSettings = () => {
             isDisabled={!info.metadata?.isOutdated}
             onClick={handleUpdate}
           >
-            Update
+            Apply
           </Button>
         </CardFooter>
       </Card>
       <Card size="md" variant="outline" className={cx('w-[50%]')}>
         <CardBody>
-          <Text>Disable the watermark, can be re-enabled later.</Text>
+          <Text>Delete watermark from the active snapshot.</Text>
         </CardBody>
         <CardFooter>
           <Button
             colorScheme="red"
-            leftIcon={<IconClose />}
+            leftIcon={<IconDelete />}
             isDisabled={!file || ltOwnerPermission(file.permission)}
             onClick={handleDelete}
           >
-            Disable
+            Delete
           </Button>
         </CardFooter>
       </Card>

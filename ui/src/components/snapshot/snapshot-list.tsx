@@ -203,7 +203,7 @@ const SnapshotList = () => {
               isDisabled={!selected || selected.isActive || isActivating}
               onClick={handleDetach}
             >
-              Detach Snapshot
+              Detach
             </Button>
             <Button
               variant="solid"
@@ -212,7 +212,7 @@ const SnapshotList = () => {
               isDisabled={!selected || selected.isActive || isActivating}
               onClick={handleActivate}
             >
-              Activate Snapshot
+              Activate
             </Button>
           </div>
         </ModalFooter>

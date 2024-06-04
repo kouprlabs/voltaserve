@@ -86,7 +86,7 @@ func (svc *WatermarkService) Create(id string, userID string) error {
 	}
 	task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
 		ID:              helper.NewID(),
-		Name:            fmt.Sprintf("Enable watermark for <b>%s</b>", file.GetName()),
+		Name:            fmt.Sprintf("Apply watermark on <b>%s</b>", file.GetName()),
 		UserID:          userID,
 		IsIndeterminate: true,
 	})
@@ -203,7 +203,7 @@ func (svc *WatermarkService) Delete(id string, userID string) error {
 	}
 	task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
 		ID:              helper.NewID(),
-		Name:            fmt.Sprintf("Disable watermark from <b>%s</b>", file.GetName()),
+		Name:            fmt.Sprintf("Delete watermark from <b>%s</b>", file.GetName()),
 		UserID:          userID,
 		IsIndeterminate: true,
 	})

@@ -110,7 +110,7 @@ func (svc *InsightsService) Create(id string, opts InsightsCreateOptions, userID
 	}
 	task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
 		ID:              helper.NewID(),
-		Name:            fmt.Sprintf("Enable insights for <b>%s</b>", file.GetName()),
+		Name:            fmt.Sprintf("Collect insights for <b>%s</b>", file.GetName()),
 		UserID:          userID,
 		IsIndeterminate: true,
 	})
@@ -182,7 +182,7 @@ func (svc *InsightsService) Patch(id string, userID string) error {
 	}
 	task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
 		ID:              helper.NewID(),
-		Name:            fmt.Sprintf("Update insights for <b>%s</b>", file.GetName()),
+		Name:            fmt.Sprintf("Collect insights for <b>%s</b>", file.GetName()),
 		UserID:          userID,
 		IsIndeterminate: true,
 	})
@@ -387,7 +387,7 @@ func (svc *InsightsService) Delete(id string, userID string) error {
 	snapshot.SetStatus(model.SnapshotStatusProcessing)
 	task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
 		ID:              helper.NewID(),
-		Name:            fmt.Sprintf("Disable insights from <b>%s</b>", file.GetName()),
+		Name:            fmt.Sprintf("Delete insights from <b>%s</b>", file.GetName()),
 		UserID:          userID,
 		IsIndeterminate: true,
 	})
