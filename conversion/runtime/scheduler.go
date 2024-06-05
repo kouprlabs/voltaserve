@@ -57,6 +57,13 @@ func (s *Scheduler) Start() {
 }
 
 func (s *Scheduler) SchedulePipeline(opts *core.PipelineRunOptions) {
+	index := s.choosePipeline()
+	s.logger.Named(infra.StrScheduler).Infow("👉  choosing", "pipeline", index)
+	s.pipelineQueue[index] = append(s.pipelineQueue[index], *opts)
+}
+
+/* Choose the pipeline with the least number of items in the queue */
+func (s *Scheduler) choosePipeline() int {
 	index := 0
 	length := len(s.pipelineQueue[0])
 	for i := 0; i < s.pipelineWorkerCount; i++ {
@@ -65,8 +72,7 @@ func (s *Scheduler) SchedulePipeline(opts *core.PipelineRunOptions) {
 			length = len(s.pipelineQueue[i])
 		}
 	}
-	s.logger.Named(infra.StrScheduler).Infow("👉  choosing", "pipeline", index)
-	s.pipelineQueue[index] = append(s.pipelineQueue[index], *opts)
+	return index
 }
 
 func (s *Scheduler) pipelineWorker(index int) {
