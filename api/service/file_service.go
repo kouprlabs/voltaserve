@@ -222,7 +222,7 @@ func (svc *FileService) Store(id string, path string, userID string) (*File, err
 	original := model.S3Object{
 		Bucket: workspace.GetBucket(),
 		Key:    snapshotID + "/original" + strings.ToLower(filepath.Ext(path)),
-		Size:   stat.Size(),
+		Size:   helper.ToPtr(stat.Size()),
 	}
 	if err = svc.s3.PutFile(original.Key, path, infra.DetectMimeFromFile(path), workspace.GetBucket()); err != nil {
 		return nil, err
@@ -252,7 +252,6 @@ func (svc *FileService) Store(id string, path string, userID string) (*File, err
 			SnapshotID: snapshot.GetID(),
 			Bucket:     original.Bucket,
 			Key:        original.Key,
-			Size:       original.Size,
 		}); err != nil {
 			return nil, err
 		}
@@ -1334,11 +1333,11 @@ func (svc *FileService) doSorting(data []model.File, sortBy string, sortOrder st
 			}
 			var sizeA int64 = 0
 			if fileA.Snapshot != nil && fileA.Snapshot.Original != nil {
-				sizeA = int64(fileA.Snapshot.Original.Size)
+				sizeA = int64(*fileA.Snapshot.Original.Size)
 			}
 			var sizeB int64 = 0
 			if fileB.Snapshot != nil && fileB.Snapshot.Original != nil {
-				sizeB = int64(fileB.Snapshot.Original.Size)
+				sizeB = int64(*fileB.Snapshot.Original.Size)
 			}
 			if sortOrder == SortOrderDesc {
 				return sizeA > sizeB

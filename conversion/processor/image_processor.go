@@ -135,3 +135,30 @@ func (p *ImageProcessor) ConvertImage(inputPath string, outputPath string) error
 	}
 	return nil
 }
+
+func (p *ImageProcessor) RemoveAlphaChannel(inputPath string, outputPath string) error {
+	if err := infra.NewCommand().Exec("convert", inputPath, "-alpha", "off", outputPath); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (p *ImageProcessor) DPIFromImage(inputPath string) (int, error) {
+	output, err := infra.NewCommand().ReadOutput("exiftool", "-S", "-s", "-ImageWidth", "-ImageHeight", "-XResolution", "-YResolution", "-ResolutionUnit", inputPath)
+	if err != nil {
+		return -1, err
+	}
+	lines := strings.Split(output, "\n")
+	if len(lines) < 5 || lines[4] != "inches" {
+		return 72, nil
+	}
+	xRes, err := strconv.ParseFloat(lines[2], 64)
+	if err != nil {
+		return -1, err
+	}
+	yRes, err := strconv.ParseFloat(lines[3], 64)
+	if err != nil {
+		return -1, err
+	}
+	return int((xRes + yRes) / 2), nil
+}

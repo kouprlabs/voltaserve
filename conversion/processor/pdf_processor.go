@@ -25,22 +25,25 @@ func NewPDFProcessor() *PDFProcessor {
 }
 
 func (p *PDFProcessor) Base64Thumbnail(inputPath string) (core.ImageBase64, error) {
-	outputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".png")
-	if err := p.imageProc.ThumbnailFromImage(inputPath, 0, p.config.Limits.ImagePreviewMaxHeight, outputPath); err != nil {
+	tmpPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".png")
+	if err := p.imageProc.ThumbnailFromImage(inputPath, 0, p.config.Limits.ImagePreviewMaxHeight, tmpPath); err != nil {
 		return core.ImageBase64{}, err
 	}
-	b64, err := helper.ImageToBase64(outputPath)
-	if err != nil {
-		return core.ImageBase64{}, err
-	}
-	imageProps, err := p.imageProc.MeasureImage(outputPath)
-	if err != nil {
-		return core.ImageBase64{}, err
-	}
-	if _, err := os.Stat(outputPath); err == nil {
-		if err := os.Remove(outputPath); err != nil {
-			return core.ImageBase64{}, err
+	defer func(path string) {
+		_, err := os.Stat(path)
+		if os.IsExist(err) {
+			if err := os.Remove(path); err != nil {
+				infra.GetLogger().Error(err)
+			}
 		}
+	}(tmpPath)
+	b64, err := helper.ImageToBase64(tmpPath)
+	if err != nil {
+		return core.ImageBase64{}, err
+	}
+	imageProps, err := p.imageProc.MeasureImage(tmpPath)
+	if err != nil {
+		return core.ImageBase64{}, err
 	}
 	return core.ImageBase64{
 		Base64: b64,
@@ -50,15 +53,20 @@ func (p *PDFProcessor) Base64Thumbnail(inputPath string) (core.ImageBase64, erro
 }
 
 func (p *PDFProcessor) TextFromPDF(inputPath string) (string, error) {
-	outputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".txt")
-	if err := infra.NewCommand().Exec("pdftotext", inputPath, outputPath); err != nil {
+	tmpPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".txt")
+	if err := infra.NewCommand().Exec("pdftotext", inputPath, tmpPath); err != nil {
 		return "", err
 	}
-	b, err := os.ReadFile(outputPath)
+	defer func(path string) {
+		_, err := os.Stat(path)
+		if os.IsExist(err) {
+			if err := os.Remove(path); err != nil {
+				infra.GetLogger().Error(err)
+			}
+		}
+	}(tmpPath)
+	b, err := os.ReadFile(tmpPath)
 	if err != nil {
-		return "", err
-	}
-	if err := os.Remove(outputPath); err != nil {
 		return "", err
 	}
 	return strings.TrimSpace(string(b)), nil

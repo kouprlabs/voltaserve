@@ -18,11 +18,22 @@ func NewPipelineClient() *PipelineClient {
 	}
 }
 
+const (
+	PipelinePDF       = "pdf"
+	PipelineOffice    = "office"
+	PipelineImage     = "image"
+	PipelineVideo     = "video"
+	PipelineInsights  = "insights"
+	PipelineMoasic    = "mosaic"
+	PipelineWatermark = "watermark"
+)
+
 type PipelineRunOptions struct {
-	SnapshotID string `json:"snapshotId"`
-	Bucket     string `json:"bucket"`
-	Key        string `json:"key"`
-	Size       int64  `json:"size"`
+	PipelineID *string  `json:"pipelineId,omitempty"`
+	SnapshotID string   `json:"snapshotId"`
+	Bucket     string   `json:"bucket"`
+	Key        string   `json:"key"`
+	Values     []string `json:"values,omitempty"`
 }
 
 func (cl *PipelineClient) Run(opts *PipelineRunOptions) error {

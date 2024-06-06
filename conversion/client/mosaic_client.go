@@ -3,14 +3,14 @@ package client
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"mime/multipart"
 	"net/http"
 	"os"
 	"voltaserve/config"
-	"voltaserve/errorpkg"
-	"voltaserve/log"
+	"voltaserve/infra"
 )
 
 type MosaicClient struct {
@@ -61,7 +61,7 @@ func (cl *MosaicClient) Create(opts MosaicCreateOptions) (*MosaicMetadata, error
 	}
 	defer func(file *os.File) {
 		if err := file.Close(); err != nil {
-			log.GetLogger().Error(err)
+			infra.GetLogger().Error(err)
 		}
 	}(file)
 	buf := &bytes.Buffer{}
@@ -94,7 +94,7 @@ func (cl *MosaicClient) Create(opts MosaicCreateOptions) (*MosaicMetadata, error
 	}
 	defer func(Body io.ReadCloser) {
 		if err := Body.Close(); err != nil {
-			log.GetLogger().Error(err)
+			infra.GetLogger().Error(err)
 		}
 	}(resp.Body)
 	if resp.StatusCode != http.StatusOK {
@@ -123,12 +123,12 @@ func (cl *MosaicClient) GetMetadata(opts MosaicGetMetadataOptions) (*MosaicMetad
 	}
 	defer func(Body io.ReadCloser) {
 		if err := Body.Close(); err != nil {
-			log.GetLogger().Error(err)
+			infra.GetLogger().Error(err)
 		}
 	}(resp.Body)
 	if resp.StatusCode != http.StatusOK {
 		if resp.StatusCode == http.StatusNotFound {
-			return nil, errorpkg.NewMosaicNotFoundError(nil)
+			return nil, errors.New("mosaic not found")
 		} else {
 			return nil, fmt.Errorf("request failed with status %d", resp.StatusCode)
 		}
@@ -162,7 +162,7 @@ func (cl *MosaicClient) Delete(opts MosaicDeleteOptions) error {
 	}
 	if resp.StatusCode != http.StatusNoContent {
 		if resp.StatusCode == http.StatusNotFound {
-			return errorpkg.NewMosaicNotFoundError(nil)
+			return errors.New("mosaic not found")
 		} else {
 			return fmt.Errorf("request failed with status %d", resp.StatusCode)
 		}
@@ -186,12 +186,12 @@ func (cl *MosaicClient) DownloadTileBuffer(opts MosaicDownloadTileOptions) (*byt
 	}
 	defer func(Body io.ReadCloser) {
 		if err := Body.Close(); err != nil {
-			log.GetLogger().Error(err)
+			infra.GetLogger().Error(err)
 		}
 	}(resp.Body)
 	if resp.StatusCode != http.StatusOK {
 		if resp.StatusCode == http.StatusNotFound {
-			return nil, errorpkg.NewMosaicNotFoundError(nil)
+			return nil, errors.New("tile not found")
 		} else {
 			return nil, fmt.Errorf("request failed with status %d", resp.StatusCode)
 		}

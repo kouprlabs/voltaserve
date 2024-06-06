@@ -1,7 +1,6 @@
 package processor
 
 import (
-	"go.uber.org/zap"
 	"os"
 	"path/filepath"
 	"voltaserve/config"
@@ -14,19 +13,13 @@ type VideoProcessor struct {
 	cmd       *infra.Command
 	imageProc *ImageProcessor
 	config    config.Config
-	logger    *zap.SugaredLogger
 }
 
 func NewVideoProcessor() *VideoProcessor {
-	logger, err := infra.GetLogger()
-	if err != nil {
-		panic(err)
-	}
 	return &VideoProcessor{
 		cmd:       infra.NewCommand(),
 		imageProc: NewImageProcessor(),
 		config:    config.GetConfig(),
-		logger:    logger,
 	}
 }
 
@@ -35,29 +28,39 @@ func (p *VideoProcessor) Thumbnail(inputPath string, width int, height int, outp
 	if err := infra.NewCommand().Exec("ffmpeg", "-i", inputPath, "-frames:v", "1", tmpPath); err != nil {
 		return err
 	}
+	defer func(path string) {
+		_, err := os.Stat(path)
+		if os.IsExist(err) {
+			if err := os.Remove(path); err != nil {
+				infra.GetLogger().Error(err)
+			}
+		}
+	}(tmpPath)
 	if err := p.imageProc.ResizeImage(tmpPath, width, height, outputPath); err != nil {
-		return err
-	}
-	if err := os.Remove(tmpPath); err != nil {
 		return err
 	}
 	return nil
 }
 
 func (p *VideoProcessor) Base64Thumbnail(inputPath string) (core.ImageBase64, error) {
-	outputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".png")
-	if err := p.Thumbnail(inputPath, 0, p.config.Limits.ImagePreviewMaxHeight, outputPath); err != nil {
+	tmpPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".png")
+	if err := p.Thumbnail(inputPath, 0, p.config.Limits.ImagePreviewMaxHeight, tmpPath); err != nil {
 		return core.ImageBase64{}, err
 	}
-	b64, err := helper.ImageToBase64(outputPath)
+	defer func(path string) {
+		_, err := os.Stat(path)
+		if os.IsExist(err) {
+			if err := os.Remove(path); err != nil {
+				infra.GetLogger().Error(err)
+			}
+		}
+	}(tmpPath)
+	b64, err := helper.ImageToBase64(tmpPath)
 	if err != nil {
 		return core.ImageBase64{}, err
 	}
-	imageProps, err := p.imageProc.MeasureImage(outputPath)
+	imageProps, err := p.imageProc.MeasureImage(tmpPath)
 	if err != nil {
-		return core.ImageBase64{}, err
-	}
-	if err := os.Remove(outputPath); err != nil {
 		return core.ImageBase64{}, err
 	}
 	return core.ImageBase64{

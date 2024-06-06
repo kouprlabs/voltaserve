@@ -65,7 +65,7 @@ type Snapshot struct {
 
 type Download struct {
 	Extension string      `json:"extension,omitempty"`
-	Size      int64       `json:"size,omitempty"`
+	Size      *int64      `json:"size,omitempty"`
 	Image     *ImageProps `json:"image,omitempty"`
 }
 
@@ -262,6 +262,9 @@ type SnapshotUpdateOptions struct {
 	Preview   *model.S3Object           `json:"preview,omitempty"`
 	Text      *model.S3Object           `json:"text,omitempty"`
 	OCR       *model.S3Object           `json:"ocr,omitempty"`
+	Entities  *model.S3Object           `json:"entities,omitempty"`
+	Mosaic    *model.S3Object           `json:"mosaic,omitempty"`
+	Watermark *model.S3Object           `json:"watermark,omitempty"`
 	Thumbnail *model.Thumbnail          `json:"thumbnail,omitempty"`
 	Status    string                    `json:"status,omitempty"`
 }
@@ -274,10 +277,14 @@ func (svc *SnapshotService) Patch(id string, opts SnapshotUpdateOptions, apiKey 
 		return errorpkg.NewInvalidAPIKeyError()
 	}
 	if err := svc.snapshotRepo.Update(id, repo.SnapshotUpdateOptions{
-		Thumbnail: opts.Thumbnail,
 		Original:  opts.Original,
 		Preview:   opts.Preview,
 		Text:      opts.Text,
+		OCR:       opts.OCR,
+		Entities:  opts.Entities,
+		Mosaic:    opts.Mosaic,
+		Watermark: opts.Watermark,
+		Thumbnail: opts.Thumbnail,
 		Status:    opts.Status,
 	}); err != nil {
 		return err
@@ -349,24 +356,24 @@ type ImageProps struct {
 	Height int `json:"height"`
 }
 
-func (mp *SnapshotMapper) mapS3Object(m *model.S3Object) *Download {
+func (mp *SnapshotMapper) mapS3Object(o *model.S3Object) *Download {
 	download := &Download{
-		Extension: filepath.Ext(m.Key),
-		Size:      m.Size,
+		Extension: filepath.Ext(o.Key),
+		Size:      o.Size,
 	}
-	if m.Image != nil {
+	if o.Image != nil {
 		download.Image = &ImageProps{
-			Width:  m.Image.Width,
-			Height: m.Image.Height,
+			Width:  o.Image.Width,
+			Height: o.Image.Height,
 		}
 	}
 	return download
 }
 
-func (mp *SnapshotMapper) mapThumbnail(m *model.Thumbnail) *Thumbnail {
+func (mp *SnapshotMapper) mapThumbnail(t *model.Thumbnail) *Thumbnail {
 	return &Thumbnail{
-		Base64: m.Base64,
-		Width:  m.Width,
-		Height: m.Height,
+		Base64: t.Base64,
+		Width:  t.Width,
+		Height: t.Height,
 	}
 }

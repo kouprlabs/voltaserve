@@ -9,8 +9,6 @@ import (
 	"voltaserve/helper"
 	"voltaserve/infra"
 	"voltaserve/processor"
-
-	"go.uber.org/zap"
 )
 
 type officePipeline struct {
@@ -20,14 +18,9 @@ type officePipeline struct {
 	s3          *infra.S3Manager
 	config      config.Config
 	apiClient   *client.APIClient
-	logger      *zap.SugaredLogger
 }
 
 func NewOfficePipeline() core.Pipeline {
-	logger, err := infra.GetLogger()
-	if err != nil {
-		panic(err)
-	}
 	return &officePipeline{
 		pdfPipeline: NewPDFPipeline(),
 		officeProc:  processor.NewOfficeProcessor(),
@@ -35,7 +28,6 @@ func NewOfficePipeline() core.Pipeline {
 		s3:          infra.NewS3Manager(),
 		config:      config.GetConfig(),
 		apiClient:   client.NewAPIClient(),
-		logger:      logger,
 	}
 }
 
@@ -44,26 +36,33 @@ func (p *officePipeline) Run(opts core.PipelineRunOptions) error {
 	if err := p.s3.GetFile(opts.Key, inputPath, opts.Bucket); err != nil {
 		return err
 	}
-	defer func(inputPath string, logger *zap.SugaredLogger) {
-		_, err := os.Stat(inputPath)
+	defer func(path string) {
+		_, err := os.Stat(path)
 		if os.IsExist(err) {
-			if err := os.Remove(inputPath); err != nil {
-				p.logger.Error(err)
+			if err := os.Remove(path); err != nil {
+				infra.GetLogger().Error(err)
 			}
 		}
-	}(inputPath, p.logger)
+	}(inputPath)
+	if err := p.create(inputPath, opts); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (p *officePipeline) create(inputPath string, opts core.PipelineRunOptions) error {
 	outputPath, err := p.officeProc.PDF(inputPath)
 	if err != nil {
 		return err
 	}
-	defer func(outputPath string, logger *zap.SugaredLogger) {
-		_, err := os.Stat(outputPath)
+	defer func(path string) {
+		_, err := os.Stat(path)
 		if os.IsExist(err) {
-			if err := os.Remove(outputPath); err != nil {
-				p.logger.Error(err)
+			if err := os.Remove(path); err != nil {
+				infra.GetLogger().Error(err)
 			}
 		}
-	}(outputPath, p.logger)
+	}(outputPath)
 	stat, err := os.Stat(outputPath)
 	if err != nil {
 		return err
@@ -87,7 +86,7 @@ func (p *officePipeline) Run(opts core.PipelineRunOptions) error {
 		Preview: &core.S3Object{
 			Bucket: opts.Bucket,
 			Key:    previewKey,
-			Size:   stat.Size(),
+			Size:   helper.ToPtr(stat.Size()),
 		},
 	}); err != nil {
 		return err

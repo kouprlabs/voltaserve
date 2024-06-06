@@ -3,10 +3,10 @@ package repo
 import (
 	"encoding/json"
 	"errors"
-	"log"
 	"time"
 	"voltaserve/errorpkg"
 	"voltaserve/infra"
+	"voltaserve/log"
 	"voltaserve/model"
 
 	"gorm.io/datatypes"
@@ -87,7 +87,7 @@ func (s *snapshotEntity) GetOriginal() *model.S3Object {
 	}
 	var res = model.S3Object{}
 	if err := json.Unmarshal([]byte(s.Original.String()), &res); err != nil {
-		log.Fatal(err)
+		log.GetLogger().Fatal(err)
 		return nil
 	}
 	return &res
@@ -99,7 +99,7 @@ func (s *snapshotEntity) GetPreview() *model.S3Object {
 	}
 	var res = model.S3Object{}
 	if err := json.Unmarshal([]byte(s.Preview.String()), &res); err != nil {
-		log.Fatal(err)
+		log.GetLogger().Fatal(err)
 		return nil
 	}
 	return &res
@@ -111,7 +111,7 @@ func (s *snapshotEntity) GetText() *model.S3Object {
 	}
 	var res = model.S3Object{}
 	if err := json.Unmarshal([]byte(s.Text.String()), &res); err != nil {
-		log.Fatal(err)
+		log.GetLogger().Fatal(err)
 		return nil
 	}
 	return &res
@@ -123,7 +123,7 @@ func (s *snapshotEntity) GetOCR() *model.S3Object {
 	}
 	var res = model.S3Object{}
 	if err := json.Unmarshal([]byte(s.OCR.String()), &res); err != nil {
-		log.Fatal(err)
+		log.GetLogger().Fatal(err)
 		return nil
 	}
 	return &res
@@ -135,7 +135,7 @@ func (s *snapshotEntity) GetEntities() *model.S3Object {
 	}
 	var res = model.S3Object{}
 	if err := json.Unmarshal([]byte(s.Entities.String()), &res); err != nil {
-		log.Fatal(err)
+		log.GetLogger().Fatal(err)
 		return nil
 	}
 	return &res
@@ -147,7 +147,7 @@ func (s *snapshotEntity) GetMosaic() *model.S3Object {
 	}
 	var res = model.S3Object{}
 	if err := json.Unmarshal([]byte(s.Mosaic.String()), &res); err != nil {
-		log.Fatal(err)
+		log.GetLogger().Fatal(err)
 		return nil
 	}
 	return &res
@@ -159,7 +159,7 @@ func (s *snapshotEntity) GetWatermark() *model.S3Object {
 	}
 	var res = model.S3Object{}
 	if err := json.Unmarshal([]byte(s.Watermark.String()), &res); err != nil {
-		log.Fatal(err)
+		log.GetLogger().Fatal(err)
 		return nil
 	}
 	return &res
@@ -171,7 +171,7 @@ func (s *snapshotEntity) GetThumbnail() *model.Thumbnail {
 	}
 	var res = model.Thumbnail{}
 	if err := json.Unmarshal([]byte(s.Thumbnail.String()), &res); err != nil {
-		log.Fatal(err)
+		log.GetLogger().Fatal(err)
 		return nil
 	}
 	return &res
@@ -199,11 +199,11 @@ func (s *snapshotEntity) SetOriginal(m *model.S3Object) {
 	} else {
 		b, err := json.Marshal(m)
 		if err != nil {
-			log.Fatal(err)
+			log.GetLogger().Fatal(err)
 			return
 		}
 		if err := s.Original.UnmarshalJSON(b); err != nil {
-			log.Fatal(err)
+			log.GetLogger().Fatal(err)
 		}
 	}
 }
@@ -214,11 +214,11 @@ func (s *snapshotEntity) SetPreview(m *model.S3Object) {
 	} else {
 		b, err := json.Marshal(m)
 		if err != nil {
-			log.Fatal(err)
+			log.GetLogger().Fatal(err)
 			return
 		}
 		if err := s.Preview.UnmarshalJSON(b); err != nil {
-			log.Fatal(err)
+			log.GetLogger().Fatal(err)
 		}
 	}
 }
@@ -229,11 +229,11 @@ func (s *snapshotEntity) SetText(m *model.S3Object) {
 	} else {
 		b, err := json.Marshal(m)
 		if err != nil {
-			log.Fatal(err)
+			log.GetLogger().Fatal(err)
 			return
 		}
 		if err := s.Text.UnmarshalJSON(b); err != nil {
-			log.Fatal(err)
+			log.GetLogger().Fatal(err)
 		}
 	}
 }
@@ -244,11 +244,11 @@ func (s *snapshotEntity) SetOCR(m *model.S3Object) {
 	} else {
 		b, err := json.Marshal(m)
 		if err != nil {
-			log.Fatal(err)
+			log.GetLogger().Fatal(err)
 			return
 		}
 		if err := s.OCR.UnmarshalJSON(b); err != nil {
-			log.Fatal(err)
+			log.GetLogger().Fatal(err)
 		}
 	}
 }
@@ -259,11 +259,11 @@ func (s *snapshotEntity) SetEntities(m *model.S3Object) {
 	} else {
 		b, err := json.Marshal(m)
 		if err != nil {
-			log.Fatal(err)
+			log.GetLogger().Fatal(err)
 			return
 		}
 		if err := s.Entities.UnmarshalJSON(b); err != nil {
-			log.Fatal(err)
+			log.GetLogger().Fatal(err)
 		}
 	}
 }
@@ -274,11 +274,11 @@ func (s *snapshotEntity) SetMosaic(m *model.S3Object) {
 	} else {
 		b, err := json.Marshal(m)
 		if err != nil {
-			log.Fatal(err)
+			log.GetLogger().Fatal(err)
 			return
 		}
 		if err := s.Mosaic.UnmarshalJSON(b); err != nil {
-			log.Fatal(err)
+			log.GetLogger().Fatal(err)
 		}
 	}
 }
@@ -289,11 +289,11 @@ func (s *snapshotEntity) SetWatermark(m *model.S3Object) {
 	} else {
 		b, err := json.Marshal(m)
 		if err != nil {
-			log.Fatal(err)
+			log.GetLogger().Fatal(err)
 			return
 		}
 		if err := s.Watermark.UnmarshalJSON(b); err != nil {
-			log.Fatal(err)
+			log.GetLogger().Fatal(err)
 		}
 	}
 }
@@ -304,11 +304,11 @@ func (s *snapshotEntity) SetThumbnail(m *model.Thumbnail) {
 	} else {
 		b, err := json.Marshal(m)
 		if err != nil {
-			log.Fatal(err)
+			log.GetLogger().Fatal(err)
 			return
 		}
 		if err := s.Thumbnail.UnmarshalJSON(b); err != nil {
-			log.Fatal(err)
+			log.GetLogger().Fatal(err)
 		}
 	}
 }
@@ -433,6 +433,10 @@ type SnapshotUpdateOptions struct {
 	Original  *model.S3Object
 	Preview   *model.S3Object
 	Text      *model.S3Object
+	OCR       *model.S3Object
+	Entities  *model.S3Object
+	Mosaic    *model.S3Object
+	Watermark *model.S3Object
 	Thumbnail *model.Thumbnail
 	Status    string
 	Language  *string
@@ -443,9 +447,6 @@ func (repo *snapshotRepo) Update(id string, opts SnapshotUpdateOptions) error {
 	if err != nil {
 		return err
 	}
-	if opts.Thumbnail != nil {
-		snapshot.SetThumbnail(opts.Thumbnail)
-	}
 	if opts.Original != nil {
 		snapshot.SetOriginal(opts.Original)
 	}
@@ -454,6 +455,21 @@ func (repo *snapshotRepo) Update(id string, opts SnapshotUpdateOptions) error {
 	}
 	if opts.Text != nil {
 		snapshot.SetText(opts.Text)
+	}
+	if opts.OCR != nil {
+		snapshot.SetOCR(opts.OCR)
+	}
+	if opts.Entities != nil {
+		snapshot.SetEntities(opts.Entities)
+	}
+	if opts.Mosaic != nil {
+		snapshot.SetMosaic(opts.Mosaic)
+	}
+	if opts.Watermark != nil {
+		snapshot.SetWatermark(opts.Watermark)
+	}
+	if opts.Thumbnail != nil {
+		snapshot.SetThumbnail(opts.Thumbnail)
 	}
 	if opts.Status != "" {
 		snapshot.SetStatus(opts.Status)

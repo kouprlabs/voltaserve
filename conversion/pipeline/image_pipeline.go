@@ -10,8 +10,6 @@ import (
 	"voltaserve/identifier"
 	"voltaserve/infra"
 	"voltaserve/processor"
-
-	"go.uber.org/zap"
 )
 
 type imagePipeline struct {
@@ -19,21 +17,15 @@ type imagePipeline struct {
 	s3        *infra.S3Manager
 	apiClient *client.APIClient
 	fileIdent *identifier.FileIdentifier
-	logger    *zap.SugaredLogger
 	config    config.Config
 }
 
 func NewImagePipeline() core.Pipeline {
-	logger, err := infra.GetLogger()
-	if err != nil {
-		panic(err)
-	}
 	return &imagePipeline{
 		imageProc: processor.NewImageProcessor(),
 		s3:        infra.NewS3Manager(),
 		apiClient: client.NewAPIClient(),
 		fileIdent: identifier.NewFileIdentifier(),
-		logger:    logger,
 		config:    config.GetConfig(),
 	}
 }
@@ -43,15 +35,26 @@ func (p *imagePipeline) Run(opts core.PipelineRunOptions) error {
 	if err := p.s3.GetFile(opts.Key, inputPath, opts.Bucket); err != nil {
 		return err
 	}
-	defer func(inputPath string, logger *zap.SugaredLogger) {
-		_, err := os.Stat(inputPath)
+	defer func(path string) {
+		_, err := os.Stat(path)
 		if os.IsExist(err) {
-			if err := os.Remove(inputPath); err != nil {
-				logger.Error(err)
+			if err := os.Remove(path); err != nil {
+				infra.GetLogger().Error(err)
 			}
 		}
-	}(inputPath, p.logger)
+	}(inputPath)
+	if err := p.create(inputPath, opts); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (p *imagePipeline) create(inputPath string, opts core.PipelineRunOptions) error {
 	imageProps, err := p.imageProc.MeasureImage(inputPath)
+	if err != nil {
+		return err
+	}
+	stat, err := os.Stat(inputPath)
 	if err != nil {
 		return err
 	}
@@ -60,7 +63,7 @@ func (p *imagePipeline) Run(opts core.PipelineRunOptions) error {
 		Original: &core.S3Object{
 			Bucket: opts.Bucket,
 			Key:    opts.Key,
-			Size:   opts.Size,
+			Size:   helper.ToPtr(stat.Size()),
 			Image:  &imageProps,
 		},
 	}
@@ -69,14 +72,14 @@ func (p *imagePipeline) Run(opts core.PipelineRunOptions) error {
 		if err := p.imageProc.ConvertImage(inputPath, jpegPath); err != nil {
 			return err
 		}
-		defer func(jpegPath string, logger *zap.SugaredLogger) {
-			_, err := os.Stat(jpegPath)
+		defer func(path string) {
+			_, err := os.Stat(path)
 			if os.IsExist(err) {
-				if err := os.Remove(jpegPath); err != nil {
-					logger.Error(err)
+				if err := os.Remove(path); err != nil {
+					infra.GetLogger().Error(err)
 				}
 			}
-		}(jpegPath, p.logger)
+		}(jpegPath)
 		stat, err := os.Stat(jpegPath)
 		if err != nil {
 			return err
@@ -89,7 +92,7 @@ func (p *imagePipeline) Run(opts core.PipelineRunOptions) error {
 		updateOpts.Preview = &core.S3Object{
 			Bucket: opts.Bucket,
 			Key:    opts.SnapshotID + "/preview.jpg",
-			Size:   stat.Size(),
+			Size:   helper.ToPtr(stat.Size()),
 			Image:  &imageProps,
 		}
 		if err := p.s3.PutFile(updateOpts.Preview.Key, jpegPath, helper.DetectMimeFromFile(jpegPath), updateOpts.Preview.Bucket); err != nil {

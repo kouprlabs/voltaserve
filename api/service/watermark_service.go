@@ -3,19 +3,15 @@ package service
 import (
 	"bytes"
 	"fmt"
-	"os"
-	"path/filepath"
-	"time"
 	"voltaserve/cache"
 	"voltaserve/client"
 	"voltaserve/errorpkg"
 	"voltaserve/guard"
 	"voltaserve/helper"
 	"voltaserve/infra"
+	"voltaserve/log"
 	"voltaserve/model"
 	"voltaserve/repo"
-
-	"go.uber.org/zap"
 )
 
 type WatermarkService struct {
@@ -29,15 +25,11 @@ type WatermarkService struct {
 	taskSvc         *TaskService
 	s3              *infra.S3Manager
 	watermarkClient *client.WatermarkClient
+	pipelineClient  *client.PipelineClient
 	fileIdent       *infra.FileIdentifier
-	logger          *zap.SugaredLogger
 }
 
 func NewWatermarkService() *WatermarkService {
-	logger, err := infra.GetLogger()
-	if err != nil {
-		panic(err)
-	}
 	return &WatermarkService{
 		workspaceCache:  cache.NewWorkspaceCache(),
 		snapshotCache:   cache.NewSnapshotCache(),
@@ -49,8 +41,8 @@ func NewWatermarkService() *WatermarkService {
 		taskSvc:         NewTaskService(),
 		s3:              infra.NewS3Manager(),
 		watermarkClient: client.NewWatermarkClient(),
+		pipelineClient:  client.NewPipelineClient(),
 		fileIdent:       infra.NewFileIdentifier(),
-		logger:          logger,
 	}
 }
 
@@ -72,10 +64,6 @@ func (svc *WatermarkService) Create(id string, userID string) error {
 	if snapshot.GetStatus() == model.SnapshotStatusProcessing {
 		return errorpkg.NewSnapshotIsProcessingError(nil)
 	}
-	snapshot.SetStatus(model.SnapshotStatusProcessing)
-	if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
-		return err
-	}
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return err
@@ -84,93 +72,13 @@ func (svc *WatermarkService) Create(id string, userID string) error {
 	if err != nil {
 		return err
 	}
-	task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
-		ID:              helper.NewID(),
-		Name:            fmt.Sprintf("Apply watermark on <b>%s</b>", file.GetName()),
-		UserID:          userID,
-		IsIndeterminate: true,
-	})
-	if err != nil {
-		return err
-	}
-	go func() {
-		err = svc.create(snapshot, workspace.GetName(), user.GetEmail())
-		if err != nil {
-			value := err.Error()
-			task.SetError(&value)
-			if err := svc.taskSvc.saveAndSync(task); err != nil {
-				svc.logger.Error(err)
-				return
-			}
-		} else {
-			if err := svc.taskSvc.deleteAndSync(task.GetID()); err != nil {
-				svc.logger.Error(err)
-				return
-			}
-		}
-		snapshot.SetStatus(model.SnapshotStatusReady)
-		if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
-			svc.logger.Error(err)
-			return
-		}
-	}()
-	return nil
-}
-
-func (svc *WatermarkService) create(snapshot model.Snapshot, workspaceName string, email string) error {
-	if !snapshot.HasOriginal() {
-		return errorpkg.NewS3ObjectNotFoundError(nil)
-	}
-	original := snapshot.GetOriginal()
-	var inputObject *model.S3Object
-	var category string
-	if svc.fileIdent.IsImage(original.Key) {
-		category = "image"
-		inputObject = original
-	} else if svc.fileIdent.IsPDF(original.Key) {
-		category = "document"
-		inputObject = original
-	} else if svc.fileIdent.IsOffice(original.Key) || svc.fileIdent.IsPlainText(original.Key) {
-		category = "document"
-		inputObject = snapshot.GetPreview()
-	} else {
-		return errorpkg.NewUnsupportedFileTypeError(nil)
-	}
-	/* Download S3 object */
-	path := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(inputObject.Key))
-	if err := svc.s3.GetFile(inputObject.Key, path, inputObject.Bucket); err != nil {
-		return err
-	}
-	defer func(inputPath string, logger *zap.SugaredLogger) {
-		_, err := os.Stat(inputPath)
-		if os.IsExist(err) {
-			if err := os.Remove(inputPath); err != nil {
-				logger.Error(err)
-			}
-		}
-	}(path, svc.logger)
-	stat, err := os.Stat(path)
-	if err != nil {
-		return err
-	}
-	outputKey := filepath.FromSlash(snapshot.GetID() + "/watermark" + filepath.Ext(inputObject.Key))
-	if err := svc.watermarkClient.Create(client.WatermarkCreateOptions{
-		Path:      path,
-		S3Key:     outputKey,
-		S3Bucket:  snapshot.GetOriginal().Bucket,
-		Category:  category,
-		DateTime:  time.Now().Format(time.RFC3339),
-		Username:  email,
-		Workspace: workspaceName,
+	if err := svc.pipelineClient.Run(&client.PipelineRunOptions{
+		PipelineID: helper.ToPtr(client.PipelineWatermark),
+		SnapshotID: snapshot.GetID(),
+		Bucket:     snapshot.GetOriginal().Bucket,
+		Key:        snapshot.GetOriginal().Key,
+		Values:     []string{workspace.GetName(), user.GetEmail()},
 	}); err != nil {
-		return err
-	}
-	snapshot.SetWatermark(&model.S3Object{
-		Key:    outputKey,
-		Bucket: snapshot.GetOriginal().Bucket,
-		Size:   stat.Size(),
-	})
-	if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
 		return err
 	}
 	return nil
@@ -216,19 +124,19 @@ func (svc *WatermarkService) Delete(id string, userID string) error {
 			value := err.Error()
 			task.SetError(&value)
 			if err := svc.taskSvc.saveAndSync(task); err != nil {
-				svc.logger.Error(err)
+				log.GetLogger().Error(err)
 				return
 			}
 		} else {
 			if err := svc.taskSvc.deleteAndSync(task.GetID()); err != nil {
-				svc.logger.Error(err)
+				log.GetLogger().Error(err)
 				return
 			}
 		}
 		snapshot.SetWatermark(nil)
 		snapshot.SetStatus(model.SnapshotStatusReady)
 		if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
-			svc.logger.Error(err)
+			log.GetLogger().Error(err)
 			return
 		}
 	}()

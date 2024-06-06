@@ -9,22 +9,13 @@ import (
 	"voltaserve/core"
 	"voltaserve/helper"
 	"voltaserve/infra"
-
-	"go.uber.org/zap"
 )
 
 type ToolRunner struct {
-	logger *zap.SugaredLogger
 }
 
 func NewToolRunner() *ToolRunner {
-	logger, err := infra.GetLogger()
-	if err != nil {
-		panic(err)
-	}
-	return &ToolRunner{
-		logger: logger,
-	}
+	return &ToolRunner{}
 }
 
 func (r *ToolRunner) Run(inputPath string, opts core.ToolRunOptions) (outputPath string, stdout string, err error) {
@@ -68,26 +59,26 @@ func (r *ToolRunner) Run(inputPath string, opts core.ToolRunOptions) (outputPath
 		}
 	}
 	cmd := infra.NewCommand()
-	r.logger.Named(infra.StrToolRunner).Infow("🔨  working", "bin", opts.Bin, "args", opts.Args)
+	infra.GetLogger().Named(infra.StrToolRunner).Infow("🔨  working", "bin", opts.Bin, "args", opts.Args)
 	start := time.Now()
 	if opts.Stdout {
 		stdout, err := cmd.ReadOutput(opts.Bin, opts.Args...)
 		elapsed := time.Since(start)
 		if err != nil {
-			r.logger.Named(infra.StrToolRunner).Errorw("⛈️  failed", "bin", opts.Bin, "args", opts.Args, "elapsed", elapsed, "error", "stdout", stdout, err.Error())
+			infra.GetLogger().Named(infra.StrToolRunner).Errorw("⛈️  failed", "bin", opts.Bin, "args", opts.Args, "elapsed", elapsed, "error", "stdout", stdout, err.Error())
 			return "", stdout, err
 		} else {
-			r.logger.Named(infra.StrToolRunner).Infow("🎉  succeeded", "bin", opts.Bin, "args", opts.Args, "elapsed", elapsed, "stdout", stdout)
+			infra.GetLogger().Named(infra.StrToolRunner).Infow("🎉  succeeded", "bin", opts.Bin, "args", opts.Args, "elapsed", elapsed, "stdout", stdout)
 			return outputPath, stdout, nil
 		}
 	} else {
 		err := cmd.Exec(opts.Bin, opts.Args...)
 		elapsed := time.Since(start)
 		if err != nil {
-			r.logger.Named(infra.StrToolRunner).Errorw("⛈️  failed", "bin", opts.Bin, "args", opts.Args, "elapsed", elapsed, "error", err.Error())
+			infra.GetLogger().Named(infra.StrToolRunner).Errorw("⛈️  failed", "bin", opts.Bin, "args", opts.Args, "elapsed", elapsed, "error", err.Error())
 			return "", "", err
 		} else {
-			r.logger.Named(infra.StrToolRunner).Infow("🎉  succeeded", "bin", opts.Bin, "args", opts.Args, "elapsed", elapsed)
+			infra.GetLogger().Named(infra.StrToolRunner).Infow("🎉  succeeded", "bin", opts.Bin, "args", opts.Args, "elapsed", elapsed)
 			return outputPath, "", err
 		}
 	}

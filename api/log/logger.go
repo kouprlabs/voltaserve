@@ -1,4 +1,4 @@
-package infra
+package log
 
 import (
 	"go.uber.org/zap"
@@ -7,16 +7,16 @@ import (
 
 var logger *zap.SugaredLogger
 
-func GetLogger() (*zap.SugaredLogger, error) {
+func GetLogger() *zap.SugaredLogger {
 	if logger == nil {
 		config := zap.NewDevelopmentConfig()
 		config.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
 		config.DisableCaller = true
 		if l, err := config.Build(); err != nil {
-			return nil, err
+			panic(err)
 		} else {
 			logger = l.Sugar()
 		}
 	}
-	return logger, nil
+	return logger
 }

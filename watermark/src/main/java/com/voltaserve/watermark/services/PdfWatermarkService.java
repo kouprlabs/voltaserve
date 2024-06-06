@@ -10,7 +10,6 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.cos.COSName;
 import org.apache.pdfbox.io.RandomAccessReadBufferedFile;
-import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.font.PDFont;
@@ -30,7 +29,6 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
 
@@ -58,40 +56,48 @@ public class PdfWatermarkService {
   private Boolean s3Secure;
 
   public void generate(WatermarkRequest request) throws IOException {
-    PDDocument document = Loader.loadPDF(new RandomAccessReadBufferedFile(new File(request.getPath())));
+    var document = Loader.loadPDF(new RandomAccessReadBufferedFile(new File(request.getPath())));
     document.setAllSecurityToBeRemoved(true);
 
-    PDFont font = PDTrueTypeFont.load(document, ResourcePatternUtils.getResourcePatternResolver(resourceLoader)
+    var font = PDTrueTypeFont.load(document, ResourcePatternUtils.getResourcePatternResolver(resourceLoader)
         .getResource("classpath:Unbounded-Medium.ttf").getInputStream(),
         Encoding.getInstance(COSName.WIN_ANSI_ENCODING));
 
-    for (PDPage page : document.getPages()) {
-      try (PDPageContentStream pdPageContentStream = new PDPageContentStream(document, page,
+    for (var page : document.getPages()) {
+      try (var stream = new PDPageContentStream(
+          document, page,
           PDPageContentStream.AppendMode.APPEND, true, true)) {
-        strokeDateTime(request.getDateTime(), page, pdPageContentStream, font);
-        strokeUsername(request.getUsername(), page, pdPageContentStream, font);
-        strokeWorkspace(request.getWorkspace(), page, pdPageContentStream, font);
+
+        var props = getStrokeProperties(page, font, request.getValues().get(0));
+        stream.transform(Matrix.getRotateInstance(Math.toRadians(270), 0, props.getWidth()));
+        stream.transform(Matrix.getRotateInstance(Math.atan2(props.getHeight(), props.getWidth()), 0, 0));
+
+        float y = -props.getFontHeight() * request.getValues().size() / 2;
+        for (var value : request.getValues()) {
+          strokeText(value, y, page, stream, font);
+          y += props.getFontHeight();
+        }
       }
     }
 
-    Path output = Paths.get(
-            System.getProperty("java.io.tmpdir"),
-            UUID.randomUUID() + "." + FilenameUtils.getExtension(request.getPath()));
+    var output = Paths.get(
+        System.getProperty("java.io.tmpdir"),
+        UUID.randomUUID() + "." + FilenameUtils.getExtension(request.getPath()));
     document.save(output.toString());
 
-    String endpoint = this.s3Url.split(":")[0];
+    var endpoint = this.s3Url.split(":")[0];
     int port = Integer.parseInt(this.s3Url.split(":")[1]);
-    try(MinioClient minioClient = MinioClient.builder()
-            .endpoint(endpoint, port, this.s3Secure)
-            .credentials(this.s3AccessKey, this.s3SecretKey)
-            .region(this.s3Region)
-            .build()) {
+    try (var minioClient = MinioClient.builder()
+        .endpoint(endpoint, port, this.s3Secure)
+        .credentials(this.s3AccessKey, this.s3SecretKey)
+        .region(this.s3Region)
+        .build()) {
       minioClient.uploadObject(
-              UploadObjectArgs.builder()
-                      .bucket(request.getS3Bucket())
-                      .object(request.getS3Key())
-                      .filename(output.toString())
-                      .build());
+          UploadObjectArgs.builder()
+              .bucket(request.getS3Bucket())
+              .object(request.getS3Key())
+              .filename(output.toString())
+              .build());
     } catch (Exception e) {
       this.logger.error(e.getMessage(), e);
     } finally {
@@ -99,49 +105,17 @@ public class PdfWatermarkService {
     }
   }
 
-  private void strokeDateTime(String text, PDPage page, PDPageContentStream stream, PDFont font)
+  private void strokeText(String text, float y, PDPage page, PDPageContentStream stream, PDFont font)
       throws IOException {
-    StrokeProperties props = getStrokeProperties(page, font, text);
-
-    stream.transform(Matrix.getRotateInstance(Math.toRadians(270), 0, props.getWidth()));
-    stream.transform(
-        Matrix.getRotateInstance((float) Math.atan2(props.getHeight(), props.getWidth()), 0, 0));
+    var props = getStrokeProperties(page, font, text);
+    props.setY(y);
 
     stream.setFont(font, props.getFontHeight());
     stream.setGraphicsStateParameters(getPDExtendedGraphicsState(stream));
-    setStrokingColor(stream);
+    stream.setNonStrokingColor(1, 0, 0);
+    stream.setStrokingColor(1, 0, 0);
 
     stream.beginText();
-    props.setY(props.getY() - 100);
-    stream.newLineAtOffset(props.getX(), props.getY());
-    stream.showText(text);
-    stream.endText();
-  }
-
-  private void strokeUsername(String text, PDPage page, PDPageContentStream stream, PDFont font)
-      throws IOException {
-    StrokeProperties props = getStrokeProperties(page, font, text);
-
-    stream.setFont(font, props.getFontHeight());
-    stream.setGraphicsStateParameters(getPDExtendedGraphicsState(stream));
-    setStrokingColor(stream);
-
-    stream.beginText();
-    stream.newLineAtOffset(props.getX(), props.getY());
-    stream.showText(text);
-    stream.endText();
-  }
-
-  private void strokeWorkspace(String text, PDPage page, PDPageContentStream stream, PDFont font)
-      throws IOException {
-    StrokeProperties props = getStrokeProperties(page, font, text);
-
-    stream.setFont(font, props.getFontHeight());
-    stream.setGraphicsStateParameters(getPDExtendedGraphicsState(stream));
-    setStrokingColor(stream);
-
-    stream.beginText();
-    props.setY(props.getY() + 100);
     stream.newLineAtOffset(props.getX(), props.getY());
     stream.showText(text);
     stream.endText();
@@ -149,31 +123,24 @@ public class PdfWatermarkService {
 
   private PDExtendedGraphicsState getPDExtendedGraphicsState(PDPageContentStream stream)
       throws IOException {
-    PDExtendedGraphicsState state = new PDExtendedGraphicsState();
+    var state = new PDExtendedGraphicsState();
     state.setNonStrokingAlphaConstant(0.2f);
     state.setStrokingAlphaConstant(0.2f);
     state.getCOSObject().setItem(COSName.BM, COSName.MULTIPLY);
-    state.setBlendMode(BlendMode.MULTIPLY); // will work in 2.0.14
-    stream.setGraphicsStateParameters(state);
+    state.setBlendMode(BlendMode.MULTIPLY);
 
     return state;
   }
 
-  private void setStrokingColor(PDPageContentStream stream) throws IOException {
-    stream.setNonStrokingColor(1, 0, 0);
-    stream.setStrokingColor(1, 0, 0);
-  }
-
   private StrokeProperties getStrokeProperties(PDPage page, PDFont font, String text) throws IOException {
-    StrokeProperties props = new StrokeProperties();
+    var props = new StrokeProperties();
     props.setWidth(page.getMediaBox().getHeight());
     props.setHeight(page.getMediaBox().getWidth());
     props.setFontHeight(72);
     props.setStringWidth(font.getStringWidth(text) / 1000 * props.getFontHeight());
-    props.setDiagonalLength((float) Math.sqrt(props.getWidth() * props.getWidth() +
-        props.getHeight() * props.getHeight()));
+    props.setDiagonalLength((float) Math.sqrt(
+        props.getWidth() * props.getWidth() + props.getHeight() * props.getHeight()));
     props.setX((props.getDiagonalLength() - props.getStringWidth()) / 2);
-    props.setY(-props.getFontHeight() / 4);
 
     return props;
   }

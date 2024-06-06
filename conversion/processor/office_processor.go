@@ -1,7 +1,6 @@
 package processor
 
 import (
-	"go.uber.org/zap"
 	"os"
 	"path"
 	"path/filepath"
@@ -14,18 +13,12 @@ import (
 type OfficeProcessor struct {
 	cmd    *infra.Command
 	config config.Config
-	logger *zap.SugaredLogger
 }
 
 func NewOfficeProcessor() *OfficeProcessor {
-	logger, err := infra.GetLogger()
-	if err != nil {
-		panic(err)
-	}
 	return &OfficeProcessor{
 		cmd:    infra.NewCommand(),
 		config: config.GetConfig(),
-		logger: logger,
 	}
 }
 

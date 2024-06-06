@@ -7,10 +7,11 @@ type ToolRunOptions struct {
 }
 
 type PipelineRunOptions struct {
-	SnapshotID string `json:"snapshotId"`
-	Bucket     string `json:"bucket"`
-	Key        string `json:"key"`
-	Size       int64  `json:"size"`
+	PipelineID *string  `json:"pipelineId"`
+	SnapshotID string   `json:"snapshotId"`
+	Bucket     string   `json:"bucket"`
+	Key        string   `json:"key"`
+	Values     []string `json:"values,omitempty"`
 }
 
 type SnapshotUpdateOptions struct {
@@ -18,6 +19,10 @@ type SnapshotUpdateOptions struct {
 	Original  *S3Object          `json:"original,omitempty"`
 	Preview   *S3Object          `json:"preview,omitempty"`
 	Text      *S3Object          `json:"text,omitempty"`
+	OCR       *S3Object          `json:"ocr,omitempty"`
+	Entities  *S3Object          `json:"entities,omitempty"`
+	Mosaic    *S3Object          `json:"mosaic,omitempty"`
+	Watermark *S3Object          `json:"watermark,omitempty"`
 	Thumbnail *ImageBase64       `json:"thumbnail,omitempty"`
 	Status    string             `json:"status,omitempty"`
 }
@@ -25,7 +30,7 @@ type SnapshotUpdateOptions struct {
 type S3Object struct {
 	Bucket string      `json:"bucket"`
 	Key    string      `json:"key"`
-	Size   int64       `json:"size"`
+	Size   *int64      `json:"size,omitempty"`
 	Image  *ImageProps `json:"image,omitempty"`
 }
 

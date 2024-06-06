@@ -10,8 +10,6 @@ import (
 	"voltaserve/identifier"
 	"voltaserve/infra"
 	"voltaserve/processor"
-
-	"go.uber.org/zap"
 )
 
 type pdfPipeline struct {
@@ -20,22 +18,16 @@ type pdfPipeline struct {
 	s3        *infra.S3Manager
 	apiClient *client.APIClient
 	fileIdent *identifier.FileIdentifier
-	logger    *zap.SugaredLogger
 	config    config.Config
 }
 
 func NewPDFPipeline() core.Pipeline {
-	logger, err := infra.GetLogger()
-	if err != nil {
-		panic(err)
-	}
 	return &pdfPipeline{
 		pdfProc:   processor.NewPDFProcessor(),
 		imageProc: processor.NewImageProcessor(),
 		s3:        infra.NewS3Manager(),
 		apiClient: client.NewAPIClient(),
 		fileIdent: identifier.NewFileIdentifier(),
-		logger:    logger,
 		config:    config.GetConfig(),
 	}
 }
@@ -45,14 +37,21 @@ func (p *pdfPipeline) Run(opts core.PipelineRunOptions) error {
 	if err := p.s3.GetFile(opts.Key, inputPath, opts.Bucket); err != nil {
 		return err
 	}
-	defer func(inputPath string, logger *zap.SugaredLogger) {
-		_, err := os.Stat(inputPath)
+	defer func(path string) {
+		_, err := os.Stat(path)
 		if os.IsExist(err) {
-			if err := os.Remove(inputPath); err != nil {
-				logger.Error(err)
+			if err := os.Remove(path); err != nil {
+				infra.GetLogger().Error(err)
 			}
 		}
-	}(inputPath, p.logger)
+	}(inputPath)
+	if err := p.create(inputPath, opts); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (p *pdfPipeline) create(inputPath string, opts core.PipelineRunOptions) error {
 	thumbnail, err := p.pdfProc.Base64Thumbnail(inputPath)
 	if err != nil {
 		return err
@@ -65,7 +64,7 @@ func (p *pdfPipeline) Run(opts core.PipelineRunOptions) error {
 	}
 	text, err := p.pdfProc.TextFromPDF(inputPath)
 	if err != nil {
-		p.logger.Named(infra.StrPipeline).Errorw(err.Error())
+		infra.GetLogger().Named(infra.StrPipeline).Errorw(err.Error())
 	}
 	textKey := opts.SnapshotID + "/text.txt"
 	if text != "" && err == nil {
@@ -73,17 +72,21 @@ func (p *pdfPipeline) Run(opts core.PipelineRunOptions) error {
 			return err
 		}
 	}
+	stat, err := os.Stat(inputPath)
+	if err != nil {
+		return err
+	}
 	if err := p.apiClient.UpdateSnapshot(core.SnapshotUpdateOptions{
 		Options: opts,
 		Preview: &core.S3Object{
 			Bucket: opts.Bucket,
 			Key:    opts.Key,
-			Size:   opts.Size,
+			Size:   helper.ToPtr(stat.Size()),
 		},
 		Text: &core.S3Object{
 			Bucket: opts.Bucket,
 			Key:    textKey,
-			Size:   int64(len(text)),
+			Size:   helper.ToPtr(int64(len(text))),
 		},
 	}); err != nil {
 		return err

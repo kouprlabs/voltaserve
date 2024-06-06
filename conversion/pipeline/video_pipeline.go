@@ -6,32 +6,21 @@ import (
 	"voltaserve/client"
 	"voltaserve/core"
 	"voltaserve/helper"
-	"voltaserve/identifier"
 	"voltaserve/infra"
 	"voltaserve/processor"
-
-	"go.uber.org/zap"
 )
 
 type videoPipeline struct {
-	pipelineIdentifier *identifier.PipelineIdentifier
-	videoProc          *processor.VideoProcessor
-	s3                 *infra.S3Manager
-	apiClient          *client.APIClient
-	logger             *zap.SugaredLogger
+	videoProc *processor.VideoProcessor
+	s3        *infra.S3Manager
+	apiClient *client.APIClient
 }
 
 func NewVideoPipeline() core.Pipeline {
-	logger, err := infra.GetLogger()
-	if err != nil {
-		panic(err)
-	}
 	return &videoPipeline{
-		pipelineIdentifier: identifier.NewPipelineIdentifier(),
-		videoProc:          processor.NewVideoProcessor(),
-		s3:                 infra.NewS3Manager(),
-		apiClient:          client.NewAPIClient(),
-		logger:             logger,
+		videoProc: processor.NewVideoProcessor(),
+		s3:        infra.NewS3Manager(),
+		apiClient: client.NewAPIClient(),
 	}
 }
 
@@ -40,14 +29,21 @@ func (p *videoPipeline) Run(opts core.PipelineRunOptions) error {
 	if err := p.s3.GetFile(opts.Key, inputPath, opts.Bucket); err != nil {
 		return err
 	}
-	defer func(inputPath string, logger *zap.SugaredLogger) {
-		_, err := os.Stat(inputPath)
+	defer func(path string) {
+		_, err := os.Stat(path)
 		if os.IsExist(err) {
-			if err := os.Remove(inputPath); err != nil {
-				logger.Error(err)
+			if err := os.Remove(path); err != nil {
+				infra.GetLogger().Error(err)
 			}
 		}
-	}(inputPath, p.logger)
+	}(inputPath)
+	if err := p.create(inputPath, opts); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (p *videoPipeline) create(inputPath string, opts core.PipelineRunOptions) error {
 	thumbnail, err := p.videoProc.Base64Thumbnail(inputPath)
 	if err != nil {
 		return err

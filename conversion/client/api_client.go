@@ -8,24 +8,15 @@ import (
 	"net/http"
 	"voltaserve/config"
 	"voltaserve/core"
-	"voltaserve/infra"
-
-	"go.uber.org/zap"
 )
 
 type APIClient struct {
 	config config.Config
-	logger *zap.SugaredLogger
 }
 
 func NewAPIClient() *APIClient {
-	logger, err := infra.GetLogger()
-	if err != nil {
-		panic(err)
-	}
 	return &APIClient{
 		config: config.GetConfig(),
-		logger: logger,
 	}
 }
 

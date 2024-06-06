@@ -2,13 +2,15 @@ package client
 
 import (
 	"bytes"
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"io"
 	"mime/multipart"
 	"net/http"
 	"os"
 	"voltaserve/config"
-	"voltaserve/log"
+	"voltaserve/infra"
 )
 
 type WatermarkClient struct {
@@ -22,13 +24,11 @@ func NewWatermarkClient() *WatermarkClient {
 }
 
 type WatermarkCreateOptions struct {
-	Path      string
-	S3Key     string
-	S3Bucket  string
-	Category  string
-	DateTime  string
-	Username  string
-	Workspace string
+	Path     string
+	S3Key    string
+	S3Bucket string
+	Category string
+	Values   []string
 }
 
 func (cl *WatermarkClient) Create(opts WatermarkCreateOptions) error {
@@ -38,7 +38,7 @@ func (cl *WatermarkClient) Create(opts WatermarkCreateOptions) error {
 	}
 	defer func(file *os.File) {
 		if err := file.Close(); err != nil {
-			log.GetLogger().Error(err)
+			infra.GetLogger().Error(err)
 		}
 	}(file)
 	buf := &bytes.Buffer{}
@@ -59,13 +59,11 @@ func (cl *WatermarkClient) Create(opts WatermarkCreateOptions) error {
 	if err = mw.WriteField("category", opts.Category); err != nil {
 		return err
 	}
-	if err = mw.WriteField("date_time", opts.DateTime); err != nil {
+	values, err := json.Marshal(opts.Values)
+	if err != nil {
 		return err
 	}
-	if err = mw.WriteField("username", opts.Username); err != nil {
-		return err
-	}
-	if err = mw.WriteField("workspace", opts.Workspace); err != nil {
+	if err = mw.WriteField("values", base64.StdEncoding.EncodeToString(values)); err != nil {
 		return err
 	}
 	if err := mw.Close(); err != nil {
@@ -83,7 +81,7 @@ func (cl *WatermarkClient) Create(opts WatermarkCreateOptions) error {
 	}
 	defer func(Body io.ReadCloser) {
 		if err := Body.Close(); err != nil {
-			log.GetLogger().Error(err)
+			infra.GetLogger().Error(err)
 		}
 	}(resp.Body)
 	if resp.StatusCode != http.StatusOK {

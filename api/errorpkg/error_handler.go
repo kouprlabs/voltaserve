@@ -3,9 +3,9 @@ package errorpkg
 import (
 	"errors"
 	"net/http"
+	"voltaserve/log"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/log"
 )
 
 func ErrorHandler(c *fiber.Ctx, err error) error {
@@ -14,7 +14,7 @@ func ErrorHandler(c *fiber.Ctx, err error) error {
 		v := err.(*ErrorResponse)
 		return c.Status(v.Status).JSON(v)
 	} else {
-		log.Error(err)
+		log.GetLogger().Error(err)
 		return c.Status(http.StatusInternalServerError).JSON(NewInternalServerError(err))
 	}
 }

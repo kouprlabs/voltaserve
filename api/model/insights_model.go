@@ -8,9 +8,3 @@ type InsightsInfo struct {
 type InsightsMetadata struct {
 	IsOutdated bool `json:"isOutdated"`
 }
-
-type InsightsEntity struct {
-	Text      string `json:"text"`
-	Label     string `json:"label"`
-	Frequency int    `json:"frequency"`
-}

@@ -8,11 +8,10 @@ import (
 	"voltaserve/errorpkg"
 	"voltaserve/guard"
 	"voltaserve/helper"
+	"voltaserve/log"
 	"voltaserve/model"
 	"voltaserve/repo"
 	"voltaserve/search"
-
-	"github.com/gofiber/fiber/v2/log"
 )
 
 type OrganizationService struct {
@@ -227,7 +226,7 @@ func (svc *OrganizationService) RemoveMember(id string, memberID string, userID 
 	}
 	for _, groupID := range groupsIDs {
 		if err := svc.groupService.RemoveMemberUnauthorized(groupID, memberID); err != nil {
-			log.Error(err)
+			log.GetLogger().Error(err)
 		}
 	}
 

@@ -7,7 +7,7 @@ import (
 	"io"
 	"net/http"
 	"voltaserve/config"
-	"voltaserve/log"
+	"voltaserve/infra"
 )
 
 type LanguageClient struct {
@@ -42,7 +42,7 @@ func (cl *LanguageClient) GetEntities(opts GetEntitiesOptions) ([]InsightsEntity
 	}
 	defer func(Body io.ReadCloser) {
 		if err := Body.Close(); err != nil {
-			log.GetLogger().Error(err)
+			infra.GetLogger().Error(err)
 		}
 	}(resp.Body)
 	if resp.StatusCode != http.StatusOK {
