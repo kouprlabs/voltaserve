@@ -26,7 +26,7 @@ const WatermarkOverviewSettings = () => {
   const handleUpdate = useCallback(async () => {
     if (id) {
       await WatermarkAPI.create(id)
-      mutateInfo?.()
+      mutateInfo?.(await WatermarkAPI.getInfo(id))
       mutateFiles?.()
       mutateTaskCount?.(await TaskAPI.getCount())
       dispatch(modalDidClose())
@@ -36,7 +36,7 @@ const WatermarkOverviewSettings = () => {
   const handleDelete = useCallback(async () => {
     if (id) {
       await WatermarkAPI.delete(id)
-      mutateInfo?.()
+      mutateInfo?.(await WatermarkAPI.getInfo(id))
       mutateFiles?.()
       mutateTaskCount?.(await TaskAPI.getCount())
       dispatch(modalDidClose())

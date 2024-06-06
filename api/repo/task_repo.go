@@ -1,24 +1,29 @@
 package repo
 
 import (
+	"encoding/json"
 	"errors"
 	"time"
 	"voltaserve/errorpkg"
 	"voltaserve/infra"
+	"voltaserve/log"
 	"voltaserve/model"
 
+	"gorm.io/datatypes"
 	"gorm.io/gorm"
 )
 
 type taskEntity struct {
-	ID              string  `json:"id" gorm:"column:id"`
-	Name            string  `json:"name" gorm:"column:name"`
-	Error           *string `json:"error,omitempty" gorm:"column:error"`
-	Percentage      *int    `json:"percentage,omitempty" gorm:"column:percentage"`
-	IsIndeterminate bool    `json:"isIndeterminate" gorm:"column:is_indeterminate"`
-	UserID          string  `json:"userId" gorm:"column:user_id"`
-	CreateTime      string  `json:"createTime" gorm:"column:create_time"`
-	UpdateTime      *string `json:"updateTime,omitempty" gorm:"column:update_time"`
+	ID              string         `json:"id" gorm:"column:id"`
+	Name            string         `json:"name" gorm:"column:name"`
+	Error           *string        `json:"error,omitempty" gorm:"column:error"`
+	Percentage      *int           `json:"percentage,omitempty" gorm:"column:percentage"`
+	IsIndeterminate bool           `json:"isIndeterminate" gorm:"column:is_indeterminate"`
+	UserID          string         `json:"userId" gorm:"column:user_id"`
+	Status          string         `json:"status" gorm:"column:status"`
+	Payload         datatypes.JSON `json:"payload" gorm:"column:payload"`
+	CreateTime      string         `json:"createTime" gorm:"column:create_time"`
+	UpdateTime      *string        `json:"updateTime,omitempty" gorm:"column:update_time"`
 }
 
 func (*taskEntity) TableName() string {
@@ -60,6 +65,22 @@ func (p *taskEntity) GetUserID() string {
 	return p.UserID
 }
 
+func (p *taskEntity) GetStatus() string {
+	return p.Status
+}
+
+func (s *taskEntity) GetPayload() map[string]string {
+	if s.Payload.String() == "" {
+		return nil
+	}
+	res := map[string]string{}
+	if err := json.Unmarshal([]byte(s.Payload.String()), &res); err != nil {
+		log.GetLogger().Fatal(err)
+		return nil
+	}
+	return res
+}
+
 func (o *taskEntity) GetCreateTime() string {
 	return o.CreateTime
 }
@@ -92,12 +113,31 @@ func (p *taskEntity) SetUserID(userID string) {
 	p.UserID = userID
 }
 
+func (p *taskEntity) SetStatus(status string) {
+	p.Status = status
+}
+
+func (s *taskEntity) SetPayload(p map[string]string) {
+	if p == nil {
+		s.Payload = nil
+	} else {
+		b, err := json.Marshal(p)
+		if err != nil {
+			log.GetLogger().Fatal(err)
+			return
+		}
+		if err := s.Payload.UnmarshalJSON(b); err != nil {
+			log.GetLogger().Fatal(err)
+		}
+	}
+}
+
 type TaskRepo interface {
 	Insert(opts TaskInsertOptions) (model.Task, error)
 	Find(id string) (model.Task, error)
 	GetIDs() ([]string, error)
 	GetCount(email string) (int64, error)
-	Save(org model.Task) error
+	Save(task model.Task) error
 	Delete(id string) error
 }
 
@@ -120,24 +160,30 @@ func newTaskRepo() *taskRepo {
 }
 
 type TaskInsertOptions struct {
-	ID              string  `json:"id"`
-	Name            string  `json:"name"`
-	Error           *string `json:"error,omitempty"`
-	Percentage      *int    `json:"percentage,omitempty"`
-	IsIndeterminate bool    `json:"isIndeterminate"`
-	UserID          string  `json:"userId"`
+	ID              string            `json:"id"`
+	Name            string            `json:"name"`
+	Error           *string           `json:"error,omitempty"`
+	Percentage      *int              `json:"percentage,omitempty"`
+	IsIndeterminate bool              `json:"isIndeterminate"`
+	UserID          string            `json:"userId"`
+	Status          string            `json:"status"`
+	Payload         map[string]string `json:"payload,omitempty"`
 }
 
 func (repo *taskRepo) Insert(opts TaskInsertOptions) (model.Task, error) {
-	org := taskEntity{
+	task := taskEntity{
 		ID:              opts.ID,
 		Name:            opts.Name,
 		Error:           opts.Error,
 		Percentage:      opts.Percentage,
 		IsIndeterminate: opts.IsIndeterminate,
 		UserID:          opts.UserID,
+		Status:          opts.Status,
 	}
-	if db := repo.db.Create(&org); db.Error != nil {
+	if opts.Payload != nil {
+		task.SetPayload(opts.Payload)
+	}
+	if db := repo.db.Create(&task); db.Error != nil {
 		return nil, db.Error
 	}
 	res, err := repo.Find(opts.ID)
@@ -196,8 +242,8 @@ func (repo *taskRepo) GetCount(userID string) (int64, error) {
 	return count, nil
 }
 
-func (repo *taskRepo) Save(org model.Task) error {
-	db := repo.db.Save(org)
+func (repo *taskRepo) Save(task model.Task) error {
+	db := repo.db.Save(task)
 	if db.Error != nil {
 		return db.Error
 	}

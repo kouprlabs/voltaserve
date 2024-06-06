@@ -5,10 +5,10 @@ import (
 	"os"
 	"path/filepath"
 	"voltaserve/client"
-	"voltaserve/core"
 	"voltaserve/helper"
 	"voltaserve/identifier"
 	"voltaserve/infra"
+	"voltaserve/model"
 	"voltaserve/processor"
 )
 
@@ -20,7 +20,7 @@ type watermarkPipeline struct {
 	watermarkClient *client.WatermarkClient
 }
 
-func NewWatermarkPipeline() core.Pipeline {
+func NewWatermarkPipeline() model.Pipeline {
 	return &watermarkPipeline{
 		videoProc:       processor.NewVideoProcessor(),
 		fileIdent:       identifier.NewFileIdentifier(),
@@ -43,7 +43,18 @@ func (p *watermarkPipeline) Run(opts client.PipelineRunOptions) error {
 			}
 		}
 	}(inputPath)
+	if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
+		Name: helper.ToPtr("Applying watermark."),
+	}); err != nil {
+		return err
+	}
 	if err := p.create(inputPath, opts); err != nil {
+		return err
+	}
+	if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
+		Name:   helper.ToPtr("Done."),
+		Status: helper.ToPtr(client.TaskStatusSuccess),
+	}); err != nil {
 		return err
 	}
 	return nil
@@ -70,7 +81,10 @@ func (p *watermarkPipeline) create(inputPath string, opts client.PipelineRunOpti
 		S3Key:    key,
 		S3Bucket: opts.Bucket,
 		Category: category,
-		Values:   opts.Values,
+		Values: []string{
+			opts.Payload["workspace"],
+			opts.Payload["user"],
+		},
 	}); err != nil {
 		return err
 	}

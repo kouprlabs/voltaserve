@@ -38,11 +38,12 @@ func (cl *APIClient) GetHealth() (string, error) {
 }
 
 type PipelineRunOptions struct {
-	PipelineID *string  `json:"pipelineId"`
-	SnapshotID string   `json:"snapshotId"`
-	Bucket     string   `json:"bucket"`
-	Key        string   `json:"key"`
-	Values     []string `json:"values,omitempty"`
+	PipelineID *string           `json:"pipelineId,omitempty"`
+	TaskID     string            `json:"taskId"`
+	SnapshotID string            `json:"snapshotId"`
+	Bucket     string            `json:"bucket"`
+	Key        string            `json:"key"`
+	Payload    map[string]string `json:"payload,omitempty"`
 }
 
 type SnapshotPatchOptions struct {
@@ -57,6 +58,13 @@ type SnapshotPatchOptions struct {
 	Thumbnail *ImageBase64       `json:"thumbnail,omitempty"`
 	Status    *string            `json:"status,omitempty"`
 }
+
+const (
+	SnapshotStatusWaiting    = "waiting"
+	SnapshotStatusProcessing = "processing"
+	SnapshotStatusReady      = "ready"
+	SnapshotStatusError      = "error"
+)
 
 type ImageBase64 struct {
 	Base64 string `json:"base64"`
@@ -96,11 +104,24 @@ func (cl *APIClient) PatchSnapshot(opts SnapshotPatchOptions) error {
 }
 
 type TaskCreateOptions struct {
-	Name            string  `json:"name"`
-	Error           *string `json:"error,omitempty"`
-	Percentage      *int    `json:"percentage,omitempty"`
-	IsIndeterminate bool    `json:"isIndeterminate"`
-	UserID          string  `json:"userId"`
+	Name            string       `json:"name"`
+	Error           *string      `json:"error,omitempty"`
+	Percentage      *int         `json:"percentage,omitempty"`
+	IsIndeterminate bool         `json:"isIndeterminate"`
+	UserID          string       `json:"userId"`
+	Status          string       `json:"status"`
+	Payload         *TaskPayload `json:"payload,omitempty"`
+}
+
+const (
+	TaskStatusWaiting = "waiting"
+	TaskStatusRunning = "running"
+	TaskStatusSuccess = "success"
+	TaskStatusError   = "error"
+)
+
+type TaskPayload struct {
+	FileID *string `json:"file_id,omitempty"`
 }
 
 func (cl *APIClient) CreateTask(opts TaskCreateOptions) error {
@@ -123,11 +144,13 @@ func (cl *APIClient) CreateTask(opts TaskCreateOptions) error {
 }
 
 type TaskPatchOptions struct {
-	Name            *string `json:"name"`
-	Error           *string `json:"error"`
-	Percentage      *int    `json:"percentage"`
-	IsIndeterminate *bool   `json:"isIndeterminate"`
-	UserID          *string `json:"userId"`
+	Name            *string           `json:"name,omitempty"`
+	Error           *string           `json:"error,omitempty"`
+	Percentage      *int              `json:"percentage,omitempty"`
+	IsIndeterminate *bool             `json:"isIndeterminate,omitempty"`
+	UserID          *string           `json:"userId,omitempty"`
+	Status          *string           `json:"status,omitempty"`
+	Payload         map[string]string `json:"payload,omitempty"`
 }
 
 func (cl *APIClient) PatchTask(id string, opts TaskPatchOptions) error {

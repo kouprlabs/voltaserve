@@ -20,7 +20,7 @@ export type Snapshot = {
 }
 
 export enum Status {
-  New = 'new',
+  Waiting = 'waiting',
   Processing = 'processing',
   Ready = 'ready',
   Error = 'error',

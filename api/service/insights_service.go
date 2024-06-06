@@ -105,7 +105,9 @@ func (svc *InsightsService) Create(id string, opts InsightsCreateOptions, userID
 		SnapshotID: snapshot.GetID(),
 		Bucket:     snapshot.GetOriginal().Bucket,
 		Key:        snapshot.GetOriginal().Key,
-		Values:     []string{opts.LanguageID},
+		Payload: map[string]string{
+			"language": opts.LanguageID,
+		},
 	}); err != nil {
 		return err
 	}
@@ -141,12 +143,24 @@ func (svc *InsightsService) Patch(id string, userID string) error {
 	if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
 		return err
 	}
+	task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
+		ID:              helper.NewID(),
+		Name:            "Waiting.",
+		UserID:          userID,
+		IsIndeterminate: true,
+		Status:          model.TaskStatusWaiting,
+		Payload:         map[string]string{"fileId": file.GetID()},
+	})
+	if err != nil {
+		return err
+	}
 	if err := svc.pipelineClient.Run(&client.PipelineRunOptions{
 		PipelineID: helper.ToPtr(client.PipelineInsights),
+		TaskID:     task.GetID(),
 		SnapshotID: snapshot.GetID(),
 		Bucket:     snapshot.GetOriginal().Bucket,
 		Key:        snapshot.GetOriginal().Key,
-		Values:     []string{*snapshot.GetLanguage()},
+		Payload:    map[string]string{"language": *snapshot.GetLanguage()},
 	}); err != nil {
 		return err
 	}

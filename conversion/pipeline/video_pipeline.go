@@ -4,9 +4,9 @@ import (
 	"os"
 	"path/filepath"
 	"voltaserve/client"
-	"voltaserve/core"
 	"voltaserve/helper"
 	"voltaserve/infra"
+	"voltaserve/model"
 	"voltaserve/processor"
 )
 
@@ -16,7 +16,7 @@ type videoPipeline struct {
 	apiClient *client.APIClient
 }
 
-func NewVideoPipeline() core.Pipeline {
+func NewVideoPipeline() model.Pipeline {
 	return &videoPipeline{
 		videoProc: processor.NewVideoProcessor(),
 		s3:        infra.NewS3Manager(),
@@ -44,6 +44,11 @@ func (p *videoPipeline) Run(opts client.PipelineRunOptions) error {
 }
 
 func (p *videoPipeline) create(inputPath string, opts client.PipelineRunOptions) error {
+	if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
+		Name: helper.ToPtr("Creating thumbnail."),
+	}); err != nil {
+		return err
+	}
 	thumbnail, err := p.videoProc.Base64Thumbnail(inputPath)
 	if err != nil {
 		return err
@@ -51,6 +56,12 @@ func (p *videoPipeline) create(inputPath string, opts client.PipelineRunOptions)
 	if err := p.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
 		Options:   opts,
 		Thumbnail: &thumbnail,
+	}); err != nil {
+		return err
+	}
+	if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
+		Name:   helper.ToPtr("Done."),
+		Status: helper.ToPtr(client.TaskStatusSuccess),
 	}); err != nil {
 		return err
 	}

@@ -9,6 +9,7 @@ import {
   IconButton,
   useDisclosure,
 } from '@chakra-ui/react'
+import cx from 'classnames'
 import TaskAPI from '@/client/api/task'
 import { swrConfig } from '@/client/options'
 import { IconStacks } from '@/lib/components/icons'
@@ -61,7 +62,7 @@ const TaskDrawer = () => {
         <DrawerContent>
           <DrawerCloseButton />
           <DrawerHeader>Tasks</DrawerHeader>
-          <DrawerBody>
+          <DrawerBody className={cx('p-2')}>
             <TasksList />
           </DrawerBody>
         </DrawerContent>

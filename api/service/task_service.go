@@ -28,14 +28,16 @@ func NewTaskService() *TaskService {
 }
 
 type Task struct {
-	ID              string  `json:"id"`
-	Name            string  `json:"name"`
-	Error           *string `json:"error,omitempty"`
-	Percentage      *int    `json:"percentage,omitempty"`
-	IsIndeterminate bool    `json:"isIndeterminate"`
-	UserID          string  `json:"userId"`
-	CreateTime      string  `json:"createTime"`
-	UpdateTime      *string `json:"updateTime,omitempty"`
+	ID              string            `json:"id"`
+	Name            string            `json:"name"`
+	Error           *string           `json:"error,omitempty"`
+	Percentage      *int              `json:"percentage,omitempty"`
+	IsIndeterminate bool              `json:"isIndeterminate"`
+	UserID          string            `json:"userId"`
+	Status          string            `json:"status"`
+	Payload         map[string]string `json:"payload,omitempty"`
+	CreateTime      string            `json:"createTime"`
+	UpdateTime      *string           `json:"updateTime,omitempty"`
 }
 
 type TaskCreateOptions struct {
@@ -66,11 +68,13 @@ func (svc *TaskService) Create(opts TaskCreateOptions) (*Task, error) {
 }
 
 type TaskPatchOptions struct {
-	Name            *string `json:"name"`
-	Error           *string `json:"error"`
-	Percentage      *int    `json:"percentage"`
-	IsIndeterminate *bool   `json:"isIndeterminate"`
-	UserID          *string `json:"userId"`
+	Name            *string           `json:"name,omitempty"`
+	Error           *string           `json:"error,omitempty"`
+	Percentage      *int              `json:"percentage,omitempty"`
+	IsIndeterminate *bool             `json:"isIndeterminate,omitempty"`
+	UserID          *string           `json:"userId,omitempty"`
+	Status          *string           `json:"status,omitempty"`
+	Payload         map[string]string `json:"payload,omitempty"`
 }
 
 func (svc *TaskService) Patch(id string, opts TaskPatchOptions) (*Task, error) {
@@ -92,6 +96,12 @@ func (svc *TaskService) Patch(id string, opts TaskPatchOptions) (*Task, error) {
 	}
 	if opts.UserID != nil {
 		task.SetUserID(*opts.UserID)
+	}
+	if opts.Status != nil {
+		task.SetStatus(*opts.Status)
+	}
+	if opts.Payload != nil {
+		task.SetPayload(opts.Payload)
 	}
 	if err := svc.saveAndSync(task); err != nil {
 		return nil, err
@@ -360,6 +370,8 @@ func (mp *taskMapper) mapOne(m model.Task) (*Task, error) {
 		Percentage:      m.GetPercentage(),
 		IsIndeterminate: m.GetIsIndeterminate(),
 		UserID:          m.GetUserID(),
+		Status:          m.GetStatus(),
+		Payload:         m.GetPayload(),
 		CreateTime:      m.GetCreateTime(),
 		UpdateTime:      m.GetUpdateTime(),
 	}, nil

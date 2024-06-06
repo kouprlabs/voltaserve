@@ -35,10 +35,10 @@ func (r *ToolRouter) AppendRoutes(g fiber.Router) {
 //	@Id				tools_run
 //	@Accept			json
 //	@Produce		json
-//	@Param			body	body	core.ToolRunOptions	true	"Body"
+//	@Param			body	body	service.ToolRunOptions	true	"Body"
 //	@Success		200
-//	@Failure		400	{object}	errorpkg.ErrorResponse
-//	@Failure		500	{object}	errorpkg.ErrorResponse
+//	@Failure		400
+//	@Failure		500
 //	@Router			/tools/run [post]
 func (r *ToolRouter) Run(c *fiber.Ctx) error {
 	apiKey := c.Query("api_key")

@@ -29,11 +29,12 @@ const (
 )
 
 type PipelineRunOptions struct {
-	PipelineID *string  `json:"pipelineId,omitempty"`
-	SnapshotID string   `json:"snapshotId"`
-	Bucket     string   `json:"bucket"`
-	Key        string   `json:"key"`
-	Values     []string `json:"values,omitempty"`
+	PipelineID *string           `json:"pipelineId,omitempty"`
+	TaskID     string            `json:"taskId"`
+	SnapshotID string            `json:"snapshotId"`
+	Bucket     string            `json:"bucket"`
+	Key        string            `json:"key"`
+	Payload    map[string]string `json:"payload,omitempty"`
 }
 
 func (cl *PipelineClient) Run(opts *PipelineRunOptions) error {

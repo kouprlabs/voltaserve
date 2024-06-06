@@ -1,4 +1,4 @@
-package core
+package model
 
 const (
 	PipelinePDF       = "pdf"
@@ -8,11 +8,4 @@ const (
 	PipelineInsights  = "insights"
 	PipelineMoasic    = "mosaic"
 	PipelineWatermark = "watermark"
-)
-
-const (
-	SnapshotStatusNew        = "new"
-	SnapshotStatusProcessing = "processing"
-	SnapshotStatusReady      = "ready"
-	SnapshotStatusError      = "error"
 )

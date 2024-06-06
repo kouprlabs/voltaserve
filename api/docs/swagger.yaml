@@ -58,14 +58,16 @@ definitions:
         type: string
       key:
         type: string
+      payload:
+        additionalProperties:
+          type: string
+        type: object
       pipelineId:
         type: string
       snapshotId:
         type: string
-      values:
-        items:
-          type: string
-        type: array
+      taskId:
+        type: string
     type: object
   errorpkg.ErrorResponse:
     properties:
@@ -632,8 +634,14 @@ definitions:
         type: boolean
       name:
         type: string
+      payload:
+        additionalProperties:
+          type: string
+        type: object
       percentage:
         type: integer
+      status:
+        type: string
       updateTime:
         type: string
       userId:
@@ -675,8 +683,14 @@ definitions:
         type: boolean
       name:
         type: string
+      payload:
+        additionalProperties:
+          type: string
+        type: object
       percentage:
         type: integer
+      status:
+        type: string
       userId:
         type: string
     type: object

@@ -41,6 +41,7 @@ type FileService struct {
 	groupGuard     *guard.GroupGuard
 	groupMapper    *groupMapper
 	permissionRepo repo.PermissionRepo
+	taskSvc        *TaskService
 	fileIdent      *infra.FileIdentifier
 	s3             *infra.S3Manager
 	pipelineClient *client.PipelineClient
@@ -67,6 +68,7 @@ func NewFileService() *FileService {
 		groupGuard:     guard.NewGroupGuard(),
 		groupMapper:    newGroupMapper(),
 		permissionRepo: repo.NewPermissionRepo(),
+		taskSvc:        NewTaskService(),
 		fileIdent:      infra.NewFileIdentifier(),
 		s3:             infra.NewS3Manager(),
 		pipelineClient: client.NewPipelineClient(),
@@ -231,7 +233,7 @@ func (svc *FileService) Store(id string, path string, userID string) (*File, err
 	if exceedsProcessingLimit {
 		snapshot.SetStatus(model.SnapshotStatusReady)
 	} else {
-		snapshot.SetStatus(model.SnapshotStatusNew)
+		snapshot.SetStatus(model.SnapshotStatusWaiting)
 	}
 	if err := svc.snapshotRepo.Save(snapshot); err != nil {
 		return nil, err
@@ -248,7 +250,19 @@ func (svc *FileService) Store(id string, path string, userID string) (*File, err
 		return nil, err
 	}
 	if !exceedsProcessingLimit {
+		task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
+			ID:              helper.NewID(),
+			Name:            "Waiting.",
+			UserID:          userID,
+			IsIndeterminate: true,
+			Status:          model.TaskStatusWaiting,
+			Payload:         map[string]string{"fileId": file.GetID()},
+		})
+		if err != nil {
+			return nil, err
+		}
 		if err := svc.pipelineClient.Run(&client.PipelineRunOptions{
+			TaskID:     task.GetID(),
 			SnapshotID: snapshot.GetID(),
 			Bucket:     original.Bucket,
 			Key:        original.Key,

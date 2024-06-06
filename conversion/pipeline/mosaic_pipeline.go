@@ -5,10 +5,10 @@ import (
 	"os"
 	"path/filepath"
 	"voltaserve/client"
-	"voltaserve/core"
 	"voltaserve/helper"
 	"voltaserve/identifier"
 	"voltaserve/infra"
+	"voltaserve/model"
 	"voltaserve/processor"
 )
 
@@ -20,7 +20,7 @@ type moasicPipeline struct {
 	mosaicClient *client.MosaicClient
 }
 
-func NewMosaicPipeline() core.Pipeline {
+func NewMosaicPipeline() model.Pipeline {
 	return &moasicPipeline{
 		videoProc:    processor.NewVideoProcessor(),
 		fileIdent:    identifier.NewFileIdentifier(),
@@ -43,7 +43,18 @@ func (p *moasicPipeline) Run(opts client.PipelineRunOptions) error {
 			}
 		}
 	}(inputPath)
+	if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
+		Name: helper.ToPtr("Creating mosaic."),
+	}); err != nil {
+		return err
+	}
 	if err := p.create(inputPath, opts); err != nil {
+		return err
+	}
+	if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
+		Name:   helper.ToPtr("Done."),
+		Status: helper.ToPtr(client.TaskStatusSuccess),
+	}); err != nil {
 		return err
 	}
 	return nil

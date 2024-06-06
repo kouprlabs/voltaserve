@@ -40,10 +40,10 @@ func (r *PipelineRouter) AppendRoutes(g fiber.Router) {
 //	@Id				pipeline_run
 //	@Accept			json
 //	@Produce		json
-//	@Param			body	body	core.PipelineRunOptions	true	"Body"
+//	@Param			body	body	client.PipelineRunOptions	true	"Body"
 //	@Success		200
-//	@Failure		400	{object}	errorpkg.ErrorResponse
-//	@Failure		500	{object}	errorpkg.ErrorResponse
+//	@Failure		400
+//	@Failure		500
 //	@Router			/pipelines/run [post]
 func (r *PipelineRouter) Run(c *fiber.Ctx) error {
 	apiKey := c.Query("api_key")

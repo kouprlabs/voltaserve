@@ -19,29 +19,29 @@ const MosaicOverviewSettings = () => {
   )
   const mutateFiles = useAppSelector((state) => state.ui.files.mutate)
   const mutateTaskCount = useAppSelector((state) => state.ui.tasks.mutateCount)
-  const mutateMetadata = useAppSelector((state) => state.ui.mosaic.mutateInfo)
+  const mutateInfo = useAppSelector((state) => state.ui.mosaic.mutateInfo)
   const { data: info } = MosaicAPI.useGetInfo(id, swrConfig())
   const { data: file } = FileAPI.useGet(id, swrConfig())
 
   const handleUpdate = useCallback(async () => {
     if (id) {
       await MosaicAPI.create(id)
-      mutateMetadata?.()
+      mutateInfo?.(await MosaicAPI.getInfo(id))
       mutateFiles?.()
       mutateTaskCount?.(await TaskAPI.getCount())
       dispatch(modalDidClose())
     }
-  }, [id, mutateFiles, mutateTaskCount, mutateMetadata, dispatch])
+  }, [id, mutateFiles, mutateTaskCount, mutateInfo, dispatch])
 
   const handleDelete = useCallback(async () => {
     if (id) {
       await MosaicAPI.delete(id)
-      mutateMetadata?.()
+      mutateInfo?.(await MosaicAPI.getInfo(id))
       mutateFiles?.()
       mutateTaskCount?.(await TaskAPI.getCount())
       dispatch(modalDidClose())
     }
-  }, [id, mutateFiles, mutateTaskCount, mutateMetadata, dispatch])
+  }, [id, mutateFiles, mutateTaskCount, mutateInfo, dispatch])
 
   if (!file || !info) {
     return null

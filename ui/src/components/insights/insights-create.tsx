@@ -24,7 +24,7 @@ const InsightsCreate = () => {
   )
   const mutateFiles = useAppSelector((state) => state.ui.files.mutate)
   const mutateTasks = useAppSelector((state) => state.ui.tasks.mutateList)
-  const mutateMetadata = useAppSelector((state) => state.ui.insights.mutateInfo)
+  const mutateInfo = useAppSelector((state) => state.ui.insights.mutateInfo)
   const [language, setLanguage] = useState<Language>()
   const { data: languages } = InsightsAPI.useGetLanguages(swrConfig())
   const { data: file } = FileAPI.useGet(id, swrConfig())
@@ -43,12 +43,12 @@ const InsightsCreate = () => {
   const handleCreate = useCallback(async () => {
     if (id && language) {
       await InsightsAPI.create(id, { languageId: language.id }, false)
-      mutateMetadata?.()
+      mutateInfo?.(await InsightsAPI.getInfo(id))
       mutateFiles?.()
       mutateTasks?.(await TaskAPI.list())
       dispatch(modalDidClose())
     }
-  }, [language, id, mutateFiles, mutateTasks, mutateMetadata, dispatch])
+  }, [language, id, mutateFiles, mutateTasks, mutateInfo, dispatch])
 
   const handleLanguageChange = useCallback(
     (value: SingleValue<LanguageOption>) => {

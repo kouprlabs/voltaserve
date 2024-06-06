@@ -6,10 +6,10 @@ import (
 	"os"
 	"path/filepath"
 	"voltaserve/client"
-	"voltaserve/core"
 	"voltaserve/helper"
 	"voltaserve/identifier"
 	"voltaserve/infra"
+	"voltaserve/model"
 	"voltaserve/processor"
 )
 
@@ -23,7 +23,7 @@ type insightsPipeline struct {
 	languageClient *client.LanguageClient
 }
 
-func NewInsightsPipeline() core.Pipeline {
+func NewInsightsPipeline() model.Pipeline {
 	return &insightsPipeline{
 		imageProc:      processor.NewImageProcessor(),
 		pdfProc:        processor.NewPDFProcessor(),
@@ -36,7 +36,7 @@ func NewInsightsPipeline() core.Pipeline {
 }
 
 func (p *insightsPipeline) Run(opts client.PipelineRunOptions) error {
-	if opts.Values == nil || len(opts.Values) == 0 {
+	if opts.Payload == nil || opts.Payload["language"] == "" {
 		return errors.New("language is undefined")
 	}
 	inputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(opts.Key))
@@ -51,11 +51,27 @@ func (p *insightsPipeline) Run(opts client.PipelineRunOptions) error {
 			}
 		}
 	}(inputPath)
+	if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
+		Name: helper.ToPtr("Extracting text."),
+	}); err != nil {
+		return err
+	}
 	text, err := p.createText(inputPath, opts)
 	if err != nil {
 		return err
 	}
+	if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
+		Name: helper.ToPtr("Collecting entities."),
+	}); err != nil {
+		return err
+	}
 	if err := p.createEntities(*text, opts); err != nil {
+		return err
+	}
+	if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
+		Name:   helper.ToPtr("Done."),
+		Status: helper.ToPtr(client.TaskStatusSuccess),
+	}); err != nil {
 		return err
 	}
 	return nil
@@ -85,7 +101,7 @@ func (p *insightsPipeline) createText(inputPath string, opts client.PipelineRunO
 		}(noAlphaImagePath)
 		/* Convert to PDF/A */
 		pdfPath = filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".pdf")
-		if err := p.ocrProc.SearchablePDFFromFile(noAlphaImagePath, opts.Values[0], dpi, pdfPath); err != nil {
+		if err := p.ocrProc.SearchablePDFFromFile(noAlphaImagePath, opts.Payload["language"], dpi, pdfPath); err != nil {
 			return nil, err
 		}
 		defer func(path string) {
@@ -152,7 +168,7 @@ func (p *insightsPipeline) createEntities(text string, opts client.PipelineRunOp
 	}
 	res, err := p.languageClient.GetEntities(client.GetEntitiesOptions{
 		Text:     text,
-		Language: opts.Values[0],
+		Language: opts.Payload["language"],
 	})
 	if err != nil {
 		return err

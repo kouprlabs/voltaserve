@@ -101,6 +101,13 @@ export default class InsightsAPI {
     )
   }
 
+  static async getInfo(id: string) {
+    return apiFetcher({
+      url: `/insights/${id}/info`,
+      method: 'GET',
+    }) as Promise<Info>
+  }
+
   static useGetLanguages(swrOptions?: SWRConfiguration) {
     const url = `/insights/languages`
     return useSWR<Language[]>(

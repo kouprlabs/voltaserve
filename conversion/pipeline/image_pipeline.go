@@ -5,10 +5,10 @@ import (
 	"path/filepath"
 	"voltaserve/client"
 	"voltaserve/config"
-	"voltaserve/core"
 	"voltaserve/helper"
 	"voltaserve/identifier"
 	"voltaserve/infra"
+	"voltaserve/model"
 	"voltaserve/processor"
 )
 
@@ -20,7 +20,7 @@ type imagePipeline struct {
 	config    config.Config
 }
 
-func NewImagePipeline() core.Pipeline {
+func NewImagePipeline() model.Pipeline {
 	return &imagePipeline{
 		imageProc: processor.NewImageProcessor(),
 		s3:        infra.NewS3Manager(),
@@ -50,6 +50,11 @@ func (p *imagePipeline) Run(opts client.PipelineRunOptions) error {
 }
 
 func (p *imagePipeline) create(inputPath string, opts client.PipelineRunOptions) error {
+	if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
+		Name: helper.ToPtr("Measuring image dimensions."),
+	}); err != nil {
+		return err
+	}
 	imageProps, err := p.imageProc.MeasureImage(inputPath)
 	if err != nil {
 		return err
@@ -68,6 +73,11 @@ func (p *imagePipeline) create(inputPath string, opts client.PipelineRunOptions)
 		},
 	}
 	if filepath.Ext(inputPath) == ".tiff" {
+		if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
+			Name: helper.ToPtr("Converting TIFF image to JPEG format."),
+		}); err != nil {
+			return err
+		}
 		jpegPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".jpg")
 		if err := p.imageProc.ConvertImage(inputPath, jpegPath); err != nil {
 			return err
@@ -82,6 +92,11 @@ func (p *imagePipeline) create(inputPath string, opts client.PipelineRunOptions)
 		}(jpegPath)
 		stat, err := os.Stat(jpegPath)
 		if err != nil {
+			return err
+		}
+		if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
+			Name: helper.ToPtr("Creating thumbnail."),
+		}); err != nil {
 			return err
 		}
 		thumbnail, err := p.imageProc.Base64Thumbnail(jpegPath)
@@ -99,6 +114,11 @@ func (p *imagePipeline) create(inputPath string, opts client.PipelineRunOptions)
 			return err
 		}
 	} else {
+		if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
+			Name: helper.ToPtr("Creating thumbnail."),
+		}); err != nil {
+			return err
+		}
 		updateOpts.Preview = updateOpts.Original
 		thumbnail, err := p.imageProc.Base64Thumbnail(inputPath)
 		if err != nil {
@@ -107,6 +127,12 @@ func (p *imagePipeline) create(inputPath string, opts client.PipelineRunOptions)
 		updateOpts.Thumbnail = &thumbnail
 	}
 	if err := p.apiClient.PatchSnapshot(updateOpts); err != nil {
+		return err
+	}
+	if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
+		Name:   helper.ToPtr("Done."),
+		Status: helper.ToPtr(client.TaskStatusSuccess),
+	}); err != nil {
 		return err
 	}
 	return nil

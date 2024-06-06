@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef } from 'react'
 import {
-  Circle,
   Drawer as ChakraDrawer,
   DrawerBody,
   DrawerCloseButton,
@@ -15,6 +14,7 @@ import {
 import cx from 'classnames'
 import UploadList from '@/components/upload/upload-list'
 import { IconClearAll, IconUpload } from '@/lib/components/icons'
+import NotificationBadge from '@/lib/components/notification-badge'
 import { completedUploadsCleared } from '@/store/entities/uploads'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { drawerDidClose } from '@/store/ui/uploads'
@@ -47,17 +47,14 @@ const UploadDrawer = () => {
 
   return (
     <>
-      <div className={cx('flex', 'items-center', 'justify-center', 'relative')}>
+      <NotificationBadge hasBadge={hasPendingUploads}>
         <IconButton
           ref={buttonRef}
           icon={<IconUpload />}
           aria-label=""
           onClick={onOpen}
         />
-        {hasPendingUploads ? (
-          <Circle size="15px" bg="red" position="absolute" top={0} right={0} />
-        ) : null}
-      </div>
+      </NotificationBadge>
       <ChakraDrawer
         isOpen={isOpen}
         placement="right"
@@ -71,7 +68,7 @@ const UploadDrawer = () => {
         <DrawerContent>
           <DrawerCloseButton />
           <DrawerHeader>Uploads</DrawerHeader>
-          <DrawerBody>
+          <DrawerBody className={cx('p-2')}>
             <UploadList />
           </DrawerBody>
           <DrawerFooter>

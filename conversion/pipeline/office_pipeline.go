@@ -5,14 +5,14 @@ import (
 	"path/filepath"
 	"voltaserve/client"
 	"voltaserve/config"
-	"voltaserve/core"
 	"voltaserve/helper"
 	"voltaserve/infra"
+	"voltaserve/model"
 	"voltaserve/processor"
 )
 
 type officePipeline struct {
-	pdfPipeline core.Pipeline
+	pdfPipeline model.Pipeline
 	officeProc  *processor.OfficeProcessor
 	pdfProc     *processor.PDFProcessor
 	s3          *infra.S3Manager
@@ -20,7 +20,7 @@ type officePipeline struct {
 	apiClient   *client.APIClient
 }
 
-func NewOfficePipeline() core.Pipeline {
+func NewOfficePipeline() model.Pipeline {
 	return &officePipeline{
 		pdfPipeline: NewPDFPipeline(),
 		officeProc:  processor.NewOfficeProcessor(),
@@ -51,6 +51,11 @@ func (p *officePipeline) Run(opts client.PipelineRunOptions) error {
 }
 
 func (p *officePipeline) create(inputPath string, opts client.PipelineRunOptions) error {
+	if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
+		Name: helper.ToPtr("Converting to PDF."),
+	}); err != nil {
+		return err
+	}
 	outputPath, err := p.officeProc.PDF(inputPath)
 	if err != nil {
 		return err
@@ -65,16 +70,6 @@ func (p *officePipeline) create(inputPath string, opts client.PipelineRunOptions
 	}(outputPath)
 	stat, err := os.Stat(outputPath)
 	if err != nil {
-		return err
-	}
-	thumbnail, err := p.pdfProc.Base64Thumbnail(outputPath)
-	if err != nil {
-		return err
-	}
-	if err := p.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
-		Options:   opts,
-		Thumbnail: &thumbnail,
-	}); err != nil {
 		return err
 	}
 	previewKey := opts.SnapshotID + "/preview.pdf"
@@ -95,6 +90,12 @@ func (p *officePipeline) create(inputPath string, opts client.PipelineRunOptions
 		Bucket:     opts.Bucket,
 		Key:        previewKey,
 		SnapshotID: opts.SnapshotID,
+	}); err != nil {
+		return err
+	}
+	if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
+		Name:   helper.ToPtr("Done."),
+		Status: helper.ToPtr(client.TaskStatusSuccess),
 	}); err != nil {
 		return err
 	}

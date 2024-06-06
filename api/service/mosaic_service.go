@@ -61,8 +61,20 @@ func (svc *MosaicService) Create(id string, userID string) error {
 	if snapshot.GetStatus() == model.SnapshotStatusProcessing {
 		return errorpkg.NewSnapshotIsProcessingError(nil)
 	}
+	task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
+		ID:              helper.NewID(),
+		Name:            "Waiting.",
+		UserID:          userID,
+		IsIndeterminate: true,
+		Status:          model.TaskStatusWaiting,
+		Payload:         map[string]string{"fileId": file.GetID()},
+	})
+	if err != nil {
+		return err
+	}
 	if err := svc.pipelineClient.Run(&client.PipelineRunOptions{
 		PipelineID: helper.ToPtr(client.PipelineMoasic),
+		TaskID:     task.GetID(),
 		SnapshotID: snapshot.GetID(),
 		Bucket:     snapshot.GetOriginal().Bucket,
 		Key:        snapshot.GetOriginal().Key,

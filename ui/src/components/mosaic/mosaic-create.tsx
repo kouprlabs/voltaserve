@@ -15,17 +15,17 @@ const MosaicCreate = () => {
   )
   const mutateFiles = useAppSelector((state) => state.ui.files.mutate)
   const mutateTasks = useAppSelector((state) => state.ui.tasks.mutateList)
-  const mutateMetadata = useAppSelector((state) => state.ui.mosaic.mutateInfo)
+  const mutateInfo = useAppSelector((state) => state.ui.mosaic.mutateInfo)
 
   const handleCreate = useCallback(async () => {
     if (id) {
       await MosaicAPI.create(id, false)
-      mutateMetadata?.()
+      mutateInfo?.(await MosaicAPI.getInfo(id))
       mutateFiles?.()
       mutateTasks?.(await TaskAPI.list())
       dispatch(modalDidClose())
     }
-  }, [id, mutateFiles, mutateTasks, mutateMetadata, dispatch])
+  }, [id, mutateFiles, mutateTasks, mutateInfo, dispatch])
 
   if (!id) {
     return null

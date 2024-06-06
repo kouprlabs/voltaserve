@@ -1,25 +1,17 @@
-import { useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
 import cx from 'classnames'
 import TaskAPI, { SortOrder } from '@/client/api/task'
 import { swrConfig } from '@/client/options'
-import { taskPaginationStorage } from '@/infra/pagination'
-import PagePagination from '@/lib/components/page-pagination'
-import usePagePagination from '@/lib/hooks/page-pagination'
+import Pagination from '@/lib/components/pagination'
 import { useAppDispatch } from '@/store/hook'
 import { mutateListUpdated } from '@/store/ui/tasks'
 import TaskDrawerItem from './task-item'
 
 const TasksList = () => {
   const dispatch = useAppDispatch()
-  const navigate = useNavigate()
-  const { page, size, steps, setPage, setSize } = usePagePagination({
-    navigate,
-    location,
-    storage: taskPaginationStorage(),
-  })
+  const [page, setPage] = useState(1)
   const { data: list, mutate: mutateList } = TaskAPI.useList(
-    { page, size, sortOrder: SortOrder.Desc },
+    { page, size: 5, sortOrder: SortOrder.Desc },
     swrConfig(),
   )
 
@@ -30,28 +22,33 @@ const TasksList = () => {
   return (
     <>
       {list && list.data.length > 0 ? (
-        <div className={cx('flex', 'flex-col', 'gap-1.5')}>
-          {list.data.map((task) => (
-            <div key={task.id} className={cx('flex', 'flex-col', 'gap-1.5')}>
-              <TaskDrawerItem task={task} />
-            </div>
-          ))}
+        <div
+          className={cx(
+            'flex',
+            'flex-col',
+            'gap-1.5',
+            'justify-between',
+            'h-full',
+          )}
+        >
+          <div className={cx('flex', 'flex-col', 'gap-1.5')}>
+            {list.data.map((task) => (
+              <TaskDrawerItem key={task.id} task={task} />
+            ))}
+          </div>
+          {list.totalPages > 1 ? (
+            <Pagination
+              uiSize="md"
+              maxButtons={3}
+              page={page}
+              totalPages={list.totalPages}
+              onPageChange={(value) => setPage(value)}
+            />
+          ) : null}
         </div>
       ) : (
         <span>There are no tasks.</span>
       )}
-      {list ? (
-        <PagePagination
-          style={{ alignSelf: 'end' }}
-          totalElements={list.totalElements}
-          totalPages={list.totalPages}
-          page={page}
-          size={size}
-          steps={steps}
-          setPage={setPage}
-          setSize={setSize}
-        />
-      ) : null}
     </>
   )
 }

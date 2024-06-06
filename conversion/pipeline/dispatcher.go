@@ -3,20 +3,20 @@ package pipeline
 import (
 	"errors"
 	"voltaserve/client"
-	"voltaserve/core"
 	"voltaserve/helper"
 	"voltaserve/identifier"
+	"voltaserve/model"
 )
 
 type Dispatcher struct {
 	pipelineIdentifier *identifier.PipelineIdentifier
-	pdfPipeline        core.Pipeline
-	imagePipeline      core.Pipeline
-	officePipeline     core.Pipeline
-	videoPipeline      core.Pipeline
-	insightsPipeline   core.Pipeline
-	mosaicPipeline     core.Pipeline
-	watermarkPipeline  core.Pipeline
+	pdfPipeline        model.Pipeline
+	imagePipeline      model.Pipeline
+	officePipeline     model.Pipeline
+	videoPipeline      model.Pipeline
+	insightsPipeline   model.Pipeline
+	mosaicPipeline     model.Pipeline
+	watermarkPipeline  model.Pipeline
 	apiClient          *client.APIClient
 }
 
@@ -37,30 +37,42 @@ func NewDispatcher() *Dispatcher {
 func (d *Dispatcher) Dispatch(opts client.PipelineRunOptions) error {
 	if err := d.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
 		Options: opts,
-		Status:  helper.ToPtr(core.SnapshotStatusProcessing),
+		Status:  helper.ToPtr(client.SnapshotStatusProcessing),
+	}); err != nil {
+		return err
+	}
+	if err := d.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
+		Name:   helper.ToPtr("Processing."),
+		Status: helper.ToPtr(client.TaskStatusRunning),
 	}); err != nil {
 		return err
 	}
 	id := d.pipelineIdentifier.Identify(opts)
 	var err error
-	if id == core.PipelinePDF {
+	if id == model.PipelinePDF {
 		err = d.pdfPipeline.Run(opts)
-	} else if id == core.PipelineOffice {
+	} else if id == model.PipelineOffice {
 		err = d.officePipeline.Run(opts)
-	} else if id == core.PipelineImage {
+	} else if id == model.PipelineImage {
 		err = d.imagePipeline.Run(opts)
-	} else if id == core.PipelineVideo {
+	} else if id == model.PipelineVideo {
 		err = d.videoPipeline.Run(opts)
-	} else if id == core.PipelineInsights {
+	} else if id == model.PipelineInsights {
 		err = d.insightsPipeline.Run(opts)
-	} else if id == core.PipelineMoasic {
+	} else if id == model.PipelineMoasic {
 		err = d.mosaicPipeline.Run(opts)
-	} else if id == core.PipelineWatermark {
+	} else if id == model.PipelineWatermark {
 		err = d.watermarkPipeline.Run(opts)
 	} else {
 		if err := d.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
 			Options: opts,
-			Status:  helper.ToPtr(core.SnapshotStatusError),
+			Status:  helper.ToPtr(client.SnapshotStatusError),
+		}); err != nil {
+			return err
+		}
+		if err := d.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
+			Status: helper.ToPtr(client.TaskStatusError),
+			Error:  helper.ToPtr("This file type cannot be processed."),
 		}); err != nil {
 			return err
 		}
@@ -69,7 +81,13 @@ func (d *Dispatcher) Dispatch(opts client.PipelineRunOptions) error {
 	if err != nil {
 		if err := d.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
 			Options: opts,
-			Status:  helper.ToPtr(core.SnapshotStatusError),
+			Status:  helper.ToPtr(client.SnapshotStatusError),
+		}); err != nil {
+			return err
+		}
+		if err := d.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
+			Status: helper.ToPtr(client.TaskStatusError),
+			Error:  helper.ToPtr("An error occurred while processing the file."),
 		}); err != nil {
 			return err
 		}
@@ -77,8 +95,11 @@ func (d *Dispatcher) Dispatch(opts client.PipelineRunOptions) error {
 	} else {
 		if err := d.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
 			Options: opts,
-			Status:  helper.ToPtr(core.SnapshotStatusReady),
+			Status:  helper.ToPtr(client.SnapshotStatusReady),
 		}); err != nil {
+			return err
+		}
+		if err := d.apiClient.DeletTask(opts.TaskID); err != nil {
 			return err
 		}
 		return nil

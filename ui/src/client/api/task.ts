@@ -19,6 +19,19 @@ export type Task = {
   percentage?: number
   isIndeterminate: boolean
   userId: string
+  status: Status
+  payload?: TaskPayload
+}
+
+export enum Status {
+  Waiting = 'waiting',
+  Running = 'running',
+  Success = 'success',
+  Error = 'error',
+}
+
+export type TaskPayload = {
+  fileId?: string
 }
 
 export type List = {

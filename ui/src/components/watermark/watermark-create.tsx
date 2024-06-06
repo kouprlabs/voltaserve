@@ -20,7 +20,7 @@ const WatermarkCreate = () => {
   const handleCreate = useCallback(async () => {
     if (id) {
       await WatermarkAPI.create(id, false)
-      mutateInfo?.()
+      mutateInfo?.(await WatermarkAPI.getInfo(id))
       mutateFiles?.()
       mutateTasks?.(await TaskAPI.list())
       dispatch(modalDidClose())

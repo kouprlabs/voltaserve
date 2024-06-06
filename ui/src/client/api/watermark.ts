@@ -42,4 +42,11 @@ export default class WatermarkAPI {
       swrOptions,
     )
   }
+
+  static async getInfo(id: string) {
+    return apiFetcher({
+      url: `/mosaics/${id}/info`,
+      method: 'GET',
+    }) as Promise<Info>
+  }
 }

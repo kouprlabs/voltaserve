@@ -19,29 +19,29 @@ const InsightsOverviewSettings = () => {
   )
   const mutateFiles = useAppSelector((state) => state.ui.files.mutate)
   const mutateTaskCount = useAppSelector((state) => state.ui.tasks.mutateCount)
-  const mutateMetadata = useAppSelector((state) => state.ui.insights.mutateInfo)
+  const mutateInfo = useAppSelector((state) => state.ui.insights.mutateInfo)
   const { data: info } = InsightsAPI.useGetInfo(id, swrConfig())
   const { data: file } = FileAPI.useGet(id, swrConfig())
 
   const handleUpdate = useCallback(async () => {
     if (id) {
       await InsightsAPI.patch(id)
-      mutateMetadata?.()
+      mutateInfo?.(await InsightsAPI.getInfo(id))
       mutateFiles?.()
       mutateTaskCount?.(await TaskAPI.getCount())
       dispatch(modalDidClose())
     }
-  }, [id, mutateFiles, mutateTaskCount, mutateMetadata, dispatch])
+  }, [id, mutateFiles, mutateTaskCount, mutateInfo, dispatch])
 
   const handleDelete = useCallback(async () => {
     if (id) {
       await InsightsAPI.delete(id)
-      mutateMetadata?.()
+      mutateInfo?.(await InsightsAPI.getInfo(id))
       mutateFiles?.()
       mutateTaskCount?.(await TaskAPI.getCount())
       dispatch(modalDidClose())
     }
-  }, [id, mutateFiles, mutateTaskCount, mutateMetadata, dispatch])
+  }, [id, mutateFiles, mutateTaskCount, mutateInfo, dispatch])
 
   if (!id || !info) {
     return null

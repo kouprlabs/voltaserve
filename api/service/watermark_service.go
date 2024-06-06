@@ -72,12 +72,27 @@ func (svc *WatermarkService) Create(id string, userID string) error {
 	if err != nil {
 		return err
 	}
+	task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
+		ID:              helper.NewID(),
+		Name:            ".",
+		UserID:          userID,
+		IsIndeterminate: true,
+		Status:          model.TaskStatusWaiting,
+		Payload:         map[string]string{"fileId": file.GetID()},
+	})
+	if err != nil {
+		return err
+	}
 	if err := svc.pipelineClient.Run(&client.PipelineRunOptions{
 		PipelineID: helper.ToPtr(client.PipelineWatermark),
+		TaskID:     task.GetID(),
 		SnapshotID: snapshot.GetID(),
 		Bucket:     snapshot.GetOriginal().Bucket,
 		Key:        snapshot.GetOriginal().Key,
-		Values:     []string{workspace.GetName(), user.GetEmail()},
+		Payload: map[string]string{
+			"workspace": workspace.GetName(),
+			"user":      user.GetEmail(),
+		},
 	}); err != nil {
 		return err
 	}

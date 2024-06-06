@@ -5,10 +5,10 @@ import (
 	"path/filepath"
 	"voltaserve/client"
 	"voltaserve/config"
-	"voltaserve/core"
 	"voltaserve/helper"
 	"voltaserve/identifier"
 	"voltaserve/infra"
+	"voltaserve/model"
 	"voltaserve/processor"
 )
 
@@ -21,7 +21,7 @@ type pdfPipeline struct {
 	config    config.Config
 }
 
-func NewPDFPipeline() core.Pipeline {
+func NewPDFPipeline() model.Pipeline {
 	return &pdfPipeline{
 		pdfProc:   processor.NewPDFProcessor(),
 		imageProc: processor.NewImageProcessor(),
@@ -52,6 +52,11 @@ func (p *pdfPipeline) Run(opts client.PipelineRunOptions) error {
 }
 
 func (p *pdfPipeline) create(inputPath string, opts client.PipelineRunOptions) error {
+	if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
+		Name: helper.ToPtr("Creating thumbnail."),
+	}); err != nil {
+		return err
+	}
 	thumbnail, err := p.pdfProc.Base64Thumbnail(inputPath)
 	if err != nil {
 		return err
@@ -59,6 +64,11 @@ func (p *pdfPipeline) create(inputPath string, opts client.PipelineRunOptions) e
 	if err := p.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
 		Options:   opts,
 		Thumbnail: &thumbnail,
+	}); err != nil {
+		return err
+	}
+	if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
+		Name: helper.ToPtr("Extracting text."),
 	}); err != nil {
 		return err
 	}
@@ -88,6 +98,12 @@ func (p *pdfPipeline) create(inputPath string, opts client.PipelineRunOptions) e
 			Key:    textKey,
 			Size:   helper.ToPtr(int64(len(text))),
 		},
+	}); err != nil {
+		return err
+	}
+	if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
+		Name:   helper.ToPtr("Done."),
+		Status: helper.ToPtr(client.TaskStatusSuccess),
 	}); err != nil {
 		return err
 	}
