@@ -4,19 +4,23 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"voltaserve/config"
 	"voltaserve/errorpkg"
 	"voltaserve/service"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 )
 
 type TaskRouter struct {
 	taskSvc *service.TaskService
+	config  config.Config
 }
 
 func NewTaskRouter() *TaskRouter {
 	return &TaskRouter{
 		taskSvc: service.NewTaskService(),
+		config:  config.GetConfig(),
 	}
 }
 
@@ -24,15 +28,21 @@ func (r *TaskRouter) AppendRoutes(g fiber.Router) {
 	g.Get("/", r.List)
 	g.Get("/count", r.GetCount)
 	g.Get("/:id", r.Get)
+	g.Post("/:id/dismiss", r.Dismiss)
+}
+
+func (r *TaskRouter) AppendNonJWTRoutes(g fiber.Router) {
+	g.Post("/", r.Create)
 	g.Delete("/:id", r.Delete)
+	g.Patch("/:id", r.Patch)
 }
 
 // Get godoc
 //
 //	@Summary		Get
 //	@Description	Get
-//	@Tags			Task
-//	@Id				task_get
+//	@Tags			Tasks
+//	@Id				tasks_get
 //	@Produce		json
 //	@Param			id	path		string	true	"ID"
 //	@Success		200	{object}	service.Task
@@ -52,8 +62,8 @@ func (r *TaskRouter) Get(c *fiber.Ctx) error {
 //
 //	@Summary		List
 //	@Description	List
-//	@Tags			Task
-//	@Id				task_list
+//	@Tags			Tasks
+//	@Id				tasks_list
 //	@Produce		json
 //	@Param			query		query		string	false	"Query"
 //	@Param			page		query		string	false	"Page"
@@ -113,8 +123,8 @@ func (r *TaskRouter) List(c *fiber.Ctx) error {
 //
 //	@Summary		Get Count
 //	@Description	Get Count
-//	@Tags			Task
-//	@Id				task_get_count
+//	@Tags			Tasks
+//	@Id				tasks_get_count
 //	@Produce		json
 //	@Success		200	{object}	int
 //	@Failure		500	{object}	errorpkg.ErrorResponse
@@ -127,12 +137,69 @@ func (r *TaskRouter) GetCount(c *fiber.Ctx) error {
 	return c.JSON(res)
 }
 
-// Delete godoc
+// Dismiss godoc
 //
-//	@Summary		Delete
-//	@Description	Delete
-//	@Tags			Task
-//	@Id				task_delete
+//	@Summary		Dismiss
+//	@Description	Dismiss
+//	@Tags			Tasks
+//	@Id				tasks_dismiss
+//	@Accept			json
+//	@Produce		json
+//	@Param			id	path	string	true	"ID"
+//	@Success		200
+//	@Failure		404	{object}	errorpkg.ErrorResponse
+//	@Failure		500	{object}	errorpkg.ErrorResponse
+//	@Router			/tasks/{id}/dismiss [post]
+func (r *TaskRouter) Dismiss(c *fiber.Ctx) error {
+	userID := GetUserID(c)
+	if err := r.taskSvc.Dismiss(c.Params("id"), userID); err != nil {
+		return err
+	}
+	return c.SendStatus(http.StatusNoContent)
+}
+
+// Create godoc
+//
+//	@Summary		Create
+//	@Description	Create
+//	@Tags			Tasks
+//	@Id				tasks_create
+//	@Produce		json
+//	@Param			api_key	query	string						true	"API Key"
+//	@Param			id		path	string						true	"ID"
+//	@Param			body	body	service.TaskCreateOptions	true	"Body"
+//	@Success		204
+//	@Failure		401	{object}	errorpkg.ErrorResponse
+//	@Failure		500	{object}	errorpkg.ErrorResponse
+//	@Router			/tasks [post]
+func (r *TaskRouter) Create(c *fiber.Ctx) error {
+	apiKey := c.Query("api_key")
+	if apiKey == "" {
+		return errorpkg.NewMissingQueryParamError("api_key")
+	}
+	if apiKey != r.config.Security.APIKey {
+		return errorpkg.NewInvalidAPIKeyError()
+	}
+	opts := new(service.TaskCreateOptions)
+	if err := c.BodyParser(opts); err != nil {
+		return err
+	}
+	if err := validator.New().Struct(opts); err != nil {
+		return errorpkg.NewRequestBodyValidationError(err)
+	}
+	task, err := r.taskSvc.Create(*opts)
+	if err != nil {
+		return err
+	}
+	return c.JSON(task)
+}
+
+// Dismiss godoc
+//
+//	@Summary		Dismiss
+//	@Description	Dismiss
+//	@Tags			Tasks
+//	@Id				tasks_delete
 //	@Accept			json
 //	@Produce		json
 //	@Param			id	path	string	true	"ID"
@@ -141,9 +208,51 @@ func (r *TaskRouter) GetCount(c *fiber.Ctx) error {
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/tasks/{id} [delete]
 func (r *TaskRouter) Delete(c *fiber.Ctx) error {
-	userID := GetUserID(c)
-	if err := r.taskSvc.Delete(c.Params("id"), userID); err != nil {
+	apiKey := c.Query("api_key")
+	if apiKey == "" {
+		return errorpkg.NewMissingQueryParamError("api_key")
+	}
+	if apiKey != r.config.Security.APIKey {
+		return errorpkg.NewInvalidAPIKeyError()
+	}
+	if err := r.taskSvc.Delete(c.Params("id")); err != nil {
 		return err
 	}
 	return c.SendStatus(http.StatusNoContent)
+}
+
+// Patch godoc
+//
+//	@Summary		Patch
+//	@Description	Patch
+//	@Tags			Tasks
+//	@Id				tasks_patch
+//	@Produce		json
+//	@Param			api_key	query		string						true	"API Key"
+//	@Param			id		path		string						true	"ID"
+//	@Param			body	body		service.TaskPatchOptions	true	"Body"
+//	@Success		200		{object}	service.Task
+//	@Failure		401		{object}	errorpkg.ErrorResponse
+//	@Failure		500		{object}	errorpkg.ErrorResponse
+//	@Router			/tasks/{id} [patch]
+func (r *TaskRouter) Patch(c *fiber.Ctx) error {
+	apiKey := c.Query("api_key")
+	if apiKey == "" {
+		return errorpkg.NewMissingQueryParamError("api_key")
+	}
+	if apiKey != r.config.Security.APIKey {
+		return errorpkg.NewInvalidAPIKeyError()
+	}
+	opts := new(service.TaskPatchOptions)
+	if err := c.BodyParser(opts); err != nil {
+		return err
+	}
+	if err := validator.New().Struct(opts); err != nil {
+		return errorpkg.NewRequestBodyValidationError(err)
+	}
+	task, err := r.taskSvc.Patch(c.Params("id"), *opts)
+	if err != nil {
+		return err
+	}
+	return c.JSON(task)
 }

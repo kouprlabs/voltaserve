@@ -107,10 +107,10 @@ export default class TaskAPI {
     }) as Promise<number>
   }
 
-  static async delete(id: string) {
+  static async dismiss(id: string) {
     return apiFetcher({
-      url: `/tasks/${id}`,
-      method: 'DELETE',
+      url: `/tasks/${id}/dismiss`,
+      method: 'POST',
     })
   }
 }

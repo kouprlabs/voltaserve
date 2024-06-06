@@ -1,15 +1,71 @@
 basePath: /v2
 definitions:
+  client.InsightsEntity:
+    properties:
+      frequency:
+        type: integer
+      label:
+        type: string
+      text:
+        type: string
+    type: object
+  client.MosaicMetadata:
+    properties:
+      extension:
+        type: string
+      height:
+        type: integer
+      isOutdated:
+        type: boolean
+      width:
+        type: integer
+      zoomLevels:
+        items:
+          $ref: '#/definitions/client.MosaicZoomLevel'
+        type: array
+    type: object
+  client.MosaicTile:
+    properties:
+      height:
+        type: integer
+      lastColWidth:
+        type: integer
+      lastRowHeight:
+        type: integer
+      width:
+        type: integer
+    type: object
+  client.MosaicZoomLevel:
+    properties:
+      cols:
+        type: integer
+      height:
+        type: integer
+      index:
+        type: integer
+      rows:
+        type: integer
+      scaleDownPercentage:
+        type: number
+      tile:
+        $ref: '#/definitions/client.MosaicTile'
+      width:
+        type: integer
+    type: object
   client.PipelineRunOptions:
     properties:
       bucket:
         type: string
       key:
         type: string
-      size:
-        type: integer
+      pipelineId:
+        type: string
       snapshotId:
         type: string
+      values:
+        items:
+          type: string
+        type: array
     type: object
   errorpkg.ErrorResponse:
     properties:
@@ -31,15 +87,6 @@ definitions:
       width:
         type: integer
     type: object
-  model.InsightsEntity:
-    properties:
-      frequency:
-        type: integer
-      label:
-        type: string
-      text:
-        type: string
-    type: object
   model.InsightsInfo:
     properties:
       isAvailable:
@@ -51,56 +98,6 @@ definitions:
     properties:
       isOutdated:
         type: boolean
-    type: object
-  model.MosaicInfo:
-    properties:
-      isAvailable:
-        type: boolean
-      metadata:
-        $ref: '#/definitions/model.MosaicMetadata'
-    type: object
-  model.MosaicMetadata:
-    properties:
-      extension:
-        type: string
-      height:
-        type: integer
-      isOutdated:
-        type: boolean
-      width:
-        type: integer
-      zoomLevels:
-        items:
-          $ref: '#/definitions/model.MosaicZoomLevel'
-        type: array
-    type: object
-  model.MosaicTile:
-    properties:
-      height:
-        type: integer
-      lastColWidth:
-        type: integer
-      lastRowHeight:
-        type: integer
-      width:
-        type: integer
-    type: object
-  model.MosaicZoomLevel:
-    properties:
-      cols:
-        type: integer
-      height:
-        type: integer
-      index:
-        type: integer
-      rows:
-        type: integer
-      scaleDownPercentage:
-        type: number
-      tile:
-        $ref: '#/definitions/model.MosaicTile'
-      width:
-        type: integer
     type: object
   model.S3Object:
     properties:
@@ -418,7 +415,7 @@ definitions:
     properties:
       data:
         items:
-          $ref: '#/definitions/model.InsightsEntity'
+          $ref: '#/definitions/client.InsightsEntity'
         type: array
       page:
         type: integer
@@ -481,6 +478,13 @@ definitions:
         type: integer
       totalPages:
         type: integer
+    type: object
+  service.MosaicInfo:
+    properties:
+      isAvailable:
+        type: boolean
+      metadata:
+        $ref: '#/definitions/client.MosaicMetadata'
     type: object
   service.Organization:
     properties:
@@ -584,8 +588,12 @@ definitions:
       totalPages:
         type: integer
     type: object
-  service.SnapshotUpdateOptions:
+  service.SnapshotPatchOptions:
     properties:
+      entities:
+        $ref: '#/definitions/model.S3Object'
+      mosaic:
+        $ref: '#/definitions/model.S3Object'
       ocr:
         $ref: '#/definitions/model.S3Object'
       options:
@@ -600,6 +608,8 @@ definitions:
         $ref: '#/definitions/model.S3Object'
       thumbnail:
         $ref: '#/definitions/model.Thumbnail'
+      watermark:
+        $ref: '#/definitions/model.S3Object'
     type: object
   service.StorageUsage:
     properties:
@@ -612,12 +622,27 @@ definitions:
     type: object
   service.Task:
     properties:
+      createTime:
+        type: string
       error:
         type: string
       id:
         type: string
-      isComplete:
+      isIndeterminate:
         type: boolean
+      name:
+        type: string
+      percentage:
+        type: integer
+      updateTime:
+        type: string
+      userId:
+        type: string
+    type: object
+  service.TaskCreateOptions:
+    properties:
+      error:
+        type: string
       isIndeterminate:
         type: boolean
       name:
@@ -641,6 +666,19 @@ definitions:
         type: integer
       totalPages:
         type: integer
+    type: object
+  service.TaskPatchOptions:
+    properties:
+      error:
+        type: string
+      isIndeterminate:
+        type: boolean
+      name:
+        type: string
+      percentage:
+        type: integer
+      userId:
+        type: string
     type: object
   service.Thumbnail:
     properties:
@@ -2269,7 +2307,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.MosaicInfo'
+            $ref: '#/definitions/service.MosaicInfo'
         "404":
           description: Not Found
           schema:
@@ -2618,12 +2656,14 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/service.SnapshotUpdateOptions'
+          $ref: '#/definitions/service.SnapshotPatchOptions'
       produces:
       - application/json
       responses:
-        "204":
-          description: No Content
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.Snapshot'
         "401":
           description: Unauthorized
           schema:
@@ -2760,7 +2800,7 @@ paths:
   /tasks:
     get:
       description: List
-      operationId: task_list
+      operationId: tasks_list
       parameters:
       - description: Query
         in: query
@@ -2799,13 +2839,49 @@ paths:
             $ref: '#/definitions/errorpkg.ErrorResponse'
       summary: List
       tags:
-      - Task
+      - Tasks
+    post:
+      description: Create
+      operationId: tasks_create
+      parameters:
+      - description: API Key
+        in: query
+        name: api_key
+        required: true
+        type: string
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/service.TaskCreateOptions'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Create
+      tags:
+      - Tasks
   /tasks/{id}:
     delete:
       consumes:
       - application/json
-      description: Delete
-      operationId: task_delete
+      description: Dismiss
+      operationId: tasks_delete
       parameters:
       - description: ID
         in: path
@@ -2825,12 +2901,12 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Delete
+      summary: Dismiss
       tags:
-      - Task
+      - Tasks
     get:
       description: Get
-      operationId: task_get
+      operationId: tasks_get
       parameters:
       - description: ID
         in: path
@@ -2854,11 +2930,77 @@ paths:
             $ref: '#/definitions/errorpkg.ErrorResponse'
       summary: Get
       tags:
-      - Task
+      - Tasks
+    patch:
+      description: Patch
+      operationId: tasks_patch
+      parameters:
+      - description: API Key
+        in: query
+        name: api_key
+        required: true
+        type: string
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/service.TaskPatchOptions'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.Task'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Patch
+      tags:
+      - Tasks
+  /tasks/{id}/dismiss:
+    post:
+      consumes:
+      - application/json
+      description: Dismiss
+      operationId: tasks_dismiss
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Dismiss
+      tags:
+      - Tasks
   /tasks/count:
     get:
       description: Get Count
-      operationId: task_get_count
+      operationId: tasks_get_count
       produces:
       - application/json
       responses:
@@ -2872,7 +3014,7 @@ paths:
             $ref: '#/definitions/errorpkg.ErrorResponse'
       summary: Get Count
       tags:
-      - Task
+      - Tasks
   /users:
     get:
       description: List

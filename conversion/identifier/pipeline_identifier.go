@@ -1,6 +1,7 @@
 package identifier
 
 import (
+	"voltaserve/client"
 	"voltaserve/core"
 )
 
@@ -14,7 +15,7 @@ func NewPipelineIdentifier() *PipelineIdentifier {
 	}
 }
 
-func (pi *PipelineIdentifier) Identify(opts core.PipelineRunOptions) string {
+func (pi *PipelineIdentifier) Identify(opts client.PipelineRunOptions) string {
 	if opts.PipelineID != nil {
 		return *opts.PipelineID
 	} else {

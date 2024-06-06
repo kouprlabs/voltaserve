@@ -15,26 +15,28 @@ import (
 )
 
 type SnapshotService struct {
-	snapshotRepo  repo.SnapshotRepo
-	snapshotCache *cache.SnapshotCache
-	fileCache     *cache.FileCache
-	fileGuard     *guard.FileGuard
-	fileRepo      repo.FileRepo
-	fileSearch    *search.FileSearch
-	fileMapper    *FileMapper
-	config        config.Config
+	snapshotRepo   repo.SnapshotRepo
+	snapshotCache  *cache.SnapshotCache
+	snapshotMapper *SnapshotMapper
+	fileCache      *cache.FileCache
+	fileGuard      *guard.FileGuard
+	fileRepo       repo.FileRepo
+	fileSearch     *search.FileSearch
+	fileMapper     *FileMapper
+	config         config.Config
 }
 
 func NewSnapshotService() *SnapshotService {
 	return &SnapshotService{
-		fileCache:     cache.NewFileCache(),
-		fileGuard:     guard.NewFileGuard(),
-		fileSearch:    search.NewFileSearch(),
-		fileMapper:    NewFileMapper(),
-		snapshotRepo:  repo.NewSnapshotRepo(),
-		snapshotCache: cache.NewSnapshotCache(),
-		fileRepo:      repo.NewFileRepo(),
-		config:        config.GetConfig(),
+		snapshotRepo:   repo.NewSnapshotRepo(),
+		snapshotCache:  cache.NewSnapshotCache(),
+		snapshotMapper: NewSnapshotMapper(),
+		fileCache:      cache.NewFileCache(),
+		fileGuard:      guard.NewFileGuard(),
+		fileSearch:     search.NewFileSearch(),
+		fileMapper:     NewFileMapper(),
+		fileRepo:       repo.NewFileRepo(),
+		config:         config.GetConfig(),
 	}
 }
 
@@ -256,7 +258,7 @@ func (svc *SnapshotService) Detach(id string, opts SnapshotDetachOptions, userID
 	return nil
 }
 
-type SnapshotUpdateOptions struct {
+type SnapshotPatchOptions struct {
 	Options   client.PipelineRunOptions `json:"options"`
 	Original  *model.S3Object           `json:"original,omitempty"`
 	Preview   *model.S3Object           `json:"preview,omitempty"`
@@ -266,15 +268,12 @@ type SnapshotUpdateOptions struct {
 	Mosaic    *model.S3Object           `json:"mosaic,omitempty"`
 	Watermark *model.S3Object           `json:"watermark,omitempty"`
 	Thumbnail *model.Thumbnail          `json:"thumbnail,omitempty"`
-	Status    string                    `json:"status,omitempty"`
+	Status    *string                   `json:"status,omitempty"`
 }
 
-func (svc *SnapshotService) Patch(id string, opts SnapshotUpdateOptions, apiKey string) error {
+func (svc *SnapshotService) Patch(id string, opts SnapshotPatchOptions) (*Snapshot, error) {
 	if id != opts.Options.SnapshotID {
-		return errorpkg.NewPathVariablesAndBodyParametersNotConsistent()
-	}
-	if apiKey != svc.config.Security.APIKey {
-		return errorpkg.NewInvalidAPIKeyError()
+		return nil, errorpkg.NewPathVariablesAndBodyParametersNotConsistent()
 	}
 	if err := svc.snapshotRepo.Update(id, repo.SnapshotUpdateOptions{
 		Original:  opts.Original,
@@ -287,16 +286,13 @@ func (svc *SnapshotService) Patch(id string, opts SnapshotUpdateOptions, apiKey 
 		Thumbnail: opts.Thumbnail,
 		Status:    opts.Status,
 	}); err != nil {
-		return err
+		return nil, err
 	}
-	snapshot, err := svc.snapshotRepo.Find(id)
+	snapshot, err := svc.snapshotCache.Refresh(id)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	if err := svc.snapshotCache.Set(snapshot); err != nil {
-		return err
-	}
-	return nil
+	return svc.snapshotMapper.mapOne(snapshot), nil
 }
 
 type SnapshotMapper struct {
@@ -306,13 +302,12 @@ func NewSnapshotMapper() *SnapshotMapper {
 	return &SnapshotMapper{}
 }
 
-func (mp *SnapshotMapper) mapOne(m model.Snapshot, isActive bool) *Snapshot {
+func (mp *SnapshotMapper) mapOne(m model.Snapshot) *Snapshot {
 	s := &Snapshot{
 		ID:         m.GetID(),
 		Version:    m.GetVersion(),
 		Status:     m.GetStatus(),
 		Language:   m.GetLanguage(),
-		IsActive:   isActive,
 		CreateTime: m.GetCreateTime(),
 		UpdateTime: m.GetUpdateTime(),
 	}
@@ -346,7 +341,9 @@ func (mp *SnapshotMapper) mapOne(m model.Snapshot, isActive bool) *Snapshot {
 func (mp *SnapshotMapper) mapMany(snapshots []model.Snapshot, activeID string) []*Snapshot {
 	res := make([]*Snapshot, 0)
 	for _, snapshot := range snapshots {
-		res = append(res, mp.mapOne(snapshot, activeID == snapshot.GetID()))
+		s := mp.mapOne(snapshot)
+		s.IsActive = activeID == snapshot.GetID()
+		res = append(res, s)
 	}
 	return res
 }

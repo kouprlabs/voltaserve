@@ -8,7 +8,6 @@ import (
 	"strings"
 	"voltaserve/client"
 	"voltaserve/config"
-	"voltaserve/core"
 	"voltaserve/helper"
 	"voltaserve/identifier"
 	"voltaserve/infra"
@@ -28,31 +27,31 @@ func NewImageProcessor() *ImageProcessor {
 	}
 }
 
-func (p *ImageProcessor) Base64Thumbnail(inputPath string) (core.ImageBase64, error) {
+func (p *ImageProcessor) Base64Thumbnail(inputPath string) (client.ImageBase64, error) {
 	inputSize, err := p.MeasureImage(inputPath)
 	if err != nil {
-		return core.ImageBase64{}, err
+		return client.ImageBase64{}, err
 	}
 	if inputSize.Width > p.config.Limits.ImagePreviewMaxWidth || inputSize.Height > p.config.Limits.ImagePreviewMaxHeight {
 		outputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(inputPath))
 		if inputSize.Width > inputSize.Height {
 			if err := p.ResizeImage(inputPath, p.config.Limits.ImagePreviewMaxWidth, 0, outputPath); err != nil {
-				return core.ImageBase64{}, err
+				return client.ImageBase64{}, err
 			}
 		} else {
 			if err := p.ResizeImage(inputPath, 0, p.config.Limits.ImagePreviewMaxHeight, outputPath); err != nil {
-				return core.ImageBase64{}, err
+				return client.ImageBase64{}, err
 			}
 		}
 		b64, err := helper.ImageToBase64(outputPath)
 		if err != nil {
-			return core.ImageBase64{}, err
+			return client.ImageBase64{}, err
 		}
 		size, err := p.MeasureImage(outputPath)
 		if err != nil {
-			return core.ImageBase64{}, err
+			return client.ImageBase64{}, err
 		}
-		return core.ImageBase64{
+		return client.ImageBase64{
 			Base64: b64,
 			Width:  size.Width,
 			Height: size.Height,
@@ -60,13 +59,13 @@ func (p *ImageProcessor) Base64Thumbnail(inputPath string) (core.ImageBase64, er
 	} else {
 		b64, err := helper.ImageToBase64(inputPath)
 		if err != nil {
-			return core.ImageBase64{}, err
+			return client.ImageBase64{}, err
 		}
 		size, err := p.MeasureImage(inputPath)
 		if err != nil {
-			return core.ImageBase64{}, err
+			return client.ImageBase64{}, err
 		}
-		return core.ImageBase64{
+		return client.ImageBase64{
 			Base64: b64,
 			Width:  size.Width,
 			Height: size.Height,
@@ -74,21 +73,21 @@ func (p *ImageProcessor) Base64Thumbnail(inputPath string) (core.ImageBase64, er
 	}
 }
 
-func (p *ImageProcessor) MeasureImage(inputPath string) (core.ImageProps, error) {
+func (p *ImageProcessor) MeasureImage(inputPath string) (client.ImageProps, error) {
 	size, err := infra.NewCommand().ReadOutput("identify", "-format", "%w,%h", inputPath)
 	if err != nil {
-		return core.ImageProps{}, err
+		return client.ImageProps{}, err
 	}
 	values := strings.Split(size, ",")
 	width, err := strconv.Atoi(helper.RemoveNonNumeric(values[0]))
 	if err != nil {
-		return core.ImageProps{}, err
+		return client.ImageProps{}, err
 	}
 	height, err := strconv.Atoi(helper.RemoveNonNumeric(values[1]))
 	if err != nil {
-		return core.ImageProps{}, err
+		return client.ImageProps{}, err
 	}
-	return core.ImageProps{Width: width, Height: height}, nil
+	return client.ImageProps{Width: width, Height: height}, nil
 }
 
 func (p *ImageProcessor) ResizeImage(inputPath string, width int, height int, outputPath string) error {

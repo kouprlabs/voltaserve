@@ -3,8 +3,8 @@ package router
 import (
 	"errors"
 	"net/http"
+	"voltaserve/client"
 	"voltaserve/config"
-	"voltaserve/core"
 	"voltaserve/errorpkg"
 	"voltaserve/runtime"
 
@@ -59,7 +59,7 @@ func (r *PipelineRouter) Run(c *fiber.Ctx) error {
 		}
 		return errors.New("invalid api_key")
 	}
-	opts := new(core.PipelineRunOptions)
+	opts := new(client.PipelineRunOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
 	}

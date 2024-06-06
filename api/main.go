@@ -69,6 +69,10 @@ func main() {
 	watermark := router.NewWatermarkRouter()
 	watermark.AppendNonJWTRoutes(watermarkGroup)
 
+	tasksGroup := v2.Group("tasks")
+	tasks := router.NewTaskRouter()
+	tasks.AppendNonJWTRoutes(tasksGroup)
+
 	app.Use(jwtware.New(jwtware.Config{
 		SigningKey: jwtware.SigningKey{Key: []byte(cfg.Security.JWTSigningKey)},
 	}))
@@ -78,15 +82,13 @@ func main() {
 	insights.AppendRoutes(insightsGroup)
 	mosaic.AppendRoutes(mosaicGroup)
 	watermark.AppendRoutes(watermarkGroup)
+	tasks.AppendRoutes(tasksGroup)
 
 	invitations := router.NewInvitationRouter()
 	invitations.AppendRoutes(v2.Group("invitations"))
 
 	organizations := router.NewOrganizationRouter()
 	organizations.AppendRoutes(v2.Group("organizations"))
-
-	tasks := router.NewTaskRouter()
-	tasks.AppendRoutes(v2.Group("tasks"))
 
 	storage := router.NewStorageRouter()
 	storage.AppendRoutes(v2.Group("storage"))

@@ -32,7 +32,7 @@ func NewPDFPipeline() core.Pipeline {
 	}
 }
 
-func (p *pdfPipeline) Run(opts core.PipelineRunOptions) error {
+func (p *pdfPipeline) Run(opts client.PipelineRunOptions) error {
 	inputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(opts.Key))
 	if err := p.s3.GetFile(opts.Key, inputPath, opts.Bucket); err != nil {
 		return err
@@ -51,12 +51,12 @@ func (p *pdfPipeline) Run(opts core.PipelineRunOptions) error {
 	return nil
 }
 
-func (p *pdfPipeline) create(inputPath string, opts core.PipelineRunOptions) error {
+func (p *pdfPipeline) create(inputPath string, opts client.PipelineRunOptions) error {
 	thumbnail, err := p.pdfProc.Base64Thumbnail(inputPath)
 	if err != nil {
 		return err
 	}
-	if err := p.apiClient.UpdateSnapshot(core.SnapshotUpdateOptions{
+	if err := p.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
 		Options:   opts,
 		Thumbnail: &thumbnail,
 	}); err != nil {
@@ -76,14 +76,14 @@ func (p *pdfPipeline) create(inputPath string, opts core.PipelineRunOptions) err
 	if err != nil {
 		return err
 	}
-	if err := p.apiClient.UpdateSnapshot(core.SnapshotUpdateOptions{
+	if err := p.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
 		Options: opts,
-		Preview: &core.S3Object{
+		Preview: &client.S3Object{
 			Bucket: opts.Bucket,
 			Key:    opts.Key,
 			Size:   helper.ToPtr(stat.Size()),
 		},
-		Text: &core.S3Object{
+		Text: &client.S3Object{
 			Bucket: opts.Bucket,
 			Key:    textKey,
 			Size:   helper.ToPtr(int64(len(text))),

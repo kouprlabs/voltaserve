@@ -5,20 +5,11 @@ import (
 	"time"
 	"voltaserve/cache"
 	"voltaserve/errorpkg"
+	"voltaserve/helper"
 	"voltaserve/model"
 	"voltaserve/repo"
 	"voltaserve/search"
 )
-
-type Task struct {
-	ID              string  `json:"id"`
-	Name            string  `json:"name"`
-	Error           *string `json:"error,omitempty"`
-	Percentage      *int    `json:"percentage,omitempty"`
-	IsComplete      bool    `json:"isComplete"`
-	IsIndeterminate bool    `json:"isIndeterminate"`
-	UserID          string  `json:"userId"`
-}
 
 type TaskService struct {
 	taskMapper *taskMapper
@@ -34,6 +25,82 @@ func NewTaskService() *TaskService {
 		taskSearch: search.NewTaskSearch(),
 		taskRepo:   repo.NewTaskRepo(),
 	}
+}
+
+type Task struct {
+	ID              string  `json:"id"`
+	Name            string  `json:"name"`
+	Error           *string `json:"error,omitempty"`
+	Percentage      *int    `json:"percentage,omitempty"`
+	IsIndeterminate bool    `json:"isIndeterminate"`
+	UserID          string  `json:"userId"`
+	CreateTime      string  `json:"createTime"`
+	UpdateTime      *string `json:"updateTime,omitempty"`
+}
+
+type TaskCreateOptions struct {
+	Name            string  `json:"name"`
+	Error           *string `json:"error,omitempty"`
+	Percentage      *int    `json:"percentage,omitempty"`
+	IsIndeterminate bool    `json:"isIndeterminate"`
+	UserID          string  `json:"userId"`
+}
+
+func (svc *TaskService) Create(opts TaskCreateOptions) (*Task, error) {
+	task, err := svc.insertAndSync(repo.TaskInsertOptions{
+		ID:              helper.NewID(),
+		Name:            opts.Name,
+		Error:           opts.Error,
+		Percentage:      opts.Percentage,
+		IsIndeterminate: opts.IsIndeterminate,
+		UserID:          opts.UserID,
+	})
+	if err != nil {
+		return nil, err
+	}
+	res, err := svc.taskMapper.mapOne(task)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
+type TaskPatchOptions struct {
+	Name            *string `json:"name"`
+	Error           *string `json:"error"`
+	Percentage      *int    `json:"percentage"`
+	IsIndeterminate *bool   `json:"isIndeterminate"`
+	UserID          *string `json:"userId"`
+}
+
+func (svc *TaskService) Patch(id string, opts TaskPatchOptions) (*Task, error) {
+	task, err := svc.taskCache.Get(id)
+	if err != nil {
+		return nil, err
+	}
+	if opts.Name != nil {
+		task.SetName(*opts.Name)
+	}
+	if opts.Error != nil {
+		task.SetError(opts.Error)
+	}
+	if opts.Percentage != nil {
+		task.SetPercentage(opts.Percentage)
+	}
+	if opts.IsIndeterminate != nil {
+		task.SetIsIndeterminate(true)
+	}
+	if opts.UserID != nil {
+		task.SetUserID(*opts.UserID)
+	}
+	if err := svc.saveAndSync(task); err != nil {
+		return nil, err
+	}
+	res, err := svc.taskMapper.mapOne(task)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
 }
 
 func (svc *TaskService) Find(id string, userID string) (*Task, error) {
@@ -195,7 +262,7 @@ func (svc *TaskService) doPagination(data []model.Task, page, size uint) ([]mode
 	return pageData, totalElements, totalPages
 }
 
-func (svc *TaskService) Delete(id string, userID string) error {
+func (svc *TaskService) Dismiss(id string, userID string) error {
 	task, err := svc.taskCache.Get(id)
 	if err != nil {
 		return err
@@ -205,6 +272,23 @@ func (svc *TaskService) Delete(id string, userID string) error {
 	}
 	if !task.HasError() {
 		return errorpkg.NewTaskIsRunningError(nil)
+	}
+	if err := svc.taskRepo.Delete(id); err != nil {
+		return err
+	}
+	if err := svc.taskCache.Delete(task.GetID()); err != nil {
+		return err
+	}
+	if err := svc.taskSearch.Delete([]string{task.GetID()}); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (svc *TaskService) Delete(id string) error {
+	task, err := svc.taskCache.Get(id)
+	if err != nil {
+		return err
 	}
 	if err := svc.taskRepo.Delete(id); err != nil {
 		return err
@@ -276,6 +360,8 @@ func (mp *taskMapper) mapOne(m model.Task) (*Task, error) {
 		Percentage:      m.GetPercentage(),
 		IsIndeterminate: m.GetIsIndeterminate(),
 		UserID:          m.GetUserID(),
+		CreateTime:      m.GetCreateTime(),
+		UpdateTime:      m.GetUpdateTime(),
 	}, nil
 }
 

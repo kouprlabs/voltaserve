@@ -31,7 +31,7 @@ func NewOfficePipeline() core.Pipeline {
 	}
 }
 
-func (p *officePipeline) Run(opts core.PipelineRunOptions) error {
+func (p *officePipeline) Run(opts client.PipelineRunOptions) error {
 	inputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(opts.Key))
 	if err := p.s3.GetFile(opts.Key, inputPath, opts.Bucket); err != nil {
 		return err
@@ -50,7 +50,7 @@ func (p *officePipeline) Run(opts core.PipelineRunOptions) error {
 	return nil
 }
 
-func (p *officePipeline) create(inputPath string, opts core.PipelineRunOptions) error {
+func (p *officePipeline) create(inputPath string, opts client.PipelineRunOptions) error {
 	outputPath, err := p.officeProc.PDF(inputPath)
 	if err != nil {
 		return err
@@ -71,7 +71,7 @@ func (p *officePipeline) create(inputPath string, opts core.PipelineRunOptions) 
 	if err != nil {
 		return err
 	}
-	if err := p.apiClient.UpdateSnapshot(core.SnapshotUpdateOptions{
+	if err := p.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
 		Options:   opts,
 		Thumbnail: &thumbnail,
 	}); err != nil {
@@ -81,9 +81,9 @@ func (p *officePipeline) create(inputPath string, opts core.PipelineRunOptions) 
 	if err := p.s3.PutFile(previewKey, outputPath, helper.DetectMimeFromFile(outputPath), opts.Bucket); err != nil {
 		return err
 	}
-	if err := p.apiClient.UpdateSnapshot(core.SnapshotUpdateOptions{
+	if err := p.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
 		Options: opts,
-		Preview: &core.S3Object{
+		Preview: &client.S3Object{
 			Bucket: opts.Bucket,
 			Key:    previewKey,
 			Size:   helper.ToPtr(stat.Size()),
@@ -91,7 +91,7 @@ func (p *officePipeline) create(inputPath string, opts core.PipelineRunOptions) 
 	}); err != nil {
 		return err
 	}
-	if err := p.pdfPipeline.Run(core.PipelineRunOptions{
+	if err := p.pdfPipeline.Run(client.PipelineRunOptions{
 		Bucket:     opts.Bucket,
 		Key:        previewKey,
 		SnapshotID: opts.SnapshotID,

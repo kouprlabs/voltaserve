@@ -30,7 +30,7 @@ func NewMosaicPipeline() core.Pipeline {
 	}
 }
 
-func (p *moasicPipeline) Run(opts core.PipelineRunOptions) error {
+func (p *moasicPipeline) Run(opts client.PipelineRunOptions) error {
 	inputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(opts.Key))
 	if err := p.s3.GetFile(opts.Key, inputPath, opts.Bucket); err != nil {
 		return err
@@ -49,7 +49,7 @@ func (p *moasicPipeline) Run(opts core.PipelineRunOptions) error {
 	return nil
 }
 
-func (p *moasicPipeline) create(inputPath string, opts core.PipelineRunOptions) error {
+func (p *moasicPipeline) create(inputPath string, opts client.PipelineRunOptions) error {
 	if p.fileIdent.IsImage(opts.Key) {
 		if _, err := p.mosaicClient.Create(client.MosaicCreateOptions{
 			Path:     inputPath,
@@ -58,9 +58,9 @@ func (p *moasicPipeline) create(inputPath string, opts core.PipelineRunOptions) 
 		}); err != nil {
 			return err
 		}
-		if err := p.apiClient.UpdateSnapshot(core.SnapshotUpdateOptions{
+		if err := p.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
 			Options: opts,
-			Mosaic: &core.S3Object{
+			Mosaic: &client.S3Object{
 				Key:    filepath.FromSlash(opts.SnapshotID + "/mosaic.json"),
 				Bucket: opts.Bucket,
 			},

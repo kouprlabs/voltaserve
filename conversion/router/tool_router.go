@@ -5,7 +5,6 @@ import (
 	"os"
 	"path/filepath"
 	"voltaserve/config"
-	"voltaserve/core"
 	"voltaserve/errorpkg"
 	"voltaserve/helper"
 	"voltaserve/service"
@@ -61,13 +60,13 @@ func (r *ToolRouter) Run(c *fiber.Ctx) error {
 			defer os.Remove(inputPath)
 		}
 	}
-	var opts core.ToolRunOptions
+	var opts service.ToolRunOptions
 	if inputPath != "" {
 		if err := json.Unmarshal([]byte(c.FormValue("json")), &opts); err != nil {
 			return err
 		}
 	} else {
-		opts := new(core.ToolRunOptions)
+		opts := new(service.ToolRunOptions)
 		if err := c.BodyParser(opts); err != nil {
 			return err
 		}

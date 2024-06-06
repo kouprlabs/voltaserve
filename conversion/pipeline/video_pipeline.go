@@ -24,7 +24,7 @@ func NewVideoPipeline() core.Pipeline {
 	}
 }
 
-func (p *videoPipeline) Run(opts core.PipelineRunOptions) error {
+func (p *videoPipeline) Run(opts client.PipelineRunOptions) error {
 	inputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(opts.Key))
 	if err := p.s3.GetFile(opts.Key, inputPath, opts.Bucket); err != nil {
 		return err
@@ -43,12 +43,12 @@ func (p *videoPipeline) Run(opts core.PipelineRunOptions) error {
 	return nil
 }
 
-func (p *videoPipeline) create(inputPath string, opts core.PipelineRunOptions) error {
+func (p *videoPipeline) create(inputPath string, opts client.PipelineRunOptions) error {
 	thumbnail, err := p.videoProc.Base64Thumbnail(inputPath)
 	if err != nil {
 		return err
 	}
-	if err := p.apiClient.UpdateSnapshot(core.SnapshotUpdateOptions{
+	if err := p.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
 		Options:   opts,
 		Thumbnail: &thumbnail,
 	}); err != nil {

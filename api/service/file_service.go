@@ -1677,7 +1677,8 @@ func (mp *FileMapper) mapOne(m model.File, userID string) (*File, error) {
 		if err != nil {
 			return nil, err
 		}
-		res.Snapshot = mp.snapshotMapper.mapOne(snapshot, true)
+		res.Snapshot = mp.snapshotMapper.mapOne(snapshot)
+		res.Snapshot.IsActive = true
 	}
 	res.Permission = ""
 	for _, p := range m.GetUserPermissions() {

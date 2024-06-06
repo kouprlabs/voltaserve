@@ -438,7 +438,7 @@ type SnapshotUpdateOptions struct {
 	Mosaic    *model.S3Object
 	Watermark *model.S3Object
 	Thumbnail *model.Thumbnail
-	Status    string
+	Status    *string
 	Language  *string
 }
 
@@ -471,8 +471,8 @@ func (repo *snapshotRepo) Update(id string, opts SnapshotUpdateOptions) error {
 	if opts.Thumbnail != nil {
 		snapshot.SetThumbnail(opts.Thumbnail)
 	}
-	if opts.Status != "" {
-		snapshot.SetStatus(opts.Status)
+	if opts.Status != nil {
+		snapshot.SetStatus(*opts.Status)
 	}
 	if opts.Language != nil {
 		snapshot.SetLanguage(*opts.Language)

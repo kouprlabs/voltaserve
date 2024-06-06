@@ -30,7 +30,7 @@ func NewWatermarkPipeline() core.Pipeline {
 	}
 }
 
-func (p *watermarkPipeline) Run(opts core.PipelineRunOptions) error {
+func (p *watermarkPipeline) Run(opts client.PipelineRunOptions) error {
 	inputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(opts.Key))
 	if err := p.s3.GetFile(opts.Key, inputPath, opts.Bucket); err != nil {
 		return err
@@ -49,7 +49,7 @@ func (p *watermarkPipeline) Run(opts core.PipelineRunOptions) error {
 	return nil
 }
 
-func (p *watermarkPipeline) create(inputPath string, opts core.PipelineRunOptions) error {
+func (p *watermarkPipeline) create(inputPath string, opts client.PipelineRunOptions) error {
 	var category string
 	if p.fileIdent.IsImage(opts.Key) {
 		category = "image"
@@ -74,9 +74,9 @@ func (p *watermarkPipeline) create(inputPath string, opts core.PipelineRunOption
 	}); err != nil {
 		return err
 	}
-	if err := p.apiClient.UpdateSnapshot(core.SnapshotUpdateOptions{
+	if err := p.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
 		Options: opts,
-		Watermark: &core.S3Object{
+		Watermark: &client.S3Object{
 			Key:    key,
 			Bucket: opts.Bucket,
 			Size:   helper.ToPtr(stat.Size()),

@@ -85,7 +85,7 @@ func (r *MosaicRouter) Delete(c *fiber.Ctx) error {
 //	@Accept			json
 //	@Produce		json
 //	@Param			id	path		string	true	"ID"
-//	@Success		200	{object}	model.MosaicInfo
+//	@Success		200	{object}	service.MosaicInfo
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/mosaics/{id}/info [get]

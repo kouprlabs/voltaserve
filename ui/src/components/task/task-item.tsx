@@ -27,8 +27,8 @@ const TaskDrawerItem = ({ task }: TaskDrawerItemProps) => {
   const handleDismiss = useCallback(async () => {
     try {
       setIsDismissing(true)
-      await TaskAPI.delete(task.id)
-      mutateList?.()
+      await TaskAPI.dismiss(task.id)
+      mutateList?.(await TaskAPI.list())
     } finally {
       setIsDismissing(false)
     }

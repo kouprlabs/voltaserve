@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import cx from 'classnames'
 import TaskAPI, { SortOrder } from '@/client/api/task'
@@ -5,19 +6,26 @@ import { swrConfig } from '@/client/options'
 import { taskPaginationStorage } from '@/infra/pagination'
 import PagePagination from '@/lib/components/page-pagination'
 import usePagePagination from '@/lib/hooks/page-pagination'
+import { useAppDispatch } from '@/store/hook'
+import { mutateListUpdated } from '@/store/ui/tasks'
 import TaskDrawerItem from './task-item'
 
 const TasksList = () => {
+  const dispatch = useAppDispatch()
   const navigate = useNavigate()
   const { page, size, steps, setPage, setSize } = usePagePagination({
     navigate,
     location,
     storage: taskPaginationStorage(),
   })
-  const { data: list } = TaskAPI.useList(
+  const { data: list, mutate: mutateList } = TaskAPI.useList(
     { page, size, sortOrder: SortOrder.Desc },
     swrConfig(),
   )
+
+  useEffect(() => {
+    dispatch(mutateListUpdated(mutateList))
+  }, [dispatch, mutateList])
 
   return (
     <>

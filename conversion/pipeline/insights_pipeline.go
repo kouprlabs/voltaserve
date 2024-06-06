@@ -35,7 +35,7 @@ func NewInsightsPipeline() core.Pipeline {
 	}
 }
 
-func (p *insightsPipeline) Run(opts core.PipelineRunOptions) error {
+func (p *insightsPipeline) Run(opts client.PipelineRunOptions) error {
 	if opts.Values == nil || len(opts.Values) == 0 {
 		return errors.New("language is undefined")
 	}
@@ -61,7 +61,7 @@ func (p *insightsPipeline) Run(opts core.PipelineRunOptions) error {
 	return nil
 }
 
-func (p *insightsPipeline) createText(inputPath string, opts core.PipelineRunOptions) (*string, error) {
+func (p *insightsPipeline) createText(inputPath string, opts client.PipelineRunOptions) (*string, error) {
 	/* Generate PDF/A */
 	var pdfPath string
 	if p.fileIdent.IsImage(opts.Key) {
@@ -101,7 +101,7 @@ func (p *insightsPipeline) createText(inputPath string, opts core.PipelineRunOpt
 		if err != nil {
 			return nil, err
 		}
-		s3Object := core.S3Object{
+		s3Object := client.S3Object{
 			Bucket: opts.Bucket,
 			Key:    opts.SnapshotID + "/ocr.pdf",
 			Size:   helper.ToPtr(stat.Size()),
@@ -109,7 +109,7 @@ func (p *insightsPipeline) createText(inputPath string, opts core.PipelineRunOpt
 		if err := p.s3.PutFile(s3Object.Key, pdfPath, helper.DetectMimeFromFile(pdfPath), s3Object.Bucket); err != nil {
 			return nil, err
 		}
-		if err := p.apiClient.UpdateSnapshot(core.SnapshotUpdateOptions{
+		if err := p.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
 			Options: opts,
 			OCR:     &s3Object,
 		}); err != nil {
@@ -126,7 +126,7 @@ func (p *insightsPipeline) createText(inputPath string, opts core.PipelineRunOpt
 		return nil, err
 	}
 	/* Set text S3 object */
-	s3Object := core.S3Object{
+	s3Object := client.S3Object{
 		Bucket: opts.Bucket,
 		Key:    opts.SnapshotID + "/text.txt",
 		Size:   helper.ToPtr(int64(len(text))),
@@ -134,7 +134,7 @@ func (p *insightsPipeline) createText(inputPath string, opts core.PipelineRunOpt
 	if err := p.s3.PutText(s3Object.Key, text, "text/plain", s3Object.Bucket); err != nil {
 		return nil, err
 	}
-	if err := p.apiClient.UpdateSnapshot(core.SnapshotUpdateOptions{
+	if err := p.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
 		Options: opts,
 		Text:    &s3Object,
 	}); err != nil {
@@ -143,7 +143,7 @@ func (p *insightsPipeline) createText(inputPath string, opts core.PipelineRunOpt
 	return &text, nil
 }
 
-func (p *insightsPipeline) createEntities(text string, opts core.PipelineRunOptions) error {
+func (p *insightsPipeline) createEntities(text string, opts client.PipelineRunOptions) error {
 	if len(text) == 0 {
 		return errors.New("text is empty")
 	}
@@ -162,7 +162,7 @@ func (p *insightsPipeline) createEntities(text string, opts core.PipelineRunOpti
 		return err
 	}
 	content := string(b)
-	s3Object := core.S3Object{
+	s3Object := client.S3Object{
 		Bucket: opts.Bucket,
 		Key:    opts.SnapshotID + "/entities.json",
 		Size:   helper.ToPtr(int64(len(content))),
@@ -170,7 +170,7 @@ func (p *insightsPipeline) createEntities(text string, opts core.PipelineRunOpti
 	if err := p.s3.PutText(s3Object.Key, content, "application/json", s3Object.Bucket); err != nil {
 		return err
 	}
-	if err := p.apiClient.UpdateSnapshot(core.SnapshotUpdateOptions{
+	if err := p.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
 		Options:  opts,
 		Entities: &s3Object,
 	}); err != nil {

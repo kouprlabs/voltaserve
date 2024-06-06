@@ -30,7 +30,7 @@ func NewImagePipeline() core.Pipeline {
 	}
 }
 
-func (p *imagePipeline) Run(opts core.PipelineRunOptions) error {
+func (p *imagePipeline) Run(opts client.PipelineRunOptions) error {
 	inputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(opts.Key))
 	if err := p.s3.GetFile(opts.Key, inputPath, opts.Bucket); err != nil {
 		return err
@@ -49,7 +49,7 @@ func (p *imagePipeline) Run(opts core.PipelineRunOptions) error {
 	return nil
 }
 
-func (p *imagePipeline) create(inputPath string, opts core.PipelineRunOptions) error {
+func (p *imagePipeline) create(inputPath string, opts client.PipelineRunOptions) error {
 	imageProps, err := p.imageProc.MeasureImage(inputPath)
 	if err != nil {
 		return err
@@ -58,9 +58,9 @@ func (p *imagePipeline) create(inputPath string, opts core.PipelineRunOptions) e
 	if err != nil {
 		return err
 	}
-	updateOpts := core.SnapshotUpdateOptions{
+	updateOpts := client.SnapshotPatchOptions{
 		Options: opts,
-		Original: &core.S3Object{
+		Original: &client.S3Object{
 			Bucket: opts.Bucket,
 			Key:    opts.Key,
 			Size:   helper.ToPtr(stat.Size()),
@@ -89,7 +89,7 @@ func (p *imagePipeline) create(inputPath string, opts core.PipelineRunOptions) e
 			return err
 		}
 		updateOpts.Thumbnail = &thumbnail
-		updateOpts.Preview = &core.S3Object{
+		updateOpts.Preview = &client.S3Object{
 			Bucket: opts.Bucket,
 			Key:    opts.SnapshotID + "/preview.jpg",
 			Size:   helper.ToPtr(stat.Size()),
@@ -106,7 +106,7 @@ func (p *imagePipeline) create(inputPath string, opts core.PipelineRunOptions) e
 		}
 		updateOpts.Thumbnail = &thumbnail
 	}
-	if err := p.apiClient.UpdateSnapshot(updateOpts); err != nil {
+	if err := p.apiClient.PatchSnapshot(updateOpts); err != nil {
 		return err
 	}
 	return nil

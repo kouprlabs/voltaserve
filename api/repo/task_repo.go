@@ -2,6 +2,7 @@ package repo
 
 import (
 	"errors"
+	"time"
 	"voltaserve/errorpkg"
 	"voltaserve/infra"
 	"voltaserve/model"
@@ -12,8 +13,8 @@ import (
 type taskEntity struct {
 	ID              string  `json:"id" gorm:"column:id"`
 	Name            string  `json:"name" gorm:"column:name"`
-	Error           *string `json:"error" gorm:"column:error"`
-	Percentage      *int    `json:"percentage" gorm:"column:percentage"`
+	Error           *string `json:"error,omitempty" gorm:"column:error"`
+	Percentage      *int    `json:"percentage,omitempty" gorm:"column:percentage"`
 	IsIndeterminate bool    `json:"isIndeterminate" gorm:"column:is_indeterminate"`
 	UserID          string  `json:"userId" gorm:"column:user_id"`
 	CreateTime      string  `json:"createTime" gorm:"column:create_time"`
@@ -22,6 +23,17 @@ type taskEntity struct {
 
 func (*taskEntity) TableName() string {
 	return "task"
+}
+
+func (o *taskEntity) BeforeCreate(*gorm.DB) (err error) {
+	o.CreateTime = time.Now().UTC().Format(time.RFC3339)
+	return nil
+}
+
+func (o *taskEntity) BeforeSave(*gorm.DB) (err error) {
+	timeNow := time.Now().UTC().Format(time.RFC3339)
+	o.UpdateTime = &timeNow
+	return nil
 }
 
 func (p *taskEntity) GetID() string {
@@ -108,13 +120,12 @@ func newTaskRepo() *taskRepo {
 }
 
 type TaskInsertOptions struct {
-	ID              string
-	Name            string
-	Error           *string
-	Percentage      *int
-	IsComplete      bool
-	IsIndeterminate bool
-	UserID          string
+	ID              string  `json:"id"`
+	Name            string  `json:"name"`
+	Error           *string `json:"error,omitempty"`
+	Percentage      *int    `json:"percentage,omitempty"`
+	IsIndeterminate bool    `json:"isIndeterminate"`
+	UserID          string  `json:"userId"`
 }
 
 func (repo *taskRepo) Insert(opts TaskInsertOptions) (model.Task, error) {

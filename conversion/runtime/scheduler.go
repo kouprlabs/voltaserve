@@ -6,12 +6,11 @@ import (
 	"voltaserve/pipeline"
 
 	"voltaserve/client"
-	"voltaserve/core"
 	"voltaserve/infra"
 )
 
 type Scheduler struct {
-	pipelineQueue       [][]core.PipelineRunOptions
+	pipelineQueue       [][]client.PipelineRunOptions
 	pipelineWorkerCount int
 	activePipelineCount int
 	apiClient           *client.APIClient
@@ -33,7 +32,7 @@ func NewDefaultSchedulerOptions() SchedulerOptions {
 
 func NewScheduler(opts SchedulerOptions) *Scheduler {
 	return &Scheduler{
-		pipelineQueue:       make([][]core.PipelineRunOptions, opts.PipelineWorkerCount),
+		pipelineQueue:       make([][]client.PipelineRunOptions, opts.PipelineWorkerCount),
 		pipelineWorkerCount: opts.PipelineWorkerCount,
 		apiClient:           client.NewAPIClient(),
 	}
@@ -48,7 +47,7 @@ func (s *Scheduler) Start() {
 	go s.pipelineWorkerStatus()
 }
 
-func (s *Scheduler) SchedulePipeline(opts *core.PipelineRunOptions) {
+func (s *Scheduler) SchedulePipeline(opts *client.PipelineRunOptions) {
 	index := s.choosePipeline()
 	infra.GetLogger().Named(infra.StrScheduler).Infow("👉  choosing", "pipeline", index)
 	s.pipelineQueue[index] = append(s.pipelineQueue[index], *opts)
@@ -69,7 +68,7 @@ func (s *Scheduler) choosePipeline() int {
 
 func (s *Scheduler) pipelineWorker(index int) {
 	dispatcher := pipeline.NewDispatcher()
-	s.pipelineQueue[index] = make([]core.PipelineRunOptions, 0)
+	s.pipelineQueue[index] = make([]client.PipelineRunOptions, 0)
 	infra.GetLogger().Named(infra.StrPipeline).Infow("⚙️  running", "worker", index)
 	for {
 		if len(s.pipelineQueue[index]) > 0 {

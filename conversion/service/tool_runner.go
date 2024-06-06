@@ -6,7 +6,6 @@ import (
 	"regexp"
 	"strings"
 	"time"
-	"voltaserve/core"
 	"voltaserve/helper"
 	"voltaserve/infra"
 )
@@ -18,7 +17,13 @@ func NewToolRunner() *ToolRunner {
 	return &ToolRunner{}
 }
 
-func (r *ToolRunner) Run(inputPath string, opts core.ToolRunOptions) (outputPath string, stdout string, err error) {
+type ToolRunOptions struct {
+	Bin    string   `json:"bin"`
+	Args   []string `json:"args"`
+	Stdout bool     `json:"stdout"`
+}
+
+func (r *ToolRunner) Run(inputPath string, opts ToolRunOptions) (outputPath string, stdout string, err error) {
 	if inputPath != "" {
 		for index, arg := range opts.Args {
 			re := regexp.MustCompile(`\${input}`)

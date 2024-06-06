@@ -4,6 +4,7 @@ import (
 	"errors"
 	"voltaserve/client"
 	"voltaserve/core"
+	"voltaserve/helper"
 	"voltaserve/identifier"
 )
 
@@ -33,10 +34,10 @@ func NewDispatcher() *Dispatcher {
 	}
 }
 
-func (d *Dispatcher) Dispatch(opts core.PipelineRunOptions) error {
-	if err := d.apiClient.UpdateSnapshot(core.SnapshotUpdateOptions{
+func (d *Dispatcher) Dispatch(opts client.PipelineRunOptions) error {
+	if err := d.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
 		Options: opts,
-		Status:  core.SnapshotStatusProcessing,
+		Status:  helper.ToPtr(core.SnapshotStatusProcessing),
 	}); err != nil {
 		return err
 	}
@@ -57,26 +58,26 @@ func (d *Dispatcher) Dispatch(opts core.PipelineRunOptions) error {
 	} else if id == core.PipelineWatermark {
 		err = d.watermarkPipeline.Run(opts)
 	} else {
-		if err := d.apiClient.UpdateSnapshot(core.SnapshotUpdateOptions{
+		if err := d.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
 			Options: opts,
-			Status:  core.SnapshotStatusError,
+			Status:  helper.ToPtr(core.SnapshotStatusError),
 		}); err != nil {
 			return err
 		}
 		return errors.New("no matching pipeline found")
 	}
 	if err != nil {
-		if err := d.apiClient.UpdateSnapshot(core.SnapshotUpdateOptions{
+		if err := d.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
 			Options: opts,
-			Status:  core.SnapshotStatusError,
+			Status:  helper.ToPtr(core.SnapshotStatusError),
 		}); err != nil {
 			return err
 		}
 		return nil
 	} else {
-		if err := d.apiClient.UpdateSnapshot(core.SnapshotUpdateOptions{
+		if err := d.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
 			Options: opts,
-			Status:  core.SnapshotStatusReady,
+			Status:  helper.ToPtr(core.SnapshotStatusReady),
 		}); err != nil {
 			return err
 		}
