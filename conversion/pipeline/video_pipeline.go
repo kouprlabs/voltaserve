@@ -37,18 +37,24 @@ func (p *videoPipeline) Run(opts client.PipelineRunOptions) error {
 			}
 		}
 	}(inputPath)
-	if err := p.create(inputPath, opts); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (p *videoPipeline) create(inputPath string, opts client.PipelineRunOptions) error {
 	if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
 		Name: helper.ToPtr("Creating thumbnail."),
 	}); err != nil {
 		return err
 	}
+	if err := p.createThumbnail(inputPath, opts); err != nil {
+		return err
+	}
+	if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
+		Name:   helper.ToPtr("Done."),
+		Status: helper.ToPtr(client.TaskStatusSuccess),
+	}); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (p *videoPipeline) createThumbnail(inputPath string, opts client.PipelineRunOptions) error {
 	thumbnail, err := p.videoProc.Base64Thumbnail(inputPath)
 	if err != nil {
 		return err
@@ -56,12 +62,6 @@ func (p *videoPipeline) create(inputPath string, opts client.PipelineRunOptions)
 	if err := p.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
 		Options:   opts,
 		Thumbnail: &thumbnail,
-	}); err != nil {
-		return err
-	}
-	if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
-		Name:   helper.ToPtr("Done."),
-		Status: helper.ToPtr(client.TaskStatusSuccess),
 	}); err != nil {
 		return err
 	}

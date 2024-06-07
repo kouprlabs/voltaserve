@@ -44,21 +44,29 @@ func (p *officePipeline) Run(opts client.PipelineRunOptions) error {
 			}
 		}
 	}(inputPath)
-	if err := p.create(inputPath, opts); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (p *officePipeline) create(inputPath string, opts client.PipelineRunOptions) error {
 	if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
 		Name: helper.ToPtr("Converting to PDF."),
 	}); err != nil {
 		return err
 	}
-	outputPath, err := p.officeProc.PDF(inputPath)
+	pdfKey, err := p.convertToPDF(inputPath, opts)
 	if err != nil {
 		return err
+	}
+	if err := p.pdfPipeline.Run(client.PipelineRunOptions{
+		Bucket:     opts.Bucket,
+		Key:        *pdfKey,
+		SnapshotID: opts.SnapshotID,
+	}); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (p *officePipeline) convertToPDF(inputPath string, opts client.PipelineRunOptions) (*string, error) {
+	outputPath, err := p.officeProc.PDF(inputPath)
+	if err != nil {
+		return nil, err
 	}
 	defer func(path string) {
 		_, err := os.Stat(path)
@@ -70,34 +78,21 @@ func (p *officePipeline) create(inputPath string, opts client.PipelineRunOptions
 	}(outputPath)
 	stat, err := os.Stat(outputPath)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	previewKey := opts.SnapshotID + "/preview.pdf"
-	if err := p.s3.PutFile(previewKey, outputPath, helper.DetectMimeFromFile(outputPath), opts.Bucket); err != nil {
-		return err
+	pdfKey := opts.SnapshotID + "/preview.pdf"
+	if err := p.s3.PutFile(pdfKey, outputPath, helper.DetectMimeFromFile(outputPath), opts.Bucket); err != nil {
+		return nil, err
 	}
 	if err := p.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
 		Options: opts,
 		Preview: &client.S3Object{
 			Bucket: opts.Bucket,
-			Key:    previewKey,
+			Key:    pdfKey,
 			Size:   helper.ToPtr(stat.Size()),
 		},
 	}); err != nil {
-		return err
+		return nil, err
 	}
-	if err := p.pdfPipeline.Run(client.PipelineRunOptions{
-		Bucket:     opts.Bucket,
-		Key:        previewKey,
-		SnapshotID: opts.SnapshotID,
-	}); err != nil {
-		return err
-	}
-	if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
-		Name:   helper.ToPtr("Done."),
-		Status: helper.ToPtr(client.TaskStatusSuccess),
-	}); err != nil {
-		return err
-	}
-	return nil
+	return &pdfKey, nil
 }

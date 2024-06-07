@@ -43,90 +43,36 @@ func (p *imagePipeline) Run(opts client.PipelineRunOptions) error {
 			}
 		}
 	}(inputPath)
-	if err := p.create(inputPath, opts); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (p *imagePipeline) create(inputPath string, opts client.PipelineRunOptions) error {
 	if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
 		Name: helper.ToPtr("Measuring image dimensions."),
 	}); err != nil {
 		return err
 	}
-	imageProps, err := p.imageProc.MeasureImage(inputPath)
+	imageProps, err := p.measureImageDimensions(inputPath, opts)
 	if err != nil {
 		return err
 	}
-	stat, err := os.Stat(inputPath)
-	if err != nil {
-		return err
-	}
-	updateOpts := client.SnapshotPatchOptions{
-		Options: opts,
-		Original: &client.S3Object{
-			Bucket: opts.Bucket,
-			Key:    opts.Key,
-			Size:   helper.ToPtr(stat.Size()),
-			Image:  &imageProps,
-		},
-	}
+	var imagePath string
 	if filepath.Ext(inputPath) == ".tiff" {
 		if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
 			Name: helper.ToPtr("Converting TIFF image to JPEG format."),
 		}); err != nil {
 			return err
 		}
-		jpegPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".jpg")
-		if err := p.imageProc.ConvertImage(inputPath, jpegPath); err != nil {
-			return err
-		}
-		defer func(path string) {
-			_, err := os.Stat(path)
-			if os.IsExist(err) {
-				if err := os.Remove(path); err != nil {
-					infra.GetLogger().Error(err)
-				}
-			}
-		}(jpegPath)
-		stat, err := os.Stat(jpegPath)
+		jpegPath, err := p.convertTIFFToJPEG(inputPath, *imageProps, opts)
 		if err != nil {
 			return err
 		}
-		if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
-			Name: helper.ToPtr("Creating thumbnail."),
-		}); err != nil {
-			return err
-		}
-		thumbnail, err := p.imageProc.Base64Thumbnail(jpegPath)
-		if err != nil {
-			return err
-		}
-		updateOpts.Thumbnail = &thumbnail
-		updateOpts.Preview = &client.S3Object{
-			Bucket: opts.Bucket,
-			Key:    opts.SnapshotID + "/preview.jpg",
-			Size:   helper.ToPtr(stat.Size()),
-			Image:  &imageProps,
-		}
-		if err := p.s3.PutFile(updateOpts.Preview.Key, jpegPath, helper.DetectMimeFromFile(jpegPath), updateOpts.Preview.Bucket); err != nil {
-			return err
-		}
+		imagePath = *jpegPath
 	} else {
-		if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
-			Name: helper.ToPtr("Creating thumbnail."),
-		}); err != nil {
-			return err
-		}
-		updateOpts.Preview = updateOpts.Original
-		thumbnail, err := p.imageProc.Base64Thumbnail(inputPath)
-		if err != nil {
-			return err
-		}
-		updateOpts.Thumbnail = &thumbnail
+		imagePath = inputPath
 	}
-	if err := p.apiClient.PatchSnapshot(updateOpts); err != nil {
+	if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
+		Name: helper.ToPtr("Creating thumbnail."),
+	}); err != nil {
+		return err
+	}
+	if err := p.createThumbnail(imagePath, opts); err != nil {
 		return err
 	}
 	if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
@@ -136,4 +82,76 @@ func (p *imagePipeline) create(inputPath string, opts client.PipelineRunOptions)
 		return err
 	}
 	return nil
+}
+
+func (p *imagePipeline) measureImageDimensions(inputPath string, opts client.PipelineRunOptions) (*client.ImageProps, error) {
+	imageProps, err := p.imageProc.MeasureImage(inputPath)
+	if err != nil {
+		return nil, err
+	}
+	stat, err := os.Stat(inputPath)
+	if err != nil {
+		return nil, err
+	}
+	if err := p.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
+		Options: opts,
+		Original: &client.S3Object{
+			Bucket: opts.Bucket,
+			Key:    opts.Key,
+			Size:   helper.ToPtr(stat.Size()),
+			Image:  &imageProps,
+		},
+	}); err != nil {
+		return nil, err
+	}
+	return &imageProps, nil
+}
+
+func (p *imagePipeline) createThumbnail(inputPath string, opts client.PipelineRunOptions) error {
+	thumbnail, err := p.imageProc.Base64Thumbnail(inputPath)
+	if err != nil {
+		return err
+	}
+	if err := p.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
+		Options:   opts,
+		Thumbnail: &thumbnail,
+	}); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (p *imagePipeline) convertTIFFToJPEG(inputPath string, imageProps client.ImageProps, opts client.PipelineRunOptions) (*string, error) {
+	jpegPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".jpg")
+	if err := p.imageProc.ConvertImage(inputPath, jpegPath); err != nil {
+		return nil, err
+	}
+	defer func(path string) {
+		_, err := os.Stat(path)
+		if os.IsExist(err) {
+			if err := os.Remove(path); err != nil {
+				infra.GetLogger().Error(err)
+			}
+		}
+	}(jpegPath)
+	stat, err := os.Stat(jpegPath)
+	if err != nil {
+		return nil, err
+	}
+	s3Object := &client.S3Object{
+		Bucket: opts.Bucket,
+		Key:    opts.SnapshotID + "/preview.jpg",
+		Size:   helper.ToPtr(stat.Size()),
+		Image:  &imageProps,
+	}
+	if err := p.s3.PutFile(s3Object.Key, jpegPath, helper.DetectMimeFromFile(jpegPath), s3Object.Bucket); err != nil {
+		return nil, err
+	}
+	if err := p.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
+		Options: opts,
+		Preview: s3Object,
+	}); err != nil {
+		return nil, err
+	}
+	return &jpegPath, nil
 }

@@ -85,7 +85,7 @@ const TaskDrawerItem = ({ task }: TaskDrawerItemProps) => {
                   <AccordionButton className={cx('p-0.5')}>
                     <div className={cx('flex', 'flex-row', 'w-full')}>
                       <span className={cx('text-left', 'grow')}>
-                        Task failed, click to expand
+                        Task failed, click to expand.
                       </span>
                       <AccordionIcon />
                     </div>

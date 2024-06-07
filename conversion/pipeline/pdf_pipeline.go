@@ -45,18 +45,32 @@ func (p *pdfPipeline) Run(opts client.PipelineRunOptions) error {
 			}
 		}
 	}(inputPath)
-	if err := p.create(inputPath, opts); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (p *pdfPipeline) create(inputPath string, opts client.PipelineRunOptions) error {
 	if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
 		Name: helper.ToPtr("Creating thumbnail."),
 	}); err != nil {
 		return err
 	}
+	if err := p.createThumbnail(inputPath, opts); err != nil {
+		return err
+	}
+	if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
+		Name: helper.ToPtr("Extracting text."),
+	}); err != nil {
+		return err
+	}
+	if err := p.extractText(inputPath, opts); err != nil {
+		return err
+	}
+	if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
+		Name:   helper.ToPtr("Done."),
+		Status: helper.ToPtr(client.TaskStatusSuccess),
+	}); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (p *pdfPipeline) createThumbnail(inputPath string, opts client.PipelineRunOptions) error {
 	thumbnail, err := p.pdfProc.Base64Thumbnail(inputPath)
 	if err != nil {
 		return err
@@ -67,11 +81,10 @@ func (p *pdfPipeline) create(inputPath string, opts client.PipelineRunOptions) e
 	}); err != nil {
 		return err
 	}
-	if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
-		Name: helper.ToPtr("Extracting text."),
-	}); err != nil {
-		return err
-	}
+	return nil
+}
+
+func (p *pdfPipeline) extractText(inputPath string, opts client.PipelineRunOptions) error {
 	text, err := p.pdfProc.TextFromPDF(inputPath)
 	if err != nil {
 		infra.GetLogger().Named(infra.StrPipeline).Errorw(err.Error())
@@ -98,12 +111,6 @@ func (p *pdfPipeline) create(inputPath string, opts client.PipelineRunOptions) e
 			Key:    textKey,
 			Size:   helper.ToPtr(int64(len(text))),
 		},
-	}); err != nil {
-		return err
-	}
-	if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
-		Name:   helper.ToPtr("Done."),
-		Status: helper.ToPtr(client.TaskStatusSuccess),
 	}); err != nil {
 		return err
 	}
