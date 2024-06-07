@@ -177,9 +177,9 @@ func (svc *SnapshotService) doSorting(data []model.Snapshot, sortBy string, sort
 	return data
 }
 
-func (svc *SnapshotService) doPagination(data []model.Snapshot, page, size uint) ([]model.Snapshot, uint, uint) {
-	totalElements := uint(len(data))
-	totalPages := (totalElements + size - 1) / size
+func (svc *SnapshotService) doPagination(data []model.Snapshot, page, size uint) (pageData []model.Snapshot, totalElements uint, totalPages uint) {
+	totalElements = uint(len(data))
+	totalPages = (totalElements + size - 1) / size
 	if page > totalPages {
 		return []model.Snapshot{}, totalElements, totalPages
 	}
@@ -188,8 +188,7 @@ func (svc *SnapshotService) doPagination(data []model.Snapshot, page, size uint)
 	if endIndex > totalElements {
 		endIndex = totalElements
 	}
-	pageData := data[startIndex:endIndex]
-	return pageData, totalElements, totalPages
+	return data[startIndex:endIndex], totalElements, totalPages
 }
 
 type SnapshotActivateOptions struct {

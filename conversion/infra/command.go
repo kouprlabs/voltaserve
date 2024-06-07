@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 	"voltaserve/config"
+	"voltaserve/helper"
 )
 
 var commandMutex sync.Mutex
@@ -46,7 +47,7 @@ func (r *Command) Exec(name string, arg ...string) error {
 	return nil
 }
 
-func (r *Command) ReadOutput(name string, arg ...string) (string, error) {
+func (r *Command) ReadOutput(name string, arg ...string) (*string, error) {
 	commandMutex.Lock()
 	defer commandMutex.Unlock()
 
@@ -59,14 +60,14 @@ func (r *Command) ReadOutput(name string, arg ...string) (string, error) {
 	res, err := cmd.Output()
 	if err != nil {
 		if stderr.Len() > 0 {
-			return "", errors.New(stderr.String())
+			return nil, errors.New(stderr.String())
 		} else {
-			return "", err
+			return nil, err
 		}
 	}
 	timer := time.AfterFunc(timeout, func() {
 		_ = cmd.Process.Kill()
 	})
 	timer.Stop()
-	return string(res), nil
+	return helper.ToPtr(string(res)), nil
 }

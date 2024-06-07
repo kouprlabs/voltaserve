@@ -248,18 +248,18 @@ func (svc *TaskService) doSorting(data []model.Task, sortBy string, sortOrder st
 	return data
 }
 
-func (svc *TaskService) GetCount(userID string) (int64, error) {
+func (svc *TaskService) GetCount(userID string) (*int64, error) {
 	var res int64
 	var err error
 	if res, err = svc.taskRepo.GetCount(userID); err != nil {
-		return -1, err
+		return nil, err
 	}
-	return res, nil
+	return &res, nil
 }
 
-func (svc *TaskService) doPagination(data []model.Task, page, size uint) ([]model.Task, uint, uint) {
-	totalElements := uint(len(data))
-	totalPages := (totalElements + size - 1) / size
+func (svc *TaskService) doPagination(data []model.Task, page, size uint) (pageData []model.Task, totalElements uint, totalPages uint) {
+	totalElements = uint(len(data))
+	totalPages = (totalElements + size - 1) / size
 	if page > totalPages {
 		return []model.Task{}, totalElements, totalPages
 	}
@@ -268,8 +268,7 @@ func (svc *TaskService) doPagination(data []model.Task, page, size uint) ([]mode
 	if endIndex > totalElements {
 		endIndex = totalElements
 	}
-	pageData := data[startIndex:endIndex]
-	return pageData, totalElements, totalPages
+	return data[startIndex:endIndex], totalElements, totalPages
 }
 
 func (svc *TaskService) Dismiss(id string, userID string) error {

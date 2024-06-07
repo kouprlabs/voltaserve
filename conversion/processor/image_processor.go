@@ -27,31 +27,31 @@ func NewImageProcessor() *ImageProcessor {
 	}
 }
 
-func (p *ImageProcessor) Base64Thumbnail(inputPath string) (client.ImageBase64, error) {
+func (p *ImageProcessor) Base64Thumbnail(inputPath string) (*client.ImageBase64, error) {
 	inputSize, err := p.MeasureImage(inputPath)
 	if err != nil {
-		return client.ImageBase64{}, err
+		return nil, err
 	}
 	if inputSize.Width > p.config.Limits.ImagePreviewMaxWidth || inputSize.Height > p.config.Limits.ImagePreviewMaxHeight {
 		outputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(inputPath))
 		if inputSize.Width > inputSize.Height {
 			if err := p.ResizeImage(inputPath, p.config.Limits.ImagePreviewMaxWidth, 0, outputPath); err != nil {
-				return client.ImageBase64{}, err
+				return nil, err
 			}
 		} else {
 			if err := p.ResizeImage(inputPath, 0, p.config.Limits.ImagePreviewMaxHeight, outputPath); err != nil {
-				return client.ImageBase64{}, err
+				return nil, err
 			}
 		}
 		b64, err := helper.ImageToBase64(outputPath)
 		if err != nil {
-			return client.ImageBase64{}, err
+			return nil, err
 		}
 		size, err := p.MeasureImage(outputPath)
 		if err != nil {
-			return client.ImageBase64{}, err
+			return nil, err
 		}
-		return client.ImageBase64{
+		return &client.ImageBase64{
 			Base64: b64,
 			Width:  size.Width,
 			Height: size.Height,
@@ -59,13 +59,13 @@ func (p *ImageProcessor) Base64Thumbnail(inputPath string) (client.ImageBase64, 
 	} else {
 		b64, err := helper.ImageToBase64(inputPath)
 		if err != nil {
-			return client.ImageBase64{}, err
+			return nil, err
 		}
 		size, err := p.MeasureImage(inputPath)
 		if err != nil {
-			return client.ImageBase64{}, err
+			return nil, err
 		}
-		return client.ImageBase64{
+		return &client.ImageBase64{
 			Base64: b64,
 			Width:  size.Width,
 			Height: size.Height,
@@ -73,21 +73,24 @@ func (p *ImageProcessor) Base64Thumbnail(inputPath string) (client.ImageBase64, 
 	}
 }
 
-func (p *ImageProcessor) MeasureImage(inputPath string) (client.ImageProps, error) {
+func (p *ImageProcessor) MeasureImage(inputPath string) (*client.ImageProps, error) {
 	size, err := infra.NewCommand().ReadOutput("identify", "-format", "%w,%h", inputPath)
 	if err != nil {
-		return client.ImageProps{}, err
+		return nil, err
 	}
-	values := strings.Split(size, ",")
+	values := strings.Split(*size, ",")
 	width, err := strconv.Atoi(helper.RemoveNonNumeric(values[0]))
 	if err != nil {
-		return client.ImageProps{}, err
+		return nil, err
 	}
 	height, err := strconv.Atoi(helper.RemoveNonNumeric(values[1]))
 	if err != nil {
-		return client.ImageProps{}, err
+		return nil, err
 	}
-	return client.ImageProps{Width: width, Height: height}, nil
+	return &client.ImageProps{
+		Width:  width,
+		Height: height,
+	}, nil
 }
 
 func (p *ImageProcessor) ResizeImage(inputPath string, width int, height int, outputPath string) error {
@@ -142,22 +145,22 @@ func (p *ImageProcessor) RemoveAlphaChannel(inputPath string, outputPath string)
 	return nil
 }
 
-func (p *ImageProcessor) DPIFromImage(inputPath string) (int, error) {
+func (p *ImageProcessor) DPIFromImage(inputPath string) (*int, error) {
 	output, err := infra.NewCommand().ReadOutput("exiftool", "-S", "-s", "-ImageWidth", "-ImageHeight", "-XResolution", "-YResolution", "-ResolutionUnit", inputPath)
 	if err != nil {
-		return -1, err
+		return nil, err
 	}
-	lines := strings.Split(output, "\n")
+	lines := strings.Split(*output, "\n")
 	if len(lines) < 5 || lines[4] != "inches" {
-		return 72, nil
+		return helper.ToPtr(72), nil
 	}
 	xRes, err := strconv.ParseFloat(lines[2], 64)
 	if err != nil {
-		return -1, err
+		return nil, err
 	}
 	yRes, err := strconv.ParseFloat(lines[3], 64)
 	if err != nil {
-		return -1, err
+		return nil, err
 	}
-	return int((xRes + yRes) / 2), nil
+	return helper.ToPtr(int((xRes + yRes) / 2)), nil
 }

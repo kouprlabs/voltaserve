@@ -23,7 +23,7 @@ type ToolRunOptions struct {
 	Stdout bool     `json:"stdout"`
 }
 
-func (r *ToolRunner) Run(inputPath string, opts ToolRunOptions) (outputPath string, stdout string, err error) {
+func (r *ToolRunner) Run(inputPath string, opts ToolRunOptions) (outputPath *string, stdout *string, err error) {
 	if inputPath != "" {
 		for index, arg := range opts.Args {
 			re := regexp.MustCompile(`\${input}`)
@@ -40,24 +40,24 @@ func (r *ToolRunner) Run(inputPath string, opts ToolRunOptions) (outputPath stri
 			substring = regexp.MustCompile(`\${(.*?)}`).ReplaceAllString(substring, "$1")
 			parts := strings.Split(substring, ".")
 			if len(parts) == 1 {
-				outputPath = filepath.FromSlash(os.TempDir() + "/" + helper.NewID())
-				opts.Args[index] = re.ReplaceAllString(arg, outputPath)
+				outputPath = helper.ToPtr(filepath.FromSlash(os.TempDir() + "/" + helper.NewID()))
+				opts.Args[index] = re.ReplaceAllString(arg, *outputPath)
 			} else if len(parts) == 2 {
-				outputPath = filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + "." + parts[1])
-				opts.Args[index] = re.ReplaceAllString(arg, outputPath)
+				outputPath = helper.ToPtr(filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + "." + parts[1]))
+				opts.Args[index] = re.ReplaceAllString(arg, *outputPath)
 			} else if len(parts) == 3 {
 				if parts[1] == "*" {
 					filename := filepath.Base(inputPath)
 					outputDir := filepath.FromSlash(os.TempDir() + "/" + helper.NewID())
 					if err := os.MkdirAll(outputDir, 0755); err != nil {
-						return "", "", err
+						return nil, nil, err
 					}
-					outputPath = filepath.FromSlash(outputDir + "/" + strings.TrimSuffix(filename, filepath.Ext(filename)) + "." + parts[2])
+					outputPath = helper.ToPtr(filepath.FromSlash(outputDir + "/" + strings.TrimSuffix(filename, filepath.Ext(filename)) + "." + parts[2]))
 					opts.Args[index] = re.ReplaceAllString(arg, outputDir)
 				} else if parts[1] == "#" {
 					filename := filepath.Base(inputPath)
 					basePath := filepath.FromSlash(os.TempDir() + "/" + strings.TrimSuffix(filename, filepath.Ext(filename)))
-					outputPath = filepath.FromSlash(basePath + "." + parts[2])
+					outputPath = helper.ToPtr(filepath.FromSlash(basePath + "." + parts[2]))
 					opts.Args[index] = re.ReplaceAllString(arg, basePath)
 				}
 			}
@@ -71,7 +71,7 @@ func (r *ToolRunner) Run(inputPath string, opts ToolRunOptions) (outputPath stri
 		elapsed := time.Since(start)
 		if err != nil {
 			infra.GetLogger().Named(infra.StrToolRunner).Errorw("⛈️  failed", "bin", opts.Bin, "args", opts.Args, "elapsed", elapsed, "error", "stdout", stdout, err.Error())
-			return "", stdout, err
+			return nil, stdout, err
 		} else {
 			infra.GetLogger().Named(infra.StrToolRunner).Infow("🎉  succeeded", "bin", opts.Bin, "args", opts.Args, "elapsed", elapsed, "stdout", stdout)
 			return outputPath, stdout, nil
@@ -81,10 +81,10 @@ func (r *ToolRunner) Run(inputPath string, opts ToolRunOptions) (outputPath stri
 		elapsed := time.Since(start)
 		if err != nil {
 			infra.GetLogger().Named(infra.StrToolRunner).Errorw("⛈️  failed", "bin", opts.Bin, "args", opts.Args, "elapsed", elapsed, "error", err.Error())
-			return "", "", err
+			return nil, nil, err
 		} else {
 			infra.GetLogger().Named(infra.StrToolRunner).Infow("🎉  succeeded", "bin", opts.Bin, "args", opts.Args, "elapsed", elapsed)
-			return outputPath, "", err
+			return outputPath, nil, err
 		}
 	}
 }

@@ -99,12 +99,12 @@ func (p *imagePipeline) measureImageDimensions(inputPath string, opts client.Pip
 			Bucket: opts.Bucket,
 			Key:    opts.Key,
 			Size:   helper.ToPtr(stat.Size()),
-			Image:  &imageProps,
+			Image:  imageProps,
 		},
 	}); err != nil {
 		return nil, err
 	}
-	return &imageProps, nil
+	return imageProps, nil
 }
 
 func (p *imagePipeline) createThumbnail(inputPath string, opts client.PipelineRunOptions) error {
@@ -114,7 +114,7 @@ func (p *imagePipeline) createThumbnail(inputPath string, opts client.PipelineRu
 	}
 	if err := p.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
 		Options:   opts,
-		Thumbnail: &thumbnail,
+		Thumbnail: thumbnail,
 	}); err != nil {
 		return err
 	}

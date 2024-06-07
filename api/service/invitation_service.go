@@ -176,16 +176,16 @@ func (svc *InvitationService) GetIncoming(opts InvitationListOptions, userID str
 	}, nil
 }
 
-func (svc *InvitationService) GetIncomingCount(userID string) (int64, error) {
+func (svc *InvitationService) GetIncomingCount(userID string) (*int64, error) {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
-		return -1, err
+		return nil, err
 	}
 	var res int64
 	if res, err = svc.invitationRepo.GetIncomingCount(user.GetEmail()); err != nil {
-		return -1, err
+		return nil, err
 	}
-	return res, nil
+	return &res, nil
 }
 
 func (svc *InvitationService) GetOutgoing(orgID string, opts InvitationListOptions, userID string) (*InvitationList, error) {
@@ -368,9 +368,9 @@ func (svc *InvitationService) doSorting(data []model.Invitation, sortBy string, 
 	return data
 }
 
-func (svc *InvitationService) doPagination(data []model.Invitation, page, size uint) ([]model.Invitation, uint, uint) {
-	totalElements := uint(len(data))
-	totalPages := (totalElements + size - 1) / size
+func (svc *InvitationService) doPagination(data []model.Invitation, page, size uint) (pageData []model.Invitation, totalElements uint, totalPages uint) {
+	totalElements = uint(len(data))
+	totalPages = (totalElements + size - 1) / size
 	if page > totalPages {
 		return []model.Invitation{}, totalElements, totalPages
 	}
@@ -379,8 +379,7 @@ func (svc *InvitationService) doPagination(data []model.Invitation, page, size u
 	if endIndex > totalElements {
 		endIndex = totalElements
 	}
-	pageData := data[startIndex:endIndex]
-	return pageData, totalElements, totalPages
+	return data[startIndex:endIndex], totalElements, totalPages
 }
 
 type invitationMapper struct {

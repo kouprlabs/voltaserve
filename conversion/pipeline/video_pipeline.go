@@ -61,7 +61,7 @@ func (p *videoPipeline) createThumbnail(inputPath string, opts client.PipelineRu
 	}
 	if err := p.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
 		Options:   opts,
-		Thumbnail: &thumbnail,
+		Thumbnail: thumbnail,
 	}); err != nil {
 		return err
 	}

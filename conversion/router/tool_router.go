@@ -81,10 +81,12 @@ func (r *ToolRouter) Run(c *fiber.Ctx) error {
 			c.Status(500)
 			return c.SendString(err.Error())
 		} else {
-			if outputPath != "" {
-				return c.Download(outputPath)
+			if outputPath != nil {
+				return c.Download(*outputPath)
+			} else if stdout != nil {
+				return c.SendString(*stdout)
 			} else {
-				return c.SendString(stdout)
+				return c.SendStatus(200)
 			}
 		}
 	} else {
@@ -92,8 +94,8 @@ func (r *ToolRouter) Run(c *fiber.Ctx) error {
 			c.Status(500)
 			return c.SendString(err.Error())
 		} else {
-			if outputPath != "" {
-				return c.Download(outputPath)
+			if outputPath != nil {
+				return c.Download(*outputPath)
 			} else {
 				return c.SendStatus(200)
 			}

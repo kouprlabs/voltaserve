@@ -391,9 +391,9 @@ func (svc *GroupService) doSorting(data []model.Group, sortBy string, sortOrder 
 	return data
 }
 
-func (svc *GroupService) doPagination(data []model.Group, page, size uint) ([]model.Group, uint, uint) {
-	totalElements := uint(len(data))
-	totalPages := (totalElements + size - 1) / size
+func (svc *GroupService) doPagination(data []model.Group, page, size uint) (pageData []model.Group, totalElements uint, totalPages uint) {
+	totalElements = uint(len(data))
+	totalPages = (totalElements + size - 1) / size
 	if page > totalPages {
 		return []model.Group{}, totalElements, totalPages
 	}
@@ -402,8 +402,7 @@ func (svc *GroupService) doPagination(data []model.Group, page, size uint) ([]mo
 	if endIndex > totalElements {
 		endIndex = totalElements
 	}
-	pageData := data[startIndex:endIndex]
-	return pageData, totalElements, totalPages
+	return data[startIndex:endIndex], totalElements, totalPages
 }
 
 func (svc *GroupService) sync(group model.Group) error {

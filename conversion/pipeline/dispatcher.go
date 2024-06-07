@@ -87,7 +87,7 @@ func (d *Dispatcher) Dispatch(opts client.PipelineRunOptions) error {
 		}
 		if err := d.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
 			Status: helper.ToPtr(client.TaskStatusError),
-			Error:  helper.ToPtr("An error occurred while processing the file."),
+			Error:  helper.ToPtr(err.Error()),
 		}); err != nil {
 			return err
 		}

@@ -77,7 +77,7 @@ func (p *pdfPipeline) createThumbnail(inputPath string, opts client.PipelineRunO
 	}
 	if err := p.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
 		Options:   opts,
-		Thumbnail: &thumbnail,
+		Thumbnail: thumbnail,
 	}); err != nil {
 		return err
 	}
@@ -89,11 +89,12 @@ func (p *pdfPipeline) extractText(inputPath string, opts client.PipelineRunOptio
 	if err != nil {
 		infra.GetLogger().Named(infra.StrPipeline).Errorw(err.Error())
 	}
-	textKey := opts.SnapshotID + "/text.txt"
-	if text != "" && err == nil {
-		if err := p.s3.PutText(textKey, text, "text/plain", opts.Bucket); err != nil {
-			return err
-		}
+	key := opts.SnapshotID + "/text.txt"
+	if text == nil || err != nil {
+		return err
+	}
+	if err := p.s3.PutText(key, *text, "text/plain", opts.Bucket); err != nil {
+		return err
 	}
 	stat, err := os.Stat(inputPath)
 	if err != nil {
@@ -108,8 +109,8 @@ func (p *pdfPipeline) extractText(inputPath string, opts client.PipelineRunOptio
 		},
 		Text: &client.S3Object{
 			Bucket: opts.Bucket,
-			Key:    textKey,
-			Size:   helper.ToPtr(int64(len(text))),
+			Key:    key,
+			Size:   helper.ToPtr(int64(len(*text))),
 		},
 	}); err != nil {
 		return err

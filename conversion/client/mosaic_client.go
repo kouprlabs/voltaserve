@@ -111,40 +111,6 @@ func (cl *MosaicClient) Create(opts MosaicCreateOptions) (*MosaicMetadata, error
 	return &res, nil
 }
 
-type MosaicGetMetadataOptions struct {
-	S3Key    string `json:"s3Key"`
-	S3Bucket string `json:"s3Bucket"`
-}
-
-func (cl *MosaicClient) GetMetadata(opts MosaicGetMetadataOptions) (*MosaicMetadata, error) {
-	resp, err := http.Get(fmt.Sprintf("%s/v2/mosaics/%s/%s/metadata", cl.config.MosaicURL, opts.S3Bucket, opts.S3Key))
-	if err != nil {
-		return nil, err
-	}
-	defer func(Body io.ReadCloser) {
-		if err := Body.Close(); err != nil {
-			infra.GetLogger().Error(err)
-		}
-	}(resp.Body)
-	if resp.StatusCode != http.StatusOK {
-		if resp.StatusCode == http.StatusNotFound {
-			return nil, errors.New("mosaic not found")
-		} else {
-			return nil, fmt.Errorf("request failed with status %d", resp.StatusCode)
-		}
-	}
-	b, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-	var res MosaicMetadata
-	err = json.Unmarshal(b, &res)
-	if err != nil {
-		return nil, err
-	}
-	return &res, nil
-}
-
 type MosaicDeleteOptions struct {
 	S3Key    string `json:"s3Key"`
 	S3Bucket string `json:"s3Bucket"`
@@ -168,38 +134,4 @@ func (cl *MosaicClient) Delete(opts MosaicDeleteOptions) error {
 		}
 	}
 	return nil
-}
-
-type MosaicDownloadTileOptions struct {
-	S3Key     string `json:"s3Key"`
-	S3Bucket  string `json:"s3Bucket"`
-	ZoomLevel int    `json:"zoomLevel"`
-	Row       int    `json:"row"`
-	Col       int    `json:"col"`
-	Ext       string `json:"ext"`
-}
-
-func (cl *MosaicClient) DownloadTileBuffer(opts MosaicDownloadTileOptions) (*bytes.Buffer, error) {
-	resp, err := http.Get(fmt.Sprintf("%s/v2/mosaics/%s/%s/zoom_level/%d/row/%d/col/%d/ext/%s", cl.config.MosaicURL, opts.S3Bucket, opts.S3Key, opts.ZoomLevel, opts.Row, opts.Col, opts.Ext))
-	if err != nil {
-		return nil, err
-	}
-	defer func(Body io.ReadCloser) {
-		if err := Body.Close(); err != nil {
-			infra.GetLogger().Error(err)
-		}
-	}(resp.Body)
-	if resp.StatusCode != http.StatusOK {
-		if resp.StatusCode == http.StatusNotFound {
-			return nil, errors.New("tile not found")
-		} else {
-			return nil, fmt.Errorf("request failed with status %d", resp.StatusCode)
-		}
-	}
-	buf := &bytes.Buffer{}
-	_, err = io.Copy(buf, resp.Body)
-	if err != nil {
-		return nil, err
-	}
-	return buf, nil
 }

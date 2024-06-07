@@ -75,13 +75,13 @@ func (p *officePipeline) convertToPDF(inputPath string, opts client.PipelineRunO
 				infra.GetLogger().Error(err)
 			}
 		}
-	}(outputPath)
-	stat, err := os.Stat(outputPath)
+	}(*outputPath)
+	stat, err := os.Stat(*outputPath)
 	if err != nil {
 		return nil, err
 	}
 	pdfKey := opts.SnapshotID + "/preview.pdf"
-	if err := p.s3.PutFile(pdfKey, outputPath, helper.DetectMimeFromFile(outputPath), opts.Bucket); err != nil {
+	if err := p.s3.PutFile(pdfKey, *outputPath, helper.DetectMimeFromFile(*outputPath), opts.Bucket); err != nil {
 		return nil, err
 	}
 	if err := p.apiClient.PatchSnapshot(client.SnapshotPatchOptions{

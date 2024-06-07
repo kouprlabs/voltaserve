@@ -1033,34 +1033,34 @@ func (svc *FileService) Delete(ids []string, userID string) ([]string, error) {
 	return res, nil
 }
 
-func (svc *FileService) GetSize(id string, userID string) (int64, error) {
+func (svc *FileService) GetSize(id string, userID string) (*int64, error) {
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
-		return -1, err
+		return nil, err
 	}
 	if err := svc.fileGuard.Authorize(userID, file, model.PermissionViewer); err != nil {
-		return -1, err
+		return nil, err
 	}
 	res, err := svc.fileRepo.GetSize(id)
 	if err != nil {
-		return -1, err
+		return nil, err
 	}
-	return res, nil
+	return &res, nil
 }
 
-func (svc *FileService) GetCount(id string, userID string) (int64, error) {
+func (svc *FileService) GetCount(id string, userID string) (*int64, error) {
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 	if err := svc.fileGuard.Authorize(userID, file, model.PermissionViewer); err != nil {
-		return 0, err
+		return nil, err
 	}
 	res, err := svc.fileRepo.GetItemCount(id)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
-	return res, nil
+	return &res, nil
 }
 
 func (svc *FileService) GrantUserPermission(ids []string, assigneeID string, permission string, userID string) error {
@@ -1553,9 +1553,9 @@ func (svc *FileService) doSorting(data []model.File, sortBy string, sortOrder st
 	return data
 }
 
-func (svc *FileService) doPagination(data []model.File, page, size uint) ([]model.File, uint, uint) {
-	totalElements := uint(len(data))
-	totalPages := (totalElements + size - 1) / size
+func (svc *FileService) doPagination(data []model.File, page, size uint) (pageData []model.File, totalElements uint, totalPages uint) {
+	totalElements = uint(len(data))
+	totalPages = (totalElements + size - 1) / size
 	if page > totalPages {
 		return []model.File{}, totalElements, totalPages
 	}
@@ -1564,8 +1564,7 @@ func (svc *FileService) doPagination(data []model.File, page, size uint) ([]mode
 	if endIndex > totalElements {
 		endIndex = totalElements
 	}
-	pageData := data[startIndex:endIndex]
-	return pageData, totalElements, totalPages
+	return data[startIndex:endIndex], totalElements, totalPages
 }
 
 func (svc *FileService) doQueryFiltering(data []model.File, opts FileQuery, parent model.File) ([]model.File, error) {

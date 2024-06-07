@@ -112,7 +112,7 @@ func (r *FileRouter) Create(c *fiber.Ctx) error {
 		if err != nil {
 			return err
 		}
-		if !ok {
+		if !*ok {
 			return errorpkg.NewStorageLimitExceededError()
 		}
 		if name == "" {
@@ -191,7 +191,7 @@ func (r *FileRouter) Patch(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	if !ok {
+	if !*ok {
 		return errorpkg.NewStorageLimitExceededError()
 	}
 	tmpPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(fh.Filename))

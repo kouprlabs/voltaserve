@@ -84,7 +84,7 @@ func (p *insightsPipeline) createText(inputPath string, opts client.PipelineRunO
 		/* Get DPI */
 		dpi, err := p.imageProc.DPIFromImage(inputPath)
 		if err != nil {
-			dpi = 72
+			dpi = helper.ToPtr(72)
 		}
 		/* Remove alpha channel */
 		noAlphaImagePath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(opts.Key))
@@ -101,7 +101,7 @@ func (p *insightsPipeline) createText(inputPath string, opts client.PipelineRunO
 		}(noAlphaImagePath)
 		/* Convert to PDF/A */
 		pdfPath = filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".pdf")
-		if err := p.ocrProc.SearchablePDFFromFile(noAlphaImagePath, opts.Payload["language"], dpi, pdfPath); err != nil {
+		if err := p.ocrProc.SearchablePDFFromFile(noAlphaImagePath, opts.Payload["language"], *dpi, pdfPath); err != nil {
 			return nil, err
 		}
 		defer func(path string) {
@@ -138,16 +138,16 @@ func (p *insightsPipeline) createText(inputPath string, opts client.PipelineRunO
 	}
 	/* Extract text */
 	text, err := p.pdfProc.TextFromPDF(pdfPath)
-	if text == "" || err != nil {
+	if text == nil || err != nil {
 		return nil, err
 	}
 	/* Set text S3 object */
 	s3Object := client.S3Object{
 		Bucket: opts.Bucket,
 		Key:    opts.SnapshotID + "/text.txt",
-		Size:   helper.ToPtr(int64(len(text))),
+		Size:   helper.ToPtr(int64(len(*text))),
 	}
-	if err := p.s3.PutText(s3Object.Key, text, "text/plain", s3Object.Bucket); err != nil {
+	if err := p.s3.PutText(s3Object.Key, *text, "text/plain", s3Object.Bucket); err != nil {
 		return nil, err
 	}
 	if err := p.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
@@ -156,7 +156,7 @@ func (p *insightsPipeline) createText(inputPath string, opts client.PipelineRunO
 	}); err != nil {
 		return nil, err
 	}
-	return &text, nil
+	return text, nil
 }
 
 func (p *insightsPipeline) createEntities(text string, opts client.PipelineRunOptions) error {

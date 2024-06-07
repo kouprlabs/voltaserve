@@ -373,9 +373,9 @@ func (svc *InsightsService) doSorting(data []*client.InsightsEntity, sortBy stri
 	return data
 }
 
-func (svc *InsightsService) doPagination(data []*client.InsightsEntity, page, size uint) ([]*client.InsightsEntity, uint, uint) {
-	totalElements := uint(len(data))
-	totalPages := (totalElements + size - 1) / size
+func (svc *InsightsService) doPagination(data []*client.InsightsEntity, page, size uint) (pageData []*client.InsightsEntity, totalElements uint, totalPages uint) {
+	totalElements = uint(len(data))
+	totalPages = (totalElements + size - 1) / size
 	if page > totalPages {
 		return []*client.InsightsEntity{}, totalElements, totalPages
 	}
@@ -384,8 +384,7 @@ func (svc *InsightsService) doPagination(data []*client.InsightsEntity, page, si
 	if endIndex > totalElements {
 		endIndex = totalElements
 	}
-	pageData := data[startIndex:endIndex]
-	return pageData, totalElements, totalPages
+	return data[startIndex:endIndex], totalElements, totalPages
 }
 
 func (svc *InsightsService) GetInfo(id string, userID string) (*model.InsightsInfo, error) {

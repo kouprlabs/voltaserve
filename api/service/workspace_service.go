@@ -272,24 +272,24 @@ func (svc *WorkspaceService) Delete(id string, userID string) error {
 	return nil
 }
 
-func (svc *WorkspaceService) HasEnoughSpaceForByteSize(id string, byteSize int64) (bool, error) {
+func (svc *WorkspaceService) HasEnoughSpaceForByteSize(id string, byteSize int64) (*bool, error) {
 	workspace, err := svc.workspaceRepo.Find(id)
 	if err != nil {
-		return false, err
+		return nil, err
 	}
 	root, err := svc.fileRepo.Find(workspace.GetRootID())
 	if err != nil {
-		return false, err
+		return nil, err
 	}
 	usage, err := svc.fileRepo.GetSize(root.GetID())
 	if err != nil {
-		return false, err
+		return nil, err
 	}
 	expectedUsage := usage + byteSize
 	if expectedUsage > workspace.GetStorageCapacity() {
-		return false, err
+		return helper.ToPtr(false), err
 	}
-	return true, nil
+	return helper.ToPtr(true), nil
 }
 
 func (svc *WorkspaceService) findAll(userID string) ([]*Workspace, error) {

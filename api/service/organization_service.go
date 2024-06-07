@@ -307,9 +307,9 @@ func (svc *OrganizationService) doSorting(data []model.Organization, sortBy stri
 	return data
 }
 
-func (svc *OrganizationService) doPagination(data []model.Organization, page, size uint) ([]model.Organization, uint, uint) {
-	totalElements := uint(len(data))
-	totalPages := (totalElements + size - 1) / size
+func (svc *OrganizationService) doPagination(data []model.Organization, page, size uint) (pageData []model.Organization, totalElements uint, totalPages uint) {
+	totalElements = uint(len(data))
+	totalPages = (totalElements + size - 1) / size
 	if page > totalPages {
 		return []model.Organization{}, totalElements, totalPages
 	}
@@ -318,8 +318,7 @@ func (svc *OrganizationService) doPagination(data []model.Organization, page, si
 	if endIndex > totalElements {
 		endIndex = totalElements
 	}
-	pageData := data[startIndex:endIndex]
-	return pageData, totalElements, totalPages
+	return data[startIndex:endIndex], totalElements, totalPages
 }
 
 func (svc *OrganizationService) sync(org model.Organization) error {

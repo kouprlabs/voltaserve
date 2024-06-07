@@ -24,10 +24,10 @@ func NewPDFProcessor() *PDFProcessor {
 	}
 }
 
-func (p *PDFProcessor) Base64Thumbnail(inputPath string) (client.ImageBase64, error) {
+func (p *PDFProcessor) Base64Thumbnail(inputPath string) (*client.ImageBase64, error) {
 	tmpPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".png")
 	if err := p.imageProc.ThumbnailFromImage(inputPath, 0, p.config.Limits.ImagePreviewMaxHeight, tmpPath); err != nil {
-		return client.ImageBase64{}, err
+		return nil, err
 	}
 	defer func(path string) {
 		_, err := os.Stat(path)
@@ -39,23 +39,23 @@ func (p *PDFProcessor) Base64Thumbnail(inputPath string) (client.ImageBase64, er
 	}(tmpPath)
 	b64, err := helper.ImageToBase64(tmpPath)
 	if err != nil {
-		return client.ImageBase64{}, err
+		return nil, err
 	}
 	imageProps, err := p.imageProc.MeasureImage(tmpPath)
 	if err != nil {
-		return client.ImageBase64{}, err
+		return nil, err
 	}
-	return client.ImageBase64{
+	return &client.ImageBase64{
 		Base64: b64,
 		Width:  imageProps.Width,
 		Height: imageProps.Height,
 	}, nil
 }
 
-func (p *PDFProcessor) TextFromPDF(inputPath string) (string, error) {
+func (p *PDFProcessor) TextFromPDF(inputPath string) (*string, error) {
 	tmpPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".txt")
 	if err := infra.NewCommand().Exec("pdftotext", inputPath, tmpPath); err != nil {
-		return "", err
+		return nil, err
 	}
 	defer func(path string) {
 		_, err := os.Stat(path)
@@ -67,7 +67,7 @@ func (p *PDFProcessor) TextFromPDF(inputPath string) (string, error) {
 	}(tmpPath)
 	b, err := os.ReadFile(tmpPath)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return strings.TrimSpace(string(b)), nil
+	return helper.ToPtr(strings.TrimSpace(string(b))), nil
 }
