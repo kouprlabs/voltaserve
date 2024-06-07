@@ -2,7 +2,6 @@ package service
 
 import (
 	"bytes"
-	"fmt"
 	"voltaserve/cache"
 	"voltaserve/client"
 	"voltaserve/errorpkg"
@@ -74,7 +73,7 @@ func (svc *WatermarkService) Create(id string, userID string) error {
 	}
 	task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
 		ID:              helper.NewID(),
-		Name:            ".",
+		Name:            "Waiting.",
 		UserID:          userID,
 		IsIndeterminate: true,
 		Status:          model.TaskStatusWaiting,
@@ -124,16 +123,19 @@ func (svc *WatermarkService) Delete(id string, userID string) error {
 	if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
 		return err
 	}
-	task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
-		ID:              helper.NewID(),
-		Name:            fmt.Sprintf("Delete watermark from <b>%s</b>", file.GetName()),
-		UserID:          userID,
-		IsIndeterminate: true,
-	})
-	if err != nil {
-		return err
-	}
 	go func() {
+		task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
+			ID:              helper.NewID(),
+			Name:            "Deleting watermark.",
+			UserID:          userID,
+			IsIndeterminate: true,
+			Status:          model.TaskStatusRunning,
+			Payload:         map[string]string{"fileId": file.GetID()},
+		})
+		if err != nil {
+			log.GetLogger().Error(err)
+			return
+		}
 		err = svc.s3.RemoveObject(snapshot.GetWatermark().Key, snapshot.GetWatermark().Bucket)
 		if err != nil {
 			value := err.Error()

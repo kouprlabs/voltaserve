@@ -2,7 +2,6 @@ package service
 
 import (
 	"bytes"
-	"fmt"
 	"path/filepath"
 	"voltaserve/cache"
 	"voltaserve/client"
@@ -110,16 +109,19 @@ func (svc *MosaicService) Delete(id string, userID string) error {
 		if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
 			return err
 		}
-		task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
-			ID:              helper.NewID(),
-			Name:            fmt.Sprintf("Delete mosaic from <b>%s</b>", file.GetName()),
-			UserID:          userID,
-			IsIndeterminate: true,
-		})
-		if err != nil {
-			return err
-		}
 		go func() {
+			task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
+				ID:              helper.NewID(),
+				Name:            "Deleting mosaic.",
+				UserID:          userID,
+				IsIndeterminate: true,
+				Status:          model.TaskStatusRunning,
+				Payload:         map[string]string{"fileId": file.GetID()},
+			})
+			if err != nil {
+				log.GetLogger().Error(err)
+				return
+			}
 			err = svc.mosaicClient.Delete(client.MosaicDeleteOptions{
 				S3Key:    filepath.FromSlash(snapshot.GetID()),
 				S3Bucket: snapshot.GetOriginal().Bucket,

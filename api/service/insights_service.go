@@ -100,8 +100,20 @@ func (svc *InsightsService) Create(id string, opts InsightsCreateOptions, userID
 	if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
 		return err
 	}
+	task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
+		ID:              helper.NewID(),
+		Name:            "Waiting.",
+		UserID:          userID,
+		IsIndeterminate: true,
+		Status:          model.TaskStatusWaiting,
+		Payload:         map[string]string{"fileId": file.GetID()},
+	})
+	if err != nil {
+		return err
+	}
 	if err := svc.pipelineClient.Run(&client.PipelineRunOptions{
 		PipelineID: helper.ToPtr(client.PipelineInsights),
+		TaskID:     task.GetID(),
 		SnapshotID: snapshot.GetID(),
 		Bucket:     snapshot.GetOriginal().Bucket,
 		Key:        snapshot.GetOriginal().Key,
@@ -189,16 +201,19 @@ func (svc *InsightsService) Delete(id string, userID string) error {
 		return errorpkg.NewSnapshotIsProcessingError(nil)
 	}
 	snapshot.SetStatus(model.SnapshotStatusProcessing)
-	task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
-		ID:              helper.NewID(),
-		Name:            fmt.Sprintf("Delete insights from <b>%s</b>", file.GetName()),
-		UserID:          userID,
-		IsIndeterminate: true,
-	})
-	if err != nil {
-		return err
-	}
 	go func() {
+		task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
+			ID:              helper.NewID(),
+			Name:            "Deleting insights.",
+			UserID:          userID,
+			IsIndeterminate: true,
+			Status:          model.TaskStatusRunning,
+			Payload:         map[string]string{"fileId": file.GetID()},
+		})
+		if err != nil {
+			log.GetLogger().Error(err)
+			return
+		}
 		failed := false
 		combinedErrMsg := ""
 		if svc.fileIdent.IsImage(snapshot.GetOriginal().Key) {
