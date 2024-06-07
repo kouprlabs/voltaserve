@@ -164,7 +164,7 @@ func (p *insightsPipeline) createEntities(text string, opts client.PipelineRunOp
 		return errors.New("text is empty")
 	}
 	if len(text) > 1000000 {
-		return errors.New("text exceeds limit")
+		return errors.New("text exceeds supported limit of 1000000 characters")
 	}
 	res, err := p.languageClient.GetEntities(client.GetEntitiesOptions{
 		Text:     text,

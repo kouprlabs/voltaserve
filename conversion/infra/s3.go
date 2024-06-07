@@ -55,7 +55,7 @@ func (mgr *S3Manager) PutFile(objectName string, filePath string, contentType st
 
 func (mgr *S3Manager) PutText(objectName string, text string, contentType string, bucketName string) error {
 	if contentType != "" && contentType != "text/plain" && contentType != "application/json" {
-		return errors.New("invalid content type '" + contentType + "'")
+		return errors.New("invalid content type")
 	}
 	if contentType == "" {
 		contentType = "text/plain"

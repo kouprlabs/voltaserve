@@ -111,12 +111,16 @@ func (svc *InsightsService) Create(id string, opts InsightsCreateOptions, userID
 	if err != nil {
 		return err
 	}
+	key := snapshot.GetOriginal().Key
+	if svc.fileIdent.IsOffice(key) || svc.fileIdent.IsPlainText(key) {
+		key = snapshot.GetPreview().Key
+	}
 	if err := svc.pipelineClient.Run(&client.PipelineRunOptions{
 		PipelineID: helper.ToPtr(client.PipelineInsights),
 		TaskID:     task.GetID(),
 		SnapshotID: snapshot.GetID(),
 		Bucket:     snapshot.GetOriginal().Bucket,
-		Key:        snapshot.GetOriginal().Key,
+		Key:        key,
 		Payload: map[string]string{
 			"language": opts.LanguageID,
 		},

@@ -3,6 +3,7 @@ package pipeline
 import (
 	"errors"
 	"voltaserve/client"
+	"voltaserve/errorpkg"
 	"voltaserve/helper"
 	"voltaserve/identifier"
 	"voltaserve/model"
@@ -70,13 +71,14 @@ func (d *Dispatcher) Dispatch(opts client.PipelineRunOptions) error {
 		}); err != nil {
 			return err
 		}
+		err = errors.New("no matching pipeline found")
 		if err := d.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
 			Status: helper.ToPtr(client.TaskStatusError),
-			Error:  helper.ToPtr("This file type cannot be processed."),
+			Error:  helper.ToPtr(errorpkg.GetUserFriendlyMessage(err.Error(), errorpkg.FallbackMessage)),
 		}); err != nil {
 			return err
 		}
-		return errors.New("no matching pipeline found")
+		return err
 	}
 	if err != nil {
 		if err := d.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
@@ -87,7 +89,7 @@ func (d *Dispatcher) Dispatch(opts client.PipelineRunOptions) error {
 		}
 		if err := d.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
 			Status: helper.ToPtr(client.TaskStatusError),
-			Error:  helper.ToPtr(err.Error()),
+			Error:  helper.ToPtr(errorpkg.GetUserFriendlyMessage(err.Error(), errorpkg.FallbackMessage)),
 		}); err != nil {
 			return err
 		}

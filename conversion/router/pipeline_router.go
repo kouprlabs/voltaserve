@@ -57,7 +57,7 @@ func (r *PipelineRouter) Run(c *fiber.Ctx) error {
 		if err := c.SendStatus(http.StatusUnauthorized); err != nil {
 			return err
 		}
-		return errors.New("invalid api_key")
+		return errors.New("invalid query param api_key")
 	}
 	opts := new(client.PipelineRunOptions)
 	if err := c.BodyParser(opts); err != nil {
