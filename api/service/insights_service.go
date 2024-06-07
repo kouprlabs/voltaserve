@@ -96,10 +96,6 @@ func (svc *InsightsService) Create(id string, opts InsightsCreateOptions, userID
 	if snapshot.GetStatus() == model.SnapshotStatusProcessing {
 		return errorpkg.NewSnapshotIsProcessingError(nil)
 	}
-	snapshot.SetLanguage(opts.LanguageID)
-	if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
-		return err
-	}
 	task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
 		ID:              helper.NewID(),
 		Name:            "Waiting.",
@@ -111,6 +107,8 @@ func (svc *InsightsService) Create(id string, opts InsightsCreateOptions, userID
 	if err != nil {
 		return err
 	}
+	snapshot.SetLanguage(opts.LanguageID)
+	snapshot.SetStatus(model.SnapshotStatusWaiting)
 	snapshot.SetTaskID(helper.ToPtr(task.GetID()))
 	if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
 		return err
@@ -159,10 +157,6 @@ func (svc *InsightsService) Patch(id string, userID string) error {
 	if previous == nil || previous.GetLanguage() == nil {
 		return errorpkg.NewSnapshotCannotBePatchedError(nil)
 	}
-	snapshot.SetLanguage(*previous.GetLanguage())
-	if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
-		return err
-	}
 	task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
 		ID:              helper.NewID(),
 		Name:            "Waiting.",
@@ -174,6 +168,8 @@ func (svc *InsightsService) Patch(id string, userID string) error {
 	if err != nil {
 		return err
 	}
+	snapshot.SetStatus(model.SnapshotStatusWaiting)
+	snapshot.SetLanguage(*previous.GetLanguage())
 	snapshot.SetTaskID(helper.ToPtr(task.GetID()))
 	if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
 		return err
@@ -216,24 +212,22 @@ func (svc *InsightsService) Delete(id string, userID string) error {
 	if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
 		return err
 	}
-	go func() {
-		task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
-			ID:              helper.NewID(),
-			Name:            "Deleting insights.",
-			UserID:          userID,
-			IsIndeterminate: true,
-			Status:          model.TaskStatusRunning,
-			Payload:         map[string]string{"fileId": file.GetID()},
-		})
-		if err != nil {
-			log.GetLogger().Error(err)
-			return
-		}
-		snapshot.SetTaskID(helper.ToPtr(task.GetID()))
-		if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
-			log.GetLogger().Error(err)
-			return
-		}
+	task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
+		ID:              helper.NewID(),
+		Name:            "Deleting insights.",
+		UserID:          userID,
+		IsIndeterminate: true,
+		Status:          model.TaskStatusRunning,
+		Payload:         map[string]string{"fileId": file.GetID()},
+	})
+	if err != nil {
+		return err
+	}
+	snapshot.SetTaskID(helper.ToPtr(task.GetID()))
+	if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
+		return err
+	}
+	go func(task model.Task, snapshot model.Snapshot) {
 		failed := false
 		combinedErrMsg := ""
 		if svc.fileIdent.IsImage(snapshot.GetOriginal().Key) {
@@ -258,12 +252,14 @@ func (svc *InsightsService) Delete(id string, userID string) error {
 				return
 			}
 		}
+		snapshot.SetEntities(nil)
+		snapshot.SetTaskID(nil)
 		snapshot.SetStatus(model.SnapshotStatusReady)
 		if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
 			log.GetLogger().Error(err)
 			return
 		}
-	}()
+	}(task, snapshot)
 	return nil
 }
 

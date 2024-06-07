@@ -6,6 +6,7 @@ import {
   ModalHeader,
   ModalOverlay,
 } from '@chakra-ui/react'
+import FileAPI from '@/client/api/file'
 import MosaicAPI from '@/client/api/mosaic'
 import { swrConfig } from '@/client/options'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
@@ -26,6 +27,13 @@ const Mosaic = () => {
     id,
     swrConfig(),
   )
+  const { data: file } = FileAPI.useGet(id, swrConfig())
+
+  useEffect(() => {
+    if (file?.snapshot?.taskId) {
+      dispatch(modalDidClose())
+    }
+  }, [file])
 
   useEffect(() => {
     if (mutateInfo) {

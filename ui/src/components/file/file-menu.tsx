@@ -10,12 +10,14 @@ import {
   Portal,
 } from '@chakra-ui/react'
 import cx from 'classnames'
+import FileAPI from '@/client/api/file'
 import {
   geEditorPermission,
   geOwnerPermission,
   geViewerPermission,
 } from '@/client/api/permission'
 import { Status } from '@/client/api/snapshot'
+import { swrConfig } from '@/client/options'
 import {
   IconFileCopy,
   IconDownload,
@@ -77,10 +79,9 @@ const FileMenu = ({
   const dispatch = useAppDispatch()
   const list = useAppSelector((state) => state.entities.files.list)
   const selection = useAppSelector((state) => state.ui.files.selection)
-  const file = useAppSelector((state) =>
-    state.ui.files.selection.length === 1
-      ? list?.data.find((e) => e.id === state.ui.files.selection[0])
-      : undefined,
+  const { data: file } = FileAPI.useGet(
+    selection.length === 1 ? selection[0] : undefined,
+    swrConfig(),
   )
   const isOwnerInSelection = useMemo(
     () =>
@@ -103,7 +104,7 @@ const FileMenu = ({
   const isInsightsAuthorized = useMemo(
     () =>
       file?.type === 'file' &&
-      file.snapshot?.status !== Status.Processing &&
+      !file.snapshot?.taskId &&
       ((geViewerPermission(file.permission) && file.snapshot?.entities) ||
         geEditorPermission(file.permission)),
     [file],
@@ -111,14 +112,14 @@ const FileMenu = ({
   const isMosaicAuthorized = useMemo(
     () =>
       file?.type === 'file' &&
-      file.snapshot?.status !== Status.Processing &&
+      !file.snapshot?.taskId &&
       isImage(file.snapshot?.original.extension),
     [file],
   )
   const isWatermarkAuthorized = useMemo(
     () =>
       file?.type === 'file' &&
-      file.snapshot?.status !== Status.Processing &&
+      !file.snapshot?.taskId &&
       (isPDF(file.snapshot?.original.extension) ||
         isMicrosoftOffice(file.snapshot?.original.extension) ||
         isOpenOffice(file.snapshot?.original.extension) ||

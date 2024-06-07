@@ -19,24 +19,28 @@ const WatermarkOverviewSettings = () => {
   )
   const mutateFiles = useAppSelector((state) => state.ui.files.mutate)
   const mutateTaskCount = useAppSelector((state) => state.ui.tasks.mutateCount)
-  const mutateInfo = useAppSelector((state) => state.ui.watermark.mutateInfo)
-  const { data: info } = WatermarkAPI.useGetInfo(id, swrConfig())
-  const { data: file } = FileAPI.useGet(id, swrConfig())
+  const { data: info, mutate: mutateInfo } = WatermarkAPI.useGetInfo(
+    id,
+    swrConfig(),
+  )
+  const { data: file, mutate: mutateFile } = FileAPI.useGet(id, swrConfig())
 
   const handleUpdate = useCallback(async () => {
     if (id) {
       await WatermarkAPI.create(id)
-      mutateInfo?.(await WatermarkAPI.getInfo(id))
+      mutateFile(await FileAPI.get(id))
+      mutateInfo(await WatermarkAPI.getInfo(id))
       mutateFiles?.()
       mutateTaskCount?.(await TaskAPI.getCount())
       dispatch(modalDidClose())
     }
-  }, [id, mutateFiles, mutateTaskCount, mutateInfo, dispatch])
+  }, [id, mutateFile, mutateFiles, mutateTaskCount, mutateInfo, dispatch])
 
   const handleDelete = useCallback(async () => {
     if (id) {
       await WatermarkAPI.delete(id)
-      mutateInfo?.(await WatermarkAPI.getInfo(id))
+      mutateFile(await FileAPI.get(id))
+      mutateInfo(await WatermarkAPI.getInfo(id))
       mutateFiles?.()
       mutateTaskCount?.(await TaskAPI.getCount())
       dispatch(modalDidClose())
@@ -56,7 +60,9 @@ const WatermarkOverviewSettings = () => {
         <CardFooter>
           <Button
             leftIcon={<IconSync />}
-            isDisabled={!info.metadata?.isOutdated}
+            isDisabled={
+              !info.metadata?.isOutdated || file.snapshot?.taskId !== undefined
+            }
             onClick={handleUpdate}
           >
             Apply
@@ -71,7 +77,12 @@ const WatermarkOverviewSettings = () => {
           <Button
             colorScheme="red"
             leftIcon={<IconDelete />}
-            isDisabled={!file || ltOwnerPermission(file.permission)}
+            isDisabled={
+              !file ||
+              file.snapshot?.taskId !== undefined ||
+              info.metadata?.isOutdated ||
+              ltOwnerPermission(file.permission)
+            }
             onClick={handleDelete}
           >
             Delete

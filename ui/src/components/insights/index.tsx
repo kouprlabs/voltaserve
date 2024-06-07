@@ -6,6 +6,7 @@ import {
   ModalHeader,
   ModalOverlay,
 } from '@chakra-ui/react'
+import FileAPI from '@/client/api/file'
 import InsightsAPI from '@/client/api/insights'
 import { swrConfig } from '@/client/options'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
@@ -25,12 +26,19 @@ const Insights = () => {
     id,
     swrConfig(),
   )
+  const { data: file } = FileAPI.useGet(id, swrConfig())
 
   useEffect(() => {
     if (mutateInfo) {
       dispatch(mutateInfoUpdated(mutateInfo))
     }
   }, [mutateInfo])
+
+  useEffect(() => {
+    if (file?.snapshot?.taskId) {
+      dispatch(modalDidClose())
+    }
+  }, [file])
 
   if (!info) {
     return null

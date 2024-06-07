@@ -15,6 +15,7 @@ export type Snapshot = {
   thumbnail?: Thumbnail
   language?: string
   isActive: boolean
+  taskId?: string
   createTime: string
   updateTime?: string
 }

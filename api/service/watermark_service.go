@@ -82,6 +82,7 @@ func (svc *WatermarkService) Create(id string, userID string) error {
 	if err != nil {
 		return err
 	}
+	snapshot.SetStatus(model.SnapshotStatusWaiting)
 	snapshot.SetTaskID(helper.ToPtr(task.GetID()))
 	if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
 		return err
@@ -127,19 +128,23 @@ func (svc *WatermarkService) Delete(id string, userID string) error {
 	if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
 		return err
 	}
-	go func() {
-		task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
-			ID:              helper.NewID(),
-			Name:            "Deleting watermark.",
-			UserID:          userID,
-			IsIndeterminate: true,
-			Status:          model.TaskStatusRunning,
-			Payload:         map[string]string{"fileId": file.GetID()},
-		})
-		if err != nil {
-			log.GetLogger().Error(err)
-			return
-		}
+	task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
+		ID:              helper.NewID(),
+		Name:            "Deleting watermark.",
+		UserID:          userID,
+		IsIndeterminate: true,
+		Status:          model.TaskStatusRunning,
+		Payload:         map[string]string{"fileId": file.GetID()},
+	})
+	if err != nil {
+		return err
+	}
+	snapshot.SetTaskID(helper.ToPtr(task.GetID()))
+	if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
+		log.GetLogger().Error(err)
+		return err
+	}
+	go func(task model.Task, snapshot model.Snapshot) {
 		err = svc.s3.RemoveObject(snapshot.GetWatermark().Key, snapshot.GetWatermark().Bucket)
 		if err != nil {
 			value := err.Error()
@@ -155,12 +160,13 @@ func (svc *WatermarkService) Delete(id string, userID string) error {
 			}
 		}
 		snapshot.SetWatermark(nil)
+		snapshot.SetTaskID(nil)
 		snapshot.SetStatus(model.SnapshotStatusReady)
 		if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
 			log.GetLogger().Error(err)
 			return
 		}
-	}()
+	}(task, snapshot)
 	return nil
 }
 

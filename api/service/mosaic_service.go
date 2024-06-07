@@ -71,6 +71,7 @@ func (svc *MosaicService) Create(id string, userID string) error {
 	if err != nil {
 		return err
 	}
+	snapshot.SetStatus(model.SnapshotStatusWaiting)
 	snapshot.SetTaskID(helper.ToPtr(task.GetID()))
 	if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
 		return err
@@ -113,24 +114,22 @@ func (svc *MosaicService) Delete(id string, userID string) error {
 		if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
 			return err
 		}
-		go func() {
-			task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
-				ID:              helper.NewID(),
-				Name:            "Deleting mosaic.",
-				UserID:          userID,
-				IsIndeterminate: true,
-				Status:          model.TaskStatusRunning,
-				Payload:         map[string]string{"fileId": file.GetID()},
-			})
-			if err != nil {
-				log.GetLogger().Error(err)
-				return
-			}
-			snapshot.SetTaskID(helper.ToPtr(task.GetID()))
-			if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
-				log.GetLogger().Error(err)
-				return
-			}
+		task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
+			ID:              helper.NewID(),
+			Name:            "Deleting mosaic.",
+			UserID:          userID,
+			IsIndeterminate: true,
+			Status:          model.TaskStatusRunning,
+			Payload:         map[string]string{"fileId": file.GetID()},
+		})
+		if err != nil {
+			return err
+		}
+		snapshot.SetTaskID(helper.ToPtr(task.GetID()))
+		if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
+			return err
+		}
+		go func(task model.Task, snapshot model.Snapshot) {
 			err = svc.mosaicClient.Delete(client.MosaicDeleteOptions{
 				S3Key:    filepath.FromSlash(snapshot.GetID()),
 				S3Bucket: snapshot.GetOriginal().Bucket,
@@ -149,12 +148,13 @@ func (svc *MosaicService) Delete(id string, userID string) error {
 				}
 			}
 			snapshot.SetMosaic(nil)
+			snapshot.SetTaskID(nil)
 			snapshot.SetStatus(model.SnapshotStatusReady)
 			if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
 				log.GetLogger().Error(err)
 				return
 			}
-		}()
+		}(task, snapshot)
 	}
 	return nil
 }

@@ -6,6 +6,7 @@ import {
   ModalHeader,
   ModalOverlay,
 } from '@chakra-ui/react'
+import FileAPI from '@/client/api/file'
 import WatermarkAPI from '@/client/api/watermark'
 import { swrConfig } from '@/client/options'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
@@ -25,6 +26,13 @@ const Watermark = () => {
     id,
     swrConfig(),
   )
+  const { data: file } = FileAPI.useGet(id, swrConfig())
+
+  useEffect(() => {
+    if (file?.snapshot?.taskId) {
+      dispatch(modalDidClose())
+    }
+  }, [file])
 
   useEffect(() => {
     if (mutateInfo) {

@@ -324,6 +324,13 @@ export default class FileAPI {
     )
   }
 
+  static async get(id: string) {
+    return apiFetcher({
+      url: `/files/${id}`,
+      method: 'GET',
+    }) as Promise<File>
+  }
+
   static useGetCount(
     id: string | null | undefined,
     swrOptions?: SWRConfiguration,
