@@ -213,6 +213,9 @@ func (svc *InsightsService) Delete(id string, userID string) error {
 		return errorpkg.NewSnapshotIsProcessingError(nil)
 	}
 	snapshot.SetStatus(model.SnapshotStatusProcessing)
+	if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
+		return err
+	}
 	go func() {
 		task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
 			ID:              helper.NewID(),
