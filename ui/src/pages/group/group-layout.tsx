@@ -37,7 +37,9 @@ const GroupLayout = () => {
 
   return (
     <div className={cx('flex', 'flex-col', 'gap-3.5')}>
-      <Heading className={cx('text-heading')}>{group.name}</Heading>
+      <Heading className={cx('text-heading', 'shrink-0')} noOfLines={1}>
+        {group.name}
+      </Heading>
       <Tabs variant="solid-rounded" colorScheme="gray" index={tabIndex}>
         <TabList>
           <Tab onClick={() => navigate(`/group/${id}/member`)}>Members</Tab>

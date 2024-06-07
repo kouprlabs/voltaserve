@@ -37,7 +37,9 @@ const WorkspaceLayout = () => {
 
   return (
     <div className={cx('flex', 'flex-col', 'gap-2', 'h-full')}>
-      <Heading className={cx('text-heading')}>{workspace.name}</Heading>
+      <Heading className={cx('text-heading', 'shrink-0')} noOfLines={1}>
+        {workspace.name}
+      </Heading>
       <Tabs variant="solid-rounded" colorScheme="gray" index={tabIndex}>
         <TabList>
           <Tab

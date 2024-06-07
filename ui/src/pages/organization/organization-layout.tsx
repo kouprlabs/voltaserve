@@ -40,7 +40,9 @@ const OrganizationLayout = () => {
 
   return (
     <div className={cx('flex', 'flex-col', 'gap-3.5')}>
-      <Heading className={cx('text-heading')}>{org.name}</Heading>
+      <Heading className={cx('text-heading', 'shrink-0')} noOfLines={1}>
+        {org.name}
+      </Heading>
       <Tabs variant="solid-rounded" colorScheme="gray" index={tabIndex}>
         <TabList>
           <Tab onClick={() => navigate(`/organization/${id}/member`)}>

@@ -17,6 +17,7 @@ import {
   IconPersonAdd,
 } from '@/lib/components/icons'
 import SectionSpinner from '@/lib/components/section-spinner'
+import { truncateEnd } from '@/lib/helpers/truncate-end'
 
 const Spacer = () => <div className={cx('grow')} />
 
@@ -54,7 +55,7 @@ const OrganizationSettingsPage = () => {
         <div className={rowClassName}>
           <span>Name</span>
           <Spacer />
-          <span>{org.name}</span>
+          <span>{truncateEnd(org.name, 60)}</span>
           <IconButton
             icon={<IconEdit />}
             isDisabled={!geEditorPermission(org.permission)}

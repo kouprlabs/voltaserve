@@ -23,7 +23,7 @@ import {
 import * as Yup from 'yup'
 import cx from 'classnames'
 import WorkspaceAPI, { Workspace } from '@/client/api/workspace'
-import useFocusAndSelectAll from '@/lib/hooks/use-focus-and-select-all'
+import useFocusAndSelectAll from '@/hooks/use-focus-and-select-all'
 import { useAppSelector } from '@/store/hook'
 
 export type WorkspaceEditNameProps = {
