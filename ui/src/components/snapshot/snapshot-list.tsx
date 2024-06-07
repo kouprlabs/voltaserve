@@ -18,9 +18,9 @@ import {
 import cx from 'classnames'
 import SnapshotAPI, { Snapshot, SortOrder } from '@/client/api/snapshot'
 import { swrConfig } from '@/client/options'
-import prettyDate from '@/helpers/pretty-date'
 import Pagination from '@/lib/components/pagination'
 import SectionSpinner from '@/lib/components/section-spinner'
+import prettyDate from '@/lib/helpers/pretty-date'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import {
   detachModalDidOpen,

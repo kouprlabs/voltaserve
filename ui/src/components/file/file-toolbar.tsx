@@ -15,7 +15,6 @@ import {
 import cx from 'classnames'
 import FileAPI, { List, SortBy, SortOrder } from '@/client/api/file'
 import { ltEditorPermission } from '@/client/api/permission'
-import mapFileList from '@/helpers/map-file-list'
 import {
   IconAdd,
   IconMoreVert,
@@ -30,6 +29,7 @@ import {
   IconClose,
   IconList,
 } from '@/lib/components/icons'
+import mapFileList from '@/lib/helpers/map-file-list'
 import { uploadAdded, UploadDecorator } from '@/store/entities/uploads'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import {

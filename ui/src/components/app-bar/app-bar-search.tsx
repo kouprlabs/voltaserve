@@ -17,14 +17,14 @@ import {
 } from '@chakra-ui/react'
 import cx from 'classnames'
 import { Query as FileQuery } from '@/client/api/file'
+import { IconClose, IconSearch, IconTune } from '@/lib/components/icons'
+import NotificationBadge from '@/lib/components/notification-badge'
 import {
   decodeFileQuery,
   decodeQuery,
   encodeFileQuery,
   encodeQuery,
-} from '@/helpers/query'
-import { IconClose, IconSearch, IconTune } from '@/lib/components/icons'
-import NotificationBadge from '@/lib/components/notification-badge'
+} from '@/lib/helpers/query'
 import { useAppDispatch } from '@/store/hook'
 import { modalDidOpen as searchFilterModalDidOpen } from '@/store/ui/search-filter'
 

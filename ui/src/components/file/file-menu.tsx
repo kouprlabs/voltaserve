@@ -16,14 +16,6 @@ import {
   geViewerPermission,
 } from '@/client/api/permission'
 import { Status } from '@/client/api/snapshot'
-import downloadFile from '@/helpers/download-file'
-import {
-  isImage,
-  isMicrosoftOffice,
-  isOpenOffice,
-  isPDF,
-} from '@/helpers/file-extension'
-import mapFileList from '@/helpers/map-file-list'
 import {
   IconFileCopy,
   IconDownload,
@@ -39,6 +31,14 @@ import {
   IconCheckBoxOutlineBlank,
   IconMoreVert,
 } from '@/lib/components/icons'
+import downloadFile from '@/lib/helpers/download-file'
+import {
+  isImage,
+  isMicrosoftOffice,
+  isOpenOffice,
+  isPDF,
+} from '@/lib/helpers/file-extension'
+import mapFileList from '@/lib/helpers/map-file-list'
 import { UploadDecorator, uploadAdded } from '@/store/entities/uploads'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import {

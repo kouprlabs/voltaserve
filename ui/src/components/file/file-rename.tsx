@@ -24,7 +24,7 @@ import {
 import * as Yup from 'yup'
 import cx from 'classnames'
 import FileAPI from '@/client/api/file'
-import useFocusAndSelectAll from '@/hooks/use-focus-and-select-all'
+import useFocusAndSelectAll from '@/lib/hooks/use-focus-and-select-all'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { renameModalDidClose } from '@/store/ui/files'
 

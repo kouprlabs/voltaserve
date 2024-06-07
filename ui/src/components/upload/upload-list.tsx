@@ -1,5 +1,4 @@
 import { useEffect } from 'react'
-import { Divider } from '@chakra-ui/react'
 import cx from 'classnames'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { drawerDidClose } from '@/store/ui/uploads'
@@ -31,10 +30,9 @@ const UploadList = () => {
 
   return (
     <div className={cx('flex', 'flex-col', 'gap-1.5')}>
-      {items.map((u, index) => (
+      {items.map((u) => (
         <div key={u.id} className={cx('flex', 'flex-col', 'gap-1.5')}>
           <UploadItem upload={u} />
-          {index !== items.length - 1 && <Divider />}
         </div>
       ))}
     </div>

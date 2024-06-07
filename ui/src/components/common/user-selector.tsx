@@ -19,10 +19,10 @@ import {
 import cx from 'classnames'
 import UserAPI, { SortOrder, User } from '@/client/api/user'
 import { swrConfig } from '@/client/options'
-import userToString from '@/helpers/user-to-string'
 import Pagination from '@/lib/components/pagination'
 import SearchInput from '@/lib/components/search-input'
 import Spinner from '@/lib/components/spinner'
+import userToString from '@/lib/helpers/user-to-string'
 
 export type UserSelectorProps = {
   value?: User

@@ -1,5 +1,5 @@
 import { File } from '@/client/api/file'
-import { getSizeWithAspectRatio } from '@/helpers/aspect-ratio'
+import { getSizeWithAspectRatio } from '@/lib/helpers/aspect-ratio'
 
 const MAX_WIDTH = 130
 const MAX_HEIGHT = 130

@@ -26,7 +26,7 @@ import * as Yup from 'yup'
 import cx from 'classnames'
 import InvitationAPI from '@/client/api/invitation'
 import EmailTokenizer from '@/components/common/email-tokenizer'
-import parseEmailList from '@/helpers/parse-email-list'
+import parseEmailList from '@/lib/helpers/parse-email-list'
 import { useAppSelector } from '@/store/hook'
 
 export type OrganizationInviteMembersProps = {

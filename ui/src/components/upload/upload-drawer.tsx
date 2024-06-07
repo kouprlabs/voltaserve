@@ -58,6 +58,7 @@ const UploadDrawer = () => {
       <ChakraDrawer
         isOpen={isOpen}
         placement="right"
+        size="sm"
         onClose={() => {
           onClose()
           dispatch(drawerDidClose())
@@ -75,6 +76,7 @@ const UploadDrawer = () => {
             {hasCompleted ? (
               <Button
                 className={cx('w-full')}
+                size="sm"
                 leftIcon={<IconClearAll />}
                 onClick={handleClearCompleted}
               >

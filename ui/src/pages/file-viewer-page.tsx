@@ -10,11 +10,11 @@ import ViewerImage from '@/components/viewer/viewer-image'
 import ViewerMosaic from '@/components/viewer/viewer-mosaic'
 import ViewerPDF from '@/components/viewer/viewer-pdf'
 import ViewerVideo from '@/components/viewer/viewer-video'
-import downloadFile from '@/helpers/download-file'
-import { isAudio, isImage, isPDF, isVideo } from '@/helpers/file-extension'
 import Drawer from '@/lib/components/drawer'
 import { IconDownload } from '@/lib/components/icons'
 import Spinner from '@/lib/components/spinner'
+import downloadFile from '@/lib/helpers/download-file'
+import { isAudio, isImage, isPDF, isVideo } from '@/lib/helpers/file-extension'
 
 const FileViewerPage = () => {
   const { id } = useParams()

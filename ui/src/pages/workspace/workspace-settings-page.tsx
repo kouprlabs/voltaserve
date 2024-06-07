@@ -15,9 +15,9 @@ import { swrConfig } from '@/client/options'
 import WorkspaceDelete from '@/components/workspace/workspace-delete'
 import WorkspaceEditName from '@/components/workspace/workspace-edit-name'
 import WorkspaceEditStorageCapacity from '@/components/workspace/workspace-edit-storage-capacity'
-import prettyBytes from '@/helpers/pretty-bytes'
 import { IconDelete, IconEdit } from '@/lib/components/icons'
 import SectionSpinner from '@/lib/components/section-spinner'
+import prettyBytes from '@/lib/helpers/pretty-bytes'
 
 const EditButton = (props: IconButtonProps) => (
   <IconButton icon={<IconEdit />} {...props} />

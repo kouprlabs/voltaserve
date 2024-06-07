@@ -52,6 +52,7 @@ const TaskDrawer = () => {
       <ChakraDrawer
         isOpen={isOpen}
         placement="right"
+        size="sm"
         onClose={() => {
           onClose()
           dispatch(drawerDidClose())

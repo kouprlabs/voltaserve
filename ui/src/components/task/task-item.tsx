@@ -10,15 +10,18 @@ import {
   CardBody,
   Text,
   CircularProgress,
+  IconButton,
 } from '@chakra-ui/react'
 import cx from 'classnames'
 import FileAPI from '@/client/api/file'
 import TaskAPI, { Status, Task } from '@/client/api/task'
 import {
   IconCheckCircle,
+  IconClose,
   IconError,
   IconHourglass,
 } from '@/lib/components/icons'
+import truncateMiddle from '@/lib/helpers/truncate-middle'
 import { useAppSelector } from '@/store/hook'
 
 export type TaskDrawerItemProps = {
@@ -66,58 +69,49 @@ const TaskDrawerItem = ({ task }: TaskDrawerItemProps) => {
             ) : null}
             <div className={cx('flex', 'flex-col', 'grow')}>
               {file ? (
-                <Text className={cx('font-semibold')} noOfLines={5}>
-                  {file.name}
-                </Text>
+                <span className={cx('font-semibold')}>
+                  {truncateMiddle(file.name, 40)}
+                </span>
               ) : null}
               {task.status !== Status.Error ? (
                 <Text
                   dangerouslySetInnerHTML={{ __html: task.name }}
-                  noOfLines={5}
+                  noOfLines={3}
                 ></Text>
               ) : null}
             </div>
+            {task.error ? (
+              <IconButton
+                icon={<IconClose />}
+                size="xs"
+                variant="outline"
+                colorScheme="gray"
+                aria-label=""
+                isLoading={isDismissing}
+                onClick={handleDismiss}
+              />
+            ) : null}
           </div>
           {task.error ? (
-            <>
-              <Accordion allowMultiple>
-                <AccordionItem className={cx('border-none')}>
-                  <AccordionButton className={cx('p-0.5')}>
-                    <div className={cx('flex', 'flex-row', 'w-full')}>
-                      <span className={cx('text-left', 'grow')}>
-                        Task failed, click to expand.
-                      </span>
-                      <AccordionIcon />
-                    </div>
-                  </AccordionButton>
-                  <AccordionPanel className={cx('p-0.5')}>
-                    <Text
-                      className={cx('text-red-500')}
-                      dangerouslySetInnerHTML={{ __html: task.error }}
-                      noOfLines={5}
-                    ></Text>
-                  </AccordionPanel>
-                </AccordionItem>
-              </Accordion>
-              <div
-                className={cx(
-                  'flex',
-                  'flex-row',
-                  'gap-0.5',
-                  'w-full',
-                  'justify-end',
-                )}
-              >
-                <Button
-                  size="sm"
-                  variant="solid"
-                  isLoading={isDismissing}
-                  onClick={handleDismiss}
-                >
-                  Dismiss
-                </Button>
-              </div>
-            </>
+            <Accordion allowMultiple>
+              <AccordionItem className={cx('border-none')}>
+                <AccordionButton className={cx('p-0.5')}>
+                  <div className={cx('flex', 'flex-row', 'w-full')}>
+                    <span className={cx('text-left', 'grow')}>
+                      Task failed, click to show error.
+                    </span>
+                    <AccordionIcon />
+                  </div>
+                </AccordionButton>
+                <AccordionPanel className={cx('p-0.5')}>
+                  <Text
+                    className={cx('text-red-500')}
+                    dangerouslySetInnerHTML={{ __html: task.error }}
+                    noOfLines={5}
+                  ></Text>
+                </AccordionPanel>
+              </AccordionItem>
+            </Accordion>
           ) : null}
         </div>
       </CardBody>

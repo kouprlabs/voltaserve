@@ -4,8 +4,11 @@ import {
   AccordionIcon,
   AccordionItem,
   AccordionPanel,
+  Card,
+  CardBody,
   CircularProgress,
   IconButton,
+  Text,
 } from '@chakra-ui/react'
 import cx from 'classnames'
 import {
@@ -14,6 +17,7 @@ import {
   IconCheckCircle,
   IconError,
 } from '@/lib/components/icons'
+import truncateMiddle from '@/lib/helpers/truncate-middle'
 import {
   Upload,
   UploadDecorator,
@@ -30,80 +34,74 @@ const UploadItem = ({ upload: uploadProp }: UploadsItemProps) => {
   const upload = new UploadDecorator(uploadProp)
 
   return (
-    <div className={cx('flex', 'flex-col', 'gap-1')}>
-      <div
-        className={cx(
-          'flex',
-          'flex-row',
-          'items-center',
-          'gap-0.5',
-          'justify-between',
-          'h-2.5',
-        )}
-      >
-        {upload.isProgressing ? (
-          <CircularProgress
-            value={upload.progress}
-            max={100}
-            isIndeterminate={upload.progress === 100 && !upload.error}
-            className={cx('text-black')}
-            size="20px"
-          />
-        ) : null}
-        {upload.isPending ? (
-          <IconSchedule className={cx('shrink-0', 'text-gray-500')} />
-        ) : null}
-        {upload.isSucceeded ? (
-          <IconCheckCircle
-            className={cx('shrink-0', 'text-green-500')}
-            filled={true}
-          />
-        ) : null}
-        {upload.isFailed ? (
-          <div className={cx('shrink-0', 'text-red-500')}>
-            <IconError filled={true} />
-          </div>
-        ) : null}
-        <span
-          className={cx(
-            'grow',
-            'text-ellipsis',
-            'overflow-hidden',
-            'whitespace-nowrap',
-          )}
-        >
-          {upload.blob.name}
-        </span>
-        <IconButton
-          icon={<IconClose />}
-          size="xs"
-          variant="outline"
-          colorScheme={upload.isProgressing ? 'red' : 'gray'}
-          aria-label=""
-          onClick={() => {
-            upload.request?.abort()
-            dispatch(uploadRemoved(upload.id))
-          }}
-        />
-      </div>
-      {upload.isFailed ? (
-        <Accordion allowMultiple>
-          <AccordionItem className={cx('border-none')}>
-            <AccordionButton className={cx('p-0.5', 'hover:bg-red-50')}>
-              <div className={cx('flex', 'flex-row', 'w-full')}>
-                <span className={cx('text-red-500', 'text-left', 'grow')}>
-                  Upload failed, click to expand
-                </span>
-                <AccordionIcon className={cx('text-red-500')} />
+    <Card variant="outline">
+      <CardBody>
+        <div className={cx('flex', 'flex-col', 'gap-1')}>
+          <div className={cx('flex', 'flex-row', 'items-center', 'gap-1.5')}>
+            {upload.isProgressing ? (
+              <CircularProgress
+                value={upload.progress}
+                max={100}
+                isIndeterminate={upload.progress === 100 && !upload.error}
+                className={cx('text-black')}
+                size="20px"
+              />
+            ) : null}
+            {upload.isPending ? (
+              <IconSchedule className={cx('shrink-0', 'text-gray-500')} />
+            ) : null}
+            {upload.isSucceeded ? (
+              <IconCheckCircle
+                className={cx('shrink-0', 'text-green-500')}
+                filled={true}
+              />
+            ) : null}
+            {upload.isFailed ? (
+              <div className={cx('shrink-0', 'text-red-500')}>
+                <IconError filled={true} />
               </div>
-            </AccordionButton>
-            <AccordionPanel className={cx('p-0.5')}>
-              {upload.error}
-            </AccordionPanel>
-          </AccordionItem>
-        </Accordion>
-      ) : null}
-    </div>
+            ) : null}
+            <div className={cx('flex', 'flex-col', 'grow')}>
+              <span className={cx('font-semibold')}>
+                {truncateMiddle(upload.blob.name, 40)}
+              </span>
+            </div>
+            <IconButton
+              icon={<IconClose />}
+              size="xs"
+              variant="outline"
+              colorScheme={upload.isProgressing ? 'red' : 'gray'}
+              aria-label=""
+              onClick={() => {
+                upload.request?.abort()
+                dispatch(uploadRemoved(upload.id))
+              }}
+            />
+          </div>
+          {upload.isFailed && upload.error ? (
+            <Accordion allowMultiple>
+              <AccordionItem className={cx('border-none')}>
+                <AccordionButton className={cx('p-0.5')}>
+                  <div className={cx('flex', 'flex-row', 'w-full')}>
+                    <span className={cx('text-left', 'grow')}>
+                      Upload failed, click to show error
+                    </span>
+                    <AccordionIcon />
+                  </div>
+                </AccordionButton>
+                <AccordionPanel className={cx('p-0.5')}>
+                  <Text
+                    className={cx('text-red-500')}
+                    dangerouslySetInnerHTML={{ __html: upload.error }}
+                    noOfLines={5}
+                  ></Text>
+                </AccordionPanel>
+              </AccordionItem>
+            </Accordion>
+          ) : null}
+        </div>
+      </CardBody>
+    </Card>
   )
 }
 

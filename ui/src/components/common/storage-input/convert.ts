@@ -5,7 +5,7 @@ import {
   gigabyteToByte,
   megabyteToByte,
   terabyteToByte,
-} from '@/helpers/convert-storage'
+} from '@/lib/helpers/convert-storage'
 
 export type Unit = 'b' | 'mb' | 'gb' | 'tb'
 
