@@ -9,5 +9,4 @@ type Organization interface {
 	GetCreateTime() string
 	GetUpdateTime() *string
 	SetName(string)
-	SetUpdateTime(*string)
 }

@@ -21,12 +21,13 @@ import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import GroupAPI, { SortOrder } from '@/client/api/group'
 import { swrConfig } from '@/client/options'
-import { CreateGroupButton } from '@/components/top-bar/top-bar-buttons'
-import prettyDate from '@/helpers/pretty-date'
-import { decodeQuery } from '@/helpers/query'
+import { CreateGroupButton } from '@/components/app-bar/app-bar-buttons'
 import { groupPaginationStorage } from '@/infra/pagination'
 import PagePagination from '@/lib/components/page-pagination'
 import SectionSpinner from '@/lib/components/section-spinner'
+import prettyDate from '@/lib/helpers/pretty-date'
+import { decodeQuery } from '@/lib/helpers/query'
+import { truncateEnd } from '@/lib/helpers/truncate-end'
 import usePagePagination from '@/lib/hooks/page-pagination'
 import { useAppDispatch } from '@/store/hook'
 import { mutateUpdated } from '@/store/ui/groups'
@@ -128,7 +129,7 @@ const GroupListPage = () => {
                         to={`/group/${g.id}/member`}
                         className={cx('no-underline')}
                       >
-                        {g.name}
+                        {truncateEnd(g.name, 60)}
                       </ChakraLink>
                     </div>
                   </Td>

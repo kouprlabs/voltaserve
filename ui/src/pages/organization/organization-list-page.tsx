@@ -21,12 +21,13 @@ import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import OrganizationAPI, { SortOrder } from '@/client/api/organization'
 import { swrConfig } from '@/client/options'
-import { CreateOrganizationButton } from '@/components/top-bar/top-bar-buttons'
-import prettyDate from '@/helpers/pretty-date'
-import { decodeQuery } from '@/helpers/query'
+import { CreateOrganizationButton } from '@/components/app-bar/app-bar-buttons'
 import { organizationPaginationStorage } from '@/infra/pagination'
 import PagePagination from '@/lib/components/page-pagination'
 import SectionSpinner from '@/lib/components/section-spinner'
+import prettyDate from '@/lib/helpers/pretty-date'
+import { decodeQuery } from '@/lib/helpers/query'
+import { truncateEnd } from '@/lib/helpers/truncate-end'
 import usePagePagination from '@/lib/hooks/page-pagination'
 import { useAppDispatch } from '@/store/hook'
 import { mutateUpdated } from '@/store/ui/organizations'
@@ -127,7 +128,7 @@ const OrganizationListPage = () => {
                         to={`/organization/${o.id}/member`}
                         className={cx('no-underline')}
                       >
-                        <span>{o.name}</span>
+                        <span>{truncateEnd(o.name, 60)}</span>
                       </ChakraLink>
                     </div>
                   </Td>

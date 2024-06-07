@@ -2,7 +2,6 @@ package service
 
 import (
 	"bytes"
-	"os"
 	"path/filepath"
 	"voltaserve/cache"
 	"voltaserve/client"
@@ -10,37 +9,36 @@ import (
 	"voltaserve/guard"
 	"voltaserve/helper"
 	"voltaserve/infra"
+	"voltaserve/log"
 	"voltaserve/model"
 	"voltaserve/repo"
-
-	"go.uber.org/zap"
 )
 
 type MosaicService struct {
-	snapshotCache *cache.SnapshotCache
-	snapshotRepo  repo.SnapshotRepo
-	fileCache     *cache.FileCache
-	fileGuard     *guard.FileGuard
-	s3            *infra.S3Manager
-	mosaicClient  *client.MosaicClient
-	fileIdent     *infra.FileIdentifier
-	logger        *zap.SugaredLogger
+	snapshotCache  *cache.SnapshotCache
+	snapshotRepo   repo.SnapshotRepo
+	snapshotSvc    *SnapshotService
+	fileCache      *cache.FileCache
+	fileGuard      *guard.FileGuard
+	taskSvc        *TaskService
+	s3             *infra.S3Manager
+	mosaicClient   *client.MosaicClient
+	pipelineClient *client.PipelineClient
+	fileIdent      *infra.FileIdentifier
 }
 
 func NewMosaicService() *MosaicService {
-	logger, err := infra.GetLogger()
-	if err != nil {
-		panic(err)
-	}
 	return &MosaicService{
-		snapshotCache: cache.NewSnapshotCache(),
-		snapshotRepo:  repo.NewSnapshotRepo(),
-		fileCache:     cache.NewFileCache(),
-		fileGuard:     guard.NewFileGuard(),
-		s3:            infra.NewS3Manager(),
-		mosaicClient:  client.NewMosaicClient(),
-		fileIdent:     infra.NewFileIdentifier(),
-		logger:        logger,
+		snapshotCache:  cache.NewSnapshotCache(),
+		snapshotRepo:   repo.NewSnapshotRepo(),
+		snapshotSvc:    NewSnapshotService(),
+		fileCache:      cache.NewFileCache(),
+		fileGuard:      guard.NewFileGuard(),
+		taskSvc:        NewTaskService(),
+		s3:             infra.NewS3Manager(),
+		mosaicClient:   client.NewMosaicClient(),
+		pipelineClient: client.NewPipelineClient(),
+		fileIdent:      infra.NewFileIdentifier(),
 	}
 }
 
@@ -62,73 +60,32 @@ func (svc *MosaicService) Create(id string, userID string) error {
 	if snapshot.GetStatus() == model.SnapshotStatusProcessing {
 		return errorpkg.NewSnapshotIsProcessingError(nil)
 	}
-	snapshot.SetStatus(model.SnapshotStatusProcessing)
-	if err := svc.snapshotRepo.Save(snapshot); err != nil {
-		return err
-	}
-	if err := svc.snapshotCache.Set(snapshot); err != nil {
-		return err
-	}
-	err = svc.create(snapshot)
+	task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
+		ID:              helper.NewID(),
+		Name:            "Waiting.",
+		UserID:          userID,
+		IsIndeterminate: true,
+		Status:          model.TaskStatusWaiting,
+		Payload:         map[string]string{"fileId": file.GetID()},
+	})
 	if err != nil {
-		snapshot.SetStatus(model.SnapshotStatusError)
-	} else {
-		snapshot.SetStatus(model.SnapshotStatusReady)
-	}
-	if err := svc.snapshotRepo.Save(snapshot); err != nil {
 		return err
 	}
-	if err := svc.snapshotCache.Set(snapshot); err != nil {
+	snapshot.SetStatus(model.SnapshotStatusWaiting)
+	snapshot.SetTaskID(helper.ToPtr(task.GetID()))
+	if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
 		return err
 	}
-	return err
-}
-
-func (svc *MosaicService) create(snapshot model.Snapshot) error {
-	if !snapshot.HasOriginal() {
-		return errorpkg.NewS3ObjectNotFoundError(nil)
+	if err := svc.pipelineClient.Run(&client.PipelineRunOptions{
+		PipelineID: helper.ToPtr(client.PipelineMoasic),
+		TaskID:     task.GetID(),
+		SnapshotID: snapshot.GetID(),
+		Bucket:     snapshot.GetOriginal().Bucket,
+		Key:        snapshot.GetOriginal().Key,
+	}); err != nil {
+		return err
 	}
-	original := snapshot.GetOriginal()
-	/* Create mosaic if image */
-	if svc.fileIdent.IsImage(original.Key) {
-		/* Download original S3 object */
-		path := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(original.Key))
-		if err := svc.s3.GetFile(original.Key, path, original.Bucket); err != nil {
-			return err
-		}
-		defer func(inputPath string, logger *zap.SugaredLogger) {
-			_, err := os.Stat(inputPath)
-			if os.IsExist(err) {
-				if err := os.Remove(inputPath); err != nil {
-					logger.Error(err)
-				}
-			}
-		}(path, svc.logger)
-		stat, err := os.Stat(path)
-		if err != nil {
-			return err
-		}
-		if _, err := svc.mosaicClient.Create(client.MosaicCreateOptions{
-			Path:     path,
-			S3Key:    filepath.FromSlash(snapshot.GetID()),
-			S3Bucket: snapshot.GetOriginal().Bucket,
-		}); err != nil {
-			return err
-		}
-		snapshot.SetMosaic(&model.S3Object{
-			Key:    filepath.FromSlash(snapshot.GetID() + "/mosaic.json"),
-			Bucket: snapshot.GetOriginal().Bucket,
-			Size:   stat.Size(),
-		})
-		if err := svc.snapshotRepo.Save(snapshot); err != nil {
-			return err
-		}
-		if err := svc.snapshotCache.Set(snapshot); err != nil {
-			return err
-		}
-		return nil
-	}
-	return errorpkg.NewUnsupportedFileTypeError(nil)
+	return nil
 }
 
 func (svc *MosaicService) Delete(id string, userID string) error {
@@ -154,34 +111,60 @@ func (svc *MosaicService) Delete(id string, userID string) error {
 			return errorpkg.NewSnapshotIsProcessingError(nil)
 		}
 		snapshot.SetStatus(model.SnapshotStatusProcessing)
-		if err := svc.snapshotRepo.Save(snapshot); err != nil {
+		if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
 			return err
 		}
-		if err := svc.snapshotCache.Set(snapshot); err != nil {
-			return err
-		}
-		err = svc.mosaicClient.Delete(client.MosaicDeleteOptions{
-			S3Key:    filepath.FromSlash(snapshot.GetID()),
-			S3Bucket: snapshot.GetOriginal().Bucket,
+		task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
+			ID:              helper.NewID(),
+			Name:            "Deleting mosaic.",
+			UserID:          userID,
+			IsIndeterminate: true,
+			Status:          model.TaskStatusRunning,
+			Payload:         map[string]string{"fileId": file.GetID()},
 		})
-		snapshot.SetMosaic(nil)
 		if err != nil {
-			snapshot.SetStatus(model.SnapshotStatusError)
-		} else {
+			return err
+		}
+		snapshot.SetTaskID(helper.ToPtr(task.GetID()))
+		if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
+			return err
+		}
+		go func(task model.Task, snapshot model.Snapshot) {
+			err = svc.mosaicClient.Delete(client.MosaicDeleteOptions{
+				S3Key:    filepath.FromSlash(snapshot.GetID()),
+				S3Bucket: snapshot.GetOriginal().Bucket,
+			})
+			if err != nil {
+				value := err.Error()
+				task.SetError(&value)
+				if err := svc.taskSvc.saveAndSync(task); err != nil {
+					log.GetLogger().Error(err)
+					return
+				}
+			} else {
+				if err := svc.taskSvc.deleteAndSync(task.GetID()); err != nil {
+					log.GetLogger().Error(err)
+					return
+				}
+			}
+			snapshot.SetMosaic(nil)
+			snapshot.SetTaskID(nil)
 			snapshot.SetStatus(model.SnapshotStatusReady)
-		}
-		if err := svc.snapshotRepo.Save(snapshot); err != nil {
-			return err
-		}
-		if err := svc.snapshotCache.Set(snapshot); err != nil {
-			return err
-		}
-		return err
+			if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
+				log.GetLogger().Error(err)
+				return
+			}
+		}(task, snapshot)
 	}
 	return nil
 }
 
-func (svc *MosaicService) GetMetadata(id string, userID string) (*model.MosaicMetadata, error) {
+type MosaicInfo struct {
+	IsAvailable bool                   `json:"isAvailable"`
+	Metadata    *client.MosaicMetadata `json:"metadata,omitempty"`
+}
+
+func (svc *MosaicService) GetInfo(id string, userID string) (*MosaicInfo, error) {
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return nil, err
@@ -203,7 +186,7 @@ func (svc *MosaicService) GetMetadata(id string, userID string) (*model.MosaicMe
 			return nil, err
 		}
 		if previous == nil {
-			return nil, errorpkg.NewMosaicNotFoundError(nil)
+			return &MosaicInfo{IsAvailable: false}, nil
 		} else {
 			snapshot = previous
 			isOutdated = true
@@ -217,7 +200,10 @@ func (svc *MosaicService) GetMetadata(id string, userID string) (*model.MosaicMe
 		return nil, err
 	}
 	res.IsOutdated = isOutdated
-	return res, nil
+	return &MosaicInfo{
+		IsAvailable: true,
+		Metadata:    res,
+	}, nil
 }
 
 type MosaicDownloadTileOptions struct {

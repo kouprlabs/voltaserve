@@ -3,9 +3,8 @@ package guard
 import (
 	"voltaserve/cache"
 	"voltaserve/errorpkg"
+	"voltaserve/log"
 	"voltaserve/model"
-
-	"github.com/gofiber/fiber/v2/log"
 )
 
 type FileGuard struct {
@@ -27,7 +26,7 @@ func (g *FileGuard) IsAuthorized(userID string, file model.File, permission stri
 	for _, p := range file.GetGroupPermissions() {
 		g, err := g.groupCache.Get(p.GetGroupID())
 		if err != nil {
-			log.Error(err)
+			log.GetLogger().Error(err)
 			return false
 		}
 		for _, u := range g.GetUsers() {

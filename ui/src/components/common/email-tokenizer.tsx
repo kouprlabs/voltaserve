@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { Tag } from '@chakra-ui/react'
 import cx from 'classnames'
-import parseEmailList from '@/helpers/parse-email-list'
+import parseEmailList from '@/lib/helpers/parse-email-list'
 
 export type EmailTokenizerProps = {
   value: string

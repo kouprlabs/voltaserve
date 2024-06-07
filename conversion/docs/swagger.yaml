@@ -1,26 +1,21 @@
 basePath: /v2
 definitions:
-  core.PipelineRunOptions:
+  client.PipelineRunOptions:
     properties:
       bucket:
         type: string
       key:
         type: string
-      size:
-        type: integer
+      payload:
+        additionalProperties:
+          type: string
+        type: object
+      pipelineId:
+        type: string
       snapshotId:
         type: string
-    type: object
-  core.ToolRunOptions:
-    properties:
-      args:
-        items:
-          type: string
-        type: array
-      bin:
+      taskId:
         type: string
-      stdout:
-        type: boolean
     type: object
   errorpkg.ErrorResponse:
     properties:
@@ -34,6 +29,17 @@ definitions:
         type: integer
       userMessage:
         type: string
+    type: object
+  service.ToolRunOptions:
+    properties:
+      args:
+        items:
+          type: string
+        type: array
+      bin:
+        type: string
+      stdout:
+        type: boolean
     type: object
 info:
   contact: {}
@@ -70,7 +76,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/core.PipelineRunOptions'
+          $ref: '#/definitions/client.PipelineRunOptions'
       produces:
       - application/json
       responses:
@@ -78,12 +84,8 @@ paths:
           description: OK
         "400":
           description: Bad Request
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
         "500":
           description: Internal Server Error
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
       summary: Run
       tags:
       - Pipelines
@@ -99,7 +101,7 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/core.ToolRunOptions'
+          $ref: '#/definitions/service.ToolRunOptions'
       produces:
       - application/json
       responses:
@@ -107,12 +109,8 @@ paths:
           description: OK
         "400":
           description: Bad Request
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
         "500":
           description: Internal Server Error
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
       summary: Run
       tags:
       - Tools

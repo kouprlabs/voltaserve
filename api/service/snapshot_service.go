@@ -15,26 +15,28 @@ import (
 )
 
 type SnapshotService struct {
-	snapshotRepo  repo.SnapshotRepo
-	snapshotCache *cache.SnapshotCache
-	fileCache     *cache.FileCache
-	fileGuard     *guard.FileGuard
-	fileRepo      repo.FileRepo
-	fileSearch    *search.FileSearch
-	fileMapper    *FileMapper
-	config        config.Config
+	snapshotRepo   repo.SnapshotRepo
+	snapshotCache  *cache.SnapshotCache
+	snapshotMapper *SnapshotMapper
+	fileCache      *cache.FileCache
+	fileGuard      *guard.FileGuard
+	fileRepo       repo.FileRepo
+	fileSearch     *search.FileSearch
+	fileMapper     *FileMapper
+	config         config.Config
 }
 
 func NewSnapshotService() *SnapshotService {
 	return &SnapshotService{
-		fileCache:     cache.NewFileCache(),
-		fileGuard:     guard.NewFileGuard(),
-		fileSearch:    search.NewFileSearch(),
-		fileMapper:    NewFileMapper(),
-		snapshotRepo:  repo.NewSnapshotRepo(),
-		snapshotCache: cache.NewSnapshotCache(),
-		fileRepo:      repo.NewFileRepo(),
-		config:        config.GetConfig(),
+		snapshotRepo:   repo.NewSnapshotRepo(),
+		snapshotCache:  cache.NewSnapshotCache(),
+		snapshotMapper: NewSnapshotMapper(),
+		fileCache:      cache.NewFileCache(),
+		fileGuard:      guard.NewFileGuard(),
+		fileSearch:     search.NewFileSearch(),
+		fileMapper:     NewFileMapper(),
+		fileRepo:       repo.NewFileRepo(),
+		config:         config.GetConfig(),
 	}
 }
 
@@ -59,13 +61,14 @@ type Snapshot struct {
 	Language   *string    `json:"language,omitempty"`
 	Status     string     `json:"status,omitempty"`
 	IsActive   bool       `json:"isActive"`
+	TaskID     *string    `json:"taskId,omitempty"`
 	CreateTime string     `json:"createTime"`
 	UpdateTime *string    `json:"updateTime,omitempty"`
 }
 
 type Download struct {
 	Extension string      `json:"extension,omitempty"`
-	Size      int64       `json:"size,omitempty"`
+	Size      *int64      `json:"size,omitempty"`
 	Image     *ImageProps `json:"image,omitempty"`
 }
 
@@ -81,6 +84,16 @@ type SnapshotList struct {
 	TotalElements uint        `json:"totalElements"`
 	Page          uint        `json:"page"`
 	Size          uint        `json:"size"`
+}
+
+func (svc *SnapshotService) SaveAndSync(snapshot model.Snapshot) error {
+	if err := svc.snapshotRepo.Save(snapshot); err != nil {
+		return err
+	}
+	if err := svc.snapshotCache.Set(snapshot); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (svc *SnapshotService) List(fileID string, opts SnapshotListOptions, userID string) (*SnapshotList, error) {
@@ -165,9 +178,9 @@ func (svc *SnapshotService) doSorting(data []model.Snapshot, sortBy string, sort
 	return data
 }
 
-func (svc *SnapshotService) doPagination(data []model.Snapshot, page, size uint) ([]model.Snapshot, uint, uint) {
-	totalElements := uint(len(data))
-	totalPages := (totalElements + size - 1) / size
+func (svc *SnapshotService) doPagination(data []model.Snapshot, page, size uint) (pageData []model.Snapshot, totalElements uint, totalPages uint) {
+	totalElements = uint(len(data))
+	totalPages = (totalElements + size - 1) / size
 	if page > totalPages {
 		return []model.Snapshot{}, totalElements, totalPages
 	}
@@ -176,8 +189,7 @@ func (svc *SnapshotService) doPagination(data []model.Snapshot, page, size uint)
 	if endIndex > totalElements {
 		endIndex = totalElements
 	}
-	pageData := data[startIndex:endIndex]
-	return pageData, totalElements, totalPages
+	return data[startIndex:endIndex], totalElements, totalPages
 }
 
 type SnapshotActivateOptions struct {
@@ -246,40 +258,44 @@ func (svc *SnapshotService) Detach(id string, opts SnapshotDetachOptions, userID
 	return nil
 }
 
-type SnapshotUpdateOptions struct {
+type SnapshotPatchOptions struct {
 	Options   client.PipelineRunOptions `json:"options"`
-	Original  *model.S3Object           `json:"original,omitempty"`
-	Preview   *model.S3Object           `json:"preview,omitempty"`
-	Text      *model.S3Object           `json:"text,omitempty"`
-	OCR       *model.S3Object           `json:"ocr,omitempty"`
-	Thumbnail *model.Thumbnail          `json:"thumbnail,omitempty"`
-	Status    string                    `json:"status,omitempty"`
+	Fields    []string                  `json:"fields"`
+	Original  *model.S3Object           `json:"original"`
+	Preview   *model.S3Object           `json:"preview"`
+	Text      *model.S3Object           `json:"text"`
+	OCR       *model.S3Object           `json:"ocr"`
+	Entities  *model.S3Object           `json:"entities"`
+	Mosaic    *model.S3Object           `json:"mosaic"`
+	Watermark *model.S3Object           `json:"watermark"`
+	Thumbnail *model.Thumbnail          `json:"thumbnail"`
+	Status    *string                   `json:"status"`
+	TaskID    *string                   `json:"taskId"`
 }
 
-func (svc *SnapshotService) Patch(id string, opts SnapshotUpdateOptions, apiKey string) error {
+func (svc *SnapshotService) Patch(id string, opts SnapshotPatchOptions) (*Snapshot, error) {
 	if id != opts.Options.SnapshotID {
-		return errorpkg.NewPathVariablesAndBodyParametersNotConsistent()
-	}
-	if apiKey != svc.config.Security.APIKey {
-		return errorpkg.NewInvalidAPIKeyError()
+		return nil, errorpkg.NewPathVariablesAndBodyParametersNotConsistent()
 	}
 	if err := svc.snapshotRepo.Update(id, repo.SnapshotUpdateOptions{
-		Thumbnail: opts.Thumbnail,
 		Original:  opts.Original,
+		Fields:    opts.Fields,
 		Preview:   opts.Preview,
 		Text:      opts.Text,
+		OCR:       opts.OCR,
+		Entities:  opts.Entities,
+		Mosaic:    opts.Mosaic,
+		Watermark: opts.Watermark,
+		Thumbnail: opts.Thumbnail,
 		Status:    opts.Status,
 	}); err != nil {
-		return err
+		return nil, err
 	}
-	snapshot, err := svc.snapshotRepo.Find(id)
+	snapshot, err := svc.snapshotCache.Refresh(id)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	if err := svc.snapshotCache.Set(snapshot); err != nil {
-		return err
-	}
-	return nil
+	return svc.snapshotMapper.mapOne(snapshot), nil
 }
 
 type SnapshotMapper struct {
@@ -289,13 +305,13 @@ func NewSnapshotMapper() *SnapshotMapper {
 	return &SnapshotMapper{}
 }
 
-func (mp *SnapshotMapper) mapOne(m model.Snapshot, isActive bool) *Snapshot {
+func (mp *SnapshotMapper) mapOne(m model.Snapshot) *Snapshot {
 	s := &Snapshot{
 		ID:         m.GetID(),
 		Version:    m.GetVersion(),
 		Status:     m.GetStatus(),
 		Language:   m.GetLanguage(),
-		IsActive:   isActive,
+		TaskID:     m.GetTaskID(),
 		CreateTime: m.GetCreateTime(),
 		UpdateTime: m.GetUpdateTime(),
 	}
@@ -329,7 +345,9 @@ func (mp *SnapshotMapper) mapOne(m model.Snapshot, isActive bool) *Snapshot {
 func (mp *SnapshotMapper) mapMany(snapshots []model.Snapshot, activeID string) []*Snapshot {
 	res := make([]*Snapshot, 0)
 	for _, snapshot := range snapshots {
-		res = append(res, mp.mapOne(snapshot, activeID == snapshot.GetID()))
+		s := mp.mapOne(snapshot)
+		s.IsActive = activeID == snapshot.GetID()
+		res = append(res, s)
 	}
 	return res
 }
@@ -339,24 +357,24 @@ type ImageProps struct {
 	Height int `json:"height"`
 }
 
-func (mp *SnapshotMapper) mapS3Object(m *model.S3Object) *Download {
+func (mp *SnapshotMapper) mapS3Object(o *model.S3Object) *Download {
 	download := &Download{
-		Extension: filepath.Ext(m.Key),
-		Size:      m.Size,
+		Extension: filepath.Ext(o.Key),
+		Size:      o.Size,
 	}
-	if m.Image != nil {
+	if o.Image != nil {
 		download.Image = &ImageProps{
-			Width:  m.Image.Width,
-			Height: m.Image.Height,
+			Width:  o.Image.Width,
+			Height: o.Image.Height,
 		}
 	}
 	return download
 }
 
-func (mp *SnapshotMapper) mapThumbnail(m *model.Thumbnail) *Thumbnail {
+func (mp *SnapshotMapper) mapThumbnail(t *model.Thumbnail) *Thumbnail {
 	return &Thumbnail{
-		Base64: m.Base64,
-		Width:  m.Width,
-		Height: m.Height,
+		Base64: t.Base64,
+		Width:  t.Width,
+		Height: t.Height,
 	}
 }

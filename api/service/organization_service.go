@@ -8,11 +8,10 @@ import (
 	"voltaserve/errorpkg"
 	"voltaserve/guard"
 	"voltaserve/helper"
+	"voltaserve/log"
 	"voltaserve/model"
 	"voltaserve/repo"
 	"voltaserve/search"
-
-	"github.com/gofiber/fiber/v2/log"
 )
 
 type OrganizationService struct {
@@ -70,15 +69,12 @@ func (svc *OrganizationService) Create(opts OrganizationCreateOptions, userID st
 	if err := svc.orgRepo.GrantUserPermission(org.GetID(), userID, model.PermissionOwner); err != nil {
 		return nil, err
 	}
-	org, err = svc.orgRepo.Find(org.GetID())
+	org, err = svc.orgCache.Refresh(org.GetID())
 	if err != nil {
 		return nil, err
 	}
 	if err := svc.orgSearch.Index([]model.Organization{org}); err != nil {
 		return nil, err
-	}
-	if err := svc.orgCache.Set(org); err != nil {
-		return nil, nil
 	}
 	res, err := svc.orgMapper.mapOne(org, userID)
 	if err != nil {
@@ -172,11 +168,7 @@ func (svc *OrganizationService) PatchName(id string, name string, userID string)
 	if err := svc.orgRepo.Save(org); err != nil {
 		return nil, err
 	}
-	if err := svc.orgSearch.Update([]model.Organization{org}); err != nil {
-		return nil, err
-	}
-	err = svc.orgCache.Set(org)
-	if err != nil {
+	if err := svc.sync(org); err != nil {
 		return nil, err
 	}
 	res, err := svc.orgMapper.mapOne(org, userID)
@@ -234,7 +226,7 @@ func (svc *OrganizationService) RemoveMember(id string, memberID string, userID 
 	}
 	for _, groupID := range groupsIDs {
 		if err := svc.groupService.RemoveMemberUnauthorized(groupID, memberID); err != nil {
-			log.Error(err)
+			log.GetLogger().Error(err)
 		}
 	}
 
@@ -315,9 +307,9 @@ func (svc *OrganizationService) doSorting(data []model.Organization, sortBy stri
 	return data
 }
 
-func (svc *OrganizationService) doPagination(data []model.Organization, page, size uint) ([]model.Organization, uint, uint) {
-	totalElements := uint(len(data))
-	totalPages := (totalElements + size - 1) / size
+func (svc *OrganizationService) doPagination(data []model.Organization, page, size uint) (pageData []model.Organization, totalElements uint, totalPages uint) {
+	totalElements = uint(len(data))
+	totalPages = (totalElements + size - 1) / size
 	if page > totalPages {
 		return []model.Organization{}, totalElements, totalPages
 	}
@@ -326,8 +318,17 @@ func (svc *OrganizationService) doPagination(data []model.Organization, page, si
 	if endIndex > totalElements {
 		endIndex = totalElements
 	}
-	pageData := data[startIndex:endIndex]
-	return pageData, totalElements, totalPages
+	return data[startIndex:endIndex], totalElements, totalPages
+}
+
+func (svc *OrganizationService) sync(org model.Organization) error {
+	if err := svc.orgCache.Set(org); err != nil {
+		return err
+	}
+	if err := svc.orgSearch.Update([]model.Organization{org}); err != nil {
+		return err
+	}
+	return nil
 }
 
 type organizationMapper struct {

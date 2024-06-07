@@ -3,8 +3,7 @@ package service
 import (
 	"bytes"
 	"encoding/json"
-	"os"
-	"path/filepath"
+	"fmt"
 	"sort"
 	"strings"
 	"voltaserve/cache"
@@ -13,30 +12,27 @@ import (
 	"voltaserve/guard"
 	"voltaserve/helper"
 	"voltaserve/infra"
+	"voltaserve/log"
 	"voltaserve/model"
 	"voltaserve/repo"
-
-	"go.uber.org/zap"
 )
 
 type InsightsService struct {
 	languages      []*InsightsLanguage
 	snapshotCache  *cache.SnapshotCache
 	snapshotRepo   repo.SnapshotRepo
+	snapshotSvc    *SnapshotService
 	fileCache      *cache.FileCache
 	fileGuard      *guard.FileGuard
+	taskSvc        *TaskService
 	s3             *infra.S3Manager
 	toolClient     *client.ToolClient
 	languageClient *client.LanguageClient
+	pipelineClient *client.PipelineClient
 	fileIdent      *infra.FileIdentifier
-	logger         *zap.SugaredLogger
 }
 
 func NewInsightsService() *InsightsService {
-	logger, err := infra.GetLogger()
-	if err != nil {
-		panic(err)
-	}
 	return &InsightsService{
 		languages: []*InsightsLanguage{
 			{ID: "ara", ISO6393: "ara", Name: "Arabic"},
@@ -56,13 +52,15 @@ func NewInsightsService() *InsightsService {
 		},
 		snapshotCache:  cache.NewSnapshotCache(),
 		snapshotRepo:   repo.NewSnapshotRepo(),
+		snapshotSvc:    NewSnapshotService(),
 		fileCache:      cache.NewFileCache(),
 		fileGuard:      guard.NewFileGuard(),
+		taskSvc:        NewTaskService(),
 		s3:             infra.NewS3Manager(),
 		toolClient:     client.NewToolClient(),
 		languageClient: client.NewLanguageClient(),
+		pipelineClient: client.NewPipelineClient(),
 		fileIdent:      infra.NewFileIdentifier(),
-		logger:         logger,
 	}
 }
 
@@ -98,34 +96,37 @@ func (svc *InsightsService) Create(id string, opts InsightsCreateOptions, userID
 	if snapshot.GetStatus() == model.SnapshotStatusProcessing {
 		return errorpkg.NewSnapshotIsProcessingError(nil)
 	}
-	snapshot.SetLanguage(opts.LanguageID)
-	snapshot.SetStatus(model.SnapshotStatusProcessing)
-	if err := svc.snapshotRepo.Save(snapshot); err != nil {
-		return err
-	}
-	if err := svc.snapshotCache.Set(snapshot); err != nil {
-		return err
-	}
-	err = svc.create(snapshot)
+	task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
+		ID:              helper.NewID(),
+		Name:            "Waiting.",
+		UserID:          userID,
+		IsIndeterminate: true,
+		Status:          model.TaskStatusWaiting,
+		Payload:         map[string]string{"fileId": file.GetID()},
+	})
 	if err != nil {
-		snapshot.SetStatus(model.SnapshotStatusError)
-	} else {
-		snapshot.SetStatus(model.SnapshotStatusReady)
-	}
-	if err := svc.snapshotRepo.Save(snapshot); err != nil {
 		return err
 	}
-	if err := svc.snapshotCache.Set(snapshot); err != nil {
+	snapshot.SetLanguage(opts.LanguageID)
+	snapshot.SetStatus(model.SnapshotStatusWaiting)
+	snapshot.SetTaskID(helper.ToPtr(task.GetID()))
+	if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
 		return err
 	}
-	return err
-}
-
-func (svc *InsightsService) create(snapshot model.Snapshot) error {
-	if err := svc.createText(snapshot); err != nil {
-		return err
+	key := snapshot.GetOriginal().Key
+	if svc.fileIdent.IsOffice(key) || svc.fileIdent.IsPlainText(key) {
+		key = snapshot.GetPreview().Key
 	}
-	if err := svc.createEntities(snapshot); err != nil {
+	if err := svc.pipelineClient.Run(&client.PipelineRunOptions{
+		PipelineID: helper.ToPtr(client.PipelineInsights),
+		TaskID:     task.GetID(),
+		SnapshotID: snapshot.GetID(),
+		Bucket:     snapshot.GetOriginal().Bucket,
+		Key:        key,
+		Payload: map[string]string{
+			"language": opts.LanguageID,
+		},
+	}); err != nil {
 		return err
 	}
 	return nil
@@ -156,184 +157,31 @@ func (svc *InsightsService) Patch(id string, userID string) error {
 	if previous == nil || previous.GetLanguage() == nil {
 		return errorpkg.NewSnapshotCannotBePatchedError(nil)
 	}
-	snapshot.SetLanguage(*previous.GetLanguage())
-	snapshot.SetStatus(model.SnapshotStatusProcessing)
-	if err := svc.snapshotRepo.Save(snapshot); err != nil {
-		return err
-	}
-	if err := svc.snapshotCache.Set(snapshot); err != nil {
-		return err
-	}
-	err = svc.create(snapshot)
-	if err != nil {
-		snapshot.SetStatus(model.SnapshotStatusError)
-	} else {
-		snapshot.SetStatus(model.SnapshotStatusReady)
-	}
-	if err := svc.snapshotRepo.Save(snapshot); err != nil {
-		return err
-	}
-	if err := svc.snapshotCache.Set(snapshot); err != nil {
-		return err
-	}
-	return err
-}
-
-func (svc *InsightsService) createText(snapshot model.Snapshot) error {
-	if snapshot.HasText() {
-		return nil
-	}
-	if !snapshot.HasOriginal() {
-		return errorpkg.NewS3ObjectNotFoundError(nil)
-	}
-	if snapshot.GetLanguage() == nil {
-		return errorpkg.NewSnapshotLanguageNotSetError(nil)
-	}
-
-	/* Download original S3 object */
-	original := snapshot.GetOriginal()
-	path := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(original.Key))
-	if err := svc.s3.GetFile(original.Key, path, original.Bucket); err != nil {
-		return err
-	}
-	defer func(inputPath string, logger *zap.SugaredLogger) {
-		_, err := os.Stat(inputPath)
-		if os.IsExist(err) {
-			if err := os.Remove(inputPath); err != nil {
-				logger.Error(err)
-			}
-		}
-	}(path, svc.logger)
-
-	var pdfPath string
-	if svc.fileIdent.IsImage(original.Key) {
-		/* Get DPI */
-		dpi, err := svc.toolClient.DPIFromImage(path)
-		if err != nil {
-			dpi = 72
-		}
-
-		/* Remove alpha channel */
-		noAlphaImagePath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(original.Key))
-		if err := svc.toolClient.RemoveAlphaChannel(path, noAlphaImagePath); err != nil {
-			return err
-		}
-		defer func(inputPath string, logger *zap.SugaredLogger) {
-			_, err := os.Stat(inputPath)
-			if os.IsExist(err) {
-				if err := os.Remove(inputPath); err != nil {
-					logger.Error(err)
-				}
-			}
-		}(noAlphaImagePath, svc.logger)
-
-		/* Convert to PDF/A */
-		pdfPath, err = svc.toolClient.OCRFromPDF(noAlphaImagePath, snapshot.GetLanguage(), &dpi)
-		if err != nil {
-			return err
-		}
-		defer func(pdfPath string, logger *zap.SugaredLogger) {
-			_, err := os.Stat(pdfPath)
-			if os.IsExist(err) {
-				if err := os.Remove(pdfPath); err != nil {
-					logger.Error(err)
-				}
-			}
-		}(pdfPath, svc.logger)
-
-		/* Set OCR S3 object */
-		stat, err := os.Stat(pdfPath)
-		if err != nil {
-			return err
-		}
-		s3Object := model.S3Object{
-			Bucket: snapshot.GetOriginal().Bucket,
-			Key:    snapshot.GetID() + "/ocr.pdf",
-			Size:   stat.Size(),
-		}
-		if err := svc.s3.PutFile(s3Object.Key, pdfPath, helper.DetectMimeFromFile(pdfPath), s3Object.Bucket); err != nil {
-			return err
-		}
-		snapshot.SetOCR(&s3Object)
-		if err := svc.snapshotRepo.Save(snapshot); err != nil {
-			return err
-		}
-		if err := svc.snapshotCache.Set(snapshot); err != nil {
-			return err
-		}
-	} else if svc.fileIdent.IsPDF(original.Key) || svc.fileIdent.IsOffice(original.Key) || svc.fileIdent.IsPlainText(original.Key) {
-		pdfPath = path
-	} else {
-		return errorpkg.NewUnsupportedFileTypeError(nil)
-	}
-
-	/* Extract text */
-	text, err := svc.toolClient.TextFromPDF(pdfPath)
-	if text == "" || err != nil {
-		return err
-	}
-
-	/* Set text S3 object */
-	s3Object := model.S3Object{
-		Bucket: snapshot.GetOriginal().Bucket,
-		Key:    snapshot.GetID() + "/text.txt",
-		Size:   int64(len(text)),
-	}
-	if err := svc.s3.PutText(s3Object.Key, text, "text/plain", s3Object.Bucket); err != nil {
-		return err
-	}
-	snapshot.SetText(&s3Object)
-	if err := svc.snapshotRepo.Save(snapshot); err != nil {
-		return err
-	}
-	if err := svc.snapshotCache.Set(snapshot); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (svc *InsightsService) createEntities(snapshot model.Snapshot) error {
-	if snapshot.HasEntities() {
-		return nil
-	}
-	if !snapshot.HasText() {
-		return errorpkg.NewS3ObjectNotFoundError(nil)
-	}
-	if snapshot.GetLanguage() == nil {
-		return errorpkg.NewSnapshotLanguageNotSetError(nil)
-	}
-	text, err := svc.s3.GetText(snapshot.GetText().Key, snapshot.GetText().Bucket)
-	if err != nil {
-		return err
-	}
-	if len(text) > 1000000 {
-		return errorpkg.NewSnapshotTextLengthExceedsLimitError(err)
-	}
-	res, err := svc.languageClient.GetEntities(client.GetEntitiesOptions{
-		Text:     text,
-		Language: *snapshot.GetLanguage(),
+	task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
+		ID:              helper.NewID(),
+		Name:            "Waiting.",
+		UserID:          userID,
+		IsIndeterminate: true,
+		Status:          model.TaskStatusWaiting,
+		Payload:         map[string]string{"fileId": file.GetID()},
 	})
 	if err != nil {
 		return err
 	}
-	b, err := json.Marshal(res)
-	if err != nil {
+	snapshot.SetStatus(model.SnapshotStatusWaiting)
+	snapshot.SetLanguage(*previous.GetLanguage())
+	snapshot.SetTaskID(helper.ToPtr(task.GetID()))
+	if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
 		return err
 	}
-	content := string(b)
-	s3Object := model.S3Object{
-		Bucket: snapshot.GetOriginal().Bucket,
-		Key:    snapshot.GetID() + "/entities.json",
-		Size:   int64(len(content)),
-	}
-	if err := svc.s3.PutText(s3Object.Key, content, "application/json", s3Object.Bucket); err != nil {
-		return err
-	}
-	snapshot.SetEntities(&s3Object)
-	if err := svc.snapshotRepo.Save(snapshot); err != nil {
-		return err
-	}
-	if err := svc.snapshotCache.Set(snapshot); err != nil {
+	if err := svc.pipelineClient.Run(&client.PipelineRunOptions{
+		PipelineID: helper.ToPtr(client.PipelineInsights),
+		TaskID:     task.GetID(),
+		SnapshotID: snapshot.GetID(),
+		Bucket:     snapshot.GetOriginal().Bucket,
+		Key:        snapshot.GetOriginal().Key,
+		Payload:    map[string]string{"language": *snapshot.GetLanguage()},
+	}); err != nil {
 		return err
 	}
 	return nil
@@ -361,29 +209,58 @@ func (svc *InsightsService) Delete(id string, userID string) error {
 		return errorpkg.NewSnapshotIsProcessingError(nil)
 	}
 	snapshot.SetStatus(model.SnapshotStatusProcessing)
-	failed := false
-	if svc.fileIdent.IsImage(snapshot.GetOriginal().Key) {
-		err = svc.deleteText(snapshot)
-		if err != nil {
+	if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
+		return err
+	}
+	task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
+		ID:              helper.NewID(),
+		Name:            "Deleting insights.",
+		UserID:          userID,
+		IsIndeterminate: true,
+		Status:          model.TaskStatusRunning,
+		Payload:         map[string]string{"fileId": file.GetID()},
+	})
+	if err != nil {
+		return err
+	}
+	snapshot.SetTaskID(helper.ToPtr(task.GetID()))
+	if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
+		return err
+	}
+	go func(task model.Task, snapshot model.Snapshot) {
+		failed := false
+		combinedErrMsg := ""
+		if svc.fileIdent.IsImage(snapshot.GetOriginal().Key) {
+			if err := svc.deleteText(snapshot); err != nil {
+				combinedErrMsg = err.Error()
+				failed = true
+			}
+		}
+		if err := svc.deleteEntities(snapshot); err != nil {
+			combinedErrMsg = fmt.Sprintf("%s\n%s", combinedErrMsg, err.Error())
 			failed = true
 		}
-	}
-	err = svc.deleteEntities(snapshot)
-	if err != nil {
-		failed = true
-	}
-	if failed {
-		snapshot.SetStatus(model.SnapshotStatusError)
-	} else {
+		if failed {
+			task.SetError(&combinedErrMsg)
+			if err := svc.taskSvc.saveAndSync(repo.NewTask()); err != nil {
+				log.GetLogger().Error(err)
+				return
+			}
+		} else {
+			if err := svc.taskSvc.deleteAndSync(task.GetID()); err != nil {
+				log.GetLogger().Error(err)
+				return
+			}
+		}
+		snapshot.SetEntities(nil)
+		snapshot.SetTaskID(nil)
 		snapshot.SetStatus(model.SnapshotStatusReady)
-	}
-	if err := svc.snapshotRepo.Save(snapshot); err != nil {
-		return err
-	}
-	if err := svc.snapshotCache.Set(snapshot); err != nil {
-		return err
-	}
-	return err
+		if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
+			log.GetLogger().Error(err)
+			return
+		}
+	}(task, snapshot)
+	return nil
 }
 
 func (svc *InsightsService) deleteText(snapshot model.Snapshot) error {
@@ -395,10 +272,7 @@ func (svc *InsightsService) deleteText(snapshot model.Snapshot) error {
 		return err
 	}
 	snapshot.SetText(nil)
-	if err := svc.snapshotRepo.Save(snapshot); err != nil {
-		return err
-	}
-	if err := svc.snapshotCache.Set(snapshot); err != nil {
+	if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
 		return err
 	}
 	return nil
@@ -413,10 +287,7 @@ func (svc *InsightsService) deleteEntities(snapshot model.Snapshot) error {
 		return err
 	}
 	snapshot.SetEntities(nil)
-	if err := svc.snapshotRepo.Save(snapshot); err != nil {
-		return err
-	}
-	if err := svc.snapshotCache.Set(snapshot); err != nil {
+	if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
 		return err
 	}
 	return nil
@@ -431,11 +302,11 @@ type InsightsListEntitiesOptions struct {
 }
 
 type InsightsEntityList struct {
-	Data          []*model.InsightsEntity `json:"data"`
-	TotalPages    uint                    `json:"totalPages"`
-	TotalElements uint                    `json:"totalElements"`
-	Page          uint                    `json:"page"`
-	Size          uint                    `json:"size"`
+	Data          []*client.InsightsEntity `json:"data"`
+	TotalPages    uint                     `json:"totalPages"`
+	TotalElements uint                     `json:"totalElements"`
+	Page          uint                     `json:"page"`
+	Size          uint                     `json:"size"`
 }
 
 func (svc *InsightsService) ListEntities(id string, opts InsightsListEntitiesOptions, userID string) (*InsightsEntityList, error) {
@@ -468,7 +339,7 @@ func (svc *InsightsService) ListEntities(id string, opts InsightsListEntitiesOpt
 	if err != nil {
 		return nil, err
 	}
-	var entities []*model.InsightsEntity
+	var entities []*client.InsightsEntity
 	if err := json.Unmarshal([]byte(text), &entities); err != nil {
 		return nil, err
 	}
@@ -487,11 +358,11 @@ func (svc *InsightsService) ListEntities(id string, opts InsightsListEntitiesOpt
 	}, nil
 }
 
-func (svc *InsightsService) doFiltering(data []*model.InsightsEntity, query string) []*model.InsightsEntity {
+func (svc *InsightsService) doFiltering(data []*client.InsightsEntity, query string) []*client.InsightsEntity {
 	if query == "" {
 		return data
 	}
-	filtered := []*model.InsightsEntity{}
+	filtered := []*client.InsightsEntity{}
 	for _, entity := range data {
 		if strings.Contains(strings.ToLower(entity.Text), strings.ToLower(query)) {
 			filtered = append(filtered, entity)
@@ -500,7 +371,7 @@ func (svc *InsightsService) doFiltering(data []*model.InsightsEntity, query stri
 	return filtered
 }
 
-func (svc *InsightsService) doSorting(data []*model.InsightsEntity, sortBy string, sortOrder string) []*model.InsightsEntity {
+func (svc *InsightsService) doSorting(data []*client.InsightsEntity, sortBy string, sortOrder string) []*client.InsightsEntity {
 	if sortBy == SortByName {
 		sort.Slice(data, func(i, j int) bool {
 			if sortOrder == SortOrderDesc {
@@ -518,26 +389,21 @@ func (svc *InsightsService) doSorting(data []*model.InsightsEntity, sortBy strin
 	return data
 }
 
-func (svc *InsightsService) doPagination(data []*model.InsightsEntity, page, size uint) ([]*model.InsightsEntity, uint, uint) {
-	totalElements := uint(len(data))
-	totalPages := (totalElements + size - 1) / size
+func (svc *InsightsService) doPagination(data []*client.InsightsEntity, page, size uint) (pageData []*client.InsightsEntity, totalElements uint, totalPages uint) {
+	totalElements = uint(len(data))
+	totalPages = (totalElements + size - 1) / size
 	if page > totalPages {
-		return []*model.InsightsEntity{}, totalElements, totalPages
+		return []*client.InsightsEntity{}, totalElements, totalPages
 	}
 	startIndex := (page - 1) * size
 	endIndex := startIndex + size
 	if endIndex > totalElements {
 		endIndex = totalElements
 	}
-	pageData := data[startIndex:endIndex]
-	return pageData, totalElements, totalPages
+	return data[startIndex:endIndex], totalElements, totalPages
 }
 
-type InsightsMetadata struct {
-	IsOutdated bool `json:"isOutdated"`
-}
-
-func (svc *InsightsService) GetMetadata(id string, userID string) (*InsightsMetadata, error) {
+func (svc *InsightsService) GetInfo(id string, userID string) (*model.InsightsInfo, error) {
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return nil, err
@@ -559,13 +425,16 @@ func (svc *InsightsService) GetMetadata(id string, userID string) (*InsightsMeta
 			return nil, err
 		}
 		if previous == nil {
-			return nil, errorpkg.NewInsightsNotFoundError(nil)
+			return &model.InsightsInfo{IsAvailable: false}, nil
 		} else {
 			isOutdated = true
 		}
 	}
-	return &InsightsMetadata{
-		IsOutdated: isOutdated,
+	return &model.InsightsInfo{
+		IsAvailable: true,
+		Metadata: &model.InsightsMetadata{
+			IsOutdated: isOutdated,
+		},
 	}, nil
 }
 

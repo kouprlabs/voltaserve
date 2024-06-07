@@ -13,6 +13,7 @@ const (
 	GroupSearchIndex        = "group"
 	WorkspaceSearchIndex    = "workspace"
 	OrganizationSearchIndex = "organization"
+	TaskSearchIndex         = "task"
 	UserSearchIndex         = "user"
 )
 
@@ -29,6 +30,7 @@ func NewSearchManager() *SearchManager {
 		searchClient = meilisearch.NewClient(meilisearch.ClientConfig{
 			Host: config.GetConfig().Search.URL,
 		})
+		/* Configure file index */
 		if _, err := searchClient.CreateIndex(&meilisearch.IndexConfig{
 			Uid:        FileSearchIndex,
 			PrimaryKey: "id",
@@ -40,6 +42,7 @@ func NewSearchManager() *SearchManager {
 		}); err != nil {
 			panic(err)
 		}
+		/* Configure group index */
 		if _, err := searchClient.CreateIndex(&meilisearch.IndexConfig{
 			Uid:        GroupSearchIndex,
 			PrimaryKey: "id",
@@ -51,6 +54,7 @@ func NewSearchManager() *SearchManager {
 		}); err != nil {
 			panic(err)
 		}
+		/* Configure workspace index */
 		if _, err := searchClient.CreateIndex(&meilisearch.IndexConfig{
 			Uid:        WorkspaceSearchIndex,
 			PrimaryKey: "id",
@@ -62,6 +66,7 @@ func NewSearchManager() *SearchManager {
 		}); err != nil {
 			panic(err)
 		}
+		/* Configure organization index */
 		if _, err := searchClient.CreateIndex(&meilisearch.IndexConfig{
 			Uid:        OrganizationSearchIndex,
 			PrimaryKey: "id",
@@ -73,6 +78,7 @@ func NewSearchManager() *SearchManager {
 		}); err != nil {
 			panic(err)
 		}
+		/* Configure user index */
 		if _, err := searchClient.CreateIndex(&meilisearch.IndexConfig{
 			Uid:        UserSearchIndex,
 			PrimaryKey: "id",
@@ -81,6 +87,18 @@ func NewSearchManager() *SearchManager {
 		}
 		if _, err := searchClient.Index(UserSearchIndex).UpdateSettings(&meilisearch.Settings{
 			SearchableAttributes: []string{"fullName", "email"},
+		}); err != nil {
+			panic(err)
+		}
+		/* Configure task index */
+		if _, err := searchClient.CreateIndex(&meilisearch.IndexConfig{
+			Uid:        TaskSearchIndex,
+			PrimaryKey: "id",
+		}); err != nil {
+			panic(err)
+		}
+		if _, err := searchClient.Index(TaskSearchIndex).UpdateSettings(&meilisearch.Settings{
+			SearchableAttributes: []string{"name"},
 		}); err != nil {
 			panic(err)
 		}

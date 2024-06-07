@@ -152,7 +152,7 @@ func (r *OrganizationRouter) PatchName(c *fiber.Ctx) error {
 //	@Param			size		query		string	false	"Size"
 //	@Param			sort_by		query		string	false	"Sort By"
 //	@Param			sort_order	query		string	false	"Sort Order"
-//	@Success		200			{object}	service.WorkspaceList
+//	@Success		200			{object}	service.OrganizationList
 //	@Failure		404			{object}	errorpkg.ErrorResponse
 //	@Failure		500			{object}	errorpkg.ErrorResponse
 //	@Router			/organizations [get]

@@ -1,7 +1,7 @@
 package model
 
 const (
-	SnapshotStatusNew        = "new"
+	SnapshotStatusWaiting    = "waiting"
 	SnapshotStatusProcessing = "processing"
 	SnapshotStatusReady      = "ready"
 	SnapshotStatusError      = "error"
@@ -18,6 +18,7 @@ type Snapshot interface {
 	GetMosaic() *S3Object
 	GetWatermark() *S3Object
 	GetThumbnail() *Thumbnail
+	GetTaskID() *string
 	HasOriginal() bool
 	HasPreview() bool
 	HasText() bool
@@ -42,12 +43,13 @@ type Snapshot interface {
 	SetThumbnail(*Thumbnail)
 	SetStatus(string)
 	SetLanguage(string)
+	SetTaskID(*string)
 }
 
 type S3Object struct {
 	Bucket string      `json:"bucket"`
 	Key    string      `json:"key"`
-	Size   int64       `json:"size"`
+	Size   *int64      `json:"size,omitempty"`
 	Image  *ImageProps `json:"image,omitempty"`
 }
 

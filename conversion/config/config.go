@@ -26,6 +26,9 @@ func GetConfig() Config {
 
 func readURLs(config *Config) {
 	config.APIURL = os.Getenv("API_URL")
+	config.LanguageURL = os.Getenv("LANGUAGE_URL")
+	config.MosaicURL = os.Getenv("MOSAIC_URL")
+	config.WatermarkURL = os.Getenv("WATERMARK_URL")
 }
 
 func readSecurity(config *Config) {

@@ -41,6 +41,7 @@ type FileService struct {
 	groupGuard     *guard.GroupGuard
 	groupMapper    *groupMapper
 	permissionRepo repo.PermissionRepo
+	taskSvc        *TaskService
 	fileIdent      *infra.FileIdentifier
 	s3             *infra.S3Manager
 	pipelineClient *client.PipelineClient
@@ -67,6 +68,7 @@ func NewFileService() *FileService {
 		groupGuard:     guard.NewGroupGuard(),
 		groupMapper:    newGroupMapper(),
 		permissionRepo: repo.NewPermissionRepo(),
+		taskSvc:        NewTaskService(),
 		fileIdent:      infra.NewFileIdentifier(),
 		s3:             infra.NewS3Manager(),
 		pipelineClient: client.NewPipelineClient(),
@@ -159,14 +161,11 @@ func (svc *FileService) create(opts FileCreateOptions, userID string) (*File, er
 	if err := svc.fileRepo.GrantUserPermission(file.GetID(), userID, model.PermissionOwner); err != nil {
 		return nil, err
 	}
-	file, err = svc.fileRepo.Find(file.GetID())
+	file, err = svc.fileCache.Refresh(file.GetID())
 	if err != nil {
 		return nil, err
 	}
 	if err = svc.fileSearch.Index([]model.File{file}); err != nil {
-		return nil, err
-	}
-	if err = svc.fileCache.Set(file); err != nil {
 		return nil, err
 	}
 	res, err := svc.fileMapper.mapOne(file, userID)
@@ -193,9 +192,6 @@ func (svc *FileService) validateParent(id string, userID string) error {
 func (svc *FileService) Store(id string, path string, userID string) (*File, error) {
 	file, err := svc.fileRepo.Find(id)
 	if err != nil {
-		return nil, err
-	}
-	if err = svc.fileCache.Set(file); err != nil {
 		return nil, err
 	}
 	workspace, err := svc.workspaceCache.Get(file.GetWorkspaceID())
@@ -228,7 +224,7 @@ func (svc *FileService) Store(id string, path string, userID string) (*File, err
 	original := model.S3Object{
 		Bucket: workspace.GetBucket(),
 		Key:    snapshotID + "/original" + strings.ToLower(filepath.Ext(path)),
-		Size:   stat.Size(),
+		Size:   helper.ToPtr(stat.Size()),
 	}
 	if err = svc.s3.PutFile(original.Key, path, infra.DetectMimeFromFile(path), workspace.GetBucket()); err != nil {
 		return nil, err
@@ -237,12 +233,9 @@ func (svc *FileService) Store(id string, path string, userID string) (*File, err
 	if exceedsProcessingLimit {
 		snapshot.SetStatus(model.SnapshotStatusReady)
 	} else {
-		snapshot.SetStatus(model.SnapshotStatusNew)
+		snapshot.SetStatus(model.SnapshotStatusWaiting)
 	}
-	if err := svc.snapshotRepo.Save(snapshot); err != nil {
-		return nil, err
-	}
-	if err := svc.snapshotCache.Set(snapshot); err != nil {
+	if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
 		return nil, err
 	}
 	file.SetSnapshotID(&snapshotID)
@@ -254,11 +247,26 @@ func (svc *FileService) Store(id string, path string, userID string) (*File, err
 		return nil, err
 	}
 	if !exceedsProcessingLimit {
+		task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
+			ID:              helper.NewID(),
+			Name:            "Waiting.",
+			UserID:          userID,
+			IsIndeterminate: true,
+			Status:          model.TaskStatusWaiting,
+			Payload:         map[string]string{"fileId": file.GetID()},
+		})
+		if err != nil {
+			return nil, err
+		}
+		snapshot.SetTaskID(helper.ToPtr(task.GetID()))
+		if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
+			return nil, err
+		}
 		if err := svc.pipelineClient.Run(&client.PipelineRunOptions{
+			TaskID:     task.GetID(),
 			SnapshotID: snapshot.GetID(),
 			Bucket:     original.Bucket,
 			Key:        original.Key,
-			Size:       original.Size,
 		}); err != nil {
 			return nil, err
 		}
@@ -887,11 +895,14 @@ func (svc *FileService) Move(targetID string, sourceIDs []string, userID string)
 		if err := svc.fileRepo.Save(source); err != nil {
 			return []string{}, err
 		}
+		if err := svc.sync(source); err != nil {
+			return []string{}, err
+		}
 		target.SetUpdateTime(&timeNow)
 		if err := svc.fileRepo.Save(target); err != nil {
 			return []string{}, err
 		}
-		if err := svc.fileSearch.Update([]model.File{source}); err != nil {
+		if err := svc.sync(target); err != nil {
 			return []string{}, err
 		}
 		sourceTree, err := svc.fileRepo.FindTree(source.GetID())
@@ -899,7 +910,7 @@ func (svc *FileService) Move(targetID string, sourceIDs []string, userID string)
 			return []string{}, err
 		}
 		for _, f := range sourceTree {
-			if err := svc.fileCache.Set(f); err != nil {
+			if err := svc.sync(f); err != nil {
 				return []string{}, err
 			}
 		}
@@ -928,11 +939,7 @@ func (svc *FileService) PatchName(id string, name string, userID string) (*File,
 	if err = svc.fileRepo.Save(file); err != nil {
 		return nil, err
 	}
-	if err = svc.fileSearch.Update([]model.File{file}); err != nil {
-		return nil, err
-	}
-	err = svc.fileCache.Set(file)
-	if err != nil {
+	if err := svc.sync(file); err != nil {
 		return nil, err
 	}
 	res, err := svc.fileMapper.mapOne(file, userID)
@@ -972,15 +979,21 @@ func (svc *FileService) Delete(ids []string, userID string) ([]string, error) {
 		for _, f := range tree {
 			treeIDs = append(treeIDs, f.GetID())
 		}
+		/* Delete from search */
 		if err := svc.fileSearch.Delete(treeIDs); err != nil {
-			// Here we don't return an error or panic but we just print the error
+			/* Here we intentionally don't return an error or panic, we just print the error,
+			that's because we still want to delete the file in the repo afterwards even
+			if we fail to delete it from the search. */
 			fmt.Println(err)
 		}
+		/* Delete from cache */
 		for _, f := range tree {
 			if err = svc.fileCache.Delete(f.GetID()); err != nil {
-				return nil, err
+				// Same thing as above for the search
+				fmt.Println(err)
 			}
 		}
+		/* Delete from repo */
 		for _, f := range tree {
 			if err = svc.fileRepo.Delete(f.GetID()); err != nil {
 				return nil, err
@@ -1010,6 +1023,9 @@ func (svc *FileService) Delete(ids []string, userID string) ([]string, error) {
 					return nil, err
 				}
 			}
+			if err := svc.snapshotCache.Delete(s.GetID()); err != nil {
+				return nil, err
+			}
 		}
 		if err = svc.snapshotRepo.DeleteAllDangling(); err != nil {
 			return nil, err
@@ -1018,34 +1034,34 @@ func (svc *FileService) Delete(ids []string, userID string) ([]string, error) {
 	return res, nil
 }
 
-func (svc *FileService) GetSize(id string, userID string) (int64, error) {
+func (svc *FileService) GetSize(id string, userID string) (*int64, error) {
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
-		return -1, err
+		return nil, err
 	}
 	if err := svc.fileGuard.Authorize(userID, file, model.PermissionViewer); err != nil {
-		return -1, err
+		return nil, err
 	}
 	res, err := svc.fileRepo.GetSize(id)
 	if err != nil {
-		return -1, err
+		return nil, err
 	}
-	return res, nil
+	return &res, nil
 }
 
-func (svc *FileService) GetCount(id string, userID string) (int64, error) {
+func (svc *FileService) GetCount(id string, userID string) (*int64, error) {
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 	if err := svc.fileGuard.Authorize(userID, file, model.PermissionViewer); err != nil {
-		return 0, err
+		return nil, err
 	}
 	res, err := svc.fileRepo.GetItemCount(id)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
-	return res, nil
+	return &res, nil
 }
 
 func (svc *FileService) GrantUserPermission(ids []string, assigneeID string, permission string, userID string) error {
@@ -1078,7 +1094,7 @@ func (svc *FileService) GrantUserPermission(ids []string, assigneeID string, per
 			return err
 		}
 		for _, f := range path {
-			if err := svc.fileCache.Set(f); err != nil {
+			if err := svc.sync(f); err != nil {
 				return err
 			}
 		}
@@ -1087,7 +1103,7 @@ func (svc *FileService) GrantUserPermission(ids []string, assigneeID string, per
 			return err
 		}
 		for _, f := range tree {
-			if err := svc.fileCache.Set(f); err != nil {
+			if err := svc.sync(f); err != nil {
 				return err
 			}
 		}
@@ -1160,7 +1176,7 @@ func (svc *FileService) GrantGroupPermission(ids []string, groupID string, permi
 			return err
 		}
 		for _, f := range path {
-			if err := svc.fileCache.Set(f); err != nil {
+			if err := svc.sync(f); err != nil {
 				return err
 			}
 		}
@@ -1169,7 +1185,7 @@ func (svc *FileService) GrantGroupPermission(ids []string, groupID string, permi
 			return err
 		}
 		for _, f := range tree {
-			if err := svc.fileCache.Set(f); err != nil {
+			if err := svc.sync(f); err != nil {
 				return err
 			}
 		}
@@ -1332,11 +1348,11 @@ func (svc *FileService) doSorting(data []model.File, sortBy string, sortOrder st
 			}
 			var sizeA int64 = 0
 			if fileA.Snapshot != nil && fileA.Snapshot.Original != nil {
-				sizeA = int64(fileA.Snapshot.Original.Size)
+				sizeA = int64(*fileA.Snapshot.Original.Size)
 			}
 			var sizeB int64 = 0
 			if fileB.Snapshot != nil && fileB.Snapshot.Original != nil {
-				sizeB = int64(fileB.Snapshot.Original.Size)
+				sizeB = int64(*fileB.Snapshot.Original.Size)
 			}
 			if sortOrder == SortOrderDesc {
 				return sizeA > sizeB
@@ -1538,9 +1554,9 @@ func (svc *FileService) doSorting(data []model.File, sortBy string, sortOrder st
 	return data
 }
 
-func (svc *FileService) doPagination(data []model.File, page, size uint) ([]model.File, uint, uint) {
-	totalElements := uint(len(data))
-	totalPages := (totalElements + size - 1) / size
+func (svc *FileService) doPagination(data []model.File, page, size uint) (pageData []model.File, totalElements uint, totalPages uint) {
+	totalElements = uint(len(data))
+	totalPages = (totalElements + size - 1) / size
 	if page > totalPages {
 		return []model.File{}, totalElements, totalPages
 	}
@@ -1549,8 +1565,7 @@ func (svc *FileService) doPagination(data []model.File, page, size uint) ([]mode
 	if endIndex > totalElements {
 		endIndex = totalElements
 	}
-	pageData := data[startIndex:endIndex]
-	return pageData, totalElements, totalPages
+	return data[startIndex:endIndex], totalElements, totalPages
 }
 
 func (svc *FileService) doQueryFiltering(data []model.File, opts FileQuery, parent model.File) ([]model.File, error) {
@@ -1633,6 +1648,16 @@ func (svc *FileService) getChildWithName(id string, name string) (model.File, er
 	return nil, nil
 }
 
+func (svc *FileService) sync(file model.File) error {
+	if err := svc.fileSearch.Update([]model.File{file}); err != nil {
+		return err
+	}
+	if err := svc.fileCache.Set(file); err != nil {
+		return err
+	}
+	return nil
+}
+
 type FileMapper struct {
 	groupCache     *cache.GroupCache
 	snapshotMapper *SnapshotMapper
@@ -1666,7 +1691,8 @@ func (mp *FileMapper) mapOne(m model.File, userID string) (*File, error) {
 		if err != nil {
 			return nil, err
 		}
-		res.Snapshot = mp.snapshotMapper.mapOne(snapshot, true)
+		res.Snapshot = mp.snapshotMapper.mapOne(snapshot)
+		res.Snapshot.IsActive = true
 	}
 	res.Permission = ""
 	for _, p := range m.GetUserPermissions() {

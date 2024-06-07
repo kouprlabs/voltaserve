@@ -1,14 +1,72 @@
 basePath: /v2
 definitions:
+  client.InsightsEntity:
+    properties:
+      frequency:
+        type: integer
+      label:
+        type: string
+      text:
+        type: string
+    type: object
+  client.MosaicMetadata:
+    properties:
+      extension:
+        type: string
+      height:
+        type: integer
+      isOutdated:
+        type: boolean
+      width:
+        type: integer
+      zoomLevels:
+        items:
+          $ref: '#/definitions/client.MosaicZoomLevel'
+        type: array
+    type: object
+  client.MosaicTile:
+    properties:
+      height:
+        type: integer
+      lastColWidth:
+        type: integer
+      lastRowHeight:
+        type: integer
+      width:
+        type: integer
+    type: object
+  client.MosaicZoomLevel:
+    properties:
+      cols:
+        type: integer
+      height:
+        type: integer
+      index:
+        type: integer
+      rows:
+        type: integer
+      scaleDownPercentage:
+        type: number
+      tile:
+        $ref: '#/definitions/client.MosaicTile'
+      width:
+        type: integer
+    type: object
   client.PipelineRunOptions:
     properties:
       bucket:
         type: string
       key:
         type: string
-      size:
-        type: integer
+      payload:
+        additionalProperties:
+          type: string
+        type: object
+      pipelineId:
+        type: string
       snapshotId:
+        type: string
+      taskId:
         type: string
     type: object
   errorpkg.ErrorResponse:
@@ -31,57 +89,17 @@ definitions:
       width:
         type: integer
     type: object
-  model.InsightsEntity:
+  model.InsightsInfo:
     properties:
-      frequency:
-        type: integer
-      label:
-        type: string
-      text:
-        type: string
+      isAvailable:
+        type: boolean
+      metadata:
+        $ref: '#/definitions/model.InsightsMetadata'
     type: object
-  model.MosaicMetadata:
+  model.InsightsMetadata:
     properties:
-      extension:
-        type: string
-      height:
-        type: integer
       isOutdated:
         type: boolean
-      width:
-        type: integer
-      zoomLevels:
-        items:
-          $ref: '#/definitions/model.MosaicZoomLevel'
-        type: array
-    type: object
-  model.MosaicTile:
-    properties:
-      height:
-        type: integer
-      lastColWidth:
-        type: integer
-      lastRowHeight:
-        type: integer
-      width:
-        type: integer
-    type: object
-  model.MosaicZoomLevel:
-    properties:
-      cols:
-        type: integer
-      height:
-        type: integer
-      index:
-        type: integer
-      rows:
-        type: integer
-      scaleDownPercentage:
-        type: number
-      tile:
-        $ref: '#/definitions/model.MosaicTile'
-      width:
-        type: integer
     type: object
   model.S3Object:
     properties:
@@ -102,6 +120,13 @@ definitions:
         type: integer
       width:
         type: integer
+    type: object
+  model.WatermarkInfo:
+    properties:
+      isAvailable:
+        type: boolean
+      metadata:
+        $ref: '#/definitions/model.WatermarkMetadata'
     type: object
   model.WatermarkMetadata:
     properties:
@@ -392,7 +417,7 @@ definitions:
     properties:
       data:
         items:
-          $ref: '#/definitions/model.InsightsEntity'
+          $ref: '#/definitions/client.InsightsEntity'
         type: array
       page:
         type: integer
@@ -411,11 +436,6 @@ definitions:
         type: string
       name:
         type: string
-    type: object
-  service.InsightsMetadata:
-    properties:
-      isOutdated:
-        type: boolean
     type: object
   service.Invitation:
     properties:
@@ -461,11 +481,12 @@ definitions:
       totalPages:
         type: integer
     type: object
-  service.Notification:
+  service.MosaicInfo:
     properties:
-      body: {}
-      type:
-        type: string
+      isAvailable:
+        type: boolean
+      metadata:
+        $ref: '#/definitions/client.MosaicMetadata'
     type: object
   service.Organization:
     properties:
@@ -492,6 +513,21 @@ definitions:
     required:
     - name
     type: object
+  service.OrganizationList:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/service.Organization'
+        type: array
+      page:
+        type: integer
+      size:
+        type: integer
+      totalElements:
+        type: integer
+      totalPages:
+        type: integer
+    type: object
   service.Snapshot:
     properties:
       createTime:
@@ -513,6 +549,8 @@ definitions:
       preview:
         $ref: '#/definitions/service.Download'
       status:
+        type: string
+      taskId:
         type: string
       text:
         $ref: '#/definitions/service.Download'
@@ -554,8 +592,16 @@ definitions:
       totalPages:
         type: integer
     type: object
-  service.SnapshotUpdateOptions:
+  service.SnapshotPatchOptions:
     properties:
+      entities:
+        $ref: '#/definitions/model.S3Object'
+      fields:
+        items:
+          type: string
+        type: array
+      mosaic:
+        $ref: '#/definitions/model.S3Object'
       ocr:
         $ref: '#/definitions/model.S3Object'
       options:
@@ -566,10 +612,14 @@ definitions:
         $ref: '#/definitions/model.S3Object'
       status:
         type: string
+      taskId:
+        type: string
       text:
         $ref: '#/definitions/model.S3Object'
       thumbnail:
         $ref: '#/definitions/model.Thumbnail'
+      watermark:
+        $ref: '#/definitions/model.S3Object'
     type: object
   service.StorageUsage:
     properties:
@@ -579,6 +629,78 @@ definitions:
         type: integer
       percentage:
         type: integer
+    type: object
+  service.Task:
+    properties:
+      createTime:
+        type: string
+      error:
+        type: string
+      id:
+        type: string
+      isIndeterminate:
+        type: boolean
+      name:
+        type: string
+      payload:
+        additionalProperties:
+          type: string
+        type: object
+      percentage:
+        type: integer
+      status:
+        type: string
+      updateTime:
+        type: string
+      userId:
+        type: string
+    type: object
+  service.TaskCreateOptions:
+    properties:
+      error:
+        type: string
+      isIndeterminate:
+        type: boolean
+      name:
+        type: string
+      percentage:
+        type: integer
+      userId:
+        type: string
+    type: object
+  service.TaskList:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/service.Task'
+        type: array
+      page:
+        type: integer
+      size:
+        type: integer
+      totalElements:
+        type: integer
+      totalPages:
+        type: integer
+    type: object
+  service.TaskPatchOptions:
+    properties:
+      error:
+        type: string
+      isIndeterminate:
+        type: boolean
+      name:
+        type: string
+      payload:
+        additionalProperties:
+          type: string
+        type: object
+      percentage:
+        type: integer
+      status:
+        type: string
+      userId:
+        type: string
     type: object
   service.Thumbnail:
     properties:
@@ -1767,12 +1889,12 @@ paths:
       summary: List Entities
       tags:
       - Insights
-  /insights/{id}/metadata:
+  /insights/{id}/info:
     get:
       consumes:
       - application/json
-      description: Get Metadata
-      operationId: insights_get_metadata
+      description: Get Info
+      operationId: insights_get_info
       parameters:
       - description: ID
         in: path
@@ -1785,7 +1907,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/service.InsightsMetadata'
+            $ref: '#/definitions/model.InsightsInfo'
         "404":
           description: Not Found
           schema:
@@ -1794,7 +1916,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Get Metadata
+      summary: Get Info
       tags:
       - Insights
   /insights/{id}/ocr{ext}:
@@ -2076,6 +2198,24 @@ paths:
       summary: Get Incoming
       tags:
       - Invitations
+  /invitations/incoming/count:
+    get:
+      description: Get Incoming Count
+      operationId: invitation_get_incoming_count
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: integer
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Get Incoming Count
+      tags:
+      - Invitations
   /invitations/outgoing:
     get:
       description: Get Outgoing
@@ -2171,12 +2311,12 @@ paths:
       summary: Create
       tags:
       - Mosaic
-  /mosaics/{id}/metadata:
+  /mosaics/{id}/info:
     get:
       consumes:
       - application/json
-      description: Get Metadata
-      operationId: mosaic_get_metadata
+      description: Get Info
+      operationId: mosaic_get_info
       parameters:
       - description: ID
         in: path
@@ -2189,7 +2329,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.MosaicMetadata'
+            $ref: '#/definitions/service.MosaicInfo'
         "404":
           description: Not Found
           schema:
@@ -2198,7 +2338,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Get Metadata
+      summary: Get Info
       tags:
       - Mosaic
   /mosaics/{id}/zoom_level/{zoom_level}/row/{row}/col/{col}/ext/{ext}:
@@ -2240,24 +2380,6 @@ paths:
       summary: Download Tile
       tags:
       - Mosaic
-  /notifications:
-    get:
-      description: List
-      operationId: notifications_list
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/service.Notification'
-            type: array
-        "500":
-          description: Internal Server Error
-      summary: List
-      tags:
-      - Notifications
   /organizations:
     get:
       description: List
@@ -2289,7 +2411,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/service.WorkspaceList'
+            $ref: '#/definitions/service.OrganizationList'
         "404":
           description: Not Found
           schema:
@@ -2556,12 +2678,14 @@ paths:
         name: body
         required: true
         schema:
-          $ref: '#/definitions/service.SnapshotUpdateOptions'
+          $ref: '#/definitions/service.SnapshotPatchOptions'
       produces:
       - application/json
       responses:
-        "204":
-          description: No Content
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.Snapshot'
         "401":
           description: Unauthorized
           schema:
@@ -2695,6 +2819,224 @@ paths:
       summary: Get workspace usage
       tags:
       - Storage
+  /tasks:
+    get:
+      description: List
+      operationId: tasks_list
+      parameters:
+      - description: Query
+        in: query
+        name: query
+        type: string
+      - description: Page
+        in: query
+        name: page
+        type: string
+      - description: Size
+        in: query
+        name: size
+        type: string
+      - description: Sort By
+        in: query
+        name: sort_by
+        type: string
+      - description: Sort Order
+        in: query
+        name: sort_order
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.TaskList'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: List
+      tags:
+      - Tasks
+    post:
+      description: Create
+      operationId: tasks_create
+      parameters:
+      - description: API Key
+        in: query
+        name: api_key
+        required: true
+        type: string
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/service.TaskCreateOptions'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Create
+      tags:
+      - Tasks
+  /tasks/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Dismiss
+      operationId: tasks_delete
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Dismiss
+      tags:
+      - Tasks
+    get:
+      description: Get
+      operationId: tasks_get
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.Task'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Get
+      tags:
+      - Tasks
+    patch:
+      description: Patch
+      operationId: tasks_patch
+      parameters:
+      - description: API Key
+        in: query
+        name: api_key
+        required: true
+        type: string
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/service.TaskPatchOptions'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.Task'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Patch
+      tags:
+      - Tasks
+  /tasks/{id}/dismiss:
+    post:
+      consumes:
+      - application/json
+      description: Dismiss
+      operationId: tasks_dismiss
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Dismiss
+      tags:
+      - Tasks
+  /tasks/count:
+    get:
+      description: Get Count
+      operationId: tasks_get_count
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: integer
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Get Count
+      tags:
+      - Tasks
   /users:
     get:
       description: List
@@ -2801,12 +3143,12 @@ paths:
       summary: Create
       tags:
       - Watermark
-  /watermarks/{id}/metadata:
+  /watermarks/{id}/info:
     get:
       consumes:
       - application/json
-      description: Get Metadata
-      operationId: watermark_get_metadata
+      description: Get Info
+      operationId: watermark_get_info
       parameters:
       - description: ID
         in: path
@@ -2819,7 +3161,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.WatermarkMetadata'
+            $ref: '#/definitions/model.WatermarkInfo'
         "404":
           description: Not Found
           schema:
@@ -2828,7 +3170,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Get Metadata
+      summary: Get Info
       tags:
       - Watermark
   /watermarks/{id}/watermark{ext}:

@@ -12,7 +12,7 @@ import {
 import cx from 'classnames'
 import OrganizationAPI, { Organization } from '@/client/api/organization'
 import { User } from '@/client/idp/user'
-import userToString from '@/helpers/user-to-string'
+import userToString from '@/lib/helpers/user-to-string'
 
 export type OrganizationRemoveMemberProps = {
   organization: Organization

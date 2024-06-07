@@ -38,11 +38,11 @@ func (c *WorkspaceCache) Get(id string) (model.Workspace, error) {
 	if err != nil {
 		return c.Refresh(id)
 	}
-	workspace := repo.NewWorkspace()
-	if err = json.Unmarshal([]byte(value), &workspace); err != nil {
+	res := repo.NewWorkspace()
+	if err = json.Unmarshal([]byte(value), &res); err != nil {
 		return nil, err
 	}
-	return workspace, nil
+	return res, nil
 }
 
 func (c *WorkspaceCache) Refresh(id string) (model.Workspace, error) {

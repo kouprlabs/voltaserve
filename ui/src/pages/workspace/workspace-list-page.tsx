@@ -21,12 +21,13 @@ import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import WorkspaceAPI, { SortOrder } from '@/client/api/workspace'
 import { swrConfig } from '@/client/options'
-import { CreateWorkspaceButton } from '@/components/top-bar/top-bar-buttons'
-import prettyDate from '@/helpers/pretty-date'
-import { decodeQuery } from '@/helpers/query'
+import { CreateWorkspaceButton } from '@/components/app-bar/app-bar-buttons'
 import { workspacePaginationStorage } from '@/infra/pagination'
 import PagePagination from '@/lib/components/page-pagination'
 import SectionSpinner from '@/lib/components/section-spinner'
+import prettyDate from '@/lib/helpers/pretty-date'
+import { decodeQuery } from '@/lib/helpers/query'
+import { truncateEnd } from '@/lib/helpers/truncate-end'
 import usePagePagination from '@/lib/hooks/page-pagination'
 import { useAppDispatch } from '@/store/hook'
 import { mutateUpdated } from '@/store/ui/workspaces'
@@ -128,7 +129,7 @@ const WorkspaceListPage = () => {
                         to={`/workspace/${w.id}/file/${w.rootId}`}
                         className={cx('no-underline')}
                       >
-                        <span>{w.name}</span>
+                        <span>{truncateEnd(w.name, 60)}</span>
                       </ChakraLink>
                     </div>
                   </Td>

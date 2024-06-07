@@ -157,3 +157,19 @@ CREATE TABLE IF NOT EXISTS organization_user
 
 CREATE INDEX organization_user_organization_id ON organization_user (organization_id);
 CREATE INDEX organization_user_user_id ON organization_user (user_id);
+
+CREATE TABLE IF NOT EXISTS task
+(
+  id                text PRIMARY KEY,
+  name              text NOT NULL,
+  error             text,
+  percentage        smallint,
+  is_complete       boolean NOT NULL DEFAULT FALSE,
+  is_indeterminate  boolean NOT NULL DEFAULT FALSE,
+  user_id           text NOT NULL REFERENCES "user" (id) ON DELETE CASCADE,
+  status            text,
+  payload           jsonb,
+  task_id           text,
+  create_time       text NOT NULL DEFAULT (to_json(now())#>>'{}'),
+  update_time       text ON UPDATE (to_json(now())#>>'{}')
+);

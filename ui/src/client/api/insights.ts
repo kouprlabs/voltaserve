@@ -11,6 +11,11 @@ export type Language = {
   name: string
 }
 
+export type Info = {
+  isAvailable: boolean
+  metadata?: Metadata
+}
+
 export type Metadata = {
   isOutdated: boolean
 }
@@ -56,11 +61,12 @@ type ListEntitiesQueryParams = {
 }
 
 export default class InsightsAPI {
-  static create(id: string, options: CreateOptions) {
+  static create(id: string, options: CreateOptions, showError = true) {
     return apiFetcher({
       url: `/insights/${id}`,
       method: 'POST',
       body: JSON.stringify(options),
+      showError,
     })
   }
 
@@ -78,21 +84,28 @@ export default class InsightsAPI {
     })
   }
 
-  static useGetMetadata(
+  static useGetInfo(
     id: string | null | undefined,
     swrOptions?: SWRConfiguration,
   ) {
-    const url = `/insights/${id}/metadata`
-    return useSWR<Metadata>(
+    const url = `/insights/${id}/info`
+    return useSWR<Info>(
       id ? url : null,
       () =>
         apiFetcher({
           url,
           method: 'GET',
           showError: false,
-        }) as Promise<Metadata>,
+        }) as Promise<Info>,
       swrOptions,
     )
+  }
+
+  static async getInfo(id: string) {
+    return apiFetcher({
+      url: `/insights/${id}/info`,
+      method: 'GET',
+    }) as Promise<Info>
   }
 
   static useGetLanguages(swrOptions?: SWRConfiguration) {

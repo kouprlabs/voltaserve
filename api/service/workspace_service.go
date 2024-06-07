@@ -104,22 +104,17 @@ func (svc *WorkspaceService) Create(opts WorkspaceCreateOptions, userID string) 
 	if err := svc.fileRepo.GrantUserPermission(root.GetID(), userID, model.PermissionOwner); err != nil {
 		return nil, err
 	}
+	if _, err := svc.fileCache.Refresh(root.GetID()); err != nil {
+		return nil, err
+	}
 	if err = svc.workspaceRepo.UpdateRootID(workspace.GetID(), root.GetID()); err != nil {
 		return nil, err
 	}
-	if workspace, err = svc.workspaceRepo.Find(workspace.GetID()); err != nil {
+	workspace, err = svc.workspaceCache.Refresh(workspace.GetID())
+	if err != nil {
 		return nil, err
 	}
 	if err = svc.workspaceSearch.Index([]model.Workspace{workspace}); err != nil {
-		return nil, err
-	}
-	if root, err = svc.fileRepo.Find(root.GetID()); err != nil {
-		return nil, err
-	}
-	if err := svc.fileCache.Set(root); err != nil {
-		return nil, err
-	}
-	if err = svc.workspaceCache.Set(workspace); err != nil {
 		return nil, err
 	}
 	res, err := svc.workspaceMapper.mapOne(workspace, userID)
@@ -213,10 +208,7 @@ func (svc *WorkspaceService) PatchName(id string, name string, userID string) (*
 	if workspace, err = svc.workspaceRepo.UpdateName(id, name); err != nil {
 		return nil, err
 	}
-	if err = svc.workspaceSearch.Update([]model.Workspace{workspace}); err != nil {
-		return nil, err
-	}
-	if err = svc.workspaceCache.Set(workspace); err != nil {
+	if err = svc.sync(workspace); err != nil {
 		return nil, err
 	}
 	res, err := svc.workspaceMapper.mapOne(workspace, userID)
@@ -244,10 +236,7 @@ func (svc *WorkspaceService) PatchStorageCapacity(id string, storageCapacity int
 	if workspace, err = svc.workspaceRepo.UpdateStorageCapacity(id, storageCapacity); err != nil {
 		return nil, err
 	}
-	if err = svc.workspaceSearch.Update([]model.Workspace{workspace}); err != nil {
-		return nil, err
-	}
-	if err = svc.workspaceCache.Set(workspace); err != nil {
+	if err = svc.sync(workspace); err != nil {
 		return nil, err
 	}
 	res, err := svc.workspaceMapper.mapOne(workspace, userID)
@@ -283,24 +272,24 @@ func (svc *WorkspaceService) Delete(id string, userID string) error {
 	return nil
 }
 
-func (svc *WorkspaceService) HasEnoughSpaceForByteSize(id string, byteSize int64) (bool, error) {
+func (svc *WorkspaceService) HasEnoughSpaceForByteSize(id string, byteSize int64) (*bool, error) {
 	workspace, err := svc.workspaceRepo.Find(id)
 	if err != nil {
-		return false, err
+		return nil, err
 	}
 	root, err := svc.fileRepo.Find(workspace.GetRootID())
 	if err != nil {
-		return false, err
+		return nil, err
 	}
 	usage, err := svc.fileRepo.GetSize(root.GetID())
 	if err != nil {
-		return false, err
+		return nil, err
 	}
 	expectedUsage := usage + byteSize
 	if expectedUsage > workspace.GetStorageCapacity() {
-		return false, err
+		return helper.ToPtr(false), err
 	}
-	return true, nil
+	return helper.ToPtr(true), nil
 }
 
 func (svc *WorkspaceService) findAll(userID string) ([]*Workspace, error) {
@@ -397,6 +386,16 @@ func (svc *WorkspaceService) doPagination(data []model.Workspace, page, size uin
 	}
 	pageData := data[startIndex:endIndex]
 	return pageData, totalElements, totalPages
+}
+
+func (svc *WorkspaceService) sync(workspace model.Workspace) error {
+	if err := svc.workspaceCache.Set(workspace); err != nil {
+		return err
+	}
+	if err := svc.workspaceSearch.Update([]model.Workspace{workspace}); err != nil {
+		return err
+	}
+	return nil
 }
 
 type workspaceMapper struct {

@@ -90,14 +90,11 @@ func (svc *GroupService) Create(opts GroupCreateOptions, userID string) (*Group,
 	if err := svc.groupRepo.GrantUserPermission(group.GetID(), userID, model.PermissionOwner); err != nil {
 		return nil, err
 	}
-	group, err = svc.groupRepo.Find(group.GetID())
+	group, err = svc.groupCache.Refresh(group.GetID())
 	if err != nil {
 		return nil, err
 	}
 	if err := svc.groupSearch.Index([]model.Group{group}); err != nil {
-		return nil, err
-	}
-	if err := svc.groupCache.Set(group); err != nil {
 		return nil, err
 	}
 	res, err := svc.groupMapper.mapOne(group, userID)
@@ -214,11 +211,7 @@ func (svc *GroupService) PatchName(id string, name string, userID string) (*Grou
 	if err := svc.groupRepo.Save(group); err != nil {
 		return nil, err
 	}
-	if err := svc.groupSearch.Update([]model.Group{group}); err != nil {
-		return nil, err
-	}
-	err = svc.groupCache.Set(group)
-	if err != nil {
+	if err := svc.sync(group); err != nil {
 		return nil, err
 	}
 	res, err := svc.groupMapper.mapOne(group, userID)
@@ -398,9 +391,9 @@ func (svc *GroupService) doSorting(data []model.Group, sortBy string, sortOrder 
 	return data
 }
 
-func (svc *GroupService) doPagination(data []model.Group, page, size uint) ([]model.Group, uint, uint) {
-	totalElements := uint(len(data))
-	totalPages := (totalElements + size - 1) / size
+func (svc *GroupService) doPagination(data []model.Group, page, size uint) (pageData []model.Group, totalElements uint, totalPages uint) {
+	totalElements = uint(len(data))
+	totalPages = (totalElements + size - 1) / size
 	if page > totalPages {
 		return []model.Group{}, totalElements, totalPages
 	}
@@ -409,8 +402,17 @@ func (svc *GroupService) doPagination(data []model.Group, page, size uint) ([]mo
 	if endIndex > totalElements {
 		endIndex = totalElements
 	}
-	pageData := data[startIndex:endIndex]
-	return pageData, totalElements, totalPages
+	return data[startIndex:endIndex], totalElements, totalPages
+}
+
+func (svc *GroupService) sync(group model.Group) error {
+	if err := svc.groupCache.Set(group); err != nil {
+		return err
+	}
+	if err := svc.groupSearch.Update([]model.Group{group}); err != nil {
+		return err
+	}
+	return nil
 }
 
 type groupMapper struct {

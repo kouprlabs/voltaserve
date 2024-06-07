@@ -15,12 +15,12 @@ import (
 	"voltaserve/errorpkg"
 	"voltaserve/helper"
 	"voltaserve/infra"
+	"voltaserve/log"
 	"voltaserve/model"
 	"voltaserve/service"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/log"
 	"github.com/golang-jwt/jwt/v5"
 )
 
@@ -112,7 +112,7 @@ func (r *FileRouter) Create(c *fiber.Ctx) error {
 		if err != nil {
 			return err
 		}
-		if !ok {
+		if !*ok {
 			return errorpkg.NewStorageLimitExceededError()
 		}
 		if name == "" {
@@ -127,16 +127,19 @@ func (r *FileRouter) Create(c *fiber.Ctx) error {
 		if err != nil {
 			return err
 		}
-		path := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(fh.Filename))
-		if err := c.SaveFile(fh, path); err != nil {
+		tmpPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(fh.Filename))
+		if err := c.SaveFile(fh, tmpPath); err != nil {
 			return err
 		}
-		defer func(name string) {
-			if err := os.Remove(name); err != nil {
-				log.Error(err)
+		defer func(path string) {
+			_, err := os.Stat(path)
+			if os.IsExist(err) {
+				if err := os.Remove(path); err != nil {
+					log.GetLogger().Error(err)
+				}
 			}
-		}(path)
-		file, err = r.fileSvc.Store(file.ID, path, userID)
+		}(tmpPath)
+		file, err = r.fileSvc.Store(file.ID, tmpPath, userID)
 		if err != nil {
 			return err
 		}
@@ -188,19 +191,22 @@ func (r *FileRouter) Patch(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	if !ok {
+	if !*ok {
 		return errorpkg.NewStorageLimitExceededError()
 	}
-	path := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(fh.Filename))
-	if err := c.SaveFile(fh, path); err != nil {
+	tmpPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(fh.Filename))
+	if err := c.SaveFile(fh, tmpPath); err != nil {
 		return err
 	}
-	defer func(name string) {
-		if err := os.Remove(name); err != nil {
-			log.Error(err)
+	defer func(path string) {
+		_, err := os.Stat(path)
+		if os.IsExist(err) {
+			if err := os.Remove(path); err != nil {
+				log.GetLogger().Error(err)
+			}
 		}
-	}(path)
-	file, err = r.fileSvc.Store(file.ID, path, userID)
+	}(tmpPath)
+	file, err = r.fileSvc.Store(file.ID, tmpPath, userID)
 	if err != nil {
 		return err
 	}

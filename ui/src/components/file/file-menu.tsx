@@ -10,20 +10,14 @@ import {
   Portal,
 } from '@chakra-ui/react'
 import cx from 'classnames'
+import FileAPI from '@/client/api/file'
 import {
   geEditorPermission,
   geOwnerPermission,
   geViewerPermission,
 } from '@/client/api/permission'
 import { Status } from '@/client/api/snapshot'
-import downloadFile from '@/helpers/download-file'
-import {
-  isImage,
-  isMicrosoftOffice,
-  isOpenOffice,
-  isPDF,
-} from '@/helpers/file-extension'
-import mapFileList from '@/helpers/map-file-list'
+import { swrConfig } from '@/client/options'
 import {
   IconFileCopy,
   IconDownload,
@@ -39,6 +33,14 @@ import {
   IconCheckBoxOutlineBlank,
   IconMoreVert,
 } from '@/lib/components/icons'
+import downloadFile from '@/lib/helpers/download-file'
+import {
+  isImage,
+  isMicrosoftOffice,
+  isOpenOffice,
+  isPDF,
+} from '@/lib/helpers/file-extension'
+import mapFileList from '@/lib/helpers/map-file-list'
 import { UploadDecorator, uploadAdded } from '@/store/entities/uploads'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import {
@@ -52,7 +54,7 @@ import {
 import { modalDidOpen as insightsModalDidOpen } from '@/store/ui/insights'
 import { modalDidOpen as mosaicModalDidOpen } from '@/store/ui/mosaic'
 import { listModalDidOpen } from '@/store/ui/snapshots'
-import { uploadsDrawerOpened } from '@/store/ui/uploads-drawer'
+import { drawerDidOpen } from '@/store/ui/uploads'
 import { modalDidOpen as watermarkModalDidOpen } from '@/store/ui/watermark'
 import Orb from '../common/orb'
 
@@ -77,10 +79,9 @@ const FileMenu = ({
   const dispatch = useAppDispatch()
   const list = useAppSelector((state) => state.entities.files.list)
   const selection = useAppSelector((state) => state.ui.files.selection)
-  const file = useAppSelector((state) =>
-    state.ui.files.selection.length === 1
-      ? list?.data.find((e) => e.id === state.ui.files.selection[0])
-      : undefined,
+  const { data: file } = FileAPI.useGet(
+    selection.length === 1 ? selection[0] : undefined,
+    swrConfig(),
   )
   const isOwnerInSelection = useMemo(
     () =>
@@ -103,7 +104,7 @@ const FileMenu = ({
   const isInsightsAuthorized = useMemo(
     () =>
       file?.type === 'file' &&
-      file.snapshot?.status !== Status.Processing &&
+      !file.snapshot?.taskId &&
       ((geViewerPermission(file.permission) && file.snapshot?.entities) ||
         geEditorPermission(file.permission)),
     [file],
@@ -111,14 +112,14 @@ const FileMenu = ({
   const isMosaicAuthorized = useMemo(
     () =>
       file?.type === 'file' &&
-      file.snapshot?.status !== Status.Processing &&
+      !file.snapshot?.taskId &&
       isImage(file.snapshot?.original.extension),
     [file],
   )
   const isWatermarkAuthorized = useMemo(
     () =>
       file?.type === 'file' &&
-      file.snapshot?.status !== Status.Processing &&
+      !file.snapshot?.taskId &&
       (isPDF(file.snapshot?.original.extension) ||
         isMicrosoftOffice(file.snapshot?.original.extension) ||
         isOpenOffice(file.snapshot?.original.extension) ||
@@ -181,7 +182,7 @@ const FileMenu = ({
             }).value,
           ),
         )
-        dispatch(uploadsDrawerOpened())
+        dispatch(drawerDidOpen())
         if (uploadInputRef && uploadInputRef.current) {
           uploadInputRef.current.value = ''
         }

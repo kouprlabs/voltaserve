@@ -10,26 +10,42 @@ import (
 	"os"
 	"voltaserve/config"
 	"voltaserve/errorpkg"
-	"voltaserve/infra"
-	"voltaserve/model"
-
-	"go.uber.org/zap"
+	"voltaserve/log"
 )
 
 type MosaicClient struct {
 	config config.Config
-	logger *zap.SugaredLogger
 }
 
 func NewMosaicClient() *MosaicClient {
-	logger, err := infra.GetLogger()
-	if err != nil {
-		panic(err)
-	}
 	return &MosaicClient{
 		config: config.GetConfig(),
-		logger: logger,
 	}
+}
+
+type MosaicMetadata struct {
+	IsOutdated bool              `json:"isOutdated"`
+	Width      int               `json:"width"`
+	Height     int               `json:"height"`
+	Extension  string            `json:"extension"`
+	ZoomLevels []MosaicZoomLevel `json:"zoomLevels"`
+}
+
+type MosaicZoomLevel struct {
+	Index               int        `json:"index"`
+	Width               int        `json:"width"`
+	Height              int        `json:"height"`
+	Rows                int        `json:"rows"`
+	Cols                int        `json:"cols"`
+	ScaleDownPercentage float32    `json:"scaleDownPercentage"`
+	Tile                MosaicTile `json:"tile"`
+}
+
+type MosaicTile struct {
+	Width         int `json:"width"`
+	Height        int `json:"height"`
+	LastColWidth  int `json:"lastColWidth"`
+	LastRowHeight int `json:"lastRowHeight"`
 }
 
 type MosaicCreateOptions struct {
@@ -38,14 +54,14 @@ type MosaicCreateOptions struct {
 	S3Bucket string
 }
 
-func (cl *MosaicClient) Create(opts MosaicCreateOptions) (*model.MosaicMetadata, error) {
+func (cl *MosaicClient) Create(opts MosaicCreateOptions) (*MosaicMetadata, error) {
 	file, err := os.Open(opts.Path)
 	if err != nil {
 		return nil, err
 	}
 	defer func(file *os.File) {
 		if err := file.Close(); err != nil {
-			cl.logger.Error(err)
+			log.GetLogger().Error(err)
 		}
 	}(file)
 	buf := &bytes.Buffer{}
@@ -78,7 +94,7 @@ func (cl *MosaicClient) Create(opts MosaicCreateOptions) (*model.MosaicMetadata,
 	}
 	defer func(Body io.ReadCloser) {
 		if err := Body.Close(); err != nil {
-			cl.logger.Error(err)
+			log.GetLogger().Error(err)
 		}
 	}(resp.Body)
 	if resp.StatusCode != http.StatusOK {
@@ -88,7 +104,7 @@ func (cl *MosaicClient) Create(opts MosaicCreateOptions) (*model.MosaicMetadata,
 	if err != nil {
 		return nil, err
 	}
-	var res model.MosaicMetadata
+	var res MosaicMetadata
 	if err = json.Unmarshal(b, &res); err != nil {
 		return nil, err
 	}
@@ -100,14 +116,14 @@ type MosaicGetMetadataOptions struct {
 	S3Bucket string `json:"s3Bucket"`
 }
 
-func (cl *MosaicClient) GetMetadata(opts MosaicGetMetadataOptions) (*model.MosaicMetadata, error) {
+func (cl *MosaicClient) GetMetadata(opts MosaicGetMetadataOptions) (*MosaicMetadata, error) {
 	resp, err := http.Get(fmt.Sprintf("%s/v2/mosaics/%s/%s/metadata", cl.config.MosaicURL, opts.S3Bucket, opts.S3Key))
 	if err != nil {
 		return nil, err
 	}
 	defer func(Body io.ReadCloser) {
 		if err := Body.Close(); err != nil {
-			cl.logger.Error(err)
+			log.GetLogger().Error(err)
 		}
 	}(resp.Body)
 	if resp.StatusCode != http.StatusOK {
@@ -121,7 +137,7 @@ func (cl *MosaicClient) GetMetadata(opts MosaicGetMetadataOptions) (*model.Mosai
 	if err != nil {
 		return nil, err
 	}
-	var res model.MosaicMetadata
+	var res MosaicMetadata
 	err = json.Unmarshal(b, &res)
 	if err != nil {
 		return nil, err
@@ -170,7 +186,7 @@ func (cl *MosaicClient) DownloadTileBuffer(opts MosaicDownloadTileOptions) (*byt
 	}
 	defer func(Body io.ReadCloser) {
 		if err := Body.Close(); err != nil {
-			cl.logger.Error(err)
+			log.GetLogger().Error(err)
 		}
 	}(resp.Body)
 	if resp.StatusCode != http.StatusOK {

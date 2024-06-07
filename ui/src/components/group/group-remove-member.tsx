@@ -12,7 +12,7 @@ import {
 import { cx } from '@emotion/css'
 import GroupAPI, { Group } from '@/client/api/group'
 import { User } from '@/client/idp/user'
-import userToString from '@/helpers/user-to-string'
+import userToString from '@/lib/helpers/user-to-string'
 
 export type GroupRemoveMemberProps = {
   group: Group

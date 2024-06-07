@@ -3,9 +3,9 @@ import { Status } from '@/client/api/snapshot'
 import IconBadgeError from './icon-badge-error'
 import IconBadgeInsights from './icon-badge-insights'
 import IconBadgeMosaic from './icon-badge-mosaic'
-import IconBadgeNew from './icon-badge-new'
 import IconBadgeProcessing from './icon-badge-processing'
 import IconBadgeShared from './icon-badge-shared'
+import IconBadgeWaiting from './icon-badge-waiting'
 import IconBadgeWatermark from './icon-badge-watermark'
 
 export type IconBadgeProps = {
@@ -18,7 +18,9 @@ const IconBadge = ({ file, isLoading }: IconBadgeProps) => {
     <>
       {file.type === 'file' ? (
         <>
-          {file.snapshot?.status === Status.New ? <IconBadgeNew /> : null}
+          {file.snapshot?.status === Status.Waiting ? (
+            <IconBadgeWaiting />
+          ) : null}
           {file.snapshot?.status === Status.Processing ? (
             <IconBadgeProcessing />
           ) : null}

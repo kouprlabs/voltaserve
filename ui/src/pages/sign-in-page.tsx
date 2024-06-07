@@ -25,8 +25,8 @@ import WorkspaceAPI from '@/client/api/workspace'
 import TokenAPI from '@/client/idp/token'
 import Logo from '@/components/common/logo'
 import LayoutFull from '@/components/layout/layout-full'
-import { gigabyteToByte } from '@/helpers/convert-storage'
 import { saveToken } from '@/infra/token'
+import { gigabyteToByte } from '@/lib/helpers/convert-storage'
 
 type FormValues = {
   email: string

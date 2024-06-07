@@ -15,12 +15,13 @@ export type Snapshot = {
   thumbnail?: Thumbnail
   language?: string
   isActive: boolean
+  taskId?: string
   createTime: string
   updateTime?: string
 }
 
 export enum Status {
-  New = 'new',
+  Waiting = 'waiting',
   Processing = 'processing',
   Ready = 'ready',
   Error = 'error',
@@ -106,22 +107,6 @@ export default class SnapshotAPI {
     )
   }
 
-  static async activate(id: string, options: ActivateOptions) {
-    return apiFetcher({
-      url: `/snapshots/${id}/activate`,
-      method: 'POST',
-      body: JSON.stringify(options),
-    }) as Promise<File>
-  }
-
-  static async detach(id: string, options: DetachOptions) {
-    return apiFetcher({
-      url: `/snapshots/${id}/detach`,
-      method: 'POST',
-      body: JSON.stringify(options),
-    })
-  }
-
   static paramsFromListOptions(options: ListOptions): URLSearchParams {
     const params: ListQueryParams = { file_id: options.fileId }
     if (options?.query) {
@@ -140,5 +125,21 @@ export default class SnapshotAPI {
       params.sort_order = options.sortOrder.toString()
     }
     return new URLSearchParams(params)
+  }
+
+  static async activate(id: string, options: ActivateOptions) {
+    return apiFetcher({
+      url: `/snapshots/${id}/activate`,
+      method: 'POST',
+      body: JSON.stringify(options),
+    }) as Promise<File>
+  }
+
+  static async detach(id: string, options: DetachOptions) {
+    return apiFetcher({
+      url: `/snapshots/${id}/detach`,
+      method: 'POST',
+      body: JSON.stringify(options),
+    })
   }
 }

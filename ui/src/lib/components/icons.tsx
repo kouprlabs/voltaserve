@@ -441,3 +441,9 @@ export const IconTune = ({ className, filled, ...props }: IconBaseProps) => (
     tune
   </span>
 )
+
+export const IconStacks = ({ className, filled, ...props }: IconBaseProps) => (
+  <span className={getClassName({ filled, className })} {...props}>
+    stacks
+  </span>
+)

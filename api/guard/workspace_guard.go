@@ -3,9 +3,8 @@ package guard
 import (
 	"voltaserve/cache"
 	"voltaserve/errorpkg"
+	"voltaserve/log"
 	"voltaserve/model"
-
-	"github.com/gofiber/fiber/v2/log"
 )
 
 type WorkspaceGuard struct {
@@ -27,7 +26,7 @@ func (g *WorkspaceGuard) IsAuthorized(userID string, workspace model.Workspace, 
 	for _, p := range workspace.GetGroupPermissions() {
 		g, err := g.groupCache.Get(p.GetGroupID())
 		if err != nil {
-			log.Error(err)
+			log.GetLogger().Error(err)
 			return false
 		}
 		for _, u := range g.GetUsers() {

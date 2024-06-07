@@ -3,24 +3,16 @@ package repo
 import (
 	"encoding/json"
 	"errors"
-	"log"
 	"time"
 	"voltaserve/errorpkg"
+	"voltaserve/helper"
 	"voltaserve/infra"
+	"voltaserve/log"
 	"voltaserve/model"
 
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
 )
-
-type SnapshotUpdateOptions struct {
-	Original  *model.S3Object
-	Preview   *model.S3Object
-	Text      *model.S3Object
-	Thumbnail *model.Thumbnail
-	Status    string
-	Language  *string
-}
 
 type SnapshotRepo interface {
 	Find(id string) (model.Snapshot, error)
@@ -63,6 +55,7 @@ type snapshotEntity struct {
 	Thumbnail  datatypes.JSON `json:"thumbnail,omitempty" gorm:"column:thumbnail"`
 	Status     string         `json:"status,omitempty" gorm:"column,status"`
 	Language   *string        `json:"language,omitempty" gorm:"column:language"`
+	TaskID     *string        `json:"taskID,omitempty" gorm:"column:task_id"`
 	CreateTime string         `json:"createTime" gorm:"column:create_time"`
 	UpdateTime *string        `json:"updateTime,omitempty" gorm:"column:update_time"`
 }
@@ -96,7 +89,7 @@ func (s *snapshotEntity) GetOriginal() *model.S3Object {
 	}
 	var res = model.S3Object{}
 	if err := json.Unmarshal([]byte(s.Original.String()), &res); err != nil {
-		log.Fatal(err)
+		log.GetLogger().Fatal(err)
 		return nil
 	}
 	return &res
@@ -108,7 +101,7 @@ func (s *snapshotEntity) GetPreview() *model.S3Object {
 	}
 	var res = model.S3Object{}
 	if err := json.Unmarshal([]byte(s.Preview.String()), &res); err != nil {
-		log.Fatal(err)
+		log.GetLogger().Fatal(err)
 		return nil
 	}
 	return &res
@@ -120,7 +113,7 @@ func (s *snapshotEntity) GetText() *model.S3Object {
 	}
 	var res = model.S3Object{}
 	if err := json.Unmarshal([]byte(s.Text.String()), &res); err != nil {
-		log.Fatal(err)
+		log.GetLogger().Fatal(err)
 		return nil
 	}
 	return &res
@@ -132,7 +125,7 @@ func (s *snapshotEntity) GetOCR() *model.S3Object {
 	}
 	var res = model.S3Object{}
 	if err := json.Unmarshal([]byte(s.OCR.String()), &res); err != nil {
-		log.Fatal(err)
+		log.GetLogger().Fatal(err)
 		return nil
 	}
 	return &res
@@ -144,7 +137,7 @@ func (s *snapshotEntity) GetEntities() *model.S3Object {
 	}
 	var res = model.S3Object{}
 	if err := json.Unmarshal([]byte(s.Entities.String()), &res); err != nil {
-		log.Fatal(err)
+		log.GetLogger().Fatal(err)
 		return nil
 	}
 	return &res
@@ -156,7 +149,7 @@ func (s *snapshotEntity) GetMosaic() *model.S3Object {
 	}
 	var res = model.S3Object{}
 	if err := json.Unmarshal([]byte(s.Mosaic.String()), &res); err != nil {
-		log.Fatal(err)
+		log.GetLogger().Fatal(err)
 		return nil
 	}
 	return &res
@@ -168,7 +161,7 @@ func (s *snapshotEntity) GetWatermark() *model.S3Object {
 	}
 	var res = model.S3Object{}
 	if err := json.Unmarshal([]byte(s.Watermark.String()), &res); err != nil {
-		log.Fatal(err)
+		log.GetLogger().Fatal(err)
 		return nil
 	}
 	return &res
@@ -180,7 +173,7 @@ func (s *snapshotEntity) GetThumbnail() *model.Thumbnail {
 	}
 	var res = model.Thumbnail{}
 	if err := json.Unmarshal([]byte(s.Thumbnail.String()), &res); err != nil {
-		log.Fatal(err)
+		log.GetLogger().Fatal(err)
 		return nil
 	}
 	return &res
@@ -192,6 +185,10 @@ func (s *snapshotEntity) GetStatus() string {
 
 func (s *snapshotEntity) GetLanguage() *string {
 	return s.Language
+}
+
+func (s *snapshotEntity) GetTaskID() *string {
+	return s.TaskID
 }
 
 func (s *snapshotEntity) SetID(id string) {
@@ -208,11 +205,11 @@ func (s *snapshotEntity) SetOriginal(m *model.S3Object) {
 	} else {
 		b, err := json.Marshal(m)
 		if err != nil {
-			log.Fatal(err)
+			log.GetLogger().Fatal(err)
 			return
 		}
 		if err := s.Original.UnmarshalJSON(b); err != nil {
-			log.Fatal(err)
+			log.GetLogger().Fatal(err)
 		}
 	}
 }
@@ -223,11 +220,11 @@ func (s *snapshotEntity) SetPreview(m *model.S3Object) {
 	} else {
 		b, err := json.Marshal(m)
 		if err != nil {
-			log.Fatal(err)
+			log.GetLogger().Fatal(err)
 			return
 		}
 		if err := s.Preview.UnmarshalJSON(b); err != nil {
-			log.Fatal(err)
+			log.GetLogger().Fatal(err)
 		}
 	}
 }
@@ -238,11 +235,11 @@ func (s *snapshotEntity) SetText(m *model.S3Object) {
 	} else {
 		b, err := json.Marshal(m)
 		if err != nil {
-			log.Fatal(err)
+			log.GetLogger().Fatal(err)
 			return
 		}
 		if err := s.Text.UnmarshalJSON(b); err != nil {
-			log.Fatal(err)
+			log.GetLogger().Fatal(err)
 		}
 	}
 }
@@ -253,11 +250,11 @@ func (s *snapshotEntity) SetOCR(m *model.S3Object) {
 	} else {
 		b, err := json.Marshal(m)
 		if err != nil {
-			log.Fatal(err)
+			log.GetLogger().Fatal(err)
 			return
 		}
 		if err := s.OCR.UnmarshalJSON(b); err != nil {
-			log.Fatal(err)
+			log.GetLogger().Fatal(err)
 		}
 	}
 }
@@ -268,11 +265,11 @@ func (s *snapshotEntity) SetEntities(m *model.S3Object) {
 	} else {
 		b, err := json.Marshal(m)
 		if err != nil {
-			log.Fatal(err)
+			log.GetLogger().Fatal(err)
 			return
 		}
 		if err := s.Entities.UnmarshalJSON(b); err != nil {
-			log.Fatal(err)
+			log.GetLogger().Fatal(err)
 		}
 	}
 }
@@ -283,11 +280,11 @@ func (s *snapshotEntity) SetMosaic(m *model.S3Object) {
 	} else {
 		b, err := json.Marshal(m)
 		if err != nil {
-			log.Fatal(err)
+			log.GetLogger().Fatal(err)
 			return
 		}
 		if err := s.Mosaic.UnmarshalJSON(b); err != nil {
-			log.Fatal(err)
+			log.GetLogger().Fatal(err)
 		}
 	}
 }
@@ -298,11 +295,11 @@ func (s *snapshotEntity) SetWatermark(m *model.S3Object) {
 	} else {
 		b, err := json.Marshal(m)
 		if err != nil {
-			log.Fatal(err)
+			log.GetLogger().Fatal(err)
 			return
 		}
 		if err := s.Watermark.UnmarshalJSON(b); err != nil {
-			log.Fatal(err)
+			log.GetLogger().Fatal(err)
 		}
 	}
 }
@@ -313,11 +310,11 @@ func (s *snapshotEntity) SetThumbnail(m *model.Thumbnail) {
 	} else {
 		b, err := json.Marshal(m)
 		if err != nil {
-			log.Fatal(err)
+			log.GetLogger().Fatal(err)
 			return
 		}
 		if err := s.Thumbnail.UnmarshalJSON(b); err != nil {
-			log.Fatal(err)
+			log.GetLogger().Fatal(err)
 		}
 	}
 }
@@ -328,6 +325,10 @@ func (s *snapshotEntity) SetStatus(status string) {
 
 func (s *snapshotEntity) SetLanguage(language string) {
 	s.Language = &language
+}
+
+func (s *snapshotEntity) SetTaskID(taskID *string) {
+	s.TaskID = taskID
 }
 
 func (s *snapshotEntity) HasOriginal() bool {
@@ -438,28 +439,72 @@ func (repo *snapshotRepo) Delete(id string) error {
 	return nil
 }
 
+type SnapshotUpdateOptions struct {
+	Fields    []string `json:"fields"`
+	Original  *model.S3Object
+	Preview   *model.S3Object
+	Text      *model.S3Object
+	OCR       *model.S3Object
+	Entities  *model.S3Object
+	Mosaic    *model.S3Object
+	Watermark *model.S3Object
+	Thumbnail *model.Thumbnail
+	Status    *string
+	Language  *string
+	TaskID    *string
+}
+
+const (
+	SnapshotFieldOriginal  = "original"
+	SnapshotFieldPreview   = "preview"
+	SnapshotFieldText      = "text"
+	SnapshotFieldOCR       = "ocr"
+	SnapshotFieldEntities  = "entities"
+	SnapshotFieldMosaic    = "mosaic"
+	SnapshotFieldWatermark = "watermark"
+	SnapshotFieldThumbnail = "thumbnail"
+	SnapshotFieldStatus    = "status"
+	SnapshotFieldLanguage  = "language"
+	SnapshotFieldTaskID    = "taskID"
+)
+
 func (repo *snapshotRepo) Update(id string, opts SnapshotUpdateOptions) error {
 	snapshot, err := repo.find(id)
 	if err != nil {
 		return err
 	}
-	if opts.Thumbnail != nil {
-		snapshot.SetThumbnail(opts.Thumbnail)
-	}
-	if opts.Original != nil {
+	if helper.Includes(opts.Fields, SnapshotFieldOriginal) {
 		snapshot.SetOriginal(opts.Original)
 	}
-	if opts.Preview != nil {
+	if helper.Includes(opts.Fields, SnapshotFieldPreview) {
 		snapshot.SetPreview(opts.Preview)
 	}
-	if opts.Text != nil {
+	if helper.Includes(opts.Fields, SnapshotFieldText) {
 		snapshot.SetText(opts.Text)
 	}
-	if opts.Status != "" {
-		snapshot.SetStatus(opts.Status)
+	if helper.Includes(opts.Fields, SnapshotFieldOCR) {
+		snapshot.SetOCR(opts.OCR)
 	}
-	if opts.Language != nil {
+	if helper.Includes(opts.Fields, SnapshotFieldEntities) {
+		snapshot.SetEntities(opts.Entities)
+	}
+	if helper.Includes(opts.Fields, SnapshotFieldMosaic) {
+		snapshot.SetMosaic(opts.Mosaic)
+	}
+	if helper.Includes(opts.Fields, SnapshotFieldWatermark) {
+		snapshot.SetWatermark(opts.Watermark)
+	}
+	if helper.Includes(opts.Fields, SnapshotFieldThumbnail) {
+		snapshot.SetThumbnail(opts.Thumbnail)
+	}
+	if helper.Includes(opts.Fields, SnapshotFieldStatus) {
+		snapshot.SetStatus(*opts.Status)
+	}
+	if helper.Includes(opts.Fields, SnapshotFieldLanguage) {
 		snapshot.SetLanguage(*opts.Language)
+	}
+	if helper.Includes(opts.Fields, SnapshotFieldTaskID) {
+		snapshot.SetTaskID(opts.TaskID)
 	}
 	if db := repo.db.Save(&snapshot); db.Error != nil {
 		return db.Error

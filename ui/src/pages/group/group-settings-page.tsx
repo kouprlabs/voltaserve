@@ -11,6 +11,7 @@ import GroupDelete from '@/components/group/group-delete'
 import GroupEditName from '@/components/group/group-edit-name'
 import { IconEdit, IconDelete, IconPersonAdd } from '@/lib/components/icons'
 import SectionSpinner from '@/lib/components/section-spinner'
+import { truncateEnd } from '@/lib/helpers/truncate-end'
 
 const Spacer = () => <div className={cx('grow')} />
 
@@ -53,7 +54,7 @@ const GroupSettingsPage = () => {
         <div className={rowClassName}>
           <span>Name</span>
           <Spacer />
-          <span>{group.name}</span>
+          <span>{truncateEnd(group.name, 60)}</span>
           <IconButton
             icon={<IconEdit />}
             isDisabled={!hasEditPermission}

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import {
   Avatar,
@@ -8,14 +8,14 @@ import {
   Tab,
   TabList,
   Tabs,
-  Tag,
 } from '@chakra-ui/react'
 import cx from 'classnames'
-import NotificationAPI from '@/client/api/notification'
+import InvitationAPI from '@/client/api/invitation'
 import UserAPI from '@/client/idp/user'
 import { swrConfig } from '@/client/options'
 import AccountEditPicture from '@/components/account/edit-picture'
 import { IconEdit } from '@/lib/components/icons'
+import NumberTag from '@/lib/components/number-tag'
 import { useAppDispatch } from '@/store/hook'
 import { mutateUpdated } from '@/store/ui/account'
 
@@ -25,11 +25,8 @@ const AccountLayout = () => {
   const dispatch = useAppDispatch()
   const [isImageModalOpen, setIsImageModalOpen] = useState(false)
   const { data: user, mutate } = UserAPI.useGet(swrConfig())
-  const { data: notfications } = NotificationAPI.useGetAll(swrConfig())
-  const invitationCount = useMemo(
-    () => notfications?.filter((e) => e.type === 'new_invitation').length,
-    [notfications],
-  )
+  const { data: invitationCount } =
+    InvitationAPI.useGetIncomingCount(swrConfig())
   const [tabIndex, setTabIndex] = useState(0)
 
   useEffect(() => {
@@ -107,7 +104,9 @@ const AccountLayout = () => {
               >
                 <span>Invitations</span>
                 {invitationCount && invitationCount > 0 ? (
-                  <Tag className={cx('rounded-full')}>{invitationCount}</Tag>
+                  <NumberTag isActive={tabIndex === 1}>
+                    {invitationCount}
+                  </NumberTag>
                 ) : null}
               </div>
             </Tab>

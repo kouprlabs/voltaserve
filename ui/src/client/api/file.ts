@@ -2,8 +2,8 @@ import useSWR, { SWRConfiguration } from 'swr'
 import { apiFetcher } from '@/client/fetcher'
 import { User } from '@/client/idp/user'
 import { getConfig } from '@/config/config'
-import { encodeQuery } from '@/helpers/query'
 import { getAccessTokenOrRedirect } from '@/infra/token'
+import { encodeQuery } from '@/lib/helpers/query'
 import { Group } from './group'
 import { PermissionType } from './permission'
 import { Snapshot } from './snapshot'
@@ -248,6 +248,29 @@ export default class FileAPI {
     )
   }
 
+  static paramsFromListOptions(options?: ListOptions): URLSearchParams {
+    const params: ListQueryParams = {}
+    if (options?.page) {
+      params.page = options.page.toString()
+    }
+    if (options?.size) {
+      params.size = options.size.toString()
+    }
+    if (options?.sortBy) {
+      params.sort_by = options.sortBy.toString()
+    }
+    if (options?.sortOrder) {
+      params.sort_order = options.sortOrder.toString()
+    }
+    if (options?.type) {
+      params.type = options.type
+    }
+    if (options?.query) {
+      params.query = encodeQuery(JSON.stringify(options.query))
+    }
+    return new URLSearchParams(params)
+  }
+
   static useGetPath(
     id: string | null | undefined,
     swrOptions?: SWRConfiguration,
@@ -299,6 +322,13 @@ export default class FileAPI {
       () => apiFetcher({ url, method: 'GET' }) as Promise<File>,
       swrOptions,
     )
+  }
+
+  static async get(id: string) {
+    return apiFetcher({
+      url: `/files/${id}`,
+      method: 'GET',
+    }) as Promise<File>
   }
 
   static useGetCount(
@@ -367,28 +397,5 @@ export default class FileAPI {
       () => apiFetcher({ url, method: 'GET' }) as Promise<GroupPermission[]>,
       swrOptions,
     )
-  }
-
-  static paramsFromListOptions(options?: ListOptions): URLSearchParams {
-    const params: ListQueryParams = {}
-    if (options?.page) {
-      params.page = options.page.toString()
-    }
-    if (options?.size) {
-      params.size = options.size.toString()
-    }
-    if (options?.sortBy) {
-      params.sort_by = options.sortBy.toString()
-    }
-    if (options?.sortOrder) {
-      params.sort_order = options.sortOrder.toString()
-    }
-    if (options?.type) {
-      params.type = options.type
-    }
-    if (options?.query) {
-      params.query = encodeQuery(JSON.stringify(options.query))
-    }
-    return new URLSearchParams(params)
   }
 }

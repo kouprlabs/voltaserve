@@ -7,8 +7,8 @@ import (
 	"os"
 	"path/filepath"
 	"voltaserve/config"
+	"voltaserve/log"
 
-	"github.com/gofiber/fiber/v2/log"
 	"gopkg.in/gomail.v2"
 	"sigs.k8s.io/yaml"
 
@@ -63,7 +63,7 @@ func (mt *MailTemplate) GetText(path string, variables map[string]string) (strin
 	}
 	defer func(f *os.File) {
 		if err := f.Close(); err != nil {
-			log.Error(err)
+			log.GetLogger().Error(err)
 		}
 	}(f)
 	b, _ := io.ReadAll(f)
@@ -87,7 +87,7 @@ func (mt *MailTemplate) GetMessageParams(templateName string) (*MessageParams, e
 	}
 	defer func(f *os.File) {
 		if err := f.Close(); err != nil {
-			log.Error(err)
+			log.GetLogger().Error(err)
 		}
 	}(f)
 	b, _ := io.ReadAll(f)

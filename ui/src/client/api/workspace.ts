@@ -90,6 +90,26 @@ export default class WorkspaceAPI {
     }) as Promise<List>
   }
 
+  static paramsFromListOptions(options?: ListOptions): URLSearchParams {
+    const params: ListQueryParams = {}
+    if (options?.query) {
+      params.query = encodeURIComponent(options.query.toString())
+    }
+    if (options?.page) {
+      params.page = options.page.toString()
+    }
+    if (options?.size) {
+      params.size = options.size.toString()
+    }
+    if (options?.sortBy) {
+      params.sort_by = options.sortBy.toString()
+    }
+    if (options?.sortOrder) {
+      params.sort_order = options.sortOrder.toString()
+    }
+    return new URLSearchParams(params)
+  }
+
   static async create(options: CreateOptions) {
     return apiFetcher({
       url: '/workspaces',
@@ -122,25 +142,5 @@ export default class WorkspaceAPI {
       url: `/workspaces/${id}`,
       method: 'DELETE',
     })
-  }
-
-  static paramsFromListOptions(options?: ListOptions): URLSearchParams {
-    const params: ListQueryParams = {}
-    if (options?.query) {
-      params.query = encodeURIComponent(options.query.toString())
-    }
-    if (options?.page) {
-      params.page = options.page.toString()
-    }
-    if (options?.size) {
-      params.size = options.size.toString()
-    }
-    if (options?.sortBy) {
-      params.sort_by = options.sortBy.toString()
-    }
-    if (options?.sortOrder) {
-      params.sort_order = options.sortOrder.toString()
-    }
-    return new URLSearchParams(params)
   }
 }

@@ -3,6 +3,7 @@ package router
 import (
 	"net/http"
 	"strconv"
+	"voltaserve/config"
 	"voltaserve/errorpkg"
 	"voltaserve/service"
 
@@ -12,11 +13,13 @@ import (
 
 type SnapshotRouter struct {
 	snapshotSvc *service.SnapshotService
+	config      config.Config
 }
 
 func NewSnapshotRouter() *SnapshotRouter {
 	return &SnapshotRouter{
 		snapshotSvc: service.NewSnapshotService(),
+		config:      config.GetConfig(),
 	}
 }
 
@@ -151,27 +154,31 @@ func (r *SnapshotRouter) Detach(c *fiber.Ctx) error {
 //	@Tags			Snapshots
 //	@Id				snapshots_patch
 //	@Produce		json
-//	@Param			api_key	query	string							true	"API Key"
-//	@Param			id		path	string							true	"ID"
-//	@Param			body	body	service.SnapshotUpdateOptions	true	"Body"
-//	@Success		204
-//	@Failure		401	{object}	errorpkg.ErrorResponse
-//	@Failure		500	{object}	errorpkg.ErrorResponse
+//	@Param			api_key	query		string							true	"API Key"
+//	@Param			id		path		string							true	"ID"
+//	@Param			body	body		service.SnapshotPatchOptions	true	"Body"
+//	@Success		200		{object}	service.Snapshot
+//	@Failure		401		{object}	errorpkg.ErrorResponse
+//	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/snapshots/{id} [patch]
 func (r *SnapshotRouter) Patch(c *fiber.Ctx) error {
 	apiKey := c.Query("api_key")
 	if apiKey == "" {
 		return errorpkg.NewMissingQueryParamError("api_key")
 	}
-	opts := new(service.SnapshotUpdateOptions)
+	if apiKey != r.config.Security.APIKey {
+		return errorpkg.NewInvalidAPIKeyError()
+	}
+	opts := new(service.SnapshotPatchOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
 	}
 	if err := validator.New().Struct(opts); err != nil {
 		return errorpkg.NewRequestBodyValidationError(err)
 	}
-	if err := r.snapshotSvc.Patch(c.Params("id"), *opts, apiKey); err != nil {
+	snapshot, err := r.snapshotSvc.Patch(c.Params("id"), *opts)
+	if err != nil {
 		return err
 	}
-	return c.SendStatus(http.StatusNoContent)
+	return c.JSON(snapshot)
 }

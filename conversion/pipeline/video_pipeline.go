@@ -4,57 +4,67 @@ import (
 	"os"
 	"path/filepath"
 	"voltaserve/client"
-	"voltaserve/core"
 	"voltaserve/helper"
-	"voltaserve/identifier"
 	"voltaserve/infra"
+	"voltaserve/model"
 	"voltaserve/processor"
-
-	"go.uber.org/zap"
 )
 
 type videoPipeline struct {
-	pipelineIdentifier *identifier.PipelineIdentifier
-	videoProc          *processor.VideoProcessor
-	s3                 *infra.S3Manager
-	apiClient          *client.APIClient
-	logger             *zap.SugaredLogger
+	videoProc *processor.VideoProcessor
+	s3        *infra.S3Manager
+	apiClient *client.APIClient
 }
 
-func NewVideoPipeline() core.Pipeline {
-	logger, err := infra.GetLogger()
-	if err != nil {
-		panic(err)
-	}
+func NewVideoPipeline() model.Pipeline {
 	return &videoPipeline{
-		pipelineIdentifier: identifier.NewPipelineIdentifier(),
-		videoProc:          processor.NewVideoProcessor(),
-		s3:                 infra.NewS3Manager(),
-		apiClient:          client.NewAPIClient(),
-		logger:             logger,
+		videoProc: processor.NewVideoProcessor(),
+		s3:        infra.NewS3Manager(),
+		apiClient: client.NewAPIClient(),
 	}
 }
 
-func (p *videoPipeline) Run(opts core.PipelineRunOptions) error {
+func (p *videoPipeline) Run(opts client.PipelineRunOptions) error {
 	inputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(opts.Key))
 	if err := p.s3.GetFile(opts.Key, inputPath, opts.Bucket); err != nil {
 		return err
 	}
-	defer func(inputPath string, logger *zap.SugaredLogger) {
-		_, err := os.Stat(inputPath)
+	defer func(path string) {
+		_, err := os.Stat(path)
 		if os.IsExist(err) {
-			if err := os.Remove(inputPath); err != nil {
-				logger.Error(err)
+			if err := os.Remove(path); err != nil {
+				infra.GetLogger().Error(err)
 			}
 		}
-	}(inputPath, p.logger)
+	}(inputPath)
+	if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
+		Fields: []string{client.TaskFieldName},
+		Name:   helper.ToPtr("Creating thumbnail."),
+	}); err != nil {
+		return err
+	}
+	if err := p.createThumbnail(inputPath, opts); err != nil {
+		return err
+	}
+	if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
+		Fields: []string{client.TaskFieldName, client.TaskFieldStatus},
+		Name:   helper.ToPtr("Done."),
+		Status: helper.ToPtr(client.TaskStatusSuccess),
+	}); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (p *videoPipeline) createThumbnail(inputPath string, opts client.PipelineRunOptions) error {
 	thumbnail, err := p.videoProc.Base64Thumbnail(inputPath)
 	if err != nil {
 		return err
 	}
-	if err := p.apiClient.UpdateSnapshot(core.SnapshotUpdateOptions{
+	if err := p.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
 		Options:   opts,
-		Thumbnail: &thumbnail,
+		Fields:    []string{client.SnapshotFieldThumbnail},
+		Thumbnail: thumbnail,
 	}); err != nil {
 		return err
 	}

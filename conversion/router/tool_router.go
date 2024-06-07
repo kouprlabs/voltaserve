@@ -5,7 +5,6 @@ import (
 	"os"
 	"path/filepath"
 	"voltaserve/config"
-	"voltaserve/core"
 	"voltaserve/errorpkg"
 	"voltaserve/helper"
 	"voltaserve/service"
@@ -36,10 +35,10 @@ func (r *ToolRouter) AppendRoutes(g fiber.Router) {
 //	@Id				tools_run
 //	@Accept			json
 //	@Produce		json
-//	@Param			body	body	core.ToolRunOptions	true	"Body"
+//	@Param			body	body	service.ToolRunOptions	true	"Body"
 //	@Success		200
-//	@Failure		400	{object}	errorpkg.ErrorResponse
-//	@Failure		500	{object}	errorpkg.ErrorResponse
+//	@Failure		400
+//	@Failure		500
 //	@Router			/tools/run [post]
 func (r *ToolRouter) Run(c *fiber.Ctx) error {
 	apiKey := c.Query("api_key")
@@ -61,13 +60,13 @@ func (r *ToolRouter) Run(c *fiber.Ctx) error {
 			defer os.Remove(inputPath)
 		}
 	}
-	var opts core.ToolRunOptions
+	var opts service.ToolRunOptions
 	if inputPath != "" {
 		if err := json.Unmarshal([]byte(c.FormValue("json")), &opts); err != nil {
 			return err
 		}
 	} else {
-		opts := new(core.ToolRunOptions)
+		opts := new(service.ToolRunOptions)
 		if err := c.BodyParser(opts); err != nil {
 			return err
 		}
@@ -82,10 +81,12 @@ func (r *ToolRouter) Run(c *fiber.Ctx) error {
 			c.Status(500)
 			return c.SendString(err.Error())
 		} else {
-			if outputPath != "" {
-				return c.Download(outputPath)
+			if outputPath != nil {
+				return c.Download(*outputPath)
+			} else if stdout != nil {
+				return c.SendString(*stdout)
 			} else {
-				return c.SendString(stdout)
+				return c.SendStatus(200)
 			}
 		}
 	} else {
@@ -93,8 +94,8 @@ func (r *ToolRouter) Run(c *fiber.Ctx) error {
 			c.Status(500)
 			return c.SendString(err.Error())
 		} else {
-			if outputPath != "" {
-				return c.Download(outputPath)
+			if outputPath != nil {
+				return c.Download(*outputPath)
 			} else {
 				return c.SendStatus(200)
 			}

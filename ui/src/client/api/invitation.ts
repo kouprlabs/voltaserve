@@ -74,6 +74,15 @@ export default class InvitationAPI {
     )
   }
 
+  static useGetIncomingCount(swrOptions?: SWRConfiguration) {
+    const url = '/invitations/incoming/count'
+    return useSWR<number>(
+      url,
+      () => apiFetcher({ url, method: 'GET' }) as Promise<number>,
+      swrOptions,
+    )
+  }
+
   static useGetOutgoing(options?: ListOptions, swrOptions?: SWRConfiguration) {
     const url = `/invitations/outgoing?${this.paramsFromListOptions(options)}`
     return useSWR<List>(
@@ -81,6 +90,26 @@ export default class InvitationAPI {
       () => apiFetcher({ url, method: 'GET' }) as Promise<List>,
       swrOptions,
     )
+  }
+
+  static paramsFromListOptions(options?: ListOptions): URLSearchParams {
+    const params: ListQueryParams = {}
+    if (options?.organizationId) {
+      params.organization_id = options.organizationId.toString()
+    }
+    if (options?.page) {
+      params.page = options.page.toString()
+    }
+    if (options?.size) {
+      params.size = options.size.toString()
+    }
+    if (options?.sortBy) {
+      params.sort_by = options.sortBy.toString()
+    }
+    if (options?.sortOrder) {
+      params.sort_order = options.sortOrder.toString()
+    }
+    return new URLSearchParams(params)
   }
 
   static async delete(id: string) {
@@ -109,25 +138,5 @@ export default class InvitationAPI {
       url: `/invitations/${id}/decline`,
       method: 'POST',
     })
-  }
-
-  static paramsFromListOptions(options?: ListOptions): URLSearchParams {
-    const params: ListQueryParams = {}
-    if (options?.organizationId) {
-      params.organization_id = options.organizationId.toString()
-    }
-    if (options?.page) {
-      params.page = options.page.toString()
-    }
-    if (options?.size) {
-      params.size = options.size.toString()
-    }
-    if (options?.sortBy) {
-      params.sort_by = options.sortBy.toString()
-    }
-    if (options?.sortOrder) {
-      params.sort_order = options.sortOrder.toString()
-    }
-    return new URLSearchParams(params)
   }
 }

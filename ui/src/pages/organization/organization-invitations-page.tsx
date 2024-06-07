@@ -24,7 +24,6 @@ import { geEditorPermission } from '@/client/api/permission'
 import { swrConfig } from '@/client/options'
 import OrganizationInviteMembers from '@/components/organization/organization-invite-members'
 import OrganizationStatus from '@/components/organization/organization-status'
-import prettyDate from '@/helpers/pretty-date'
 import { outgoingInvitationPaginationStorage } from '@/infra/pagination'
 import {
   IconDelete,
@@ -34,6 +33,7 @@ import {
 } from '@/lib/components/icons'
 import PagePagination from '@/lib/components/page-pagination'
 import SectionSpinner from '@/lib/components/section-spinner'
+import prettyDate from '@/lib/helpers/pretty-date'
 import usePagePagination from '@/lib/hooks/page-pagination'
 import { useAppDispatch } from '@/store/hook'
 import { mutateUpdated } from '@/store/ui/outgoing-invitations'

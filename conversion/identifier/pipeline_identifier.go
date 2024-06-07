@@ -1,7 +1,8 @@
 package identifier
 
 import (
-	"voltaserve/core"
+	"voltaserve/client"
+	"voltaserve/model"
 )
 
 type PipelineIdentifier struct {
@@ -14,15 +15,19 @@ func NewPipelineIdentifier() *PipelineIdentifier {
 	}
 }
 
-func (pi *PipelineIdentifier) Identify(opts core.PipelineRunOptions) string {
-	if pi.fileIdent.IsPDF(opts.Key) {
-		return core.PipelinePDF
-	} else if pi.fileIdent.IsOffice(opts.Key) || pi.fileIdent.IsPlainText(opts.Key) {
-		return core.PipelineOffice
-	} else if pi.fileIdent.IsImage(opts.Key) {
-		return core.PipelineImage
-	} else if pi.fileIdent.IsVideo(opts.Key) {
-		return core.PipelineVideo
+func (pi *PipelineIdentifier) Identify(opts client.PipelineRunOptions) string {
+	if opts.PipelineID != nil {
+		return *opts.PipelineID
+	} else {
+		if pi.fileIdent.IsPDF(opts.Key) {
+			return model.PipelinePDF
+		} else if pi.fileIdent.IsOffice(opts.Key) || pi.fileIdent.IsPlainText(opts.Key) {
+			return model.PipelineOffice
+		} else if pi.fileIdent.IsImage(opts.Key) {
+			return model.PipelineImage
+		} else if pi.fileIdent.IsVideo(opts.Key) {
+			return model.PipelineVideo
+		}
 	}
 	return ""
 }

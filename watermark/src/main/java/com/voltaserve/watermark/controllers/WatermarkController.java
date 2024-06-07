@@ -1,5 +1,7 @@
 package com.voltaserve.watermark.controllers;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.voltaserve.watermark.dtos.WatermarkRequest;
 import com.voltaserve.watermark.services.ImageWatermarkService;
 import com.voltaserve.watermark.services.PdfWatermarkService;
@@ -12,7 +14,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.UUID;
+import java.util.Base64;
+import org.springframework.web.bind.annotation.PostMapping;
 
 @RestController
 @RequestMapping("/v2/watermarks")
@@ -28,34 +33,31 @@ public class WatermarkController {
     }
 
     @PostMapping
-    public ResponseEntity<?> generate(
+    public ResponseEntity<?> create(
             @RequestParam("file") MultipartFile file,
             @RequestParam("category") String category,
             @RequestParam("s3_key") String s3Key,
             @RequestParam("s3_bucket") String s3Bucket,
-            @RequestParam("date_time") String dateTime,
-            @RequestParam("username") String username,
-            @RequestParam("workspace") String workspace)
+            @RequestParam("values") String values)
             throws IOException {
 
-        Path path =
-                Paths.get(
-                        System.getProperty("java.io.tmpdir"),
-                        UUID.randomUUID()
-                                + "."
-                                + FilenameUtils.getExtension(file.getOriginalFilename()));
+        Path path = Paths.get(
+                System.getProperty("java.io.tmpdir"),
+                UUID.randomUUID()
+                        + "."
+                        + FilenameUtils.getExtension(file.getOriginalFilename()));
         file.transferTo(path.toFile());
 
-        var request =
-                WatermarkRequest.builder()
-                        .path(path.toString())
-                        .category(category)
-                        .s3Key(s3Key)
-                        .s3Bucket(s3Bucket)
-                        .dateTime(dateTime)
-                        .username(username)
-                        .workspace(workspace)
-                        .build();
+        WatermarkRequest request = WatermarkRequest.builder()
+                .path(path.toString())
+                .category(category)
+                .s3Key(s3Key)
+                .s3Bucket(s3Bucket)
+                .values(new ObjectMapper().readValue(
+                        new String(Base64.getDecoder().decode(values)),
+                        new TypeReference<ArrayList<String>>() {
+                        }))
+                .build();
         try {
             if (request.getCategory().equals("document")) {
                 pdfWatermarkService.generate(request);

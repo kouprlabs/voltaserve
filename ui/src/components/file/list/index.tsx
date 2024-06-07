@@ -20,7 +20,7 @@ import {
   selectionAdded,
   selectionUpdated,
 } from '@/store/ui/files'
-import { uploadsDrawerOpened } from '@/store/ui/uploads-drawer'
+import { drawerDidOpen } from '@/store/ui/uploads'
 import { FileViewType } from '@/types/file'
 import FileMenu, { FileMenuPosition } from '../file-menu'
 import ListDragOverlay from './list-drag-overlay'
@@ -70,7 +70,7 @@ const FileList = ({ list, scale }: FileListProps) => {
           ),
         )
       }
-      dispatch(uploadsDrawerOpened())
+      dispatch(drawerDidOpen())
     },
     [workspaceId, fileId, dispatch],
   )

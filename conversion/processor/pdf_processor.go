@@ -4,8 +4,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"voltaserve/client"
 	"voltaserve/config"
-	"voltaserve/core"
 	"voltaserve/helper"
 	"voltaserve/infra"
 )
@@ -24,42 +24,50 @@ func NewPDFProcessor() *PDFProcessor {
 	}
 }
 
-func (p *PDFProcessor) Base64Thumbnail(inputPath string) (core.ImageBase64, error) {
-	outputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".png")
-	if err := p.imageProc.ThumbnailFromImage(inputPath, 0, p.config.Limits.ImagePreviewMaxHeight, outputPath); err != nil {
-		return core.ImageBase64{}, err
+func (p *PDFProcessor) Base64Thumbnail(inputPath string) (*client.ImageBase64, error) {
+	tmpPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".png")
+	if err := p.imageProc.ThumbnailFromImage(inputPath, 0, p.config.Limits.ImagePreviewMaxHeight, tmpPath); err != nil {
+		return nil, err
 	}
-	b64, err := helper.ImageToBase64(outputPath)
-	if err != nil {
-		return core.ImageBase64{}, err
-	}
-	imageProps, err := p.imageProc.MeasureImage(outputPath)
-	if err != nil {
-		return core.ImageBase64{}, err
-	}
-	if _, err := os.Stat(outputPath); err == nil {
-		if err := os.Remove(outputPath); err != nil {
-			return core.ImageBase64{}, err
+	defer func(path string) {
+		_, err := os.Stat(path)
+		if os.IsExist(err) {
+			if err := os.Remove(path); err != nil {
+				infra.GetLogger().Error(err)
+			}
 		}
+	}(tmpPath)
+	b64, err := helper.ImageToBase64(tmpPath)
+	if err != nil {
+		return nil, err
 	}
-	return core.ImageBase64{
+	imageProps, err := p.imageProc.MeasureImage(tmpPath)
+	if err != nil {
+		return nil, err
+	}
+	return &client.ImageBase64{
 		Base64: b64,
 		Width:  imageProps.Width,
 		Height: imageProps.Height,
 	}, nil
 }
 
-func (p *PDFProcessor) TextFromPDF(inputPath string) (string, error) {
-	outputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".txt")
-	if err := infra.NewCommand().Exec("pdftotext", inputPath, outputPath); err != nil {
-		return "", err
+func (p *PDFProcessor) TextFromPDF(inputPath string) (*string, error) {
+	tmpPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".txt")
+	if err := infra.NewCommand().Exec("pdftotext", inputPath, tmpPath); err != nil {
+		return nil, err
 	}
-	b, err := os.ReadFile(outputPath)
+	defer func(path string) {
+		_, err := os.Stat(path)
+		if os.IsExist(err) {
+			if err := os.Remove(path); err != nil {
+				infra.GetLogger().Error(err)
+			}
+		}
+	}(tmpPath)
+	b, err := os.ReadFile(tmpPath)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	if err := os.Remove(outputPath); err != nil {
-		return "", err
-	}
-	return strings.TrimSpace(string(b)), nil
+	return helper.ToPtr(strings.TrimSpace(string(b))), nil
 }

@@ -34,7 +34,7 @@ func (r *InsightsRouter) AppendRoutes(g fiber.Router) {
 	g.Post("/:id", r.Create)
 	g.Patch("/:id", r.Patch)
 	g.Delete("/:id", r.Delete)
-	g.Get("/:id/metadata", r.GetMetadata)
+	g.Get("/:id/info", r.GetInfo)
 	g.Get("/:id/entities", r.ListEntities)
 }
 
@@ -194,21 +194,21 @@ func (r *InsightsRouter) ListEntities(c *fiber.Ctx) error {
 	return c.JSON(res)
 }
 
-// GetMetadata godoc
+// GetInfo godoc
 //
-//	@Summary		Get Metadata
-//	@Description	Get Metadata
+//	@Summary		Get Info
+//	@Description	Get Info
 //	@Tags			Insights
-//	@Id				insights_get_metadata
+//	@Id				insights_get_info
 //	@Accept			json
 //	@Produce		json
 //	@Param			id	path		string	true	"ID"
-//	@Success		200	{object}	service.InsightsMetadata
+//	@Success		200	{object}	model.InsightsInfo
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
-//	@Router			/insights/{id}/metadata [get]
-func (r *InsightsRouter) GetMetadata(c *fiber.Ctx) error {
-	res, err := r.insightsSvc.GetMetadata(c.Params("id"), GetUserID(c))
+//	@Router			/insights/{id}/info [get]
+func (r *InsightsRouter) GetInfo(c *fiber.Ctx) error {
+	res, err := r.insightsSvc.GetInfo(c.Params("id"), GetUserID(c))
 	if err != nil {
 		return err
 	}

@@ -3,16 +3,21 @@ package pipeline
 import (
 	"errors"
 	"voltaserve/client"
-	"voltaserve/core"
+	"voltaserve/errorpkg"
+	"voltaserve/helper"
 	"voltaserve/identifier"
+	"voltaserve/model"
 )
 
 type Dispatcher struct {
 	pipelineIdentifier *identifier.PipelineIdentifier
-	pdfPipeline        core.Pipeline
-	imagePipeline      core.Pipeline
-	officePipeline     core.Pipeline
-	videoPipeline      core.Pipeline
+	pdfPipeline        model.Pipeline
+	imagePipeline      model.Pipeline
+	officePipeline     model.Pipeline
+	videoPipeline      model.Pipeline
+	insightsPipeline   model.Pipeline
+	mosaicPipeline     model.Pipeline
+	watermarkPipeline  model.Pipeline
 	apiClient          *client.APIClient
 }
 
@@ -23,49 +28,87 @@ func NewDispatcher() *Dispatcher {
 		imagePipeline:      NewImagePipeline(),
 		officePipeline:     NewOfficePipeline(),
 		videoPipeline:      NewVideoPipeline(),
+		insightsPipeline:   NewInsightsPipeline(),
+		mosaicPipeline:     NewMosaicPipeline(),
+		watermarkPipeline:  NewWatermarkPipeline(),
 		apiClient:          client.NewAPIClient(),
 	}
 }
 
-func (d *Dispatcher) Dispatch(opts core.PipelineRunOptions) error {
-	if err := d.apiClient.UpdateSnapshot(core.SnapshotUpdateOptions{
+func (d *Dispatcher) Dispatch(opts client.PipelineRunOptions) error {
+	if err := d.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
 		Options: opts,
-		Status:  core.SnapshotStatusProcessing,
+		Fields:  []string{client.SnapshotFieldStatus},
+		Status:  helper.ToPtr(client.SnapshotStatusProcessing),
 	}); err != nil {
 		return err
 	}
-	p := d.pipelineIdentifier.Identify(opts)
+	if err := d.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
+		Name:   helper.ToPtr("Processing."),
+		Fields: []string{client.TaskFieldStatus},
+		Status: helper.ToPtr(client.TaskStatusRunning),
+	}); err != nil {
+		return err
+	}
+	id := d.pipelineIdentifier.Identify(opts)
 	var err error
-	if p == core.PipelinePDF {
+	if id == model.PipelinePDF {
 		err = d.pdfPipeline.Run(opts)
-	} else if p == core.PipelineOffice {
+	} else if id == model.PipelineOffice {
 		err = d.officePipeline.Run(opts)
-	} else if p == core.PipelineImage {
+	} else if id == model.PipelineImage {
 		err = d.imagePipeline.Run(opts)
-	} else if p == core.PipelineVideo {
+	} else if id == model.PipelineVideo {
 		err = d.videoPipeline.Run(opts)
+	} else if id == model.PipelineInsights {
+		err = d.insightsPipeline.Run(opts)
+	} else if id == model.PipelineMoasic {
+		err = d.mosaicPipeline.Run(opts)
+	} else if id == model.PipelineWatermark {
+		err = d.watermarkPipeline.Run(opts)
 	} else {
-		if err := d.apiClient.UpdateSnapshot(core.SnapshotUpdateOptions{
+		if err := d.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
 			Options: opts,
-			Status:  core.SnapshotStatusError,
+			Fields:  []string{client.SnapshotFieldStatus},
+			Status:  helper.ToPtr(client.SnapshotStatusError),
 		}); err != nil {
 			return err
 		}
-		return errors.New("no matching pipeline found")
+		err = errors.New("no matching pipeline found")
+		if err := d.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
+			Fields: []string{client.TaskFieldStatus, client.TaskFieldError},
+			Status: helper.ToPtr(client.TaskStatusError),
+			Error:  helper.ToPtr(errorpkg.GetUserFriendlyMessage(err.Error(), errorpkg.FallbackMessage)),
+		}); err != nil {
+			return err
+		}
+		return err
 	}
 	if err != nil {
-		if err := d.apiClient.UpdateSnapshot(core.SnapshotUpdateOptions{
+		if err := d.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
 			Options: opts,
-			Status:  core.SnapshotStatusError,
+			Fields:  []string{client.SnapshotFieldStatus},
+			Status:  helper.ToPtr(client.SnapshotStatusError),
+		}); err != nil {
+			return err
+		}
+		if err := d.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
+			Fields: []string{client.TaskFieldStatus, client.TaskFieldError},
+			Status: helper.ToPtr(client.TaskStatusError),
+			Error:  helper.ToPtr(errorpkg.GetUserFriendlyMessage(err.Error(), errorpkg.FallbackMessage)),
 		}); err != nil {
 			return err
 		}
 		return nil
 	} else {
-		if err := d.apiClient.UpdateSnapshot(core.SnapshotUpdateOptions{
+		if err := d.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
 			Options: opts,
-			Status:  core.SnapshotStatusReady,
+			Fields:  []string{client.SnapshotFieldStatus, client.SnapshotFieldTaskID},
+			Status:  helper.ToPtr(client.SnapshotStatusReady),
 		}); err != nil {
+			return err
+		}
+		if err := d.apiClient.DeletTask(opts.TaskID); err != nil {
 			return err
 		}
 		return nil

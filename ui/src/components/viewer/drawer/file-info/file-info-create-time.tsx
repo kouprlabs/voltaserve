@@ -1,7 +1,7 @@
 import { Stat, StatLabel, StatNumber } from '@chakra-ui/react'
 import cx from 'classnames'
 import { File } from '@/client/api/file'
-import prettyDate from '@/helpers/pretty-date'
+import prettyDate from '@/lib/helpers/pretty-date'
 
 export type FileInfoCreateTimeProps = {
   file: File

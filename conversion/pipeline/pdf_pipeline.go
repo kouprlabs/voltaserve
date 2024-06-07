@@ -5,13 +5,11 @@ import (
 	"path/filepath"
 	"voltaserve/client"
 	"voltaserve/config"
-	"voltaserve/core"
 	"voltaserve/helper"
 	"voltaserve/identifier"
 	"voltaserve/infra"
+	"voltaserve/model"
 	"voltaserve/processor"
-
-	"go.uber.org/zap"
 )
 
 type pdfPipeline struct {
@@ -20,70 +18,104 @@ type pdfPipeline struct {
 	s3        *infra.S3Manager
 	apiClient *client.APIClient
 	fileIdent *identifier.FileIdentifier
-	logger    *zap.SugaredLogger
 	config    config.Config
 }
 
-func NewPDFPipeline() core.Pipeline {
-	logger, err := infra.GetLogger()
-	if err != nil {
-		panic(err)
-	}
+func NewPDFPipeline() model.Pipeline {
 	return &pdfPipeline{
 		pdfProc:   processor.NewPDFProcessor(),
 		imageProc: processor.NewImageProcessor(),
 		s3:        infra.NewS3Manager(),
 		apiClient: client.NewAPIClient(),
 		fileIdent: identifier.NewFileIdentifier(),
-		logger:    logger,
 		config:    config.GetConfig(),
 	}
 }
 
-func (p *pdfPipeline) Run(opts core.PipelineRunOptions) error {
+func (p *pdfPipeline) Run(opts client.PipelineRunOptions) error {
 	inputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(opts.Key))
 	if err := p.s3.GetFile(opts.Key, inputPath, opts.Bucket); err != nil {
 		return err
 	}
-	defer func(inputPath string, logger *zap.SugaredLogger) {
-		_, err := os.Stat(inputPath)
+	defer func(path string) {
+		_, err := os.Stat(path)
 		if os.IsExist(err) {
-			if err := os.Remove(inputPath); err != nil {
-				logger.Error(err)
+			if err := os.Remove(path); err != nil {
+				infra.GetLogger().Error(err)
 			}
 		}
-	}(inputPath, p.logger)
+	}(inputPath)
+	if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
+		Fields: []string{client.TaskFieldName},
+		Name:   helper.ToPtr("Creating thumbnail."),
+	}); err != nil {
+		return err
+	}
+	if err := p.createThumbnail(inputPath, opts); err != nil {
+		return err
+	}
+	if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
+		Fields: []string{client.TaskFieldName},
+		Name:   helper.ToPtr("Extracting text."),
+	}); err != nil {
+		return err
+	}
+	if err := p.extractText(inputPath, opts); err != nil {
+		return err
+	}
+	if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
+		Fields: []string{client.TaskFieldName, client.TaskFieldStatus},
+		Name:   helper.ToPtr("Done."),
+		Status: helper.ToPtr(client.TaskStatusSuccess),
+	}); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (p *pdfPipeline) createThumbnail(inputPath string, opts client.PipelineRunOptions) error {
 	thumbnail, err := p.pdfProc.Base64Thumbnail(inputPath)
 	if err != nil {
 		return err
 	}
-	if err := p.apiClient.UpdateSnapshot(core.SnapshotUpdateOptions{
+	if err := p.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
 		Options:   opts,
-		Thumbnail: &thumbnail,
+		Fields:    []string{client.SnapshotFieldThumbnail},
+		Thumbnail: thumbnail,
 	}); err != nil {
 		return err
 	}
+	return nil
+}
+
+func (p *pdfPipeline) extractText(inputPath string, opts client.PipelineRunOptions) error {
 	text, err := p.pdfProc.TextFromPDF(inputPath)
 	if err != nil {
-		p.logger.Named(infra.StrPipeline).Errorw(err.Error())
+		infra.GetLogger().Named(infra.StrPipeline).Errorw(err.Error())
 	}
-	textKey := opts.SnapshotID + "/text.txt"
-	if text != "" && err == nil {
-		if err := p.s3.PutText(textKey, text, "text/plain", opts.Bucket); err != nil {
-			return err
-		}
+	key := opts.SnapshotID + "/text.txt"
+	if text == nil || err != nil {
+		return err
 	}
-	if err := p.apiClient.UpdateSnapshot(core.SnapshotUpdateOptions{
+	if err := p.s3.PutText(key, *text, "text/plain", opts.Bucket); err != nil {
+		return err
+	}
+	stat, err := os.Stat(inputPath)
+	if err != nil {
+		return err
+	}
+	if err := p.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
 		Options: opts,
-		Preview: &core.S3Object{
+		Fields:  []string{client.SnapshotFieldPreview, client.SnapshotFieldText},
+		Preview: &client.S3Object{
 			Bucket: opts.Bucket,
 			Key:    opts.Key,
-			Size:   opts.Size,
+			Size:   helper.ToPtr(stat.Size()),
 		},
-		Text: &core.S3Object{
+		Text: &client.S3Object{
 			Bucket: opts.Bucket,
-			Key:    textKey,
-			Size:   int64(len(text)),
+			Key:    key,
+			Size:   helper.ToPtr(int64(len(*text))),
 		},
 	}); err != nil {
 		return err

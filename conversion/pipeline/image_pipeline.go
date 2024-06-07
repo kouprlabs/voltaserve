@@ -5,13 +5,11 @@ import (
 	"path/filepath"
 	"voltaserve/client"
 	"voltaserve/config"
-	"voltaserve/core"
 	"voltaserve/helper"
 	"voltaserve/identifier"
 	"voltaserve/infra"
+	"voltaserve/model"
 	"voltaserve/processor"
-
-	"go.uber.org/zap"
 )
 
 type imagePipeline struct {
@@ -19,92 +17,148 @@ type imagePipeline struct {
 	s3        *infra.S3Manager
 	apiClient *client.APIClient
 	fileIdent *identifier.FileIdentifier
-	logger    *zap.SugaredLogger
 	config    config.Config
 }
 
-func NewImagePipeline() core.Pipeline {
-	logger, err := infra.GetLogger()
-	if err != nil {
-		panic(err)
-	}
+func NewImagePipeline() model.Pipeline {
 	return &imagePipeline{
 		imageProc: processor.NewImageProcessor(),
 		s3:        infra.NewS3Manager(),
 		apiClient: client.NewAPIClient(),
 		fileIdent: identifier.NewFileIdentifier(),
-		logger:    logger,
 		config:    config.GetConfig(),
 	}
 }
 
-func (p *imagePipeline) Run(opts core.PipelineRunOptions) error {
+func (p *imagePipeline) Run(opts client.PipelineRunOptions) error {
 	inputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(opts.Key))
 	if err := p.s3.GetFile(opts.Key, inputPath, opts.Bucket); err != nil {
 		return err
 	}
-	defer func(inputPath string, logger *zap.SugaredLogger) {
-		_, err := os.Stat(inputPath)
+	defer func(path string) {
+		_, err := os.Stat(path)
 		if os.IsExist(err) {
-			if err := os.Remove(inputPath); err != nil {
-				logger.Error(err)
+			if err := os.Remove(path); err != nil {
+				infra.GetLogger().Error(err)
 			}
 		}
-	}(inputPath, p.logger)
-	imageProps, err := p.imageProc.MeasureImage(inputPath)
+	}(inputPath)
+	if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
+		Fields: []string{client.TaskFieldName},
+		Name:   helper.ToPtr("Measuring image dimensions."),
+	}); err != nil {
+		return err
+	}
+	imageProps, err := p.measureImageDimensions(inputPath, opts)
 	if err != nil {
 		return err
 	}
-	updateOpts := core.SnapshotUpdateOptions{
-		Options: opts,
-		Original: &core.S3Object{
-			Bucket: opts.Bucket,
-			Key:    opts.Key,
-			Size:   opts.Size,
-			Image:  &imageProps,
-		},
-	}
+	var imagePath string
 	if filepath.Ext(inputPath) == ".tiff" {
-		jpegPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".jpg")
-		if err := p.imageProc.ConvertImage(inputPath, jpegPath); err != nil {
+		if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
+			Fields: []string{client.TaskFieldName},
+			Name:   helper.ToPtr("Converting TIFF image to JPEG format."),
+		}); err != nil {
 			return err
 		}
-		defer func(jpegPath string, logger *zap.SugaredLogger) {
-			_, err := os.Stat(jpegPath)
-			if os.IsExist(err) {
-				if err := os.Remove(jpegPath); err != nil {
-					logger.Error(err)
-				}
-			}
-		}(jpegPath, p.logger)
-		stat, err := os.Stat(jpegPath)
+		jpegPath, err := p.convertTIFFToJPEG(inputPath, *imageProps, opts)
 		if err != nil {
 			return err
 		}
-		thumbnail, err := p.imageProc.Base64Thumbnail(jpegPath)
-		if err != nil {
-			return err
-		}
-		updateOpts.Thumbnail = &thumbnail
-		updateOpts.Preview = &core.S3Object{
-			Bucket: opts.Bucket,
-			Key:    opts.SnapshotID + "/preview.jpg",
-			Size:   stat.Size(),
-			Image:  &imageProps,
-		}
-		if err := p.s3.PutFile(updateOpts.Preview.Key, jpegPath, helper.DetectMimeFromFile(jpegPath), updateOpts.Preview.Bucket); err != nil {
-			return err
-		}
+		imagePath = *jpegPath
 	} else {
-		updateOpts.Preview = updateOpts.Original
-		thumbnail, err := p.imageProc.Base64Thumbnail(inputPath)
-		if err != nil {
-			return err
-		}
-		updateOpts.Thumbnail = &thumbnail
+		imagePath = inputPath
 	}
-	if err := p.apiClient.UpdateSnapshot(updateOpts); err != nil {
+	if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
+		Fields: []string{client.TaskFieldName},
+		Name:   helper.ToPtr("Creating thumbnail."),
+	}); err != nil {
+		return err
+	}
+	if err := p.createThumbnail(imagePath, opts); err != nil {
+		return err
+	}
+	if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
+		Fields: []string{client.TaskFieldName, client.TaskFieldStatus},
+		Name:   helper.ToPtr("Done."),
+		Status: helper.ToPtr(client.TaskStatusSuccess),
+	}); err != nil {
 		return err
 	}
 	return nil
+}
+
+func (p *imagePipeline) measureImageDimensions(inputPath string, opts client.PipelineRunOptions) (*client.ImageProps, error) {
+	imageProps, err := p.imageProc.MeasureImage(inputPath)
+	if err != nil {
+		return nil, err
+	}
+	stat, err := os.Stat(inputPath)
+	if err != nil {
+		return nil, err
+	}
+	if err := p.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
+		Options: opts,
+		Fields:  []string{client.SnapshotFieldOriginal},
+		Original: &client.S3Object{
+			Bucket: opts.Bucket,
+			Key:    opts.Key,
+			Size:   helper.ToPtr(stat.Size()),
+			Image:  imageProps,
+		},
+	}); err != nil {
+		return nil, err
+	}
+	return imageProps, nil
+}
+
+func (p *imagePipeline) createThumbnail(inputPath string, opts client.PipelineRunOptions) error {
+	thumbnail, err := p.imageProc.Base64Thumbnail(inputPath)
+	if err != nil {
+		return err
+	}
+	if err := p.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
+		Options:   opts,
+		Fields:    []string{client.SnapshotFieldThumbnail},
+		Thumbnail: thumbnail,
+	}); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (p *imagePipeline) convertTIFFToJPEG(inputPath string, imageProps client.ImageProps, opts client.PipelineRunOptions) (*string, error) {
+	jpegPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".jpg")
+	if err := p.imageProc.ConvertImage(inputPath, jpegPath); err != nil {
+		return nil, err
+	}
+	defer func(path string) {
+		_, err := os.Stat(path)
+		if os.IsExist(err) {
+			if err := os.Remove(path); err != nil {
+				infra.GetLogger().Error(err)
+			}
+		}
+	}(jpegPath)
+	stat, err := os.Stat(jpegPath)
+	if err != nil {
+		return nil, err
+	}
+	s3Object := &client.S3Object{
+		Bucket: opts.Bucket,
+		Key:    opts.SnapshotID + "/preview.jpg",
+		Size:   helper.ToPtr(stat.Size()),
+		Image:  &imageProps,
+	}
+	if err := p.s3.PutFile(s3Object.Key, jpegPath, helper.DetectMimeFromFile(jpegPath), s3Object.Bucket); err != nil {
+		return nil, err
+	}
+	if err := p.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
+		Options: opts,
+		Fields:  []string{client.SnapshotFieldPreview},
+		Preview: s3Object,
+	}); err != nil {
+		return nil, err
+	}
+	return &jpegPath, nil
 }

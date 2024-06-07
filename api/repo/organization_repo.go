@@ -11,11 +11,6 @@ import (
 	"gorm.io/gorm"
 )
 
-type OrganizationInsertOptions struct {
-	ID   string
-	Name string
-}
-
 type OrganizationRepo interface {
 	Insert(opts OrganizationInsertOptions) (model.Organization, error)
 	Find(id string) (model.Organization, error)
@@ -104,10 +99,6 @@ func (o *organizationEntity) SetName(name string) {
 	o.Name = name
 }
 
-func (o *organizationEntity) SetUpdateTime(updateTime *string) {
-	o.UpdateTime = updateTime
-}
-
 type organizationRepo struct {
 	db             *gorm.DB
 	groupRepo      *groupRepo
@@ -120,6 +111,11 @@ func newOrganizationRepo() *organizationRepo {
 		groupRepo:      newGroupRepo(),
 		permissionRepo: newPermissionRepo(),
 	}
+}
+
+type OrganizationInsertOptions struct {
+	ID   string
+	Name string
 }
 
 func (repo *organizationRepo) Insert(opts OrganizationInsertOptions) (model.Organization, error) {

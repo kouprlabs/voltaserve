@@ -2,8 +2,8 @@ import { useEffect } from 'react'
 import { Outlet } from 'react-router-dom'
 import { useToast } from '@chakra-ui/react'
 import { cx } from '@emotion/css'
+import AppBar from '@/components/app-bar'
 import Logo from '@/components/common/logo'
-import TopBar from '@/components/top-bar'
 import { IconGroup, IconFlag, IconWorkspaces } from '@/lib/components/icons'
 import Shell from '@/lib/components/shell'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
@@ -33,7 +33,7 @@ const LayoutShell = () => {
           <Logo />
         </div>
       }
-      topBar={<TopBar />}
+      topBar={<AppBar />}
       items={[
         {
           href: '/workspace',

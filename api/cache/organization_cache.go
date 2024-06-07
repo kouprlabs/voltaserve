@@ -38,11 +38,11 @@ func (c *OrganizationCache) Get(id string) (model.Organization, error) {
 	if err != nil {
 		return c.Refresh(id)
 	}
-	var org = repo.NewOrganization()
-	if err = json.Unmarshal([]byte(value), &org); err != nil {
+	res := repo.NewOrganization()
+	if err = json.Unmarshal([]byte(value), &res); err != nil {
 		return nil, err
 	}
-	return org, nil
+	return res, nil
 }
 
 func (c *OrganizationCache) Refresh(id string) (model.Organization, error) {

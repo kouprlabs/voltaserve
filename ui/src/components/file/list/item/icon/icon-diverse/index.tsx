@@ -1,6 +1,6 @@
 import { useColorMode } from '@chakra-ui/react'
 import { File } from '@/client/api/file'
-import * as fe from '@/helpers/file-extension'
+import * as fe from '@/lib/helpers/file-extension'
 import DarkArchiveSvg from './assets/dark-icon-archive.svg'
 import DarkAudioSvg from './assets/dark-icon-audio.svg'
 import DarkCodeSvg from './assets/dark-icon-code.svg'

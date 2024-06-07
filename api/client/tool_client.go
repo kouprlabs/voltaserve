@@ -13,25 +13,17 @@ import (
 	"strings"
 	"voltaserve/config"
 	"voltaserve/helper"
-	"voltaserve/infra"
+	"voltaserve/log"
 	"voltaserve/model"
-
-	"go.uber.org/zap"
 )
 
 type ToolClient struct {
 	config config.Config
-	logger *zap.SugaredLogger
 }
 
 func NewToolClient() *ToolClient {
-	logger, err := infra.GetLogger()
-	if err != nil {
-		panic(err)
-	}
 	return &ToolClient{
 		config: config.GetConfig(),
-		logger: logger,
 	}
 }
 
@@ -55,7 +47,7 @@ func (cl *ToolClient) ResizeImage(inputPath string, width int, height int, outpu
 	}
 	defer func(file *os.File) {
 		if err := file.Close(); err != nil {
-			cl.logger.Error(err)
+			log.GetLogger().Error(err)
 		}
 	}(file)
 	buf := &bytes.Buffer{}
@@ -97,7 +89,7 @@ func (cl *ToolClient) ResizeImage(inputPath string, width int, height int, outpu
 	}
 	defer func(Body io.ReadCloser) {
 		if err := Body.Close(); err != nil {
-			cl.logger.Error(err)
+			log.GetLogger().Error(err)
 		}
 	}(resp.Body)
 	if resp.StatusCode != http.StatusOK {
@@ -109,7 +101,7 @@ func (cl *ToolClient) ResizeImage(inputPath string, width int, height int, outpu
 	}
 	defer func(outputFile *os.File) {
 		if err := outputFile.Close(); err != nil {
-			cl.logger.Error(err)
+			log.GetLogger().Error(err)
 		}
 	}(outputFile)
 	_, err = io.Copy(outputFile, resp.Body)
@@ -139,7 +131,7 @@ func (cl *ToolClient) ThumbnailFromImage(inputPath string, width int, height int
 	}
 	defer func(file *os.File) {
 		if err := file.Close(); err != nil {
-			cl.logger.Error(err)
+			log.GetLogger().Error(err)
 		}
 	}(file)
 	buf := &bytes.Buffer{}
@@ -181,7 +173,7 @@ func (cl *ToolClient) ThumbnailFromImage(inputPath string, width int, height int
 	}
 	defer func(Body io.ReadCloser) {
 		if err := Body.Close(); err != nil {
-			cl.logger.Error(err)
+			log.GetLogger().Error(err)
 		}
 	}(resp.Body)
 	if resp.StatusCode != http.StatusOK {
@@ -193,7 +185,7 @@ func (cl *ToolClient) ThumbnailFromImage(inputPath string, width int, height int
 	}
 	defer func(outputFile *os.File) {
 		if err := outputFile.Close(); err != nil {
-			cl.logger.Error(err)
+			log.GetLogger().Error(err)
 		}
 	}(outputFile)
 	_, err = io.Copy(outputFile, resp.Body)
@@ -210,7 +202,7 @@ func (cl *ToolClient) ConvertImage(inputPath string, outputPath string) error {
 	}
 	defer func(file *os.File) {
 		if err := file.Close(); err != nil {
-			cl.logger.Error(err)
+			log.GetLogger().Error(err)
 		}
 	}(file)
 	buf := &bytes.Buffer{}
@@ -252,7 +244,7 @@ func (cl *ToolClient) ConvertImage(inputPath string, outputPath string) error {
 	}
 	defer func(Body io.ReadCloser) {
 		if err := Body.Close(); err != nil {
-			cl.logger.Error(err)
+			log.GetLogger().Error(err)
 		}
 	}(resp.Body)
 	if resp.StatusCode != http.StatusOK {
@@ -264,7 +256,7 @@ func (cl *ToolClient) ConvertImage(inputPath string, outputPath string) error {
 	}
 	defer func(outputFile *os.File) {
 		if err := outputFile.Close(); err != nil {
-			cl.logger.Error(err)
+			log.GetLogger().Error(err)
 		}
 	}(outputFile)
 	_, err = io.Copy(outputFile, resp.Body)
@@ -281,7 +273,7 @@ func (cl *ToolClient) RemoveAlphaChannel(inputPath string, outputPath string) er
 	}
 	defer func(file *os.File) {
 		if err := file.Close(); err != nil {
-			cl.logger.Error(err)
+			log.GetLogger().Error(err)
 		}
 	}(file)
 	buf := &bytes.Buffer{}
@@ -323,7 +315,7 @@ func (cl *ToolClient) RemoveAlphaChannel(inputPath string, outputPath string) er
 	}
 	defer func(Body io.ReadCloser) {
 		if err := Body.Close(); err != nil {
-			cl.logger.Error(err)
+			log.GetLogger().Error(err)
 		}
 	}(resp.Body)
 	if resp.StatusCode != http.StatusOK {
@@ -335,7 +327,7 @@ func (cl *ToolClient) RemoveAlphaChannel(inputPath string, outputPath string) er
 	}
 	defer func(outputFile *os.File) {
 		if err := outputFile.Close(); err != nil {
-			cl.logger.Error(err)
+			log.GetLogger().Error(err)
 		}
 	}(outputFile)
 	_, err = io.Copy(outputFile, resp.Body)
@@ -357,7 +349,7 @@ func (cl *ToolClient) MeasureImage(inputPath string) (*model.ImageProps, error) 
 	}
 	defer func(file *os.File) {
 		if err := file.Close(); err != nil {
-			cl.logger.Error(err)
+			log.GetLogger().Error(err)
 		}
 	}(file)
 	buf := &bytes.Buffer{}
@@ -399,7 +391,7 @@ func (cl *ToolClient) MeasureImage(inputPath string) (*model.ImageProps, error) 
 	}
 	defer func(Body io.ReadCloser) {
 		if err := Body.Close(); err != nil {
-			cl.logger.Error(err)
+			log.GetLogger().Error(err)
 		}
 	}(resp.Body)
 	if resp.StatusCode != http.StatusOK {
@@ -430,7 +422,7 @@ func (cl *ToolClient) TSVFromImage(inputPath string, model string) (string, erro
 	}
 	defer func(file *os.File) {
 		if err := file.Close(); err != nil {
-			cl.logger.Error(err)
+			log.GetLogger().Error(err)
 		}
 	}(file)
 	buf := &bytes.Buffer{}
@@ -472,7 +464,7 @@ func (cl *ToolClient) TSVFromImage(inputPath string, model string) (string, erro
 	}
 	defer func(Body io.ReadCloser) {
 		if err := Body.Close(); err != nil {
-			cl.logger.Error(err)
+			log.GetLogger().Error(err)
 		}
 	}(resp.Body)
 	if resp.StatusCode != http.StatusOK {
@@ -492,7 +484,7 @@ func (cl *ToolClient) TextFromImage(inputPath string, model string) (string, err
 	}
 	defer func(file *os.File) {
 		if err := file.Close(); err != nil {
-			cl.logger.Error(err)
+			log.GetLogger().Error(err)
 		}
 	}(file)
 	buf := &bytes.Buffer{}
@@ -534,7 +526,7 @@ func (cl *ToolClient) TextFromImage(inputPath string, model string) (string, err
 	}
 	defer func(Body io.ReadCloser) {
 		if err := Body.Close(); err != nil {
-			cl.logger.Error(err)
+			log.GetLogger().Error(err)
 		}
 	}(resp.Body)
 	if resp.StatusCode != http.StatusOK {
@@ -554,7 +546,7 @@ func (cl *ToolClient) DPIFromImage(inputPath string) (int, error) {
 	}
 	defer func(file *os.File) {
 		if err := file.Close(); err != nil {
-			cl.logger.Error(err)
+			log.GetLogger().Error(err)
 		}
 	}(file)
 	reqBuf := &bytes.Buffer{}
@@ -596,7 +588,7 @@ func (cl *ToolClient) DPIFromImage(inputPath string) (int, error) {
 	}
 	defer func(Body io.ReadCloser) {
 		if err := Body.Close(); err != nil {
-			cl.logger.Error(err)
+			log.GetLogger().Error(err)
 		}
 	}(resp.Body)
 	if resp.StatusCode != http.StatusOK {
@@ -629,7 +621,7 @@ func (cl *ToolClient) OCRFromPDF(inputPath string, language *string, dpi *int) (
 	}
 	defer func(file *os.File) {
 		if err := file.Close(); err != nil {
-			cl.logger.Error(err)
+			log.GetLogger().Error(err)
 		}
 	}(file)
 	buf := &bytes.Buffer{}
@@ -684,7 +676,7 @@ func (cl *ToolClient) OCRFromPDF(inputPath string, language *string, dpi *int) (
 	}
 	defer func(Body io.ReadCloser) {
 		if err := Body.Close(); err != nil {
-			cl.logger.Error(err)
+			log.GetLogger().Error(err)
 		}
 	}(resp.Body)
 	if resp.StatusCode != http.StatusOK {
@@ -697,7 +689,7 @@ func (cl *ToolClient) OCRFromPDF(inputPath string, language *string, dpi *int) (
 	}
 	defer func(outputFile *os.File) {
 		if err := outputFile.Close(); err != nil {
-			cl.logger.Error(err)
+			log.GetLogger().Error(err)
 		}
 	}(outputFile)
 	_, err = io.Copy(outputFile, resp.Body)
@@ -714,7 +706,7 @@ func (cl *ToolClient) TextFromPDF(inputPath string) (string, error) {
 	}
 	defer func(file *os.File) {
 		if err := file.Close(); err != nil {
-			cl.logger.Error(err)
+			log.GetLogger().Error(err)
 		}
 	}(file)
 	buf := &bytes.Buffer{}
@@ -756,7 +748,7 @@ func (cl *ToolClient) TextFromPDF(inputPath string) (string, error) {
 	}
 	defer func(Body io.ReadCloser) {
 		if err := Body.Close(); err != nil {
-			cl.logger.Error(err)
+			log.GetLogger().Error(err)
 		}
 	}(resp.Body)
 	if resp.StatusCode != http.StatusOK {
@@ -769,7 +761,7 @@ func (cl *ToolClient) TextFromPDF(inputPath string) (string, error) {
 	}
 	defer func(outputFile *os.File) {
 		if err := outputFile.Close(); err != nil {
-			cl.logger.Error(err)
+			log.GetLogger().Error(err)
 		}
 	}(outputFile)
 	_, err = io.Copy(outputFile, resp.Body)

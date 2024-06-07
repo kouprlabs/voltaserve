@@ -8,24 +8,16 @@ import (
 	"net/http"
 	"os"
 	"voltaserve/config"
-	"voltaserve/infra"
-
-	"go.uber.org/zap"
+	"voltaserve/log"
 )
 
 type WatermarkClient struct {
 	config config.Config
-	logger *zap.SugaredLogger
 }
 
 func NewWatermarkClient() *WatermarkClient {
-	logger, err := infra.GetLogger()
-	if err != nil {
-		panic(err)
-	}
 	return &WatermarkClient{
 		config: config.GetConfig(),
-		logger: logger,
 	}
 }
 
@@ -46,7 +38,7 @@ func (cl *WatermarkClient) Create(opts WatermarkCreateOptions) error {
 	}
 	defer func(file *os.File) {
 		if err := file.Close(); err != nil {
-			cl.logger.Error(err)
+			log.GetLogger().Error(err)
 		}
 	}(file)
 	buf := &bytes.Buffer{}
@@ -91,7 +83,7 @@ func (cl *WatermarkClient) Create(opts WatermarkCreateOptions) error {
 	}
 	defer func(Body io.ReadCloser) {
 		if err := Body.Close(); err != nil {
-			cl.logger.Error(err)
+			log.GetLogger().Error(err)
 		}
 	}(resp.Body)
 	if resp.StatusCode != http.StatusOK {
