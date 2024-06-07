@@ -44,7 +44,8 @@ func (p *watermarkPipeline) Run(opts client.PipelineRunOptions) error {
 		}
 	}(inputPath)
 	if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
-		Name: helper.ToPtr("Applying watermark."),
+		Fields: []string{client.TaskFieldName},
+		Name:   helper.ToPtr("Applying watermark."),
 	}); err != nil {
 		return err
 	}
@@ -52,6 +53,7 @@ func (p *watermarkPipeline) Run(opts client.PipelineRunOptions) error {
 		return err
 	}
 	if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
+		Fields: []string{client.TaskFieldName, client.TaskFieldStatus},
 		Name:   helper.ToPtr("Done."),
 		Status: helper.ToPtr(client.TaskStatusSuccess),
 	}); err != nil {
@@ -90,6 +92,7 @@ func (p *watermarkPipeline) create(inputPath string, opts client.PipelineRunOpti
 	}
 	if err := p.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
 		Options: opts,
+		Fields:  []string{client.SnapshotFieldWatermark},
 		Watermark: &client.S3Object{
 			Key:    key,
 			Bucket: opts.Bucket,

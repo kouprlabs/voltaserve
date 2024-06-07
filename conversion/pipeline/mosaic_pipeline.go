@@ -44,7 +44,8 @@ func (p *moasicPipeline) Run(opts client.PipelineRunOptions) error {
 		}
 	}(inputPath)
 	if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
-		Name: helper.ToPtr("Creating mosaic."),
+		Fields: []string{client.TaskFieldName},
+		Name:   helper.ToPtr("Creating mosaic."),
 	}); err != nil {
 		return err
 	}
@@ -52,6 +53,7 @@ func (p *moasicPipeline) Run(opts client.PipelineRunOptions) error {
 		return err
 	}
 	if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
+		Fields: []string{client.TaskFieldName, client.TaskFieldStatus},
 		Name:   helper.ToPtr("Done."),
 		Status: helper.ToPtr(client.TaskStatusSuccess),
 	}); err != nil {
@@ -71,6 +73,7 @@ func (p *moasicPipeline) create(inputPath string, opts client.PipelineRunOptions
 		}
 		if err := p.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
 			Options: opts,
+			Fields:  []string{client.SnapshotFieldMosaic},
 			Mosaic: &client.S3Object{
 				Key:    filepath.FromSlash(opts.SnapshotID + "/mosaic.json"),
 				Bucket: opts.Bucket,

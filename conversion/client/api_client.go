@@ -47,16 +47,18 @@ type PipelineRunOptions struct {
 }
 
 type SnapshotPatchOptions struct {
-	Options   PipelineRunOptions `json:"options,omitempty"`
-	Original  *S3Object          `json:"original,omitempty"`
-	Preview   *S3Object          `json:"preview,omitempty"`
-	Text      *S3Object          `json:"text,omitempty"`
-	OCR       *S3Object          `json:"ocr,omitempty"`
-	Entities  *S3Object          `json:"entities,omitempty"`
-	Mosaic    *S3Object          `json:"mosaic,omitempty"`
-	Watermark *S3Object          `json:"watermark,omitempty"`
-	Thumbnail *ImageBase64       `json:"thumbnail,omitempty"`
-	Status    *string            `json:"status,omitempty"`
+	Options   PipelineRunOptions `json:"options"`
+	Fields    []string           `json:"fields"`
+	Original  *S3Object          `json:"original"`
+	Preview   *S3Object          `json:"preview"`
+	Text      *S3Object          `json:"text"`
+	OCR       *S3Object          `json:"ocr"`
+	Entities  *S3Object          `json:"entities"`
+	Mosaic    *S3Object          `json:"mosaic"`
+	Watermark *S3Object          `json:"watermark"`
+	Thumbnail *ImageBase64       `json:"thumbnail"`
+	Status    *string            `json:"status"`
+	TaskID    *string            `json:"taskID"`
 }
 
 const (
@@ -64,6 +66,20 @@ const (
 	SnapshotStatusProcessing = "processing"
 	SnapshotStatusReady      = "ready"
 	SnapshotStatusError      = "error"
+)
+
+const (
+	SnapshotFieldOriginal  = "original"
+	SnapshotFieldPreview   = "preview"
+	SnapshotFieldText      = "text"
+	SnapshotFieldOCR       = "ocr"
+	SnapshotFieldEntities  = "entities"
+	SnapshotFieldMosaic    = "mosaic"
+	SnapshotFieldWatermark = "watermark"
+	SnapshotFieldThumbnail = "thumbnail"
+	SnapshotFieldStatus    = "status"
+	SnapshotFieldLanguage  = "language"
+	SnapshotFieldTaskID    = "taskID"
 )
 
 type ImageBase64 struct {
@@ -144,14 +160,25 @@ func (cl *APIClient) CreateTask(opts TaskCreateOptions) error {
 }
 
 type TaskPatchOptions struct {
-	Name            *string           `json:"name,omitempty"`
-	Error           *string           `json:"error,omitempty"`
-	Percentage      *int              `json:"percentage,omitempty"`
-	IsIndeterminate *bool             `json:"isIndeterminate,omitempty"`
-	UserID          *string           `json:"userId,omitempty"`
-	Status          *string           `json:"status,omitempty"`
-	Payload         map[string]string `json:"payload,omitempty"`
+	Fields          []string          `json:"fields"`
+	Name            *string           `json:"name"`
+	Error           *string           `json:"error"`
+	Percentage      *int              `json:"percentage"`
+	IsIndeterminate *bool             `json:"isIndeterminate"`
+	UserID          *string           `json:"userId"`
+	Status          *string           `json:"status"`
+	Payload         map[string]string `json:"payload"`
 }
+
+const (
+	TaskFieldName            = "name"
+	TaskFieldError           = "error"
+	TaskFieldPercentage      = "percentage"
+	TaskFieldIsIndeterminate = "isIndeterminate"
+	TaskFieldUserID          = "userId"
+	TaskFieldStatus          = "status"
+	TaskFieldPayload         = "payload"
+)
 
 func (cl *APIClient) PatchTask(id string, opts TaskPatchOptions) error {
 	body, err := json.Marshal(opts)

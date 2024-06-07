@@ -61,6 +61,7 @@ type Snapshot struct {
 	Language   *string    `json:"language,omitempty"`
 	Status     string     `json:"status,omitempty"`
 	IsActive   bool       `json:"isActive"`
+	TaskID     *string    `json:"taskId,omitempty"`
 	CreateTime string     `json:"createTime"`
 	UpdateTime *string    `json:"updateTime,omitempty"`
 }
@@ -259,15 +260,17 @@ func (svc *SnapshotService) Detach(id string, opts SnapshotDetachOptions, userID
 
 type SnapshotPatchOptions struct {
 	Options   client.PipelineRunOptions `json:"options"`
-	Original  *model.S3Object           `json:"original,omitempty"`
-	Preview   *model.S3Object           `json:"preview,omitempty"`
-	Text      *model.S3Object           `json:"text,omitempty"`
-	OCR       *model.S3Object           `json:"ocr,omitempty"`
-	Entities  *model.S3Object           `json:"entities,omitempty"`
-	Mosaic    *model.S3Object           `json:"mosaic,omitempty"`
-	Watermark *model.S3Object           `json:"watermark,omitempty"`
-	Thumbnail *model.Thumbnail          `json:"thumbnail,omitempty"`
-	Status    *string                   `json:"status,omitempty"`
+	Fields    []string                  `json:"fields"`
+	Original  *model.S3Object           `json:"original"`
+	Preview   *model.S3Object           `json:"preview"`
+	Text      *model.S3Object           `json:"text"`
+	OCR       *model.S3Object           `json:"ocr"`
+	Entities  *model.S3Object           `json:"entities"`
+	Mosaic    *model.S3Object           `json:"mosaic"`
+	Watermark *model.S3Object           `json:"watermark"`
+	Thumbnail *model.Thumbnail          `json:"thumbnail"`
+	Status    *string                   `json:"status"`
+	TaskID    *string                   `json:"taskId"`
 }
 
 func (svc *SnapshotService) Patch(id string, opts SnapshotPatchOptions) (*Snapshot, error) {
@@ -276,6 +279,7 @@ func (svc *SnapshotService) Patch(id string, opts SnapshotPatchOptions) (*Snapsh
 	}
 	if err := svc.snapshotRepo.Update(id, repo.SnapshotUpdateOptions{
 		Original:  opts.Original,
+		Fields:    opts.Fields,
 		Preview:   opts.Preview,
 		Text:      opts.Text,
 		OCR:       opts.OCR,
@@ -307,6 +311,7 @@ func (mp *SnapshotMapper) mapOne(m model.Snapshot) *Snapshot {
 		Version:    m.GetVersion(),
 		Status:     m.GetStatus(),
 		Language:   m.GetLanguage(),
+		TaskID:     m.GetTaskID(),
 		CreateTime: m.GetCreateTime(),
 		UpdateTime: m.GetUpdateTime(),
 	}

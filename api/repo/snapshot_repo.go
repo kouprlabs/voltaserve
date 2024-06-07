@@ -5,6 +5,7 @@ import (
 	"errors"
 	"time"
 	"voltaserve/errorpkg"
+	"voltaserve/helper"
 	"voltaserve/infra"
 	"voltaserve/log"
 	"voltaserve/model"
@@ -54,6 +55,7 @@ type snapshotEntity struct {
 	Thumbnail  datatypes.JSON `json:"thumbnail,omitempty" gorm:"column:thumbnail"`
 	Status     string         `json:"status,omitempty" gorm:"column,status"`
 	Language   *string        `json:"language,omitempty" gorm:"column:language"`
+	TaskID     *string        `json:"taskID,omitempty" gorm:"column:task_id"`
 	CreateTime string         `json:"createTime" gorm:"column:create_time"`
 	UpdateTime *string        `json:"updateTime,omitempty" gorm:"column:update_time"`
 }
@@ -183,6 +185,10 @@ func (s *snapshotEntity) GetStatus() string {
 
 func (s *snapshotEntity) GetLanguage() *string {
 	return s.Language
+}
+
+func (s *snapshotEntity) GetTaskID() *string {
+	return s.TaskID
 }
 
 func (s *snapshotEntity) SetID(id string) {
@@ -321,6 +327,10 @@ func (s *snapshotEntity) SetLanguage(language string) {
 	s.Language = &language
 }
 
+func (s *snapshotEntity) SetTaskID(taskID *string) {
+	s.TaskID = taskID
+}
+
 func (s *snapshotEntity) HasOriginal() bool {
 	return s.Original != nil
 }
@@ -430,6 +440,7 @@ func (repo *snapshotRepo) Delete(id string) error {
 }
 
 type SnapshotUpdateOptions struct {
+	Fields    []string `json:"fields"`
 	Original  *model.S3Object
 	Preview   *model.S3Object
 	Text      *model.S3Object
@@ -440,42 +451,60 @@ type SnapshotUpdateOptions struct {
 	Thumbnail *model.Thumbnail
 	Status    *string
 	Language  *string
+	TaskID    *string
 }
+
+const (
+	SnapshotFieldOriginal  = "original"
+	SnapshotFieldPreview   = "preview"
+	SnapshotFieldText      = "text"
+	SnapshotFieldOCR       = "ocr"
+	SnapshotFieldEntities  = "entities"
+	SnapshotFieldMosaic    = "mosaic"
+	SnapshotFieldWatermark = "watermark"
+	SnapshotFieldThumbnail = "thumbnail"
+	SnapshotFieldStatus    = "status"
+	SnapshotFieldLanguage  = "language"
+	SnapshotFieldTaskID    = "taskID"
+)
 
 func (repo *snapshotRepo) Update(id string, opts SnapshotUpdateOptions) error {
 	snapshot, err := repo.find(id)
 	if err != nil {
 		return err
 	}
-	if opts.Original != nil {
+	if helper.Includes(opts.Fields, SnapshotFieldOriginal) {
 		snapshot.SetOriginal(opts.Original)
 	}
-	if opts.Preview != nil {
+	if helper.Includes(opts.Fields, SnapshotFieldPreview) {
 		snapshot.SetPreview(opts.Preview)
 	}
-	if opts.Text != nil {
+	if helper.Includes(opts.Fields, SnapshotFieldText) {
 		snapshot.SetText(opts.Text)
 	}
-	if opts.OCR != nil {
+	if helper.Includes(opts.Fields, SnapshotFieldOCR) {
 		snapshot.SetOCR(opts.OCR)
 	}
-	if opts.Entities != nil {
+	if helper.Includes(opts.Fields, SnapshotFieldEntities) {
 		snapshot.SetEntities(opts.Entities)
 	}
-	if opts.Mosaic != nil {
+	if helper.Includes(opts.Fields, SnapshotFieldMosaic) {
 		snapshot.SetMosaic(opts.Mosaic)
 	}
-	if opts.Watermark != nil {
+	if helper.Includes(opts.Fields, SnapshotFieldWatermark) {
 		snapshot.SetWatermark(opts.Watermark)
 	}
-	if opts.Thumbnail != nil {
+	if helper.Includes(opts.Fields, SnapshotFieldThumbnail) {
 		snapshot.SetThumbnail(opts.Thumbnail)
 	}
-	if opts.Status != nil {
+	if helper.Includes(opts.Fields, SnapshotFieldStatus) {
 		snapshot.SetStatus(*opts.Status)
 	}
-	if opts.Language != nil {
+	if helper.Includes(opts.Fields, SnapshotFieldLanguage) {
 		snapshot.SetLanguage(*opts.Language)
+	}
+	if helper.Includes(opts.Fields, SnapshotFieldTaskID) {
+		snapshot.SetTaskID(opts.TaskID)
 	}
 	if db := repo.db.Save(&snapshot); db.Error != nil {
 		return db.Error

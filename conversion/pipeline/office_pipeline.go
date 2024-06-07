@@ -45,7 +45,8 @@ func (p *officePipeline) Run(opts client.PipelineRunOptions) error {
 		}
 	}(inputPath)
 	if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
-		Name: helper.ToPtr("Converting to PDF."),
+		Fields: []string{client.TaskFieldName},
+		Name:   helper.ToPtr("Converting to PDF."),
 	}); err != nil {
 		return err
 	}
@@ -86,6 +87,7 @@ func (p *officePipeline) convertToPDF(inputPath string, opts client.PipelineRunO
 	}
 	if err := p.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
 		Options: opts,
+		Fields:  []string{client.SnapshotFieldPreview},
 		Preview: &client.S3Object{
 			Bucket: opts.Bucket,
 			Key:    pdfKey,

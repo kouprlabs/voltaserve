@@ -44,7 +44,8 @@ func (p *imagePipeline) Run(opts client.PipelineRunOptions) error {
 		}
 	}(inputPath)
 	if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
-		Name: helper.ToPtr("Measuring image dimensions."),
+		Fields: []string{client.TaskFieldName},
+		Name:   helper.ToPtr("Measuring image dimensions."),
 	}); err != nil {
 		return err
 	}
@@ -55,7 +56,8 @@ func (p *imagePipeline) Run(opts client.PipelineRunOptions) error {
 	var imagePath string
 	if filepath.Ext(inputPath) == ".tiff" {
 		if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
-			Name: helper.ToPtr("Converting TIFF image to JPEG format."),
+			Fields: []string{client.TaskFieldName},
+			Name:   helper.ToPtr("Converting TIFF image to JPEG format."),
 		}); err != nil {
 			return err
 		}
@@ -68,7 +70,8 @@ func (p *imagePipeline) Run(opts client.PipelineRunOptions) error {
 		imagePath = inputPath
 	}
 	if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
-		Name: helper.ToPtr("Creating thumbnail."),
+		Fields: []string{client.TaskFieldName},
+		Name:   helper.ToPtr("Creating thumbnail."),
 	}); err != nil {
 		return err
 	}
@@ -76,6 +79,7 @@ func (p *imagePipeline) Run(opts client.PipelineRunOptions) error {
 		return err
 	}
 	if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
+		Fields: []string{client.TaskFieldName, client.TaskFieldStatus},
 		Name:   helper.ToPtr("Done."),
 		Status: helper.ToPtr(client.TaskStatusSuccess),
 	}); err != nil {
@@ -95,6 +99,7 @@ func (p *imagePipeline) measureImageDimensions(inputPath string, opts client.Pip
 	}
 	if err := p.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
 		Options: opts,
+		Fields:  []string{client.SnapshotFieldOriginal},
 		Original: &client.S3Object{
 			Bucket: opts.Bucket,
 			Key:    opts.Key,
@@ -114,6 +119,7 @@ func (p *imagePipeline) createThumbnail(inputPath string, opts client.PipelineRu
 	}
 	if err := p.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
 		Options:   opts,
+		Fields:    []string{client.SnapshotFieldThumbnail},
 		Thumbnail: thumbnail,
 	}); err != nil {
 		return err
@@ -149,6 +155,7 @@ func (p *imagePipeline) convertTIFFToJPEG(inputPath string, imageProps client.Im
 	}
 	if err := p.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
 		Options: opts,
+		Fields:  []string{client.SnapshotFieldPreview},
 		Preview: s3Object,
 	}); err != nil {
 		return nil, err

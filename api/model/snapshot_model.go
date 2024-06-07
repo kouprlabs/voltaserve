@@ -18,6 +18,7 @@ type Snapshot interface {
 	GetMosaic() *S3Object
 	GetWatermark() *S3Object
 	GetThumbnail() *Thumbnail
+	GetTaskID() *string
 	HasOriginal() bool
 	HasPreview() bool
 	HasText() bool
@@ -42,6 +43,7 @@ type Snapshot interface {
 	SetThumbnail(*Thumbnail)
 	SetStatus(string)
 	SetLanguage(string)
+	SetTaskID(*string)
 }
 
 type S3Object struct {

@@ -38,12 +38,14 @@ func NewDispatcher() *Dispatcher {
 func (d *Dispatcher) Dispatch(opts client.PipelineRunOptions) error {
 	if err := d.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
 		Options: opts,
+		Fields:  []string{client.SnapshotFieldStatus},
 		Status:  helper.ToPtr(client.SnapshotStatusProcessing),
 	}); err != nil {
 		return err
 	}
 	if err := d.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
 		Name:   helper.ToPtr("Processing."),
+		Fields: []string{client.TaskFieldStatus},
 		Status: helper.ToPtr(client.TaskStatusRunning),
 	}); err != nil {
 		return err
@@ -67,12 +69,14 @@ func (d *Dispatcher) Dispatch(opts client.PipelineRunOptions) error {
 	} else {
 		if err := d.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
 			Options: opts,
+			Fields:  []string{client.SnapshotFieldStatus},
 			Status:  helper.ToPtr(client.SnapshotStatusError),
 		}); err != nil {
 			return err
 		}
 		err = errors.New("no matching pipeline found")
 		if err := d.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
+			Fields: []string{client.TaskFieldStatus, client.TaskFieldError},
 			Status: helper.ToPtr(client.TaskStatusError),
 			Error:  helper.ToPtr(errorpkg.GetUserFriendlyMessage(err.Error(), errorpkg.FallbackMessage)),
 		}); err != nil {
@@ -83,11 +87,13 @@ func (d *Dispatcher) Dispatch(opts client.PipelineRunOptions) error {
 	if err != nil {
 		if err := d.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
 			Options: opts,
+			Fields:  []string{client.SnapshotFieldStatus},
 			Status:  helper.ToPtr(client.SnapshotStatusError),
 		}); err != nil {
 			return err
 		}
 		if err := d.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
+			Fields: []string{client.TaskFieldStatus, client.TaskFieldError},
 			Status: helper.ToPtr(client.TaskStatusError),
 			Error:  helper.ToPtr(errorpkg.GetUserFriendlyMessage(err.Error(), errorpkg.FallbackMessage)),
 		}); err != nil {
@@ -97,6 +103,7 @@ func (d *Dispatcher) Dispatch(opts client.PipelineRunOptions) error {
 	} else {
 		if err := d.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
 			Options: opts,
+			Fields:  []string{client.SnapshotFieldStatus, client.SnapshotFieldTaskID},
 			Status:  helper.ToPtr(client.SnapshotStatusReady),
 		}); err != nil {
 			return err

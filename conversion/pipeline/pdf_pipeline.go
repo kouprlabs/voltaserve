@@ -46,7 +46,8 @@ func (p *pdfPipeline) Run(opts client.PipelineRunOptions) error {
 		}
 	}(inputPath)
 	if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
-		Name: helper.ToPtr("Creating thumbnail."),
+		Fields: []string{client.TaskFieldName},
+		Name:   helper.ToPtr("Creating thumbnail."),
 	}); err != nil {
 		return err
 	}
@@ -54,7 +55,8 @@ func (p *pdfPipeline) Run(opts client.PipelineRunOptions) error {
 		return err
 	}
 	if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
-		Name: helper.ToPtr("Extracting text."),
+		Fields: []string{client.TaskFieldName},
+		Name:   helper.ToPtr("Extracting text."),
 	}); err != nil {
 		return err
 	}
@@ -62,6 +64,7 @@ func (p *pdfPipeline) Run(opts client.PipelineRunOptions) error {
 		return err
 	}
 	if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
+		Fields: []string{client.TaskFieldName, client.TaskFieldStatus},
 		Name:   helper.ToPtr("Done."),
 		Status: helper.ToPtr(client.TaskStatusSuccess),
 	}); err != nil {
@@ -77,6 +80,7 @@ func (p *pdfPipeline) createThumbnail(inputPath string, opts client.PipelineRunO
 	}
 	if err := p.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
 		Options:   opts,
+		Fields:    []string{client.SnapshotFieldThumbnail},
 		Thumbnail: thumbnail,
 	}); err != nil {
 		return err
@@ -102,6 +106,7 @@ func (p *pdfPipeline) extractText(inputPath string, opts client.PipelineRunOptio
 	}
 	if err := p.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
 		Options: opts,
+		Fields:  []string{client.SnapshotFieldPreview, client.SnapshotFieldText},
 		Preview: &client.S3Object{
 			Bucket: opts.Bucket,
 			Key:    opts.Key,

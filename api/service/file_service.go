@@ -235,10 +235,7 @@ func (svc *FileService) Store(id string, path string, userID string) (*File, err
 	} else {
 		snapshot.SetStatus(model.SnapshotStatusWaiting)
 	}
-	if err := svc.snapshotRepo.Save(snapshot); err != nil {
-		return nil, err
-	}
-	if err := svc.snapshotCache.Set(snapshot); err != nil {
+	if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
 		return nil, err
 	}
 	file.SetSnapshotID(&snapshotID)
@@ -259,6 +256,10 @@ func (svc *FileService) Store(id string, path string, userID string) (*File, err
 			Payload:         map[string]string{"fileId": file.GetID()},
 		})
 		if err != nil {
+			return nil, err
+		}
+		snapshot.SetTaskID(helper.ToPtr(task.GetID()))
+		if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
 			return nil, err
 		}
 		if err := svc.pipelineClient.Run(&client.PipelineRunOptions{

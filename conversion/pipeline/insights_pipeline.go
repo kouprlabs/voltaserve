@@ -52,7 +52,8 @@ func (p *insightsPipeline) Run(opts client.PipelineRunOptions) error {
 		}
 	}(inputPath)
 	if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
-		Name: helper.ToPtr("Extracting text."),
+		Fields: []string{client.TaskFieldName},
+		Name:   helper.ToPtr("Extracting text."),
 	}); err != nil {
 		return err
 	}
@@ -61,7 +62,8 @@ func (p *insightsPipeline) Run(opts client.PipelineRunOptions) error {
 		return err
 	}
 	if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
-		Name: helper.ToPtr("Collecting entities."),
+		Fields: []string{client.TaskFieldName},
+		Name:   helper.ToPtr("Collecting entities."),
 	}); err != nil {
 		return err
 	}
@@ -69,6 +71,7 @@ func (p *insightsPipeline) Run(opts client.PipelineRunOptions) error {
 		return err
 	}
 	if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
+		Fields: []string{client.TaskFieldName, client.TaskFieldStatus},
 		Name:   helper.ToPtr("Done."),
 		Status: helper.ToPtr(client.TaskStatusSuccess),
 	}); err != nil {
@@ -127,6 +130,7 @@ func (p *insightsPipeline) createText(inputPath string, opts client.PipelineRunO
 		}
 		if err := p.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
 			Options: opts,
+			Fields:  []string{client.SnapshotFieldOCR},
 			OCR:     &s3Object,
 		}); err != nil {
 			return nil, err
@@ -152,6 +156,7 @@ func (p *insightsPipeline) createText(inputPath string, opts client.PipelineRunO
 	}
 	if err := p.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
 		Options: opts,
+		Fields:  []string{client.SnapshotFieldText},
 		Text:    &s3Object,
 	}); err != nil {
 		return nil, err
@@ -188,6 +193,7 @@ func (p *insightsPipeline) createEntities(text string, opts client.PipelineRunOp
 	}
 	if err := p.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
 		Options:  opts,
+		Fields:   []string{client.SnapshotFieldEntities},
 		Entities: &s3Object,
 	}); err != nil {
 		return err

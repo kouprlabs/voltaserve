@@ -38,7 +38,8 @@ func (p *videoPipeline) Run(opts client.PipelineRunOptions) error {
 		}
 	}(inputPath)
 	if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
-		Name: helper.ToPtr("Creating thumbnail."),
+		Fields: []string{client.TaskFieldName},
+		Name:   helper.ToPtr("Creating thumbnail."),
 	}); err != nil {
 		return err
 	}
@@ -46,6 +47,7 @@ func (p *videoPipeline) Run(opts client.PipelineRunOptions) error {
 		return err
 	}
 	if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
+		Fields: []string{client.TaskFieldName, client.TaskFieldStatus},
 		Name:   helper.ToPtr("Done."),
 		Status: helper.ToPtr(client.TaskStatusSuccess),
 	}); err != nil {
@@ -61,6 +63,7 @@ func (p *videoPipeline) createThumbnail(inputPath string, opts client.PipelineRu
 	}
 	if err := p.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
 		Options:   opts,
+		Fields:    []string{client.SnapshotFieldThumbnail},
 		Thumbnail: thumbnail,
 	}); err != nil {
 		return err

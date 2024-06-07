@@ -71,6 +71,10 @@ func (svc *MosaicService) Create(id string, userID string) error {
 	if err != nil {
 		return err
 	}
+	snapshot.SetTaskID(helper.ToPtr(task.GetID()))
+	if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
+		return err
+	}
 	if err := svc.pipelineClient.Run(&client.PipelineRunOptions{
 		PipelineID: helper.ToPtr(client.PipelineMoasic),
 		TaskID:     task.GetID(),
@@ -119,6 +123,11 @@ func (svc *MosaicService) Delete(id string, userID string) error {
 				Payload:         map[string]string{"fileId": file.GetID()},
 			})
 			if err != nil {
+				log.GetLogger().Error(err)
+				return
+			}
+			snapshot.SetTaskID(helper.ToPtr(task.GetID()))
+			if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
 				log.GetLogger().Error(err)
 				return
 			}

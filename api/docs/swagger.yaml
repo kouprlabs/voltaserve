@@ -550,6 +550,8 @@ definitions:
         $ref: '#/definitions/service.Download'
       status:
         type: string
+      taskId:
+        type: string
       text:
         $ref: '#/definitions/service.Download'
       thumbnail:
@@ -594,6 +596,10 @@ definitions:
     properties:
       entities:
         $ref: '#/definitions/model.S3Object'
+      fields:
+        items:
+          type: string
+        type: array
       mosaic:
         $ref: '#/definitions/model.S3Object'
       ocr:
@@ -605,6 +611,8 @@ definitions:
       preview:
         $ref: '#/definitions/model.S3Object'
       status:
+        type: string
+      taskId:
         type: string
       text:
         $ref: '#/definitions/model.S3Object'

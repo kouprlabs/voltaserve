@@ -68,39 +68,50 @@ func (svc *TaskService) Create(opts TaskCreateOptions) (*Task, error) {
 }
 
 type TaskPatchOptions struct {
-	Name            *string           `json:"name,omitempty"`
-	Error           *string           `json:"error,omitempty"`
-	Percentage      *int              `json:"percentage,omitempty"`
-	IsIndeterminate *bool             `json:"isIndeterminate,omitempty"`
-	UserID          *string           `json:"userId,omitempty"`
-	Status          *string           `json:"status,omitempty"`
-	Payload         map[string]string `json:"payload,omitempty"`
+	Fields          []string          `json:"fields"`
+	Name            *string           `json:"name"`
+	Error           *string           `json:"error"`
+	Percentage      *int              `json:"percentage"`
+	IsIndeterminate *bool             `json:"isIndeterminate"`
+	UserID          *string           `json:"userId"`
+	Status          *string           `json:"status"`
+	Payload         map[string]string `json:"payload"`
 }
+
+const (
+	TaskFieldName            = "name"
+	TaskFieldError           = "error"
+	TaskFieldPercentage      = "percentage"
+	TaskFieldIsIndeterminate = "isIndeterminate"
+	TaskFieldUserID          = "userId"
+	TaskFieldStatus          = "status"
+	TaskFieldPayload         = "payload"
+)
 
 func (svc *TaskService) Patch(id string, opts TaskPatchOptions) (*Task, error) {
 	task, err := svc.taskCache.Get(id)
 	if err != nil {
 		return nil, err
 	}
-	if opts.Name != nil {
+	if helper.Includes(opts.Fields, TaskFieldName) {
 		task.SetName(*opts.Name)
 	}
-	if opts.Error != nil {
+	if helper.Includes(opts.Fields, TaskFieldError) {
 		task.SetError(opts.Error)
 	}
-	if opts.Percentage != nil {
+	if helper.Includes(opts.Fields, TaskFieldPercentage) {
 		task.SetPercentage(opts.Percentage)
 	}
-	if opts.IsIndeterminate != nil {
+	if helper.Includes(opts.Fields, TaskFieldIsIndeterminate) {
 		task.SetIsIndeterminate(true)
 	}
-	if opts.UserID != nil {
+	if helper.Includes(opts.Fields, TaskFieldUserID) {
 		task.SetUserID(*opts.UserID)
 	}
-	if opts.Status != nil {
+	if helper.Includes(opts.Fields, TaskFieldStatus) {
 		task.SetStatus(*opts.Status)
 	}
-	if opts.Payload != nil {
+	if helper.Includes(opts.Fields, TaskFieldPayload) {
 		task.SetPayload(opts.Payload)
 	}
 	if err := svc.saveAndSync(task); err != nil {

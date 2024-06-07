@@ -111,6 +111,10 @@ func (svc *InsightsService) Create(id string, opts InsightsCreateOptions, userID
 	if err != nil {
 		return err
 	}
+	snapshot.SetTaskID(helper.ToPtr(task.GetID()))
+	if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
+		return err
+	}
 	key := snapshot.GetOriginal().Key
 	if svc.fileIdent.IsOffice(key) || svc.fileIdent.IsPlainText(key) {
 		key = snapshot.GetPreview().Key
@@ -170,6 +174,10 @@ func (svc *InsightsService) Patch(id string, userID string) error {
 	if err != nil {
 		return err
 	}
+	snapshot.SetTaskID(helper.ToPtr(task.GetID()))
+	if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
+		return err
+	}
 	if err := svc.pipelineClient.Run(&client.PipelineRunOptions{
 		PipelineID: helper.ToPtr(client.PipelineInsights),
 		TaskID:     task.GetID(),
@@ -215,6 +223,11 @@ func (svc *InsightsService) Delete(id string, userID string) error {
 			Payload:         map[string]string{"fileId": file.GetID()},
 		})
 		if err != nil {
+			log.GetLogger().Error(err)
+			return
+		}
+		snapshot.SetTaskID(helper.ToPtr(task.GetID()))
+		if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
 			log.GetLogger().Error(err)
 			return
 		}
