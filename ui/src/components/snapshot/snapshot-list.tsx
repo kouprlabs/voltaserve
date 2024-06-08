@@ -161,6 +161,15 @@ const SnapshotList = () => {
                           <span className={cx('text-base')}>
                             {prettyDate(s.createTime)}
                           </span>
+                          {s.entities ? (
+                            <Badge variant="outline">Insights</Badge>
+                          ) : null}
+                          {s.mosaic ? (
+                            <Badge variant="outline">Mosaic</Badge>
+                          ) : null}
+                          {s.watermark ? (
+                            <Badge variant="outline">Watermark</Badge>
+                          ) : null}
                           {s.isActive ? (
                             <Badge colorScheme="green">Active</Badge>
                           ) : null}
