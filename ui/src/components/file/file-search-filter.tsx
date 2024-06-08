@@ -44,7 +44,7 @@ const typeOptions = [
   { value: 'folder', label: 'Folder' },
 ]
 
-const SearchFilter = () => {
+const FileSearchFilter = () => {
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
   const { id: workspaceId, fileId } = useParams()
@@ -269,4 +269,4 @@ const SearchFilter = () => {
   )
 }
 
-export default SearchFilter
+export default FileSearchFilter
