@@ -23,7 +23,7 @@ import {
   isVideo,
 } from '@/lib/helpers/file-extension'
 
-const FileViewerPage = () => {
+const ViewerPage = () => {
   const { id } = useParams()
   const location = useLocation()
   const isMosaic = useMemo(
@@ -143,4 +143,4 @@ const FileViewerPage = () => {
   )
 }
 
-export default FileViewerPage
+export default ViewerPage
