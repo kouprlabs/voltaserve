@@ -5,6 +5,7 @@ import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import FileAPI, { File } from '@/client/api/file'
 import DrawerContent from '@/components/viewer/drawer/drawer-content'
+import Viewer3D from '@/components/viewer/viewer-3d'
 import ViewerAudio from '@/components/viewer/viewer-audio'
 import ViewerImage from '@/components/viewer/viewer-image'
 import ViewerMosaic from '@/components/viewer/viewer-mosaic'
@@ -23,12 +24,15 @@ const FileViewerPage = () => {
     () => location.pathname.endsWith('/mosaic'),
     [location],
   )
+  const is3D = useMemo(() => location.pathname.endsWith('/3d'), [location])
   const { data: file } = FileAPI.useGet(id)
 
   const renderViewer = useCallback(
     (file: File) => {
       if (isMosaic) {
         return <ViewerMosaic file={file} />
+      } else if (is3D) {
+        return <Viewer3D />
       } else {
         if (
           (file.snapshot?.original &&
