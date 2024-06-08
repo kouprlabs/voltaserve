@@ -5,7 +5,7 @@ import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import FileAPI, { File } from '@/client/api/file'
 import DrawerContent from '@/components/viewer/drawer/drawer-content'
-import Viewer3DModel from '@/components/viewer/viewer-3d-model'
+import Viewer3D from '@/components/viewer/viewer-3d'
 import ViewerAudio from '@/components/viewer/viewer-audio'
 import ViewerImage from '@/components/viewer/viewer-image'
 import ViewerMosaic from '@/components/viewer/viewer-mosaic'
@@ -16,7 +16,7 @@ import { IconDownload } from '@/lib/components/icons'
 import Spinner from '@/lib/components/spinner'
 import downloadFile from '@/lib/helpers/download-file'
 import {
-  is3DModel,
+  is3D,
   isAudio,
   isImage,
   isPDF,
@@ -64,9 +64,9 @@ const ViewerPage = () => {
           return <ViewerAudio file={file} />
         } else if (
           file.snapshot?.preview &&
-          is3DModel(file.snapshot.preview.extension)
+          is3D(file.snapshot.preview.extension)
         ) {
-          return <Viewer3DModel file={file} />
+          return <Viewer3D file={file} />
         } else {
           return (
             <div className={cx('flex', 'flex-col', 'gap-1.5')}>

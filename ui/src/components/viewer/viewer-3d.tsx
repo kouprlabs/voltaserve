@@ -3,11 +3,11 @@ import '@google/model-viewer'
 import { File } from '@/client/api/file'
 import { getAccessTokenOrRedirect } from '@/infra/token'
 
-export type Viewer3DModelProps = {
+export type Viewer3DProps = {
   file: File
 }
 
-const Viewer3DModel = ({ file }: Viewer3DModelProps) => {
+const Viewer3D = ({ file }: Viewer3DProps) => {
   const download = useMemo(() => file.snapshot?.preview, [file])
   const url = useMemo(() => {
     if (!download || !download.extension) {
@@ -40,4 +40,4 @@ const Viewer3DModel = ({ file }: Viewer3DModelProps) => {
   )
 }
 
-export default Viewer3DModel
+export default Viewer3D
