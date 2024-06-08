@@ -36,7 +36,7 @@ const MosaicOverview = () => {
     <>
       <ModalBody>
         <div className={cx('flex', 'flex-col', 'gap-1.5', 'w-full')}>
-          {info.metadata?.isOutdated && isWarningVisible ? (
+          {info.isOutdated && isWarningVisible ? (
             <Alert status="warning" className={cx('flex')}>
               <AlertIcon />
               <Box className={cx('grow')}>

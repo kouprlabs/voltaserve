@@ -5,7 +5,6 @@ import {
   AccordionIcon,
   AccordionItem,
   AccordionPanel,
-  Button,
   Card,
   CardBody,
   Text,

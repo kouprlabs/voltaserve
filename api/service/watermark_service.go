@@ -170,7 +170,13 @@ func (svc *WatermarkService) Delete(id string, userID string) error {
 	return nil
 }
 
-func (svc *WatermarkService) GetInfo(id string, userID string) (*model.WatermarkInfo, error) {
+type WatermarkInfo struct {
+	IsAvailable bool      `json:"isAvailable"`
+	IsOutdated  bool      `json:"isOutdated"`
+	Snapshot    *Snapshot `json:"snapshot,omitempty"`
+}
+
+func (svc *WatermarkService) GetInfo(id string, userID string) (*WatermarkInfo, error) {
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return nil, err
@@ -192,14 +198,16 @@ func (svc *WatermarkService) GetInfo(id string, userID string) (*model.Watermark
 			return nil, err
 		}
 		if previous == nil {
-			return &model.WatermarkInfo{IsAvailable: false}, nil
+			return &WatermarkInfo{IsAvailable: false}, nil
 		} else {
 			isOutdated = true
+			snapshot = previous
 		}
 	}
-	return &model.WatermarkInfo{
+	return &WatermarkInfo{
 		IsAvailable: true,
-		Metadata:    &model.WatermarkMetadata{IsOutdated: isOutdated},
+		IsOutdated:  isOutdated,
+		Snapshot:    svc.snapshotSvc.snapshotMapper.mapOne(snapshot),
 	}, nil
 }
 

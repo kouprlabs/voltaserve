@@ -403,7 +403,13 @@ func (svc *InsightsService) doPagination(data []*client.InsightsEntity, page, si
 	return data[startIndex:endIndex], totalElements, totalPages
 }
 
-func (svc *InsightsService) GetInfo(id string, userID string) (*model.InsightsInfo, error) {
+type InsightsInfo struct {
+	IsAvailable bool      `json:"isAvailable"`
+	IsOutdated  bool      `json:"isOutdated"`
+	Snapshot    *Snapshot `json:"snapshot,omitempty"`
+}
+
+func (svc *InsightsService) GetInfo(id string, userID string) (*InsightsInfo, error) {
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return nil, err
@@ -425,16 +431,16 @@ func (svc *InsightsService) GetInfo(id string, userID string) (*model.InsightsIn
 			return nil, err
 		}
 		if previous == nil {
-			return &model.InsightsInfo{IsAvailable: false}, nil
+			return &InsightsInfo{IsAvailable: false}, nil
 		} else {
 			isOutdated = true
+			snapshot = previous
 		}
 	}
-	return &model.InsightsInfo{
+	return &InsightsInfo{
 		IsAvailable: true,
-		Metadata: &model.InsightsMetadata{
-			IsOutdated: isOutdated,
-		},
+		IsOutdated:  isOutdated,
+		Snapshot:    svc.snapshotSvc.snapshotMapper.mapOne(snapshot),
 	}, nil
 }
 

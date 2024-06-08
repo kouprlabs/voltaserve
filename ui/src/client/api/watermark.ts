@@ -1,13 +1,11 @@
 import useSWR, { SWRConfiguration } from 'swr'
 import { apiFetcher } from '@/client/fetcher'
+import { Snapshot } from './snapshot'
 
 export type Info = {
   isAvailable: boolean
-  metadata?: Metadata
-}
-
-export type Metadata = {
   isOutdated: boolean
+  snapshot?: Snapshot
 }
 
 export default class WatermarkAPI {

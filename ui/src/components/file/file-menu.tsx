@@ -16,7 +16,6 @@ import {
   geOwnerPermission,
   geViewerPermission,
 } from '@/client/api/permission'
-import { Status } from '@/client/api/snapshot'
 import { swrConfig } from '@/client/options'
 import {
   IconFileCopy,

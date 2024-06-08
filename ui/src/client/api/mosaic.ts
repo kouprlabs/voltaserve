@@ -1,5 +1,6 @@
 import useSWR, { SWRConfiguration } from 'swr'
 import { apiFetcher } from '@/client/fetcher'
+import { Snapshot } from './snapshot'
 
 export type Tile = {
   width: number
@@ -20,11 +21,12 @@ export type ZoomLevel = {
 
 export type Info = {
   isAvailable: boolean
+  isOutdated: boolean
+  snapshot?: Snapshot
   metadata?: Metadata
 }
 
 export type Metadata = {
-  isOutdated: boolean
   width: number
   height: number
   extension: string

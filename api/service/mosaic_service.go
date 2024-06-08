@@ -158,6 +158,8 @@ func (svc *MosaicService) Delete(id string, userID string) error {
 
 type MosaicInfo struct {
 	IsAvailable bool                   `json:"isAvailable"`
+	IsOutdated  bool                   `json:"isOutdated"`
+	Snapshot    *Snapshot              `json:"snapshot,omitempty"`
 	Metadata    *client.MosaicMetadata `json:"metadata,omitempty"`
 }
 
@@ -196,9 +198,10 @@ func (svc *MosaicService) GetInfo(id string, userID string) (*MosaicInfo, error)
 	if err != nil {
 		return nil, err
 	}
-	res.IsOutdated = isOutdated
 	return &MosaicInfo{
 		IsAvailable: true,
+		IsOutdated:  isOutdated,
+		Snapshot:    svc.snapshotSvc.snapshotMapper.mapOne(snapshot),
 		Metadata:    res,
 	}, nil
 }

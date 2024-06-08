@@ -24,7 +24,6 @@ func NewMosaicClient() *MosaicClient {
 }
 
 type MosaicMetadata struct {
-	IsOutdated bool              `json:"isOutdated"`
 	Width      int               `json:"width"`
 	Height     int               `json:"height"`
 	Extension  string            `json:"extension"`
