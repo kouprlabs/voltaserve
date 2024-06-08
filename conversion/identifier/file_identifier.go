@@ -145,3 +145,16 @@ func (fi *FileIdentifier) IsVideo(path string) bool {
 	}
 	return false
 }
+
+func (fi *FileIdentifier) IsGLB(path string) bool {
+	extensions := []string{
+		".glb",
+	}
+	extension := filepath.Ext(path)
+	for _, v := range extensions {
+		if strings.ToLower(extension) == v {
+			return true
+		}
+	}
+	return false
+}

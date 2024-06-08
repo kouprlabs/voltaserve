@@ -8,4 +8,5 @@ const (
 	PipelineInsights  = "insights"
 	PipelineMoasic    = "mosaic"
 	PipelineWatermark = "watermark"
+	PipelineGLB       = "glb"
 )
