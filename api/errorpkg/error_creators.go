@@ -169,12 +169,12 @@ func NewSnapshotCannotBePatchedError(err error) *ErrorResponse {
 	)
 }
 
-func NewSnapshotIsProcessingError(err error) *ErrorResponse {
+func NewSnapshotHasPendingTaskError(err error) *ErrorResponse {
 	return NewErrorResponse(
-		"snapshot_is_processing",
+		"snapshot_has_pending_task",
 		http.StatusBadRequest,
-		"Snapshot is processing.",
-		"Snapshot is processing.",
+		"Snapshot has a pending task.",
+		"Snapshot has a pending task.",
 		err,
 	)
 }

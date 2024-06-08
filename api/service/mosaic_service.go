@@ -57,8 +57,8 @@ func (svc *MosaicService) Create(id string, userID string) error {
 	if err != nil {
 		return err
 	}
-	if snapshot.GetStatus() == model.SnapshotStatusProcessing {
-		return errorpkg.NewSnapshotIsProcessingError(nil)
+	if snapshot.GetTaskID() != nil {
+		return errorpkg.NewSnapshotHasPendingTaskError(nil)
 	}
 	task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
 		ID:              helper.NewID(),
@@ -103,17 +103,13 @@ func (svc *MosaicService) Delete(id string, userID string) error {
 	if err != nil {
 		return err
 	}
+	if snapshot.GetTaskID() != nil {
+		return errorpkg.NewSnapshotHasPendingTaskError(nil)
+	}
 	if !snapshot.HasMosaic() {
 		return errorpkg.NewMosaicNotFoundError(nil)
 	}
 	if svc.fileIdent.IsImage(snapshot.GetOriginal().Key) {
-		if snapshot.GetStatus() == model.SnapshotStatusProcessing {
-			return errorpkg.NewSnapshotIsProcessingError(nil)
-		}
-		snapshot.SetStatus(model.SnapshotStatusProcessing)
-		if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
-			return err
-		}
 		task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
 			ID:              helper.NewID(),
 			Name:            "Deleting mosaic.",
@@ -126,6 +122,7 @@ func (svc *MosaicService) Delete(id string, userID string) error {
 			return err
 		}
 		snapshot.SetTaskID(helper.ToPtr(task.GetID()))
+		snapshot.SetStatus(model.SnapshotStatusProcessing)
 		if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
 			return err
 		}

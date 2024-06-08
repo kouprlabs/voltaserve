@@ -93,8 +93,8 @@ func (svc *InsightsService) Create(id string, opts InsightsCreateOptions, userID
 	if err != nil {
 		return err
 	}
-	if snapshot.GetStatus() == model.SnapshotStatusProcessing {
-		return errorpkg.NewSnapshotIsProcessingError(nil)
+	if snapshot.GetTaskID() != nil {
+		return errorpkg.NewSnapshotHasPendingTaskError(nil)
 	}
 	task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
 		ID:              helper.NewID(),
@@ -147,8 +147,8 @@ func (svc *InsightsService) Patch(id string, userID string) error {
 	if err != nil {
 		return err
 	}
-	if snapshot.GetStatus() == model.SnapshotStatusProcessing {
-		return errorpkg.NewSnapshotIsProcessingError(nil)
+	if snapshot.GetTaskID() != nil {
+		return errorpkg.NewSnapshotHasPendingTaskError(nil)
 	}
 	previous, err := svc.getPreviousSnapshot(file.GetID(), snapshot.GetVersion())
 	if err != nil {
@@ -205,8 +205,8 @@ func (svc *InsightsService) Delete(id string, userID string) error {
 	if !snapshot.HasEntities() {
 		return errorpkg.NewInsightsNotFoundError(nil)
 	}
-	if snapshot.GetStatus() == model.SnapshotStatusProcessing {
-		return errorpkg.NewSnapshotIsProcessingError(nil)
+	if snapshot.GetTaskID() != nil {
+		return errorpkg.NewSnapshotHasPendingTaskError(nil)
 	}
 	snapshot.SetStatus(model.SnapshotStatusProcessing)
 	if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
