@@ -192,3 +192,10 @@ export function isCSV(ext?: string | null) {
   }
   return ['.csv'].findIndex((e) => e === ext) !== -1
 }
+
+export function isGLB(ext?: string | null) {
+  if (!ext) {
+    return false
+  }
+  return ext === '.glb'
+}

@@ -20,6 +20,7 @@ import CodeSvg from './assets/icon-code.svg'
 import CsvSvg from './assets/icon-csv.svg'
 import FileSvg from './assets/icon-file.svg'
 import ImageSvg from './assets/icon-image.svg'
+import ModelSvg from './assets/icon-model.svg'
 import PdfSvg from './assets/icon-pdf.svg'
 import PowerPointSvg from './assets/icon-power-point.svg'
 import RichTextSvg from './assets/icon-rich-text.svg'
@@ -79,6 +80,8 @@ const IconDiverse = ({ file, scale }: IconFontProps) => {
     image = isDark ? DarkCodeSvg : CodeSvg
   } else if (fe.isCSV(original?.extension)) {
     image = isDark ? DarkCsvSvg : CsvSvg
+  } else if (fe.isGLB(original?.extension)) {
+    image = ModelSvg
   } else {
     image = isDark ? DarkFileSvg : FileSvg
   }

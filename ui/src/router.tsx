@@ -3,7 +3,6 @@ import AccountInvitationsPage from '@/pages/account/account-invitations-page'
 import AccountLayout from '@/pages/account/account-layout'
 import AccountSettingsPage from '@/pages/account/account-settings-page'
 import ConfirmEmailPage from '@/pages/confirm-email-page'
-import FileViewerPage from '@/pages/file-viewer-page'
 import ForgotPasswordPage from '@/pages/forgot-password-page'
 import GroupLayout from '@/pages/group/group-layout'
 import GroupListPage from '@/pages/group/group-list-page'
@@ -22,6 +21,7 @@ import RootPage from '@/pages/root-page'
 import SignInPage from '@/pages/sign-in-page'
 import SignOutPage from '@/pages/sign-out-page'
 import SignUpPage from '@/pages/sign-up-page'
+import ViewerPage from '@/pages/viewer-page'
 import WorkspaceFilesPage from '@/pages/workspace/workspace-files-page'
 import WorkspaceLayout from '@/pages/workspace/workspace-layout'
 import WorkspaceListPage from '@/pages/workspace/workspace-list-page'
@@ -121,15 +121,15 @@ const router = createBrowserRouter([
       },
       {
         path: '/file/:id',
-        element: <FileViewerPage />,
+        element: <ViewerPage />,
       },
       {
         path: '/file/:id/mosaic',
-        element: <FileViewerPage />,
+        element: <ViewerPage />,
       },
       {
         path: '/file/:id/watermark',
-        element: <FileViewerPage />,
+        element: <ViewerPage />,
       },
       {
         path: '/sign-up',

@@ -18,6 +18,8 @@ type Dispatcher struct {
 	insightsPipeline   model.Pipeline
 	mosaicPipeline     model.Pipeline
 	watermarkPipeline  model.Pipeline
+	glbPipeline        model.Pipeline
+	zipPipeline        model.Pipeline
 	apiClient          *client.APIClient
 }
 
@@ -31,6 +33,8 @@ func NewDispatcher() *Dispatcher {
 		insightsPipeline:   NewInsightsPipeline(),
 		mosaicPipeline:     NewMosaicPipeline(),
 		watermarkPipeline:  NewWatermarkPipeline(),
+		glbPipeline:        NewGLBPipeline(),
+		zipPipeline:        NewZIPPipeline(),
 		apiClient:          client.NewAPIClient(),
 	}
 }
@@ -66,6 +70,10 @@ func (d *Dispatcher) Dispatch(opts client.PipelineRunOptions) error {
 		err = d.mosaicPipeline.Run(opts)
 	} else if id == model.PipelineWatermark {
 		err = d.watermarkPipeline.Run(opts)
+	} else if id == model.PipelineGLB {
+		err = d.glbPipeline.Run(opts)
+	} else if id == model.PipelineZIP {
+		err = d.zipPipeline.Run(opts)
 	} else {
 		if err := d.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
 			Options: opts,

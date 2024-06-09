@@ -7,6 +7,7 @@ import FileAPI, { File } from '@/client/api/file'
 import DrawerContent from '@/components/viewer/drawer/drawer-content'
 import ViewerAudio from '@/components/viewer/viewer-audio'
 import ViewerImage from '@/components/viewer/viewer-image'
+import ViewerModel from '@/components/viewer/viewer-model'
 import ViewerMosaic from '@/components/viewer/viewer-mosaic'
 import ViewerPDF from '@/components/viewer/viewer-pdf'
 import ViewerVideo from '@/components/viewer/viewer-video'
@@ -14,9 +15,15 @@ import Drawer from '@/lib/components/drawer'
 import { IconDownload } from '@/lib/components/icons'
 import Spinner from '@/lib/components/spinner'
 import downloadFile from '@/lib/helpers/download-file'
-import { isAudio, isImage, isPDF, isVideo } from '@/lib/helpers/file-extension'
+import {
+  isGLB,
+  isAudio,
+  isImage,
+  isPDF,
+  isVideo,
+} from '@/lib/helpers/file-extension'
 
-const FileViewerPage = () => {
+const ViewerPage = () => {
   const { id } = useParams()
   const location = useLocation()
   const isMosaic = useMemo(
@@ -55,6 +62,11 @@ const FileViewerPage = () => {
           isAudio(file.snapshot?.original.extension)
         ) {
           return <ViewerAudio file={file} />
+        } else if (
+          file.snapshot?.preview &&
+          isGLB(file.snapshot.preview.extension)
+        ) {
+          return <ViewerModel file={file} />
         } else {
           return (
             <div className={cx('flex', 'flex-col', 'gap-1.5')}>
@@ -131,4 +143,4 @@ const FileViewerPage = () => {
   )
 }
 
-export default FileViewerPage
+export default ViewerPage
