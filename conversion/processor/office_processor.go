@@ -22,8 +22,7 @@ func NewOfficeProcessor() *OfficeProcessor {
 	}
 }
 
-func (p *OfficeProcessor) PDF(inputPath string) (*string, error) {
-	outputDir := filepath.FromSlash(os.TempDir() + "/" + helper.NewID())
+func (p *OfficeProcessor) PDF(inputPath string, outputDir string) (*string, error) {
 	if err := infra.NewCommand().Exec("soffice", "--headless", "--convert-to", "pdf", "--outdir", outputDir, inputPath); err != nil {
 		return nil, err
 	}

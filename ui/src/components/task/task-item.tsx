@@ -30,7 +30,10 @@ export type TaskDrawerItemProps = {
 const TaskDrawerItem = ({ task }: TaskDrawerItemProps) => {
   const [isDismissing, setIsDismissing] = useState(false)
   const mutateList = useAppSelector((state) => state.ui.tasks.mutateList)
-  const { data: file } = FileAPI.useGet(task.payload?.fileId)
+  const { data: file } = FileAPI.useGet(
+    task.status !== Status.Error ? task.payload?.fileId : undefined,
+  )
+  const fileName = task.payload?.fileId && file ? file?.name : 'File deleted.'
 
   const handleDismiss = useCallback(async () => {
     try {
@@ -67,9 +70,9 @@ const TaskDrawerItem = ({ task }: TaskDrawerItemProps) => {
               <IconError filled={true} className={cx('text-red-500')} />
             ) : null}
             <div className={cx('flex', 'flex-col', 'grow')}>
-              {file ? (
+              {fileName ? (
                 <span className={cx('font-semibold')}>
-                  {truncateMiddle(file.name, 40)}
+                  {truncateMiddle(fileName, 40)}
                 </span>
               ) : null}
               {task.status !== Status.Error ? (

@@ -65,7 +65,8 @@ func (p *officePipeline) Run(opts client.PipelineRunOptions) error {
 }
 
 func (p *officePipeline) convertToPDF(inputPath string, opts client.PipelineRunOptions) (*string, error) {
-	outputPath, err := p.officeProc.PDF(inputPath)
+	outputDir := filepath.FromSlash(os.TempDir() + "/" + helper.NewID())
+	outputPath, err := p.officeProc.PDF(inputPath, outputDir)
 	if err != nil {
 		return nil, err
 	}
@@ -77,6 +78,11 @@ func (p *officePipeline) convertToPDF(inputPath string, opts client.PipelineRunO
 			}
 		}
 	}(*outputPath)
+	defer func(path string) {
+		if err := os.RemoveAll(path); err != nil {
+			infra.GetLogger().Error(err)
+		}
+	}(outputDir)
 	stat, err := os.Stat(*outputPath)
 	if err != nil {
 		return nil, err

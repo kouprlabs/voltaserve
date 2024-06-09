@@ -9,4 +9,5 @@ const (
 	PipelineMoasic    = "mosaic"
 	PipelineWatermark = "watermark"
 	PipelineGLB       = "glb"
+	PipelineZIP       = "zip"
 )

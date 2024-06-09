@@ -29,6 +29,8 @@ func (pi *PipelineIdentifier) Identify(opts client.PipelineRunOptions) string {
 			return model.PipelineVideo
 		} else if pi.fileIdent.IsGLB(opts.Key) {
 			return model.PipelineGLB
+		} else if pi.fileIdent.IsZIP(opts.Key) {
+			return model.PipelineZIP
 		}
 	}
 	return ""

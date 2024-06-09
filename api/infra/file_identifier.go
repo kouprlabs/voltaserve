@@ -1,8 +1,6 @@
 package infra
 
 import (
-	"archive/zip"
-	"encoding/json"
 	"path/filepath"
 	"strings"
 )
@@ -106,23 +104,6 @@ func (fi *FileIdentifier) IsImage(path string) bool {
 	return false
 }
 
-func (fi *FileIdentifier) IsNonAlphaChannelImage(path string) bool {
-	extensions := []string{
-		".jpg",
-		".jpeg",
-		".gif",
-		".tiff",
-		".bmp",
-	}
-	extension := filepath.Ext(path)
-	for _, v := range extensions {
-		if strings.ToLower(extension) == v {
-			return true
-		}
-	}
-	return false
-}
-
 func (fi *FileIdentifier) IsVideo(path string) bool {
 	extensions := []string{
 		".ogv",
@@ -146,76 +127,4 @@ func (fi *FileIdentifier) IsVideo(path string) bool {
 		}
 	}
 	return false
-}
-
-func (fi *FileIdentifier) IsGLB(path string) bool {
-	extensions := []string{
-		".glb",
-	}
-	extension := filepath.Ext(path)
-	for _, v := range extensions {
-		if strings.ToLower(extension) == v {
-			return true
-		}
-	}
-	return false
-}
-
-func (fi *FileIdentifier) IsZIP(path string) bool {
-	extensions := []string{
-		".zip",
-		".zipx",
-	}
-	extension := filepath.Ext(path)
-	for _, v := range extensions {
-		if strings.ToLower(extension) == v {
-			return true
-		}
-	}
-	return false
-}
-
-type GLTF struct {
-	Buffers []struct {
-		URI string `json:"uri"`
-	} `json:"buffers"`
-}
-
-func (fi *FileIdentifier) IsGLTF(path string) (bool, error) {
-	zipFile, err := zip.OpenReader(path)
-	if err != nil {
-		return false, err
-	}
-	defer zipFile.Close()
-	var hasGLTF, hasBin bool
-	var gltfFile *zip.File
-	for _, file := range zipFile.File {
-		if strings.HasSuffix(file.Name, ".gltf") {
-			hasGLTF = true
-			gltfFile = file
-		}
-		if strings.HasSuffix(file.Name, ".bin") {
-			hasBin = true
-		}
-	}
-	if hasGLTF {
-		if gltfFile != nil {
-			rc, err := gltfFile.Open()
-			if err != nil {
-				return false, err
-			}
-			defer rc.Close()
-			var gltf GLTF
-			if err := json.NewDecoder(rc).Decode(&gltf); err != nil {
-				return false, err
-			}
-			for _, buffer := range gltf.Buffers {
-				if strings.HasSuffix(buffer.URI, ".bin") {
-					hasBin = true
-					break
-				}
-			}
-		}
-	}
-	return hasGLTF && (!hasBin || (hasBin && gltfFile != nil)), nil
 }

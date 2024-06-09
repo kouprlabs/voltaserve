@@ -1,19 +1,16 @@
 package processor
 
 import (
-	"voltaserve/config"
 	"voltaserve/infra"
 )
 
 type GLTFProcessor struct {
-	cmd    *infra.Command
-	config config.Config
+	cmd *infra.Command
 }
 
 func NewGLTFProcessor() *GLTFProcessor {
 	return &GLTFProcessor{
-		cmd:    infra.NewCommand(),
-		config: config.GetConfig(),
+		cmd: infra.NewCommand(),
 	}
 }
 
