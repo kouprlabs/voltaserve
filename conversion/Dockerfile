@@ -7,7 +7,7 @@ COPY . .
 RUN go mod download
 RUN go build -o voltaserve-conversion
 
-FROM ubuntu:noble AS runner
+FROM mcr.microsoft.com/playwright:jammy AS runner
 
 RUN apt-get update
 
@@ -19,7 +19,11 @@ RUN apt-get install -y \
   imagemagick \
   poppler-utils \
   libimage-exiftool-perl \
-  ocrmypdf
+  ocrmypdf \
+  unzip
+
+RUN npm i -g gltf-pipeline
+RUN npm i -g @koupr/screenshot-glb
 
 RUN apt-get install -y \
   libreoffice-base-nogui \
@@ -37,7 +41,6 @@ RUN apt-get install -y \
   fonts-beng-extra \
   fonts-dejavu-core \
   fonts-dejavu-extra \
-  fonts-dejavu-mono \
   fonts-deva \
   fonts-deva-extra \
   fonts-droid-fallback \
@@ -61,8 +64,10 @@ RUN apt-get install -y \
   fonts-lao \
   fonts-lato \
   fonts-liberation \
-  fonts-liberation-sans-narrow \
-  fonts-lklug-sinhala \
+  fonts-liberation2 \
+  fonts-lklug-sinhala
+
+RUN apt-get install -y \
   fonts-lohit-beng-assamese \
   fonts-lohit-beng-bengali \
   fonts-lohit-deva \
@@ -97,12 +102,13 @@ RUN apt-get install -y \
   fonts-samyak-taml \
   fonts-sarai \
   fonts-sil-abyssinica \
-  fonts-sil-annapurna \
   fonts-sil-ezra \
   fonts-sil-nuosusil \
   fonts-sil-padauk \
   fonts-sil-scheherazade \
-  fonts-smc \
+  fonts-smc
+
+RUN apt-get install -y \
   fonts-smc-anjalioldlipi \
   fonts-smc-chilanka \
   fonts-smc-dyuthi \
@@ -128,7 +134,9 @@ RUN apt-get install -y \
   fonts-tlwg-laksaman \
   fonts-tlwg-laksaman-ttf \
   fonts-tlwg-loma \
-  fonts-tlwg-loma-ttf \
+  fonts-tlwg-loma-ttf
+
+RUN apt-get install -y \
   fonts-tlwg-mono \
   fonts-tlwg-mono-ttf \
   fonts-tlwg-norasi \
@@ -149,9 +157,7 @@ RUN apt-get install -y \
   fonts-tlwg-waree-ttf \
   fonts-ubuntu \
   fonts-ubuntu-console \
-  fonts-ukij-uyghur
-
-RUN apt-get install -y \
+  fonts-ukij-uyghur \
   fonts-urw-base35 \
   fonts-yrsa-rasa \
   fonts-3270 \
@@ -164,7 +170,9 @@ RUN apt-get install -y \
   fonts-adf-libris \
   fonts-adf-mekanus \
   fonts-adf-oldania \
-  fonts-adf-romande \
+  fonts-adf-romande
+
+RUN apt-get install -y \
   fonts-adf-solothurn \
   fonts-adf-switzera \
   fonts-adf-tribun \
@@ -191,10 +199,6 @@ RUN apt-get install -y \
   fonts-arphic-gkai00mp \
   fonts-arundina \
   fonts-atarismall \
-  fonts-atarist \
-  fonts-atkinson-hyperlegible \
-  fonts-atkinson-hyperlegible-ttf \
-  fonts-atkinson-hyperlegible-web \
   fonts-averia-gwf \
   fonts-averia-sans-gwf \
   fonts-averia-serif-gwf \
@@ -217,8 +221,9 @@ RUN apt-get install -y \
   fonts-cascadia-code \
   fonts-cegui \
   fonts-century-catalogue \
-  fonts-cherrybomb \
-  fonts-chomsky \
+  fonts-cherrybomb
+
+RUN apt-get install -y \
   fonts-circos-symbols \
   fonts-clear-sans \
   fonts-cmu \
@@ -239,11 +244,9 @@ RUN apt-get install -y \
   fonts-dancingscript \
   fonts-ddc-uchen \
   fonts-dejavu \
-  fonts-dejavu-web \
   fonts-dejima-mincho \
   fonts-denemo \
   fonts-dkg-handwriting \
-  fonts-dm-mono \
   fonts-dosis \
   fonts-dotgothic16 \
   fonts-dseg \
@@ -263,7 +266,9 @@ RUN apt-get install -y \
   fonts-eurofurence \
   fonts-evertype-conakry \
   fonts-f500 \
-  fonts-fantasma \
+  fonts-fantasma
+
+RUN apt-get install -y \
   fonts-fantasque-sans \
   fonts-fanwood \
   fonts-femkeklaver \
@@ -302,7 +307,9 @@ RUN apt-get install -y \
   fonts-hermit \
   fonts-horai-umefont \
   fonts-hosny-thabit \
-  fonts-humor-sans \
+  fonts-humor-sans
+
+RUN apt-get install -y \
   fonts-inconsolata \
   fonts-inter \
   fonts-inter-variable \
@@ -313,14 +320,8 @@ RUN apt-get install -y \
   fonts-ipafont-gothic \
   fonts-ipafont-mincho \
   fonts-ipamj-mincho \
-  fonts-ir \
-  fonts-irannastaliq \
   fonts-isabella \
-  fonts-jetbrains-mono \
-  fonts-jetbrains-mono-web \
-  fonts-johnsmith-induni
-
-RUN apt-get install -y \
+  fonts-johnsmith-induni \
   fonts-joscelyn \
   fonts-jsmath \
   fonts-junction \
@@ -334,7 +335,6 @@ RUN apt-get install -y \
   fonts-kiloji \
   fonts-klaudia-berenika \
   fonts-klee \
-  fonts-kode-mono \
   fonts-komatuna \
   fonts-konatu \
   fonts-kouzan-mouhitsu \
@@ -350,7 +350,6 @@ RUN apt-get install -y \
   fonts-lexi-gulim \
   fonts-lexi-saebom \
   fonts-lg-aboriginal \
-  fonts-liberation2 \
   fonts-libfinal \
   fonts-lindenhill \
   fonts-linex \
@@ -360,13 +359,13 @@ RUN apt-get install -y \
   fonts-lobstertwo \
   fonts-lohit-deva-marathi \
   fonts-lohit-deva-nepali \
-  fonts-lxgw-wenkai \
-  fonts-lxgw-wenkai-doc \
   fonts-lyx \
   fonts-manrope \
   fonts-material-design-icons-iconfont \
   fonts-materialdesignicons-webfont \
-  fonts-mathjax-extras \
+  fonts-mathjax-extras
+
+RUN apt-get install -y \
   fonts-meera-inimai \
   fonts-meera-taml \
   fonts-migmix \
@@ -382,10 +381,6 @@ RUN apt-get install -y \
   fonts-monoid-halftight \
   fonts-monoid-loose \
   fonts-monoid-tight \
-  fonts-mononoki \
-  fonts-montserrat \
-  fonts-morisawa-bizud-gothic \
-  fonts-morisawa-bizud-mincho \
   fonts-motoya-l-cedar \
   fonts-motoya-l-maruberi \
   fonts-mph-2b-damase \
@@ -419,7 +414,10 @@ RUN apt-get install -y \
   fonts-paratype \
   fonts-pc \
   fonts-pc-extra \
-  fonts-play \
+  fonts-pecita \
+  fonts-play
+
+RUN apt-get install -y \
   fonts-povray \
   fonts-powerline \
   fonts-prociono \
@@ -439,10 +437,7 @@ RUN apt-get install -y \
   fonts-roboto-slab \
   fonts-roboto-unhinted \
   fonts-rocknroll \
-  fonts-routed-gothic \
   fonts-rufscript \
-  fonts-sahel \
-  fonts-sahel-variable \
   fonts-sambhota-tsugring \
   fonts-sambhota-yigchung \
   fonts-samyak \
@@ -456,6 +451,7 @@ RUN apt-get install -y \
   fonts-sil-andika \
   fonts-sil-andika-compact \
   fonts-sil-andikanewbasic \
+  fonts-sil-annapurna \
   fonts-sil-awami-nastaliq \
   fonts-sil-charis \
   fonts-sil-charis-compact \
@@ -466,16 +462,16 @@ RUN apt-get install -y \
   fonts-sil-gentium \
   fonts-sil-gentium-basic \
   fonts-sil-gentiumplus \
-  fonts-sil-gentiumplus-compact
-
-RUN apt-get install -y \
+  fonts-sil-gentiumplus-compact \
   fonts-sil-harmattan \
   fonts-sil-lateef \
   fonts-sil-mingzat \
   fonts-sil-mondulkiri \
   fonts-sil-mondulkiri-extra \
   fonts-sil-shimenkan \
-  fonts-sil-shimenkan-gsm \
+  fonts-sil-shimenkan-gsm
+
+RUN apt-get install -y \
   fonts-sil-shimenkan-guifan \
   fonts-sil-shimenkan-mas \
   fonts-sil-shimenkan-mgs \
@@ -487,21 +483,17 @@ RUN apt-get install -y \
   fonts-sil-tagmukay \
   fonts-sil-taiheritagepro \
   fonts-sil-zaghawa-beria \
+  fonts-sipa-arundina \
   fonts-sixtyfour \
   fonts-sjfonts \
-  fonts-smiley-sans \
   fonts-solide-mirage \
   fonts-sora \
-  fonts-space-grotesk \
-  fonts-space-grotesk-otf \
-  fonts-space-grotesk-ttf \
   fonts-spleen \
   fonts-staypuft \
   fonts-stick \
   fonts-stix \
   fonts-summersby \
   fonts-symbola \
-  fonts-tagbanwa \
   fonts-takao \
   fonts-takao-gothic \
   fonts-takao-mincho \
@@ -511,7 +503,6 @@ RUN apt-get install -y \
   fonts-terminus \
   fonts-terminus-otb \
   fonts-texgyre \
-  fonts-texgyre-math \
   fonts-thai-tlwg-otf \
   fonts-thai-tlwg-ttf \
   fonts-thai-tlwg-web \
@@ -519,7 +510,9 @@ RUN apt-get install -y \
   fonts-tlwg-garuda-otf \
   fonts-tlwg-kinnari-otf \
   fonts-tlwg-laksaman-otf \
-  fonts-tlwg-loma-otf \
+  fonts-tlwg-loma-otf
+
+RUN apt-get install -y \
   fonts-tlwg-mono-otf \
   fonts-tlwg-norasi-otf \
   fonts-tlwg-purisa-otf \
@@ -532,9 +525,7 @@ RUN apt-get install -y \
   fonts-tomsontalks \
   fonts-train \
   fonts-triod-postnaja \
-  fonts-tt2020 \
   fonts-tuffy \
-  fonts-ubuntu-classic \
   fonts-ubuntu-title \
   fonts-umeplus \
   fonts-umeplus-cl \
@@ -542,17 +533,16 @@ RUN apt-get install -y \
   fonts-unfonts-extra \
   fonts-unifont \
   fonts-unikurdweb \
-  fonts-uniol \
   fonts-uralic \
-  fonts-vazirmatn \
   fonts-vlgothic \
   fonts-vollkorn \
   fonts-wine \
-  fonts-woowa-bm \
+  fonts-woowa-bm
+
+RUN apt-get install -y \
   fonts-wqy-microhei \
   fonts-wqy-zenhei \
   fonts-yanone-kaffeesatz \
-  fonts-yas \
   fonts-yozvox-yozfont \
   fonts-yozvox-yozfont-antique \
   fonts-yozvox-yozfont-cute \
@@ -565,12 +555,14 @@ RUN apt-get install -y \
   fonts-ibm-plex \
   fonts-ipafont-nonfree-jisx0208 \
   fonts-ipafont-nonfree-uigothic \
+  fonts-jetbrains-mono \
   fonts-larabie-deco \
   fonts-larabie-straight \
   fonts-larabie-uncommon \
   fonts-mikachan \
   fonts-moe-standard-kai \
   fonts-moe-standard-song \
+  fonts-mononoki \
   fonts-xfree86-nonfree \
   fonts-xfree86-nonfree-syriac
 

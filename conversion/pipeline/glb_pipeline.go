@@ -65,7 +65,7 @@ func (p *glbPipeline) Run(opts client.PipelineRunOptions) error {
 }
 
 func (p *glbPipeline) createThumbnail(inputPath string, opts client.PipelineRunOptions) error {
-	thumbnail, err := p.glbProc.Base64Thumbnail(inputPath, "white")
+	thumbnail, err := p.glbProc.Base64Thumbnail(inputPath, "rgb(255,255,255)")
 	if err != nil {
 		return err
 	}

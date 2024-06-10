@@ -35,7 +35,7 @@ const Insights = () => {
   }, [mutateInfo])
 
   useEffect(() => {
-    if (file?.snapshot?.taskId) {
+    if (file?.snapshot?.task?.isPending) {
       dispatch(modalDidClose())
     }
   }, [file])

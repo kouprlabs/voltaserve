@@ -60,7 +60,7 @@ const InsightsOverviewSettings = () => {
         <CardFooter>
           <Button
             leftIcon={<IconSync />}
-            isDisabled={!info.isOutdated || file.snapshot?.taskId !== undefined}
+            isDisabled={!info.isOutdated || file.snapshot?.task?.isPending}
             onClick={handleUpdate}
           >
             Collect
@@ -77,7 +77,7 @@ const InsightsOverviewSettings = () => {
             leftIcon={<IconDelete />}
             isDisabled={
               !file ||
-              file.snapshot?.taskId !== undefined ||
+              file.snapshot?.task?.isPending ||
               info.isOutdated ||
               ltOwnerPermission(file.permission)
             }

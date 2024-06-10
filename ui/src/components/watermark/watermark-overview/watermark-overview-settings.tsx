@@ -60,7 +60,7 @@ const WatermarkOverviewSettings = () => {
         <CardFooter>
           <Button
             leftIcon={<IconSync />}
-            isDisabled={!info.isOutdated || file.snapshot?.taskId !== undefined}
+            isDisabled={!info.isOutdated || file.snapshot?.task?.isPending}
             onClick={handleUpdate}
           >
             Apply
@@ -77,7 +77,7 @@ const WatermarkOverviewSettings = () => {
             leftIcon={<IconDelete />}
             isDisabled={
               !file ||
-              file.snapshot?.taskId !== undefined ||
+              file.snapshot?.task?.isPending ||
               info.isOutdated ||
               ltOwnerPermission(file.permission)
             }

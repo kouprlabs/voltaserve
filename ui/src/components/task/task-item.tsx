@@ -14,6 +14,7 @@ import {
 import cx from 'classnames'
 import FileAPI from '@/client/api/file'
 import TaskAPI, { Status, Task } from '@/client/api/task'
+import { swrConfig } from '@/client/options'
 import {
   IconCheckCircle,
   IconClose,
@@ -31,9 +32,11 @@ const TaskDrawerItem = ({ task }: TaskDrawerItemProps) => {
   const [isDismissing, setIsDismissing] = useState(false)
   const mutateList = useAppSelector((state) => state.ui.tasks.mutateList)
   const { data: file } = FileAPI.useGet(
-    task.status !== Status.Error ? task.payload?.fileId : undefined,
+    task.payload?.fileId,
+    swrConfig(),
+    false,
   )
-  const fileName = task.payload?.fileId && file ? file?.name : 'File deleted.'
+  const fileName = file ? file?.name : 'File deleted.'
 
   const handleDismiss = useCallback(async () => {
     try {

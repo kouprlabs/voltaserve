@@ -12,21 +12,21 @@ else:
 
 app = Flask(__name__)
 nlp = None
-iso6393_to_model = {
-    "ara": "xx",
-    "chi_sim": "zh",
-    "chi_tra": "zh",
-    "deu": "de",
-    "eng": "en",
-    "fra": "fr",
-    "hin": "xx",
-    "ita": "it",
-    "jpn": "ja",
-    "nld": "nl",
-    "por": "pt",
-    "rus": "ru",
-    "spa": "es",
-    "swe": "sv",
+iso_6393_to_model = {
+    "ara": "xx_ent_wiki_sm",
+    "chi_sim": "zh_core_web_trf",
+    "chi_tra": "zh_core_web_trf",
+    "deu": "de_core_news_lg",
+    "eng": "en_core_web_trf",
+    "fra": "fr_core_news_lg",
+    "hin": "xx_ent_wiki_sm",
+    "ita": "it_core_news_lg",
+    "jpn": "ja_core_news_trf",
+    "nld": "nl_core_news_lg",
+    "por": "pt_core_news_lg",
+    "rus": "ru_core_news_lg",
+    "spa": "es_core_news_lg",
+    "swe": "sv_core_news_lg",
 }
 
 
@@ -38,7 +38,7 @@ def health():
 @app.route("/v2/entities", methods=["POST"])
 def ner_entities():
     global nlp
-    global iso6393_to_model
+    global iso_6393_to_6391
 
     content = request.json
     text = content["text"]
@@ -46,24 +46,14 @@ def ner_entities():
 
     entities = []
     if nlp is None:
-        nlp = {
-            "xx": spacy.load("xx_ent_wiki_sm"),
-            "zh": spacy.load("zh_core_web_trf"),
-            "de": spacy.load("de_core_news_lg"),
-            "en": spacy.load("en_core_web_trf"),
-            "fr": spacy.load("fr_core_news_lg"),
-            "it": spacy.load("it_core_news_lg"),
-            "ja": spacy.load("ja_core_news_trf"),
-            "nl": spacy.load("nl_core_news_lg"),
-            "pt": spacy.load("pt_core_news_lg"),
-            "ru": spacy.load("ru_core_news_lg"),
-            "es": spacy.load("es_core_news_lg"),
-            "sv": spacy.load("sv_core_news_lg"),
-        }
-        for key in nlp:
-            nlp[key].add_pipe("sentencizer")
+        nlp = {}
+        for key in iso_6393_to_model.keys():
+            nlp[key] = None
+    if nlp[language] is None:
+        nlp[language] = spacy.load(iso_6393_to_model[language])
+        nlp[language].add_pipe("sentencizer")
 
-    for doc in nlp[iso6393_to_model[language]].pipe([text], disable=["tagger"]):
+    for doc in nlp[language].pipe([text], disable=["tagger"]):
         for sent in doc.sents:
             for ent in sent.ents:
                 entities.append({"text": ent.text, "label": ent.label_})

@@ -57,7 +57,11 @@ func (svc *MosaicService) Create(id string, userID string) error {
 	if err != nil {
 		return err
 	}
-	if snapshot.GetTaskID() != nil {
+	isTaskPending, err := svc.snapshotSvc.IsTaskPending(snapshot)
+	if err != nil {
+		return err
+	}
+	if *isTaskPending {
 		return errorpkg.NewSnapshotHasPendingTaskError(nil)
 	}
 	task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
@@ -103,7 +107,11 @@ func (svc *MosaicService) Delete(id string, userID string) error {
 	if err != nil {
 		return err
 	}
-	if snapshot.GetTaskID() != nil {
+	isTaskPending, err := svc.snapshotSvc.IsTaskPending(snapshot)
+	if err != nil {
+		return err
+	}
+	if *isTaskPending {
 		return errorpkg.NewSnapshotHasPendingTaskError(nil)
 	}
 	if !snapshot.HasMosaic() {

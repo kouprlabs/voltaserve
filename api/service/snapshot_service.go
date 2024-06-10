@@ -9,6 +9,8 @@ import (
 	"voltaserve/config"
 	"voltaserve/errorpkg"
 	"voltaserve/guard"
+	"voltaserve/helper"
+	"voltaserve/log"
 	"voltaserve/model"
 	"voltaserve/repo"
 	"voltaserve/search"
@@ -23,6 +25,7 @@ type SnapshotService struct {
 	fileRepo       repo.FileRepo
 	fileSearch     *search.FileSearch
 	fileMapper     *FileMapper
+	taskCache      *cache.TaskCache
 	config         config.Config
 }
 
@@ -36,6 +39,7 @@ func NewSnapshotService() *SnapshotService {
 		fileSearch:     search.NewFileSearch(),
 		fileMapper:     NewFileMapper(),
 		fileRepo:       repo.NewFileRepo(),
+		taskCache:      cache.NewTaskCache(),
 		config:         config.GetConfig(),
 	}
 }
@@ -61,9 +65,14 @@ type Snapshot struct {
 	Language   *string    `json:"language,omitempty"`
 	Status     string     `json:"status,omitempty"`
 	IsActive   bool       `json:"isActive"`
-	TaskID     *string    `json:"taskId,omitempty"`
+	Task       *TaskInfo  `json:"task,omitempty"`
 	CreateTime string     `json:"createTime"`
 	UpdateTime *string    `json:"updateTime,omitempty"`
+}
+
+type TaskInfo struct {
+	ID        string `json:"id"`
+	IsPending bool   `json:"isPending"`
 }
 
 type Download struct {
@@ -298,11 +307,31 @@ func (svc *SnapshotService) Patch(id string, opts SnapshotPatchOptions) (*Snapsh
 	return svc.snapshotMapper.mapOne(snapshot), nil
 }
 
+func (svc *SnapshotService) IsTaskPending(snapshot model.Snapshot) (*bool, error) {
+	return isTaskPending(snapshot, svc.taskCache)
+}
+
+func isTaskPending(snapshot model.Snapshot, taskCache *cache.TaskCache) (*bool, error) {
+	if snapshot.GetTaskID() != nil {
+		task, err := taskCache.Get(*snapshot.GetTaskID())
+		if err != nil {
+			return nil, err
+		}
+		if task.GetStatus() == model.TaskStatusWaiting || task.GetStatus() == model.TaskStatusRunning {
+			return helper.ToPtr(true), nil
+		}
+	}
+	return helper.ToPtr(false), nil
+}
+
 type SnapshotMapper struct {
+	taskCache *cache.TaskCache
 }
 
 func NewSnapshotMapper() *SnapshotMapper {
-	return &SnapshotMapper{}
+	return &SnapshotMapper{
+		taskCache: cache.NewTaskCache(),
+	}
 }
 
 func (mp *SnapshotMapper) mapOne(m model.Snapshot) *Snapshot {
@@ -311,7 +340,6 @@ func (mp *SnapshotMapper) mapOne(m model.Snapshot) *Snapshot {
 		Version:    m.GetVersion(),
 		Status:     m.GetStatus(),
 		Language:   m.GetLanguage(),
-		TaskID:     m.GetTaskID(),
 		CreateTime: m.GetCreateTime(),
 		UpdateTime: m.GetUpdateTime(),
 	}
@@ -339,6 +367,18 @@ func (mp *SnapshotMapper) mapOne(m model.Snapshot) *Snapshot {
 	if m.HasThumbnail() {
 		s.Thumbnail = mp.mapThumbnail(m.GetThumbnail())
 	}
+	if m.GetTaskID() != nil {
+		s.Task = &TaskInfo{
+			ID: *m.GetTaskID(),
+		}
+		isPending, err := isTaskPending(m, mp.taskCache)
+		if err != nil {
+			log.GetLogger().Error(err)
+		} else {
+			s.Task.IsPending = *isPending
+		}
+	}
+
 	return s
 }
 

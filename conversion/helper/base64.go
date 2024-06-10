@@ -6,10 +6,10 @@ import (
 	"os"
 )
 
-func ImageToBase64(path string) (string, error) {
+func ImageToBase64(path string) (*string, error) {
 	bytes, err := os.ReadFile(path)
 	if err != nil {
-		return "", nil
+		return nil, err
 	}
 	var res string
 	mimeType := http.DetectContentType(bytes)
@@ -20,5 +20,5 @@ func ImageToBase64(path string) (string, error) {
 		res += "data:image/png;base64,"
 	}
 	res += base64.StdEncoding.EncodeToString(bytes)
-	return res, nil
+	return &res, nil
 }
