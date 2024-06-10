@@ -315,11 +315,15 @@ export default class FileAPI {
     })
   }
 
-  static useGet(id: string | null | undefined, swrOptions?: SWRConfiguration) {
+  static useGet(
+    id: string | null | undefined,
+    swrOptions?: SWRConfiguration,
+    showError = true,
+  ) {
     const url = `/files/${id}`
     return useSWR(
       id ? url : null,
-      () => apiFetcher({ url, method: 'GET' }) as Promise<File>,
+      () => apiFetcher({ url, method: 'GET', showError }) as Promise<File>,
       swrOptions,
     )
   }

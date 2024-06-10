@@ -30,7 +30,7 @@ const Mosaic = () => {
   const { data: file } = FileAPI.useGet(id, swrConfig())
 
   useEffect(() => {
-    if (file?.snapshot?.taskId) {
+    if (file?.snapshot?.task?.isPending) {
       dispatch(modalDidClose())
     }
   }, [file])

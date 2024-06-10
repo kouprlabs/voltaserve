@@ -26,7 +26,7 @@ const ViewerModel = ({ file }: ViewerModelProps) => {
 
   return (
     <>
-      {/* @ts-ignore */}
+      {/* @ts-expect-error: ignored */}
       <model-viewer
         src={url}
         shadow-intensity="1"
@@ -34,7 +34,7 @@ const ViewerModel = ({ file }: ViewerModelProps) => {
         touch-action="pan-y"
         style={{ width: '100%', height: '100%' }}
       >
-        {/* @ts-ignore */}
+        {/* @ts-expect-error: ignored */}
       </model-viewer>
     </>
   )

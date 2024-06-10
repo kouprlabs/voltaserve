@@ -60,7 +60,11 @@ func (svc *WatermarkService) Create(id string, userID string) error {
 	if err != nil {
 		return err
 	}
-	if snapshot.GetTaskID() != nil {
+	isTaskPending, err := svc.snapshotSvc.IsTaskPending(snapshot)
+	if err != nil {
+		return err
+	}
+	if *isTaskPending {
 		return errorpkg.NewSnapshotHasPendingTaskError(nil)
 	}
 	user, err := svc.userRepo.Find(userID)
@@ -121,7 +125,11 @@ func (svc *WatermarkService) Delete(id string, userID string) error {
 	if !snapshot.HasWatermark() {
 		return errorpkg.NewWatermarkNotFoundError(nil)
 	}
-	if snapshot.GetTaskID() != nil {
+	isTaskPending, err := svc.snapshotSvc.IsTaskPending(snapshot)
+	if err != nil {
+		return err
+	}
+	if *isTaskPending {
 		return errorpkg.NewSnapshotHasPendingTaskError(nil)
 	}
 	snapshot.SetStatus(model.SnapshotStatusProcessing)

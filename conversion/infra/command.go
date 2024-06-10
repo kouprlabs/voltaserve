@@ -3,6 +3,7 @@ package infra
 import (
 	"bytes"
 	"errors"
+	"os"
 	"os/exec"
 	"sync"
 	"time"
@@ -18,6 +19,13 @@ type Command struct {
 
 func NewCommand() *Command {
 	return &Command{config: config.GetConfig()}
+}
+
+func (r *Command) RunWithConsoleOutput(name string, arg ...string) error {
+	cmd := exec.Command(name, arg...)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
 }
 
 func (r *Command) Exec(name string, arg ...string) error {
