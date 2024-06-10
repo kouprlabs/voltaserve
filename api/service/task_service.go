@@ -293,33 +293,11 @@ func (svc *TaskService) Dismiss(id string, userID string) error {
 	if !task.HasError() {
 		return errorpkg.NewTaskIsRunningError(nil)
 	}
-	if err := svc.taskRepo.Delete(id); err != nil {
-		return err
-	}
-	if err := svc.taskCache.Delete(task.GetID()); err != nil {
-		return err
-	}
-	if err := svc.taskSearch.Delete([]string{task.GetID()}); err != nil {
-		return err
-	}
-	return nil
+	return svc.deleteAndSync(id)
 }
 
 func (svc *TaskService) Delete(id string) error {
-	task, err := svc.taskCache.Get(id)
-	if err != nil {
-		return err
-	}
-	if err := svc.taskRepo.Delete(id); err != nil {
-		return err
-	}
-	if err := svc.taskCache.Delete(task.GetID()); err != nil {
-		return err
-	}
-	if err := svc.taskSearch.Delete([]string{task.GetID()}); err != nil {
-		return err
-	}
-	return nil
+	return svc.deleteAndSync(id)
 }
 
 func (svc *TaskService) insertAndSync(opts repo.TaskInsertOptions) (model.Task, error) {
