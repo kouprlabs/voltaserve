@@ -103,7 +103,7 @@ const FileMenu = ({
   const isInsightsAuthorized = useMemo(
     () =>
       file?.type === 'file' &&
-      !file.snapshot?.taskId &&
+      !file.snapshot?.task?.isPending &&
       ((geViewerPermission(file.permission) && file.snapshot?.entities) ||
         geEditorPermission(file.permission)),
     [file],
@@ -111,14 +111,14 @@ const FileMenu = ({
   const isMosaicAuthorized = useMemo(
     () =>
       file?.type === 'file' &&
-      !file.snapshot?.taskId &&
+      !file.snapshot?.task?.isPending &&
       isImage(file.snapshot?.original.extension),
     [file],
   )
   const isWatermarkAuthorized = useMemo(
     () =>
       file?.type === 'file' &&
-      !file.snapshot?.taskId &&
+      !file.snapshot?.task?.isPending &&
       (isPDF(file.snapshot?.original.extension) ||
         isMicrosoftOffice(file.snapshot?.original.extension) ||
         isOpenOffice(file.snapshot?.original.extension) ||

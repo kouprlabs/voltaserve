@@ -93,7 +93,11 @@ func (svc *InsightsService) Create(id string, opts InsightsCreateOptions, userID
 	if err != nil {
 		return err
 	}
-	if snapshot.GetTaskID() != nil {
+	isTaskPending, err := svc.snapshotSvc.IsTaskPending(snapshot)
+	if err != nil {
+		return err
+	}
+	if *isTaskPending {
 		return errorpkg.NewSnapshotHasPendingTaskError(nil)
 	}
 	task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
@@ -147,7 +151,11 @@ func (svc *InsightsService) Patch(id string, userID string) error {
 	if err != nil {
 		return err
 	}
-	if snapshot.GetTaskID() != nil {
+	isTaskPending, err := svc.snapshotSvc.IsTaskPending(snapshot)
+	if err != nil {
+		return err
+	}
+	if *isTaskPending {
 		return errorpkg.NewSnapshotHasPendingTaskError(nil)
 	}
 	previous, err := svc.getPreviousSnapshot(file.GetID(), snapshot.GetVersion())
@@ -205,7 +213,11 @@ func (svc *InsightsService) Delete(id string, userID string) error {
 	if !snapshot.HasEntities() {
 		return errorpkg.NewInsightsNotFoundError(nil)
 	}
-	if snapshot.GetTaskID() != nil {
+	isTaskPending, err := svc.snapshotSvc.IsTaskPending(snapshot)
+	if err != nil {
+		return err
+	}
+	if *isTaskPending {
 		return errorpkg.NewSnapshotHasPendingTaskError(nil)
 	}
 	snapshot.SetStatus(model.SnapshotStatusProcessing)

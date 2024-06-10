@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"voltaserve/client"
 	"voltaserve/config"
 	"voltaserve/helper"
@@ -25,14 +26,21 @@ func NewGLBProcessor() *GLBProcessor {
 }
 
 func (p *GLBProcessor) Thumbnail(inputPath string, width int, height int, color string, outputPath string) error {
-	if err := infra.NewCommand().Exec("screenshot-glb", "-i", inputPath, "-o", outputPath, "--width", fmt.Sprintf("%d", width), "--height", fmt.Sprintf("%d", height), "--color", color); err != nil {
-		return err
+	switch os := runtime.GOOS; os {
+	case "darwin":
+		if err := infra.NewCommand().Exec("screenshot-glb", "-i", inputPath, "-o", outputPath, "--width", fmt.Sprintf("%d", width), "--height", fmt.Sprintf("%d", height), "--color", color); err != nil {
+			return err
+		}
+	case "linux":
+		if err := infra.NewCommand().Exec("xvfb-run", "--auto-servernum", "--server-args", "-screen 0 1280x1024x24", "screenshot-glb", "-i", inputPath, "-o", outputPath, "--width", fmt.Sprintf("%d", width), "--height", fmt.Sprintf("%d", height), "--color", color); err != nil {
+			return err
+		}
 	}
 	return nil
 }
 
 func (p *GLBProcessor) Base64Thumbnail(inputPath string, color string) (*client.ImageBase64, error) {
-	tmpPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".png")
+	tmpPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".jpeg")
 	if err := p.Thumbnail(inputPath, p.config.Limits.ImagePreviewMaxWidth, p.config.Limits.ImagePreviewMaxHeight, color, tmpPath); err != nil {
 		return nil, err
 	}
@@ -53,7 +61,7 @@ func (p *GLBProcessor) Base64Thumbnail(inputPath string, color string) (*client.
 		return nil, err
 	}
 	return &client.ImageBase64{
-		Base64: b64,
+		Base64: *b64,
 		Width:  imageProps.Width,
 		Height: imageProps.Height,
 	}, nil

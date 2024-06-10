@@ -46,7 +46,7 @@ func (p *PDFProcessor) Base64Thumbnail(inputPath string) (*client.ImageBase64, e
 		return nil, err
 	}
 	return &client.ImageBase64{
-		Base64: b64,
+		Base64: *b64,
 		Width:  imageProps.Width,
 		Height: imageProps.Height,
 	}, nil

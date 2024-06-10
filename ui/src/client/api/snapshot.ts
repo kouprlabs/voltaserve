@@ -15,7 +15,7 @@ export type Snapshot = {
   thumbnail?: Thumbnail
   language?: string
   isActive: boolean
-  taskId?: string
+  task?: TaskInfo
   createTime: string
   updateTime?: string
 }
@@ -54,6 +54,11 @@ export enum SortBy {
 export enum SortOrder {
   Asc = 'asc',
   Desc = 'desc',
+}
+
+export type TaskInfo = {
+  id: string
+  isPending: boolean
 }
 
 export type Download = {

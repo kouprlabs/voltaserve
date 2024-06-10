@@ -107,7 +107,7 @@ func (d *Dispatcher) Dispatch(opts client.PipelineRunOptions) error {
 		}); err != nil {
 			return err
 		}
-		return nil
+		return err
 	} else {
 		if err := d.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
 			Options: opts,
