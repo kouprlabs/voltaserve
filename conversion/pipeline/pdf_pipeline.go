@@ -74,14 +74,34 @@ func (p *pdfPipeline) Run(opts client.PipelineRunOptions) error {
 }
 
 func (p *pdfPipeline) createThumbnail(inputPath string, opts client.PipelineRunOptions) error {
-	thumbnail, err := p.pdfProc.Base64Thumbnail(inputPath)
+	tmpPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".png")
+	if err := p.pdfProc.Thumbnail(inputPath, 0, p.config.Limits.ImagePreviewMaxHeight, tmpPath); err != nil {
+		return err
+	}
+	defer func(path string) {
+		_, err := os.Stat(path)
+		if os.IsExist(err) {
+			if err := os.Remove(path); err != nil {
+				infra.GetLogger().Error(err)
+			}
+		}
+	}(tmpPath)
+	imageProps, err := p.imageProc.MeasureImage(tmpPath)
 	if err != nil {
+		return err
+	}
+	s3Object := &client.S3Object{
+		Bucket: opts.Bucket,
+		Key:    opts.SnapshotID + "/thumbnail" + filepath.Ext(tmpPath),
+		Image:  imageProps,
+	}
+	if err := p.s3.PutFile(s3Object.Key, tmpPath, helper.DetectMimeFromFile(tmpPath), s3Object.Bucket); err != nil {
 		return err
 	}
 	if err := p.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
 		Options:   opts,
 		Fields:    []string{client.SnapshotFieldThumbnail},
-		Thumbnail: thumbnail,
+		Thumbnail: s3Object,
 	}); err != nil {
 		return err
 	}

@@ -167,11 +167,11 @@ func (s *snapshotEntity) GetWatermark() *model.S3Object {
 	return &res
 }
 
-func (s *snapshotEntity) GetThumbnail() *model.Thumbnail {
+func (s *snapshotEntity) GetThumbnail() *model.S3Object {
 	if s.Thumbnail.String() == "" {
 		return nil
 	}
-	var res = model.Thumbnail{}
+	var res = model.S3Object{}
 	if err := json.Unmarshal([]byte(s.Thumbnail.String()), &res); err != nil {
 		log.GetLogger().Fatal(err)
 		return nil
@@ -304,7 +304,7 @@ func (s *snapshotEntity) SetWatermark(m *model.S3Object) {
 	}
 }
 
-func (s *snapshotEntity) SetThumbnail(m *model.Thumbnail) {
+func (s *snapshotEntity) SetThumbnail(m *model.S3Object) {
 	if m == nil {
 		s.Thumbnail = nil
 	} else {
@@ -448,7 +448,7 @@ type SnapshotUpdateOptions struct {
 	Entities  *model.S3Object
 	Mosaic    *model.S3Object
 	Watermark *model.S3Object
-	Thumbnail *model.Thumbnail
+	Thumbnail *model.S3Object
 	Status    *string
 	Language  *string
 	TaskID    *string

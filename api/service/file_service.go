@@ -342,6 +342,29 @@ func (svc *FileService) DownloadPreviewBuffer(id string, userID string) (*bytes.
 	}
 }
 
+func (svc *FileService) DownloadThumbnailBuffer(id string, userID string) (*bytes.Buffer, model.File, model.Snapshot, error) {
+	file, err := svc.fileCache.Get(id)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
+		return nil, nil, nil, errorpkg.NewFileIsNotAFileError(file)
+	}
+	snapshot, err := svc.snapshotCache.Get(*file.GetSnapshotID())
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	if snapshot.HasThumbnail() {
+		buf, err := svc.s3.GetObject(snapshot.GetThumbnail().Key, snapshot.GetThumbnail().Bucket)
+		if err != nil {
+			return nil, nil, nil, err
+		}
+		return buf, file, snapshot, nil
+	} else {
+		return nil, nil, nil, errorpkg.NewS3ObjectNotFoundError(nil)
+	}
+}
+
 func (svc *FileService) Find(ids []string, userID string) ([]*File, error) {
 	var res []*File
 	for _, id := range ids {

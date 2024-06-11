@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 	"voltaserve/client"
+	"voltaserve/config"
 	"voltaserve/helper"
 	"voltaserve/infra"
 	"voltaserve/model"
@@ -12,15 +13,19 @@ import (
 
 type videoPipeline struct {
 	videoProc *processor.VideoProcessor
+	imageProc *processor.ImageProcessor
 	s3        *infra.S3Manager
 	apiClient *client.APIClient
+	config    config.Config
 }
 
 func NewVideoPipeline() model.Pipeline {
 	return &videoPipeline{
 		videoProc: processor.NewVideoProcessor(),
+		imageProc: processor.NewImageProcessor(),
 		s3:        infra.NewS3Manager(),
 		apiClient: client.NewAPIClient(),
+		config:    config.GetConfig(),
 	}
 }
 
@@ -57,14 +62,34 @@ func (p *videoPipeline) Run(opts client.PipelineRunOptions) error {
 }
 
 func (p *videoPipeline) createThumbnail(inputPath string, opts client.PipelineRunOptions) error {
-	thumbnail, err := p.videoProc.Base64Thumbnail(inputPath)
+	tmpPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".png")
+	defer func(path string) {
+		_, err := os.Stat(path)
+		if os.IsExist(err) {
+			if err := os.Remove(path); err != nil {
+				infra.GetLogger().Error(err)
+			}
+		}
+	}(tmpPath)
+	if err := p.videoProc.Thumbnail(inputPath, 0, p.config.Limits.ImagePreviewMaxHeight, tmpPath); err != nil {
+		return err
+	}
+	imageProps, err := p.imageProc.MeasureImage(tmpPath)
 	if err != nil {
+		return err
+	}
+	s3Object := &client.S3Object{
+		Bucket: opts.Bucket,
+		Key:    opts.SnapshotID + "/thumbnail" + filepath.Ext(tmpPath),
+		Image:  imageProps,
+	}
+	if err := p.s3.PutFile(s3Object.Key, tmpPath, helper.DetectMimeFromFile(tmpPath), s3Object.Bucket); err != nil {
 		return err
 	}
 	if err := p.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
 		Options:   opts,
 		Fields:    []string{client.SnapshotFieldThumbnail},
-		Thumbnail: thumbnail,
+		Thumbnail: s3Object,
 	}); err != nil {
 		return err
 	}

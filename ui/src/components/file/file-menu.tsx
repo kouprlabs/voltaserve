@@ -104,6 +104,10 @@ const FileMenu = ({
     () =>
       file?.type === 'file' &&
       !file.snapshot?.task?.isPending &&
+      (isPDF(file.snapshot?.original.extension) ||
+        isMicrosoftOffice(file.snapshot?.original.extension) ||
+        isOpenOffice(file.snapshot?.original.extension) ||
+        isImage(file.snapshot?.original.extension)) &&
       ((geViewerPermission(file.permission) && file.snapshot?.entities) ||
         geEditorPermission(file.permission)),
     [file],

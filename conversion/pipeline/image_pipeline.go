@@ -113,14 +113,39 @@ func (p *imagePipeline) measureImageDimensions(inputPath string, opts client.Pip
 }
 
 func (p *imagePipeline) createThumbnail(inputPath string, opts client.PipelineRunOptions) error {
-	thumbnail, err := p.imageProc.Base64Thumbnail(inputPath)
+	tmpPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".png")
+	isAvailable, err := p.imageProc.Thumbnail(inputPath, tmpPath)
 	if err != nil {
+		return err
+	}
+	if *isAvailable {
+		defer func(path string) {
+			_, err := os.Stat(path)
+			if os.IsExist(err) {
+				if err := os.Remove(path); err != nil {
+					infra.GetLogger().Error(err)
+				}
+			}
+		}(tmpPath)
+	} else {
+		tmpPath = inputPath
+	}
+	imageProps, err := p.imageProc.MeasureImage(tmpPath)
+	if err != nil {
+		return err
+	}
+	s3Object := &client.S3Object{
+		Bucket: opts.Bucket,
+		Key:    opts.SnapshotID + "/thumbnail" + filepath.Ext(tmpPath),
+		Image:  imageProps,
+	}
+	if err := p.s3.PutFile(s3Object.Key, tmpPath, helper.DetectMimeFromFile(tmpPath), s3Object.Bucket); err != nil {
 		return err
 	}
 	if err := p.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
 		Options:   opts,
 		Fields:    []string{client.SnapshotFieldThumbnail},
-		Thumbnail: thumbnail,
+		Thumbnail: s3Object,
 	}); err != nil {
 		return err
 	}

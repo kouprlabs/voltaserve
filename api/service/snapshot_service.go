@@ -52,22 +52,22 @@ type SnapshotListOptions struct {
 }
 
 type Snapshot struct {
-	ID         string     `json:"id"`
-	Version    int64      `json:"version"`
-	Original   *Download  `json:"original,omitempty"`
-	Preview    *Download  `json:"preview,omitempty"`
-	OCR        *Download  `json:"ocr,omitempty"`
-	Text       *Download  `json:"text,omitempty"`
-	Entities   *Download  `json:"entities,omitempty"`
-	Mosaic     *Download  `json:"mosaic,omitempty"`
-	Watermark  *Download  `json:"watermark,omitempty"`
-	Thumbnail  *Thumbnail `json:"thumbnail,omitempty"`
-	Language   *string    `json:"language,omitempty"`
-	Status     string     `json:"status,omitempty"`
-	IsActive   bool       `json:"isActive"`
-	Task       *TaskInfo  `json:"task,omitempty"`
-	CreateTime string     `json:"createTime"`
-	UpdateTime *string    `json:"updateTime,omitempty"`
+	ID         string    `json:"id"`
+	Version    int64     `json:"version"`
+	Original   *Download `json:"original,omitempty"`
+	Preview    *Download `json:"preview,omitempty"`
+	OCR        *Download `json:"ocr,omitempty"`
+	Text       *Download `json:"text,omitempty"`
+	Entities   *Download `json:"entities,omitempty"`
+	Mosaic     *Download `json:"mosaic,omitempty"`
+	Watermark  *Download `json:"watermark,omitempty"`
+	Thumbnail  *Download `json:"thumbnail,omitempty"`
+	Language   *string   `json:"language,omitempty"`
+	Status     string    `json:"status,omitempty"`
+	IsActive   bool      `json:"isActive"`
+	Task       *TaskInfo `json:"task,omitempty"`
+	CreateTime string    `json:"createTime"`
+	UpdateTime *string   `json:"updateTime,omitempty"`
 }
 
 type TaskInfo struct {
@@ -277,7 +277,7 @@ type SnapshotPatchOptions struct {
 	Entities  *model.S3Object           `json:"entities"`
 	Mosaic    *model.S3Object           `json:"mosaic"`
 	Watermark *model.S3Object           `json:"watermark"`
-	Thumbnail *model.Thumbnail          `json:"thumbnail"`
+	Thumbnail *model.S3Object           `json:"thumbnail"`
 	Status    *string                   `json:"status"`
 	TaskID    *string                   `json:"taskId"`
 }
@@ -365,7 +365,7 @@ func (mp *SnapshotMapper) mapOne(m model.Snapshot) *Snapshot {
 		s.Watermark = mp.mapS3Object(m.GetWatermark())
 	}
 	if m.HasThumbnail() {
-		s.Thumbnail = mp.mapThumbnail(m.GetThumbnail())
+		s.Thumbnail = mp.mapS3Object(m.GetThumbnail())
 	}
 	if m.GetTaskID() != nil {
 		s.Task = &TaskInfo{
@@ -409,12 +409,4 @@ func (mp *SnapshotMapper) mapS3Object(o *model.S3Object) *Download {
 		}
 	}
 	return download
-}
-
-func (mp *SnapshotMapper) mapThumbnail(t *model.Thumbnail) *Thumbnail {
-	return &Thumbnail{
-		Base64: t.Base64,
-		Width:  t.Width,
-		Height: t.Height,
-	}
 }

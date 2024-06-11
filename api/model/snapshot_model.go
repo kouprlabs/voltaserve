@@ -17,7 +17,7 @@ type Snapshot interface {
 	GetEntities() *S3Object
 	GetMosaic() *S3Object
 	GetWatermark() *S3Object
-	GetThumbnail() *Thumbnail
+	GetThumbnail() *S3Object
 	GetTaskID() *string
 	HasOriginal() bool
 	HasPreview() bool
@@ -40,7 +40,7 @@ type Snapshot interface {
 	SetEntities(*S3Object)
 	SetMosaic(*S3Object)
 	SetWatermark(*S3Object)
-	SetThumbnail(*Thumbnail)
+	SetThumbnail(*S3Object)
 	SetStatus(string)
 	SetLanguage(string)
 	SetTaskID(*string)
@@ -56,10 +56,4 @@ type S3Object struct {
 type ImageProps struct {
 	Width  int `json:"width"`
 	Height int `json:"height"`
-}
-
-type Thumbnail struct {
-	Base64 string `json:"base64"`
-	Width  int    `json:"width"`
-	Height int    `json:"height"`
 }

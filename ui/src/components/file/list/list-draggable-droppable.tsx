@@ -70,11 +70,14 @@ const ListDraggableDroppable = ({
         }
         dispatch(hiddenUpdated(idsToMove))
         setIsLoading(true)
-        await FileAPI.move(file.id, { ids: idsToMove })
-        mutateList?.()
-        setIsLoading(false)
-        dispatch(hiddenUpdated([]))
-        dispatch(selectionUpdated([]))
+        try {
+          await FileAPI.move(file.id, { ids: idsToMove })
+          mutateList?.()
+        } finally {
+          setIsLoading(false)
+          dispatch(hiddenUpdated([]))
+          dispatch(selectionUpdated([]))
+        }
       }
     },
     onDragCancel: (event: DragCancelEvent) => {

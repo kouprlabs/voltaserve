@@ -15,8 +15,6 @@ definitions:
         type: string
       height:
         type: integer
-      isOutdated:
-        type: boolean
       width:
         type: integer
       zoomLevels:
@@ -89,18 +87,6 @@ definitions:
       width:
         type: integer
     type: object
-  model.InsightsInfo:
-    properties:
-      isAvailable:
-        type: boolean
-      metadata:
-        $ref: '#/definitions/model.InsightsMetadata'
-    type: object
-  model.InsightsMetadata:
-    properties:
-      isOutdated:
-        type: boolean
-    type: object
   model.S3Object:
     properties:
       bucket:
@@ -111,27 +97,6 @@ definitions:
         type: string
       size:
         type: integer
-    type: object
-  model.Thumbnail:
-    properties:
-      base64:
-        type: string
-      height:
-        type: integer
-      width:
-        type: integer
-    type: object
-  model.WatermarkInfo:
-    properties:
-      isAvailable:
-        type: boolean
-      metadata:
-        $ref: '#/definitions/model.WatermarkMetadata'
-    type: object
-  model.WatermarkMetadata:
-    properties:
-      isOutdated:
-        type: boolean
     type: object
   router.FileCopyOptions:
     properties:
@@ -428,6 +393,15 @@ definitions:
       totalPages:
         type: integer
     type: object
+  service.InsightsInfo:
+    properties:
+      isAvailable:
+        type: boolean
+      isOutdated:
+        type: boolean
+      snapshot:
+        $ref: '#/definitions/service.Snapshot'
+    type: object
   service.InsightsLanguage:
     properties:
       id:
@@ -485,8 +459,12 @@ definitions:
     properties:
       isAvailable:
         type: boolean
+      isOutdated:
+        type: boolean
       metadata:
         $ref: '#/definitions/client.MosaicMetadata'
+      snapshot:
+        $ref: '#/definitions/service.Snapshot'
     type: object
   service.Organization:
     properties:
@@ -550,12 +528,12 @@ definitions:
         $ref: '#/definitions/service.Download'
       status:
         type: string
-      taskId:
-        type: string
+      task:
+        $ref: '#/definitions/service.TaskInfo'
       text:
         $ref: '#/definitions/service.Download'
       thumbnail:
-        $ref: '#/definitions/service.Thumbnail'
+        $ref: '#/definitions/service.Download'
       updateTime:
         type: string
       version:
@@ -617,7 +595,7 @@ definitions:
       text:
         $ref: '#/definitions/model.S3Object'
       thumbnail:
-        $ref: '#/definitions/model.Thumbnail'
+        $ref: '#/definitions/model.S3Object'
       watermark:
         $ref: '#/definitions/model.S3Object'
     type: object
@@ -668,6 +646,13 @@ definitions:
       userId:
         type: string
     type: object
+  service.TaskInfo:
+    properties:
+      id:
+        type: string
+      isPending:
+        type: boolean
+    type: object
   service.TaskList:
     properties:
       data:
@@ -687,6 +672,10 @@ definitions:
     properties:
       error:
         type: string
+      fields:
+        items:
+          type: string
+        type: array
       isIndeterminate:
         type: boolean
       name:
@@ -701,15 +690,6 @@ definitions:
         type: string
       userId:
         type: string
-    type: object
-  service.Thumbnail:
-    properties:
-      base64:
-        type: string
-      height:
-        type: integer
-      width:
-        type: integer
     type: object
   service.User:
     properties:
@@ -751,6 +731,15 @@ definitions:
         type: string
       user:
         $ref: '#/definitions/service.User'
+    type: object
+  service.WatermarkInfo:
+    properties:
+      isAvailable:
+        type: boolean
+      isOutdated:
+        type: boolean
+      snapshot:
+        $ref: '#/definitions/service.Snapshot'
     type: object
   service.Workspace:
     properties:
@@ -1334,6 +1323,40 @@ paths:
       summary: Get Size
       tags:
       - Files
+  /files/{id}/thumbnail{ext}:
+    get:
+      description: Download Thumbnail
+      operationId: files_download_thumbnail
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Access Token
+        in: query
+        name: access_token
+        required: true
+        type: string
+      - description: Extension
+        in: query
+        name: ext
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Download Thumbnail
+      tags:
+      - Files
   /files/{id}/user_permissions:
     get:
       description: Get User Permissions
@@ -1907,7 +1930,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.InsightsInfo'
+            $ref: '#/definitions/service.InsightsInfo'
         "404":
           description: Not Found
           schema:
@@ -3161,7 +3184,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/model.WatermarkInfo'
+            $ref: '#/definitions/service.WatermarkInfo'
         "404":
           description: Not Found
           schema:

@@ -1,9 +1,6 @@
 package processor
 
 import (
-	"fmt"
-	"os"
-	"path/filepath"
 	"strconv"
 	"strings"
 	"voltaserve/client"
@@ -27,14 +24,13 @@ func NewImageProcessor() *ImageProcessor {
 	}
 }
 
-func (p *ImageProcessor) Base64Thumbnail(inputPath string) (*client.ImageBase64, error) {
-	inputSize, err := p.MeasureImage(inputPath)
+func (p *ImageProcessor) Thumbnail(inputPath string, outputPath string) (*bool, error) {
+	props, err := p.MeasureImage(inputPath)
 	if err != nil {
 		return nil, err
 	}
-	if inputSize.Width > p.config.Limits.ImagePreviewMaxWidth || inputSize.Height > p.config.Limits.ImagePreviewMaxHeight {
-		outputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(inputPath))
-		if inputSize.Width > inputSize.Height {
+	if props.Width > p.config.Limits.ImagePreviewMaxWidth || props.Height > p.config.Limits.ImagePreviewMaxHeight {
+		if props.Width > props.Height {
 			if err := p.ResizeImage(inputPath, p.config.Limits.ImagePreviewMaxWidth, 0, outputPath); err != nil {
 				return nil, err
 			}
@@ -43,34 +39,9 @@ func (p *ImageProcessor) Base64Thumbnail(inputPath string) (*client.ImageBase64,
 				return nil, err
 			}
 		}
-		b64, err := helper.ImageToBase64(outputPath)
-		if err != nil {
-			return nil, err
-		}
-		size, err := p.MeasureImage(outputPath)
-		if err != nil {
-			return nil, err
-		}
-		return &client.ImageBase64{
-			Base64: *b64,
-			Width:  size.Width,
-			Height: size.Height,
-		}, nil
-	} else {
-		b64, err := helper.ImageToBase64(inputPath)
-		if err != nil {
-			return nil, err
-		}
-		size, err := p.MeasureImage(inputPath)
-		if err != nil {
-			return nil, err
-		}
-		return &client.ImageBase64{
-			Base64: *b64,
-			Width:  size.Width,
-			Height: size.Height,
-		}, nil
+		return helper.ToPtr(true), nil
 	}
+	return helper.ToPtr(false), nil
 }
 
 func (p *ImageProcessor) MeasureImage(inputPath string) (*client.ImageProps, error) {
@@ -107,25 +78,6 @@ func (p *ImageProcessor) ResizeImage(inputPath string, width int, height int, ou
 		heightStr = strconv.FormatInt(int64(height), 10)
 	}
 	if err := infra.NewCommand().Exec("convert", "-resize", widthStr+"x"+heightStr, inputPath, outputPath); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (p *ImageProcessor) ThumbnailFromImage(inputPath string, width int, height int, outputPath string) error {
-	var widthStr string
-	if width == 0 {
-		widthStr = ""
-	} else {
-		widthStr = strconv.FormatInt(int64(width), 10)
-	}
-	var heightStr string
-	if height == 0 {
-		heightStr = ""
-	} else {
-		heightStr = strconv.FormatInt(int64(height), 10)
-	}
-	if err := infra.NewCommand().Exec("convert", "-thumbnail", widthStr+"x"+heightStr, "-background", "white", "-alpha", "remove", "-flatten", fmt.Sprintf("%s[0]", inputPath), outputPath); err != nil {
 		return err
 	}
 	return nil
