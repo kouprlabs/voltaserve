@@ -70,11 +70,7 @@ const IconDiverse = ({ file, scale }: IconFontProps) => {
     image = isDark ? DarkPowerPointSvg : PowerPointSvg
   } else if (fe.isVideo(original?.extension) && thumbnail) {
     image = isDark ? DarkVideoSvg : VideoSvg
-  } else if (
-    fe.isAudio(original?.extension) ||
-    (fe.isVideo(original?.extension) && !thumbnail)
-  ) {
-    // We consider a video file without thumbnail as an audio file
+  } else if (fe.isAudio(original?.extension) && !thumbnail) {
     image = isDark ? DarkAudioSvg : AudioSvg
   } else if (fe.isArchive(original?.extension)) {
     image = isDark ? DarkArchiveSvg : ArchiveSvg

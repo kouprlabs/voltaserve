@@ -10,6 +10,8 @@ import (
 	"voltaserve/infra"
 	"voltaserve/model"
 	"voltaserve/processor"
+
+	"github.com/minio/minio-go/v7"
 )
 
 type pdfPipeline struct {
@@ -34,7 +36,7 @@ func NewPDFPipeline() model.Pipeline {
 
 func (p *pdfPipeline) Run(opts client.PipelineRunOptions) error {
 	inputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(opts.Key))
-	if err := p.s3.GetFile(opts.Key, inputPath, opts.Bucket); err != nil {
+	if err := p.s3.GetFile(opts.Key, inputPath, opts.Bucket, minio.GetObjectOptions{}); err != nil {
 		return err
 	}
 	defer func(path string) {
@@ -109,7 +111,7 @@ func (p *pdfPipeline) createThumbnail(inputPath string, opts client.PipelineRunO
 		Image:  props,
 		Size:   helper.ToPtr(stat.Size()),
 	}
-	if err := p.s3.PutFile(s3Object.Key, tmpPath, helper.DetectMimeFromFile(tmpPath), s3Object.Bucket); err != nil {
+	if err := p.s3.PutFile(s3Object.Key, tmpPath, helper.DetectMimeFromFile(tmpPath), s3Object.Bucket, minio.PutObjectOptions{}); err != nil {
 		return err
 	}
 	if err := p.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
@@ -131,7 +133,7 @@ func (p *pdfPipeline) extractText(inputPath string, opts client.PipelineRunOptio
 	if text == nil || err != nil {
 		return err
 	}
-	if err := p.s3.PutText(key, *text, "text/plain", opts.Bucket); err != nil {
+	if err := p.s3.PutText(key, *text, "text/plain", opts.Bucket, minio.PutObjectOptions{}); err != nil {
 		return err
 	}
 	if err := p.apiClient.PatchSnapshot(client.SnapshotPatchOptions{

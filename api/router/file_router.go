@@ -1,6 +1,7 @@
 package router
 
 import (
+	"bytes"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -11,6 +12,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"sync"
 	"voltaserve/config"
 	"voltaserve/errorpkg"
 	"voltaserve/helper"
@@ -28,14 +30,20 @@ type FileRouter struct {
 	fileSvc               *service.FileService
 	workspaceSvc          *service.WorkspaceService
 	config                config.Config
+	bufferPool            sync.Pool
 	accessTokenCookieName string
 }
 
 func NewFileRouter() *FileRouter {
 	return &FileRouter{
-		fileSvc:               service.NewFileService(),
-		workspaceSvc:          service.NewWorkspaceService(),
-		config:                config.GetConfig(),
+		fileSvc:      service.NewFileService(),
+		workspaceSvc: service.NewWorkspaceService(),
+		config:       config.GetConfig(),
+		bufferPool: sync.Pool{
+			New: func() interface{} {
+				return new(bytes.Buffer)
+			},
+		},
 		accessTokenCookieName: "voltaserve_access_token",
 	}
 }
@@ -779,16 +787,23 @@ func (r *FileRouter) DownloadOriginal(c *fiber.Ctx) error {
 	if ext == "" {
 		return errorpkg.NewMissingQueryParamError("ext")
 	}
-	buf, file, snapshot, err := r.fileSvc.DownloadOriginalBuffer(id, userID)
+	buf := r.bufferPool.Get().(*bytes.Buffer)
+	buf.Reset()
+	defer r.bufferPool.Put(buf)
+	res, err := r.fileSvc.DownloadOriginalBuffer(id, c.Get("Range"), buf, userID)
 	if err != nil {
 		return err
 	}
-	if filepath.Ext(snapshot.GetOriginal().Key) != ext {
+	if filepath.Ext(res.Snapshot.GetOriginal().Key) != ext {
 		return errorpkg.NewS3ObjectNotFoundError(nil)
 	}
-	b := buf.Bytes()
+	b := res.Buffer.Bytes()
 	c.Set("Content-Type", infra.DetectMimeFromBytes(b))
-	c.Set("Content-Disposition", fmt.Sprintf("filename=\"%s\"", filepath.Base(file.GetName())))
+	c.Set("Content-Disposition", fmt.Sprintf("filename=\"%s\"", filepath.Base(res.File.GetName())))
+	if res.RangeInterval != nil {
+		res.RangeInterval.ApplyToFiberContext(c)
+		c.Status(http.StatusPartialContent)
+	}
 	return c.Send(b)
 }
 
@@ -825,16 +840,23 @@ func (r *FileRouter) DownloadPreview(c *fiber.Ctx) error {
 	if ext == "" {
 		return errorpkg.NewMissingQueryParamError("ext")
 	}
-	buf, file, snapshot, err := r.fileSvc.DownloadPreviewBuffer(id, userID)
+	buf := r.bufferPool.Get().(*bytes.Buffer)
+	buf.Reset()
+	defer r.bufferPool.Put(buf)
+	res, err := r.fileSvc.DownloadPreviewBuffer(id, c.Get("Range"), buf, userID)
 	if err != nil {
 		return err
 	}
-	if filepath.Ext(snapshot.GetPreview().Key) != ext {
+	if filepath.Ext(res.Snapshot.GetPreview().Key) != ext {
 		return errorpkg.NewS3ObjectNotFoundError(nil)
 	}
 	b := buf.Bytes()
 	c.Set("Content-Type", infra.DetectMimeFromBytes(b))
-	c.Set("Content-Disposition", fmt.Sprintf("filename=\"%s\"", filepath.Base(file.GetName())))
+	c.Set("Content-Disposition", fmt.Sprintf("filename=\"%s\"", filepath.Base(res.File.GetName())))
+	if res.RangeInterval != nil {
+		res.RangeInterval.ApplyToFiberContext(c)
+		c.Status(http.StatusPartialContent)
+	}
 	return c.Send(b)
 }
 

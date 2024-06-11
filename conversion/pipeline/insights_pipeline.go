@@ -11,6 +11,8 @@ import (
 	"voltaserve/infra"
 	"voltaserve/model"
 	"voltaserve/processor"
+
+	"github.com/minio/minio-go/v7"
 )
 
 type insightsPipeline struct {
@@ -40,7 +42,7 @@ func (p *insightsPipeline) Run(opts client.PipelineRunOptions) error {
 		return errors.New("language is undefined")
 	}
 	inputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(opts.Key))
-	if err := p.s3.GetFile(opts.Key, inputPath, opts.Bucket); err != nil {
+	if err := p.s3.GetFile(opts.Key, inputPath, opts.Bucket, minio.GetObjectOptions{}); err != nil {
 		return err
 	}
 	defer func(path string) {
@@ -125,7 +127,7 @@ func (p *insightsPipeline) createText(inputPath string, opts client.PipelineRunO
 			Key:    opts.SnapshotID + "/ocr.pdf",
 			Size:   helper.ToPtr(stat.Size()),
 		}
-		if err := p.s3.PutFile(s3Object.Key, pdfPath, helper.DetectMimeFromFile(pdfPath), s3Object.Bucket); err != nil {
+		if err := p.s3.PutFile(s3Object.Key, pdfPath, helper.DetectMimeFromFile(pdfPath), s3Object.Bucket, minio.PutObjectOptions{}); err != nil {
 			return nil, err
 		}
 		if err := p.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
@@ -151,7 +153,7 @@ func (p *insightsPipeline) createText(inputPath string, opts client.PipelineRunO
 		Key:    opts.SnapshotID + "/text.txt",
 		Size:   helper.ToPtr(int64(len(*text))),
 	}
-	if err := p.s3.PutText(s3Object.Key, *text, "text/plain", s3Object.Bucket); err != nil {
+	if err := p.s3.PutText(s3Object.Key, *text, "text/plain", s3Object.Bucket, minio.PutObjectOptions{}); err != nil {
 		return nil, err
 	}
 	if err := p.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
@@ -188,7 +190,7 @@ func (p *insightsPipeline) createEntities(text string, opts client.PipelineRunOp
 		Key:    opts.SnapshotID + "/entities.json",
 		Size:   helper.ToPtr(int64(len(content))),
 	}
-	if err := p.s3.PutText(s3Object.Key, content, "application/json", s3Object.Bucket); err != nil {
+	if err := p.s3.PutText(s3Object.Key, content, "application/json", s3Object.Bucket, minio.PutObjectOptions{}); err != nil {
 		return err
 	}
 	if err := p.apiClient.PatchSnapshot(client.SnapshotPatchOptions{

@@ -16,11 +16,11 @@ export type AccountMenuAvatarButtonProps = {
 const AccountMenuAvatarButton = forwardRef<AccountMenuAvatarButtonProps, 'div'>(
   ({ user, ...props }, ref) => {
     const activeNav = useAppSelector((state) => state.ui.nav.active)
-    const {} = InvitationAPI.useGetIncoming(undefined, swrConfig())
+    const { data: count } = InvitationAPI.useGetIncomingCount(swrConfig())
     const isActive = activeNav === NavType.Account
 
     return (
-      <NotificationBadge hasBadge={true}>
+      <NotificationBadge hasBadge={count && count > 0 ? true : false}>
         <div ref={ref} {...props} className={cx('cursor-pointer')}>
           <AccountMenuActiveCircle>
             <Avatar
