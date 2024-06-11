@@ -10,7 +10,6 @@ import (
 
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
-	"github.com/minio/minio-go/v7/pkg/sse"
 )
 
 type S3Manager struct {
@@ -24,34 +23,37 @@ func NewS3Manager() *S3Manager {
 	return mgr
 }
 
-func (mgr *S3Manager) GetFile(objectName string, filePath string, bucketName string) error {
+func (mgr *S3Manager) StatObject(objectName string, bucketName string, opts minio.StatObjectOptions) (minio.ObjectInfo, error) {
+	return mgr.client.StatObject(context.Background(), bucketName, objectName, opts)
+}
+
+func (mgr *S3Manager) GetFile(objectName string, filePath string, bucketName string, opts minio.GetObjectOptions) error {
 	if mgr.client == nil {
 		if err := mgr.Connect(); err != nil {
 			return err
 		}
 	}
-	if err := mgr.client.FGetObject(context.Background(), bucketName, objectName, filePath, minio.GetObjectOptions{}); err != nil {
+	if err := mgr.client.FGetObject(context.Background(), bucketName, objectName, filePath, opts); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (mgr *S3Manager) PutFile(objectName string, filePath string, contentType string, bucketName string) error {
+func (mgr *S3Manager) PutFile(objectName string, filePath string, contentType string, bucketName string, opts minio.PutObjectOptions) error {
 	if err := mgr.Connect(); err != nil {
 		return err
 	}
 	if contentType == "" {
 		contentType = "application/octet-stream"
 	}
-	if _, err := mgr.client.FPutObject(context.Background(), bucketName, objectName, filePath, minio.PutObjectOptions{
-		ContentType: contentType,
-	}); err != nil {
+	opts.ContentType = contentType
+	if _, err := mgr.client.FPutObject(context.Background(), bucketName, objectName, filePath, opts); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (mgr *S3Manager) PutText(objectName string, text string, contentType string, bucketName string) error {
+func (mgr *S3Manager) PutText(objectName string, text string, contentType string, bucketName string, opts minio.PutObjectOptions) error {
 	if contentType != "" && contentType != "text/plain" && contentType != "application/json" {
 		return errorpkg.NewS3Error("Invalid content type '" + contentType + "'")
 	}
@@ -61,35 +63,34 @@ func (mgr *S3Manager) PutText(objectName string, text string, contentType string
 	if err := mgr.Connect(); err != nil {
 		return err
 	}
-	if _, err := mgr.client.PutObject(context.Background(), bucketName, objectName, strings.NewReader(text), int64(len(text)), minio.PutObjectOptions{
-		ContentType: contentType,
-	}); err != nil {
+	opts.ContentType = contentType
+	if _, err := mgr.client.PutObject(context.Background(), bucketName, objectName, strings.NewReader(text), int64(len(text)), opts); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (mgr *S3Manager) GetObject(objectName string, bucketName string) (*bytes.Buffer, error) {
+func (mgr *S3Manager) GetObject(objectName string, bucketName string, opts minio.GetObjectOptions) (*bytes.Buffer, *int64, error) {
 	if err := mgr.Connect(); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	reader, err := mgr.client.GetObject(context.Background(), bucketName, objectName, minio.GetObjectOptions{})
+	reader, err := mgr.client.GetObject(context.Background(), bucketName, objectName, opts)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	var buf bytes.Buffer
-	_, err = io.Copy(io.Writer(&buf), reader)
+	written, err := io.Copy(io.Writer(&buf), reader)
 	if err != nil {
-		return nil, nil
+		return nil, nil, nil
 	}
-	return &buf, nil
+	return &buf, &written, nil
 }
 
-func (mgr *S3Manager) GetText(objectName string, bucketName string) (string, error) {
+func (mgr *S3Manager) GetText(objectName string, bucketName string, opts minio.GetObjectOptions) (string, error) {
 	if err := mgr.Connect(); err != nil {
 		return "", err
 	}
-	reader, err := mgr.client.GetObject(context.Background(), bucketName, objectName, minio.GetObjectOptions{})
+	reader, err := mgr.client.GetObject(context.Background(), bucketName, objectName, opts)
 	if err != nil {
 		return "", err
 	}
@@ -101,11 +102,11 @@ func (mgr *S3Manager) GetText(objectName string, bucketName string) (string, err
 	return buf.String(), nil
 }
 
-func (mgr *S3Manager) RemoveObject(objectName string, bucketName string) error {
+func (mgr *S3Manager) RemoveObject(objectName string, bucketName string, opts minio.RemoveObjectOptions) error {
 	if err := mgr.Connect(); err != nil {
 		return err
 	}
-	err := mgr.client.RemoveObject(context.Background(), bucketName, objectName, minio.RemoveObjectOptions{})
+	err := mgr.client.RemoveObject(context.Background(), bucketName, objectName, opts)
 	if err != nil {
 		return err
 	}
@@ -147,28 +148,6 @@ func (mgr *S3Manager) RemoveBucket(bucketName string) error {
 	})
 	mgr.client.RemoveObjects(context.Background(), bucketName, objectCh, minio.RemoveObjectsOptions{})
 	if err = mgr.client.RemoveBucket(context.Background(), bucketName); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (mgr *S3Manager) EnableBucketEncryption(bucketName string) error {
-	if err := mgr.Connect(); err != nil {
-		return err
-	}
-	err := mgr.client.SetBucketEncryption(context.Background(), bucketName, sse.NewConfigurationSSES3())
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (mgr *S3Manager) DisableBucketEncryption(bucketName string) error {
-	if err := mgr.Connect(); err != nil {
-		return err
-	}
-	err := mgr.client.RemoveBucketEncryption(context.Background(), bucketName)
-	if err != nil {
 		return err
 	}
 	return nil

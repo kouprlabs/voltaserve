@@ -15,6 +15,8 @@ import (
 	"voltaserve/log"
 	"voltaserve/model"
 	"voltaserve/repo"
+
+	"github.com/minio/minio-go/v7"
 )
 
 type InsightsService struct {
@@ -280,7 +282,7 @@ func (svc *InsightsService) deleteText(snapshot model.Snapshot) error {
 		return nil
 	}
 	s3Object := snapshot.GetText()
-	if err := svc.s3.RemoveObject(s3Object.Key, s3Object.Bucket); err != nil {
+	if err := svc.s3.RemoveObject(s3Object.Key, s3Object.Bucket, minio.RemoveObjectOptions{}); err != nil {
 		return err
 	}
 	snapshot.SetText(nil)
@@ -295,7 +297,7 @@ func (svc *InsightsService) deleteEntities(snapshot model.Snapshot) error {
 		return nil
 	}
 	s3Object := snapshot.GetEntities()
-	if err := svc.s3.RemoveObject(s3Object.Key, s3Object.Bucket); err != nil {
+	if err := svc.s3.RemoveObject(s3Object.Key, s3Object.Bucket, minio.RemoveObjectOptions{}); err != nil {
 		return err
 	}
 	snapshot.SetEntities(nil)
@@ -347,7 +349,7 @@ func (svc *InsightsService) ListEntities(id string, opts InsightsListEntitiesOpt
 			snapshot = previous
 		}
 	}
-	text, err := svc.s3.GetText(snapshot.GetEntities().Key, snapshot.GetEntities().Bucket)
+	text, err := svc.s3.GetText(snapshot.GetEntities().Key, snapshot.GetEntities().Bucket, minio.GetObjectOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -483,7 +485,7 @@ func (svc *InsightsService) DownloadTextBuffer(id string, userID string) (*bytes
 		}
 	}
 	if snapshot.HasText() {
-		buf, err := svc.s3.GetObject(snapshot.GetText().Key, snapshot.GetText().Bucket)
+		buf, _, err := svc.s3.GetObject(snapshot.GetText().Key, snapshot.GetText().Bucket, minio.GetObjectOptions{})
 		if err != nil {
 			return nil, nil, nil, err
 		}
@@ -520,7 +522,7 @@ func (svc *InsightsService) DownloadOCRBuffer(id string, userID string) (*bytes.
 		}
 	}
 	if snapshot.HasOCR() {
-		buf, err := svc.s3.GetObject(snapshot.GetOCR().Key, snapshot.GetOCR().Bucket)
+		buf, _, err := svc.s3.GetObject(snapshot.GetOCR().Key, snapshot.GetOCR().Bucket, minio.GetObjectOptions{})
 		if err != nil {
 			return nil, nil, nil, err
 		}

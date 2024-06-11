@@ -70,6 +70,7 @@ CREATE TABLE IF NOT EXISTS "snapshot"
   thumbnail   jsonb,
   language    text,
   status      text,
+  task_id     text,
   create_time text NOT NULL DEFAULT (to_json(now())#>>'{}'),
   update_time text ON UPDATE (to_json(now())#>>'{}')
 );

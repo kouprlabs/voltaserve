@@ -9,6 +9,8 @@ import (
 	"voltaserve/infra"
 	"voltaserve/model"
 	"voltaserve/processor"
+
+	"github.com/minio/minio-go/v7"
 )
 
 type zipPipeline struct {
@@ -33,7 +35,7 @@ func NewZIPPipeline() model.Pipeline {
 
 func (p *zipPipeline) Run(opts client.PipelineRunOptions) error {
 	inputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(opts.Key))
-	if err := p.s3.GetFile(opts.Key, inputPath, opts.Bucket); err != nil {
+	if err := p.s3.GetFile(opts.Key, inputPath, opts.Bucket, minio.GetObjectOptions{}); err != nil {
 		return err
 	}
 	defer func(path string) {
@@ -112,7 +114,7 @@ func (p *zipPipeline) convertToGLB(inputPath string, opts client.PipelineRunOpti
 		return nil, err
 	}
 	glbKey := opts.SnapshotID + "/preview.glb"
-	if err := p.s3.PutFile(glbKey, outputPath, helper.DetectMimeFromFile(outputPath), opts.Bucket); err != nil {
+	if err := p.s3.PutFile(glbKey, outputPath, helper.DetectMimeFromFile(outputPath), opts.Bucket, minio.PutObjectOptions{}); err != nil {
 		return nil, err
 	}
 	if err := p.apiClient.PatchSnapshot(client.SnapshotPatchOptions{

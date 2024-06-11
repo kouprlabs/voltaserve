@@ -22,6 +22,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/minio/minio-go/v7"
 )
 
 type FileRouter struct {
@@ -779,16 +780,25 @@ func (r *FileRouter) DownloadOriginal(c *fiber.Ctx) error {
 	if ext == "" {
 		return errorpkg.NewMissingQueryParamError("ext")
 	}
-	buf, file, snapshot, err := r.fileSvc.DownloadOriginalBuffer(id, userID)
+	opts := minio.GetObjectOptions{}
+	var ri *infra.RangeInterval
+	if c.Get("Range") != "" {
+		ri = infra.NewRangeInterval(c.Get("Range"))
+		ri.ApplyToMinIOGetObjectOptions(&opts)
+	}
+	buf, err := r.fileSvc.DownloadOriginalBuffer(id, opts, userID)
 	if err != nil {
 		return err
 	}
-	if filepath.Ext(snapshot.GetOriginal().Key) != ext {
+	if filepath.Ext(buf.Snapshot.GetOriginal().Key) != ext {
 		return errorpkg.NewS3ObjectNotFoundError(nil)
 	}
-	b := buf.Bytes()
+	b := buf.Buffer.Bytes()
 	c.Set("Content-Type", infra.DetectMimeFromBytes(b))
-	c.Set("Content-Disposition", fmt.Sprintf("filename=\"%s\"", filepath.Base(file.GetName())))
+	c.Set("Content-Disposition", fmt.Sprintf("filename=\"%s\"", filepath.Base(buf.File.GetName())))
+	if ri != nil {
+		ri.ApplyToFiberContext(*buf.PartialSize, *buf.TotalSize, c)
+	}
 	return c.Send(b)
 }
 
@@ -825,16 +835,26 @@ func (r *FileRouter) DownloadPreview(c *fiber.Ctx) error {
 	if ext == "" {
 		return errorpkg.NewMissingQueryParamError("ext")
 	}
-	buf, file, snapshot, err := r.fileSvc.DownloadPreviewBuffer(id, userID)
+	opts := minio.GetObjectOptions{}
+	var ri *infra.RangeInterval
+	if c.Get("Range") != "" {
+		ri = infra.NewRangeInterval(c.Get("Range"))
+		ri.ApplyToMinIOGetObjectOptions(&opts)
+	}
+	buf, err := r.fileSvc.DownloadPreviewBuffer(id, opts, userID)
 	if err != nil {
 		return err
 	}
-	if filepath.Ext(snapshot.GetPreview().Key) != ext {
+	if filepath.Ext(buf.Snapshot.GetPreview().Key) != ext {
 		return errorpkg.NewS3ObjectNotFoundError(nil)
 	}
-	b := buf.Bytes()
+	b := buf.Buffer.Bytes()
 	c.Set("Content-Type", infra.DetectMimeFromBytes(b))
-	c.Set("Content-Disposition", fmt.Sprintf("filename=\"%s\"", filepath.Base(file.GetName())))
+	c.Set("Content-Disposition", fmt.Sprintf("filename=\"%s\"", filepath.Base(buf.File.GetName())))
+	if ri != nil {
+		ri.ApplyToFiberContext(*buf.PartialSize, *buf.TotalSize, c)
+		c.Status(http.StatusPartialContent)
+	}
 	return c.Send(b)
 }
 

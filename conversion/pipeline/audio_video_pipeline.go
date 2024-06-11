@@ -9,6 +9,8 @@ import (
 	"voltaserve/infra"
 	"voltaserve/model"
 	"voltaserve/processor"
+
+	"github.com/minio/minio-go/v7"
 )
 
 type audioVideoPipeline struct {
@@ -31,7 +33,7 @@ func NewAudioVideoPipeline() model.Pipeline {
 
 func (p *audioVideoPipeline) Run(opts client.PipelineRunOptions) error {
 	inputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(opts.Key))
-	if err := p.s3.GetFile(opts.Key, inputPath, opts.Bucket); err != nil {
+	if err := p.s3.GetFile(opts.Key, inputPath, opts.Bucket, minio.GetObjectOptions{}); err != nil {
 		return err
 	}
 	defer func(path string) {
@@ -96,7 +98,7 @@ func (p *audioVideoPipeline) createThumbnail(inputPath string, opts client.Pipel
 		Image:  props,
 		Size:   helper.ToPtr(stat.Size()),
 	}
-	if err := p.s3.PutFile(s3Object.Key, tmpPath, helper.DetectMimeFromFile(tmpPath), s3Object.Bucket); err != nil {
+	if err := p.s3.PutFile(s3Object.Key, tmpPath, helper.DetectMimeFromFile(tmpPath), s3Object.Bucket, minio.PutObjectOptions{}); err != nil {
 		return err
 	}
 	if err := p.apiClient.PatchSnapshot(client.SnapshotPatchOptions{

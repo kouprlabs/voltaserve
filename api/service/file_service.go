@@ -19,6 +19,7 @@ import (
 	"voltaserve/repo"
 	"voltaserve/search"
 
+	"github.com/minio/minio-go/v7"
 	"github.com/reactivex/rxgo/v2"
 )
 
@@ -226,7 +227,7 @@ func (svc *FileService) Store(id string, path string, userID string) (*File, err
 		Key:    snapshotID + "/original" + strings.ToLower(filepath.Ext(path)),
 		Size:   helper.ToPtr(stat.Size()),
 	}
-	if err = svc.s3.PutFile(original.Key, path, infra.DetectMimeFromFile(path), workspace.GetBucket()); err != nil {
+	if err = svc.s3.PutFile(original.Key, path, infra.DetectMimeFromPath(path), workspace.GetBucket(), minio.PutObjectOptions{}); err != nil {
 		return nil, err
 	}
 	snapshot.SetOriginal(&original)
@@ -278,67 +279,87 @@ func (svc *FileService) Store(id string, path string, userID string) (*File, err
 	return res, nil
 }
 
-func (svc *FileService) DownloadOriginalBuffer(id string, userID string) (*bytes.Buffer, model.File, model.Snapshot, error) {
+func (svc *FileService) DownloadOriginalBuffer(id string, opts minio.GetObjectOptions, userID string) (*DownloadResult, error) {
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, err
 	}
 	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
-		return nil, nil, nil, errorpkg.NewFileIsNotAFileError(file)
+		return nil, errorpkg.NewFileIsNotAFileError(file)
 	}
 	snapshot, err := svc.snapshotCache.Get(*file.GetSnapshotID())
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, err
 	}
 	if snapshot.HasWatermark() {
 		if err = svc.fileGuard.Authorize(userID, file, model.PermissionEditor); err != nil {
-			return nil, nil, nil, err
+			return nil, err
 		}
 	} else {
 		if err = svc.fileGuard.Authorize(userID, file, model.PermissionViewer); err != nil {
-			return nil, nil, nil, err
+			return nil, err
 		}
 	}
 	if snapshot.HasOriginal() {
-		buf, err := svc.s3.GetObject(snapshot.GetOriginal().Key, snapshot.GetOriginal().Bucket)
+		objectInfo, err := svc.s3.StatObject(snapshot.GetOriginal().Key, snapshot.GetOriginal().Bucket, minio.StatObjectOptions{})
 		if err != nil {
-			return nil, nil, nil, err
+			return nil, err
 		}
-		return buf, file, snapshot, nil
+		buf, partialSize, err := svc.s3.GetObject(snapshot.GetOriginal().Key, snapshot.GetOriginal().Bucket, opts)
+		if err != nil {
+			return nil, err
+		}
+		return &DownloadResult{
+			Buffer:      buf,
+			PartialSize: partialSize,
+			TotalSize:   &objectInfo.Size,
+			File:        file,
+			Snapshot:    snapshot,
+		}, nil
 	} else {
-		return nil, nil, nil, errorpkg.NewS3ObjectNotFoundError(nil)
+		return nil, errorpkg.NewS3ObjectNotFoundError(nil)
 	}
 }
 
-func (svc *FileService) DownloadPreviewBuffer(id string, userID string) (*bytes.Buffer, model.File, model.Snapshot, error) {
+func (svc *FileService) DownloadPreviewBuffer(id string, opts minio.GetObjectOptions, userID string) (*DownloadResult, error) {
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, err
 	}
 	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
-		return nil, nil, nil, errorpkg.NewFileIsNotAFileError(file)
+		return nil, errorpkg.NewFileIsNotAFileError(file)
 	}
 	snapshot, err := svc.snapshotCache.Get(*file.GetSnapshotID())
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, err
 	}
 	if snapshot.HasWatermark() {
 		if err = svc.fileGuard.Authorize(userID, file, model.PermissionEditor); err != nil {
-			return nil, nil, nil, err
+			return nil, err
 		}
 	} else {
 		if err = svc.fileGuard.Authorize(userID, file, model.PermissionViewer); err != nil {
-			return nil, nil, nil, err
+			return nil, err
 		}
 	}
 	if snapshot.HasPreview() {
-		buf, err := svc.s3.GetObject(snapshot.GetPreview().Key, snapshot.GetPreview().Bucket)
+		objectInfo, err := svc.s3.StatObject(snapshot.GetOriginal().Key, snapshot.GetOriginal().Bucket, minio.StatObjectOptions{})
 		if err != nil {
-			return nil, nil, nil, err
+			return nil, err
 		}
-		return buf, file, snapshot, nil
+		buf, partialSize, err := svc.s3.GetObject(snapshot.GetPreview().Key, snapshot.GetPreview().Bucket, opts)
+		if err != nil {
+			return nil, err
+		}
+		return &DownloadResult{
+			Buffer:      buf,
+			PartialSize: partialSize,
+			TotalSize:   &objectInfo.Size,
+			File:        file,
+			Snapshot:    snapshot,
+		}, nil
 	} else {
-		return nil, nil, nil, errorpkg.NewS3ObjectNotFoundError(nil)
+		return nil, errorpkg.NewS3ObjectNotFoundError(nil)
 	}
 }
 
@@ -355,7 +376,7 @@ func (svc *FileService) DownloadThumbnailBuffer(id string, userID string) (*byte
 		return nil, nil, nil, err
 	}
 	if snapshot.HasThumbnail() {
-		buf, err := svc.s3.GetObject(snapshot.GetThumbnail().Key, snapshot.GetThumbnail().Bucket)
+		buf, _, err := svc.s3.GetObject(snapshot.GetThumbnail().Key, snapshot.GetThumbnail().Bucket, minio.GetObjectOptions{})
 		if err != nil {
 			return nil, nil, nil, err
 		}
@@ -1032,17 +1053,17 @@ func (svc *FileService) Delete(ids []string, userID string) ([]string, error) {
 		}
 		for _, s := range danglingSnapshots {
 			if s.HasOriginal() {
-				if err = svc.s3.RemoveObject(s.GetOriginal().Key, s.GetOriginal().Bucket); err != nil {
+				if err = svc.s3.RemoveObject(s.GetOriginal().Key, s.GetOriginal().Bucket, minio.RemoveObjectOptions{}); err != nil {
 					return nil, err
 				}
 			}
 			if s.HasPreview() {
-				if err = svc.s3.RemoveObject(s.GetPreview().Key, s.GetPreview().Bucket); err != nil {
+				if err = svc.s3.RemoveObject(s.GetPreview().Key, s.GetPreview().Bucket, minio.RemoveObjectOptions{}); err != nil {
 					return nil, err
 				}
 			}
 			if s.HasText() {
-				if err = svc.s3.RemoveObject(s.GetText().Key, s.GetText().Bucket); err != nil {
+				if err = svc.s3.RemoveObject(s.GetText().Key, s.GetText().Bucket, minio.RemoveObjectOptions{}); err != nil {
 					return nil, err
 				}
 			}

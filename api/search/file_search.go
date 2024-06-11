@@ -5,6 +5,8 @@ import (
 	"voltaserve/infra"
 	"voltaserve/model"
 	"voltaserve/repo"
+
+	"github.com/minio/minio-go/v7"
 )
 
 type FileSearch struct {
@@ -96,7 +98,7 @@ func (s *FileSearch) populateTextField(files []model.File) error {
 				return err
 			}
 			if snapshot.HasText() {
-				text, err := s.s3.GetText(snapshot.GetText().Key, snapshot.GetText().Bucket)
+				text, err := s.s3.GetText(snapshot.GetText().Key, snapshot.GetText().Bucket, minio.GetObjectOptions{})
 				if err != nil {
 					return err
 				}

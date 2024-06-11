@@ -10,6 +10,8 @@ import (
 	"voltaserve/infra"
 	"voltaserve/model"
 	"voltaserve/processor"
+
+	"github.com/minio/minio-go/v7"
 )
 
 type watermarkPipeline struct {
@@ -32,7 +34,7 @@ func NewWatermarkPipeline() model.Pipeline {
 
 func (p *watermarkPipeline) Run(opts client.PipelineRunOptions) error {
 	inputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(opts.Key))
-	if err := p.s3.GetFile(opts.Key, inputPath, opts.Bucket); err != nil {
+	if err := p.s3.GetFile(opts.Key, inputPath, opts.Bucket, minio.GetObjectOptions{}); err != nil {
 		return err
 	}
 	defer func(path string) {

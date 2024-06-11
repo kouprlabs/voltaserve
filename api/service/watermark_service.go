@@ -11,6 +11,8 @@ import (
 	"voltaserve/log"
 	"voltaserve/model"
 	"voltaserve/repo"
+
+	"github.com/minio/minio-go/v7"
 )
 
 type WatermarkService struct {
@@ -153,7 +155,7 @@ func (svc *WatermarkService) Delete(id string, userID string) error {
 		return err
 	}
 	go func(task model.Task, snapshot model.Snapshot) {
-		err = svc.s3.RemoveObject(snapshot.GetWatermark().Key, snapshot.GetWatermark().Bucket)
+		err = svc.s3.RemoveObject(snapshot.GetWatermark().Key, snapshot.GetWatermark().Bucket, minio.RemoveObjectOptions{})
 		if err != nil {
 			value := err.Error()
 			task.SetError(&value)
@@ -246,7 +248,7 @@ func (svc *WatermarkService) DownloadWatermarkBuffer(id string, userID string) (
 		}
 	}
 	if snapshot.HasWatermark() {
-		buf, err := svc.s3.GetObject(snapshot.GetWatermark().Key, snapshot.GetWatermark().Bucket)
+		buf, _, err := svc.s3.GetObject(snapshot.GetWatermark().Key, snapshot.GetWatermark().Bucket, minio.GetObjectOptions{})
 		if err != nil {
 			return nil, nil, nil, err
 		}
