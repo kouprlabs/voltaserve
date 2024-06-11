@@ -4,7 +4,14 @@
   <h1 align="center">Voltaserve</h1>
 </p>
 
-Upload files, search and preview documents, create groups and organizations, assign permissions and collaborate in real-time with your team.
+<h2 align="center">The Cloud Storage for Content Creators</h2>
+
+- Open gigabyte-large images in seconds and enjoy buttery smooth zooming in and out.
+- Extract valuable insights from documents or scans using powerful AI.
+- Stream audio and video effortlessly.<br/>
+- Protect your sensitive documents with a watermark.<br/>
+- Upload and preview nearly any file type without needing a dedicated app.<br/>
+- Create groups and organizations, assign permissions, and collaborate in real-time with your team.<br/>
 
 ![](./assets/screencast.gif)
 
