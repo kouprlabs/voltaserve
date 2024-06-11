@@ -279,7 +279,7 @@ func (svc *FileService) Store(id string, path string, userID string) (*File, err
 	return res, nil
 }
 
-func (svc *FileService) DownloadOriginalBuffer(id string, opts minio.GetObjectOptions, userID string) (*DownloadResult, error) {
+func (svc *FileService) DownloadOriginalBuffer(id string, rangeHeader string, buf *bytes.Buffer, userID string) (*DownloadResult, error) {
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return nil, err
@@ -305,23 +305,23 @@ func (svc *FileService) DownloadOriginalBuffer(id string, opts minio.GetObjectOp
 		if err != nil {
 			return nil, err
 		}
-		buf, partialSize, err := svc.s3.GetObject(snapshot.GetOriginal().Key, snapshot.GetOriginal().Bucket, opts)
-		if err != nil {
+		opts := minio.GetObjectOptions{}
+		ri := infra.NewRangeInterval(rangeHeader, objectInfo.Size)
+		ri.ApplyToMinIOGetObjectOptions(&opts)
+		if _, err := svc.s3.GetObjectWithBuffer(snapshot.GetOriginal().Key, snapshot.GetOriginal().Bucket, buf, opts); err != nil {
 			return nil, err
 		}
 		return &DownloadResult{
-			Buffer:      buf,
-			PartialSize: partialSize,
-			TotalSize:   &objectInfo.Size,
-			File:        file,
-			Snapshot:    snapshot,
+			Buffer:   buf,
+			File:     file,
+			Snapshot: snapshot,
 		}, nil
 	} else {
 		return nil, errorpkg.NewS3ObjectNotFoundError(nil)
 	}
 }
 
-func (svc *FileService) DownloadPreviewBuffer(id string, opts minio.GetObjectOptions, userID string) (*DownloadResult, error) {
+func (svc *FileService) DownloadPreviewBuffer(id string, rangeHeader string, buf *bytes.Buffer, userID string) (*DownloadResult, error) {
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return nil, err
@@ -347,16 +347,17 @@ func (svc *FileService) DownloadPreviewBuffer(id string, opts minio.GetObjectOpt
 		if err != nil {
 			return nil, err
 		}
-		buf, partialSize, err := svc.s3.GetObject(snapshot.GetPreview().Key, snapshot.GetPreview().Bucket, opts)
-		if err != nil {
+		opts := minio.GetObjectOptions{}
+		ri := infra.NewRangeInterval(rangeHeader, objectInfo.Size)
+		ri.ApplyToMinIOGetObjectOptions(&opts)
+		if _, err := svc.s3.GetObjectWithBuffer(snapshot.GetPreview().Key, snapshot.GetPreview().Bucket, buf, opts); err != nil {
 			return nil, err
 		}
 		return &DownloadResult{
-			Buffer:      buf,
-			PartialSize: partialSize,
-			TotalSize:   &objectInfo.Size,
-			File:        file,
-			Snapshot:    snapshot,
+			RangeInterval: ri,
+			Buffer:        buf,
+			File:          file,
+			Snapshot:      snapshot,
 		}, nil
 	} else {
 		return nil, errorpkg.NewS3ObjectNotFoundError(nil)

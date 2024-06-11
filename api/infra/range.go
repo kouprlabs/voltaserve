@@ -9,13 +9,19 @@ import (
 	"github.com/minio/minio-go/v7"
 )
 
+const (
+	MaxRangeSize     = 250 * 1024 * 1024 // 250 MB
+	DefaultChunkSize = 250 * 1024 * 1024 // Default size to serve for open-ended ranges
+)
+
 type RangeInterval struct {
-	Start int64
-	End   int64
+	Start    int64
+	End      int64
+	FileSize int64
 }
 
-func NewRangeInterval(header string) *RangeInterval {
-	ri := new(RangeInterval)
+func NewRangeInterval(header string, fileSize int64) *RangeInterval {
+	ri := &RangeInterval{FileSize: fileSize}
 	if header != "" {
 		parts := strings.Split(header, "=")
 		if len(parts) == 2 {
@@ -23,32 +29,37 @@ func NewRangeInterval(header string) *RangeInterval {
 			ri.Start, _ = strconv.ParseInt(ranges[0], 10, 64)
 			if len(ranges) > 1 && ranges[1] != "" {
 				ri.End, _ = strconv.ParseInt(ranges[1], 10, 64)
+			} else {
+				// Indicates an open-ended range
+				ri.End = 0
 			}
 		}
 	}
+	ri.adjustRange()
 	return ri
 }
 
-func (ri RangeInterval) ApplyToMinIOGetObjectOptions(opts *minio.GetObjectOptions) {
-	if ri.End != 0 {
-		opts.SetRange(ri.Start, ri.End)
-	} else {
-		opts.SetRange(ri.Start, 0)
+func (ri *RangeInterval) adjustRange() {
+	/* For open-ended ranges, serve 250 MB */
+	if ri.End == 0 {
+		ri.End = ri.Start + DefaultChunkSize - 1
+	}
+	/* Ensure the end is within file size limits */
+	if ri.End >= ri.FileSize {
+		ri.End = ri.FileSize - 1
+	}
+	/* Ensure the range size is within limits for closed ranges */
+	if ri.End-ri.Start+1 > MaxRangeSize && ri.End != 0 {
+		ri.End = ri.Start + MaxRangeSize - 1
 	}
 }
 
-func (ri RangeInterval) ApplyToFiberContext(partialSize int64, totalSize int64, ctx *fiber.Ctx) {
+func (ri RangeInterval) ApplyToMinIOGetObjectOptions(opts *minio.GetObjectOptions) {
+	opts.SetRange(ri.Start, ri.End)
+}
+
+func (ri RangeInterval) ApplyToFiberContext(ctx *fiber.Ctx) {
 	ctx.Set("Accept-Ranges", "bytes")
-	if ri.Start != 0 || ri.End != 0 {
-		if ri.End != 0 {
-			ctx.Set("Content-Range", fmt.Sprintf("bytes %d-%d/%d", ri.Start, ri.End, totalSize))
-			ctx.Set("Content-Length", fmt.Sprintf("%d", partialSize))
-		} else {
-			ctx.Set("Content-Range", fmt.Sprintf("bytes %d-%d/%d", ri.Start, totalSize-1, totalSize))
-			ctx.Set("Content-Length", fmt.Sprintf("%d", partialSize))
-		}
-	} else {
-		ctx.Set("Content-Range", fmt.Sprintf("bytes 0-%d/%d", totalSize-1, totalSize))
-		ctx.Set("Content-Length", fmt.Sprintf("%d", totalSize))
-	}
+	ctx.Set("Content-Range", fmt.Sprintf("bytes %d-%d/%d", ri.Start, ri.End, ri.FileSize))
+	ctx.Set("Content-Length", fmt.Sprintf("%d", ri.End-ri.Start+1))
 }

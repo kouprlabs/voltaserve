@@ -24,6 +24,11 @@ func NewS3Manager() *S3Manager {
 }
 
 func (mgr *S3Manager) StatObject(objectName string, bucketName string, opts minio.StatObjectOptions) (minio.ObjectInfo, error) {
+	if mgr.client == nil {
+		if err := mgr.Connect(); err != nil {
+			return minio.ObjectInfo{}, err
+		}
+	}
 	return mgr.client.StatObject(context.Background(), bucketName, objectName, opts)
 }
 
@@ -84,6 +89,21 @@ func (mgr *S3Manager) GetObject(objectName string, bucketName string, opts minio
 		return nil, nil, nil
 	}
 	return &buf, &written, nil
+}
+
+func (mgr *S3Manager) GetObjectWithBuffer(objectName string, bucketName string, buf *bytes.Buffer, opts minio.GetObjectOptions) (*int64, error) {
+	if err := mgr.Connect(); err != nil {
+		return nil, err
+	}
+	reader, err := mgr.client.GetObject(context.Background(), bucketName, objectName, opts)
+	if err != nil {
+		return nil, err
+	}
+	written, err := io.Copy(io.Writer(buf), reader)
+	if err != nil {
+		return nil, nil
+	}
+	return &written, nil
 }
 
 func (mgr *S3Manager) GetText(objectName string, bucketName string, opts minio.GetObjectOptions) (string, error) {

@@ -2,13 +2,13 @@ package service
 
 import (
 	"bytes"
+	"voltaserve/infra"
 	"voltaserve/model"
 )
 
 type DownloadResult struct {
-	Buffer      *bytes.Buffer
-	PartialSize *int64
-	TotalSize   *int64
-	File        model.File
-	Snapshot    model.Snapshot
+	RangeInterval *infra.RangeInterval
+	Buffer        *bytes.Buffer
+	File          model.File
+	Snapshot      model.Snapshot
 }
