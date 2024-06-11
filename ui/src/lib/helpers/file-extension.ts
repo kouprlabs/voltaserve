@@ -99,6 +99,7 @@ export function isVideo(ext?: string | null) {
   return (
     [
       '.ogv',
+      '.ogg',
       '.mpeg',
       '.mov',
       '.mqv',
@@ -122,7 +123,6 @@ export function isAudio(ext?: string | null) {
   return (
     [
       '.oga',
-      '.ogg',
       '.mp3',
       '.flac',
       '.midi',

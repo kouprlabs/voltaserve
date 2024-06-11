@@ -11,7 +11,7 @@ import (
 	"voltaserve/processor"
 )
 
-type videoPipeline struct {
+type audioVideoPipeline struct {
 	videoProc *processor.VideoProcessor
 	imageProc *processor.ImageProcessor
 	s3        *infra.S3Manager
@@ -19,8 +19,8 @@ type videoPipeline struct {
 	config    config.Config
 }
 
-func NewVideoPipeline() model.Pipeline {
-	return &videoPipeline{
+func NewAudioVideoPipeline() model.Pipeline {
+	return &audioVideoPipeline{
 		videoProc: processor.NewVideoProcessor(),
 		imageProc: processor.NewImageProcessor(),
 		s3:        infra.NewS3Manager(),
@@ -29,7 +29,7 @@ func NewVideoPipeline() model.Pipeline {
 	}
 }
 
-func (p *videoPipeline) Run(opts client.PipelineRunOptions) error {
+func (p *audioVideoPipeline) Run(opts client.PipelineRunOptions) error {
 	inputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(opts.Key))
 	if err := p.s3.GetFile(opts.Key, inputPath, opts.Bucket); err != nil {
 		return err
@@ -48,7 +48,15 @@ func (p *videoPipeline) Run(opts client.PipelineRunOptions) error {
 	}); err != nil {
 		return err
 	}
-	if err := p.createThumbnail(inputPath, opts); err != nil {
+	// Here we intentionally ignore the error, as the media file may contain just audio
+	p.createThumbnail(inputPath, opts)
+	if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
+		Fields: []string{client.TaskFieldName},
+		Name:   helper.ToPtr("Saving preview."),
+	}); err != nil {
+		return err
+	}
+	if err := p.saveOriginalAsPreview(inputPath, opts); err != nil {
 		return err
 	}
 	if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
@@ -61,7 +69,7 @@ func (p *videoPipeline) Run(opts client.PipelineRunOptions) error {
 	return nil
 }
 
-func (p *videoPipeline) createThumbnail(inputPath string, opts client.PipelineRunOptions) error {
+func (p *audioVideoPipeline) createThumbnail(inputPath string, opts client.PipelineRunOptions) error {
 	tmpPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".png")
 	defer func(path string) {
 		_, err := os.Stat(path)
@@ -74,14 +82,19 @@ func (p *videoPipeline) createThumbnail(inputPath string, opts client.PipelineRu
 	if err := p.videoProc.Thumbnail(inputPath, 0, p.config.Limits.ImagePreviewMaxHeight, tmpPath); err != nil {
 		return err
 	}
-	imageProps, err := p.imageProc.MeasureImage(tmpPath)
+	props, err := p.imageProc.MeasureImage(tmpPath)
+	if err != nil {
+		return err
+	}
+	stat, err := os.Stat(inputPath)
 	if err != nil {
 		return err
 	}
 	s3Object := &client.S3Object{
 		Bucket: opts.Bucket,
 		Key:    opts.SnapshotID + "/thumbnail" + filepath.Ext(tmpPath),
-		Image:  imageProps,
+		Image:  props,
+		Size:   helper.ToPtr(stat.Size()),
 	}
 	if err := p.s3.PutFile(s3Object.Key, tmpPath, helper.DetectMimeFromFile(tmpPath), s3Object.Bucket); err != nil {
 		return err
@@ -90,6 +103,25 @@ func (p *videoPipeline) createThumbnail(inputPath string, opts client.PipelineRu
 		Options:   opts,
 		Fields:    []string{client.SnapshotFieldThumbnail},
 		Thumbnail: s3Object,
+	}); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (p *audioVideoPipeline) saveOriginalAsPreview(inputPath string, opts client.PipelineRunOptions) error {
+	stat, err := os.Stat(inputPath)
+	if err != nil {
+		return err
+	}
+	if err := p.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
+		Options: opts,
+		Fields:  []string{client.SnapshotFieldPreview},
+		Preview: &client.S3Object{
+			Bucket: opts.Bucket,
+			Key:    opts.Key,
+			Size:   helper.ToPtr(stat.Size()),
+		},
 	}); err != nil {
 		return err
 	}

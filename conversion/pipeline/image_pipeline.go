@@ -68,6 +68,9 @@ func (p *imagePipeline) Run(opts client.PipelineRunOptions) error {
 		imagePath = *jpegPath
 	} else {
 		imagePath = inputPath
+		if err := p.saveOriginalAsPreview(imagePath, opts); err != nil {
+			return err
+		}
 	}
 	if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
 		Fields: []string{client.TaskFieldName},
@@ -130,14 +133,19 @@ func (p *imagePipeline) createThumbnail(inputPath string, opts client.PipelineRu
 	} else {
 		tmpPath = inputPath
 	}
-	imageProps, err := p.imageProc.MeasureImage(tmpPath)
+	props, err := p.imageProc.MeasureImage(tmpPath)
+	if err != nil {
+		return err
+	}
+	stat, err := os.Stat(inputPath)
 	if err != nil {
 		return err
 	}
 	s3Object := &client.S3Object{
 		Bucket: opts.Bucket,
 		Key:    opts.SnapshotID + "/thumbnail" + filepath.Ext(tmpPath),
-		Image:  imageProps,
+		Image:  props,
+		Size:   helper.ToPtr(stat.Size()),
 	}
 	if err := p.s3.PutFile(s3Object.Key, tmpPath, helper.DetectMimeFromFile(tmpPath), s3Object.Bucket); err != nil {
 		return err
@@ -186,4 +194,23 @@ func (p *imagePipeline) convertTIFFToJPEG(inputPath string, imageProps client.Im
 		return nil, err
 	}
 	return &jpegPath, nil
+}
+
+func (p *imagePipeline) saveOriginalAsPreview(inputPath string, opts client.PipelineRunOptions) error {
+	stat, err := os.Stat(inputPath)
+	if err != nil {
+		return err
+	}
+	if err := p.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
+		Options: opts,
+		Fields:  []string{client.SnapshotFieldPreview},
+		Preview: &client.S3Object{
+			Bucket: opts.Bucket,
+			Key:    opts.Key,
+			Size:   helper.ToPtr(stat.Size()),
+		},
+	}); err != nil {
+		return err
+	}
+	return nil
 }

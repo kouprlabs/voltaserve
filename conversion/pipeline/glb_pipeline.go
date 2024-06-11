@@ -82,14 +82,19 @@ func (p *glbPipeline) createThumbnail(inputPath string, opts client.PipelineRunO
 	if err := p.glbProc.Thumbnail(inputPath, p.config.Limits.ImagePreviewMaxWidth, p.config.Limits.ImagePreviewMaxHeight, "rgb(255,255,255)", tmpPath); err != nil {
 		return err
 	}
-	imageProps, err := p.imageProc.MeasureImage(tmpPath)
+	props, err := p.imageProc.MeasureImage(tmpPath)
+	if err != nil {
+		return err
+	}
+	stat, err := os.Stat(inputPath)
 	if err != nil {
 		return err
 	}
 	s3Object := &client.S3Object{
 		Bucket: opts.Bucket,
 		Key:    opts.SnapshotID + "/thumbnail" + filepath.Ext(tmpPath),
-		Image:  imageProps,
+		Image:  props,
+		Size:   helper.ToPtr(stat.Size()),
 	}
 	if err := p.s3.PutFile(s3Object.Key, tmpPath, helper.DetectMimeFromFile(tmpPath), s3Object.Bucket); err != nil {
 		return err

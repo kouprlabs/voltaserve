@@ -25,8 +25,8 @@ func (pi *PipelineIdentifier) Identify(opts client.PipelineRunOptions) string {
 			return model.PipelineOffice
 		} else if pi.fileIdent.IsImage(opts.Key) {
 			return model.PipelineImage
-		} else if pi.fileIdent.IsVideo(opts.Key) {
-			return model.PipelineVideo
+		} else if pi.fileIdent.IsAudio(opts.Key) || pi.fileIdent.IsVideo(opts.Key) {
+			return model.PipelineAudioVideo
 		} else if pi.fileIdent.IsGLB(opts.Key) {
 			return model.PipelineGLB
 		} else if pi.fileIdent.IsZIP(opts.Key) {
