@@ -203,7 +203,7 @@ func (r *InsightsRouter) ListEntities(c *fiber.Ctx) error {
 //	@Accept			json
 //	@Produce		json
 //	@Param			id	path		string	true	"ID"
-//	@Success		200	{object}	model.InsightsInfo
+//	@Success		200	{object}	service.InsightsInfo
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/insights/{id}/info [get]

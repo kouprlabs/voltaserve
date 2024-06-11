@@ -85,7 +85,7 @@ func (r *WatermarkRouter) Delete(c *fiber.Ctx) error {
 //	@Accept			json
 //	@Produce		json
 //	@Param			id	path		string	true	"ID"
-//	@Success		200	{object}	model.WatermarkInfo
+//	@Success		200	{object}	service.WatermarkInfo
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/watermarks/{id}/info [get]

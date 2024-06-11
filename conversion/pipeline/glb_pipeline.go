@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 	"voltaserve/client"
+	"voltaserve/config"
 	"voltaserve/helper"
 	"voltaserve/infra"
 	"voltaserve/model"
@@ -12,15 +13,19 @@ import (
 
 type glbPipeline struct {
 	glbProc   *processor.GLBProcessor
+	imageProc *processor.ImageProcessor
 	s3        *infra.S3Manager
 	apiClient *client.APIClient
+	config    config.Config
 }
 
 func NewGLBPipeline() model.Pipeline {
 	return &glbPipeline{
 		glbProc:   processor.NewGLBProcessor(),
+		imageProc: processor.NewImageProcessor(),
 		s3:        infra.NewS3Manager(),
 		apiClient: client.NewAPIClient(),
+		config:    config.GetConfig(),
 	}
 }
 
@@ -65,14 +70,39 @@ func (p *glbPipeline) Run(opts client.PipelineRunOptions) error {
 }
 
 func (p *glbPipeline) createThumbnail(inputPath string, opts client.PipelineRunOptions) error {
-	thumbnail, err := p.glbProc.Base64Thumbnail(inputPath, "rgb(255,255,255)")
+	tmpPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".jpeg")
+	defer func(path string) {
+		_, err := os.Stat(path)
+		if os.IsExist(err) {
+			if err := os.Remove(path); err != nil {
+				infra.GetLogger().Error(err)
+			}
+		}
+	}(tmpPath)
+	if err := p.glbProc.Thumbnail(inputPath, p.config.Limits.ImagePreviewMaxWidth, p.config.Limits.ImagePreviewMaxHeight, "rgb(255,255,255)", tmpPath); err != nil {
+		return err
+	}
+	props, err := p.imageProc.MeasureImage(tmpPath)
 	if err != nil {
+		return err
+	}
+	stat, err := os.Stat(tmpPath)
+	if err != nil {
+		return err
+	}
+	s3Object := &client.S3Object{
+		Bucket: opts.Bucket,
+		Key:    opts.SnapshotID + "/thumbnail" + filepath.Ext(tmpPath),
+		Image:  props,
+		Size:   helper.ToPtr(stat.Size()),
+	}
+	if err := p.s3.PutFile(s3Object.Key, tmpPath, helper.DetectMimeFromFile(tmpPath), s3Object.Bucket); err != nil {
 		return err
 	}
 	if err := p.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
 		Options:   opts,
 		Fields:    []string{client.SnapshotFieldThumbnail},
-		Thumbnail: thumbnail,
+		Thumbnail: s3Object,
 	}); err != nil {
 		return err
 	}

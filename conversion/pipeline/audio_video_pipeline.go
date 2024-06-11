@@ -6,33 +6,30 @@ import (
 	"voltaserve/client"
 	"voltaserve/config"
 	"voltaserve/helper"
-	"voltaserve/identifier"
 	"voltaserve/infra"
 	"voltaserve/model"
 	"voltaserve/processor"
 )
 
-type pdfPipeline struct {
-	pdfProc   *processor.PDFProcessor
+type audioVideoPipeline struct {
+	videoProc *processor.VideoProcessor
 	imageProc *processor.ImageProcessor
 	s3        *infra.S3Manager
 	apiClient *client.APIClient
-	fileIdent *identifier.FileIdentifier
 	config    config.Config
 }
 
-func NewPDFPipeline() model.Pipeline {
-	return &pdfPipeline{
-		pdfProc:   processor.NewPDFProcessor(),
+func NewAudioVideoPipeline() model.Pipeline {
+	return &audioVideoPipeline{
+		videoProc: processor.NewVideoProcessor(),
 		imageProc: processor.NewImageProcessor(),
 		s3:        infra.NewS3Manager(),
 		apiClient: client.NewAPIClient(),
-		fileIdent: identifier.NewFileIdentifier(),
 		config:    config.GetConfig(),
 	}
 }
 
-func (p *pdfPipeline) Run(opts client.PipelineRunOptions) error {
+func (p *audioVideoPipeline) Run(opts client.PipelineRunOptions) error {
 	inputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(opts.Key))
 	if err := p.s3.GetFile(opts.Key, inputPath, opts.Bucket); err != nil {
 		return err
@@ -51,9 +48,8 @@ func (p *pdfPipeline) Run(opts client.PipelineRunOptions) error {
 	}); err != nil {
 		return err
 	}
-	if err := p.createThumbnail(inputPath, opts); err != nil {
-		return err
-	}
+	// Here we intentionally ignore the error, as the media file may contain just audio
+	p.createThumbnail(inputPath, opts)
 	if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
 		Fields: []string{client.TaskFieldName},
 		Name:   helper.ToPtr("Saving preview."),
@@ -61,15 +57,6 @@ func (p *pdfPipeline) Run(opts client.PipelineRunOptions) error {
 		return err
 	}
 	if err := p.saveOriginalAsPreview(inputPath, opts); err != nil {
-		return err
-	}
-	if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
-		Fields: []string{client.TaskFieldName},
-		Name:   helper.ToPtr("Extracting text."),
-	}); err != nil {
-		return err
-	}
-	if err := p.extractText(inputPath, opts); err != nil {
 		return err
 	}
 	if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
@@ -82,11 +69,8 @@ func (p *pdfPipeline) Run(opts client.PipelineRunOptions) error {
 	return nil
 }
 
-func (p *pdfPipeline) createThumbnail(inputPath string, opts client.PipelineRunOptions) error {
+func (p *audioVideoPipeline) createThumbnail(inputPath string, opts client.PipelineRunOptions) error {
 	tmpPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".png")
-	if err := p.pdfProc.Thumbnail(inputPath, 0, p.config.Limits.ImagePreviewMaxHeight, tmpPath); err != nil {
-		return err
-	}
 	defer func(path string) {
 		_, err := os.Stat(path)
 		if os.IsExist(err) {
@@ -95,6 +79,9 @@ func (p *pdfPipeline) createThumbnail(inputPath string, opts client.PipelineRunO
 			}
 		}
 	}(tmpPath)
+	if err := p.videoProc.Thumbnail(inputPath, 0, p.config.Limits.ImagePreviewMaxHeight, tmpPath); err != nil {
+		return err
+	}
 	props, err := p.imageProc.MeasureImage(tmpPath)
 	if err != nil {
 		return err
@@ -122,33 +109,7 @@ func (p *pdfPipeline) createThumbnail(inputPath string, opts client.PipelineRunO
 	return nil
 }
 
-func (p *pdfPipeline) extractText(inputPath string, opts client.PipelineRunOptions) error {
-	text, err := p.pdfProc.TextFromPDF(inputPath)
-	if err != nil {
-		infra.GetLogger().Named(infra.StrPipeline).Errorw(err.Error())
-	}
-	key := opts.SnapshotID + "/text.txt"
-	if text == nil || err != nil {
-		return err
-	}
-	if err := p.s3.PutText(key, *text, "text/plain", opts.Bucket); err != nil {
-		return err
-	}
-	if err := p.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
-		Options: opts,
-		Fields:  []string{client.SnapshotFieldText},
-		Text: &client.S3Object{
-			Bucket: opts.Bucket,
-			Key:    key,
-			Size:   helper.ToPtr(int64(len(*text))),
-		},
-	}); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (p *pdfPipeline) saveOriginalAsPreview(inputPath string, opts client.PipelineRunOptions) error {
+func (p *audioVideoPipeline) saveOriginalAsPreview(inputPath string, opts client.PipelineRunOptions) error {
 	stat, err := os.Stat(inputPath)
 	if err != nil {
 		return err

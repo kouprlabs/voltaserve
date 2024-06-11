@@ -46,7 +46,7 @@ const IconDiverse = ({ file, scale }: IconFontProps) => {
   const height = Math.max(MIN_HEIGHT, BASE_HEIGHT * scale)
 
   const { snapshot } = file
-  const { original } = snapshot || {}
+  const { original, thumbnail } = snapshot || {}
   let image
   if (fe.isImage(original?.extension)) {
     image = isDark ? DarkImageSvg : ImageSvg
@@ -68,9 +68,13 @@ const IconDiverse = ({ file, scale }: IconFontProps) => {
     image = isDark ? DarkSpreadsheetSvg : SpreadsheetSvg
   } else if (fe.isSlides(original?.extension)) {
     image = isDark ? DarkPowerPointSvg : PowerPointSvg
-  } else if (fe.isVideo(original?.extension)) {
+  } else if (fe.isVideo(original?.extension) && thumbnail) {
     image = isDark ? DarkVideoSvg : VideoSvg
-  } else if (fe.isAudio(original?.extension)) {
+  } else if (
+    fe.isAudio(original?.extension) ||
+    (fe.isVideo(original?.extension) && !thumbnail)
+  ) {
+    // We consider a video file without thumbnail as an audio file
     image = isDark ? DarkAudioSvg : AudioSvg
   } else if (fe.isArchive(original?.extension)) {
     image = isDark ? DarkArchiveSvg : ArchiveSvg

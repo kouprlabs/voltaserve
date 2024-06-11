@@ -1,10 +1,11 @@
 package processor
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
-	"voltaserve/client"
 	"voltaserve/config"
 	"voltaserve/helper"
 	"voltaserve/infra"
@@ -22,34 +23,6 @@ func NewPDFProcessor() *PDFProcessor {
 		imageProc: NewImageProcessor(),
 		config:    config.GetConfig(),
 	}
-}
-
-func (p *PDFProcessor) Base64Thumbnail(inputPath string) (*client.ImageBase64, error) {
-	tmpPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".png")
-	if err := p.imageProc.ThumbnailFromImage(inputPath, 0, p.config.Limits.ImagePreviewMaxHeight, tmpPath); err != nil {
-		return nil, err
-	}
-	defer func(path string) {
-		_, err := os.Stat(path)
-		if os.IsExist(err) {
-			if err := os.Remove(path); err != nil {
-				infra.GetLogger().Error(err)
-			}
-		}
-	}(tmpPath)
-	b64, err := helper.ImageToBase64(tmpPath)
-	if err != nil {
-		return nil, err
-	}
-	imageProps, err := p.imageProc.MeasureImage(tmpPath)
-	if err != nil {
-		return nil, err
-	}
-	return &client.ImageBase64{
-		Base64: *b64,
-		Width:  imageProps.Width,
-		Height: imageProps.Height,
-	}, nil
 }
 
 func (p *PDFProcessor) TextFromPDF(inputPath string) (*string, error) {
@@ -70,4 +43,23 @@ func (p *PDFProcessor) TextFromPDF(inputPath string) (*string, error) {
 		return nil, err
 	}
 	return helper.ToPtr(strings.TrimSpace(string(b))), nil
+}
+
+func (p *PDFProcessor) Thumbnail(inputPath string, width int, height int, outputPath string) error {
+	var widthStr string
+	if width == 0 {
+		widthStr = ""
+	} else {
+		widthStr = strconv.FormatInt(int64(width), 10)
+	}
+	var heightStr string
+	if height == 0 {
+		heightStr = ""
+	} else {
+		heightStr = strconv.FormatInt(int64(height), 10)
+	}
+	if err := infra.NewCommand().Exec("convert", "-thumbnail", widthStr+"x"+heightStr, "-background", "white", "-alpha", "remove", "-flatten", fmt.Sprintf("%s[0]", inputPath), outputPath); err != nil {
+		return err
+	}
+	return nil
 }

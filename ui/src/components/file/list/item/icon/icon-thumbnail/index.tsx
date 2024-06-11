@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Image, Skeleton } from '@chakra-ui/react'
 import cx from 'classnames'
 import { File } from '@/client/api/file'
+import { getAccessTokenOrRedirect } from '@/infra/token'
 import { IconPlayArrow } from '@/lib/components/icons'
 import * as fe from '@/lib/helpers/file-extension'
 import IconBadge from '../icon-badge'
@@ -17,10 +18,20 @@ const IconThumbnail = ({ file, scale }: IconThumbnailProps) => {
   const width = getThumbnailWidth(file, scale)
   const height = getThumbnailHeight(file, scale)
   const [isLoading, setIsLoading] = useState(true)
+  const url = useMemo(() => {
+    if (file.snapshot?.thumbnail) {
+      return `/proxy/api/v2/files/${file.id}/thumbnail${
+        file.snapshot.thumbnail.extension
+      }?${new URLSearchParams({
+        access_token: getAccessTokenOrRedirect(),
+      })}`
+    }
+  }, [file])
+
   return (
     <>
       <Image
-        src={file.snapshot?.thumbnail?.base64}
+        src={url}
         style={{
           width: isLoading ? 0 : width,
           height: isLoading ? 0 : height,

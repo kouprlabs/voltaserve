@@ -65,6 +65,7 @@ func (r *FileRouter) AppendRoutes(g fiber.Router) {
 func (r *FileRouter) AppendNonJWTRoutes(g fiber.Router) {
 	g.Get("/:id/original:ext", r.DownloadOriginal)
 	g.Get("/:id/preview:ext", r.DownloadPreview)
+	g.Get("/:id/thumbnail:ext", r.DownloadThumbnail)
 }
 
 // Create godoc
@@ -829,6 +830,52 @@ func (r *FileRouter) DownloadPreview(c *fiber.Ctx) error {
 		return err
 	}
 	if filepath.Ext(snapshot.GetPreview().Key) != ext {
+		return errorpkg.NewS3ObjectNotFoundError(nil)
+	}
+	b := buf.Bytes()
+	c.Set("Content-Type", infra.DetectMimeFromBytes(b))
+	c.Set("Content-Disposition", fmt.Sprintf("filename=\"%s\"", filepath.Base(file.GetName())))
+	return c.Send(b)
+}
+
+// DownloadThumbnail godoc
+//
+//	@Summary		Download Thumbnail
+//	@Description	Download Thumbnail
+//	@Tags			Files
+//	@Id				files_download_thumbnail
+//	@Produce		json
+//	@Param			id				path		string	true	"ID"
+//	@Param			access_token	query		string	true	"Access Token"
+//	@Param			ext				query		string	true	"Extension"
+//	@Failure		404				{object}	errorpkg.ErrorResponse
+//	@Failure		500				{object}	errorpkg.ErrorResponse
+//	@Router			/files/{id}/thumbnail{ext} [get]
+func (r *FileRouter) DownloadThumbnail(c *fiber.Ctx) error {
+	accessToken := c.Cookies(r.accessTokenCookieName)
+	if accessToken == "" {
+		accessToken = c.Query("access_token")
+		if accessToken == "" {
+			return errorpkg.NewFileNotFoundError(nil)
+		}
+	}
+	userID, err := r.getUserIDFromAccessToken(accessToken)
+	if err != nil {
+		return c.SendStatus(http.StatusNotFound)
+	}
+	id := c.Params("id")
+	if id == "" {
+		return errorpkg.NewMissingQueryParamError("id")
+	}
+	ext := c.Params("ext")
+	if ext == "" {
+		return errorpkg.NewMissingQueryParamError("ext")
+	}
+	buf, file, snapshot, err := r.fileSvc.DownloadThumbnailBuffer(id, userID)
+	if err != nil {
+		return err
+	}
+	if filepath.Ext(snapshot.GetThumbnail().Key) != ext {
 		return errorpkg.NewS3ObjectNotFoundError(nil)
 	}
 	b := buf.Bytes()

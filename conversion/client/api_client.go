@@ -56,7 +56,7 @@ type SnapshotPatchOptions struct {
 	Entities  *S3Object          `json:"entities"`
 	Mosaic    *S3Object          `json:"mosaic"`
 	Watermark *S3Object          `json:"watermark"`
-	Thumbnail *ImageBase64       `json:"thumbnail"`
+	Thumbnail *S3Object          `json:"thumbnail"`
 	Status    *string            `json:"status"`
 	TaskID    *string            `json:"taskID"`
 }
@@ -81,12 +81,6 @@ const (
 	SnapshotFieldLanguage  = "language"
 	SnapshotFieldTaskID    = "taskID"
 )
-
-type ImageBase64 struct {
-	Base64 string `json:"base64"`
-	Width  int    `json:"width"`
-	Height int    `json:"height"`
-}
 
 type S3Object struct {
 	Bucket string      `json:"bucket"`

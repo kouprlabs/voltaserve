@@ -3,7 +3,6 @@ package processor
 import (
 	"os"
 	"path/filepath"
-	"voltaserve/client"
 	"voltaserve/config"
 	"voltaserve/helper"
 	"voltaserve/infra"
@@ -40,32 +39,4 @@ func (p *VideoProcessor) Thumbnail(inputPath string, width int, height int, outp
 		return err
 	}
 	return nil
-}
-
-func (p *VideoProcessor) Base64Thumbnail(inputPath string) (*client.ImageBase64, error) {
-	tmpPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".png")
-	if err := p.Thumbnail(inputPath, 0, p.config.Limits.ImagePreviewMaxHeight, tmpPath); err != nil {
-		return nil, err
-	}
-	defer func(path string) {
-		_, err := os.Stat(path)
-		if os.IsExist(err) {
-			if err := os.Remove(path); err != nil {
-				infra.GetLogger().Error(err)
-			}
-		}
-	}(tmpPath)
-	b64, err := helper.ImageToBase64(tmpPath)
-	if err != nil {
-		return nil, err
-	}
-	imageProps, err := p.imageProc.MeasureImage(tmpPath)
-	if err != nil {
-		return nil, err
-	}
-	return &client.ImageBase64{
-		Base64: *b64,
-		Width:  imageProps.Width,
-		Height: imageProps.Height,
-	}, nil
 }

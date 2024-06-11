@@ -14,7 +14,7 @@ type Dispatcher struct {
 	pdfPipeline        model.Pipeline
 	imagePipeline      model.Pipeline
 	officePipeline     model.Pipeline
-	videoPipeline      model.Pipeline
+	audioVideoPipeline model.Pipeline
 	insightsPipeline   model.Pipeline
 	mosaicPipeline     model.Pipeline
 	watermarkPipeline  model.Pipeline
@@ -29,7 +29,7 @@ func NewDispatcher() *Dispatcher {
 		pdfPipeline:        NewPDFPipeline(),
 		imagePipeline:      NewImagePipeline(),
 		officePipeline:     NewOfficePipeline(),
-		videoPipeline:      NewVideoPipeline(),
+		audioVideoPipeline: NewAudioVideoPipeline(),
 		insightsPipeline:   NewInsightsPipeline(),
 		mosaicPipeline:     NewMosaicPipeline(),
 		watermarkPipeline:  NewWatermarkPipeline(),
@@ -62,8 +62,8 @@ func (d *Dispatcher) Dispatch(opts client.PipelineRunOptions) error {
 		err = d.officePipeline.Run(opts)
 	} else if id == model.PipelineImage {
 		err = d.imagePipeline.Run(opts)
-	} else if id == model.PipelineVideo {
-		err = d.videoPipeline.Run(opts)
+	} else if id == model.PipelineAudioVideo {
+		err = d.audioVideoPipeline.Run(opts)
 	} else if id == model.PipelineInsights {
 		err = d.insightsPipeline.Run(opts)
 	} else if id == model.PipelineMoasic {

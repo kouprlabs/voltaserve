@@ -12,7 +12,7 @@ export type Snapshot = {
   entities?: Download
   mosaic?: Download
   watermark?: Download
-  thumbnail?: Thumbnail
+  thumbnail?: Download
   language?: string
   isActive: boolean
   task?: TaskInfo
