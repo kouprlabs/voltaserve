@@ -86,7 +86,7 @@ func (p *audioVideoPipeline) createThumbnail(inputPath string, opts client.Pipel
 	if err != nil {
 		return err
 	}
-	stat, err := os.Stat(inputPath)
+	stat, err := os.Stat(tmpPath)
 	if err != nil {
 		return err
 	}

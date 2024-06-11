@@ -137,7 +137,7 @@ func (p *imagePipeline) createThumbnail(inputPath string, opts client.PipelineRu
 	if err != nil {
 		return err
 	}
-	stat, err := os.Stat(inputPath)
+	stat, err := os.Stat(tmpPath)
 	if err != nil {
 		return err
 	}
