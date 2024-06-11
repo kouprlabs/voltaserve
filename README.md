@@ -4,7 +4,7 @@
   <h1 align="center">Voltaserve</h1>
 </p>
 
-<h2 align="center">The Cloud Storage for Content Creators</h2>
+<h3 align="center">The Cloud Storage for Content Creators</h2>
 
 - Open gigabyte-large images in seconds and enjoy buttery smooth zooming in and out.
 - Extract valuable insights from documents or scans using powerful AI.
