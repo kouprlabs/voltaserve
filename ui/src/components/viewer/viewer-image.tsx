@@ -4,6 +4,7 @@ import { File } from '@/client/api/file'
 import { leViewerPermission } from '@/client/api/permission'
 import { getAccessTokenOrRedirect } from '@/infra/token'
 import SectionSpinner from '@/lib/components/section-spinner'
+import variables from '@/lib/variables'
 
 export type ViewerImageProps = {
   file: File
@@ -58,8 +59,9 @@ const ViewerImage = ({ file }: ViewerImageProps) => {
           style={{
             objectFit: 'contain',
             width: isLoading ? 0 : 'auto',
-            height: isLoading ? 0 : '100%',
+            height: isLoading ? 0 : '90%',
             visibility: isLoading ? 'hidden' : 'visible',
+            borderRadius: variables.borderRadius,
           }}
           onLoad={() => setIsLoading(false)}
           alt={file.name}

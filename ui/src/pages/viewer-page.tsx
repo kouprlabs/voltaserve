@@ -26,46 +26,71 @@ import {
 const ViewerPage = () => {
   const { id } = useParams()
   const location = useLocation()
-  const isMosaic = useMemo(
+  const { data: file } = FileAPI.useGet(id)
+  const hasMosaicPath = useMemo(
     () => location.pathname.endsWith('/mosaic'),
     [location],
   )
-  const { data: file } = FileAPI.useGet(id)
+  const hasPDF = useMemo(() => {
+    return file?.snapshot &&
+      ((file.snapshot.original && isPDF(file.snapshot.original.extension)) ||
+        (file.snapshot.preview && isPDF(file.snapshot.preview.extension)))
+      ? true
+      : false
+  }, [file, location])
+  const hasImage = useMemo(
+    () =>
+      file?.snapshot &&
+      file.snapshot?.original &&
+      isImage(file.snapshot?.original.extension)
+        ? true
+        : false,
+    [file],
+  )
+  const hasMosaicImage = useMemo(
+    () => hasImage && file?.snapshot && file.snapshot?.mosaic,
+    [hasImage],
+  )
+  const hasVideo = useMemo(
+    () =>
+      file?.snapshot &&
+      file.snapshot?.original &&
+      isVideo(file.snapshot?.original.extension),
+    [file],
+  )
+  const hasAudio = useMemo(
+    () =>
+      file?.snapshot &&
+      file.snapshot?.original &&
+      isAudio(file.snapshot?.original.extension),
+    [file],
+  )
+  const hasGLB = useMemo(
+    () =>
+      file?.snapshot &&
+      file.snapshot?.preview &&
+      isGLB(file.snapshot.preview.extension),
+    [file],
+  )
 
   const renderViewer = useCallback(
     (file: File) => {
-      if (isMosaic) {
+      if (hasMosaicPath) {
         return <ViewerMosaic file={file} />
       } else {
-        if (
-          (file.snapshot?.original &&
-            isPDF(file.snapshot?.original.extension)) ||
-          (file.snapshot?.preview && isPDF(file.snapshot?.preview.extension))
-        ) {
+        if (hasPDF) {
           return <ViewerPDF file={file} />
-        } else if (
-          file.snapshot?.original &&
-          isImage(file.snapshot?.original.extension)
-        ) {
-          if (file.snapshot?.mosaic) {
+        } else if (hasImage) {
+          if (hasMosaicImage) {
             return <ViewerMosaic file={file} />
           } else {
             return <ViewerImage file={file} />
           }
-        } else if (
-          file.snapshot?.original &&
-          isVideo(file.snapshot?.original.extension)
-        ) {
+        } else if (hasVideo) {
           return <ViewerVideo file={file} />
-        } else if (
-          file.snapshot?.original &&
-          isAudio(file.snapshot?.original.extension)
-        ) {
+        } else if (hasAudio) {
           return <ViewerAudio file={file} />
-        } else if (
-          file.snapshot?.preview &&
-          isGLB(file.snapshot.preview.extension)
-        ) {
+        } else if (hasGLB) {
           return <ViewerModel file={file} />
         } else {
           return (
@@ -85,7 +110,15 @@ const ViewerPage = () => {
         }
       }
     },
-    [isMosaic],
+    [
+      hasMosaicPath,
+      hasMosaicImage,
+      hasPDF,
+      hasImage,
+      hasVideo,
+      hasAudio,
+      hasGLB,
+    ],
   )
 
   return (
@@ -110,9 +143,14 @@ const ViewerPage = () => {
                   'w-full',
                   'h-[80px]',
                   'min-h-[80px]',
+                  { 'bg-black': hasVideo || hasImage },
                 )}
               >
-                <span className={cx('font-medium', 'text-[16px]')}>
+                <span
+                  className={cx('font-medium', 'text-[16px]', {
+                    'text-white': hasVideo || hasImage,
+                  })}
+                >
                   {file.name}
                 </span>
               </div>
@@ -125,6 +163,7 @@ const ViewerPage = () => {
                   'h-full',
                   'overflow-hidden',
                   'relative',
+                  { 'bg-black': hasVideo || hasImage },
                 )}
               >
                 {renderViewer(file)}

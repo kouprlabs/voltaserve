@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { File } from '@/client/api/file'
 import { getAccessTokenOrRedirect } from '@/infra/token'
+import variables from '@/lib/variables'
 
 export type ViewerVideoProps = {
   file: File
@@ -24,7 +25,15 @@ const ViewerVideo = ({ file }: ViewerVideoProps) => {
   }
 
   return (
-    <video controls autoPlay style={{ maxWidth: '100%', maxHeight: '100%' }}>
+    <video
+      controls
+      autoPlay
+      style={{
+        maxWidth: '100%',
+        maxHeight: '100%',
+        borderRadius: variables.borderRadius,
+      }}
+    >
       <source src={url} />
     </video>
   )
