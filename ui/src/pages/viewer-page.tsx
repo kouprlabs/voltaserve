@@ -120,6 +120,7 @@ const ViewerPage = () => {
       hasGLB,
     ],
   )
+  const isPresentational = hasVideo || (hasImage && !hasMosaicImage)
 
   return (
     <>
@@ -143,12 +144,12 @@ const ViewerPage = () => {
                   'w-full',
                   'h-[80px]',
                   'min-h-[80px]',
-                  { 'bg-black': hasVideo || hasImage },
+                  { 'bg-black': isPresentational },
                 )}
               >
                 <span
                   className={cx('font-medium', 'text-[16px]', {
-                    'text-white': hasVideo || hasImage,
+                    'text-white': isPresentational,
                   })}
                 >
                   {file.name}
@@ -163,7 +164,7 @@ const ViewerPage = () => {
                   'h-full',
                   'overflow-hidden',
                   'relative',
-                  { 'bg-black': hasVideo || hasImage },
+                  { 'bg-black': isPresentational },
                 )}
               >
                 {renderViewer(file)}
