@@ -304,6 +304,19 @@ func (svc *SnapshotService) Patch(id string, opts SnapshotPatchOptions) (*Snapsh
 	if err != nil {
 		return nil, err
 	}
+	fileIDs, err := svc.fileRepo.GetIDsBySnapshot(id)
+	if err != nil {
+		return nil, err
+	}
+	for _, fileID := range fileIDs {
+		file, err := svc.fileCache.Refresh(fileID)
+		if err != nil {
+			return nil, err
+		}
+		if err = svc.fileSearch.Update([]model.File{file}); err != nil {
+			return nil, err
+		}
+	}
 	return svc.snapshotMapper.mapOne(snapshot), nil
 }
 

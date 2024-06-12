@@ -18,6 +18,7 @@ type FileRepo interface {
 	FindPath(id string) ([]model.File, error)
 	FindTree(id string) ([]model.File, error)
 	GetIDsByWorkspace(workspaceID string) ([]string, error)
+	GetIDsBySnapshot(snapshotID string) ([]string, error)
 	MoveSourceIntoTarget(targetID string, sourceID string) error
 	Save(file model.File) error
 	BulkInsert(values []model.File, chunkSize int) error
@@ -295,6 +296,24 @@ func (repo *fileRepo) GetIDsByWorkspace(workspaceID string) ([]string, error) {
 	res := []string{}
 	for _, id := range ids {
 		res = append(res, id.Result)
+	}
+	return res, nil
+}
+
+func (repo *fileRepo) GetIDsBySnapshot(snapshotID string) ([]string, error) {
+	type Value struct {
+		Result string
+	}
+	var values []Value
+	db := repo.db.
+		Raw("SELECT file_id result FROM snapshot_file WHERE snapshot_id = ?", snapshotID).
+		Scan(&values)
+	if db.Error != nil {
+		return nil, db.Error
+	}
+	res := []string{}
+	for _, v := range values {
+		res = append(res, v.Result)
 	}
 	return res, nil
 }
