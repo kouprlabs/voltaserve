@@ -77,6 +77,7 @@ const SnapshotList = () => {
     if (selected) {
       dispatch(selectionUpdated([selected.id]))
       dispatch(detachModalDidOpen())
+      setSelected(undefined)
     }
   }, [selected, dispatch])
 
