@@ -13,17 +13,9 @@
 - Upload and preview nearly any file type without needing a dedicated app.<br/>
 - Create groups and organizations, assign permissions, and collaborate in real-time with your team.<br/>
 
-![](./assets/screencast.gif)
-
 ## Getting Started
 
-Pull images: (_recommended for first time users_)
-
-```shell
-docker compose pull
-```
-
-Or, alternatively you can build them from the source:
+Build images:
 
 ```shell
 docker compose build
