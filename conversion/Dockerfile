@@ -54,31 +54,21 @@ RUN apt-get install -y \
   fonts-roboto \
   fonts-roboto-slab \
   fonts-open-sans \
-  fonts-source-code-pro \
-  fonts-noto-sans \
-  fonts-noto-serif \
   fonts-hack \
-  fonts-cascadia-code \
   fonts-firacode \
   fonts-anonymous-pro \
   fonts-comfortaa \
   fonts-cantarell \
   fonts-lobster \
-  fonts-meslo-nf \
   fonts-monoid \
-  fonts-iosevka \
   fonts-jetbrains-mono \
-  fonts-pt-sans-narrow \
-  fonts-fantasque-sans-mono \
-  fonts-ubuntu-monospace \
-  fonts-verdana \
-  fonts-gill-sans \
-  fonts-futura \
-  fonts-century-gothic \
-  fonts-calibri \
-  fonts-times-new-roman \
-  fonts-arial \
-  fonts-playfair-display
+  fonts-source-code-pro \
+  fonts-noto-sans \
+  fonts-noto-serif \
+  fonts-cascadia-code \
+  fonts-meslo-nf \
+  fonts-iosevka \
+  fonts-pt-sans-narrow
 
 RUN apt-get install -y \
   tesseract-ocr \
