@@ -15,13 +15,21 @@
 
 ## Getting Started
 
+Pull images: (_recommended for most users_)
+
+```shell
+docker compose pull
+```
+
+Or, alternatively you can build the images from the source:
+
 Build images:
 
 ```shell
 docker compose build
 ```
 
-Run containers:
+Start containers:
 
 ```shell
 docker compose up -d
@@ -33,6 +41,8 @@ Wait until the following containers are running:
 - `voltaserve-idp`
 - `voltaserve-conversion`
 - `voltaserve-webdav`
+- `voltaserve-language`
+- `voltaserve-mosaic`
 - `voltaserve-ui`
 
 You can check that by running the command `docker ps` and look at the `STATUS` column.
