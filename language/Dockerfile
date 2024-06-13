@@ -10,7 +10,7 @@ RUN apt-get install -y curl build-essential python3-poetry rust-all
 
 RUN poetry install --no-root
 
-RUN pip3 install torch==2.3.1
+RUN pip3 install --pre torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/nightly/cpu
 
 ENV PIP_DEFAULT_TIMEOUT=900
 
