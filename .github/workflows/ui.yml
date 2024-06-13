@@ -28,13 +28,10 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build and push Docker image for ui
+      - name: Build and push Docker image
         uses: docker/build-push-action@v3
         with:
           context: ./ui
           push: true
           tags: voltaserve/ui:latest
           platforms: linux/amd64,linux/arm64
-
-      - name: Cleanup Docker
-        run: docker system prune -af

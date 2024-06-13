@@ -1,19 +1,19 @@
-name: Build and Push voltaserve/conversion
+name: Build and Push voltaserve/watermark
 
 on:
   push:
     branches:
       - main
     paths:
-      - "conversion/**"
+      - "watermark/**"
   pull_request:
     branches:
       - main
     paths:
-      - "conversion/**"
+      - "watermark/**"
 
 jobs:
-  build_conversion:
+  build_watermark:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -31,7 +31,7 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v3
         with:
-          context: ./conversion
+          context: ./watermark
           push: true
-          tags: voltaserve/conversion:latest
+          tags: voltaserve/watermark:latest
           platforms: linux/amd64,linux/arm64
