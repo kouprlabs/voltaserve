@@ -1,6 +1,7 @@
 name: Build and Push voltaserve/api
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main

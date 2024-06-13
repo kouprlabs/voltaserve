@@ -1,6 +1,7 @@
 name: Build and Push voltaserve/idp
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
