@@ -20,13 +20,13 @@ iso_6393_to_model = {
     "eng": "en_core_web_trf",
     "fra": "fr_core_news_lg",
     "hin": "xx_ent_wiki_sm",
-    "ita": "it_core_news_lg",
-    "jpn": "ja_core_news_trf",
-    "nld": "nl_core_news_lg",
+    "ita": "xx_ent_wiki_sm",
+    "jpn": "xx_ent_wiki_sm",
+    "nld": "xx_ent_wiki_sm",
     "por": "pt_core_news_lg",
-    "rus": "ru_core_news_lg",
+    "rus": "xx_ent_wiki_sm",
     "spa": "es_core_news_lg",
-    "swe": "sv_core_news_lg",
+    "swe": "xx_ent_wiki_sm",
 }
 
 
