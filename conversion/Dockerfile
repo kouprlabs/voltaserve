@@ -9,6 +9,8 @@ RUN go build -o voltaserve-conversion
 
 FROM mcr.microsoft.com/playwright:jammy AS runner
 
+RUN apt-get update
+RUN apt-get install software-properties-common
 RUN add-apt-repository universe
 RUN apt-get update
 
