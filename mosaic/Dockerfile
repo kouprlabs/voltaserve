@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:8.0.300 AS build
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 
 WORKDIR /src
 
@@ -9,7 +9,7 @@ COPY . .
 RUN dotnet build "mosaic.csproj" -c Release -o /build
 RUN dotnet publish "mosaic.csproj" -c Release -o /publish
 
-FROM mcr.microsoft.com/dotnet/aspnet:8.0.300
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
 
 WORKDIR /app
 COPY --from=build /publish .
