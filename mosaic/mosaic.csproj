@@ -12,7 +12,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.2.0" />
     <PackageReference Include="System.Text.Json" Version="8.0.3" />
     <PackageReference Include="Magick.NET-Q8-AnyCPU" Version="13.8.0" />
     <PackageReference Include="dotenv.net" Version="3.1.3" />
