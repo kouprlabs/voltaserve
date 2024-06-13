@@ -78,17 +78,7 @@ RUN apt-get install -y \
   fonts-calibri \
   fonts-times-new-roman \
   fonts-arial \
-  fonts-playfair-display \
-  fonts-lora \
-  fonts-century-schoolbook \
-  fonts-bookman-old-style \
-  fonts-garamond \
-  fonts-georgia \
-  fonts-cambria \
-  fonts-palatino \
-  fonts-tahoma \
-  fonts-trebuchet-ms \
-  fonts-baskerville
+  fonts-playfair-display
 
 RUN apt-get install -y \
   tesseract-ocr \
