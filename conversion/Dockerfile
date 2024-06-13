@@ -61,14 +61,7 @@ RUN apt-get install -y \
   fonts-cantarell \
   fonts-lobster \
   fonts-monoid \
-  fonts-jetbrains-mono \
-  fonts-source-code-pro \
-  fonts-noto-sans \
-  fonts-noto-serif \
-  fonts-cascadia-code \
-  fonts-meslo-nf \
-  fonts-iosevka \
-  fonts-pt-sans-narrow
+  fonts-jetbrains-mono
 
 RUN apt-get install -y \
   tesseract-ocr \
