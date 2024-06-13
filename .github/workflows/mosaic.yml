@@ -6,13 +6,11 @@ on:
       - main
     paths:
       - "mosaic/**"
-      - ".github/workflows/mosaic/**"
   pull_request:
     branches:
       - main
     paths:
       - "mosaic/**"
-      - ".github/workflows/mosaic/**"
 
 jobs:
   build_mosaic:

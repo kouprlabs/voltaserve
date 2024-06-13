@@ -1,21 +1,19 @@
-name: Build and Push voltaserve/ui
+name: Build and Push voltaserve/watermark
 
 on:
   push:
     branches:
       - main
     paths:
-      - "ui/**"
-      - ".github/workflows/ui/**"
+      - "watermark/**"
   pull_request:
     branches:
       - main
     paths:
-      - "ui/**"
-      - ".github/workflows/ui/**"
+      - "watermark/**"
 
 jobs:
-  build_ui:
+  build_watermark:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -33,7 +31,7 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v3
         with:
-          context: ./ui
+          context: ./watermark
           push: true
-          tags: voltaserve/ui:latest
+          tags: voltaserve/watermark:latest
           platforms: linux/amd64,linux/arm64

@@ -1,21 +1,19 @@
-name: Build and Push voltaserve/watermark
+name: Build and Push voltaserve/language
 
 on:
   push:
     branches:
       - main
     paths:
-      - "watermark/**"
-      - ".github/workflows/watermark/**"
+      - "language/**"
   pull_request:
     branches:
       - main
     paths:
-      - "watermark/**"
-      - ".github/workflows/watermark/**"
+      - "language/**"
 
 jobs:
-  build_watermark:
+  build_language:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -33,7 +31,7 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v3
         with:
-          context: ./watermark
+          context: ./language
           push: true
-          tags: voltaserve/watermark:latest
+          tags: voltaserve/language:latest
           platforms: linux/amd64,linux/arm64

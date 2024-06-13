@@ -1,21 +1,19 @@
-name: Build and Push voltaserve/idp
+name: Build and Push voltaserve/ui
 
 on:
   push:
     branches:
       - main
     paths:
-      - "idp/**"
-      - ".github/workflows/idp/**"
+      - "ui/**"
   pull_request:
     branches:
       - main
     paths:
-      - "idp/**"
-      - ".github/workflows/idp/**"
+      - "ui/**"
 
 jobs:
-  build_idp:
+  build_ui:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -33,7 +31,7 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v3
         with:
-          context: ./idp
+          context: ./ui
           push: true
-          tags: voltaserve/idp:latest
+          tags: voltaserve/ui:latest
           platforms: linux/amd64,linux/arm64
