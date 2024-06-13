@@ -1,4 +1,4 @@
-name: Build voltaserve/idp
+name: Build and Push voltaserve/idp
 
 on:
   push:

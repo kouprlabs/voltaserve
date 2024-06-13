@@ -1,4 +1,4 @@
-name: Build voltaserve/language
+name: Build and Push voltaserve/language
 
 on:
   push:

@@ -1,4 +1,4 @@
-name: Build voltaserve/conversion
+name: Build and Push voltaserve/conversion
 
 on:
   push:
