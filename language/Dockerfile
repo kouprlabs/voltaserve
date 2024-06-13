@@ -6,16 +6,7 @@ COPY . .
 
 RUN apt-get update
 
-RUN apt-get install -y curl build-essential
-
-RUN apt-get update && \
-  apt-get install -y curl && \
-  curl https://sh.rustup.rs -sSf | sh -s -- -y && \
-  /root/.cargo/bin/rustup default stable
-
-RUN curl -sSL https://install.python-poetry.org | python3 -
-
-ENV PATH="/root/.cargo/bin:/root/.local/bin:${PATH}"
+RUN apt-get install -y curl build-essential python3-poetry rust-all
 
 RUN poetry install --no-root
 
