@@ -1,19 +1,21 @@
-name: Build and Push voltaserve/conversion
+name: Build and Push voltaserve/webdav
 
 on:
   push:
     branches:
       - main
     paths:
-      - "conversion/**"
+      - "webdav/**"
+      - ".github/workflows/webdav/**"
   pull_request:
     branches:
       - main
     paths:
-      - "conversion/**"
+      - "webdav/**"
+      - ".github/workflows/webdav/**"
 
 jobs:
-  build_conversion:
+  build_webdav:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -31,7 +33,7 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v3
         with:
-          context: ./conversion
+          context: ./webdav
           push: true
-          tags: voltaserve/conversion:latest
+          tags: voltaserve/webdav:latest
           platforms: linux/amd64,linux/arm64

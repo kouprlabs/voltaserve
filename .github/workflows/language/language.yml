@@ -1,18 +1,21 @@
-name: Build and Push voltaserve/api
+name: Build and Push voltaserve/language
 
 on:
   push:
     branches:
       - main
     paths:
-      - "api/**"
+      - "language/**"
+      - ".github/workflows/language/**"
   pull_request:
     branches:
       - main
     paths:
-      - "api/**"
+      - "language/**"
+      - ".github/workflows/language/**"
+
 jobs:
-  build_api:
+  build_language:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -30,7 +33,7 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v3
         with:
-          context: ./api
+          context: ./language
           push: true
-          tags: voltaserve/api:latest
+          tags: voltaserve/language:latest
           platforms: linux/amd64,linux/arm64
