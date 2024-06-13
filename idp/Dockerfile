@@ -1,7 +1,4 @@
-FROM node:22-bookworm
-
-RUN apt-get update
-RUN apt-get install -y curl
+FROM node:22-alpine
 
 WORKDIR /app
 

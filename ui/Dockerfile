@@ -1,4 +1,4 @@
-FROM node:22-bookworm AS ui-builder
+FROM node:22-alpine AS ui-builder
 
 WORKDIR /build
 
@@ -16,7 +16,7 @@ COPY tsconfig.node.json .
 RUN npm ci --legacy-peer-deps
 RUN npm run build
 
-FROM golang:1.22 AS go-builder
+FROM golang:1.22-alpine AS go-builder
 
 WORKDIR /build
 

@@ -1,4 +1,4 @@
-FROM golang:1.22 AS builder
+FROM golang:1.22-alpine AS builder
 
 WORKDIR /build
 
@@ -7,10 +7,7 @@ COPY . .
 RUN go mod download
 RUN go build -o voltaserve-api
 
-FROM ubuntu:noble AS runner
-
-RUN apt-get update
-RUN apt-get install -y curl
+FROM golang:1.22-alpine AS runner
 
 WORKDIR /app
 

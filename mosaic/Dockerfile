@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS build
 
 WORKDIR /src
 
@@ -9,7 +9,7 @@ COPY . .
 RUN dotnet build "mosaic.csproj" -c Release -o /build
 RUN dotnet publish "mosaic.csproj" -c Release -o /publish
 
-FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/aspnet:8.0
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/aspnet:8.0-alpine
 
 WORKDIR /app
 COPY --from=build /publish .
