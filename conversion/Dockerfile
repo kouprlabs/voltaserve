@@ -21,7 +21,6 @@ RUN apk add --no-cache \
   imagemagick \
   poppler-utils \
   exiftool \
-  perl-image-exiftool \
   ocrmypdf \
   unzip
 
