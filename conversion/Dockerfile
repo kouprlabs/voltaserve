@@ -39,26 +39,37 @@ RUN apk add --no-cache \
 RUN apk add --no-cache \
   font-dejavu \
   font-droid \
+  font-droid-nonlatin \
   font-awesome \
   font-liberation \
   font-liberation-sans-narrow \
-  font-noto-all \
   font-ubuntu \
   font-inconsolata \
   font-roboto \
+  font-roboto-flex \
+  font-roboto-mono \
   font-opensans \
   font-hack \
   font-cantarell \
   font-jetbrains-mono \
   font-adobe-source-code-pro \
   font-adobe-utopia-100dpi \
+  font-alias \
   font-arimo \
+  font-b612 \
   font-barlow \
+  font-bh-100dpi \
+  font-bitstream-100dpi \
   font-carlito \
+  font-croscore \
+  font-eb-garamond \
   font-freefont \
   font-inter \
   font-montserrat \
-  font-noto
+  font-noto \
+  font-overpass \
+  font-vollkorn \
+  font-wqy-zenhei
 
 RUN apk add --no-cache \
   tesseract-ocr \
