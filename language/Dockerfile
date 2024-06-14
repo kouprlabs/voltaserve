@@ -1,21 +1,21 @@
-FROM python:3.11-slim-bookworm
+FROM python:3.12-alpine
 
 WORKDIR /app
 
 COPY . .
 
-RUN apt-get update
+RUN apk update
+RUN apk add --no-cache build-base
 
-RUN apt-get install -y curl build-essential python3-poetry rust-all
+RUN pip3 install pipx
+ENV PATH="/root/.local/bin:$PATH"
 
-RUN poetry install --no-root
+RUN pipx install pdm --python $(which python)
 
-RUN pip3 install --pre torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/nightly/cpu
+RUN pdm install --prod --no-editable
+RUN .venv/bin/python3 -m ensurepip
+RUN .venv/bin/python3 -m spacy download xx_ent_wiki_sm
 
-ENV PIP_DEFAULT_TIMEOUT=900
-
-RUN poetry run spacy download xx_ent_wiki_sm
-
-ENTRYPOINT ["poetry", "run", "flask", "run", "--host=0.0.0.0", "--port=8084"]
+ENTRYPOINT ["pdm", "run", "flask", "run", "--host=0.0.0.0", "--port=8084"]
 
 EXPOSE 8084

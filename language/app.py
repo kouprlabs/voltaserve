@@ -1,14 +1,6 @@
 from flask import Flask, request, jsonify
 import string
 import spacy
-import torch
-
-if torch.backends.mps.is_available():
-    mps_device = torch.device("mps")
-    x = torch.ones(1, device=mps_device)
-    print(f"🔥 MPS device is available: {x}")
-else:
-    print ("MPS device not found.")
 
 app = Flask(__name__)
 nlp = None
@@ -75,9 +67,12 @@ def ner_entities():
             result[key]["frequency"] += 1
         else:
             result[key] = {"text": entity["text"], "frequency": 1}
-    
+
     # Convert the dictionary back to a list of entities with the "frequency" field
-    result = [{"text": value["text"], "frequency": value["frequency"]} for value in result.values()]
+    result = [
+        {"text": value["text"], "frequency": value["frequency"]}
+        for value in result.values()
+    ]
 
     # Sort by descending order of frequency
     result.sort(key=lambda x: x["frequency"], reverse=True)

@@ -1,7 +1,7 @@
 {
   "name": "voltaserve-idp",
   "version": "2.0.0",
-  "license": "MIT",
+  "license": "AGPL-3.0-only",
   "private": true,
   "scripts": {
     "start": "ts-node -r tsconfig-paths/register src/app.ts",
