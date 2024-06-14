@@ -13,7 +13,7 @@ import (
 
 type SnapshotRouter struct {
 	snapshotSvc *service.SnapshotService
-	config      config.Config
+	config      *config.Config
 }
 
 func NewSnapshotRouter() *SnapshotRouter {

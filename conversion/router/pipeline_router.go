@@ -13,7 +13,7 @@ import (
 )
 
 type PipelineRouter struct {
-	config    config.Config
+	config    *config.Config
 	scheduler *runtime.Scheduler
 }
 

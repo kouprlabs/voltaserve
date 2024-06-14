@@ -13,6 +13,15 @@
       "path": "conversion"
     },
     {
+      "path": "language"
+    },
+    {
+      "path": "mosaic"
+    },
+    {
+      "path": "watermark"
+    },
+    {
       "path": "ui"
     },
     {

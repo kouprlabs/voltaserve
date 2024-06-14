@@ -14,7 +14,7 @@ import (
 var commandMutex sync.Mutex
 
 type Command struct {
-	config config.Config
+	config *config.Config
 }
 
 func NewCommand() *Command {

@@ -14,7 +14,7 @@ import (
 
 type TaskRouter struct {
 	taskSvc *service.TaskService
-	config  config.Config
+	config  *config.Config
 }
 
 func NewTaskRouter() *TaskRouter {

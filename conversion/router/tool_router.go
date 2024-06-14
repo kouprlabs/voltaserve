@@ -14,7 +14,7 @@ import (
 )
 
 type ToolRouter struct {
-	config config.Config
+	config *config.Config
 }
 
 func NewToolRouter() *ToolRouter {

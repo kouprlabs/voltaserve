@@ -37,7 +37,7 @@ func main() {
 
 	app := fiber.New(fiber.Config{
 		ErrorHandler: errorpkg.ErrorHandler,
-		BodyLimit:    int(helper.MegabyteToByte(cfg.Limits.MultipartBodyLengthLimitMB)),
+		BodyLimit:    int(helper.MegabyteToByte(cfg.Limits.FileUploadMB)),
 	})
 
 	app.Use(cors.New(cors.Config{

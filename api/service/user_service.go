@@ -19,7 +19,7 @@ type UserService struct {
 	groupRepo  repo.GroupRepo
 	groupGuard *guard.GroupGuard
 	groupCache *cache.GroupCache
-	config     config.Config
+	config     *config.Config
 }
 
 func NewUserService() *UserService {

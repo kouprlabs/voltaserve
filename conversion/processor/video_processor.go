@@ -11,7 +11,7 @@ import (
 type VideoProcessor struct {
 	cmd       *infra.Command
 	imageProc *ImageProcessor
-	config    config.Config
+	config    *config.Config
 }
 
 func NewVideoProcessor() *VideoProcessor {

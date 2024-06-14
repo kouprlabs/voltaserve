@@ -10,7 +10,7 @@ import (
 )
 
 type APIClient struct {
-	config config.Config
+	config *config.Config
 }
 
 func NewAPIClient() *APIClient {

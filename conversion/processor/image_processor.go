@@ -13,7 +13,7 @@ import (
 type ImageProcessor struct {
 	apiClient *client.APIClient
 	fileIdent *identifier.FileIdentifier
-	config    config.Config
+	config    *config.Config
 }
 
 func NewImageProcessor() *ImageProcessor {

@@ -28,7 +28,7 @@ type WorkspaceService struct {
 	fileGuard       *guard.FileGuard
 	fileMapper      *FileMapper
 	s3              *infra.S3Manager
-	config          config.Config
+	config          *config.Config
 }
 
 func NewWorkspaceService() *WorkspaceService {
@@ -73,7 +73,7 @@ func (svc *WorkspaceService) Create(opts WorkspaceCreateOptions, userID string) 
 		return nil, err
 	}
 	if opts.StorageCapacity == 0 {
-		opts.StorageCapacity = svc.config.Defaults.WorkspaceStorageCapacityBytes
+		opts.StorageCapacity = helper.MegabyteToByte(svc.config.Defaults.WorkspaceStorageCapacityMB)
 	}
 	workspace, err := svc.workspaceRepo.Insert(repo.WorkspaceInsertOptions{
 		ID:              id,

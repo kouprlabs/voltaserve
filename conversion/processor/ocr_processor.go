@@ -9,7 +9,7 @@ import (
 type OCRProcessor struct {
 	cmd       *infra.Command
 	imageProc *ImageProcessor
-	config    config.Config
+	config    *config.Config
 }
 
 func NewOCRProcessor() *OCRProcessor {

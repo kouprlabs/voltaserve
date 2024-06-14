@@ -18,7 +18,7 @@ import (
 )
 
 type ToolClient struct {
-	config config.Config
+	config *config.Config
 }
 
 func NewToolClient() *ToolClient {

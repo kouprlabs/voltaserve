@@ -12,7 +12,7 @@ import (
 
 type OfficeProcessor struct {
 	cmd    *infra.Command
-	config config.Config
+	config *config.Config
 }
 
 func NewOfficeProcessor() *OfficeProcessor {

@@ -29,7 +29,7 @@ type GroupService struct {
 	orgRepo        repo.OrganizationRepo
 	orgCache       *cache.OrganizationCache
 	orgGuard       *guard.OrganizationGuard
-	config         config.Config
+	config         *config.Config
 }
 
 func NewGroupService() *GroupService {

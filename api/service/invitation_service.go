@@ -22,7 +22,7 @@ type InvitationService struct {
 	orgGuard         *guard.OrganizationGuard
 	userRepo         repo.UserRepo
 	mailTmpl         *infra.MailTemplate
-	config           config.Config
+	config           *config.Config
 }
 
 func NewInvitationService() *InvitationService {

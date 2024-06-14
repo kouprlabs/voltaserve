@@ -19,7 +19,7 @@ type imagePipeline struct {
 	s3        *infra.S3Manager
 	apiClient *client.APIClient
 	fileIdent *identifier.FileIdentifier
-	config    config.Config
+	config    *config.Config
 }
 
 func NewImagePipeline() model.Pipeline {

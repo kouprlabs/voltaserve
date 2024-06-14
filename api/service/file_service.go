@@ -46,7 +46,7 @@ type FileService struct {
 	fileIdent      *infra.FileIdentifier
 	s3             *infra.S3Manager
 	pipelineClient *client.PipelineClient
-	config         config.Config
+	config         *config.Config
 }
 
 func NewFileService() *FileService {
@@ -221,7 +221,7 @@ func (svc *FileService) Store(id string, path string, userID string) (*File, err
 	if err != nil {
 		return nil, err
 	}
-	exceedsProcessingLimit := stat.Size() > helper.MegabyteToByte(svc.config.Limits.FileProcessingMaxSizeMB)
+	exceedsProcessingLimit := stat.Size() > helper.MegabyteToByte(svc.fileIdent.GetProcessingLimitMB(path))
 	original := model.S3Object{
 		Bucket: workspace.GetBucket(),
 		Key:    snapshotID + "/original" + strings.ToLower(filepath.Ext(path)),
@@ -1714,7 +1714,7 @@ type FileMapper struct {
 	snapshotMapper *SnapshotMapper
 	snapshotCache  *cache.SnapshotCache
 	snapshotRepo   repo.SnapshotRepo
-	config         config.Config
+	config         *config.Config
 }
 
 func NewFileMapper() *FileMapper {

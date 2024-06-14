@@ -18,7 +18,7 @@ type officePipeline struct {
 	officeProc  *processor.OfficeProcessor
 	pdfProc     *processor.PDFProcessor
 	s3          *infra.S3Manager
-	config      config.Config
+	config      *config.Config
 	apiClient   *client.APIClient
 }
 

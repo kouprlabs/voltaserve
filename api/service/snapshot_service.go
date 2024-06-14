@@ -26,7 +26,7 @@ type SnapshotService struct {
 	fileSearch     *search.FileSearch
 	fileMapper     *FileMapper
 	taskCache      *cache.TaskCache
-	config         config.Config
+	config         *config.Config
 }
 
 func NewSnapshotService() *SnapshotService {

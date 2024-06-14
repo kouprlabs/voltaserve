@@ -10,7 +10,7 @@ import (
 type GLBProcessor struct {
 	cmd       *infra.Command
 	imageProc *ImageProcessor
-	config    config.Config
+	config    *config.Config
 }
 
 func NewGLBProcessor() *GLBProcessor {

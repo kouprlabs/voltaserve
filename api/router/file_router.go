@@ -29,7 +29,7 @@ import (
 type FileRouter struct {
 	fileSvc               *service.FileService
 	workspaceSvc          *service.WorkspaceService
-	config                config.Config
+	config                *config.Config
 	bufferPool            sync.Pool
 	accessTokenCookieName string
 }

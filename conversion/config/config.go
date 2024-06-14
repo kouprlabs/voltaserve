@@ -5,9 +5,39 @@ import (
 	"strconv"
 )
 
+type Config struct {
+	Port         int
+	APIURL       string
+	LanguageURL  string
+	MosaicURL    string
+	WatermarkURL string
+	Security     SecurityConfig
+	Limits       LimitsConfig
+	S3           S3Config
+}
+
+type SecurityConfig struct {
+	APIKey string `json:"api_key"`
+}
+
+type LimitsConfig struct {
+	ExternalCommandTimeoutSeconds int
+	ImagePreviewMaxWidth          int
+	ImagePreviewMaxHeight         int
+	MultipartBodyLengthLimitMB    int
+}
+
+type S3Config struct {
+	URL       string
+	AccessKey string
+	SecretKey string
+	Region    string
+	Secure    bool
+}
+
 var config *Config
 
-func GetConfig() Config {
+func GetConfig() *Config {
 	if config == nil {
 		port, err := strconv.Atoi(os.Getenv("PORT"))
 		if err != nil {
@@ -21,7 +51,7 @@ func GetConfig() Config {
 		readS3(config)
 		readLimits(config)
 	}
-	return *config
+	return config
 }
 
 func readURLs(config *Config) {

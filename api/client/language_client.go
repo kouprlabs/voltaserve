@@ -11,7 +11,7 @@ import (
 )
 
 type LanguageClient struct {
-	config config.Config
+	config *config.Config
 }
 
 func NewLanguageClient() *LanguageClient {

@@ -9,7 +9,7 @@ import (
 )
 
 type PipelineClient struct {
-	config config.Config
+	config *config.Config
 }
 
 func NewPipelineClient() *PipelineClient {

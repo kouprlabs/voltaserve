@@ -18,7 +18,7 @@ type glbPipeline struct {
 	imageProc *processor.ImageProcessor
 	s3        *infra.S3Manager
 	apiClient *client.APIClient
-	config    config.Config
+	config    *config.Config
 }
 
 func NewGLBPipeline() model.Pipeline {

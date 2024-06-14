@@ -14,7 +14,7 @@ import (
 type PDFProcessor struct {
 	cmd       *infra.Command
 	imageProc *ImageProcessor
-	config    config.Config
+	config    *config.Config
 }
 
 func NewPDFProcessor() *PDFProcessor {

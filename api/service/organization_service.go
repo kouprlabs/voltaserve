@@ -25,7 +25,7 @@ type OrganizationService struct {
 	groupRepo    repo.GroupRepo
 	groupService *GroupService
 	groupMapper  *groupMapper
-	config       config.Config
+	config       *config.Config
 }
 
 func NewOrganizationService() *OrganizationService {

@@ -14,7 +14,7 @@ import (
 )
 
 type MosaicClient struct {
-	config config.Config
+	config *config.Config
 }
 
 func NewMosaicClient() *MosaicClient {

@@ -12,7 +12,7 @@ import (
 )
 
 type WatermarkClient struct {
-	config config.Config
+	config *config.Config
 }
 
 func NewWatermarkClient() *WatermarkClient {

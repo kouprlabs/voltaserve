@@ -6,9 +6,89 @@ import (
 	"strings"
 )
 
+type Config struct {
+	Port          int
+	PublicUIURL   string
+	ConversionURL string
+	LanguageURL   string
+	MosaicURL     string
+	WatermarkURL  string
+	DatabaseURL   string
+	Search        SearchConfig
+	Redis         RedisConfig
+	S3            S3Config
+	Limits        LimitsConfig
+	Security      SecurityConfig
+	SMTP          SMTPConfig
+	Defaults      DefaultsConfig
+}
+
+type LimitsConfig struct {
+	FileUploadMB     int
+	FileProcessingMB map[string]int
+}
+
+type DefaultsConfig struct {
+	WorkspaceStorageCapacityMB int
+}
+
+type TokenConfig struct {
+	AccessTokenLifetime  int
+	RefreshTokenLifetime int
+	TokenAudience        string
+	TokenIssuer          string
+}
+
+type SearchConfig struct {
+	URL string
+}
+
+type RedisConfig struct {
+	Address  string
+	Password string
+	DB       int
+}
+
+type S3Config struct {
+	URL       string
+	AccessKey string
+	SecretKey string
+	Region    string
+	Secure    bool
+}
+
+type SecurityConfig struct {
+	JWTSigningKey string
+	CORSOrigins   []string
+	APIKey        string
+}
+
+type SMTPConfig struct {
+	Host          string
+	Port          int
+	Secure        bool
+	Username      string
+	Password      string
+	SenderAddress string
+	SenderName    string
+}
+
+const (
+	FileTypePDF            = "pdf"
+	FileTypeOffice         = "office"
+	FileTypePlainText      = "plain_text"
+	FileTypeImage          = "image"
+	FileTypeVideo          = "video"
+	FileTypeAudio          = "audio"
+	FileTypeGLB            = "glb"
+	FileTypeZIP            = "zip"
+	FileTypeGLTF           = "gltf"
+	FileTypeEverythingElse = "*"
+)
+
 var config *Config
 
-func GetConfig() Config {
+func GetConfig() *Config {
 	if config == nil {
 		port, err := strconv.Atoi(os.Getenv("PORT"))
 		if err != nil {
@@ -26,7 +106,15 @@ func GetConfig() Config {
 		readLimits(config)
 		readDefaults(config)
 	}
-	return *config
+	return config
+}
+
+func (l *LimitsConfig) GetFileProcessingMB(fileType string) int {
+	v, ok := l.FileProcessingMB[fileType]
+	if !ok {
+		return l.FileProcessingMB[FileTypeEverythingElse]
+	}
+	return v
 }
 
 func readURLs(config *Config) {
@@ -97,35 +185,37 @@ func readSMTP(config *Config) {
 }
 
 func readLimits(config *Config) {
-	if len(os.Getenv("LIMITS_EXTERNAL_COMMAND_TIMEOUT_SECONDS")) > 0 {
-		v, err := strconv.ParseInt(os.Getenv("LIMITS_EXTERNAL_COMMAND_TIMEOUT_SECONDS"), 10, 32)
+	if len(os.Getenv("LIMITS_FILE_UPLOAD_MB")) > 0 {
+		v, err := strconv.ParseInt(os.Getenv("LIMITS_FILE_UPLOAD_MB"), 10, 32)
 		if err != nil {
 			panic(err)
 		}
-		config.Limits.ExternalCommandTimeoutSeconds = int(v)
+		config.Limits.FileUploadMB = int(v)
 	}
-	if len(os.Getenv("LIMITS_MULTIPART_BODY_LENGTH_LIMIT_MB")) > 0 {
-		v, err := strconv.ParseInt(os.Getenv("LIMITS_MULTIPART_BODY_LENGTH_LIMIT_MB"), 10, 32)
-		if err != nil {
-			panic(err)
+	if len(os.Getenv("LIMITS_FILE_PROCESSING_MB")) > 0 {
+		raw := os.Getenv("LIMITS_FILE_PROCESSING_MB")
+		parts := strings.Split(raw, ",")
+		config.Limits.FileProcessingMB = make(map[string]int)
+		for _, part := range parts {
+			limit := strings.Split(part, ":")
+			if len(limit) != 2 {
+				panic("invalid LIMITS_FILE_PROCESSING_MB format")
+			}
+			v, err := strconv.ParseInt(limit[1], 10, 32)
+			if err != nil {
+				panic(err)
+			}
+			config.Limits.FileProcessingMB[limit[0]] = int(v)
 		}
-		config.Limits.MultipartBodyLengthLimitMB = int(v)
-	}
-	if len(os.Getenv("LIMITS_FILE_PROCESSING_MAX_SIZE_MB")) > 0 {
-		v, err := strconv.ParseInt(os.Getenv("LIMITS_FILE_PROCESSING_MAX_SIZE_MB"), 10, 32)
-		if err != nil {
-			panic(err)
-		}
-		config.Limits.FileProcessingMaxSizeMB = int(v)
 	}
 }
 
 func readDefaults(config *Config) {
-	if len(os.Getenv("DEFAULT_WORKSPACE_STORAGE_CAPACITY_BYTES")) > 0 {
-		v, err := strconv.ParseInt(os.Getenv("DEFAULT_WORKSPACE_STORAGE_CAPACITY_BYTES"), 10, 64)
+	if len(os.Getenv("DEFAULTS_WORKSPACE_STORAGE_CAPACITY_MB")) > 0 {
+		v, err := strconv.ParseInt(os.Getenv("DEFAULTS_WORKSPACE_STORAGE_CAPACITY_MB"), 10, 32)
 		if err != nil {
 			panic(err)
 		}
-		config.Defaults.WorkspaceStorageCapacityBytes = v
+		config.Defaults.WorkspaceStorageCapacityMB = int(v)
 	}
 }
