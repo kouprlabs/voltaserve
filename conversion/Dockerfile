@@ -7,73 +7,90 @@ COPY . .
 RUN go mod download
 RUN go build -o voltaserve-conversion
 
-FROM mcr.microsoft.com/playwright:jammy AS runner
+FROM zenika/alpine-chrome:124-with-playwright
 
-RUN apt-get update
-RUN apt-get install -y software-properties-common
-RUN add-apt-repository universe
-RUN apt-get update
+USER root
 
-RUN apt-get install -y \
+RUN apk update
+
+RUN apk add --no-cache \
   curl \
   ffmpeg \
   gawk \
   ghostscript \
   imagemagick \
   poppler-utils \
-  libimage-exiftool-perl \
+  exiftool \
+  perl-image-exiftool \
   ocrmypdf \
   unzip
 
 RUN npm i -g gltf-pipeline
-RUN npm i -g @koupr/screenshot-glb
+RUN npm i -g @shopify/screenshot-glb
 
-RUN apt-get install -y \
-  libreoffice-base-nogui \
-  libreoffice-core-nogui \
-  libreoffice-writer-nogui \
-  libreoffice-calc-nogui \
-  libreoffice-impress-nogui \
-  libreoffice-draw-nogui \
-  libreoffice-math-nogui
+RUN apk add --no-cache \
+  libreoffice-base \
+  libreoffice-writer \
+  libreoffice-calc \
+  libreoffice-impress \
+  libreoffice-draw \
+  libreoffice-math
 
-RUN apt-get install -y \
-  fonts-dejavu-core \
-  fonts-dejavu-extra \
-  fonts-droid-fallback \
-  fonts-font-awesome \
-  fonts-liberation \
-  fonts-liberation2 \
-  fonts-noto-cjk \
-  fonts-noto-color-emoji \
-  fonts-noto-core \
-  fonts-noto-mono \
-  fonts-ubuntu \
-  fonts-ubuntu-console \
-  fonts-inconsolata \
-  fonts-roboto \
-  fonts-roboto-slab \
-  fonts-open-sans \
-  fonts-hack \
-  fonts-firacode \
-  fonts-anonymous-pro \
-  fonts-comfortaa \
-  fonts-cantarell \
-  fonts-lobster \
-  fonts-monoid \
-  fonts-jetbrains-mono
+RUN apk add --no-cache \
+  font-dejavu \
+  font-droid \
+  font-droid-nonlatin \
+  font-awesome \
+  font-liberation \
+  font-liberation-sans-narrow \
+  font-noto-cjk \
+  font-noto-all \
+  font-noto-cjk-extra \
+  font-noto-emoji \
+  font-ubuntu \
+  font-inconsolata \
+  font-roboto \
+  font-roboto-flex \
+  font-roboto-mono \
+  font-opensans \
+  font-hack \
+  font-cantarell \
+  font-jetbrains-mono \
+  font-adobe-source-code-pro \
+  font-adobe-utopia-100dpi \
+  font-adobe-utopia-75dpi \
+  font-adobe-utopia-type1 \
+  font-alias \
+  font-arimo \
+  font-b612 \
+  font-barlow \
+  font-bh-100dpi \
+  font-bh-75dpi \
+  font-bitstream-100dpi \
+  font-bitstream-75dpi \
+  font-bitstream-type1 \
+  font-carlito \
+  font-croscore \
+  font-eb-garamond \
+  font-freefont \
+  font-inter \
+  font-montserrat \
+  font-noto \
+  font-overpass \
+  font-vollkorn \
+  font-wqy-zenhei
 
-RUN apt-get install -y \
+RUN apk add --no-cache \
   tesseract-ocr \
-  tesseract-ocr-osd \
-  tesseract-ocr-ara \
-  tesseract-ocr-chi-sim \
-  tesseract-ocr-chi-tra \
-  tesseract-ocr-eng \
-  tesseract-ocr-fra \
-  tesseract-ocr-deu \
-  tesseract-ocr-por \
-  tesseract-ocr-spa
+  tesseract-ocr-data-osd \
+  tesseract-ocr-data-ara \
+  tesseract-ocr-data-chi_sim \
+  tesseract-ocr-data-chi_tra \
+  tesseract-ocr-data-eng \
+  tesseract-ocr-data-fra \
+  tesseract-ocr-data-deu \
+  tesseract-ocr-data-por \
+  tesseract-ocr-data-spa
 
 WORKDIR /app
 
