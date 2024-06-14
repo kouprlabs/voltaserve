@@ -29,12 +29,9 @@ RUN npm i -g gltf-pipeline
 RUN npm i -g @shopify/screenshot-glb
 
 RUN apk add --no-cache \
-  libreoffice-base \
   libreoffice-writer \
   libreoffice-calc \
-  libreoffice-impress \
-  libreoffice-draw \
-  libreoffice-math
+  libreoffice-impress
 
 RUN apk add --no-cache \
   font-dejavu \
