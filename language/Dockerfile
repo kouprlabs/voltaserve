@@ -16,7 +16,14 @@ RUN pdm install --prod --no-editable
 
 RUN .venv/bin/python3 -m ensurepip
 
-RUN .venv/bin/pip3 install torch==2.3.1
+RUN if [ "$BUILDPLATFORM" = "linux/amd64" ]; then \
+  .venv/bin/pip3 install https://download.pytorch.org/whl/cpu/torch-2.3.1+cpu-cp312-cp312-linux_x86_64.whl; \
+  elif [ "$BUILDPLATFORM" = "linux/arm64" ]; then \
+  .venv/bin/pip3 install https://download.pytorch.org/whl/cpu/torch-2.3.1-cp312-cp312-manylinux_2_17_aarch64.manylinux2014_aarch64.whl; \
+  else \
+  echo "Unsupported build platform: $BUILDPLATFORM"; \
+  exit 1; \
+  fi
 
 RUN .venv/bin/python3 -m spacy download xx_ent_wiki_sm
 RUN .venv/bin/python3 -m spacy download zh_core_web_trf
