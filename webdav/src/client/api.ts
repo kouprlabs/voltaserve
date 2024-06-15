@@ -28,13 +28,9 @@ export type File = {
   name: string
   type: FileType
   parentId: string
-  version: number
-  original?: Download
-  preview?: Download
-  thumbnail?: Thumbnail
-  snapshots: Snapshot[]
   permission: PermissionType
   isShared: boolean
+  snapshot?: Snapshot
   createTime: string
   updateTime?: string
 }
@@ -258,7 +254,7 @@ export class FileAPI {
     return new Promise<void>((resolve, reject) => {
       const ws = createWriteStream(outputPath)
       const request = get(
-        `${API_URL}/v2/files/${file.id}/original${file.original.extension}?access_token=${this.token.access_token}`,
+        `${API_URL}/v2/files/${file.id}/original${file.snapshot.original.extension}?access_token=${this.token.access_token}`,
         (response) => {
           response.pipe(ws)
           ws.on('finish', () => {

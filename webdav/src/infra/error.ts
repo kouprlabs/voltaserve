@@ -16,4 +16,5 @@ export function handleError(err: any, res: ServerResponse) {
     res.statusCode = 500
     res.end()
   }
+  console.error(err)
 }

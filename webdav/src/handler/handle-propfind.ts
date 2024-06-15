@@ -32,8 +32,8 @@ async function handlePropfind(
               <D:prop>
                 <D:resourcetype></D:resourcetype>
                 ${
-                  file.original
-                    ? `<D:getcontentlength>${file.original.size}</D:getcontentlength>`
+                  file.snapshot.original
+                    ? `<D:getcontentlength>${file.snapshot.original.size}</D:getcontentlength>`
                     : ''
                 }
                 <D:creationdate>${new Date(
@@ -81,8 +81,8 @@ async function handlePropfind(
                         item.type === FileType.Folder ? '<D:collection/>' : ''
                       }</D:resourcetype>
                       ${
-                        item.type === FileType.File && item.original
-                          ? `<D:getcontentlength>${item.original.size}</D:getcontentlength>`
+                        item.type === FileType.File && item.snapshot.original
+                          ? `<D:getcontentlength>${item.snapshot.original.size}</D:getcontentlength>`
                           : ''
                       }
                       <D:getlastmodified>${new Date(

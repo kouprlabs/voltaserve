@@ -72,12 +72,6 @@ export type ImageProps = {
   height: number
 }
 
-export type Thumbnail = {
-  base64: string
-  width: number
-  height: number
-}
-
 export type ListQueryParams = {
   file_id: string
   page?: string

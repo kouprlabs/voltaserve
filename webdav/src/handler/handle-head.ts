@@ -23,7 +23,7 @@ async function handleHead(
     const file = await new FileAPI(token).getByPath(decodeURIComponent(req.url))
     if (file.type === FileType.File) {
       res.statusCode = 200
-      res.setHeader('Content-Length', file.original.size)
+      res.setHeader('Content-Length', file.snapshot.original.size)
       res.end()
     } else {
       res.statusCode = 200
