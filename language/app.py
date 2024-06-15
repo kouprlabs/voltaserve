@@ -6,19 +6,19 @@ app = Flask(__name__)
 nlp = None
 iso_6393_to_model = {
     "ara": "xx_ent_wiki_sm",
-    "chi_sim": "xx_ent_wiki_sm",
-    "chi_tra": "xx_ent_wiki_sm",
-    "deu": "xx_ent_wiki_sm",
-    "eng": "xx_ent_wiki_sm",
-    "fra": "xx_ent_wiki_sm",
+    "chi_sim": "zh_core_web_trf",
+    "chi_tra": "zh_core_web_trf",
+    "deu": "de_core_news_lg",
+    "eng": "en_core_web_trf",
+    "fra": "fr_core_news_lg",
     "hin": "xx_ent_wiki_sm",
-    "ita": "xx_ent_wiki_sm",
-    "jpn": "xx_ent_wiki_sm",
-    "nld": "xx_ent_wiki_sm",
-    "por": "xx_ent_wiki_sm",
-    "rus": "xx_ent_wiki_sm",
-    "spa": "xx_ent_wiki_sm",
-    "swe": "xx_ent_wiki_sm",
+    "ita": "it_core_news_lg",
+    "jpn": "ja_core_news_trf",
+    "nld": "nl_core_news_lg",
+    "por": "pt_core_news_lg",
+    "rus": "ru_core_news_lg",
+    "spa": "es_core_news_lg",
+    "swe": "sv_core_news_lg",
 }
 
 
