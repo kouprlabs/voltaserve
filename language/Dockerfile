@@ -16,6 +16,8 @@ RUN pdm install --prod --no-editable
 
 RUN .venv/bin/python3 -m ensurepip
 
+RUN .venv/bin/pip3 install torch==2.3.1
+
 RUN .venv/bin/python3 -m spacy download xx_ent_wiki_sm
 RUN .venv/bin/python3 -m spacy download zh_core_web_trf
 RUN .venv/bin/python3 -m spacy download de_core_news_lg
