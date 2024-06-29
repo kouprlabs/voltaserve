@@ -12,6 +12,18 @@ Run for development:
 bun run dev
 ```
 
+Build for production:
+
+```shell
+bun run build
+```
+
+Run for production:
+
+```shell
+go run .
+```
+
 Lint TypeScript code:
 
 ```shell

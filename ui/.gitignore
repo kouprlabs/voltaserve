@@ -7,4 +7,3 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 __debug_bin*
-/voltaserve-ui
