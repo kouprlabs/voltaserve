@@ -30,7 +30,7 @@ export async function exchange(options: TokenExchangeOptions): Promise<Token> {
   if (options.grant_type === 'password') {
     let user: User
     try {
-      user = await userRepo.findByUsername(options.username)
+      user = await userRepo.findByUsername(options.username.toLocaleLowerCase())
     } catch {
       throw newError({ code: ErrorCode.InvalidUsernameOrPassword })
     }
