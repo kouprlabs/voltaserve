@@ -7,6 +7,7 @@ import {
   MenuDivider,
   MenuItem,
   MenuList,
+  MenuOptionGroup,
   Portal,
 } from '@chakra-ui/react'
 import cx from 'classnames'
@@ -18,19 +19,19 @@ import {
 } from '@/client/api/permission'
 import { swrConfig } from '@/client/options'
 import {
-  IconFileCopy,
+  IconArrowTopRight,
+  IconCheckBoxOutlineBlank,
+  IconDelete,
   IconDownload,
   IconEdit,
-  IconArrowTopRight,
+  IconFileCopy,
   IconGroup,
-  IconDelete,
-  IconUpload,
   IconHistory,
   IconModeHeat,
+  IconMoreVert,
   IconSecurity,
   IconSelectCheckBox,
-  IconCheckBoxOutlineBlank,
-  IconMoreVert,
+  IconUpload,
 } from '@/lib/components/icons'
 import downloadFile from '@/lib/helpers/download-file'
 import {
@@ -162,15 +163,25 @@ const FileMenu = ({
     () => file !== undefined && geEditorPermission(file.permission),
     [file],
   )
-  const isAnyFeatureAuthorized = useMemo(
+  const isAnyProToolsAvailable = useMemo(
     () =>
-      isInsightsAuthorized ||
-      isSharingAuthorized ||
-      isSnapshotsAuthorized ||
-      isMosaicAuthorized ||
+      !isToolbarMode &&
+      (isInsightsAuthorized || isMosaicAuthorized || isWatermarkAuthorized) &&
+      file?.type === 'file',
+    [
+      isToolbarMode,
+      isInsightsAuthorized,
+      isMosaicAuthorized,
       isWatermarkAuthorized,
-    [],
+      file,
+    ],
   )
+  const isAnyManagementToolsAvailable = useMemo(() => {
+    return (
+      (!isToolbarMode && (isSharingAuthorized || isSnapshotsAuthorized)) ||
+      file?.type === 'file'
+    )
+  }, [isToolbarMode, isSharingAuthorized, isSnapshotsAuthorized, file])
   const uploadInputRef = useRef<HTMLInputElement>(null)
 
   const handleUploadInputChange = useCallback(
@@ -268,19 +279,44 @@ const FileMenu = ({
                 : undefined
             }
           >
-            {!isToolbarMode && isInsightsAuthorized ? (
-              <>
-                <MenuItem
-                  icon={<Orb width="16px" height="16px" />}
-                  onClick={(event: MouseEvent) => {
-                    event.stopPropagation()
-                    dispatch(insightsModalDidOpen())
-                  }}
-                >
-                  Insights
-                </MenuItem>
-              </>
+            {isAnyProToolsAvailable ? (
+              <MenuOptionGroup title="Pro Tools">
+                {!isToolbarMode && isInsightsAuthorized ? (
+                  <MenuItem
+                    icon={<Orb width="16px" height="16px" />}
+                    onClick={(event: MouseEvent) => {
+                      event.stopPropagation()
+                      dispatch(insightsModalDidOpen())
+                    }}
+                  >
+                    Insights
+                  </MenuItem>
+                ) : null}
+                {!isToolbarMode && isMosaicAuthorized ? (
+                  <MenuItem
+                    icon={<IconModeHeat />}
+                    onClick={(event: MouseEvent) => {
+                      event.stopPropagation()
+                      dispatch(mosaicModalDidOpen())
+                    }}
+                  >
+                    Mosaic
+                  </MenuItem>
+                ) : null}
+                {!isToolbarMode && isWatermarkAuthorized ? (
+                  <MenuItem
+                    icon={<IconSecurity />}
+                    onClick={(event: MouseEvent) => {
+                      event.stopPropagation()
+                      dispatch(watermarkModalDidOpen())
+                    }}
+                  >
+                    Watermark
+                  </MenuItem>
+                ) : null}
+              </MenuOptionGroup>
             ) : null}
+            {isAnyProToolsAvailable ? <MenuDivider /> : null}
             {!isToolbarMode && isSharingAuthorized ? (
               <MenuItem
                 icon={<IconGroup />}
@@ -303,56 +339,37 @@ const FileMenu = ({
                 Snapshots
               </MenuItem>
             ) : null}
-            {!isToolbarMode && isMosaicAuthorized ? (
-              <MenuItem
-                icon={<IconModeHeat />}
-                onClick={(event: MouseEvent) => {
-                  event.stopPropagation()
-                  dispatch(mosaicModalDidOpen())
-                }}
-              >
-                Mosaic
-              </MenuItem>
+            {file?.type === 'file' ? (
+              <>
+                <MenuItem
+                  icon={<IconUpload />}
+                  isDisabled={!isUploadAuthorized}
+                  onClick={(event: MouseEvent) => {
+                    event.stopPropagation()
+                    const singleId = file?.id
+                    uploadInputRef?.current?.click()
+                    if (singleId) {
+                      dispatch(selectionUpdated([singleId]))
+                    }
+                  }}
+                >
+                  Upload
+                </MenuItem>
+                <MenuItem
+                  icon={<IconDownload />}
+                  isDisabled={!isDownloadAuthorized}
+                  onClick={(event: MouseEvent) => {
+                    event.stopPropagation()
+                    if (file) {
+                      downloadFile(file)
+                    }
+                  }}
+                >
+                  Download
+                </MenuItem>
+              </>
             ) : null}
-            {!isToolbarMode && isWatermarkAuthorized ? (
-              <MenuItem
-                icon={<IconSecurity />}
-                onClick={(event: MouseEvent) => {
-                  event.stopPropagation()
-                  dispatch(watermarkModalDidOpen())
-                }}
-              >
-                Watermark
-              </MenuItem>
-            ) : null}
-            {isAnyFeatureAuthorized && !isToolbarMode ? <MenuDivider /> : null}
-            <MenuItem
-              icon={<IconUpload />}
-              isDisabled={!isUploadAuthorized}
-              onClick={(event: MouseEvent) => {
-                event.stopPropagation()
-                const singleId = file?.id
-                uploadInputRef?.current?.click()
-                if (singleId) {
-                  dispatch(selectionUpdated([singleId]))
-                }
-              }}
-            >
-              Upload
-            </MenuItem>
-            <MenuItem
-              icon={<IconDownload />}
-              isDisabled={!isDownloadAuthorized}
-              onClick={(event: MouseEvent) => {
-                event.stopPropagation()
-                if (file) {
-                  downloadFile(file)
-                }
-              }}
-            >
-              Download
-            </MenuItem>
-            <MenuDivider />
+            {isAnyManagementToolsAvailable ? <MenuDivider /> : null}
             <MenuItem
               icon={<IconDelete />}
               className={cx('text-red-500')}
