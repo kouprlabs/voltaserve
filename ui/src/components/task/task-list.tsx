@@ -11,7 +11,7 @@ const TasksList = () => {
   const dispatch = useAppDispatch()
   const [page, setPage] = useState(1)
   const { data: list, mutate: mutateList } = TaskAPI.useList(
-    { page, size: 5, sortOrder: SortOrder.Desc },
+    { page, size: 5, sortOrder: SortOrder.Asc },
     swrConfig(),
   )
 
