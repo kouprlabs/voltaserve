@@ -7,7 +7,7 @@ import { hashPassword } from '@/infra/password'
 import search, { USER_SEARCH_INDEX } from '@/infra/search'
 import { User } from '@/user/model'
 import userRepo from '@/user/repo'
-import { mapEntity, UserDTO } from '@/user/service'
+import { UserDTO, mapEntity } from '@/user/service'
 
 export type AccountCreateOptions = {
   email: string
@@ -40,8 +40,8 @@ export async function createUser(
     const emailConfirmationToken = newHyphenlessUuid()
     const user = await userRepo.insert({
       id,
-      username: options.email,
-      email: options.email,
+      username: options.email.toLocaleLowerCase(),
+      email: options.email.toLocaleLowerCase(),
       fullName: options.fullName,
       picture: options.picture,
       passwordHash: hashPassword(options.password),
