@@ -3,23 +3,35 @@
 Install dependencies:
 
 ```shell
-npm i --legacy-peer-deps
+bun i
 ```
 
 Run for development:
 
 ```shell
-npm run dev
+bun run dev
+```
+
+Lint TypeScript code:
+
+```shell
+bun run lint
+```
+
+Format TypeScript code:
+
+```shell
+bun run format
+```
+
+Lint Go code:
+
+```shell
+golangci-lint run
 ```
 
 Build Docker Image:
 
 ```shell
 docker build -t voltaserve/ui .
-```
-
-Run code linter:
-
-```shell
-golangci-lint run
 ```

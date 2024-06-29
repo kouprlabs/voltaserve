@@ -16,19 +16,19 @@ Build binary:
 go build .
 ```
 
+Lint code:
+
+```shell
+golangci-lint run
+```
+
 Build Docker image:
 
 ```shell
 docker build -t voltaserve/conversion .
 ```
 
-Run code linter:
-
-```shell
-golangci-lint run
-```
-
-## Generate and Publish Documentation
+## Generate Documentation
 
 Format swag comments:
 
