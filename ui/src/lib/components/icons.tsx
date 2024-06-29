@@ -1,8 +1,9 @@
+import { HTMLAttributes } from 'react'
 import { cx } from '@emotion/css'
 
 export type IconBaseProps = {
   filled?: boolean
-} & React.HTMLAttributes<HTMLSpanElement>
+} & HTMLAttributes<HTMLSpanElement>
 
 type GetClassNameOptions = {
   filled?: boolean
@@ -445,5 +446,15 @@ export const IconTune = ({ className, filled, ...props }: IconBaseProps) => (
 export const IconStacks = ({ className, filled, ...props }: IconBaseProps) => (
   <span className={getClassName({ filled, className })} {...props}>
     stacks
+  </span>
+)
+
+export const IconCloudUpload = ({
+  className,
+  filled,
+  ...props
+}: IconBaseProps) => (
+  <span className={getClassName({ filled, className })} {...props}>
+    cloud_upload
   </span>
 )

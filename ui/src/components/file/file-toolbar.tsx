@@ -1,8 +1,6 @@
 import { ChangeEvent, ReactElement, useCallback, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import {
-  Button,
-  ButtonGroup,
   IconButton,
   Menu,
   MenuButton,
@@ -11,6 +9,7 @@ import {
   Portal,
   Spacer,
   MenuDivider,
+  Tooltip,
 } from '@chakra-ui/react'
 import cx from 'classnames'
 import FileAPI, { List, SortBy, SortOrder } from '@/client/api/file'
@@ -25,9 +24,9 @@ import {
   IconArrowUpward,
   IconCheck,
   IconLibraryAddCheck,
-  IconExpandMore,
   IconClose,
   IconList,
+  IconCloudUpload,
 } from '@/lib/components/icons'
 import mapFileList from '@/lib/helpers/map-file-list'
 import { uploadAdded, UploadDecorator } from '@/store/entities/uploads'
@@ -179,48 +178,47 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
   return (
     <>
       <div className={cx('flex', 'flex-row', 'gap-0.5')}>
-        <ButtonGroup isAttached>
-          <Menu>
+        <Menu>
+          <Tooltip label="Upload">
             <MenuButton
-              as={Button}
+              as={IconButton}
               variant="solid"
               colorScheme="blue"
-              leftIcon={<IconExpandMore />}
+              icon={<IconCloudUpload />}
               isDisabled={
                 !folder || ltEditorPermission(folder.permission) || !list
               }
-            >
-              Upload
-            </MenuButton>
-            <Portal>
-              <MenuList>
-                <MenuItem
-                  icon={<IconAdd />}
-                  onClick={() => fileUploadInput?.current?.click()}
-                >
-                  Upload Files
-                </MenuItem>
-                <MenuItem
-                  icon={<IconUpload />}
-                  onClick={() => folderUploadInput?.current?.click()}
-                >
-                  Upload Folder
-                </MenuItem>
-              </MenuList>
-            </Portal>
-          </Menu>
-          <Button
+            />
+          </Tooltip>
+          <Portal>
+            <MenuList>
+              <MenuItem
+                icon={<IconAdd />}
+                onClick={() => fileUploadInput?.current?.click()}
+              >
+                Upload Files
+              </MenuItem>
+              <MenuItem
+                icon={<IconUpload />}
+                onClick={() => folderUploadInput?.current?.click()}
+              >
+                Upload Folder
+              </MenuItem>
+            </MenuList>
+          </Portal>
+        </Menu>
+        <Tooltip label="New Folder">
+          <IconButton
             variant="outline"
             colorScheme="blue"
-            leftIcon={<IconAdd />}
+            icon={<IconAdd />}
             isDisabled={
               !folder || ltEditorPermission(folder.permission) || !list
             }
             onClick={() => dispatch(createModalDidOpen())}
-          >
-            New Folder
-          </Button>
-        </ButtonGroup>
+            aria-label=""
+          />
+        </Tooltip>
         {!isContextMenuOpen ? (
           <div className={cx('flex', 'flex-row', 'gap-0.5')}>
             <FileMenu isToolbarMode={true} />

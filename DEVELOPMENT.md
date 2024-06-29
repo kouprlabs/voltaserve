@@ -138,6 +138,10 @@ MailHog
 ### Install Command Line Tools
 
 ```shell
+brew install --cask libreoffice
+```
+
+```shell
 npm i -g gltf-pipeline
 ```
 
