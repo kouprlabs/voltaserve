@@ -14,6 +14,7 @@ import {
   PopoverContent,
   PopoverTrigger,
   Switch,
+  Tooltip,
 } from '@chakra-ui/react'
 import cx from 'classnames'
 
@@ -72,13 +73,17 @@ const SwitchCard = ({
     return (
       <Popover>
         <PopoverTrigger>
-          <IconButton
-            icon={icon}
-            variant="outline"
-            className={cx('w-[50px]', 'h-[50px]', 'p-1.5', 'rounded-md')}
-            aria-label={label}
-            title={label}
-          />
+          <div>
+            <Tooltip label={label}>
+              <IconButton
+                icon={icon}
+                variant="outline"
+                className={cx('w-[50px]', 'h-[50px]', 'p-1.5', 'rounded-md')}
+                aria-label={label}
+                title={label}
+              />
+            </Tooltip>
+          </div>
         </PopoverTrigger>
         <PopoverContent>
           <PopoverBody>{children}</PopoverBody>

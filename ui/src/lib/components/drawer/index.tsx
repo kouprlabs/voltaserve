@@ -29,14 +29,10 @@ const Drawer = ({ children, storage, logo }: DrawerProps) => {
       if (value) {
         collapse = JSON.parse(value)
       } else {
-        localStorage.setItem(localStorageCollapsedKey, JSON.stringify(false))
+        localStorage.setItem(localStorageCollapsedKey, JSON.stringify(true))
       }
     }
-    if (collapse) {
-      setIsCollapsed(true)
-    } else {
-      setIsCollapsed(false)
-    }
+    setIsCollapsed(collapse)
   }, [localStorageCollapsedKey, setIsCollapsed])
 
   if (isCollapsed === undefined) {
