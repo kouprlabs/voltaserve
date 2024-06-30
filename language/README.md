@@ -2,9 +2,11 @@
 
 ## Getting Started
 
-Install [PDM](https://pdm-project.org).
+Use Python 3.12:
 
-Install Python 3.12.
+```shell
+pdm use cpython@3.12.3
+```
 
 Install dependencies:
 
@@ -36,3 +38,5 @@ Run for development:
 ```shell
 flask run --host=0.0.0.0 --port=8084 --debug
 ```
+
+You can omit the `--debug` flag when not developing.

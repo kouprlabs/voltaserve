@@ -14,7 +14,7 @@ import (
 	"github.com/minio/minio-go/v7"
 )
 
-type moasicPipeline struct {
+type mosaicPipeline struct {
 	videoProc    *processor.VideoProcessor
 	fileIdent    *identifier.FileIdentifier
 	s3           *infra.S3Manager
@@ -23,7 +23,7 @@ type moasicPipeline struct {
 }
 
 func NewMosaicPipeline() model.Pipeline {
-	return &moasicPipeline{
+	return &mosaicPipeline{
 		videoProc:    processor.NewVideoProcessor(),
 		fileIdent:    identifier.NewFileIdentifier(),
 		s3:           infra.NewS3Manager(),
@@ -32,7 +32,7 @@ func NewMosaicPipeline() model.Pipeline {
 	}
 }
 
-func (p *moasicPipeline) Run(opts client.PipelineRunOptions) error {
+func (p *mosaicPipeline) Run(opts client.PipelineRunOptions) error {
 	inputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(opts.Key))
 	if err := p.s3.GetFile(opts.Key, inputPath, opts.Bucket, minio.GetObjectOptions{}); err != nil {
 		return err
@@ -64,7 +64,7 @@ func (p *moasicPipeline) Run(opts client.PipelineRunOptions) error {
 	return nil
 }
 
-func (p *moasicPipeline) create(inputPath string, opts client.PipelineRunOptions) error {
+func (p *mosaicPipeline) create(inputPath string, opts client.PipelineRunOptions) error {
 	if p.fileIdent.IsImage(opts.Key) {
 		if _, err := p.mosaicClient.Create(client.MosaicCreateOptions{
 			Path:     inputPath,
