@@ -4,14 +4,9 @@
   <h1 align="center">Voltaserve</h1>
 </p>
 
-<h3 align="center">The Cloud Storage for Content Creators</h2>
+<h3 align="center">Cloud Storage for Creators</h2>
 
-- Open gigabyte-large images in seconds and enjoy buttery smooth zooming in and out.
-- Extract valuable insights from documents or scans using powerful AI.
-- Stream audio and video effortlessly.<br/>
-- Protect your sensitive documents with a watermark.<br/>
-- Upload and preview nearly any file type without needing a dedicated app.<br/>
-- Create groups and organizations, assign permissions, and collaborate in real-time with your team.<br/>
+Handle massive images with mosaic technology, extract insights from documents, stream large videos, protect documents with permissions and watermarks, preview 3D models. collaborate in real-time with your team.
 
 ## Getting Started
 
