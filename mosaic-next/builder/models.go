@@ -2,7 +2,8 @@ package builder
 
 import (
 	"fmt"
-	"gopkg.in/gographics/imagick.v3/imagick"
+	"github.com/disintegration/imaging"
+	"image"
 	"os"
 	"path/filepath"
 )
@@ -20,10 +21,10 @@ type Size struct {
 }
 
 type Rectangle struct {
-	X      uint `json:"x"`
-	Y      uint `json:"y"`
-	Width  uint `json:"width"`
-	Height uint `json:"height"`
+	X      int `json:"x"`
+	Y      int `json:"y"`
+	Width  int `json:"width"`
+	Height int `json:"height"`
 }
 
 type MinimumScaleSize struct {
@@ -165,42 +166,37 @@ type ZoomLevel struct {
 }
 
 type Image struct {
-	magickImage *imagick.MagickWand
-	file        string
+	img  image.Image
+	file string
 }
 
 func NewImage(file string) (*Image, error) {
-	imagick.Initialize()
-	mw := imagick.NewMagickWand()
-	img := &Image{
-		magickImage: mw,
-		file:        file,
-	}
-	err := img.Load(file)
+	img, err := imaging.Open(file)
 	if err != nil {
 		return nil, err
 	}
-	return img, nil
-}
-
-func NewImageFromSource(source *Image) (*Image, error) {
-	imagick.Initialize()
-	mw := source.magickImage.Clone()
-	if mw == nil {
-		return nil, fmt.Errorf("failed to clone image")
-	}
 	return &Image{
-		magickImage: mw,
-		file:        source.file,
+		img:  img,
+		file: file,
 	}, nil
 }
 
-func (img *Image) Width() uint {
-	return img.magickImage.GetImageWidth()
+func NewImageFromSource(source *Image) (*Image, error) {
+	if source == nil {
+		return nil, fmt.Errorf("source image is nil")
+	}
+	return &Image{
+		img:  source.img,
+		file: source.file,
+	}, nil
 }
 
-func (img *Image) Height() uint {
-	return img.magickImage.GetImageHeight()
+func (img *Image) Width() int {
+	return img.img.Bounds().Dx()
+}
+
+func (img *Image) Height() int {
+	return img.img.Bounds().Dy()
 }
 
 func (img *Image) Extension() string {
@@ -208,29 +204,35 @@ func (img *Image) Extension() string {
 }
 
 func (img *Image) Load(file string) error {
-	err := img.magickImage.ReadImage(file)
+	loadedImg, err := imaging.Open(file)
 	if err != nil {
 		return err
 	}
-	return img.magickImage.AutoOrientImage()
+	img.img = loadedImg
+	img.file = file
+	return nil
 }
 
-func (img *Image) Crop(x, y, width, height uint) error {
-	return img.magickImage.CropImage(width, height, int(x), int(y))
+func (img *Image) Crop(x, y, width, height int) error {
+	croppedImg := imaging.Crop(img.img, image.Rect(x, y, x+width, y+height))
+	img.img = croppedImg
+	return nil
 }
 
 func (img *Image) CropWithRectangle(rectangle Rectangle) error {
 	return img.Crop(rectangle.X, rectangle.Y, rectangle.Width, rectangle.Height)
 }
 
-func (img *Image) ScaleWithAspectRatio(width, height uint) error {
-	return img.magickImage.ScaleImage(width, height)
+func (img *Image) ScaleWithAspectRatio(width, height int) error {
+	scaledImg := imaging.Fit(img.img, width, height, imaging.Lanczos)
+	img.img = scaledImg
+	return nil
 }
 
 func (img *Image) Save(file string) error {
-	return img.magickImage.WriteImage(file)
+	return imaging.Save(img.img, file)
 }
 
 func (img *Image) SaveAsPngToStream(stream *os.File) error {
-	return img.magickImage.WriteImageFile(stream)
+	return imaging.Encode(stream, img.img, imaging.PNG)
 }

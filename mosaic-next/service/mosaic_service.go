@@ -28,40 +28,44 @@ func NewMosaicService() *MosaicService {
 }
 
 func (svc *MosaicService) Create(path, s3Key, s3Bucket string) (*builder.Metadata, error) {
-	id := helper.NewID()
-	outputDirectory := filepath.Join(os.TempDir(), id)
+	tmpDir := filepath.Join(os.TempDir(), helper.NewID())
 	defer func() {
-		if err := os.RemoveAll(outputDirectory); err != nil {
-			fmt.Printf("Error cleaning up directory %s: %v\n", outputDirectory, err)
+		if err := os.RemoveAll(tmpDir); err != nil {
+			infra.GetLogger().Error(err)
 		}
 	}()
 	metadata, err := builder.NewMosaicBuilder(builder.MosaicBuilderOptions{
 		File:            path,
-		OutputDirectory: outputDirectory,
+		OutputDirectory: tmpDir,
 	}).Build()
-
 	if err != nil {
 		return nil, err
 	}
-	files, err := os.ReadDir(outputDirectory)
+	var files []string
+	err = filepath.Walk(tmpDir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !info.IsDir() {
+			files = append(files, path)
+		}
+		return nil
+	})
 	if err != nil {
 		return nil, err
 	}
 	for _, file := range files {
-		filePath := filepath.Join(outputDirectory, file.Name())
-		contentType := mime.TypeByExtension(filepath.Ext(file.Name()))
+		contentType := mime.TypeByExtension(filepath.Ext(file))
 		if contentType == "" {
 			contentType = "application/octet-stream"
 		}
-		file, err := os.Open(filePath)
+		putOptions := minio.PutObjectOptions{ContentType: contentType}
+		relativePath, err := filepath.Rel(tmpDir, file)
 		if err != nil {
 			return nil, err
 		}
-		if err := file.Close(); err != nil {
-			return nil, err
-		}
-		putOptions := minio.PutObjectOptions{ContentType: contentType}
-		if err := svc.s3.PutFile(filepath.Join(s3Key, "mosaic", filepath.Base(filePath)), filePath, contentType, s3Bucket, putOptions); err != nil {
+		destinationKey := filepath.Join(s3Key, "mosaic", relativePath)
+		if err := svc.s3.PutFile(destinationKey, file, contentType, s3Bucket, putOptions); err != nil {
 			return nil, err
 		}
 	}

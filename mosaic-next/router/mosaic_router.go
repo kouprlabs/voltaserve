@@ -25,7 +25,9 @@ func NewMosaicRouter() *MosaicRouter {
 
 func (r *MosaicRouter) AppendRoutes(g fiber.Router) {
 	g.Post("/", r.Create)
-	g.Delete("/{s3_bucket}/{s3_key}", r.Delete)
+	g.Get("/:s3_bucket/:s3_key/zoom_level/:zoom_level/row/:row/col/:col/ext/:ext", r.DownloadTile)
+	g.Get("/:s3_bucket/:s3_key/metadata", r.GetMetadata)
+	g.Delete("/:s3_bucket/:s3_key", r.Delete)
 }
 
 // Create godoc
@@ -46,11 +48,11 @@ func (r *MosaicRouter) AppendRoutes(g fiber.Router) {
 func (r *MosaicRouter) Create(c *fiber.Ctx) error {
 	form, err := c.MultipartForm()
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).SendString("Failed to parse form")
+		return err
 	}
 	headers := form.File["file"]
 	if len(headers) == 0 {
-		return c.Status(fiber.StatusBadRequest).SendString("No file uploaded")
+		return err
 	}
 	fh := headers[0]
 	path := filepath.Join(os.TempDir(), helper.NewID()+filepath.Ext(fh.Filename))

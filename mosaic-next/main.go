@@ -41,7 +41,7 @@ func main() {
 	healthRouter.AppendRoutes(v2)
 
 	mosaicRouter := router.NewMosaicRouter()
-	mosaicRouter.AppendRoutes(v2)
+	mosaicRouter.AppendRoutes(v2.Group("mosaics"))
 
 	if err := app.Listen(fmt.Sprintf(":%d", cfg.Port)); err != nil {
 		panic(err)

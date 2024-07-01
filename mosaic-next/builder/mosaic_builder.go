@@ -114,8 +114,8 @@ func (mb *MosaicBuilder) Build() (*Metadata, error) {
 	}
 
 	metadata := &Metadata{
-		Width:      int(mb.image.Width()),
-		Height:     int(mb.image.Height()),
+		Width:      mb.image.Width(),
+		Height:     mb.image.Height(),
 		Extension:  filepath.Ext(mb.options.File),
 		ZoomLevels: zoomLevels,
 	}
@@ -130,8 +130,8 @@ func (mb *MosaicBuilder) Build() (*Metadata, error) {
 }
 
 func (mb *MosaicBuilder) Decompose(image *Image, zoomLevel int, region Region) ZoomLevel {
-	tileWidthExceeded := image.Width() > uint(mb.TileSize().Width())
-	tileHeightExceeded := image.Height() > uint(mb.TileSize().Height())
+	tileWidthExceeded := image.Width() > mb.TileSize().Width()
+	tileHeightExceeded := image.Height() > mb.TileSize().Height()
 
 	cols := 1
 	if tileWidthExceeded {
@@ -187,10 +187,10 @@ func (mb *MosaicBuilder) Decompose(image *Image, zoomLevel int, region Region) Z
 				Col:    c,
 			}
 			clippingRect := Rectangle{
-				X:      uint(tileMetadata.X),
-				Y:      uint(tileMetadata.Y),
-				Width:  uint(tileMetadata.Width),
-				Height: uint(tileMetadata.Height),
+				X:      tileMetadata.X,
+				Y:      tileMetadata.Y,
+				Width:  tileMetadata.Width,
+				Height: tileMetadata.Height,
 			}
 			cropped, _ := NewImageFromSource(image)
 			if err := cropped.Crop(clippingRect.X, clippingRect.Y, clippingRect.Width, clippingRect.Height); err != nil {
@@ -205,10 +205,10 @@ func (mb *MosaicBuilder) Decompose(image *Image, zoomLevel int, region Region) Z
 	if includesRemainingTiles && remainingHeight > 0 {
 		for c := 0; c < cols; c++ {
 			clippingRect := Rectangle{
-				X:      uint(c * mb.tileSize.Width()),
-				Y:      image.Height() - uint(remainingHeight),
-				Width:  uint(mb.tileSize.Width()),
-				Height: uint(remainingHeight),
+				X:      c * mb.tileSize.Width(),
+				Y:      image.Height() - remainingHeight,
+				Width:  mb.tileSize.Width(),
+				Height: remainingHeight,
 			}
 			cropped, _ := NewImageFromSource(image)
 			if err := cropped.Crop(clippingRect.X, clippingRect.Y, clippingRect.Width, clippingRect.Height); err != nil {
@@ -223,10 +223,10 @@ func (mb *MosaicBuilder) Decompose(image *Image, zoomLevel int, region Region) Z
 	if includesRemainingTiles && remainingWidth > 0 {
 		for r := 0; r < rows; r++ {
 			clippingRect := Rectangle{
-				X:      image.Width() - uint(remainingWidth),
-				Y:      uint(r * mb.tileSize.Height()),
-				Width:  uint(remainingWidth),
-				Height: uint(mb.tileSize.Height()),
+				X:      image.Width() - remainingWidth,
+				Y:      r * mb.tileSize.Height(),
+				Width:  remainingWidth,
+				Height: mb.tileSize.Height(),
 			}
 			cropped, _ := NewImageFromSource(image)
 			if err := cropped.Crop(clippingRect.X, clippingRect.Y, clippingRect.Width, clippingRect.Height); err != nil {
@@ -240,10 +240,10 @@ func (mb *MosaicBuilder) Decompose(image *Image, zoomLevel int, region Region) Z
 
 	if includesRemainingTiles && remainingWidth > 0 && remainingHeight > 0 {
 		clippingRect := Rectangle{
-			X:      image.Width() - uint(remainingWidth),
-			Y:      image.Height() - uint(remainingHeight),
-			Width:  uint(remainingWidth),
-			Height: uint(remainingHeight),
+			X:      image.Width() - remainingWidth,
+			Y:      image.Height() - remainingHeight,
+			Width:  remainingWidth,
+			Height: remainingHeight,
 		}
 		cropped, _ := NewImageFromSource(image)
 		if err := cropped.Crop(clippingRect.X, clippingRect.Y, clippingRect.Width, clippingRect.Height); err != nil {
@@ -256,8 +256,8 @@ func (mb *MosaicBuilder) Decompose(image *Image, zoomLevel int, region Region) Z
 
 	return ZoomLevel{
 		Index:               zoomLevel,
-		Width:               int(image.Width()),
-		Height:              int(image.Height()),
+		Width:               image.Width(),
+		Height:              image.Height(),
 		Rows:                totalRows,
 		Cols:                totalCols,
 		ScaleDownPercentage: float32(mb.GetScaleDownPercentage(zoomLevel)),
@@ -284,7 +284,7 @@ func (mb *MosaicBuilder) Scale(zoomLevel int) (*Image, error) {
 	if err != nil {
 		return nil, err
 	}
-	err = scaled.ScaleWithAspectRatio(uint(imageSizeForZoomLevel.Width), uint(imageSizeForZoomLevel.Height))
+	err = scaled.ScaleWithAspectRatio(imageSizeForZoomLevel.Width, imageSizeForZoomLevel.Height)
 	if err != nil {
 		return nil, err
 	}
@@ -308,7 +308,7 @@ func (mb *MosaicBuilder) GetImageSizeForZoomLevel(zoomLevel int) Size {
 func (mb *MosaicBuilder) RequiredZoomLevelIndexes() []int {
 	var levels []int
 	zoomLevelCount := 0
-	imageSize := Size{Width: int(mb.image.Width()), Height: int(mb.image.Height())}
+	imageSize := Size{Width: mb.image.Width(), Height: mb.image.Height()}
 	for {
 		imageSize.Width = int(float64(imageSize.Width) * mb.ScaleDownPercentage().Factor())
 		imageSize.Height = int(float64(imageSize.Height) * mb.ScaleDownPercentage().Factor())

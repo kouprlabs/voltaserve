@@ -17,7 +17,7 @@ func (r *HealthRouter) AppendRoutes(g fiber.Router) {
 	g.Get("health", r.GetHealth)
 }
 
-// Healdth godoc
+// GetHealth godoc
 //
 //	@Summary		Get Health
 //	@Description	Get Health
