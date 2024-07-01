@@ -17,14 +17,12 @@ import snapshots from './snapshots'
 import notifications from './tasks'
 import tasks from './tasks'
 import uploads from './uploads'
-import watermark from './watermark'
 import workspace from './workspace'
 import workspaces from './workspaces'
 
 export default combineReducers({
   insights,
   mosaic,
-  watermark,
   searchFilter,
   uploads,
   tasks,
