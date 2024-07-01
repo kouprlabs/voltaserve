@@ -5,31 +5,31 @@
 Install dependencies:
 
 ```shell
-bun i
+npm i --legacy-peer-deps
 ```
 
 Run for development:
 
 ```shell
-bun run dev
+npm run dev
 ```
 
 Run for production:
 
 ```shell
-bun run start
+npm run start
 ```
 
 Lint code:
 
 ```shell
-bun run lint
+npm run lint
 ```
 
 Format code:
 
 ```shell
-bun run format
+npm run format
 ```
 
 Build Docker image:

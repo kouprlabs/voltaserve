@@ -3,19 +3,19 @@
 Install dependencies:
 
 ```shell
-bun i
+npm i --legacy-peer-deps
 ```
 
 Run for development:
 
 ```shell
-bun run dev
+npm run dev
 ```
 
 Build for production:
 
 ```shell
-bun run build
+npm run build
 ```
 
 Run for production:
@@ -27,13 +27,13 @@ go run .
 Lint TypeScript code:
 
 ```shell
-bun run lint
+npm run lint
 ```
 
 Format TypeScript code:
 
 ```shell
-bun run format
+npm run format
 ```
 
 Lint Go code:
