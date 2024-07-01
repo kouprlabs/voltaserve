@@ -1,11 +1,9 @@
 package router
 
 import (
-	"net/http"
-	"voltaserve/client"
-	"voltaserve/infra"
-
 	"github.com/gofiber/fiber/v2"
+	"net/http"
+	"voltaserve/infra"
 )
 
 type HealthRouter struct {
@@ -31,9 +29,6 @@ func (r *HealthRouter) AppendRoutes(g fiber.Router) {
 //	@Router			/health [get]
 func (r *HealthRouter) GetHealth(c *fiber.Ctx) error {
 	if err := infra.NewS3Manager().Connect(); err != nil {
-		return c.SendStatus(http.StatusServiceUnavailable)
-	}
-	if ok, err := client.NewAPIClient().GetHealth(); err != nil || ok != "OK" {
 		return c.SendStatus(http.StatusServiceUnavailable)
 	}
 	return c.SendString("OK")

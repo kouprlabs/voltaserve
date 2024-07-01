@@ -28,7 +28,6 @@ type InsightsService struct {
 	fileGuard      *guard.FileGuard
 	taskSvc        *TaskService
 	s3             *infra.S3Manager
-	toolClient     *client.ToolClient
 	languageClient *client.LanguageClient
 	pipelineClient *client.PipelineClient
 	fileIdent      *infra.FileIdentifier
@@ -59,7 +58,6 @@ func NewInsightsService() *InsightsService {
 		fileGuard:      guard.NewFileGuard(),
 		taskSvc:        NewTaskService(),
 		s3:             infra.NewS3Manager(),
-		toolClient:     client.NewToolClient(),
 		languageClient: client.NewLanguageClient(),
 		pipelineClient: client.NewPipelineClient(),
 		fileIdent:      infra.NewFileIdentifier(),

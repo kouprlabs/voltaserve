@@ -1,21 +1,18 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"os"
 
+	"github.com/gofiber/fiber/v2"
+	"github.com/joho/godotenv"
 	"voltaserve/config"
 	"voltaserve/errorpkg"
 	"voltaserve/helper"
 	"voltaserve/router"
-	"voltaserve/runtime"
-
-	"github.com/gofiber/fiber/v2"
-	"github.com/joho/godotenv"
 )
 
-// @title		Voltaserve Conversion
+// @title		Voltaserve Mosaic
 // @version	2.0.0
 // @BasePath	/v2
 func main() {
@@ -33,13 +30,6 @@ func main() {
 
 	cfg := config.GetConfig()
 
-	schedulerOpts := runtime.NewDefaultSchedulerOptions()
-	pipelineWorkers := flag.Int("pipeline-workers", schedulerOpts.PipelineWorkerCount, "Number of pipeline workers")
-	flag.Parse()
-	scheduler := runtime.NewScheduler(runtime.SchedulerOptions{
-		PipelineWorkerCount: *pipelineWorkers,
-	})
-
 	app := fiber.New(fiber.Config{
 		ErrorHandler: errorpkg.ErrorHandler,
 		BodyLimit:    int(helper.MegabyteToByte(cfg.Limits.MultipartBodyLengthLimitMB)),
@@ -50,12 +40,8 @@ func main() {
 	healthRouter := router.NewHealthRouter()
 	healthRouter.AppendRoutes(v2)
 
-	pipelineRouter := router.NewPipelineRouter(router.NewPipelineRouterOptions{
-		Scheduler: scheduler,
-	})
-	pipelineRouter.AppendRoutes(v2)
-
-	scheduler.Start()
+	mosaicRouter := router.NewMosaicRouter()
+	mosaicRouter.AppendRoutes(v2)
 
 	if err := app.Listen(fmt.Sprintf(":%d", cfg.Port)); err != nil {
 		panic(err)

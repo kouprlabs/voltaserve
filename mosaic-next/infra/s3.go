@@ -88,6 +88,21 @@ func (mgr *S3Manager) GetObject(objectName string, bucketName string, opts minio
 	return &buf, nil
 }
 
+func (mgr *S3Manager) GetObjectWithBuffer(objectName string, bucketName string, buf *bytes.Buffer, opts minio.GetObjectOptions) (*int64, error) {
+	if err := mgr.Connect(); err != nil {
+		return nil, err
+	}
+	reader, err := mgr.client.GetObject(context.Background(), bucketName, objectName, opts)
+	if err != nil {
+		return nil, err
+	}
+	written, err := io.Copy(io.Writer(buf), reader)
+	if err != nil {
+		return nil, nil
+	}
+	return &written, nil
+}
+
 func (mgr *S3Manager) GetText(objectName string, bucketName string, opts minio.GetObjectOptions) (string, error) {
 	if mgr.client == nil {
 		if err := mgr.Connect(); err != nil {
@@ -117,6 +132,24 @@ func (mgr *S3Manager) RemoveObject(objectName string, bucketName string, opts mi
 		return err
 	}
 	return nil
+}
+
+func (mgr *S3Manager) ListObjects(bucketName string, options minio.ListObjectsOptions) ([]minio.ObjectInfo, error) {
+	if err := mgr.Connect(); err != nil {
+		return nil, err
+	}
+
+	objectCh := mgr.client.ListObjects(context.Background(), bucketName, options)
+
+	var objects []minio.ObjectInfo
+	for object := range objectCh {
+		if object.Err != nil {
+			return nil, object.Err
+		}
+		objects = append(objects, object)
+	}
+
+	return objects, nil
 }
 
 func (mgr *S3Manager) Connect() error {

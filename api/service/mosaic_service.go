@@ -81,7 +81,7 @@ func (svc *MosaicService) Create(id string, userID string) error {
 		return err
 	}
 	if err := svc.pipelineClient.Run(&client.PipelineRunOptions{
-		PipelineID: helper.ToPtr(client.PipelineMoasic),
+		PipelineID: helper.ToPtr(client.PipelineMosaic),
 		TaskID:     task.GetID(),
 		SnapshotID: snapshot.GetID(),
 		Bucket:     snapshot.GetOriginal().Bucket,

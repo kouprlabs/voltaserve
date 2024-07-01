@@ -25,7 +25,7 @@ namespace Voltaserve.Mosaic.Services
             var outputDirectory = Path.Combine(Path.GetTempPath(), id);
             try
             {
-                var metadata = new MosaicBuilder(new TilesBuilterOptions
+                var metadata = new MosaicBuilder(new MosaicBuilderOptions
                 {
                     File = path,
                     OutputDirectory = outputDirectory,

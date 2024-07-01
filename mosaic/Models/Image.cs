@@ -4,7 +4,7 @@
     using System.IO;
     using ImageMagick;
 
-    public class Image : IImage
+    public class Image
     {
         private readonly MagickImage _magickImage;
         private readonly string _file;
@@ -16,7 +16,7 @@
             Load(file);
         }
 
-        public Image(IImage source)
+        public Image(Image source)
         {
             if (source.GetType() == typeof(Image))
             {

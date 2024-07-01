@@ -1,8 +1,6 @@
 package router
 
 import (
-	"errors"
-	"net/http"
 	"voltaserve/client"
 	"voltaserve/config"
 	"voltaserve/errorpkg"
@@ -37,7 +35,7 @@ func (r *PipelineRouter) AppendRoutes(g fiber.Router) {
 //	@Summary		Run
 //	@Description	Run
 //	@Tags			Pipelines
-//	@Id				pipeline_run
+//	@Id				pipelines_run
 //	@Accept			json
 //	@Produce		json
 //	@Param			body	body	client.PipelineRunOptions	true	"Body"
@@ -46,19 +44,6 @@ func (r *PipelineRouter) AppendRoutes(g fiber.Router) {
 //	@Failure		500
 //	@Router			/pipelines/run [post]
 func (r *PipelineRouter) Run(c *fiber.Ctx) error {
-	apiKey := c.Query("api_key")
-	if apiKey == "" {
-		if err := c.SendStatus(http.StatusBadRequest); err != nil {
-			return err
-		}
-		return errors.New("missing query param api_key")
-	}
-	if apiKey != r.config.Security.APIKey {
-		if err := c.SendStatus(http.StatusUnauthorized); err != nil {
-			return err
-		}
-		return errors.New("invalid query param api_key")
-	}
 	opts := new(client.PipelineRunOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err

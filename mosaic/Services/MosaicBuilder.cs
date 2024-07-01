@@ -13,16 +13,16 @@
         Skip
     }
 
-    public class TilesBuilterOptions
+    public class MosaicBuilderOptions
     {
         public string File { get; set; }
 
         public string OutputDirectory { get; set; }
     }
 
-    public class MosaicBuilder(TilesBuilterOptions options)
+    public class MosaicBuilder(MosaicBuilderOptions options)
     {
-        private IImage _image;
+        private Image _image;
 
         private ScaleDownPercentage _scaleDownPercentage;
 
@@ -30,7 +30,7 @@
 
         private TileSize _tileSize;
 
-        private readonly TilesBuilterOptions _options = options;
+        private readonly MosaicBuilderOptions _options = options;
 
         public ScaleDownPercentage ScaleDownPercentage
         {
