@@ -38,6 +38,7 @@ const IconThumbnail = ({ file, scale }: IconThumbnailProps) => {
         }}
         className={cx(
           'pointer-events-none',
+          'select-none',
           'object-cover',
           'border',
           'border-solid',

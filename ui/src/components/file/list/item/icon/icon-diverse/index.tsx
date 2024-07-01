@@ -87,7 +87,11 @@ const IconDiverse = ({ file, scale }: IconFontProps) => {
   }
 
   return (
-    <img src={image} style={{ width: `${width}px`, height: `${height}px` }} />
+    <img
+      src={image}
+      className="pointer-events-none select-none"
+      style={{ width: `${width}px`, height: `${height}px` }}
+    />
   )
 }
 

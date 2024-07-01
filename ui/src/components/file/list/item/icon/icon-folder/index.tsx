@@ -20,6 +20,7 @@ const IconFolder = ({ file, scale, isLoading }: IconFolderProps) => {
     <>
       <img
         src={FolderSvg}
+        className="pointer-events-none select-none"
         style={{ width: `${width}px`, height: `${height}px` }}
       />
       <div

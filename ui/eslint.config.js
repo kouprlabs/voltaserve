@@ -23,6 +23,6 @@ export default [
     },
   },
   {
-    ignores: ['*.cjs'],
+    ignores: ['*.cjs', 'dist'],
   },
 ]

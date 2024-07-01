@@ -145,7 +145,7 @@ const ListItem = ({
         'transition',
         'duration-400',
         'ease-in-out',
-        { 'bg-transparent': !isChecked },
+        { 'bg-transparent': !isChecked && !isDragging },
         'rounded-md',
         'select-none',
         'cursor-default',
@@ -154,8 +154,8 @@ const ListItem = ({
         'active:gray-200',
         'active:dark:gray-600',
         {
-          'bg-gray-100': isChecked,
-          'dark:bg-gray-700': isChecked,
+          'bg-gray-100': isChecked || isDragging,
+          'dark:bg-gray-700': isChecked || isDragging,
         },
         'border-2',
         {

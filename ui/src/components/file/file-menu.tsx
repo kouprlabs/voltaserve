@@ -31,6 +31,7 @@ import {
   IconSecurity,
   IconSelectCheckBox,
   IconUpload,
+  IconVisibility,
 } from '@/lib/components/icons'
 import downloadFile from '@/lib/helpers/download-file'
 import {
@@ -55,7 +56,6 @@ import { modalDidOpen as mosaicModalDidOpen } from '@/store/ui/mosaic'
 import { listModalDidOpen } from '@/store/ui/snapshots'
 import { drawerDidOpen } from '@/store/ui/uploads'
 import { modalDidOpen as watermarkModalDidOpen } from '@/store/ui/watermark'
-import Orb from '../common/orb'
 
 export type FileMenuProps = {
   isOpen?: boolean
@@ -236,7 +236,7 @@ const FileMenu = ({
               <MenuOptionGroup>
                 {isInsightsAuthorized ? (
                   <MenuItem
-                    icon={<Orb width="16px" height="16px" />}
+                    icon={<IconVisibility />}
                     onClick={(event: MouseEvent) => {
                       event.stopPropagation()
                       dispatch(insightsModalDidOpen())
