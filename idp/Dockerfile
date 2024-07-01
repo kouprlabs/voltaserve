@@ -1,4 +1,4 @@
-FROM node:22-alpine
+FROM oven/bun:1-alpine
 
 WORKDIR /app
 
@@ -6,11 +6,11 @@ COPY src ./src
 COPY templates ./templates
 COPY .env .
 COPY package.json .
-COPY package-lock.json .
+COPY bun.lockb .
 COPY tsconfig.json .
 
-RUN npm ci --legacy-peer-deps
+RUN bun install --frozen-lockfile
 
-ENTRYPOINT ["npm", "run", "start"]
+ENTRYPOINT ["bun", "run", "start"]
 
 EXPOSE 8081

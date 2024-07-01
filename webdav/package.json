@@ -10,9 +10,6 @@
     "format": "prettier --write .",
     "lint": "eslint"
   },
-  "engines": {
-    "node": "22.x"
-  },
   "dependencies": {
     "dotenv": "16.4.5",
     "passport": "0.7.0",

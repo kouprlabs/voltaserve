@@ -1,4 +1,4 @@
-FROM node:22-alpine AS ui-builder
+FROM oven/bun:1-alpine AS ui-builder
 
 WORKDIR /build
 
@@ -9,12 +9,12 @@ COPY postcss.config.cjs .
 COPY tailwind.config.cjs .
 COPY vite.config.ts .
 COPY package.json .
-COPY package-lock.json .
+COPY bun.lockb .
 COPY tsconfig.json .
 COPY tsconfig.node.json .
 
-RUN npm ci --legacy-peer-deps
-RUN npm run build
+RUN bun install --frozen-lockfile
+RUN bun run build
 
 FROM golang:1.22-alpine AS go-builder
 
@@ -29,10 +29,7 @@ COPY go.sum .
 RUN go mod download
 RUN go build -o voltaserve-ui
 
-FROM ubuntu:noble AS runner
-
-RUN apt-get update
-RUN apt-get install -y curl
+FROM alpine:3.20 AS runner
 
 WORKDIR /app
 
