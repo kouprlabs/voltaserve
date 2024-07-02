@@ -13,7 +13,7 @@ docker compose up -d \
     mailhog
 ```
 
-### Run Infrastructure Services From Binaries on macOS
+### Run Infrastructure Services From Binaries
 
 #### Install Languages and Runtimes
 
@@ -33,21 +33,6 @@ Install Go for your platform:
 
 https://go.dev
 
-Install .NET for your platform:
-
-http://dot.net
-
-Install latest JDK with [SDKMAN!](https://sdkman.io):
-
-```shell
-sdk install java
-```
-
-Install latest Gradle with [SDKMAN!](https://sdkman.io):
-
-```shell
-sdk install gradle
-```
 
 Install [PDM](https://pdm-project.org/en/latest).
 
@@ -59,7 +44,7 @@ pdm py install cpython@3.12.3
 
 #### CockroachDB
 
-Download the [binary archive](https://www.cockroachlabs.com/docs/releases/?filters=mac) and extract the archive.
+Download the [binary archive](https://www.cockroachlabs.com/docs/releases) and extract the archive.
 
 Start CockroachDB:
 
@@ -174,3 +159,5 @@ Start each microservice separately in a new terminal as described here:
 - [Voltaserve Identity Provider](idp/README.md)
 - [Voltaserve WebDAV](webdav/README.md)
 - [Voltaserve Conversion](conversion/README.md)
+- [Voltaserve Mosaic](mosaic/README.md)
+- [Voltaserve Language](mosaic/README.md)

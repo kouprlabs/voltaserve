@@ -19,7 +19,6 @@ import Mosaic from '@/components/mosaic'
 import Sharing from '@/components/sharing'
 import SnapshotDetach from '@/components/snapshot/snapshot-detach'
 import SnapshotList from '@/components/snapshot/snapshot-list'
-import Watermark from '@/components/watermark'
 import { filePaginationSteps, filesPaginationStorage } from '@/infra/pagination'
 import PagePagination from '@/lib/components/page-pagination'
 import Spinner from '@/lib/components/spinner'
@@ -66,9 +65,6 @@ const WorkspaceFilesPage = () => {
   )
   const isMosaicModalOpen = useAppSelector(
     (state) => state.ui.mosaic.isModalOpen,
-  )
-  const isWatermarkModalOpen = useAppSelector(
-    (state) => state.ui.watermark.isModalOpen,
   )
   const isSearchFilterModalOpen = useAppSelector(
     (state) => state.ui.searchFilter.isModalOpen,
@@ -206,7 +202,6 @@ const WorkspaceFilesPage = () => {
       {isRenameModalOpen ? <FileRename /> : null}
       {isInsightsModalOpen ? <Insights /> : null}
       {isMosaicModalOpen ? <Mosaic /> : null}
-      {isWatermarkModalOpen ? <Watermark /> : null}
       {isSearchFilterModalOpen ? <SearchFilter /> : null}
     </>
   )

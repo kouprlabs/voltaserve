@@ -55,9 +55,6 @@ func main() {
 	})
 	pipelineRouter.AppendRoutes(v2)
 
-	toolRouter := router.NewToolRouter()
-	toolRouter.AppendRoutes(v2)
-
 	scheduler.Start()
 
 	if err := app.Listen(fmt.Sprintf(":%d", cfg.Port)); err != nil {

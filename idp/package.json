@@ -4,15 +4,12 @@
   "license": "AGPL-3.0-only",
   "private": true,
   "scripts": {
-    "start": "ts-node -r tsconfig-paths/register src/app.ts",
-    "dev": "nodemon --exec ts-node -r tsconfig-paths/register src/app.ts",
+    "start": "bun src/app.ts",
+    "dev": "bun dev src/app.ts",
     "tsc": "tsc --noEmit",
     "format": "prettier --write .",
-    "swagger-autogen": "node ./swagger.js",
+    "swagger-autogen": "bun ./swagger.js",
     "lint": "eslint"
-  },
-  "engines": {
-    "node": "20.x"
   },
   "dependencies": {
     "body-parser": "1.20.2",

@@ -28,7 +28,6 @@ import {
   IconHistory,
   IconModeHeat,
   IconMoreVert,
-  IconSecurity,
   IconSelectCheckBox,
   IconUpload,
   IconVisibility,
@@ -55,7 +54,6 @@ import { modalDidOpen as insightsModalDidOpen } from '@/store/ui/insights'
 import { modalDidOpen as mosaicModalDidOpen } from '@/store/ui/mosaic'
 import { listModalDidOpen } from '@/store/ui/snapshots'
 import { drawerDidOpen } from '@/store/ui/uploads'
-import { modalDidOpen as watermarkModalDidOpen } from '@/store/ui/watermark'
 
 export type FileMenuProps = {
   isOpen?: boolean
@@ -119,17 +117,6 @@ const FileMenu = ({
       isImage(file.snapshot?.original.extension),
     [file],
   )
-  const isWatermarkAuthorized = useMemo(
-    () =>
-      file?.type === 'file' &&
-      !file.snapshot?.task?.isPending &&
-      (isPDF(file.snapshot?.original.extension) ||
-        isMicrosoftOffice(file.snapshot?.original.extension) ||
-        isOpenOffice(file.snapshot?.original.extension) ||
-        isImage(file.snapshot?.original.extension)) &&
-      geEditorPermission(file.permission),
-    [file],
-  )
   const isSharingAuthorized = useMemo(
     () => selection.length > 0 && isOwnerInSelection,
     [selection, isOwnerInSelection],
@@ -163,8 +150,8 @@ const FileMenu = ({
     [file],
   )
   const isProToolsAvailable = useMemo(
-    () => isInsightsAuthorized || isMosaicAuthorized || isWatermarkAuthorized,
-    [isInsightsAuthorized, isMosaicAuthorized, isWatermarkAuthorized],
+    () => isInsightsAuthorized || isMosaicAuthorized,
+    [isInsightsAuthorized, isMosaicAuthorized],
   )
   const isManagementAvailable = useMemo(() => {
     return (
@@ -254,17 +241,6 @@ const FileMenu = ({
                     }}
                   >
                     Mosaic
-                  </MenuItem>
-                ) : null}
-                {isWatermarkAuthorized ? (
-                  <MenuItem
-                    icon={<IconSecurity />}
-                    onClick={(event: MouseEvent) => {
-                      event.stopPropagation()
-                      dispatch(watermarkModalDidOpen())
-                    }}
-                  >
-                    Watermark
                   </MenuItem>
                 ) : null}
               </MenuOptionGroup>

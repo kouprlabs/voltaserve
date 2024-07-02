@@ -25,7 +25,7 @@ func NewS3Manager() *S3Manager {
 
 func (mgr *S3Manager) GetFile(objectName string, filePath string, bucketName string, opts minio.GetObjectOptions) error {
 	if mgr.client == nil {
-		if err := mgr.connect(); err != nil {
+		if err := mgr.Connect(); err != nil {
 			return err
 		}
 	}
@@ -37,7 +37,7 @@ func (mgr *S3Manager) GetFile(objectName string, filePath string, bucketName str
 
 func (mgr *S3Manager) PutFile(objectName string, filePath string, contentType string, bucketName string, opts minio.PutObjectOptions) error {
 	if mgr.client == nil {
-		if err := mgr.connect(); err != nil {
+		if err := mgr.Connect(); err != nil {
 			return err
 		}
 	}
@@ -59,7 +59,7 @@ func (mgr *S3Manager) PutText(objectName string, text string, contentType string
 		contentType = "text/plain"
 	}
 	if mgr.client == nil {
-		if err := mgr.connect(); err != nil {
+		if err := mgr.Connect(); err != nil {
 			return err
 		}
 	}
@@ -72,7 +72,7 @@ func (mgr *S3Manager) PutText(objectName string, text string, contentType string
 
 func (mgr *S3Manager) GetObject(objectName string, bucketName string, opts minio.GetObjectOptions) (*bytes.Buffer, error) {
 	if mgr.client == nil {
-		if err := mgr.connect(); err != nil {
+		if err := mgr.Connect(); err != nil {
 			return nil, err
 		}
 	}
@@ -90,7 +90,7 @@ func (mgr *S3Manager) GetObject(objectName string, bucketName string, opts minio
 
 func (mgr *S3Manager) GetText(objectName string, bucketName string, opts minio.GetObjectOptions) (string, error) {
 	if mgr.client == nil {
-		if err := mgr.connect(); err != nil {
+		if err := mgr.Connect(); err != nil {
 			return "", err
 		}
 	}
@@ -108,7 +108,7 @@ func (mgr *S3Manager) GetText(objectName string, bucketName string, opts minio.G
 
 func (mgr *S3Manager) RemoveObject(objectName string, bucketName string, opts minio.RemoveObjectOptions) error {
 	if mgr.client == nil {
-		if err := mgr.connect(); err != nil {
+		if err := mgr.Connect(); err != nil {
 			return err
 		}
 	}
@@ -119,7 +119,7 @@ func (mgr *S3Manager) RemoveObject(objectName string, bucketName string, opts mi
 	return nil
 }
 
-func (mgr *S3Manager) connect() error {
+func (mgr *S3Manager) Connect() error {
 	client, err := minio.New(mgr.config.URL, &minio.Options{
 		Creds:  credentials.NewStaticV4(mgr.config.AccessKey, mgr.config.SecretKey, ""),
 		Secure: mgr.config.Secure,

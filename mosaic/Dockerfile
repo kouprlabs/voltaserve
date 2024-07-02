@@ -1,18 +1,19 @@
-FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS build
+FROM golang:1.22-alpine AS builder
 
-WORKDIR /src
-
-COPY ./mosaic.csproj .
-RUN dotnet restore "./mosaic.csproj"
+WORKDIR /build
 
 COPY . .
-RUN dotnet build "mosaic.csproj" -c Release -o /build
-RUN dotnet publish "mosaic.csproj" -c Release -o /publish
 
-FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/aspnet:8.0-alpine
+RUN go mod download
+RUN go build -o voltaserve-mosaic
+
+FROM golang:1.22-alpine AS runner
 
 WORKDIR /app
-COPY --from=build /publish .
 
-ENTRYPOINT ["dotnet", "mosaic.dll"]
+COPY --from=builder /build/voltaserve-mosaic ./voltaserve-mosaic
+COPY --from=builder /build/.env ./.env
+
+ENTRYPOINT ["./voltaserve-mosaic"]
+
 EXPOSE 8085
