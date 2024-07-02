@@ -13,7 +13,7 @@ COPY bun.lockb .
 COPY tsconfig.json .
 COPY tsconfig.node.json .
 
-RUN bun install --frozen-lockfile --production
+RUN bun install --frozen-lockfile
 RUN bun run build
 
 FROM golang:1.22-alpine AS go-builder
