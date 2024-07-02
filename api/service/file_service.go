@@ -1399,11 +1399,11 @@ func (svc *FileService) doSorting(data []model.File, sortBy string, sortOrder st
 			}
 			var sizeA int64 = 0
 			if fileA.Snapshot != nil && fileA.Snapshot.Original != nil {
-				sizeA = int64(*fileA.Snapshot.Original.Size)
+				sizeA = *fileA.Snapshot.Original.Size
 			}
 			var sizeB int64 = 0
 			if fileB.Snapshot != nil && fileB.Snapshot.Original != nil {
-				sizeB = int64(*fileB.Snapshot.Original.Size)
+				sizeB = *fileB.Snapshot.Original.Size
 			}
 			if sortOrder == SortOrderDesc {
 				return sizeA > sizeB
@@ -1455,10 +1455,10 @@ func (svc *FileService) doSorting(data []model.File, sortBy string, sortOrder st
 				if err != nil {
 					return false
 				}
-				if f.Snapshot.Original == nil {
+				if f.Snapshot != nil && f.Snapshot.Original == nil {
 					return false
 				}
-				if svc.fileIdent.IsImage(f.Snapshot.Original.Extension) {
+				if f.Snapshot != nil && svc.fileIdent.IsImage(f.Snapshot.Original.Extension) {
 					return true
 				}
 				return false
@@ -1470,10 +1470,10 @@ func (svc *FileService) doSorting(data []model.File, sortBy string, sortOrder st
 				if err != nil {
 					return false
 				}
-				if f.Snapshot.Original == nil {
+				if f.Snapshot != nil && f.Snapshot.Original == nil {
 					return false
 				}
-				if svc.fileIdent.IsPDF(f.Snapshot.Original.Extension) {
+				if f.Snapshot != nil && svc.fileIdent.IsPDF(f.Snapshot.Original.Extension) {
 					return true
 				}
 				return false
@@ -1485,10 +1485,10 @@ func (svc *FileService) doSorting(data []model.File, sortBy string, sortOrder st
 				if err != nil {
 					return false
 				}
-				if f.Snapshot.Original == nil {
+				if f.Snapshot != nil && f.Snapshot.Original == nil {
 					return false
 				}
-				if svc.fileIdent.IsOffice(f.Snapshot.Original.Extension) {
+				if f.Snapshot != nil && svc.fileIdent.IsOffice(f.Snapshot.Original.Extension) {
 					return true
 				}
 				return false
@@ -1500,10 +1500,10 @@ func (svc *FileService) doSorting(data []model.File, sortBy string, sortOrder st
 				if err != nil {
 					return false
 				}
-				if f.Snapshot.Original == nil {
+				if f.Snapshot != nil && f.Snapshot.Original == nil {
 					return false
 				}
-				if svc.fileIdent.IsVideo(f.Snapshot.Original.Extension) {
+				if f.Snapshot != nil && svc.fileIdent.IsVideo(f.Snapshot.Original.Extension) {
 					return true
 				}
 				return false
@@ -1515,10 +1515,10 @@ func (svc *FileService) doSorting(data []model.File, sortBy string, sortOrder st
 				if err != nil {
 					return false
 				}
-				if f.Snapshot.Original == nil {
+				if f.Snapshot != nil && f.Snapshot.Original == nil {
 					return false
 				}
-				if svc.fileIdent.IsPlainText(f.Snapshot.Original.Extension) {
+				if f.Snapshot != nil && svc.fileIdent.IsPlainText(f.Snapshot.Original.Extension) {
 					return true
 				}
 				return false
@@ -1530,10 +1530,11 @@ func (svc *FileService) doSorting(data []model.File, sortBy string, sortOrder st
 				if err != nil {
 					return false
 				}
-				if f.Snapshot.Original == nil {
+				if f.Snapshot != nil && f.Snapshot.Original == nil {
 					return false
 				}
-				if !svc.fileIdent.IsImage(f.Snapshot.Original.Extension) &&
+				if f.Snapshot != nil &&
+					!svc.fileIdent.IsImage(f.Snapshot.Original.Extension) &&
 					!svc.fileIdent.IsPDF(f.Snapshot.Original.Extension) &&
 					!svc.fileIdent.IsOffice(f.Snapshot.Original.Extension) &&
 					!svc.fileIdent.IsVideo(f.Snapshot.Original.Extension) &&
