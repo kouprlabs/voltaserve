@@ -6,6 +6,10 @@
 
 <h3 align="center">Cloud Storage for Creators</h2>
 
+<p align="center">
+<a href="https://youtu.be/Uf3EWb2hDfs?feature=shared">Watch the Demo Video</a>
+</p>
+
 Handle massive images with mosaic technology, extract insights from documents, stream large videos, protect documents with permissions and watermarks, preview 3D models. collaborate in real-time.
 
 ## Getting Started
@@ -16,9 +20,7 @@ Pull images: (_recommended for most users_)
 docker compose pull
 ```
 
-Or, alternatively you can build the images from the source:
-
-Build images:
+Optionally build the images from the source: (_can be skipped if you pulled the images_)
 
 ```shell
 docker compose build
@@ -40,19 +42,33 @@ Wait until the following containers are running:
 - `voltaserve-mosaic`
 - `voltaserve-ui`
 
-You can check that by running the command `docker ps` and look at the `STATUS` column.
+> **Note**
+>
+> You can check that by running the command `docker ps` and look at the `STATUS` column.
 
-3. Go to the **sign up page** <http://localhost:3000/sign-up> and create an account.
+Create an account and sign in:
 
-4. Open MailCatcher <http://localhost:8025>, select the received email and click the **confirm email** link.
+1. Go to the **sign up page** <http://localhost:3000/sign-up> and create an account.
 
-5. Finally, go to the **sign in page** <http://localhost:3000/sign-in> and login with your credentials.
+2. Open MailDev <http://localhost:8025>, select the received email and click the **confirm email** link.
 
-### Connect with WebDAV
+3. Finally, go to the **sign in page** <http://localhost:3000/sign-in> and login with your credentials.
 
-Voltaserve supports [WebDAV](https://en.wikipedia.org/wiki/WebDAV), by default it's using the port `8082`.
+> **Note**
+>
+> Voltaserve supports [WebDAV](https://en.wikipedia.org/wiki/WebDAV), by default it's listening on the port `8082`.
 
-To connect you can use [Mountainduck](https://mountainduck.io), [Cyberduck](https://cyberduck.io), [WinSCP](https://winscp.net), [Owlfiles](https://www.skyjos.com/owlfiles) or [Rclone](https://rclone.org/webdav).
+### Use a Mobile App
+
+We recommend using WebDAV with [Documents](https://readdle.com/documents) or [Owlfiles](https://www.skyjos.com/owlfiles).
+
+### Mount the Drive on Your Computer
+
+We recommend using WebDAV with [Mountainduck](https://mountainduck.io) or [Owlfiles](https://www.skyjos.com/owlfiles).
+
+### Browse the Content Remotely
+
+We recommend using WebDAV with [Cyberduck](https://cyberduck.io), [WinSCP](https://winscp.net) or [Rclone](https://rclone.org/webdav).
 
 ### Configuration
 
@@ -80,7 +96,9 @@ The port `3000` is used for the UI, therefore it needs to be open and accessible
 sudo ufw allow 3000
 ```
 
-You can change the UI port to something else, other than `3000`, like `80` for example. This can be done by editing the `VOLTASERVE_UI_PORT` environment variable in [.env](.env) file as follows:
+> **Note**
+>
+> You can change the UI port to something else, other than `3000`, like `80` for example. This can be done by editing the `VOLTASERVE_UI_PORT` environment variable in [.env](.env) file as follows:
 
 ```properties
 VOLTASERVE_UI_PORT=80
