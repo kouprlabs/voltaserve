@@ -17,9 +17,11 @@ docker compose up -d \
 
 #### Install Languages and Runtimes
 
+Install [Bun](https://bun.sh/).
+
 Install [NVM](https://github.com/nvm-sh/nvm?tab=readme-ov-file#installing-and-updating).
 
-Install Node.js v20.x with NVM and set it as default:
+Install [Node.js](https://nodejs.org/) 20.x with NVM and set it as default:
 
 ```shell
 nvm install lts/iron
@@ -29,10 +31,7 @@ nvm install lts/iron
 nvm alias default lts/iron
 ```
 
-Install Go for your platform:
-
-https://go.dev
-
+Install [Go](https://go.dev) for your platform.
 
 Install [PDM](https://pdm-project.org/en/latest).
 
