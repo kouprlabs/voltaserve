@@ -56,7 +56,7 @@ Create an account and sign in:
 
 > **Note**
 >
-> Voltaserve supports [WebDAV](https://en.wikipedia.org/wiki/WebDAV), by default it's listening on the port `8082`.
+> Voltaserve supports [WebDAV](https://en.wikipedia.org/wiki/WebDAV) and by default it listens on port `8082`.
 
 ### Use a Mobile App
 
