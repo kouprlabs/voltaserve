@@ -1,6 +1,5 @@
 const variables = {
-  headingFontFamily:
-    "'Unbounded', Almarai, 'Noto Sans JP', 'Noto Sans TC', 'Noto Sans SC', 'Noto Sans KR', Poppins, 'Noto Sans Bengali'",
+  headingFontFamily: "'Unbounded'",
   headingFontSize: '24px',
   headingFontWeight: '500',
   bodyFontFamily: 'IBM Plex Sans',

@@ -7,8 +7,8 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        display: ['IBM Plex Serif'],
-        body: ['IBM Plex Sans'],
+        display: [variables.headingFontFamily],
+        body: [variables.bodyFontFamily],
       },
       fontSize: {
         'base': variables.bodyFontSize,
