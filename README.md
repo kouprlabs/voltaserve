@@ -6,7 +6,7 @@
 
 <h3 align="center">Cloud Storage for Creators</h2>
 
-Handle massive images with mosaic technology, extract insights from documents, stream large videos, protect documents with permissions and watermarks, preview 3D models. collaborate in real-time with your team.
+Handle massive images with mosaic technology, extract insights from documents, stream large videos, protect documents with permissions and watermarks, preview 3D models. collaborate in real-time.
 
 ## Getting Started
 
