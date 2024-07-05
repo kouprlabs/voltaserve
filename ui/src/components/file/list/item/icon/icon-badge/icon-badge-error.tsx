@@ -3,7 +3,7 @@ import cx from 'classnames'
 import { IconClose } from '@/lib/components/icons'
 
 const IconBadgeError = () => (
-  <Tooltip label="An error occured while processing this item">
+  <Tooltip label="An error occurred while processing this item">
     <Circle
       className={cx(
         'text-orange-600',
