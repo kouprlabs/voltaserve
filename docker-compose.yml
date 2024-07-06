@@ -31,8 +31,6 @@ services:
     volumes:
       - minio:/data
     command: server /data --console-address ":9001"
-    healthcheck:
-      test: curl --fail http://127.0.0.1:9000/minio/health/ready || exit 1
   meilisearch:
     image: getmeili/meilisearch:v1.7
     ports:
