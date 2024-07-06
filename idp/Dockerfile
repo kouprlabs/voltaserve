@@ -1,3 +1,5 @@
+ARG TARGETPLATFORM
+
 FROM node:20-alpine AS base_amd64
 
 WORKDIR /app
@@ -27,9 +29,9 @@ RUN bun install --frozen-lockfile --production
 FROM --platform=$TARGETPLATFORM base_${TARGETPLATFORM#*/} AS final
 
 ENTRYPOINT if [ "$TARGETPLATFORM" = "linux/arm64" ]; then \
-      bun run start; \
-    else \
-      npm run start:node; \
-    fi
+  bun run start; \
+  else \
+  npm run start:node; \
+  fi
 
 EXPOSE 8081
