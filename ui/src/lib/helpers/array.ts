@@ -1,3 +1,13 @@
+// Copyright 2023 Anass Bouassaba.
+//
+// Use of this software is governed by the Business Source License
+// included in the file licenses/BSL.txt.
+//
+// As of the Change Date specified in that file, in accordance with
+// the Business Source License, use of this software will be governed
+// by the GNU Affero General Public License v3.0 only, included in the file
+// licenses/AGPL.txt.
+
 export function stringArraysIdentical(a: string[], b: string[]): boolean {
   if (a.length !== b.length) {
     return false // Different lengths, not identical

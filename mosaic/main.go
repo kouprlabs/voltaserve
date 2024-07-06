@@ -1,15 +1,26 @@
+// Copyright 2023 Anass Bouassaba.
+//
+// Use of this software is governed by the Business Source License
+// included in the file licenses/BSL.txt.
+//
+// As of the Change Date specified in that file, in accordance with
+// the Business Source License, use of this software will be governed
+// by the GNU Affero General Public License v3.0 only, included in the file
+// licenses/AGPL.txt.
+
 package main
 
 import (
 	"fmt"
 	"os"
 
-	"github.com/gofiber/fiber/v2"
-	"github.com/joho/godotenv"
 	"voltaserve/config"
 	"voltaserve/errorpkg"
 	"voltaserve/helper"
 	"voltaserve/router"
+
+	"github.com/gofiber/fiber/v2"
+	"github.com/joho/godotenv"
 )
 
 // @title		Voltaserve Mosaic
