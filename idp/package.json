@@ -6,6 +6,8 @@
   "scripts": {
     "start": "bun src/app.ts",
     "dev": "bun dev src/app.ts",
+    "start:node": "ts-node -r tsconfig-paths/register src/app.ts",
+    "dev:node": "nodemon --exec ts-node -r tsconfig-paths/register src/app.ts",
     "tsc": "tsc --noEmit",
     "format": "prettier --write .",
     "swagger-autogen": "bun ./swagger.js",
