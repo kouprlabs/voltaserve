@@ -32,7 +32,7 @@ services:
       - minio:/data
     command: server /data --console-address ":9001"
     healthcheck:
-      test: curl --fail http://127.0.0.1:9000/health/ready || exit 1
+      test: curl --fail http://127.0.0.1:9000/minio/health/ready || exit 1
   meilisearch:
     image: getmeili/meilisearch:v1.7
     ports:
@@ -55,7 +55,7 @@ services:
       - ${VOLTASERVE_MAILDEV_SMTP_PORT}:1025
       - ${VOLTASERVE_MAILDEV_WEB_PORT}:1080
     healthcheck:
-      test: wget -q --spider http://127.0.0.1:8025/api/v2/messages || exit 1
+      test: wget --quiet --spider http://127.0.0.1:1080 || exit 1
   api:
     image: voltaserve/api
     build:
@@ -81,7 +81,7 @@ services:
       - SMTP_SENDER_ADDRESS=${VOLTASERVE_SMTP_SENDER_ADDRESS}
       - SMTP_SENDER_NAME=${VOLTASERVE_SMTP_SENDER_NAME}
     healthcheck:
-      test: curl --fail http://127.0.0.1:8080/v2/health || exit 1
+      test: wget --quiet --spider http://127.0.0.1:8080/v2/health || exit 1
     depends_on:
       - cockroach
       - redis
@@ -107,7 +107,7 @@ services:
       - SMTP_SENDER_ADDRESS=${VOLTASERVE_SMTP_SENDER_ADDRESS}
       - SMTP_SENDER_NAME=${VOLTASERVE_SMTP_SENDER_NAME}
     healthcheck:
-      test: curl --fail http://127.0.0.1:8081/v2/health || exit 1
+      test: wget --quiet --spider http://127.0.0.1:8081/v2/health || exit 1
     depends_on:
       - cockroach
       - meilisearch
@@ -123,7 +123,7 @@ services:
       - API_URL=http://api:8080
       - IDP_URL=http://idp:8081
     healthcheck:
-      test: curl --fail http://127.0.0.1:3000/index.html || exit 1
+      test: wget --quiet --spider http://127.0.0.1:3000/index.html || exit 1
     depends_on:
       - idp
       - api
@@ -139,7 +139,7 @@ services:
       - IDP_URL=http://idp:8081
       - API_URL=http://api:8080
     healthcheck:
-      test: curl --fail http://127.0.0.1:8082/v2/health || exit 1
+      test: wget --quiet --spider http://127.0.0.1:8082/v2/health || exit 1
     depends_on:
       - idp
       - api
@@ -158,7 +158,7 @@ services:
       - WATERMARK_URL=http://watermark:8086
       - S3_URL=minio:9000
     healthcheck:
-      test: curl --fail http://127.0.0.1:8083/v2/health || exit 1
+      test: wget --quiet --spider http://127.0.0.1:8083/v2/health || exit 1
     depends_on:
       - api
       - minio
@@ -170,7 +170,7 @@ services:
     ports:
       - ${VOLTASERVE_LANGUAGE_PORT}:8084
     healthcheck:
-      test: curl --fail http://127.0.0.1:8084/v2/health || exit 1
+      test: wget --quiet --spider http://127.0.0.1:8084/v2/health || exit 1
     restart: on-failure
   mosaic:
     image: voltaserve/mosaic
@@ -181,5 +181,5 @@ services:
     environment:
       - S3_URL=minio:9000
     healthcheck:
-      test: curl --fail http://127.0.0.1:8085/v2/health || exit 1
+      test: wget --quiet --spider http://127.0.0.1:8085/v2/health || exit 1
     restart: on-failure
