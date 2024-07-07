@@ -57,5 +57,5 @@ jobs:
         with:
           context: ./api
           push: false
-          tags: voltaserve/api:${{ env.TRIMMED_TAG || latest }}
+          tags: voltaserve/api:${{ env.TRIMMED_TAG || "latest" }}
           platforms: linux/amd64,linux/arm64
