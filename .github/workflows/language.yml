@@ -17,6 +17,8 @@ on:
       - main
     paths:
       - "language/**"
+    tags:
+      - 'v*'
   pull_request:
     branches:
       - main
@@ -35,6 +37,12 @@ jobs:
         with:
           platforms: arm64, amd64
 
+      - name: Extract tag that triggered this action
+        if: ${{ github.ref_type == 'tag' }}
+        run: |
+          TAG=${{ github.ref_name }}
+          echo "TRIMMED_TAG=${TAG#v}" >> $GITHUB_ENV
+
       - name: Set Up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -49,5 +57,5 @@ jobs:
         with:
           context: ./language
           push: true
-          tags: voltaserve/language:latest
+          tags: voltaserve/language:${{ env.TRIMMED_TAG || 'latest' }}
           platforms: linux/amd64,linux/arm64
