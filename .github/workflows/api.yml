@@ -38,7 +38,7 @@ jobs:
           platforms: arm64, amd64
 
       - name: Extract tag that triggered this action
-        if: github.ref_type == tag
+        if: github.ref_type == "tag"
         run: |
           TAG=${{ github.ref_name }}
           echo "TRIMMED_TAG=${TAG#v}" >> $GITHUB_ENV
