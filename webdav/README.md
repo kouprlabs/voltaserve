@@ -1,4 +1,4 @@
-# Voltaserve Mosaic
+# Voltaserve WebDAV
 
 Install [golangci-lint](https://github.com/golangci/golangci-lint).
 
@@ -25,31 +25,5 @@ golangci-lint run
 Build Docker image:
 
 ```shell
-docker build -t voltaserve/mosaic .
-```
-
-## Generate Documentation
-
-Format swag comments:
-
-```shell
-swag fmt
-```
-
-Generate `swagger.yml`:
-
-```shell
-swag init --output ./docs --outputTypes yaml
-```
-
-Preview (will be served at [http://localhost:19093](http://localhost:19093)):
-
-```shell
-bunx @redocly/cli preview-docs --port 19095 ./docs/swagger.yaml
-```
-
-Generate the final static HTML documentation:
-
-```shell
-bunx @redocly/cli build-docs ./docs/swagger.yaml --output ./docs/index.html
+docker build -t voltaserve/webdav .
 ```
