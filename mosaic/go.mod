@@ -1,4 +1,4 @@
-module voltaserve
+module github.com/kouprlabs/voltaserve/mosaic
 
 go 1.22
 

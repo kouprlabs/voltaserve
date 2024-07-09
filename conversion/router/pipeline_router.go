@@ -11,10 +11,10 @@
 package router
 
 import (
-	"voltaserve/client"
-	"voltaserve/config"
-	"voltaserve/errorpkg"
-	"voltaserve/runtime"
+	"github.com/kouprlabs/voltaserve/conversion/client"
+	"github.com/kouprlabs/voltaserve/conversion/config"
+	"github.com/kouprlabs/voltaserve/conversion/errorpkg"
+	"github.com/kouprlabs/voltaserve/conversion/runtime"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"

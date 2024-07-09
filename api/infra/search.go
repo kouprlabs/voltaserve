@@ -11,7 +11,7 @@
 package infra
 
 import (
-	"voltaserve/config"
+	"github.com/kouprlabs/voltaserve/api/config"
 
 	"github.com/meilisearch/meilisearch-go"
 )

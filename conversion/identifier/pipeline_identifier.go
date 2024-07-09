@@ -11,8 +11,8 @@
 package identifier
 
 import (
-	"voltaserve/client"
-	"voltaserve/model"
+	"github.com/kouprlabs/voltaserve/conversion/client"
+	"github.com/kouprlabs/voltaserve/conversion/model"
 )
 
 type PipelineIdentifier struct {

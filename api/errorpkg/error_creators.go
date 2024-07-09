@@ -14,7 +14,8 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
-	"voltaserve/model"
+
+	"github.com/kouprlabs/voltaserve/api/model"
 
 	"github.com/go-playground/validator/v10"
 )

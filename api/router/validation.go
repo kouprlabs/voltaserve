@@ -10,7 +10,7 @@
 
 package router
 
-import "voltaserve/service"
+import "github.com/kouprlabs/voltaserve/api/service"
 
 func IsValidSortBy(value string) bool {
 	return value == "" ||

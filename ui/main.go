@@ -17,7 +17,8 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"voltaserve/config"
+
+	"github.com/kouprlabs/voltaserve/ui/config"
 
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"

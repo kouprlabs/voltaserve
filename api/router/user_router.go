@@ -13,8 +13,9 @@ package router
 import (
 	"net/url"
 	"strconv"
-	"voltaserve/errorpkg"
-	"voltaserve/service"
+
+	"github.com/kouprlabs/voltaserve/api/errorpkg"
+	"github.com/kouprlabs/voltaserve/api/service"
 
 	"github.com/gofiber/fiber/v2"
 )

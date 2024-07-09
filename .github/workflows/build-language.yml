@@ -1,4 +1,4 @@
-# Copyright 2023 Anass Bouassaba.
+# Copyright 2023 Anass Bouassaba, Piotr Łoboda.
 #
 # Use of this software is governed by the Business Source License
 # included in the file licenses/BSL.txt.
@@ -8,7 +8,7 @@
 # by the GNU Affero General Public License v3.0 only, included in the file
 # licenses/AGPL.txt.
 
-name: Build and Push voltaserve/ui
+name: Build and Push voltaserve/language
 
 on:
   workflow_dispatch:
@@ -16,36 +16,16 @@ on:
     branches:
       - main
     paths:
-      - "ui/**"
+      - "language/**"
     tags:
       - 'v*'
   pull_request:
     branches:
       - main
     paths:
-      - "ui/**"
+      - "language/**"
 
 jobs:
-  linting:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Add dummy embedded files
-        run: |
-          mkdir ui/dist
-          touch ui/dist/index.html
-
-      - name: Lint using Golanci lint
-        uses: golangci/golangci-lint-action@v6
-        with:
-          working-directory: ui
-    permissions:
-      contents: read
-      pull-requests: read
-      checks: write
-
   build_and_push:
     runs-on: ubuntu-latest
     steps:
@@ -75,7 +55,7 @@ jobs:
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v5
         with:
-          context: ./ui
+          context: ./language
           push: true
-          tags: voltaserve/ui:${{ env.TRIMMED_TAG || 'latest' }}
+          tags: voltaserve/language:${{ env.TRIMMED_TAG || 'latest' }}
           platforms: linux/amd64,linux/arm64

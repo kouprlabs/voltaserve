@@ -15,8 +15,9 @@ import (
 	"context"
 	"io"
 	"strings"
-	"voltaserve/config"
-	"voltaserve/errorpkg"
+
+	"github.com/kouprlabs/voltaserve/api/config"
+	"github.com/kouprlabs/voltaserve/api/errorpkg"
 
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"

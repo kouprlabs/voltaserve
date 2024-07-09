@@ -12,8 +12,9 @@ package processor
 
 import (
 	"fmt"
-	"voltaserve/config"
-	"voltaserve/infra"
+
+	"github.com/kouprlabs/voltaserve/conversion/config"
+	"github.com/kouprlabs/voltaserve/conversion/infra"
 )
 
 type OCRProcessor struct {

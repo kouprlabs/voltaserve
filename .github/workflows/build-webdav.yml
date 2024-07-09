@@ -1,4 +1,4 @@
-# Copyright 2023 Anass Bouassaba.
+# Copyright 2023 Anass Bouassaba, Piotr Łoboda.
 #
 # Use of this software is governed by the Business Source License
 # included in the file licenses/BSL.txt.
@@ -8,7 +8,7 @@
 # by the GNU Affero General Public License v3.0 only, included in the file
 # licenses/AGPL.txt.
 
-name: Build and Push voltaserve/idp
+name: Build and Push voltaserve/webdav
 
 on:
   workflow_dispatch:
@@ -16,14 +16,14 @@ on:
     branches:
       - main
     paths:
-      - "idp/**"
+      - "webdav/**"
     tags:
       - 'v*'
   pull_request:
     branches:
       - main
     paths:
-      - "idp/**"
+      - "webdav/**"
 
 jobs:
   build_and_push:
@@ -55,7 +55,7 @@ jobs:
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v5
         with:
-          context: ./idp
+          context: ./webdav
           push: true
-          tags: voltaserve/idp:${{ env.TRIMMED_TAG || 'latest' }}
+          tags: voltaserve/webdav:${{ env.TRIMMED_TAG || 'latest' }}
           platforms: linux/amd64,linux/arm64

@@ -12,8 +12,9 @@ package repo
 
 import (
 	"time"
-	"voltaserve/infra"
-	"voltaserve/model"
+
+	"github.com/kouprlabs/voltaserve/api/infra"
+	"github.com/kouprlabs/voltaserve/api/model"
 
 	"gorm.io/gorm"
 )

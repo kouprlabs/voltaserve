@@ -14,11 +14,12 @@ import (
 	"encoding/json"
 	"errors"
 	"time"
-	"voltaserve/errorpkg"
-	"voltaserve/helper"
-	"voltaserve/infra"
-	"voltaserve/log"
-	"voltaserve/model"
+
+	"github.com/kouprlabs/voltaserve/api/errorpkg"
+	"github.com/kouprlabs/voltaserve/api/helper"
+	"github.com/kouprlabs/voltaserve/api/infra"
+	"github.com/kouprlabs/voltaserve/api/log"
+	"github.com/kouprlabs/voltaserve/api/model"
 
 	"gorm.io/datatypes"
 	"gorm.io/gorm"

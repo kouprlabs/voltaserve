@@ -16,7 +16,8 @@ import (
 	"errors"
 	"io"
 	"strings"
-	"voltaserve/config"
+
+	"github.com/kouprlabs/voltaserve/mosaic/config"
 
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"

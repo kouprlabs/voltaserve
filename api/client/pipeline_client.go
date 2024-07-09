@@ -15,7 +15,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"voltaserve/config"
+
+	"github.com/kouprlabs/voltaserve/api/config"
 )
 
 type PipelineClient struct {

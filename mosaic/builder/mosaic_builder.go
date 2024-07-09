@@ -15,7 +15,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"voltaserve/infra"
+
+	"github.com/kouprlabs/voltaserve/mosaic/infra"
 )
 
 const (

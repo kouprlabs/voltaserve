@@ -16,7 +16,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"voltaserve/config"
+
+	"github.com/kouprlabs/voltaserve/conversion/config"
 )
 
 type APIClient struct {

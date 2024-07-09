@@ -15,9 +15,10 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
-	"voltaserve/config"
-	"voltaserve/helper"
-	"voltaserve/infra"
+
+	"github.com/kouprlabs/voltaserve/conversion/config"
+	"github.com/kouprlabs/voltaserve/conversion/helper"
+	"github.com/kouprlabs/voltaserve/conversion/infra"
 )
 
 type OfficeProcessor struct {

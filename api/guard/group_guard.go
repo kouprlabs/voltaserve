@@ -11,10 +11,10 @@
 package guard
 
 import (
-	"voltaserve/cache"
-	"voltaserve/errorpkg"
-	"voltaserve/log"
-	"voltaserve/model"
+	"github.com/kouprlabs/voltaserve/api/cache"
+	"github.com/kouprlabs/voltaserve/api/errorpkg"
+	"github.com/kouprlabs/voltaserve/api/log"
+	"github.com/kouprlabs/voltaserve/api/model"
 )
 
 type GroupGuard struct {

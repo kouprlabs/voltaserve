@@ -14,10 +14,10 @@ import (
 	"fmt"
 	"os"
 
-	"voltaserve/config"
-	"voltaserve/errorpkg"
-	"voltaserve/helper"
-	"voltaserve/router"
+	"github.com/kouprlabs/voltaserve/mosaic/config"
+	"github.com/kouprlabs/voltaserve/mosaic/errorpkg"
+	"github.com/kouprlabs/voltaserve/mosaic/helper"
+	"github.com/kouprlabs/voltaserve/mosaic/router"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/joho/godotenv"

@@ -10,7 +10,7 @@
 
 package model
 
-import "voltaserve/client"
+import "github.com/kouprlabs/voltaserve/conversion/client"
 
 type Pipeline interface {
 	Run(client.PipelineRunOptions) error

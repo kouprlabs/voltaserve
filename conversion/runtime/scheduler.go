@@ -13,10 +13,11 @@ package runtime
 import (
 	"runtime"
 	"time"
-	"voltaserve/pipeline"
 
-	"voltaserve/client"
-	"voltaserve/infra"
+	"github.com/kouprlabs/voltaserve/conversion/pipeline"
+
+	"github.com/kouprlabs/voltaserve/conversion/client"
+	"github.com/kouprlabs/voltaserve/conversion/infra"
 )
 
 type Scheduler struct {

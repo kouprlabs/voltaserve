@@ -14,13 +14,14 @@ import (
 	"sort"
 	"strings"
 	"time"
-	"voltaserve/cache"
-	"voltaserve/config"
-	"voltaserve/errorpkg"
-	"voltaserve/guard"
-	"voltaserve/infra"
-	"voltaserve/model"
-	"voltaserve/repo"
+
+	"github.com/kouprlabs/voltaserve/api/cache"
+	"github.com/kouprlabs/voltaserve/api/config"
+	"github.com/kouprlabs/voltaserve/api/errorpkg"
+	"github.com/kouprlabs/voltaserve/api/guard"
+	"github.com/kouprlabs/voltaserve/api/infra"
+	"github.com/kouprlabs/voltaserve/api/model"
+	"github.com/kouprlabs/voltaserve/api/repo"
 )
 
 type InvitationService struct {

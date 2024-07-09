@@ -12,12 +12,13 @@ package service
 
 import (
 	"sort"
-	"voltaserve/cache"
-	"voltaserve/config"
-	"voltaserve/guard"
-	"voltaserve/model"
-	"voltaserve/repo"
-	"voltaserve/search"
+
+	"github.com/kouprlabs/voltaserve/api/cache"
+	"github.com/kouprlabs/voltaserve/api/config"
+	"github.com/kouprlabs/voltaserve/api/guard"
+	"github.com/kouprlabs/voltaserve/api/model"
+	"github.com/kouprlabs/voltaserve/api/repo"
+	"github.com/kouprlabs/voltaserve/api/search"
 )
 
 type UserService struct {

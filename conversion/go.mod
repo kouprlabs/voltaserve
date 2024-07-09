@@ -1,4 +1,4 @@
-module voltaserve
+module github.com/kouprlabs/voltaserve/conversion
 
 go 1.22
 
