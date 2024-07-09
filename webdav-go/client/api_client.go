@@ -135,11 +135,12 @@ func (cl *APIClient) CreateFileFromS3(opts FileCreateFromS3Options) (*File, erro
 		return nil, err
 	}
 	req, err := http.NewRequest("POST",
-		fmt.Sprintf("%s/v2/files/create_from_s3?api_key=%s&access_token=%s&workspace_id=%s&name=%s&s3_key=%s&s3_bucket=%s&snapshot_id=%s&content_type=%s&size=%d",
+		fmt.Sprintf("%s/v2/files/create_from_s3?api_key=%s&access_token=%s&workspace_id=%s&parent_id=%s&name=%s&s3_key=%s&s3_bucket=%s&snapshot_id=%s&content_type=%s&size=%d",
 			cl.config.APIURL,
 			cl.config.Security.APIKey,
 			cl.token.AccessToken,
 			opts.WorkspaceID,
+			opts.ParentID,
 			opts.Name,
 			opts.S3Reference.Key,
 			opts.S3Reference.Bucket,
@@ -157,7 +158,13 @@ func (cl *APIClient) CreateFileFromS3(opts FileCreateFromS3Options) (*File, erro
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			infra.GetLogger().Error(err.Error())
+			return
+		}
+	}(res.Body)
 	var file File
 	if err = json.Unmarshal(body, &file); err != nil {
 		return nil, err
@@ -199,7 +206,12 @@ func (cl *APIClient) PatchFileFromS3(opts FilePatchFromS3Options) (*File, error)
 	if err != nil {
 		return nil, err
 	}
-	defer res.Body.Close()
+	defer func(Body io.ReadCloser) {
+		if err := Body.Close(); err != nil {
+			infra.GetLogger().Error(err.Error())
+			return
+		}
+	}(res.Body)
 	var file File
 	if err = json.Unmarshal(body, &file); err != nil {
 		return nil, err

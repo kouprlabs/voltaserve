@@ -931,9 +931,9 @@ func (r *FileRouter) DownloadThumbnail(c *fiber.Ctx) error {
 //	@Param			workspace_id	query		string	true	"Workspace ID"
 //	@Param			parent_id		query		string	false	"Parent ID"
 //	@Param			name			query		string	false	"Name"
-//	@Param			s3_key	query		string	true	"S3 Key"
-//	@Param			s3_bucket	query		string	true	"S3 Bucket"
-//	@Param			size	query		string	true	"Size"
+//	@Param			s3_key			query		string	true	"S3 Key"
+//	@Param			s3_bucket		query		string	true	"S3 Bucket"
+//	@Param			size			query		string	true	"Size"
 //	@Success		200				{object}	service.File
 //	@Failure		404				{object}	errorpkg.ErrorResponse
 //	@Failure		400				{object}	errorpkg.ErrorResponse
@@ -1036,14 +1036,14 @@ func (r *FileRouter) CreateFromS3(c *fiber.Ctx) error {
 //	@Produce		json
 //	@Param			api_key			query		string	true	"API Key"
 //	@Param			access_token	query		string	true	"Access Token"
-//	@Param			s3_key	query		string	true	"S3 Key"
-//	@Param			s3_bucket	query		string	true	"S3 Bucket"
-//	@Param			size	query		string	true	"Size"
-//	@Param			id	path		string	true	"ID"
-//	@Success		200	{object}	service.File
-//	@Failure		404	{object}	errorpkg.ErrorResponse
-//	@Failure		400	{object}	errorpkg.ErrorResponse
-//	@Failure		500	{object}	errorpkg.ErrorResponse
+//	@Param			s3_key			query		string	true	"S3 Key"
+//	@Param			s3_bucket		query		string	true	"S3 Bucket"
+//	@Param			size			query		string	true	"Size"
+//	@Param			id				path		string	true	"ID"
+//	@Success		200				{object}	service.File
+//	@Failure		404				{object}	errorpkg.ErrorResponse
+//	@Failure		400				{object}	errorpkg.ErrorResponse
+//	@Failure		500				{object}	errorpkg.ErrorResponse
 //	@Router			/files/{id}/patch_from_s3 [patch]
 func (r *FileRouter) PatchFromS3(c *fiber.Ctx) error {
 	apiKey := c.Query("api_key")
