@@ -29,7 +29,6 @@ linters:
     - prealloc
     - lll
     - gosec
-    - gofumpt
     - godot
     - gocritic
     - funlen

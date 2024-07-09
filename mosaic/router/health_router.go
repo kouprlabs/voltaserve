@@ -18,8 +18,7 @@ import (
 	"github.com/kouprlabs/voltaserve/mosaic/infra"
 )
 
-type HealthRouter struct {
-}
+type HealthRouter struct{}
 
 func NewHealthRouter() *HealthRouter {
 	return &HealthRouter{}
