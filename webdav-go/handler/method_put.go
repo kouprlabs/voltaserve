@@ -2,12 +2,8 @@ package handler
 
 import (
 	"fmt"
-	"github.com/google/uuid"
-	"io"
 	"net/http"
-	"os"
 	"path"
-	"path/filepath"
 	"voltaserve/client"
 	"voltaserve/helper"
 	"voltaserve/infra"
@@ -37,35 +33,7 @@ func (h *Handler) methodPut(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	apiClient := client.NewAPIClient(token)
-	directoryPath := helper.DecodeURIComponent(helper.Dirname(r.URL.Path))
-	directory, err := apiClient.GetFileByPath(directoryPath)
-	if err != nil {
-		infra.HandleError(err, w)
-		return
-	}
-	outputPath := filepath.Join(os.TempDir(), uuid.New().String())
-	ws, err := os.Create(outputPath)
-	if err != nil {
-		infra.HandleError(err, w)
-		return
-	}
-	defer func(ws *os.File) {
-		err := ws.Close()
-		if err != nil {
-			infra.HandleError(err, w)
-		}
-	}(ws)
-	_, err = io.Copy(ws, r.Body)
-	if err != nil {
-		infra.HandleError(err, w)
-		return
-	}
-	err = ws.Close()
-	if err != nil {
-		infra.HandleError(err, w)
-		return
-	}
-	blob, err := os.ReadFile(outputPath)
+	directory, err := apiClient.GetFileByPath(helper.DecodeURIComponent(helper.Dirname(r.URL.Path)))
 	if err != nil {
 		infra.HandleError(err, w)
 		return
@@ -73,25 +41,26 @@ func (h *Handler) methodPut(w http.ResponseWriter, r *http.Request) {
 	existingFile, err := apiClient.GetFileByPath(r.URL.Path)
 	if err == nil {
 		if _, err = apiClient.PatchFile(client.FilePatchOptions{
-			ID:   existingFile.ID,
-			Blob: blob,
-			Name: name,
+			ID:     existingFile.ID,
+			Reader: r.Body,
+			Name:   name,
 		}); err != nil {
 			infra.HandleError(err, w)
 			return
 		}
 		w.WriteHeader(http.StatusCreated)
 		return
-	}
-	if _, err = apiClient.CreateFile(client.FileCreateOptions{
-		Type:        client.FileTypeFile,
-		WorkspaceID: directory.WorkspaceID,
-		ParentID:    directory.ID,
-		Blob:        blob,
-		Name:        name,
-	}); err != nil {
-		infra.HandleError(err, w)
-		return
+	} else {
+		if _, err = apiClient.CreateFile(client.FileCreateOptions{
+			Type:        client.FileTypeFile,
+			WorkspaceID: directory.WorkspaceID,
+			ParentID:    directory.ID,
+			Reader:      r.Body,
+			Name:        name,
+		}); err != nil {
+			infra.HandleError(err, w)
+			return
+		}
 	}
 	w.WriteHeader(http.StatusCreated)
 }

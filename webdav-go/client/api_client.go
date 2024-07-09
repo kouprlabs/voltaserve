@@ -73,11 +73,11 @@ type Thumbnail struct {
 }
 
 type FileCreateOptions struct {
-	Type        string `json:"type"`
-	WorkspaceID string `json:"workspaceId"`
-	ParentID    string `json:"parentId,omitempty"`
-	Blob        []byte `json:"blob,omitempty"`
-	Name        string `json:"name,omitempty"`
+	Type        string
+	WorkspaceID string
+	ParentID    string
+	Reader      io.Reader
+	Name        string
 }
 
 func (cl *APIClient) CreateFile(opts FileCreateOptions) (*File, error) {
@@ -90,8 +90,8 @@ func (cl *APIClient) CreateFile(opts FileCreateOptions) (*File, error) {
 	if opts.Name != "" {
 		params.Set("name", opts.Name)
 	}
-	if opts.Type == FileTypeFile && opts.Blob != nil {
-		return cl.upload(fmt.Sprintf("%s/v2/files?%s", cl.config.APIURL, params.Encode()), "POST", opts.Blob, opts.Name)
+	if opts.Type == FileTypeFile && opts.Reader != nil {
+		return cl.upload(fmt.Sprintf("%s/v2/files?%s", cl.config.APIURL, params.Encode()), "POST", opts.Reader, opts.Name)
 	} else if opts.Type == FileTypeFolder {
 		req, err := http.NewRequest("POST", fmt.Sprintf("%s/v2/files?%s", cl.config.APIURL, params.Encode()), nil)
 		if err != nil {
@@ -123,29 +123,51 @@ func (cl *APIClient) CreateFile(opts FileCreateOptions) (*File, error) {
 }
 
 type FilePatchOptions struct {
-	ID   string `json:"id"`
-	Blob []byte `json:"blob"`
-	Name string `json:"name"`
+	ID     string
+	Reader io.Reader
+	Name   string
 }
 
 func (cl *APIClient) PatchFile(opts FilePatchOptions) (*File, error) {
-	return cl.upload(fmt.Sprintf("%s/v2/files/%s", cl.config.APIURL, opts.ID), "PATCH", opts.Blob, opts.Name)
+	return cl.upload(fmt.Sprintf("%s/v2/files/%s", cl.config.APIURL, opts.ID), "PATCH", opts.Reader, opts.Name)
 }
 
-func (cl *APIClient) upload(url, method string, blob []byte, name string) (*File, error) {
-	body := new(bytes.Buffer)
-	writer := multipart.NewWriter(body)
-	part, err := writer.CreateFormFile("file", name)
-	if err != nil {
-		return nil, err
-	}
-	if _, err := part.Write(blob); err != nil {
-		return nil, err
-	}
-	if err := writer.Close(); err != nil {
-		return nil, err
-	}
-	req, err := http.NewRequest(method, url, body)
+func (cl *APIClient) upload(url, method string, reader io.Reader, name string) (*File, error) {
+	pr, pw := io.Pipe()
+	writer := multipart.NewWriter(pw)
+	go func() {
+		defer func(pw *io.PipeWriter) {
+			if err := pw.Close(); err != nil {
+				infra.GetLogger().Error(err.Error())
+			}
+		}(pw)
+		part, err := writer.CreateFormFile("file", name)
+		if err != nil {
+			if err := pw.CloseWithError(err); err != nil {
+				infra.GetLogger().Error(err.Error())
+				return
+			}
+			infra.GetLogger().Error(err.Error())
+			return
+		}
+		if _, err := io.Copy(part, reader); err != nil {
+			if err := pw.CloseWithError(err); err != nil {
+				infra.GetLogger().Error(err.Error())
+				return
+			}
+			infra.GetLogger().Error(err.Error())
+			return
+		}
+		if err := writer.Close(); err != nil {
+			if err := pw.CloseWithError(err); err != nil {
+				infra.GetLogger().Error(err.Error())
+				return
+			}
+			infra.GetLogger().Error(err.Error())
+			return
+		}
+	}()
+	req, err := http.NewRequest(method, url, pr)
 	if err != nil {
 		return nil, err
 	}
