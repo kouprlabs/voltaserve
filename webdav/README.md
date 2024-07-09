@@ -1,33 +1,25 @@
 # Voltaserve WebDAV
 
-Install dependencies:
+Install [golangci-lint](https://github.com/golangci/golangci-lint).
 
-```shell
-bun i
-```
+Install [swag](https://github.com/swaggo/swag).
 
 Run for development:
 
 ```shell
-bun run dev
+go run .
 ```
 
-Run for production:
+Build binary:
 
 ```shell
-bun run start
+go build .
 ```
 
 Lint code:
 
 ```shell
-bun run lint
-```
-
-Format code:
-
-```shell
-bun run format
+golangci-lint run
 ```
 
 Build Docker image:

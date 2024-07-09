@@ -1,2 +1,5 @@
-node_modules
-.env.local
+/.env.local
+/voltaserve
+__debug_bin*
+/*.tsv
+/.air

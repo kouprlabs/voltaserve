@@ -146,6 +146,8 @@ services:
       - PORT=8082
       - IDP_URL=http://idp:8081
       - API_URL=http://api:8080
+      - REDIS_ADDRESS=redis:6379
+      - S3_URL=minio:9000
     healthcheck:
       test: wget --quiet --spider http://127.0.0.1:8082/v2/health || exit 1
     depends_on:

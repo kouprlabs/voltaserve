@@ -67,3 +67,11 @@ type ImageProps struct {
 	Width  int `json:"width"`
 	Height int `json:"height"`
 }
+
+type S3Reference struct {
+	Bucket      string `json:"bucket"`
+	Key         string `json:"key"`
+	Size        int64  `json:"size"`
+	SnapshotID  string `json:"snapshotId"`
+	ContentType string `json:"contentType"`
+}

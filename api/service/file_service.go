@@ -201,7 +201,12 @@ func (svc *FileService) validateParent(id string, userID string) error {
 	return nil
 }
 
-func (svc *FileService) Store(id string, path string, userID string) (*File, error) {
+type StoreOptions struct {
+	S3Reference *model.S3Reference
+	Path        *string
+}
+
+func (svc *FileService) Store(id string, opts StoreOptions, userID string) (*File, error) {
 	file, err := svc.fileRepo.Find(id)
 	if err != nil {
 		return nil, err
@@ -214,7 +219,39 @@ func (svc *FileService) Store(id string, path string, userID string) (*File, err
 	if err != nil {
 		return nil, err
 	}
-	snapshotID := helper.NewID()
+	var snapshotID string
+	var size int64
+	var path string
+	var original model.S3Object
+	var bucket string
+	var contentType string
+	if opts.S3Reference == nil {
+		snapshotID = helper.NewID()
+		path = *opts.Path
+		stat, err := os.Stat(*opts.Path)
+		if err != nil {
+			return nil, err
+		}
+		size = stat.Size()
+		original = model.S3Object{
+			Bucket: workspace.GetBucket(),
+			Key:    snapshotID + "/original" + strings.ToLower(filepath.Ext(path)),
+			Size:   helper.ToPtr(size),
+		}
+		bucket = workspace.GetBucket()
+		contentType = infra.DetectMimeFromPath(path)
+	} else {
+		snapshotID = opts.S3Reference.SnapshotID
+		path = opts.S3Reference.Key
+		size = opts.S3Reference.Size
+		original = model.S3Object{
+			Bucket: opts.S3Reference.Bucket,
+			Key:    opts.S3Reference.Key,
+			Size:   helper.ToPtr(size),
+		}
+		bucket = opts.S3Reference.Bucket
+		contentType = opts.S3Reference.ContentType
+	}
 	snapshot := repo.NewSnapshot()
 	snapshot.SetID(snapshotID)
 	snapshot.SetVersion(latestVersion + 1)
@@ -228,18 +265,11 @@ func (svc *FileService) Store(id string, path string, userID string) (*File, err
 	if err = svc.snapshotRepo.MapWithFile(snapshotID, id); err != nil {
 		return nil, err
 	}
-	stat, err := os.Stat(path)
-	if err != nil {
-		return nil, err
-	}
-	exceedsProcessingLimit := stat.Size() > helper.MegabyteToByte(svc.fileIdent.GetProcessingLimitMB(path))
-	original := model.S3Object{
-		Bucket: workspace.GetBucket(),
-		Key:    snapshotID + "/original" + strings.ToLower(filepath.Ext(path)),
-		Size:   helper.ToPtr(stat.Size()),
-	}
-	if err = svc.s3.PutFile(original.Key, path, infra.DetectMimeFromPath(path), workspace.GetBucket(), minio.PutObjectOptions{}); err != nil {
-		return nil, err
+	exceedsProcessingLimit := size > helper.MegabyteToByte(svc.fileIdent.GetProcessingLimitMB(path))
+	if opts.S3Reference == nil {
+		if err = svc.s3.PutFile(original.Key, path, contentType, bucket, minio.PutObjectOptions{}); err != nil {
+			return nil, err
+		}
 	}
 	snapshot.SetOriginal(&original)
 	if exceedsProcessingLimit {
