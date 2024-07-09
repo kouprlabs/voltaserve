@@ -36,7 +36,8 @@ func main() {
 			panic(err)
 		}
 	} else {
-		if err := godotenv.Load(); err != nil {
+		err := godotenv.Load()
+		if err != nil {
 			panic(err)
 		}
 	}
