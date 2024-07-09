@@ -12,6 +12,7 @@ package cache
 
 import (
 	"encoding/json"
+
 	"github.com/kouprlabs/voltaserve/webdav/infra"
 )
 
@@ -28,14 +29,14 @@ func NewWorkspaceCache() *WorkspaceCache {
 }
 
 type Workspace struct {
-	ID              string  `json:"id," gorm:"column:id;size:36"`
-	Name            string  `json:"name" gorm:"column:name;size:255"`
-	StorageCapacity int64   `json:"storageCapacity" gorm:"column:storage_capacity"`
-	RootID          string  `json:"rootId" gorm:"column:root_id;size:36"`
-	OrganizationID  string  `json:"organizationId" gorm:"column:organization_id;size:36"`
-	Bucket          string  `json:"bucket" gorm:"column:bucket;size:255"`
-	CreateTime      string  `json:"createTime" gorm:"column:create_time"`
-	UpdateTime      *string `json:"updateTime,omitempty" gorm:"column:update_time"`
+	ID              string  `gorm:"column:id;size:36"              json:"id"`
+	Name            string  `gorm:"column:name;size:255"           json:"name"`
+	StorageCapacity int64   `gorm:"column:storage_capacity"        json:"storageCapacity"`
+	RootID          string  `gorm:"column:root_id;size:36"         json:"rootId"`
+	OrganizationID  string  `gorm:"column:organization_id;size:36" json:"organizationId"`
+	Bucket          string  `gorm:"column:bucket;size:255"         json:"bucket"`
+	CreateTime      string  `gorm:"column:create_time"             json:"createTime"`
+	UpdateTime      *string `gorm:"column:update_time"             json:"updateTime,omitempty"`
 }
 
 func (c *WorkspaceCache) Get(id string) (*Workspace, error) {

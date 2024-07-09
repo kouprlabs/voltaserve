@@ -33,11 +33,6 @@ linters:
     - lll
     - gosec
     - funlen
-    - goimports
-    - gofmt
-    - gofumpt
-    - gci
-    - tagalign
 
 severity:
   default-severity: major
