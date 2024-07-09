@@ -98,7 +98,7 @@ func (s *snapshotEntity) GetOriginal() *model.S3Object {
 	if s.Original.String() == "" {
 		return nil
 	}
-	var res = model.S3Object{}
+	res := model.S3Object{}
 	if err := json.Unmarshal([]byte(s.Original.String()), &res); err != nil {
 		log.GetLogger().Fatal(err)
 		return nil
@@ -110,7 +110,7 @@ func (s *snapshotEntity) GetPreview() *model.S3Object {
 	if s.Preview.String() == "" {
 		return nil
 	}
-	var res = model.S3Object{}
+	res := model.S3Object{}
 	if err := json.Unmarshal([]byte(s.Preview.String()), &res); err != nil {
 		log.GetLogger().Fatal(err)
 		return nil
@@ -122,7 +122,7 @@ func (s *snapshotEntity) GetText() *model.S3Object {
 	if s.Text.String() == "" {
 		return nil
 	}
-	var res = model.S3Object{}
+	res := model.S3Object{}
 	if err := json.Unmarshal([]byte(s.Text.String()), &res); err != nil {
 		log.GetLogger().Fatal(err)
 		return nil
@@ -134,7 +134,7 @@ func (s *snapshotEntity) GetOCR() *model.S3Object {
 	if s.OCR.String() == "" {
 		return nil
 	}
-	var res = model.S3Object{}
+	res := model.S3Object{}
 	if err := json.Unmarshal([]byte(s.OCR.String()), &res); err != nil {
 		log.GetLogger().Fatal(err)
 		return nil
@@ -146,7 +146,7 @@ func (s *snapshotEntity) GetEntities() *model.S3Object {
 	if s.Entities.String() == "" {
 		return nil
 	}
-	var res = model.S3Object{}
+	res := model.S3Object{}
 	if err := json.Unmarshal([]byte(s.Entities.String()), &res); err != nil {
 		log.GetLogger().Fatal(err)
 		return nil
@@ -158,7 +158,7 @@ func (s *snapshotEntity) GetMosaic() *model.S3Object {
 	if s.Mosaic.String() == "" {
 		return nil
 	}
-	var res = model.S3Object{}
+	res := model.S3Object{}
 	if err := json.Unmarshal([]byte(s.Mosaic.String()), &res); err != nil {
 		log.GetLogger().Fatal(err)
 		return nil
@@ -170,7 +170,7 @@ func (s *snapshotEntity) GetWatermark() *model.S3Object {
 	if s.Watermark.String() == "" {
 		return nil
 	}
-	var res = model.S3Object{}
+	res := model.S3Object{}
 	if err := json.Unmarshal([]byte(s.Watermark.String()), &res); err != nil {
 		log.GetLogger().Fatal(err)
 		return nil
@@ -182,7 +182,7 @@ func (s *snapshotEntity) GetThumbnail() *model.S3Object {
 	if s.Thumbnail.String() == "" {
 		return nil
 	}
-	var res = model.S3Object{}
+	res := model.S3Object{}
 	if err := json.Unmarshal([]byte(s.Thumbnail.String()), &res); err != nil {
 		log.GetLogger().Fatal(err)
 		return nil
@@ -413,7 +413,7 @@ func (repo *snapshotRepo) Find(id string) (model.Snapshot, error) {
 }
 
 func (repo *snapshotRepo) FindByVersion(version int64) (model.Snapshot, error) {
-	var res = snapshotEntity{}
+	res := snapshotEntity{}
 	db := repo.db.Where("version = ?", version).First(&res)
 	if db.Error != nil {
 		if errors.Is(db.Error, gorm.ErrRecordNotFound) {

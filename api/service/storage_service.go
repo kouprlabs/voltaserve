@@ -119,8 +119,7 @@ func (svc *StorageService) GetFileUsage(fileID string, userID string) (*StorageU
 	return svc.storageMapper.mapStorageUsage(size, workspace.GetStorageCapacity()), nil
 }
 
-type storageMapper struct {
-}
+type storageMapper struct{}
 
 func newStorageMapper() *storageMapper {
 	return &storageMapper{}

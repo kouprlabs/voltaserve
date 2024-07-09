@@ -156,7 +156,7 @@ func (repo *groupRepo) Insert(opts GroupInsertOptions) (model.Group, error) {
 }
 
 func (repo *groupRepo) find(id string) (*groupEntity, error) {
-	var res = groupEntity{}
+	res := groupEntity{}
 	db := repo.db.Where("id = ?", id).First(&res)
 	if db.Error != nil {
 		if errors.Is(db.Error, gorm.ErrRecordNotFound) {

@@ -145,7 +145,7 @@ func (repo *organizationRepo) Insert(opts OrganizationInsertOptions) (model.Orga
 }
 
 func (repo *organizationRepo) find(id string) (*organizationEntity, error) {
-	var res = organizationEntity{}
+	res := organizationEntity{}
 	db := repo.db.Where("id = ?", id).First(&res)
 	if db.Error != nil {
 		if errors.Is(db.Error, gorm.ErrRecordNotFound) {

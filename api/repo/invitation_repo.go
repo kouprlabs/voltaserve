@@ -134,7 +134,7 @@ func (repo *invitationRepo) Insert(opts InvitationInsertOptions) ([]model.Invita
 }
 
 func (repo *invitationRepo) Find(id string) (model.Invitation, error) {
-	var invitation = invitationEntity{}
+	invitation := invitationEntity{}
 	db := repo.db.Where("id = ?", id).First(&invitation)
 	if db.Error != nil {
 		if errors.Is(db.Error, gorm.ErrRecordNotFound) {

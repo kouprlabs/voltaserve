@@ -173,7 +173,7 @@ func (repo *workspaceRepo) Insert(opts WorkspaceInsertOptions) (model.Workspace,
 }
 
 func (repo *workspaceRepo) find(id string) (*workspaceEntity, error) {
-	var res = workspaceEntity{}
+	res := workspaceEntity{}
 	db := repo.db.Where("id = ?", id).First(&res)
 	if db.Error != nil {
 		if errors.Is(db.Error, gorm.ErrRecordNotFound) {

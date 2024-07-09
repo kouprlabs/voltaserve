@@ -819,8 +819,8 @@ func (svc *FileService) Copy(targetID string, sourceIDs []string, userID string)
 
 		/* Clone source tree */
 		var rootCloneIndex int
-		var cloneIDs = make(map[string]string)
-		var originalIDs = make(map[string]string)
+		cloneIDs := make(map[string]string)
+		originalIDs := make(map[string]string)
 		var clones []model.File
 		var permissions []model.UserPermission
 		for i, o := range sourceTree {

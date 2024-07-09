@@ -10,15 +10,19 @@
 
 package service
 
-const SortByEmail = "email"
-const SortByFullName = "full_name"
-const SortByName = "name"
-const SortByKind = "kind"
-const SortBySize = "size"
-const SortByVersion = "version"
-const SortByFrequency = "frequency"
-const SortByDateCreated = "date_created"
-const SortByDateModified = "date_modified"
+const (
+	SortByEmail        = "email"
+	SortByFullName     = "full_name"
+	SortByName         = "name"
+	SortByKind         = "kind"
+	SortBySize         = "size"
+	SortByVersion      = "version"
+	SortByFrequency    = "frequency"
+	SortByDateCreated  = "date_created"
+	SortByDateModified = "date_modified"
+)
 
-const SortOrderAsc = "asc"
-const SortOrderDesc = "desc"
+const (
+	SortOrderAsc  = "asc"
+	SortOrderDesc = "desc"
+)

@@ -223,8 +223,7 @@ func (svc *UserService) doPagination(data []model.User, page, size uint) ([]mode
 	return pageData, totalElements, totalPages
 }
 
-type userMapper struct {
-}
+type userMapper struct{}
 
 func newUserMapper() *userMapper {
 	return &userMapper{}

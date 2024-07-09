@@ -205,7 +205,7 @@ func (repo *taskRepo) Insert(opts TaskInsertOptions) (model.Task, error) {
 }
 
 func (repo *taskRepo) find(id string) (*taskEntity, error) {
-	var res = taskEntity{}
+	res := taskEntity{}
 	db := repo.db.Where("id = ?", id).First(&res)
 	if db.Error != nil {
 		if errors.Is(db.Error, gorm.ErrRecordNotFound) {

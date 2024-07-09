@@ -19,8 +19,7 @@ import (
 
 var db *gorm.DB
 
-type PostgresManager struct {
-}
+type PostgresManager struct{}
 
 func NewPostgresManager() *PostgresManager {
 	return &PostgresManager{}

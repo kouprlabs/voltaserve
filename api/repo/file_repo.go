@@ -223,7 +223,7 @@ func (repo *fileRepo) Find(id string) (model.File, error) {
 }
 
 func (repo *fileRepo) find(id string) (*fileEntity, error) {
-	var res = fileEntity{}
+	res := fileEntity{}
 	db := repo.db.Raw("SELECT * FROM file WHERE id = ?", id).Scan(&res)
 	if db.Error != nil {
 		if errors.Is(db.Error, gorm.ErrRecordNotFound) {

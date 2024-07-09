@@ -97,7 +97,7 @@ func newUserRepo() *userRepo {
 }
 
 func (repo *userRepo) Find(id string) (model.User, error) {
-	var res = userEntity{}
+	res := userEntity{}
 	db := repo.db.Where("id = ?", id).First(&res)
 	if db.Error != nil {
 		if errors.Is(db.Error, gorm.ErrRecordNotFound) {
@@ -110,7 +110,7 @@ func (repo *userRepo) Find(id string) (model.User, error) {
 }
 
 func (repo *userRepo) FindByEmail(email string) (model.User, error) {
-	var res = userEntity{}
+	res := userEntity{}
 	db := repo.db.Where("email = ?", email).First(&res)
 	if db.Error != nil {
 		if errors.Is(db.Error, gorm.ErrRecordNotFound) {
