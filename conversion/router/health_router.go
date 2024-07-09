@@ -13,10 +13,10 @@ package router
 import (
 	"net/http"
 
+	"github.com/gofiber/fiber/v2"
+
 	"github.com/kouprlabs/voltaserve/conversion/client"
 	"github.com/kouprlabs/voltaserve/conversion/infra"
-
-	"github.com/gofiber/fiber/v2"
 )
 
 type HealthRouter struct {

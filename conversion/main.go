@@ -15,14 +15,14 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/gofiber/fiber/v2"
+	"github.com/joho/godotenv"
+
 	"github.com/kouprlabs/voltaserve/conversion/config"
 	"github.com/kouprlabs/voltaserve/conversion/errorpkg"
 	"github.com/kouprlabs/voltaserve/conversion/helper"
 	"github.com/kouprlabs/voltaserve/conversion/router"
 	"github.com/kouprlabs/voltaserve/conversion/runtime"
-
-	"github.com/gofiber/fiber/v2"
-	"github.com/joho/godotenv"
 )
 
 // @title		Voltaserve Conversion

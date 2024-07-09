@@ -11,13 +11,13 @@
 package router
 
 import (
+	"github.com/go-playground/validator/v10"
+	"github.com/gofiber/fiber/v2"
+
 	"github.com/kouprlabs/voltaserve/conversion/client"
 	"github.com/kouprlabs/voltaserve/conversion/config"
 	"github.com/kouprlabs/voltaserve/conversion/errorpkg"
 	"github.com/kouprlabs/voltaserve/conversion/runtime"
-
-	"github.com/go-playground/validator/v10"
-	"github.com/gofiber/fiber/v2"
 )
 
 type PipelineRouter struct {

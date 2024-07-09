@@ -14,10 +14,9 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/kouprlabs/voltaserve/conversion/pipeline"
-
 	"github.com/kouprlabs/voltaserve/conversion/client"
 	"github.com/kouprlabs/voltaserve/conversion/infra"
+	"github.com/kouprlabs/voltaserve/conversion/pipeline"
 )
 
 type Scheduler struct {

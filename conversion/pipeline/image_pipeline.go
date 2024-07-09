@@ -14,6 +14,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/minio/minio-go/v7"
+
 	"github.com/kouprlabs/voltaserve/conversion/client"
 	"github.com/kouprlabs/voltaserve/conversion/config"
 	"github.com/kouprlabs/voltaserve/conversion/helper"
@@ -21,8 +23,6 @@ import (
 	"github.com/kouprlabs/voltaserve/conversion/infra"
 	"github.com/kouprlabs/voltaserve/conversion/model"
 	"github.com/kouprlabs/voltaserve/conversion/processor"
-
-	"github.com/minio/minio-go/v7"
 )
 
 type imagePipeline struct {
