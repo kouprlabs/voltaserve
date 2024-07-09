@@ -17,11 +17,12 @@ import (
 	"mime"
 	"os"
 	"path/filepath"
-	"voltaserve/builder"
-	"voltaserve/config"
-	"voltaserve/errorpkg"
-	"voltaserve/helper"
-	"voltaserve/infra"
+
+	"github.com/kouprlabs/voltaserve/mosaic/builder"
+	"github.com/kouprlabs/voltaserve/mosaic/config"
+	"github.com/kouprlabs/voltaserve/mosaic/errorpkg"
+	"github.com/kouprlabs/voltaserve/mosaic/helper"
+	"github.com/kouprlabs/voltaserve/mosaic/infra"
 
 	"github.com/minio/minio-go/v7"
 )

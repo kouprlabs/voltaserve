@@ -12,8 +12,9 @@ package service
 
 import (
 	"bytes"
-	"voltaserve/infra"
-	"voltaserve/model"
+
+	"github.com/kouprlabs/voltaserve/api/infra"
+	"github.com/kouprlabs/voltaserve/api/model"
 )
 
 type DownloadResult struct {

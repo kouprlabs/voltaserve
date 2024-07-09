@@ -15,7 +15,8 @@ import (
 	"encoding/json"
 	"path/filepath"
 	"strings"
-	"voltaserve/config"
+
+	"github.com/kouprlabs/voltaserve/api/config"
 )
 
 type FileIdentifier struct {

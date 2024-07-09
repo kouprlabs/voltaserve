@@ -13,11 +13,12 @@ package processor
 import (
 	"strconv"
 	"strings"
-	"voltaserve/client"
-	"voltaserve/config"
-	"voltaserve/helper"
-	"voltaserve/identifier"
-	"voltaserve/infra"
+
+	"github.com/kouprlabs/voltaserve/conversion/client"
+	"github.com/kouprlabs/voltaserve/conversion/config"
+	"github.com/kouprlabs/voltaserve/conversion/helper"
+	"github.com/kouprlabs/voltaserve/conversion/identifier"
+	"github.com/kouprlabs/voltaserve/conversion/infra"
 )
 
 type ImageProcessor struct {

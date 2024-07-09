@@ -13,15 +13,16 @@ package service
 import (
 	"bytes"
 	"path/filepath"
-	"voltaserve/cache"
-	"voltaserve/client"
-	"voltaserve/errorpkg"
-	"voltaserve/guard"
-	"voltaserve/helper"
-	"voltaserve/infra"
-	"voltaserve/log"
-	"voltaserve/model"
-	"voltaserve/repo"
+
+	"github.com/kouprlabs/voltaserve/api/cache"
+	"github.com/kouprlabs/voltaserve/api/client"
+	"github.com/kouprlabs/voltaserve/api/errorpkg"
+	"github.com/kouprlabs/voltaserve/api/guard"
+	"github.com/kouprlabs/voltaserve/api/helper"
+	"github.com/kouprlabs/voltaserve/api/infra"
+	"github.com/kouprlabs/voltaserve/api/log"
+	"github.com/kouprlabs/voltaserve/api/model"
+	"github.com/kouprlabs/voltaserve/api/repo"
 )
 
 type MosaicService struct {

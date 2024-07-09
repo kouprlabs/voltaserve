@@ -17,8 +17,9 @@ import (
 	"mime/multipart"
 	"net/http"
 	"os"
-	"voltaserve/config"
-	"voltaserve/log"
+
+	"github.com/kouprlabs/voltaserve/api/config"
+	"github.com/kouprlabs/voltaserve/api/log"
 )
 
 type WatermarkClient struct {

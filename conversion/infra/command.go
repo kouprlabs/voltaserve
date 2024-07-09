@@ -17,8 +17,9 @@ import (
 	"os/exec"
 	"sync"
 	"time"
-	"voltaserve/config"
-	"voltaserve/helper"
+
+	"github.com/kouprlabs/voltaserve/conversion/config"
+	"github.com/kouprlabs/voltaserve/conversion/helper"
 )
 
 var commandMutex sync.Mutex

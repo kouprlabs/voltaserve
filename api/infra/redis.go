@@ -13,7 +13,8 @@ package infra
 import (
 	"context"
 	"strings"
-	"voltaserve/config"
+
+	"github.com/kouprlabs/voltaserve/api/config"
 
 	"github.com/redis/go-redis/v9"
 )

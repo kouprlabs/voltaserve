@@ -11,7 +11,7 @@
 package processor
 
 import (
-	"voltaserve/infra"
+	"github.com/kouprlabs/voltaserve/conversion/infra"
 )
 
 type ZIPProcessor struct {

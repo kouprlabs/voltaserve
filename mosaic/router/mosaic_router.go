@@ -14,10 +14,11 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
-	"voltaserve/config"
-	"voltaserve/helper"
-	"voltaserve/infra"
-	"voltaserve/service"
+
+	"github.com/kouprlabs/voltaserve/mosaic/config"
+	"github.com/kouprlabs/voltaserve/mosaic/helper"
+	"github.com/kouprlabs/voltaserve/mosaic/infra"
+	"github.com/kouprlabs/voltaserve/mosaic/service"
 
 	"github.com/gofiber/fiber/v2"
 )

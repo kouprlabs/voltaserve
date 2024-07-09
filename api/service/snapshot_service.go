@@ -14,16 +14,17 @@ import (
 	"path/filepath"
 	"sort"
 	"time"
-	"voltaserve/cache"
-	"voltaserve/client"
-	"voltaserve/config"
-	"voltaserve/errorpkg"
-	"voltaserve/guard"
-	"voltaserve/helper"
-	"voltaserve/log"
-	"voltaserve/model"
-	"voltaserve/repo"
-	"voltaserve/search"
+
+	"github.com/kouprlabs/voltaserve/api/cache"
+	"github.com/kouprlabs/voltaserve/api/client"
+	"github.com/kouprlabs/voltaserve/api/config"
+	"github.com/kouprlabs/voltaserve/api/errorpkg"
+	"github.com/kouprlabs/voltaserve/api/guard"
+	"github.com/kouprlabs/voltaserve/api/helper"
+	"github.com/kouprlabs/voltaserve/api/log"
+	"github.com/kouprlabs/voltaserve/api/model"
+	"github.com/kouprlabs/voltaserve/api/repo"
+	"github.com/kouprlabs/voltaserve/api/search"
 )
 
 type SnapshotService struct {

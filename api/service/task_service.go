@@ -13,12 +13,13 @@ package service
 import (
 	"sort"
 	"time"
-	"voltaserve/cache"
-	"voltaserve/errorpkg"
-	"voltaserve/helper"
-	"voltaserve/model"
-	"voltaserve/repo"
-	"voltaserve/search"
+
+	"github.com/kouprlabs/voltaserve/api/cache"
+	"github.com/kouprlabs/voltaserve/api/errorpkg"
+	"github.com/kouprlabs/voltaserve/api/helper"
+	"github.com/kouprlabs/voltaserve/api/model"
+	"github.com/kouprlabs/voltaserve/api/repo"
+	"github.com/kouprlabs/voltaserve/api/search"
 )
 
 type TaskService struct {

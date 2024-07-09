@@ -11,10 +11,10 @@
 package service
 
 import (
-	"voltaserve/cache"
-	"voltaserve/guard"
-	"voltaserve/model"
-	"voltaserve/repo"
+	"github.com/kouprlabs/voltaserve/api/cache"
+	"github.com/kouprlabs/voltaserve/api/guard"
+	"github.com/kouprlabs/voltaserve/api/model"
+	"github.com/kouprlabs/voltaserve/api/repo"
 )
 
 type StorageService struct {

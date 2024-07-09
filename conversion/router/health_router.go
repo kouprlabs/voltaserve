@@ -12,8 +12,9 @@ package router
 
 import (
 	"net/http"
-	"voltaserve/client"
-	"voltaserve/infra"
+
+	"github.com/kouprlabs/voltaserve/conversion/client"
+	"github.com/kouprlabs/voltaserve/conversion/infra"
 
 	"github.com/gofiber/fiber/v2"
 )

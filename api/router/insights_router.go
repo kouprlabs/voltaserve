@@ -17,10 +17,11 @@ import (
 	"net/url"
 	"path/filepath"
 	"strconv"
-	"voltaserve/config"
-	"voltaserve/errorpkg"
-	"voltaserve/infra"
-	"voltaserve/service"
+
+	"github.com/kouprlabs/voltaserve/api/config"
+	"github.com/kouprlabs/voltaserve/api/errorpkg"
+	"github.com/kouprlabs/voltaserve/api/infra"
+	"github.com/kouprlabs/voltaserve/api/service"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"

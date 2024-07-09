@@ -13,9 +13,10 @@ package processor
 import (
 	"os"
 	"path/filepath"
-	"voltaserve/config"
-	"voltaserve/helper"
-	"voltaserve/infra"
+
+	"github.com/kouprlabs/voltaserve/conversion/config"
+	"github.com/kouprlabs/voltaserve/conversion/helper"
+	"github.com/kouprlabs/voltaserve/conversion/infra"
 )
 
 type VideoProcessor struct {

@@ -16,8 +16,9 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"voltaserve/config"
-	"voltaserve/infra"
+
+	"github.com/kouprlabs/voltaserve/conversion/config"
+	"github.com/kouprlabs/voltaserve/conversion/infra"
 )
 
 type LanguageClient struct {

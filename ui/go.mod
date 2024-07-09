@@ -1,4 +1,4 @@
-module voltaserve
+module github.com/kouprlabs/voltaserve/ui
 
 go 1.22.2
 

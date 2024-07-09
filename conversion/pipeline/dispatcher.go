@@ -12,11 +12,12 @@ package pipeline
 
 import (
 	"errors"
-	"voltaserve/client"
-	"voltaserve/errorpkg"
-	"voltaserve/helper"
-	"voltaserve/identifier"
-	"voltaserve/model"
+
+	"github.com/kouprlabs/voltaserve/conversion/client"
+	"github.com/kouprlabs/voltaserve/conversion/errorpkg"
+	"github.com/kouprlabs/voltaserve/conversion/helper"
+	"github.com/kouprlabs/voltaserve/conversion/identifier"
+	"github.com/kouprlabs/voltaserve/conversion/model"
 )
 
 type Dispatcher struct {

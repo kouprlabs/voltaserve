@@ -11,7 +11,7 @@
 package infra
 
 import (
-	"voltaserve/config"
+	"github.com/kouprlabs/voltaserve/api/config"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"

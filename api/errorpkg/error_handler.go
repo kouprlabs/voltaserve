@@ -13,7 +13,8 @@ package errorpkg
 import (
 	"errors"
 	"net/http"
-	"voltaserve/log"
+
+	"github.com/kouprlabs/voltaserve/api/log"
 
 	"github.com/gofiber/fiber/v2"
 )

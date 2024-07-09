@@ -16,8 +16,9 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"voltaserve/config"
-	"voltaserve/log"
+
+	"github.com/kouprlabs/voltaserve/api/config"
+	"github.com/kouprlabs/voltaserve/api/log"
 
 	"gopkg.in/gomail.v2"
 	"sigs.k8s.io/yaml"

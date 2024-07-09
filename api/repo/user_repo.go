@@ -12,9 +12,10 @@ package repo
 
 import (
 	"errors"
-	"voltaserve/errorpkg"
-	"voltaserve/infra"
-	"voltaserve/model"
+
+	"github.com/kouprlabs/voltaserve/api/errorpkg"
+	"github.com/kouprlabs/voltaserve/api/infra"
+	"github.com/kouprlabs/voltaserve/api/model"
 
 	"gorm.io/gorm"
 )

@@ -1,4 +1,4 @@
-module voltaserve
+module github.com/kouprlabs/voltaserve/api
 
 go 1.22
 

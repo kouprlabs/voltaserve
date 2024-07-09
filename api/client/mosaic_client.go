@@ -18,9 +18,10 @@ import (
 	"mime/multipart"
 	"net/http"
 	"os"
-	"voltaserve/config"
-	"voltaserve/errorpkg"
-	"voltaserve/log"
+
+	"github.com/kouprlabs/voltaserve/api/config"
+	"github.com/kouprlabs/voltaserve/api/errorpkg"
+	"github.com/kouprlabs/voltaserve/api/log"
 )
 
 type MosaicClient struct {
