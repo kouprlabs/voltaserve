@@ -1,4 +1,4 @@
-# Copyright 2023 Anass Bouassaba.
+# Copyright 2023 Anass Bouassaba, Piotr Łoboda.
 #
 # Use of this software is governed by the Business Source License
 # included in the file licenses/BSL.txt.
@@ -8,7 +8,7 @@
 # by the GNU Affero General Public License v3.0 only, included in the file
 # licenses/AGPL.txt.
 
-name: Build and Push voltaserve/api
+name: Build and Push voltaserve/mosaic
 
 on:
   workflow_dispatch:
@@ -16,14 +16,14 @@ on:
     branches:
       - main
     paths:
-      - "api/**"
+      - "mosaic/**"
     tags:
       - 'v*'
   pull_request:
     branches:
       - main
     paths:
-      - "api/**"
+      - "mosaic/**"
 
 jobs:
   linting:
@@ -35,7 +35,7 @@ jobs:
       - name: Lint using Golanci lint
         uses: golangci/golangci-lint-action@v6
         with:
-          working-directory: api
+          working-directory: mosaic
     permissions:
       contents: read
       pull-requests: read
@@ -70,7 +70,7 @@ jobs:
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v5
         with:
-          context: ./api
+          context: ./mosaic
           push: true
-          tags: voltaserve/api:${{ env.TRIMMED_TAG || 'latest' }}
+          tags: voltaserve/mosaic:${{ env.TRIMMED_TAG || 'latest' }}
           platforms: linux/amd64,linux/arm64
