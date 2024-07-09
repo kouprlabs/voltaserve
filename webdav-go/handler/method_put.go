@@ -65,12 +65,11 @@ func (h *Handler) methodPut(w http.ResponseWriter, r *http.Request) {
 		infra.HandleError(err, w)
 		return
 	}
-	fileData, err := os.ReadFile(outputPath)
+	blob, err := os.ReadFile(outputPath)
 	if err != nil {
 		infra.HandleError(err, w)
 		return
 	}
-	blob := fileData
 	existingFile, err := apiClient.GetFileByPath(r.URL.Path)
 	if err == nil {
 		if _, err = apiClient.PatchFile(client.FilePatchOptions{
