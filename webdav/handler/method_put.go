@@ -13,6 +13,9 @@ package handler
 import (
 	"fmt"
 	"github.com/google/uuid"
+	"github.com/kouprlabs/voltaserve/webdav/client"
+	"github.com/kouprlabs/voltaserve/webdav/helper"
+	"github.com/kouprlabs/voltaserve/webdav/infra"
 	"github.com/minio/minio-go/v7"
 	"io"
 	"net/http"
@@ -20,9 +23,6 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
-	"voltaserve/client"
-	"voltaserve/helper"
-	"voltaserve/infra"
 )
 
 /*

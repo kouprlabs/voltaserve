@@ -12,7 +12,7 @@ package cache
 
 import (
 	"encoding/json"
-	"voltaserve/infra"
+	"github.com/kouprlabs/voltaserve/webdav/infra"
 )
 
 type WorkspaceCache struct {

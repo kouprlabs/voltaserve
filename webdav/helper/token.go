@@ -11,8 +11,8 @@
 package helper
 
 import (
+	"github.com/kouprlabs/voltaserve/webdav/infra"
 	"time"
-	"voltaserve/infra"
 )
 
 func NewExpiry(token *infra.Token) time.Time {
