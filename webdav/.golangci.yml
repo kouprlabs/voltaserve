@@ -1,0 +1,125 @@
+---
+linters:
+  enable-all: true
+  disable:
+    - exhaustruct    # Structs may be uninitialized
+    - nlreturn       # covered by wsl cuddle rules
+    - nonamedreturns # named returns are acceptable
+    - depguard       # no dependency management
+    # deprecated
+    - execinquery
+    - gomnd
+    # To fix ###############################################
+    - wsl
+    - wrapcheck
+    - usestdlibvars
+    - tagliatelle
+    - stylecheck
+    - perfsprint
+    - noctx
+    - nilerr
+    - nilnil
+    - musttag
+    - mnd
+    - govet
+    - gochecknoglobals
+    - err113
+    - bodyclose
+    - revive
+    - staticcheck
+    - cyclop
+    - nestif
+    - canonicalheader
+    - lll
+    - gosec
+    - funlen
+    - goimports
+    - gofmt
+    - gofumpt
+    - gci
+    - tagalign
+
+severity:
+  default-severity: major
+
+issues:
+  fast: false
+  max-issues-per-linter: 0
+  max-same-issues: 0
+  exclude-use-default: false
+  exclude-case-sensitive: true
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - errcheck
+        - errchkjson
+        - funlen
+        - gochecknoglobals
+        - goconst
+        - wrapcheck
+
+linters-settings:
+  gci:
+    sections:
+      - standard
+      - default
+      - prefix(github.com/kouprlabs)
+      - prefix(github.com/kouprlabs/voltaserve/webdav)
+
+  mnd:
+    ignored-numbers: ['2', '4', '8', '16', '32', '64', '10', '100', '1000']
+
+  gosec:
+    excludes:
+      - G104  # Errors unhandled. Already covered by errcheck linter.
+      - G307  # Deferring a method which returns an error. Already covered by errcheck linter.
+      - G601  # No longer applicable since go v1.22 update to for loops.
+
+  govet:
+    enable-all: true
+    disable:
+      - fieldalignment  # misalignment is accepted
+
+  revive:
+    # see https://github.com/mgechev/revive#recommended-configuration
+    rules:
+      - name: blank-imports
+      - name: context-as-argument
+      - name: context-keys-type
+      - name: dot-imports
+      - name: error-return
+      - name: error-strings
+      - name: error-naming
+      - name: exported
+      - name: if-return
+      - name: increment-decrement
+      - name: var-naming
+      - name: var-declaration
+      - name: package-comments
+      - name: range
+      - name: receiver-naming
+      - name: time-naming
+      - name: unexported-return
+      - name: indent-error-flow
+      - name: errorf
+      - name: empty-block
+      - name: superfluous-else
+      - name: unused-parameter
+      - name: unreachable-code
+      - name: redefines-builtin-id
+
+  stylecheck:
+    checks: [all]
+
+  tagliatelle:
+    case:
+      rules:
+        json: goCamel
+        yaml: goSnake
+
+  varnamelen:
+    min-name-length: 1
+
+  wsl:
+    force-err-cuddling: true
+
