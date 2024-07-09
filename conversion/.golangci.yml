@@ -36,7 +36,6 @@ linters:
     - nestif
     - lll
     - gosec
-    - gofumpt
     - godot
     - gocritic
     - gocognit

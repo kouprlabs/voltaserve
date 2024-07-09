@@ -19,8 +19,7 @@ import (
 	"github.com/kouprlabs/voltaserve/conversion/infra"
 )
 
-type HealthRouter struct {
-}
+type HealthRouter struct{}
 
 func NewHealthRouter() *HealthRouter {
 	return &HealthRouter{}
