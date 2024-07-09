@@ -17,6 +17,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"sync"
 	"time"
 	"voltaserve/client"
 	"voltaserve/handler"
@@ -30,7 +31,7 @@ import (
 var (
 	tokens   = make(map[string]*infra.Token)
 	expiries = make(map[string]time.Time)
-	//mu       sync.Mutex
+	mu       sync.Mutex
 )
 
 func startTokenRefresh(idpClient *client.IdPClient) {
@@ -38,7 +39,7 @@ func startTokenRefresh(idpClient *client.IdPClient) {
 	go func() {
 		for {
 			<-ticker.C
-			//mu.Lock()
+			mu.Lock()
 			for username, token := range tokens {
 				expiry := expiries[username]
 				if time.Now().After(expiry.Add(-1 * time.Minute)) {
@@ -52,7 +53,7 @@ func startTokenRefresh(idpClient *client.IdPClient) {
 					}
 				}
 			}
-			//mu.Unlock()
+			mu.Unlock()
 		}
 	}()
 }
@@ -65,8 +66,8 @@ func basicAuthMiddleware(next http.Handler, idpClient *client.IdPClient) http.Ha
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
 		}
-		//mu.Lock()
-		//defer mu.Unlock()
+		mu.Lock()
+		defer mu.Unlock()
 		token, exists := tokens[username]
 		if !exists {
 			var err error
@@ -86,9 +87,9 @@ func basicAuthMiddleware(next http.Handler, idpClient *client.IdPClient) http.Ha
 	})
 }
 
-// @title		Voltaserve WebDAV
-// @version	2.0.0
-// @BasePath	/v2
+//	@title		Voltaserve WebDAV
+//	@version	2.0.0
+//	@BasePath	/v2
 func main() {
 	if _, err := os.Stat(".env.local"); err == nil {
 		if err := godotenv.Load(".env.local"); err != nil {
