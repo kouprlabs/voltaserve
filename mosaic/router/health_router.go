@@ -13,9 +13,9 @@ package router
 import (
 	"net/http"
 
-	"github.com/kouprlabs/voltaserve/mosaic/infra"
-
 	"github.com/gofiber/fiber/v2"
+
+	"github.com/kouprlabs/voltaserve/mosaic/infra"
 )
 
 type HealthRouter struct {

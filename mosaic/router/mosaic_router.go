@@ -15,12 +15,12 @@ import (
 	"path/filepath"
 	"strconv"
 
+	"github.com/gofiber/fiber/v2"
+
 	"github.com/kouprlabs/voltaserve/mosaic/config"
 	"github.com/kouprlabs/voltaserve/mosaic/helper"
 	"github.com/kouprlabs/voltaserve/mosaic/infra"
 	"github.com/kouprlabs/voltaserve/mosaic/service"
-
-	"github.com/gofiber/fiber/v2"
 )
 
 type MosaicRouter struct {

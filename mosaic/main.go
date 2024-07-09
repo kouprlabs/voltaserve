@@ -14,13 +14,13 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/gofiber/fiber/v2"
+	"github.com/joho/godotenv"
+
 	"github.com/kouprlabs/voltaserve/mosaic/config"
 	"github.com/kouprlabs/voltaserve/mosaic/errorpkg"
 	"github.com/kouprlabs/voltaserve/mosaic/helper"
 	"github.com/kouprlabs/voltaserve/mosaic/router"
-
-	"github.com/gofiber/fiber/v2"
-	"github.com/joho/godotenv"
 )
 
 // @title		Voltaserve Mosaic

@@ -32,7 +32,6 @@ linters:
     - gofumpt
     - godot
     - gocritic
-    - gci
     - funlen
     - gocognit
 
