@@ -17,6 +17,8 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/minio/minio-go/v7"
+
 	"github.com/kouprlabs/voltaserve/api/cache"
 	"github.com/kouprlabs/voltaserve/api/client"
 	"github.com/kouprlabs/voltaserve/api/errorpkg"
@@ -26,8 +28,6 @@ import (
 	"github.com/kouprlabs/voltaserve/api/log"
 	"github.com/kouprlabs/voltaserve/api/model"
 	"github.com/kouprlabs/voltaserve/api/repo"
-
-	"github.com/minio/minio-go/v7"
 )
 
 type InsightsService struct {

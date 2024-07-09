@@ -11,9 +11,9 @@
 package infra
 
 import (
-	"github.com/kouprlabs/voltaserve/api/config"
-
 	"github.com/meilisearch/meilisearch-go"
+
+	"github.com/kouprlabs/voltaserve/api/config"
 )
 
 var searchClient *meilisearch.Client

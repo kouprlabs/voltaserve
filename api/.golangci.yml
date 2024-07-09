@@ -45,7 +45,6 @@ linters:
     - godot
     - gocritic
     - gocognit
-    - gci
     - funlen
     - forbidigo
     - errcheck
@@ -78,7 +77,7 @@ linters-settings:
       - standard
       - default
       - prefix(github.com/kouprlabs)
-      - prefix(github.com/kouprlabs/voltaserve)
+      - prefix(github.com/kouprlabs/voltaserve/api)
 
   mnd:
     ignored-numbers: ['2', '4', '8', '16', '32', '64', '10', '100', '1000']

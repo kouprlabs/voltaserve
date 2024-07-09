@@ -14,9 +14,9 @@ import (
 	"context"
 	"strings"
 
-	"github.com/kouprlabs/voltaserve/api/config"
-
 	"github.com/redis/go-redis/v9"
+
+	"github.com/kouprlabs/voltaserve/api/config"
 )
 
 type RedisManager struct {

@@ -14,9 +14,9 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/kouprlabs/voltaserve/api/log"
-
 	"github.com/gofiber/fiber/v2"
+
+	"github.com/kouprlabs/voltaserve/api/log"
 )
 
 func ErrorHandler(c *fiber.Ctx, err error) error {

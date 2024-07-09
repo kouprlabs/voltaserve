@@ -15,11 +15,11 @@ import (
 	"net/url"
 	"strconv"
 
-	"github.com/kouprlabs/voltaserve/api/errorpkg"
-	"github.com/kouprlabs/voltaserve/api/service"
-
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
+
+	"github.com/kouprlabs/voltaserve/api/errorpkg"
+	"github.com/kouprlabs/voltaserve/api/service"
 )
 
 type GroupRouter struct {

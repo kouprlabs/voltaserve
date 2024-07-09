@@ -15,13 +15,13 @@ import (
 	"errors"
 	"time"
 
+	"gorm.io/datatypes"
+	"gorm.io/gorm"
+
 	"github.com/kouprlabs/voltaserve/api/errorpkg"
 	"github.com/kouprlabs/voltaserve/api/infra"
 	"github.com/kouprlabs/voltaserve/api/log"
 	"github.com/kouprlabs/voltaserve/api/model"
-
-	"gorm.io/datatypes"
-	"gorm.io/gorm"
 )
 
 type taskEntity struct {

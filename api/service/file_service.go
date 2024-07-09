@@ -19,6 +19,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/minio/minio-go/v7"
+	"github.com/reactivex/rxgo/v2"
+
 	"github.com/kouprlabs/voltaserve/api/cache"
 	"github.com/kouprlabs/voltaserve/api/client"
 	"github.com/kouprlabs/voltaserve/api/config"
@@ -29,9 +32,6 @@ import (
 	"github.com/kouprlabs/voltaserve/api/model"
 	"github.com/kouprlabs/voltaserve/api/repo"
 	"github.com/kouprlabs/voltaserve/api/search"
-
-	"github.com/minio/minio-go/v7"
-	"github.com/reactivex/rxgo/v2"
 )
 
 type FileService struct {

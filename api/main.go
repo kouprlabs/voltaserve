@@ -15,16 +15,15 @@ import (
 	"os"
 	"strings"
 
+	jwtware "github.com/gofiber/contrib/jwt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/joho/godotenv"
 
 	"github.com/kouprlabs/voltaserve/api/config"
 	"github.com/kouprlabs/voltaserve/api/errorpkg"
 	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/router"
-
-	jwtware "github.com/gofiber/contrib/jwt"
-	"github.com/joho/godotenv"
 )
 
 // @title		Voltaserve API
