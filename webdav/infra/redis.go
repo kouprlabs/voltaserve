@@ -12,9 +12,8 @@ package infra
 
 import (
 	"context"
-	"github.com/redis/go-redis/v9"
+	"github.com/kouprlabs/voltaserve/webdav/config"
 	"strings"
-	"voltaserve/config"
 )
 
 type RedisManager struct {

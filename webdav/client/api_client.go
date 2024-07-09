@@ -15,14 +15,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/kouprlabs/voltaserve/webdav/config"
+	"github.com/kouprlabs/voltaserve/webdav/helper"
+	"github.com/kouprlabs/voltaserve/webdav/infra"
 	"io"
 	"net/http"
 	"net/url"
 	"os"
 	"strings"
-	"voltaserve/config"
-	"voltaserve/helper"
-	"voltaserve/infra"
 )
 
 const (
