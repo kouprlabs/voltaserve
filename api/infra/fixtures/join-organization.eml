@@ -1,0 +1,64 @@
+Mime-Version: 1.0
+Date: Now
+From: "Voltaserve" <voltaserve@example.com>
+To: "Someone" <someone@example.com>
+Subject: Invitation to join a Voltaserve organization
+Content-Type: multipart/alternative;
+ boundary=XXX
+
+--XXX
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain ; charset=UTF-8
+
+You have been invited by Someone to join the organization ACME.
+Please follow this link to sign up: example.com/sign-up
+--XXX
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/html; charset=UTF-8
+
+<html>
+  <head>
+    <link rel=3D"preconnect" href=3D"https://fonts.googleapis.com" />
+    <link rel=3D"preconnect" href=3D"https://fonts.gstatic.com" crossorigin=
+ />
+    <link
+      href=3D"https://fonts.googleapis.com/css2?family=3DIBM+Plex+Sans:ital=
+,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,5=
+00;1,600;1,700&display=3Dswap"
+      rel=3D"stylesheet"
+    />
+    <style>
+      .container {
+        font-family: "IBM Plex Sans", sans-serif;
+        font-size: 14px;
+        color: black;
+        width: 580px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      .link {
+        color: #0c4cf3 !important;
+      }
+      .link:visited {
+        color: #0c4cf3 !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div class=3D"container">
+      <p>Hello,</p>
+      <p>
+        You have been invited by <b>Someone</b> to join the
+        organization <b>ACME</b>. Please follow this link to
+        view your incoming invitations:
+      </p>
+      <p>
+        <a class=3D"link" href=3D"example.com/account/invitation">
+          View incoming invitations
+        </a>
+      </p>
+    </div>
+  </body>
+</html>
+
+--XXX

@@ -39,7 +39,6 @@ linters:
     - prealloc
     - nestif
     - lll
-    - gosec
     - gocritic
     - gocognit
     - funlen
