@@ -26,6 +26,8 @@ import (
 // @title		Voltaserve Mosaic
 // @version	2.0.0
 // @BasePath	/v2
+//
+// .
 func main() {
 	if _, err := os.Stat(".env.local"); err == nil {
 		err := godotenv.Load(".env.local")
