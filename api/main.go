@@ -32,7 +32,8 @@ import (
 // @BasePath	/v2
 func main() {
 	if _, err := os.Stat(".env.local"); err == nil {
-		if err := godotenv.Load(".env.local"); err != nil {
+		err := godotenv.Load(".env.local")
+		if err != nil {
 			panic(err)
 		}
 	} else {
