@@ -24,6 +24,11 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      - name: Add dummy embedded files
+        run: |
+          mkdir ui/dist
+          touch ui/dist/index.html
+
       - name: Lint using Golanci lint
         uses: golangci/golangci-lint-action@v6
         with:
