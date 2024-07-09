@@ -1,6 +1,7 @@
 package client
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/json"
 	"errors"
@@ -150,7 +151,9 @@ func (cl *APIClient) upload(url, method string, reader io.Reader, name string) (
 			infra.GetLogger().Error(err.Error())
 			return
 		}
-		if _, err := io.Copy(part, reader); err != nil {
+		br := bufio.NewReaderSize(reader, 100*1024*1024) // 100 MB buffer
+		bw := bufio.NewWriterSize(part, 100*1024*1024)   // 100 MB buffer
+		if _, err := io.Copy(bw, br); err != nil {
 			if err := pw.CloseWithError(err); err != nil {
 				infra.GetLogger().Error(err.Error())
 				return
