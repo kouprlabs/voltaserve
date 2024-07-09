@@ -16,6 +16,7 @@ import (
 	"github.com/kouprlabs/voltaserve/webdav/client"
 	"github.com/kouprlabs/voltaserve/webdav/helper"
 	"github.com/kouprlabs/voltaserve/webdav/infra"
+	"github.com/minio/minio-go/v7"
 	"io"
 	"net/http"
 	"os"

@@ -13,6 +13,7 @@ package infra
 import (
 	"context"
 	"github.com/kouprlabs/voltaserve/webdav/config"
+	"github.com/redis/go-redis/v9"
 	"strings"
 )
 
