@@ -76,8 +76,7 @@ func (h *Handler) methodPut(w http.ResponseWriter, r *http.Request) {
 		infra.HandleError(err, w)
 		return
 	}
-	workspaceID := helper.ExtractWorkspaceIDFromPath(r.URL.Path)
-	workspace, err := h.workspaceCache.Get(workspaceID)
+	workspace, err := h.workspaceCache.Get(helper.ExtractWorkspaceIDFromPath(r.URL.Path))
 	if err != nil {
 		infra.HandleError(err, w)
 		return
