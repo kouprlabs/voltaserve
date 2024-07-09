@@ -52,7 +52,7 @@ func NewInvitationService() *InvitationService {
 
 type InvitationCreateOptions struct {
 	OrganizationID string   `json:"organizationId" validate:"required"`
-	Emails         []string `json:"emails" validate:"required,dive,email"`
+	Emails         []string `json:"emails"         validate:"required,dive,email"`
 }
 
 func (svc *InvitationService) Create(opts InvitationCreateOptions, userID string) error {

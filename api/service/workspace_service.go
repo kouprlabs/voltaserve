@@ -71,9 +71,9 @@ type Workspace struct {
 }
 
 type WorkspaceCreateOptions struct {
-	Name            string  `json:"name" validate:"required,max=255"`
+	Name            string  `json:"name"            validate:"required,max=255"`
 	Image           *string `json:"image"`
-	OrganizationID  string  `json:"organizationId" validate:"required"`
+	OrganizationID  string  `json:"organizationId"  validate:"required"`
 	StorageCapacity int64   `json:"storageCapacity"`
 }
 

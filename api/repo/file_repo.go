@@ -54,17 +54,17 @@ func NewFile() model.File {
 }
 
 type fileEntity struct {
-	ID               string                  `json:"id" gorm:"column:id"`
-	WorkspaceID      string                  `json:"workspaceId" gorm:"column:workspace_id"`
-	Name             string                  `json:"name" gorm:"column:name"`
-	Type             string                  `json:"type" gorm:"column:type"`
-	ParentID         *string                 `json:"parentId,omitempty" gorm:"column:parent_id"`
-	UserPermissions  []*UserPermissionValue  `json:"userPermissions" gorm:"-"`
-	GroupPermissions []*GroupPermissionValue `json:"groupPermissions" gorm:"-"`
-	Text             *string                 `json:"text,omitempty" gorm:"-"`
-	SnapshotID       *string                 `json:"snapshotId,omitempty" gorm:"column:snapshot_id"`
-	CreateTime       string                  `json:"createTime" gorm:"column:create_time"`
-	UpdateTime       *string                 `json:"updateTime,omitempty" gorm:"column:update_time"`
+	ID               string                  `gorm:"column:id"           json:"id"`
+	WorkspaceID      string                  `gorm:"column:workspace_id" json:"workspaceId"`
+	Name             string                  `gorm:"column:name"         json:"name"`
+	Type             string                  `gorm:"column:type"         json:"type"`
+	ParentID         *string                 `gorm:"column:parent_id"    json:"parentId,omitempty"`
+	UserPermissions  []*UserPermissionValue  `gorm:"-"                   json:"userPermissions"`
+	GroupPermissions []*GroupPermissionValue `gorm:"-"                   json:"groupPermissions"`
+	Text             *string                 `gorm:"-"                   json:"text,omitempty"`
+	SnapshotID       *string                 `gorm:"column:snapshot_id"  json:"snapshotId,omitempty"`
+	CreateTime       string                  `gorm:"column:create_time"  json:"createTime"`
+	UpdateTime       *string                 `gorm:"column:update_time"  json:"updateTime,omitempty"`
 }
 
 func (*fileEntity) TableName() string {

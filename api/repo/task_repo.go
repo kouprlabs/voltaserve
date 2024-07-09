@@ -25,16 +25,16 @@ import (
 )
 
 type taskEntity struct {
-	ID              string         `json:"id" gorm:"column:id"`
-	Name            string         `json:"name" gorm:"column:name"`
-	Error           *string        `json:"error,omitempty" gorm:"column:error"`
-	Percentage      *int           `json:"percentage,omitempty" gorm:"column:percentage"`
-	IsIndeterminate bool           `json:"isIndeterminate" gorm:"column:is_indeterminate"`
-	UserID          string         `json:"userId" gorm:"column:user_id"`
-	Status          string         `json:"status" gorm:"column:status"`
-	Payload         datatypes.JSON `json:"payload" gorm:"column:payload"`
-	CreateTime      string         `json:"createTime" gorm:"column:create_time"`
-	UpdateTime      *string        `json:"updateTime,omitempty" gorm:"column:update_time"`
+	ID              string         `gorm:"column:id"               json:"id"`
+	Name            string         `gorm:"column:name"             json:"name"`
+	Error           *string        `gorm:"column:error"            json:"error,omitempty"`
+	Percentage      *int           `gorm:"column:percentage"       json:"percentage,omitempty"`
+	IsIndeterminate bool           `gorm:"column:is_indeterminate" json:"isIndeterminate"`
+	UserID          string         `gorm:"column:user_id"          json:"userId"`
+	Status          string         `gorm:"column:status"           json:"status"`
+	Payload         datatypes.JSON `gorm:"column:payload"          json:"payload"`
+	CreateTime      string         `gorm:"column:create_time"      json:"createTime"`
+	UpdateTime      *string        `gorm:"column:update_time"      json:"updateTime,omitempty"`
 }
 
 func (*taskEntity) TableName() string {

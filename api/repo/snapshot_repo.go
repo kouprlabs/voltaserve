@@ -54,21 +54,21 @@ func NewSnapshot() model.Snapshot {
 }
 
 type snapshotEntity struct {
-	ID         string         `json:"id" gorm:"column:id;size:36"`
-	Version    int64          `json:"version" gorm:"column:version"`
-	Original   datatypes.JSON `json:"original,omitempty" gorm:"column:original"`
-	Preview    datatypes.JSON `json:"preview,omitempty" gorm:"column:preview"`
-	Text       datatypes.JSON `json:"text,omitempty" gorm:"column:text"`
-	OCR        datatypes.JSON `json:"ocr,omitempty" gorm:"column:ocr"`
-	Entities   datatypes.JSON `json:"entities,omitempty" gorm:"column:entities"`
-	Mosaic     datatypes.JSON `json:"mosaic,omitempty" gorm:"column:mosaic"`
-	Watermark  datatypes.JSON `json:"watermark,omitempty" gorm:"column:watermark"`
-	Thumbnail  datatypes.JSON `json:"thumbnail,omitempty" gorm:"column:thumbnail"`
-	Status     string         `json:"status,omitempty" gorm:"column,status"`
-	Language   *string        `json:"language,omitempty" gorm:"column:language"`
-	TaskID     *string        `json:"taskID,omitempty" gorm:"column:task_id"`
-	CreateTime string         `json:"createTime" gorm:"column:create_time"`
-	UpdateTime *string        `json:"updateTime,omitempty" gorm:"column:update_time"`
+	ID         string         `gorm:"column:id;size:36"  json:"id"`
+	Version    int64          `gorm:"column:version"     json:"version"`
+	Original   datatypes.JSON `gorm:"column:original"    json:"original,omitempty"`
+	Preview    datatypes.JSON `gorm:"column:preview"     json:"preview,omitempty"`
+	Text       datatypes.JSON `gorm:"column:text"        json:"text,omitempty"`
+	OCR        datatypes.JSON `gorm:"column:ocr"         json:"ocr,omitempty"`
+	Entities   datatypes.JSON `gorm:"column:entities"    json:"entities,omitempty"`
+	Mosaic     datatypes.JSON `gorm:"column:mosaic"      json:"mosaic,omitempty"`
+	Watermark  datatypes.JSON `gorm:"column:watermark"   json:"watermark,omitempty"`
+	Thumbnail  datatypes.JSON `gorm:"column:thumbnail"   json:"thumbnail,omitempty"`
+	Status     string         `gorm:"column,status"      json:"status,omitempty"`
+	Language   *string        `gorm:"column:language"    json:"language,omitempty"`
+	TaskID     *string        `gorm:"column:task_id"     json:"taskID,omitempty"`
+	CreateTime string         `gorm:"column:create_time" json:"createTime"`
+	UpdateTime *string        `gorm:"column:update_time" json:"updateTime,omitempty"`
 }
 
 func (*snapshotEntity) TableName() string {

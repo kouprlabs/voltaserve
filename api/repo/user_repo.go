@@ -35,19 +35,19 @@ func NewUser() model.User {
 }
 
 type userEntity struct {
-	ID                     string  `json:"id" gorm:"column:id"`
-	FullName               string  `json:"fullName" gorm:"column:full_name"`
-	Username               string  `json:"username" gorm:"column:username"`
-	Email                  string  `json:"email" gorm:"column:email"`
-	Picture                *string `json:"picture" gorm:"column:picture"`
-	IsEmailConfirmed       bool    `json:"isEmailConfirmed" gorm:"column:is_email_confirmed"`
-	PasswordHash           string  `json:"passwordHash" gorm:"column:password_hash"`
-	RefreshTokenValue      *string `json:"refreshTokenValue" gorm:"column:refresh_token_value"`
-	RefreshTokenValidTo    *int64  `json:"refreshTokenValidTo" gorm:"column:refresh_token_valid_to"`
-	ResetPasswordToken     *string `json:"resetPasswordToken" gorm:"column:reset_password_token"`
-	EmailConfirmationToken *string `json:"emailConfirmationToken" gorm:"column:email_confirmation_token"`
-	CreateTime             string  `json:"createTime" gorm:"column:create_time"`
-	UpdateTime             *string `json:"updateTime" gorm:"column:update_time"`
+	ID                     string  `gorm:"column:id"                       json:"id"`
+	FullName               string  `gorm:"column:full_name"                json:"fullName"`
+	Username               string  `gorm:"column:username"                 json:"username"`
+	Email                  string  `gorm:"column:email"                    json:"email"`
+	Picture                *string `gorm:"column:picture"                  json:"picture"`
+	IsEmailConfirmed       bool    `gorm:"column:is_email_confirmed"       json:"isEmailConfirmed"`
+	PasswordHash           string  `gorm:"column:password_hash"            json:"passwordHash"`
+	RefreshTokenValue      *string `gorm:"column:refresh_token_value"      json:"refreshTokenValue"`
+	RefreshTokenValidTo    *int64  `gorm:"column:refresh_token_valid_to"   json:"refreshTokenValidTo"`
+	ResetPasswordToken     *string `gorm:"column:reset_password_token"     json:"resetPasswordToken"`
+	EmailConfirmationToken *string `gorm:"column:email_confirmation_token" json:"emailConfirmationToken"`
+	CreateTime             string  `gorm:"column:create_time"              json:"createTime"`
+	UpdateTime             *string `gorm:"column:update_time"              json:"updateTime"`
 }
 
 func (userEntity) TableName() string {

@@ -37,11 +37,11 @@ func NewGroupPermission() model.GroupPermission {
 }
 
 type userPermissionEntity struct {
-	ID         string `json:"id" gorm:"column:id"`
-	UserID     string `json:"userId" gorm:"column:user_id"`
-	ResourceID string `json:"resourceId" gorm:"column:resource_id"`
-	Permission string `json:"permission" gorm:"column:permission"`
-	CreateTime string `json:"createTime" gorm:"column:create_time"`
+	ID         string `gorm:"column:id"          json:"id"`
+	UserID     string `gorm:"column:user_id"     json:"userId"`
+	ResourceID string `gorm:"column:resource_id" json:"resourceId"`
+	Permission string `gorm:"column:permission"  json:"permission"`
+	CreateTime string `gorm:"column:create_time" json:"createTime"`
 }
 
 func (*userPermissionEntity) TableName() string {
@@ -94,11 +94,11 @@ func (u *userPermissionEntity) SetCreateTime(createTime string) {
 }
 
 type groupPermissionEntity struct {
-	ID         string `json:"id" gorm:"column:id"`
-	GroupID    string `json:"groupId" gorm:"column:group_id"`
-	ResourceID string `json:"resourceId" gorm:"column:resource_id"`
-	Permission string `json:"permission" gorm:"column:permission"`
-	CreateTime string `json:"createTime" gorm:"column:create_time"`
+	ID         string `gorm:"column:id"          json:"id"`
+	GroupID    string `gorm:"column:group_id"    json:"groupId"`
+	ResourceID string `gorm:"column:resource_id" json:"resourceId"`
+	Permission string `gorm:"column:permission"  json:"permission"`
+	CreateTime string `gorm:"column:create_time" json:"createTime"`
 }
 
 func (*groupPermissionEntity) TableName() string {

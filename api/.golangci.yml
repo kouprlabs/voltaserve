@@ -32,7 +32,6 @@ linters:
     - asasalint
     - bodyclose
     - unparam
-    - tagalign
     - revive
     - predeclared
     - interfacebloat

@@ -90,9 +90,9 @@ func NewFileService() *FileService {
 
 type FileCreateOptions struct {
 	WorkspaceID string  `json:"workspaceId" validate:"required"`
-	Name        string  `json:"name" validate:"required,max=255"`
-	Type        string  `json:"type" validate:"required,oneof=file folder"`
-	ParentID    *string `json:"parentId" validate:"required"`
+	Name        string  `json:"name"        validate:"required,max=255"`
+	Type        string  `json:"type"        validate:"required,oneof=file folder"`
+	ParentID    *string `json:"parentId"    validate:"required"`
 }
 
 type File struct {
@@ -622,8 +622,8 @@ func (svc *FileService) ListByPath(path string, userID string) ([]*File, error) 
 }
 
 type FileQuery struct {
-	Text             string  `json:"text" validate:"required"`
-	Type             *string `json:"type,omitempty" validate:"omitempty,oneof=file folder"`
+	Text             string  `json:"text"                       validate:"required"`
+	Type             *string `json:"type,omitempty"             validate:"omitempty,oneof=file folder"`
 	CreateTimeAfter  *int64  `json:"createTimeAfter,omitempty"`
 	CreateTimeBefore *int64  `json:"createTimeBefore,omitempty"`
 	UpdateTimeAfter  *int64  `json:"updateTimeAfter,omitempty"`

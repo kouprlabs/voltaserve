@@ -37,13 +37,13 @@ func NewInvitationRepo() InvitationRepo {
 }
 
 type invitationEntity struct {
-	ID             string  `json:"id" gorm:"column:id"`
-	OrganizationID string  `json:"organizationId" gorm:"column:organization_id"`
-	OwnerID        string  `json:"ownerId" gorm:"column:owner_id"`
-	Email          string  `json:"email" gorm:"column:email"`
-	Status         string  `json:"status" gorm:"column:status"`
-	CreateTime     string  `json:"createTime" gorm:"column:create_time"`
-	UpdateTime     *string `json:"updateTime" gorm:"column:update_time"`
+	ID             string  `gorm:"column:id"              json:"id"`
+	OrganizationID string  `gorm:"column:organization_id" json:"organizationId"`
+	OwnerID        string  `gorm:"column:owner_id"        json:"ownerId"`
+	Email          string  `gorm:"column:email"           json:"email"`
+	Status         string  `gorm:"column:status"          json:"status"`
+	CreateTime     string  `gorm:"column:create_time"     json:"createTime"`
+	UpdateTime     *string `gorm:"column:update_time"     json:"updateTime"`
 }
 
 func (*invitationEntity) TableName() string {
