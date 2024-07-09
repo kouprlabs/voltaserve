@@ -42,15 +42,15 @@ func NewMailTemplate() *MailTemplate {
 }
 
 func (mt *MailTemplate) Send(templateName string, address string, variables map[string]string) error {
-	html, err := mt.GetText(filepath.FromSlash("templates/"+templateName+"/template.html"), variables)
+	html, err := mt.getText(filepath.FromSlash("templates/"+templateName+"/template.html"), variables)
 	if err != nil {
 		return err
 	}
-	text, err := mt.GetText(filepath.FromSlash("templates/"+templateName+"/template.txt"), variables)
+	text, err := mt.getText(filepath.FromSlash("templates/"+templateName+"/template.txt"), variables)
 	if err != nil {
 		return err
 	}
-	params, err := mt.GetMessageParams(templateName)
+	params, err := mt.getMessageParams(templateName)
 	if err != nil {
 		return err
 	}
@@ -66,7 +66,7 @@ func (mt *MailTemplate) Send(templateName string, address string, variables map[
 	return nil
 }
 
-func (mt *MailTemplate) GetText(path string, variables map[string]string) (string, error) {
+func (mt *MailTemplate) getText(path string, variables map[string]string) (string, error) {
 	f, err := os.Open(path)
 	if err != nil {
 		return "", err
@@ -90,7 +90,7 @@ func (mt *MailTemplate) GetText(path string, variables map[string]string) (strin
 	return buf.String(), nil
 }
 
-func (mt *MailTemplate) GetMessageParams(templateName string) (*MessageParams, error) {
+func (mt *MailTemplate) getMessageParams(templateName string) (*MessageParams, error) {
 	f, err := os.Open(filepath.FromSlash("templates/" + templateName + "/params.yml"))
 	if err != nil {
 		return nil, err
