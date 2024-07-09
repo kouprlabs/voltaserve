@@ -52,10 +52,9 @@ func (h *Handler) methodCopy(w http.ResponseWriter, r *http.Request) {
 			infra.HandleError(err, w)
 			return
 		}
-		_, err = apiClient.PatchFileName(clones[0].ID, client.FileRenameOptions{
+		if _, err = apiClient.PatchFileName(clones[0].ID, client.FileRenameOptions{
 			Name: path.Base(targetPath),
-		})
-		if err != nil {
+		}); err != nil {
 			infra.HandleError(err, w)
 			return
 		}

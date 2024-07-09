@@ -49,7 +49,12 @@ func (h *Handler) methodPut(w http.ResponseWriter, r *http.Request) {
 		infra.HandleError(err, w)
 		return
 	}
-	defer ws.Close()
+	defer func(ws *os.File) {
+		err := ws.Close()
+		if err != nil {
+			infra.HandleError(err, w)
+		}
+	}(ws)
 	_, err = io.Copy(ws, r.Body)
 	if err != nil {
 		infra.HandleError(err, w)
@@ -68,26 +73,24 @@ func (h *Handler) methodPut(w http.ResponseWriter, r *http.Request) {
 	blob := fileData
 	existingFile, err := apiClient.GetFileByPath(r.URL.Path)
 	if err == nil {
-		_, err = apiClient.PatchFile(client.FilePatchOptions{
+		if _, err = apiClient.PatchFile(client.FilePatchOptions{
 			ID:   existingFile.ID,
 			Blob: blob,
 			Name: name,
-		})
-		if err != nil {
+		}); err != nil {
 			infra.HandleError(err, w)
 			return
 		}
 		w.WriteHeader(http.StatusCreated)
 		return
 	}
-	_, err = apiClient.CreateFile(client.FileCreateOptions{
+	if _, err = apiClient.CreateFile(client.FileCreateOptions{
 		Type:        client.FileTypeFile,
 		WorkspaceID: directory.WorkspaceID,
 		ParentID:    directory.ID,
 		Blob:        blob,
 		Name:        name,
-	})
-	if err != nil {
+	}); err != nil {
 		infra.HandleError(err, w)
 		return
 	}

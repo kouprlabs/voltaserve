@@ -32,13 +32,12 @@ func (h *Handler) methodMkcol(w http.ResponseWriter, r *http.Request) {
 		infra.HandleError(err, w)
 		return
 	}
-	_, err = apiClient.CreateFile(client.FileCreateOptions{
+	if _, err = apiClient.CreateFile(client.FileCreateOptions{
 		Type:        client.FileTypeFolder,
 		WorkspaceID: directory.WorkspaceID,
 		ParentID:    directory.ID,
 		Name:        helper.DecodeURIComponent(path.Base(r.URL.Path)),
-	})
-	if err != nil {
+	}); err != nil {
 		infra.HandleError(err, w)
 		return
 	}
