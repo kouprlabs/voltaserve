@@ -49,7 +49,12 @@ func (h *Handler) methodPropfind(w http.ResponseWriter, r *http.Request) {
 				</D:response>
 			</D:multistatus>`,
 			helper.EncodeURIComponent(file.Name),
-			file.Snapshot.Original.Size,
+			func() int {
+				if file.Type == client.FileTypeFile && file.Snapshot != nil && file.Snapshot.Original != nil {
+					return file.Snapshot.Original.Size
+				}
+				return 0
+			}(),
 			helper.ToUTCString(&file.CreateTime),
 			helper.ToUTCString(file.UpdateTime),
 		)
@@ -105,7 +110,7 @@ func (h *Handler) methodPropfind(w http.ResponseWriter, r *http.Request) {
 					return ""
 				}(),
 				func() int {
-					if item.Type == client.FileTypeFile && item.Snapshot.Original != nil {
+					if item.Type == client.FileTypeFile && item.Snapshot != nil && item.Snapshot.Original != nil {
 						return item.Snapshot.Original.Size
 					}
 					return 0
