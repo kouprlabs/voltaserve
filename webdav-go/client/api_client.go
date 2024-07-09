@@ -10,25 +10,11 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strings"
 	"voltaserve/config"
+	"voltaserve/helper"
 	"voltaserve/infra"
 )
-
-type APIErrorResponse struct {
-	Code        string `json:"code"`
-	Status      int    `json:"status"`
-	Message     string `json:"message"`
-	UserMessage string `json:"userMessage"`
-	MoreInfo    string `json:"moreInfo"`
-}
-
-type APIError struct {
-	Value APIErrorResponse
-}
-
-func (e *APIError) Error() string {
-	return fmt.Sprintf("APIError: %v", e.Value)
-}
 
 const (
 	FileTypeFile   = "file"
@@ -37,32 +23,14 @@ const (
 
 type APIClient struct {
 	config *config.Config
-	token  *Token
+	token  *infra.Token
 }
 
-func NewAPIClient(token *Token) *APIClient {
+func NewAPIClient(token *infra.Token) *APIClient {
 	return &APIClient{
 		token:  token,
 		config: config.GetConfig(),
 	}
-}
-
-func (cl *APIClient) GetHealth() (string, error) {
-	resp, err := http.Get(fmt.Sprintf("%s/v2/health", cl.config.IdPURL))
-	if err != nil {
-		return "", err
-	}
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			infra.GetLogger().Error(err.Error())
-		}
-	}(resp.Body)
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return "", err
-	}
-	return string(body), nil
 }
 
 type File struct {
@@ -75,12 +43,12 @@ type File struct {
 	IsShared    bool      `json:"isShared"`
 	Snapshot    *Snapshot `json:"snapshot,omitempty"`
 	CreateTime  string    `json:"createTime"`
-	UpdateTime  string    `json:"updateTime,omitempty"`
+	UpdateTime  *string   `json:"updateTime,omitempty"`
 }
 
 type Snapshot struct {
 	Version   int        `json:"version"`
-	Original  Download   `json:"original"`
+	Original  *Download  `json:"original,omitempty"`
 	Preview   *Download  `json:"preview,omitempty"`
 	OCR       *Download  `json:"ocr,omitempty"`
 	Text      *Download  `json:"text,omitempty"`
@@ -146,8 +114,7 @@ func (cl *APIClient) CreateFile(opts FileCreateOptions) (*File, error) {
 			return nil, err
 		}
 		var file File
-		err = json.Unmarshal(body, &file)
-		if err != nil {
+		if err = json.Unmarshal(body, &file); err != nil {
 			return nil, err
 		}
 		return &file, nil
@@ -200,15 +167,14 @@ func (cl *APIClient) upload(url, method string, blob []byte, name string) (*File
 		return nil, err
 	}
 	var file File
-	err = json.Unmarshal(respBody, &file)
-	if err != nil {
+	if err = json.Unmarshal(respBody, &file); err != nil {
 		return nil, err
 	}
 	return &file, nil
 }
 
 func (cl *APIClient) GetFileByPath(path string) (*File, error) {
-	req, err := http.NewRequest("GET", fmt.Sprintf("%s/v2/files?path=%s", cl.config.APIURL, url.PathEscape(path)), nil)
+	req, err := http.NewRequest("GET", fmt.Sprintf("%s/v2/files?path=%s", cl.config.APIURL, helper.EncodeURIComponent(path)), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -230,15 +196,14 @@ func (cl *APIClient) GetFileByPath(path string) (*File, error) {
 		return nil, err
 	}
 	var file File
-	err = json.Unmarshal(body, &file)
-	if err != nil {
+	if err = json.Unmarshal(body, &file); err != nil {
 		return nil, err
 	}
 	return &file, nil
 }
 
 func (cl *APIClient) ListFilesByPath(path string) ([]File, error) {
-	req, err := http.NewRequest("GET", fmt.Sprintf("%s/v2/files/list?path=%s", cl.config.APIURL, url.PathEscape(path)), nil)
+	req, err := http.NewRequest("GET", fmt.Sprintf("%s/v2/files/list?path=%s", cl.config.APIURL, helper.EncodeURIComponent(path)), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -260,8 +225,7 @@ func (cl *APIClient) ListFilesByPath(path string) ([]File, error) {
 		return nil, err
 	}
 	var files []File
-	err = json.Unmarshal(body, &files)
-	if err != nil {
+	if err = json.Unmarshal(body, &files); err != nil {
 		return nil, err
 	}
 	return files, nil
@@ -298,8 +262,7 @@ func (cl *APIClient) CopyFile(id string, opts FileCopyOptions) ([]File, error) {
 		return nil, err
 	}
 	var files []File
-	err = json.Unmarshal(body, &files)
-	if err != nil {
+	if err = json.Unmarshal(body, &files); err != nil {
 		return nil, err
 	}
 	return files, nil
@@ -331,8 +294,7 @@ func (cl *APIClient) MoveFile(id string, opts FileMoveOptions) error {
 			infra.GetLogger().Error(err.Error())
 		}
 	}(resp.Body)
-	_, err = cl.jsonResponseOrThrow(resp)
-	return err
+	return cl.successfulResponseOrThrow(resp)
 }
 
 type FileRenameOptions struct {
@@ -366,28 +328,27 @@ func (cl *APIClient) PatchFileName(id string, opts FileRenameOptions) (*File, er
 		return nil, err
 	}
 	var file File
-	err = json.Unmarshal(body, &file)
-	if err != nil {
+	if err = json.Unmarshal(body, &file); err != nil {
 		return nil, err
 	}
 	return &file, nil
 }
 
-func (cl *APIClient) DeleteFile(id string) error {
+func (cl *APIClient) DeleteFile(id string) ([]string, error) {
 	b, err := json.Marshal(map[string][]string{"ids": {id}})
 	if err != nil {
-		return err
+		return nil, err
 	}
 	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/v2/files", cl.config.APIURL), bytes.NewBuffer(b))
 	if err != nil {
-		return err
+		return nil, err
 	}
 	req.Header.Set("Authorization", "Bearer "+cl.token.AccessToken)
 	req.Header.Set("Content-Type", "application/json")
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
@@ -395,8 +356,15 @@ func (cl *APIClient) DeleteFile(id string) error {
 			infra.GetLogger().Error(err.Error())
 		}
 	}(resp.Body)
-	_, err = cl.jsonResponseOrThrow(resp)
-	return err
+	body, err := cl.jsonResponseOrThrow(resp)
+	if err != nil {
+		return nil, err
+	}
+	var ids []string
+	if err = json.Unmarshal(body, &ids); err != nil {
+		return nil, err
+	}
+	return ids, nil
 }
 
 func (cl *APIClient) DownloadOriginal(file *File, outputPath string) error {
@@ -425,24 +393,65 @@ func (cl *APIClient) DownloadOriginal(file *File, outputPath string) error {
 }
 
 func (cl *APIClient) jsonResponseOrThrow(resp *http.Response) ([]byte, error) {
-	if resp.Header.Get("Content-Type") == "application/json" {
+	if strings.HasPrefix(resp.Header.Get("content-type"), "application/json") {
 		body, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return nil, err
 		}
 		if resp.StatusCode > 299 {
-			var apiError APIErrorResponse
-			err = json.Unmarshal(body, &apiError)
-			if err != nil {
+			var apiError infra.APIErrorResponse
+			if err = json.Unmarshal(body, &apiError); err != nil {
 				return nil, err
 			}
-			return nil, &APIError{Value: apiError}
+			return nil, &infra.APIError{Value: apiError}
+		} else {
+			return body, nil
 		}
-		return body, nil
 	} else {
-		if resp.StatusCode > 299 {
-			return nil, errors.New(resp.Status)
-		}
+		return nil, errors.New("unexpected response format")
 	}
-	return nil, errors.New("unexpected response format")
+}
+
+func (cl *APIClient) successfulResponseOrThrow(resp *http.Response) error {
+	if resp.StatusCode > 299 {
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return err
+		}
+		var apiError infra.APIErrorResponse
+		if err = json.Unmarshal(body, &apiError); err != nil {
+			return err
+		}
+		return &infra.APIError{Value: apiError}
+	} else {
+		return nil
+	}
+}
+
+type HealthAPIClient struct {
+	config *config.Config
+}
+
+func NewHealthAPIClient() *HealthAPIClient {
+	return &HealthAPIClient{
+		config: config.GetConfig(),
+	}
+}
+
+func (cl *HealthAPIClient) GetHealth() (string, error) {
+	resp, err := http.Get(fmt.Sprintf("%s/v2/health", cl.config.IdPURL))
+	if err != nil {
+		return "", err
+	}
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			infra.GetLogger().Error(err.Error())
+		}
+	}(resp.Body)
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+	return string(body), nil
 }

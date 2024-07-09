@@ -17,47 +17,47 @@ import (
 	"net/http"
 	"os"
 	"strings"
-	"sync"
 	"time"
 	"voltaserve/client"
 	"voltaserve/handler"
+	"voltaserve/helper"
+	"voltaserve/infra"
 
 	"github.com/joho/godotenv"
 	"voltaserve/config"
 )
 
 var (
-	tokens   = make(map[string]*client.Token)
+	tokens   = make(map[string]*infra.Token)
 	expiries = make(map[string]time.Time)
-	api      = &client.IdPClient{}
-	mu       sync.Mutex
+	//mu       sync.Mutex
 )
 
-func startTokenRefresh() {
+func startTokenRefresh(idpClient *client.IdPClient) {
 	ticker := time.NewTicker(5 * time.Second)
 	go func() {
 		for {
 			<-ticker.C
-			mu.Lock()
+			//mu.Lock()
 			for username, token := range tokens {
 				expiry := expiries[username]
 				if time.Now().After(expiry.Add(-1 * time.Minute)) {
-					newToken, err := api.Exchange(client.TokenExchangeOptions{
+					newToken, err := idpClient.Exchange(client.TokenExchangeOptions{
 						GrantType:    client.GrantTypeRefreshToken,
 						RefreshToken: token.RefreshToken,
 					})
 					if err == nil {
 						tokens[username] = newToken
-						expiries[username] = time.Now().Add(time.Duration(newToken.ExpiresIn) * time.Second)
+						expiries[username] = helper.NewExpiry(newToken)
 					}
 				}
 			}
-			mu.Unlock()
+			//mu.Unlock()
 		}
 	}()
 }
 
-func basicAuthMiddleware(next http.Handler) http.Handler {
+func basicAuthMiddleware(next http.Handler, idpClient *client.IdPClient) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		username, password, ok := r.BasicAuth()
 		if !ok {
@@ -65,11 +65,12 @@ func basicAuthMiddleware(next http.Handler) http.Handler {
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
 		}
-		mu.Lock()
-		defer mu.Unlock()
+		//mu.Lock()
+		//defer mu.Unlock()
 		token, exists := tokens[username]
 		if !exists {
-			token, err := api.Exchange(client.TokenExchangeOptions{
+			var err error
+			token, err = idpClient.Exchange(client.TokenExchangeOptions{
 				GrantType: client.GrantTypePassword,
 				Username:  username,
 				Password:  password,
@@ -81,8 +82,7 @@ func basicAuthMiddleware(next http.Handler) http.Handler {
 			tokens[username] = token
 			expiries[username] = time.Now().Add(time.Duration(token.ExpiresIn) * time.Second)
 		}
-		ctx := context.WithValue(r.Context(), "token", token)
-		next.ServeHTTP(w, r.WithContext(ctx))
+		next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), "token", token)))
 	})
 }
 
@@ -91,32 +91,32 @@ func basicAuthMiddleware(next http.Handler) http.Handler {
 // @BasePath	/v2
 func main() {
 	if _, err := os.Stat(".env.local"); err == nil {
-		err := godotenv.Load(".env.local")
-		if err != nil {
+		if err := godotenv.Load(".env.local"); err != nil {
 			panic(err)
 		}
 	} else {
-		err := godotenv.Load()
-		if err != nil {
+		if err := godotenv.Load(); err != nil {
 			panic(err)
 		}
 	}
 
 	cfg := config.GetConfig()
 
+	idpClient := client.NewIdPClient()
+
 	h := handler.NewHandler()
 	mux := http.NewServeMux()
 	mux.HandleFunc("/v2/health", h.Health)
 	mux.HandleFunc("/", h.Dispatch)
 
-	startTokenRefresh()
+	startTokenRefresh(idpClient)
 
 	log.Printf("Listening on port %d", cfg.Port)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", cfg.Port), http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if strings.HasPrefix(r.URL.Path, "/v2/health") {
 			mux.ServeHTTP(w, r)
 		} else {
-			basicAuthMiddleware(mux).ServeHTTP(w, r)
+			basicAuthMiddleware(mux, idpClient).ServeHTTP(w, r)
 		}
 	})))
 }

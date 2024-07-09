@@ -3,36 +3,15 @@ package client
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
+	"strings"
 	"voltaserve/config"
 	"voltaserve/infra"
 )
-
-type IdPErrorResponse struct {
-	Code        string `json:"code"`
-	Status      int    `json:"status"`
-	Message     string `json:"message"`
-	UserMessage string `json:"userMessage"`
-	MoreInfo    string `json:"moreInfo"`
-}
-
-type IdPError struct {
-	Value IdPErrorResponse
-}
-
-func (e *IdPError) Error() string {
-	return fmt.Sprintf("IdPError: %v", e.Value)
-}
-
-type Token struct {
-	AccessToken  string `json:"access_token"`
-	ExpiresIn    int    `json:"expires_in"`
-	TokenType    string `json:"token_type"`
-	RefreshToken string `json:"refresh_token"`
-}
 
 const (
 	GrantTypePassword     = "password"
@@ -57,7 +36,7 @@ func NewIdPClient() *IdPClient {
 	}
 }
 
-func (cl *IdPClient) Exchange(options TokenExchangeOptions) (*Token, error) {
+func (cl *IdPClient) Exchange(options TokenExchangeOptions) (*infra.Token, error) {
 	form := url.Values{}
 	form.Set("grant_type", options.GrantType)
 	if options.Username != "" {
@@ -85,38 +64,49 @@ func (cl *IdPClient) Exchange(options TokenExchangeOptions) (*Token, error) {
 			infra.GetLogger().Error(err.Error())
 		}
 	}(resp.Body)
-	return cl.jsonResponseOrThrow(resp)
+	body, err := cl.jsonResponseOrThrow(resp)
+	if err != nil {
+		return nil, err
+	}
+	var token infra.Token
+	if err = json.Unmarshal(body, &token); err != nil {
+		return nil, err
+	}
+	return &token, nil
 }
 
-func (cl *IdPClient) jsonResponseOrThrow(resp *http.Response) (*Token, error) {
-	if resp.Header.Get("Content-Type") == "application/json" {
-		var jsonResponse Token
+func (cl *IdPClient) jsonResponseOrThrow(resp *http.Response) ([]byte, error) {
+	if strings.HasPrefix(resp.Header.Get("content-type"), "application/json") {
 		body, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return nil, err
 		}
-		err = json.Unmarshal(body, &jsonResponse)
-		if err != nil {
-			return nil, err
-		}
 		if resp.StatusCode > 299 {
-			var idpError IdPErrorResponse
+			var idpError infra.IdPErrorResponse
 			err = json.Unmarshal(body, &idpError)
 			if err != nil {
 				return nil, err
 			}
-			return nil, &IdPError{Value: idpError}
+			return nil, &infra.IdPError{Value: idpError}
+		} else {
+			return body, nil
 		}
-		return &jsonResponse, nil
 	} else {
-		if resp.StatusCode > 299 {
-			return nil, fmt.Errorf(resp.Status)
-		}
+		return nil, errors.New("unexpected response format")
 	}
-	return nil, fmt.Errorf("unexpected response format")
 }
 
-func (cl *IdPClient) GetHealth() (string, error) {
+type HealthIdPClient struct {
+	config *config.Config
+}
+
+func NewHealthIdPClient() *HealthIdPClient {
+	return &HealthIdPClient{
+		config: config.GetConfig(),
+	}
+}
+
+func (cl *HealthIdPClient) GetHealth() (string, error) {
 	resp, err := http.Get(fmt.Sprintf("%s/v2/health", cl.config.IdPURL))
 	if err != nil {
 		return "", err

@@ -80,6 +80,7 @@ function handleRequest(req: IncomingMessage, res: ServerResponse) {
         res.end()
       } else {
         const method = req.method.toUpperCase()
+        console.log(method)
         switch (method) {
           case 'OPTIONS':
             await handleOptions(req, res)

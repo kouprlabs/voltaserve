@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"voltaserve/client"
 )
 
 type Handler struct{}
@@ -37,6 +38,22 @@ func (h *Handler) Dispatch(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (h *Handler) Health(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
+func (h *Handler) Health(w http.ResponseWriter, _ *http.Request) {
+	apiClient := client.NewHealthAPIClient()
+	apiHealth, err := apiClient.GetHealth()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	idpClient := client.NewHealthIdPClient()
+	idpHealth, err := idpClient.GetHealth()
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	if apiHealth == "OK" && idpHealth == "OK" {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+	w.WriteHeader(http.StatusServiceUnavailable)
 }
