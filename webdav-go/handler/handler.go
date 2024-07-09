@@ -2,13 +2,21 @@ package handler
 
 import (
 	"net/http"
+	"voltaserve/cache"
 	"voltaserve/client"
+	"voltaserve/infra"
 )
 
-type Handler struct{}
+type Handler struct {
+	s3             *infra.S3Manager
+	workspaceCache *cache.WorkspaceCache
+}
 
 func NewHandler() *Handler {
-	return &Handler{}
+	return &Handler{
+		s3:             infra.NewS3Manager(),
+		workspaceCache: cache.NewWorkspaceCache(),
+	}
 }
 
 func (h *Handler) Dispatch(w http.ResponseWriter, r *http.Request) {

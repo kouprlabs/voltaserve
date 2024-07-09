@@ -1,13 +1,11 @@
 package client
 
 import (
-	"bufio"
 	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
-	"mime/multipart"
 	"net/http"
 	"net/url"
 	"os"
@@ -73,109 +71,26 @@ type Thumbnail struct {
 	Height int    `json:"height"`
 }
 
-type FileCreateOptions struct {
+type FileCreateFolderOptions struct {
 	Type        string
 	WorkspaceID string
 	ParentID    string
-	Reader      io.Reader
 	Name        string
 }
 
-func (cl *APIClient) CreateFile(opts FileCreateOptions) (*File, error) {
+func (cl *APIClient) CreateFolder(opts FileCreateFolderOptions) (*File, error) {
 	params := url.Values{}
 	params.Set("type", opts.Type)
 	params.Set("workspace_id", opts.WorkspaceID)
 	if opts.ParentID != "" {
 		params.Set("parent_id", opts.ParentID)
 	}
-	if opts.Name != "" {
-		params.Set("name", opts.Name)
-	}
-	if opts.Type == FileTypeFile && opts.Reader != nil {
-		return cl.upload(fmt.Sprintf("%s/v2/files?%s", cl.config.APIURL, params.Encode()), "POST", opts.Reader, opts.Name)
-	} else if opts.Type == FileTypeFolder {
-		req, err := http.NewRequest("POST", fmt.Sprintf("%s/v2/files?%s", cl.config.APIURL, params.Encode()), nil)
-		if err != nil {
-			return nil, err
-		}
-		req.Header.Set("Authorization", "Bearer "+cl.token.AccessToken)
-		client := &http.Client{}
-		resp, err := client.Do(req)
-		if err != nil {
-			return nil, err
-		}
-		defer func(Body io.ReadCloser) {
-			err := Body.Close()
-			if err != nil {
-				infra.GetLogger().Error(err.Error())
-			}
-		}(resp.Body)
-		body, err := cl.jsonResponseOrThrow(resp)
-		if err != nil {
-			return nil, err
-		}
-		var file File
-		if err = json.Unmarshal(body, &file); err != nil {
-			return nil, err
-		}
-		return &file, nil
-	}
-	return nil, errors.New("invalid file type or missing blob")
-}
-
-type FilePatchOptions struct {
-	ID     string
-	Reader io.Reader
-	Name   string
-}
-
-func (cl *APIClient) PatchFile(opts FilePatchOptions) (*File, error) {
-	return cl.upload(fmt.Sprintf("%s/v2/files/%s", cl.config.APIURL, opts.ID), "PATCH", opts.Reader, opts.Name)
-}
-
-func (cl *APIClient) upload(url, method string, reader io.Reader, name string) (*File, error) {
-	pr, pw := io.Pipe()
-	writer := multipart.NewWriter(pw)
-	go func() {
-		defer func(pw *io.PipeWriter) {
-			if err := pw.Close(); err != nil {
-				infra.GetLogger().Error(err.Error())
-			}
-		}(pw)
-		part, err := writer.CreateFormFile("file", name)
-		if err != nil {
-			if err := pw.CloseWithError(err); err != nil {
-				infra.GetLogger().Error(err.Error())
-				return
-			}
-			infra.GetLogger().Error(err.Error())
-			return
-		}
-		br := bufio.NewReaderSize(reader, 100*1024*1024) // 100 MB buffer
-		bw := bufio.NewWriterSize(part, 100*1024*1024)   // 100 MB buffer
-		if _, err := io.Copy(bw, br); err != nil {
-			if err := pw.CloseWithError(err); err != nil {
-				infra.GetLogger().Error(err.Error())
-				return
-			}
-			infra.GetLogger().Error(err.Error())
-			return
-		}
-		if err := writer.Close(); err != nil {
-			if err := pw.CloseWithError(err); err != nil {
-				infra.GetLogger().Error(err.Error())
-				return
-			}
-			infra.GetLogger().Error(err.Error())
-			return
-		}
-	}()
-	req, err := http.NewRequest(method, url, pr)
+	params.Set("name", opts.Name)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v2/files?%s", cl.config.APIURL, params.Encode()), nil)
 	if err != nil {
 		return nil, err
 	}
 	req.Header.Set("Authorization", "Bearer "+cl.token.AccessToken)
-	req.Header.Set("Content-Type", writer.FormDataContentType())
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
@@ -187,12 +102,106 @@ func (cl *APIClient) upload(url, method string, reader io.Reader, name string) (
 			infra.GetLogger().Error(err.Error())
 		}
 	}(resp.Body)
-	respBody, err := cl.jsonResponseOrThrow(resp)
+	body, err := cl.jsonResponseOrThrow(resp)
 	if err != nil {
 		return nil, err
 	}
 	var file File
-	if err = json.Unmarshal(respBody, &file); err != nil {
+	if err = json.Unmarshal(body, &file); err != nil {
+		return nil, err
+	}
+	return &file, nil
+}
+
+type S3Reference struct {
+	Bucket      string
+	Key         string
+	SnapshotID  string
+	Size        int64
+	ContentType string
+}
+
+type FileCreateFromS3Options struct {
+	Type        string
+	WorkspaceID string
+	ParentID    string
+	Name        string
+	S3Reference S3Reference
+}
+
+func (cl *APIClient) CreateFileFromS3(opts FileCreateFromS3Options) (*File, error) {
+	body, err := json.Marshal(opts)
+	if err != nil {
+		return nil, err
+	}
+	req, err := http.NewRequest("POST",
+		fmt.Sprintf("%s/v2/files/create_from_s3?api_key=%s&access_token=%s&workspace_id=%s&name=%s&s3_key=%s&s3_bucket=%s&snapshot_id=%s&content_type=%s&size=%d",
+			cl.config.APIURL,
+			cl.config.Security.APIKey,
+			cl.token.AccessToken,
+			opts.WorkspaceID,
+			opts.Name,
+			opts.S3Reference.Key,
+			opts.S3Reference.Bucket,
+			opts.S3Reference.SnapshotID,
+			opts.S3Reference.ContentType,
+			opts.S3Reference.Size,
+		),
+		bytes.NewBuffer(body))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json; charset=UTF-8")
+	client := &http.Client{}
+	res, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+	var file File
+	if err = json.Unmarshal(body, &file); err != nil {
+		return nil, err
+	}
+	return &file, nil
+}
+
+type FilePatchFromS3Options struct {
+	ID          string
+	Name        string
+	S3Reference S3Reference
+}
+
+func (cl *APIClient) PatchFileFromS3(opts FilePatchFromS3Options) (*File, error) {
+	body, err := json.Marshal(opts)
+	if err != nil {
+		return nil, err
+	}
+	req, err := http.NewRequest("PATCH",
+		fmt.Sprintf("%s/v2/files/%s/patch_from_s3?api_key=%s&access_token=%s&name=%s&s3_key=%s&s3_bucket=%s&snapshot_id=%s&content_type=%s&size=%d",
+			cl.config.APIURL,
+			cl.config.Security.APIKey,
+			cl.token.AccessToken,
+			opts.ID,
+			opts.Name,
+			opts.S3Reference.Key,
+			opts.S3Reference.Bucket,
+			opts.S3Reference.SnapshotID,
+			opts.S3Reference.ContentType,
+			opts.S3Reference.Size,
+		),
+		bytes.NewBuffer(body))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json; charset=UTF-8")
+	client := &http.Client{}
+	res, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+	var file File
+	if err = json.Unmarshal(body, &file); err != nil {
 		return nil, err
 	}
 	return &file, nil
