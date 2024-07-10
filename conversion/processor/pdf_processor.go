@@ -11,7 +11,9 @@
 package processor
 
 import (
+	"errors"
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -37,22 +39,25 @@ func NewPDFProcessor() *PDFProcessor {
 }
 
 func (p *PDFProcessor) TextFromPDF(inputPath string) (*string, error) {
-	tmpPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".txt")
+	tmpPath := filepath.Join(os.TempDir(), helper.NewID()+".txt")
+
 	if err := infra.NewCommand().Exec("pdftotext", inputPath, tmpPath); err != nil {
 		return nil, err
 	}
+
 	defer func(path string) {
-		_, err := os.Stat(path)
-		if os.IsExist(err) {
-			if err := os.Remove(path); err != nil {
-				infra.GetLogger().Error(err)
-			}
+		if err := os.Remove(path); errors.Is(err, fs.ErrNotExist) {
+			return
+		} else if err != nil {
+			infra.GetLogger().Error(err)
 		}
 	}(tmpPath)
-	b, err := os.ReadFile(tmpPath)
+
+	b, err := os.ReadFile(tmpPath) //nolint:gosec // Known path
 	if err != nil {
 		return nil, err
 	}
+
 	return helper.ToPtr(strings.TrimSpace(string(b))), nil
 }
 
