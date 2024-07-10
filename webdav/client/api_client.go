@@ -435,7 +435,7 @@ func (cl *APIClient) DownloadOriginal(file *File, outputPath string) error {
 			infra.GetLogger().Error(err.Error())
 		}
 	}(resp.Body)
-	out, err := os.Create(outputPath)
+	out, err := os.Create(outputPath) //nolint:gosec // Known safe value
 	if err != nil {
 		return err
 	}

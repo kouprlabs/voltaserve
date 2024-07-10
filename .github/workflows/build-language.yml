@@ -75,7 +75,7 @@ jobs:
           TAGS+=",$name:latest"
           echo "TAGS=$TAGS" >> $GITHUB_ENV
 
-      - name: Set the tag on wokflow dispatch
+      - name: Set the tag on workflow dispatch
         if: ${{ github.ref_type != 'tag' }}
         run: echo "TAGS=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
 

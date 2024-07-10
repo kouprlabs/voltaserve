@@ -31,7 +31,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Prepare input branch
-        if: ${{ github.event.inputs.branch != "" }}
+        if: ${{ github.event.inputs.branch != '' }}
         run: echo "branch=refs/heads/${{ github.event.inputs.branch }}" >> $GITHUB_ENV
 
       - name: Checkout Repository
@@ -70,9 +70,9 @@ jobs:
           TAGS+=",$name:latest"
           echo "TAGS=$TAGS" >> $GITHUB_ENV
 
-      - name: Set the tag on wokflow dispatch
+      - name: Set the tag on workflow dispatch
         if: ${{ github.ref_type != 'tag' }}
-        run: echo "TAGS=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+        run: echo "TAGS=voltaserve/api:$(git rev-parse --short HEAD)" >> $GITHUB_ENV
 
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v5
