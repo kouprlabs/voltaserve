@@ -44,17 +44,28 @@ jobs:
       - name: Extract tag that triggered this action
         if: ${{ github.ref_type == 'tag' }}
         run: |
-          TAG=${{ github.ref_name }}
-          echo "TAG=${TAG#v}" >> $GITHUB_ENV
+          name="voltaserve/ui"
+          version="${{ github.ref_name }}"
+          version="${version}#v"
+          IFS='.' read -r -a parts <<< "$version"
+          TAGS="$name:$version"
+
+          for ((i=${#parts[@]}-1; i>0; i--)); do
+            tag=$(IFS='.'; echo "${parts[*]:0:$i}")
+            TAGS+=",$name:$tag"
+          done
+
+          TAGS+=",$name:latest"
+          echo "TAGS=$TAGS" >> $GITHUB_ENV
 
       - name: Set the tag on wokflow dispatch
         if: ${{ github.ref_type != 'tag' }}
-        run: echo "TAG=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+        run: echo "TAGS=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
 
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v5
         with:
           context: ./ui
           push: true
-          tags: voltaserve/ui:${{ env.TAG }}
+          tags: ${{ env.TAGS }}
           platforms: linux/amd64,linux/arm64
