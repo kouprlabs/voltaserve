@@ -26,7 +26,7 @@ type Config struct {
 }
 
 type SecurityConfig struct {
-	APIKey string `json:"api_key"`
+	APIKey string
 }
 
 type LimitsConfig struct {

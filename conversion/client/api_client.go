@@ -68,7 +68,7 @@ type SnapshotPatchOptions struct {
 	Mosaic    *S3Object          `json:"mosaic"`
 	Thumbnail *S3Object          `json:"thumbnail"`
 	Status    *string            `json:"status"`
-	TaskID    *string            `json:"taskID"`
+	TaskID    *string            `json:"taskId"`
 }
 
 const (
@@ -88,7 +88,7 @@ const (
 	SnapshotFieldThumbnail = "thumbnail"
 	SnapshotFieldStatus    = "status"
 	SnapshotFieldLanguage  = "language"
-	SnapshotFieldTaskID    = "taskID"
+	SnapshotFieldTaskID    = "taskId"
 )
 
 type S3Object struct {
@@ -123,13 +123,12 @@ func (cl *APIClient) PatchSnapshot(opts SnapshotPatchOptions) error {
 }
 
 type TaskCreateOptions struct {
-	Name            string       `json:"name"`
-	Error           *string      `json:"error,omitempty"`
-	Percentage      *int         `json:"percentage,omitempty"`
-	IsIndeterminate bool         `json:"isIndeterminate"`
-	UserID          string       `json:"userId"`
-	Status          string       `json:"status"`
-	Payload         *TaskPayload `json:"payload,omitempty"`
+	Name            string  `json:"name"`
+	Error           *string `json:"error,omitempty"`
+	Percentage      *int    `json:"percentage,omitempty"`
+	IsIndeterminate bool    `json:"isIndeterminate"`
+	UserID          string  `json:"userId"`
+	Status          string  `json:"status"`
 }
 
 const (
@@ -138,10 +137,6 @@ const (
 	TaskStatusSuccess = "success"
 	TaskStatusError   = "error"
 )
-
-type TaskPayload struct {
-	FileID *string `json:"file_id,omitempty"`
-}
 
 func (cl *APIClient) CreateTask(opts TaskCreateOptions) error {
 	body, err := json.Marshal(opts)

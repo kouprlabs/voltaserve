@@ -65,7 +65,7 @@ type snapshotEntity struct {
 	Thumbnail  datatypes.JSON `gorm:"column:thumbnail"   json:"thumbnail,omitempty"`
 	Status     string         `gorm:"column,status"      json:"status,omitempty"`
 	Language   *string        `gorm:"column:language"    json:"language,omitempty"`
-	TaskID     *string        `gorm:"column:task_id"     json:"taskID,omitempty"`
+	TaskID     *string        `gorm:"column:task_id"     json:"taskId,omitempty"`
 	CreateTime string         `gorm:"column:create_time" json:"createTime"`
 	UpdateTime *string        `gorm:"column:update_time" json:"updateTime,omitempty"`
 }
@@ -442,7 +442,7 @@ const (
 	SnapshotFieldThumbnail = "thumbnail"
 	SnapshotFieldStatus    = "status"
 	SnapshotFieldLanguage  = "language"
-	SnapshotFieldTaskID    = "taskID"
+	SnapshotFieldTaskID    = "taskId"
 )
 
 func (repo *snapshotRepo) Update(id string, opts SnapshotUpdateOptions) error {

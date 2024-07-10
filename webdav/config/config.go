@@ -40,7 +40,7 @@ type RedisConfig struct {
 }
 
 type SecurityConfig struct {
-	APIKey string `json:"api_key"`
+	APIKey string
 }
 
 var config *Config

@@ -29,6 +29,7 @@ const (
 	GrantTypeRefreshToken = "refresh_token"
 )
 
+//nolint:tagliatelle // JWT-Esque
 type TokenExchangeOptions struct {
 	GrantType    string `json:"grant_type"`
 	Username     string `json:"username,omitempty"`

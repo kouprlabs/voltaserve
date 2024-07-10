@@ -245,7 +245,7 @@ func (svc *SnapshotService) Activate(id string, opts SnapshotActivateOptions, us
 }
 
 type SnapshotDetachOptions struct {
-	FileID string `json:"fileID" validate:"required"`
+	FileID string `json:"fileId" validate:"required"`
 }
 
 func (svc *SnapshotService) Detach(id string, opts SnapshotDetachOptions, userID string) error {
