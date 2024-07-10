@@ -17,7 +17,6 @@ import (
 	"net/http"
 	"os"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/joho/godotenv"
@@ -32,7 +31,6 @@ import (
 var (
 	tokens   = make(map[string]*infra.Token)
 	expiries = make(map[string]time.Time)
-	mu       sync.Mutex
 )
 
 func startTokenRefresh(idpClient *client.IdPClient) {
@@ -40,7 +38,6 @@ func startTokenRefresh(idpClient *client.IdPClient) {
 	go func() {
 		for {
 			<-ticker.C
-			mu.Lock()
 			for username, token := range tokens {
 				expiry := expiries[username]
 				if time.Now().After(expiry.Add(-1 * time.Minute)) {
@@ -54,7 +51,6 @@ func startTokenRefresh(idpClient *client.IdPClient) {
 					}
 				}
 			}
-			mu.Unlock()
 		}
 	}()
 }
@@ -67,8 +63,6 @@ func basicAuthMiddleware(next http.Handler, idpClient *client.IdPClient) http.Ha
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
 		}
-		mu.Lock()
-		defer mu.Unlock()
 		token, exists := tokens[username]
 		if !exists {
 			var err error
