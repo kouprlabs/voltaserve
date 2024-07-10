@@ -48,7 +48,7 @@ jobs:
         run: |
           name="voltaserve/api"
           version="${{ github.ref_name }}"
-          version="${version}#v"
+          version="${version#v}"
           IFS='.' read -r -a parts <<< "$version"
           TAGS="$name:$version"
 
