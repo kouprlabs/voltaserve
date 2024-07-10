@@ -71,7 +71,6 @@ type Snapshot struct {
 	Text       *Download `json:"text,omitempty"`
 	Entities   *Download `json:"entities,omitempty"`
 	Mosaic     *Download `json:"mosaic,omitempty"`
-	Watermark  *Download `json:"watermark,omitempty"`
 	Thumbnail  *Download `json:"thumbnail,omitempty"`
 	Language   *string   `json:"language,omitempty"`
 	Status     string    `json:"status,omitempty"`
@@ -287,7 +286,6 @@ type SnapshotPatchOptions struct {
 	OCR       *model.S3Object           `json:"ocr"`
 	Entities  *model.S3Object           `json:"entities"`
 	Mosaic    *model.S3Object           `json:"mosaic"`
-	Watermark *model.S3Object           `json:"watermark"`
 	Thumbnail *model.S3Object           `json:"thumbnail"`
 	Status    *string                   `json:"status"`
 	TaskID    *string                   `json:"taskId"`
@@ -305,7 +303,6 @@ func (svc *SnapshotService) Patch(id string, opts SnapshotPatchOptions) (*Snapsh
 		OCR:       opts.OCR,
 		Entities:  opts.Entities,
 		Mosaic:    opts.Mosaic,
-		Watermark: opts.Watermark,
 		Thumbnail: opts.Thumbnail,
 		Status:    opts.Status,
 	}); err != nil {
@@ -384,9 +381,6 @@ func (mp *SnapshotMapper) mapOne(m model.Snapshot) *Snapshot {
 	}
 	if m.HasMosaic() {
 		s.Mosaic = mp.mapS3Object(m.GetMosaic())
-	}
-	if m.HasWatermark() {
-		s.Watermark = mp.mapS3Object(m.GetWatermark())
 	}
 	if m.HasThumbnail() {
 		s.Thumbnail = mp.mapS3Object(m.GetThumbnail())

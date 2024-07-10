@@ -16,14 +16,13 @@ import (
 )
 
 type Config struct {
-	Port         int
-	APIURL       string
-	LanguageURL  string
-	MosaicURL    string
-	WatermarkURL string
-	Security     SecurityConfig
-	Limits       LimitsConfig
-	S3           S3Config
+	Port        int
+	APIURL      string
+	LanguageURL string
+	MosaicURL   string
+	Security    SecurityConfig
+	Limits      LimitsConfig
+	S3          S3Config
 }
 
 type SecurityConfig struct {
@@ -68,7 +67,6 @@ func readURLs(config *Config) {
 	config.APIURL = os.Getenv("API_URL")
 	config.LanguageURL = os.Getenv("LANGUAGE_URL")
 	config.MosaicURL = os.Getenv("MOSAIC_URL")
-	config.WatermarkURL = os.Getenv("WATERMARK_URL")
 }
 
 func readSecurity(config *Config) {

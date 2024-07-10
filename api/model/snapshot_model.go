@@ -26,7 +26,6 @@ type Snapshot interface {
 	GetOCR() *S3Object
 	GetEntities() *S3Object
 	GetMosaic() *S3Object
-	GetWatermark() *S3Object
 	GetThumbnail() *S3Object
 	GetTaskID() *string
 	HasOriginal() bool
@@ -35,7 +34,6 @@ type Snapshot interface {
 	HasOCR() bool
 	HasEntities() bool
 	HasMosaic() bool
-	HasWatermark() bool
 	HasThumbnail() bool
 	GetStatus() string
 	GetLanguage() *string
@@ -49,7 +47,6 @@ type Snapshot interface {
 	SetOCR(*S3Object)
 	SetEntities(*S3Object)
 	SetMosaic(*S3Object)
-	SetWatermark(*S3Object)
 	SetThumbnail(*S3Object)
 	SetStatus(string)
 	SetLanguage(string)

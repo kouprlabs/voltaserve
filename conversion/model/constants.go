@@ -16,8 +16,7 @@ const (
 	PipelineImage      = "image"
 	PipelineAudioVideo = "audio_video"
 	PipelineInsights   = "insights"
-	PipelineMoasic     = "mosaic"
-	PipelineWatermark  = "watermark"
+	PipelineMosaic     = "mosaic"
 	PipelineGLB        = "glb"
 	PipelineZIP        = "zip"
 )

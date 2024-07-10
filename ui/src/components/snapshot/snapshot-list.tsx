@@ -7,7 +7,6 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import { useCallback, useEffect, useState } from 'react'
 import {
   Badge,
@@ -177,9 +176,6 @@ const SnapshotList = () => {
                           ) : null}
                           {s.mosaic ? (
                             <Badge variant="outline">Mosaic</Badge>
-                          ) : null}
-                          {s.watermark ? (
-                            <Badge variant="outline">Watermark</Badge>
                           ) : null}
                           {s.isActive ? (
                             <Badge colorScheme="green">Active</Badge>
