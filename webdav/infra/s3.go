@@ -14,11 +14,13 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"github.com/kouprlabs/voltaserve/webdav/config"
-	"github.com/minio/minio-go/v7"
-	"github.com/minio/minio-go/v7/pkg/credentials"
 	"io"
 	"strings"
+
+	"github.com/minio/minio-go/v7"
+	"github.com/minio/minio-go/v7/pkg/credentials"
+
+	"github.com/kouprlabs/voltaserve/webdav/config"
 )
 
 type S3Manager struct {

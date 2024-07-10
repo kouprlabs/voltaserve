@@ -8,14 +8,14 @@
 # by the GNU Affero General Public License v3.0 only, included in the file
 # licenses/AGPL.txt.
 
-name: Lint voltaserve/ui
+name: Lint voltaserve/webdav
 
 on:
   pull_request:
     branches:
       - main
     paths:
-      - "ui/**"
+      - "webdav/**"
       
 jobs:
   linting:
@@ -24,15 +24,10 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Add dummy embedded files
-        run: |
-          mkdir ui/dist
-          touch ui/dist/index.html
-
       - name: Lint using Golanci lint
         uses: golangci/golangci-lint-action@v6
         with:
-          working-directory: ui
+          working-directory: webdav
     permissions:
       contents: read
       pull-requests: read

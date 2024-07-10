@@ -11,10 +11,11 @@
 package handler
 
 import (
+	"net/http"
+
 	"github.com/kouprlabs/voltaserve/webdav/cache"
 	"github.com/kouprlabs/voltaserve/webdav/client"
 	"github.com/kouprlabs/voltaserve/webdav/infra"
-	"net/http"
 )
 
 type Handler struct {

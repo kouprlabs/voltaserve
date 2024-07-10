@@ -24,6 +24,10 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/go-playground/validator/v10"
+	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt/v5"
+
 	"github.com/kouprlabs/voltaserve/api/config"
 	"github.com/kouprlabs/voltaserve/api/errorpkg"
 	"github.com/kouprlabs/voltaserve/api/helper"
@@ -31,10 +35,6 @@ import (
 	"github.com/kouprlabs/voltaserve/api/log"
 	"github.com/kouprlabs/voltaserve/api/model"
 	"github.com/kouprlabs/voltaserve/api/service"
-
-	"github.com/go-playground/validator/v10"
-	"github.com/gofiber/fiber/v2"
-	"github.com/golang-jwt/jwt/v5"
 )
 
 type FileRouter struct {
@@ -237,7 +237,7 @@ func (r *FileRouter) Patch(c *fiber.Ctx) error {
 
 type FileCreateFolderOptions struct {
 	WorkspaceID string  `json:"workspaceId" validate:"required"`
-	Name        string  `json:"name" validate:"required,max=255"`
+	Name        string  `json:"name"        validate:"required,max=255"`
 	ParentID    *string `json:"parentId"`
 }
 
@@ -596,8 +596,8 @@ func (r *FileRouter) GetCount(c *fiber.Ctx) error {
 }
 
 type FileGrantUserPermissionOptions struct {
-	UserID     string   `json:"userId" validate:"required"`
-	IDs        []string `json:"ids" validate:"required"`
+	UserID     string   `json:"userId"     validate:"required"`
+	IDs        []string `json:"ids"        validate:"required"`
 	Permission string   `json:"permission" validate:"required,oneof=viewer editor owner"`
 }
 
@@ -629,7 +629,7 @@ func (r *FileRouter) GrantUserPermission(c *fiber.Ctx) error {
 }
 
 type FileRevokeUserPermissionOptions struct {
-	IDs    []string `json:"ids" validate:"required"`
+	IDs    []string `json:"ids"    validate:"required"`
 	UserID string   `json:"userId" validate:"required"`
 }
 
@@ -661,8 +661,8 @@ func (r *FileRouter) RevokeUserPermission(c *fiber.Ctx) error {
 }
 
 type FileGrantGroupPermissionOptions struct {
-	GroupID    string   `json:"groupId" validate:"required"`
-	IDs        []string `json:"ids" validate:"required"`
+	GroupID    string   `json:"groupId"    validate:"required"`
+	IDs        []string `json:"ids"        validate:"required"`
 	Permission string   `json:"permission" validate:"required,oneof=viewer editor owner"`
 }
 
@@ -694,7 +694,7 @@ func (r *FileRouter) GrantGroupPermission(c *fiber.Ctx) error {
 }
 
 type FileRevokeGroupPermissionOptions struct {
-	IDs     []string `json:"ids" validate:"required"`
+	IDs     []string `json:"ids"     validate:"required"`
 	GroupID string   `json:"groupId" validate:"required"`
 }
 

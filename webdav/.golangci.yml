@@ -12,36 +12,27 @@ linters:
     # To fix ###############################################
     - wsl
     - wrapcheck
+    - usestdlibvars
     - tagliatelle
     - stylecheck
     - perfsprint
     - noctx
     - nilerr
-    - ireturn
-    - usestdlibvars
     - nilnil
-    - inamedparam
-    - govet
+    - musttag
     - mnd
-    - err113
+    - govet
     - gochecknoglobals
-    - forcetypeassert
-    - errorlint
-    - dupword
-    - cyclop
+    - err113
     - bodyclose
     - revive
-    - errname
-    - prealloc
+    - staticcheck
+    - cyclop
     - nestif
+    - canonicalheader
     - lll
     - gosec
-    - gocritic
-    - gocognit
     - funlen
-    - errcheck
-    - dupl
-    - intrange
 
 severity:
   default-severity: major
@@ -68,7 +59,7 @@ linters-settings:
       - standard
       - default
       - prefix(github.com/kouprlabs)
-      - prefix(github.com/kouprlabs/voltaserve/conversion)
+      - prefix(github.com/kouprlabs/voltaserve/webdav)
 
   mnd:
     ignored-numbers: ['2', '4', '8', '16', '32', '64', '10', '100', '1000']

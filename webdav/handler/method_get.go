@@ -12,16 +12,18 @@ package handler
 
 import (
 	"fmt"
-	"github.com/google/uuid"
-	"github.com/kouprlabs/voltaserve/webdav/client"
-	"github.com/kouprlabs/voltaserve/webdav/helper"
-	"github.com/kouprlabs/voltaserve/webdav/infra"
 	"io"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
+
+	"github.com/google/uuid"
+
+	"github.com/kouprlabs/voltaserve/webdav/client"
+	"github.com/kouprlabs/voltaserve/webdav/helper"
+	"github.com/kouprlabs/voltaserve/webdav/infra"
 )
 
 /*

@@ -14,12 +14,12 @@ import (
 	"errors"
 	"time"
 
+	"gorm.io/gorm"
+
 	"github.com/kouprlabs/voltaserve/api/errorpkg"
 	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/infra"
 	"github.com/kouprlabs/voltaserve/api/model"
-
-	"gorm.io/gorm"
 )
 
 type FileRepo interface {
@@ -54,17 +54,17 @@ func NewFile() model.File {
 }
 
 type fileEntity struct {
-	ID               string                  `json:"id" gorm:"column:id"`
-	WorkspaceID      string                  `json:"workspaceId" gorm:"column:workspace_id"`
-	Name             string                  `json:"name" gorm:"column:name"`
-	Type             string                  `json:"type" gorm:"column:type"`
-	ParentID         *string                 `json:"parentId,omitempty" gorm:"column:parent_id"`
-	UserPermissions  []*UserPermissionValue  `json:"userPermissions" gorm:"-"`
-	GroupPermissions []*GroupPermissionValue `json:"groupPermissions" gorm:"-"`
-	Text             *string                 `json:"text,omitempty" gorm:"-"`
-	SnapshotID       *string                 `json:"snapshotId,omitempty" gorm:"column:snapshot_id"`
-	CreateTime       string                  `json:"createTime" gorm:"column:create_time"`
-	UpdateTime       *string                 `json:"updateTime,omitempty" gorm:"column:update_time"`
+	ID               string                  `gorm:"column:id"           json:"id"`
+	WorkspaceID      string                  `gorm:"column:workspace_id" json:"workspaceId"`
+	Name             string                  `gorm:"column:name"         json:"name"`
+	Type             string                  `gorm:"column:type"         json:"type"`
+	ParentID         *string                 `gorm:"column:parent_id"    json:"parentId,omitempty"`
+	UserPermissions  []*UserPermissionValue  `gorm:"-"                   json:"userPermissions"`
+	GroupPermissions []*GroupPermissionValue `gorm:"-"                   json:"groupPermissions"`
+	Text             *string                 `gorm:"-"                   json:"text,omitempty"`
+	SnapshotID       *string                 `gorm:"column:snapshot_id"  json:"snapshotId,omitempty"`
+	CreateTime       string                  `gorm:"column:create_time"  json:"createTime"`
+	UpdateTime       *string                 `gorm:"column:update_time"  json:"updateTime,omitempty"`
 }
 
 func (*fileEntity) TableName() string {
@@ -223,7 +223,7 @@ func (repo *fileRepo) Find(id string) (model.File, error) {
 }
 
 func (repo *fileRepo) find(id string) (*fileEntity, error) {
-	var res = fileEntity{}
+	res := fileEntity{}
 	db := repo.db.Raw("SELECT * FROM file WHERE id = ?", id).Scan(&res)
 	if db.Error != nil {
 		if errors.Is(db.Error, gorm.ErrRecordNotFound) {

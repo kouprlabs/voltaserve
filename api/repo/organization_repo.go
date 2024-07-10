@@ -14,12 +14,12 @@ import (
 	"errors"
 	"time"
 
+	"gorm.io/gorm"
+
 	"github.com/kouprlabs/voltaserve/api/errorpkg"
 	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/infra"
 	"github.com/kouprlabs/voltaserve/api/model"
-
-	"gorm.io/gorm"
 )
 
 type OrganizationRepo interface {
@@ -46,13 +46,13 @@ func NewOrganization() model.Organization {
 }
 
 type organizationEntity struct {
-	ID               string                  `json:"id" gorm:"column:id"`
-	Name             string                  `json:"name" gorm:"column:name"`
-	UserPermissions  []*UserPermissionValue  `json:"userPermissions" gorm:"-"`
-	GroupPermissions []*GroupPermissionValue `json:"groupPermissions" gorm:"-"`
-	Members          []string                `json:"members" gorm:"-"`
-	CreateTime       string                  `json:"createTime" gorm:"column:create_time"`
-	UpdateTime       *string                 `json:"updateTime,omitempty" gorm:"column:update_time"`
+	ID               string                  `gorm:"column:id"          json:"id"`
+	Name             string                  `gorm:"column:name"        json:"name"`
+	UserPermissions  []*UserPermissionValue  `gorm:"-"                  json:"userPermissions"`
+	GroupPermissions []*GroupPermissionValue `gorm:"-"                  json:"groupPermissions"`
+	Members          []string                `gorm:"-"                  json:"members"`
+	CreateTime       string                  `gorm:"column:create_time" json:"createTime"`
+	UpdateTime       *string                 `gorm:"column:update_time" json:"updateTime,omitempty"`
 }
 
 func (*organizationEntity) TableName() string {
@@ -145,7 +145,7 @@ func (repo *organizationRepo) Insert(opts OrganizationInsertOptions) (model.Orga
 }
 
 func (repo *organizationRepo) find(id string) (*organizationEntity, error) {
-	var res = organizationEntity{}
+	res := organizationEntity{}
 	db := repo.db.Where("id = ?", id).First(&res)
 	if db.Error != nil {
 		if errors.Is(db.Error, gorm.ErrRecordNotFound) {

@@ -17,8 +17,7 @@ import (
 	"strings"
 )
 
-type FileIdentifier struct {
-}
+type FileIdentifier struct{}
 
 func NewFileIdentifier() *FileIdentifier {
 	return &FileIdentifier{}

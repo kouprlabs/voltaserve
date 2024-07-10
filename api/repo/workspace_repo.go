@@ -14,12 +14,12 @@ import (
 	"errors"
 	"time"
 
+	"gorm.io/gorm"
+
 	"github.com/kouprlabs/voltaserve/api/errorpkg"
 	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/infra"
 	"github.com/kouprlabs/voltaserve/api/model"
-
-	"gorm.io/gorm"
 )
 
 type WorkspaceRepo interface {
@@ -43,16 +43,16 @@ func NewWorkspace() model.Workspace {
 }
 
 type workspaceEntity struct {
-	ID               string                  `json:"id," gorm:"column:id;size:36"`
-	Name             string                  `json:"name" gorm:"column:name;size:255"`
-	StorageCapacity  int64                   `json:"storageCapacity" gorm:"column:storage_capacity"`
-	RootID           string                  `json:"rootId" gorm:"column:root_id;size:36"`
-	OrganizationID   string                  `json:"organizationId" gorm:"column:organization_id;size:36"`
-	UserPermissions  []*UserPermissionValue  `json:"userPermissions" gorm:"-"`
-	GroupPermissions []*GroupPermissionValue `json:"groupPermissions" gorm:"-"`
-	Bucket           string                  `json:"bucket" gorm:"column:bucket;size:255"`
-	CreateTime       string                  `json:"createTime" gorm:"column:create_time"`
-	UpdateTime       *string                 `json:"updateTime,omitempty" gorm:"column:update_time"`
+	ID               string                  `gorm:"column:id;size:36"              json:"id"`
+	Name             string                  `gorm:"column:name;size:255"           json:"name"`
+	StorageCapacity  int64                   `gorm:"column:storage_capacity"        json:"storageCapacity"`
+	RootID           string                  `gorm:"column:root_id;size:36"         json:"rootId"`
+	OrganizationID   string                  `gorm:"column:organization_id;size:36" json:"organizationId"`
+	UserPermissions  []*UserPermissionValue  `gorm:"-"                              json:"userPermissions"`
+	GroupPermissions []*GroupPermissionValue `gorm:"-"                              json:"groupPermissions"`
+	Bucket           string                  `gorm:"column:bucket;size:255"         json:"bucket"`
+	CreateTime       string                  `gorm:"column:create_time"             json:"createTime"`
+	UpdateTime       *string                 `gorm:"column:update_time"             json:"updateTime,omitempty"`
 }
 
 func (*workspaceEntity) TableName() string {
@@ -173,7 +173,7 @@ func (repo *workspaceRepo) Insert(opts WorkspaceInsertOptions) (model.Workspace,
 }
 
 func (repo *workspaceRepo) find(id string) (*workspaceEntity, error) {
-	var res = workspaceEntity{}
+	res := workspaceEntity{}
 	db := repo.db.Where("id = ?", id).First(&res)
 	if db.Error != nil {
 		if errors.Is(db.Error, gorm.ErrRecordNotFound) {

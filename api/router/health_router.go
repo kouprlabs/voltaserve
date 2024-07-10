@@ -13,13 +13,12 @@ package router
 import (
 	"net/http"
 
-	"github.com/kouprlabs/voltaserve/api/infra"
-
 	"github.com/gofiber/fiber/v2"
+
+	"github.com/kouprlabs/voltaserve/api/infra"
 )
 
-type HealthRouter struct {
-}
+type HealthRouter struct{}
 
 func NewHealthRouter() *HealthRouter {
 	return &HealthRouter{}

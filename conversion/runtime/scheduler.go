@@ -14,10 +14,9 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/kouprlabs/voltaserve/conversion/pipeline"
-
 	"github.com/kouprlabs/voltaserve/conversion/client"
 	"github.com/kouprlabs/voltaserve/conversion/infra"
+	"github.com/kouprlabs/voltaserve/conversion/pipeline"
 )
 
 type Scheduler struct {
@@ -64,7 +63,7 @@ func (s *Scheduler) SchedulePipeline(opts *client.PipelineRunOptions) {
 	s.pipelineQueue[index] = append(s.pipelineQueue[index], *opts)
 }
 
-/* Choose the pipeline with the least number of items in the queue */
+// Choose the pipeline with the least number of items in the queue.
 func (s *Scheduler) choosePipeline() int {
 	index := 0
 	length := len(s.pipelineQueue[0])

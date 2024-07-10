@@ -17,10 +17,10 @@ import (
 	"io"
 	"strings"
 
-	"github.com/kouprlabs/voltaserve/mosaic/config"
-
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
+
+	"github.com/kouprlabs/voltaserve/mosaic/config"
 )
 
 type S3Manager struct {

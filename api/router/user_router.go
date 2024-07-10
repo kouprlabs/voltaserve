@@ -14,10 +14,10 @@ import (
 	"net/url"
 	"strconv"
 
+	"github.com/gofiber/fiber/v2"
+
 	"github.com/kouprlabs/voltaserve/api/errorpkg"
 	"github.com/kouprlabs/voltaserve/api/service"
-
-	"github.com/gofiber/fiber/v2"
 )
 
 type UserRouter struct {

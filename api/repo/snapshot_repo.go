@@ -15,14 +15,14 @@ import (
 	"errors"
 	"time"
 
+	"gorm.io/datatypes"
+	"gorm.io/gorm"
+
 	"github.com/kouprlabs/voltaserve/api/errorpkg"
 	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/infra"
 	"github.com/kouprlabs/voltaserve/api/log"
 	"github.com/kouprlabs/voltaserve/api/model"
-
-	"gorm.io/datatypes"
-	"gorm.io/gorm"
 )
 
 type SnapshotRepo interface {
@@ -54,21 +54,21 @@ func NewSnapshot() model.Snapshot {
 }
 
 type snapshotEntity struct {
-	ID         string         `json:"id" gorm:"column:id;size:36"`
-	Version    int64          `json:"version" gorm:"column:version"`
-	Original   datatypes.JSON `json:"original,omitempty" gorm:"column:original"`
-	Preview    datatypes.JSON `json:"preview,omitempty" gorm:"column:preview"`
-	Text       datatypes.JSON `json:"text,omitempty" gorm:"column:text"`
-	OCR        datatypes.JSON `json:"ocr,omitempty" gorm:"column:ocr"`
-	Entities   datatypes.JSON `json:"entities,omitempty" gorm:"column:entities"`
-	Mosaic     datatypes.JSON `json:"mosaic,omitempty" gorm:"column:mosaic"`
-	Watermark  datatypes.JSON `json:"watermark,omitempty" gorm:"column:watermark"`
-	Thumbnail  datatypes.JSON `json:"thumbnail,omitempty" gorm:"column:thumbnail"`
-	Status     string         `json:"status,omitempty" gorm:"column,status"`
-	Language   *string        `json:"language,omitempty" gorm:"column:language"`
-	TaskID     *string        `json:"taskID,omitempty" gorm:"column:task_id"`
-	CreateTime string         `json:"createTime" gorm:"column:create_time"`
-	UpdateTime *string        `json:"updateTime,omitempty" gorm:"column:update_time"`
+	ID         string         `gorm:"column:id;size:36"  json:"id"`
+	Version    int64          `gorm:"column:version"     json:"version"`
+	Original   datatypes.JSON `gorm:"column:original"    json:"original,omitempty"`
+	Preview    datatypes.JSON `gorm:"column:preview"     json:"preview,omitempty"`
+	Text       datatypes.JSON `gorm:"column:text"        json:"text,omitempty"`
+	OCR        datatypes.JSON `gorm:"column:ocr"         json:"ocr,omitempty"`
+	Entities   datatypes.JSON `gorm:"column:entities"    json:"entities,omitempty"`
+	Mosaic     datatypes.JSON `gorm:"column:mosaic"      json:"mosaic,omitempty"`
+	Watermark  datatypes.JSON `gorm:"column:watermark"   json:"watermark,omitempty"`
+	Thumbnail  datatypes.JSON `gorm:"column:thumbnail"   json:"thumbnail,omitempty"`
+	Status     string         `gorm:"column,status"      json:"status,omitempty"`
+	Language   *string        `gorm:"column:language"    json:"language,omitempty"`
+	TaskID     *string        `gorm:"column:task_id"     json:"taskID,omitempty"`
+	CreateTime string         `gorm:"column:create_time" json:"createTime"`
+	UpdateTime *string        `gorm:"column:update_time" json:"updateTime,omitempty"`
 }
 
 func (*snapshotEntity) TableName() string {
@@ -98,7 +98,7 @@ func (s *snapshotEntity) GetOriginal() *model.S3Object {
 	if s.Original.String() == "" {
 		return nil
 	}
-	var res = model.S3Object{}
+	res := model.S3Object{}
 	if err := json.Unmarshal([]byte(s.Original.String()), &res); err != nil {
 		log.GetLogger().Fatal(err)
 		return nil
@@ -110,7 +110,7 @@ func (s *snapshotEntity) GetPreview() *model.S3Object {
 	if s.Preview.String() == "" {
 		return nil
 	}
-	var res = model.S3Object{}
+	res := model.S3Object{}
 	if err := json.Unmarshal([]byte(s.Preview.String()), &res); err != nil {
 		log.GetLogger().Fatal(err)
 		return nil
@@ -122,7 +122,7 @@ func (s *snapshotEntity) GetText() *model.S3Object {
 	if s.Text.String() == "" {
 		return nil
 	}
-	var res = model.S3Object{}
+	res := model.S3Object{}
 	if err := json.Unmarshal([]byte(s.Text.String()), &res); err != nil {
 		log.GetLogger().Fatal(err)
 		return nil
@@ -134,7 +134,7 @@ func (s *snapshotEntity) GetOCR() *model.S3Object {
 	if s.OCR.String() == "" {
 		return nil
 	}
-	var res = model.S3Object{}
+	res := model.S3Object{}
 	if err := json.Unmarshal([]byte(s.OCR.String()), &res); err != nil {
 		log.GetLogger().Fatal(err)
 		return nil
@@ -146,7 +146,7 @@ func (s *snapshotEntity) GetEntities() *model.S3Object {
 	if s.Entities.String() == "" {
 		return nil
 	}
-	var res = model.S3Object{}
+	res := model.S3Object{}
 	if err := json.Unmarshal([]byte(s.Entities.String()), &res); err != nil {
 		log.GetLogger().Fatal(err)
 		return nil
@@ -158,7 +158,7 @@ func (s *snapshotEntity) GetMosaic() *model.S3Object {
 	if s.Mosaic.String() == "" {
 		return nil
 	}
-	var res = model.S3Object{}
+	res := model.S3Object{}
 	if err := json.Unmarshal([]byte(s.Mosaic.String()), &res); err != nil {
 		log.GetLogger().Fatal(err)
 		return nil
@@ -170,7 +170,7 @@ func (s *snapshotEntity) GetWatermark() *model.S3Object {
 	if s.Watermark.String() == "" {
 		return nil
 	}
-	var res = model.S3Object{}
+	res := model.S3Object{}
 	if err := json.Unmarshal([]byte(s.Watermark.String()), &res); err != nil {
 		log.GetLogger().Fatal(err)
 		return nil
@@ -182,7 +182,7 @@ func (s *snapshotEntity) GetThumbnail() *model.S3Object {
 	if s.Thumbnail.String() == "" {
 		return nil
 	}
-	var res = model.S3Object{}
+	res := model.S3Object{}
 	if err := json.Unmarshal([]byte(s.Thumbnail.String()), &res); err != nil {
 		log.GetLogger().Fatal(err)
 		return nil
@@ -413,7 +413,7 @@ func (repo *snapshotRepo) Find(id string) (model.Snapshot, error) {
 }
 
 func (repo *snapshotRepo) FindByVersion(version int64) (model.Snapshot, error) {
-	var res = snapshotEntity{}
+	res := snapshotEntity{}
 	db := repo.db.Where("version = ?", version).First(&res)
 	if db.Error != nil {
 		if errors.Is(db.Error, gorm.ErrRecordNotFound) {

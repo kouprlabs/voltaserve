@@ -16,14 +16,13 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-
-	"github.com/kouprlabs/voltaserve/api/config"
-	"github.com/kouprlabs/voltaserve/api/log"
+	"text/template"
 
 	"gopkg.in/gomail.v2"
 	"sigs.k8s.io/yaml"
 
-	"text/template"
+	"github.com/kouprlabs/voltaserve/api/config"
+	"github.com/kouprlabs/voltaserve/api/log"
 )
 
 type MessageParams struct {

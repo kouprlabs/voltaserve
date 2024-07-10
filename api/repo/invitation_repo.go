@@ -14,12 +14,12 @@ import (
 	"errors"
 	"time"
 
+	"gorm.io/gorm"
+
 	"github.com/kouprlabs/voltaserve/api/errorpkg"
 	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/infra"
 	"github.com/kouprlabs/voltaserve/api/model"
-
-	"gorm.io/gorm"
 )
 
 type InvitationRepo interface {
@@ -37,13 +37,13 @@ func NewInvitationRepo() InvitationRepo {
 }
 
 type invitationEntity struct {
-	ID             string  `json:"id" gorm:"column:id"`
-	OrganizationID string  `json:"organizationId" gorm:"column:organization_id"`
-	OwnerID        string  `json:"ownerId" gorm:"column:owner_id"`
-	Email          string  `json:"email" gorm:"column:email"`
-	Status         string  `json:"status" gorm:"column:status"`
-	CreateTime     string  `json:"createTime" gorm:"column:create_time"`
-	UpdateTime     *string `json:"updateTime" gorm:"column:update_time"`
+	ID             string  `gorm:"column:id"              json:"id"`
+	OrganizationID string  `gorm:"column:organization_id" json:"organizationId"`
+	OwnerID        string  `gorm:"column:owner_id"        json:"ownerId"`
+	Email          string  `gorm:"column:email"           json:"email"`
+	Status         string  `gorm:"column:status"          json:"status"`
+	CreateTime     string  `gorm:"column:create_time"     json:"createTime"`
+	UpdateTime     *string `gorm:"column:update_time"     json:"updateTime"`
 }
 
 func (*invitationEntity) TableName() string {
@@ -134,7 +134,7 @@ func (repo *invitationRepo) Insert(opts InvitationInsertOptions) ([]model.Invita
 }
 
 func (repo *invitationRepo) Find(id string) (model.Invitation, error) {
-	var invitation = invitationEntity{}
+	invitation := invitationEntity{}
 	db := repo.db.Where("id = ?", id).First(&invitation)
 	if db.Error != nil {
 		if errors.Is(db.Error, gorm.ErrRecordNotFound) {

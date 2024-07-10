@@ -11,16 +11,15 @@
 package infra
 
 import (
-	"github.com/kouprlabs/voltaserve/api/config"
-
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+
+	"github.com/kouprlabs/voltaserve/api/config"
 )
 
 var db *gorm.DB
 
-type PostgresManager struct {
-}
+type PostgresManager struct{}
 
 func NewPostgresManager() *PostgresManager {
 	return &PostgresManager{}

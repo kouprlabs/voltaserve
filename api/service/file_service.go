@@ -19,6 +19,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/minio/minio-go/v7"
+	"github.com/reactivex/rxgo/v2"
+
 	"github.com/kouprlabs/voltaserve/api/cache"
 	"github.com/kouprlabs/voltaserve/api/client"
 	"github.com/kouprlabs/voltaserve/api/config"
@@ -29,9 +32,6 @@ import (
 	"github.com/kouprlabs/voltaserve/api/model"
 	"github.com/kouprlabs/voltaserve/api/repo"
 	"github.com/kouprlabs/voltaserve/api/search"
-
-	"github.com/minio/minio-go/v7"
-	"github.com/reactivex/rxgo/v2"
 )
 
 type FileService struct {
@@ -90,9 +90,9 @@ func NewFileService() *FileService {
 
 type FileCreateOptions struct {
 	WorkspaceID string  `json:"workspaceId" validate:"required"`
-	Name        string  `json:"name" validate:"required,max=255"`
-	Type        string  `json:"type" validate:"required,oneof=file folder"`
-	ParentID    *string `json:"parentId" validate:"required"`
+	Name        string  `json:"name"        validate:"required,max=255"`
+	Type        string  `json:"type"        validate:"required,oneof=file folder"`
+	ParentID    *string `json:"parentId"    validate:"required"`
 }
 
 type File struct {
@@ -622,8 +622,8 @@ func (svc *FileService) ListByPath(path string, userID string) ([]*File, error) 
 }
 
 type FileQuery struct {
-	Text             string  `json:"text" validate:"required"`
-	Type             *string `json:"type,omitempty" validate:"omitempty,oneof=file folder"`
+	Text             string  `json:"text"                       validate:"required"`
+	Type             *string `json:"type,omitempty"             validate:"omitempty,oneof=file folder"`
 	CreateTimeAfter  *int64  `json:"createTimeAfter,omitempty"`
 	CreateTimeBefore *int64  `json:"createTimeBefore,omitempty"`
 	UpdateTimeAfter  *int64  `json:"updateTimeAfter,omitempty"`
@@ -819,8 +819,8 @@ func (svc *FileService) Copy(targetID string, sourceIDs []string, userID string)
 
 		/* Clone source tree */
 		var rootCloneIndex int
-		var cloneIDs = make(map[string]string)
-		var originalIDs = make(map[string]string)
+		cloneIDs := make(map[string]string)
+		originalIDs := make(map[string]string)
 		var clones []model.File
 		var permissions []model.UserPermission
 		for i, o := range sourceTree {

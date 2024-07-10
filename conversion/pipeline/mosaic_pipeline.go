@@ -15,14 +15,14 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/minio/minio-go/v7"
+
 	"github.com/kouprlabs/voltaserve/conversion/client"
 	"github.com/kouprlabs/voltaserve/conversion/helper"
 	"github.com/kouprlabs/voltaserve/conversion/identifier"
 	"github.com/kouprlabs/voltaserve/conversion/infra"
 	"github.com/kouprlabs/voltaserve/conversion/model"
 	"github.com/kouprlabs/voltaserve/conversion/processor"
-
-	"github.com/minio/minio-go/v7"
 )
 
 type mosaicPipeline struct {

@@ -13,10 +13,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/kouprlabs/voltaserve/webdav/client"
-	"github.com/kouprlabs/voltaserve/webdav/handler"
-	"github.com/kouprlabs/voltaserve/webdav/helper"
-	"github.com/kouprlabs/voltaserve/webdav/infra"
 	"log"
 	"net/http"
 	"os"
@@ -25,7 +21,12 @@ import (
 	"time"
 
 	"github.com/joho/godotenv"
+
+	"github.com/kouprlabs/voltaserve/webdav/client"
 	"github.com/kouprlabs/voltaserve/webdav/config"
+	"github.com/kouprlabs/voltaserve/webdav/handler"
+	"github.com/kouprlabs/voltaserve/webdav/helper"
+	"github.com/kouprlabs/voltaserve/webdav/infra"
 )
 
 var (
@@ -90,6 +91,8 @@ func basicAuthMiddleware(next http.Handler, idpClient *client.IdPClient) http.Ha
 // @title		Voltaserve WebDAV
 // @version	2.0.0
 // @BasePath	/v2
+//
+// .
 func main() {
 	if _, err := os.Stat(".env.local"); err == nil {
 		if err := godotenv.Load(".env.local"); err != nil {

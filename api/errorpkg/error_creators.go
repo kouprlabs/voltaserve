@@ -15,9 +15,9 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/kouprlabs/voltaserve/api/model"
-
 	"github.com/go-playground/validator/v10"
+
+	"github.com/kouprlabs/voltaserve/api/model"
 )
 
 func NewGroupNotFoundError(err error) *ErrorResponse {
