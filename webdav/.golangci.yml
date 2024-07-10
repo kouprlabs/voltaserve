@@ -31,7 +31,6 @@ linters:
     - nestif
     - canonicalheader
     - lll
-    - gosec
     - funlen
 
 severity:
