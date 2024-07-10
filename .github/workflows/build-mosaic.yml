@@ -12,6 +12,12 @@ name: Build and Push voltaserve/mosaic
 
 on:
   workflow_dispatch:
+    inputs:
+      branch:
+        required: false
+        default: ""
+        type: string
+        description: Override code checkout branch (e.g. "feature/branch")
   push:
     branches:
       - main
@@ -24,8 +30,14 @@ jobs:
   build_and_push:
     runs-on: ubuntu-latest
     steps:
+      - name: Prepare input branch
+        if: ${{ github.event.inputs.branch != "" }}
+        run: echo "branch=refs/heads/${{ github.event.inputs.branch }}" >> $GITHUB_ENV
+
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ env.branch || github.ref }}
 
       - name: Set Up QEMU
         uses: docker/setup-qemu-action@v3
