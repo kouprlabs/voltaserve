@@ -19,11 +19,6 @@ on:
       - "idp/**"
     tags:
       - 'v*'
-  pull_request:
-    branches:
-      - main
-    paths:
-      - "idp/**"
 
 jobs:
   build_and_push:
@@ -37,12 +32,6 @@ jobs:
         with:
           platforms: arm64, amd64
 
-      - name: Extract tag that triggered this action
-        if: ${{ github.ref_type == 'tag' }}
-        run: |
-          TAG=${{ github.ref_name }}
-          echo "TRIMMED_TAG=${TAG#v}" >> $GITHUB_ENV
-
       - name: Set Up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -52,10 +41,20 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
+      - name: Extract tag that triggered this action
+        if: ${{ github.ref_type == 'tag' }}
+        run: |
+          TAG=${{ github.ref_name }}
+          echo "TAG=${TAG#v}" >> $GITHUB_ENV
+
+      - name: Set the tag on wokflow dispatch
+        if: ${{ github.ref_type != 'tag' }}
+        run: echo "TAG=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v5
         with:
           context: ./idp
           push: true
-          tags: voltaserve/idp:${{ env.TRIMMED_TAG || 'latest' }}
+          tags: voltaserve/idp:${{ env.TAG }}
           platforms: linux/amd64,linux/arm64
