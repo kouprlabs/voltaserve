@@ -41,7 +41,7 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Extract tag that triggered this action
+      - name: Create tag list matching semver from executing tag
         if: ${{ github.ref_type == 'tag' }}
         run: |
           name="voltaserve/conversion"
