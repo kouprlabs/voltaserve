@@ -1,3 +1,5 @@
+// Package helper contains various helper functions.
+//
 // Copyright 2023 Anass Bouassaba.
 //
 // Use of this software is governed by the Business Source License
@@ -10,7 +12,10 @@
 
 package helper
 
+import "slices"
+
 func Includes(arr []string, str string) bool {
+	slices.Contains(arr, str)
 	for _, v := range arr {
 		if v == str {
 			return true

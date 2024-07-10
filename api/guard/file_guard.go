@@ -1,3 +1,5 @@
+// Package guard contains the guards ensuring proper access validation.
+//
 // Copyright 2023 Anass Bouassaba.
 //
 // Use of this software is governed by the Business Source License

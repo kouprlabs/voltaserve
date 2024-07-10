@@ -1,3 +1,5 @@
+// Package config contains the application configuration for the api server.
+//
 // Copyright 2023 Anass Bouassaba.
 //
 // Use of this software is governed by the Business Source License

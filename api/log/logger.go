@@ -1,3 +1,5 @@
+// Package log contains the globally used logger.
+//
 // Copyright 2023 Anass Bouassaba.
 //
 // Use of this software is governed by the Business Source License

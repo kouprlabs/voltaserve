@@ -12,7 +12,6 @@ linters:
     # To fix ###############################################
     - wsl
     - wrapcheck
-    - stylecheck
     - perfsprint
     - noctx
     - nilerr

@@ -1,3 +1,5 @@
+// Package model contains the database models.
+//
 // Copyright 2023 Anass Bouassaba.
 //
 // Use of this software is governed by the Business Source License

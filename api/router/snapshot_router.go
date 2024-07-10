@@ -62,8 +62,8 @@ func (r *SnapshotRouter) AppendNonJWTRoutes(g fiber.Router) {
 //	@Router			/snapshots [get]
 func (r *SnapshotRouter) List(c *fiber.Ctx) error {
 	var err error
-	fileId := c.Query("file_id")
-	if fileId == "" {
+	fileID := c.Query("file_id")
+	if fileID == "" {
 		return errorpkg.NewMissingQueryParamError("file_id")
 	}
 	var page int64
@@ -92,7 +92,7 @@ func (r *SnapshotRouter) List(c *fiber.Ctx) error {
 	if !IsValidSortOrder(sortOrder) {
 		return errorpkg.NewInvalidQueryParamError("sort_order")
 	}
-	res, err := r.snapshotSvc.List(fileId, service.SnapshotListOptions{
+	res, err := r.snapshotSvc.List(fileID, service.SnapshotListOptions{
 		Page:      uint(page),
 		Size:      uint(size),
 		SortBy:    sortBy,

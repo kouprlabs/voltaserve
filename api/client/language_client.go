@@ -1,3 +1,5 @@
+// Package client contains the external clients used by the API.
+//
 // Copyright 2023 Anass Bouassaba.
 //
 // Use of this software is governed by the Business Source License
