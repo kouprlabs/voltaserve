@@ -7,7 +7,6 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import useSWR, { SWRConfiguration } from 'swr'
 import { apiFetcher } from '../fetcher'
 
@@ -21,7 +20,6 @@ export type Snapshot = {
   text?: Download
   entities?: Download
   mosaic?: Download
-  watermark?: Download
   thumbnail?: Download
   language?: string
   isActive: boolean

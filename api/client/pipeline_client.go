@@ -30,13 +30,12 @@ func NewPipelineClient() *PipelineClient {
 }
 
 const (
-	PipelinePDF       = "pdf"
-	PipelineOffice    = "office"
-	PipelineImage     = "image"
-	PipelineVideo     = "video"
-	PipelineInsights  = "insights"
-	PipelineMosaic    = "mosaic"
-	PipelineWatermark = "watermark"
+	PipelinePDF      = "pdf"
+	PipelineOffice   = "office"
+	PipelineImage    = "image"
+	PipelineVideo    = "video"
+	PipelineInsights = "insights"
+	PipelineMosaic   = "mosaic"
 )
 
 type PipelineRunOptions struct {

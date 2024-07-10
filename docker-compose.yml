@@ -75,7 +75,6 @@ services:
       - CONVERSION_URL=http://conversion:8083
       - LANGUAGE_URL=http://language:8084
       - MOSAIC_URL=http://mosaic:8085
-      - WATERMARK_URL=http://mosaic:8086
       - POSTGRES_URL=postgresql://voltaserve@cockroach:26257/voltaserve
       - S3_URL=minio:9000
       - SEARCH_URL=http://meilisearch:7700
@@ -165,7 +164,6 @@ services:
       - API_URL=http://api:8080
       - LANGUAGE_URL=http://language:8084
       - MOSAIC_URL=http://mosaic:8085
-      - WATERMARK_URL=http://watermark:8086
       - S3_URL=minio:9000
     healthcheck:
       test: wget --quiet --spider http://127.0.0.1:8083/v2/health || exit 1

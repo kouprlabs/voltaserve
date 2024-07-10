@@ -66,7 +66,6 @@ type SnapshotPatchOptions struct {
 	OCR       *S3Object          `json:"ocr"`
 	Entities  *S3Object          `json:"entities"`
 	Mosaic    *S3Object          `json:"mosaic"`
-	Watermark *S3Object          `json:"watermark"`
 	Thumbnail *S3Object          `json:"thumbnail"`
 	Status    *string            `json:"status"`
 	TaskID    *string            `json:"taskID"`
@@ -86,7 +85,6 @@ const (
 	SnapshotFieldOCR       = "ocr"
 	SnapshotFieldEntities  = "entities"
 	SnapshotFieldMosaic    = "mosaic"
-	SnapshotFieldWatermark = "watermark"
 	SnapshotFieldThumbnail = "thumbnail"
 	SnapshotFieldStatus    = "status"
 	SnapshotFieldLanguage  = "language"

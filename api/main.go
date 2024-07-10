@@ -76,10 +76,6 @@ func main() {
 	mosaic := router.NewMosaicRouter()
 	mosaic.AppendNonJWTRoutes(mosaicGroup)
 
-	watermarkGroup := v2.Group("watermarks")
-	watermark := router.NewWatermarkRouter()
-	watermark.AppendNonJWTRoutes(watermarkGroup)
-
 	tasksGroup := v2.Group("tasks")
 	tasks := router.NewTaskRouter()
 	tasks.AppendNonJWTRoutes(tasksGroup)
@@ -92,7 +88,6 @@ func main() {
 	snapshots.AppendRoutes(snapshotsGroup)
 	insights.AppendRoutes(insightsGroup)
 	mosaic.AppendRoutes(mosaicGroup)
-	watermark.AppendRoutes(watermarkGroup)
 	tasks.AppendRoutes(tasksGroup)
 
 	invitations := router.NewInvitationRouter()

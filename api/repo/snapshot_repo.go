@@ -62,7 +62,6 @@ type snapshotEntity struct {
 	OCR        datatypes.JSON `gorm:"column:ocr"         json:"ocr,omitempty"`
 	Entities   datatypes.JSON `gorm:"column:entities"    json:"entities,omitempty"`
 	Mosaic     datatypes.JSON `gorm:"column:mosaic"      json:"mosaic,omitempty"`
-	Watermark  datatypes.JSON `gorm:"column:watermark"   json:"watermark,omitempty"`
 	Thumbnail  datatypes.JSON `gorm:"column:thumbnail"   json:"thumbnail,omitempty"`
 	Status     string         `gorm:"column,status"      json:"status,omitempty"`
 	Language   *string        `gorm:"column:language"    json:"language,omitempty"`
@@ -160,18 +159,6 @@ func (s *snapshotEntity) GetMosaic() *model.S3Object {
 	}
 	res := model.S3Object{}
 	if err := json.Unmarshal([]byte(s.Mosaic.String()), &res); err != nil {
-		log.GetLogger().Fatal(err)
-		return nil
-	}
-	return &res
-}
-
-func (s *snapshotEntity) GetWatermark() *model.S3Object {
-	if s.Watermark.String() == "" {
-		return nil
-	}
-	res := model.S3Object{}
-	if err := json.Unmarshal([]byte(s.Watermark.String()), &res); err != nil {
 		log.GetLogger().Fatal(err)
 		return nil
 	}
@@ -300,21 +287,6 @@ func (s *snapshotEntity) SetMosaic(m *model.S3Object) {
 	}
 }
 
-func (s *snapshotEntity) SetWatermark(m *model.S3Object) {
-	if m == nil {
-		s.Watermark = nil
-	} else {
-		b, err := json.Marshal(m)
-		if err != nil {
-			log.GetLogger().Fatal(err)
-			return
-		}
-		if err := s.Watermark.UnmarshalJSON(b); err != nil {
-			log.GetLogger().Fatal(err)
-		}
-	}
-}
-
 func (s *snapshotEntity) SetThumbnail(m *model.S3Object) {
 	if m == nil {
 		s.Thumbnail = nil
@@ -364,10 +336,6 @@ func (s *snapshotEntity) HasEntities() bool {
 
 func (s *snapshotEntity) HasMosaic() bool {
 	return s.Mosaic != nil
-}
-
-func (s *snapshotEntity) HasWatermark() bool {
-	return s.Watermark != nil
 }
 
 func (s *snapshotEntity) HasThumbnail() bool {
@@ -458,7 +426,6 @@ type SnapshotUpdateOptions struct {
 	OCR       *model.S3Object
 	Entities  *model.S3Object
 	Mosaic    *model.S3Object
-	Watermark *model.S3Object
 	Thumbnail *model.S3Object
 	Status    *string
 	Language  *string
@@ -472,7 +439,6 @@ const (
 	SnapshotFieldOCR       = "ocr"
 	SnapshotFieldEntities  = "entities"
 	SnapshotFieldMosaic    = "mosaic"
-	SnapshotFieldWatermark = "watermark"
 	SnapshotFieldThumbnail = "thumbnail"
 	SnapshotFieldStatus    = "status"
 	SnapshotFieldLanguage  = "language"
@@ -501,9 +467,6 @@ func (repo *snapshotRepo) Update(id string, opts SnapshotUpdateOptions) error {
 	}
 	if helper.Includes(opts.Fields, SnapshotFieldMosaic) {
 		snapshot.SetMosaic(opts.Mosaic)
-	}
-	if helper.Includes(opts.Fields, SnapshotFieldWatermark) {
-		snapshot.SetWatermark(opts.Watermark)
 	}
 	if helper.Includes(opts.Fields, SnapshotFieldThumbnail) {
 		snapshot.SetThumbnail(opts.Thumbnail)

@@ -10,7 +10,7 @@
 <a href="https://youtu.be/Uf3EWb2hDfs?feature=shared">Watch the Demo Video</a>
 </p>
 
-Handle massive images with mosaic technology, extract insights from documents, stream large videos, protect documents with permissions and watermarks, preview 3D models. collaborate in real-time.
+Handle massive images with mosaic technology, extract insights from documents, stream large videos, protect documents with permissions, preview 3D models. collaborate in real-time.
 
 ## Getting Started
 

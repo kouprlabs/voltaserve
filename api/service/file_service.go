@@ -332,14 +332,8 @@ func (svc *FileService) DownloadOriginalBuffer(id string, rangeHeader string, bu
 	if err != nil {
 		return nil, err
 	}
-	if snapshot.HasWatermark() {
-		if err = svc.fileGuard.Authorize(userID, file, model.PermissionEditor); err != nil {
-			return nil, err
-		}
-	} else {
-		if err = svc.fileGuard.Authorize(userID, file, model.PermissionViewer); err != nil {
-			return nil, err
-		}
+	if err = svc.fileGuard.Authorize(userID, file, model.PermissionViewer); err != nil {
+		return nil, err
 	}
 	if snapshot.HasOriginal() {
 		objectInfo, err := svc.s3.StatObject(snapshot.GetOriginal().Key, snapshot.GetOriginal().Bucket, minio.StatObjectOptions{})
@@ -377,14 +371,8 @@ func (svc *FileService) DownloadPreviewBuffer(id string, rangeHeader string, buf
 	if err != nil {
 		return nil, err
 	}
-	if snapshot.HasWatermark() {
-		if err = svc.fileGuard.Authorize(userID, file, model.PermissionEditor); err != nil {
-			return nil, err
-		}
-	} else {
-		if err = svc.fileGuard.Authorize(userID, file, model.PermissionViewer); err != nil {
-			return nil, err
-		}
+	if err = svc.fileGuard.Authorize(userID, file, model.PermissionViewer); err != nil {
+		return nil, err
 	}
 	if snapshot.HasPreview() {
 		objectInfo, err := svc.s3.StatObject(snapshot.GetOriginal().Key, snapshot.GetOriginal().Bucket, minio.StatObjectOptions{})

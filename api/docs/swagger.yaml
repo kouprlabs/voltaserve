@@ -538,8 +538,6 @@ definitions:
         type: string
       version:
         type: integer
-      watermark:
-        $ref: '#/definitions/service.Download'
     type: object
   service.SnapshotActivateOptions:
     properties:
@@ -595,8 +593,6 @@ definitions:
       text:
         $ref: '#/definitions/model.S3Object'
       thumbnail:
-        $ref: '#/definitions/model.S3Object'
-      watermark:
         $ref: '#/definitions/model.S3Object'
     type: object
   service.StorageUsage:
@@ -731,15 +727,6 @@ definitions:
         type: string
       user:
         $ref: '#/definitions/service.User'
-    type: object
-  service.WatermarkInfo:
-    properties:
-      isAvailable:
-        type: boolean
-      isOutdated:
-        type: boolean
-      snapshot:
-        $ref: '#/definitions/service.Snapshot'
     type: object
   service.Workspace:
     properties:
@@ -1201,6 +1188,65 @@ paths:
       summary: Download Original
       tags:
       - Files
+  /files/{id}/patch_from_s3:
+    patch:
+      consumes:
+      - application/x-www-form-urlencoded
+      description: Patch from S3
+      operationId: files_patch_from_s3
+      parameters:
+      - description: API Key
+        in: query
+        name: api_key
+        required: true
+        type: string
+      - description: Access Token
+        in: query
+        name: access_token
+        required: true
+        type: string
+      - description: S3 Key
+        in: query
+        name: s3_key
+        required: true
+        type: string
+      - description: S3 Bucket
+        in: query
+        name: s3_bucket
+        required: true
+        type: string
+      - description: Size
+        in: query
+        name: size
+        required: true
+        type: string
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.File'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Patch from S3
+      tags:
+      - Files
   /files/{id}/path:
     get:
       description: Get Path
@@ -1385,6 +1431,73 @@ paths:
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
       summary: Get User Permissions
+      tags:
+      - Files
+  /files/create_from_s3:
+    post:
+      consumes:
+      - application/x-www-form-urlencoded
+      description: Create from S3
+      operationId: files_create_from_s3
+      parameters:
+      - description: API Key
+        in: query
+        name: api_key
+        required: true
+        type: string
+      - description: Access Token
+        in: query
+        name: access_token
+        required: true
+        type: string
+      - description: Workspace ID
+        in: query
+        name: workspace_id
+        required: true
+        type: string
+      - description: Parent ID
+        in: query
+        name: parent_id
+        type: string
+      - description: Name
+        in: query
+        name: name
+        type: string
+      - description: S3 Key
+        in: query
+        name: s3_key
+        required: true
+        type: string
+      - description: S3 Bucket
+        in: query
+        name: s3_bucket
+        required: true
+        type: string
+      - description: Size
+        in: query
+        name: size
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.File'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Create from S3
       tags:
       - Files
   /files/grant_group_permission:
@@ -3111,115 +3224,6 @@ paths:
       summary: List
       tags:
       - Users
-  /watermarks/{id}:
-    delete:
-      consumes:
-      - application/json
-      description: Delete
-      operationId: watermark_delete
-      parameters:
-      - description: ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Delete
-      tags:
-      - Watermark
-    post:
-      consumes:
-      - application/json
-      description: Create
-      operationId: watermark_create
-      parameters:
-      - description: ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Create
-      tags:
-      - Watermark
-  /watermarks/{id}/info:
-    get:
-      consumes:
-      - application/json
-      description: Get Info
-      operationId: watermark_get_info
-      parameters:
-      - description: ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/service.WatermarkInfo'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Get Info
-      tags:
-      - Watermark
-  /watermarks/{id}/watermark{ext}:
-    get:
-      description: Download
-      operationId: watermark_download
-      parameters:
-      - description: ID
-        in: path
-        name: id
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Download
-      tags:
-      - Watermark
   /workspaces:
     get:
       description: List

@@ -22,7 +22,6 @@ type Config struct {
 	ConversionURL string
 	LanguageURL   string
 	MosaicURL     string
-	WatermarkURL  string
 	DatabaseURL   string
 	Search        SearchConfig
 	Redis         RedisConfig
@@ -132,7 +131,6 @@ func readURLs(config *Config) {
 	config.ConversionURL = os.Getenv("CONVERSION_URL")
 	config.LanguageURL = os.Getenv("LANGUAGE_URL")
 	config.MosaicURL = os.Getenv("MOSAIC_URL")
-	config.WatermarkURL = os.Getenv("WATERMARK_URL")
 	config.DatabaseURL = os.Getenv("POSTGRES_URL")
 }
 

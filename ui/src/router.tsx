@@ -7,7 +7,6 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import { createBrowserRouter } from 'react-router-dom'
 import AccountInvitationsPage from '@/pages/account/account-invitations-page'
 import AccountLayout from '@/pages/account/account-layout'
@@ -135,10 +134,6 @@ const router = createBrowserRouter([
       },
       {
         path: '/file/:id/mosaic',
-        element: <ViewerPage />,
-      },
-      {
-        path: '/file/:id/watermark',
         element: <ViewerPage />,
       },
       {
