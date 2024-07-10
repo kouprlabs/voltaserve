@@ -84,8 +84,7 @@ func (p *officePipeline) convertToPDF(inputPath string, opts client.PipelineRunO
 		return nil, err
 	}
 	defer func(path string) {
-		_, err := os.Stat(path)
-		if os.IsExist(err) {
+		if _, err := os.Stat(path); !os.IsNotExist(err) {
 			if err := os.Remove(path); err != nil {
 				infra.GetLogger().Error(err)
 			}

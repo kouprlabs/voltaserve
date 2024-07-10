@@ -57,24 +57,22 @@ func (h *Handler) methodPut(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	outputPath := filepath.Join(os.TempDir(), uuid.New().String())
-	ws, err := os.Create(outputPath)
+	file, err := os.Create(outputPath)
 	if err != nil {
 		infra.HandleError(err, w)
 		return
 	}
-	defer func(ws *os.File) {
-		err := ws.Close()
-		if err != nil {
+	defer func(path string, file *os.File) {
+		if err := file.Close(); err != nil {
 			infra.HandleError(err, w)
 		}
-	}(ws)
-	_, err = io.Copy(ws, r.Body)
-	if err != nil {
-		infra.HandleError(err, w)
-		return
-	}
-	err = ws.Close()
-	if err != nil {
+		if _, err := os.Stat(path); !os.IsNotExist(err) {
+			if err := os.Remove(path); err != nil {
+				infra.GetLogger().Error(err)
+			}
+		}
+	}(outputPath, file)
+	if _, err = io.Copy(file, r.Body); err != nil {
 		infra.HandleError(err, w)
 		return
 	}

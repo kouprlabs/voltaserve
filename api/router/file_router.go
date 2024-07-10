@@ -154,8 +154,7 @@ func (r *FileRouter) Create(c *fiber.Ctx) error {
 			return err
 		}
 		defer func(path string) {
-			_, err := os.Stat(path)
-			if os.IsExist(err) {
+			if _, err := os.Stat(path); !os.IsNotExist(err) {
 				if err := os.Remove(path); err != nil {
 					log.GetLogger().Error(err)
 				}
@@ -221,8 +220,7 @@ func (r *FileRouter) Patch(c *fiber.Ctx) error {
 		return err
 	}
 	defer func(path string) {
-		_, err := os.Stat(path)
-		if os.IsExist(err) {
+		if _, err := os.Stat(path); !os.IsNotExist(err) {
 			if err := os.Remove(path); err != nil {
 				log.GetLogger().Error(err)
 			}

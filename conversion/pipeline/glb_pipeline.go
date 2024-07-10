@@ -49,7 +49,7 @@ func (p *glbPipeline) Run(opts client.PipelineRunOptions) error {
 	}
 	defer func(path string) {
 		_, err := os.Stat(path)
-		if os.IsExist(err) {
+		if !os.IsNotExist(err) {
 			if err := os.Remove(path); err != nil {
 				infra.GetLogger().Error(err)
 			}
@@ -85,8 +85,7 @@ func (p *glbPipeline) Run(opts client.PipelineRunOptions) error {
 func (p *glbPipeline) createThumbnail(inputPath string, opts client.PipelineRunOptions) error {
 	tmpPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".jpeg")
 	defer func(path string) {
-		_, err := os.Stat(path)
-		if os.IsExist(err) {
+		if _, err := os.Stat(path); !os.IsNotExist(err) {
 			if err := os.Remove(path); err != nil {
 				infra.GetLogger().Error(err)
 			}
