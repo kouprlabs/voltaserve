@@ -12,7 +12,6 @@ linters:
     # To fix ###############################################
     - wsl
     - wrapcheck
-    - tagliatelle
     - stylecheck
     - perfsprint
     - noctx
@@ -35,7 +34,6 @@ linters:
     - prealloc
     - nestif
     - lll
-    - gosec
     - gocritic
     - gocognit
     - funlen
@@ -118,8 +116,8 @@ linters-settings:
   tagliatelle:
     case:
       rules:
-        json: goCamel
-        yaml: goSnake
+        json: camel
+        yaml: snake
 
   varnamelen:
     min-name-length: 1

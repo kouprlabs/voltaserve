@@ -81,7 +81,7 @@ func (h *Handler) methodGet(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Length", fmt.Sprintf("%d", chunkSize))
 		w.Header().Set("Content-Type", "application/octet-stream")
 		w.WriteHeader(http.StatusPartialContent)
-		file, err := os.Open(outputPath)
+		file, err := os.Open(outputPath) //nolint:gosec // Known safe path
 		if err != nil {
 			infra.HandleError(err, w)
 			return
@@ -106,7 +106,7 @@ func (h *Handler) methodGet(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Length", fmt.Sprintf("%d", stat.Size()))
 		w.Header().Set("Content-Type", "application/octet-stream")
 		w.WriteHeader(http.StatusOK)
-		file, err := os.Open(outputPath)
+		file, err := os.Open(outputPath) //nolint:gosec // Known safe path
 		if err != nil {
 			infra.HandleError(err, w)
 			return

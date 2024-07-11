@@ -12,8 +12,8 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"strings"
@@ -115,12 +115,19 @@ func main() {
 
 	startTokenRefresh(idpClient)
 
-	log.Printf("Listening on port %d", cfg.Port)
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", cfg.Port), http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if strings.HasPrefix(r.URL.Path, "/v2/health") {
-			mux.ServeHTTP(w, r)
-		} else {
-			basicAuthMiddleware(mux, idpClient).ServeHTTP(w, r)
-		}
-	})))
+	server := &http.Server{
+		Addr:              net.JoinHostPort(cfg.Host, cfg.Port),
+		ReadHeaderTimeout: 30 * time.Second,
+		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if strings.HasPrefix(r.URL.Path, "/v2/health") {
+				mux.ServeHTTP(w, r)
+			} else {
+				basicAuthMiddleware(mux, idpClient).ServeHTTP(w, r)
+			}
+		}),
+	}
+
+	log.Printf("Listening on %s", server.Addr)
+
+	log.Fatal(server.ListenAndServe())
 }

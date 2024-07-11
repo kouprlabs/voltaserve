@@ -86,7 +86,7 @@ func (mb *MosaicBuilder) SetActionOnExistingDirectory(action string) {
 func (mb *MosaicBuilder) Build() (*Metadata, error) {
 	cleanupIfFails := false
 	if _, err := os.Stat(mb.options.OutputDirectory); os.IsNotExist(err) {
-		if err := os.MkdirAll(mb.options.OutputDirectory, os.ModePerm); err != nil {
+		if err := os.MkdirAll(mb.options.OutputDirectory, 0o750); err != nil {
 			return nil, err
 		}
 		cleanupIfFails = true
@@ -133,7 +133,7 @@ func (mb *MosaicBuilder) Build() (*Metadata, error) {
 
 	metadataFilePath := mb.GetMetadataFilePath()
 	metadataBytes, _ := json.MarshalIndent(metadata, "", "  ")
-	if err := os.WriteFile(metadataFilePath, metadataBytes, os.ModePerm); err != nil {
+	if err := os.WriteFile(metadataFilePath, metadataBytes, 0o600); err != nil {
 		return nil, err
 	}
 
@@ -363,7 +363,7 @@ func (mb *MosaicBuilder) CreateDirectory(directory string) {
 			return
 		}
 	}
-	if err := os.MkdirAll(directory, os.ModePerm); err != nil {
+	if err := os.MkdirAll(directory, 0o750); err != nil {
 		return
 	}
 }

@@ -14,7 +14,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"os"
+	"io/fs"
 	"path/filepath"
 	"text/template"
 
@@ -23,30 +23,39 @@ import (
 
 	"github.com/kouprlabs/voltaserve/api/config"
 	"github.com/kouprlabs/voltaserve/api/log"
+	"github.com/kouprlabs/voltaserve/api/templates"
 )
+
+type dialer interface {
+	DialAndSend(m ...*gomail.Message) error
+}
 
 type MessageParams struct {
 	Subject string
 }
 
 type MailTemplate struct {
-	dialer *gomail.Dialer
+	dialer dialer
 	config config.SMTPConfig
 }
 
-func NewMailTemplate() *MailTemplate {
-	mt := new(MailTemplate)
-	mt.config = config.GetConfig().SMTP
-	mt.dialer = gomail.NewDialer(mt.config.Host, mt.config.Port, mt.config.Username, mt.config.Password)
-	return mt
+func NewMailTemplate(config config.SMTPConfig) *MailTemplate {
+	return NewMailTemplateWithDialer(config, gomail.NewDialer(config.Host, config.Port, config.Username, config.Password))
+}
+
+func NewMailTemplateWithDialer(config config.SMTPConfig, dialer dialer) *MailTemplate {
+	return &MailTemplate{
+		config: config,
+		dialer: dialer,
+	}
 }
 
 func (mt *MailTemplate) Send(templateName string, address string, variables map[string]string) error {
-	html, err := mt.getText(filepath.FromSlash("templates/"+templateName+"/template.html"), variables)
+	html, err := mt.getText(filepath.FromSlash(templateName+"/template.html"), variables)
 	if err != nil {
 		return err
 	}
-	text, err := mt.getText(filepath.FromSlash("templates/"+templateName+"/template.txt"), variables)
+	text, err := mt.getText(filepath.FromSlash(templateName+"/template.txt"), variables)
 	if err != nil {
 		return err
 	}
@@ -61,17 +70,17 @@ func (mt *MailTemplate) Send(templateName string, address string, variables map[
 	m.SetBody("text/plain ", text)
 	m.AddAlternative("text/html", html)
 	if err := mt.dialer.DialAndSend(m); err != nil {
-		return err
+		return fmt.Errorf("dial and sending mail: %w", err)
 	}
 	return nil
 }
 
 func (mt *MailTemplate) getText(path string, variables map[string]string) (string, error) {
-	f, err := os.Open(path)
+	f, err := templates.FS.Open(path)
 	if err != nil {
 		return "", err
 	}
-	defer func(f *os.File) {
+	defer func(f fs.File) {
 		if err := f.Close(); err != nil {
 			log.GetLogger().Error(err)
 		}
@@ -91,11 +100,11 @@ func (mt *MailTemplate) getText(path string, variables map[string]string) (strin
 }
 
 func (mt *MailTemplate) getMessageParams(templateName string) (*MessageParams, error) {
-	f, err := os.Open(filepath.FromSlash("templates/" + templateName + "/params.yml"))
+	f, err := templates.FS.Open(filepath.FromSlash(templateName + "/params.yml"))
 	if err != nil {
 		return nil, err
 	}
-	defer func(f *os.File) {
+	defer func(f fs.File) {
 		if err := f.Close(); err != nil {
 			log.GetLogger().Error(err)
 		}
