@@ -11,6 +11,7 @@
 package processor
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 
@@ -39,11 +40,10 @@ func (p *VideoProcessor) Thumbnail(inputPath string, width int, height int, outp
 		return err
 	}
 	defer func(path string) {
-		_, err := os.Stat(path)
-		if os.IsExist(err) {
-			if err := os.Remove(path); err != nil {
-				infra.GetLogger().Error(err)
-			}
+		if err := os.Remove(path); errors.Is(err, os.ErrNotExist) {
+			return
+		} else if err != nil {
+			infra.GetLogger().Error(err)
 		}
 	}(tmpPath)
 	if err := p.imageProc.ResizeImage(tmpPath, width, height, outputPath); err != nil {

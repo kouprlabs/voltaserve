@@ -32,7 +32,7 @@ import (
 var (
 	tokens   = make(map[string]*infra.Token)
 	expiries = make(map[string]time.Time)
-	mu       sync.Mutex
+	mu       sync.RWMutex
 )
 
 func startTokenRefresh(idpClient *client.IdPClient) {

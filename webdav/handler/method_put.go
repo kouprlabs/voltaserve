@@ -11,6 +11,7 @@
 package handler
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -57,24 +58,23 @@ func (h *Handler) methodPut(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	outputPath := filepath.Join(os.TempDir(), uuid.New().String())
-	ws, err := os.Create(outputPath) //nolint:gosec // Known safe path
+	//nolint:gosec // Known safe path
+	file, err := os.Create(outputPath)
 	if err != nil {
 		infra.HandleError(err, w)
 		return
 	}
-	defer func(ws *os.File) {
-		err := ws.Close()
-		if err != nil {
+	defer func(path string, file *os.File) {
+		if err := file.Close(); err != nil {
 			infra.HandleError(err, w)
 		}
-	}(ws)
-	_, err = io.Copy(ws, r.Body)
-	if err != nil {
-		infra.HandleError(err, w)
-		return
-	}
-	err = ws.Close()
-	if err != nil {
+		if err := os.Remove(path); errors.Is(err, os.ErrNotExist) {
+			return
+		} else if err != nil {
+			infra.GetLogger().Error(err)
+		}
+	}(outputPath, file)
+	if _, err = io.Copy(file, r.Body); err != nil {
 		infra.HandleError(err, w)
 		return
 	}

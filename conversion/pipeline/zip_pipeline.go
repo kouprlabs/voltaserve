@@ -11,6 +11,7 @@
 package pipeline
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 
@@ -50,11 +51,10 @@ func (p *zipPipeline) Run(opts client.PipelineRunOptions) error {
 		return err
 	}
 	defer func(path string) {
-		_, err := os.Stat(path)
-		if os.IsExist(err) {
-			if err := os.Remove(path); err != nil {
-				infra.GetLogger().Error(err)
-			}
+		if err := os.Remove(path); errors.Is(err, os.ErrNotExist) {
+			return
+		} else if err != nil {
+			infra.GetLogger().Error(err)
 		}
 	}(inputPath)
 	isGLTF, err := p.fi.IsGLTF(inputPath)
@@ -113,11 +113,10 @@ func (p *zipPipeline) convertToGLB(inputPath string, opts client.PipelineRunOpti
 		return nil, err
 	}
 	defer func(path string) {
-		_, err := os.Stat(path)
-		if os.IsExist(err) {
-			if err := os.Remove(path); err != nil {
-				infra.GetLogger().Error(err)
-			}
+		if err := os.Remove(path); errors.Is(err, os.ErrNotExist) {
+			return
+		} else if err != nil {
+			infra.GetLogger().Error(err)
 		}
 	}(outputPath)
 	stat, err := os.Stat(outputPath)

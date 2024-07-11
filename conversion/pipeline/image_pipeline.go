@@ -11,6 +11,7 @@
 package pipeline
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 
@@ -49,11 +50,10 @@ func (p *imagePipeline) Run(opts client.PipelineRunOptions) error {
 		return err
 	}
 	defer func(path string) {
-		_, err := os.Stat(path)
-		if os.IsExist(err) {
-			if err := os.Remove(path); err != nil {
-				infra.GetLogger().Error(err)
-			}
+		if err := os.Remove(path); errors.Is(err, os.ErrNotExist) {
+			return
+		} else if err != nil {
+			infra.GetLogger().Error(err)
 		}
 	}(inputPath)
 	if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
@@ -136,11 +136,10 @@ func (p *imagePipeline) createThumbnail(inputPath string, opts client.PipelineRu
 	}
 	if *isAvailable {
 		defer func(path string) {
-			_, err := os.Stat(path)
-			if os.IsExist(err) {
-				if err := os.Remove(path); err != nil {
-					infra.GetLogger().Error(err)
-				}
+			if err := os.Remove(path); errors.Is(err, os.ErrNotExist) {
+				return
+			} else if err != nil {
+				infra.GetLogger().Error(err)
 			}
 		}(tmpPath)
 	} else {
@@ -179,11 +178,10 @@ func (p *imagePipeline) convertTIFFToJPEG(inputPath string, imageProps client.Im
 		return nil, err
 	}
 	defer func(path string) {
-		_, err := os.Stat(path)
-		if os.IsExist(err) {
-			if err := os.Remove(path); err != nil {
-				infra.GetLogger().Error(err)
-			}
+		if err := os.Remove(path); errors.Is(err, os.ErrNotExist) {
+			return
+		} else if err != nil {
+			infra.GetLogger().Error(err)
 		}
 	}(jpegPath)
 	stat, err := os.Stat(jpegPath)

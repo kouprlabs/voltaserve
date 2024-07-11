@@ -154,11 +154,10 @@ func (r *FileRouter) Create(c *fiber.Ctx) error {
 			return err
 		}
 		defer func(path string) {
-			_, err := os.Stat(path)
-			if os.IsExist(err) {
-				if err := os.Remove(path); err != nil {
-					log.GetLogger().Error(err)
-				}
+			if err := os.Remove(path); errors.Is(err, os.ErrNotExist) {
+				return
+			} else if err != nil {
+				log.GetLogger().Error(err)
 			}
 		}(tmpPath)
 		file, err = r.fileSvc.Store(file.ID, service.StoreOptions{Path: &tmpPath}, userID)
@@ -221,11 +220,10 @@ func (r *FileRouter) Patch(c *fiber.Ctx) error {
 		return err
 	}
 	defer func(path string) {
-		_, err := os.Stat(path)
-		if os.IsExist(err) {
-			if err := os.Remove(path); err != nil {
-				log.GetLogger().Error(err)
-			}
+		if err := os.Remove(path); errors.Is(err, os.ErrNotExist) {
+			return
+		} else if err != nil {
+			log.GetLogger().Error(err)
 		}
 	}(tmpPath)
 	file, err = r.fileSvc.Store(file.ID, service.StoreOptions{Path: &tmpPath}, userID)

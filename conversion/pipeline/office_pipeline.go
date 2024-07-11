@@ -11,6 +11,7 @@
 package pipeline
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 
@@ -84,11 +85,10 @@ func (p *officePipeline) convertToPDF(inputPath string, opts client.PipelineRunO
 		return nil, err
 	}
 	defer func(path string) {
-		_, err := os.Stat(path)
-		if os.IsExist(err) {
-			if err := os.Remove(path); err != nil {
-				infra.GetLogger().Error(err)
-			}
+		if err := os.Remove(path); errors.Is(err, os.ErrNotExist) {
+			return
+		} else if err != nil {
+			infra.GetLogger().Error(err)
 		}
 	}(*outputPath)
 	defer func(path string) {
