@@ -7,7 +7,6 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import { Avatar } from '@chakra-ui/react'
 import { forwardRef } from '@chakra-ui/system'
 import cx from 'classnames'
@@ -37,11 +36,15 @@ const AccountMenuAvatarButton = forwardRef<AccountMenuAvatarButtonProps, 'div'>(
               name={user.fullName}
               src={user.picture}
               size="sm"
-              className={cx('w-[40px]', 'h-[40px]', {
-                'border': isActive,
-                'border-gray-300': isActive,
-                'dark:border-gray-700': isActive,
-              })}
+              className={cx(
+                'w-[40px]',
+                'h-[40px]',
+                'border',
+                'border-gray-300',
+                {
+                  'dark:border-gray-700': !isActive,
+                },
+              )}
             />
           </AccountMenuActiveCircle>
         </div>

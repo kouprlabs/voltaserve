@@ -7,9 +7,9 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import { ReactNode } from 'react'
 import { Circle } from '@chakra-ui/react'
+import cx from 'classnames'
 import variables from '@/lib/variables'
 import { useAppSelector } from '@/store/hook'
 import { NavType } from '@/store/ui/nav'
@@ -24,6 +24,7 @@ const AccountMenuActiveCircle = ({
   const activeNav = useAppSelector((state) => state.ui.nav.active)
   return (
     <Circle
+      className={cx('w-[50px]', 'h-[50px]')}
       bg={activeNav === NavType.Account ? variables.gradiant : 'transparent'}
     >
       {children}
