@@ -7,7 +7,6 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import { useEffect, useState } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import {
@@ -70,7 +69,13 @@ const AccountLayout = () => {
               name={user.fullName}
               src={user.picture}
               size="2xl"
-              className={cx('w-[165px]', 'h-[165px]')}
+              className={cx(
+                'w-[165px]',
+                'h-[165px]',
+                'border',
+                'border-gray-300',
+                'dark:border-gray-700',
+              )}
             />
             <IconButton
               icon={<IconEdit />}
