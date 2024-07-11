@@ -58,6 +58,7 @@ func (h *Handler) methodPut(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	outputPath := filepath.Join(os.TempDir(), uuid.New().String())
+	//nolint:gosec // Known safe path
 	file, err := os.Create(outputPath)
 	if err != nil {
 		infra.HandleError(err, w)
