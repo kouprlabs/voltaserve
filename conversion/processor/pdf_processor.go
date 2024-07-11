@@ -11,6 +11,7 @@
 package processor
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -42,10 +43,10 @@ func (p *PDFProcessor) TextFromPDF(inputPath string) (*string, error) {
 		return nil, err
 	}
 	defer func(path string) {
-		if _, err := os.Stat(path); !os.IsNotExist(err) {
-			if err := os.Remove(path); err != nil {
-				infra.GetLogger().Error(err)
-			}
+		if err := os.Remove(path); errors.Is(err, os.ErrNotExist) {
+			return
+		} else if err != nil {
+			infra.GetLogger().Error(err)
 		}
 	}(tmpPath)
 	b, err := os.ReadFile(tmpPath)

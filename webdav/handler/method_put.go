@@ -11,6 +11,7 @@
 package handler
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -66,10 +67,10 @@ func (h *Handler) methodPut(w http.ResponseWriter, r *http.Request) {
 		if err := file.Close(); err != nil {
 			infra.HandleError(err, w)
 		}
-		if _, err := os.Stat(path); !os.IsNotExist(err) {
-			if err := os.Remove(path); err != nil {
-				infra.GetLogger().Error(err)
-			}
+		if err := os.Remove(path); errors.Is(err, os.ErrNotExist) {
+			return
+		} else if err != nil {
+			infra.GetLogger().Error(err)
 		}
 	}(outputPath, file)
 	if _, err = io.Copy(file, r.Body); err != nil {

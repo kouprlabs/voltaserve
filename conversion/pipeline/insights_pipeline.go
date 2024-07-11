@@ -57,10 +57,10 @@ func (p *insightsPipeline) Run(opts client.PipelineRunOptions) error {
 		return err
 	}
 	defer func(path string) {
-		if _, err := os.Stat(path); !os.IsNotExist(err) {
-			if err := os.Remove(path); err != nil {
-				infra.GetLogger().Error(err)
-			}
+		if err := os.Remove(path); errors.Is(err, os.ErrNotExist) {
+			return
+		} else if err != nil {
+			infra.GetLogger().Error(err)
 		}
 	}(inputPath)
 	if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
@@ -107,10 +107,10 @@ func (p *insightsPipeline) createText(inputPath string, opts client.PipelineRunO
 			return nil, err
 		}
 		defer func(path string) {
-			if _, err := os.Stat(path); !os.IsNotExist(err) {
-				if err := os.Remove(path); err != nil {
-					infra.GetLogger().Error(err)
-				}
+			if err := os.Remove(path); errors.Is(err, os.ErrNotExist) {
+				return
+			} else if err != nil {
+				infra.GetLogger().Error(err)
 			}
 		}(noAlphaImagePath)
 		/* Convert to PDF/A */
@@ -119,10 +119,10 @@ func (p *insightsPipeline) createText(inputPath string, opts client.PipelineRunO
 			return nil, err
 		}
 		defer func(path string) {
-			if _, err := os.Stat(path); !os.IsNotExist(err) {
-				if err := os.Remove(path); err != nil {
-					infra.GetLogger().Error(err)
-				}
+			if err := os.Remove(path); errors.Is(err, os.ErrNotExist) {
+				return
+			} else if err != nil {
+				infra.GetLogger().Error(err)
 			}
 		}(pdfPath)
 		/* Set OCR S3 object */

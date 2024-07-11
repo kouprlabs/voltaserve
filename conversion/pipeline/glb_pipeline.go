@@ -11,6 +11,7 @@
 package pipeline
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 
@@ -48,11 +49,10 @@ func (p *glbPipeline) Run(opts client.PipelineRunOptions) error {
 		return err
 	}
 	defer func(path string) {
-		_, err := os.Stat(path)
-		if !os.IsNotExist(err) {
-			if err := os.Remove(path); err != nil {
-				infra.GetLogger().Error(err)
-			}
+		if err := os.Remove(path); errors.Is(err, os.ErrNotExist) {
+			return
+		} else if err != nil {
+			infra.GetLogger().Error(err)
 		}
 	}(inputPath)
 	if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
@@ -85,10 +85,10 @@ func (p *glbPipeline) Run(opts client.PipelineRunOptions) error {
 func (p *glbPipeline) createThumbnail(inputPath string, opts client.PipelineRunOptions) error {
 	tmpPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".jpeg")
 	defer func(path string) {
-		if _, err := os.Stat(path); !os.IsNotExist(err) {
-			if err := os.Remove(path); err != nil {
-				infra.GetLogger().Error(err)
-			}
+		if err := os.Remove(path); errors.Is(err, os.ErrNotExist) {
+			return
+		} else if err != nil {
+			infra.GetLogger().Error(err)
 		}
 	}(tmpPath)
 	if err := p.glbProc.Thumbnail(inputPath, p.config.Limits.ImagePreviewMaxWidth, p.config.Limits.ImagePreviewMaxHeight, "rgb(255,255,255)", tmpPath); err != nil {
