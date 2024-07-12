@@ -1,3 +1,12 @@
+---
+name: Documentation Update
+about: Suggest changes or additions to the documentation
+title: ''
+labels: documentation
+assignees: ''
+
+---
+
 ## Documentation Update
 
 ---
