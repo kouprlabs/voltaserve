@@ -35,4 +35,4 @@ _Any additional information or context that might be relevant._
 
 ---
 
-**Thank you for helping us improve our documentation!**
+[//]: # (**Thank you for helping us improve our documentation!**)

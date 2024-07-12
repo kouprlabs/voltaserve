@@ -55,4 +55,4 @@ _Any additional information, context, or logs that might be relevant to the issu
 
 ---
 
-**Thank you for helping us improve our project!**
+[//]: # (**Thank you for helping us improve our project!**)
