@@ -550,7 +550,6 @@ RUN apt-get install -y \
   fonts-tt2020 \
   fonts-tuffy \
   fonts-ubuntu \
-  fonts-ubuntu-classic \
   fonts-ubuntu-console \
   fonts-ubuntu-title \
   fonts-ukij-uyghur \
