@@ -586,30 +586,6 @@ RUN apt-get install -y \
 
 RUN apt-get install -y \
   tesseract-ocr \
-  tesseract-ocr-data-osd \
-  tesseract-ocr-data-ara \
-  tesseract-ocr-data-chi_sim \
-  tesseract-ocr-data-chi_tra \
-  tesseract-ocr-data-eng \
-  tesseract-ocr-data-fra \
-  tesseract-ocr-data-deu \
-  tesseract-ocr-data-por \
-  tesseract-ocr-data-spa
-
-RUN apt-get install -y \
-  tesseract-ocr \
-  tesseract-ocr-osd \
-  tesseract-ocr-ara \
-  tesseract-ocr-chi-sim \
-  tesseract-ocr-chi-tra \
-  tesseract-ocr-eng \
-  tesseract-ocr-fra \
-  tesseract-ocr-deu \
-  tesseract-ocr-por \
-  tesseract-ocr-spa
-
-RUN apt-get install -y \
-  tesseract-ocr \
   tesseract-ocr-osd \
   tesseract-ocr-ara \
   tesseract-ocr-chi-sim \
