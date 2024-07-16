@@ -582,7 +582,7 @@ RUN apt-get install -y \
   fonts-yrsa-rasa \
   fonts-yusei-magic
 
-RUN apk add --no-cache \
+RUN apt-get install -y \
   tesseract-ocr \
   tesseract-ocr-data-osd \
   tesseract-ocr-data-ara \
