@@ -36,6 +36,8 @@ RUN apt-get install -y \
 
 RUN npm i -g gltf-pipeline
 RUN npm i -g @koupr/screenshot-glb
+RUN npx playwright install
+RUN npx playwright install-deps
 
 RUN apt-get install -y \
   libreoffice-core-nogui \
