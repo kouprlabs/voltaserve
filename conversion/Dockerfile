@@ -608,6 +608,18 @@ RUN apt-get install -y \
   tesseract-ocr-por \
   tesseract-ocr-spa
 
+RUN apt-get install -y \
+  tesseract-ocr \
+  tesseract-ocr-osd \
+  tesseract-ocr-ara \
+  tesseract-ocr-chi-sim \
+  tesseract-ocr-chi-tra \
+  tesseract-ocr-eng \
+  tesseract-ocr-fra \
+  tesseract-ocr-deu \
+  tesseract-ocr-por \
+  tesseract-ocr-spa
+
 WORKDIR /app
 
 COPY --from=builder /build/voltaserve-conversion ./voltaserve-conversion
