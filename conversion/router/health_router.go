@@ -17,12 +17,21 @@ import (
 
 	"github.com/kouprlabs/voltaserve/conversion/client"
 	"github.com/kouprlabs/voltaserve/conversion/infra"
+	"github.com/kouprlabs/voltaserve/conversion/runtime"
 )
 
-type HealthRouter struct{}
+type HealthRouter struct {
+	installer *runtime.Installer
+}
 
-func NewHealthRouter() *HealthRouter {
-	return &HealthRouter{}
+type HealthRouterOptions struct {
+	Installer *runtime.Installer
+}
+
+func NewHealthRouter(opts HealthRouterOptions) *HealthRouter {
+	return &HealthRouter{
+		installer: opts.Installer,
+	}
 }
 
 func (r *HealthRouter) AppendRoutes(g fiber.Router) {
@@ -40,6 +49,9 @@ func (r *HealthRouter) AppendRoutes(g fiber.Router) {
 //	@Failure		503	{object}	errorpkg.ErrorResponse
 //	@Router			/health [get]
 func (r *HealthRouter) GetHealth(c *fiber.Ctx) error {
+	if r.installer.IsRunning() {
+		return c.SendStatus(http.StatusServiceUnavailable)
+	}
 	if err := infra.NewS3Manager().Connect(); err != nil {
 		return c.SendStatus(http.StatusServiceUnavailable)
 	}
