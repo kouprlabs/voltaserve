@@ -12,8 +12,51 @@ func NewDependencyDownloader() *DependencyDownloader {
 	}
 }
 
-func (d *DependencyDownloader) DownloadFonts() error {
-	fonts := `
+func (d *DependencyDownloader) Start() {
+	go func() {
+		infra.GetLogger().Info("⬇️ Installing LibreOffice packages...")
+		d.downloadLibreOffice()
+		infra.GetLogger().Info("⬇️ Installing Tesseract packages...")
+		d.downloadTesseract()
+		infra.GetLogger().Info("⬇️ Installing font packages...")
+		d.downloadFonts()
+	}()
+}
+
+func (d *DependencyDownloader) downloadLibreOffice() {
+	packages := `
+		libreoffice \libreoffice-core-nogui \
+		libreoffice-writer-nogui \
+		libreoffice-calc-nogui \
+		libreoffice-impress-nogui \
+		libreoffice-draw-nogui \
+		libreoffice-math-nogui`
+	if err := d.cmd.Exec("apt-get", "install", "-y", packages); err != nil {
+		infra.GetLogger().Error(err)
+		return
+	}
+}
+
+func (d *DependencyDownloader) downloadTesseract() {
+	packages := `
+		tesseract-ocr \
+		tesseract-ocr-osd \
+		tesseract-ocr-ara \
+		tesseract-ocr-chi-sim \
+		tesseract-ocr-chi-tra \
+		tesseract-ocr-eng \
+		tesseract-ocr-fra \
+		tesseract-ocr-deu \
+		tesseract-ocr-por \
+		tesseract-ocr-spa`
+	if err := d.cmd.Exec("apt-get", "install", "-y", packages); err != nil {
+		infra.GetLogger().Error(err)
+		return
+	}
+}
+
+func (d *DependencyDownloader) downloadFonts() {
+	packages := `
 		fonts-3270 \
 		fonts-adf-accanthis \
 		fonts-adf-baskervald \
@@ -549,8 +592,8 @@ func (d *DependencyDownloader) DownloadFonts() error {
 		fonts-yozvox-yozfont-standard-kana \
 		fonts-yrsa-rasa \
 		fonts-yusei-magic`
-	if err := d.cmd.Exec("apt-get", "install", "-y", fonts); err != nil {
-		return err
+	if err := d.cmd.Exec("apt-get", "install", "-y", packages); err != nil {
+		infra.GetLogger().Error(err)
+		return
 	}
-	return nil
 }

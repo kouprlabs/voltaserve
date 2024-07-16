@@ -51,6 +51,7 @@ func main() {
 	scheduler := runtime.NewScheduler(runtime.SchedulerOptions{
 		PipelineWorkerCount: *pipelineWorkers,
 	})
+	dependencyDownloader := runtime.NewDependencyDownloader()
 
 	app := fiber.New(fiber.Config{
 		ErrorHandler: errorpkg.ErrorHandler,
@@ -68,6 +69,7 @@ func main() {
 	pipelineRouter.AppendRoutes(v2)
 
 	scheduler.Start()
+	dependencyDownloader.Start()
 
 	if err := app.Listen(fmt.Sprintf(":%d", cfg.Port)); err != nil {
 		panic(err)
