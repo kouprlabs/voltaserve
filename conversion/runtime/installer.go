@@ -146,6 +146,7 @@ func (d *Installer) installTesseract() {
 	infra.GetLogger().Named(infra.StrDependencyDownloader).Infow("✅️  completed", "package", "tesseract")
 }
 
+//nolint:maintidx
 func (d *Installer) installFonts() {
 	infra.GetLogger().Named(infra.StrDependencyDownloader).Infow("⬇️  installing", "package", "fonts")
 	packages := []string{
