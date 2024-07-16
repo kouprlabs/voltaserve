@@ -18,11 +18,11 @@ import (
 )
 
 var (
-	StrScheduler            = fmt.Sprintf("%-13s", "scheduler")
-	StrPipeline             = fmt.Sprintf("%-13s", "pipeline")
-	StrWorkerStatus         = fmt.Sprintf("%-13s", "worker_status")
-	StrQueueStatus          = fmt.Sprintf("%-13s", "queue_status")
-	StrDependencyDownloader = fmt.Sprintf("%-13s", "installer")
+	StrScheduler    = fmt.Sprintf("%-13s", "scheduler")
+	StrPipeline     = fmt.Sprintf("%-13s", "pipeline")
+	StrWorkerStatus = fmt.Sprintf("%-13s", "worker_status")
+	StrQueueStatus  = fmt.Sprintf("%-13s", "queue_status")
+	StrInstaller    = fmt.Sprintf("%-13s", "installer")
 )
 
 var logger *zap.SugaredLogger

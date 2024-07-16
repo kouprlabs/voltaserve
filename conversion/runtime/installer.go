@@ -40,7 +40,7 @@ func (d *Installer) Start() {
 }
 
 func (d *Installer) installCoreTools() {
-	infra.GetLogger().Named(infra.StrDependencyDownloader).Infow("⬇️  installing", "package", "core-tools")
+	infra.GetLogger().Named(infra.StrInstaller).Infow("⬇️  installing", "package", "core-tools")
 	packages := []string{
 		"curl",
 		"ffmpeg",
@@ -57,54 +57,54 @@ func (d *Installer) installCoreTools() {
 	args := append([]string{"install", "-y"}, packages...)
 	if err := d.cmd.Exec("apt-get", args...); err != nil {
 		infra.GetLogger().Error(err)
-		infra.GetLogger().Named(infra.StrDependencyDownloader).Infow("❌️  failed", "package", "core-tools")
+		infra.GetLogger().Named(infra.StrInstaller).Infow("❌️  failed", "package", "core-tools")
 		return
 	}
-	infra.GetLogger().Named(infra.StrDependencyDownloader).Infow("✅️  completed", "package", "core-tools")
+	infra.GetLogger().Named(infra.StrInstaller).Infow("✅️  completed", "package", "core-tools")
 }
 
 func (d *Installer) installGltfPipeline() {
-	infra.GetLogger().Named(infra.StrDependencyDownloader).Infow("⬇️  installing", "package", "gltf-pipeline")
+	infra.GetLogger().Named(infra.StrInstaller).Infow("⬇️  installing", "package", "gltf-pipeline")
 	if err := d.cmd.Exec("npm", "i", "-g", "gltf-pipeline"); err != nil {
 		infra.GetLogger().Error(err)
-		infra.GetLogger().Named(infra.StrDependencyDownloader).Infow("❌️  failed", "package", "gltf-pipeline")
+		infra.GetLogger().Named(infra.StrInstaller).Infow("❌️  failed", "package", "gltf-pipeline")
 		return
 	}
-	infra.GetLogger().Named(infra.StrDependencyDownloader).Infow("✅️  completed", "package", "gltf-pipeline")
+	infra.GetLogger().Named(infra.StrInstaller).Infow("✅️  completed", "package", "gltf-pipeline")
 }
 
 func (d *Installer) installScreenshotGLB() {
-	infra.GetLogger().Named(infra.StrDependencyDownloader).Infow("⬇️  installing", "package", "@koupr/screenshot-glb")
+	infra.GetLogger().Named(infra.StrInstaller).Infow("⬇️  installing", "package", "@koupr/screenshot-glb")
 	if err := d.cmd.Exec("npm", "i", "-g", "@koupr/screenshot-glb"); err != nil {
 		infra.GetLogger().Error(err)
-		infra.GetLogger().Named(infra.StrDependencyDownloader).Infow("❌️  failed", "package", "@koupr/screenshot-glb")
+		infra.GetLogger().Named(infra.StrInstaller).Infow("❌️  failed", "package", "@koupr/screenshot-glb")
 		return
 	}
-	infra.GetLogger().Named(infra.StrDependencyDownloader).Infow("✅️  completed", "package", "@koupr/screenshot-glb")
+	infra.GetLogger().Named(infra.StrInstaller).Infow("✅️  completed", "package", "@koupr/screenshot-glb")
 }
 
 func (d *Installer) installBrowsersDeps() {
-	infra.GetLogger().Named(infra.StrDependencyDownloader).Infow("⬇️  installing", "package", "browsers-deps")
+	infra.GetLogger().Named(infra.StrInstaller).Infow("⬇️  installing", "package", "browsers-deps")
 	if err := d.cmd.Exec("npx", "playwright", "install-deps"); err != nil {
 		infra.GetLogger().Error(err)
-		infra.GetLogger().Named(infra.StrDependencyDownloader).Infow("❌️  failed", "package", "browsers-deps")
+		infra.GetLogger().Named(infra.StrInstaller).Infow("❌️  failed", "package", "browsers-deps")
 		return
 	}
-	infra.GetLogger().Named(infra.StrDependencyDownloader).Infow("✅️  completed", "package", "browsers-deps")
+	infra.GetLogger().Named(infra.StrInstaller).Infow("✅️  completed", "package", "browsers-deps")
 }
 
 func (d *Installer) installBrowsers() {
-	infra.GetLogger().Named(infra.StrDependencyDownloader).Infow("⬇️  installing", "package", "browsers")
+	infra.GetLogger().Named(infra.StrInstaller).Infow("⬇️  installing", "package", "browsers")
 	if err := d.cmd.Exec("npx", "playwright", "install"); err != nil {
 		infra.GetLogger().Error(err)
-		infra.GetLogger().Named(infra.StrDependencyDownloader).Infow("❌️  failed", "package", "browsers")
+		infra.GetLogger().Named(infra.StrInstaller).Infow("❌️  failed", "package", "browsers")
 		return
 	}
-	infra.GetLogger().Named(infra.StrDependencyDownloader).Infow("✅️  completed", "package", "browsers")
+	infra.GetLogger().Named(infra.StrInstaller).Infow("✅️  completed", "package", "browsers")
 }
 
 func (d *Installer) installLibreOffice() {
-	infra.GetLogger().Named(infra.StrDependencyDownloader).Infow("⬇️  installing", "package", "libreoffice")
+	infra.GetLogger().Named(infra.StrInstaller).Infow("⬇️  installing", "package", "libreoffice")
 	packages := []string{
 		"libreoffice",
 		"libreoffice-core",
@@ -117,14 +117,14 @@ func (d *Installer) installLibreOffice() {
 	args := append([]string{"install", "-y"}, packages...)
 	if err := d.cmd.Exec("apt-get", args...); err != nil {
 		infra.GetLogger().Error(err)
-		infra.GetLogger().Named(infra.StrDependencyDownloader).Infow("❌️  failed", "package", "libreoffice")
+		infra.GetLogger().Named(infra.StrInstaller).Infow("❌️  failed", "package", "libreoffice")
 		return
 	}
-	infra.GetLogger().Named(infra.StrDependencyDownloader).Infow("✅️  completed", "package", "libreoffice")
+	infra.GetLogger().Named(infra.StrInstaller).Infow("✅️  completed", "package", "libreoffice")
 }
 
 func (d *Installer) installTesseract() {
-	infra.GetLogger().Named(infra.StrDependencyDownloader).Infow("⬇️  installing", "package", "tesseract")
+	infra.GetLogger().Named(infra.StrInstaller).Infow("⬇️  installing", "package", "tesseract")
 	packages := []string{
 		"tesseract-ocr",
 		"tesseract-ocr-osd",
@@ -140,15 +140,15 @@ func (d *Installer) installTesseract() {
 	args := append([]string{"install", "-y"}, packages...)
 	if err := d.cmd.Exec("apt-get", args...); err != nil {
 		infra.GetLogger().Error(err)
-		infra.GetLogger().Named(infra.StrDependencyDownloader).Infow("❌️  failed", "package", "tesseract")
+		infra.GetLogger().Named(infra.StrInstaller).Infow("❌️  failed", "package", "tesseract")
 		return
 	}
-	infra.GetLogger().Named(infra.StrDependencyDownloader).Infow("✅️  completed", "package", "tesseract")
+	infra.GetLogger().Named(infra.StrInstaller).Infow("✅️  completed", "package", "tesseract")
 }
 
 //nolint:maintidx
 func (d *Installer) installFonts() {
-	infra.GetLogger().Named(infra.StrDependencyDownloader).Infow("⬇️  installing", "package", "fonts")
+	infra.GetLogger().Named(infra.StrInstaller).Infow("⬇️  installing", "package", "fonts")
 	packages := []string{
 		"fonts-3270",
 		"fonts-adf-accanthis",
@@ -689,8 +689,8 @@ func (d *Installer) installFonts() {
 	args := append([]string{"install", "-y"}, packages...)
 	if err := d.cmd.Exec("apt-get", args...); err != nil {
 		infra.GetLogger().Error(err)
-		infra.GetLogger().Named(infra.StrDependencyDownloader).Infow("❌️  failed", "package", "fonts")
+		infra.GetLogger().Named(infra.StrInstaller).Infow("❌️  failed", "package", "fonts")
 		return
 	}
-	infra.GetLogger().Named(infra.StrDependencyDownloader).Infow("✅️  completed", "package", "fonts")
+	infra.GetLogger().Named(infra.StrInstaller).Infow("✅️  completed", "package", "fonts")
 }
