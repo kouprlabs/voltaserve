@@ -48,10 +48,11 @@ func main() {
 	schedulerOpts := runtime.NewDefaultSchedulerOptions()
 	pipelineWorkers := flag.Int("pipeline-workers", schedulerOpts.PipelineWorkerCount, "Number of pipeline workers")
 	flag.Parse()
+	installer := runtime.NewInstaller()
 	scheduler := runtime.NewScheduler(runtime.SchedulerOptions{
 		PipelineWorkerCount: *pipelineWorkers,
+		Installer:           installer,
 	})
-	dependencyDownloader := runtime.NewDependencyDownloader()
 
 	app := fiber.New(fiber.Config{
 		ErrorHandler: errorpkg.ErrorHandler,
@@ -60,7 +61,9 @@ func main() {
 
 	v2 := app.Group("v2")
 
-	healthRouter := router.NewHealthRouter()
+	healthRouter := router.NewHealthRouter(router.HealthRouterOptions{
+		Installer: installer,
+	})
 	healthRouter.AppendRoutes(v2)
 
 	pipelineRouter := router.NewPipelineRouter(router.NewPipelineRouterOptions{
@@ -69,7 +72,7 @@ func main() {
 	pipelineRouter.AppendRoutes(v2)
 
 	scheduler.Start()
-	dependencyDownloader.Start()
+	installer.Start()
 
 	if err := app.Listen(fmt.Sprintf(":%d", cfg.Port)); err != nil {
 		panic(err)

@@ -23,11 +23,13 @@ type Scheduler struct {
 	pipelineQueue       [][]client.PipelineRunOptions
 	pipelineWorkerCount int
 	activePipelineCount int
+	installer           *Installer
 	apiClient           *client.APIClient
 }
 
 type SchedulerOptions struct {
 	PipelineWorkerCount int
+	Installer           *Installer
 }
 
 func NewDefaultSchedulerOptions() SchedulerOptions {
@@ -44,6 +46,7 @@ func NewScheduler(opts SchedulerOptions) *Scheduler {
 	return &Scheduler{
 		pipelineQueue:       make([][]client.PipelineRunOptions, opts.PipelineWorkerCount),
 		pipelineWorkerCount: opts.PipelineWorkerCount,
+		installer:           opts.Installer,
 		apiClient:           client.NewAPIClient(),
 	}
 }
@@ -81,7 +84,7 @@ func (s *Scheduler) pipelineWorker(index int) {
 	s.pipelineQueue[index] = make([]client.PipelineRunOptions, 0)
 	infra.GetLogger().Named(infra.StrPipeline).Infow("⚙️  running", "worker", index)
 	for {
-		if len(s.pipelineQueue[index]) > 0 {
+		if len(s.pipelineQueue[index]) > 0 && !s.installer.IsRunning() {
 			s.activePipelineCount++
 			opts := s.pipelineQueue[index][0]
 			infra.GetLogger().Named(infra.StrPipeline).Infow("🔨  working", "worker", index, "bucket", opts.Bucket, "key", opts.Key)
