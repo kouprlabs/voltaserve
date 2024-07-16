@@ -25,7 +25,8 @@ func (d *DependencyDownloader) Start() {
 
 func (d *DependencyDownloader) downloadLibreOffice() {
 	packages := `
-		libreoffice \libreoffice-core-nogui \
+		libreoffice \
+		libreoffice-core-nogui \
 		libreoffice-writer-nogui \
 		libreoffice-calc-nogui \
 		libreoffice-impress-nogui \
