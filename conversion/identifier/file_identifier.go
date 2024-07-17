@@ -13,6 +13,10 @@ package identifier
 import (
 	"archive/zip"
 	"encoding/json"
+	"errors"
+	"fmt"
+	"io"
+	"io/fs"
 	"path/filepath"
 	"strings"
 )
@@ -255,4 +259,28 @@ func (fi *FileIdentifier) IsGLTF(path string) (bool, error) {
 		}
 	}
 	return hasGLTF && (!hasBin || (hasBin && gltfFile != nil)), nil
+}
+
+func (fi *FileIdentifier) IsKRA(path string) (bool, error) {
+	zipFile, err := zip.OpenReader(path)
+	if err != nil {
+		return false, fmt.Errorf("open zip: %w", err)
+	}
+
+	defer zipFile.Close()
+
+	mimetypeFile, err := zipFile.Open("mimetype")
+	if errors.Is(err, fs.ErrNotExist) {
+		return false, nil
+	} else if err != nil {
+		return false, fmt.Errorf("open mimetype: %w", err)
+	}
+	defer mimetypeFile.Close()
+
+	mimetype, err := io.ReadAll(mimetypeFile)
+	if err != nil {
+		return false, fmt.Errorf("read mimetype: %w", err)
+	}
+
+	return string(mimetype) == "application/x-krita", nil
 }
