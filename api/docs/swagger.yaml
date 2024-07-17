@@ -548,10 +548,10 @@ definitions:
     type: object
   service.SnapshotDetachOptions:
     properties:
-      fileID:
+      fileId:
         type: string
     required:
-    - fileID
+    - fileId
     type: object
   service.SnapshotList:
     properties:
@@ -3171,6 +3171,28 @@ paths:
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
       summary: Get Count
+      tags:
+      - Tasks
+  /tasks/dismiss:
+    post:
+      consumes:
+      - application/json
+      description: Dismiss All
+      operationId: tasks_dismiss_all
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Dismiss All
       tags:
       - Tasks
   /users:
