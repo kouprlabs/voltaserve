@@ -24,10 +24,10 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Lint using Golanci lint
-        uses: golangci/golangci-lint-action@v6
+      - name: Lint using flake8
+        uses: suo/flake8-github-action@releases/v1
         with:
-          working-directory: language
+          checkName: linting
     permissions:
       contents: read
       pull-requests: read

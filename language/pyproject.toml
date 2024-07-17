@@ -6,7 +6,10 @@ requires-python = "==3.12.*"
 dependencies = ["flask==3.0.3", "spacy==3.7.4", "requests==2.32.2"]
 
 [tool.pdm.dev-dependencies]
-dev = ["black==24.4.2"]
+dev = [
+    "black==24.4.2",
+    "flake8==7.1.0",
+]
 
 [tool.pdm]
 distribution = false
