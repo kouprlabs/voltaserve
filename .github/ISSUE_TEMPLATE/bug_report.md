@@ -40,6 +40,10 @@ _Add any screenshots or code snippets that might help in diagnosing the issue._
 ---
 
 ### **Environment Details:**
+**Deployment type**
+- [ ] Docker
+- [ ] Kubernetes
+- [ ] Other
 
 _Any relevant to the case environment details (e.g. browser in case of UI bug)_ 
 
