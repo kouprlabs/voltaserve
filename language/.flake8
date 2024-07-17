@@ -1,0 +1,4 @@
+[flake8]
+exclude = .git,.venv
+extend-ignore = E203
+max-line-length = 88

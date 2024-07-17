@@ -35,6 +35,7 @@ iso_6393_to_model = {
     "dan": "da_core_news_lg",
 }
 
+
 @app.route("/v2/health", methods=["GET"])
 def health():
     return "OK", 200
