@@ -25,11 +25,6 @@ on:
       - "language/**"
     tags:
       - 'v*'
-  pull_request:
-    branches:
-      - main
-    paths:
-      - "language/**"
 
 jobs:
   build_and_push:
