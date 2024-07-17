@@ -179,7 +179,6 @@ func (r *TaskRouter) Dismiss(c *fiber.Ctx) error {
 //	@Accept			json
 //	@Produce		json
 //	@Success		200
-//	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/tasks/dismiss [post]
 func (r *TaskRouter) DismissAll(c *fiber.Ctx) error {

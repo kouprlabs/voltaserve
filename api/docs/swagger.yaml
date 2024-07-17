@@ -3184,10 +3184,6 @@ paths:
       responses:
         "200":
           description: OK
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
