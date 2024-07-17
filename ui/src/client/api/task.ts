@@ -7,7 +7,6 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import useSWR, { SWRConfiguration } from 'swr'
 import { apiFetcher } from '@/client/fetcher'
 
@@ -133,6 +132,13 @@ export default class TaskAPI {
   static async dismiss(id: string) {
     return apiFetcher({
       url: `/tasks/${id}/dismiss`,
+      method: 'POST',
+    })
+  }
+
+  static async dismissAll() {
+    return apiFetcher({
+      url: `/tasks/dismiss`,
       method: 'POST',
     })
   }

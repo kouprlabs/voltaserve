@@ -97,9 +97,8 @@ func (p *pdfPipeline) Run(opts client.PipelineRunOptions) error {
 
 func (p *pdfPipeline) createThumbnail(inputPath string, opts client.PipelineRunOptions) error {
 	tmpPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".png")
-	if err := p.pdfProc.Thumbnail(inputPath, 0, p.config.Limits.ImagePreviewMaxHeight, tmpPath); err != nil {
-		return err
-	}
+	// We don't consider failing the creation of the thumbnail as an error
+	_ = p.pdfProc.Thumbnail(inputPath, 0, p.config.Limits.ImagePreviewMaxHeight, tmpPath)
 	defer func(path string) {
 		if err := os.Remove(path); errors.Is(err, os.ErrNotExist) {
 			return

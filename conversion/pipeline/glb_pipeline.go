@@ -91,9 +91,8 @@ func (p *glbPipeline) createThumbnail(inputPath string, opts client.PipelineRunO
 			infra.GetLogger().Error(err)
 		}
 	}(tmpPath)
-	if err := p.glbProc.Thumbnail(inputPath, p.config.Limits.ImagePreviewMaxWidth, p.config.Limits.ImagePreviewMaxHeight, "rgb(255,255,255)", tmpPath); err != nil {
-		return err
-	}
+	// We don't consider failing the creation of the thumbnail as an error
+	_ = p.glbProc.Thumbnail(inputPath, p.config.Limits.ImagePreviewMaxWidth, p.config.Limits.ImagePreviewMaxHeight, "rgb(255,255,255)", tmpPath)
 	props, err := p.imageProc.MeasureImage(tmpPath)
 	if err != nil {
 		return err

@@ -166,7 +166,7 @@ type TaskList struct {
 func (svc *TaskService) List(opts TaskListOptions, userID string) (*TaskList, error) {
 	var authorized []model.Task
 	if opts.Query == "" {
-		ids, err := svc.taskRepo.GetIDs()
+		ids, err := svc.taskRepo.GetIDs(userID)
 		if err != nil {
 			return nil, err
 		}
@@ -175,11 +175,11 @@ func (svc *TaskService) List(opts TaskListOptions, userID string) (*TaskList, er
 			return nil, err
 		}
 	} else {
-		orgs, err := svc.taskSearch.Query(opts.Query)
+		tasks, err := svc.taskSearch.Query(opts.Query)
 		if err != nil {
 			return nil, err
 		}
-		authorized, err = svc.doAuthorization(orgs, userID)
+		authorized, err = svc.doAuthorization(tasks, userID)
 		if err != nil {
 			return nil, err
 		}
@@ -305,6 +305,25 @@ func (svc *TaskService) Dismiss(id string, userID string) error {
 		return errorpkg.NewTaskIsRunningError(nil)
 	}
 	return svc.deleteAndSync(id)
+}
+
+func (svc *TaskService) DismissAll(userID string) error {
+	ids, err := svc.taskRepo.GetIDs(userID)
+	if err != nil {
+		return err
+	}
+	authorized, err := svc.doAuthorizationByIDs(ids, userID)
+	if err != nil {
+		return err
+	}
+	for _, t := range authorized {
+		if t.HasError() {
+			if err := svc.deleteAndSync(t.GetID()); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
 
 func (svc *TaskService) Delete(id string) error {
