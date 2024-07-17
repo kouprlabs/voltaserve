@@ -24,10 +24,20 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Lint using Golanci lint
-        uses: golangci/golangci-lint-action@v6
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
-          working-directory: language
+          python-version: 3.12
+
+      - name: Lint using flake8
+        uses: py-actions/flake8@v2
+        with:
+          path: language
+          ignore: "E203"
+          max-line-length: "88"
+          exclude: ".git,.venv,.dockerignore,.pdm-python,Dockerfile"
+          plugins: "flake8-black"
+
     permissions:
       contents: read
       pull-requests: read

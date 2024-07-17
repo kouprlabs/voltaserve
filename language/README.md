@@ -40,3 +40,14 @@ flask run --host=0.0.0.0 --port=8084 --debug
 ```
 
 You can omit the `--debug` flag when not developing.
+
+Lint code:
+
+```shell
+flake8 .
+```
+
+Format code:
+```shell
+black .
+```
