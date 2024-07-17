@@ -24,7 +24,6 @@ RUN pipx install pdm --python $(which python)
 
 RUN pdm install --prod --no-editable
 RUN .venv/bin/python3 -m ensurepip
-RUN .venv/bin/python3 -m spacy download xx_ent_wiki_sm
 
 ENTRYPOINT ["pdm", "run", "flask", "run", "--host=0.0.0.0", "--port=8084"]
 
