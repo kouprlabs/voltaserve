@@ -1,3 +1,5 @@
+// Package search contains the implementation of the search indices.
+//
 // Copyright 2023 Anass Bouassaba.
 //
 // Use of this software is governed by the Business Source License

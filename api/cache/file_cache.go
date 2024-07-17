@@ -1,3 +1,5 @@
+// Package cache contains the various redis stored caches for metadata information.
+//
 // Copyright 2023 Anass Bouassaba.
 //
 // Use of this software is governed by the Business Source License

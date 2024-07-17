@@ -1,3 +1,5 @@
+// Package service contains the services of the api.
+//
 // Copyright 2023 Anass Bouassaba.
 //
 // Use of this software is governed by the Business Source License

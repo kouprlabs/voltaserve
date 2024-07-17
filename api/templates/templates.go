@@ -1,3 +1,4 @@
+// Package templates contains the virtual filesystem containing the email templates.
 package templates
 
 import "embed"
