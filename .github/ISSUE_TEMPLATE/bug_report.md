@@ -7,10 +7,6 @@ assignees: ''
 
 ---
 
-## Bug Report
-
----
-
 ### **Pre-checklist:**
 
 - [ ] I have searched for similar issues in the repository and could not find a duplicate.

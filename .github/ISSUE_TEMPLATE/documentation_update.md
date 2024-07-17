@@ -7,10 +7,6 @@ assignees: ''
 
 ---
 
-## Documentation Update
-
----
-
 ### **Description:**
 
 _A detailed description of the documentation update needed._

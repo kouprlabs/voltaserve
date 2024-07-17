@@ -7,10 +7,6 @@ assignees: ''
 
 ---
 
-## Ask me anything
-
----
-
 ### **Question:**
 
 _A clear and concise question._

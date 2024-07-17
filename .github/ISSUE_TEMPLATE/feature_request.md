@@ -7,10 +7,6 @@ assignees: ''
 
 ---
 
-## Feature Request
-
----
-
 ### **Description:**
 
 _A detailed description of the feature you are requesting._
