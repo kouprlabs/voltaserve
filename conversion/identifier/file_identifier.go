@@ -80,6 +80,7 @@ func (fi *FileIdentifier) IsPlainText(path string) bool {
 		".yaml",
 		".toml",
 		".md",
+		".csv",
 	}
 	extension := filepath.Ext(path)
 	for _, v := range extensions {
