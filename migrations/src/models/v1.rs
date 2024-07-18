@@ -1,7 +1,8 @@
-mod organization;
-mod user;
-mod workspace;
 mod group;
 mod invitation;
+mod organization;
+mod snapshot;
+mod user;
+mod workspace;
 
-pub use {organization::*, user::*, workspace::*, group::*, invitation::*};
+pub use {group::*, invitation::*, organization::*, snapshot::*, user::*, workspace::*};

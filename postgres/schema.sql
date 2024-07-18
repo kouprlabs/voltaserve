@@ -25,24 +25,6 @@ CREATE TABLE IF NOT EXISTS "file"
 CREATE INDEX IF NOT EXISTS file_parent_id_idx ON "file" (parent_id);
 CREATE INDEX IF NOT EXISTS file_workspace_id_idx ON "file" (workspace_id);
 
-CREATE TABLE IF NOT EXISTS "snapshot"
-(
-  id          text PRIMARY KEY,
-  version     bigint,
-  original    jsonb,
-  preview     jsonb,
-  text        jsonb,
-  ocr         jsonb,
-  entities    jsonb,
-  mosaic      jsonb,
-  thumbnail   jsonb,
-  language    text,
-  status      text,
-  task_id     text,
-  create_time text NOT NULL DEFAULT (to_json(now())#>>'{}'),
-  update_time text ON UPDATE (to_json(now())#>>'{}')
-);
-
 CREATE TABLE IF NOT EXISTS snapshot_file
 (
     snapshot_id text REFERENCES snapshot (id) ON DELETE CASCADE,
