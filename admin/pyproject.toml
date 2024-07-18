@@ -22,8 +22,7 @@ python = "^3.12"
 fastapi = "^0.111.1"
 uvicorn = "^0.30.1"
 psycopg2-binary = "^2.9.9"
-
-
+pydantic-settings = "2.3.4"
 
 [build-system]
 requires = ["poetry-core"]
