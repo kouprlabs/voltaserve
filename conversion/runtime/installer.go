@@ -65,7 +65,7 @@ func (d *Installer) installCoreTools() {
 
 func (d *Installer) installGltfPipeline() {
 	infra.GetLogger().Named(infra.StrInstaller).Infow("⬇️  installing", "package", "gltf-pipeline")
-	if err := d.cmd.Exec("npm", "i", "-g", "gltf-pipeline"); err != nil {
+	if err := d.cmd.Exec("npm", "i", "-g", "gltf-pipeline@4.1.0"); err != nil {
 		infra.GetLogger().Error(err)
 		infra.GetLogger().Named(infra.StrInstaller).Infow("❌️  failed", "package", "gltf-pipeline")
 		return
@@ -75,7 +75,7 @@ func (d *Installer) installGltfPipeline() {
 
 func (d *Installer) installScreenshotGLB() {
 	infra.GetLogger().Named(infra.StrInstaller).Infow("⬇️  installing", "package", "@koupr/screenshot-glb")
-	if err := d.cmd.Exec("npm", "i", "-g", "@koupr/screenshot-glb"); err != nil {
+	if err := d.cmd.Exec("npm", "i", "-g", "@koupr/screenshot-glb@1.10.6"); err != nil {
 		infra.GetLogger().Error(err)
 		infra.GetLogger().Named(infra.StrInstaller).Infow("❌️  failed", "package", "@koupr/screenshot-glb")
 		return
@@ -136,6 +136,14 @@ func (d *Installer) installTesseract() {
 		"tesseract-ocr-deu",
 		"tesseract-ocr-por",
 		"tesseract-ocr-spa",
+		"tesseract-ocr-nld",
+		"tesseract-ocr-ita",
+		"tesseract-ocr-jpn",
+		"tesseract-ocr-nor",
+		"tesseract-ocr-swe",
+		"tesseract-ocr-fin",
+		"tesseract-ocr-dan",
+		"tesseract-ocr-rus",
 	}
 	args := append([]string{"install", "-y"}, packages...)
 	if err := d.cmd.Exec("apt-get", args...); err != nil {
