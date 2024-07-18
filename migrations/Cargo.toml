@@ -1,0 +1,14 @@
+[package]
+name = "voltaserve-migrations"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[lib]
+name = "voltaserve_migration"
+path = "src/lib.rs"
+
+[dependencies]
+async-std = { version = "^1", features = ["attributes", "tokio1"] }
+
+sea-orm-migration = { version = "0.12.15", features = ["runtime-async-std-rustls", "sqlx-postgres"] }
