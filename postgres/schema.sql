@@ -10,20 +10,6 @@
 
 SET DATABASE = voltaserve;
 
-CREATE TABLE IF NOT EXISTS workspace
-(
-    id                        text PRIMARY KEY,
-    name                      text NOT NULL,
-    organization_id           text NOT NULL REFERENCES organization (id) ON DELETE CASCADE,
-    storage_capacity          bigint NOT NULL,
-    root_id                   text UNIQUE,
-    bucket                    text UNIQUE NOT NULL,
-    create_time               text NOT NULL DEFAULT (to_json(now())#>>'{}'),
-    update_time               text ON UPDATE (to_json(now())#>>'{}')
-);
-
-CREATE INDEX IF NOT EXISTS workspace_organization_id_idx ON workspace (organization_id);
-
 CREATE TABLE IF NOT EXISTS "file"
 (
     id           text PRIMARY KEY,
