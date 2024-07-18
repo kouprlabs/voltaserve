@@ -7,13 +7,14 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
-import { useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import {
+  Button,
   Drawer as ChakraDrawer,
   DrawerBody,
   DrawerCloseButton,
   DrawerContent,
+  DrawerFooter,
   DrawerHeader,
   DrawerOverlay,
   IconButton,
@@ -22,7 +23,7 @@ import {
 import cx from 'classnames'
 import TaskAPI from '@/client/api/task'
 import { swrConfig } from '@/client/options'
-import { IconStacks } from '@/lib/components/icons'
+import { IconClearAll, IconStacks } from '@/lib/components/icons'
 import NotificationBadge from '@/lib/components/notification-badge'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { drawerDidClose, mutateCountUpdated } from '@/store/ui/tasks'
@@ -32,7 +33,9 @@ const TaskDrawer = () => {
   const dispatch = useAppDispatch()
   const buttonRef = useRef<HTMLButtonElement>(null)
   const { isOpen, onOpen, onClose } = useDisclosure()
+  const [isDismissing, setIsDismissing] = useState(false)
   const isDrawerOpen = useAppSelector((state) => state.ui.tasks.isDrawerOpen)
+  const mutateList = useAppSelector((state) => state.ui.tasks.mutateList)
   const { data: count, mutate: mutateCount } = TaskAPI.useGetCount(swrConfig())
 
   useEffect(() => {
@@ -48,6 +51,16 @@ const TaskDrawer = () => {
       dispatch(mutateCountUpdated(mutateCount))
     }
   }, [mutateCount, dispatch])
+
+  const handleClearCompleted = useCallback(async () => {
+    try {
+      setIsDismissing(true)
+      await TaskAPI.dismissAll()
+      mutateList?.(await TaskAPI.list())
+    } finally {
+      setIsDismissing(false)
+    }
+  }, [dispatch, mutateList])
 
   return (
     <>
@@ -76,6 +89,19 @@ const TaskDrawer = () => {
           <DrawerBody className={cx('p-2')}>
             <TasksList />
           </DrawerBody>
+          <DrawerFooter>
+            {count && count > 0 ? (
+              <Button
+                className={cx('w-full')}
+                size="sm"
+                leftIcon={<IconClearAll />}
+                isLoading={isDismissing}
+                onClick={handleClearCompleted}
+              >
+                Clear Completed Items
+              </Button>
+            ) : null}
+          </DrawerFooter>
         </DrawerContent>
       </ChakraDrawer>
     </>

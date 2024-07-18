@@ -85,15 +85,21 @@ func (p *imagePipeline) Run(opts client.PipelineRunOptions) error {
 			return err
 		}
 	}
+	defer func(path string) {
+		if err := os.Remove(path); errors.Is(err, os.ErrNotExist) {
+			return
+		} else if err != nil {
+			infra.GetLogger().Error(err)
+		}
+	}(imagePath)
 	if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
 		Fields: []string{client.TaskFieldName},
 		Name:   helper.ToPtr("Creating thumbnail."),
 	}); err != nil {
 		return err
 	}
-	if err := p.createThumbnail(imagePath, opts); err != nil {
-		return err
-	}
+	// We don't consider failing the creation of the thumbnail as an error
+	_ = p.createThumbnail(imagePath, opts)
 	if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
 		Fields: []string{client.TaskFieldName, client.TaskFieldStatus},
 		Name:   helper.ToPtr("Done."),
@@ -177,13 +183,6 @@ func (p *imagePipeline) convertTIFFToJPEG(inputPath string, imageProps client.Im
 	if err := p.imageProc.ConvertImage(inputPath, jpegPath); err != nil {
 		return nil, err
 	}
-	defer func(path string) {
-		if err := os.Remove(path); errors.Is(err, os.ErrNotExist) {
-			return
-		} else if err != nil {
-			infra.GetLogger().Error(err)
-		}
-	}(jpegPath)
 	stat, err := os.Stat(jpegPath)
 	if err != nil {
 		return nil, err

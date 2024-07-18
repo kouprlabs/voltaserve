@@ -25,7 +25,7 @@ func (d *Installer) IsRunning() bool {
 func (d *Installer) Start() {
 	go func() {
 		d.isRunning = true
-		if !d.config.DisableInstaller {
+		if d.config.EnableInstaller {
 			d.installCoreTools()
 			d.installGltfPipeline()
 			d.installScreenshotGLB()

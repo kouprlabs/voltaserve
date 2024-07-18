@@ -38,6 +38,7 @@ func NewTaskRouter() *TaskRouter {
 func (r *TaskRouter) AppendRoutes(g fiber.Router) {
 	g.Get("/", r.List)
 	g.Get("/count", r.GetCount)
+	g.Post("/dismiss", r.DismissAll)
 	g.Get("/:id", r.Get)
 	g.Post("/:id/dismiss", r.Dismiss)
 }
@@ -164,6 +165,25 @@ func (r *TaskRouter) GetCount(c *fiber.Ctx) error {
 func (r *TaskRouter) Dismiss(c *fiber.Ctx) error {
 	userID := GetUserID(c)
 	if err := r.taskSvc.Dismiss(c.Params("id"), userID); err != nil {
+		return err
+	}
+	return c.SendStatus(http.StatusNoContent)
+}
+
+// DismissAll godoc
+//
+//	@Summary		Dismiss All
+//	@Description	Dismiss All
+//	@Tags			Tasks
+//	@Id				tasks_dismiss_all
+//	@Accept			json
+//	@Produce		json
+//	@Success		200
+//	@Failure		500	{object}	errorpkg.ErrorResponse
+//	@Router			/tasks/dismiss [post]
+func (r *TaskRouter) DismissAll(c *fiber.Ctx) error {
+	userID := GetUserID(c)
+	if err := r.taskSvc.DismissAll(userID); err != nil {
 		return err
 	}
 	return c.SendStatus(http.StatusNoContent)

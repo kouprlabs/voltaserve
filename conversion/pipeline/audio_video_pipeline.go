@@ -62,7 +62,7 @@ func (p *audioVideoPipeline) Run(opts client.PipelineRunOptions) error {
 		return err
 	}
 	// Here we intentionally ignore the error, as the media file may contain just audio
-	p.createThumbnail(inputPath, opts)
+	_ = p.createThumbnail(inputPath, opts)
 	if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
 		Fields: []string{client.TaskFieldName},
 		Name:   helper.ToPtr("Saving preview."),

@@ -161,6 +161,7 @@ services:
       - ${VOLTASERVE_CONVERSION_PORT}:8083
     environment:
       - PORT=8083
+      - ENABLE_INSTALLER=true
       - API_URL=http://api:8080
       - LANGUAGE_URL=http://language:8084
       - MOSAIC_URL=http://mosaic:8085

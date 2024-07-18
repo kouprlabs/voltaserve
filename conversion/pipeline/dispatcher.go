@@ -11,8 +11,6 @@
 package pipeline
 
 import (
-	"errors"
-
 	"github.com/kouprlabs/voltaserve/conversion/client"
 	"github.com/kouprlabs/voltaserve/conversion/errorpkg"
 	"github.com/kouprlabs/voltaserve/conversion/helper"
@@ -81,23 +79,6 @@ func (d *Dispatcher) Dispatch(opts client.PipelineRunOptions) error {
 		err = d.glbPipeline.Run(opts)
 	} else if id == model.PipelineZIP {
 		err = d.zipPipeline.Run(opts)
-	} else {
-		if err := d.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
-			Options: opts,
-			Fields:  []string{client.SnapshotFieldStatus},
-			Status:  helper.ToPtr(client.SnapshotStatusError),
-		}); err != nil {
-			return err
-		}
-		err = errors.New("no matching pipeline found")
-		if err := d.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
-			Fields: []string{client.TaskFieldStatus, client.TaskFieldError},
-			Status: helper.ToPtr(client.TaskStatusError),
-			Error:  helper.ToPtr(errorpkg.GetUserFriendlyMessage(err.Error(), errorpkg.FallbackMessage)),
-		}); err != nil {
-			return err
-		}
-		return err
 	}
 	if err != nil {
 		if err := d.apiClient.PatchSnapshot(client.SnapshotPatchOptions{

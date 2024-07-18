@@ -16,14 +16,14 @@ import (
 )
 
 type Config struct {
-	Port             int
-	APIURL           string
-	LanguageURL      string
-	MosaicURL        string
-	DisableInstaller bool
-	Security         SecurityConfig
-	Limits           LimitsConfig
-	S3               S3Config
+	Port            int
+	APIURL          string
+	LanguageURL     string
+	MosaicURL       string
+	EnableInstaller bool
+	Security        SecurityConfig
+	Limits          LimitsConfig
+	S3              S3Config
 }
 
 type SecurityConfig struct {
@@ -56,12 +56,12 @@ func GetConfig() *Config {
 		config = &Config{
 			Port: port,
 		}
-		if len(os.Getenv("DISABLE_INSTALLER")) > 0 {
-			v, err := strconv.ParseBool(os.Getenv("DISABLE_INSTALLER"))
+		if len(os.Getenv("ENABLE_INSTALLER")) > 0 {
+			v, err := strconv.ParseBool(os.Getenv("ENABLE_INSTALLER"))
 			if err != nil {
 				panic(err)
 			}
-			config.DisableInstaller = v
+			config.EnableInstaller = v
 		}
 		readURLs(config)
 		readSecurity(config)
