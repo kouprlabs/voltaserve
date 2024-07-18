@@ -10,14 +10,6 @@
 
 SET DATABASE = voltaserve;
 
-CREATE TABLE IF NOT EXISTS organization
-(
-    id          text PRIMARY KEY,
-    name        text NOT NULL,
-    create_time text NOT NULL DEFAULT (to_json(now())#>>'{}'),
-    update_time text ON UPDATE (to_json(now())#>>'{}')
-);
-
 CREATE TABLE IF NOT EXISTS workspace
 (
     id                        text PRIMARY KEY,
@@ -137,17 +129,6 @@ CREATE TABLE IF NOT EXISTS invitation
 
 CREATE INDEX invitation_organization_id_idx ON invitation (organization_id);
 CREATE INDEX invitation_user_id_idx ON invitation (owner_id);
-
-CREATE TABLE IF NOT EXISTS organization_user
-(
-  organization_id text NOT NULL REFERENCES organization (id) ON DELETE CASCADE,
-  user_id         text NOT NULL REFERENCES "user" (id) ON DELETE CASCADE,
-  create_time     text NOT NULL DEFAULT (to_json(now())#>>'{}'),
-  PRIMARY KEY (organization_id, user_id)
-);
-
-CREATE INDEX organization_user_organization_id ON organization_user (organization_id);
-CREATE INDEX organization_user_user_id ON organization_user (user_id);
 
 CREATE TABLE IF NOT EXISTS task
 (

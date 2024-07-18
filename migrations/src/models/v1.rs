@@ -1,3 +1,4 @@
+mod organization;
 mod user;
 
-pub use user::*;
+pub use {organization::*, user::*};
