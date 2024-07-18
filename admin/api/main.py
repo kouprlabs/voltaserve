@@ -1,9 +1,11 @@
-import time
 import logging
+import time
 
 import psycopg2
 from fastapi import FastAPI, Request, Response, status
+
 from routers import users_api_router
+from dependencies import settings
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -28,9 +30,13 @@ async def root():
 @app.get('/liveness')
 async def liveness():
     try:
-        psycopg2.connect(host='192.168.1.254', user='root', dbname='voltaserve', port=26257)
+        psycopg2.connect(host=settings.db_host,
+                         user=settings.db_user,
+                         password=settings.db_password,
+                         dbname=settings.db_name,
+                         port=settings.db_port)
         return Response(
-            status_code=status.HTTP_200_OK,
+            status_code=status.HTTP_204_NO_CONTENT,
         )
     except:
         return Response(
@@ -41,9 +47,13 @@ async def liveness():
 @app.get('/readiness')
 async def readiness():
     try:
-        psycopg2.connect(host='192.168.1.254', user='root', dbname='voltaserve', port=26257)
+        psycopg2.connect(host=settings.db_host,
+                         user=settings.db_user,
+                         password=settings.db_password,
+                         dbname=settings.db_name,
+                         port=settings.db_port)
         return Response(
-            status_code=status.HTTP_200_OK,
+            status_code=status.HTTP_204_NO_CONTENT,
         )
     except:
         return Response(
