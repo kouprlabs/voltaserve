@@ -503,7 +503,10 @@ func (repo *snapshotRepo) DeleteMappingsForFile(fileID string) error {
 func (repo *snapshotRepo) findAllForFile(fileID string) ([]*snapshotEntity, error) {
 	var res []*snapshotEntity
 	db := repo.db.
-		Raw("SELECT * FROM snapshot s LEFT JOIN snapshot_file sf ON s.id = sf.snapshot_id WHERE sf.file_id = ? ORDER BY s.version", fileID).
+		Raw(`SELECT * FROM snapshot s
+             LEFT JOIN snapshot_file sf ON s.id = sf.snapshot_id
+             WHERE sf.file_id = ? ORDER BY s.version`,
+			fileID).
 		Scan(&res)
 	if db.Error != nil {
 		return nil, db.Error
@@ -525,7 +528,11 @@ func (repo *snapshotRepo) FindAllForFile(fileID string) ([]model.Snapshot, error
 
 func (repo *snapshotRepo) FindAllDangling() ([]model.Snapshot, error) {
 	var entities []*snapshotEntity
-	db := repo.db.Raw("SELECT * FROM snapshot s LEFT JOIN snapshot_file sf ON s.id = sf.snapshot_id WHERE sf.snapshot_id IS NULL").Scan(&entities)
+	db := repo.db.
+		Raw(`SELECT * FROM snapshot s
+             LEFT JOIN snapshot_file sf ON s.id = sf.snapshot_id
+             WHERE sf.snapshot_id IS NULL`).
+		Scan(&entities)
 	if db.Error != nil {
 		return nil, db.Error
 	}
@@ -538,7 +545,13 @@ func (repo *snapshotRepo) FindAllDangling() ([]model.Snapshot, error) {
 
 func (repo *snapshotRepo) FindAllPrevious(fileID string, version int64) ([]model.Snapshot, error) {
 	var entities []*snapshotEntity
-	db := repo.db.Raw("SELECT * FROM snapshot s LEFT JOIN snapshot_file sf ON s.id = sf.snapshot_id WHERE sf.file_id = ? AND s.version < ? ORDER BY s.version DESC", fileID, version).Scan(&entities)
+	db := repo.db.
+		Raw(`SELECT * FROM snapshot s
+             LEFT JOIN snapshot_file sf ON s.id = sf.snapshot_id
+             WHERE sf.file_id = ? AND s.version < ?
+             ORDER BY s.version DESC`,
+			fileID, version).
+		Scan(&entities)
 	if db.Error != nil {
 		return nil, db.Error
 	}
@@ -568,7 +581,10 @@ func (repo *snapshotRepo) GetIDsForFile(fileID string) ([]string, error) {
 }
 
 func (repo *snapshotRepo) DeleteAllDangling() error {
-	if db := repo.db.Exec("DELETE FROM snapshot WHERE id IN (SELECT s.id FROM (SELECT * FROM snapshot) s LEFT JOIN snapshot_file sf ON s.id = sf.snapshot_id WHERE sf.snapshot_id IS NULL)"); db.Error != nil {
+	if db := repo.db.
+		Exec(`DELETE FROM snapshot
+              WHERE id IN (SELECT s.id FROM (SELECT * FROM snapshot) s 
+              LEFT JOIN snapshot_file sf ON s.id = sf.snapshot_id WHERE sf.snapshot_id IS NULL)`); db.Error != nil {
 		return db.Error
 	}
 	return nil
@@ -580,7 +596,10 @@ func (repo *snapshotRepo) GetLatestVersionForFile(fileID string) (int64, error) 
 	}
 	var res Result
 	if db := repo.db.
-		Raw("SELECT coalesce(max(s.version), 0) result FROM snapshot s LEFT JOIN snapshot_file map ON s.id = map.snapshot_id WHERE map.file_id = ?", fileID).
+		Raw(`SELECT coalesce(max(s.version), 0) result 
+             FROM snapshot s LEFT JOIN snapshot_file map ON s.id = map.snapshot_id
+             WHERE map.file_id = ?`,
+			fileID).
 		Scan(&res); db.Error != nil {
 		return 0, db.Error
 	}
@@ -592,16 +611,20 @@ func (repo *snapshotRepo) CountAssociations(id string) (int, error) {
 		Count int
 	}
 	var res Result
-	if db := repo.db.Raw("SELECT COUNT(*) count FROM snapshot_file WHERE snapshot_id = ?", id).Scan(&res); db.Error != nil {
+	if db := repo.db.
+		Raw("SELECT COUNT(*) count FROM snapshot_file WHERE snapshot_id = ?", id).
+		Scan(&res); db.Error != nil {
 		return 0, db.Error
 	}
 	return res.Count, nil
 }
 
 func (repo *snapshotRepo) Attach(sourceFileID string, targetFileID string) error {
-	if db := repo.db.Exec("INSERT INTO snapshot_file (snapshot_id, file_id) SELECT s.id, ? "+
-		"FROM snapshot s LEFT JOIN snapshot_file map ON s.id = map.snapshot_id "+
-		"WHERE map.file_id = ? ORDER BY s.version DESC LIMIT 1", targetFileID, sourceFileID); db.Error != nil {
+	if db := repo.db.
+		Exec(`INSERT INTO snapshot_file (snapshot_id, file_id) SELECT s.id, ?
+              FROM snapshot s LEFT JOIN snapshot_file map ON s.id = map.snapshot_id
+              WHERE map.file_id = ? ORDER BY s.version DESC LIMIT 1`,
+			targetFileID, sourceFileID); db.Error != nil {
 		return db.Error
 	}
 	return nil

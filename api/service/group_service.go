@@ -14,6 +14,8 @@ import (
 	"sort"
 	"time"
 
+	"github.com/kouprlabs/voltaserve/api/infra"
+
 	"github.com/kouprlabs/voltaserve/api/cache"
 	"github.com/kouprlabs/voltaserve/api/config"
 	"github.com/kouprlabs/voltaserve/api/guard"
@@ -170,7 +172,11 @@ func (svc *GroupService) List(opts GroupListOptions, userID string) (*GroupList,
 			}
 		}
 	} else {
-		groups, err := svc.groupSearch.Query(opts.Query)
+		count, err := svc.groupRepo.Count()
+		if err != nil {
+			return nil, err
+		}
+		groups, err := svc.groupSearch.Query(opts.Query, infra.QueryOptions{Limit: count})
 		if err != nil {
 			return nil, err
 		}

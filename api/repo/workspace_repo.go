@@ -25,6 +25,7 @@ import (
 type WorkspaceRepo interface {
 	Insert(opts WorkspaceInsertOptions) (model.Workspace, error)
 	Find(id string) (model.Workspace, error)
+	Count() (int64, error)
 	UpdateName(id string, name string) (model.Workspace, error)
 	UpdateStorageCapacity(id string, storageCapacity int64) (model.Workspace, error)
 	UpdateRootID(id string, rootNodeID string) error
@@ -196,6 +197,20 @@ func (repo *workspaceRepo) Find(id string) (model.Workspace, error) {
 	return workspace, err
 }
 
+func (repo *workspaceRepo) Count() (int64, error) {
+	type Result struct {
+		Result int64
+	}
+	var res Result
+	db := repo.db.
+		Raw("SELECT count(*) as result FROM workspace").
+		Scan(&res)
+	if db.Error != nil {
+		return 0, db.Error
+	}
+	return res.Result, nil
+}
+
 func (repo *workspaceRepo) UpdateName(id string, name string) (model.Workspace, error) {
 	workspace, err := repo.find(id)
 	if err != nil {
@@ -288,9 +303,11 @@ func (repo *workspaceRepo) GetIDsByOrganization(orgID string) ([]string, error) 
 }
 
 func (repo *workspaceRepo) GrantUserPermission(id string, userID string, permission string) error {
-	db := repo.db.Exec(
-		"INSERT INTO userpermission (id, user_id, resource_id, permission) VALUES (?, ?, ?, ?) ON CONFLICT (user_id, resource_id) DO UPDATE SET permission = ?",
-		helper.NewID(), userID, id, permission, permission)
+	db := repo.db.
+		Exec(`INSERT INTO userpermission (id, user_id, resource_id, permission)
+              VALUES (?, ?, ?, ?)
+              ON CONFLICT (user_id, resource_id) DO UPDATE SET permission = ?`,
+			helper.NewID(), userID, id, permission, permission)
 	if db.Error != nil {
 		return db.Error
 	}

@@ -24,6 +24,7 @@ type UserRepo interface {
 	Find(id string) (model.User, error)
 	FindByEmail(email string) (model.User, error)
 	FindAll() ([]model.User, error)
+	Count() (int64, error)
 }
 
 func NewUserRepo() UserRepo {
@@ -124,7 +125,7 @@ func (repo *userRepo) FindByEmail(email string) (model.User, error) {
 
 func (repo *userRepo) FindAll() ([]model.User, error) {
 	var entities []*userEntity
-	db := repo.db.Raw(`select * from "user"`).Scan(&entities)
+	db := repo.db.Raw(`SELECT * FROM "user"`).Scan(&entities)
 	if db.Error != nil {
 		return nil, db.Error
 	}
@@ -133,4 +134,18 @@ func (repo *userRepo) FindAll() ([]model.User, error) {
 		res = append(res, u)
 	}
 	return res, nil
+}
+
+func (repo *userRepo) Count() (int64, error) {
+	type Result struct {
+		Result int64
+	}
+	var res Result
+	db := repo.db.
+		Raw(`SELECT count(*) as result FROM "user"`).
+		Scan(&res)
+	if db.Error != nil {
+		return 0, db.Error
+	}
+	return res.Result, nil
 }

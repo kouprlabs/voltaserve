@@ -178,7 +178,11 @@ func (svc *WorkspaceService) List(opts WorkspaceListOptions, userID string) (*Wo
 			return nil, err
 		}
 	} else {
-		workspaces, err := svc.workspaceSearch.Query(opts.Query)
+		count, err := svc.workspaceRepo.Count()
+		if err != nil {
+			return nil, err
+		}
+		workspaces, err := svc.workspaceSearch.Query(opts.Query, infra.QueryOptions{Limit: count})
 		if err != nil {
 			return nil, err
 		}

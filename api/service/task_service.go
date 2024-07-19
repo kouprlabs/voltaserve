@@ -14,6 +14,8 @@ import (
 	"sort"
 	"time"
 
+	"github.com/kouprlabs/voltaserve/api/infra"
+
 	"github.com/kouprlabs/voltaserve/api/cache"
 	"github.com/kouprlabs/voltaserve/api/errorpkg"
 	"github.com/kouprlabs/voltaserve/api/helper"
@@ -175,7 +177,11 @@ func (svc *TaskService) List(opts TaskListOptions, userID string) (*TaskList, er
 			return nil, err
 		}
 	} else {
-		tasks, err := svc.taskSearch.Query(opts.Query)
+		count, err := svc.taskRepo.Count()
+		if err != nil {
+			return nil, err
+		}
+		tasks, err := svc.taskSearch.Query(opts.Query, infra.QueryOptions{Limit: count})
 		if err != nil {
 			return nil, err
 		}

@@ -701,7 +701,14 @@ func (svc *FileService) Search(id string, opts FileListOptions, userID string) (
 	}
 	var data []model.File
 	if opts.Query.Text != "" {
-		data, err = svc.fileSearch.Query(opts.Query.Text)
+		count, err := svc.fileRepo.Count()
+		if err != nil {
+			return nil, err
+		}
+		data, err = svc.fileSearch.Query(opts.Query.Text, infra.QueryOptions{Limit: count})
+		if err != nil {
+			return nil, err
+		}
 	} else {
 		ids, err := svc.fileRepo.GetChildrenIDs(id)
 		if err != nil {
@@ -716,25 +723,22 @@ func (svc *FileService) Search(id string, opts FileListOptions, userID string) (
 			data = append(data, f)
 		}
 	}
+	filteredData, err := svc.doQueryFiltering(data, *opts.Query, parent)
 	if err != nil {
 		return nil, err
 	}
-	filtered, err := svc.doQueryFiltering(data, *opts.Query, parent)
+	authorizedData, err := svc.doAuthorization(filteredData, userID)
 	if err != nil {
 		return nil, err
 	}
-	authorized, err := svc.doAuthorization(filtered, userID)
-	if err != nil {
-		return nil, err
-	}
-	sorted := svc.doSorting(authorized, opts.SortBy, opts.SortOrder, userID)
-	paged, totalElements, totalPages := svc.doPagination(sorted, opts.Page, opts.Size)
-	v, err := svc.fileMapper.mapMany(paged, userID)
+	sortedData := svc.doSorting(authorizedData, opts.SortBy, opts.SortOrder, userID)
+	paged, totalElements, totalPages := svc.doPagination(sortedData, opts.Page, opts.Size)
+	mappedData, err := svc.fileMapper.mapMany(paged, userID)
 	if err != nil {
 		return nil, err
 	}
 	res := &FileList{
-		Data:          v,
+		Data:          mappedData,
 		TotalElements: totalElements,
 		TotalPages:    totalPages,
 		Page:          opts.Page,
