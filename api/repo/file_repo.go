@@ -448,9 +448,9 @@ func (repo *fileRepo) IsGrandChildOf(id string, ancestorID string) (bool, error)
 	if db := repo.db.
 		Raw(`WITH RECURSIVE rec (id, parent_id) AS
              (SELECT f.id, f.parent_id FROM file f WHERE f.id = ?
-             UNION SELECT f.id, f.parent_id FROM rec, file f WHERE f.parent_id = rec.id)
+             UNION SELECT f.id, f.parent_id FROM rec JOIN file f ON f.id = rec.parent_id)
              SELECT count(rec.id) > 0 as result FROM rec WHERE rec.id = ?`,
-			ancestorID, id).
+			id, ancestorID).
 		Scan(&res); db.Error != nil {
 		return false, db.Error
 	}
