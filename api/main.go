@@ -12,7 +12,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/kouprlabs/voltaserve/api/service"
 	"os"
 	"strings"
 
@@ -25,6 +24,7 @@ import (
 	"github.com/kouprlabs/voltaserve/api/errorpkg"
 	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/router"
+	"github.com/kouprlabs/voltaserve/api/service"
 )
 
 // @title		Voltaserve API
