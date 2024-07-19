@@ -19,6 +19,7 @@ import (
 	"github.com/kouprlabs/voltaserve/api/errorpkg"
 	"github.com/kouprlabs/voltaserve/api/guard"
 	"github.com/kouprlabs/voltaserve/api/helper"
+	"github.com/kouprlabs/voltaserve/api/infra"
 	"github.com/kouprlabs/voltaserve/api/log"
 	"github.com/kouprlabs/voltaserve/api/model"
 	"github.com/kouprlabs/voltaserve/api/repo"
@@ -137,7 +138,11 @@ func (svc *OrganizationService) List(opts OrganizationListOptions, userID string
 			return nil, err
 		}
 	} else {
-		orgs, err := svc.orgSearch.Query(opts.Query)
+		count, err := svc.groupRepo.Count()
+		if err != nil {
+			return nil, err
+		}
+		orgs, err := svc.orgSearch.Query(opts.Query, infra.QueryOptions{Limit: count})
 		if err != nil {
 			return nil, err
 		}

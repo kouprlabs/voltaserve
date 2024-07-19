@@ -16,6 +16,7 @@ import (
 	"github.com/kouprlabs/voltaserve/api/cache"
 	"github.com/kouprlabs/voltaserve/api/config"
 	"github.com/kouprlabs/voltaserve/api/guard"
+	"github.com/kouprlabs/voltaserve/api/infra"
 	"github.com/kouprlabs/voltaserve/api/model"
 	"github.com/kouprlabs/voltaserve/api/repo"
 	"github.com/kouprlabs/voltaserve/api/search"
@@ -23,6 +24,7 @@ import (
 
 type UserService struct {
 	userMapper *userMapper
+	userRepo   repo.UserRepo
 	userSearch *search.UserSearch
 	orgRepo    repo.OrganizationRepo
 	orgCache   *cache.OrganizationCache
@@ -36,6 +38,7 @@ type UserService struct {
 func NewUserService() *UserService {
 	return &UserService{
 		userMapper: newUserMapper(),
+		userRepo:   repo.NewUserRepo(),
 		userSearch: search.NewUserSearch(),
 		orgRepo:    repo.NewOrganizationRepo(),
 		orgCache:   cache.NewOrganizationCache(),
@@ -140,7 +143,11 @@ func (svc *UserService) List(opts UserListOptions, userID string) (*UserList, er
 			}
 		}
 	} else {
-		users, err := svc.userSearch.Query(opts.Query)
+		count, err := svc.userRepo.Count()
+		if err != nil {
+			return nil, err
+		}
+		users, err := svc.userSearch.Query(opts.Query, infra.QueryOptions{Limit: count})
 		if err != nil {
 			return nil, err
 		}

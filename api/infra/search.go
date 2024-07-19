@@ -118,8 +118,12 @@ func NewSearchManager() *SearchManager {
 	}
 }
 
-func (mgr *SearchManager) Query(index string, query string) ([]interface{}, error) {
-	res, err := searchClient.Index(index).Search(query, &meilisearch.SearchRequest{})
+type QueryOptions struct {
+	Limit int64
+}
+
+func (mgr *SearchManager) Query(index string, query string, opts QueryOptions) ([]interface{}, error) {
+	res, err := searchClient.Index(index).Search(query, &meilisearch.SearchRequest{Limit: opts.Limit})
 	if err != nil {
 		return nil, err
 	}

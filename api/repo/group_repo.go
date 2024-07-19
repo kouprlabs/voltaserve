@@ -25,6 +25,7 @@ import (
 type GroupRepo interface {
 	Insert(opts GroupInsertOptions) (model.Group, error)
 	Find(id string) (model.Group, error)
+	Count() (int64, error)
 	GetIDsForFile(fileID string) ([]string, error)
 	GetIDsForUser(userID string) ([]string, error)
 	GetIDsForOrganization(id string) ([]string, error)
@@ -179,13 +180,30 @@ func (repo *groupRepo) Find(id string) (model.Group, error) {
 	return group, nil
 }
 
+func (repo *groupRepo) Count() (int64, error) {
+	type Result struct {
+		Result int64
+	}
+	var res Result
+	db := repo.db.
+		Raw("SELECT count(*) as result FROM group").
+		Scan(&res)
+	if db.Error != nil {
+		return 0, db.Error
+	}
+	return res.Result, nil
+}
+
 func (repo *groupRepo) GetIDsForFile(fileID string) ([]string, error) {
 	type Value struct {
 		Result string
 	}
 	var values []Value
 	db := repo.db.
-		Raw(`SELECT DISTINCT g.id as result FROM "group" g INNER JOIN grouppermission p ON p.resource_id = ? WHERE p.group_id = g.id`, fileID).
+		Raw(`SELECT DISTINCT g.id as result FROM "group" g
+             INNER JOIN grouppermission p ON p.resource_id = ?
+			 WHERE p.group_id = g.id`,
+			fileID).
 		Scan(&values)
 	if db.Error != nil {
 		return []string{}, db.Error
@@ -301,9 +319,10 @@ func (repo *groupRepo) GetMembers(id string) ([]model.User, error) {
 }
 
 func (repo *groupRepo) GrantUserPermission(id string, userID string, permission string) error {
-	db := repo.db.Exec(
-		"INSERT INTO userpermission (id, user_id, resource_id, permission) VALUES (?, ?, ?, ?) ON CONFLICT (user_id, resource_id) DO UPDATE SET permission = ?",
-		helper.NewID(), userID, id, permission, permission)
+	db := repo.db.
+		Exec(`INSERT INTO userpermission (id, user_id, resource_id, permission)
+              VALUES (?, ?, ?, ?) ON CONFLICT (user_id, resource_id) DO UPDATE SET permission = ?`,
+			helper.NewID(), userID, id, permission, permission)
 	if db.Error != nil {
 		return db.Error
 	}

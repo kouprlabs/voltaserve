@@ -146,6 +146,7 @@ func (s *taskEntity) SetPayload(p map[string]string) {
 type TaskRepo interface {
 	Insert(opts TaskInsertOptions) (model.Task, error)
 	Find(id string) (model.Task, error)
+	Count() (int64, error)
 	GetIDs(userID string) ([]string, error)
 	GetCount(email string) (int64, error)
 	Save(task model.Task) error
@@ -225,12 +226,28 @@ func (repo *taskRepo) Find(id string) (model.Task, error) {
 	return res, nil
 }
 
+func (repo *taskRepo) Count() (int64, error) {
+	type Result struct {
+		Result int64
+	}
+	var res Result
+	db := repo.db.
+		Raw("SELECT count(*) as result FROM task").
+		Scan(&res)
+	if db.Error != nil {
+		return 0, db.Error
+	}
+	return res.Result, nil
+}
+
 func (repo *taskRepo) GetIDs(userID string) ([]string, error) {
 	type Value struct {
 		Result string
 	}
 	var values []Value
-	db := repo.db.Raw("SELECT id result FROM task WHERE user_id = ? ORDER BY create_time DESC", userID).Scan(&values)
+	db := repo.db.
+		Raw("SELECT id result FROM task WHERE user_id = ? ORDER BY create_time DESC", userID).
+		Scan(&values)
 	if db.Error != nil {
 		return []string{}, db.Error
 	}

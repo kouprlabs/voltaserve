@@ -70,8 +70,8 @@ func (s *GroupSearch) Delete(ids []string) error {
 	return nil
 }
 
-func (s *GroupSearch) Query(query string) ([]model.Group, error) {
-	hits, err := s.search.Query(s.index, query)
+func (s *GroupSearch) Query(query string, opts infra.QueryOptions) ([]model.Group, error) {
+	hits, err := s.search.Query(s.index, query, opts)
 	if err != nil {
 		return nil, err
 	}

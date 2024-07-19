@@ -25,6 +25,7 @@ import (
 type OrganizationRepo interface {
 	Insert(opts OrganizationInsertOptions) (model.Organization, error)
 	Find(id string) (model.Organization, error)
+	Count() (int64, error)
 	Save(org model.Organization) error
 	Delete(id string) error
 	GetIDs() ([]string, error)
@@ -168,6 +169,20 @@ func (repo *organizationRepo) Find(id string) (model.Organization, error) {
 	return org, nil
 }
 
+func (repo *organizationRepo) Count() (int64, error) {
+	type Result struct {
+		Result int64
+	}
+	var res Result
+	db := repo.db.
+		Raw("SELECT count(*) as result FROM organization").
+		Scan(&res)
+	if db.Error != nil {
+		return 0, db.Error
+	}
+	return res.Result, nil
+}
+
 func (repo *organizationRepo) Save(org model.Organization) error {
 	db := repo.db.Save(org)
 	if db.Error != nil {
@@ -227,7 +242,10 @@ func (repo *organizationRepo) RemoveMember(id string, userID string) error {
 func (repo *organizationRepo) GetMembers(id string) ([]model.User, error) {
 	var entities []*userEntity
 	db := repo.db.
-		Raw(`SELECT DISTINCT u.* FROM "user" u INNER JOIN organization_user ou ON u.id = ou.user_id WHERE ou.organization_id = ? ORDER BY u.full_name`, id).
+		Raw(`SELECT DISTINCT u.* FROM "user" u 
+             INNER JOIN organization_user ou ON u.id = ou.user_id
+			 WHERE ou.organization_id = ? ORDER BY u.full_name`,
+			id).
 		Scan(&entities)
 	if db.Error != nil {
 		return nil, db.Error
@@ -263,7 +281,9 @@ func (repo *organizationRepo) GetOwnerCount(id string) (int64, error) {
 	}
 	var res Result
 	db := repo.db.
-		Raw("SELECT count(*) as result FROM userpermission WHERE resource_id = ? and permission = ?", id, model.PermissionOwner).
+		Raw(`SELECT count(*) as result FROM userpermission
+             WHERE resource_id = ? and permission = ?`,
+			id, model.PermissionOwner).
 		Scan(&res)
 	if db.Error != nil {
 		return 0, db.Error
@@ -272,9 +292,10 @@ func (repo *organizationRepo) GetOwnerCount(id string) (int64, error) {
 }
 
 func (repo *organizationRepo) GrantUserPermission(id string, userID string, permission string) error {
-	db := repo.db.Exec(
-		"INSERT INTO userpermission (id, user_id, resource_id, permission) VALUES (?, ?, ?, ?) ON CONFLICT (user_id, resource_id) DO UPDATE SET permission = ?",
-		helper.NewID(), userID, id, permission, permission)
+	db := repo.db.
+		Exec(`INSERT INTO userpermission (id, user_id, resource_id, permission)
+              VALUES (?, ?, ?, ?) ON CONFLICT (user_id, resource_id) DO UPDATE SET permission = ?`,
+			helper.NewID(), userID, id, permission, permission)
 	if db.Error != nil {
 		return db.Error
 	}
