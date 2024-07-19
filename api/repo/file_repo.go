@@ -38,7 +38,6 @@ type FileRepo interface {
 	Delete(id string) error
 	GetChildrenIDs(id string) ([]string, error)
 	GetItemCount(id string) (int64, error)
-	IsGrandChildOf(id string, ancestorID string) (bool, error)
 	GetSize(id string) (int64, error)
 	GrantUserPermission(id string, userID string, permission string) error
 	RevokeUserPermission(tree []model.File, userID string) error
@@ -442,22 +441,6 @@ func (repo *fileRepo) GetItemCount(id string) (int64, error) {
 		return 0, db.Error
 	}
 	return res.Result - 1, nil
-}
-
-func (repo *fileRepo) IsGrandChildOf(id string, ancestorID string) (bool, error) {
-	type Result struct {
-		Result bool
-	}
-	var res Result
-	if db := repo.db.
-		Raw("WITH RECURSIVE rec (id, parent_id) AS "+
-			"(SELECT f.id, f.parent_id FROM file f WHERE f.id = ? "+
-			"UNION SELECT f.id, f.parent_id FROM rec, file f WHERE f.parent_id = rec.id) "+
-			"SELECT count(rec.id) > 0 as result FROM rec WHERE rec.id = ?", ancestorID, id).
-		Scan(&res); db.Error != nil {
-		return false, db.Error
-	}
-	return res.Result, nil
 }
 
 func (repo *fileRepo) GetSize(id string) (int64, error) {

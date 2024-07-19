@@ -800,7 +800,7 @@ func (svc *FileService) Copy(targetID string, sourceIDs []string, userID string)
 		if target.GetType() != model.FileTypeFolder {
 			return nil, errorpkg.NewFileIsNotAFolderError(target)
 		}
-		if yes, _ := svc.fileRepo.IsGrandChildOf(target.GetID(), source.GetID()); yes {
+		if svc.IsGrandChildOf(target, source) {
 			return nil, errorpkg.NewFileCannotBeCopiedIntoOwnSubtreeError(source)
 		}
 	}
@@ -952,7 +952,7 @@ func (svc *FileService) Move(targetID string, sourceIDs []string, userID string)
 		if target.GetType() != model.FileTypeFolder {
 			return []string{}, errorpkg.NewFileIsNotAFolderError(target)
 		}
-		targetIsGrandChildOfSource, _ := svc.fileRepo.IsGrandChildOf(target.GetID(), source.GetID())
+		targetIsGrandChildOfSource := svc.IsGrandChildOf(target, source)
 		if targetIsGrandChildOfSource {
 			return []string{}, errorpkg.NewTargetIsGrandChildOfSourceError(source)
 		}
@@ -1426,6 +1426,10 @@ func (svc *FileService) MigrateToPathField() error {
 	return nil
 }
 
+func (svc *FileService) IsGrandChildOf(file model.File, ancestor model.File) bool {
+	return strings.HasPrefix(file.GetPath(), ancestor.GetPath())
+}
+
 func (svc *FileService) doAuthorization(data []model.File, userID string) ([]model.File, error) {
 	var res []model.File
 	for _, f := range data {
@@ -1708,11 +1712,7 @@ func (svc *FileService) doQueryFiltering(data []model.File, opts FileQuery, pare
 		}).
 		Filter(func(v interface{}) bool {
 			file := v.(model.File)
-			res, err := svc.fileRepo.IsGrandChildOf(file.GetID(), parent.GetID())
-			if err != nil {
-				return false
-			}
-			return res
+			return svc.IsGrandChildOf(file, parent)
 		}).
 		Filter(func(v interface{}) bool {
 			if opts.CreateTimeBefore != nil {
