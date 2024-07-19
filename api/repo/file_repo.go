@@ -28,6 +28,7 @@ type FileRepo interface {
 	FindChildren(id string) ([]model.File, error)
 	FindPath(id string) ([]model.File, error)
 	FindTree(id string) ([]model.File, error)
+	FindAllWithoutPath() ([]model.File, error)
 	GetIDsByWorkspace(workspaceID string) ([]string, error)
 	GetIDsBySnapshot(snapshotID string) ([]string, error)
 	MoveSourceIntoTarget(targetID string, sourceID string) error
@@ -43,6 +44,7 @@ type FileRepo interface {
 	RevokeUserPermission(tree []model.File, userID string) error
 	GrantGroupPermission(id string, groupID string, permission string) error
 	RevokeGroupPermission(tree []model.File, groupID string) error
+	AddPathColumnIfNotExists() error
 }
 
 func NewFileRepo() FileRepo {
@@ -59,6 +61,7 @@ type fileEntity struct {
 	Name             string                  `gorm:"column:name"         json:"name"`
 	Type             string                  `gorm:"column:type"         json:"type"`
 	ParentID         *string                 `gorm:"column:parent_id"    json:"parentId,omitempty"`
+	Path             string                  `gorm:"column:path"         json:"path"`
 	UserPermissions  []*UserPermissionValue  `gorm:"-"                   json:"userPermissions"`
 	GroupPermissions []*GroupPermissionValue `gorm:"-"                   json:"groupPermissions"`
 	Text             *string                 `gorm:"-"                   json:"text,omitempty"`
@@ -102,6 +105,10 @@ func (f *fileEntity) GetParentID() *string {
 	return f.ParentID
 }
 
+func (f *fileEntity) GetPath() string {
+	return f.Path
+}
+
 func (f *fileEntity) GetUserPermissions() []model.CoreUserPermission {
 	var res []model.CoreUserPermission
 	for _, p := range f.UserPermissions {
@@ -140,6 +147,10 @@ func (f *fileEntity) SetID(id string) {
 
 func (f *fileEntity) SetParentID(parentID *string) {
 	f.ParentID = parentID
+}
+
+func (f *fileEntity) SetPath(path string) {
+	f.Path = path
 }
 
 func (f *fileEntity) SetWorkspaceID(workspaceID string) {
@@ -186,6 +197,7 @@ type FileInsertOptions struct {
 	Name        string
 	WorkspaceID string
 	ParentID    *string
+	Path        string
 	Type        string
 }
 
@@ -197,6 +209,7 @@ func (repo *fileRepo) Insert(opts FileInsertOptions) (model.File, error) {
 		Name:        opts.Name,
 		Type:        opts.Type,
 		ParentID:    opts.ParentID,
+		Path:        opts.Path,
 	}
 	if db := repo.db.Create(&file); db.Error != nil {
 		return nil, db.Error
@@ -257,9 +270,9 @@ func (repo *fileRepo) FindChildren(id string) ([]model.File, error) {
 func (repo *fileRepo) FindPath(id string) ([]model.File, error) {
 	var entities []*fileEntity
 	if db := repo.db.
-		Raw("WITH RECURSIVE rec (id, name, type, parent_id, workspace_id, create_time, update_time) AS "+
-			"(SELECT f.id, f.name, f.type, f.parent_id, f.workspace_id, f.create_time, f.update_time FROM file f WHERE f.id = ? "+
-			"UNION SELECT f.id, f.name, f.type, f.parent_id, f.workspace_id, f.create_time, f.update_time FROM rec, file f WHERE f.id = rec.parent_id) "+
+		Raw("WITH RECURSIVE rec (id, name, type, parent_id, path, workspace_id, create_time, update_time) AS "+
+			"(SELECT f.id, f.name, f.type, f.parent_id, f.path, f.workspace_id, f.create_time, f.update_time FROM file f WHERE f.id = ? "+
+			"UNION SELECT f.id, f.name, f.type, f.parent_id, f.path, f.workspace_id, f.create_time, f.update_time FROM rec, file f WHERE f.id = rec.parent_id) "+
 			"SELECT * FROM rec", id).
 		Scan(&entities); db.Error != nil {
 		return nil, db.Error
@@ -277,12 +290,29 @@ func (repo *fileRepo) FindPath(id string) ([]model.File, error) {
 func (repo *fileRepo) FindTree(id string) ([]model.File, error) {
 	var entities []*fileEntity
 	db := repo.db.
-		Raw("WITH RECURSIVE rec (id, name, type, parent_id, workspace_id, snapshot_id, create_time, update_time) AS "+
-			"(SELECT f.id, f.name, f.type, f.parent_id, f.workspace_id, f.snapshot_id, f.create_time, f.update_time FROM file f WHERE f.id = ? "+
-			"UNION SELECT f.id, f.name, f.type, f.parent_id, f.workspace_id, f.snapshot_id, f.create_time, f.update_time FROM rec, file f WHERE f.parent_id = rec.id) "+
+		Raw("WITH RECURSIVE rec (id, name, type, parent_id, path, workspace_id, snapshot_id, create_time, update_time) AS "+
+			"(SELECT f.id, f.name, f.type, f.parent_id, f.path, f.workspace_id, f.snapshot_id, f.create_time, f.update_time FROM file f WHERE f.id = ? "+
+			"UNION SELECT f.id, f.name, f.type, f.parent_id, f.path, f.workspace_id, f.snapshot_id, f.create_time, f.update_time FROM rec, file f WHERE f.parent_id = rec.id) "+
 			"SELECT rec.* FROM rec ORDER BY create_time ASC", id).
 		Scan(&entities)
 	if db.Error != nil {
+		return nil, db.Error
+	}
+	if err := repo.populateModelFields(entities); err != nil {
+		return nil, err
+	}
+	var res []model.File
+	for _, f := range entities {
+		res = append(res, f)
+	}
+	return res, nil
+}
+
+func (repo *fileRepo) FindAllWithoutPath() ([]model.File, error) {
+	var entities []*fileEntity
+	if db := repo.db.
+		Raw(`SELECT * FROM file WHERE path = ''`).
+		Scan(&entities); db.Error != nil {
 		return nil, db.Error
 	}
 	if err := repo.populateModelFields(entities); err != nil {
@@ -547,6 +577,15 @@ func (repo *fileRepo) RevokeGroupPermission(tree []model.File, groupID string) e
 		db := repo.db.Exec("DELETE FROM grouppermission WHERE group_id = ? AND resource_id = ?", groupID, f.GetID())
 		if db.Error != nil {
 			return db.Error
+		}
+	}
+	return nil
+}
+
+func (repo *fileRepo) AddPathColumnIfNotExists() error {
+	if !repo.db.Migrator().HasColumn(&fileEntity{}, "path") {
+		if err := repo.db.Exec("ALTER TABLE file ADD COLUMN path text NOT NULL DEFAULT ''").Error; err != nil {
+			return err
 		}
 	}
 	return nil

@@ -12,6 +12,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/kouprlabs/voltaserve/api/service"
 	"os"
 	"strings"
 
@@ -107,6 +108,10 @@ func main() {
 
 	users := router.NewUserRouter()
 	users.AppendRoutes(v2.Group("users"))
+
+	if err := service.NewFileService().MigrateToPathField(); err != nil {
+		panic(err)
+	}
 
 	if err := app.Listen(fmt.Sprintf(":%d", cfg.Port)); err != nil {
 		panic(err)

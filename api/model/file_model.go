@@ -21,6 +21,7 @@ type File interface {
 	GetName() string
 	GetType() string
 	GetParentID() *string
+	GetPath() string
 	GetCreateTime() string
 	GetUpdateTime() *string
 	GetUserPermissions() []CoreUserPermission
@@ -29,6 +30,7 @@ type File interface {
 	GetSnapshotID() *string
 	SetID(string)
 	SetParentID(*string)
+	SetPath(string)
 	SetWorkspaceID(string)
 	SetType(string)
 	SetName(string)

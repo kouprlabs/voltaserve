@@ -101,6 +101,7 @@ type File struct {
 	Name        string    `json:"name"`
 	Type        string    `json:"type"`
 	ParentID    *string   `json:"parentId,omitempty"`
+	Path        string    `json:"path"`
 	Permission  string    `json:"permission"`
 	IsShared    *bool     `json:"isShared,omitempty"`
 	Snapshot    *Snapshot `json:"snapshot,omitempty"`
@@ -149,8 +150,11 @@ func (svc *FileService) Create(opts FileCreateOptions, userID string) (*File, er
 }
 
 func (svc *FileService) create(opts FileCreateOptions, userID string) (*File, error) {
+	var parent model.File
+	var err error
 	if len(*opts.ParentID) > 0 {
-		if err := svc.validateParent(*opts.ParentID, userID); err != nil {
+		parent, err = svc.validateParent(*opts.ParentID, userID)
+		if err != nil {
 			return nil, err
 		}
 		existing, err := svc.getChildWithName(*opts.ParentID, opts.Name)
@@ -161,10 +165,15 @@ func (svc *FileService) create(opts FileCreateOptions, userID string) (*File, er
 			return nil, errorpkg.NewFileWithSimilarNameExistsError()
 		}
 	}
+	path := "/"
+	if parent != nil {
+		path = parent.GetPath() + "/" + parent.GetID()
+	}
 	file, err := svc.fileRepo.Insert(repo.FileInsertOptions{
 		Name:        opts.Name,
 		WorkspaceID: opts.WorkspaceID,
 		ParentID:    opts.ParentID,
+		Path:        path,
 		Type:        opts.Type,
 	})
 	if err != nil {
@@ -187,18 +196,18 @@ func (svc *FileService) create(opts FileCreateOptions, userID string) (*File, er
 	return res, nil
 }
 
-func (svc *FileService) validateParent(id string, userID string) error {
+func (svc *FileService) validateParent(id string, userID string) (model.File, error) {
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if err = svc.fileGuard.Authorize(userID, file, model.PermissionEditor); err != nil {
-		return err
+		return nil, err
 	}
 	if file.GetType() != model.FileTypeFolder {
-		return errorpkg.NewFileIsNotAFolderError(file)
+		return nil, errorpkg.NewFileIsNotAFolderError(file)
 	}
-	return nil
+	return file, nil
 }
 
 type StoreOptions struct {
@@ -815,6 +824,7 @@ func (svc *FileService) Copy(targetID string, sourceIDs []string, userID string)
 			c := repo.NewFile()
 			c.SetID(helper.NewID())
 			c.SetParentID(o.GetParentID())
+			c.SetPath(o.GetPath())
 			c.SetWorkspaceID(o.GetWorkspaceID())
 			c.SetSnapshotID(o.GetSnapshotID())
 			c.SetType(o.GetType())
@@ -968,6 +978,9 @@ func (svc *FileService) Move(targetID string, sourceIDs []string, userID string)
 
 		// Add new parent
 		parentIDs = append(parentIDs, *source.GetParentID())
+
+		// Update path
+		source.SetPath(target.GetPath() + "/" + target.GetID())
 
 		/* Refresh updateTime on source and target */
 		timeNow := time.Now().UTC().Format(time.RFC3339)
@@ -1381,6 +1394,38 @@ func (svc *FileService) GetGroupPermissions(id string, userID string) ([]*GroupP
 	return res, nil
 }
 
+func (svc *FileService) MigrateToPathField() error {
+	if err := svc.fileRepo.AddPathColumnIfNotExists(); err != nil {
+		return err
+	}
+	files, err := svc.fileRepo.FindAllWithoutPath()
+	if err != nil {
+		return err
+	}
+	for _, f := range files {
+		if f.GetParentID() == nil {
+			f.SetPath("/")
+		} else {
+			ancestors, err := svc.fileRepo.FindPath(f.GetID())
+			if err != nil {
+				return err
+			}
+			var path string
+			for i := len(ancestors) - 1; i > 0; i-- {
+				path += "/" + ancestors[i].GetID()
+			}
+			f.SetPath(path)
+		}
+		if err := svc.fileRepo.Save(f); err != nil {
+			return err
+		}
+		if err := svc.sync(f); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func (svc *FileService) doAuthorization(data []model.File, userID string) ([]model.File, error) {
 	var res []model.File
 	for _, f := range data {
@@ -1764,6 +1809,7 @@ func (mp *FileMapper) mapOne(m model.File, userID string) (*File, error) {
 		Name:        m.GetName(),
 		Type:        m.GetType(),
 		ParentID:    m.GetParentID(),
+		Path:        m.GetPath(),
 		CreateTime:  m.GetCreateTime(),
 		UpdateTime:  m.GetUpdateTime(),
 	}
