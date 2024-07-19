@@ -10,6 +10,7 @@ mod m20240718_000003_create_workspace;
 mod m20240718_000004_create_group;
 mod m20240718_000005_create_invitation;
 mod m20240718_000006_create_snapshot;
+mod m20240718_000007_create_file;
 
 #[async_trait::async_trait]
 impl MigratorTrait for Migrator {
@@ -21,6 +22,7 @@ impl MigratorTrait for Migrator {
             Box::new(m20240718_000004_create_group::Migration),
             Box::new(m20240718_000005_create_invitation::Migration),
             Box::new(m20240718_000006_create_snapshot::Migration),
+            Box::new(m20240718_000007_create_file::Migration),
         ]
     }
 }
