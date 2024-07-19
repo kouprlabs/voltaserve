@@ -1427,7 +1427,7 @@ func (svc *FileService) MigrateToPathField() error {
 }
 
 func (svc *FileService) IsGrandChildOf(file model.File, ancestor model.File) bool {
-	return strings.HasPrefix(file.GetPath(), ancestor.GetPath())
+	return strings.HasPrefix(file.GetPath(), ancestor.GetPath()) && len(file.GetPath()) > len(ancestor.GetPath())
 }
 
 func (svc *FileService) doAuthorization(data []model.File, userID string) ([]model.File, error) {
