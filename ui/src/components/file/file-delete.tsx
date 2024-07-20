@@ -20,9 +20,9 @@ import {
   ModalHeader,
   ModalOverlay,
 } from '@chakra-ui/react'
-import { useSWRConfig } from 'swr'
 import cx from 'classnames'
 import FileAPI from '@/client/api/file'
+import { fileRemoved } from '@/store/entities/files'
 import { useAppSelector } from '@/store/hook'
 import {
   deleteModalDidClose,
@@ -32,7 +32,6 @@ import {
 } from '@/store/ui/files'
 
 const FileDelete = () => {
-  const { mutate } = useSWRConfig()
   const { fileId } = useParams()
   const dispatch = useDispatch()
   const selection = useAppSelector((state) => state.ui.files.selection)
@@ -41,32 +40,20 @@ const FileDelete = () => {
   )
   const mutateList = useAppSelector((state) => state.ui.files.mutate)
   const mutateTasks = useAppSelector((state) => state.ui.tasks.mutateList)
-  const [isLoading, setIsLoading] = useState(false)
 
   const handleDelete = useCallback(async () => {
-    try {
-      setIsLoading(true)
-
-      // We intentionally mutate before we delete to avoid SWR
-      // trying to fetch the file while the delete process is still ongoing
-      for (const id of selection) {
-        await mutate(`/files/${id}`, null, false)
-      }
-
-      const ids = [...selection]
-      for (const id of ids) {
-        FileAPI.delete({ id }).then(() => {
-          mutateList?.()
-          dispatch(loadingRemoved([id]))
-        })
-        dispatch(loadingAdded([id]))
-      }
-      await mutateTasks?.()
-      dispatch(selectionUpdated([]))
-      dispatch(deleteModalDidClose())
-    } finally {
-      setIsLoading(false)
+    const ids = [...selection]
+    for (const id of ids) {
+      FileAPI.delete({ id }).then(async () => {
+        dispatch(fileRemoved(id))
+        dispatch(loadingRemoved([id]))
+        await mutateList?.()
+      })
+      dispatch(loadingAdded([id]))
     }
+    await mutateTasks?.()
+    dispatch(selectionUpdated([]))
+    dispatch(deleteModalDidClose())
   }, [selection, fileId, dispatch, mutateList, mutateTasks])
 
   return (
@@ -99,7 +86,6 @@ const FileDelete = () => {
               type="button"
               variant="outline"
               colorScheme="blue"
-              disabled={isLoading}
               onClick={() => dispatch(deleteModalDidClose())}
             >
               Cancel
@@ -108,7 +94,6 @@ const FileDelete = () => {
               type="submit"
               variant="solid"
               colorScheme="red"
-              isLoading={isLoading}
               onClick={handleDelete}
             >
               Delete

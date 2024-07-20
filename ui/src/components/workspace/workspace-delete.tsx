@@ -69,11 +69,8 @@ const WorkspaceDelete = ({
       try {
         navigate('/workspace')
 
-        // We intentionally mutate before we delete to avoid SWR
-        // trying to fetch the workspace while the delete process is still ongoing
-        mutate?.()
-
         await WorkspaceAPI.delete(workspace.id)
+        await mutate?.()
         onClose?.()
       } finally {
         setSubmitting(false)

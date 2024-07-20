@@ -7,7 +7,6 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { List } from '@/client/api/file'
 
@@ -24,9 +23,17 @@ const slice = createSlice({
     listUpdated: (state, action: PayloadAction<List>) => {
       state.list = action.payload
     },
+    fileRemoved: (state, action: PayloadAction<string>) => {
+      if (state.list) {
+        state.list = {
+          ...state.list,
+          data: state.list.data.filter((item) => item.id !== action.payload),
+        }
+      }
+    },
   },
 })
 
-export const { listUpdated } = slice.actions
+export const { listUpdated, fileRemoved } = slice.actions
 
 export default slice.reducer

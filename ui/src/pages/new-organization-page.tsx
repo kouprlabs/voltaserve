@@ -7,7 +7,6 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import { useCallback, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Heading } from '@chakra-ui/react'
@@ -49,7 +48,7 @@ const NewOrganizationPage = () => {
         const result = await OrganizationAPI.create({
           name,
         })
-        mutate?.()
+        await mutate?.()
         setSubmitting(false)
         navigate(`/organization/${result.id}/member`)
       } catch {

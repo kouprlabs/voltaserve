@@ -159,7 +159,7 @@ func (svc *FileService) create(opts FileCreateOptions, userID string) (*File, er
 			return nil, err
 		}
 		if existing != nil {
-			opts.Name = helper.UniqueFilename(opts.Name)
+			return nil, errorpkg.NewFileWithSimilarNameExistsError()
 		}
 	}
 	file, err := svc.fileRepo.Insert(repo.FileInsertOptions{
@@ -658,10 +658,9 @@ func (svc *FileService) List(id string, opts FileListOptions, userID string) (*F
 	for _, id := range ids {
 		var f model.File
 		f, err := svc.fileCache.Get(id)
-		if err != nil {
-			return nil, err
+		if err == nil {
+			data = append(data, f)
 		}
-		data = append(data, f)
 	}
 	var filtered []model.File
 	for _, f := range data {
@@ -962,13 +961,7 @@ func (svc *FileService) Move(targetID string, sourceID string, userID string) er
 			return err
 		}
 		if existing != nil {
-			source.SetName(helper.UniqueFilename(source.GetName()))
-			if err = svc.fileRepo.Save(source); err != nil {
-				return err
-			}
-			if err := svc.sync(source); err != nil {
-				return err
-			}
+			return errorpkg.NewFileWithSimilarNameExistsError()
 		}
 	}
 	if err := svc.fileGuard.Authorize(userID, target, model.PermissionEditor); err != nil {
@@ -1033,7 +1026,7 @@ func (svc *FileService) PatchName(id string, name string, userID string) (*File,
 			return nil, err
 		}
 		if existing != nil {
-			name = helper.UniqueFilename(name)
+			return nil, errorpkg.NewFileWithSimilarNameExistsError()
 		}
 	}
 	if err = svc.fileGuard.Authorize(userID, file, model.PermissionEditor); err != nil {
@@ -1429,11 +1422,10 @@ func (svc *FileService) doAuthorizationByIDs(ids []string, userID string) ([]mod
 	for _, id := range ids {
 		var f model.File
 		f, err := svc.fileCache.Get(id)
-		if err != nil {
-			return nil, err
-		}
-		if svc.fileGuard.IsAuthorized(userID, f, model.PermissionViewer) {
-			res = append(res, f)
+		if err == nil {
+			if svc.fileGuard.IsAuthorized(userID, f, model.PermissionViewer) {
+				res = append(res, f)
+			}
 		}
 	}
 	return res, nil
