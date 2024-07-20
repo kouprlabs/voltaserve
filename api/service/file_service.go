@@ -772,14 +772,14 @@ func (svc *FileService) GetPath(id string, userID string) ([]*File, error) {
 	return res, nil
 }
 
-func (svc *FileService) Copy(targetID string, sourceID string, userID string) error {
+func (svc *FileService) Copy(targetID string, sourceID string, userID string) (*File, error) {
 	target, err := svc.fileCache.Get(targetID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	source, err := svc.fileCache.Get(sourceID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
@@ -791,7 +791,7 @@ func (svc *FileService) Copy(targetID string, sourceID string, userID string) er
 		Payload:         map[string]string{"object": source.GetName()},
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer func(taskID string) {
 		if err := svc.taskSvc.deleteAndSync(taskID); err != nil {
@@ -801,25 +801,25 @@ func (svc *FileService) Copy(targetID string, sourceID string, userID string) er
 
 	/* Do checks */
 	if err := svc.fileGuard.Authorize(userID, target, model.PermissionEditor); err != nil {
-		return err
+		return nil, err
 	}
 	if err := svc.fileGuard.Authorize(userID, source, model.PermissionEditor); err != nil {
-		return err
+		return nil, err
 	}
 	if source.GetID() == target.GetID() {
-		return errorpkg.NewFileCannotBeCopiedIntoIselfError(source)
+		return nil, errorpkg.NewFileCannotBeCopiedIntoIselfError(source)
 	}
 	if target.GetType() != model.FileTypeFolder {
-		return errorpkg.NewFileIsNotAFolderError(target)
+		return nil, errorpkg.NewFileIsNotAFolderError(target)
 	}
 	if yes, _ := svc.fileRepo.IsGrandChildOf(target.GetID(), source.GetID()); yes {
-		return errorpkg.NewFileCannotBeCopiedIntoOwnSubtreeError(source)
+		return nil, errorpkg.NewFileCannotBeCopiedIntoOwnSubtreeError(source)
 	}
 
 	/* Get original tree */
 	var sourceTree []model.File
 	if sourceTree, err = svc.fileRepo.FindTree(source.GetID()); err != nil {
-		return err
+		return nil, err
 	}
 
 	/* Clone source tree */
@@ -869,7 +869,7 @@ func (svc *FileService) Copy(targetID string, sourceID string, userID string) er
 	/* If there is a file with similar name, append a prefix */
 	existing, err := svc.getChildWithName(target.GetID(), rootClone.GetName())
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if existing != nil {
 		rootClone.SetName(helper.UniqueFilename(rootClone.GetName()))
@@ -879,12 +879,12 @@ func (svc *FileService) Copy(targetID string, sourceID string, userID string) er
 
 	/* Persist clones */
 	if err = svc.fileRepo.BulkInsert(clones, BulkInsertChunkSize); err != nil {
-		return err
+		return nil, err
 	}
 
 	/* Persist permissions */
 	if err = svc.fileRepo.BulkInsertPermissions(permissions, BulkInsertChunkSize); err != nil {
-		return err
+		return nil, err
 	}
 
 	/* Attach latest snapshot to clones */
@@ -899,18 +899,18 @@ func (svc *FileService) Copy(targetID string, sourceID string, userID string) er
 		}
 	}
 	if err := svc.snapshotRepo.BulkMapWithFile(mappings, BulkInsertChunkSize); err != nil {
-		return err
+		return nil, err
 	}
 
 	/* Index clones for search */
 	if err := svc.fileSearch.Index(clones); err != nil {
-		return err
+		return nil, err
 	}
 
 	/* Create cache for clones */
 	for _, c := range clones {
 		if _, err := svc.fileCache.Refresh(c.GetID()); err != nil {
-			return err
+			return nil, err
 		}
 	}
 
@@ -918,10 +918,14 @@ func (svc *FileService) Copy(targetID string, sourceID string, userID string) er
 	timeNow := time.Now().UTC().Format(time.RFC3339)
 	target.SetUpdateTime(&timeNow)
 	if err := svc.fileRepo.Save(target); err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	res, err := svc.fileMapper.mapOne(rootClone, userID)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
 }
 
 func (svc *FileService) Move(targetID string, sourceID string, userID string) error {

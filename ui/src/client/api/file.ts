@@ -321,7 +321,7 @@ export default class FileAPI {
       url: `/files/${id}/copy`,
       method: 'POST',
       body: JSON.stringify(options),
-    })
+    }) as Promise<File>
   }
 
   static useGet(

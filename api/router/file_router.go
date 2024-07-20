@@ -448,10 +448,11 @@ func (r *FileRouter) Copy(c *fiber.Ctx) error {
 	if err := validator.New().Struct(opts); err != nil {
 		return errorpkg.NewRequestBodyValidationError(err)
 	}
-	if err := r.fileSvc.Copy(c.Params("id"), opts.ID, userID); err != nil {
+	res, err := r.fileSvc.Copy(c.Params("id"), opts.ID, userID)
+	if err != nil {
 		return err
 	}
-	return c.SendStatus(http.StatusNoContent)
+	return c.JSON(res)
 }
 
 type FileMoveOptions struct {

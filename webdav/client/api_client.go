@@ -289,10 +289,10 @@ func (cl *APIClient) ListFilesByPath(path string) ([]File, error) {
 }
 
 type FileCopyOptions struct {
-	IDs []string `json:"ids"`
+	ID string `json:"id"`
 }
 
-func (cl *APIClient) CopyFile(id string, opts FileCopyOptions) ([]File, error) {
+func (cl *APIClient) CopyFile(id string, opts FileCopyOptions) (*File, error) {
 	b, err := json.Marshal(opts)
 	if err != nil {
 		return nil, err
@@ -318,15 +318,15 @@ func (cl *APIClient) CopyFile(id string, opts FileCopyOptions) ([]File, error) {
 	if err != nil {
 		return nil, err
 	}
-	var files []File
-	if err = json.Unmarshal(body, &files); err != nil {
+	var file *File
+	if err = json.Unmarshal(body, &file); err != nil {
 		return nil, err
 	}
-	return files, nil
+	return file, nil
 }
 
 type FileMoveOptions struct {
-	IDs []string `json:"ids"`
+	ID string `json:"id"`
 }
 
 func (cl *APIClient) MoveFile(id string, opts FileMoveOptions) error {
@@ -391,21 +391,25 @@ func (cl *APIClient) PatchFileName(id string, opts FileRenameOptions) (*File, er
 	return &file, nil
 }
 
-func (cl *APIClient) DeleteFile(id string) ([]string, error) {
-	b, err := json.Marshal(map[string][]string{"ids": {id}})
+type FileDeleteOptions struct {
+	ID string `json:"id"`
+}
+
+func (cl *APIClient) DeleteFile(opts FileDeleteOptions) error {
+	body, err := json.Marshal(opts)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/v2/files", cl.config.APIURL), bytes.NewBuffer(b))
+	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/v2/files", cl.config.APIURL), bytes.NewBuffer(body))
 	if err != nil {
-		return nil, err
+		return err
 	}
 	req.Header.Set("Authorization", "Bearer "+cl.token.AccessToken)
 	req.Header.Set("Content-Type", "application/json")
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
@@ -413,15 +417,7 @@ func (cl *APIClient) DeleteFile(id string) ([]string, error) {
 			infra.GetLogger().Error(err.Error())
 		}
 	}(resp.Body)
-	body, err := cl.jsonResponseOrThrow(resp)
-	if err != nil {
-		return nil, err
-	}
-	var ids []string
-	if err = json.Unmarshal(body, &ids); err != nil {
-		return nil, err
-	}
-	return ids, nil
+	return cl.successfulResponseOrThrow(resp)
 }
 
 func (cl *APIClient) DownloadOriginal(file *File, outputPath string) error {

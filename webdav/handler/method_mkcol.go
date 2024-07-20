@@ -12,12 +12,11 @@ package handler
 
 import (
 	"fmt"
-	"net/http"
-	"path"
-
 	"github.com/kouprlabs/voltaserve/webdav/client"
 	"github.com/kouprlabs/voltaserve/webdav/helper"
 	"github.com/kouprlabs/voltaserve/webdav/infra"
+	"net/http"
+	"path"
 )
 
 /*
@@ -43,14 +42,18 @@ func (h *Handler) methodMkcol(w http.ResponseWriter, r *http.Request) {
 		infra.HandleError(err, w)
 		return
 	}
-	if _, err = apiClient.CreateFolder(client.FileCreateFolderOptions{
-		Type:        client.FileTypeFolder,
-		WorkspaceID: directory.WorkspaceID,
-		ParentID:    directory.ID,
-		Name:        helper.DecodeURIComponent(path.Base(r.URL.Path)),
-	}); err != nil {
-		infra.HandleError(err, w)
-		return
+	if directory.Name != "/" && directory.WorkspaceID != "" {
+		if _, err = apiClient.CreateFolder(client.FileCreateFolderOptions{
+			Type:        client.FileTypeFolder,
+			WorkspaceID: directory.WorkspaceID,
+			ParentID:    directory.ID,
+			Name:        helper.DecodeURIComponent(path.Base(r.URL.Path)),
+		}); err != nil {
+			infra.HandleError(err, w)
+			return
+		}
+		w.WriteHeader(http.StatusCreated)
+	} else {
+		w.WriteHeader(http.StatusMethodNotAllowed)
 	}
-	w.WriteHeader(http.StatusCreated)
 }

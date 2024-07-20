@@ -56,14 +56,12 @@ func (h *Handler) methodCopy(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	} else {
-		clones, err := apiClient.CopyFile(targetFile.ID, client.FileCopyOptions{
-			IDs: []string{sourceFile.ID},
-		})
+		clone, err := apiClient.CopyFile(targetFile.ID, client.FileCopyOptions{ID: sourceFile.ID})
 		if err != nil {
 			infra.HandleError(err, w)
 			return
 		}
-		if _, err = apiClient.PatchFileName(clones[0].ID, client.FileRenameOptions{
+		if _, err = apiClient.PatchFileName(clone.ID, client.FileRenameOptions{
 			Name: path.Base(targetPath),
 		}); err != nil {
 			infra.HandleError(err, w)

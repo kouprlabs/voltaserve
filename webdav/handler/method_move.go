@@ -68,9 +68,7 @@ func (h *Handler) methodMove(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		} else {
-			if err := apiClient.MoveFile(targetFile.ID, client.FileMoveOptions{
-				IDs: []string{sourceFile.ID},
-			}); err != nil {
+			if err := apiClient.MoveFile(targetFile.ID, client.FileMoveOptions{ID: sourceFile.ID}); err != nil {
 				infra.HandleError(err, w)
 				return
 			}
