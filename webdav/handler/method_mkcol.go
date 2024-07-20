@@ -12,11 +12,12 @@ package handler
 
 import (
 	"fmt"
+	"net/http"
+	"path"
+
 	"github.com/kouprlabs/voltaserve/webdav/client"
 	"github.com/kouprlabs/voltaserve/webdav/helper"
 	"github.com/kouprlabs/voltaserve/webdav/infra"
-	"net/http"
-	"path"
 )
 
 /*
