@@ -435,16 +435,6 @@ func NewFileCannotBeCopiedIntoIselfError(file model.File) *ErrorResponse {
 	)
 }
 
-func NewFileWithSimilarNameExistsError() *ErrorResponse {
-	return NewErrorResponse(
-		"file_with_similar_name_exists",
-		http.StatusForbidden,
-		"File with similar name exists.",
-		"Item with similar name exists.",
-		nil,
-	)
-}
-
 func NewInvalidPageParameterError() *ErrorResponse {
 	return NewErrorResponse(
 		"invalid_page_parameter",

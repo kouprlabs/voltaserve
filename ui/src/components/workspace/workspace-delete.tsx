@@ -7,7 +7,6 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
@@ -69,8 +68,12 @@ const WorkspaceDelete = ({
       setSubmitting(true)
       try {
         navigate('/workspace')
-        await WorkspaceAPI.delete(workspace.id)
+
+        // We intentionally mutate before we delete to avoid SWR
+        // trying to fetch the workspace while the delete process is still ongoing
         mutate?.()
+
+        await WorkspaceAPI.delete(workspace.id)
         onClose?.()
       } finally {
         setSubmitting(false)

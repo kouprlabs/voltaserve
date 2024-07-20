@@ -37,11 +37,11 @@ type SnapshotRepo interface {
 	Delete(id string) error
 	Update(id string, opts SnapshotUpdateOptions) error
 	MapWithFile(id string, fileID string) error
+	BulkMapWithFile(entities []*SnapshotFileEntity, chunkSize int) error
 	DeleteMappingsForFile(fileID string) error
 	DeleteAllDangling() error
 	GetLatestVersionForFile(fileID string) (int64, error)
 	CountAssociations(id string) (int, error)
-	Attach(sourceFileID string, targetFileID string) error
 	Detach(id string, fileID string) error
 }
 
@@ -350,6 +350,21 @@ func (s *snapshotEntity) GetUpdateTime() *string {
 	return s.UpdateTime
 }
 
+type SnapshotFileEntity struct {
+	SnapshotID string `gorm:"column:snapshot_id"`
+	FileID     string `gorm:"column:file_id"`
+	CreateTime string `gorm:"column:create_time"`
+}
+
+func (*SnapshotFileEntity) TableName() string {
+	return "snapshot_file"
+}
+
+func (s *SnapshotFileEntity) BeforeCreate(*gorm.DB) (err error) {
+	s.CreateTime = time.Now().UTC().Format(time.RFC3339)
+	return nil
+}
+
 type snapshotRepo struct {
 	db *gorm.DB
 }
@@ -493,6 +508,13 @@ func (repo *snapshotRepo) MapWithFile(id string, fileID string) error {
 	return nil
 }
 
+func (repo *snapshotRepo) BulkMapWithFile(entities []*SnapshotFileEntity, chunkSize int) error {
+	if db := repo.db.CreateInBatches(entities, chunkSize); db.Error != nil {
+		return db.Error
+	}
+	return nil
+}
+
 func (repo *snapshotRepo) DeleteMappingsForFile(fileID string) error {
 	if db := repo.db.Exec("DELETE FROM snapshot_file WHERE file_id = ?", fileID); db.Error != nil {
 		return db.Error
@@ -617,17 +639,6 @@ func (repo *snapshotRepo) CountAssociations(id string) (int, error) {
 		return 0, db.Error
 	}
 	return res.Count, nil
-}
-
-func (repo *snapshotRepo) Attach(sourceFileID string, targetFileID string) error {
-	if db := repo.db.
-		Exec(`INSERT INTO snapshot_file (snapshot_id, file_id) SELECT s.id, ?
-              FROM snapshot s LEFT JOIN snapshot_file map ON s.id = map.snapshot_id
-              WHERE map.file_id = ? ORDER BY s.version DESC LIMIT 1`,
-			targetFileID, sourceFileID); db.Error != nil {
-		return db.Error
-	}
-	return nil
 }
 
 func (repo *snapshotRepo) Detach(id string, fileID string) error {

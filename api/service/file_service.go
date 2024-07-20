@@ -13,6 +13,7 @@ package service
 import (
 	"bytes"
 	"fmt"
+	"github.com/kouprlabs/voltaserve/api/log"
 	"os"
 	"path/filepath"
 	"sort"
@@ -158,7 +159,7 @@ func (svc *FileService) create(opts FileCreateOptions, userID string) (*File, er
 			return nil, err
 		}
 		if existing != nil {
-			return nil, errorpkg.NewFileWithSimilarNameExistsError()
+			opts.Name = helper.UniqueFilename(opts.Name)
 		}
 	}
 	file, err := svc.fileRepo.Insert(repo.FileInsertOptions{
@@ -295,7 +296,7 @@ func (svc *FileService) Store(id string, opts StoreOptions, userID string) (*Fil
 			UserID:          userID,
 			IsIndeterminate: true,
 			Status:          model.TaskStatusWaiting,
-			Payload:         map[string]string{"fileId": file.GetID()},
+			Payload:         map[string]string{"object": file.GetName()},
 		})
 		if err != nil {
 			return nil, err
@@ -777,120 +778,17 @@ func (svc *FileService) Copy(targetID string, sourceIDs []string, userID string)
 		return nil, err
 	}
 
-	/* Do checks */
+	/* Do copying */
+	allClones := []model.File{}
 	for _, sourceID := range sourceIDs {
 		var source model.File
 		if source, err = svc.fileCache.Get(sourceID); err != nil {
 			return nil, err
 		}
-		if err = svc.fileGuard.Authorize(userID, target, model.PermissionEditor); err != nil {
-			return nil, err
-		}
-		if err = svc.fileGuard.Authorize(userID, source, model.PermissionEditor); err != nil {
-			return nil, err
-		}
-		if source.GetID() == target.GetID() {
-			return nil, errorpkg.NewFileCannotBeCopiedIntoIselfError(source)
-		}
-		if target.GetType() != model.FileTypeFolder {
-			return nil, errorpkg.NewFileIsNotAFolderError(target)
-		}
-		if yes, _ := svc.fileRepo.IsGrandChildOf(target.GetID(), source.GetID()); yes {
-			return nil, errorpkg.NewFileCannotBeCopiedIntoOwnSubtreeError(source)
-		}
-	}
-
-	/* Do copying */
-	allClones := []model.File{}
-	for _, sourceID := range sourceIDs {
-		/* Get original tree */
-		var sourceTree []model.File
-		if sourceTree, err = svc.fileRepo.FindTree(sourceID); err != nil {
-			return nil, err
-		}
-
-		/* Clone source tree */
-		var rootCloneIndex int
-		cloneIDs := make(map[string]string)
-		originalIDs := make(map[string]string)
-		var clones []model.File
-		var permissions []model.UserPermission
-		for i, o := range sourceTree {
-			c := repo.NewFile()
-			c.SetID(helper.NewID())
-			c.SetParentID(o.GetParentID())
-			c.SetWorkspaceID(o.GetWorkspaceID())
-			c.SetSnapshotID(o.GetSnapshotID())
-			c.SetType(o.GetType())
-			c.SetName(o.GetName())
-			c.SetCreateTime(time.Now().UTC().Format(time.RFC3339))
-			if o.GetID() == sourceID {
-				rootCloneIndex = i
-			}
-			cloneIDs[o.GetID()] = c.GetID()
-			originalIDs[c.GetID()] = o.GetID()
-			clones = append(clones, c)
-
-			p := repo.NewUserPermission()
-			p.SetID(helper.NewID())
-			p.SetUserID(userID)
-			p.SetResourceID(c.GetID())
-			p.SetPermission(model.PermissionOwner)
-			p.SetCreateTime(time.Now().UTC().Format(time.RFC3339))
-			permissions = append(permissions, p)
-		}
-
-		/* Set parent IDs of clones */
-		for i, c := range clones {
-			id := cloneIDs[*c.GetParentID()]
-			clones[i].SetParentID(&id)
-		}
-
-		rootClone := clones[rootCloneIndex]
-
-		/* Parent ID of root clone is target ID */
-		if clones != nil {
-			rootClone.SetParentID(&targetID)
-		}
-
-		/* If there is a file with similar name, append a prefix */
-		existing, err := svc.getChildWithName(targetID, rootClone.GetName())
+		clones, err := svc.copyOne(target, source, userID)
 		if err != nil {
 			return nil, err
 		}
-		if existing != nil {
-			rootClone.SetName(fmt.Sprintf("Copy of %s", rootClone.GetName()))
-		}
-
-		/* Persist clones */
-		if err = svc.fileRepo.BulkInsert(clones, 100); err != nil {
-			return nil, err
-		}
-
-		/* Persist permissions */
-		if err = svc.fileRepo.BulkInsertPermissions(permissions, 100); err != nil {
-			return nil, err
-		}
-
-		/* Attach latest snapshot to clones */
-		for _, c := range clones {
-			if err := svc.snapshotRepo.Attach(originalIDs[c.GetID()], c.GetID()); err != nil {
-				return nil, err
-			}
-		}
-
-		/* Index clones for search */
-		if err := svc.fileSearch.Index(clones); err != nil {
-			return nil, err
-		}
-
-		/* Create cache for clones */
-		for _, c := range clones {
-			if _, err := svc.fileCache.Refresh(c.GetID()); err != nil {
-				return nil, err
-			}
-		}
-
 		allClones = append(allClones, clones...)
 	}
 
@@ -907,6 +805,142 @@ func (svc *FileService) Copy(targetID string, sourceIDs []string, userID string)
 	}
 
 	return copiedFiles, nil
+}
+
+func (svc *FileService) copyOne(target model.File, source model.File, userID string) ([]model.File, error) {
+	task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
+		ID:              helper.NewID(),
+		Name:            "Copying.",
+		UserID:          userID,
+		IsIndeterminate: true,
+		Status:          model.TaskStatusRunning,
+		Payload:         map[string]string{"object": source.GetName()},
+	})
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		if err := svc.taskSvc.deleteAndSync(task.GetID()); err != nil {
+			log.GetLogger().Error(err)
+		}
+	}()
+
+	/* Do checks */
+	if err := svc.fileGuard.Authorize(userID, target, model.PermissionEditor); err != nil {
+		return nil, err
+	}
+	if err := svc.fileGuard.Authorize(userID, source, model.PermissionEditor); err != nil {
+		return nil, err
+	}
+	if source.GetID() == target.GetID() {
+		return nil, errorpkg.NewFileCannotBeCopiedIntoIselfError(source)
+	}
+	if target.GetType() != model.FileTypeFolder {
+		return nil, errorpkg.NewFileIsNotAFolderError(target)
+	}
+	if yes, _ := svc.fileRepo.IsGrandChildOf(target.GetID(), source.GetID()); yes {
+		return nil, errorpkg.NewFileCannotBeCopiedIntoOwnSubtreeError(source)
+	}
+
+	/* Get original tree */
+	var sourceTree []model.File
+	if sourceTree, err = svc.fileRepo.FindTree(source.GetID()); err != nil {
+		return nil, err
+	}
+
+	/* Clone source tree */
+	var rootCloneIndex int
+	cloneIDs := make(map[string]string)
+	originalIDs := make(map[string]string)
+	var clones []model.File
+	var permissions []model.UserPermission
+	for i, o := range sourceTree {
+		c := repo.NewFile()
+		c.SetID(helper.NewID())
+		c.SetParentID(o.GetParentID())
+		c.SetWorkspaceID(o.GetWorkspaceID())
+		c.SetSnapshotID(o.GetSnapshotID())
+		c.SetType(o.GetType())
+		c.SetName(o.GetName())
+		c.SetCreateTime(time.Now().UTC().Format(time.RFC3339))
+		if o.GetID() == source.GetID() {
+			rootCloneIndex = i
+		}
+		cloneIDs[o.GetID()] = c.GetID()
+		originalIDs[c.GetID()] = o.GetID()
+		clones = append(clones, c)
+
+		p := repo.NewUserPermission()
+		p.SetID(helper.NewID())
+		p.SetUserID(userID)
+		p.SetResourceID(c.GetID())
+		p.SetPermission(model.PermissionOwner)
+		p.SetCreateTime(time.Now().UTC().Format(time.RFC3339))
+		permissions = append(permissions, p)
+	}
+
+	/* Set parent IDs of clones */
+	for i, c := range clones {
+		id := cloneIDs[*c.GetParentID()]
+		clones[i].SetParentID(&id)
+	}
+
+	rootClone := clones[rootCloneIndex]
+
+	/* Parent ID of root clone is target ID */
+	if clones != nil {
+		rootClone.SetParentID(helper.ToPtr(target.GetID()))
+	}
+
+	/* If there is a file with similar name, append a prefix */
+	existing, err := svc.getChildWithName(target.GetID(), rootClone.GetName())
+	if err != nil {
+		return nil, err
+	}
+	if existing != nil {
+		rootClone.SetName(helper.UniqueFilename(rootClone.GetName()))
+	}
+
+	const BulkInsertChunkSize = 1000
+
+	/* Persist clones */
+	if err = svc.fileRepo.BulkInsert(clones, BulkInsertChunkSize); err != nil {
+		return nil, err
+	}
+
+	/* Persist permissions */
+	if err = svc.fileRepo.BulkInsertPermissions(permissions, BulkInsertChunkSize); err != nil {
+		return nil, err
+	}
+
+	/* Attach latest snapshot to clones */
+	var mappings []*repo.SnapshotFileEntity
+	for i, c := range clones {
+		original := sourceTree[i]
+		if original.GetSnapshotID() != nil {
+			mappings = append(mappings, &repo.SnapshotFileEntity{
+				SnapshotID: *original.GetSnapshotID(),
+				FileID:     c.GetID(),
+			})
+		}
+	}
+	if err := svc.snapshotRepo.BulkMapWithFile(mappings, BulkInsertChunkSize); err != nil {
+		return nil, err
+	}
+
+	/* Index clones for search */
+	if err := svc.fileSearch.Index(clones); err != nil {
+		return nil, err
+	}
+
+	/* Create cache for clones */
+	for _, c := range clones {
+		if _, err := svc.fileCache.Refresh(c.GetID()); err != nil {
+			return nil, err
+		}
+	}
+
+	return clones, nil
 }
 
 func (svc *FileService) Move(targetID string, sourceIDs []string, userID string) (parentIDs []string, err error) {
@@ -928,7 +962,13 @@ func (svc *FileService) Move(targetID string, sourceIDs []string, userID string)
 				return nil, err
 			}
 			if existing != nil {
-				return nil, errorpkg.NewFileWithSimilarNameExistsError()
+				source.SetName(helper.UniqueFilename(source.GetName()))
+				if err = svc.fileRepo.Save(source); err != nil {
+					return nil, err
+				}
+				if err := svc.sync(source); err != nil {
+					return nil, err
+				}
 			}
 		}
 		if err := svc.fileGuard.Authorize(userID, target, model.PermissionEditor); err != nil {
@@ -954,51 +994,71 @@ func (svc *FileService) Move(targetID string, sourceIDs []string, userID string)
 
 	/* Do moving */
 	for _, id := range sourceIDs {
-		source, _ := svc.fileCache.Get(id)
-
-		/* Add old parent */
-		parentIDs = append(parentIDs, *source.GetParentID())
-
-		/* Move source into target */
-		if err := svc.fileRepo.MoveSourceIntoTarget(target.GetID(), source.GetID()); err != nil {
-			return []string{}, err
-		}
-
-		/* Get updated source */
-		source, err = svc.fileRepo.Find(source.GetID())
+		source, err := svc.fileCache.Get(id)
 		if err != nil {
-			return []string{}, err
+			return nil, err
 		}
-
-		// Add new parent
-		parentIDs = append(parentIDs, *source.GetParentID())
-
-		/* Refresh updateTime on source and target */
-		timeNow := time.Now().UTC().Format(time.RFC3339)
-		source.SetUpdateTime(&timeNow)
-		if err := svc.fileRepo.Save(source); err != nil {
-			return []string{}, err
+		var ids []string
+		if ids, err = svc.moveOne(target, source, userID); err != nil {
+			return nil, err
 		}
-		if err := svc.sync(source); err != nil {
-			return []string{}, err
-		}
-		target.SetUpdateTime(&timeNow)
-		if err := svc.fileRepo.Save(target); err != nil {
-			return []string{}, err
-		}
-		if err := svc.sync(target); err != nil {
-			return []string{}, err
-		}
-		sourceTree, err := svc.fileRepo.FindTree(source.GetID())
-		if err != nil {
-			return []string{}, err
-		}
-		for _, f := range sourceTree {
-			if err := svc.sync(f); err != nil {
-				return []string{}, err
-			}
-		}
+		parentIDs = append(parentIDs, ids...)
 	}
+	return parentIDs, nil
+}
+
+func (svc *FileService) moveOne(target model.File, source model.File, userID string) (parentIDs []string, err error) {
+	task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
+		ID:              helper.NewID(),
+		Name:            "Moving.",
+		UserID:          userID,
+		IsIndeterminate: true,
+		Status:          model.TaskStatusRunning,
+		Payload:         map[string]string{"object": source.GetName()},
+	})
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		if err := svc.taskSvc.deleteAndSync(task.GetID()); err != nil {
+			log.GetLogger().Error(err)
+		}
+	}()
+
+	/* Add old parent */
+	parentIDs = append(parentIDs, *source.GetParentID())
+
+	/* Move source into target */
+	if err := svc.fileRepo.MoveSourceIntoTarget(target.GetID(), source.GetID()); err != nil {
+		return []string{}, err
+	}
+
+	/* Get updated source */
+	source, err = svc.fileRepo.Find(source.GetID())
+	if err != nil {
+		return []string{}, err
+	}
+
+	// Add new parent
+	parentIDs = append(parentIDs, *source.GetParentID())
+
+	/* Refresh updateTime on source and target */
+	timeNow := time.Now().UTC().Format(time.RFC3339)
+	source.SetUpdateTime(&timeNow)
+	if err := svc.fileRepo.Save(source); err != nil {
+		return []string{}, err
+	}
+	if err := svc.sync(source); err != nil {
+		return []string{}, err
+	}
+	target.SetUpdateTime(&timeNow)
+	if err := svc.fileRepo.Save(target); err != nil {
+		return []string{}, err
+	}
+	if err := svc.sync(target); err != nil {
+		return []string{}, err
+	}
+
 	return parentIDs, nil
 }
 
@@ -1013,7 +1073,7 @@ func (svc *FileService) PatchName(id string, name string, userID string) (*File,
 			return nil, err
 		}
 		if existing != nil {
-			return nil, errorpkg.NewFileWithSimilarNameExistsError()
+			name = helper.UniqueFilename(name)
 		}
 	}
 	if err = svc.fileGuard.Authorize(userID, file, model.PermissionEditor); err != nil {
@@ -1036,85 +1096,111 @@ func (svc *FileService) PatchName(id string, name string, userID string) (*File,
 func (svc *FileService) Delete(ids []string, userID string) ([]string, error) {
 	var res []string
 	for _, id := range ids {
-		file, err := svc.fileCache.Get(id)
+		ids, err := svc.deleteOne(id, userID)
 		if err != nil {
 			return nil, err
 		}
-		if file.GetParentID() == nil {
-			workspace, err := svc.workspaceCache.Get(file.GetWorkspaceID())
-			if err != nil {
-				return []string{}, err
-			}
-			return nil, errorpkg.NewCannotDeleteWorkspaceRootError(file, workspace)
-		}
-		if err = svc.fileGuard.Authorize(userID, file, model.PermissionOwner); err != nil {
-			return nil, err
-		}
+		res = append(res, ids...)
+	}
+	return res, nil
+}
 
-		// Add parent
-		res = append(res, *file.GetParentID())
+func (svc *FileService) deleteOne(id string, userID string) ([]string, error) {
+	var res []string
 
-		var tree []model.File
-		tree, err = svc.fileRepo.FindTree(file.GetID())
+	file, err := svc.fileCache.Get(id)
+	if err != nil {
+		return nil, err
+	}
+
+	task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
+		ID:              helper.NewID(),
+		Name:            "Deleting.",
+		UserID:          userID,
+		IsIndeterminate: true,
+		Status:          model.TaskStatusRunning,
+		Payload:         map[string]string{"object": file.GetName()},
+	})
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		if err := svc.taskSvc.deleteAndSync(task.GetID()); err != nil {
+			log.GetLogger().Error(err)
+		}
+	}()
+
+	if file.GetParentID() == nil {
+		workspace, err := svc.workspaceCache.Get(file.GetWorkspaceID())
 		if err != nil {
-			return nil, err
+			return []string{}, err
 		}
-		var treeIDs []string
-		for _, f := range tree {
-			treeIDs = append(treeIDs, f.GetID())
-		}
-		/* Delete from search */
-		if err := svc.fileSearch.Delete(treeIDs); err != nil {
-			/* Here we intentionally don't return an error or panic, we just print the error,
-			that's because we still want to delete the file in the repo afterwards even
-			if we fail to delete it from the search. */
+		return nil, errorpkg.NewCannotDeleteWorkspaceRootError(file, workspace)
+	}
+	if err = svc.fileGuard.Authorize(userID, file, model.PermissionOwner); err != nil {
+		return nil, err
+	}
+
+	// Add parent
+	res = append(res, *file.GetParentID())
+
+	var treeIDs []string
+	treeIDs, err = svc.fileRepo.FindTreeIDs(file.GetID())
+	if err != nil {
+		return nil, err
+	}
+	/* Delete from search */
+	if err := svc.fileSearch.Delete(treeIDs); err != nil {
+		/* Here we intentionally don't return an error or panic, we just print the error,
+		that's because we still want to delete the file in the repo afterwards even
+		if we fail to delete it from the search. */
+		fmt.Println(err)
+	}
+	/* Delete from cache */
+	for _, treeItemID := range treeIDs {
+		if err = svc.fileCache.Delete(treeItemID); err != nil {
+			// Same thing as above for the search
 			fmt.Println(err)
 		}
-		/* Delete from cache */
-		for _, f := range tree {
-			if err = svc.fileCache.Delete(f.GetID()); err != nil {
-				// Same thing as above for the search
-				fmt.Println(err)
-			}
-		}
-		/* Delete from repo */
-		for _, f := range tree {
-			if err = svc.fileRepo.Delete(f.GetID()); err != nil {
-				return nil, err
-			}
-			if err = svc.snapshotRepo.DeleteMappingsForFile(f.GetID()); err != nil {
-				return nil, err
-			}
-		}
-		var danglingSnapshots []model.Snapshot
-		danglingSnapshots, err = svc.snapshotRepo.FindAllDangling()
-		if err != nil {
+	}
+	/* Delete from repo */
+	for _, treeItemID := range treeIDs {
+		if err = svc.fileRepo.Delete(treeItemID); err != nil {
 			return nil, err
 		}
-		for _, s := range danglingSnapshots {
-			if s.HasOriginal() {
-				if err = svc.s3.RemoveObject(s.GetOriginal().Key, s.GetOriginal().Bucket, minio.RemoveObjectOptions{}); err != nil {
-					return nil, err
-				}
-			}
-			if s.HasPreview() {
-				if err = svc.s3.RemoveObject(s.GetPreview().Key, s.GetPreview().Bucket, minio.RemoveObjectOptions{}); err != nil {
-					return nil, err
-				}
-			}
-			if s.HasText() {
-				if err = svc.s3.RemoveObject(s.GetText().Key, s.GetText().Bucket, minio.RemoveObjectOptions{}); err != nil {
-					return nil, err
-				}
-			}
-			if err := svc.snapshotCache.Delete(s.GetID()); err != nil {
-				return nil, err
-			}
-		}
-		if err = svc.snapshotRepo.DeleteAllDangling(); err != nil {
+		if err = svc.snapshotRepo.DeleteMappingsForFile(treeItemID); err != nil {
 			return nil, err
 		}
 	}
+	var danglingSnapshots []model.Snapshot
+	danglingSnapshots, err = svc.snapshotRepo.FindAllDangling()
+	if err != nil {
+		return nil, err
+	}
+	for _, s := range danglingSnapshots {
+		if s.HasOriginal() {
+			if err = svc.s3.RemoveObject(s.GetOriginal().Key, s.GetOriginal().Bucket, minio.RemoveObjectOptions{}); err != nil {
+				return nil, err
+			}
+		}
+		if s.HasPreview() {
+			if err = svc.s3.RemoveObject(s.GetPreview().Key, s.GetPreview().Bucket, minio.RemoveObjectOptions{}); err != nil {
+				return nil, err
+			}
+		}
+		if s.HasText() {
+			if err = svc.s3.RemoveObject(s.GetText().Key, s.GetText().Bucket, minio.RemoveObjectOptions{}); err != nil {
+				return nil, err
+			}
+		}
+		if err := svc.snapshotCache.Delete(s.GetID()); err != nil {
+			return nil, err
+		}
+	}
+	if err = svc.snapshotRepo.DeleteAllDangling(); err != nil {
+		return nil, err
+	}
+
 	return res, nil
 }
 
