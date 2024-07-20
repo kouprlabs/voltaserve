@@ -7,7 +7,6 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import cx from 'classnames'
 import { FileCommonProps } from '@/types/file'
 import { computeScale } from '../scale'
@@ -28,6 +27,7 @@ const ItemIcon = ({ file, scale, viewType, isLoading }: ItemIconProps) => (
           file={file}
           scale={computeScale(scale, viewType)}
           viewType={viewType}
+          isLoading={isLoading}
         />
       ) : file.type === 'folder' ? (
         <IconFolder

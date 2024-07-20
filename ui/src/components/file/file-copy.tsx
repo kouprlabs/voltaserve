@@ -10,20 +10,24 @@
 import { useCallback, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import {
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalCloseButton,
-  ModalBody,
-  ModalFooter,
   Button,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
 } from '@chakra-ui/react'
 import cx from 'classnames'
 import FileAPI from '@/client/api/file'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
-import { copyModalDidClose, selectionUpdated } from '@/store/ui/files'
-import { drawerDidOpen } from '@/store/ui/tasks'
+import {
+  copyModalDidClose,
+  loadingAdded,
+  loadingRemoved,
+  selectionUpdated,
+} from '@/store/ui/files'
 import FileBrowse from './file-browse'
 
 const FileCopy = () => {
@@ -39,13 +43,15 @@ const FileCopy = () => {
     if (!targetId) {
       return
     }
-    FileAPI.copy(targetId, { ids: selection }).then(() => {
+    const ids = [...selection]
+    FileAPI.copy(targetId, { ids }).then(() => {
       if (fileId === targetId) {
         mutateList?.()
       }
+      dispatch(loadingRemoved(ids))
     })
     await mutateTasks?.()
-    dispatch(drawerDidOpen())
+    dispatch(loadingAdded(ids))
     dispatch(selectionUpdated([]))
     dispatch(copyModalDidClose())
   }, [targetId, fileId, selection, dispatch, mutateList, mutateTasks])

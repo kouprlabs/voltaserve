@@ -7,7 +7,6 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import { ChangeEvent, MouseEvent, useCallback, useMemo, useRef } from 'react'
 import {
   IconButton,
@@ -156,7 +155,7 @@ const FileMenu = ({
     [file],
   )
   const isRenameAuthorized = useMemo(
-    () => file !== undefined && geEditorPermission(file.permission),
+    () => file && geEditorPermission(file.permission),
     [file],
   )
   const isProToolsAvailable = useMemo(

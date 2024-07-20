@@ -950,48 +950,6 @@ func (svc *FileService) Move(targetID string, sourceIDs []string, userID string)
 		return []string{}, err
 	}
 
-	/* Do checks */
-	for _, id := range sourceIDs {
-		source, err := svc.fileCache.Get(id)
-		if err != nil {
-			return []string{}, err
-		}
-		if source.GetParentID() != nil {
-			existing, err := svc.getChildWithName(targetID, source.GetName())
-			if err != nil {
-				return nil, err
-			}
-			if existing != nil {
-				source.SetName(helper.UniqueFilename(source.GetName()))
-				if err = svc.fileRepo.Save(source); err != nil {
-					return nil, err
-				}
-				if err := svc.sync(source); err != nil {
-					return nil, err
-				}
-			}
-		}
-		if err := svc.fileGuard.Authorize(userID, target, model.PermissionEditor); err != nil {
-			return []string{}, err
-		}
-		if err := svc.fileGuard.Authorize(userID, source, model.PermissionEditor); err != nil {
-			return []string{}, err
-		}
-		if source.GetParentID() != nil && *source.GetParentID() == target.GetID() {
-			return []string{}, errorpkg.NewFileAlreadyChildOfDestinationError(source, target)
-		}
-		if target.GetID() == source.GetID() {
-			return []string{}, errorpkg.NewFileCannotBeMovedIntoItselfError(source)
-		}
-		if target.GetType() != model.FileTypeFolder {
-			return []string{}, errorpkg.NewFileIsNotAFolderError(target)
-		}
-		targetIsGrandChildOfSource, _ := svc.fileRepo.IsGrandChildOf(target.GetID(), source.GetID())
-		if targetIsGrandChildOfSource {
-			return []string{}, errorpkg.NewTargetIsGrandChildOfSourceError(source)
-		}
-	}
-
 	/* Do moving */
 	for _, id := range sourceIDs {
 		source, err := svc.fileCache.Get(id)
@@ -1024,6 +982,42 @@ func (svc *FileService) moveOne(target model.File, source model.File, userID str
 			log.GetLogger().Error(err)
 		}
 	}()
+
+	/* Do checks */
+	if source.GetParentID() != nil {
+		existing, err := svc.getChildWithName(target.GetID(), source.GetName())
+		if err != nil {
+			return nil, err
+		}
+		if existing != nil {
+			source.SetName(helper.UniqueFilename(source.GetName()))
+			if err = svc.fileRepo.Save(source); err != nil {
+				return nil, err
+			}
+			if err := svc.sync(source); err != nil {
+				return nil, err
+			}
+		}
+	}
+	if err := svc.fileGuard.Authorize(userID, target, model.PermissionEditor); err != nil {
+		return []string{}, err
+	}
+	if err := svc.fileGuard.Authorize(userID, source, model.PermissionEditor); err != nil {
+		return []string{}, err
+	}
+	if source.GetParentID() != nil && *source.GetParentID() == target.GetID() {
+		return []string{}, errorpkg.NewFileAlreadyChildOfDestinationError(source, target)
+	}
+	if target.GetID() == source.GetID() {
+		return []string{}, errorpkg.NewFileCannotBeMovedIntoItselfError(source)
+	}
+	if target.GetType() != model.FileTypeFolder {
+		return []string{}, errorpkg.NewFileIsNotAFolderError(target)
+	}
+	targetIsGrandChildOfSource, _ := svc.fileRepo.IsGrandChildOf(target.GetID(), source.GetID())
+	if targetIsGrandChildOfSource {
+		return []string{}, errorpkg.NewTargetIsGrandChildOfSourceError(source)
+	}
 
 	/* Add old parent */
 	parentIDs = append(parentIDs, *source.GetParentID())

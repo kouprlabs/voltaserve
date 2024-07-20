@@ -22,8 +22,12 @@ import {
 import cx from 'classnames'
 import FileAPI from '@/client/api/file'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
-import { moveModalDidClose, selectionUpdated } from '@/store/ui/files'
-import { drawerDidOpen } from '@/store/ui/tasks'
+import {
+  loadingAdded,
+  loadingRemoved,
+  moveModalDidClose,
+  selectionUpdated,
+} from '@/store/ui/files'
 import FileBrowse from './file-browse'
 
 const FileMove = () => {
@@ -39,9 +43,13 @@ const FileMove = () => {
     if (!targetId) {
       return
     }
-    FileAPI.move(targetId, { ids: selection }).then(() => mutateList?.())
+    const ids = [...selection]
+    FileAPI.move(targetId, { ids }).then(() => {
+      mutateList?.()
+      dispatch(loadingRemoved([targetId]))
+    })
     await mutateTasks?.()
-    dispatch(drawerDidOpen())
+    dispatch(loadingAdded([targetId]))
     dispatch(selectionUpdated([]))
     dispatch(moveModalDidClose())
   }, [targetId, fileId, selection, dispatch, mutateList, mutateTasks])

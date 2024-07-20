@@ -24,8 +24,12 @@ import { useSWRConfig } from 'swr'
 import cx from 'classnames'
 import FileAPI from '@/client/api/file'
 import { useAppSelector } from '@/store/hook'
-import { deleteModalDidClose, selectionUpdated } from '@/store/ui/files'
-import { drawerDidOpen } from '@/store/ui/tasks'
+import {
+  deleteModalDidClose,
+  loadingAdded,
+  loadingRemoved,
+  selectionUpdated,
+} from '@/store/ui/files'
 
 const FileDelete = () => {
   const { mutate } = useSWRConfig()
@@ -45,11 +49,17 @@ const FileDelete = () => {
 
       // We intentionally mutate before we delete to avoid SWR
       // trying to fetch the file while the delete process is still ongoing
-      await mutate(`/files/${fileId}`, null, false)
+      for (const id of selection) {
+        await mutate(`/files/${id}`, null, false)
+      }
 
-      FileAPI.delete({ ids: selection }).then(() => mutateList?.())
+      const ids = [...selection]
+      FileAPI.delete({ ids }).then(() => {
+        mutateList?.()
+        dispatch(loadingRemoved(ids))
+      })
       await mutateTasks?.()
-      dispatch(drawerDidOpen())
+      dispatch(loadingAdded(ids))
       dispatch(selectionUpdated([]))
       dispatch(deleteModalDidClose())
     } finally {
