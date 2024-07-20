@@ -54,12 +54,14 @@ const FileDelete = () => {
       }
 
       const ids = [...selection]
-      FileAPI.delete({ ids }).then(() => {
-        mutateList?.()
-        dispatch(loadingRemoved(ids))
-      })
+      for (const id of ids) {
+        FileAPI.delete({ id }).then(() => {
+          mutateList?.()
+          dispatch(loadingRemoved([id]))
+        })
+        dispatch(loadingAdded([id]))
+      }
       await mutateTasks?.()
-      dispatch(loadingAdded(ids))
       dispatch(selectionUpdated([]))
       dispatch(deleteModalDidClose())
     } finally {

@@ -100,21 +100,17 @@ definitions:
     type: object
   router.FileCopyOptions:
     properties:
-      ids:
-        items:
-          type: string
-        type: array
+      id:
+        type: string
     required:
-    - ids
+    - id
     type: object
   router.FileDeleteOptions:
     properties:
-      ids:
-        items:
-          type: string
-        type: array
+      id:
+        type: string
     required:
-    - ids
+    - id
     type: object
   router.FileGrantGroupPermissionOptions:
     properties:
@@ -156,12 +152,10 @@ definitions:
     type: object
   router.FileMoveOptions:
     properties:
-      ids:
-        items:
-          type: string
-        type: array
+      id:
+        type: string
     required:
-    - ids
+    - id
     type: object
   router.FilePatchNameOptions:
     properties:

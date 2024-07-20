@@ -7,7 +7,6 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import useSWR, { SWRConfiguration } from 'swr'
 import { apiFetcher } from '@/client/fetcher'
 import { User } from '@/client/idp/user'
@@ -89,15 +88,15 @@ export type ListOptions = {
 }
 
 export type MoveOptions = {
-  ids: string[]
+  id: string
 }
 
 export type CopyOptions = {
-  ids: string[]
+  id: string
 }
 
 export type DeleteOptions = {
-  ids: string[]
+  id: string
 }
 
 export type PatchNameOptions = {

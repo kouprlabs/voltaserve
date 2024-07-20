@@ -424,7 +424,7 @@ func (r *FileRouter) GetPath(c *fiber.Ctx) error {
 }
 
 type FileCopyOptions struct {
-	IDs []string `json:"ids" validate:"required"`
+	ID string `json:"id" validate:"required"`
 }
 
 // Copy godoc
@@ -448,15 +448,14 @@ func (r *FileRouter) Copy(c *fiber.Ctx) error {
 	if err := validator.New().Struct(opts); err != nil {
 		return errorpkg.NewRequestBodyValidationError(err)
 	}
-	res, err := r.fileSvc.Copy(c.Params("id"), opts.IDs, userID)
-	if err != nil {
+	if err := r.fileSvc.Copy(c.Params("id"), opts.ID, userID); err != nil {
 		return err
 	}
-	return c.JSON(res)
+	return c.SendStatus(http.StatusNoContent)
 }
 
 type FileMoveOptions struct {
-	IDs []string `json:"ids" validate:"required"`
+	ID string `json:"id" validate:"required"`
 }
 
 // Move godoc
@@ -480,7 +479,7 @@ func (r *FileRouter) Move(c *fiber.Ctx) error {
 	if err := validator.New().Struct(opts); err != nil {
 		return errorpkg.NewRequestBodyValidationError(err)
 	}
-	if _, err := r.fileSvc.Move(c.Params("id"), opts.IDs, userID); err != nil {
+	if err := r.fileSvc.Move(c.Params("id"), opts.ID, userID); err != nil {
 		return err
 	}
 	return c.SendStatus(http.StatusNoContent)
@@ -520,7 +519,7 @@ func (r *FileRouter) PatchName(c *fiber.Ctx) error {
 }
 
 type FileDeleteOptions struct {
-	IDs []string `json:"ids" validate:"required"`
+	ID string `json:"id" validate:"required"`
 }
 
 // Delete godoc
@@ -543,11 +542,10 @@ func (r *FileRouter) Delete(c *fiber.Ctx) error {
 	if err := validator.New().Struct(opts); err != nil {
 		return errorpkg.NewRequestBodyValidationError(err)
 	}
-	res, err := r.fileSvc.Delete(opts.IDs, userID)
-	if err != nil {
+	if err := r.fileSvc.Delete(opts.ID, userID); err != nil {
 		return err
 	}
-	return c.JSON(res)
+	return c.SendStatus(http.StatusNoContent)
 }
 
 // GetSize godoc

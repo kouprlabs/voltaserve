@@ -44,14 +44,16 @@ const FileCopy = () => {
       return
     }
     const ids = [...selection]
-    FileAPI.copy(targetId, { ids }).then(() => {
-      if (fileId === targetId) {
-        mutateList?.()
-      }
-      dispatch(loadingRemoved(ids))
-    })
+    for (const id of ids) {
+      FileAPI.copy(targetId, { id }).then(() => {
+        if (fileId === targetId) {
+          mutateList?.()
+        }
+        dispatch(loadingRemoved([id]))
+      })
+      dispatch(loadingAdded([id]))
+    }
     await mutateTasks?.()
-    dispatch(loadingAdded(ids))
     dispatch(selectionUpdated([]))
     dispatch(copyModalDidClose())
   }, [targetId, fileId, selection, dispatch, mutateList, mutateTasks])
