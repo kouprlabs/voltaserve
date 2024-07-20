@@ -7,7 +7,6 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import { useState, MouseEvent } from 'react'
 import {
   DragCancelEvent,
@@ -81,8 +80,9 @@ const ListDraggableDroppable = ({
         dispatch(hiddenUpdated(idsToMove))
         setIsLoading(true)
         try {
-          await FileAPI.move(file.id, { ids: idsToMove })
-          mutateList?.()
+          for (const id of idsToMove) {
+            await FileAPI.move(file.id, { id }).then(() => mutateList?.())
+          }
         } finally {
           setIsLoading(false)
           dispatch(hiddenUpdated([]))
