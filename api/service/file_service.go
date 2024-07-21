@@ -1836,7 +1836,6 @@ type FileMapper struct {
 	groupCache     *cache.GroupCache
 	snapshotMapper *SnapshotMapper
 	snapshotCache  *cache.SnapshotCache
-	snapshotRepo   repo.SnapshotRepo
 	config         *config.Config
 }
 
@@ -1845,7 +1844,6 @@ func NewFileMapper() *FileMapper {
 		groupCache:     cache.NewGroupCache(),
 		snapshotMapper: NewSnapshotMapper(),
 		snapshotCache:  cache.NewSnapshotCache(),
-		snapshotRepo:   repo.NewSnapshotRepo(),
 		config:         config.GetConfig(),
 	}
 }
