@@ -12,6 +12,8 @@ package repo
 
 import (
 	"errors"
+	"fmt"
+	"strings"
 	"time"
 
 	"gorm.io/gorm"
@@ -29,13 +31,13 @@ type FileRepo interface {
 	FindPath(id string) ([]model.File, error)
 	FindTree(id string) ([]model.File, error)
 	FindTreeIDs(id string) ([]string, error)
-	DeleteTree(id string) error
+	DeleteChunk(ids []string) error
 	Count() (int64, error)
 	GetIDsByWorkspace(workspaceID string) ([]string, error)
 	GetIDsBySnapshot(snapshotID string) ([]string, error)
 	MoveSourceIntoTarget(targetID string, sourceID string) error
 	Save(file model.File) error
-	BulkInsert(values []model.File, chunkSize int) error
+	BulkInsert(files []model.File, chunkSize int) error
 	BulkInsertPermissions(values []model.UserPermission, chunkSize int) error
 	Delete(id string) error
 	GetChildrenIDs(id string) ([]string, error)
@@ -46,6 +48,7 @@ type FileRepo interface {
 	RevokeUserPermission(tree []model.File, userID string) error
 	GrantGroupPermission(id string, groupID string, permission string) error
 	RevokeGroupPermission(tree []model.File, groupID string) error
+	PopulateModelFieldsForUser(files []model.File, userID string) error
 }
 
 func NewFileRepo() FileRepo {
@@ -165,6 +168,19 @@ func (f *fileEntity) SetSnapshotID(snapshotID *string) {
 	f.SnapshotID = snapshotID
 }
 
+func (f *fileEntity) SetUserPermissions(permissions []model.CoreUserPermission) {
+	f.UserPermissions = make([]*UserPermissionValue, len(permissions))
+	for i, p := range permissions {
+		f.UserPermissions[i] = p.(*UserPermissionValue)
+	}
+}
+
+func (f *fileEntity) SetGroupPermissions(permissions []model.CoreGroupPermission) {
+	f.GroupPermissions = make([]*GroupPermissionValue, len(permissions))
+	for i, p := range permissions {
+		f.GroupPermissions[i] = p.(*GroupPermissionValue)
+	}
+}
 func (f *fileEntity) SetCreateTime(createTime string) {
 	f.CreateTime = createTime
 }
@@ -326,14 +342,10 @@ func (repo *fileRepo) FindTreeIDs(id string) ([]string, error) {
 	return res, nil
 }
 
-func (repo *fileRepo) DeleteTree(id string) error {
-	db := repo.db.
-		Exec(`WITH RECURSIVE rec (id, parent_id) AS
-              (SELECT f.id, f.parent_id FROM file f WHERE f.parent_id = ?
-              UNION SELECT f.id, f.parent_id FROM rec, file f WHERE f.parent_id = rec.id)
-              DELETE FROM file WHERE id in (SELECT id FROM rec);`,
-			id)
-	if db.Error != nil {
+func (repo *fileRepo) DeleteChunk(ids []string) error {
+	in := "'" + strings.Join(ids, "','") + "'"
+	query := fmt.Sprintf("DELETE FROM file WHERE id IN (%s)", in)
+	if db := repo.db.Raw(query); db.Error != nil {
 		return db.Error
 	}
 	return nil
@@ -651,6 +663,19 @@ func (repo *fileRepo) populateModelFields(entities []*fileEntity) error {
 				Value:   p.GetPermission(),
 			})
 		}
+	}
+	return nil
+}
+
+func (repo *fileRepo) PopulateModelFieldsForUser(files []model.File, userID string) error {
+	for _, f := range files {
+		userPermissions := make([]model.CoreUserPermission, 0)
+		userPermissions = append(userPermissions, &UserPermissionValue{
+			UserID: userID,
+			Value:  model.PermissionOwner,
+		})
+		f.SetUserPermissions(userPermissions)
+		f.SetGroupPermissions(make([]model.CoreGroupPermission, 0))
 	}
 	return nil
 }

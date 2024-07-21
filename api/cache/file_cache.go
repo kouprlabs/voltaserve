@@ -67,6 +67,17 @@ func (c *FileCache) Refresh(id string) (model.File, error) {
 	return res, nil
 }
 
+func (c *FileCache) RefreshWithExisting(file model.File, userID string) (model.File, error) {
+	err := c.fileRepo.PopulateModelFieldsForUser([]model.File{file}, userID)
+	if err != nil {
+		return nil, err
+	}
+	if err = c.Set(file); err != nil {
+		return nil, err
+	}
+	return file, nil
+}
+
 func (c *FileCache) Delete(id string) error {
 	if err := c.redis.Delete(c.keyPrefix + id); err != nil {
 		return nil

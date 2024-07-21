@@ -823,11 +823,11 @@ func (svc *FileService) CopyOne(sourceID string, targetID string, userID string)
 	}
 	var sourceTree []model.File
 	for _, id := range sourceIds {
-		sourceItem, err := svc.fileCache.Get(id)
+		sourceFile, err := svc.fileCache.Get(id)
 		if err != nil {
 			return nil, err
 		}
-		sourceTree = append(sourceTree, sourceItem)
+		sourceTree = append(sourceTree, sourceFile)
 	}
 
 	/* Clone source tree */
@@ -836,34 +836,34 @@ func (svc *FileService) CopyOne(sourceID string, targetID string, userID string)
 	originalIDs := make(map[string]string)
 	var clones []model.File
 	var permissions []model.UserPermission
-	for i, sourceItem := range sourceTree {
-		clone := repo.NewFile()
-		clone.SetID(helper.NewID())
-		clone.SetParentID(sourceItem.GetParentID())
-		clone.SetWorkspaceID(sourceItem.GetWorkspaceID())
-		clone.SetSnapshotID(sourceItem.GetSnapshotID())
-		clone.SetType(sourceItem.GetType())
-		clone.SetName(sourceItem.GetName())
-		clone.SetCreateTime(time.Now().UTC().Format(time.RFC3339))
-		if sourceItem.GetID() == source.GetID() {
+	for i, sourceFile := range sourceTree {
+		f := repo.NewFile()
+		f.SetID(helper.NewID())
+		f.SetParentID(sourceFile.GetParentID())
+		f.SetWorkspaceID(sourceFile.GetWorkspaceID())
+		f.SetSnapshotID(sourceFile.GetSnapshotID())
+		f.SetType(sourceFile.GetType())
+		f.SetName(sourceFile.GetName())
+		f.SetCreateTime(time.Now().UTC().Format(time.RFC3339))
+		if sourceFile.GetID() == source.GetID() {
 			rootCloneIndex = i
 		}
-		cloneIDs[sourceItem.GetID()] = clone.GetID()
-		originalIDs[clone.GetID()] = sourceItem.GetID()
-		clones = append(clones, clone)
+		cloneIDs[sourceFile.GetID()] = f.GetID()
+		originalIDs[f.GetID()] = sourceFile.GetID()
+		clones = append(clones, f)
 
-		permission := repo.NewUserPermission()
-		permission.SetID(helper.NewID())
-		permission.SetUserID(userID)
-		permission.SetResourceID(clone.GetID())
-		permission.SetPermission(model.PermissionOwner)
-		permission.SetCreateTime(time.Now().UTC().Format(time.RFC3339))
-		permissions = append(permissions, permission)
+		p := repo.NewUserPermission()
+		p.SetID(helper.NewID())
+		p.SetUserID(userID)
+		p.SetResourceID(f.GetID())
+		p.SetPermission(model.PermissionOwner)
+		p.SetCreateTime(time.Now().UTC().Format(time.RFC3339))
+		permissions = append(permissions, p)
 	}
 
 	/* Set parent IDs of clones */
-	for i, clone := range clones {
-		id := cloneIDs[*clone.GetParentID()]
+	for i, f := range clones {
+		id := cloneIDs[*f.GetParentID()]
 		clones[i].SetParentID(&id)
 	}
 
@@ -897,12 +897,12 @@ func (svc *FileService) CopyOne(sourceID string, targetID string, userID string)
 
 	/* Attach latest snapshot to clones */
 	var mappings []*repo.SnapshotFileEntity
-	for i, clone := range clones {
+	for i, f := range clones {
 		original := sourceTree[i]
 		if original.GetSnapshotID() != nil {
 			mappings = append(mappings, &repo.SnapshotFileEntity{
 				SnapshotID: *original.GetSnapshotID(),
-				FileID:     clone.GetID(),
+				FileID:     f.GetID(),
 			})
 		}
 	}
@@ -912,7 +912,7 @@ func (svc *FileService) CopyOne(sourceID string, targetID string, userID string)
 
 	/* Create cache for clones */
 	for _, clone := range clones {
-		if _, err := svc.fileCache.Refresh(clone.GetID()); err != nil {
+		if _, err := svc.fileCache.RefreshWithExisting(clone, userID); err != nil {
 			log.GetLogger().Error(err)
 		}
 	}
@@ -1112,16 +1112,38 @@ func (svc *FileService) DeleteOne(id string, userID string) error {
 		return err
 	}
 
-	// Delete from repo
+	/* Delete file from repo */
 	if err := svc.fileRepo.Delete(id); err != nil {
 		return err
 	}
 
-	for _, treeItemID := range treeIDs {
-		if err = svc.fileCache.Delete(treeItemID); err != nil {
+	/* Delete tree from cache */
+	for _, fileID := range treeIDs {
+		if err = svc.fileCache.Delete(fileID); err != nil {
 			log.GetLogger().Error(err)
 		}
 	}
+
+	/* Delete tree from repo */
+	go func(ids []string) {
+		const ChunkSize = 1000
+		for i := 0; i < len(ids); i += ChunkSize {
+			end := i + ChunkSize
+			if end > len(ids) {
+				end = len(ids)
+			}
+			chunk := ids[i:end]
+			start := time.Now()
+			if err := svc.fileRepo.DeleteChunk(chunk); err != nil {
+				log.GetLogger().Error(err)
+			}
+			/* Sleep as long as we took to process the previous chunk.
+			This lets the DB have some breathing room to process other queries */
+			duration := time.Since(start)
+			time.Sleep(duration)
+		}
+		fmt.Println()
+	}(treeIDs)
 
 	/* Delete from search */
 	go func() {
@@ -1131,6 +1153,7 @@ func (svc *FileService) DeleteOne(id string, userID string) error {
 			if we fail to delete it from the search. */
 			fmt.Println(err)
 		}
+		fmt.Println()
 	}()
 
 	/* Delete snapshot mappings */
@@ -1138,6 +1161,7 @@ func (svc *FileService) DeleteOne(id string, userID string) error {
 		if err := svc.snapshotRepo.DeleteMappingsForTree(id); err != nil {
 			log.GetLogger().Error(err)
 		}
+		fmt.Println()
 	}()
 
 	/* Delete dangling snapshots */

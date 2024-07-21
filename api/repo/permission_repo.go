@@ -155,6 +155,10 @@ type UserPermissionValue struct {
 	Value  string `json:"value,omitempty"`
 }
 
+func MakeCoreUserPermission() model.CoreUserPermission {
+	return &UserPermissionValue{}
+}
+
 func (p UserPermissionValue) GetUserID() string {
 	return p.UserID
 }
@@ -166,6 +170,10 @@ func (p UserPermissionValue) GetValue() string {
 type GroupPermissionValue struct {
 	GroupID string `json:"groupId,omitempty"`
 	Value   string `json:"value,omitempty"`
+}
+
+func MakeCoreGroupPermission() model.CoreGroupPermission {
+	return &GroupPermissionValue{}
 }
 
 func (p GroupPermissionValue) GetGroupID() string {
