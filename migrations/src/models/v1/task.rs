@@ -12,7 +12,6 @@ pub enum Task {
     UserId,
     Status,
     Payload,
-    TaskId,
     CreateTime,
     UpdateTime,
 }
