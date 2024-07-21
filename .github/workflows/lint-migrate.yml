@@ -1,0 +1,32 @@
+# Copyright 2023 Daniël Sonck, Piotr Łoboda.
+#
+# Use of this software is governed by the Business Source License
+# included in the file licenses/BSL.txt.
+#
+# As of the Change Date specified in that file, in accordance with
+# the Business Source License, use of this software will be governed
+# by the GNU Affero General Public License v3.0 only, included in the file
+# licenses/AGPL.txt.
+
+name: Lint voltaserve/migration
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "migrations/**"
+      
+jobs:
+  linting:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Lint using Clippy
+        run: cargo clippy --manifest-path migrations/Cargo.toml --all-features -- -D warnings
+    permissions:
+      contents: read
+      pull-requests: read
+      checks: write

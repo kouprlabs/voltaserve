@@ -1,0 +1,22 @@
+# Copyright 2023 Daniël Sonck.
+#
+# Use of this software is governed by the Business Source License
+# included in the file licenses/BSL.txt.
+#
+# As of the Change Date specified in that file, in accordance with
+# the Business Source License, use of this software will be governed
+# by the GNU Affero General Public License v3.0 only, included in the file
+# licenses/AGPL.txt.
+[package]
+name = "voltaserve-migrations"
+edition = "2021"
+publish = false
+
+[lib]
+name = "voltaserve_migration"
+path = "src/lib.rs"
+
+[dependencies]
+async-std = { version = "^1", features = ["attributes", "tokio1"] }
+
+sea-orm-migration = { version = "0.12.15", features = ["runtime-async-std-rustls", "sqlx-postgres"] }

@@ -10,25 +10,6 @@
 
 SET DATABASE = voltaserve;
 
-CREATE TABLE IF NOT EXISTS "user"
-(
-    id                       text PRIMARY KEY,
-    full_name                text NOT NULL,
-    username                 text NOT NULL UNIQUE,
-    email                    text UNIQUE,
-    password_hash            text NOT NULL,
-    refresh_token_value      text UNIQUE,
-    refresh_token_expiry     text,
-    reset_password_token     text UNIQUE,
-    email_confirmation_token text UNIQUE,
-    email_update_token       text UNIQUE,
-    email_update_value       text UNIQUE,
-    is_email_confirmed       boolean NOT NULL DEFAULT FALSE,
-    picture                  text,
-    create_time              text NOT NULL DEFAULT (to_json(now())#>>'{}'),
-    update_time              text ON UPDATE (to_json(now())#>>'{}')
-);
-
 CREATE TABLE IF NOT EXISTS organization
 (
     id          text PRIMARY KEY,
