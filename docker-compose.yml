@@ -25,7 +25,6 @@ services:
       COCKROACH_USER: voltaserve
     volumes:
       - cockroach:/cockroach/cockroach-data
-      - ./postgres/schema.sql:/docker-entrypoint-initdb.d/schema.sql
     command: start-single-node --insecure
     healthcheck:
       test: cockroach sql --insecure --execute='SELECT 1;' || exit 1
