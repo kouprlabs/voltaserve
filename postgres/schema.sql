@@ -54,28 +54,6 @@ CREATE TABLE IF NOT EXISTS snapshot_file
 CREATE INDEX IF NOT EXISTS snapshot_file_snapshot_id_idx ON snapshot_file (snapshot_id);
 CREATE INDEX IF NOT EXISTS snapshot_file_file_id_idx ON snapshot_file (file_id);
 
-CREATE TABLE IF NOT EXISTS "group"
-(
-    id              text PRIMARY KEY,
-    name            text NOT NULL,
-    organization_id text NOT NULL REFERENCES organization (id) ON DELETE CASCADE,
-    create_time     text NOT NULL DEFAULT (to_json(now())#>>'{}'),
-    update_time     text ON UPDATE (to_json(now())#>>'{}')
-);
-
-CREATE INDEX IF NOT EXISTS group_organization_id_idx ON "group" (organization_id);
-
-CREATE TABLE IF NOT EXISTS group_user
-(
-    group_id    text REFERENCES "group" (id) ON DELETE CASCADE,
-    user_id     text REFERENCES "user" (id) ON DELETE CASCADE,
-    create_time text NOT NULL DEFAULT (to_json(now())#>>'{}'),
-    PRIMARY KEY (group_id, user_id)
-);
-
-CREATE INDEX IF NOT EXISTS group_user_group_id_idx ON group_user (group_id);
-CREATE INDEX IF NOT EXISTS group_user_user_id_idx ON group_user (user_id);
-
 CREATE TABLE IF NOT EXISTS userpermission
 (
     id          text PRIMARY KEY,
