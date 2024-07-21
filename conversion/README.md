@@ -29,7 +29,7 @@ gci write -s standard -s default -s "prefix(github.com/kouprlabs)" -s "prefix(gi
 ```
 
 ```shell
-gofmt -w .
+gofmt -s -w .
 ```
 
 ```shell
