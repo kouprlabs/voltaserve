@@ -29,6 +29,7 @@ type FileRepo interface {
 	FindPath(id string) ([]model.File, error)
 	FindTree(id string) ([]model.File, error)
 	FindTreeIDs(id string) ([]string, error)
+	DeleteTree(id string) error
 	Count() (int64, error)
 	GetIDsByWorkspace(workspaceID string) ([]string, error)
 	GetIDsBySnapshot(snapshotID string) ([]string, error)
@@ -323,6 +324,19 @@ func (repo *fileRepo) FindTreeIDs(id string) ([]string, error) {
 		res = append(res, v.Result)
 	}
 	return res, nil
+}
+
+func (repo *fileRepo) DeleteTree(id string) error {
+	db := repo.db.
+		Exec(`WITH RECURSIVE rec (id, parent_id) AS
+              (SELECT f.id, f.parent_id FROM file f WHERE f.parent_id = ?
+              UNION SELECT f.id, f.parent_id FROM rec, file f WHERE f.parent_id = rec.id)
+              DELETE FROM file WHERE id in (SELECT id FROM rec);`,
+			id)
+	if db.Error != nil {
+		return db.Error
+	}
+	return nil
 }
 
 func (repo *fileRepo) Count() (int64, error) {

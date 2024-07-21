@@ -12,7 +12,7 @@ package search
 
 import (
 	"encoding/json"
-
+	"github.com/kouprlabs/voltaserve/api/cache"
 	"github.com/minio/minio-go/v7"
 
 	"github.com/kouprlabs/voltaserve/api/infra"
@@ -21,18 +21,20 @@ import (
 )
 
 type FileSearch struct {
-	search       *infra.SearchManager
-	index        string
-	s3           *infra.S3Manager
-	snapshotRepo repo.SnapshotRepo
+	search        *infra.SearchManager
+	index         string
+	s3            *infra.S3Manager
+	snapshotCache *cache.SnapshotCache
+	fileIdent     *infra.FileIdentifier
 }
 
 func NewFileSearch() *FileSearch {
 	return &FileSearch{
-		index:        infra.FileSearchIndex,
-		search:       infra.NewSearchManager(),
-		s3:           infra.NewS3Manager(),
-		snapshotRepo: repo.NewSnapshotRepo(),
+		index:         infra.FileSearchIndex,
+		search:        infra.NewSearchManager(),
+		s3:            infra.NewS3Manager(),
+		snapshotCache: cache.NewSnapshotCache(),
+		fileIdent:     infra.NewFileIdentifier(),
 	}
 }
 
@@ -103,8 +105,12 @@ func (s *FileSearch) Query(query string, opts infra.QueryOptions) ([]model.File,
 
 func (s *FileSearch) populateTextField(files []model.File) error {
 	for _, f := range files {
-		if f.GetType() == model.FileTypeFile && f.GetSnapshotID() != nil {
-			snapshot, err := s.snapshotRepo.Find(*f.GetSnapshotID())
+		mayContainText := s.fileIdent.IsPlainText(f.GetName()) ||
+			s.fileIdent.IsOffice(f.GetName()) ||
+			s.fileIdent.IsPDF(f.GetName()) ||
+			s.fileIdent.IsImage(f.GetName())
+		if f.GetType() == model.FileTypeFile && mayContainText && f.GetSnapshotID() != nil {
+			snapshot, err := s.snapshotCache.Get(*f.GetSnapshotID())
 			if err != nil {
 				return err
 			}

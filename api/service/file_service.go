@@ -816,9 +816,18 @@ func (svc *FileService) CopyOne(sourceID string, targetID string, userID string)
 	}
 
 	/* Get original tree */
-	var sourceTree []model.File
-	if sourceTree, err = svc.fileRepo.FindTree(source.GetID()); err != nil {
+	var sourceIds []string
+	sourceIds, err = svc.fileRepo.FindTreeIDs(source.GetID())
+	if err != nil {
 		return nil, err
+	}
+	var sourceTree []model.File
+	for _, id := range sourceIds {
+		sourceItem, err := svc.fileCache.Get(id)
+		if err != nil {
+			return nil, err
+		}
+		sourceTree = append(sourceTree, sourceItem)
 	}
 
 	/* Clone source tree */
@@ -901,17 +910,19 @@ func (svc *FileService) CopyOne(sourceID string, targetID string, userID string)
 		return nil, err
 	}
 
-	/* Index clones for search */
-	if err := svc.fileSearch.Index(clones); err != nil {
-		return nil, err
-	}
-
 	/* Create cache for clones */
 	for _, clone := range clones {
 		if _, err := svc.fileCache.Refresh(clone.GetID()); err != nil {
-			return nil, err
+			log.GetLogger().Error(err)
 		}
 	}
+
+	/* Index clones for search */
+	go func() {
+		if err := svc.fileSearch.Index(clones); err != nil {
+			log.GetLogger().Error(err)
+		}
+	}()
 
 	/* Refresh updateTime on target */
 	timeNow := time.Now().UTC().Format(time.RFC3339)
@@ -1096,62 +1107,70 @@ func (svc *FileService) DeleteOne(id string, userID string) error {
 		return err
 	}
 
-	var treeIDs []string
-	treeIDs, err = svc.fileRepo.FindTreeIDs(file.GetID())
+	treeIDs, err := svc.fileRepo.FindTreeIDs(file.GetID())
 	if err != nil {
 		return err
 	}
-	/* Delete from search */
-	if err := svc.fileSearch.Delete(treeIDs); err != nil {
-		/* Here we intentionally don't return an error or panic, we just print the error,
-		that's because we still want to delete the file in the repo afterwards even
-		if we fail to delete it from the search. */
-		fmt.Println(err)
+
+	// Delete from repo
+	if err := svc.fileRepo.Delete(id); err != nil {
+		return err
 	}
-	/* Delete from cache */
+
 	for _, treeItemID := range treeIDs {
 		if err = svc.fileCache.Delete(treeItemID); err != nil {
-			// Same thing as above for the search
+			log.GetLogger().Error(err)
+		}
+	}
+
+	/* Delete from search */
+	go func() {
+		if err := svc.fileSearch.Delete(treeIDs); err != nil {
+			/* Here we intentionally don't return an error or panic, we just print the error,
+			that's because we still want to delete the file in the repo afterward even
+			if we fail to delete it from the search. */
 			fmt.Println(err)
 		}
-	}
-	/* Delete from repo */
-	for _, treeItemID := range treeIDs {
-		if err = svc.fileRepo.Delete(treeItemID); err != nil {
-			return err
+	}()
+
+	/* Delete snapshot mappings */
+	go func() {
+		if err := svc.snapshotRepo.DeleteMappingsForTree(id); err != nil {
+			log.GetLogger().Error(err)
 		}
-		if err = svc.snapshotRepo.DeleteMappingsForFile(treeItemID); err != nil {
-			return err
+	}()
+
+	/* Delete dangling snapshots */
+	go func() {
+		var danglingSnapshots []model.Snapshot
+		danglingSnapshots, err = svc.snapshotRepo.FindAllDangling()
+		if err != nil {
+			log.GetLogger().Error(err)
 		}
-	}
-	var danglingSnapshots []model.Snapshot
-	danglingSnapshots, err = svc.snapshotRepo.FindAllDangling()
-	if err != nil {
-		return err
-	}
-	for _, s := range danglingSnapshots {
-		if s.HasOriginal() {
-			if err = svc.s3.RemoveObject(s.GetOriginal().Key, s.GetOriginal().Bucket, minio.RemoveObjectOptions{}); err != nil {
-				return err
+		for _, s := range danglingSnapshots {
+			if s.HasOriginal() {
+				if err = svc.s3.RemoveObject(s.GetOriginal().Key, s.GetOriginal().Bucket, minio.RemoveObjectOptions{}); err != nil {
+					log.GetLogger().Error(err)
+				}
+			}
+			if s.HasPreview() {
+				if err = svc.s3.RemoveObject(s.GetPreview().Key, s.GetPreview().Bucket, minio.RemoveObjectOptions{}); err != nil {
+					log.GetLogger().Error(err)
+				}
+			}
+			if s.HasText() {
+				if err = svc.s3.RemoveObject(s.GetText().Key, s.GetText().Bucket, minio.RemoveObjectOptions{}); err != nil {
+					log.GetLogger().Error(err)
+				}
+			}
+			if err := svc.snapshotCache.Delete(s.GetID()); err != nil {
+				log.GetLogger().Error(err)
 			}
 		}
-		if s.HasPreview() {
-			if err = svc.s3.RemoveObject(s.GetPreview().Key, s.GetPreview().Bucket, minio.RemoveObjectOptions{}); err != nil {
-				return err
-			}
+		if err = svc.snapshotRepo.DeleteAllDangling(); err != nil {
+			log.GetLogger().Error(err)
 		}
-		if s.HasText() {
-			if err = svc.s3.RemoveObject(s.GetText().Key, s.GetText().Bucket, minio.RemoveObjectOptions{}); err != nil {
-				return err
-			}
-		}
-		if err := svc.snapshotCache.Delete(s.GetID()); err != nil {
-			return err
-		}
-	}
-	if err = svc.snapshotRepo.DeleteAllDangling(); err != nil {
-		return err
-	}
+	}()
 
 	return nil
 }
