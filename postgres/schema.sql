@@ -80,20 +80,6 @@ CREATE TABLE IF NOT EXISTS grouppermission
 CREATE INDEX IF NOT EXISTS grouppermission_group_id_idx ON grouppermission (group_id);
 CREATE INDEX IF NOT EXISTS grouppermission_resource_id_idx ON grouppermission (resource_id);
 
-CREATE TABLE IF NOT EXISTS invitation
-(
-  id              text PRIMARY KEY,
-  organization_id text NOT NULL REFERENCES organization (id) ON DELETE CASCADE,
-  owner_id        text NOT NULL REFERENCES "user" (id) ON DELETE CASCADE,
-  email           text NOT NULL,
-  status          text NOT NULL DEFAULT 'pending',
-  create_time     text NOT NULL DEFAULT (to_json(now())#>>'{}'),
-  update_time     text ON UPDATE (to_json(now())#>>'{}')
-);
-
-CREATE INDEX invitation_organization_id_idx ON invitation (organization_id);
-CREATE INDEX invitation_user_id_idx ON invitation (owner_id);
-
 CREATE TABLE IF NOT EXISTS task
 (
   id                text PRIMARY KEY,
