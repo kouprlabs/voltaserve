@@ -59,7 +59,7 @@ CREATE USER voltaserve;
 GRANT ALL PRIVILEGES ON DATABASE voltaserve TO voltaserve;
 ```
 
-Run the [postgres/schema.sql]() in the newly created database.
+Run the [migrations/migrate]() tool in the newly created database.
 
 #### Redis
 
