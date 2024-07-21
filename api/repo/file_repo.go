@@ -181,6 +181,7 @@ func (f *fileEntity) SetGroupPermissions(permissions []model.CoreGroupPermission
 		f.GroupPermissions[i] = p.(*GroupPermissionValue)
 	}
 }
+
 func (f *fileEntity) SetCreateTime(createTime string) {
 	f.CreateTime = createTime
 }

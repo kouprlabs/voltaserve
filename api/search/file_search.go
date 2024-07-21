@@ -12,9 +12,10 @@ package search
 
 import (
 	"encoding/json"
-	"github.com/kouprlabs/voltaserve/api/cache"
+
 	"github.com/minio/minio-go/v7"
 
+	"github.com/kouprlabs/voltaserve/api/cache"
 	"github.com/kouprlabs/voltaserve/api/infra"
 	"github.com/kouprlabs/voltaserve/api/model"
 	"github.com/kouprlabs/voltaserve/api/repo"
