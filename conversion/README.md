@@ -1,8 +1,10 @@
 # Voltaserve Conversion
 
-Install [golangci-lint](https://github.com/golangci/golangci-lint).
-
-Install [swag](https://github.com/swaggo/swag).
+Prerequisites:
+- [golangci-lint](https://github.com/golangci/golangci-lint)
+- [gci](https://github.com/daixiang0/gci)
+- [gofumpt](https://github.com/mvdan/gofumpt)
+- [swag](https://github.com/swaggo/swag)
 
 Run for development:
 
@@ -25,18 +27,11 @@ golangci-lint run
 Format code:
 
 ```shell
-gci write -s standard -s default -s "prefix(github.com/kouprlabs)" -s "prefix(github.com/kouprlabs/voltaserve/conversion)" .
-```
-
-```shell
-gofmt -s -w .
-```
-
-```shell
-gofumpt -w .
-```
-
-```shell
+gci write -s standard -s default \
+  -s "prefix(github.com/kouprlabs)" \
+  -s "prefix(github.com/kouprlabs/voltaserve/conversion)" . && \
+gofumpt -w . && \
+gofmt -s -w . && \
 goimports -w .
 ```
 
