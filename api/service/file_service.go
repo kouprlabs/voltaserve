@@ -1133,16 +1133,10 @@ func (svc *FileService) DeleteOne(id string, userID string) error {
 				end = len(ids)
 			}
 			chunk := ids[i:end]
-			start := time.Now()
 			if err := svc.fileRepo.DeleteChunk(chunk); err != nil {
 				log.GetLogger().Error(err)
 			}
-			/* Sleep as long as we took to process the previous chunk.
-			This lets the DB have some breathing room to process other queries */
-			duration := time.Since(start)
-			time.Sleep(duration)
 		}
-		fmt.Println()
 	}(treeIDs)
 
 	/* Delete from search */
@@ -1153,7 +1147,6 @@ func (svc *FileService) DeleteOne(id string, userID string) error {
 			if we fail to delete it from the search. */
 			fmt.Println(err)
 		}
-		fmt.Println()
 	}()
 
 	/* Delete snapshot mappings */
@@ -1161,7 +1154,6 @@ func (svc *FileService) DeleteOne(id string, userID string) error {
 		if err := svc.snapshotRepo.DeleteMappingsForTree(id); err != nil {
 			log.GetLogger().Error(err)
 		}
-		fmt.Println()
 	}()
 
 	/* Delete dangling snapshots */
