@@ -77,7 +77,7 @@ jobs:
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v5
         with:
-          context: ./migration
+          context: ./migrations
           push: true
           tags: ${{ env.TAGS }}
           platforms: linux/amd64,linux/arm64
