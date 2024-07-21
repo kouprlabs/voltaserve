@@ -12,7 +12,6 @@ package main
 
 import (
 	"context"
-	"github.com/kouprlabs/voltaserve/webdav/client/idp_client"
 	"log"
 	"net"
 	"net/http"
@@ -23,6 +22,7 @@ import (
 
 	"github.com/joho/godotenv"
 
+	"github.com/kouprlabs/voltaserve/webdav/client/idp_client"
 	"github.com/kouprlabs/voltaserve/webdav/config"
 	"github.com/kouprlabs/voltaserve/webdav/handler"
 	"github.com/kouprlabs/voltaserve/webdav/helper"

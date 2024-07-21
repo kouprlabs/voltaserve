@@ -929,7 +929,7 @@ func (svc *FileService) CopyOne(sourceID string, targetID string, userID string)
 
 type FileCopyManyOptions struct {
 	SourceIDs []string `json:"sourceIds" validate:"required"`
-	TargetID  string   `json:"targetId" validate:"required"`
+	TargetID  string   `json:"targetId"  validate:"required"`
 }
 
 type FileCopyManyResult struct {
@@ -1042,7 +1042,7 @@ func (svc *FileService) MoveOne(sourceID string, targetID string, userID string)
 
 type FileMoveManyOptions struct {
 	SourceIDs []string `json:"sourceIds" validate:"required"`
-	TargetID  string   `json:"targetId" validate:"required"`
+	TargetID  string   `json:"targetId"  validate:"required"`
 }
 
 type FileMoveManyResult struct {

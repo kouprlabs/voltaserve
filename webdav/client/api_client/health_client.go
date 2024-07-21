@@ -12,10 +12,11 @@ package api_client
 
 import (
 	"fmt"
-	"github.com/kouprlabs/voltaserve/webdav/config"
-	"github.com/kouprlabs/voltaserve/webdav/infra"
 	"io"
 	"net/http"
+
+	"github.com/kouprlabs/voltaserve/webdav/config"
+	"github.com/kouprlabs/voltaserve/webdav/infra"
 )
 
 type HealthClient struct {

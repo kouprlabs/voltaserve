@@ -22,11 +22,11 @@ Lint code:
 golangci-lint run
 ```
 
+Format code:
+
 ```shell
 gci write -s standard -s default -s "prefix(github.com/kouprlabs)" -s "prefix(github.com/kouprlabs/voltaserve/webdav)" .
 ```
-
-Format code:
 
 ```shell
 gofmt -w .

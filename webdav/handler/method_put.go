@@ -13,7 +13,6 @@ package handler
 import (
 	"errors"
 	"fmt"
-	"github.com/kouprlabs/voltaserve/webdav/client/api_client"
 	"io"
 	"net/http"
 	"os"
@@ -24,6 +23,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/minio/minio-go/v7"
 
+	"github.com/kouprlabs/voltaserve/webdav/client/api_client"
 	"github.com/kouprlabs/voltaserve/webdav/helper"
 	"github.com/kouprlabs/voltaserve/webdav/infra"
 )

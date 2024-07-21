@@ -22,11 +22,11 @@ Lint code:
 golangci-lint run
 ```
 
+Format code:
+
 ```shell
 gci write -s standard -s default -s "prefix(github.com/kouprlabs)" -s "prefix(github.com/kouprlabs/voltaserve/conversion)" .
 ```
-
-Format code:
 
 ```shell
 gofmt -w .
@@ -40,9 +40,6 @@ gofumpt -w .
 goimports -w .
 ```
 
-```shell
-swag fmt
-```
 Build Docker image:
 
 ```shell

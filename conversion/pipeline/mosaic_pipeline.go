@@ -12,13 +12,13 @@ package pipeline
 
 import (
 	"errors"
-	"github.com/kouprlabs/voltaserve/conversion/client/api_client"
-	"github.com/kouprlabs/voltaserve/conversion/client/mosaic_client"
 	"os"
 	"path/filepath"
 
 	"github.com/minio/minio-go/v7"
 
+	"github.com/kouprlabs/voltaserve/conversion/client/api_client"
+	"github.com/kouprlabs/voltaserve/conversion/client/mosaic_client"
 	"github.com/kouprlabs/voltaserve/conversion/helper"
 	"github.com/kouprlabs/voltaserve/conversion/identifier"
 	"github.com/kouprlabs/voltaserve/conversion/infra"

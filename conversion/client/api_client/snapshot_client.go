@@ -14,11 +14,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/kouprlabs/voltaserve/conversion/infra"
 	"io"
 	"net/http"
 
 	"github.com/kouprlabs/voltaserve/conversion/config"
+	"github.com/kouprlabs/voltaserve/conversion/infra"
 )
 
 type SnapshotClient struct {

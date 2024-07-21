@@ -11,10 +11,10 @@
 package processor
 
 import (
-	"github.com/kouprlabs/voltaserve/conversion/client/api_client"
 	"strconv"
 	"strings"
 
+	"github.com/kouprlabs/voltaserve/conversion/client/api_client"
 	"github.com/kouprlabs/voltaserve/conversion/config"
 	"github.com/kouprlabs/voltaserve/conversion/helper"
 	"github.com/kouprlabs/voltaserve/conversion/identifier"
