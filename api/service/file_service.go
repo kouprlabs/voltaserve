@@ -827,34 +827,34 @@ func (svc *FileService) CopyOne(sourceID string, targetID string, userID string)
 	originalIDs := make(map[string]string)
 	var clones []model.File
 	var permissions []model.UserPermission
-	for i, o := range sourceTree {
-		c := repo.NewFile()
-		c.SetID(helper.NewID())
-		c.SetParentID(o.GetParentID())
-		c.SetWorkspaceID(o.GetWorkspaceID())
-		c.SetSnapshotID(o.GetSnapshotID())
-		c.SetType(o.GetType())
-		c.SetName(o.GetName())
-		c.SetCreateTime(time.Now().UTC().Format(time.RFC3339))
-		if o.GetID() == source.GetID() {
+	for i, sourceItem := range sourceTree {
+		clone := repo.NewFile()
+		clone.SetID(helper.NewID())
+		clone.SetParentID(sourceItem.GetParentID())
+		clone.SetWorkspaceID(sourceItem.GetWorkspaceID())
+		clone.SetSnapshotID(sourceItem.GetSnapshotID())
+		clone.SetType(sourceItem.GetType())
+		clone.SetName(sourceItem.GetName())
+		clone.SetCreateTime(time.Now().UTC().Format(time.RFC3339))
+		if sourceItem.GetID() == source.GetID() {
 			rootCloneIndex = i
 		}
-		cloneIDs[o.GetID()] = c.GetID()
-		originalIDs[c.GetID()] = o.GetID()
-		clones = append(clones, c)
+		cloneIDs[sourceItem.GetID()] = clone.GetID()
+		originalIDs[clone.GetID()] = sourceItem.GetID()
+		clones = append(clones, clone)
 
-		p := repo.NewUserPermission()
-		p.SetID(helper.NewID())
-		p.SetUserID(userID)
-		p.SetResourceID(c.GetID())
-		p.SetPermission(model.PermissionOwner)
-		p.SetCreateTime(time.Now().UTC().Format(time.RFC3339))
-		permissions = append(permissions, p)
+		permission := repo.NewUserPermission()
+		permission.SetID(helper.NewID())
+		permission.SetUserID(userID)
+		permission.SetResourceID(clone.GetID())
+		permission.SetPermission(model.PermissionOwner)
+		permission.SetCreateTime(time.Now().UTC().Format(time.RFC3339))
+		permissions = append(permissions, permission)
 	}
 
 	/* Set parent IDs of clones */
-	for i, c := range clones {
-		id := cloneIDs[*c.GetParentID()]
+	for i, clone := range clones {
+		id := cloneIDs[*clone.GetParentID()]
 		clones[i].SetParentID(&id)
 	}
 
@@ -888,12 +888,12 @@ func (svc *FileService) CopyOne(sourceID string, targetID string, userID string)
 
 	/* Attach latest snapshot to clones */
 	var mappings []*repo.SnapshotFileEntity
-	for i, c := range clones {
+	for i, clone := range clones {
 		original := sourceTree[i]
 		if original.GetSnapshotID() != nil {
 			mappings = append(mappings, &repo.SnapshotFileEntity{
 				SnapshotID: *original.GetSnapshotID(),
-				FileID:     c.GetID(),
+				FileID:     clone.GetID(),
 			})
 		}
 	}
@@ -907,8 +907,8 @@ func (svc *FileService) CopyOne(sourceID string, targetID string, userID string)
 	}
 
 	/* Create cache for clones */
-	for _, c := range clones {
-		if _, err := svc.fileCache.Refresh(c.GetID()); err != nil {
+	for _, clone := range clones {
+		if _, err := svc.fileCache.Refresh(clone.GetID()); err != nil {
 			return nil, err
 		}
 	}
