@@ -1,7 +1,10 @@
-mod organization;
-mod user;
-mod workspace;
+mod file;
 mod group;
 mod invitation;
+mod organization;
+mod snapshot;
+mod user;
+mod workspace;
+mod task;
 
-pub use {organization::*, user::*, workspace::*, group::*, invitation::*};
+pub use {file::*, group::*, invitation::*, organization::*, snapshot::*, user::*, workspace::*, task::*};
