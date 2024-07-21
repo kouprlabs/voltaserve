@@ -44,12 +44,10 @@ const FileDelete = () => {
   const handleDelete = useCallback(async () => {
     const ids = [...selection]
     for (const id of ids) {
-      FileAPI.delete({ id }).then(async () => {
-        dispatch(fileRemoved(id))
-        dispatch(loadingRemoved([id]))
-        await mutateList?.()
-      })
       dispatch(loadingAdded([id]))
+      FileAPI.deleteOne(id)
+        .then(() => mutateList?.())
+        .finally(() => dispatch(loadingRemoved([id])))
     }
     await mutateTasks?.()
     dispatch(selectionUpdated([]))

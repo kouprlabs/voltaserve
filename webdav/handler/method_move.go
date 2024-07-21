@@ -12,11 +12,11 @@ package handler
 
 import (
 	"fmt"
+	"github.com/kouprlabs/voltaserve/webdav/client/api_client"
 	"net/http"
 	"path"
 	"strings"
 
-	"github.com/kouprlabs/voltaserve/webdav/client"
 	"github.com/kouprlabs/voltaserve/webdav/helper"
 	"github.com/kouprlabs/voltaserve/webdav/infra"
 )
@@ -27,7 +27,7 @@ This method moves or renames a resource from a source URL to a destination URL.
 Example implementation:
 
 - Extract the source and destination paths from the headers or request body.
-- Use fs.rename() to move or rename the file from the source to the destination.
+- Move or rename the file from the source to the destination.
 - Set the response status code to 204 if successful or an appropriate error code if the source file is not found or encountered an error.
 - Return the response.
 */
@@ -37,16 +37,16 @@ func (h *Handler) methodMove(w http.ResponseWriter, r *http.Request) {
 		infra.HandleError(fmt.Errorf("missing token"), w)
 		return
 	}
-	apiClient := client.NewAPIClient(token)
+	cl := api_client.NewFileClient(token)
 	sourcePath := helper.DecodeURIComponent(r.URL.Path)
 	targetPath := helper.DecodeURIComponent(helper.GetTargetPath(r))
-	sourceFile, err := apiClient.GetFileByPath(sourcePath)
+	sourceFile, err := cl.GetByPath(sourcePath)
 	if err != nil {
 		infra.HandleError(err, w)
 		return
 	}
 	targetDir := helper.DecodeURIComponent(helper.Dirname(helper.GetTargetPath(r)))
-	targetFile, err := apiClient.GetFileByPath(targetDir)
+	targetFile, err := cl.GetByPath(targetDir)
 	if err != nil {
 		infra.HandleError(err, w)
 		return
@@ -61,14 +61,14 @@ func (h *Handler) methodMove(w http.ResponseWriter, r *http.Request) {
 		sourcePathParts := strings.Split(sourcePath, "/")
 		targetPathParts := strings.Split(targetPath, "/")
 		if len(sourcePathParts) == len(targetPathParts) && helper.Dirname(sourcePath) == helper.Dirname(targetPath) {
-			if _, err := apiClient.PatchFileName(sourceFile.ID, client.FileRenameOptions{
+			if _, err := cl.PatchName(sourceFile.ID, api_client.FilePatchNameOptions{
 				Name: helper.DecodeURIComponent(path.Base(targetPath)),
 			}); err != nil {
 				infra.HandleError(err, w)
 				return
 			}
 		} else {
-			if err := apiClient.MoveFile(targetFile.ID, client.FileMoveOptions{ID: sourceFile.ID}); err != nil {
+			if err := cl.MoveOne(sourceFile.ID, targetFile.ID); err != nil {
 				infra.HandleError(err, w)
 				return
 			}

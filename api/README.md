@@ -24,6 +24,28 @@ Lint code:
 golangci-lint run
 ```
 
+```shell
+gci write -s standard -s default -s "prefix(github.com/kouprlabs)" -s "prefix(github.com/kouprlabs/voltaserve/api)" .
+```
+
+Format code:
+
+```shell
+gofmt -w .
+```
+
+```shell
+gofumpt -w .
+```
+
+```shell
+goimports -w .
+```
+
+```shell
+swag fmt
+```
+
 Build Docker image:
 
 ```shell
@@ -31,12 +53,6 @@ docker build -t voltaserve/api .
 ```
 
 ## Generate Documentation
-
-Format swag comments:
-
-```shell
-swag fmt
-```
 
 Generate `swagger.yml`:
 

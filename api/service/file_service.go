@@ -771,7 +771,7 @@ func (svc *FileService) GetPath(id string, userID string) ([]*File, error) {
 	return res, nil
 }
 
-func (svc *FileService) Copy(targetID string, sourceID string, userID string) (*File, error) {
+func (svc *FileService) CopyOne(sourceID string, targetID string, userID string) (*File, error) {
 	target, err := svc.fileCache.Get(targetID)
 	if err != nil {
 		return nil, err
@@ -927,7 +927,32 @@ func (svc *FileService) Copy(targetID string, sourceID string, userID string) (*
 	return res, nil
 }
 
-func (svc *FileService) Move(targetID string, sourceID string, userID string) error {
+type FileCopyManyOptions struct {
+	SourceIDs []string `json:"sourceIds" validate:"required"`
+	TargetID  string   `json:"targetId" validate:"required"`
+}
+
+type FileCopyManyResult struct {
+	New       []string `json:"new"`
+	Succeeded []string `json:"succeeded"`
+	Failed    []string `json:"failed"`
+}
+
+func (svc *FileService) CopyMany(opts FileCopyManyOptions, userID string) (*FileCopyManyResult, error) {
+	res := &FileCopyManyResult{}
+	for _, id := range opts.SourceIDs {
+		file, err := svc.CopyOne(opts.TargetID, id, userID)
+		if err != nil {
+			res.Failed = append(res.Failed, id)
+		} else {
+			res.New = append(res.New, file.ID)
+			res.Succeeded = append(res.Succeeded, id)
+		}
+	}
+	return res, nil
+}
+
+func (svc *FileService) MoveOne(sourceID string, targetID string, userID string) error {
 	target, err := svc.fileCache.Get(targetID)
 	if err != nil {
 		return err
@@ -1015,38 +1040,29 @@ func (svc *FileService) Move(targetID string, sourceID string, userID string) er
 	return nil
 }
 
-func (svc *FileService) PatchName(id string, name string, userID string) (*File, error) {
-	file, err := svc.fileCache.Get(id)
-	if err != nil {
-		return nil, err
-	}
-	if file.GetParentID() != nil {
-		existing, err := svc.getChildWithName(*file.GetParentID(), name)
-		if err != nil {
-			return nil, err
+type FileMoveManyOptions struct {
+	SourceIDs []string `json:"sourceIds" validate:"required"`
+	TargetID  string   `json:"targetId" validate:"required"`
+}
+
+type FileMoveManyResult struct {
+	Succeeded []string `json:"succeeded"`
+	Failed    []string `json:"failed"`
+}
+
+func (svc *FileService) MoveMany(opts FileMoveManyOptions, userID string) (*FileMoveManyResult, error) {
+	res := &FileMoveManyResult{}
+	for _, id := range opts.SourceIDs {
+		if err := svc.MoveOne(opts.TargetID, id, userID); err != nil {
+			res.Failed = append(res.Failed, id)
+		} else {
+			res.Succeeded = append(res.Succeeded, id)
 		}
-		if existing != nil {
-			return nil, errorpkg.NewFileWithSimilarNameExistsError()
-		}
-	}
-	if err = svc.fileGuard.Authorize(userID, file, model.PermissionEditor); err != nil {
-		return nil, err
-	}
-	file.SetName(name)
-	if err = svc.fileRepo.Save(file); err != nil {
-		return nil, err
-	}
-	if err := svc.sync(file); err != nil {
-		return nil, err
-	}
-	res, err := svc.fileMapper.mapOne(file, userID)
-	if err != nil {
-		return nil, err
 	}
 	return res, nil
 }
 
-func (svc *FileService) Delete(id string, userID string) error {
+func (svc *FileService) DeleteOne(id string, userID string) error {
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return err
@@ -1138,6 +1154,58 @@ func (svc *FileService) Delete(id string, userID string) error {
 	}
 
 	return nil
+}
+
+type FileDeleteManyOptions struct {
+	IDs []string `json:"sourceIds" validate:"required"`
+}
+
+type FileDeleteManyResult struct {
+	Succeeded []string `json:"succeeded"`
+	Failed    []string `json:"failed"`
+}
+
+func (svc *FileService) DeleteMany(opts FileDeleteManyOptions, userID string) (*FileDeleteManyResult, error) {
+	res := &FileDeleteManyResult{}
+	for _, id := range opts.IDs {
+		if err := svc.DeleteOne(id, userID); err != nil {
+			res.Failed = append(res.Failed, id)
+		} else {
+			res.Succeeded = append(res.Succeeded, id)
+		}
+	}
+	return res, nil
+}
+
+func (svc *FileService) PatchName(id string, name string, userID string) (*File, error) {
+	file, err := svc.fileCache.Get(id)
+	if err != nil {
+		return nil, err
+	}
+	if file.GetParentID() != nil {
+		existing, err := svc.getChildWithName(*file.GetParentID(), name)
+		if err != nil {
+			return nil, err
+		}
+		if existing != nil {
+			return nil, errorpkg.NewFileWithSimilarNameExistsError()
+		}
+	}
+	if err = svc.fileGuard.Authorize(userID, file, model.PermissionEditor); err != nil {
+		return nil, err
+	}
+	file.SetName(name)
+	if err = svc.fileRepo.Save(file); err != nil {
+		return nil, err
+	}
+	if err := svc.sync(file); err != nil {
+		return nil, err
+	}
+	res, err := svc.fileMapper.mapOne(file, userID)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
 }
 
 func (svc *FileService) GetSize(id string, userID string) (*int64, error) {

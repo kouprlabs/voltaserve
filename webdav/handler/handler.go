@@ -11,10 +11,11 @@
 package handler
 
 import (
+	"github.com/kouprlabs/voltaserve/webdav/client/api_client"
+	"github.com/kouprlabs/voltaserve/webdav/client/idp_client"
 	"net/http"
 
 	"github.com/kouprlabs/voltaserve/webdav/cache"
-	"github.com/kouprlabs/voltaserve/webdav/client"
 	"github.com/kouprlabs/voltaserve/webdav/infra"
 )
 
@@ -58,14 +59,14 @@ func (h *Handler) Dispatch(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) Health(w http.ResponseWriter, _ *http.Request) {
-	apiClient := client.NewHealthAPIClient()
-	apiHealth, err := apiClient.GetHealth()
+	apiClient := api_client.NewHealthClient()
+	apiHealth, err := apiClient.Get()
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	idpClient := client.NewHealthIdPClient()
-	idpHealth, err := idpClient.GetHealth()
+	idpClient := idp_client.NewHealthClient()
+	idpHealth, err := idpClient.Get()
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return

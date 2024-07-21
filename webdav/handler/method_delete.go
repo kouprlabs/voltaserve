@@ -12,9 +12,9 @@ package handler
 
 import (
 	"fmt"
+	"github.com/kouprlabs/voltaserve/webdav/client/api_client"
 	"net/http"
 
-	"github.com/kouprlabs/voltaserve/webdav/client"
 	"github.com/kouprlabs/voltaserve/webdav/helper"
 	"github.com/kouprlabs/voltaserve/webdav/infra"
 )
@@ -25,7 +25,7 @@ This method deletes a resource identified by the URL.
 Example implementation:
 
 - Extract the file path from the URL.
-- Use fs.unlink() to delete the file.
+- Delete the file.
 - Set the response status code to 204 if successful or an appropriate error code if the file is not found.
 - Return the response.
 */
@@ -35,13 +35,13 @@ func (h *Handler) methodDelete(w http.ResponseWriter, r *http.Request) {
 		infra.HandleError(fmt.Errorf("missing token"), w)
 		return
 	}
-	apiClient := client.NewAPIClient(token)
-	file, err := apiClient.GetFileByPath(helper.DecodeURIComponent(r.URL.Path))
+	cl := api_client.NewFileClient(token)
+	file, err := cl.GetByPath(helper.DecodeURIComponent(r.URL.Path))
 	if err != nil {
 		infra.HandleError(err, w)
 		return
 	}
-	if err = apiClient.DeleteFile(client.FileDeleteOptions{ID: file.ID}); err != nil {
+	if err = cl.DeleteOne(file.ID); err != nil {
 		infra.HandleError(err, w)
 		return
 	}

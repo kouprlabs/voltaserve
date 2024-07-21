@@ -12,6 +12,7 @@ package main
 
 import (
 	"context"
+	"github.com/kouprlabs/voltaserve/webdav/client/idp_client"
 	"log"
 	"net"
 	"net/http"
@@ -22,7 +23,6 @@ import (
 
 	"github.com/joho/godotenv"
 
-	"github.com/kouprlabs/voltaserve/webdav/client"
 	"github.com/kouprlabs/voltaserve/webdav/config"
 	"github.com/kouprlabs/voltaserve/webdav/handler"
 	"github.com/kouprlabs/voltaserve/webdav/helper"
@@ -35,7 +35,7 @@ var (
 	mu       sync.RWMutex
 )
 
-func startTokenRefresh(idpClient *client.IdPClient) {
+func startTokenRefresh(idpClient *idp_client.TokenClient) {
 	ticker := time.NewTicker(5 * time.Second)
 	go func() {
 		for {
@@ -44,8 +44,8 @@ func startTokenRefresh(idpClient *client.IdPClient) {
 			for username, token := range tokens {
 				expiry := expiries[username]
 				if time.Now().After(expiry.Add(-1 * time.Minute)) {
-					newToken, err := idpClient.Exchange(client.TokenExchangeOptions{
-						GrantType:    client.GrantTypeRefreshToken,
+					newToken, err := idpClient.Exchange(idp_client.TokenExchangeOptions{
+						GrantType:    idp_client.GrantTypeRefreshToken,
 						RefreshToken: token.RefreshToken,
 					})
 					if err == nil {
@@ -59,7 +59,7 @@ func startTokenRefresh(idpClient *client.IdPClient) {
 	}()
 }
 
-func basicAuthMiddleware(next http.Handler, idpClient *client.IdPClient) http.Handler {
+func basicAuthMiddleware(next http.Handler, idpClient *idp_client.TokenClient) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		username, password, ok := r.BasicAuth()
 		if !ok {
@@ -72,8 +72,8 @@ func basicAuthMiddleware(next http.Handler, idpClient *client.IdPClient) http.Ha
 		token, exists := tokens[username]
 		if !exists {
 			var err error
-			token, err = idpClient.Exchange(client.TokenExchangeOptions{
-				GrantType: client.GrantTypePassword,
+			token, err = idpClient.Exchange(idp_client.TokenExchangeOptions{
+				GrantType: idp_client.GrantTypePassword,
 				Username:  username,
 				Password:  password,
 			})
@@ -106,7 +106,7 @@ func main() {
 
 	cfg := config.GetConfig()
 
-	idpClient := client.NewIdPClient()
+	idpClient := idp_client.NewTokenClient()
 
 	h := handler.NewHandler()
 	mux := http.NewServeMux()

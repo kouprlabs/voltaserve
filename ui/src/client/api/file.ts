@@ -87,16 +87,29 @@ export type ListOptions = {
   query?: Query
 }
 
-export type MoveOptions = {
-  id: string
+export type MoveManyOptions = {
+  sourceIds: string[]
+  targetId: string
 }
 
-export type CopyOptions = {
-  id: string
+export type MoveManyResult = {
+  succeeded: string[]
+  failed: string[]
 }
 
-export type DeleteOptions = {
-  id: string
+export type CopyManyOptions = {
+  sourceIds: string[]
+  targetId: string
+}
+
+export type CopyManyResult = {
+  new: string[]
+  succeeded: string[]
+  failed: string[]
+}
+
+export type DeleteManyOptions = {
+  ids: string
 }
 
 export type PatchNameOptions = {
@@ -300,7 +313,14 @@ export default class FileAPI {
     }) as Promise<File>
   }
 
-  static async delete(options: DeleteOptions) {
+  static async deleteOne(id: string) {
+    return apiFetcher({
+      url: `/files/${id}`,
+      method: 'DELETE',
+    })
+  }
+
+  static async deleteMany(options: DeleteManyOptions) {
     return apiFetcher({
       url: `/files`,
       method: 'DELETE',
@@ -308,20 +328,34 @@ export default class FileAPI {
     })
   }
 
-  static async move(id: string, options: MoveOptions) {
+  static async moveOne(id: string, targetId: string) {
     return apiFetcher({
-      url: `/files/${id}/move`,
+      url: `/files/${id}/move/${targetId}`,
       method: 'POST',
-      body: JSON.stringify(options),
     })
   }
 
-  static async copy(id: string, options: CopyOptions) {
+  static async moveMany(id: string, options: MoveManyOptions) {
     return apiFetcher({
-      url: `/files/${id}/copy`,
+      url: `/files/move`,
       method: 'POST',
       body: JSON.stringify(options),
+    }) as Promise<MoveManyResult>
+  }
+
+  static async copyOne(id: string, targetId: string) {
+    return apiFetcher({
+      url: `/files/${id}/copy/${targetId}`,
+      method: 'POST',
     }) as Promise<File>
+  }
+
+  static async copyMany(options: CopyManyOptions) {
+    return apiFetcher({
+      url: `/files/copy`,
+      method: 'POST',
+      body: JSON.stringify(options),
+    }) as Promise<CopyManyResult>
   }
 
   static useGet(

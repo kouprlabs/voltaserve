@@ -12,10 +12,10 @@ package handler
 
 import (
 	"fmt"
+	"github.com/kouprlabs/voltaserve/webdav/client/api_client"
 	"net/http"
 	"path"
 
-	"github.com/kouprlabs/voltaserve/webdav/client"
 	"github.com/kouprlabs/voltaserve/webdav/helper"
 	"github.com/kouprlabs/voltaserve/webdav/infra"
 )
@@ -36,16 +36,16 @@ func (h *Handler) methodCopy(w http.ResponseWriter, r *http.Request) {
 		infra.HandleError(fmt.Errorf("missing token"), w)
 		return
 	}
-	apiClient := client.NewAPIClient(token)
+	cl := api_client.NewFileClient(token)
 	sourcePath := helper.DecodeURIComponent(r.URL.Path)
 	targetPath := helper.DecodeURIComponent(helper.GetTargetPath(r))
-	sourceFile, err := apiClient.GetFileByPath(sourcePath)
+	sourceFile, err := cl.GetByPath(sourcePath)
 	if err != nil {
 		infra.HandleError(err, w)
 		return
 	}
 	targetDir := helper.DecodeURIComponent(helper.Dirname(helper.GetTargetPath(r)))
-	targetFile, err := apiClient.GetFileByPath(targetDir)
+	targetFile, err := cl.GetByPath(targetDir)
 	if err != nil {
 		infra.HandleError(err, w)
 		return
@@ -56,14 +56,12 @@ func (h *Handler) methodCopy(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	} else {
-		clone, err := apiClient.CopyFile(targetFile.ID, client.FileCopyOptions{ID: sourceFile.ID})
+		clone, err := cl.CopyOne(sourceFile.ID, targetFile.ID)
 		if err != nil {
 			infra.HandleError(err, w)
 			return
 		}
-		if _, err = apiClient.PatchFileName(clone.ID, client.FileRenameOptions{
-			Name: path.Base(targetPath),
-		}); err != nil {
+		if _, err = cl.PatchName(clone.ID, api_client.FilePatchNameOptions{Name: path.Base(targetPath)}); err != nil {
 			infra.HandleError(err, w)
 			return
 		}

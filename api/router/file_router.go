@@ -62,16 +62,19 @@ func NewFileRouter() *FileRouter {
 func (r *FileRouter) AppendRoutes(g fiber.Router) {
 	g.Post("/", r.Create)
 	g.Get("/list", r.ListByPath)
+	g.Post("/copy", r.CopyMany)
+	g.Post("/move", r.MoveMany)
+	g.Delete("/", r.DeleteMany)
 	g.Get("/", r.GetByPath)
-	g.Delete("/", r.Delete)
 	g.Get("/:id", r.Get)
 	g.Patch("/:id", r.Patch)
 	g.Get("/:id/list", r.List)
 	g.Get("/:id/count", r.GetCount)
 	g.Get("/:id/path", r.GetPath)
-	g.Post("/:id/move", r.Move)
+	g.Post("/:id/copy/:targetId", r.CopyOne)
+	g.Post("/:id/move/:targetId", r.MoveOne)
+	g.Delete("/:id", r.DeleteOne)
 	g.Patch("/:id/name", r.PatchName)
-	g.Post("/:id/copy", r.Copy)
 	g.Get("/:id/size", r.GetSize)
 	g.Post("/grant_user_permission", r.GrantUserPermission)
 	g.Post("/revoke_user_permission", r.RevokeUserPermission)
@@ -423,67 +426,150 @@ func (r *FileRouter) GetPath(c *fiber.Ctx) error {
 	return c.JSON(res)
 }
 
-type FileCopyOptions struct {
-	ID string `json:"id" validate:"required"`
-}
-
-// Copy godoc
+// CopyOne godoc
 //
-//	@Summary		Copy
-//	@Description	Copy
+//	@Summary		Copy One
+//	@Description	Copy One
 //	@Tags			Files
-//	@Id				files_copy
+//	@Id				files_copy_one
 //	@Produce		json
-//	@Param			id		path		string			true	"ID"
-//	@Param			body	body		FileCopyOptions	true	"Body"
-//	@Failure		404		{object}	errorpkg.ErrorResponse
-//	@Failure		500		{object}	errorpkg.ErrorResponse
-//	@Router			/files/{id}/copy [post]
-func (r *FileRouter) Copy(c *fiber.Ctx) error {
+//	@Param			id			path		string	true	"ID"
+//	@Param			targetId	path		string	true	"ID"
+//	@Failure		404			{object}	errorpkg.ErrorResponse
+//	@Failure		500			{object}	errorpkg.ErrorResponse
+//	@Router			/files/{id}/copy/{targetId} [post]
+func (r *FileRouter) CopyOne(c *fiber.Ctx) error {
 	userID := GetUserID(c)
-	opts := new(FileCopyOptions)
-	if err := c.BodyParser(opts); err != nil {
-		return err
-	}
-	if err := validator.New().Struct(opts); err != nil {
-		return errorpkg.NewRequestBodyValidationError(err)
-	}
-	res, err := r.fileSvc.Copy(c.Params("id"), opts.ID, userID)
+	res, err := r.fileSvc.CopyOne(c.Params("id"), c.Params("targetId"), userID)
 	if err != nil {
 		return err
 	}
 	return c.JSON(res)
 }
 
-type FileMoveOptions struct {
-	ID string `json:"id" validate:"required"`
-}
-
-// Move godoc
+// CopyMany godoc
 //
-//	@Summary		Move
-//	@Description	Move
+//	@Summary		Copy Many
+//	@Description	Copy Many
 //	@Tags			Files
-//	@Id				files_move
+//	@Id				files_copy_many
 //	@Produce		json
-//	@Param			id		path		string			true	"ID"
-//	@Param			body	body		FileMoveOptions	true	"Body"
+//	@Param			id		path		string						true	"ID"
+//	@Param			body	body		service.FileCopyManyOptions	true	"Body"
+//	@Success		200		{object}	service.FileCopyManyResult
 //	@Failure		404		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
-//	@Router			/files/{id}/move [post]
-func (r *FileRouter) Move(c *fiber.Ctx) error {
+//	@Router			/files/copy [post]
+func (r *FileRouter) CopyMany(c *fiber.Ctx) error {
 	userID := GetUserID(c)
-	opts := new(FileMoveOptions)
+	opts := new(service.FileCopyManyOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
 	}
 	if err := validator.New().Struct(opts); err != nil {
 		return errorpkg.NewRequestBodyValidationError(err)
 	}
-	if err := r.fileSvc.Move(c.Params("id"), opts.ID, userID); err != nil {
+	res, err := r.fileSvc.CopyMany(*opts, userID)
+	if err != nil {
+		return err
+	}
+	return c.JSON(res)
+}
+
+// MoveOne godoc
+//
+//	@Summary		Move One
+//	@Description	Move One
+//	@Tags			Files
+//	@Id				files_move_one
+//	@Produce		json
+//	@Param			id			path		string	true	"ID"
+//	@Param			targetId	path		string	true	"ID"
+//	@Failure		404			{object}	errorpkg.ErrorResponse
+//	@Failure		500			{object}	errorpkg.ErrorResponse
+//	@Router			/files/{id}/move/{targetId} [post]
+func (r *FileRouter) MoveOne(c *fiber.Ctx) error {
+	userID := GetUserID(c)
+	if err := r.fileSvc.MoveOne(c.Params("id"), c.Params("targetId"), userID); err != nil {
 		return err
 	}
 	return c.SendStatus(http.StatusNoContent)
+}
+
+// MoveMany godoc
+//
+//	@Summary		Move Many
+//	@Description	Move Many
+//	@Tags			Files
+//	@Id				files_move_many
+//	@Produce		json
+//	@Param			id		path		string						true	"ID"
+//	@Param			body	body		service.FileMoveManyOptions	true	"Body"
+//	@Success		200		{object}	service.FileMoveManyResult
+//	@Failure		404		{object}	errorpkg.ErrorResponse
+//	@Failure		500		{object}	errorpkg.ErrorResponse
+//	@Router			/files/move [post]
+func (r *FileRouter) MoveMany(c *fiber.Ctx) error {
+	userID := GetUserID(c)
+	opts := new(service.FileMoveManyOptions)
+	if err := c.BodyParser(opts); err != nil {
+		return err
+	}
+	if err := validator.New().Struct(opts); err != nil {
+		return errorpkg.NewRequestBodyValidationError(err)
+	}
+	res, err := r.fileSvc.MoveMany(*opts, userID)
+	if err != nil {
+		return err
+	}
+	return c.JSON(res)
+}
+
+// DeleteOne godoc
+//
+//	@Summary		Delete One
+//	@Description	Delete One
+//	@Tags			Files
+//	@Id				files_delete_one
+//	@Produce		json
+//	@Param			id			path		string	true	"ID"
+//	@Param			targetId	path		string	true	"ID"
+//	@Failure		404			{object}	errorpkg.ErrorResponse
+//	@Failure		500			{object}	errorpkg.ErrorResponse
+//	@Router			/files/{id} [delete]
+func (r *FileRouter) DeleteOne(c *fiber.Ctx) error {
+	userID := GetUserID(c)
+	if err := r.fileSvc.DeleteOne(c.Params("id"), userID); err != nil {
+		return err
+	}
+	return c.JSON(http.StatusNoContent)
+}
+
+// DeleteMany godoc
+//
+//	@Summary		Delete Many
+//	@Description	Delete Many
+//	@Tags			Files
+//	@Id				files_delete_many
+//	@Produce		json
+//	@Param			body	body		service.FileDeleteManyOptions	true	"Body"
+//	@Success		200		{array}		string
+//	@Failure		500		{object}	errorpkg.ErrorResponse
+//	@Router			/files [delete]
+func (r *FileRouter) DeleteMany(c *fiber.Ctx) error {
+	userID := GetUserID(c)
+	opts := new(service.FileDeleteManyOptions)
+	if err := c.BodyParser(opts); err != nil {
+		return err
+	}
+	if err := validator.New().Struct(opts); err != nil {
+		return errorpkg.NewRequestBodyValidationError(err)
+	}
+	res, err := r.fileSvc.DeleteMany(*opts, userID)
+	if err != nil {
+		return err
+	}
+	return c.JSON(res)
 }
 
 type FilePatchNameOptions struct {
@@ -517,36 +603,6 @@ func (r *FileRouter) PatchName(c *fiber.Ctx) error {
 		return err
 	}
 	return c.JSON(res)
-}
-
-type FileDeleteOptions struct {
-	ID string `json:"id" validate:"required"`
-}
-
-// Delete godoc
-//
-//	@Summary		Delete
-//	@Description	Delete
-//	@Tags			Files
-//	@Id				files_delete
-//	@Produce		json
-//	@Param			body	body		FileDeleteOptions	true	"Body"
-//	@Success		200		{array}		string
-//	@Failure		500		{object}	errorpkg.ErrorResponse
-//	@Router			/files [delete]
-func (r *FileRouter) Delete(c *fiber.Ctx) error {
-	userID := GetUserID(c)
-	opts := new(FileDeleteOptions)
-	if err := c.BodyParser(opts); err != nil {
-		return err
-	}
-	if err := validator.New().Struct(opts); err != nil {
-		return errorpkg.NewRequestBodyValidationError(err)
-	}
-	if err := r.fileSvc.Delete(opts.ID, userID); err != nil {
-		return err
-	}
-	return c.SendStatus(http.StatusNoContent)
 }
 
 // GetSize godoc

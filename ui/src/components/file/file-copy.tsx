@@ -39,19 +39,20 @@ const FileCopy = () => {
   const mutateTasks = useAppSelector((state) => state.ui.tasks.mutateList)
   const [targetId, setTargetId] = useState<string>()
 
-  const handleMove = useCallback(async () => {
+  const handleCopy = useCallback(async () => {
     if (!targetId) {
       return
     }
     const ids = [...selection]
     for (const id of ids) {
-      FileAPI.copy(targetId, { id }).then(() => {
-        if (fileId === targetId) {
-          mutateList?.()
-        }
-        dispatch(loadingRemoved([id]))
-      })
       dispatch(loadingAdded([id]))
+      FileAPI.copyOne(id, targetId)
+        .then(() => {
+          if (fileId === targetId) {
+            mutateList?.()
+          }
+        })
+        .finally(() => dispatch(loadingRemoved([id])))
     }
     await mutateTasks?.()
     dispatch(selectionUpdated([]))
@@ -81,7 +82,7 @@ const FileCopy = () => {
             >
               Cancel
             </Button>
-            <Button variant="solid" colorScheme="blue" onClick={handleMove}>
+            <Button variant="solid" colorScheme="blue" onClick={handleCopy}>
               Copy Here
             </Button>
           </div>

@@ -12,12 +12,12 @@ package pipeline
 
 import (
 	"errors"
+	"github.com/kouprlabs/voltaserve/conversion/client/api_client"
 	"os"
 	"path/filepath"
 
 	"github.com/minio/minio-go/v7"
 
-	"github.com/kouprlabs/voltaserve/conversion/client"
 	"github.com/kouprlabs/voltaserve/conversion/config"
 	"github.com/kouprlabs/voltaserve/conversion/helper"
 	"github.com/kouprlabs/voltaserve/conversion/infra"
@@ -26,24 +26,26 @@ import (
 )
 
 type glbPipeline struct {
-	glbProc   *processor.GLBProcessor
-	imageProc *processor.ImageProcessor
-	s3        *infra.S3Manager
-	apiClient *client.APIClient
-	config    *config.Config
+	glbProc        *processor.GLBProcessor
+	imageProc      *processor.ImageProcessor
+	s3             *infra.S3Manager
+	snapshotClient *api_client.SnapshotClient
+	taskClient     *api_client.TaskClient
+	config         *config.Config
 }
 
 func NewGLBPipeline() model.Pipeline {
 	return &glbPipeline{
-		glbProc:   processor.NewGLBProcessor(),
-		imageProc: processor.NewImageProcessor(),
-		s3:        infra.NewS3Manager(),
-		apiClient: client.NewAPIClient(),
-		config:    config.GetConfig(),
+		glbProc:        processor.NewGLBProcessor(),
+		imageProc:      processor.NewImageProcessor(),
+		s3:             infra.NewS3Manager(),
+		snapshotClient: api_client.NewSnapshotClient(),
+		taskClient:     api_client.NewTaskClient(),
+		config:         config.GetConfig(),
 	}
 }
 
-func (p *glbPipeline) Run(opts client.PipelineRunOptions) error {
+func (p *glbPipeline) Run(opts api_client.PipelineRunOptions) error {
 	inputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(opts.Key))
 	if err := p.s3.GetFile(opts.Key, inputPath, opts.Bucket, minio.GetObjectOptions{}); err != nil {
 		return err
@@ -55,8 +57,8 @@ func (p *glbPipeline) Run(opts client.PipelineRunOptions) error {
 			infra.GetLogger().Error(err)
 		}
 	}(inputPath)
-	if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
-		Fields: []string{client.TaskFieldName},
+	if err := p.taskClient.Patch(opts.TaskID, api_client.TaskPatchOptions{
+		Fields: []string{api_client.TaskFieldName},
 		Name:   helper.ToPtr("Creating thumbnail."),
 	}); err != nil {
 		return err
@@ -68,10 +70,10 @@ func (p *glbPipeline) Run(opts client.PipelineRunOptions) error {
 	if err != nil {
 		return err
 	}
-	if err := p.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
+	if err := p.snapshotClient.Patch(api_client.SnapshotPatchOptions{
 		Options: opts,
-		Fields:  []string{client.SnapshotFieldPreview},
-		Preview: &client.S3Object{
+		Fields:  []string{api_client.SnapshotFieldPreview},
+		Preview: &api_client.S3Object{
 			Bucket: opts.Bucket,
 			Key:    opts.Key,
 			Size:   helper.ToPtr(stat.Size()),
@@ -82,7 +84,7 @@ func (p *glbPipeline) Run(opts client.PipelineRunOptions) error {
 	return nil
 }
 
-func (p *glbPipeline) createThumbnail(inputPath string, opts client.PipelineRunOptions) error {
+func (p *glbPipeline) createThumbnail(inputPath string, opts api_client.PipelineRunOptions) error {
 	tmpPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".jpeg")
 	defer func(path string) {
 		if err := os.Remove(path); errors.Is(err, os.ErrNotExist) {
@@ -101,7 +103,7 @@ func (p *glbPipeline) createThumbnail(inputPath string, opts client.PipelineRunO
 	if err != nil {
 		return err
 	}
-	s3Object := &client.S3Object{
+	s3Object := &api_client.S3Object{
 		Bucket: opts.Bucket,
 		Key:    opts.SnapshotID + "/thumbnail" + filepath.Ext(tmpPath),
 		Image:  props,
@@ -110,9 +112,9 @@ func (p *glbPipeline) createThumbnail(inputPath string, opts client.PipelineRunO
 	if err := p.s3.PutFile(s3Object.Key, tmpPath, helper.DetectMimeFromFile(tmpPath), s3Object.Bucket, minio.PutObjectOptions{}); err != nil {
 		return err
 	}
-	if err := p.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
+	if err := p.snapshotClient.Patch(api_client.SnapshotPatchOptions{
 		Options:   opts,
-		Fields:    []string{client.SnapshotFieldThumbnail},
+		Fields:    []string{api_client.SnapshotFieldThumbnail},
 		Thumbnail: s3Object,
 	}); err != nil {
 		return err

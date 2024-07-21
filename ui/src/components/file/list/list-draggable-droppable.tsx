@@ -81,7 +81,7 @@ const ListDraggableDroppable = ({
         setIsLoading(true)
         try {
           for (const id of idsToMove) {
-            await FileAPI.move(file.id, { id }).then(() => mutateList?.())
+            await FileAPI.moveOne(id, file.id).then(() => mutateList?.())
           }
         } finally {
           setIsLoading(false)

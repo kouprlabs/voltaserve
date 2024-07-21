@@ -45,11 +45,10 @@ const FileMove = () => {
     }
     const ids = [...selection]
     for (const id of ids) {
-      FileAPI.move(targetId, { id }).then(() => {
-        mutateList?.()
-        dispatch(loadingRemoved([id]))
-      })
       dispatch(loadingAdded([id]))
+      FileAPI.moveOne(id, targetId)
+        .then(() => mutateList?.())
+        .finally(() => dispatch(loadingRemoved([id])))
     }
     await mutateTasks?.()
     dispatch(selectionUpdated([]))

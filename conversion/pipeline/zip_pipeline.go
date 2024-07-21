@@ -12,12 +12,12 @@ package pipeline
 
 import (
 	"errors"
+	"github.com/kouprlabs/voltaserve/conversion/client/api_client"
 	"os"
 	"path/filepath"
 
 	"github.com/minio/minio-go/v7"
 
-	"github.com/kouprlabs/voltaserve/conversion/client"
 	"github.com/kouprlabs/voltaserve/conversion/helper"
 	"github.com/kouprlabs/voltaserve/conversion/identifier"
 	"github.com/kouprlabs/voltaserve/conversion/infra"
@@ -26,26 +26,28 @@ import (
 )
 
 type zipPipeline struct {
-	glbPipeline model.Pipeline
-	zipProc     *processor.ZIPProcessor
-	gltfProc    *processor.GLTFProcessor
-	s3          *infra.S3Manager
-	fi          *identifier.FileIdentifier
-	apiClient   *client.APIClient
+	glbPipeline    model.Pipeline
+	zipProc        *processor.ZIPProcessor
+	gltfProc       *processor.GLTFProcessor
+	s3             *infra.S3Manager
+	fi             *identifier.FileIdentifier
+	snapshotClient *api_client.SnapshotClient
+	taskClient     *api_client.TaskClient
 }
 
 func NewZIPPipeline() model.Pipeline {
 	return &zipPipeline{
-		glbPipeline: NewGLBPipeline(),
-		zipProc:     processor.NewZIPProcessor(),
-		gltfProc:    processor.NewGLTFProcessor(),
-		s3:          infra.NewS3Manager(),
-		fi:          identifier.NewFileIdentifier(),
-		apiClient:   client.NewAPIClient(),
+		glbPipeline:    NewGLBPipeline(),
+		zipProc:        processor.NewZIPProcessor(),
+		gltfProc:       processor.NewGLTFProcessor(),
+		s3:             infra.NewS3Manager(),
+		fi:             identifier.NewFileIdentifier(),
+		snapshotClient: api_client.NewSnapshotClient(),
+		taskClient:     api_client.NewTaskClient(),
 	}
 }
 
-func (p *zipPipeline) Run(opts client.PipelineRunOptions) error {
+func (p *zipPipeline) Run(opts api_client.PipelineRunOptions) error {
 	inputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(opts.Key))
 	if err := p.s3.GetFile(opts.Key, inputPath, opts.Bucket, minio.GetObjectOptions{}); err != nil {
 		return err
@@ -62,8 +64,8 @@ func (p *zipPipeline) Run(opts client.PipelineRunOptions) error {
 		return err
 	}
 	if isGLTF {
-		if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
-			Fields: []string{client.TaskFieldName},
+		if err := p.taskClient.Patch(opts.TaskID, api_client.TaskPatchOptions{
+			Fields: []string{api_client.TaskFieldName},
 			Name:   helper.ToPtr("Extracting ZIP."),
 		}); err != nil {
 			return err
@@ -85,8 +87,8 @@ func (p *zipPipeline) Run(opts client.PipelineRunOptions) error {
 			// Do nothing, treat it as a ZIP file
 			return nil
 		}
-		if err := p.apiClient.PatchTask(opts.TaskID, client.TaskPatchOptions{
-			Fields: []string{client.TaskFieldName},
+		if err := p.taskClient.Patch(opts.TaskID, api_client.TaskPatchOptions{
+			Fields: []string{api_client.TaskFieldName},
 			Name:   helper.ToPtr("Converting to GLB."),
 		}); err != nil {
 			return err
@@ -95,7 +97,7 @@ func (p *zipPipeline) Run(opts client.PipelineRunOptions) error {
 		if err != nil {
 			return err
 		}
-		if err := p.glbPipeline.Run(client.PipelineRunOptions{
+		if err := p.glbPipeline.Run(api_client.PipelineRunOptions{
 			Bucket:     opts.Bucket,
 			Key:        *glbKey,
 			SnapshotID: opts.SnapshotID,
@@ -107,7 +109,7 @@ func (p *zipPipeline) Run(opts client.PipelineRunOptions) error {
 	return nil
 }
 
-func (p *zipPipeline) convertToGLB(inputPath string, opts client.PipelineRunOptions) (*string, error) {
+func (p *zipPipeline) convertToGLB(inputPath string, opts api_client.PipelineRunOptions) (*string, error) {
 	outputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".glb")
 	if err := p.gltfProc.ToGLB(inputPath, outputPath); err != nil {
 		return nil, err
@@ -127,10 +129,10 @@ func (p *zipPipeline) convertToGLB(inputPath string, opts client.PipelineRunOpti
 	if err := p.s3.PutFile(glbKey, outputPath, helper.DetectMimeFromFile(outputPath), opts.Bucket, minio.PutObjectOptions{}); err != nil {
 		return nil, err
 	}
-	if err := p.apiClient.PatchSnapshot(client.SnapshotPatchOptions{
+	if err := p.snapshotClient.Patch(api_client.SnapshotPatchOptions{
 		Options: opts,
-		Fields:  []string{client.SnapshotFieldPreview},
-		Preview: &client.S3Object{
+		Fields:  []string{api_client.SnapshotFieldPreview},
+		Preview: &api_client.S3Object{
 			Bucket: opts.Bucket,
 			Key:    glbKey,
 			Size:   helper.ToPtr(stat.Size()),

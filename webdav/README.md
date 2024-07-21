@@ -22,6 +22,24 @@ Lint code:
 golangci-lint run
 ```
 
+```shell
+gci write -s standard -s default -s "prefix(github.com/kouprlabs)" -s "prefix(github.com/kouprlabs/voltaserve/webdav)" .
+```
+
+Format code:
+
+```shell
+gofmt -w .
+```
+
+```shell
+gofumpt -w .
+```
+
+```shell
+goimports -w .
+```
+
 Build Docker image:
 
 ```shell

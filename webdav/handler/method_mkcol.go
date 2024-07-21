@@ -12,10 +12,10 @@ package handler
 
 import (
 	"fmt"
+	"github.com/kouprlabs/voltaserve/webdav/client/api_client"
 	"net/http"
 	"path"
 
-	"github.com/kouprlabs/voltaserve/webdav/client"
 	"github.com/kouprlabs/voltaserve/webdav/helper"
 	"github.com/kouprlabs/voltaserve/webdav/infra"
 )
@@ -26,7 +26,7 @@ This method creates a new collection (directory) at the specified URL.
 Example implementation:
 
 - Extract the directory path from the URL.
-- Use fs.mkdir() to create the directory.
+- Create the directory.
 - Set the response status code to 201 if created or an appropriate error code if the directory already exists or encountered an error.
 - Return the response.
 */
@@ -36,16 +36,16 @@ func (h *Handler) methodMkcol(w http.ResponseWriter, r *http.Request) {
 		infra.HandleError(fmt.Errorf("missing token"), w)
 		return
 	}
-	apiClient := client.NewAPIClient(token)
-	directoryPath := helper.DecodeURIComponent(helper.Dirname(r.URL.Path))
-	directory, err := apiClient.GetFileByPath(directoryPath)
+	cl := api_client.NewFileClient(token)
+	wantedPath := helper.DecodeURIComponent(helper.Dirname(r.URL.Path))
+	directory, err := cl.GetByPath(wantedPath)
 	if err != nil {
 		infra.HandleError(err, w)
 		return
 	}
 	if directory.Name != "/" && directory.WorkspaceID != "" {
-		if _, err = apiClient.CreateFolder(client.FileCreateFolderOptions{
-			Type:        client.FileTypeFolder,
+		if _, err = cl.CreateFolder(api_client.FileCreateFolderOptions{
+			Type:        api_client.FileTypeFolder,
 			WorkspaceID: directory.WorkspaceID,
 			ParentID:    directory.ID,
 			Name:        helper.DecodeURIComponent(path.Base(r.URL.Path)),
