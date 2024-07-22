@@ -10,7 +10,6 @@
 import { useMemo } from 'react'
 import cx from 'classnames'
 import { File } from '@/client/api/file'
-import { leViewerPermission } from '@/client/api/permission'
 import { getAccessTokenOrRedirect } from '@/infra/token'
 
 export type ViewerPDFProps = {
