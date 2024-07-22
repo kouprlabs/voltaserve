@@ -11,10 +11,9 @@
 package repo
 
 import (
-	"time"
-
 	"gorm.io/gorm"
 
+	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/infra"
 	"github.com/kouprlabs/voltaserve/api/model"
 )
@@ -49,7 +48,7 @@ func (*userPermissionEntity) TableName() string {
 }
 
 func (u *userPermissionEntity) BeforeCreate(*gorm.DB) (err error) {
-	u.CreateTime = time.Now().UTC().Format(time.RFC3339)
+	u.CreateTime = helper.NewTimestamp()
 	return nil
 }
 
@@ -106,7 +105,7 @@ func (*groupPermissionEntity) TableName() string {
 }
 
 func (g *groupPermissionEntity) BeforeCreate(*gorm.DB) (err error) {
-	g.CreateTime = time.Now().UTC().Format(time.RFC3339)
+	g.CreateTime = helper.NewTimestamp()
 	return nil
 }
 

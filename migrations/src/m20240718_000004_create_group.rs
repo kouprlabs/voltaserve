@@ -39,8 +39,7 @@ impl MigrationTrait for Migration {
                     .col(
                         ColumnDef::new(Group::CreateTime)
                             .text()
-                            .not_null()
-                            .default(Keyword::CurrentTimestamp),
+                            .not_null(),
                     )
                     .col(ColumnDef::new(Group::UpdateTime).text())
                     .to_owned(),
@@ -77,8 +76,7 @@ impl MigrationTrait for Migration {
                     .col(
                         ColumnDef::new(GroupUser::CreateTime)
                             .text()
-                            .not_null()
-                            .default(Keyword::CurrentTimestamp),
+                            .not_null(),
                     )
                     .primary_key(
                         Index::create()

@@ -12,7 +12,6 @@ package repo
 
 import (
 	"errors"
-	"time"
 
 	"gorm.io/gorm"
 
@@ -63,12 +62,12 @@ func (*groupEntity) TableName() string {
 }
 
 func (g *groupEntity) BeforeCreate(*gorm.DB) (err error) {
-	g.CreateTime = time.Now().UTC().Format(time.RFC3339)
+	g.CreateTime = helper.NewTimestamp()
 	return nil
 }
 
 func (g *groupEntity) BeforeSave(*gorm.DB) (err error) {
-	timeNow := time.Now().UTC().Format(time.RFC3339)
+	timeNow := helper.NewTimestamp()
 	g.UpdateTime = &timeNow
 	return nil
 }
@@ -272,7 +271,7 @@ func (repo *groupRepo) Delete(id string) error {
 }
 
 func (repo *groupRepo) AddUser(id string, userID string) error {
-	db := repo.db.Exec("INSERT INTO group_user (group_id, user_id) VALUES (?, ?)", id, userID)
+	db := repo.db.Exec("INSERT INTO group_user (group_id, user_id, create_time) VALUES (?, ?, ?)", id, userID, helper.NewTimestamp())
 	if db.Error != nil {
 		return db.Error
 	}
@@ -320,9 +319,9 @@ func (repo *groupRepo) GetMembers(id string) ([]model.User, error) {
 
 func (repo *groupRepo) GrantUserPermission(id string, userID string, permission string) error {
 	db := repo.db.
-		Exec(`INSERT INTO userpermission (id, user_id, resource_id, permission)
-              VALUES (?, ?, ?, ?) ON CONFLICT (user_id, resource_id) DO UPDATE SET permission = ?`,
-			helper.NewID(), userID, id, permission, permission)
+		Exec(`INSERT INTO userpermission (id, user_id, resource_id, permission, create_time)
+              VALUES (?, ?, ?, ?, ?) ON CONFLICT (user_id, resource_id) DO UPDATE SET permission = ?`,
+			helper.NewID(), userID, id, permission, helper.NewTimestamp(), permission)
 	if db.Error != nil {
 		return db.Error
 	}

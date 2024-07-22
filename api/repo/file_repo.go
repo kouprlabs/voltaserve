@@ -12,7 +12,6 @@ package repo
 
 import (
 	"errors"
-	"time"
 
 	"gorm.io/gorm"
 
@@ -73,12 +72,12 @@ func (*fileEntity) TableName() string {
 }
 
 func (f *fileEntity) BeforeCreate(*gorm.DB) (err error) {
-	f.CreateTime = time.Now().UTC().Format(time.RFC3339)
+	f.CreateTime = helper.NewTimestamp()
 	return nil
 }
 
 func (f *fileEntity) BeforeSave(*gorm.DB) (err error) {
-	timeNow := time.Now().UTC().Format(time.RFC3339)
+	timeNow := helper.NewTimestamp()
 	f.UpdateTime = &timeNow
 	return nil
 }
@@ -479,11 +478,11 @@ func (repo *fileRepo) GetSize(id string) (int64, error) {
 func (repo *fileRepo) GrantUserPermission(id string, userID string, permission string) error {
 	/* Grant permission to workspace */
 	db := repo.db.
-		Exec(`INSERT INTO userpermission (id, user_id, resource_id, permission)
-              (SELECT ?, ?, w.id, 'viewer' FROM file f
+		Exec(`INSERT INTO userpermission (id, user_id, resource_id, permission, create_time)
+              (SELECT ?, ?, w.id, 'viewer', ? FROM file f
               INNER JOIN workspace w ON w.id = f.workspace_id AND f.id = ?)
               ON CONFLICT DO NOTHING`,
-			helper.NewID(), userID, id)
+			helper.NewID(), userID, helper.NewTimestamp(), id)
 	if db.Error != nil {
 		return db.Error
 	}
@@ -495,9 +494,9 @@ func (repo *fileRepo) GrantUserPermission(id string, userID string, permission s
 	}
 	for _, f := range path {
 		db := repo.db.
-			Exec(`INSERT INTO userpermission (id, user_id, resource_id, permission)
-                  VALUES (?, ?, ?, 'viewer') ON CONFLICT DO NOTHING`,
-				helper.NewID(), userID, f.GetID())
+			Exec(`INSERT INTO userpermission (id, user_id, resource_id, permission, create_time)
+                  VALUES (?, ?, ?, 'viewer', ?) ON CONFLICT DO NOTHING`,
+				helper.NewID(), userID, f.GetID(), helper.NewTimestamp())
 		if db.Error != nil {
 			return db.Error
 		}
@@ -510,9 +509,9 @@ func (repo *fileRepo) GrantUserPermission(id string, userID string, permission s
 	}
 	for _, f := range tree {
 		db := repo.db.
-			Exec(`INSERT INTO userpermission (id, user_id, resource_id, permission)
-                  VALUES (?, ?, ?, ?) ON CONFLICT (user_id, resource_id) DO UPDATE SET permission = ?`,
-				helper.NewID(), userID, f.GetID(), permission, permission)
+			Exec(`INSERT INTO userpermission (id, user_id, resource_id, permission, create_time)
+                  VALUES (?, ?, ?, ?, ?) ON CONFLICT (user_id, resource_id) DO UPDATE SET permission = ?`,
+				helper.NewID(), userID, f.GetID(), permission, helper.NewTimestamp(), permission)
 		if db.Error != nil {
 			return db.Error
 		}
@@ -536,11 +535,11 @@ func (repo *fileRepo) RevokeUserPermission(tree []model.File, userID string) err
 func (repo *fileRepo) GrantGroupPermission(id string, groupID string, permission string) error {
 	/* Grant permission to workspace */
 	db := repo.db.
-		Exec(`INSERT INTO grouppermission (id, group_id, resource_id, permission)
-              (SELECT ?, ?, w.id, 'viewer' FROM file f
+		Exec(`INSERT INTO grouppermission (id, group_id, resource_id, permission, create_time)
+              (SELECT ?, ?, w.id, 'viewer', ? FROM file f
               INNER JOIN workspace w ON w.id = f.workspace_id AND f.id = ?)
               ON CONFLICT DO NOTHING`,
-			helper.NewID(), groupID, id)
+			helper.NewID(), groupID, helper.NewTimestamp(), id)
 	if db.Error != nil {
 		return db.Error
 	}
@@ -552,9 +551,9 @@ func (repo *fileRepo) GrantGroupPermission(id string, groupID string, permission
 	}
 	for _, f := range path {
 		db := repo.db.
-			Exec(`INSERT INTO grouppermission (id, group_id, resource_id, permission)
-                  VALUES (?, ?, ?, 'viewer') ON CONFLICT DO NOTHING`,
-				helper.NewID(), groupID, f.GetID())
+			Exec(`INSERT INTO grouppermission (id, group_id, resource_id, permission, create_time)
+                  VALUES (?, ?, ?, 'viewer', ?) ON CONFLICT DO NOTHING`,
+				helper.NewID(), groupID, f.GetID(), helper.NewTimestamp())
 		if db.Error != nil {
 			return db.Error
 		}
@@ -567,9 +566,9 @@ func (repo *fileRepo) GrantGroupPermission(id string, groupID string, permission
 	}
 	for _, f := range tree {
 		db := repo.db.
-			Exec(`INSERT INTO grouppermission (id, group_id, resource_id, permission)
-                  VALUES (?, ?, ?, ?) ON CONFLICT (group_id, resource_id) DO UPDATE SET permission = ?`,
-				helper.NewID(), groupID, f.GetID(), permission, permission)
+			Exec(`INSERT INTO grouppermission (id, group_id, resource_id, permission, create_time)
+                  VALUES (?, ?, ?, ?, ?) ON CONFLICT (group_id, resource_id) DO UPDATE SET permission = ?`,
+				helper.NewID(), groupID, f.GetID(), permission, helper.NewTimestamp(), permission)
 		if db.Error != nil {
 			return db.Error
 		}

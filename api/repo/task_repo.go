@@ -13,12 +13,12 @@ package repo
 import (
 	"encoding/json"
 	"errors"
-	"time"
 
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
 
 	"github.com/kouprlabs/voltaserve/api/errorpkg"
+	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/infra"
 	"github.com/kouprlabs/voltaserve/api/log"
 	"github.com/kouprlabs/voltaserve/api/model"
@@ -42,12 +42,12 @@ func (*taskEntity) TableName() string {
 }
 
 func (o *taskEntity) BeforeCreate(*gorm.DB) (err error) {
-	o.CreateTime = time.Now().UTC().Format(time.RFC3339)
+	o.CreateTime = helper.NewTimestamp()
 	return nil
 }
 
 func (o *taskEntity) BeforeSave(*gorm.DB) (err error) {
-	timeNow := time.Now().UTC().Format(time.RFC3339)
+	timeNow := helper.NewTimestamp()
 	o.UpdateTime = &timeNow
 	return nil
 }

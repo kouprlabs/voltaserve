@@ -1,6 +1,8 @@
 use sea_orm_migration::prelude::*;
 
-use crate::models::v1::{Invitation, Organization, User};
+use crate::models::v1::{
+    User, Userpermission,
+};
 
 #[derive(DeriveMigrationName)]
 pub struct Migration;
@@ -14,39 +16,26 @@ impl MigrationTrait for Migration {
         manager
             .create_table(
                 Table::create()
-                    .table(Invitation::Table)
-                    .if_not_exists()
+                    .table(Userpermission::Table)
                     .col(
-                        ColumnDef::new(Invitation::Id)
+                        ColumnDef::new(Userpermission::Id)
                             .text()
                             .primary_key(),
                     )
-                    .col(ColumnDef::new(Invitation::OrganizationId).text())
+                    .col(ColumnDef::new(Userpermission::UserId).text())
                     .foreign_key(
                         ForeignKey::create()
-                            .from(Invitation::Table, Invitation::OrganizationId)
-                            .to(Organization::Table, Organization::Id)
-                            .on_delete(ForeignKeyAction::Cascade),
-                    )
-                    .col(ColumnDef::new(Invitation::OwnerId).text())
-                    .foreign_key(
-                        ForeignKey::create()
-                            .from(Invitation::Table, Invitation::OwnerId)
+                            .from(Userpermission::Table, Userpermission::UserId)
                             .to(User::Table, User::Id)
                             .on_delete(ForeignKeyAction::Cascade),
                     )
-                    .col(ColumnDef::new(Invitation::Email).text())
+                    .col(ColumnDef::new(Userpermission::ResourceId).text())
+                    .col(ColumnDef::new(Userpermission::Permission).text())
                     .col(
-                        ColumnDef::new(Invitation::Status)
-                            .text()
-                            .default("pending"),
-                    )
-                    .col(
-                        ColumnDef::new(Invitation::CreateTime)
+                        ColumnDef::new(Userpermission::CreateTime)
                             .text()
                             .not_null(),
                     )
-                    .col(ColumnDef::new(Invitation::UpdateTime).text())
                     .to_owned(),
             )
             .await?;
@@ -54,16 +43,27 @@ impl MigrationTrait for Migration {
         manager
             .create_index(
                 Index::create()
-                    .table(Invitation::Table)
-                    .col(Invitation::OrganizationId)
+                    .table(Userpermission::Table)
+                    .col(Userpermission::UserId)
+                    .col(Userpermission::ResourceId)
+                    .unique()
+                    .to_owned(),
+            )
+            .await?;
+
+        manager
+            .create_index(
+                Index::create()
+                    .table(Userpermission::Table)
+                    .col(Userpermission::UserId)
                     .to_owned(),
             )
             .await?;
         manager
             .create_index(
                 Index::create()
-                    .table(Invitation::Table)
-                    .col(Invitation::OwnerId)
+                    .table(Userpermission::Table)
+                    .col(Userpermission::ResourceId)
                     .to_owned(),
             )
             .await?;
@@ -78,7 +78,7 @@ impl MigrationTrait for Migration {
         manager
             .drop_table(
                 Table::drop()
-                    .table(Invitation::Table)
+                    .table(Userpermission::Table)
                     .to_owned(),
             )
             .await?;

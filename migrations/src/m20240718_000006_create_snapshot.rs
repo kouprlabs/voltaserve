@@ -35,7 +35,7 @@ impl MigrationTrait for Migration {
                     .col(
                         ColumnDef::new(Snapshot::CreateTime)
                             .text()
-                            .default(Keyword::CurrentTimestamp),
+                            .not_null(),
                     )
                     .col(ColumnDef::new(Snapshot::UpdateTime).text())
                     .to_owned(),
