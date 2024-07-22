@@ -6,7 +6,7 @@ Build:
 cargo build --release
 ```
 
-Run migrations locally:
+Run locally:
 
 ```shell
 DATABASE_URL=postgresql://voltaserve@localhost:26257/voltaserve ./target/release/migrate
