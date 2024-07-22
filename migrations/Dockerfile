@@ -15,11 +15,14 @@ WORKDIR /build
 COPY . ./
 
 RUN apk add --no-cache musl-dev
-RUN cargo build --release --locked --target=x86_64-unknown-linux-musl
+RUN rustc --print target-list
+RUN export ARCH=$(apk --print-arch); \
+    cargo build --release --locked --target=${ARCH}-unknown-linux-musl; \
+    mv /build/target/${ARCH}-unknown-linux-musl/release/migrate /build/migrate
 
 FROM scratch AS runner
 
-COPY --from=rust-builder /build/target/x86_64-unknown-linux-musl/release/migrate /migrate
+COPY --from=rust-builder /build/migrate /migrate
 
 ENTRYPOINT ["/migrate"]
 
