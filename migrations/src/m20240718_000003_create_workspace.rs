@@ -51,7 +51,11 @@ impl MigrationTrait for Migration {
                             .text()
                             .not_null(),
                     )
-                    .col(ColumnDef::new(Workspace::CreateTime).text())
+                    .col(
+                        ColumnDef::new(Workspace::CreateTime)
+                            .text()
+                            .not_null(),
+                    )
                     .col(ColumnDef::new(Workspace::UpdateTime).text())
                     .to_owned(),
             )
