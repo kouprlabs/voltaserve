@@ -1,7 +1,7 @@
 use sea_orm_migration::prelude::*;
 
 use crate::models::v1::{
-    File, Group, Grouppermission, Snapshot, SnapshotFile, User, Userpermission, Workspace,
+    File, Snapshot, SnapshotFile, Workspace,
 };
 
 #[derive(DeriveMigrationName)]
@@ -17,10 +17,6 @@ impl MigrationTrait for Migration {
 
         Self::create_file_snapshot_table(manager).await?;
 
-        Self::create_userpermission_table(manager).await?;
-
-        Self::create_grouppermission_table(manager).await?;
-
         Ok(())
     }
 
@@ -28,22 +24,6 @@ impl MigrationTrait for Migration {
         &self,
         manager: &SchemaManager,
     ) -> Result<(), DbErr> {
-        manager
-            .drop_table(
-                Table::drop()
-                    .table(Grouppermission::Table)
-                    .to_owned(),
-            )
-            .await?;
-
-        manager
-            .drop_table(
-                Table::drop()
-                    .table(Userpermission::Table)
-                    .to_owned(),
-            )
-            .await?;
-
         manager
             .drop_table(
                 Table::drop()
@@ -181,114 +161,6 @@ impl Migration {
                     .to_owned(),
             )
             .await?;
-        Ok(())
-    }
-
-    async fn create_userpermission_table(manager: &SchemaManager<'_>) -> Result<(), DbErr> {
-        manager
-            .create_table(
-                Table::create()
-                    .table(Userpermission::Table)
-                    .col(
-                        ColumnDef::new(Userpermission::Id)
-                            .text()
-                            .primary_key(),
-                    )
-                    .col(ColumnDef::new(Userpermission::UserId).text())
-                    .foreign_key(
-                        ForeignKey::create()
-                            .from(Userpermission::Table, Userpermission::UserId)
-                            .to(User::Table, User::Id)
-                            .on_delete(ForeignKeyAction::Cascade),
-                    )
-                    .col(ColumnDef::new(Userpermission::ResourceId).text())
-                    .foreign_key(
-                        ForeignKey::create()
-                            .from(Userpermission::Table, Userpermission::ResourceId)
-                            .to(File::Table, File::Id)
-                            .on_delete(ForeignKeyAction::Cascade),
-                    )
-                    .col(ColumnDef::new(Userpermission::Permission).text())
-                    .col(
-                        ColumnDef::new(Userpermission::CreateTime)
-                            .text()
-                            .not_null(),
-                    )
-                    .to_owned(),
-            )
-            .await?;
-
-        manager
-            .create_index(
-                Index::create()
-                    .table(Userpermission::Table)
-                    .col(Userpermission::UserId)
-                    .to_owned(),
-            )
-            .await?;
-        manager
-            .create_index(
-                Index::create()
-                    .table(Userpermission::Table)
-                    .col(Userpermission::ResourceId)
-                    .to_owned(),
-            )
-            .await?;
-
-        Ok(())
-    }
-
-    async fn create_grouppermission_table(manager: &SchemaManager<'_>) -> Result<(), DbErr> {
-        manager
-            .create_table(
-                Table::create()
-                    .table(Grouppermission::Table)
-                    .col(
-                        ColumnDef::new(Grouppermission::Id)
-                            .text()
-                            .primary_key(),
-                    )
-                    .col(ColumnDef::new(Grouppermission::GroupId).text())
-                    .foreign_key(
-                        ForeignKey::create()
-                            .from(Grouppermission::Table, Grouppermission::GroupId)
-                            .to(Group::Table, Group::Id)
-                            .on_delete(ForeignKeyAction::Cascade),
-                    )
-                    .col(ColumnDef::new(Grouppermission::ResourceId).text())
-                    .foreign_key(
-                        ForeignKey::create()
-                            .from(Grouppermission::Table, Grouppermission::ResourceId)
-                            .to(File::Table, File::Id)
-                            .on_delete(ForeignKeyAction::Cascade),
-                    )
-                    .col(ColumnDef::new(Grouppermission::Permission).text())
-                    .col(
-                        ColumnDef::new(Grouppermission::CreateTime)
-                            .text()
-                            .not_null(),
-                    )
-                    .to_owned(),
-            )
-            .await?;
-
-        manager
-            .create_index(
-                Index::create()
-                    .table(Grouppermission::Table)
-                    .col(Grouppermission::GroupId)
-                    .to_owned(),
-            )
-            .await?;
-        manager
-            .create_index(
-                Index::create()
-                    .table(Grouppermission::Table)
-                    .col(Grouppermission::ResourceId)
-                    .to_owned(),
-            )
-            .await?;
-
         Ok(())
     }
 }
