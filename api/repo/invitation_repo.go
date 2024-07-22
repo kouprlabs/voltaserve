@@ -12,8 +12,6 @@ package repo
 
 import (
 	"errors"
-	"time"
-
 	"gorm.io/gorm"
 
 	"github.com/kouprlabs/voltaserve/api/errorpkg"
@@ -51,12 +49,12 @@ func (*invitationEntity) TableName() string {
 }
 
 func (i *invitationEntity) BeforeCreate(*gorm.DB) (err error) {
-	i.CreateTime = time.Now().UTC().Format(time.RFC3339)
+	i.CreateTime = helper.NewTimestamp()
 	return nil
 }
 
 func (i *invitationEntity) BeforeSave(*gorm.DB) (err error) {
-	timeNow := time.Now().UTC().Format(time.RFC3339)
+	timeNow := helper.NewTimestamp()
 	i.UpdateTime = &timeNow
 	return nil
 }

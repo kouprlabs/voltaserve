@@ -823,7 +823,7 @@ func (svc *FileService) Copy(targetID string, sourceIDs []string, userID string)
 			c.SetSnapshotID(o.GetSnapshotID())
 			c.SetType(o.GetType())
 			c.SetName(o.GetName())
-			c.SetCreateTime(time.Now().UTC().Format(time.RFC3339))
+			c.SetCreateTime(helper.NewTimestamp())
 			if o.GetID() == sourceID {
 				rootCloneIndex = i
 			}
@@ -836,7 +836,7 @@ func (svc *FileService) Copy(targetID string, sourceIDs []string, userID string)
 			p.SetUserID(userID)
 			p.SetResourceID(c.GetID())
 			p.SetPermission(model.PermissionOwner)
-			p.SetCreateTime(time.Now().UTC().Format(time.RFC3339))
+			p.SetCreateTime(helper.NewTimestamp())
 			permissions = append(permissions, p)
 		}
 
@@ -895,7 +895,7 @@ func (svc *FileService) Copy(targetID string, sourceIDs []string, userID string)
 	}
 
 	/* Refresh updateTime on target */
-	timeNow := time.Now().UTC().Format(time.RFC3339)
+	timeNow := helper.NewTimestamp()
 	target.SetUpdateTime(&timeNow)
 	if err := svc.fileRepo.Save(target); err != nil {
 		return nil, err
@@ -974,7 +974,7 @@ func (svc *FileService) Move(targetID string, sourceIDs []string, userID string)
 		parentIDs = append(parentIDs, *source.GetParentID())
 
 		/* Refresh updateTime on source and target */
-		timeNow := time.Now().UTC().Format(time.RFC3339)
+		timeNow := helper.NewTimestamp()
 		source.SetUpdateTime(&timeNow)
 		if err := svc.fileRepo.Save(source); err != nil {
 			return []string{}, err

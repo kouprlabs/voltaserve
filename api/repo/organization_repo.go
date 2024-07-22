@@ -12,8 +12,6 @@ package repo
 
 import (
 	"errors"
-	"time"
-
 	"gorm.io/gorm"
 
 	"github.com/kouprlabs/voltaserve/api/errorpkg"
@@ -61,12 +59,12 @@ func (*organizationEntity) TableName() string {
 }
 
 func (o *organizationEntity) BeforeCreate(*gorm.DB) (err error) {
-	o.CreateTime = time.Now().UTC().Format(time.RFC3339)
+	o.CreateTime = helper.NewTimestamp()
 	return nil
 }
 
 func (o *organizationEntity) BeforeSave(*gorm.DB) (err error) {
-	timeNow := time.Now().UTC().Format(time.RFC3339)
+	timeNow := helper.NewTimestamp()
 	o.UpdateTime = &timeNow
 	return nil
 }
@@ -224,7 +222,7 @@ func (repo *organizationRepo) GetIDs() ([]string, error) {
 }
 
 func (repo *organizationRepo) AddUser(id string, userID string) error {
-	db := repo.db.Exec("INSERT INTO organization_user (organization_id, user_id, create_time) VALUES (?, ?, ?)", id, userID, time.Now().UTC().Format(time.RFC3339))
+	db := repo.db.Exec("INSERT INTO organization_user (organization_id, user_id, create_time) VALUES (?, ?, ?)", id, userID, helper.NewTimestamp())
 	if db.Error != nil {
 		return db.Error
 	}
@@ -295,7 +293,7 @@ func (repo *organizationRepo) GrantUserPermission(id string, userID string, perm
 	db := repo.db.
 		Exec(`INSERT INTO userpermission (id, user_id, resource_id, permission, create_time)
               VALUES (?, ?, ?, ?, ?) ON CONFLICT (user_id, resource_id) DO UPDATE SET permission = ?`,
-			helper.NewID(), userID, id, permission, time.Now().UTC().Format(time.RFC3339), permission)
+			helper.NewID(), userID, id, permission, helper.NewTimestamp(), permission)
 	if db.Error != nil {
 		return db.Error
 	}

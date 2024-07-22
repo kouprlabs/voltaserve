@@ -12,8 +12,6 @@ package repo
 
 import (
 	"errors"
-	"time"
-
 	"gorm.io/gorm"
 
 	"github.com/kouprlabs/voltaserve/api/errorpkg"
@@ -61,12 +59,12 @@ func (*workspaceEntity) TableName() string {
 }
 
 func (w *workspaceEntity) BeforeCreate(*gorm.DB) (err error) {
-	w.CreateTime = time.Now().UTC().Format(time.RFC3339)
+	w.CreateTime = helper.NewTimestamp()
 	return nil
 }
 
 func (w *workspaceEntity) BeforeSave(*gorm.DB) (err error) {
-	timeNow := time.Now().UTC().Format(time.RFC3339)
+	timeNow := helper.NewTimestamp()
 	w.UpdateTime = &timeNow
 	return nil
 }
@@ -307,7 +305,7 @@ func (repo *workspaceRepo) GrantUserPermission(id string, userID string, permiss
 		Exec(`INSERT INTO userpermission (id, user_id, resource_id, permission, create_time)
               VALUES (?, ?, ?, ?, ?)
               ON CONFLICT (user_id, resource_id) DO UPDATE SET permission = ?`,
-			helper.NewID(), userID, id, permission, time.Now().UTC().Format(time.RFC3339), permission)
+			helper.NewID(), userID, id, permission, helper.NewTimestamp(), permission)
 	if db.Error != nil {
 		return db.Error
 	}
