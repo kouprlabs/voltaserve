@@ -70,11 +70,7 @@ impl MigrationTrait for Migration {
                             .default(false),
                     )
                     .col(ColumnDef::new(User::Picture).text())
-                    .col(
-                        ColumnDef::new(User::CreateTime)
-                            .text()
-                            .default(Keyword::CurrentTimestamp),
-                    )
+                    .col(ColumnDef::new(User::CreateTime).text())
                     .col(ColumnDef::new(User::UpdateTime).text())
                     .to_owned(),
             )
