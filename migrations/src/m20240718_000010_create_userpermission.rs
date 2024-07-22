@@ -45,6 +45,17 @@ impl MigrationTrait for Migration {
                 Index::create()
                     .table(Userpermission::Table)
                     .col(Userpermission::UserId)
+                    .col(Userpermission::ResourceId)
+                    .unique()
+                    .to_owned(),
+            )
+            .await?;
+
+        manager
+            .create_index(
+                Index::create()
+                    .table(Userpermission::Table)
+                    .col(Userpermission::UserId)
                     .to_owned(),
             )
             .await?;

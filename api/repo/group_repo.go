@@ -272,7 +272,7 @@ func (repo *groupRepo) Delete(id string) error {
 }
 
 func (repo *groupRepo) AddUser(id string, userID string) error {
-	db := repo.db.Exec("INSERT INTO group_user (group_id, user_id) VALUES (?, ?)", id, userID)
+	db := repo.db.Exec("INSERT INTO group_user (group_id, user_id, create_time) VALUES (?, ?, ?)", id, userID, time.Now().UTC().Format(time.RFC3339))
 	if db.Error != nil {
 		return db.Error
 	}
@@ -320,9 +320,9 @@ func (repo *groupRepo) GetMembers(id string) ([]model.User, error) {
 
 func (repo *groupRepo) GrantUserPermission(id string, userID string, permission string) error {
 	db := repo.db.
-		Exec(`INSERT INTO userpermission (id, user_id, resource_id, permission)
-              VALUES (?, ?, ?, ?) ON CONFLICT (user_id, resource_id) DO UPDATE SET permission = ?`,
-			helper.NewID(), userID, id, permission, permission)
+		Exec(`INSERT INTO userpermission (id, user_id, resource_id, permission, create_time)
+              VALUES (?, ?, ?, ?, ?) ON CONFLICT (user_id, resource_id) DO UPDATE SET permission = ?`,
+			helper.NewID(), userID, id, permission, time.Now().UTC().Format(time.RFC3339), permission)
 	if db.Error != nil {
 		return db.Error
 	}

@@ -487,7 +487,7 @@ func (repo *snapshotRepo) Update(id string, opts SnapshotUpdateOptions) error {
 }
 
 func (repo *snapshotRepo) MapWithFile(id string, fileID string) error {
-	if db := repo.db.Exec("INSERT INTO snapshot_file (snapshot_id, file_id) VALUES (?, ?)", id, fileID); db.Error != nil {
+	if db := repo.db.Exec("INSERT INTO snapshot_file (snapshot_id, file_id, create_time) VALUES (?, ?, ?)", id, fileID, time.Now().UTC().Format(time.RFC3339)); db.Error != nil {
 		return db.Error
 	}
 	return nil
@@ -621,10 +621,10 @@ func (repo *snapshotRepo) CountAssociations(id string) (int, error) {
 
 func (repo *snapshotRepo) Attach(sourceFileID string, targetFileID string) error {
 	if db := repo.db.
-		Exec(`INSERT INTO snapshot_file (snapshot_id, file_id) SELECT s.id, ?
+		Exec(`INSERT INTO snapshot_file (snapshot_id, file_id, create_time) SELECT s.id, ?, ?
               FROM snapshot s LEFT JOIN snapshot_file map ON s.id = map.snapshot_id
               WHERE map.file_id = ? ORDER BY s.version DESC LIMIT 1`,
-			targetFileID, sourceFileID); db.Error != nil {
+			targetFileID, time.Now().UTC().Format(time.RFC3339), sourceFileID); db.Error != nil {
 		return db.Error
 	}
 	return nil

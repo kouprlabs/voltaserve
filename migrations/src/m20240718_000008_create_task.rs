@@ -29,13 +29,13 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(Task::Percentage).small_integer())
                     .col(
                         ColumnDef::new(Task::IsComplete)
-                            .text()
+                            .boolean()
                             .not_null()
                             .default(false),
                     )
                     .col(
                         ColumnDef::new(Task::IsIndeterminate)
-                            .text()
+                            .boolean()
                             .not_null()
                             .default(false),
                     )

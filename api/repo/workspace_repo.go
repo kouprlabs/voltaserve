@@ -304,10 +304,10 @@ func (repo *workspaceRepo) GetIDsByOrganization(orgID string) ([]string, error) 
 
 func (repo *workspaceRepo) GrantUserPermission(id string, userID string, permission string) error {
 	db := repo.db.
-		Exec(`INSERT INTO userpermission (id, user_id, resource_id, permission)
-              VALUES (?, ?, ?, ?)
+		Exec(`INSERT INTO userpermission (id, user_id, resource_id, permission, create_time)
+              VALUES (?, ?, ?, ?, ?)
               ON CONFLICT (user_id, resource_id) DO UPDATE SET permission = ?`,
-			helper.NewID(), userID, id, permission, permission)
+			helper.NewID(), userID, id, permission, time.Now().UTC().Format(time.RFC3339), permission)
 	if db.Error != nil {
 		return db.Error
 	}
