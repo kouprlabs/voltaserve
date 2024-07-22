@@ -26,7 +26,11 @@ impl MigrationTrait for Migration {
                             .text()
                             .not_null(),
                     )
-                    .col(ColumnDef::new(Organization::CreateTime).text())
+                    .col(
+                        ColumnDef::new(Organization::CreateTime)
+                            .text()
+                            .not_null(),
+                    )
                     .col(ColumnDef::new(Organization::UpdateTime).text())
                     .to_owned(),
             )
@@ -51,7 +55,11 @@ impl MigrationTrait for Migration {
                             .to(User::Table, User::Id)
                             .on_delete(ForeignKeyAction::Cascade),
                     )
-                    .col(ColumnDef::new(OrganizationUser::CreateTime).text())
+                    .col(
+                        ColumnDef::new(OrganizationUser::CreateTime)
+                            .text()
+                            .not_null(),
+                    )
                     .primary_key(
                         Index::create()
                             .col(OrganizationUser::OrganizationId)

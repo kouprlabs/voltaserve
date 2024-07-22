@@ -105,7 +105,11 @@ impl Migration {
                             .from(File::Table, File::SnapshotId)
                             .to(Snapshot::Table, Snapshot::Id),
                     )
-                    .col(ColumnDef::new(File::CreateTime).text())
+                    .col(
+                        ColumnDef::new(File::CreateTime)
+                            .text()
+                            .not_null(),
+                    )
                     .col(ColumnDef::new(File::UpdateTime).text())
                     .to_owned(),
             )
@@ -147,7 +151,11 @@ impl Migration {
                             .from(SnapshotFile::Table, SnapshotFile::FileId)
                             .to(File::Table, File::Id),
                     )
-                    .col(ColumnDef::new(SnapshotFile::CreateTime).text())
+                    .col(
+                        ColumnDef::new(SnapshotFile::CreateTime)
+                            .text()
+                            .not_null(),
+                    )
                     .primary_key(
                         Index::create()
                             .col(SnapshotFile::SnapshotId)
@@ -201,7 +209,11 @@ impl Migration {
                             .on_delete(ForeignKeyAction::Cascade),
                     )
                     .col(ColumnDef::new(Userpermission::Permission).text())
-                    .col(ColumnDef::new(Userpermission::CreateTime).text())
+                    .col(
+                        ColumnDef::new(Userpermission::CreateTime)
+                            .text()
+                            .not_null(),
+                    )
                     .to_owned(),
             )
             .await?;
@@ -251,7 +263,11 @@ impl Migration {
                             .on_delete(ForeignKeyAction::Cascade),
                     )
                     .col(ColumnDef::new(Grouppermission::Permission).text())
-                    .col(ColumnDef::new(Grouppermission::CreateTime).text())
+                    .col(
+                        ColumnDef::new(Grouppermission::CreateTime)
+                            .text()
+                            .not_null(),
+                    )
                     .to_owned(),
             )
             .await?;

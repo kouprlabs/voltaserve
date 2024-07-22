@@ -32,7 +32,11 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(Snapshot::Language).text())
                     .col(ColumnDef::new(Snapshot::Status).text())
                     .col(ColumnDef::new(Snapshot::TaskId).text())
-                    .col(ColumnDef::new(Snapshot::CreateTime).text())
+                    .col(
+                        ColumnDef::new(Snapshot::CreateTime)
+                            .text()
+                            .not_null(),
+                    )
                     .col(ColumnDef::new(Snapshot::UpdateTime).text())
                     .to_owned(),
             )

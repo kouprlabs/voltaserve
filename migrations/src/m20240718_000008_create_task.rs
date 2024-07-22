@@ -52,7 +52,11 @@ impl MigrationTrait for Migration {
                     )
                     .col(ColumnDef::new(Task::Status).text())
                     .col(ColumnDef::new(Task::Payload).json_binary())
-                    .col(ColumnDef::new(Task::CreateTime).text())
+                    .col(
+                        ColumnDef::new(Task::CreateTime)
+                            .text()
+                            .not_null(),
+                    )
                     .col(ColumnDef::new(Task::UpdateTime).text())
                     .to_owned(),
             )
