@@ -47,11 +47,11 @@ swag init --output ./docs --outputTypes yaml
 Preview (will be served at [http://localhost:19090](http://localhost:19090)):
 
 ```shell
-bunx @redocly/cli preview-docs --port 19090 ./docs/swagger.yaml
+npx @redocly/cli preview-docs --port 19090 ./docs/swagger.yaml
 ```
 
 Generate the final static HTML documentation:
 
 ```shell
-bunx @redocly/cli build-docs ./docs/swagger.yaml --output ./docs/index.html
+npx @redocly/cli build-docs ./docs/swagger.yaml --output ./docs/index.html
 ```

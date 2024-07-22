@@ -24,10 +24,11 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Lint using Golanci lint
-        uses: golangci/golangci-lint-action@v6
-        with:
-          working-directory: idp
+      - name: Install packages
+        run: npm i --legacy-peer-deps
+
+      - name: Run ESLint
+        run: npm run lint
     permissions:
       contents: read
       pull-requests: read

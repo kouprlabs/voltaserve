@@ -29,10 +29,11 @@ jobs:
           mkdir ui/dist
           touch ui/dist/index.html
 
-      - name: Lint using Golanci lint
-        uses: golangci/golangci-lint-action@v6
-        with:
-          working-directory: ui
+      - name: Install packages
+        run: npm i --legacy-peer-deps
+  
+      - name: Run ESLint
+        run: npm run lint
     permissions:
       contents: read
       pull-requests: read
