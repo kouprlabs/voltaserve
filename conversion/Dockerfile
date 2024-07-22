@@ -14,14 +14,13 @@ WORKDIR /build
 
 COPY . .
 
-RUN go mod download
-RUN go build -o voltaserve-conversion
+RUN go mod download &&\
+    go build -o voltaserve-conversion
 
 FROM ubuntu:noble
 
-RUN apt-get update
-
-RUN apt-get install -y htop
+RUN apt-get update &&\
+    apt-get install -y htop
 
 WORKDIR /app
 

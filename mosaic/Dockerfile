@@ -14,8 +14,8 @@ WORKDIR /build
 
 COPY . .
 
-RUN go mod download
-RUN go build -o voltaserve-mosaic
+RUN go mod download &&\
+    go build -o voltaserve-mosaic
 
 FROM golang:1.22-alpine AS runner
 

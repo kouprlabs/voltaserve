@@ -14,8 +14,8 @@ WORKDIR /build
 
 COPY . .
 
-RUN go mod download
-RUN go build -o voltaserve-webdav
+RUN go mod download &&\
+    go build -o voltaserve-webdav
 
 FROM golang:1.22-alpine AS runner
 

@@ -14,9 +14,9 @@ WORKDIR /build
 
 COPY . ./
 
-RUN apk add --no-cache musl-dev
-RUN rustc --print target-list
-RUN export ARCH=$(apk --print-arch); \
+RUN apk add --no-cache musl-dev &&\
+    rustc --print target-list &&\
+    export ARCH=$(apk --print-arch); \
     cargo build --release --locked --target=${ARCH}-unknown-linux-musl; \
     mv /build/target/${ARCH}-unknown-linux-musl/release/migrate /build/migrate
 
