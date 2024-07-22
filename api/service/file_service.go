@@ -1117,15 +1117,8 @@ func (svc *FileService) DeleteOne(id string, userID string) error {
 		return err
 	}
 
-	/* Delete tree from cache */
-	for _, fileID := range treeIDs {
-		if err = svc.fileCache.Delete(fileID); err != nil {
-			log.GetLogger().Error(err)
-		}
-	}
-
-	/* Delete tree from repo */
 	go func(ids []string) {
+		/* Delete tree from repo */
 		const ChunkSize = 1000
 		for i := 0; i < len(ids); i += ChunkSize {
 			end := i + ChunkSize
@@ -1137,32 +1130,17 @@ func (svc *FileService) DeleteOne(id string, userID string) error {
 				log.GetLogger().Error(err)
 			}
 		}
-	}(treeIDs)
-
-	/* Delete from search */
-	go func() {
-		if err := svc.fileSearch.Delete(treeIDs); err != nil {
-			/* Here we intentionally don't return an error or panic, we just print the error,
-			that's because we still want to delete the file in the repo afterward even
-			if we fail to delete it from the search. */
-			fmt.Println(err)
-		}
-	}()
-
-	/* Delete snapshot mappings */
-	go func() {
+		/* Delete snapshot mappings from tree */
 		if err := svc.snapshotRepo.DeleteMappingsForTree(id); err != nil {
 			log.GetLogger().Error(err)
 		}
-	}()
-
-	/* Delete dangling snapshots */
-	go func() {
+		/* Fetch dangling snapshots */
 		var danglingSnapshots []model.Snapshot
 		danglingSnapshots, err = svc.snapshotRepo.FindAllDangling()
 		if err != nil {
 			log.GetLogger().Error(err)
 		}
+		/* Delete dangling snapshots from S3 */
 		for _, s := range danglingSnapshots {
 			if s.HasOriginal() {
 				if err = svc.s3.RemoveObject(s.GetOriginal().Key, s.GetOriginal().Bucket, minio.RemoveObjectOptions{}); err != nil {
@@ -1179,14 +1157,36 @@ func (svc *FileService) DeleteOne(id string, userID string) error {
 					log.GetLogger().Error(err)
 				}
 			}
+			if s.HasThumbnail() {
+				if err = svc.s3.RemoveObject(s.GetThumbnail().Key, s.GetThumbnail().Bucket, minio.RemoveObjectOptions{}); err != nil {
+					log.GetLogger().Error(err)
+				}
+			}
 			if err := svc.snapshotCache.Delete(s.GetID()); err != nil {
 				log.GetLogger().Error(err)
 			}
 		}
+		/* Delete dangling snapshots from cache */
+		for _, s := range danglingSnapshots {
+			if err = svc.snapshotCache.Delete(s.GetID()); err != nil {
+				log.GetLogger().Error(err)
+			}
+		}
+		/* Delete dangling snapshots from repo */
 		if err = svc.snapshotRepo.DeleteAllDangling(); err != nil {
 			log.GetLogger().Error(err)
 		}
-	}()
+	}(treeIDs)
+
+	/* Delete from search */
+	go func(ids []string) {
+		if err := svc.fileSearch.Delete(treeIDs); err != nil {
+			/* Here we intentionally don't return an error or panic, we just print the error,
+			that's because we still want to delete the file in the repo afterward even
+			if we fail to delete it from the search. */
+			fmt.Println(err)
+		}
+	}(treeIDs)
 
 	return nil
 }

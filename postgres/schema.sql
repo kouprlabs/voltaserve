@@ -179,7 +179,6 @@ CREATE TABLE IF NOT EXISTS task
   user_id           text NOT NULL REFERENCES "user" (id) ON DELETE CASCADE,
   status            text,
   payload           jsonb,
-  task_id           text,
   create_time       text NOT NULL DEFAULT (to_json(now())#>>'{}'),
   update_time       text ON UPDATE (to_json(now())#>>'{}')
 );

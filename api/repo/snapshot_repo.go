@@ -13,6 +13,8 @@ package repo
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
+	"strings"
 	"time"
 
 	"gorm.io/datatypes"
@@ -35,6 +37,7 @@ type SnapshotRepo interface {
 	Insert(snapshot model.Snapshot) error
 	Save(snapshot model.Snapshot) error
 	Delete(id string) error
+	DeleteChunk(ids []string) error
 	Update(id string, opts SnapshotUpdateOptions) error
 	MapWithFile(id string, fileID string) error
 	BulkMapWithFile(entities []*SnapshotFileEntity, chunkSize int) error
@@ -434,6 +437,15 @@ func (repo *snapshotRepo) Delete(id string) error {
 	return nil
 }
 
+func (repo *snapshotRepo) DeleteChunk(ids []string) error {
+	in := "'" + strings.Join(ids, "','") + "'"
+	query := fmt.Sprintf("DELETE FROM snapshot WHERE id IN (%s)", in)
+	if db := repo.db.Exec(query); db.Error != nil {
+		return db.Error
+	}
+	return nil
+}
+
 type SnapshotUpdateOptions struct {
 	Fields    []string `json:"fields"`
 	Original  *model.S3Object
@@ -528,7 +540,7 @@ func (repo *snapshotRepo) DeleteMappingsForTree(fileID string) error {
 		Exec(`WITH RECURSIVE rec (id, parent_id, create_time) AS
               (SELECT f.id, f.parent_id, f.create_time FROM file f WHERE f.parent_id = ?
               UNION SELECT f.id, f.parent_id, f.create_time FROM rec, file f WHERE f.parent_id = rec.id)
-              DELETE FROM snapshot_file WHERE id in (SELECT id FROM rec);`,
+              DELETE FROM snapshot_file WHERE file_id in (SELECT id FROM rec);`,
 			fileID)
 	if db.Error != nil {
 		return db.Error
