@@ -278,7 +278,7 @@ func (svc *TaskService) doSorting(data []model.Task, sortBy string, sortOrder st
 func (svc *TaskService) GetCount(userID string) (*int64, error) {
 	var res int64
 	var err error
-	if res, err = svc.taskRepo.GetCount(userID); err != nil {
+	if res, err = svc.taskRepo.CountByEmail(userID); err != nil {
 		return nil, err
 	}
 	return &res, nil

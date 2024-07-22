@@ -26,8 +26,6 @@ type GroupRepo interface {
 	Insert(opts GroupInsertOptions) (model.Group, error)
 	Find(id string) (model.Group, error)
 	Count() (int64, error)
-	GetIDsForFile(fileID string) ([]string, error)
-	GetIDsForUser(userID string) ([]string, error)
 	GetIDsForOrganization(id string) ([]string, error)
 	Save(group model.Group) error
 	Delete(id string) error
@@ -192,43 +190,6 @@ func (repo *groupRepo) Count() (int64, error) {
 		return 0, db.Error
 	}
 	return res.Result, nil
-}
-
-func (repo *groupRepo) GetIDsForFile(fileID string) ([]string, error) {
-	type Value struct {
-		Result string
-	}
-	var values []Value
-	db := repo.db.
-		Raw(`SELECT DISTINCT g.id as result FROM "group" g
-             INNER JOIN grouppermission p ON p.resource_id = ?
-			 WHERE p.group_id = g.id`,
-			fileID).
-		Scan(&values)
-	if db.Error != nil {
-		return []string{}, db.Error
-	}
-	res := []string{}
-	for _, v := range values {
-		res = append(res, v.Result)
-	}
-	return res, nil
-}
-
-func (repo *groupRepo) GetIDsForUser(userID string) ([]string, error) {
-	type Value struct {
-		Result string
-	}
-	var values []Value
-	db := repo.db.Raw(`SELECT group_id from group_user WHERE user_id = ?`, userID).Scan(&values)
-	if db.Error != nil {
-		return []string{}, db.Error
-	}
-	res := []string{}
-	for _, v := range values {
-		res = append(res, v.Result)
-	}
-	return res, nil
 }
 
 func (repo *groupRepo) GetIDsForOrganization(id string) ([]string, error) {

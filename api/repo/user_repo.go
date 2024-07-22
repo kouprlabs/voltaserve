@@ -23,7 +23,6 @@ import (
 type UserRepo interface {
 	Find(id string) (model.User, error)
 	FindByEmail(email string) (model.User, error)
-	FindAll() ([]model.User, error)
 	Count() (int64, error)
 }
 
@@ -121,19 +120,6 @@ func (repo *userRepo) FindByEmail(email string) (model.User, error) {
 		}
 	}
 	return &res, nil
-}
-
-func (repo *userRepo) FindAll() ([]model.User, error) {
-	var entities []*userEntity
-	db := repo.db.Raw(`SELECT * FROM "user"`).Scan(&entities)
-	if db.Error != nil {
-		return nil, db.Error
-	}
-	var res []model.User
-	for _, u := range entities {
-		res = append(res, u)
-	}
-	return res, nil
 }
 
 func (repo *userRepo) Count() (int64, error) {

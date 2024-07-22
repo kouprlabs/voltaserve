@@ -147,8 +147,8 @@ type TaskRepo interface {
 	Insert(opts TaskInsertOptions) (model.Task, error)
 	Find(id string) (model.Task, error)
 	Count() (int64, error)
+	CountByEmail(email string) (int64, error)
 	GetIDs(userID string) ([]string, error)
-	GetCount(email string) (int64, error)
 	Save(task model.Task) error
 	Delete(id string) error
 }
@@ -258,7 +258,7 @@ func (repo *taskRepo) GetIDs(userID string) ([]string, error) {
 	return res, nil
 }
 
-func (repo *taskRepo) GetCount(userID string) (int64, error) {
+func (repo *taskRepo) CountByEmail(userID string) (int64, error) {
 	var count int64
 	db := repo.db.
 		Model(&taskEntity{}).

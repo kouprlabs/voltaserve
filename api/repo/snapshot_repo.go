@@ -13,8 +13,6 @@ package repo
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
-	"strings"
 	"time"
 
 	"gorm.io/datatypes"
@@ -29,19 +27,15 @@ import (
 
 type SnapshotRepo interface {
 	Find(id string) (model.Snapshot, error)
-	FindByVersion(version int64) (model.Snapshot, error)
-	FindAllForFile(fileID string) ([]model.Snapshot, error)
 	FindAllDangling() ([]model.Snapshot, error)
 	FindAllPrevious(fileID string, version int64) ([]model.Snapshot, error)
 	GetIDsForFile(fileID string) ([]string, error)
 	Insert(snapshot model.Snapshot) error
 	Save(snapshot model.Snapshot) error
 	Delete(id string) error
-	DeleteChunk(ids []string) error
 	Update(id string, opts SnapshotUpdateOptions) error
 	MapWithFile(id string, fileID string) error
 	BulkMapWithFile(entities []*SnapshotFileEntity, chunkSize int) error
-	DeleteMappingsForFile(fileID string) error
 	DeleteMappingsForTree(fileID string) error
 	DeleteAllDangling() error
 	GetLatestVersionForFile(fileID string) (int64, error)
@@ -399,19 +393,6 @@ func (repo *snapshotRepo) Find(id string) (model.Snapshot, error) {
 	return res, nil
 }
 
-func (repo *snapshotRepo) FindByVersion(version int64) (model.Snapshot, error) {
-	res := snapshotEntity{}
-	db := repo.db.Where("version = ?", version).First(&res)
-	if db.Error != nil {
-		if errors.Is(db.Error, gorm.ErrRecordNotFound) {
-			return nil, errorpkg.NewSnapshotNotFoundError(db.Error)
-		} else {
-			return nil, errorpkg.NewInternalServerError(db.Error)
-		}
-	}
-	return &res, nil
-}
-
 func (repo *snapshotRepo) Insert(snapshot model.Snapshot) error {
 	if db := repo.db.Create(snapshot); db.Error != nil {
 		return db.Error
@@ -432,15 +413,6 @@ func (repo *snapshotRepo) Delete(id string) error {
 		return err
 	}
 	if db := repo.db.Delete(snapshot); db.Error != nil {
-		return db.Error
-	}
-	return nil
-}
-
-func (repo *snapshotRepo) DeleteChunk(ids []string) error {
-	in := "'" + strings.Join(ids, "','") + "'"
-	query := fmt.Sprintf("DELETE FROM snapshot WHERE id IN (%s)", in)
-	if db := repo.db.Exec(query); db.Error != nil {
 		return db.Error
 	}
 	return nil
@@ -528,13 +500,6 @@ func (repo *snapshotRepo) BulkMapWithFile(entities []*SnapshotFileEntity, chunkS
 	return nil
 }
 
-func (repo *snapshotRepo) DeleteMappingsForFile(fileID string) error {
-	if db := repo.db.Exec("DELETE FROM snapshot_file WHERE file_id = ?", fileID); db.Error != nil {
-		return db.Error
-	}
-	return nil
-}
-
 func (repo *snapshotRepo) DeleteMappingsForTree(fileID string) error {
 	db := repo.db.
 		Exec(`WITH RECURSIVE rec (id, parent_id, create_time) AS
@@ -558,18 +523,6 @@ func (repo *snapshotRepo) findAllForFile(fileID string) ([]*snapshotEntity, erro
 		Scan(&res)
 	if db.Error != nil {
 		return nil, db.Error
-	}
-	return res, nil
-}
-
-func (repo *snapshotRepo) FindAllForFile(fileID string) ([]model.Snapshot, error) {
-	snapshots, err := repo.findAllForFile(fileID)
-	if err != nil {
-		return nil, err
-	}
-	var res []model.Snapshot
-	for _, s := range snapshots {
-		res = append(res, s)
 	}
 	return res, nil
 }
