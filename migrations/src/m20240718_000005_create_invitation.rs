@@ -41,12 +41,7 @@ impl MigrationTrait for Migration {
                             .text()
                             .default("pending"),
                     )
-                    .col(
-                        ColumnDef::new(Invitation::CreateTime)
-                            .text()
-                            .not_null()
-                            .default(Keyword::CurrentTimestamp),
-                    )
+                    .col(ColumnDef::new(Invitation::CreateTime).text())
                     .col(ColumnDef::new(Invitation::UpdateTime).text())
                     .to_owned(),
             )

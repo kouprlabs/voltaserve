@@ -36,12 +36,7 @@ impl MigrationTrait for Migration {
                             .from(Group::Table, Group::OrganizationId)
                             .to(Organization::Table, Organization::Id),
                     )
-                    .col(
-                        ColumnDef::new(Group::CreateTime)
-                            .text()
-                            .not_null()
-                            .default(Keyword::CurrentTimestamp),
-                    )
+                    .col(ColumnDef::new(Group::CreateTime).text())
                     .col(ColumnDef::new(Group::UpdateTime).text())
                     .to_owned(),
             )
@@ -74,12 +69,7 @@ impl MigrationTrait for Migration {
                             .to(User::Table, User::Id)
                             .on_delete(ForeignKeyAction::Cascade),
                     )
-                    .col(
-                        ColumnDef::new(GroupUser::CreateTime)
-                            .text()
-                            .not_null()
-                            .default(Keyword::CurrentTimestamp),
-                    )
+                    .col(ColumnDef::new(GroupUser::CreateTime).text())
                     .primary_key(
                         Index::create()
                             .col(GroupUser::GroupId)

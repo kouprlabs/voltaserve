@@ -26,12 +26,7 @@ impl MigrationTrait for Migration {
                             .text()
                             .not_null(),
                     )
-                    .col(
-                        ColumnDef::new(Organization::CreateTime)
-                            .text()
-                            .not_null()
-                            .default(Keyword::CurrentTimestamp),
-                    )
+                    .col(ColumnDef::new(Organization::CreateTime).text())
                     .col(ColumnDef::new(Organization::UpdateTime).text())
                     .to_owned(),
             )
@@ -56,11 +51,7 @@ impl MigrationTrait for Migration {
                             .to(User::Table, User::Id)
                             .on_delete(ForeignKeyAction::Cascade),
                     )
-                    .col(
-                        ColumnDef::new(OrganizationUser::CreateTime)
-                            .text()
-                            .default(Keyword::CurrentTimestamp),
-                    )
+                    .col(ColumnDef::new(OrganizationUser::CreateTime).text())
                     .primary_key(
                         Index::create()
                             .col(OrganizationUser::OrganizationId)
