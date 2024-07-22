@@ -31,9 +31,11 @@ jobs:
 
       - name: Install packages
         run: npm i --legacy-peer-deps
+        working-directory: ui
   
       - name: Run ESLint
         run: npm run lint
+        working-directory: ui
     permissions:
       contents: read
       pull-requests: read

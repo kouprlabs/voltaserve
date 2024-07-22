@@ -26,9 +26,11 @@ jobs:
 
       - name: Install packages
         run: npm i --legacy-peer-deps
+        working-directory: idp
 
       - name: Run ESLint
         run: npm run lint
+        working-directory: idp
     permissions:
       contents: read
       pull-requests: read
