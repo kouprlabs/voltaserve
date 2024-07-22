@@ -11,9 +11,9 @@
 package repo
 
 import (
-	"github.com/kouprlabs/voltaserve/api/helper"
 	"gorm.io/gorm"
 
+	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/infra"
 	"github.com/kouprlabs/voltaserve/api/model"
 )
