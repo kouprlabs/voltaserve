@@ -925,7 +925,7 @@ func (svc *FileService) CopyOne(sourceID string, targetID string, userID string)
 	}()
 
 	/* Refresh updateTime on target */
-	timeNow := time.Now().UTC().Format(time.RFC3339)
+	timeNow := helper.NewTimestamp()
 	target.SetUpdateTime(&timeNow)
 	if err := svc.fileRepo.Save(target); err != nil {
 		return nil, err

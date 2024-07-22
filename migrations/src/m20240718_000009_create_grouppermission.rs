@@ -45,6 +45,17 @@ impl MigrationTrait for Migration {
                 Index::create()
                     .table(Grouppermission::Table)
                     .col(Grouppermission::GroupId)
+                    .col(Grouppermission::ResourceId)
+                    .unique()
+                    .to_owned(),
+            )
+            .await?;
+
+        manager
+            .create_index(
+                Index::create()
+                    .table(Grouppermission::Table)
+                    .col(Grouppermission::GroupId)
                     .to_owned(),
             )
             .await?;

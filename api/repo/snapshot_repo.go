@@ -73,12 +73,12 @@ func (*snapshotEntity) TableName() string {
 }
 
 func (s *snapshotEntity) BeforeCreate(*gorm.DB) (err error) {
-	s.CreateTime = time.Now().UTC().Format(time.RFC3339)
+	s.CreateTime = helper.NewTimestamp()
 	return nil
 }
 
 func (s *snapshotEntity) BeforeSave(*gorm.DB) (err error) {
-	timeNow := time.Now().UTC().Format(time.RFC3339)
+	timeNow := helper.NewTimestamp()
 	s.UpdateTime = &timeNow
 	return nil
 }
@@ -487,7 +487,7 @@ func (repo *snapshotRepo) Update(id string, opts SnapshotUpdateOptions) error {
 }
 
 func (repo *snapshotRepo) MapWithFile(id string, fileID string) error {
-	if db := repo.db.Exec("INSERT INTO snapshot_file (snapshot_id, file_id) VALUES (?, ?)", id, fileID); db.Error != nil {
+	if db := repo.db.Exec("INSERT INTO snapshot_file (snapshot_id, file_id, create_time) VALUES (?, ?, ?)", id, fileID, helper.NewTimestamp()); db.Error != nil {
 		return db.Error
 	}
 	return nil

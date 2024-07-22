@@ -45,11 +45,16 @@ impl MigrationTrait for Migration {
                     .col(
                         ColumnDef::new(User::RefreshTokenValue)
                             .text()
-                            .not_null(),
+                            .unique_key(),
                     )
                     .col(ColumnDef::new(User::RefreshTokenExpiry).text())
                     .col(
                         ColumnDef::new(User::ResetPasswordToken)
+                            .text()
+                            .unique_key(),
+                    )
+                    .col(
+                        ColumnDef::new(User::EmailConfirmationToken)
                             .text()
                             .unique_key(),
                     )
