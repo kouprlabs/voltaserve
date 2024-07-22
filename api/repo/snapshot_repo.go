@@ -513,20 +513,6 @@ func (repo *snapshotRepo) DeleteMappingsForTree(fileID string) error {
 	return nil
 }
 
-func (repo *snapshotRepo) findAllForFile(fileID string) ([]*snapshotEntity, error) {
-	var res []*snapshotEntity
-	db := repo.db.
-		Raw(`SELECT * FROM snapshot s
-             LEFT JOIN snapshot_file sf ON s.id = sf.snapshot_id
-             WHERE sf.file_id = ? ORDER BY s.version`,
-			fileID).
-		Scan(&res)
-	if db.Error != nil {
-		return nil, db.Error
-	}
-	return res, nil
-}
-
 func (repo *snapshotRepo) FindAllDangling() ([]model.Snapshot, error) {
 	var entities []*snapshotEntity
 	db := repo.db.
