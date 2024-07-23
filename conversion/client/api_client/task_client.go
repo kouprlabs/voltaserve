@@ -32,12 +32,13 @@ func NewTaskClient() *TaskClient {
 }
 
 type TaskCreateOptions struct {
-	Name            string  `json:"name"`
-	Error           *string `json:"error,omitempty"`
-	Percentage      *int    `json:"percentage,omitempty"`
-	IsIndeterminate bool    `json:"isIndeterminate"`
-	UserID          string  `json:"userId"`
-	Status          string  `json:"status"`
+	Name            string            `json:"name"`
+	Error           *string           `json:"error,omitempty"`
+	Percentage      *int              `json:"percentage,omitempty"`
+	IsIndeterminate bool              `json:"isIndeterminate"`
+	UserID          string            `json:"userId"`
+	Status          string            `json:"status"`
+	Payload         map[string]string `json:"payload,omitempty"`
 }
 
 const (
@@ -58,11 +59,15 @@ func (cl *TaskClient) Create(opts TaskCreateOptions) error {
 	}
 	req.Header.Set("Content-Type", "application/json; charset=UTF-8")
 	client := &http.Client{}
-	res, err := client.Do(req)
+	resp, err := client.Do(req)
 	if err != nil {
 		return err
 	}
-	defer res.Body.Close()
+	defer func(Body io.ReadCloser) {
+		if err := Body.Close(); err != nil {
+			infra.GetLogger().Error(err)
+		}
+	}(resp.Body)
 	return nil
 }
 

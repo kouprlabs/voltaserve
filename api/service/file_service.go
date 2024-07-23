@@ -296,7 +296,7 @@ func (svc *FileService) Store(id string, opts StoreOptions, userID string) (*Fil
 			UserID:          userID,
 			IsIndeterminate: true,
 			Status:          model.TaskStatusWaiting,
-			Payload:         map[string]string{"fileId": file.GetID()},
+			Payload:         map[string]string{repo.TaskPayloadObjectKey: file.GetName()},
 		})
 		if err != nil {
 			return nil, err
