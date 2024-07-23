@@ -1,4 +1,6 @@
 from pydantic import BaseModel, Field
+from fastapi.exceptions import HTTPException
+from fastapi import status
 
 
 # --- REQUEST MODELS --- #
@@ -18,3 +20,8 @@ class GenericResponse(BaseModel):
 
 class GenericListResponse(BaseModel):
     pass
+
+
+class GenericNotFoundResponse(BaseModel):
+    status: int = status.HTTP_404_NOT_FOUND
+    message: str

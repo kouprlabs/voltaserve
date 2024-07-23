@@ -14,7 +14,7 @@ conn = psycopg2.connect(host=settings.db_host,
 def fetch_workspace(_id: str):
     with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as curs:
         try:
-            curs.execute(f"SELECT id, name, organization, storage_capacity, root_id, bucket, create_time, update_time "
+            curs.execute(f"SELECT id, name, organization_id, storage_capacity, root_id, bucket, create_time, update_time "
                          f"FROM {settings.db_name}.workspace "
                          f"WHERE id='{_id}'")
             return curs.fetchone()
@@ -25,7 +25,7 @@ def fetch_workspace(_id: str):
 def fetch_workspaces(page=0, size=10):
     with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as curs:
         try:
-            curs.execute(f"SELECT id, name, create_time, update_time "
+            curs.execute(f"SELECT id, name, organization_id, storage_capacity, root_id, bucket, create_time, update_time "
                          f"FROM {settings.db_name}.workspace "
                          f"ORDER BY create_time "
                          f"OFFSET {page * size} "

@@ -14,7 +14,7 @@ conn = psycopg2.connect(host=settings.db_host,
 def fetch_group(_id: str):
     with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as curs:
         try:
-            curs.execute(f"SELECT id, organization_id, create_time, update_time "
+            curs.execute(f"SELECT id, name, organization_id, create_time, update_time "
                          f"FROM {settings.db_name}.group "
                          f"WHERE id='{_id}'")
             return curs.fetchone()
@@ -25,12 +25,13 @@ def fetch_group(_id: str):
 def fetch_groups(page=0, size=10):
     with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as curs:
         try:
-            curs.execute(f"SELECT id, organization_id, create_time, update_time "
+            curs.execute(f"SELECT id, name, organization_id, create_time, update_time "
                          f"FROM {settings.db_name}.group "
                          f"ORDER BY create_time "
                          f"OFFSET {page * size} "
                          f"LIMIT {page * size + size}")
-            return curs.fetchall()
+            x = curs.fetchall()
+            return x
         except (Exception, psycopg2.DatabaseError) as error:
             print(error)
 

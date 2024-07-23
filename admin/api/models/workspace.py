@@ -16,7 +16,7 @@ class WorkspaceListRequest(GenericPaginationRequest):
 # --- RESPONSE MODELS --- #
 class WorkspaceResponse(GenericResponse):
     name: str
-    organization: str
+    organization_id: str
     storage_capacity: float
     root_id: str
     bucket: str
