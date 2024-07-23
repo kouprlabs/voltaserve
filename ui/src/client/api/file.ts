@@ -108,8 +108,8 @@ export type CopyManyResult = {
   failed: string[]
 }
 
-export type DeleteOptions = {
-  ids: string[]
+export type DeleteManyOptions = {
+  ids: string
 }
 
 export type PatchNameOptions = {
@@ -313,7 +313,14 @@ export default class FileAPI {
     }) as Promise<File>
   }
 
-  static async delete(options: DeleteOptions) {
+  static async deleteOne(id: string) {
+    return apiFetcher({
+      url: `/files/${id}`,
+      method: 'DELETE',
+    })
+  }
+
+  static async deleteMany(options: DeleteManyOptions) {
     return apiFetcher({
       url: `/files`,
       method: 'DELETE',

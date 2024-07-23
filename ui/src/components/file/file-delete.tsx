@@ -7,8 +7,7 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
-import { useCallback, useState } from 'react'
+import { useCallback } from 'react'
 import { useParams } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
 import {
@@ -24,7 +23,12 @@ import {
 import cx from 'classnames'
 import FileAPI from '@/client/api/file'
 import { useAppSelector } from '@/store/hook'
-import { deleteModalDidClose, selectionUpdated } from '@/store/ui/files'
+import {
+  deleteModalDidClose,
+  loadingAdded,
+  loadingRemoved,
+  selectionUpdated,
+} from '@/store/ui/files'
 
 const FileDelete = () => {
   const { fileId } = useParams()
@@ -34,19 +38,20 @@ const FileDelete = () => {
     (state) => state.ui.files.isDeleteModalOpen,
   )
   const mutateList = useAppSelector((state) => state.ui.files.mutate)
-  const [isLoading, setIsLoading] = useState(false)
+  const mutateTasks = useAppSelector((state) => state.ui.tasks.mutateList)
 
   const handleDelete = useCallback(async () => {
-    try {
-      setIsLoading(true)
-      await FileAPI.delete({ ids: selection })
-      mutateList?.()
-      dispatch(selectionUpdated([]))
-      dispatch(deleteModalDidClose())
-    } finally {
-      setIsLoading(false)
+    const ids = [...selection]
+    for (const id of ids) {
+      dispatch(loadingAdded([id]))
+      FileAPI.deleteOne(id)
+        .then(() => mutateList?.())
+        .finally(() => dispatch(loadingRemoved([id])))
     }
-  }, [selection, fileId, dispatch, mutateList])
+    await mutateTasks?.()
+    dispatch(selectionUpdated([]))
+    dispatch(deleteModalDidClose())
+  }, [selection, fileId, dispatch, mutateList, mutateTasks])
 
   return (
     <Modal
@@ -78,7 +83,6 @@ const FileDelete = () => {
               type="button"
               variant="outline"
               colorScheme="blue"
-              disabled={isLoading}
               onClick={() => dispatch(deleteModalDidClose())}
             >
               Cancel
@@ -87,7 +91,6 @@ const FileDelete = () => {
               type="submit"
               variant="solid"
               colorScheme="red"
-              isLoading={isLoading}
               onClick={handleDelete}
             >
               Delete
