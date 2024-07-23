@@ -1,3 +1,5 @@
 .idea
 .run
 admin/venv
+admin/dist
+admin/api/**/__pycache__
