@@ -243,11 +243,22 @@ func NewOrganizationPermissionError(userID string, org model.Organization, permi
 	)
 }
 
-func NewCannotRemoveLastRemainingOwnerOfOrganizationError(id string) *ErrorResponse {
+func NewCannotRemoveLastRemainingOwnerOfOrganizationError(org model.Organization) *ErrorResponse {
 	return NewErrorResponse(
 		"cannot_remove_last_owner_of_organization",
 		http.StatusBadRequest,
-		fmt.Sprintf("Cannot remove the last remaining owner of organization '%s'.", id), MsgInvalidRequest,
+		fmt.Sprintf("Cannot remove the last remaining owner of organization '%s'.", org.GetID()),
+		fmt.Sprintf("Cannot remove the last remaining owner of organization '%s'.", org.GetName()),
+		nil,
+	)
+}
+
+func NewCannotRemoveLastRemainingOwnerOfGroupError(group model.Group) *ErrorResponse {
+	return NewErrorResponse(
+		"cannot_remove_last_owner_of_group",
+		http.StatusBadRequest,
+		fmt.Sprintf("Cannot remove the last remaining owner of group '%s'.", group.GetID()),
+		fmt.Sprintf("Cannot remove the last remaining owner of group '%s'.", group.GetName()),
 		nil,
 	)
 }

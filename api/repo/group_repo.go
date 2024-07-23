@@ -28,10 +28,9 @@ type GroupRepo interface {
 	GetIDsForOrganization(id string) ([]string, error)
 	Save(group model.Group) error
 	Delete(id string) error
-	AddUser(id string, userID string) error
-	RemoveMember(id string, userID string) error
 	GetIDs() ([]string, error)
 	GetMembers(id string) ([]model.User, error)
+	GetOwnerCount(id string) (int64, error)
 	GrantUserPermission(id string, userID string, permission string) error
 	RevokeUserPermission(id string, userID string) error
 }
@@ -231,22 +230,6 @@ func (repo *groupRepo) Delete(id string) error {
 	return nil
 }
 
-func (repo *groupRepo) AddUser(id string, userID string) error {
-	db := repo.db.Exec("INSERT INTO group_user (group_id, user_id, create_time) VALUES (?, ?, ?)", id, userID, helper.NewTimestamp())
-	if db.Error != nil {
-		return db.Error
-	}
-	return nil
-}
-
-func (repo *groupRepo) RemoveMember(id string, userID string) error {
-	db := repo.db.Exec("DELETE FROM group_user WHERE group_id = ? AND user_id = ?", id, userID)
-	if db.Error != nil {
-		return db.Error
-	}
-	return nil
-}
-
 func (repo *groupRepo) GetIDs() ([]string, error) {
 	type Value struct {
 		Result string
@@ -266,7 +249,8 @@ func (repo *groupRepo) GetIDs() ([]string, error) {
 func (repo *groupRepo) GetMembers(id string) ([]model.User, error) {
 	var entities []*userEntity
 	db := repo.db.
-		Raw(`SELECT DISTINCT u.* FROM "user" u INNER JOIN group_user gu ON u.id = gu.user_id WHERE gu.group_id = ?`, id).
+		Raw(`SELECT u.* FROM "user" u INNER JOIN userpermission up on
+             u.id = up.user_id AND up.resource_id = ?`, id).
 		Scan(&entities)
 	if db.Error != nil {
 		return nil, db.Error
@@ -276,6 +260,22 @@ func (repo *groupRepo) GetMembers(id string) ([]model.User, error) {
 		res = append(res, u)
 	}
 	return res, nil
+}
+
+func (repo *groupRepo) GetOwnerCount(id string) (int64, error) {
+	type Result struct {
+		Result int64
+	}
+	var res Result
+	db := repo.db.
+		Raw(`SELECT count(*) as result FROM userpermission
+             WHERE resource_id = ? and permission = ?`,
+			id, model.PermissionOwner).
+		Scan(&res)
+	if db.Error != nil {
+		return 0, db.Error
+	}
+	return res.Result, nil
 }
 
 func (repo *groupRepo) GrantUserPermission(id string, userID string, permission string) error {

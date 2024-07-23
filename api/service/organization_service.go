@@ -220,19 +220,17 @@ func (svc *OrganizationService) RemoveMember(id string, memberID string, userID 
 		return err
 	}
 
+	if err := svc.orgGuard.Authorize(userID, org, model.PermissionOwner); err != nil {
+		return err
+	}
+
 	/* Make sure member is not the last remaining owner of the organization */
 	ownerCount, err := svc.orgRepo.GetOwnerCount(org.GetID())
 	if err != nil {
 		return err
 	}
 	if svc.orgGuard.IsAuthorized(memberID, org, model.PermissionOwner) && ownerCount == 1 {
-		return errorpkg.NewCannotRemoveLastRemainingOwnerOfOrganizationError(org.GetID())
-	}
-
-	if userID != memberID {
-		if err := svc.orgGuard.Authorize(userID, org, model.PermissionOwner); err != nil {
-			return err
-		}
+		return errorpkg.NewCannotRemoveLastRemainingOwnerOfOrganizationError(org)
 	}
 
 	/* Remove member from all groups belonging to this organization */
@@ -247,9 +245,6 @@ func (svc *OrganizationService) RemoveMember(id string, memberID string, userID 
 	}
 
 	if err := svc.orgRepo.RevokeUserPermission(id, memberID); err != nil {
-		return err
-	}
-	if err := svc.orgRepo.RemoveMember(id, memberID); err != nil {
 		return err
 	}
 	if _, err := svc.orgCache.Refresh(org.GetID()); err != nil {
