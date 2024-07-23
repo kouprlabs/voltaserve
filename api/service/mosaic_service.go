@@ -81,7 +81,7 @@ func (svc *MosaicService) Create(id string, userID string) error {
 		UserID:          userID,
 		IsIndeterminate: true,
 		Status:          model.TaskStatusWaiting,
-		Payload:         map[string]string{"fileId": file.GetID()},
+		Payload:         map[string]string{repo.TaskPayloadObjectKey: file.GetName()},
 	})
 	if err != nil {
 		return err
@@ -135,7 +135,7 @@ func (svc *MosaicService) Delete(id string, userID string) error {
 			UserID:          userID,
 			IsIndeterminate: true,
 			Status:          model.TaskStatusRunning,
-			Payload:         map[string]string{"fileId": file.GetID()},
+			Payload:         map[string]string{repo.TaskPayloadObjectKey: file.GetName()},
 		})
 		if err != nil {
 			return err

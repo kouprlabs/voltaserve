@@ -788,7 +788,7 @@ func (svc *FileService) CopyOne(sourceID string, targetID string, userID string)
 		UserID:          userID,
 		IsIndeterminate: true,
 		Status:          model.TaskStatusRunning,
-		Payload:         map[string]string{"object": source.GetName()},
+		Payload:         map[string]string{repo.TaskPayloadObjectKey: source.GetName()},
 	})
 	if err != nil {
 		return nil, err
@@ -980,7 +980,7 @@ func (svc *FileService) MoveOne(sourceID string, targetID string, userID string)
 		UserID:          userID,
 		IsIndeterminate: true,
 		Status:          model.TaskStatusRunning,
-		Payload:         map[string]string{"object": source.GetName()},
+		Payload:         map[string]string{repo.TaskPayloadObjectKey: source.GetName()},
 	})
 	if err != nil {
 		return err
@@ -1117,7 +1117,7 @@ func (svc *FileService) DeleteOne(id string, userID string) error {
 		UserID:          userID,
 		IsIndeterminate: true,
 		Status:          model.TaskStatusRunning,
-		Payload:         map[string]string{"object": file.GetName()},
+		Payload:         map[string]string{repo.TaskPayloadObjectKey: file.GetName()},
 	})
 	if err != nil {
 		return err

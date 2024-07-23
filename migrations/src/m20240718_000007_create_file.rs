@@ -67,11 +67,6 @@ impl Migration {
                             .not_null(),
                     )
                     .col(ColumnDef::new(File::ParentId).text())
-                    .foreign_key(
-                        ForeignKey::create()
-                            .from(File::Table, File::ParentId)
-                            .to(File::Table, File::Id),
-                    )
                     .col(ColumnDef::new(File::WorkspaceId).text())
                     .foreign_key(
                         ForeignKey::create()
