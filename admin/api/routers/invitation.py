@@ -3,11 +3,17 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, status
 
 from admin.api.database.invitation import fetch_invitation, fetch_invitations
+from admin.api.models.generic import GenericNotFoundResponse
 from admin.api.models.invitation import InvitationResponse, InvitationListRequest, InvitationListResponse, InvitationRequest
 
 invitation_api_router = APIRouter(
     prefix='/invitation',
-    tags=['invitation']
+    tags=['invitation'],
+    responses={
+        status.HTTP_404_NOT_FOUND: {
+            'model': GenericNotFoundResponse
+        }
+    }
 )
 
 
@@ -19,7 +25,11 @@ invitation_api_router = APIRouter(
                                }}
                            )
 async def get_invitation(data: Annotated[InvitationRequest, Depends()]):
-    return fetch_invitation(_id=data.id)
+    invitation = fetch_invitation(_id=data.id)(_id=data.id)
+    if invitation is None:
+        return GenericNotFoundResponse(message=f'Invitation with id={data.id} does not exist')
+
+    return InvitationResponse(**invitation)
 
 
 @invitation_api_router.get(path="/all",
@@ -30,7 +40,11 @@ async def get_invitation(data: Annotated[InvitationRequest, Depends()]):
                            }
                            )
 async def get_all_invitations(data: Annotated[InvitationListRequest, Depends()]):
-    return fetch_invitations(page=data.page, size=data.size)
+    invitations = fetch_invitations(page=data.page, size=data.size)
+    if invitations is None:
+        return GenericNotFoundResponse(message=f'This instance has no invitations')
+
+    return InvitationListResponse(invitations=invitations)
 
 # --- PATCH --- #
 

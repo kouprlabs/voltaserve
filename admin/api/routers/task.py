@@ -3,11 +3,17 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, status
 
 from admin.api.database.task import fetch_task, fetch_tasks
+from admin.api.models.generic import GenericNotFoundResponse
 from admin.api.models.task import TaskResponse, TaskRequest, TaskListResponse, TaskListRequest
 
 task_api_router = APIRouter(
     prefix='/task',
-    tags=['task']
+    tags=['task'],
+    responses={
+        status.HTTP_404_NOT_FOUND: {
+            'model': GenericNotFoundResponse
+        }
+    }
 )
 
 
@@ -19,7 +25,11 @@ task_api_router = APIRouter(
                          }}
                      )
 async def get_task(data: Annotated[TaskRequest, Depends()]):
-    return fetch_task(_id=data.id)
+    task = fetch_task(_id=data.id)
+    if task is None:
+        return GenericNotFoundResponse(message=f'Task with id={data.id} does not exist')
+
+    return TaskResponse(**task)
 
 
 @task_api_router.get(path="/all",
@@ -30,7 +40,11 @@ async def get_task(data: Annotated[TaskRequest, Depends()]):
                      }
                      )
 async def get_all_tasks(data: Annotated[TaskListRequest, Depends()]):
-    return fetch_tasks(page=data.page, size=data.size)
+    tasks = fetch_tasks(page=data.page, size=data.size)
+    if tasks is None:
+        return GenericNotFoundResponse(message=f'This instance has no tasks')
+
+    return TaskListResponse(tasks=tasks)
 
 # --- PATCH --- #
 
