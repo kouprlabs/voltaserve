@@ -12,9 +12,6 @@ package repo
 
 import (
 	"errors"
-	"fmt"
-	"strings"
-
 	"gorm.io/gorm"
 
 	"github.com/kouprlabs/voltaserve/api/errorpkg"
@@ -343,8 +340,7 @@ func (repo *fileRepo) FindTreeIDs(id string) ([]string, error) {
 }
 
 func (repo *fileRepo) DeleteChunk(ids []string) error {
-	in := "'" + strings.Join(ids, "','") + "'"
-	if db := repo.db.Exec("DELETE FROM file WHERE id IN (?)", ids); db.Error != nil {
+	if db := repo.db.Delete(&fileEntity{}, ids); db.Error != nil {
 		return db.Error
 	}
 	return nil
