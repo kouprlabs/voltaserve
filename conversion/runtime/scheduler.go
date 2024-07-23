@@ -11,10 +11,10 @@
 package runtime
 
 import (
-	"github.com/kouprlabs/voltaserve/conversion/client/api_client"
 	"runtime"
 	"time"
 
+	"github.com/kouprlabs/voltaserve/conversion/client/api_client"
 	"github.com/kouprlabs/voltaserve/conversion/infra"
 	"github.com/kouprlabs/voltaserve/conversion/pipeline"
 )

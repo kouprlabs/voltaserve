@@ -11,11 +11,11 @@
 package handler
 
 import (
-	"github.com/kouprlabs/voltaserve/webdav/client/api_client"
-	"github.com/kouprlabs/voltaserve/webdav/client/idp_client"
 	"net/http"
 
 	"github.com/kouprlabs/voltaserve/webdav/cache"
+	"github.com/kouprlabs/voltaserve/webdav/client/api_client"
+	"github.com/kouprlabs/voltaserve/webdav/client/idp_client"
 	"github.com/kouprlabs/voltaserve/webdav/infra"
 )
 
