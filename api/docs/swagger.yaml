@@ -98,15 +98,6 @@ definitions:
       size:
         type: integer
     type: object
-  router.FileCopyOptions:
-    properties:
-      ids:
-        items:
-          type: string
-        type: array
-    required:
-    - ids
-    type: object
   router.FileGrantGroupPermissionOptions:
     properties:
       groupId:
@@ -263,6 +254,33 @@ definitions:
         type: string
       workspaceId:
         type: string
+    type: object
+  service.FileCopyManyOptions:
+    properties:
+      sourceIds:
+        items:
+          type: string
+        type: array
+      targetId:
+        type: string
+    required:
+    - sourceIds
+    - targetId
+    type: object
+  service.FileCopyManyResult:
+    properties:
+      failed:
+        items:
+          type: string
+        type: array
+      new:
+        items:
+          type: string
+        type: array
+      succeeded:
+        items:
+          type: string
+        type: array
     type: object
   service.FileDeleteManyOptions:
     properties:
