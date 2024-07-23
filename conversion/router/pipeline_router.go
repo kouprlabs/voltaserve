@@ -13,8 +13,8 @@ package router
 import (
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
+	"github.com/kouprlabs/voltaserve/conversion/client/api_client"
 
-	"github.com/kouprlabs/voltaserve/conversion/client"
 	"github.com/kouprlabs/voltaserve/conversion/config"
 	"github.com/kouprlabs/voltaserve/conversion/errorpkg"
 	"github.com/kouprlabs/voltaserve/conversion/runtime"
@@ -40,7 +40,7 @@ func (r *PipelineRouter) AppendRoutes(g fiber.Router) {
 	g.Post("pipelines/run", r.Run)
 }
 
-// Create godoc
+// Run godoc
 //
 //	@Summary		Run
 //	@Description	Run
@@ -48,13 +48,13 @@ func (r *PipelineRouter) AppendRoutes(g fiber.Router) {
 //	@Id				pipelines_run
 //	@Accept			json
 //	@Produce		json
-//	@Param			body	body	client.PipelineRunOptions	true	"Body"
+//	@Param			body	body	api_client.PipelineRunOptions	true	"Body"
 //	@Success		200
 //	@Failure		400
 //	@Failure		500
 //	@Router			/pipelines/run [post]
 func (r *PipelineRouter) Run(c *fiber.Ctx) error {
-	opts := new(client.PipelineRunOptions)
+	opts := new(api_client.PipelineRunOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
 	}

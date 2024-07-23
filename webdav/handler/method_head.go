@@ -14,7 +14,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/kouprlabs/voltaserve/webdav/client"
+	"github.com/kouprlabs/voltaserve/webdav/client/api_client"
 	"github.com/kouprlabs/voltaserve/webdav/helper"
 	"github.com/kouprlabs/voltaserve/webdav/infra"
 )
@@ -25,7 +25,7 @@ This method is similar to GET but only retrieves the metadata of a resource, wit
 Example implementation:
 
 - Extract the file path from the URL.
-- Retrieve the file metadata using fs.stat().
+- Retrieve the file metadata.
 - Set the response status code to 200 if successful or an appropriate error code if the file is not found.
 - Set the Content-Length header with the file size.
 - Return the response.
@@ -36,14 +36,14 @@ func (h *Handler) methodHead(w http.ResponseWriter, r *http.Request) {
 		infra.HandleError(fmt.Errorf("missing token"), w)
 		return
 	}
-	apiClient := client.NewAPIClient(token)
-	filePath := helper.DecodeURIComponent(r.URL.Path)
-	file, err := apiClient.GetFileByPath(filePath)
+	cl := api_client.NewFileClient(token)
+	inputPath := helper.DecodeURIComponent(r.URL.Path)
+	file, err := cl.GetByPath(inputPath)
 	if err != nil {
 		infra.HandleError(err, w)
 		return
 	}
-	if file.Type == client.FileTypeFile {
+	if file.Type == api_client.FileTypeFile {
 		w.Header().Set("Content-Length", fmt.Sprintf("%d", file.Snapshot.Original.Size))
 	}
 	w.WriteHeader(http.StatusOK)
