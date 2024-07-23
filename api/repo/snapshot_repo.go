@@ -30,7 +30,7 @@ type SnapshotRepo interface {
 	FindAllForFile(fileID string) ([]model.Snapshot, error)
 	FindAllDangling() ([]model.Snapshot, error)
 	FindAllPrevious(fileID string, version int64) ([]model.Snapshot, error)
-	GetIDsForFile(fileID string) ([]string, error)
+	GetIDsByFile(fileID string) ([]string, error)
 	Insert(snapshot model.Snapshot) error
 	Save(snapshot model.Snapshot) error
 	Delete(id string) error
@@ -561,7 +561,7 @@ func (repo *snapshotRepo) FindAllPrevious(fileID string, version int64) ([]model
 	return res, nil
 }
 
-func (repo *snapshotRepo) GetIDsForFile(fileID string) ([]string, error) {
+func (repo *snapshotRepo) GetIDsByFile(fileID string) ([]string, error) {
 	type Value struct {
 		Result string
 	}

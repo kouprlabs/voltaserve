@@ -247,7 +247,7 @@ func (svc *OrganizationService) RemoveMember(id string, memberID string, userID 
 	}
 
 	/* Revoke permissions from all groups belonging to this organization. */
-	groupsIDs, err := svc.groupRepo.GetIDsForOrganization(org.GetID())
+	groupsIDs, err := svc.groupRepo.GetIDsByOrganization(org.GetID())
 	if err != nil {
 		return err
 	}
