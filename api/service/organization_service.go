@@ -27,32 +27,40 @@ import (
 )
 
 type OrganizationService struct {
-	orgRepo      repo.OrganizationRepo
-	orgCache     *cache.OrganizationCache
-	orgGuard     *guard.OrganizationGuard
-	orgMapper    *organizationMapper
-	orgSearch    *search.OrganizationSearch
-	userSearch   *search.UserSearch
-	userMapper   *userMapper
-	groupRepo    repo.GroupRepo
-	groupService *GroupService
-	groupMapper  *groupMapper
-	config       *config.Config
+	orgRepo        repo.OrganizationRepo
+	orgCache       *cache.OrganizationCache
+	orgGuard       *guard.OrganizationGuard
+	orgMapper      *organizationMapper
+	orgSearch      *search.OrganizationSearch
+	userSearch     *search.UserSearch
+	userMapper     *userMapper
+	userRepo       repo.UserRepo
+	groupCache     *cache.GroupCache
+	groupRepo      repo.GroupRepo
+	groupService   *GroupService
+	groupMapper    *groupMapper
+	workspaceCache *cache.WorkspaceCache
+	workspaceRepo  repo.WorkspaceRepo
+	config         *config.Config
 }
 
 func NewOrganizationService() *OrganizationService {
 	return &OrganizationService{
-		orgRepo:      repo.NewOrganizationRepo(),
-		orgCache:     cache.NewOrganizationCache(),
-		orgGuard:     guard.NewOrganizationGuard(),
-		orgSearch:    search.NewOrganizationSearch(),
-		orgMapper:    newOrganizationMapper(),
-		userSearch:   search.NewUserSearch(),
-		groupRepo:    repo.NewGroupRepo(),
-		groupService: NewGroupService(),
-		groupMapper:  newGroupMapper(),
-		userMapper:   newUserMapper(),
-		config:       config.GetConfig(),
+		orgRepo:        repo.NewOrganizationRepo(),
+		orgCache:       cache.NewOrganizationCache(),
+		orgGuard:       guard.NewOrganizationGuard(),
+		orgSearch:      search.NewOrganizationSearch(),
+		orgMapper:      newOrganizationMapper(),
+		userSearch:     search.NewUserSearch(),
+		userRepo:       repo.NewUserRepo(),
+		groupCache:     cache.NewGroupCache(),
+		groupRepo:      repo.NewGroupRepo(),
+		groupService:   NewGroupService(),
+		groupMapper:    newGroupMapper(),
+		userMapper:     newUserMapper(),
+		workspaceCache: cache.NewWorkspaceCache(),
+		workspaceRepo:  repo.NewWorkspaceRepo(),
+		config:         config.GetConfig(),
 	}
 }
 
@@ -220,6 +228,11 @@ func (svc *OrganizationService) RemoveMember(id string, memberID string, userID 
 		return err
 	}
 
+	/* Ensure the member exists before proceeding. */
+	if _, err := svc.userRepo.Find(memberID); err != nil {
+		return err
+	}
+
 	if err := svc.orgGuard.Authorize(userID, org, model.PermissionOwner); err != nil {
 		return err
 	}
@@ -233,17 +246,35 @@ func (svc *OrganizationService) RemoveMember(id string, memberID string, userID 
 		return errorpkg.NewCannotRemoveLastRemainingOwnerOfOrganizationError(org)
 	}
 
-	/* Remove member from all groups belonging to this organization */
+	/* Revoke permissions from all groups belonging to this organization. */
 	groupsIDs, err := svc.groupRepo.GetIDsForOrganization(org.GetID())
 	if err != nil {
 		return err
 	}
 	for _, groupID := range groupsIDs {
-		if err := svc.groupService.RemoveMemberUnauthorized(groupID, memberID); err != nil {
+		if err := svc.groupRepo.RevokeUserPermission(groupID, memberID); err != nil {
+			log.GetLogger().Error(err)
+		}
+		if _, err := svc.groupCache.Refresh(groupID); err != nil {
 			log.GetLogger().Error(err)
 		}
 	}
 
+	/* Revoke permissions from all workspaces belonging to this organization */
+	workspaceIDs, err := svc.workspaceRepo.GetIDsByOrganization(org.GetID())
+	if err != nil {
+		return err
+	}
+	for _, workspaceID := range workspaceIDs {
+		if err := svc.workspaceRepo.RevokeUserPermission(workspaceID, memberID); err != nil {
+			log.GetLogger().Error(err)
+		}
+		if _, err := svc.workspaceCache.Refresh(workspaceID); err != nil {
+			log.GetLogger().Error(err)
+		}
+	}
+
+	/* Revoke permission from organization */
 	if err := svc.orgRepo.RevokeUserPermission(id, memberID); err != nil {
 		return err
 	}

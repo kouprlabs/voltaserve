@@ -66,3 +66,10 @@ func (c *GroupCache) Refresh(id string) (model.Group, error) {
 	}
 	return res, nil
 }
+
+func (c *GroupCache) Delete(id string) error {
+	if err := c.redis.Delete(c.keyPrefix + id); err != nil {
+		return err
+	}
+	return nil
+}
