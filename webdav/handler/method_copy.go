@@ -56,9 +56,7 @@ func (h *Handler) methodCopy(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	} else {
-		clones, err := apiClient.CopyFile(targetFile.ID, client.FileCopyOptions{
-			IDs: []string{sourceFile.ID},
-		})
+		clones, err := apiClient.CopyOne(targetFile.ID, sourceFile.ID)
 		if err != nil {
 			infra.HandleError(err, w)
 			return

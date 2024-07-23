@@ -47,6 +47,7 @@ type FileRepo interface {
 	RevokeUserPermission(tree []model.File, userID string) error
 	GrantGroupPermission(id string, groupID string, permission string) error
 	RevokeGroupPermission(tree []model.File, groupID string) error
+	PopulateModelFieldsForUser(files []model.File, userID string) error
 }
 
 func NewFileRepo() FileRepo {
@@ -164,6 +165,20 @@ func (f *fileEntity) SetText(text *string) {
 
 func (f *fileEntity) SetSnapshotID(snapshotID *string) {
 	f.SnapshotID = snapshotID
+}
+
+func (f *fileEntity) SetUserPermissions(permissions []model.CoreUserPermission) {
+	f.UserPermissions = make([]*UserPermissionValue, len(permissions))
+	for i, p := range permissions {
+		f.UserPermissions[i] = p.(*UserPermissionValue)
+	}
+}
+
+func (f *fileEntity) SetGroupPermissions(permissions []model.CoreGroupPermission) {
+	f.GroupPermissions = make([]*GroupPermissionValue, len(permissions))
+	for i, p := range permissions {
+		f.GroupPermissions[i] = p.(*GroupPermissionValue)
+	}
 }
 
 func (f *fileEntity) SetCreateTime(createTime string) {
@@ -620,6 +635,19 @@ func (repo *fileRepo) RevokeGroupPermission(tree []model.File, groupID string) e
 		if db.Error != nil {
 			return db.Error
 		}
+	}
+	return nil
+}
+
+func (repo *fileRepo) PopulateModelFieldsForUser(files []model.File, userID string) error {
+	for _, f := range files {
+		userPermissions := make([]model.CoreUserPermission, 0)
+		userPermissions = append(userPermissions, &UserPermissionValue{
+			UserID: userID,
+			Value:  model.PermissionOwner,
+		})
+		f.SetUserPermissions(userPermissions)
+		f.SetGroupPermissions(make([]model.CoreGroupPermission, 0))
 	}
 	return nil
 }

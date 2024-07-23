@@ -77,7 +77,7 @@ func (svc *InvitationService) Create(opts InvitationCreateOptions, userID string
 
 	var emails []string
 
-	/* Collect emails of non existing members and outgoing invitations */
+	/* Collect emails of non-existing members and outgoing invitations */
 	for _, e := range opts.Emails {
 		existing := false
 		for _, u := range orgMembers {
@@ -251,9 +251,6 @@ func (svc *InvitationService) Accept(id string, userID string) error {
 	}
 	invitation.SetStatus(model.InvitationStatusAccepted)
 	if err := svc.invitationRepo.Save(invitation); err != nil {
-		return err
-	}
-	if err := svc.orgRepo.AddUser(invitation.GetOrganizationID(), userID); err != nil {
 		return err
 	}
 	if err := svc.orgRepo.GrantUserPermission(invitation.GetOrganizationID(), userID, model.PermissionViewer); err != nil {

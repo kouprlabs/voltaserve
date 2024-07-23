@@ -7,7 +7,6 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import useSWR, { SWRConfiguration } from 'swr'
 import { apiFetcher } from '@/client/fetcher'
 
@@ -41,7 +40,7 @@ export type ListOptions = {
   query?: string
   organizationId?: string
   groupId?: string
-  nonGroupMembersOnly?: boolean
+  excludeGroupMembers?: boolean
   size?: number
   page?: number
   sortBy?: SortBy
@@ -56,7 +55,7 @@ type ListQueryParams = {
   query?: string
   organization_id?: string
   group_id?: string
-  non_group_members_only?: string
+  exclude_group_members?: string
 }
 
 export default class UserAPI {
@@ -87,8 +86,8 @@ export default class UserAPI {
     if (options?.groupId) {
       params.group_id = options.groupId.toString()
     }
-    if (options?.nonGroupMembersOnly) {
-      params.non_group_members_only = options.nonGroupMembersOnly.toString()
+    if (options?.excludeGroupMembers) {
+      params.exclude_group_members = options.excludeGroupMembers.toString()
     }
     if (options?.page) {
       params.page = options.page.toString()

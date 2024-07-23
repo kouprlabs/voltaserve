@@ -34,6 +34,8 @@ type File interface {
 	SetName(string)
 	SetText(*string)
 	SetSnapshotID(*string)
+	SetUserPermissions([]CoreUserPermission)
+	SetGroupPermissions([]CoreGroupPermission)
 	SetCreateTime(string)
 	SetUpdateTime(*string)
 }
