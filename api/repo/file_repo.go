@@ -28,6 +28,7 @@ type FileRepo interface {
 	FindPath(id string) ([]model.File, error)
 	FindTree(id string) ([]model.File, error)
 	FindTreeIDs(id string) ([]string, error)
+	DeleteChunk(ids []string) error
 	Count() (int64, error)
 	GetIDsByWorkspace(workspaceID string) ([]string, error)
 	GetIDsBySnapshot(snapshotID string) ([]string, error)
@@ -337,6 +338,13 @@ func (repo *fileRepo) FindTreeIDs(id string) ([]string, error) {
 		res = append(res, v.Result)
 	}
 	return res, nil
+}
+
+func (repo *fileRepo) DeleteChunk(ids []string) error {
+	if db := repo.db.Delete(&fileEntity{}, ids); db.Error != nil {
+		return db.Error
+	}
+	return nil
 }
 
 func (repo *fileRepo) Count() (int64, error) {
