@@ -10,6 +10,10 @@ class Settings(BaseSettings):
     db_user: str
     db_password: Optional[str]
 
+    host: str
+    workers: int
+    port: int
+
     class Config:
         env_file = ".env"
 

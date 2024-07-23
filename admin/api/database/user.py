@@ -16,7 +16,7 @@ def fetch_user(_id: str):
         try:
             curs.execute(f"SELECT id, full_name, username, email, is_email_confirmed, create_time, update_time "
                          f"FROM {settings.db_name}.user "
-                         f"WHERE id={_id}")
+                         f"WHERE id='{_id}'")
             return curs.fetchone()
         except (Exception, psycopg2.DatabaseError) as error:
             print(error)
