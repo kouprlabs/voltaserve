@@ -11,7 +11,7 @@
 package identifier
 
 import (
-	"github.com/kouprlabs/voltaserve/conversion/client"
+	"github.com/kouprlabs/voltaserve/conversion/client/api_client"
 	"github.com/kouprlabs/voltaserve/conversion/model"
 )
 
@@ -25,7 +25,7 @@ func NewPipelineIdentifier() *PipelineIdentifier {
 	}
 }
 
-func (pi *PipelineIdentifier) Identify(opts client.PipelineRunOptions) string {
+func (pi *PipelineIdentifier) Identify(opts api_client.PipelineRunOptions) string {
 	if opts.PipelineID != nil {
 		return *opts.PipelineID
 	} else {

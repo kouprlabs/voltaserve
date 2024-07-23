@@ -21,7 +21,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/kouprlabs/voltaserve/webdav/client"
+	"github.com/kouprlabs/voltaserve/webdav/client/api_client"
 	"github.com/kouprlabs/voltaserve/webdav/helper"
 	"github.com/kouprlabs/voltaserve/webdav/infra"
 )
@@ -42,15 +42,15 @@ func (h *Handler) methodGet(w http.ResponseWriter, r *http.Request) {
 		infra.HandleError(fmt.Errorf("missing token"), w)
 		return
 	}
-	apiClient := client.NewAPIClient(token)
-	filePath := helper.DecodeURIComponent(r.URL.Path)
-	file, err := apiClient.GetFileByPath(filePath)
+	cl := api_client.NewFileClient(token)
+	inputPath := helper.DecodeURIComponent(r.URL.Path)
+	file, err := cl.GetByPath(inputPath)
 	if err != nil {
 		infra.HandleError(err, w)
 		return
 	}
 	outputPath := filepath.Join(os.TempDir(), uuid.New().String())
-	err = apiClient.DownloadOriginal(file, outputPath)
+	err = cl.DownloadOriginal(file, outputPath)
 	if err != nil {
 		infra.HandleError(err, w)
 		return

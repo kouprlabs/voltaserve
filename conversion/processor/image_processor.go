@@ -14,7 +14,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/kouprlabs/voltaserve/conversion/client"
+	"github.com/kouprlabs/voltaserve/conversion/client/api_client"
 	"github.com/kouprlabs/voltaserve/conversion/config"
 	"github.com/kouprlabs/voltaserve/conversion/helper"
 	"github.com/kouprlabs/voltaserve/conversion/identifier"
@@ -22,14 +22,12 @@ import (
 )
 
 type ImageProcessor struct {
-	apiClient *client.APIClient
 	fileIdent *identifier.FileIdentifier
 	config    *config.Config
 }
 
 func NewImageProcessor() *ImageProcessor {
 	return &ImageProcessor{
-		apiClient: client.NewAPIClient(),
 		fileIdent: identifier.NewFileIdentifier(),
 		config:    config.GetConfig(),
 	}
@@ -55,7 +53,7 @@ func (p *ImageProcessor) Thumbnail(inputPath string, outputPath string) (*bool, 
 	return helper.ToPtr(false), nil
 }
 
-func (p *ImageProcessor) MeasureImage(inputPath string) (*client.ImageProps, error) {
+func (p *ImageProcessor) MeasureImage(inputPath string) (*api_client.ImageProps, error) {
 	size, err := infra.NewCommand().ReadOutput("identify", "-format", "%w,%h", inputPath)
 	if err != nil {
 		return nil, err
@@ -69,7 +67,7 @@ func (p *ImageProcessor) MeasureImage(inputPath string) (*client.ImageProps, err
 	if err != nil {
 		return nil, err
 	}
-	return &client.ImageProps{
+	return &api_client.ImageProps{
 		Width:  width,
 		Height: height,
 	}, nil

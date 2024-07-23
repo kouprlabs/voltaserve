@@ -15,7 +15,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 
-	"github.com/kouprlabs/voltaserve/conversion/client"
+	"github.com/kouprlabs/voltaserve/conversion/client/api_client"
 	"github.com/kouprlabs/voltaserve/conversion/infra"
 	"github.com/kouprlabs/voltaserve/conversion/runtime"
 )
@@ -38,7 +38,7 @@ func (r *HealthRouter) AppendRoutes(g fiber.Router) {
 	g.Get("health", r.GetHealth)
 }
 
-// Healdth godoc
+// GetHealth godoc
 //
 //	@Summary		Get Health
 //	@Description	Get Health
@@ -55,7 +55,7 @@ func (r *HealthRouter) GetHealth(c *fiber.Ctx) error {
 	if err := infra.NewS3Manager().Connect(); err != nil {
 		return c.SendStatus(http.StatusServiceUnavailable)
 	}
-	if ok, err := client.NewAPIClient().GetHealth(); err != nil || ok != "OK" {
+	if ok, err := api_client.NewHealthClient().Get(); err != nil || ok != "OK" {
 		return c.SendStatus(http.StatusServiceUnavailable)
 	}
 	return c.SendString("OK")
