@@ -1,8 +1,6 @@
 use sea_orm_migration::prelude::*;
 
-use crate::models::v1::{
-    File, Snapshot, SnapshotFile, Workspace,
-};
+use crate::models::v1::{File, Snapshot, SnapshotFile, Workspace};
 
 #[derive(DeriveMigrationName)]
 pub struct Migration;
@@ -67,6 +65,12 @@ impl Migration {
                             .not_null(),
                     )
                     .col(ColumnDef::new(File::ParentId).text())
+                    .foreign_key(
+                        ForeignKey::create()
+                            .from(File::Table, File::ParentId)
+                            .to(File::Table, File::Id)
+                            .on_delete(ForeignKeyAction::SetNull),
+                    )
                     .col(ColumnDef::new(File::WorkspaceId).text())
                     .foreign_key(
                         ForeignKey::create()
