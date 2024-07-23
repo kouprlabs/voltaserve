@@ -18,7 +18,7 @@ group_api_router = APIRouter(
                               'model': GroupResponse
                           }}
                       )
-async def get_user(data: Annotated[GroupRequest, Depends()]):
+async def get_group(data: Annotated[GroupRequest, Depends()]):
     return fetch_group(_id=data.id)
 
 
@@ -29,7 +29,7 @@ async def get_user(data: Annotated[GroupRequest, Depends()]):
                           }
                       }
                       )
-async def get_all_users(data: Annotated[GroupListRequest, Depends()]):
+async def get_all_groups(data: Annotated[GroupListRequest, Depends()]):
     return fetch_groups(page=data.page, size=data.size)
 
 # --- PATCH --- #

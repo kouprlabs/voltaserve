@@ -19,7 +19,7 @@ organization_api_router = APIRouter(
                                      'model': OrganizationResponse
                                  }}
                              )
-async def get_user(data: Annotated[OrganizationRequest, Depends()]):
+async def get_organization(data: Annotated[OrganizationRequest, Depends()]):
     return fetch_organization(_id=data.id)
 
 
@@ -30,7 +30,7 @@ async def get_user(data: Annotated[OrganizationRequest, Depends()]):
                                  }
                              }
                              )
-async def get_all_users(data: Annotated[OrganizationListRequest, Depends()]):
+async def get_all_organizations(data: Annotated[OrganizationListRequest, Depends()]):
     return fetch_organizations(page=data.page, size=data.size)
 
 # --- PATCH --- #
