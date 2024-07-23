@@ -29,9 +29,9 @@ const AccountMenuAvatarButton = forwardRef<AccountMenuAvatarButtonProps, 'div'>(
     const isActive = activeNav === NavType.Account
 
     return (
-      <NotificationBadge hasBadge={count && count > 0 ? true : false}>
-        <div ref={ref} {...props} className={cx('cursor-pointer')}>
-          <AccountMenuActiveCircle>
+      <div ref={ref} {...props} className={cx('cursor-pointer')}>
+        <AccountMenuActiveCircle>
+          <NotificationBadge hasBadge={count && count > 0 ? true : false}>
             <Avatar
               name={user.fullName}
               src={user.picture}
@@ -46,9 +46,9 @@ const AccountMenuAvatarButton = forwardRef<AccountMenuAvatarButtonProps, 'div'>(
                 },
               )}
             />
-          </AccountMenuActiveCircle>
-        </div>
-      </NotificationBadge>
+          </NotificationBadge>
+        </AccountMenuActiveCircle>
+      </div>
     )
   },
 )

@@ -30,12 +30,13 @@ type SnapshotRepo interface {
 	FindAllForFile(fileID string) ([]model.Snapshot, error)
 	FindAllDangling() ([]model.Snapshot, error)
 	FindAllPrevious(fileID string, version int64) ([]model.Snapshot, error)
-	GetIDsForFile(fileID string) ([]string, error)
+	GetIDsByFile(fileID string) ([]string, error)
 	Insert(snapshot model.Snapshot) error
 	Save(snapshot model.Snapshot) error
 	Delete(id string) error
 	Update(id string, opts SnapshotUpdateOptions) error
 	MapWithFile(id string, fileID string) error
+	BulkMapWithFile(entities []*SnapshotFileEntity, chunkSize int) error
 	DeleteMappingsForFile(fileID string) error
 	DeleteAllDangling() error
 	GetLatestVersionForFile(fileID string) (int64, error)
@@ -349,6 +350,21 @@ func (s *snapshotEntity) GetUpdateTime() *string {
 	return s.UpdateTime
 }
 
+type SnapshotFileEntity struct {
+	SnapshotID string `gorm:"column:snapshot_id"`
+	FileID     string `gorm:"column:file_id"`
+	CreateTime string `gorm:"column:create_time"`
+}
+
+func (*SnapshotFileEntity) TableName() string {
+	return "snapshot_file"
+}
+
+func (s *SnapshotFileEntity) BeforeCreate(*gorm.DB) (err error) {
+	s.CreateTime = helper.NewTimestamp()
+	return nil
+}
+
 type snapshotRepo struct {
 	db *gorm.DB
 }
@@ -492,6 +508,13 @@ func (repo *snapshotRepo) MapWithFile(id string, fileID string) error {
 	return nil
 }
 
+func (repo *snapshotRepo) BulkMapWithFile(entities []*SnapshotFileEntity, chunkSize int) error {
+	if db := repo.db.CreateInBatches(entities, chunkSize); db.Error != nil {
+		return db.Error
+	}
+	return nil
+}
+
 func (repo *snapshotRepo) DeleteMappingsForFile(fileID string) error {
 	if db := repo.db.Exec("DELETE FROM snapshot_file WHERE file_id = ?", fileID); db.Error != nil {
 		return db.Error
@@ -561,7 +584,7 @@ func (repo *snapshotRepo) FindAllPrevious(fileID string, version int64) ([]model
 	return res, nil
 }
 
-func (repo *snapshotRepo) GetIDsForFile(fileID string) ([]string, error) {
+func (repo *snapshotRepo) GetIDsByFile(fileID string) ([]string, error) {
 	type Value struct {
 		Result string
 	}

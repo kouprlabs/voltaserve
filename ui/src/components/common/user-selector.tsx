@@ -7,7 +7,6 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import { useCallback, useEffect, useState } from 'react'
 import {
   Button,
@@ -62,7 +61,7 @@ const UserSelector = ({
       query,
       organizationId,
       groupId,
-      nonGroupMembersOnly,
+      excludeGroupMembers: nonGroupMembersOnly,
       page,
       size: 5,
       sortOrder: SortOrder.Desc,

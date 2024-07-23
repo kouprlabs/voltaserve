@@ -132,7 +132,7 @@ func (svc *SnapshotService) List(fileID string, opts SnapshotListOptions, userID
 	if opts.SortOrder == "" {
 		opts.SortOrder = SortOrderAsc
 	}
-	ids, err := svc.snapshotRepo.GetIDsForFile(fileID)
+	ids, err := svc.snapshotRepo.GetIDsByFile(fileID)
 	if err != nil {
 		return nil, err
 	}
