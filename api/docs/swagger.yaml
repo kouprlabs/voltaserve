@@ -978,7 +978,7 @@ paths:
         name: id
         required: true
         type: string
-      - description: ID
+      - description: Target ID
         in: path
         name: targetId
         required: true
@@ -1455,11 +1455,6 @@ paths:
       description: Copy Many
       operationId: files_copy_many
       parameters:
-      - description: ID
-        in: path
-        name: id
-        required: true
-        type: string
       - description: Body
         in: body
         name: body

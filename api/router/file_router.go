@@ -436,7 +436,7 @@ type FileCopyOptions struct {
 //	@Id				files_copy_one
 //	@Produce		json
 //	@Param			id			path		string	true	"ID"
-//	@Param			targetId	path		string	true	"ID"
+//	@Param			targetId	path		string	true	"Target ID"
 //	@Failure		404			{object}	errorpkg.ErrorResponse
 //	@Failure		500			{object}	errorpkg.ErrorResponse
 //	@Router			/files/{id}/copy/{targetId} [post]
@@ -456,7 +456,6 @@ func (r *FileRouter) CopyOne(c *fiber.Ctx) error {
 //	@Tags			Files
 //	@Id				files_copy_many
 //	@Produce		json
-//	@Param			id		path		string						true	"ID"
 //	@Param			body	body		service.FileCopyManyOptions	true	"Body"
 //	@Success		200		{object}	service.FileCopyManyResult
 //	@Failure		404		{object}	errorpkg.ErrorResponse
