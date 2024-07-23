@@ -17,7 +17,6 @@ class InvitationListRequest(GenericPaginationRequest):
 
 # --- RESPONSE MODELS --- #
 class InvitationResponse(GenericResponse):
-    name: str
     organization_id: str
     owner_id: str
     email: EmailStr

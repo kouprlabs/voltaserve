@@ -4,7 +4,8 @@ import time
 import psycopg2
 from fastapi import FastAPI, Request, Response, status
 
-from routers import users_api_router, group_api_router, organization_api_router, task_api_router, workspace_api_router
+from routers import users_api_router, group_api_router, organization_api_router, task_api_router, workspace_api_router, \
+    invitation_api_router
 from dependencies import settings
 
 logging.basicConfig(level=logging.DEBUG)
@@ -16,6 +17,7 @@ app.include_router(group_api_router)
 app.include_router(organization_api_router)
 app.include_router(task_api_router)
 app.include_router(workspace_api_router)
+app.include_router(invitation_api_router)
 
 
 @app.middleware("http")
