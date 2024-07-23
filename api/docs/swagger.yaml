@@ -899,7 +899,7 @@ paths:
         name: id
         required: true
         type: string
-      - description: ID
+      - description: Target ID
         in: path
         name: targetId
         required: true

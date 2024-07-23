@@ -532,7 +532,7 @@ type FileDeleteOptions struct {
 //	@Id				files_delete_one
 //	@Produce		json
 //	@Param			id			path		string	true	"ID"
-//	@Param			targetId	path		string	true	"ID"
+//	@Param			targetId	path		string	true	"Target ID"
 //	@Failure		404			{object}	errorpkg.ErrorResponse
 //	@Failure		500			{object}	errorpkg.ErrorResponse
 //	@Router			/files/{id} [delete]
