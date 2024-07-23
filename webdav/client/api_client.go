@@ -317,16 +317,8 @@ func (cl *APIClient) CopyOne(id string, targetID string) ([]File, error) {
 	return files, nil
 }
 
-type FileMoveOptions struct {
-	IDs []string `json:"ids"`
-}
-
-func (cl *APIClient) MoveFile(id string, opts FileMoveOptions) error {
-	body, err := json.Marshal(opts)
-	if err != nil {
-		return err
-	}
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v2/files/%s/move", cl.config.APIURL, id), bytes.NewBuffer(body))
+func (cl *APIClient) MoveOne(id string, targetID string) error {
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v2/files/%s/move/%s", cl.config.APIURL, id, targetID), nil)
 	if err != nil {
 		return err
 	}
