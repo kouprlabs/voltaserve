@@ -1,4 +1,10 @@
 import uvicorn
 
+from dependencies import settings
+
 if __name__ == "__main__":
-    uvicorn.run("main:app", host='localhost', port=20001, reload=True, workers=1)
+    uvicorn.run("main:app",
+                host=settings.host,
+                port=settings.port,
+                reload=True,
+                workers=settings.workers)
