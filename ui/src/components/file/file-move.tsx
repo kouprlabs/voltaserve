@@ -7,7 +7,6 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import { useCallback, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import {
@@ -23,7 +22,12 @@ import {
 import cx from 'classnames'
 import FileAPI from '@/client/api/file'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
-import { moveModalDidClose, selectionUpdated } from '@/store/ui/files'
+import {
+  loadingAdded,
+  loadingRemoved,
+  moveModalDidClose,
+  selectionUpdated,
+} from '@/store/ui/files'
 import FileBrowse from './file-browse'
 
 const FileMove = () => {
@@ -32,23 +36,24 @@ const FileMove = () => {
   const selection = useAppSelector((state) => state.ui.files.selection)
   const isModalOpen = useAppSelector((state) => state.ui.files.isMoveModalOpen)
   const mutateList = useAppSelector((state) => state.ui.files.mutate)
-  const [isLoading, setIsLoading] = useState(false)
+  const mutateTasks = useAppSelector((state) => state.ui.tasks.mutateList)
   const [targetId, setTargetId] = useState<string>()
 
   const handleMove = useCallback(async () => {
     if (!targetId) {
       return
     }
-    try {
-      setIsLoading(true)
-      await FileAPI.move(targetId, { ids: selection })
-      mutateList?.()
-      dispatch(selectionUpdated([]))
-      dispatch(moveModalDidClose())
-    } finally {
-      setIsLoading(false)
+    const ids = [...selection]
+    for (const id of ids) {
+      dispatch(loadingAdded([id]))
+      FileAPI.moveOne(id, targetId)
+        .then(() => mutateList?.())
+        .finally(() => dispatch(loadingRemoved([id])))
     }
-  }, [targetId, fileId, selection, dispatch, mutateList])
+    await mutateTasks?.()
+    dispatch(selectionUpdated([]))
+    dispatch(moveModalDidClose())
+  }, [targetId, fileId, selection, dispatch, mutateList, mutateTasks])
 
   return (
     <Modal
@@ -69,7 +74,6 @@ const FileMove = () => {
               type="button"
               variant="outline"
               colorScheme="blue"
-              disabled={isLoading}
               onClick={() => dispatch(moveModalDidClose())}
             >
               Cancel
@@ -78,7 +82,6 @@ const FileMove = () => {
               variant="solid"
               colorScheme="blue"
               isDisabled={targetId === fileId}
-              isLoading={isLoading}
               onClick={handleMove}
             >
               Move Here
