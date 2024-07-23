@@ -97,8 +97,15 @@ export type MoveManyResult = {
   failed: string[]
 }
 
-export type CopyOptions = {
-  ids: string[]
+export type CopyManyOptions = {
+  sourceIds: string[]
+  targetId: string
+}
+
+export type CopyManyResult = {
+  new: string[]
+  succeeded: string[]
+  failed: string[]
 }
 
 export type DeleteOptions = {
@@ -329,12 +336,19 @@ export default class FileAPI {
     }) as Promise<MoveManyResult>
   }
 
-  static async copy(id: string, options: CopyOptions) {
+  static async copyOne(id: string, targetId: string) {
     return apiFetcher({
-      url: `/files/${id}/copy`,
+      url: `/files/${id}/copy/${targetId}`,
+      method: 'POST',
+    }) as Promise<File>
+  }
+
+  static async copyMany(options: CopyManyOptions) {
+    return apiFetcher({
+      url: `/files/copy`,
       method: 'POST',
       body: JSON.stringify(options),
-    })
+    }) as Promise<CopyManyResult>
   }
 
   static useGet(

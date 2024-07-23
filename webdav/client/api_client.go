@@ -288,16 +288,8 @@ func (cl *APIClient) ListFilesByPath(path string) ([]File, error) {
 	return files, nil
 }
 
-type FileCopyOptions struct {
-	IDs []string `json:"ids"`
-}
-
-func (cl *APIClient) CopyFile(id string, opts FileCopyOptions) ([]File, error) {
-	b, err := json.Marshal(opts)
-	if err != nil {
-		return nil, err
-	}
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v2/files/%s/copy", cl.config.APIURL, id), bytes.NewBuffer(b))
+func (cl *APIClient) CopyOne(id string, targetID string) ([]File, error) {
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v2/files/%s/copy/%s", cl.config.APIURL, id, targetID), nil)
 	if err != nil {
 		return nil, err
 	}

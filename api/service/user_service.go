@@ -54,7 +54,7 @@ type UserListOptions struct {
 	Query               string
 	OrganizationID      string
 	GroupID             string
-	NonGroupMembersOnly bool
+	ExcludeGroupMembers bool
 	SortBy              string
 	SortOrder           string
 	Page                uint
@@ -110,7 +110,7 @@ func (svc *UserService) List(opts UserListOptions, userID string) (*UserList, er
 	res := []model.User{}
 	var err error
 	if opts.Query == "" {
-		if opts.OrganizationID != "" && opts.GroupID != "" && opts.NonGroupMembersOnly {
+		if opts.OrganizationID != "" && opts.GroupID != "" && opts.ExcludeGroupMembers {
 			orgMembers, err := svc.orgRepo.GetMembers(opts.OrganizationID)
 			if err != nil {
 				return nil, err
@@ -120,14 +120,14 @@ func (svc *UserService) List(opts UserListOptions, userID string) (*UserList, er
 				return nil, err
 			}
 			for _, om := range orgMembers {
-				found := false
-				for _, tm := range groupMembers {
-					if om.GetID() == tm.GetID() {
-						found = true
+				isGroupMember := false
+				for _, gm := range groupMembers {
+					if om.GetID() == gm.GetID() {
+						isGroupMember = true
 						break
 					}
 				}
-				if !found {
+				if !isGroupMember {
 					res = append(res, om)
 				}
 			}
