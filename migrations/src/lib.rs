@@ -14,6 +14,8 @@ mod m20240718_000007_create_file;
 mod m20240718_000008_create_task;
 mod m20240718_000009_create_grouppermission;
 mod m20240718_000010_create_userpermission;
+mod m20240723_000001_drop_organization_user;
+mod m20240723_000002_drop_group_user;
 
 #[async_trait::async_trait]
 impl MigratorTrait for Migrator {
@@ -29,6 +31,8 @@ impl MigratorTrait for Migrator {
             Box::new(m20240718_000008_create_task::Migration),
             Box::new(m20240718_000009_create_grouppermission::Migration),
             Box::new(m20240718_000010_create_userpermission::Migration),
+            Box::new(m20240723_000001_drop_organization_user::Migration),
+            Box::new(m20240723_000002_drop_group_user::Migration),
         ]
     }
 }

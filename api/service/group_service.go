@@ -11,6 +11,7 @@
 package service
 
 import (
+	"github.com/kouprlabs/voltaserve/api/errorpkg"
 	"sort"
 	"time"
 
@@ -268,17 +269,17 @@ func (svc *GroupService) AddMember(id string, memberID string, userID string) er
 	if _, err := svc.userRepo.Find(memberID); err != nil {
 		return err
 	}
-	if err := svc.groupRepo.AddUser(id, memberID); err != nil {
-		return err
-	}
-	if err := svc.groupRepo.GrantUserPermission(group.GetID(), memberID, model.PermissionViewer); err != nil {
-		return err
-	}
-	if _, err := svc.groupCache.Refresh(group.GetID()); err != nil {
-		return err
-	}
-	if err := svc.refreshCacheForOrganization(group.GetOrganizationID()); err != nil {
-		return err
+	if !svc.groupGuard.IsAuthorized(memberID, group, model.PermissionViewer) &&
+		!svc.groupGuard.IsAuthorized(memberID, group, model.PermissionEditor) {
+		if err := svc.groupRepo.GrantUserPermission(group.GetID(), memberID, model.PermissionViewer); err != nil {
+			return err
+		}
+		if _, err := svc.groupCache.Refresh(group.GetID()); err != nil {
+			return err
+		}
+		if err := svc.refreshCacheForOrganization(group.GetOrganizationID()); err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -288,9 +289,20 @@ func (svc *GroupService) RemoveMember(id string, memberID string, userID string)
 	if err != nil {
 		return nil
 	}
+
 	if err := svc.groupGuard.Authorize(userID, group, model.PermissionOwner); err != nil {
 		return err
 	}
+
+	/* Make sure member is not the last remaining owner of the group */
+	ownerCount, err := svc.groupRepo.GetOwnerCount(group.GetID())
+	if err != nil {
+		return err
+	}
+	if svc.groupGuard.IsAuthorized(memberID, group, model.PermissionOwner) && ownerCount == 1 {
+		return errorpkg.NewCannotRemoveLastRemainingOwnerOfGroupError(group)
+	}
+
 	if err := svc.RemoveMemberUnauthorized(id, memberID); err != nil {
 		return err
 	}
@@ -303,9 +315,6 @@ func (svc *GroupService) RemoveMemberUnauthorized(id string, memberID string) er
 		return nil
 	}
 	if _, err := svc.userRepo.Find(memberID); err != nil {
-		return err
-	}
-	if err := svc.groupRepo.RemoveMember(id, memberID); err != nil {
 		return err
 	}
 	if err := svc.groupRepo.RevokeUserPermission(id, memberID); err != nil {

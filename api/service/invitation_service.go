@@ -253,9 +253,6 @@ func (svc *InvitationService) Accept(id string, userID string) error {
 	if err := svc.invitationRepo.Save(invitation); err != nil {
 		return err
 	}
-	if err := svc.orgRepo.AddUser(invitation.GetOrganizationID(), userID); err != nil {
-		return err
-	}
 	if err := svc.orgRepo.GrantUserPermission(invitation.GetOrganizationID(), userID, model.PermissionViewer); err != nil {
 		return err
 	}
