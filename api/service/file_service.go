@@ -964,97 +964,114 @@ func (svc *FileService) CopyMany(opts FileCopyManyOptions, userID string) (*File
 	return res, nil
 }
 
-func (svc *FileService) Move(targetID string, sourceIDs []string, userID string) (parentIDs []string, err error) {
-	parentIDs = []string{}
+func (svc *FileService) MoveOne(sourceID string, targetID string, userID string) error {
 	target, err := svc.fileCache.Get(targetID)
 	if err != nil {
-		return []string{}, err
+		return err
 	}
+	source, err := svc.fileCache.Get(sourceID)
+	if err != nil {
+		return err
+	}
+
+	task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
+		ID:              helper.NewID(),
+		Name:            "Moving.",
+		UserID:          userID,
+		IsIndeterminate: true,
+		Status:          model.TaskStatusRunning,
+		Payload:         map[string]string{"object": source.GetName()},
+	})
+	if err != nil {
+		return err
+	}
+	defer func(taskID string) {
+		if err := svc.taskSvc.deleteAndSync(taskID); err != nil {
+			log.GetLogger().Error(err)
+		}
+	}(task.GetID())
 
 	/* Do checks */
-	for _, id := range sourceIDs {
-		source, err := svc.fileCache.Get(id)
+	if source.GetParentID() != nil {
+		existing, err := svc.getChildWithName(target.GetID(), source.GetName())
 		if err != nil {
-			return []string{}, err
+			return err
 		}
-		if source.GetParentID() != nil {
-			existing, err := svc.getChildWithName(targetID, source.GetName())
-			if err != nil {
-				return nil, err
-			}
-			if existing != nil {
-				return nil, errorpkg.NewFileWithSimilarNameExistsError()
-			}
-		}
-		if err := svc.fileGuard.Authorize(userID, target, model.PermissionEditor); err != nil {
-			return []string{}, err
-		}
-		if err := svc.fileGuard.Authorize(userID, source, model.PermissionEditor); err != nil {
-			return []string{}, err
-		}
-		if source.GetParentID() != nil && *source.GetParentID() == target.GetID() {
-			return []string{}, errorpkg.NewFileAlreadyChildOfDestinationError(source, target)
-		}
-		if target.GetID() == source.GetID() {
-			return []string{}, errorpkg.NewFileCannotBeMovedIntoItselfError(source)
-		}
-		if target.GetType() != model.FileTypeFolder {
-			return []string{}, errorpkg.NewFileIsNotAFolderError(target)
-		}
-		targetIsGrandChildOfSource, _ := svc.fileRepo.IsGrandChildOf(target.GetID(), source.GetID())
-		if targetIsGrandChildOfSource {
-			return []string{}, errorpkg.NewTargetIsGrandChildOfSourceError(source)
+		if existing != nil {
+			return errorpkg.NewFileWithSimilarNameExistsError()
 		}
 	}
+	if err := svc.fileGuard.Authorize(userID, target, model.PermissionEditor); err != nil {
+		return err
+	}
+	if err := svc.fileGuard.Authorize(userID, source, model.PermissionEditor); err != nil {
+		return err
+	}
+	if source.GetParentID() != nil && *source.GetParentID() == target.GetID() {
+		return errorpkg.NewFileAlreadyChildOfDestinationError(source, target)
+	}
+	if target.GetID() == source.GetID() {
+		return errorpkg.NewFileCannotBeMovedIntoItselfError(source)
+	}
+	if target.GetType() != model.FileTypeFolder {
+		return errorpkg.NewFileIsNotAFolderError(target)
+	}
+	targetIsGrandChildOfSource, _ := svc.fileRepo.IsGrandChildOf(target.GetID(), source.GetID())
+	if targetIsGrandChildOfSource {
+		return errorpkg.NewTargetIsGrandChildOfSourceError(source)
+	}
 
-	/* Do moving */
-	for _, id := range sourceIDs {
-		source, _ := svc.fileCache.Get(id)
+	/* Move source into target */
+	if err := svc.fileRepo.MoveSourceIntoTarget(target.GetID(), source.GetID()); err != nil {
+		return err
+	}
 
-		/* Add old parent */
-		parentIDs = append(parentIDs, *source.GetParentID())
+	/* Get updated source */
+	source, err = svc.fileRepo.Find(source.GetID())
+	if err != nil {
+		return err
+	}
 
-		/* Move source into target */
-		if err := svc.fileRepo.MoveSourceIntoTarget(target.GetID(), source.GetID()); err != nil {
-			return []string{}, err
-		}
+	/* Refresh updateTime on source and target */
+	timeNow := time.Now().UTC().Format(time.RFC3339)
+	source.SetUpdateTime(&timeNow)
+	if err := svc.fileRepo.Save(source); err != nil {
+		return err
+	}
+	if err := svc.sync(source); err != nil {
+		return err
+	}
+	target.SetUpdateTime(&timeNow)
+	if err := svc.fileRepo.Save(target); err != nil {
+		return err
+	}
+	if err := svc.sync(target); err != nil {
+		return err
+	}
 
-		/* Get updated source */
-		source, err = svc.fileRepo.Find(source.GetID())
-		if err != nil {
-			return []string{}, err
-		}
+	return nil
+}
 
-		// Add new parent
-		parentIDs = append(parentIDs, *source.GetParentID())
+type FileMoveManyOptions struct {
+	SourceIDs []string `json:"sourceIds" validate:"required"`
+	TargetID  string   `json:"targetId"  validate:"required"`
+}
 
-		/* Refresh updateTime on source and target */
-		timeNow := helper.NewTimestamp()
-		source.SetUpdateTime(&timeNow)
-		if err := svc.fileRepo.Save(source); err != nil {
-			return []string{}, err
-		}
-		if err := svc.sync(source); err != nil {
-			return []string{}, err
-		}
-		target.SetUpdateTime(&timeNow)
-		if err := svc.fileRepo.Save(target); err != nil {
-			return []string{}, err
-		}
-		if err := svc.sync(target); err != nil {
-			return []string{}, err
-		}
-		sourceTree, err := svc.fileRepo.FindTree(source.GetID())
-		if err != nil {
-			return []string{}, err
-		}
-		for _, f := range sourceTree {
-			if err := svc.sync(f); err != nil {
-				return []string{}, err
-			}
+type FileMoveManyResult struct {
+	Succeeded []string `json:"succeeded"`
+	Failed    []string `json:"failed"`
+}
+
+func (svc *FileService) MoveMany(opts FileMoveManyOptions, userID string) (*FileMoveManyResult, error) {
+	res := &FileMoveManyResult{}
+	for _, id := range opts.SourceIDs {
+		if err := svc.MoveOne(opts.TargetID, id, userID); err != nil {
+			res.Failed = append(res.Failed, id)
+		} else {
+			res.Succeeded = append(res.Succeeded, id)
 		}
 	}
-	return parentIDs, nil
+	return res, nil
 }
 
 func (svc *FileService) PatchName(id string, name string, userID string) (*File, error) {

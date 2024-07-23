@@ -62,6 +62,7 @@ func NewFileRouter() *FileRouter {
 func (r *FileRouter) AppendRoutes(g fiber.Router) {
 	g.Post("/", r.Create)
 	g.Get("/list", r.ListByPath)
+	g.Post("/move", r.MoveMany)
 	g.Post("/copy", r.CopyMany)
 	g.Get("/", r.GetByPath)
 	g.Delete("/", r.DeleteMany)
@@ -70,8 +71,8 @@ func (r *FileRouter) AppendRoutes(g fiber.Router) {
 	g.Get("/:id/list", r.List)
 	g.Get("/:id/count", r.GetCount)
 	g.Get("/:id/path", r.GetPath)
-	g.Post("/:id/move", r.Move)
 	g.Delete("/:id", r.DeleteOne)
+	g.Post("/:id/move/:targetId", r.MoveOne)
 	g.Patch("/:id/name", r.PatchName)
 	g.Post("/:id/copy/:targetId", r.CopyOne)
 	g.Get("/:id/size", r.GetSize)
@@ -482,31 +483,52 @@ type FileMoveOptions struct {
 	IDs []string `json:"ids" validate:"required"`
 }
 
-// Move godoc
+// MoveOne godoc
 //
-//	@Summary		Move
-//	@Description	Move
+//	@Summary		Move One
+//	@Description	Move One
 //	@Tags			Files
-//	@Id				files_move
+//	@Id				files_move_one
 //	@Produce		json
-//	@Param			id		path		string			true	"ID"
-//	@Param			body	body		FileMoveOptions	true	"Body"
+//	@Param			id			path		string	true	"ID"
+//	@Param			targetId	path		string	true	"Target ID"
+//	@Failure		404			{object}	errorpkg.ErrorResponse
+//	@Failure		500			{object}	errorpkg.ErrorResponse
+//	@Router			/files/{id}/move/{targetId} [post]
+func (r *FileRouter) MoveOne(c *fiber.Ctx) error {
+	userID := GetUserID(c)
+	if err := r.fileSvc.MoveOne(c.Params("id"), c.Params("targetId"), userID); err != nil {
+		return err
+	}
+	return c.SendStatus(http.StatusNoContent)
+}
+
+// MoveMany godoc
+//
+//	@Summary		Move Many
+//	@Description	Move Many
+//	@Tags			Files
+//	@Id				files_move_many
+//	@Produce		json
+//	@Param			body	body		service.FileMoveManyOptions	true	"Body"
+//	@Success		200		{object}	service.FileMoveManyResult
 //	@Failure		404		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
-//	@Router			/files/{id}/move [post]
-func (r *FileRouter) Move(c *fiber.Ctx) error {
+//	@Router			/files/move [post]
+func (r *FileRouter) MoveMany(c *fiber.Ctx) error {
 	userID := GetUserID(c)
-	opts := new(FileMoveOptions)
+	opts := new(service.FileMoveManyOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
 	}
 	if err := validator.New().Struct(opts); err != nil {
 		return errorpkg.NewRequestBodyValidationError(err)
 	}
-	if _, err := r.fileSvc.Move(c.Params("id"), opts.IDs, userID); err != nil {
+	res, err := r.fileSvc.MoveMany(*opts, userID)
+	if err != nil {
 		return err
 	}
-	return c.SendStatus(http.StatusNoContent)
+	return c.JSON(res)
 }
 
 type FilePatchNameOptions struct {
