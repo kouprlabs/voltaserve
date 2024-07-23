@@ -27,6 +27,7 @@ type FileRepo interface {
 	FindChildren(id string) ([]model.File, error)
 	FindPath(id string) ([]model.File, error)
 	FindTree(id string) ([]model.File, error)
+	FindTreeIDs(id string) ([]string, error)
 	Count() (int64, error)
 	GetIDsByWorkspace(workspaceID string) ([]string, error)
 	GetIDsBySnapshot(snapshotID string) ([]string, error)
@@ -43,6 +44,7 @@ type FileRepo interface {
 	RevokeUserPermission(tree []model.File, userID string) error
 	GrantGroupPermission(id string, groupID string, permission string) error
 	RevokeGroupPermission(tree []model.File, groupID string) error
+	PopulateModelFieldsForUser(files []model.File, userID string) error
 }
 
 func NewFileRepo() FileRepo {
@@ -160,6 +162,20 @@ func (f *fileEntity) SetText(text *string) {
 
 func (f *fileEntity) SetSnapshotID(snapshotID *string) {
 	f.SnapshotID = snapshotID
+}
+
+func (f *fileEntity) SetUserPermissions(permissions []model.CoreUserPermission) {
+	f.UserPermissions = make([]*UserPermissionValue, len(permissions))
+	for i, p := range permissions {
+		f.UserPermissions[i] = p.(*UserPermissionValue)
+	}
+}
+
+func (f *fileEntity) SetGroupPermissions(permissions []model.CoreGroupPermission) {
+	f.GroupPermissions = make([]*GroupPermissionValue, len(permissions))
+	for i, p := range permissions {
+		f.GroupPermissions[i] = p.(*GroupPermissionValue)
+	}
 }
 
 func (f *fileEntity) SetCreateTime(createTime string) {
@@ -297,6 +313,28 @@ func (repo *fileRepo) FindTree(id string) ([]model.File, error) {
 	var res []model.File
 	for _, f := range entities {
 		res = append(res, f)
+	}
+	return res, nil
+}
+
+func (repo *fileRepo) FindTreeIDs(id string) ([]string, error) {
+	type Value struct {
+		Result string
+	}
+	var values []Value
+	db := repo.db.
+		Raw(`WITH RECURSIVE rec (id, parent_id, create_time) AS
+             (SELECT f.id, f.parent_id, f.create_time FROM file f WHERE f.id = ?
+             UNION SELECT f.id, f.parent_id, f.create_time FROM rec, file f WHERE f.parent_id = rec.id)
+             SELECT rec.id as result FROM rec ORDER BY create_time ASC`,
+			id).
+		Scan(&values)
+	if db.Error != nil {
+		return nil, db.Error
+	}
+	res := []string{}
+	for _, v := range values {
+		res = append(res, v.Result)
 	}
 	return res, nil
 }
@@ -585,6 +623,19 @@ func (repo *fileRepo) RevokeGroupPermission(tree []model.File, groupID string) e
 		if db.Error != nil {
 			return db.Error
 		}
+	}
+	return nil
+}
+
+func (repo *fileRepo) PopulateModelFieldsForUser(files []model.File, userID string) error {
+	for _, f := range files {
+		userPermissions := make([]model.CoreUserPermission, 0)
+		userPermissions = append(userPermissions, &UserPermissionValue{
+			UserID: userID,
+			Value:  model.PermissionOwner,
+		})
+		f.SetUserPermissions(userPermissions)
+		f.SetGroupPermissions(make([]model.CoreGroupPermission, 0))
 	}
 	return nil
 }

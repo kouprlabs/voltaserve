@@ -7,7 +7,6 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import useSWR, { SWRConfiguration } from 'swr'
 import { apiFetcher } from '@/client/fetcher'
 import { User } from '@/client/idp/user'
@@ -92,8 +91,15 @@ export type MoveOptions = {
   ids: string[]
 }
 
-export type CopyOptions = {
-  ids: string[]
+export type CopyManyOptions = {
+  sourceIds: string[]
+  targetId: string
+}
+
+export type CopyManyResult = {
+  new: string[]
+  succeeded: string[]
+  failed: string[]
 }
 
 export type DeleteOptions = {
@@ -317,12 +323,19 @@ export default class FileAPI {
     })
   }
 
-  static async copy(id: string, options: CopyOptions) {
+  static async copyOne(id: string, targetId: string) {
     return apiFetcher({
-      url: `/files/${id}/copy`,
+      url: `/files/${id}/copy/${targetId}`,
+      method: 'POST',
+    }) as Promise<File>
+  }
+
+  static async copyMany(options: CopyManyOptions) {
+    return apiFetcher({
+      url: `/files/copy`,
       method: 'POST',
       body: JSON.stringify(options),
-    })
+    }) as Promise<CopyManyResult>
   }
 
   static useGet(

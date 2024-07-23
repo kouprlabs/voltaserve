@@ -62,6 +62,7 @@ func NewFileRouter() *FileRouter {
 func (r *FileRouter) AppendRoutes(g fiber.Router) {
 	g.Post("/", r.Create)
 	g.Get("/list", r.ListByPath)
+	g.Post("/copy", r.CopyMany)
 	g.Get("/", r.GetByPath)
 	g.Delete("/", r.Delete)
 	g.Get("/:id", r.Get)
@@ -71,7 +72,7 @@ func (r *FileRouter) AppendRoutes(g fiber.Router) {
 	g.Get("/:id/path", r.GetPath)
 	g.Post("/:id/move", r.Move)
 	g.Patch("/:id/name", r.PatchName)
-	g.Post("/:id/copy", r.Copy)
+	g.Post("/:id/copy/:targetId", r.CopyOne)
 	g.Get("/:id/size", r.GetSize)
 	g.Post("/grant_user_permission", r.GrantUserPermission)
 	g.Post("/revoke_user_permission", r.RevokeUserPermission)
@@ -427,28 +428,50 @@ type FileCopyOptions struct {
 	IDs []string `json:"ids" validate:"required"`
 }
 
-// Copy godoc
+// CopyOne godoc
 //
-//	@Summary		Copy
-//	@Description	Copy
+//	@Summary		Copy One
+//	@Description	Copy One
 //	@Tags			Files
-//	@Id				files_copy
+//	@Id				files_copy_one
 //	@Produce		json
-//	@Param			id		path		string			true	"ID"
-//	@Param			body	body		FileCopyOptions	true	"Body"
+//	@Param			id			path		string	true	"ID"
+//	@Param			targetId	path		string	true	"ID"
+//	@Failure		404			{object}	errorpkg.ErrorResponse
+//	@Failure		500			{object}	errorpkg.ErrorResponse
+//	@Router			/files/{id}/copy/{targetId} [post]
+func (r *FileRouter) CopyOne(c *fiber.Ctx) error {
+	userID := GetUserID(c)
+	res, err := r.fileSvc.CopyOne(c.Params("id"), c.Params("targetId"), userID)
+	if err != nil {
+		return err
+	}
+	return c.JSON(res)
+}
+
+// CopyMany godoc
+//
+//	@Summary		Copy Many
+//	@Description	Copy Many
+//	@Tags			Files
+//	@Id				files_copy_many
+//	@Produce		json
+//	@Param			id		path		string						true	"ID"
+//	@Param			body	body		service.FileCopyManyOptions	true	"Body"
+//	@Success		200		{object}	service.FileCopyManyResult
 //	@Failure		404		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
-//	@Router			/files/{id}/copy [post]
-func (r *FileRouter) Copy(c *fiber.Ctx) error {
+//	@Router			/files/copy [post]
+func (r *FileRouter) CopyMany(c *fiber.Ctx) error {
 	userID := GetUserID(c)
-	opts := new(FileCopyOptions)
+	opts := new(service.FileCopyManyOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
 	}
 	if err := validator.New().Struct(opts); err != nil {
 		return errorpkg.NewRequestBodyValidationError(err)
 	}
-	res, err := r.fileSvc.Copy(c.Params("id"), opts.IDs, userID)
+	res, err := r.fileSvc.CopyMany(*opts, userID)
 	if err != nil {
 		return err
 	}

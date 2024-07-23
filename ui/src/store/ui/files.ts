@@ -7,7 +7,6 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import { KeyedMutator } from 'swr'
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { List, SortBy, SortOrder } from '@/client/api/file'
@@ -28,6 +27,7 @@ export const SORT_ORDER_KEY = 'voltaserve_file_sort_order'
 export type FilesState = {
   selection: string[]
   hidden: string[]
+  loading: string[]
   isMultiSelectActive: boolean
   isRangeSelectActive: boolean
   isMoveModalOpen: boolean
@@ -48,6 +48,7 @@ export type FilesState = {
 const initialState: FilesState = {
   selection: [],
   hidden: [],
+  loading: [],
   isMultiSelectActive: false,
   isRangeSelectActive: false,
   isMoveModalOpen: false,
@@ -81,6 +82,12 @@ const slice = createSlice({
     },
     hiddenUpdated: (state, action: PayloadAction<string[]>) => {
       state.hidden = action.payload
+    },
+    loadingAdded: (state, action: PayloadAction<string[]>) => {
+      state.loading.push(...action.payload)
+    },
+    loadingRemoved: (state, action: PayloadAction<string[]>) => {
+      state.loading = state.loading.filter((e) => !action.payload.includes(e))
     },
     moveModalDidOpen: (state) => {
       state.isMoveModalOpen = true
@@ -167,6 +174,8 @@ export const {
   selectionAdded,
   selectionRemoved,
   hiddenUpdated,
+  loadingAdded,
+  loadingRemoved,
   moveModalDidOpen,
   copyModalDidOpen,
   createModalDidOpen,
