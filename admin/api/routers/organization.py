@@ -7,7 +7,8 @@ from admin.api.models.organization import OrganizationResponse, OrganizationRequ
     OrganizationListRequest
 
 organization_api_router = APIRouter(
-    prefix='/organization'
+    prefix='/organization',
+    tags=['organization']
 )
 
 

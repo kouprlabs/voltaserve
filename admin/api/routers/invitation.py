@@ -6,7 +6,8 @@ from admin.api.database.invitation import fetch_invitation, fetch_invitations
 from admin.api.models.invitation import InvitationResponse, InvitationListRequest, InvitationListResponse, InvitationRequest
 
 invitation_api_router = APIRouter(
-    prefix='/invitation'
+    prefix='/invitation',
+    tags=['invitation']
 )
 
 

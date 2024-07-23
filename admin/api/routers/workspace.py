@@ -6,7 +6,8 @@ from admin.api.database.workspace import fetch_workspace, fetch_workspaces
 from admin.api.models.workspace import WorkspaceResponse, WorkspaceRequest, WorkspaceListResponse, WorkspaceListRequest
 
 workspace_api_router = APIRouter(
-    prefix='/workspace'
+    prefix='/workspace',
+    tags=['workspace']
 )
 
 

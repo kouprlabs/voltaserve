@@ -5,7 +5,8 @@ from admin.api.models.user import UserListRequest, UserListResponse, UserRequest
 from admin.api.database.user import fetch_user, fetch_users
 
 users_api_router = APIRouter(
-    prefix='/users'
+    prefix='/user',
+    tags=['user']
 )
 
 
