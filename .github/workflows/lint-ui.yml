@@ -29,10 +29,18 @@ jobs:
           mkdir ui/dist
           touch ui/dist/index.html
 
-      - name: Lint using Golanci lint
-        uses: golangci/golangci-lint-action@v6
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
-          working-directory: ui
+          node-version: '20'
+
+      - name: Install packages
+        run: npm i --legacy-peer-deps
+        working-directory: ui
+  
+      - name: Run ESLint
+        run: npm run lint
+        working-directory: ui
     permissions:
       contents: read
       pull-requests: read
