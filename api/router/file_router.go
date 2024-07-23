@@ -468,7 +468,7 @@ type FileMoveOptions struct {
 //	@Id				files_move_one
 //	@Produce		json
 //	@Param			id			path		string	true	"ID"
-//	@Param			targetId	path		string	true	"ID"
+//	@Param			targetId	path		string	true	"Target ID"
 //	@Failure		404			{object}	errorpkg.ErrorResponse
 //	@Failure		500			{object}	errorpkg.ErrorResponse
 //	@Router			/files/{id}/move/{targetId} [post]
@@ -487,7 +487,6 @@ func (r *FileRouter) MoveOne(c *fiber.Ctx) error {
 //	@Tags			Files
 //	@Id				files_move_many
 //	@Produce		json
-//	@Param			id		path		string						true	"ID"
 //	@Param			body	body		service.FileMoveManyOptions	true	"Body"
 //	@Success		200		{object}	service.FileMoveManyResult
 //	@Failure		404		{object}	errorpkg.ErrorResponse
