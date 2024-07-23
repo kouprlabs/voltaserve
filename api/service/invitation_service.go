@@ -77,7 +77,7 @@ func (svc *InvitationService) Create(opts InvitationCreateOptions, userID string
 
 	var emails []string
 
-	/* Collect emails of non existing members and outgoing invitations */
+	/* Collect emails of non-existing members and outgoing invitations */
 	for _, e := range opts.Emails {
 		existing := false
 		for _, u := range orgMembers {

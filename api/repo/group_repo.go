@@ -25,10 +25,10 @@ type GroupRepo interface {
 	Insert(opts GroupInsertOptions) (model.Group, error)
 	Find(id string) (model.Group, error)
 	Count() (int64, error)
-	GetIDsForOrganization(id string) ([]string, error)
+	GetIDs() ([]string, error)
+	GetIDsByOrganization(id string) ([]string, error)
 	Save(group model.Group) error
 	Delete(id string) error
-	GetIDs() ([]string, error)
 	GetMembers(id string) ([]model.User, error)
 	GetOwnerCount(id string) (int64, error)
 	GrantUserPermission(id string, userID string, permission string) error
@@ -190,7 +190,7 @@ func (repo *groupRepo) Count() (int64, error) {
 	return res.Result, nil
 }
 
-func (repo *groupRepo) GetIDsForOrganization(id string) ([]string, error) {
+func (repo *groupRepo) GetIDsByOrganization(id string) ([]string, error) {
 	type Value struct {
 		Result string
 	}
