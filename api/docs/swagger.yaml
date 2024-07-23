@@ -107,15 +107,6 @@ definitions:
     required:
     - ids
     type: object
-  router.FileDeleteOptions:
-    properties:
-      ids:
-        items:
-          type: string
-        type: array
-    required:
-    - ids
-    type: object
   router.FileGrantGroupPermissionOptions:
     properties:
       groupId:
@@ -272,6 +263,15 @@ definitions:
         type: string
       workspaceId:
         type: string
+    type: object
+  service.FileDeleteManyOptions:
+    properties:
+      sourceIds:
+        items:
+          type: string
+        type: array
+    required:
+    - sourceIds
     type: object
   service.FileList:
     properties:
@@ -786,15 +786,15 @@ info:
 paths:
   /files:
     delete:
-      description: Delete
-      operationId: files_delete
+      description: Delete Many
+      operationId: files_delete_many
       parameters:
       - description: Body
         in: body
         name: body
         required: true
         schema:
-          $ref: '#/definitions/router.FileDeleteOptions'
+          $ref: '#/definitions/service.FileDeleteManyOptions'
       produces:
       - application/json
       responses:
@@ -808,7 +808,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Delete
+      summary: Delete Many
       tags:
       - Files
     get:
@@ -890,6 +890,34 @@ paths:
       tags:
       - Files
   /files/{id}:
+    delete:
+      description: Delete One
+      operationId: files_delete_one
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: ID
+        in: path
+        name: targetId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Delete One
+      tags:
+      - Files
     get:
       description: Get
       operationId: files_get
