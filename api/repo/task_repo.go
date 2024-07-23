@@ -147,8 +147,8 @@ type TaskRepo interface {
 	Insert(opts TaskInsertOptions) (model.Task, error)
 	Find(id string) (model.Task, error)
 	Count() (int64, error)
-	GetCountByEmail(email string) (int64, error)
 	GetIDs(userID string) ([]string, error)
+	GetCountByEmail(email string) (int64, error)
 	Save(task model.Task) error
 	Delete(id string) error
 }
