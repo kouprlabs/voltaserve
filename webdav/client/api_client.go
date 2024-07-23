@@ -391,12 +391,8 @@ func (cl *APIClient) PatchFileName(id string, opts FileRenameOptions) (*File, er
 	return &file, nil
 }
 
-func (cl *APIClient) DeleteFile(id string) ([]string, error) {
-	b, err := json.Marshal(map[string][]string{"ids": {id}})
-	if err != nil {
-		return nil, err
-	}
-	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/v2/files", cl.config.APIURL), bytes.NewBuffer(b))
+func (cl *APIClient) DeleteOne(id string) ([]string, error) {
+	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/v2/files/%s", cl.config.APIURL, id), nil)
 	if err != nil {
 		return nil, err
 	}

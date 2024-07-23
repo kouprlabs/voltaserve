@@ -7,7 +7,6 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import useSWR, { SWRConfiguration } from 'swr'
 import { apiFetcher } from '@/client/fetcher'
 import { User } from '@/client/idp/user'
@@ -96,8 +95,8 @@ export type CopyOptions = {
   ids: string[]
 }
 
-export type DeleteOptions = {
-  ids: string[]
+export type DeleteManyOptions = {
+  ids: string
 }
 
 export type PatchNameOptions = {
@@ -301,7 +300,14 @@ export default class FileAPI {
     }) as Promise<File>
   }
 
-  static async delete(options: DeleteOptions) {
+  static async deleteOne(id: string) {
+    return apiFetcher({
+      url: `/files/${id}`,
+      method: 'DELETE',
+    })
+  }
+
+  static async deleteMany(options: DeleteManyOptions) {
     return apiFetcher({
       url: `/files`,
       method: 'DELETE',

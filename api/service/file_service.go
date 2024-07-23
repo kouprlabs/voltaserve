@@ -29,6 +29,7 @@ import (
 	"github.com/kouprlabs/voltaserve/api/guard"
 	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/infra"
+	"github.com/kouprlabs/voltaserve/api/log"
 	"github.com/kouprlabs/voltaserve/api/model"
 	"github.com/kouprlabs/voltaserve/api/repo"
 	"github.com/kouprlabs/voltaserve/api/search"
@@ -1033,86 +1034,140 @@ func (svc *FileService) PatchName(id string, name string, userID string) (*File,
 	return res, nil
 }
 
-func (svc *FileService) Delete(ids []string, userID string) ([]string, error) {
-	var res []string
-	for _, id := range ids {
-		file, err := svc.fileCache.Get(id)
-		if err != nil {
-			return nil, err
-		}
-		if file.GetParentID() == nil {
-			workspace, err := svc.workspaceCache.Get(file.GetWorkspaceID())
-			if err != nil {
-				return []string{}, err
-			}
-			return nil, errorpkg.NewCannotDeleteWorkspaceRootError(file, workspace)
-		}
-		if err = svc.fileGuard.Authorize(userID, file, model.PermissionOwner); err != nil {
-			return nil, err
-		}
+func (svc *FileService) DeleteOne(id string, userID string) error {
+	file, err := svc.fileCache.Get(id)
+	if err != nil {
+		return err
+	}
 
-		// Add parent
-		res = append(res, *file.GetParentID())
+	task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
+		ID:              helper.NewID(),
+		Name:            "Deleting.",
+		UserID:          userID,
+		IsIndeterminate: true,
+		Status:          model.TaskStatusRunning,
+		Payload:         map[string]string{"object": file.GetName()},
+	})
+	if err != nil {
+		return err
+	}
+	defer func(taskID string) {
+		if err := svc.taskSvc.deleteAndSync(taskID); err != nil {
+			log.GetLogger().Error(err)
+		}
+	}(task.GetID())
 
-		var tree []model.File
-		tree, err = svc.fileRepo.FindTree(file.GetID())
+	if file.GetParentID() == nil {
+		workspace, err := svc.workspaceCache.Get(file.GetWorkspaceID())
 		if err != nil {
-			return nil, err
+			return err
 		}
-		var treeIDs []string
-		for _, f := range tree {
-			treeIDs = append(treeIDs, f.GetID())
-		}
-		/* Delete from search */
-		if err := svc.fileSearch.Delete(treeIDs); err != nil {
-			/* Here we intentionally don't return an error or panic, we just print the error,
-			that's because we still want to delete the file in the repo afterwards even
-			if we fail to delete it from the search. */
-			fmt.Println(err)
-		}
-		/* Delete from cache */
-		for _, f := range tree {
-			if err = svc.fileCache.Delete(f.GetID()); err != nil {
-				// Same thing as above for the search
-				fmt.Println(err)
+		return errorpkg.NewCannotDeleteWorkspaceRootError(file, workspace)
+	}
+	if err = svc.fileGuard.Authorize(userID, file, model.PermissionOwner); err != nil {
+		return err
+	}
+
+	treeIDs, err := svc.fileRepo.FindTreeIDs(file.GetID())
+	if err != nil {
+		return err
+	}
+
+	/* Delete file from repo */
+	if err := svc.fileRepo.Delete(id); err != nil {
+		return err
+	}
+
+	go func(ids []string) {
+		/* Delete tree from repo */
+		const ChunkSize = 1000
+		for i := 0; i < len(ids); i += ChunkSize {
+			end := i + ChunkSize
+			if end > len(ids) {
+				end = len(ids)
+			}
+			chunk := ids[i:end]
+			if err := svc.fileRepo.DeleteChunk(chunk); err != nil {
+				log.GetLogger().Error(err)
 			}
 		}
-		/* Delete from repo */
-		for _, f := range tree {
-			if err = svc.fileRepo.Delete(f.GetID()); err != nil {
-				return nil, err
-			}
-			if err = svc.snapshotRepo.DeleteMappingsForFile(f.GetID()); err != nil {
-				return nil, err
-			}
+		/* Delete snapshot mappings from tree */
+		if err := svc.snapshotRepo.DeleteMappingsForTree(id); err != nil {
+			log.GetLogger().Error(err)
 		}
+		/* Fetch dangling snapshots */
 		var danglingSnapshots []model.Snapshot
 		danglingSnapshots, err = svc.snapshotRepo.FindAllDangling()
 		if err != nil {
-			return nil, err
+			log.GetLogger().Error(err)
 		}
+		/* Delete dangling snapshots from S3 */
 		for _, s := range danglingSnapshots {
 			if s.HasOriginal() {
 				if err = svc.s3.RemoveObject(s.GetOriginal().Key, s.GetOriginal().Bucket, minio.RemoveObjectOptions{}); err != nil {
-					return nil, err
+					log.GetLogger().Error(err)
 				}
 			}
 			if s.HasPreview() {
 				if err = svc.s3.RemoveObject(s.GetPreview().Key, s.GetPreview().Bucket, minio.RemoveObjectOptions{}); err != nil {
-					return nil, err
+					log.GetLogger().Error(err)
 				}
 			}
 			if s.HasText() {
 				if err = svc.s3.RemoveObject(s.GetText().Key, s.GetText().Bucket, minio.RemoveObjectOptions{}); err != nil {
-					return nil, err
+					log.GetLogger().Error(err)
+				}
+			}
+			if s.HasThumbnail() {
+				if err = svc.s3.RemoveObject(s.GetThumbnail().Key, s.GetThumbnail().Bucket, minio.RemoveObjectOptions{}); err != nil {
+					log.GetLogger().Error(err)
 				}
 			}
 			if err := svc.snapshotCache.Delete(s.GetID()); err != nil {
-				return nil, err
+				log.GetLogger().Error(err)
 			}
 		}
+		/* Delete dangling snapshots from cache */
+		for _, s := range danglingSnapshots {
+			if err = svc.snapshotCache.Delete(s.GetID()); err != nil {
+				log.GetLogger().Error(err)
+			}
+		}
+		/* Delete dangling snapshots from repo */
 		if err = svc.snapshotRepo.DeleteAllDangling(); err != nil {
-			return nil, err
+			log.GetLogger().Error(err)
+		}
+	}(treeIDs)
+
+	/* Delete from search */
+	go func(ids []string) {
+		if err := svc.fileSearch.Delete(treeIDs); err != nil {
+			/* Here we intentionally don't return an error or panic, we just print the error,
+			that's because we still want to delete the file in the repo afterward even
+			if we fail to delete it from the search. */
+			fmt.Println(err)
+		}
+	}(treeIDs)
+
+	return nil
+}
+
+type FileDeleteManyOptions struct {
+	IDs []string `json:"sourceIds" validate:"required"`
+}
+
+type FileDeleteManyResult struct {
+	Succeeded []string `json:"succeeded"`
+	Failed    []string `json:"failed"`
+}
+
+func (svc *FileService) DeleteMany(opts FileDeleteManyOptions, userID string) (*FileDeleteManyResult, error) {
+	res := &FileDeleteManyResult{}
+	for _, id := range opts.IDs {
+		if err := svc.DeleteOne(id, userID); err != nil {
+			res.Failed = append(res.Failed, id)
+		} else {
+			res.Succeeded = append(res.Succeeded, id)
 		}
 	}
 	return res, nil

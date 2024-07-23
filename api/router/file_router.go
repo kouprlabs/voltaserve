@@ -63,13 +63,14 @@ func (r *FileRouter) AppendRoutes(g fiber.Router) {
 	g.Post("/", r.Create)
 	g.Get("/list", r.ListByPath)
 	g.Get("/", r.GetByPath)
-	g.Delete("/", r.Delete)
+	g.Delete("/", r.DeleteMany)
 	g.Get("/:id", r.Get)
 	g.Patch("/:id", r.Patch)
 	g.Get("/:id/list", r.List)
 	g.Get("/:id/count", r.GetCount)
 	g.Get("/:id/path", r.GetPath)
 	g.Post("/:id/move", r.Move)
+	g.Delete("/:id", r.DeleteOne)
 	g.Patch("/:id/name", r.PatchName)
 	g.Post("/:id/copy", r.Copy)
 	g.Get("/:id/size", r.GetSize)
@@ -523,27 +524,47 @@ type FileDeleteOptions struct {
 	IDs []string `json:"ids" validate:"required"`
 }
 
-// Delete godoc
+// DeleteOne godoc
 //
-//	@Summary		Delete
-//	@Description	Delete
+//	@Summary		Delete One
+//	@Description	Delete One
 //	@Tags			Files
-//	@Id				files_delete
+//	@Id				files_delete_one
 //	@Produce		json
-//	@Param			body	body		FileDeleteOptions	true	"Body"
+//	@Param			id			path		string	true	"ID"
+//	@Param			targetId	path		string	true	"ID"
+//	@Failure		404			{object}	errorpkg.ErrorResponse
+//	@Failure		500			{object}	errorpkg.ErrorResponse
+//	@Router			/files/{id} [delete]
+func (r *FileRouter) DeleteOne(c *fiber.Ctx) error {
+	userID := GetUserID(c)
+	if err := r.fileSvc.DeleteOne(c.Params("id"), userID); err != nil {
+		return err
+	}
+	return c.JSON(http.StatusNoContent)
+}
+
+// DeleteMany godoc
+//
+//	@Summary		Delete Many
+//	@Description	Delete Many
+//	@Tags			Files
+//	@Id				files_delete_many
+//	@Produce		json
+//	@Param			body	body		service.FileDeleteManyOptions	true	"Body"
 //	@Success		200		{array}		string
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/files [delete]
-func (r *FileRouter) Delete(c *fiber.Ctx) error {
+func (r *FileRouter) DeleteMany(c *fiber.Ctx) error {
 	userID := GetUserID(c)
-	opts := new(FileDeleteOptions)
+	opts := new(service.FileDeleteManyOptions)
 	if err := c.BodyParser(opts); err != nil {
 		return err
 	}
 	if err := validator.New().Struct(opts); err != nil {
 		return errorpkg.NewRequestBodyValidationError(err)
 	}
-	res, err := r.fileSvc.Delete(opts.IDs, userID)
+	res, err := r.fileSvc.DeleteMany(*opts, userID)
 	if err != nil {
 		return err
 	}

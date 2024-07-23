@@ -37,6 +37,7 @@ type SnapshotRepo interface {
 	Update(id string, opts SnapshotUpdateOptions) error
 	MapWithFile(id string, fileID string) error
 	DeleteMappingsForFile(fileID string) error
+	DeleteMappingsForTree(fileID string) error
 	DeleteAllDangling() error
 	GetLatestVersionForFile(fileID string) (int64, error)
 	CountAssociations(id string) (int, error)
@@ -511,6 +512,19 @@ func (repo *snapshotRepo) findAllForFile(fileID string) ([]*snapshotEntity, erro
 		return nil, db.Error
 	}
 	return res, nil
+}
+
+func (repo *snapshotRepo) DeleteMappingsForTree(fileID string) error {
+	db := repo.db.
+		Exec(`WITH RECURSIVE rec (id, parent_id, create_time) AS
+              (SELECT f.id, f.parent_id, f.create_time FROM file f WHERE f.parent_id = ?
+              UNION SELECT f.id, f.parent_id, f.create_time FROM rec, file f WHERE f.parent_id = rec.id)
+              DELETE FROM snapshot_file WHERE file_id in (SELECT id FROM rec);`,
+			fileID)
+	if db.Error != nil {
+		return db.Error
+	}
+	return nil
 }
 
 func (repo *snapshotRepo) FindAllForFile(fileID string) ([]model.Snapshot, error) {

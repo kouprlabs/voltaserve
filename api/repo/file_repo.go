@@ -12,6 +12,8 @@ package repo
 
 import (
 	"errors"
+	"fmt"
+	"strings"
 
 	"gorm.io/gorm"
 
@@ -27,6 +29,8 @@ type FileRepo interface {
 	FindChildren(id string) ([]model.File, error)
 	FindPath(id string) ([]model.File, error)
 	FindTree(id string) ([]model.File, error)
+	FindTreeIDs(id string) ([]string, error)
+	DeleteChunk(ids []string) error
 	Count() (int64, error)
 	GetIDsByWorkspace(workspaceID string) ([]string, error)
 	GetIDsBySnapshot(snapshotID string) ([]string, error)
@@ -299,6 +303,37 @@ func (repo *fileRepo) FindTree(id string) ([]model.File, error) {
 		res = append(res, f)
 	}
 	return res, nil
+}
+
+func (repo *fileRepo) FindTreeIDs(id string) ([]string, error) {
+	type Value struct {
+		Result string
+	}
+	var values []Value
+	db := repo.db.
+		Raw(`WITH RECURSIVE rec (id, parent_id, create_time) AS
+             (SELECT f.id, f.parent_id, f.create_time FROM file f WHERE f.id = ?
+             UNION SELECT f.id, f.parent_id, f.create_time FROM rec, file f WHERE f.parent_id = rec.id)
+             SELECT rec.id as result FROM rec ORDER BY create_time ASC`,
+			id).
+		Scan(&values)
+	if db.Error != nil {
+		return nil, db.Error
+	}
+	res := []string{}
+	for _, v := range values {
+		res = append(res, v.Result)
+	}
+	return res, nil
+}
+
+func (repo *fileRepo) DeleteChunk(ids []string) error {
+	in := "'" + strings.Join(ids, "','") + "'"
+	query := fmt.Sprintf("DELETE FROM file WHERE id IN (%s)", in)
+	if db := repo.db.Exec(query); db.Error != nil {
+		return db.Error
+	}
+	return nil
 }
 
 func (repo *fileRepo) Count() (int64, error) {

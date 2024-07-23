@@ -41,7 +41,7 @@ func (h *Handler) methodDelete(w http.ResponseWriter, r *http.Request) {
 		infra.HandleError(err, w)
 		return
 	}
-	if _, err = apiClient.DeleteFile(file.ID); err != nil {
+	if _, err = apiClient.DeleteOne(file.ID); err != nil {
 		infra.HandleError(err, w)
 		return
 	}
