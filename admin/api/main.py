@@ -28,12 +28,12 @@ async def add_process_time_header(request: Request, call_next):
     return response
 
 
-@app.get('/')
+@app.get('/', tags=['main'])
 async def root():
     return {"message": "Hello, it is root of admin microservice!"}
 
 
-@app.get('/liveness')
+@app.get('/liveness', tags=['liveness'])
 async def liveness():
     try:
         psycopg2.connect(host=settings.db_host,
@@ -50,7 +50,7 @@ async def liveness():
         )
 
 
-@app.get('/readiness')
+@app.get('/readiness', tags=['readiness'])
 async def readiness():
     try:
         psycopg2.connect(host=settings.db_host,

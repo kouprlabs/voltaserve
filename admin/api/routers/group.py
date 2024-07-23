@@ -6,7 +6,8 @@ from admin.api.database.group import fetch_group, fetch_groups
 from admin.api.models.group import GroupResponse, GroupListRequest, GroupListResponse, GroupRequest
 
 group_api_router = APIRouter(
-    prefix='/group'
+    prefix='/group',
+    tags=['group']
 )
 
 
