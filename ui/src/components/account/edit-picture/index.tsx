@@ -7,7 +7,6 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import { useCallback, useEffect, useState } from 'react'
 import {
   Button,
@@ -88,7 +87,7 @@ const AccountEditPicture = ({
       setSubmitting(true)
       try {
         const result = await UserAPI.updatePicture(picture)
-        mutate?.(result)
+        await mutate?.(result)
         setSubmitting(false)
         onClose?.()
       } finally {
@@ -102,7 +101,7 @@ const AccountEditPicture = ({
     try {
       setDeletionInProgress(true)
       const result = await UserAPI.deletePicture()
-      mutate?.(result)
+      await mutate?.(result)
       onClose?.()
     } finally {
       setDeletionInProgress(false)

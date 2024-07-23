@@ -11,9 +11,14 @@ import { getThumbnailHeight, getThumbnailWidth } from './size'
 export type IconThumbnailProps = {
   file: File
   scale: number
+  isLoading?: boolean
 }
 
-const IconThumbnail = ({ file, scale }: IconThumbnailProps) => {
+const IconThumbnail = ({
+  file,
+  scale,
+  isLoading: isLoadingProp,
+}: IconThumbnailProps) => {
   const { original } = file.snapshot || {}
   const width = getThumbnailWidth(file, scale)
   const height = getThumbnailHeight(file, scale)
@@ -84,7 +89,7 @@ const IconThumbnail = ({ file, scale }: IconThumbnailProps) => {
           'right-[-5px]',
         )}
       >
-        <IconBadge file={file} />
+        <IconBadge file={file} isLoading={isLoadingProp} />
       </div>
     </>
   )

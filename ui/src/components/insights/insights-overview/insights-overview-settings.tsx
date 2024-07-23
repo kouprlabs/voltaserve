@@ -7,7 +7,6 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import { useCallback } from 'react'
 import { Button, Card, CardBody, CardFooter, Text } from '@chakra-ui/react'
 import cx from 'classnames'
@@ -38,10 +37,10 @@ const InsightsOverviewSettings = () => {
   const handleUpdate = useCallback(async () => {
     if (id) {
       await InsightsAPI.patch(id)
-      mutateFile(await FileAPI.get(id))
-      mutateInfo(await InsightsAPI.getInfo(id))
-      mutateFiles?.()
-      mutateTaskCount?.(await TaskAPI.getCount())
+      await mutateFile(await FileAPI.get(id))
+      await mutateInfo(await InsightsAPI.getInfo(id))
+      await mutateFiles?.()
+      await mutateTaskCount?.(await TaskAPI.getCount())
       dispatch(modalDidClose())
     }
   }, [id, mutateFiles, mutateTaskCount, mutateInfo, dispatch])
@@ -49,10 +48,10 @@ const InsightsOverviewSettings = () => {
   const handleDelete = useCallback(async () => {
     if (id) {
       await InsightsAPI.delete(id)
-      mutateFile(await FileAPI.get(id))
-      mutateInfo(await InsightsAPI.getInfo(id))
-      mutateFiles?.()
-      mutateTaskCount?.(await TaskAPI.getCount())
+      await mutateFile(await FileAPI.get(id))
+      await mutateInfo(await InsightsAPI.getInfo(id))
+      await mutateFiles?.()
+      await mutateTaskCount?.(await TaskAPI.getCount())
       dispatch(modalDidClose())
     }
   }, [id, mutateFile, mutateFiles, mutateTaskCount, mutateInfo, dispatch])

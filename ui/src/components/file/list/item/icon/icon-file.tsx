@@ -7,7 +7,6 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import cx from 'classnames'
 import { FileCommonProps } from '@/types/file'
 import IconBadge from './icon-badge'
@@ -16,10 +15,10 @@ import IconThumbnail from './icon-thumbnail'
 
 type IconFileProps = FileCommonProps
 
-const IconFile = ({ file, scale }: IconFileProps) => (
+const IconFile = ({ file, scale, isLoading }: IconFileProps) => (
   <>
     {file.snapshot?.thumbnail ? (
-      <IconThumbnail file={file} scale={scale} />
+      <IconThumbnail file={file} scale={scale} isLoading={isLoading} />
     ) : (
       <>
         <IconDiverse file={file} scale={scale} />
@@ -34,7 +33,7 @@ const IconFile = ({ file, scale }: IconFileProps) => (
             'right-[-5px]',
           )}
         >
-          <IconBadge file={file} />
+          <IconBadge file={file} isLoading={isLoading} />
         </div>
       </>
     )}

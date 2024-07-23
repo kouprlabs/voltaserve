@@ -43,7 +43,7 @@ const TaskDrawerItem = ({ task }: TaskDrawerItemProps) => {
     try {
       setIsDismissing(true)
       await TaskAPI.dismiss(task.id)
-      mutateList?.(await TaskAPI.list())
+      await mutateList?.(await TaskAPI.list())
     } finally {
       setIsDismissing(false)
     }

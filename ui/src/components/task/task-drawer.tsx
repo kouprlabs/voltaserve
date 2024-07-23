@@ -56,7 +56,7 @@ const TaskDrawer = () => {
     try {
       setIsDismissing(true)
       await TaskAPI.dismissAll()
-      mutateList?.(await TaskAPI.list())
+      await mutateList?.(await TaskAPI.list())
     } finally {
       setIsDismissing(false)
     }

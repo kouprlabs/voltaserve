@@ -1065,7 +1065,7 @@ type FileMoveManyResult struct {
 func (svc *FileService) MoveMany(opts FileMoveManyOptions, userID string) (*FileMoveManyResult, error) {
 	res := &FileMoveManyResult{}
 	for _, id := range opts.SourceIDs {
-		if err := svc.MoveOne(opts.TargetID, id, userID); err != nil {
+		if err := svc.MoveOne(id, opts.TargetID, userID); err != nil {
 			res.Failed = append(res.Failed, id)
 		} else {
 			res.Succeeded = append(res.Succeeded, id)
