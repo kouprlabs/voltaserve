@@ -18,7 +18,7 @@ invitation_api_router = APIRouter(
                                    'model': InvitationResponse
                                }}
                            )
-async def get_user(data: Annotated[InvitationRequest, Depends()]):
+async def get_invitation(data: Annotated[InvitationRequest, Depends()]):
     return fetch_invitation(_id=data.id)
 
 
@@ -29,7 +29,7 @@ async def get_user(data: Annotated[InvitationRequest, Depends()]):
                                }
                            }
                            )
-async def get_all_users(data: Annotated[InvitationListRequest, Depends()]):
+async def get_all_invitations(data: Annotated[InvitationListRequest, Depends()]):
     return fetch_invitations(page=data.page, size=data.size)
 
 # --- PATCH --- #

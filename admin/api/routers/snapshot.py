@@ -18,7 +18,7 @@ snapshot_api_router = APIRouter(
                                  'model': SnapshotResponse
                              }}
                          )
-async def get_user(data: Annotated[SnapshotRequest, Depends()]):
+async def get_snapshot(data: Annotated[SnapshotRequest, Depends()]):
     return fetch_snapshot(_id=data.id)
 
 
@@ -29,7 +29,7 @@ async def get_user(data: Annotated[SnapshotRequest, Depends()]):
                              }
                          }
                          )
-async def get_all_users(data: Annotated[SnapshotListRequest, Depends()]):
+async def get_all_snapshots(data: Annotated[SnapshotListRequest, Depends()]):
     return fetch_snapshots(page=data.page, size=data.size)
 
 # --- PATCH --- #
