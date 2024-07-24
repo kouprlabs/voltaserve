@@ -11,6 +11,7 @@
 package handler
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"path"
@@ -50,7 +51,17 @@ func (h *Handler) methodMkcol(w http.ResponseWriter, r *http.Request) {
 			ParentID:    directory.ID,
 			Name:        helper.DecodeURIComponent(path.Base(r.URL.Path)),
 		}); err != nil {
-			infra.HandleError(err, w)
+			var apiError *infra.APIError
+			if errors.As(err, &apiError) {
+				if apiError.Value.Code == "file_with_similar_name_exists" && apiError.Value.Status == http.StatusForbidden {
+					// No-op
+					return
+				} else {
+					infra.HandleError(err, w)
+				}
+			} else {
+				infra.HandleError(err, w)
+			}
 			return
 		}
 		w.WriteHeader(http.StatusCreated)
