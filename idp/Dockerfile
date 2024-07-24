@@ -21,6 +21,6 @@ COPY tsconfig.json .
 
 RUN npm ci --legacy-peer-deps
 
-ENTRYPOINT ["npm", "run", "start:node"]
+ENTRYPOINT ["npm", "run", "start"]
 
 EXPOSE 8081
