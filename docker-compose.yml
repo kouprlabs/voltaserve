@@ -191,3 +191,12 @@ services:
     healthcheck:
       test: wget --quiet --spider http://127.0.0.1:8085/v2/health || exit 1
     restart: on-failure
+  migrations:
+    image: voltaserve/migrations
+    build:
+      context: ./migrations
+    environment:
+      - DATABASE_URL=postgresql://voltaserve@cockroach:26257/voltaserve
+    depends_on:
+      - cockroach
+    restart: on-failure
