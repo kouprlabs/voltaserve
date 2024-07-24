@@ -45,6 +45,9 @@ func (fi *FileIdentifier) IsOffice(path string) bool {
 		".otg",
 		".odf",
 		".odc",
+		".pages",
+		".numbers",
+		".key",
 		".rtf",
 	}
 	extension := filepath.Ext(path)
