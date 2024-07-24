@@ -13,6 +13,10 @@ class WorkspaceListRequest(GenericPaginationRequest):
     pass
 
 
+class OrganizationWorkspaceListRequest(WorkspaceRequest, WorkspaceListRequest):
+    pass
+
+
 # --- RESPONSE MODELS --- #
 class WorkspaceResponse(GenericResponse):
     name: str

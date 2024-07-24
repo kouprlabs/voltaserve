@@ -3,8 +3,9 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, status
 
 from admin.api.models.generic import GenericNotFoundResponse
+from admin.api.models.organization import UserOrganizationListRequest, UserOrganizationListResponse
 from admin.api.models.user import UserListRequest, UserListResponse, UserRequest, UserResponse
-from admin.api.database.user import fetch_user, fetch_users
+from admin.api.database.user import fetch_user, fetch_users, fetch_user_organizations
 
 users_api_router = APIRouter(
     prefix='/user',
@@ -22,7 +23,8 @@ users_api_router = APIRouter(
                       responses={
                           status.HTTP_200_OK: {
                               'model': UserListResponse
-                          }}
+                          }
+                      }
                       )
 async def get_user(data: Annotated[UserRequest, Depends()]):
     user = fetch_user(_id=data.id)
@@ -45,6 +47,21 @@ async def get_all_users(data: Annotated[UserListRequest, Depends()]):
         return GenericNotFoundResponse(message=f'This instance has no users')
 
     return UserListResponse(users=users)
+
+
+@users_api_router.get(path="/organizations",
+                      responses={
+                          status.HTTP_200_OK: {
+                              'model': UserOrganizationListResponse
+                          }
+                      }
+                      )
+async def get_user_organizations(data: Annotated[UserOrganizationListRequest, Depends()]):
+    organizations = fetch_user_organizations(user_id=data.id, page=data.page, size=data.size)
+    if organizations is None:
+        return GenericNotFoundResponse(message=f'This user has no organizations')
+
+    return UserOrganizationListResponse(organizations=organizations)
 
 # --- PATCH --- #
 

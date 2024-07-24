@@ -26,7 +26,7 @@ organization_api_router = APIRouter(
                                  }}
                              )
 async def get_organization(data: Annotated[OrganizationRequest, Depends()]):
-    organization = fetch_organization(_id=data.id)
+    organization = fetch_organization(organization_id=data.id)
     if organization is None:
         return GenericNotFoundResponse(message=f'Organization with id={data.id} does not exist')
 

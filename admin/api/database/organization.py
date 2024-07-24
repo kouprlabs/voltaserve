@@ -11,12 +11,12 @@ conn = psycopg2.connect(host=settings.db_host,
 
 
 # --- FETCH --- #
-def fetch_organization(_id: str):
+def fetch_organization(organization_id: str):
     with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as curs:
         try:
             curs.execute(f"SELECT id, name, create_time, update_time "
                          f"FROM {settings.db_name}.organization "
-                         f"WHERE id='{_id}'")
+                         f"WHERE id='{organization_id}'")
             return curs.fetchone()
         except (Exception, psycopg2.DatabaseError) as error:
             print(error)
