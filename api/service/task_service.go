@@ -11,6 +11,7 @@
 package service
 
 import (
+	"slices"
 	"sort"
 	"time"
 
@@ -105,25 +106,25 @@ func (svc *TaskService) Patch(id string, opts TaskPatchOptions) (*Task, error) {
 	if err != nil {
 		return nil, err
 	}
-	if helper.Includes(opts.Fields, TaskFieldName) {
+	if slices.Contains(opts.Fields, TaskFieldName) {
 		task.SetName(*opts.Name)
 	}
-	if helper.Includes(opts.Fields, TaskFieldError) {
+	if slices.Contains(opts.Fields, TaskFieldError) {
 		task.SetError(opts.Error)
 	}
-	if helper.Includes(opts.Fields, TaskFieldPercentage) {
+	if slices.Contains(opts.Fields, TaskFieldPercentage) {
 		task.SetPercentage(opts.Percentage)
 	}
-	if helper.Includes(opts.Fields, TaskFieldIsIndeterminate) {
+	if slices.Contains(opts.Fields, TaskFieldIsIndeterminate) {
 		task.SetIsIndeterminate(true)
 	}
-	if helper.Includes(opts.Fields, TaskFieldUserID) {
+	if slices.Contains(opts.Fields, TaskFieldUserID) {
 		task.SetUserID(*opts.UserID)
 	}
-	if helper.Includes(opts.Fields, TaskFieldStatus) {
+	if slices.Contains(opts.Fields, TaskFieldStatus) {
 		task.SetStatus(*opts.Status)
 	}
-	if helper.Includes(opts.Fields, TaskFieldPayload) {
+	if slices.Contains(opts.Fields, TaskFieldPayload) {
 		task.SetPayload(opts.Payload)
 	}
 	if err := svc.saveAndSync(task); err != nil {
