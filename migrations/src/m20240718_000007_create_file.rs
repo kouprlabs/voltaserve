@@ -82,7 +82,7 @@ impl Migration {
                     .foreign_key(
                         ForeignKey::create()
                             .from(File::Table, File::SnapshotId)
-                            .to(Snapshot::Table, Snapshot::Id)
+                            .to(Snapshot::Table, Snapshot::Id),
                     )
                     .col(
                         ColumnDef::new(File::CreateTime)

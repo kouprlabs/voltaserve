@@ -1,8 +1,6 @@
 use sea_orm_migration::prelude::*;
 
-use crate::models::v1::{
-    Group, Grouppermission,
-};
+use crate::models::v1::{Group, Grouppermission};
 
 #[derive(DeriveMigrationName)]
 pub struct Migration;
@@ -86,4 +84,3 @@ impl MigrationTrait for Migration {
         Ok(())
     }
 }
-
