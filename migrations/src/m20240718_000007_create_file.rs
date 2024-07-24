@@ -79,6 +79,11 @@ impl Migration {
                             .on_delete(ForeignKeyAction::Cascade),
                     )
                     .col(ColumnDef::new(File::SnapshotId).text())
+                    .foreign_key(
+                        ForeignKey::create()
+                            .from(File::Table, File::SnapshotId)
+                            .to(Snapshot::Table, Snapshot::Id)
+                    )
                     .col(
                         ColumnDef::new(File::CreateTime)
                             .text()
