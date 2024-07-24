@@ -8,11 +8,3 @@ pub enum Organization {
     CreateTime,
     UpdateTime,
 }
-
-#[derive(Iden)]
-pub enum OrganizationUser {
-    Table,
-    OrganizationId,
-    UserId,
-    CreateTime,
-}

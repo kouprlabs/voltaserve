@@ -7,7 +7,6 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
@@ -70,7 +69,7 @@ const OrganizationDelete = ({
       try {
         navigate('/organization')
         await OrganizationAPI.delete(organization.id)
-        mutate?.()
+        await mutate?.()
         onClose?.()
       } finally {
         setSubmitting(false)

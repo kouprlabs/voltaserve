@@ -7,7 +7,6 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import { useCallback } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import {
@@ -102,7 +101,7 @@ const FileSearchFilter = () => {
             : undefined,
         })
         navigate(`/workspace/${workspaceId}/file/${fileId}?q=${encodedQuery}`)
-        mutateList?.()
+        await mutateList?.()
         dispatch(modalDidClose())
         setSubmitting(false)
       } finally {
@@ -112,9 +111,9 @@ const FileSearchFilter = () => {
     [query, workspaceId, fileId, mutateList, dispatch],
   )
 
-  const handleClear = useCallback(() => {
+  const handleClear = useCallback(async () => {
     navigate(`/workspace/${workspaceId}/file/${fileId}`)
-    mutateList?.()
+    await mutateList?.()
     dispatch(modalDidClose())
   }, [workspaceId, fileId, mutateList, navigate, dispatch])
 

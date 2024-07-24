@@ -1,8 +1,6 @@
 use sea_orm_migration::prelude::*;
 
-use crate::models::v1::{
-    User, Userpermission,
-};
+use crate::models::v1::{User, Userpermission};
 
 #[derive(DeriveMigrationName)]
 pub struct Migration;

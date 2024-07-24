@@ -182,6 +182,8 @@ type TaskInsertOptions struct {
 	Payload         map[string]string `json:"payload,omitempty"`
 }
 
+const TaskPayloadObjectKey = "object"
+
 func (repo *taskRepo) Insert(opts TaskInsertOptions) (model.Task, error) {
 	task := taskEntity{
 		ID:              opts.ID,

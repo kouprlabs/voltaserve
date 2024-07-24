@@ -296,7 +296,7 @@ func (svc *FileService) Store(id string, opts StoreOptions, userID string) (*Fil
 			UserID:          userID,
 			IsIndeterminate: true,
 			Status:          model.TaskStatusWaiting,
-			Payload:         map[string]string{"fileId": file.GetID()},
+			Payload:         map[string]string{repo.TaskPayloadObjectKey: file.GetName()},
 		})
 		if err != nil {
 			return nil, err
@@ -788,7 +788,7 @@ func (svc *FileService) CopyOne(sourceID string, targetID string, userID string)
 		UserID:          userID,
 		IsIndeterminate: true,
 		Status:          model.TaskStatusRunning,
-		Payload:         map[string]string{"object": source.GetName()},
+		Payload:         map[string]string{repo.TaskPayloadObjectKey: source.GetName()},
 	})
 	if err != nil {
 		return nil, err
@@ -980,7 +980,7 @@ func (svc *FileService) MoveOne(sourceID string, targetID string, userID string)
 		UserID:          userID,
 		IsIndeterminate: true,
 		Status:          model.TaskStatusRunning,
-		Payload:         map[string]string{"object": source.GetName()},
+		Payload:         map[string]string{repo.TaskPayloadObjectKey: source.GetName()},
 	})
 	if err != nil {
 		return err
@@ -1065,7 +1065,7 @@ type FileMoveManyResult struct {
 func (svc *FileService) MoveMany(opts FileMoveManyOptions, userID string) (*FileMoveManyResult, error) {
 	res := &FileMoveManyResult{}
 	for _, id := range opts.SourceIDs {
-		if err := svc.MoveOne(opts.TargetID, id, userID); err != nil {
+		if err := svc.MoveOne(id, opts.TargetID, userID); err != nil {
 			res.Failed = append(res.Failed, id)
 		} else {
 			res.Succeeded = append(res.Succeeded, id)
@@ -1117,7 +1117,7 @@ func (svc *FileService) DeleteOne(id string, userID string) error {
 		UserID:          userID,
 		IsIndeterminate: true,
 		Status:          model.TaskStatusRunning,
-		Payload:         map[string]string{"object": file.GetName()},
+		Payload:         map[string]string{repo.TaskPayloadObjectKey: file.GetName()},
 	})
 	if err != nil {
 		return err

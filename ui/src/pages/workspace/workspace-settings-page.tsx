@@ -7,8 +7,7 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import {
   Divider,
@@ -64,6 +63,16 @@ const WorkspaceSettingsPage = () => {
     'gap-1',
     `h-[40px]`,
   )
+
+  const handleEditNameClose = useCallback(async () => {
+    setIsNameModalOpen(false)
+    await mutate()
+  }, [])
+
+  const handleEditStorageCapacityClose = useCallback(async () => {
+    setIsStorageCapacityModalOpen(false)
+    await mutateStorageUsage()
+  }, [])
 
   if (workspaceError) {
     return null
@@ -144,18 +153,12 @@ const WorkspaceSettingsPage = () => {
       <WorkspaceEditName
         open={isNameModalOpen}
         workspace={workspace}
-        onClose={() => {
-          setIsNameModalOpen(false)
-          mutate()
-        }}
+        onClose={handleEditNameClose}
       />
       <WorkspaceEditStorageCapacity
         open={isStorageCapacityModalOpen}
         workspace={workspace}
-        onClose={() => {
-          setIsStorageCapacityModalOpen(false)
-          mutateStorageUsage()
-        }}
+        onClose={handleEditStorageCapacityClose}
       />
       <WorkspaceDelete
         open={isDeleteModalOpen}

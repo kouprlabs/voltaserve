@@ -120,7 +120,7 @@ func (svc *InsightsService) Create(id string, opts InsightsCreateOptions, userID
 		UserID:          userID,
 		IsIndeterminate: true,
 		Status:          model.TaskStatusWaiting,
-		Payload:         map[string]string{"fileId": file.GetID()},
+		Payload:         map[string]string{repo.TaskPayloadObjectKey: file.GetName()},
 	})
 	if err != nil {
 		return err
@@ -185,7 +185,7 @@ func (svc *InsightsService) Patch(id string, userID string) error {
 		UserID:          userID,
 		IsIndeterminate: true,
 		Status:          model.TaskStatusWaiting,
-		Payload:         map[string]string{"fileId": file.GetID()},
+		Payload:         map[string]string{repo.TaskPayloadObjectKey: file.GetName()},
 	})
 	if err != nil {
 		return err
@@ -244,7 +244,7 @@ func (svc *InsightsService) Delete(id string, userID string) error {
 		UserID:          userID,
 		IsIndeterminate: true,
 		Status:          model.TaskStatusRunning,
-		Payload:         map[string]string{"fileId": file.GetID()},
+		Payload:         map[string]string{repo.TaskPayloadObjectKey: file.GetName()},
 	})
 	if err != nil {
 		return err

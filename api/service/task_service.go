@@ -53,11 +53,13 @@ type Task struct {
 }
 
 type TaskCreateOptions struct {
-	Name            string  `json:"name"`
-	Error           *string `json:"error,omitempty"`
-	Percentage      *int    `json:"percentage,omitempty"`
-	IsIndeterminate bool    `json:"isIndeterminate"`
-	UserID          string  `json:"userId"`
+	Name            string            `json:"name"`
+	Error           *string           `json:"error,omitempty"`
+	Percentage      *int              `json:"percentage,omitempty"`
+	IsIndeterminate bool              `json:"isIndeterminate"`
+	UserID          string            `json:"userId"`
+	Status          string            `json:"status"`
+	Payload         map[string]string `json:"payload,omitempty"`
 }
 
 func (svc *TaskService) Create(opts TaskCreateOptions) (*Task, error) {
@@ -68,6 +70,7 @@ func (svc *TaskService) Create(opts TaskCreateOptions) (*Task, error) {
 		Percentage:      opts.Percentage,
 		IsIndeterminate: opts.IsIndeterminate,
 		UserID:          opts.UserID,
+		Payload:         opts.Payload,
 	})
 	if err != nil {
 		return nil, err
@@ -140,6 +143,9 @@ func (svc *TaskService) Find(id string, userID string) (*Task, error) {
 	task, err := svc.taskCache.Get(id)
 	if err != nil {
 		return nil, err
+	}
+	if task.GetUserID() != userID {
+		return nil, errorpkg.NewTaskNotFoundError(nil)
 	}
 	res, err := svc.taskMapper.mapOne(task)
 	if err != nil {

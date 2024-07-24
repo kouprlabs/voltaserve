@@ -7,7 +7,6 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import { useCallback } from 'react'
 import { Button, ModalBody, ModalFooter } from '@chakra-ui/react'
 import cx from 'classnames'
@@ -30,9 +29,9 @@ const MosaicCreate = () => {
   const handleCreate = useCallback(async () => {
     if (id) {
       await MosaicAPI.create(id, false)
-      mutateInfo?.(await MosaicAPI.getInfo(id))
-      mutateFiles?.()
-      mutateTasks?.(await TaskAPI.list())
+      await mutateInfo?.(await MosaicAPI.getInfo(id))
+      await mutateFiles?.()
+      await mutateTasks?.(await TaskAPI.list())
       dispatch(modalDidClose())
     }
   }, [id, mutateFiles, mutateTasks, mutateInfo, dispatch])

@@ -74,7 +74,7 @@ const SnapshotList = () => {
       try {
         setIsActivating(true)
         await SnapshotAPI.activate(selected.id, { fileId })
-        snapshotMutate()
+        await snapshotMutate()
         mutateFiles?.()
       } finally {
         setIsActivating(false)

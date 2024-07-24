@@ -7,7 +7,6 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import { MouseEvent, useEffect, useMemo } from 'react'
 import { useCallback, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -17,7 +16,7 @@ import { Status } from '@/client/api/snapshot'
 import Text from '@/lib/components/text'
 import relativeDate from '@/lib/helpers/relative-date'
 import store from '@/store/configure-store'
-import { useAppDispatch } from '@/store/hook'
+import { useAppDispatch, useAppSelector } from '@/store/hook'
 import {
   selectionAdded,
   selectionRemoved,
@@ -50,6 +49,7 @@ const ListItem = ({
   const navigate = useNavigate()
   const [isChecked, setIsChecked] = useState(false)
   const [isSelected, setIsSelected] = useState(false)
+  const loading = useAppSelector((state) => state.ui.files.loading)
   const noOfLines = useMemo(() => {
     if (viewType === FileViewType.Grid) {
       return 3
@@ -191,7 +191,7 @@ const ListItem = ({
           file={file}
           scale={scale}
           viewType={viewType}
-          isLoading={isLoading}
+          isLoading={isLoading || loading.includes(file.id)}
         />
       </div>
       <div

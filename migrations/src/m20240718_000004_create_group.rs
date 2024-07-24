@@ -1,6 +1,6 @@
 use sea_orm_migration::prelude::*;
 
-use crate::models::v1::{Group, GroupUser, Organization, User};
+use crate::models::v1::{Group, Organization};
 
 #[derive(DeriveMigrationName)]
 pub struct Migration;
@@ -55,55 +55,6 @@ impl MigrationTrait for Migration {
             )
             .await?;
 
-        manager
-            .create_table(
-                Table::create()
-                    .table(GroupUser::Table)
-                    .col(ColumnDef::new(GroupUser::GroupId).text())
-                    .foreign_key(
-                        ForeignKey::create()
-                            .from(GroupUser::Table, GroupUser::GroupId)
-                            .to(Group::Table, Group::Id)
-                            .on_delete(ForeignKeyAction::Cascade),
-                    )
-                    .col(ColumnDef::new(GroupUser::UserId).text())
-                    .foreign_key(
-                        ForeignKey::create()
-                            .from(GroupUser::Table, GroupUser::UserId)
-                            .to(User::Table, User::Id)
-                            .on_delete(ForeignKeyAction::Cascade),
-                    )
-                    .col(
-                        ColumnDef::new(GroupUser::CreateTime)
-                            .text()
-                            .not_null(),
-                    )
-                    .primary_key(
-                        Index::create()
-                            .col(GroupUser::GroupId)
-                            .col(GroupUser::UserId),
-                    )
-                    .to_owned(),
-            )
-            .await?;
-
-        manager
-            .create_index(
-                Index::create()
-                    .table(GroupUser::Table)
-                    .col(GroupUser::GroupId)
-                    .to_owned(),
-            )
-            .await?;
-        manager
-            .create_index(
-                Index::create()
-                    .table(GroupUser::Table)
-                    .col(GroupUser::UserId)
-                    .to_owned(),
-            )
-            .await?;
-
         Ok(())
     }
 
@@ -111,14 +62,6 @@ impl MigrationTrait for Migration {
         &self,
         manager: &SchemaManager,
     ) -> Result<(), DbErr> {
-        manager
-            .drop_table(
-                Table::drop()
-                    .table(GroupUser::Table)
-                    .to_owned(),
-            )
-            .await?;
-
         manager
             .drop_table(
                 Table::drop()

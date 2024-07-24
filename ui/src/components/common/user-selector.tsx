@@ -37,7 +37,7 @@ export type UserSelectorProps = {
   value?: User
   organizationId?: string
   groupId?: string
-  nonGroupMembersOnly?: boolean
+  excludeGroupMembers?: boolean
   onConfirm?: (user: User) => void
 }
 
@@ -45,7 +45,7 @@ const UserSelector = ({
   value,
   organizationId,
   groupId,
-  nonGroupMembersOnly,
+  excludeGroupMembers,
   onConfirm,
 }: UserSelectorProps) => {
   const { isOpen, onOpen, onClose } = useDisclosure()
@@ -61,7 +61,7 @@ const UserSelector = ({
       query,
       organizationId,
       groupId,
-      excludeGroupMembers: nonGroupMembersOnly,
+      excludeGroupMembers,
       page,
       size: 5,
       sortOrder: SortOrder.Desc,

@@ -7,7 +7,6 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import { useCallback, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import {
@@ -69,7 +68,7 @@ const SharingGroups = ({
           groupId: activeGroup.id,
           permission: activePermission,
         })
-        mutateList?.()
+        await mutateList?.()
         if (isSingleSelection) {
           await mutateGroupPermissions()
         }
@@ -101,7 +100,7 @@ const SharingGroups = ({
           ids: selection,
           groupId: permission.group.id,
         })
-        mutateList?.()
+        await mutateList?.()
         if (isSingleSelection) {
           await mutateGroupPermissions()
         }

@@ -44,6 +44,7 @@ func NewDispatcher() *Dispatcher {
 		glbPipeline:        NewGLBPipeline(),
 		zipPipeline:        NewZIPPipeline(),
 		taskClient:         api_client.NewTaskClient(),
+		snapshotClient:     api_client.NewSnapshotClient(),
 	}
 }
 

@@ -335,7 +335,7 @@ export default class FileAPI {
     })
   }
 
-  static async moveMany(id: string, options: MoveManyOptions) {
+  static async moveMany(options: MoveManyOptions) {
     return apiFetcher({
       url: `/files/move`,
       method: 'POST',

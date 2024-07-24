@@ -7,7 +7,6 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import { ChangeEvent, ReactElement, useCallback, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import {
@@ -121,7 +120,7 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true)
     dispatch(selectionUpdated([]))
-    mutateList?.()
+    await mutateList?.()
     setIsRefreshing(false)
   }, [fileId, dispatch, mutateList])
 

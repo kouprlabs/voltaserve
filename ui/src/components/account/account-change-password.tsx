@@ -7,7 +7,6 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import { useCallback, useEffect, useState } from 'react'
 import {
   Button,
@@ -73,7 +72,7 @@ const AccountChangePassword = ({
           currentPassword,
           newPassword,
         })
-        mutate?.(result)
+        await mutate?.(result)
         setSubmitting(false)
         onClose?.()
       } finally {
