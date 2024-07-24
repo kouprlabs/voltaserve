@@ -117,13 +117,15 @@ impl Migration {
                     .foreign_key(
                         ForeignKey::create()
                             .from(SnapshotFile::Table, SnapshotFile::SnapshotId)
-                            .to(Snapshot::Table, Snapshot::Id),
+                            .to(Snapshot::Table, Snapshot::Id)
+                            .on_delete(ForeignKeyAction::Cascade),
                     )
                     .col(ColumnDef::new(SnapshotFile::FileId).text())
                     .foreign_key(
                         ForeignKey::create()
                             .from(SnapshotFile::Table, SnapshotFile::FileId)
-                            .to(File::Table, File::Id),
+                            .to(File::Table, File::Id)
+                            .on_delete(ForeignKeyAction::Cascade),
                     )
                     .col(
                         ColumnDef::new(SnapshotFile::CreateTime)
