@@ -13,7 +13,6 @@ package infra
 import (
 	"bytes"
 	"context"
-	"github.com/kouprlabs/voltaserve/api/log"
 	"io"
 	"strings"
 
@@ -22,6 +21,7 @@ import (
 
 	"github.com/kouprlabs/voltaserve/api/config"
 	"github.com/kouprlabs/voltaserve/api/errorpkg"
+	"github.com/kouprlabs/voltaserve/api/log"
 )
 
 type S3Manager struct {
