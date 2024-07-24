@@ -13,6 +13,7 @@ package infra
 import (
 	"bytes"
 	"context"
+	"github.com/kouprlabs/voltaserve/api/log"
 	"io"
 	"strings"
 
@@ -177,7 +178,12 @@ func (mgr *S3Manager) RemoveBucket(bucketName string) error {
 		Prefix:    "",
 		Recursive: true,
 	})
-	mgr.client.RemoveObjects(context.Background(), bucketName, objectCh, minio.RemoveObjectsOptions{})
+	removeObjectErrCh := mgr.client.RemoveObjects(context.Background(), bucketName, objectCh, minio.RemoveObjectsOptions{})
+	for removeErr := range removeObjectErrCh {
+		if removeErr.Err != nil {
+			log.GetLogger().Error(removeErr.Err)
+		}
+	}
 	if err = mgr.client.RemoveBucket(context.Background(), bucketName); err != nil {
 		return err
 	}
