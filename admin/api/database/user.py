@@ -34,6 +34,20 @@ def fetch_users(page=0, size=10):
         except (Exception, psycopg2.DatabaseError) as error:
             print(error)
 
+
+def fetch_user_organizations(user_id: str, page=0, size=10):
+    with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as curs:
+        try:
+            curs.execute(f"SELECT * from {settings.db_name}.userpermission u "
+                         f"JOIN {settings.db_name}.organization o ON u.resource_id = o.id "
+                         f"WHERE u.user_id = '{user_id}' "
+                         f"ORDER BY o.create_time "
+                         f"OFFSET {page * size} "
+                         f"LIMIT {page * size + size}")
+            return curs.fetchall()
+        except (Exception, psycopg2.DatabaseError) as error:
+            print(error)
+
 # --- UPDATE --- #
 
 # --- CREATE --- #

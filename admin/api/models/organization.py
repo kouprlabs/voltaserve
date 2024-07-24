@@ -1,6 +1,8 @@
 import datetime
 from typing import List
 
+from pydantic import Field
+
 from .generic import GenericPaginationRequest, GenericResponse, GenericListResponse, GenericRequest
 
 
@@ -13,6 +15,10 @@ class OrganizationListRequest(GenericPaginationRequest):
     pass
 
 
+class UserOrganizationListRequest(OrganizationRequest, OrganizationListRequest):
+    pass
+
+
 # --- RESPONSE MODELS --- #
 class OrganizationResponse(GenericResponse):
     name: str
@@ -22,3 +28,11 @@ class OrganizationResponse(GenericResponse):
 
 class OrganizationListResponse(GenericListResponse):
     organizations: List[OrganizationResponse]
+
+
+class UserOrganizationResponse(OrganizationResponse):
+    permission: str
+
+
+class UserOrganizationListResponse(GenericListResponse):
+    organizations: List[UserOrganizationResponse]
