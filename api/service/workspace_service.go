@@ -269,9 +269,6 @@ func (svc *WorkspaceService) Delete(id string, userID string) error {
 	if err = svc.workspaceGuard.Authorize(userID, workspace, model.PermissionOwner); err != nil {
 		return err
 	}
-	if workspace, err = svc.workspaceRepo.Find(id); err != nil {
-		return err
-	}
 	if err = svc.workspaceRepo.Delete(id); err != nil {
 		return err
 	}
