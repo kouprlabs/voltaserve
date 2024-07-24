@@ -13,6 +13,7 @@ package repo
 import (
 	"encoding/json"
 	"errors"
+	"slices"
 
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
@@ -466,34 +467,34 @@ func (repo *snapshotRepo) Update(id string, opts SnapshotUpdateOptions) error {
 	if err != nil {
 		return err
 	}
-	if helper.Includes(opts.Fields, SnapshotFieldOriginal) {
+	if slices.Contains(opts.Fields, SnapshotFieldOriginal) {
 		snapshot.SetOriginal(opts.Original)
 	}
-	if helper.Includes(opts.Fields, SnapshotFieldPreview) {
+	if slices.Contains(opts.Fields, SnapshotFieldPreview) {
 		snapshot.SetPreview(opts.Preview)
 	}
-	if helper.Includes(opts.Fields, SnapshotFieldText) {
+	if slices.Contains(opts.Fields, SnapshotFieldText) {
 		snapshot.SetText(opts.Text)
 	}
-	if helper.Includes(opts.Fields, SnapshotFieldOCR) {
+	if slices.Contains(opts.Fields, SnapshotFieldOCR) {
 		snapshot.SetOCR(opts.OCR)
 	}
-	if helper.Includes(opts.Fields, SnapshotFieldEntities) {
+	if slices.Contains(opts.Fields, SnapshotFieldEntities) {
 		snapshot.SetEntities(opts.Entities)
 	}
-	if helper.Includes(opts.Fields, SnapshotFieldMosaic) {
+	if slices.Contains(opts.Fields, SnapshotFieldMosaic) {
 		snapshot.SetMosaic(opts.Mosaic)
 	}
-	if helper.Includes(opts.Fields, SnapshotFieldThumbnail) {
+	if slices.Contains(opts.Fields, SnapshotFieldThumbnail) {
 		snapshot.SetThumbnail(opts.Thumbnail)
 	}
-	if helper.Includes(opts.Fields, SnapshotFieldStatus) {
+	if slices.Contains(opts.Fields, SnapshotFieldStatus) {
 		snapshot.SetStatus(*opts.Status)
 	}
-	if helper.Includes(opts.Fields, SnapshotFieldLanguage) {
+	if slices.Contains(opts.Fields, SnapshotFieldLanguage) {
 		snapshot.SetLanguage(*opts.Language)
 	}
-	if helper.Includes(opts.Fields, SnapshotFieldTaskID) {
+	if slices.Contains(opts.Fields, SnapshotFieldTaskID) {
 		snapshot.SetTaskID(opts.TaskID)
 	}
 	if db := repo.db.Save(&snapshot); db.Error != nil {
