@@ -35,7 +35,7 @@ jobs:
 
       - name: Run TypeScript Compiler
         run: npm run tsc
-        working-directory: ui
+        working-directory: idp
 
       - name: Run ESLint
         run: npm run lint
