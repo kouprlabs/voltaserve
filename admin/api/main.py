@@ -3,11 +3,10 @@ import time
 
 import psycopg2
 from fastapi import FastAPI, Request, Response, status
-from starlette.background import BackgroundTask
 
-from routers import users_api_router, group_api_router, organization_api_router, task_api_router, workspace_api_router, \
+from .dependencies import settings
+from .routers import users_api_router, group_api_router, organization_api_router, task_api_router, workspace_api_router, \
     invitation_api_router
-from dependencies import settings
 
 app = FastAPI(debug=True)
 
@@ -22,31 +21,12 @@ app.include_router(workspace_api_router)
 app.include_router(invitation_api_router)
 
 
-# def log_debug(req_body, res_body):
-#     logger.debug(req_body)
-#     logger.debug(res_body)
-
-
 @app.middleware("http")
 async def add_process_time_header(request: Request, call_next):
     start_time = time.time()
     response = await call_next(request)
     response.headers["X-Process-Time-Ms"] = str(round((time.time() - start_time) * 1000, 4))
     return response
-
-
-# @app.middleware('http')
-# async def logme(request: Request, call_next):
-#     req_body = await request.body()
-#     response = await call_next(request)
-#
-#     res_body = b''
-#     async for chunk in response.body_iterator:
-#         res_body += chunk
-#
-#     task = BackgroundTask(log_debug, req_body.decode(), res_body.decode())
-#     return Response(content=res_body, status_code=response.status_code,
-#                     headers=dict(response.headers), media_type=response.media_type, background=task)
 
 
 @app.get('/', tags=['main'])

@@ -2,9 +2,8 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, status
 
-from admin.api.database.group import fetch_group, fetch_groups
-from admin.api.models.generic import GenericNotFoundResponse
-from admin.api.models.group import GroupResponse, GroupListRequest, GroupListResponse, GroupRequest
+from ..database import fetch_group, fetch_groups
+from ..models import GenericNotFoundResponse, GroupResponse, GroupListRequest, GroupListResponse, GroupRequest
 
 group_api_router = APIRouter(
     prefix='/group',

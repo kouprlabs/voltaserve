@@ -2,9 +2,8 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, status
 
-from admin.api.database.snapshot import fetch_snapshot, fetch_snapshots
-from admin.api.models.generic import GenericNotFoundResponse
-from admin.api.models.snapshot import SnapshotResponse, SnapshotListRequest, SnapshotListResponse, SnapshotRequest
+from ..database import fetch_snapshot, fetch_snapshots
+from ..models import GenericNotFoundResponse, SnapshotResponse, SnapshotListRequest, SnapshotListResponse, SnapshotRequest
 
 snapshot_api_router = APIRouter(
     prefix='/snapshot',

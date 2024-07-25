@@ -1,14 +1,16 @@
 [tool.poetry]
-name = "voltaserve/admin"
+name = "voltaserve-admin"
 version = "0.0.1"
-description = "Asynchronous API for voltaserve/admin microservice"
+description = "Asynchronous API for voltaserve-admin microservice"
 authors = ["Piotr Łoboda <voltaserve@lobson.pl>"]
 maintainers = ["Piotr Łoboda <voltaserve@lobson.pl>"]
 packages = [
         {include = 'api/'},
         {include = 'api/routers'},
-        {include = 'api/models'}
+        {include = 'api/models'},
+        {include = 'api/database'}
     ]
+
 classifiers = [
         "Programming Language :: Python :: 3.12",
         "Framework :: FastAPI",
