@@ -27,7 +27,7 @@ const PasswordHints = ({ value, requirements }: PasswordHintsProps) => {
         isFulfilled={hasMinNumbers(value, requirements.minNumbers)}
       />
       <PasswordRequirement
-        text={`Contains at least ${requirements.minSymbols} symbol(s).`}
+        text={`Contains at least ${requirements.minSymbols} special character(s) (!#$%).`}
         isFulfilled={hasMinSymbols(value, requirements.minSymbols)}
       />
     </div>

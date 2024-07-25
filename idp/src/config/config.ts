@@ -52,7 +52,7 @@ export function readPassword(config: Config) {
   config.password.minLowercase = parseInt(process.env.PASSWORD_MIN_LOWERCASE)
   config.password.minUppercase = parseInt(process.env.PASSWORD_MIN_UPPERCASE)
   config.password.minNumbers = parseInt(process.env.PASSWORD_MIN_NUMBERS)
-  config.password.minSymbols = parseInt(process.env.PASSWORD_MIN_NUMBERS)
+  config.password.minSymbols = parseInt(process.env.PASSWORD_MIN_SYMBOLS)
 }
 
 export function readCORS(config: Config) {
