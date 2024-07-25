@@ -5,8 +5,8 @@ import psycopg2
 from fastapi import FastAPI, Request, Response, status
 
 from .dependencies import settings
-from .routers import users_api_router, group_api_router, organization_api_router, task_api_router, workspace_api_router, \
-    invitation_api_router
+from .routers import users_api_router, group_api_router, organization_api_router, task_api_router, \
+    workspace_api_router, invitation_api_router
 
 app = FastAPI(debug=True)
 
@@ -45,9 +45,10 @@ async def liveness():
         return Response(
             status_code=status.HTTP_204_NO_CONTENT,
         )
-    except:
+    except Exception as e:
         return Response(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            content=e
         )
 
 
@@ -62,7 +63,8 @@ async def readiness():
         return Response(
             status_code=status.HTTP_204_NO_CONTENT,
         )
-    except:
+    except Exception as e:
         return Response(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            content=e
         )

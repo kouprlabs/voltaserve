@@ -3,7 +3,8 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, status
 
 from ..database import fetch_invitation, fetch_invitations
-from ..models import GenericNotFoundResponse, InvitationResponse, InvitationListRequest, InvitationListResponse, InvitationRequest
+from ..models import GenericNotFoundResponse, InvitationResponse, InvitationListRequest, \
+    InvitationListResponse, InvitationRequest
 
 invitation_api_router = APIRouter(
     prefix='/invitation',
@@ -41,7 +42,7 @@ async def get_invitation(data: Annotated[InvitationRequest, Depends()]):
 async def get_all_invitations(data: Annotated[InvitationListRequest, Depends()]):
     invitations = fetch_invitations(page=data.page, size=data.size)
     if invitations is None:
-        return GenericNotFoundResponse(message=f'This instance has no invitations')
+        return GenericNotFoundResponse(message='This instance has no invitations')
 
     return InvitationListResponse(invitations=invitations)
 

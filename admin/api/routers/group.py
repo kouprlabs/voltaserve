@@ -41,7 +41,7 @@ async def get_group(data: Annotated[GroupRequest, Depends()]):
 async def get_all_groups(data: Annotated[GroupListRequest, Depends()]):
     groups = fetch_groups(page=data.page, size=data.size)
     if groups is None:
-        return GenericNotFoundResponse(message=f'This instance has no groups')
+        return GenericNotFoundResponse(message='This instance has no groups')
 
     return GroupListResponse(groups=groups)
 
