@@ -7,9 +7,9 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import { Router, Request, Response, NextFunction } from 'express'
 import { body, validationResult } from 'express-validator'
+import { getConfig } from '@/config/config'
 import { parseValidationError } from '@/infra/error'
 import {
   confirmEmail,
@@ -20,6 +20,7 @@ import {
   AccountCreateOptions,
   AccountResetPasswordOptions,
   AccountSendResetPasswordEmailOptions,
+  getPasswordRequirements,
 } from './service'
 
 const router = Router()
@@ -27,7 +28,15 @@ const router = Router()
 router.post(
   '/',
   body('email').isEmail().isLength({ max: 255 }),
-  body('password').isStrongPassword().isLength({ max: 10000 }),
+  body('password')
+    .isStrongPassword({
+      minLength: getConfig().password.minLength,
+      minLowercase: getConfig().password.minLowercase,
+      minUppercase: getConfig().password.minUppercase,
+      minNumbers: getConfig().password.minNumbers,
+      minSymbols: getConfig().password.minSymbols,
+    })
+    .isLength({ max: 10000 }),
   body('fullName').isString().notEmpty().trim().escape().isLength({ max: 255 }),
   body('picture').optional().isBase64().isByteLength({ max: 3000000 }),
   async (req: Request, res: Response, next: NextFunction) => {
@@ -42,6 +51,10 @@ router.post(
     }
   },
 )
+
+router.get('/password_requirements', async (_: Request, res: Response) => {
+  res.json(getPasswordRequirements())
+})
 
 router.post(
   '/reset_password',

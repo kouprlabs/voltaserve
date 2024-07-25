@@ -7,7 +7,7 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
+import * as process from 'node:process'
 import { Config } from './types'
 
 let config: Config
@@ -18,6 +18,7 @@ export function getConfig(): Config {
     config.port = parseInt(process.env.PORT)
     readURLs(config)
     readToken(config)
+    readPassword(config)
     readCORS(config)
     readSearch(config)
     readSMTP(config)
@@ -44,6 +45,14 @@ export function readToken(config: Config) {
       process.env.TOKEN_REFRESH_TOKEN_LIFETIME,
     )
   }
+}
+
+export function readPassword(config: Config) {
+  config.password.minLength = parseInt(process.env.PASSWORD_MIN_LENGTH)
+  config.password.minLowercase = parseInt(process.env.PASSWORD_MIN_LOWERCASE)
+  config.password.minUppercase = parseInt(process.env.PASSWORD_MIN_UPPERCASE)
+  config.password.minNumbers = parseInt(process.env.PASSWORD_MIN_NUMBERS)
+  config.password.minSymbols = parseInt(process.env.PASSWORD_MIN_NUMBERS)
 }
 
 export function readCORS(config: Config) {

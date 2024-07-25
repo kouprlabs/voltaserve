@@ -13,19 +13,17 @@ export class Config {
   publicUIURL: string
   databaseURL: string
   token: TokenConfig
+  password: PasswordConfig
   corsOrigins: string[]
   search: SearchConfig
   smtp: SMTPConfig
 
   constructor() {
     this.token = new TokenConfig()
+    this.password = new PasswordConfig()
     this.search = new SearchConfig()
     this.smtp = new SMTPConfig()
   }
-}
-
-export class DatabaseConfig {
-  url: string
 }
 
 export class TokenConfig {
@@ -34,6 +32,14 @@ export class TokenConfig {
   issuer: string
   accessTokenLifetime: number
   refreshTokenLifetime: number
+}
+
+export class PasswordConfig {
+  minLength: number
+  minLowercase: number
+  minUppercase: number
+  minNumbers: number
+  minSymbols: number
 }
 
 export class SearchConfig {

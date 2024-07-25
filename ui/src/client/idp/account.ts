@@ -7,7 +7,7 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
+import useSWR, { SWRConfiguration } from 'swr'
 import { idpFetcher } from '@/client/fetcher'
 import { User } from './user'
 
@@ -29,6 +29,14 @@ export type ResetPasswordOptions = {
 
 export type ConfirmEmailOptions = {
   token: string
+}
+
+export type PasswordRequirements = {
+  minLength: number
+  minLowercase: number
+  minUppercase: number
+  minNumbers: number
+  minSymbols: number
 }
 
 export default class AccountAPI {
@@ -64,5 +72,21 @@ export default class AccountAPI {
       method: 'POST',
       body: JSON.stringify(options),
     })
+  }
+
+  static async getPasswordRequirements() {
+    return idpFetcher({
+      url: `/accounts/password_requirements`,
+      method: 'GET',
+    })
+  }
+
+  static useGetPasswordRequirements(swrOptions?: SWRConfiguration) {
+    const url = `/accounts/password_requirements`
+    return useSWR<PasswordRequirements | undefined>(
+      url,
+      () => idpFetcher({ url, method: 'GET' }) as Promise<PasswordRequirements>,
+      swrOptions,
+    )
   }
 }

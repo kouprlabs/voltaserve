@@ -7,7 +7,6 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import { getConfig } from '@/config/config'
 import { newDateTime } from '@/infra/date-time'
 import { ErrorCode, newError } from '@/infra/error'
@@ -37,6 +36,14 @@ export type AccountConfirmEmailOptions = {
 
 export type AccountSendResetPasswordEmailOptions = {
   email: string
+}
+
+export type PasswordRequirements = {
+  minLength: number
+  minLowercase: number
+  minUppercase: number
+  minNumbers: number
+  minSymbols: number
 }
 
 export async function createUser(
@@ -126,4 +133,14 @@ export async function sendResetPasswordEmail(
     await userRepo.update({ id, resetPasswordToken: null })
     throw newError({ code: ErrorCode.InternalServerError, error })
   }
+}
+
+export function getPasswordRequirements(): PasswordRequirements {
+  return {
+    minLength: getConfig().password.minLength,
+    minLowercase: getConfig().password.minLowercase,
+    minUppercase: getConfig().password.minUppercase,
+    minNumbers: getConfig().password.minNumbers,
+    minSymbols: getConfig().password.minSymbols,
+  } as PasswordRequirements
 }
