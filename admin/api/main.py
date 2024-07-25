@@ -6,7 +6,7 @@ from fastapi import FastAPI, Request, Response, status
 
 from .dependencies import settings
 from .routers import users_api_router, group_api_router, organization_api_router, task_api_router, \
-    workspace_api_router, invitation_api_router
+    workspace_api_router, invitation_api_router, token_api_router
 
 app = FastAPI(debug=True)
 
@@ -19,6 +19,7 @@ app.include_router(organization_api_router)
 app.include_router(task_api_router)
 app.include_router(workspace_api_router)
 app.include_router(invitation_api_router)
+app.include_router(token_api_router)
 
 
 @app.middleware("http")

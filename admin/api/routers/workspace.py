@@ -3,6 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, status
 
 from ..database import fetch_workspace, fetch_workspaces, fetch_organization_workspaces
+from ..exceptions import GenericNotFoundException
 from ..models import GenericNotFoundResponse, WorkspaceResponse, WorkspaceRequest, WorkspaceListResponse, \
     WorkspaceListRequest, OrganizationWorkspaceListRequest
 
@@ -27,7 +28,7 @@ workspace_api_router = APIRouter(
 async def get_workspace(data: Annotated[WorkspaceRequest, Depends()]):
     workspace = fetch_workspace(_id=data.id)
     if workspace is None:
-        return GenericNotFoundResponse(message=f'Workspace with id={data.id} does not exist')
+        raise GenericNotFoundException(detail=f'Workspace with id={data.id} does not exist')
 
     return WorkspaceResponse(**workspace)
 
@@ -42,7 +43,7 @@ async def get_workspace(data: Annotated[WorkspaceRequest, Depends()]):
 async def get_all_workspaces(data: Annotated[WorkspaceListRequest, Depends()]):
     workspaces = fetch_workspaces(page=data.page, size=data.size)
     if workspaces is None:
-        return GenericNotFoundResponse(message='This instance has no workspaces')
+        raise GenericNotFoundException(detail='This instance has no workspaces')
 
     return WorkspaceListResponse(workspaces=workspaces)
 
@@ -57,7 +58,7 @@ async def get_all_workspaces(data: Annotated[WorkspaceListRequest, Depends()]):
 async def get_organization_workspaces(data: Annotated[OrganizationWorkspaceListRequest, Depends()]):
     workspaces = fetch_organization_workspaces(organization_id=data.id, page=data.page, size=data.size)
     if workspaces is None:
-        return GenericNotFoundResponse(message='This instance has no workspaces')
+        raise GenericNotFoundException(detail='This instance has no workspaces')
 
     return WorkspaceListResponse(workspaces=workspaces)
 

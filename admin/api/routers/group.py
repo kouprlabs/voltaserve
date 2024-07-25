@@ -3,6 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, status
 
 from ..database import fetch_group, fetch_groups
+from ..exceptions import GenericNotFoundException
 from ..models import GenericNotFoundResponse, GroupResponse, GroupListRequest, GroupListResponse, GroupRequest
 
 group_api_router = APIRouter(
@@ -26,7 +27,7 @@ group_api_router = APIRouter(
 async def get_group(data: Annotated[GroupRequest, Depends()]):
     group = fetch_group(_id=data.id)
     if group is None:
-        return GenericNotFoundResponse(message=f'Groups with id={data.id} does not exist')
+        raise GenericNotFoundException(detail=f'Groups with id={data.id} does not exist')
 
     return GroupResponse(**group)
 
@@ -41,7 +42,7 @@ async def get_group(data: Annotated[GroupRequest, Depends()]):
 async def get_all_groups(data: Annotated[GroupListRequest, Depends()]):
     groups = fetch_groups(page=data.page, size=data.size)
     if groups is None:
-        return GenericNotFoundResponse(message='This instance has no groups')
+        raise GenericNotFoundException(detail='This instance has no groups')
 
     return GroupListResponse(groups=groups)
 

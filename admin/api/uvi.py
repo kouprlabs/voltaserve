@@ -11,6 +11,6 @@ if __name__ == "__main__":
     uvicorn.run(app="api.main:app",
                 host=settings.host,
                 port=settings.port,
-                reload=True,
+                reload=False,
                 workers=settings.workers,
                 log_config=log_config)

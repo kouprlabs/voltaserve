@@ -1,4 +1,6 @@
-from fastapi import status
+import datetime
+
+from fastapi import status, HTTPException
 from pydantic import BaseModel, Field
 
 
@@ -22,5 +24,26 @@ class GenericListResponse(BaseModel):
 
 
 class GenericNotFoundResponse(BaseModel):
-    status: int = status.HTTP_404_NOT_FOUND
-    message: str
+    status_code: int = status.HTTP_404_NOT_FOUND
+    detail: str = 'Not found'
+
+
+class GenericUnauthorizedResponse(BaseModel):
+    status_code: int = status.HTTP_401_UNAUTHORIZED
+    detail: str = 'Unauthorized'
+
+
+# --- TOKEN SPECIFIC --- #
+class GenericTokenPayload(BaseModel):
+    iat: datetime.datetime
+    iss: str
+    aud: str
+    exp: datetime.datetime
+
+
+class GenericTokenRequest(BaseModel):
+    pass
+
+
+class GenericTokenResponse(BaseModel):
+    pass
