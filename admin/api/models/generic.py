@@ -1,6 +1,5 @@
-from pydantic import BaseModel, Field
-from fastapi.exceptions import HTTPException
 from fastapi import status
+from pydantic import BaseModel, Field
 
 
 # --- REQUEST MODELS --- #

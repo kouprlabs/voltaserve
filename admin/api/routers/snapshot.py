@@ -3,7 +3,8 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, status
 
 from ..database import fetch_snapshot, fetch_snapshots
-from ..models import GenericNotFoundResponse, SnapshotResponse, SnapshotListRequest, SnapshotListResponse, SnapshotRequest
+from ..models import GenericNotFoundResponse, SnapshotResponse, SnapshotListRequest, SnapshotListResponse, \
+    SnapshotRequest
 
 snapshot_api_router = APIRouter(
     prefix='/snapshot',
@@ -41,7 +42,7 @@ async def get_snapshot(data: Annotated[SnapshotRequest, Depends()]):
 async def get_all_snapshots(data: Annotated[SnapshotListRequest, Depends()]):
     snapshots = fetch_snapshots(page=data.page, size=data.size)
     if snapshots is None:
-        return GenericNotFoundResponse(message=f'This instance has no snapshots')
+        return GenericNotFoundResponse(message='This instance has no snapshots')
 
     return SnapshotListResponse(snapshots=snapshots)
 

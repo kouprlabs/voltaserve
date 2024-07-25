@@ -43,7 +43,7 @@ async def get_user(data: Annotated[UserRequest, Depends()]):
 async def get_all_users(data: Annotated[UserListRequest, Depends()]):
     users = fetch_users(page=data.page, size=data.size)
     if users is None:
-        return GenericNotFoundResponse(message=f'This instance has no users')
+        return GenericNotFoundResponse(message='This instance has no users')
 
     return UserListResponse(users=users)
 
@@ -58,7 +58,7 @@ async def get_all_users(data: Annotated[UserListRequest, Depends()]):
 async def get_user_organizations(data: Annotated[UserOrganizationListRequest, Depends()]):
     organizations = fetch_user_organizations(user_id=data.id, page=data.page, size=data.size)
     if organizations is None:
-        return GenericNotFoundResponse(message=f'This user has no organizations')
+        return GenericNotFoundResponse(message='This user has no organizations')
 
     return UserOrganizationListResponse(organizations=organizations)
 

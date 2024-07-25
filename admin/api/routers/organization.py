@@ -42,7 +42,7 @@ async def get_organization(data: Annotated[OrganizationRequest, Depends()]):
 async def get_all_organizations(data: Annotated[OrganizationListRequest, Depends()]):
     organizations = fetch_organizations(page=data.page, size=data.size)
     if organizations is None:
-        return GenericNotFoundResponse(message=f'This instance has no organizations')
+        return GenericNotFoundResponse(message='This instance has no organizations')
 
     return OrganizationListResponse(organizations=organizations)
 

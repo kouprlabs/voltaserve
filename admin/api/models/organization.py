@@ -1,8 +1,6 @@
 import datetime
 from typing import List
 
-from pydantic import Field
-
 from .generic import GenericPaginationRequest, GenericResponse, GenericListResponse, GenericRequest
 
 
