@@ -7,7 +7,6 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import { useCallback, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
@@ -32,6 +31,7 @@ import { Helmet } from 'react-helmet-async'
 import AccountAPI from '@/client/idp/account'
 import Logo from '@/components/common/logo'
 import LayoutFull from '@/components/layout/layout-full'
+import PasswordHints from '@/components/sign-up/password-hints'
 
 type FormValues = {
   fullName: string
@@ -52,6 +52,7 @@ const SignUpPage = () => {
       .oneOf([Yup.ref('password'), undefined], 'Passwords must match')
       .required('Confirm your password'),
   })
+  const { data: passwordRequirements } = AccountAPI.useGetPasswordRequirements()
 
   const handleSubmit = useCallback(
     async (
@@ -129,7 +130,7 @@ const SignUpPage = () => {
               validateOnBlur={false}
               onSubmit={handleSubmit}
             >
-              {({ errors, touched, isSubmitting }) => (
+              {({ errors, touched, isSubmitting, values }) => (
                 <Form className={cx('w-full')}>
                   <div
                     className={cx(
@@ -188,6 +189,14 @@ const SignUpPage = () => {
                             disabled={isSubmitting}
                           />
                           <FormErrorMessage>{errors.password}</FormErrorMessage>
+                          {passwordRequirements ? (
+                            <div className="pt-1">
+                              <PasswordHints
+                                value={values.password}
+                                requirements={passwordRequirements}
+                              />
+                            </div>
+                          ) : null}
                         </FormControl>
                       )}
                     </Field>
