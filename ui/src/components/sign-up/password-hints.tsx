@@ -15,11 +15,11 @@ const PasswordHints = ({ value, requirements }: PasswordHintsProps) => {
         isFulfilled={hasMinLength(value, requirements.minLength)}
       />
       <PasswordRequirement
-        text={`Contains at least ${requirements.minLowercase} lower case character.`}
+        text={`Contains at least ${requirements.minLowercase} lowercase character.`}
         isFulfilled={hasMinLowerCase(value, requirements.minLowercase)}
       />
       <PasswordRequirement
-        text={`Contains at least ${requirements.minUppercase} upper case character.`}
+        text={`Contains at least ${requirements.minUppercase} uppercase character.`}
         isFulfilled={hasMinUpperCase(value, requirements.minUppercase)}
       />
       <PasswordRequirement
