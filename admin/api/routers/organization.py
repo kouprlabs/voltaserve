@@ -2,9 +2,8 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, status
 
-from admin.api.database.organization import fetch_organization, fetch_organizations
-from admin.api.models.generic import GenericNotFoundResponse
-from admin.api.models.organization import OrganizationResponse, OrganizationRequest, OrganizationListResponse, \
+from ..database import fetch_organization, fetch_organizations
+from ..models import GenericNotFoundResponse, OrganizationResponse, OrganizationRequest, OrganizationListResponse, \
     OrganizationListRequest
 
 organization_api_router = APIRouter(

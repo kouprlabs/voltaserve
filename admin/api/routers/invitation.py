@@ -2,9 +2,8 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, status
 
-from admin.api.database.invitation import fetch_invitation, fetch_invitations
-from admin.api.models.generic import GenericNotFoundResponse
-from admin.api.models.invitation import InvitationResponse, InvitationListRequest, InvitationListResponse, InvitationRequest
+from ..database import fetch_invitation, fetch_invitations
+from ..models import GenericNotFoundResponse, InvitationResponse, InvitationListRequest, InvitationListResponse, InvitationRequest
 
 invitation_api_router = APIRouter(
     prefix='/invitation',

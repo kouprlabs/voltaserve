@@ -16,5 +16,5 @@ RUN poetry config virtualenvs.create false &&\
     apk del .build-deps &&\
     rm -rf /root/.cache /root/.cargo
 
-ENTRYPOINT ["python", "api/uvi.py"]
+ENTRYPOINT ["python","-m", "api.uvi"]
 

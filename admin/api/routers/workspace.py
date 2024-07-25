@@ -2,10 +2,8 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, status
 
-from admin.api.database.workspace import fetch_workspace, fetch_workspaces, fetch_organization_workspaces
-from admin.api.models.generic import GenericNotFoundResponse
-from admin.api.models.workspace import WorkspaceResponse, WorkspaceRequest, WorkspaceListResponse, WorkspaceListRequest, \
-    OrganizationWorkspaceListRequest
+from ..database import fetch_workspace, fetch_workspaces, fetch_organization_workspaces
+from ..models import GenericNotFoundResponse, WorkspaceResponse, WorkspaceRequest, WorkspaceListResponse, WorkspaceListRequest, OrganizationWorkspaceListRequest
 
 workspace_api_router = APIRouter(
     prefix='/workspace',

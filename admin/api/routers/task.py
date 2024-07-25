@@ -2,9 +2,8 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, status
 
-from admin.api.database.task import fetch_task, fetch_tasks
-from admin.api.models.generic import GenericNotFoundResponse
-from admin.api.models.task import TaskResponse, TaskRequest, TaskListResponse, TaskListRequest
+from ..database import fetch_task, fetch_tasks
+from ..models import GenericNotFoundResponse, TaskResponse, TaskRequest, TaskListResponse, TaskListRequest
 
 task_api_router = APIRouter(
     prefix='/task',
