@@ -12,7 +12,6 @@ package repo
 
 import (
 	"errors"
-	"time"
 
 	"gorm.io/gorm"
 
@@ -26,15 +25,13 @@ type GroupRepo interface {
 	Insert(opts GroupInsertOptions) (model.Group, error)
 	Find(id string) (model.Group, error)
 	Count() (int64, error)
-	GetIDsForFile(fileID string) ([]string, error)
-	GetIDsForUser(userID string) ([]string, error)
-	GetIDsForOrganization(id string) ([]string, error)
+	GetIDs() ([]string, error)
+	GetIDsByFile(fileID string) ([]string, error)
+	GetIDsByOrganization(id string) ([]string, error)
 	Save(group model.Group) error
 	Delete(id string) error
-	AddUser(id string, userID string) error
-	RemoveMember(id string, userID string) error
-	GetIDs() ([]string, error)
 	GetMembers(id string) ([]model.User, error)
+	GetOwnerCount(id string) (int64, error)
 	GrantUserPermission(id string, userID string, permission string) error
 	RevokeUserPermission(id string, userID string) error
 }
@@ -63,12 +60,12 @@ func (*groupEntity) TableName() string {
 }
 
 func (g *groupEntity) BeforeCreate(*gorm.DB) (err error) {
-	g.CreateTime = time.Now().UTC().Format(time.RFC3339)
+	g.CreateTime = helper.NewTimestamp()
 	return nil
 }
 
 func (g *groupEntity) BeforeSave(*gorm.DB) (err error) {
-	timeNow := time.Now().UTC().Format(time.RFC3339)
+	timeNow := helper.NewTimestamp()
 	g.UpdateTime = &timeNow
 	return nil
 }
@@ -194,7 +191,7 @@ func (repo *groupRepo) Count() (int64, error) {
 	return res.Result, nil
 }
 
-func (repo *groupRepo) GetIDsForFile(fileID string) ([]string, error) {
+func (repo *groupRepo) GetIDsByFile(fileID string) ([]string, error) {
 	type Value struct {
 		Result string
 	}
@@ -215,23 +212,7 @@ func (repo *groupRepo) GetIDsForFile(fileID string) ([]string, error) {
 	return res, nil
 }
 
-func (repo *groupRepo) GetIDsForUser(userID string) ([]string, error) {
-	type Value struct {
-		Result string
-	}
-	var values []Value
-	db := repo.db.Raw(`SELECT group_id from group_user WHERE user_id = ?`, userID).Scan(&values)
-	if db.Error != nil {
-		return []string{}, db.Error
-	}
-	res := []string{}
-	for _, v := range values {
-		res = append(res, v.Result)
-	}
-	return res, nil
-}
-
-func (repo *groupRepo) GetIDsForOrganization(id string) ([]string, error) {
+func (repo *groupRepo) GetIDsByOrganization(id string) ([]string, error) {
 	type Value struct {
 		Result string
 	}
@@ -271,22 +252,6 @@ func (repo *groupRepo) Delete(id string) error {
 	return nil
 }
 
-func (repo *groupRepo) AddUser(id string, userID string) error {
-	db := repo.db.Exec("INSERT INTO group_user (group_id, user_id) VALUES (?, ?)", id, userID)
-	if db.Error != nil {
-		return db.Error
-	}
-	return nil
-}
-
-func (repo *groupRepo) RemoveMember(id string, userID string) error {
-	db := repo.db.Exec("DELETE FROM group_user WHERE group_id = ? AND user_id = ?", id, userID)
-	if db.Error != nil {
-		return db.Error
-	}
-	return nil
-}
-
 func (repo *groupRepo) GetIDs() ([]string, error) {
 	type Value struct {
 		Result string
@@ -306,7 +271,8 @@ func (repo *groupRepo) GetIDs() ([]string, error) {
 func (repo *groupRepo) GetMembers(id string) ([]model.User, error) {
 	var entities []*userEntity
 	db := repo.db.
-		Raw(`SELECT DISTINCT u.* FROM "user" u INNER JOIN group_user gu ON u.id = gu.user_id WHERE gu.group_id = ?`, id).
+		Raw(`SELECT u.* FROM "user" u INNER JOIN userpermission up on
+             u.id = up.user_id AND up.resource_id = ?`, id).
 		Scan(&entities)
 	if db.Error != nil {
 		return nil, db.Error
@@ -318,11 +284,27 @@ func (repo *groupRepo) GetMembers(id string) ([]model.User, error) {
 	return res, nil
 }
 
+func (repo *groupRepo) GetOwnerCount(id string) (int64, error) {
+	type Result struct {
+		Result int64
+	}
+	var res Result
+	db := repo.db.
+		Raw(`SELECT count(*) as result FROM userpermission
+             WHERE resource_id = ? and permission = ?`,
+			id, model.PermissionOwner).
+		Scan(&res)
+	if db.Error != nil {
+		return 0, db.Error
+	}
+	return res.Result, nil
+}
+
 func (repo *groupRepo) GrantUserPermission(id string, userID string, permission string) error {
 	db := repo.db.
-		Exec(`INSERT INTO userpermission (id, user_id, resource_id, permission)
-              VALUES (?, ?, ?, ?) ON CONFLICT (user_id, resource_id) DO UPDATE SET permission = ?`,
-			helper.NewID(), userID, id, permission, permission)
+		Exec(`INSERT INTO userpermission (id, user_id, resource_id, permission, create_time)
+              VALUES (?, ?, ?, ?, ?) ON CONFLICT (user_id, resource_id) DO UPDATE SET permission = ?`,
+			helper.NewID(), userID, id, permission, helper.NewTimestamp(), permission)
 	if db.Error != nil {
 		return db.Error
 	}

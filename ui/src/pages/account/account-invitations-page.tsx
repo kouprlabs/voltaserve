@@ -7,7 +7,6 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import { useCallback, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import {
@@ -69,7 +68,7 @@ const AccountInvitationsPage = () => {
   const handleAccept = useCallback(
     async (invitationId: string) => {
       await InvitationAPI.accept(invitationId)
-      mutate()
+      await mutate()
       toast({
         title: 'Invitation accepted',
         status: 'success',
@@ -82,7 +81,7 @@ const AccountInvitationsPage = () => {
   const handleDecline = useCallback(
     async (invitationId: string) => {
       await InvitationAPI.decline(invitationId)
-      mutate()
+      await mutate()
       toast({
         title: 'Invitation declined',
         status: 'info',

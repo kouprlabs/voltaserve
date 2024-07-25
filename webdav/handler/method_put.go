@@ -23,7 +23,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/minio/minio-go/v7"
 
-	"github.com/kouprlabs/voltaserve/webdav/client"
+	"github.com/kouprlabs/voltaserve/webdav/client/api_client"
 	"github.com/kouprlabs/voltaserve/webdav/helper"
 	"github.com/kouprlabs/voltaserve/webdav/infra"
 )
@@ -51,8 +51,8 @@ func (h *Handler) methodPut(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		return
 	}
-	apiClient := client.NewAPIClient(token)
-	directory, err := apiClient.GetFileByPath(helper.DecodeURIComponent(helper.Dirname(r.URL.Path)))
+	cl := api_client.NewFileClient(token)
+	directory, err := cl.GetByPath(helper.DecodeURIComponent(helper.Dirname(r.URL.Path)))
 	if err != nil {
 		infra.HandleError(err, w)
 		return
@@ -94,16 +94,16 @@ func (h *Handler) methodPut(w http.ResponseWriter, r *http.Request) {
 		infra.HandleError(err, w)
 		return
 	}
-	s3Reference := client.S3Reference{
+	s3Reference := api_client.S3Reference{
 		Bucket:      workspace.Bucket,
 		Key:         key,
 		SnapshotID:  snapshotID,
 		Size:        stat.Size(),
 		ContentType: infra.DetectMimeFromPath(outputPath),
 	}
-	existingFile, err := apiClient.GetFileByPath(r.URL.Path)
+	existingFile, err := cl.GetByPath(r.URL.Path)
 	if err == nil {
-		if _, err = apiClient.PatchFileFromS3(client.FilePatchFromS3Options{
+		if _, err = cl.PatchFromS3(api_client.FilePatchFromS3Options{
 			ID:          existingFile.ID,
 			Name:        name,
 			S3Reference: s3Reference,
@@ -114,8 +114,8 @@ func (h *Handler) methodPut(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusCreated)
 		return
 	} else {
-		if _, err = apiClient.CreateFileFromS3(client.FileCreateFromS3Options{
-			Type:        client.FileTypeFile,
+		if _, err = cl.CreateFromS3(api_client.FileCreateFromS3Options{
+			Type:        api_client.FileTypeFile,
 			WorkspaceID: directory.WorkspaceID,
 			ParentID:    directory.ID,
 			Name:        name,

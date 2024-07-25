@@ -44,8 +44,7 @@ impl MigrationTrait for Migration {
                     .col(
                         ColumnDef::new(Invitation::CreateTime)
                             .text()
-                            .not_null()
-                            .default(Keyword::CurrentTimestamp),
+                            .not_null(),
                     )
                     .col(ColumnDef::new(Invitation::UpdateTime).text())
                     .to_owned(),

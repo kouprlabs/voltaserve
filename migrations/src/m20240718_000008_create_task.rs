@@ -29,13 +29,13 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(Task::Percentage).small_integer())
                     .col(
                         ColumnDef::new(Task::IsComplete)
-                            .text()
+                            .boolean()
                             .not_null()
                             .default(false),
                     )
                     .col(
                         ColumnDef::new(Task::IsIndeterminate)
-                            .text()
+                            .boolean()
                             .not_null()
                             .default(false),
                     )
@@ -55,8 +55,7 @@ impl MigrationTrait for Migration {
                     .col(
                         ColumnDef::new(Task::CreateTime)
                             .text()
-                            .not_null()
-                            .default(Keyword::CurrentTimestamp),
+                            .not_null(),
                     )
                     .col(ColumnDef::new(Task::UpdateTime).text())
                     .to_owned(),

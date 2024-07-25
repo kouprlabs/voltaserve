@@ -7,7 +7,6 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import { useCallback, useMemo, useState } from 'react'
 import { Button, ModalBody, ModalFooter } from '@chakra-ui/react'
 import { OptionBase, Select, SingleValue } from 'chakra-react-select'
@@ -53,9 +52,9 @@ const InsightsCreate = () => {
   const handleCreate = useCallback(async () => {
     if (id && language) {
       await InsightsAPI.create(id, { languageId: language.id }, false)
-      mutateInfo?.(await InsightsAPI.getInfo(id))
-      mutateFiles?.()
-      mutateTasks?.(await TaskAPI.list())
+      await mutateInfo?.(await InsightsAPI.getInfo(id))
+      await mutateFiles?.()
+      await mutateTasks?.(await TaskAPI.list())
       dispatch(modalDidClose())
     }
   }, [language, id, mutateFiles, mutateTasks, mutateInfo, dispatch])

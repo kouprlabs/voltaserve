@@ -7,7 +7,6 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import { useCallback, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import {
@@ -60,7 +59,7 @@ const NewGroupPage = () => {
           name,
           organizationId,
         })
-        mutate?.()
+        await mutate?.()
         setSubmitting(false)
         navigate(`/group/${result.id}/member`)
       } catch {

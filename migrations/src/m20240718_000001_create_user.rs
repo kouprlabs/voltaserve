@@ -45,11 +45,16 @@ impl MigrationTrait for Migration {
                     .col(
                         ColumnDef::new(User::RefreshTokenValue)
                             .text()
-                            .not_null(),
+                            .unique_key(),
                     )
                     .col(ColumnDef::new(User::RefreshTokenExpiry).text())
                     .col(
                         ColumnDef::new(User::ResetPasswordToken)
+                            .text()
+                            .unique_key(),
+                    )
+                    .col(
+                        ColumnDef::new(User::EmailConfirmationToken)
                             .text()
                             .unique_key(),
                     )
@@ -73,7 +78,7 @@ impl MigrationTrait for Migration {
                     .col(
                         ColumnDef::new(User::CreateTime)
                             .text()
-                            .default(Keyword::CurrentTimestamp),
+                            .not_null(),
                     )
                     .col(ColumnDef::new(User::UpdateTime).text())
                     .to_owned(),

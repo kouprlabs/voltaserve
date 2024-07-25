@@ -40,7 +40,7 @@ export enum Status {
 }
 
 export type TaskPayload = {
-  fileId?: string
+  object?: string
 }
 
 export type List = {

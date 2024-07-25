@@ -7,7 +7,6 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
@@ -70,7 +69,7 @@ const GroupAddMember = ({ group, open, onClose }: GroupAddMemberProps) => {
         await GroupAPI.addMember(group.id, {
           userId,
         })
-        mutateList?.()
+        await mutateList?.()
         setSubmitting(false)
         onClose?.()
         navigate(`/group/${group.id}/member`)
@@ -113,7 +112,7 @@ const GroupAddMember = ({ group, open, onClose }: GroupAddMemberProps) => {
                           value={activeUser}
                           organizationId={group.organization.id}
                           groupId={group.id}
-                          nonGroupMembersOnly={true}
+                          excludeGroupMembers={true}
                           onConfirm={(value) => {
                             setActiveUser(value)
                             setFieldValue(field.name, value.id)

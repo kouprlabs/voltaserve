@@ -98,24 +98,6 @@ definitions:
       size:
         type: integer
     type: object
-  router.FileCopyOptions:
-    properties:
-      ids:
-        items:
-          type: string
-        type: array
-    required:
-    - ids
-    type: object
-  router.FileDeleteOptions:
-    properties:
-      ids:
-        items:
-          type: string
-        type: array
-    required:
-    - ids
-    type: object
   router.FileGrantGroupPermissionOptions:
     properties:
       groupId:
@@ -153,15 +135,6 @@ definitions:
     - ids
     - permission
     - userId
-    type: object
-  router.FileMoveOptions:
-    properties:
-      ids:
-        items:
-          type: string
-        type: array
-    required:
-    - ids
     type: object
   router.FilePatchNameOptions:
     properties:
@@ -273,6 +246,42 @@ definitions:
       workspaceId:
         type: string
     type: object
+  service.FileCopyManyOptions:
+    properties:
+      sourceIds:
+        items:
+          type: string
+        type: array
+      targetId:
+        type: string
+    required:
+    - sourceIds
+    - targetId
+    type: object
+  service.FileCopyManyResult:
+    properties:
+      failed:
+        items:
+          type: string
+        type: array
+      new:
+        items:
+          type: string
+        type: array
+      succeeded:
+        items:
+          type: string
+        type: array
+    type: object
+  service.FileDeleteManyOptions:
+    properties:
+      sourceIds:
+        items:
+          type: string
+        type: array
+    required:
+    - sourceIds
+    type: object
   service.FileList:
     properties:
       data:
@@ -289,6 +298,29 @@ definitions:
         type: integer
       totalPages:
         type: integer
+    type: object
+  service.FileMoveManyOptions:
+    properties:
+      sourceIds:
+        items:
+          type: string
+        type: array
+      targetId:
+        type: string
+    required:
+    - sourceIds
+    - targetId
+    type: object
+  service.FileMoveManyResult:
+    properties:
+      failed:
+        items:
+          type: string
+        type: array
+      succeeded:
+        items:
+          type: string
+        type: array
     type: object
   service.FileQuery:
     properties:
@@ -786,15 +818,15 @@ info:
 paths:
   /files:
     delete:
-      description: Delete
-      operationId: files_delete
+      description: Delete Many
+      operationId: files_delete_many
       parameters:
       - description: Body
         in: body
         name: body
         required: true
         schema:
-          $ref: '#/definitions/router.FileDeleteOptions'
+          $ref: '#/definitions/service.FileDeleteManyOptions'
       produces:
       - application/json
       responses:
@@ -808,7 +840,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Delete
+      summary: Delete Many
       tags:
       - Files
     get:
@@ -890,6 +922,34 @@ paths:
       tags:
       - Files
   /files/{id}:
+    delete:
+      description: Delete One
+      operationId: files_delete_one
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Target ID
+        in: path
+        name: targetId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Delete One
+      tags:
+      - Files
     get:
       description: Get
       operationId: files_get
@@ -950,22 +1010,21 @@ paths:
       summary: Patch
       tags:
       - Files
-  /files/{id}/copy:
+  /files/{id}/copy/{targetId}:
     post:
-      description: Copy
-      operationId: files_copy
+      description: Copy One
+      operationId: files_copy_one
       parameters:
       - description: ID
         in: path
         name: id
         required: true
         type: string
-      - description: Body
-        in: body
-        name: body
+      - description: Target ID
+        in: path
+        name: targetId
         required: true
-        schema:
-          $ref: '#/definitions/router.FileCopyOptions'
+        type: string
       produces:
       - application/json
       responses:
@@ -977,7 +1036,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Copy
+      summary: Copy One
       tags:
       - Files
   /files/{id}/count:
@@ -1090,22 +1149,21 @@ paths:
       summary: List
       tags:
       - Files
-  /files/{id}/move:
+  /files/{id}/move/{targetId}:
     post:
-      description: Move
-      operationId: files_move
+      description: Move One
+      operationId: files_move_one
       parameters:
       - description: ID
         in: path
         name: id
         required: true
         type: string
-      - description: Body
-        in: body
-        name: body
+      - description: Target ID
+        in: path
+        name: targetId
         required: true
-        schema:
-          $ref: '#/definitions/router.FileMoveOptions'
+        type: string
       produces:
       - application/json
       responses:
@@ -1117,7 +1175,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Move
+      summary: Move One
       tags:
       - Files
   /files/{id}/name:
@@ -1433,6 +1491,35 @@ paths:
       summary: Get User Permissions
       tags:
       - Files
+  /files/copy:
+    post:
+      description: Copy Many
+      operationId: files_copy_many
+      parameters:
+      - description: Body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/service.FileCopyManyOptions'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.FileCopyManyResult'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Copy Many
+      tags:
+      - Files
   /files/create_from_s3:
     post:
       consumes:
@@ -1588,6 +1675,35 @@ paths:
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
       summary: List by Path
+      tags:
+      - Files
+  /files/move:
+    post:
+      description: Move Many
+      operationId: files_move_many
+      parameters:
+      - description: Body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/service.FileMoveManyOptions'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.FileMoveManyResult'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Move Many
       tags:
       - Files
   /files/revoke_user_permission:

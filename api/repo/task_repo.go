@@ -13,12 +13,12 @@ package repo
 import (
 	"encoding/json"
 	"errors"
-	"time"
 
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
 
 	"github.com/kouprlabs/voltaserve/api/errorpkg"
+	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/infra"
 	"github.com/kouprlabs/voltaserve/api/log"
 	"github.com/kouprlabs/voltaserve/api/model"
@@ -42,12 +42,12 @@ func (*taskEntity) TableName() string {
 }
 
 func (o *taskEntity) BeforeCreate(*gorm.DB) (err error) {
-	o.CreateTime = time.Now().UTC().Format(time.RFC3339)
+	o.CreateTime = helper.NewTimestamp()
 	return nil
 }
 
 func (o *taskEntity) BeforeSave(*gorm.DB) (err error) {
-	timeNow := time.Now().UTC().Format(time.RFC3339)
+	timeNow := helper.NewTimestamp()
 	o.UpdateTime = &timeNow
 	return nil
 }
@@ -148,7 +148,7 @@ type TaskRepo interface {
 	Find(id string) (model.Task, error)
 	Count() (int64, error)
 	GetIDs(userID string) ([]string, error)
-	GetCount(email string) (int64, error)
+	GetCountByEmail(email string) (int64, error)
 	Save(task model.Task) error
 	Delete(id string) error
 }
@@ -181,6 +181,8 @@ type TaskInsertOptions struct {
 	Status          string            `json:"status"`
 	Payload         map[string]string `json:"payload,omitempty"`
 }
+
+const TaskPayloadObjectKey = "object"
 
 func (repo *taskRepo) Insert(opts TaskInsertOptions) (model.Task, error) {
 	task := taskEntity{
@@ -258,7 +260,7 @@ func (repo *taskRepo) GetIDs(userID string) ([]string, error) {
 	return res, nil
 }
 
-func (repo *taskRepo) GetCount(userID string) (int64, error) {
+func (repo *taskRepo) GetCountByEmail(userID string) (int64, error) {
 	var count int64
 	db := repo.db.
 		Model(&taskEntity{}).

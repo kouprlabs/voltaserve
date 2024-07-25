@@ -7,7 +7,6 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import { useState, MouseEvent } from 'react'
 import {
   DragCancelEvent,
@@ -73,7 +72,7 @@ const ListDraggableDroppable = ({
         ]
         const list = store.getState().entities.files.list
         if (list) {
-          mutateList?.({
+          await mutateList?.({
             ...list,
             data: list.data.filter((e) => !idsToMove.includes(e.id)),
           })
@@ -81,8 +80,9 @@ const ListDraggableDroppable = ({
         dispatch(hiddenUpdated(idsToMove))
         setIsLoading(true)
         try {
-          await FileAPI.move(file.id, { ids: idsToMove })
-          mutateList?.()
+          for (const id of idsToMove) {
+            await FileAPI.moveOne(id, file.id).then(() => mutateList?.())
+          }
         } finally {
           setIsLoading(false)
           dispatch(hiddenUpdated([]))

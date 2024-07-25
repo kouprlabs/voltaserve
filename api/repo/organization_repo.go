@@ -12,7 +12,6 @@ package repo
 
 import (
 	"errors"
-	"time"
 
 	"gorm.io/gorm"
 
@@ -29,8 +28,6 @@ type OrganizationRepo interface {
 	Save(org model.Organization) error
 	Delete(id string) error
 	GetIDs() ([]string, error)
-	AddUser(id string, userID string) error
-	RemoveMember(id string, userID string) error
 	GetMembers(id string) ([]model.User, error)
 	GetGroups(id string) ([]model.Group, error)
 	GetOwnerCount(id string) (int64, error)
@@ -61,12 +58,12 @@ func (*organizationEntity) TableName() string {
 }
 
 func (o *organizationEntity) BeforeCreate(*gorm.DB) (err error) {
-	o.CreateTime = time.Now().UTC().Format(time.RFC3339)
+	o.CreateTime = helper.NewTimestamp()
 	return nil
 }
 
 func (o *organizationEntity) BeforeSave(*gorm.DB) (err error) {
-	timeNow := time.Now().UTC().Format(time.RFC3339)
+	timeNow := helper.NewTimestamp()
 	o.UpdateTime = &timeNow
 	return nil
 }
@@ -223,28 +220,11 @@ func (repo *organizationRepo) GetIDs() ([]string, error) {
 	return res, nil
 }
 
-func (repo *organizationRepo) AddUser(id string, userID string) error {
-	db := repo.db.Exec("INSERT INTO organization_user (organization_id, user_id) VALUES (?, ?)", id, userID)
-	if db.Error != nil {
-		return db.Error
-	}
-	return nil
-}
-
-func (repo *organizationRepo) RemoveMember(id string, userID string) error {
-	db := repo.db.Exec("DELETE FROM organization_user WHERE organization_id = ? AND user_id = ?", id, userID)
-	if db.Error != nil {
-		return db.Error
-	}
-	return nil
-}
-
 func (repo *organizationRepo) GetMembers(id string) ([]model.User, error) {
 	var entities []*userEntity
 	db := repo.db.
-		Raw(`SELECT DISTINCT u.* FROM "user" u 
-             INNER JOIN organization_user ou ON u.id = ou.user_id
-			 WHERE ou.organization_id = ? ORDER BY u.full_name`,
+		Raw(`SELECT u.* FROM "user" u INNER JOIN userpermission up on
+             u.id = up.user_id AND up.resource_id = ?`,
 			id).
 		Scan(&entities)
 	if db.Error != nil {
@@ -293,9 +273,9 @@ func (repo *organizationRepo) GetOwnerCount(id string) (int64, error) {
 
 func (repo *organizationRepo) GrantUserPermission(id string, userID string, permission string) error {
 	db := repo.db.
-		Exec(`INSERT INTO userpermission (id, user_id, resource_id, permission)
-              VALUES (?, ?, ?, ?) ON CONFLICT (user_id, resource_id) DO UPDATE SET permission = ?`,
-			helper.NewID(), userID, id, permission, permission)
+		Exec(`INSERT INTO userpermission (id, user_id, resource_id, permission, create_time)
+              VALUES (?, ?, ?, ?, ?) ON CONFLICT (user_id, resource_id) DO UPDATE SET permission = ?`,
+			helper.NewID(), userID, id, permission, helper.NewTimestamp(), permission)
 	if db.Error != nil {
 		return db.Error
 	}

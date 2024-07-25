@@ -17,8 +17,6 @@ docker compose up -d \
 
 #### Install Languages and Runtimes
 
-Install [Bun](https://bun.sh/).
-
 Install [NVM](https://github.com/nvm-sh/nvm?tab=readme-ov-file#installing-and-updating).
 
 Install [Node.js](https://nodejs.org/) 20.x with NVM and set it as default:

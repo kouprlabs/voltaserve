@@ -13,7 +13,7 @@ package repo
 import (
 	"encoding/json"
 	"errors"
-	"time"
+	"slices"
 
 	"gorm.io/datatypes"
 	"gorm.io/gorm"
@@ -31,13 +31,15 @@ type SnapshotRepo interface {
 	FindAllForFile(fileID string) ([]model.Snapshot, error)
 	FindAllDangling() ([]model.Snapshot, error)
 	FindAllPrevious(fileID string, version int64) ([]model.Snapshot, error)
-	GetIDsForFile(fileID string) ([]string, error)
+	GetIDsByFile(fileID string) ([]string, error)
 	Insert(snapshot model.Snapshot) error
 	Save(snapshot model.Snapshot) error
 	Delete(id string) error
 	Update(id string, opts SnapshotUpdateOptions) error
 	MapWithFile(id string, fileID string) error
+	BulkMapWithFile(entities []*SnapshotFileEntity, chunkSize int) error
 	DeleteMappingsForFile(fileID string) error
+	DeleteMappingsForTree(fileID string) error
 	DeleteAllDangling() error
 	GetLatestVersionForFile(fileID string) (int64, error)
 	CountAssociations(id string) (int, error)
@@ -75,12 +77,12 @@ func (*snapshotEntity) TableName() string {
 }
 
 func (s *snapshotEntity) BeforeCreate(*gorm.DB) (err error) {
-	s.CreateTime = time.Now().UTC().Format(time.RFC3339)
+	s.CreateTime = helper.NewTimestamp()
 	return nil
 }
 
 func (s *snapshotEntity) BeforeSave(*gorm.DB) (err error) {
-	timeNow := time.Now().UTC().Format(time.RFC3339)
+	timeNow := helper.NewTimestamp()
 	s.UpdateTime = &timeNow
 	return nil
 }
@@ -350,6 +352,21 @@ func (s *snapshotEntity) GetUpdateTime() *string {
 	return s.UpdateTime
 }
 
+type SnapshotFileEntity struct {
+	SnapshotID string `gorm:"column:snapshot_id"`
+	FileID     string `gorm:"column:file_id"`
+	CreateTime string `gorm:"column:create_time"`
+}
+
+func (*SnapshotFileEntity) TableName() string {
+	return "snapshot_file"
+}
+
+func (s *SnapshotFileEntity) BeforeCreate(*gorm.DB) (err error) {
+	s.CreateTime = helper.NewTimestamp()
+	return nil
+}
+
 type snapshotRepo struct {
 	db *gorm.DB
 }
@@ -450,34 +467,34 @@ func (repo *snapshotRepo) Update(id string, opts SnapshotUpdateOptions) error {
 	if err != nil {
 		return err
 	}
-	if helper.Includes(opts.Fields, SnapshotFieldOriginal) {
+	if slices.Contains(opts.Fields, SnapshotFieldOriginal) {
 		snapshot.SetOriginal(opts.Original)
 	}
-	if helper.Includes(opts.Fields, SnapshotFieldPreview) {
+	if slices.Contains(opts.Fields, SnapshotFieldPreview) {
 		snapshot.SetPreview(opts.Preview)
 	}
-	if helper.Includes(opts.Fields, SnapshotFieldText) {
+	if slices.Contains(opts.Fields, SnapshotFieldText) {
 		snapshot.SetText(opts.Text)
 	}
-	if helper.Includes(opts.Fields, SnapshotFieldOCR) {
+	if slices.Contains(opts.Fields, SnapshotFieldOCR) {
 		snapshot.SetOCR(opts.OCR)
 	}
-	if helper.Includes(opts.Fields, SnapshotFieldEntities) {
+	if slices.Contains(opts.Fields, SnapshotFieldEntities) {
 		snapshot.SetEntities(opts.Entities)
 	}
-	if helper.Includes(opts.Fields, SnapshotFieldMosaic) {
+	if slices.Contains(opts.Fields, SnapshotFieldMosaic) {
 		snapshot.SetMosaic(opts.Mosaic)
 	}
-	if helper.Includes(opts.Fields, SnapshotFieldThumbnail) {
+	if slices.Contains(opts.Fields, SnapshotFieldThumbnail) {
 		snapshot.SetThumbnail(opts.Thumbnail)
 	}
-	if helper.Includes(opts.Fields, SnapshotFieldStatus) {
+	if slices.Contains(opts.Fields, SnapshotFieldStatus) {
 		snapshot.SetStatus(*opts.Status)
 	}
-	if helper.Includes(opts.Fields, SnapshotFieldLanguage) {
+	if slices.Contains(opts.Fields, SnapshotFieldLanguage) {
 		snapshot.SetLanguage(*opts.Language)
 	}
-	if helper.Includes(opts.Fields, SnapshotFieldTaskID) {
+	if slices.Contains(opts.Fields, SnapshotFieldTaskID) {
 		snapshot.SetTaskID(opts.TaskID)
 	}
 	if db := repo.db.Save(&snapshot); db.Error != nil {
@@ -487,7 +504,14 @@ func (repo *snapshotRepo) Update(id string, opts SnapshotUpdateOptions) error {
 }
 
 func (repo *snapshotRepo) MapWithFile(id string, fileID string) error {
-	if db := repo.db.Exec("INSERT INTO snapshot_file (snapshot_id, file_id) VALUES (?, ?)", id, fileID); db.Error != nil {
+	if db := repo.db.Exec("INSERT INTO snapshot_file (snapshot_id, file_id, create_time) VALUES (?, ?, ?)", id, fileID, helper.NewTimestamp()); db.Error != nil {
+		return db.Error
+	}
+	return nil
+}
+
+func (repo *snapshotRepo) BulkMapWithFile(entities []*SnapshotFileEntity, chunkSize int) error {
+	if db := repo.db.CreateInBatches(entities, chunkSize); db.Error != nil {
 		return db.Error
 	}
 	return nil
@@ -512,6 +536,19 @@ func (repo *snapshotRepo) findAllForFile(fileID string) ([]*snapshotEntity, erro
 		return nil, db.Error
 	}
 	return res, nil
+}
+
+func (repo *snapshotRepo) DeleteMappingsForTree(fileID string) error {
+	db := repo.db.
+		Exec(`WITH RECURSIVE rec (id, parent_id, create_time) AS
+              (SELECT f.id, f.parent_id, f.create_time FROM file f WHERE f.parent_id = ?
+              UNION SELECT f.id, f.parent_id, f.create_time FROM rec, file f WHERE f.parent_id = rec.id)
+              DELETE FROM snapshot_file WHERE file_id in (SELECT id FROM rec);`,
+			fileID)
+	if db.Error != nil {
+		return db.Error
+	}
+	return nil
 }
 
 func (repo *snapshotRepo) FindAllForFile(fileID string) ([]model.Snapshot, error) {
@@ -562,7 +599,7 @@ func (repo *snapshotRepo) FindAllPrevious(fileID string, version int64) ([]model
 	return res, nil
 }
 
-func (repo *snapshotRepo) GetIDsForFile(fileID string) ([]string, error) {
+func (repo *snapshotRepo) GetIDsByFile(fileID string) ([]string, error) {
 	type Value struct {
 		Result string
 	}
@@ -621,10 +658,10 @@ func (repo *snapshotRepo) CountAssociations(id string) (int, error) {
 
 func (repo *snapshotRepo) Attach(sourceFileID string, targetFileID string) error {
 	if db := repo.db.
-		Exec(`INSERT INTO snapshot_file (snapshot_id, file_id) SELECT s.id, ?
+		Exec(`INSERT INTO snapshot_file (snapshot_id, file_id, create_time) SELECT s.id, ?, ?
               FROM snapshot s LEFT JOIN snapshot_file map ON s.id = map.snapshot_id
               WHERE map.file_id = ? ORDER BY s.version DESC LIMIT 1`,
-			targetFileID, sourceFileID); db.Error != nil {
+			targetFileID, helper.NewTimestamp(), sourceFileID); db.Error != nil {
 		return db.Error
 	}
 	return nil

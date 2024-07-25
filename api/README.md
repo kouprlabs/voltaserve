@@ -2,9 +2,11 @@
 
 ## Getting Started
 
-Install [golangci-lint](https://github.com/golangci/golangci-lint).
-
-Install [swag](https://github.com/swaggo/swag).
+Prerequisites:
+- [golangci-lint](https://github.com/golangci/golangci-lint)
+- [gci](https://github.com/daixiang0/gci)
+- [gofumpt](https://github.com/mvdan/gofumpt)
+- [swag](https://github.com/swaggo/swag)
 
 Run for development:
 
@@ -24,6 +26,18 @@ Lint code:
 golangci-lint run
 ```
 
+Format code:
+
+```shell
+gci write -s standard -s default \
+  -s "prefix(github.com/kouprlabs)" \
+  -s "prefix(github.com/kouprlabs/voltaserve/api)" . && \
+gofumpt -w . && \
+gofmt -s -w . && \
+goimports -w . && \
+swag fmt
+```
+
 Build Docker image:
 
 ```shell
@@ -31,12 +45,6 @@ docker build -t voltaserve/api .
 ```
 
 ## Generate Documentation
-
-Format swag comments:
-
-```shell
-swag fmt
-```
 
 Generate `swagger.yml`:
 
@@ -47,11 +55,11 @@ swag init --output ./docs --outputTypes yaml
 Preview (will be served at [http://localhost:19090](http://localhost:19090)):
 
 ```shell
-bunx @redocly/cli preview-docs --port 19090 ./docs/swagger.yaml
+npx @redocly/cli preview-docs --port 19090 ./docs/swagger.yaml
 ```
 
 Generate the final static HTML documentation:
 
 ```shell
-bunx @redocly/cli build-docs ./docs/swagger.yaml --output ./docs/index.html
+npx @redocly/cli build-docs ./docs/swagger.yaml --output ./docs/index.html
 ```

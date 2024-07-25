@@ -7,7 +7,6 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import { useCallback, useEffect, useState } from 'react'
 import {
   Button,
@@ -38,7 +37,7 @@ export type UserSelectorProps = {
   value?: User
   organizationId?: string
   groupId?: string
-  nonGroupMembersOnly?: boolean
+  excludeGroupMembers?: boolean
   onConfirm?: (user: User) => void
 }
 
@@ -46,7 +45,7 @@ const UserSelector = ({
   value,
   organizationId,
   groupId,
-  nonGroupMembersOnly,
+  excludeGroupMembers,
   onConfirm,
 }: UserSelectorProps) => {
   const { isOpen, onOpen, onClose } = useDisclosure()
@@ -62,7 +61,7 @@ const UserSelector = ({
       query,
       organizationId,
       groupId,
-      nonGroupMembersOnly,
+      excludeGroupMembers,
       page,
       size: 5,
       sortOrder: SortOrder.Desc,

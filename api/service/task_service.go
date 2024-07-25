@@ -11,6 +11,7 @@
 package service
 
 import (
+	"slices"
 	"sort"
 	"time"
 
@@ -53,11 +54,13 @@ type Task struct {
 }
 
 type TaskCreateOptions struct {
-	Name            string  `json:"name"`
-	Error           *string `json:"error,omitempty"`
-	Percentage      *int    `json:"percentage,omitempty"`
-	IsIndeterminate bool    `json:"isIndeterminate"`
-	UserID          string  `json:"userId"`
+	Name            string            `json:"name"`
+	Error           *string           `json:"error,omitempty"`
+	Percentage      *int              `json:"percentage,omitempty"`
+	IsIndeterminate bool              `json:"isIndeterminate"`
+	UserID          string            `json:"userId"`
+	Status          string            `json:"status"`
+	Payload         map[string]string `json:"payload,omitempty"`
 }
 
 func (svc *TaskService) Create(opts TaskCreateOptions) (*Task, error) {
@@ -68,6 +71,7 @@ func (svc *TaskService) Create(opts TaskCreateOptions) (*Task, error) {
 		Percentage:      opts.Percentage,
 		IsIndeterminate: opts.IsIndeterminate,
 		UserID:          opts.UserID,
+		Payload:         opts.Payload,
 	})
 	if err != nil {
 		return nil, err
@@ -105,25 +109,25 @@ func (svc *TaskService) Patch(id string, opts TaskPatchOptions) (*Task, error) {
 	if err != nil {
 		return nil, err
 	}
-	if helper.Includes(opts.Fields, TaskFieldName) {
+	if slices.Contains(opts.Fields, TaskFieldName) {
 		task.SetName(*opts.Name)
 	}
-	if helper.Includes(opts.Fields, TaskFieldError) {
+	if slices.Contains(opts.Fields, TaskFieldError) {
 		task.SetError(opts.Error)
 	}
-	if helper.Includes(opts.Fields, TaskFieldPercentage) {
+	if slices.Contains(opts.Fields, TaskFieldPercentage) {
 		task.SetPercentage(opts.Percentage)
 	}
-	if helper.Includes(opts.Fields, TaskFieldIsIndeterminate) {
+	if slices.Contains(opts.Fields, TaskFieldIsIndeterminate) {
 		task.SetIsIndeterminate(true)
 	}
-	if helper.Includes(opts.Fields, TaskFieldUserID) {
+	if slices.Contains(opts.Fields, TaskFieldUserID) {
 		task.SetUserID(*opts.UserID)
 	}
-	if helper.Includes(opts.Fields, TaskFieldStatus) {
+	if slices.Contains(opts.Fields, TaskFieldStatus) {
 		task.SetStatus(*opts.Status)
 	}
-	if helper.Includes(opts.Fields, TaskFieldPayload) {
+	if slices.Contains(opts.Fields, TaskFieldPayload) {
 		task.SetPayload(opts.Payload)
 	}
 	if err := svc.saveAndSync(task); err != nil {
@@ -140,6 +144,9 @@ func (svc *TaskService) Find(id string, userID string) (*Task, error) {
 	task, err := svc.taskCache.Get(id)
 	if err != nil {
 		return nil, err
+	}
+	if task.GetUserID() != userID {
+		return nil, errorpkg.NewTaskNotFoundError(nil)
 	}
 	res, err := svc.taskMapper.mapOne(task)
 	if err != nil {
@@ -278,7 +285,7 @@ func (svc *TaskService) doSorting(data []model.Task, sortBy string, sortOrder st
 func (svc *TaskService) GetCount(userID string) (*int64, error) {
 	var res int64
 	var err error
-	if res, err = svc.taskRepo.GetCount(userID); err != nil {
+	if res, err = svc.taskRepo.GetCountByEmail(userID); err != nil {
 		return nil, err
 	}
 	return &res, nil

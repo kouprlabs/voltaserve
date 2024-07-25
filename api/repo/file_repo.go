@@ -12,7 +12,6 @@ package repo
 
 import (
 	"errors"
-	"time"
 
 	"gorm.io/gorm"
 
@@ -28,6 +27,8 @@ type FileRepo interface {
 	FindChildren(id string) ([]model.File, error)
 	FindPath(id string) ([]model.File, error)
 	FindTree(id string) ([]model.File, error)
+	FindTreeIDs(id string) ([]string, error)
+	DeleteChunk(ids []string) error
 	Count() (int64, error)
 	GetIDsByWorkspace(workspaceID string) ([]string, error)
 	GetIDsBySnapshot(snapshotID string) ([]string, error)
@@ -44,6 +45,7 @@ type FileRepo interface {
 	RevokeUserPermission(tree []model.File, userID string) error
 	GrantGroupPermission(id string, groupID string, permission string) error
 	RevokeGroupPermission(tree []model.File, groupID string) error
+	PopulateModelFieldsForUser(files []model.File, userID string) error
 }
 
 func NewFileRepo() FileRepo {
@@ -73,12 +75,12 @@ func (*fileEntity) TableName() string {
 }
 
 func (f *fileEntity) BeforeCreate(*gorm.DB) (err error) {
-	f.CreateTime = time.Now().UTC().Format(time.RFC3339)
+	f.CreateTime = helper.NewTimestamp()
 	return nil
 }
 
 func (f *fileEntity) BeforeSave(*gorm.DB) (err error) {
-	timeNow := time.Now().UTC().Format(time.RFC3339)
+	timeNow := helper.NewTimestamp()
 	f.UpdateTime = &timeNow
 	return nil
 }
@@ -161,6 +163,20 @@ func (f *fileEntity) SetText(text *string) {
 
 func (f *fileEntity) SetSnapshotID(snapshotID *string) {
 	f.SnapshotID = snapshotID
+}
+
+func (f *fileEntity) SetUserPermissions(permissions []model.CoreUserPermission) {
+	f.UserPermissions = make([]*UserPermissionValue, len(permissions))
+	for i, p := range permissions {
+		f.UserPermissions[i] = p.(*UserPermissionValue)
+	}
+}
+
+func (f *fileEntity) SetGroupPermissions(permissions []model.CoreGroupPermission) {
+	f.GroupPermissions = make([]*GroupPermissionValue, len(permissions))
+	for i, p := range permissions {
+		f.GroupPermissions[i] = p.(*GroupPermissionValue)
+	}
 }
 
 func (f *fileEntity) SetCreateTime(createTime string) {
@@ -300,6 +316,35 @@ func (repo *fileRepo) FindTree(id string) ([]model.File, error) {
 		res = append(res, f)
 	}
 	return res, nil
+}
+
+func (repo *fileRepo) FindTreeIDs(id string) ([]string, error) {
+	type Value struct {
+		Result string
+	}
+	var values []Value
+	db := repo.db.
+		Raw(`WITH RECURSIVE rec (id, parent_id, create_time) AS
+             (SELECT f.id, f.parent_id, f.create_time FROM file f WHERE f.id = ?
+             UNION SELECT f.id, f.parent_id, f.create_time FROM rec, file f WHERE f.parent_id = rec.id)
+             SELECT rec.id as result FROM rec ORDER BY create_time ASC`,
+			id).
+		Scan(&values)
+	if db.Error != nil {
+		return nil, db.Error
+	}
+	res := []string{}
+	for _, v := range values {
+		res = append(res, v.Result)
+	}
+	return res, nil
+}
+
+func (repo *fileRepo) DeleteChunk(ids []string) error {
+	if db := repo.db.Delete(&fileEntity{}, ids); db.Error != nil {
+		return db.Error
+	}
+	return nil
 }
 
 func (repo *fileRepo) Count() (int64, error) {
@@ -479,11 +524,11 @@ func (repo *fileRepo) GetSize(id string) (int64, error) {
 func (repo *fileRepo) GrantUserPermission(id string, userID string, permission string) error {
 	/* Grant permission to workspace */
 	db := repo.db.
-		Exec(`INSERT INTO userpermission (id, user_id, resource_id, permission)
-              (SELECT ?, ?, w.id, 'viewer' FROM file f
+		Exec(`INSERT INTO userpermission (id, user_id, resource_id, permission, create_time)
+              (SELECT ?, ?, w.id, 'viewer', ? FROM file f
               INNER JOIN workspace w ON w.id = f.workspace_id AND f.id = ?)
               ON CONFLICT DO NOTHING`,
-			helper.NewID(), userID, id)
+			helper.NewID(), userID, helper.NewTimestamp(), id)
 	if db.Error != nil {
 		return db.Error
 	}
@@ -495,9 +540,9 @@ func (repo *fileRepo) GrantUserPermission(id string, userID string, permission s
 	}
 	for _, f := range path {
 		db := repo.db.
-			Exec(`INSERT INTO userpermission (id, user_id, resource_id, permission)
-                  VALUES (?, ?, ?, 'viewer') ON CONFLICT DO NOTHING`,
-				helper.NewID(), userID, f.GetID())
+			Exec(`INSERT INTO userpermission (id, user_id, resource_id, permission, create_time)
+                  VALUES (?, ?, ?, 'viewer', ?) ON CONFLICT DO NOTHING`,
+				helper.NewID(), userID, f.GetID(), helper.NewTimestamp())
 		if db.Error != nil {
 			return db.Error
 		}
@@ -510,9 +555,9 @@ func (repo *fileRepo) GrantUserPermission(id string, userID string, permission s
 	}
 	for _, f := range tree {
 		db := repo.db.
-			Exec(`INSERT INTO userpermission (id, user_id, resource_id, permission)
-                  VALUES (?, ?, ?, ?) ON CONFLICT (user_id, resource_id) DO UPDATE SET permission = ?`,
-				helper.NewID(), userID, f.GetID(), permission, permission)
+			Exec(`INSERT INTO userpermission (id, user_id, resource_id, permission, create_time)
+                  VALUES (?, ?, ?, ?, ?) ON CONFLICT (user_id, resource_id) DO UPDATE SET permission = ?`,
+				helper.NewID(), userID, f.GetID(), permission, helper.NewTimestamp(), permission)
 		if db.Error != nil {
 			return db.Error
 		}
@@ -536,11 +581,11 @@ func (repo *fileRepo) RevokeUserPermission(tree []model.File, userID string) err
 func (repo *fileRepo) GrantGroupPermission(id string, groupID string, permission string) error {
 	/* Grant permission to workspace */
 	db := repo.db.
-		Exec(`INSERT INTO grouppermission (id, group_id, resource_id, permission)
-              (SELECT ?, ?, w.id, 'viewer' FROM file f
+		Exec(`INSERT INTO grouppermission (id, group_id, resource_id, permission, create_time)
+              (SELECT ?, ?, w.id, 'viewer', ? FROM file f
               INNER JOIN workspace w ON w.id = f.workspace_id AND f.id = ?)
               ON CONFLICT DO NOTHING`,
-			helper.NewID(), groupID, id)
+			helper.NewID(), groupID, helper.NewTimestamp(), id)
 	if db.Error != nil {
 		return db.Error
 	}
@@ -552,9 +597,9 @@ func (repo *fileRepo) GrantGroupPermission(id string, groupID string, permission
 	}
 	for _, f := range path {
 		db := repo.db.
-			Exec(`INSERT INTO grouppermission (id, group_id, resource_id, permission)
-                  VALUES (?, ?, ?, 'viewer') ON CONFLICT DO NOTHING`,
-				helper.NewID(), groupID, f.GetID())
+			Exec(`INSERT INTO grouppermission (id, group_id, resource_id, permission, create_time)
+                  VALUES (?, ?, ?, 'viewer', ?) ON CONFLICT DO NOTHING`,
+				helper.NewID(), groupID, f.GetID(), helper.NewTimestamp())
 		if db.Error != nil {
 			return db.Error
 		}
@@ -567,9 +612,9 @@ func (repo *fileRepo) GrantGroupPermission(id string, groupID string, permission
 	}
 	for _, f := range tree {
 		db := repo.db.
-			Exec(`INSERT INTO grouppermission (id, group_id, resource_id, permission)
-                  VALUES (?, ?, ?, ?) ON CONFLICT (group_id, resource_id) DO UPDATE SET permission = ?`,
-				helper.NewID(), groupID, f.GetID(), permission, permission)
+			Exec(`INSERT INTO grouppermission (id, group_id, resource_id, permission, create_time)
+                  VALUES (?, ?, ?, ?, ?) ON CONFLICT (group_id, resource_id) DO UPDATE SET permission = ?`,
+				helper.NewID(), groupID, f.GetID(), permission, helper.NewTimestamp(), permission)
 		if db.Error != nil {
 			return db.Error
 		}
@@ -586,6 +631,19 @@ func (repo *fileRepo) RevokeGroupPermission(tree []model.File, groupID string) e
 		if db.Error != nil {
 			return db.Error
 		}
+	}
+	return nil
+}
+
+func (repo *fileRepo) PopulateModelFieldsForUser(files []model.File, userID string) error {
+	for _, f := range files {
+		userPermissions := make([]model.CoreUserPermission, 0)
+		userPermissions = append(userPermissions, &UserPermissionValue{
+			UserID: userID,
+			Value:  model.PermissionOwner,
+		})
+		f.SetUserPermissions(userPermissions)
+		f.SetGroupPermissions(make([]model.CoreGroupPermission, 0))
 	}
 	return nil
 }

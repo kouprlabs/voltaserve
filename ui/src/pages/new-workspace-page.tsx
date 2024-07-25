@@ -7,7 +7,6 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import { useCallback, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {
@@ -68,7 +67,7 @@ const NewWorkspacePage = () => {
           organizationId,
           storageCapacity,
         })
-        mutate?.()
+        await mutate?.()
         setSubmitting(false)
         navigate(`/workspace/${result.id}/file/${result.rootId}`)
       } catch (error) {

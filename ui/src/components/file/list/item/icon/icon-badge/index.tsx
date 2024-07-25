@@ -29,7 +29,7 @@ const IconBadge = ({ file, isLoading }: IconBadgeProps) => {
           {file.snapshot?.status === Status.Waiting ? (
             <IconBadgeWaiting />
           ) : null}
-          {file.snapshot?.status === Status.Processing ? (
+          {file.snapshot?.status === Status.Processing || isLoading ? (
             <IconBadgeProcessing />
           ) : null}
           {file.snapshot?.status === Status.Error ? <IconBadgeError /> : null}

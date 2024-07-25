@@ -7,7 +7,6 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import { useCallback, useRef } from 'react'
 import { useParams } from 'react-router-dom'
 import {
@@ -68,7 +67,7 @@ const FileRename = () => {
       setSubmitting(true)
       try {
         await mutateFile(await FileAPI.patchName(file.id, { name }))
-        mutateList?.()
+        await mutateList?.()
         setSubmitting(false)
         dispatch(renameModalDidClose())
       } finally {

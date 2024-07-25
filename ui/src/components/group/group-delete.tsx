@@ -7,7 +7,6 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
@@ -66,7 +65,7 @@ const GroupDelete = ({ open, group, onClose }: GroupDeleteProps) => {
       try {
         navigate('/group')
         await GroupAPI.delete(group.id)
-        mutate?.()
+        await mutate?.()
         onClose?.()
       } finally {
         setSubmitting(false)

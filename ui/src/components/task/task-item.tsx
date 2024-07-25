@@ -7,7 +7,6 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import { useCallback, useState } from 'react'
 import {
   Accordion,
@@ -17,14 +16,12 @@ import {
   AccordionPanel,
   Card,
   CardBody,
-  Text,
   CircularProgress,
   IconButton,
+  Text,
 } from '@chakra-ui/react'
 import cx from 'classnames'
-import FileAPI from '@/client/api/file'
 import TaskAPI, { Status, Task } from '@/client/api/task'
-import { swrConfig } from '@/client/options'
 import {
   IconCheckCircle,
   IconClose,
@@ -41,18 +38,12 @@ export type TaskDrawerItemProps = {
 const TaskDrawerItem = ({ task }: TaskDrawerItemProps) => {
   const [isDismissing, setIsDismissing] = useState(false)
   const mutateList = useAppSelector((state) => state.ui.tasks.mutateList)
-  const { data: file } = FileAPI.useGet(
-    task.payload?.fileId,
-    swrConfig(),
-    false,
-  )
-  const fileName = file ? file?.name : 'File deleted.'
 
   const handleDismiss = useCallback(async () => {
     try {
       setIsDismissing(true)
       await TaskAPI.dismiss(task.id)
-      mutateList?.(await TaskAPI.list())
+      await mutateList?.(await TaskAPI.list())
     } finally {
       setIsDismissing(false)
     }
@@ -83,9 +74,9 @@ const TaskDrawerItem = ({ task }: TaskDrawerItemProps) => {
               <IconError filled={true} className={cx('text-red-500')} />
             ) : null}
             <div className={cx('flex', 'flex-col', 'grow')}>
-              {fileName ? (
+              {task.payload?.object ? (
                 <span className={cx('font-semibold')}>
-                  {truncateMiddle(fileName, 40)}
+                  {truncateMiddle(task.payload.object, 40)}
                 </span>
               ) : null}
               {task.status !== Status.Error ? (

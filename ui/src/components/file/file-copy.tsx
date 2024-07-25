@@ -7,23 +7,27 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import { useCallback, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import {
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalCloseButton,
-  ModalBody,
-  ModalFooter,
   Button,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
 } from '@chakra-ui/react'
 import cx from 'classnames'
 import FileAPI from '@/client/api/file'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
-import { copyModalDidClose, selectionUpdated } from '@/store/ui/files'
+import {
+  copyModalDidClose,
+  loadingAdded,
+  loadingRemoved,
+  selectionUpdated,
+} from '@/store/ui/files'
 import FileBrowse from './file-browse'
 
 const FileCopy = () => {
@@ -32,27 +36,28 @@ const FileCopy = () => {
   const isModalOpen = useAppSelector((state) => state.ui.files.isCopyModalOpen)
   const selection = useAppSelector((state) => state.ui.files.selection)
   const mutateList = useAppSelector((state) => state.ui.files.mutate)
-  const [isLoading, setIsLoading] = useState(false)
+  const mutateTasks = useAppSelector((state) => state.ui.tasks.mutateList)
   const [targetId, setTargetId] = useState<string>()
 
-  const handleMove = useCallback(async () => {
+  const handleCopy = useCallback(async () => {
     if (!targetId) {
       return
     }
-    try {
-      setIsLoading(true)
-      await FileAPI.copy(targetId, {
-        ids: selection,
-      })
-      if (fileId === targetId) {
-        mutateList?.()
-      }
-      dispatch(selectionUpdated([]))
-      dispatch(copyModalDidClose())
-    } finally {
-      setIsLoading(false)
+    const ids = [...selection]
+    for (const id of ids) {
+      dispatch(loadingAdded([id]))
+      FileAPI.copyOne(id, targetId)
+        .then(() => {
+          if (fileId === targetId) {
+            mutateList?.()
+          }
+        })
+        .finally(() => dispatch(loadingRemoved([id])))
     }
-  }, [targetId, fileId, selection, dispatch, mutateList])
+    await mutateTasks?.()
+    dispatch(selectionUpdated([]))
+    dispatch(copyModalDidClose())
+  }, [targetId, fileId, selection, dispatch, mutateList, mutateTasks])
 
   return (
     <Modal
@@ -73,17 +78,11 @@ const FileCopy = () => {
               type="button"
               variant="outline"
               colorScheme="blue"
-              disabled={isLoading}
               onClick={() => dispatch(copyModalDidClose())}
             >
               Cancel
             </Button>
-            <Button
-              variant="solid"
-              colorScheme="blue"
-              isLoading={isLoading}
-              onClick={handleMove}
-            >
+            <Button variant="solid" colorScheme="blue" onClick={handleCopy}>
               Copy Here
             </Button>
           </div>

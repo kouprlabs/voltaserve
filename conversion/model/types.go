@@ -10,12 +10,14 @@
 
 package model
 
-import "github.com/kouprlabs/voltaserve/conversion/client"
+import (
+	"github.com/kouprlabs/voltaserve/conversion/client/api_client"
+)
 
 type Pipeline interface {
-	Run(client.PipelineRunOptions) error
+	Run(api_client.PipelineRunOptions) error
 }
 
 type Builder interface {
-	Build(client.PipelineRunOptions) error
+	Build(api_client.PipelineRunOptions) error
 }
