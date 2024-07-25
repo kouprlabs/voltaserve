@@ -4,3 +4,4 @@ from .organization import organization_api_router
 from .task import task_api_router
 from .workspace import workspace_api_router
 from .invitation import invitation_api_router
+from .token import token_api_router

@@ -14,8 +14,11 @@ class Settings(BaseSettings):
     workers: int
     port: int
 
+    jwt_secret: str
+    jwt_algorithm: str
+
     class Config:
-        env_file = ".env"
+        env_file = "C:/Users/lobod/PycharmProjects/voltaserve/admin/api/.env"
 
 
 settings = Settings()

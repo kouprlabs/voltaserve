@@ -3,6 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, status
 
 from ..database import fetch_invitation, fetch_invitations
+from ..exceptions import GenericNotFoundException
 from ..models import GenericNotFoundResponse, InvitationResponse, InvitationListRequest, \
     InvitationListResponse, InvitationRequest
 
@@ -27,7 +28,7 @@ invitation_api_router = APIRouter(
 async def get_invitation(data: Annotated[InvitationRequest, Depends()]):
     invitation = fetch_invitation(_id=data.id)(_id=data.id)
     if invitation is None:
-        return GenericNotFoundResponse(message=f'Invitation with id={data.id} does not exist')
+        raise GenericNotFoundException(detail=f'Invitation with id={data.id} does not exist')
 
     return InvitationResponse(**invitation)
 
@@ -42,7 +43,7 @@ async def get_invitation(data: Annotated[InvitationRequest, Depends()]):
 async def get_all_invitations(data: Annotated[InvitationListRequest, Depends()]):
     invitations = fetch_invitations(page=data.page, size=data.size)
     if invitations is None:
-        return GenericNotFoundResponse(message='This instance has no invitations')
+        raise GenericNotFoundException(detail='This instance has no invitations')
 
     return InvitationListResponse(invitations=invitations)
 
