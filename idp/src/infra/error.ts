@@ -7,7 +7,6 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import { Request, Response, NextFunction } from 'express'
 
 export enum ErrorCode {
@@ -124,11 +123,20 @@ export function errorHandler(
 /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
 export function parseValidationError(result: any): ErrorData {
   let message: string
+  let userMessage: string
   if (result.errors) {
     message = result.errors
       /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
       .map((e: any) => `${e.msg} for ${e.type} ${e.path} in ${e.location}.`)
       .join(' ')
+    userMessage = result.errors
+      /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+      .map((e: any) => `${e.msg} for ${e.type} ${e.path}.`)
+      .join(' ')
   }
-  return newError({ code: ErrorCode.RequestValidationError, message })
+  return newError({
+    code: ErrorCode.RequestValidationError,
+    message,
+    userMessage,
+  })
 }
