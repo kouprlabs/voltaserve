@@ -31,7 +31,9 @@ nvm alias default lts/iron
 
 Install [Go](https://go.dev) for your platform.
 
-Install [PDM](https://pdm-project.org/en/latest).
+Install [Rust](https://www.rust-lang.org) for your platform.
+
+Install [PDM](https://pdm-project.org).
 
 Install Python 3.12 with PDM:
 
