@@ -12,11 +12,12 @@ FROM python:3.12-alpine
 
 WORKDIR /app
 
-COPY . .
-
 RUN apk update &&\
     apk add --no-cache build-base &&\
     pip3 install pipx
+
+COPY . .
+
 ENV PATH="/root/.local/bin:$PATH"
 
 RUN pipx install pdm --python $(which python) &&\

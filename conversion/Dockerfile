@@ -12,10 +12,11 @@ FROM golang:1.22-bookworm AS builder
 
 WORKDIR /build
 
+RUN go mod download
+
 COPY . .
 
-RUN go mod download &&\
-    go build -o voltaserve-conversion
+RUN go build -o voltaserve-conversion
 
 FROM ubuntu:noble
 

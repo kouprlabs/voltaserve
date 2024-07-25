@@ -36,8 +36,8 @@ COPY main.go .
 COPY go.mod .
 COPY go.sum .
 
-RUN go mod download
-RUN go build -o voltaserve-ui
+RUN go mod download &&\
+    go build -o voltaserve-ui
 
 FROM alpine:3.20 AS runner
 

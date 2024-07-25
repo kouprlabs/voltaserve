@@ -12,10 +12,11 @@ FROM golang:1.22-alpine AS builder
 
 WORKDIR /build
 
+RUN go mod download
+
 COPY . .
 
-RUN go mod download &&\
-    go build -o voltaserve-webdav
+RUN go build -o voltaserve-webdav
 
 FROM golang:1.22-alpine AS runner
 
