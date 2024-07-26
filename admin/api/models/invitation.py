@@ -26,4 +26,4 @@ class InvitationResponse(GenericResponse):
 
 
 class InvitationListResponse(GenericListResponse):
-    invitations: List[InvitationResponse]
+    data: List[InvitationResponse]

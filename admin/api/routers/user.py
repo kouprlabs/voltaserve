@@ -2,10 +2,10 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, status
 
+from ..database import fetch_user, fetch_users, fetch_user_organizations
 from ..exceptions import GenericNotFoundException
 from ..models import GenericNotFoundResponse, UserOrganizationListRequest, UserOrganizationListResponse, \
     UserListRequest, UserListResponse, UserRequest, UserResponse
-from ..database import fetch_user, fetch_users, fetch_user_organizations
 
 users_api_router = APIRouter(
     prefix='/user',
@@ -42,11 +42,11 @@ async def get_user(data: Annotated[UserRequest, Depends()]):
                       }
                       )
 async def get_all_users(data: Annotated[UserListRequest, Depends()]):
-    users = fetch_users(page=data.page, size=data.size)
+    users, count = fetch_users(page=data.page, size=data.size)
     if users is None:
         raise GenericNotFoundException(detail='This instance has no users')
 
-    return UserListResponse(users=users)
+    return UserListResponse(data=users, total_elements=count['count'], page=data.page, size=data.size)
 
 
 @users_api_router.get(path="/organizations",
@@ -57,11 +57,14 @@ async def get_all_users(data: Annotated[UserListRequest, Depends()]):
                       }
                       )
 async def get_user_organizations(data: Annotated[UserOrganizationListRequest, Depends()]):
-    organizations = fetch_user_organizations(user_id=data.id, page=data.page, size=data.size)
+    organizations, count = fetch_user_organizations(user_id=data.id, page=data.page, size=data.size)
     if organizations is None:
         raise GenericNotFoundException(detail='This user has no organizations')
 
-    return UserOrganizationListResponse(organizations=organizations)
+    return UserOrganizationListResponse(data=organizations,
+                                        total_elements=count['count'],
+                                        page=data.page,
+                                        size=data.size)
 
 # --- PATCH --- #
 

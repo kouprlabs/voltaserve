@@ -22,4 +22,4 @@ class UserPermissionResponse(GenericResponse):
 
 
 class UserPermissionListResponse(GenericListResponse):
-    userpermissions: List[UserPermissionResponse]
+    data: List[UserPermissionResponse]

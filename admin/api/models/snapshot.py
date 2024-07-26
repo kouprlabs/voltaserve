@@ -31,4 +31,4 @@ class SnapshotResponse(GenericResponse):
 
 
 class SnapshotListResponse(GenericListResponse):
-    snapshots: List[SnapshotResponse]
+    data: List[SnapshotResponse]

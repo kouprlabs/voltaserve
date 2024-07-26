@@ -41,11 +41,11 @@ async def get_snapshot(data: Annotated[SnapshotRequest, Depends()]):
                          }
                          )
 async def get_all_snapshots(data: Annotated[SnapshotListRequest, Depends()]):
-    snapshots = fetch_snapshots(page=data.page, size=data.size)
+    snapshots, count = fetch_snapshots(page=data.page, size=data.size)
     if snapshots is None:
         raise GenericNotFoundException(detail='This instance has no snapshots')
 
-    return SnapshotListResponse(snapshots=snapshots)
+    return SnapshotListResponse(data=snapshots, total_elements=count['count'], page=data.page, size=data.size)
 
 # --- PATCH --- #
 

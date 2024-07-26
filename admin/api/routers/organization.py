@@ -41,11 +41,11 @@ async def get_organization(data: Annotated[OrganizationRequest, Depends()]):
                              }
                              )
 async def get_all_organizations(data: Annotated[OrganizationListRequest, Depends()]):
-    organizations = fetch_organizations(page=data.page, size=data.size)
+    organizations, count = fetch_organizations(page=data.page, size=data.size)
     if organizations is None:
         raise GenericNotFoundException(detail='This instance has no organizations')
 
-    return OrganizationListResponse(organizations=organizations)
+    return OrganizationListResponse(data=organizations, total_elements=count['count'], page=data.page, size=data.size)
 
 # --- PATCH --- #
 

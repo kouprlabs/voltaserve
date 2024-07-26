@@ -33,7 +33,13 @@ def fetch_snapshots(page=1, size=10):
                 f"ORDER BY create_time "
                 f"OFFSET {(page - 1) * size} "
                 f"LIMIT {(page - 1) * size + size}")
-            return curs.fetchall()
+            data = curs.fetchall()
+
+            curs.execute(f"SELECT count(1) "
+                         f"FROM {settings.db_name}.snapshot")
+            count = curs.fetchone()
+
+            return data, count
         except (Exception, DatabaseError) as error:
             print(error)
 

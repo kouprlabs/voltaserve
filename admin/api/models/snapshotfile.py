@@ -21,4 +21,4 @@ class SnapshotFileResponse(GenericResponse):
 
 
 class SnapshotFileListResponse(GenericListResponse):
-    snapshotfiles: List[SnapshotFileResponse]
+    data: List[SnapshotFileResponse]

@@ -40,11 +40,11 @@ async def get_task(data: Annotated[TaskRequest, Depends()]):
                      }
                      )
 async def get_all_tasks(data: Annotated[TaskListRequest, Depends()]):
-    tasks = fetch_tasks(page=data.page, size=data.size)
+    tasks, count = fetch_tasks(page=data.page, size=data.size)
     if tasks is None:
         raise GenericNotFoundException(detail='This instance has no tasks')
 
-    return TaskListResponse(tasks=tasks)
+    return TaskListResponse(data=tasks, total_elements=count['count'], page=data.page, size=data.size)
 
 # --- PATCH --- #
 

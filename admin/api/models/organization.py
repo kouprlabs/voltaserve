@@ -25,7 +25,7 @@ class OrganizationResponse(GenericResponse):
 
 
 class OrganizationListResponse(GenericListResponse):
-    organizations: List[OrganizationResponse]
+    data: List[OrganizationResponse]
 
 
 class UserOrganizationResponse(OrganizationResponse):
@@ -33,4 +33,4 @@ class UserOrganizationResponse(OrganizationResponse):
 
 
 class UserOrganizationListResponse(GenericListResponse):
-    organizations: List[UserOrganizationResponse]
+    data: List[UserOrganizationResponse]
