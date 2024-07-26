@@ -30,7 +30,7 @@ def fetch_users(page=1, size=10):
                          f"FROM {settings.db_name}.user "
                          f"ORDER BY create_time "
                          f"OFFSET {(page - 1) * size} "
-                         f"LIMIT {(page - 1) * size + size}")
+                         f"LIMIT {size}")
             data = curs.fetchall()
 
             curs.execute(f"SELECT count(1) "
@@ -50,7 +50,7 @@ def fetch_user_organizations(user_id: str, page=1, size=10):
                          f"WHERE u.user_id = '{user_id}' "
                          f"ORDER BY o.create_time "
                          f"OFFSET {(page - 1) * size} "
-                         f"LIMIT {(page - 1) * size + size}")
+                         f"LIMIT {size}")
             data = curs.fetchall()
 
             curs.execute(f"SELECT count(1) "
