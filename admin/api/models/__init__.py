@@ -18,3 +18,4 @@ from .userpermission import UserPermissionRequest, UserPermissionListRequest, Us
 from .workspace import WorkspaceRequest, WorkspaceListRequest, WorkspaceResponse, WorkspaceListResponse, \
     OrganizationWorkspaceListRequest
 from .token import TokenResponse, TokenPayload
+from .index import IndexRequest, IndexListRequest, IndexResponse, IndexListResponse
