@@ -12,11 +12,17 @@ FROM rust:1.79-alpine AS rust-builder
 
 WORKDIR /build
 
+RUN apk add --no-cache musl-dev
+COPY Cargo.toml Cargo.lock ./
+
+# Build our dependencies first for the cache
+RUN ARCH=$(apk --print-arch); \
+    cargo build -p sea-orm-migration --release --locked --target=${ARCH}-unknown-linux-musl;
+
 COPY . ./
 
-RUN apk add --no-cache musl-dev &&\
-    rustc --print target-list &&\
-    export ARCH=$(apk --print-arch); \
+# Now build our software
+RUN ARCH=$(apk --print-arch); \
     cargo build --release --locked --target=${ARCH}-unknown-linux-musl; \
     mv /build/target/${ARCH}-unknown-linux-musl/release/migrate /build/migrate
 
@@ -25,5 +31,7 @@ FROM scratch AS runner
 COPY --from=rust-builder /build/migrate /migrate
 
 ENTRYPOINT ["/migrate"]
+
+CMD ["up"]
 
 EXPOSE 3000
