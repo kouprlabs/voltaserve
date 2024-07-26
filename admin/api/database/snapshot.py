@@ -23,7 +23,7 @@ def fetch_snapshot(_id: str):
             print(error)
 
 
-def fetch_snapshots(page=0, size=10):
+def fetch_snapshots(page=1, size=10):
     with conn.cursor(cursor_factory=extras.RealDictCursor) as curs:
         try:
             curs.execute(
@@ -31,8 +31,8 @@ def fetch_snapshots(page=0, size=10):
                 f"status, task_id, create_time, update_time "
                 f"FROM {settings.db_name}.snapshot "
                 f"ORDER BY create_time "
-                f"OFFSET {page * size} "
-                f"LIMIT {page * size + size}")
+                f"OFFSET {(page - 1) * size} "
+                f"LIMIT {(page - 1) * size + size}")
             return curs.fetchall()
         except (Exception, DatabaseError) as error:
             print(error)

@@ -10,7 +10,7 @@ class GenericRequest(BaseModel):
 
 
 class GenericPaginationRequest(BaseModel):
-    page: int | None = Field(default=0)
+    page: int | None = Field(default=1)
     size: int | None = Field(default=10)
 
 
