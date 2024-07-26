@@ -3,6 +3,7 @@ import time
 
 import psycopg2
 from fastapi import FastAPI, Request, Response, status, Depends
+from fastapi.middleware.cors import CORSMiddleware
 
 from .dependencies import settings, JWTBearer
 from .routers import users_api_router, group_api_router, organization_api_router, task_api_router, \
@@ -10,6 +11,18 @@ from .routers import users_api_router, group_api_router, organization_api_router
 
 app = FastAPI(debug=True,)
               # dependencies=[Depends(JWTBearer())])
+
+
+origins = ['http://localhost:3000']
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"]
+)
+
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.DEBUG)
 logger = logging.getLogger(__name__)
