@@ -324,7 +324,7 @@ const FileMenu = ({
                 }}
               >
                 <div className={cx('flex', 'flex-row', 'justify-between')}>
-                  <span>Rename</span>
+                  <span>Delete</span>
                   {isMacOS ? (
                     <div>
                       <Kbd>fn</Kbd>+<Kbd>del</Kbd>
