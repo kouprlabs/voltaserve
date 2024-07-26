@@ -22,4 +22,4 @@ class GroupResponse(GenericResponse):
 
 
 class GroupListResponse(GenericListResponse):
-    groups: List[GroupResponse]
+    data: List[GroupResponse]

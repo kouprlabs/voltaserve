@@ -1,7 +1,6 @@
-import datetime
 from typing import List
 
-from .generic import GenericPaginationRequest, GenericResponse, GenericListResponse, GenericRequest, BaseModel
+from .generic import GenericPaginationRequest, GenericListResponse, GenericRequest, BaseModel
 
 
 # --- REQUEST MODELS --- #
@@ -21,4 +20,4 @@ class IndexResponse(BaseModel):
 
 
 class IndexListResponse(GenericListResponse):
-    indexes: List[IndexResponse]
+    data: List[IndexResponse]

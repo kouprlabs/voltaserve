@@ -29,4 +29,4 @@ class TaskResponse(GenericResponse):
 
 
 class TaskListResponse(GenericListResponse):
-    tasks: List[TaskResponse]
+    data: List[TaskResponse]

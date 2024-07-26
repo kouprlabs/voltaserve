@@ -21,10 +21,10 @@ class UserResponse(GenericResponse):
     username: str
     email: EmailStr
     is_email_confirmed: bool
-    # picture: str
+    picture: str | None
     create_time: datetime.datetime
     update_time: datetime.datetime
 
 
 class UserListResponse(GenericListResponse):
-    users: List[UserResponse]
+    data: List[UserResponse]

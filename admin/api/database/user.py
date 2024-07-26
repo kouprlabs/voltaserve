@@ -13,7 +13,8 @@ conn = connect(host=settings.db_host,
 def fetch_user(_id: str):
     with conn.cursor(cursor_factory=extras.RealDictCursor) as curs:
         try:
-            curs.execute(f"SELECT id, full_name, username, email, is_email_confirmed, create_time, update_time "
+            curs.execute(f"SELECT id, full_name, username, email, picture, "
+                         f"is_email_confirmed, create_time, update_time "
                          f"FROM {settings.db_name}.user "
                          f"WHERE id='{_id}'")
             return curs.fetchone()
@@ -24,12 +25,19 @@ def fetch_user(_id: str):
 def fetch_users(page=1, size=10):
     with conn.cursor(cursor_factory=extras.RealDictCursor) as curs:
         try:
-            curs.execute(f"SELECT id, full_name, username, email, is_email_confirmed, create_time, update_time "
+            curs.execute(f"SELECT id, full_name, username, email, picture, "
+                         f"is_email_confirmed, create_time, update_time "
                          f"FROM {settings.db_name}.user "
                          f"ORDER BY create_time "
                          f"OFFSET {(page - 1) * size} "
                          f"LIMIT {(page - 1) * size + size}")
-            return curs.fetchall()
+            data = curs.fetchall()
+
+            curs.execute(f"SELECT count(1) "
+                         f"FROM {settings.db_name}.user")
+            count = curs.fetchone()
+
+            return data, count
         except (Exception, DatabaseError) as error:
             print(error)
 
@@ -43,7 +51,14 @@ def fetch_user_organizations(user_id: str, page=1, size=10):
                          f"ORDER BY o.create_time "
                          f"OFFSET {(page - 1) * size} "
                          f"LIMIT {(page - 1) * size + size}")
-            return curs.fetchall()
+            data = curs.fetchall()
+
+            curs.execute(f"SELECT count(1) "
+                         f"FROM {settings.db_name}.user "
+                         f"WHERE u.user_id = '{user_id}' ")
+            count = curs.fetchone()
+
+            return data, count
         except (Exception, DatabaseError) as error:
             print(error)
 

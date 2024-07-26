@@ -59,4 +59,3 @@ class JWTBearer(HTTPBearer):
             return credentials.credentials
         else:
             raise GenericForbiddenException(detail="Invalid token")
-

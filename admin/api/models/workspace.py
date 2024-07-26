@@ -29,4 +29,4 @@ class WorkspaceResponse(GenericResponse):
 
 
 class WorkspaceListResponse(GenericListResponse):
-    workspaces: List[WorkspaceResponse]
+    data: List[WorkspaceResponse]

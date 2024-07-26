@@ -21,4 +21,4 @@ class OrganizationUserResponse(GenericResponse):
 
 
 class OrganizationUserListResponse(GenericListResponse):
-    OrganizationUsers: List[OrganizationUserResponse]
+    data: List[OrganizationUserResponse]

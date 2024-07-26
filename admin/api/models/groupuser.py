@@ -21,4 +21,4 @@ class GroupUserResponse(GenericResponse):
 
 
 class GroupUserListResponse(GenericListResponse):
-    groupusers: List[GroupUserResponse]
+    data: List[GroupUserResponse]

@@ -1,4 +1,5 @@
 import datetime
+from typing import List
 
 from fastapi import status, HTTPException
 from pydantic import BaseModel, Field
@@ -20,7 +21,10 @@ class GenericResponse(BaseModel):
 
 
 class GenericListResponse(BaseModel):
-    pass
+    total_elements: int
+    page: int
+    size: int
+    data: List[None]
 
 
 class GenericNotFoundResponse(BaseModel):

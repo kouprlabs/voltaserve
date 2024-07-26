@@ -21,4 +21,4 @@ class GroupPermissionResponse(GenericResponse):
 
 
 class GroupPermissionListResponse(GenericListResponse):
-    grouppermissions: List[GroupPermissionResponse]
+    data: List[GroupPermissionResponse]
