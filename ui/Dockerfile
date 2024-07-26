@@ -37,8 +37,6 @@ RUN go mod download
 COPY --from=ui-builder /build/dist ./dist
 COPY config ./config
 COPY main.go .
-COPY go.mod .
-COPY go.sum .
 
 RUN go build -o voltaserve-ui
 
