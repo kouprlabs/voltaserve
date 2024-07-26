@@ -21,14 +21,14 @@ def fetch_organization(organization_id: str):
             print(error)
 
 
-def fetch_organizations(page=0, size=10):
+def fetch_organizations(page=1, size=10):
     with conn.cursor(cursor_factory=extras.RealDictCursor) as curs:
         try:
             curs.execute(f"SELECT id, name, create_time, update_time "
                          f"FROM {settings.db_name}.organization "
                          f"ORDER BY create_time "
-                         f"OFFSET {page * size} "
-                         f"LIMIT {page * size + size}")
+                         f"OFFSET {(page - 1) * size} "
+                         f"LIMIT {(page - 1) * size + size}")
             return curs.fetchall()
         except (Exception, DatabaseError) as error:
             print(error)
