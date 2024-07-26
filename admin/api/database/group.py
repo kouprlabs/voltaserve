@@ -28,7 +28,7 @@ def fetch_groups(page=1, size=10):
                          f"FROM {settings.db_name}.group "
                          f"ORDER BY create_time "
                          f"OFFSET {(page - 1) * size} "
-                         f"LIMIT {(page - 1) * size + size}")
+                         f"LIMIT {size}")
             data = curs.fetchall()
 
             curs.execute(f"SELECT count(1) "

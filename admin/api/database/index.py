@@ -29,7 +29,7 @@ def fetch_indexes(page=1, size=10):
                          f"WHERE schemaname = 'public' "
                          f"ORDER BY tablename, indexname "
                          f"OFFSET {(page - 1) * size} "
-                         f"LIMIT {(page - 1) * size + size}")
+                         f"LIMIT {size}")
             data = curs.fetchall()
 
             curs.execute("SELECT count(1) FROM pg_indexes WHERE schemaname = 'public' ")
