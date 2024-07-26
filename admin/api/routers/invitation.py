@@ -45,7 +45,7 @@ async def get_all_invitations(data: Annotated[InvitationListRequest, Depends()])
     if invitations is None:
         raise GenericNotFoundException(detail='This instance has no invitations')
 
-    return InvitationListResponse(data=invitations, total_elements=count['count'], page=data.page, size=data.size)
+    return InvitationListResponse(data=invitations, totalElements=count['count'], page=data.page, size=data.size)
 
 # --- PATCH --- #
 

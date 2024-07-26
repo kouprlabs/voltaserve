@@ -21,7 +21,7 @@ class GenericResponse(BaseModel):
 
 
 class GenericListResponse(BaseModel):
-    total_elements: int
+    totalElements: int
     page: int
     size: int
     data: List[None]

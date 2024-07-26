@@ -44,7 +44,7 @@ async def get_all_groups(data: Annotated[GroupListRequest, Depends()]):
     if groups is None:
         raise GenericNotFoundException(detail='This instance has no groups')
 
-    return GroupListResponse(data=groups, total_elements=count['count'], page=data.page, size=data.size)
+    return GroupListResponse(data=groups, totalElements=count['count'], page=data.page, size=data.size)
 
 # --- PATCH --- #
 

@@ -44,7 +44,7 @@ async def get_all_indexes(data: Annotated[IndexListRequest, Depends()]):
     if indexes is None:
         raise GenericNotFoundException(detail='This instance has no indexes')
 
-    return IndexListResponse(data=indexes, total_elements=count['count'], page=data.page, size=data.size)
+    return IndexListResponse(data=indexes, totalElements=count['count'], page=data.page, size=data.size)
 
 # --- PATCH --- #
 
