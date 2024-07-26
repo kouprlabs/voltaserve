@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, status, Header
+from fastapi import APIRouter, status, Header
 
 from ..exceptions import GenericUnauthorizedException
 from ..models import GenericNotFoundResponse, TokenResponse, GenericUnauthorizedResponse
