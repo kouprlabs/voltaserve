@@ -60,7 +60,7 @@ async def get_organization_workspaces(data: Annotated[OrganizationWorkspaceListR
     if workspaces is None:
         raise GenericNotFoundException(detail='This instance has no workspaces')
 
-    return WorkspaceListResponse(data=workspaces, total_elements=count['count'], page=data.page, size=data.size)
+    return WorkspaceListResponse(data=workspaces, totalElements=count['count'], page=data.page, size=data.size)
 
 # --- PATCH --- #
 

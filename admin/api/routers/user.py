@@ -46,7 +46,7 @@ async def get_all_users(data: Annotated[UserListRequest, Depends()]):
     if users is None:
         raise GenericNotFoundException(detail='This instance has no users')
 
-    return UserListResponse(data=users, total_elements=count['count'], page=data.page, size=data.size)
+    return UserListResponse(data=users, totalElements=count['count'], page=data.page, size=data.size)
 
 
 @users_api_router.get(path="/organizations",
@@ -62,7 +62,7 @@ async def get_user_organizations(data: Annotated[UserOrganizationListRequest, De
         raise GenericNotFoundException(detail='This user has no organizations')
 
     return UserOrganizationListResponse(data=organizations,
-                                        total_elements=count['count'],
+                                        totalElements=count['count'],
                                         page=data.page,
                                         size=data.size)
 

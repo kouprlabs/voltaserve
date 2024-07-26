@@ -45,7 +45,7 @@ async def get_all_snapshots(data: Annotated[SnapshotListRequest, Depends()]):
     if snapshots is None:
         raise GenericNotFoundException(detail='This instance has no snapshots')
 
-    return SnapshotListResponse(data=snapshots, total_elements=count['count'], page=data.page, size=data.size)
+    return SnapshotListResponse(data=snapshots, totalElements=count['count'], page=data.page, size=data.size)
 
 # --- PATCH --- #
 
