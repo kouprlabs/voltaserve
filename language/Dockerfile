@@ -12,18 +12,17 @@ FROM python:3.12-alpine
 
 WORKDIR /app
 
+RUN apk update &&\
+    apk add --no-cache build-base &&\
+    pip3 install pipx
+
 COPY . .
 
-RUN apk update
-RUN apk add --no-cache build-base
-
-RUN pip3 install pipx
 ENV PATH="/root/.local/bin:$PATH"
 
-RUN pipx install pdm --python $(which python)
-
-RUN pdm install --prod --no-editable
-RUN .venv/bin/python3 -m ensurepip
+RUN pipx install pdm --python $(which python) &&\
+    pdm install --prod --no-editable &&\
+    .venv/bin/python3 -m ensurepip
 
 ENTRYPOINT ["pdm", "run", "flask", "run", "--host=0.0.0.0", "--port=8084"]
 

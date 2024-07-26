@@ -12,16 +12,18 @@ FROM golang:1.22-bookworm AS builder
 
 WORKDIR /build
 
-COPY . .
+COPY go.mod go.sum .
 
 RUN go mod download
+
+COPY . .
+
 RUN go build -o voltaserve-conversion
 
 FROM ubuntu:noble
 
-RUN apt-get update
-
-RUN apt-get install -y htop
+RUN apt-get update &&\
+    apt-get install -y htop
 
 WORKDIR /app
 
