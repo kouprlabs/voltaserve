@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .dependencies import settings, JWTBearer
 from .routers import users_api_router, group_api_router, organization_api_router, task_api_router, \
-    workspace_api_router, invitation_api_router, token_api_router
+    workspace_api_router, invitation_api_router, token_api_router, index_api_router
 
 app = FastAPI(debug=True,)
               # dependencies=[Depends(JWTBearer())])
@@ -34,6 +34,7 @@ app.include_router(task_api_router)
 app.include_router(workspace_api_router)
 app.include_router(invitation_api_router)
 app.include_router(token_api_router)
+app.include_router(index_api_router)
 
 
 @app.middleware("http")
