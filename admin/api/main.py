@@ -2,13 +2,14 @@ import logging
 import time
 
 import psycopg2
-from fastapi import FastAPI, Request, Response, status
+from fastapi import FastAPI, Request, Response, status, Depends
 
-from .dependencies import settings
+from .dependencies import settings, JWTBearer
 from .routers import users_api_router, group_api_router, organization_api_router, task_api_router, \
     workspace_api_router, invitation_api_router, token_api_router
 
-app = FastAPI(debug=True)
+app = FastAPI(debug=True,)
+              # dependencies=[Depends(JWTBearer())])
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.DEBUG)
 logger = logging.getLogger(__name__)
