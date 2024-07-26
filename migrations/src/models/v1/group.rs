@@ -9,3 +9,8 @@ pub enum Group {
     CreateTime,
     UpdateTime,
 }
+
+#[derive(Iden)]
+pub enum GroupUser {
+    Table,
+}
