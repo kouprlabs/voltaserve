@@ -39,6 +39,7 @@ class GenericUnauthorizedResponse(BaseModel):
 
 # --- TOKEN SPECIFIC --- #
 class GenericTokenPayload(BaseModel):
+    sub: str
     iat: datetime.datetime
     iss: str
     aud: str

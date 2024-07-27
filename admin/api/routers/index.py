@@ -3,6 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, status
 
 from ..database import fetch_index, fetch_indexes
+from ..dependencies import JWTBearer
 from ..exceptions import GenericNotFoundException
 from ..models import GenericNotFoundResponse, IndexListResponse, IndexListRequest, IndexResponse, IndexRequest
 
@@ -13,7 +14,8 @@ index_api_router = APIRouter(
         status.HTTP_404_NOT_FOUND: {
             'model': GenericNotFoundResponse
         }
-    }
+    },
+    dependencies=[Depends(JWTBearer())]
 )
 
 

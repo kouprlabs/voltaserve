@@ -1,7 +1,8 @@
 from typing import Annotated
 
-from fastapi import APIRouter, status, Header
+from fastapi import APIRouter, status, Header, Depends
 
+from ..dependencies import JWTBearer
 from ..exceptions import GenericUnauthorizedException
 from ..models import GenericNotFoundResponse, TokenResponse, GenericUnauthorizedResponse
 
@@ -15,11 +16,16 @@ token_api_router = APIRouter(
         status.HTTP_401_UNAUTHORIZED: {
             'model': GenericUnauthorizedResponse
         }
-    }
+    },
+    dependencies=[Depends(JWTBearer())]
 )
 
 
 # --- GET --- #
+
+# --- PATCH --- #
+
+# --- POST --- #
 @token_api_router.post(path="/validate",
                        responses={
                            status.HTTP_200_OK: {
@@ -32,10 +38,6 @@ async def validate_token(authorization: Annotated[str | None, Header()] = None):
         raise GenericUnauthorizedException()
 
     return TokenResponse(authorized=True)
-
-# --- PATCH --- #
-
-# --- POST --- #
 
 # --- PUT --- #
 

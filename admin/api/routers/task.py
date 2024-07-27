@@ -3,6 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, status
 
 from ..database import fetch_task, fetch_tasks
+from ..dependencies import JWTBearer
 from ..exceptions import GenericNotFoundException
 from ..models import GenericNotFoundResponse, TaskResponse, TaskRequest, TaskListResponse, TaskListRequest
 
@@ -13,7 +14,8 @@ task_api_router = APIRouter(
         status.HTTP_404_NOT_FOUND: {
             'model': GenericNotFoundResponse
         }
-    }
+    },
+    dependencies=[Depends(JWTBearer())]
 )
 
 
