@@ -62,6 +62,8 @@
     "@vitejs/plugin-react": "4.2.1",
     "autoprefixer": "10.4.19",
     "eslint": "9.3.0",
+    "eslint-config-prettier": "9.1.0",
+    "eslint-plugin-prettier": "5.2.1",
     "eslint-plugin-react": "7.34.1",
     "globals": "15.3.0",
     "postcss": "8.4.38",
