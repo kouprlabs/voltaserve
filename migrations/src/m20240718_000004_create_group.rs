@@ -43,7 +43,8 @@ impl MigrationTrait for Migration {
                     .foreign_key(
                         ForeignKey::create()
                             .from(Group::Table, Group::OrganizationId)
-                            .to(Organization::Table, Organization::Id),
+                            .to(Organization::Table, Organization::Id)
+                            .on_delete(ForeignKeyAction::Cascade),
                     )
                     .col(
                         ColumnDef::new(Group::CreateTime)

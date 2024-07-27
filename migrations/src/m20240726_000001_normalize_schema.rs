@@ -66,7 +66,8 @@ impl MigrationTrait for Migration {
                             .from_tbl(File::Table)
                             .from_col(File::ParentId)
                             .to_tbl(File::Table)
-                            .to_col(File::Id),
+                            .to_col(File::Id)
+                            .on_delete(ForeignKeyAction::SetNull),
                     )
                     // Create stricter file -> snapshot foreign key constraint to prevent in-use snapshots
                     // from being deleted
