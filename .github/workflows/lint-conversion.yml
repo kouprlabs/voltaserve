@@ -8,7 +8,7 @@
 # by the GNU Affero General Public License v3.0 only, included in the file
 # licenses/AGPL.txt.
 
-name: Lint voltaserve/conversion
+name: Lin and build voltaserve/conversion
 
 on:
   pull_request:
