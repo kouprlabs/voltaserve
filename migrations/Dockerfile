@@ -8,23 +8,25 @@
 # by the GNU Affero General Public License v3.0 only, included in the file
 # licenses/AGPL.txt.
 
-FROM rust:1.79-alpine AS rust-builder
+FROM --platform=$BUILDPLATFORM rust:1.79 AS rust-builder
 
 WORKDIR /build
 
-RUN apk add --no-cache musl-dev
+ARG TARGETPLATFORM
+
+COPY build.sh ./
+
+RUN /build/build.sh install
+
 COPY Cargo.toml Cargo.lock ./
 
 # Build our dependencies first for the cache
-RUN ARCH=$(apk --print-arch); \
-    cargo build -p sea-orm-migration --release --locked --target=${ARCH}-unknown-linux-musl;
+RUN /build/build.sh deps
 
 COPY . ./
 
 # Now build our software
-RUN ARCH=$(apk --print-arch); \
-    cargo build --release --locked --target=${ARCH}-unknown-linux-musl; \
-    mv /build/target/${ARCH}-unknown-linux-musl/release/migrate /build/migrate
+RUN /build/build.sh
 
 FROM scratch AS runner
 
