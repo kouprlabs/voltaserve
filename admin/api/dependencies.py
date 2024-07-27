@@ -37,24 +37,29 @@ class JWTBearer(HTTPBearer):
         super(JWTBearer, self).__init__(auto_error=auto_error)
 
     async def __call__(self, request: Request):
+        jwt.api_jws.PyJWS.header_typ = False
         credentials: HTTPAuthorizationCredentials = await super(JWTBearer, self).__call__(request)
         if credentials:
             if not credentials.scheme == "Bearer":
                 raise GenericForbiddenException(detail="Invalid authentication scheme.")
+
             try:
                 decoded_token = jwt.decode(jwt=credentials.credentials,
                                            key=settings.jwt_secret,
-                                           algorithms=[settings.jwt_algorithm])
-                print(decoded_token)
+                                           algorithms=[settings.jwt_algorithm],
+                                           audience=settings.url,
+                                           issuer=settings.url,
+                                           verify=True)
+
             except Exception as e:
                 raise GenericForbiddenException(detail=str(e))
 
+            if decoded_token['sub'] is None or decoded_token['sub'] == '':
+                raise GenericForbiddenException(detail='Invalid subject')
             if decoded_token['iat'] > time.time():
                 raise GenericForbiddenException(detail='Token issued in the future')
             if decoded_token['exp'] < time.time():
                 raise GenericForbiddenException(detail='Token expired')
-            if decoded_token['iss'] != settings.url != decoded_token['aud']:
-                raise GenericForbiddenException(detail='Token issued for another instance')
 
             return credentials.credentials
         else:

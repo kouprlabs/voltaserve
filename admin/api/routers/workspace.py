@@ -3,6 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, status
 
 from ..database import fetch_workspace, fetch_workspaces, fetch_organization_workspaces
+from ..dependencies import JWTBearer
 from ..exceptions import GenericNotFoundException
 from ..models import GenericNotFoundResponse, WorkspaceResponse, WorkspaceRequest, WorkspaceListResponse, \
     WorkspaceListRequest, OrganizationWorkspaceListRequest
@@ -14,7 +15,8 @@ workspace_api_router = APIRouter(
         status.HTTP_404_NOT_FOUND: {
             'model': GenericNotFoundResponse
         }
-    }
+    },
+    dependencies=[Depends(JWTBearer())]
 )
 
 
