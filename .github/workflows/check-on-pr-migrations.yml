@@ -8,7 +8,7 @@
 # by the GNU Affero General Public License v3.0 only, included in the file
 # licenses/AGPL.txt.
 
-name: Lint and build voltaserve/migration
+name: Lint and build voltaserve/migrations
 
 on:
   pull_request:
@@ -49,6 +49,6 @@ jobs:
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v5
         with:
-          context: ./migrate
+          context: ./migrations
           push: false
           platforms: linux/amd64,linux/arm64
