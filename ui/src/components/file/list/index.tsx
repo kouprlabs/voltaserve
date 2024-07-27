@@ -157,8 +157,8 @@ const FileList = ({ list, scale }: FileListProps) => {
           dispatch(moveModalDidOpen())
         }
       } else if (
-        (keyName === 'command+e' && isMacOS()) ||
-        (keyName === 'ctrl+e' && !isMacOS())
+        (keyName === 'return' && isMacOS()) ||
+        (keyName === 'f2' && !isMacOS())
       ) {
         if (selection.length > 0) {
           dispatch(renameModalDidOpen())
@@ -181,7 +181,7 @@ const FileList = ({ list, scale }: FileListProps) => {
         command+a,ctrl+a,
         command+c,ctrl+c,
         command+x,ctrl+x,
-        command+e,ctrl+e,
+        return,f2,
         command+backspace,del`}
       onKeyDown={handleKeyDown}
     >

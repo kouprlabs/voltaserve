@@ -327,11 +327,11 @@ const FileMenu = ({
                   <span>Delete</span>
                   {isMacOS ? (
                     <div>
-                      <Kbd>fn</Kbd>+<Kbd>del</Kbd>
+                      <Kbd>⌘</Kbd>+<Kbd>delete</Kbd>
                     </div>
                   ) : (
                     <div>
-                      <Kbd>del</Kbd>
+                      <Kbd>Del</Kbd>
                     </div>
                   )}
                 </div>
@@ -348,11 +348,11 @@ const FileMenu = ({
                   <span>Rename</span>
                   {isMacOS ? (
                     <div>
-                      <Kbd>⌘</Kbd>+<Kbd>E</Kbd>
+                      <Kbd>return</Kbd>
                     </div>
                   ) : (
                     <div>
-                      <Kbd>ctrl</Kbd>+<Kbd>E</Kbd>
+                      <Kbd>F2</Kbd>
                     </div>
                   )}
                 </div>
@@ -373,7 +373,7 @@ const FileMenu = ({
                     </div>
                   ) : (
                     <div>
-                      <Kbd>ctrl</Kbd>+<Kbd>X</Kbd>
+                      <Kbd>Ctrl</Kbd>+<Kbd>X</Kbd>
                     </div>
                   )}
                 </div>
@@ -394,7 +394,7 @@ const FileMenu = ({
                     </div>
                   ) : (
                     <div>
-                      <Kbd>ctrl</Kbd>+<Kbd>C</Kbd>
+                      <Kbd>Ctrl</Kbd>+<Kbd>C</Kbd>
                     </div>
                   )}
                 </div>
@@ -415,7 +415,7 @@ const FileMenu = ({
                       </div>
                     ) : (
                       <div>
-                        <Kbd>^</Kbd>+<Kbd>A</Kbd>
+                        <Kbd>Ctrl</Kbd>+<Kbd>A</Kbd>
                       </div>
                     )}
                   </div>
