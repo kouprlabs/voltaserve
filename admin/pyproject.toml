@@ -26,7 +26,8 @@ uvicorn = "^0.30.1"
 psycopg2-binary = "^2.9.9"
 pydantic-settings = "2.3.4"
 PyJWT = "^2.8.0"
-websockets = "12.0"
+fastapi-utils = "^0.7.0"
+typing-inspect = "^0.9.0"
 
 [build-system]
 requires = ["poetry-core"]

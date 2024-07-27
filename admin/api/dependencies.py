@@ -14,6 +14,7 @@ from typing import Optional
 import jwt
 from fastapi import Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from pydantic import Field
 from pydantic_settings import BaseSettings
 
 from .exceptions import GenericForbiddenException
@@ -34,6 +35,10 @@ class Settings(BaseSettings):
     jwt_algorithm: str
 
     url: str
+    cors_origins: str
+
+    admin_token: Optional[str] = Field('')
+    admin_token_expiration: int = Field(60*10)
 
     class Config:
         env_file = ".env"
@@ -64,12 +69,15 @@ class JWTBearer(HTTPBearer):
             except Exception as e:
                 raise GenericForbiddenException(detail=str(e))
 
-            if decoded_token['sub'] is None or decoded_token['sub'] == '':
+            if decoded_token['sub'] != 'SUPERUSER':
                 raise GenericForbiddenException(detail='Invalid subject')
             if decoded_token['iat'] > time.time():
                 raise GenericForbiddenException(detail='Token issued in the future')
             if decoded_token['exp'] < time.time():
                 raise GenericForbiddenException(detail='Token expired')
+
+            if credentials.credentials != settings.admin_token:
+                raise GenericForbiddenException(detail="You are not a superuser :D")
 
             return credentials.credentials
         else:
