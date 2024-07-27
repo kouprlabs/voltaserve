@@ -1,3 +1,13 @@
+# Copyright 2024 Piotr Łoboda.
+#
+# Use of this software is governed by the Business Source License
+# included in the file licenses/BSL.txt.
+#
+# As of the Change Date specified in that file, in accordance with
+# the Business Source License, use of this software will be governed
+# by the GNU Affero General Public License v3.0 only, included in the file
+# licenses/AGPL.txt.
+
 import logging
 import time
 
@@ -6,8 +16,8 @@ from fastapi import FastAPI, Request, Response, status, Depends
 from fastapi.middleware.cors import CORSMiddleware
 
 from .dependencies import settings, JWTBearer
-from .routers import users_api_router, group_api_router, organization_api_router, task_api_router, \
-    workspace_api_router, invitation_api_router, token_api_router, index_api_router
+from .routers import users_api_router, group_api_router, organization_api_router, workspace_api_router, \
+    invitation_api_router, index_api_router
 
 app = FastAPI(debug=True)
 
@@ -32,7 +42,6 @@ app.include_router(organization_api_router)
 # app.include_router(task_api_router)
 app.include_router(workspace_api_router)
 app.include_router(invitation_api_router)
-# app.include_router(token_api_router)
 app.include_router(index_api_router)
 
 
