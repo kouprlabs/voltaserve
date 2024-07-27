@@ -14,19 +14,48 @@ WORKDIR /build
 
 ARG TARGETPLATFORM
 
-COPY build.sh ./
-
-RUN /build/build.sh install
+RUN case $TARGETPLATFORM in \
+    linux/arm64) \
+        dpkg --add-architecture arm64; \
+        apt-get update; \
+        apt-get install -y gcc-aarch64-linux-gnu musl-tools:arm64 musl-dev:arm64; \
+        rustup target add aarch64-unknown-linux-musl; \
+    ;; \
+    linux/amd64) \
+        apt-get update; \
+        apt-get install -y musl-dev musl-tools; \
+        rustup target add x86_64-unknown-linux-musl; \
+    ;; \
+    esac
 
 COPY Cargo.toml Cargo.lock ./
 
 # Build our dependencies first for the cache
-RUN /build/build.sh deps
+RUN case $TARGETPLATFORM in \
+    linux/arm64) \
+        export CARGO_BUILD_TARGET=aarch64-unknown-linux-musl; \
+        export CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER=aarch64-linux-gnu-gcc; \
+    ;; \
+    linux/amd64) \
+        export CARGO_BUILD_TARGET=x86_64-unknown-linux-musl; \
+    ;; \
+    esac; \
+    cargo build -p sea-orm-migration --release --locked
 
 COPY . ./
 
 # Now build our software
-RUN /build/build.sh
+RUN case $TARGETPLATFORM in \
+    linux/arm64) \
+        export CARGO_BUILD_TARGET=aarch64-unknown-linux-musl; \
+        export CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER=aarch64-linux-gnu-gcc; \
+    ;; \
+    linux/amd64) \
+        export CARGO_BUILD_TARGET=x86_64-unknown-linux-musl; \
+    ;; \
+    esac; \
+    cargo build --release --locked; \
+    mv /build/target/${CARGO_BUILD_TARGET}/release/migrate /build/migrate
 
 FROM scratch AS runner
 
