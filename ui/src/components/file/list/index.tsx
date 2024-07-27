@@ -160,7 +160,7 @@ const FileList = ({ list, scale }: FileListProps) => {
         (keyName === 'return' && isMacOS()) ||
         (keyName === 'f2' && !isMacOS())
       ) {
-        if (selection.length > 0) {
+        if (selection.length === 1) {
           dispatch(renameModalDidOpen())
         }
       } else if (
