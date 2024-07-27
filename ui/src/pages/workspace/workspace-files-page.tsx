@@ -7,7 +7,6 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import { useEffect } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import cx from 'classnames'
@@ -123,7 +122,13 @@ const WorkspaceFilesPage = () => {
 
   return (
     <>
-      <Helmet>{workspace && <title>{workspace.name}</title>}</Helmet>
+      <Helmet>
+        {workspace ? (
+          <title>{workspace.name}</title>
+        ) : (
+          <title>Undefined workspace</title>
+        )}
+      </Helmet>
       <div
         className={cx(
           'flex',

@@ -2,10 +2,10 @@
 linters:
   enable-all: true
   disable:
-    - exhaustruct    # Structs may be uninitialized
-    - nlreturn       # covered by wsl cuddle rules
+    - exhaustruct # Structs may be uninitialized
+    - nlreturn # covered by wsl cuddle rules
     - nonamedreturns # named returns are acceptable
-    - depguard       # no dependency management
+    - depguard # no dependency management
     # deprecated
     - execinquery
     - gomnd
@@ -53,14 +53,14 @@ linters-settings:
 
   gosec:
     excludes:
-      - G104  # Errors unhandled. Already covered by errcheck linter.
-      - G307  # Deferring a method which returns an error. Already covered by errcheck linter.
-      - G601  # No longer applicable since go v1.22 update to for loops.
+      - G104 # Errors unhandled. Already covered by errcheck linter.
+      - G307 # Deferring a method which returns an error. Already covered by errcheck linter.
+      - G601 # No longer applicable since go v1.22 update to for loops.
 
   govet:
     enable-all: true
     disable:
-      - fieldalignment  # misalignment is accepted
+      - fieldalignment # misalignment is accepted
 
   revive:
     # see https://github.com/mgechev/revive#recommended-configuration
@@ -104,4 +104,3 @@ linters-settings:
 
   wsl:
     force-err-cuddling: true
-

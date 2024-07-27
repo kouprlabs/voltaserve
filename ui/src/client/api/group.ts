@@ -7,21 +7,11 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import useSWR, { SWRConfiguration } from 'swr'
+import { paramsFromListOptions } from '@/client/api/query-helpers'
+import { ListOptions } from '@/client/api/types/queries'
 import { apiFetcher } from '@/client/fetcher'
 import { Organization } from './organization'
-
-export enum SortBy {
-  Name = 'name',
-  DateCreated = 'date_created',
-  DateModified = 'date_modified',
-}
-
-export enum SortOrder {
-  Asc = 'asc',
-  Desc = 'desc',
-}
 
 export type Group = {
   id: string
@@ -40,15 +30,6 @@ export type List = {
   size: number
 }
 
-export type ListOptions = {
-  query?: string
-  organizationId?: string
-  size?: number
-  page?: number
-  sortBy?: SortBy
-  sortOrder?: SortOrder
-}
-
 export type CreateOptions = {
   name: string
   image?: string
@@ -65,15 +46,6 @@ export type AddMemberOptions = {
 
 export type RemoveMemberOptions = {
   userId: string
-}
-
-type ListQueryParams = {
-  page?: string
-  size?: string
-  sort_by?: string
-  sort_order?: string
-  query?: string
-  organization_id?: string
 }
 
 export default class GroupAPI {
@@ -103,35 +75,12 @@ export default class GroupAPI {
   }
 
   static useList(options?: ListOptions, swrOptions?: SWRConfiguration) {
-    const url = `/groups?${this.paramsFromListOptions(options)}`
+    const url = `/groups?${paramsFromListOptions(options)}`
     return useSWR<List>(
       url,
       () => apiFetcher({ url, method: 'GET' }) as Promise<List>,
       swrOptions,
     )
-  }
-
-  static paramsFromListOptions(options?: ListOptions): URLSearchParams {
-    const params: ListQueryParams = {}
-    if (options?.query) {
-      params.query = encodeURIComponent(options.query.toString())
-    }
-    if (options?.organizationId) {
-      params.organization_id = options.organizationId.toString()
-    }
-    if (options?.page) {
-      params.page = options.page.toString()
-    }
-    if (options?.size) {
-      params.size = options.size.toString()
-    }
-    if (options?.sortBy) {
-      params.sort_by = options.sortBy.toString()
-    }
-    if (options?.sortOrder) {
-      params.sort_order = options.sortOrder.toString()
-    }
-    return new URLSearchParams(params)
   }
 
   static delete(id: string) {

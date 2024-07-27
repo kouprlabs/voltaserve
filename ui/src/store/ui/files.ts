@@ -9,7 +9,8 @@
 // licenses/AGPL.txt.
 import { KeyedMutator } from 'swr'
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { List, SortBy, SortOrder } from '@/client/api/file'
+import { List } from '@/client/api/file'
+import { SortBy, SortOrder } from '@/client/api/types/queries'
 import {
   loadFileSortBy,
   loadFileSortOrder,
@@ -21,8 +22,6 @@ import {
   saveIconScale,
 } from '@/local-storage'
 import { FileViewType } from '@/types/file'
-
-export const SORT_ORDER_KEY = 'voltaserve_file_sort_order'
 
 export type FilesState = {
   selection: string[]

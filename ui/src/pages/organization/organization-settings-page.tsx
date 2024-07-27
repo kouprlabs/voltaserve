@@ -7,7 +7,6 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { Divider, IconButton } from '@chakra-ui/react'

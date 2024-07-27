@@ -7,7 +7,6 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import dateFormat from 'dateformat'
 import TimeAgo from 'javascript-time-ago'
 import en from 'javascript-time-ago/locale/en'

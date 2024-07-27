@@ -7,7 +7,6 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import { useState } from 'react'
 import {
   useLocation,
@@ -35,7 +34,8 @@ import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import OrganizationAPI from '@/client/api/organization'
 import { geEditorPermission } from '@/client/api/permission'
-import UserAPI, { SortBy, SortOrder, User } from '@/client/api/user'
+import { SortBy, SortOrder } from '@/client/api/types/queries'
+import UserAPI, { User } from '@/client/api/user'
 import { swrConfig } from '@/client/options'
 import OrganizationInviteMembers from '@/components/organization/organization-invite-members'
 import OrganizationRemoveMember from '@/components/organization/organization-remove-member'

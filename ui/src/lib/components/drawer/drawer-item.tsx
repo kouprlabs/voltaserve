@@ -7,7 +7,6 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import { ReactElement, useContext, useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { Tooltip } from '@chakra-ui/react'

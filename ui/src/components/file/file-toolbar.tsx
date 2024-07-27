@@ -21,8 +21,9 @@ import {
   Tooltip,
 } from '@chakra-ui/react'
 import cx from 'classnames'
-import FileAPI, { List, SortBy, SortOrder } from '@/client/api/file'
+import FileAPI, { List } from '@/client/api/file'
 import { ltEditorPermission } from '@/client/api/permission'
+import { SortBy, SortOrder } from '@/client/api/types/queries'
 import {
   IconAdd,
   IconMoreVert,
