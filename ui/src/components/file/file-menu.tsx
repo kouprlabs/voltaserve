@@ -352,7 +352,7 @@ const FileMenu = ({
                     </div>
                   ) : (
                     <div>
-                      <Kbd>ctrl</Kbd>+<Kbd>E</Kbd>
+                      <Kbd>^</Kbd>+<Kbd>E</Kbd>
                     </div>
                   )}
                 </div>
@@ -373,7 +373,7 @@ const FileMenu = ({
                     </div>
                   ) : (
                     <div>
-                      <Kbd>ctrl</Kbd>+<Kbd>X</Kbd>
+                      <Kbd>^</Kbd>+<Kbd>X</Kbd>
                     </div>
                   )}
                 </div>
@@ -394,7 +394,7 @@ const FileMenu = ({
                     </div>
                   ) : (
                     <div>
-                      <Kbd>ctrl</Kbd>+<Kbd>C</Kbd>
+                      <Kbd>^</Kbd>+<Kbd>C</Kbd>
                     </div>
                   )}
                 </div>
