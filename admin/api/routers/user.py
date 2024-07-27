@@ -10,10 +10,11 @@
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, status
+from aiohttp import ClientSession
+from fastapi import APIRouter, Depends, status, Header
 
 from ..database import fetch_user, fetch_users, fetch_user_organizations
-from ..dependencies import JWTBearer
+from ..dependencies import JWTBearer, settings
 from ..exceptions import GenericNotFoundException
 from ..models import GenericNotFoundResponse, UserOrganizationListRequest, UserOrganizationListResponse, \
     UserListRequest, UserListResponse, UserRequest, UserResponse
@@ -53,8 +54,20 @@ async def get_user(data: Annotated[UserRequest, Depends()]):
                           }
                       }
                       )
-async def get_all_users(data: Annotated[UserListRequest, Depends()]):
-    users, count = fetch_users(page=data.page, size=data.size)
+async def get_all_users(data: Annotated[UserListRequest, Depends()], x_authorization: Annotated[str, Header()]):
+    async with ClientSession() as sess:
+        async with sess.get(f"{settings.idp_url}/v2/user/all?page=1&size=5", headers={'Authorization': x_authorization}) as resp:
+            if resp.status != 200:
+                raise GenericNotFoundException(detail='Wrong user authorization token')
+
+            users = await resp.json()
+
+        async with sess.get(f"{settings.idp_url}/v2/user/count", headers={'Authorization': x_authorization}) as resp:
+            if resp.status != 200:
+                raise GenericNotFoundException(detail='Wrong user authorization token')
+
+            count = await resp.json()
+
     if users is None:
         raise GenericNotFoundException(detail='This instance has no users')
 

@@ -28,6 +28,7 @@ pydantic-settings = "2.3.4"
 PyJWT = "^2.8.0"
 fastapi-utils = "^0.7.0"
 typing-inspect = "^0.9.0"
+aiohttp = "^3.9.5"
 
 [build-system]
 requires = ["poetry-core"]
