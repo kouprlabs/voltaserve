@@ -78,6 +78,8 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./migrations
+          cache-from: type=gha
+          cache-to: type=gha,mode=max 
           push: true
           tags: ${{ env.TAGS }}
           platforms: linux/amd64,linux/arm64
