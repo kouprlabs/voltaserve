@@ -7,10 +7,10 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import { ChangeEvent, MouseEvent, useCallback, useMemo, useRef } from 'react'
 import {
   IconButton,
+  Kbd,
   Menu,
   MenuButton,
   MenuDivider,
@@ -50,6 +50,7 @@ import {
   isPDF,
 } from '@/lib/helpers/file-extension'
 import mapFileList from '@/lib/helpers/map-file-list'
+import { isMacOS as helperIsMacOS } from '@/lib/helpers/os'
 import { UploadDecorator, uploadAdded } from '@/store/entities/uploads'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import {
@@ -176,6 +177,7 @@ const FileMenu = ({
     isUploadAuthorized,
     isDownloadAuthorized,
   ])
+  const isMacOS = useMemo(() => helperIsMacOS(), [])
   const uploadInputRef = useRef<HTMLInputElement>(null)
 
   const handleUploadInputChange = useCallback(
@@ -321,7 +323,18 @@ const FileMenu = ({
                   dispatch(deleteModalDidOpen())
                 }}
               >
-                Delete
+                <div className={cx('flex', 'flex-row', 'justify-between')}>
+                  <span>Delete</span>
+                  {isMacOS ? (
+                    <div>
+                      <Kbd>⌘</Kbd>+<Kbd>delete</Kbd>
+                    </div>
+                  ) : (
+                    <div>
+                      <Kbd>Del</Kbd>
+                    </div>
+                  )}
+                </div>
               </MenuItem>
               <MenuItem
                 icon={<IconEdit />}
@@ -331,7 +344,18 @@ const FileMenu = ({
                   dispatch(renameModalDidOpen())
                 }}
               >
-                Rename
+                <div className={cx('flex', 'flex-row', 'justify-between')}>
+                  <span>Rename</span>
+                  {isMacOS ? (
+                    <div>
+                      <Kbd>return</Kbd>
+                    </div>
+                  ) : (
+                    <div>
+                      <Kbd>F2</Kbd>
+                    </div>
+                  )}
+                </div>
               </MenuItem>
               <MenuItem
                 icon={<IconArrowTopRight />}
@@ -341,7 +365,18 @@ const FileMenu = ({
                   dispatch(moveModalDidOpen())
                 }}
               >
-                Move
+                <div className={cx('flex', 'flex-row', 'justify-between')}>
+                  <span>Move</span>
+                  {isMacOS ? (
+                    <div>
+                      <Kbd>⌘</Kbd>+<Kbd>X</Kbd>
+                    </div>
+                  ) : (
+                    <div>
+                      <Kbd>Ctrl</Kbd>+<Kbd>X</Kbd>
+                    </div>
+                  )}
+                </div>
               </MenuItem>
               <MenuItem
                 icon={<IconFileCopy />}
@@ -351,7 +386,18 @@ const FileMenu = ({
                   dispatch(copyModalDidOpen())
                 }}
               >
-                Copy
+                <div className={cx('flex', 'flex-row', 'justify-between')}>
+                  <span>Copy</span>
+                  {isMacOS ? (
+                    <div>
+                      <Kbd>⌘</Kbd>+<Kbd>C</Kbd>
+                    </div>
+                  ) : (
+                    <div>
+                      <Kbd>Ctrl</Kbd>+<Kbd>C</Kbd>
+                    </div>
+                  )}
+                </div>
               </MenuItem>
             </MenuOptionGroup>
             {isToolbarMode ? (
@@ -361,7 +407,18 @@ const FileMenu = ({
                   icon={<IconSelectCheckBox />}
                   onClick={handleSelectAllClick}
                 >
-                  Select All
+                  <div className={cx('flex', 'flex-row', 'justify-between')}>
+                    <span>Select All</span>
+                    {isMacOS ? (
+                      <div>
+                        <Kbd>⌘</Kbd>+<Kbd>A</Kbd>
+                      </div>
+                    ) : (
+                      <div>
+                        <Kbd>Ctrl</Kbd>+<Kbd>A</Kbd>
+                      </div>
+                    )}
+                  </div>
                 </MenuItem>
                 <MenuItem
                   icon={<IconCheckBoxOutlineBlank />}

@@ -7,7 +7,6 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import { MouseEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import {
@@ -19,14 +18,20 @@ import {
 } from '@dnd-kit/core'
 import cx from 'classnames'
 import { FileWithPath, useDropzone } from 'react-dropzone'
+import Hotkeys from 'react-hot-keys'
 import { List as ApiFileList } from '@/client/api/file'
+import { isMacOS } from '@/lib/helpers/os'
 import { UploadDecorator, uploadAdded } from '@/store/entities/uploads'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import {
   contextMenuDidClose,
   contextMenuDidOpen,
+  copyModalDidOpen,
+  deleteModalDidOpen,
+  moveModalDidOpen,
   multiSelectKeyUpdated,
   rangeSelectKeyUpdated,
+  renameModalDidOpen,
   selectionAdded,
   selectionUpdated,
 } from '@/store/ui/files'
@@ -49,6 +54,7 @@ const FileList = ({ list, scale }: FileListProps) => {
   const isSelectionMode = useAppSelector(
     (state) => state.ui.files.isSelectionMode,
   )
+  const selection = useAppSelector((state) => state.ui.files.selection)
   const [activeId, setActiveId] = useState<string | null>(null)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [menuPosition, setMenuPosition] = useState<FileMenuPosition>()
@@ -128,8 +134,57 @@ const FileList = ({ list, scale }: FileListProps) => {
     setActiveId(null)
   }, [])
 
+  const handleKeyDown = useCallback(
+    (keyName: string, event: KeyboardEvent) => {
+      event.preventDefault()
+      if (
+        (keyName === 'command+a' && isMacOS()) ||
+        (keyName === 'ctrl+a' && !isMacOS())
+      ) {
+        dispatch(selectionUpdated(list?.data.map((f) => f.id)))
+      } else if (
+        (keyName === 'command+c' && isMacOS()) ||
+        (keyName === 'ctrl+c' && !isMacOS())
+      ) {
+        if (selection.length > 0) {
+          dispatch(copyModalDidOpen())
+        }
+      } else if (
+        (keyName === 'command+x' && isMacOS()) ||
+        (keyName === 'ctrl+x' && !isMacOS())
+      ) {
+        if (selection.length > 0) {
+          dispatch(moveModalDidOpen())
+        }
+      } else if (
+        (keyName === 'return' && isMacOS()) ||
+        (keyName === 'f2' && !isMacOS())
+      ) {
+        if (selection.length > 0) {
+          dispatch(renameModalDidOpen())
+        }
+      } else if (
+        (keyName === 'command+backspace' && isMacOS()) ||
+        keyName === 'del'
+      ) {
+        if (selection.length > 0) {
+          dispatch(deleteModalDidOpen())
+        }
+      }
+    },
+    [selection],
+  )
+
   return (
-    <>
+    <Hotkeys
+      keyName={`
+        command+a,ctrl+a,
+        command+c,ctrl+c,
+        command+x,ctrl+x,
+        return,f2,
+        command+backspace,del`}
+      onKeyDown={handleKeyDown}
+    >
       <div
         className={cx(
           'border-2',
@@ -229,7 +284,7 @@ const FileList = ({ list, scale }: FileListProps) => {
         position={menuPosition}
         onClose={() => setIsMenuOpen(false)}
       />
-    </>
+    </Hotkeys>
   )
 }
 
