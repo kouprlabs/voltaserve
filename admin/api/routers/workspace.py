@@ -43,11 +43,11 @@ async def get_workspace(data: Annotated[WorkspaceRequest, Depends()]):
                           }
                           )
 async def get_all_workspaces(data: Annotated[WorkspaceListRequest, Depends()]):
-    workspaces = fetch_workspaces(page=data.page, size=data.size)
+    workspaces, count = fetch_workspaces(page=data.page, size=data.size)
     if workspaces is None:
         raise GenericNotFoundException(detail='This instance has no workspaces')
 
-    return WorkspaceListResponse(workspaces=workspaces)
+    return WorkspaceListResponse(data=workspaces, totalElements=count['count'], page=data.page, size=data.size)
 
 
 @workspace_api_router.get(path="/organization",
