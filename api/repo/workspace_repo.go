@@ -145,7 +145,7 @@ type WorkspaceInsertOptions struct {
 	StorageCapacity int64
 	Image           *string
 	OrganizationID  string
-	RootID          string
+	RootID          *string
 	Bucket          string
 }
 
@@ -160,7 +160,7 @@ func (repo *workspaceRepo) Insert(opts WorkspaceInsertOptions) (model.Workspace,
 		ID:              id,
 		Name:            opts.Name,
 		StorageCapacity: opts.StorageCapacity,
-		RootID:          &opts.RootID,
+		RootID:          opts.RootID,
 		OrganizationID:  opts.OrganizationID,
 		Bucket:          opts.Bucket,
 	}
