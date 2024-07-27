@@ -1,21 +1,6 @@
 # Voltaserve Development
 
-## Getting Started
-
-### Run Infrastructure Services With Docker
-
-```shell
-docker compose up -d \
-    cockroach \
-    minio \
-    meilisearch \
-    redis \
-    mailhog
-```
-
-### Run Infrastructure Services From Binaries
-
-#### Install Languages and Runtimes
+## Prerequisites
 
 Install [NVM](https://github.com/nvm-sh/nvm?tab=readme-ov-file#installing-and-updating).
 
@@ -40,6 +25,23 @@ Install Python 3.12 with PDM:
 ```shell
 pdm py install cpython@3.12.3
 ```
+
+## Run Infrastructure Services
+
+### Using Docker
+
+```shell
+docker compose up -d \
+    cockroach \
+    minio \
+    meilisearch \
+    redis \
+    maildev
+```
+
+Run the [migrations/migrate]() tool in the newly created database.
+
+### From Binaries
 
 #### CockroachDB
 
@@ -115,41 +117,49 @@ Start Mailhog:
 MailHog
 ```
 
-### Install Command Line Tools
+## Install Command Line Tools
 
-```shell
-brew install --cask libreoffice
-```
+### macOS 14.5 Sonoma and later
 
 ```shell
 npm i -g gltf-pipeline
 ```
 
 ```shell
-npm i -g @shopify/screenshot-glb
+npm i -g @koupr/screenshot-glb
+```
+
+Install browser dependencies:
+
+```shell
+npx playwright install-deps
+```
+
+Install browsers:
+
+```shell
+npx playwright install
 ```
 
 ```shell
-brew install ocrmypdf
+brew install --cask libreoffice
 ```
 
 ```shell
-brew install exiftool
+brew install \
+    ocrmypdf \
+    exiftool \
+    poppler \
+    imagemagick \
+    ffmpeg
 ```
 
-```shell
-brew install poppler
-```
+### Debian 12 bookworm and later
 
-```shell
-brew install imagemagick
-```
+Run [Voltaserve Conversion](conversion/README.md) with the environment variable `ENABLE_INSTALLER` set to `true`.
+This will install the dependencies in the background. Incoming requests will be queued and be waiting until the installation is complete.
 
-```shell
-brew install ffmpeg
-```
-
-### Run Microservices
+## Run Microservices
 
 Start each microservice separately in a new terminal as described here:
 
