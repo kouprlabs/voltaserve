@@ -157,7 +157,7 @@ brew install \
 ### Debian 12 bookworm and later
 
 Run [Voltaserve Conversion](conversion/README.md) with the environment variable `ENABLE_INSTALLER` set to `true`.
-This will install the dependencies in the background, the incoming requests will queued and be waiting until the installation is complete.
+This will install the dependencies in the background. Incoming requests will be queued and be waiting until the installation is complete.
 
 ## Run Microservices
 
