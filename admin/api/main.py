@@ -11,9 +11,11 @@
 import logging
 import time
 
+import jwt
 import psycopg2
 from fastapi import FastAPI, Request, Response, status, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi_utils.tasks import repeat_every
 
 from .dependencies import settings, JWTBearer
 from .routers import users_api_router, group_api_router, organization_api_router, workspace_api_router, \
@@ -21,20 +23,16 @@ from .routers import users_api_router, group_api_router, organization_api_router
 
 app = FastAPI(debug=True)
 
-
-origins = ['http://localhost:3000']
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=settings.cors_origins.split(','),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"]
 )
 
-
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.DEBUG)
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('voltaserve-admin-api')
 
 app.include_router(users_api_router)
 app.include_router(group_api_router)
@@ -43,6 +41,23 @@ app.include_router(organization_api_router)
 app.include_router(workspace_api_router)
 app.include_router(invitation_api_router)
 app.include_router(index_api_router)
+
+@app.on_event("startup")
+@repeat_every(seconds=settings.admin_token_expiration)
+async def regenerate_admin_secret() -> None:
+    jwt.api_jws.PyJWS.header_typ = False
+    token = jwt.encode(payload={"sub": "SUPERUSER",
+                                "iat": time.time(),
+                                "iss": settings.url,
+                                "aud": settings.url,
+                                "exp": time.time() + settings.admin_token_expiration},
+                       key=settings.jwt_secret,
+                       algorithm=settings.jwt_algorithm
+                       )
+
+    logger.info(f"Admin token: \n{token}")
+    settings.admin_token = token
+    del token
 
 
 @app.middleware("http")
