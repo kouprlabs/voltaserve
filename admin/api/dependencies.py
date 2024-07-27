@@ -38,7 +38,7 @@ class Settings(BaseSettings):
     cors_origins: str
 
     admin_token: Optional[str] = Field('')
-    admin_token_expiration: int = Field(60*10)
+    admin_token_expiration: int
 
     class Config:
         env_file = ".env"

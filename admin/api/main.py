@@ -42,6 +42,7 @@ app.include_router(workspace_api_router)
 app.include_router(invitation_api_router)
 app.include_router(index_api_router)
 
+
 @app.on_event("startup")
 @repeat_every(seconds=settings.admin_token_expiration)
 async def regenerate_admin_secret() -> None:
