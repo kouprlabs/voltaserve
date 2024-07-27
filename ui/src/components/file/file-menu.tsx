@@ -348,7 +348,7 @@ const FileMenu = ({
                   <span>Rename</span>
                   {isMacOS ? (
                     <div>
-                      <Kbd>return</Kbd>
+                      <Kbd>⌘</Kbd>+<Kbd>E</Kbd>
                     </div>
                   ) : (
                     <div>
