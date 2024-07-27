@@ -90,7 +90,9 @@ const WorkspaceSettingsPage = () => {
       <div className={cx('flex', 'flex-col', 'gap-0')}>
         <div className={sectionClassName}>
           <span className={cx('font-bold')}>Storage</span>
-          {storageUsageError && <span>Failed to load storage usage.</span>}
+          {storageUsageError ? (
+            <span>Failed to load storage usage.</span>
+          ) : null}
           {storageUsage && !storageUsageError ? (
             <>
               <span>

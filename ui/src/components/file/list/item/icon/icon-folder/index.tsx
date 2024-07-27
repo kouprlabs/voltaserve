@@ -7,7 +7,6 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import cx from 'classnames'
 import { FileCommonProps } from '@/types/file'
 import IconBadge from '../icon-badge'
@@ -30,6 +29,7 @@ const IconFolder = ({ file, scale, isLoading }: IconFolderProps) => {
     <>
       <img
         src={FolderSvg}
+        alt="Directory"
         className="pointer-events-none select-none"
         style={{ width: `${width}px`, height: `${height}px` }}
       />

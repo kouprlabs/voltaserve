@@ -7,7 +7,6 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import react from 'eslint-plugin-react'
 import globals from 'globals'
 import ts from 'typescript-eslint'

@@ -7,7 +7,6 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import { useState } from 'react'
 import {
   Divider,
@@ -74,7 +73,9 @@ const AccountSettingsPage = () => {
       <div className={cx('flex', 'flex-col', 'gap-0')}>
         <div className={sectionClassName}>
           <span className={cx('font-bold')}>Storage Usage</span>
-          {storageUsageError && <span>Failed to load storage usage.</span>}
+          {storageUsageError ? (
+            <span>Failed to load storage usage.</span>
+          ) : null}
           {storageUsage && !storageUsageError ? (
             <>
               <span>
@@ -84,7 +85,7 @@ const AccountSettingsPage = () => {
               <Progress value={storageUsage.percentage} hasStripe />
             </>
           ) : null}
-          {!storageUsage && !storageUsageError ? (
+          {!(storageUsage && !storageUsageError) ? (
             <>
               <span>Calculating…</span>
               <Progress value={0} hasStripe />

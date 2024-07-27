@@ -7,10 +7,10 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import { useEffect, useState } from 'react'
 import cx from 'classnames'
-import TaskAPI, { SortOrder } from '@/client/api/task'
+import TaskAPI from '@/client/api/task'
+import { SortOrder } from '@/client/api/types/queries'
 import { swrConfig } from '@/client/options'
 import Pagination from '@/lib/components/pagination'
 import { useAppDispatch } from '@/store/hook'

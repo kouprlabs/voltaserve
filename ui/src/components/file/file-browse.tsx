@@ -7,12 +7,12 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import { useCallback, useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { Button } from '@chakra-ui/react'
 import cx from 'classnames'
-import FileAPI, { File, FileType } from '@/client/api/file'
+import FileAPI, { File } from '@/client/api/file'
+import { FileType } from '@/client/api/types/queries'
 import WorkspaceAPI from '@/client/api/workspace'
 import Path from '@/components/common/path'
 import FolderSvg from '@/components/file/list/item/icon/icon-folder/assets/icon-folder.svg'
@@ -130,6 +130,7 @@ const FileBrowse = ({ onChange }: FileBrowseProps) => {
             >
               <img
                 src={FolderSvg}
+                alt="Directory"
                 className={cx('shrink-0', 'w-[36px]', 'h-[28.84px]')}
               />
               <Text noOfLines={1}>{f.name}</Text>

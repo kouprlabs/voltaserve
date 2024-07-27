@@ -48,7 +48,7 @@ const ViewerImage = ({ file }: ViewerImageProps) => {
           'overflow-scroll',
         )}
       >
-        {isLoading && <SectionSpinner />}
+        {isLoading ? <SectionSpinner /> : null}
         <img
           src={url}
           style={{

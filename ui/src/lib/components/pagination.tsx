@@ -7,7 +7,6 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import { useCallback, useMemo } from 'react'
 import { ButtonGroup, Button, IconButton } from '@chakra-ui/react'
 import {

@@ -7,7 +7,6 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import { useEffect } from 'react'
 import {
   Link,
@@ -29,7 +28,8 @@ import {
 } from '@chakra-ui/react'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
-import WorkspaceAPI, { SortOrder } from '@/client/api/workspace'
+import { SortOrder } from '@/client/api/types/queries'
+import WorkspaceAPI from '@/client/api/workspace'
 import { swrConfig } from '@/client/options'
 import { CreateWorkspaceButton } from '@/components/app-bar/app-bar-buttons'
 import { workspacePaginationStorage } from '@/infra/pagination'
@@ -91,7 +91,7 @@ const WorkspaceListPage = () => {
             <span>Failed to load workspaces.</span>
           </div>
         ) : null}
-        {!list && !error && <SectionSpinner />}
+        {!list && !error ? <SectionSpinner /> : null}
         {list && list.data.length === 0 && !error ? (
           <div
             className={cx(

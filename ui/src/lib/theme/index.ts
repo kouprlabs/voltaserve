@@ -7,7 +7,6 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import { extendTheme } from '@chakra-ui/react'
 import breakpoints from './breakpoints'
 import colors from './colors'

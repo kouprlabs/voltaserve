@@ -7,7 +7,6 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import { useCallback, useEffect, useState } from 'react'
 import {
   Button,
@@ -27,10 +26,8 @@ import {
   Radio,
 } from '@chakra-ui/react'
 import cx from 'classnames'
-import OrganizationAPI, {
-  Organization,
-  SortOrder,
-} from '@/client/api/organization'
+import OrganizationAPI, { Organization } from '@/client/api/organization'
+import { SortOrder } from '@/client/api/types/queries'
 import { swrConfig } from '@/client/options'
 import Pagination from '@/lib/components/pagination'
 import SearchInput from '@/lib/components/search-input'
