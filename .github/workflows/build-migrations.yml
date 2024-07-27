@@ -8,7 +8,7 @@
 # by the GNU Affero General Public License v3.0 only, included in the file
 # licenses/AGPL.txt.
 
-name: Build and Push voltaserve/migration
+name: Build and Push voltaserve/migrations
 
 on:
   workflow_dispatch:
@@ -56,7 +56,7 @@ jobs:
       - name: Create tag list matching semver from executing tag
         if: ${{ github.ref_type == 'tag' }}
         run: |
-          name="voltaserve/migration"
+          name="voltaserve/migrations"
           version="${{ github.ref_name }}"
           version="${version#v}"
           IFS='.' read -r -a parts <<< "$version"
@@ -72,7 +72,7 @@ jobs:
 
       - name: Set the tag on workflow dispatch
         if: ${{ github.ref_type != 'tag' }}
-        run: echo "TAGS=voltaserve/migration:$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+        run: echo "TAGS=voltaserve/migrations:$(git rev-parse --short HEAD)" >> $GITHUB_ENV
 
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v5
