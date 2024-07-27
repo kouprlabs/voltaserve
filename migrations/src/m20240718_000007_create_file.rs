@@ -116,6 +116,7 @@ impl Migration {
             .create_table(
                 Table::create()
                     .table(SnapshotFile::Table)
+                    .if_not_exists()
                     .col(ColumnDef::new(SnapshotFile::SnapshotId).text())
                     .foreign_key(
                         ForeignKey::create()
