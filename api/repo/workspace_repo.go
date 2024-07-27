@@ -47,7 +47,7 @@ type workspaceEntity struct {
 	ID               string                  `gorm:"column:id;size:36"              json:"id"`
 	Name             string                  `gorm:"column:name;size:255"           json:"name"`
 	StorageCapacity  int64                   `gorm:"column:storage_capacity"        json:"storageCapacity"`
-	RootID           string                  `gorm:"column:root_id;size:36"         json:"rootId"`
+	RootID           *string                 `gorm:"column:root_id;size:36"         json:"rootId"`
 	OrganizationID   string                  `gorm:"column:organization_id;size:36" json:"organizationId"`
 	UserPermissions  []*UserPermissionValue  `gorm:"-"                              json:"userPermissions"`
 	GroupPermissions []*GroupPermissionValue `gorm:"-"                              json:"groupPermissions"`
@@ -84,7 +84,11 @@ func (w *workspaceEntity) GetStorageCapacity() int64 {
 }
 
 func (w *workspaceEntity) GetRootID() string {
-	return w.RootID
+	if w.RootID == nil {
+		return ""
+	}
+
+	return *w.RootID
 }
 
 func (w *workspaceEntity) GetOrganizationID() string {
@@ -156,7 +160,7 @@ func (repo *workspaceRepo) Insert(opts WorkspaceInsertOptions) (model.Workspace,
 		ID:              id,
 		Name:            opts.Name,
 		StorageCapacity: opts.StorageCapacity,
-		RootID:          opts.RootID,
+		RootID:          &opts.RootID,
 		OrganizationID:  opts.OrganizationID,
 		Bucket:          opts.Bucket,
 	}
