@@ -117,7 +117,9 @@ Start Mailhog:
 MailHog
 ```
 
-## Install Cross Platform Tools
+## Install Command Line Tools
+
+### macOS 14.5 Sonoma and later
 
 ```shell
 npm i -g gltf-pipeline
@@ -129,10 +131,6 @@ npm i -g @koupr/screenshot-glb
 
 Install browser dependencies:
 
-> **Note**
->
-> This works on Debian based systems only.
-
 ```shell
 npx playwright install-deps
 ```
@@ -143,32 +141,17 @@ Install browsers:
 npx playwright install
 ```
 
-## Install OS Specific Tools
-
-### macOS 14.5 Sonoma and later
-
 ```shell
 brew install --cask libreoffice
 ```
 
 ```shell
-brew install ocrmypdf
-```
-
-```shell
-brew install exiftool
-```
-
-```shell
-brew install poppler
-```
-
-```shell
-brew install imagemagick
-```
-
-```shell
-brew install ffmpeg
+brew install \
+    ocrmypdf \
+    exiftool \
+    poppler \
+    imagemagick \
+    ffmpeg
 ```
 
 ### Debian 12 bookworm and later
