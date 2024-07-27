@@ -40,6 +40,8 @@ class Settings(BaseSettings):
     admin_token: Optional[str] = Field('')
     admin_token_expiration: int
 
+    idp_url: str
+
     class Config:
         env_file = ".env"
 

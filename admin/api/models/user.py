@@ -27,13 +27,13 @@ class UserListRequest(GenericPaginationRequest):
 
 # --- RESPONSE MODELS --- #
 class UserResponse(GenericResponse):
-    full_name: str
+    fullName: str
     username: str
     email: EmailStr
-    is_email_confirmed: bool
+    isEmailConfirmed: bool
     picture: str | None
-    create_time: datetime.datetime
-    update_time: datetime.datetime
+    createTime: datetime.datetime
+    updateTime: datetime.datetime
 
 
 class UserListResponse(GenericListResponse):
