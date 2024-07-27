@@ -7,11 +7,11 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import { useCallback, useEffect, useState } from 'react'
 import { Badge, Table, Tbody, Td, Tooltip, Tr } from '@chakra-ui/react'
 import cx from 'classnames'
-import InsightsAPI, { SortBy, SortOrder } from '@/client/api/insights'
+import InsightsAPI from '@/client/api/insights'
+import { SortBy, SortOrder } from '@/client/api/types/queries'
 import { swrConfig } from '@/client/options'
 import Pagination from '@/lib/components/pagination'
 import SearchInput from '@/lib/components/search-input'

@@ -7,8 +7,7 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
-import { SortBy, SortOrder } from '@/client/api/file'
+import { SortBy, SortOrder } from '@/client/api/types/queries'
 import { FileViewType } from '@/types/file'
 
 const ICON_SCALE_KEY = 'voltaserve_file_icon_scale'

@@ -7,12 +7,12 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import { useMemo } from 'react'
 import { useColorMode } from '@chakra-ui/react'
 import { ResponsivePie } from '@nivo/pie'
 import cx from 'classnames'
-import InsightsAPI, { SortBy, SortOrder } from '@/client/api/insights'
+import InsightsAPI from '@/client/api/insights'
+import { SortBy, SortOrder } from '@/client/api/types/queries'
 import { swrConfig } from '@/client/options'
 import { useAppSelector } from '@/store/hook'
 

@@ -7,7 +7,6 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import { useColorMode } from '@chakra-ui/react'
 import { File } from '@/client/api/file'
 import * as fe from '@/lib/helpers/file-extension'
@@ -99,6 +98,7 @@ const IconDiverse = ({ file, scale }: IconFontProps) => {
   return (
     <img
       src={image}
+      alt="Image"
       className="pointer-events-none select-none"
       style={{ width: `${width}px`, height: `${height}px` }}
     />

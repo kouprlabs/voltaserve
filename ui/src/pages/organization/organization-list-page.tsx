@@ -7,7 +7,6 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import { useEffect } from 'react'
 import {
   Link,
@@ -29,7 +28,8 @@ import {
 } from '@chakra-ui/react'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
-import OrganizationAPI, { SortOrder } from '@/client/api/organization'
+import OrganizationAPI from '@/client/api/organization'
+import { SortOrder } from '@/client/api/types/queries'
 import { swrConfig } from '@/client/options'
 import { CreateOrganizationButton } from '@/components/app-bar/app-bar-buttons'
 import { organizationPaginationStorage } from '@/infra/pagination'
@@ -91,7 +91,7 @@ const OrganizationListPage = () => {
             <span>Failed to load organizations.</span>
           </div>
         ) : null}
-        {!list && !error && <SectionSpinner />}
+        {!list && !error ? <SectionSpinner /> : null}
         {list && list.data.length === 0 ? (
           <div
             className={cx(

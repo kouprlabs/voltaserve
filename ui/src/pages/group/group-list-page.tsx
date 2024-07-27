@@ -7,7 +7,6 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import { useEffect } from 'react'
 import {
   Link,
@@ -29,7 +28,8 @@ import {
 } from '@chakra-ui/react'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
-import GroupAPI, { SortOrder } from '@/client/api/group'
+import GroupAPI from '@/client/api/group'
+import { SortOrder } from '@/client/api/types/queries'
 import { swrConfig } from '@/client/options'
 import { CreateGroupButton } from '@/components/app-bar/app-bar-buttons'
 import { groupPaginationStorage } from '@/infra/pagination'
@@ -91,7 +91,7 @@ const GroupListPage = () => {
             <span>Failed to load groups.</span>
           </div>
         ) : null}
-        {!list && !error && <SectionSpinner />}
+        {!list && !error ? <SectionSpinner /> : null}
         {list && list.data.length === 0 ? (
           <div
             className={cx(

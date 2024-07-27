@@ -7,7 +7,6 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import { HTMLAttributes } from 'react'
 import { cx } from '@emotion/css'
 
@@ -42,6 +41,28 @@ export const IconPlayArrow = ({
 export const IconUpload = ({ className, filled, ...props }: IconBaseProps) => (
   <span className={getClassName({ filled, className })} {...props}>
     upload
+  </span>
+)
+
+export const IconAdmin = ({ className, filled, ...props }: IconBaseProps) => (
+  <span className={getClassName({ filled, className })} {...props}>
+    admin_panel_settings
+  </span>
+)
+
+export const IconDatabase = ({
+  className,
+  filled,
+  ...props
+}: IconBaseProps) => (
+  <span className={getClassName({ filled, className })} {...props}>
+    database
+  </span>
+)
+
+export const IconDeAdmin = ({ className, filled, ...props }: IconBaseProps) => (
+  <span className={getClassName({ filled, className })} {...props}>
+    remove_moderator
   </span>
 )
 
@@ -161,6 +182,12 @@ export const IconPersonAdd = ({
   </span>
 )
 
+export const IconPerson = ({ className, filled, ...props }: IconBaseProps) => (
+  <span className={getClassName({ filled, className })} {...props}>
+    person
+  </span>
+)
+
 export const IconCheck = ({ className, filled, ...props }: IconBaseProps) => (
   <span className={getClassName({ filled, className })} {...props}>
     check
@@ -216,6 +243,16 @@ export const IconError = ({ className, filled, ...props }: IconBaseProps) => (
 export const IconWarning = ({ className, filled, ...props }: IconBaseProps) => (
   <span className={getClassName({ filled, className })} {...props}>
     warning
+  </span>
+)
+
+export const IconInvitations = ({
+  className,
+  filled,
+  ...props
+}: IconBaseProps) => (
+  <span className={getClassName({ filled, className })} {...props}>
+    forward_to_inbox
   </span>
 )
 
@@ -450,6 +487,12 @@ export const IconVisibility = ({
 export const IconTune = ({ className, filled, ...props }: IconBaseProps) => (
   <span className={getClassName({ filled, className })} {...props}>
     tune
+  </span>
+)
+
+export const IconHome = ({ className, filled, ...props }: IconBaseProps) => (
+  <span className={getClassName({ filled, className })} {...props}>
+    home
   </span>
 )
 
