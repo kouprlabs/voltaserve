@@ -51,6 +51,8 @@ impl MigrationTrait for Migration {
         manager
             .create_index(
                 Index::create()
+                    .name("userpermission_user_id_resource_id_idx")
+                    .if_not_exists()
                     .table(Userpermission::Table)
                     .col(Userpermission::UserId)
                     .col(Userpermission::ResourceId)
@@ -62,6 +64,8 @@ impl MigrationTrait for Migration {
         manager
             .create_index(
                 Index::create()
+                    .name("userpermission_user_id_idx")
+                    .if_not_exists()
                     .table(Userpermission::Table)
                     .col(Userpermission::UserId)
                     .to_owned(),
@@ -70,6 +74,8 @@ impl MigrationTrait for Migration {
         manager
             .create_index(
                 Index::create()
+                    .name("userpermission_resource_id_idx")
+                    .if_not_exists()
                     .table(Userpermission::Table)
                     .col(Userpermission::ResourceId)
                     .to_owned(),

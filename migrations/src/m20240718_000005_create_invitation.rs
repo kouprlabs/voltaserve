@@ -63,6 +63,8 @@ impl MigrationTrait for Migration {
         manager
             .create_index(
                 Index::create()
+                    .name("invitation_organization_id_idx")
+                    .if_not_exists()
                     .table(Invitation::Table)
                     .col(Invitation::OrganizationId)
                     .to_owned(),
@@ -71,6 +73,8 @@ impl MigrationTrait for Migration {
         manager
             .create_index(
                 Index::create()
+                    .name("invitation_user_id_idx")
+                    .if_not_exists()
                     .table(Invitation::Table)
                     .col(Invitation::OwnerId)
                     .to_owned(),

@@ -75,6 +75,7 @@ impl MigrationTrait for Migration {
             .create_index(
                 Index::create()
                     .name("workspace_organization_id_idx")
+                    .if_not_exists()
                     .table(Workspace::Table)
                     .col(Workspace::OrganizationId)
                     .to_owned(),

@@ -95,6 +95,8 @@ impl Migration {
         manager
             .create_index(
                 Index::create()
+                    .name("file_parent_id_idx")
+                    .if_not_exists()
                     .table(File::Table)
                     .col(File::ParentId)
                     .to_owned(),
@@ -103,6 +105,8 @@ impl Migration {
         manager
             .create_index(
                 Index::create()
+                    .name("file_workspace_id_idx")
+                    .if_not_exists()
                     .table(File::Table)
                     .col(File::WorkspaceId)
                     .to_owned(),
