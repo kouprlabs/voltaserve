@@ -13,10 +13,11 @@ conn = connect(host=settings.db_host,
 def fetch_user(_id: str):
     with conn.cursor(cursor_factory=extras.RealDictCursor) as curs:
         try:
-            curs.execute(f"SELECT id, full_name, username, email, picture, "
-                         f"is_email_confirmed, create_time, update_time "
-                         f"FROM {settings.db_name}.user "
-                         f"WHERE id='{_id}'")
+            curs.execute(f"""
+            SELECT id, full_name, username, email, picture, 
+            is_email_confirmed, create_time, update_time 
+            FROM {settings.db_name}.user 
+            WHERE id='{_id}'""")
             return curs.fetchone()
         except (Exception, DatabaseError) as error:
             print(error)
@@ -25,12 +26,12 @@ def fetch_user(_id: str):
 def fetch_users(page=1, size=10):
     with conn.cursor(cursor_factory=extras.RealDictCursor) as curs:
         try:
-            curs.execute(f"SELECT id, full_name, username, email, picture, "
-                         f"is_email_confirmed, create_time, update_time "
-                         f"FROM {settings.db_name}.user "
-                         f"ORDER BY create_time "
-                         f"OFFSET {(page - 1) * size} "
-                         f"LIMIT {size}")
+            curs.execute(f"""SELECT id, full_name, username, email, picture, 
+            is_email_confirmed, create_time, update_time 
+            FROM {settings.db_name}.user 
+            ORDER BY create_time 
+            OFFSET {(page - 1) * size} 
+            LIMIT {size}""")
             data = curs.fetchall()
 
             curs.execute(f"SELECT count(1) "
