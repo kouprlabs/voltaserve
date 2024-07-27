@@ -58,6 +58,8 @@ impl MigrationTrait for Migration {
         manager
             .create_index(
                 Index::create()
+                    .name("group_organization_id_idx")
+                    .if_not_exists()
                     .table(Group::Table)
                     .col(Group::OrganizationId)
                     .to_owned(),

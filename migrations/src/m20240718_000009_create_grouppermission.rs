@@ -51,6 +51,7 @@ impl MigrationTrait for Migration {
         manager
             .create_index(
                 Index::create()
+                    .name("grouppermission_group_id_resource_id_idx")
                     .table(Grouppermission::Table)
                     .col(Grouppermission::GroupId)
                     .col(Grouppermission::ResourceId)
@@ -62,6 +63,8 @@ impl MigrationTrait for Migration {
         manager
             .create_index(
                 Index::create()
+                    .name("grouppermission_group_id_idx")
+                    .if_not_exists()
                     .table(Grouppermission::Table)
                     .col(Grouppermission::GroupId)
                     .to_owned(),
@@ -70,6 +73,8 @@ impl MigrationTrait for Migration {
         manager
             .create_index(
                 Index::create()
+                    .name("grouppermission_resource_id_idx")
+                    .if_not_exists()
                     .table(Grouppermission::Table)
                     .col(Grouppermission::ResourceId)
                     .to_owned(),
