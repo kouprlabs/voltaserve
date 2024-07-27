@@ -24,6 +24,7 @@ impl MigrationTrait for Migration {
             .create_table(
                 Table::create()
                     .table(Userpermission::Table)
+                    .if_not_exists()
                     .col(
                         ColumnDef::new(Userpermission::Id)
                             .text()

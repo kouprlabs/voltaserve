@@ -24,6 +24,7 @@ impl MigrationTrait for Migration {
             .create_table(
                 Table::create()
                     .table(Workspace::Table)
+                    .if_not_exists()
                     .col(
                         ColumnDef::new(Workspace::Id)
                             .text()
