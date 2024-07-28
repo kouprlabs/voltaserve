@@ -33,7 +33,7 @@ import {
 import * as Yup from 'yup'
 import { Select } from 'chakra-react-select'
 import cx from 'classnames'
-import { FileType } from '@/client/api/types/queries'
+import { FileType } from '@/client/api/file'
 import { decodeFileQuery, encodeFileQuery } from '@/lib/helpers/query'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { modalDidClose } from '@/store/ui/search-filter'

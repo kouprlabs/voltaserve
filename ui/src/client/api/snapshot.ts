@@ -8,8 +8,6 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
 import useSWR, { SWRConfiguration } from 'swr'
-import { paramsFromListOptions } from '@/client/api/query-helpers'
-import { ListOptions } from '@/client/api/types/queries'
 import { apiFetcher } from '../fetcher'
 
 export type Snapshot = {
@@ -45,6 +43,27 @@ export type List = {
   size: number
 }
 
+export type ListOptions = {
+  fileId: string
+  query?: string
+  organizationId?: string
+  size?: number
+  page?: number
+  sortBy?: SortBy
+  sortOrder?: SortOrder
+}
+
+export enum SortBy {
+  Version = 'version',
+  DateCreated = 'date_created',
+  DateModified = 'date_modified',
+}
+
+export enum SortOrder {
+  Asc = 'asc',
+  Desc = 'desc',
+}
+
 export type TaskInfo = {
   id: string
   isPending: boolean
@@ -61,6 +80,15 @@ export type ImageProps = {
   height: number
 }
 
+export type ListQueryParams = {
+  file_id: string
+  page?: string
+  size?: string
+  sort_by?: string
+  sort_order?: string
+  query?: string
+}
+
 export type ActivateOptions = {
   fileId: string
 }
@@ -72,18 +100,38 @@ export type DetachOptions = {
 export default class SnapshotAPI {
   static async list(options: ListOptions) {
     return apiFetcher({
-      url: `/snapshots?${paramsFromListOptions(options)}`,
+      url: `/snapshots?${this.paramsFromListOptions(options)}`,
       method: 'GET',
     }) as Promise<List>
   }
 
   static useList(options: ListOptions, swrOptions?: SWRConfiguration) {
-    const url = `/snapshots?${paramsFromListOptions(options)}`
+    const url = `/snapshots?${this.paramsFromListOptions(options)}`
     return useSWR<List | undefined>(
       url,
       () => apiFetcher({ url, method: 'GET' }),
       swrOptions,
     )
+  }
+
+  static paramsFromListOptions(options: ListOptions): URLSearchParams {
+    const params: ListQueryParams = { file_id: options.fileId }
+    if (options?.query) {
+      params.query = encodeURIComponent(options.query.toString())
+    }
+    if (options?.page) {
+      params.page = options.page.toString()
+    }
+    if (options?.size) {
+      params.size = options.size.toString()
+    }
+    if (options?.sortBy) {
+      params.sort_by = options.sortBy.toString()
+    }
+    if (options?.sortOrder) {
+      params.sort_order = options.sortOrder.toString()
+    }
+    return new URLSearchParams(params)
   }
 
   static async activate(id: string, options: ActivateOptions) {

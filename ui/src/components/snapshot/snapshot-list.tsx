@@ -25,8 +25,7 @@ import {
   Tr,
 } from '@chakra-ui/react'
 import cx from 'classnames'
-import SnapshotAPI, { Snapshot } from '@/client/api/snapshot'
-import { SortOrder } from '@/client/api/types/queries'
+import SnapshotAPI, { Snapshot, SortOrder } from '@/client/api/snapshot'
 import { swrConfig } from '@/client/options'
 import Pagination from '@/lib/components/pagination'
 import SectionSpinner from '@/lib/components/section-spinner'

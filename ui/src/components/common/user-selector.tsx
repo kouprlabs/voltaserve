@@ -26,8 +26,7 @@ import {
   Radio,
 } from '@chakra-ui/react'
 import cx from 'classnames'
-import { SortOrder } from '@/client/api/types/queries'
-import UserAPI, { User } from '@/client/api/user'
+import UserAPI, { SortOrder, User } from '@/client/api/user'
 import { swrConfig } from '@/client/options'
 import Pagination from '@/lib/components/pagination'
 import SearchInput from '@/lib/components/search-input'
