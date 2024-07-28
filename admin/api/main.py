@@ -71,7 +71,7 @@ async def add_process_time_header(request: Request, call_next):
 
 @app.get('/', tags=['main'], dependencies=[Depends(JWTBearer())])
 async def root():
-    return {"message": "Hello, it is root of admin microservice!"}
+    return {"detail": "Hello, it is root of admin microservice!"}
 
 
 @app.get('/liveness', tags=['liveness'])
