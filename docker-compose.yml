@@ -64,7 +64,7 @@ services:
     healthcheck:
       test: wget --quiet --spider http://127.0.0.1:1080 || exit 1
   api:
-    image: voltaserve/api
+    image: voltaserve/api:a974410
     build:
       context: ./api
     ports:
@@ -95,7 +95,7 @@ services:
       - meilisearch
     restart: on-failure
   idp:
-    image: voltaserve/idp
+    image: voltaserve/idp:07308f7
     build:
       context: ./idp
     ports:
@@ -120,7 +120,7 @@ services:
       - minio
     restart: on-failure
   ui:
-    image: voltaserve/ui
+    image: voltaserve/ui:edc3699
     build:
       context: ./ui
     ports:
@@ -135,7 +135,7 @@ services:
       - api
     restart: on-failure
   webdav:
-    image: voltaserve/webdav
+    image: voltaserve/webdav:8eaad7f
     build:
       context: ./webdav
     ports:
@@ -153,7 +153,7 @@ services:
       - api
     restart: on-failure
   conversion:
-    image: voltaserve/conversion
+    image: voltaserve/conversion:ca02a6d
     build:
       context: ./conversion
     ports:
@@ -172,7 +172,7 @@ services:
       - minio
     restart: on-failure
   language:
-    image: voltaserve/language
+    image: voltaserve/language:8eaad7f
     build:
       context: ./language
     ports:
@@ -181,7 +181,7 @@ services:
       test: wget --quiet --spider http://127.0.0.1:8084/v2/health || exit 1
     restart: on-failure
   mosaic:
-    image: voltaserve/mosaic
+    image: voltaserve/mosaic:ca02a6d
     build:
       context: ./mosaic
     ports:
@@ -192,7 +192,7 @@ services:
       test: wget --quiet --spider http://127.0.0.1:8085/v2/health || exit 1
     restart: on-failure
   migrations:
-    image: voltaserve/migrations
+    image: voltaserve/migrations:c30bc7a
     build:
       context: ./migrations
     environment:

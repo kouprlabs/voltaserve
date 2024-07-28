@@ -32,8 +32,7 @@ import {
 } from 'formik'
 import * as Yup from 'yup'
 import cx from 'classnames'
-import FileAPI from '@/client/api/file'
-import { FileType } from '@/client/api/types/queries'
+import FileAPI, { FileType } from '@/client/api/file'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { createModalDidClose } from '@/store/ui/files'
 

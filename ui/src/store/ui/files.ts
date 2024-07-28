@@ -9,8 +9,7 @@
 // licenses/AGPL.txt.
 import { KeyedMutator } from 'swr'
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { List } from '@/client/api/file'
-import { SortBy, SortOrder } from '@/client/api/types/queries'
+import { List, SortBy, SortOrder } from '@/client/api/file'
 import {
   loadFileSortBy,
   loadFileSortOrder,

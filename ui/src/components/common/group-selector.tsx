@@ -26,8 +26,7 @@ import {
   Radio,
 } from '@chakra-ui/react'
 import cx from 'classnames'
-import GroupAPI, { Group } from '@/client/api/group'
-import { SortOrder } from '@/client/api/types/queries'
+import GroupAPI, { Group, SortOrder } from '@/client/api/group'
 import { swrConfig } from '@/client/options'
 import Pagination from '@/lib/components/pagination'
 import SearchInput from '@/lib/components/search-input'

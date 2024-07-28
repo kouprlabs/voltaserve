@@ -8,8 +8,6 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
 import useSWR, { SWRConfiguration } from 'swr'
-import { paramsFromListOptions } from '@/client/api/query-helpers'
-import { SortBy, SortOrder } from '@/client/api/types/queries'
 import { apiFetcher } from '@/client/fetcher'
 import { Snapshot } from './snapshot'
 
@@ -49,6 +47,24 @@ export type ListEntitiesOptions = {
   page?: number
   sortBy?: SortBy
   sortOrder?: SortOrder
+}
+
+export enum SortBy {
+  Name = 'name',
+  Frequency = 'frequency',
+}
+
+export enum SortOrder {
+  Asc = 'asc',
+  Desc = 'desc',
+}
+
+type ListEntitiesQueryParams = {
+  page?: string
+  size?: string
+  sort_by?: string
+  sort_order?: string
+  query?: string
 }
 
 export default class InsightsAPI {
@@ -113,11 +129,31 @@ export default class InsightsAPI {
     options?: ListEntitiesOptions,
     swrOptions?: SWRConfiguration,
   ) {
-    const url = `/insights/${id}/entities?${paramsFromListOptions(options)}`
+    const url = `/insights/${id}/entities?${this.paramsFromListOptions(options)}`
     return useSWR<EntityList>(
       id ? url : null,
       () => apiFetcher({ url, method: 'GET' }) as Promise<EntityList>,
       swrOptions,
     )
+  }
+
+  static paramsFromListOptions(options?: ListEntitiesOptions): URLSearchParams {
+    const params: ListEntitiesQueryParams = {}
+    if (options?.query) {
+      params.query = encodeURIComponent(options.query.toString())
+    }
+    if (options?.page) {
+      params.page = options.page.toString()
+    }
+    if (options?.size) {
+      params.size = options.size.toString()
+    }
+    if (options?.sortBy) {
+      params.sort_by = options.sortBy.toString()
+    }
+    if (options?.sortOrder) {
+      params.sort_order = options.sortOrder.toString()
+    }
+    return new URLSearchParams(params)
   }
 }

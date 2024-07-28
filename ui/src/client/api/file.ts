@@ -8,15 +8,32 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
 import useSWR, { SWRConfiguration } from 'swr'
-import { paramsFromListOptions } from '@/client/api/query-helpers'
-import { FileType, ListOptions } from '@/client/api/types/queries'
 import { apiFetcher } from '@/client/fetcher'
 import { User } from '@/client/idp/user'
 import { getConfig } from '@/config/config'
 import { getAccessTokenOrRedirect } from '@/infra/token'
+import { encodeQuery } from '@/lib/helpers/query'
 import { Group } from './group'
 import { PermissionType } from './permission'
 import { Snapshot } from './snapshot'
+
+export enum FileType {
+  File = 'file',
+  Folder = 'folder',
+}
+
+export enum SortBy {
+  Name = 'name',
+  Kind = 'kind',
+  Size = 'size',
+  DateCreated = 'date_created',
+  DateModified = 'date_modified',
+}
+
+export enum SortOrder {
+  Asc = 'asc',
+  Desc = 'desc',
+}
 
 export type File = {
   id: string
@@ -59,6 +76,15 @@ export type Query = {
   createTimeBefore?: number
   updateTimeAfter?: number
   updateTimeBefore?: number
+}
+
+export type ListOptions = {
+  size?: number
+  page?: number
+  type?: FileType
+  sortBy?: SortBy
+  sortOrder?: SortOrder
+  query?: Query
 }
 
 export type MoveManyOptions = {
@@ -127,6 +153,15 @@ export type PatchOptions = {
   request: XMLHttpRequest
   blob: Blob
   onProgress?: (value: number) => void
+}
+
+type ListQueryParams = {
+  page?: string
+  size?: string
+  sort_by?: string
+  sort_order?: string
+  type?: string
+  query?: string
 }
 
 export default class FileAPI {
@@ -217,7 +252,7 @@ export default class FileAPI {
 
   static async list(id: string, options: ListOptions) {
     return apiFetcher({
-      url: `/files/${id}/list?${paramsFromListOptions(options)}`,
+      url: `/files/${id}/list?${this.paramsFromListOptions(options)}`,
       method: 'GET',
     }) as Promise<List>
   }
@@ -227,12 +262,35 @@ export default class FileAPI {
     options: ListOptions,
     swrOptions?: SWRConfiguration,
   ) {
-    const url = `/files/${id}/list?${paramsFromListOptions(options)}`
+    const url = `/files/${id}/list?${this.paramsFromListOptions(options)}`
     return useSWR<List | undefined>(
       id ? url : null,
       () => apiFetcher({ url, method: 'GET' }),
       swrOptions,
     )
+  }
+
+  static paramsFromListOptions(options?: ListOptions): URLSearchParams {
+    const params: ListQueryParams = {}
+    if (options?.page) {
+      params.page = options.page.toString()
+    }
+    if (options?.size) {
+      params.size = options.size.toString()
+    }
+    if (options?.sortBy) {
+      params.sort_by = options.sortBy.toString()
+    }
+    if (options?.sortOrder) {
+      params.sort_order = options.sortOrder.toString()
+    }
+    if (options?.type) {
+      params.type = options.type
+    }
+    if (options?.query) {
+      params.query = encodeQuery(JSON.stringify(options.query))
+    }
+    return new URLSearchParams(params)
   }
 
   static useGetPath(
