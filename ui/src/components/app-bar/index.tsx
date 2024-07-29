@@ -11,6 +11,8 @@ import { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 import cx from 'classnames'
 import AccountMenu from '@/components/account/menu'
+import AdminButton from '@/components/admin/admin-button'
+import DeAdminButton from '@/components/admin/deadmin-button'
 import TaskDrawer from '@/components/task/task-drawer'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { activeNavChanged, NavType } from '@/store/ui/nav'
@@ -40,6 +42,9 @@ const AppBar = () => {
     if (location.pathname.startsWith('/workspace')) {
       dispatch(activeNavChanged(NavType.Workspaces))
     }
+    if (location.pathname.startsWith('/admin')) {
+      dispatch(activeNavChanged(NavType.Admin))
+    }
   }, [location, dispatch])
 
   return (
@@ -58,9 +63,16 @@ const AppBar = () => {
         <AppBarSearch />
       </div>
       <div className={cx('flex', 'flex-row', 'items-center', 'gap-1.5')}>
-        {activeNav === NavType.Workspaces && <CreateWorkspaceButton />}
-        {activeNav === NavType.Groups && <CreateGroupButton />}
-        {activeNav === NavType.Organizations && <CreateOrganizationButton />}
+        {activeNav === NavType.Workspaces ? <CreateWorkspaceButton /> : null}
+        {activeNav === NavType.Groups ? <CreateGroupButton /> : null}
+        {activeNav === NavType.Organizations ? (
+          <CreateOrganizationButton />
+        ) : null}
+        {location.pathname.startsWith('/admin') ? (
+          <DeAdminButton />
+        ) : (
+          <AdminButton />
+        )}
         <UploadDrawer />
         <TaskDrawer />
         <AccountMenu />

@@ -8,6 +8,7 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
 import { getConfig } from '@/config/config'
+import { getAdminAccessToken } from '@/infra/admin-token'
 import { getAccessToken, getAccessTokenOrRedirect } from '@/infra/token'
 import store from '@/store/configure-store'
 import { errorOccurred } from '@/store/ui/error'
@@ -20,6 +21,7 @@ export type FetcherOptions = {
   contentType?: string
   redirect?: boolean
   authenticate?: boolean
+  adminAuthenticate?: boolean
   showError?: boolean
 }
 
@@ -34,6 +36,13 @@ export function idpFetcher<T>(options: FetcherOptions) {
   })
 }
 
+export function adminFetcher<T>(options: FetcherOptions) {
+  return fetcher<T>({
+    ...options,
+    url: `${getConfig().adminURL}${options.url}`,
+  })
+}
+
 export async function fetcher<T>({
   url,
   method,
@@ -41,17 +50,25 @@ export async function fetcher<T>({
   contentType,
   redirect,
   authenticate = true,
+  adminAuthenticate = false,
   showError = true,
 }: FetcherOptions): Promise<T | undefined> {
   const headers: HeadersInit = {}
   if (!contentType) {
     headers['Content-Type'] = 'application/json'
   }
-  if (authenticate) {
+  if (authenticate && !adminAuthenticate) {
     headers['Authorization'] = `Bearer ${
       redirect ? getAccessTokenOrRedirect() : getAccessToken()
     }`
   }
+  if (adminAuthenticate) {
+    headers['Authorization'] = `Bearer ${getAdminAccessToken()}`
+    headers['X-Authorization'] = `Bearer ${
+      redirect ? getAccessTokenOrRedirect() : getAccessToken()
+    }`
+  }
+  headers['Access-Control-Allow-Origin'] = `${getConfig().adminURL}` // TODO: To be deleted after local tests
   const response = await baseFetcher(
     url,
     {
