@@ -223,14 +223,10 @@ definitions:
     type: object
   service.Download:
     properties:
-      bucket:
-        type: string
       extension:
         type: string
       image:
         $ref: '#/definitions/service.ImageProps'
-      key:
-        type: string
       pdf:
         $ref: '#/definitions/service.PDFProps'
       size:
