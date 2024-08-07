@@ -1672,7 +1672,7 @@ func (svc *FileService) doSorting(data []model.File, sortBy string, sortOrder st
 				if f.Snapshot != nil && f.Snapshot.Original == nil {
 					return false
 				}
-				if f.Snapshot != nil && svc.fileIdent.IsImage(f.Snapshot.Original.Key) {
+				if f.Snapshot != nil && svc.fileIdent.IsImage(f.Snapshot.Original.Extension) {
 					return true
 				}
 				return false
@@ -1687,7 +1687,7 @@ func (svc *FileService) doSorting(data []model.File, sortBy string, sortOrder st
 				if f.Snapshot != nil && f.Snapshot.Original == nil {
 					return false
 				}
-				if f.Snapshot != nil && svc.fileIdent.IsPDF(f.Snapshot.Original.Key) {
+				if f.Snapshot != nil && svc.fileIdent.IsPDF(f.Snapshot.Original.Extension) {
 					return true
 				}
 				return false
@@ -1702,7 +1702,7 @@ func (svc *FileService) doSorting(data []model.File, sortBy string, sortOrder st
 				if f.Snapshot != nil && f.Snapshot.Original == nil {
 					return false
 				}
-				if f.Snapshot != nil && svc.fileIdent.IsOffice(f.Snapshot.Original.Key) {
+				if f.Snapshot != nil && svc.fileIdent.IsOffice(f.Snapshot.Original.Extension) {
 					return true
 				}
 				return false
@@ -1717,7 +1717,7 @@ func (svc *FileService) doSorting(data []model.File, sortBy string, sortOrder st
 				if f.Snapshot != nil && f.Snapshot.Original == nil {
 					return false
 				}
-				if f.Snapshot != nil && svc.fileIdent.IsVideo(f.Snapshot.Original.Key) {
+				if f.Snapshot != nil && svc.fileIdent.IsVideo(f.Snapshot.Original.Extension) {
 					return true
 				}
 				return false
@@ -1732,7 +1732,7 @@ func (svc *FileService) doSorting(data []model.File, sortBy string, sortOrder st
 				if f.Snapshot != nil && f.Snapshot.Original == nil {
 					return false
 				}
-				if f.Snapshot != nil && svc.fileIdent.IsPlainText(f.Snapshot.Original.Key) {
+				if f.Snapshot != nil && svc.fileIdent.IsPlainText(f.Snapshot.Original.Extension) {
 					return true
 				}
 				return false
@@ -1748,11 +1748,11 @@ func (svc *FileService) doSorting(data []model.File, sortBy string, sortOrder st
 					return false
 				}
 				if f.Snapshot != nil &&
-					!svc.fileIdent.IsImage(f.Snapshot.Original.Key) &&
-					!svc.fileIdent.IsPDF(f.Snapshot.Original.Key) &&
-					!svc.fileIdent.IsOffice(f.Snapshot.Original.Key) &&
-					!svc.fileIdent.IsVideo(f.Snapshot.Original.Key) &&
-					!svc.fileIdent.IsPlainText(f.Snapshot.Original.Key) {
+					!svc.fileIdent.IsImage(f.Snapshot.Original.Extension) &&
+					!svc.fileIdent.IsPDF(f.Snapshot.Original.Extension) &&
+					!svc.fileIdent.IsOffice(f.Snapshot.Original.Extension) &&
+					!svc.fileIdent.IsVideo(f.Snapshot.Original.Extension) &&
+					!svc.fileIdent.IsPlainText(f.Snapshot.Original.Extension) {
 					return true
 				}
 				return false
