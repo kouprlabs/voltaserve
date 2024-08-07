@@ -40,6 +40,7 @@ type SnapshotPatchOptions struct {
 	OCR       *S3Object          `json:"ocr"`
 	Entities  *S3Object          `json:"entities"`
 	Mosaic    *S3Object          `json:"mosaic"`
+	Mobile    *S3Object          `json:"mobile"`
 	Thumbnail *S3Object          `json:"thumbnail"`
 	Status    *string            `json:"status"`
 	TaskID    *string            `json:"taskId"`
@@ -59,6 +60,7 @@ const (
 	SnapshotFieldOCR       = "ocr"
 	SnapshotFieldEntities  = "entities"
 	SnapshotFieldMosaic    = "mosaic"
+	SnapshotFieldMobile    = "mobile"
 	SnapshotFieldThumbnail = "thumbnail"
 	SnapshotFieldStatus    = "status"
 	SnapshotFieldLanguage  = "language"
@@ -79,11 +81,16 @@ type S3Object struct {
 	Key    string      `json:"key"`
 	Size   *int64      `json:"size,omitempty"`
 	Image  *ImageProps `json:"image,omitempty"`
+	PDF    *PDFProps   `json:"pdf,omitempty"`
 }
 
 type ImageProps struct {
 	Width  int `json:"width"`
 	Height int `json:"height"`
+}
+
+type PDFProps struct {
+	Pages int `json:"pages"`
 }
 
 func (cl *SnapshotClient) Patch(opts SnapshotPatchOptions) error {

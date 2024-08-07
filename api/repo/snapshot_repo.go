@@ -64,6 +64,7 @@ type snapshotEntity struct {
 	OCR        datatypes.JSON `gorm:"column:ocr"         json:"ocr,omitempty"`
 	Entities   datatypes.JSON `gorm:"column:entities"    json:"entities,omitempty"`
 	Mosaic     datatypes.JSON `gorm:"column:mosaic"      json:"mosaic,omitempty"`
+	Mobile     datatypes.JSON `gorm:"column:mobile"      json:"mobile,omitempty"`
 	Thumbnail  datatypes.JSON `gorm:"column:thumbnail"   json:"thumbnail,omitempty"`
 	Status     string         `gorm:"column,status"      json:"status,omitempty"`
 	Language   *string        `gorm:"column:language"    json:"language,omitempty"`
@@ -161,6 +162,18 @@ func (s *snapshotEntity) GetMosaic() *model.S3Object {
 	}
 	res := model.S3Object{}
 	if err := json.Unmarshal([]byte(s.Mosaic.String()), &res); err != nil {
+		log.GetLogger().Fatal(err)
+		return nil
+	}
+	return &res
+}
+
+func (s *snapshotEntity) GetMobile() *model.S3Object {
+	if s.Mobile.String() == "" {
+		return nil
+	}
+	res := model.S3Object{}
+	if err := json.Unmarshal([]byte(s.Mobile.String()), &res); err != nil {
 		log.GetLogger().Fatal(err)
 		return nil
 	}
@@ -289,6 +302,21 @@ func (s *snapshotEntity) SetMosaic(m *model.S3Object) {
 	}
 }
 
+func (s *snapshotEntity) SetMobile(m *model.S3Object) {
+	if m == nil {
+		s.Mobile = nil
+	} else {
+		b, err := json.Marshal(m)
+		if err != nil {
+			log.GetLogger().Fatal(err)
+			return
+		}
+		if err := s.Mobile.UnmarshalJSON(b); err != nil {
+			log.GetLogger().Fatal(err)
+		}
+	}
+}
+
 func (s *snapshotEntity) SetThumbnail(m *model.S3Object) {
 	if m == nil {
 		s.Thumbnail = nil
@@ -338,6 +366,10 @@ func (s *snapshotEntity) HasEntities() bool {
 
 func (s *snapshotEntity) HasMosaic() bool {
 	return s.Mosaic != nil
+}
+
+func (s *snapshotEntity) HasMobile() bool {
+	return s.Mobile != nil
 }
 
 func (s *snapshotEntity) HasThumbnail() bool {
@@ -443,6 +475,7 @@ type SnapshotUpdateOptions struct {
 	OCR       *model.S3Object
 	Entities  *model.S3Object
 	Mosaic    *model.S3Object
+	Mobile    *model.S3Object
 	Thumbnail *model.S3Object
 	Status    *string
 	Language  *string
@@ -456,6 +489,7 @@ const (
 	SnapshotFieldOCR       = "ocr"
 	SnapshotFieldEntities  = "entities"
 	SnapshotFieldMosaic    = "mosaic"
+	SnapshotFieldMobile    = "mobile"
 	SnapshotFieldThumbnail = "thumbnail"
 	SnapshotFieldStatus    = "status"
 	SnapshotFieldLanguage  = "language"
@@ -484,6 +518,9 @@ func (repo *snapshotRepo) Update(id string, opts SnapshotUpdateOptions) error {
 	}
 	if slices.Contains(opts.Fields, SnapshotFieldMosaic) {
 		snapshot.SetMosaic(opts.Mosaic)
+	}
+	if slices.Contains(opts.Fields, SnapshotFieldMobile) {
+		snapshot.SetMobile(opts.Mobile)
 	}
 	if slices.Contains(opts.Fields, SnapshotFieldThumbnail) {
 		snapshot.SetThumbnail(opts.Thumbnail)

@@ -60,6 +60,9 @@ func (p *pdfPipeline) Run(opts api_client.PipelineRunOptions) error {
 			infra.GetLogger().Error(err)
 		}
 	}(inputPath)
+	if err := p.updateSnapshot(inputPath, opts); err != nil {
+		return err
+	}
 	if err := p.taskClient.Patch(opts.TaskID, api_client.TaskPatchOptions{
 		Fields: []string{api_client.TaskFieldName},
 		Name:   helper.ToPtr("Creating thumbnail."),
@@ -73,9 +76,6 @@ func (p *pdfPipeline) Run(opts api_client.PipelineRunOptions) error {
 		Fields: []string{api_client.TaskFieldName},
 		Name:   helper.ToPtr("Saving preview."),
 	}); err != nil {
-		return err
-	}
-	if err := p.saveOriginalAsPreview(inputPath, opts); err != nil {
 		return err
 	}
 	if err := p.taskClient.Patch(opts.TaskID, api_client.TaskPatchOptions{
@@ -170,19 +170,31 @@ func (p *pdfPipeline) extractText(inputPath string, opts api_client.PipelineRunO
 	return nil
 }
 
-func (p *pdfPipeline) saveOriginalAsPreview(inputPath string, opts api_client.PipelineRunOptions) error {
+func (p *pdfPipeline) updateSnapshot(inputPath string, opts api_client.PipelineRunOptions) error {
 	stat, err := os.Stat(inputPath)
 	if err != nil {
 		return err
 	}
+	pages, err := p.pdfProc.CountPages(inputPath)
+	if err != nil {
+		return err
+	}
+	s3Object := &api_client.S3Object{
+		Bucket: opts.Bucket,
+		Key:    opts.Key,
+		Size:   helper.ToPtr(stat.Size()),
+		PDF: &api_client.PDFProps{
+			Pages: *pages,
+		},
+	}
 	if err := p.snapshotClient.Patch(api_client.SnapshotPatchOptions{
 		Options: opts,
-		Fields:  []string{api_client.SnapshotFieldPreview},
-		Preview: &api_client.S3Object{
-			Bucket: opts.Bucket,
-			Key:    opts.Key,
-			Size:   helper.ToPtr(stat.Size()),
+		Fields: []string{
+			api_client.SnapshotFieldOriginal,
+			api_client.SnapshotFieldPreview,
 		},
+		Original: s3Object,
+		Preview:  s3Object,
 	}); err != nil {
 		return err
 	}
@@ -194,6 +206,16 @@ func (p *pdfPipeline) optimizeForMobile(inputPath string, opts api_client.Pipeli
 		return err
 	}
 	if err := p.splitThumbnails(inputPath, opts); err != nil {
+		return err
+	}
+	if err := p.snapshotClient.Patch(api_client.SnapshotPatchOptions{
+		Options: opts,
+		Fields:  []string{api_client.SnapshotFieldMobile},
+		Mobile: &api_client.S3Object{
+			Bucket: opts.Bucket,
+			Key:    filepath.FromSlash(opts.SnapshotID + "/mobile"),
+		},
+	}); err != nil {
 		return err
 	}
 	return nil

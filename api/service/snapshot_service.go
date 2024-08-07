@@ -71,6 +71,7 @@ type Snapshot struct {
 	Text       *Download `json:"text,omitempty"`
 	Entities   *Download `json:"entities,omitempty"`
 	Mosaic     *Download `json:"mosaic,omitempty"`
+	Mobile     *Download `json:"mobile,omitempty"`
 	Thumbnail  *Download `json:"thumbnail,omitempty"`
 	Language   *string   `json:"language,omitempty"`
 	Status     string    `json:"status,omitempty"`
@@ -86,9 +87,21 @@ type TaskInfo struct {
 }
 
 type Download struct {
+	Bucket    string      `json:"bucket"`
+	Key       string      `json:"key"`
 	Extension string      `json:"extension,omitempty"`
 	Size      *int64      `json:"size,omitempty"`
 	Image     *ImageProps `json:"image,omitempty"`
+	PDF       *PDFProps   `json:"pdf,omitempty"`
+}
+
+type ImageProps struct {
+	Width  int `json:"width"`
+	Height int `json:"height"`
+}
+
+type PDFProps struct {
+	Pages int `json:"pages"`
 }
 
 type Thumbnail struct {
@@ -286,6 +299,7 @@ type SnapshotPatchOptions struct {
 	OCR       *model.S3Object           `json:"ocr"`
 	Entities  *model.S3Object           `json:"entities"`
 	Mosaic    *model.S3Object           `json:"mosaic"`
+	Mobile    *model.S3Object           `json:"mobile"`
 	Thumbnail *model.S3Object           `json:"thumbnail"`
 	Status    *string                   `json:"status"`
 	TaskID    *string                   `json:"taskId"`
@@ -303,6 +317,7 @@ func (svc *SnapshotService) Patch(id string, opts SnapshotPatchOptions) (*Snapsh
 		OCR:       opts.OCR,
 		Entities:  opts.Entities,
 		Mosaic:    opts.Mosaic,
+		Mobile:    opts.Mobile,
 		Thumbnail: opts.Thumbnail,
 		Status:    opts.Status,
 	}); err != nil {
@@ -382,6 +397,9 @@ func (mp *SnapshotMapper) mapOne(m model.Snapshot) *Snapshot {
 	if m.HasMosaic() {
 		s.Mosaic = mp.mapS3Object(m.GetMosaic())
 	}
+	if m.HasMobile() {
+		s.Mobile = mp.mapS3Object(m.GetMobile())
+	}
 	if m.HasThumbnail() {
 		s.Thumbnail = mp.mapS3Object(m.GetThumbnail())
 	}
@@ -410,13 +428,10 @@ func (mp *SnapshotMapper) mapMany(snapshots []model.Snapshot, activeID string) [
 	return res
 }
 
-type ImageProps struct {
-	Width  int `json:"width"`
-	Height int `json:"height"`
-}
-
 func (mp *SnapshotMapper) mapS3Object(o *model.S3Object) *Download {
 	download := &Download{
+		Bucket:    o.Bucket,
+		Key:       o.Key,
 		Extension: filepath.Ext(o.Key),
 		Size:      o.Size,
 	}
@@ -424,6 +439,11 @@ func (mp *SnapshotMapper) mapS3Object(o *model.S3Object) *Download {
 		download.Image = &ImageProps{
 			Width:  o.Image.Width,
 			Height: o.Image.Height,
+		}
+	}
+	if o.PDF != nil {
+		download.PDF = &PDFProps{
+			Pages: o.PDF.Pages,
 		}
 	}
 	return download

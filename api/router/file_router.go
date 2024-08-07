@@ -88,6 +88,8 @@ func (r *FileRouter) AppendNonJWTRoutes(g fiber.Router) {
 	g.Get("/:id/original:ext", r.DownloadOriginal)
 	g.Get("/:id/preview:ext", r.DownloadPreview)
 	g.Get("/:id/thumbnail:ext", r.DownloadThumbnail)
+	g.Get("/:id/mobile/pages/:page.pdf", r.DownloadMobilePage)
+	g.Get("/:id/mobile/thumbnails/:page.png", r.DownloadMobileThumbnail)
 	g.Post("/create_from_s3", r.CreateFromS3)
 	g.Patch("/:id/patch_from_s3", r.PatchFromS3)
 }
@@ -975,6 +977,92 @@ func (r *FileRouter) DownloadThumbnail(c *fiber.Ctx) error {
 	}
 	if filepath.Ext(snapshot.GetThumbnail().Key) != ext {
 		return errorpkg.NewS3ObjectNotFoundError(nil)
+	}
+	b := buf.Bytes()
+	c.Set("Content-Type", infra.DetectMimeFromBytes(b))
+	c.Set("Content-Disposition", fmt.Sprintf("filename=\"%s\"", filepath.Base(file.GetName())))
+	return c.Send(b)
+}
+
+// DownloadMobilePage godoc
+//
+//	@Summary		Download Mobile Page
+//	@Description	Download Mobile Page
+//	@Tags			Files
+//	@Id				files_download_mobile_page
+//	@Produce		json
+//	@Param			id				path		string	true	"ID"
+//	@Param			access_token	query		string	true	"Access Token"
+//	@Param			ext				query		string	true	"Extension"
+//	@Failure		404				{object}	errorpkg.ErrorResponse
+//	@Failure		500				{object}	errorpkg.ErrorResponse
+//	@Router			/files/{id}/mobile/pages/{page}.png [get]
+func (r *FileRouter) DownloadMobilePage(c *fiber.Ctx) error {
+	accessToken := c.Cookies(r.accessTokenCookieName)
+	if accessToken == "" {
+		accessToken = c.Query("access_token")
+		if accessToken == "" {
+			return errorpkg.NewFileNotFoundError(nil)
+		}
+	}
+	userID, err := r.getUserIDFromAccessToken(accessToken)
+	if err != nil {
+		return c.SendStatus(http.StatusNotFound)
+	}
+	id := c.Params("id")
+	if id == "" {
+		return errorpkg.NewMissingQueryParamError("id")
+	}
+	page, err := strconv.Atoi(c.Params("page"))
+	if err != nil {
+		return errorpkg.NewInvalidQueryParamError("page")
+	}
+	buf, file, err := r.fileSvc.DownloadMobilePageBuffer(id, page, userID)
+	if err != nil {
+		return err
+	}
+	b := buf.Bytes()
+	c.Set("Content-Type", infra.DetectMimeFromBytes(b))
+	c.Set("Content-Disposition", fmt.Sprintf("filename=\"%s\"", filepath.Base(file.GetName())))
+	return c.Send(b)
+}
+
+// DownloadMobileThumbnail godoc
+//
+//	@Summary		Download Mobile Thumbnail
+//	@Description	Download Mobile Thumbnail
+//	@Tags			Files
+//	@Id				files_download_mobile_thumbnail
+//	@Produce		json
+//	@Param			id				path		string	true	"ID"
+//	@Param			access_token	query		string	true	"Access Token"
+//	@Param			ext				query		string	true	"Extension"
+//	@Failure		404				{object}	errorpkg.ErrorResponse
+//	@Failure		500				{object}	errorpkg.ErrorResponse
+//	@Router			/files/{id}/mobile/thumbnails/{page}.png [get]
+func (r *FileRouter) DownloadMobileThumbnail(c *fiber.Ctx) error {
+	accessToken := c.Cookies(r.accessTokenCookieName)
+	if accessToken == "" {
+		accessToken = c.Query("access_token")
+		if accessToken == "" {
+			return errorpkg.NewFileNotFoundError(nil)
+		}
+	}
+	userID, err := r.getUserIDFromAccessToken(accessToken)
+	if err != nil {
+		return c.SendStatus(http.StatusNotFound)
+	}
+	id := c.Params("id")
+	if id == "" {
+		return errorpkg.NewMissingQueryParamError("id")
+	}
+	page, err := strconv.Atoi(c.Params("page"))
+	if err != nil {
+		return errorpkg.NewInvalidQueryParamError("page")
+	}
+	buf, file, err := r.fileSvc.DownloadMobileThumbnailBuffer(id, page, userID)
+	if err != nil {
+		return err
 	}
 	b := buf.Bytes()
 	c.Set("Content-Type", infra.DetectMimeFromBytes(b))

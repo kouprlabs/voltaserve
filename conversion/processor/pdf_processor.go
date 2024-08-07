@@ -15,6 +15,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -83,12 +84,50 @@ func (p *PDFProcessor) SplitPages(inputPath string, outputDir string) error {
 	if err := infra.NewCommand().Exec("qpdf", "--split-pages", inputPath, filepath.FromSlash(outputDir+"/%d.pdf")); err != nil {
 		return err
 	}
+	/* Rename files by removing leading zeros */
+	if err := filepath.Walk(outputDir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !info.IsDir() && strings.HasSuffix(info.Name(), ".pdf") {
+			base := filepath.Base(path)
+			ext := filepath.Ext(base)
+			re := regexp.MustCompile(`(\D*)(\d+)(.*)`)
+			matches := re.FindStringSubmatch(strings.TrimSuffix(base, ext))
+			if len(matches) == 4 {
+				number, err := strconv.Atoi(matches[2])
+				if err != nil {
+					return err
+				}
+				newName := fmt.Sprintf("%s%d%s%s", matches[1], number, matches[3], ext)
+				newPath := filepath.Join(filepath.Dir(path), newName)
+				if err = os.Rename(path, newPath); err != nil {
+					return err
+				}
+			}
+		}
+		return nil
+	}); err != nil {
+		return err
+	}
 	return nil
 }
 
 func (p *PDFProcessor) SplitThumbnails(inputPath string, outputDir string) error {
-	if err := infra.NewCommand().Exec("gs", "-dNOPAUSE", "-dBATCH", "-sDEVICE=pngalpha", "-r72", fmt.Sprintf("-sOutputFile=%s", filepath.FromSlash(outputDir+"/%d.png")), inputPath); err != nil {
+	if err := infra.NewCommand().Exec("gs", "-dNOPAUSE", "-dBATCH", "-sDEVICE=png16m", "-r72", fmt.Sprintf("-sOutputFile=%s", filepath.FromSlash(outputDir+"/%d.png")), inputPath); err != nil {
 		return err
 	}
 	return nil
+}
+
+func (p *PDFProcessor) CountPages(inputPath string) (*int, error) {
+	output, err := infra.NewCommand().ReadOutput("qpdf", "--show-npages", inputPath)
+	if err != nil {
+		return nil, err
+	}
+	count, err := strconv.Atoi(strings.TrimSpace(*output))
+	if err != nil {
+		return nil, err
+	}
+	return &count, nil
 }

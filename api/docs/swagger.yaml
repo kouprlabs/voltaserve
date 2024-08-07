@@ -87,6 +87,11 @@ definitions:
       width:
         type: integer
     type: object
+  model.PDFProps:
+    properties:
+      pages:
+        type: integer
+    type: object
   model.S3Object:
     properties:
       bucket:
@@ -95,6 +100,8 @@ definitions:
         $ref: '#/definitions/model.ImageProps'
       key:
         type: string
+      pdf:
+        $ref: '#/definitions/model.PDFProps'
       size:
         type: integer
     type: object
@@ -216,10 +223,16 @@ definitions:
     type: object
   service.Download:
     properties:
+      bucket:
+        type: string
       extension:
         type: string
       image:
         $ref: '#/definitions/service.ImageProps'
+      key:
+        type: string
+      pdf:
+        $ref: '#/definitions/service.PDFProps'
       size:
         type: integer
     type: object
@@ -538,6 +551,11 @@ definitions:
       totalPages:
         type: integer
     type: object
+  service.PDFProps:
+    properties:
+      pages:
+        type: integer
+    type: object
   service.Snapshot:
     properties:
       createTime:
@@ -550,6 +568,8 @@ definitions:
         type: boolean
       language:
         type: string
+      mobile:
+        $ref: '#/definitions/service.Download'
       mosaic:
         $ref: '#/definitions/service.Download'
       ocr:
@@ -608,6 +628,8 @@ definitions:
         items:
           type: string
         type: array
+      mobile:
+        $ref: '#/definitions/model.S3Object'
       mosaic:
         $ref: '#/definitions/model.S3Object'
       ocr:
@@ -669,8 +691,14 @@ definitions:
         type: boolean
       name:
         type: string
+      payload:
+        additionalProperties:
+          type: string
+        type: object
       percentage:
         type: integer
+      status:
+        type: string
       userId:
         type: string
     type: object
@@ -1147,6 +1175,74 @@ paths:
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
       summary: List
+      tags:
+      - Files
+  /files/{id}/mobile/pages/{page}.png:
+    get:
+      description: Download Mobile Page
+      operationId: files_download_mobile_page
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Access Token
+        in: query
+        name: access_token
+        required: true
+        type: string
+      - description: Extension
+        in: query
+        name: ext
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Download Mobile Page
+      tags:
+      - Files
+  /files/{id}/mobile/thumbnails/{page}.png:
+    get:
+      description: Download Mobile Thumbnail
+      operationId: files_download_mobile_thumbnail
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Access Token
+        in: query
+        name: access_token
+        required: true
+        type: string
+      - description: Extension
+        in: query
+        name: ext
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Download Mobile Thumbnail
       tags:
       - Files
   /files/{id}/move/{targetId}:
