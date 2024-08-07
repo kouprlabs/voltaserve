@@ -22,6 +22,8 @@ export enum ErrorCode {
   InvalidRequest = 'invalid_request',
   UnsupportedGrantType = 'unsupported_grant_type',
   PasswordValidationFailed = 'password_validation_failed',
+  UserSuspended = 'user_suspended',
+  MissingPermission = 'missing_permission',
 }
 
 const statuses: { [key: string]: number } = {
@@ -37,6 +39,8 @@ const statuses: { [key: string]: number } = {
   [ErrorCode.InvalidRequest]: 400,
   [ErrorCode.UnsupportedGrantType]: 400,
   [ErrorCode.PasswordValidationFailed]: 400,
+  [ErrorCode.UserSuspended]: 403,
+  [ErrorCode.MissingPermission]: 403,
 }
 
 const userMessages: { [key: string]: string } = {
@@ -44,6 +48,8 @@ const userMessages: { [key: string]: string } = {
   [ErrorCode.EmailNotConfimed]: 'Email not confirmed.',
   [ErrorCode.InvalidPassword]: 'Invalid password.',
   [ErrorCode.InvalidUsernameOrPassword]: 'Invalid username or password.',
+  [ErrorCode.UserSuspended]: 'User suspended.',
+  [ErrorCode.MissingPermission]: 'You are not an admin',
 }
 
 export type ErrorData = {

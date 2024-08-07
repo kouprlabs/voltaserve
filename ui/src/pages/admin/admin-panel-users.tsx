@@ -7,8 +7,8 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-import { useEffect } from 'react'
-import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
+import { useCallback, useEffect, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import {
   Badge,
   Button,
@@ -23,46 +23,30 @@ import {
 } from '@chakra-ui/react'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
-import AdminApi from '@/client/admin/admin'
-import { swrConfig } from '@/client/options'
-import { organizationPaginationStorage } from '@/infra/pagination'
+import UserAPI, { AdminUsersResponse } from '@/client/idp/user'
+import { adminUsersPaginationStorage } from '@/infra/pagination'
 import PagePagination from '@/lib/components/page-pagination'
 import SectionSpinner from '@/lib/components/section-spinner'
-import { decodeQuery } from '@/lib/helpers/query'
 import usePagePagination from '@/lib/hooks/page-pagination'
-import { useAppDispatch } from '@/store/hook'
-import { mutateUpdated } from '@/store/ui/users'
 
 const AdminPanelUsers = () => {
   const navigate = useNavigate()
   const location = useLocation()
-  const dispatch = useAppDispatch()
-  const [searchParams] = useSearchParams()
-  const query = decodeQuery(searchParams.get('q') as string)
+  const [list, setList] = useState<AdminUsersResponse | undefined>(undefined)
   const { page, size, steps, setPage, setSize } = usePagePagination({
     navigate,
     location,
-    storage: organizationPaginationStorage(),
+    storage: adminUsersPaginationStorage(),
   })
-  const {
-    data: list,
-    error,
-    mutate,
-  } = AdminApi.useListUsers({ page, size }, swrConfig())
 
   useEffect(() => {
-    mutate()
-  }, [query, page, size, mutate])
-
-  useEffect(() => {
-    if (mutate) {
-      dispatch(mutateUpdated(mutate))
-    }
-  }, [mutate, dispatch])
-
-  if (error) {
-    return null
-  }
+    console.log('Przed requestem')
+    UserAPI.getAllUsers({ page: page, size: size }).then((value) => {
+      console.log('Przed wyciagniaciem danych')
+      setList(value)
+      console.log(value)
+    })
+  }, [page, size])
 
   if (!list) {
     return <SectionSpinner />
@@ -104,7 +88,11 @@ const AdminPanelUsers = () => {
                     <Td>{new Date(user.updateTime).toLocaleString()}</Td>
                     <Td>
                       <Button>Manage</Button>
-                      <Button colorScheme="red">Suspend</Button>
+                      {user.isActive ? (
+                        <Button colorScheme="red">Suspend</Button>
+                      ) : (
+                        <Button colorScheme="yellow">Unsuspend</Button>
+                      )}
                     </Td>
                   </Tr>
                 ))}

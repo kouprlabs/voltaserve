@@ -72,6 +72,8 @@ export async function createUser(
         email: user.email,
         fullName: user.fullName,
         isEmailConfirmed: user.isEmailConfirmed,
+        isAdmin: user.isAdmin,
+        isActive: user.isActive,
         createTime: user.createTime,
       },
     ])

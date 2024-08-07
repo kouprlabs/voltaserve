@@ -83,3 +83,10 @@ export function workspacePaginationStorage() {
     namespace: 'workspace',
   }
 }
+
+export function adminUsersPaginationStorage() {
+  return {
+    prefix: 'voltaserve',
+    namespace: 'admin_users',
+  }
+}

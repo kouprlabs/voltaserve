@@ -19,6 +19,21 @@ export type User = {
   pendingEmail?: string
 }
 
+export interface AdminUsers extends User {
+  isEmailConfirmed: boolean
+  createTime: Date
+  updateTime: Date
+  isAdmin: boolean
+  isActive: boolean
+}
+
+export interface AdminUsersResponse {
+  data: AdminUsers[]
+  totalElements: number
+  page: number
+  size: number
+}
+
 export type UpdateFullNameOptions = {
   fullName: string
 }
@@ -31,6 +46,10 @@ export type UpdateEmailConfirmationOptions = {
   token: string
 }
 
+export type suspendUserOptions = {
+  id: string
+}
+
 export type UpdatePasswordOptions = {
   currentPassword: string
   newPassword: string
@@ -38,6 +57,16 @@ export type UpdatePasswordOptions = {
 
 export type DeleteOptions = {
   password: string
+}
+
+type ListOptions = {
+  size?: number
+  page?: number
+}
+
+type ListQueryParams = {
+  page?: string
+  size?: string
 }
 
 export default class UserAPI {
@@ -50,9 +79,25 @@ export default class UserAPI {
     )
   }
 
+  static async getAllUsers(options: ListOptions) {
+    console.log('getAllUsers', options)
+    return idpFetcher({
+      url: `/user/all?${this.paramsFromListOptions(options)}`,
+      method: 'GET',
+    }) as Promise<AdminUsersResponse>
+  }
+
   static async updateFullName(options: UpdateFullNameOptions) {
     return idpFetcher({
       url: `/user/update_full_name`,
+      method: 'POST',
+      body: JSON.stringify(options),
+    }) as Promise<User>
+  }
+
+  static async suspendUser(options: suspendUserOptions) {
+    return idpFetcher({
+      url: `/user/suspend`,
       method: 'POST',
       body: JSON.stringify(options),
     }) as Promise<User>
@@ -108,5 +153,16 @@ export default class UserAPI {
       url: `/user/delete_picture`,
       method: 'POST',
     }) as Promise<User>
+  }
+
+  static paramsFromListOptions(options?: ListOptions): URLSearchParams {
+    const params: ListQueryParams = {}
+    if (options?.page) {
+      params.page = options.page.toString()
+    }
+    if (options?.size) {
+      params.size = options.size.toString()
+    }
+    return new URLSearchParams(params)
   }
 }

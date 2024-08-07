@@ -8,11 +8,12 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
 import { useEffect } from 'react'
-import { Outlet } from 'react-router-dom'
+import { Outlet, useNavigate } from 'react-router-dom'
 import { useToast } from '@chakra-ui/react'
 import { cx } from '@emotion/css'
 import AppBar from '@/components/app-bar'
 import Logo from '@/components/common/logo'
+import { getAdminStatus } from '@/infra/token'
 import {
   IconWorkspaces,
   IconHome,
@@ -29,6 +30,7 @@ import { errorCleared } from '@/store/ui/error'
 const LayoutAdmin = () => {
   const toast = useToast()
   const error = useAppSelector((state) => state.ui.error.value)
+  const navigate = useNavigate()
   const dispatch = useAppDispatch()
 
   useEffect(() => {
@@ -41,6 +43,12 @@ const LayoutAdmin = () => {
       dispatch(errorCleared())
     }
   }, [error, toast, dispatch])
+
+  useEffect(() => {
+    if (!getAdminStatus()) {
+      navigate('/')
+    }
+  }, [])
 
   return (
     <Shell
