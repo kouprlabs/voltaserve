@@ -34,12 +34,14 @@ import (
 	"github.com/kouprlabs/voltaserve/api/infra"
 	"github.com/kouprlabs/voltaserve/api/log"
 	"github.com/kouprlabs/voltaserve/api/model"
+	"github.com/kouprlabs/voltaserve/api/processor"
 	"github.com/kouprlabs/voltaserve/api/service"
 )
 
 type FileRouter struct {
 	fileSvc               *service.FileService
 	workspaceSvc          *service.WorkspaceService
+	pdfProc               *processor.PDFProcessor
 	config                *config.Config
 	bufferPool            sync.Pool
 	accessTokenCookieName string
@@ -49,6 +51,7 @@ func NewFileRouter() *FileRouter {
 	return &FileRouter{
 		fileSvc:      service.NewFileService(),
 		workspaceSvc: service.NewWorkspaceService(),
+		pdfProc:      processor.NewPDFProcessor(),
 		config:       config.GetConfig(),
 		bufferPool: sync.Pool{
 			New: func() interface{} {
@@ -891,6 +894,7 @@ func (r *FileRouter) DownloadOriginal(c *fiber.Ctx) error {
 //	@Id				files_download_preview
 //	@Produce		json
 //	@Param			id				path		string	true	"ID"
+//	@Param			page			query		string	true	"Extension"
 //	@Param			access_token	query		string	true	"Access Token"
 //	@Param			ext				query		string	true	"Extension"
 //	@Failure		404				{object}	errorpkg.ErrorResponse
@@ -927,6 +931,16 @@ func (r *FileRouter) DownloadPreview(c *fiber.Ctx) error {
 		return errorpkg.NewS3ObjectNotFoundError(nil)
 	}
 	b := buf.Bytes()
+	if c.Query("page") != "" {
+		page, err := strconv.ParseInt(c.Query("page"), 10, 32)
+		if err != nil {
+			page = 1
+		}
+		b, err = r.pdfProc.ExtractPage(b, int(page))
+		if err != nil {
+			return err
+		}
+	}
 	c.Set("Content-Type", infra.DetectMimeFromBytes(b))
 	c.Set("Content-Disposition", fmt.Sprintf("filename=\"%s\"", filepath.Base(res.File.GetName())))
 	if res.RangeInterval != nil {
