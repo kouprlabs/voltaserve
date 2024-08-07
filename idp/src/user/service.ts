@@ -7,7 +7,6 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import fs from 'fs/promises'
 import { getConfig } from '@/config/config'
 import { ErrorCode, newError } from '@/infra/error'
@@ -19,6 +18,15 @@ import { User } from '@/user/model'
 import userRepo from '@/user/repo'
 
 export type UserDTO = {
+  id: string
+  fullName: string
+  picture: string
+  email: string
+  username: string
+  pendingEmail?: string
+}
+
+export type UserListDTO = {
   id: string
   fullName: string
   picture: string
@@ -50,6 +58,17 @@ export type UserDeleteOptions = {
 
 export async function getUser(id: string): Promise<UserDTO> {
   return mapEntity(await userRepo.findByID(id))
+}
+
+export async function getUserListPaginated(
+  page: number,
+  size: number,
+): Promise<User[]> {
+  return await userRepo.listAllPaginated(page, size)
+}
+
+export async function getUserCount(): Promise<{ count: number }> {
+  return { count: await userRepo.getUserCount() }
 }
 
 export async function getByPicture(picture: string): Promise<UserDTO> {

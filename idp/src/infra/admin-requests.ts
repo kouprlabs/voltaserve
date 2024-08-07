@@ -1,4 +1,4 @@
-// Copyright 2023 Anass Bouassaba.
+// Copyright 2024 Piotr Łoboda.
 //
 // Use of this software is governed by the Business Source License
 // included in the file licenses/BSL.txt.
@@ -7,13 +7,25 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-import hashids from 'hashids'
-import { v4 as uuidv4 } from 'uuid'
+import { Request } from 'express'
 
-export function newHashId(): string {
-  return new hashids(uuidv4()).encode(Date.now())
+export type Pagination = {
+  page: string
+  size: string
 }
 
-export function newHyphenlessUuid(): string {
-  return uuidv4().replaceAll('-', '')
+export type UserId = {
+  id: string
+}
+
+export type UserCreationDate = {
+  userCreationDate: string
+}
+
+export type UserUpdateDate = {
+  id: string
+}
+
+export interface PaginatedRequest extends Request {
+  query: Pagination
 }

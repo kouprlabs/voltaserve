@@ -12,8 +12,8 @@ import { useLocation } from 'react-router-dom'
 import cx from 'classnames'
 import AccountMenu from '@/components/account/menu'
 import AdminButton from '@/components/admin/admin-button'
-import DeAdminButton from '@/components/admin/deadmin-button'
 import TaskDrawer from '@/components/task/task-drawer'
+import { getAdminStatus } from '@/infra/token'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { activeNavChanged, NavType } from '@/store/ui/nav'
 import UploadDrawer from '../upload/upload-drawer'
@@ -68,11 +68,7 @@ const AppBar = () => {
         {activeNav === NavType.Organizations ? (
           <CreateOrganizationButton />
         ) : null}
-        {location.pathname.startsWith('/admin') ? (
-          <DeAdminButton />
-        ) : (
-          <AdminButton />
-        )}
+        {getAdminStatus() ? <AdminButton /> : null}
         <UploadDrawer />
         <TaskDrawer />
         <AccountMenu />

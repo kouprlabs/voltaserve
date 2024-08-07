@@ -9,9 +9,7 @@
 // licenses/AGPL.txt.
 import { useEffect } from 'react'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
-import {
-  Heading,
-} from '@chakra-ui/react'
+import { Heading } from '@chakra-ui/react'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import AdminApi from '@/client/admin/admin'

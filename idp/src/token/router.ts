@@ -7,7 +7,6 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import { Router, Request, Response, NextFunction } from 'express'
 import { exchange, TokenExchangeOptions } from './service'
 
@@ -26,6 +25,9 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
         err.error === 'unsupported_grant_type')
     ) {
       res.json(err)
+    } else if (err.error && err.error === 'user_suspended') {
+      res.status(403)
+      res.json({ err })
     }
     next(err)
   }

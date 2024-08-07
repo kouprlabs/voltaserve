@@ -7,15 +7,17 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import { NextFunction, Router, Response } from 'express'
 import { body, validationResult } from 'express-validator'
 import fs from 'fs/promises'
+import { decodeJwt } from 'jose'
 import multer from 'multer'
 import os from 'os'
 import passport from 'passport'
-import { parseValidationError } from '@/infra/error'
+import { PaginatedRequest } from '@/infra/admin-requests'
+import { ErrorCode, newError, parseValidationError } from '@/infra/error'
 import { PassportRequest } from '@/infra/passport-request'
+import { checkAdmin } from '@/token/service'
 import {
   deleteUser,
   getUser,
@@ -30,6 +32,8 @@ import {
   UserUpdateEmailConfirmationOptions,
   updateEmailRequest,
   updateEmailConfirmation,
+  getUserListPaginated,
+  getUserCount,
 } from './service'
 
 const router = Router()
@@ -40,6 +44,41 @@ router.get(
   async (req: PassportRequest, res: Response, next: NextFunction) => {
     try {
       res.json(await getUser(req.user.id))
+    } catch (err) {
+      next(err)
+    }
+  },
+)
+
+router.get(
+  '/all',
+  passport.authenticate('jwt', { session: false }),
+  async (req: PaginatedRequest, res: Response, next: NextFunction) => {
+    try {
+      console.log('Before admin validation')
+      checkAdmin(req.header('Authorization'))
+      console.log('After validation')
+      res.json({
+        data: await getUserListPaginated(
+          parseInt(req.query.page),
+          parseInt(req.query.size),
+        ),
+        totalElements: await getUserCount(),
+        page: req.query.page,
+        size: req.query.size,
+      })
+    } catch (err) {
+      next(err)
+    }
+  },
+)
+
+router.get(
+  '/count',
+  passport.authenticate('jwt', { session: false }),
+  async (req: null, res: Response, next: NextFunction) => {
+    try {
+      res.json(await getUserCount())
     } catch (err) {
       next(err)
     }
@@ -60,6 +99,29 @@ router.post(
         await updateFullName(
           req.user.id,
           req.body as UserUpdateFullNameOptions,
+        ),
+      )
+    } catch (err) {
+      next(err)
+    }
+  },
+)
+
+router.post(
+  '/suspend',
+  passport.authenticate('jwt', { session: false }),
+  body('email').isEmail().isLength({ max: 255 }),
+  async (req: PassportRequest, res: Response, next: NextFunction) => {
+    try {
+      checkAdmin(req.header('Authorization'))
+      const result = validationResult(req)
+      if (!result.isEmpty()) {
+        throw parseValidationError(result)
+      }
+      res.json(
+        await updateEmailRequest(
+          req.user.id,
+          req.body as UserUpdateEmailRequestOptions,
         ),
       )
     } catch (err) {
