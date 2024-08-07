@@ -71,10 +71,8 @@ export type TaskInfo = {
 }
 
 export type Download = {
-  bucket: string
-  key: string
-  extension: string
-  size: number
+  extension?: string
+  size?: number
   image?: ImageProps
 }
 

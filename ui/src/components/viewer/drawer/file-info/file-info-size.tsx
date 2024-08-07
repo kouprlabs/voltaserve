@@ -17,7 +17,7 @@ export type FileInfoSizeProps = {
 }
 
 const FileInfoSize = ({ file }: FileInfoSizeProps) => {
-  if (!file.snapshot?.original) {
+  if (!file.snapshot?.original.size) {
     return null
   }
   return (

@@ -87,8 +87,6 @@ type TaskInfo struct {
 }
 
 type Download struct {
-	Bucket    string      `json:"bucket"`
-	Key       string      `json:"key"`
 	Extension string      `json:"extension,omitempty"`
 	Size      *int64      `json:"size,omitempty"`
 	Image     *ImageProps `json:"image,omitempty"`
@@ -430,8 +428,6 @@ func (mp *SnapshotMapper) mapMany(snapshots []model.Snapshot, activeID string) [
 
 func (mp *SnapshotMapper) mapS3Object(o *model.S3Object) *Download {
 	download := &Download{
-		Bucket:    o.Bucket,
-		Key:       o.Key,
 		Extension: filepath.Ext(o.Key),
 		Size:      o.Size,
 	}
