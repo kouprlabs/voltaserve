@@ -88,6 +88,15 @@ func (p *pdfPipeline) Run(opts api_client.PipelineRunOptions) error {
 		return err
 	}
 	if err := p.taskClient.Patch(opts.TaskID, api_client.TaskPatchOptions{
+		Fields: []string{api_client.TaskFieldName},
+		Name:   helper.ToPtr("Optimizing for mobile."),
+	}); err != nil {
+		return err
+	}
+	if err := p.optimizeForMobile(inputPath, opts); err != nil {
+		return err
+	}
+	if err := p.taskClient.Patch(opts.TaskID, api_client.TaskPatchOptions{
 		Fields: []string{api_client.TaskFieldName, api_client.TaskFieldStatus},
 		Name:   helper.ToPtr("Done."),
 		Status: helper.ToPtr(api_client.TaskStatusSuccess),
@@ -175,6 +184,58 @@ func (p *pdfPipeline) saveOriginalAsPreview(inputPath string, opts api_client.Pi
 			Size:   helper.ToPtr(stat.Size()),
 		},
 	}); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (p *pdfPipeline) optimizeForMobile(inputPath string, opts api_client.PipelineRunOptions) error {
+	if err := p.splitPages(inputPath, opts); err != nil {
+		return err
+	}
+	if err := p.splitThumbnails(inputPath, opts); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (p *pdfPipeline) splitPages(inputPath string, opts api_client.PipelineRunOptions) error {
+	pagesDir := filepath.FromSlash(os.TempDir() + "/" + helper.NewID())
+	if err := os.MkdirAll(pagesDir, 0o750); err != nil {
+		return nil
+	}
+	defer func(path string) {
+		if err := os.RemoveAll(path); errors.Is(err, os.ErrNotExist) {
+			return
+		} else if err != nil {
+			infra.GetLogger().Error(err)
+		}
+	}(pagesDir)
+	if err := p.pdfProc.SplitPages(inputPath, pagesDir); err != nil {
+		return err
+	}
+	if err := p.s3.PutFolder(filepath.FromSlash(opts.SnapshotID+"/mobile/pages"), pagesDir, opts.Bucket); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (p *pdfPipeline) splitThumbnails(inputPath string, opts api_client.PipelineRunOptions) error {
+	thumbnailsDir := filepath.FromSlash(os.TempDir() + "/" + helper.NewID())
+	if err := os.MkdirAll(thumbnailsDir, 0o750); err != nil {
+		return nil
+	}
+	defer func(path string) {
+		if err := os.RemoveAll(path); errors.Is(err, os.ErrNotExist) {
+			return
+		} else if err != nil {
+			infra.GetLogger().Error(err)
+		}
+	}(thumbnailsDir)
+	if err := p.pdfProc.SplitThumbnails(inputPath, thumbnailsDir); err != nil {
+		return err
+	}
+	if err := p.s3.PutFolder(filepath.FromSlash(opts.SnapshotID+"/mobile/thumbnails"), thumbnailsDir, opts.Bucket); err != nil {
 		return err
 	}
 	return nil

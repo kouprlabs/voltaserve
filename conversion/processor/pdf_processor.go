@@ -78,3 +78,17 @@ func (p *PDFProcessor) Thumbnail(inputPath string, width int, height int, output
 	}
 	return nil
 }
+
+func (p *PDFProcessor) SplitPages(inputPath string, outputDir string) error {
+	if err := infra.NewCommand().Exec("qpdf", "--split-pages", inputPath, filepath.FromSlash(outputDir+"/%d.pdf")); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (p *PDFProcessor) SplitThumbnails(inputPath string, outputDir string) error {
+	if err := infra.NewCommand().Exec("gs", "-dNOPAUSE", "-dBATCH", "-sDEVICE=pngalpha", "-r72", fmt.Sprintf("-sOutputFile=%s", filepath.FromSlash(outputDir+"/%d.png")), inputPath); err != nil {
+		return err
+	}
+	return nil
+}
