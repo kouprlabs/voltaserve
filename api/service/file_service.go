@@ -326,14 +326,14 @@ func (svc *FileService) DownloadOriginalBuffer(id string, rangeHeader string, bu
 	if err != nil {
 		return nil, err
 	}
+	if err = svc.fileGuard.Authorize(userID, file, model.PermissionViewer); err != nil {
+		return nil, err
+	}
 	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
 		return nil, errorpkg.NewFileIsNotAFileError(file)
 	}
 	snapshot, err := svc.snapshotCache.Get(*file.GetSnapshotID())
 	if err != nil {
-		return nil, err
-	}
-	if err = svc.fileGuard.Authorize(userID, file, model.PermissionViewer); err != nil {
 		return nil, err
 	}
 	if snapshot.HasOriginal() {
@@ -365,14 +365,14 @@ func (svc *FileService) DownloadPreviewBuffer(id string, rangeHeader string, buf
 	if err != nil {
 		return nil, err
 	}
+	if err = svc.fileGuard.Authorize(userID, file, model.PermissionViewer); err != nil {
+		return nil, err
+	}
 	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
 		return nil, errorpkg.NewFileIsNotAFileError(file)
 	}
 	snapshot, err := svc.snapshotCache.Get(*file.GetSnapshotID())
 	if err != nil {
-		return nil, err
-	}
-	if err = svc.fileGuard.Authorize(userID, file, model.PermissionViewer); err != nil {
 		return nil, err
 	}
 	if snapshot.HasPreview() {
@@ -407,6 +407,9 @@ func (svc *FileService) DownloadThumbnailBuffer(id string, userID string) (*byte
 	}
 	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
 		return nil, nil, nil, errorpkg.NewFileIsNotAFileError(file)
+	}
+	if err = svc.fileGuard.Authorize(userID, file, model.PermissionViewer); err != nil {
+		return nil, nil, nil, err
 	}
 	snapshot, err := svc.snapshotCache.Get(*file.GetSnapshotID())
 	if err != nil {
