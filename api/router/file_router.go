@@ -88,8 +88,8 @@ func (r *FileRouter) AppendNonJWTRoutes(g fiber.Router) {
 	g.Get("/:id/original:ext", r.DownloadOriginal)
 	g.Get("/:id/preview:ext", r.DownloadPreview)
 	g.Get("/:id/thumbnail:ext", r.DownloadThumbnail)
-	g.Get("/:id/mobile/pages/:page.pdf", r.DownloadMobilePage)
-	g.Get("/:id/mobile/thumbnails/:page.png", r.DownloadMobileThumbnail)
+	g.Get("/:id/segmentation/pages/:page.pdf", r.DownloadSegmentationPage)
+	g.Get("/:id/segmentation/thumbnails/:page.png", r.DownloadSegmentationThumbnail)
 	g.Post("/create_from_s3", r.CreateFromS3)
 	g.Patch("/:id/patch_from_s3", r.PatchFromS3)
 }
@@ -984,20 +984,20 @@ func (r *FileRouter) DownloadThumbnail(c *fiber.Ctx) error {
 	return c.Send(b)
 }
 
-// DownloadMobilePage godoc
+// DownloadSegmentationPage godoc
 //
-//	@Summary		Download Mobile Page
-//	@Description	Download Mobile Page
+//	@Summary		Download Segmentation Page
+//	@Description	Download Segmentation Page
 //	@Tags			Files
-//	@Id				files_download_mobile_page
+//	@Id				files_download_segmentation_page
 //	@Produce		json
 //	@Param			id				path		string	true	"ID"
 //	@Param			page			path		string	true	"Page"
 //	@Param			access_token	query		string	true	"Access Token"
 //	@Failure		404				{object}	errorpkg.ErrorResponse
 //	@Failure		500				{object}	errorpkg.ErrorResponse
-//	@Router			/files/{id}/mobile/pages/{page}.png [get]
-func (r *FileRouter) DownloadMobilePage(c *fiber.Ctx) error {
+//	@Router			/files/{id}/segmentation/pages/{page}.png [get]
+func (r *FileRouter) DownloadSegmentationPage(c *fiber.Ctx) error {
 	accessToken := c.Cookies(r.accessTokenCookieName)
 	if accessToken == "" {
 		accessToken = c.Query("access_token")
@@ -1017,7 +1017,7 @@ func (r *FileRouter) DownloadMobilePage(c *fiber.Ctx) error {
 	if err != nil {
 		return errorpkg.NewInvalidQueryParamError("page")
 	}
-	buf, file, err := r.fileSvc.DownloadMobilePageBuffer(id, page, userID)
+	buf, file, err := r.fileSvc.DownloadSegmentationPageBuffer(id, page, userID)
 	if err != nil {
 		return err
 	}
@@ -1027,20 +1027,20 @@ func (r *FileRouter) DownloadMobilePage(c *fiber.Ctx) error {
 	return c.Send(b)
 }
 
-// DownloadMobileThumbnail godoc
+// DownloadSegmentationThumbnail godoc
 //
-//	@Summary		Download Mobile Thumbnail
-//	@Description	Download Mobile Thumbnail
+//	@Summary		Download Segmentation Thumbnail
+//	@Description	Download Segmentation Thumbnail
 //	@Tags			Files
-//	@Id				files_download_mobile_thumbnail
+//	@Id				files_download_segmentation_thumbnail
 //	@Produce		json
 //	@Param			id				path		string	true	"ID"
 //	@Param			page			path		string	true	"Page"
 //	@Param			access_token	query		string	true	"Access Token"
 //	@Failure		404				{object}	errorpkg.ErrorResponse
 //	@Failure		500				{object}	errorpkg.ErrorResponse
-//	@Router			/files/{id}/mobile/thumbnails/{page}.png [get]
-func (r *FileRouter) DownloadMobileThumbnail(c *fiber.Ctx) error {
+//	@Router			/files/{id}/segmentation/thumbnails/{page}.png [get]
+func (r *FileRouter) DownloadSegmentationThumbnail(c *fiber.Ctx) error {
 	accessToken := c.Cookies(r.accessTokenCookieName)
 	if accessToken == "" {
 		accessToken = c.Query("access_token")
@@ -1060,7 +1060,7 @@ func (r *FileRouter) DownloadMobileThumbnail(c *fiber.Ctx) error {
 	if err != nil {
 		return errorpkg.NewInvalidQueryParamError("page")
 	}
-	buf, file, err := r.fileSvc.DownloadMobileThumbnailBuffer(id, page, userID)
+	buf, file, err := r.fileSvc.DownloadSegmentationThumbnailBuffer(id, page, userID)
 	if err != nil {
 		return err
 	}

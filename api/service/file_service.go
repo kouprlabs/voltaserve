@@ -426,7 +426,7 @@ func (svc *FileService) DownloadThumbnailBuffer(id string, userID string) (*byte
 	}
 }
 
-func (svc *FileService) DownloadMobilePageBuffer(id string, page int, userID string) (*bytes.Buffer, model.File, error) {
+func (svc *FileService) DownloadSegmentationPageBuffer(id string, page int, userID string) (*bytes.Buffer, model.File, error) {
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return nil, nil, err
@@ -441,8 +441,8 @@ func (svc *FileService) DownloadMobilePageBuffer(id string, page int, userID str
 	if err != nil {
 		return nil, nil, err
 	}
-	if snapshot.HasMobile() {
-		buf, _, err := svc.s3.GetObject(filepath.FromSlash(snapshot.GetMobile().Key+fmt.Sprintf("/pages/%d.pdf", page)), snapshot.GetMobile().Bucket, minio.GetObjectOptions{})
+	if snapshot.HasSegmentation() {
+		buf, _, err := svc.s3.GetObject(filepath.FromSlash(snapshot.GetSegmentation().Key+fmt.Sprintf("/pages/%d.pdf", page)), snapshot.GetSegmentation().Bucket, minio.GetObjectOptions{})
 		if err != nil {
 			return nil, nil, err
 		}
@@ -452,7 +452,7 @@ func (svc *FileService) DownloadMobilePageBuffer(id string, page int, userID str
 	}
 }
 
-func (svc *FileService) DownloadMobileThumbnailBuffer(id string, page int, userID string) (*bytes.Buffer, model.File, error) {
+func (svc *FileService) DownloadSegmentationThumbnailBuffer(id string, page int, userID string) (*bytes.Buffer, model.File, error) {
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return nil, nil, err
@@ -467,8 +467,8 @@ func (svc *FileService) DownloadMobileThumbnailBuffer(id string, page int, userI
 	if err != nil {
 		return nil, nil, err
 	}
-	if snapshot.HasMobile() {
-		buf, _, err := svc.s3.GetObject(filepath.FromSlash(snapshot.GetMobile().Key+fmt.Sprintf("/thumbnails/%d.png", page)), snapshot.GetMobile().Bucket, minio.GetObjectOptions{})
+	if snapshot.HasSegmentation() {
+		buf, _, err := svc.s3.GetObject(filepath.FromSlash(snapshot.GetSegmentation().Key+fmt.Sprintf("/thumbnails/%d.png", page)), snapshot.GetSegmentation().Bucket, minio.GetObjectOptions{})
 		if err != nil {
 			return nil, nil, err
 		}

@@ -20,7 +20,7 @@ pub enum Snapshot {
     Ocr,
     Entities,
     Mosaic,
-    Mobile,
+    Segmentation,
     Thumbnail,
     Language,
     Status,

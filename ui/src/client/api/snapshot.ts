@@ -20,6 +20,7 @@ export type Snapshot = {
   text?: Download
   entities?: Download
   mosaic?: Download
+  segmentation?: Download
   thumbnail?: Download
   language?: string
   isActive: boolean

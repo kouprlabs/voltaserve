@@ -56,21 +56,21 @@ func NewSnapshot() model.Snapshot {
 }
 
 type snapshotEntity struct {
-	ID         string         `gorm:"column:id;size:36"  json:"id"`
-	Version    int64          `gorm:"column:version"     json:"version"`
-	Original   datatypes.JSON `gorm:"column:original"    json:"original,omitempty"`
-	Preview    datatypes.JSON `gorm:"column:preview"     json:"preview,omitempty"`
-	Text       datatypes.JSON `gorm:"column:text"        json:"text,omitempty"`
-	OCR        datatypes.JSON `gorm:"column:ocr"         json:"ocr,omitempty"`
-	Entities   datatypes.JSON `gorm:"column:entities"    json:"entities,omitempty"`
-	Mosaic     datatypes.JSON `gorm:"column:mosaic"      json:"mosaic,omitempty"`
-	Mobile     datatypes.JSON `gorm:"column:mobile"      json:"mobile,omitempty"`
-	Thumbnail  datatypes.JSON `gorm:"column:thumbnail"   json:"thumbnail,omitempty"`
-	Status     string         `gorm:"column,status"      json:"status,omitempty"`
-	Language   *string        `gorm:"column:language"    json:"language,omitempty"`
-	TaskID     *string        `gorm:"column:task_id"     json:"taskId,omitempty"`
-	CreateTime string         `gorm:"column:create_time" json:"createTime"`
-	UpdateTime *string        `gorm:"column:update_time" json:"updateTime,omitempty"`
+	ID           string         `gorm:"column:id;size:36"   json:"id"`
+	Version      int64          `gorm:"column:version"      json:"version"`
+	Original     datatypes.JSON `gorm:"column:original"     json:"original,omitempty"`
+	Preview      datatypes.JSON `gorm:"column:preview"      json:"preview,omitempty"`
+	Text         datatypes.JSON `gorm:"column:text"         json:"text,omitempty"`
+	OCR          datatypes.JSON `gorm:"column:ocr"          json:"ocr,omitempty"`
+	Entities     datatypes.JSON `gorm:"column:entities"     json:"entities,omitempty"`
+	Mosaic       datatypes.JSON `gorm:"column:mosaic"       json:"mosaic,omitempty"`
+	Segmentation datatypes.JSON `gorm:"column:segmentation" json:"segmentation,omitempty"`
+	Thumbnail    datatypes.JSON `gorm:"column:thumbnail"    json:"thumbnail,omitempty"`
+	Status       string         `gorm:"column,status"       json:"status,omitempty"`
+	Language     *string        `gorm:"column:language"     json:"language,omitempty"`
+	TaskID       *string        `gorm:"column:task_id"      json:"taskId,omitempty"`
+	CreateTime   string         `gorm:"column:create_time"  json:"createTime"`
+	UpdateTime   *string        `gorm:"column:update_time"  json:"updateTime,omitempty"`
 }
 
 func (*snapshotEntity) TableName() string {
@@ -168,12 +168,12 @@ func (s *snapshotEntity) GetMosaic() *model.S3Object {
 	return &res
 }
 
-func (s *snapshotEntity) GetMobile() *model.S3Object {
-	if s.Mobile.String() == "" {
+func (s *snapshotEntity) GetSegmentation() *model.S3Object {
+	if s.Segmentation.String() == "" {
 		return nil
 	}
 	res := model.S3Object{}
-	if err := json.Unmarshal([]byte(s.Mobile.String()), &res); err != nil {
+	if err := json.Unmarshal([]byte(s.Segmentation.String()), &res); err != nil {
 		log.GetLogger().Fatal(err)
 		return nil
 	}
@@ -302,16 +302,16 @@ func (s *snapshotEntity) SetMosaic(m *model.S3Object) {
 	}
 }
 
-func (s *snapshotEntity) SetMobile(m *model.S3Object) {
+func (s *snapshotEntity) SetSegmentation(m *model.S3Object) {
 	if m == nil {
-		s.Mobile = nil
+		s.Segmentation = nil
 	} else {
 		b, err := json.Marshal(m)
 		if err != nil {
 			log.GetLogger().Fatal(err)
 			return
 		}
-		if err := s.Mobile.UnmarshalJSON(b); err != nil {
+		if err := s.Segmentation.UnmarshalJSON(b); err != nil {
 			log.GetLogger().Fatal(err)
 		}
 	}
@@ -368,8 +368,8 @@ func (s *snapshotEntity) HasMosaic() bool {
 	return s.Mosaic != nil
 }
 
-func (s *snapshotEntity) HasMobile() bool {
-	return s.Mobile != nil
+func (s *snapshotEntity) HasSegmentation() bool {
+	return s.Segmentation != nil
 }
 
 func (s *snapshotEntity) HasThumbnail() bool {
@@ -468,32 +468,32 @@ func (repo *snapshotRepo) Delete(id string) error {
 }
 
 type SnapshotUpdateOptions struct {
-	Fields    []string `json:"fields"`
-	Original  *model.S3Object
-	Preview   *model.S3Object
-	Text      *model.S3Object
-	OCR       *model.S3Object
-	Entities  *model.S3Object
-	Mosaic    *model.S3Object
-	Mobile    *model.S3Object
-	Thumbnail *model.S3Object
-	Status    *string
-	Language  *string
-	TaskID    *string
+	Fields       []string `json:"fields"`
+	Original     *model.S3Object
+	Preview      *model.S3Object
+	Text         *model.S3Object
+	OCR          *model.S3Object
+	Entities     *model.S3Object
+	Mosaic       *model.S3Object
+	Segmentation *model.S3Object
+	Thumbnail    *model.S3Object
+	Status       *string
+	Language     *string
+	TaskID       *string
 }
 
 const (
-	SnapshotFieldOriginal  = "original"
-	SnapshotFieldPreview   = "preview"
-	SnapshotFieldText      = "text"
-	SnapshotFieldOCR       = "ocr"
-	SnapshotFieldEntities  = "entities"
-	SnapshotFieldMosaic    = "mosaic"
-	SnapshotFieldMobile    = "mobile"
-	SnapshotFieldThumbnail = "thumbnail"
-	SnapshotFieldStatus    = "status"
-	SnapshotFieldLanguage  = "language"
-	SnapshotFieldTaskID    = "taskId"
+	SnapshotFieldOriginal     = "original"
+	SnapshotFieldPreview      = "preview"
+	SnapshotFieldText         = "text"
+	SnapshotFieldOCR          = "ocr"
+	SnapshotFieldEntities     = "entities"
+	SnapshotFieldMosaic       = "mosaic"
+	SnapshotFieldSegmentation = "segmentation"
+	SnapshotFieldThumbnail    = "thumbnail"
+	SnapshotFieldStatus       = "status"
+	SnapshotFieldLanguage     = "language"
+	SnapshotFieldTaskID       = "taskId"
 )
 
 func (repo *snapshotRepo) Update(id string, opts SnapshotUpdateOptions) error {
@@ -519,8 +519,8 @@ func (repo *snapshotRepo) Update(id string, opts SnapshotUpdateOptions) error {
 	if slices.Contains(opts.Fields, SnapshotFieldMosaic) {
 		snapshot.SetMosaic(opts.Mosaic)
 	}
-	if slices.Contains(opts.Fields, SnapshotFieldMobile) {
-		snapshot.SetMobile(opts.Mobile)
+	if slices.Contains(opts.Fields, SnapshotFieldSegmentation) {
+		snapshot.SetSegmentation(opts.Segmentation)
 	}
 	if slices.Contains(opts.Fields, SnapshotFieldThumbnail) {
 		snapshot.SetThumbnail(opts.Thumbnail)

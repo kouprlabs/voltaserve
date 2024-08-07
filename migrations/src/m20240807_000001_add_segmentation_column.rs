@@ -24,7 +24,23 @@ impl MigrationTrait for Migration {
             .alter_table(
                 Table::alter()
                     .table(Snapshot::Table)
-                    .add_column(ColumnDef::new(Snapshot::Mobile).json_binary())
+                    .add_column(ColumnDef::new(Snapshot::Segmentation).json_binary())
+                    .to_owned(),
+            )
+            .await?;
+
+        Ok(())
+    }
+
+    async fn down(
+        &self,
+        manager: &SchemaManager,
+    ) -> Result<(), DbErr> {
+        manager
+            .alter_table(
+                Table::alter()
+                    .table(Snapshot::Table)
+                    .drop_column(Snapshot::Segmentation)
                     .to_owned(),
             )
             .await?;

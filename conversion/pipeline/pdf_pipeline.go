@@ -89,11 +89,11 @@ func (p *pdfPipeline) Run(opts api_client.PipelineRunOptions) error {
 	}
 	if err := p.taskClient.Patch(opts.TaskID, api_client.TaskPatchOptions{
 		Fields: []string{api_client.TaskFieldName},
-		Name:   helper.ToPtr("Optimizing for mobile."),
+		Name:   helper.ToPtr("Performing segmentation."),
 	}); err != nil {
 		return err
 	}
-	if err := p.optimizeForMobile(inputPath, opts); err != nil {
+	if err := p.performSegmentation(inputPath, opts); err != nil {
 		return err
 	}
 	if err := p.taskClient.Patch(opts.TaskID, api_client.TaskPatchOptions{
@@ -201,7 +201,7 @@ func (p *pdfPipeline) updateSnapshot(inputPath string, opts api_client.PipelineR
 	return nil
 }
 
-func (p *pdfPipeline) optimizeForMobile(inputPath string, opts api_client.PipelineRunOptions) error {
+func (p *pdfPipeline) performSegmentation(inputPath string, opts api_client.PipelineRunOptions) error {
 	if err := p.splitPages(inputPath, opts); err != nil {
 		return err
 	}
@@ -210,10 +210,10 @@ func (p *pdfPipeline) optimizeForMobile(inputPath string, opts api_client.Pipeli
 	}
 	if err := p.snapshotClient.Patch(api_client.SnapshotPatchOptions{
 		Options: opts,
-		Fields:  []string{api_client.SnapshotFieldMobile},
-		Mobile: &api_client.S3Object{
+		Fields:  []string{api_client.SnapshotFieldSegmentation},
+		Segmentation: &api_client.S3Object{
 			Bucket: opts.Bucket,
-			Key:    filepath.FromSlash(opts.SnapshotID + "/mobile"),
+			Key:    filepath.FromSlash(opts.SnapshotID + "/segmentation"),
 		},
 	}); err != nil {
 		return err
@@ -236,7 +236,7 @@ func (p *pdfPipeline) splitPages(inputPath string, opts api_client.PipelineRunOp
 	if err := p.pdfProc.SplitPages(inputPath, pagesDir); err != nil {
 		return err
 	}
-	if err := p.s3.PutFolder(filepath.FromSlash(opts.SnapshotID+"/mobile/pages"), pagesDir, opts.Bucket); err != nil {
+	if err := p.s3.PutFolder(filepath.FromSlash(opts.SnapshotID+"/segmentation/pages"), pagesDir, opts.Bucket); err != nil {
 		return err
 	}
 	return nil
@@ -257,7 +257,7 @@ func (p *pdfPipeline) splitThumbnails(inputPath string, opts api_client.Pipeline
 	if err := p.pdfProc.SplitThumbnails(inputPath, thumbnailsDir); err != nil {
 		return err
 	}
-	if err := p.s3.PutFolder(filepath.FromSlash(opts.SnapshotID+"/mobile/thumbnails"), thumbnailsDir, opts.Bucket); err != nil {
+	if err := p.s3.PutFolder(filepath.FromSlash(opts.SnapshotID+"/segmentation/thumbnails"), thumbnailsDir, opts.Bucket); err != nil {
 		return err
 	}
 	return nil
