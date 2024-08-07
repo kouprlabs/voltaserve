@@ -1187,14 +1187,14 @@ paths:
         name: id
         required: true
         type: string
+      - description: Page
+        in: path
+        name: page
+        required: true
+        type: string
       - description: Access Token
         in: query
         name: access_token
-        required: true
-        type: string
-      - description: Extension
-        in: query
-        name: ext
         required: true
         type: string
       produces:
@@ -1533,14 +1533,14 @@ paths:
         name: id
         required: true
         type: string
+      - description: Page
+        in: path
+        name: page
+        required: true
+        type: string
       - description: Access Token
         in: query
         name: access_token
-        required: true
-        type: string
-      - description: Extension
-        in: query
-        name: ext
         required: true
         type: string
       produces:

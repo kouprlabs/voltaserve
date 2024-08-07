@@ -946,8 +946,8 @@ func (r *FileRouter) DownloadPreview(c *fiber.Ctx) error {
 //	@Id				files_download_thumbnail
 //	@Produce		json
 //	@Param			id				path		string	true	"ID"
+//	@Param			page			path		string	true	"Page"
 //	@Param			access_token	query		string	true	"Access Token"
-//	@Param			ext				query		string	true	"Extension"
 //	@Failure		404				{object}	errorpkg.ErrorResponse
 //	@Failure		500				{object}	errorpkg.ErrorResponse
 //	@Router			/files/{id}/thumbnail{ext} [get]
@@ -992,8 +992,8 @@ func (r *FileRouter) DownloadThumbnail(c *fiber.Ctx) error {
 //	@Id				files_download_mobile_page
 //	@Produce		json
 //	@Param			id				path		string	true	"ID"
+//	@Param			page			path		string	true	"Page"
 //	@Param			access_token	query		string	true	"Access Token"
-//	@Param			ext				query		string	true	"Extension"
 //	@Failure		404				{object}	errorpkg.ErrorResponse
 //	@Failure		500				{object}	errorpkg.ErrorResponse
 //	@Router			/files/{id}/mobile/pages/{page}.png [get]
