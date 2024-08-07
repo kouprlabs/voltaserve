@@ -568,8 +568,6 @@ definitions:
         type: boolean
       language:
         type: string
-      mobile:
-        $ref: '#/definitions/service.Download'
       mosaic:
         $ref: '#/definitions/service.Download'
       ocr:
@@ -577,6 +575,8 @@ definitions:
       original:
         $ref: '#/definitions/service.Download'
       preview:
+        $ref: '#/definitions/service.Download'
+      segmentation:
         $ref: '#/definitions/service.Download'
       status:
         type: string
@@ -628,8 +628,6 @@ definitions:
         items:
           type: string
         type: array
-      mobile:
-        $ref: '#/definitions/model.S3Object'
       mosaic:
         $ref: '#/definitions/model.S3Object'
       ocr:
@@ -639,6 +637,8 @@ definitions:
       original:
         $ref: '#/definitions/model.S3Object'
       preview:
+        $ref: '#/definitions/model.S3Object'
+      segmentation:
         $ref: '#/definitions/model.S3Object'
       status:
         type: string
@@ -1177,74 +1177,6 @@ paths:
       summary: List
       tags:
       - Files
-  /files/{id}/mobile/pages/{page}.png:
-    get:
-      description: Download Mobile Page
-      operationId: files_download_mobile_page
-      parameters:
-      - description: ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: Page
-        in: path
-        name: page
-        required: true
-        type: string
-      - description: Access Token
-        in: query
-        name: access_token
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Download Mobile Page
-      tags:
-      - Files
-  /files/{id}/mobile/thumbnails/{page}.png:
-    get:
-      description: Download Mobile Thumbnail
-      operationId: files_download_mobile_thumbnail
-      parameters:
-      - description: ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: Page
-        in: path
-        name: page
-        required: true
-        type: string
-      - description: Access Token
-        in: query
-        name: access_token
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Download Mobile Thumbnail
-      tags:
-      - Files
   /files/{id}/move/{targetId}:
     post:
       description: Move One
@@ -1493,6 +1425,74 @@ paths:
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
       summary: Revoke Group Permission
+      tags:
+      - Files
+  /files/{id}/segmentation/pages/{page}.png:
+    get:
+      description: Download Segmentation Page
+      operationId: files_download_segmentation_page
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Page
+        in: path
+        name: page
+        required: true
+        type: string
+      - description: Access Token
+        in: query
+        name: access_token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Download Segmentation Page
+      tags:
+      - Files
+  /files/{id}/segmentation/thumbnails/{page}.png:
+    get:
+      description: Download Segmentation Thumbnail
+      operationId: files_download_segmentation_thumbnail
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Page
+        in: path
+        name: page
+        required: true
+        type: string
+      - description: Access Token
+        in: query
+        name: access_token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Download Segmentation Thumbnail
       tags:
       - Files
   /files/{id}/size:
