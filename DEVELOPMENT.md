@@ -148,6 +148,7 @@ brew install --cask libreoffice
 ```shell
 brew install \
     ocrmypdf \
+    qpdf \
     exiftool \
     poppler \
     imagemagick \
