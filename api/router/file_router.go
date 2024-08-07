@@ -891,8 +891,8 @@ func (r *FileRouter) DownloadOriginal(c *fiber.Ctx) error {
 //	@Id				files_download_preview
 //	@Produce		json
 //	@Param			id				path		string	true	"ID"
+//	@Param			ext				path		string	true	"Extension"
 //	@Param			access_token	query		string	true	"Access Token"
-//	@Param			ext				query		string	true	"Extension"
 //	@Failure		404				{object}	errorpkg.ErrorResponse
 //	@Failure		500				{object}	errorpkg.ErrorResponse
 //	@Router			/files/{id}/preview{ext} [get]
