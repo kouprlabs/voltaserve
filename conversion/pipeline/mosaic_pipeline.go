@@ -90,7 +90,7 @@ func (p *mosaicPipeline) create(inputPath string, opts api_client.PipelineRunOpt
 			Options: opts,
 			Fields:  []string{api_client.SnapshotFieldMosaic},
 			Mosaic: &api_client.S3Object{
-				Key:    filepath.FromSlash(opts.SnapshotID + "/mosaic.json"),
+				Key:    filepath.FromSlash(opts.SnapshotID + "/mosaic"),
 				Bucket: opts.Bucket,
 			},
 		}); err != nil {
