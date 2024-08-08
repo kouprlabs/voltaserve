@@ -74,11 +74,16 @@ export type Download = {
   extension?: string
   size?: number
   image?: ImageProps
+  pdf?: PDFProps
 }
 
 export type ImageProps = {
   width: number
   height: number
+}
+
+export type PDFProps = {
+  pages: number
 }
 
 export type ListQueryParams = {
