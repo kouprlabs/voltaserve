@@ -41,103 +41,103 @@ func (*taskEntity) TableName() string {
 	return "task"
 }
 
-func (o *taskEntity) BeforeCreate(*gorm.DB) (err error) {
-	o.CreateTime = helper.NewTimestamp()
+func (e *taskEntity) BeforeCreate(*gorm.DB) (err error) {
+	e.CreateTime = helper.NewTimestamp()
 	return nil
 }
 
-func (o *taskEntity) BeforeSave(*gorm.DB) (err error) {
+func (e *taskEntity) BeforeSave(*gorm.DB) (err error) {
 	timeNow := helper.NewTimestamp()
-	o.UpdateTime = &timeNow
+	e.UpdateTime = &timeNow
 	return nil
 }
 
-func (p *taskEntity) GetID() string {
-	return p.ID
+func (e *taskEntity) GetID() string {
+	return e.ID
 }
 
-func (p *taskEntity) GetName() string {
-	return p.Name
+func (e *taskEntity) GetName() string {
+	return e.Name
 }
 
-func (p *taskEntity) GetError() *string {
-	return p.Error
+func (e *taskEntity) GetError() *string {
+	return e.Error
 }
 
-func (p *taskEntity) GetPercentage() *int {
-	return p.Percentage
+func (e *taskEntity) GetPercentage() *int {
+	return e.Percentage
 }
 
-func (p *taskEntity) GetIsIndeterminate() bool {
-	return p.IsIndeterminate
+func (e *taskEntity) GetIsIndeterminate() bool {
+	return e.IsIndeterminate
 }
 
-func (p *taskEntity) GetUserID() string {
-	return p.UserID
+func (e *taskEntity) GetUserID() string {
+	return e.UserID
 }
 
-func (p *taskEntity) GetStatus() string {
-	return p.Status
+func (e *taskEntity) GetStatus() string {
+	return e.Status
 }
 
-func (s *taskEntity) GetPayload() map[string]string {
-	if s.Payload.String() == "" {
+func (e *taskEntity) GetPayload() map[string]string {
+	if e.Payload.String() == "" {
 		return nil
 	}
 	res := map[string]string{}
-	if err := json.Unmarshal([]byte(s.Payload.String()), &res); err != nil {
+	if err := json.Unmarshal([]byte(e.Payload.String()), &res); err != nil {
 		log.GetLogger().Fatal(err)
 		return nil
 	}
 	return res
 }
 
-func (o *taskEntity) GetCreateTime() string {
-	return o.CreateTime
+func (e *taskEntity) GetCreateTime() string {
+	return e.CreateTime
 }
 
-func (o *taskEntity) GetUpdateTime() *string {
-	return o.UpdateTime
+func (e *taskEntity) GetUpdateTime() *string {
+	return e.UpdateTime
 }
 
-func (p *taskEntity) HasError() bool {
-	return p.Error != nil
+func (e *taskEntity) HasError() bool {
+	return e.Error != nil
 }
 
-func (p *taskEntity) SetName(name string) {
-	p.Name = name
+func (e *taskEntity) SetName(name string) {
+	e.Name = name
 }
 
-func (p *taskEntity) SetError(error *string) {
-	p.Error = error
+func (e *taskEntity) SetError(error *string) {
+	e.Error = error
 }
 
-func (p *taskEntity) SetPercentage(percentage *int) {
-	p.Percentage = percentage
+func (e *taskEntity) SetPercentage(percentage *int) {
+	e.Percentage = percentage
 }
 
-func (p *taskEntity) SetIsIndeterminate(isIndeterminate bool) {
-	p.IsIndeterminate = isIndeterminate
+func (e *taskEntity) SetIsIndeterminate(isIndeterminate bool) {
+	e.IsIndeterminate = isIndeterminate
 }
 
-func (p *taskEntity) SetUserID(userID string) {
-	p.UserID = userID
+func (e *taskEntity) SetUserID(userID string) {
+	e.UserID = userID
 }
 
-func (p *taskEntity) SetStatus(status string) {
-	p.Status = status
+func (e *taskEntity) SetStatus(status string) {
+	e.Status = status
 }
 
-func (s *taskEntity) SetPayload(p map[string]string) {
+func (e *taskEntity) SetPayload(p map[string]string) {
 	if p == nil {
-		s.Payload = nil
+		e.Payload = nil
 	} else {
 		b, err := json.Marshal(p)
 		if err != nil {
 			log.GetLogger().Fatal(err)
 			return
 		}
-		if err := s.Payload.UnmarshalJSON(b); err != nil {
+		if err := e.Payload.UnmarshalJSON(b); err != nil {
 			log.GetLogger().Fatal(err)
 		}
 	}
