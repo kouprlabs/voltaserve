@@ -63,21 +63,22 @@ type SnapshotListOptions struct {
 }
 
 type Snapshot struct {
-	ID         string    `json:"id"`
-	Version    int64     `json:"version"`
-	Original   *Download `json:"original,omitempty"`
-	Preview    *Download `json:"preview,omitempty"`
-	OCR        *Download `json:"ocr,omitempty"`
-	Text       *Download `json:"text,omitempty"`
-	Entities   *Download `json:"entities,omitempty"`
-	Mosaic     *Download `json:"mosaic,omitempty"`
-	Thumbnail  *Download `json:"thumbnail,omitempty"`
-	Language   *string   `json:"language,omitempty"`
-	Status     string    `json:"status,omitempty"`
-	IsActive   bool      `json:"isActive"`
-	Task       *TaskInfo `json:"task,omitempty"`
-	CreateTime string    `json:"createTime"`
-	UpdateTime *string   `json:"updateTime,omitempty"`
+	ID           string    `json:"id"`
+	Version      int64     `json:"version"`
+	Original     *Download `json:"original,omitempty"`
+	Preview      *Download `json:"preview,omitempty"`
+	OCR          *Download `json:"ocr,omitempty"`
+	Text         *Download `json:"text,omitempty"`
+	Entities     *Download `json:"entities,omitempty"`
+	Mosaic       *Download `json:"mosaic,omitempty"`
+	Segmentation *Download `json:"segmentation,omitempty"`
+	Thumbnail    *Download `json:"thumbnail,omitempty"`
+	Language     *string   `json:"language,omitempty"`
+	Status       string    `json:"status,omitempty"`
+	IsActive     bool      `json:"isActive"`
+	Task         *TaskInfo `json:"task,omitempty"`
+	CreateTime   string    `json:"createTime"`
+	UpdateTime   *string   `json:"updateTime,omitempty"`
 }
 
 type TaskInfo struct {
@@ -89,6 +90,16 @@ type Download struct {
 	Extension string      `json:"extension,omitempty"`
 	Size      *int64      `json:"size,omitempty"`
 	Image     *ImageProps `json:"image,omitempty"`
+	PDF       *PDFProps   `json:"pdf,omitempty"`
+}
+
+type ImageProps struct {
+	Width  int `json:"width"`
+	Height int `json:"height"`
+}
+
+type PDFProps struct {
+	Pages int `json:"pages"`
 }
 
 type Thumbnail struct {
@@ -278,17 +289,18 @@ func (svc *SnapshotService) Detach(id string, opts SnapshotDetachOptions, userID
 }
 
 type SnapshotPatchOptions struct {
-	Options   client.PipelineRunOptions `json:"options"`
-	Fields    []string                  `json:"fields"`
-	Original  *model.S3Object           `json:"original"`
-	Preview   *model.S3Object           `json:"preview"`
-	Text      *model.S3Object           `json:"text"`
-	OCR       *model.S3Object           `json:"ocr"`
-	Entities  *model.S3Object           `json:"entities"`
-	Mosaic    *model.S3Object           `json:"mosaic"`
-	Thumbnail *model.S3Object           `json:"thumbnail"`
-	Status    *string                   `json:"status"`
-	TaskID    *string                   `json:"taskId"`
+	Options      client.PipelineRunOptions `json:"options"`
+	Fields       []string                  `json:"fields"`
+	Original     *model.S3Object           `json:"original"`
+	Preview      *model.S3Object           `json:"preview"`
+	Text         *model.S3Object           `json:"text"`
+	OCR          *model.S3Object           `json:"ocr"`
+	Entities     *model.S3Object           `json:"entities"`
+	Mosaic       *model.S3Object           `json:"mosaic"`
+	Segmentation *model.S3Object           `json:"segmentation"`
+	Thumbnail    *model.S3Object           `json:"thumbnail"`
+	Status       *string                   `json:"status"`
+	TaskID       *string                   `json:"taskId"`
 }
 
 func (svc *SnapshotService) Patch(id string, opts SnapshotPatchOptions) (*Snapshot, error) {
@@ -296,15 +308,16 @@ func (svc *SnapshotService) Patch(id string, opts SnapshotPatchOptions) (*Snapsh
 		return nil, errorpkg.NewPathVariablesAndBodyParametersNotConsistent()
 	}
 	if err := svc.snapshotRepo.Update(id, repo.SnapshotUpdateOptions{
-		Original:  opts.Original,
-		Fields:    opts.Fields,
-		Preview:   opts.Preview,
-		Text:      opts.Text,
-		OCR:       opts.OCR,
-		Entities:  opts.Entities,
-		Mosaic:    opts.Mosaic,
-		Thumbnail: opts.Thumbnail,
-		Status:    opts.Status,
+		Original:     opts.Original,
+		Fields:       opts.Fields,
+		Preview:      opts.Preview,
+		Text:         opts.Text,
+		OCR:          opts.OCR,
+		Entities:     opts.Entities,
+		Mosaic:       opts.Mosaic,
+		Segmentation: opts.Segmentation,
+		Thumbnail:    opts.Thumbnail,
+		Status:       opts.Status,
 	}); err != nil {
 		return nil, err
 	}
@@ -382,6 +395,9 @@ func (mp *SnapshotMapper) mapOne(m model.Snapshot) *Snapshot {
 	if m.HasMosaic() {
 		s.Mosaic = mp.mapS3Object(m.GetMosaic())
 	}
+	if m.HasSegmentation() {
+		s.Segmentation = mp.mapS3Object(m.GetSegmentation())
+	}
 	if m.HasThumbnail() {
 		s.Thumbnail = mp.mapS3Object(m.GetThumbnail())
 	}
@@ -410,11 +426,6 @@ func (mp *SnapshotMapper) mapMany(snapshots []model.Snapshot, activeID string) [
 	return res
 }
 
-type ImageProps struct {
-	Width  int `json:"width"`
-	Height int `json:"height"`
-}
-
 func (mp *SnapshotMapper) mapS3Object(o *model.S3Object) *Download {
 	download := &Download{
 		Extension: filepath.Ext(o.Key),
@@ -424,6 +435,11 @@ func (mp *SnapshotMapper) mapS3Object(o *model.S3Object) *Download {
 		download.Image = &ImageProps{
 			Width:  o.Image.Width,
 			Height: o.Image.Height,
+		}
+	}
+	if o.PDF != nil {
+		download.PDF = &PDFProps{
+			Pages: o.PDF.Pages,
 		}
 	}
 	return download

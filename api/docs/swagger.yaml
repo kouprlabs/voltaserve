@@ -87,6 +87,11 @@ definitions:
       width:
         type: integer
     type: object
+  model.PDFProps:
+    properties:
+      pages:
+        type: integer
+    type: object
   model.S3Object:
     properties:
       bucket:
@@ -95,6 +100,8 @@ definitions:
         $ref: '#/definitions/model.ImageProps'
       key:
         type: string
+      pdf:
+        $ref: '#/definitions/model.PDFProps'
       size:
         type: integer
     type: object
@@ -220,6 +227,8 @@ definitions:
         type: string
       image:
         $ref: '#/definitions/service.ImageProps'
+      pdf:
+        $ref: '#/definitions/service.PDFProps'
       size:
         type: integer
     type: object
@@ -538,6 +547,11 @@ definitions:
       totalPages:
         type: integer
     type: object
+  service.PDFProps:
+    properties:
+      pages:
+        type: integer
+    type: object
   service.Snapshot:
     properties:
       createTime:
@@ -557,6 +571,8 @@ definitions:
       original:
         $ref: '#/definitions/service.Download'
       preview:
+        $ref: '#/definitions/service.Download'
+      segmentation:
         $ref: '#/definitions/service.Download'
       status:
         type: string
@@ -618,6 +634,8 @@ definitions:
         $ref: '#/definitions/model.S3Object'
       preview:
         $ref: '#/definitions/model.S3Object'
+      segmentation:
+        $ref: '#/definitions/model.S3Object'
       status:
         type: string
       taskId:
@@ -669,8 +687,14 @@ definitions:
         type: boolean
       name:
         type: string
+      payload:
+        additionalProperties:
+          type: string
+        type: object
       percentage:
         type: integer
+      status:
+        type: string
       userId:
         type: string
     type: object
@@ -1345,14 +1369,14 @@ paths:
         name: id
         required: true
         type: string
+      - description: Extension
+        in: path
+        name: ext
+        required: true
+        type: string
       - description: Access Token
         in: query
         name: access_token
-        required: true
-        type: string
-      - description: Extension
-        in: query
-        name: ext
         required: true
         type: string
       produces:
@@ -1399,6 +1423,74 @@ paths:
       summary: Revoke Group Permission
       tags:
       - Files
+  /files/{id}/segmentation/pages/{page}.png:
+    get:
+      description: Download Segmentation Page
+      operationId: files_download_segmentation_page
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Page
+        in: path
+        name: page
+        required: true
+        type: string
+      - description: Access Token
+        in: query
+        name: access_token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Download Segmentation Page
+      tags:
+      - Files
+  /files/{id}/segmentation/thumbnails/{page}.jpg:
+    get:
+      description: Download Segmentation Thumbnail
+      operationId: files_download_segmentation_thumbnail
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Page
+        in: path
+        name: page
+        required: true
+        type: string
+      - description: Access Token
+        in: query
+        name: access_token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Download Segmentation Thumbnail
+      tags:
+      - Files
   /files/{id}/size:
     get:
       description: Get Size
@@ -1437,14 +1529,14 @@ paths:
         name: id
         required: true
         type: string
+      - description: Extension
+        in: path
+        name: ext
+        required: true
+        type: string
       - description: Access Token
         in: query
         name: access_token
-        required: true
-        type: string
-      - description: Extension
-        in: query
-        name: ext
         required: true
         type: string
       produces:

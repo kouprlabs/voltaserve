@@ -15,6 +15,9 @@ import (
 	"context"
 	"errors"
 	"io"
+	"mime"
+	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/minio/minio-go/v7"
@@ -77,6 +80,37 @@ func (mgr *S3Manager) PutText(objectName string, text string, contentType string
 	opts.ContentType = contentType
 	if _, err := mgr.client.PutObject(context.Background(), bucketName, objectName, strings.NewReader(text), int64(len(text)), opts); err != nil {
 		return err
+	}
+	return nil
+}
+
+func (mgr *S3Manager) PutFolder(objectName string, dirPath string, bucketName string) error {
+	var files []string
+	if err := filepath.Walk(dirPath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !info.IsDir() {
+			files = append(files, path)
+		}
+		return nil
+	}); err != nil {
+		return err
+	}
+	for _, file := range files {
+		contentType := mime.TypeByExtension(filepath.Ext(file))
+		if contentType == "" {
+			contentType = "application/octet-stream"
+		}
+		putOptions := minio.PutObjectOptions{ContentType: contentType}
+		relativePath, err := filepath.Rel(dirPath, file)
+		if err != nil {
+			return err
+		}
+		destinationKey := filepath.Join(objectName, relativePath)
+		if err := mgr.PutFile(destinationKey, file, contentType, bucketName, putOptions); err != nil {
+			return err
+		}
 	}
 	return nil
 }

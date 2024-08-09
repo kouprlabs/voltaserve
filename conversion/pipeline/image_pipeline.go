@@ -83,7 +83,7 @@ func (p *imagePipeline) Run(opts api_client.PipelineRunOptions) error {
 		imagePath = *jpegPath
 	} else {
 		imagePath = inputPath
-		if err := p.saveOriginalAsPreview(imagePath, opts); err != nil {
+		if err := p.saveOriginalAsPreview(imagePath, *imageProps, opts); err != nil {
 			return err
 		}
 	}
@@ -208,7 +208,7 @@ func (p *imagePipeline) convertTIFFToJPEG(inputPath string, imageProps api_clien
 	return &jpegPath, nil
 }
 
-func (p *imagePipeline) saveOriginalAsPreview(inputPath string, opts api_client.PipelineRunOptions) error {
+func (p *imagePipeline) saveOriginalAsPreview(inputPath string, imageProps api_client.ImageProps, opts api_client.PipelineRunOptions) error {
 	stat, err := os.Stat(inputPath)
 	if err != nil {
 		return err
@@ -220,6 +220,7 @@ func (p *imagePipeline) saveOriginalAsPreview(inputPath string, opts api_client.
 			Bucket: opts.Bucket,
 			Key:    opts.Key,
 			Size:   helper.ToPtr(stat.Size()),
+			Image:  &imageProps,
 		},
 	}); err != nil {
 		return err

@@ -50,6 +50,7 @@ func (d *Installer) installCoreTools() {
 		"poppler-utils",
 		"libimage-exiftool-perl",
 		"ocrmypdf",
+		"qpdf",
 		"unzip",
 		"nodejs",
 		"npm",
