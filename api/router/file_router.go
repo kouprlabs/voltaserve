@@ -88,8 +88,8 @@ func (r *FileRouter) AppendNonJWTRoutes(g fiber.Router) {
 	g.Get("/:id/original:ext", r.DownloadOriginal)
 	g.Get("/:id/preview:ext", r.DownloadPreview)
 	g.Get("/:id/thumbnail:ext", r.DownloadThumbnail)
-	g.Get("/:id/segmentation/pages/:page.pdf", r.DownloadSegmentationPage)
-	g.Get("/:id/segmentation/thumbnails/:page.jpg", r.DownloadSegmentationThumbnail)
+	g.Get("/:id/segmentation/pages/:page.:ext", r.DownloadSegmentationPage)
+	g.Get("/:id/segmentation/thumbnails/:page.:ext", r.DownloadSegmentationThumbnail)
 	g.Post("/create_from_s3", r.CreateFromS3)
 	g.Patch("/:id/patch_from_s3", r.PatchFromS3)
 }
@@ -1015,18 +1015,11 @@ func (r *FileRouter) DownloadSegmentationPage(c *fiber.Ctx) error {
 		return errorpkg.NewMissingQueryParamError("id")
 	}
 	page, err := strconv.Atoi(c.Params("page"))
-	if err != nil {
-		return errorpkg.NewInvalidQueryParamError("page")
-	}
-	ext := c.Params("ext")
-	if ext == "" {
-		return errorpkg.NewMissingQueryParamError("ext")
-	}
 	buf, snapshot, file, err := r.fileSvc.DownloadSegmentationPageBuffer(id, page, userID)
 	if err != nil {
 		return err
 	}
-	if snapshot.GetSegmentation().Page.Extension != strings.TrimPrefix(ext, ".") {
+	if strings.TrimPrefix(snapshot.GetSegmentation().Page.Extension, ".") != c.Params("ext") {
 		return errorpkg.NewS3ObjectNotFoundError(nil)
 	}
 	b := buf.Bytes()
@@ -1066,18 +1059,11 @@ func (r *FileRouter) DownloadSegmentationThumbnail(c *fiber.Ctx) error {
 		return errorpkg.NewMissingQueryParamError("id")
 	}
 	page, err := strconv.Atoi(c.Params("page"))
-	if err != nil {
-		return errorpkg.NewInvalidQueryParamError("page")
-	}
-	ext := c.Params("ext")
-	if ext == "" {
-		return errorpkg.NewMissingQueryParamError("ext")
-	}
 	buf, snapshot, file, err := r.fileSvc.DownloadSegmentationThumbnailBuffer(id, page, userID)
 	if err != nil {
 		return err
 	}
-	if snapshot.GetSegmentation().Thumbnail.Extension != strings.TrimPrefix(ext, ".") {
+	if strings.TrimPrefix(snapshot.GetSegmentation().Thumbnail.Extension, ".") != c.Params("ext") {
 		return errorpkg.NewS3ObjectNotFoundError(nil)
 	}
 	b := buf.Bytes()
