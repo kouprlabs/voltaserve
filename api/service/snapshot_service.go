@@ -11,7 +11,6 @@
 package service
 
 import (
-	"github.com/kouprlabs/voltaserve/conversion/client/mosaic_client"
 	"path/filepath"
 	"sort"
 	"time"
@@ -88,13 +87,13 @@ type TaskInfo struct {
 }
 
 type Download struct {
-	Extension string                        `json:"extension,omitempty"`
-	Size      *int64                        `json:"size,omitempty"`
-	Image     *ImageProps                   `json:"image,omitempty"`
-	Document  *DocumentProps                `json:"document,omitempty"`
-	Page      *PageProps                    `json:"page,omitempty"`
-	Thumbnail *ThumbnailProps               `json:"thumbnail,omitempty"`
-	Metadata  *mosaic_client.MosaicMetadata `json:"metadata,omitempty"`
+	Extension string         `json:"extension,omitempty"`
+	Size      *int64         `json:"size,omitempty"`
+	Image     *ImageProps    `json:"image,omitempty"`
+	Document  *DocumentProps `json:"document,omitempty"`
+	Page      *PathProps     `json:"page,omitempty"`
+	Thumbnail *PathProps     `json:"thumbnail,omitempty"`
+	Tile      *PathProps     `json:"tile,omitempty"`
 }
 
 type ImageProps struct {
@@ -106,11 +105,7 @@ type DocumentProps struct {
 	Pages int `json:"pages"`
 }
 
-type PageProps struct {
-	Extension string `json:"extension"`
-}
-
-type ThumbnailProps struct {
+type PathProps struct {
 	Extension string `json:"extension"`
 }
 
@@ -449,17 +444,19 @@ func (mp *SnapshotMapper) mapS3Object(o *model.S3Object) *Download {
 		}
 	}
 	if o.Page != nil {
-		download.Page = &PageProps{
+		download.Page = &PathProps{
 			Extension: o.Page.Extension,
 		}
 	}
 	if o.Thumbnail != nil {
-		download.Thumbnail = &ThumbnailProps{
+		download.Thumbnail = &PathProps{
 			Extension: o.Thumbnail.Extension,
 		}
 	}
-	if o.Metadata != nil {
-		download.Metadata = o.Metadata
+	if o.Tile != nil {
+		download.Tile = &PathProps{
+			Extension: o.Tile.Extension,
+		}
 	}
 	return download
 }

@@ -75,8 +75,9 @@ export type Download = {
   size?: number
   image?: ImageProps
   document?: DocumentProps
-  page?: PageProps
-  thumbnail?: ThumbnailProps
+  page?: PathProps
+  thumbnail?: PathProps
+  tile?: PathProps
 }
 
 export type ImageProps = {
@@ -88,11 +89,7 @@ export type DocumentProps = {
   pages: number
 }
 
-export type PageProps = {
-  extension: string
-}
-
-export type ThumbnailProps = {
+export type PathProps = {
   extension: string
 }
 

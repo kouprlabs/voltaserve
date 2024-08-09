@@ -214,10 +214,10 @@ func (p *pdfPipeline) performSegmentation(inputPath string, opts api_client.Pipe
 		Segmentation: &api_client.S3Object{
 			Bucket: opts.Bucket,
 			Key:    filepath.FromSlash(opts.SnapshotID + "/segmentation"),
-			Page: &api_client.PageProps{
+			Page: &api_client.PathProps{
 				Extension: ".pdf",
 			},
-			Thumbnail: &api_client.ThumbnailProps{
+			Thumbnail: &api_client.PathProps{
 				Extension: ".jpg",
 			},
 		},

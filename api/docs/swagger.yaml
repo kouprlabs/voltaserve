@@ -92,7 +92,7 @@ definitions:
       width:
         type: integer
     type: object
-  model.PageProps:
+  model.PathProps:
     properties:
       extension:
         type: string
@@ -108,16 +108,13 @@ definitions:
       key:
         type: string
       page:
-        $ref: '#/definitions/model.PageProps'
+        $ref: '#/definitions/model.PathProps'
       size:
         type: integer
       thumbnail:
-        $ref: '#/definitions/model.ThumbnailProps'
-    type: object
-  model.ThumbnailProps:
-    properties:
-      extension:
-        type: string
+        $ref: '#/definitions/model.PathProps'
+      tile:
+        $ref: '#/definitions/model.PathProps'
     type: object
   router.FileGrantGroupPermissionOptions:
     properties:
@@ -249,11 +246,13 @@ definitions:
       image:
         $ref: '#/definitions/service.ImageProps'
       page:
-        $ref: '#/definitions/service.PageProps'
+        $ref: '#/definitions/service.PathProps'
       size:
         type: integer
       thumbnail:
-        $ref: '#/definitions/service.ThumbnailProps'
+        $ref: '#/definitions/service.PathProps'
+      tile:
+        $ref: '#/definitions/service.PathProps'
     type: object
   service.File:
     properties:
@@ -570,7 +569,7 @@ definitions:
       totalPages:
         type: integer
     type: object
-  service.PageProps:
+  service.PathProps:
     properties:
       extension:
         type: string
@@ -764,11 +763,6 @@ definitions:
       status:
         type: string
       userId:
-        type: string
-    type: object
-  service.ThumbnailProps:
-    properties:
-      extension:
         type: string
     type: object
   service.User:
