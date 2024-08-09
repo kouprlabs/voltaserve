@@ -1457,7 +1457,7 @@ paths:
       summary: Download Segmentation Page
       tags:
       - Files
-  /files/{id}/segmentation/thumbnails/{page}.png:
+  /files/{id}/segmentation/thumbnails/{page}.jpg:
     get:
       description: Download Segmentation Thumbnail
       operationId: files_download_segmentation_thumbnail
