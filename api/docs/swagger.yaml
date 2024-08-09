@@ -80,6 +80,11 @@ definitions:
       userMessage:
         type: string
     type: object
+  model.DocumentProps:
+    properties:
+      pages:
+        type: integer
+    type: object
   model.ImageProps:
     properties:
       height:
@@ -87,23 +92,32 @@ definitions:
       width:
         type: integer
     type: object
-  model.PDFProps:
+  model.PageProps:
     properties:
-      pages:
-        type: integer
+      extension:
+        type: string
     type: object
   model.S3Object:
     properties:
       bucket:
         type: string
+      document:
+        $ref: '#/definitions/model.DocumentProps'
       image:
         $ref: '#/definitions/model.ImageProps'
       key:
         type: string
-      pdf:
-        $ref: '#/definitions/model.PDFProps'
+      page:
+        $ref: '#/definitions/model.PageProps'
       size:
         type: integer
+      thumbnail:
+        $ref: '#/definitions/model.ThumbnailProps'
+    type: object
+  model.ThumbnailProps:
+    properties:
+      extension:
+        type: string
     type: object
   router.FileGrantGroupPermissionOptions:
     properties:
@@ -221,16 +235,25 @@ definitions:
     required:
     - storageCapacity
     type: object
+  service.DocumentProps:
+    properties:
+      pages:
+        type: integer
+    type: object
   service.Download:
     properties:
+      document:
+        $ref: '#/definitions/service.DocumentProps'
       extension:
         type: string
       image:
         $ref: '#/definitions/service.ImageProps'
-      pdf:
-        $ref: '#/definitions/service.PDFProps'
+      page:
+        $ref: '#/definitions/service.PageProps'
       size:
         type: integer
+      thumbnail:
+        $ref: '#/definitions/service.ThumbnailProps'
     type: object
   service.File:
     properties:
@@ -547,10 +570,10 @@ definitions:
       totalPages:
         type: integer
     type: object
-  service.PDFProps:
+  service.PageProps:
     properties:
-      pages:
-        type: integer
+      extension:
+        type: string
     type: object
   service.Snapshot:
     properties:
@@ -741,6 +764,11 @@ definitions:
       status:
         type: string
       userId:
+        type: string
+    type: object
+  service.ThumbnailProps:
+    properties:
+      extension:
         type: string
     type: object
   service.User:
@@ -1423,7 +1451,7 @@ paths:
       summary: Revoke Group Permission
       tags:
       - Files
-  /files/{id}/segmentation/pages/{page}.png:
+  /files/{id}/segmentation/pages/{page}.{ext}:
     get:
       description: Download Segmentation Page
       operationId: files_download_segmentation_page
@@ -1436,6 +1464,11 @@ paths:
       - description: Page
         in: path
         name: page
+        required: true
+        type: string
+      - description: Extension
+        in: path
+        name: ext
         required: true
         type: string
       - description: Access Token
@@ -1457,7 +1490,7 @@ paths:
       summary: Download Segmentation Page
       tags:
       - Files
-  /files/{id}/segmentation/thumbnails/{page}.jpg:
+  /files/{id}/segmentation/thumbnails/{page}.{ext}:
     get:
       description: Download Segmentation Thumbnail
       operationId: files_download_segmentation_thumbnail
@@ -1470,6 +1503,11 @@ paths:
       - description: Page
         in: path
         name: page
+        required: true
+        type: string
+      - description: Extension
+        in: path
+        name: ext
         required: true
         type: string
       - description: Access Token

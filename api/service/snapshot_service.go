@@ -87,10 +87,12 @@ type TaskInfo struct {
 }
 
 type Download struct {
-	Extension string      `json:"extension,omitempty"`
-	Size      *int64      `json:"size,omitempty"`
-	Image     *ImageProps `json:"image,omitempty"`
-	PDF       *PDFProps   `json:"pdf,omitempty"`
+	Extension string          `json:"extension,omitempty"`
+	Size      *int64          `json:"size,omitempty"`
+	Image     *ImageProps     `json:"image,omitempty"`
+	Document  *DocumentProps  `json:"document,omitempty"`
+	Page      *PageProps      `json:"page,omitempty"`
+	Thumbnail *ThumbnailProps `json:"thumbnail,omitempty"`
 }
 
 type ImageProps struct {
@@ -98,14 +100,16 @@ type ImageProps struct {
 	Height int `json:"height"`
 }
 
-type PDFProps struct {
+type DocumentProps struct {
 	Pages int `json:"pages"`
 }
 
-type Thumbnail struct {
-	Base64 string `json:"base64"`
-	Width  int    `json:"width"`
-	Height int    `json:"height"`
+type PageProps struct {
+	Extension string `json:"extension"`
+}
+
+type ThumbnailProps struct {
+	Extension string `json:"extension"`
 }
 
 type SnapshotList struct {
@@ -437,9 +441,19 @@ func (mp *SnapshotMapper) mapS3Object(o *model.S3Object) *Download {
 			Height: o.Image.Height,
 		}
 	}
-	if o.PDF != nil {
-		download.PDF = &PDFProps{
-			Pages: o.PDF.Pages,
+	if o.Document != nil {
+		download.Document = &DocumentProps{
+			Pages: o.Document.Pages,
+		}
+	}
+	if o.Page != nil {
+		download.Page = &PageProps{
+			Extension: o.Page.Extension,
+		}
+	}
+	if o.Thumbnail != nil {
+		download.Thumbnail = &ThumbnailProps{
+			Extension: o.Thumbnail.Extension,
 		}
 	}
 	return download

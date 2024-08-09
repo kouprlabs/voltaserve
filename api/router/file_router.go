@@ -993,10 +993,11 @@ func (r *FileRouter) DownloadThumbnail(c *fiber.Ctx) error {
 //	@Produce		json
 //	@Param			id				path		string	true	"ID"
 //	@Param			page			path		string	true	"Page"
+//	@Param			ext				path		string	true	"Extension"
 //	@Param			access_token	query		string	true	"Access Token"
 //	@Failure		404				{object}	errorpkg.ErrorResponse
 //	@Failure		500				{object}	errorpkg.ErrorResponse
-//	@Router			/files/{id}/segmentation/pages/{page}.png [get]
+//	@Router			/files/{id}/segmentation/pages/{page}.{ext} [get]
 func (r *FileRouter) DownloadSegmentationPage(c *fiber.Ctx) error {
 	accessToken := c.Cookies(r.accessTokenCookieName)
 	if accessToken == "" {
@@ -1017,9 +1018,16 @@ func (r *FileRouter) DownloadSegmentationPage(c *fiber.Ctx) error {
 	if err != nil {
 		return errorpkg.NewInvalidQueryParamError("page")
 	}
-	buf, file, err := r.fileSvc.DownloadSegmentationPageBuffer(id, page, userID)
+	ext := c.Params("ext")
+	if ext == "" {
+		return errorpkg.NewMissingQueryParamError("ext")
+	}
+	buf, snapshot, file, err := r.fileSvc.DownloadSegmentationPageBuffer(id, page, userID)
 	if err != nil {
 		return err
+	}
+	if snapshot.GetSegmentation().Page.Extension != strings.TrimPrefix(ext, ".") {
+		return errorpkg.NewS3ObjectNotFoundError(nil)
 	}
 	b := buf.Bytes()
 	c.Set("Content-Type", infra.DetectMimeFromBytes(b))
@@ -1036,10 +1044,11 @@ func (r *FileRouter) DownloadSegmentationPage(c *fiber.Ctx) error {
 //	@Produce		json
 //	@Param			id				path		string	true	"ID"
 //	@Param			page			path		string	true	"Page"
+//	@Param			ext				path		string	true	"Extension"
 //	@Param			access_token	query		string	true	"Access Token"
 //	@Failure		404				{object}	errorpkg.ErrorResponse
 //	@Failure		500				{object}	errorpkg.ErrorResponse
-//	@Router			/files/{id}/segmentation/thumbnails/{page}.jpg [get]
+//	@Router			/files/{id}/segmentation/thumbnails/{page}.{ext} [get]
 func (r *FileRouter) DownloadSegmentationThumbnail(c *fiber.Ctx) error {
 	accessToken := c.Cookies(r.accessTokenCookieName)
 	if accessToken == "" {
@@ -1060,9 +1069,16 @@ func (r *FileRouter) DownloadSegmentationThumbnail(c *fiber.Ctx) error {
 	if err != nil {
 		return errorpkg.NewInvalidQueryParamError("page")
 	}
-	buf, file, err := r.fileSvc.DownloadSegmentationThumbnailBuffer(id, page, userID)
+	ext := c.Params("ext")
+	if ext == "" {
+		return errorpkg.NewMissingQueryParamError("ext")
+	}
+	buf, snapshot, file, err := r.fileSvc.DownloadSegmentationThumbnailBuffer(id, page, userID)
 	if err != nil {
 		return err
+	}
+	if snapshot.GetSegmentation().Thumbnail.Extension != strings.TrimPrefix(ext, ".") {
+		return errorpkg.NewS3ObjectNotFoundError(nil)
 	}
 	b := buf.Bytes()
 	c.Set("Content-Type", infra.DetectMimeFromBytes(b))
