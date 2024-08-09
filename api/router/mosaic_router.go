@@ -15,6 +15,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
@@ -166,10 +167,7 @@ func (r *MosaicRouter) DownloadTile(c *fiber.Ctx) error {
 		}
 	}
 	ext := c.Params("ext")
-	if ext == "" {
-		return errorpkg.NewMissingQueryParamError("ext")
-	}
-	buf, err := r.mosaicSvc.DownloadTileBuffer(id, service.MosaicDownloadTileOptions{
+	buf, snapshot, err := r.mosaicSvc.DownloadTileBuffer(id, service.MosaicDownloadTileOptions{
 		ZoomLevel: int(zoomLevel),
 		Row:       int(row),
 		Col:       int(col),
@@ -177,6 +175,9 @@ func (r *MosaicRouter) DownloadTile(c *fiber.Ctx) error {
 	}, userID)
 	if err != nil {
 		return err
+	}
+	if strings.TrimPrefix(snapshot.GetMosaic().Tile.Extension, ".") != c.Params("ext") {
+		return errorpkg.NewS3ObjectNotFoundError(nil)
 	}
 	b := buf.Bytes()
 	c.Set("Content-Type", infra.DetectMimeFromBytes(b))

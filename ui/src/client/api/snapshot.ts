@@ -74,7 +74,10 @@ export type Download = {
   extension?: string
   size?: number
   image?: ImageProps
-  pdf?: PDFProps
+  document?: DocumentProps
+  page?: PathProps
+  thumbnail?: PathProps
+  tile?: PathProps
 }
 
 export type ImageProps = {
@@ -82,8 +85,12 @@ export type ImageProps = {
   height: number
 }
 
-export type PDFProps = {
+export type DocumentProps = {
   pages: number
+}
+
+export type PathProps = {
+  extension: string
 }
 
 export type ListQueryParams = {

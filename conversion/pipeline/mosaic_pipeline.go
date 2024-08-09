@@ -79,11 +79,12 @@ func (p *mosaicPipeline) Run(opts api_client.PipelineRunOptions) error {
 
 func (p *mosaicPipeline) create(inputPath string, opts api_client.PipelineRunOptions) error {
 	if p.fileIdent.IsImage(opts.Key) {
-		if _, err := p.mosaicClient.Create(mosaic_client.MosaicCreateOptions{
+		metadata, err := p.mosaicClient.Create(mosaic_client.MosaicCreateOptions{
 			Path:     inputPath,
 			S3Key:    filepath.FromSlash(opts.SnapshotID),
 			S3Bucket: opts.Bucket,
-		}); err != nil {
+		})
+		if err != nil {
 			return err
 		}
 		if err := p.snapshotClient.Patch(api_client.SnapshotPatchOptions{
@@ -92,6 +93,9 @@ func (p *mosaicPipeline) create(inputPath string, opts api_client.PipelineRunOpt
 			Mosaic: &api_client.S3Object{
 				Key:    filepath.FromSlash(opts.SnapshotID + "/mosaic"),
 				Bucket: opts.Bucket,
+				Tile: &api_client.PathProps{
+					Extension: metadata.Extension,
+				},
 			},
 		}); err != nil {
 			return err
