@@ -1264,7 +1264,7 @@ paths:
       summary: Patch Name
       tags:
       - Files
-  /files/{id}/original{ext}:
+  /files/{id}/original.{ext}:
     get:
       description: Download Original
       operationId: files_download_original
@@ -1387,7 +1387,7 @@ paths:
       summary: Get Path
       tags:
       - Files
-  /files/{id}/preview{ext}:
+  /files/{id}/preview.{ext}:
     get:
       description: Download Preview
       operationId: files_download_preview
@@ -1557,7 +1557,7 @@ paths:
       summary: Get Size
       tags:
       - Files
-  /files/{id}/thumbnail{ext}:
+  /files/{id}/thumbnail.{ext}:
     get:
       description: Download Thumbnail
       operationId: files_download_thumbnail
