@@ -1015,6 +1015,9 @@ func (r *FileRouter) DownloadSegmentationPage(c *fiber.Ctx) error {
 		return errorpkg.NewMissingQueryParamError("id")
 	}
 	page, err := strconv.Atoi(c.Params("page"))
+	if err != nil {
+		return errorpkg.NewInvalidPathParamError("page")
+	}
 	buf, snapshot, file, err := r.fileSvc.DownloadSegmentationPageBuffer(id, page, userID)
 	if err != nil {
 		return err
@@ -1059,6 +1062,9 @@ func (r *FileRouter) DownloadSegmentationThumbnail(c *fiber.Ctx) error {
 		return errorpkg.NewMissingQueryParamError("id")
 	}
 	page, err := strconv.Atoi(c.Params("page"))
+	if err != nil {
+		return errorpkg.NewInvalidPathParamError("page")
+	}
 	buf, snapshot, file, err := r.fileSvc.DownloadSegmentationThumbnailBuffer(id, page, userID)
 	if err != nil {
 		return err
