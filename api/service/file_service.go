@@ -442,11 +442,16 @@ func (svc *FileService) DownloadSegmentationPageBuffer(id string, page int, user
 		return nil, nil, err
 	}
 	if snapshot.HasSegmentation() {
-		buf, _, err := svc.s3.GetObject(filepath.FromSlash(snapshot.GetSegmentation().Key+fmt.Sprintf("/pages/%d.pdf", page)), snapshot.GetSegmentation().Bucket, minio.GetObjectOptions{})
-		if err != nil {
-			return nil, nil, err
+		pdfProps := snapshot.GetPreview().PDF
+		if pdfProps != nil && (page < 1 || page > pdfProps.Pages) {
+			return nil, nil, errorpkg.NewInvalidQueryParamError("page")
+		} else {
+			buf, _, err := svc.s3.GetObject(filepath.FromSlash(snapshot.GetSegmentation().Key+fmt.Sprintf("/pages/%d.pdf", page)), snapshot.GetSegmentation().Bucket, minio.GetObjectOptions{})
+			if err != nil {
+				return nil, nil, err
+			}
+			return buf, file, nil
 		}
-		return buf, file, nil
 	} else {
 		return nil, nil, errorpkg.NewS3ObjectNotFoundError(nil)
 	}
@@ -468,11 +473,16 @@ func (svc *FileService) DownloadSegmentationThumbnailBuffer(id string, page int,
 		return nil, nil, err
 	}
 	if snapshot.HasSegmentation() {
-		buf, _, err := svc.s3.GetObject(filepath.FromSlash(snapshot.GetSegmentation().Key+fmt.Sprintf("/thumbnails/%d.png", page)), snapshot.GetSegmentation().Bucket, minio.GetObjectOptions{})
-		if err != nil {
-			return nil, nil, err
+		pdfProps := snapshot.GetPreview().PDF
+		if pdfProps != nil && (page < 1 || page > pdfProps.Pages) {
+			return nil, nil, errorpkg.NewInvalidQueryParamError("page")
+		} else {
+			buf, _, err := svc.s3.GetObject(filepath.FromSlash(snapshot.GetSegmentation().Key+fmt.Sprintf("/thumbnails/%d.jpg", page)), snapshot.GetSegmentation().Bucket, minio.GetObjectOptions{})
+			if err != nil {
+				return nil, nil, err
+			}
+			return buf, file, nil
 		}
-		return buf, file, nil
 	} else {
 		return nil, nil, errorpkg.NewS3ObjectNotFoundError(nil)
 	}

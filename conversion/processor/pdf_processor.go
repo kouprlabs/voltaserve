@@ -16,6 +16,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -113,10 +114,68 @@ func (p *PDFProcessor) SplitPages(inputPath string, outputDir string) error {
 	return nil
 }
 
-func (p *PDFProcessor) SplitThumbnails(inputPath string, outputDir string) error {
-	if err := infra.NewCommand().Exec("gs", "-dNOPAUSE", "-dBATCH", "-sDEVICE=png16m", "-r72", fmt.Sprintf("-sOutputFile=%s", filepath.FromSlash(outputDir+"/%d.png")), inputPath); err != nil {
+func (p *PDFProcessor) SplitThumbnails(inputPath string, width int, height int, extension string, outputDir string) error {
+	var widthStr string
+	if width == 0 {
+		widthStr = ""
+	} else {
+		widthStr = strconv.FormatInt(int64(width), 10)
+	}
+	var heightStr string
+	if height == 0 {
+		heightStr = ""
+	} else {
+		heightStr = strconv.FormatInt(int64(height), 10)
+	}
+	dimensions := widthStr + "x" + heightStr
+	if err := infra.NewCommand().Exec("convert", "-thumbnail", dimensions, "-gravity", "center", "-extent", dimensions, inputPath, fmt.Sprintf("%s%s", filepath.FromSlash(outputDir+"/%d"), extension)); err != nil {
 		return err
 	}
+
+	// Rename all files in outputDir to add +1 to their filenames.
+	// For example: 0.jpg, 1.jpg, 2.jpg become 1.jpg, 2.jpg and 3.jpg respectively.
+	// We start the renaming from the last file (largest number) to the smallest (0.jpg).
+	// We consider all content of outputDir to be a flat hierarchy of files, no recursive processing is needed.
+
+	files, err := os.ReadDir(outputDir)
+	if err != nil {
+		return err
+	}
+
+	// Create a list of files with their integer values.
+	var structs []struct {
+		Name  string
+		Index int
+	}
+	for _, file := range files {
+		baseName := file.Name()
+		index, err := strconv.Atoi(strings.TrimSuffix(baseName, filepath.Ext(baseName)))
+		if err != nil {
+			continue
+		}
+		structs = append(structs, struct {
+			Name  string
+			Index int
+		}{
+			Name:  baseName,
+			Index: index,
+		})
+	}
+
+	// Sort the file names by their index in descending order.
+	sort.Slice(structs, func(i, j int) bool {
+		return structs[i].Index > structs[j].Index
+	})
+
+	// Rename files to add +1 to their index.
+	for _, file := range structs {
+		oldPath := filepath.Join(outputDir, file.Name)
+		newPath := filepath.Join(outputDir, fmt.Sprintf("%d%s", file.Index+1, filepath.Ext(file.Name)))
+		if err := os.Rename(oldPath, newPath); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 

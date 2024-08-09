@@ -89,7 +89,7 @@ func (r *FileRouter) AppendNonJWTRoutes(g fiber.Router) {
 	g.Get("/:id/preview:ext", r.DownloadPreview)
 	g.Get("/:id/thumbnail:ext", r.DownloadThumbnail)
 	g.Get("/:id/segmentation/pages/:page.pdf", r.DownloadSegmentationPage)
-	g.Get("/:id/segmentation/thumbnails/:page.png", r.DownloadSegmentationThumbnail)
+	g.Get("/:id/segmentation/thumbnails/:page.jpg", r.DownloadSegmentationThumbnail)
 	g.Post("/create_from_s3", r.CreateFromS3)
 	g.Patch("/:id/patch_from_s3", r.PatchFromS3)
 }
@@ -1039,7 +1039,7 @@ func (r *FileRouter) DownloadSegmentationPage(c *fiber.Ctx) error {
 //	@Param			access_token	query		string	true	"Access Token"
 //	@Failure		404				{object}	errorpkg.ErrorResponse
 //	@Failure		500				{object}	errorpkg.ErrorResponse
-//	@Router			/files/{id}/segmentation/thumbnails/{page}.png [get]
+//	@Router			/files/{id}/segmentation/thumbnails/{page}.jpg [get]
 func (r *FileRouter) DownloadSegmentationThumbnail(c *fiber.Ctx) error {
 	accessToken := c.Cookies(r.accessTokenCookieName)
 	if accessToken == "" {

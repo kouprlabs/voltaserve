@@ -254,7 +254,7 @@ func (p *pdfPipeline) splitThumbnails(inputPath string, opts api_client.Pipeline
 			infra.GetLogger().Error(err)
 		}
 	}(thumbnailsDir)
-	if err := p.pdfProc.SplitThumbnails(inputPath, thumbnailsDir); err != nil {
+	if err := p.pdfProc.SplitThumbnails(inputPath, 100, 0, ".jpg", thumbnailsDir); err != nil {
 		return err
 	}
 	if err := p.s3.PutFolder(filepath.FromSlash(opts.SnapshotID+"/segmentation/thumbnails"), thumbnailsDir, opts.Bucket); err != nil {
