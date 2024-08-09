@@ -14,6 +14,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/kouprlabs/voltaserve/conversion/client/mosaic_client"
 	"io"
 	"net/http"
 
@@ -77,13 +78,14 @@ type PipelineRunOptions struct {
 }
 
 type S3Object struct {
-	Bucket    string          `json:"bucket"`
-	Key       string          `json:"key"`
-	Size      *int64          `json:"size,omitempty"`
-	Image     *ImageProps     `json:"image,omitempty"`
-	Document  *DocumentProps  `json:"document,omitempty"`
-	Page      *PageProps      `json:"page,omitempty"`
-	Thumbnail *ThumbnailProps `json:"thumbnail,omitempty"`
+	Bucket    string                        `json:"bucket"`
+	Key       string                        `json:"key"`
+	Size      *int64                        `json:"size,omitempty"`
+	Image     *ImageProps                   `json:"image,omitempty"`
+	Document  *DocumentProps                `json:"document,omitempty"`
+	Page      *PageProps                    `json:"page,omitempty"`
+	Thumbnail *ThumbnailProps               `json:"thumbnail,omitempty"`
+	Metadata  *mosaic_client.MosaicMetadata `json:"metadata,omitempty"`
 }
 
 type ImageProps struct {

@@ -10,6 +10,8 @@
 
 package model
 
+import "github.com/kouprlabs/voltaserve/conversion/client/mosaic_client"
+
 const (
 	SnapshotStatusWaiting    = "waiting"
 	SnapshotStatusProcessing = "processing"
@@ -57,13 +59,14 @@ type Snapshot interface {
 }
 
 type S3Object struct {
-	Bucket    string          `json:"bucket"`
-	Key       string          `json:"key"`
-	Size      *int64          `json:"size,omitempty"`
-	Image     *ImageProps     `json:"image,omitempty"`
-	Document  *DocumentProps  `json:"document,omitempty"`
-	Page      *PageProps      `json:"page,omitempty"`
-	Thumbnail *ThumbnailProps `json:"thumbnail,omitempty"`
+	Bucket    string                        `json:"bucket"`
+	Key       string                        `json:"key"`
+	Size      *int64                        `json:"size,omitempty"`
+	Image     *ImageProps                   `json:"image,omitempty"`
+	Document  *DocumentProps                `json:"document,omitempty"`
+	Page      *PageProps                    `json:"page,omitempty"`
+	Thumbnail *ThumbnailProps               `json:"thumbnail,omitempty"`
+	Metadata  *mosaic_client.MosaicMetadata `json:"metadata,omitempty"`
 }
 
 type ImageProps struct {

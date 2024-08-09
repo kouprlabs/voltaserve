@@ -11,6 +11,7 @@
 package service
 
 import (
+	"github.com/kouprlabs/voltaserve/conversion/client/mosaic_client"
 	"path/filepath"
 	"sort"
 	"time"
@@ -87,12 +88,13 @@ type TaskInfo struct {
 }
 
 type Download struct {
-	Extension string          `json:"extension,omitempty"`
-	Size      *int64          `json:"size,omitempty"`
-	Image     *ImageProps     `json:"image,omitempty"`
-	Document  *DocumentProps  `json:"document,omitempty"`
-	Page      *PageProps      `json:"page,omitempty"`
-	Thumbnail *ThumbnailProps `json:"thumbnail,omitempty"`
+	Extension string                        `json:"extension,omitempty"`
+	Size      *int64                        `json:"size,omitempty"`
+	Image     *ImageProps                   `json:"image,omitempty"`
+	Document  *DocumentProps                `json:"document,omitempty"`
+	Page      *PageProps                    `json:"page,omitempty"`
+	Thumbnail *ThumbnailProps               `json:"thumbnail,omitempty"`
+	Metadata  *mosaic_client.MosaicMetadata `json:"metadata,omitempty"`
 }
 
 type ImageProps struct {
@@ -455,6 +457,9 @@ func (mp *SnapshotMapper) mapS3Object(o *model.S3Object) *Download {
 		download.Thumbnail = &ThumbnailProps{
 			Extension: o.Thumbnail.Extension,
 		}
+	}
+	if o.Metadata != nil {
+		download.Metadata = o.Metadata
 	}
 	return download
 }
