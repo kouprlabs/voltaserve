@@ -88,6 +88,8 @@ func (r *FileRouter) AppendNonJWTRoutes(g fiber.Router) {
 	g.Get("/:id/original:ext", r.DownloadOriginal)
 	g.Get("/:id/preview:ext", r.DownloadPreview)
 	g.Get("/:id/thumbnail:ext", r.DownloadThumbnail)
+	g.Get("/:id/segmentation/pages/:page.pdf", r.DownloadSegmentationPage)
+	g.Get("/:id/segmentation/thumbnails/:page.jpg", r.DownloadSegmentationThumbnail)
 	g.Post("/create_from_s3", r.CreateFromS3)
 	g.Patch("/:id/patch_from_s3", r.PatchFromS3)
 }
@@ -944,8 +946,8 @@ func (r *FileRouter) DownloadPreview(c *fiber.Ctx) error {
 //	@Id				files_download_thumbnail
 //	@Produce		json
 //	@Param			id				path		string	true	"ID"
+//	@Param			ext				path		string	true	"Extension"
 //	@Param			access_token	query		string	true	"Access Token"
-//	@Param			ext				query		string	true	"Extension"
 //	@Failure		404				{object}	errorpkg.ErrorResponse
 //	@Failure		500				{object}	errorpkg.ErrorResponse
 //	@Router			/files/{id}/thumbnail{ext} [get]
@@ -975,6 +977,92 @@ func (r *FileRouter) DownloadThumbnail(c *fiber.Ctx) error {
 	}
 	if filepath.Ext(snapshot.GetThumbnail().Key) != ext {
 		return errorpkg.NewS3ObjectNotFoundError(nil)
+	}
+	b := buf.Bytes()
+	c.Set("Content-Type", infra.DetectMimeFromBytes(b))
+	c.Set("Content-Disposition", fmt.Sprintf("filename=\"%s\"", filepath.Base(file.GetName())))
+	return c.Send(b)
+}
+
+// DownloadSegmentationPage godoc
+//
+//	@Summary		Download Segmentation Page
+//	@Description	Download Segmentation Page
+//	@Tags			Files
+//	@Id				files_download_segmentation_page
+//	@Produce		json
+//	@Param			id				path		string	true	"ID"
+//	@Param			page			path		string	true	"Page"
+//	@Param			access_token	query		string	true	"Access Token"
+//	@Failure		404				{object}	errorpkg.ErrorResponse
+//	@Failure		500				{object}	errorpkg.ErrorResponse
+//	@Router			/files/{id}/segmentation/pages/{page}.png [get]
+func (r *FileRouter) DownloadSegmentationPage(c *fiber.Ctx) error {
+	accessToken := c.Cookies(r.accessTokenCookieName)
+	if accessToken == "" {
+		accessToken = c.Query("access_token")
+		if accessToken == "" {
+			return errorpkg.NewFileNotFoundError(nil)
+		}
+	}
+	userID, err := r.getUserIDFromAccessToken(accessToken)
+	if err != nil {
+		return c.SendStatus(http.StatusNotFound)
+	}
+	id := c.Params("id")
+	if id == "" {
+		return errorpkg.NewMissingQueryParamError("id")
+	}
+	page, err := strconv.Atoi(c.Params("page"))
+	if err != nil {
+		return errorpkg.NewInvalidQueryParamError("page")
+	}
+	buf, file, err := r.fileSvc.DownloadSegmentationPageBuffer(id, page, userID)
+	if err != nil {
+		return err
+	}
+	b := buf.Bytes()
+	c.Set("Content-Type", infra.DetectMimeFromBytes(b))
+	c.Set("Content-Disposition", fmt.Sprintf("filename=\"%s\"", filepath.Base(file.GetName())))
+	return c.Send(b)
+}
+
+// DownloadSegmentationThumbnail godoc
+//
+//	@Summary		Download Segmentation Thumbnail
+//	@Description	Download Segmentation Thumbnail
+//	@Tags			Files
+//	@Id				files_download_segmentation_thumbnail
+//	@Produce		json
+//	@Param			id				path		string	true	"ID"
+//	@Param			page			path		string	true	"Page"
+//	@Param			access_token	query		string	true	"Access Token"
+//	@Failure		404				{object}	errorpkg.ErrorResponse
+//	@Failure		500				{object}	errorpkg.ErrorResponse
+//	@Router			/files/{id}/segmentation/thumbnails/{page}.jpg [get]
+func (r *FileRouter) DownloadSegmentationThumbnail(c *fiber.Ctx) error {
+	accessToken := c.Cookies(r.accessTokenCookieName)
+	if accessToken == "" {
+		accessToken = c.Query("access_token")
+		if accessToken == "" {
+			return errorpkg.NewFileNotFoundError(nil)
+		}
+	}
+	userID, err := r.getUserIDFromAccessToken(accessToken)
+	if err != nil {
+		return c.SendStatus(http.StatusNotFound)
+	}
+	id := c.Params("id")
+	if id == "" {
+		return errorpkg.NewMissingQueryParamError("id")
+	}
+	page, err := strconv.Atoi(c.Params("page"))
+	if err != nil {
+		return errorpkg.NewInvalidQueryParamError("page")
+	}
+	buf, file, err := r.fileSvc.DownloadSegmentationThumbnailBuffer(id, page, userID)
+	if err != nil {
+		return err
 	}
 	b := buf.Bytes()
 	c.Set("Content-Type", infra.DetectMimeFromBytes(b))

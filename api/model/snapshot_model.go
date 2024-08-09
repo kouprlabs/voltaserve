@@ -26,6 +26,7 @@ type Snapshot interface {
 	GetOCR() *S3Object
 	GetEntities() *S3Object
 	GetMosaic() *S3Object
+	GetSegmentation() *S3Object
 	GetThumbnail() *S3Object
 	GetTaskID() *string
 	HasOriginal() bool
@@ -34,6 +35,7 @@ type Snapshot interface {
 	HasOCR() bool
 	HasEntities() bool
 	HasMosaic() bool
+	HasSegmentation() bool
 	HasThumbnail() bool
 	GetStatus() string
 	GetLanguage() *string
@@ -47,6 +49,7 @@ type Snapshot interface {
 	SetOCR(*S3Object)
 	SetEntities(*S3Object)
 	SetMosaic(*S3Object)
+	SetSegmentation(*S3Object)
 	SetThumbnail(*S3Object)
 	SetStatus(string)
 	SetLanguage(string)
@@ -58,11 +61,16 @@ type S3Object struct {
 	Key    string      `json:"key"`
 	Size   *int64      `json:"size,omitempty"`
 	Image  *ImageProps `json:"image,omitempty"`
+	PDF    *PDFProps   `json:"pdf,omitempty"`
 }
 
 type ImageProps struct {
 	Width  int `json:"width"`
 	Height int `json:"height"`
+}
+
+type PDFProps struct {
+	Pages int `json:"pages"`
 }
 
 type S3Reference struct {

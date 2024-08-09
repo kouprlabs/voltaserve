@@ -20,6 +20,7 @@ export type Snapshot = {
   text?: Download
   entities?: Download
   mosaic?: Download
+  segmentation?: Download
   thumbnail?: Download
   language?: string
   isActive: boolean
@@ -70,14 +71,19 @@ export type TaskInfo = {
 }
 
 export type Download = {
-  extension: string
-  size: number
+  extension?: string
+  size?: number
   image?: ImageProps
+  pdf?: PDFProps
 }
 
 export type ImageProps = {
   width: number
   height: number
+}
+
+export type PDFProps = {
+  pages: number
 }
 
 export type ListQueryParams = {
