@@ -16,7 +16,7 @@ import (
 	"time"
 
 	"github.com/kouprlabs/voltaserve/api/cache"
-	"github.com/kouprlabs/voltaserve/api/client"
+	"github.com/kouprlabs/voltaserve/api/client/conversion_client"
 	"github.com/kouprlabs/voltaserve/api/config"
 	"github.com/kouprlabs/voltaserve/api/errorpkg"
 	"github.com/kouprlabs/voltaserve/api/guard"
@@ -87,26 +87,10 @@ type TaskInfo struct {
 }
 
 type Download struct {
-	Extension string         `json:"extension,omitempty"`
-	Size      *int64         `json:"size,omitempty"`
-	Image     *ImageProps    `json:"image,omitempty"`
-	Document  *DocumentProps `json:"document,omitempty"`
-	Page      *PathProps     `json:"page,omitempty"`
-	Thumbnail *PathProps     `json:"thumbnail,omitempty"`
-	Tile      *PathProps     `json:"tile,omitempty"`
-}
-
-type ImageProps struct {
-	Width  int `json:"width"`
-	Height int `json:"height"`
-}
-
-type DocumentProps struct {
-	Pages int `json:"pages"`
-}
-
-type PathProps struct {
-	Extension string `json:"extension"`
+	Extension string               `json:"extension,omitempty"`
+	Size      *int64               `json:"size,omitempty"`
+	Image     *model.ImageProps    `json:"image,omitempty"`
+	Document  *model.DocumentProps `json:"document,omitempty"`
 }
 
 type SnapshotList struct {
@@ -290,18 +274,18 @@ func (svc *SnapshotService) Detach(id string, opts SnapshotDetachOptions, userID
 }
 
 type SnapshotPatchOptions struct {
-	Options      client.PipelineRunOptions `json:"options"`
-	Fields       []string                  `json:"fields"`
-	Original     *model.S3Object           `json:"original"`
-	Preview      *model.S3Object           `json:"preview"`
-	Text         *model.S3Object           `json:"text"`
-	OCR          *model.S3Object           `json:"ocr"`
-	Entities     *model.S3Object           `json:"entities"`
-	Mosaic       *model.S3Object           `json:"mosaic"`
-	Segmentation *model.S3Object           `json:"segmentation"`
-	Thumbnail    *model.S3Object           `json:"thumbnail"`
-	Status       *string                   `json:"status"`
-	TaskID       *string                   `json:"taskId"`
+	Options      conversion_client.PipelineRunOptions `json:"options"`
+	Fields       []string                             `json:"fields"`
+	Original     *model.S3Object                      `json:"original"`
+	Preview      *model.S3Object                      `json:"preview"`
+	Text         *model.S3Object                      `json:"text"`
+	OCR          *model.S3Object                      `json:"ocr"`
+	Entities     *model.S3Object                      `json:"entities"`
+	Mosaic       *model.S3Object                      `json:"mosaic"`
+	Segmentation *model.S3Object                      `json:"segmentation"`
+	Thumbnail    *model.S3Object                      `json:"thumbnail"`
+	Status       *string                              `json:"status"`
+	TaskID       *string                              `json:"taskId"`
 }
 
 func (svc *SnapshotService) Patch(id string, opts SnapshotPatchOptions) (*Snapshot, error) {
@@ -433,30 +417,10 @@ func (mp *SnapshotMapper) mapS3Object(o *model.S3Object) *Download {
 		Size:      o.Size,
 	}
 	if o.Image != nil {
-		download.Image = &ImageProps{
-			Width:  o.Image.Width,
-			Height: o.Image.Height,
-		}
+		download.Image = o.Image
 	}
 	if o.Document != nil {
-		download.Document = &DocumentProps{
-			Pages: o.Document.Pages,
-		}
-	}
-	if o.Page != nil {
-		download.Page = &PathProps{
-			Extension: o.Page.Extension,
-		}
-	}
-	if o.Thumbnail != nil {
-		download.Thumbnail = &PathProps{
-			Extension: o.Thumbnail.Extension,
-		}
-	}
-	if o.Tile != nil {
-		download.Tile = &PathProps{
-			Extension: o.Tile.Extension,
-		}
+		download.Document = o.Document
 	}
 	return download
 }

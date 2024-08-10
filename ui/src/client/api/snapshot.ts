@@ -75,22 +75,43 @@ export type Download = {
   size?: number
   image?: ImageProps
   document?: DocumentProps
-  page?: PathProps
-  thumbnail?: PathProps
-  tile?: PathProps
 }
 
 export type ImageProps = {
   width: number
   height: number
+  zoomLevels?: ZoomLevel[]
 }
 
 export type DocumentProps = {
-  pages: number
+  pages?: PagesProps
+  thumbnails?: ThumbnailsProps
 }
 
-export type PathProps = {
+export type PagesProps = {
+  count: number
   extension: string
+}
+
+export type ThumbnailsProps = {
+  extension: string
+}
+
+export type Tile = {
+  width: number
+  height: number
+  lastColWidth: number
+  lastRowHeight: number
+}
+
+export type ZoomLevel = {
+  index: number
+  width: number
+  height: number
+  rows: number
+  cols: number
+  scaleDownPercentage: number
+  tile: Tile
 }
 
 export type ListQueryParams = {
