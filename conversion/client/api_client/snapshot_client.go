@@ -77,27 +77,48 @@ type PipelineRunOptions struct {
 }
 
 type S3Object struct {
-	Bucket    string         `json:"bucket"`
-	Key       string         `json:"key"`
-	Size      *int64         `json:"size,omitempty"`
-	Image     *ImageProps    `json:"image,omitempty"`
-	Document  *DocumentProps `json:"document,omitempty"`
-	Page      *PathProps     `json:"page,omitempty"`
-	Thumbnail *PathProps     `json:"thumbnail,omitempty"`
-	Tile      *PathProps     `json:"tile,omitempty"`
+	Bucket   string         `json:"bucket"`
+	Key      string         `json:"key"`
+	Size     *int64         `json:"size,omitempty"`
+	Image    *ImageProps    `json:"image,omitempty"`
+	Document *DocumentProps `json:"document,omitempty"`
 }
 
 type ImageProps struct {
-	Width  int `json:"width"`
-	Height int `json:"height"`
+	Width      int         `json:"width"`
+	Height     int         `json:"height"`
+	ZoomLevels []ZoomLevel `json:"zoomLevels,omitempty"`
 }
 
 type DocumentProps struct {
-	Pages int `json:"pages"`
+	Pages      *PagesProps      `json:"pages,omitempty"`
+	Thumbnails *ThumbnailsProps `json:"thumbnails,omitempty"`
 }
 
-type PathProps struct {
+type PagesProps struct {
+	Count     int    `json:"count"`
 	Extension string `json:"extension"`
+}
+
+type ThumbnailsProps struct {
+	Extension string `json:"extension"`
+}
+
+type ZoomLevel struct {
+	Index               int     `json:"index"`
+	Width               int     `json:"width"`
+	Height              int     `json:"height"`
+	Rows                int     `json:"rows"`
+	Cols                int     `json:"cols"`
+	ScaleDownPercentage float32 `json:"scaleDownPercentage"`
+	Tile                Tile    `json:"tile"`
+}
+
+type Tile struct {
+	Width         int `json:"width"`
+	Height        int `json:"height"`
+	LastColWidth  int `json:"lastColWidth"`
+	LastRowHeight int `json:"lastRowHeight"`
 }
 
 func (cl *SnapshotClient) Patch(opts SnapshotPatchOptions) error {

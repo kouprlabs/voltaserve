@@ -20,7 +20,8 @@ import (
 	"github.com/minio/minio-go/v7"
 
 	"github.com/kouprlabs/voltaserve/api/cache"
-	"github.com/kouprlabs/voltaserve/api/client"
+	"github.com/kouprlabs/voltaserve/api/client/conversion_client"
+	"github.com/kouprlabs/voltaserve/api/client/language_client"
 	"github.com/kouprlabs/voltaserve/api/errorpkg"
 	"github.com/kouprlabs/voltaserve/api/guard"
 	"github.com/kouprlabs/voltaserve/api/helper"
@@ -39,8 +40,8 @@ type InsightsService struct {
 	fileGuard      *guard.FileGuard
 	taskSvc        *TaskService
 	s3             *infra.S3Manager
-	languageClient *client.LanguageClient
-	pipelineClient *client.PipelineClient
+	languageClient *language_client.LanguageClient
+	pipelineClient *conversion_client.PipelineClient
 	fileIdent      *infra.FileIdentifier
 }
 
@@ -72,8 +73,8 @@ func NewInsightsService() *InsightsService {
 		fileGuard:      guard.NewFileGuard(),
 		taskSvc:        NewTaskService(),
 		s3:             infra.NewS3Manager(),
-		languageClient: client.NewLanguageClient(),
-		pipelineClient: client.NewPipelineClient(),
+		languageClient: language_client.NewLanguageClient(),
+		pipelineClient: conversion_client.NewPipelineClient(),
 		fileIdent:      infra.NewFileIdentifier(),
 	}
 }
@@ -135,8 +136,8 @@ func (svc *InsightsService) Create(id string, opts InsightsCreateOptions, userID
 	if svc.fileIdent.IsOffice(key) || svc.fileIdent.IsPlainText(key) {
 		key = snapshot.GetPreview().Key
 	}
-	if err := svc.pipelineClient.Run(&client.PipelineRunOptions{
-		PipelineID: helper.ToPtr(client.PipelineInsights),
+	if err := svc.pipelineClient.Run(&conversion_client.PipelineRunOptions{
+		PipelineID: helper.ToPtr(conversion_client.PipelineInsights),
 		TaskID:     task.GetID(),
 		SnapshotID: snapshot.GetID(),
 		Bucket:     snapshot.GetOriginal().Bucket,
@@ -196,8 +197,8 @@ func (svc *InsightsService) Patch(id string, userID string) error {
 	if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
 		return err
 	}
-	if err := svc.pipelineClient.Run(&client.PipelineRunOptions{
-		PipelineID: helper.ToPtr(client.PipelineInsights),
+	if err := svc.pipelineClient.Run(&conversion_client.PipelineRunOptions{
+		PipelineID: helper.ToPtr(conversion_client.PipelineInsights),
 		TaskID:     task.GetID(),
 		SnapshotID: snapshot.GetID(),
 		Bucket:     snapshot.GetOriginal().Bucket,
@@ -328,11 +329,11 @@ type InsightsListEntitiesOptions struct {
 }
 
 type InsightsEntityList struct {
-	Data          []*client.InsightsEntity `json:"data"`
-	TotalPages    uint                     `json:"totalPages"`
-	TotalElements uint                     `json:"totalElements"`
-	Page          uint                     `json:"page"`
-	Size          uint                     `json:"size"`
+	Data          []*language_client.InsightsEntity `json:"data"`
+	TotalPages    uint                              `json:"totalPages"`
+	TotalElements uint                              `json:"totalElements"`
+	Page          uint                              `json:"page"`
+	Size          uint                              `json:"size"`
 }
 
 func (svc *InsightsService) ListEntities(id string, opts InsightsListEntitiesOptions, userID string) (*InsightsEntityList, error) {
@@ -365,7 +366,7 @@ func (svc *InsightsService) ListEntities(id string, opts InsightsListEntitiesOpt
 	if err != nil {
 		return nil, err
 	}
-	var entities []*client.InsightsEntity
+	var entities []*language_client.InsightsEntity
 	if err := json.Unmarshal([]byte(text), &entities); err != nil {
 		return nil, err
 	}
@@ -384,11 +385,11 @@ func (svc *InsightsService) ListEntities(id string, opts InsightsListEntitiesOpt
 	}, nil
 }
 
-func (svc *InsightsService) doFiltering(data []*client.InsightsEntity, query string) []*client.InsightsEntity {
+func (svc *InsightsService) doFiltering(data []*language_client.InsightsEntity, query string) []*language_client.InsightsEntity {
 	if query == "" {
 		return data
 	}
-	filtered := []*client.InsightsEntity{}
+	filtered := []*language_client.InsightsEntity{}
 	for _, entity := range data {
 		if strings.Contains(strings.ToLower(entity.Text), strings.ToLower(query)) {
 			filtered = append(filtered, entity)
@@ -397,7 +398,7 @@ func (svc *InsightsService) doFiltering(data []*client.InsightsEntity, query str
 	return filtered
 }
 
-func (svc *InsightsService) doSorting(data []*client.InsightsEntity, sortBy string, sortOrder string) []*client.InsightsEntity {
+func (svc *InsightsService) doSorting(data []*language_client.InsightsEntity, sortBy string, sortOrder string) []*language_client.InsightsEntity {
 	if sortBy == SortByName {
 		sort.Slice(data, func(i, j int) bool {
 			if sortOrder == SortOrderDesc {
@@ -415,11 +416,11 @@ func (svc *InsightsService) doSorting(data []*client.InsightsEntity, sortBy stri
 	return data
 }
 
-func (svc *InsightsService) doPagination(data []*client.InsightsEntity, page, size uint) (pageData []*client.InsightsEntity, totalElements uint, totalPages uint) {
+func (svc *InsightsService) doPagination(data []*language_client.InsightsEntity, page, size uint) (pageData []*language_client.InsightsEntity, totalElements uint, totalPages uint) {
 	totalElements = uint(len(data))
 	totalPages = (totalElements + size - 1) / size
 	if page > totalPages {
-		return []*client.InsightsEntity{}, totalElements, totalPages
+		return []*language_client.InsightsEntity{}, totalElements, totalPages
 	}
 	startIndex := (page - 1) * size
 	endIndex := startIndex + size

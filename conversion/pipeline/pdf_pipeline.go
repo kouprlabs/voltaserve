@@ -60,7 +60,17 @@ func (p *pdfPipeline) Run(opts api_client.PipelineRunOptions) error {
 			infra.GetLogger().Error(err)
 		}
 	}(inputPath)
-	if err := p.updateSnapshot(inputPath, opts); err != nil {
+	count, err := p.pdfProc.CountPages(inputPath)
+	if err != nil {
+		return err
+	}
+	document := api_client.DocumentProps{
+		Pages: &api_client.PagesProps{
+			Count:     *count,
+			Extension: filepath.Ext(opts.Key),
+		},
+	}
+	if err := p.updateSnapshot(inputPath, &document, opts); err != nil {
 		return err
 	}
 	if err := p.taskClient.Patch(opts.TaskID, api_client.TaskPatchOptions{
@@ -93,7 +103,7 @@ func (p *pdfPipeline) Run(opts api_client.PipelineRunOptions) error {
 	}); err != nil {
 		return err
 	}
-	if err := p.performSegmentation(inputPath, opts); err != nil {
+	if err := p.performSegmentation(inputPath, &document, opts); err != nil {
 		return err
 	}
 	if err := p.taskClient.Patch(opts.TaskID, api_client.TaskPatchOptions{
@@ -170,22 +180,16 @@ func (p *pdfPipeline) extractText(inputPath string, opts api_client.PipelineRunO
 	return nil
 }
 
-func (p *pdfPipeline) updateSnapshot(inputPath string, opts api_client.PipelineRunOptions) error {
+func (p *pdfPipeline) updateSnapshot(inputPath string, document *api_client.DocumentProps, opts api_client.PipelineRunOptions) error {
 	stat, err := os.Stat(inputPath)
 	if err != nil {
 		return err
 	}
-	pages, err := p.pdfProc.CountPages(inputPath)
-	if err != nil {
-		return err
-	}
 	s3Object := &api_client.S3Object{
-		Bucket: opts.Bucket,
-		Key:    opts.Key,
-		Size:   helper.ToPtr(stat.Size()),
-		Document: &api_client.DocumentProps{
-			Pages: *pages,
-		},
+		Bucket:   opts.Bucket,
+		Key:      opts.Key,
+		Size:     helper.ToPtr(stat.Size()),
+		Document: document,
 	}
 	if err := p.snapshotClient.Patch(api_client.SnapshotPatchOptions{
 		Options: opts,
@@ -201,25 +205,23 @@ func (p *pdfPipeline) updateSnapshot(inputPath string, opts api_client.PipelineR
 	return nil
 }
 
-func (p *pdfPipeline) performSegmentation(inputPath string, opts api_client.PipelineRunOptions) error {
+func (p *pdfPipeline) performSegmentation(inputPath string, document *api_client.DocumentProps, opts api_client.PipelineRunOptions) error {
 	if err := p.splitPages(inputPath, opts); err != nil {
 		return err
 	}
 	if err := p.splitThumbnails(inputPath, opts); err != nil {
 		return err
 	}
+	document.Thumbnails = &api_client.ThumbnailsProps{
+		Extension: ".jpg",
+	}
 	if err := p.snapshotClient.Patch(api_client.SnapshotPatchOptions{
 		Options: opts,
 		Fields:  []string{api_client.SnapshotFieldSegmentation},
 		Segmentation: &api_client.S3Object{
-			Bucket: opts.Bucket,
-			Key:    filepath.FromSlash(opts.SnapshotID + "/segmentation"),
-			Page: &api_client.PathProps{
-				Extension: ".pdf",
-			},
-			Thumbnail: &api_client.PathProps{
-				Extension: ".jpg",
-			},
+			Bucket:   opts.Bucket,
+			Key:      filepath.FromSlash(opts.SnapshotID + "/segmentation"),
+			Document: document,
 		},
 	}); err != nil {
 		return err

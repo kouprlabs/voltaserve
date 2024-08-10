@@ -1022,7 +1022,7 @@ func (r *FileRouter) DownloadSegmentationPage(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	if strings.TrimPrefix(snapshot.GetSegmentation().Page.Extension, ".") != c.Params("ext") {
+	if strings.TrimPrefix(snapshot.GetSegmentation().Document.Pages.Extension, ".") != c.Params("ext") {
 		return errorpkg.NewS3ObjectNotFoundError(nil)
 	}
 	b := buf.Bytes()
@@ -1069,7 +1069,7 @@ func (r *FileRouter) DownloadSegmentationThumbnail(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	if strings.TrimPrefix(snapshot.GetSegmentation().Thumbnail.Extension, ".") != c.Params("ext") {
+	if strings.TrimPrefix(snapshot.GetSegmentation().Document.Thumbnails.Extension, ".") != c.Params("ext") {
 		return errorpkg.NewS3ObjectNotFoundError(nil)
 	}
 	b := buf.Bytes()

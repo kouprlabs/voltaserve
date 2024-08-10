@@ -1,56 +1,6 @@
 basePath: /v2
 definitions:
-  client.InsightsEntity:
-    properties:
-      frequency:
-        type: integer
-      label:
-        type: string
-      text:
-        type: string
-    type: object
-  client.MosaicMetadata:
-    properties:
-      extension:
-        type: string
-      height:
-        type: integer
-      width:
-        type: integer
-      zoomLevels:
-        items:
-          $ref: '#/definitions/client.MosaicZoomLevel'
-        type: array
-    type: object
-  client.MosaicTile:
-    properties:
-      height:
-        type: integer
-      lastColWidth:
-        type: integer
-      lastRowHeight:
-        type: integer
-      width:
-        type: integer
-    type: object
-  client.MosaicZoomLevel:
-    properties:
-      cols:
-        type: integer
-      height:
-        type: integer
-      index:
-        type: integer
-      rows:
-        type: integer
-      scaleDownPercentage:
-        type: number
-      tile:
-        $ref: '#/definitions/client.MosaicTile'
-      width:
-        type: integer
-    type: object
-  client.PipelineRunOptions:
+  conversion_client.PipelineRunOptions:
     properties:
       bucket:
         type: string
@@ -80,10 +30,21 @@ definitions:
       userMessage:
         type: string
     type: object
+  language_client.InsightsEntity:
+    properties:
+      frequency:
+        type: integer
+      label:
+        type: string
+      text:
+        type: string
+    type: object
   model.DocumentProps:
     properties:
       pages:
-        type: integer
+        $ref: '#/definitions/model.PagesProps'
+      thumbnails:
+        $ref: '#/definitions/model.ThumbnailsProps'
     type: object
   model.ImageProps:
     properties:
@@ -91,9 +52,15 @@ definitions:
         type: integer
       width:
         type: integer
+      zoomLevels:
+        items:
+          $ref: '#/definitions/model.ZoomLevel'
+        type: array
     type: object
-  model.PathProps:
+  model.PagesProps:
     properties:
+      count:
+        type: integer
       extension:
         type: string
     type: object
@@ -107,14 +74,82 @@ definitions:
         $ref: '#/definitions/model.ImageProps'
       key:
         type: string
-      page:
-        $ref: '#/definitions/model.PathProps'
       size:
         type: integer
-      thumbnail:
-        $ref: '#/definitions/model.PathProps'
+    type: object
+  model.ThumbnailsProps:
+    properties:
+      extension:
+        type: string
+    type: object
+  model.Tile:
+    properties:
+      height:
+        type: integer
+      lastColWidth:
+        type: integer
+      lastRowHeight:
+        type: integer
+      width:
+        type: integer
+    type: object
+  model.ZoomLevel:
+    properties:
+      cols:
+        type: integer
+      height:
+        type: integer
+      index:
+        type: integer
+      rows:
+        type: integer
+      scaleDownPercentage:
+        type: number
       tile:
-        $ref: '#/definitions/model.PathProps'
+        $ref: '#/definitions/model.Tile'
+      width:
+        type: integer
+    type: object
+  mosaic_client.MosaicMetadata:
+    properties:
+      extension:
+        type: string
+      height:
+        type: integer
+      width:
+        type: integer
+      zoomLevels:
+        items:
+          $ref: '#/definitions/mosaic_client.MosaicZoomLevel'
+        type: array
+    type: object
+  mosaic_client.MosaicTile:
+    properties:
+      height:
+        type: integer
+      lastColWidth:
+        type: integer
+      lastRowHeight:
+        type: integer
+      width:
+        type: integer
+    type: object
+  mosaic_client.MosaicZoomLevel:
+    properties:
+      cols:
+        type: integer
+      height:
+        type: integer
+      index:
+        type: integer
+      rows:
+        type: integer
+      scaleDownPercentage:
+        type: number
+      tile:
+        $ref: '#/definitions/mosaic_client.MosaicTile'
+      width:
+        type: integer
     type: object
   router.FileGrantGroupPermissionOptions:
     properties:
@@ -232,27 +267,16 @@ definitions:
     required:
     - storageCapacity
     type: object
-  service.DocumentProps:
-    properties:
-      pages:
-        type: integer
-    type: object
   service.Download:
     properties:
       document:
-        $ref: '#/definitions/service.DocumentProps'
+        $ref: '#/definitions/model.DocumentProps'
       extension:
         type: string
       image:
-        $ref: '#/definitions/service.ImageProps'
-      page:
-        $ref: '#/definitions/service.PathProps'
+        $ref: '#/definitions/model.ImageProps'
       size:
         type: integer
-      thumbnail:
-        $ref: '#/definitions/service.PathProps'
-      tile:
-        $ref: '#/definitions/service.PathProps'
     type: object
   service.File:
     properties:
@@ -427,13 +451,6 @@ definitions:
       permission:
         type: string
     type: object
-  service.ImageProps:
-    properties:
-      height:
-        type: integer
-      width:
-        type: integer
-    type: object
   service.InsightsCreateOptions:
     properties:
       languageId:
@@ -445,7 +462,7 @@ definitions:
     properties:
       data:
         items:
-          $ref: '#/definitions/client.InsightsEntity'
+          $ref: '#/definitions/language_client.InsightsEntity'
         type: array
       page:
         type: integer
@@ -525,7 +542,7 @@ definitions:
       isOutdated:
         type: boolean
       metadata:
-        $ref: '#/definitions/client.MosaicMetadata'
+        $ref: '#/definitions/mosaic_client.MosaicMetadata'
       snapshot:
         $ref: '#/definitions/service.Snapshot'
     type: object
@@ -568,11 +585,6 @@ definitions:
         type: integer
       totalPages:
         type: integer
-    type: object
-  service.PathProps:
-    properties:
-      extension:
-        type: string
     type: object
   service.Snapshot:
     properties:
@@ -651,7 +663,7 @@ definitions:
       ocr:
         $ref: '#/definitions/model.S3Object'
       options:
-        $ref: '#/definitions/client.PipelineRunOptions'
+        $ref: '#/definitions/conversion_client.PipelineRunOptions'
       original:
         $ref: '#/definitions/model.S3Object'
       preview:

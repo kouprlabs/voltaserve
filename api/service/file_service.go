@@ -23,7 +23,7 @@ import (
 	"github.com/reactivex/rxgo/v2"
 
 	"github.com/kouprlabs/voltaserve/api/cache"
-	"github.com/kouprlabs/voltaserve/api/client"
+	"github.com/kouprlabs/voltaserve/api/client/conversion_client"
 	"github.com/kouprlabs/voltaserve/api/config"
 	"github.com/kouprlabs/voltaserve/api/errorpkg"
 	"github.com/kouprlabs/voltaserve/api/guard"
@@ -57,7 +57,7 @@ type FileService struct {
 	taskSvc        *TaskService
 	fileIdent      *infra.FileIdentifier
 	s3             *infra.S3Manager
-	pipelineClient *client.PipelineClient
+	pipelineClient *conversion_client.PipelineClient
 	config         *config.Config
 }
 
@@ -84,7 +84,7 @@ func NewFileService() *FileService {
 		taskSvc:        NewTaskService(),
 		fileIdent:      infra.NewFileIdentifier(),
 		s3:             infra.NewS3Manager(),
-		pipelineClient: client.NewPipelineClient(),
+		pipelineClient: conversion_client.NewPipelineClient(),
 		config:         config.GetConfig(),
 	}
 }
@@ -305,7 +305,7 @@ func (svc *FileService) Store(id string, opts StoreOptions, userID string) (*Fil
 		if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
 			return nil, err
 		}
-		if err := svc.pipelineClient.Run(&client.PipelineRunOptions{
+		if err := svc.pipelineClient.Run(&conversion_client.PipelineRunOptions{
 			TaskID:     task.GetID(),
 			SnapshotID: snapshot.GetID(),
 			Bucket:     original.Bucket,
@@ -442,8 +442,8 @@ func (svc *FileService) DownloadSegmentationPageBuffer(id string, page int, user
 		return nil, nil, nil, err
 	}
 	if snapshot.HasSegmentation() {
-		pdfProps := snapshot.GetPreview().Document
-		if pdfProps != nil && (page < 1 || page > pdfProps.Pages) {
+		documentProps := snapshot.GetPreview().Document
+		if documentProps != nil && (page < 1 || page > documentProps.Pages.Count) {
 			return nil, nil, nil, errorpkg.NewInvalidQueryParamError("page")
 		} else {
 			buf, _, err := svc.s3.GetObject(filepath.FromSlash(snapshot.GetSegmentation().Key+fmt.Sprintf("/pages/%d.pdf", page)), snapshot.GetSegmentation().Bucket, minio.GetObjectOptions{})
@@ -473,8 +473,8 @@ func (svc *FileService) DownloadSegmentationThumbnailBuffer(id string, page int,
 		return nil, nil, nil, err
 	}
 	if snapshot.HasSegmentation() {
-		pdfProps := snapshot.GetPreview().Document
-		if pdfProps != nil && (page < 1 || page > pdfProps.Pages) {
+		documentProps := snapshot.GetPreview().Document
+		if documentProps != nil && (page < 1 || page > documentProps.Pages.Count) {
 			return nil, nil, nil, errorpkg.NewInvalidQueryParamError("page")
 		} else {
 			buf, _, err := svc.s3.GetObject(filepath.FromSlash(snapshot.GetSegmentation().Key+fmt.Sprintf("/thumbnails/%d.jpg", page)), snapshot.GetSegmentation().Bucket, minio.GetObjectOptions{})
