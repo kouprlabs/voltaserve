@@ -8,7 +8,7 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
 
-package client
+package mosaic_client
 
 import (
 	"bytes"
@@ -34,6 +34,12 @@ func NewMosaicClient() *MosaicClient {
 	}
 }
 
+type MosaicCreateOptions struct {
+	Path     string
+	S3Key    string
+	S3Bucket string
+}
+
 type MosaicMetadata struct {
 	Width      int               `json:"width"`
 	Height     int               `json:"height"`
@@ -56,12 +62,6 @@ type MosaicTile struct {
 	Height        int `json:"height"`
 	LastColWidth  int `json:"lastColWidth"`
 	LastRowHeight int `json:"lastRowHeight"`
-}
-
-type MosaicCreateOptions struct {
-	Path     string
-	S3Key    string
-	S3Bucket string
 }
 
 func (cl *MosaicClient) Create(opts MosaicCreateOptions) (*MosaicMetadata, error) {

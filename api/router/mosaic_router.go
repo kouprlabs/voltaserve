@@ -14,6 +14,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -176,7 +177,7 @@ func (r *MosaicRouter) DownloadTile(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	if strings.TrimPrefix(snapshot.GetMosaic().Tile.Extension, ".") != c.Params("ext") {
+	if strings.TrimPrefix(filepath.Ext(snapshot.GetPreview().Key), ".") != c.Params("ext") {
 		return errorpkg.NewS3ObjectNotFoundError(nil)
 	}
 	b := buf.Bytes()

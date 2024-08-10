@@ -87,14 +87,33 @@ func (p *mosaicPipeline) create(inputPath string, opts api_client.PipelineRunOpt
 		if err != nil {
 			return err
 		}
+		var zoomLevels []api_client.ZoomLevel
+		for _, level := range metadata.ZoomLevels {
+			zoomLevels = append(zoomLevels, api_client.ZoomLevel{
+				Index:               level.Index,
+				Width:               level.Width,
+				Height:              level.Height,
+				Rows:                level.Rows,
+				Cols:                level.Cols,
+				ScaleDownPercentage: level.ScaleDownPercentage,
+				Tile: api_client.Tile{
+					Width:         level.Tile.Width,
+					Height:        level.Tile.Height,
+					LastColWidth:  level.Tile.LastColWidth,
+					LastRowHeight: level.Tile.LastRowHeight,
+				},
+			})
+		}
 		if err := p.snapshotClient.Patch(api_client.SnapshotPatchOptions{
 			Options: opts,
 			Fields:  []string{api_client.SnapshotFieldMosaic},
 			Mosaic: &api_client.S3Object{
 				Key:    filepath.FromSlash(opts.SnapshotID + "/mosaic"),
 				Bucket: opts.Bucket,
-				Tile: &api_client.PathProps{
-					Extension: metadata.Extension,
+				Image: &api_client.ImageProps{
+					Width:      metadata.Width,
+					Height:     metadata.Height,
+					ZoomLevels: zoomLevels,
 				},
 			},
 		}); err != nil {
