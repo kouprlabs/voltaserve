@@ -322,6 +322,16 @@ func NewMissingQueryParamError(param string) *ErrorResponse {
 	)
 }
 
+func NewInvalidPathParamError(param string) *ErrorResponse {
+	return NewErrorResponse(
+		"invalid_path_param",
+		http.StatusBadRequest,
+		fmt.Sprintf("Path param '%s' is invalid.", param),
+		MsgInvalidRequest,
+		nil,
+	)
+}
+
 func NewInvalidQueryParamError(param string) *ErrorResponse {
 	return NewErrorResponse(
 		"invalid_query_param",

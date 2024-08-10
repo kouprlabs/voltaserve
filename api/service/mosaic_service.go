@@ -232,28 +232,28 @@ type MosaicDownloadTileOptions struct {
 	Ext       string
 }
 
-func (svc *MosaicService) DownloadTileBuffer(id string, opts MosaicDownloadTileOptions, userID string) (*bytes.Buffer, error) {
+func (svc *MosaicService) DownloadTileBuffer(id string, opts MosaicDownloadTileOptions, userID string) (*bytes.Buffer, model.Snapshot, error) {
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	if err = svc.fileGuard.Authorize(userID, file, model.PermissionViewer); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
-		return nil, errorpkg.NewFileIsNotAFileError(file)
+		return nil, nil, errorpkg.NewFileIsNotAFileError(file)
 	}
 	snapshot, err := svc.snapshotCache.Get(*file.GetSnapshotID())
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	if !snapshot.HasMosaic() {
 		previous, err := svc.getPreviousSnapshot(file.GetID(), snapshot.GetVersion())
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		if previous == nil {
-			return nil, errorpkg.NewMosaicNotFoundError(nil)
+			return nil, nil, errorpkg.NewMosaicNotFoundError(nil)
 		} else {
 			snapshot = previous
 		}
@@ -267,9 +267,9 @@ func (svc *MosaicService) DownloadTileBuffer(id string, opts MosaicDownloadTileO
 		Ext:       opts.Ext,
 	})
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	return res, err
+	return res, snapshot, err
 }
 
 func (svc *MosaicService) getPreviousSnapshot(fileID string, version int64) (model.Snapshot, error) {
