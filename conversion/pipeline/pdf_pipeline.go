@@ -183,7 +183,7 @@ func (p *pdfPipeline) updateSnapshot(inputPath string, opts api_client.PipelineR
 		Bucket: opts.Bucket,
 		Key:    opts.Key,
 		Size:   helper.ToPtr(stat.Size()),
-		PDF: &api_client.PDFProps{
+		Document: &api_client.DocumentProps{
 			Pages: *pages,
 		},
 	}
@@ -214,6 +214,12 @@ func (p *pdfPipeline) performSegmentation(inputPath string, opts api_client.Pipe
 		Segmentation: &api_client.S3Object{
 			Bucket: opts.Bucket,
 			Key:    filepath.FromSlash(opts.SnapshotID + "/segmentation"),
+			Page: &api_client.PathProps{
+				Extension: ".pdf",
+			},
+			Thumbnail: &api_client.PathProps{
+				Extension: ".jpg",
+			},
 		},
 	}); err != nil {
 		return err

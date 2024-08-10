@@ -85,11 +85,11 @@ func (r *FileRouter) AppendRoutes(g fiber.Router) {
 }
 
 func (r *FileRouter) AppendNonJWTRoutes(g fiber.Router) {
-	g.Get("/:id/original:ext", r.DownloadOriginal)
-	g.Get("/:id/preview:ext", r.DownloadPreview)
-	g.Get("/:id/thumbnail:ext", r.DownloadThumbnail)
-	g.Get("/:id/segmentation/pages/:page.pdf", r.DownloadSegmentationPage)
-	g.Get("/:id/segmentation/thumbnails/:page.jpg", r.DownloadSegmentationThumbnail)
+	g.Get("/:id/original.:ext", r.DownloadOriginal)
+	g.Get("/:id/preview.:ext", r.DownloadPreview)
+	g.Get("/:id/thumbnail.:ext", r.DownloadThumbnail)
+	g.Get("/:id/segmentation/pages/:page.:ext", r.DownloadSegmentationPage)
+	g.Get("/:id/segmentation/thumbnails/:page.:ext", r.DownloadSegmentationThumbnail)
 	g.Post("/create_from_s3", r.CreateFromS3)
 	g.Patch("/:id/patch_from_s3", r.PatchFromS3)
 }
@@ -844,7 +844,7 @@ func (r *FileRouter) GetGroupPermissions(c *fiber.Ctx) error {
 //	@Param			ext				query		string	true	"Extension"
 //	@Failure		404				{object}	errorpkg.ErrorResponse
 //	@Failure		500				{object}	errorpkg.ErrorResponse
-//	@Router			/files/{id}/original{ext} [get]
+//	@Router			/files/{id}/original.{ext} [get]
 func (r *FileRouter) DownloadOriginal(c *fiber.Ctx) error {
 	accessToken := c.Cookies(r.accessTokenCookieName)
 	if accessToken == "" {
@@ -872,7 +872,7 @@ func (r *FileRouter) DownloadOriginal(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	if filepath.Ext(res.Snapshot.GetOriginal().Key) != ext {
+	if strings.TrimPrefix(filepath.Ext(res.Snapshot.GetOriginal().Key), ".") != ext {
 		return errorpkg.NewS3ObjectNotFoundError(nil)
 	}
 	b := res.Buffer.Bytes()
@@ -897,7 +897,7 @@ func (r *FileRouter) DownloadOriginal(c *fiber.Ctx) error {
 //	@Param			access_token	query		string	true	"Access Token"
 //	@Failure		404				{object}	errorpkg.ErrorResponse
 //	@Failure		500				{object}	errorpkg.ErrorResponse
-//	@Router			/files/{id}/preview{ext} [get]
+//	@Router			/files/{id}/preview.{ext} [get]
 func (r *FileRouter) DownloadPreview(c *fiber.Ctx) error {
 	accessToken := c.Cookies(r.accessTokenCookieName)
 	if accessToken == "" {
@@ -925,7 +925,7 @@ func (r *FileRouter) DownloadPreview(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	if filepath.Ext(res.Snapshot.GetPreview().Key) != ext {
+	if strings.TrimPrefix(filepath.Ext(res.Snapshot.GetPreview().Key), ".") != ext {
 		return errorpkg.NewS3ObjectNotFoundError(nil)
 	}
 	b := buf.Bytes()
@@ -950,7 +950,7 @@ func (r *FileRouter) DownloadPreview(c *fiber.Ctx) error {
 //	@Param			access_token	query		string	true	"Access Token"
 //	@Failure		404				{object}	errorpkg.ErrorResponse
 //	@Failure		500				{object}	errorpkg.ErrorResponse
-//	@Router			/files/{id}/thumbnail{ext} [get]
+//	@Router			/files/{id}/thumbnail.{ext} [get]
 func (r *FileRouter) DownloadThumbnail(c *fiber.Ctx) error {
 	accessToken := c.Cookies(r.accessTokenCookieName)
 	if accessToken == "" {
@@ -975,7 +975,7 @@ func (r *FileRouter) DownloadThumbnail(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	if filepath.Ext(snapshot.GetThumbnail().Key) != ext {
+	if strings.TrimPrefix(filepath.Ext(snapshot.GetThumbnail().Key), ".") != ext {
 		return errorpkg.NewS3ObjectNotFoundError(nil)
 	}
 	b := buf.Bytes()
@@ -993,10 +993,11 @@ func (r *FileRouter) DownloadThumbnail(c *fiber.Ctx) error {
 //	@Produce		json
 //	@Param			id				path		string	true	"ID"
 //	@Param			page			path		string	true	"Page"
+//	@Param			ext				path		string	true	"Extension"
 //	@Param			access_token	query		string	true	"Access Token"
 //	@Failure		404				{object}	errorpkg.ErrorResponse
 //	@Failure		500				{object}	errorpkg.ErrorResponse
-//	@Router			/files/{id}/segmentation/pages/{page}.png [get]
+//	@Router			/files/{id}/segmentation/pages/{page}.{ext} [get]
 func (r *FileRouter) DownloadSegmentationPage(c *fiber.Ctx) error {
 	accessToken := c.Cookies(r.accessTokenCookieName)
 	if accessToken == "" {
@@ -1015,11 +1016,14 @@ func (r *FileRouter) DownloadSegmentationPage(c *fiber.Ctx) error {
 	}
 	page, err := strconv.Atoi(c.Params("page"))
 	if err != nil {
-		return errorpkg.NewInvalidQueryParamError("page")
+		return errorpkg.NewInvalidPathParamError("page")
 	}
-	buf, file, err := r.fileSvc.DownloadSegmentationPageBuffer(id, page, userID)
+	buf, snapshot, file, err := r.fileSvc.DownloadSegmentationPageBuffer(id, page, userID)
 	if err != nil {
 		return err
+	}
+	if strings.TrimPrefix(snapshot.GetSegmentation().Page.Extension, ".") != c.Params("ext") {
+		return errorpkg.NewS3ObjectNotFoundError(nil)
 	}
 	b := buf.Bytes()
 	c.Set("Content-Type", infra.DetectMimeFromBytes(b))
@@ -1036,10 +1040,11 @@ func (r *FileRouter) DownloadSegmentationPage(c *fiber.Ctx) error {
 //	@Produce		json
 //	@Param			id				path		string	true	"ID"
 //	@Param			page			path		string	true	"Page"
+//	@Param			ext				path		string	true	"Extension"
 //	@Param			access_token	query		string	true	"Access Token"
 //	@Failure		404				{object}	errorpkg.ErrorResponse
 //	@Failure		500				{object}	errorpkg.ErrorResponse
-//	@Router			/files/{id}/segmentation/thumbnails/{page}.jpg [get]
+//	@Router			/files/{id}/segmentation/thumbnails/{page}.{ext} [get]
 func (r *FileRouter) DownloadSegmentationThumbnail(c *fiber.Ctx) error {
 	accessToken := c.Cookies(r.accessTokenCookieName)
 	if accessToken == "" {
@@ -1058,11 +1063,14 @@ func (r *FileRouter) DownloadSegmentationThumbnail(c *fiber.Ctx) error {
 	}
 	page, err := strconv.Atoi(c.Params("page"))
 	if err != nil {
-		return errorpkg.NewInvalidQueryParamError("page")
+		return errorpkg.NewInvalidPathParamError("page")
 	}
-	buf, file, err := r.fileSvc.DownloadSegmentationThumbnailBuffer(id, page, userID)
+	buf, snapshot, file, err := r.fileSvc.DownloadSegmentationThumbnailBuffer(id, page, userID)
 	if err != nil {
 		return err
+	}
+	if strings.TrimPrefix(snapshot.GetSegmentation().Thumbnail.Extension, ".") != c.Params("ext") {
+		return errorpkg.NewS3ObjectNotFoundError(nil)
 	}
 	b := buf.Bytes()
 	c.Set("Content-Type", infra.DetectMimeFromBytes(b))
