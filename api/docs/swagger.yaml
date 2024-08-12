@@ -586,6 +586,17 @@ definitions:
       totalPages:
         type: integer
     type: object
+  service.ReprocessResponse:
+    properties:
+      accepted:
+        items:
+          type: string
+        type: array
+      rejected:
+        items:
+          type: string
+        type: array
+    type: object
   service.Snapshot:
     properties:
       createTime:
@@ -1425,6 +1436,34 @@ paths:
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
       summary: Download Preview
+      tags:
+      - Files
+  /files/{id}/reprocess:
+    post:
+      description: Reprocess
+      operationId: files_reprocess
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.ReprocessResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Reprocess
       tags:
       - Files
   /files/{id}/revoke_group_permission:

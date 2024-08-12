@@ -19,24 +19,33 @@ import (
 	"github.com/kouprlabs/voltaserve/api/errorpkg"
 	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/infra"
+	"github.com/kouprlabs/voltaserve/api/log"
 	"github.com/kouprlabs/voltaserve/api/model"
 	"github.com/kouprlabs/voltaserve/api/repo"
 	"github.com/kouprlabs/voltaserve/api/search"
 )
 
 type TaskService struct {
-	taskMapper *taskMapper
-	taskCache  *cache.TaskCache
-	taskSearch *search.TaskSearch
-	taskRepo   repo.TaskRepo
+	taskMapper    *taskMapper
+	taskCache     *cache.TaskCache
+	taskSearch    *search.TaskSearch
+	taskRepo      repo.TaskRepo
+	snapshotRepo  repo.SnapshotRepo
+	snapshotCache *cache.SnapshotCache
+	fileRepo      repo.FileRepo
+	fileCache     *cache.FileCache
 }
 
 func NewTaskService() *TaskService {
 	return &TaskService{
-		taskMapper: newTaskMapper(),
-		taskCache:  cache.NewTaskCache(),
-		taskSearch: search.NewTaskSearch(),
-		taskRepo:   repo.NewTaskRepo(),
+		taskMapper:    newTaskMapper(),
+		taskCache:     cache.NewTaskCache(),
+		taskSearch:    search.NewTaskSearch(),
+		taskRepo:      repo.NewTaskRepo(),
+		snapshotRepo:  repo.NewSnapshotRepo(),
+		snapshotCache: cache.NewSnapshotCache(),
+		fileRepo:      repo.NewFileRepo(),
+		fileCache:     cache.NewFileCache(),
 	}
 }
 
@@ -370,13 +379,39 @@ func (svc *TaskService) saveAndSync(task model.Task) error {
 }
 
 func (svc *TaskService) deleteAndSync(id string) error {
-	if err := svc.taskRepo.Delete(id); err != nil {
+	snapshots, err := svc.snapshotRepo.FindAllForTask(id)
+	if err != nil {
 		return err
 	}
-	if err := svc.taskCache.Delete(id); err != nil {
+	/* Clear task ID field from all snapshots and files in both repo and cache */
+	for _, snapshot := range snapshots {
+		snapshot.SetTaskID(nil)
+		if err = svc.snapshotRepo.Save(snapshot); err != nil {
+			log.GetLogger().Error(err)
+		}
+		if _, err = svc.snapshotCache.Refresh(snapshot.GetID()); err != nil {
+			log.GetLogger().Error(err)
+		}
+		var filesIDs []string
+		filesIDs, err = svc.fileRepo.GetIDsBySnapshot(snapshot.ID)
+		if err == nil {
+			for _, fileID := range filesIDs {
+				if _, err = svc.fileCache.Refresh(fileID); err != nil {
+					log.GetLogger().Error(err)
+				}
+			}
+		} else {
+			log.GetLogger().Error(err)
+		}
+	}
+	/* Proceed with deleting the task */
+	if err = svc.taskRepo.Delete(id); err != nil {
 		return err
 	}
-	if err := svc.taskSearch.Delete([]string{id}); err != nil {
+	if err = svc.taskCache.Delete(id); err != nil {
+		return err
+	}
+	if err = svc.taskSearch.Delete([]string{id}); err != nil {
 		return err
 	}
 	return nil

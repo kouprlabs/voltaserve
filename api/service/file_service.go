@@ -15,6 +15,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strings"
 	"time"
@@ -1168,6 +1169,131 @@ func (svc *FileService) PatchName(id string, name string, userID string) (*File,
 		return nil, err
 	}
 	return res, nil
+}
+
+type ReprocessResponse struct {
+	Accepted []string `json:"accepted"`
+	Rejected []string `json:"rejected"`
+}
+
+func (r *ReprocessResponse) AppendAccepted(id string) {
+	if !slices.Contains(r.Accepted, id) {
+		r.Accepted = append(r.Accepted, id)
+	}
+}
+
+func (r *ReprocessResponse) AppendRejected(id string) {
+	if !slices.Contains(r.Rejected, id) {
+		r.Rejected = append(r.Rejected, id)
+	}
+}
+
+func (svc *FileService) Reprocess(id string, userID string) (res *ReprocessResponse, err error) {
+	res = &ReprocessResponse{
+		// We intend to send an empty array to the caller, better than nil
+		Accepted: []string{},
+		Rejected: []string{},
+	}
+
+	var ancestor model.File
+	ancestor, err = svc.fileCache.Get(id)
+	if err != nil {
+		return nil, err
+	}
+
+	var tree []model.File
+	if ancestor.GetType() == model.FileTypeFolder {
+		if err = svc.fileGuard.Authorize(userID, ancestor, model.PermissionViewer); err != nil {
+			return nil, err
+		}
+		tree, err = svc.fileRepo.FindTree(ancestor.GetID())
+		if err != nil {
+			return nil, err
+		}
+	} else if ancestor.GetType() == model.FileTypeFile {
+		var file model.File
+		file, err = svc.fileCache.Get(id)
+		if err != nil {
+			return nil, err
+		}
+		tree = append(tree, file)
+	}
+
+	for _, file := range tree {
+		if file.GetType() != model.FileTypeFile {
+			continue
+		}
+		if err = svc.fileGuard.Authorize(userID, file, model.PermissionEditor); err != nil {
+			log.GetLogger().Error(err)
+			continue
+		}
+		if !svc.canReprocessFile(file) {
+			res.AppendRejected(file.GetID())
+			continue
+		}
+
+		var snapshot model.Snapshot
+		snapshot, err = svc.snapshotCache.Get(*file.GetSnapshotID())
+		if err != nil {
+			log.GetLogger().Error(err)
+			continue
+		}
+		if !svc.canReprocessSnapshot(snapshot) {
+			res.AppendRejected(file.GetID())
+			continue
+		}
+
+		// Create a task
+		var task model.Task
+		task, err = svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
+			ID:              helper.NewID(),
+			Name:            "Waiting.",
+			UserID:          userID,
+			IsIndeterminate: true,
+			Status:          model.TaskStatusWaiting,
+			Payload:         map[string]string{repo.TaskPayloadObjectKey: file.GetName()},
+		})
+		if err != nil {
+			log.GetLogger().Error(err)
+			continue
+		}
+		snapshot.SetTaskID(helper.ToPtr(task.GetID()))
+		if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
+			log.GetLogger().Error(err)
+			continue
+		}
+
+		// Forward to conversion microservice
+		if err = svc.pipelineClient.Run(&conversion_client.PipelineRunOptions{
+			TaskID:     task.GetID(),
+			SnapshotID: snapshot.GetID(),
+			Bucket:     snapshot.GetOriginal().Bucket,
+			Key:        snapshot.GetOriginal().Key,
+		}); err != nil {
+			log.GetLogger().Error(err)
+			continue
+		} else {
+			res.AppendAccepted(file.GetID())
+		}
+	}
+	return res, nil
+}
+
+func (svc *FileService) canReprocessFile(file model.File) bool {
+	// We don't reprocess if there is no active snapshot
+	return file.GetSnapshotID() != nil
+}
+
+func (svc *FileService) canReprocessSnapshot(snapshot model.Snapshot) bool {
+	// We don't reprocess if there is an existing task
+	if snapshot.GetTaskID() != nil {
+		return false
+	}
+	// We don't reprocess without an "original" on the active snapshot
+	if !snapshot.HasOriginal() {
+		return false
+	}
+	return true
 }
 
 func (svc *FileService) DeleteOne(id string, userID string) error {

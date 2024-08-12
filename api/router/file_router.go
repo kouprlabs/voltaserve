@@ -75,6 +75,7 @@ func (r *FileRouter) AppendRoutes(g fiber.Router) {
 	g.Post("/:id/move/:targetId", r.MoveOne)
 	g.Post("/:id/copy/:targetId", r.CopyOne)
 	g.Patch("/:id/name", r.PatchName)
+	g.Post("/:id/reprocess", r.Reprocess)
 	g.Get("/:id/size", r.GetSize)
 	g.Post("/grant_user_permission", r.GrantUserPermission)
 	g.Post("/revoke_user_permission", r.RevokeUserPermission)
@@ -566,6 +567,27 @@ func (r *FileRouter) PatchName(c *fiber.Ctx) error {
 	return c.JSON(res)
 }
 
+// Reprocess godoc
+//
+//	@Summary		Reprocess
+//	@Description	Reprocess
+//	@Tags			Files
+//	@Id				files_reprocess
+//	@Produce		json
+//	@Param			id	path		string	true	"ID"
+//	@Success		200	{object}	service.ReprocessResponse
+//	@Failure		404	{object}	errorpkg.ErrorResponse
+//	@Failure		500	{object}	errorpkg.ErrorResponse
+//	@Router			/files/{id}/reprocess [post]
+func (r *FileRouter) Reprocess(c *fiber.Ctx) error {
+	userID := GetUserID(c)
+	res, err := r.fileSvc.Reprocess(c.Params("id"), userID)
+	if err != nil {
+		return err
+	}
+	return c.JSON(res)
+}
+
 type FileDeleteOptions struct {
 	IDs []string `json:"ids" validate:"required"`
 }
@@ -587,7 +609,7 @@ func (r *FileRouter) DeleteOne(c *fiber.Ctx) error {
 	if err := r.fileSvc.DeleteOne(c.Params("id"), userID); err != nil {
 		return err
 	}
-	return c.JSON(http.StatusNoContent)
+	return c.SendStatus(http.StatusNoContent)
 }
 
 // DeleteMany godoc
