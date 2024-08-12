@@ -26,6 +26,7 @@ func (d *Installer) Start() {
 	go func() {
 		d.isRunning = true
 		if d.config.EnableInstaller {
+			d.updatePackageList()
 			d.installCoreTools()
 			d.installGltfPipeline()
 			d.installScreenshotGLB()
@@ -37,6 +38,16 @@ func (d *Installer) Start() {
 		}
 		d.isRunning = false
 	}()
+}
+
+func (d *Installer) updatePackageList() {
+	infra.GetLogger().Named(infra.StrInstaller).Infow("↻  updating", "debian", "package list")
+	if err := d.cmd.Exec("apt-get", "update"); err != nil {
+		infra.GetLogger().Error(err)
+		infra.GetLogger().Named(infra.StrInstaller).Infow("❌️  failed", "debian", "package list")
+		return
+	}
+	infra.GetLogger().Named(infra.StrInstaller).Infow("✅️  completed", "debian", "package list")
 }
 
 func (d *Installer) installCoreTools() {
