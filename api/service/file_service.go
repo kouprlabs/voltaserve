@@ -55,6 +55,7 @@ type FileService struct {
 	groupGuard     *guard.GroupGuard
 	groupMapper    *groupMapper
 	permissionRepo repo.PermissionRepo
+	taskCache      *cache.TaskCache
 	taskSvc        *TaskService
 	fileIdent      *infra.FileIdentifier
 	s3             *infra.S3Manager
@@ -82,6 +83,7 @@ func NewFileService() *FileService {
 		groupGuard:     guard.NewGroupGuard(),
 		groupMapper:    newGroupMapper(),
 		permissionRepo: repo.NewPermissionRepo(),
+		taskCache:      cache.NewTaskCache(),
 		taskSvc:        NewTaskService(),
 		fileIdent:      infra.NewFileIdentifier(),
 		s3:             infra.NewS3Manager(),
@@ -1285,9 +1287,16 @@ func (svc *FileService) canReprocessFile(file model.File) bool {
 }
 
 func (svc *FileService) canReprocessSnapshot(snapshot model.Snapshot) bool {
-	// We don't reprocess if there is an existing task
+	// We don't reprocess if there is a pending task
 	if snapshot.GetTaskID() != nil {
-		return false
+		task, err := svc.taskCache.Get(*snapshot.GetTaskID())
+		if err != nil {
+			log.GetLogger().Error(err)
+			return false
+		}
+		if task.GetStatus() == model.TaskStatusWaiting || task.GetStatus() == model.TaskStatusRunning {
+			return false
+		}
 	}
 	// We don't reprocess without an "original" on the active snapshot
 	if !snapshot.HasOriginal() {
