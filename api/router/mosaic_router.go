@@ -167,22 +167,27 @@ func (r *MosaicRouter) DownloadTile(c *fiber.Ctx) error {
 			return err
 		}
 	}
-	ext := c.Params("ext")
 	buf, snapshot, err := r.mosaicSvc.DownloadTileBuffer(id, service.MosaicDownloadTileOptions{
 		ZoomLevel: int(zoomLevel),
 		Row:       int(row),
 		Col:       int(col),
-		Ext:       ext,
+		Ext:       c.Params("ext"),
 	}, userID)
 	if err != nil {
 		return err
 	}
-	if strings.TrimPrefix(filepath.Ext(snapshot.GetPreview().Key), ".") != c.Params("ext") {
+	var extension string
+	if snapshot.GetPreview() != nil {
+		extension = filepath.Ext(snapshot.GetPreview().Key)
+	} else {
+		extension = filepath.Ext(snapshot.GetOriginal().Key)
+	}
+	if strings.TrimPrefix(extension, ".") != c.Params("ext") {
 		return errorpkg.NewS3ObjectNotFoundError(nil)
 	}
 	b := buf.Bytes()
 	c.Set("Content-Type", infra.DetectMimeFromBytes(b))
-	c.Set("Content-Disposition", fmt.Sprintf("filename=\"tile%s\"", ext))
+	c.Set("Content-Disposition", fmt.Sprintf("filename=\"tile%s\"", c.Params("ext")))
 	return c.Send(b)
 }
 
