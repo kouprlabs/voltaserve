@@ -1273,7 +1273,7 @@ func (svc *FileService) Reprocess(id string, userID string) (res *ReprocessRespo
 			res.AppendAccepted(file.GetID())
 		}
 	}
-	return
+	return res, nil
 }
 
 func (svc *FileService) canReprocessFile(file model.File) bool {
