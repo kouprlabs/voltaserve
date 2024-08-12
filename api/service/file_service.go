@@ -1220,6 +1220,9 @@ func (svc *FileService) Reprocess(id string, userID string) (res *ReprocessRespo
 	}
 
 	for _, file := range tree {
+		if file.GetType() != model.FileTypeFile {
+			continue
+		}
 		if err = svc.fileGuard.Authorize(userID, file, model.PermissionEditor); err != nil {
 			log.GetLogger().Error(err)
 			continue
@@ -1277,10 +1280,6 @@ func (svc *FileService) Reprocess(id string, userID string) (res *ReprocessRespo
 }
 
 func (svc *FileService) canReprocessFile(file model.File) bool {
-	// We don't reprocess if the type is not "file"
-	if file.GetType() != model.FileTypeFile {
-		return false
-	}
 	// We don't reprocess if there is no active snapshot
 	if file.GetSnapshotID() == nil {
 		return false
