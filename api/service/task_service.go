@@ -11,7 +11,6 @@
 package service
 
 import (
-	"github.com/kouprlabs/voltaserve/api/log"
 	"slices"
 	"sort"
 	"time"
@@ -20,6 +19,7 @@ import (
 	"github.com/kouprlabs/voltaserve/api/errorpkg"
 	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/infra"
+	"github.com/kouprlabs/voltaserve/api/log"
 	"github.com/kouprlabs/voltaserve/api/model"
 	"github.com/kouprlabs/voltaserve/api/repo"
 	"github.com/kouprlabs/voltaserve/api/search"

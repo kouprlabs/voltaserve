@@ -12,10 +12,11 @@ package pipeline
 
 import (
 	"errors"
-	"github.com/minio/minio-go/v7"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/minio/minio-go/v7"
 
 	"github.com/kouprlabs/voltaserve/conversion/client/api_client"
 	"github.com/kouprlabs/voltaserve/conversion/config"

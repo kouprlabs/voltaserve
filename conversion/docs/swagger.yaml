@@ -1,6 +1,6 @@
 basePath: /v2
 definitions:
-  client.PipelineRunOptions:
+  api_client.PipelineRunOptions:
     properties:
       bucket:
         type: string
@@ -30,17 +30,6 @@ definitions:
       userMessage:
         type: string
     type: object
-  service.ToolRunOptions:
-    properties:
-      args:
-        items:
-          type: string
-        type: array
-      bin:
-        type: string
-      stdout:
-        type: boolean
-    type: object
 info:
   contact: {}
   title: Voltaserve Conversion
@@ -69,14 +58,14 @@ paths:
       consumes:
       - application/json
       description: Run
-      operationId: pipeline_run
+      operationId: pipelines_run
       parameters:
       - description: Body
         in: body
         name: body
         required: true
         schema:
-          $ref: '#/definitions/client.PipelineRunOptions'
+          $ref: '#/definitions/api_client.PipelineRunOptions'
       produces:
       - application/json
       responses:
@@ -89,29 +78,4 @@ paths:
       summary: Run
       tags:
       - Pipelines
-  /tools/run:
-    post:
-      consumes:
-      - application/json
-      description: Run
-      operationId: tools_run
-      parameters:
-      - description: Body
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/service.ToolRunOptions'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-        "400":
-          description: Bad Request
-        "500":
-          description: Internal Server Error
-      summary: Run
-      tags:
-      - Tools
 swagger: "2.0"
