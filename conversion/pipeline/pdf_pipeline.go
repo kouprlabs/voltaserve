@@ -14,6 +14,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/minio/minio-go/v7"
 
@@ -207,7 +208,10 @@ func (p *pdfPipeline) updateSnapshot(inputPath string, document *api_client.Docu
 
 func (p *pdfPipeline) performSegmentation(inputPath string, document *api_client.DocumentProps, opts api_client.PipelineRunOptions) error {
 	if err := p.splitPages(inputPath, opts); err != nil {
-		return err
+		// This is a false positive, qpdf exists with a non-zero code on warnings
+		if !strings.Contains(err.Error(), "qpdf: operation succeeded with warnings; resulting file may have some problems") {
+			return err
+		}
 	}
 	if err := p.splitThumbnails(inputPath, opts); err != nil {
 		return err
