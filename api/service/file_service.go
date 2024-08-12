@@ -1281,10 +1281,7 @@ func (svc *FileService) Reprocess(id string, userID string) (res *ReprocessRespo
 
 func (svc *FileService) canReprocessFile(file model.File) bool {
 	// We don't reprocess if there is no active snapshot
-	if file.GetSnapshotID() == nil {
-		return false
-	}
-	return true
+	return file.GetSnapshotID() != nil
 }
 
 func (svc *FileService) canReprocessSnapshot(snapshot model.Snapshot) bool {
