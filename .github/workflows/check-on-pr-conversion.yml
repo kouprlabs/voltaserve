@@ -8,7 +8,7 @@
 # by the GNU Affero General Public License v3.0 only, included in the file
 # licenses/AGPL.txt.
 
-name: Lin and build voltaserve/conversion
+name: Lint and build voltaserve/conversion
 
 on:
   pull_request:
@@ -40,6 +40,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: lint
     steps:
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y libvips-dev
+
       - name: Checkout Repository
         uses: actions/checkout@v4
 
