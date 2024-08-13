@@ -96,8 +96,8 @@ func (svc *MosaicService) Create(id string, userID string) error {
 		PipelineID: helper.ToPtr(conversion_client.PipelineMosaic),
 		TaskID:     task.GetID(),
 		SnapshotID: snapshot.GetID(),
-		Bucket:     snapshot.GetOriginal().Bucket,
-		Key:        snapshot.GetOriginal().Key,
+		Bucket:     snapshot.GetPreview().Bucket,
+		Key:        snapshot.GetPreview().Key,
 	}); err != nil {
 		return err
 	}
@@ -129,7 +129,7 @@ func (svc *MosaicService) Delete(id string, userID string) error {
 	if !snapshot.HasMosaic() {
 		return errorpkg.NewMosaicNotFoundError(nil)
 	}
-	if svc.fileIdent.IsImage(snapshot.GetOriginal().Key) {
+	if svc.fileIdent.IsImage(snapshot.GetPreview().Key) {
 		task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
 			ID:              helper.NewID(),
 			Name:            "Deleting mosaic.",
@@ -149,7 +149,7 @@ func (svc *MosaicService) Delete(id string, userID string) error {
 		go func(task model.Task, snapshot model.Snapshot) {
 			err = svc.mosaicClient.Delete(mosaic_client.MosaicDeleteOptions{
 				S3Key:    filepath.FromSlash(snapshot.GetID()),
-				S3Bucket: snapshot.GetOriginal().Bucket,
+				S3Bucket: snapshot.GetPreview().Bucket,
 			})
 			if err != nil {
 				value := err.Error()
@@ -213,7 +213,7 @@ func (svc *MosaicService) GetInfo(id string, userID string) (*MosaicInfo, error)
 	}
 	res, err := svc.mosaicClient.GetMetadata(mosaic_client.MosaicGetMetadataOptions{
 		S3Key:    filepath.FromSlash(snapshot.GetID()),
-		S3Bucket: snapshot.GetOriginal().Bucket,
+		S3Bucket: snapshot.GetPreview().Bucket,
 	})
 	if err != nil {
 		return nil, err
@@ -261,7 +261,7 @@ func (svc *MosaicService) DownloadTileBuffer(id string, opts MosaicDownloadTileO
 	}
 	res, err := svc.mosaicClient.DownloadTileBuffer(mosaic_client.MosaicDownloadTileOptions{
 		S3Key:     filepath.FromSlash(snapshot.GetID()),
-		S3Bucket:  snapshot.GetOriginal().Bucket,
+		S3Bucket:  snapshot.GetPreview().Bucket,
 		ZoomLevel: opts.ZoomLevel,
 		Row:       opts.Row,
 		Col:       opts.Col,
