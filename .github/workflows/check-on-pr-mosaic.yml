@@ -40,9 +40,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: lint
     steps:
-      - name: Install dependencies
-        run: sudo apt-get update && sudo apt-get install -y libvips-dev
-
       - name: Checkout Repository
         uses: actions/checkout@v4
 
