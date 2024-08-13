@@ -14,7 +14,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"path"
+	"strings"
 
 	"github.com/kouprlabs/voltaserve/webdav/client/api_client"
 	"github.com/kouprlabs/voltaserve/webdav/helper"
@@ -38,18 +38,18 @@ func (h *Handler) methodMkcol(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	cl := api_client.NewFileClient(token)
-	wantedPath := helper.DecodeURIComponent(helper.Dirname(r.URL.Path))
-	directory, err := cl.GetByPath(wantedPath)
+	rootPath := helper.DecodeURIComponent(getRootPath(r.URL.Path))
+	rootDir, err := cl.GetByPath(rootPath)
 	if err != nil {
 		infra.HandleError(err, w)
 		return
 	}
-	if directory.Name != "/" && directory.WorkspaceID != "" {
+	if rootDir.Name != "/" && rootDir.WorkspaceID != "" {
 		if _, err = cl.CreateFolder(api_client.FileCreateFolderOptions{
 			Type:        api_client.FileTypeFolder,
-			WorkspaceID: directory.WorkspaceID,
-			ParentID:    directory.ID,
-			Name:        helper.DecodeURIComponent(path.Base(r.URL.Path)),
+			WorkspaceID: rootDir.WorkspaceID,
+			ParentID:    rootDir.ID,
+			Name:        helper.DecodeURIComponent(getSubPath(r.URL.Path)),
 		}); err != nil {
 			var apiError *infra.APIError
 			if errors.As(err, &apiError) {
@@ -68,4 +68,20 @@ func (h *Handler) methodMkcol(w http.ResponseWriter, r *http.Request) {
 	} else {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 	}
+}
+
+func getRootPath(path string) string {
+	parts := strings.Split(path, "/")
+	if len(parts) > 2 {
+		return "/" + parts[1]
+	}
+	return path
+}
+
+func getSubPath(path string) string {
+	parts := strings.SplitN(path, "/", 3)
+	if len(parts) < 3 {
+		return ""
+	}
+	return parts[2]
 }
