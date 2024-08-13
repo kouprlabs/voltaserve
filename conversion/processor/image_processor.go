@@ -140,7 +140,6 @@ func (p *ImageProcessor) RemoveAlphaChannel(inputPath string, outputPath string)
 	bildImage, err := imgio.Open(inputPath)
 	if err == nil && p.canBeHandledByBild(outputPath) {
 		return imgio.Save(outputPath, bildImage, imgio.JPEGEncoder(100))
-
 	} else {
 		if err := infra.NewCommand().Exec("convert", inputPath, "-alpha", "off", outputPath); err != nil {
 			return err
