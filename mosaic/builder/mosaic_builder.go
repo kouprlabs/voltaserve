@@ -303,7 +303,7 @@ func (mb *MosaicBuilder) Scale(zoomLevel int) (*Image, error) {
 }
 
 func (mb *MosaicBuilder) GetImageSizeForZoomLevel(zoomLevel int) Size {
-	size := Size{Width: int(mb.image.Width()), Height: int(mb.image.Height())}
+	size := Size{Width: mb.image.Width(), Height: mb.image.Height()}
 	counter := 0
 	for {
 		if counter == zoomLevel {
