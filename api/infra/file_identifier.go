@@ -106,6 +106,7 @@ func (fi *FileIdentifier) IsImage(path string) bool {
 		".gif",
 		".webp",
 		".tiff",
+		".tif",
 		".bmp",
 		".ico",
 		".heif",

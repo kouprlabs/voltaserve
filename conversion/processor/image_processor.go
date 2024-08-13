@@ -11,7 +11,6 @@
 package processor
 
 import (
-	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -26,14 +25,16 @@ import (
 )
 
 type ImageProcessor struct {
-	fileIdent *identifier.FileIdentifier
-	config    *config.Config
+	fileIdent  *identifier.FileIdentifier
+	imageIdent *identifier.ImageIdentifier
+	config     *config.Config
 }
 
 func NewImageProcessor() *ImageProcessor {
 	return &ImageProcessor{
-		fileIdent: identifier.NewFileIdentifier(),
-		config:    config.GetConfig(),
+		fileIdent:  identifier.NewFileIdentifier(),
+		imageIdent: identifier.NewImageIdentifier(),
+		config:     config.GetConfig(),
 	}
 }
 
@@ -92,9 +93,9 @@ func (p *ImageProcessor) ResizeImage(inputPath string, width int, height int, ou
 	if err == nil && p.canBeHandledByBild(outputPath) {
 		newImage := transform.Resize(bildImage, width, height, transform.Lanczos)
 		var encoder imgio.Encoder
-		if p.isPNG(inputPath) {
+		if p.imageIdent.IsPNG(inputPath) {
 			encoder = imgio.PNGEncoder()
-		} else if p.isJPEG(inputPath) {
+		} else if p.imageIdent.IsJPEG(inputPath) {
 			encoder = imgio.JPEGEncoder(100)
 		}
 		return imgio.Save(outputPath, newImage, encoder)
@@ -122,9 +123,9 @@ func (p *ImageProcessor) ConvertImage(inputPath string, outputPath string) error
 	bildImage, err := imgio.Open(inputPath)
 	if err == nil && p.canBeHandledByBild(outputPath) {
 		var encoder imgio.Encoder
-		if p.isPNG(outputPath) {
+		if p.imageIdent.IsPNG(outputPath) {
 			encoder = imgio.PNGEncoder()
-		} else if p.isJPEG(outputPath) {
+		} else if p.imageIdent.IsJPEG(outputPath) {
 			encoder = imgio.JPEGEncoder(100)
 		}
 		return imgio.Save(outputPath, bildImage, encoder)
@@ -169,19 +170,5 @@ func (p *ImageProcessor) DPIFromImage(inputPath string) (*int, error) {
 }
 
 func (p *ImageProcessor) canBeHandledByBild(path string) bool {
-	return p.isJPEG(path) || p.isPNG(path)
-}
-
-func (p *ImageProcessor) isJPEG(path string) bool {
-	path = strings.ToLower(path)
-	return filepath.Ext(path) == ".jpg" ||
-		filepath.Ext(path) == ".jpeg" ||
-		filepath.Ext(path) == ".jpe" ||
-		filepath.Ext(path) == ".jfif" ||
-		filepath.Ext(path) == ".jif"
-}
-
-func (p *ImageProcessor) isPNG(path string) bool {
-	path = strings.ToLower(path)
-	return filepath.Ext(path) == ".png"
+	return p.imageIdent.IsJPEG(path) || p.imageIdent.IsPNG(path)
 }
