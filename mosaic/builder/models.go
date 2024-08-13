@@ -230,7 +230,7 @@ func (img *Image) Extension() string {
 	return filepath.Ext(img.file)
 }
 
-func (img *Image) Crop(x int, y int, width int, height int) error {
+func (img *Image) Crop(x, y, width, height int) error {
 	var err error
 	img.buffer, err = bimg.NewImage(img.buffer).Extract(y, x, width, height)
 	if err != nil {
@@ -239,7 +239,7 @@ func (img *Image) Crop(x int, y int, width int, height int) error {
 	return nil
 }
 
-func (img *Image) ScaleWithAspectRatio(width int, height int) error {
+func (img *Image) ScaleWithAspectRatio(width, height int) error {
 	var err error
 	img.buffer, err = bimg.Resize(img.buffer, bimg.Options{
 		Width:  width,
