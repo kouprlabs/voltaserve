@@ -137,7 +137,7 @@ func (p *imagePipeline) measureImageDimensions(inputPath string, opts api_client
 }
 
 func (p *imagePipeline) createThumbnail(inputPath string, opts api_client.PipelineRunOptions) error {
-	tmpPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".png")
+	tmpPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(inputPath))
 	isAvailable, err := p.imageProc.Thumbnail(inputPath, tmpPath)
 	if err != nil {
 		return err
