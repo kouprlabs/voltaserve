@@ -58,7 +58,6 @@ func (d *Installer) installCoreTools() {
 		"gawk",
 		"ghostscript",
 		"imagemagick",
-		"libvips-dev",
 		"poppler-utils",
 		"libimage-exiftool-perl",
 		"ocrmypdf",
