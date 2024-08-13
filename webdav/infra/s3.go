@@ -97,7 +97,7 @@ func (mgr *S3Manager) GetObject(objectName string, bucketName string, opts minio
 	var buf bytes.Buffer
 	written, err := io.Copy(io.Writer(&buf), reader)
 	if err != nil {
-		return nil, nil, nil
+		return nil, nil, err
 	}
 	return &buf, &written, nil
 }
@@ -112,7 +112,7 @@ func (mgr *S3Manager) GetObjectWithBuffer(objectName string, bucketName string, 
 	}
 	written, err := io.Copy(io.Writer(buf), reader)
 	if err != nil {
-		return nil, nil
+		return nil, err
 	}
 	return &written, nil
 }
@@ -128,7 +128,7 @@ func (mgr *S3Manager) GetText(objectName string, bucketName string, opts minio.G
 	buf := new(strings.Builder)
 	_, err = io.Copy(buf, reader)
 	if err != nil {
-		return "", nil
+		return "", err
 	}
 	return buf.String(), nil
 }
