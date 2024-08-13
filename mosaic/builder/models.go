@@ -177,6 +177,8 @@ type ZoomLevel struct {
 type Image struct {
 	buffer []byte
 	file   string
+	width  *int
+	height *int
 }
 
 func NewImage(file string) (*Image, error) {
@@ -195,25 +197,33 @@ func NewImageFromSource(source *Image) (*Image, error) {
 		return nil, fmt.Errorf("source image is nil")
 	}
 	return &Image{
-		buffer: bimg.NewImage(source.buffer).Image(),
+		buffer: source.buffer,
 		file:   source.file,
 	}, nil
 }
 
 func (img *Image) Width() int {
-	size, err := bimg.Size(img.buffer)
-	if err != nil {
-		return -1
+	if img.width == nil {
+		size, err := bimg.Size(img.buffer)
+		if err != nil {
+			return -1
+		}
+		img.width = new(int)
+		*img.width = size.Width
 	}
-	return size.Width
+	return *img.width
 }
 
 func (img *Image) Height() int {
-	size, err := bimg.Size(img.buffer)
-	if err != nil {
-		return -1
+	if img.height == nil {
+		size, err := bimg.Size(img.buffer)
+		if err != nil {
+			return -1
+		}
+		img.height = new(int)
+		*img.height = size.Height
 	}
-	return size.Height
+	return *img.height
 }
 
 func (img *Image) Extension() string {
