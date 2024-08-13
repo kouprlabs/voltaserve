@@ -30,6 +30,9 @@ jobs:
   build_and_push:
     runs-on: ubuntu-latest
     steps:
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y libvips-dev
+
       - name: Prepare input branch
         if: ${{ github.event.inputs.branch != '' }}
         run: echo "branch=refs/heads/${{ github.event.inputs.branch }}" >> $GITHUB_ENV
