@@ -12,11 +12,11 @@ package builder
 
 import (
 	"fmt"
+	"github.com/anthonynsimon/bild/imgio"
+	"github.com/anthonynsimon/bild/transform"
 	"image"
-	"os"
 	"path/filepath"
-
-	"github.com/disintegration/imaging"
+	"strings"
 )
 
 type Metadata struct {
@@ -182,7 +182,7 @@ type Image struct {
 }
 
 func NewImage(file string) (*Image, error) {
-	img, err := imaging.Open(file)
+	img, err := imgio.Open(file)
 	if err != nil {
 		return nil, err
 	}
@@ -214,36 +214,31 @@ func (img *Image) Extension() string {
 	return filepath.Ext(img.file)
 }
 
-func (img *Image) Load(file string) error {
-	loadedImg, err := imaging.Open(file)
-	if err != nil {
-		return err
-	}
-	img.img = loadedImg
-	img.file = file
-	return nil
-}
-
 func (img *Image) Crop(x, y, width, height int) error {
-	croppedImg := imaging.Crop(img.img, image.Rect(x, y, x+width, y+height))
+	croppedImg := transform.Crop(
+		img.img,
+		image.Rectangle{
+			Min: image.Point{X: x, Y: y},
+			Max: image.Point{X: x + width, Y: y + height},
+		})
 	img.img = croppedImg
 	return nil
 }
 
-func (img *Image) CropWithRectangle(rectangle Rectangle) error {
-	return img.Crop(rectangle.X, rectangle.Y, rectangle.Width, rectangle.Height)
-}
-
 func (img *Image) ScaleWithAspectRatio(width, height int) error {
-	scaledImg := imaging.Fit(img.img, width, height, imaging.Lanczos)
+	scaledImg := transform.Resize(img.img, width, height, transform.Lanczos)
 	img.img = scaledImg
 	return nil
 }
 
 func (img *Image) Save(file string) error {
-	return imaging.Save(img.img, file)
-}
-
-func (img *Image) SaveAsPngToStream(stream *os.File) error {
-	return imaging.Encode(stream, img.img, imaging.PNG)
+	var encoder imgio.Encoder
+	if strings.HasSuffix(file, ".png") {
+		encoder = imgio.PNGEncoder()
+	} else if strings.HasSuffix(file, ".jpg") {
+		encoder = imgio.JPEGEncoder(100)
+	} else {
+		return fmt.Errorf("unsupported image format: %s", file)
+	}
+	return imgio.Save(file, img.img, encoder)
 }
