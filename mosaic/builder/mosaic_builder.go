@@ -146,19 +146,19 @@ func (mb *MosaicBuilder) Decompose(image *Image, zoomLevel int, region Region) Z
 
 	cols := 1
 	if tileWidthExceeded {
-		cols = int(image.Width()) / mb.TileSize().Width()
+		cols = image.Width() / mb.TileSize().Width()
 	}
 	rows := 1
 	if tileHeightExceeded {
-		rows = int(image.Height()) / mb.TileSize().Height()
+		rows = image.Height() / mb.TileSize().Height()
 	}
 	remainingWidth := 0
 	if tileWidthExceeded {
-		remainingWidth = int(image.Width()) - (mb.TileSize().Width() * cols)
+		remainingWidth = image.Width() - (mb.TileSize().Width() * cols)
 	}
 	remainingHeight := 0
 	if tileHeightExceeded {
-		remainingHeight = int(image.Height()) - (mb.TileSize().Height() * rows)
+		remainingHeight = image.Height() - (mb.TileSize().Height() * rows)
 	}
 	totalCols := cols
 	if remainingWidth != 0 {
@@ -171,10 +171,10 @@ func (mb *MosaicBuilder) Decompose(image *Image, zoomLevel int, region Region) Z
 
 	adaptedTileSize := *mb.TileSize()
 	if !tileWidthExceeded {
-		adaptedTileSize.SetWidth(int(image.Width()))
+		adaptedTileSize.SetWidth(image.Width())
 	}
 	if !tileHeightExceeded {
-		adaptedTileSize.SetHeight(int(image.Height()))
+		adaptedTileSize.SetHeight(image.Height())
 	}
 
 	colStart, colEnd, rowStart, rowEnd := 0, cols-1, 0, rows-1
