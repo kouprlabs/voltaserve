@@ -104,6 +104,7 @@ func (fi *FileIdentifier) IsImage(path string) bool {
 		".gif",
 		".webp",
 		".tiff",
+		".tif",
 		".bmp",
 		".ico",
 		".heif",
@@ -125,6 +126,7 @@ func (fi *FileIdentifier) IsNonAlphaChannelImage(path string) bool {
 		".jpeg",
 		".gif",
 		".tiff",
+		".tif",
 		".bmp",
 	}
 	extension := filepath.Ext(path)

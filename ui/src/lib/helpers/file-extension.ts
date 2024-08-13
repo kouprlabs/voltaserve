@@ -29,6 +29,7 @@ export function isImage(ext?: string | null) {
       '.gif',
       '.webp',
       '.tiff',
+      '.tif',
       '.bmp',
       '.ico',
       '.heif',

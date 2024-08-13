@@ -32,6 +32,7 @@ type imagePipeline struct {
 	taskClient     *api_client.TaskClient
 	snapshotClient *api_client.SnapshotClient
 	fileIdent      *identifier.FileIdentifier
+	imageIdent     *identifier.ImageIdentifier
 	config         *config.Config
 }
 
@@ -42,6 +43,7 @@ func NewImagePipeline() model.Pipeline {
 		taskClient:     api_client.NewTaskClient(),
 		snapshotClient: api_client.NewSnapshotClient(),
 		fileIdent:      identifier.NewFileIdentifier(),
+		imageIdent:     identifier.NewImageIdentifier(),
 		config:         config.GetConfig(),
 	}
 }
@@ -69,7 +71,7 @@ func (p *imagePipeline) Run(opts api_client.PipelineRunOptions) error {
 		return err
 	}
 	var imagePath string
-	if filepath.Ext(inputPath) == ".tiff" {
+	if p.imageIdent.IsTIFF(inputPath) {
 		if err := p.taskClient.Patch(opts.TaskID, api_client.TaskPatchOptions{
 			Fields: []string{api_client.TaskFieldName},
 			Name:   helper.ToPtr("Converting TIFF image to JPEG format."),
@@ -137,7 +139,7 @@ func (p *imagePipeline) measureImageDimensions(inputPath string, opts api_client
 }
 
 func (p *imagePipeline) createThumbnail(inputPath string, opts api_client.PipelineRunOptions) error {
-	tmpPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".png")
+	tmpPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(inputPath))
 	isAvailable, err := p.imageProc.Thumbnail(inputPath, tmpPath)
 	if err != nil {
 		return err
