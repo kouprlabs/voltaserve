@@ -8,11 +8,14 @@
 # by the GNU Affero General Public License v3.0 only, included in the file
 # licenses/AGPL.txt.
 
-FROM golang:1.22-alpine AS builder
+FROM golang:1.22-bookworm AS builder
+
+RUN apt-get update
+RUN apt-get install -y libvips-dev
 
 WORKDIR /build
 
-COPY go.mod go.sum .
+COPY go.mod go.sum ./
 
 RUN go mod download
 
@@ -20,7 +23,10 @@ COPY . .
 
 RUN go build -o voltaserve-mosaic
 
-FROM golang:1.22-alpine AS runner
+FROM golang:1.22-bookworm AS runner
+
+RUN apt-get update
+RUN apt-get install -y libvips
 
 WORKDIR /app
 

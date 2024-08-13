@@ -14,6 +14,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/h2non/bimg"
+
 	"github.com/kouprlabs/voltaserve/conversion/client/api_client"
 	"github.com/kouprlabs/voltaserve/conversion/config"
 	"github.com/kouprlabs/voltaserve/conversion/helper"
@@ -54,53 +56,73 @@ func (p *ImageProcessor) Thumbnail(inputPath string, outputPath string) (*bool, 
 }
 
 func (p *ImageProcessor) MeasureImage(inputPath string) (*api_client.ImageProps, error) {
-	size, err := infra.NewCommand().ReadOutput("identify", "-format", "%w,%h", inputPath)
+	b, err := bimg.Read(inputPath)
 	if err != nil {
 		return nil, err
 	}
-	values := strings.Split(*size, ",")
-	width, err := strconv.Atoi(helper.RemoveNonNumeric(values[0]))
-	if err != nil {
-		return nil, err
-	}
-	height, err := strconv.Atoi(helper.RemoveNonNumeric(values[1]))
+	size, err := bimg.Size(b)
 	if err != nil {
 		return nil, err
 	}
 	return &api_client.ImageProps{
-		Width:  width,
-		Height: height,
+		Width:  size.Width,
+		Height: size.Height,
 	}, nil
 }
 
 func (p *ImageProcessor) ResizeImage(inputPath string, width int, height int, outputPath string) error {
-	var widthStr string
-	if width == 0 {
-		widthStr = ""
-	} else {
-		widthStr = strconv.FormatInt(int64(width), 10)
+	b, err := bimg.Read(inputPath)
+	if err != nil {
+		return err
 	}
-	var heightStr string
-	if height == 0 {
-		heightStr = ""
-	} else {
-		heightStr = strconv.FormatInt(int64(height), 10)
+	b, err = bimg.Resize(b, bimg.Options{
+		Width:  width,
+		Height: height,
+	})
+	if err != nil {
+		return err
 	}
-	if err := infra.NewCommand().Exec("convert", "-resize", widthStr+"x"+heightStr, inputPath, outputPath); err != nil {
+	if err = bimg.Write(outputPath, b); err != nil {
 		return err
 	}
 	return nil
 }
 
 func (p *ImageProcessor) ConvertImage(inputPath string, outputPath string) error {
-	if err := infra.NewCommand().Exec("convert", inputPath, outputPath); err != nil {
+	b, err := bimg.Read(inputPath)
+	if err != nil {
+		return err
+	}
+	var imageType bimg.ImageType
+	if strings.HasSuffix(outputPath, ".png") {
+		imageType = bimg.PNG
+	} else if strings.HasSuffix(outputPath, ".jpg") {
+		imageType = bimg.JPEG
+	} else if strings.HasSuffix(outputPath, ".webp") {
+		imageType = bimg.WEBP
+	} else if strings.HasSuffix(outputPath, ".tiff") || strings.HasSuffix(outputPath, ".tif") {
+		imageType = bimg.TIFF
+	}
+	b, err = bimg.NewImage(b).Convert(imageType)
+	if err != nil {
+		return err
+	}
+	if err = bimg.Write(outputPath, b); err != nil {
 		return err
 	}
 	return nil
 }
 
 func (p *ImageProcessor) RemoveAlphaChannel(inputPath string, outputPath string) error {
-	if err := infra.NewCommand().Exec("convert", inputPath, "-alpha", "off", outputPath); err != nil {
+	b, err := bimg.Read(inputPath)
+	if err != nil {
+		return err
+	}
+	b, err = bimg.NewImage(b).Convert(bimg.JPEG)
+	if err != nil {
+		return err
+	}
+	if err = bimg.Write(outputPath, b); err != nil {
 		return err
 	}
 	return nil

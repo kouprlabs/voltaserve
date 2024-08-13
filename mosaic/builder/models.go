@@ -12,11 +12,9 @@ package builder
 
 import (
 	"fmt"
-	"image"
-	"os"
 	"path/filepath"
 
-	"github.com/disintegration/imaging"
+	"github.com/h2non/bimg"
 )
 
 type Metadata struct {
@@ -177,18 +175,18 @@ type ZoomLevel struct {
 }
 
 type Image struct {
-	img  image.Image
-	file string
+	buffer []byte
+	file   string
 }
 
 func NewImage(file string) (*Image, error) {
-	img, err := imaging.Open(file)
+	b, err := bimg.Read(file)
 	if err != nil {
 		return nil, err
 	}
 	return &Image{
-		img:  img,
-		file: file,
+		buffer: b,
+		file:   file,
 	}, nil
 }
 
@@ -197,53 +195,55 @@ func NewImageFromSource(source *Image) (*Image, error) {
 		return nil, fmt.Errorf("source image is nil")
 	}
 	return &Image{
-		img:  source.img,
-		file: source.file,
+		buffer: bimg.NewImage(source.buffer).Image(),
+		file:   source.file,
 	}, nil
 }
 
 func (img *Image) Width() int {
-	return img.img.Bounds().Dx()
+	size, err := bimg.Size(img.buffer)
+	if err != nil {
+		return -1
+	}
+	return size.Width
 }
 
 func (img *Image) Height() int {
-	return img.img.Bounds().Dy()
+	size, err := bimg.Size(img.buffer)
+	if err != nil {
+		return -1
+	}
+	return size.Height
 }
 
 func (img *Image) Extension() string {
 	return filepath.Ext(img.file)
 }
 
-func (img *Image) Load(file string) error {
-	loadedImg, err := imaging.Open(file)
+func (img *Image) Crop(x int, y int, width int, height int) error {
+	var err error
+	img.buffer, err = bimg.NewImage(img.buffer).Extract(y, x, width, height)
 	if err != nil {
 		return err
 	}
-	img.img = loadedImg
-	img.file = file
 	return nil
 }
 
-func (img *Image) Crop(x, y, width, height int) error {
-	croppedImg := imaging.Crop(img.img, image.Rect(x, y, x+width, y+height))
-	img.img = croppedImg
-	return nil
-}
-
-func (img *Image) CropWithRectangle(rectangle Rectangle) error {
-	return img.Crop(rectangle.X, rectangle.Y, rectangle.Width, rectangle.Height)
-}
-
-func (img *Image) ScaleWithAspectRatio(width, height int) error {
-	scaledImg := imaging.Fit(img.img, width, height, imaging.Lanczos)
-	img.img = scaledImg
+func (img *Image) ScaleWithAspectRatio(width int, height int) error {
+	var err error
+	img.buffer, err = bimg.Resize(img.buffer, bimg.Options{
+		Width:  width,
+		Height: height,
+	})
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
 func (img *Image) Save(file string) error {
-	return imaging.Save(img.img, file)
-}
-
-func (img *Image) SaveAsPngToStream(stream *os.File) error {
-	return imaging.Encode(stream, img.img, imaging.PNG)
+	if err := bimg.Write(file, img.buffer); err != nil {
+		return err
+	}
+	return nil
 }
