@@ -146,19 +146,19 @@ func (mb *MosaicBuilder) Decompose(image *Image, zoomLevel int, region Region) Z
 
 	cols := 1
 	if tileWidthExceeded {
-		cols = int(image.Width()) / mb.TileSize().Width()
+		cols = image.Width() / mb.TileSize().Width()
 	}
 	rows := 1
 	if tileHeightExceeded {
-		rows = int(image.Height()) / mb.TileSize().Height()
+		rows = image.Height() / mb.TileSize().Height()
 	}
 	remainingWidth := 0
 	if tileWidthExceeded {
-		remainingWidth = int(image.Width()) - (mb.TileSize().Width() * cols)
+		remainingWidth = image.Width() - (mb.TileSize().Width() * cols)
 	}
 	remainingHeight := 0
 	if tileHeightExceeded {
-		remainingHeight = int(image.Height()) - (mb.TileSize().Height() * rows)
+		remainingHeight = image.Height() - (mb.TileSize().Height() * rows)
 	}
 	totalCols := cols
 	if remainingWidth != 0 {
@@ -303,7 +303,7 @@ func (mb *MosaicBuilder) Scale(zoomLevel int) (*Image, error) {
 }
 
 func (mb *MosaicBuilder) GetImageSizeForZoomLevel(zoomLevel int) Size {
-	size := Size{Width: int(mb.image.Width()), Height: int(mb.image.Height())}
+	size := Size{Width: mb.image.Width(), Height: mb.image.Height()}
 	counter := 0
 	for {
 		if counter == zoomLevel {
