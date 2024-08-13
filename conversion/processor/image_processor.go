@@ -11,8 +11,12 @@
 package processor
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
+
+	"github.com/anthonynsimon/bild/imgio"
+	"github.com/anthonynsimon/bild/transform"
 
 	"github.com/kouprlabs/voltaserve/conversion/client/api_client"
 	"github.com/kouprlabs/voltaserve/conversion/config"
@@ -54,56 +58,55 @@ func (p *ImageProcessor) Thumbnail(inputPath string, outputPath string) (*bool, 
 }
 
 func (p *ImageProcessor) MeasureImage(inputPath string) (*api_client.ImageProps, error) {
-	size, err := infra.NewCommand().ReadOutput("identify", "-format", "%w,%h", inputPath)
-	if err != nil {
-		return nil, err
-	}
-	values := strings.Split(*size, ",")
-	width, err := strconv.Atoi(helper.RemoveNonNumeric(values[0]))
-	if err != nil {
-		return nil, err
-	}
-	height, err := strconv.Atoi(helper.RemoveNonNumeric(values[1]))
+	img, err := imgio.Open(inputPath)
 	if err != nil {
 		return nil, err
 	}
 	return &api_client.ImageProps{
-		Width:  width,
-		Height: height,
+		Width:  img.Bounds().Dx(),
+		Height: img.Bounds().Dy(),
 	}, nil
 }
 
 func (p *ImageProcessor) ResizeImage(inputPath string, width int, height int, outputPath string) error {
-	var widthStr string
-	if width == 0 {
-		widthStr = ""
-	} else {
-		widthStr = strconv.FormatInt(int64(width), 10)
-	}
-	var heightStr string
-	if height == 0 {
-		heightStr = ""
-	} else {
-		heightStr = strconv.FormatInt(int64(height), 10)
-	}
-	if err := infra.NewCommand().Exec("convert", "-resize", widthStr+"x"+heightStr, inputPath, outputPath); err != nil {
+	img, err := imgio.Open(inputPath)
+	if err != nil {
 		return err
 	}
-	return nil
+	newImg := transform.Resize(img, width, height, transform.Lanczos)
+	var encoder imgio.Encoder
+	if strings.HasSuffix(inputPath, ".png") {
+		encoder = imgio.PNGEncoder()
+	} else if strings.HasSuffix(inputPath, ".jpg") {
+		encoder = imgio.JPEGEncoder(100)
+	} else {
+		return fmt.Errorf("unsupported image format: %s", inputPath)
+	}
+	return imgio.Save(outputPath, newImg, encoder)
 }
 
 func (p *ImageProcessor) ConvertImage(inputPath string, outputPath string) error {
-	if err := infra.NewCommand().Exec("convert", inputPath, outputPath); err != nil {
+	img, err := imgio.Open(inputPath)
+	if err != nil {
 		return err
 	}
-	return nil
+	var encoder imgio.Encoder
+	if strings.HasSuffix(outputPath, ".png") {
+		encoder = imgio.PNGEncoder()
+	} else if strings.HasSuffix(outputPath, ".jpg") {
+		encoder = imgio.JPEGEncoder(100)
+	} else {
+		return fmt.Errorf("unsupported image format: %s", inputPath)
+	}
+	return imgio.Save(outputPath, img, encoder)
 }
 
 func (p *ImageProcessor) RemoveAlphaChannel(inputPath string, outputPath string) error {
-	if err := infra.NewCommand().Exec("convert", inputPath, "-alpha", "off", outputPath); err != nil {
+	img, err := imgio.Open(inputPath)
+	if err != nil {
 		return err
 	}
-	return nil
+	return imgio.Save(outputPath, img, imgio.JPEGEncoder(100))
 }
 
 func (p *ImageProcessor) DPIFromImage(inputPath string) (*int, error) {
