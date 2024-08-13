@@ -171,10 +171,10 @@ func (mb *MosaicBuilder) Decompose(image *Image, zoomLevel int, region Region) Z
 
 	adaptedTileSize := *mb.TileSize()
 	if !tileWidthExceeded {
-		adaptedTileSize.SetWidth(int(image.Width()))
+		adaptedTileSize.SetWidth(image.Width())
 	}
 	if !tileHeightExceeded {
-		adaptedTileSize.SetHeight(int(image.Height()))
+		adaptedTileSize.SetHeight(image.Height())
 	}
 
 	colStart, colEnd, rowStart, rowEnd := 0, cols-1, 0, rows-1
