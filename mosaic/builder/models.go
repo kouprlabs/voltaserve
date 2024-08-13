@@ -12,11 +12,12 @@ package builder
 
 import (
 	"fmt"
-	"github.com/anthonynsimon/bild/imgio"
-	"github.com/anthonynsimon/bild/transform"
 	"image"
 	"path/filepath"
 	"strings"
+
+	"github.com/anthonynsimon/bild/imgio"
+	"github.com/anthonynsimon/bild/transform"
 )
 
 type Metadata struct {
@@ -215,19 +216,17 @@ func (img *Image) Extension() string {
 }
 
 func (img *Image) Crop(x, y, width, height int) error {
-	croppedImg := transform.Crop(
+	img.img = transform.Crop(
 		img.img,
 		image.Rectangle{
 			Min: image.Point{X: x, Y: y},
 			Max: image.Point{X: x + width, Y: y + height},
 		})
-	img.img = croppedImg
 	return nil
 }
 
 func (img *Image) ScaleWithAspectRatio(width, height int) error {
-	scaledImg := transform.Resize(img.img, width, height, transform.Lanczos)
-	img.img = scaledImg
+	img.img = transform.Resize(img.img, width, height, transform.Lanczos)
 	return nil
 }
 
