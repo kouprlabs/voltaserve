@@ -10,8 +10,8 @@
 
 FROM golang:1.22-bookworm AS builder
 
-RUN apt-get update
-RUN apt-get install -y libvips-dev
+RUN apt-get update &&\
+    apt-get install -y libvips-dev
 
 WORKDIR /build
 
@@ -25,8 +25,8 @@ RUN go build -o voltaserve-mosaic
 
 FROM golang:1.22-bookworm AS runner
 
-RUN apt-get update
-RUN apt-get install -y libvips
+RUN apt-get update &&\
+    apt-get install -y libvips
 
 WORKDIR /app
 

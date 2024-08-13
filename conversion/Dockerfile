@@ -10,6 +10,9 @@
 
 FROM golang:1.22-bookworm AS builder
 
+RUN apt-get update &&\
+    apt-get install -y libvips-dev
+
 WORKDIR /build
 
 COPY go.mod go.sum ./
@@ -23,7 +26,7 @@ RUN go build -o voltaserve-conversion
 FROM ubuntu:noble
 
 RUN apt-get update &&\
-    apt-get install -y htop
+    apt-get install -y htop libvips
 
 WORKDIR /app
 
