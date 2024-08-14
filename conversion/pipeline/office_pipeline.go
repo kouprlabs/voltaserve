@@ -11,6 +11,7 @@
 package pipeline
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 
@@ -74,7 +75,9 @@ func (p *officePipeline) RunFromLocalPath(inputPath string, opts api_client.Pipe
 		return err
 	}
 	defer func(path string) {
-		if err := os.RemoveAll(path); err != nil {
+		if err := os.Remove(path); errors.Is(err, os.ErrNotExist) {
+			return
+		} else if err != nil {
 			infra.GetLogger().Error(err)
 		}
 	}(*pdfPath)
