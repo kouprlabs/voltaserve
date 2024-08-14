@@ -70,11 +70,11 @@ func (p *officePipeline) RunFromLocalPath(inputPath string, opts api_client.Pipe
 	}); err != nil {
 		return err
 	}
-	pdfKey, err := p.convertToPDF(inputPath, opts)
+	pdfPath, err := p.convertToPDF(inputPath, opts)
 	if err != nil {
 		return err
 	}
-	if err := p.pdfPipeline.RunFromLocalPath(*pdfKey, opts); err != nil {
+	if err := p.pdfPipeline.RunFromLocalPath(*pdfPath, opts); err != nil {
 		return err
 	}
 	return nil
@@ -117,5 +117,5 @@ func (p *officePipeline) convertToPDF(inputPath string, opts api_client.Pipeline
 	}); err != nil {
 		return nil, err
 	}
-	return &pdfKey, nil
+	return outputPath, nil
 }

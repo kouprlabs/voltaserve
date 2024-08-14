@@ -129,11 +129,7 @@ func (p *imagePipeline) RunFromLocalPath(inputPath string, opts api_client.Pipel
 }
 
 func (p *imagePipeline) triggerMosaic(imagePath string, opts api_client.PipelineRunOptions) error {
-	if err := p.mosaicPipeline.RunFromLocalPath(imagePath, api_client.PipelineRunOptions{
-		Bucket:     opts.Bucket,
-		Key:        opts.Key,
-		SnapshotID: opts.SnapshotID,
-	}); err != nil {
+	if err := p.mosaicPipeline.RunFromLocalPath(imagePath, opts); err != nil {
 		return err
 	}
 	return nil

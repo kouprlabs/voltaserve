@@ -97,15 +97,11 @@ func (p *zipPipeline) RunFromLocalPath(inputPath string, opts api_client.Pipelin
 		}); err != nil {
 			return err
 		}
-		glbKey, err := p.convertToGLB(*gltfPath, opts)
+		glbPath, err := p.convertToGLB(*gltfPath, opts)
 		if err != nil {
 			return err
 		}
-		if err := p.glbPipeline.Run(api_client.PipelineRunOptions{
-			Bucket:     opts.Bucket,
-			Key:        *glbKey,
-			SnapshotID: opts.SnapshotID,
-		}); err != nil {
+		if err := p.glbPipeline.RunFromLocalPath(*glbPath, opts); err != nil {
 			return err
 		}
 	}
@@ -144,5 +140,5 @@ func (p *zipPipeline) convertToGLB(inputPath string, opts api_client.PipelineRun
 	}); err != nil {
 		return nil, err
 	}
-	return &glbKey, nil
+	return &outputPath, nil
 }
