@@ -14,6 +14,22 @@ export const OWNER_PERMISSION = 'owner'
 
 export type PermissionType = 'viewer' | 'editor' | 'owner'
 
+export function gtViewerPermission(permission: string): boolean {
+  return (
+    getPermissionWeight(permission) > getPermissionWeight(VIEWER_PERMISSION)
+  )
+}
+
+export function gtEditorPermission(permission: string) {
+  return (
+    getPermissionWeight(permission) > getPermissionWeight(EDITOR_PERMISSION)
+  )
+}
+
+export function gtOwnerPermission(permission: string) {
+  return getPermissionWeight(permission) > getPermissionWeight(OWNER_PERMISSION)
+}
+
 export function geViewerPermission(permission: string): boolean {
   return (
     getPermissionWeight(permission) >= getPermissionWeight(VIEWER_PERMISSION)
