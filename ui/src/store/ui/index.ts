@@ -27,7 +27,6 @@ import snapshots from './snapshots'
 import notifications from './tasks'
 import tasks from './tasks'
 import uploads from './uploads'
-import users from './users'
 import workspace from './workspace'
 import workspaces from './workspaces'
 
@@ -53,5 +52,4 @@ export default combineReducers({
   notifications,
   workspace,
   workspaces,
-  users,
 })

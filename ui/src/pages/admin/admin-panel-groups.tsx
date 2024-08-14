@@ -7,6 +7,8 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
+import { useEffect, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import {
   Button,
   Heading,
@@ -20,27 +22,32 @@ import {
 } from '@chakra-ui/react'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
-
-const groups = {
-  'groups': [
-    {
-      'id': '6o7EbGD2rZ8JQ',
-      'name': 'My Group',
-      'organization_id': 'mz4GymnAnXB2O',
-      'create_time': '2024-07-22T22:35:04Z',
-      'update_time': '2024-07-22T22:35:04Z',
-    },
-    {
-      'id': 'AdW38nLY5GlQn',
-      'name': 'My Group',
-      'organization_id': 'aa4Vdo6KD27y0',
-      'create_time': '2024-07-23T06:21:13Z',
-      'update_time': '2024-07-23T06:21:13Z',
-    },
-  ],
-}
+import AdminApi, { GroupManagementList } from '@/client/admin/admin'
+import { adminGroupsPaginationStorage } from '@/infra/pagination'
+import PagePagination from '@/lib/components/page-pagination'
+import SectionSpinner from '@/lib/components/section-spinner'
+import usePagePagination from '@/lib/hooks/page-pagination'
 
 const AdminPanelGroups = () => {
+  const navigate = useNavigate()
+  const location = useLocation()
+  const [list, setList] = useState<GroupManagementList | undefined>(undefined)
+  const { page, size, steps, setPage, setSize } = usePagePagination({
+    navigate,
+    location,
+    storage: adminGroupsPaginationStorage(),
+  })
+
+  useEffect(() => {
+    AdminApi.listGroups({ page: page, size: size }).then((value) =>
+      setList(value),
+    )
+  }, [page, size])
+
+  if (!list) {
+    return <SectionSpinner />
+  }
+
   return (
     <>
       <Helmet>
@@ -48,31 +55,50 @@ const AdminPanelGroups = () => {
       </Helmet>
       <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
         <Heading className={cx('text-heading')}>Group management</Heading>
-        <Stack direction="column" spacing={2}>
-          <Table variant="simple">
-            <Thead>
-              <Tr>
-                <Th>Group name</Th>
-                <Th>Organization</Th>
-                <Th>Actions</Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              {groups.groups.map((group) => (
-                <Tr key={group.id}>
-                  <Td>{group.name}</Td>
-                  <Td>
-                    <Button>Show org</Button>
-                  </Td>
-                  <Td>
-                    <Button>Manage</Button>
-                    <Button colorScheme="red">Suspend</Button>
-                  </Td>
+        {list && list.data.length > 0 ? (
+          <Stack direction="column" spacing={2}>
+            <Table variant="simple">
+              <Thead>
+                <Tr>
+                  <Th>Group name</Th>
+                  <Th>Organization</Th>
+                  <Th>Create time</Th>
+                  <Th>Update time</Th>
+                  <Th>Actions</Th>
                 </Tr>
-              ))}
-            </Tbody>
-          </Table>
-        </Stack>
+              </Thead>
+              <Tbody>
+                {list.data.map((group) => (
+                  <Tr key={group.id}>
+                    <Td>{group.name}</Td>
+                    <Td>
+                      <Button>{group.organization.name}</Button>
+                    </Td>
+                    <Td>{new Date(group.createTime).toLocaleDateString()}</Td>
+                    <Td>{new Date(group.updateTime).toLocaleString()}</Td>
+                    <Td>
+                      <Button>Rename</Button>
+                    </Td>
+                  </Tr>
+                ))}
+              </Tbody>
+            </Table>
+          </Stack>
+        ) : (
+          <div> No groups found </div>
+        )}
+        {list ? (
+          <PagePagination
+            style={{ alignSelf: 'end' }}
+            totalElements={list.totalElements}
+            totalPages={Math.ceil(list.totalElements / size)}
+            page={page}
+            size={size}
+            steps={steps}
+            setPage={setPage}
+            setSize={setSize}
+          />
+        ) : null}
       </div>
     </>
   )

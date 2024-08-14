@@ -87,7 +87,7 @@ const LayoutAdmin = () => {
         {
           href: '/admin/organizations',
           icon: <IconFlag />,
-          primaryText: 'Workspaces management',
+          primaryText: 'Organizations management',
           secondaryText: 'Manage workspaces of your cloud instance',
         },
         {

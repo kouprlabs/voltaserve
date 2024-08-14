@@ -14,8 +14,12 @@ export type Pagination = {
   size: string
 }
 
-export type UserId = {
+export interface UserIdRequest extends Request {
   id: string
+}
+
+export interface UserSuspendRequest extends UserIdRequest {
+  suspend: boolean
 }
 
 export type UserCreationDate = {
