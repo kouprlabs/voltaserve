@@ -31,10 +31,11 @@ type SecurityConfig struct {
 }
 
 type LimitsConfig struct {
-	ExternalCommandTimeoutSeconds int
-	ImagePreviewMaxWidth          int
-	ImagePreviewMaxHeight         int
-	MultipartBodyLengthLimitMB    int
+	ExternalCommandTimeoutSeconds     int
+	ImagePreviewMaxWidth              int
+	ImagePreviewMaxHeight             int
+	MultipartBodyLengthLimitMB        int
+	ImageMosaicTriggerThresholdPixels int
 }
 
 type S3Config struct {

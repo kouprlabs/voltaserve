@@ -59,6 +59,10 @@ func (p *zipPipeline) Run(opts api_client.PipelineRunOptions) error {
 			infra.GetLogger().Error(err)
 		}
 	}(inputPath)
+	return p.RunFromLocalPath(inputPath, opts)
+}
+
+func (p *zipPipeline) RunFromLocalPath(inputPath string, opts api_client.PipelineRunOptions) error {
 	isGLTF, err := p.fi.IsGLTF(inputPath)
 	if err != nil {
 		return err
@@ -93,15 +97,18 @@ func (p *zipPipeline) Run(opts api_client.PipelineRunOptions) error {
 		}); err != nil {
 			return err
 		}
-		glbKey, err := p.convertToGLB(*gltfPath, opts)
+		glbPath, err := p.convertToGLB(*gltfPath, opts)
 		if err != nil {
 			return err
 		}
-		if err := p.glbPipeline.Run(api_client.PipelineRunOptions{
-			Bucket:     opts.Bucket,
-			Key:        *glbKey,
-			SnapshotID: opts.SnapshotID,
-		}); err != nil {
+		defer func(path string) {
+			if err := os.Remove(path); errors.Is(err, os.ErrNotExist) {
+				return
+			} else if err != nil {
+				infra.GetLogger().Error(err)
+			}
+		}(*glbPath)
+		if err := p.glbPipeline.RunFromLocalPath(*glbPath, opts); err != nil {
 			return err
 		}
 	}
@@ -114,13 +121,6 @@ func (p *zipPipeline) convertToGLB(inputPath string, opts api_client.PipelineRun
 	if err := p.gltfProc.ToGLB(inputPath, outputPath); err != nil {
 		return nil, err
 	}
-	defer func(path string) {
-		if err := os.Remove(path); errors.Is(err, os.ErrNotExist) {
-			return
-		} else if err != nil {
-			infra.GetLogger().Error(err)
-		}
-	}(outputPath)
 	stat, err := os.Stat(outputPath)
 	if err != nil {
 		return nil, err
@@ -140,5 +140,5 @@ func (p *zipPipeline) convertToGLB(inputPath string, opts api_client.PipelineRun
 	}); err != nil {
 		return nil, err
 	}
-	return &glbKey, nil
+	return &outputPath, nil
 }

@@ -27,6 +27,7 @@ import (
 )
 
 type imagePipeline struct {
+	mosaicPipeline model.Pipeline
 	imageProc      *processor.ImageProcessor
 	s3             *infra.S3Manager
 	taskClient     *api_client.TaskClient
@@ -38,6 +39,7 @@ type imagePipeline struct {
 
 func NewImagePipeline() model.Pipeline {
 	return &imagePipeline{
+		mosaicPipeline: NewMosaicPipeline(),
 		imageProc:      processor.NewImageProcessor(),
 		s3:             infra.NewS3Manager(),
 		taskClient:     api_client.NewTaskClient(),
@@ -60,6 +62,10 @@ func (p *imagePipeline) Run(opts api_client.PipelineRunOptions) error {
 			infra.GetLogger().Error(err)
 		}
 	}(inputPath)
+	return p.RunFromLocalPath(inputPath, opts)
+}
+
+func (p *imagePipeline) RunFromLocalPath(inputPath string, opts api_client.PipelineRunOptions) error {
 	if err := p.taskClient.Patch(opts.TaskID, api_client.TaskPatchOptions{
 		Fields: []string{api_client.TaskFieldName},
 		Name:   helper.ToPtr("Measuring image dimensions."),
@@ -104,12 +110,20 @@ func (p *imagePipeline) Run(opts api_client.PipelineRunOptions) error {
 	}
 	// We don't consider failing the creation of the thumbnail as an error
 	_ = p.createThumbnail(imagePath, opts)
-	if err := p.taskClient.Patch(opts.TaskID, api_client.TaskPatchOptions{
-		Fields: []string{api_client.TaskFieldName, api_client.TaskFieldStatus},
-		Name:   helper.ToPtr("Done."),
-		Status: helper.ToPtr(api_client.TaskStatusSuccess),
-	}); err != nil {
-		return err
+	// Automatically trigger mosaic pipeline if the image exceeds the pixels threshold
+	if imageProps.Width >= p.config.Limits.ImageMosaicTriggerThresholdPixels ||
+		imageProps.Height >= p.config.Limits.ImageMosaicTriggerThresholdPixels {
+		if err := p.mosaicPipeline.RunFromLocalPath(imagePath, opts); err != nil {
+			return err
+		}
+	} else {
+		if err := p.taskClient.Patch(opts.TaskID, api_client.TaskPatchOptions{
+			Fields: []string{api_client.TaskFieldName, api_client.TaskFieldStatus},
+			Name:   helper.ToPtr("Done."),
+			Status: helper.ToPtr(api_client.TaskStatusSuccess),
+		}); err != nil {
+			return err
+		}
 	}
 	return nil
 }
