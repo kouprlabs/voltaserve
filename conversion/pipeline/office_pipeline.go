@@ -11,7 +11,6 @@
 package pipeline
 
 import (
-	"errors"
 	"os"
 	"path/filepath"
 
@@ -74,10 +73,12 @@ func (p *officePipeline) RunFromLocalPath(inputPath string, opts api_client.Pipe
 	if err != nil {
 		return err
 	}
-	if err := p.pdfPipeline.RunFromLocalPath(*pdfPath, opts); err != nil {
-		return err
-	}
-	return nil
+	defer func(path string) {
+		if err := os.RemoveAll(path); err != nil {
+			infra.GetLogger().Error(err)
+		}
+	}(*pdfPath)
+	return p.pdfPipeline.RunFromLocalPath(*pdfPath, opts)
 }
 
 func (p *officePipeline) convertToPDF(inputPath string, opts api_client.PipelineRunOptions) (*string, error) {
@@ -87,25 +88,23 @@ func (p *officePipeline) convertToPDF(inputPath string, opts api_client.Pipeline
 		return nil, err
 	}
 	defer func(path string) {
-		if err := os.Remove(path); errors.Is(err, os.ErrNotExist) {
-			return
-		} else if err != nil {
-			infra.GetLogger().Error(err)
-		}
-	}(*outputPath)
-	defer func(path string) {
 		if err := os.RemoveAll(path); err != nil {
 			infra.GetLogger().Error(err)
 		}
 	}(outputDir)
-	stat, err := os.Stat(*outputPath)
+	pdfPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".pdf")
+	if err := os.Rename(*outputPath, pdfPath); err != nil {
+		return nil, err
+	}
+	stat, err := os.Stat(pdfPath)
 	if err != nil {
 		return nil, err
 	}
 	pdfKey := opts.SnapshotID + "/preview.pdf"
-	if err := p.s3.PutFile(pdfKey, *outputPath, helper.DetectMimeFromFile(*outputPath), opts.Bucket, minio.PutObjectOptions{}); err != nil {
+	if err := p.s3.PutFile(pdfKey, pdfPath, helper.DetectMimeFromFile(pdfPath), opts.Bucket, minio.PutObjectOptions{}); err != nil {
 		return nil, err
 	}
+
 	if err := p.snapshotClient.Patch(api_client.SnapshotPatchOptions{
 		Options: opts,
 		Fields:  []string{api_client.SnapshotFieldPreview},
@@ -117,5 +116,5 @@ func (p *officePipeline) convertToPDF(inputPath string, opts api_client.Pipeline
 	}); err != nil {
 		return nil, err
 	}
-	return outputPath, nil
+	return &pdfPath, nil
 }

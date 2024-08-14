@@ -101,6 +101,13 @@ func (p *zipPipeline) RunFromLocalPath(inputPath string, opts api_client.Pipelin
 		if err != nil {
 			return err
 		}
+		defer func(path string) {
+			if err := os.Remove(path); errors.Is(err, os.ErrNotExist) {
+				return
+			} else if err != nil {
+				infra.GetLogger().Error(err)
+			}
+		}(*glbPath)
 		if err := p.glbPipeline.RunFromLocalPath(*glbPath, opts); err != nil {
 			return err
 		}
@@ -114,13 +121,6 @@ func (p *zipPipeline) convertToGLB(inputPath string, opts api_client.PipelineRun
 	if err := p.gltfProc.ToGLB(inputPath, outputPath); err != nil {
 		return nil, err
 	}
-	defer func(path string) {
-		if err := os.Remove(path); errors.Is(err, os.ErrNotExist) {
-			return
-		} else if err != nil {
-			infra.GetLogger().Error(err)
-		}
-	}(outputPath)
 	stat, err := os.Stat(outputPath)
 	if err != nil {
 		return nil, err
