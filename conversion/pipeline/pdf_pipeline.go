@@ -75,7 +75,7 @@ func (p *pdfPipeline) RunFromLocalPath(inputPath string, opts api_client.Pipelin
 			Extension: filepath.Ext(opts.Key),
 		},
 	}
-	if err := p.updateSnapshot(inputPath, &document, opts); err != nil {
+	if err := p.patchSnapshotPreviewField(inputPath, &document, opts); err != nil {
 		return err
 	}
 	if err := p.taskClient.Patch(opts.TaskID, api_client.TaskPatchOptions{
@@ -185,27 +185,39 @@ func (p *pdfPipeline) extractText(inputPath string, opts api_client.PipelineRunO
 	return nil
 }
 
-func (p *pdfPipeline) updateSnapshot(inputPath string, document *api_client.DocumentProps, opts api_client.PipelineRunOptions) error {
+func (p *pdfPipeline) patchSnapshotPreviewField(inputPath string, document *api_client.DocumentProps, opts api_client.PipelineRunOptions) error {
 	stat, err := os.Stat(inputPath)
 	if err != nil {
 		return err
 	}
-	s3Object := &api_client.S3Object{
-		Bucket:   opts.Bucket,
-		Key:      opts.Key,
-		Size:     helper.ToPtr(stat.Size()),
-		Document: document,
-	}
-	if err := p.snapshotClient.Patch(api_client.SnapshotPatchOptions{
-		Options: opts,
-		Fields: []string{
-			api_client.SnapshotFieldOriginal,
-			api_client.SnapshotFieldPreview,
-		},
-		Original: s3Object,
-		Preview:  s3Object,
-	}); err != nil {
-		return err
+	if filepath.Ext(inputPath) == filepath.Ext(opts.Key) {
+		/* The original is a PDF file */
+		if err := p.snapshotClient.Patch(api_client.SnapshotPatchOptions{
+			Options: opts,
+			Fields:  []string{api_client.SnapshotFieldPreview},
+			Preview: &api_client.S3Object{
+				Bucket:   opts.Bucket,
+				Key:      opts.Key,
+				Size:     helper.ToPtr(stat.Size()),
+				Document: document,
+			},
+		}); err != nil {
+			return err
+		}
+	} else {
+		/* The original is an office file */
+		if err := p.snapshotClient.Patch(api_client.SnapshotPatchOptions{
+			Options: opts,
+			Fields:  []string{api_client.SnapshotFieldPreview},
+			Preview: &api_client.S3Object{
+				Bucket:   opts.Bucket,
+				Key:      filepath.FromSlash(opts.SnapshotID + "/preview" + filepath.Ext(inputPath)),
+				Size:     helper.ToPtr(stat.Size()),
+				Document: document,
+			},
+		}); err != nil {
+			return err
+		}
 	}
 	return nil
 }

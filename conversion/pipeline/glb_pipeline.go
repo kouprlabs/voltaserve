@@ -70,20 +70,43 @@ func (p *glbPipeline) RunFromLocalPath(inputPath string, opts api_client.Pipelin
 	if err := p.createThumbnail(inputPath, opts); err != nil {
 		return err
 	}
+	if err := p.patchSnapshotPreviewField(inputPath, opts); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (p *glbPipeline) patchSnapshotPreviewField(inputPath string, opts api_client.PipelineRunOptions) error {
 	stat, err := os.Stat(inputPath)
 	if err != nil {
 		return err
 	}
-	if err := p.snapshotClient.Patch(api_client.SnapshotPatchOptions{
-		Options: opts,
-		Fields:  []string{api_client.SnapshotFieldPreview},
-		Preview: &api_client.S3Object{
-			Bucket: opts.Bucket,
-			Key:    opts.Key,
-			Size:   helper.ToPtr(stat.Size()),
-		},
-	}); err != nil {
-		return err
+	if filepath.Ext(inputPath) == filepath.Ext(opts.Key) {
+		/* The original is a .glb */
+		if err := p.snapshotClient.Patch(api_client.SnapshotPatchOptions{
+			Options: opts,
+			Fields:  []string{api_client.SnapshotFieldPreview},
+			Preview: &api_client.S3Object{
+				Bucket: opts.Bucket,
+				Key:    opts.Key,
+				Size:   helper.ToPtr(stat.Size()),
+			},
+		}); err != nil {
+			return err
+		}
+	} else {
+		/* The original is likely an .zip glTF file */
+		if err := p.snapshotClient.Patch(api_client.SnapshotPatchOptions{
+			Options: opts,
+			Fields:  []string{api_client.SnapshotFieldPreview},
+			Preview: &api_client.S3Object{
+				Bucket: opts.Bucket,
+				Key:    filepath.FromSlash(opts.SnapshotID + "/preview" + filepath.Ext(inputPath)),
+				Size:   helper.ToPtr(stat.Size()),
+			},
+		}); err != nil {
+			return err
+		}
 	}
 	return nil
 }
