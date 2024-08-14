@@ -60,6 +60,10 @@ func (p *officePipeline) Run(opts api_client.PipelineRunOptions) error {
 			}
 		}
 	}(inputPath)
+	return p.RunFromLocalPath(inputPath, opts)
+}
+
+func (p *officePipeline) RunFromLocalPath(inputPath string, opts api_client.PipelineRunOptions) error {
 	if err := p.taskClient.Patch(opts.TaskID, api_client.TaskPatchOptions{
 		Fields: []string{api_client.TaskFieldName},
 		Name:   helper.ToPtr("Converting to PDF."),
@@ -70,11 +74,7 @@ func (p *officePipeline) Run(opts api_client.PipelineRunOptions) error {
 	if err != nil {
 		return err
 	}
-	if err := p.pdfPipeline.Run(api_client.PipelineRunOptions{
-		Bucket:     opts.Bucket,
-		Key:        *pdfKey,
-		SnapshotID: opts.SnapshotID,
-	}); err != nil {
+	if err := p.pdfPipeline.RunFromLocalPath(*pdfKey, opts); err != nil {
 		return err
 	}
 	return nil

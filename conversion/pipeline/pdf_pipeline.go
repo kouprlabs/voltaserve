@@ -61,6 +61,10 @@ func (p *pdfPipeline) Run(opts api_client.PipelineRunOptions) error {
 			infra.GetLogger().Error(err)
 		}
 	}(inputPath)
+	return p.RunFromLocalPath(inputPath, opts)
+}
+
+func (p *pdfPipeline) RunFromLocalPath(inputPath string, opts api_client.PipelineRunOptions) error {
 	count, err := p.pdfProc.CountPages(inputPath)
 	if err != nil {
 		return err

@@ -59,6 +59,10 @@ func (p *zipPipeline) Run(opts api_client.PipelineRunOptions) error {
 			infra.GetLogger().Error(err)
 		}
 	}(inputPath)
+	return p.RunFromLocalPath(inputPath, opts)
+}
+
+func (p *zipPipeline) RunFromLocalPath(inputPath string, opts api_client.PipelineRunOptions) error {
 	isGLTF, err := p.fi.IsGLTF(inputPath)
 	if err != nil {
 		return err
