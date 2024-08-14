@@ -113,7 +113,7 @@ func (p *imagePipeline) RunFromLocalPath(inputPath string, opts api_client.Pipel
 	// Automatically trigger mosaic pipeline if the image exceeds the pixels threshold
 	if imageProps.Width >= p.config.Limits.ImageMosaicTriggerThresholdPixels ||
 		imageProps.Height >= p.config.Limits.ImageMosaicTriggerThresholdPixels {
-		if err := p.triggerMosaic(imagePath, opts); err != nil {
+		if err := p.mosaicPipeline.RunFromLocalPath(imagePath, opts); err != nil {
 			return err
 		}
 	} else {
@@ -124,13 +124,6 @@ func (p *imagePipeline) RunFromLocalPath(inputPath string, opts api_client.Pipel
 		}); err != nil {
 			return err
 		}
-	}
-	return nil
-}
-
-func (p *imagePipeline) triggerMosaic(imagePath string, opts api_client.PipelineRunOptions) error {
-	if err := p.mosaicPipeline.RunFromLocalPath(imagePath, opts); err != nil {
-		return err
 	}
 	return nil
 }
