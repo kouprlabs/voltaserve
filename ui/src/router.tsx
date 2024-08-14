@@ -19,6 +19,7 @@ import AdminPanelGroups from '@/pages/admin/admin-panel-groups'
 import AdminPanelInvitations from '@/pages/admin/admin-panel-invitations'
 import AdminPanelOrganizations from '@/pages/admin/admin-panel-organizations'
 import AdminPanelOverview from '@/pages/admin/admin-panel-overview'
+import AdminPanelUser from '@/pages/admin/admin-panel-user'
 import AdminPanelUsers from '@/pages/admin/admin-panel-users'
 import AdminPanelWorkspaces from '@/pages/admin/admin-panel-workspaces'
 import ConfirmEmailPage from '@/pages/confirm-email-page'
@@ -184,6 +185,10 @@ const router = createBrowserRouter([
           {
             path: '/admin/users',
             element: <AdminPanelUsers />,
+          },
+          {
+            path: '/admin/users/:id',
+            element: <AdminPanelUser />,
           },
           {
             path: 'admin/workspaces',

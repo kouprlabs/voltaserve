@@ -24,6 +24,8 @@ export enum ErrorCode {
   PasswordValidationFailed = 'password_validation_failed',
   UserSuspended = 'user_suspended',
   MissingPermission = 'missing_permission',
+  UserNotFound = 'user_not_found',
+  OrphanError = 'orphan_error'
 }
 
 const statuses: { [key: string]: number } = {
@@ -41,6 +43,8 @@ const statuses: { [key: string]: number } = {
   [ErrorCode.PasswordValidationFailed]: 400,
   [ErrorCode.UserSuspended]: 403,
   [ErrorCode.MissingPermission]: 403,
+  [ErrorCode.UserNotFound]: 404,
+  [ErrorCode.OrphanError]: 400
 }
 
 const userMessages: { [key: string]: string } = {
@@ -50,6 +54,7 @@ const userMessages: { [key: string]: string } = {
   [ErrorCode.InvalidUsernameOrPassword]: 'Invalid username or password.',
   [ErrorCode.UserSuspended]: 'User suspended.',
   [ErrorCode.MissingPermission]: 'You are not an admin',
+  [ErrorCode.OrphanError]: 'You cannot suspend last admin'
 }
 
 export type ErrorData = {

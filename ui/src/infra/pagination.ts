@@ -90,3 +90,31 @@ export function adminUsersPaginationStorage() {
     namespace: 'admin_users',
   }
 }
+
+export function adminGroupsPaginationStorage() {
+  return {
+    prefix: 'voltaserve',
+    namespace: 'admin_groups',
+  }
+}
+
+export function adminInvitationsPaginationStorage() {
+  return {
+    prefix: 'voltaserve',
+    namespace: 'admin_invitations',
+  }
+}
+
+export function adminOrganizationsPaginationStorage() {
+  return {
+    prefix: 'voltaserve',
+    namespace: 'admin_organizations',
+  }
+}
+
+export function adminWorkspacesPaginationStorage() {
+  return {
+    prefix: 'voltaserve',
+    namespace: 'admin_workspaces',
+  }
+}

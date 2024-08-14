@@ -10,12 +10,11 @@
 import { NextFunction, Router, Response } from 'express'
 import { body, validationResult } from 'express-validator'
 import fs from 'fs/promises'
-import { decodeJwt } from 'jose'
 import multer from 'multer'
 import os from 'os'
 import passport from 'passport'
-import { PaginatedRequest } from '@/infra/admin-requests'
-import { ErrorCode, newError, parseValidationError } from '@/infra/error'
+import {PaginatedRequest, UserSuspendRequest} from '@/infra/admin-requests'
+import { parseValidationError } from '@/infra/error'
 import { PassportRequest } from '@/infra/passport-request'
 import { checkAdmin } from '@/token/service'
 import {
@@ -33,7 +32,7 @@ import {
   updateEmailRequest,
   updateEmailConfirmation,
   getUserListPaginated,
-  getUserCount,
+  getUserCount, suspendUser,
 } from './service'
 
 const router = Router()
@@ -110,7 +109,8 @@ router.post(
 router.post(
   '/suspend',
   passport.authenticate('jwt', { session: false }),
-  body('email').isEmail().isLength({ max: 255 }),
+  body('id').isString(),
+  body('suspend').isBoolean(),
   async (req: PassportRequest, res: Response, next: NextFunction) => {
     try {
       checkAdmin(req.header('Authorization'))
@@ -118,12 +118,8 @@ router.post(
       if (!result.isEmpty()) {
         throw parseValidationError(result)
       }
-      res.json(
-        await updateEmailRequest(
-          req.user.id,
-          req.body as UserUpdateEmailRequestOptions,
-        ),
-      )
+      await suspendUser(req.body as UserSuspendRequest)
+      res.sendStatus(200)
     } catch (err) {
       next(err)
     }

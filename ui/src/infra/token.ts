@@ -67,6 +67,15 @@ export function getAdminStatus(): boolean {
   }
 }
 
+export function getUserId(): string {
+  const accessToken = getAccessToken()
+  if (accessToken) {
+    return JSON.parse(atob(accessToken.split('.')[1])).sub
+  } else {
+    return ''
+  }
+}
+
 setInterval(async () => {
   const refreshToken = loadRefreshToken()
   const tokenExpiry = loadTokenExpiry()

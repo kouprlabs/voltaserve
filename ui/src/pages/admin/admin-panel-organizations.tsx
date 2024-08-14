@@ -7,6 +7,8 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
+import { useEffect, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import {
   Button,
   Heading,
@@ -20,37 +22,34 @@ import {
 } from '@chakra-ui/react'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
-
-const organizations = {
-  'organizations': [
-    {
-      'id': 'mz4GymnAnXB2O',
-      'name': 'My Organization',
-      'create_time': '2024-07-22T22:35:04Z',
-      'update_time': '2024-07-22T22:35:04Z',
-    },
-    {
-      'id': 'aa4Vdo6KD27y0',
-      'name': 'My Organization',
-      'create_time': '2024-07-23T06:21:13Z',
-      'update_time': '2024-07-23T06:21:13Z',
-    },
-    {
-      'id': 'LWl2Kl3LXr4Q7',
-      'name': 'test',
-      'create_time': '2024-07-24T17:07:19Z',
-      'update_time': '2024-07-24T17:07:19Z',
-    },
-    {
-      'id': 'kxlY3zYVD6WBO',
-      'name': 'My organization asdasdadsdfasfda',
-      'create_time': '2024-07-24T17:10:58Z',
-      'update_time': '2024-07-24T17:11:50Z',
-    },
-  ],
-}
+import AdminApi, { OrganizationManagementList } from '@/client/admin/admin'
+import { adminOrganizationsPaginationStorage } from '@/infra/pagination'
+import PagePagination from '@/lib/components/page-pagination'
+import SectionSpinner from '@/lib/components/section-spinner'
+import usePagePagination from '@/lib/hooks/page-pagination'
 
 const AdminPanelOrganizations = () => {
+  const navigate = useNavigate()
+  const location = useLocation()
+  const [list, setList] = useState<OrganizationManagementList | undefined>(
+    undefined,
+  )
+  const { page, size, steps, setPage, setSize } = usePagePagination({
+    navigate,
+    location,
+    storage: adminOrganizationsPaginationStorage(),
+  })
+
+  useEffect(() => {
+    AdminApi.listOrganizations({ page: page, size: size }).then((value) =>
+      setList(value),
+    )
+  }, [page, size])
+
+  if (!list) {
+    return <SectionSpinner />
+  }
+
   return (
     <>
       <Helmet>
@@ -60,35 +59,50 @@ const AdminPanelOrganizations = () => {
         <Heading className={cx('text-heading')}>
           Organizations management
         </Heading>
-        <Stack direction="column" spacing={2}>
-          <Table variant="simple">
-            <Thead>
-              <Tr>
-                <Th>Organization name</Th>
-                <Th>User</Th>
-                <Th>Groups</Th>
-                <Th>Actions</Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              {organizations.organizations.map((organization) => (
-                <Tr key={organization.id}>
-                  <Td>{organization.name}</Td>
-                  <Td>
-                    <Button>Show owner</Button>
-                  </Td>
-                  <Td>
-                    <Button>Show groups</Button>
-                  </Td>
-                  <Td>
-                    <Button>Manage</Button>
-                    <Button colorScheme="red">Suspend</Button>
-                  </Td>
+        {list && list.data.length > 0 ? (
+          <Stack direction="column" spacing={2}>
+            <Table variant="simple">
+              <Thead>
+                <Tr>
+                  <Th>Workspace name</Th>
+                  <Th>Create time</Th>
+                  <Th>Update time</Th>
+                  <Th>Actions</Th>
                 </Tr>
-              ))}
-            </Tbody>
-          </Table>
-        </Stack>
+              </Thead>
+              <Tbody>
+                {list.data.map((organization) => (
+                  <Tr key={organization.id}>
+                    <Td>{organization.name}</Td>
+                    <Td>
+                      {new Date(organization.createTime).toLocaleDateString()}
+                    </Td>
+                    <Td>
+                      {new Date(organization.updateTime).toLocaleString()}
+                    </Td>
+                    <Td>
+                      <Button>Rename</Button>
+                    </Td>
+                  </Tr>
+                ))}
+              </Tbody>
+            </Table>
+          </Stack>
+        ) : (
+          <div> No organizations found </div>
+        )}
+        {list ? (
+          <PagePagination
+            style={{ alignSelf: 'end' }}
+            totalElements={list.totalElements}
+            totalPages={Math.ceil(list.totalElements / size)}
+            page={page}
+            size={size}
+            steps={steps}
+            setPage={setPage}
+            setSize={setSize}
+          />
+        ) : null}
       </div>
     </>
   )

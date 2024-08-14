@@ -271,6 +271,16 @@ class UserRepoImpl {
     await client.query('DELETE FROM "user" WHERE id = $1', [id])
   }
 
+  async suspend(id: string, suspend: boolean) :Promise<void> {
+    await client.query('UPDATE "user" SET is_active = $1, refresh_token_value = null, refresh_token_expiry = null, update_time = $2 WHERE id = $3', [!suspend, new Date().toISOString(), id])
+  }
+
+  async enoughActiveAdmins() {
+    const {rows } = await client.query('SELECT COUNT(*) as count FROM "user" WHERE is_admin IS TRUE AND is_active IS TRUE',  [])
+    console.log('enough admins', rows[0].count)
+    return rows[0].count > 1
+  }
+
   /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
   private mapRow(row: any): User {
     return {

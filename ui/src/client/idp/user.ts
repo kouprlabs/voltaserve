@@ -48,6 +48,7 @@ export type UpdateEmailConfirmationOptions = {
 
 export type suspendUserOptions = {
   id: string
+  suspend: boolean
 }
 
 export type UpdatePasswordOptions = {
@@ -80,7 +81,6 @@ export default class UserAPI {
   }
 
   static async getAllUsers(options: ListOptions) {
-    console.log('getAllUsers', options)
     return idpFetcher({
       url: `/user/all?${this.paramsFromListOptions(options)}`,
       method: 'GET',

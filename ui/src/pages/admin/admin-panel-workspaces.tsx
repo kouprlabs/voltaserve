@@ -7,9 +7,15 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
+import { useEffect, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import {
   Button,
   Heading,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
   Stack,
   Table,
   Tbody,
@@ -20,43 +26,36 @@ import {
 } from '@chakra-ui/react'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
-
-const workspaces = {
-  'workspaces': [
-    {
-      'id': '3v3L8OQ32VZy1',
-      'name': 'My Workspace',
-      'organization_id': 'mz4GymnAnXB2O',
-      'storage_capacity': 100000000000,
-      'root_id': 'nxKEbdA5Z3ezP',
-      'bucket': '785db6bb56514527b6d9b4b284ca7d19',
-      'create_time': '2024-07-22T22:35:05Z',
-      'update_time': '2024-07-22T22:35:05.391560Z',
-    },
-    {
-      'id': 'y6gW1nQo57Bxy',
-      'name': 'My Workspace',
-      'organization_id': 'aa4Vdo6KD27y0',
-      'storage_capacity': 100000000000,
-      'root_id': 'v3W0RV6AelNgg',
-      'bucket': '0ef7bc71b75c45418ee90e39a9f12d3c',
-      'create_time': '2024-07-23T06:21:14Z',
-      'update_time': '2024-07-23T06:21:14.413159Z',
-    },
-    {
-      'id': '8bmWRBRLPyLYO',
-      'name': 'x',
-      'organization_id': 'aa4Vdo6KD27y0',
-      'storage_capacity': 1000000000,
-      'root_id': 'oqAE1D16jJzEk',
-      'bucket': 'bdb440af006140ceb71c57897e13defc',
-      'create_time': '2024-07-24T16:56:34Z',
-      'update_time': '2024-07-24T16:56:34.867934Z',
-    },
-  ],
-}
+import AdminApi, { WorkspaceManagementList } from '@/client/admin/admin'
+import { adminWorkspacesPaginationStorage } from '@/infra/pagination'
+import { IconChevronDown, IconChevronUp } from '@/lib/components/icons'
+import PagePagination from '@/lib/components/page-pagination'
+import SectionSpinner from '@/lib/components/section-spinner'
+import prettyBytes from '@/lib/helpers/pretty-bytes'
+import usePagePagination from '@/lib/hooks/page-pagination'
 
 const AdminPanelWorkspaces = () => {
+  const navigate = useNavigate()
+  const location = useLocation()
+  const [list, setList] = useState<WorkspaceManagementList | undefined>(
+    undefined,
+  )
+  const { page, size, steps, setPage, setSize } = usePagePagination({
+    navigate,
+    location,
+    storage: adminWorkspacesPaginationStorage(),
+  })
+
+  useEffect(() => {
+    AdminApi.listWorkspaces({ page: page, size: size }).then((value) =>
+      setList(value),
+    )
+  }, [page, size])
+
+  if (!list) {
+    return <SectionSpinner />
+  }
+
   return (
     <>
       <Helmet>
@@ -64,35 +63,72 @@ const AdminPanelWorkspaces = () => {
       </Helmet>
       <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
         <Heading className={cx('text-heading')}>Workspaces management</Heading>
-        <Stack direction="column" spacing={2}>
-          <Table variant="simple">
-            <Thead>
-              <Tr>
-                <Th>Workspace name</Th>
-                <Th>Organisation</Th>
-                <Th>Storage</Th>
-                <Th>Actions</Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              {workspaces.workspaces.map((workspace) => (
-                <Tr key={workspace.id}>
-                  <Td>{workspace.name}</Td>
-                  <Td>
-                    <Button>Show owner</Button>
-                  </Td>
-                  <Td>
-                    <Button>Show groups</Button>
-                  </Td>
-                  <Td>
-                    <Button>Manage</Button>
-                    <Button colorScheme="red">Suspend</Button>
-                  </Td>
+        {list && list.data.length > 0 ? (
+          <Stack direction="column" spacing={2}>
+            <Table variant="simple">
+              <Thead>
+                <Tr>
+                  <Th>Workspace name</Th>
+                  <Th>Organization</Th>
+                  <Th>Quota</Th>
+                  <Th>Create time</Th>
+                  <Th>Update time</Th>
+                  <Th>Actions</Th>
                 </Tr>
-              ))}
-            </Tbody>
-          </Table>
-        </Stack>
+              </Thead>
+              <Tbody>
+                {list.data.map((workspace) => (
+                  <Tr key={workspace.id}>
+                    <Td>{workspace.name}</Td>
+                    <Td>
+                      <Button>{workspace.organization.name}</Button>
+                    </Td>
+                    <Td>{prettyBytes(workspace.storageCapacity)}</Td>
+                    <Td>
+                      {new Date(workspace.createTime).toLocaleDateString()}
+                    </Td>
+                    <Td>{new Date(workspace.updateTime).toLocaleString()}</Td>
+                    <Td>
+                      <Menu>
+                        {({ isOpen }) => (
+                          <>
+                            <MenuButton
+                              isActive={isOpen}
+                              as={Button}
+                              rightIcon={
+                                isOpen ? <IconChevronUp /> : <IconChevronDown />
+                              }
+                            >
+                              Actions
+                            </MenuButton>
+                            <MenuList>
+                              <MenuItem>Rename</MenuItem>
+                              <MenuItem>Change quota</MenuItem>
+                            </MenuList>
+                          </>
+                        )}
+                      </Menu>
+                    </Td>
+                  </Tr>
+                ))}
+              </Tbody>
+            </Table>
+          </Stack>
+        ) : (
+          <div> No workspaces found </div>
+        )}
+        {list ? (
+          <PagePagination
+            style={{ alignSelf: 'end' }}
+            totalElements={list.totalElements}
+            totalPages={Math.ceil(list.totalElements / size)}
+            page={page}
+            size={size}
+            steps={steps}
+            setPage={setPage}
+            setSize={setSize}
+          />
+        ) : null}
       </div>
     </>
   )

@@ -8,14 +8,15 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
 import fs from 'fs/promises'
-import { getConfig } from '@/config/config'
-import { ErrorCode, newError } from '@/infra/error'
-import { newHyphenlessUuid } from '@/infra/id'
-import { sendTemplateMail } from '@/infra/mail'
-import { hashPassword, verifyPassword } from '@/infra/password'
-import search, { USER_SEARCH_INDEX } from '@/infra/search'
-import { User } from '@/user/model'
+import {getConfig} from '@/config/config'
+import {ErrorCode, newError} from '@/infra/error'
+import {newHyphenlessUuid} from '@/infra/id'
+import {sendTemplateMail} from '@/infra/mail'
+import {hashPassword, verifyPassword} from '@/infra/password'
+import search, {USER_SEARCH_INDEX} from '@/infra/search'
+import {User} from '@/user/model'
 import userRepo from '@/user/repo'
+import {UserSuspendRequest} from "@/infra/admin-requests";
 
 export type UserDTO = {
   id: string
@@ -67,8 +68,8 @@ export async function getUserListPaginated(
   return await userRepo.listAllPaginated(page, size)
 }
 
-export async function getUserCount(): Promise<{ count: number }> {
-  return { count: await userRepo.getUserCount() }
+export async function getUserCount(): Promise<number> {
+  return await userRepo.getUserCount()
 }
 
 export async function getByPicture(picture: string): Promise<UserDTO> {
@@ -202,6 +203,18 @@ export async function deleteUser(id: string, options: UserDeleteOptions) {
     await search.index(USER_SEARCH_INDEX).deleteDocuments([user.id])
   } else {
     throw newError({ code: ErrorCode.InvalidPassword })
+  }
+}
+
+export async function suspendUser(options: UserSuspendRequest) {
+  const user = await userRepo.findByID(options.id)
+  if (user.isAdmin && !await userRepo.enoughActiveAdmins() && options.suspend) {
+    throw newError({ code: ErrorCode.OrphanError })
+  }
+  if (user) {
+    await userRepo.suspend(user.id, options.suspend)
+  } else {
+    throw newError({ code: ErrorCode.UserNotFound })
   }
 }
 

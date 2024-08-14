@@ -112,6 +112,26 @@ export const IconChevronRight = ({
   </span>
 )
 
+export const IconChevronDown = ({
+  className,
+  filled,
+  ...props
+}: IconBaseProps) => (
+  <span className={getClassName({ filled, className })} {...props}>
+    keyboard_arrow_down
+  </span>
+)
+
+export const IconChevronUp = ({
+  className,
+  filled,
+  ...props
+}: IconBaseProps) => (
+  <span className={getClassName({ filled, className })} {...props}>
+    keyboard_arrow_up
+  </span>
+)
+
 export const IconAdd = ({ className, filled, ...props }: IconBaseProps) => (
   <span className={getClassName({ filled, className })} {...props}>
     add

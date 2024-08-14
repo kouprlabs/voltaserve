@@ -11,11 +11,13 @@ import { useEffect, useState } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { Heading, Tab, TabList, Tabs } from '@chakra-ui/react'
 import cx from 'classnames'
+import AdminApi from '@/client/admin/admin'
 
 const AdminPanelDatabase = () => {
   const location = useLocation()
   const navigate = useNavigate()
   const [tabIndex, setTabIndex] = useState(0)
+  const [indexesAvailable, setIndexesAvailable] = useState(true)
 
   useEffect(() => {
     const segments = location.pathname.split('/')
@@ -27,6 +29,12 @@ const AdminPanelDatabase = () => {
     }
   }, [location])
 
+  useEffect(() => {
+    AdminApi.checkIndexesAvailability().then((value) => {
+      setIndexesAvailable(value)
+    })
+  }, [])
+
   return (
     <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
       <Heading className={cx('text-heading', 'shrink-0')} noOfLines={1}>
@@ -37,7 +45,11 @@ const AdminPanelDatabase = () => {
           <Tab onClick={() => navigate(`/admin/database/overview`)}>
             Overview
           </Tab>
-          <Tab onClick={() => navigate(`/admin/database/indexes`)}>Indexes</Tab>
+          {indexesAvailable ? (
+            <Tab onClick={() => navigate(`/admin/database/indexes`)}>
+              Indexes
+            </Tab>
+          ) : null}
         </TabList>
       </Tabs>
       <Outlet />
