@@ -16,6 +16,7 @@ import (
 
 type Pipeline interface {
 	Run(api_client.PipelineRunOptions) error
+	RunFromLocalPath(string, api_client.PipelineRunOptions) error
 }
 
 type Builder interface {

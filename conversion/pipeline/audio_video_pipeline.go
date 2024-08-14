@@ -57,6 +57,10 @@ func (p *audioVideoPipeline) Run(opts api_client.PipelineRunOptions) error {
 			infra.GetLogger().Error(err)
 		}
 	}(inputPath)
+	return p.RunFromLocalPath(inputPath, opts)
+}
+
+func (p *audioVideoPipeline) RunFromLocalPath(inputPath string, opts api_client.PipelineRunOptions) error {
 	if err := p.taskClient.Patch(opts.TaskID, api_client.TaskPatchOptions{
 		Fields: []string{api_client.TaskFieldName},
 		Name:   helper.ToPtr("Creating thumbnail."),

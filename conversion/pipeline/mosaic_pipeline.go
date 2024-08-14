@@ -58,13 +58,57 @@ func (p *mosaicPipeline) Run(opts api_client.PipelineRunOptions) error {
 			infra.GetLogger().Error(err)
 		}
 	}(inputPath)
+	return p.RunFromLocalPath(inputPath, opts)
+}
+
+func (p *mosaicPipeline) RunFromLocalPath(inputPath string, opts api_client.PipelineRunOptions) error {
+	if !p.fileIdent.IsImage(opts.Key) {
+		return errors.New("unsupported file type")
+	}
 	if err := p.taskClient.Patch(opts.TaskID, api_client.TaskPatchOptions{
 		Fields: []string{api_client.TaskFieldName},
 		Name:   helper.ToPtr("Creating mosaic."),
 	}); err != nil {
 		return err
 	}
-	if err := p.create(inputPath, opts); err != nil {
+	metadata, err := p.mosaicClient.Create(mosaic_client.MosaicCreateOptions{
+		Path:     inputPath,
+		S3Key:    filepath.FromSlash(opts.SnapshotID),
+		S3Bucket: opts.Bucket,
+	})
+	if err != nil {
+		return err
+	}
+	var zoomLevels []api_client.ZoomLevel
+	for _, level := range metadata.ZoomLevels {
+		zoomLevels = append(zoomLevels, api_client.ZoomLevel{
+			Index:               level.Index,
+			Width:               level.Width,
+			Height:              level.Height,
+			Rows:                level.Rows,
+			Cols:                level.Cols,
+			ScaleDownPercentage: level.ScaleDownPercentage,
+			Tile: api_client.Tile{
+				Width:         level.Tile.Width,
+				Height:        level.Tile.Height,
+				LastColWidth:  level.Tile.LastColWidth,
+				LastRowHeight: level.Tile.LastRowHeight,
+			},
+		})
+	}
+	if err := p.snapshotClient.Patch(api_client.SnapshotPatchOptions{
+		Options: opts,
+		Fields:  []string{api_client.SnapshotFieldMosaic},
+		Mosaic: &api_client.S3Object{
+			Key:    filepath.FromSlash(opts.SnapshotID + "/mosaic"),
+			Bucket: opts.Bucket,
+			Image: &api_client.ImageProps{
+				Width:      metadata.Width,
+				Height:     metadata.Height,
+				ZoomLevels: zoomLevels,
+			},
+		},
+	}); err != nil {
 		return err
 	}
 	if err := p.taskClient.Patch(opts.TaskID, api_client.TaskPatchOptions{
@@ -75,51 +119,4 @@ func (p *mosaicPipeline) Run(opts api_client.PipelineRunOptions) error {
 		return err
 	}
 	return nil
-}
-
-func (p *mosaicPipeline) create(inputPath string, opts api_client.PipelineRunOptions) error {
-	if p.fileIdent.IsImage(opts.Key) {
-		metadata, err := p.mosaicClient.Create(mosaic_client.MosaicCreateOptions{
-			Path:     inputPath,
-			S3Key:    filepath.FromSlash(opts.SnapshotID),
-			S3Bucket: opts.Bucket,
-		})
-		if err != nil {
-			return err
-		}
-		var zoomLevels []api_client.ZoomLevel
-		for _, level := range metadata.ZoomLevels {
-			zoomLevels = append(zoomLevels, api_client.ZoomLevel{
-				Index:               level.Index,
-				Width:               level.Width,
-				Height:              level.Height,
-				Rows:                level.Rows,
-				Cols:                level.Cols,
-				ScaleDownPercentage: level.ScaleDownPercentage,
-				Tile: api_client.Tile{
-					Width:         level.Tile.Width,
-					Height:        level.Tile.Height,
-					LastColWidth:  level.Tile.LastColWidth,
-					LastRowHeight: level.Tile.LastRowHeight,
-				},
-			})
-		}
-		if err := p.snapshotClient.Patch(api_client.SnapshotPatchOptions{
-			Options: opts,
-			Fields:  []string{api_client.SnapshotFieldMosaic},
-			Mosaic: &api_client.S3Object{
-				Key:    filepath.FromSlash(opts.SnapshotID + "/mosaic"),
-				Bucket: opts.Bucket,
-				Image: &api_client.ImageProps{
-					Width:      metadata.Width,
-					Height:     metadata.Height,
-					ZoomLevels: zoomLevels,
-				},
-			},
-		}); err != nil {
-			return err
-		}
-		return nil
-	}
-	return errors.New("unsupported file type")
 }
