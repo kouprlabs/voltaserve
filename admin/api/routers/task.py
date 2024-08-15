@@ -13,9 +13,9 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, status
 
 from ..database import fetch_task, fetch_tasks
-from ..dependencies import JWTBearer
 from ..exceptions import GenericNotFoundException
 from ..models import GenericNotFoundResponse, TaskResponse, TaskRequest, TaskListResponse, TaskListRequest
+from ..tasks.celery_app import celery_app
 
 task_api_router = APIRouter(
     prefix='/task',
@@ -24,19 +24,38 @@ task_api_router = APIRouter(
         status.HTTP_404_NOT_FOUND: {
             'model': GenericNotFoundResponse
         }
-    },
-    dependencies=[Depends(JWTBearer())]
+    }
+)
+
+user_task_api_router = APIRouter(
+    prefix='/user',
+    tags=['task'],
+    responses={
+        status.HTTP_404_NOT_FOUND: {
+            'model': GenericNotFoundResponse
+        }
+    }
+)
+
+admin_task_api_router = APIRouter(
+    prefix='/admin',
+    tags=['task'],
+    responses={
+        status.HTTP_404_NOT_FOUND: {
+            'model': GenericNotFoundResponse
+        }
+    }
 )
 
 
 # --- GET --- #
-@task_api_router.get(path="/",
-                     responses={
-                         status.HTTP_200_OK: {
-                             'model': TaskResponse
-                         }}
-                     )
-async def get_task(data: Annotated[TaskRequest, Depends()]):
+@user_task_api_router.get(path="",
+                          responses={
+                              status.HTTP_200_OK: {
+                                  'model': TaskResponse
+                              }}
+                          )
+async def get_user_task(data: Annotated[TaskRequest, Depends()]):
     task = fetch_task(_id=data.id)
     if task is None:
         raise GenericNotFoundException(detail=f'Task with id={data.id} does not exist')
@@ -44,19 +63,52 @@ async def get_task(data: Annotated[TaskRequest, Depends()]):
     return TaskResponse(**task)
 
 
-@task_api_router.get(path="/all",
-                     responses={
-                         status.HTTP_200_OK: {
-                             'model': TaskListResponse
-                         }
-                     }
-                     )
-async def get_all_tasks(data: Annotated[TaskListRequest, Depends()]):
+@user_task_api_router.get(path="/all",
+                          responses={
+                              status.HTTP_200_OK: {
+                                  'model': TaskListResponse
+                              }
+                          }
+                          )
+async def get_all_user_tasks(data: Annotated[TaskListRequest, Depends()]):
     tasks, count = fetch_tasks(page=data.page, size=data.size)
     if tasks is None:
         raise GenericNotFoundException(detail='This instance has no tasks')
 
     return TaskListResponse(data=tasks, totalElements=count['count'], page=data.page, size=data.size)
+
+
+@admin_task_api_router.get(path="/all",
+                           # responses={
+                           #     status.HTTP_200_OK: {
+                           #         'model': TaskListResponse
+                           #     }
+                           # }
+                           )
+async def get_all_admin_tasks():
+    return celery_app.control.inspect().reserved()
+
+
+@admin_task_api_router.get(path="/active",
+                           # responses={
+                           #     status.HTTP_200_OK: {
+                           #         'model': TaskListResponse
+                           #     }
+                           # }
+                           )
+async def get_active_admin_tasks():
+    return celery_app.control.inspect().active()
+
+
+@admin_task_api_router.get(path="/scheduled",
+                           # responses={
+                           #     status.HTTP_200_OK: {
+                           #         'model': TaskListResponse
+                           #     }
+                           # }
+                           )
+async def get_scheduled_admin_tasks():
+    return celery_app.control.inspect().scheduled()
 
 # --- PATCH --- #
 

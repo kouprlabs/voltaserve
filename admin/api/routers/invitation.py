@@ -10,13 +10,12 @@
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, Response
 
-from ..database import fetch_invitation, fetch_invitations
-from ..dependencies import JWTBearer
-from ..exceptions import GenericNotFoundException
+from ..database import fetch_invitation, fetch_invitations, update_invitation
+from ..exceptions import GenericNotFoundException, GenericApiException
 from ..models import GenericNotFoundResponse, InvitationResponse, InvitationListRequest, \
-    InvitationListResponse, InvitationRequest
+    InvitationListResponse, InvitationRequest, ConfirmInvitationRequest, GenericAcceptedResponse
 
 invitation_api_router = APIRouter(
     prefix='/invitation',
@@ -25,22 +24,25 @@ invitation_api_router = APIRouter(
         status.HTTP_404_NOT_FOUND: {
             'model': GenericNotFoundResponse
         }
-    },
-    dependencies=[Depends(JWTBearer())]
+    }
 )
 
 
 # --- GET --- #
-@invitation_api_router.get(path="/",
+@invitation_api_router.get(path="",
                            responses={
                                status.HTTP_200_OK: {
                                    'model': InvitationResponse
-                               }}
+                               }
+                           }
                            )
 async def get_invitation(data: Annotated[InvitationRequest, Depends()]):
-    invitation = fetch_invitation(_id=data.id)(_id=data.id)
-    if invitation is None:
-        raise GenericNotFoundException(detail=f'Invitation with id={data.id} does not exist')
+    try:
+        invitation = fetch_invitation(_id=data.id)(_id=data.id)
+        if invitation is None or invitation == {}:
+            raise GenericNotFoundException(detail=f'Invitation with id={data.id} does not exist')
+    except Exception as e:
+        raise GenericApiException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)) from e
 
     return InvitationResponse(**invitation)
 
@@ -53,13 +55,33 @@ async def get_invitation(data: Annotated[InvitationRequest, Depends()]):
                            }
                            )
 async def get_all_invitations(data: Annotated[InvitationListRequest, Depends()]):
-    invitations, count = fetch_invitations(page=data.page, size=data.size)
-    if invitations is None:
-        raise GenericNotFoundException(detail='This instance has no invitations')
+    try:
+        invitations, count = fetch_invitations(page=data.page, size=data.size)
+        if invitations is None or invitations == {} or count == 0:
+            raise GenericNotFoundException(detail='This instance has no invitations')
+    except Exception as e:
+        raise GenericApiException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)) from e
 
-    return InvitationListResponse(data=invitations, totalElements=count['count'], page=data.page, size=data.size)
+    return InvitationListResponse(data=invitations, totalElements=count, page=data.page, size=data.size)
+
 
 # --- PATCH --- #
+@invitation_api_router.patch(path="",
+                             responses={
+                                 status.HTTP_202_ACCEPTED: {
+                                     'model': GenericAcceptedResponse
+                                 }
+                             },
+                             status_code=status.HTTP_202_ACCEPTED
+                             )
+async def patch_invitation(data: ConfirmInvitationRequest, response: Response):
+    try:
+        update_invitation(data.model_dump(exclude_unset=True, exclude_none=True))
+    except Exception as e:
+        raise GenericApiException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)) from e
+
+    response.status_code = status.HTTP_202_ACCEPTED
+    return None
 
 # --- POST --- #
 

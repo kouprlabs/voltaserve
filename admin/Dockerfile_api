@@ -46,4 +46,4 @@ RUN poetry install --no-interaction --no-ansi &&\
 
 USER $USERNAME
 
-ENTRYPOINT ["python","-m", "api.uvi"]
+ENTRYPOINT ["python", "-m", "api.uvi"]

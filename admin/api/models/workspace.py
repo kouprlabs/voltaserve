@@ -11,12 +11,24 @@
 import datetime
 from typing import List
 
+from pydantic import Field
+
+from ..models.organization import OrganizationResponse
 from .generic import GenericPaginationRequest, GenericResponse, GenericListResponse, GenericRequest
 
 
 # --- REQUEST MODELS --- #
 class WorkspaceRequest(GenericRequest):
     pass
+
+
+class UpdateWorkspaceRequest(GenericRequest):
+    name: str | None = Field(None)
+    organizationId: str | None = Field(None)
+    storageCapacity: float | None = Field(None)
+    rootId: str | None = Field(None)
+    bucket: str | None = Field(None)
+    updateTime: datetime.datetime | None = Field(default_factory=datetime.datetime.now)
 
 
 class WorkspaceListRequest(GenericPaginationRequest):
@@ -30,12 +42,12 @@ class OrganizationWorkspaceListRequest(WorkspaceRequest, WorkspaceListRequest):
 # --- RESPONSE MODELS --- #
 class WorkspaceResponse(GenericResponse):
     name: str
-    organization_id: str
-    storage_capacity: float
-    root_id: str
-    bucket: str
-    create_time: datetime.datetime
-    update_time: datetime.datetime
+    organization: OrganizationResponse
+    storageCapacity: float
+    rootId: str | None = Field(None)
+    bucket: str | None = Field(None)
+    createTime: datetime.datetime
+    updateTime: datetime.datetime
 
 
 class WorkspaceListResponse(GenericListResponse):

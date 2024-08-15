@@ -9,15 +9,22 @@
 # licenses/AGPL.txt.
 
 import datetime
-from typing import List
+from typing import List, Any, Self
 
-from fastapi import status, HTTPException
-from pydantic import BaseModel, Field
+from fastapi import status
+from pydantic import BaseModel, Field, model_validator
 
 
 # --- REQUEST MODELS --- #
 class GenericRequest(BaseModel):
     id: str = Field(...)
+
+    # @model_validator(mode='after')
+    # def not_null(self) -> Self:
+    #     if not any(self.model_dump(exclude={'id'}).values()):
+    #         raise ValueError('At lease one value must be set!')
+    #
+    #     return self
 
 
 class GenericPaginationRequest(BaseModel):
@@ -32,9 +39,10 @@ class GenericResponse(BaseModel):
 
 class GenericListResponse(BaseModel):
     totalElements: int
+    totalPages: int | None = Field(None)
     page: int
     size: int
-    data: List[None]
+    data: List[Any]
 
 
 class GenericNotFoundResponse(BaseModel):
@@ -45,6 +53,20 @@ class GenericNotFoundResponse(BaseModel):
 class GenericUnauthorizedResponse(BaseModel):
     status_code: int = status.HTTP_401_UNAUTHORIZED
     detail: str = 'Unauthorized'
+
+
+class GenericServiceUnavailableResponse(BaseModel):
+    status_code: int = status.HTTP_401_UNAUTHORIZED
+    detail: str = 'Unauthorized'
+
+
+class GenericUnexpectedErrorResponse(BaseModel):
+    status_code: int = status.HTTP_500_INTERNAL_SERVER_ERROR
+    detail: str = 'Unexpected error'
+
+
+class GenericAcceptedResponse(BaseModel):
+    pass
 
 
 # --- TOKEN SPECIFIC --- #

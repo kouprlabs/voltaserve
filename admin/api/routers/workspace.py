@@ -10,13 +10,12 @@
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, Response
 
-from ..database import fetch_workspace, fetch_workspaces, fetch_organization_workspaces
-from ..dependencies import JWTBearer
-from ..exceptions import GenericNotFoundException
+from ..database import fetch_workspace, fetch_workspaces, update_workspace
+from ..exceptions import GenericNotFoundException, GenericApiException
 from ..models import GenericNotFoundResponse, WorkspaceResponse, WorkspaceRequest, WorkspaceListResponse, \
-    WorkspaceListRequest, OrganizationWorkspaceListRequest
+    WorkspaceListRequest, UpdateWorkspaceRequest, GenericUnexpectedErrorResponse, GenericAcceptedResponse
 
 workspace_api_router = APIRouter(
     prefix='/workspace',
@@ -24,19 +23,25 @@ workspace_api_router = APIRouter(
     responses={
         status.HTTP_404_NOT_FOUND: {
             'model': GenericNotFoundResponse
+        },
+        status.HTTP_500_INTERNAL_SERVER_ERROR: {
+            'model': GenericUnexpectedErrorResponse
+        },
+        status.HTTP_202_ACCEPTED: {
+            'model': GenericAcceptedResponse
         }
-    },
-    dependencies=[Depends(JWTBearer())]
+    }
 )
 
 
 # --- GET --- #
-@workspace_api_router.get(path="/",
+@workspace_api_router.get(path="",
                           responses={
                               status.HTTP_200_OK: {
                                   'model': WorkspaceResponse
                               }
-                          })
+                          }
+                          )
 async def get_workspace(data: Annotated[WorkspaceRequest, Depends()]):
     workspace = fetch_workspace(_id=data.id)
     if workspace is None:
@@ -57,24 +62,20 @@ async def get_all_workspaces(data: Annotated[WorkspaceListRequest, Depends()]):
     if workspaces is None:
         raise GenericNotFoundException(detail='This instance has no workspaces')
 
-    return WorkspaceListResponse(data=workspaces, totalElements=count['count'], page=data.page, size=data.size)
+    return WorkspaceListResponse(data=workspaces, totalElements=count, page=data.page, size=data.size)
 
-
-@workspace_api_router.get(path="/organization",
-                          responses={
-                              status.HTTP_200_OK: {
-                                  'model': WorkspaceListResponse
-                              }
-                          }
-                          )
-async def get_organization_workspaces(data: Annotated[OrganizationWorkspaceListRequest, Depends()]):
-    workspaces, count = fetch_organization_workspaces(organization_id=data.id, page=data.page, size=data.size)
-    if workspaces is None:
-        raise GenericNotFoundException(detail='This instance has no workspaces')
-
-    return WorkspaceListResponse(data=workspaces, totalElements=count['count'], page=data.page, size=data.size)
 
 # --- PATCH --- #
+@workspace_api_router.patch(path="",
+                            status_code=status.HTTP_202_ACCEPTED)
+async def patch_workspace(data: UpdateWorkspaceRequest, response: Response):
+    try:
+        update_workspace(data=data.model_dump(exclude_unset=True, exclude_none=True))
+    except Exception as e:
+        raise GenericApiException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)) from e
+
+    response.status_code = status.HTTP_202_ACCEPTED
+    return None
 
 # --- POST --- #
 

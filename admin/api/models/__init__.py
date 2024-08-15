@@ -9,23 +9,26 @@
 # licenses/AGPL.txt.
 
 from .generic import GenericRequest, GenericPaginationRequest, GenericResponse, GenericListResponse, \
-    GenericNotFoundResponse, GenericUnauthorizedResponse, GenericTokenPayload, GenericTokenRequest, GenericTokenResponse
-from .group import GroupRequest, GroupListRequest, GroupResponse, GroupListResponse
+    GenericNotFoundResponse, GenericUnauthorizedResponse, GenericTokenPayload, GenericTokenRequest, \
+    GenericTokenResponse, GenericUnexpectedErrorResponse, GenericAcceptedResponse, GenericServiceUnavailableResponse
+from .group import GroupRequest, GroupListRequest, GroupResponse, GroupListResponse, UpdateGroupRequest
 from .grouppermission import GroupPermissionRequest, GroupPermissionListRequest, GroupPermissionResponse, \
     GroupPermissionListResponse
 from .groupuser import GroupUserRequest, GroupUserListRequest, GroupUserResponse, GroupUserListResponse
-from .invitation import InvitationRequest, InvitationListRequest, InvitationResponse, InvitationListResponse
+from .invitation import InvitationRequest, InvitationListRequest, InvitationResponse, InvitationListResponse, \
+    ConfirmInvitationRequest
 from .organization import OrganizationRequest, OrganizationListRequest, OrganizationResponse, \
-    OrganizationListResponse, UserOrganizationResponse, UserOrganizationListResponse, UserOrganizationListRequest
-from .organizationuser import OrganizationUserRequest, OrganizationUserListRequest, OrganizationUserResponse, \
-    OrganizationUserListResponse
+    OrganizationListResponse, OrganizationUserListRequest, UpdateOrganizationRequest
 from .snapshot import SnapshotRequest, SnapshotListRequest, SnapshotResponse, SnapshotListResponse
 from .snapshotfile import SnapshotFileRequest, SnapshotFileListRequest, SnapshotFileResponse, SnapshotFileListResponse
 from .task import TaskRequest, TaskListRequest, TaskResponse, TaskListResponse
-from .user import UserRequest, UserListRequest, UserResponse, UserListResponse
+from .user import UserRequest, UserListRequest, UserResponse, UserListResponse, WorkspaceUserResponse, \
+    WorkspaceUserListResponse, OrganizationUserRequest, OrganizationUserListRequest, OrganizationUserResponse, \
+    OrganizationUserListResponse, WorkspaceUserListRequest, WorkspaceUserRequest, GroupUserRequest, \
+    GroupUserListRequest, GroupUserResponse, GroupUserListResponse
 from .userpermission import UserPermissionRequest, UserPermissionListRequest, UserPermissionResponse, \
     UserPermissionListResponse
 from .workspace import WorkspaceRequest, WorkspaceListRequest, WorkspaceResponse, WorkspaceListResponse, \
-    OrganizationWorkspaceListRequest
+    OrganizationWorkspaceListRequest, UpdateWorkspaceRequest
 from .token import TokenResponse, TokenPayload
 from .index import IndexRequest, IndexListRequest, IndexResponse, IndexListResponse

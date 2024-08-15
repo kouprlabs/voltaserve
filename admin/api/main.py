@@ -11,15 +11,14 @@
 import logging
 import time
 
-import jwt
-import psycopg2
-from fastapi import FastAPI, Request, Response, status, Depends
+from fastapi import FastAPI, Request, Response, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi_utils.tasks import repeat_every
 
-from .dependencies import settings, JWTBearer
-from .routers import users_api_router, group_api_router, organization_api_router, workspace_api_router, \
-    invitation_api_router, index_api_router
+from .dependencies import settings, conn
+from .exceptions import GenericServiceUnavailableException
+from .models import GenericServiceUnavailableResponse
+from .routers import group_api_router, organization_api_router, workspace_api_router, \
+    invitation_api_router, index_api_router, task_api_router, users_api_router
 
 app = FastAPI(debug=True)
 
@@ -34,31 +33,15 @@ app.add_middleware(
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.DEBUG)
 logger = logging.getLogger('voltaserve-admin-api')
 
+# task_api_router.include_router(user_task_api_router)
+# task_api_router.include_router(admin_task_api_router)
 app.include_router(users_api_router)
 app.include_router(group_api_router)
 app.include_router(organization_api_router)
-# app.include_router(task_api_router)
+app.include_router(task_api_router)
 app.include_router(workspace_api_router)
 app.include_router(invitation_api_router)
 app.include_router(index_api_router)
-
-
-@app.on_event("startup")
-@repeat_every(seconds=settings.admin_token_expiration)
-async def regenerate_admin_secret() -> None:
-    jwt.api_jws.PyJWS.header_typ = False
-    token = jwt.encode(payload={"sub": "SUPERUSER",
-                                "iat": time.time(),
-                                "iss": settings.url,
-                                "aud": settings.url,
-                                "exp": time.time() + settings.admin_token_expiration},
-                       key=settings.jwt_secret,
-                       algorithm=settings.jwt_algorithm
-                       )
-
-    logger.info(f"Admin token: \n{token}")
-    settings.admin_token = token
-    del token
 
 
 @app.middleware("http")
@@ -69,42 +52,48 @@ async def add_process_time_header(request: Request, call_next):
     return response
 
 
-@app.get('/', tags=['main'], dependencies=[Depends(JWTBearer())])
+@app.get('/', tags=['main'])
 async def root():
     return {"detail": "Hello, it is root of admin microservice!"}
 
 
-@app.get('/liveness', tags=['liveness'])
-async def liveness():
+@app.get(path='/liveness',
+         tags=['liveness'],
+         status_code=status.HTTP_204_NO_CONTENT,
+         responses={
+             status.HTTP_204_NO_CONTENT: {},
+             status.HTTP_503_SERVICE_UNAVAILABLE: {
+                 'model': GenericServiceUnavailableResponse
+             }
+         }
+         )
+async def liveness(response: Response):
     try:
-        psycopg2.connect(host=settings.db_host,
-                         user=settings.db_user,
-                         password=settings.db_password,
-                         dbname=settings.db_name,
-                         port=settings.db_port)
-        return Response(
-            status_code=status.HTTP_204_NO_CONTENT,
-        )
+        with conn.cursor() as curs:
+            curs.execute('SELECT 1;')
+
+        response.status_code = status.HTTP_204_NO_CONTENT
+        return None
     except Exception as e:
-        return Response(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            content=e
-        )
+        raise GenericServiceUnavailableException(detail=str(e))
 
 
-@app.get('/readiness', tags=['readiness'])
-async def readiness():
+@app.get(path='/readiness',
+         tags=['readiness'],
+         status_code=status.HTTP_204_NO_CONTENT,
+         responses={
+             status.HTTP_204_NO_CONTENT: {},
+             status.HTTP_503_SERVICE_UNAVAILABLE: {
+                 'model': GenericServiceUnavailableResponse
+             }
+         }
+         )
+async def readiness(response: Response):
     try:
-        psycopg2.connect(host=settings.db_host,
-                         user=settings.db_user,
-                         password=settings.db_password,
-                         dbname=settings.db_name,
-                         port=settings.db_port)
-        return Response(
-            status_code=status.HTTP_204_NO_CONTENT,
-        )
+        with conn.cursor() as curs:
+            curs.execute('SELECT 1;')
+
+        response.status_code = status.HTTP_204_NO_CONTENT
+        return None
     except Exception as e:
-        return Response(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            content=e
-        )
+        raise GenericServiceUnavailableException(detail=str(e))

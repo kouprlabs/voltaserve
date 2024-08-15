@@ -7,66 +7,64 @@
 # the Business Source License, use of this software will be governed
 # by the GNU Affero General Public License v3.0 only, included in the file
 # licenses/AGPL.txt.
+from psycopg import DatabaseError
 
-from psycopg2 import extras, connect, DatabaseError
-
-from ..dependencies import settings
-
-conn = connect(host=settings.db_host,
-               user=settings.db_user,
-               password=settings.db_password,
-               dbname=settings.db_name,
-               port=settings.db_port)
+from ..dependencies import conn, parse_sql_update_query
 
 
 # --- FETCH --- #
 def fetch_workspace(_id: str):
-    with conn.cursor(cursor_factory=extras.RealDictCursor) as curs:
-        try:
+    try:
+        with conn.cursor() as curs:
             curs.execute(
-                f"SELECT id, name, organization_id, storage_capacity, root_id, bucket, create_time, update_time "
-                f"FROM {settings.db_name}.workspace "
-                f"WHERE id='{_id}'")
+                f'SELECT w.id, w.name, w.organization_id as "organizationId", o.name as "organizationName", '
+                f'w.storage_capacity as "storageCapacity", w.root_id as "rootId", w.bucket,'
+                f' w.create_time as "createTime", w.update_time as "updateTime" '
+                f'FROM workspace w join organization o on w.organization_id = o.id '
+                f'WHERE w.id = \'{_id}\'')
             return curs.fetchone()
-        except (Exception, DatabaseError) as error:
-            print(error)
+    except DatabaseError as error:
+        raise error
 
 
 def fetch_workspaces(page=1, size=10):
-    with conn.cursor(cursor_factory=extras.RealDictCursor) as curs:
-        try:
-            curs.execute(
-                f"SELECT id, name, organization_id, storage_capacity, root_id, bucket, create_time, update_time "
-                f"FROM {settings.db_name}.workspace "
-                f"ORDER BY create_time "
-                f"OFFSET {(page - 1) * size} "
-                f"LIMIT {size}")
-            return curs.fetchall()
-        except (Exception, DatabaseError) as error:
-            print(error)
+    try:
+        with conn.cursor() as curs:
+            data = curs.execute(
+                f'SELECT w.id, w.name, w.organization_id, o.name as "organization_name", '
+                f'o.create_time as "organization_create_time", o.update_time as "organization_update_time", '
+                f'w.storage_capacity, w.root_id, w.bucket, w.create_time, w.update_time '
+                f'FROM workspace w join organization o on w.organization_id = o.id '
+                f'ORDER BY w.create_time '
+                f'OFFSET {(page - 1) * size} '
+                f'LIMIT {size}').fetchall()
 
+            count = curs.execute(f'SELECT count(1) FROM workspace').fetchone()
+            return ({'id': d.get('id'),
+                     'createTime': d.get('create_time'),
+                     'updateTime': d.get('update_time'),
+                     'name': d.get('name'),
+                     'storageCapacity': d.get('storage_capacity'),
+                     'rootId': d.get('root_id'),
+                     'bucket': d.get('bucket'),
+                     'organization': {
+                         'id': d.get('organization_id'),
+                         'name': d.get('organization_name'),
+                         'createTime': d.get('organization_create_time'),
+                         'updateTime': d.get('organization_update_time'),
+                     }
+                     } for d in data), count['count']
+    except DatabaseError as error:
+        raise error
 
-def fetch_organization_workspaces(organization_id: str, page=1, size=10):
-    with conn.cursor(cursor_factory=extras.RealDictCursor) as curs:
-        try:
-            curs.execute(
-                f"SELECT id, name, organization_id, storage_capacity, root_id, bucket, create_time, update_time "
-                f"FROM {settings.db_name}.workspace "
-                f"WHERE organization_id = '{organization_id}' "
-                f"ORDER BY create_time "
-                f"OFFSET {(page - 1) * size} "
-                f"LIMIT {size}")
-            data = curs.fetchall()
-
-            curs.execute(f"SELECT count(1) "
-                         f"FROM {settings.db_name}.workspace")
-            count = curs.fetchone()
-
-            return data, count
-        except (Exception, DatabaseError) as error:
-            print(error)
 
 # --- UPDATE --- #
+def update_workspace(data: dict):
+    try:
+        with conn.cursor() as curs:
+            curs.execute(parse_sql_update_query('workspace', data))
+    except DatabaseError as error:
+        raise error
 
 # --- CREATE --- #
 

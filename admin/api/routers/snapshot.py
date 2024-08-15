@@ -31,7 +31,7 @@ snapshot_api_router = APIRouter(
 
 
 # --- GET --- #
-@snapshot_api_router.get(path="/",
+@snapshot_api_router.get(path="",
                          responses={
                              status.HTTP_200_OK: {
                                  'model': SnapshotResponse

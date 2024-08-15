@@ -8,32 +8,26 @@
 # by the GNU Affero General Public License v3.0 only, included in the file
 # licenses/AGPL.txt.
 
-from psycopg2 import extras, connect, DatabaseError
+from psycopg import DatabaseError
 
-from ..dependencies import settings
-
-conn = connect(host=settings.db_host,
-               user=settings.db_user,
-               password=settings.db_password,
-               dbname=settings.db_name,
-               port=settings.db_port)
+from ..dependencies import conn
 
 
 # --- FETCH --- #
 def fetch_index(_id: str):
-    with conn.cursor(cursor_factory=extras.RealDictCursor) as curs:
-        try:
+    try:
+        with conn.cursor() as curs:
             curs.execute(f"SELECT tablename, indexname, indexdef "
                          f"FROM pg_indexes "
                          f"WHERE schemaname = 'public' AND indexname='{_id}'")
             return curs.fetchone()
-        except (Exception, DatabaseError) as error:
-            print(error)
+    except DatabaseError as error:
+        raise error
 
 
 def fetch_indexes(page=1, size=10):
-    with conn.cursor(cursor_factory=extras.RealDictCursor) as curs:
-        try:
+    try:
+        with conn.cursor() as curs:
             curs.execute(f"SELECT tablename, indexname, indexdef "
                          f"FROM pg_indexes "
                          f"WHERE schemaname = 'public' "
@@ -46,8 +40,8 @@ def fetch_indexes(page=1, size=10):
             count = curs.fetchone()
 
             return data, count
-        except (Exception, DatabaseError) as error:
-            print(error)
+    except DatabaseError as error:
+        raise error
 
 # --- UPDATE --- #
 
