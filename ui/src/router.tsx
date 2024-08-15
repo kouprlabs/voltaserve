@@ -17,6 +17,7 @@ import AdminPanelDatabaseIndexes from '@/pages/admin/admin-panel-database-indexe
 import AdminPanelDatabaseOverview from '@/pages/admin/admin-panel-database-overview'
 import AdminPanelGroups from '@/pages/admin/admin-panel-groups'
 import AdminPanelInvitations from '@/pages/admin/admin-panel-invitations'
+import AdminPanelOrganization from '@/pages/admin/admin-panel-organization'
 import AdminPanelOrganizations from '@/pages/admin/admin-panel-organizations'
 import AdminPanelOverview from '@/pages/admin/admin-panel-overview'
 import AdminPanelUser from '@/pages/admin/admin-panel-user'
@@ -201,6 +202,10 @@ const router = createBrowserRouter([
           {
             path: 'admin/organizations',
             element: <AdminPanelOrganizations />,
+          },
+          {
+            path: 'admin/organizations/:id',
+            element: <AdminPanelOrganization />,
           },
           {
             path: 'admin/groups',

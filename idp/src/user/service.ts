@@ -16,7 +16,7 @@ import {hashPassword, verifyPassword} from '@/infra/password'
 import search, {USER_SEARCH_INDEX} from '@/infra/search'
 import {User} from '@/user/model'
 import userRepo from '@/user/repo'
-import {UserSuspendRequest} from "@/infra/admin-requests";
+import {UserAdminRequest, UserSuspendRequest} from "@/infra/admin-requests";
 
 export type UserDTO = {
   id: string
@@ -213,6 +213,18 @@ export async function suspendUser(options: UserSuspendRequest) {
   }
   if (user) {
     await userRepo.suspend(user.id, options.suspend)
+  } else {
+    throw newError({ code: ErrorCode.UserNotFound })
+  }
+}
+
+export async function makeAdminUser(options: UserAdminRequest) {
+  const user = await userRepo.findByID(options.id)
+  if (user.isAdmin && !await userRepo.enoughActiveAdmins() && options.makeAdmin) {
+    throw newError({ code: ErrorCode.OrphanError })
+  }
+  if (user) {
+    await userRepo.makeAdmin(user.id, options.makeAdmin)
   } else {
     throw newError({ code: ErrorCode.UserNotFound })
   }

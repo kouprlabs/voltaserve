@@ -11,11 +11,7 @@ import { Heading } from '@chakra-ui/react'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 
-const AdminPanelUser = () => {
-  // if (error) {
-  //   return null
-  // }
-  //
+const AdminPanelOrganization = () => {
   // if (!list) {
   //   return <SectionSpinner />
   // }
@@ -23,13 +19,15 @@ const AdminPanelUser = () => {
   return (
     <>
       <Helmet>
-        <title>User management</title>
+        <title>Organization management</title>
       </Helmet>
       <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
-        <Heading className={cx('text-heading')}>User management</Heading>
+        <Heading className={cx('text-heading')}>
+          Organization management
+        </Heading>
       </div>
     </>
   )
 }
 
-export default AdminPanelUser
+export default AdminPanelOrganization

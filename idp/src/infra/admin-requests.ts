@@ -22,6 +22,10 @@ export interface UserSuspendRequest extends UserIdRequest {
   suspend: boolean
 }
 
+export interface UserAdminRequest extends UserIdRequest {
+  makeAdmin: boolean
+}
+
 export type UserCreationDate = {
   userCreationDate: string
 }

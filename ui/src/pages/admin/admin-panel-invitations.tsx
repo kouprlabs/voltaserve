@@ -21,6 +21,7 @@ import {
   Table,
   Tbody,
   Td,
+  Text,
   Th,
   Thead,
   Tr,
@@ -33,6 +34,7 @@ import { IconChevronDown, IconChevronUp } from '@/lib/components/icons'
 import PagePagination from '@/lib/components/page-pagination'
 import SectionSpinner from '@/lib/components/section-spinner'
 import usePagePagination from '@/lib/hooks/page-pagination'
+import AdminConfirmationModal from '@/pages/admin/admin-confirmation-modal'
 
 const AdminPanelInvitations = () => {
   const navigate = useNavigate()
@@ -40,17 +42,63 @@ const AdminPanelInvitations = () => {
   const [list, setList] = useState<InvitationsManagementList | undefined>(
     undefined,
   )
+  const [isSubmitting, setSubmitting] = useState(false)
+  const [invitationId, setInvitationId] = useState<string | undefined>(
+    undefined,
+  )
+  const [invitationDetails, setInvitationDetails] = useState<
+    string | undefined
+  >(undefined)
+  const [actionState, setActionState] = useState<boolean | undefined>(undefined)
+  const [confirmInvitationWindowOpen, setConfirmInvitationWindowOpen] =
+    useState(false)
+  const [confirmWindowAction, setConfirmWindowAction] = useState<
+    string | undefined
+  >(undefined)
   const { page, size, steps, setPage, setSize } = usePagePagination({
     navigate,
     location,
     storage: adminInvitationsPaginationStorage(),
   })
 
+  const changeInvitationStatus = async (
+    id: string | null,
+    invitation: string | null,
+    accept: boolean | null,
+    confirm: boolean = false,
+  ) => {
+    if (confirm && invitationId && actionState !== undefined) {
+      setSubmitting(true)
+      try {
+        await AdminApi.invitationChangeStatus({
+          id: invitationId,
+          accept: actionState,
+        })
+      } finally {
+        closeConfirmationWindow()
+      }
+    } else if (id && accept !== null && invitation) {
+      setConfirmInvitationWindowOpen(true)
+      setActionState(accept)
+      setInvitationDetails(invitation)
+      setInvitationId(id)
+    }
+  }
+
+  const closeConfirmationWindow = () => {
+    setInvitationId(undefined)
+    setInvitationDetails(undefined)
+    setActionState(undefined)
+    setConfirmInvitationWindowOpen(false)
+    setSubmitting(false)
+    setConfirmWindowAction(undefined)
+  }
+
   useEffect(() => {
     AdminApi.listInvitations({ page: page, size: size }).then((value) =>
       setList(value),
     )
-  }, [page, size])
+  }, [page, size, isSubmitting])
 
   if (!list) {
     return <SectionSpinner />
@@ -58,6 +106,14 @@ const AdminPanelInvitations = () => {
 
   return (
     <>
+      <AdminConfirmationModal
+        isOpen={confirmInvitationWindowOpen}
+        action={confirmWindowAction}
+        target={invitationDetails}
+        closeConfirmationWindow={closeConfirmationWindow}
+        isSubmitting={isSubmitting}
+        request={changeInvitationStatus}
+      />
       <Helmet>
         <title>Invitations management</title>
       </Helmet>
@@ -80,36 +136,88 @@ const AdminPanelInvitations = () => {
                 {list.data.map((invitation) => (
                   <Tr key={invitation.id}>
                     <Td>
-                      <Button>{invitation.organization.name}</Button>
+                      <Button
+                        onClick={() => {
+                          navigate(
+                            `/admin/organizations/${invitation.organization.id}`,
+                          )
+                        }}
+                      >
+                        {invitation.organization.name}
+                      </Button>
                     </Td>
-                    <Td>{invitation.email} </Td>
                     <Td>
-                      <Badge colorScheme="red">Pending</Badge>
+                      <Text>{invitation.email}</Text>
                     </Td>
                     <Td>
-                      {new Date(invitation.createTime).toLocaleDateString()}
+                      {invitation.status === 'pending' ? (
+                        <Badge colorScheme="yellow">Pending</Badge>
+                      ) : invitation.status === 'declined' ? (
+                        <Badge colorScheme="red">Declined</Badge>
+                      ) : invitation.status === 'accepted' ? (
+                        <Badge colorScheme="green">Accepted</Badge>
+                      ) : (
+                        <Badge colorScheme="gray">Unknown</Badge>
+                      )}
                     </Td>
-                    <Td>{new Date(invitation.updateTime).toLocaleString()}</Td>
                     <Td>
-                      <Menu>
-                        {({ isOpen }) => (
-                          <>
-                            <MenuButton
-                              isActive={isOpen}
-                              as={Button}
-                              rightIcon={
-                                isOpen ? <IconChevronUp /> : <IconChevronDown />
-                              }
-                            >
-                              Actions
-                            </MenuButton>
-                            <MenuList>
-                              <MenuItem>Accept</MenuItem>
-                              <MenuItem>Deny</MenuItem>
-                            </MenuList>
-                          </>
-                        )}
-                      </Menu>
+                      <Text>
+                        {new Date(invitation.createTime).toLocaleDateString()}
+                      </Text>
+                    </Td>
+                    <Td>
+                      <Text>
+                        {new Date(invitation.updateTime).toLocaleString()}
+                      </Text>
+                    </Td>
+                    <Td>
+                      {invitation.status === 'pending' ? (
+                        <Menu>
+                          {({ isOpen }) => (
+                            <>
+                              <MenuButton
+                                isActive={isOpen}
+                                as={Button}
+                                rightIcon={
+                                  isOpen ? (
+                                    <IconChevronUp />
+                                  ) : (
+                                    <IconChevronDown />
+                                  )
+                                }
+                              >
+                                Actions
+                              </MenuButton>
+                              <MenuList>
+                                {/*<MenuItem*/}
+                                {/*  onClick={async () => {*/}
+                                {/*    setConfirmWindowAction('deny invitation')*/}
+                                {/*    await changeInvitationStatus(*/}
+                                {/*      invitation.id,*/}
+                                {/*      `${invitation.email} to ${invitation.organization.name}`,*/}
+                                {/*      false,*/}
+                                {/*    )*/}
+                                {/*  }}*/}
+                                {/*>*/}
+                                {/*  Accept*/}
+                                {/*</MenuItem>*/}
+                                <MenuItem
+                                  onClick={async () => {
+                                    setConfirmWindowAction('deny invitation')
+                                    await changeInvitationStatus(
+                                      invitation.id,
+                                      `${invitation.email} to ${invitation.organization.name}`,
+                                      false,
+                                    )
+                                  }}
+                                >
+                                  Deny
+                                </MenuItem>
+                              </MenuList>
+                            </>
+                          )}
+                        </Menu>
+                      ) : null}
                     </Td>
                   </Tr>
                 ))}
