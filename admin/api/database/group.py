@@ -31,9 +31,9 @@ def fetch_group(_id: str):
                         'id': data.get('org_id'),
                         'name': data.get('org_name'),
                         'createTime': data.get('org_create_time'),
-                        'updateTime': data.get('org_update_time')
+                        'updateTime': data.get('org_update_time')}
                     }
-                    }
+
     except DatabaseError as error:
         raise error
 
@@ -51,7 +51,7 @@ def fetch_groups(page=1, size=10):
                                 f'OFFSET {(page - 1) * size} '
                                 f'LIMIT {size}').fetchall()
 
-            count = curs.execute(f'SELECT count(1) FROM "group"').fetchone()
+            count = curs.execute('SELECT count(1) FROM "group"').fetchone()
 
             return ({'id': d.get('group_id'),
                      'createTime': d.get('group_create_time'),
@@ -61,8 +61,7 @@ def fetch_groups(page=1, size=10):
                          'id': d.get('org_id'),
                          'name': d.get('org_name'),
                          'createTime': d.get('org_create_time'),
-                         'updateTime': d.get('org_update_time'),
-                     }
+                         'updateTime': d.get('org_update_time')}
                      } for d in data), count['count']
 
     except DatabaseError as error:

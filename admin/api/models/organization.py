@@ -25,10 +25,6 @@ class OrganizationListRequest(GenericPaginationRequest):
     pass
 
 
-class OrganizationUserListRequest(OrganizationRequest, OrganizationListRequest):
-    pass
-
-
 class UpdateOrganizationRequest(GenericRequest):
     name: str | None = Field(None)
     updateTime: datetime.datetime | None = Field(default_factory=datetime.datetime.now)

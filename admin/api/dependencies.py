@@ -64,7 +64,9 @@ def camel_to_snake(data: str):
 
 
 def parse_sql_update_query(tablename: str, data: dict):
-    return f'UPDATE "{tablename}" SET {", ".join(f'{camel_to_snake(k)} = \'{v}\'' for k, v in data.items() if k != "id")} WHERE id = \'{data["id"]}\';'
+    return (f'UPDATE "{tablename}" SET {", ".join(f'{camel_to_snake(k)} = '
+                                                  f'\'{v}\'' for k, v in data.items() if k != "id")} '
+            f'WHERE id = \'{data["id"]}\';')
 
 
 class JWTBearer(HTTPBearer):

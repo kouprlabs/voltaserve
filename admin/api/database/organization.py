@@ -34,7 +34,7 @@ def fetch_organizations(page=1, size=10):
                                 f'OFFSET {(page - 1) * size} '
                                 f'LIMIT {size}').fetchall()
 
-            count = curs.execute(f'SELECT count(1) FROM "organization"').fetchone()
+            count = curs.execute('SELECT count(1) FROM "organization"').fetchone()
 
             return data, count['count']
 
