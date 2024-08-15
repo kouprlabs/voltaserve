@@ -25,6 +25,7 @@ import {
   MenuList,
   MenuItem,
   Menu,
+  Center,
 } from '@chakra-ui/react'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
@@ -136,53 +137,6 @@ const AdminPanelUsers = () => {
         isSubmitting={isSubmitting}
         request={makeAdminUser}
       />
-      {/*<Modal*/}
-      {/*  isOpen={confirmSuspendWindowOpen}*/}
-      {/*  onClose={() => {*/}
-      {/*    closeConfirmationWindow()*/}
-      {/*  }}*/}
-      {/*>*/}
-      {/*  <ModalOverlay />*/}
-      {/*  <ModalContent>*/}
-      {/*    <ModalHeader>Are You sure?</ModalHeader>*/}
-      {/*    <ModalCloseButton />*/}
-      {/*    <ModalBody>*/}
-      {/*      You are going to {confirmWindowAction}*/}
-      {/*      <br />*/}
-      {/*      <Code children={userEmail} />*/}
-      {/*      <br />*/}
-      {/*      Please confirm this action*/}
-      {/*    </ModalBody>*/}
-      {/*    <ModalFooter>*/}
-      {/*      <Button*/}
-      {/*        type="button"*/}
-      {/*        variant="outline"*/}
-      {/*        colorScheme="blue"*/}
-      {/*        disabled={isSubmitting}*/}
-      {/*        onClick={() => {*/}
-      {/*          closeConfirmationWindow()*/}
-      {/*        }}*/}
-      {/*      >*/}
-      {/*        Cancel*/}
-      {/*      </Button>*/}
-      {/*      <Button*/}
-      {/*        type="button"*/}
-      {/*        variant="solid"*/}
-      {/*        colorScheme="blue"*/}
-      {/*        isLoading={isSubmitting}*/}
-      {/*        onClick={async () => {*/}
-      {/*          if (suspendAction !== undefined) {*/}
-      {/*            await suspendUser(null, null, null, true)*/}
-      {/*          } else if (adminAction !== undefined) {*/}
-      {/*            await makeAdminUser(null, null, null, true)*/}
-      {/*          }*/}
-      {/*        }}*/}
-      {/*      >*/}
-      {/*        Confirm*/}
-      {/*      </Button>*/}
-      {/*    </ModalFooter>*/}
-      {/*  </ModalContent>*/}
-      {/*</Modal>*/}
       <Helmet>
         <title>Users management</title>
       </Helmet>
@@ -255,7 +209,9 @@ const AdminPanelUsers = () => {
                     </Td>
                     <Td>
                       {getUserId() === user.id ? (
-                        <Badge colorScheme="red">It's you</Badge>
+                        <Center>
+                          <Badge colorScheme="red">It's you</Badge>
+                        </Center>
                       ) : (
                         <Menu>
                           {({ isOpen }) => (

@@ -13,7 +13,12 @@ import fs from 'fs/promises'
 import multer from 'multer'
 import os from 'os'
 import passport from 'passport'
-import {PaginatedRequest, UserAdminRequest, UserSuspendRequest} from '@/infra/admin-requests'
+import {
+  PaginatedRequest,
+  UserAdminPostRequest,
+  UserIdRequest,
+  UserSuspendPostRequest
+} from '@/infra/admin-requests'
 import { parseValidationError } from '@/infra/error'
 import { PassportRequest } from '@/infra/passport-request'
 import { checkAdmin } from '@/token/service'
@@ -32,7 +37,7 @@ import {
   updateEmailRequest,
   updateEmailConfirmation,
   getUserListPaginated,
-  getUserCount, suspendUser, makeAdminUser,
+  getUserCount, suspendUser, makeAdminUser, getUserByAdmin,
 } from './service'
 
 const router = Router()
@@ -43,39 +48,6 @@ router.get(
   async (req: PassportRequest, res: Response, next: NextFunction) => {
     try {
       res.json(await getUser(req.user.id))
-    } catch (err) {
-      next(err)
-    }
-  },
-)
-
-router.get(
-  '/all',
-  passport.authenticate('jwt', { session: false }),
-  async (req: PaginatedRequest, res: Response, next: NextFunction) => {
-    try {
-      checkAdmin(req.header('Authorization'))
-      res.json({
-        data: await getUserListPaginated(
-          parseInt(req.query.page),
-          parseInt(req.query.size),
-        ),
-        totalElements: await getUserCount(),
-        page: req.query.page,
-        size: req.query.size,
-      })
-    } catch (err) {
-      next(err)
-    }
-  },
-)
-
-router.get(
-  '/count',
-  passport.authenticate('jwt', { session: false }),
-  async (req: null, res: Response, next: NextFunction) => {
-    try {
-      res.json(await getUserCount())
     } catch (err) {
       next(err)
     }
@@ -98,46 +70,6 @@ router.post(
           req.body as UserUpdateFullNameOptions,
         ),
       )
-    } catch (err) {
-      next(err)
-    }
-  },
-)
-
-router.patch(
-  '/suspend',
-  passport.authenticate('jwt', { session: false }),
-  body('id').isString(),
-  body('suspend').isBoolean(),
-  async (req: PassportRequest, res: Response, next: NextFunction) => {
-    try {
-      checkAdmin(req.header('Authorization'))
-      const result = validationResult(req)
-      if (!result.isEmpty()) {
-        throw parseValidationError(result)
-      }
-      await suspendUser(req.body as UserSuspendRequest)
-      res.sendStatus(200)
-    } catch (err) {
-      next(err)
-    }
-  },
-)
-
-router.patch(
-  '/admin',
-  passport.authenticate('jwt', { session: false }),
-  body('id').isString(),
-  body('makeAdmin').isBoolean(),
-  async (req: PassportRequest, res: Response, next: NextFunction) => {
-    try {
-      checkAdmin(req.header('Authorization'))
-      const result = validationResult(req)
-      if (!result.isEmpty()) {
-        throw parseValidationError(result)
-      }
-      await makeAdminUser(req.body as UserAdminRequest)
-      res.sendStatus(200)
     } catch (err) {
       next(err)
     }
@@ -268,6 +200,82 @@ router.delete(
       } else {
         next(err)
       }
+    }
+  },
+)
+
+// ---------- Admin Part -------------
+
+router.get(
+  '/by_id',
+  passport.authenticate('jwt', { session: false }),
+  async (req: UserIdRequest, res: Response, next: NextFunction) => {
+    checkAdmin(req.header('Authorization'))
+    try {
+      res.json(await getUserByAdmin(req.query.id))
+    } catch (err) {
+      next(err)
+    }
+  },
+)
+
+router.get(
+  '/all',
+  passport.authenticate('jwt', { session: false }),
+  async (req: PaginatedRequest, res: Response, next: NextFunction) => {
+    try {
+      checkAdmin(req.header('Authorization'))
+      res.json({
+        data: await getUserListPaginated(
+          parseInt(req.query.page),
+          parseInt(req.query.size),
+        ),
+        totalElements: await getUserCount(),
+        page: req.query.page,
+        size: req.query.size,
+      })
+    } catch (err) {
+      next(err)
+    }
+  },
+)
+
+router.patch(
+  '/suspend',
+  passport.authenticate('jwt', { session: false }),
+  body('id').isString(),
+  body('suspend').isBoolean(),
+  async (req: PassportRequest, res: Response, next: NextFunction) => {
+    try {
+      checkAdmin(req.header('Authorization'))
+      const result = validationResult(req)
+      if (!result.isEmpty()) {
+        throw parseValidationError(result)
+      }
+      await suspendUser(req.body as UserSuspendPostRequest)
+      res.sendStatus(200)
+    } catch (err) {
+      next(err)
+    }
+  },
+)
+
+router.patch(
+  '/admin',
+  passport.authenticate('jwt', { session: false }),
+  body('id').isString(),
+  body('makeAdmin').isBoolean(),
+  async (req: PassportRequest, res: Response, next: NextFunction) => {
+    try {
+      checkAdmin(req.header('Authorization'))
+      const result = validationResult(req)
+      if (!result.isEmpty()) {
+        throw parseValidationError(result)
+      }
+      await makeAdminUser(req.body as UserAdminPostRequest)
+      res.sendStatus(200)
+    } catch (err) {
+      next(err)
     }
   },
 )

@@ -16,7 +16,7 @@ import {hashPassword, verifyPassword} from '@/infra/password'
 import search, {USER_SEARCH_INDEX} from '@/infra/search'
 import {User} from '@/user/model'
 import userRepo from '@/user/repo'
-import {UserAdminRequest, UserSuspendRequest} from "@/infra/admin-requests";
+import {UserAdminPostRequest, UserSuspendPostRequest} from "@/infra/admin-requests";
 
 export type UserDTO = {
   id: string
@@ -59,6 +59,10 @@ export type UserDeleteOptions = {
 
 export async function getUser(id: string): Promise<UserDTO> {
   return mapEntity(await userRepo.findByID(id))
+}
+
+export async function getUserByAdmin(id: string): Promise<User> {
+  return adminMapEntity(await userRepo.findByID(id))
 }
 
 export async function getUserListPaginated(
@@ -206,7 +210,7 @@ export async function deleteUser(id: string, options: UserDeleteOptions) {
   }
 }
 
-export async function suspendUser(options: UserSuspendRequest) {
+export async function suspendUser(options: UserSuspendPostRequest) {
   const user = await userRepo.findByID(options.id)
   if (user.isAdmin && !await userRepo.enoughActiveAdmins() && options.suspend) {
     throw newError({ code: ErrorCode.OrphanError })
@@ -218,7 +222,7 @@ export async function suspendUser(options: UserSuspendRequest) {
   }
 }
 
-export async function makeAdminUser(options: UserAdminRequest) {
+export async function makeAdminUser(options: UserAdminPostRequest) {
   const user = await userRepo.findByID(options.id)
   if (user.isAdmin && !await userRepo.enoughActiveAdmins() && options.makeAdmin) {
     throw newError({ code: ErrorCode.OrphanError })
@@ -238,6 +242,25 @@ export function mapEntity(entity: User): UserDTO {
     fullName: entity.fullName,
     picture: entity.picture,
     pendingEmail: entity.emailUpdateValue,
+  }
+  Object.keys(user).forEach(
+    (index) => !user[index] && user[index] !== undefined && delete user[index],
+  )
+  return user
+}
+
+export function adminMapEntity(entity: User): User {
+  const user: User = {
+    id: entity.id,
+    email: entity.email,
+    username: entity.username,
+    fullName: entity.fullName,
+    picture: entity.picture,
+    createTime: entity.createTime,
+    updateTime: entity.updateTime,
+    isActive: entity.isActive,
+    isAdmin: entity.isAdmin,
+    isEmailConfirmed: entity.isEmailConfirmed,
   }
   Object.keys(user).forEach(
     (index) => !user[index] && user[index] !== undefined && delete user[index],

@@ -19,7 +19,7 @@ export type User = {
   pendingEmail?: string
 }
 
-export interface AdminUsers extends User {
+export interface AdminUser extends User {
   isEmailConfirmed: boolean
   createTime: Date
   updateTime: Date
@@ -28,7 +28,7 @@ export interface AdminUsers extends User {
 }
 
 export interface AdminUsersResponse {
-  data: AdminUsers[]
+  data: AdminUser[]
   totalElements: number
   page: number
   size: number
@@ -68,11 +68,13 @@ export type DeleteOptions = {
 }
 
 type ListOptions = {
+  id?: string
   size?: number
   page?: number
 }
 
 type ListQueryParams = {
+  id?: string
   page?: string
   size?: string
 }
@@ -85,6 +87,13 @@ export default class UserAPI {
       () => idpFetcher({ url, method: 'GET' }) as Promise<User>,
       swrOptions,
     )
+  }
+
+  static async getUserById(options: baseUserIdRequest) {
+    return idpFetcher({
+      url: `/user/by_id?${this.paramsFromListOptions(options)}`,
+      method: 'GET',
+    }) as Promise<AdminUser>
   }
 
   static async getAllUsers(options: ListOptions) {
@@ -172,6 +181,9 @@ export default class UserAPI {
 
   static paramsFromListOptions(options?: ListOptions): URLSearchParams {
     const params: ListQueryParams = {}
+    if (options?.id) {
+      params.id = options.id.toString()
+    }
     if (options?.page) {
       params.page = options.page.toString()
     }

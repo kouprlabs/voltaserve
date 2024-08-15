@@ -9,31 +9,31 @@
 // licenses/AGPL.txt.
 import { Request } from 'express'
 
+export interface UserIdPostRequest extends Request {
+  id: string
+}
+
+export interface UserSuspendPostRequest extends UserIdPostRequest {
+  suspend: boolean
+}
+
+export interface UserAdminPostRequest extends UserIdPostRequest {
+  makeAdmin: boolean
+}
+
 export type Pagination = {
   page: string
   size: string
 }
 
-export interface UserIdRequest extends Request {
-  id: string
-}
-
-export interface UserSuspendRequest extends UserIdRequest {
-  suspend: boolean
-}
-
-export interface UserAdminRequest extends UserIdRequest {
-  makeAdmin: boolean
-}
-
-export type UserCreationDate = {
-  userCreationDate: string
-}
-
-export type UserUpdateDate = {
+export type UserId = {
   id: string
 }
 
 export interface PaginatedRequest extends Request {
   query: Pagination
+}
+
+export interface UserIdRequest extends Request {
+  query: UserId
 }

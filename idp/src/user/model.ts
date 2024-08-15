@@ -13,7 +13,7 @@ export type User = {
   fullName: string
   username: string
   email: string
-  passwordHash: string
+  passwordHash?: string
   refreshTokenValue?: string
   refreshTokenExpiry?: string
   resetPasswordToken?: string

@@ -28,7 +28,7 @@ import {
 } from '@chakra-ui/react'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
-import AdminApi, { InvitationsManagementList } from '@/client/admin/admin'
+import AdminApi, { InvitationManagementList } from '@/client/admin/admin'
 import { adminInvitationsPaginationStorage } from '@/infra/pagination'
 import { IconChevronDown, IconChevronUp } from '@/lib/components/icons'
 import PagePagination from '@/lib/components/page-pagination'
@@ -39,7 +39,7 @@ import AdminConfirmationModal from '@/pages/admin/admin-confirmation-modal'
 const AdminPanelInvitations = () => {
   const navigate = useNavigate()
   const location = useLocation()
-  const [list, setList] = useState<InvitationsManagementList | undefined>(
+  const [list, setList] = useState<InvitationManagementList | undefined>(
     undefined,
   )
   const [isSubmitting, setSubmitting] = useState(false)

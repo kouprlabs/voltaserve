@@ -8,6 +8,7 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
 import useSWR, { SWRConfiguration } from 'swr'
+import { PermissionType } from '@/client/api/permission'
 import { adminFetcher } from '@/client/fetcher'
 import { getConfig } from '@/config/config'
 
@@ -21,7 +22,7 @@ export interface ListResponse {
 export interface CommonFields {
   id: string
   createTime: Date
-  updateTime: Date
+  updateTime?: Date
 }
 
 export type IndexManagement = {
@@ -38,13 +39,19 @@ export interface OrganizationManagement extends CommonFields {
   name: string
 }
 
-export interface OrganizationExtendedManagement extends OrganizationManagement {
-  workspaces: WorkspaceManagement[]
-  groups: GroupManagement[]
+export interface OrganizationUserManagement extends CommonFields {
+  permission: PermissionType
+  organizationId: string
+  organizationName: string
+  createTime: Date
 }
 
 export interface OrganizationManagementList extends ListResponse {
   data: OrganizationManagement[]
+}
+
+export interface OrganizationUserManagementList extends ListResponse {
+  data: OrganizationUserManagement[]
 }
 
 export interface GroupManagement extends CommonFields {
@@ -53,8 +60,19 @@ export interface GroupManagement extends CommonFields {
   OrganizationName: string
 }
 
+export interface GroupUserManagement extends CommonFields {
+  permission: PermissionType
+  groupId: string
+  groupName: string
+  createTime: Date
+}
+
 export interface GroupManagementList extends ListResponse {
   data: GroupManagement[]
+}
+
+export interface GroupUserManagementList extends ListResponse {
+  data: GroupUserManagement[]
 }
 
 export interface WorkspaceManagement extends CommonFields {
@@ -65,27 +83,50 @@ export interface WorkspaceManagement extends CommonFields {
   bucket: string
 }
 
+export interface WorkspaceUserManagement extends CommonFields {
+  permission: PermissionType
+  workspaceId: string
+  workspaceName: string
+  createTime: Date
+}
+
 export interface WorkspaceManagementList extends ListResponse {
   data: WorkspaceManagement[]
 }
 
-export interface InvitationsManagement extends CommonFields {
+export interface WorkspaceUserManagementList extends ListResponse {
+  data: WorkspaceUserManagement[]
+}
+
+export interface InvitationManagement extends CommonFields {
   organization: OrganizationManagement
   ownerId: string
   email: string
   status: string
 }
 
-export interface InvitationsManagementList extends ListResponse {
-  data: InvitationsManagement[]
+export interface InvitationManagementList extends ListResponse {
+  data: InvitationManagement[]
+}
+
+export interface UserOrganizationManagement extends CommonFields {
+  username: string
+  permission: PermissionType
+  picture: string
+}
+
+export interface UserOrganizationManagementList extends ListResponse {
+  data: UserOrganizationManagement[]
 }
 
 export type ListOptions = {
+  id?: string
   size?: number
   page?: number
 }
 
 type ListQueryParams = {
+  id?: string
   page?: string
   size?: string
 }
@@ -130,9 +171,30 @@ export default class AdminApi {
     )
   }
 
+  static async getUsersByOrganization(options: ListOptions) {
+    return adminFetcher({
+      url: `/organization/users?${this.paramsFromListOptions(options)}`,
+      method: 'GET',
+    }) as Promise<UserOrganizationManagementList>
+  }
+
   static async listGroups(options: ListOptions) {
     return adminFetcher({
       url: `/group/all?${this.paramsFromListOptions(options)}`,
+      method: 'GET',
+    }) as Promise<GroupManagementList>
+  }
+
+  static async getGroupsByUser(options: ListOptions) {
+    return adminFetcher({
+      url: `/user/groups?${this.paramsFromListOptions(options)}`,
+      method: 'GET',
+    }) as Promise<GroupUserManagementList>
+  }
+
+  static async getGroupsByOrganization(options: ListOptions) {
+    return adminFetcher({
+      url: `/organization/groups?${this.paramsFromListOptions(options)}`,
       method: 'GET',
     }) as Promise<GroupManagementList>
   }
@@ -144,9 +206,37 @@ export default class AdminApi {
     }) as Promise<OrganizationManagementList>
   }
 
+  static async getOrganizationsByUser(options: ListOptions) {
+    return adminFetcher({
+      url: `/user/organizations?${this.paramsFromListOptions(options)}`,
+      method: 'GET',
+    }) as Promise<OrganizationUserManagementList>
+  }
+
+  static async getOrganizationById(options: baseIdRequest) {
+    return adminFetcher({
+      url: `/organization?${this.paramsFromListOptions(options)}`,
+      method: 'GET',
+    }) as Promise<OrganizationManagement>
+  }
+
   static async listWorkspaces(options: ListOptions) {
     return adminFetcher({
       url: `/workspace/all?${this.paramsFromListOptions(options)}`,
+      method: 'GET',
+    }) as Promise<WorkspaceManagementList>
+  }
+
+  static async getWorkspacesByUser(options: ListOptions) {
+    return adminFetcher({
+      url: `/user/workspaces?${this.paramsFromListOptions(options)}`,
+      method: 'GET',
+    }) as Promise<WorkspaceUserManagementList>
+  }
+
+  static async getWorkspacesByOrganization(options: ListOptions) {
+    return adminFetcher({
+      url: `/organization/workspaces?${this.paramsFromListOptions(options)}`,
       method: 'GET',
     }) as Promise<WorkspaceManagementList>
   }
@@ -155,7 +245,7 @@ export default class AdminApi {
     return adminFetcher({
       url: `/invitation/all?${this.paramsFromListOptions(options)}`,
       method: 'GET',
-    }) as Promise<InvitationsManagementList>
+    }) as Promise<InvitationManagementList>
   }
 
   static async renameObject(options: baseIdNameRequest, object: string) {
@@ -176,6 +266,9 @@ export default class AdminApi {
 
   static paramsFromListOptions(options?: ListOptions): URLSearchParams {
     const params: ListQueryParams = {}
+    if (options?.id) {
+      params.id = options.id.toString()
+    }
     if (options?.page) {
       params.page = options.page.toString()
     }
