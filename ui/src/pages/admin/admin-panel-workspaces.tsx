@@ -48,7 +48,7 @@ const AdminPanelWorkspaces = () => {
     location,
     storage: adminWorkspacesPaginationStorage(),
   })
-  const [confirmWindowOpen, setConfirmWindowOpen] = useState(false)
+  const [confirmRenameWindowOpen, setConfirmRenameWindowOpen] = useState(false)
   const [isSubmitting, setSubmitting] = useState(false)
   const [currentName, setCurrentName] = useState<string | undefined>(undefined)
   const [workspaceId, setWorkspaceId] = useState<string | undefined>(undefined)
@@ -73,14 +73,14 @@ const AdminPanelWorkspaces = () => {
         closeConfirmationWindow()
       }
     } else if (id !== null && currentName !== null) {
-      setConfirmWindowOpen(true)
+      setConfirmRenameWindowOpen(true)
       setCurrentName(currentName)
       setWorkspaceId(id)
     }
   }
 
   const closeConfirmationWindow = () => {
-    setConfirmWindowOpen(false)
+    setConfirmRenameWindowOpen(false)
     setSubmitting(false)
     setCurrentName(undefined)
     setWorkspaceId(undefined)
@@ -100,7 +100,7 @@ const AdminPanelWorkspaces = () => {
     <>
       <AdminRenameModal
         closeConfirmationWindow={closeConfirmationWindow}
-        isOpen={confirmWindowOpen}
+        isOpen={confirmRenameWindowOpen}
         isSubmitting={isSubmitting}
         previousName={currentName}
         object="workspace"
@@ -180,7 +180,7 @@ const AdminPanelWorkspaces = () => {
                               >
                                 Rename
                               </MenuItem>
-                              <MenuItem>Change quota</MenuItem>
+                              {/*<MenuItem>Change quota</MenuItem>*/}
                             </MenuList>
                           </>
                         )}

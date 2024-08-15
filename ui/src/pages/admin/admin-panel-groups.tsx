@@ -40,7 +40,7 @@ const AdminPanelGroups = () => {
     location,
     storage: adminGroupsPaginationStorage(),
   })
-  const [confirmWindowOpen, setConfirmWindowOpen] = useState(false)
+  const [confirmRenameWindowOpen, setConfirmRenameWindowOpen] = useState(false)
   const [isSubmitting, setSubmitting] = useState(false)
   const [currentName, setCurrentName] = useState<string | undefined>(undefined)
   const [groupId, setGroupId] = useState<string | undefined>(undefined)
@@ -62,14 +62,14 @@ const AdminPanelGroups = () => {
         closeConfirmationWindow()
       }
     } else if (id !== null && currentName !== null) {
-      setConfirmWindowOpen(true)
+      setConfirmRenameWindowOpen(true)
       setCurrentName(currentName)
       setGroupId(id)
     }
   }
 
   const closeConfirmationWindow = () => {
-    setConfirmWindowOpen(false)
+    setConfirmRenameWindowOpen(false)
     setSubmitting(false)
     setCurrentName(undefined)
     setGroupId(undefined)
@@ -89,7 +89,7 @@ const AdminPanelGroups = () => {
     <>
       <AdminRenameModal
         closeConfirmationWindow={closeConfirmationWindow}
-        isOpen={confirmWindowOpen}
+        isOpen={confirmRenameWindowOpen}
         isSubmitting={isSubmitting}
         previousName={currentName}
         object="group"

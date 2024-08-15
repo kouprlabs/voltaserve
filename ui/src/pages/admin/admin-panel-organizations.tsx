@@ -42,7 +42,7 @@ const AdminPanelOrganizations = () => {
     location,
     storage: adminOrganizationsPaginationStorage(),
   })
-  const [confirmWindowOpen, setConfirmWindowOpen] = useState(false)
+  const [confirmRenameWindowOpen, setConfirmRenameWindowOpen] = useState(false)
   const [isSubmitting, setSubmitting] = useState(false)
   const [currentName, setCurrentName] = useState<string | undefined>(undefined)
   const [organizationId, setOrganizationId] = useState<string | undefined>(
@@ -69,14 +69,14 @@ const AdminPanelOrganizations = () => {
         closeConfirmationWindow()
       }
     } else if (id !== null && currentName !== null) {
-      setConfirmWindowOpen(true)
+      setConfirmRenameWindowOpen(true)
       setCurrentName(currentName)
       setOrganizationId(id)
     }
   }
 
   const closeConfirmationWindow = () => {
-    setConfirmWindowOpen(false)
+    setConfirmRenameWindowOpen(false)
     setSubmitting(false)
     setCurrentName(undefined)
     setOrganizationId(undefined)
@@ -96,7 +96,7 @@ const AdminPanelOrganizations = () => {
     <>
       <AdminRenameModal
         closeConfirmationWindow={closeConfirmationWindow}
-        isOpen={confirmWindowOpen}
+        isOpen={confirmRenameWindowOpen}
         isSubmitting={isSubmitting}
         previousName={currentName}
         object="organization"

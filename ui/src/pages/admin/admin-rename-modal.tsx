@@ -73,7 +73,6 @@ const AdminRenameModal = (props: AdminRenameModalProps) => {
           validationSchema={props.formSchema}
           validateOnBlur={false}
           onSubmit={async (event) => {
-            console.log('click')
             await props.request(null, null, event.name, true)
           }}
         >
