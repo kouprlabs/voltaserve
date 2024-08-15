@@ -13,7 +13,6 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, status
 
 from ..database import fetch_index, fetch_indexes
-from ..dependencies import JWTBearer
 from ..exceptions import GenericNotFoundException
 from ..models import GenericNotFoundResponse, IndexListResponse, IndexListRequest, IndexResponse, IndexRequest
 
@@ -24,13 +23,12 @@ index_api_router = APIRouter(
         status.HTTP_404_NOT_FOUND: {
             'model': GenericNotFoundResponse
         }
-    },
-    dependencies=[Depends(JWTBearer())]
+    }
 )
 
 
 # --- GET --- #
-@index_api_router.get(path="/",
+@index_api_router.get(path="",
                       responses={
                           status.HTTP_200_OK: {
                               'model': IndexResponse
@@ -57,6 +55,7 @@ async def get_all_indexes(data: Annotated[IndexListRequest, Depends()]):
         raise GenericNotFoundException(detail='This instance has no indexes')
 
     return IndexListResponse(data=indexes, totalElements=count['count'], page=data.page, size=data.size)
+
 
 # --- PATCH --- #
 

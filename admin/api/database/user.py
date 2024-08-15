@@ -7,71 +7,74 @@
 # the Business Source License, use of this software will be governed
 # by the GNU Affero General Public License v3.0 only, included in the file
 # licenses/AGPL.txt.
+from psycopg import DatabaseError
 
-from psycopg2 import extras, connect, DatabaseError
-
-from ..dependencies import settings
-
-conn = connect(host=settings.db_host,
-               user=settings.db_user,
-               password=settings.db_password,
-               dbname=settings.db_name,
-               port=settings.db_port)
+from ..dependencies import conn
 
 
 # --- FETCH --- #
-def fetch_user(_id: str):
-    with conn.cursor(cursor_factory=extras.RealDictCursor) as curs:
-        try:
-            curs.execute(f"""
-            SELECT id, full_name, username, email, picture, 
-            is_email_confirmed, create_time, update_time 
-            FROM {settings.db_name}.user 
-            WHERE id='{_id}'""")
-            return curs.fetchone()
-        except (Exception, DatabaseError) as error:
-            print(error)
-
-
-def fetch_users(page=1, size=10):
-    with conn.cursor(cursor_factory=extras.RealDictCursor) as curs:
-        try:
-            curs.execute(f"""SELECT id, full_name, username, email, picture, 
-            is_email_confirmed, create_time, update_time 
-            FROM {settings.db_name}.user 
-            ORDER BY create_time 
-            OFFSET {(page - 1) * size} 
-            LIMIT {size}""")
-            data = curs.fetchall()
-
-            curs.execute(f"SELECT count(1) "
-                         f"FROM {settings.db_name}.user")
-            count = curs.fetchone()
-
-            return data, count
-        except (Exception, DatabaseError) as error:
-            print(error)
-
 
 def fetch_user_organizations(user_id: str, page=1, size=10):
-    with conn.cursor(cursor_factory=extras.RealDictCursor) as curs:
-        try:
-            curs.execute(f"SELECT * from {settings.db_name}.userpermission u "
-                         f"JOIN {settings.db_name}.organization o ON u.resource_id = o.id "
-                         f"WHERE u.user_id = '{user_id}' "
-                         f"ORDER BY o.create_time "
-                         f"OFFSET {(page - 1) * size} "
-                         f"LIMIT {size}")
-            data = curs.fetchall()
+    try:
+        with conn.cursor() as curs:
+            data = curs.execute(f'SELECT u.id, u."permission", u.create_time as "createTime", '
+                                f'o.id as "organizationId", o."name" as "organizationName" from userpermission u '
+                                f'JOIN organization o ON u.resource_id = o.id '
+                                f'WHERE u.user_id = \'{user_id}\' '
+                                f'ORDER BY u.create_time '
+                                f'OFFSET {(page - 1) * size} '
+                                f'LIMIT {size}').fetchall()
 
-            curs.execute(f"SELECT count(1) "
-                         f"FROM {settings.db_name}.user "
-                         f"WHERE u.user_id = '{user_id}' ")
-            count = curs.fetchone()
+            count = curs.execute(f'SELECT count(1) '
+                                 f'FROM userpermission u '
+                                 f'JOIN organization o ON u.resource_id = o.id '
+                                 f'WHERE u.user_id = \'{user_id}\'').fetchone()
 
-            return data, count
-        except (Exception, DatabaseError) as error:
-            print(error)
+            return data, count['count']
+    except DatabaseError as error:
+        raise error
+
+
+def fetch_user_workspaces(user_id: str, page=1, size=10):
+    try:
+        with conn.cursor() as curs:
+            data = curs.execute(f'SELECT u.id, u.permission, u.create_time as "createTime", '
+                                f'w.id as "workspaceId", w."name" as "workspaceName" '
+                                f'FROM userpermission u '
+                                f'JOIN workspace w ON u.resource_id = w.id WHERE u.user_id = \'{user_id}\' '
+                                f'ORDER BY u.create_time '
+                                f'OFFSET {(page - 1) * size} '
+                                f'LIMIT {size}').fetchall()
+
+            count = curs.execute(f'SELECT count(1)'
+                                 f'FROM userpermission u '
+                                 f'JOIN workspace w ON u.resource_id = w.id '
+                                 f'WHERE u.user_id = \'{user_id}\'').fetchone()
+
+            return data, count['count']
+    except DatabaseError as error:
+        raise error
+
+
+def fetch_user_groups(user_id: str, page=1, size=10):
+    try:
+        with conn.cursor() as curs:
+            data = curs.execute(f'SELECT u.id, u.permission, u.create_time as "createTime", '
+                                f'g.id as "groupId", g."name" as "groupName" '
+                                f'FROM userpermission u '
+                                f'JOIN "group" g ON u.resource_id = g.id WHERE u.user_id = \'{user_id}\' '
+                                f'ORDER BY u.create_time '
+                                f'OFFSET {(page - 1) * size} '
+                                f'LIMIT {size}').fetchall()
+
+            count = curs.execute(f'SELECT count(1)'
+                                 f'FROM userpermission u '
+                                 f'JOIN workspace w ON u.resource_id = w.id '
+                                 f'WHERE u.user_id = \'{user_id}\'').fetchone()
+
+            return data, count['count']
+    except DatabaseError as error:
+        raise error
 
 # --- UPDATE --- #
 

@@ -11,7 +11,7 @@
 import datetime
 from typing import List
 
-from pydantic import EmailStr
+from pydantic import EmailStr, Field
 
 from .generic import GenericPaginationRequest, GenericResponse, GenericListResponse, GenericRequest
 
@@ -25,16 +25,73 @@ class UserListRequest(GenericPaginationRequest):
     pass
 
 
+class OrganizationUserRequest(GenericRequest):
+    pass
+
+
+class OrganizationUserListRequest(OrganizationUserRequest, GenericPaginationRequest):
+    pass
+
+
+class WorkspaceUserRequest(GenericRequest):
+    pass
+
+
+class WorkspaceUserListRequest(WorkspaceUserRequest, GenericPaginationRequest):
+    pass
+
+
+class GroupUserRequest(GenericRequest):
+    pass
+
+
+class GroupUserListRequest(GroupUserRequest, GenericPaginationRequest):
+    pass
+
+
 # --- RESPONSE MODELS --- #
 class UserResponse(GenericResponse):
     fullName: str
     username: str
     email: EmailStr
     isEmailConfirmed: bool
-    picture: str | None
+    picture: str | None = Field(None)
     createTime: datetime.datetime
     updateTime: datetime.datetime
 
 
 class UserListResponse(GenericListResponse):
     data: List[UserResponse]
+
+
+class OrganizationUserResponse(GenericResponse):
+    permission: str
+    organizationId: str
+    organizationName: str
+    createTime: datetime.datetime
+
+
+class WorkspaceUserResponse(GenericResponse):
+    permission: str
+    workspaceId: str
+    workspaceName: str
+    createTime: datetime.datetime
+
+
+class GroupUserResponse(GenericResponse):
+    permission: str
+    groupId: str
+    groupName: str
+    createTime: datetime.datetime
+
+
+class OrganizationUserListResponse(GenericListResponse):
+    data: List[OrganizationUserResponse]
+
+
+class WorkspaceUserListResponse(GenericListResponse):
+    data: List[WorkspaceUserResponse]
+
+
+class GroupUserListResponse(GenericListResponse):
+    data: List[GroupUserResponse]

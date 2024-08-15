@@ -10,14 +10,12 @@
 
 from typing import Annotated
 
-from aiohttp import ClientSession
-from fastapi import APIRouter, Depends, status, Header
+from fastapi import APIRouter, Depends, status
 
-from ..database import fetch_user, fetch_users, fetch_user_organizations
-from ..dependencies import JWTBearer, settings
+from ..database import fetch_user_organizations, fetch_user_workspaces, fetch_user_groups
 from ..exceptions import GenericNotFoundException
-from ..models import GenericNotFoundResponse, UserOrganizationListRequest, UserOrganizationListResponse, \
-    UserListRequest, UserListResponse, UserRequest, UserResponse
+from ..models import GenericNotFoundResponse, OrganizationUserListRequest, OrganizationUserListResponse, \
+    WorkspaceUserListResponse, WorkspaceUserListRequest, GroupUserListResponse, GroupUserListRequest
 
 users_api_router = APIRouter(
     prefix='/user',
@@ -26,70 +24,63 @@ users_api_router = APIRouter(
         status.HTTP_404_NOT_FOUND: {
             'model': GenericNotFoundResponse
         }
-    },
-    dependencies=[Depends(JWTBearer())]
+    }
 )
 
 
 # --- GET --- #
-@users_api_router.get(path="/",
-                      responses={
-                          status.HTTP_200_OK: {
-                              'model': UserResponse
-                          }
-                      }
-                      )
-async def get_user(data: Annotated[UserRequest, Depends()]):
-    user = fetch_user(_id=data.id)
-    if user is None:
-        raise GenericNotFoundException(detail=f'User with id={data.id} does not exist')
-
-    return UserResponse(**user)
-
-
-@users_api_router.get(path="/all",
-                      responses={
-                          status.HTTP_200_OK: {
-                              'model': UserListResponse
-                          }
-                      }
-                      )
-async def get_all_users(data: Annotated[UserListRequest, Depends()], x_authorization: Annotated[str, Header()]):
-    async with ClientSession() as sess:
-        async with sess.get(f"{settings.idp_url}/v2/user/all?page=1&size=5", headers={'Authorization': x_authorization}) as resp:
-            if resp.status != 200:
-                raise GenericNotFoundException(detail='Wrong user authorization token')
-
-            users = await resp.json()
-
-        async with sess.get(f"{settings.idp_url}/v2/user/count", headers={'Authorization': x_authorization}) as resp:
-            if resp.status != 200:
-                raise GenericNotFoundException(detail='Wrong user authorization token')
-
-            count = await resp.json()
-
-    if users is None:
-        raise GenericNotFoundException(detail='This instance has no users')
-
-    return UserListResponse(data=users, totalElements=count['count'], page=data.page, size=data.size)
-
-
 @users_api_router.get(path="/organizations",
                       responses={
                           status.HTTP_200_OK: {
-                              'model': UserOrganizationListResponse
+                              'model': OrganizationUserListResponse
                           }
                       }
                       )
-async def get_user_organizations(data: Annotated[UserOrganizationListRequest, Depends()]):
+async def get_user_organizations(data: Annotated[OrganizationUserListRequest, Depends()]):
     organizations, count = fetch_user_organizations(user_id=data.id, page=data.page, size=data.size)
     if organizations is None:
         raise GenericNotFoundException(detail='This user has no organizations')
 
-    return UserOrganizationListResponse(data=organizations,
-                                        totalElements=count['count'],
+    return OrganizationUserListResponse(data=organizations,
+                                        totalElements=count,
                                         page=data.page,
                                         size=data.size)
+
+
+@users_api_router.get(path="/workspaces",
+                      responses={
+                          status.HTTP_200_OK: {
+                              'model': WorkspaceUserListResponse
+                          }
+                      }
+                      )
+async def get_user_workspaces(data: Annotated[WorkspaceUserListRequest, Depends()]):
+    workspaces, count = fetch_user_workspaces(user_id=data.id, page=data.page, size=data.size)
+    if workspaces is None:
+        raise GenericNotFoundException(detail='This user has no workspaces')
+
+    return WorkspaceUserListResponse(data=workspaces,
+                                     totalElements=count,
+                                     page=data.page,
+                                     size=data.size)
+
+
+@users_api_router.get(path="/groups",
+                      responses={
+                          status.HTTP_200_OK: {
+                              'model': GroupUserListResponse
+                          }
+                      }
+                      )
+async def get_user_groups(data: Annotated[GroupUserListRequest, Depends()]):
+    groups, count = fetch_user_groups(user_id=data.id, page=data.page, size=data.size)
+    if groups is None:
+        raise GenericNotFoundException(detail='This user has no groups')
+
+    return GroupUserListResponse(data=groups,
+                                 totalElements=count,
+                                 page=data.page,
+                                 size=data.size)
 
 # --- PATCH --- #
 

@@ -8,48 +8,74 @@
 # by the GNU Affero General Public License v3.0 only, included in the file
 # licenses/AGPL.txt.
 
-from psycopg2 import extras, connect, DatabaseError
+from psycopg import DatabaseError
 
-from ..dependencies import settings
-
-conn = connect(host=settings.db_host,
-               user=settings.db_user,
-               password=settings.db_password,
-               dbname=settings.db_name,
-               port=settings.db_port)
+from ..dependencies import conn, parse_sql_update_query
 
 
 # --- FETCH --- #
 def fetch_group(_id: str):
-    with conn.cursor(cursor_factory=extras.RealDictCursor) as curs:
-        try:
-            curs.execute(f"SELECT id, name, organization_id, create_time, update_time "
-                         f"FROM {settings.db_name}.group "
-                         f"WHERE id='{_id}'")
-            return curs.fetchone()
-        except (Exception, DatabaseError) as error:
-            print(error)
+    try:
+        with conn.cursor() as curs:
+            data = curs.execute(f'SELECT g.id as "group_id", g."name" as "group_name", g.create_time, g.update_time'
+                                f'o.id as "org_id", o."name" as "org_name", o.create_time as "org_create_time", '
+                                f'o.update_time as "org_update_time"'
+                                f'FROM "group" g '
+                                f'JOIN organization o ON g.organization_id = o.id '
+                                f'WHERE g.id=\'{_id}\'').fetchone()
+
+            return {'createTime': data.get('create_time'),
+                    'id': data.get('group_id'),
+                    'name': data.get('group_name'),
+                    'organization': {
+                        'id': data.get('org_id'),
+                        'name': data.get('org_name'),
+                        'createTime': data.get('org_create_time'),
+                        'updateTime': data.get('org_update_time')
+                    }
+                    }
+    except DatabaseError as error:
+        raise error
 
 
 def fetch_groups(page=1, size=10):
-    with conn.cursor(cursor_factory=extras.RealDictCursor) as curs:
-        try:
-            curs.execute(f"SELECT id, name, organization_id, create_time, update_time "
-                         f"FROM {settings.db_name}.group "
-                         f"ORDER BY create_time "
-                         f"OFFSET {(page - 1) * size} "
-                         f"LIMIT {size}")
-            data = curs.fetchall()
+    try:
+        with conn.cursor() as curs:
+            data = curs.execute(f'SELECT g.id as "group_id", g."name" as "group_name", g.create_time '
+                                f'as "group_create_time", g.update_time as "group_update_time", '
+                                f'o.id as "org_id", o."name" as "org_name", o.create_time as "org_create_time", '
+                                f'o.update_time as "org_update_time"'
+                                f'FROM "group" g '
+                                f'JOIN organization o ON g.organization_id = o.id '
+                                f'ORDER BY g.create_time '
+                                f'OFFSET {(page - 1) * size} '
+                                f'LIMIT {size}').fetchall()
 
-            curs.execute(f"SELECT count(1) "
-                         f"FROM {settings.db_name}.group")
-            count = curs.fetchone()
+            count = curs.execute(f'SELECT count(1) FROM "group"').fetchone()
 
-            return data, count
-        except (Exception, DatabaseError) as error:
-            print(error)
+            return ({'id': d.get('group_id'),
+                     'createTime': d.get('group_create_time'),
+                     'updateTime': d.get('group_update_time'),
+                     'name': d.get('group_name'),
+                     'organization': {
+                         'id': d.get('org_id'),
+                         'name': d.get('org_name'),
+                         'createTime': d.get('org_create_time'),
+                         'updateTime': d.get('org_update_time'),
+                     }
+                     } for d in data), count['count']
+
+    except DatabaseError as error:
+        raise error
+
 
 # --- UPDATE --- #
+def update_group(data: dict):
+    try:
+        with conn.cursor() as curs:
+            curs.execute(parse_sql_update_query('group', data))
+    except DatabaseError as error:
+        raise error
 
 # --- CREATE --- #
 

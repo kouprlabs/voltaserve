@@ -11,8 +11,9 @@
 import datetime
 from typing import List
 
-from pydantic import EmailStr
+from pydantic import EmailStr, Field
 
+from ..models.organization import OrganizationResponse
 from .generic import GenericPaginationRequest, GenericResponse, GenericListResponse, GenericRequest
 
 
@@ -25,14 +26,19 @@ class InvitationListRequest(GenericPaginationRequest):
     pass
 
 
+class ConfirmInvitationRequest(GenericRequest):
+    accept: bool
+    updateTime: datetime.datetime | None = Field(default_factory=datetime.datetime.now)
+
+
 # --- RESPONSE MODELS --- #
 class InvitationResponse(GenericResponse):
-    organization_id: str
-    owner_id: str
+    organization: OrganizationResponse
+    ownerId: str
     email: EmailStr
     status: str
-    create_time: datetime.datetime
-    update_time: datetime.datetime
+    createTime: datetime.datetime
+    updateTime: datetime.datetime
 
 
 class InvitationListResponse(GenericListResponse):

@@ -11,6 +11,9 @@
 import datetime
 from typing import List
 
+from pydantic import Field
+
+from ..models.organization import OrganizationResponse
 from .generic import GenericPaginationRequest, GenericResponse, GenericListResponse, GenericRequest
 
 
@@ -23,12 +26,17 @@ class GroupListRequest(GenericPaginationRequest):
     pass
 
 
+class UpdateGroupRequest(GenericRequest):
+    name: str | None = Field(None)
+    updateTime: datetime.datetime | None = Field(default_factory=datetime.datetime.now)
+
+
 # --- RESPONSE MODELS --- #
 class GroupResponse(GenericResponse):
     name: str
-    organization_id: str
-    create_time: datetime.datetime
-    update_time: datetime.datetime
+    organization: OrganizationResponse
+    createTime: datetime.datetime = Field(None)
+    updateTime: datetime.datetime = Field(None)
 
 
 class GroupListResponse(GenericListResponse):
