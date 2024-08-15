@@ -39,7 +39,8 @@ def fetch_workspaces(page=1, size=10):
                 f'OFFSET {(page - 1) * size} '
                 f'LIMIT {size}').fetchall()
 
-            count = curs.execute(f'SELECT count(1) FROM workspace').fetchone()
+            count = curs.execute('SELECT count(1) FROM workspace').fetchone()
+
             return ({'id': d.get('id'),
                      'createTime': d.get('create_time'),
                      'updateTime': d.get('update_time'),
@@ -51,9 +52,9 @@ def fetch_workspaces(page=1, size=10):
                          'id': d.get('organization_id'),
                          'name': d.get('organization_name'),
                          'createTime': d.get('organization_create_time'),
-                         'updateTime': d.get('organization_update_time'),
-                     }
+                         'updateTime': d.get('organization_update_time')}
                      } for d in data), count['count']
+
     except DatabaseError as error:
         raise error
 

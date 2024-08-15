@@ -36,8 +36,7 @@ def fetch_tasks(page=1, size=10):
                          f"LIMIT {size}")
             data = curs.fetchall()
 
-            curs.execute(f"SELECT count(1) "
-                         f"FROM task")
+            curs.execute("SELECT count(1) FROM task")
             count = curs.fetchone()
 
             return data, count['count']

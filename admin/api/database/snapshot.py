@@ -38,8 +38,7 @@ def fetch_snapshots(page=1, size=10):
                 f"LIMIT {size}")
             data = curs.fetchall()
 
-            curs.execute(f"SELECT count(1) "
-                         f"FROM snapshot")
+            curs.execute("SELECT count(1) FROM snapshot")
             count = curs.fetchone()
 
             return data, count

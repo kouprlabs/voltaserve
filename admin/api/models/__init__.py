@@ -14,11 +14,10 @@ from .generic import GenericRequest, GenericPaginationRequest, GenericResponse, 
 from .group import GroupRequest, GroupListRequest, GroupResponse, GroupListResponse, UpdateGroupRequest
 from .grouppermission import GroupPermissionRequest, GroupPermissionListRequest, GroupPermissionResponse, \
     GroupPermissionListResponse
-from .groupuser import GroupUserRequest, GroupUserListRequest, GroupUserResponse, GroupUserListResponse
 from .invitation import InvitationRequest, InvitationListRequest, InvitationResponse, InvitationListResponse, \
     ConfirmInvitationRequest
 from .organization import OrganizationRequest, OrganizationListRequest, OrganizationResponse, \
-    OrganizationListResponse, OrganizationUserListRequest, UpdateOrganizationRequest
+    OrganizationListResponse, UpdateOrganizationRequest
 from .snapshot import SnapshotRequest, SnapshotListRequest, SnapshotResponse, SnapshotListResponse
 from .snapshotfile import SnapshotFileRequest, SnapshotFileListRequest, SnapshotFileResponse, SnapshotFileListResponse
 from .task import TaskRequest, TaskListRequest, TaskResponse, TaskListResponse
