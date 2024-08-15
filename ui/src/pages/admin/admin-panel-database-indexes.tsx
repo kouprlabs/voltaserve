@@ -63,7 +63,6 @@ const AdminPanelDatabaseIndexes = () => {
     confirmation: boolean | undefined,
   ) => {
     if (confirmation) {
-      console.log('Api request to rebuild index', indexname)
       setSubmitting(true)
       setTimeout(() => {
         setSubmitting(false)

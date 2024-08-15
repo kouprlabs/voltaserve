@@ -38,6 +38,10 @@ export type UpdateFullNameOptions = {
   fullName: string
 }
 
+export interface baseUserIdRequest {
+  id: string
+}
+
 export type UpdateEmailRequestOptions = {
   email: string
 }
@@ -46,9 +50,12 @@ export type UpdateEmailConfirmationOptions = {
   token: string
 }
 
-export type suspendUserOptions = {
-  id: string
+export interface suspendUserOptions extends baseUserIdRequest {
   suspend: boolean
+}
+
+export interface makeAdminOptions extends baseUserIdRequest {
+  makeAdmin: boolean
 }
 
 export type UpdatePasswordOptions = {
@@ -98,7 +105,15 @@ export default class UserAPI {
   static async suspendUser(options: suspendUserOptions) {
     return idpFetcher({
       url: `/user/suspend`,
-      method: 'POST',
+      method: 'PATCH',
+      body: JSON.stringify(options),
+    }) as Promise<User>
+  }
+
+  static async makeAdmin(options: makeAdminOptions) {
+    return idpFetcher({
+      url: `/user/admin`,
+      method: 'PATCH',
       body: JSON.stringify(options),
     }) as Promise<User>
   }

@@ -90,6 +90,18 @@ type ListQueryParams = {
   size?: string
 }
 
+export interface baseIdRequest {
+  id: string
+}
+
+export interface baseIdNameRequest extends baseIdRequest {
+  name: string
+}
+
+export interface invitationStatusRequest extends baseIdRequest {
+  accept: boolean
+}
+
 export default class AdminApi {
   static async checkIndexesAvailability() {
     const response = await fetch(`${getConfig().adminURL}/index/all`, {
@@ -144,6 +156,22 @@ export default class AdminApi {
       url: `/invitation/all?${this.paramsFromListOptions(options)}`,
       method: 'GET',
     }) as Promise<InvitationsManagementList>
+  }
+
+  static async renameObject(options: baseIdNameRequest, object: string) {
+    return adminFetcher({
+      url: `/${object}`,
+      method: 'PATCH',
+      body: JSON.stringify(options),
+    }) as Promise<void>
+  }
+
+  static async invitationChangeStatus(options: invitationStatusRequest) {
+    return adminFetcher({
+      url: `/invitation`,
+      method: 'PATCH',
+      body: JSON.stringify(options),
+    }) as Promise<void>
   }
 
   static paramsFromListOptions(options?: ListOptions): URLSearchParams {

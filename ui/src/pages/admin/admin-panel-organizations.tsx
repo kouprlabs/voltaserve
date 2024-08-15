@@ -16,10 +16,12 @@ import {
   Table,
   Tbody,
   Td,
+  Text,
   Th,
   Thead,
   Tr,
 } from '@chakra-ui/react'
+import * as Yup from 'yup'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import AdminApi, { OrganizationManagementList } from '@/client/admin/admin'
@@ -27,6 +29,7 @@ import { adminOrganizationsPaginationStorage } from '@/infra/pagination'
 import PagePagination from '@/lib/components/page-pagination'
 import SectionSpinner from '@/lib/components/section-spinner'
 import usePagePagination from '@/lib/hooks/page-pagination'
+import AdminRenameModal from '@/pages/admin/admin-rename-modal'
 
 const AdminPanelOrganizations = () => {
   const navigate = useNavigate()
@@ -39,12 +42,51 @@ const AdminPanelOrganizations = () => {
     location,
     storage: adminOrganizationsPaginationStorage(),
   })
+  const [confirmWindowOpen, setConfirmWindowOpen] = useState(false)
+  const [isSubmitting, setSubmitting] = useState(false)
+  const [currentName, setCurrentName] = useState<string | undefined>(undefined)
+  const [organizationId, setOrganizationId] = useState<string | undefined>(
+    undefined,
+  )
+  const formSchema = Yup.object().shape({
+    name: Yup.string().required('Name is required').max(255),
+  })
+
+  const renameOrganization = async (
+    id: string | null,
+    currentName: string | null,
+    newName: string | null,
+    confirm: boolean = false,
+  ) => {
+    if (confirm && organizationId !== undefined && newName !== null) {
+      try {
+        setSubmitting(true)
+        await AdminApi.renameObject(
+          { id: organizationId, name: newName },
+          'organization',
+        )
+      } finally {
+        closeConfirmationWindow()
+      }
+    } else if (id !== null && currentName !== null) {
+      setConfirmWindowOpen(true)
+      setCurrentName(currentName)
+      setOrganizationId(id)
+    }
+  }
+
+  const closeConfirmationWindow = () => {
+    setConfirmWindowOpen(false)
+    setSubmitting(false)
+    setCurrentName(undefined)
+    setOrganizationId(undefined)
+  }
 
   useEffect(() => {
     AdminApi.listOrganizations({ page: page, size: size }).then((value) =>
       setList(value),
     )
-  }, [page, size])
+  }, [page, size, isSubmitting])
 
   if (!list) {
     return <SectionSpinner />
@@ -52,6 +94,15 @@ const AdminPanelOrganizations = () => {
 
   return (
     <>
+      <AdminRenameModal
+        closeConfirmationWindow={closeConfirmationWindow}
+        isOpen={confirmWindowOpen}
+        isSubmitting={isSubmitting}
+        previousName={currentName}
+        object="organization"
+        formSchema={formSchema}
+        request={renameOrganization}
+      />
       <Helmet>
         <title>Organizations management</title>
       </Helmet>
@@ -72,16 +123,43 @@ const AdminPanelOrganizations = () => {
               </Thead>
               <Tbody>
                 {list.data.map((organization) => (
-                  <Tr key={organization.id}>
-                    <Td>{organization.name}</Td>
+                  <Tr
+                    key={organization.id}
+                    onClick={(event) => {
+                      if (
+                        !(event.target instanceof HTMLButtonElement) &&
+                        !(event.target instanceof HTMLSpanElement) &&
+                        !(event.target instanceof HTMLParagraphElement)
+                      ) {
+                        navigate(`/admin/organizations/${organization.id}`)
+                      }
+                    }}
+                  >
                     <Td>
-                      {new Date(organization.createTime).toLocaleDateString()}
+                      <Text>{organization.name}</Text>
                     </Td>
                     <Td>
-                      {new Date(organization.updateTime).toLocaleString()}
+                      <Text>
+                        {new Date(organization.createTime).toLocaleDateString()}
+                      </Text>
                     </Td>
                     <Td>
-                      <Button>Rename</Button>
+                      <Text>
+                        {new Date(organization.updateTime).toLocaleString()}
+                      </Text>
+                    </Td>
+                    <Td>
+                      <Button
+                        onClick={async () => {
+                          await renameOrganization(
+                            organization.id,
+                            organization.name,
+                            null,
+                          )
+                        }}
+                      >
+                        Rename
+                      </Button>
                     </Td>
                   </Tr>
                 ))}
