@@ -176,6 +176,12 @@ func (cl *FileClient) CreateFromS3(opts FileCreateFromS3Options) (*File, error) 
 			return
 		}
 	}(res.Body)
+
+	body, err = cl.jsonResponseOrThrow(res)
+	if err != nil {
+		return nil, err
+	}
+
 	var file File
 	if err = json.Unmarshal(body, &file); err != nil {
 		return nil, err
@@ -223,6 +229,12 @@ func (cl *FileClient) PatchFromS3(opts FilePatchFromS3Options) (*File, error) {
 			return
 		}
 	}(res.Body)
+
+	body, err = cl.jsonResponseOrThrow(res)
+	if err != nil {
+		return nil, err
+	}
+
 	var file File
 	if err = json.Unmarshal(body, &file); err != nil {
 		return nil, err
