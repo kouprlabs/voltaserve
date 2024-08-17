@@ -19,29 +19,29 @@ from psycopg import connect
 from psycopg.rows import dict_row
 from pydantic_settings import BaseSettings
 
-from .exceptions import GenericForbiddenException
+from api.routers.exceptions import GenericForbiddenException
 
 
 class Settings(BaseSettings):
-    db_host: str
-    db_port: int
-    db_name: str
-    db_user: str
-    db_password: Optional[str]
+    DB_HOST: str
+    DB_PORT: int
+    DB_NAME: str
+    DB_USER: str
+    DB_PASSWORD: Optional[str]
 
-    host: str
-    workers: int
-    port: int
+    HOST: str
+    WORKERS: int
+    PORT: int
 
-    jwt_secret: str
-    jwt_algorithm: str
+    JWT_SECRET: str
+    JWT_ALGORITHM: str
 
-    url: str
-    cors_origins: str
+    URL: str
+    CORS_ORIGINS: str
 
-    idp_url: str
-    api_url: str
-    redis_url: str
+    IDP_URL: str
+    API_URL: str
+    REDIS_URL: str
 
     class Config:
         env_file = "C:/Users/lobod/PycharmProjects/voltaserve/admin/api/.env"
@@ -49,11 +49,11 @@ class Settings(BaseSettings):
 
 settings = Settings()
 
-conn = connect(conninfo=f"postgres://{settings.db_user}:"
-                        f"{settings.db_password}@"
-                        f"{settings.db_host}:"
-                        f"{settings.db_port}/"
-                        f"{settings.db_name}",
+conn = connect(conninfo=f"postgres://{settings.DB_USER}:"
+                        f"{settings.DB_PASSWORD}@"
+                        f"{settings.DB_HOST}:"
+                        f"{settings.DB_PORT}/"
+                        f"{settings.DB_NAME}",
                row_factory=dict_row,
                autocommit=True
                )
@@ -82,10 +82,10 @@ class JWTBearer(HTTPBearer):
 
             try:
                 decoded_token = jwt.decode(jwt=credentials.credentials,
-                                           key=settings.jwt_secret,
-                                           algorithms=[settings.jwt_algorithm],
-                                           audience=settings.url,
-                                           issuer=settings.url,
+                                           key=settings.JWT_SECRET,
+                                           algorithms=[settings.JWT_ALGORITHM],
+                                           audience=settings.URL,
+                                           issuer=settings.URL,
                                            verify=True)
 
             except Exception as e:

@@ -15,20 +15,20 @@ from .generic import GenericPaginationRequest, GenericResponse, GenericListRespo
 
 
 # --- REQUEST MODELS --- #
-class GroupUserRequest(GenericRequest):
+class UserGroupRequest(GenericRequest):
     pass
 
 
-class GroupUserListRequest(GenericPaginationRequest):
+class UserGroupListRequest(GenericPaginationRequest):
     pass
 
 
 # --- RESPONSE MODELS --- #
-class GroupUserResponse(GenericResponse):
+class UserGroupResponse(GenericResponse):
     group_id: str
     user_id: str
     create_time: datetime.datetime
 
 
-class GroupUserListResponse(GenericListResponse):
-    data: List[GroupUserResponse]
+class UserGroupListResponse(GenericListResponse):
+    data: List[UserGroupResponse]

@@ -7,41 +7,48 @@
 # the Business Source License, use of this software will be governed
 # by the GNU Affero General Public License v3.0 only, included in the file
 # licenses/AGPL.txt.
+from typing import Dict, Tuple, Iterable
+
 from psycopg import DatabaseError
 
+from . import exists
 from ..dependencies import conn
+from ..errors import EmptyDataException, NotFoundException
 
 
 # --- FETCH --- #
-def fetch_snapshot(_id: str):
+def fetch_snapshot(_id: str) -> Dict:
     try:
         with conn.cursor() as curs:
-            curs.execute(
+            if not exists(curs=curs, tablename='snapshot', _id=_id):
+                raise NotFoundException(message=f'Snapshot with id={_id} does not exist!')
+
+            return curs.execute(
                 f"SELECT id, version, original, preview, text, ocr, entities, mosaic, thumbnail, language, "
                 f"status, task_id, create_time, update_time "
                 f"FROM snapshot "
-                f"WHERE id='{_id}'")
-            return curs.fetchone()
+                f"WHERE id='{_id}'").fetchone()
     except DatabaseError as error:
         raise error
 
 
-def fetch_snapshots(page=1, size=10):
+def fetch_snapshots(page=1, size=10) -> Tuple[Iterable[Dict], int]:
     try:
         with conn.cursor() as curs:
-            curs.execute(
+            data = curs.execute(
                 f"SELECT id, version, original, preview, text, ocr, entities, mosaic, thumbnail, language, "
                 f"status, task_id, create_time, update_time "
                 f"FROM snapshot "
                 f"ORDER BY create_time "
                 f"OFFSET {(page - 1) * size} "
-                f"LIMIT {size}")
-            data = curs.fetchall()
+                f"LIMIT {size}").fetchall()
 
-            curs.execute("SELECT count(1) FROM snapshot")
-            count = curs.fetchone()
+            if data is None or data == {}:
+                raise EmptyDataException
 
-            return data, count
+            count = curs.execute("SELECT count(1) FROM snapshot").fetchone()
+
+            return data, count['count']
     except DatabaseError as error:
         raise error
 

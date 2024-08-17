@@ -13,17 +13,15 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, status, Response
 
 from ..database import fetch_workspace, fetch_workspaces, update_workspace
-from ..exceptions import GenericNotFoundException, GenericApiException
-from ..models import GenericNotFoundResponse, WorkspaceResponse, WorkspaceRequest, WorkspaceListResponse, \
+from ..errors import NotFoundError, EmptyDataException, NoContentError, NotFoundException, \
+    UnknownApiError
+from ..models import WorkspaceResponse, WorkspaceRequest, WorkspaceListResponse, \
     WorkspaceListRequest, UpdateWorkspaceRequest, GenericUnexpectedErrorResponse, GenericAcceptedResponse
 
 workspace_api_router = APIRouter(
     prefix='/workspace',
     tags=['workspace'],
     responses={
-        status.HTTP_404_NOT_FOUND: {
-            'model': GenericNotFoundResponse
-        },
         status.HTTP_500_INTERNAL_SERVER_ERROR: {
             'model': GenericUnexpectedErrorResponse
         },
@@ -43,11 +41,16 @@ workspace_api_router = APIRouter(
                           }
                           )
 async def get_workspace(data: Annotated[WorkspaceRequest, Depends()]):
-    workspace = fetch_workspace(_id=data.id)
-    if workspace is None:
-        raise GenericNotFoundException(detail=f'Workspace with id={data.id} does not exist')
+    try:
+        workspace = fetch_workspace(_id=data.id)
+        if workspace is None:
+            return NotFoundError(message=f'Workspace with id={data.id} does not exist')
 
-    return WorkspaceResponse(**workspace)
+        return WorkspaceResponse(**workspace)
+    except NotFoundException as e:
+        return NotFoundError(message=str(e))
+    except Exception as e:
+        return UnknownApiError(message=str(e))
 
 
 @workspace_api_router.get(path="/all",
@@ -58,11 +61,16 @@ async def get_workspace(data: Annotated[WorkspaceRequest, Depends()]):
                           }
                           )
 async def get_all_workspaces(data: Annotated[WorkspaceListRequest, Depends()]):
-    workspaces, count = fetch_workspaces(page=data.page, size=data.size)
-    if workspaces is None:
-        raise GenericNotFoundException(detail='This instance has no workspaces')
+    try:
+        workspaces, count = fetch_workspaces(page=data.page, size=data.size)
 
-    return WorkspaceListResponse(data=workspaces, totalElements=count, page=data.page, size=data.size)
+        return WorkspaceListResponse(data=workspaces, totalElements=count, page=data.page, size=data.size)
+    except EmptyDataException:
+        return NoContentError()
+    except NotFoundException as e:
+        return NotFoundError(message=str(e))
+    except Exception as e:
+        return UnknownApiError(message=str(e))
 
 
 # --- PATCH --- #
@@ -71,11 +79,12 @@ async def get_all_workspaces(data: Annotated[WorkspaceListRequest, Depends()]):
 async def patch_workspace(data: UpdateWorkspaceRequest, response: Response):
     try:
         update_workspace(data=data.model_dump(exclude_unset=True, exclude_none=True))
+        response.status_code = status.HTTP_202_ACCEPTED
+        return None
+    except NotFoundException as e:
+        return NotFoundError(message=str(e))
     except Exception as e:
-        raise GenericApiException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)) from e
-
-    response.status_code = status.HTTP_202_ACCEPTED
-    return None
+        return UnknownApiError(message=str(e))
 
 # --- POST --- #
 

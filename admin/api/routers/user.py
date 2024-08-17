@@ -13,18 +13,14 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, status
 
 from ..database import fetch_user_organizations, fetch_user_workspaces, fetch_user_groups
-from ..exceptions import GenericNotFoundException
-from ..models import GenericNotFoundResponse, OrganizationUserListRequest, OrganizationUserListResponse, \
-    WorkspaceUserListResponse, WorkspaceUserListRequest, GroupUserListResponse, GroupUserListRequest
+from ..errors import NotFoundError, EmptyDataException, NoContentError, NotFoundException, \
+    UnknownApiError
+from ..models import UserOrganizationListRequest, UserOrganizationListResponse, \
+    UserWorkspaceListResponse, UserWorkspaceListRequest, UserGroupListResponse, UserGroupListRequest
 
 users_api_router = APIRouter(
     prefix='/user',
     tags=['user'],
-    responses={
-        status.HTTP_404_NOT_FOUND: {
-            'model': GenericNotFoundResponse
-        }
-    }
 )
 
 
@@ -32,55 +28,70 @@ users_api_router = APIRouter(
 @users_api_router.get(path="/organizations",
                       responses={
                           status.HTTP_200_OK: {
-                              'model': OrganizationUserListResponse
+                              'model': UserOrganizationListResponse
                           }
                       }
                       )
-async def get_user_organizations(data: Annotated[OrganizationUserListRequest, Depends()]):
-    organizations, count = fetch_user_organizations(user_id=data.id, page=data.page, size=data.size)
-    if organizations is None:
-        raise GenericNotFoundException(detail='This user has no organizations')
+async def get_user_organizations(data: Annotated[UserOrganizationListRequest, Depends()]):
+    try:
+        organizations, count = fetch_user_organizations(user_id=data.id, page=data.page, size=data.size)
 
-    return OrganizationUserListResponse(data=organizations,
-                                        totalElements=count,
-                                        page=data.page,
-                                        size=data.size)
+        return UserOrganizationListResponse(data=organizations,
+                                            totalElements=count,
+                                            page=data.page,
+                                            size=data.size)
+    except EmptyDataException:
+        return NoContentError()
+    except NotFoundException as e:
+        return NotFoundError(message=str(e))
+    except Exception as e:
+        return UnknownApiError(message=str(e))
 
 
 @users_api_router.get(path="/workspaces",
                       responses={
                           status.HTTP_200_OK: {
-                              'model': WorkspaceUserListResponse
+                              'model': UserWorkspaceListResponse
                           }
                       }
                       )
-async def get_user_workspaces(data: Annotated[WorkspaceUserListRequest, Depends()]):
-    workspaces, count = fetch_user_workspaces(user_id=data.id, page=data.page, size=data.size)
-    if workspaces is None:
-        raise GenericNotFoundException(detail='This user has no workspaces')
+async def get_user_workspaces(data: Annotated[UserWorkspaceListRequest, Depends()]):
+    try:
+        workspaces, count = fetch_user_workspaces(user_id=data.id, page=data.page, size=data.size)
 
-    return WorkspaceUserListResponse(data=workspaces,
-                                     totalElements=count,
-                                     page=data.page,
-                                     size=data.size)
+        return UserWorkspaceListResponse(data=workspaces,
+                                         totalElements=count,
+                                         page=data.page,
+                                         size=data.size)
+    except EmptyDataException:
+        return NoContentError()
+    except NotFoundException as e:
+        return NotFoundError(message=str(e))
+    except Exception as e:
+        return UnknownApiError(message=str(e))
 
 
 @users_api_router.get(path="/groups",
                       responses={
                           status.HTTP_200_OK: {
-                              'model': GroupUserListResponse
+                              'model': UserGroupListResponse
                           }
                       }
                       )
-async def get_user_groups(data: Annotated[GroupUserListRequest, Depends()]):
-    groups, count = fetch_user_groups(user_id=data.id, page=data.page, size=data.size)
-    if groups is None:
-        raise GenericNotFoundException(detail='This user has no groups')
+async def get_user_groups(data: Annotated[UserGroupListRequest, Depends()]):
+    try:
+        groups, count = fetch_user_groups(user_id=data.id, page=data.page, size=data.size)
 
-    return GroupUserListResponse(data=groups,
-                                 totalElements=count,
-                                 page=data.page,
-                                 size=data.size)
+        return UserGroupListResponse(data=groups,
+                                     totalElements=count,
+                                     page=data.page,
+                                     size=data.size)
+    except EmptyDataException:
+        return NoContentError()
+    except NotFoundException as e:
+        return NotFoundError(message=str(e))
+    except Exception as e:
+        return UnknownApiError(message=str(e))
 
 # --- PATCH --- #
 

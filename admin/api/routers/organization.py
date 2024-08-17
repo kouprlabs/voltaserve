@@ -12,21 +12,18 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, status, Response
 
-from ..database import fetch_organization, fetch_organizations, fetch_organization_users, fetch_organization_workspaces
-from ..database.organization import update_organization
-from ..exceptions import GenericNotFoundException, GenericApiException
-from ..models import GenericNotFoundResponse, OrganizationResponse, OrganizationRequest, OrganizationListResponse, \
-    OrganizationListRequest, OrganizationUserListRequest, OrganizationUserListResponse, \
-    WorkspaceListResponse, OrganizationWorkspaceListRequest, UpdateOrganizationRequest
+from ..database import fetch_organization, fetch_organizations, fetch_organization_users, \
+    fetch_organization_workspaces, update_organization, fetch_organization_groups
+from ..errors import NotFoundError, EmptyDataException, NoContentError, NotFoundException, \
+    UnknownApiError
+from ..models import OrganizationResponse, OrganizationRequest, OrganizationListResponse, \
+    OrganizationListRequest, OrganizationWorkspaceListRequest, UpdateOrganizationRequest, \
+    OrganizationWorkspaceListResponse, OrganizationGroupListResponse, OrganizationGroupListRequest, \
+    OrganizationUserListRequest, OrganizationUserListResponse
 
 organization_api_router = APIRouter(
     prefix='/organization',
     tags=['organization'],
-    responses={
-        status.HTTP_404_NOT_FOUND: {
-            'model': GenericNotFoundResponse
-        }
-    }
 )
 
 
@@ -39,11 +36,12 @@ organization_api_router = APIRouter(
                              }
                              )
 async def get_organization(data: Annotated[OrganizationRequest, Depends()]):
-    organization = fetch_organization(organization_id=data.id)
-    if organization is None or organization == {}:
-        raise GenericNotFoundException(detail=f'Organization with id={data.id} does not exist!')
+    try:
+        organization = fetch_organization(organization_id=data.id)
 
-    return OrganizationResponse(**organization)
+        return OrganizationResponse(**organization)
+    except NotFoundException as e:
+        return NotFoundError(message=str(e))
 
 
 @organization_api_router.get(path="/all",
@@ -54,41 +52,76 @@ async def get_organization(data: Annotated[OrganizationRequest, Depends()]):
                              }
                              )
 async def get_all_organizations(data: Annotated[OrganizationListRequest, Depends()]):
-    organizations, count = fetch_organizations(page=data.page, size=data.size)
-    if organizations is None or organizations == {} or count == 0:
-        raise GenericNotFoundException(detail='This instance has no organizations')
+    try:
+        organizations, count = fetch_organizations(page=data.page, size=data.size)
 
-    return OrganizationListResponse(data=organizations, totalElements=count, page=data.page, size=data.size)
+        return OrganizationListResponse(data=organizations, totalElements=count, page=data.page, size=data.size)
+    except NotFoundException as e:
+        return NotFoundError(message=str(e))
+    except EmptyDataException:
+        return NoContentError()
+    except Exception as e:
+        return UnknownApiError(message=str(e))
 
 
 @organization_api_router.get(path="/users",
                              responses={
                                  status.HTTP_200_OK: {
-                                     'model': OrganizationListResponse
+                                     'model': OrganizationUserListResponse
                                  }
                              }
                              )
 async def get_organization_users(data: Annotated[OrganizationUserListRequest, Depends()]):
-    users, count = fetch_organization_users(organization_id=data.id, page=data.page, size=data.size)
-    if users is None or users == {}:
-        raise GenericNotFoundException(detail='This organization has no users')
+    try:
+        users, count = fetch_organization_users(organization_id=data.id, page=data.page, size=data.size)
 
-    return OrganizationUserListResponse(data=users, totalElements=count, page=data.page, size=data.size)
+        return OrganizationUserListResponse(data=users, totalElements=count, page=data.page, size=data.size)
+    except EmptyDataException:
+        return NoContentError()
+    except NotFoundException as e:
+        return NotFoundError(message=str(e))
+    except Exception as e:
+        return UnknownApiError(message=str(e))
 
 
 @organization_api_router.get(path="/workspaces",
                              responses={
                                  status.HTTP_200_OK: {
-                                     'model': WorkspaceListResponse
+                                     'model': OrganizationWorkspaceListResponse
                                  }
                              }
                              )
 async def get_organization_workspaces(data: Annotated[OrganizationWorkspaceListRequest, Depends()]):
-    workspaces, count = fetch_organization_workspaces(organization_id=data.id, page=data.page, size=data.size)
-    if workspaces is None or workspaces == {} or count == 0:
-        raise GenericNotFoundException(detail='This organization has no workspaces')
+    try:
+        workspaces, count = fetch_organization_workspaces(organization_id=data.id, page=data.page, size=data.size)
 
-    return WorkspaceListResponse(data=workspaces, totalElements=count, page=data.page, size=data.size)
+        return OrganizationWorkspaceListResponse(data=workspaces, totalElements=count, page=data.page, size=data.size)
+    except EmptyDataException:
+        return NoContentError()
+    except NotFoundException as e:
+        return NotFoundError(message=str(e))
+    except Exception as e:
+        return UnknownApiError(message=str(e))
+
+
+@organization_api_router.get(path="/groups",
+                             responses={
+                                 status.HTTP_200_OK: {
+                                     'model': OrganizationGroupListResponse
+                                 }
+                             }
+                             )
+async def get_organization_groups(data: Annotated[OrganizationGroupListRequest, Depends()]):
+    try:
+        groups, count = fetch_organization_groups(organization_id=data.id, page=data.page, size=data.size)
+
+        return OrganizationWorkspaceListResponse(data=groups, totalElements=count, page=data.page, size=data.size)
+    except EmptyDataException:
+        return NoContentError()
+    except NotFoundException as e:
+        return NotFoundError(message=str(e))
+    except Exception as e:
+        return UnknownApiError(message=str(e))
 
 
 # --- PATCH --- #
@@ -97,11 +130,13 @@ async def get_organization_workspaces(data: Annotated[OrganizationWorkspaceListR
 async def patch_workspace(data: UpdateOrganizationRequest, response: Response):
     try:
         update_organization(data=data.model_dump(exclude_unset=True, exclude_none=True))
-    except Exception as e:
-        raise GenericApiException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)) from e
 
-    response.status_code = status.HTTP_202_ACCEPTED
-    return None
+        response.status_code = status.HTTP_202_ACCEPTED
+        return None
+    except NotFoundException as e:
+        return NotFoundError(message=str(e))
+    except Exception as e:
+        return UnknownApiError(message=str(e))
 
 # --- POST --- #
 

@@ -13,17 +13,12 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, status
 
 from ..database import fetch_index, fetch_indexes
-from ..exceptions import GenericNotFoundException
+from ..errors import NotFoundError, NoContentError, EmptyDataException, UnknownApiError
 from ..models import GenericNotFoundResponse, IndexListResponse, IndexListRequest, IndexResponse, IndexRequest
 
 index_api_router = APIRouter(
     prefix='/index',
     tags=['index'],
-    responses={
-        status.HTTP_404_NOT_FOUND: {
-            'model': GenericNotFoundResponse
-        }
-    }
 )
 
 
@@ -35,11 +30,14 @@ index_api_router = APIRouter(
                           }}
                       )
 async def get_index(data: Annotated[IndexRequest, Depends()]):
-    index = fetch_index(_id=data.id)
-    if index is None:
-        raise GenericNotFoundException(detail=f'Index with id={data.id} does not exist')
+    try:
+        index = fetch_index(_id=data.id)
+        if index is None:
+            return NotFoundError(message=f'Index with id={data.id} does not exist')
 
-    return IndexResponse(**index)
+        return IndexResponse(**index)
+    except Exception as e:
+        return UnknownApiError(message=str(e))
 
 
 @index_api_router.get(path="/all",
@@ -50,12 +48,14 @@ async def get_index(data: Annotated[IndexRequest, Depends()]):
                       }
                       )
 async def get_all_indexes(data: Annotated[IndexListRequest, Depends()]):
-    indexes, count = fetch_indexes(page=data.page, size=data.size)
-    if indexes is None:
-        raise GenericNotFoundException(detail='This instance has no indexes')
+    try:
+        indexes, count = fetch_indexes(page=data.page, size=data.size)
 
-    return IndexListResponse(data=indexes, totalElements=count['count'], page=data.page, size=data.size)
-
+        return IndexListResponse(data=indexes, totalElements=count['count'], page=data.page, size=data.size)
+    except EmptyDataException:
+        return NoContentError()
+    except Exception as e:
+        return UnknownApiError(message=str(e))
 
 # --- PATCH --- #
 

@@ -7,14 +7,16 @@
 # the Business Source License, use of this software will be governed
 # by the GNU Affero General Public License v3.0 only, included in the file
 # licenses/AGPL.txt.
+from typing import Dict, Tuple, Iterable
 
 from psycopg import DatabaseError
 
 from ..dependencies import conn
+from ..errors import EmptyDataException
 
 
 # --- FETCH --- #
-def fetch_index(_id: str):
+def fetch_index(_id: str) -> Dict:
     try:
         with conn.cursor() as curs:
             curs.execute(f"SELECT tablename, indexname, indexdef "
@@ -25,7 +27,7 @@ def fetch_index(_id: str):
         raise error
 
 
-def fetch_indexes(page=1, size=10):
+def fetch_indexes(page=1, size=10) -> Tuple[Iterable[Dict], int]:
     try:
         with conn.cursor() as curs:
             curs.execute(f"SELECT tablename, indexname, indexdef "
@@ -35,6 +37,9 @@ def fetch_indexes(page=1, size=10):
                          f"OFFSET {(page - 1) * size} "
                          f"LIMIT {size}")
             data = curs.fetchall()
+
+            if data is None or data == {}:
+                raise EmptyDataException
 
             curs.execute("SELECT count(1) FROM pg_indexes WHERE schemaname = 'public' ")
             count = curs.fetchone()

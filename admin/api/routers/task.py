@@ -13,38 +13,24 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, status
 
 from ..database import fetch_task, fetch_tasks
-from ..exceptions import GenericNotFoundException
-from ..models import GenericNotFoundResponse, TaskResponse, TaskRequest, TaskListResponse, TaskListRequest
+from ..errors import NotFoundError, EmptyDataException, NoContentError, NotFoundException, \
+    UnknownApiError
+from ..models import TaskResponse, TaskRequest, TaskListResponse, TaskListRequest
 from ..tasks.celery_app import celery_app
 
 task_api_router = APIRouter(
     prefix='/task',
     tags=['task'],
-    responses={
-        status.HTTP_404_NOT_FOUND: {
-            'model': GenericNotFoundResponse
-        }
-    }
 )
 
 user_task_api_router = APIRouter(
     prefix='/user',
     tags=['task'],
-    responses={
-        status.HTTP_404_NOT_FOUND: {
-            'model': GenericNotFoundResponse
-        }
-    }
 )
 
 admin_task_api_router = APIRouter(
     prefix='/admin',
     tags=['task'],
-    responses={
-        status.HTTP_404_NOT_FOUND: {
-            'model': GenericNotFoundResponse
-        }
-    }
 )
 
 
@@ -56,11 +42,14 @@ admin_task_api_router = APIRouter(
                               }}
                           )
 async def get_user_task(data: Annotated[TaskRequest, Depends()]):
-    task = fetch_task(_id=data.id)
-    if task is None:
-        raise GenericNotFoundException(detail=f'Task with id={data.id} does not exist')
+    try:
+        task = fetch_task(_id=data.id)
+        if task is None:
+            return NotFoundError(message=f'Task with id={data.id} does not exist')
 
-    return TaskResponse(**task)
+        return TaskResponse(**task)
+    except Exception as e:
+        return UnknownApiError(message=str(e))
 
 
 @user_task_api_router.get(path="/all",
@@ -71,11 +60,16 @@ async def get_user_task(data: Annotated[TaskRequest, Depends()]):
                           }
                           )
 async def get_all_user_tasks(data: Annotated[TaskListRequest, Depends()]):
-    tasks, count = fetch_tasks(page=data.page, size=data.size)
-    if tasks is None:
-        raise GenericNotFoundException(detail='This instance has no tasks')
+    try:
+        tasks, count = fetch_tasks(page=data.page, size=data.size)
 
-    return TaskListResponse(data=tasks, totalElements=count['count'], page=data.page, size=data.size)
+        return TaskListResponse(data=tasks, totalElements=count, page=data.page, size=data.size)
+    except EmptyDataException:
+        return NoContentError()
+    except NotFoundException as e:
+        return NotFoundError(message=str(e))
+    except Exception as e:
+        return UnknownApiError(message=str(e))
 
 
 @admin_task_api_router.get(path="/all",
@@ -86,7 +80,10 @@ async def get_all_user_tasks(data: Annotated[TaskListRequest, Depends()]):
                            # }
                            )
 async def get_all_admin_tasks():
-    return celery_app.control.inspect().reserved()
+    try:
+        return celery_app.control.inspect().reserved()
+    except Exception as e:
+        return UnknownApiError(message=str(e))
 
 
 @admin_task_api_router.get(path="/active",
@@ -97,7 +94,10 @@ async def get_all_admin_tasks():
                            # }
                            )
 async def get_active_admin_tasks():
-    return celery_app.control.inspect().active()
+    try:
+        return celery_app.control.inspect().active()
+    except Exception as e:
+        return UnknownApiError(message=str(e))
 
 
 @admin_task_api_router.get(path="/scheduled",
@@ -108,7 +108,10 @@ async def get_active_admin_tasks():
                            # }
                            )
 async def get_scheduled_admin_tasks():
-    return celery_app.control.inspect().scheduled()
+    try:
+        return celery_app.control.inspect().scheduled()
+    except Exception as e:
+        return UnknownApiError(message=str(e))
 
 # --- PATCH --- #
 

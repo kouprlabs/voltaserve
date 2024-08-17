@@ -8,23 +8,7 @@
 # by the GNU Affero General Public License v3.0 only, included in the file
 # licenses/AGPL.txt.
 
-DB_HOST="localhost"
-DB_PORT=5432
-DB_NAME=voltaserve
-DB_USER=voltaserve
-DB_PASSWORD="voltaserve"
-
-HOST=localhost
-PORT=20001
-WORKERS=1
-
-JWT_SECRET=
-JWT_ALGORITHM=HS256
-
-CORS_ORIGINS=http://localhost:3000
-
-URL=0.0.0.0
-
-IDP_URL=
-API_URL=
-REDIS_URL=
+from .api_errors import NotFoundError, NoContentError, ServiceUnavailableError, \
+    UnknownApiError
+from .database_errors import EmptyDataException, NotFoundException
+from .error_codes import errors

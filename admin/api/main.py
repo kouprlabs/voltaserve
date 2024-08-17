@@ -15,16 +15,24 @@ from fastapi import FastAPI, Request, Response, status
 from fastapi.middleware.cors import CORSMiddleware
 
 from .dependencies import settings, conn
-from .exceptions import GenericServiceUnavailableException
-from .models import GenericServiceUnavailableResponse
+from .errors import ServiceUnavailableError
+from .models import GenericServiceUnavailableResponse, GenericErrorResponse
 from .routers import group_api_router, organization_api_router, workspace_api_router, \
     invitation_api_router, index_api_router, task_api_router, users_api_router
 
-app = FastAPI(debug=True)
+app = FastAPI(debug=True,
+              responses={
+                  status.HTTP_404_NOT_FOUND: {
+                      'model': GenericErrorResponse
+                  },
+                  status.HTTP_204_NO_CONTENT: {
+                      'model': None
+                  }
+              })
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.cors_origins.split(','),
+    allow_origins=settings.CORS_ORIGINS.split(','),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"]
@@ -74,8 +82,8 @@ async def liveness(response: Response):
 
         response.status_code = status.HTTP_204_NO_CONTENT
         return None
-    except Exception as e:
-        raise GenericServiceUnavailableException(detail=str(e))
+    except Exception:
+        return ServiceUnavailableError()
 
 
 @app.get(path='/readiness',
@@ -95,5 +103,5 @@ async def readiness(response: Response):
 
         response.status_code = status.HTTP_204_NO_CONTENT
         return None
-    except Exception as e:
-        raise GenericServiceUnavailableException(detail=str(e))
+    except Exception:
+        return ServiceUnavailableError()

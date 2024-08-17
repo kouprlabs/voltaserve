@@ -25,27 +25,27 @@ class UserListRequest(GenericPaginationRequest):
     pass
 
 
-class OrganizationUserRequest(GenericRequest):
+class UserOrganizationRequest(GenericRequest):
     pass
 
 
-class OrganizationUserListRequest(OrganizationUserRequest, GenericPaginationRequest):
+class UserOrganizationListRequest(UserOrganizationRequest, GenericPaginationRequest):
     pass
 
 
-class WorkspaceUserRequest(GenericRequest):
+class UserWorkspaceRequest(GenericRequest):
     pass
 
 
-class WorkspaceUserListRequest(WorkspaceUserRequest, GenericPaginationRequest):
+class UserWorkspaceListRequest(UserWorkspaceRequest, GenericPaginationRequest):
     pass
 
 
-class GroupUserRequest(GenericRequest):
+class UserGroupRequest(GenericRequest):
     pass
 
 
-class GroupUserListRequest(GroupUserRequest, GenericPaginationRequest):
+class UserGroupListRequest(UserGroupRequest, GenericPaginationRequest):
     pass
 
 
@@ -64,34 +64,34 @@ class UserListResponse(GenericListResponse):
     data: List[UserResponse]
 
 
-class OrganizationUserResponse(GenericResponse):
+class UserOrganizationResponse(GenericResponse):
     permission: str
     organizationId: str
     organizationName: str
     createTime: datetime.datetime
 
 
-class WorkspaceUserResponse(GenericResponse):
+class UserWorkspaceResponse(GenericResponse):
     permission: str
     workspaceId: str
     workspaceName: str
     createTime: datetime.datetime
 
 
-class GroupUserResponse(GenericResponse):
+class UserGroupResponse(GenericResponse):
     permission: str
     groupId: str
     groupName: str
     createTime: datetime.datetime
 
 
-class OrganizationUserListResponse(GenericListResponse):
-    data: List[OrganizationUserResponse]
+class UserOrganizationListResponse(GenericListResponse):
+    data: List[UserOrganizationResponse]
 
 
-class WorkspaceUserListResponse(GenericListResponse):
-    data: List[WorkspaceUserResponse]
+class UserWorkspaceListResponse(GenericListResponse):
+    data: List[UserWorkspaceResponse]
 
 
-class GroupUserListResponse(GenericListResponse):
-    data: List[GroupUserResponse]
+class UserGroupListResponse(GenericListResponse):
+    data: List[UserGroupResponse]

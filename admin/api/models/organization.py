@@ -25,6 +25,18 @@ class OrganizationListRequest(GenericPaginationRequest):
     pass
 
 
+class OrganizationWorkspaceListRequest(GenericRequest, GenericPaginationRequest):
+    pass
+
+
+class OrganizationUserListRequest(GenericRequest, GenericPaginationRequest):
+    pass
+
+
+class OrganizationGroupListRequest(GenericRequest, GenericPaginationRequest):
+    pass
+
+
 class UpdateOrganizationRequest(GenericRequest):
     name: str | None = Field(None)
     updateTime: datetime.datetime | None = Field(default_factory=datetime.datetime.now)
@@ -37,5 +49,34 @@ class OrganizationResponse(GenericResponse):
     updateTime: datetime.datetime = Field(None)
 
 
+class OrganizationUserResponse(GenericResponse):
+    username: str
+    picture: str | None = Field(None)
+    permission: str
+    createTime: datetime.datetime
+
+
+class OrganizationWorkspaceResponse(GenericResponse):
+    name: str
+    createTime: datetime.datetime
+
+
+class OrganizationGroupResponse(GenericResponse):
+    name: str
+    createTime: datetime.datetime
+
+
 class OrganizationListResponse(GenericListResponse):
     data: List[OrganizationResponse]
+
+
+class OrganizationUserListResponse(GenericListResponse):
+    data: List[OrganizationUserResponse]
+
+
+class OrganizationWorkspaceListResponse(GenericListResponse):
+    data: List[OrganizationWorkspaceResponse]
+
+
+class OrganizationGroupListResponse(GenericListResponse):
+    data: List[OrganizationGroupResponse]

@@ -45,6 +45,14 @@ class GenericListResponse(BaseModel):
     data: List[Any]
 
 
+class GenericErrorResponse(BaseModel):
+    code: str
+    status: int
+    message: str
+    userMessage: str
+    moreInfo: str
+
+
 class GenericNotFoundResponse(BaseModel):
     status_code: int = status.HTTP_404_NOT_FOUND
     detail: str = 'Not found'

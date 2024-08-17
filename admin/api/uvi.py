@@ -19,8 +19,8 @@ if __name__ == "__main__":
     log_config["formatters"]["default"]["fmt"] = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 
     uvicorn.run(app="api.main:app",
-                host=settings.host,
-                port=settings.port,
+                host=settings.HOST,
+                port=settings.PORT,
                 reload=False,
-                workers=settings.workers,
+                workers=settings.WORKERS,
                 log_config=log_config)

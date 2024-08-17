@@ -13,20 +13,14 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, status
 
 from ..database import fetch_snapshot, fetch_snapshots
-from ..dependencies import JWTBearer
-from ..exceptions import GenericNotFoundException
-from ..models import GenericNotFoundResponse, SnapshotResponse, SnapshotListRequest, SnapshotListResponse, \
+from ..errors import NotFoundError, EmptyDataException, NoContentError, NotFoundException, \
+    UnknownApiError
+from ..models import SnapshotResponse, SnapshotListRequest, SnapshotListResponse, \
     SnapshotRequest
 
 snapshot_api_router = APIRouter(
     prefix='/snapshot',
     tags=['snapshot'],
-    responses={
-        status.HTTP_404_NOT_FOUND: {
-            'model': GenericNotFoundResponse
-        }
-    },
-    dependencies=[Depends(JWTBearer())]
 )
 
 
@@ -38,11 +32,16 @@ snapshot_api_router = APIRouter(
                              }}
                          )
 async def get_snapshot(data: Annotated[SnapshotRequest, Depends()]):
-    snapshot = fetch_snapshot(_id=data.id)
-    if snapshot is None:
-        raise GenericNotFoundException(detail=f'Snapshot with id={data.id} does not exist')
+    try:
+        snapshot = fetch_snapshot(_id=data.id)
+        if snapshot is None:
+            return NotFoundError(message=f'Snapshot with id={data.id} does not exist')
 
-    return SnapshotResponse(**snapshot)
+        return SnapshotResponse(**snapshot)
+    except NotFoundException as e:
+        return NotFoundError(message=str(e))
+    except Exception as e:
+        return UnknownApiError(message=str(e))
 
 
 @snapshot_api_router.get(path="/all",
@@ -53,12 +52,16 @@ async def get_snapshot(data: Annotated[SnapshotRequest, Depends()]):
                          }
                          )
 async def get_all_snapshots(data: Annotated[SnapshotListRequest, Depends()]):
-    snapshots, count = fetch_snapshots(page=data.page, size=data.size)
-    if snapshots is None:
-        raise GenericNotFoundException(detail='This instance has no snapshots')
+    try:
+        snapshots, count = fetch_snapshots(page=data.page, size=data.size)
 
-    return SnapshotListResponse(data=snapshots, totalElements=count['count'], page=data.page, size=data.size)
-
+        return SnapshotListResponse(data=snapshots, totalElements=count['count'], page=data.page, size=data.size)
+    except EmptyDataException:
+        return NoContentError()
+    except NotFoundException as e:
+        return NotFoundError(message=str(e))
+    except Exception as e:
+        return UnknownApiError(message=str(e))
 # --- PATCH --- #
 
 # --- POST --- #

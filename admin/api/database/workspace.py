@@ -7,15 +7,22 @@
 # the Business Source License, use of this software will be governed
 # by the GNU Affero General Public License v3.0 only, included in the file
 # licenses/AGPL.txt.
+from typing import Dict, Tuple, Iterable
+
 from psycopg import DatabaseError
 
+from . import exists
 from ..dependencies import conn, parse_sql_update_query
+from ..errors import EmptyDataException, NotFoundException
 
 
 # --- FETCH --- #
-def fetch_workspace(_id: str):
+def fetch_workspace(_id: str) -> Dict:
     try:
         with conn.cursor() as curs:
+            if not exists(curs=curs, tablename='workspace', _id=_id):
+                raise NotFoundException(message=f'Workspace with id={_id} does not exist!')
+
             curs.execute(
                 f'SELECT w.id, w.name, w.organization_id as "organizationId", o.name as "organizationName", '
                 f'w.storage_capacity as "storageCapacity", w.root_id as "rootId", w.bucket,'
@@ -27,7 +34,7 @@ def fetch_workspace(_id: str):
         raise error
 
 
-def fetch_workspaces(page=1, size=10):
+def fetch_workspaces(page=1, size=10) -> Tuple[Iterable[Dict], int]:
     try:
         with conn.cursor() as curs:
             data = curs.execute(
@@ -38,6 +45,9 @@ def fetch_workspaces(page=1, size=10):
                 f'ORDER BY w.create_time '
                 f'OFFSET {(page - 1) * size} '
                 f'LIMIT {size}').fetchall()
+
+            if data is None or data == {}:
+                raise EmptyDataException
 
             count = curs.execute('SELECT count(1) FROM workspace').fetchone()
 
@@ -60,7 +70,7 @@ def fetch_workspaces(page=1, size=10):
 
 
 # --- UPDATE --- #
-def update_workspace(data: dict):
+def update_workspace(data: dict) -> None:
     try:
         with conn.cursor() as curs:
             curs.execute(parse_sql_update_query('workspace', data))
