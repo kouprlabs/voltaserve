@@ -8,11 +8,14 @@
 # by the GNU Affero General Public License v3.0 only, included in the file
 # licenses/AGPL.txt.
 
-from fastapi import status
+from psycopg import DatabaseError
 
-errors = {
-    status.HTTP_500_INTERNAL_SERVER_ERROR: "internal_server_error",
-    status.HTTP_400_BAD_REQUEST: "bad_request",
-    status.HTTP_404_NOT_FOUND: "resource_not_found",
-    status.HTTP_403_FORBIDDEN: "forbidden"
-}
+from ..dependencies import conn
+
+
+def fetch_version() -> str:
+    try:
+        with conn.cursor() as curs:
+            return curs.execute(f"SELECT version();").fetchone()['version'].split(' ')[1]
+    except DatabaseError as error:
+        raise error

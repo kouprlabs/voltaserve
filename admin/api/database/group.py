@@ -44,6 +44,15 @@ def fetch_group(_id: str) -> Dict:
         raise error
 
 
+def fetch_group_count() -> Dict:
+    try:
+        with conn.cursor() as curs:
+            return curs.execute('SELECT count(id) FROM "group"').fetchone()
+
+    except DatabaseError as error:
+        raise error
+
+
 def fetch_groups(page=1, size=10) -> Tuple[Iterable[Dict], int]:
     try:
         with conn.cursor() as curs:

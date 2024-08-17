@@ -37,6 +37,10 @@ class GenericResponse(BaseModel):
     id: str
 
 
+class CountResponse(BaseModel):
+    count: int | str
+
+
 class GenericListResponse(BaseModel):
     totalElements: int
     totalPages: int | None = Field(None)

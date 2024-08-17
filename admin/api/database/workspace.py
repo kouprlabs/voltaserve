@@ -7,6 +7,7 @@
 # the Business Source License, use of this software will be governed
 # by the GNU Affero General Public License v3.0 only, included in the file
 # licenses/AGPL.txt.
+
 from typing import Dict, Tuple, Iterable
 
 from psycopg import DatabaseError
@@ -30,6 +31,15 @@ def fetch_workspace(_id: str) -> Dict:
                 f'FROM workspace w join organization o on w.organization_id = o.id '
                 f'WHERE w.id = \'{_id}\'')
             return curs.fetchone()
+    except DatabaseError as error:
+        raise error
+
+
+def fetch_workspace_count() -> Dict:
+    try:
+        with conn.cursor() as curs:
+            return curs.execute('SELECT count(id) FROM "workspace"').fetchone()
+
     except DatabaseError as error:
         raise error
 

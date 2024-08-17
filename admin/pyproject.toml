@@ -8,7 +8,8 @@ packages = [
         {include = 'api/'},
         {include = 'api/routers'},
         {include = 'api/models'},
-        {include = 'api/database'}
+        {include = 'api/database'},
+        {include = 'api/errors'}
     ]
 
 classifiers = [

@@ -13,12 +13,14 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, status
 
 from ..database import fetch_index, fetch_indexes
+from ..dependencies import JWTBearer
 from ..errors import NotFoundError, NoContentError, EmptyDataException, UnknownApiError
-from ..models import GenericNotFoundResponse, IndexListResponse, IndexListRequest, IndexResponse, IndexRequest
+from ..models import IndexListResponse, IndexListRequest, IndexResponse, IndexRequest
 
 index_api_router = APIRouter(
     prefix='/index',
     tags=['index'],
+    dependencies=[Depends(JWTBearer())]
 )
 
 

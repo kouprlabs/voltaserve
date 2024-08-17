@@ -12,15 +12,17 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, status, Response
 
 from ..database import fetch_groups, fetch_group
-from ..database.group import update_group
+from ..database.group import update_group, fetch_group_count
+from ..dependencies import JWTBearer
 from ..errors import NotFoundError, NoContentError, EmptyDataException, NotFoundException, \
     UnknownApiError
 from ..models import GroupResponse, GroupListRequest, GroupListResponse, GroupRequest, \
-    UpdateGroupRequest
+    UpdateGroupRequest, CountResponse
 
 group_api_router = APIRouter(
     prefix='/group',
     tags=['group'],
+    dependencies=[Depends(JWTBearer())]
 )
 
 
@@ -37,6 +39,24 @@ async def get_group(data: Annotated[GroupRequest, Depends()]):
         group = fetch_group(_id=data.id)
 
         return GroupResponse(**group)
+    except NotFoundException as e:
+        return NotFoundError(message=str(e))
+    except Exception as e:
+        return UnknownApiError(message=str(e))
+
+
+@group_api_router.get(path="/count",
+                      responses={
+                          status.HTTP_200_OK: {
+                              'model': CountResponse
+                          }
+                      }
+                      )
+async def get_group_count():
+    try:
+        return CountResponse(**fetch_group_count())
+    except EmptyDataException:
+        return NoContentError()
     except NotFoundException as e:
         return NotFoundError(message=str(e))
     except Exception as e:

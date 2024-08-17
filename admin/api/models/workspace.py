@@ -35,7 +35,7 @@ class WorkspaceListRequest(GenericPaginationRequest):
     pass
 
 
-class OrganizationWorkspaceListRequest(WorkspaceRequest, WorkspaceListRequest):
+class WorkspaceOrganizationListRequest(WorkspaceRequest, WorkspaceListRequest):
     pass
 
 

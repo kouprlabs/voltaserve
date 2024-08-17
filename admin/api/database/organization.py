@@ -51,6 +51,15 @@ def fetch_organizations(page=1, size=10) -> Tuple[Iterable[Dict], int]:
         raise error
 
 
+def fetch_organization_count() -> Dict:
+    try:
+        with conn.cursor() as curs:
+            return curs.execute('SELECT count(id) FROM "organization"').fetchone()
+
+    except DatabaseError as error:
+        raise error
+
+
 def fetch_organization_users(organization_id: str, page=1, size=10) -> Tuple[Iterable[Dict], int]:
     try:
         with conn.cursor() as curs:

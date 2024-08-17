@@ -7,6 +7,7 @@
 # the Business Source License, use of this software will be governed
 # by the GNU Affero General Public License v3.0 only, included in the file
 # licenses/AGPL.txt.
+
 from typing import Tuple, Iterable, Dict
 
 from psycopg import DatabaseError
@@ -41,6 +42,15 @@ def fetch_user_organizations(user_id: str, page=1, size=10) -> Tuple[Iterable[Di
                                  f'WHERE u.user_id = \'{user_id}\'').fetchone()
 
             return data, count['count']
+    except DatabaseError as error:
+        raise error
+
+
+def fetch_user_count() -> Dict:
+    try:
+        with conn.cursor() as curs:
+            return curs.execute('SELECT count(id) FROM "user"').fetchone()
+
     except DatabaseError as error:
         raise error
 

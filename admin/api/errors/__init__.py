@@ -9,6 +9,6 @@
 # licenses/AGPL.txt.
 
 from .api_errors import NotFoundError, NoContentError, ServiceUnavailableError, \
-    UnknownApiError
+    UnknownApiError, ForbiddenError, GenericForbiddenException
 from .database_errors import EmptyDataException, NotFoundException
 from .error_codes import errors

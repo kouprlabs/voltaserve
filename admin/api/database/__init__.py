@@ -9,12 +9,13 @@
 # licenses/AGPL.txt.
 
 from .generic import exists
-from .group import fetch_group, fetch_groups
+from .group import fetch_group, fetch_groups, fetch_group_count
 from .invitation import fetch_invitation, fetch_invitations, update_invitation
 from .organization import fetch_organization, fetch_organizations, fetch_organization_users, \
-    fetch_organization_workspaces, fetch_organization_groups, update_organization
+    fetch_organization_workspaces, fetch_organization_groups, update_organization, fetch_organization_count
 from .snapshot import fetch_snapshot, fetch_snapshots
 from .task import fetch_task, fetch_tasks
-from .user import fetch_user_organizations, fetch_user_groups, fetch_user_workspaces
-from .workspace import fetch_workspace, fetch_workspaces, update_workspace
+from .user import fetch_user_organizations, fetch_user_groups, fetch_user_workspaces, fetch_user_count
+from .workspace import fetch_workspace, fetch_workspaces, update_workspace, fetch_workspace_count
 from .index import fetch_index, fetch_indexes
+from .overview import fetch_version

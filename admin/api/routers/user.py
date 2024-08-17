@@ -12,15 +12,17 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, status
 
-from ..database import fetch_user_organizations, fetch_user_workspaces, fetch_user_groups
+from ..database import fetch_user_organizations, fetch_user_workspaces, fetch_user_groups, fetch_user_count
+from ..dependencies import JWTBearer
 from ..errors import NotFoundError, EmptyDataException, NoContentError, NotFoundException, \
     UnknownApiError
 from ..models import UserOrganizationListRequest, UserOrganizationListResponse, \
-    UserWorkspaceListResponse, UserWorkspaceListRequest, UserGroupListResponse, UserGroupListRequest
+    UserWorkspaceListResponse, UserWorkspaceListRequest, UserGroupListResponse, UserGroupListRequest, CountResponse
 
 users_api_router = APIRouter(
     prefix='/user',
     tags=['user'],
+    dependencies=[Depends(JWTBearer())]
 )
 
 
@@ -86,6 +88,24 @@ async def get_user_groups(data: Annotated[UserGroupListRequest, Depends()]):
                                      totalElements=count,
                                      page=data.page,
                                      size=data.size)
+    except EmptyDataException:
+        return NoContentError()
+    except NotFoundException as e:
+        return NotFoundError(message=str(e))
+    except Exception as e:
+        return UnknownApiError(message=str(e))
+
+
+@users_api_router.get(path="/count",
+                      responses={
+                          status.HTTP_200_OK: {
+                              'model': CountResponse
+                          }
+                      }
+                      )
+async def get_user_count():
+    try:
+        return CountResponse(**fetch_user_count())
     except EmptyDataException:
         return NoContentError()
     except NotFoundException as e:

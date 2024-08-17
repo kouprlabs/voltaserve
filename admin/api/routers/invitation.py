@@ -13,6 +13,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, status, Response
 
 from ..database import fetch_invitation, fetch_invitations, update_invitation
+from ..dependencies import JWTBearer
 from ..errors import NotFoundError, NoContentError, EmptyDataException, NotFoundException, \
     UnknownApiError
 from ..models import InvitationResponse, InvitationListRequest, \
@@ -21,6 +22,7 @@ from ..models import InvitationResponse, InvitationListRequest, \
 invitation_api_router = APIRouter(
     prefix='/invitation',
     tags=['invitation'],
+    dependencies=[Depends(JWTBearer())]
 )
 
 

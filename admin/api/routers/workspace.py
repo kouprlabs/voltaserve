@@ -12,11 +12,12 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, status, Response
 
-from ..database import fetch_workspace, fetch_workspaces, update_workspace
+from ..database import fetch_workspace, fetch_workspaces, update_workspace, fetch_workspace_count
+from ..dependencies import JWTBearer
 from ..errors import NotFoundError, EmptyDataException, NoContentError, NotFoundException, \
     UnknownApiError
 from ..models import WorkspaceResponse, WorkspaceRequest, WorkspaceListResponse, \
-    WorkspaceListRequest, UpdateWorkspaceRequest, GenericUnexpectedErrorResponse, GenericAcceptedResponse
+    WorkspaceListRequest, UpdateWorkspaceRequest, GenericUnexpectedErrorResponse, GenericAcceptedResponse, CountResponse
 
 workspace_api_router = APIRouter(
     prefix='/workspace',
@@ -28,7 +29,8 @@ workspace_api_router = APIRouter(
         status.HTTP_202_ACCEPTED: {
             'model': GenericAcceptedResponse
         }
-    }
+    },
+    dependencies=[Depends(JWTBearer())]
 )
 
 
@@ -47,6 +49,24 @@ async def get_workspace(data: Annotated[WorkspaceRequest, Depends()]):
             return NotFoundError(message=f'Workspace with id={data.id} does not exist')
 
         return WorkspaceResponse(**workspace)
+    except NotFoundException as e:
+        return NotFoundError(message=str(e))
+    except Exception as e:
+        return UnknownApiError(message=str(e))
+
+
+@workspace_api_router.get(path="/count",
+                          responses={
+                              status.HTTP_200_OK: {
+                                  'model': CountResponse
+                              }
+                          }
+                          )
+async def get_user_count():
+    try:
+        return CountResponse(**fetch_workspace_count())
+    except EmptyDataException:
+        return NoContentError()
     except NotFoundException as e:
         return NotFoundError(message=str(e))
     except Exception as e:

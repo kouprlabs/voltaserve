@@ -13,6 +13,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, status
 
 from ..database import fetch_task, fetch_tasks
+from ..dependencies import JWTBearer
 from ..errors import NotFoundError, EmptyDataException, NoContentError, NotFoundException, \
     UnknownApiError
 from ..models import TaskResponse, TaskRequest, TaskListResponse, TaskListRequest
@@ -21,6 +22,7 @@ from ..tasks.celery_app import celery_app
 task_api_router = APIRouter(
     prefix='/task',
     tags=['task'],
+    dependencies=[Depends(JWTBearer())]
 )
 
 user_task_api_router = APIRouter(

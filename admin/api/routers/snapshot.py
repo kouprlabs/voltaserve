@@ -13,6 +13,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, status
 
 from ..database import fetch_snapshot, fetch_snapshots
+from ..dependencies import JWTBearer
 from ..errors import NotFoundError, EmptyDataException, NoContentError, NotFoundException, \
     UnknownApiError
 from ..models import SnapshotResponse, SnapshotListRequest, SnapshotListResponse, \
@@ -21,6 +22,7 @@ from ..models import SnapshotResponse, SnapshotListRequest, SnapshotListResponse
 snapshot_api_router = APIRouter(
     prefix='/snapshot',
     tags=['snapshot'],
+    dependencies=[Depends(JWTBearer())]
 )
 
 

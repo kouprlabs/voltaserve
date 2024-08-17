@@ -13,17 +13,19 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, status, Response
 
 from ..database import fetch_organization, fetch_organizations, fetch_organization_users, \
-    fetch_organization_workspaces, update_organization, fetch_organization_groups
+    fetch_organization_workspaces, update_organization, fetch_organization_groups, fetch_organization_count
+from ..dependencies import JWTBearer
 from ..errors import NotFoundError, EmptyDataException, NoContentError, NotFoundException, \
     UnknownApiError
 from ..models import OrganizationResponse, OrganizationRequest, OrganizationListResponse, \
     OrganizationListRequest, OrganizationWorkspaceListRequest, UpdateOrganizationRequest, \
     OrganizationWorkspaceListResponse, OrganizationGroupListResponse, OrganizationGroupListRequest, \
-    OrganizationUserListRequest, OrganizationUserListResponse
+    OrganizationUserListRequest, OrganizationUserListResponse, CountResponse
 
 organization_api_router = APIRouter(
     prefix='/organization',
     tags=['organization'],
+    dependencies=[Depends(JWTBearer())]
 )
 
 
@@ -42,6 +44,24 @@ async def get_organization(data: Annotated[OrganizationRequest, Depends()]):
         return OrganizationResponse(**organization)
     except NotFoundException as e:
         return NotFoundError(message=str(e))
+
+
+@organization_api_router.get(path="/count",
+                             responses={
+                                 status.HTTP_200_OK: {
+                                     'model': CountResponse
+                                 }
+                             }
+                             )
+async def get_organization_count():
+    try:
+        return CountResponse(**fetch_organization_count())
+    except EmptyDataException:
+        return NoContentError()
+    except NotFoundException as e:
+        return NotFoundError(message=str(e))
+    except Exception as e:
+        return UnknownApiError(message=str(e))
 
 
 @organization_api_router.get(path="/all",

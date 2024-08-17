@@ -11,7 +11,7 @@
 from .generic import GenericRequest, GenericPaginationRequest, GenericResponse, GenericListResponse, \
     GenericNotFoundResponse, GenericUnauthorizedResponse, GenericTokenPayload, GenericTokenRequest, \
     GenericTokenResponse, GenericUnexpectedErrorResponse, GenericAcceptedResponse, GenericServiceUnavailableResponse, \
-    GenericErrorResponse
+    GenericErrorResponse, CountResponse
 
 from .group import GroupRequest, GroupListRequest, GroupResponse, GroupListResponse, UpdateGroupRequest
 from .grouppermission import GroupPermissionRequest, GroupPermissionListRequest, GroupPermissionResponse, \
@@ -33,6 +33,7 @@ from .user import UserRequest, UserListRequest, UserResponse, UserListResponse, 
 from .userpermission import UserPermissionRequest, UserPermissionListRequest, UserPermissionResponse, \
     UserPermissionListResponse
 from .workspace import WorkspaceRequest, WorkspaceListRequest, WorkspaceResponse, WorkspaceListResponse, \
-    OrganizationWorkspaceListRequest, UpdateWorkspaceRequest
+    WorkspaceOrganizationListRequest, UpdateWorkspaceRequest
 from .token import TokenResponse, TokenPayload
 from .index import IndexRequest, IndexListRequest, IndexResponse, IndexListResponse
+from .overview import VersionsResponse

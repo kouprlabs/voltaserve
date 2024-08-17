@@ -11,23 +11,41 @@
 import logging
 import time
 
-from fastapi import FastAPI, Request, Response, status
+from fastapi import FastAPI, Request, Response, status, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
 from .dependencies import settings, conn
-from .errors import ServiceUnavailableError
+from .errors import ServiceUnavailableError, ForbiddenError
 from .models import GenericServiceUnavailableResponse, GenericErrorResponse
 from .routers import group_api_router, organization_api_router, workspace_api_router, \
-    invitation_api_router, index_api_router, task_api_router, users_api_router
+    invitation_api_router, index_api_router, task_api_router, users_api_router, overview_api_router
 
-app = FastAPI(debug=True,
+
+async def custom_http_exception_handler(request: Request, exc: HTTPException):
+    return ForbiddenError(
+        status_code=exc.status_code,
+        message=exc.detail
+    )
+
+
+app = FastAPI(root_path='/v1',
+              debug=True,
               responses={
+                  status.HTTP_204_NO_CONTENT: {
+                      'model': None
+                  },
+                  status.HTTP_403_FORBIDDEN: {
+                      'model': GenericErrorResponse
+                  },
                   status.HTTP_404_NOT_FOUND: {
                       'model': GenericErrorResponse
                   },
-                  status.HTTP_204_NO_CONTENT: {
-                      'model': None
-                  }
+                  status.HTTP_500_INTERNAL_SERVER_ERROR: {
+                      'model': GenericErrorResponse
+                  },
+              },
+              exception_handlers={
+                  status.HTTP_403_FORBIDDEN: custom_http_exception_handler
               })
 
 app.add_middleware(
@@ -41,8 +59,6 @@ app.add_middleware(
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.DEBUG)
 logger = logging.getLogger('voltaserve-admin-api')
 
-# task_api_router.include_router(user_task_api_router)
-# task_api_router.include_router(admin_task_api_router)
 app.include_router(users_api_router)
 app.include_router(group_api_router)
 app.include_router(organization_api_router)
@@ -50,6 +66,7 @@ app.include_router(task_api_router)
 app.include_router(workspace_api_router)
 app.include_router(invitation_api_router)
 app.include_router(index_api_router)
+app.include_router(overview_api_router)
 
 
 @app.middleware("http")

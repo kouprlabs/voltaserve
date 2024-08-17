@@ -19,7 +19,7 @@ from psycopg import connect
 from psycopg.rows import dict_row
 from pydantic_settings import BaseSettings
 
-from api.routers.exceptions import GenericForbiddenException
+from .errors import GenericForbiddenException
 
 
 class Settings(BaseSettings):
@@ -39,8 +39,6 @@ class Settings(BaseSettings):
     URL: str
     CORS_ORIGINS: str
 
-    IDP_URL: str
-    API_URL: str
     REDIS_URL: str
 
     class Config:
@@ -91,10 +89,8 @@ class JWTBearer(HTTPBearer):
             except Exception as e:
                 raise GenericForbiddenException(detail=str(e)) from e
 
-            if decoded_token['iat'] > time.time():
-                raise GenericForbiddenException(detail='Token issued in the future')
-            if decoded_token['exp'] < time.time():
-                raise GenericForbiddenException(detail='Token expired')
+            if not decoded_token['is_admin']:
+                raise GenericForbiddenException(detail='Dude, u aint admin')
 
             return credentials.credentials
         else:

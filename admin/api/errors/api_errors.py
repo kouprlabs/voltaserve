@@ -9,9 +9,19 @@
 # licenses/AGPL.txt.
 
 from fastapi.responses import JSONResponse, Response
-from fastapi import status
+from fastapi import status, HTTPException
 from .error_codes import errors
 
+
+# --- REQUIRED FOR AUTHORIZATION --- #
+class GenericForbiddenException(HTTPException):
+    def __init__(self,
+                 status_code: int = status.HTTP_403_FORBIDDEN,
+                 detail='Forbidden'):
+        super().__init__(status_code=status_code, detail=detail)
+
+
+# /--- REQUIRED FOR AUTHORIZATION ---/ #
 
 class GenericError(JSONResponse):
     def __init__(self,
@@ -21,7 +31,6 @@ class GenericError(JSONResponse):
                  code: str | None = None):
         super().__init__(
             status_code=status_code,
-            # headers=headers,
             content={
                 'code': errors[status_code] if code is None else code,
                 'status': status_code,
@@ -34,13 +43,11 @@ class GenericError(JSONResponse):
 
 class UnknownApiError(GenericError):
     def __init__(self,
-                 # headers: Mapping[str, str],
                  status_code: int = status.HTTP_500_INTERNAL_SERVER_ERROR,
                  message: str = 'Internal server error',
                  user_message: str | None = None):
         super().__init__(
             status_code=status_code,
-            # headers=headers,
             message=message,
             user_message=user_message
         )
@@ -50,14 +57,12 @@ class NoContentError(Response):
     def __init__(self):
         super().__init__(
             status_code=status.HTTP_204_NO_CONTENT,
-            # headers=headers,
             content=None
         )
 
 
 class NotFoundError(GenericError):
     def __init__(self,
-                 # headers: Mapping[str, str],
                  status_code: int = status.HTTP_404_NOT_FOUND,
                  message: str = 'Not Found',
                  user_message: str | None = None):
@@ -71,13 +76,24 @@ class NotFoundError(GenericError):
 
 class ServiceUnavailableError(GenericError):
     def __init__(self,
-                 # headers: Mapping[str, str],
                  status_code: int = status.HTTP_503_SERVICE_UNAVAILABLE,
                  message: str = 'Service unavailable',
                  user_message: str | None = None):
         super().__init__(
             status_code=status_code,
-            # headers=headers,
+            message=message,
+            user_message=user_message
+        )
+
+
+class ForbiddenError(GenericError):
+    def __init__(self,
+                 # headers: Mapping[str, str],
+                 status_code: int = status.HTTP_403_FORBIDDEN,
+                 message: str = 'Forbidden',
+                 user_message: str | None = None):
+        super().__init__(
+            status_code=status_code,
             message=message,
             user_message=user_message
         )
