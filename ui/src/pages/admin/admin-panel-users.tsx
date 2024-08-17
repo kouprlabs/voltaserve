@@ -30,13 +30,14 @@ import {
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import UserAPI, { AdminUsersResponse } from '@/client/idp/user'
+import AdminConfirmationModal from '@/components/admin/admin-confirmation-modal'
+import AdminHighlightableTr from '@/components/admin/admin-highlightable-tr'
 import { adminUsersPaginationStorage } from '@/infra/pagination'
 import { getUserId } from '@/infra/token'
 import { IconChevronDown, IconChevronUp } from '@/lib/components/icons'
 import PagePagination from '@/lib/components/page-pagination'
 import SectionSpinner from '@/lib/components/section-spinner'
 import usePagePagination from '@/lib/hooks/page-pagination'
-import AdminConfirmationModal from '@/pages/admin/admin-confirmation-modal'
 
 const AdminPanelUsers = () => {
   const navigate = useNavigate()
@@ -158,7 +159,7 @@ const AdminPanelUsers = () => {
               </Thead>
               <Tbody>
                 {list.data.map((user) => (
-                  <Tr
+                  <AdminHighlightableTr
                     key={user.id}
                     onClick={(event) => {
                       if (
@@ -294,7 +295,7 @@ const AdminPanelUsers = () => {
                         </Menu>
                       )}
                     </Td>
-                  </Tr>
+                  </AdminHighlightableTr>
                 ))}
               </Tbody>
             </Table>

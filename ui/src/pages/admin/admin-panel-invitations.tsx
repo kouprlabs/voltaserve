@@ -29,12 +29,12 @@ import {
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import AdminApi, { InvitationManagementList } from '@/client/admin/admin'
+import AdminConfirmationModal from '@/components/admin/admin-confirmation-modal'
 import { adminInvitationsPaginationStorage } from '@/infra/pagination'
 import { IconChevronDown, IconChevronUp } from '@/lib/components/icons'
 import PagePagination from '@/lib/components/page-pagination'
 import SectionSpinner from '@/lib/components/section-spinner'
 import usePagePagination from '@/lib/hooks/page-pagination'
-import AdminConfirmationModal from '@/pages/admin/admin-confirmation-modal'
 
 const AdminPanelInvitations = () => {
   const navigate = useNavigate()

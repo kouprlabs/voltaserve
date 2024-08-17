@@ -22,7 +22,7 @@ export interface ListResponse {
 export interface CommonFields {
   id: string
   createTime: Date
-  updateTime?: Date
+  updateTime: Date
 }
 
 export type IndexManagement = {
@@ -143,13 +143,26 @@ export interface invitationStatusRequest extends baseIdRequest {
   accept: boolean
 }
 
+export interface CountResponse {
+  count: number
+}
+
+export interface ComponentVersion {
+  name: string
+  currentVersion: string
+  latestVersion: string
+  updateAvailable: boolean
+  location: string
+}
+
+export interface ComponentVersionList extends ListResponse {
+  data: ComponentVersion[]
+}
+
 export default class AdminApi {
   static async checkIndexesAvailability() {
     const response = await fetch(`${getConfig().adminURL}/index/all`, {
       method: 'GET',
-      headers: {
-        'Access-Control-Allow-Origin': `${getConfig().adminURL}`, // TODO: To be deleted after local tests
-      },
     })
     if (response) {
       return response.ok
@@ -246,6 +259,20 @@ export default class AdminApi {
       url: `/invitation/all?${this.paramsFromListOptions(options)}`,
       method: 'GET',
     }) as Promise<InvitationManagementList>
+  }
+
+  static async countObject(object: string) {
+    return adminFetcher({
+      url: `/${object}/count`,
+      method: 'GET',
+    }) as Promise<CountResponse>
+  }
+
+  static async getComponentsVersions() {
+    return adminFetcher({
+      url: `/overview/versions`,
+      method: 'GET',
+    }) as Promise<ComponentVersionList>
   }
 
   static async renameObject(options: baseIdNameRequest, object: string) {

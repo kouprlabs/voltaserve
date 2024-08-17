@@ -59,7 +59,6 @@ export async function fetcher<T>({
       redirect ? getAccessTokenOrRedirect() : getAccessToken()
     }`
   }
-  headers['Access-Control-Allow-Origin'] = `${getConfig().adminURL}` // TODO: To be deleted after local tests
   const response = await baseFetcher(
     url,
     {

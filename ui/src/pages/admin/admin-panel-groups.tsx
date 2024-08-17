@@ -25,11 +25,11 @@ import * as Yup from 'yup'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import AdminApi, { GroupManagementList } from '@/client/admin/admin'
+import AdminRenameModal from '@/components/admin/admin-rename-modal'
 import { adminGroupsPaginationStorage } from '@/infra/pagination'
 import PagePagination from '@/lib/components/page-pagination'
 import SectionSpinner from '@/lib/components/section-spinner'
 import usePagePagination from '@/lib/hooks/page-pagination'
-import AdminRenameModal from '@/pages/admin/admin-rename-modal'
 
 const AdminPanelGroups = () => {
   const navigate = useNavigate()

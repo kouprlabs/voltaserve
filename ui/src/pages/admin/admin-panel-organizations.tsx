@@ -25,11 +25,12 @@ import * as Yup from 'yup'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import AdminApi, { OrganizationManagementList } from '@/client/admin/admin'
+import AdminHighlightableTr from '@/components/admin/admin-highlightable-tr'
+import AdminRenameModal from '@/components/admin/admin-rename-modal'
 import { adminOrganizationsPaginationStorage } from '@/infra/pagination'
 import PagePagination from '@/lib/components/page-pagination'
 import SectionSpinner from '@/lib/components/section-spinner'
 import usePagePagination from '@/lib/hooks/page-pagination'
-import AdminRenameModal from '@/pages/admin/admin-rename-modal'
 
 const AdminPanelOrganizations = () => {
   const navigate = useNavigate()
@@ -123,7 +124,7 @@ const AdminPanelOrganizations = () => {
               </Thead>
               <Tbody>
                 {list.data.map((organization) => (
-                  <Tr
+                  <AdminHighlightableTr
                     key={organization.id}
                     onClick={(event) => {
                       if (
@@ -161,7 +162,7 @@ const AdminPanelOrganizations = () => {
                         Rename
                       </Button>
                     </Td>
-                  </Tr>
+                  </AdminHighlightableTr>
                 ))}
               </Tbody>
             </Table>
