@@ -204,6 +204,7 @@ services:
       - POSTGRES_USER=voltaserve
       - POSTGRES_PASSWORD=""
       - WORKERS=4
+      - JWT_SECRET=""
       - URL=localhost
       - API_URL=http://api:8080
       - IDP_URL=http://idp:8081
