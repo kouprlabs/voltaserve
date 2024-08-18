@@ -198,12 +198,15 @@ services:
       - ${VOLTASERVE_ADMIN_PORT}:8086
     environment:
       - PORT=8086
+      - HOST=0.0.0.0
       - POSTGRES_URL=postgres
       - POSTGRES_PORT=5432
       - POSTGRES_NAME=voltaserve
       - POSTGRES_USER=voltaserve
       - POSTGRES_PASSWORD=voltaserve
       - WORKERS=4
+      - SECURITY_JWT_SIGNING_KEY=586cozl1x9m6zmu4fg8iwi6ajazguehcm9qdfgd5ndo2pc3pcn
+      - SECURITY_CORS_ORIGINS=http://localhost:3000
       - JWT_ALGORITHM=HS256
       - URL=localhost
       - API_URL=http://api:8080
