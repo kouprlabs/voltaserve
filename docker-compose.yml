@@ -213,7 +213,7 @@ services:
       - LANGUAGE_URL=http://language:8084
       - MOSAIC_URL=http://mosaic:8085
     healthcheck:
-      test: wget --quiet --spider http://127.0.0.1:8085/v2/health || exit 1
+      test: wget --quiet --spider http://127.0.0.1:8086/liveness || exit 1
     restart: on-failure
   migrations:
     image: voltaserve/migrations
