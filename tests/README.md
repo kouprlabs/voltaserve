@@ -16,7 +16,12 @@ docker build -t voltaserve/tests .
 Run with Docker:
 
 ```shell
-docker run --rm -e API_HOST=host.docker.internal voltaserve/tests
+docker run --rm \
+    -e API_HOST=host.docker.internal \
+    -e IDP_HOST=host.docker.internal \
+    -e USERNAME='anass@koupr.com' \
+    -e PASSWORD='Passw0rd!' \
+    voltaserve/tests
 ```
 
 In Linux you should replace `host.docker.internal` with the host IP address, it can be found as follows:
