@@ -1,4 +1,4 @@
-// Copyright 2023 Anass Bouassaba.
+// Copyright 2024 Mateusz Kaźmierczak.
 //
 // Use of this software is governed by the Business Source License
 // included in the file licenses/BSL.txt.
@@ -7,15 +7,17 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-import { Config } from './types'
+import { Router, Request, Response, NextFunction } from 'express'
 
-const config: Config = {
-  apiURL: '/proxy/api/v2',
-  idpURL: '/proxy/idp/v2',
-  // adminURL: '/proxy/admin/v1',
-  adminURL: 'http://10.13.13.2:8086',
-}
+const router = Router()
 
-export function getConfig(): Config {
-  return config
-}
+router.get('/', async (_: Request, res: Response, next: NextFunction) => {
+  try {
+    res.json({version: `2.1.0`})
+  } catch (err) {
+    res.sendStatus(503)
+    next(err)
+  }
+})
+
+export default router

@@ -34,5 +34,5 @@ func GetConfig() Config {
 func readURLs(config *Config) {
 	config.APIURL = os.Getenv("API_URL")
 	config.IDPURL = os.Getenv("IDP_URL")
-	config.ADMINURL = os.Getenv("ADMIN_URL")
+	config.AdminURL = os.Getenv("ADMIN_URL")
 }

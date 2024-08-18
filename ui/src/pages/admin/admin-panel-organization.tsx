@@ -158,7 +158,9 @@ const AdminPanelOrganization = () => {
                     steps={[]}
                     setPage={setUsersPage}
                     setSize={() => {}}
-                    uiSize="xxs"
+                    uiSize="xs"
+                    disableLastNav
+                    disableMiddleNav
                   />
                 </>
               ) : null}
@@ -202,7 +204,9 @@ const AdminPanelOrganization = () => {
                     steps={[]}
                     setPage={setWorkspacesPage}
                     setSize={() => {}}
-                    uiSize="xxs"
+                    uiSize="xs"
+                    disableLastNav
+                    disableMiddleNav
                   />
                 </>
               ) : null}
@@ -241,7 +245,9 @@ const AdminPanelOrganization = () => {
                     steps={[]}
                     setPage={setGroupsPage}
                     setSize={() => {}}
-                    uiSize="xxs"
+                    uiSize="xs"
+                    disableLastNav
+                    disableMiddleNav
                   />
                 </>
               ) : null}

@@ -19,6 +19,10 @@ export interface ListResponse {
   size: number
 }
 
+export interface emptyListResponse extends ListResponse {
+  data: []
+}
+
 export interface CommonFields {
   id: string
   createTime: Date
@@ -159,6 +163,40 @@ export interface ComponentVersionList extends ListResponse {
   data: ComponentVersion[]
 }
 
+export interface DockerHubVersion {
+  creator: number
+  id: number
+  images: never
+  last_updated: Date
+  last_updater: number
+  last_updater_username: string
+  name: string
+  repository: number
+  full_size: number
+  v2: boolean
+  tag_status: string
+  tag_last_pulled: Date
+  tag_last_pushed: Date
+  media_type: string
+  content_type: string
+  digest: string
+}
+
+export interface DockerHubVersionListResponse {
+  count: number
+  next: never
+  previous: never
+  results: DockerHubVersion[]
+}
+
+export const emptyListResponseValue: emptyListResponse = {
+  totalPages: 0,
+  totalElements: 0,
+  page: 0,
+  size: 0,
+  data: [],
+}
+
 export default class AdminApi {
   static async checkIndexesAvailability() {
     const response = await fetch(`${getConfig().adminURL}/index/all`, {
@@ -268,11 +306,11 @@ export default class AdminApi {
     }) as Promise<CountResponse>
   }
 
-  static async getComponentsVersions() {
+  static async getComponentsVersions(options: ListOptions) {
     return adminFetcher({
-      url: `/overview/versions`,
+      url: `/overview/version/internal?${this.paramsFromListOptions(options)}`,
       method: 'GET',
-    }) as Promise<ComponentVersionList>
+    }) as Promise<ComponentVersion>
   }
 
   static async renameObject(options: baseIdNameRequest, object: string) {
@@ -291,7 +329,64 @@ export default class AdminApi {
     }) as Promise<void>
   }
 
-  static paramsFromListOptions(options?: ListOptions): URLSearchParams {
+  // static async getUiVersion() {
+  //   const currentVersion = '2.1.0'
+  //   return await baseFetcher(
+  //     'https://hub.docker.com/v2/repositories/voltaserve/ui/tags?page_size=50&page=1&ordering=last_updated&name=',
+  //     {},
+  //     false,
+  //     true,
+  //   )
+  //     .then(async (resp) => {
+  //       if (resp && resp.ok) {
+  //         const tags: DockerHubVersionListResponse = await resp.json()
+  //         // const latestDigest = tags.results.find((l) => {
+  //         //   l.name === 'latest'
+  //         // }).digest
+  //         if (tags.results) {
+  //           const latestDigest = tags.results
+  //             .filter((tag) => {
+  //               tag.name === 'latest'
+  //             })
+  //             .map((tag) => {
+  //               return tag.digest
+  //             })[0]
+  //           const latestVersion = semver.maxSatisfying(
+  //             tags.results
+  //               .filter((tag) => {
+  //                 tag.name != 'latest' && tag.digest === latestDigest
+  //               })
+  //               .map((tag) => {
+  //                 return tag.name
+  //               }),
+  //             '*',
+  //           )
+  //           return { latestDigest: latestDigest, latestVersion: latestVersion }
+  //         }
+  //       }
+  //     })
+  //     .then((value) => {
+  //       if (value && value.latestVersion) {
+  //         return {
+  //           name: 'ui',
+  //           currentVersion: currentVersion,
+  //           location: `https://hub.docker.com/layers/voltaserve/$ui/${value.latestVersion}/images/${value.latestDigest}`,
+  //           latestVersion: value.latestVersion,
+  //           updateAvailable: semver.gt(value.latestVersion, currentVersion),
+  //         }
+  //       } else {
+  //         return {
+  //           name: 'ui',
+  //           currentVersion: currentVersion,
+  //           location: ``,
+  //           latestVersion: '',
+  //           updateAvailable: false,
+  //         }
+  //       }
+  //     })
+  // }
+
+  static paramsFromListOptions = (options?: ListOptions): URLSearchParams => {
     const params: ListQueryParams = {}
     if (options?.id) {
       params.id = options.id.toString()

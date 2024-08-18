@@ -29,6 +29,11 @@ const config = ({ mode }) => {
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/proxy\/idp/, ''),
         },
+        '/proxy/admin/v1': {
+          target: process.env.ADMIN_URL,
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/proxy\/admin/, ''),
+        },
       },
     },
   })

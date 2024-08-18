@@ -13,7 +13,7 @@ import { getConfig } from '@/config/config'
 
 const router = Router()
 
-router.get('/', async (_: Request, res: Response, next: NextFunction) => {
+router.get('', async (_: Request, res: Response, next: NextFunction) => {
   let pg: PgClient
   try {
     pg = new PgClient({ connectionString: getConfig().databaseURL })

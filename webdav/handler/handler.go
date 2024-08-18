@@ -13,6 +13,8 @@ package handler
 import (
 	"net/http"
 
+	"encoding/json"
+
 	"github.com/kouprlabs/voltaserve/webdav/cache"
 	"github.com/kouprlabs/voltaserve/webdav/client/api_client"
 	"github.com/kouprlabs/voltaserve/webdav/client/idp_client"
@@ -76,4 +78,17 @@ func (h *Handler) Health(w http.ResponseWriter, _ *http.Request) {
 		return
 	}
 	w.WriteHeader(http.StatusServiceUnavailable)
+}
+
+func (h *Handler) Version(w http.ResponseWriter, _ *http.Request) {
+	versionInfo := map[string]string{
+		"version": "2.1.0",
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+
+	if err := json.NewEncoder(w).Encode(versionInfo); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }

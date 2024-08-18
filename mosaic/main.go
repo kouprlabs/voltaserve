@@ -53,6 +53,9 @@ func main() {
 	healthRouter := router.NewHealthRouter()
 	healthRouter.AppendRoutes(v2)
 
+	version := router.NewVersionRouter()
+	version.AppendRoutes(app)
+
 	mosaicRouter := router.NewMosaicRouter()
 	mosaicRouter.AppendRoutes(v2.Group("mosaics"))
 

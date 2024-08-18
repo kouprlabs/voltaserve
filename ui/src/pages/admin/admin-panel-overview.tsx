@@ -24,7 +24,8 @@ import {
 } from '@chakra-ui/react'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
-import AdminApi, { ComponentVersionList } from '@/client/admin/admin'
+import semver from 'semver'
+import AdminApi, { ComponentVersion } from '@/client/admin/admin'
 import {
   IconChevronRight,
   IconFlag,
@@ -35,6 +36,19 @@ import {
 import SectionSpinner from '@/lib/components/section-spinner'
 
 const spinnerHeight = '40px'
+const uiCurrentVersion = { version: '2.1.0' }
+const internalComponents = [
+  { id: 'ui' },
+  { id: 'api' },
+  { id: 'language' },
+  { id: 'webdav' },
+  { id: 'idp' },
+  { id: 'mosaic' },
+  { id: 'admin' },
+  { id: 'conversion' },
+]
+const compareFn = (a: ComponentVersion, b: ComponentVersion) =>
+  a.name > b.name ? 1 : 0
 
 const AdminPanelOverview = () => {
   const [usersAmount, setUsersAmount] = useState<number | undefined>(undefined)
@@ -47,9 +61,7 @@ const AdminPanelOverview = () => {
   const [workspacesAmount, setWorkspacesAmount] = useState<number | undefined>(
     undefined,
   )
-  const [componentsData, setComponentsData] = useState<
-    ComponentVersionList | undefined
-  >(undefined)
+  const [componentsData, setComponentsData] = useState<ComponentVersion[]>([])
 
   useEffect(() => {
     AdminApi.countObject('user').then((value) => {
@@ -64,8 +76,22 @@ const AdminPanelOverview = () => {
     AdminApi.countObject('workspace').then((value) => {
       setWorkspacesAmount(value.count)
     })
-    AdminApi.getComponentsVersions().then((value) => {
-      setComponentsData(value)
+    internalComponents.map((component) => {
+      AdminApi.getComponentsVersions(component).then((value) => {
+        if (component.id == 'ui') {
+          value.currentVersion = uiCurrentVersion.version
+          value.updateAvailable = semver.gt(
+            value.latestVersion,
+            uiCurrentVersion.version,
+          )
+        }
+        setComponentsData((prevState) => {
+          return [
+            ...prevState.filter((item) => item.name !== value.name),
+            value,
+          ].toSorted(compareFn)
+        })
+      })
     })
   }, [])
 
@@ -149,11 +175,10 @@ const AdminPanelOverview = () => {
                   <span className={cx('font-bold')}>Components</span>
                 </Text>
                 <Spacer />
-                {componentsData.data.filter(
-                  (component) => component.updateAvailable,
-                ).length > 1 ? (
+                {componentsData.filter((component) => component.updateAvailable)
+                  .length > 1 ? (
                   <Badge colorScheme="yellow">Updates available</Badge>
-                ) : componentsData.data.filter(
+                ) : componentsData.filter(
                     (component) => component.updateAvailable,
                   ).length === 1 ? (
                   <Badge colorScheme="yellow">Update available</Badge>
@@ -161,31 +186,29 @@ const AdminPanelOverview = () => {
               </Flex>
               <Divider />
               <Stack>
-                {componentsData.data.map((component) => (
-                  <>
-                    <StackItem>
-                      <Flex padding={2}>
-                        <Text>{component.name}</Text>
-                        <Spacer />
-                        {component.updateAvailable ? (
-                          <Link to={component.location}>
-                            <Center>
-                              <Badge colorScheme="red">
-                                {component.currentVersion}
-                              </Badge>
-                              <IconChevronRight />
-                              <Badge colorScheme="green">
-                                {component.latestVersion}
-                              </Badge>
-                            </Center>
-                          </Link>
-                        ) : (
-                          <Badge>{component.currentVersion}</Badge>
-                        )}
-                      </Flex>
-                    </StackItem>
+                {componentsData.map((component) => (
+                  <StackItem key={component.name}>
+                    <Flex padding={2}>
+                      <Text>{component.name}</Text>
+                      <Spacer />
+                      {component.updateAvailable ? (
+                        <Link to={component.location}>
+                          <Center>
+                            <Badge colorScheme="red">
+                              {component.currentVersion}
+                            </Badge>
+                            <IconChevronRight />
+                            <Badge colorScheme="green">
+                              {component.latestVersion}
+                            </Badge>
+                          </Center>
+                        </Link>
+                      ) : (
+                        <Badge>{component.currentVersion}</Badge>
+                      )}
+                    </Flex>
                     <Divider />
-                  </>
+                  </StackItem>
                 ))}
               </Stack>
             </GridItem>

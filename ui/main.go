@@ -79,7 +79,7 @@ func main() {
 	}))
 
 	adminProxy := e.Group("proxy/admin")
-	adminURL, err := url.Parse(cfg.ADMINURL)
+	adminURL, err := url.Parse(cfg.AdminURL)
 	if err != nil {
 		e.Logger.Fatal(err)
 	}
