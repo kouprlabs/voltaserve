@@ -189,6 +189,31 @@ services:
     healthcheck:
       test: wget --quiet --spider http://127.0.0.1:8085/v2/health || exit 1
     restart: on-failure
+  admin:
+    image: voltaserve/admin
+    build:
+      context: ./admin
+      dockerfile: Dockerfile_api
+    ports:
+      - ${VOLTASERVE_ADMIN_PORT}:8086
+    environment:
+      - POSTGRES_URL=10.13.13.5
+      - POSTGRES_PORT=5432
+      - POSTGRES_NAME=voltaserve
+      - POSTGRES_USER=voltaserve
+      - POSTGRES_PASSWORD=""
+      - PORT=8086
+      - WORKERS=4
+      - URL=localhost
+      - API_URL=http://api:8080
+      - IDP_URL=http://idp:8081
+      - WEBDAV_URL=http://webdav:8082
+      - CONVERSION_URL=http://conversion:8083
+      - LANGUAGE_URL=http://language:8084
+      - MOSAIC_URL=http://mosaic:8085
+    healthcheck:
+      test: wget --quiet --spider http://127.0.0.1:8085/v2/health || exit 1
+    restart: on-failure
   migrations:
     image: voltaserve/migrations
     build:
