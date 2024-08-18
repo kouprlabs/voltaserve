@@ -39,10 +39,8 @@ class Settings(BaseSettings):
     URL: str
     CORS_ORIGINS: str
 
-    REDIS_URL: str
-
     class Config:
-        env_file = "C:/Users/lobod/PycharmProjects/voltaserve/admin/api/.env"
+        env_file = "/app/api/.env"
 
 
 settings = Settings()

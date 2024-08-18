@@ -18,7 +18,7 @@ from .dependencies import settings, conn
 from .errors import ServiceUnavailableError, ForbiddenError
 from .models import GenericServiceUnavailableResponse, GenericErrorResponse
 from .routers import group_api_router, organization_api_router, workspace_api_router, \
-    invitation_api_router, index_api_router, task_api_router, users_api_router, overview_api_router
+    invitation_api_router, index_api_router, users_api_router, overview_api_router
 
 
 async def custom_http_exception_handler(request: Request, exc: HTTPException):
@@ -62,7 +62,6 @@ logger = logging.getLogger('voltaserve-admin-api')
 app.include_router(users_api_router)
 app.include_router(group_api_router)
 app.include_router(organization_api_router)
-app.include_router(task_api_router)
 app.include_router(workspace_api_router)
 app.include_router(invitation_api_router)
 app.include_router(index_api_router)

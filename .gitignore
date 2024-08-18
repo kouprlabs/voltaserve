@@ -3,3 +3,5 @@
 admin/venv
 admin/dist
 admin/api/**/__pycache__
+admin/api/tasks
+admin/api/routers/task.py

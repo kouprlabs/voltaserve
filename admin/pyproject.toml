@@ -24,6 +24,7 @@ classifiers = [
 python = "^3.12"
 fastapi = "^0.111.1"
 uvicorn = "^0.30.1"
+psycopg = "3.2.1"
 psycopg-binary = "3.2.1"
 pydantic-settings = "2.3.4"
 PyJWT = "^2.8.0"
