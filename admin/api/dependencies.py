@@ -32,23 +32,17 @@ class Settings(BaseSettings):
     WORKERS: int
     PORT: int
 
-    JWT_SECRET: str
+    SECURITY_JWT_SIGNING_KEY: str
     JWT_ALGORITHM: str
 
     URL: str
-    CORS_ORIGINS: str
-    REDIS_URL: str
-    MEILISEARCH_URL: str
+    SECURITY_CORS_ORIGINS: str
     API_URL: str
     IDP_URL: str
     WEBDAV_URL: str
     CONVERSION_URL: str
     LANGUAGE_URL: str
     MOSAIC_URL: str
-    MINIO_URL: str
-
-    class Config:
-        env_file = "C:/Users/lobod/PycharmProjects/voltaserve/admin/api/.env"
 
 
 settings = Settings()
@@ -86,7 +80,7 @@ class JWTBearer(HTTPBearer):
 
             try:
                 decoded_token = jwt.decode(jwt=credentials.credentials,
-                                           key=settings.JWT_SECRET,
+                                           key=settings.SECURITY_JWT_SIGNING_KEY,
                                            algorithms=[settings.JWT_ALGORITHM],
                                            audience=settings.URL,
                                            issuer=settings.URL,

@@ -202,9 +202,9 @@ services:
       - POSTGRES_PORT=5432
       - POSTGRES_NAME=voltaserve
       - POSTGRES_USER=voltaserve
-      - POSTGRES_PASSWORD=""
+      - POSTGRES_PASSWORD=voltaserve
       - WORKERS=4
-      - JWT_SECRET=""
+      - JWT_ALGORITHM=HS256
       - URL=localhost
       - API_URL=http://api:8080
       - IDP_URL=http://idp:8081
