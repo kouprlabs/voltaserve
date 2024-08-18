@@ -11,13 +11,10 @@
 @testable import Voltaserve
 import XCTest
 
-struct FailedToFetchToken: Error {}
-
 final class WorkspaceTests: XCTestCase {
     var config = Config()
-    var token = Token()
 
-    func testFlow() async throws {
+    func testWorkspaceFlow() async throws {
         let token = try await fetchTokenOrFail()
 
         /* Create organization */
@@ -85,6 +82,23 @@ final class WorkspaceTests: XCTestCase {
         XCTAssertEqual(workspace.organization.id, workspaces[0].organization.id)
         XCTAssertEqual(workspace.storageCapacity, workspaces[0].storageCapacity)
 
+        /* Test patch name */
+        let newName = "New Workspace"
+        let resultAlpha = try await workspaceClient.patchName(workspace.id, options: .init(name: newName))
+        XCTAssertEqual(resultAlpha.name, newName)
+        let workspaceAlpha = try await workspaceClient.fetch(workspace.id)
+        XCTAssertEqual(workspaceAlpha.name, newName)
+
+        /* Test patch storage capacity */
+        let newStorageCapacity = 200_000
+        let resultBeta = try await workspaceClient.patchStorageCapacity(
+            workspace.id,
+            options: .init(storageCapacity: newStorageCapacity)
+        )
+        XCTAssertEqual(resultBeta.storageCapacity, newStorageCapacity)
+        let workspaceBeta = try await workspaceClient.fetch(workspace.id)
+        XCTAssertEqual(workspaceBeta.storageCapacity, newStorageCapacity)
+
         /* Test delete */
         for workspace in workspaces {
             try await workspaceClient.delete(workspace.id)
@@ -99,13 +113,5 @@ final class WorkspaceTests: XCTestCase {
 
         /* Delete organization */
         try await organizationClient.delete(organization.id)
-    }
-
-    func fetchTokenOrFail() async throws -> VOToken.Value {
-        if let token = try await token.fetch() {
-            return token
-        } else {
-            throw FailedToFetchToken()
-        }
     }
 }
