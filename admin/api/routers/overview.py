@@ -81,10 +81,7 @@ async def get_internal_version(data: Annotated[VersionRequest, Depends()]):
             else:
                 response = await get_local_version(sess, urls[f'{data.id.upper()}_URL'], response)
 
-            response['updateAvailable'] = response['latestVersion'] > response['currentVersion'] if response[
-                                                                                                        'currentVersion'] != '' and \
-                                                                                                    response[
-                                                                                                        'latestVersion'] != 'UNKNOWN' else None
+            response['updateAvailable'] = response['latestVersion'] > response['currentVersion'] if response['currentVersion'] != '' and response['latestVersion'] != 'UNKNOWN' else None
 
         return VersionResponse(**response)
     except Exception as e:

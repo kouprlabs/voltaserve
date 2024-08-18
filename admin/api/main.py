@@ -64,7 +64,7 @@ app.include_router(group_api_router)
 app.include_router(organization_api_router)
 app.include_router(workspace_api_router)
 app.include_router(invitation_api_router)
-app.include_router(index_api_router)
+# app.include_router(index_api_router)
 app.include_router(overview_api_router)
 
 

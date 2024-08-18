@@ -76,7 +76,12 @@ def fetch_organization_users(organization_id: str, page=1, size=10) -> Tuple[Ite
             if data is None or data == {}:
                 raise EmptyDataException
 
-            return data, len(data)
+            count = curs.execute(f'SELECT count(u.id) '
+                                 f'FROM userpermission u '
+                                 f'JOIN organization o ON u.resource_id = o.id '
+                                 f'WHERE o.id = \'{organization_id}\'').fetchone()
+
+            return data, count['count']
 
     except DatabaseError as error:
         raise error
@@ -87,7 +92,7 @@ def fetch_organization_workspaces(organization_id: str, page=1, size=10) -> Tupl
         with conn.cursor() as curs:
             data = curs.execute(
                 f'SELECT id, name, create_time as "createTime"'
-                f'FROM workspace '
+                f'FROM "workspace" '
                 f'WHERE organization_id = \'{organization_id}\' '
                 f'ORDER BY create_time '
                 f'OFFSET {(page - 1) * size} '
@@ -96,7 +101,12 @@ def fetch_organization_workspaces(organization_id: str, page=1, size=10) -> Tupl
             if data is None or data == {}:
                 raise EmptyDataException
 
-            return data, len(data)
+            count = curs.execute(f'SELECT count(u.id) '
+                                 f'FROM "userpermission" u '
+                                 f'JOIN "workspace" w ON u.resource_id = w.id '
+                                 f'WHERE w.organization_id = \'{organization_id}\'').fetchone()
+
+            return data, count['count']
     except DatabaseError as error:
         raise error
 
@@ -115,13 +125,17 @@ def fetch_organization_groups(organization_id: str, page=1, size=10) -> Tuple[It
             if data is None or data == {}:
                 raise EmptyDataException
 
-            return data, len(data)
+            count = curs.execute(f'SELECT count(id) '
+                                 f'FROM "group" '
+                                 f'WHERE organization_id = \'{organization_id}\'').fetchone()
+
+            return data, count['count']
     except DatabaseError as error:
         raise error
 
 
 # --- UPDATE --- #
-def update_organization(data: Dict) -> Dict:
+def update_organization(data: Dict) -> None:
     try:
         with conn.cursor() as curs:
             curs.execute(parse_sql_update_query('organization', data))
