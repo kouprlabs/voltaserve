@@ -197,12 +197,12 @@ services:
     ports:
       - ${VOLTASERVE_ADMIN_PORT}:8086
     environment:
-      - POSTGRES_URL=10.13.13.5
+      - PORT=8086
+      - POSTGRES_URL=postgres
       - POSTGRES_PORT=5432
       - POSTGRES_NAME=voltaserve
       - POSTGRES_USER=voltaserve
       - POSTGRES_PASSWORD=""
-      - PORT=8086
       - WORKERS=4
       - URL=localhost
       - API_URL=http://api:8080
