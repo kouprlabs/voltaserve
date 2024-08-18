@@ -214,6 +214,13 @@ services:
       - MOSAIC_URL=http://mosaic:8085
     healthcheck:
       test: wget --quiet --spider http://127.0.0.1:8086/liveness || exit 1
+    depends_on:
+      - api
+      - idp
+      - webdav
+      - conversion
+      - language
+      - mosaic
     restart: on-failure
   migrations:
     image: voltaserve/migrations
