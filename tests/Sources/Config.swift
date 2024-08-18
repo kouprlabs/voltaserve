@@ -12,17 +12,8 @@ import Foundation
 import Voltaserve
 
 struct Config {
-    private(set) var token: VOToken.Value?
     let apiURL = "http://\(ProcessInfo.processInfo.environment["API_HOST"] ?? "localhost"):8080/v2"
     let idpURL = "http://\(ProcessInfo.processInfo.environment["IDP_HOST"] ?? "localhost"):8081/v2"
-
-    mutating func connect() async throws {
-        token = try await VOToken(baseURL: idpURL).exchange(VOToken.ExchangeOptions(
-            grantType: .password,
-            username: ProcessInfo.processInfo.environment["USERNAME"]!,
-            password: ProcessInfo.processInfo.environment["PASSWORD"]!,
-            refreshToken: nil,
-            locale: nil
-        ))
-    }
+    let username = ProcessInfo.processInfo.environment["USERNAME"] ?? "test@koupr.com"
+    let password = ProcessInfo.processInfo.environment["PASSWORD"] ?? "Passw0rd!"
 }
