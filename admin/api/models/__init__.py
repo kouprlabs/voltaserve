@@ -36,4 +36,4 @@ from .workspace import WorkspaceRequest, WorkspaceListRequest, WorkspaceResponse
     WorkspaceOrganizationListRequest, UpdateWorkspaceRequest
 from .token import TokenResponse, TokenPayload
 from .index import IndexRequest, IndexListRequest, IndexResponse, IndexListResponse
-from .overview import VersionsResponse
+from .overview import VersionsResponse, VersionRequest, VersionResponse

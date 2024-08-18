@@ -7,14 +7,14 @@
 # the Business Source License, use of this software will be governed
 # by the GNU Affero General Public License v3.0 only, included in the file
 # licenses/AGPL.txt.
+from typing import Annotated
 
-from fastapi import APIRouter, status, Depends
 from aiohttp import ClientSession
+from fastapi import APIRouter, status, Depends
 
-from ..database import fetch_version
-from ..dependencies import JWTBearer
-from ..errors import UnknownApiError
-from ..models import VersionsResponse
+from ..dependencies import settings, JWTBearer
+from ..errors import UnknownApiError, NotFoundError
+from ..models import VersionRequest, VersionResponse
 
 overview_api_router = APIRouter(
     prefix='/overview',
@@ -23,57 +23,69 @@ overview_api_router = APIRouter(
 )
 
 
-@overview_api_router.get(path="/versions",
+async def get_dockerhub_version(sess: ClientSession, id: str, response: dict, params: dict) -> dict:
+    try:
+        async with sess.get(f"https://hub.docker.com/v2/repositories/voltaserve/{id}/tags", params=params) as resp:
+            if resp.status == 200:
+                tags = await resp.json()
+                latest_digest = next(l['digest'] for l in tags['results'] if l['name'] == 'latest')
+                response['latestVersion'] = max(
+                    l['name'] for l in tags['results'] if
+                    l['digest'] == latest_digest and l['name'] != 'latest')
+                response['location'] = (f"https://hub.docker.com/layers/voltaserve/{id}"
+                                        f"/{response['latestVersion']}/images/{latest_digest}")
+            else:
+                response['latestVersion'] = 'UNKNOWN'
+                response['location'] = f"https://hub.docker.com/layers/voltaserve/{id}"
+    except:
+        response['latestVersion'] = 'UNKNOWN'
+        response['location'] = f"https://hub.docker.com/layers/voltaserve/{id}"
+
+    return response
+
+
+async def get_local_version(sess: ClientSession, url: str, response: dict) -> dict:
+    try:
+        async with sess.get(f'{url}/version') as local_resp:
+            if local_resp.status == 200:
+                response['currentVersion'] = (await local_resp.json())['version']
+            else:
+                response['currentVersion'] = 'UNKNOWN'
+    except:
+        response['currentVersion'] = 'UNKNOWN'
+
+    return response
+
+
+@overview_api_router.get(path="/version/internal",
                          responses={
                              status.HTTP_200_OK: {
-                                 'model': VersionsResponse
+                                 'model': VersionResponse
                              }
                          }
                          )
-async def get_versions():
+async def get_internal_version(data: Annotated[VersionRequest, Depends()]):
+    if data.id not in ('api', 'conversion', 'idp', 'language', 'mosaic', 'ui', 'webdav', 'admin'):
+        return NotFoundError(message=f'Microservice {data.id} not found')
+
     try:
-        loc = ['admin', 'database']
-        ext = ['api', 'conversion', 'idp', 'language', 'mosaic', 'ui', 'webdav']
-        data = []
-        # series of requests to obtain versions
+        urls = settings.model_dump()
+        response = {'name': data.id}
         async with ClientSession() as sess:
-            for svc in ext:
-                url = f"https://hub.docker.com/v2/repositories/voltaserve/{svc}/tags"
-                params = {"page_size": 50, "page": 1, "ordering": "last_updated", "name": ""}
+            params = {"page_size": 50, "page": 1, "ordering": "last_updated", "name": ""}
+            response = await get_dockerhub_version(sess, data.id, response, params)
+            if data.id == 'admin':
+                response['currentVersion'] = '2.1.0'
+            elif data.id == 'ui':
+                response['currentVersion'] = ''
+            else:
+                response = await get_local_version(sess, urls[f'{data.id.upper()}_URL'], response)
 
-                async with sess.get(url, params=params) as resp:
-                    tags = await resp.json()
+            response['updateAvailable'] = response['latestVersion'] > response['currentVersion'] if response[
+                                                                                                        'currentVersion'] != '' and \
+                                                                                                    response[
+                                                                                                        'latestVersion'] != 'UNKNOWN' else None
 
-                    latest_digest = next(l['digest'] for l in tags['results'] if l['name'] == 'latest')
-                    latest_version = max(
-                        l['name'] for l in tags['results'] if l['digest'] == latest_digest and l['name'] != 'latest')
-
-                    data.append({
-                        'name': svc,
-                        'currentVersion': '2.0.1',
-                        'latestVersion': latest_version,
-                        'updateAvailable': latest_version > '2.0.1',
-                        'location': f"https://hub.docker.com/layers/voltaserve/{svc}/"
-                                    f"{latest_version}/images/{latest_digest}"
-                    })
-
-        data.extend([{
-            'name': 'database',
-            'currentVersion': fetch_version(),
-            'latestVersion': '16.1',
-            'updateAvailable': '16.1' > fetch_version(),
-            'location': 'https://hub.docker.com/_/postgres'
-        },
-            {
-                'name': 'admin',
-                'currentVersion': '2.0.1',
-                'latestVersion': '2.1.0',
-                'updateAvailable': '2.1.0' > '2.0.1',
-                'location': f"https://hub.docker.com/layers/voltaserve/admin/"
-                            f"{latest_version}/images/{latest_digest}"
-        }
-        ])
-
-        return VersionsResponse(data=data, totalElements=len(data), page=1, size=len(data))
+        return VersionResponse(**response)
     except Exception as e:
         return UnknownApiError(message=str(e))

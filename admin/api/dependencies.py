@@ -8,7 +8,6 @@
 # by the GNU Affero General Public License v3.0 only, included in the file
 # licenses/AGPL.txt.
 
-import time
 from functools import reduce
 from typing import Optional
 
@@ -23,11 +22,11 @@ from .errors import GenericForbiddenException
 
 
 class Settings(BaseSettings):
-    DB_HOST: str
-    DB_PORT: int
-    DB_NAME: str
-    DB_USER: str
-    DB_PASSWORD: Optional[str]
+    POSTGRES_URL: str
+    POSTGRES_PORT: int
+    POSTGRES_NAME: str
+    POSTGRES_USER: str
+    POSTGRES_PASSWORD: Optional[str]
 
     HOST: str
     WORKERS: int
@@ -38,18 +37,27 @@ class Settings(BaseSettings):
 
     URL: str
     CORS_ORIGINS: str
+    REDIS_URL: str
+    MEILISEARCH_URL: str
+    API_URL: str
+    IDP_URL: str
+    WEBDAV_URL: str
+    CONVERSION_URL: str
+    LANGUAGE_URL: str
+    MOSAIC_URL: str
+    MINIO_URL: str
 
     class Config:
-        env_file = "/app/api/.env"
+        env_file = "C:/Users/lobod/PycharmProjects/voltaserve/admin/api/.env"
 
 
 settings = Settings()
 
-conn = connect(conninfo=f"postgres://{settings.DB_USER}:"
-                        f"{settings.DB_PASSWORD}@"
-                        f"{settings.DB_HOST}:"
-                        f"{settings.DB_PORT}/"
-                        f"{settings.DB_NAME}",
+conn = connect(conninfo=f"postgres://{settings.POSTGRES_USER}:"
+                        f"{settings.POSTGRES_PASSWORD}@"
+                        f"{settings.POSTGRES_URL}:"
+                        f"{settings.POSTGRES_PORT}/"
+                        f"{settings.POSTGRES_NAME}",
                row_factory=dict_row,
                autocommit=True
                )
