@@ -96,6 +96,9 @@ final class WorkspaceTests: XCTestCase {
                 XCTAssertEqual(error.code, "workspace_not_found")
             }
         }
+
+        /* Delete organization */
+        try await organizationClient.delete(organization.id)
     }
 
     func fetchTokenOrFail() async throws -> VOToken.Value {
