@@ -500,10 +500,11 @@ type FileMoveOptions struct {
 //	@Router			/files/{id}/move/{targetId} [post]
 func (r *FileRouter) MoveOne(c *fiber.Ctx) error {
 	userID := GetUserID(c)
-	if err := r.fileSvc.MoveOne(c.Params("id"), c.Params("targetId"), userID); err != nil {
+	res, err := r.fileSvc.MoveOne(c.Params("id"), c.Params("targetId"), userID)
+	if err != nil {
 		return err
 	}
-	return c.SendStatus(http.StatusNoContent)
+	return c.JSON(res)
 }
 
 // MoveMany godoc
