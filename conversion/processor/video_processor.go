@@ -35,7 +35,7 @@ func NewVideoProcessor() *VideoProcessor {
 }
 
 func (p *VideoProcessor) Thumbnail(inputPath string, width int, height int, outputPath string) error {
-	tmpPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".png")
+	tmpPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(outputPath))
 	if err := infra.NewCommand().Exec("ffmpeg", "-i", inputPath, "-frames:v", "1", tmpPath); err != nil {
 		return err
 	}
@@ -46,8 +46,20 @@ func (p *VideoProcessor) Thumbnail(inputPath string, width int, height int, outp
 			infra.GetLogger().Error(err)
 		}
 	}(tmpPath)
-	if err := p.imageProc.ResizeImage(tmpPath, width, height, outputPath); err != nil {
+	size, err := p.imageProc.MeasureImage(tmpPath)
+	if err != nil {
 		return err
+	}
+	if size.Width > size.Height {
+		newWidth, newHeight := helper.AspectRatio(width, 0, size.Width, size.Height)
+		if err := p.imageProc.ResizeImage(tmpPath, newWidth, newHeight, outputPath); err != nil {
+			return err
+		}
+	} else {
+		newWidth, newHeight := helper.AspectRatio(0, p.config.Limits.ImagePreviewMaxHeight, size.Width, size.Height)
+		if err := p.imageProc.ResizeImage(tmpPath, newWidth, newHeight, outputPath); err != nil {
+			return err
+		}
 	}
 	return nil
 }
