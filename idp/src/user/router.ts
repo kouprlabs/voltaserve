@@ -184,7 +184,7 @@ router.delete(
         throw parseValidationError(result)
       }
       await deleteUser(req.user.id, req.body as UserDeleteOptions)
-      res.sendStatus(200)
+      res.sendStatus(204)
     } catch (err) {
       if (err === 'invalid_password') {
         res.status(400).json({ error: err })
