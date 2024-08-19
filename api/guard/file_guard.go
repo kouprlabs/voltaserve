@@ -54,7 +54,7 @@ func (g *FileGuard) Authorize(userID string, file model.File, permission string)
 		if g.IsAuthorized(userID, file, model.PermissionViewer) {
 			return err
 		} else {
-			return errorpkg.NewOrganizationNotFoundError(err)
+			return errorpkg.NewFileNotFoundError(err)
 		}
 	}
 	return nil
