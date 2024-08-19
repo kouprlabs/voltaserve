@@ -1414,9 +1414,7 @@ func (svc *FileService) DeleteOne(id string, userID string) error {
 	go func(ids []string) {
 		for _, treeID := range treeIDs {
 			if err := svc.fileCache.Delete(treeID); err != nil {
-				/* Here we intentionally don't return an error or panic, we just print the error,
-				that's because we still want to delete the file in the repo afterward even
-				if we fail to delete it from the search. */
+				// Here we intentionally don't return an error or panic, we just print the error
 				fmt.Println(err)
 			}
 		}
@@ -1425,9 +1423,7 @@ func (svc *FileService) DeleteOne(id string, userID string) error {
 	/* Delete from search */
 	go func(ids []string) {
 		if err := svc.fileSearch.Delete(treeIDs); err != nil {
-			/* Here we intentionally don't return an error or panic, we just print the error,
-			that's because we still want to delete the file in the repo afterward even
-			if we fail to delete it from the search. */
+			// Here we intentionally don't return an error or panic, we just print the error
 			fmt.Println(err)
 		}
 	}(treeIDs)
