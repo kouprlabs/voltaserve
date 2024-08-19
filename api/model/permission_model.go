@@ -11,6 +11,7 @@
 package model
 
 const (
+	PermissionNone   = "none"
 	PermissionViewer = "viewer"
 	PermissionEditor = "editor"
 	PermissionOwner  = "owner"

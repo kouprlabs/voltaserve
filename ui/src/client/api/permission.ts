@@ -8,6 +8,7 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
 
+export const NONE_PERMISSION = 'none'
 export const VIEWER_PERMISSION = 'viewer'
 export const EDITOR_PERMISSION = 'editor'
 export const OWNER_PERMISSION = 'owner'

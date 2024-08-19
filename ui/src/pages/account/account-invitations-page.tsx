@@ -125,8 +125,8 @@ const AccountInvitationsPage = () => {
               {list.data.length > 0 &&
                 list.data.map((i) => (
                   <Tr key={i.id}>
-                    <Td>{userToString(i.owner)}</Td>
-                    <Td>{i.organization.name}</Td>
+                    <Td>{i.owner ? userToString(i.owner) : ''}</Td>
+                    <Td>{i.organization ? i.organization.name : ''}</Td>
                     <Td>{prettyDate(i.createTime)}</Td>
                     <Td className={cx('text-right')}>
                       <Menu>

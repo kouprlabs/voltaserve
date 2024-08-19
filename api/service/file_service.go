@@ -2124,7 +2124,7 @@ func (mp *FileMapper) mapOne(m model.File, userID string) (*File, error) {
 		res.Snapshot = mp.snapshotMapper.mapOne(snapshot)
 		res.Snapshot.IsActive = true
 	}
-	res.Permission = ""
+	res.Permission = model.PermissionNone
 	for _, p := range m.GetUserPermissions() {
 		if p.GetUserID() == userID && model.GetPermissionWeight(p.GetValue()) > model.GetPermissionWeight(res.Permission) {
 			res.Permission = p.GetValue()
