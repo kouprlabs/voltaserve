@@ -27,9 +27,9 @@ export type InvitationStatus = 'pending' | 'accepted' | 'declined'
 
 export type Invitation = {
   id: string
-  owner: User
+  owner?: User
   email: string[]
-  organization: Organization
+  organization?: Organization
   status: InvitationStatus
   createTime: string
   updateTime?: string

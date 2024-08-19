@@ -440,7 +440,7 @@ func (mp *groupMapper) mapOne(m model.Group, userID string) (*Group, error) {
 		CreateTime:   m.GetCreateTime(),
 		UpdateTime:   m.GetUpdateTime(),
 	}
-	res.Permission = ""
+	res.Permission = model.PermissionNone
 	for _, p := range m.GetUserPermissions() {
 		if p.GetUserID() == userID && model.GetPermissionWeight(p.GetValue()) > model.GetPermissionWeight(res.Permission) {
 			res.Permission = p.GetValue()
