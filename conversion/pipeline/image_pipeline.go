@@ -154,11 +154,11 @@ func (p *imagePipeline) measureImageDimensions(inputPath string, opts api_client
 
 func (p *imagePipeline) createThumbnail(inputPath string, opts api_client.PipelineRunOptions) error {
 	tmpPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(inputPath))
-	isAvailable, err := p.imageProc.Thumbnail(inputPath, tmpPath)
+	thumbnailResult, err := p.imageProc.Thumbnail(inputPath, tmpPath)
 	if err != nil {
 		return err
 	}
-	if *isAvailable {
+	if thumbnailResult.Success {
 		defer func(path string) {
 			if err := os.Remove(path); errors.Is(err, os.ErrNotExist) {
 				return
@@ -169,10 +169,6 @@ func (p *imagePipeline) createThumbnail(inputPath string, opts api_client.Pipeli
 	} else {
 		tmpPath = inputPath
 	}
-	props, err := p.imageProc.MeasureImage(tmpPath)
-	if err != nil {
-		return err
-	}
 	stat, err := os.Stat(tmpPath)
 	if err != nil {
 		return err
@@ -180,8 +176,11 @@ func (p *imagePipeline) createThumbnail(inputPath string, opts api_client.Pipeli
 	s3Object := &api_client.S3Object{
 		Bucket: opts.Bucket,
 		Key:    opts.SnapshotID + "/thumbnail" + filepath.Ext(tmpPath),
-		Image:  props,
-		Size:   helper.ToPtr(stat.Size()),
+		Image: &api_client.ImageProps{
+			Width:  *thumbnailResult.Width,
+			Height: *thumbnailResult.Height,
+		},
+		Size: helper.ToPtr(stat.Size()),
 	}
 	if err := p.s3.PutFile(s3Object.Key, tmpPath, helper.DetectMimeFromFile(tmpPath), s3Object.Bucket, minio.PutObjectOptions{}); err != nil {
 		return err
