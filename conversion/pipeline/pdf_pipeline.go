@@ -72,7 +72,7 @@ func (p *pdfPipeline) RunFromLocalPath(inputPath string, opts api_client.Pipelin
 	document := api_client.DocumentProps{
 		Pages: &api_client.PagesProps{
 			Count:     *count,
-			Extension: filepath.Ext(opts.Key),
+			Extension: ".pdf",
 		},
 	}
 	if err := p.patchSnapshotPreviewField(inputPath, &document, opts); err != nil {
