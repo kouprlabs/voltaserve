@@ -55,24 +55,24 @@ type InvitationCreateOptions struct {
 	Emails         []string `json:"emails"         validate:"required,dive,email"`
 }
 
-func (svc *InvitationService) Create(opts InvitationCreateOptions, userID string) error {
+func (svc *InvitationService) Create(opts InvitationCreateOptions, userID string) ([]*Invitation, error) {
 	for i := range opts.Emails {
 		opts.Emails[i] = strings.ToLower(opts.Emails[i])
 	}
 	org, err := svc.orgCache.Get(opts.OrganizationID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if err := svc.orgGuard.Authorize(userID, org, model.PermissionOwner); err != nil {
-		return err
+		return nil, err
 	}
 	orgMembers, err := svc.orgRepo.GetMembers(opts.OrganizationID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	outgoingInvitations, err := svc.invitationRepo.GetOutgoing(opts.OrganizationID, userID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	var emails []string
@@ -104,13 +104,13 @@ func (svc *InvitationService) Create(opts InvitationCreateOptions, userID string
 		Emails:         emails,
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	/* Send emails */
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	for _, inv := range invitations {
 		variables := map[string]string{
@@ -126,10 +126,15 @@ func (svc *InvitationService) Create(opts InvitationCreateOptions, userID string
 			templateName = "signup-and-join-organization"
 		}
 		if err := svc.mailTmpl.Send(templateName, inv.GetEmail(), variables); err != nil {
-			return err
+			return nil, err
 		}
 	}
-	return nil
+
+	res, err := svc.invitationMapper.mapMany(invitations, userID)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
 }
 
 type InvitationListOptions struct {
