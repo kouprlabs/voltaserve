@@ -1,7 +1,7 @@
 [tool.poetry]
-name = "voltaserve-admin"
+name = "voltaserve-console"
 version = "0.0.1"
-description = "Asynchronous API for voltaserve-admin microservice"
+description = "Asynchronous API for voltaserve-console microservice"
 authors = ["Piotr Łoboda <voltaserve@lobson.pl>"]
 maintainers = ["Piotr Łoboda <voltaserve@lobson.pl>"]
 packages = [

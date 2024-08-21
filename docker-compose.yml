@@ -189,13 +189,13 @@ services:
     healthcheck:
       test: wget --quiet --spider http://127.0.0.1:8085/v2/health || exit 1
     restart: on-failure
-  admin:
-    image: voltaserve/admin
+  console:
+    image: voltaserve/console
     build:
-      context: ./admin
-      dockerfile: Dockerfile_api
+      context: ./console
+      dockerfile: Dockerfile
     ports:
-      - ${VOLTASERVE_ADMIN_PORT}:8086
+      - ${VOLTASERVE_CONSOLE_PORT}:8086
     environment:
       - PORT=8086
       - HOST=0.0.0.0

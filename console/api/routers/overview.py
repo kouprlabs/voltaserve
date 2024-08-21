@@ -65,7 +65,7 @@ async def get_local_version(sess: ClientSession, url: str, response: dict) -> di
                          }
                          )
 async def get_internal_version(data: Annotated[VersionRequest, Depends()]):
-    if data.id not in ('api', 'conversion', 'idp', 'language', 'mosaic', 'ui', 'webdav', 'admin'):
+    if data.id not in ('api', 'conversion', 'idp', 'language', 'mosaic', 'ui', 'webdav', 'console'):
         return NotFoundError(message=f'Microservice {data.id} not found')
 
     try:
@@ -74,7 +74,7 @@ async def get_internal_version(data: Annotated[VersionRequest, Depends()]):
         async with ClientSession() as sess:
             params = {"page_size": 50, "page": 1, "ordering": "last_updated", "name": ""}
             response = await get_dockerhub_version(sess, data.id, response, params)
-            if data.id == 'admin':
+            if data.id == 'console':
                 response['currentVersion'] = '2.1.0'
             elif data.id == 'ui':
                 response['currentVersion'] = ''

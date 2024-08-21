@@ -57,14 +57,14 @@ app.add_middleware(
 )
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.DEBUG)
-logger = logging.getLogger('voltaserve-admin-api')
+logger = logging.getLogger('voltaserve-console-api')
 
 app.include_router(users_api_router)
 app.include_router(group_api_router)
 app.include_router(organization_api_router)
 app.include_router(workspace_api_router)
 app.include_router(invitation_api_router)
-# app.include_router(index_api_router)
+app.include_router(index_api_router)
 app.include_router(overview_api_router)
 
 
@@ -78,7 +78,7 @@ async def add_process_time_header(request: Request, call_next):
 
 @app.get('/', tags=['main'])
 async def root():
-    return {"detail": "Hello, it is root of admin microservice!"}
+    return {"detail": "Hello, it is root of console microservice!"}
 
 
 @app.get(path='/liveness',
