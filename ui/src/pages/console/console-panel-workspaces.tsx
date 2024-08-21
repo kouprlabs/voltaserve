@@ -28,16 +28,16 @@ import {
 import * as Yup from 'yup'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
-import AdminApi, { WorkspaceManagementList } from '@/client/admin/admin'
-import AdminRenameModal from '@/components/admin/admin-rename-modal'
-import { adminWorkspacesPaginationStorage } from '@/infra/pagination'
+import ConsoleApi, { WorkspaceManagementList } from '@/client/console/console'
+import ConsoleRenameModal from '@/components/console/console-rename-modal'
+import { consoleWorkspacesPaginationStorage } from '@/infra/pagination'
 import { IconChevronDown, IconChevronUp } from '@/lib/components/icons'
 import PagePagination from '@/lib/components/page-pagination'
 import SectionSpinner from '@/lib/components/section-spinner'
 import prettyBytes from '@/lib/helpers/pretty-bytes'
 import usePagePagination from '@/lib/hooks/page-pagination'
 
-const AdminPanelWorkspaces = () => {
+const ConsolePanelWorkspaces = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const [list, setList] = useState<WorkspaceManagementList | undefined>(
@@ -46,7 +46,7 @@ const AdminPanelWorkspaces = () => {
   const { page, size, steps, setPage, setSize } = usePagePagination({
     navigate,
     location,
-    storage: adminWorkspacesPaginationStorage(),
+    storage: consoleWorkspacesPaginationStorage(),
   })
   const [confirmRenameWindowOpen, setConfirmRenameWindowOpen] = useState(false)
   const [isSubmitting, setSubmitting] = useState(false)
@@ -65,7 +65,7 @@ const AdminPanelWorkspaces = () => {
     if (confirm && workspaceId !== undefined && newName !== null) {
       try {
         setSubmitting(true)
-        await AdminApi.renameObject(
+        await ConsoleApi.renameObject(
           { id: workspaceId, name: newName },
           'workspace',
         )
@@ -87,7 +87,7 @@ const AdminPanelWorkspaces = () => {
   }
 
   useEffect(() => {
-    AdminApi.listWorkspaces({ page: page, size: size }).then((value) =>
+    ConsoleApi.listWorkspaces({ page: page, size: size }).then((value) =>
       setList(value),
     )
   }, [page, size, isSubmitting])
@@ -98,7 +98,7 @@ const AdminPanelWorkspaces = () => {
 
   return (
     <>
-      <AdminRenameModal
+      <ConsoleRenameModal
         closeConfirmationWindow={closeConfirmationWindow}
         isOpen={confirmRenameWindowOpen}
         isSubmitting={isSubmitting}
@@ -135,7 +135,7 @@ const AdminPanelWorkspaces = () => {
                       <Button
                         onClick={() => {
                           navigate(
-                            `/admin/organizations/${workspace.organization.id}`,
+                            `/console/organizations/${workspace.organization.id}`,
                           )
                         }}
                       >
@@ -211,4 +211,4 @@ const AdminPanelWorkspaces = () => {
   )
 }
 
-export default AdminPanelWorkspaces
+export default ConsolePanelWorkspaces

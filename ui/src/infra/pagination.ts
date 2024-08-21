@@ -84,37 +84,37 @@ export function workspacePaginationStorage() {
   }
 }
 
-export function adminUsersPaginationStorage() {
+export function consoleUsersPaginationStorage() {
   return {
     prefix: 'voltaserve',
-    namespace: 'admin_users',
+    namespace: 'console_users',
   }
 }
 
-export function adminGroupsPaginationStorage() {
+export function consoleGroupsPaginationStorage() {
   return {
     prefix: 'voltaserve',
-    namespace: 'admin_groups',
+    namespace: 'console_groups',
   }
 }
 
-export function adminInvitationsPaginationStorage() {
+export function consoleInvitationsPaginationStorage() {
   return {
     prefix: 'voltaserve',
-    namespace: 'admin_invitations',
+    namespace: 'console_invitations',
   }
 }
 
-export function adminOrganizationsPaginationStorage() {
+export function consoleOrganizationsPaginationStorage() {
   return {
     prefix: 'voltaserve',
-    namespace: 'admin_organizations',
+    namespace: 'console_organizations',
   }
 }
 
-export function adminWorkspacesPaginationStorage() {
+export function consoleWorkspacesPaginationStorage() {
   return {
     prefix: 'voltaserve',
-    namespace: 'admin_workspaces',
+    namespace: 'console_workspaces',
   }
 }

@@ -24,16 +24,16 @@ import {
 } from '@chakra-ui/react'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
-import AdminApi, {
+import ConsoleApi, {
   GroupManagementList,
   OrganizationManagement,
   UserOrganizationManagementList,
   WorkspaceManagementList,
-} from '@/client/admin/admin'
+} from '@/client/console/console'
 import PagePagination from '@/lib/components/page-pagination'
 import SectionSpinner from '@/lib/components/section-spinner'
 
-const AdminPanelOrganization = () => {
+const ConsolePanelOrganization = () => {
   const [organizationData, setOrganizationData] = useState<
     OrganizationManagement | undefined
   >(undefined)
@@ -53,24 +53,24 @@ const AdminPanelOrganization = () => {
 
   useEffect(() => {
     if (id) {
-      AdminApi.getOrganizationById({ id: id }).then((value) => {
+      ConsoleApi.getOrganizationById({ id: id }).then((value) => {
         setOrganizationData(value)
       })
-      AdminApi.getUsersByOrganization({
+      ConsoleApi.getUsersByOrganization({
         id: id,
         page: usersPage,
         size: 5,
       }).then((value) => {
         setUsersData(value)
       })
-      AdminApi.getWorkspacesByOrganization({
+      ConsoleApi.getWorkspacesByOrganization({
         id: id,
         page: workspacesPage,
         size: 5,
       }).then((value) => {
         setWorkspacesData(value)
       })
-      AdminApi.getGroupsByOrganization({
+      ConsoleApi.getGroupsByOrganization({
         id: id,
         page: workspacesPage,
         size: 5,
@@ -82,7 +82,7 @@ const AdminPanelOrganization = () => {
 
   useEffect(() => {
     if (id) {
-      AdminApi.getUsersByOrganization({
+      ConsoleApi.getUsersByOrganization({
         id: id,
         page: usersPage,
         size: 5,
@@ -94,7 +94,7 @@ const AdminPanelOrganization = () => {
 
   useEffect(() => {
     if (id) {
-      AdminApi.getGroupsByOrganization({
+      ConsoleApi.getGroupsByOrganization({
         id: id,
         page: groupsPage,
         size: 5,
@@ -105,7 +105,7 @@ const AdminPanelOrganization = () => {
   }, [groupsPage])
 
   useEffect(() => {
-    AdminApi.getWorkspacesByOrganization({
+    ConsoleApi.getWorkspacesByOrganization({
       id: id,
       page: workspacesPage,
       size: 5,
@@ -278,4 +278,4 @@ const AdminPanelOrganization = () => {
   )
 }
 
-export default AdminPanelOrganization
+export default ConsolePanelOrganization

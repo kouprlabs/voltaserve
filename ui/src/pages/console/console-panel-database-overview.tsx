@@ -10,7 +10,7 @@
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 
-const AdminPanelDatabaseOverview = () => {
+const ConsolePanelDatabaseOverview = () => {
   // const [socket, setWebsocket] = useState<WebSocket>(new WebSocket('ws://192.168.1.254:20002'))
   // useEffect(() => {
   //   socket.addEventListener("open", event => {
@@ -30,4 +30,4 @@ const AdminPanelDatabaseOverview = () => {
   )
 }
 
-export default AdminPanelDatabaseOverview
+export default ConsolePanelDatabaseOverview

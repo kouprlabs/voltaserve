@@ -53,8 +53,8 @@ const userMessages: { [key: string]: string } = {
   [ErrorCode.InvalidPassword]: 'Invalid password.',
   [ErrorCode.InvalidUsernameOrPassword]: 'Invalid username or password.',
   [ErrorCode.UserSuspended]: 'User suspended.',
-  [ErrorCode.MissingPermission]: 'You are not an admin',
-  [ErrorCode.OrphanError]: 'You cannot suspend last admin'
+  [ErrorCode.MissingPermission]: 'You are not an console',
+  [ErrorCode.OrphanError]: 'You cannot suspend last console'
 }
 
 export type ErrorData = {

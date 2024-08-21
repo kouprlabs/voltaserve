@@ -2,13 +2,13 @@ import { CSSProperties, MouseEvent, ReactNode } from 'react'
 import { Tr } from '@chakra-ui/react'
 import { useColorModeValue } from '@chakra-ui/system'
 
-export interface AdminHighlightableProps {
+export interface ConsoleHighlightableProps {
   onClick: (event: MouseEvent) => void
   style?: CSSProperties
   children: ReactNode
 }
 
-const AdminHighlightableTr = (props: AdminHighlightableProps) => {
+const ConsoleHighlightableTr = (props: ConsoleHighlightableProps) => {
   const hoverBg = useColorModeValue('gray.300', 'gray.700')
 
   return (
@@ -24,4 +24,4 @@ const AdminHighlightableTr = (props: AdminHighlightableProps) => {
   )
 }
 
-export default AdminHighlightableTr
+export default ConsoleHighlightableTr

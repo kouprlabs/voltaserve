@@ -12,16 +12,16 @@ import { Link } from 'react-router-dom'
 import { IconButton } from '@chakra-ui/react'
 import { IconAdmin, IconDeAdmin } from '@/lib/components/icons'
 
-const AdminButton = () => {
+const ConsoleButton = () => {
   const buttonRef = useRef<HTMLButtonElement>(null)
   return (
     <>
-      {location.pathname.startsWith('/admin') ? (
+      {location.pathname.startsWith('/console') ? (
         <Link to="/" title="User dashbaord">
           <IconButton ref={buttonRef} icon={<IconDeAdmin />} aria-label="" />
         </Link>
       ) : (
-        <Link to="/admin/dashboard" title="Admin dashbaord">
+        <Link to="/console/dashboard" title="Cloud console dashbaord">
           <IconButton ref={buttonRef} icon={<IconAdmin />} aria-label="" />
         </Link>
       )}
@@ -29,4 +29,4 @@ const AdminButton = () => {
   )
 }
 
-export default AdminButton
+export default ConsoleButton

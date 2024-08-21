@@ -34,10 +34,10 @@ export function idpFetcher<T>(options: FetcherOptions) {
   })
 }
 
-export function adminFetcher<T>(options: FetcherOptions) {
+export function consoleFetcher<T>(options: FetcherOptions) {
   return fetcher<T>({
     ...options,
-    url: `${getConfig().adminURL}${options.url}`,
+    url: `${getConfig().consoleURL}${options.url}`,
   })
 }
 

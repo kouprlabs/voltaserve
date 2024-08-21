@@ -11,5 +11,5 @@
 export type Config = {
   apiURL: string
   idpURL: string
-  adminURL: string
+  consoleURL: string
 }

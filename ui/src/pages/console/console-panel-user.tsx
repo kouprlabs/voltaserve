@@ -27,12 +27,12 @@ import {
 } from '@chakra-ui/react'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
-import AdminApi, {
+import ConsoleApi, {
   GroupUserManagementList,
   OrganizationUserManagementList,
   WorkspaceUserManagementList,
-} from '@/client/admin/admin'
-import UserAPI, { AdminUser } from '@/client/idp/user'
+} from '@/client/console/console'
+import UserAPI, { ConsoleUser } from '@/client/idp/user'
 import { IconClose, IconEdit, IconWarning } from '@/lib/components/icons'
 import PagePagination from '@/lib/components/page-pagination'
 import SectionSpinner from '@/lib/components/section-spinner'
@@ -45,7 +45,7 @@ const EditButton = (props: IconButtonProps) => (
   />
 )
 
-const AdminPanelUser = () => {
+const ConsolePanelUser = () => {
   const sectionClassName = cx('flex', 'flex-col', 'gap-1', 'py-1.5')
   const rowClassName = cx(
     'flex',
@@ -54,7 +54,7 @@ const AdminPanelUser = () => {
     'gap-1',
     `h-[40px]`,
   )
-  const [userData, setUserData] = useState<AdminUser | undefined>(undefined)
+  const [userData, setUserData] = useState<ConsoleUser | undefined>(undefined)
   const [organizationsData, setOrganizationsData] = useState<
     OrganizationUserManagementList | undefined
   >(undefined)
@@ -74,19 +74,19 @@ const AdminPanelUser = () => {
       UserAPI.getUserById({ id: id }).then((value) => {
         setUserData(value)
       })
-      AdminApi.getGroupsByUser({ id: id, page: groupsPage, size: 5 }).then(
+      ConsoleApi.getGroupsByUser({ id: id, page: groupsPage, size: 5 }).then(
         (value) => {
           setGroupsData(value)
         },
       )
-      AdminApi.getOrganizationsByUser({
+      ConsoleApi.getOrganizationsByUser({
         id: id,
         page: organizationsPage,
         size: 5,
       }).then((value) => {
         setOrganizationsData(value)
       })
-      AdminApi.getWorkspacesByUser({
+      ConsoleApi.getWorkspacesByUser({
         id: id,
         page: workspacesPage,
         size: 5,
@@ -98,7 +98,7 @@ const AdminPanelUser = () => {
 
   useEffect(() => {
     if (id) {
-      AdminApi.getOrganizationsByUser({
+      ConsoleApi.getOrganizationsByUser({
         id: id,
         page: organizationsPage,
         size: 5,
@@ -110,7 +110,7 @@ const AdminPanelUser = () => {
 
   useEffect(() => {
     if (id) {
-      AdminApi.getGroupsByUser({ id: id, page: groupsPage, size: 5 }).then(
+      ConsoleApi.getGroupsByUser({ id: id, page: groupsPage, size: 5 }).then(
         (value) => {
           setGroupsData(value)
         },
@@ -119,7 +119,7 @@ const AdminPanelUser = () => {
   }, [groupsPage])
 
   useEffect(() => {
-    AdminApi.getWorkspacesByUser({
+    ConsoleApi.getWorkspacesByUser({
       id: id,
       page: workspacesPage,
       size: 5,
@@ -383,4 +383,4 @@ const AdminPanelUser = () => {
   )
 }
 
-export default AdminPanelUser
+export default ConsolePanelUser

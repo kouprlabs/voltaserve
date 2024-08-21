@@ -20,7 +20,7 @@ import {
   ModalOverlay,
 } from '@chakra-ui/react'
 
-interface AdminConfirmationModalProps {
+interface ConsoleConfirmationModalProps {
   action: string | undefined
   closeConfirmationWindow: () => void
   isOpen: boolean
@@ -34,7 +34,7 @@ interface AdminConfirmationModalProps {
   target: string | undefined
 }
 
-const AdminConfirmationModal = (props: AdminConfirmationModalProps) => {
+const ConsoleConfirmationModal = (props: ConsoleConfirmationModalProps) => {
   useEffect(() => {
     if (
       props.isOpen &&
@@ -95,4 +95,4 @@ const AdminConfirmationModal = (props: AdminConfirmationModalProps) => {
   )
 }
 
-export default AdminConfirmationModal
+export default ConsoleConfirmationModal

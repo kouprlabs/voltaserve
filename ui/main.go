@@ -78,15 +78,15 @@ func main() {
 		},
 	}))
 
-	adminProxy := e.Group("proxy/admin")
-	adminURL, err := url.Parse(cfg.AdminURL)
+	consoleProxy := e.Group("proxy/console")
+	consoleUrl, err := url.Parse(cfg.ConsoleUrl)
 	if err != nil {
 		e.Logger.Fatal(err)
 	}
-	adminProxy.Use(middleware.ProxyWithConfig(middleware.ProxyConfig{
-		Balancer: middleware.NewRoundRobinBalancer([]*middleware.ProxyTarget{{URL: adminURL}}),
+	consoleProxy.Use(middleware.ProxyWithConfig(middleware.ProxyConfig{
+		Balancer: middleware.NewRoundRobinBalancer([]*middleware.ProxyTarget{{URL: consoleUrl}}),
 		Rewrite: map[string]string{
-			"^/proxy/admin/*": "/$1",
+			"^/proxy/console/*": "/$1",
 		},
 	}))
 

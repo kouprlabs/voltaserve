@@ -25,7 +25,7 @@ import {
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import semver from 'semver'
-import AdminApi, { ComponentVersion } from '@/client/admin/admin'
+import ConsoleApi, { ComponentVersion } from '@/client/console/console'
 import {
   IconChevronRight,
   IconFlag,
@@ -44,13 +44,13 @@ const internalComponents = [
   { id: 'webdav' },
   { id: 'idp' },
   { id: 'mosaic' },
-  { id: 'admin' },
+  { id: 'console' },
   { id: 'conversion' },
 ]
 const compareFn = (a: ComponentVersion, b: ComponentVersion) =>
   a.name > b.name ? 1 : 0
 
-const AdminPanelOverview = () => {
+const ConsolePanelOverview = () => {
   const [usersAmount, setUsersAmount] = useState<number | undefined>(undefined)
   const [groupsAmount, setGroupsAmount] = useState<number | undefined>(
     undefined,
@@ -64,20 +64,20 @@ const AdminPanelOverview = () => {
   const [componentsData, setComponentsData] = useState<ComponentVersion[]>([])
 
   useEffect(() => {
-    AdminApi.countObject('user').then((value) => {
+    ConsoleApi.countObject('user').then((value) => {
       setUsersAmount(value.count)
     })
-    AdminApi.countObject('organization').then((value) => {
+    ConsoleApi.countObject('organization').then((value) => {
       setOrganizationsAmount(value.count)
     })
-    AdminApi.countObject('group').then((value) => {
+    ConsoleApi.countObject('group').then((value) => {
       setGroupsAmount(value.count)
     })
-    AdminApi.countObject('workspace').then((value) => {
+    ConsoleApi.countObject('workspace').then((value) => {
       setWorkspacesAmount(value.count)
     })
     internalComponents.map((component) => {
-      AdminApi.getComponentsVersions(component).then((value) => {
+      ConsoleApi.getComponentsVersions(component).then((value) => {
         if (component.id == 'ui') {
           value.currentVersion = uiCurrentVersion.version
           value.updateAvailable = semver.gt(
@@ -98,7 +98,7 @@ const AdminPanelOverview = () => {
   return (
     <>
       <Helmet>
-        <title>Admin Panel</title>
+        <title>Console Panel</title>
       </Helmet>
       <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
         <Heading className={cx('text-heading')}>Cloud Panel</Heading>
@@ -221,4 +221,4 @@ const AdminPanelOverview = () => {
   )
 }
 
-export default AdminPanelOverview
+export default ConsolePanelOverview

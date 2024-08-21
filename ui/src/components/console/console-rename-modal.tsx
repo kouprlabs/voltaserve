@@ -24,7 +24,7 @@ import {
 import { Field, FieldAttributes, FieldProps, Form, Formik } from 'formik'
 import * as Yup from 'yup'
 
-interface AdminRenameModalProps {
+interface ConsoleRenameModalProps {
   closeConfirmationWindow: () => void
   isOpen: boolean
   isSubmitting: boolean
@@ -42,7 +42,7 @@ interface AdminRenameModalProps {
     confirm: boolean,
   ) => Promise<void>
 }
-const AdminRenameModal = (props: AdminRenameModalProps) => {
+const ConsoleRenameModal = (props: ConsoleRenameModalProps) => {
   const inputRef = useRef<HTMLInputElement>(null)
   useEffect(() => {
     if (
@@ -126,4 +126,4 @@ const AdminRenameModal = (props: AdminRenameModalProps) => {
   )
 }
 
-export default AdminRenameModal
+export default ConsoleRenameModal

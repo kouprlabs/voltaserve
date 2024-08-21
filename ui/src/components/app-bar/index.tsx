@@ -11,7 +11,7 @@ import { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 import cx from 'classnames'
 import AccountMenu from '@/components/account/menu'
-import AdminButton from '@/components/admin/admin-button'
+import ConsoleButton from '@/components/console/console-button'
 import TaskDrawer from '@/components/task/task-drawer'
 import { getAdminStatus } from '@/infra/token'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
@@ -42,8 +42,8 @@ const AppBar = () => {
     if (location.pathname.startsWith('/workspace')) {
       dispatch(activeNavChanged(NavType.Workspaces))
     }
-    if (location.pathname.startsWith('/admin')) {
-      dispatch(activeNavChanged(NavType.Admin))
+    if (location.pathname.startsWith('/console')) {
+      dispatch(activeNavChanged(NavType.Console))
     }
   }, [location, dispatch])
 
@@ -68,7 +68,7 @@ const AppBar = () => {
         {activeNav === NavType.Organizations ? (
           <CreateOrganizationButton />
         ) : null}
-        {getAdminStatus() ? <AdminButton /> : null}
+        {getAdminStatus() ? <ConsoleButton /> : null}
         <UploadDrawer />
         <TaskDrawer />
         <AccountMenu />

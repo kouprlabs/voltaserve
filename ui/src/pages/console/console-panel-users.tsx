@@ -29,20 +29,20 @@ import {
 } from '@chakra-ui/react'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
-import UserAPI, { AdminUsersResponse } from '@/client/idp/user'
-import AdminConfirmationModal from '@/components/admin/admin-confirmation-modal'
-import AdminHighlightableTr from '@/components/admin/admin-highlightable-tr'
-import { adminUsersPaginationStorage } from '@/infra/pagination'
+import UserAPI, { ConsoleUsersResponse } from '@/client/idp/user'
+import ConsoleConfirmationModal from '@/components/console/console-confirmation-modal'
+import ConsoleHighlightableTr from '@/components/console/console-highlightable-tr'
+import { consoleUsersPaginationStorage } from '@/infra/pagination'
 import { getUserId } from '@/infra/token'
 import { IconChevronDown, IconChevronUp } from '@/lib/components/icons'
 import PagePagination from '@/lib/components/page-pagination'
 import SectionSpinner from '@/lib/components/section-spinner'
 import usePagePagination from '@/lib/hooks/page-pagination'
 
-const AdminPanelUsers = () => {
+const ConsolePanelUsers = () => {
   const navigate = useNavigate()
   const location = useLocation()
-  const [list, setList] = useState<AdminUsersResponse | undefined>(undefined)
+  const [list, setList] = useState<ConsoleUsersResponse | undefined>(undefined)
   const [isSubmitting, setSubmitting] = useState(false)
   const [userId, setUserId] = useState<string | undefined>(undefined)
   const [userEmail, setUserEmail] = useState<string | undefined>(undefined)
@@ -56,7 +56,7 @@ const AdminPanelUsers = () => {
   const { page, size, steps, setPage, setSize } = usePagePagination({
     navigate,
     location,
-    storage: adminUsersPaginationStorage(),
+    storage: consoleUsersPaginationStorage(),
   })
 
   const suspendUser = async (
@@ -122,7 +122,7 @@ const AdminPanelUsers = () => {
 
   return (
     <>
-      <AdminConfirmationModal
+      <ConsoleConfirmationModal
         isOpen={confirmSuspendWindowOpen}
         action={confirmWindowAction}
         target={userEmail}
@@ -130,7 +130,7 @@ const AdminPanelUsers = () => {
         isSubmitting={isSubmitting}
         request={suspendUser}
       />
-      <AdminConfirmationModal
+      <ConsoleConfirmationModal
         isOpen={confirmAdminWindowOpen}
         action={confirmWindowAction}
         target={userEmail}
@@ -159,7 +159,7 @@ const AdminPanelUsers = () => {
               </Thead>
               <Tbody>
                 {list.data.map((user) => (
-                  <AdminHighlightableTr
+                  <ConsoleHighlightableTr
                     key={user.id}
                     onClick={(event) => {
                       if (
@@ -167,7 +167,7 @@ const AdminPanelUsers = () => {
                         !(event.target instanceof HTMLSpanElement) &&
                         !(event.target instanceof HTMLParagraphElement)
                       ) {
-                        navigate(`/admin/users/${user.id}`)
+                        navigate(`/console/users/${user.id}`)
                       }
                     }}
                   >
@@ -262,7 +262,7 @@ const AdminPanelUsers = () => {
                                   <MenuItem
                                     onClick={async () => {
                                       setConfirmWindowAction(
-                                        'remove admin rights from',
+                                        'remove console rights from',
                                       )
                                       await makeAdminUser(
                                         user.id,
@@ -277,7 +277,7 @@ const AdminPanelUsers = () => {
                                   <MenuItem
                                     onClick={async () => {
                                       setConfirmWindowAction(
-                                        'grant admin rights to',
+                                        'grant console rights to',
                                       )
                                       await makeAdminUser(
                                         user.id,
@@ -295,7 +295,7 @@ const AdminPanelUsers = () => {
                         </Menu>
                       )}
                     </Td>
-                  </AdminHighlightableTr>
+                  </ConsoleHighlightableTr>
                 ))}
               </Tbody>
             </Table>
@@ -320,4 +320,4 @@ const AdminPanelUsers = () => {
   )
 }
 
-export default AdminPanelUsers
+export default ConsolePanelUsers

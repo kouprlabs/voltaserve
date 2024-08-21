@@ -8,21 +8,21 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
 import { createBrowserRouter } from 'react-router-dom'
-import LayoutAdmin from '@/components/layout/layout-admin'
+import LayoutConsole from '@/components/layout/layout-console'
 import AccountInvitationsPage from '@/pages/account/account-invitations-page'
 import AccountLayout from '@/pages/account/account-layout'
 import AccountSettingsPage from '@/pages/account/account-settings-page'
-import AdminPanelDatabase from '@/pages/admin/admin-panel-database'
-import AdminPanelDatabaseIndexes from '@/pages/admin/admin-panel-database-indexes'
-import AdminPanelDatabaseOverview from '@/pages/admin/admin-panel-database-overview'
-import AdminPanelGroups from '@/pages/admin/admin-panel-groups'
-import AdminPanelInvitations from '@/pages/admin/admin-panel-invitations'
-import AdminPanelOrganization from '@/pages/admin/admin-panel-organization'
-import AdminPanelOrganizations from '@/pages/admin/admin-panel-organizations'
-import AdminPanelOverview from '@/pages/admin/admin-panel-overview'
-import AdminPanelUser from '@/pages/admin/admin-panel-user'
-import AdminPanelUsers from '@/pages/admin/admin-panel-users'
-import AdminPanelWorkspaces from '@/pages/admin/admin-panel-workspaces'
+import ConsolePanelDatabase from '@/pages/console/console-panel-database'
+import ConsolePanelDatabaseIndexes from '@/pages/console/console-panel-database-indexes'
+import ConsolePanelDatabaseOverview from '@/pages/console/console-panel-database-overview'
+import ConsolePanelGroups from '@/pages/console/console-panel-groups'
+import ConsolePanelInvitations from '@/pages/console/console-panel-invitations'
+import ConsolePanelOrganization from '@/pages/console/console-panel-organization'
+import ConsolePanelOrganizations from '@/pages/console/console-panel-organizations'
+import ConsolePanelOverview from '@/pages/console/console-panel-overview'
+import ConsolePanelUser from '@/pages/console/console-panel-user'
+import ConsolePanelUsers from '@/pages/console/console-panel-users'
+import ConsolePanelWorkspaces from '@/pages/console/console-panel-workspaces'
 import ConfirmEmailPage from '@/pages/confirm-email-page'
 import ForgotPasswordPage from '@/pages/forgot-password-page'
 import GroupLayout from '@/pages/group/group-layout'
@@ -177,54 +177,54 @@ const router = createBrowserRouter([
         element: <UpdateEmailPage />,
       },
       {
-        element: <LayoutAdmin />,
+        element: <LayoutConsole />,
         children: [
           {
-            path: '/admin/dashboard',
-            element: <AdminPanelOverview />,
+            path: '/console/dashboard',
+            element: <ConsolePanelOverview />,
           },
           {
-            path: '/admin/users',
-            element: <AdminPanelUsers />,
+            path: '/console/users',
+            element: <ConsolePanelUsers />,
           },
           {
-            path: '/admin/users/:id',
-            element: <AdminPanelUser />,
+            path: '/console/users/:id',
+            element: <ConsolePanelUser />,
           },
           {
-            path: 'admin/workspaces',
-            element: <AdminPanelWorkspaces />,
+            path: '/console/workspaces',
+            element: <ConsolePanelWorkspaces />,
           },
           {
-            path: 'admin/invitations',
-            element: <AdminPanelInvitations />,
+            path: '/console/invitations',
+            element: <ConsolePanelInvitations />,
           },
           {
-            path: 'admin/organizations',
-            element: <AdminPanelOrganizations />,
+            path: '/console/organizations',
+            element: <ConsolePanelOrganizations />,
           },
           {
-            path: 'admin/organizations/:id',
-            element: <AdminPanelOrganization />,
+            path: '/console/organizations/:id',
+            element: <ConsolePanelOrganization />,
           },
           {
-            path: 'admin/groups',
-            element: <AdminPanelGroups />,
+            path: '/console/groups',
+            element: <ConsolePanelGroups />,
           },
           {
-            element: <AdminPanelDatabase />,
+            element: <ConsolePanelDatabase />,
             children: [
               {
-                path: 'admin/database',
-                element: <AdminPanelDatabaseOverview />,
+                path: '/console/database',
+                element: <ConsolePanelDatabaseOverview />,
               },
               {
-                path: 'admin/database/overview',
-                element: <AdminPanelDatabaseOverview />,
+                path: '/console/database/overview',
+                element: <ConsolePanelDatabaseOverview />,
               },
               {
-                path: 'admin/database/indexes',
-                element: <AdminPanelDatabaseIndexes />,
+                path: '/console/database/indexes',
+                element: <ConsolePanelDatabaseIndexes />,
               },
             ],
           },

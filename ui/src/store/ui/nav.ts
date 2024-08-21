@@ -18,7 +18,7 @@ export enum NavType {
   Workspaces = 'workspaces',
   Groups = 'groups',
   Organizations = 'organizations',
-  Admin = 'admin',
+  Console = 'console',
 }
 
 const initialState: NavState = {

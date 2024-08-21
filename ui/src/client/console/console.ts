@@ -9,7 +9,7 @@
 // licenses/AGPL.txt.
 import useSWR, { SWRConfiguration } from 'swr'
 import { PermissionType } from '@/client/api/permission'
-import { adminFetcher } from '@/client/fetcher'
+import { consoleFetcher } from '@/client/fetcher'
 import { getConfig } from '@/config/config'
 
 export interface ListResponse {
@@ -197,9 +197,9 @@ export const emptyListResponseValue: emptyListResponse = {
   data: [],
 }
 
-export default class AdminApi {
+export default class ConsoleApi {
   static async checkIndexesAvailability() {
-    const response = await fetch(`${getConfig().adminURL}/index/all`, {
+    const response = await fetch(`${getConfig().consoleURL}/index/all`, {
       method: 'GET',
     })
     if (response) {
@@ -214,7 +214,7 @@ export default class AdminApi {
     return useSWR<IndexManagementList>(
       url,
       () =>
-        adminFetcher({
+        consoleFetcher({
           url,
           method: 'GET',
         }) as Promise<IndexManagementList>,
@@ -223,98 +223,98 @@ export default class AdminApi {
   }
 
   static async getUsersByOrganization(options: ListOptions) {
-    return adminFetcher({
+    return consoleFetcher({
       url: `/organization/users?${this.paramsFromListOptions(options)}`,
       method: 'GET',
     }) as Promise<UserOrganizationManagementList>
   }
 
   static async listGroups(options: ListOptions) {
-    return adminFetcher({
+    return consoleFetcher({
       url: `/group/all?${this.paramsFromListOptions(options)}`,
       method: 'GET',
     }) as Promise<GroupManagementList>
   }
 
   static async getGroupsByUser(options: ListOptions) {
-    return adminFetcher({
+    return consoleFetcher({
       url: `/user/groups?${this.paramsFromListOptions(options)}`,
       method: 'GET',
     }) as Promise<GroupUserManagementList>
   }
 
   static async getGroupsByOrganization(options: ListOptions) {
-    return adminFetcher({
+    return consoleFetcher({
       url: `/organization/groups?${this.paramsFromListOptions(options)}`,
       method: 'GET',
     }) as Promise<GroupManagementList>
   }
 
   static async listOrganizations(options: ListOptions) {
-    return adminFetcher({
+    return consoleFetcher({
       url: `/organization/all?${this.paramsFromListOptions(options)}`,
       method: 'GET',
     }) as Promise<OrganizationManagementList>
   }
 
   static async getOrganizationsByUser(options: ListOptions) {
-    return adminFetcher({
+    return consoleFetcher({
       url: `/user/organizations?${this.paramsFromListOptions(options)}`,
       method: 'GET',
     }) as Promise<OrganizationUserManagementList>
   }
 
   static async getOrganizationById(options: baseIdRequest) {
-    return adminFetcher({
+    return consoleFetcher({
       url: `/organization?${this.paramsFromListOptions(options)}`,
       method: 'GET',
     }) as Promise<OrganizationManagement>
   }
 
   static async listWorkspaces(options: ListOptions) {
-    return adminFetcher({
+    return consoleFetcher({
       url: `/workspace/all?${this.paramsFromListOptions(options)}`,
       method: 'GET',
     }) as Promise<WorkspaceManagementList>
   }
 
   static async getWorkspacesByUser(options: ListOptions) {
-    return adminFetcher({
+    return consoleFetcher({
       url: `/user/workspaces?${this.paramsFromListOptions(options)}`,
       method: 'GET',
     }) as Promise<WorkspaceUserManagementList>
   }
 
   static async getWorkspacesByOrganization(options: ListOptions) {
-    return adminFetcher({
+    return consoleFetcher({
       url: `/organization/workspaces?${this.paramsFromListOptions(options)}`,
       method: 'GET',
     }) as Promise<WorkspaceManagementList>
   }
 
   static async listInvitations(options: ListOptions) {
-    return adminFetcher({
+    return consoleFetcher({
       url: `/invitation/all?${this.paramsFromListOptions(options)}`,
       method: 'GET',
     }) as Promise<InvitationManagementList>
   }
 
   static async countObject(object: string) {
-    return adminFetcher({
+    return consoleFetcher({
       url: `/${object}/count`,
       method: 'GET',
     }) as Promise<CountResponse>
   }
 
   static async getComponentsVersions(options: ListOptions) {
-    return adminFetcher({
+    return consoleFetcher({
       url: `/overview/version/internal?${this.paramsFromListOptions(options)}`,
       method: 'GET',
     }) as Promise<ComponentVersion>
   }
 
   static async renameObject(options: baseIdNameRequest, object: string) {
-    return adminFetcher({
+    return consoleFetcher({
       url: `/${object}`,
       method: 'PATCH',
       body: JSON.stringify(options),
@@ -322,7 +322,7 @@ export default class AdminApi {
   }
 
   static async invitationChangeStatus(options: invitationStatusRequest) {
-    return adminFetcher({
+    return consoleFetcher({
       url: `/invitation`,
       method: 'PATCH',
       body: JSON.stringify(options),

@@ -28,15 +28,15 @@ import {
 } from '@chakra-ui/react'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
-import AdminApi, { InvitationManagementList } from '@/client/admin/admin'
-import AdminConfirmationModal from '@/components/admin/admin-confirmation-modal'
-import { adminInvitationsPaginationStorage } from '@/infra/pagination'
+import ConsoleApi, { InvitationManagementList } from '@/client/console/console'
+import ConsoleConfirmationModal from '@/components/console/console-confirmation-modal'
+import { consoleInvitationsPaginationStorage } from '@/infra/pagination'
 import { IconChevronDown, IconChevronUp } from '@/lib/components/icons'
 import PagePagination from '@/lib/components/page-pagination'
 import SectionSpinner from '@/lib/components/section-spinner'
 import usePagePagination from '@/lib/hooks/page-pagination'
 
-const AdminPanelInvitations = () => {
+const ConsolePanelInvitations = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const [list, setList] = useState<InvitationManagementList | undefined>(
@@ -58,7 +58,7 @@ const AdminPanelInvitations = () => {
   const { page, size, steps, setPage, setSize } = usePagePagination({
     navigate,
     location,
-    storage: adminInvitationsPaginationStorage(),
+    storage: consoleInvitationsPaginationStorage(),
   })
 
   const changeInvitationStatus = async (
@@ -70,7 +70,7 @@ const AdminPanelInvitations = () => {
     if (confirm && invitationId && actionState !== undefined) {
       setSubmitting(true)
       try {
-        await AdminApi.invitationChangeStatus({
+        await ConsoleApi.invitationChangeStatus({
           id: invitationId,
           accept: actionState,
         })
@@ -95,7 +95,7 @@ const AdminPanelInvitations = () => {
   }
 
   useEffect(() => {
-    AdminApi.listInvitations({ page: page, size: size }).then((value) =>
+    ConsoleApi.listInvitations({ page: page, size: size }).then((value) =>
       setList(value),
     )
   }, [page, size, isSubmitting])
@@ -106,7 +106,7 @@ const AdminPanelInvitations = () => {
 
   return (
     <>
-      <AdminConfirmationModal
+      <ConsoleConfirmationModal
         isOpen={confirmInvitationWindowOpen}
         action={confirmWindowAction}
         target={invitationDetails}
@@ -139,7 +139,7 @@ const AdminPanelInvitations = () => {
                       <Button
                         onClick={() => {
                           navigate(
-                            `/admin/organizations/${invitation.organization.id}`,
+                            `/console/organizations/${invitation.organization.id}`,
                           )
                         }}
                       >
@@ -244,4 +244,4 @@ const AdminPanelInvitations = () => {
   )
 }
 
-export default AdminPanelInvitations
+export default ConsolePanelInvitations

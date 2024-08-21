@@ -9,7 +9,7 @@
 // licenses/AGPL.txt.
 import { KeyedMutator } from 'swr'
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
-import { IndexManagementList } from '@/client/admin/admin'
+import { IndexManagementList } from '@/client/console/console'
 
 type IndexesState = {
   mutate?: KeyedMutator<IndexManagementList>

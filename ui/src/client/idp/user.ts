@@ -19,7 +19,7 @@ export type User = {
   pendingEmail?: string
 }
 
-export interface AdminUser extends User {
+export interface ConsoleUser extends User {
   isEmailConfirmed: boolean
   createTime: Date
   updateTime: Date
@@ -27,8 +27,8 @@ export interface AdminUser extends User {
   isActive: boolean
 }
 
-export interface AdminUsersResponse {
-  data: AdminUser[]
+export interface ConsoleUsersResponse {
+  data: ConsoleUser[]
   totalElements: number
   page: number
   size: number
@@ -93,14 +93,14 @@ export default class UserAPI {
     return idpFetcher({
       url: `/user/by_id?${this.paramsFromListOptions(options)}`,
       method: 'GET',
-    }) as Promise<AdminUser>
+    }) as Promise<ConsoleUser>
   }
 
   static async getAllUsers(options: ListOptions) {
     return idpFetcher({
       url: `/user/all?${this.paramsFromListOptions(options)}`,
       method: 'GET',
-    }) as Promise<AdminUsersResponse>
+    }) as Promise<ConsoleUsersResponse>
   }
 
   static async updateFullName(options: UpdateFullNameOptions) {

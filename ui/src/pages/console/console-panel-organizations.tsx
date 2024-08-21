@@ -24,47 +24,55 @@ import {
 import * as Yup from 'yup'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
-import AdminApi, { GroupManagementList } from '@/client/admin/admin'
-import AdminRenameModal from '@/components/admin/admin-rename-modal'
-import { adminGroupsPaginationStorage } from '@/infra/pagination'
+import ConsoleApi, { OrganizationManagementList } from '@/client/console/console'
+import ConsoleHighlightableTr from '@/components/console/console-highlightable-tr'
+import ConsoleRenameModal from '@/components/console/console-rename-modal'
+import { consoleOrganizationsPaginationStorage } from '@/infra/pagination'
 import PagePagination from '@/lib/components/page-pagination'
 import SectionSpinner from '@/lib/components/section-spinner'
 import usePagePagination from '@/lib/hooks/page-pagination'
 
-const AdminPanelGroups = () => {
+const ConsolePanelOrganizations = () => {
   const navigate = useNavigate()
   const location = useLocation()
-  const [list, setList] = useState<GroupManagementList | undefined>(undefined)
+  const [list, setList] = useState<OrganizationManagementList | undefined>(
+    undefined,
+  )
   const { page, size, steps, setPage, setSize } = usePagePagination({
     navigate,
     location,
-    storage: adminGroupsPaginationStorage(),
+    storage: consoleOrganizationsPaginationStorage(),
   })
   const [confirmRenameWindowOpen, setConfirmRenameWindowOpen] = useState(false)
   const [isSubmitting, setSubmitting] = useState(false)
   const [currentName, setCurrentName] = useState<string | undefined>(undefined)
-  const [groupId, setGroupId] = useState<string | undefined>(undefined)
+  const [organizationId, setOrganizationId] = useState<string | undefined>(
+    undefined,
+  )
   const formSchema = Yup.object().shape({
     name: Yup.string().required('Name is required').max(255),
   })
 
-  const renameGroup = async (
+  const renameOrganization = async (
     id: string | null,
     currentName: string | null,
     newName: string | null,
     confirm: boolean = false,
   ) => {
-    if (confirm && groupId !== undefined && newName !== null) {
+    if (confirm && organizationId !== undefined && newName !== null) {
       try {
         setSubmitting(true)
-        await AdminApi.renameObject({ id: groupId, name: newName }, 'group')
+        await ConsoleApi.renameObject(
+          { id: organizationId, name: newName },
+          'organization',
+        )
       } finally {
         closeConfirmationWindow()
       }
     } else if (id !== null && currentName !== null) {
       setConfirmRenameWindowOpen(true)
       setCurrentName(currentName)
-      setGroupId(id)
+      setOrganizationId(id)
     }
   }
 
@@ -72,11 +80,11 @@ const AdminPanelGroups = () => {
     setConfirmRenameWindowOpen(false)
     setSubmitting(false)
     setCurrentName(undefined)
-    setGroupId(undefined)
+    setOrganizationId(undefined)
   }
 
   useEffect(() => {
-    AdminApi.listGroups({ page: page, size: size }).then((value) =>
+    ConsoleApi.listOrganizations({ page: page, size: size }).then((value) =>
       setList(value),
     )
   }, [page, size, isSubmitting])
@@ -87,73 +95,80 @@ const AdminPanelGroups = () => {
 
   return (
     <>
-      <AdminRenameModal
+      <ConsoleRenameModal
         closeConfirmationWindow={closeConfirmationWindow}
         isOpen={confirmRenameWindowOpen}
         isSubmitting={isSubmitting}
         previousName={currentName}
-        object="group"
+        object="organization"
         formSchema={formSchema}
-        request={renameGroup}
+        request={renameOrganization}
       />
       <Helmet>
-        <title>Groups management</title>
+        <title>Organizations management</title>
       </Helmet>
       <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
-        <Heading className={cx('text-heading')}>Groups management</Heading>
+        <Heading className={cx('text-heading')}>
+          Organizations management
+        </Heading>
         {list && list.data.length > 0 ? (
           <Stack direction="column" spacing={2}>
             <Table variant="simple">
               <Thead>
                 <Tr>
-                  <Th>Group name</Th>
-                  <Th>Organization</Th>
+                  <Th>Workspace name</Th>
                   <Th>Create time</Th>
                   <Th>Update time</Th>
                   <Th>Actions</Th>
                 </Tr>
               </Thead>
               <Tbody>
-                {list.data.map((group) => (
-                  <Tr key={group.id}>
+                {list.data.map((organization) => (
+                  <ConsoleHighlightableTr
+                    key={organization.id}
+                    onClick={(event) => {
+                      if (
+                        !(event.target instanceof HTMLButtonElement) &&
+                        !(event.target instanceof HTMLSpanElement) &&
+                        !(event.target instanceof HTMLParagraphElement)
+                      ) {
+                        navigate(`/console/organizations/${organization.id}`)
+                      }
+                    }}
+                  >
                     <Td>
-                      <Text>{group.name}</Text>
-                    </Td>
-                    <Td>
-                      <Button
-                        onClick={() => {
-                          navigate(
-                            `/admin/organizations/${group.organization.id}`,
-                          )
-                        }}
-                      >
-                        {group.organization.name}
-                      </Button>
+                      <Text>{organization.name}</Text>
                     </Td>
                     <Td>
                       <Text>
-                        {new Date(group.createTime).toLocaleDateString()}
+                        {new Date(organization.createTime).toLocaleDateString()}
                       </Text>
                     </Td>
                     <Td>
-                      <Text>{new Date(group.updateTime).toLocaleString()}</Text>
+                      <Text>
+                        {new Date(organization.updateTime).toLocaleString()}
+                      </Text>
                     </Td>
                     <Td>
                       <Button
                         onClick={async () => {
-                          await renameGroup(group.id, group.name, null)
+                          await renameOrganization(
+                            organization.id,
+                            organization.name,
+                            null,
+                          )
                         }}
                       >
                         Rename
                       </Button>
                     </Td>
-                  </Tr>
+                  </ConsoleHighlightableTr>
                 ))}
               </Tbody>
             </Table>
           </Stack>
         ) : (
-          <div> No groups found </div>
+          <div> No organizations found </div>
         )}
         {list ? (
           <PagePagination
@@ -172,4 +187,4 @@ const AdminPanelGroups = () => {
   )
 }
 
-export default AdminPanelGroups
+export default ConsolePanelOrganizations

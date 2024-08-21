@@ -28,7 +28,7 @@ import {
 } from '@chakra-ui/react'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
-import AdminApi from '@/client/admin/admin'
+import ConsoleApi from '@/client/console/console'
 import { swrConfig } from '@/client/options'
 import { organizationPaginationStorage } from '@/infra/pagination'
 import PagePagination from '@/lib/components/page-pagination'
@@ -38,7 +38,7 @@ import usePagePagination from '@/lib/hooks/page-pagination'
 import { useAppDispatch } from '@/store/hook'
 import { mutateUpdated } from '@/store/ui/indexes'
 
-const AdminPanelDatabaseIndexes = () => {
+const ConsolePanelDatabaseIndexes = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const dispatch = useAppDispatch()
@@ -56,7 +56,7 @@ const AdminPanelDatabaseIndexes = () => {
     data: list,
     error,
     mutate,
-  } = AdminApi.useListIndexes({ page, size }, swrConfig())
+  } = ConsoleApi.useListIndexes({ page, size }, swrConfig())
 
   const sendRebuildRequest = (
     indexname: string | null,
@@ -195,4 +195,4 @@ const AdminPanelDatabaseIndexes = () => {
   )
 }
 
-export default AdminPanelDatabaseIndexes
+export default ConsolePanelDatabaseIndexes

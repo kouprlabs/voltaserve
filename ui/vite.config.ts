@@ -29,10 +29,10 @@ const config = ({ mode }) => {
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/proxy\/idp/, ''),
         },
-        '/proxy/admin/v1': {
-          target: process.env.ADMIN_URL,
+        '/proxy/console/v1': {
+          target: process.env.CONSOLE_URL,
           changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/proxy\/admin/, ''),
+          rewrite: (path) => path.replace(/^\/proxy\/console/, ''),
         },
       },
     },

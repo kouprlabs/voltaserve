@@ -111,17 +111,3 @@ export function loadTokenExpiry(): string | null {
 export function removeTokenExpiry() {
   return localStorage.removeItem(TOKEN_EXPIRY)
 }
-
-export const ADMIN_ACCESS_TOKEN = 'voltaserve_admin_access_token'
-
-export function saveAdminAccessToken(token: string) {
-  return localStorage.setItem(ADMIN_ACCESS_TOKEN, token)
-}
-
-export function removeAdminAccessToken() {
-  return localStorage.removeItem(ADMIN_ACCESS_TOKEN)
-}
-
-export function loadAdminAccessToken(): string | null {
-  return localStorage.getItem(ADMIN_ACCESS_TOKEN)
-}

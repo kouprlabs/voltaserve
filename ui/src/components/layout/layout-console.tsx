@@ -27,7 +27,7 @@ import Shell from '@/lib/components/shell'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { errorCleared } from '@/store/ui/error'
 
-const LayoutAdmin = () => {
+const LayoutConsole = () => {
   const toast = useToast()
   const error = useAppSelector((state) => state.ui.error.value)
   const navigate = useNavigate()
@@ -61,43 +61,43 @@ const LayoutAdmin = () => {
       topBar={<AppBar />}
       items={[
         {
-          href: '/admin/dashboard',
+          href: '/console/dashboard',
           icon: <IconHome />,
-          primaryText: 'Admin overview',
+          primaryText: 'Cloud Console overview',
           secondaryText: 'Basic information about instance',
         },
         {
-          href: '/admin/users',
+          href: '/console/users',
           icon: <IconPerson />,
           primaryText: 'Users management',
           secondaryText: 'Manage users of your cloud instance',
         },
         {
-          href: '/admin/groups',
+          href: '/console/groups',
           icon: <IconGroup />,
           primaryText: 'Groups management',
           secondaryText: 'Manage groups of your cloud instance',
         },
         {
-          href: '/admin/workspaces',
+          href: '/console/workspaces',
           icon: <IconWorkspaces />,
           primaryText: 'Workspaces management',
           secondaryText: 'Manage workspaces of your cloud instance',
         },
         {
-          href: '/admin/organizations',
+          href: '/console/organizations',
           icon: <IconFlag />,
           primaryText: 'Organizations management',
           secondaryText: 'Manage workspaces of your cloud instance',
         },
         {
-          href: '/admin/invitations',
+          href: '/console/invitations',
           icon: <IconInvitations />,
           primaryText: 'Invitations management',
           secondaryText: 'Manage invitations of your cloud instance',
         },
         {
-          href: '/admin/database',
+          href: '/console/database',
           icon: <IconDatabase />,
           primaryText: 'Database management',
           secondaryText: 'Manage database of your cloud instance',
@@ -109,4 +109,4 @@ const LayoutAdmin = () => {
   )
 }
 
-export default LayoutAdmin
+export default LayoutConsole

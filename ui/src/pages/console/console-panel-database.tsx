@@ -11,9 +11,9 @@ import { useEffect, useState } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { Heading, Tab, TabList, Tabs } from '@chakra-ui/react'
 import cx from 'classnames'
-import AdminApi from '@/client/admin/admin'
+import ConsoleApi from '@/client/console/console'
 
-const AdminPanelDatabase = () => {
+const ConsolePanelDatabase = () => {
   const location = useLocation()
   const navigate = useNavigate()
   const [tabIndex, setTabIndex] = useState(0)
@@ -30,7 +30,7 @@ const AdminPanelDatabase = () => {
   }, [location])
 
   useEffect(() => {
-    AdminApi.checkIndexesAvailability().then((value) => {
+    ConsoleApi.checkIndexesAvailability().then((value) => {
       setIndexesAvailable(value)
     })
   }, [])
@@ -42,11 +42,11 @@ const AdminPanelDatabase = () => {
       </Heading>
       <Tabs variant="solid-rounded" colorScheme="gray" index={tabIndex}>
         <TabList>
-          <Tab onClick={() => navigate(`/admin/database/overview`)}>
+          <Tab onClick={() => navigate(`/console/database/overview`)}>
             Overview
           </Tab>
           {indexesAvailable ? (
-            <Tab onClick={() => navigate(`/admin/database/indexes`)}>
+            <Tab onClick={() => navigate(`/console/database/indexes`)}>
               Indexes
             </Tab>
           ) : null}
@@ -57,4 +57,4 @@ const AdminPanelDatabase = () => {
   )
 }
 
-export default AdminPanelDatabase
+export default ConsolePanelDatabase

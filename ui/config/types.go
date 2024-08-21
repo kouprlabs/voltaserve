@@ -14,5 +14,5 @@ type Config struct {
 	Port   int
 	APIURL string
 	IDPURL string
-	AdminURL string
+	ConsoleUrl string
 }
