@@ -442,7 +442,7 @@ func (mp *workspaceMapper) mapOne(m model.Workspace, userID string) (*Workspace,
 		CreateTime:      m.GetCreateTime(),
 		UpdateTime:      m.GetUpdateTime(),
 	}
-	res.Permission = ""
+	res.Permission = model.PermissionNone
 	for _, p := range m.GetUserPermissions() {
 		if p.GetUserID() == userID && model.GetPermissionWeight(p.GetValue()) > model.GetPermissionWeight(res.Permission) {
 			res.Permission = p.GetValue()

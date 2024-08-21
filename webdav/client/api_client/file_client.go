@@ -19,6 +19,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/kouprlabs/voltaserve/webdav/config"
@@ -145,20 +146,21 @@ func (cl *FileClient) CreateFromS3(opts FileCreateFromS3Options) (*File, error) 
 	if err != nil {
 		return nil, err
 	}
+	args := url.Values{
+		"api_key":      []string{cl.config.Security.APIKey},
+		"access_token": []string{cl.token.AccessToken},
+		"workspace_id": []string{opts.WorkspaceID},
+		"parent_id":    []string{opts.ParentID},
+		"name":         []string{opts.Name},
+		"s3_key":       []string{opts.S3Reference.Key},
+		"s3_bucket":    []string{opts.S3Reference.Bucket},
+		"snapshot_id":  []string{opts.S3Reference.SnapshotID},
+		"content_type": []string{opts.S3Reference.ContentType},
+		"size":         []string{strconv.FormatInt(opts.S3Reference.Size, 10)},
+	}
+	reqUrl := cl.config.APIURL + "/v2/files/create_from_s3?" + args.Encode()
 	req, err := http.NewRequest("POST",
-		fmt.Sprintf("%s/v2/files/create_from_s3?api_key=%s&access_token=%s&workspace_id=%s&parent_id=%s&name=%s&s3_key=%s&s3_bucket=%s&snapshot_id=%s&content_type=%s&size=%d",
-			cl.config.APIURL,
-			cl.config.Security.APIKey,
-			cl.token.AccessToken,
-			opts.WorkspaceID,
-			opts.ParentID,
-			opts.Name,
-			opts.S3Reference.Key,
-			opts.S3Reference.Bucket,
-			opts.S3Reference.SnapshotID,
-			opts.S3Reference.ContentType,
-			opts.S3Reference.Size,
-		),
+		reqUrl,
 		bytes.NewBuffer(body))
 	if err != nil {
 		return nil, err
@@ -176,6 +178,12 @@ func (cl *FileClient) CreateFromS3(opts FileCreateFromS3Options) (*File, error) 
 			return
 		}
 	}(res.Body)
+
+	body, err = cl.jsonResponseOrThrow(res)
+	if err != nil {
+		return nil, err
+	}
+
 	var file File
 	if err = json.Unmarshal(body, &file); err != nil {
 		return nil, err
@@ -194,19 +202,19 @@ func (cl *FileClient) PatchFromS3(opts FilePatchFromS3Options) (*File, error) {
 	if err != nil {
 		return nil, err
 	}
+	args := url.Values{
+		"api_key":      []string{cl.config.Security.APIKey},
+		"access_token": []string{cl.token.AccessToken},
+		"name":         []string{opts.Name},
+		"s3_key":       []string{opts.S3Reference.Key},
+		"s3_bucket":    []string{opts.S3Reference.Bucket},
+		"snapshot_id":  []string{opts.S3Reference.SnapshotID},
+		"content_type": []string{opts.S3Reference.ContentType},
+		"size":         []string{strconv.FormatInt(opts.S3Reference.Size, 10)},
+	}
+	reqUrl := cl.config.APIURL + "/v2/files/" + opts.ID + "/patch_from_s3?" + args.Encode()
 	req, err := http.NewRequest("PATCH",
-		fmt.Sprintf("%s/v2/files/%s/patch_from_s3?api_key=%s&access_token=%s&name=%s&s3_key=%s&s3_bucket=%s&snapshot_id=%s&content_type=%s&size=%d",
-			cl.config.APIURL,
-			opts.ID,
-			cl.config.Security.APIKey,
-			cl.token.AccessToken,
-			opts.Name,
-			opts.S3Reference.Key,
-			opts.S3Reference.Bucket,
-			opts.S3Reference.SnapshotID,
-			opts.S3Reference.ContentType,
-			opts.S3Reference.Size,
-		),
+		reqUrl,
 		bytes.NewBuffer(body))
 	if err != nil {
 		return nil, err
@@ -223,6 +231,12 @@ func (cl *FileClient) PatchFromS3(opts FilePatchFromS3Options) (*File, error) {
 			return
 		}
 	}(res.Body)
+
+	body, err = cl.jsonResponseOrThrow(res)
+	if err != nil {
+		return nil, err
+	}
+
 	var file File
 	if err = json.Unmarshal(body, &file); err != nil {
 		return nil, err

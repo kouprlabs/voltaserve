@@ -125,4 +125,11 @@ func readLimits(config *Config) {
 		}
 		config.Limits.MultipartBodyLengthLimitMB = int(v)
 	}
+	if len(os.Getenv("LIMITS_IMAGE_MOSAIC_TRIGGER_THRESHOLD_PIXELS")) > 0 {
+		v, err := strconv.ParseInt(os.Getenv("LIMITS_IMAGE_MOSAIC_TRIGGER_THRESHOLD_PIXELS"), 10, 32)
+		if err != nil {
+			panic(err)
+		}
+		config.Limits.ImageMosaicTriggerThresholdPixels = int(v)
+	}
 }

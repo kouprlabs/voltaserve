@@ -511,7 +511,7 @@ func (repo *fileRepo) GetSize(id string) (int64, error) {
 		Raw(`WITH RECURSIVE rec (id, parent_id) AS
              (SELECT f.id, f.parent_id FROM file f WHERE f.id = ?
              UNION SELECT f.id, f.parent_id FROM rec, file f WHERE f.parent_id = rec.id)
-             SELECT coalesce(sum((s.original->>'size')::int), 0) as result FROM snapshot s, rec
+             SELECT coalesce(sum((s.original->>'size')::bigint), 0) as result FROM snapshot s, rec
              LEFT JOIN snapshot_file map ON rec.id = map.file_id WHERE map.snapshot_id = s.id`,
 			id).
 		Scan(&res)

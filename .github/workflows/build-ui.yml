@@ -70,9 +70,9 @@ jobs:
           TAGS+=",$name:latest"
           echo "TAGS=$TAGS" >> $GITHUB_ENV
 
-      - name: Set the tag on workflow dispatch
+      - name: Set the docker tag on runs other than tag push
         if: ${{ github.ref_type != 'tag' }}
-        run: echo "TAGS=voltaserve/ui:$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+        run: echo "TAGS=voltaserve/ui:$(git rev-parse --short HEAD),voltaserve/ui:main" >> $GITHUB_ENV
 
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v5
