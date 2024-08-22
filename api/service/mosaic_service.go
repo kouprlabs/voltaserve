@@ -33,6 +33,7 @@ type MosaicService struct {
 	fileCache      *cache.FileCache
 	fileGuard      *guard.FileGuard
 	taskSvc        *TaskService
+	taskMapper     *taskMapper
 	s3             *infra.S3Manager
 	mosaicClient   *mosaic_client.MosaicClient
 	pipelineClient *conversion_client.PipelineClient
@@ -47,6 +48,7 @@ func NewMosaicService() *MosaicService {
 		fileCache:      cache.NewFileCache(),
 		fileGuard:      guard.NewFileGuard(),
 		taskSvc:        NewTaskService(),
+		taskMapper:     newTaskMapper(),
 		s3:             infra.NewS3Manager(),
 		mosaicClient:   mosaic_client.NewMosaicClient(),
 		pipelineClient: conversion_client.NewPipelineClient(),
@@ -54,27 +56,27 @@ func NewMosaicService() *MosaicService {
 	}
 }
 
-func (svc *MosaicService) Create(id string, userID string) error {
+func (svc *MosaicService) Create(id string, userID string) (*Task, error) {
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if err = svc.fileGuard.Authorize(userID, file, model.PermissionEditor); err != nil {
-		return err
+		return nil, err
 	}
 	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
-		return errorpkg.NewFileIsNotAFileError(file)
+		return nil, errorpkg.NewFileIsNotAFileError(file)
 	}
 	snapshot, err := svc.snapshotCache.Get(*file.GetSnapshotID())
 	if err != nil {
-		return err
+		return nil, err
 	}
 	isTaskPending, err := svc.snapshotSvc.IsTaskPending(snapshot)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if *isTaskPending {
-		return errorpkg.NewSnapshotHasPendingTaskError(nil)
+		return nil, errorpkg.NewSnapshotHasPendingTaskError(nil)
 	}
 	task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
 		ID:              helper.NewID(),
@@ -85,12 +87,12 @@ func (svc *MosaicService) Create(id string, userID string) error {
 		Payload:         map[string]string{repo.TaskPayloadObjectKey: file.GetName()},
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
 	snapshot.SetStatus(model.SnapshotStatusWaiting)
 	snapshot.SetTaskID(helper.ToPtr(task.GetID()))
 	if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
-		return err
+		return nil, err
 	}
 	if err := svc.pipelineClient.Run(&conversion_client.PipelineRunOptions{
 		PipelineID: helper.ToPtr(conversion_client.PipelineMosaic),
@@ -99,9 +101,13 @@ func (svc *MosaicService) Create(id string, userID string) error {
 		Bucket:     snapshot.GetPreview().Bucket,
 		Key:        snapshot.GetPreview().Key,
 	}); err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	res, err := svc.taskMapper.mapOne(task)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
 }
 
 func (svc *MosaicService) Delete(id string, userID string) error {
