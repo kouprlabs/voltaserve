@@ -110,76 +110,78 @@ func (svc *MosaicService) Create(id string, userID string) (*Task, error) {
 	return res, nil
 }
 
-func (svc *MosaicService) Delete(id string, userID string) error {
+func (svc *MosaicService) Delete(id string, userID string) (*Task, error) {
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if err = svc.fileGuard.Authorize(userID, file, model.PermissionOwner); err != nil {
-		return err
+		return nil, err
 	}
 	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
-		return errorpkg.NewFileIsNotAFileError(file)
+		return nil, errorpkg.NewFileIsNotAFileError(file)
 	}
 	snapshot, err := svc.snapshotCache.Get(*file.GetSnapshotID())
 	if err != nil {
-		return err
+		return nil, err
 	}
 	isTaskPending, err := svc.snapshotSvc.IsTaskPending(snapshot)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if *isTaskPending {
-		return errorpkg.NewSnapshotHasPendingTaskError(nil)
+		return nil, errorpkg.NewSnapshotHasPendingTaskError(nil)
 	}
 	if !snapshot.HasMosaic() {
-		return errorpkg.NewMosaicNotFoundError(nil)
+		return nil, errorpkg.NewMosaicNotFoundError(nil)
 	}
-	if svc.fileIdent.IsImage(snapshot.GetPreview().Key) {
-		task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
-			ID:              helper.NewID(),
-			Name:            "Deleting mosaic.",
-			UserID:          userID,
-			IsIndeterminate: true,
-			Status:          model.TaskStatusRunning,
-			Payload:         map[string]string{repo.TaskPayloadObjectKey: file.GetName()},
+	task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
+		ID:              helper.NewID(),
+		Name:            "Deleting mosaic.",
+		UserID:          userID,
+		IsIndeterminate: true,
+		Status:          model.TaskStatusRunning,
+		Payload:         map[string]string{repo.TaskPayloadObjectKey: file.GetName()},
+	})
+	if err != nil {
+		return nil, err
+	}
+	snapshot.SetTaskID(helper.ToPtr(task.GetID()))
+	snapshot.SetStatus(model.SnapshotStatusProcessing)
+	if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
+		return nil, err
+	}
+	go func(task model.Task, snapshot model.Snapshot) {
+		err = svc.mosaicClient.Delete(mosaic_client.MosaicDeleteOptions{
+			S3Key:    filepath.FromSlash(snapshot.GetID()),
+			S3Bucket: snapshot.GetPreview().Bucket,
 		})
 		if err != nil {
-			return err
-		}
-		snapshot.SetTaskID(helper.ToPtr(task.GetID()))
-		snapshot.SetStatus(model.SnapshotStatusProcessing)
-		if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
-			return err
-		}
-		go func(task model.Task, snapshot model.Snapshot) {
-			err = svc.mosaicClient.Delete(mosaic_client.MosaicDeleteOptions{
-				S3Key:    filepath.FromSlash(snapshot.GetID()),
-				S3Bucket: snapshot.GetPreview().Bucket,
-			})
-			if err != nil {
-				value := err.Error()
-				task.SetError(&value)
-				if err := svc.taskSvc.saveAndSync(task); err != nil {
-					log.GetLogger().Error(err)
-					return
-				}
-			} else {
-				if err := svc.taskSvc.deleteAndSync(task.GetID()); err != nil {
-					log.GetLogger().Error(err)
-					return
-				}
-			}
-			snapshot.SetMosaic(nil)
-			snapshot.SetTaskID(nil)
-			snapshot.SetStatus(model.SnapshotStatusReady)
-			if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
+			value := err.Error()
+			task.SetError(&value)
+			if err := svc.taskSvc.saveAndSync(task); err != nil {
 				log.GetLogger().Error(err)
 				return
 			}
-		}(task, snapshot)
+		} else {
+			if err := svc.taskSvc.deleteAndSync(task.GetID()); err != nil {
+				log.GetLogger().Error(err)
+				return
+			}
+		}
+		snapshot.SetMosaic(nil)
+		snapshot.SetTaskID(nil)
+		snapshot.SetStatus(model.SnapshotStatusReady)
+		if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
+			log.GetLogger().Error(err)
+			return
+		}
+	}(task, snapshot)
+	res, err := svc.taskMapper.mapOne(task)
+	if err != nil {
+		return nil, err
 	}
-	return nil
+	return res, nil
 }
 
 type MosaicInfo struct {

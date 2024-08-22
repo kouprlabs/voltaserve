@@ -139,10 +139,11 @@ func (r *InsightsRouter) Patch(c *fiber.Ctx) error {
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/insights/{id} [delete]
 func (r *InsightsRouter) Delete(c *fiber.Ctx) error {
-	if err := r.insightsSvc.Delete(c.Params("id"), GetUserID(c)); err != nil {
+	res, err := r.insightsSvc.Delete(c.Params("id"), GetUserID(c))
+	if err != nil {
 		return err
 	}
-	return c.SendStatus(http.StatusNoContent)
+	return c.JSON(res)
 }
 
 // ListEntities godoc

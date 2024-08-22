@@ -207,8 +207,8 @@ func (svc *InsightsService) Patch(id string, userID string) (*Task, error) {
 		PipelineID: helper.ToPtr(conversion_client.PipelineInsights),
 		TaskID:     task.GetID(),
 		SnapshotID: snapshot.GetID(),
-		Bucket:     snapshot.GetOriginal().Bucket,
-		Key:        snapshot.GetOriginal().Key,
+		Bucket:     snapshot.GetPreview().Bucket,
+		Key:        snapshot.GetPreview().Key,
 		Payload:    map[string]string{"language": *snapshot.GetLanguage()},
 	}); err != nil {
 		return nil, err
@@ -220,34 +220,34 @@ func (svc *InsightsService) Patch(id string, userID string) (*Task, error) {
 	return res, nil
 }
 
-func (svc *InsightsService) Delete(id string, userID string) error {
+func (svc *InsightsService) Delete(id string, userID string) (*Task, error) {
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if err = svc.fileGuard.Authorize(userID, file, model.PermissionOwner); err != nil {
-		return err
+		return nil, err
 	}
 	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
-		return errorpkg.NewFileIsNotAFileError(file)
+		return nil, errorpkg.NewFileIsNotAFileError(file)
 	}
 	snapshot, err := svc.snapshotCache.Get(*file.GetSnapshotID())
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if !snapshot.HasEntities() {
-		return errorpkg.NewInsightsNotFoundError(nil)
+		return nil, errorpkg.NewInsightsNotFoundError(nil)
 	}
 	isTaskPending, err := svc.snapshotSvc.IsTaskPending(snapshot)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if *isTaskPending {
-		return errorpkg.NewSnapshotHasPendingTaskError(nil)
+		return nil, errorpkg.NewSnapshotHasPendingTaskError(nil)
 	}
 	snapshot.SetStatus(model.SnapshotStatusProcessing)
 	if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
-		return err
+		return nil, err
 	}
 	task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
 		ID:              helper.NewID(),
@@ -258,11 +258,11 @@ func (svc *InsightsService) Delete(id string, userID string) error {
 		Payload:         map[string]string{repo.TaskPayloadObjectKey: file.GetName()},
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
 	snapshot.SetTaskID(helper.ToPtr(task.GetID()))
 	if err := svc.snapshotSvc.SaveAndSync(snapshot); err != nil {
-		return err
+		return nil, err
 	}
 	go func(task model.Task, snapshot model.Snapshot) {
 		failed := false
@@ -297,7 +297,11 @@ func (svc *InsightsService) Delete(id string, userID string) error {
 			return
 		}
 	}(task, snapshot)
-	return nil
+	res, err := svc.taskMapper.mapOne(task)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
 }
 
 func (svc *InsightsService) deleteText(snapshot model.Snapshot) error {
@@ -556,11 +560,11 @@ func (svc *InsightsService) DownloadOCRBuffer(id string, userID string) (*bytes.
 }
 
 func (svc *InsightsService) getPreviousSnapshot(fileID string, version int64) (model.Snapshot, error) {
-	snaphots, err := svc.snapshotRepo.FindAllPrevious(fileID, version)
+	snapshots, err := svc.snapshotRepo.FindAllPrevious(fileID, version)
 	if err != nil {
 		return nil, err
 	}
-	for _, snapshot := range snaphots {
+	for _, snapshot := range snapshots {
 		if snapshot.HasEntities() {
 			return snapshot, nil
 		}
