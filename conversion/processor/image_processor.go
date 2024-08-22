@@ -133,7 +133,7 @@ func (p *ImageProcessor) ResizeImage(inputPath string, width int, height int, ou
 
 func (p *ImageProcessor) ConvertImage(inputPath string, outputPath string) error {
 	bildImage, err := imgio.Open(inputPath)
-	if err == nil && p.canBeHandledByBild(outputPath) {
+	if err == nil && p.canBeHandledByBild(inputPath) && p.canBeHandledByBild(outputPath) {
 		var encoder imgio.Encoder
 		if p.imageIdent.IsPNG(outputPath) {
 			encoder = imgio.PNGEncoder()
