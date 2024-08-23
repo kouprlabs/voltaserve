@@ -102,7 +102,7 @@ func (p *ImageProcessor) MeasureImage(inputPath string) (*api_client.ImageProps,
 
 func (p *ImageProcessor) ResizeImage(inputPath string, width int, height int, outputPath string) error {
 	bildImage, err := imgio.Open(inputPath)
-	if err == nil && p.canBeHandledByBild(outputPath) {
+	if err == nil && p.IsSupportedByBild(outputPath) {
 		newImage := transform.Resize(bildImage, width, height, transform.Lanczos)
 		var encoder imgio.Encoder
 		if p.imageIdent.IsPNG(inputPath) {
@@ -133,7 +133,7 @@ func (p *ImageProcessor) ResizeImage(inputPath string, width int, height int, ou
 
 func (p *ImageProcessor) ConvertImage(inputPath string, outputPath string) error {
 	bildImage, err := imgio.Open(inputPath)
-	if err == nil && p.canBeHandledByBild(inputPath) && p.canBeHandledByBild(outputPath) {
+	if err == nil && p.IsSupportedByBild(inputPath) && p.IsSupportedByBild(outputPath) {
 		var encoder imgio.Encoder
 		if p.imageIdent.IsPNG(outputPath) {
 			encoder = imgio.PNGEncoder()
@@ -151,7 +151,7 @@ func (p *ImageProcessor) ConvertImage(inputPath string, outputPath string) error
 
 func (p *ImageProcessor) RemoveAlphaChannel(inputPath string, outputPath string) error {
 	bildImage, err := imgio.Open(inputPath)
-	if err == nil && p.canBeHandledByBild(outputPath) {
+	if err == nil && p.IsSupportedByBild(outputPath) {
 		return imgio.Save(outputPath, bildImage, imgio.JPEGEncoder(100))
 	} else {
 		if err := infra.NewCommand().Exec("convert", inputPath, "-alpha", "off", outputPath); err != nil {
@@ -181,6 +181,6 @@ func (p *ImageProcessor) DPIFromImage(inputPath string) (*int, error) {
 	return helper.ToPtr(int((xRes + yRes) / 2)), nil
 }
 
-func (p *ImageProcessor) canBeHandledByBild(path string) bool {
+func (p *ImageProcessor) IsSupportedByBild(path string) bool {
 	return p.imageIdent.IsJPEG(path) || p.imageIdent.IsPNG(path)
 }

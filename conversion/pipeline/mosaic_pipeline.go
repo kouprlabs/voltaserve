@@ -75,7 +75,7 @@ func (p *mosaicPipeline) RunFromLocalPath(inputPath string, opts api_client.Pipe
 	}); err != nil {
 		return err
 	}
-	if !p.imageIdent.IsPNG(inputPath) && !p.imageIdent.IsJPEG(inputPath) {
+	if !p.imageProc.IsSupportedByBild(inputPath) {
 		outputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".jpg")
 		if err := p.imageProc.ConvertImage(inputPath, outputPath); err != nil {
 			return err
