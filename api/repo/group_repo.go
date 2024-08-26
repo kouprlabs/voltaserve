@@ -183,7 +183,7 @@ func (repo *groupRepo) Count() (int64, error) {
 	}
 	var res Result
 	db := repo.db.
-		Raw("SELECT count(*) as result FROM group").
+		Raw("SELECT count(*) as result FROM \"group\"").
 		Scan(&res)
 	if db.Error != nil {
 		return 0, db.Error
