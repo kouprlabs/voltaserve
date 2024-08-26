@@ -229,17 +229,12 @@ func (repo *taskRepo) Find(id string) (model.Task, error) {
 }
 
 func (repo *taskRepo) Count() (int64, error) {
-	type Result struct {
-		Result int64
-	}
-	var res Result
-	db := repo.db.
-		Raw("SELECT count(*) as result FROM task").
-		Scan(&res)
+	var count int64
+	db := repo.db.Model(&taskEntity{}).Count(&count)
 	if db.Error != nil {
-		return 0, db.Error
+		return -1, db.Error
 	}
-	return res.Result, nil
+	return count, nil
 }
 
 func (repo *taskRepo) GetIDs(userID string) ([]string, error) {
@@ -267,7 +262,7 @@ func (repo *taskRepo) GetCountByEmail(userID string) (int64, error) {
 		Where("user_id = ?", userID).
 		Count(&count)
 	if db.Error != nil {
-		return 0, db.Error
+		return -1, db.Error
 	}
 	return count, nil
 }
