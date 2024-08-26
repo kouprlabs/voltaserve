@@ -202,17 +202,12 @@ func (repo *workspaceRepo) Find(id string) (model.Workspace, error) {
 }
 
 func (repo *workspaceRepo) Count() (int64, error) {
-	type Result struct {
-		Result int64
-	}
-	var res Result
-	db := repo.db.
-		Raw("SELECT count(*) as result FROM workspace").
-		Scan(&res)
+	var count int64
+	db := repo.db.Model(&workspaceEntity{}).Count(&count)
 	if db.Error != nil {
-		return 0, db.Error
+		return -1, db.Error
 	}
-	return res.Result, nil
+	return count, nil
 }
 
 func (repo *workspaceRepo) UpdateName(id string, name string) (model.Workspace, error) {

@@ -348,17 +348,12 @@ func (repo *fileRepo) DeleteChunk(ids []string) error {
 }
 
 func (repo *fileRepo) Count() (int64, error) {
-	type Result struct {
-		Result int64
-	}
-	var res Result
-	db := repo.db.
-		Raw("SELECT count(*) as result FROM file").
-		Scan(&res)
+	var count int64
+	db := repo.db.Model(&fileEntity{}).Count(&count)
 	if db.Error != nil {
-		return 0, db.Error
+		return -1, db.Error
 	}
-	return res.Result, nil
+	return count, nil
 }
 
 func (repo *fileRepo) GetIDsByWorkspace(workspaceID string) ([]string, error) {
@@ -480,7 +475,7 @@ func (repo *fileRepo) GetItemCount(id string) (int64, error) {
 			id).
 		Scan(&res)
 	if db.Error != nil {
-		return 0, db.Error
+		return -1, db.Error
 	}
 	return res.Result - 1, nil
 }
