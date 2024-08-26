@@ -178,17 +178,12 @@ func (repo *groupRepo) Find(id string) (model.Group, error) {
 }
 
 func (repo *groupRepo) Count() (int64, error) {
-	type Result struct {
-		Result int64
-	}
-	var res Result
-	db := repo.db.
-		Raw("SELECT count(*) as result FROM \"group\"").
-		Scan(&res)
+	var count int64
+	db := repo.db.Model(&groupEntity{}).Count(&count)
 	if db.Error != nil {
 		return 0, db.Error
 	}
-	return res.Result, nil
+	return count, nil
 }
 
 func (repo *groupRepo) GetIDsByFile(fileID string) ([]string, error) {
