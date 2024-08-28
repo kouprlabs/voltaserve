@@ -12,6 +12,7 @@ from functools import reduce
 from typing import Optional
 
 import jwt
+from meilisearch import Client
 from fastapi import Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from psycopg import connect
@@ -44,6 +45,8 @@ class Settings(BaseSettings):
     LANGUAGE_URL: str
     MOSAIC_URL: str
 
+    SEARCH_URL: str
+
 
 settings = Settings()
 
@@ -55,6 +58,8 @@ conn = connect(conninfo=f"postgres://{settings.POSTGRES_USER}:"
                row_factory=dict_row,
                autocommit=True
                )
+
+meilisearch_client = Client(settings.SEARCH_URL)
 
 
 def camel_to_snake(data: str):

@@ -32,6 +32,10 @@ class GenericPaginationRequest(BaseModel):
     size: int | None = Field(default=10)
 
 
+class GenericSearchRequest(GenericPaginationRequest):
+    query: str | None = Field('')
+
+
 # --- RESPONSE MODELS --- #
 class GenericResponse(BaseModel):
     id: str
