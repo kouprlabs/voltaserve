@@ -13,11 +13,11 @@ from fastapi import APIRouter, Depends, status, Response
 
 from ..database import fetch_groups, fetch_group
 from ..database.group import update_group, fetch_group_count
-from ..dependencies import JWTBearer
+from ..dependencies import JWTBearer, meilisearch_client
 from ..errors import NotFoundError, NoContentError, EmptyDataException, NotFoundException, \
     UnknownApiError
 from ..models import GroupResponse, GroupListRequest, GroupListResponse, GroupRequest, \
-    UpdateGroupRequest, CountResponse
+    UpdateGroupRequest, CountResponse, GroupSearchRequest
 
 group_api_router = APIRouter(
     prefix='/group',
@@ -75,6 +75,27 @@ async def get_all_groups(data: Annotated[GroupListRequest, Depends()]):
         groups, count = fetch_groups(page=data.page, size=data.size)
 
         return GroupListResponse(data=groups, totalElements=count, page=data.page, size=data.size)
+    except EmptyDataException:
+        return NoContentError()
+    except NotFoundException as e:
+        return NotFoundError(message=str(e))
+    except Exception as e:
+        return UnknownApiError(message=str(e))
+
+
+@group_api_router.get(path="/search",
+                      responses={
+                          status.HTTP_200_OK: {
+                              'model': GroupListResponse
+                          }
+                      }
+                      )
+async def get_search_groups(data: Annotated[GroupSearchRequest, Depends()]):
+    try:
+        groups = meilisearch_client.index('group').search(data.query, {'page': data.page, 'hitsPerPage': data.size})
+
+        return GroupListResponse(data=(fetch_group(group['id']) for group in groups['hits']),
+                                 totalElements=len(groups['hits']), page=data.page, size=data.size)
     except EmptyDataException:
         return NoContentError()
     except NotFoundException as e:

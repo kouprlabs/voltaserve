@@ -14,7 +14,8 @@ from typing import List
 from pydantic import Field
 
 from ..models.organization import OrganizationResponse
-from .generic import GenericPaginationRequest, GenericResponse, GenericListResponse, GenericRequest
+from .generic import GenericPaginationRequest, GenericResponse, GenericListResponse, GenericRequest, \
+    GenericSearchRequest
 
 
 # --- REQUEST MODELS --- #
@@ -23,6 +24,10 @@ class GroupRequest(GenericRequest):
 
 
 class GroupListRequest(GenericPaginationRequest):
+    pass
+
+
+class GroupSearchRequest(GenericSearchRequest):
     pass
 
 

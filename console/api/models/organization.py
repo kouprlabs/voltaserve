@@ -13,7 +13,8 @@ from typing import List
 
 from pydantic import Field
 
-from .generic import GenericPaginationRequest, GenericResponse, GenericListResponse, GenericRequest
+from .generic import GenericPaginationRequest, GenericResponse, GenericListResponse, GenericRequest, \
+    GenericSearchRequest
 
 
 # --- REQUEST MODELS --- #
@@ -22,6 +23,10 @@ class OrganizationRequest(GenericRequest):
 
 
 class OrganizationListRequest(GenericPaginationRequest):
+    pass
+
+
+class OrganizationSearchRequest(GenericSearchRequest):
     pass
 
 

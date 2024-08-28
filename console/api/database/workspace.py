@@ -24,13 +24,27 @@ def fetch_workspace(_id: str) -> Dict:
             if not exists(curs=curs, tablename='workspace', _id=_id):
                 raise NotFoundException(message=f'Workspace with id={_id} does not exist!')
 
-            curs.execute(
-                f'SELECT w.id, w.name, w.organization_id as "organizationId", o.name as "organizationName", '
-                f'w.storage_capacity as "storageCapacity", w.root_id as "rootId", w.bucket,'
-                f' w.create_time as "createTime", w.update_time as "updateTime" '
+            data = curs.execute(
+                f'SELECT w.id, w.name, w.organization_id, o.name as "organizationName", '
+                f'o.create_time as "organization_create_time", o.update_time as "organization_update_time", '
+                f'w.storage_capacity, w.root_id, w.bucket, '
+                f' w.create_time, w.update_time '
                 f'FROM workspace w join organization o on w.organization_id = o.id '
-                f'WHERE w.id = \'{_id}\'')
-            return curs.fetchone()
+                f'WHERE w.id = \'{_id}\'').fetchone()
+
+            return {'id': data.get('id'),
+                    'createTime': data.get('create_time'),
+                    'updateTime': data.get('update_time'),
+                    'name': data.get('name'),
+                    'storageCapacity': data.get('storage_capacity'),
+                    'rootId': data.get('root_id'),
+                    'bucket': data.get('bucket'),
+                    'organization': {
+                        'id': data.get('organization_id'),
+                        'name': data.get('organizationName'),
+                        'createTime': data.get('organization_create_time'),
+                        'updateTime': data.get('organization_update_time')}
+                    }
     except DatabaseError as error:
         raise error
 

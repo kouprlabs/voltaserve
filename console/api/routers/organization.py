@@ -14,13 +14,13 @@ from fastapi import APIRouter, Depends, status, Response
 
 from ..database import fetch_organization, fetch_organizations, fetch_organization_users, \
     fetch_organization_workspaces, update_organization, fetch_organization_groups, fetch_organization_count
-from ..dependencies import JWTBearer
+from ..dependencies import JWTBearer, meilisearch_client
 from ..errors import NotFoundError, EmptyDataException, NoContentError, NotFoundException, \
     UnknownApiError
 from ..models import OrganizationResponse, OrganizationRequest, OrganizationListResponse, \
     OrganizationListRequest, OrganizationWorkspaceListRequest, UpdateOrganizationRequest, \
     OrganizationWorkspaceListResponse, OrganizationGroupListResponse, OrganizationGroupListRequest, \
-    OrganizationUserListRequest, OrganizationUserListResponse, CountResponse
+    OrganizationUserListRequest, OrganizationUserListResponse, CountResponse, OrganizationSearchRequest
 
 organization_api_router = APIRouter(
     prefix='/organization',
@@ -76,6 +76,28 @@ async def get_all_organizations(data: Annotated[OrganizationListRequest, Depends
         organizations, count = fetch_organizations(page=data.page, size=data.size)
 
         return OrganizationListResponse(data=organizations, totalElements=count, page=data.page, size=data.size)
+    except NotFoundException as e:
+        return NotFoundError(message=str(e))
+    except EmptyDataException:
+        return NoContentError()
+    except Exception as e:
+        return UnknownApiError(message=str(e))
+
+
+@organization_api_router.get(path="/search",
+                             responses={
+                                 status.HTTP_200_OK: {
+                                     'model': OrganizationListResponse
+                                 }
+                             }
+                             )
+async def get_all_organizations(data: Annotated[OrganizationSearchRequest, Depends()]):
+    try:
+        organizations = meilisearch_client.index('organization').search(data.query,
+                                                                        {'page': data.page, 'hitsPerPage': data.size})
+
+        return OrganizationListResponse(data=(fetch_organization(organization['id']) for organization in organizations['hits']),
+                                        totalElements=len(organizations['hits']), page=data.page, size=data.size)
     except NotFoundException as e:
         return NotFoundError(message=str(e))
     except EmptyDataException:

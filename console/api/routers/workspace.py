@@ -13,11 +13,12 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, status, Response
 
 from ..database import fetch_workspace, fetch_workspaces, update_workspace, fetch_workspace_count
-from ..dependencies import JWTBearer
+from ..dependencies import JWTBearer, meilisearch_client
 from ..errors import NotFoundError, EmptyDataException, NoContentError, NotFoundException, \
     UnknownApiError
 from ..models import WorkspaceResponse, WorkspaceRequest, WorkspaceListResponse, \
-    WorkspaceListRequest, UpdateWorkspaceRequest, GenericUnexpectedErrorResponse, GenericAcceptedResponse, CountResponse
+    WorkspaceListRequest, UpdateWorkspaceRequest, GenericUnexpectedErrorResponse, GenericAcceptedResponse, \
+    CountResponse, WorkspaceSearchRequest
 
 workspace_api_router = APIRouter(
     prefix='/workspace',
@@ -93,12 +94,39 @@ async def get_all_workspaces(data: Annotated[WorkspaceListRequest, Depends()]):
         return UnknownApiError(message=str(e))
 
 
+@workspace_api_router.get(path="/search",
+                          responses={
+                              status.HTTP_200_OK: {
+                                  'model': WorkspaceListResponse
+                              }
+                          }
+                          )
+async def get_all_workspaces(data: Annotated[WorkspaceSearchRequest, Depends()]):
+    try:
+        workspaces = meilisearch_client.index('workspace').search(data.query,
+                                                                  {'page': data.page, 'hitsPerPage': data.size})
+
+        return WorkspaceListResponse(data=(fetch_workspace(workspace['id']) for workspace in workspaces['hits']),
+                                     totalElements=len(workspaces['hits']), page=data.page, size=data.size)
+    except EmptyDataException:
+        return NoContentError()
+    except NotFoundException as e:
+        return NotFoundError(message=str(e))
+    except Exception as e:
+        return UnknownApiError(message=str(e))
+
+
 # --- PATCH --- #
 @workspace_api_router.patch(path="",
                             status_code=status.HTTP_202_ACCEPTED)
 async def patch_workspace(data: UpdateWorkspaceRequest, response: Response):
     try:
         update_workspace(data=data.model_dump(exclude_unset=True, exclude_none=True))
+        meilisearch_client.index('workspace').update_documents([{
+            'id': data.id,
+            'name': data.name,
+            'storagecapacity': data.storageCapacity
+        }])
         response.status_code = status.HTTP_202_ACCEPTED
         return None
     except NotFoundException as e:

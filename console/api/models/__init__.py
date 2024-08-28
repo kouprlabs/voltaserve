@@ -13,7 +13,8 @@ from .generic import GenericRequest, GenericPaginationRequest, GenericResponse, 
     GenericTokenResponse, GenericUnexpectedErrorResponse, GenericAcceptedResponse, GenericServiceUnavailableResponse, \
     GenericErrorResponse, CountResponse
 
-from .group import GroupRequest, GroupListRequest, GroupResponse, GroupListResponse, UpdateGroupRequest
+from .group import GroupRequest, GroupListRequest, GroupResponse, GroupListResponse, UpdateGroupRequest, \
+    GroupSearchRequest
 from .grouppermission import GroupPermissionRequest, GroupPermissionListRequest, GroupPermissionResponse, \
     GroupPermissionListResponse
 from .invitation import InvitationRequest, InvitationListRequest, InvitationResponse, InvitationListResponse, \
@@ -22,7 +23,7 @@ from .organization import OrganizationRequest, OrganizationListRequest, Organiza
     OrganizationListResponse, UpdateOrganizationRequest, OrganizationWorkspaceResponse, OrganizationUserListResponse, \
     OrganizationUserResponse, OrganizationWorkspaceListResponse, OrganizationGroupListResponse, \
     OrganizationGroupResponse, OrganizationGroupListRequest, OrganizationUserListRequest, \
-    OrganizationWorkspaceListRequest
+    OrganizationWorkspaceListRequest, OrganizationSearchRequest
 from .snapshot import SnapshotRequest, SnapshotListRequest, SnapshotResponse, SnapshotListResponse
 from .snapshotfile import SnapshotFileRequest, SnapshotFileListRequest, SnapshotFileResponse, SnapshotFileListResponse
 from .task import TaskRequest, TaskListRequest, TaskResponse, TaskListResponse
@@ -33,7 +34,7 @@ from .user import UserRequest, UserListRequest, UserResponse, UserListResponse, 
 from .userpermission import UserPermissionRequest, UserPermissionListRequest, UserPermissionResponse, \
     UserPermissionListResponse
 from .workspace import WorkspaceRequest, WorkspaceListRequest, WorkspaceResponse, WorkspaceListResponse, \
-    WorkspaceOrganizationListRequest, UpdateWorkspaceRequest
+    WorkspaceOrganizationListRequest, UpdateWorkspaceRequest, WorkspaceSearchRequest
 from .token import TokenResponse, TokenPayload
 from .index import IndexRequest, IndexListRequest, IndexResponse, IndexListResponse
 from .overview import VersionsResponse, VersionRequest, VersionResponse
