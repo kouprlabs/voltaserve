@@ -16,13 +16,14 @@ import { hashPassword } from '@/infra/password'
 import search, { USER_SEARCH_INDEX } from '@/infra/search'
 import { User } from '@/user/model'
 import userRepo from '@/user/repo'
-import { UserDTO, mapEntity } from '@/user/service'
+import {UserDTO, mapEntity, getUserCount} from '@/user/service'
 
 export type AccountCreateOptions = {
   email: string
   password: string
   fullName: string
   picture?: string
+  isAdmin?: boolean
 }
 
 export type AccountResetPasswordOptions = {
@@ -53,6 +54,9 @@ export async function createUser(
   if (!(await userRepo.isUsernameAvailable(options.email))) {
     throw newError({ code: ErrorCode.UsernameUnavailable })
   }
+  if (await getUserCount() === 0) {
+    options.isAdmin = true
+  }
   try {
     const emailConfirmationToken = newHyphenlessUuid()
     const user = await userRepo.insert({
@@ -64,6 +68,7 @@ export async function createUser(
       passwordHash: hashPassword(options.password),
       emailConfirmationToken,
       createTime: newDateTime(),
+      isAdmin: options.isAdmin,
     })
     await search.index(USER_SEARCH_INDEX).addDocuments([
       {
@@ -72,9 +77,8 @@ export async function createUser(
         email: user.email,
         fullName: user.fullName,
         isEmailConfirmed: user.isEmailConfirmed,
-        isAdmin: user.isAdmin,
-        isActive: user.isActive,
         createTime: user.createTime,
+        updateTime: user.updateTime
       },
     ])
     await sendTemplateMail('email-confirmation', options.email, {
@@ -106,8 +110,14 @@ export async function confirmEmail(options: AccountConfirmEmailOptions) {
   })
   await search.index(USER_SEARCH_INDEX).updateDocuments([
     {
-      ...user,
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      fullName: user.fullName,
       isEmailConfirmed: user.isEmailConfirmed,
+      createTime: user.createTime,
+      updateTime: user.updateTime,
+      picture: user.picture,
     },
   ])
 }

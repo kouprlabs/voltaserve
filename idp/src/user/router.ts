@@ -14,7 +14,7 @@ import multer from 'multer'
 import os from 'os'
 import passport from 'passport'
 import {
-  PaginatedRequest,
+  SearchPaginatedRequest,
   UserAdminPostRequest,
   UserIdRequest,
   UserSuspendPostRequest
@@ -36,8 +36,7 @@ import {
   UserUpdateEmailConfirmationOptions,
   updateEmailRequest,
   updateEmailConfirmation,
-  getUserListPaginated,
-  getUserCount, suspendUser, makeAdminUser, getUserByAdmin,
+  suspendUser, makeAdminUser, getUserByAdmin, searchUserListPaginated
 } from './service'
 
 const router = Router()
@@ -222,18 +221,10 @@ router.get(
 router.get(
   '/all',
   passport.authenticate('jwt', { session: false }),
-  async (req: PaginatedRequest, res: Response, next: NextFunction) => {
+  async (req: SearchPaginatedRequest, res: Response, next: NextFunction) => {
     try {
       checkAdmin(req.header('Authorization'))
-      res.json({
-        data: await getUserListPaginated(
-          parseInt(req.query.page),
-          parseInt(req.query.size),
-        ),
-        totalElements: await getUserCount(),
-        page: req.query.page,
-        size: req.query.size,
-      })
+      res.json(await searchUserListPaginated(req.query.query, parseInt(req.query.size), parseInt(req.query.page)))
     } catch (err) {
       next(err)
     }

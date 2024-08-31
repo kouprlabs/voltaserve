@@ -8,7 +8,7 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
 import { useEffect, useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import {
   Button,
   Heading,
@@ -24,17 +24,22 @@ import {
 import * as Yup from 'yup'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
-import ConsoleApi, { OrganizationManagementList } from '@/client/console/console'
+import ConsoleApi, {
+  OrganizationManagementList,
+} from '@/client/console/console'
 import ConsoleHighlightableTr from '@/components/console/console-highlightable-tr'
 import ConsoleRenameModal from '@/components/console/console-rename-modal'
 import { consoleOrganizationsPaginationStorage } from '@/infra/pagination'
 import PagePagination from '@/lib/components/page-pagination'
 import SectionSpinner from '@/lib/components/section-spinner'
+import { decodeQuery } from '@/lib/helpers/query'
 import usePagePagination from '@/lib/hooks/page-pagination'
 
 const ConsolePanelOrganizations = () => {
+  const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const location = useLocation()
+  const query = decodeQuery(searchParams.get('q') as string)
   const [list, setList] = useState<OrganizationManagementList | undefined>(
     undefined,
   )
@@ -84,10 +89,18 @@ const ConsolePanelOrganizations = () => {
   }
 
   useEffect(() => {
-    ConsoleApi.listOrganizations({ page: page, size: size }).then((value) =>
-      setList(value),
-    )
-  }, [page, size, isSubmitting])
+    if (query && query.length >= 3) {
+      ConsoleApi.searchObject('organization', {
+        page: page,
+        size: size,
+        query: query,
+      }).then((value) => setList(value))
+    } else {
+      ConsoleApi.listOrganizations({ page: page, size: size }).then((value) =>
+        setList(value),
+      )
+    }
+  }, [page, size, isSubmitting, query])
 
   if (!list) {
     return <SectionSpinner />
@@ -105,11 +118,11 @@ const ConsolePanelOrganizations = () => {
         request={renameOrganization}
       />
       <Helmet>
-        <title>Organizations management</title>
+        <title>Organization management</title>
       </Helmet>
       <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
         <Heading className={cx('text-heading')}>
-          Organizations management
+          Organization management
         </Heading>
         {list && list.data.length > 0 ? (
           <Stack direction="column" spacing={2}>

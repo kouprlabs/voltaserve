@@ -8,7 +8,7 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
 import { useEffect, useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import {
   Badge,
   Button,
@@ -37,9 +37,12 @@ import { getUserId } from '@/infra/token'
 import { IconChevronDown, IconChevronUp } from '@/lib/components/icons'
 import PagePagination from '@/lib/components/page-pagination'
 import SectionSpinner from '@/lib/components/section-spinner'
+import { decodeQuery } from '@/lib/helpers/query'
 import usePagePagination from '@/lib/hooks/page-pagination'
 
 const ConsolePanelUsers = () => {
+  const [searchParams] = useSearchParams()
+  const query = decodeQuery(searchParams.get('q') as string)
   const navigate = useNavigate()
   const location = useLocation()
   const [list, setList] = useState<ConsoleUsersResponse | undefined>(undefined)
@@ -111,10 +114,12 @@ const ConsolePanelUsers = () => {
   }
 
   useEffect(() => {
-    UserAPI.getAllUsers({ page: page, size: size }).then((value) => {
-      setList(value)
-    })
-  }, [page, size, isSubmitting])
+    UserAPI.getAllUsers({ page: page, size: size, query: query }).then(
+      (value) => {
+        setList(value)
+      },
+    )
+  }, [page, size, isSubmitting, query])
 
   if (!list) {
     return <SectionSpinner />
@@ -139,10 +144,10 @@ const ConsolePanelUsers = () => {
         request={makeAdminUser}
       />
       <Helmet>
-        <title>Users management</title>
+        <title>User management</title>
       </Helmet>
       <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
-        <Heading className={cx('text-heading')}>Users management</Heading>
+        <Heading className={cx('text-heading')}>User management</Heading>
         {list && list.data.length > 0 ? (
           <Stack direction="column" spacing={2}>
             <Table variant="simple">

@@ -8,7 +8,7 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
 import { useEffect, useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import {
   Button,
   Heading,
@@ -35,11 +35,14 @@ import { IconChevronDown, IconChevronUp } from '@/lib/components/icons'
 import PagePagination from '@/lib/components/page-pagination'
 import SectionSpinner from '@/lib/components/section-spinner'
 import prettyBytes from '@/lib/helpers/pretty-bytes'
+import { decodeQuery } from '@/lib/helpers/query'
 import usePagePagination from '@/lib/hooks/page-pagination'
 
 const ConsolePanelWorkspaces = () => {
+  const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const location = useLocation()
+  const query = decodeQuery(searchParams.get('q') as string)
   const [list, setList] = useState<WorkspaceManagementList | undefined>(
     undefined,
   )
@@ -87,10 +90,18 @@ const ConsolePanelWorkspaces = () => {
   }
 
   useEffect(() => {
-    ConsoleApi.listWorkspaces({ page: page, size: size }).then((value) =>
-      setList(value),
-    )
-  }, [page, size, isSubmitting])
+    if (query && query.length >= 3) {
+      ConsoleApi.searchObject('workspace', {
+        page: page,
+        size: size,
+        query: query,
+      }).then((value) => setList(value))
+    } else {
+      ConsoleApi.listWorkspaces({ page: page, size: size, query: query }).then(
+        (value) => setList(value),
+      )
+    }
+  }, [page, size, isSubmitting, query])
 
   if (!list) {
     return <SectionSpinner />
@@ -108,10 +119,10 @@ const ConsolePanelWorkspaces = () => {
         request={renameWorkspace}
       />
       <Helmet>
-        <title>Workspaces management</title>
+        <title>Workspace management</title>
       </Helmet>
       <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
-        <Heading className={cx('text-heading')}>Workspaces management</Heading>
+        <Heading className={cx('text-heading')}>Workspace management</Heading>
         {list && list.data.length > 0 ? (
           <Stack direction="column" spacing={2}>
             <Table variant="simple">

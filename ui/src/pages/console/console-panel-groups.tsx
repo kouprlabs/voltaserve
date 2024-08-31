@@ -8,7 +8,7 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
 import { useEffect, useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import {
   Button,
   Heading,
@@ -29,11 +29,14 @@ import ConsoleRenameModal from '@/components/console/console-rename-modal'
 import { consoleGroupsPaginationStorage } from '@/infra/pagination'
 import PagePagination from '@/lib/components/page-pagination'
 import SectionSpinner from '@/lib/components/section-spinner'
+import { decodeQuery } from '@/lib/helpers/query'
 import usePagePagination from '@/lib/hooks/page-pagination'
 
 const ConsolePanelGroups = () => {
+  const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const location = useLocation()
+  const query = decodeQuery(searchParams.get('q') as string)
   const [list, setList] = useState<GroupManagementList | undefined>(undefined)
   const { page, size, steps, setPage, setSize } = usePagePagination({
     navigate,
@@ -76,10 +79,18 @@ const ConsolePanelGroups = () => {
   }
 
   useEffect(() => {
-    ConsoleApi.listGroups({ page: page, size: size }).then((value) =>
-      setList(value),
-    )
-  }, [page, size, isSubmitting])
+    if (query && query.length >= 3) {
+      ConsoleApi.searchObject('group', {
+        page: page,
+        size: size,
+        query: query,
+      }).then((value) => setList(value))
+    } else {
+      ConsoleApi.listGroups({ page: page, size: size }).then((value) =>
+        setList(value),
+      )
+    }
+  }, [page, size, isSubmitting, query])
 
   if (!list) {
     return <SectionSpinner />
@@ -97,10 +108,10 @@ const ConsolePanelGroups = () => {
         request={renameGroup}
       />
       <Helmet>
-        <title>Groups management</title>
+        <title>Group management</title>
       </Helmet>
       <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
-        <Heading className={cx('text-heading')}>Groups management</Heading>
+        <Heading className={cx('text-heading')}>Group management</Heading>
         {list && list.data.length > 0 ? (
           <Stack direction="column" spacing={2}>
             <Table variant="simple">

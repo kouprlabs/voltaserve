@@ -69,31 +69,31 @@ const LayoutConsole = () => {
         {
           href: '/console/users',
           icon: <IconPerson />,
-          primaryText: 'Users management',
+          primaryText: 'User management',
           secondaryText: 'Manage users of your cloud instance',
         },
         {
           href: '/console/groups',
           icon: <IconGroup />,
-          primaryText: 'Groups management',
+          primaryText: 'Group management',
           secondaryText: 'Manage groups of your cloud instance',
         },
         {
           href: '/console/workspaces',
           icon: <IconWorkspaces />,
-          primaryText: 'Workspaces management',
+          primaryText: 'Workspace management',
           secondaryText: 'Manage workspaces of your cloud instance',
         },
         {
           href: '/console/organizations',
           icon: <IconFlag />,
-          primaryText: 'Organizations management',
+          primaryText: 'Organization management',
           secondaryText: 'Manage workspaces of your cloud instance',
         },
         {
           href: '/console/invitations',
           icon: <IconInvitations />,
-          primaryText: 'Invitations management',
+          primaryText: 'Invitation management',
           secondaryText: 'Manage invitations of your cloud instance',
         },
         {

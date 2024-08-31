@@ -68,12 +68,14 @@ export type DeleteOptions = {
 }
 
 type ListOptions = {
+  query?: string
   id?: string
   size?: number
   page?: number
 }
 
 type ListQueryParams = {
+  query?: string
   id?: string
   page?: string
   size?: string
@@ -179,16 +181,22 @@ export default class UserAPI {
     }) as Promise<User>
   }
 
-  static paramsFromListOptions(options?: ListOptions): URLSearchParams {
+  static paramsFromListOptions(options: ListOptions): URLSearchParams {
     const params: ListQueryParams = {}
     if (options?.id) {
       params.id = options.id.toString()
+    }
+    if (options.query) {
+      params.query = options.query.toString()
     }
     if (options?.page) {
       params.page = options.page.toString()
     }
     if (options?.size) {
       params.size = options.size.toString()
+    }
+    if (options?.query) {
+      params.query = options.query.toString()
     }
     return new URLSearchParams(params)
   }

@@ -16,7 +16,7 @@ import {hashPassword, verifyPassword} from '@/infra/password'
 import search, {USER_SEARCH_INDEX} from '@/infra/search'
 import {User} from '@/user/model'
 import userRepo from '@/user/repo'
-import {UserAdminPostRequest, UserSuspendPostRequest} from "@/infra/admin-requests";
+import {UserAdminPostRequest, UserSearchResponse, UserSuspendPostRequest} from "@/infra/admin-requests";
 
 export type UserDTO = {
   id: string
@@ -65,11 +65,19 @@ export async function getUserByAdmin(id: string): Promise<User> {
   return adminMapEntity(await userRepo.findByID(id))
 }
 
-export async function getUserListPaginated(
-  page: number,
-  size: number,
-): Promise<User[]> {
-  return await userRepo.listAllPaginated(page, size)
+export async function searchUserListPaginated(query: string, size: number, page: number
+): Promise<UserSearchResponse> {
+  if (query && query.length >= 3) {
+    const users = await search.index(USER_SEARCH_INDEX).search(query, {page: page, hitsPerPage: size}).then((value) =>{
+      return {
+        data: value.hits,
+        totalElements: value.totalHits
+      }
+    })
+    return {data: await userRepo.listAllByIds(users.data.map((value) => {return value.id})), totalElements: users.totalElements, size: size, page: page}
+  } else {
+    return {data: await userRepo.listAllPaginated(page, size), totalElements: await userRepo.getUserCount(), size: size, page: page}
+  }
 }
 
 export async function getUserCount(): Promise<number> {
@@ -88,11 +96,21 @@ export async function updateFullName(
   user = await userRepo.update({ id: user.id, fullName: options.fullName })
   await search.index(USER_SEARCH_INDEX).updateDocuments([
     {
-      ...user,
+      id: user.id,
+      username: user.username,
+      email: user.email,
       fullName: user.fullName,
+      isEmailConfirmed: user.isEmailConfirmed,
+      createTime: user.createTime,
+      updateTime: user.updateTime,
+      picture: user.picture,
     },
   ])
   return mapEntity(user)
+}
+
+export const raiseSearchError = () => {
+  throw newError({code: ErrorCode.SearchError})
 }
 
 export async function updateEmailRequest(
@@ -154,11 +172,14 @@ export async function updateEmailConfirmation(
   })
   await search.index(USER_SEARCH_INDEX).updateDocuments([
     {
-      ...user,
+      id: user.id,
+      username: user.username,
       email: user.email,
-      username: user.email,
-      emailUpdateToken: null,
-      emailUpdateValue: null,
+      fullName: user.fullName,
+      isEmailConfirmed: user.isEmailConfirmed,
+      createTime: user.createTime,
+      updateTime: user.updateTime,
+      picture: user.picture,
     },
   ])
   return mapEntity(user)
@@ -191,12 +212,36 @@ export async function updatePicture(
     id: userId,
     picture: `data:${contentType};base64,${picture}`,
   })
+  await search.index(USER_SEARCH_INDEX).updateDocuments([
+    {
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      fullName: user.fullName,
+      isEmailConfirmed: user.isEmailConfirmed,
+      createTime: user.createTime,
+      updateTime: user.updateTime,
+      picture: user.picture,
+    },
+  ])
   return mapEntity(user)
 }
 
 export async function deletePicture(id: string): Promise<UserDTO> {
   let user = await userRepo.findByID(id)
   user = await userRepo.update({ id: user.id, picture: null })
+  await search.index(USER_SEARCH_INDEX).updateDocuments([
+    {
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      fullName: user.fullName,
+      isEmailConfirmed: user.isEmailConfirmed,
+      createTime: user.createTime,
+      updateTime: user.updateTime,
+      picture: user.picture,
+    },
+  ])
   return mapEntity(user)
 }
 
@@ -217,6 +262,18 @@ export async function suspendUser(options: UserSuspendPostRequest) {
   }
   if (user) {
     await userRepo.suspend(user.id, options.suspend)
+    await search.index(USER_SEARCH_INDEX).updateDocuments([
+      {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        fullName: user.fullName,
+        isEmailConfirmed: user.isEmailConfirmed,
+        createTime: user.createTime,
+        updateTime: user.updateTime,
+        picture: user.picture,
+      },
+    ])
   } else {
     throw newError({ code: ErrorCode.UserNotFound })
   }
@@ -229,6 +286,18 @@ export async function makeAdminUser(options: UserAdminPostRequest) {
   }
   if (user) {
     await userRepo.makeAdmin(user.id, options.makeAdmin)
+    await search.index(USER_SEARCH_INDEX).updateDocuments([
+      {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        fullName: user.fullName,
+        isEmailConfirmed: user.isEmailConfirmed,
+        createTime: user.createTime,
+        updateTime: user.updateTime,
+        picture: user.picture,
+      },
+    ])
   } else {
     throw newError({ code: ErrorCode.UserNotFound })
   }

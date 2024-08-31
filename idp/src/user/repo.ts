@@ -144,6 +144,24 @@ class UserRepoImpl {
     return this.mapList(rows)
   }
 
+  async listAllByIds(idList: number[]): Promise<User[]> {
+    const { rowCount, rows } = await client.query(
+      `SELECT *
+       FROM "user"
+       WHERE id = ANY ($1)
+       ORDER BY create_time`,
+      [idList],
+    )
+    if (rowCount < 1) {
+      throw newError({
+        code: ErrorCode.ResourceNotFound,
+        error: `User list is empty`,
+        userMessage: `Not found users`
+      })
+    }
+    return this.mapList(rows)
+  }
+
   async getUserCount(): Promise<number> {
     const { rowCount, rows } = await client.query(
       `SELECT COUNT(id) as count FROM "user"`,
@@ -154,7 +172,7 @@ class UserRepoImpl {
         error: `Fatal database error (no users present in database)`,
       })
     }
-    return rows[0].count
+    return parseInt(rows[0].count)
   }
 
   async isUsernameAvailable(username: string): Promise<boolean> {
