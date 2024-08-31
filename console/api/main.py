@@ -42,12 +42,21 @@ if settings.LOG_FORMAT == 'JSON':
                 '"code":"%(code)s",'
                 '"headers":"%(headers)s"'
                 )
+    base_fmt = ('{"timestamp":"%(asctime)s",'
+                '"logger_name":"%(name)s",'
+                '"log_level":"%(levelname)s",'
+                '"message":"%(message)s"}'
+                )
 elif settings.LOG_FORMAT == "PLAIN":
     req_fmt = ('%(asctime)s|%(name)s|%(levelname)s|%(type)s|%(identifier)s|%(path)s|'
                '%(method)s|%(headers)s|%(query_params)s|%(path_params)s|%(message)s')
     resp_fmt = '%(asctime)s|%(name)s|%(levelname)s|%(type)s|%(identifier)s|%(code)s|%(headers)s|%(message)s'
+    base_fmt = '%(asctime)s|%(name)s|%(levelname)s|%(message)s'
 else:
     raise ValueError('Wrong logging format, available JSON and PLAIN')
+
+logging.basicConfig(format=base_fmt, level=settings.LOG_LEVEL)
+logger = logging.getLogger('voltaserve.console.api')
 
 
 async def custom_http_exception_handler(request: Request, exc: HTTPException):
@@ -86,9 +95,6 @@ app.add_middleware(
 )
 
 if settings.LOG_LEVEL == 'DEBUG':
-    logger = logging.getLogger('voltaserve.console.api')
-    logger.setLevel(settings.LOG_LEVEL)
-
     req_handler = logging.StreamHandler()
     req_handler.setFormatter(logging.Formatter(req_fmt))
 

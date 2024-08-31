@@ -9,10 +9,10 @@
 # licenses/AGPL.txt.
 
 import datetime
-from typing import List, Any, Self
+from typing import List, Any
 
 from fastapi import status
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field
 
 
 # --- REQUEST MODELS --- #
