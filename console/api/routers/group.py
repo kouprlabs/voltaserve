@@ -109,7 +109,12 @@ async def get_search_groups(data: Annotated[GroupSearchRequest, Depends()]):
                         status_code=status.HTTP_202_ACCEPTED)
 async def patch_group(data: UpdateGroupRequest, response: Response):
     try:
-        update_group(data=data.model_dump(exclude_unset=True, exclude_none=True))
+        update_group(data=data.model_dump(exclude_none=True))
+        meilisearch_client.index('group').update_documents([{
+            'id': data.id,
+            'name': data.name,
+            'updateTime': data.updateTime.strftime("%Y-%m-%dT%H:%M:%SZ")
+        }])
     except NotFoundException as e:
         return NotFoundError(message=str(e))
     except Exception as e:

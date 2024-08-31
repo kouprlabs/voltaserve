@@ -171,8 +171,13 @@ async def get_organization_groups(data: Annotated[OrganizationGroupListRequest, 
                                status_code=status.HTTP_202_ACCEPTED)
 async def patch_workspace(data: UpdateOrganizationRequest, response: Response):
     try:
-        update_organization(data=data.model_dump(exclude_unset=True, exclude_none=True))
-
+        print(data.model_dump())
+        update_organization(data=data.model_dump(exclude_none=True))
+        meilisearch_client.index('organization').update_documents([{
+            'id': data.id,
+            'name': data.name,
+            'updateTime': data.updateTime.strftime("%Y-%m-%dT%H:%M:%SZ")
+        }])
         response.status_code = status.HTTP_202_ACCEPTED
         return None
     except NotFoundException as e:

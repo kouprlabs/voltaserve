@@ -121,11 +121,12 @@ async def get_all_workspaces(data: Annotated[WorkspaceSearchRequest, Depends()])
                             status_code=status.HTTP_202_ACCEPTED)
 async def patch_workspace(data: UpdateWorkspaceRequest, response: Response):
     try:
-        update_workspace(data=data.model_dump(exclude_unset=True, exclude_none=True))
+        update_workspace(data=data.model_dump(exclude_none=True))
         meilisearch_client.index('workspace').update_documents([{
             'id': data.id,
             'name': data.name,
-            'storagecapacity': data.storageCapacity
+            'storageCapacity': data.storageCapacity,
+            'updateTime': data.updateTime.strftime("%Y-%m-%dT%H:%M:%SZ")
         }])
         response.status_code = status.HTTP_202_ACCEPTED
         return None
