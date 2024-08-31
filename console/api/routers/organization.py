@@ -15,6 +15,7 @@ from fastapi import APIRouter, Depends, status, Response
 from ..database import fetch_organization, fetch_organizations, fetch_organization_users, \
     fetch_organization_workspaces, update_organization, fetch_organization_groups, fetch_organization_count
 from ..dependencies import JWTBearer, meilisearch_client
+from ..log import base_logger
 from ..errors import NotFoundError, EmptyDataException, NoContentError, NotFoundException, \
     UnknownApiError
 from ..models import OrganizationResponse, OrganizationRequest, OrganizationListResponse, \
@@ -27,6 +28,9 @@ organization_api_router = APIRouter(
     tags=['organization'],
     dependencies=[Depends(JWTBearer())]
 )
+
+
+logger = base_logger.getChild("organization")
 
 
 # --- GET --- #
@@ -43,7 +47,11 @@ async def get_organization(data: Annotated[OrganizationRequest, Depends()]):
 
         return OrganizationResponse(**organization)
     except NotFoundException as e:
+        logger.error(e)
         return NotFoundError(message=str(e))
+    except Exception as e:
+        logger.exception(e)
+        return UnknownApiError()
 
 
 @organization_api_router.get(path="/count",
@@ -56,12 +64,9 @@ async def get_organization(data: Annotated[OrganizationRequest, Depends()]):
 async def get_organization_count():
     try:
         return CountResponse(**fetch_organization_count())
-    except EmptyDataException:
-        return NoContentError()
-    except NotFoundException as e:
-        return NotFoundError(message=str(e))
     except Exception as e:
-        return UnknownApiError(message=str(e))
+        logger.exception(e)
+        return UnknownApiError()
 
 
 @organization_api_router.get(path="/all",
@@ -76,12 +81,12 @@ async def get_all_organizations(data: Annotated[OrganizationListRequest, Depends
         organizations, count = fetch_organizations(page=data.page, size=data.size)
 
         return OrganizationListResponse(data=organizations, totalElements=count, page=data.page, size=data.size)
-    except NotFoundException as e:
-        return NotFoundError(message=str(e))
-    except EmptyDataException:
+    except EmptyDataException as e:
+        logger.error(e)
         return NoContentError()
     except Exception as e:
-        return UnknownApiError(message=str(e))
+        logger.exception(e)
+        return UnknownApiError()
 
 
 @organization_api_router.get(path="/search",
@@ -99,11 +104,11 @@ async def get_all_organizations(data: Annotated[OrganizationSearchRequest, Depen
         return OrganizationListResponse(data=(fetch_organization(organization['id']) for organization in organizations['hits']),
                                         totalElements=len(organizations['hits']), page=data.page, size=data.size)
     except NotFoundException as e:
+        logger.error(e)
         return NotFoundError(message=str(e))
-    except EmptyDataException:
-        return NoContentError()
     except Exception as e:
-        return UnknownApiError(message=str(e))
+        logger.exception(e)
+        return UnknownApiError()
 
 
 @organization_api_router.get(path="/users",
@@ -118,12 +123,15 @@ async def get_organization_users(data: Annotated[OrganizationUserListRequest, De
         users, count = fetch_organization_users(organization_id=data.id, page=data.page, size=data.size)
 
         return OrganizationUserListResponse(data=users, totalElements=count, page=data.page, size=data.size)
-    except EmptyDataException:
+    except EmptyDataException as e:
+        logger.error(e)
         return NoContentError()
     except NotFoundException as e:
+        logger.error(e)
         return NotFoundError(message=str(e))
     except Exception as e:
-        return UnknownApiError(message=str(e))
+        logger.exception(e)
+        return UnknownApiError()
 
 
 @organization_api_router.get(path="/workspaces",
@@ -138,12 +146,15 @@ async def get_organization_workspaces(data: Annotated[OrganizationWorkspaceListR
         workspaces, count = fetch_organization_workspaces(organization_id=data.id, page=data.page, size=data.size)
 
         return OrganizationWorkspaceListResponse(data=workspaces, totalElements=count, page=data.page, size=data.size)
-    except EmptyDataException:
+    except EmptyDataException as e:
+        logger.error(e)
         return NoContentError()
     except NotFoundException as e:
+        logger.error(e)
         return NotFoundError(message=str(e))
     except Exception as e:
-        return UnknownApiError(message=str(e))
+        logger.exception(e)
+        return UnknownApiError()
 
 
 @organization_api_router.get(path="/groups",
@@ -158,32 +169,37 @@ async def get_organization_groups(data: Annotated[OrganizationGroupListRequest, 
         groups, count = fetch_organization_groups(organization_id=data.id, page=data.page, size=data.size)
 
         return OrganizationWorkspaceListResponse(data=groups, totalElements=count, page=data.page, size=data.size)
-    except EmptyDataException:
+    except EmptyDataException as e:
+        logger.error(e)
         return NoContentError()
     except NotFoundException as e:
+        logger.error(e)
         return NotFoundError(message=str(e))
     except Exception as e:
-        return UnknownApiError(message=str(e))
+        logger.exception(e)
+        return UnknownApiError()
 
 
 # --- PATCH --- #
 @organization_api_router.patch(path="",
                                status_code=status.HTTP_202_ACCEPTED)
-async def patch_workspace(data: UpdateOrganizationRequest, response: Response):
+async def patch_organization(data: UpdateOrganizationRequest, response: Response):
     try:
-        print(data.model_dump())
         update_organization(data=data.model_dump(exclude_none=True))
         meilisearch_client.index('organization').update_documents([{
             'id': data.id,
             'name': data.name,
             'updateTime': data.updateTime.strftime("%Y-%m-%dT%H:%M:%SZ")
         }])
-        response.status_code = status.HTTP_202_ACCEPTED
-        return None
     except NotFoundException as e:
+        logger.error(e)
         return NotFoundError(message=str(e))
     except Exception as e:
-        return UnknownApiError(message=str(e))
+        logger.exception(e)
+        return UnknownApiError()
+
+    response.status_code = status.HTTP_202_ACCEPTED
+    return None
 
 # --- POST --- #
 

@@ -14,6 +14,7 @@ from fastapi import APIRouter, Depends, status
 
 from ..database import fetch_user_organizations, fetch_user_workspaces, fetch_user_groups, fetch_user_count
 from ..dependencies import JWTBearer
+from ..log import base_logger
 from ..errors import NotFoundError, EmptyDataException, NoContentError, NotFoundException, \
     UnknownApiError
 from ..models import UserOrganizationListRequest, UserOrganizationListResponse, \
@@ -24,6 +25,9 @@ users_api_router = APIRouter(
     tags=['user'],
     dependencies=[Depends(JWTBearer())]
 )
+
+
+logger = base_logger.getChild("user")
 
 
 # --- GET --- #
@@ -42,12 +46,15 @@ async def get_user_organizations(data: Annotated[UserOrganizationListRequest, De
                                             totalElements=count,
                                             page=data.page,
                                             size=data.size)
-    except EmptyDataException:
+    except EmptyDataException as e:
+        logger.error(e)
         return NoContentError()
     except NotFoundException as e:
+        logger.error(e)
         return NotFoundError(message=str(e))
     except Exception as e:
-        return UnknownApiError(message=str(e))
+        logger.exception(e)
+        return UnknownApiError()
 
 
 @users_api_router.get(path="/workspaces",
@@ -65,12 +72,15 @@ async def get_user_workspaces(data: Annotated[UserWorkspaceListRequest, Depends(
                                          totalElements=count,
                                          page=data.page,
                                          size=data.size)
-    except EmptyDataException:
+    except EmptyDataException as e:
+        logger.error(e)
         return NoContentError()
     except NotFoundException as e:
+        logger.error(e)
         return NotFoundError(message=str(e))
     except Exception as e:
-        return UnknownApiError(message=str(e))
+        logger.exception(e)
+        return UnknownApiError()
 
 
 @users_api_router.get(path="/groups",
@@ -88,12 +98,15 @@ async def get_user_groups(data: Annotated[UserGroupListRequest, Depends()]):
                                      totalElements=count,
                                      page=data.page,
                                      size=data.size)
-    except EmptyDataException:
+    except EmptyDataException as e:
+        logger.error(e)
         return NoContentError()
     except NotFoundException as e:
+        logger.error(e)
         return NotFoundError(message=str(e))
     except Exception as e:
-        return UnknownApiError(message=str(e))
+        logger.exception(e)
+        return UnknownApiError()
 
 
 @users_api_router.get(path="/count",
@@ -106,12 +119,9 @@ async def get_user_groups(data: Annotated[UserGroupListRequest, Depends()]):
 async def get_user_count():
     try:
         return CountResponse(**fetch_user_count())
-    except EmptyDataException:
-        return NoContentError()
-    except NotFoundException as e:
-        return NotFoundError(message=str(e))
     except Exception as e:
-        return UnknownApiError(message=str(e))
+        logger.exception(e)
+        return UnknownApiError()
 
 # --- PATCH --- #
 

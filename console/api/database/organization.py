@@ -138,6 +138,8 @@ def fetch_organization_groups(organization_id: str, page=1, size=10) -> Tuple[It
 def update_organization(data: Dict) -> None:
     try:
         with conn.cursor() as curs:
+            if not exists(curs=curs, _id=data['id'], tablename='group'):
+                raise NotFoundException(f'Organization with id={data['id']} does not exist!')
             curs.execute(parse_sql_update_query('organization', data))
     except DatabaseError as error:
         raise error

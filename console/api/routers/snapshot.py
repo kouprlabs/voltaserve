@@ -14,6 +14,7 @@ from fastapi import APIRouter, Depends, status
 
 from ..database import fetch_snapshot, fetch_snapshots
 from ..dependencies import JWTBearer
+from ..log import base_logger
 from ..errors import NotFoundError, EmptyDataException, NoContentError, NotFoundException, \
     UnknownApiError
 from ..models import SnapshotResponse, SnapshotListRequest, SnapshotListResponse, \
@@ -24,6 +25,9 @@ snapshot_api_router = APIRouter(
     tags=['snapshot'],
     dependencies=[Depends(JWTBearer())]
 )
+
+
+logger = base_logger.getChild("snapshot")
 
 
 # --- GET --- #
@@ -41,9 +45,11 @@ async def get_snapshot(data: Annotated[SnapshotRequest, Depends()]):
 
         return SnapshotResponse(**snapshot)
     except NotFoundException as e:
+        logger.error(e)
         return NotFoundError(message=str(e))
     except Exception as e:
-        return UnknownApiError(message=str(e))
+        logger.exception(e)
+        return UnknownApiError()
 
 
 @snapshot_api_router.get(path="/all",
@@ -58,12 +64,12 @@ async def get_all_snapshots(data: Annotated[SnapshotListRequest, Depends()]):
         snapshots, count = fetch_snapshots(page=data.page, size=data.size)
 
         return SnapshotListResponse(data=snapshots, totalElements=count['count'], page=data.page, size=data.size)
-    except EmptyDataException:
+    except EmptyDataException as e:
+        logger.error(e)
         return NoContentError()
-    except NotFoundException as e:
-        return NotFoundError(message=str(e))
     except Exception as e:
-        return UnknownApiError(message=str(e))
+        logger.exception(e)
+        return UnknownApiError()
 # --- PATCH --- #
 
 # --- POST --- #

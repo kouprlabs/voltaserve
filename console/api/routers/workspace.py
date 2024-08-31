@@ -14,6 +14,7 @@ from fastapi import APIRouter, Depends, status, Response
 
 from ..database import fetch_workspace, fetch_workspaces, update_workspace, fetch_workspace_count
 from ..dependencies import JWTBearer, meilisearch_client
+from ..log import base_logger
 from ..errors import NotFoundError, EmptyDataException, NoContentError, NotFoundException, \
     UnknownApiError
 from ..models import WorkspaceResponse, WorkspaceRequest, WorkspaceListResponse, \
@@ -35,6 +36,9 @@ workspace_api_router = APIRouter(
 )
 
 
+logger = base_logger.getChild("workspace")
+
+
 # --- GET --- #
 @workspace_api_router.get(path="",
                           responses={
@@ -46,14 +50,14 @@ workspace_api_router = APIRouter(
 async def get_workspace(data: Annotated[WorkspaceRequest, Depends()]):
     try:
         workspace = fetch_workspace(_id=data.id)
-        if workspace is None:
-            return NotFoundError(message=f'Workspace with id={data.id} does not exist')
 
         return WorkspaceResponse(**workspace)
     except NotFoundException as e:
+        logger.error(e)
         return NotFoundError(message=str(e))
     except Exception as e:
-        return UnknownApiError(message=str(e))
+        logger.exception(e)
+        return UnknownApiError()
 
 
 @workspace_api_router.get(path="/count",
@@ -63,15 +67,12 @@ async def get_workspace(data: Annotated[WorkspaceRequest, Depends()]):
                               }
                           }
                           )
-async def get_user_count():
+async def get_workspace_count():
     try:
         return CountResponse(**fetch_workspace_count())
-    except EmptyDataException:
-        return NoContentError()
-    except NotFoundException as e:
-        return NotFoundError(message=str(e))
     except Exception as e:
-        return UnknownApiError(message=str(e))
+        logger.exception(e)
+        return UnknownApiError()
 
 
 @workspace_api_router.get(path="/all",
@@ -86,12 +87,12 @@ async def get_all_workspaces(data: Annotated[WorkspaceListRequest, Depends()]):
         workspaces, count = fetch_workspaces(page=data.page, size=data.size)
 
         return WorkspaceListResponse(data=workspaces, totalElements=count, page=data.page, size=data.size)
-    except EmptyDataException:
+    except EmptyDataException as e:
+        logger.error(e)
         return NoContentError()
-    except NotFoundException as e:
-        return NotFoundError(message=str(e))
     except Exception as e:
-        return UnknownApiError(message=str(e))
+        logger.exception(e)
+        return UnknownApiError()
 
 
 @workspace_api_router.get(path="/search",
@@ -101,19 +102,18 @@ async def get_all_workspaces(data: Annotated[WorkspaceListRequest, Depends()]):
                               }
                           }
                           )
-async def get_all_workspaces(data: Annotated[WorkspaceSearchRequest, Depends()]):
+async def get_search_workspaces(data: Annotated[WorkspaceSearchRequest, Depends()]):
     try:
         workspaces = meilisearch_client.index('workspace').search(data.query,
                                                                   {'page': data.page, 'hitsPerPage': data.size})
 
         return WorkspaceListResponse(data=(fetch_workspace(workspace['id']) for workspace in workspaces['hits']),
                                      totalElements=len(workspaces['hits']), page=data.page, size=data.size)
-    except EmptyDataException:
-        return NoContentError()
     except NotFoundException as e:
         return NotFoundError(message=str(e))
     except Exception as e:
-        return UnknownApiError(message=str(e))
+        logger.exception(e)
+        return UnknownApiError()
 
 
 # --- PATCH --- #
@@ -128,12 +128,15 @@ async def patch_workspace(data: UpdateWorkspaceRequest, response: Response):
             'storageCapacity': data.storageCapacity,
             'updateTime': data.updateTime.strftime("%Y-%m-%dT%H:%M:%SZ")
         }])
-        response.status_code = status.HTTP_202_ACCEPTED
-        return None
     except NotFoundException as e:
+        logger.error(e)
         return NotFoundError(message=str(e))
     except Exception as e:
-        return UnknownApiError(message=str(e))
+        logger.exception(e)
+        return UnknownApiError()
+
+    response.status_code = status.HTTP_202_ACCEPTED
+    return None
 
 # --- POST --- #
 

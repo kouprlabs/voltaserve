@@ -14,6 +14,7 @@ from fastapi import APIRouter, Depends, status
 
 from ..database import fetch_index, fetch_indexes
 from ..dependencies import JWTBearer
+from ..log import base_logger
 from ..errors import NotFoundError, NoContentError, EmptyDataException, UnknownApiError
 from ..models import IndexListResponse, IndexListRequest, IndexResponse, IndexRequest
 
@@ -22,6 +23,8 @@ index_api_router = APIRouter(
     tags=['index'],
     dependencies=[Depends(JWTBearer())]
 )
+
+logger = base_logger.getChild("index")
 
 
 # --- GET --- #
@@ -39,7 +42,8 @@ async def get_index(data: Annotated[IndexRequest, Depends()]):
 
         return IndexResponse(**index)
     except Exception as e:
-        return UnknownApiError(message=str(e))
+        logger.exception(e)
+        return UnknownApiError()
 
 
 @index_api_router.get(path="/all",
@@ -54,10 +58,12 @@ async def get_all_indexes(data: Annotated[IndexListRequest, Depends()]):
         indexes, count = fetch_indexes(page=data.page, size=data.size)
 
         return IndexListResponse(data=indexes, totalElements=count['count'], page=data.page, size=data.size)
-    except EmptyDataException:
+    except EmptyDataException as e:
+        logger.error(e)
         return NoContentError()
     except Exception as e:
-        return UnknownApiError(message=str(e))
+        logger.exception(e)
+        return UnknownApiError()
 
 # --- PATCH --- #
 

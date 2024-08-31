@@ -14,6 +14,7 @@ from fastapi import APIRouter, Depends, status, Response
 
 from ..database import fetch_invitation, fetch_invitations, update_invitation
 from ..dependencies import JWTBearer
+from ..log import base_logger
 from ..errors import NotFoundError, NoContentError, EmptyDataException, NotFoundException, \
     UnknownApiError
 from ..models import InvitationResponse, InvitationListRequest, \
@@ -24,6 +25,9 @@ invitation_api_router = APIRouter(
     tags=['invitation'],
     dependencies=[Depends(JWTBearer())]
 )
+
+
+logger = base_logger.getChild("invitation")
 
 
 # --- GET --- #
@@ -40,9 +44,11 @@ async def get_invitation(data: Annotated[InvitationRequest, Depends()]):
 
         return InvitationResponse(**invitation)
     except NotFoundException as e:
+        logger.error(e)
         return NotFoundError(message=str(e))
     except Exception as e:
-        return UnknownApiError(message=str(e))
+        logger.exception(e)
+        return UnknownApiError()
 
 
 @invitation_api_router.get(path="/all",
@@ -57,12 +63,15 @@ async def get_all_invitations(data: Annotated[InvitationListRequest, Depends()])
         invitations, count = fetch_invitations(page=data.page, size=data.size)
 
         return InvitationListResponse(data=invitations, totalElements=count, page=data.page, size=data.size)
-    except EmptyDataException:
+    except EmptyDataException as e:
+        logger.error(e)
         return NoContentError()
     except NotFoundException as e:
+        logger.error(e)
         return NotFoundError(message=str(e))
     except Exception as e:
-        return UnknownApiError(message=str(e))
+        logger.exception(e)
+        return UnknownApiError()
 
 
 # --- PATCH --- #
@@ -78,12 +87,15 @@ async def patch_invitation(data: ConfirmInvitationRequest, response: Response):
     try:
         update_invitation(data.model_dump(exclude_unset=True, exclude_none=True))
 
-        response.status_code = status.HTTP_202_ACCEPTED
-        return None
     except NotFoundException as e:
+        logger.error(e)
         return NotFoundError(message=str(e))
     except Exception as e:
-        return UnknownApiError(message=str(e))
+        logger.exception(e)
+        return UnknownApiError()
+
+    response.status_code = status.HTTP_202_ACCEPTED
+    return None
 
 # --- POST --- #
 

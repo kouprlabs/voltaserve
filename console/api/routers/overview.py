@@ -13,6 +13,7 @@ from aiohttp import ClientSession
 from fastapi import APIRouter, status, Depends
 
 from ..dependencies import settings, JWTBearer
+from ..log import base_logger
 from ..errors import UnknownApiError, NotFoundError
 from ..models import VersionRequest, VersionResponse
 
@@ -22,7 +23,10 @@ overview_api_router = APIRouter(
     dependencies=[Depends(JWTBearer())]
 )
 
+logger = base_logger.getChild("overview")
 
+
+# --- GET --- #
 async def get_dockerhub_version(sess: ClientSession, id: str, response: dict, params: dict) -> dict:
     try:
         async with sess.get(f"https://hub.docker.com/v2/repositories/voltaserve/{id}/tags", params=params) as resp:
@@ -37,7 +41,8 @@ async def get_dockerhub_version(sess: ClientSession, id: str, response: dict, pa
             else:
                 response['latestVersion'] = 'UNKNOWN'
                 response['location'] = f"https://hub.docker.com/layers/voltaserve/{id}"
-    except:
+    except Exception as e:
+        logger.exception(e)
         response['latestVersion'] = 'UNKNOWN'
         response['location'] = f"https://hub.docker.com/layers/voltaserve/{id}"
 
@@ -51,7 +56,8 @@ async def get_local_version(sess: ClientSession, url: str, response: dict) -> di
                 response['currentVersion'] = (await local_resp.json())['version']
             else:
                 response['currentVersion'] = 'UNKNOWN'
-    except:
+    except Exception as e:
+        logger.exception(e)
         response['currentVersion'] = 'UNKNOWN'
 
     return response
@@ -85,4 +91,5 @@ async def get_internal_version(data: Annotated[VersionRequest, Depends()]):
 
         return VersionResponse(**response)
     except Exception as e:
-        return UnknownApiError(message=str(e))
+        logger.exception(e)
+        return UnknownApiError()

@@ -14,6 +14,7 @@ from fastapi import APIRouter, Depends, status, Response
 from ..database import fetch_groups, fetch_group
 from ..database.group import update_group, fetch_group_count
 from ..dependencies import JWTBearer, meilisearch_client
+from ..log import base_logger
 from ..errors import NotFoundError, NoContentError, EmptyDataException, NotFoundException, \
     UnknownApiError
 from ..models import GroupResponse, GroupListRequest, GroupListResponse, GroupRequest, \
@@ -24,6 +25,8 @@ group_api_router = APIRouter(
     tags=['group'],
     dependencies=[Depends(JWTBearer())]
 )
+
+logger = base_logger.getChild("group")
 
 
 # --- GET --- #
@@ -40,9 +43,11 @@ async def get_group(data: Annotated[GroupRequest, Depends()]):
 
         return GroupResponse(**group)
     except NotFoundException as e:
+        logger.error(e)
         return NotFoundError(message=str(e))
     except Exception as e:
-        return UnknownApiError(message=str(e))
+        logger.exception(e)
+        return UnknownApiError()
 
 
 @group_api_router.get(path="/count",
@@ -55,12 +60,9 @@ async def get_group(data: Annotated[GroupRequest, Depends()]):
 async def get_group_count():
     try:
         return CountResponse(**fetch_group_count())
-    except EmptyDataException:
-        return NoContentError()
-    except NotFoundException as e:
-        return NotFoundError(message=str(e))
     except Exception as e:
-        return UnknownApiError(message=str(e))
+        logger.exception(e)
+        return UnknownApiError()
 
 
 @group_api_router.get(path="/all",
@@ -75,12 +77,12 @@ async def get_all_groups(data: Annotated[GroupListRequest, Depends()]):
         groups, count = fetch_groups(page=data.page, size=data.size)
 
         return GroupListResponse(data=groups, totalElements=count, page=data.page, size=data.size)
-    except EmptyDataException:
+    except EmptyDataException as e:
+        logger.error(e)
         return NoContentError()
-    except NotFoundException as e:
-        return NotFoundError(message=str(e))
     except Exception as e:
-        return UnknownApiError(message=str(e))
+        logger.exception(e)
+        return UnknownApiError()
 
 
 @group_api_router.get(path="/search",
@@ -96,12 +98,12 @@ async def get_search_groups(data: Annotated[GroupSearchRequest, Depends()]):
 
         return GroupListResponse(data=(fetch_group(group['id']) for group in groups['hits']),
                                  totalElements=len(groups['hits']), page=data.page, size=data.size)
-    except EmptyDataException:
-        return NoContentError()
     except NotFoundException as e:
+        logger.error(e)
         return NotFoundError(message=str(e))
     except Exception as e:
-        return UnknownApiError(message=str(e))
+        logger.exception(e)
+        return UnknownApiError()
 
 
 # --- PATCH --- #
@@ -116,9 +118,11 @@ async def patch_group(data: UpdateGroupRequest, response: Response):
             'updateTime': data.updateTime.strftime("%Y-%m-%dT%H:%M:%SZ")
         }])
     except NotFoundException as e:
+        logger.error(e)
         return NotFoundError(message=str(e))
     except Exception as e:
-        return UnknownApiError(message=str(e))
+        logger.exception(e)
+        return UnknownApiError()
 
     response.status_code = status.HTTP_202_ACCEPTED
     return None
