@@ -47,6 +47,8 @@ class Settings(BaseSettings):
 
     SEARCH_URL: str
 
+    LOG_LEVEL: str = "INFO"
+    LOG_FORMAT: str = "PLAIN"
 
 settings = Settings()
 
@@ -67,9 +69,13 @@ def camel_to_snake(data: str):
 
 
 def parse_sql_update_query(tablename: str, data: dict):
-    return (f'UPDATE "{tablename}" SET {", ".join(f'{camel_to_snake(k)} = '
-                                                  f'\'{v}\'' for k, v in data.items() if k != "id")} '
-            f'WHERE id = \'{data["id"]}\';')
+    date_fields = ", ".join(f'{camel_to_snake(k)} = \'{v.strftime("%Y-%m-%dT%H:%M:%SZ")}\'' for
+                            k, v in data.items() if k != "id" and isinstance(v, datetime.datetime))
+    data_fields = ", ".join(f'{camel_to_snake(k)} = \'{v}\'' for
+                            k, v in data.items() if k != "id" and not isinstance(v, datetime.datetime))
+    return (f'UPDATE "{tablename}" SET {data_fields} WHERE id = \'{data["id"]}\''
+            f';') if date_fields == '' else (f'UPDATE "{tablename}" SET '
+                                             f'{data_fields}, {date_fields} WHERE id = \'{data["id"]}\';')
 
 
 class JWTBearer(HTTPBearer):
