@@ -8,7 +8,7 @@
 # by the GNU Affero General Public License v3.0 only, included in the file
 # licenses/AGPL.txt.
 
-name: Build and Push voltaserve/admin
+name: Build and Push voltaserve/console
 
 on:
   workflow_dispatch:
@@ -22,7 +22,7 @@ on:
     branches:
       - main
     paths:
-      - "admin/**"
+      - "console/**"
     tags:
       - 'v*'
 
@@ -56,7 +56,7 @@ jobs:
       - name: Create tag list matching semver from executing tag
         if: ${{ github.ref_type == 'tag' }}
         run: |
-          name="voltaserve/admin"
+          name="voltaserve/console"
           version="${{ github.ref_name }}"
           version="${version#v}"
           IFS='.' read -r -a parts <<< "$version"
@@ -72,12 +72,12 @@ jobs:
 
       - name: Set the tag on workflow dispatch
         if: ${{ github.ref_type != 'tag' }}
-        run: echo "TAGS=voltaserve/admin:$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+        run: echo "TAGS=voltaserve/console:$(git rev-parse --short HEAD)" >> $GITHUB_ENV
 
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v5
         with:
-          context: ./admin
+          context: ./console
           push: true
           tags: ${{ env.TAGS }}
           platforms: linux/amd64,linux/arm64

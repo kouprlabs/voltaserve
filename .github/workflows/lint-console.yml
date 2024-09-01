@@ -8,14 +8,14 @@
 # by the GNU Affero General Public License v3.0 only, included in the file
 # licenses/AGPL.txt.
 
-name: Lint voltaserve/admin
+name: Lint voltaserve/console
 
 on:
   pull_request:
     branches:
       - main
     paths:
-      - "admin/**"
+      - "console/**"
 
 jobs:
   linting:
@@ -32,7 +32,7 @@ jobs:
       - name: Lint using flake8
         uses: py-actions/flake8@v2
         with:
-          path: admin
+          path: console
           ignore: "F401,W291"
           max-line-length: "120"
           exclude: ".git,Dockerfile"
