@@ -42,7 +42,7 @@ export type File = {
   type: FileType
   parentId: string
   permission: PermissionType
-  isShared: boolean
+  isShared?: boolean
   snapshot?: Snapshot
   createTime: string
   updateTime?: string

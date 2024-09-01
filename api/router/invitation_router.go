@@ -52,6 +52,7 @@ func (r *InvitationRouter) AppendRoutes(g fiber.Router) {
 //	@Produce		json
 //	@Param			id		path		string							true	"ID"
 //	@Param			body	body		service.InvitationCreateOptions	true	"Body"
+//	@Success		200		{array}		service.Invitation
 //	@Failure		404		{object}	errorpkg.ErrorResponse
 //	@Failure		400		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
@@ -65,10 +66,11 @@ func (r *InvitationRouter) Create(c *fiber.Ctx) error {
 	if err := validator.New().Struct(opts); err != nil {
 		return errorpkg.NewRequestBodyValidationError(err)
 	}
-	if err := r.invitationSvc.Create(*opts, userID); err != nil {
+	res, err := r.invitationSvc.Create(*opts, userID)
+	if err != nil {
 		return err
 	}
-	return c.SendStatus(http.StatusNoContent)
+	return c.JSON(res)
 }
 
 // GetIncoming godoc

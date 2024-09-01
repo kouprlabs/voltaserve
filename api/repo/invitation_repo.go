@@ -164,10 +164,11 @@ func (repo *invitationRepo) GetIncomingCount(email string) (int64, error) {
 	var count int64
 	db := repo.db.
 		Model(&invitationEntity{}).
-		Where("email = ? and status = 'pending'", email).
+		Where("email = ?", email).
+		Where("status = 'pending'").
 		Count(&count)
 	if db.Error != nil {
-		return 0, db.Error
+		return -1, db.Error
 	}
 	return count, nil
 }

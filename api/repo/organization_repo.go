@@ -167,17 +167,12 @@ func (repo *organizationRepo) Find(id string) (model.Organization, error) {
 }
 
 func (repo *organizationRepo) Count() (int64, error) {
-	type Result struct {
-		Result int64
-	}
-	var res Result
-	db := repo.db.
-		Raw("SELECT count(*) as result FROM organization").
-		Scan(&res)
+	var count int64
+	db := repo.db.Model(&organizationEntity{}).Count(&count)
 	if db.Error != nil {
-		return 0, db.Error
+		return -1, db.Error
 	}
-	return res.Result, nil
+	return count, nil
 }
 
 func (repo *organizationRepo) Save(org model.Organization) error {
@@ -256,19 +251,15 @@ func (repo *organizationRepo) GetGroups(id string) ([]model.Group, error) {
 }
 
 func (repo *organizationRepo) GetOwnerCount(id string) (int64, error) {
-	type Result struct {
-		Result int64
-	}
-	var res Result
-	db := repo.db.
-		Raw(`SELECT count(*) as result FROM userpermission
-             WHERE resource_id = ? and permission = ?`,
-			id, model.PermissionOwner).
-		Scan(&res)
+	var count int64
+	db := repo.db.Model(&userPermissionEntity{}).
+		Where("resource_id = ?", id).
+		Where("permission = ?", model.PermissionOwner).
+		Count(&count)
 	if db.Error != nil {
-		return 0, db.Error
+		return -1, db.Error
 	}
-	return res.Result, nil
+	return count, nil
 }
 
 func (repo *organizationRepo) GrantUserPermission(id string, userID string, permission string) error {

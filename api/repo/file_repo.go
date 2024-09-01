@@ -348,17 +348,12 @@ func (repo *fileRepo) DeleteChunk(ids []string) error {
 }
 
 func (repo *fileRepo) Count() (int64, error) {
-	type Result struct {
-		Result int64
-	}
-	var res Result
-	db := repo.db.
-		Raw("SELECT count(*) as result FROM file").
-		Scan(&res)
+	var count int64
+	db := repo.db.Model(&fileEntity{}).Count(&count)
 	if db.Error != nil {
-		return 0, db.Error
+		return -1, db.Error
 	}
-	return res.Result, nil
+	return count, nil
 }
 
 func (repo *fileRepo) GetIDsByWorkspace(workspaceID string) ([]string, error) {
@@ -480,7 +475,7 @@ func (repo *fileRepo) GetItemCount(id string) (int64, error) {
 			id).
 		Scan(&res)
 	if db.Error != nil {
-		return 0, db.Error
+		return -1, db.Error
 	}
 	return res.Result - 1, nil
 }
@@ -511,7 +506,7 @@ func (repo *fileRepo) GetSize(id string) (int64, error) {
 		Raw(`WITH RECURSIVE rec (id, parent_id) AS
              (SELECT f.id, f.parent_id FROM file f WHERE f.id = ?
              UNION SELECT f.id, f.parent_id FROM rec, file f WHERE f.parent_id = rec.id)
-             SELECT coalesce(sum((s.original->>'size')::int), 0) as result FROM snapshot s, rec
+             SELECT coalesce(sum((s.original->>'size')::bigint), 0) as result FROM snapshot s, rec
              LEFT JOIN snapshot_file map ON rec.id = map.file_id WHERE map.snapshot_id = s.id`,
 			id).
 		Scan(&res)

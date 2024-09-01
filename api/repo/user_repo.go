@@ -137,15 +137,10 @@ func (repo *userRepo) FindAll() ([]model.User, error) {
 }
 
 func (repo *userRepo) Count() (int64, error) {
-	type Result struct {
-		Result int64
-	}
-	var res Result
-	db := repo.db.
-		Raw(`SELECT count(*) as result FROM "user"`).
-		Scan(&res)
+	var count int64
+	db := repo.db.Model(&userEntity{}).Count(&count)
 	if db.Error != nil {
-		return 0, db.Error
+		return -1, db.Error
 	}
-	return res.Result, nil
+	return count, nil
 }

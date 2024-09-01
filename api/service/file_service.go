@@ -1019,9 +1019,13 @@ type FileCopyManyResult struct {
 }
 
 func (svc *FileService) CopyMany(opts FileCopyManyOptions, userID string) (*FileCopyManyResult, error) {
-	res := &FileCopyManyResult{}
+	res := &FileCopyManyResult{
+		New:       make([]string, 0),
+		Succeeded: make([]string, 0),
+		Failed:    make([]string, 0),
+	}
 	for _, id := range opts.SourceIDs {
-		file, err := svc.CopyOne(opts.TargetID, id, userID)
+		file, err := svc.CopyOne(id, opts.TargetID, userID)
 		if err != nil {
 			res.Failed = append(res.Failed, id)
 		} else {
@@ -1032,14 +1036,14 @@ func (svc *FileService) CopyMany(opts FileCopyManyOptions, userID string) (*File
 	return res, nil
 }
 
-func (svc *FileService) MoveOne(sourceID string, targetID string, userID string) error {
+func (svc *FileService) MoveOne(sourceID string, targetID string, userID string) (*File, error) {
 	target, err := svc.fileCache.Get(targetID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	source, err := svc.fileCache.Get(sourceID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	task, err := svc.taskSvc.insertAndSync(repo.TaskInsertOptions{
@@ -1051,7 +1055,7 @@ func (svc *FileService) MoveOne(sourceID string, targetID string, userID string)
 		Payload:         map[string]string{repo.TaskPayloadObjectKey: source.GetName()},
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer func(taskID string) {
 		if err := svc.taskSvc.deleteAndSync(taskID); err != nil {
@@ -1063,61 +1067,65 @@ func (svc *FileService) MoveOne(sourceID string, targetID string, userID string)
 	if source.GetParentID() != nil {
 		existing, err := svc.getChildWithName(target.GetID(), source.GetName())
 		if err != nil {
-			return err
+			return nil, err
 		}
 		if existing != nil {
-			return errorpkg.NewFileWithSimilarNameExistsError()
+			return nil, errorpkg.NewFileWithSimilarNameExistsError()
 		}
 	}
 	if err := svc.fileGuard.Authorize(userID, target, model.PermissionEditor); err != nil {
-		return err
+		return nil, err
 	}
 	if err := svc.fileGuard.Authorize(userID, source, model.PermissionEditor); err != nil {
-		return err
+		return nil, err
 	}
 	if source.GetParentID() != nil && *source.GetParentID() == target.GetID() {
-		return errorpkg.NewFileAlreadyChildOfDestinationError(source, target)
+		return nil, errorpkg.NewFileAlreadyChildOfDestinationError(source, target)
 	}
 	if target.GetID() == source.GetID() {
-		return errorpkg.NewFileCannotBeMovedIntoItselfError(source)
+		return nil, errorpkg.NewFileCannotBeMovedIntoItselfError(source)
 	}
 	if target.GetType() != model.FileTypeFolder {
-		return errorpkg.NewFileIsNotAFolderError(target)
+		return nil, errorpkg.NewFileIsNotAFolderError(target)
 	}
 	targetIsGrandChildOfSource, _ := svc.fileRepo.IsGrandChildOf(target.GetID(), source.GetID())
 	if targetIsGrandChildOfSource {
-		return errorpkg.NewTargetIsGrandChildOfSourceError(source)
+		return nil, errorpkg.NewTargetIsGrandChildOfSourceError(source)
 	}
 
 	/* Move source into target */
 	if err := svc.fileRepo.MoveSourceIntoTarget(target.GetID(), source.GetID()); err != nil {
-		return err
+		return nil, err
 	}
 
 	/* Get updated source */
 	source, err = svc.fileRepo.Find(source.GetID())
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	/* Refresh updateTime on source and target */
 	timeNow := time.Now().UTC().Format(time.RFC3339)
 	source.SetUpdateTime(&timeNow)
 	if err := svc.fileRepo.Save(source); err != nil {
-		return err
+		return nil, err
 	}
 	if err := svc.sync(source); err != nil {
-		return err
+		return nil, err
 	}
 	target.SetUpdateTime(&timeNow)
 	if err := svc.fileRepo.Save(target); err != nil {
-		return err
+		return nil, err
 	}
 	if err := svc.sync(target); err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	res, err := svc.fileMapper.mapOne(source, userID)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
 }
 
 type FileMoveManyOptions struct {
@@ -1131,9 +1139,12 @@ type FileMoveManyResult struct {
 }
 
 func (svc *FileService) MoveMany(opts FileMoveManyOptions, userID string) (*FileMoveManyResult, error) {
-	res := &FileMoveManyResult{}
+	res := &FileMoveManyResult{
+		Failed:    make([]string, 0),
+		Succeeded: make([]string, 0),
+	}
 	for _, id := range opts.SourceIDs {
-		if err := svc.MoveOne(id, opts.TargetID, userID); err != nil {
+		if _, err := svc.MoveOne(id, opts.TargetID, userID); err != nil {
 			res.Failed = append(res.Failed, id)
 		} else {
 			res.Succeeded = append(res.Succeeded, id)
@@ -1410,12 +1421,20 @@ func (svc *FileService) DeleteOne(id string, userID string) error {
 		}
 	}(treeIDs)
 
+	/* Delete from cache */
+	go func(ids []string) {
+		for _, treeID := range treeIDs {
+			if err := svc.fileCache.Delete(treeID); err != nil {
+				// Here we intentionally don't return an error or panic, we just print the error
+				fmt.Println(err)
+			}
+		}
+	}(treeIDs)
+
 	/* Delete from search */
 	go func(ids []string) {
 		if err := svc.fileSearch.Delete(treeIDs); err != nil {
-			/* Here we intentionally don't return an error or panic, we just print the error,
-			that's because we still want to delete the file in the repo afterward even
-			if we fail to delete it from the search. */
+			// Here we intentionally don't return an error or panic, we just print the error
 			fmt.Println(err)
 		}
 	}(treeIDs)
@@ -1424,7 +1443,7 @@ func (svc *FileService) DeleteOne(id string, userID string) error {
 }
 
 type FileDeleteManyOptions struct {
-	IDs []string `json:"sourceIds" validate:"required"`
+	IDs []string `json:"ids" validate:"required"`
 }
 
 type FileDeleteManyResult struct {
@@ -2105,7 +2124,7 @@ func (mp *FileMapper) mapOne(m model.File, userID string) (*File, error) {
 		res.Snapshot = mp.snapshotMapper.mapOne(snapshot)
 		res.Snapshot.IsActive = true
 	}
-	res.Permission = ""
+	res.Permission = model.PermissionNone
 	for _, p := range m.GetUserPermissions() {
 		if p.GetUserID() == userID && model.GetPermissionWeight(p.GetValue()) > model.GetPermissionWeight(res.Permission) {
 			res.Permission = p.GetValue()

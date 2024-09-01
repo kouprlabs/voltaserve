@@ -43,7 +43,7 @@ type SnapshotRepo interface {
 	DeleteMappingsForTree(fileID string) error
 	DeleteAllDangling() error
 	GetLatestVersionForFile(fileID string) (int64, error)
-	CountAssociations(id string) (int, error)
+	CountAssociations(id string) (int64, error)
 	Attach(sourceFileID string, targetFileID string) error
 	Detach(id string, fileID string) error
 }
@@ -687,22 +687,19 @@ func (repo *snapshotRepo) GetLatestVersionForFile(fileID string) (int64, error) 
              WHERE map.file_id = ?`,
 			fileID).
 		Scan(&res); db.Error != nil {
-		return 0, db.Error
+		return -1, db.Error
 	}
 	return res.Result, nil
 }
 
-func (repo *snapshotRepo) CountAssociations(id string) (int, error) {
-	type Result struct {
-		Count int
+func (repo *snapshotRepo) CountAssociations(id string) (int64, error) {
+	var count int64
+	if db := repo.db.Model(&SnapshotFileEntity{}).
+		Where("snapshot_id = ?", id).
+		Count(&count); db.Error != nil {
+		return -1, db.Error
 	}
-	var res Result
-	if db := repo.db.
-		Raw("SELECT COUNT(*) count FROM snapshot_file WHERE snapshot_id = ?", id).
-		Scan(&res); db.Error != nil {
-		return 0, db.Error
-	}
-	return res.Count, nil
+	return count, nil
 }
 
 func (repo *snapshotRepo) Attach(sourceFileID string, targetFileID string) error {

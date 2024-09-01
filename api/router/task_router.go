@@ -178,15 +178,16 @@ func (r *TaskRouter) Dismiss(c *fiber.Ctx) error {
 //	@Id				tasks_dismiss_all
 //	@Accept			json
 //	@Produce		json
-//	@Success		200
+//	@Success		200 {object}	service.TaskDismissAllResult
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/tasks/dismiss [post]
 func (r *TaskRouter) DismissAll(c *fiber.Ctx) error {
 	userID := GetUserID(c)
-	if err := r.taskSvc.DismissAll(userID); err != nil {
+	res, err := r.taskSvc.DismissAll(userID)
+	if err != nil {
 		return err
 	}
-	return c.SendStatus(http.StatusNoContent)
+	return c.JSON(res)
 }
 
 // Create godoc

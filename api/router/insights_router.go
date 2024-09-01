@@ -80,12 +80,12 @@ func (r *InsightsRouter) GetLanguages(c *fiber.Ctx) error {
 //	@Id				insights_create
 //	@Accept			json
 //	@Produce		json
-//	@Param			id		path	string							true	"ID"
-//	@Param			body	body	service.InsightsCreateOptions	true	"Body"
-//	@Success		200
-//	@Failure		404	{object}	errorpkg.ErrorResponse
-//	@Failure		400	{object}	errorpkg.ErrorResponse
-//	@Failure		500	{object}	errorpkg.ErrorResponse
+//	@Param			id		path		string							true	"ID"
+//	@Param			body	body		service.InsightsCreateOptions	true	"Body"
+//	@Success		200		{object}	service.Task
+//	@Failure		404		{object}	errorpkg.ErrorResponse
+//	@Failure		400		{object}	errorpkg.ErrorResponse
+//	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/insights/{id} [post]
 func (r *InsightsRouter) Create(c *fiber.Ctx) error {
 	opts := new(service.InsightsCreateOptions)
@@ -95,10 +95,11 @@ func (r *InsightsRouter) Create(c *fiber.Ctx) error {
 	if err := validator.New().Struct(opts); err != nil {
 		return errorpkg.NewRequestBodyValidationError(err)
 	}
-	if err := r.insightsSvc.Create(c.Params("id"), *opts, GetUserID(c)); err != nil {
+	res, err := r.insightsSvc.Create(c.Params("id"), *opts, GetUserID(c))
+	if err != nil {
 		return err
 	}
-	return c.SendStatus(http.StatusNoContent)
+	return c.JSON(res)
 }
 
 // Patch godoc
@@ -116,10 +117,11 @@ func (r *InsightsRouter) Create(c *fiber.Ctx) error {
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/insights/{id} [patch]
 func (r *InsightsRouter) Patch(c *fiber.Ctx) error {
-	if err := r.insightsSvc.Patch(c.Params("id"), GetUserID(c)); err != nil {
+	res, err := r.insightsSvc.Patch(c.Params("id"), GetUserID(c))
+	if err != nil {
 		return err
 	}
-	return c.SendStatus(http.StatusNoContent)
+	return c.JSON(res)
 }
 
 // Delete godoc
@@ -137,10 +139,11 @@ func (r *InsightsRouter) Patch(c *fiber.Ctx) error {
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/insights/{id} [delete]
 func (r *InsightsRouter) Delete(c *fiber.Ctx) error {
-	if err := r.insightsSvc.Delete(c.Params("id"), GetUserID(c)); err != nil {
+	res, err := r.insightsSvc.Delete(c.Params("id"), GetUserID(c))
+	if err != nil {
 		return err
 	}
-	return c.SendStatus(http.StatusNoContent)
+	return c.JSON(res)
 }
 
 // ListEntities godoc

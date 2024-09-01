@@ -28,7 +28,9 @@ import (
 
 type mosaicPipeline struct {
 	videoProc      *processor.VideoProcessor
+	imageProc      *processor.ImageProcessor
 	fileIdent      *identifier.FileIdentifier
+	imageIdent     *identifier.ImageIdentifier
 	s3             *infra.S3Manager
 	taskClient     *api_client.TaskClient
 	snapshotClient *api_client.SnapshotClient
@@ -38,7 +40,9 @@ type mosaicPipeline struct {
 func NewMosaicPipeline() model.Pipeline {
 	return &mosaicPipeline{
 		videoProc:      processor.NewVideoProcessor(),
+		imageProc:      processor.NewImageProcessor(),
 		fileIdent:      identifier.NewFileIdentifier(),
+		imageIdent:     identifier.NewImageIdentifier(),
 		s3:             infra.NewS3Manager(),
 		taskClient:     api_client.NewTaskClient(),
 		snapshotClient: api_client.NewSnapshotClient(),
@@ -70,6 +74,20 @@ func (p *mosaicPipeline) RunFromLocalPath(inputPath string, opts api_client.Pipe
 		Name:   helper.ToPtr("Creating mosaic."),
 	}); err != nil {
 		return err
+	}
+	if !p.imageProc.IsSupportedByBild(inputPath) {
+		outputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".jpg")
+		if err := p.imageProc.ConvertImage(inputPath, outputPath); err != nil {
+			return err
+		}
+		defer func(path string) {
+			if err := os.Remove(path); errors.Is(err, os.ErrNotExist) {
+				return
+			} else if err != nil {
+				infra.GetLogger().Error(err)
+			}
+		}(outputPath)
+		inputPath = outputPath
 	}
 	metadata, err := p.mosaicClient.Create(mosaic_client.MosaicCreateOptions{
 		Path:     inputPath,

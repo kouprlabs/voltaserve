@@ -328,23 +328,34 @@ func (svc *TaskService) Dismiss(id string, userID string) error {
 	return svc.deleteAndSync(id)
 }
 
-func (svc *TaskService) DismissAll(userID string) error {
+type TaskDismissAllResult struct {
+	Succeeded []string `json:"succeeded"`
+	Failed    []string `json:"failed"`
+}
+
+func (svc *TaskService) DismissAll(userID string) (*TaskDismissAllResult, error) {
 	ids, err := svc.taskRepo.GetIDs(userID)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	authorized, err := svc.doAuthorizationByIDs(ids, userID)
 	if err != nil {
-		return err
+		return nil, err
+	}
+	res := TaskDismissAllResult{
+		Succeeded: make([]string, 0),
+		Failed:    make([]string, 0),
 	}
 	for _, t := range authorized {
 		if t.HasError() {
 			if err := svc.deleteAndSync(t.GetID()); err != nil {
-				return err
+				res.Failed = append(res.Failed, t.GetID())
+			} else {
+				res.Succeeded = append(res.Succeeded, t.GetID())
 			}
 		}
 	}
-	return nil
+	return &res, nil
 }
 
 func (svc *TaskService) Delete(id string) error {
