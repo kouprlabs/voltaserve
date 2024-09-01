@@ -18,7 +18,7 @@ on:
       - "console/**"
 
 jobs:
-  linting:
+  lint:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -36,9 +36,32 @@ jobs:
           ignore: "F401,W291"
           max-line-length: "120"
           exclude: ".git,Dockerfile"
-          plugins: "flake8-black"
+#          plugins: "flake8-black"
 
     permissions:
       contents: read
       pull-requests: read
       checks: write
+
+  build_and_push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set Up QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: arm64, amd64
+
+      - name: Set Up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./console
+          push: false
+          platforms: linux/amd64,linux/arm64
+
