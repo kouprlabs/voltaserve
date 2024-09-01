@@ -96,12 +96,13 @@ async def get_all_organizations(data: Annotated[OrganizationListRequest, Depends
                                  }
                              }
                              )
-async def get_all_organizations(data: Annotated[OrganizationSearchRequest, Depends()]):
+async def get_search_organizations(data: Annotated[OrganizationSearchRequest, Depends()]):
     try:
         organizations = meilisearch_client.index('organization').search(data.query,
                                                                         {'page': data.page, 'hitsPerPage': data.size})
 
-        return OrganizationListResponse(data=(fetch_organization(organization['id']) for organization in organizations['hits']),
+        return OrganizationListResponse(data=(fetch_organization(organization['id'])
+                                              for organization in organizations['hits']),
                                         totalElements=len(organizations['hits']), page=data.page, size=data.size)
     except NotFoundException as e:
         logger.error(e)

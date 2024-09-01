@@ -32,10 +32,10 @@ async def get_dockerhub_version(sess: ClientSession, id: str, response: dict, pa
         async with sess.get(f"https://hub.docker.com/v2/repositories/voltaserve/{id}/tags", params=params) as resp:
             if resp.status == 200:
                 tags = await resp.json()
-                latest_digest = next(l['digest'] for l in tags['results'] if l['name'] == 'latest')
+                latest_digest = next(tag['digest'] for tag in tags['results'] if tag['name'] == 'latest')
                 response['latestVersion'] = max(
-                    l['name'] for l in tags['results'] if
-                    l['digest'] == latest_digest and l['name'] != 'latest')
+                    tag['name'] for tag in tags['results'] if
+                    tag['digest'] == latest_digest and tag['name'] != 'latest')
                 response['location'] = (f"https://hub.docker.com/layers/voltaserve/{id}"
                                         f"/{response['latestVersion']}/images/{latest_digest}")
             else:
@@ -87,7 +87,9 @@ async def get_internal_version(data: Annotated[VersionRequest, Depends()]):
             else:
                 response = await get_local_version(sess, urls[f'{data.id.upper()}_URL'], response)
 
-            response['updateAvailable'] = response['latestVersion'] > response['currentVersion'] if response['currentVersion'] != '' and response['latestVersion'] != 'UNKNOWN' else None
+            response['updateAvailable'] = (response['latestVersion'] > response['currentVersion'] if
+                                           response['currentVersion'] != '' and response['latestVersion'] != 'UNKNOWN'
+                                           else None)
 
         return VersionResponse(**response)
     except Exception as e:
