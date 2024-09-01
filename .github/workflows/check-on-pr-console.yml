@@ -43,7 +43,7 @@ jobs:
       pull-requests: read
       checks: write
 
-  build_and_push:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
