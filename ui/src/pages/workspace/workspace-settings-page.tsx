@@ -108,9 +108,8 @@ const WorkspaceSettingsPage = () => {
               <Progress value={0} hasStripe />
             </>
           ) : null}
-          <Divider />
           <div className={rowClassName}>
-            <span>Storage capacity</span>
+            <span>Capacity</span>
             <Spacer />
             <span>{prettyBytes(workspace.storageCapacity)}</span>
             <EditButton
@@ -135,11 +134,12 @@ const WorkspaceSettingsPage = () => {
               }}
             />
           </div>
+          <Divider />
         </div>
         <div className={sectionClassName}>
           <span className={cx('font-bold')}>Advanced</span>
           <div className={rowClassName}>
-            <span>Delete permanently</span>
+            <span>Delete workspace</span>
             <Spacer />
             <IconButton
               icon={<IconDelete />}

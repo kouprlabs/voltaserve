@@ -59,62 +59,71 @@ const GroupSettingsPage = () => {
       <Helmet>
         <title>{group.name}</title>
       </Helmet>
-      <div className={sectionClassName}>
-        <div className={rowClassName}>
-          <span>Name</span>
-          <Spacer />
-          <span>{truncateEnd(group.name, 60)}</span>
-          <IconButton
-            icon={<IconEdit />}
-            isDisabled={!hasEditPermission}
-            aria-label=""
-            onClick={() => {
-              setIsNameModalOpen(true)
-            }}
-          />
+      <div className={cx('flex', 'flex-col', 'gap-0')}>
+        <div className={sectionClassName}>
+          <span className={cx('font-bold')}>Basics</span>
+          <div className={rowClassName}>
+            <span>Name</span>
+            <Spacer />
+            <span>{truncateEnd(group.name, 60)}</span>
+            <IconButton
+              icon={<IconEdit />}
+              isDisabled={!hasEditPermission}
+              aria-label=""
+              onClick={() => {
+                setIsNameModalOpen(true)
+              }}
+            />
+          </div>
+          <Divider />
         </div>
-        <Divider />
-        <div className={rowClassName}>
-          <span>Add members</span>
-          <Spacer />
-          <IconButton
-            icon={<IconPersonAdd />}
-            isDisabled={!hasOwnerPermission}
-            aria-label=""
-            onClick={() => {
-              setIsAddMembersModalOpen(true)
-            }}
-          />
+        <div className={sectionClassName}>
+          <span className={cx('font-bold')}>Membership</span>
+          <div className={rowClassName}>
+            <span>Add members</span>
+            <Spacer />
+            <IconButton
+              icon={<IconPersonAdd />}
+              isDisabled={!hasOwnerPermission}
+              aria-label=""
+              onClick={() => {
+                setIsAddMembersModalOpen(true)
+              }}
+            />
+          </div>
+          <Divider />
         </div>
-        <Divider />
-        <div className={rowClassName}>
-          <span>Delete permanently</span>
-          <Spacer />
-          <IconButton
-            icon={<IconDelete />}
-            variant="solid"
-            colorScheme="red"
-            isDisabled={!hasOwnerPermission}
-            aria-label=""
-            onClick={() => setDeleteModalOpen(true)}
-          />
+        <div className={sectionClassName}>
+          <span className={cx('font-bold')}>Advanced</span>
+          <div className={rowClassName}>
+            <span>Delete permanently</span>
+            <Spacer />
+            <IconButton
+              icon={<IconDelete />}
+              variant="solid"
+              colorScheme="red"
+              isDisabled={!hasOwnerPermission}
+              aria-label=""
+              onClick={() => setDeleteModalOpen(true)}
+            />
+          </div>
         </div>
-        <GroupEditName
-          open={isNameModalOpen}
-          group={group}
-          onClose={() => setIsNameModalOpen(false)}
-        />
-        <GroupAddMember
-          open={isAddMembersModalOpen}
-          group={group}
-          onClose={() => setIsAddMembersModalOpen(false)}
-        />
-        <GroupDelete
-          open={deleteModalOpen}
-          group={group}
-          onClose={() => setDeleteModalOpen(false)}
-        />
       </div>
+      <GroupEditName
+        open={isNameModalOpen}
+        group={group}
+        onClose={() => setIsNameModalOpen(false)}
+      />
+      <GroupAddMember
+        open={isAddMembersModalOpen}
+        group={group}
+        onClose={() => setIsAddMembersModalOpen(false)}
+      />
+      <GroupDelete
+        open={deleteModalOpen}
+        group={group}
+        onClose={() => setDeleteModalOpen(false)}
+      />
     </>
   )
 }

@@ -140,26 +140,6 @@ func NewInvitationNotFoundError(err error) *ErrorResponse {
 	)
 }
 
-func NewSnapshotLanguageNotSetError(err error) *ErrorResponse {
-	return NewErrorResponse(
-		"snapshot_language_not_set",
-		http.StatusBadRequest,
-		"Snapshot language is not set.",
-		"Snapshot language is not set.",
-		err,
-	)
-}
-
-func NewSnapshotTextLengthExceedsLimitError(err error) *ErrorResponse {
-	return NewErrorResponse(
-		"snapshot_text_length_exceeds_limit",
-		http.StatusBadRequest,
-		"Snapshot text length exceeds limit.",
-		"Snapshot text length exceeds limit.",
-		err,
-	)
-}
-
 func NewSnapshotCannotBePatchedError(err error) *ErrorResponse {
 	return NewErrorResponse(
 		"snapshot_cannot_be_patched",
@@ -180,16 +160,6 @@ func NewSnapshotHasPendingTaskError(err error) *ErrorResponse {
 	)
 }
 
-func NewUnsupportedFileTypeError(err error) *ErrorResponse {
-	return NewErrorResponse(
-		"unsupported_file_type",
-		http.StatusBadRequest,
-		"File type is not supported.",
-		"File type is not supported.",
-		err,
-	)
-}
-
 func NewTaskIsRunningError(err error) *ErrorResponse {
 	return NewErrorResponse(
 		"task_is_running",
@@ -206,16 +176,6 @@ func NewTaskBelongsToAnotherUserError(err error) *ErrorResponse {
 		http.StatusBadRequest,
 		"Task belongs to another user.",
 		"Task belongs to another user.",
-		err,
-	)
-}
-
-func NewCannotDeletePendingTaskError(err error) *ErrorResponse {
-	return NewErrorResponse(
-		"cannot_delete_pending_task",
-		http.StatusBadRequest,
-		"Cannot delete a pending task.",
-		"Cannot delete a pending task.",
 		err,
 	)
 }
