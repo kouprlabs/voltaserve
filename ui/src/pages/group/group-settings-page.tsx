@@ -96,7 +96,7 @@ const GroupSettingsPage = () => {
         <div className={sectionClassName}>
           <span className={cx('font-bold')}>Advanced</span>
           <div className={rowClassName}>
-            <span>Delete permanently</span>
+            <span>Delete group</span>
             <Spacer />
             <IconButton
               icon={<IconDelete />}

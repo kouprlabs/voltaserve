@@ -108,7 +108,7 @@ const OrganizationSettingsPage = () => {
         <div className={sectionClassName}>
           <span className={cx('font-bold')}>Advanced</span>
           <div className={rowClassName}>
-            <span>Delete permanently</span>
+            <span>Delete organization</span>
             <Spacer />
             <IconButton
               icon={<IconDelete />}
