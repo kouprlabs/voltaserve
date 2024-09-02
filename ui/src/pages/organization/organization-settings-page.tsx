@@ -60,78 +60,87 @@ const OrganizationSettingsPage = () => {
       <Helmet>
         <title>{org.name}</title>
       </Helmet>
-      <div className={sectionClassName}>
-        <div className={rowClassName}>
-          <span>Name</span>
-          <Spacer />
-          <span>{truncateEnd(org.name, 60)}</span>
-          <IconButton
-            icon={<IconEdit />}
-            isDisabled={!geEditorPermission(org.permission)}
-            aria-label=""
-            onClick={() => {
-              setIsNameModalOpen(true)
-            }}
-          />
+      <div className={cx('flex', 'flex-col', 'gap-0')}>
+        <div className={sectionClassName}>
+          <span className={cx('font-bold')}>Basics</span>
+          <div className={rowClassName}>
+            <span>Name</span>
+            <Spacer />
+            <span>{truncateEnd(org.name, 60)}</span>
+            <IconButton
+              icon={<IconEdit />}
+              isDisabled={!geEditorPermission(org.permission)}
+              aria-label=""
+              onClick={() => {
+                setIsNameModalOpen(true)
+              }}
+            />
+          </div>
+          <Divider />
         </div>
-        <Divider />
-        <div className={rowClassName}>
-          <span>Invite members</span>
-          <Spacer />
-          <IconButton
-            icon={<IconPersonAdd />}
-            isDisabled={!geOwnerPermission(org.permission)}
-            aria-label=""
-            onClick={() => {
-              setIsInviteMembersModalOpen(true)
-            }}
-          />
+        <div className={sectionClassName}>
+          <span className={cx('font-bold')}>Membership</span>
+          <div className={rowClassName}>
+            <span>Invite members</span>
+            <Spacer />
+            <IconButton
+              icon={<IconPersonAdd />}
+              isDisabled={!geOwnerPermission(org.permission)}
+              aria-label=""
+              onClick={() => {
+                setIsInviteMembersModalOpen(true)
+              }}
+            />
+          </div>
+          <div className={rowClassName}>
+            <span>Leave</span>
+            <Spacer />
+            <IconButton
+              icon={<IconLogout />}
+              variant="solid"
+              colorScheme="red"
+              aria-label=""
+              onClick={() => setIsLeaveModalOpen(true)}
+            />
+          </div>
+          <Divider />
         </div>
-        <div className={rowClassName}>
-          <span>Leave</span>
-          <Spacer />
-          <IconButton
-            icon={<IconLogout />}
-            variant="solid"
-            colorScheme="red"
-            aria-label=""
-            onClick={() => setIsLeaveModalOpen(true)}
-          />
+        <div className={sectionClassName}>
+          <span className={cx('font-bold')}>Advanced</span>
+          <div className={rowClassName}>
+            <span>Delete organization</span>
+            <Spacer />
+            <IconButton
+              icon={<IconDelete />}
+              variant="solid"
+              colorScheme="red"
+              isDisabled={!geEditorPermission(org.permission)}
+              aria-label=""
+              onClick={() => setIsDeleteModalOpen(true)}
+            />
+          </div>
         </div>
-        <Divider />
-        <div className={rowClassName}>
-          <span>Delete permanently</span>
-          <Spacer />
-          <IconButton
-            icon={<IconDelete />}
-            variant="solid"
-            colorScheme="red"
-            isDisabled={!geEditorPermission(org.permission)}
-            aria-label=""
-            onClick={() => setIsDeleteModalOpen(true)}
-          />
-        </div>
-        <OrganizationEditName
-          open={isNameModalOpen}
-          organization={org}
-          onClose={() => setIsNameModalOpen(false)}
-        />
-        <OrganizationInviteMembers
-          open={isInviteMembersModalOpen}
-          id={org.id}
-          onClose={() => setIsInviteMembersModalOpen(false)}
-        />
-        <OrganizationLeave
-          open={isLeaveModalOpen}
-          id={org.id}
-          onClose={() => setIsLeaveModalOpen(false)}
-        />
-        <OrganizationDelete
-          open={isDeleteModalOpen}
-          organization={org}
-          onClose={() => setIsDeleteModalOpen(false)}
-        />
       </div>
+      <OrganizationEditName
+        open={isNameModalOpen}
+        organization={org}
+        onClose={() => setIsNameModalOpen(false)}
+      />
+      <OrganizationInviteMembers
+        open={isInviteMembersModalOpen}
+        id={org.id}
+        onClose={() => setIsInviteMembersModalOpen(false)}
+      />
+      <OrganizationLeave
+        open={isLeaveModalOpen}
+        id={org.id}
+        onClose={() => setIsLeaveModalOpen(false)}
+      />
+      <OrganizationDelete
+        open={isDeleteModalOpen}
+        organization={org}
+        onClose={() => setIsDeleteModalOpen(false)}
+      />
     </>
   )
 }
