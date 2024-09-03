@@ -39,7 +39,7 @@ RUN apk update &&\
 
 COPY . .
 
-RUN poetry install --no-interaction --no-ansi &&\
+RUN poetry install --no-interaction --no-ansi --no-cache &&\
     apk del .build-deps &&\
     rm -rf /root/.cache /root/.cargo &&\
     chown $USERNAME:$GROUPNAME /app
