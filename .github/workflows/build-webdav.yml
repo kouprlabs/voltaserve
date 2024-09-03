@@ -30,8 +30,8 @@ jobs:
   prepare_env:
     runs-on: ubuntu-latest
     outputs:
-      branch: ${{ input_branch.input_branch.outputs.branch }}
-      tags: ${{ input_branch.input_branch.outputs.tags }}
+      branch: ${{ steps.input_branch.outputs.branch }}
+      tags: ${{ steps.tag.outputs.tags || steps.tags.outputs.tags }}
     steps:
       - name: Prepare input branch
         id: input_branch
@@ -39,6 +39,7 @@ jobs:
         run: echo "branch=refs/heads/${{ github.event.inputs.branch }}" >> $GITHUB_OUTPUT
 
       - name: Create tag list matching semver from executing tag
+        id: tag
         if: ${{ github.ref_type == 'tag' }}
         run: |
           name="voltaserve/webdav"
@@ -56,6 +57,7 @@ jobs:
           echo "tags=$TAGS" >> $GITHUB_OUTPUT
 
       - name: Set the tag on workflow dispatch
+        id: tags
         if: ${{ github.ref_type != 'tag' }}
         run: echo "tags=voltaserve/webdav:$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
