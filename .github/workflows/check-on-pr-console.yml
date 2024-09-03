@@ -36,7 +36,6 @@ jobs:
           ignore: "F401,W291"
           max-line-length: "120"
           exclude: ".git,Dockerfile"
-#          plugins: "flake8-black"
 
     permissions:
       contents: read

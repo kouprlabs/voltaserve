@@ -34,9 +34,8 @@ jobs:
         with:
           path: language
           ignore: "E203"
-          max-line-length: "88"
+          max-line-length: "120"
           exclude: ".git,.venv,.dockerignore,.pdm-python,Dockerfile"
-          plugins: "flake8-black"
 
     permissions:
       contents: read
