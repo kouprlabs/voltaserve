@@ -49,7 +49,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        platform: ["arm", "amd64"]
+        platform: ["arm64", "amd64"]
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
