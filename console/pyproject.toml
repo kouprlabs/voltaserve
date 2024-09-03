@@ -22,7 +22,7 @@ classifiers = [
     ]
 
 [tool.poetry.dependencies]
-python = "^3.12"
+python = "3.12"
 fastapi = "^0.111.1"
 uvicorn = "^0.30.1"
 psycopg = "3.2.1"
