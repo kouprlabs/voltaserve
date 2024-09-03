@@ -27,31 +27,16 @@ on:
       - 'v*'
 
 jobs:
-  build_and_push:
+  prepare_env:
     runs-on: ubuntu-latest
+    outputs:
+      branch: ${{ input_branch.input_branch.outputs.branch }}
+      tags: ${{ input_branch.input_branch.outputs.tags }}
     steps:
       - name: Prepare input branch
+        id: input_branch
         if: ${{ github.event.inputs.branch != '' }}
-        run: echo "branch=refs/heads/${{ github.event.inputs.branch }}" >> $GITHUB_ENV
-
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ env.branch || github.ref }}
-
-      - name: Set Up QEMU
-        uses: docker/setup-qemu-action@v3
-        with:
-          platforms: arm64, amd64
-
-      - name: Set Up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+        run: echo "branch=refs/heads/${{ github.event.inputs.branch }}" >> $GITHUB_OUTPUT
 
       - name: Create tag list matching semver from executing tag
         if: ${{ github.ref_type == 'tag' }}
@@ -68,16 +53,42 @@ jobs:
           done
 
           TAGS+=",$name:latest"
-          echo "TAGS=$TAGS" >> $GITHUB_ENV
+          echo "tags=$TAGS" >> $GITHUB_OUTPUT
 
-      - name: Set the docker tag on runs other than tag push
+      - name: Set the tag on workflow dispatch
         if: ${{ github.ref_type != 'tag' }}
-        run: echo "TAGS=voltaserve/idp:$(git rev-parse --short HEAD),voltaserve/idp:main" >> $GITHUB_ENV
+        run: echo "tags=voltaserve/idp:$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+  build_and_push:
+    runs-on: ubuntu-latest
+    needs: prepare_env
+    strategy:
+      matrix:
+        platform: [ "arm64", "amd64" ]
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.prepare_env.outputs.branch || github.ref }}
+
+      - name: Set Up QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: ${{ matrix.platform }}
+
+      - name: Set Up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v5
         with:
           context: ./idp
           push: true
-          tags: ${{ env.TAGS }}
-          platforms: linux/amd64,linux/arm64
+          tags: ${{ needs.prepare_env.outputs.tags }}
+          platforms: ${{ matrix.platform }}
