@@ -189,6 +189,42 @@ services:
     healthcheck:
       test: wget --quiet --spider http://127.0.0.1:8085/v2/health || exit 1
     restart: on-failure
+  console:
+    image: voltaserve/console
+    build:
+      context: ./console
+      dockerfile: Dockerfile
+    ports:
+      - ${VOLTASERVE_CONSOLE_PORT}:8086
+    environment:
+      - PORT=8086
+      - HOST=0.0.0.0
+      - POSTGRES_URL=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_NAME=voltaserve
+      - POSTGRES_USER=voltaserve
+      - POSTGRES_PASSWORD=voltaserve
+      - WORKERS=4
+      - SECURITY_JWT_SIGNING_KEY=586cozl1x9m6zmu4fg8iwi6ajazguehcm9qdfgd5ndo2pc3pcn
+      - SECURITY_CORS_ORIGINS=http://localhost:3000
+      - JWT_ALGORITHM=HS256
+      - URL=localhost
+      - API_URL=http://api:8080
+      - IDP_URL=http://idp:8081
+      - WEBDAV_URL=http://webdav:8082
+      - CONVERSION_URL=http://conversion:8083
+      - LANGUAGE_URL=http://language:8084
+      - MOSAIC_URL=http://mosaic:8085
+    healthcheck:
+      test: wget --quiet --spider http://127.0.0.1:8086/liveness || exit 1
+    depends_on:
+      - api
+      - idp
+      - webdav
+      - conversion
+      - language
+      - mosaic
+    restart: on-failure
   migrations:
     image: voltaserve/migrations
     build:

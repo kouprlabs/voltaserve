@@ -1,0 +1,34 @@
+[tool.poetry]
+name = "voltaserve-console"
+version = "0.0.1"
+description = "Asynchronous API for voltaserve-console microservice"
+authors = ["Piotr Łoboda <voltaserve@lobson.pl>"]
+maintainers = ["Piotr Łoboda <voltaserve@lobson.pl>"]
+packages = [
+        {include = 'api/'},
+        {include = 'api/routers'},
+        {include = 'api/models'},
+        {include = 'api/database'},
+        {include = 'api/errors'},
+        {include = 'api/dependencies'}
+    ]
+
+classifiers = [
+        "Programming Language :: Python :: 3.12",
+        "Framework :: FastAPI",
+        "Operating System :: Microsoft :: Windows",
+        "Operating System :: POSIX :: Linux",
+        "Development Status :: 3 - Alpha"
+    ]
+
+[tool.poetry.dependencies]
+python = "3.12.5"
+fastapi = "^0.111.1"
+uvicorn = "^0.30.1"
+psycopg = { extras = ["binary"], version = "^3.2.1" }
+pydantic-settings = "2.3.4"
+PyJWT = "^2.8.0"
+fastapi-utils = "^0.7.0"
+typing-inspect = "^0.9.0"
+aiohttp = "^3.9.5"
+meilisearch = "^0.31.5"
