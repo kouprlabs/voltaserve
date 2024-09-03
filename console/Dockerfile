@@ -36,8 +36,12 @@ RUN apk update &&\
     apk add --no-cache --virtual .build-deps gcc build-base libffi-dev libretls-dev cargo &&\
     pip install poetry &&\
     poetry config virtualenvs.create false &&\
+    poetry config virtualenvs.options.no-setuptools true &&\
     poetry config installer.max-workers 8 &&\
-    poetry config installer.parallel true
+    poetry config installer.parallel true &&\
+    poetry config solver.lazy-wheel true
+
+
 
 COPY . .
 
