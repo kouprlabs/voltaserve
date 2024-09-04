@@ -11,6 +11,7 @@ import useSWR, { SWRConfiguration } from 'swr'
 import { PermissionType } from '@/client/api/permission'
 import { consoleFetcher } from '@/client/fetcher'
 import { getConfig } from '@/config/config'
+import { getAccessToken } from '@/infra/token'
 
 export interface ListResponse {
   totalElements: number
@@ -30,9 +31,9 @@ export interface CommonFields {
 }
 
 export type IndexManagement = {
-  tablename: string
-  indexname: string
-  indexdef: string
+  tableName: string
+  indexName: string
+  indexDef: string
 }
 
 export interface IndexManagementList extends ListResponse {
@@ -165,6 +166,9 @@ export default class ConsoleApi {
   static async checkIndexesAvailability() {
     const response = await fetch(`${getConfig().consoleURL}/index/all`, {
       method: 'GET',
+      headers: {
+        Authorization: `Bearer ${getAccessToken()}`,
+      },
     })
     if (response) {
       return response.ok

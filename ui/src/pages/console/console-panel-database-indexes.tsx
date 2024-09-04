@@ -35,7 +35,9 @@ import PagePagination from '@/lib/components/page-pagination'
 import SectionSpinner from '@/lib/components/section-spinner'
 import { decodeQuery } from '@/lib/helpers/query'
 import usePagePagination from '@/lib/hooks/page-pagination'
+import store from '@/store/configure-store'
 import { useAppDispatch } from '@/store/hook'
+import { errorOccurred } from '@/store/ui/error'
 import { mutateUpdated } from '@/store/ui/indexes'
 
 const ConsolePanelDatabaseIndexes = () => {
@@ -73,7 +75,9 @@ const ConsolePanelDatabaseIndexes = () => {
       setFocusedIndex(indexname)
       setConfirmWindowOpen(true)
     } else {
-      console.log('Fatal error while dispatching rebuild index', indexname)
+      const message = `Fatal error while dispatching rebuild index ${indexname}`
+      store.dispatch(errorOccurred(message))
+      console.error(message)
     }
   }
 
@@ -152,24 +156,16 @@ const ConsolePanelDatabaseIndexes = () => {
                   <Th>Name</Th>
                   <Th>Table</Th>
                   <Th>Syntax</Th>
+                  <Th>Actions</Th>
                 </Tr>
               </Thead>
               <Tbody>
                 {list.data.map((item) => (
-                  <Tr key={item.indexname}>
-                    <Td>{item.indexname}</Td>
-                    <Td>{item.tablename}</Td>
-                    <Td>{item.indexdef}</Td>
-                    <Td>
-                      <Button
-                        colorScheme="green"
-                        onClick={() =>
-                          sendRebuildRequest(item.indexname, false)
-                        }
-                      >
-                        Rebuild
-                      </Button>
-                    </Td>
+                  <Tr key={item.indexName}>
+                    <Td>{item.indexName}</Td>
+                    <Td>{item.tableName}</Td>
+                    <Td>{item.indexDef}</Td>
+                    <Td></Td>
                   </Tr>
                 ))}
               </Tbody>

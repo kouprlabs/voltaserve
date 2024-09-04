@@ -26,7 +26,7 @@ export enum ErrorCode {
   MissingPermission = 'missing_permission',
   UserNotFound = 'user_not_found',
   OrphanError = 'orphan_error',
-  SearchError = 'search_error'
+  SearchError = 'search_error',
 }
 
 const statuses: { [key: string]: number } = {
@@ -46,7 +46,7 @@ const statuses: { [key: string]: number } = {
   [ErrorCode.MissingPermission]: 403,
   [ErrorCode.UserNotFound]: 404,
   [ErrorCode.OrphanError]: 400,
-  [ErrorCode.SearchError]: 500
+  [ErrorCode.SearchError]: 500,
 }
 
 const userMessages: { [key: string]: string } = {
@@ -57,7 +57,8 @@ const userMessages: { [key: string]: string } = {
   [ErrorCode.UserSuspended]: 'User suspended.',
   [ErrorCode.MissingPermission]: 'You are not an console',
   [ErrorCode.OrphanError]: 'You cannot suspend last console',
-  [ErrorCode.SearchError]: 'Search engine encountered error or is not available'
+  [ErrorCode.SearchError]:
+    'Search engine encountered error or is not available',
 }
 
 export type ErrorData = {

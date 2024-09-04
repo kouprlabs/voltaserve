@@ -7,7 +7,7 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import {
   Badge,
@@ -45,64 +45,68 @@ const ConsolePanelUsers = () => {
   const query = decodeQuery(searchParams.get('q') as string)
   const navigate = useNavigate()
   const location = useLocation()
-  const [list, setList] = useState<ConsoleUsersResponse | undefined>(undefined)
+  const [list, setList] = useState<ConsoleUsersResponse>()
   const [isSubmitting, setSubmitting] = useState(false)
-  const [userId, setUserId] = useState<string | undefined>(undefined)
-  const [userEmail, setUserEmail] = useState<string | undefined>(undefined)
-  const [actionState, setActionState] = useState<boolean | undefined>(undefined)
+  const [userId, setUserId] = useState<string>()
+  const [userEmail, setUserEmail] = useState<string>()
+  const [actionState, setActionState] = useState<boolean>()
   const [confirmSuspendWindowOpen, setConfirmSuspendWindowOpen] =
     useState(false)
   const [confirmAdminWindowOpen, setConfirmAdminWindowOpen] = useState(false)
-  const [confirmWindowAction, setConfirmWindowAction] = useState<
-    string | undefined
-  >(undefined)
+  const [confirmWindowAction, setConfirmWindowAction] = useState<string>()
   const { page, size, steps, setPage, setSize } = usePagePagination({
     navigate,
     location,
     storage: consoleUsersPaginationStorage(),
   })
 
-  const suspendUser = async (
-    id: string | null,
-    email: string | null,
-    suspend: boolean | null,
-    confirm: boolean = false,
-  ) => {
-    if (confirm && userId && actionState !== undefined) {
-      setSubmitting(true)
-      try {
-        await UserAPI.suspendUser({ id: userId, suspend: actionState })
-      } finally {
-        closeConfirmationWindow()
+  const suspendUser = useCallback(
+    async (
+      id: string | null,
+      email: string | null,
+      suspend: boolean | null,
+      confirm: boolean = false,
+    ) => {
+      if (confirm && userId && actionState !== undefined) {
+        setSubmitting(true)
+        try {
+          await UserAPI.suspendUser({ id: userId, suspend: actionState })
+        } finally {
+          closeConfirmationWindow()
+        }
+      } else if (id && suspend !== null && email) {
+        setConfirmSuspendWindowOpen(true)
+        setActionState(suspend)
+        setUserEmail(email)
+        setUserId(id)
       }
-    } else if (id && suspend !== null && email) {
-      setConfirmSuspendWindowOpen(true)
-      setActionState(suspend)
-      setUserEmail(email)
-      setUserId(id)
-    }
-  }
+    },
+    [],
+  )
 
-  const makeAdminUser = async (
-    id: string | null,
-    email: string | null,
-    makeAdmin: boolean | null,
-    confirm: boolean = false,
-  ) => {
-    if (confirm && userId && actionState !== undefined) {
-      setSubmitting(true)
-      try {
-        await UserAPI.makeAdmin({ id: userId, makeAdmin: actionState })
-      } finally {
-        closeConfirmationWindow()
+  const makeAdminUser = useCallback(
+    async (
+      id: string | null,
+      email: string | null,
+      makeAdmin: boolean | null,
+      confirm: boolean = false,
+    ) => {
+      if (confirm && userId && actionState !== undefined) {
+        setSubmitting(true)
+        try {
+          await UserAPI.makeAdmin({ id: userId, makeAdmin: actionState })
+        } finally {
+          closeConfirmationWindow()
+        }
+      } else if (id && makeAdmin !== null && email) {
+        setConfirmAdminWindowOpen(true)
+        setActionState(makeAdmin)
+        setUserEmail(email)
+        setUserId(id)
       }
-    } else if (id && makeAdmin !== null && email) {
-      setConfirmAdminWindowOpen(true)
-      setActionState(makeAdmin)
-      setUserEmail(email)
-      setUserId(id)
-    }
-  }
+    },
+    [],
+  )
 
   const closeConfirmationWindow = () => {
     setUserId(undefined)
@@ -306,7 +310,7 @@ const ConsolePanelUsers = () => {
             </Table>
           </Stack>
         ) : (
-          <div> No users found </div>
+          <div>No users found</div>
         )}
         {list ? (
           <PagePagination

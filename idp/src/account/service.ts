@@ -16,7 +16,7 @@ import { hashPassword } from '@/infra/password'
 import search, { USER_SEARCH_INDEX } from '@/infra/search'
 import { User } from '@/user/model'
 import userRepo from '@/user/repo'
-import {UserDTO, mapEntity, getUserCount} from '@/user/service'
+import { UserDTO, mapEntity, getUserCount } from '@/user/service'
 
 export type AccountCreateOptions = {
   email: string
@@ -54,7 +54,7 @@ export async function createUser(
   if (!(await userRepo.isUsernameAvailable(options.email))) {
     throw newError({ code: ErrorCode.UsernameUnavailable })
   }
-  if (await getUserCount() === 0) {
+  if ((await getUserCount()) === 0) {
     options.isAdmin = true
   }
   try {
@@ -78,7 +78,7 @@ export async function createUser(
         fullName: user.fullName,
         isEmailConfirmed: user.isEmailConfirmed,
         createTime: user.createTime,
-        updateTime: user.updateTime
+        updateTime: user.updateTime,
       },
     ])
     await sendTemplateMail('email-confirmation', options.email, {

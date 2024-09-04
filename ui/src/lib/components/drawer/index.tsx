@@ -72,7 +72,9 @@ const Drawer = ({ children, storage, logo }: DrawerProps) => {
         >
           <Link
             to={
-              location.pathname.startsWith('/console') ? '/console/dashboard' : '/'
+              location.pathname.startsWith('/console')
+                ? '/console/dashboard'
+                : '/'
             }
           >
             <div className={cx('flex', 'h-[40px]')}>

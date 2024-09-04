@@ -34,28 +34,27 @@ import PagePagination from '@/lib/components/page-pagination'
 import SectionSpinner from '@/lib/components/section-spinner'
 
 const ConsolePanelOrganization = () => {
-  const [organizationData, setOrganizationData] = useState<
-    OrganizationManagement | undefined
-  >(undefined)
-  const [usersData, setUsersData] = useState<
-    UserOrganizationManagementList | undefined
-  >(undefined)
-  const [workspacesData, setWorkspacesData] = useState<
-    WorkspaceManagementList | undefined
-  >(undefined)
-  const [groupsData, setGroupsData] = useState<GroupManagementList | undefined>(
-    undefined,
-  )
+  const [organizationData, setOrganizationData] =
+    useState<OrganizationManagement>()
+  const [usersData, setUsersData] = useState<UserOrganizationManagementList>()
+  const [workspacesData, setWorkspacesData] =
+    useState<WorkspaceManagementList>()
+  const [groupsData, setGroupsData] = useState<GroupManagementList>()
   const { id } = useParams()
   const [usersPage, setUsersPage] = useState(1)
   const [workspacesPage, setWorkspacesPage] = useState(1)
   const [groupsPage, setGroupsPage] = useState(1)
 
-  useEffect(() => {
+  const organizationFetch = () => {
     if (id) {
-      ConsoleApi.getOrganizationById({ id: id }).then((value) => {
+      ConsoleApi.getOrganizationById({ id }).then((value) => {
         setOrganizationData(value)
       })
+    }
+  }
+
+  const usersFetch = () => {
+    if (id) {
       ConsoleApi.getUsersByOrganization({
         id: id,
         page: usersPage,
@@ -63,6 +62,11 @@ const ConsolePanelOrganization = () => {
       }).then((value) => {
         setUsersData(value)
       })
+    }
+  }
+
+  const workspacesFetch = () => {
+    if (id) {
       ConsoleApi.getWorkspacesByOrganization({
         id: id,
         page: workspacesPage,
@@ -70,6 +74,11 @@ const ConsolePanelOrganization = () => {
       }).then((value) => {
         setWorkspacesData(value)
       })
+    }
+  }
+
+  const groupsFetch = () => {
+    if (id) {
       ConsoleApi.getGroupsByOrganization({
         id: id,
         page: workspacesPage,
@@ -78,43 +87,28 @@ const ConsolePanelOrganization = () => {
         setGroupsData(value)
       })
     }
+  }
+
+  useEffect(() => {
+    organizationFetch()
+    usersFetch()
+    workspacesFetch()
+    groupsFetch()
   }, [])
 
   useEffect(() => {
-    if (id) {
-      ConsoleApi.getUsersByOrganization({
-        id: id,
-        page: usersPage,
-        size: 5,
-      }).then((value) => {
-        setUsersData(value)
-      })
-    }
+    usersFetch()
   }, [usersPage])
 
   useEffect(() => {
-    if (id) {
-      ConsoleApi.getGroupsByOrganization({
-        id: id,
-        page: groupsPage,
-        size: 5,
-      }).then((value) => {
-        setGroupsData(value)
-      })
-    }
+    groupsFetch()
   }, [groupsPage])
 
   useEffect(() => {
-    ConsoleApi.getWorkspacesByOrganization({
-      id: id,
-      page: workspacesPage,
-      size: 5,
-    }).then((value) => {
-      setWorkspacesData(value)
-    })
+    workspacesFetch()
   }, [workspacesPage])
 
-  if (!organizationData || !usersData || !workspacesData || !groupsData) {
+  if (!organizationData) {
     return <SectionSpinner />
   }
 
@@ -145,132 +139,152 @@ const ConsolePanelOrganization = () => {
           </GridItem>
           <GridItem colSpan={8}></GridItem>
           <GridItem colSpan={3}>
-            <Flex>
-              <span className={cx('font-bold')}>Users</span>
-              <Spacer />
-              {usersData.totalElements > 5 ? (
-                <>
-                  <PagePagination
-                    totalElements={usersData.totalElements}
-                    totalPages={Math.ceil(usersData.totalElements / 5)}
-                    page={usersPage}
-                    size={5}
-                    steps={[]}
-                    setPage={setUsersPage}
-                    setSize={() => {}}
-                    uiSize="xs"
-                    disableLastNav
-                    disableMiddleNav
-                  />
-                </>
-              ) : null}
-            </Flex>
-            <Divider mb={4} />
-            <Stack>
-              {usersData.data && usersData.data.length > 0 ? (
-                usersData.data.map((user) => (
-                  <Flex key={user.id}>
-                    <Avatar name={user.username} src={user.picture} />
-                    <Box ml="3">
-                      <Text fontWeight="bold">
-                        {user.username}
-                        <Badge ml="1" colorScheme="green">
-                          {user.permission}
-                        </Badge>
-                      </Text>
-                      <Text fontSize="sm">
-                        created:{' '}
-                        {new Date(user.createTime).toLocaleDateString()}
-                      </Text>
-                    </Box>
-                  </Flex>
-                ))
-              ) : (
-                <Text>No organizations found</Text>
-              )}
-            </Stack>
+            {!usersData ? (
+              <SectionSpinner />
+            ) : (
+              <>
+                <Flex>
+                  <span className={cx('font-bold')}>Users</span>
+                  <Spacer />
+                  {usersData.totalElements > 5 ? (
+                    <>
+                      <PagePagination
+                        totalElements={usersData.totalElements}
+                        totalPages={Math.ceil(usersData.totalElements / 5)}
+                        page={usersPage}
+                        size={5}
+                        steps={[]}
+                        setPage={setUsersPage}
+                        setSize={() => {}}
+                        uiSize="xs"
+                        disableLastNav
+                        disableMiddleNav
+                      />
+                    </>
+                  ) : null}
+                </Flex>
+                <Divider mb={4} />
+                <Stack>
+                  {usersData.data && usersData.data.length > 0 ? (
+                    usersData.data.map((user) => (
+                      <Flex key={user.id}>
+                        <Avatar name={user.username} src={user.picture} />
+                        <Box ml="3">
+                          <Text fontWeight="bold">
+                            {user.username}
+                            <Badge ml="1" colorScheme="green">
+                              {user.permission}
+                            </Badge>
+                          </Text>
+                          <Text fontSize="sm">
+                            created:{' '}
+                            {new Date(user.createTime).toLocaleDateString()}
+                          </Text>
+                        </Box>
+                      </Flex>
+                    ))
+                  ) : (
+                    <Text>No organizations found</Text>
+                  )}
+                </Stack>
+              </>
+            )}
           </GridItem>
           <GridItem colSpan={3}>
-            <Flex>
-              <span className={cx('font-bold')}>Workspaces</span>
-              <Spacer />
-              {workspacesData.totalElements > 5 ? (
-                <>
-                  <PagePagination
-                    totalElements={workspacesData.totalElements}
-                    totalPages={Math.ceil(workspacesData.totalElements / 5)}
-                    page={workspacesPage}
-                    size={5}
-                    steps={[]}
-                    setPage={setWorkspacesPage}
-                    setSize={() => {}}
-                    uiSize="xs"
-                    disableLastNav
-                    disableMiddleNav
-                  />
-                </>
-              ) : null}
-            </Flex>
-            <Divider mb={4} />
-            <Stack overflowX="auto">
-              {workspacesData.data && workspacesData.data.length > 0 ? (
-                workspacesData.data.map((workspace) => (
-                  <Flex key={workspace.id}>
-                    <Avatar name={workspace.name} />
-                    <Box ml="3">
-                      <Text fontWeight="bold">{workspace.name}</Text>
-                      <Text fontSize="sm">
-                        created:{' '}
-                        {new Date(workspace.createTime).toLocaleDateString()}
-                      </Text>
-                    </Box>
-                  </Flex>
-                ))
-              ) : (
-                <Text>No workspaces found</Text>
-              )}
-            </Stack>
+            {!workspacesData ? (
+              <SectionSpinner />
+            ) : (
+              <>
+                <Flex>
+                  <span className={cx('font-bold')}>Workspaces</span>
+                  <Spacer />
+                  {workspacesData.totalElements > 5 ? (
+                    <>
+                      <PagePagination
+                        totalElements={workspacesData.totalElements}
+                        totalPages={Math.ceil(workspacesData.totalElements / 5)}
+                        page={workspacesPage}
+                        size={5}
+                        steps={[]}
+                        setPage={setWorkspacesPage}
+                        setSize={() => {}}
+                        uiSize="xs"
+                        disableLastNav
+                        disableMiddleNav
+                      />
+                    </>
+                  ) : null}
+                </Flex>
+                <Divider mb={4} />
+                <Stack overflowX="auto">
+                  {workspacesData.data && workspacesData.data.length > 0 ? (
+                    workspacesData.data.map((workspace) => (
+                      <Flex key={workspace.id}>
+                        <Avatar name={workspace.name} />
+                        <Box ml="3">
+                          <Text fontWeight="bold">{workspace.name}</Text>
+                          <Text fontSize="sm">
+                            created:{' '}
+                            {new Date(
+                              workspace.createTime,
+                            ).toLocaleDateString()}
+                          </Text>
+                        </Box>
+                      </Flex>
+                    ))
+                  ) : (
+                    <Text>No workspaces found</Text>
+                  )}
+                </Stack>
+              </>
+            )}
           </GridItem>
           <GridItem colSpan={3}>
-            <Flex>
-              <span className={cx('font-bold')}>Groups</span>
-              <Spacer />
-              {groupsData.totalElements > 5 ? (
-                <>
-                  <PagePagination
-                    totalElements={groupsData.totalElements}
-                    totalPages={Math.ceil(groupsData.totalElements / 5)}
-                    page={groupsPage}
-                    size={5}
-                    steps={[]}
-                    setPage={setGroupsPage}
-                    setSize={() => {}}
-                    uiSize="xs"
-                    disableLastNav
-                    disableMiddleNav
-                  />
-                </>
-              ) : null}
-            </Flex>
-            <Divider mb={4} />
-            <Stack>
-              {groupsData.data && groupsData.data.length > 0 ? (
-                groupsData.data.map((group) => (
-                  <Flex key={group.id}>
-                    <Avatar name={group.name} />
-                    <Box ml="3">
-                      <Text fontWeight="bold">{group.name}</Text>
-                      <Text fontSize="sm">
-                        created:{' '}
-                        {new Date(group.createTime).toLocaleDateString()}
-                      </Text>
-                    </Box>
-                  </Flex>
-                ))
-              ) : (
-                <Text>No groups found</Text>
-              )}
-            </Stack>
+            {!groupsData ? (
+              <SectionSpinner />
+            ) : (
+              <>
+                <Flex>
+                  <span className={cx('font-bold')}>Groups</span>
+                  <Spacer />
+                  {groupsData.totalElements > 5 ? (
+                    <>
+                      <PagePagination
+                        totalElements={groupsData.totalElements}
+                        totalPages={Math.ceil(groupsData.totalElements / 5)}
+                        page={groupsPage}
+                        size={5}
+                        steps={[]}
+                        setPage={setGroupsPage}
+                        setSize={() => {}}
+                        uiSize="xs"
+                        disableLastNav
+                        disableMiddleNav
+                      />
+                    </>
+                  ) : null}
+                </Flex>
+                <Divider mb={4} />
+                <Stack>
+                  {groupsData.data && groupsData.data.length > 0 ? (
+                    groupsData.data.map((group) => (
+                      <Flex key={group.id}>
+                        <Avatar name={group.name} />
+                        <Box ml="3">
+                          <Text fontWeight="bold">{group.name}</Text>
+                          <Text fontSize="sm">
+                            created:{' '}
+                            {new Date(group.createTime).toLocaleDateString()}
+                          </Text>
+                        </Box>
+                      </Flex>
+                    ))
+                  ) : (
+                    <Text>No groups found</Text>
+                  )}
+                </Stack>
+              </>
+            )}
           </GridItem>
         </Grid>
       </div>

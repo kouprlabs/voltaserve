@@ -37,7 +37,7 @@ const ConsolePanelGroups = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const query = decodeQuery(searchParams.get('q') as string)
-  const [list, setList] = useState<GroupManagementList | undefined>(undefined)
+  const [list, setList] = useState<GroupManagementList>()
   const { page, size, steps, setPage, setSize } = usePagePagination({
     navigate,
     location,
@@ -45,8 +45,8 @@ const ConsolePanelGroups = () => {
   })
   const [confirmRenameWindowOpen, setConfirmRenameWindowOpen] = useState(false)
   const [isSubmitting, setSubmitting] = useState(false)
-  const [currentName, setCurrentName] = useState<string | undefined>(undefined)
-  const [groupId, setGroupId] = useState<string | undefined>(undefined)
+  const [currentName, setCurrentName] = useState<string>()
+  const [groupId, setGroupId] = useState<string>()
   const formSchema = Yup.object().shape({
     name: Yup.string().required('Name is required').max(255),
   })
@@ -164,7 +164,7 @@ const ConsolePanelGroups = () => {
             </Table>
           </Stack>
         ) : (
-          <div> No groups found </div>
+          <div>No groups found</div>
         )}
         {list ? (
           <PagePagination

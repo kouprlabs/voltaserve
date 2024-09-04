@@ -40,9 +40,7 @@ const ConsolePanelOrganizations = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const query = decodeQuery(searchParams.get('q') as string)
-  const [list, setList] = useState<OrganizationManagementList | undefined>(
-    undefined,
-  )
+  const [list, setList] = useState<OrganizationManagementList>()
   const { page, size, steps, setPage, setSize } = usePagePagination({
     navigate,
     location,
@@ -50,10 +48,8 @@ const ConsolePanelOrganizations = () => {
   })
   const [confirmRenameWindowOpen, setConfirmRenameWindowOpen] = useState(false)
   const [isSubmitting, setSubmitting] = useState(false)
-  const [currentName, setCurrentName] = useState<string | undefined>(undefined)
-  const [organizationId, setOrganizationId] = useState<string | undefined>(
-    undefined,
-  )
+  const [currentName, setCurrentName] = useState<string>()
+  const [organizationId, setOrganizationId] = useState<string>()
   const formSchema = Yup.object().shape({
     name: Yup.string().required('Name is required').max(255),
   })
@@ -181,7 +177,7 @@ const ConsolePanelOrganizations = () => {
             </Table>
           </Stack>
         ) : (
-          <div> No organizations found </div>
+          <div>No organizations found</div>
         )}
         {list ? (
           <PagePagination

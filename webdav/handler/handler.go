@@ -11,9 +11,8 @@
 package handler
 
 import (
-	"net/http"
-
 	"encoding/json"
+	"net/http"
 
 	"github.com/kouprlabs/voltaserve/webdav/cache"
 	"github.com/kouprlabs/voltaserve/webdav/client/api_client"

@@ -10,17 +10,21 @@
 import { useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { IconButton } from '@chakra-ui/react'
-import { IconDeAdmin } from '@/lib/components/icons'
+import { IconRemoveOperator } from '@/lib/components/icons'
 
-const DeAdminButton = () => {
+const ConsoleExitButton = () => {
   const buttonRef = useRef<HTMLButtonElement>(null)
   return (
     <>
       <Link to="/" title="User dashbaord">
-        <IconButton ref={buttonRef} icon={<IconDeAdmin />} aria-label="" />
+        <IconButton
+          ref={buttonRef}
+          icon={<IconRemoveOperator />}
+          aria-label=""
+        />
       </Link>
     </>
   )
 }
 
-export default DeAdminButton
+export default ConsoleExitButton

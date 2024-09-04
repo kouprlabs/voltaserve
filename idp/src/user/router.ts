@@ -17,7 +17,7 @@ import {
   SearchPaginatedRequest,
   UserAdminPostRequest,
   UserIdRequest,
-  UserSuspendPostRequest
+  UserSuspendPostRequest,
 } from '@/infra/admin-requests'
 import { parseValidationError } from '@/infra/error'
 import { PassportRequest } from '@/infra/passport-request'
@@ -36,7 +36,10 @@ import {
   UserUpdateEmailConfirmationOptions,
   updateEmailRequest,
   updateEmailConfirmation,
-  suspendUser, makeAdminUser, getUserByAdmin, searchUserListPaginated
+  suspendUser,
+  makeAdminUser,
+  getUserByAdmin,
+  searchUserListPaginated,
 } from './service'
 
 const router = Router()
@@ -203,28 +206,19 @@ router.delete(
   },
 )
 
-// ---------- Admin Part -------------
-
-router.get(
-  '/by_id',
-  passport.authenticate('jwt', { session: false }),
-  async (req: UserIdRequest, res: Response, next: NextFunction) => {
-    checkAdmin(req.header('Authorization'))
-    try {
-      res.json(await getUserByAdmin(req.query.id))
-    } catch (err) {
-      next(err)
-    }
-  },
-)
-
 router.get(
   '/all',
   passport.authenticate('jwt', { session: false }),
   async (req: SearchPaginatedRequest, res: Response, next: NextFunction) => {
     try {
       checkAdmin(req.header('Authorization'))
-      res.json(await searchUserListPaginated(req.query.query, parseInt(req.query.size), parseInt(req.query.page)))
+      res.json(
+        await searchUserListPaginated(
+          req.query.query,
+          parseInt(req.query.size),
+          parseInt(req.query.page),
+        ),
+      )
     } catch (err) {
       next(err)
     }
@@ -265,6 +259,19 @@ router.patch(
       }
       await makeAdminUser(req.body as UserAdminPostRequest)
       res.sendStatus(200)
+    } catch (err) {
+      next(err)
+    }
+  },
+)
+
+router.get(
+  '/:id',
+  passport.authenticate('jwt', { session: false }),
+  async (req: UserIdRequest, res: Response, next: NextFunction) => {
+    checkAdmin(req.header('Authorization'))
+    try {
+      res.json(await getUserByAdmin(req.params.id))
     } catch (err) {
       next(err)
     }

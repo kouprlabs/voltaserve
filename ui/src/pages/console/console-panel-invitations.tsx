@@ -7,7 +7,7 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import {
   Badge,
@@ -39,51 +39,46 @@ import usePagePagination from '@/lib/hooks/page-pagination'
 const ConsolePanelInvitations = () => {
   const navigate = useNavigate()
   const location = useLocation()
-  const [list, setList] = useState<InvitationManagementList | undefined>(
-    undefined,
-  )
+  const [list, setList] = useState<InvitationManagementList>()
   const [isSubmitting, setSubmitting] = useState(false)
-  const [invitationId, setInvitationId] = useState<string | undefined>(
-    undefined,
-  )
-  const [invitationDetails, setInvitationDetails] = useState<
-    string | undefined
-  >(undefined)
-  const [actionState, setActionState] = useState<boolean | undefined>(undefined)
+  const [invitationId, setInvitationId] = useState<string>()
+  const [invitationDetails, setInvitationDetails] = useState<string>()
+  const [actionState, setActionState] = useState<boolean>()
   const [confirmInvitationWindowOpen, setConfirmInvitationWindowOpen] =
     useState(false)
-  const [confirmWindowAction, setConfirmWindowAction] = useState<
-    string | undefined
-  >(undefined)
+  const [confirmWindowAction, setConfirmWindowAction] = useState<string>()
   const { page, size, steps, setPage, setSize } = usePagePagination({
     navigate,
     location,
     storage: consoleInvitationsPaginationStorage(),
   })
 
-  const changeInvitationStatus = async (
-    id: string | null,
-    invitation: string | null,
-    accept: boolean | null,
-    confirm: boolean = false,
-  ) => {
-    if (confirm && invitationId && actionState !== undefined) {
-      setSubmitting(true)
-      try {
-        await ConsoleApi.invitationChangeStatus({
-          id: invitationId,
-          accept: actionState,
-        })
-      } finally {
-        closeConfirmationWindow()
+  const changeInvitationStatus = useCallback(
+    async (
+      id: string | null,
+      invitation: string | null,
+      accept: boolean | null,
+      confirm: boolean = false,
+    ) => {
+      if (confirm && invitationId && actionState !== undefined) {
+        setSubmitting(true)
+        try {
+          await ConsoleApi.invitationChangeStatus({
+            id: invitationId,
+            accept: actionState,
+          })
+        } finally {
+          closeConfirmationWindow()
+        }
+      } else if (id && accept !== null && invitation) {
+        setConfirmInvitationWindowOpen(true)
+        setActionState(accept)
+        setInvitationDetails(invitation)
+        setInvitationId(id)
       }
-    } else if (id && accept !== null && invitation) {
-      setConfirmInvitationWindowOpen(true)
-      setActionState(accept)
-      setInvitationDetails(invitation)
-      setInvitationId(id)
-    }
-  }
+    },
+    [],
+  )
 
   const closeConfirmationWindow = () => {
     setInvitationId(undefined)
@@ -189,18 +184,6 @@ const ConsolePanelInvitations = () => {
                                 Actions
                               </MenuButton>
                               <MenuList>
-                                {/*<MenuItem*/}
-                                {/*  onClick={async () => {*/}
-                                {/*    setConfirmWindowAction('deny invitation')*/}
-                                {/*    await changeInvitationStatus(*/}
-                                {/*      invitation.id,*/}
-                                {/*      `${invitation.email} to ${invitation.organization.name}`,*/}
-                                {/*      false,*/}
-                                {/*    )*/}
-                                {/*  }}*/}
-                                {/*>*/}
-                                {/*  Accept*/}
-                                {/*</MenuItem>*/}
                                 <MenuItem
                                   onClick={async () => {
                                     setConfirmWindowAction('deny invitation')
@@ -225,7 +208,7 @@ const ConsolePanelInvitations = () => {
             </Table>
           </Stack>
         ) : (
-          <div> No invitations found </div>
+          <div>No invitations found</div>
         )}
         {list ? (
           <PagePagination

@@ -8,15 +8,19 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
 import fs from 'fs/promises'
-import {getConfig} from '@/config/config'
-import {ErrorCode, newError} from '@/infra/error'
-import {newHyphenlessUuid} from '@/infra/id'
-import {sendTemplateMail} from '@/infra/mail'
-import {hashPassword, verifyPassword} from '@/infra/password'
-import search, {USER_SEARCH_INDEX} from '@/infra/search'
-import {User} from '@/user/model'
+import { getConfig } from '@/config/config'
+import {
+  UserAdminPostRequest,
+  UserSearchResponse,
+  UserSuspendPostRequest,
+} from '@/infra/admin-requests'
+import { ErrorCode, newError } from '@/infra/error'
+import { newHyphenlessUuid } from '@/infra/id'
+import { sendTemplateMail } from '@/infra/mail'
+import { hashPassword, verifyPassword } from '@/infra/password'
+import search, { USER_SEARCH_INDEX } from '@/infra/search'
+import { User } from '@/user/model'
 import userRepo from '@/user/repo'
-import {UserAdminPostRequest, UserSearchResponse, UserSuspendPostRequest} from "@/infra/admin-requests";
 
 export type UserDTO = {
   id: string
@@ -65,18 +69,38 @@ export async function getUserByAdmin(id: string): Promise<User> {
   return adminMapEntity(await userRepo.findByID(id))
 }
 
-export async function searchUserListPaginated(query: string, size: number, page: number
+export async function searchUserListPaginated(
+  query: string,
+  size: number,
+  page: number,
 ): Promise<UserSearchResponse> {
   if (query && query.length >= 3) {
-    const users = await search.index(USER_SEARCH_INDEX).search(query, {page: page, hitsPerPage: size}).then((value) =>{
-      return {
-        data: value.hits,
-        totalElements: value.totalHits
-      }
-    })
-    return {data: await userRepo.listAllByIds(users.data.map((value) => {return value.id})), totalElements: users.totalElements, size: size, page: page}
+    const users = await search
+      .index(USER_SEARCH_INDEX)
+      .search(query, { page: page, hitsPerPage: size })
+      .then((value) => {
+        return {
+          data: value.hits,
+          totalElements: value.totalHits,
+        }
+      })
+    return {
+      data: await userRepo.listAllByIds(
+        users.data.map((value) => {
+          return value.id
+        }),
+      ),
+      totalElements: users.totalElements,
+      size: size,
+      page: page,
+    }
   } else {
-    return {data: await userRepo.listAllPaginated(page, size), totalElements: await userRepo.getUserCount(), size: size, page: page}
+    return {
+      data: await userRepo.listAllPaginated(page, size),
+      totalElements: await userRepo.getUserCount(),
+      size: size,
+      page: page,
+    }
   }
 }
 
@@ -110,7 +134,7 @@ export async function updateFullName(
 }
 
 export const raiseSearchError = () => {
-  throw newError({code: ErrorCode.SearchError})
+  throw newError({ code: ErrorCode.SearchError })
 }
 
 export async function updateEmailRequest(
@@ -257,7 +281,11 @@ export async function deleteUser(id: string, options: UserDeleteOptions) {
 
 export async function suspendUser(options: UserSuspendPostRequest) {
   const user = await userRepo.findByID(options.id)
-  if (user.isAdmin && !await userRepo.enoughActiveAdmins() && options.suspend) {
+  if (
+    user.isAdmin &&
+    !(await userRepo.enoughActiveAdmins()) &&
+    options.suspend
+  ) {
     throw newError({ code: ErrorCode.OrphanError })
   }
   if (user) {
@@ -281,7 +309,11 @@ export async function suspendUser(options: UserSuspendPostRequest) {
 
 export async function makeAdminUser(options: UserAdminPostRequest) {
   const user = await userRepo.findByID(options.id)
-  if (user.isAdmin && !await userRepo.enoughActiveAdmins() && options.makeAdmin) {
+  if (
+    user.isAdmin &&
+    !(await userRepo.enoughActiveAdmins()) &&
+    options.makeAdmin
+  ) {
     throw newError({ code: ErrorCode.OrphanError })
   }
   if (user) {

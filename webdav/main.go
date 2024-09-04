@@ -120,7 +120,6 @@ func main() {
 		Addr:              net.JoinHostPort(cfg.Host, cfg.Port),
 		ReadHeaderTimeout: 30 * time.Second,
 		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
 			if strings.HasPrefix(r.URL.Path, "/v2/health") || strings.HasPrefix(r.URL.Path, "/version") {
 				mux.ServeHTTP(w, r)
 			} else {

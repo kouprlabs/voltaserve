@@ -79,7 +79,7 @@ func main() {
 	}))
 
 	consoleProxy := e.Group("proxy/console")
-	consoleUrl, err := url.Parse(cfg.ConsoleUrl)
+	consoleUrl, err := url.Parse(cfg.ConsoleURL)
 	if err != nil {
 		e.Logger.Fatal(err)
 	}

@@ -93,7 +93,7 @@ export default class UserAPI {
 
   static async getUserById(options: baseUserIdRequest) {
     return idpFetcher({
-      url: `/user/by_id?${this.paramsFromListOptions(options)}`,
+      url: `/user/${options.id}`,
       method: 'GET',
     }) as Promise<ConsoleUser>
   }

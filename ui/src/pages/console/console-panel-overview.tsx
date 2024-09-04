@@ -51,16 +51,10 @@ const compareFn = (a: ComponentVersion, b: ComponentVersion) =>
   a.name > b.name ? 1 : 0
 
 const ConsolePanelOverview = () => {
-  const [usersAmount, setUsersAmount] = useState<number | undefined>(undefined)
-  const [groupsAmount, setGroupsAmount] = useState<number | undefined>(
-    undefined,
-  )
-  const [organizationsAmount, setOrganizationsAmount] = useState<
-    number | undefined
-  >(undefined)
-  const [workspacesAmount, setWorkspacesAmount] = useState<number | undefined>(
-    undefined,
-  )
+  const [usersAmount, setUsersAmount] = useState<number>()
+  const [groupsAmount, setGroupsAmount] = useState<number>()
+  const [organizationsAmount, setOrganizationsAmount] = useState<number>()
+  const [workspacesAmount, setWorkspacesAmount] = useState<number>()
   const [componentsData, setComponentsData] = useState<ComponentVersion[]>([])
 
   useEffect(() => {

@@ -11,15 +11,6 @@ import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 
 const ConsolePanelDatabaseOverview = () => {
-  // const [socket, setWebsocket] = useState<WebSocket>(new WebSocket('ws://192.168.1.254:20002'))
-  // useEffect(() => {
-  //   socket.addEventListener("open", event => {
-  //     socket.send("Kurwa xD")
-  //   });
-  //   socket.addEventListener("message", event => {
-  //     console.log("Message from server ", event.data)
-  //   });
-  // }, [socket])
   return (
     <>
       <Helmet>

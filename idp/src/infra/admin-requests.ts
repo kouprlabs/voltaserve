@@ -8,7 +8,7 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
 import { Request } from 'express'
-import {User} from "@/user/model";
+import { User } from '@/user/model'
 
 export interface UserIdPostRequest extends Request {
   id: string

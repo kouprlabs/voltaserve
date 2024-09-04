@@ -156,7 +156,7 @@ class UserRepoImpl {
       throw newError({
         code: ErrorCode.ResourceNotFound,
         error: `User list is empty`,
-        userMessage: `Not found users`
+        userMessage: `Not found users`,
       })
     }
     return this.mapList(rows)
@@ -289,16 +289,25 @@ class UserRepoImpl {
     await client.query('DELETE FROM "user" WHERE id = $1', [id])
   }
 
-  async suspend(id: string, suspend: boolean) :Promise<void> {
-    await client.query('UPDATE "user" SET is_active = $1, refresh_token_value = null, refresh_token_expiry = null, update_time = $2 WHERE id = $3', [!suspend, new Date().toISOString(), id])
+  async suspend(id: string, suspend: boolean): Promise<void> {
+    await client.query(
+      'UPDATE "user" SET is_active = $1, refresh_token_value = null, refresh_token_expiry = null, update_time = $2 WHERE id = $3',
+      [!suspend, new Date().toISOString(), id],
+    )
   }
 
-  async makeAdmin(id: string, makeAdmin: boolean) :Promise<void> {
-    await client.query('UPDATE "user" SET is_admin = $1, update_time = $2 WHERE id = $3', [makeAdmin, new Date().toISOString(), id])
+  async makeAdmin(id: string, makeAdmin: boolean): Promise<void> {
+    await client.query(
+      'UPDATE "user" SET is_admin = $1, update_time = $2 WHERE id = $3',
+      [makeAdmin, new Date().toISOString(), id],
+    )
   }
 
   async enoughActiveAdmins() {
-    const {rows } = await client.query('SELECT COUNT(*) as count FROM "user" WHERE is_admin IS TRUE AND is_active IS TRUE',  [])
+    const { rows } = await client.query(
+      'SELECT COUNT(*) as count FROM "user" WHERE is_admin IS TRUE AND is_active IS TRUE',
+      [],
+    )
     return rows[0].count > 1
   }
 

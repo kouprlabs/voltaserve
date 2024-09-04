@@ -60,7 +60,11 @@ export const IconDatabase = ({
   </span>
 )
 
-export const IconDeAdmin = ({ className, filled, ...props }: IconBaseProps) => (
+export const IconRemoveOperator = ({
+  className,
+  filled,
+  ...props
+}: IconBaseProps) => (
   <span className={getClassName({ filled, className })} {...props}>
     remove_moderator
   </span>

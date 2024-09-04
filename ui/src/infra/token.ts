@@ -7,6 +7,7 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
+import { decodeJwt } from 'jose'
 import TokenAPI, { Token } from '@/client/idp/token'
 import {
   loadAccessToken,
@@ -61,7 +62,7 @@ export function getAccessToken() {
 export function getAdminStatus(): boolean {
   const accessToken = getAccessToken()
   if (accessToken) {
-    return JSON.parse(atob(accessToken.split('.')[1])).is_admin
+    return <boolean>decodeJwt(accessToken).is_admin
   } else {
     return false
   }
@@ -70,7 +71,7 @@ export function getAdminStatus(): boolean {
 export function getUserId(): string {
   const accessToken = getAccessToken()
   if (accessToken) {
-    return JSON.parse(atob(accessToken.split('.')[1])).sub
+    return <string>decodeJwt(accessToken).sub
   } else {
     return ''
   }

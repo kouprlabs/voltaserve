@@ -7,7 +7,7 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import {
   Button,
@@ -43,9 +43,7 @@ const ConsolePanelWorkspaces = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const query = decodeQuery(searchParams.get('q') as string)
-  const [list, setList] = useState<WorkspaceManagementList | undefined>(
-    undefined,
-  )
+  const [list, setList] = useState<WorkspaceManagementList>()
   const { page, size, steps, setPage, setSize } = usePagePagination({
     navigate,
     location,
@@ -53,34 +51,37 @@ const ConsolePanelWorkspaces = () => {
   })
   const [confirmRenameWindowOpen, setConfirmRenameWindowOpen] = useState(false)
   const [isSubmitting, setSubmitting] = useState(false)
-  const [currentName, setCurrentName] = useState<string | undefined>(undefined)
-  const [workspaceId, setWorkspaceId] = useState<string | undefined>(undefined)
+  const [currentName, setCurrentName] = useState<string>()
+  const [workspaceId, setWorkspaceId] = useState<string>()
   const formSchema = Yup.object().shape({
     name: Yup.string().required('Name is required').max(255),
   })
 
-  const renameWorkspace = async (
-    id: string | null,
-    currentName: string | null,
-    newName: string | null,
-    confirm: boolean = false,
-  ) => {
-    if (confirm && workspaceId !== undefined && newName !== null) {
-      try {
-        setSubmitting(true)
-        await ConsoleApi.renameObject(
-          { id: workspaceId, name: newName },
-          'workspace',
-        )
-      } finally {
-        closeConfirmationWindow()
+  const renameWorkspace = useCallback(
+    async (
+      id: string | null,
+      currentName: string | null,
+      newName: string | null,
+      confirm: boolean = false,
+    ) => {
+      if (confirm && workspaceId !== undefined && newName !== null) {
+        try {
+          setSubmitting(true)
+          await ConsoleApi.renameObject(
+            { id: workspaceId, name: newName },
+            'workspace',
+          )
+        } finally {
+          closeConfirmationWindow()
+        }
+      } else if (id !== null && currentName !== null) {
+        setConfirmRenameWindowOpen(true)
+        setCurrentName(currentName)
+        setWorkspaceId(id)
       }
-    } else if (id !== null && currentName !== null) {
-      setConfirmRenameWindowOpen(true)
-      setCurrentName(currentName)
-      setWorkspaceId(id)
-    }
-  }
+    },
+    [],
+  )
 
   const closeConfirmationWindow = () => {
     setConfirmRenameWindowOpen(false)
@@ -191,7 +192,6 @@ const ConsolePanelWorkspaces = () => {
                               >
                                 Rename
                               </MenuItem>
-                              {/*<MenuItem>Change quota</MenuItem>*/}
                             </MenuList>
                           </>
                         )}
@@ -203,7 +203,7 @@ const ConsolePanelWorkspaces = () => {
             </Table>
           </Stack>
         ) : (
-          <div> No workspaces found </div>
+          <div>No workspaces found</div>
         )}
         {list ? (
           <PagePagination
