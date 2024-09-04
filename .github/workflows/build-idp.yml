@@ -38,6 +38,11 @@ jobs:
         if: ${{ github.event.inputs.branch != '' }}
         run: echo "branch=refs/heads/${{ github.event.inputs.branch }}" >> $GITHUB_OUTPUT
 
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.input_branch.outputs.branch || github.ref }}
+
       - name: Create tag list matching semver from executing tag
         id: tag
         if: ${{ github.ref_type == 'tag' }}
