@@ -1,0 +1,35 @@
+name: Question
+description: Ask a question about the project
+title: <title>
+labels:
+  - question
+assignees: bouassaba
+
+body:
+  - type: textarea
+    id: question
+    attributes:
+      label: A clear and concise question
+      description: Describe your question clearly and concisely.
+      placeholder: Please enter your question here.
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Provide context or background information
+      description: Provide any relevant context or background information related to the question.
+      placeholder: Please provide context here.
+
+  - type: textarea
+    id: tried
+    attributes:
+      label: Describe what you have tried or researched already
+      description: Share any steps you have taken to try and answer the question on your own.
+      placeholder: Please describe what you've tried.
+
+  - type: textarea
+    id: additional_information
+    attributes:
+      label: Any additional information or context
+      description: Include any other details that may be helpful in answering your question.
+      placeholder: Please provide additional information.
