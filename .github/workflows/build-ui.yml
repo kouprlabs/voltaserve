@@ -12,12 +12,6 @@ name: Build and Push voltaserve/ui
 
 on:
   workflow_dispatch:
-    inputs:
-      branch:
-        required: false
-        default: ""
-        type: string
-        description: Override code checkout branch (e.g. "feature/branch")
   push:
     branches:
       - main
@@ -26,57 +20,18 @@ on:
     tags:
       - 'v*'
 
+env:
+  IMAGE: voltaserve/ui
+
 jobs:
-  prepare_env:
+  build:
     runs-on: ubuntu-latest
-    outputs:
-      branch: ${{ steps.input_branch.outputs.branch }}
-      tags: ${{ steps.tag.outputs.tags || steps.tags.outputs.tags }}
-    steps:
-      - name: Prepare input branch
-        id: input_branch
-        if: ${{ github.event.inputs.branch != '' }}
-        run: echo "branch=refs/heads/${{ github.event.inputs.branch }}" >> $GITHUB_OUTPUT
-
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ steps.input_branch.outputs.branch || github.ref }}
-
-      - name: Create tag list matching semver from executing tag
-        id: tag
-        if: ${{ github.ref_type == 'tag' }}
-        run: |
-          name="voltaserve/ui"
-          version="${{ github.ref_name }}"
-          version="${version#v}"
-          IFS='.' read -r -a parts <<< "$version"
-          TAGS="$name:$version"
-
-          for ((i=${#parts[@]}-1; i>0; i--)); do
-            tag=$(IFS='.'; echo "${parts[*]:0:$i}")
-            TAGS+=",$name:$tag"
-          done
-
-          TAGS+=",$name:latest"
-          echo "tags=$TAGS" >> $GITHUB_OUTPUT
-
-      - name: Set the tag on workflow dispatch
-        id: tags
-        if: ${{ github.ref_type != 'tag' }}
-        run: echo "tags=voltaserve/ui:$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-
-  build_and_push:
-    runs-on: ubuntu-latest
-    needs: prepare_env
     strategy:
       matrix:
         platform: [ "arm64", "amd64" ]
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-        with:
-          ref: ${{ needs.prepare_env.outputs.branch || github.ref }}
 
       - name: Set Up QEMU
         uses: docker/setup-qemu-action@v3
@@ -92,10 +47,70 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE }}
+          tags: |
+            type=ref,event=branch,enable=${{ github.ref_type != 'tag' }}
+            type=ref,event=tag
+            type=sha,enable=${{ github.ref_type != 'tag' }}
+            type=semver,pattern={{version}},enable=${{ github.ref_type == 'tag' }}
+            type=semver,pattern={{major}}.{{minor}},enable=${{ github.ref_type == 'tag' }}
+            type=semver,pattern={{major}},enable=${{ github.ref_type == 'tag' }}
+
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v5
         with:
           context: ./ui
-          push: true
-          tags: ${{ needs.prepare_env.outputs.tags }}
           platforms: ${{ matrix.platform }}
+          labels: ${{ steps.meta.outputs.labels }}
+          outputs: type=image,name=${{ env.IMAGE }},push-by-digest=true,name-canonical=true,push=true
+
+      - name: Export digest
+        run: |
+          mkdir -p /tmp/digests
+          digest="${{ steps.build.outputs.digest }}"
+          touch "/tmp/digests/${digest#sha256:}"          
+
+      - name: Upload digest
+        uses: actions/upload-artifact@v4
+        with:
+          name: digests-${{ matrix.platform }}
+          path: /tmp/digests/*
+          if-no-files-found: error
+          retention-days: 1
+
+  merge:
+    runs-on: ubuntu-latest
+    needs:
+      - build
+    steps:
+      - name: Download digests
+        uses: actions/download-artifact@v4
+        with:
+          path: /tmp/digests
+          pattern: digests-*
+          merge-multiple: true
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE }}
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Create manifest list and push
+        working-directory: /tmp/digests
+        run: |
+          docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
+            $(printf '${{ env.IMAGE }}@sha256:%s ' *)

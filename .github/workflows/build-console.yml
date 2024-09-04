@@ -34,19 +34,6 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Docker meta
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.IMAGE }}
-          tags: |
-            type=ref,event=branch,enable=${{ github.ref_type != 'tag' }}
-            type=ref,event=tag
-            type=sha,enable=${{ github.ref_type != 'tag' }}
-            type=semver,pattern={{version}},enable=${{ github.ref_type == 'tag' }}
-            type=semver,pattern={{major}}.{{minor}},enable=${{ github.ref_type == 'tag' }}
-            type=semver,pattern={{major}},enable=${{ github.ref_type == 'tag' }}
-
       - name: Set Up QEMU
         uses: docker/setup-qemu-action@v3
         with:
@@ -60,6 +47,19 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE }}
+          tags: |
+            type=ref,event=branch,enable=${{ github.ref_type != 'tag' }}
+            type=ref,event=tag
+            type=sha,enable=${{ github.ref_type != 'tag' }}
+            type=semver,pattern={{version}},enable=${{ github.ref_type == 'tag' }}
+            type=semver,pattern={{major}}.{{minor}},enable=${{ github.ref_type == 'tag' }}
+            type=semver,pattern={{major}},enable=${{ github.ref_type == 'tag' }}
 
       - name: Build and Push Docker Image
         id: build
