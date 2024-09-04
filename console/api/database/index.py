@@ -19,10 +19,12 @@ from ..errors import EmptyDataException
 def fetch_index(_id: str) -> Dict:
     try:
         with conn.cursor() as curs:
-            curs.execute(f"SELECT tablename, indexname, indexdef "
-                         f"FROM pg_indexes "
-                         f"WHERE schemaname = 'public' AND indexname='{_id}'")
-            return curs.fetchone()
+            data = curs.execute(f"SELECT tablename, indexname, indexdef "
+                                f"FROM pg_indexes "
+                                f"WHERE schemaname = 'public' AND indexname='{_id}'").fetchone()
+            return {'tableName': data.get('tablename'),
+                    'indexName': data.get('indexname'),
+                    'indexDef': data.get('indexdef')}
     except DatabaseError as error:
         raise error
 
@@ -30,13 +32,12 @@ def fetch_index(_id: str) -> Dict:
 def fetch_indexes(page=1, size=10) -> Tuple[Iterable[Dict], int]:
     try:
         with conn.cursor() as curs:
-            curs.execute(f"SELECT tablename, indexname, indexdef "
-                         f"FROM pg_indexes "
-                         f"WHERE schemaname = 'public' "
-                         f"ORDER BY tablename, indexname "
-                         f"OFFSET {(page - 1) * size} "
-                         f"LIMIT {size}")
-            data = curs.fetchall()
+            data = curs.execute(f"SELECT tablename, indexname, indexdef "
+                                f"FROM pg_indexes "
+                                f"WHERE schemaname = 'public' "
+                                f"ORDER BY tablename, indexname "
+                                f"OFFSET {(page - 1) * size} "
+                                f"LIMIT {size}").fetchall()
 
             if data is None or data == {}:
                 raise EmptyDataException
@@ -44,7 +45,9 @@ def fetch_indexes(page=1, size=10) -> Tuple[Iterable[Dict], int]:
             curs.execute("SELECT count(1) FROM pg_indexes WHERE schemaname = 'public' ")
             count = curs.fetchone()
 
-            return data, count
+            return ({'tableName': d.get('tablename'),
+                     'indexName': d.get('indexname'),
+                     'indexDef': d.get('indexdef')} for d in data), count['count']
     except DatabaseError as error:
         raise error
 

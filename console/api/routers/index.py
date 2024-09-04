@@ -57,7 +57,7 @@ async def get_all_indexes(data: Annotated[IndexListRequest, Depends()]):
     try:
         indexes, count = fetch_indexes(page=data.page, size=data.size)
 
-        return IndexListResponse(data=indexes, totalElements=count['count'], page=data.page, size=data.size)
+        return IndexListResponse(data=indexes, totalElements=count, page=data.page, size=data.size)
     except EmptyDataException as e:
         logger.error(e)
         return NoContentError()
