@@ -77,8 +77,8 @@ async def get_internal_version(data: Annotated[VersionRequest, Depends()]):
     try:
         urls = settings.model_dump()
         response = {'name': data.id}
+        params = {"page_size": 50, "page": 1, "ordering": "last_updated", "name": ""}
         async with ClientSession() as sess:
-            params = {"page_size": 50, "page": 1, "ordering": "last_updated", "name": ""}
             response = await get_dockerhub_version(sess, data.id, response, params)
             if data.id == 'console':
                 response['currentVersion'] = '2.1.0'

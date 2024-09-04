@@ -29,7 +29,7 @@ async def custom_http_exception_handler(request: Request, exc: HTTPException):
 
 
 app = FastAPI(root_path='/v1',
-              debug=True,
+              debug=False,
               responses={
                   status.HTTP_204_NO_CONTENT: {
                       'model': None
@@ -46,7 +46,11 @@ app = FastAPI(root_path='/v1',
               },
               exception_handlers={
                   status.HTTP_403_FORBIDDEN: custom_http_exception_handler
-              })
+              },
+              # Comment below to enable swagger and redoc docs
+              redoc_url=None,
+              docs_url=None
+              )
 
 app.add_middleware(
     CORSMiddleware,

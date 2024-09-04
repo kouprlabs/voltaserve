@@ -24,9 +24,9 @@ class IndexListRequest(GenericPaginationRequest):
 
 # --- RESPONSE MODELS --- #
 class IndexResponse(BaseModel):
-    tablename: str
-    indexname: str
-    indexdef: str
+    tableName: str
+    indexName: str
+    indexDef: str
 
 
 class IndexListResponse(GenericListResponse):
