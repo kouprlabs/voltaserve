@@ -1,0 +1,77 @@
+name: Bug Report
+description: Create a report to help us improve
+title: <title>
+labels:
+  - bug
+assignees: [bouassaba, dsonck92, loboda4450, mrkazik99]
+
+body:
+  - type: checkboxes
+    id: pre_checklist
+    attributes:
+      label: Ensure these are true before submitting the bug report
+      options:
+        - label: I have searched for similar issues in the repository and could not find a duplicate.
+        - label: I have provided detailed steps to reproduce the bug.
+        - label: I have included all necessary information about my environment.
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Provide a brief summary of the bug
+      description: Describe the issue concisely.
+      placeholder: Please provide a brief summary of the issue.
+
+  - type: textarea
+    id: steps_to_reproduce
+    attributes:
+      label: Detailed steps to reproduce the bug
+      description: List the steps to reproduce the issue, and describe the expected vs. actual result.
+      placeholder: |
+        1. Step 1 description
+        2. Step 2 description
+        3. Step 3 description
+
+  - type: textarea
+    id: expected_result
+    attributes:
+      label: Expected Result
+      description: Describe what you expected to happen.
+      placeholder: Describe the expected outcome.
+
+  - type: textarea
+    id: actual_result
+    attributes:
+      label: Actual Result
+      description: Describe what actually happened.
+      placeholder: Describe what actually happened.
+
+  - type: textarea
+    id: screenshots_or_code
+    attributes:
+      label: Screenshots or Code Snippets (if applicable)
+      description: Add any screenshots or code snippets that might help in diagnosing the issue.
+      placeholder: Provide any relevant screenshots or code snippets.
+
+  - type: checkboxes
+    id: deployment_type
+    attributes:
+      label: Deployment type
+      options:
+        - label: Docker
+        - label: Kubernetes
+        - label: Other
+
+  - type: textarea
+    id: environment_details
+    attributes:
+      label: Additional environment details
+      description: Include any relevant details about your environment (e.g., browser, operating system).
+      placeholder: Provide environment details here.
+
+  - type: textarea
+    id: additional_information
+    attributes:
+      label: Any additional information, context, or logs
+      description: Provide any other details that might be relevant to the issue.
+      placeholder: Provide additional information here.
