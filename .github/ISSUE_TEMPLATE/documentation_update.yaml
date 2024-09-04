@@ -1,0 +1,35 @@
+name: Documentation Update
+description: Suggest changes or additions to the documentation
+title: <title>
+labels:
+  - documentation
+assignees: [bouassaba, dsonck92, loboda4450, mrkazik99]
+
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Detailed description of the documentation update needed
+      description: Provide a detailed description of what needs to be updated in the documentation.
+      placeholder: Please describe the documentation update needed.
+
+  - type: textarea
+    id: sections_to_be_updated
+    attributes:
+      label: Sections or pages that need updates
+      description: List the sections or pages in the documentation that need to be updated.
+      placeholder: Please list the sections or pages that need updates.
+
+  - type: textarea
+    id: suggested_changes
+    attributes:
+      label: Suggested changes or additions
+      description: Provide the suggested changes or additions to the documentation.
+      placeholder: Please describe your suggested changes.
+
+  - type: textarea
+    id: additional_information
+    attributes:
+      label: Any additional information or context
+      description: Provide any additional information or context that might be relevant.
+      placeholder: Please provide additional information here.
