@@ -30,7 +30,7 @@ env:
   IMAGE: voltaserve/language
 
 jobs:
-  build_and_push:
+  build:
     runs-on: ubuntu-latest
     strategy:
       matrix:
