@@ -45,7 +45,7 @@ type MinimumScaleSize struct {
 
 func NewMinimumScaleSize(value Size) (*MinimumScaleSize, error) {
 	if !IsValidSize(value) {
-		return nil, errors.New((MinimumScaleSize{}).GetAcceptanceCriteria())
+		return nil, fmt.Errorf("%s", (MinimumScaleSize{}).GetAcceptanceCriteria())
 	}
 	return &MinimumScaleSize{Value: value}, nil
 }
@@ -86,7 +86,7 @@ type ScaleDownPercentage struct {
 func NewScaleDownPercentage(value uint16) (*ScaleDownPercentage, error) {
 	s := &ScaleDownPercentage{Value: value}
 	if !s.isValid() {
-		return nil, errors.New(s.GetAcceptanceCriteria())
+		return nil, fmt.Errorf("%s", s.GetAcceptanceCriteria())
 	}
 	return s, nil
 }
@@ -130,7 +130,7 @@ type TileSize struct {
 func NewTileSize(value Size) (*TileSize, error) {
 	t := &TileSize{Value: value}
 	if !t.IsValid() {
-		return nil, errors.New(t.GetAcceptanceCriteria())
+		return nil, fmt.Errorf("%s", t.GetAcceptanceCriteria())
 	}
 	return t, nil
 }
