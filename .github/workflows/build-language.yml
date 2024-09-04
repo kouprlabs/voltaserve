@@ -27,6 +27,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         platform: [ "arm64", "amd64" ]
     steps:
