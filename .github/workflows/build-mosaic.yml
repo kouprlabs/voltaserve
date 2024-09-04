@@ -61,7 +61,8 @@ jobs:
             type=semver,pattern={{major}},enable=${{ github.ref_type == 'tag' }}
 
       - name: Build and Push Docker Image
-        uses: docker/build-push-action@v5
+        id: build
+        uses: docker/build-push-action@v6
         with:
           context: ./mosaic
           platforms: ${{ matrix.platform }}
