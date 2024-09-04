@@ -61,7 +61,7 @@ const ConsolePanelDatabaseIndexes = () => {
   } = ConsoleApi.useListIndexes({ page, size }, swrConfig())
 
   const sendRebuildRequest = (
-    indexname: string | null,
+    indexName: string | null,
     confirmation: boolean | undefined,
   ) => {
     if (confirmation) {
@@ -71,11 +71,11 @@ const ConsolePanelDatabaseIndexes = () => {
         setConfirmWindowOpen(false)
         setFocusedIndex(null)
       }, 2000)
-    } else if (indexname) {
-      setFocusedIndex(indexname)
+    } else if (indexName) {
+      setFocusedIndex(indexName)
       setConfirmWindowOpen(true)
     } else {
-      const message = `Fatal error while dispatching rebuild index ${indexname}`
+      const message = `Fatal error while dispatching rebuild index ${indexName}`
       store.dispatch(errorOccurred(message))
       console.error(message)
     }

@@ -62,7 +62,7 @@ export function getAccessToken() {
 export function getAdminStatus(): boolean {
   const accessToken = getAccessToken()
   if (accessToken) {
-    return <boolean>decodeJwt(accessToken).is_admin
+    return !!decodeJwt(accessToken).is_admin
   } else {
     return false
   }
@@ -71,7 +71,8 @@ export function getAdminStatus(): boolean {
 export function getUserId(): string {
   const accessToken = getAccessToken()
   if (accessToken) {
-    return <string>decodeJwt(accessToken).sub
+    const userId = decodeJwt(accessToken).sub
+    return userId ? userId : ''
   } else {
     return ''
   }
