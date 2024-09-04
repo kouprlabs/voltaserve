@@ -7,8 +7,7 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
-import { SignJWT } from 'jose'
+import { decodeJwt, SignJWT } from 'jose'
 import { getConfig } from '@/config/config'
 import { ErrorCode, newError } from '@/infra/error'
 import { newHyphenlessUuid } from '@/infra/id'
@@ -47,8 +46,11 @@ export async function exchange(options: TokenExchangeOptions): Promise<Token> {
     if (!user.isEmailConfirmed) {
       throw newError({ code: ErrorCode.EmailNotConfimed })
     }
+    if (!user.isActive) {
+      throw newError({ code: ErrorCode.UserSuspended })
+    }
     if (verifyPassword(options.password, user.passwordHash)) {
-      return newToken(user.id)
+      return newToken(user.id, user.isAdmin)
     } else {
       throw newError({ code: ErrorCode.InvalidUsernameOrPassword })
     }
@@ -67,8 +69,13 @@ export async function exchange(options: TokenExchangeOptions): Promise<Token> {
     if (new Date() >= new Date(user.refreshTokenExpiry)) {
       throw newError({ code: ErrorCode.RefreshTokenExpired })
     }
-    return newToken(user.id)
+    return newToken(user.id, user.isAdmin)
   }
+}
+
+export const checkAdmin = (jwt) => {
+  if (!decodeJwt(jwt).is_admin)
+    throw newError({ code: ErrorCode.MissingPermission })
 }
 
 function validateParemeters(options: TokenExchangeOptions) {
@@ -109,10 +116,10 @@ function validateParemeters(options: TokenExchangeOptions) {
   }
 }
 
-async function newToken(userId: string): Promise<Token> {
+async function newToken(userId: string, isAdmin: boolean): Promise<Token> {
   const config = getConfig().token
   const expiry = newAccessTokenExpiry()
-  const jwt = await new SignJWT({ sub: userId })
+  const jwt = await new SignJWT({ sub: userId, is_admin: isAdmin })
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setIssuer(config.issuer)

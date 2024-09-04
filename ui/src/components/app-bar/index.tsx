@@ -11,7 +11,9 @@ import { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 import cx from 'classnames'
 import AccountMenu from '@/components/account/menu'
+import ConsoleButton from '@/components/console/console-button'
 import TaskDrawer from '@/components/task/task-drawer'
+import { getAdminStatus } from '@/infra/token'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { activeNavChanged, NavType } from '@/store/ui/nav'
 import UploadDrawer from '../upload/upload-drawer'
@@ -40,6 +42,9 @@ const AppBar = () => {
     if (location.pathname.startsWith('/workspace')) {
       dispatch(activeNavChanged(NavType.Workspaces))
     }
+    if (location.pathname.startsWith('/console')) {
+      dispatch(activeNavChanged(NavType.Console))
+    }
   }, [location, dispatch])
 
   return (
@@ -58,9 +63,12 @@ const AppBar = () => {
         <AppBarSearch />
       </div>
       <div className={cx('flex', 'flex-row', 'items-center', 'gap-1.5')}>
-        {activeNav === NavType.Workspaces && <CreateWorkspaceButton />}
-        {activeNav === NavType.Groups && <CreateGroupButton />}
-        {activeNav === NavType.Organizations && <CreateOrganizationButton />}
+        {activeNav === NavType.Workspaces ? <CreateWorkspaceButton /> : null}
+        {activeNav === NavType.Groups ? <CreateGroupButton /> : null}
+        {activeNav === NavType.Organizations ? (
+          <CreateOrganizationButton />
+        ) : null}
+        {getAdminStatus() ? <ConsoleButton /> : null}
         <UploadDrawer />
         <TaskDrawer />
         <AccountMenu />

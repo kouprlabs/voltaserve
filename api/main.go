@@ -60,6 +60,9 @@ func main() {
 	health := router.NewHealthRouter()
 	health.AppendRoutes(v2)
 
+	version := router.NewVersionRouter()
+	version.AppendRoutes(app)
+
 	filesGroup := v2.Group("files")
 	files := router.NewFileRouter()
 	files.AppendNonJWTRoutes(filesGroup)

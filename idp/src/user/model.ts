@@ -13,12 +13,14 @@ export type User = {
   fullName: string
   username: string
   email: string
-  passwordHash: string
+  passwordHash?: string
   refreshTokenValue?: string
   refreshTokenExpiry?: string
   resetPasswordToken?: string
   emailConfirmationToken?: string
   isEmailConfirmed: boolean
+  isAdmin: boolean
+  isActive: boolean
   emailUpdateToken?: string
   emailUpdateValue?: string
   picture?: string
@@ -37,6 +39,8 @@ export type InsertOptions = {
   resetPasswordToken?: string
   emailConfirmationToken?: string
   isEmailConfirmed?: boolean
+  isAdmin?: boolean
+  isActive?: boolean
   picture?: string
   createTime?: string
   updateTime?: string
@@ -69,6 +73,7 @@ export interface UserRepo {
   findByEmailConfirmationToken(emailConfirmationToken: string): Promise<User>
   findByEmailUpdateToken(emailUpdateToken: string): Promise<User>
   findByPicture(picture: string): Promise<User>
+  listAllPaginated(page: number, size: number): Promise<User>
   isUsernameAvailable(username: string): Promise<boolean>
   insert(data: InsertOptions): Promise<User>
   update(data: UpdateOptions): Promise<User>

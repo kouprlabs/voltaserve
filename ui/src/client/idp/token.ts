@@ -17,6 +17,7 @@ export type Token = {
   expires_in: number
   token_type: string
   refresh_token: string
+  is_admin: boolean
 }
 
 export type ExchangeOptions = {

@@ -7,7 +7,6 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import '@/infra/env'
 import bodyParser from 'body-parser'
 import cors from 'cors'
@@ -22,6 +21,7 @@ import { errorHandler } from '@/infra/error'
 import tokenRouter from '@/token/router'
 import userRepo from '@/user/repo'
 import userRouter from '@/user/router'
+import versionRouter from '@/version/router'
 import { client as postgres } from './infra/postgres'
 
 const app = express()
@@ -56,6 +56,7 @@ app.use('/v2/health', healthRouter)
 app.use('/v2/user', userRouter)
 app.use('/v2/accounts', accountRouter)
 app.use('/v2/token', tokenRouter)
+app.use('/version', versionRouter)
 
 app.use(errorHandler)
 

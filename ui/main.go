@@ -78,6 +78,18 @@ func main() {
 		},
 	}))
 
+	consoleProxy := e.Group("proxy/console")
+	consoleUrl, err := url.Parse(cfg.ConsoleURL)
+	if err != nil {
+		e.Logger.Fatal(err)
+	}
+	consoleProxy.Use(middleware.ProxyWithConfig(middleware.ProxyConfig{
+		Balancer: middleware.NewRoundRobinBalancer([]*middleware.ProxyTarget{{URL: consoleUrl}}),
+		Rewrite: map[string]string{
+			"^/proxy/console/*": "/$1",
+		},
+	}))
+
 	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			err := next(c)

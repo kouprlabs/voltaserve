@@ -22,6 +22,11 @@ export enum ErrorCode {
   InvalidRequest = 'invalid_request',
   UnsupportedGrantType = 'unsupported_grant_type',
   PasswordValidationFailed = 'password_validation_failed',
+  UserSuspended = 'user_suspended',
+  MissingPermission = 'missing_permission',
+  UserNotFound = 'user_not_found',
+  OrphanError = 'orphan_error',
+  SearchError = 'search_error',
 }
 
 const statuses: { [key: string]: number } = {
@@ -37,6 +42,11 @@ const statuses: { [key: string]: number } = {
   [ErrorCode.InvalidRequest]: 400,
   [ErrorCode.UnsupportedGrantType]: 400,
   [ErrorCode.PasswordValidationFailed]: 400,
+  [ErrorCode.UserSuspended]: 403,
+  [ErrorCode.MissingPermission]: 403,
+  [ErrorCode.UserNotFound]: 404,
+  [ErrorCode.OrphanError]: 400,
+  [ErrorCode.SearchError]: 500,
 }
 
 const userMessages: { [key: string]: string } = {
@@ -44,6 +54,11 @@ const userMessages: { [key: string]: string } = {
   [ErrorCode.EmailNotConfimed]: 'Email not confirmed.',
   [ErrorCode.InvalidPassword]: 'Invalid password.',
   [ErrorCode.InvalidUsernameOrPassword]: 'Invalid username or password.',
+  [ErrorCode.UserSuspended]: 'User suspended.',
+  [ErrorCode.MissingPermission]: 'You are not an console',
+  [ErrorCode.OrphanError]: 'You cannot suspend last console',
+  [ErrorCode.SearchError]:
+    'Search engine encountered error or is not available',
 }
 
 export type ErrorData = {

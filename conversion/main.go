@@ -66,6 +66,9 @@ func main() {
 	})
 	healthRouter.AppendRoutes(v2)
 
+	version := router.NewVersionRouter()
+	version.AppendRoutes(app)
+
 	pipelineRouter := router.NewPipelineRouter(router.NewPipelineRouterOptions{
 		Scheduler: scheduler,
 	})

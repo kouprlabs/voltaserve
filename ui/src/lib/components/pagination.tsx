@@ -24,6 +24,8 @@ type PaginationProps = {
   maxButtons?: number
   uiSize?: string
   onPageChange?: (page: number) => void
+  disableMiddleNav?: boolean
+  disableLastNav?: boolean
 }
 
 const Pagination = ({
@@ -32,6 +34,8 @@ const Pagination = ({
   maxButtons: maxButtonsProp = 5,
   uiSize = 'md',
   onPageChange,
+  disableMiddleNav = false,
+  disableLastNav = false,
 }: PaginationProps) => {
   const maxButtons = totalPages < maxButtonsProp ? totalPages : maxButtonsProp
   const pages = useMemo(() => {
@@ -57,22 +61,26 @@ const Pagination = ({
 
   return (
     <ButtonGroup>
-      <IconButton
-        variant="outline"
-        size={uiSize}
-        isDisabled={page === 1}
-        icon={<IconFirstPage />}
-        aria-label="First"
-        onClick={() => handlePageChange(firstPage)}
-      />
-      <IconButton
-        variant="outline"
-        size={uiSize}
-        isDisabled={rewindPage < 1}
-        icon={<IconKeyboardDoubleArrowLeft />}
-        aria-label="Rewind"
-        onClick={() => handlePageChange(rewindPage)}
-      />
+      {!disableLastNav ? (
+        <IconButton
+          variant="outline"
+          size={uiSize}
+          isDisabled={page === 1}
+          icon={<IconFirstPage />}
+          aria-label="First"
+          onClick={() => handlePageChange(firstPage)}
+        />
+      ) : null}
+      {!disableMiddleNav ? (
+        <IconButton
+          variant="outline"
+          size={uiSize}
+          isDisabled={rewindPage < 1}
+          icon={<IconKeyboardDoubleArrowLeft />}
+          aria-label="Rewind"
+          onClick={() => handlePageChange(rewindPage)}
+        />
+      ) : null}
       <IconButton
         variant="outline"
         size={uiSize}
@@ -100,22 +108,26 @@ const Pagination = ({
         aria-label="Next"
         onClick={() => handlePageChange(nextPage)}
       />
-      <IconButton
-        variant="outline"
-        size={uiSize}
-        isDisabled={fastForwardPage > lastPage}
-        icon={<IconKeyboardDoubleArrowRight />}
-        aria-label="Fast Forward"
-        onClick={() => handlePageChange(fastForwardPage)}
-      />
-      <IconButton
-        variant="outline"
-        size={uiSize}
-        isDisabled={page === lastPage}
-        icon={<IconLastPage />}
-        aria-label="Last"
-        onClick={() => handlePageChange(lastPage)}
-      />
+      {!disableLastNav ? (
+        <IconButton
+          variant="outline"
+          size={uiSize}
+          isDisabled={fastForwardPage > lastPage}
+          icon={<IconKeyboardDoubleArrowRight />}
+          aria-label="Fast Forward"
+          onClick={() => handlePageChange(fastForwardPage)}
+        />
+      ) : null}
+      {!disableLastNav ? (
+        <IconButton
+          variant="outline"
+          size={uiSize}
+          isDisabled={page === lastPage}
+          icon={<IconLastPage />}
+          aria-label="Last"
+          onClick={() => handlePageChange(lastPage)}
+        />
+      ) : null}
     </ButtonGroup>
   )
 }

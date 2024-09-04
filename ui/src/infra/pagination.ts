@@ -83,3 +83,38 @@ export function workspacePaginationStorage() {
     namespace: 'workspace',
   }
 }
+
+export function consoleUsersPaginationStorage() {
+  return {
+    prefix: 'voltaserve',
+    namespace: 'console_users',
+  }
+}
+
+export function consoleGroupsPaginationStorage() {
+  return {
+    prefix: 'voltaserve',
+    namespace: 'console_groups',
+  }
+}
+
+export function consoleInvitationsPaginationStorage() {
+  return {
+    prefix: 'voltaserve',
+    namespace: 'console_invitations',
+  }
+}
+
+export function consoleOrganizationsPaginationStorage() {
+  return {
+    prefix: 'voltaserve',
+    namespace: 'console_organizations',
+  }
+}
+
+export function consoleWorkspacesPaginationStorage() {
+  return {
+    prefix: 'voltaserve',
+    namespace: 'console_workspaces',
+  }
+}

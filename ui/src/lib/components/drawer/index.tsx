@@ -70,7 +70,13 @@ const Drawer = ({ children, storage, logo }: DrawerProps) => {
         <div
           className={cx('flex', 'items-center', 'justify-center', 'h-[80px]')}
         >
-          <Link to="/">
+          <Link
+            to={
+              location.pathname.startsWith('/console')
+                ? '/console/dashboard'
+                : '/'
+            }
+          >
             <div className={cx('flex', 'h-[40px]')}>
               <div
                 className={cx(

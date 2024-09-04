@@ -60,7 +60,11 @@ export const IconDatabase = ({
   </span>
 )
 
-export const IconDeAdmin = ({ className, filled, ...props }: IconBaseProps) => (
+export const IconRemoveOperator = ({
+  className,
+  filled,
+  ...props
+}: IconBaseProps) => (
   <span className={getClassName({ filled, className })} {...props}>
     remove_moderator
   </span>
@@ -109,6 +113,26 @@ export const IconChevronRight = ({
 }: IconBaseProps) => (
   <span className={getClassName({ filled, className })} {...props}>
     chevron_right
+  </span>
+)
+
+export const IconChevronDown = ({
+  className,
+  filled,
+  ...props
+}: IconBaseProps) => (
+  <span className={getClassName({ filled, className })} {...props}>
+    keyboard_arrow_down
+  </span>
+)
+
+export const IconChevronUp = ({
+  className,
+  filled,
+  ...props
+}: IconBaseProps) => (
+  <span className={getClassName({ filled, className })} {...props}>
+    keyboard_arrow_up
   </span>
 )
 

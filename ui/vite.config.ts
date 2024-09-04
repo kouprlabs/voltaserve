@@ -29,6 +29,11 @@ const config = ({ mode }) => {
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/proxy\/idp/, ''),
         },
+        '/proxy/console/v1': {
+          target: process.env.CONSOLE_URL,
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/proxy\/console/, ''),
+        },
       },
     },
   })

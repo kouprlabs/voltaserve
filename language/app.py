@@ -41,6 +41,11 @@ def health():
     return "OK", 200
 
 
+@app.route("/version", methods=["GET"])
+def version():
+    return {'version': '2.1.0'}
+
+
 @app.route("/v2/entities", methods=["POST"])
 def ner_entities():
     global nlp

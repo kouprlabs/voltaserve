@@ -7,10 +7,9 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import { ErrorCode, newError } from '@/infra/error'
 import { client } from '@/infra/postgres'
-import { InsertOptions, UpdateOptions, User, UserRepo } from './model'
+import { InsertOptions, UpdateOptions, User } from './model'
 
 class UserRepoImpl {
   async findByID(id: string): Promise<User> {
@@ -127,6 +126,55 @@ class UserRepoImpl {
     return this.mapRow(rows[0])
   }
 
+  async listAllPaginated(page: number, size: number): Promise<User[]> {
+    const { rowCount, rows } = await client.query(
+      `SELECT *
+       FROM "user"
+       ORDER BY create_time
+       OFFSET $1
+       LIMIT $2`,
+      [(page - 1) * size, size],
+    )
+    if (rowCount < 1) {
+      throw newError({
+        code: ErrorCode.ResourceNotFound,
+        error: `User list is empty`,
+      })
+    }
+    return this.mapList(rows)
+  }
+
+  async listAllByIds(idList: number[]): Promise<User[]> {
+    const { rowCount, rows } = await client.query(
+      `SELECT *
+       FROM "user"
+       WHERE id = ANY ($1)
+       ORDER BY create_time`,
+      [idList],
+    )
+    if (rowCount < 1) {
+      throw newError({
+        code: ErrorCode.ResourceNotFound,
+        error: `User list is empty`,
+        userMessage: `Not found users`,
+      })
+    }
+    return this.mapList(rows)
+  }
+
+  async getUserCount(): Promise<number> {
+    const { rowCount, rows } = await client.query(
+      `SELECT COUNT(id) as count FROM "user"`,
+    )
+    if (rowCount < 1) {
+      throw newError({
+        code: ErrorCode.ResourceNotFound,
+        error: `Fatal database error (no users present in database)`,
+      })
+    }
+    return parseInt(rows[0].count)
+  }
+
   async isUsernameAvailable(username: string): Promise<boolean> {
     const { rowCount } = await client.query(
       `SELECT * FROM "user" WHERE username = $1`,
@@ -148,9 +196,11 @@ class UserRepoImpl {
         reset_password_token,
         email_confirmation_token,
         is_email_confirmed,
+        is_admin,
+        is_active,
         picture,
         create_time
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *`,
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING *`,
       [
         data.id,
         data.fullName,
@@ -162,6 +212,8 @@ class UserRepoImpl {
         data.resetPasswordToken,
         data.emailConfirmationToken,
         data.isEmailConfirmed || false,
+        data.isAdmin || false,
+        data.isActive || true,
         data.picture,
         new Date().toISOString(),
       ],
@@ -197,11 +249,13 @@ class UserRepoImpl {
           reset_password_token = $7,
           email_confirmation_token = $8,
           is_email_confirmed = $9,
-          email_update_token = $10,
-          email_update_value = $11,
-          picture = $12,
-          update_time = $13
-        WHERE id = $14
+          is_admin = $10,
+          is_active = $11,
+          email_update_token = $12,
+          email_update_value = $13,
+          picture = $14,
+          update_time = $15
+        WHERE id = $16
         RETURNING *`,
       [
         entity.fullName,
@@ -213,6 +267,8 @@ class UserRepoImpl {
         entity.resetPasswordToken,
         entity.emailConfirmationToken,
         entity.isEmailConfirmed,
+        entity.isAdmin,
+        entity.isActive,
         entity.emailUpdateToken,
         entity.emailUpdateValue,
         entity.picture,
@@ -233,6 +289,28 @@ class UserRepoImpl {
     await client.query('DELETE FROM "user" WHERE id = $1', [id])
   }
 
+  async suspend(id: string, suspend: boolean): Promise<void> {
+    await client.query(
+      'UPDATE "user" SET is_active = $1, refresh_token_value = null, refresh_token_expiry = null, update_time = $2 WHERE id = $3',
+      [!suspend, new Date().toISOString(), id],
+    )
+  }
+
+  async makeAdmin(id: string, makeAdmin: boolean): Promise<void> {
+    await client.query(
+      'UPDATE "user" SET is_admin = $1, update_time = $2 WHERE id = $3',
+      [makeAdmin, new Date().toISOString(), id],
+    )
+  }
+
+  async enoughActiveAdmins() {
+    const { rows } = await client.query(
+      'SELECT COUNT(*) as count FROM "user" WHERE is_admin IS TRUE AND is_active IS TRUE',
+      [],
+    )
+    return rows[0].count > 1
+  }
+
   /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
   private mapRow(row: any): User {
     return {
@@ -246,6 +324,8 @@ class UserRepoImpl {
       resetPasswordToken: row.reset_password_token,
       emailConfirmationToken: row.email_confirmation_token,
       isEmailConfirmed: row.is_email_confirmed,
+      isAdmin: row.is_admin,
+      isActive: row.is_active,
       emailUpdateToken: row.email_update_token,
       emailUpdateValue: row.email_update_value,
       picture: row.picture,
@@ -253,8 +333,26 @@ class UserRepoImpl {
       updateTime: row.update_time,
     }
   }
+
+  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+  private mapList(list: any): User[] {
+    return list.map((user) => {
+      return {
+        id: user.id,
+        fullName: user.full_name,
+        username: user.username,
+        email: user.email,
+        isEmailConfirmed: user.is_email_confirmed,
+        isAdmin: user.is_admin,
+        isActive: user.is_active,
+        picture: user.picture,
+        createTime: user.create_time,
+        updateTime: user.update_time,
+      }
+    })
+  }
 }
 
-const userRepo: UserRepo = new UserRepoImpl()
+const userRepo: UserRepoImpl = new UserRepoImpl()
 
 export default userRepo

@@ -8,10 +8,22 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
 import { createBrowserRouter } from 'react-router-dom'
+import LayoutConsole from '@/components/layout/layout-console'
 import AccountInvitationsPage from '@/pages/account/account-invitations-page'
 import AccountLayout from '@/pages/account/account-layout'
 import AccountSettingsPage from '@/pages/account/account-settings-page'
 import ConfirmEmailPage from '@/pages/confirm-email-page'
+import ConsolePanelDatabase from '@/pages/console/console-panel-database'
+import ConsolePanelDatabaseIndexes from '@/pages/console/console-panel-database-indexes'
+import ConsolePanelDatabaseOverview from '@/pages/console/console-panel-database-overview'
+import ConsolePanelGroups from '@/pages/console/console-panel-groups'
+import ConsolePanelInvitations from '@/pages/console/console-panel-invitations'
+import ConsolePanelOrganization from '@/pages/console/console-panel-organization'
+import ConsolePanelOrganizations from '@/pages/console/console-panel-organizations'
+import ConsolePanelOverview from '@/pages/console/console-panel-overview'
+import ConsolePanelUser from '@/pages/console/console-panel-user'
+import ConsolePanelUsers from '@/pages/console/console-panel-users'
+import ConsolePanelWorkspaces from '@/pages/console/console-panel-workspaces'
 import ForgotPasswordPage from '@/pages/forgot-password-page'
 import GroupLayout from '@/pages/group/group-layout'
 import GroupListPage from '@/pages/group/group-list-page'
@@ -163,6 +175,60 @@ const router = createBrowserRouter([
       {
         path: '/update-email/:token',
         element: <UpdateEmailPage />,
+      },
+      {
+        element: <LayoutConsole />,
+        children: [
+          {
+            path: '/console/dashboard',
+            element: <ConsolePanelOverview />,
+          },
+          {
+            path: '/console/users',
+            element: <ConsolePanelUsers />,
+          },
+          {
+            path: '/console/users/:id',
+            element: <ConsolePanelUser />,
+          },
+          {
+            path: '/console/workspaces',
+            element: <ConsolePanelWorkspaces />,
+          },
+          {
+            path: '/console/invitations',
+            element: <ConsolePanelInvitations />,
+          },
+          {
+            path: '/console/organizations',
+            element: <ConsolePanelOrganizations />,
+          },
+          {
+            path: '/console/organizations/:id',
+            element: <ConsolePanelOrganization />,
+          },
+          {
+            path: '/console/groups',
+            element: <ConsolePanelGroups />,
+          },
+          {
+            element: <ConsolePanelDatabase />,
+            children: [
+              {
+                path: '/console/database',
+                element: <ConsolePanelDatabaseOverview />,
+              },
+              {
+                path: '/console/database/overview',
+                element: <ConsolePanelDatabaseOverview />,
+              },
+              {
+                path: '/console/database/indexes',
+                element: <ConsolePanelDatabaseIndexes />,
+              },
+            ],
+          },
+        ],
       },
     ],
   },

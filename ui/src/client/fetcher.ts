@@ -34,6 +34,13 @@ export function idpFetcher<T>(options: FetcherOptions) {
   })
 }
 
+export function consoleFetcher<T>(options: FetcherOptions) {
+  return fetcher<T>({
+    ...options,
+    url: `${getConfig().consoleURL}${options.url}`,
+  })
+}
+
 export async function fetcher<T>({
   url,
   method,

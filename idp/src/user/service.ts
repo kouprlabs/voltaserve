@@ -7,9 +7,13 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-
 import fs from 'fs/promises'
 import { getConfig } from '@/config/config'
+import {
+  UserAdminPostRequest,
+  UserSearchResponse,
+  UserSuspendPostRequest,
+} from '@/infra/admin-requests'
 import { ErrorCode, newError } from '@/infra/error'
 import { newHyphenlessUuid } from '@/infra/id'
 import { sendTemplateMail } from '@/infra/mail'
@@ -19,6 +23,15 @@ import { User } from '@/user/model'
 import userRepo from '@/user/repo'
 
 export type UserDTO = {
+  id: string
+  fullName: string
+  picture: string
+  email: string
+  username: string
+  pendingEmail?: string
+}
+
+export type UserListDTO = {
   id: string
   fullName: string
   picture: string
@@ -52,6 +65,49 @@ export async function getUser(id: string): Promise<UserDTO> {
   return mapEntity(await userRepo.findByID(id))
 }
 
+export async function getUserByAdmin(id: string): Promise<User> {
+  return adminMapEntity(await userRepo.findByID(id))
+}
+
+export async function searchUserListPaginated(
+  query: string,
+  size: number,
+  page: number,
+): Promise<UserSearchResponse> {
+  if (query && query.length >= 3) {
+    const users = await search
+      .index(USER_SEARCH_INDEX)
+      .search(query, { page: page, hitsPerPage: size })
+      .then((value) => {
+        return {
+          data: value.hits,
+          totalElements: value.totalHits,
+        }
+      })
+    return {
+      data: await userRepo.listAllByIds(
+        users.data.map((value) => {
+          return value.id
+        }),
+      ),
+      totalElements: users.totalElements,
+      size: size,
+      page: page,
+    }
+  } else {
+    return {
+      data: await userRepo.listAllPaginated(page, size),
+      totalElements: await userRepo.getUserCount(),
+      size: size,
+      page: page,
+    }
+  }
+}
+
+export async function getUserCount(): Promise<number> {
+  return await userRepo.getUserCount()
+}
+
 export async function getByPicture(picture: string): Promise<UserDTO> {
   return mapEntity(await userRepo.findByPicture(picture))
 }
@@ -64,11 +120,21 @@ export async function updateFullName(
   user = await userRepo.update({ id: user.id, fullName: options.fullName })
   await search.index(USER_SEARCH_INDEX).updateDocuments([
     {
-      ...user,
+      id: user.id,
+      username: user.username,
+      email: user.email,
       fullName: user.fullName,
+      isEmailConfirmed: user.isEmailConfirmed,
+      createTime: user.createTime,
+      updateTime: user.updateTime,
+      picture: user.picture,
     },
   ])
   return mapEntity(user)
+}
+
+export const raiseSearchError = () => {
+  throw newError({ code: ErrorCode.SearchError })
 }
 
 export async function updateEmailRequest(
@@ -130,11 +196,14 @@ export async function updateEmailConfirmation(
   })
   await search.index(USER_SEARCH_INDEX).updateDocuments([
     {
-      ...user,
+      id: user.id,
+      username: user.username,
       email: user.email,
-      username: user.email,
-      emailUpdateToken: null,
-      emailUpdateValue: null,
+      fullName: user.fullName,
+      isEmailConfirmed: user.isEmailConfirmed,
+      createTime: user.createTime,
+      updateTime: user.updateTime,
+      picture: user.picture,
     },
   ])
   return mapEntity(user)
@@ -167,12 +236,36 @@ export async function updatePicture(
     id: userId,
     picture: `data:${contentType};base64,${picture}`,
   })
+  await search.index(USER_SEARCH_INDEX).updateDocuments([
+    {
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      fullName: user.fullName,
+      isEmailConfirmed: user.isEmailConfirmed,
+      createTime: user.createTime,
+      updateTime: user.updateTime,
+      picture: user.picture,
+    },
+  ])
   return mapEntity(user)
 }
 
 export async function deletePicture(id: string): Promise<UserDTO> {
   let user = await userRepo.findByID(id)
   user = await userRepo.update({ id: user.id, picture: null })
+  await search.index(USER_SEARCH_INDEX).updateDocuments([
+    {
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      fullName: user.fullName,
+      isEmailConfirmed: user.isEmailConfirmed,
+      createTime: user.createTime,
+      updateTime: user.updateTime,
+      picture: user.picture,
+    },
+  ])
   return mapEntity(user)
 }
 
@@ -186,6 +279,62 @@ export async function deleteUser(id: string, options: UserDeleteOptions) {
   }
 }
 
+export async function suspendUser(options: UserSuspendPostRequest) {
+  const user = await userRepo.findByID(options.id)
+  if (
+    user.isAdmin &&
+    !(await userRepo.enoughActiveAdmins()) &&
+    options.suspend
+  ) {
+    throw newError({ code: ErrorCode.OrphanError })
+  }
+  if (user) {
+    await userRepo.suspend(user.id, options.suspend)
+    await search.index(USER_SEARCH_INDEX).updateDocuments([
+      {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        fullName: user.fullName,
+        isEmailConfirmed: user.isEmailConfirmed,
+        createTime: user.createTime,
+        updateTime: user.updateTime,
+        picture: user.picture,
+      },
+    ])
+  } else {
+    throw newError({ code: ErrorCode.UserNotFound })
+  }
+}
+
+export async function makeAdminUser(options: UserAdminPostRequest) {
+  const user = await userRepo.findByID(options.id)
+  if (
+    user.isAdmin &&
+    !(await userRepo.enoughActiveAdmins()) &&
+    options.makeAdmin
+  ) {
+    throw newError({ code: ErrorCode.OrphanError })
+  }
+  if (user) {
+    await userRepo.makeAdmin(user.id, options.makeAdmin)
+    await search.index(USER_SEARCH_INDEX).updateDocuments([
+      {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        fullName: user.fullName,
+        isEmailConfirmed: user.isEmailConfirmed,
+        createTime: user.createTime,
+        updateTime: user.updateTime,
+        picture: user.picture,
+      },
+    ])
+  } else {
+    throw newError({ code: ErrorCode.UserNotFound })
+  }
+}
+
 export function mapEntity(entity: User): UserDTO {
   const user: UserDTO = {
     id: entity.id,
@@ -194,6 +343,25 @@ export function mapEntity(entity: User): UserDTO {
     fullName: entity.fullName,
     picture: entity.picture,
     pendingEmail: entity.emailUpdateValue,
+  }
+  Object.keys(user).forEach(
+    (index) => !user[index] && user[index] !== undefined && delete user[index],
+  )
+  return user
+}
+
+export function adminMapEntity(entity: User): User {
+  const user: User = {
+    id: entity.id,
+    email: entity.email,
+    username: entity.username,
+    fullName: entity.fullName,
+    picture: entity.picture,
+    createTime: entity.createTime,
+    updateTime: entity.updateTime,
+    isActive: entity.isActive,
+    isAdmin: entity.isAdmin,
+    isEmailConfirmed: entity.isEmailConfirmed,
   }
   Object.keys(user).forEach(
     (index) => !user[index] && user[index] !== undefined && delete user[index],

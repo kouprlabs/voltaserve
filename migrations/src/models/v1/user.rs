@@ -24,6 +24,8 @@ pub enum User {
     EmailUpdateToken,
     EmailUpdateValue,
     IsEmailConfirmed,
+    IsAdmin,
+    IsActive,
     Picture,
     CreateTime,
     UpdateTime,

@@ -34,7 +34,9 @@ import {
   encodeFileQuery,
   encodeQuery,
 } from '@/lib/helpers/query'
+import store from '@/store/configure-store'
 import { useAppDispatch } from '@/store/hook'
+import { errorOccurred } from '@/store/ui/error'
 import { modalDidOpen as searchFilterModalDidOpen } from '@/store/ui/search-filter'
 
 const AppBarSearch = () => {
@@ -70,6 +72,30 @@ const AppBarSearch = () => {
       location.pathname.includes('/member'),
     [location],
   )
+  const isConsoleUsers = useMemo(
+    () =>
+      location.pathname.includes('/console/') &&
+      location.pathname.includes('/users'),
+    [location],
+  )
+  const isConsoleGroups = useMemo(
+    () =>
+      location.pathname.includes('/console/') &&
+      location.pathname.includes('/groups'),
+    [location],
+  )
+  const isConsoleWorkspaces = useMemo(
+    () =>
+      location.pathname.includes('/console/') &&
+      location.pathname.includes('/workspaces'),
+    [location],
+  )
+  const isConsoleOrganizations = useMemo(
+    () =>
+      location.pathname.includes('/console/') &&
+      location.pathname.includes('/organizations'),
+    [location],
+  )
   const query: string | FileQuery | undefined = isFiles
     ? decodeFileQuery(searchParams.get('q') as string)
     : decodeQuery(searchParams.get('q') as string)
@@ -85,8 +111,23 @@ const AppBarSearch = () => {
       isGroups ||
       isOrgs ||
       isOrgMembers ||
+      isGroupMembers ||
+      isConsoleUsers ||
+      isConsoleGroups ||
+      isConsoleOrganizations ||
+      isConsoleWorkspaces,
+    [
+      isWorkspaces,
+      isFiles,
+      isGroups,
+      isOrgs,
+      isOrgMembers,
       isGroupMembers,
-    [isWorkspaces, isFiles, isGroups, isOrgs, isOrgMembers, isGroupMembers],
+      isConsoleUsers,
+      isConsoleGroups,
+      isConsoleWorkspaces,
+      isConsoleOrganizations,
+    ],
   )
   const hasFileQuery = useMemo(() => {
     const fileQuery = query as FileQuery
@@ -101,20 +142,33 @@ const AppBarSearch = () => {
       : false
   }, [isFiles, query])
   const placeholder = useMemo(() => {
-    if (isWorkspaces) {
+    if (isWorkspaces || isConsoleWorkspaces) {
       return 'Search Workspaces'
     } else if (isFiles) {
       return 'Search Files'
-    } else if (isGroups) {
+    } else if (isGroups || isConsoleGroups) {
       return 'Search Groups'
-    } else if (isOrgs) {
+    } else if (isOrgs || isConsoleOrganizations) {
       return 'Search Organizations'
     } else if (isOrgMembers) {
       return 'Search Organization Members'
     } else if (isGroupMembers) {
       return 'Search Group Members'
+    } else if (isConsoleUsers) {
+      return 'Search Users'
     }
-  }, [isWorkspaces, isFiles, isGroups, isOrgs, isOrgMembers, isGroupMembers])
+  }, [
+    isWorkspaces,
+    isFiles,
+    isGroups,
+    isOrgs,
+    isOrgMembers,
+    isGroupMembers,
+    isConsoleUsers,
+    isConsoleGroups,
+    isConsoleWorkspaces,
+    isConsoleOrganizations,
+  ])
   const [buffer, setBuffer] = useState(parsedQuery)
   const [isFocused, setIsFocused] = useState(false)
 
@@ -170,6 +224,30 @@ const AppBarSearch = () => {
         } else {
           navigate(`/group/${workspaceId}/member`)
         }
+      } else if (isConsoleUsers) {
+        if (value) {
+          navigate(`/console/users?q=${encodeQuery(value)}`)
+        } else {
+          navigate(`/console/users`)
+        }
+      } else if (isConsoleWorkspaces) {
+        if (value) {
+          navigate(`/console/workspaces?q=${encodeQuery(value)}`)
+        } else {
+          navigate(`/console/workspaces`)
+        }
+      } else if (isConsoleOrganizations) {
+        if (value) {
+          navigate(`/console/organizations?q=${encodeQuery(value)}`)
+        } else {
+          navigate(`/console/organizations`)
+        }
+      } else if (isConsoleGroups) {
+        if (value) {
+          navigate(`/console/groups?q=${encodeQuery(value)}`)
+        } else {
+          navigate(`/console/groups`)
+        }
       }
     },
     [
@@ -181,6 +259,10 @@ const AppBarSearch = () => {
       isOrgs,
       isOrgMembers,
       isGroupMembers,
+      isConsoleUsers,
+      isConsoleOrganizations,
+      isConsoleGroups,
+      isConsoleWorkspaces,
       navigate,
     ],
   )
@@ -199,6 +281,14 @@ const AppBarSearch = () => {
       navigate(`/organization/${workspaceId}/member`)
     } else if (isGroupMembers) {
       navigate(`/group/${workspaceId}/member`)
+    } else if (isConsoleUsers) {
+      navigate(`/console/users`)
+    } else if (isConsoleOrganizations) {
+      navigate(`/console/organization`)
+    } else if (isConsoleGroups) {
+      navigate(`/console/groups`)
+    } else if (isConsoleWorkspaces) {
+      navigate(`/console/workspaces`)
     }
   }, [
     workspaceId,
@@ -214,8 +304,19 @@ const AppBarSearch = () => {
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent<HTMLInputElement>) => {
-      if (event.key === 'Enter') {
-        handleSearch(buffer)
+      if (event.key === 'Enter' && buffer.length >= 3) {
+        handleSearch(buffer.trim())
+      } else if (
+        event.key === 'Enter' &&
+        buffer.trim().length > 0 &&
+        buffer.length < 3 &&
+        !isFiles
+      ) {
+        store.dispatch(
+          errorOccurred('Search query needs at least 3 characters'),
+        )
+      } else if (event.key === 'Enter' && buffer.trim().length === 0) {
+        handleClear()
       }
     },
     [buffer, handleSearch],

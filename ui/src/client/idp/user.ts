@@ -19,8 +19,27 @@ export type User = {
   pendingEmail?: string
 }
 
+export interface ConsoleUser extends User {
+  isEmailConfirmed: boolean
+  createTime: Date
+  updateTime: Date
+  isAdmin: boolean
+  isActive: boolean
+}
+
+export interface ConsoleUsersResponse {
+  data: ConsoleUser[]
+  totalElements: number
+  page: number
+  size: number
+}
+
 export type UpdateFullNameOptions = {
   fullName: string
+}
+
+export interface baseUserIdRequest {
+  id: string
 }
 
 export type UpdateEmailRequestOptions = {
@@ -31,6 +50,14 @@ export type UpdateEmailConfirmationOptions = {
   token: string
 }
 
+export interface suspendUserOptions extends baseUserIdRequest {
+  suspend: boolean
+}
+
+export interface makeAdminOptions extends baseUserIdRequest {
+  makeAdmin: boolean
+}
+
 export type UpdatePasswordOptions = {
   currentPassword: string
   newPassword: string
@@ -38,6 +65,20 @@ export type UpdatePasswordOptions = {
 
 export type DeleteOptions = {
   password: string
+}
+
+type ListOptions = {
+  query?: string
+  id?: string
+  size?: number
+  page?: number
+}
+
+type ListQueryParams = {
+  query?: string
+  id?: string
+  page?: string
+  size?: string
 }
 
 export default class UserAPI {
@@ -50,10 +91,40 @@ export default class UserAPI {
     )
   }
 
+  static async getUserById(options: baseUserIdRequest) {
+    return idpFetcher({
+      url: `/user/${options.id}`,
+      method: 'GET',
+    }) as Promise<ConsoleUser>
+  }
+
+  static async getAllUsers(options: ListOptions) {
+    return idpFetcher({
+      url: `/user/all?${this.paramsFromListOptions(options)}`,
+      method: 'GET',
+    }) as Promise<ConsoleUsersResponse>
+  }
+
   static async updateFullName(options: UpdateFullNameOptions) {
     return idpFetcher({
       url: `/user/update_full_name`,
       method: 'POST',
+      body: JSON.stringify(options),
+    }) as Promise<User>
+  }
+
+  static async suspendUser(options: suspendUserOptions) {
+    return idpFetcher({
+      url: `/user/suspend`,
+      method: 'PATCH',
+      body: JSON.stringify(options),
+    }) as Promise<User>
+  }
+
+  static async makeAdmin(options: makeAdminOptions) {
+    return idpFetcher({
+      url: `/user/admin`,
+      method: 'PATCH',
       body: JSON.stringify(options),
     }) as Promise<User>
   }
@@ -108,5 +179,25 @@ export default class UserAPI {
       url: `/user/delete_picture`,
       method: 'POST',
     }) as Promise<User>
+  }
+
+  static paramsFromListOptions(options: ListOptions): URLSearchParams {
+    const params: ListQueryParams = {}
+    if (options?.id) {
+      params.id = options.id.toString()
+    }
+    if (options.query) {
+      params.query = options.query.toString()
+    }
+    if (options?.page) {
+      params.page = options.page.toString()
+    }
+    if (options?.size) {
+      params.size = options.size.toString()
+    }
+    if (options?.query) {
+      params.query = options.query.toString()
+    }
+    return new URLSearchParams(params)
   }
 }

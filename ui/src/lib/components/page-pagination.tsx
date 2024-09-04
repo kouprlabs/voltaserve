@@ -23,6 +23,8 @@ type PagePaginationProps = {
   style?: React.CSSProperties
   setPage: (page: number) => void
   setSize: (size: number) => void
+  disableMiddleNav?: boolean
+  disableLastNav?: boolean
 }
 
 const PagePagination = ({
@@ -35,6 +37,8 @@ const PagePagination = ({
   style,
   setPage,
   setSize,
+  disableMiddleNav = false,
+  disableLastNav = false,
 }: PagePaginationProps) => {
   const { hasPageSwitcher, hasSizeSelector } = usePageMonitor({
     totalElements,
@@ -63,6 +67,8 @@ const PagePagination = ({
               page={page}
               totalPages={totalPages}
               onPageChange={setPage}
+              disableMiddleNav={disableMiddleNav}
+              disableLastNav={disableLastNav}
             />
           ) : null}
           {hasSizeSelector ? (
