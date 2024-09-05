@@ -41,4 +41,4 @@ class Settings(BaseSettings):
     LOG_FORMAT: str = "PLAIN"
 
 
-settings = Settings(_env_file="../.env")
+settings = Settings(_env_file="./api/.env")
