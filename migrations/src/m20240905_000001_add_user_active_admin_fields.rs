@@ -11,7 +11,7 @@ use sea_orm_migration::prelude::*;
 
 use crate::models::v1::User;
 
-#[derive(DeriveEntityModel)]
+#[derive(DeriveMigrationName)]
 pub struct Migration;
 
 #[async_trait::async_trait]
@@ -56,5 +56,7 @@ impl MigrationTrait for Migration {
                     .to_owned(),
             )
             .await?;
+        
+        Ok(())
     }
 }
