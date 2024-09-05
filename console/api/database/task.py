@@ -20,13 +20,17 @@ from ..errors import EmptyDataException, NotFoundException
 def fetch_task(_id: str) -> Dict:
     try:
         with conn.cursor() as curs:
-            if not exists(curs=curs, tablename='task', _id=_id):
-                raise NotFoundException(message=f'Task with id={_id} does not exist!')
+            if not exists(curs=curs, tablename="task", _id=_id):
+                raise NotFoundException(message=f"Task with id={_id} does not exist!")
 
-            curs.execute(f"SELECT id, name, error, percentage, is_complete, is_indeterminate, user_id, status, "
-                         f"payload, task_id, create_time, update_time "
-                         f"FROM task "
-                         f"WHERE id='{_id}'")
+            curs.execute(
+                f"""
+                SELECT id, name, error, percentage, is_complete, is_indeterminate, user_id, status, payload, 
+                task_id, create_time, update_time 
+                FROM task 
+                WHERE id='{_id}'
+                """
+            )
             return curs.fetchone()
     except DatabaseError as error:
         raise error
@@ -35,20 +39,25 @@ def fetch_task(_id: str) -> Dict:
 def fetch_tasks(page=1, size=10) -> Tuple[Iterable[Dict], int]:
     try:
         with conn.cursor() as curs:
-            data = curs.execute(f"SELECT id, name, error, percentage, is_complete, is_indeterminate, user_id, status, "
-                                f"payload, task_id, create_time, update_time "
-                                f"FROM task "
-                                f"ORDER BY create_time "
-                                f"OFFSET {(page - 1) * size} "
-                                f"LIMIT {size}").fetchall()
+            data = curs.execute(
+                f"""
+                SELECT id, name, error, percentage, is_complete, is_indeterminate, user_id, status, payload, 
+                task_id, create_time, update_time 
+                FROM task 
+                ORDER BY create_time 
+                OFFSET {(page - 1) * size} 
+                LIMIT {size}
+                """
+            ).fetchall()
 
             if data is None or data == {}:
                 raise EmptyDataException
 
             count = curs.execute("SELECT count(1) FROM task").fetchone()
-            return data, count['count']
+            return data, count["count"]
     except DatabaseError as error:
         raise error
+
 
 # --- UPDATE --- #
 

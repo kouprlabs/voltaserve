@@ -8,7 +8,13 @@
 # by the GNU Affero General Public License v3.0 only, included in the file
 # licenses/AGPL.txt.
 
-from .api_errors import NotFoundError, NoContentError, ServiceUnavailableError, \
-    UnknownApiError, ForbiddenError, GenericForbiddenException
+from .api_errors import (
+    NotFoundError,
+    NoContentError,
+    ServiceUnavailableError,
+    UnknownApiError,
+    ForbiddenError,
+    GenericForbiddenException,
+)
 from .database_errors import EmptyDataException, NotFoundException
 from .error_codes import errors

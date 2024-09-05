@@ -19,26 +19,19 @@ from ..errors import NotFoundError, NoContentError, EmptyDataException, UnknownA
 from ..models import IndexListResponse, IndexListRequest, IndexResponse, IndexRequest
 
 index_api_router = APIRouter(
-    prefix='/index',
-    tags=['index'],
-    dependencies=[Depends(JWTBearer())]
+    prefix="/index", tags=["index"], dependencies=[Depends(JWTBearer())]
 )
 
 logger = base_logger.getChild("index")
 
 
 # --- GET --- #
-@index_api_router.get(path="",
-                      responses={
-                          status.HTTP_200_OK: {
-                              'model': IndexResponse
-                          }}
-                      )
+@index_api_router.get(path="", responses={status.HTTP_200_OK: {"model": IndexResponse}})
 async def get_index(data: Annotated[IndexRequest, Depends()]):
     try:
         index = fetch_index(_id=data.id)
         if index is None:
-            return NotFoundError(message=f'Index with id={data.id} does not exist')
+            return NotFoundError(message=f"Index with id={data.id} does not exist")
 
         return IndexResponse(**index)
     except Exception as e:
@@ -46,24 +39,23 @@ async def get_index(data: Annotated[IndexRequest, Depends()]):
         return UnknownApiError()
 
 
-@index_api_router.get(path="/all",
-                      responses={
-                          status.HTTP_200_OK: {
-                              'model': IndexListResponse
-                          }
-                      }
-                      )
+@index_api_router.get(
+    path="/all", responses={status.HTTP_200_OK: {"model": IndexListResponse}}
+)
 async def get_all_indexes(data: Annotated[IndexListRequest, Depends()]):
     try:
         indexes, count = fetch_indexes(page=data.page, size=data.size)
 
-        return IndexListResponse(data=indexes, totalElements=count, page=data.page, size=data.size)
+        return IndexListResponse(
+            data=indexes, totalElements=count, page=data.page, size=data.size
+        )
     except EmptyDataException as e:
         logger.error(e)
         return NoContentError()
     except Exception as e:
         logger.exception(e)
         return UnknownApiError()
+
 
 # --- PATCH --- #
 

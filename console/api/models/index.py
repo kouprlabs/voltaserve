@@ -10,7 +10,12 @@
 
 from typing import List
 
-from .generic import GenericPaginationRequest, GenericListResponse, GenericRequest, BaseModel
+from .generic import (
+    GenericPaginationRequest,
+    GenericListResponse,
+    GenericRequest,
+    BaseModel,
+)
 
 
 # --- REQUEST MODELS --- #

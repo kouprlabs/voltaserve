@@ -33,7 +33,7 @@ class GenericPaginationRequest(BaseModel):
 
 
 class GenericSearchRequest(GenericPaginationRequest):
-    query: str | None = Field('')
+    query: str | None = Field("")
 
 
 # --- RESPONSE MODELS --- #
@@ -63,22 +63,22 @@ class GenericErrorResponse(BaseModel):
 
 class GenericNotFoundResponse(BaseModel):
     status_code: int = status.HTTP_404_NOT_FOUND
-    detail: str = 'Not found'
+    detail: str = "Not found"
 
 
 class GenericUnauthorizedResponse(BaseModel):
     status_code: int = status.HTTP_401_UNAUTHORIZED
-    detail: str = 'Unauthorized'
+    detail: str = "Unauthorized"
 
 
 class GenericServiceUnavailableResponse(BaseModel):
     status_code: int = status.HTTP_401_UNAUTHORIZED
-    detail: str = 'Unauthorized'
+    detail: str = "Unauthorized"
 
 
 class GenericUnexpectedErrorResponse(BaseModel):
     status_code: int = status.HTTP_500_INTERNAL_SERVER_ERROR
-    detail: str = 'Unexpected error'
+    detail: str = "Unexpected error"
 
 
 class GenericAcceptedResponse(BaseModel):
