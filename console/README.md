@@ -23,7 +23,7 @@ poetry run python -m api.uvi
 Lint code:
 
 ```shell
-flake8 . --extend-ignore F401,W291 --max-line-length 120 --extend-exclude Dockerfile
+flake8 . --extend-ignore F401,W291,W503 --max-line-length 120 --extend-exclude Dockerfile
 ```
 
 Format code:
