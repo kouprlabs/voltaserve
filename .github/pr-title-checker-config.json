@@ -76,7 +76,15 @@
       "test(migrations):",
       "test(mosaic):",
       "test(ui):",
-      "test(webdav):"
+      "test(webdav):",
+      "fix(workflow)",
+      "feat(workflow)",
+      "chore(workflow)",
+      "docs(workflow)",
+      "ci(workflow)",
+      "refactor(workflow)",
+      "perf(workflow)",
+      "test(workflow)"
     ]
   },
   "MESSAGES": {
