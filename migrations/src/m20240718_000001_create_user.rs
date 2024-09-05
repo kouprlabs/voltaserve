@@ -83,18 +83,6 @@ impl MigrationTrait for Migration {
                             .not_null()
                             .default(false),
                     )
-                    .col(
-                        ColumnDef::new(User::IsAdmin)
-                            .boolean()
-                            .not_null()
-                            .default(false),
-                    )
-                    .col(
-                        ColumnDef::new(User::IsActive)
-                            .boolean()
-                            .not_null()
-                            .default(true),
-                    )
                     .col(ColumnDef::new(User::Picture).text())
                     .col(
                         ColumnDef::new(User::CreateTime)
