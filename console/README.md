@@ -17,7 +17,19 @@ source /home/your_user/.cache/pypoetry/virtualenvs/voltaserve-console-something/
 Run:
 
 ```shell
-poetry run python -m api.uvi
+poetry run python -m api.uvi --port 8086
+```
+
+Add `--reload` flag for development:
+
+```shell
+poetry run python -m api.uvi --port 8086 --reload
+```
+
+To use CockroachDB, add the `POSTGRES_PORT` environment variable:
+
+```shell
+POSTGRES_PORT=26257 poetry run python -m api.uvi --reload --port 8086
 ```
 
 Lint code:
