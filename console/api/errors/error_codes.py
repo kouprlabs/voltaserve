@@ -15,5 +15,5 @@ errors = {
     status.HTTP_503_SERVICE_UNAVAILABLE: "service_unavailable",
     status.HTTP_400_BAD_REQUEST: "bad_request",
     status.HTTP_404_NOT_FOUND: "resource_not_found",
-    status.HTTP_403_FORBIDDEN: "forbidden"
+    status.HTTP_403_FORBIDDEN: "forbidden",
 }

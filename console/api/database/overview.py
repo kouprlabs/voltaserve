@@ -16,6 +16,6 @@ from ..dependencies import conn
 def fetch_version() -> str:
     try:
         with conn.cursor() as curs:
-            return curs.execute("SELECT version();").fetchone()['version'].split(' ')[1]
+            return curs.execute("SELECT version();").fetchone()["version"].split(" ")[1]
     except DatabaseError as error:
         raise error

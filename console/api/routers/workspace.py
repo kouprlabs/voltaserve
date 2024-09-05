@@ -12,27 +12,43 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, status, Response
 
-from ..database import fetch_workspace, fetch_workspaces, update_workspace, fetch_workspace_count
+from ..database import (
+    fetch_workspace,
+    fetch_workspaces,
+    update_workspace,
+    fetch_workspace_count,
+)
 from ..dependencies import JWTBearer, meilisearch_client
 from ..log import base_logger
-from ..errors import NotFoundError, EmptyDataException, NoContentError, NotFoundException, \
-    UnknownApiError
-from ..models import WorkspaceResponse, WorkspaceRequest, WorkspaceListResponse, \
-    WorkspaceListRequest, UpdateWorkspaceRequest, GenericUnexpectedErrorResponse, GenericAcceptedResponse, \
-    CountResponse, WorkspaceSearchRequest
+from ..errors import (
+    NotFoundError,
+    EmptyDataException,
+    NoContentError,
+    NotFoundException,
+    UnknownApiError,
+)
+from ..models import (
+    WorkspaceResponse,
+    WorkspaceRequest,
+    WorkspaceListResponse,
+    WorkspaceListRequest,
+    UpdateWorkspaceRequest,
+    GenericUnexpectedErrorResponse,
+    GenericAcceptedResponse,
+    CountResponse,
+    WorkspaceSearchRequest,
+)
 
 workspace_api_router = APIRouter(
-    prefix='/workspace',
-    tags=['workspace'],
+    prefix="/workspace",
+    tags=["workspace"],
     responses={
         status.HTTP_500_INTERNAL_SERVER_ERROR: {
-            'model': GenericUnexpectedErrorResponse
+            "model": GenericUnexpectedErrorResponse
         },
-        status.HTTP_202_ACCEPTED: {
-            'model': GenericAcceptedResponse
-        }
+        status.HTTP_202_ACCEPTED: {"model": GenericAcceptedResponse},
     },
-    dependencies=[Depends(JWTBearer())]
+    dependencies=[Depends(JWTBearer())],
 )
 
 
@@ -40,13 +56,9 @@ logger = base_logger.getChild("workspace")
 
 
 # --- GET --- #
-@workspace_api_router.get(path="",
-                          responses={
-                              status.HTTP_200_OK: {
-                                  'model': WorkspaceResponse
-                              }
-                          }
-                          )
+@workspace_api_router.get(
+    path="", responses={status.HTTP_200_OK: {"model": WorkspaceResponse}}
+)
 async def get_workspace(data: Annotated[WorkspaceRequest, Depends()]):
     try:
         workspace = fetch_workspace(_id=data.id)
@@ -60,13 +72,9 @@ async def get_workspace(data: Annotated[WorkspaceRequest, Depends()]):
         return UnknownApiError()
 
 
-@workspace_api_router.get(path="/count",
-                          responses={
-                              status.HTTP_200_OK: {
-                                  'model': CountResponse
-                              }
-                          }
-                          )
+@workspace_api_router.get(
+    path="/count", responses={status.HTTP_200_OK: {"model": CountResponse}}
+)
 async def get_workspace_count():
     try:
         return CountResponse(**fetch_workspace_count())
@@ -75,18 +83,16 @@ async def get_workspace_count():
         return UnknownApiError()
 
 
-@workspace_api_router.get(path="/all",
-                          responses={
-                              status.HTTP_200_OK: {
-                                  'model': WorkspaceListResponse
-                              }
-                          }
-                          )
+@workspace_api_router.get(
+    path="/all", responses={status.HTTP_200_OK: {"model": WorkspaceListResponse}}
+)
 async def get_all_workspaces(data: Annotated[WorkspaceListRequest, Depends()]):
     try:
         workspaces, count = fetch_workspaces(page=data.page, size=data.size)
 
-        return WorkspaceListResponse(data=workspaces, totalElements=count, page=data.page, size=data.size)
+        return WorkspaceListResponse(
+            data=workspaces, totalElements=count, page=data.page, size=data.size
+        )
     except EmptyDataException as e:
         logger.error(e)
         return NoContentError()
@@ -95,20 +101,21 @@ async def get_all_workspaces(data: Annotated[WorkspaceListRequest, Depends()]):
         return UnknownApiError()
 
 
-@workspace_api_router.get(path="/search",
-                          responses={
-                              status.HTTP_200_OK: {
-                                  'model': WorkspaceListResponse
-                              }
-                          }
-                          )
+@workspace_api_router.get(
+    path="/search", responses={status.HTTP_200_OK: {"model": WorkspaceListResponse}}
+)
 async def get_search_workspaces(data: Annotated[WorkspaceSearchRequest, Depends()]):
     try:
-        workspaces = meilisearch_client.index('workspace').search(data.query,
-                                                                  {'page': data.page, 'hitsPerPage': data.size})
+        workspaces = meilisearch_client.index("workspace").search(
+            data.query, {"page": data.page, "hitsPerPage": data.size}
+        )
 
-        return WorkspaceListResponse(data=(fetch_workspace(workspace['id']) for workspace in workspaces['hits']),
-                                     totalElements=len(workspaces['hits']), page=data.page, size=data.size)
+        return WorkspaceListResponse(
+            data=(fetch_workspace(workspace["id"]) for workspace in workspaces["hits"]),
+            totalElements=len(workspaces["hits"]),
+            page=data.page,
+            size=data.size,
+        )
     except NotFoundException as e:
         return NotFoundError(message=str(e))
     except Exception as e:
@@ -117,17 +124,20 @@ async def get_search_workspaces(data: Annotated[WorkspaceSearchRequest, Depends(
 
 
 # --- PATCH --- #
-@workspace_api_router.patch(path="",
-                            status_code=status.HTTP_202_ACCEPTED)
+@workspace_api_router.patch(path="", status_code=status.HTTP_202_ACCEPTED)
 async def patch_workspace(data: UpdateWorkspaceRequest, response: Response):
     try:
         update_workspace(data=data.model_dump(exclude_none=True))
-        meilisearch_client.index('workspace').update_documents([{
-            'id': data.id,
-            'name': data.name,
-            'storageCapacity': data.storageCapacity,
-            'updateTime': data.updateTime.strftime("%Y-%m-%dT%H:%M:%SZ")
-        }])
+        meilisearch_client.index("workspace").update_documents(
+            [
+                {
+                    "id": data.id,
+                    "name": data.name,
+                    "storageCapacity": data.storageCapacity,
+                    "updateTime": data.updateTime.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                }
+            ]
+        )
     except NotFoundException as e:
         logger.error(e)
         return NotFoundError(message=str(e))
@@ -137,6 +147,7 @@ async def patch_workspace(data: UpdateWorkspaceRequest, response: Response):
 
     response.status_code = status.HTTP_202_ACCEPTED
     return None
+
 
 # --- POST --- #
 

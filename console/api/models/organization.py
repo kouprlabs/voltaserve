@@ -13,8 +13,13 @@ from typing import List
 
 from pydantic import Field
 
-from .generic import GenericPaginationRequest, GenericResponse, GenericListResponse, GenericRequest, \
-    GenericSearchRequest
+from .generic import (
+    GenericPaginationRequest,
+    GenericResponse,
+    GenericListResponse,
+    GenericRequest,
+    GenericSearchRequest,
+)
 
 
 # --- REQUEST MODELS --- #

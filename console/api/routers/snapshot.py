@@ -15,15 +15,22 @@ from fastapi import APIRouter, Depends, status
 from ..database import fetch_snapshot, fetch_snapshots
 from ..dependencies import JWTBearer
 from ..log import base_logger
-from ..errors import NotFoundError, EmptyDataException, NoContentError, NotFoundException, \
-    UnknownApiError
-from ..models import SnapshotResponse, SnapshotListRequest, SnapshotListResponse, \
-    SnapshotRequest
+from ..errors import (
+    NotFoundError,
+    EmptyDataException,
+    NoContentError,
+    NotFoundException,
+    UnknownApiError,
+)
+from ..models import (
+    SnapshotResponse,
+    SnapshotListRequest,
+    SnapshotListResponse,
+    SnapshotRequest,
+)
 
 snapshot_api_router = APIRouter(
-    prefix='/snapshot',
-    tags=['snapshot'],
-    dependencies=[Depends(JWTBearer())]
+    prefix="/snapshot", tags=["snapshot"], dependencies=[Depends(JWTBearer())]
 )
 
 
@@ -31,17 +38,14 @@ logger = base_logger.getChild("snapshot")
 
 
 # --- GET --- #
-@snapshot_api_router.get(path="",
-                         responses={
-                             status.HTTP_200_OK: {
-                                 'model': SnapshotResponse
-                             }}
-                         )
+@snapshot_api_router.get(
+    path="", responses={status.HTTP_200_OK: {"model": SnapshotResponse}}
+)
 async def get_snapshot(data: Annotated[SnapshotRequest, Depends()]):
     try:
         snapshot = fetch_snapshot(_id=data.id)
         if snapshot is None:
-            return NotFoundError(message=f'Snapshot with id={data.id} does not exist')
+            return NotFoundError(message=f"Snapshot with id={data.id} does not exist")
 
         return SnapshotResponse(**snapshot)
     except NotFoundException as e:
@@ -52,24 +56,24 @@ async def get_snapshot(data: Annotated[SnapshotRequest, Depends()]):
         return UnknownApiError()
 
 
-@snapshot_api_router.get(path="/all",
-                         responses={
-                             status.HTTP_200_OK: {
-                                 'model': SnapshotListResponse
-                             }
-                         }
-                         )
+@snapshot_api_router.get(
+    path="/all", responses={status.HTTP_200_OK: {"model": SnapshotListResponse}}
+)
 async def get_all_snapshots(data: Annotated[SnapshotListRequest, Depends()]):
     try:
         snapshots, count = fetch_snapshots(page=data.page, size=data.size)
 
-        return SnapshotListResponse(data=snapshots, totalElements=count['count'], page=data.page, size=data.size)
+        return SnapshotListResponse(
+            data=snapshots, totalElements=count["count"], page=data.page, size=data.size
+        )
     except EmptyDataException as e:
         logger.error(e)
         return NoContentError()
     except Exception as e:
         logger.exception(e)
         return UnknownApiError()
+
+
 # --- PATCH --- #
 
 # --- POST --- #

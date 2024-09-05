@@ -20,12 +20,18 @@ from ..errors import EmptyDataException, NotFoundException
 def fetch_organization(organization_id: str) -> Dict:
     try:
         with conn.cursor() as curs:
-            if not exists(curs=curs, tablename='organization', _id=organization_id):
-                raise NotFoundException(message=f'Organization with id={organization_id} does not exist!')
+            if not exists(curs=curs, tablename="organization", _id=organization_id):
+                raise NotFoundException(
+                    message=f"Organization with id={organization_id} does not exist!"
+                )
 
-            return curs.execute(f'SELECT id, name, create_time as "createTime", update_time as "updateTime" '
-                                f'FROM organization '
-                                f'WHERE id=\'{organization_id}\'').fetchone()
+            return curs.execute(
+                f"""
+                SELECT id, name, create_time as "createTime", update_time as "updateTime" 
+                FROM organization 
+                WHERE id='{organization_id}'
+                """
+            ).fetchone()
 
     except DatabaseError as error:
         raise error
@@ -34,18 +40,22 @@ def fetch_organization(organization_id: str) -> Dict:
 def fetch_organizations(page=1, size=10) -> Tuple[Iterable[Dict], int]:
     try:
         with conn.cursor() as curs:
-            data = curs.execute(f'SELECT id, name, create_time as "createTime", update_time as "updateTime" '
-                                f'FROM "organization" '
-                                f'ORDER BY create_time '
-                                f'OFFSET {(page - 1) * size} '
-                                f'LIMIT {size}').fetchall()
+            data = curs.execute(
+                f"""
+                SELECT id, name, create_time as "createTime", update_time as "updateTime" 
+                FROM "organization" 
+                ORDER BY create_time 
+                OFFSET {(page - 1) * size} 
+                LIMIT {size}
+                """
+            ).fetchall()
 
             if data is None or data == {}:
                 raise EmptyDataException
 
             count = curs.execute('SELECT count(1) FROM "organization"').fetchone()
 
-            return data, count['count']
+            return data, count["count"]
 
     except DatabaseError as error:
         raise error
@@ -60,76 +70,104 @@ def fetch_organization_count() -> Dict:
         raise error
 
 
-def fetch_organization_users(organization_id: str, page=1, size=10) -> Tuple[Iterable[Dict], int]:
+def fetch_organization_users(
+    organization_id: str, page=1, size=10
+) -> Tuple[Iterable[Dict], int]:
     try:
         with conn.cursor() as curs:
-            data = curs.execute(f'SELECT u.user_id as "id", u2.username, u2.picture, u."permission", '
-                                f'u.create_time as "createTime" '
-                                f'FROM organization o '
-                                f'JOIN userpermission u on o.id = u.resource_id '
-                                f'JOIN "user" u2 on u.user_id = u2.id '
-                                f'WHERE o.id = \'{organization_id}\' '
-                                f'ORDER BY o.create_time '
-                                f'OFFSET {(page - 1) * size} '
-                                f'LIMIT {size}').fetchall()
+            data = curs.execute(
+                f"""
+                SELECT u.user_id as "id", u2.username, u2.picture, u."permission", u.create_time as "createTime" 
+                FROM organization o 
+                JOIN userpermission u ON o.id = u.resource_id 
+                JOIN "user" u2 ON u.user_id = u2.id 
+                WHERE o.id = '{organization_id}' 
+                ORDER BY o.create_time 
+                OFFSET {(page - 1) * size} 
+                LIMIT {size}
+                """
+            ).fetchall()
 
             if data is None or data == {}:
                 raise EmptyDataException
 
-            count = curs.execute(f'SELECT count(u.id) '
-                                 f'FROM userpermission u '
-                                 f'JOIN organization o ON u.resource_id = o.id '
-                                 f'WHERE o.id = \'{organization_id}\'').fetchone()
+            count = curs.execute(
+                f"""
+                SELECT count(u.id) 
+                FROM userpermission u 
+                JOIN organization o 
+                ON u.resource_id = o.id 
+                WHERE o.id = '{organization_id}'
+                """
+            ).fetchone()
 
-            return data, count['count']
+            return data, count["count"]
 
     except DatabaseError as error:
         raise error
 
 
-def fetch_organization_workspaces(organization_id: str, page=1, size=10) -> Tuple[Iterable[Dict], int]:
+def fetch_organization_workspaces(
+    organization_id: str, page=1, size=10
+) -> Tuple[Iterable[Dict], int]:
     try:
         with conn.cursor() as curs:
             data = curs.execute(
-                f'SELECT id, name, create_time as "createTime"'
-                f'FROM "workspace" '
-                f'WHERE organization_id = \'{organization_id}\' '
-                f'ORDER BY create_time '
-                f'OFFSET {(page - 1) * size} '
-                f'LIMIT {size}').fetchall()
+                f"""
+                SELECT id, name, create_time as "createTime" 
+                FROM "workspace" 
+                WHERE organization_id = '{organization_id}' 
+                ORDER BY create_time 
+                OFFSET {(page - 1) * size} 
+                LIMIT {size}
+                """
+            ).fetchall()
 
             if data is None or data == {}:
                 raise EmptyDataException
 
-            count = curs.execute(f'SELECT count(u.id) '
-                                 f'FROM "userpermission" u '
-                                 f'JOIN "workspace" w ON u.resource_id = w.id '
-                                 f'WHERE w.organization_id = \'{organization_id}\'').fetchone()
+            count = curs.execute(
+                f"""
+                SELECT count(u.id) 
+                FROM "userpermission" u 
+                JOIN "workspace" w ON u.resource_id = w.id 
+                WHERE w.organization_id = '{organization_id}'
+                """
+            ).fetchone()
 
-            return data, count['count']
+            return data, count["count"]
     except DatabaseError as error:
         raise error
 
 
-def fetch_organization_groups(organization_id: str, page=1, size=10) -> Tuple[Iterable[Dict], int]:
+def fetch_organization_groups(
+    organization_id: str, page=1, size=10
+) -> Tuple[Iterable[Dict], int]:
     try:
         with conn.cursor() as curs:
             data = curs.execute(
-                f'SELECT id, name, create_time as "createTime"'
-                f'FROM "group" '
-                f'WHERE organization_id = \'{organization_id}\' '
-                f'ORDER BY create_time '
-                f'OFFSET {(page - 1) * size} '
-                f'LIMIT {size}').fetchall()
+                f"""
+                SELECT id, name, create_time as "createTime" 
+                FROM "group" 
+                WHERE organization_id = '{organization_id}' 
+                ORDER BY create_time 
+                OFFSET {(page - 1) * size} 
+                LIMIT {size}
+                """
+            ).fetchall()
 
             if data is None or data == {}:
                 raise EmptyDataException
 
-            count = curs.execute(f'SELECT count(id) '
-                                 f'FROM "group" '
-                                 f'WHERE organization_id = \'{organization_id}\'').fetchone()
+            count = curs.execute(
+                f"""
+                SELECT count(id) 
+                FROM "group" 
+                WHERE organization_id = '{organization_id}'
+                """
+            ).fetchone()
 
-            return data, count['count']
+            return data, count["count"]
     except DatabaseError as error:
         raise error
 
@@ -138,11 +176,14 @@ def fetch_organization_groups(organization_id: str, page=1, size=10) -> Tuple[It
 def update_organization(data: Dict) -> None:
     try:
         with conn.cursor() as curs:
-            if not exists(curs=curs, _id=data['id'], tablename='group'):
-                raise NotFoundException(f'Organization with id={data['id']} does not exist!')
-            curs.execute(parse_sql_update_query('organization', data))
+            if not exists(curs=curs, _id=data["id"], tablename="group"):
+                raise NotFoundException(
+                    f"Organization with id={data['id']} does not exist!"
+                )
+            curs.execute(parse_sql_update_query("organization", data))
     except DatabaseError as error:
         raise error
+
 
 # --- CREATE --- #
 

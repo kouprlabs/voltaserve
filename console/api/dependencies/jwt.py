@@ -22,24 +22,28 @@ class JWTBearer(HTTPBearer):
 
     async def __call__(self, request: Request):
         jwt.api_jws.PyJWS.header_typ = False
-        credentials: HTTPAuthorizationCredentials = await super(JWTBearer, self).__call__(request)
+        credentials: HTTPAuthorizationCredentials = await super(
+            JWTBearer, self
+        ).__call__(request)
         if credentials:
             if not credentials.scheme == "Bearer":
                 raise GenericForbiddenException(detail="Invalid authentication scheme.")
 
             try:
-                decoded_token = jwt.decode(jwt=credentials.credentials,
-                                           key=settings.SECURITY_JWT_SIGNING_KEY,
-                                           algorithms=[settings.JWT_ALGORITHM],
-                                           audience=settings.URL,
-                                           issuer=settings.URL,
-                                           verify=True)
+                decoded_token = jwt.decode(
+                    jwt=credentials.credentials,
+                    key=settings.SECURITY_JWT_SIGNING_KEY,
+                    algorithms=[settings.JWT_ALGORITHM],
+                    audience=settings.URL,
+                    issuer=settings.URL,
+                    verify=True,
+                )
 
             except Exception as e:
                 raise GenericForbiddenException(detail=str(e)) from e
 
-            if not decoded_token['is_admin']:
-                raise GenericForbiddenException(detail='Dude, u aint admin')
+            if not decoded_token["is_admin"]:
+                raise GenericForbiddenException(detail="Dude, u aint admin")
 
             return credentials.credentials
         else:

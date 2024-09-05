@@ -14,8 +14,13 @@ from typing import List
 from pydantic import Field
 
 from ..models.organization import OrganizationResponse
-from .generic import GenericPaginationRequest, GenericResponse, GenericListResponse, GenericRequest, \
-    GenericSearchRequest
+from .generic import (
+    GenericPaginationRequest,
+    GenericResponse,
+    GenericListResponse,
+    GenericRequest,
+    GenericSearchRequest,
+)
 
 
 # --- REQUEST MODELS --- #

@@ -15,15 +15,24 @@ from fastapi import APIRouter, Depends, status, Response
 from ..database import fetch_invitation, fetch_invitations, update_invitation
 from ..dependencies import JWTBearer
 from ..log import base_logger
-from ..errors import NotFoundError, NoContentError, EmptyDataException, NotFoundException, \
-    UnknownApiError
-from ..models import InvitationResponse, InvitationListRequest, \
-    InvitationListResponse, InvitationRequest, ConfirmInvitationRequest, GenericAcceptedResponse
+from ..errors import (
+    NotFoundError,
+    NoContentError,
+    EmptyDataException,
+    NotFoundException,
+    UnknownApiError,
+)
+from ..models import (
+    InvitationResponse,
+    InvitationListRequest,
+    InvitationListResponse,
+    InvitationRequest,
+    ConfirmInvitationRequest,
+    GenericAcceptedResponse,
+)
 
 invitation_api_router = APIRouter(
-    prefix='/invitation',
-    tags=['invitation'],
-    dependencies=[Depends(JWTBearer())]
+    prefix="/invitation", tags=["invitation"], dependencies=[Depends(JWTBearer())]
 )
 
 
@@ -31,13 +40,9 @@ logger = base_logger.getChild("invitation")
 
 
 # --- GET --- #
-@invitation_api_router.get(path="",
-                           responses={
-                               status.HTTP_200_OK: {
-                                   'model': InvitationResponse
-                               }
-                           }
-                           )
+@invitation_api_router.get(
+    path="", responses={status.HTTP_200_OK: {"model": InvitationResponse}}
+)
 async def get_invitation(data: Annotated[InvitationRequest, Depends()]):
     try:
         invitation = fetch_invitation(_id=data.id)
@@ -51,18 +56,16 @@ async def get_invitation(data: Annotated[InvitationRequest, Depends()]):
         return UnknownApiError()
 
 
-@invitation_api_router.get(path="/all",
-                           responses={
-                               status.HTTP_200_OK: {
-                                   'model': InvitationListResponse
-                               }
-                           }
-                           )
+@invitation_api_router.get(
+    path="/all", responses={status.HTTP_200_OK: {"model": InvitationListResponse}}
+)
 async def get_all_invitations(data: Annotated[InvitationListRequest, Depends()]):
     try:
         invitations, count = fetch_invitations(page=data.page, size=data.size)
 
-        return InvitationListResponse(data=invitations, totalElements=count, page=data.page, size=data.size)
+        return InvitationListResponse(
+            data=invitations, totalElements=count, page=data.page, size=data.size
+        )
     except EmptyDataException as e:
         logger.error(e)
         return NoContentError()
@@ -75,14 +78,11 @@ async def get_all_invitations(data: Annotated[InvitationListRequest, Depends()])
 
 
 # --- PATCH --- #
-@invitation_api_router.patch(path="",
-                             responses={
-                                 status.HTTP_202_ACCEPTED: {
-                                     'model': GenericAcceptedResponse
-                                 }
-                             },
-                             status_code=status.HTTP_202_ACCEPTED
-                             )
+@invitation_api_router.patch(
+    path="",
+    responses={status.HTTP_202_ACCEPTED: {"model": GenericAcceptedResponse}},
+    status_code=status.HTTP_202_ACCEPTED,
+)
 async def patch_invitation(data: ConfirmInvitationRequest, response: Response):
     try:
         update_invitation(data.model_dump(exclude_unset=True, exclude_none=True))
@@ -96,6 +96,7 @@ async def patch_invitation(data: ConfirmInvitationRequest, response: Response):
 
     response.status_code = status.HTTP_202_ACCEPTED
     return None
+
 
 # --- POST --- #
 

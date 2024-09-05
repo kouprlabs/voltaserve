@@ -17,70 +17,75 @@ from .dependencies import settings, conn
 from .errors import ServiceUnavailableError, ForbiddenError
 from .log import req_logger, resp_logger
 from .models import GenericServiceUnavailableResponse, GenericErrorResponse
-from .routers import group_api_router, organization_api_router, workspace_api_router, \
-    invitation_api_router, index_api_router, users_api_router, overview_api_router
+from .routers import (
+    group_api_router,
+    organization_api_router,
+    workspace_api_router,
+    invitation_api_router,
+    index_api_router,
+    users_api_router,
+    overview_api_router,
+)
 
 
 async def custom_http_exception_handler(request: Request, exc: HTTPException):
-    return ForbiddenError(
-        status_code=exc.status_code,
-        message=exc.detail
-    )
+    return ForbiddenError(status_code=exc.status_code, message=exc.detail)
 
 
-app = FastAPI(root_path='/v1',
-              debug=False,
-              responses={
-                  status.HTTP_204_NO_CONTENT: {
-                      'model': None
-                  },
-                  status.HTTP_403_FORBIDDEN: {
-                      'model': GenericErrorResponse
-                  },
-                  status.HTTP_404_NOT_FOUND: {
-                      'model': GenericErrorResponse
-                  },
-                  status.HTTP_500_INTERNAL_SERVER_ERROR: {
-                      'model': GenericErrorResponse
-                  },
-              },
-              exception_handlers={
-                  status.HTTP_403_FORBIDDEN: custom_http_exception_handler
-              },
-              # Comment below to enable swagger and redoc docs
-              redoc_url=None,
-              docs_url=None
-              )
+app = FastAPI(
+    root_path="/v1",
+    debug=False,
+    responses={
+        status.HTTP_204_NO_CONTENT: {"model": None},
+        status.HTTP_403_FORBIDDEN: {"model": GenericErrorResponse},
+        status.HTTP_404_NOT_FOUND: {"model": GenericErrorResponse},
+        status.HTTP_500_INTERNAL_SERVER_ERROR: {"model": GenericErrorResponse},
+    },
+    exception_handlers={status.HTTP_403_FORBIDDEN: custom_http_exception_handler},
+    # Comment below to enable swagger and redoc docs
+    redoc_url=None,
+    docs_url=None,
+)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.SECURITY_CORS_ORIGINS.split(','),
+    allow_origins=settings.SECURITY_CORS_ORIGINS.split(","),
     allow_credentials=True,
     allow_methods=["*"],
-    allow_headers=["*"]
+    allow_headers=["*"],
 )
 
-if settings.LOG_LEVEL == 'DEBUG':
+if settings.LOG_LEVEL == "DEBUG":
+
     @app.middleware("http")
     async def log_requests(request: Request, call_next):
         identifier = uuid.uuid4()
-        req_logger.debug(msg='', extra={'type': 'request',
-                                        'identifier': identifier,
-                                        'path': request.url.path,
-                                        'method': request.method,
-                                        'headers': dict(request.headers),
-                                        'query_params': dict(request.query_params),
-                                        'path_params': dict(request.path_params)
-                                        })
+        req_logger.debug(
+            msg="",
+            extra={
+                "type": "request",
+                "identifier": identifier,
+                "path": request.url.path,
+                "method": request.method,
+                "headers": dict(request.headers),
+                "query_params": dict(request.query_params),
+                "path_params": dict(request.path_params),
+            },
+        )
 
         response: Response = await call_next(request)
-        resp_logger.debug(msg='', extra={'type': 'response',
-                                         'identifier': identifier,
-                                         'code': response.status_code,
-                                         'headers': dict(response.headers)
-                                         })
+        resp_logger.debug(
+            msg="",
+            extra={
+                "type": "response",
+                "identifier": identifier,
+                "code": response.status_code,
+                "headers": dict(response.headers),
+            },
+        )
 
         return response
+
 
 app.include_router(users_api_router)
 app.include_router(group_api_router)
@@ -95,29 +100,32 @@ app.include_router(overview_api_router)
 async def add_process_time_header(request: Request, call_next):
     start_time = time.time()
     response = await call_next(request)
-    response.headers["X-Process-Time-Ms"] = str(round((time.time() - start_time) * 1000, 4))
+    response.headers["X-Process-Time-Ms"] = str(
+        round((time.time() - start_time) * 1000, 4)
+    )
     return response
 
 
-@app.get('/', tags=['main'])
+@app.get("/", tags=["main"])
 async def root():
     return {"detail": "Hello, it is root of console microservice!"}
 
 
-@app.get(path='/liveness',
-         tags=['liveness'],
-         status_code=status.HTTP_204_NO_CONTENT,
-         responses={
-             status.HTTP_204_NO_CONTENT: {},
-             status.HTTP_503_SERVICE_UNAVAILABLE: {
-                 'model': GenericServiceUnavailableResponse
-             }
-         }
-         )
+@app.get(
+    path="/liveness",
+    tags=["liveness"],
+    status_code=status.HTTP_204_NO_CONTENT,
+    responses={
+        status.HTTP_204_NO_CONTENT: {},
+        status.HTTP_503_SERVICE_UNAVAILABLE: {
+            "model": GenericServiceUnavailableResponse
+        },
+    },
+)
 async def liveness(response: Response):
     try:
         with conn.cursor() as curs:
-            curs.execute('SELECT 1;')
+            curs.execute("SELECT 1;")
 
         response.status_code = status.HTTP_204_NO_CONTENT
         return None
@@ -125,20 +133,21 @@ async def liveness(response: Response):
         return ServiceUnavailableError()
 
 
-@app.get(path='/readiness',
-         tags=['readiness'],
-         status_code=status.HTTP_204_NO_CONTENT,
-         responses={
-             status.HTTP_204_NO_CONTENT: {},
-             status.HTTP_503_SERVICE_UNAVAILABLE: {
-                 'model': GenericServiceUnavailableResponse
-             }
-         }
-         )
+@app.get(
+    path="/readiness",
+    tags=["readiness"],
+    status_code=status.HTTP_204_NO_CONTENT,
+    responses={
+        status.HTTP_204_NO_CONTENT: {},
+        status.HTTP_503_SERVICE_UNAVAILABLE: {
+            "model": GenericServiceUnavailableResponse
+        },
+    },
+)
 async def readiness(response: Response):
     try:
         with conn.cursor() as curs:
-            curs.execute('SELECT 1;')
+            curs.execute("SELECT 1;")
 
         response.status_code = status.HTTP_204_NO_CONTENT
         return None

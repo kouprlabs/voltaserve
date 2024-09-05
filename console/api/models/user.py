@@ -13,7 +13,12 @@ from typing import List
 
 from pydantic import EmailStr, Field
 
-from .generic import GenericPaginationRequest, GenericResponse, GenericListResponse, GenericRequest
+from .generic import (
+    GenericPaginationRequest,
+    GenericResponse,
+    GenericListResponse,
+    GenericRequest,
+)
 
 
 # --- REQUEST MODELS --- #

@@ -8,6 +8,7 @@
 # by the GNU Affero General Public License v3.0 only, included in the file
 # licenses/AGPL.txt.
 
+
 class GenericDatabaseException(Exception):
     def __init__(self, message: str):
         super().__init__(message)

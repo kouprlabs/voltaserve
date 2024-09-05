@@ -15,28 +15,32 @@ from ..database import fetch_groups, fetch_group
 from ..database.group import update_group, fetch_group_count
 from ..dependencies import JWTBearer, meilisearch_client
 from ..log import base_logger
-from ..errors import NotFoundError, NoContentError, EmptyDataException, NotFoundException, \
-    UnknownApiError
-from ..models import GroupResponse, GroupListRequest, GroupListResponse, GroupRequest, \
-    UpdateGroupRequest, CountResponse, GroupSearchRequest
+from ..errors import (
+    NotFoundError,
+    NoContentError,
+    EmptyDataException,
+    NotFoundException,
+    UnknownApiError,
+)
+from ..models import (
+    GroupResponse,
+    GroupListRequest,
+    GroupListResponse,
+    GroupRequest,
+    UpdateGroupRequest,
+    CountResponse,
+    GroupSearchRequest,
+)
 
 group_api_router = APIRouter(
-    prefix='/group',
-    tags=['group'],
-    dependencies=[Depends(JWTBearer())]
+    prefix="/group", tags=["group"], dependencies=[Depends(JWTBearer())]
 )
 
 logger = base_logger.getChild("group")
 
 
 # --- GET --- #
-@group_api_router.get(path="",
-                      responses={
-                          status.HTTP_200_OK: {
-                              'model': GroupResponse
-                          }
-                      }
-                      )
+@group_api_router.get(path="", responses={status.HTTP_200_OK: {"model": GroupResponse}})
 async def get_group(data: Annotated[GroupRequest, Depends()]):
     try:
         group = fetch_group(_id=data.id)
@@ -50,13 +54,9 @@ async def get_group(data: Annotated[GroupRequest, Depends()]):
         return UnknownApiError()
 
 
-@group_api_router.get(path="/count",
-                      responses={
-                          status.HTTP_200_OK: {
-                              'model': CountResponse
-                          }
-                      }
-                      )
+@group_api_router.get(
+    path="/count", responses={status.HTTP_200_OK: {"model": CountResponse}}
+)
 async def get_group_count():
     try:
         return CountResponse(**fetch_group_count())
@@ -65,18 +65,16 @@ async def get_group_count():
         return UnknownApiError()
 
 
-@group_api_router.get(path="/all",
-                      responses={
-                          status.HTTP_200_OK: {
-                              'model': GroupListResponse
-                          }
-                      }
-                      )
+@group_api_router.get(
+    path="/all", responses={status.HTTP_200_OK: {"model": GroupListResponse}}
+)
 async def get_all_groups(data: Annotated[GroupListRequest, Depends()]):
     try:
         groups, count = fetch_groups(page=data.page, size=data.size)
 
-        return GroupListResponse(data=groups, totalElements=count, page=data.page, size=data.size)
+        return GroupListResponse(
+            data=groups, totalElements=count, page=data.page, size=data.size
+        )
     except EmptyDataException as e:
         logger.error(e)
         return NoContentError()
@@ -85,19 +83,21 @@ async def get_all_groups(data: Annotated[GroupListRequest, Depends()]):
         return UnknownApiError()
 
 
-@group_api_router.get(path="/search",
-                      responses={
-                          status.HTTP_200_OK: {
-                              'model': GroupListResponse
-                          }
-                      }
-                      )
+@group_api_router.get(
+    path="/search", responses={status.HTTP_200_OK: {"model": GroupListResponse}}
+)
 async def get_search_groups(data: Annotated[GroupSearchRequest, Depends()]):
     try:
-        groups = meilisearch_client.index('group').search(data.query, {'page': data.page, 'hitsPerPage': data.size})
+        groups = meilisearch_client.index("group").search(
+            data.query, {"page": data.page, "hitsPerPage": data.size}
+        )
 
-        return GroupListResponse(data=(fetch_group(group['id']) for group in groups['hits']),
-                                 totalElements=len(groups['hits']), page=data.page, size=data.size)
+        return GroupListResponse(
+            data=(fetch_group(group["id"]) for group in groups["hits"]),
+            totalElements=len(groups["hits"]),
+            page=data.page,
+            size=data.size,
+        )
     except NotFoundException as e:
         logger.error(e)
         return NotFoundError(message=str(e))
@@ -107,16 +107,19 @@ async def get_search_groups(data: Annotated[GroupSearchRequest, Depends()]):
 
 
 # --- PATCH --- #
-@group_api_router.patch(path="",
-                        status_code=status.HTTP_202_ACCEPTED)
+@group_api_router.patch(path="", status_code=status.HTTP_202_ACCEPTED)
 async def patch_group(data: UpdateGroupRequest, response: Response):
     try:
         update_group(data=data.model_dump(exclude_none=True))
-        meilisearch_client.index('group').update_documents([{
-            'id': data.id,
-            'name': data.name,
-            'updateTime': data.updateTime.strftime("%Y-%m-%dT%H:%M:%SZ")
-        }])
+        meilisearch_client.index("group").update_documents(
+            [
+                {
+                    "id": data.id,
+                    "name": data.name,
+                    "updateTime": data.updateTime.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                }
+            ]
+        )
     except NotFoundException as e:
         logger.error(e)
         return NotFoundError(message=str(e))
@@ -126,6 +129,7 @@ async def patch_group(data: UpdateGroupRequest, response: Response):
 
     response.status_code = status.HTTP_202_ACCEPTED
     return None
+
 
 # --- POST --- #
 

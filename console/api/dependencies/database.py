@@ -12,11 +12,12 @@ from psycopg.rows import dict_row
 
 from . import settings
 
-conn = connect(conninfo=f"postgres://{settings.POSTGRES_USER}:"
-                        f"{settings.POSTGRES_PASSWORD}@"
-                        f"{settings.POSTGRES_URL}:"
-                        f"{settings.POSTGRES_PORT}/"
-                        f"{settings.POSTGRES_NAME}",
-               row_factory=dict_row,
-               autocommit=True
-               )
+conn = connect(
+    conninfo=f"postgres://{settings.POSTGRES_USER}:"
+    f"{settings.POSTGRES_PASSWORD}@"
+    f"{settings.POSTGRES_URL}:"
+    f"{settings.POSTGRES_PORT}/"
+    f"{settings.POSTGRES_NAME}",
+    row_factory=dict_row,
+    autocommit=True,
+)
