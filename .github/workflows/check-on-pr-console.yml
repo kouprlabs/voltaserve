@@ -33,7 +33,7 @@ jobs:
         uses: py-actions/flake8@v2
         with:
           path: console
-          ignore: "F401,W291"
+          ignore: "F401,W291,W503"
           max-line-length: "120"
           exclude: ".git,Dockerfile"
 
