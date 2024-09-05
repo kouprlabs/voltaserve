@@ -1,0 +1,42 @@
+name: Feature Request
+description: Suggest an idea for this project
+title: <title>
+labels:
+  - enhancement
+assignees: [bouassaba, dsonck92, loboda4450, mrkazik99]
+
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Detailed description of the feature
+      description: Provide a detailed description of the feature you are requesting.
+      placeholder: Please describe the feature you are requesting.
+
+  - type: textarea
+    id: use_case
+    attributes:
+      label: Description of the use case
+      description: Describe the use case that this feature would address.
+      placeholder: Please describe the use case for this feature.
+
+  - type: textarea
+    id: benefits
+    attributes:
+      label: Explanation of the benefits
+      description: Explain the benefits that this feature would bring to the project.
+      placeholder: Please describe the benefits of this feature.
+
+  - type: textarea
+    id: possible_implementation
+    attributes:
+      label: Possible Implementation (if applicable)
+      description: Describe how you think this feature could be implemented, if applicable.
+      placeholder: Please describe the possible implementation.
+
+  - type: textarea
+    id: additional_information
+    attributes:
+      label: Any additional information, context, or logs
+      description: Provide any additional information, context, or logs that might be relevant to the request.
+      placeholder: Please provide additional information here.
