@@ -19,6 +19,7 @@ import {
   ModalHeader,
   ModalOverlay,
 } from '@chakra-ui/react'
+import cx from 'classnames'
 
 interface ConsoleConfirmationModalProps {
   action: string | undefined
@@ -66,28 +67,30 @@ const ConsoleConfirmationModal = (props: ConsoleConfirmationModalProps) => {
             Please confirm this action
           </ModalBody>
           <ModalFooter>
-            <Button
-              type="button"
-              variant="outline"
-              colorScheme="blue"
-              disabled={props.isSubmitting}
-              onClick={() => {
-                props.closeConfirmationWindow()
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="button"
-              variant="solid"
-              colorScheme="blue"
-              isLoading={props.isSubmitting}
-              onClick={async () => {
-                await props.request(null, null, null, true)
-              }}
-            >
-              Confirm
-            </Button>
+            <div className={cx('flex', 'flex-row', 'items-center', 'gap-1')}>
+              <Button
+                type="button"
+                variant="outline"
+                colorScheme="blue"
+                disabled={props.isSubmitting}
+                onClick={() => {
+                  props.closeConfirmationWindow()
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                variant="solid"
+                colorScheme="blue"
+                isLoading={props.isSubmitting}
+                onClick={async () => {
+                  await props.request(null, null, null, true)
+                }}
+              >
+                Confirm
+              </Button>
+            </div>
           </ModalFooter>
         </ModalContent>
       </Modal>

@@ -17,7 +17,7 @@ const ConsolePanelDatabase = () => {
   const location = useLocation()
   const navigate = useNavigate()
   const [tabIndex, setTabIndex] = useState(0)
-  const [indexesAvailable, setIndexesAvailable] = useState(true)
+  const [indexesAvailable, setIndexesAvailable] = useState(false)
 
   useEffect(() => {
     const segments = location.pathname.split('/')

@@ -12,7 +12,9 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import {
   Badge,
   Button,
+  Center,
   Heading,
+  IconButton,
   Menu,
   MenuButton,
   MenuItem,
@@ -31,7 +33,7 @@ import { Helmet } from 'react-helmet-async'
 import ConsoleApi, { InvitationManagementList } from '@/client/console/console'
 import ConsoleConfirmationModal from '@/components/console/console-confirmation-modal'
 import { consoleInvitationsPaginationStorage } from '@/infra/pagination'
-import { IconChevronDown, IconChevronUp } from '@/lib/components/icons'
+import { IconMoreVert } from '@/lib/components/icons'
 import PagePagination from '@/lib/components/page-pagination'
 import SectionSpinner from '@/lib/components/section-spinner'
 import usePagePagination from '@/lib/hooks/page-pagination'
@@ -124,7 +126,7 @@ const ConsolePanelInvitations = () => {
                   <Th>Status</Th>
                   <Th>Create time</Th>
                   <Th>Update time</Th>
-                  <Th>Actions</Th>
+                  <Th></Th>
                 </Tr>
               </Thead>
               <Tbody>
@@ -167,39 +169,30 @@ const ConsolePanelInvitations = () => {
                     </Td>
                     <Td>
                       {invitation.status === 'pending' ? (
-                        <Menu>
-                          {({ isOpen }) => (
-                            <>
-                              <MenuButton
-                                isActive={isOpen}
-                                as={Button}
-                                rightIcon={
-                                  isOpen ? (
-                                    <IconChevronUp />
-                                  ) : (
-                                    <IconChevronDown />
+                        <Center>
+                          <Menu>
+                            <MenuButton
+                              as={IconButton}
+                              icon={<IconMoreVert />}
+                              variant="ghost"
+                              aria-label=""
+                            />
+                            <MenuList>
+                              <MenuItem
+                                onClick={async () => {
+                                  setConfirmWindowAction('deny invitation')
+                                  await changeInvitationStatus(
+                                    invitation.id,
+                                    `${invitation.email} to ${invitation.organization.name}`,
+                                    false,
                                   )
-                                }
+                                }}
                               >
-                                Actions
-                              </MenuButton>
-                              <MenuList>
-                                <MenuItem
-                                  onClick={async () => {
-                                    setConfirmWindowAction('deny invitation')
-                                    await changeInvitationStatus(
-                                      invitation.id,
-                                      `${invitation.email} to ${invitation.organization.name}`,
-                                      false,
-                                    )
-                                  }}
-                                >
-                                  Deny
-                                </MenuItem>
-                              </MenuList>
-                            </>
-                          )}
-                        </Menu>
+                                Deny
+                              </MenuItem>
+                            </MenuList>
+                          </Menu>
+                        </Center>
                       ) : null}
                     </Td>
                   </Tr>

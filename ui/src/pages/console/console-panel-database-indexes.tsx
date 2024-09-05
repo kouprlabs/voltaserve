@@ -156,7 +156,7 @@ const ConsolePanelDatabaseIndexes = () => {
                   <Th>Name</Th>
                   <Th>Table</Th>
                   <Th>Syntax</Th>
-                  <Th>Actions</Th>
+                  <Th></Th>
                 </Tr>
               </Thead>
               <Tbody>

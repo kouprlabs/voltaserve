@@ -10,8 +10,13 @@
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import {
-  Button,
+  Center,
   Heading,
+  IconButton,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
   Stack,
   Table,
   Tbody,
@@ -27,9 +32,9 @@ import { Helmet } from 'react-helmet-async'
 import ConsoleApi, {
   OrganizationManagementList,
 } from '@/client/console/console'
-import ConsoleHighlightableTr from '@/components/console/console-highlightable-tr'
 import ConsoleRenameModal from '@/components/console/console-rename-modal'
 import { consoleOrganizationsPaginationStorage } from '@/infra/pagination'
+import { IconMoreVert } from '@/lib/components/icons'
 import PagePagination from '@/lib/components/page-pagination'
 import SectionSpinner from '@/lib/components/section-spinner'
 import { decodeQuery } from '@/lib/helpers/query'
@@ -48,7 +53,7 @@ const ConsolePanelOrganizations = () => {
   })
   const [confirmRenameWindowOpen, setConfirmRenameWindowOpen] = useState(false)
   const [isSubmitting, setSubmitting] = useState(false)
-  const [currentName, setCurrentName] = useState<string>()
+  const [currentName, setCurrentName] = useState<string>('')
   const [organizationId, setOrganizationId] = useState<string>()
   const formSchema = Yup.object().shape({
     name: Yup.string().required('Name is required').max(255),
@@ -70,7 +75,7 @@ const ConsolePanelOrganizations = () => {
       } finally {
         closeConfirmationWindow()
       }
-    } else if (id !== null && currentName !== null) {
+    } else if (id !== null && currentName !== null && currentName !== '') {
       setConfirmRenameWindowOpen(true)
       setCurrentName(currentName)
       setOrganizationId(id)
@@ -80,7 +85,7 @@ const ConsolePanelOrganizations = () => {
   const closeConfirmationWindow = () => {
     setConfirmRenameWindowOpen(false)
     setSubmitting(false)
-    setCurrentName(undefined)
+    setCurrentName('')
     setOrganizationId(undefined)
   }
 
@@ -128,12 +133,13 @@ const ConsolePanelOrganizations = () => {
                   <Th>Workspace name</Th>
                   <Th>Create time</Th>
                   <Th>Update time</Th>
-                  <Th>Actions</Th>
+                  <Th></Th>
                 </Tr>
               </Thead>
               <Tbody>
                 {list.data.map((organization) => (
-                  <ConsoleHighlightableTr
+                  <Tr
+                    style={{ cursor: 'pointer' }}
                     key={organization.id}
                     onClick={(event) => {
                       if (
@@ -159,19 +165,31 @@ const ConsolePanelOrganizations = () => {
                       </Text>
                     </Td>
                     <Td>
-                      <Button
-                        onClick={async () => {
-                          await renameOrganization(
-                            organization.id,
-                            organization.name,
-                            null,
-                          )
-                        }}
-                      >
-                        Rename
-                      </Button>
+                      <Center>
+                        <Menu>
+                          <MenuButton
+                            as={IconButton}
+                            icon={<IconMoreVert />}
+                            variant="ghost"
+                            aria-label=""
+                          />
+                          <MenuList>
+                            <MenuItem
+                              onClick={async () => {
+                                await renameOrganization(
+                                  organization.id,
+                                  organization.name,
+                                  null,
+                                )
+                              }}
+                            >
+                              Rename
+                            </MenuItem>
+                          </MenuList>
+                        </Menu>
+                      </Center>
                     </Td>
-                  </ConsoleHighlightableTr>
+                  </Tr>
                 ))}
               </Tbody>
             </Table>
