@@ -144,8 +144,7 @@ const ConsolePanelOrganizations = () => {
                     onClick={(event) => {
                       if (
                         !(event.target instanceof HTMLButtonElement) &&
-                        !(event.target instanceof HTMLSpanElement) &&
-                        !(event.target instanceof HTMLParagraphElement)
+                        !(event.target instanceof HTMLSpanElement)
                       ) {
                         navigate(`/console/organizations/${organization.id}`)
                       }

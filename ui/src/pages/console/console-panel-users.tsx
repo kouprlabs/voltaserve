@@ -173,8 +173,7 @@ const ConsolePanelUsers = () => {
                     onClick={(event) => {
                       if (
                         !(event.target instanceof HTMLButtonElement) &&
-                        !(event.target instanceof HTMLSpanElement) &&
-                        !(event.target instanceof HTMLParagraphElement)
+                        !(event.target instanceof HTMLSpanElement)
                       ) {
                         navigate(`/console/users/${user.id}`)
                       }
