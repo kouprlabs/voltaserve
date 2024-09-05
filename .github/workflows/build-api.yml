@@ -17,6 +17,9 @@ on:
       - main
     paths:
       - "api/**"
+      - "!api/.gitattributes"
+      - "!api/.gitignore"
+      - "!api/.README.md"
     tags:
       - 'v*'
 

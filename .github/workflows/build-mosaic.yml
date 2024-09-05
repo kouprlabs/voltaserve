@@ -17,6 +17,9 @@ on:
       - main
     paths:
       - "mosaic/**"
+      - "!mosaic/.gitattributes"
+      - "!mosaic/.gitignore"
+      - "!mosaic/.README.md"
     tags:
       - 'v*'
 

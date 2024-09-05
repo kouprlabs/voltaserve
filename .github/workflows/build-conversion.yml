@@ -17,6 +17,9 @@ on:
       - main
     paths:
       - "conversion/**"
+      - "!conversion/.gitattributes"
+      - "!conversion/.gitignore"
+      - "!conversion/.README.md"
     tags:
       - 'v*'
 

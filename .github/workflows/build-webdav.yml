@@ -17,6 +17,9 @@ on:
       - main
     paths:
       - "webdav/**"
+      - "!webdav/.gitattributes"
+      - "!webdav/.gitignore"
+      - "!webdav/.README.md"
     tags:
       - 'v*'
 

@@ -17,6 +17,8 @@ on:
       - main
     paths:
       - "console/**"
+      - "!console/.gitignore"
+      - "!console/.README.md"
     tags:
       - 'v*'
 

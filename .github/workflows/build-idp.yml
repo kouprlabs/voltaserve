@@ -17,6 +17,9 @@ on:
       - main
     paths:
       - "idp/**"
+      - "!idp/.gitattributes"
+      - "!idp/.gitignore"
+      - "!idp/.README.md"
     tags:
       - 'v*'
 
