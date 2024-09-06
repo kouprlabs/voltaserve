@@ -129,6 +129,9 @@ func (r *GroupRouter) List(c *fiber.Ctx) error {
 			return err
 		}
 	}
+	if size == 0 {
+		return errorpkg.NewInvalidQueryParamError("size")
+	}
 	sortBy := c.Query("sort_by")
 	if !IsValidSortBy(sortBy) {
 		return errorpkg.NewInvalidQueryParamError("sort_by")
