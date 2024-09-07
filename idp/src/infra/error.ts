@@ -72,6 +72,7 @@ export type ErrorData = {
   moreInfo: string
   /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
   error?: any
+  payload?: Map<string, string>
 }
 
 export type ErrorResponse = {
@@ -88,6 +89,7 @@ export type ErrorOptions = {
   userMessage?: string
   /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
   error?: any
+  payload?: Map<string, string>
 }
 
 export function newError(options: ErrorOptions): ErrorData {
@@ -102,6 +104,7 @@ export function newError(options: ErrorOptions): ErrorData {
     userMessage,
     moreInfo: `https://voltaserve.com/docs/idp/errors/${options.code}`,
     error: options.error,
+    payload: options.payload
   }
 }
 

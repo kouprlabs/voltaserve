@@ -83,9 +83,11 @@ export const checkForcePasswordChange = async (userId: string) => {
   const user = await getUserByAdmin(userId)
   if (user.forceChangePassword) {
     const resetPasswordToken = await userRepo.getResetPasswordToken(user.id)
+    const payload = new Map<string, string>()
+    payload.set('resetPasswordToken', resetPasswordToken)
     throw newError({
       code: ErrorCode.ForceChangePassword,
-      message: resetPasswordToken,
+      payload
     })
   }
 }
