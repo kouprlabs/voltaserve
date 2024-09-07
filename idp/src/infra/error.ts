@@ -27,6 +27,7 @@ export enum ErrorCode {
   UserNotFound = 'user_not_found',
   OrphanError = 'orphan_error',
   SearchError = 'search_error',
+  ForceChangePassword = 'force_change_password',
 }
 
 const statuses: { [key: string]: number } = {
@@ -35,6 +36,7 @@ const statuses: { [key: string]: number } = {
   [ErrorCode.UsernameUnavailable]: 409,
   [ErrorCode.ResourceNotFound]: 404,
   [ErrorCode.InvalidUsernameOrPassword]: 401,
+  [ErrorCode.ForceChangePassword]: 401,
   [ErrorCode.InvalidPassword]: 401,
   [ErrorCode.InvalidJwt]: 401,
   [ErrorCode.EmailNotConfimed]: 401,
@@ -54,6 +56,7 @@ const userMessages: { [key: string]: string } = {
   [ErrorCode.EmailNotConfimed]: 'Email not confirmed.',
   [ErrorCode.InvalidPassword]: 'Invalid password.',
   [ErrorCode.InvalidUsernameOrPassword]: 'Invalid username or password.',
+  [ErrorCode.ForceChangePassword]: 'You need to change your password ASAP.',
   [ErrorCode.UserSuspended]: 'User suspended.',
   [ErrorCode.MissingPermission]: 'You are not an console',
   [ErrorCode.OrphanError]: 'You cannot suspend last console',

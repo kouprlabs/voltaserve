@@ -20,7 +20,7 @@ import {
   UserIdRequest,
   UserSuspendPostRequest,
 } from '@/infra/admin-requests'
-import { parseValidationError } from '@/infra/error'
+import {ErrorCode, newError, parseValidationError} from '@/infra/error'
 import { PassportRequest } from '@/infra/passport-request'
 import { checkAdmin } from '@/token/service'
 import {
@@ -42,7 +42,6 @@ import {
   getUserByAdmin,
   searchUserListPaginated,
   forceResetPassword,
-  getResetPasswordToken,
 } from './service'
 
 const router = Router()
@@ -54,8 +53,9 @@ router.get(
     const user = await getUserByAdmin(req.user.id)
     console.log('test', user.forceChangePassword)
     if (user.forceChangePassword) {
-      const resetPasswordToken = await getResetPasswordToken(user.id)
-      res.redirect(`/reset-password/${resetPasswordToken}`)
+      throw newError({
+        code: ErrorCode.ForceChangePassword,
+      })
     }
     try {
       res.json(await getUser(req.user.id))

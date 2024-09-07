@@ -66,6 +66,7 @@ export async function fetcher<T>({
       body,
       headers,
       credentials: authenticate ? 'include' : undefined,
+      redirect: 'error',
     },
     redirect,
     showError,
@@ -87,6 +88,11 @@ export async function baseFetcher(
 ) {
   try {
     const response = await fetch(url, init)
+    if (url.endsWith('/user')) {
+      if (response.status === 304 || response.status === 302) {
+        console.log(response.status)
+      }
+    }
     return handleResponse(response, redirect, showError)
   } catch (error) {
     if (showError) {
@@ -102,11 +108,14 @@ async function handleResponse(
   redirect = true,
   showError = true,
 ) {
-  if (response.status <= 299) {
+  console.log(response.status)
+  if (response.status <= 299 && response.status >= 200) {
     return response
   } else {
     if (response.status === 401 && redirect) {
       window.location.href = '/sign-in'
+    } else if (response.status === 302 || response.status === 301) {
+      window.location.href = response.headers.get('location')!
     }
     if (showError) {
       let message
