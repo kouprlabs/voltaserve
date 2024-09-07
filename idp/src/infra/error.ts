@@ -72,7 +72,7 @@ export type ErrorData = {
   moreInfo: string
   /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
   error?: any
-  payload?: Map<string, string>
+  payload?: { [key: string]: string }
 }
 
 export type ErrorResponse = {
@@ -81,7 +81,7 @@ export type ErrorResponse = {
   message: string
   userMessage: string
   moreInfo: string
-  payload?: Map<string, string>
+  payload?: { [key: string]: string }
 }
 
 export type ErrorOptions = {
@@ -90,7 +90,7 @@ export type ErrorOptions = {
   userMessage?: string
   /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
   error?: any
-  payload?: Map<string, string>
+  payload?: { [key: string]: string }
 }
 
 export function newError(options: ErrorOptions): ErrorData {
