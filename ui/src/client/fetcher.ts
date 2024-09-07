@@ -108,7 +108,7 @@ async function handleResponse(
     const errorResponse = await response.json()
     if (response.status === 401 && redirect) {
       if (errorResponse.code === 'force_change_password') {
-        window.location.href = `/reset-password/${errorResponse.payload.resetpasswordToken}`
+        window.location.href = `/reset-password/${errorResponse.payload.resetPasswordToken}`
       } else {
         window.location.href = '/sign-in'
       }
