@@ -98,6 +98,7 @@ export async function resetPassword(options: AccountResetPasswordOptions) {
   await userRepo.update({
     id: user.id,
     passwordHash: hashPassword(options.newPassword),
+    resetPasswordToken: null
   })
 }
 
