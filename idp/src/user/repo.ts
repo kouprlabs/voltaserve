@@ -270,7 +270,8 @@ class UserRepoImpl {
           email_update_value = $13,
           picture = $14,
           update_time = $15
-        WHERE id = $16
+          force_change_password = $16
+        WHERE id = $17
         RETURNING *`,
       [
         entity.fullName,
@@ -288,6 +289,7 @@ class UserRepoImpl {
         entity.emailUpdateValue,
         entity.picture,
         new Date().toISOString(),
+        entity.forceChangePassword,
         entity.id,
       ],
     )
