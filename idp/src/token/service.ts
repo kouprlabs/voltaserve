@@ -149,6 +149,6 @@ function newRefreshTokenExpiry(): string {
 
 function newAccessTokenExpiry(): number {
   const now = new Date()
-  now.setSeconds(now.getSeconds() + getConfig().token.refreshTokenLifetime)
+  now.setSeconds(now.getSeconds() + getConfig().token.accessTokenLifetime)
   return Math.floor(now.getTime() / 1000)
 }
