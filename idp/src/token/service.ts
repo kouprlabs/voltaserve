@@ -79,7 +79,7 @@ export const checkAdmin = (jwt) => {
     throw newError({ code: ErrorCode.MissingPermission })
 }
 
-export const checkForcePasswordChange = async (userId) => {
+export const checkForcePasswordChange = async (userId: string) => {
   const user = await getUserByAdmin(userId)
   if (user.forceChangePassword) {
     throw newError({
