@@ -81,6 +81,7 @@ export type ErrorResponse = {
   message: string
   userMessage: string
   moreInfo: string
+  payload?: Map<string, string>
 }
 
 export type ErrorOptions = {
@@ -115,6 +116,7 @@ export function newResponse(data: ErrorData): ErrorResponse {
     message: data.message,
     userMessage: data.userMessage,
     moreInfo: data.moreInfo,
+    payload: data.payload,
   }
 }
 
