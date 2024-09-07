@@ -66,7 +66,9 @@ const ConsolePanelUsers = () => {
       suspend: boolean | null,
       confirm: boolean = false,
     ) => {
+      console.log('suspend', confirm, userId, actionState)
       if (confirm && userId && actionState !== undefined) {
+        console.log('suspend fire req')
         setSubmitting(true)
         try {
           await UserAPI.suspendUser({ id: userId, suspend: actionState })
@@ -80,7 +82,7 @@ const ConsolePanelUsers = () => {
         setUserId(id)
       }
     },
-    [],
+    [userId, isSubmitting],
   )
 
   const makeAdminUser = useCallback(
@@ -104,7 +106,7 @@ const ConsolePanelUsers = () => {
         setUserId(id)
       }
     },
-    [],
+    [userId, isSubmitting],
   )
 
   const closeConfirmationWindow = () => {
@@ -256,7 +258,7 @@ const ConsolePanelUsers = () => {
                                 <MenuItem
                                   onClick={async () => {
                                     setConfirmWindowAction(
-                                      'remove console rights from',
+                                      'remove admin rights from',
                                     )
                                     await makeAdminUser(
                                       user.id,
@@ -271,7 +273,7 @@ const ConsolePanelUsers = () => {
                                 <MenuItem
                                   onClick={async () => {
                                     setConfirmWindowAction(
-                                      'grant console rights to',
+                                      'grant admin rights to',
                                     )
                                     await makeAdminUser(
                                       user.id,

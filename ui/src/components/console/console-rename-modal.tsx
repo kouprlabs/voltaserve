@@ -24,6 +24,7 @@ import {
 import { Field, FieldAttributes, FieldProps, Form, Formik } from 'formik'
 import * as Yup from 'yup'
 import cx from 'classnames'
+import useFocusAndSelectAll from '@/hooks/use-focus-and-select-all'
 
 interface ConsoleRenameModalProps {
   closeConfirmationWindow: () => void
@@ -45,6 +46,9 @@ interface ConsoleRenameModalProps {
 }
 const ConsoleRenameModal = (props: ConsoleRenameModalProps) => {
   const inputRef = useRef<HTMLInputElement>(null)
+
+  useFocusAndSelectAll(inputRef, props.isOpen)
+
   useEffect(() => {
     if (
       props.isOpen &&

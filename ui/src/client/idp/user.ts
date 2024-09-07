@@ -181,6 +181,14 @@ export default class UserAPI {
     }) as Promise<User>
   }
 
+  static async forceResetPassword(options: baseUserIdRequest) {
+    return idpFetcher({
+      url: `/user/force_reset_password`,
+      method: 'PATCH',
+      body: JSON.stringify(options),
+    }) as Promise<void>
+  }
+
   static paramsFromListOptions(options: ListOptions): URLSearchParams {
     const params: ListQueryParams = {}
     if (options?.id) {

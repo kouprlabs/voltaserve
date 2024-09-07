@@ -7,7 +7,7 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import {
   Avatar,
@@ -26,7 +26,9 @@ import {
   Table,
   Text,
   Th,
+  Thead,
   Tooltip,
+  Tr,
 } from '@chakra-ui/react'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
@@ -36,6 +38,7 @@ import ConsoleApi, {
   WorkspaceUserManagementList,
 } from '@/client/console/console'
 import UserAPI, { ConsoleUser } from '@/client/idp/user'
+import ConsoleConfirmationModal from '@/components/console/console-confirmation-modal'
 import {
   IconClose,
   IconEdit,
@@ -73,6 +76,40 @@ const ConsolePanelUser = () => {
   const [workspacesPage, setWorkspacesPage] = useState(1)
   const [groupsPage, setGroupsPage] = useState(1)
   const [organizationsPage, setOrganizationsPage] = useState(1)
+  const [confirmResetPasswordWindowOpen, setConfirmResetPasswordWindowOpen] =
+    useState(false)
+  const [isSubmitting, setSubmitting] = useState(false)
+  const [userEmail, setUserEmail] = useState<string>()
+  const [userId, setUserId] = useState<string>()
+
+  const closeConfirmationWindow = () => {
+    setConfirmResetPasswordWindowOpen(false)
+    setSubmitting(false)
+  }
+
+  const forceResetPassword = useCallback(
+    async (
+      id: string | null,
+      email: string | null,
+      _action: boolean | null,
+      confirm: boolean = false,
+    ) => {
+      console.log('xDDD', id, email, confirm)
+      if (confirm && userId) {
+        setSubmitting(true)
+        try {
+          await UserAPI.forceResetPassword({ id: userId })
+        } finally {
+          closeConfirmationWindow()
+        }
+      } else if (id && email) {
+        setConfirmResetPasswordWindowOpen(true)
+        setUserEmail(email)
+        setUserId(id)
+      }
+    },
+    [userId, isSubmitting],
+  )
 
   const userFetch = () => {
     if (id) {
@@ -135,6 +172,14 @@ const ConsolePanelUser = () => {
 
   return (
     <>
+      <ConsoleConfirmationModal
+        isOpen={confirmResetPasswordWindowOpen}
+        action={'force password change on'}
+        target={userEmail}
+        closeConfirmationWindow={closeConfirmationWindow}
+        isSubmitting={isSubmitting}
+        request={forceResetPassword}
+      />
       <Helmet>
         <title>User Management</title>
       </Helmet>
@@ -235,8 +280,8 @@ const ConsolePanelUser = () => {
                 <EditButton
                   aria-label=""
                   icon={<IconSync />}
-                  onClick={() => {
-                    console.log('change password')
+                  onClick={async () => {
+                    await forceResetPassword(userData.id, userData.email, true)
                   }}
                 />
               </div>
@@ -249,32 +294,36 @@ const ConsolePanelUser = () => {
           ) : (
             <>
               <Table>
-                <Th>
-                  <Flex>
-                    <span className={cx('font-bold')}>Organizations</span>
-                    <Spacer />
-                    {organizationsData.totalElements > 5 ? (
-                      <Center>
-                        <>
-                          <PagePagination
-                            totalElements={organizationsData.totalElements}
-                            totalPages={Math.ceil(
-                              organizationsData.totalElements / 5,
-                            )}
-                            page={organizationsPage}
-                            size={5}
-                            steps={[]}
-                            setPage={setOrganizationsPage}
-                            setSize={() => {}}
-                            uiSize="xs"
-                            disableLastNav
-                            disableMiddleNav
-                          />
-                        </>
-                      </Center>
-                    ) : null}
-                  </Flex>
-                </Th>
+                <Thead>
+                  <Tr>
+                    <Th>
+                      <Flex>
+                        <span className={cx('font-bold')}>Organizations</span>
+                        <Spacer />
+                        {organizationsData.totalElements > 5 ? (
+                          <Center>
+                            <>
+                              <PagePagination
+                                totalElements={organizationsData.totalElements}
+                                totalPages={Math.ceil(
+                                  organizationsData.totalElements / 5,
+                                )}
+                                page={organizationsPage}
+                                size={5}
+                                steps={[]}
+                                setPage={setOrganizationsPage}
+                                setSize={() => {}}
+                                uiSize="xs"
+                                disableLastNav
+                                disableMiddleNav
+                              />
+                            </>
+                          </Center>
+                        ) : null}
+                      </Flex>
+                    </Th>
+                  </Tr>
+                </Thead>
               </Table>
               <Divider mb={4} />
               <Stack>
@@ -311,30 +360,34 @@ const ConsolePanelUser = () => {
           ) : (
             <>
               <Table>
-                <Th>
-                  <Flex>
-                    <span className={cx('font-bold')}>Workspaces</span>
-                    <Spacer />
-                    {workspacesData.totalElements > 5 ? (
-                      <>
-                        <PagePagination
-                          totalElements={workspacesData.totalElements}
-                          totalPages={Math.ceil(
-                            workspacesData.totalElements / 5,
-                          )}
-                          page={workspacesPage}
-                          size={5}
-                          steps={[]}
-                          setPage={setWorkspacesPage}
-                          setSize={() => {}}
-                          uiSize="xs"
-                          disableLastNav
-                          disableMiddleNav
-                        />
-                      </>
-                    ) : null}
-                  </Flex>
-                </Th>
+                <Thead>
+                  <Tr>
+                    <Th>
+                      <Flex>
+                        <span className={cx('font-bold')}>Workspaces</span>
+                        <Spacer />
+                        {workspacesData.totalElements > 5 ? (
+                          <>
+                            <PagePagination
+                              totalElements={workspacesData.totalElements}
+                              totalPages={Math.ceil(
+                                workspacesData.totalElements / 5,
+                              )}
+                              page={workspacesPage}
+                              size={5}
+                              steps={[]}
+                              setPage={setWorkspacesPage}
+                              setSize={() => {}}
+                              uiSize="xs"
+                              disableLastNav
+                              disableMiddleNav
+                            />
+                          </>
+                        ) : null}
+                      </Flex>
+                    </Th>
+                  </Tr>
+                </Thead>
               </Table>
               <Divider mb={4} />
               <Stack overflowX="auto">
@@ -369,28 +422,34 @@ const ConsolePanelUser = () => {
           ) : (
             <>
               <Table>
-                <Th>
-                  <Flex>
-                    <span className={cx('font-bold')}>Groups</span>
-                    <Spacer />
-                    {groupsData.totalElements > 5 ? (
-                      <>
-                        <PagePagination
-                          totalElements={groupsData.totalElements}
-                          totalPages={Math.ceil(groupsData.totalElements / 5)}
-                          page={groupsPage}
-                          size={5}
-                          steps={[]}
-                          setPage={setGroupsPage}
-                          setSize={() => {}}
-                          uiSize="xs"
-                          disableLastNav
-                          disableMiddleNav
-                        />
-                      </>
-                    ) : null}
-                  </Flex>
-                </Th>
+                <Thead>
+                  <Tr>
+                    <Th>
+                      <Flex>
+                        <span className={cx('font-bold')}>Groups</span>
+                        <Spacer />
+                        {groupsData.totalElements > 5 ? (
+                          <>
+                            <PagePagination
+                              totalElements={groupsData.totalElements}
+                              totalPages={Math.ceil(
+                                groupsData.totalElements / 5,
+                              )}
+                              page={groupsPage}
+                              size={5}
+                              steps={[]}
+                              setPage={setGroupsPage}
+                              setSize={() => {}}
+                              uiSize="xs"
+                              disableLastNav
+                              disableMiddleNav
+                            />
+                          </>
+                        ) : null}
+                      </Flex>
+                    </Th>
+                  </Tr>
+                </Thead>
               </Table>
               <Divider mb={4} />
               <Stack>
