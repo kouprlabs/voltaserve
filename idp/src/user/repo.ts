@@ -26,6 +26,21 @@ class UserRepoImpl {
     return this.mapRow(rows[0])
   }
 
+  async getResetPasswordToken(id: string): Promise<string> {
+    const { rowCount, rows } = await client.query(
+      `SELECT reset_password_token FROM "user" WHERE id = $1`,
+      [id],
+    )
+    if (rowCount < 1) {
+      throw newError({
+        code: ErrorCode.InternalServerError,
+        userMessage:
+          'Critical error, please contact administrator (missing password token)',
+      })
+    }
+    return rows[0].reset_password_token
+  }
+
   async findByUsername(username: string): Promise<User> {
     const { rowCount, rows } = await client.query(
       `SELECT * FROM "user" WHERE username = $1`,
@@ -335,6 +350,7 @@ class UserRepoImpl {
       isActive: row.is_active,
       emailUpdateToken: row.email_update_token,
       emailUpdateValue: row.email_update_value,
+      forceChangePassword: row.force_change_password,
       picture: row.picture,
       createTime: row.create_time,
       updateTime: row.update_time,

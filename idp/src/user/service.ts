@@ -70,6 +70,10 @@ export async function getUserByAdmin(id: string): Promise<User> {
   return adminMapEntity(await userRepo.findByID(id))
 }
 
+export async function getResetPasswordToken(id: string): Promise<string> {
+  return await userRepo.getResetPasswordToken(id)
+}
+
 export async function searchUserListPaginated(
   query: string,
   size: number,
@@ -385,6 +389,7 @@ export function adminMapEntity(entity: User): User {
     isActive: entity.isActive,
     isAdmin: entity.isAdmin,
     isEmailConfirmed: entity.isEmailConfirmed,
+    forceChangePassword: entity.forceChangePassword,
   }
   Object.keys(user).forEach(
     (index) => !user[index] && user[index] !== undefined && delete user[index],

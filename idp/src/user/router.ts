@@ -20,7 +20,7 @@ import {
   UserIdRequest,
   UserSuspendPostRequest,
 } from '@/infra/admin-requests'
-import { ErrorCode, newError, parseValidationError } from '@/infra/error'
+import { parseValidationError } from '@/infra/error'
 import { PassportRequest } from '@/infra/passport-request'
 import { checkAdmin } from '@/token/service'
 import {
@@ -42,6 +42,7 @@ import {
   getUserByAdmin,
   searchUserListPaginated,
   forceResetPassword,
+  getResetPasswordToken,
 } from './service'
 
 const router = Router()
@@ -51,15 +52,10 @@ router.get(
   passport.authenticate('jwt', { session: false }),
   async (req: PassportRequest, res: Response, next: NextFunction) => {
     const user = await getUserByAdmin(req.user.id)
+    console.log('test', user.forceChangePassword)
     if (user.forceChangePassword) {
-      if (user.resetPasswordToken === null) {
-        throw newError({
-          code: ErrorCode.InternalServerError,
-          userMessage:
-            'Critical error, please contact administrator (missing password token)',
-        })
-      }
-      res.redirect(`/reset-password/${user.resetPasswordToken}`)
+      const resetPasswordToken = await getResetPasswordToken(user.id)
+      res.redirect(`/reset-password/${resetPasswordToken}`)
     }
     try {
       res.json(await getUser(req.user.id))
