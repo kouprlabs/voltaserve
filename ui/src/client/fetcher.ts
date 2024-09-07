@@ -105,8 +105,13 @@ async function handleResponse(
   if (response.status <= 299) {
     return response
   } else {
+    const errorResponse = await response.json()
     if (response.status === 401 && redirect) {
-      window.location.href = '/sign-in'
+      if (errorResponse.code === 'force_change_password') {
+        window.location.href = `/reset-password/${errorResponse.message}`
+      } else {
+        window.location.href = '/sign-in'
+      }
     }
     if (showError) {
       let message
