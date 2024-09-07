@@ -82,8 +82,10 @@ export const checkAdmin = (jwt) => {
 export const checkForcePasswordChange = async (userId: string) => {
   const user = await getUserByAdmin(userId)
   if (user.forceChangePassword) {
+    const resetPasswordToken = await userRepo.getResetPasswordToken(user.id)
     throw newError({
       code: ErrorCode.ForceChangePassword,
+      message: resetPasswordToken,
     })
   }
 }
