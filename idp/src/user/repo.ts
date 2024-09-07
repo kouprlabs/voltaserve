@@ -269,7 +269,7 @@ class UserRepoImpl {
           email_update_token = $12,
           email_update_value = $13,
           picture = $14,
-          update_time = $15
+          update_time = $15,
           force_change_password = $16
         WHERE id = $17
         RETURNING *`,
