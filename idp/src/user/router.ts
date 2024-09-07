@@ -20,9 +20,9 @@ import {
   UserIdRequest,
   UserSuspendPostRequest,
 } from '@/infra/admin-requests'
-import {ErrorCode, newError, parseValidationError} from '@/infra/error'
+import {parseValidationError} from '@/infra/error'
 import { PassportRequest } from '@/infra/passport-request'
-import { checkAdmin } from '@/token/service'
+import {checkAdmin, checkForcePasswordChange} from '@/token/service'
 import {
   deleteUser,
   getUser,
@@ -50,13 +50,7 @@ router.get(
   '/',
   passport.authenticate('jwt', { session: false }),
   async (req: PassportRequest, res: Response, next: NextFunction) => {
-    const user = await getUserByAdmin(req.user.id)
-    console.log('test', user.forceChangePassword)
-    if (user.forceChangePassword) {
-      throw newError({
-        code: ErrorCode.ForceChangePassword,
-      })
-    }
+    await checkForcePasswordChange(req.user.id)
     try {
       res.json(await getUser(req.user.id))
     } catch (err) {

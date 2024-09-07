@@ -14,6 +14,7 @@ import { newHyphenlessUuid } from '@/infra/id'
 import { verifyPassword } from '@/infra/password'
 import { User } from '@/user/model'
 import userRepo from '@/user/repo'
+import {getUserByAdmin} from "@/user/service";
 
 export type TokenGrantType = 'password' | 'refresh_token'
 
@@ -34,7 +35,7 @@ export type TokenExchangeOptions = {
 }
 
 export async function exchange(options: TokenExchangeOptions): Promise<Token> {
-  validateParemeters(options)
+  validateParameters(options)
   // https://datatracker.ietf.org/doc/html/rfc6749#section-4.3
   if (options.grant_type === 'password') {
     let user: User
@@ -78,7 +79,16 @@ export const checkAdmin = (jwt) => {
     throw newError({ code: ErrorCode.MissingPermission })
 }
 
-function validateParemeters(options: TokenExchangeOptions) {
+export const checkForcePasswordChange = async (userId) => {
+  const user = await getUserByAdmin(userId)
+  if (user.forceChangePassword) {
+    throw newError({
+      code: ErrorCode.ForceChangePassword,
+    })
+  }
+}
+
+function validateParameters(options: TokenExchangeOptions) {
   if (!options.grant_type) {
     throw newError({
       code: ErrorCode.InvalidRequest,
