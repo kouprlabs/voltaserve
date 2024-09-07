@@ -269,27 +269,7 @@ const AppBarSearch = () => {
 
   const handleClear = useCallback(() => {
     setBuffer('')
-    if (isFiles) {
-      navigate(`/workspace/${workspaceId}/file/${fileId}`)
-    } else if (isWorkspaces) {
-      navigate(`/workspace`)
-    } else if (isGroups) {
-      navigate(`/group`)
-    } else if (isOrgs) {
-      navigate(`/organization`)
-    } else if (isOrgMembers) {
-      navigate(`/organization/${workspaceId}/member`)
-    } else if (isGroupMembers) {
-      navigate(`/group/${workspaceId}/member`)
-    } else if (isConsoleUsers) {
-      navigate(`/console/users`)
-    } else if (isConsoleOrganizations) {
-      navigate(`/console/organization`)
-    } else if (isConsoleGroups) {
-      navigate(`/console/groups`)
-    } else if (isConsoleWorkspaces) {
-      navigate(`/console/workspaces`)
-    }
+    handleSearch('')
   }, [
     workspaceId,
     fileId,
@@ -299,12 +279,16 @@ const AppBarSearch = () => {
     isOrgs,
     isOrgMembers,
     isGroupMembers,
+    isConsoleUsers,
+    isConsoleOrganizations,
+    isConsoleGroups,
+    isConsoleWorkspaces,
     navigate,
   ])
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent<HTMLInputElement>) => {
-      if (event.key === 'Enter' && buffer.length >= 3) {
+      if (event.key === 'Enter' && buffer.trim().length >= 3) {
         handleSearch(buffer.trim())
       } else if (
         event.key === 'Enter' &&

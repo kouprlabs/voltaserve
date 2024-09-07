@@ -23,12 +23,13 @@ import {
 } from '@chakra-ui/react'
 import { Field, FieldAttributes, FieldProps, Form, Formik } from 'formik'
 import * as Yup from 'yup'
+import cx from 'classnames'
 
 interface ConsoleRenameModalProps {
   closeConfirmationWindow: () => void
   isOpen: boolean
   isSubmitting: boolean
-  previousName: string | undefined
+  previousName: string
   object: string
   formSchema: Yup.ObjectSchema<
     { name: string },
@@ -69,7 +70,7 @@ const ConsoleRenameModal = (props: ConsoleRenameModalProps) => {
         <ModalCloseButton />
         <Formik
           enableReinitialize={true}
-          initialValues={{ name: '' }}
+          initialValues={{ name: props.previousName }}
           validationSchema={props.formSchema}
           validateOnBlur={false}
           onSubmit={async (event) => {
@@ -98,25 +99,29 @@ const ConsoleRenameModal = (props: ConsoleRenameModalProps) => {
                 </Field>
               </ModalBody>
               <ModalFooter>
-                <Button
-                  type="button"
-                  variant="outline"
-                  colorScheme="blue"
-                  disabled={isSubmitting}
-                  onClick={() => {
-                    props.closeConfirmationWindow()
-                  }}
+                <div
+                  className={cx('flex', 'flex-row', 'items-center', 'gap-1')}
                 >
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  variant="solid"
-                  colorScheme="blue"
-                  isLoading={isSubmitting}
-                >
-                  Confirm
-                </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    colorScheme="blue"
+                    disabled={isSubmitting}
+                    onClick={() => {
+                      props.closeConfirmationWindow()
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    variant="solid"
+                    colorScheme="blue"
+                    isLoading={isSubmitting}
+                  >
+                    Confirm
+                  </Button>
+                </div>
               </ModalFooter>
             </Form>
           )}

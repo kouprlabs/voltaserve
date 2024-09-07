@@ -13,6 +13,7 @@ import {
   Avatar,
   Badge,
   Box,
+  Center,
   Divider,
   Flex,
   Grid,
@@ -22,7 +23,9 @@ import {
   IconButtonProps,
   Spacer,
   Stack,
+  Table,
   Text,
+  Th,
   Tooltip,
 } from '@chakra-ui/react'
 import cx from 'classnames'
@@ -33,13 +36,19 @@ import ConsoleApi, {
   WorkspaceUserManagementList,
 } from '@/client/console/console'
 import UserAPI, { ConsoleUser } from '@/client/idp/user'
-import { IconClose, IconEdit, IconWarning } from '@/lib/components/icons'
+import {
+  IconClose,
+  IconEdit,
+  IconSync,
+  IconWarning,
+} from '@/lib/components/icons'
 import PagePagination from '@/lib/components/page-pagination'
 import SectionSpinner from '@/lib/components/section-spinner'
 
 const EditButton = (props: IconButtonProps) => (
   <IconButton
-    icon={<IconEdit />}
+    disabled
+    icon={props.icon ? props.icon : <IconEdit />}
     className={cx('h-[40px]', 'w-[40px]')}
     {...props}
   />
@@ -127,7 +136,7 @@ const ConsolePanelUser = () => {
   return (
     <>
       <Helmet>
-        <title>User management</title>
+        <title>User Management</title>
       </Helmet>
       <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
         <Heading className={cx('text-heading')}>{userData.fullName}</Heading>
@@ -221,10 +230,11 @@ const ConsolePanelUser = () => {
                 />
               </div>
               <div className={cx(rowClassName)}>
-                <span>Password</span>
+                <span>Force change password</span>
                 <Spacer />
                 <EditButton
                   aria-label=""
+                  icon={<IconSync />}
                   onClick={() => {
                     console.log('change password')
                   }}
@@ -238,28 +248,34 @@ const ConsolePanelUser = () => {
             <SectionSpinner />
           ) : (
             <>
-              <Flex>
-                <span className={cx('font-bold')}>Organizations</span>
-                <Spacer />
-                {organizationsData.totalElements > 5 ? (
-                  <>
-                    <PagePagination
-                      totalElements={organizationsData.totalElements}
-                      totalPages={Math.ceil(
-                        organizationsData.totalElements / 5,
-                      )}
-                      page={organizationsPage}
-                      size={5}
-                      steps={[]}
-                      setPage={setOrganizationsPage}
-                      setSize={() => {}}
-                      uiSize="xs"
-                      disableLastNav
-                      disableMiddleNav
-                    />
-                  </>
-                ) : null}
-              </Flex>
+              <Table>
+                <Th>
+                  <Flex>
+                    <span className={cx('font-bold')}>Organizations</span>
+                    <Spacer />
+                    {organizationsData.totalElements > 5 ? (
+                      <Center>
+                        <>
+                          <PagePagination
+                            totalElements={organizationsData.totalElements}
+                            totalPages={Math.ceil(
+                              organizationsData.totalElements / 5,
+                            )}
+                            page={organizationsPage}
+                            size={5}
+                            steps={[]}
+                            setPage={setOrganizationsPage}
+                            setSize={() => {}}
+                            uiSize="xs"
+                            disableLastNav
+                            disableMiddleNav
+                          />
+                        </>
+                      </Center>
+                    ) : null}
+                  </Flex>
+                </Th>
+              </Table>
               <Divider mb={4} />
               <Stack>
                 {organizationsData.data && organizationsData.data.length > 0 ? (
@@ -294,26 +310,32 @@ const ConsolePanelUser = () => {
             <SectionSpinner />
           ) : (
             <>
-              <Flex>
-                <span className={cx('font-bold')}>Workspaces</span>
-                <Spacer />
-                {workspacesData.totalElements > 5 ? (
-                  <>
-                    <PagePagination
-                      totalElements={workspacesData.totalElements}
-                      totalPages={Math.ceil(workspacesData.totalElements / 5)}
-                      page={workspacesPage}
-                      size={5}
-                      steps={[]}
-                      setPage={setWorkspacesPage}
-                      setSize={() => {}}
-                      uiSize="xs"
-                      disableLastNav
-                      disableMiddleNav
-                    />
-                  </>
-                ) : null}
-              </Flex>
+              <Table>
+                <Th>
+                  <Flex>
+                    <span className={cx('font-bold')}>Workspaces</span>
+                    <Spacer />
+                    {workspacesData.totalElements > 5 ? (
+                      <>
+                        <PagePagination
+                          totalElements={workspacesData.totalElements}
+                          totalPages={Math.ceil(
+                            workspacesData.totalElements / 5,
+                          )}
+                          page={workspacesPage}
+                          size={5}
+                          steps={[]}
+                          setPage={setWorkspacesPage}
+                          setSize={() => {}}
+                          uiSize="xs"
+                          disableLastNav
+                          disableMiddleNav
+                        />
+                      </>
+                    ) : null}
+                  </Flex>
+                </Th>
+              </Table>
               <Divider mb={4} />
               <Stack overflowX="auto">
                 {workspacesData.data && workspacesData.data.length > 0 ? (
@@ -346,26 +368,30 @@ const ConsolePanelUser = () => {
             <SectionSpinner />
           ) : (
             <>
-              <Flex>
-                <span className={cx('font-bold')}>Groups</span>
-                <Spacer />
-                {groupsData.totalElements > 5 ? (
-                  <>
-                    <PagePagination
-                      totalElements={groupsData.totalElements}
-                      totalPages={Math.ceil(groupsData.totalElements / 5)}
-                      page={groupsPage}
-                      size={5}
-                      steps={[]}
-                      setPage={setGroupsPage}
-                      setSize={() => {}}
-                      uiSize="xs"
-                      disableLastNav
-                      disableMiddleNav
-                    />
-                  </>
-                ) : null}
-              </Flex>
+              <Table>
+                <Th>
+                  <Flex>
+                    <span className={cx('font-bold')}>Groups</span>
+                    <Spacer />
+                    {groupsData.totalElements > 5 ? (
+                      <>
+                        <PagePagination
+                          totalElements={groupsData.totalElements}
+                          totalPages={Math.ceil(groupsData.totalElements / 5)}
+                          page={groupsPage}
+                          size={5}
+                          steps={[]}
+                          setPage={setGroupsPage}
+                          setSize={() => {}}
+                          uiSize="xs"
+                          disableLastNav
+                          disableMiddleNav
+                        />
+                      </>
+                    ) : null}
+                  </Flex>
+                </Th>
+              </Table>
               <Divider mb={4} />
               <Stack>
                 {groupsData.data && groupsData.data.length > 0 ? (

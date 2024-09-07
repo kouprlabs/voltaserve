@@ -11,7 +11,9 @@ import { useCallback, useEffect, useState } from 'react'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import {
   Button,
+  Center,
   Heading,
+  IconButton,
   Menu,
   MenuButton,
   MenuItem,
@@ -31,7 +33,7 @@ import { Helmet } from 'react-helmet-async'
 import ConsoleApi, { WorkspaceManagementList } from '@/client/console/console'
 import ConsoleRenameModal from '@/components/console/console-rename-modal'
 import { consoleWorkspacesPaginationStorage } from '@/infra/pagination'
-import { IconChevronDown, IconChevronUp } from '@/lib/components/icons'
+import { IconMoreVert } from '@/lib/components/icons'
 import PagePagination from '@/lib/components/page-pagination'
 import SectionSpinner from '@/lib/components/section-spinner'
 import prettyBytes from '@/lib/helpers/pretty-bytes'
@@ -51,7 +53,7 @@ const ConsolePanelWorkspaces = () => {
   })
   const [confirmRenameWindowOpen, setConfirmRenameWindowOpen] = useState(false)
   const [isSubmitting, setSubmitting] = useState(false)
-  const [currentName, setCurrentName] = useState<string>()
+  const [currentName, setCurrentName] = useState<string>('')
   const [workspaceId, setWorkspaceId] = useState<string>()
   const formSchema = Yup.object().shape({
     name: Yup.string().required('Name is required').max(255),
@@ -74,7 +76,7 @@ const ConsolePanelWorkspaces = () => {
         } finally {
           closeConfirmationWindow()
         }
-      } else if (id !== null && currentName !== null) {
+      } else if (id !== null && currentName !== null && currentName !== '') {
         setConfirmRenameWindowOpen(true)
         setCurrentName(currentName)
         setWorkspaceId(id)
@@ -86,7 +88,7 @@ const ConsolePanelWorkspaces = () => {
   const closeConfirmationWindow = () => {
     setConfirmRenameWindowOpen(false)
     setSubmitting(false)
-    setCurrentName(undefined)
+    setCurrentName('')
     setWorkspaceId(undefined)
   }
 
@@ -120,10 +122,10 @@ const ConsolePanelWorkspaces = () => {
         request={renameWorkspace}
       />
       <Helmet>
-        <title>Workspace management</title>
+        <title>Workspace Management</title>
       </Helmet>
       <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
-        <Heading className={cx('text-heading')}>Workspace management</Heading>
+        <Heading className={cx('text-heading')}>Workspace Management</Heading>
         {list && list.data.length > 0 ? (
           <Stack direction="column" spacing={2}>
             <Table variant="simple">
@@ -134,7 +136,7 @@ const ConsolePanelWorkspaces = () => {
                   <Th>Quota</Th>
                   <Th>Create time</Th>
                   <Th>Update time</Th>
-                  <Th>Actions</Th>
+                  <Th></Th>
                 </Tr>
               </Thead>
               <Tbody>
@@ -168,34 +170,29 @@ const ConsolePanelWorkspaces = () => {
                       </Text>
                     </Td>
                     <Td>
-                      <Menu>
-                        {({ isOpen }) => (
-                          <>
-                            <MenuButton
-                              isActive={isOpen}
-                              as={Button}
-                              rightIcon={
-                                isOpen ? <IconChevronUp /> : <IconChevronDown />
-                              }
+                      <Center>
+                        <Menu>
+                          <MenuButton
+                            as={IconButton}
+                            icon={<IconMoreVert />}
+                            variant="ghost"
+                            aria-label=""
+                          />
+                          <MenuList>
+                            <MenuItem
+                              onClick={async () => {
+                                await renameWorkspace(
+                                  workspace.id,
+                                  workspace.name,
+                                  null,
+                                )
+                              }}
                             >
-                              Actions
-                            </MenuButton>
-                            <MenuList>
-                              <MenuItem
-                                onClick={async () => {
-                                  await renameWorkspace(
-                                    workspace.id,
-                                    workspace.name,
-                                    null,
-                                  )
-                                }}
-                              >
-                                Rename
-                              </MenuItem>
-                            </MenuList>
-                          </>
-                        )}
-                      </Menu>
+                              Rename
+                            </MenuItem>
+                          </MenuList>
+                        </Menu>
+                      </Center>
                     </Td>
                   </Tr>
                 ))}

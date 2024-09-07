@@ -145,7 +145,7 @@ const ConsolePanelDatabaseIndexes = () => {
         </ModalContent>
       </Modal>
       <Helmet>
-        <title>Index management</title>
+        <title>Index Management</title>
       </Helmet>
       <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
         {list && list.data.length > 0 ? (
@@ -156,7 +156,7 @@ const ConsolePanelDatabaseIndexes = () => {
                   <Th>Name</Th>
                   <Th>Table</Th>
                   <Th>Syntax</Th>
-                  <Th>Actions</Th>
+                  <Th></Th>
                 </Tr>
               </Thead>
               <Tbody>

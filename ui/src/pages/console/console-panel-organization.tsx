@@ -20,7 +20,9 @@ import {
   Heading,
   Spacer,
   Stack,
+  Table,
   Text,
+  Th,
 } from '@chakra-ui/react'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
@@ -115,7 +117,7 @@ const ConsolePanelOrganization = () => {
   return (
     <>
       <Helmet>
-        <title>Organization management</title>
+        <title>Organization Management</title>
       </Helmet>
       <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
         <Heading className={cx('text-heading')}>
@@ -143,26 +145,30 @@ const ConsolePanelOrganization = () => {
               <SectionSpinner />
             ) : (
               <>
-                <Flex>
-                  <span className={cx('font-bold')}>Users</span>
-                  <Spacer />
-                  {usersData.totalElements > 5 ? (
-                    <>
-                      <PagePagination
-                        totalElements={usersData.totalElements}
-                        totalPages={Math.ceil(usersData.totalElements / 5)}
-                        page={usersPage}
-                        size={5}
-                        steps={[]}
-                        setPage={setUsersPage}
-                        setSize={() => {}}
-                        uiSize="xs"
-                        disableLastNav
-                        disableMiddleNav
-                      />
-                    </>
-                  ) : null}
-                </Flex>
+                <Table>
+                  <Th>
+                    <Flex>
+                      <span className={cx('font-bold')}>Users</span>
+                      <Spacer />
+                      {usersData.totalElements > 5 ? (
+                        <>
+                          <PagePagination
+                            totalElements={usersData.totalElements}
+                            totalPages={Math.ceil(usersData.totalElements / 5)}
+                            page={usersPage}
+                            size={5}
+                            steps={[]}
+                            setPage={setUsersPage}
+                            setSize={() => {}}
+                            uiSize="xs"
+                            disableLastNav
+                            disableMiddleNav
+                          />
+                        </>
+                      ) : null}
+                    </Flex>
+                  </Th>
+                </Table>
                 <Divider mb={4} />
                 <Stack>
                   {usersData.data && usersData.data.length > 0 ? (
@@ -195,26 +201,32 @@ const ConsolePanelOrganization = () => {
               <SectionSpinner />
             ) : (
               <>
-                <Flex>
-                  <span className={cx('font-bold')}>Workspaces</span>
-                  <Spacer />
-                  {workspacesData.totalElements > 5 ? (
-                    <>
-                      <PagePagination
-                        totalElements={workspacesData.totalElements}
-                        totalPages={Math.ceil(workspacesData.totalElements / 5)}
-                        page={workspacesPage}
-                        size={5}
-                        steps={[]}
-                        setPage={setWorkspacesPage}
-                        setSize={() => {}}
-                        uiSize="xs"
-                        disableLastNav
-                        disableMiddleNav
-                      />
-                    </>
-                  ) : null}
-                </Flex>
+                <Table>
+                  <Th>
+                    <Flex>
+                      <span className={cx('font-bold')}>Workspaces</span>
+                      <Spacer />
+                      {workspacesData.totalElements > 5 ? (
+                        <>
+                          <PagePagination
+                            totalElements={workspacesData.totalElements}
+                            totalPages={Math.ceil(
+                              workspacesData.totalElements / 5,
+                            )}
+                            page={workspacesPage}
+                            size={5}
+                            steps={[]}
+                            setPage={setWorkspacesPage}
+                            setSize={() => {}}
+                            uiSize="xs"
+                            disableLastNav
+                            disableMiddleNav
+                          />
+                        </>
+                      ) : null}
+                    </Flex>
+                  </Th>
+                </Table>
                 <Divider mb={4} />
                 <Stack overflowX="auto">
                   {workspacesData.data && workspacesData.data.length > 0 ? (
@@ -244,26 +256,30 @@ const ConsolePanelOrganization = () => {
               <SectionSpinner />
             ) : (
               <>
-                <Flex>
-                  <span className={cx('font-bold')}>Groups</span>
-                  <Spacer />
-                  {groupsData.totalElements > 5 ? (
-                    <>
-                      <PagePagination
-                        totalElements={groupsData.totalElements}
-                        totalPages={Math.ceil(groupsData.totalElements / 5)}
-                        page={groupsPage}
-                        size={5}
-                        steps={[]}
-                        setPage={setGroupsPage}
-                        setSize={() => {}}
-                        uiSize="xs"
-                        disableLastNav
-                        disableMiddleNav
-                      />
-                    </>
-                  ) : null}
-                </Flex>
+                <Table>
+                  <Th>
+                    <Flex>
+                      <span className={cx('font-bold')}>Groups</span>
+                      <Spacer />
+                      {groupsData.totalElements > 5 ? (
+                        <>
+                          <PagePagination
+                            totalElements={groupsData.totalElements}
+                            totalPages={Math.ceil(groupsData.totalElements / 5)}
+                            page={groupsPage}
+                            size={5}
+                            steps={[]}
+                            setPage={setGroupsPage}
+                            setSize={() => {}}
+                            uiSize="xs"
+                            disableLastNav
+                            disableMiddleNav
+                          />
+                        </>
+                      ) : null}
+                    </Flex>
+                  </Th>
+                </Table>
                 <Divider mb={4} />
                 <Stack>
                   {groupsData.data && groupsData.data.length > 0 ? (

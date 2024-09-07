@@ -11,7 +11,6 @@ import { useCallback, useEffect, useState } from 'react'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import {
   Badge,
-  Button,
   Heading,
   Stack,
   Table,
@@ -26,15 +25,15 @@ import {
   MenuItem,
   Menu,
   Center,
+  IconButton,
 } from '@chakra-ui/react'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import UserAPI, { ConsoleUsersResponse } from '@/client/idp/user'
 import ConsoleConfirmationModal from '@/components/console/console-confirmation-modal'
-import ConsoleHighlightableTr from '@/components/console/console-highlightable-tr'
 import { consoleUsersPaginationStorage } from '@/infra/pagination'
 import { getUserId } from '@/infra/token'
-import { IconChevronDown, IconChevronUp } from '@/lib/components/icons'
+import { IconMoreVert } from '@/lib/components/icons'
 import PagePagination from '@/lib/components/page-pagination'
 import SectionSpinner from '@/lib/components/section-spinner'
 import { decodeQuery } from '@/lib/helpers/query'
@@ -148,10 +147,10 @@ const ConsolePanelUsers = () => {
         request={makeAdminUser}
       />
       <Helmet>
-        <title>User management</title>
+        <title>User Management</title>
       </Helmet>
       <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
-        <Heading className={cx('text-heading')}>User management</Heading>
+        <Heading className={cx('text-heading')}>User Management</Heading>
         {list && list.data.length > 0 ? (
           <Stack direction="column" spacing={2}>
             <Table variant="simple">
@@ -163,18 +162,18 @@ const ConsolePanelUsers = () => {
                   <Th>Create time</Th>
                   <Th>Update time</Th>
                   <Th>Props</Th>
-                  <Th>Actions</Th>
+                  <Th></Th>
                 </Tr>
               </Thead>
               <Tbody>
                 {list.data.map((user) => (
-                  <ConsoleHighlightableTr
+                  <Tr
+                    style={{ cursor: 'pointer' }}
                     key={user.id}
                     onClick={(event) => {
                       if (
                         !(event.target instanceof HTMLButtonElement) &&
-                        !(event.target instanceof HTMLSpanElement) &&
-                        !(event.target instanceof HTMLParagraphElement)
+                        !(event.target instanceof HTMLSpanElement)
                       ) {
                         navigate(`/console/users/${user.id}`)
                       }
@@ -219,92 +218,77 @@ const ConsolePanelUsers = () => {
                     </Td>
                     <Td>
                       {getUserId() === user.id ? (
-                        <Center>
-                          <Badge colorScheme="red">It's you</Badge>
-                        </Center>
+                        <Badge colorScheme="red">It's you</Badge>
                       ) : (
-                        <Menu>
-                          {({ isOpen }) => (
-                            <>
-                              <MenuButton
-                                isActive={isOpen}
-                                as={Button}
-                                rightIcon={
-                                  isOpen ? (
-                                    <IconChevronUp />
-                                  ) : (
-                                    <IconChevronDown />
-                                  )
-                                }
-                              >
-                                Actions
-                              </MenuButton>
-                              <MenuList>
-                                {user.isActive ? (
-                                  <MenuItem
-                                    onClick={async () => {
-                                      setConfirmWindowAction('suspend')
-                                      await suspendUser(
-                                        user.id,
-                                        user.email,
-                                        true,
-                                      )
-                                    }}
-                                  >
-                                    Suspend
-                                  </MenuItem>
-                                ) : (
-                                  <MenuItem
-                                    onClick={async () => {
-                                      setConfirmWindowAction('unsuspend')
-                                      await suspendUser(
-                                        user.id,
-                                        user.email,
-                                        false,
-                                      )
-                                    }}
-                                  >
-                                    Unsuspend
-                                  </MenuItem>
-                                )}
-                                {user.isAdmin ? (
-                                  <MenuItem
-                                    onClick={async () => {
-                                      setConfirmWindowAction(
-                                        'remove console rights from',
-                                      )
-                                      await makeAdminUser(
-                                        user.id,
-                                        user.email,
-                                        false,
-                                      )
-                                    }}
-                                  >
-                                    Deadmin
-                                  </MenuItem>
-                                ) : (
-                                  <MenuItem
-                                    onClick={async () => {
-                                      setConfirmWindowAction(
-                                        'grant console rights to',
-                                      )
-                                      await makeAdminUser(
-                                        user.id,
-                                        user.email,
-                                        true,
-                                      )
-                                    }}
-                                  >
-                                    Make Admin
-                                  </MenuItem>
-                                )}
-                              </MenuList>
-                            </>
-                          )}
-                        </Menu>
+                        <Center>
+                          <Menu>
+                            <MenuButton
+                              as={IconButton}
+                              icon={<IconMoreVert />}
+                              variant="ghost"
+                              aria-label=""
+                            />
+                            <MenuList>
+                              {user.isActive ? (
+                                <MenuItem
+                                  onClick={async () => {
+                                    setConfirmWindowAction('suspend')
+                                    await suspendUser(user.id, user.email, true)
+                                  }}
+                                >
+                                  Suspend
+                                </MenuItem>
+                              ) : (
+                                <MenuItem
+                                  onClick={async () => {
+                                    setConfirmWindowAction('unsuspend')
+                                    await suspendUser(
+                                      user.id,
+                                      user.email,
+                                      false,
+                                    )
+                                  }}
+                                >
+                                  Unsuspend
+                                </MenuItem>
+                              )}
+                              {user.isAdmin ? (
+                                <MenuItem
+                                  onClick={async () => {
+                                    setConfirmWindowAction(
+                                      'remove console rights from',
+                                    )
+                                    await makeAdminUser(
+                                      user.id,
+                                      user.email,
+                                      false,
+                                    )
+                                  }}
+                                >
+                                  Deadmin
+                                </MenuItem>
+                              ) : (
+                                <MenuItem
+                                  onClick={async () => {
+                                    setConfirmWindowAction(
+                                      'grant console rights to',
+                                    )
+                                    await makeAdminUser(
+                                      user.id,
+                                      user.email,
+                                      true,
+                                    )
+                                  }}
+                                >
+                                  Make Admin
+                                </MenuItem>
+                              )}
+                            </MenuList>
+                          </Menu>
+                        </Center>
                       )}
                     </Td>
-                  </ConsoleHighlightableTr>
+                  </Tr>
                 ))}
               </Tbody>
             </Table>

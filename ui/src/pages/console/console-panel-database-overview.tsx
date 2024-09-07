@@ -14,7 +14,7 @@ const ConsolePanelDatabaseOverview = () => {
   return (
     <>
       <Helmet>
-        <title>Database management</title>
+        <title>Database Management</title>
       </Helmet>
       <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}></div>
     </>

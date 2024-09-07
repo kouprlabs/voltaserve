@@ -17,7 +17,7 @@ const ConsolePanelDatabase = () => {
   const location = useLocation()
   const navigate = useNavigate()
   const [tabIndex, setTabIndex] = useState(0)
-  const [indexesAvailable, setIndexesAvailable] = useState(true)
+  const [indexesAvailable, setIndexesAvailable] = useState(false)
 
   useEffect(() => {
     const segments = location.pathname.split('/')
@@ -38,7 +38,7 @@ const ConsolePanelDatabase = () => {
   return (
     <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
       <Heading className={cx('text-heading', 'shrink-0')} noOfLines={1}>
-        Database management
+        Database Management
       </Heading>
       <Tabs variant="solid-rounded" colorScheme="gray" index={tabIndex}>
         <TabList>
