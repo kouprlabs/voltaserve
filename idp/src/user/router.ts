@@ -50,8 +50,8 @@ router.get(
   '/',
   passport.authenticate('jwt', { session: false }),
   async (req: PassportRequest, res: Response, next: NextFunction) => {
-    await checkForcePasswordChange(req.user.id)
     try {
+      await checkForcePasswordChange(req.user.id)
       res.json(await getUser(req.user.id))
     } catch (err) {
       next(err)
