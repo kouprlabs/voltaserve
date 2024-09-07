@@ -107,6 +107,9 @@ func (r *InvitationRouter) GetIncoming(c *fiber.Ctx) error {
 			return err
 		}
 	}
+	if size == 0 {
+		return errorpkg.NewInvalidQueryParamError("size")
+	}
 	sortBy := c.Query("sort_by")
 	if !IsValidSortBy(sortBy) {
 		return errorpkg.NewInvalidQueryParamError("sort_by")
@@ -183,6 +186,9 @@ func (r *InvitationRouter) GetOutgoing(c *fiber.Ctx) error {
 		if err != nil {
 			return err
 		}
+	}
+	if size == 0 {
+		return errorpkg.NewInvalidQueryParamError("size")
 	}
 	sortBy := c.Query("sort_by")
 	if !IsValidSortBy(sortBy) {
