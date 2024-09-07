@@ -303,6 +303,13 @@ class UserRepoImpl {
     )
   }
 
+  async forceResetPassword(id: string, token: string): Promise<void> {
+    await client.query(
+      'UPDATE "user" SET force_change_password = $1, reset_password_token = $2, update_time = $3 WHERE id = $4',
+      [true, token, new Date().toISOString(), id],
+    )
+  }
+
   async enoughActiveAdmins() {
     const { rows } = await client.query(
       'SELECT COUNT(*) as count FROM "user" WHERE is_admin IS TRUE AND is_active IS TRUE',

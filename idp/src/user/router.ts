@@ -16,10 +16,11 @@ import passport from 'passport'
 import {
   SearchPaginatedRequest,
   UserAdminPostRequest,
+  UserIdPostRequest,
   UserIdRequest,
   UserSuspendPostRequest,
 } from '@/infra/admin-requests'
-import { parseValidationError } from '@/infra/error'
+import { ErrorCode, newError, parseValidationError } from '@/infra/error'
 import { PassportRequest } from '@/infra/passport-request'
 import { checkAdmin } from '@/token/service'
 import {
@@ -40,6 +41,7 @@ import {
   makeAdminUser,
   getUserByAdmin,
   searchUserListPaginated,
+  forceResetPassword,
 } from './service'
 
 const router = Router()
@@ -48,6 +50,17 @@ router.get(
   '/',
   passport.authenticate('jwt', { session: false }),
   async (req: PassportRequest, res: Response, next: NextFunction) => {
+    const user = await getUserByAdmin(req.user.id)
+    if (user.forceChangePassword) {
+      if (user.resetPasswordToken === null) {
+        throw newError({
+          code: ErrorCode.InternalServerError,
+          userMessage:
+            'Critical error, please contact administrator (missing password token)',
+        })
+      }
+      res.redirect(`/reset-password/${user.resetPasswordToken}`)
+    }
     try {
       res.json(await getUser(req.user.id))
     } catch (err) {
@@ -258,6 +271,25 @@ router.patch(
         throw parseValidationError(result)
       }
       await makeAdminUser(req.body as UserAdminPostRequest)
+      res.sendStatus(200)
+    } catch (err) {
+      next(err)
+    }
+  },
+)
+
+router.patch(
+  '/force_reset_password',
+  passport.authenticate('jwt', { session: false }),
+  body('id').isString(),
+  async (req: PassportRequest, res: Response, next: NextFunction) => {
+    try {
+      checkAdmin(req.header('Authorization'))
+      const result = validationResult(req)
+      if (!result.isEmpty()) {
+        throw parseValidationError(result)
+      }
+      await forceResetPassword(req.body as UserIdPostRequest)
       res.sendStatus(200)
     } catch (err) {
       next(err)

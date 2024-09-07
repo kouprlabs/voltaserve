@@ -11,6 +11,7 @@ import fs from 'fs/promises'
 import { getConfig } from '@/config/config'
 import {
   UserAdminPostRequest,
+  UserIdPostRequest,
   UserSearchResponse,
   UserSuspendPostRequest,
 } from '@/infra/admin-requests'
@@ -318,6 +319,28 @@ export async function makeAdminUser(options: UserAdminPostRequest) {
   }
   if (user) {
     await userRepo.makeAdmin(user.id, options.makeAdmin)
+    await search.index(USER_SEARCH_INDEX).updateDocuments([
+      {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        fullName: user.fullName,
+        isEmailConfirmed: user.isEmailConfirmed,
+        createTime: user.createTime,
+        updateTime: user.updateTime,
+        picture: user.picture,
+      },
+    ])
+  } else {
+    throw newError({ code: ErrorCode.UserNotFound })
+  }
+}
+
+export async function forceResetPassword(options: UserIdPostRequest) {
+  const user = await userRepo.findByID(options.id)
+  if (user) {
+    const token = newHyphenlessUuid()
+    await userRepo.forceResetPassword(user.id, token)
     await search.index(USER_SEARCH_INDEX).updateDocuments([
       {
         id: user.id,
