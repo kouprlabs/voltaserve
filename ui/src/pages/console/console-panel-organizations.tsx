@@ -119,11 +119,11 @@ const ConsolePanelOrganizations = () => {
         request={renameOrganization}
       />
       <Helmet>
-        <title>Organization management</title>
+        <title>Organization Management</title>
       </Helmet>
       <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
         <Heading className={cx('text-heading')}>
-          Organization management
+          Organization Management
         </Heading>
         {list && list.data.length > 0 ? (
           <Stack direction="column" spacing={2}>

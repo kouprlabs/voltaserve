@@ -115,10 +115,10 @@ const ConsolePanelGroups = () => {
         request={renameGroup}
       />
       <Helmet>
-        <title>Group management</title>
+        <title>Group Management</title>
       </Helmet>
       <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
-        <Heading className={cx('text-heading')}>Group management</Heading>
+        <Heading className={cx('text-heading')}>Group Management</Heading>
         {list && list.data.length > 0 ? (
           <Stack direction="column" spacing={2}>
             <Table variant="simple">

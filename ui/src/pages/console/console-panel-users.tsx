@@ -147,10 +147,10 @@ const ConsolePanelUsers = () => {
         request={makeAdminUser}
       />
       <Helmet>
-        <title>User management</title>
+        <title>User Management</title>
       </Helmet>
       <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
-        <Heading className={cx('text-heading')}>User management</Heading>
+        <Heading className={cx('text-heading')}>User Management</Heading>
         {list && list.data.length > 0 ? (
           <Stack direction="column" spacing={2}>
             <Table variant="simple">

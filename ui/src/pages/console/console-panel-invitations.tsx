@@ -112,10 +112,10 @@ const ConsolePanelInvitations = () => {
         request={changeInvitationStatus}
       />
       <Helmet>
-        <title>Invitation management</title>
+        <title>Invitation Management</title>
       </Helmet>
       <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
-        <Heading className={cx('text-heading')}>Invitation management</Heading>
+        <Heading className={cx('text-heading')}>Invitation Management</Heading>
         {list && list.data.length > 0 ? (
           <Stack direction="column" spacing={2}>
             <Table variant="simple">
