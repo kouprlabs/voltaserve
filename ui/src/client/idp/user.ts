@@ -54,6 +54,11 @@ export interface suspendUserOptions extends baseUserIdRequest {
   suspend: boolean
 }
 
+export interface consoleUpdateDataReqeust {
+  email?: string
+  fullName?: string
+}
+
 export interface makeAdminOptions extends baseUserIdRequest {
   makeAdmin: boolean
 }
@@ -184,6 +189,17 @@ export default class UserAPI {
   static async forceResetPassword(options: baseUserIdRequest) {
     return idpFetcher({
       url: `/user/force_reset_password`,
+      method: 'PATCH',
+      body: JSON.stringify(options),
+    }) as Promise<void>
+  }
+
+  static async adminUpdateUserData(
+    id: string,
+    options: consoleUpdateDataReqeust,
+  ) {
+    return idpFetcher({
+      url: `/user/${id}`,
       method: 'PATCH',
       body: JSON.stringify(options),
     }) as Promise<void>
