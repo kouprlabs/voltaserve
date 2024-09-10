@@ -14,7 +14,7 @@ import { newHyphenlessUuid } from '@/infra/id'
 import { verifyPassword } from '@/infra/password'
 import { User } from '@/user/model'
 import userRepo from '@/user/repo'
-import {getUserByAdmin} from "@/user/service";
+import { getUserByAdmin } from '@/user/service'
 
 export type TokenGrantType = 'password' | 'refresh_token'
 
@@ -79,14 +79,23 @@ export const checkAdmin = (jwt) => {
     throw newError({ code: ErrorCode.MissingPermission })
 }
 
+export const checkEmptyFields = (fields: Array<string>) => {
+  if (fields.every((field) => field === null || field === undefined)) {
+    throw newError({
+      code: ErrorCode.InvalidRequest,
+      userMessage: 'There are missing fields in your request',
+    })
+  }
+}
+
 export const checkForcePasswordChange = async (userId: string) => {
   const user = await getUserByAdmin(userId)
   if (user.forceChangePassword) {
     const resetPasswordToken = await userRepo.getResetPasswordToken(user.id)
-    const payload = {'resetPasswordToken': resetPasswordToken}
+    const payload = { 'resetPasswordToken': resetPasswordToken }
     throw newError({
       code: ErrorCode.ForceChangePassword,
-      payload
+      payload,
     })
   }
 }

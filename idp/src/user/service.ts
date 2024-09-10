@@ -14,13 +14,14 @@ import {
   UserIdPostRequest,
   UserSearchResponse,
   UserSuspendPostRequest,
+  UserUpdateAdminRequest,
 } from '@/infra/admin-requests'
 import { ErrorCode, newError } from '@/infra/error'
 import { newHyphenlessUuid } from '@/infra/id'
 import { sendTemplateMail } from '@/infra/mail'
 import { hashPassword, verifyPassword } from '@/infra/password'
 import search, { USER_SEARCH_INDEX } from '@/infra/search'
-import { User } from '@/user/model'
+import { UpdateOptions, User } from '@/user/model'
 import userRepo from '@/user/repo'
 
 export type UserDTO = {
@@ -70,8 +71,13 @@ export async function getUserByAdmin(id: string): Promise<User> {
   return adminMapEntity(await userRepo.findByID(id))
 }
 
-export async function getResetPasswordToken(id: string): Promise<string> {
-  return await userRepo.getResetPasswordToken(id)
+export async function updateAdminUser(
+  id: string,
+  data: UserUpdateAdminRequest,
+): Promise<UserDTO> {
+  return mapEntity(
+    await userRepo.update({ id: id, ...(data as UpdateOptions) }),
+  )
 }
 
 export async function searchUserListPaginated(

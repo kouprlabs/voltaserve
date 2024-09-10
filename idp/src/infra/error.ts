@@ -105,7 +105,7 @@ export function newError(options: ErrorOptions): ErrorData {
     userMessage,
     moreInfo: `https://voltaserve.com/docs/idp/errors/${options.code}`,
     error: options.error,
-    payload: options.payload
+    payload: options.payload,
   }
 }
 
