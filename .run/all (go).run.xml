@@ -1,0 +1,9 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="all (go)" type="CompoundRunConfigurationType">
+    <toRun name="api" type="GoApplicationRunConfiguration" />
+    <toRun name="conversion" type="GoApplicationRunConfiguration" />
+    <toRun name="mosaic" type="GoApplicationRunConfiguration" />
+    <toRun name="webdav" type="GoApplicationRunConfiguration" />
+    <method v="2" />
+  </configuration>
+</component>
