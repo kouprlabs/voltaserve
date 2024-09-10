@@ -315,6 +315,9 @@ router.patch(
     try {
       checkAdmin(req.header('Authorization'))
       checkEmptyFields([req.body.fullName, req.body.email])
+      if (req.body.email) {
+        req.body.username = req.body.email
+      }
       const result = validationResult(req)
       if (!result.isEmpty()) {
         throw parseValidationError(result)
