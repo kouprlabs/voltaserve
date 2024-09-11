@@ -160,11 +160,11 @@ const FileMenu = ({
     () => file !== undefined && geEditorPermission(file.permission),
     [file],
   )
-  const isProToolsAvailable = useMemo(
+  const isToolsAuthorized = useMemo(
     () => isInsightsAuthorized || isMosaicAuthorized,
     [isInsightsAuthorized, isMosaicAuthorized],
   )
-  const isManagementAvailable = useMemo(() => {
+  const isManagementAuthorized = useMemo(() => {
     return (
       isSharingAuthorized ||
       isSnapshotsAuthorized ||
@@ -231,7 +231,7 @@ const FileMenu = ({
                 : undefined
             }
           >
-            {isProToolsAvailable ? (
+            {isToolsAuthorized ? (
               <MenuOptionGroup>
                 {isInsightsAuthorized ? (
                   <MenuItem
@@ -257,8 +257,8 @@ const FileMenu = ({
                 ) : null}
               </MenuOptionGroup>
             ) : null}
-            {isProToolsAvailable ? <MenuDivider /> : null}
-            {isManagementAvailable ? (
+            {isToolsAuthorized ? <MenuDivider /> : null}
+            {isManagementAuthorized ? (
               <MenuOptionGroup>
                 {isSharingAuthorized ? (
                   <MenuItem
@@ -312,7 +312,7 @@ const FileMenu = ({
                 ) : null}
               </MenuOptionGroup>
             ) : null}
-            {isManagementAvailable ? <MenuDivider /> : null}
+            {isManagementAuthorized ? <MenuDivider /> : null}
             <MenuOptionGroup>
               <MenuItem
                 icon={<IconDelete />}
