@@ -312,10 +312,11 @@ router.patch(
   passport.authenticate('jwt', { session: false }),
   body('fullName').optional().isString().trim().escape().isLength({ max: 255 }),
   body('email').optional().isEmail().isLength({ max: 255 }),
+  body('picture').optional(),
   async (req: PassportRequest, res: Response, next: NextFunction) => {
     try {
       checkAdmin(req.header('Authorization'))
-      checkEmptyFields([req.body.fullName, req.body.email])
+      checkEmptyFields([req.body.fullName, req.body.email, req.body.picture])
       if (req.body.email) {
         req.body.username = req.body.email
         req.body.isEmailConfirmed = false

@@ -79,8 +79,9 @@ export const checkAdmin = (jwt) => {
     throw newError({ code: ErrorCode.MissingPermission })
 }
 
-export const checkEmptyFields = (fields: Array<string>) => {
-  if (fields.every((field) => field === null || field === undefined)) {
+export const checkEmptyFields = (fields: Array<string | null>) => {
+  console.log(fields)
+  if (fields.every((field) => field === undefined)) {
     throw newError({
       code: ErrorCode.InvalidRequest,
       userMessage: 'There are missing fields in your request',
