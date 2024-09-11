@@ -75,9 +75,37 @@ export async function updateAdminUser(
   id: string,
   data: UserUpdateAdminRequest,
 ): Promise<UserDTO> {
-  return mapEntity(
-    await userRepo.update({ id: id, ...(data as UpdateOptions) }),
-  )
+  if (!data.isEmailConfirmed) {
+    let usernameUnavailable = false
+    try {
+      await userRepo.findByUsername(data.email)
+      usernameUnavailable = true
+    } catch {
+      // Ignored
+    }
+    if (usernameUnavailable) {
+      throw newError({ code: ErrorCode.UsernameUnavailable })
+    }
+    const user = await userRepo.update({ id: id, ...(data as UpdateOptions) })
+    try {
+      await sendTemplateMail('email-confirmation', user.email, {
+        'UI_URL': getConfig().publicUIURL,
+        'TOKEN': user.emailConfirmationToken,
+      })
+      return mapEntity(user)
+    } catch (error) {
+      await userRepo.update({
+        id,
+        emailUpdateToken: null,
+        emailUpdateValue: null,
+      })
+      throw newError({ code: ErrorCode.InternalServerError, error })
+    }
+  } else {
+    return mapEntity(
+      await userRepo.update({ id: id, ...(data as UpdateOptions) }),
+    )
+  }
 }
 
 export async function searchUserListPaginated(

@@ -48,6 +48,9 @@ export interface UserSearchResponse {
 }
 
 export interface UserUpdateAdminRequest {
-  fullName: string
-  email: string
+  fullName?: string
+  email?: string
+  username?: string
+  isEmailConfirmed?: boolean
+  emailConfirmationToken?: string
 }

@@ -22,6 +22,7 @@ import {
   UserUpdateAdminRequest,
 } from '@/infra/admin-requests'
 import { parseValidationError } from '@/infra/error'
+import { newHyphenlessUuid } from '@/infra/id'
 import { PassportRequest } from '@/infra/passport-request'
 import {
   checkAdmin,
@@ -317,6 +318,8 @@ router.patch(
       checkEmptyFields([req.body.fullName, req.body.email])
       if (req.body.email) {
         req.body.username = req.body.email
+        req.body.isEmailConfirmed = false
+        req.body.emailConfirmationToken = newHyphenlessUuid()
       }
       const result = validationResult(req)
       if (!result.isEmpty()) {
