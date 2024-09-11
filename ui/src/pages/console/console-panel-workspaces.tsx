@@ -82,7 +82,7 @@ const ConsolePanelWorkspaces = () => {
         setWorkspaceId(id)
       }
     },
-    [],
+    [workspaceId, isSubmitting],
   )
 
   const closeConfirmationWindow = () => {

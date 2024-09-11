@@ -79,7 +79,7 @@ const ConsolePanelInvitations = () => {
         setInvitationId(id)
       }
     },
-    [],
+    [invitationId, isSubmitting],
   )
 
   const closeConfirmationWindow = () => {

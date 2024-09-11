@@ -54,7 +54,7 @@ export interface suspendUserOptions extends baseUserIdRequest {
   suspend: boolean
 }
 
-export interface consoleUpdateDataReqeust {
+export interface consoleUpdateDataRequest {
   email?: string
   fullName?: string
 }
@@ -196,8 +196,9 @@ export default class UserAPI {
 
   static async adminUpdateUserData(
     id: string,
-    options: consoleUpdateDataReqeust,
+    options: consoleUpdateDataRequest,
   ) {
+    console.log(options)
     return idpFetcher({
       url: `/user/${id}`,
       method: 'PATCH',

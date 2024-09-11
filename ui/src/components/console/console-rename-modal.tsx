@@ -32,11 +32,7 @@ interface ConsoleRenameModalProps {
   isSubmitting: boolean
   previousName: string
   object: string
-  formSchema: Yup.ObjectSchema<
-    { name: string },
-    Yup.AnyObject,
-    { name: undefined }
-  >
+  formSchema: Yup.ObjectSchema<object>
   request: (
     id: string | null,
     currentName: string | null,
@@ -52,7 +48,9 @@ const ConsoleRenameModal = (props: ConsoleRenameModalProps) => {
   useEffect(() => {
     if (
       props.isOpen &&
-      (props.previousName === undefined || props.formSchema == undefined)
+      (props.previousName === undefined ||
+        props.formSchema === undefined ||
+        props.request === undefined)
     ) {
       setTimeout(() => {
         window.location.reload()

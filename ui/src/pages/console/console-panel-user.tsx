@@ -30,6 +30,7 @@ import {
   Tooltip,
   Tr,
 } from '@chakra-ui/react'
+import * as Yup from 'yup'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import ConsoleApi, {
@@ -39,6 +40,7 @@ import ConsoleApi, {
 } from '@/client/console/console'
 import UserAPI, { ConsoleUser } from '@/client/idp/user'
 import ConsoleConfirmationModal from '@/components/console/console-confirmation-modal'
+import ConsoleRenameModal from '@/components/console/console-rename-modal'
 import {
   IconClose,
   IconEdit,
@@ -56,6 +58,11 @@ const EditButton = (props: IconButtonProps) => (
     {...props}
   />
 )
+
+enum actionChooser {
+  Email = 'email',
+  FullName = 'fullName',
+}
 
 const ConsolePanelUser = () => {
   const sectionClassName = cx('flex', 'flex-col', 'gap-1', 'py-1.5')
@@ -78,13 +85,32 @@ const ConsolePanelUser = () => {
   const [organizationsPage, setOrganizationsPage] = useState(1)
   const [confirmResetPasswordWindowOpen, setConfirmResetPasswordWindowOpen] =
     useState(false)
+  const [confirmRenameWindowOpen, setConfirmRenameWindowOpen] = useState(false)
+  const [currentName, setCurrentName] = useState<string>('')
   const [isSubmitting, setSubmitting] = useState(false)
   const [userEmail, setUserEmail] = useState<string>()
   const [userId, setUserId] = useState<string>()
+  const [action, setAction] = useState<string>('')
+  const formSchemaEmail = Yup.object().shape({
+    name: Yup.string().required('Email is required').max(255),
+  })
+  const formSchemaFullName = Yup.object().shape({
+    name: Yup.string().required('Full Name is required').max(255),
+  })
+
+  const formSchemaChooser: { [key: string]: Yup.ObjectSchema<object> } = {
+    [actionChooser.Email]: formSchemaEmail,
+    [actionChooser.FullName]: formSchemaFullName,
+  }
 
   const closeConfirmationWindow = () => {
     setConfirmResetPasswordWindowOpen(false)
     setSubmitting(false)
+    setConfirmRenameWindowOpen(false)
+    setUserEmail('')
+    setUserId('')
+    setCurrentName('')
+    setAction('')
   }
 
   const forceResetPassword = useCallback(
@@ -94,7 +120,6 @@ const ConsolePanelUser = () => {
       _action: boolean | null,
       confirm: boolean = false,
     ) => {
-      console.log('xDDD', id, email, confirm)
       if (confirm && userId) {
         setSubmitting(true)
         try {
@@ -110,6 +135,67 @@ const ConsolePanelUser = () => {
     },
     [userId, isSubmitting],
   )
+
+  const renameUser = useCallback(
+    async (
+      id: string | null,
+      currentName: string | null,
+      newName: string | null,
+      confirm: boolean = false,
+    ) => {
+      console.log('boom')
+      if (confirm && userId !== undefined && newName !== null) {
+        try {
+          setSubmitting(true)
+          await UserAPI.adminUpdateUserData(userId, { fullName: newName })
+        } finally {
+          closeConfirmationWindow()
+        }
+      } else if (id !== null && currentName !== null && currentName !== '') {
+        setConfirmRenameWindowOpen(true)
+        setCurrentName(currentName)
+        setUserId(id)
+        setAction(actionChooser.FullName)
+      }
+    },
+    [userId, isSubmitting, action],
+  )
+
+  const changeUserEmail = useCallback(
+    async (
+      id: string | null,
+      currentName: string | null,
+      newName: string | null,
+      confirm: boolean = false,
+    ) => {
+      if (confirm && userId !== undefined && newName !== null) {
+        try {
+          setSubmitting(true)
+          await UserAPI.adminUpdateUserData(userId, { email: newName })
+        } finally {
+          closeConfirmationWindow()
+        }
+      } else if (id !== null && currentName !== null && currentName !== '') {
+        setConfirmRenameWindowOpen(true)
+        setCurrentName(currentName)
+        setUserId(id)
+        setAction(actionChooser.Email)
+      }
+    },
+    [userId, isSubmitting, action],
+  )
+
+  const functionChooser: {
+    [key: string]: (
+      id: string | null,
+      currentName: string | null,
+      newName: string | null,
+      confirm: boolean,
+    ) => Promise<void>
+  } = {
+    [actionChooser.Email]: changeUserEmail,
+    [actionChooser.FullName]: renameUser,
+  }
 
   const userFetch = () => {
     if (id) {
@@ -152,7 +238,7 @@ const ConsolePanelUser = () => {
     groupsFetch()
     organizationsFetch()
     workspacesFetch()
-  }, [])
+  }, [isSubmitting])
 
   useEffect(() => {
     organizationsFetch()
@@ -179,6 +265,15 @@ const ConsolePanelUser = () => {
         closeConfirmationWindow={closeConfirmationWindow}
         isSubmitting={isSubmitting}
         request={forceResetPassword}
+      />
+      <ConsoleRenameModal
+        closeConfirmationWindow={closeConfirmationWindow}
+        isOpen={confirmRenameWindowOpen}
+        isSubmitting={isSubmitting}
+        previousName={currentName}
+        object={'user'}
+        formSchema={formSchemaChooser[action]}
+        request={functionChooser[action]}
       />
       <Helmet>
         <title>User Management</title>
@@ -228,8 +323,8 @@ const ConsolePanelUser = () => {
                 <span>{userData.fullName}</span>
                 <EditButton
                   aria-label=""
-                  onClick={() => {
-                    console.log('Rename')
+                  onClick={async () => {
+                    await renameUser(userData.id, userData.fullName, null)
                   }}
                 />
               </div>
@@ -269,8 +364,8 @@ const ConsolePanelUser = () => {
                 ) : null}
                 <EditButton
                   aria-label=""
-                  onClick={() => {
-                    console.log('edit email')
+                  onClick={async () => {
+                    await changeUserEmail(userData.id, userData.email, null)
                   }}
                 />
               </div>
