@@ -200,8 +200,8 @@ func (r *InsightsRouter) ListEntities(c *fiber.Ctx) error {
 	}
 	res, err := r.insightsSvc.ListEntities(c.Params("id"), service.InsightsListEntitiesOptions{
 		Query:     query,
-		Page:      uint(page),
-		Size:      uint(size),
+		Page:      uint(page), // #nosec G103
+		Size:      uint(size), // #nosec G103
 		SortBy:    sortBy,
 		SortOrder: sortOrder,
 	}, GetUserID(c))

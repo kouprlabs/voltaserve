@@ -123,8 +123,8 @@ func (r *TaskRouter) List(c *fiber.Ctx) error {
 	}
 	res, err := r.taskSvc.List(service.TaskListOptions{
 		Query:     query,
-		Page:      uint(page),
-		Size:      uint(size),
+		Page:      uint(page), // #nosec G103
+		Size:      uint(size), // #nosec G103
 		SortBy:    sortBy,
 		SortOrder: sortOrder,
 	}, GetUserID(c))

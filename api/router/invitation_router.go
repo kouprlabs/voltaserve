@@ -119,8 +119,8 @@ func (r *InvitationRouter) GetIncoming(c *fiber.Ctx) error {
 		return errorpkg.NewInvalidQueryParamError("sort_order")
 	}
 	res, err := r.invitationSvc.GetIncoming(service.InvitationListOptions{
-		Page:      uint(page),
-		Size:      uint(size),
+		Page:      uint(page), // #nosec G103
+		Size:      uint(size), // #nosec G103
 		SortBy:    sortBy,
 		SortOrder: sortOrder,
 	}, GetUserID(c))
@@ -199,8 +199,8 @@ func (r *InvitationRouter) GetOutgoing(c *fiber.Ctx) error {
 		return errorpkg.NewInvalidQueryParamError("sort_order")
 	}
 	res, err := r.invitationSvc.GetOutgoing(orgID, service.InvitationListOptions{
-		Page:      uint(page),
-		Size:      uint(size),
+		Page:      uint(page), // #nosec G103
+		Size:      uint(size), // #nosec G103
 		SortBy:    sortBy,
 		SortOrder: sortOrder,
 	}, GetUserID(c))

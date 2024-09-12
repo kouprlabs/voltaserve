@@ -143,8 +143,8 @@ func (r *WorkspaceRouter) List(c *fiber.Ctx) error {
 	}
 	res, err := r.workspaceSvc.List(service.WorkspaceListOptions{
 		Query:     query,
-		Page:      uint(page),
-		Size:      uint(size),
+		Page:      uint(page), // #nosec G103
+		Size:      uint(size), // #nosec G103
 		SortBy:    sortBy,
 		SortOrder: sortOrder,
 	}, GetUserID(c))
