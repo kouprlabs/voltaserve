@@ -342,20 +342,20 @@ func (r *FileRouter) List(c *fiber.Ctx) error {
 	var res *service.FileList
 	id := c.Params("id")
 	userID := GetUserID(c)
-	var page int
+	var page int64
 	if c.Query("page") == "" {
 		page = 1
 	} else {
-		page, err = strconv.Atoi(c.Query("page"))
+		page, err = strconv.ParseInt(c.Query("page"), 10, 64)
 		if err != nil {
 			page = 1
 		}
 	}
-	var size int
+	var size int64
 	if c.Query("size") == "" {
 		size = FileDefaultPageSize
 	} else {
-		size, err = strconv.Atoi(c.Query("size"))
+		size, err = strconv.ParseInt(c.Query("size"), 10, 64)
 		if err != nil {
 			return err
 		}
