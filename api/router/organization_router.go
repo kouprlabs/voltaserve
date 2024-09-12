@@ -204,8 +204,8 @@ func (r *OrganizationRouter) List(c *fiber.Ctx) error {
 	}
 	res, err := r.orgSvc.List(service.OrganizationListOptions{
 		Query:     query,
-		Page:      uint(page), // #nosec G103
-		Size:      uint(size), // #nosec G103
+		Page:      uint(page), // #nosec G115
+		Size:      uint(size), // #nosec G115
 		SortBy:    sortBy,
 		SortOrder: sortOrder,
 	}, GetUserID(c))

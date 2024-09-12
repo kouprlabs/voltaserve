@@ -96,8 +96,8 @@ func (r *SnapshotRouter) List(c *fiber.Ctx) error {
 		return errorpkg.NewInvalidQueryParamError("sort_order")
 	}
 	res, err := r.snapshotSvc.List(fileID, service.SnapshotListOptions{
-		Page:      uint(page), // #nosec G103
-		Size:      uint(size), // #nosec G103
+		Page:      uint(page), // #nosec G115
+		Size:      uint(size), // #nosec G115
 		SortBy:    sortBy,
 		SortOrder: sortOrder,
 	}, GetUserID(c))
