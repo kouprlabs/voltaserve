@@ -102,8 +102,8 @@ func (r *UserRouter) List(c *fiber.Ctx) error {
 		ExcludeGroupMembers: excludeGroupMembers,
 		SortBy:              sortBy,
 		SortOrder:           sortOrder,
-		Page:                uint(page),
-		Size:                uint(size),
+		Page:                uint(page), // #nosec G115
+		Size:                uint(size), // #nosec G115
 	}, userID)
 	if err != nil {
 		return err

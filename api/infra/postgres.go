@@ -37,16 +37,11 @@ func (mgr *PostgresManager) Connect(ignoreExisting bool) error {
 	return nil
 }
 
-func (mgr *PostgresManager) GetDB() (*gorm.DB, error) {
-	if err := mgr.Connect(false); err != nil {
-		return nil, err
-	}
-	return db, nil
-}
-
 func (mgr *PostgresManager) GetDBOrPanic() *gorm.DB {
-	if err := mgr.Connect(false); err != nil {
-		panic(err)
+	if db == nil {
+		if err := mgr.Connect(false); err != nil {
+			panic(err)
+		}
 	}
 	return db
 }

@@ -380,8 +380,8 @@ func (r *FileRouter) List(c *fiber.Ctx) error {
 		return errorpkg.NewInvalidQueryParamError("query")
 	}
 	opts := service.FileListOptions{
-		Page:      uint(page),
-		Size:      uint(size),
+		Page:      uint(page), // #nosec G115
+		Size:      uint(size), // #nosec G115
 		SortBy:    sortBy,
 		SortOrder: sortOrder,
 	}

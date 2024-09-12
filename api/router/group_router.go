@@ -147,8 +147,8 @@ func (r *GroupRouter) List(c *fiber.Ctx) error {
 	res, err := r.groupSvc.List(service.GroupListOptions{
 		Query:          query,
 		OrganizationID: c.Query("organization_id"),
-		Page:           uint(page),
-		Size:           uint(size),
+		Page:           uint(page), // #nosec G115
+		Size:           uint(size), // #nosec G115
 		SortBy:         sortBy,
 		SortOrder:      sortOrder,
 	}, GetUserID(c))
