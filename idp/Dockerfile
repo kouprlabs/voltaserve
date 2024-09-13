@@ -8,7 +8,7 @@
 # by the GNU Affero General Public License v3.0 only, included in the file
 # licenses/AGPL.txt.
 
-FROM node:20-alpine
+FROM oven/bun:1-alpine
 
 WORKDIR /app
 
@@ -16,11 +16,11 @@ COPY src ./src
 COPY templates ./templates
 COPY .env .
 COPY package.json .
-COPY package-lock.json .
+COPY bun.lockb .
 COPY tsconfig.json .
 
-RUN npm ci --legacy-peer-deps
+RUN bun install --frozen-lockfile --production
 
-ENTRYPOINT ["npm", "run", "start"]
+ENTRYPOINT ["bun", "run", "start"]
 
 EXPOSE 8081
