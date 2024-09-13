@@ -26,6 +26,7 @@ mod m20240718_000010_create_userpermission;
 mod m20240726_000001_normalize_schema;
 mod m20240807_000001_add_segmentation_column;
 mod m20240905_000001_add_user_active_admin_fields;
+mod m20240907_000001_add_user_force_change_password_field;
 
 #[async_trait::async_trait]
 impl MigratorTrait for Migrator {
@@ -44,6 +45,7 @@ impl MigratorTrait for Migrator {
             Box::new(m20240726_000001_normalize_schema::Migration),
             Box::new(m20240807_000001_add_segmentation_column::Migration),
             Box::new(m20240905_000001_add_user_active_admin_fields::Migration),
+            Box::new(m20240907_000001_add_user_force_change_password_field::Migration),
         ]
     }
 }

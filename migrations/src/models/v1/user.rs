@@ -26,6 +26,7 @@ pub enum User {
     IsEmailConfirmed,
     IsAdmin,
     IsActive,
+    ForceChangePassword,
     Picture,
     CreateTime,
     UpdateTime,
