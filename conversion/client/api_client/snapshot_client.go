@@ -32,18 +32,17 @@ func NewSnapshotClient() *SnapshotClient {
 }
 
 type SnapshotPatchOptions struct {
-	Options      PipelineRunOptions `json:"options"`
-	Fields       []string           `json:"fields"`
-	Original     *S3Object          `json:"original"`
-	Preview      *S3Object          `json:"preview"`
-	Text         *S3Object          `json:"text"`
-	OCR          *S3Object          `json:"ocr"`
-	Entities     *S3Object          `json:"entities"`
-	Mosaic       *S3Object          `json:"mosaic"`
-	Segmentation *S3Object          `json:"segmentation"`
-	Thumbnail    *S3Object          `json:"thumbnail"`
-	Status       *string            `json:"status"`
-	TaskID       *string            `json:"taskId"`
+	Options   PipelineRunOptions `json:"options"`
+	Fields    []string           `json:"fields"`
+	Original  *S3Object          `json:"original"`
+	Preview   *S3Object          `json:"preview"`
+	Text      *S3Object          `json:"text"`
+	OCR       *S3Object          `json:"ocr"`
+	Entities  *S3Object          `json:"entities"`
+	Mosaic    *S3Object          `json:"mosaic"`
+	Thumbnail *S3Object          `json:"thumbnail"`
+	Status    *string            `json:"status"`
+	TaskID    *string            `json:"taskId"`
 }
 
 const (
@@ -54,17 +53,16 @@ const (
 )
 
 const (
-	SnapshotFieldOriginal     = "original"
-	SnapshotFieldPreview      = "preview"
-	SnapshotFieldText         = "text"
-	SnapshotFieldOCR          = "ocr"
-	SnapshotFieldEntities     = "entities"
-	SnapshotFieldMosaic       = "mosaic"
-	SnapshotFieldSegmentation = "segmentation"
-	SnapshotFieldThumbnail    = "thumbnail"
-	SnapshotFieldStatus       = "status"
-	SnapshotFieldLanguage     = "language"
-	SnapshotFieldTaskID       = "taskId"
+	SnapshotFieldOriginal  = "original"
+	SnapshotFieldPreview   = "preview"
+	SnapshotFieldText      = "text"
+	SnapshotFieldOCR       = "ocr"
+	SnapshotFieldEntities  = "entities"
+	SnapshotFieldMosaic    = "mosaic"
+	SnapshotFieldThumbnail = "thumbnail"
+	SnapshotFieldStatus    = "status"
+	SnapshotFieldLanguage  = "language"
+	SnapshotFieldTaskID    = "taskId"
 )
 
 type PipelineRunOptions struct {
