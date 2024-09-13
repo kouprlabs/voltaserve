@@ -16,6 +16,7 @@ on:
       - main
     paths:
       - "migrations/**"
+      - "!migrations/README.md"
       
 jobs:
   lint:

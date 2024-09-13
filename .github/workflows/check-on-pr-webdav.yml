@@ -16,6 +16,8 @@ on:
       - main
     paths:
       - "webdav/**"
+      - "!webdav/.env"
+      - "!webdav/README.md"
       
 jobs:
   lint:

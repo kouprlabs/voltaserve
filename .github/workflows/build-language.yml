@@ -18,7 +18,7 @@ on:
     paths:
       - "language/**"
       - "!language/.gitignore"
-      - "!language/.README.md"
+      - "!language/README.md"
     tags:
       - 'v*'
 

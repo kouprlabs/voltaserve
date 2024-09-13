@@ -19,7 +19,8 @@ on:
       - "api/**"
       - "!api/.gitattributes"
       - "!api/.gitignore"
-      - "!api/.README.md"
+      - "!api/README.md"
+      - "!api/.env"
     tags:
       - 'v*'
 

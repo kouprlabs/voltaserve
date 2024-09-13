@@ -16,6 +16,8 @@ on:
       - main
     paths:
       - "ui/**"
+      - "!ui/.env"
+      - "!ui/README.md"
       
 jobs:
   lint:

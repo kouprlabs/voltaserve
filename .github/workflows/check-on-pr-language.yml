@@ -16,6 +16,7 @@ on:
       - main
     paths:
       - "language/**"
+      - "!language/README.md"
       
 jobs:
   lint:

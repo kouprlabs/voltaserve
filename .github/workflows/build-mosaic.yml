@@ -19,7 +19,8 @@ on:
       - "mosaic/**"
       - "!mosaic/.gitattributes"
       - "!mosaic/.gitignore"
-      - "!mosaic/.README.md"
+      - "!mosaic/README.md"
+      - "!mosaic/.env"
     tags:
       - 'v*'
 
