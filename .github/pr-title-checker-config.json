@@ -84,7 +84,15 @@
       "ci(workflow)",
       "refactor(workflow)",
       "perf(workflow)",
-      "test(workflow)"
+      "test(workflow)",
+      "feat(misc)",
+      "fix(misc)",
+      "chore(misc)",
+      "docs(misc)",
+      "ci(misc)",
+      "refactor(misc)",
+      "perf(misc)",
+      "test(misc)"
     ]
   },
   "MESSAGES": {
