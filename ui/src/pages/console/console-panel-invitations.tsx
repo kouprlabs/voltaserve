@@ -44,11 +44,11 @@ const ConsolePanelInvitations = () => {
   const [list, setList] = useState<InvitationManagementList>()
   const [isSubmitting, setSubmitting] = useState(false)
   const [invitationId, setInvitationId] = useState<string>()
-  const [invitationDetails, setInvitationDetails] = useState<string>()
+  const [invitationDetails, setInvitationDetails] = useState<string>('')
   const [actionState, setActionState] = useState<boolean>()
   const [confirmInvitationWindowOpen, setConfirmInvitationWindowOpen] =
     useState(false)
-  const [confirmWindowAction, setConfirmWindowAction] = useState<string>()
+  const [confirmWindowAction, setConfirmWindowAction] = useState<string>('')
   const { page, size, steps, setPage, setSize } = usePagePagination({
     navigate,
     location,
@@ -84,11 +84,11 @@ const ConsolePanelInvitations = () => {
 
   const closeConfirmationWindow = () => {
     setInvitationId(undefined)
-    setInvitationDetails(undefined)
+    setInvitationDetails('')
     setActionState(undefined)
     setConfirmInvitationWindowOpen(false)
     setSubmitting(false)
-    setConfirmWindowAction(undefined)
+    setConfirmWindowAction('')
   }
 
   useEffect(() => {
@@ -104,6 +104,7 @@ const ConsolePanelInvitations = () => {
   return (
     <>
       <ConsoleConfirmationModal
+        verbose={'You are going to force deny invitation '}
         isOpen={confirmInvitationWindowOpen}
         action={confirmWindowAction}
         target={invitationDetails}
@@ -180,10 +181,10 @@ const ConsolePanelInvitations = () => {
                             <MenuList>
                               <MenuItem
                                 onClick={async () => {
-                                  setConfirmWindowAction('deny invitation')
+                                  setConfirmWindowAction('Deny invitation')
                                   await changeInvitationStatus(
                                     invitation.id,
-                                    `${invitation.email} to ${invitation.organization.name}`,
+                                    `${invitation.email} to organization ${invitation.organization.name}`,
                                     false,
                                   )
                                 }}

@@ -39,6 +39,8 @@ interface ConsoleRenameModalProps {
     newName: string | null,
     confirm: boolean,
   ) => Promise<void>
+  action: string
+  target: string
 }
 const ConsoleRenameModal = (props: ConsoleRenameModalProps) => {
   const inputRef = useRef<HTMLInputElement>(null)
@@ -68,7 +70,9 @@ const ConsoleRenameModal = (props: ConsoleRenameModalProps) => {
     >
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>Rename {props.object}</ModalHeader>
+        <ModalHeader>
+          {props.action} {props.target}
+        </ModalHeader>
         <ModalCloseButton />
         <Formik
           enableReinitialize={true}

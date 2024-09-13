@@ -19,7 +19,6 @@ import {
   Td,
   IconButton,
   Badge,
-  Avatar,
 } from '@chakra-ui/react'
 import { KeyedMutator } from 'swr'
 import { Select } from 'chakra-react-select'
@@ -33,6 +32,7 @@ import UserSelector from '@/components/common/user-selector'
 import { IconCheck, IconDelete, IconPersonAdd } from '@/lib/components/icons'
 import Spinner from '@/lib/components/spinner'
 import Text from '@/lib/components/text'
+import UserAvatar from '@/lib/components/user-avatar'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { sharingModalDidClose } from '@/store/ui/files'
 import { inviteModalDidOpen } from '@/store/ui/organizations'
@@ -211,11 +211,11 @@ const SharingUsers = ({
                             'gap-1',
                           )}
                         >
-                          <Avatar
+                          <UserAvatar
                             name={p.user.fullName}
                             src={p.user.picture}
-                            size="sm"
-                            className={cx('w-[40px]', 'h-[40px]')}
+                            height={'40px'}
+                            size={'sm'}
                           />
                           <div className={cx('flex', 'flex-col', 'gap-0.5')}>
                             <Text noOfLines={1}>{p.user.fullName}</Text>

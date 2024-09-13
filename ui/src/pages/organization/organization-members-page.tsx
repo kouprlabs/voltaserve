@@ -27,7 +27,6 @@ import {
   Thead,
   Tr,
   Button,
-  Avatar,
   Portal,
 } from '@chakra-ui/react'
 import cx from 'classnames'
@@ -42,6 +41,7 @@ import { organizationMemberPaginationStorage } from '@/infra/pagination'
 import { IconLogout, IconMoreVert, IconPersonAdd } from '@/lib/components/icons'
 import PagePagination from '@/lib/components/page-pagination'
 import SectionSpinner from '@/lib/components/section-spinner'
+import UserAvatar from '@/lib/components/user-avatar'
 import { decodeQuery } from '@/lib/helpers/query'
 import usePagePagination from '@/lib/hooks/page-pagination'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
@@ -120,7 +120,12 @@ const OrganizationMembersPage = () => {
                         'items-center',
                       )}
                     >
-                      <Avatar name={u.fullName} src={u.picture} />
+                      <UserAvatar
+                        name={u.fullName}
+                        src={u.picture}
+                        height={'40px'}
+                        size={'sm'}
+                      />
                       <span>{u.fullName}</span>
                     </div>
                   </Td>

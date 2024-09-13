@@ -10,7 +10,6 @@
 import { useEffect } from 'react'
 import {
   Button,
-  Code,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -23,6 +22,8 @@ import cx from 'classnames'
 
 interface ConsoleConfirmationModalProps {
   action: string | undefined
+  target: string
+  verbose: string
   closeConfirmationWindow: () => void
   isOpen: boolean
   isSubmitting: boolean
@@ -32,7 +33,6 @@ interface ConsoleConfirmationModalProps {
     action: boolean | null,
     confirm: boolean,
   ) => Promise<void>
-  target: string | undefined
 }
 
 const ConsoleConfirmationModal = (props: ConsoleConfirmationModalProps) => {
@@ -57,14 +57,11 @@ const ConsoleConfirmationModal = (props: ConsoleConfirmationModalProps) => {
       >
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>Are You sure?</ModalHeader>
+          <ModalHeader>{props.action}</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            You are going to {props.action}
-            <br />
-            <Code children={props.target} />
-            <br />
-            Please confirm this action
+            {props.verbose}
+            <b>{props.target}</b>
           </ModalBody>
           <ModalFooter>
             <div className={cx('flex', 'flex-row', 'items-center', 'gap-1')}>

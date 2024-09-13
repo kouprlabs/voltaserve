@@ -10,6 +10,7 @@
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import {
+  Avatar,
   Button,
   Center,
   Heading,
@@ -106,6 +107,8 @@ const ConsolePanelGroups = () => {
   return (
     <>
       <ConsoleRenameModal
+        target={currentName}
+        action={'Rename'}
         closeConfirmationWindow={closeConfirmationWindow}
         isOpen={confirmRenameWindowOpen}
         isSubmitting={isSubmitting}
@@ -124,6 +127,7 @@ const ConsolePanelGroups = () => {
             <Table variant="simple">
               <Thead>
                 <Tr>
+                  <Th></Th>
                   <Th>Group name</Th>
                   <Th>Organization</Th>
                   <Th>Create time</Th>
@@ -134,6 +138,9 @@ const ConsolePanelGroups = () => {
               <Tbody>
                 {list.data.map((group) => (
                   <Tr key={group.id}>
+                    <Td>
+                      <Avatar name={group.name} />
+                    </Td>
                     <Td>
                       <Text>{group.name}</Text>
                     </Td>

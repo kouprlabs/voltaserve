@@ -10,6 +10,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import {
+  Avatar,
   Button,
   Center,
   Heading,
@@ -113,6 +114,8 @@ const ConsolePanelWorkspaces = () => {
   return (
     <>
       <ConsoleRenameModal
+        target={currentName}
+        action={'Rename'}
         closeConfirmationWindow={closeConfirmationWindow}
         isOpen={confirmRenameWindowOpen}
         isSubmitting={isSubmitting}
@@ -131,6 +134,7 @@ const ConsolePanelWorkspaces = () => {
             <Table variant="simple">
               <Thead>
                 <Tr>
+                  <Th></Th>
                   <Th>Workspace name</Th>
                   <Th>Organization</Th>
                   <Th>Quota</Th>
@@ -142,6 +146,9 @@ const ConsolePanelWorkspaces = () => {
               <Tbody>
                 {list.data.map((workspace) => (
                   <Tr key={workspace.id}>
+                    <Td>
+                      <Avatar name={workspace.name} />
+                    </Td>
                     <Td>
                       <Text>{workspace.name}</Text>
                     </Td>

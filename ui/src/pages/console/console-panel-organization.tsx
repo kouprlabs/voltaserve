@@ -34,6 +34,7 @@ import ConsoleApi, {
 } from '@/client/console/console'
 import PagePagination from '@/lib/components/page-pagination'
 import SectionSpinner from '@/lib/components/section-spinner'
+import UserAvatar from '@/lib/components/user-avatar'
 
 const ConsolePanelOrganization = () => {
   const [organizationData, setOrganizationData] =
@@ -174,7 +175,12 @@ const ConsolePanelOrganization = () => {
                   {usersData.data && usersData.data.length > 0 ? (
                     usersData.data.map((user) => (
                       <Flex key={user.id}>
-                        <Avatar name={user.username} src={user.picture} />
+                        <UserAvatar
+                          name={user.username}
+                          src={user.picture}
+                          height={'40px'}
+                          size={'sm'}
+                        />
                         <Box ml="3">
                           <Text fontWeight="bold">
                             {user.username}

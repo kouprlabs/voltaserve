@@ -49,6 +49,7 @@ import {
 } from '@/lib/components/icons'
 import PagePagination from '@/lib/components/page-pagination'
 import SectionSpinner from '@/lib/components/section-spinner'
+import UserAvatar from '@/lib/components/user-avatar'
 
 const EditButton = (props: IconButtonProps) => (
   <IconButton
@@ -62,6 +63,8 @@ const EditButton = (props: IconButtonProps) => (
 enum actionChooser {
   Email = 'email',
   FullName = 'fullName',
+  Password = 'password',
+  Picture = 'picture',
 }
 
 const ConsolePanelUser = () => {
@@ -83,12 +86,11 @@ const ConsolePanelUser = () => {
   const [workspacesPage, setWorkspacesPage] = useState(1)
   const [groupsPage, setGroupsPage] = useState(1)
   const [organizationsPage, setOrganizationsPage] = useState(1)
-  const [confirmResetPasswordWindowOpen, setConfirmResetPasswordWindowOpen] =
-    useState(false)
+  const [confirmWindowOpen, setConfirmWindowOpen] = useState(false)
   const [confirmRenameWindowOpen, setConfirmRenameWindowOpen] = useState(false)
   const [currentName, setCurrentName] = useState<string>('')
   const [isSubmitting, setSubmitting] = useState(false)
-  const [userEmail, setUserEmail] = useState<string>()
+  const [userTarget, setUserTarget] = useState<string>('')
   const [userId, setUserId] = useState<string>()
   const [action, setAction] = useState<string>('')
   const formSchemaEmail = Yup.object().shape({
@@ -98,16 +100,28 @@ const ConsolePanelUser = () => {
     name: Yup.string().required('Full Name is required').max(255),
   })
 
+  const verboseAction: { [key: string]: string } = {
+    [actionChooser.Email]: 'Change email',
+    [actionChooser.FullName]: 'Change Full name',
+    [actionChooser.Password]: 'Force reset password',
+    [actionChooser.Picture]: 'Remove the profile picture',
+  }
+
+  const verboseActionDescription: { [key: string]: string } = {
+    [actionChooser.Password]: 'You are going to force reset password on ',
+    [actionChooser.Picture]: 'You are going to remove the profile picture of ',
+  }
+
   const formSchemaChooser: { [key: string]: Yup.ObjectSchema<object> } = {
     [actionChooser.Email]: formSchemaEmail,
     [actionChooser.FullName]: formSchemaFullName,
   }
 
   const closeConfirmationWindow = () => {
-    setConfirmResetPasswordWindowOpen(false)
+    setConfirmWindowOpen(false)
     setSubmitting(false)
     setConfirmRenameWindowOpen(false)
-    setUserEmail('')
+    setUserTarget('')
     setUserId('')
     setCurrentName('')
     setAction('')
@@ -116,7 +130,7 @@ const ConsolePanelUser = () => {
   const forceResetPassword = useCallback(
     async (
       id: string | null,
-      email: string | null,
+      target: string | null,
       _action: boolean | null,
       confirm: boolean = false,
     ) => {
@@ -127,13 +141,38 @@ const ConsolePanelUser = () => {
         } finally {
           closeConfirmationWindow()
         }
-      } else if (id && email) {
-        setConfirmResetPasswordWindowOpen(true)
-        setUserEmail(email)
+      } else if (id && target) {
+        setConfirmWindowOpen(true)
+        setUserTarget(target)
         setUserId(id)
+        setAction(actionChooser.Password)
       }
     },
-    [userId, isSubmitting],
+    [userId, isSubmitting, action],
+  )
+
+  const removeUsersPicture = useCallback(
+    async (
+      id: string | null,
+      target: string | null,
+      _action: boolean | null,
+      confirm: boolean = false,
+    ) => {
+      if (confirm && userId) {
+        setSubmitting(true)
+        try {
+          await UserAPI.adminUpdateUserData(userId, { picture: null })
+        } finally {
+          closeConfirmationWindow()
+        }
+      } else if (id && target) {
+        setConfirmWindowOpen(true)
+        setUserTarget(target)
+        setUserId(id)
+        setAction(actionChooser.Picture)
+      }
+    },
+    [userId, isSubmitting, action],
   )
 
   const renameUser = useCallback(
@@ -143,7 +182,6 @@ const ConsolePanelUser = () => {
       newName: string | null,
       confirm: boolean = false,
     ) => {
-      console.log('boom')
       if (confirm && userId !== undefined && newName !== null) {
         try {
           setSubmitting(true)
@@ -185,7 +223,19 @@ const ConsolePanelUser = () => {
     [userId, isSubmitting, action],
   )
 
-  const functionChooser: {
+  const functionConfirmChooser: {
+    [key: string]: (
+      id: string | null,
+      target: string | null,
+      action: boolean | null,
+      confirm: boolean,
+    ) => Promise<void>
+  } = {
+    [actionChooser.Password]: forceResetPassword,
+    [actionChooser.Picture]: removeUsersPicture,
+  }
+
+  const functionInputChooser: {
     [key: string]: (
       id: string | null,
       currentName: string | null,
@@ -259,21 +309,24 @@ const ConsolePanelUser = () => {
   return (
     <>
       <ConsoleConfirmationModal
-        isOpen={confirmResetPasswordWindowOpen}
-        action={'force password change on'}
-        target={userEmail}
+        isOpen={confirmWindowOpen}
+        action={verboseAction[action]}
+        verbose={verboseActionDescription[action]}
+        target={userTarget}
         closeConfirmationWindow={closeConfirmationWindow}
         isSubmitting={isSubmitting}
-        request={forceResetPassword}
+        request={functionConfirmChooser[action]}
       />
       <ConsoleRenameModal
+        action={verboseAction[action]}
+        target={currentName}
         closeConfirmationWindow={closeConfirmationWindow}
         isOpen={confirmRenameWindowOpen}
         isSubmitting={isSubmitting}
         previousName={currentName}
         object={'user'}
         formSchema={formSchemaChooser[action]}
-        request={functionChooser[action]}
+        request={functionInputChooser[action]}
       />
       <Helmet>
         <title>User Management</title>
@@ -284,17 +337,11 @@ const ConsolePanelUser = () => {
       <Grid gap={4} templateColumns="repeat(9, 1fr)">
         <GridItem>
           <div className={cx('relative', 'shrink-0')}>
-            <Avatar
+            <UserAvatar
               name={userData.fullName}
               src={userData.picture}
-              size="2xl"
-              className={cx(
-                'w-[165px]',
-                'h-[165px]',
-                'border',
-                'border-gray-300',
-                'dark:border-gray-700',
-              )}
+              height={'165px'}
+              size={'2xl'}
             />
             {userData.picture ? (
               <IconButton
@@ -306,8 +353,12 @@ const ConsolePanelUser = () => {
                 position="absolute"
                 zIndex={1000}
                 aria-label=""
-                onClick={() => {
-                  console.log('remove')
+                onClick={async () => {
+                  await removeUsersPicture(
+                    userData.id,
+                    `${userData.fullName} (${userData.email})`,
+                    true,
+                  )
                 }}
               />
             ) : null}
@@ -376,7 +427,11 @@ const ConsolePanelUser = () => {
                   aria-label=""
                   icon={<IconSync />}
                   onClick={async () => {
-                    await forceResetPassword(userData.id, userData.email, true)
+                    await forceResetPassword(
+                      userData.id,
+                      `${userData.fullName} (${userData.email})`,
+                      true,
+                    )
                   }}
                 />
               </div>

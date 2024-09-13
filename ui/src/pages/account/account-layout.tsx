@@ -10,7 +10,6 @@
 import { useEffect, useState } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import {
-  Avatar,
   Button,
   Heading,
   IconButton,
@@ -25,6 +24,7 @@ import { swrConfig } from '@/client/options'
 import AccountEditPicture from '@/components/account/edit-picture'
 import { IconEdit } from '@/lib/components/icons'
 import NumberTag from '@/lib/components/number-tag'
+import UserAvatar from '@/lib/components/user-avatar'
 import { useAppDispatch } from '@/store/hook'
 import { mutateUpdated } from '@/store/ui/account'
 
@@ -65,17 +65,11 @@ const AccountLayout = () => {
       >
         <div className={cx('flex', 'flex-col', 'gap-2', 'items-center')}>
           <div className={cx('relative', 'shrink-0')}>
-            <Avatar
+            <UserAvatar
               name={user.fullName}
               src={user.picture}
-              size="2xl"
-              className={cx(
-                'w-[165px]',
-                'h-[165px]',
-                'border',
-                'border-gray-300',
-                'dark:border-gray-700',
-              )}
+              height={'165px'}
+              size={'2xl'}
             />
             <IconButton
               icon={<IconEdit />}

@@ -36,8 +36,16 @@ import { getUserId } from '@/infra/token'
 import { IconMoreVert } from '@/lib/components/icons'
 import PagePagination from '@/lib/components/page-pagination'
 import SectionSpinner from '@/lib/components/section-spinner'
+import UserAvatar from '@/lib/components/user-avatar'
 import { decodeQuery } from '@/lib/helpers/query'
 import usePagePagination from '@/lib/hooks/page-pagination'
+
+enum actionChooser {
+  Suspend = 'suspend',
+  UnSuspend = 'unsupend',
+  Admin = 'admin',
+  DeAdmin = 'deadmin',
+}
 
 const ConsolePanelUsers = () => {
   const [searchParams] = useSearchParams()
@@ -47,48 +55,59 @@ const ConsolePanelUsers = () => {
   const [list, setList] = useState<ConsoleUsersResponse>()
   const [isSubmitting, setSubmitting] = useState(false)
   const [userId, setUserId] = useState<string>()
-  const [userEmail, setUserEmail] = useState<string>()
+  const [userTarget, setUserTarget] = useState<string>('')
   const [actionState, setActionState] = useState<boolean>()
-  const [confirmSuspendWindowOpen, setConfirmSuspendWindowOpen] =
-    useState(false)
-  const [confirmAdminWindowOpen, setConfirmAdminWindowOpen] = useState(false)
-  const [confirmWindowAction, setConfirmWindowAction] = useState<string>()
+  const [action, setAction] = useState<string>('')
+  const [confirmWindowOpen, setConfirmWindowOpen] = useState(false)
   const { page, size, steps, setPage, setSize } = usePagePagination({
     navigate,
     location,
     storage: consoleUsersPaginationStorage(),
   })
 
+  const verboseAction: { [key: string]: string } = {
+    [actionChooser.Suspend]: 'Suspend',
+    [actionChooser.UnSuspend]: 'Unsuspend',
+    [actionChooser.Admin]: 'Add admin',
+    [actionChooser.DeAdmin]: 'Remove admin',
+  }
+
+  const verboseActionDescription: { [key: string]: string } = {
+    [actionChooser.Suspend]: 'You are going to suspend ',
+    [actionChooser.UnSuspend]: 'You are going to unsuspend ',
+    [actionChooser.Admin]: 'You are going to grant admin rights to ',
+    [actionChooser.DeAdmin]: 'You are going to remove admin rights from ',
+  }
+
   const suspendUser = useCallback(
     async (
       id: string | null,
-      email: string | null,
+      target: string | null,
       suspend: boolean | null,
       confirm: boolean = false,
     ) => {
-      console.log('suspend', confirm, userId, actionState)
       if (confirm && userId && actionState !== undefined) {
-        console.log('suspend fire req')
         setSubmitting(true)
         try {
           await UserAPI.suspendUser({ id: userId, suspend: actionState })
         } finally {
           closeConfirmationWindow()
         }
-      } else if (id && suspend !== null && email) {
-        setConfirmSuspendWindowOpen(true)
+      } else if (id && suspend !== null && target) {
+        setConfirmWindowOpen(true)
         setActionState(suspend)
-        setUserEmail(email)
+        setUserTarget(target)
+        setAction(suspend ? actionChooser.Suspend : actionChooser.UnSuspend)
         setUserId(id)
       }
     },
-    [userId, isSubmitting],
+    [userId, isSubmitting, action],
   )
 
   const makeAdminUser = useCallback(
     async (
       id: string | null,
-      email: string | null,
+      target: string | null,
       makeAdmin: boolean | null,
       confirm: boolean = false,
     ) => {
@@ -99,23 +118,38 @@ const ConsolePanelUsers = () => {
         } finally {
           closeConfirmationWindow()
         }
-      } else if (id && makeAdmin !== null && email) {
-        setConfirmAdminWindowOpen(true)
+      } else if (id && makeAdmin !== null && target) {
+        setConfirmWindowOpen(true)
         setActionState(makeAdmin)
-        setUserEmail(email)
+        setUserTarget(target)
+        setAction(makeAdmin ? actionChooser.Admin : actionChooser.DeAdmin)
         setUserId(id)
       }
     },
-    [userId, isSubmitting],
+    [userId, isSubmitting, action],
   )
 
   const closeConfirmationWindow = () => {
     setUserId(undefined)
-    setUserEmail(undefined)
+    setUserTarget('')
     setActionState(undefined)
-    setConfirmSuspendWindowOpen(false)
     setSubmitting(false)
-    setConfirmAdminWindowOpen(false)
+    setConfirmWindowOpen(false)
+    setAction('')
+  }
+
+  const functionConfirmChooser: {
+    [key: string]: (
+      id: string | null,
+      target: string | null,
+      action: boolean | null,
+      confirm: boolean,
+    ) => Promise<void>
+  } = {
+    [actionChooser.Admin]: makeAdminUser,
+    [actionChooser.DeAdmin]: makeAdminUser,
+    [actionChooser.Suspend]: suspendUser,
+    [actionChooser.UnSuspend]: suspendUser,
   }
 
   useEffect(() => {
@@ -133,20 +167,13 @@ const ConsolePanelUsers = () => {
   return (
     <>
       <ConsoleConfirmationModal
-        isOpen={confirmSuspendWindowOpen}
-        action={confirmWindowAction}
-        target={userEmail}
+        isOpen={confirmWindowOpen}
+        action={verboseAction[action]}
+        verbose={verboseActionDescription[action]}
+        target={userTarget}
         closeConfirmationWindow={closeConfirmationWindow}
         isSubmitting={isSubmitting}
-        request={suspendUser}
-      />
-      <ConsoleConfirmationModal
-        isOpen={confirmAdminWindowOpen}
-        action={confirmWindowAction}
-        target={userEmail}
-        closeConfirmationWindow={closeConfirmationWindow}
-        isSubmitting={isSubmitting}
-        request={makeAdminUser}
+        request={functionConfirmChooser[action]}
       />
       <Helmet>
         <title>User Management</title>
@@ -158,6 +185,7 @@ const ConsolePanelUsers = () => {
             <Table variant="simple">
               <Thead>
                 <Tr>
+                  <Th></Th>
                   <Th>Full name</Th>
                   <Th>Email</Th>
                   <Th>Email confirmed</Th>
@@ -181,6 +209,14 @@ const ConsolePanelUsers = () => {
                       }
                     }}
                   >
+                    <Td>
+                      <UserAvatar
+                        name={user.fullName}
+                        src={user.picture}
+                        height={'40px'}
+                        size={'sm'}
+                      />
+                    </Td>
                     <Td>
                       <Text>{user.fullName}</Text>
                     </Td>
@@ -234,8 +270,11 @@ const ConsolePanelUsers = () => {
                               {user.isActive ? (
                                 <MenuItem
                                   onClick={async () => {
-                                    setConfirmWindowAction('suspend')
-                                    await suspendUser(user.id, user.email, true)
+                                    await suspendUser(
+                                      user.id,
+                                      `${user.fullName} (${user.email})`,
+                                      true,
+                                    )
                                   }}
                                 >
                                   Suspend
@@ -243,10 +282,9 @@ const ConsolePanelUsers = () => {
                               ) : (
                                 <MenuItem
                                   onClick={async () => {
-                                    setConfirmWindowAction('unsuspend')
                                     await suspendUser(
                                       user.id,
-                                      user.email,
+                                      `${user.fullName} (${user.email})`,
                                       false,
                                     )
                                   }}
@@ -257,27 +295,21 @@ const ConsolePanelUsers = () => {
                               {user.isAdmin ? (
                                 <MenuItem
                                   onClick={async () => {
-                                    setConfirmWindowAction(
-                                      'remove admin rights from',
-                                    )
                                     await makeAdminUser(
                                       user.id,
-                                      user.email,
+                                      `${user.fullName} (${user.email})`,
                                       false,
                                     )
                                   }}
                                 >
-                                  Deadmin
+                                  Remove admin
                                 </MenuItem>
                               ) : (
                                 <MenuItem
                                   onClick={async () => {
-                                    setConfirmWindowAction(
-                                      'grant admin rights to',
-                                    )
                                     await makeAdminUser(
                                       user.id,
-                                      user.email,
+                                      `${user.fullName} (${user.email})`,
                                       true,
                                     )
                                   }}
