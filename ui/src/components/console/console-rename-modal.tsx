@@ -24,6 +24,7 @@ import {
 import { Field, FieldAttributes, FieldProps, Form, Formik } from 'formik'
 import * as Yup from 'yup'
 import cx from 'classnames'
+import useFocusAndSelectAll from '@/hooks/use-focus-and-select-all'
 
 interface ConsoleRenameModalProps {
   closeConfirmationWindow: () => void
@@ -31,24 +32,27 @@ interface ConsoleRenameModalProps {
   isSubmitting: boolean
   previousName: string
   object: string
-  formSchema: Yup.ObjectSchema<
-    { name: string },
-    Yup.AnyObject,
-    { name: undefined }
-  >
+  formSchema: Yup.ObjectSchema<object>
   request: (
     id: string | null,
     currentName: string | null,
     newName: string | null,
     confirm: boolean,
   ) => Promise<void>
+  action: string
+  target: string
 }
 const ConsoleRenameModal = (props: ConsoleRenameModalProps) => {
   const inputRef = useRef<HTMLInputElement>(null)
+
+  useFocusAndSelectAll(inputRef, props.isOpen)
+
   useEffect(() => {
     if (
       props.isOpen &&
-      (props.previousName === undefined || props.formSchema == undefined)
+      (props.previousName === undefined ||
+        props.formSchema === undefined ||
+        props.request === undefined)
     ) {
       setTimeout(() => {
         window.location.reload()
@@ -66,7 +70,9 @@ const ConsoleRenameModal = (props: ConsoleRenameModalProps) => {
     >
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>Rename {props.object}</ModalHeader>
+        <ModalHeader>
+          {props.action} {props.target}
+        </ModalHeader>
         <ModalCloseButton />
         <Formik
           enableReinitialize={true}

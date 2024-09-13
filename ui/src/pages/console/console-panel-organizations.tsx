@@ -10,6 +10,7 @@
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import {
+  Avatar,
   Center,
   Heading,
   IconButton,
@@ -111,6 +112,8 @@ const ConsolePanelOrganizations = () => {
     <>
       <ConsoleRenameModal
         closeConfirmationWindow={closeConfirmationWindow}
+        action={'Rename'}
+        target={currentName}
         isOpen={confirmRenameWindowOpen}
         isSubmitting={isSubmitting}
         previousName={currentName}
@@ -130,6 +133,7 @@ const ConsolePanelOrganizations = () => {
             <Table variant="simple">
               <Thead>
                 <Tr>
+                  <Th></Th>
                   <Th>Workspace name</Th>
                   <Th>Create time</Th>
                   <Th>Update time</Th>
@@ -150,6 +154,9 @@ const ConsolePanelOrganizations = () => {
                       }
                     }}
                   >
+                    <Td>
+                      <Avatar name={organization.name} />
+                    </Td>
                     <Td>
                       <Text>{organization.name}</Text>
                     </Td>

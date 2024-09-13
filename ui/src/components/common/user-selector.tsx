@@ -22,7 +22,6 @@ import {
   Tr,
   Tbody,
   Td,
-  Avatar,
   Radio,
 } from '@chakra-ui/react'
 import cx from 'classnames'
@@ -31,6 +30,7 @@ import { swrConfig } from '@/client/options'
 import Pagination from '@/lib/components/pagination'
 import SearchInput from '@/lib/components/search-input'
 import Spinner from '@/lib/components/spinner'
+import UserAvatar from '@/lib/components/user-avatar'
 import userToString from '@/lib/helpers/user-to-string'
 
 export type UserSelectorProps = {
@@ -212,10 +212,11 @@ const UserSelector = ({
                                 'gap-1.5',
                               )}
                             >
-                              <Avatar
+                              <UserAvatar
                                 name={u.fullName}
-                                size="sm"
-                                className={cx('w-[40px]', 'h-[40px]')}
+                                src={u.picture}
+                                height={'40px'}
+                                size={'sm'}
                               />
                               <span className={cx('text-base')}>
                                 {userToString(u)}

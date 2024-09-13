@@ -14,6 +14,7 @@ import InvitationAPI from '@/client/api/invitation'
 import { User } from '@/client/idp/user'
 import { swrConfig } from '@/client/options'
 import NotificationBadge from '@/lib/components/notification-badge'
+import { randomColorFromString } from '@/lib/helpers/colorGenerator'
 import { useAppSelector } from '@/store/hook'
 import { NavType } from '@/store/ui/nav'
 import AccountMenuActiveCircle from './account-menu-active-circle'
@@ -32,20 +33,37 @@ const AccountMenuAvatarButton = forwardRef<AccountMenuAvatarButtonProps, 'div'>(
       <div ref={ref} {...props} className={cx('cursor-pointer')}>
         <AccountMenuActiveCircle>
           <NotificationBadge hasBadge={count && count > 0 ? true : false}>
-            <Avatar
-              name={user.fullName}
-              src={user.picture}
-              size="sm"
-              className={cx(
-                'w-[40px]',
-                'h-[40px]',
-                'border',
-                'border-gray-300',
-                {
-                  'dark:border-gray-700': !isActive,
-                },
-              )}
-            />
+            {user.picture ? (
+              <Avatar
+                name={user.fullName}
+                src={user.picture}
+                size="sm"
+                className={cx(
+                  'w-[40px]',
+                  'h-[40px]',
+                  'border',
+                  'border-gray-300',
+                  {
+                    'dark:border-gray-700': !isActive,
+                  },
+                )}
+              />
+            ) : (
+              <Avatar
+                name={user.fullName}
+                size="sm"
+                className={cx(
+                  'w-[40px]',
+                  'h-[40px]',
+                  'border',
+                  'border-gray-300',
+                  {
+                    'dark:border-gray-700': !isActive,
+                  },
+                )}
+                sx={{ backgroundColor: randomColorFromString(user.fullName) }}
+              />
+            )}
           </NotificationBadge>
         </AccountMenuActiveCircle>
       </div>

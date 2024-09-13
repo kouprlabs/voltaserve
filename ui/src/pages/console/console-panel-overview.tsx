@@ -101,10 +101,13 @@ const ConsolePanelOverview = () => {
         <Grid gap={4} templateColumns="repeat(4, 1fr)">
           <GridItem>
             <Table>
-              <Th>
-                <span className={cx('font-bold')}>Users</span>
-                {/*<Divider />*/}
-              </Th>
+              <Thead>
+                <Tr>
+                  <Th>
+                    <span className={cx('font-bold')}>Users</span>
+                  </Th>
+                </Tr>
+              </Thead>
             </Table>
             {usersAmount ? (
               <Heading>
@@ -117,9 +120,13 @@ const ConsolePanelOverview = () => {
           </GridItem>
           <GridItem>
             <Table>
-              <Th>
-                <span className={cx('font-bold')}>Organizations</span>
-              </Th>
+              <Thead>
+                <Tr>
+                  <Th>
+                    <span className={cx('font-bold')}>Organizations</span>
+                  </Th>
+                </Tr>
+              </Thead>
             </Table>
             {organizationsAmount ? (
               <Heading>
@@ -132,9 +139,13 @@ const ConsolePanelOverview = () => {
           </GridItem>
           <GridItem>
             <Table>
-              <Th>
-                <span className={cx('font-bold')}>Workspaces</span>
-              </Th>
+              <Thead>
+                <Tr>
+                  <Th>
+                    <span className={cx('font-bold')}>Workspaces</span>
+                  </Th>
+                </Tr>
+              </Thead>
             </Table>
             {workspacesAmount ? (
               <Heading>
@@ -147,9 +158,13 @@ const ConsolePanelOverview = () => {
           </GridItem>
           <GridItem>
             <Table>
-              <Th>
-                <span className={cx('font-bold')}>Groups</span>
-              </Th>
+              <Thead>
+                <Tr>
+                  <Th>
+                    <span className={cx('font-bold')}>Groups</span>
+                  </Th>
+                </Tr>
+              </Thead>
             </Table>
             {groupsAmount ? (
               <Heading>
@@ -162,12 +177,16 @@ const ConsolePanelOverview = () => {
           </GridItem>
           <GridItem colSpan={2}>
             <Table>
-              <Th>
-                <Flex padding={1}>
-                  <span className={cx('font-bold')}>Statistics</span>
-                  <Spacer />
-                </Flex>
-              </Th>
+              <Thead>
+                <Tr>
+                  <Th>
+                    <Flex padding={1}>
+                      <span className={cx('font-bold')}>Statistics</span>
+                      <Spacer />
+                    </Flex>
+                  </Th>
+                </Tr>
+              </Thead>
             </Table>
           </GridItem>
           <GridItem colSpan={2}>
@@ -222,55 +241,6 @@ const ConsolePanelOverview = () => {
               </Tbody>
             </Table>
           </GridItem>
-          {/*</GridItem>*/}
-          {/*{componentsData ? (*/}
-          {/*  <GridItem colSpan={2}>*/}
-          {/*    <Flex padding={1}>*/}
-          {/*      <Table>*/}
-          {/*        <Th>*/}
-          {/*          <span className={cx('font-bold')}>Components</span>*/}
-          {/*        </Th>*/}
-          {/*      </Table>*/}
-          {/*      <Spacer />*/}
-          {/*      {componentsData.filter((component) => component.updateAvailable)*/}
-          {/*        .length > 1 ? (*/}
-          {/*        <Badge colorScheme="yellow">Updates available</Badge>*/}
-          {/*      ) : componentsData.filter(*/}
-          {/*          (component) => component.updateAvailable,*/}
-          {/*        ).length === 1 ? (*/}
-          {/*        <Badge colorScheme="yellow">Update available</Badge>*/}
-          {/*      ) : null}*/}
-          {/*    </Flex>*/}
-          {/*    <Stack>*/}
-          {/*      {componentsData.map((component) => (*/}
-          {/*        <StackItem key={component.name}>*/}
-          {/*          <Flex padding={2}>*/}
-          {/*            <Text>{component.name}</Text>*/}
-          {/*            <Spacer />*/}
-          {/*            {component.updateAvailable ? (*/}
-          {/*              <Link to={component.location}>*/}
-          {/*                <Center>*/}
-          {/*                  <Badge colorScheme="red">*/}
-          {/*                    {component.currentVersion}*/}
-          {/*                  </Badge>*/}
-          {/*                  <IconChevronRight />*/}
-          {/*                  <Badge colorScheme="green">*/}
-          {/*                    {component.latestVersion}*/}
-          {/*                  </Badge>*/}
-          {/*                </Center>*/}
-          {/*              </Link>*/}
-          {/*            ) : (*/}
-          {/*              <Badge>{component.currentVersion}</Badge>*/}
-          {/*            )}*/}
-          {/*          </Flex>*/}
-          {/*          <Divider />*/}
-          {/*        </StackItem>*/}
-          {/*      ))}*/}
-          {/*    </Stack>*/}
-          {/*  </GridItem>*/}
-          {/*) : (*/}
-          {/*  <SectionSpinner />*/}
-          {/*)}*/}
         </Grid>
       </div>
     </>
