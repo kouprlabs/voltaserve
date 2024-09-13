@@ -330,12 +330,12 @@ definitions:
     type: object
   service.FileDeleteManyOptions:
     properties:
-      sourceIds:
+      ids:
         items:
           type: string
         type: array
     required:
-    - sourceIds
+    - ids
     type: object
   service.FileList:
     properties:
@@ -617,8 +617,6 @@ definitions:
         $ref: '#/definitions/service.Download'
       preview:
         $ref: '#/definitions/service.Download'
-      segmentation:
-        $ref: '#/definitions/service.Download'
       status:
         type: string
       task:
@@ -678,8 +676,6 @@ definitions:
       original:
         $ref: '#/definitions/model.S3Object'
       preview:
-        $ref: '#/definitions/model.S3Object'
-      segmentation:
         $ref: '#/definitions/model.S3Object'
       status:
         type: string
@@ -742,6 +738,17 @@ definitions:
         type: string
       userId:
         type: string
+    type: object
+  service.TaskDismissAllResult:
+    properties:
+      failed:
+        items:
+          type: string
+        type: array
+      succeeded:
+        items:
+          type: string
+        type: array
     type: object
   service.TaskInfo:
     properties:
@@ -1496,84 +1503,6 @@ paths:
       summary: Revoke Group Permission
       tags:
       - Files
-  /files/{id}/segmentation/pages/{page}.{ext}:
-    get:
-      description: Download Segmentation Page
-      operationId: files_download_segmentation_page
-      parameters:
-      - description: ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: Page
-        in: path
-        name: page
-        required: true
-        type: string
-      - description: Extension
-        in: path
-        name: ext
-        required: true
-        type: string
-      - description: Access Token
-        in: query
-        name: access_token
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Download Segmentation Page
-      tags:
-      - Files
-  /files/{id}/segmentation/thumbnails/{page}.{ext}:
-    get:
-      description: Download Segmentation Thumbnail
-      operationId: files_download_segmentation_thumbnail
-      parameters:
-      - description: ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: Page
-        in: path
-        name: page
-        required: true
-        type: string
-      - description: Extension
-        in: path
-        name: ext
-        required: true
-        type: string
-      - description: Access Token
-        in: query
-        name: access_token
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Download Segmentation Thumbnail
-      tags:
-      - Files
   /files/{id}/size:
     get:
       description: Get Size
@@ -2151,12 +2080,12 @@ paths:
   /health:
     get:
       description: Get
-      operationId: get_health
+      operationId: get_version
       produces:
       - application/json
       responses:
         "200":
-          description: OK
+          description: '{Version}'
           schema:
             type: string
         "503":
@@ -2165,7 +2094,7 @@ paths:
             $ref: '#/definitions/errorpkg.ErrorResponse'
       summary: Get
       tags:
-      - Health
+      - Version
   /insights/{id}:
     delete:
       consumes:
@@ -2251,6 +2180,8 @@ paths:
       responses:
         "200":
           description: OK
+          schema:
+            $ref: '#/definitions/service.Task'
         "400":
           description: Bad Request
           schema:
@@ -2455,6 +2386,12 @@ paths:
       produces:
       - application/json
       responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/service.Invitation'
+            type: array
         "400":
           description: Bad Request
           schema:
@@ -3475,6 +3412,8 @@ paths:
       responses:
         "200":
           description: OK
+          schema:
+            $ref: '#/definitions/service.TaskDismissAllResult'
         "500":
           description: Internal Server Error
           schema:
