@@ -20,6 +20,7 @@ on:
       - "!webdav/.gitattributes"
       - "!webdav/.gitignore"
       - "!webdav/.README.md"
+      - "!webdav/.env"
     tags:
       - 'v*'
 

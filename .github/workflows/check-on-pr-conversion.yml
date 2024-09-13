@@ -16,6 +16,8 @@ on:
       - main
     paths:
       - "conversion/**"
+      - "!conversion/.env"
+      - "!conversion/README.md"
       
 jobs:
   lint:

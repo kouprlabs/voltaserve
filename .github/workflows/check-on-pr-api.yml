@@ -16,7 +16,9 @@ on:
       - main
     paths:
       - "api/**"
-      
+      - "!api/.env"
+      - "!api/README.md"
+
 jobs:
   lint:
     runs-on: ubuntu-latest

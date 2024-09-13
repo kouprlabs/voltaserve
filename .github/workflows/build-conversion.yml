@@ -20,6 +20,7 @@ on:
       - "!conversion/.gitattributes"
       - "!conversion/.gitignore"
       - "!conversion/.README.md"
+      - "!conversion/.env"
     tags:
       - 'v*'
 

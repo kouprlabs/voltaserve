@@ -20,6 +20,7 @@ on:
       - "!ui/.gitattributes"
       - "!ui/.gitignore"
       - "!ui/.README.md"
+      - "!ui/.env"
     tags:
       - 'v*'
 

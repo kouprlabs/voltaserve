@@ -16,6 +16,8 @@ on:
       - main
     paths:
       - "console/**"
+      - "!console/.env"
+      - "!console/README.md"
 
 jobs:
   lint:
