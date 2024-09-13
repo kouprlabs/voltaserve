@@ -38,7 +38,7 @@ export type UpdateFullNameOptions = {
   fullName: string
 }
 
-export interface baseUserIdRequest {
+export interface BaseUserIdRequest {
   id: string
 }
 
@@ -50,16 +50,17 @@ export type UpdateEmailConfirmationOptions = {
   token: string
 }
 
-export interface suspendUserOptions extends baseUserIdRequest {
+export interface suspendUserOptions extends BaseUserIdRequest {
   suspend: boolean
 }
 
-export interface consoleUpdateDataRequest {
+export interface ConsoleUpdateDataRequest {
   email?: string
   fullName?: string
+  picture?: null
 }
 
-export interface makeAdminOptions extends baseUserIdRequest {
+export interface MakeAdminOptions extends BaseUserIdRequest {
   makeAdmin: boolean
 }
 
@@ -96,7 +97,7 @@ export default class UserAPI {
     )
   }
 
-  static async getUserById(options: baseUserIdRequest) {
+  static async getUserById(options: BaseUserIdRequest) {
     return idpFetcher({
       url: `/user/${options.id}`,
       method: 'GET',
@@ -126,7 +127,7 @@ export default class UserAPI {
     }) as Promise<User>
   }
 
-  static async makeAdmin(options: makeAdminOptions) {
+  static async makeAdmin(options: MakeAdminOptions) {
     return idpFetcher({
       url: `/user/admin`,
       method: 'PATCH',
@@ -186,7 +187,7 @@ export default class UserAPI {
     }) as Promise<User>
   }
 
-  static async forceResetPassword(options: baseUserIdRequest) {
+  static async forceResetPassword(options: BaseUserIdRequest) {
     return idpFetcher({
       url: `/user/force_reset_password`,
       method: 'PATCH',
@@ -196,9 +197,8 @@ export default class UserAPI {
 
   static async adminUpdateUserData(
     id: string,
-    options: consoleUpdateDataRequest,
+    options: ConsoleUpdateDataRequest,
   ) {
-    console.log(options)
     return idpFetcher({
       url: `/user/${id}`,
       method: 'PATCH',
