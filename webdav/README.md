@@ -32,6 +32,7 @@ gci write -s standard -s default \
   -s "prefix(github.com/kouprlabs/voltaserve/webdav)" . && \
 gofumpt -w . && \
 gofmt -s -w . && \
+golangci-lint run --fix && \
 goimports -w .
 ```
 
