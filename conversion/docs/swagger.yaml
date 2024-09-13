@@ -37,22 +37,22 @@ info:
 paths:
   /health:
     get:
-      description: Get Health
-      operationId: get_health
+      description: Get
+      operationId: get_version
       produces:
       - application/json
       responses:
         "200":
-          description: OK
+          description: '{Version}'
           schema:
             type: string
         "503":
           description: Service Unavailable
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Get Health
+      summary: Get
       tags:
-      - Health
+      - Version
   /pipelines/run:
     post:
       consumes:
