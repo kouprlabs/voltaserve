@@ -33,6 +33,7 @@ gci write -s standard -s default \
 gofumpt -w . && \
 gofmt -s -w . && \
 goimports -w . && \
+golangci-lint run --fix && \
 swag fmt
 ```
 

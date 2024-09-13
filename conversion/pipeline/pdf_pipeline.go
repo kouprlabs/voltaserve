@@ -14,7 +14,6 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/minio/minio-go/v7"
 
@@ -100,15 +99,6 @@ func (p *pdfPipeline) RunFromLocalPath(inputPath string, opts api_client.Pipelin
 		return err
 	}
 	if err := p.extractText(inputPath, opts); err != nil {
-		return err
-	}
-	if err := p.taskClient.Patch(opts.TaskID, api_client.TaskPatchOptions{
-		Fields: []string{api_client.TaskFieldName},
-		Name:   helper.ToPtr("Performing segmentation."),
-	}); err != nil {
-		return err
-	}
-	if err := p.performSegmentation(inputPath, &document, opts); err != nil {
 		return err
 	}
 	if err := p.taskClient.Patch(opts.TaskID, api_client.TaskPatchOptions{
@@ -218,75 +208,6 @@ func (p *pdfPipeline) patchSnapshotPreviewField(inputPath string, document *api_
 		}); err != nil {
 			return err
 		}
-	}
-	return nil
-}
-
-func (p *pdfPipeline) performSegmentation(inputPath string, document *api_client.DocumentProps, opts api_client.PipelineRunOptions) error {
-	if err := p.splitPages(inputPath, opts); err != nil {
-		// This is a false positive, qpdf exists with a non-zero code on warnings
-		if !strings.Contains(err.Error(), "qpdf: operation succeeded with warnings; resulting file may have some problems") {
-			return err
-		}
-	}
-	if err := p.splitThumbnails(inputPath, opts); err != nil {
-		return err
-	}
-	document.Thumbnails = &api_client.ThumbnailsProps{
-		Extension: ".jpg",
-	}
-	if err := p.snapshotClient.Patch(api_client.SnapshotPatchOptions{
-		Options: opts,
-		Fields:  []string{api_client.SnapshotFieldSegmentation},
-		Segmentation: &api_client.S3Object{
-			Bucket:   opts.Bucket,
-			Key:      filepath.FromSlash(opts.SnapshotID + "/segmentation"),
-			Document: document,
-		},
-	}); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (p *pdfPipeline) splitPages(inputPath string, opts api_client.PipelineRunOptions) error {
-	pagesDir := filepath.FromSlash(os.TempDir() + "/" + helper.NewID())
-	if err := os.MkdirAll(pagesDir, 0o750); err != nil {
-		return nil
-	}
-	defer func(path string) {
-		if err := os.RemoveAll(path); errors.Is(err, os.ErrNotExist) {
-			return
-		} else if err != nil {
-			infra.GetLogger().Error(err)
-		}
-	}(pagesDir)
-	if err := p.pdfProc.SplitPages(inputPath, pagesDir); err != nil {
-		return err
-	}
-	if err := p.s3.PutFolder(filepath.FromSlash(opts.SnapshotID+"/segmentation/pages"), pagesDir, opts.Bucket); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (p *pdfPipeline) splitThumbnails(inputPath string, opts api_client.PipelineRunOptions) error {
-	thumbnailsDir := filepath.FromSlash(os.TempDir() + "/" + helper.NewID())
-	if err := os.MkdirAll(thumbnailsDir, 0o750); err != nil {
-		return nil
-	}
-	defer func(path string) {
-		if err := os.RemoveAll(path); errors.Is(err, os.ErrNotExist) {
-			return
-		} else if err != nil {
-			infra.GetLogger().Error(err)
-		}
-	}(thumbnailsDir)
-	if err := p.pdfProc.SplitThumbnails(inputPath, 100, 0, ".jpg", thumbnailsDir); err != nil {
-		return err
-	}
-	if err := p.s3.PutFolder(filepath.FromSlash(opts.SnapshotID+"/segmentation/thumbnails"), thumbnailsDir, opts.Bucket); err != nil {
-		return err
 	}
 	return nil
 }

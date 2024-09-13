@@ -429,68 +429,6 @@ func (svc *FileService) DownloadThumbnailBuffer(id string, userID string) (*byte
 	}
 }
 
-func (svc *FileService) DownloadSegmentationPageBuffer(id string, page int, userID string) (*bytes.Buffer, model.Snapshot, model.File, error) {
-	file, err := svc.fileCache.Get(id)
-	if err != nil {
-		return nil, nil, nil, err
-	}
-	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
-		return nil, nil, nil, errorpkg.NewFileIsNotAFileError(file)
-	}
-	if err = svc.fileGuard.Authorize(userID, file, model.PermissionViewer); err != nil {
-		return nil, nil, nil, err
-	}
-	snapshot, err := svc.snapshotCache.Get(*file.GetSnapshotID())
-	if err != nil {
-		return nil, nil, nil, err
-	}
-	if snapshot.HasSegmentation() {
-		documentProps := snapshot.GetPreview().Document
-		if documentProps != nil && (page < 1 || page > documentProps.Pages.Count) {
-			return nil, nil, nil, errorpkg.NewInvalidQueryParamError("page")
-		} else {
-			buf, _, err := svc.s3.GetObject(filepath.FromSlash(snapshot.GetSegmentation().Key+fmt.Sprintf("/pages/%d.pdf", page)), snapshot.GetSegmentation().Bucket, minio.GetObjectOptions{})
-			if err != nil {
-				return nil, nil, nil, err
-			}
-			return buf, snapshot, file, nil
-		}
-	} else {
-		return nil, nil, nil, errorpkg.NewS3ObjectNotFoundError(nil)
-	}
-}
-
-func (svc *FileService) DownloadSegmentationThumbnailBuffer(id string, page int, userID string) (*bytes.Buffer, model.Snapshot, model.File, error) {
-	file, err := svc.fileCache.Get(id)
-	if err != nil {
-		return nil, nil, nil, err
-	}
-	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
-		return nil, nil, nil, errorpkg.NewFileIsNotAFileError(file)
-	}
-	if err = svc.fileGuard.Authorize(userID, file, model.PermissionViewer); err != nil {
-		return nil, nil, nil, err
-	}
-	snapshot, err := svc.snapshotCache.Get(*file.GetSnapshotID())
-	if err != nil {
-		return nil, nil, nil, err
-	}
-	if snapshot.HasSegmentation() {
-		documentProps := snapshot.GetPreview().Document
-		if documentProps != nil && (page < 1 || page > documentProps.Pages.Count) {
-			return nil, nil, nil, errorpkg.NewInvalidQueryParamError("page")
-		} else {
-			buf, _, err := svc.s3.GetObject(filepath.FromSlash(snapshot.GetSegmentation().Key+fmt.Sprintf("/thumbnails/%d.jpg", page)), snapshot.GetSegmentation().Bucket, minio.GetObjectOptions{})
-			if err != nil {
-				return nil, nil, nil, err
-			}
-			return buf, snapshot, file, nil
-		}
-	} else {
-		return nil, nil, nil, errorpkg.NewS3ObjectNotFoundError(nil)
-	}
-}
-
 func (svc *FileService) Find(ids []string, userID string) ([]*File, error) {
 	var res []*File
 	for _, id := range ids {

@@ -617,8 +617,6 @@ definitions:
         $ref: '#/definitions/service.Download'
       preview:
         $ref: '#/definitions/service.Download'
-      segmentation:
-        $ref: '#/definitions/service.Download'
       status:
         type: string
       task:
@@ -678,8 +676,6 @@ definitions:
       original:
         $ref: '#/definitions/model.S3Object'
       preview:
-        $ref: '#/definitions/model.S3Object'
-      segmentation:
         $ref: '#/definitions/model.S3Object'
       status:
         type: string
@@ -1505,84 +1501,6 @@ paths:
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
       summary: Revoke Group Permission
-      tags:
-      - Files
-  /files/{id}/segmentation/pages/{page}.{ext}:
-    get:
-      description: Download Segmentation Page
-      operationId: files_download_segmentation_page
-      parameters:
-      - description: ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: Page
-        in: path
-        name: page
-        required: true
-        type: string
-      - description: Extension
-        in: path
-        name: ext
-        required: true
-        type: string
-      - description: Access Token
-        in: query
-        name: access_token
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Download Segmentation Page
-      tags:
-      - Files
-  /files/{id}/segmentation/thumbnails/{page}.{ext}:
-    get:
-      description: Download Segmentation Thumbnail
-      operationId: files_download_segmentation_thumbnail
-      parameters:
-      - description: ID
-        in: path
-        name: id
-        required: true
-        type: string
-      - description: Page
-        in: path
-        name: page
-        required: true
-        type: string
-      - description: Extension
-        in: path
-        name: ext
-        required: true
-        type: string
-      - description: Access Token
-        in: query
-        name: access_token
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Download Segmentation Thumbnail
       tags:
       - Files
   /files/{id}/size:
