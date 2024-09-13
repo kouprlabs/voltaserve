@@ -19,7 +19,7 @@ on:
       - "idp/**"
       - "!idp/.gitattributes"
       - "!idp/.gitignore"
-      - "!idp/.README.md"
+      - "!idp/README.md"
       - "!idp/.env"
     tags:
       - 'v*'

@@ -18,7 +18,7 @@ on:
     paths:
       - "console/**"
       - "!console/.gitignore"
-      - "!console/.README.md"
+      - "!console/README.md"
       - "!console/api/.env"
     tags:
       - 'v*'
