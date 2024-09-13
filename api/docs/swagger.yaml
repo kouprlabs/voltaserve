@@ -330,12 +330,12 @@ definitions:
     type: object
   service.FileDeleteManyOptions:
     properties:
-      sourceIds:
+      ids:
         items:
           type: string
         type: array
     required:
-    - sourceIds
+    - ids
     type: object
   service.FileList:
     properties:
@@ -742,6 +742,17 @@ definitions:
         type: string
       userId:
         type: string
+    type: object
+  service.TaskDismissAllResult:
+    properties:
+      failed:
+        items:
+          type: string
+        type: array
+      succeeded:
+        items:
+          type: string
+        type: array
     type: object
   service.TaskInfo:
     properties:
@@ -2151,12 +2162,12 @@ paths:
   /health:
     get:
       description: Get
-      operationId: get_health
+      operationId: get_version
       produces:
       - application/json
       responses:
         "200":
-          description: OK
+          description: '{Version}'
           schema:
             type: string
         "503":
@@ -2165,7 +2176,7 @@ paths:
             $ref: '#/definitions/errorpkg.ErrorResponse'
       summary: Get
       tags:
-      - Health
+      - Version
   /insights/{id}:
     delete:
       consumes:
@@ -2251,6 +2262,8 @@ paths:
       responses:
         "200":
           description: OK
+          schema:
+            $ref: '#/definitions/service.Task'
         "400":
           description: Bad Request
           schema:
@@ -2455,6 +2468,12 @@ paths:
       produces:
       - application/json
       responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/service.Invitation'
+            type: array
         "400":
           description: Bad Request
           schema:
@@ -3475,6 +3494,8 @@ paths:
       responses:
         "200":
           description: OK
+          schema:
+            $ref: '#/definitions/service.TaskDismissAllResult'
         "500":
           description: Internal Server Error
           schema:

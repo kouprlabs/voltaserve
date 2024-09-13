@@ -5,7 +5,7 @@
     <scripts>
       <script value="dev" />
     </scripts>
-    <node-interpreter value="project" />
+    <node-interpreter value="$USER_HOME$/.bun/bin/bun" />
     <envs />
     <method v="2" />
   </configuration>
