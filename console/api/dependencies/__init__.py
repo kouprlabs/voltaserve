@@ -12,3 +12,4 @@ from .meilisearch import meilisearch_client
 from .database import conn
 from .utils import parse_sql_update_query, camel_to_snake
 from .jwt import JWTBearer
+from .redis import redis_conn

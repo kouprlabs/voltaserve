@@ -36,6 +36,7 @@ class Settings(BaseSettings):
     MOSAIC_URL: str
 
     SEARCH_URL: str
+    REDIS_URL: str
 
     LOG_LEVEL: str = "INFO"
     LOG_FORMAT: str = "PLAIN"

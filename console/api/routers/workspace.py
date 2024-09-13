@@ -18,7 +18,7 @@ from ..database import (
     update_workspace,
     fetch_workspace_count,
 )
-from ..dependencies import JWTBearer, meilisearch_client
+from ..dependencies import JWTBearer, meilisearch_client, redis_conn
 from ..log import base_logger
 from ..errors import (
     NotFoundError,
@@ -127,6 +127,7 @@ async def get_search_workspaces(data: Annotated[WorkspaceSearchRequest, Depends(
 @workspace_api_router.patch(path="", status_code=status.HTTP_202_ACCEPTED)
 async def patch_workspace(data: UpdateWorkspaceRequest, response: Response):
     try:
+        await redis_conn.delete(f"workspace:{data.id}")
         update_workspace(data=data.model_dump(exclude_none=True))
         meilisearch_client.index("workspace").update_documents(
             [

@@ -32,6 +32,8 @@ from ..models import (
     GroupSearchRequest,
 )
 
+from ..dependencies import redis_conn
+
 group_api_router = APIRouter(
     prefix="/group", tags=["group"], dependencies=[Depends(JWTBearer())]
 )
@@ -110,6 +112,7 @@ async def get_search_groups(data: Annotated[GroupSearchRequest, Depends()]):
 @group_api_router.patch(path="", status_code=status.HTTP_202_ACCEPTED)
 async def patch_group(data: UpdateGroupRequest, response: Response):
     try:
+        await redis_conn.delete(f"group:{data.id}")
         update_group(data=data.model_dump(exclude_none=True))
         meilisearch_client.index("group").update_documents(
             [
