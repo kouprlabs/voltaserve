@@ -29,9 +29,7 @@ func (d *Installer) Start() {
 			d.updatePackageList()
 			d.installCoreTools()
 			d.installGltfPipeline()
-			d.installScreenshotGLB()
-			d.installBrowsersDeps()
-			d.installBrowsers()
+			d.installBlender()
 			d.installLibreOffice()
 			d.installTesseract()
 			d.installFonts()
@@ -41,7 +39,7 @@ func (d *Installer) Start() {
 }
 
 func (d *Installer) updatePackageList() {
-	infra.GetLogger().Named(infra.StrInstaller).Infow("↻  updating", "debian", "package list")
+	infra.GetLogger().Named(infra.StrInstaller).Infow("🔄  updating", "debian", "package list")
 	if err := d.cmd.Exec("apt-get", "update"); err != nil {
 		infra.GetLogger().Error(err)
 		infra.GetLogger().Named(infra.StrInstaller).Infow("❌️  failed", "debian", "package list")
@@ -85,34 +83,19 @@ func (d *Installer) installGltfPipeline() {
 	infra.GetLogger().Named(infra.StrInstaller).Infow("✅️  completed", "package", "gltf-pipeline")
 }
 
-func (d *Installer) installScreenshotGLB() {
-	infra.GetLogger().Named(infra.StrInstaller).Infow("⬇️  installing", "package", "@koupr/screenshot-glb")
-	if err := d.cmd.Exec("npm", "i", "-g", "@koupr/screenshot-glb@1.10.6"); err != nil {
+func (d *Installer) installBlender() {
+	infra.GetLogger().Named(infra.StrInstaller).Infow("⬇️  installing", "package", "blender")
+	packages := []string{
+		"blender",
+		"python3-numpy",
+	}
+	args := append([]string{"install", "-y"}, packages...)
+	if err := d.cmd.Exec("apt-get", args...); err != nil {
 		infra.GetLogger().Error(err)
-		infra.GetLogger().Named(infra.StrInstaller).Infow("❌️  failed", "package", "@koupr/screenshot-glb")
+		infra.GetLogger().Named(infra.StrInstaller).Infow("❌️  failed", "package", "blender")
 		return
 	}
-	infra.GetLogger().Named(infra.StrInstaller).Infow("✅️  completed", "package", "@koupr/screenshot-glb")
-}
-
-func (d *Installer) installBrowsersDeps() {
-	infra.GetLogger().Named(infra.StrInstaller).Infow("⬇️  installing", "package", "browsers-deps")
-	if err := d.cmd.Exec("npx", "playwright", "install-deps"); err != nil {
-		infra.GetLogger().Error(err)
-		infra.GetLogger().Named(infra.StrInstaller).Infow("❌️  failed", "package", "browsers-deps")
-		return
-	}
-	infra.GetLogger().Named(infra.StrInstaller).Infow("✅️  completed", "package", "browsers-deps")
-}
-
-func (d *Installer) installBrowsers() {
-	infra.GetLogger().Named(infra.StrInstaller).Infow("⬇️  installing", "package", "browsers")
-	if err := d.cmd.Exec("npx", "playwright", "install"); err != nil {
-		infra.GetLogger().Error(err)
-		infra.GetLogger().Named(infra.StrInstaller).Infow("❌️  failed", "package", "browsers")
-		return
-	}
-	infra.GetLogger().Named(infra.StrInstaller).Infow("✅️  completed", "package", "browsers")
+	infra.GetLogger().Named(infra.StrInstaller).Infow("✅️  completed", "package", "blender")
 }
 
 func (d *Installer) installLibreOffice() {
