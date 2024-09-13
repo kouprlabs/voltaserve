@@ -176,7 +176,7 @@ def fetch_organization_groups(
 def update_organization(data: Dict) -> None:
     try:
         with conn.cursor() as curs:
-            if not exists(curs=curs, _id=data["id"], tablename="group"):
+            if not exists(curs=curs, _id=data["id"], tablename="organization"):
                 raise NotFoundException(
                     f"Organization with id={data['id']} does not exist!"
                 )
