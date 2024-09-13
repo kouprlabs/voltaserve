@@ -21,7 +21,7 @@ from ..database import (
     fetch_organization_groups,
     fetch_organization_count,
 )
-from ..dependencies import JWTBearer, meilisearch_client
+from ..dependencies import JWTBearer, meilisearch_client, redis_conn
 from ..log import base_logger
 from ..errors import (
     NotFoundError,
@@ -210,6 +210,7 @@ async def get_organization_groups(
 @organization_api_router.patch(path="", status_code=status.HTTP_202_ACCEPTED)
 async def patch_organization(data: UpdateOrganizationRequest, response: Response):
     try:
+        await redis_conn.delete(f"organization:{data.id}")
         update_organization(data=data.model_dump(exclude_none=True))
         meilisearch_client.index("organization").update_documents(
             [
