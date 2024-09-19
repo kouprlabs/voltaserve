@@ -112,6 +112,11 @@ export type DeleteManyOptions = {
   ids: string
 }
 
+export type DeleteManyResult = {
+  succeeded: string[]
+  failed: string[]
+}
+
 export type PatchNameOptions = {
   name: string
 }
@@ -325,7 +330,7 @@ export default class FileAPI {
       url: `/files`,
       method: 'DELETE',
       body: JSON.stringify(options),
-    })
+    }) as Promise<DeleteManyResult>
   }
 
   static async moveOne(id: string, targetId: string) {

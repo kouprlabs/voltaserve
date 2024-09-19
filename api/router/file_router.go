@@ -622,7 +622,7 @@ func (r *FileRouter) DeleteOne(c *fiber.Ctx) error {
 //	@Id				files_delete_many
 //	@Produce		json
 //	@Param			body	body		service.FileDeleteManyOptions	true	"Body"
-//	@Success		200		{array}		string
+//	@Success		200		{object}	service.FileDeleteManyResult
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/files [delete]
 func (r *FileRouter) DeleteMany(c *fiber.Ctx) error {
