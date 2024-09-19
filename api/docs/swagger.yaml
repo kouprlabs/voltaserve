@@ -337,6 +337,17 @@ definitions:
     required:
     - ids
     type: object
+  service.FileDeleteManyResult:
+    properties:
+      failed:
+        items:
+          type: string
+        type: array
+      succeeded:
+        items:
+          type: string
+        type: array
+    type: object
   service.FileList:
     properties:
       data:
@@ -909,9 +920,7 @@ paths:
         "200":
           description: OK
           schema:
-            items:
-              type: string
-            type: array
+            $ref: '#/definitions/service.FileDeleteManyResult'
         "500":
           description: Internal Server Error
           schema:

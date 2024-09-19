@@ -1390,7 +1390,10 @@ type FileDeleteManyResult struct {
 }
 
 func (svc *FileService) DeleteMany(opts FileDeleteManyOptions, userID string) (*FileDeleteManyResult, error) {
-	res := &FileDeleteManyResult{}
+	res := &FileDeleteManyResult{
+		Failed:    make([]string, 0),
+		Succeeded: make([]string, 0),
+	}
 	for _, id := range opts.IDs {
 		if err := svc.DeleteOne(id, userID); err != nil {
 			res.Failed = append(res.Failed, id)
