@@ -141,7 +141,7 @@ func (r *TaskRouter) List(c *fiber.Ctx) error {
 //	@Tags			Tasks
 //	@Id				tasks_get_count
 //	@Produce		json
-//	@Success		200	{integer}		int
+//	@Success		200	{integer}	int
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/tasks/count [get]
 func (r *TaskRouter) GetCount(c *fiber.Ctx) error {

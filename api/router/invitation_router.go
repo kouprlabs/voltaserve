@@ -137,7 +137,7 @@ func (r *InvitationRouter) GetIncoming(c *fiber.Ctx) error {
 //	@Tags			Invitations
 //	@Id				invitation_get_incoming_count
 //	@Produce		json
-//	@Success		200	{integer}		int
+//	@Success		200	{integer}	int
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/invitations/incoming/count [get]
 func (r *InvitationRouter) GetIncomingCount(c *fiber.Ctx) error {
