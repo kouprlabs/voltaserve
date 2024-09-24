@@ -215,7 +215,13 @@ const SharingUsers = ({
                             name={p.user.fullName}
                             src={p.user.picture}
                             size="sm"
-                            className={cx('w-[40px]', 'h-[40px]')}
+                            className={cx(
+                              'w-[40px]',
+                              'h-[40px]',
+                              'border',
+                              'border-gray-300',
+                              'dark:border-gray-700',
+                            )}
                           />
                           <div className={cx('flex', 'flex-col', 'gap-0.5')}>
                             <Text noOfLines={1}>{p.user.fullName}</Text>

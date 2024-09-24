@@ -120,7 +120,15 @@ const OrganizationMembersPage = () => {
                         'items-center',
                       )}
                     >
-                      <Avatar name={u.fullName} src={u.picture} />
+                      <Avatar
+                        name={u.fullName}
+                        src={u.picture}
+                        className={cx(
+                          'border',
+                          'border-gray-300',
+                          'dark:border-gray-700',
+                        )}
+                      />
                       <span>{u.fullName}</span>
                     </div>
                   </Td>
