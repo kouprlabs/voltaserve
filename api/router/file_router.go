@@ -649,7 +649,7 @@ func (r *FileRouter) DeleteMany(c *fiber.Ctx) error {
 //	@Id				files_get_size
 //	@Produce		json
 //	@Param			id	path		string	true	"ID"
-//	@Success		200	{object}	int
+//	@Success		200	{int}		int
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/files/{id}/size [get]
@@ -671,7 +671,7 @@ func (r *FileRouter) GetSize(c *fiber.Ctx) error {
 //	@Id				files_get_count
 //	@Produce		json
 //	@Param			id	path		string	true	"ID"
-//	@Success		200	{object}	int
+//	@Success		200	{int}		int
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/files/{id}/count [get]

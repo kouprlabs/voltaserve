@@ -141,7 +141,7 @@ func (r *TaskRouter) List(c *fiber.Ctx) error {
 //	@Tags			Tasks
 //	@Id				tasks_get_count
 //	@Produce		json
-//	@Success		200	{object}	int
+//	@Success		200	{int}		int
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/tasks/count [get]
 func (r *TaskRouter) GetCount(c *fiber.Ctx) error {
@@ -181,7 +181,7 @@ func (r *TaskRouter) Dismiss(c *fiber.Ctx) error {
 //	@Id				tasks_dismiss_all
 //	@Accept			json
 //	@Produce		json
-//	@Success		200 {object}	service.TaskDismissAllResult
+//	@Success		200	{object}	service.TaskDismissAllResult
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/tasks/dismiss [post]
 func (r *TaskRouter) DismissAll(c *fiber.Ctx) error {
