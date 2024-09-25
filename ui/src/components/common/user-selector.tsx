@@ -214,8 +214,15 @@ const UserSelector = ({
                             >
                               <Avatar
                                 name={u.fullName}
+                                src={u.picture}
                                 size="sm"
-                                className={cx('w-[40px]', 'h-[40px]')}
+                                className={cx(
+                                  'w-[40px]',
+                                  'h-[40px]',
+                                  'border',
+                                  'border-gray-300',
+                                  'dark:border-gray-700',
+                                )}
                               />
                               <span className={cx('text-base')}>
                                 {userToString(u)}
