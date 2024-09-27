@@ -26,6 +26,21 @@ class UserRepoImpl {
     return this.mapRow(rows[0])
   }
 
+  async getResetPasswordToken(id: string): Promise<string> {
+    const { rowCount, rows } = await client.query(
+      `SELECT reset_password_token FROM "user" WHERE id = $1`,
+      [id],
+    )
+    if (rowCount < 1) {
+      throw newError({
+        code: ErrorCode.InternalServerError,
+        userMessage:
+          'Critical error, please contact administrator (missing password token)',
+      })
+    }
+    return rows[0].reset_password_token
+  }
+
   async findByUsername(username: string): Promise<User> {
     const { rowCount, rows } = await client.query(
       `SELECT * FROM "user" WHERE username = $1`,
@@ -254,8 +269,9 @@ class UserRepoImpl {
           email_update_token = $12,
           email_update_value = $13,
           picture = $14,
-          update_time = $15
-        WHERE id = $16
+          update_time = $15,
+          force_change_password = $16
+        WHERE id = $17
         RETURNING *`,
       [
         entity.fullName,
@@ -273,6 +289,7 @@ class UserRepoImpl {
         entity.emailUpdateValue,
         entity.picture,
         new Date().toISOString(),
+        entity.forceChangePassword,
         entity.id,
       ],
     )
@@ -303,6 +320,13 @@ class UserRepoImpl {
     )
   }
 
+  async forceResetPassword(id: string, token: string): Promise<void> {
+    await client.query(
+      'UPDATE "user" SET force_change_password = $1, reset_password_token = $2, update_time = $3 WHERE id = $4',
+      [true, token, new Date().toISOString(), id],
+    )
+  }
+
   async enoughActiveAdmins() {
     const { rows } = await client.query(
       'SELECT COUNT(*) as count FROM "user" WHERE is_admin IS TRUE AND is_active IS TRUE',
@@ -328,6 +352,7 @@ class UserRepoImpl {
       isActive: row.is_active,
       emailUpdateToken: row.email_update_token,
       emailUpdateValue: row.email_update_value,
+      forceChangePassword: row.force_change_password,
       picture: row.picture,
       createTime: row.create_time,
       updateTime: row.update_time,

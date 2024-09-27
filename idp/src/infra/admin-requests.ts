@@ -46,3 +46,11 @@ export interface UserSearchResponse {
   size: number
   totalElements: number
 }
+
+export interface UserUpdateAdminRequest {
+  fullName?: string
+  email?: string
+  username?: string
+  isEmailConfirmed?: boolean
+  emailConfirmationToken?: string
+}

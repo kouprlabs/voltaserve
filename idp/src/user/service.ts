@@ -11,15 +11,17 @@ import fs from 'fs/promises'
 import { getConfig } from '@/config/config'
 import {
   UserAdminPostRequest,
+  UserIdPostRequest,
   UserSearchResponse,
   UserSuspendPostRequest,
+  UserUpdateAdminRequest,
 } from '@/infra/admin-requests'
 import { ErrorCode, newError } from '@/infra/error'
 import { newHyphenlessUuid } from '@/infra/id'
 import { sendTemplateMail } from '@/infra/mail'
 import { hashPassword, verifyPassword } from '@/infra/password'
 import search, { USER_SEARCH_INDEX } from '@/infra/search'
-import { User } from '@/user/model'
+import { UpdateOptions, User } from '@/user/model'
 import userRepo from '@/user/repo'
 
 export type UserDTO = {
@@ -67,6 +69,43 @@ export async function getUser(id: string): Promise<UserDTO> {
 
 export async function getUserByAdmin(id: string): Promise<User> {
   return adminMapEntity(await userRepo.findByID(id))
+}
+
+export async function updateAdminUser(
+  id: string,
+  data: UserUpdateAdminRequest,
+): Promise<UserDTO> {
+  if (!data.isEmailConfirmed) {
+    let usernameUnavailable = false
+    try {
+      await userRepo.findByUsername(data.email)
+      usernameUnavailable = true
+    } catch {
+      // Ignored
+    }
+    if (usernameUnavailable) {
+      throw newError({ code: ErrorCode.UsernameUnavailable })
+    }
+    const user = await userRepo.update({ id: id, ...(data as UpdateOptions) })
+    try {
+      await sendTemplateMail('email-confirmation', user.email, {
+        'UI_URL': getConfig().publicUIURL,
+        'TOKEN': user.emailConfirmationToken,
+      })
+      return mapEntity(user)
+    } catch (error) {
+      await userRepo.update({
+        id,
+        emailUpdateToken: null,
+        emailUpdateValue: null,
+      })
+      throw newError({ code: ErrorCode.InternalServerError, error })
+    }
+  } else {
+    return mapEntity(
+      await userRepo.update({ id: id, ...(data as UpdateOptions) }),
+    )
+  }
 }
 
 export async function searchUserListPaginated(
@@ -335,6 +374,28 @@ export async function makeAdminUser(options: UserAdminPostRequest) {
   }
 }
 
+export async function forceResetPassword(options: UserIdPostRequest) {
+  const user = await userRepo.findByID(options.id)
+  if (user) {
+    const token = newHyphenlessUuid()
+    await userRepo.forceResetPassword(user.id, token)
+    await search.index(USER_SEARCH_INDEX).updateDocuments([
+      {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        fullName: user.fullName,
+        isEmailConfirmed: user.isEmailConfirmed,
+        createTime: user.createTime,
+        updateTime: user.updateTime,
+        picture: user.picture,
+      },
+    ])
+  } else {
+    throw newError({ code: ErrorCode.UserNotFound })
+  }
+}
+
 export function mapEntity(entity: User): UserDTO {
   const user: UserDTO = {
     id: entity.id,
@@ -362,6 +423,7 @@ export function adminMapEntity(entity: User): User {
     isActive: entity.isActive,
     isAdmin: entity.isAdmin,
     isEmailConfirmed: entity.isEmailConfirmed,
+    forceChangePassword: entity.forceChangePassword,
   }
   Object.keys(user).forEach(
     (index) => !user[index] && user[index] !== undefined && delete user[index],

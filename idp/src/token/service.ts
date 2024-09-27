@@ -14,6 +14,7 @@ import { newHyphenlessUuid } from '@/infra/id'
 import { verifyPassword } from '@/infra/password'
 import { User } from '@/user/model'
 import userRepo from '@/user/repo'
+import { getUserByAdmin } from '@/user/service'
 
 export type TokenGrantType = 'password' | 'refresh_token'
 
@@ -34,7 +35,7 @@ export type TokenExchangeOptions = {
 }
 
 export async function exchange(options: TokenExchangeOptions): Promise<Token> {
-  validateParemeters(options)
+  validateParameters(options)
   // https://datatracker.ietf.org/doc/html/rfc6749#section-4.3
   if (options.grant_type === 'password') {
     let user: User
@@ -78,7 +79,29 @@ export const checkAdmin = (jwt) => {
     throw newError({ code: ErrorCode.MissingPermission })
 }
 
-function validateParemeters(options: TokenExchangeOptions) {
+export const checkEmptyFields = (fields: Array<string | null>) => {
+  console.log(fields)
+  if (fields.every((field) => field === undefined)) {
+    throw newError({
+      code: ErrorCode.InvalidRequest,
+      userMessage: 'There are missing fields in your request',
+    })
+  }
+}
+
+export const checkForcePasswordChange = async (userId: string) => {
+  const user = await getUserByAdmin(userId)
+  if (user.forceChangePassword) {
+    const resetPasswordToken = await userRepo.getResetPasswordToken(user.id)
+    const payload = { 'resetPasswordToken': resetPasswordToken }
+    throw newError({
+      code: ErrorCode.ForceChangePassword,
+      payload,
+    })
+  }
+}
+
+function validateParameters(options: TokenExchangeOptions) {
   if (!options.grant_type) {
     throw newError({
       code: ErrorCode.InvalidRequest,

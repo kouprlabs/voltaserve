@@ -16,12 +16,19 @@ import passport from 'passport'
 import {
   SearchPaginatedRequest,
   UserAdminPostRequest,
+  UserIdPostRequest,
   UserIdRequest,
   UserSuspendPostRequest,
+  UserUpdateAdminRequest,
 } from '@/infra/admin-requests'
 import { parseValidationError } from '@/infra/error'
+import { newHyphenlessUuid } from '@/infra/id'
 import { PassportRequest } from '@/infra/passport-request'
-import { checkAdmin } from '@/token/service'
+import {
+  checkAdmin,
+  checkEmptyFields,
+  checkForcePasswordChange,
+} from '@/token/service'
 import {
   deleteUser,
   getUser,
@@ -40,6 +47,8 @@ import {
   makeAdminUser,
   getUserByAdmin,
   searchUserListPaginated,
+  forceResetPassword,
+  updateAdminUser,
 } from './service'
 
 const router = Router()
@@ -49,6 +58,7 @@ router.get(
   passport.authenticate('jwt', { session: false }),
   async (req: PassportRequest, res: Response, next: NextFunction) => {
     try {
+      await checkForcePasswordChange(req.user.id)
       res.json(await getUser(req.user.id))
     } catch (err) {
       next(err)
@@ -265,13 +275,63 @@ router.patch(
   },
 )
 
+router.patch(
+  '/force_reset_password',
+  passport.authenticate('jwt', { session: false }),
+  body('id').isString(),
+  async (req: PassportRequest, res: Response, next: NextFunction) => {
+    try {
+      checkAdmin(req.header('Authorization'))
+      const result = validationResult(req)
+      if (!result.isEmpty()) {
+        throw parseValidationError(result)
+      }
+      await forceResetPassword(req.body as UserIdPostRequest)
+      res.sendStatus(200)
+    } catch (err) {
+      next(err)
+    }
+  },
+)
+
 router.get(
   '/:id',
   passport.authenticate('jwt', { session: false }),
   async (req: UserIdRequest, res: Response, next: NextFunction) => {
-    checkAdmin(req.header('Authorization'))
     try {
+      checkAdmin(req.header('Authorization'))
       res.json(await getUserByAdmin(req.params.id))
+    } catch (err) {
+      next(err)
+    }
+  },
+)
+
+router.patch(
+  '/:id',
+  passport.authenticate('jwt', { session: false }),
+  body('fullName').optional().isString().trim().escape().isLength({ max: 255 }),
+  body('email').optional().isEmail().isLength({ max: 255 }),
+  body('picture').optional(),
+  async (req: PassportRequest, res: Response, next: NextFunction) => {
+    try {
+      checkAdmin(req.header('Authorization'))
+      checkEmptyFields([req.body.fullName, req.body.email, req.body.picture])
+      if (req.body.email) {
+        req.body.username = req.body.email
+        req.body.isEmailConfirmed = false
+        req.body.emailConfirmationToken = newHyphenlessUuid()
+      }
+      const result = validationResult(req)
+      if (!result.isEmpty()) {
+        throw parseValidationError(result)
+      }
+      res.json(
+        await updateAdminUser(
+          req.params.id,
+          req.body as UserUpdateAdminRequest,
+        ),
+      )
     } catch (err) {
       next(err)
     }

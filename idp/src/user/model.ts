@@ -23,6 +23,7 @@ export type User = {
   isActive: boolean
   emailUpdateToken?: string
   emailUpdateValue?: string
+  forceChangePassword?: boolean
   picture?: string
   createTime: string
   updateTime?: string
@@ -59,6 +60,7 @@ export type UpdateOptions = {
   isEmailConfirmed?: boolean
   emailUpdateToken?: string
   emailUpdateValue?: string
+  forceChangePassword?: boolean
   picture?: string
   createTime?: string
   updateTime?: string
