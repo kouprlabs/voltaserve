@@ -55,6 +55,15 @@ const FileList = ({ list, scale }: FileListProps) => {
     (state) => state.ui.files.isSelectionMode,
   )
   const selection = useAppSelector((state) => state.ui.files.selection)
+  const isModalOpen = useAppSelector(
+    (state) =>
+      state.ui.files.isCopyModalOpen ||
+      state.ui.files.isMoveModalOpen ||
+      state.ui.files.isDeleteModalOpen ||
+      state.ui.files.isCreateModalOpen ||
+      state.ui.files.isShareModalOpen ||
+      state.ui.files.isRenameModalOpen,
+  )
   const [activeId, setActiveId] = useState<string | null>(null)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [menuPosition, setMenuPosition] = useState<FileMenuPosition>()
@@ -136,6 +145,9 @@ const FileList = ({ list, scale }: FileListProps) => {
 
   const handleKeyDown = useCallback(
     (keyName: string, event: KeyboardEvent) => {
+      if (isModalOpen) {
+        return
+      }
       event.preventDefault()
       if (
         (keyName === 'command+a' && isMacOS()) ||
@@ -172,7 +184,7 @@ const FileList = ({ list, scale }: FileListProps) => {
         }
       }
     },
-    [selection],
+    [selection, isModalOpen],
   )
 
   return (

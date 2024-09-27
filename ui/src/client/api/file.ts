@@ -60,13 +60,13 @@ export type List = {
 export type UserPermission = {
   id: string
   user: User
-  permission: string
+  permission: PermissionType
 }
 
 export type GroupPermission = {
   id: string
   group: Group
-  permission: string
+  permission: PermissionType
 }
 
 export type Query = {
