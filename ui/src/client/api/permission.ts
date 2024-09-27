@@ -13,7 +13,7 @@ export const VIEWER_PERMISSION = 'viewer'
 export const EDITOR_PERMISSION = 'editor'
 export const OWNER_PERMISSION = 'owner'
 
-export type PermissionType = 'viewer' | 'editor' | 'owner'
+export type PermissionType = 'viewer' | 'editor' | 'owner' | 'none'
 
 export function gtViewerPermission(permission: string): boolean {
   return (
