@@ -17,7 +17,8 @@ export enum ErrorCode {
   InvalidUsernameOrPassword = 'invalid_username_or_password',
   InvalidPassword = 'invalid_password',
   InvalidJwt = 'invalid_jwt',
-  EmailNotConfimed = 'email_not_confirmed',
+  InvalidCredentials = 'invalid_credentials',
+  EmailNotConfirmed = 'email_not_confirmed',
   RefreshTokenExpired = 'refresh_token_expired',
   InvalidRequest = 'invalid_request',
   UnsupportedGrantType = 'unsupported_grant_type',
@@ -37,7 +38,8 @@ const statuses: { [key: string]: number } = {
   [ErrorCode.InvalidUsernameOrPassword]: 401,
   [ErrorCode.InvalidPassword]: 401,
   [ErrorCode.InvalidJwt]: 401,
-  [ErrorCode.EmailNotConfimed]: 401,
+  [ErrorCode.InvalidCredentials]: 401,
+  [ErrorCode.EmailNotConfirmed]: 401,
   [ErrorCode.RefreshTokenExpired]: 401,
   [ErrorCode.InvalidRequest]: 400,
   [ErrorCode.UnsupportedGrantType]: 400,
@@ -51,9 +53,10 @@ const statuses: { [key: string]: number } = {
 
 const userMessages: { [key: string]: string } = {
   [ErrorCode.UsernameUnavailable]: 'Email belongs to an existing user.',
-  [ErrorCode.EmailNotConfimed]: 'Email not confirmed.',
+  [ErrorCode.EmailNotConfirmed]: 'Email not confirmed.',
   [ErrorCode.InvalidPassword]: 'Invalid password.',
   [ErrorCode.InvalidUsernameOrPassword]: 'Invalid username or password.',
+  [ErrorCode.InvalidCredentials]: 'Invalid credentials.',
   [ErrorCode.UserSuspended]: 'User suspended.',
   [ErrorCode.MissingPermission]: 'You are not an console',
   [ErrorCode.OrphanError]: 'You cannot suspend last console',
@@ -91,7 +94,7 @@ export function newError(options: ErrorOptions): ErrorData {
   const userMessage =
     options.userMessage ||
     userMessages[options.code] ||
-    'Oops! something went wrong'
+    'Oops! something went wrong.'
   return {
     code: options.code,
     status: statuses[options.code],

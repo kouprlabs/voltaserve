@@ -34,7 +34,7 @@ export type TokenExchangeOptions = {
 }
 
 export async function exchange(options: TokenExchangeOptions): Promise<Token> {
-  validateParemeters(options)
+  validateParameters(options)
   // https://datatracker.ietf.org/doc/html/rfc6749#section-4.3
   if (options.grant_type === 'password') {
     let user: User
@@ -44,7 +44,7 @@ export async function exchange(options: TokenExchangeOptions): Promise<Token> {
       throw newError({ code: ErrorCode.InvalidUsernameOrPassword })
     }
     if (!user.isEmailConfirmed) {
-      throw newError({ code: ErrorCode.EmailNotConfimed })
+      throw newError({ code: ErrorCode.EmailNotConfirmed })
     }
     if (!user.isActive) {
       throw newError({ code: ErrorCode.UserSuspended })
@@ -64,7 +64,7 @@ export async function exchange(options: TokenExchangeOptions): Promise<Token> {
       throw newError({ code: ErrorCode.InvalidUsernameOrPassword })
     }
     if (!user.isEmailConfirmed) {
-      throw newError({ code: ErrorCode.EmailNotConfimed })
+      throw newError({ code: ErrorCode.EmailNotConfirmed })
     }
     if (new Date() >= new Date(user.refreshTokenExpiry)) {
       throw newError({ code: ErrorCode.RefreshTokenExpired })
@@ -78,7 +78,7 @@ export const checkAdmin = (jwt) => {
     throw newError({ code: ErrorCode.MissingPermission })
 }
 
-function validateParemeters(options: TokenExchangeOptions) {
+function validateParameters(options: TokenExchangeOptions) {
   if (!options.grant_type) {
     throw newError({
       code: ErrorCode.InvalidRequest,

@@ -13,11 +13,11 @@ import cors from 'cors'
 import express from 'express'
 import logger from 'morgan'
 import passport from 'passport'
-import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt'
+import { ExtractJwt, Strategy as JwtStrategy } from 'passport-jwt'
 import accountRouter from '@/account/router'
 import { getConfig } from '@/config/config'
 import healthRouter from '@/health/router'
-import { errorHandler } from '@/infra/error'
+import { ErrorCode, errorHandler, newError, newResponse } from '@/infra/error'
 import tokenRouter from '@/token/router'
 import userRepo from '@/user/repo'
 import userRouter from '@/user/router'
@@ -46,7 +46,10 @@ passport.use(
         const user = await userRepo.findByID(payload.sub)
         return done(null, user)
       } catch {
-        return done(null, false)
+        return done(
+          newResponse(newError({ code: ErrorCode.InvalidCredentials })),
+          false,
+        )
       }
     },
   ),

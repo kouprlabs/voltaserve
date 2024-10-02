@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "start": "bun src/app.ts",
-    "dev": "nodemon --exec ts-node -r tsconfig-paths/register src/app.ts",
+    "dev": "bun src/app.ts",
     "tsc": "tsc --noEmit",
     "format": "prettier --write .",
     "swagger-autogen": "bun ./swagger.js",
@@ -50,10 +50,8 @@
     "@types/uuid": "9.0.8",
     "eslint": "9.3.0",
     "globals": "15.3.0",
-    "nodemon": "3.1.0",
     "prettier": "3.2.5",
     "swagger-autogen": "2.23.7",
-    "ts-node": "10.9.2",
     "tsconfig-paths": "4.2.0",
     "typescript": "5.4.5",
     "typescript-eslint": "7.9.0"
