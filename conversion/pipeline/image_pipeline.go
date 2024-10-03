@@ -153,8 +153,8 @@ func (p *imagePipeline) measureImageDimensions(inputPath string, opts api_client
 }
 
 func (p *imagePipeline) createThumbnail(inputPath string, opts api_client.PipelineRunOptions) error {
-	outputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(inputPath))
-	res, err := p.imageProc.Thumbnail(inputPath, outputPath)
+	tmpPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(inputPath))
+	res, err := p.imageProc.Thumbnail(inputPath, tmpPath)
 	if err != nil {
 		return err
 	}
@@ -165,24 +165,24 @@ func (p *imagePipeline) createThumbnail(inputPath string, opts api_client.Pipeli
 			} else if err != nil {
 				infra.GetLogger().Error(err)
 			}
-		}(outputPath)
+		}(tmpPath)
 	} else {
-		outputPath = inputPath
+		tmpPath = inputPath
 	}
-	stat, err := os.Stat(outputPath)
+	stat, err := os.Stat(tmpPath)
 	if err != nil {
 		return err
 	}
 	s3Object := &api_client.S3Object{
 		Bucket: opts.Bucket,
-		Key:    opts.SnapshotID + "/thumbnail" + filepath.Ext(outputPath),
+		Key:    opts.SnapshotID + "/thumbnail" + filepath.Ext(tmpPath),
 		Image: &api_client.ImageProps{
 			Width:  res.Width,
 			Height: res.Height,
 		},
 		Size: helper.ToPtr(stat.Size()),
 	}
-	if err := p.s3.PutFile(s3Object.Key, outputPath, helper.DetectMimeFromFile(outputPath), s3Object.Bucket, minio.PutObjectOptions{}); err != nil {
+	if err := p.s3.PutFile(s3Object.Key, tmpPath, helper.DetectMimeFromFile(tmpPath), s3Object.Bucket, minio.PutObjectOptions{}); err != nil {
 		return err
 	}
 	if err := p.snapshotClient.Patch(api_client.SnapshotPatchOptions{
