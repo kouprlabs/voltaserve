@@ -154,11 +154,11 @@ func (p *imagePipeline) measureImageDimensions(inputPath string, opts api_client
 
 func (p *imagePipeline) createThumbnail(inputPath string, opts api_client.PipelineRunOptions) error {
 	tmpPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + filepath.Ext(inputPath))
-	res, err := p.imageProc.Thumbnail(inputPath, tmpPath)
+	thumbnailResult, err := p.imageProc.Thumbnail(inputPath, tmpPath)
 	if err != nil {
 		return err
 	}
-	if res.IsCreated {
+	if thumbnailResult.IsCreated {
 		defer func(path string) {
 			if err := os.Remove(path); errors.Is(err, os.ErrNotExist) {
 				return
@@ -177,8 +177,8 @@ func (p *imagePipeline) createThumbnail(inputPath string, opts api_client.Pipeli
 		Bucket: opts.Bucket,
 		Key:    opts.SnapshotID + "/thumbnail" + filepath.Ext(tmpPath),
 		Image: &api_client.ImageProps{
-			Width:  res.Width,
-			Height: res.Height,
+			Width:  thumbnailResult.Width,
+			Height: thumbnailResult.Height,
 		},
 		Size: helper.ToPtr(stat.Size()),
 	}
