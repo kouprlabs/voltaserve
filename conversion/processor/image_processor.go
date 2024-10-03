@@ -44,7 +44,7 @@ type ThumbnailResult struct {
 	IsCreated bool
 }
 
-func (p *ImageProcessor) Thumbnail(inputPath string, outputPath string) (*ThumbnailResult, error) {
+func (p *ImageProcessor) Thumbnail(inputPath string, width int, height int, outputPath string) (*ThumbnailResult, error) {
 	props, err := p.MeasureImage(inputPath)
 	if err != nil {
 		return nil, err
@@ -53,12 +53,12 @@ func (p *ImageProcessor) Thumbnail(inputPath string, outputPath string) (*Thumbn
 	var newHeight int
 	if props.Width > p.config.Limits.ImagePreviewMaxWidth || props.Height > p.config.Limits.ImagePreviewMaxHeight {
 		if props.Width > props.Height {
-			newWidth, newHeight = helper.AspectRatio(p.config.Limits.ImagePreviewMaxWidth, 0, props.Width, props.Height)
+			newWidth, newHeight = helper.AspectRatio(width, 0, props.Width, props.Height)
 			if err := p.ResizeImage(inputPath, newWidth, newHeight, outputPath); err != nil {
 				return nil, err
 			}
 		} else {
-			newWidth, newHeight = helper.AspectRatio(0, p.config.Limits.ImagePreviewMaxHeight, props.Width, props.Height)
+			newWidth, newHeight = helper.AspectRatio(0, height, props.Width, props.Height)
 			if err := p.ResizeImage(inputPath, newWidth, newHeight, outputPath); err != nil {
 				return nil, err
 			}
