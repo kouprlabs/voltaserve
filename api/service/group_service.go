@@ -461,7 +461,7 @@ func (mp *groupMapper) mapOne(m model.Group, userID string) (*Group, error) {
 }
 
 func (mp *groupMapper) mapMany(groups []model.Group, userID string) ([]*Group, error) {
-	res := []*Group{}
+	res := make([]*Group, 0)
 	for _, group := range groups {
 		g, err := mp.mapOne(group, userID)
 		if err != nil {

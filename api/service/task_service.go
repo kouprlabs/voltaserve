@@ -453,9 +453,9 @@ func (mp *taskMapper) mapOne(m model.Task) (*Task, error) {
 	}, nil
 }
 
-func (mp *taskMapper) mapMany(orgs []model.Task) ([]*Task, error) {
+func (mp *taskMapper) mapMany(tasks []model.Task) ([]*Task, error) {
 	res := make([]*Task, 0)
-	for _, task := range orgs {
+	for _, task := range tasks {
 		t, err := mp.mapOne(task)
 		if err != nil {
 			return nil, err
