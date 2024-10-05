@@ -83,9 +83,8 @@ func (p *pdfPipeline) RunFromLocalPath(inputPath string, opts api_client.Pipelin
 	}); err != nil {
 		return err
 	}
-	if err := p.createThumbnail(inputPath, opts); err != nil {
-		return err
-	}
+	// We don't consider failing the creation of the thumbnail an error
+	_ = p.createThumbnail(inputPath, opts)
 	if err := p.taskClient.Patch(opts.TaskID, api_client.TaskPatchOptions{
 		Fields: []string{api_client.TaskFieldName},
 		Name:   helper.ToPtr("Saving preview."),
@@ -112,31 +111,32 @@ func (p *pdfPipeline) RunFromLocalPath(inputPath string, opts api_client.Pipelin
 }
 
 func (p *pdfPipeline) createThumbnail(inputPath string, opts api_client.PipelineRunOptions) error {
-	tmpPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".png")
-	// We don't consider failing the creation of the thumbnail as an error
-	_ = p.pdfProc.Thumbnail(inputPath, 0, p.config.Limits.ImagePreviewMaxHeight, tmpPath)
+	outputPath := filepath.FromSlash(os.TempDir() + "/" + helper.NewID() + ".png")
+	if err := p.pdfProc.Thumbnail(inputPath, 0, p.config.Limits.ImagePreviewMaxHeight, outputPath); err != nil {
+		return err
+	}
 	defer func(path string) {
 		if err := os.Remove(path); errors.Is(err, os.ErrNotExist) {
 			return
 		} else if err != nil {
 			infra.GetLogger().Error(err)
 		}
-	}(tmpPath)
-	props, err := p.imageProc.MeasureImage(tmpPath)
+	}(outputPath)
+	props, err := p.imageProc.MeasureImage(outputPath)
 	if err != nil {
 		return err
 	}
-	stat, err := os.Stat(tmpPath)
+	stat, err := os.Stat(outputPath)
 	if err != nil {
 		return err
 	}
 	s3Object := &api_client.S3Object{
 		Bucket: opts.Bucket,
-		Key:    opts.SnapshotID + "/thumbnail" + filepath.Ext(tmpPath),
+		Key:    opts.SnapshotID + "/thumbnail" + filepath.Ext(outputPath),
 		Image:  props,
 		Size:   helper.ToPtr(stat.Size()),
 	}
-	if err := p.s3.PutFile(s3Object.Key, tmpPath, helper.DetectMimeFromFile(tmpPath), s3Object.Bucket, minio.PutObjectOptions{}); err != nil {
+	if err := p.s3.PutFile(s3Object.Key, outputPath, helper.DetectMimeFromFile(outputPath), s3Object.Bucket, minio.PutObjectOptions{}); err != nil {
 		return err
 	}
 	if err := p.snapshotClient.Patch(api_client.SnapshotPatchOptions{

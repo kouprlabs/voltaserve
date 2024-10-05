@@ -56,7 +56,7 @@ func (p *VideoProcessor) Thumbnail(inputPath string, width int, height int, outp
 			return err
 		}
 	} else {
-		newWidth, newHeight := helper.AspectRatio(0, p.config.Limits.ImagePreviewMaxHeight, size.Width, size.Height)
+		newWidth, newHeight := helper.AspectRatio(0, height, size.Width, size.Height)
 		if err := p.imageProc.ResizeImage(tmpPath, newWidth, newHeight, outputPath); err != nil {
 			return err
 		}
