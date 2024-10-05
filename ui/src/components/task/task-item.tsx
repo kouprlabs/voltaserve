@@ -80,10 +80,7 @@ const TaskDrawerItem = ({ task }: TaskDrawerItemProps) => {
                 </span>
               ) : null}
               {task.status !== Status.Error ? (
-                <Text
-                  dangerouslySetInnerHTML={{ __html: task.name }}
-                  noOfLines={3}
-                ></Text>
+                <Text noOfLines={3}>{task.name}</Text>
               ) : null}
             </div>
             {task.error ? (
@@ -110,11 +107,9 @@ const TaskDrawerItem = ({ task }: TaskDrawerItemProps) => {
                   </div>
                 </AccordionButton>
                 <AccordionPanel className={cx('p-0.5')}>
-                  <Text
-                    className={cx('text-red-500')}
-                    dangerouslySetInnerHTML={{ __html: task.error }}
-                    noOfLines={5}
-                  ></Text>
+                  <Text className={cx('text-red-500')} noOfLines={5}>
+                    {task.error}
+                  </Text>
                 </AccordionPanel>
               </AccordionItem>
             </Accordion>
