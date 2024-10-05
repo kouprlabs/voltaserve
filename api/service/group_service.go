@@ -11,6 +11,7 @@
 package service
 
 import (
+	"errors"
 	"sort"
 	"time"
 
@@ -337,7 +338,12 @@ func (svc *GroupService) doAuthorizationByIDs(ids []string, userID string) ([]mo
 		var o model.Group
 		o, err := svc.groupCache.Get(id)
 		if err != nil {
-			return nil, err
+			var e *errorpkg.ErrorResponse
+			if errors.As(err, &e) && e.Code == errorpkg.NewGroupNotFoundError(nil).Code {
+				continue
+			} else {
+				return nil, err
+			}
 		}
 		if svc.groupGuard.IsAuthorized(userID, o, model.PermissionViewer) {
 			res = append(res, o)
@@ -461,11 +467,16 @@ func (mp *groupMapper) mapOne(m model.Group, userID string) (*Group, error) {
 }
 
 func (mp *groupMapper) mapMany(groups []model.Group, userID string) ([]*Group, error) {
-	res := []*Group{}
+	res := make([]*Group, 0)
 	for _, group := range groups {
 		g, err := mp.mapOne(group, userID)
 		if err != nil {
-			return nil, err
+			var e *errorpkg.ErrorResponse
+			if errors.As(err, &e) && e.Code == errorpkg.NewGroupNotFoundError(nil).Code {
+				continue
+			} else {
+				return nil, err
+			}
 		}
 		res = append(res, g)
 	}

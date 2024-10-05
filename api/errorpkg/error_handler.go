@@ -22,8 +22,7 @@ import (
 func ErrorHandler(c *fiber.Ctx, err error) error {
 	var e *ErrorResponse
 	if errors.As(err, &e) {
-		v := err.(*ErrorResponse)
-		return c.Status(v.Status).JSON(v)
+		return c.Status(e.Status).JSON(e)
 	} else {
 		log.GetLogger().Error(err)
 		return c.Status(http.StatusInternalServerError).JSON(NewInternalServerError(err))
