@@ -11,6 +11,7 @@
 package service
 
 import (
+	"errors"
 	"sort"
 	"strings"
 	"time"
@@ -336,7 +337,12 @@ func (svc *WorkspaceService) doAuthorizationByIDs(ids []string, userID string) (
 		var w model.Workspace
 		w, err := svc.workspaceCache.Get(id)
 		if err != nil {
-			return nil, err
+			var e *errorpkg.ErrorResponse
+			if errors.As(err, &e) && e.Code == errorpkg.NewWorkspaceNotFoundError(nil).Code {
+				continue
+			} else {
+				return nil, err
+			}
 		}
 		if svc.workspaceGuard.IsAuthorized(userID, w, model.PermissionViewer) {
 			res = append(res, w)
@@ -467,7 +473,12 @@ func (mp *workspaceMapper) mapMany(workspaces []model.Workspace, userID string) 
 	for _, workspace := range workspaces {
 		w, err := mp.mapOne(workspace, userID)
 		if err != nil {
-			return nil, err
+			var e *errorpkg.ErrorResponse
+			if errors.As(err, &e) && e.Code == errorpkg.NewWorkspaceNotFoundError(nil).Code {
+				continue
+			} else {
+				return nil, err
+			}
 		}
 		res = append(res, w)
 	}

@@ -12,6 +12,7 @@ package service
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -533,7 +534,7 @@ func (svc *FileService) ListByPath(path string, userID string) ([]*File, error) 
 		if err != nil {
 			return nil, err
 		}
-		result := []*File{}
+		result := make([]*File, 0)
 		for _, w := range workspaces {
 			result = append(result, &File{
 				ID:          w.RootID,
@@ -767,7 +768,7 @@ func (svc *FileService) GetPath(id string, userID string) ([]*File, error) {
 	if err != nil {
 		return nil, err
 	}
-	res := []*File{}
+	res := make([]*File, 0)
 	for _, file := range path {
 		f, err := svc.fileMapper.mapOne(file, userID)
 		if err != nil {
@@ -1687,7 +1688,12 @@ func (svc *FileService) doAuthorizationByIDs(ids []string, userID string) ([]mod
 		var f model.File
 		f, err := svc.fileCache.Get(id)
 		if err != nil {
-			return nil, err
+			var e *errorpkg.ErrorResponse
+			if errors.As(err, &e) && e.Code == errorpkg.NewFileNotFoundError(nil).Code {
+				continue
+			} else {
+				return nil, err
+			}
 		}
 		if svc.fileGuard.IsAuthorized(userID, f, model.PermissionViewer) {
 			res = append(res, f)
@@ -2105,7 +2111,12 @@ func (mp *FileMapper) mapMany(data []model.File, userID string) ([]*File, error)
 	for _, file := range data {
 		f, err := mp.mapOne(file, userID)
 		if err != nil {
-			return nil, err
+			var e *errorpkg.ErrorResponse
+			if errors.As(err, &e) && e.Code == errorpkg.NewFileNotFoundError(nil).Code {
+				continue
+			} else {
+				return nil, err
+			}
 		}
 		res = append(res, f)
 	}

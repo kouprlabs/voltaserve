@@ -11,6 +11,7 @@
 package service
 
 import (
+	"errors"
 	"sort"
 	"time"
 
@@ -300,7 +301,12 @@ func (svc *OrganizationService) doAuthorizationByIDs(ids []string, userID string
 		var o model.Organization
 		o, err := svc.orgCache.Get(id)
 		if err != nil {
-			return nil, err
+			var e *errorpkg.ErrorResponse
+			if errors.As(err, &e) && e.Code == errorpkg.NewOrganizationNotFoundError(nil).Code {
+				continue
+			} else {
+				return nil, err
+			}
 		}
 		if svc.orgGuard.IsAuthorized(userID, o, model.PermissionViewer) {
 			res = append(res, o)
@@ -415,7 +421,12 @@ func (mp *organizationMapper) mapMany(orgs []model.Organization, userID string) 
 	for _, org := range orgs {
 		o, err := mp.mapOne(org, userID)
 		if err != nil {
-			return nil, err
+			var e *errorpkg.ErrorResponse
+			if errors.As(err, &e) && e.Code == errorpkg.NewOrganizationNotFoundError(nil).Code {
+				continue
+			} else {
+				return nil, err
+			}
 		}
 		res = append(res, o)
 	}
