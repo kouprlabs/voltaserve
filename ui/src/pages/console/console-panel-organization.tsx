@@ -23,6 +23,8 @@ import {
   Table,
   Text,
   Th,
+  Thead,
+  Tr,
 } from '@chakra-ui/react'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
@@ -120,7 +122,7 @@ const ConsolePanelOrganization = () => {
         <title>Organization Management</title>
       </Helmet>
       <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
-        <Heading className={cx('text-heading')}>
+        <Heading className={cx('text-heading')} noOfLines={1}>
           {organizationData.name}
         </Heading>
         <Grid gap={4} templateColumns="repeat(9, 1fr)">
@@ -146,28 +148,34 @@ const ConsolePanelOrganization = () => {
             ) : (
               <>
                 <Table>
-                  <Th>
-                    <Flex>
-                      <span className={cx('font-bold')}>Users</span>
-                      <Spacer />
-                      {usersData.totalElements > 5 ? (
-                        <>
-                          <PagePagination
-                            totalElements={usersData.totalElements}
-                            totalPages={Math.ceil(usersData.totalElements / 5)}
-                            page={usersPage}
-                            size={5}
-                            steps={[]}
-                            setPage={setUsersPage}
-                            setSize={() => {}}
-                            uiSize="xs"
-                            disableLastNav
-                            disableMiddleNav
-                          />
-                        </>
-                      ) : null}
-                    </Flex>
-                  </Th>
+                  <Thead>
+                    <Tr>
+                      <Th>
+                        <Flex>
+                          <span className={cx('font-bold')}>Users</span>
+                          <Spacer />
+                          {usersData.totalElements > 5 ? (
+                            <>
+                              <PagePagination
+                                totalElements={usersData.totalElements}
+                                totalPages={Math.ceil(
+                                  usersData.totalElements / 5,
+                                )}
+                                page={usersPage}
+                                size={5}
+                                steps={[]}
+                                setPage={setUsersPage}
+                                setSize={() => {}}
+                                uiSize="xs"
+                                disableLastNav
+                                disableMiddleNav
+                              />
+                            </>
+                          ) : null}
+                        </Flex>
+                      </Th>
+                    </Tr>
+                  </Thead>
                 </Table>
                 <Divider mb={4} />
                 <Stack>
@@ -176,7 +184,7 @@ const ConsolePanelOrganization = () => {
                       <Flex key={user.id}>
                         <Avatar name={user.username} src={user.picture} />
                         <Box ml="3">
-                          <Text fontWeight="bold">
+                          <Text fontWeight="bold" noOfLines={1}>
                             {user.username}
                             <Badge ml="1" colorScheme="green">
                               {user.permission}
@@ -190,7 +198,7 @@ const ConsolePanelOrganization = () => {
                       </Flex>
                     ))
                   ) : (
-                    <Text>No organizations found</Text>
+                    <Text>No organizations found.</Text>
                   )}
                 </Stack>
               </>
@@ -202,30 +210,34 @@ const ConsolePanelOrganization = () => {
             ) : (
               <>
                 <Table>
-                  <Th>
-                    <Flex>
-                      <span className={cx('font-bold')}>Workspaces</span>
-                      <Spacer />
-                      {workspacesData.totalElements > 5 ? (
-                        <>
-                          <PagePagination
-                            totalElements={workspacesData.totalElements}
-                            totalPages={Math.ceil(
-                              workspacesData.totalElements / 5,
-                            )}
-                            page={workspacesPage}
-                            size={5}
-                            steps={[]}
-                            setPage={setWorkspacesPage}
-                            setSize={() => {}}
-                            uiSize="xs"
-                            disableLastNav
-                            disableMiddleNav
-                          />
-                        </>
-                      ) : null}
-                    </Flex>
-                  </Th>
+                  <Thead>
+                    <Tr>
+                      <Th>
+                        <Flex>
+                          <span className={cx('font-bold')}>Workspaces</span>
+                          <Spacer />
+                          {workspacesData.totalElements > 5 ? (
+                            <>
+                              <PagePagination
+                                totalElements={workspacesData.totalElements}
+                                totalPages={Math.ceil(
+                                  workspacesData.totalElements / 5,
+                                )}
+                                page={workspacesPage}
+                                size={5}
+                                steps={[]}
+                                setPage={setWorkspacesPage}
+                                setSize={() => {}}
+                                uiSize="xs"
+                                disableLastNav
+                                disableMiddleNav
+                              />
+                            </>
+                          ) : null}
+                        </Flex>
+                      </Th>
+                    </Tr>
+                  </Thead>
                 </Table>
                 <Divider mb={4} />
                 <Stack overflowX="auto">
@@ -234,7 +246,9 @@ const ConsolePanelOrganization = () => {
                       <Flex key={workspace.id}>
                         <Avatar name={workspace.name} />
                         <Box ml="3">
-                          <Text fontWeight="bold">{workspace.name}</Text>
+                          <Text fontWeight="bold" noOfLines={1}>
+                            {workspace.name}
+                          </Text>
                           <Text fontSize="sm">
                             created:{' '}
                             {new Date(
@@ -245,7 +259,7 @@ const ConsolePanelOrganization = () => {
                       </Flex>
                     ))
                   ) : (
-                    <Text>No workspaces found</Text>
+                    <Text>No workspaces found.</Text>
                   )}
                 </Stack>
               </>
@@ -257,28 +271,34 @@ const ConsolePanelOrganization = () => {
             ) : (
               <>
                 <Table>
-                  <Th>
-                    <Flex>
-                      <span className={cx('font-bold')}>Groups</span>
-                      <Spacer />
-                      {groupsData.totalElements > 5 ? (
-                        <>
-                          <PagePagination
-                            totalElements={groupsData.totalElements}
-                            totalPages={Math.ceil(groupsData.totalElements / 5)}
-                            page={groupsPage}
-                            size={5}
-                            steps={[]}
-                            setPage={setGroupsPage}
-                            setSize={() => {}}
-                            uiSize="xs"
-                            disableLastNav
-                            disableMiddleNav
-                          />
-                        </>
-                      ) : null}
-                    </Flex>
-                  </Th>
+                  <Thead>
+                    <Tr>
+                      <Th>
+                        <Flex>
+                          <span className={cx('font-bold')}>Groups</span>
+                          <Spacer />
+                          {groupsData.totalElements > 5 ? (
+                            <>
+                              <PagePagination
+                                totalElements={groupsData.totalElements}
+                                totalPages={Math.ceil(
+                                  groupsData.totalElements / 5,
+                                )}
+                                page={groupsPage}
+                                size={5}
+                                steps={[]}
+                                setPage={setGroupsPage}
+                                setSize={() => {}}
+                                uiSize="xs"
+                                disableLastNav
+                                disableMiddleNav
+                              />
+                            </>
+                          ) : null}
+                        </Flex>
+                      </Th>
+                    </Tr>
+                  </Thead>
                 </Table>
                 <Divider mb={4} />
                 <Stack>
@@ -287,7 +307,9 @@ const ConsolePanelOrganization = () => {
                       <Flex key={group.id}>
                         <Avatar name={group.name} />
                         <Box ml="3">
-                          <Text fontWeight="bold">{group.name}</Text>
+                          <Text fontWeight="bold" noOfLines={1}>
+                            {group.name}
+                          </Text>
                           <Text fontSize="sm">
                             created:{' '}
                             {new Date(group.createTime).toLocaleDateString()}
@@ -296,7 +318,7 @@ const ConsolePanelOrganization = () => {
                       </Flex>
                     ))
                   ) : (
-                    <Text>No groups found</Text>
+                    <Text>No groups found.</Text>
                   )}
                 </Stack>
               </>

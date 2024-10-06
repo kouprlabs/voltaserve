@@ -25,6 +25,7 @@ import { swrConfig } from '@/client/options'
 import AccountEditPicture from '@/components/account/edit-picture'
 import { IconEdit } from '@/lib/components/icons'
 import NumberTag from '@/lib/components/number-tag'
+import { truncateEnd } from '@/lib/helpers/truncate-end'
 import { useAppDispatch } from '@/store/hook'
 import { mutateUpdated } from '@/store/ui/account'
 
@@ -89,7 +90,7 @@ const AccountLayout = () => {
             />
           </div>
           <Heading className={cx('text-center', 'text-heading')}>
-            {user.fullName}
+            {truncateEnd(user.fullName, 50)}
           </Heading>
         </div>
         <div className={cx('w-full', 'gap-1')}>

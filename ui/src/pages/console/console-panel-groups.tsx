@@ -8,9 +8,14 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
 import { useEffect, useState } from 'react'
-import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import {
-  Button,
+  Link,
+  useLocation,
+  useNavigate,
+  useSearchParams,
+} from 'react-router-dom'
+import { Link as ChakraLink } from '@chakra-ui/react'
+import {
   Center,
   Heading,
   IconButton,
@@ -135,18 +140,16 @@ const ConsolePanelGroups = () => {
                 {list.data.map((group) => (
                   <Tr key={group.id}>
                     <Td>
-                      <Text>{group.name}</Text>
+                      <Text noOfLines={1}>{group.name}</Text>
                     </Td>
                     <Td>
-                      <Button
-                        onClick={() => {
-                          navigate(
-                            `/console/organizations/${group.organization.id}`,
-                          )
-                        }}
+                      <ChakraLink
+                        as={Link}
+                        to={`/console/organizations/${group.organization.id}`}
+                        className={cx('no-underline')}
                       >
-                        {group.organization.name}
-                      </Button>
+                        <Text noOfLines={1}>{group.organization.name}</Text>
+                      </ChakraLink>
                     </Td>
                     <Td>
                       <Text>
@@ -183,7 +186,7 @@ const ConsolePanelGroups = () => {
             </Table>
           </Stack>
         ) : (
-          <div>No groups found</div>
+          <div>No groups found.</div>
         )}
         {list ? (
           <PagePagination

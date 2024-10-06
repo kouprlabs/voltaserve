@@ -19,6 +19,7 @@ import {
   Table,
   Tbody,
   Td,
+  Text,
   Th,
   Thead,
   Tr,
@@ -126,7 +127,11 @@ const AccountInvitationsPage = () => {
                 list.data.map((i) => (
                   <Tr key={i.id}>
                     <Td>{i.owner ? userToString(i.owner) : ''}</Td>
-                    <Td>{i.organization ? i.organization.name : ''}</Td>
+                    <Td>
+                      <Text noOfLines={1}>
+                        {i.organization ? i.organization.name : ''}
+                      </Text>
+                    </Td>
                     <Td>{prettyDate(i.createTime)}</Td>
                     <Td className={cx('text-right')}>
                       <Menu>

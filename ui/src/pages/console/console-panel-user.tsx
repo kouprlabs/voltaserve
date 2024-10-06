@@ -12,7 +12,6 @@ import { useParams } from 'react-router-dom'
 import {
   Avatar,
   Badge,
-  Box,
   Center,
   Divider,
   Flex,
@@ -26,7 +25,9 @@ import {
   Table,
   Text,
   Th,
+  Thead,
   Tooltip,
+  Tr,
 } from '@chakra-ui/react'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
@@ -44,6 +45,8 @@ import {
 } from '@/lib/components/icons'
 import PagePagination from '@/lib/components/page-pagination'
 import SectionSpinner from '@/lib/components/section-spinner'
+import { truncateEnd } from '@/lib/helpers/truncate-end'
+import truncateMiddle from '@/lib/helpers/truncate-middle'
 
 const EditButton = (props: IconButtonProps) => (
   <IconButton
@@ -139,7 +142,9 @@ const ConsolePanelUser = () => {
         <title>User Management</title>
       </Helmet>
       <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
-        <Heading className={cx('text-heading')}>{userData.fullName}</Heading>
+        <Heading className={cx('text-heading')} noOfLines={1}>
+          {userData.fullName}
+        </Heading>
       </div>
       <Grid gap={4} templateColumns="repeat(9, 1fr)">
         <GridItem>
@@ -180,7 +185,7 @@ const ConsolePanelUser = () => {
               <div className={cx(rowClassName)}>
                 <span>Full name</span>
                 <Spacer />
-                <span>{userData.fullName}</span>
+                <span>{truncateEnd(userData.fullName, 50)}</span>
                 <EditButton
                   aria-label=""
                   onClick={() => {
@@ -216,11 +221,16 @@ const ConsolePanelUser = () => {
                         <IconWarning className={cx('text-yellow-400')} />
                       </div>
                     </Tooltip>
-                    <span>{userData.pendingEmail}</span>
+                    <span>{truncateMiddle(userData.pendingEmail, 50)}</span>
                   </div>
                 ) : null}
                 {!userData.pendingEmail ? (
-                  <span>{userData.pendingEmail || userData.email}</span>
+                  <span>
+                    {truncateMiddle(
+                      userData.pendingEmail || userData.email,
+                      50,
+                    )}
+                  </span>
                 ) : null}
                 <EditButton
                   aria-label=""
@@ -249,57 +259,67 @@ const ConsolePanelUser = () => {
           ) : (
             <>
               <Table>
-                <Th>
-                  <Flex>
-                    <span className={cx('font-bold')}>Organizations</span>
-                    <Spacer />
-                    {organizationsData.totalElements > 5 ? (
-                      <Center>
-                        <>
-                          <PagePagination
-                            totalElements={organizationsData.totalElements}
-                            totalPages={Math.ceil(
-                              organizationsData.totalElements / 5,
-                            )}
-                            page={organizationsPage}
-                            size={5}
-                            steps={[]}
-                            setPage={setOrganizationsPage}
-                            setSize={() => {}}
-                            uiSize="xs"
-                            disableLastNav
-                            disableMiddleNav
-                          />
-                        </>
-                      </Center>
-                    ) : null}
-                  </Flex>
-                </Th>
+                <Thead>
+                  <Tr>
+                    <Th>
+                      <Flex>
+                        <span className={cx('font-bold')}>Organizations</span>
+                        <Spacer />
+                        {organizationsData.totalElements > 5 ? (
+                          <Center>
+                            <>
+                              <PagePagination
+                                totalElements={organizationsData.totalElements}
+                                totalPages={Math.ceil(
+                                  organizationsData.totalElements / 5,
+                                )}
+                                page={organizationsPage}
+                                size={5}
+                                steps={[]}
+                                setPage={setOrganizationsPage}
+                                setSize={() => {}}
+                                uiSize="xs"
+                                disableLastNav
+                                disableMiddleNav
+                              />
+                            </>
+                          </Center>
+                        ) : null}
+                      </Flex>
+                    </Th>
+                  </Tr>
+                </Thead>
               </Table>
               <Divider mb={4} />
               <Stack>
                 {organizationsData.data && organizationsData.data.length > 0 ? (
                   organizationsData.data.map((organization) => (
-                    <Flex key={organization.organizationId}>
+                    <Stack
+                      direction="row"
+                      alignItems="center"
+                      key={organization.organizationId}
+                    >
                       <Avatar name={organization.organizationName} />
-                      <Box ml="3">
-                        <Text fontWeight="bold">
-                          {organization.organizationName}
-                          <Badge ml="1" colorScheme="green">
+                      <Stack direction="column">
+                        <Stack direction="row" alignItems="center">
+                          <Text fontWeight="bold" noOfLines={1}>
+                            {organization.organizationName}
+                          </Text>
+                          <Badge colorScheme="green">
                             {organization.permission}
                           </Badge>
-                        </Text>
+                        </Stack>
                         <Text fontSize="sm">
                           from:{' '}
                           {new Date(
                             organization.createTime,
                           ).toLocaleDateString()}
                         </Text>
-                      </Box>
-                    </Flex>
+                      </Stack>
+                    </Stack>
                   ))
                 ) : (
-                  <Text>No organizations found</Text>
+                  <Text>No organizations found.</Text>
                 )}
               </Stack>
             </>
@@ -311,53 +331,63 @@ const ConsolePanelUser = () => {
           ) : (
             <>
               <Table>
-                <Th>
-                  <Flex>
-                    <span className={cx('font-bold')}>Workspaces</span>
-                    <Spacer />
-                    {workspacesData.totalElements > 5 ? (
-                      <>
-                        <PagePagination
-                          totalElements={workspacesData.totalElements}
-                          totalPages={Math.ceil(
-                            workspacesData.totalElements / 5,
-                          )}
-                          page={workspacesPage}
-                          size={5}
-                          steps={[]}
-                          setPage={setWorkspacesPage}
-                          setSize={() => {}}
-                          uiSize="xs"
-                          disableLastNav
-                          disableMiddleNav
-                        />
-                      </>
-                    ) : null}
-                  </Flex>
-                </Th>
+                <Thead>
+                  <Tr>
+                    <Th>
+                      <Flex>
+                        <span className={cx('font-bold')}>Workspaces</span>
+                        <Spacer />
+                        {workspacesData.totalElements > 5 ? (
+                          <>
+                            <PagePagination
+                              totalElements={workspacesData.totalElements}
+                              totalPages={Math.ceil(
+                                workspacesData.totalElements / 5,
+                              )}
+                              page={workspacesPage}
+                              size={5}
+                              steps={[]}
+                              setPage={setWorkspacesPage}
+                              setSize={() => {}}
+                              uiSize="xs"
+                              disableLastNav
+                              disableMiddleNav
+                            />
+                          </>
+                        ) : null}
+                      </Flex>
+                    </Th>
+                  </Tr>
+                </Thead>
               </Table>
               <Divider mb={4} />
               <Stack overflowX="auto">
                 {workspacesData.data && workspacesData.data.length > 0 ? (
                   workspacesData.data.map((workspace) => (
-                    <Flex key={workspace.workspaceId}>
+                    <Stack
+                      direction="row"
+                      alignItems="center"
+                      key={workspace.workspaceId}
+                    >
                       <Avatar name={workspace.workspaceName} />
-                      <Box ml="3">
-                        <Text fontWeight="bold">
-                          {workspace.workspaceName}
+                      <Stack direction="column">
+                        <Stack direction="row" alignItems="center">
+                          <Text fontWeight="bold" noOfLines={1}>
+                            {workspace.workspaceName}
+                          </Text>
                           <Badge ml="1" colorScheme="green">
                             {workspace.permission}
                           </Badge>
-                        </Text>
+                        </Stack>
                         <Text fontSize="sm">
                           from:{' '}
                           {new Date(workspace.createTime).toLocaleDateString()}
                         </Text>
-                      </Box>
-                    </Flex>
+                      </Stack>
+                    </Stack>
                   ))
                 ) : (
-                  <Text>No workspaces found</Text>
+                  <Text>No workspaces found.</Text>
                 )}
               </Stack>
             </>
@@ -369,51 +399,63 @@ const ConsolePanelUser = () => {
           ) : (
             <>
               <Table>
-                <Th>
-                  <Flex>
-                    <span className={cx('font-bold')}>Groups</span>
-                    <Spacer />
-                    {groupsData.totalElements > 5 ? (
-                      <>
-                        <PagePagination
-                          totalElements={groupsData.totalElements}
-                          totalPages={Math.ceil(groupsData.totalElements / 5)}
-                          page={groupsPage}
-                          size={5}
-                          steps={[]}
-                          setPage={setGroupsPage}
-                          setSize={() => {}}
-                          uiSize="xs"
-                          disableLastNav
-                          disableMiddleNav
-                        />
-                      </>
-                    ) : null}
-                  </Flex>
-                </Th>
+                <Thead>
+                  <Tr>
+                    <Th>
+                      <Flex>
+                        <span className={cx('font-bold')}>Groups</span>
+                        <Spacer />
+                        {groupsData.totalElements > 5 ? (
+                          <>
+                            <PagePagination
+                              totalElements={groupsData.totalElements}
+                              totalPages={Math.ceil(
+                                groupsData.totalElements / 5,
+                              )}
+                              page={groupsPage}
+                              size={5}
+                              steps={[]}
+                              setPage={setGroupsPage}
+                              setSize={() => {}}
+                              uiSize="xs"
+                              disableLastNav
+                              disableMiddleNav
+                            />
+                          </>
+                        ) : null}
+                      </Flex>
+                    </Th>
+                  </Tr>
+                </Thead>
               </Table>
               <Divider mb={4} />
               <Stack>
                 {groupsData.data && groupsData.data.length > 0 ? (
                   groupsData.data.map((group) => (
-                    <Flex key={group.groupId}>
+                    <Stack
+                      direction="row"
+                      alignItems="center"
+                      key={group.groupId}
+                    >
                       <Avatar name={group.groupName} />
-                      <Box ml="3">
-                        <Text fontWeight="bold">
-                          {group.groupName}
+                      <Stack direction="column">
+                        <Stack direction="row" alignItems="center">
+                          <Text fontWeight="bold" noOfLines={1}>
+                            {group.groupName}
+                          </Text>
                           <Badge ml="1" colorScheme="green">
                             {group.permission}
                           </Badge>
-                        </Text>
+                        </Stack>
                         <Text fontSize="sm">
                           from:{' '}
                           {new Date(group.createTime).toLocaleDateString()}
                         </Text>
-                      </Box>
-                    </Flex>
+                      </Stack>
+                    </Stack>
                   ))
                 ) : (
-                  <Text>No groups found</Text>
+                  <Text>No groups found.</Text>
                 )}
               </Stack>
             </>

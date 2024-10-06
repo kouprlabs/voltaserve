@@ -8,9 +8,14 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
 import { useCallback, useEffect, useState } from 'react'
-import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import {
-  Button,
+  Link,
+  useLocation,
+  useNavigate,
+  useSearchParams,
+} from 'react-router-dom'
+import { Link as ChakraLink } from '@chakra-ui/react'
+import {
   Center,
   Heading,
   IconButton,
@@ -143,18 +148,16 @@ const ConsolePanelWorkspaces = () => {
                 {list.data.map((workspace) => (
                   <Tr key={workspace.id}>
                     <Td>
-                      <Text>{workspace.name}</Text>
+                      <Text noOfLines={1}>{workspace.name}</Text>
                     </Td>
                     <Td>
-                      <Button
-                        onClick={() => {
-                          navigate(
-                            `/console/organizations/${workspace.organization.id}`,
-                          )
-                        }}
+                      <ChakraLink
+                        as={Link}
+                        to={`/console/organizations/${workspace.organization.id}`}
+                        className={cx('no-underline')}
                       >
-                        {workspace.organization.name}
-                      </Button>
+                        <Text noOfLines={1}>{workspace.organization.name}</Text>
+                      </ChakraLink>
                     </Td>
                     <Td>
                       <Text>{prettyBytes(workspace.storageCapacity)}</Text>
@@ -200,7 +203,7 @@ const ConsolePanelWorkspaces = () => {
             </Table>
           </Stack>
         ) : (
-          <div>No workspaces found</div>
+          <div>No workspaces found.</div>
         )}
         {list ? (
           <PagePagination

@@ -43,6 +43,8 @@ import { IconLogout, IconMoreVert, IconPersonAdd } from '@/lib/components/icons'
 import PagePagination from '@/lib/components/page-pagination'
 import SectionSpinner from '@/lib/components/section-spinner'
 import { decodeQuery } from '@/lib/helpers/query'
+import { truncateEnd } from '@/lib/helpers/truncate-end'
+import truncateMiddle from '@/lib/helpers/truncate-middle'
 import usePagePagination from '@/lib/hooks/page-pagination'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import {
@@ -129,10 +131,10 @@ const OrganizationMembersPage = () => {
                           'dark:border-gray-700',
                         )}
                       />
-                      <span>{u.fullName}</span>
+                      <span>{truncateEnd(u.fullName, 50)}</span>
                     </div>
                   </Td>
-                  <Td>{u.email}</Td>
+                  <Td>{truncateMiddle(u.email, 50)}</Td>
                   <Td className={cx('text-right')}>
                     <Menu>
                       <MenuButton

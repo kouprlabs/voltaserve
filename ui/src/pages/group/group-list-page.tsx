@@ -25,6 +25,7 @@ import {
   Tr,
   Avatar,
   Badge,
+  Text,
 } from '@chakra-ui/react'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
@@ -36,7 +37,6 @@ import PagePagination from '@/lib/components/page-pagination'
 import SectionSpinner from '@/lib/components/section-spinner'
 import prettyDate from '@/lib/helpers/pretty-date'
 import { decodeQuery } from '@/lib/helpers/query'
-import { truncateEnd } from '@/lib/helpers/truncate-end'
 import usePagePagination from '@/lib/hooks/page-pagination'
 import { useAppDispatch } from '@/store/hook'
 import { mutateUpdated } from '@/store/ui/groups'
@@ -138,7 +138,7 @@ const GroupListPage = () => {
                         to={`/group/${g.id}/member`}
                         className={cx('no-underline')}
                       >
-                        {truncateEnd(g.name, 60)}
+                        <Text noOfLines={1}>{g.name}</Text>
                       </ChakraLink>
                     </div>
                   </Td>
@@ -148,7 +148,7 @@ const GroupListPage = () => {
                       to={`/organization/${g.organization.id}/member`}
                       className={cx('no-underline')}
                     >
-                      {g.organization.name}
+                      <Text noOfLines={1}>{g.organization.name}</Text>
                     </ChakraLink>
                   </Td>
                   <Td>

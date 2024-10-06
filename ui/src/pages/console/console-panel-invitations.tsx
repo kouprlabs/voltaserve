@@ -201,7 +201,7 @@ const ConsolePanelInvitations = () => {
             </Table>
           </Stack>
         ) : (
-          <div>No invitations found</div>
+          <div>No invitations found.</div>
         )}
         {list ? (
           <PagePagination

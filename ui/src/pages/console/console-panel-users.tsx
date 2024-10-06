@@ -180,10 +180,10 @@ const ConsolePanelUsers = () => {
                     }}
                   >
                     <Td>
-                      <Text>{user.fullName}</Text>
+                      <Text noOfLines={1}>{user.fullName}</Text>
                     </Td>
                     <Td>
-                      <Text>{user.email}</Text>
+                      <Text noOfLines={1}>{user.email}</Text>
                     </Td>
                     <Td>
                       <Badge
@@ -294,7 +294,7 @@ const ConsolePanelUsers = () => {
             </Table>
           </Stack>
         ) : (
-          <div>No users found</div>
+          <div>No users found.</div>
         )}
         {list ? (
           <PagePagination

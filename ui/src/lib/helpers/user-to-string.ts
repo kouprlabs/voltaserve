@@ -8,7 +8,9 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
 import { User } from '@/client/idp/user'
+import { truncateEnd } from '@/lib/helpers/truncate-end'
+import truncateMiddle from '@/lib/helpers/truncate-middle'
 
 export default function userToString(user: User) {
-  return `${user.fullName} (${user.email})`
+  return `${truncateEnd(user.fullName, 25)} (${truncateMiddle(user.email, 25)})`
 }
