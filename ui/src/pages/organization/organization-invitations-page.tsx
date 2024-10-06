@@ -43,6 +43,7 @@ import {
 import PagePagination from '@/lib/components/page-pagination'
 import SectionSpinner from '@/lib/components/section-spinner'
 import prettyDate from '@/lib/helpers/pretty-date'
+import truncateMiddle from '@/lib/helpers/truncate-middle'
 import usePagePagination from '@/lib/hooks/page-pagination'
 import { useAppDispatch } from '@/store/hook'
 import { mutateUpdated } from '@/store/ui/outgoing-invitations'
@@ -147,7 +148,7 @@ const OrganizationInvitationsPage = () => {
         </>
       ) : null}
       {list && list.data.length > 0 ? (
-        <div className={cx('flex', 'flex-col', 'gap-3.5', 'py-3.5')}>
+        <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
           <Table variant="simple">
             <Thead>
               <Tr>
@@ -160,7 +161,7 @@ const OrganizationInvitationsPage = () => {
             <Tbody>
               {list.data.map((i) => (
                 <Tr key={i.id}>
-                  <Td>{i.email}</Td>
+                  <Td>{truncateMiddle(i.email, 50)}</Td>
                   <Td>
                     <OrganizationStatus value={i.status} />
                   </Td>

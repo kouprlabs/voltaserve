@@ -66,7 +66,7 @@ const OrganizationSettingsPage = () => {
           <div className={rowClassName}>
             <span>Name</span>
             <Spacer />
-            <span>{truncateEnd(org.name, 60)}</span>
+            <span>{truncateEnd(org.name, 50)}</span>
             <IconButton
               icon={<IconEdit />}
               isDisabled={!geEditorPermission(org.permission)}

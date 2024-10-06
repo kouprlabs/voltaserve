@@ -11,6 +11,7 @@ import { useEffect, useState } from 'react'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import {
   Button,
+  Code,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -164,7 +165,9 @@ const ConsolePanelDatabaseIndexes = () => {
                   <Tr key={item.indexName}>
                     <Td>{item.indexName}</Td>
                     <Td>{item.tableName}</Td>
-                    <Td>{item.indexDef}</Td>
+                    <Td>
+                      <Code>{item.indexDef}</Code>
+                    </Td>
                     <Td></Td>
                   </Tr>
                 ))}

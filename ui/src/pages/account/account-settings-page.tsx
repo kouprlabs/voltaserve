@@ -29,6 +29,8 @@ import AccountEditFullName from '@/components/account/account-edit-full-name'
 import { IconEdit, IconDelete, IconWarning } from '@/lib/components/icons'
 import SectionSpinner from '@/lib/components/section-spinner'
 import prettyBytes from '@/lib/helpers/pretty-bytes'
+import { truncateEnd } from '@/lib/helpers/truncate-end'
+import truncateMiddle from '@/lib/helpers/truncate-middle'
 
 const EditButton = (props: IconButtonProps) => (
   <IconButton
@@ -98,7 +100,7 @@ const AccountSettingsPage = () => {
           <div className={cx(rowClassName)}>
             <span>Full name</span>
             <Spacer />
-            <span>{user.fullName}</span>
+            <span>{truncateEnd(user.fullName, 50)}</span>
             <EditButton
               aria-label=""
               onClick={() => {
@@ -129,11 +131,11 @@ const AccountSettingsPage = () => {
                     <IconWarning className={cx('text-yellow-400')} />
                   </div>
                 </Tooltip>
-                <span>{user.pendingEmail}</span>
+                <span>{truncateMiddle(user.pendingEmail, 50)}</span>
               </div>
             ) : null}
             {!user.pendingEmail ? (
-              <span>{user.pendingEmail || user.email}</span>
+              <span>{truncateMiddle(user.pendingEmail || user.email, 50)}</span>
             ) : null}
             <EditButton
               aria-label=""

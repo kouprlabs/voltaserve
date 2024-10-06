@@ -125,7 +125,7 @@ const WorkspaceSettingsPage = () => {
           <div className={rowClassName}>
             <span>Name</span>
             <Spacer />
-            <span>{truncateEnd(workspace.name, 60)}</span>
+            <span>{truncateEnd(workspace.name, 50)}</span>
             <EditButton
               aria-label=""
               isDisabled={!hasEditPermission}

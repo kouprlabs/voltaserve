@@ -130,7 +130,7 @@ const ConsolePanelOrganizations = () => {
             <Table variant="simple">
               <Thead>
                 <Tr>
-                  <Th>Workspace name</Th>
+                  <Th>Organization name</Th>
                   <Th>Create time</Th>
                   <Th>Update time</Th>
                   <Th></Th>
@@ -151,7 +151,7 @@ const ConsolePanelOrganizations = () => {
                     }}
                   >
                     <Td>
-                      <Text>{organization.name}</Text>
+                      <Text noOfLines={1}>{organization.name}</Text>
                     </Td>
                     <Td>
                       <Text>
@@ -194,7 +194,7 @@ const ConsolePanelOrganizations = () => {
             </Table>
           </Stack>
         ) : (
-          <div>No organizations found</div>
+          <div>No organizations found.</div>
         )}
         {list ? (
           <PagePagination

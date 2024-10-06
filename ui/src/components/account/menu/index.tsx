@@ -22,6 +22,8 @@ import InvitationAPI from '@/client/api/invitation'
 import UserAPI from '@/client/idp/user'
 import { swrConfig } from '@/client/options'
 import NumberTag from '@/lib/components/number-tag'
+import { truncateEnd } from '@/lib/helpers/truncate-end'
+import truncateMiddle from '@/lib/helpers/truncate-middle'
 import AccountMenuActiveCircle from './account-menu-active-circle'
 import AccountMenuAvatarButton from './account-menu-avatar-button'
 import AccountMenuAvatarImage from './account-menu-avatar-image'
@@ -57,9 +59,11 @@ const AccountMenu = () => {
                     'whitespace-nowrap',
                   )}
                 >
-                  {user.fullName}
+                  {truncateEnd(user.fullName, 50)}
                 </span>
-                <span className={cx('text-gray-500')}>{user.email}</span>
+                <span className={cx('text-gray-500')}>
+                  {truncateMiddle(user.email, 50)}
+                </span>
               </div>
             </div>
             <MenuDivider />

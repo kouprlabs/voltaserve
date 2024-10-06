@@ -9,7 +9,7 @@
 // licenses/AGPL.txt.
 import { useCallback, useMemo } from 'react'
 import { useLocation, useParams } from 'react-router-dom'
-import { Button } from '@chakra-ui/react'
+import { Button, Text } from '@chakra-ui/react'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import FileAPI, { File } from '@/client/api/file'
@@ -156,13 +156,14 @@ const ViewerPage = () => {
                   { 'bg-black': isPresentational },
                 )}
               >
-                <span
-                  className={cx('font-medium', 'text-[16px]', {
+                <Text
+                  className={cx('font-medium', 'text-[16px]', 'px-3.5', {
                     'text-white': isPresentational,
                   })}
+                  noOfLines={1}
                 >
                   {file.name}
-                </span>
+                </Text>
               </div>
               <div
                 className={cx(

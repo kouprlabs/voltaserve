@@ -65,7 +65,7 @@ const GroupSettingsPage = () => {
           <div className={rowClassName}>
             <span>Name</span>
             <Spacer />
-            <span>{truncateEnd(group.name, 60)}</span>
+            <span>{truncateEnd(group.name, 50)}</span>
             <IconButton
               icon={<IconEdit />}
               isDisabled={!hasEditPermission}

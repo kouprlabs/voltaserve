@@ -25,6 +25,7 @@ import {
   Tr,
   Avatar,
   Badge,
+  Text,
 } from '@chakra-ui/react'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
@@ -36,7 +37,6 @@ import PagePagination from '@/lib/components/page-pagination'
 import SectionSpinner from '@/lib/components/section-spinner'
 import prettyDate from '@/lib/helpers/pretty-date'
 import { decodeQuery } from '@/lib/helpers/query'
-import { truncateEnd } from '@/lib/helpers/truncate-end'
 import usePagePagination from '@/lib/hooks/page-pagination'
 import { useAppDispatch } from '@/store/hook'
 import { mutateUpdated } from '@/store/ui/organizations'
@@ -137,7 +137,7 @@ const OrganizationListPage = () => {
                         to={`/organization/${o.id}/member`}
                         className={cx('no-underline')}
                       >
-                        <span>{truncateEnd(o.name, 60)}</span>
+                        <Text noOfLines={1}>{o.name}</Text>
                       </ChakraLink>
                     </div>
                   </Td>
