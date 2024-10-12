@@ -114,20 +114,12 @@ func (r *SnapshotRouter) List(c *fiber.Ctx) error {
 //	@Tags			Snapshots
 //	@Id				snapshots_activate
 //	@Produce		json
-//	@Param			id		path		string							true	"ID"
-//	@Param			body	body		service.SnapshotActivateOptions	true	"Body"
-//	@Failure		404		{object}	errorpkg.ErrorResponse
-//	@Failure		500		{object}	errorpkg.ErrorResponse
+//	@Param			id	path		string	true	"ID"
+//	@Failure		404	{object}	errorpkg.ErrorResponse
+//	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/snapshots/{id}/activate [post]
 func (r *SnapshotRouter) Activate(c *fiber.Ctx) error {
-	opts := new(service.SnapshotActivateOptions)
-	if err := c.BodyParser(opts); err != nil {
-		return err
-	}
-	if err := validator.New().Struct(opts); err != nil {
-		return errorpkg.NewRequestBodyValidationError(err)
-	}
-	res, err := r.snapshotSvc.Activate(c.Params("id"), *opts, GetUserID(c))
+	res, err := r.snapshotSvc.Activate(c.Params("id"), GetUserID(c))
 	if err != nil {
 		return err
 	}
@@ -141,21 +133,13 @@ func (r *SnapshotRouter) Activate(c *fiber.Ctx) error {
 //	@Tags			Snapshots
 //	@Id				snapshots_detach
 //	@Produce		json
-//	@Param			id		path	string							true	"ID"
-//	@Param			body	body	service.SnapshotDetachOptions	true	"Body"
+//	@Param			id	path	string	true	"ID"
 //	@Success		204
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/snapshots/{id}/detach [post]
 func (r *SnapshotRouter) Detach(c *fiber.Ctx) error {
-	opts := new(service.SnapshotDetachOptions)
-	if err := c.BodyParser(opts); err != nil {
-		return err
-	}
-	if err := validator.New().Struct(opts); err != nil {
-		return errorpkg.NewRequestBodyValidationError(err)
-	}
-	if err := r.snapshotSvc.Detach(c.Params("id"), *opts, GetUserID(c)); err != nil {
+	if err := r.snapshotSvc.Detach(c.Params("id"), GetUserID(c)); err != nil {
 		return err
 	}
 	return c.SendStatus(http.StatusNoContent)

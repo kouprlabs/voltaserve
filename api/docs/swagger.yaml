@@ -641,20 +641,6 @@ definitions:
       version:
         type: integer
     type: object
-  service.SnapshotActivateOptions:
-    properties:
-      fileId:
-        type: string
-    required:
-    - fileId
-    type: object
-  service.SnapshotDetachOptions:
-    properties:
-      fileId:
-        type: string
-    required:
-    - fileId
-    type: object
   service.SnapshotList:
     properties:
       data:
@@ -3080,12 +3066,6 @@ paths:
         name: id
         required: true
         type: string
-      - description: Body
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/service.SnapshotActivateOptions'
       produces:
       - application/json
       responses:
@@ -3110,12 +3090,6 @@ paths:
         name: id
         required: true
         type: string
-      - description: Body
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/service.SnapshotDetachOptions'
       produces:
       - application/json
       responses:
