@@ -206,12 +206,12 @@ func (svc *SnapshotService) doPagination(data []model.Snapshot, page, size uint)
 	return data[startIndex:endIndex], totalElements, totalPages
 }
 
-type SnapshotActivateOptions struct {
-	FileID string `json:"fileId" validate:"required"`
-}
-
-func (svc *SnapshotService) Activate(id string, opts SnapshotActivateOptions, userID string) (*File, error) {
-	file, err := svc.fileCache.Get(opts.FileID)
+func (svc *SnapshotService) Activate(id string, userID string) (*File, error) {
+	fileID, err := svc.snapshotRepo.GetFileID(id)
+	if err != nil {
+		return nil, err
+	}
+	file, err := svc.fileCache.Get(fileID)
 	if err != nil {
 		return nil, err
 	}
@@ -239,12 +239,12 @@ func (svc *SnapshotService) Activate(id string, opts SnapshotActivateOptions, us
 	return res, nil
 }
 
-type SnapshotDetachOptions struct {
-	FileID string `json:"fileId" validate:"required"`
-}
-
-func (svc *SnapshotService) Detach(id string, opts SnapshotDetachOptions, userID string) error {
-	file, err := svc.fileCache.Get(opts.FileID)
+func (svc *SnapshotService) Detach(id string, userID string) error {
+	fileID, err := svc.snapshotRepo.GetFileID(id)
+	if err != nil {
+		return err
+	}
+	file, err := svc.fileCache.Get(fileID)
 	if err != nil {
 		return err
 	}

@@ -122,14 +122,6 @@ export type ListQueryParams = {
   query?: string
 }
 
-export type ActivateOptions = {
-  fileId: string
-}
-
-export type DetachOptions = {
-  fileId: string
-}
-
 export default class SnapshotAPI {
   static async list(options: ListOptions) {
     return apiFetcher({
@@ -167,19 +159,17 @@ export default class SnapshotAPI {
     return new URLSearchParams(params)
   }
 
-  static async activate(id: string, options: ActivateOptions) {
+  static async activate(id: string) {
     return apiFetcher({
       url: `/snapshots/${id}/activate`,
       method: 'POST',
-      body: JSON.stringify(options),
     }) as Promise<File>
   }
 
-  static async detach(id: string, options: DetachOptions) {
+  static async detach(id: string) {
     return apiFetcher({
       url: `/snapshots/${id}/detach`,
       method: 'POST',
-      body: JSON.stringify(options),
     })
   }
 }

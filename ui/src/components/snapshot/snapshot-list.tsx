@@ -73,7 +73,7 @@ const SnapshotList = () => {
     if (selected) {
       try {
         setIsActivating(true)
-        await SnapshotAPI.activate(selected.id, { fileId })
+        await SnapshotAPI.activate(selected.id)
         await snapshotMutate()
         mutateFiles?.()
       } finally {
@@ -94,6 +94,13 @@ const SnapshotList = () => {
     setSelected(snapshot)
     dispatch(selectionUpdated([snapshot.id]))
   }, [])
+
+  const isSelected = useCallback(
+    (snapshot: Snapshot) => {
+      return selected?.id === snapshot.id || (snapshot.isActive && !selected)
+    },
+    [selected],
+  )
 
   return (
     <Modal
@@ -150,14 +157,14 @@ const SnapshotList = () => {
                       className={cx(
                         'cursor-pointer',
                         'h-[52px]',
-                        { 'bg-gray-100': selected?.id === s.id },
-                        { 'dark:bg-gray-600': selected?.id === s.id },
-                        { 'bg-transparent': selected?.id !== s.id },
+                        { 'bg-gray-100': isSelected(s) },
+                        { 'dark:bg-gray-600': isSelected(s) },
+                        { 'bg-transparent': !isSelected(s) },
                       )}
                       onClick={() => handleSelect(s)}
                     >
                       <Td className={cx('px-0.5', 'text-center')}>
-                        <Radio size="md" isChecked={selected?.id === s.id} />
+                        <Radio size="md" isChecked={isSelected(s)} />
                       </Td>
                       <Td className={cx('px-0.5')}>
                         <div
@@ -168,18 +175,23 @@ const SnapshotList = () => {
                             'gap-1.5',
                           )}
                         >
-                          <span className={cx('text-base')}>
-                            {prettyDate(s.createTime)}
-                          </span>
-                          {s.entities ? (
-                            <Badge variant="outline">Insights</Badge>
-                          ) : null}
-                          {s.mosaic ? (
-                            <Badge variant="outline">Mosaic</Badge>
-                          ) : null}
-                          {s.isActive ? (
-                            <Badge colorScheme="green">Active</Badge>
-                          ) : null}
+                          <div className={cx('flex', 'flex-col', 'gap-1')}>
+                            <span className={cx('text-base')}>
+                              {prettyDate(s.createTime)}
+                            </span>
+                            <div className={cx('flex', 'flex-row', 'gap-1')}>
+                              <Badge variant="outline">{`v${s.version}`}</Badge>
+                              {s.entities ? (
+                                <Badge variant="outline">Insights</Badge>
+                              ) : null}
+                              {s.mosaic ? (
+                                <Badge variant="outline">Mosaic</Badge>
+                              ) : null}
+                              {s.isActive ? (
+                                <Badge colorScheme="green">Active</Badge>
+                              ) : null}
+                            </div>
+                          </div>
                         </div>
                       </Td>
                     </Tr>

@@ -31,11 +31,6 @@ const SnapshotDetach = () => {
       ? state.ui.snapshots.selection[0]
       : undefined,
   )
-  const fileId = useAppSelector((state) =>
-    state.ui.files.selection.length > 0
-      ? state.ui.files.selection[0]
-      : undefined,
-  )
   const mutate = useAppSelector((state) => state.ui.snapshots.snapshotMutate)
   const isModalOpen = useAppSelector(
     (state) => state.ui.snapshots.isDetachModalOpen,
@@ -43,10 +38,10 @@ const SnapshotDetach = () => {
   const [isLoading, setIsLoading] = useState(false)
 
   const handleDetach = useCallback(async () => {
-    async function unlink(id: string, fileId: string) {
+    async function detach(id: string) {
       setIsLoading(true)
       try {
-        await SnapshotAPI.detach(id, { fileId })
+        await SnapshotAPI.detach(id)
         await mutate?.()
         dispatch(selectionUpdated([]))
         dispatch(detachModalDidClose())
@@ -56,10 +51,10 @@ const SnapshotDetach = () => {
         setIsLoading(false)
       }
     }
-    if (id && fileId) {
-      unlink(id, fileId)
+    if (id) {
+      detach(id)
     }
-  }, [id, fileId, dispatch, mutate])
+  }, [id, dispatch, mutate])
 
   return (
     <Modal
