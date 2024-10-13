@@ -7,12 +7,17 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 import { Button, Card, CardBody, CardFooter, Text } from '@chakra-ui/react'
 import cx from 'classnames'
 import FileAPI from '@/client/api/file'
 import InsightsAPI from '@/client/api/insights'
-import { ltOwnerPermission } from '@/client/api/permission'
+import {
+  geEditorPermission,
+  geOwnerPermission,
+  ltOwnerPermission,
+  NONE_PERMISSION,
+} from '@/client/api/permission'
 import TaskAPI from '@/client/api/task'
 import { swrConfig } from '@/client/options'
 import { IconBolt, IconDelete } from '@/lib/components/icons'
@@ -56,6 +61,22 @@ const InsightsOverviewSettings = () => {
     }
   }, [id, mutateFile, mutateFiles, mutateTaskCount, mutateInfo, dispatch])
 
+  const canCollect = useMemo(() => {
+    return !!(
+      !file?.snapshot?.task?.isPending &&
+      info?.isOutdated &&
+      geEditorPermission(file?.permission ?? NONE_PERMISSION)
+    )
+  }, [info, file])
+
+  const canDelete = useMemo(() => {
+    return (
+      !file?.snapshot?.task?.isPending &&
+      !info?.isOutdated &&
+      geOwnerPermission(file?.permission ?? NONE_PERMISSION)
+    )
+  }, [info, file])
+
   if (!file || !info) {
     return null
   }
@@ -69,7 +90,7 @@ const InsightsOverviewSettings = () => {
         <CardFooter>
           <Button
             leftIcon={<IconBolt />}
-            isDisabled={!info.isOutdated || file.snapshot?.task?.isPending}
+            isDisabled={!canCollect}
             onClick={handleUpdate}
           >
             Collect
@@ -84,12 +105,7 @@ const InsightsOverviewSettings = () => {
           <Button
             colorScheme="red"
             leftIcon={<IconDelete />}
-            isDisabled={
-              !file ||
-              file.snapshot?.task?.isPending ||
-              info.isOutdated ||
-              ltOwnerPermission(file.permission)
-            }
+            isDisabled={!canDelete}
             onClick={handleDelete}
           >
             Delete
