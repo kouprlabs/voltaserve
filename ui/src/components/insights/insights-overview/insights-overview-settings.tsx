@@ -15,7 +15,6 @@ import InsightsAPI from '@/client/api/insights'
 import {
   geEditorPermission,
   geOwnerPermission,
-  ltOwnerPermission,
   NONE_PERMISSION,
 } from '@/client/api/permission'
 import TaskAPI from '@/client/api/task'
