@@ -8,6 +8,7 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
 import useSWR, { SWRConfiguration } from 'swr'
+import { PermissionType } from '@/client/api/permission'
 import { apiFetcher } from '@/client/fetcher'
 import { Organization } from './organization'
 
@@ -26,7 +27,7 @@ export type Group = {
   id: string
   name: string
   organization: Organization
-  permission: string
+  permission: PermissionType
   createTime: string
   updateTime?: string
 }

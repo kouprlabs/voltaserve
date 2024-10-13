@@ -535,3 +535,9 @@ export const IconCloudUpload = ({
     cloud_upload
   </span>
 )
+
+export const IconBolt = ({ className, filled, ...props }: IconBaseProps) => (
+  <span className={getClassName({ filled, className })} {...props}>
+    bolt
+  </span>
+)

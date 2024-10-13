@@ -75,7 +75,7 @@ const MosaicCreate = () => {
             colorScheme="blue"
             onClick={handleCreate}
           >
-            Create
+            Create Mosaic
           </Button>
         </div>
       </ModalFooter>

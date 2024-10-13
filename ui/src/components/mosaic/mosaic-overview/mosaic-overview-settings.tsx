@@ -7,15 +7,19 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 import { Button, Card, CardBody, CardFooter, Text } from '@chakra-ui/react'
 import cx from 'classnames'
 import FileAPI from '@/client/api/file'
 import MosaicAPI from '@/client/api/mosaic'
-import { ltOwnerPermission } from '@/client/api/permission'
+import {
+  geEditorPermission,
+  geOwnerPermission,
+  NONE_PERMISSION,
+} from '@/client/api/permission'
 import TaskAPI from '@/client/api/task'
 import { swrConfig } from '@/client/options'
-import { IconDelete, IconSync } from '@/lib/components/icons'
+import { IconBolt, IconDelete } from '@/lib/components/icons'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { modalDidClose } from '@/store/ui/mosaic'
 
@@ -56,6 +60,22 @@ const MosaicOverviewSettings = () => {
     }
   }, [id, mutateFiles, mutateTaskCount, mutateInfo, dispatch])
 
+  const canCreate = useMemo(() => {
+    return !!(
+      !file?.snapshot?.task?.isPending &&
+      info?.isOutdated &&
+      geEditorPermission(file?.permission ?? NONE_PERMISSION)
+    )
+  }, [info, file])
+
+  const canDelete = useMemo(() => {
+    return (
+      !file?.snapshot?.task?.isPending &&
+      !info?.isOutdated &&
+      geOwnerPermission(file?.permission ?? NONE_PERMISSION)
+    )
+  }, [info, file])
+
   if (!file || !info) {
     return null
   }
@@ -68,11 +88,11 @@ const MosaicOverviewSettings = () => {
         </CardBody>
         <CardFooter>
           <Button
-            leftIcon={<IconSync />}
-            isDisabled={!info.isOutdated || file.snapshot?.task?.isPending}
+            leftIcon={<IconBolt />}
+            isDisabled={!canCreate}
             onClick={handleUpdate}
           >
-            Create
+            Create Mosaic
           </Button>
         </CardFooter>
       </Card>
@@ -84,15 +104,10 @@ const MosaicOverviewSettings = () => {
           <Button
             colorScheme="red"
             leftIcon={<IconDelete />}
-            isDisabled={
-              !file ||
-              file.snapshot?.task?.isPending ||
-              info.isOutdated ||
-              ltOwnerPermission(file.permission)
-            }
+            isDisabled={!canDelete}
             onClick={handleDelete}
           >
-            Delete
+            Delete Mosaic
           </Button>
         </CardFooter>
       </Card>
