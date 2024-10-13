@@ -15,7 +15,7 @@ import InsightsAPI from '@/client/api/insights'
 import { ltOwnerPermission } from '@/client/api/permission'
 import TaskAPI from '@/client/api/task'
 import { swrConfig } from '@/client/options'
-import { IconDelete, IconSync } from '@/lib/components/icons'
+import { IconBolt, IconDelete } from '@/lib/components/icons'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { modalDidClose } from '@/store/ui/insights'
 
@@ -68,7 +68,7 @@ const InsightsOverviewSettings = () => {
         </CardBody>
         <CardFooter>
           <Button
-            leftIcon={<IconSync />}
+            leftIcon={<IconBolt />}
             isDisabled={!info.isOutdated || file.snapshot?.task?.isPending}
             onClick={handleUpdate}
           >
