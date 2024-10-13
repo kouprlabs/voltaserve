@@ -123,7 +123,7 @@ const InsightsCreate = () => {
             isDisabled={!language}
             onClick={handleCreate}
           >
-            Collect
+            Collect Insights
           </Button>
         </div>
       </ModalFooter>

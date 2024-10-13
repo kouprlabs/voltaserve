@@ -92,7 +92,7 @@ const InsightsOverviewSettings = () => {
             isDisabled={!canCollect}
             onClick={handleUpdate}
           >
-            Collect
+            Collect Insights
           </Button>
         </CardFooter>
       </Card>
@@ -107,7 +107,7 @@ const InsightsOverviewSettings = () => {
             isDisabled={!canDelete}
             onClick={handleDelete}
           >
-            Delete
+            Delete Insights
           </Button>
         </CardFooter>
       </Card>

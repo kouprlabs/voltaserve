@@ -92,7 +92,7 @@ const MosaicOverviewSettings = () => {
             isDisabled={!canCreate}
             onClick={handleUpdate}
           >
-            Create
+            Create Mosaic
           </Button>
         </CardFooter>
       </Card>
@@ -107,7 +107,7 @@ const MosaicOverviewSettings = () => {
             isDisabled={!canDelete}
             onClick={handleDelete}
           >
-            Delete
+            Delete Mosaic
           </Button>
         </CardFooter>
       </Card>
