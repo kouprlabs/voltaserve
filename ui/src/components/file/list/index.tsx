@@ -62,7 +62,9 @@ const FileList = ({ list, scale }: FileListProps) => {
       state.ui.files.isDeleteModalOpen ||
       state.ui.files.isCreateModalOpen ||
       state.ui.files.isShareModalOpen ||
-      state.ui.files.isRenameModalOpen,
+      state.ui.files.isRenameModalOpen ||
+      state.ui.mosaic.isModalOpen ||
+      state.ui.insights.isModalOpen,
   )
   const [activeId, setActiveId] = useState<string | null>(null)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
