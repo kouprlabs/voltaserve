@@ -16,7 +16,7 @@ const ConsoleExitButton = () => {
   const buttonRef = useRef<HTMLButtonElement>(null)
   return (
     <>
-      <Link to="/" title="User dashbaord">
+      <Link to="/" title="User Dashboard">
         <IconButton
           ref={buttonRef}
           icon={<IconRemoveOperator />}

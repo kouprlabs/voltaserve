@@ -17,7 +17,7 @@ const ConsoleButton = () => {
   return (
     <>
       {location.pathname.startsWith('/console') ? (
-        <Link to="/" title="User dashbaord">
+        <Link to="/" title="User Dashboard">
           <IconButton
             ref={buttonRef}
             icon={<IconRemoveOperator />}
@@ -25,7 +25,7 @@ const ConsoleButton = () => {
           />
         </Link>
       ) : (
-        <Link to="/console/dashboard" title="Cloud console dashbaord">
+        <Link to="/console/dashboard" title="Cloud Console Dashboard">
           <IconButton ref={buttonRef} icon={<IconAdmin />} aria-label="" />
         </Link>
       )}
