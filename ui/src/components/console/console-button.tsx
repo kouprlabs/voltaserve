@@ -17,7 +17,7 @@ const ConsoleButton = () => {
   return (
     <>
       {location.pathname.startsWith('/console') ? (
-        <Link to="/" title="User dashbaord">
+        <Link to="/" title="User Dashboard">
           <IconButton
             ref={buttonRef}
             icon={<IconRemoveOperator />}
