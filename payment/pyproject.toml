@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "payment"
+version = "0.0.1"
+description = "Voltaserve Payment Service using Stripe"
+authors = ["Hoang Nguyen <hoangna1204@gmail.com>"]
+maintainers = ["Hoang Nguyen <hoangna1204@gmail.com>"]
+readme = "README.md"
+packages = [{ include = "*", from = "src" }]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+pendulum = "^3.0.0"
+pydantic = "^2.6.2"
+pyyaml = "^6.0.1"
+python-json-logger = "^2.0.7"
+stackprinter = "^0.2.12"
+fastapi = "^0.111.0"
+uvicorn = "^0.30.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
