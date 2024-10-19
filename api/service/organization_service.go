@@ -136,29 +136,9 @@ type OrganizationList struct {
 }
 
 func (svc *OrganizationService) List(opts OrganizationListOptions, userID string) (*OrganizationList, error) {
-	var authorized []model.Organization
-	if opts.Query == "" {
-		ids, err := svc.orgRepo.FindIDs()
-		if err != nil {
-			return nil, err
-		}
-		authorized, err = svc.doAuthorizationByIDs(ids, userID)
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		count, err := svc.groupRepo.Count()
-		if err != nil {
-			return nil, err
-		}
-		orgs, err := svc.orgSearch.Query(opts.Query, infra.QueryOptions{Limit: count})
-		if err != nil {
-			return nil, err
-		}
-		authorized, err = svc.doAuthorization(orgs, userID)
-		if err != nil {
-			return nil, err
-		}
+	all, err := svc.findAll(opts, userID)
+	if err != nil {
+		return nil, err
 	}
 	if opts.SortBy == "" {
 		opts.SortBy = SortByDateCreated
@@ -166,7 +146,7 @@ func (svc *OrganizationService) List(opts OrganizationListOptions, userID string
 	if opts.SortOrder == "" {
 		opts.SortOrder = SortOrderAsc
 	}
-	sorted := svc.doSorting(authorized, opts.SortBy, opts.SortOrder)
+	sorted := svc.doSorting(all, opts.SortBy, opts.SortOrder)
 	paged, totalElements, totalPages := svc.doPagination(sorted, opts.Page, opts.Size)
 	mapped, err := svc.orgMapper.mapMany(paged, userID)
 	if err != nil {
@@ -181,17 +161,49 @@ func (svc *OrganizationService) List(opts OrganizationListOptions, userID string
 	}, nil
 }
 
-type OrganizationProbeOptions struct {
-	Size int64
-}
-
 type OrganizationProbe struct {
 	TotalPages    int64 `json:"totalPages"`
 	TotalElements int64 `json:"totalElements"`
 }
 
-func (svc *OrganizationService) Probe(opts OrganizationProbeOptions, userID string) (*OrganizationProbe, error) {
-	return nil, nil
+func (svc *OrganizationService) Probe(opts OrganizationListOptions, userID string) (*OrganizationProbe, error) {
+	all, err := svc.findAll(opts, userID)
+	if err != nil {
+		return nil, err
+	}
+	totalElements := int64(len(all))
+	return &OrganizationProbe{
+		TotalElements: totalElements,
+		TotalPages:    (totalElements + opts.Size - 1) / opts.Size,
+	}, nil
+}
+
+func (svc *OrganizationService) findAll(opts OrganizationListOptions, userID string) ([]model.Organization, error) {
+	var res []model.Organization
+	if opts.Query == "" {
+		ids, err := svc.orgRepo.FindIDs()
+		if err != nil {
+			return nil, err
+		}
+		res, err = svc.doAuthorizationByIDs(ids, userID)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		count, err := svc.groupRepo.Count()
+		if err != nil {
+			return nil, err
+		}
+		orgs, err := svc.orgSearch.Query(opts.Query, infra.QueryOptions{Limit: count})
+		if err != nil {
+			return nil, err
+		}
+		res, err = svc.doAuthorization(orgs, userID)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
 }
 
 func (svc *OrganizationService) PatchName(id string, name string, userID string) (*Organization, error) {

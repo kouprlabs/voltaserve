@@ -151,14 +151,57 @@ type GroupList struct {
 }
 
 func (svc *GroupService) List(opts GroupListOptions, userID string) (*GroupList, error) {
-	var authorized []model.Group
+	all, err := svc.findAll(opts, userID)
+	if err != nil {
+		return nil, err
+	}
+	if opts.SortBy == "" {
+		opts.SortBy = SortByDateCreated
+	}
+	if opts.SortOrder == "" {
+		opts.SortOrder = SortOrderAsc
+	}
+	sorted := svc.doSorting(all, opts.SortBy, opts.SortOrder)
+	paged, totalElements, totalPages := svc.doPagination(sorted, opts.Page, opts.Size)
+	mapped, err := svc.groupMapper.mapMany(paged, userID)
+	if err != nil {
+		return nil, err
+	}
+	return &GroupList{
+		Data:          mapped,
+		TotalPages:    totalPages,
+		TotalElements: totalElements,
+		Page:          opts.Page,
+		Size:          int64(len(mapped)),
+	}, nil
+}
+
+type GroupProbe struct {
+	TotalPages    int64 `json:"totalPages"`
+	TotalElements int64 `json:"totalElements"`
+}
+
+func (svc *GroupService) Probe(opts GroupListOptions, userID string) (*GroupProbe, error) {
+	all, err := svc.findAll(opts, userID)
+	if err != nil {
+		return nil, err
+	}
+	totalElements := int64(len(all))
+	return &GroupProbe{
+		TotalElements: totalElements,
+		TotalPages:    (totalElements + opts.Size - 1) / opts.Size,
+	}, nil
+}
+
+func (svc *GroupService) findAll(opts GroupListOptions, userID string) ([]model.Group, error) {
+	var res []model.Group
 	if opts.Query == "" {
 		if opts.OrganizationID == "" {
 			ids, err := svc.groupRepo.FindIDs()
 			if err != nil {
 				return nil, err
 			}
-			authorized, err = svc.doAuthorizationByIDs(ids, userID)
+			res, err = svc.doAuthorizationByIDs(ids, userID)
 			if err != nil {
 				return nil, err
 			}
@@ -167,7 +210,7 @@ func (svc *GroupService) List(opts GroupListOptions, userID string) (*GroupList,
 			if err != nil {
 				return nil, err
 			}
-			authorized, err = svc.doAuthorization(groups, userID)
+			res, err = svc.doAuthorization(groups, userID)
 			if err != nil {
 				return nil, err
 			}
@@ -191,43 +234,12 @@ func (svc *GroupService) List(opts GroupListOptions, userID string) (*GroupList,
 				}
 			}
 		}
-		authorized, err = svc.doAuthorization(filtered, userID)
+		res, err = svc.doAuthorization(filtered, userID)
 		if err != nil {
 			return nil, err
 		}
 	}
-	if opts.SortBy == "" {
-		opts.SortBy = SortByDateCreated
-	}
-	if opts.SortOrder == "" {
-		opts.SortOrder = SortOrderAsc
-	}
-	sorted := svc.doSorting(authorized, opts.SortBy, opts.SortOrder)
-	paged, totalElements, totalPages := svc.doPagination(sorted, opts.Page, opts.Size)
-	mapped, err := svc.groupMapper.mapMany(paged, userID)
-	if err != nil {
-		return nil, err
-	}
-	return &GroupList{
-		Data:          mapped,
-		TotalPages:    totalPages,
-		TotalElements: totalElements,
-		Page:          opts.Page,
-		Size:          int64(len(mapped)),
-	}, nil
-}
-
-type GroupProbeOptions struct {
-	Size int64
-}
-
-type GroupProbe struct {
-	TotalPages    int64 `json:"totalPages"`
-	TotalElements int64 `json:"totalElements"`
-}
-
-func (svc *GroupService) Probe(opts GroupProbeOptions, userID string) (*GroupProbe, error) {
-	return nil, nil
+	return res, nil
 }
 
 func (svc *GroupService) PatchName(id string, name string, userID string) (*Group, error) {

@@ -465,7 +465,7 @@ func (svc *FileService) FindByPath(path string, userID string) (*File, error) {
 			UpdateTime:  nil,
 		}, nil
 	}
-	components := []string{}
+	components := make([]string, 0)
 	for _, v := range strings.Split(path, "/") {
 		if v != "" {
 			components = append(components, v)
@@ -530,7 +530,7 @@ func (svc *FileService) FindByPath(path string, userID string) (*File, error) {
 
 func (svc *FileService) ListByPath(path string, userID string) ([]*File, error) {
 	if path == "/" {
-		workspaces, err := svc.workspaceSvc.findAll(userID)
+		workspaces, err := svc.workspaceSvc.findAllWithoutOptions(userID)
 		if err != nil {
 			return nil, err
 		}
@@ -548,7 +548,7 @@ func (svc *FileService) ListByPath(path string, userID string) ([]*File, error) 
 		}
 		return result, nil
 	}
-	components := []string{}
+	components := make([]string, 0)
 	for _, v := range strings.Split(path, "/") {
 		if v != "" {
 			components = append(components, v)
@@ -694,11 +694,7 @@ type FileProbe struct {
 	TotalElements int64 `json:"totalElements"`
 }
 
-type FileProbeOptions struct {
-	Size int64
-}
-
-func (svc *FileService) Probe(id string, opts FileProbeOptions, userID string) (*FileProbe, error) {
+func (svc *FileService) Probe(id string, opts FileListOptions, userID string) (*FileProbe, error) {
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return nil, err

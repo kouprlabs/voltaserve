@@ -165,47 +165,11 @@ func (r *InsightsRouter) Delete(c *fiber.Ctx) error {
 //	@Failure		500			{object}	errorpkg.ErrorResponse
 //	@Router			/insights/{id}/entities [get]
 func (r *InsightsRouter) ListEntities(c *fiber.Ctx) error {
-	var err error
-	var page int64
-	if c.Query("page") == "" {
-		page = 1
-	} else {
-		page, err = strconv.ParseInt(c.Query("page"), 10, 64)
-		if err != nil {
-			page = 1
-		}
-	}
-	var size int64
-	if c.Query("size") == "" {
-		size = InsightsEntityDefaultPageSize
-	} else {
-		size, err = strconv.ParseInt(c.Query("size"), 10, 64)
-		if err != nil {
-			return err
-		}
-	}
-	if size == 0 {
-		return errorpkg.NewInvalidQueryParamError("size")
-	}
-	sortBy := c.Query("sort_by")
-	if !IsValidSortBy(sortBy) {
-		return errorpkg.NewInvalidQueryParamError("sort_by")
-	}
-	sortOrder := c.Query("sort_order")
-	if !IsValidSortOrder(sortOrder) {
-		return errorpkg.NewInvalidQueryParamError("sort_order")
-	}
-	query, err := url.QueryUnescape(c.Query("query"))
+	opts, err := r.parseEntityListQueryParams(c)
 	if err != nil {
-		return errorpkg.NewInvalidQueryParamError("query")
+		return err
 	}
-	res, err := r.insightsSvc.ListEntities(c.Params("id"), service.InsightsListEntitiesOptions{
-		Query:     query,
-		Page:      page,
-		Size:      size,
-		SortBy:    sortBy,
-		SortOrder: sortOrder,
-	}, GetUserID(c))
+	res, err := r.insightsSvc.ListEntities(c.Params("id"), *opts, GetUserID(c))
 	if err != nil {
 		return err
 	}
@@ -226,7 +190,59 @@ func (r *InsightsRouter) ListEntities(c *fiber.Ctx) error {
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/insights/{id}/entities/probe [get]
 func (r *InsightsRouter) ProbeEntities(c *fiber.Ctx) error {
-	return nil
+	opts, err := r.parseEntityListQueryParams(c)
+	if err != nil {
+		return err
+	}
+	res, err := r.insightsSvc.ProbeEntities(c.Params("id"), *opts, GetUserID(c))
+	if err != nil {
+		return err
+	}
+	return c.JSON(res)
+}
+
+func (r *InsightsRouter) parseEntityListQueryParams(c *fiber.Ctx) (*service.InsightsListEntitiesOptions, error) {
+	var err error
+	var page int64
+	if c.Query("page") == "" {
+		page = 1
+	} else {
+		page, err = strconv.ParseInt(c.Query("page"), 10, 64)
+		if err != nil {
+			page = 1
+		}
+	}
+	var size int64
+	if c.Query("size") == "" {
+		size = InsightsEntityDefaultPageSize
+	} else {
+		size, err = strconv.ParseInt(c.Query("size"), 10, 64)
+		if err != nil {
+			return nil, err
+		}
+	}
+	if size == 0 {
+		return nil, errorpkg.NewInvalidQueryParamError("size")
+	}
+	sortBy := c.Query("sort_by")
+	if !IsValidSortBy(sortBy) {
+		return nil, errorpkg.NewInvalidQueryParamError("sort_by")
+	}
+	sortOrder := c.Query("sort_order")
+	if !IsValidSortOrder(sortOrder) {
+		return nil, errorpkg.NewInvalidQueryParamError("sort_order")
+	}
+	query, err := url.QueryUnescape(c.Query("query"))
+	if err != nil {
+		return nil, errorpkg.NewInvalidQueryParamError("query")
+	}
+	return &service.InsightsListEntitiesOptions{
+		Query:     query,
+		Page:      page,
+		Size:      size,
+		SortBy:    sortBy,
+		SortOrder: sortOrder,
+	}, nil
 }
 
 // ReadInfo godoc

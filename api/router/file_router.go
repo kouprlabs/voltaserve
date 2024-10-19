@@ -337,10 +337,61 @@ func (r *FileRouter) ListByPath(c *fiber.Ctx) error {
 //	@Failure		500			{object}	errorpkg.ErrorResponse
 //	@Router			/files/{id}/list [get]
 func (r *FileRouter) List(c *fiber.Ctx) error {
-	var err error
-	var res *service.FileList
 	id := c.Params("id")
 	userID := GetUserID(c)
+	opts, err := r.parseListQueryParams(c)
+	if err != nil {
+		return err
+	}
+	var res *service.FileList
+	if c.Query("query") != "" {
+		res, err = r.fileSvc.Search(id, *opts, userID)
+		if err != nil {
+			return err
+		}
+	} else {
+		res, err = r.fileSvc.List(id, *opts, userID)
+		if err != nil {
+			return err
+		}
+	}
+	return c.JSON(res)
+}
+
+// Probe godoc
+//
+//	@Summary		Probe
+//	@Description	Probe
+//	@Tags			Files
+//	@Id				files_probe
+//	@Produce		json
+//	@Param			id			path		string	true	"ID"
+//	@Param			type		query		string	false	"Type"
+//	@Param			page		query		string	false	"Page"
+//	@Param			size		query		string	false	"Size"
+//	@Param			sort_by		query		string	false	"Sort By"
+//	@Param			sort_order	query		string	false	"Sort Order"
+//	@Param			query		query		string	false	"Query"
+//	@Success		200			{object}	service.FileList
+//	@Failure		404			{object}	errorpkg.ErrorResponse
+//	@Failure		500			{object}	errorpkg.ErrorResponse
+//	@Router			/files/{id}/probe [get]
+func (r *FileRouter) Probe(c *fiber.Ctx) error {
+	id := c.Params("id")
+	userID := GetUserID(c)
+	opts, err := r.parseListQueryParams(c)
+	if err != nil {
+		return err
+	}
+	res, err := r.fileSvc.Probe(id, *opts, userID)
+	if err != nil {
+		return err
+	}
+	return c.JSON(res)
+}
+
+func (r *FileRouter) parseListQueryParams(c *fiber.Ctx) (*service.FileListOptions, error) {
+	var err error
 	var page int64
 	if c.Query("page") == "" {
 		page = 1
@@ -356,27 +407,27 @@ func (r *FileRouter) List(c *fiber.Ctx) error {
 	} else {
 		size, err = strconv.ParseInt(c.Query("size"), 10, 64)
 		if err != nil {
-			return err
+			return nil, err
 		}
 	}
 	if size < 1 {
-		return errorpkg.NewInvalidQueryParamError("size")
+		return nil, errorpkg.NewInvalidQueryParamError("size")
 	}
 	sortBy := c.Query("sort_by")
 	if !IsValidSortBy(sortBy) {
-		return errorpkg.NewInvalidQueryParamError("sort_by")
+		return nil, errorpkg.NewInvalidQueryParamError("sort_by")
 	}
 	sortOrder := c.Query("sort_order")
 	if !IsValidSortOrder(sortOrder) {
-		return errorpkg.NewInvalidQueryParamError("sort_order")
+		return nil, errorpkg.NewInvalidQueryParamError("sort_order")
 	}
 	fileType := c.Query("type")
 	if fileType != model.FileTypeFile && fileType != model.FileTypeFolder && fileType != "" {
-		return errorpkg.NewInvalidQueryParamError("type")
+		return nil, errorpkg.NewInvalidQueryParamError("type")
 	}
 	query, err := url.QueryUnescape(c.Query("query"))
 	if err != nil {
-		return errorpkg.NewInvalidQueryParamError("query")
+		return nil, errorpkg.NewInvalidQueryParamError("query")
 	}
 	opts := service.FileListOptions{
 		Page:      page,
@@ -387,14 +438,10 @@ func (r *FileRouter) List(c *fiber.Ctx) error {
 	if query != "" {
 		b, err := base64.StdEncoding.DecodeString(query + strings.Repeat("=", (4-len(query)%4)%4))
 		if err != nil {
-			return errorpkg.NewInvalidQueryParamError("query")
+			return nil, errorpkg.NewInvalidQueryParamError("query")
 		}
 		if err := json.Unmarshal(b, &opts.Query); err != nil {
-			return errorpkg.NewInvalidQueryParamError("query")
-		}
-		res, err = r.fileSvc.Search(id, opts, userID)
-		if err != nil {
-			return err
+			return nil, errorpkg.NewInvalidQueryParamError("query")
 		}
 	} else {
 		if fileType != "" {
@@ -402,48 +449,8 @@ func (r *FileRouter) List(c *fiber.Ctx) error {
 				Type: &fileType,
 			}
 		}
-		res, err = r.fileSvc.List(id, opts, userID)
-		if err != nil {
-			return err
-		}
 	}
-	return c.JSON(res)
-}
-
-// Probe godoc
-//
-//	@Summary		Probe
-//	@Description	Probe
-//	@Tags			Files
-//	@Id				files_probe
-//	@Produce		json
-//	@Param			id		path		string	true	"ID"
-//	@Param			size	query		string	false	"Size"
-//	@Success		200		{object}	service.FileProbe
-//	@Failure		404		{object}	errorpkg.ErrorResponse
-//	@Failure		500		{object}	errorpkg.ErrorResponse
-//	@Router			/files/{id}/probe [get]
-func (r *FileRouter) Probe(c *fiber.Ctx) error {
-	userID := GetUserID(c)
-	id := c.Params("id")
-	var err error
-	var size int64
-	if c.Query("size") == "" {
-		size = FileDefaultPageSize
-	} else {
-		size, err = strconv.ParseInt(c.Query("size"), 10, 64)
-		if err != nil {
-			return err
-		}
-	}
-	if size == 0 {
-		return errorpkg.NewInvalidQueryParamError("size")
-	}
-	res, err := r.fileSvc.Probe(id, service.FileProbeOptions{Size: size}, userID)
-	if err != nil {
-		return err
-	}
-	return c.JSON(res)
+	return &opts, nil
 }
 
 // FindPath godoc

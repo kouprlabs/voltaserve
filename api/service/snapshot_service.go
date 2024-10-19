@@ -111,36 +111,11 @@ type SnapshotList struct {
 }
 
 func (svc *SnapshotService) List(fileID string, opts SnapshotListOptions, userID string) (*SnapshotList, error) {
-	file, err := svc.fileCache.Get(fileID)
+	all, file, err := svc.findAll(fileID, opts, userID)
 	if err != nil {
 		return nil, err
 	}
-	if err = svc.fileGuard.Authorize(userID, file, model.PermissionOwner); err != nil {
-		return nil, err
-	}
-	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
-		return nil, errorpkg.NewFileIsNotAFileError(file)
-	}
-	if opts.SortBy == "" {
-		opts.SortBy = SortByDateCreated
-	}
-	if opts.SortOrder == "" {
-		opts.SortOrder = SortOrderAsc
-	}
-	ids, err := svc.snapshotRepo.FindIDsByFile(fileID)
-	if err != nil {
-		return nil, err
-	}
-	var snapshots []model.Snapshot
-	for _, id := range ids {
-		var s model.Snapshot
-		s, err := svc.snapshotCache.Get(id)
-		if err != nil {
-			return nil, err
-		}
-		snapshots = append(snapshots, s)
-	}
-	sorted := svc.doSorting(snapshots, opts.SortBy, opts.SortOrder)
+	sorted := svc.doSorting(all, opts.SortBy, opts.SortOrder)
 	paged, totalElements, totalPages := svc.doPagination(sorted, opts.Page, opts.Size)
 	mapped := NewSnapshotMapper().mapMany(paged, *file.GetSnapshotID())
 	return &SnapshotList{
@@ -152,17 +127,54 @@ func (svc *SnapshotService) List(fileID string, opts SnapshotListOptions, userID
 	}, nil
 }
 
-type SnapshotProbeOptions struct {
-	Size int64
-}
-
 type SnapshotProbe struct {
 	TotalPages    int64 `json:"totalPages"`
 	TotalElements int64 `json:"totalElements"`
 }
 
-func (svc *SnapshotService) Probe(fileID string, opts SnapshotProbeOptions, userID string) (*SnapshotProbe, error) {
-	return nil, nil
+func (svc *SnapshotService) Probe(fileID string, opts SnapshotListOptions, userID string) (*SnapshotProbe, error) {
+	all, _, err := svc.findAll(fileID, opts, userID)
+	if err != nil {
+		return nil, err
+	}
+	totalElements := int64(len(all))
+	return &SnapshotProbe{
+		TotalElements: totalElements,
+		TotalPages:    (totalElements + opts.Size - 1) / opts.Size,
+	}, nil
+}
+
+func (svc *SnapshotService) findAll(fileID string, opts SnapshotListOptions, userID string) ([]model.Snapshot, model.File, error) {
+	file, err := svc.fileCache.Get(fileID)
+	if err != nil {
+		return nil, nil, err
+	}
+	if err = svc.fileGuard.Authorize(userID, file, model.PermissionEditor); err != nil {
+		return nil, nil, err
+	}
+	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
+		return nil, nil, errorpkg.NewFileIsNotAFileError(file)
+	}
+	if opts.SortBy == "" {
+		opts.SortBy = SortByDateCreated
+	}
+	if opts.SortOrder == "" {
+		opts.SortOrder = SortOrderAsc
+	}
+	ids, err := svc.snapshotRepo.FindIDsByFile(fileID)
+	if err != nil {
+		return nil, nil, err
+	}
+	var res []model.Snapshot
+	for _, id := range ids {
+		var s model.Snapshot
+		s, err := svc.snapshotCache.Get(id)
+		if err != nil {
+			return nil, nil, err
+		}
+		res = append(res, s)
+	}
+	return res, file, nil
 }
 
 func (svc *SnapshotService) doSorting(data []model.Snapshot, sortBy string, sortOrder string) []model.Snapshot {
@@ -228,7 +240,7 @@ func (svc *SnapshotService) Activate(id string, userID string) (*File, error) {
 	if err != nil {
 		return nil, err
 	}
-	if err = svc.fileGuard.Authorize(userID, file, model.PermissionOwner); err != nil {
+	if err = svc.fileGuard.Authorize(userID, file, model.PermissionEditor); err != nil {
 		return nil, err
 	}
 	if _, err := svc.snapshotCache.Get(id); err != nil {

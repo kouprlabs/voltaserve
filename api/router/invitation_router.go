@@ -90,42 +90,11 @@ func (r *InvitationRouter) Create(c *fiber.Ctx) error {
 //	@Failure		500			{object}	errorpkg.ErrorResponse
 //	@Router			/invitations/incoming [get]
 func (r *InvitationRouter) ListIncoming(c *fiber.Ctx) error {
-	var err error
-	var page int64
-	if c.Query("page") == "" {
-		page = 1
-	} else {
-		page, err = strconv.ParseInt(c.Query("page"), 10, 64)
-		if err != nil {
-			page = 1
-		}
+	opts, err := r.parseIncomingListQueryParams(c)
+	if err != nil {
+		return err
 	}
-	var size int64
-	if c.Query("size") == "" {
-		size = InvitationDefaultPageSize
-	} else {
-		size, err = strconv.ParseInt(c.Query("size"), 10, 64)
-		if err != nil {
-			return err
-		}
-	}
-	if size == 0 {
-		return errorpkg.NewInvalidQueryParamError("size")
-	}
-	sortBy := c.Query("sort_by")
-	if !IsValidSortBy(sortBy) {
-		return errorpkg.NewInvalidQueryParamError("sort_by")
-	}
-	sortOrder := c.Query("sort_order")
-	if !IsValidSortOrder(sortOrder) {
-		return errorpkg.NewInvalidQueryParamError("sort_order")
-	}
-	res, err := r.invitationSvc.ListIncoming(service.InvitationListOptions{
-		Page:      page,
-		Size:      size,
-		SortBy:    sortBy,
-		SortOrder: sortOrder,
-	}, GetUserID(c))
+	res, err := r.invitationSvc.ListIncoming(*opts, GetUserID(c))
 	if err != nil {
 		return err
 	}
@@ -144,7 +113,54 @@ func (r *InvitationRouter) ListIncoming(c *fiber.Ctx) error {
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/invitations/incoming/probe [get]
 func (r *InvitationRouter) ProbeIncoming(c *fiber.Ctx) error {
-	return nil
+	opts, err := r.parseIncomingListQueryParams(c)
+	if err != nil {
+		return err
+	}
+	res, err := r.invitationSvc.ProbeIncoming(*opts, GetUserID(c))
+	if err != nil {
+		return err
+	}
+	return c.JSON(res)
+}
+
+func (r *InvitationRouter) parseIncomingListQueryParams(c *fiber.Ctx) (*service.InvitationListOptions, error) {
+	var err error
+	var page int64
+	if c.Query("page") == "" {
+		page = 1
+	} else {
+		page, err = strconv.ParseInt(c.Query("page"), 10, 64)
+		if err != nil {
+			page = 1
+		}
+	}
+	var size int64
+	if c.Query("size") == "" {
+		size = InvitationDefaultPageSize
+	} else {
+		size, err = strconv.ParseInt(c.Query("size"), 10, 64)
+		if err != nil {
+			return nil, err
+		}
+	}
+	if size == 0 {
+		return nil, errorpkg.NewInvalidQueryParamError("size")
+	}
+	sortBy := c.Query("sort_by")
+	if !IsValidSortBy(sortBy) {
+		return nil, errorpkg.NewInvalidQueryParamError("sort_by")
+	}
+	sortOrder := c.Query("sort_order")
+	if !IsValidSortOrder(sortOrder) {
+		return nil, errorpkg.NewInvalidQueryParamError("sort_order")
+	}
+	return &service.InvitationListOptions{
+		Page:      page,
+		Size:      size,
+		SortBy:    sortBy,
+		SortOrder: sortOrder,
+	}, nil
 }
 
 // CountIncoming godoc
@@ -181,46 +197,11 @@ func (r *InvitationRouter) CountIncoming(c *fiber.Ctx) error {
 //	@Failure		500				{object}	errorpkg.ErrorResponse
 //	@Router			/invitations/outgoing [get]
 func (r *InvitationRouter) ListOutgoing(c *fiber.Ctx) error {
-	orgID := c.Query("organization_id")
-	if orgID == "" {
-		return errorpkg.NewMissingQueryParamError("org")
+	opts, err := r.parseOutgoingListQueryParams(c)
+	if err != nil {
+		return err
 	}
-	var err error
-	var page int64
-	if c.Query("page") == "" {
-		page = 1
-	} else {
-		page, err = strconv.ParseInt(c.Query("page"), 10, 64)
-		if err != nil {
-			page = 1
-		}
-	}
-	var size int64
-	if c.Query("size") == "" {
-		size = InvitationDefaultPageSize
-	} else {
-		size, err = strconv.ParseInt(c.Query("size"), 10, 64)
-		if err != nil {
-			return err
-		}
-	}
-	if size == 0 {
-		return errorpkg.NewInvalidQueryParamError("size")
-	}
-	sortBy := c.Query("sort_by")
-	if !IsValidSortBy(sortBy) {
-		return errorpkg.NewInvalidQueryParamError("sort_by")
-	}
-	sortOrder := c.Query("sort_order")
-	if !IsValidSortOrder(sortOrder) {
-		return errorpkg.NewInvalidQueryParamError("sort_order")
-	}
-	res, err := r.invitationSvc.ListOutgoing(orgID, service.InvitationListOptions{
-		Page:      page,
-		Size:      size,
-		SortBy:    sortBy,
-		SortOrder: sortOrder,
-	}, GetUserID(c))
+	res, err := r.invitationSvc.ListOutgoing(c.Query("organization_id"), *opts, GetUserID(c))
 	if err != nil {
 		return err
 	}
@@ -240,7 +221,58 @@ func (r *InvitationRouter) ListOutgoing(c *fiber.Ctx) error {
 //	@Failure		500				{object}	errorpkg.ErrorResponse
 //	@Router			/invitations/outgoing/probe [get]
 func (r *InvitationRouter) ProbeOutgoing(c *fiber.Ctx) error {
-	return nil
+	opts, err := r.parseOutgoingListQueryParams(c)
+	if err != nil {
+		return err
+	}
+	res, err := r.invitationSvc.ProbeOutgoing(c.Query("organization_id"), *opts, GetUserID(c))
+	if err != nil {
+		return err
+	}
+	return c.JSON(res)
+}
+
+func (r *InvitationRouter) parseOutgoingListQueryParams(c *fiber.Ctx) (*service.InvitationListOptions, error) {
+	orgID := c.Query("organization_id")
+	if orgID == "" {
+		return nil, errorpkg.NewMissingQueryParamError("org")
+	}
+	var err error
+	var page int64
+	if c.Query("page") == "" {
+		page = 1
+	} else {
+		page, err = strconv.ParseInt(c.Query("page"), 10, 64)
+		if err != nil {
+			page = 1
+		}
+	}
+	var size int64
+	if c.Query("size") == "" {
+		size = InvitationDefaultPageSize
+	} else {
+		size, err = strconv.ParseInt(c.Query("size"), 10, 64)
+		if err != nil {
+			return nil, err
+		}
+	}
+	if size == 0 {
+		return nil, errorpkg.NewInvalidQueryParamError("size")
+	}
+	sortBy := c.Query("sort_by")
+	if !IsValidSortBy(sortBy) {
+		return nil, errorpkg.NewInvalidQueryParamError("sort_by")
+	}
+	sortOrder := c.Query("sort_order")
+	if !IsValidSortOrder(sortOrder) {
+		return nil, errorpkg.NewInvalidQueryParamError("sort_order")
+	}
+	return &service.InvitationListOptions{
+		Page:      page,
+		Size:      size,
+		SortBy:    sortBy,
+		SortOrder: sortOrder,
+	}, nil
 }
 
 // Delete godoc

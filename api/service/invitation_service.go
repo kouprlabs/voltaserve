@@ -192,17 +192,24 @@ func (svc *InvitationService) ListIncoming(opts InvitationListOptions, userID st
 	}, nil
 }
 
-type InvitationProbeOptions struct {
-	Size int64
-}
-
 type InvitationProbe struct {
 	TotalPages    int64 `json:"totalPages"`
 	TotalElements int64 `json:"totalElements"`
 }
 
-func (svc *InvitationService) ProbeIncoming(opts InvitationProbeOptions, userID string) (*InvitationProbe, error) {
-	return nil, nil
+func (svc *InvitationService) ProbeIncoming(opts InvitationListOptions, userID string) (*InvitationProbe, error) {
+	user, err := svc.userRepo.Find(userID)
+	if err != nil {
+		return nil, err
+	}
+	totalElements, err := svc.invitationRepo.CountIncoming(user.GetEmail())
+	if err != nil {
+		return nil, err
+	}
+	return &InvitationProbe{
+		TotalElements: totalElements,
+		TotalPages:    (totalElements + opts.Size - 1) / opts.Size,
+	}, nil
 }
 
 func (svc *InvitationService) CountIncoming(userID string) (*int64, error) {
@@ -218,7 +225,7 @@ func (svc *InvitationService) CountIncoming(userID string) (*int64, error) {
 }
 
 func (svc *InvitationService) ListOutgoing(orgID string, opts InvitationListOptions, userID string) (*InvitationList, error) {
-	invitations, err := svc.invitationRepo.FindOutgoing(orgID, userID)
+	all, err := svc.invitationRepo.FindOutgoing(orgID, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -228,7 +235,7 @@ func (svc *InvitationService) ListOutgoing(orgID string, opts InvitationListOpti
 	if opts.SortOrder == "" {
 		opts.SortOrder = SortOrderAsc
 	}
-	sorted := svc.doSorting(invitations, opts.SortBy, opts.SortOrder)
+	sorted := svc.doSorting(all, opts.SortBy, opts.SortOrder)
 	paged, totalElements, totalPages := svc.doPagination(sorted, opts.Page, opts.Size)
 	mapped, err := svc.invitationMapper.mapMany(paged, userID)
 	if err != nil {
@@ -243,8 +250,16 @@ func (svc *InvitationService) ListOutgoing(orgID string, opts InvitationListOpti
 	}, nil
 }
 
-func (svc *InvitationService) ProbeOutgoing(orgID string, opts InvitationProbeOptions, userID string) (*InvitationProbe, error) {
-	return nil, nil
+func (svc *InvitationService) ProbeOutgoing(orgID string, opts InvitationListOptions, userID string) (*InvitationProbe, error) {
+	all, err := svc.invitationRepo.FindOutgoing(orgID, userID)
+	totalElements := int64(len(all))
+	if err != nil {
+		return nil, err
+	}
+	return &InvitationProbe{
+		TotalElements: totalElements,
+		TotalPages:    (totalElements + opts.Size - 1) / opts.Size,
+	}, nil
 }
 
 func (svc *InvitationService) Accept(id string, userID string) error {

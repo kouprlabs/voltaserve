@@ -276,7 +276,7 @@ func (repo *workspaceRepo) FindIDs() ([]string, error) {
 	if db.Error != nil {
 		return []string{}, db.Error
 	}
-	res := []string{}
+	res := make([]string, 0)
 	for _, id := range ids {
 		res = append(res, id.Result)
 	}
@@ -294,7 +294,7 @@ func (repo *workspaceRepo) FindIDsByOrganization(orgID string) ([]string, error)
 	if db.Error != nil {
 		return nil, db.Error
 	}
-	res := []string{}
+	res := make([]string, 0)
 	for _, id := range ids {
 		res = append(res, id.Result)
 	}

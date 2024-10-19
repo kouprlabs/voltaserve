@@ -200,7 +200,7 @@ func (repo *groupRepo) FindIDsByFile(fileID string) ([]string, error) {
 	if db.Error != nil {
 		return []string{}, db.Error
 	}
-	res := []string{}
+	res := make([]string, 0)
 	for _, v := range values {
 		res = append(res, v.Result)
 	}
@@ -216,7 +216,7 @@ func (repo *groupRepo) FindIDsByOrganization(id string) ([]string, error) {
 	if db.Error != nil {
 		return []string{}, db.Error
 	}
-	res := []string{}
+	res := make([]string, 0)
 	for _, v := range values {
 		res = append(res, v.Result)
 	}
@@ -256,7 +256,7 @@ func (repo *groupRepo) FindIDs() ([]string, error) {
 	if db.Error != nil {
 		return []string{}, db.Error
 	}
-	res := []string{}
+	res := make([]string, 0)
 	for _, v := range values {
 		res = append(res, v.Result)
 	}
@@ -282,7 +282,8 @@ func (repo *groupRepo) FindMembers(id string) ([]model.User, error) {
 func (repo *groupRepo) CountOwners(id string) (int64, error) {
 	var count int64
 	db := repo.db.Model(&userPermissionEntity{}).
-		Where("resource_id = ? and permission = ?").
+		Where("resource_id = ?", id).
+		Where("permission = ?", model.PermissionOwner).
 		Count(&count)
 	if db.Error != nil {
 		return -1, db.Error

@@ -31,10 +31,6 @@ func NewUserPermission() model.UserPermission {
 	return &userPermissionEntity{}
 }
 
-func NewGroupPermission() model.GroupPermission {
-	return &groupPermissionEntity{}
-}
-
 type userPermissionEntity struct {
 	ID         string `gorm:"column:id"          json:"id"`
 	UserID     string `gorm:"column:user_id"     json:"userId"`

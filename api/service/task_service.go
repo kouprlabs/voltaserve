@@ -182,29 +182,9 @@ type TaskList struct {
 }
 
 func (svc *TaskService) List(opts TaskListOptions, userID string) (*TaskList, error) {
-	var authorized []model.Task
-	if opts.Query == "" {
-		ids, err := svc.taskRepo.FindIDs(userID)
-		if err != nil {
-			return nil, err
-		}
-		authorized, err = svc.doAuthorizationByIDs(ids, userID)
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		count, err := svc.taskRepo.Count()
-		if err != nil {
-			return nil, err
-		}
-		tasks, err := svc.taskSearch.Query(opts.Query, infra.QueryOptions{Limit: count})
-		if err != nil {
-			return nil, err
-		}
-		authorized, err = svc.doAuthorization(tasks, userID)
-		if err != nil {
-			return nil, err
-		}
+	all, err := svc.findAll(opts, userID)
+	if err != nil {
+		return nil, err
 	}
 	if opts.SortBy == "" {
 		opts.SortBy = SortByDateCreated
@@ -212,7 +192,7 @@ func (svc *TaskService) List(opts TaskListOptions, userID string) (*TaskList, er
 	if opts.SortOrder == "" {
 		opts.SortOrder = SortOrderAsc
 	}
-	sorted := svc.doSorting(authorized, opts.SortBy, opts.SortOrder)
+	sorted := svc.doSorting(all, opts.SortBy, opts.SortOrder)
 	paged, totalElements, totalPages := svc.doPagination(sorted, opts.Page, opts.Size)
 	mapped, err := svc.taskMapper.mapMany(paged)
 	if err != nil {
@@ -227,17 +207,49 @@ func (svc *TaskService) List(opts TaskListOptions, userID string) (*TaskList, er
 	}, nil
 }
 
-type TaskProbeOptions struct {
-	Size int64
-}
-
 type TaskProbe struct {
 	TotalPages    int64 `json:"totalPages"`
 	TotalElements int64 `json:"totalElements"`
 }
 
-func (svc *TaskService) Probe(opts TaskProbeOptions, userID string) (*TaskProbe, error) {
-	return nil, nil
+func (svc *TaskService) Probe(opts TaskListOptions, userID string) (*TaskProbe, error) {
+	all, err := svc.findAll(opts, userID)
+	if err != nil {
+		return nil, err
+	}
+	totalElements := int64(len(all))
+	return &TaskProbe{
+		TotalElements: totalElements,
+		TotalPages:    (totalElements + opts.Size - 1) / opts.Size,
+	}, nil
+}
+
+func (svc *TaskService) findAll(opts TaskListOptions, userID string) ([]model.Task, error) {
+	var res []model.Task
+	if opts.Query == "" {
+		ids, err := svc.taskRepo.FindIDs(userID)
+		if err != nil {
+			return nil, err
+		}
+		res, err = svc.doAuthorizationByIDs(ids, userID)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		count, err := svc.taskRepo.Count()
+		if err != nil {
+			return nil, err
+		}
+		tasks, err := svc.taskSearch.Query(opts.Query, infra.QueryOptions{Limit: count})
+		if err != nil {
+			return nil, err
+		}
+		res, err = svc.doAuthorization(tasks, userID)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
 }
 
 func (svc *TaskService) Count(userID string) (*int64, error) {

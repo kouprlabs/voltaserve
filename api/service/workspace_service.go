@@ -168,29 +168,9 @@ type WorkspaceList struct {
 }
 
 func (svc *WorkspaceService) List(opts WorkspaceListOptions, userID string) (*WorkspaceList, error) {
-	var authorized []model.Workspace
-	if opts.Query == "" {
-		ids, err := svc.workspaceRepo.FindIDs()
-		if err != nil {
-			return nil, err
-		}
-		authorized, err = svc.doAuthorizationByIDs(ids, userID)
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		count, err := svc.workspaceRepo.Count()
-		if err != nil {
-			return nil, err
-		}
-		workspaces, err := svc.workspaceSearch.Query(opts.Query, infra.QueryOptions{Limit: count})
-		if err != nil {
-			return nil, err
-		}
-		authorized, err = svc.doAuthorization(workspaces, userID)
-		if err != nil {
-			return nil, err
-		}
+	all, err := svc.findAll(opts, userID)
+	if err != nil {
+		return nil, err
 	}
 	if opts.SortBy == "" {
 		opts.SortBy = SortByDateCreated
@@ -198,7 +178,7 @@ func (svc *WorkspaceService) List(opts WorkspaceListOptions, userID string) (*Wo
 	if opts.SortOrder == "" {
 		opts.SortOrder = SortOrderAsc
 	}
-	sorted := svc.doSorting(authorized, opts.SortBy, opts.SortOrder)
+	sorted := svc.doSorting(all, opts.SortBy, opts.SortOrder)
 	paged, totalElements, totalPages := svc.doPagination(sorted, opts.Page, opts.Size)
 	mapped, err := svc.workspaceMapper.mapMany(paged, userID)
 	if err != nil {
@@ -213,17 +193,21 @@ func (svc *WorkspaceService) List(opts WorkspaceListOptions, userID string) (*Wo
 	}, nil
 }
 
-type WorkspaceProbeOptions struct {
-	Size int64
-}
-
 type WorkspaceProbe struct {
 	TotalPages    int64 `json:"totalPages"`
 	TotalElements int64 `json:"totalElements"`
 }
 
-func (svc *WorkspaceService) Probe(opts WorkspaceProbeOptions, userID string) (*WorkspaceProbe, error) {
-	return nil, nil
+func (svc *WorkspaceService) Probe(opts WorkspaceListOptions, userID string) (*WorkspaceProbe, error) {
+	all, err := svc.findAll(opts, userID)
+	if err != nil {
+		return nil, err
+	}
+	totalElements := int64(len(all))
+	return &WorkspaceProbe{
+		TotalElements: totalElements,
+		TotalPages:    (totalElements + opts.Size - 1) / opts.Size,
+	}, nil
 }
 
 func (svc *WorkspaceService) PatchName(id string, name string, userID string) (*Workspace, error) {
@@ -318,7 +302,7 @@ func (svc *WorkspaceService) HasEnoughSpaceForByteSize(id string, byteSize int64
 	return helper.ToPtr(true), nil
 }
 
-func (svc *WorkspaceService) findAll(userID string) ([]*Workspace, error) {
+func (svc *WorkspaceService) findAllWithoutOptions(userID string) ([]*Workspace, error) {
 	ids, err := svc.workspaceRepo.FindIDs()
 	if err != nil {
 		return nil, err
@@ -332,6 +316,34 @@ func (svc *WorkspaceService) findAll(userID string) ([]*Workspace, error) {
 		return nil, err
 	}
 	return mapped, nil
+}
+
+func (svc *WorkspaceService) findAll(opts WorkspaceListOptions, userID string) ([]model.Workspace, error) {
+	var res []model.Workspace
+	if opts.Query == "" {
+		ids, err := svc.workspaceRepo.FindIDs()
+		if err != nil {
+			return nil, err
+		}
+		res, err = svc.doAuthorizationByIDs(ids, userID)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		count, err := svc.workspaceRepo.Count()
+		if err != nil {
+			return nil, err
+		}
+		workspaces, err := svc.workspaceSearch.Query(opts.Query, infra.QueryOptions{Limit: count})
+		if err != nil {
+			return nil, err
+		}
+		res, err = svc.doAuthorization(workspaces, userID)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
 }
 
 func (svc *WorkspaceService) doAuthorization(data []model.Workspace, userID string) ([]model.Workspace, error) {

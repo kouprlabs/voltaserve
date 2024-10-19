@@ -80,14 +80,51 @@ type UserList struct {
 }
 
 func (svc *UserService) List(opts UserListOptions, userID string) (*UserList, error) {
+	users, err := svc.findAll(opts, userID)
+	if err != nil {
+		return nil, err
+	}
+	if opts.SortBy == "" {
+		opts.SortBy = SortByDateCreated
+	}
+	if opts.SortOrder == "" {
+		opts.SortOrder = SortOrderAsc
+	}
+	sorted := svc.doSorting(users, opts.SortBy, opts.SortOrder)
+	paged, totalElements, totalPages := svc.doPagination(sorted, opts.Page, opts.Size)
+	mapped, err := svc.userMapper.mapMany(paged)
+	if err != nil {
+		return nil, err
+	}
+	return &UserList{
+		Data:          mapped,
+		TotalPages:    totalPages,
+		TotalElements: totalElements,
+		Page:          opts.Page,
+		Size:          int64(len(mapped)),
+	}, nil
+}
+
+type UserProbe struct {
+	TotalPages    int64 `json:"totalPages"`
+	TotalElements int64 `json:"totalElements"`
+}
+
+func (svc *UserService) Probe(opts UserListOptions, userID string) (*UserProbe, error) {
+	users, err := svc.findAll(opts, userID)
+	if err != nil {
+		return nil, err
+	}
+	totalElements := int64(len(users))
+	return &UserProbe{
+		TotalElements: totalElements,
+		TotalPages:    (totalElements + opts.Size - 1) / opts.Size,
+	}, nil
+}
+
+func (svc *UserService) findAll(opts UserListOptions, userID string) ([]model.User, error) {
 	if opts.OrganizationID == "" && opts.GroupID == "" {
-		return &UserList{
-			Data:          []*User{},
-			TotalPages:    1,
-			TotalElements: 0,
-			Page:          1,
-			Size:          0,
-		}, nil
+		return make([]model.User, 0), nil
 	}
 	if opts.OrganizationID != "" {
 		org, err := svc.orgCache.Get(opts.OrganizationID)
@@ -107,7 +144,7 @@ func (svc *UserService) List(opts UserListOptions, userID string) (*UserList, er
 			return nil, err
 		}
 	}
-	res := []model.User{}
+	res := make([]model.User, 0)
 	var err error
 	if opts.Query == "" {
 		if opts.OrganizationID != "" && opts.GroupID != "" && opts.ExcludeGroupMembers {
@@ -171,38 +208,7 @@ func (svc *UserService) List(opts UserListOptions, userID string) (*UserList, er
 			}
 		}
 	}
-	if opts.SortBy == "" {
-		opts.SortBy = SortByDateCreated
-	}
-	if opts.SortOrder == "" {
-		opts.SortOrder = SortOrderAsc
-	}
-	sorted := svc.doSorting(res, opts.SortBy, opts.SortOrder)
-	paged, totalElements, totalPages := svc.doPagination(sorted, opts.Page, opts.Size)
-	mapped, err := svc.userMapper.mapMany(paged)
-	if err != nil {
-		return nil, err
-	}
-	return &UserList{
-		Data:          mapped,
-		TotalPages:    totalPages,
-		TotalElements: totalElements,
-		Page:          opts.Page,
-		Size:          int64(len(mapped)),
-	}, nil
-}
-
-type UserProbeOptions struct {
-	Size int64
-}
-
-type UserProbe struct {
-	TotalPages    int64 `json:"totalPages"`
-	TotalElements int64 `json:"totalElements"`
-}
-
-func (svc *UserService) Probe(opts UserProbeOptions, userID string) (*UserProbe, error) {
-	return nil, nil
+	return res, nil
 }
 
 func (svc *UserService) doSorting(data []model.User, sortBy string, sortOrder string) []model.User {

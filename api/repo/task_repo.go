@@ -248,7 +248,7 @@ func (repo *taskRepo) FindIDs(userID string) ([]string, error) {
 	if db.Error != nil {
 		return []string{}, db.Error
 	}
-	res := []string{}
+	res := make([]string, 0)
 	for _, v := range values {
 		res = append(res, v.Result)
 	}

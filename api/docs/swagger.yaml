@@ -388,13 +388,6 @@ definitions:
           type: string
         type: array
     type: object
-  service.FileProbe:
-    properties:
-      totalElements:
-        type: integer
-      totalPages:
-        type: integer
-    type: object
   service.FileQuery:
     properties:
       createTimeAfter:
@@ -1513,9 +1506,29 @@ paths:
         name: id
         required: true
         type: string
+      - description: Type
+        in: query
+        name: type
+        type: string
+      - description: Page
+        in: query
+        name: page
+        type: string
       - description: Size
         in: query
         name: size
+        type: string
+      - description: Sort By
+        in: query
+        name: sort_by
+        type: string
+      - description: Sort Order
+        in: query
+        name: sort_order
+        type: string
+      - description: Query
+        in: query
+        name: query
         type: string
       produces:
       - application/json
@@ -1523,7 +1536,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/service.FileProbe'
+            $ref: '#/definitions/service.FileList'
         "404":
           description: Not Found
           schema:
@@ -3730,6 +3743,10 @@ paths:
         in: query
         name: sort_order
         type: string
+      - description: Exclude Group Members
+        in: query
+        name: exclude_group_members
+        type: boolean
       produces:
       - application/json
       responses:

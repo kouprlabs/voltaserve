@@ -334,7 +334,7 @@ func (repo *fileRepo) FindTreeIDs(id string) ([]string, error) {
 	if db.Error != nil {
 		return nil, db.Error
 	}
-	res := []string{}
+	res := make([]string, 0)
 	for _, v := range values {
 		res = append(res, v.Result)
 	}
@@ -368,7 +368,7 @@ func (repo *fileRepo) FindIDsByWorkspace(workspaceID string) ([]string, error) {
 	if db.Error != nil {
 		return nil, db.Error
 	}
-	res := []string{}
+	res := make([]string, 0)
 	for _, id := range ids {
 		res = append(res, id.Result)
 	}
@@ -386,7 +386,7 @@ func (repo *fileRepo) FindIDsBySnapshot(snapshotID string) ([]string, error) {
 	if db.Error != nil {
 		return nil, db.Error
 	}
-	res := []string{}
+	res := make([]string, 0)
 	for _, v := range values {
 		res = append(res, v.Result)
 	}
@@ -456,7 +456,7 @@ func (repo *fileRepo) FindChildrenIDs(id string) ([]string, error) {
 	if db.Error != nil {
 		return []string{}, db.Error
 	}
-	res := []string{}
+	res := make([]string, 0)
 	for _, v := range values {
 		res = append(res, v.Result)
 	}

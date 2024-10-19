@@ -623,7 +623,7 @@ func (repo *snapshotRepo) FindIDsByFile(fileID string) ([]string, error) {
 	if db.Error != nil {
 		return nil, db.Error
 	}
-	res := []string{}
+	res := make([]string, 0)
 	for _, v := range values {
 		res = append(res, v.Result)
 	}

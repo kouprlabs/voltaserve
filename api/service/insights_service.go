@@ -351,6 +351,41 @@ type InsightsEntityList struct {
 }
 
 func (svc *InsightsService) ListEntities(id string, opts InsightsListEntitiesOptions, userID string) (*InsightsEntityList, error) {
+	all, err := svc.findEntities(id, opts, userID)
+	if err != nil {
+		return nil, err
+	}
+	if opts.SortBy == "" {
+		opts.SortBy = SortByName
+	}
+	sorted := svc.doSorting(all, opts.SortBy, opts.SortOrder)
+	data, totalElements, totalPages := svc.doPagination(sorted, opts.Page, opts.Size)
+	return &InsightsEntityList{
+		Data:          data,
+		TotalPages:    totalPages,
+		TotalElements: totalElements,
+		Page:          opts.Page,
+		Size:          int64(len(data)),
+	}, nil
+}
+
+type InsightsEntityProbe struct {
+	TotalPages    int64 `json:"totalPages"`
+	TotalElements int64 `json:"totalElements"`
+}
+
+func (svc *InsightsService) ProbeEntities(id string, opts InsightsListEntitiesOptions, userID string) (*InsightsEntityProbe, error) {
+	all, err := svc.findEntities(id, opts, userID)
+	if err != nil {
+		return nil, err
+	}
+	return &InsightsEntityProbe{
+		TotalElements: int64(len(all)),
+		TotalPages:    (int64(len(all)) + opts.Size - 1) / opts.Size,
+	}, nil
+}
+
+func (svc *InsightsService) findEntities(id string, opts InsightsListEntitiesOptions, userID string) ([]*language_client.InsightsEntity, error) {
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return nil, err
@@ -384,32 +419,7 @@ func (svc *InsightsService) ListEntities(id string, opts InsightsListEntitiesOpt
 	if err := json.Unmarshal([]byte(text), &entities); err != nil {
 		return nil, err
 	}
-	if opts.SortBy == "" {
-		opts.SortBy = SortByName
-	}
-	filtered := svc.doFiltering(entities, opts.Query)
-	sorted := svc.doSorting(filtered, opts.SortBy, opts.SortOrder)
-	data, totalElements, totalPages := svc.doPagination(sorted, opts.Page, opts.Size)
-	return &InsightsEntityList{
-		Data:          data,
-		TotalPages:    totalPages,
-		TotalElements: totalElements,
-		Page:          opts.Page,
-		Size:          int64(len(data)),
-	}, nil
-}
-
-type InsightsEntityProbeOptions struct {
-	Size int64
-}
-
-type InsightsEntityProbe struct {
-	TotalPages    int64 `json:"totalPages"`
-	TotalElements int64 `json:"totalElements"`
-}
-
-func (svc *InsightsService) ProbeEntities(id string, opts InsightsEntityProbeOptions, userID string) (*InsightsEntityProbe, error) {
-	return nil, nil
+	return svc.doFiltering(entities, opts.Query), nil
 }
 
 func (svc *InsightsService) doFiltering(data []*language_client.InsightsEntity, query string) []*language_client.InsightsEntity {

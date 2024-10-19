@@ -62,46 +62,11 @@ func (r *SnapshotRouter) AppendNonJWTRoutes(g fiber.Router) {
 //	@Failure		500			{object}	errorpkg.ErrorResponse
 //	@Router			/snapshots [get]
 func (r *SnapshotRouter) List(c *fiber.Ctx) error {
-	var err error
-	fileID := c.Query("file_id")
-	if fileID == "" {
-		return errorpkg.NewMissingQueryParamError("file_id")
+	opts, err := r.parseListQueryParams(c)
+	if err != nil {
+		return err
 	}
-	var page int64
-	if c.Query("page") == "" {
-		page = 1
-	} else {
-		page, err = strconv.ParseInt(c.Query("page"), 10, 64)
-		if err != nil {
-			page = 1
-		}
-	}
-	var size int64
-	if c.Query("size") == "" {
-		size = OrganizationDefaultPageSize
-	} else {
-		size, err = strconv.ParseInt(c.Query("size"), 10, 64)
-		if err != nil {
-			return err
-		}
-	}
-	if size == 0 {
-		return errorpkg.NewInvalidQueryParamError("size")
-	}
-	sortBy := c.Query("sort_by")
-	if !IsValidSortBy(sortBy) {
-		return errorpkg.NewInvalidQueryParamError("sort_by")
-	}
-	sortOrder := c.Query("sort_order")
-	if !IsValidSortOrder(sortOrder) {
-		return errorpkg.NewInvalidQueryParamError("sort_order")
-	}
-	res, err := r.snapshotSvc.List(fileID, service.SnapshotListOptions{
-		Page:      page,
-		Size:      size,
-		SortBy:    sortBy,
-		SortOrder: sortOrder,
-	}, GetUserID(c))
+	res, err := r.snapshotSvc.List(c.Query("file_id"), *opts, GetUserID(c))
 	if err != nil {
 		return err
 	}
@@ -122,7 +87,58 @@ func (r *SnapshotRouter) List(c *fiber.Ctx) error {
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/snapshots/probe [get]
 func (r *SnapshotRouter) Probe(c *fiber.Ctx) error {
-	return nil
+	opts, err := r.parseListQueryParams(c)
+	if err != nil {
+		return err
+	}
+	res, err := r.snapshotSvc.Probe(c.Query("file_id"), *opts, GetUserID(c))
+	if err != nil {
+		return err
+	}
+	return c.JSON(res)
+}
+
+func (r *SnapshotRouter) parseListQueryParams(c *fiber.Ctx) (*service.SnapshotListOptions, error) {
+	var err error
+	fileID := c.Query("file_id")
+	if fileID == "" {
+		return nil, errorpkg.NewMissingQueryParamError("file_id")
+	}
+	var page int64
+	if c.Query("page") == "" {
+		page = 1
+	} else {
+		page, err = strconv.ParseInt(c.Query("page"), 10, 64)
+		if err != nil {
+			page = 1
+		}
+	}
+	var size int64
+	if c.Query("size") == "" {
+		size = OrganizationDefaultPageSize
+	} else {
+		size, err = strconv.ParseInt(c.Query("size"), 10, 64)
+		if err != nil {
+			return nil, err
+		}
+	}
+	if size == 0 {
+		return nil, errorpkg.NewInvalidQueryParamError("size")
+	}
+	sortBy := c.Query("sort_by")
+	if !IsValidSortBy(sortBy) {
+		return nil, errorpkg.NewInvalidQueryParamError("sort_by")
+	}
+	sortOrder := c.Query("sort_order")
+	if !IsValidSortOrder(sortOrder) {
+		return nil, errorpkg.NewInvalidQueryParamError("sort_order")
+	}
+	return &service.SnapshotListOptions{
+		Page:      page,
+		Size:      size,
+		SortBy:    sortBy,
+		SortOrder: sortOrder,
+	}, err
 }
 
 // Activate godoc

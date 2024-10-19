@@ -111,48 +111,11 @@ func (r *GroupRouter) Find(c *fiber.Ctx) error {
 //	@Failure		500				{object}	errorpkg.ErrorResponse
 //	@Router			/groups [get]
 func (r *GroupRouter) List(c *fiber.Ctx) error {
-	var err error
-	var page int64
-	if c.Query("page") == "" {
-		page = 1
-	} else {
-		page, err = strconv.ParseInt(c.Query("page"), 10, 64)
-		if err != nil {
-			page = 1
-		}
-	}
-	var size int64
-	if c.Query("size") == "" {
-		size = GroupDefaultPageSize
-	} else {
-		size, err = strconv.ParseInt(c.Query("size"), 10, 64)
-		if err != nil {
-			return err
-		}
-	}
-	if size == 0 {
-		return errorpkg.NewInvalidQueryParamError("size")
-	}
-	sortBy := c.Query("sort_by")
-	if !IsValidSortBy(sortBy) {
-		return errorpkg.NewInvalidQueryParamError("sort_by")
-	}
-	sortOrder := c.Query("sort_order")
-	if !IsValidSortOrder(sortOrder) {
-		return errorpkg.NewInvalidQueryParamError("sort_order")
-	}
-	query, err := url.QueryUnescape(c.Query("query"))
+	opts, err := r.parseListQueryParams(c)
 	if err != nil {
-		return errorpkg.NewInvalidQueryParamError("query")
+		return err
 	}
-	res, err := r.groupSvc.List(service.GroupListOptions{
-		Query:          query,
-		OrganizationID: c.Query("organization_id"),
-		Page:           page,
-		Size:           size,
-		SortBy:         sortBy,
-		SortOrder:      sortOrder,
-	}, GetUserID(c))
+	res, err := r.groupSvc.List(*opts, GetUserID(c))
 	if err != nil {
 		return err
 	}
@@ -172,7 +135,60 @@ func (r *GroupRouter) List(c *fiber.Ctx) error {
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/groups/probe [get]
 func (r *GroupRouter) Probe(c *fiber.Ctx) error {
-	return nil
+	opts, err := r.parseListQueryParams(c)
+	if err != nil {
+		return err
+	}
+	res, err := r.groupSvc.Probe(*opts, GetUserID(c))
+	if err != nil {
+		return err
+	}
+	return c.JSON(res)
+}
+
+func (r *GroupRouter) parseListQueryParams(c *fiber.Ctx) (*service.GroupListOptions, error) {
+	var err error
+	var page int64
+	if c.Query("page") == "" {
+		page = 1
+	} else {
+		page, err = strconv.ParseInt(c.Query("page"), 10, 64)
+		if err != nil {
+			page = 1
+		}
+	}
+	var size int64
+	if c.Query("size") == "" {
+		size = GroupDefaultPageSize
+	} else {
+		size, err = strconv.ParseInt(c.Query("size"), 10, 64)
+		if err != nil {
+			return nil, err
+		}
+	}
+	if size == 0 {
+		return nil, errorpkg.NewInvalidQueryParamError("size")
+	}
+	sortBy := c.Query("sort_by")
+	if !IsValidSortBy(sortBy) {
+		return nil, errorpkg.NewInvalidQueryParamError("sort_by")
+	}
+	sortOrder := c.Query("sort_order")
+	if !IsValidSortOrder(sortOrder) {
+		return nil, errorpkg.NewInvalidQueryParamError("sort_order")
+	}
+	query, err := url.QueryUnescape(c.Query("query"))
+	if err != nil {
+		return nil, errorpkg.NewInvalidQueryParamError("query")
+	}
+	return &service.GroupListOptions{
+		Query:          query,
+		OrganizationID: c.Query("organization_id"),
+		Page:           page,
+		Size:           size,
+		SortBy:         sortBy,
+		SortOrder:      sortOrder,
+	}, nil
 }
 
 type GroupPatchNameOptions struct {
