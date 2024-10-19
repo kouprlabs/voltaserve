@@ -71,7 +71,7 @@ func (r *FileRouter) AppendRoutes(g fiber.Router) {
 	g.Get("/:id/list", r.List)
 	g.Get("/:id/probe", r.Probe)
 	g.Get("/:id/count", r.Count)
-	g.Get("/:id/path", r.Path)
+	g.Get("/:id/path", r.FindPath)
 	g.Delete("/:id", r.DeleteOne)
 	g.Post("/:id/move/:targetId", r.MoveOne)
 	g.Post("/:id/copy/:targetId", r.CopyOne)
@@ -270,13 +270,13 @@ func (r *FileRouter) Find(c *fiber.Ctx) error {
 
 // FindByPath godoc
 //
-//	@Summary		Read by Path
-//	@Description	Read by Path
+//	@Summary		Read by FindPath
+//	@Description	Read by FindPath
 //	@Tags			Files
 //	@Id				files_find_by_path
 //	@Produce		json
 //	@Param			id		path		string	true	"ID"
-//	@Param			path	query		string	true	"Path"
+//	@Param			path	query		string	true	"FindPath"
 //	@Success		200		{object}	service.File
 //	@Failure		404		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
@@ -296,12 +296,12 @@ func (r *FileRouter) FindByPath(c *fiber.Ctx) error {
 
 // ListByPath godoc
 //
-//	@Summary		List by Path
-//	@Description	List by Path
+//	@Summary		List by FindPath
+//	@Description	List by FindPath
 //	@Tags			Files
 //	@Id				files_list_by_path
 //	@Produce		json
-//	@Param			path	query		string	true	"Path"
+//	@Param			path	query		string	true	"FindPath"
 //	@Success		200		{array}		service.File
 //	@Failure		404		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
@@ -446,21 +446,21 @@ func (r *FileRouter) Probe(c *fiber.Ctx) error {
 	return c.JSON(res)
 }
 
-// Path godoc
+// FindPath godoc
 //
-//	@Summary		Read Path
-//	@Description	Read Path
+//	@Summary		Find Path
+//	@Description	Find Path
 //	@Tags			Files
-//	@Id				files_path
+//	@Id				files_find_path
 //	@Produce		json
 //	@Param			id	path		string	true	"ID"
 //	@Success		200	{array}		service.File
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/files/{id}/path [get]
-func (r *FileRouter) Path(c *fiber.Ctx) error {
+func (r *FileRouter) FindPath(c *fiber.Ctx) error {
 	userID := GetUserID(c)
-	res, err := r.fileSvc.Path(c.Params("id"), userID)
+	res, err := r.fileSvc.FindPath(c.Params("id"), userID)
 	if err != nil {
 		return err
 	}

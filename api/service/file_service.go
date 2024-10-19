@@ -777,7 +777,7 @@ func (svc *FileService) Search(id string, opts FileListOptions, userID string) (
 	return res, nil
 }
 
-func (svc *FileService) Path(id string, userID string) ([]*File, error) {
+func (svc *FileService) FindPath(id string, userID string) ([]*File, error) {
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return nil, err
