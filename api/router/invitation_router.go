@@ -235,7 +235,7 @@ func (r *InvitationRouter) ProbeOutgoing(c *fiber.Ctx) error {
 func (r *InvitationRouter) parseOutgoingListQueryParams(c *fiber.Ctx) (*service.InvitationListOptions, error) {
 	orgID := c.Query("organization_id")
 	if orgID == "" {
-		return nil, errorpkg.NewMissingQueryParamError("org")
+		return nil, errorpkg.NewMissingQueryParamError("organization_id")
 	}
 	var err error
 	var page int64

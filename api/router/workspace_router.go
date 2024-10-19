@@ -34,6 +34,7 @@ func NewWorkspaceRouter() *WorkspaceRouter {
 
 func (r *WorkspaceRouter) AppendRoutes(g fiber.Router) {
 	g.Get("/", r.List)
+	g.Get("/probe", r.Probe)
 	g.Post("/", r.Create)
 	g.Get("/:id", r.Find)
 	g.Delete("/:id", r.Delete)

@@ -32,6 +32,7 @@ func NewUserRouter() *UserRouter {
 
 func (r *UserRouter) AppendRoutes(g fiber.Router) {
 	g.Get("/", r.List)
+	g.Get("/probe", r.Probe)
 }
 
 // List godoc
