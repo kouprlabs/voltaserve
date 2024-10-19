@@ -426,26 +426,6 @@ func NewFileWithSimilarNameExistsError() *ErrorResponse {
 	)
 }
 
-func NewInvalidPageParameterError() *ErrorResponse {
-	return NewErrorResponse(
-		"invalid_page_parameter",
-		http.StatusBadRequest,
-		"Invalid page parameter, must be >= 1.",
-		MsgInvalidRequest,
-		nil,
-	)
-}
-
-func NewInvalidSizeParameterError() *ErrorResponse {
-	return NewErrorResponse(
-		"invalid_size_parameter",
-		http.StatusBadRequest,
-		"Invalid size parameter, must be >= 1.",
-		MsgInvalidRequest,
-		nil,
-	)
-}
-
 func NewCannotAcceptNonPendingInvitationError(invitation model.Invitation) *ErrorResponse {
 	return NewErrorResponse(
 		"cannot_accept_non_pending_invitation",

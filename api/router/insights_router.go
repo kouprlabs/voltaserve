@@ -41,12 +41,13 @@ func NewInsightsRouter() *InsightsRouter {
 }
 
 func (r *InsightsRouter) AppendRoutes(g fiber.Router) {
-	g.Get("/languages", r.GetLanguages)
+	g.Get("/languages", r.FindLanguages)
 	g.Post("/:id", r.Create)
 	g.Patch("/:id", r.Patch)
 	g.Delete("/:id", r.Delete)
-	g.Get("/:id/info", r.GetInfo)
+	g.Get("/:id/info", r.ReadInfo)
 	g.Get("/:id/entities", r.ListEntities)
+	g.Get("/:id/entities/probe", r.ProbeEntities)
 }
 
 func (r *InsightsRouter) AppendNonJWTRoutes(g fiber.Router) {
@@ -54,18 +55,18 @@ func (r *InsightsRouter) AppendNonJWTRoutes(g fiber.Router) {
 	g.Get("/:id/ocr:ext", r.DownloadOCR)
 }
 
-// GetLanguages godoc
+// FindLanguages godoc
 //
-//	@Summary		Get Languages
-//	@Description	Get Languages
+//	@Summary		Read Languages
+//	@Description	Read Languages
 //	@Tags			Insights
-//	@Id				insights_get_languages
+//	@Id				insights_find_languages
 //	@Produce		json
 //	@Success		200	{array}		service.InsightsLanguage
 //	@Failure		503	{object}	errorpkg.ErrorResponse
 //	@Router			/insights/languages [get]
-func (r *InsightsRouter) GetLanguages(c *fiber.Ctx) error {
-	res, err := r.insightsSvc.GetLanguages()
+func (r *InsightsRouter) FindLanguages(c *fiber.Ctx) error {
+	res, err := r.insightsSvc.FindLanguages()
 	if err != nil {
 		return err
 	}
@@ -200,8 +201,8 @@ func (r *InsightsRouter) ListEntities(c *fiber.Ctx) error {
 	}
 	res, err := r.insightsSvc.ListEntities(c.Params("id"), service.InsightsListEntitiesOptions{
 		Query:     query,
-		Page:      uint(page), // #nosec G115
-		Size:      uint(size), // #nosec G115
+		Page:      page,
+		Size:      size,
 		SortBy:    sortBy,
 		SortOrder: sortOrder,
 	}, GetUserID(c))
@@ -211,12 +212,29 @@ func (r *InsightsRouter) ListEntities(c *fiber.Ctx) error {
 	return c.JSON(res)
 }
 
-// GetInfo godoc
+// ProbeEntities godoc
 //
-//	@Summary		Get Info
-//	@Description	Get Info
+//	@Summary		Probe Entities
+//	@Description	Probe Entities
 //	@Tags			Insights
-//	@Id				insights_get_info
+//	@Id				insights_probe_entities
+//	@Produce		json
+//	@Param			id		path		string	true	"ID"
+//	@Param			size	query		string	false	"Size"
+//	@Success		200		{array}		service.InsightsEntityProbe
+//	@Failure		404		{object}	errorpkg.ErrorResponse
+//	@Failure		500		{object}	errorpkg.ErrorResponse
+//	@Router			/insights/{id}/entities/probe [get]
+func (r *InsightsRouter) ProbeEntities(c *fiber.Ctx) error {
+	return nil
+}
+
+// ReadInfo godoc
+//
+//	@Summary		Read Info
+//	@Description	Read Info
+//	@Tags			Insights
+//	@Id				insights_read_info
 //	@Accept			json
 //	@Produce		json
 //	@Param			id	path		string	true	"ID"
@@ -224,8 +242,8 @@ func (r *InsightsRouter) ListEntities(c *fiber.Ctx) error {
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/insights/{id}/info [get]
-func (r *InsightsRouter) GetInfo(c *fiber.Ctx) error {
-	res, err := r.insightsSvc.GetInfo(c.Params("id"), GetUserID(c))
+func (r *InsightsRouter) ReadInfo(c *fiber.Ctx) error {
+	res, err := r.insightsSvc.ReadInfo(c.Params("id"), GetUserID(c))
 	if err != nil {
 		return err
 	}

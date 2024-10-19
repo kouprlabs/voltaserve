@@ -27,10 +27,10 @@ type OrganizationRepo interface {
 	Count() (int64, error)
 	Save(org model.Organization) error
 	Delete(id string) error
-	GetIDs() ([]string, error)
-	GetMembers(id string) ([]model.User, error)
-	GetGroups(id string) ([]model.Group, error)
-	GetOwnerCount(id string) (int64, error)
+	FindIDs() ([]string, error)
+	FindMembers(id string) ([]model.User, error)
+	FindGroups(id string) ([]model.Group, error)
+	CountOwners(id string) (int64, error)
 	GrantUserPermission(id string, userID string, permission string) error
 	RevokeUserPermission(id string, userID string) error
 }
@@ -199,7 +199,7 @@ func (repo *organizationRepo) Delete(id string) error {
 	return nil
 }
 
-func (repo *organizationRepo) GetIDs() ([]string, error) {
+func (repo *organizationRepo) FindIDs() ([]string, error) {
 	type Value struct {
 		Result string
 	}
@@ -215,7 +215,7 @@ func (repo *organizationRepo) GetIDs() ([]string, error) {
 	return res, nil
 }
 
-func (repo *organizationRepo) GetMembers(id string) ([]model.User, error) {
+func (repo *organizationRepo) FindMembers(id string) ([]model.User, error) {
 	var entities []*userEntity
 	db := repo.db.
 		Raw(`SELECT u.* FROM "user" u INNER JOIN userpermission up on
@@ -232,7 +232,7 @@ func (repo *organizationRepo) GetMembers(id string) ([]model.User, error) {
 	return res, nil
 }
 
-func (repo *organizationRepo) GetGroups(id string) ([]model.Group, error) {
+func (repo *organizationRepo) FindGroups(id string) ([]model.Group, error) {
 	var entities []*groupEntity
 	db := repo.db.
 		Raw(`SELECT * FROM "group" g WHERE g.organization_id = ? ORDER BY g.name`, id).
@@ -250,7 +250,7 @@ func (repo *organizationRepo) GetGroups(id string) ([]model.Group, error) {
 	return res, nil
 }
 
-func (repo *organizationRepo) GetOwnerCount(id string) (int64, error) {
+func (repo *organizationRepo) CountOwners(id string) (int64, error) {
 	var count int64
 	db := repo.db.Model(&userPermissionEntity{}).
 		Where("resource_id = ?", id).
@@ -284,7 +284,7 @@ func (repo *organizationRepo) RevokeUserPermission(id string, userID string) err
 func (repo *organizationRepo) populateModelFields(organizations []*organizationEntity) error {
 	for _, o := range organizations {
 		o.UserPermissions = make([]*UserPermissionValue, 0)
-		userPermissions, err := repo.permissionRepo.GetUserPermissions(o.ID)
+		userPermissions, err := repo.permissionRepo.FindUserPermissions(o.ID)
 		if err != nil {
 			return err
 		}
@@ -295,7 +295,7 @@ func (repo *organizationRepo) populateModelFields(organizations []*organizationE
 			})
 		}
 		o.GroupPermissions = make([]*GroupPermissionValue, 0)
-		groupPermissions, err := repo.permissionRepo.GetGroupPermissions(o.ID)
+		groupPermissions, err := repo.permissionRepo.FindGroupPermissions(o.ID)
 		if err != nil {
 			return err
 		}
@@ -305,7 +305,7 @@ func (repo *organizationRepo) populateModelFields(organizations []*organizationE
 				Value:   p.GetPermission(),
 			})
 		}
-		members, err := repo.GetMembers(o.ID)
+		members, err := repo.FindMembers(o.ID)
 		if err != nil {
 			return nil
 		}

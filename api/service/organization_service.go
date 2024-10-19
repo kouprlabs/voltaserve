@@ -121,24 +121,24 @@ func (svc *OrganizationService) Find(id string, userID string) (*Organization, e
 
 type OrganizationListOptions struct {
 	Query     string
-	Page      uint
-	Size      uint
+	Page      int64
+	Size      int64
 	SortBy    string
 	SortOrder string
 }
 
 type OrganizationList struct {
 	Data          []*Organization `json:"data"`
-	TotalPages    uint            `json:"totalPages"`
-	TotalElements uint            `json:"totalElements"`
-	Page          uint            `json:"page"`
-	Size          uint            `json:"size"`
+	TotalPages    int64           `json:"totalPages"`
+	TotalElements int64           `json:"totalElements"`
+	Page          int64           `json:"page"`
+	Size          int64           `json:"size"`
 }
 
 func (svc *OrganizationService) List(opts OrganizationListOptions, userID string) (*OrganizationList, error) {
 	var authorized []model.Organization
 	if opts.Query == "" {
-		ids, err := svc.orgRepo.GetIDs()
+		ids, err := svc.orgRepo.FindIDs()
 		if err != nil {
 			return nil, err
 		}
@@ -177,8 +177,21 @@ func (svc *OrganizationService) List(opts OrganizationListOptions, userID string
 		TotalPages:    totalPages,
 		TotalElements: totalElements,
 		Page:          opts.Page,
-		Size:          uint(len(mapped)),
+		Size:          int64(len(mapped)),
 	}, nil
+}
+
+type OrganizationProbeOptions struct {
+	Size int64
+}
+
+type OrganizationProbe struct {
+	TotalPages    int64 `json:"totalPages"`
+	TotalElements int64 `json:"totalElements"`
+}
+
+func (svc *OrganizationService) Probe(opts OrganizationProbeOptions, userID string) (*OrganizationProbe, error) {
+	return nil, nil
 }
 
 func (svc *OrganizationService) PatchName(id string, name string, userID string) (*Organization, error) {
@@ -239,7 +252,7 @@ func (svc *OrganizationService) RemoveMember(id string, memberID string, userID 
 	}
 
 	/* Make sure member is not the last remaining owner of the organization */
-	ownerCount, err := svc.orgRepo.GetOwnerCount(org.GetID())
+	ownerCount, err := svc.orgRepo.CountOwners(org.GetID())
 	if err != nil {
 		return err
 	}
@@ -248,7 +261,7 @@ func (svc *OrganizationService) RemoveMember(id string, memberID string, userID 
 	}
 
 	/* Revoke permissions from all groups belonging to this organization. */
-	groupsIDs, err := svc.groupRepo.GetIDsByOrganization(org.GetID())
+	groupsIDs, err := svc.groupRepo.FindIDsByOrganization(org.GetID())
 	if err != nil {
 		return err
 	}
@@ -262,7 +275,7 @@ func (svc *OrganizationService) RemoveMember(id string, memberID string, userID 
 	}
 
 	/* Revoke permissions from all workspaces belonging to this organization */
-	workspaceIDs, err := svc.workspaceRepo.GetIDsByOrganization(org.GetID())
+	workspaceIDs, err := svc.workspaceRepo.FindIDsByOrganization(org.GetID())
 	if err != nil {
 		return err
 	}
@@ -355,8 +368,8 @@ func (svc *OrganizationService) doSorting(data []model.Organization, sortBy stri
 	return data
 }
 
-func (svc *OrganizationService) doPagination(data []model.Organization, page, size uint) (pageData []model.Organization, totalElements uint, totalPages uint) {
-	totalElements = uint(len(data))
+func (svc *OrganizationService) doPagination(data []model.Organization, page, size int64) (pageData []model.Organization, totalElements int64, totalPages int64) {
+	totalElements = int64(len(data))
 	totalPages = (totalElements + size - 1) / size
 	if page > totalPages {
 		return []model.Organization{}, totalElements, totalPages

@@ -102,11 +102,27 @@ func (r *UserRouter) List(c *fiber.Ctx) error {
 		ExcludeGroupMembers: excludeGroupMembers,
 		SortBy:              sortBy,
 		SortOrder:           sortOrder,
-		Page:                uint(page), // #nosec G115
-		Size:                uint(size), // #nosec G115
+		Page:                page,
+		Size:                size,
 	}, userID)
 	if err != nil {
 		return err
 	}
 	return c.JSON(res)
+}
+
+// Probe godoc
+//
+//	@Summary		Probe
+//	@Description	Probe
+//	@Tags			Users
+//	@Id				users_probe
+//	@Produce		json
+//	@Param			size	query		string	false	"Size"
+//	@Success		200		{object}	service.UserProbe
+//	@Failure		404		{object}	errorpkg.ErrorResponse
+//	@Failure		500		{object}	errorpkg.ErrorResponse
+//	@Router			/users/probe [get]
+func (r *UserRouter) Probe(c *fiber.Ctx) error {
+	return nil
 }

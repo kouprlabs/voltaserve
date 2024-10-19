@@ -167,24 +167,24 @@ func (svc *TaskService) Find(id string, userID string) (*Task, error) {
 
 type TaskListOptions struct {
 	Query     string
-	Page      uint
-	Size      uint
+	Page      int64
+	Size      int64
 	SortBy    string
 	SortOrder string
 }
 
 type TaskList struct {
 	Data          []*Task `json:"data"`
-	TotalPages    uint    `json:"totalPages"`
-	TotalElements uint    `json:"totalElements"`
-	Page          uint    `json:"page"`
-	Size          uint    `json:"size"`
+	TotalPages    int64   `json:"totalPages"`
+	TotalElements int64   `json:"totalElements"`
+	Page          int64   `json:"page"`
+	Size          int64   `json:"size"`
 }
 
 func (svc *TaskService) List(opts TaskListOptions, userID string) (*TaskList, error) {
 	var authorized []model.Task
 	if opts.Query == "" {
-		ids, err := svc.taskRepo.GetIDs(userID)
+		ids, err := svc.taskRepo.FindIDs(userID)
 		if err != nil {
 			return nil, err
 		}
@@ -223,14 +223,27 @@ func (svc *TaskService) List(opts TaskListOptions, userID string) (*TaskList, er
 		TotalPages:    totalPages,
 		TotalElements: totalElements,
 		Page:          opts.Page,
-		Size:          uint(len(mapped)),
+		Size:          int64(len(mapped)),
 	}, nil
 }
 
-func (svc *TaskService) GetCount(userID string) (*int64, error) {
+type TaskProbeOptions struct {
+	Size int64
+}
+
+type TaskProbe struct {
+	TotalPages    int64 `json:"totalPages"`
+	TotalElements int64 `json:"totalElements"`
+}
+
+func (svc *TaskService) Probe(opts TaskProbeOptions, userID string) (*TaskProbe, error) {
+	return nil, nil
+}
+
+func (svc *TaskService) Count(userID string) (*int64, error) {
 	var res int64
 	var err error
-	if res, err = svc.taskRepo.GetCountByEmail(userID); err != nil {
+	if res, err = svc.taskRepo.CountByEmail(userID); err != nil {
 		return nil, err
 	}
 	return &res, nil
@@ -256,7 +269,7 @@ type TaskDismissAllResult struct {
 }
 
 func (svc *TaskService) DismissAll(userID string) (*TaskDismissAllResult, error) {
-	ids, err := svc.taskRepo.GetIDs(userID)
+	ids, err := svc.taskRepo.FindIDs(userID)
 	if err != nil {
 		return nil, err
 	}
@@ -354,8 +367,8 @@ func (svc *TaskService) doSorting(data []model.Task, sortBy string, sortOrder st
 	return data
 }
 
-func (svc *TaskService) doPagination(data []model.Task, page, size uint) (pageData []model.Task, totalElements uint, totalPages uint) {
-	totalElements = uint(len(data))
+func (svc *TaskService) doPagination(data []model.Task, page, size int64) (pageData []model.Task, totalElements int64, totalPages int64) {
+	totalElements = int64(len(data))
 	totalPages = (totalElements + size - 1) / size
 	if page > totalPages {
 		return []model.Task{}, totalElements, totalPages
@@ -410,7 +423,7 @@ func (svc *TaskService) deleteAndSync(id string) error {
 			log.GetLogger().Error(err)
 		}
 		var filesIDs []string
-		filesIDs, err = svc.fileRepo.GetIDsBySnapshot(snapshot.ID)
+		filesIDs, err = svc.fileRepo.FindIDsBySnapshot(snapshot.ID)
 		if err == nil {
 			for _, fileID := range filesIDs {
 				if _, err = svc.fileCache.Refresh(fileID); err != nil {

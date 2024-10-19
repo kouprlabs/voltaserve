@@ -136,25 +136,25 @@ func (svc *GroupService) Find(id string, userID string) (*Group, error) {
 type GroupListOptions struct {
 	Query          string
 	OrganizationID string
-	Page           uint
-	Size           uint
+	Page           int64
+	Size           int64
 	SortBy         string
 	SortOrder      string
 }
 
 type GroupList struct {
 	Data          []*Group `json:"data"`
-	TotalPages    uint     `json:"totalPages"`
-	TotalElements uint     `json:"totalElements"`
-	Page          uint     `json:"page"`
-	Size          uint     `json:"size"`
+	TotalPages    int64    `json:"totalPages"`
+	TotalElements int64    `json:"totalElements"`
+	Page          int64    `json:"page"`
+	Size          int64    `json:"size"`
 }
 
 func (svc *GroupService) List(opts GroupListOptions, userID string) (*GroupList, error) {
 	var authorized []model.Group
 	if opts.Query == "" {
 		if opts.OrganizationID == "" {
-			ids, err := svc.groupRepo.GetIDs()
+			ids, err := svc.groupRepo.FindIDs()
 			if err != nil {
 				return nil, err
 			}
@@ -163,7 +163,7 @@ func (svc *GroupService) List(opts GroupListOptions, userID string) (*GroupList,
 				return nil, err
 			}
 		} else {
-			groups, err := svc.orgRepo.GetGroups(opts.OrganizationID)
+			groups, err := svc.orgRepo.FindGroups(opts.OrganizationID)
 			if err != nil {
 				return nil, err
 			}
@@ -213,8 +213,21 @@ func (svc *GroupService) List(opts GroupListOptions, userID string) (*GroupList,
 		TotalPages:    totalPages,
 		TotalElements: totalElements,
 		Page:          opts.Page,
-		Size:          uint(len(mapped)),
+		Size:          int64(len(mapped)),
 	}, nil
+}
+
+type GroupProbeOptions struct {
+	Size int64
+}
+
+type GroupProbe struct {
+	TotalPages    int64 `json:"totalPages"`
+	TotalElements int64 `json:"totalElements"`
+}
+
+func (svc *GroupService) Probe(opts GroupProbeOptions, userID string) (*GroupProbe, error) {
+	return nil, nil
 }
 
 func (svc *GroupService) PatchName(id string, name string, userID string) (*Group, error) {
@@ -305,7 +318,7 @@ func (svc *GroupService) RemoveMember(id string, memberID string, userID string)
 	}
 
 	/* Make sure member is not the last remaining owner of the group */
-	ownerCount, err := svc.groupRepo.GetOwnerCount(group.GetID())
+	ownerCount, err := svc.groupRepo.CountOwners(group.GetID())
 	if err != nil {
 		return err
 	}
@@ -392,8 +405,8 @@ func (svc *GroupService) doSorting(data []model.Group, sortBy string, sortOrder 
 	return data
 }
 
-func (svc *GroupService) doPagination(data []model.Group, page, size uint) (pageData []model.Group, totalElements uint, totalPages uint) {
-	totalElements = uint(len(data))
+func (svc *GroupService) doPagination(data []model.Group, page, size int64) (pageData []model.Group, totalElements int64, totalPages int64) {
+	totalElements = int64(len(data))
 	totalPages = (totalElements + size - 1) / size
 	if page > totalPages {
 		return []model.Group{}, totalElements, totalPages

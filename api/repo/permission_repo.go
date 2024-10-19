@@ -19,8 +19,8 @@ import (
 )
 
 type PermissionRepo interface {
-	GetUserPermissions(id string) ([]model.UserPermission, error)
-	GetGroupPermissions(id string) ([]model.GroupPermission, error)
+	FindUserPermissions(id string) ([]model.UserPermission, error)
+	FindGroupPermissions(id string) ([]model.GroupPermission, error)
 }
 
 func NewPermissionRepo() PermissionRepo {
@@ -185,7 +185,7 @@ func newPermissionRepo() *permissionRepo {
 	}
 }
 
-func (repo *permissionRepo) GetUserPermissions(id string) ([]model.UserPermission, error) {
+func (repo *permissionRepo) FindUserPermissions(id string) ([]model.UserPermission, error) {
 	var entities []*userPermissionEntity
 	if db := repo.db.
 		Raw("SELECT * FROM userpermission WHERE resource_id = ?", id).
@@ -203,7 +203,7 @@ func (repo *permissionRepo) GetUserPermissions(id string) ([]model.UserPermissio
 	}
 }
 
-func (repo *permissionRepo) GetGroupPermissions(id string) ([]model.GroupPermission, error) {
+func (repo *permissionRepo) FindGroupPermissions(id string) ([]model.GroupPermission, error) {
 	var entities []*groupPermissionEntity
 	if db := repo.db.
 		Raw("SELECT * FROM grouppermission WHERE resource_id = ?", id).

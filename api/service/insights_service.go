@@ -87,7 +87,7 @@ type InsightsLanguage struct {
 	Name    string `json:"name"`
 }
 
-func (svc *InsightsService) GetLanguages() ([]*InsightsLanguage, error) {
+func (svc *InsightsService) FindLanguages() ([]*InsightsLanguage, error) {
 	return svc.languages, nil
 }
 
@@ -336,18 +336,18 @@ func (svc *InsightsService) deleteEntities(snapshot model.Snapshot) error {
 
 type InsightsListEntitiesOptions struct {
 	Query     string `json:"query"`
-	Page      uint   `json:"page"`
-	Size      uint   `json:"size"`
+	Page      int64  `json:"page"`
+	Size      int64  `json:"size"`
 	SortBy    string `json:"sortBy"`
 	SortOrder string `json:"sortOrder"`
 }
 
 type InsightsEntityList struct {
 	Data          []*language_client.InsightsEntity `json:"data"`
-	TotalPages    uint                              `json:"totalPages"`
-	TotalElements uint                              `json:"totalElements"`
-	Page          uint                              `json:"page"`
-	Size          uint                              `json:"size"`
+	TotalPages    int64                             `json:"totalPages"`
+	TotalElements int64                             `json:"totalElements"`
+	Page          int64                             `json:"page"`
+	Size          int64                             `json:"size"`
 }
 
 func (svc *InsightsService) ListEntities(id string, opts InsightsListEntitiesOptions, userID string) (*InsightsEntityList, error) {
@@ -395,15 +395,28 @@ func (svc *InsightsService) ListEntities(id string, opts InsightsListEntitiesOpt
 		TotalPages:    totalPages,
 		TotalElements: totalElements,
 		Page:          opts.Page,
-		Size:          uint(len(data)),
+		Size:          int64(len(data)),
 	}, nil
+}
+
+type InsightsEntityProbeOptions struct {
+	Size int64
+}
+
+type InsightsEntityProbe struct {
+	TotalPages    int64 `json:"totalPages"`
+	TotalElements int64 `json:"totalElements"`
+}
+
+func (svc *InsightsService) ProbeEntities(id string, opts InsightsEntityProbeOptions, userID string) (*InsightsEntityProbe, error) {
+	return nil, nil
 }
 
 func (svc *InsightsService) doFiltering(data []*language_client.InsightsEntity, query string) []*language_client.InsightsEntity {
 	if query == "" {
 		return data
 	}
-	filtered := []*language_client.InsightsEntity{}
+	filtered := make([]*language_client.InsightsEntity, 0)
 	for _, entity := range data {
 		if strings.Contains(strings.ToLower(entity.Text), strings.ToLower(query)) {
 			filtered = append(filtered, entity)
@@ -430,8 +443,8 @@ func (svc *InsightsService) doSorting(data []*language_client.InsightsEntity, so
 	return data
 }
 
-func (svc *InsightsService) doPagination(data []*language_client.InsightsEntity, page, size uint) (pageData []*language_client.InsightsEntity, totalElements uint, totalPages uint) {
-	totalElements = uint(len(data))
+func (svc *InsightsService) doPagination(data []*language_client.InsightsEntity, page, size int64) (pageData []*language_client.InsightsEntity, totalElements int64, totalPages int64) {
+	totalElements = int64(len(data))
 	totalPages = (totalElements + size - 1) / size
 	if page > totalPages {
 		return []*language_client.InsightsEntity{}, totalElements, totalPages
@@ -450,7 +463,7 @@ type InsightsInfo struct {
 	Snapshot    *Snapshot `json:"snapshot,omitempty"`
 }
 
-func (svc *InsightsService) GetInfo(id string, userID string) (*InsightsInfo, error) {
+func (svc *InsightsService) ReadInfo(id string, userID string) (*InsightsInfo, error) {
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return nil, err

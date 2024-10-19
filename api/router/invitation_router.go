@@ -33,9 +33,11 @@ func NewInvitationRouter() *InvitationRouter {
 
 func (r *InvitationRouter) AppendRoutes(g fiber.Router) {
 	g.Post("/", r.Create)
-	g.Get("/incoming", r.GetIncoming)
-	g.Get("/incoming/count", r.GetIncomingCount)
-	g.Get("/outgoing", r.GetOutgoing)
+	g.Get("/incoming", r.ListIncoming)
+	g.Get("/incoming/probe", r.ProbeIncoming)
+	g.Get("/incoming/count", r.CountIncoming)
+	g.Get("/outgoing", r.ListOutgoing)
+	g.Get("/outgoing/probe", r.ProbeOutgoing)
 	g.Post("/:id/accept", r.Accept)
 	g.Post("/:id/resend", r.Resend)
 	g.Post("/:id/decline", r.Decline)
@@ -73,12 +75,12 @@ func (r *InvitationRouter) Create(c *fiber.Ctx) error {
 	return c.JSON(res)
 }
 
-// GetIncoming godoc
+// ListIncoming godoc
 //
-//	@Summary		Get Incoming
-//	@Description	Get Incoming
+//	@Summary		List Incoming
+//	@Description	List Incoming
 //	@Tags			Invitations
-//	@Id				invitation_get_incoming
+//	@Id				invitation_list_incoming
 //	@Produce		json
 //	@Param			page		query		string	false	"Page"
 //	@Param			size		query		string	false	"Size"
@@ -87,7 +89,7 @@ func (r *InvitationRouter) Create(c *fiber.Ctx) error {
 //	@Success		200			{object}	service.InvitationList
 //	@Failure		500			{object}	errorpkg.ErrorResponse
 //	@Router			/invitations/incoming [get]
-func (r *InvitationRouter) GetIncoming(c *fiber.Ctx) error {
+func (r *InvitationRouter) ListIncoming(c *fiber.Ctx) error {
 	var err error
 	var page int64
 	if c.Query("page") == "" {
@@ -118,9 +120,9 @@ func (r *InvitationRouter) GetIncoming(c *fiber.Ctx) error {
 	if !IsValidSortOrder(sortOrder) {
 		return errorpkg.NewInvalidQueryParamError("sort_order")
 	}
-	res, err := r.invitationSvc.GetIncoming(service.InvitationListOptions{
-		Page:      uint(page), // #nosec G115
-		Size:      uint(size), // #nosec G115
+	res, err := r.invitationSvc.ListIncoming(service.InvitationListOptions{
+		Page:      page,
+		Size:      size,
 		SortBy:    sortBy,
 		SortOrder: sortOrder,
 	}, GetUserID(c))
@@ -130,30 +132,45 @@ func (r *InvitationRouter) GetIncoming(c *fiber.Ctx) error {
 	return c.JSON(res)
 }
 
-// GetIncomingCount godoc
+// ProbeIncoming godoc
 //
-//	@Summary		Get Incoming Count
-//	@Description	Get Incoming Count
+//	@Summary		Probe Incoming
+//	@Description	Probe Incoming
 //	@Tags			Invitations
-//	@Id				invitation_get_incoming_count
+//	@Id				invitation_probe_incoming
+//	@Produce		json
+//	@Param			size	query		string	false	"Size"
+//	@Success		200		{object}	service.InvitationProbe
+//	@Failure		500		{object}	errorpkg.ErrorResponse
+//	@Router			/invitations/incoming/probe [get]
+func (r *InvitationRouter) ProbeIncoming(c *fiber.Ctx) error {
+	return nil
+}
+
+// CountIncoming godoc
+//
+//	@Summary		Count Incoming
+//	@Description	Count Incoming
+//	@Tags			Invitations
+//	@Id				invitation_count_incoming
 //	@Produce		json
 //	@Success		200	{integer}	int
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/invitations/incoming/count [get]
-func (r *InvitationRouter) GetIncomingCount(c *fiber.Ctx) error {
-	res, err := r.invitationSvc.GetIncomingCount(GetUserID(c))
+func (r *InvitationRouter) CountIncoming(c *fiber.Ctx) error {
+	res, err := r.invitationSvc.CountIncoming(GetUserID(c))
 	if err != nil {
 		return err
 	}
 	return c.JSON(res)
 }
 
-// GetOutgoing godoc
+// ListOutgoing godoc
 //
-//	@Summary		Get Outgoing
-//	@Description	Get Outgoing
+//	@Summary		List Outgoing
+//	@Description	List Outgoing
 //	@Tags			Invitations
-//	@Id				invitation_get_outgoing
+//	@Id				invitation_list_outgoing
 //	@Produce		json
 //	@Param			organization_id	query		string	true	"Organization ID"
 //	@Param			page			query		string	false	"Page"
@@ -163,7 +180,7 @@ func (r *InvitationRouter) GetIncomingCount(c *fiber.Ctx) error {
 //	@Success		200				{object}	service.InvitationList
 //	@Failure		500				{object}	errorpkg.ErrorResponse
 //	@Router			/invitations/outgoing [get]
-func (r *InvitationRouter) GetOutgoing(c *fiber.Ctx) error {
+func (r *InvitationRouter) ListOutgoing(c *fiber.Ctx) error {
 	orgID := c.Query("organization_id")
 	if orgID == "" {
 		return errorpkg.NewMissingQueryParamError("org")
@@ -198,9 +215,9 @@ func (r *InvitationRouter) GetOutgoing(c *fiber.Ctx) error {
 	if !IsValidSortOrder(sortOrder) {
 		return errorpkg.NewInvalidQueryParamError("sort_order")
 	}
-	res, err := r.invitationSvc.GetOutgoing(orgID, service.InvitationListOptions{
-		Page:      uint(page), // #nosec G115
-		Size:      uint(size), // #nosec G115
+	res, err := r.invitationSvc.ListOutgoing(orgID, service.InvitationListOptions{
+		Page:      page,
+		Size:      size,
 		SortBy:    sortBy,
 		SortOrder: sortOrder,
 	}, GetUserID(c))
@@ -208,6 +225,22 @@ func (r *InvitationRouter) GetOutgoing(c *fiber.Ctx) error {
 		return err
 	}
 	return c.JSON(res)
+}
+
+// ProbeOutgoing godoc
+//
+//	@Summary		Probe Outgoing
+//	@Description	Probe Outgoing
+//	@Tags			Invitations
+//	@Id				invitation_probe_outgoing
+//	@Produce		json
+//	@Param			organization_id	query		string	true	"Organization ID"
+//	@Param			size			query		string	false	"Size"
+//	@Success		200				{object}	service.InvitationList
+//	@Failure		500				{object}	errorpkg.ErrorResponse
+//	@Router			/invitations/outgoing/probe [get]
+func (r *InvitationRouter) ProbeOutgoing(c *fiber.Ctx) error {
+	return nil
 }
 
 // Delete godoc

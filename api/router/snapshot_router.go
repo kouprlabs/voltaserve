@@ -36,6 +36,7 @@ func NewSnapshotRouter() *SnapshotRouter {
 
 func (r *SnapshotRouter) AppendRoutes(g fiber.Router) {
 	g.Get("/", r.List)
+	g.Get("/probe", r.Probe)
 	g.Post("/:id/activate", r.Activate)
 	g.Post("/:id/detach", r.Detach)
 }
@@ -96,8 +97,8 @@ func (r *SnapshotRouter) List(c *fiber.Ctx) error {
 		return errorpkg.NewInvalidQueryParamError("sort_order")
 	}
 	res, err := r.snapshotSvc.List(fileID, service.SnapshotListOptions{
-		Page:      uint(page), // #nosec G115
-		Size:      uint(size), // #nosec G115
+		Page:      page,
+		Size:      size,
 		SortBy:    sortBy,
 		SortOrder: sortOrder,
 	}, GetUserID(c))
@@ -105,6 +106,23 @@ func (r *SnapshotRouter) List(c *fiber.Ctx) error {
 		return err
 	}
 	return c.JSON(res)
+}
+
+// Probe godoc
+//
+//	@Summary		Probe
+//	@Description	Probe
+//	@Tags			Snapshots
+//	@Id				snapshots_probe
+//	@Produce		json
+//	@Param			file_id	query		string	true	"File ID"
+//	@Param			size	query		string	false	"Size"
+//	@Success		200		{object}	service.SnapshotProbe
+//	@Failure		404		{object}	errorpkg.ErrorResponse
+//	@Failure		500		{object}	errorpkg.ErrorResponse
+//	@Router			/snapshots/probe [get]
+func (r *SnapshotRouter) Probe(c *fiber.Ctx) error {
+	return nil
 }
 
 // Activate godoc

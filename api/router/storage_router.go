@@ -28,69 +28,69 @@ func NewStorageRouter() *StorageRouter {
 }
 
 func (r *StorageRouter) AppendRoutes(g fiber.Router) {
-	g.Get("/account_usage", r.GetAccountUsage)
-	g.Get("/workspace_usage", r.GetWorkspaceUsage)
-	g.Get("/file_usage", r.GetFileUsage)
+	g.Get("/account_usage", r.ComputeAccountUsage)
+	g.Get("/workspace_usage", r.ComputeWorkspaceUsage)
+	g.Get("/file_usage", r.ComputeFileUsage)
 }
 
-// GetAccountUsage godoc
+// ComputeAccountUsage godoc
 //
-//	@Summary		Get Account Usage
-//	@Description	Get Account Usage
+//	@Summary		Compute Account Usage
+//	@Description	Compute Account Usage
 //	@Tags			Storage
-//	@Id				storage_get_account_usage
+//	@Id				storage_compute_account_usage
 //	@Produce		json
 //	@Success		200	{object}	service.StorageUsage
 //	@Failure		500
 //	@Router			/storage/account_usage [get]
-func (r *StorageRouter) GetAccountUsage(c *fiber.Ctx) error {
-	res, err := r.storageSvc.GetAccountUsage(GetUserID(c))
+func (r *StorageRouter) ComputeAccountUsage(c *fiber.Ctx) error {
+	res, err := r.storageSvc.ComputeAccountUsage(GetUserID(c))
 	if err != nil {
 		return err
 	}
 	return c.JSON(res)
 }
 
-// GetWorkspaceUsage godoc
+// ComputeWorkspaceUsage godoc
 //
-//	@Summary		Get workspace usage
-//	@Description	Get workspace usage
+//	@Summary		Compute Workspace Usage
+//	@Description	Compute Workspace Usage
 //	@Tags			Storage
-//	@Id				storage_get_workspace_usage
+//	@Id				storage_compute_workspace_usage
 //	@Produce		json
 //	@Param			id	query		string	true	"Workspace ID"
 //	@Success		200	{object}	service.StorageUsage
 //	@Failure		500
 //	@Router			/storage/workspace_usage [get]
-func (r *StorageRouter) GetWorkspaceUsage(c *fiber.Ctx) error {
+func (r *StorageRouter) ComputeWorkspaceUsage(c *fiber.Ctx) error {
 	id := c.Query("id")
 	if id == "" {
 		return errorpkg.NewMissingQueryParamError("id")
 	}
-	res, err := r.storageSvc.GetWorkspaceUsage(id, GetUserID(c))
+	res, err := r.storageSvc.ComputeWorkspaceUsage(id, GetUserID(c))
 	if err != nil {
 		return err
 	}
 	return c.JSON(res)
 }
 
-// GetFileUsage godoc
+// ComputeFileUsage godoc
 //
-//	@Summary		Get file usage
-//	@Description	Get file usage
+//	@Summary		Compute File Usage
+//	@Description	Compute File Usage
 //	@Tags			Storage
-//	@Id				storage_get_file_usage
+//	@Id				storage_compute_file_usage
 //	@Produce		json
 //	@Param			id	query		string	true	"File ID"
 //	@Success		200	{object}	service.StorageUsage
 //	@Failure		500
 //	@Router			/storage/file_usage [get]
-func (r *StorageRouter) GetFileUsage(c *fiber.Ctx) error {
+func (r *StorageRouter) ComputeFileUsage(c *fiber.Ctx) error {
 	id := c.Query("id")
 	if id == "" {
 		return errorpkg.NewMissingQueryParamError("id")
 	}
-	res, err := r.storageSvc.GetFileUsage(id, GetUserID(c))
+	res, err := r.storageSvc.ComputeFileUsage(id, GetUserID(c))
 	if err != nil {
 		return err
 	}

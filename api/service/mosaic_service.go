@@ -191,7 +191,7 @@ type MosaicInfo struct {
 	Metadata    *mosaic_client.MosaicMetadata `json:"metadata,omitempty"`
 }
 
-func (svc *MosaicService) GetInfo(id string, userID string) (*MosaicInfo, error) {
+func (svc *MosaicService) ReadInfo(id string, userID string) (*MosaicInfo, error) {
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return nil, err

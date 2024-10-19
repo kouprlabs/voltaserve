@@ -21,20 +21,20 @@ func NewVersionRouter() *VersionRouter {
 }
 
 func (r *VersionRouter) AppendRoutes(g fiber.Router) {
-	g.Get("/version", r.GetVersion)
+	g.Get("/version", r.Read)
 }
 
-// GetVersion godoc
+// Read godoc
 //
-//	@Summary		Get
-//	@Description	Get
+//	@Summary		Read
+//	@Description	Read
 //	@Tags			Version
-//	@Id				get_version
+//	@Id				version_read
 //	@Produce		json
 //	@Success		200	{string}	string	"{Version}"
 //	@Failure		503	{object}	errorpkg.ErrorResponse
-//	@Router			/health [get]
-func (r *VersionRouter) GetVersion(c *fiber.Ctx) error {
+//	@Router			/version [get]
+func (r *VersionRouter) Read(c *fiber.Ctx) error {
 	return c.JSON(map[string]string{
 		"version": "2.1.0",
 	})

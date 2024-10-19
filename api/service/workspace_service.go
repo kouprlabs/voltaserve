@@ -153,24 +153,24 @@ func (svc *WorkspaceService) Find(id string, userID string) (*Workspace, error) 
 
 type WorkspaceListOptions struct {
 	Query     string
-	Page      uint
-	Size      uint
+	Page      int64
+	Size      int64
 	SortBy    string
 	SortOrder string
 }
 
 type WorkspaceList struct {
 	Data          []*Workspace `json:"data"`
-	TotalPages    uint         `json:"totalPages"`
-	TotalElements uint         `json:"totalElements"`
-	Page          uint         `json:"page"`
-	Size          uint         `json:"size"`
+	TotalPages    int64        `json:"totalPages"`
+	TotalElements int64        `json:"totalElements"`
+	Page          int64        `json:"page"`
+	Size          int64        `json:"size"`
 }
 
 func (svc *WorkspaceService) List(opts WorkspaceListOptions, userID string) (*WorkspaceList, error) {
 	var authorized []model.Workspace
 	if opts.Query == "" {
-		ids, err := svc.workspaceRepo.GetIDs()
+		ids, err := svc.workspaceRepo.FindIDs()
 		if err != nil {
 			return nil, err
 		}
@@ -209,8 +209,21 @@ func (svc *WorkspaceService) List(opts WorkspaceListOptions, userID string) (*Wo
 		TotalPages:    totalPages,
 		TotalElements: totalElements,
 		Page:          opts.Page,
-		Size:          uint(len(mapped)),
+		Size:          int64(len(mapped)),
 	}, nil
+}
+
+type WorkspaceProbeOptions struct {
+	Size int64
+}
+
+type WorkspaceProbe struct {
+	TotalPages    int64 `json:"totalPages"`
+	TotalElements int64 `json:"totalElements"`
+}
+
+func (svc *WorkspaceService) Probe(opts WorkspaceProbeOptions, userID string) (*WorkspaceProbe, error) {
+	return nil, nil
 }
 
 func (svc *WorkspaceService) PatchName(id string, name string, userID string) (*Workspace, error) {
@@ -242,7 +255,7 @@ func (svc *WorkspaceService) PatchStorageCapacity(id string, storageCapacity int
 	if err = svc.workspaceGuard.Authorize(userID, workspace, model.PermissionEditor); err != nil {
 		return nil, err
 	}
-	size, err := svc.fileRepo.GetSize(workspace.GetRootID())
+	size, err := svc.fileRepo.ComputeSize(workspace.GetRootID())
 	if err != nil {
 		return nil, err
 	}
@@ -294,7 +307,7 @@ func (svc *WorkspaceService) HasEnoughSpaceForByteSize(id string, byteSize int64
 	if err != nil {
 		return nil, err
 	}
-	usage, err := svc.fileRepo.GetSize(root.GetID())
+	usage, err := svc.fileRepo.ComputeSize(root.GetID())
 	if err != nil {
 		return nil, err
 	}
@@ -306,7 +319,7 @@ func (svc *WorkspaceService) HasEnoughSpaceForByteSize(id string, byteSize int64
 }
 
 func (svc *WorkspaceService) findAll(userID string) ([]*Workspace, error) {
-	ids, err := svc.workspaceRepo.GetIDs()
+	ids, err := svc.workspaceRepo.FindIDs()
 	if err != nil {
 		return nil, err
 	}
@@ -391,8 +404,8 @@ func (svc *WorkspaceService) doSorting(data []model.Workspace, sortBy string, so
 	return data
 }
 
-func (svc *WorkspaceService) doPagination(data []model.Workspace, page, size uint) ([]model.Workspace, uint, uint) {
-	totalElements := uint(len(data))
+func (svc *WorkspaceService) doPagination(data []model.Workspace, page, size int64) ([]model.Workspace, int64, int64) {
+	totalElements := int64(len(data))
 	totalPages := (totalElements + size - 1) / size
 	if page > totalPages {
 		return []model.Workspace{}, totalElements, totalPages

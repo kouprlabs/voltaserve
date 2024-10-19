@@ -35,7 +35,7 @@ func NewWorkspaceRouter() *WorkspaceRouter {
 func (r *WorkspaceRouter) AppendRoutes(g fiber.Router) {
 	g.Get("/", r.List)
 	g.Post("/", r.Create)
-	g.Get("/:id", r.Get)
+	g.Get("/:id", r.Find)
 	g.Delete("/:id", r.Delete)
 	g.Patch("/:id/name", r.PatchName)
 	g.Patch("/:id/storage_capacity", r.PatchStorageCapacity)
@@ -70,19 +70,19 @@ func (r *WorkspaceRouter) Create(c *fiber.Ctx) error {
 	return c.Status(http.StatusCreated).JSON(res)
 }
 
-// Get godoc
+// Find godoc
 //
-//	@Summary		Get
-//	@Description	Get
+//	@Summary		Read
+//	@Description	Read
 //	@Tags			Workspaces
-//	@Id				workspaces_get
+//	@Id				workspaces_find
 //	@Produce		json
 //	@Param			id	path		string	true	"ID"
 //	@Success		200	{object}	service.Workspace
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/workspaces/{id} [get]
-func (r *WorkspaceRouter) Get(c *fiber.Ctx) error {
+func (r *WorkspaceRouter) Find(c *fiber.Ctx) error {
 	res, err := r.workspaceSvc.Find(c.Params("id"), GetUserID(c))
 	if err != nil {
 		return err
@@ -143,8 +143,8 @@ func (r *WorkspaceRouter) List(c *fiber.Ctx) error {
 	}
 	res, err := r.workspaceSvc.List(service.WorkspaceListOptions{
 		Query:     query,
-		Page:      uint(page), // #nosec G115
-		Size:      uint(size), // #nosec G115
+		Page:      page,
+		Size:      size,
 		SortBy:    sortBy,
 		SortOrder: sortOrder,
 	}, GetUserID(c))
@@ -152,6 +152,22 @@ func (r *WorkspaceRouter) List(c *fiber.Ctx) error {
 		return err
 	}
 	return c.JSON(res)
+}
+
+// Probe godoc
+//
+//	@Summary		Probe
+//	@Description	Probe
+//	@Tags			Workspaces
+//	@Id				workspaces_probe
+//	@Produce		json
+//	@Param			size	query		string	false	"Size"
+//	@Success		200		{object}	service.WorkspaceProbe
+//	@Failure		404		{object}	errorpkg.ErrorResponse
+//	@Failure		500		{object}	errorpkg.ErrorResponse
+//	@Router			/workspaces/probe [get]
+func (r *WorkspaceRouter) Probe(c *fiber.Ctx) error {
+	return nil
 }
 
 type WorkspacePatchNameOptions struct {

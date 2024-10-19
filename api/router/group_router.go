@@ -34,8 +34,9 @@ func NewGroupRouter() *GroupRouter {
 
 func (r *GroupRouter) AppendRoutes(g fiber.Router) {
 	g.Get("/", r.List)
+	g.Get("/probe", r.Probe)
 	g.Post("/", r.Create)
-	g.Get("/:id", r.Get)
+	g.Get("/:id", r.Find)
 	g.Delete("/:id", r.Delete)
 	g.Patch("/:id/name", r.PatchName)
 	g.Post("/:id/members", r.AddMember)
@@ -71,19 +72,19 @@ func (r *GroupRouter) Create(c *fiber.Ctx) error {
 	return c.Status(http.StatusCreated).JSON(res)
 }
 
-// Get godoc
+// Find godoc
 //
-//	@Summary		Get
-//	@Description	Get
+//	@Summary		Read
+//	@Description	Read
 //	@Tags			Groups
-//	@Id				groups_get
+//	@Id				groups_find
 //	@Produce		json
 //	@Param			id	path		string	true	"ID"
 //	@Success		200	{object}	service.Group
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/groups/{id} [get]
-func (r *GroupRouter) Get(c *fiber.Ctx) error {
+func (r *GroupRouter) Find(c *fiber.Ctx) error {
 	userID := GetUserID(c)
 	res, err := r.groupSvc.Find(c.Params("id"), userID)
 	if err != nil {
@@ -147,8 +148,8 @@ func (r *GroupRouter) List(c *fiber.Ctx) error {
 	res, err := r.groupSvc.List(service.GroupListOptions{
 		Query:          query,
 		OrganizationID: c.Query("organization_id"),
-		Page:           uint(page), // #nosec G115
-		Size:           uint(size), // #nosec G115
+		Page:           page,
+		Size:           size,
 		SortBy:         sortBy,
 		SortOrder:      sortOrder,
 	}, GetUserID(c))
@@ -156,6 +157,22 @@ func (r *GroupRouter) List(c *fiber.Ctx) error {
 		return err
 	}
 	return c.JSON(res)
+}
+
+// Probe godoc
+//
+//	@Summary		Probe
+//	@Description	Probe
+//	@Tags			Groups
+//	@Id				groups_probe
+//	@Produce		json
+//	@Param			size	query		string	false	"Size"
+//	@Success		200		{object}	service.GroupProbe
+//	@Failure		404		{object}	errorpkg.ErrorResponse
+//	@Failure		500		{object}	errorpkg.ErrorResponse
+//	@Router			/groups/probe [get]
+func (r *GroupRouter) Probe(c *fiber.Ctx) error {
+	return nil
 }
 
 type GroupPatchNameOptions struct {

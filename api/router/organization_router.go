@@ -34,8 +34,9 @@ func NewOrganizationRouter() *OrganizationRouter {
 
 func (r *OrganizationRouter) AppendRoutes(g fiber.Router) {
 	g.Get("/", r.List)
+	g.Get("/probe", r.Probe)
 	g.Post("/", r.Create)
-	g.Get("/:id", r.Get)
+	g.Get("/:id", r.Find)
 	g.Delete("/:id", r.Delete)
 	g.Patch("/:id/name", r.PatchName)
 	g.Post("/:id/leave", r.Leave)
@@ -74,19 +75,19 @@ func (r *OrganizationRouter) Create(c *fiber.Ctx) error {
 	return c.Status(http.StatusCreated).JSON(res)
 }
 
-// Get godoc
+// Find godoc
 //
-//	@Summary		Get
-//	@Description	Get
+//	@Summary		Read
+//	@Description	Read
 //	@Tags			Organizations
-//	@Id				organizations_get
+//	@Id				organizations_find
 //	@Produce		json
 //	@Param			id	path		string	true	"ID"
 //	@Success		200	{object}	service.Organization
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/organizations/{id} [get]
-func (r *OrganizationRouter) Get(c *fiber.Ctx) error {
+func (r *OrganizationRouter) Find(c *fiber.Ctx) error {
 	userID := GetUserID(c)
 	res, err := r.orgSvc.Find(c.Params("id"), userID)
 	if err != nil {
@@ -204,8 +205,8 @@ func (r *OrganizationRouter) List(c *fiber.Ctx) error {
 	}
 	res, err := r.orgSvc.List(service.OrganizationListOptions{
 		Query:     query,
-		Page:      uint(page), // #nosec G115
-		Size:      uint(size), // #nosec G115
+		Page:      page,
+		Size:      size,
 		SortBy:    sortBy,
 		SortOrder: sortOrder,
 	}, GetUserID(c))
@@ -213,6 +214,22 @@ func (r *OrganizationRouter) List(c *fiber.Ctx) error {
 		return err
 	}
 	return c.JSON(res)
+}
+
+// Probe godoc
+//
+//	@Summary		Probe
+//	@Description	Probe
+//	@Tags			Organizations
+//	@Id				organizations_probe
+//	@Produce		json
+//	@Param			size	query		string	false	"Size"
+//	@Success		200		{object}	service.OrganizationProbe
+//	@Failure		404		{object}	errorpkg.ErrorResponse
+//	@Failure		500		{object}	errorpkg.ErrorResponse
+//	@Router			/organizations/probe [get]
+func (r *OrganizationRouter) Probe(c *fiber.Ctx) error {
+	return nil
 }
 
 // Leave godoc

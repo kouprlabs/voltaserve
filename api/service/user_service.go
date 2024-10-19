@@ -50,17 +50,6 @@ func NewUserService() *UserService {
 	}
 }
 
-type UserListOptions struct {
-	Query               string
-	OrganizationID      string
-	GroupID             string
-	ExcludeGroupMembers bool
-	SortBy              string
-	SortOrder           string
-	Page                uint
-	Size                uint
-}
-
 type User struct {
 	ID         string  `json:"id"`
 	FullName   string  `json:"fullName"`
@@ -71,12 +60,23 @@ type User struct {
 	UpdateTime *string `json:"updateTime"`
 }
 
+type UserListOptions struct {
+	Query               string
+	OrganizationID      string
+	GroupID             string
+	ExcludeGroupMembers bool
+	SortBy              string
+	SortOrder           string
+	Page                int64
+	Size                int64
+}
+
 type UserList struct {
 	Data          []*User `json:"data"`
-	TotalPages    uint    `json:"totalPages"`
-	TotalElements uint    `json:"totalElements"`
-	Page          uint    `json:"page"`
-	Size          uint    `json:"size"`
+	TotalPages    int64   `json:"totalPages"`
+	TotalElements int64   `json:"totalElements"`
+	Page          int64   `json:"page"`
+	Size          int64   `json:"size"`
 }
 
 func (svc *UserService) List(opts UserListOptions, userID string) (*UserList, error) {
@@ -111,11 +111,11 @@ func (svc *UserService) List(opts UserListOptions, userID string) (*UserList, er
 	var err error
 	if opts.Query == "" {
 		if opts.OrganizationID != "" && opts.GroupID != "" && opts.ExcludeGroupMembers {
-			orgMembers, err := svc.orgRepo.GetMembers(opts.OrganizationID)
+			orgMembers, err := svc.orgRepo.FindMembers(opts.OrganizationID)
 			if err != nil {
 				return nil, err
 			}
-			groupMembers, err := svc.groupRepo.GetMembers(opts.GroupID)
+			groupMembers, err := svc.groupRepo.FindMembers(opts.GroupID)
 			if err != nil {
 				return nil, err
 			}
@@ -132,12 +132,12 @@ func (svc *UserService) List(opts UserListOptions, userID string) (*UserList, er
 				}
 			}
 		} else if opts.OrganizationID != "" {
-			res, err = svc.orgRepo.GetMembers(opts.OrganizationID)
+			res, err = svc.orgRepo.FindMembers(opts.OrganizationID)
 			if err != nil {
 				return nil, err
 			}
 		} else if opts.GroupID != "" {
-			res, err = svc.groupRepo.GetMembers(opts.GroupID)
+			res, err = svc.groupRepo.FindMembers(opts.GroupID)
 			if err != nil {
 				return nil, err
 			}
@@ -153,12 +153,12 @@ func (svc *UserService) List(opts UserListOptions, userID string) (*UserList, er
 		}
 		var members []model.User
 		if opts.OrganizationID != "" {
-			members, err = svc.orgRepo.GetMembers(opts.OrganizationID)
+			members, err = svc.orgRepo.FindMembers(opts.OrganizationID)
 			if err != nil {
 				return nil, err
 			}
 		} else if opts.GroupID != "" {
-			members, err = svc.groupRepo.GetMembers(opts.GroupID)
+			members, err = svc.groupRepo.FindMembers(opts.GroupID)
 			if err != nil {
 				return nil, err
 			}
@@ -188,8 +188,21 @@ func (svc *UserService) List(opts UserListOptions, userID string) (*UserList, er
 		TotalPages:    totalPages,
 		TotalElements: totalElements,
 		Page:          opts.Page,
-		Size:          uint(len(mapped)),
+		Size:          int64(len(mapped)),
 	}, nil
+}
+
+type UserProbeOptions struct {
+	Size int64
+}
+
+type UserProbe struct {
+	TotalPages    int64 `json:"totalPages"`
+	TotalElements int64 `json:"totalElements"`
+}
+
+func (svc *UserService) Probe(opts UserProbeOptions, userID string) (*UserProbe, error) {
+	return nil, nil
 }
 
 func (svc *UserService) doSorting(data []model.User, sortBy string, sortOrder string) []model.User {
@@ -215,8 +228,8 @@ func (svc *UserService) doSorting(data []model.User, sortBy string, sortOrder st
 	return data
 }
 
-func (svc *UserService) doPagination(data []model.User, page, size uint) ([]model.User, uint, uint) {
-	totalElements := uint(len(data))
+func (svc *UserService) doPagination(data []model.User, page, size int64) ([]model.User, int64, int64) {
+	totalElements := int64(len(data))
 	totalPages := (totalElements + size - 1) / size
 	if page > totalPages {
 		return []model.User{}, totalElements, totalPages

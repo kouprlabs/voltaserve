@@ -30,17 +30,18 @@ type FileRepo interface {
 	FindTreeIDs(id string) ([]string, error)
 	DeleteChunk(ids []string) error
 	Count() (int64, error)
-	GetIDsByWorkspace(workspaceID string) ([]string, error)
-	GetIDsBySnapshot(snapshotID string) ([]string, error)
+	FindIDsByWorkspace(workspaceID string) ([]string, error)
+	FindIDsBySnapshot(snapshotID string) ([]string, error)
 	MoveSourceIntoTarget(targetID string, sourceID string) error
 	Save(file model.File) error
 	BulkInsert(values []model.File, chunkSize int) error
 	BulkInsertPermissions(values []model.UserPermission, chunkSize int) error
 	Delete(id string) error
-	GetChildrenIDs(id string) ([]string, error)
-	GetItemCount(id string) (int64, error)
+	FindChildrenIDs(id string) ([]string, error)
+	CountChildren(id string) (int64, error)
+	CountItems(id string) (int64, error)
 	IsGrandChildOf(id string, ancestorID string) (bool, error)
-	GetSize(id string) (int64, error)
+	ComputeSize(id string) (int64, error)
 	GrantUserPermission(id string, userID string, permission string) error
 	RevokeUserPermission(tree []model.File, userID string) error
 	GrantGroupPermission(id string, groupID string, permission string) error
@@ -356,7 +357,7 @@ func (repo *fileRepo) Count() (int64, error) {
 	return count, nil
 }
 
-func (repo *fileRepo) GetIDsByWorkspace(workspaceID string) ([]string, error) {
+func (repo *fileRepo) FindIDsByWorkspace(workspaceID string) ([]string, error) {
 	type IDResult struct {
 		Result string
 	}
@@ -374,7 +375,7 @@ func (repo *fileRepo) GetIDsByWorkspace(workspaceID string) ([]string, error) {
 	return res, nil
 }
 
-func (repo *fileRepo) GetIDsBySnapshot(snapshotID string) ([]string, error) {
+func (repo *fileRepo) FindIDsBySnapshot(snapshotID string) ([]string, error) {
 	type Value struct {
 		Result string
 	}
@@ -444,7 +445,7 @@ func (repo *fileRepo) Delete(id string) error {
 	return nil
 }
 
-func (repo *fileRepo) GetChildrenIDs(id string) ([]string, error) {
+func (repo *fileRepo) FindChildrenIDs(id string) ([]string, error) {
 	type Value struct {
 		Result string
 	}
@@ -462,7 +463,21 @@ func (repo *fileRepo) GetChildrenIDs(id string) ([]string, error) {
 	return res, nil
 }
 
-func (repo *fileRepo) GetItemCount(id string) (int64, error) {
+func (repo *fileRepo) CountChildren(id string) (int64, error) {
+	type Result struct {
+		Result int64
+	}
+	var res Result
+	db := repo.db.
+		Raw("SELECT count(*) as result FROM file WHERE parent_id = ?", id).
+		Scan(&res)
+	if db.Error != nil {
+		return -1, db.Error
+	}
+	return res.Result, nil
+}
+
+func (repo *fileRepo) CountItems(id string) (int64, error) {
 	type Result struct {
 		Result int64
 	}
@@ -497,7 +512,7 @@ func (repo *fileRepo) IsGrandChildOf(id string, ancestorID string) (bool, error)
 	return res.Result, nil
 }
 
-func (repo *fileRepo) GetSize(id string) (int64, error) {
+func (repo *fileRepo) ComputeSize(id string) (int64, error) {
 	type Result struct {
 		Result int64
 	}
@@ -646,7 +661,7 @@ func (repo *fileRepo) PopulateModelFieldsForUser(files []model.File, userID stri
 func (repo *fileRepo) populateModelFields(entities []*fileEntity) error {
 	for _, f := range entities {
 		f.UserPermissions = make([]*UserPermissionValue, 0)
-		userPermissions, err := repo.permissionRepo.GetUserPermissions(f.ID)
+		userPermissions, err := repo.permissionRepo.FindUserPermissions(f.ID)
 		if err != nil {
 			return err
 		}
@@ -657,7 +672,7 @@ func (repo *fileRepo) populateModelFields(entities []*fileEntity) error {
 			})
 		}
 		f.GroupPermissions = make([]*GroupPermissionValue, 0)
-		groupPermissions, err := repo.permissionRepo.GetGroupPermissions(f.ID)
+		groupPermissions, err := repo.permissionRepo.FindGroupPermissions(f.ID)
 		if err != nil {
 			return err
 		}
