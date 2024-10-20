@@ -66,11 +66,11 @@ func (svc *InvitationService) Create(opts InvitationCreateOptions, userID string
 	if err := svc.orgGuard.Authorize(userID, org, model.PermissionOwner); err != nil {
 		return nil, err
 	}
-	orgMembers, err := svc.orgRepo.GetMembers(opts.OrganizationID)
+	orgMembers, err := svc.orgRepo.FindMembers(opts.OrganizationID)
 	if err != nil {
 		return nil, err
 	}
-	outgoingInvitations, err := svc.invitationRepo.GetOutgoing(opts.OrganizationID, userID)
+	outgoingInvitations, err := svc.invitationRepo.FindOutgoing(opts.OrganizationID, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -137,13 +137,6 @@ func (svc *InvitationService) Create(opts InvitationCreateOptions, userID string
 	return res, nil
 }
 
-type InvitationListOptions struct {
-	Page      uint
-	Size      uint
-	SortBy    string
-	SortOrder string
-}
-
 type Invitation struct {
 	ID           string        `json:"id"`
 	Owner        *User         `json:"owner,omitempty"`
@@ -154,20 +147,27 @@ type Invitation struct {
 	UpdateTime   *string       `json:"updateTime"`
 }
 
-type InvitationList struct {
-	Data          []*Invitation `json:"data"`
-	TotalPages    uint          `json:"totalPages"`
-	TotalElements uint          `json:"totalElements"`
-	Page          uint          `json:"page"`
-	Size          uint          `json:"size"`
+type InvitationListOptions struct {
+	Page      int64
+	Size      int64
+	SortBy    string
+	SortOrder string
 }
 
-func (svc *InvitationService) GetIncoming(opts InvitationListOptions, userID string) (*InvitationList, error) {
+type InvitationList struct {
+	Data          []*Invitation `json:"data"`
+	TotalPages    int64         `json:"totalPages"`
+	TotalElements int64         `json:"totalElements"`
+	Page          int64         `json:"page"`
+	Size          int64         `json:"size"`
+}
+
+func (svc *InvitationService) ListIncoming(opts InvitationListOptions, userID string) (*InvitationList, error) {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
 	}
-	invitations, err := svc.invitationRepo.GetIncoming(user.GetEmail())
+	invitations, err := svc.invitationRepo.FindIncoming(user.GetEmail())
 	if err != nil {
 		return nil, err
 	}
@@ -188,24 +188,44 @@ func (svc *InvitationService) GetIncoming(opts InvitationListOptions, userID str
 		TotalPages:    totalPages,
 		TotalElements: totalElements,
 		Page:          opts.Page,
-		Size:          uint(len(mapped)),
+		Size:          int64(len(mapped)),
 	}, nil
 }
 
-func (svc *InvitationService) GetIncomingCount(userID string) (*int64, error) {
+type InvitationProbe struct {
+	TotalPages    int64 `json:"totalPages"`
+	TotalElements int64 `json:"totalElements"`
+}
+
+func (svc *InvitationService) ProbeIncoming(opts InvitationListOptions, userID string) (*InvitationProbe, error) {
+	user, err := svc.userRepo.Find(userID)
+	if err != nil {
+		return nil, err
+	}
+	totalElements, err := svc.invitationRepo.CountIncoming(user.GetEmail())
+	if err != nil {
+		return nil, err
+	}
+	return &InvitationProbe{
+		TotalElements: totalElements,
+		TotalPages:    (totalElements + opts.Size - 1) / opts.Size,
+	}, nil
+}
+
+func (svc *InvitationService) CountIncoming(userID string) (*int64, error) {
 	user, err := svc.userRepo.Find(userID)
 	if err != nil {
 		return nil, err
 	}
 	var res int64
-	if res, err = svc.invitationRepo.GetIncomingCount(user.GetEmail()); err != nil {
+	if res, err = svc.invitationRepo.CountIncoming(user.GetEmail()); err != nil {
 		return nil, err
 	}
 	return &res, nil
 }
 
-func (svc *InvitationService) GetOutgoing(orgID string, opts InvitationListOptions, userID string) (*InvitationList, error) {
-	invitations, err := svc.invitationRepo.GetOutgoing(orgID, userID)
+func (svc *InvitationService) ListOutgoing(orgID string, opts InvitationListOptions, userID string) (*InvitationList, error) {
+	all, err := svc.invitationRepo.FindOutgoing(orgID, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -215,7 +235,7 @@ func (svc *InvitationService) GetOutgoing(orgID string, opts InvitationListOptio
 	if opts.SortOrder == "" {
 		opts.SortOrder = SortOrderAsc
 	}
-	sorted := svc.doSorting(invitations, opts.SortBy, opts.SortOrder)
+	sorted := svc.doSorting(all, opts.SortBy, opts.SortOrder)
 	paged, totalElements, totalPages := svc.doPagination(sorted, opts.Page, opts.Size)
 	mapped, err := svc.invitationMapper.mapMany(paged, userID)
 	if err != nil {
@@ -226,7 +246,19 @@ func (svc *InvitationService) GetOutgoing(orgID string, opts InvitationListOptio
 		TotalPages:    totalPages,
 		TotalElements: totalElements,
 		Page:          opts.Page,
-		Size:          uint(len(mapped)),
+		Size:          int64(len(mapped)),
+	}, nil
+}
+
+func (svc *InvitationService) ProbeOutgoing(orgID string, opts InvitationListOptions, userID string) (*InvitationProbe, error) {
+	all, err := svc.invitationRepo.FindOutgoing(orgID, userID)
+	totalElements := int64(len(all))
+	if err != nil {
+		return nil, err
+	}
+	return &InvitationProbe{
+		TotalElements: totalElements,
+		TotalPages:    (totalElements + opts.Size - 1) / opts.Size,
 	}, nil
 }
 
@@ -381,8 +413,8 @@ func (svc *InvitationService) doSorting(data []model.Invitation, sortBy string, 
 	return data
 }
 
-func (svc *InvitationService) doPagination(data []model.Invitation, page, size uint) (pageData []model.Invitation, totalElements uint, totalPages uint) {
-	totalElements = uint(len(data))
+func (svc *InvitationService) doPagination(data []model.Invitation, page, size int64) (pageData []model.Invitation, totalElements int64, totalPages int64) {
+	totalElements = int64(len(data))
 	totalPages = (totalElements + size - 1) / size
 	if page > totalPages {
 		return []model.Invitation{}, totalElements, totalPages

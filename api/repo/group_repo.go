@@ -25,13 +25,13 @@ type GroupRepo interface {
 	Insert(opts GroupInsertOptions) (model.Group, error)
 	Find(id string) (model.Group, error)
 	Count() (int64, error)
-	GetIDs() ([]string, error)
-	GetIDsByFile(fileID string) ([]string, error)
-	GetIDsByOrganization(id string) ([]string, error)
+	FindIDs() ([]string, error)
+	FindIDsByFile(fileID string) ([]string, error)
+	FindIDsByOrganization(id string) ([]string, error)
 	Save(group model.Group) error
 	Delete(id string) error
-	GetMembers(id string) ([]model.User, error)
-	GetOwnerCount(id string) (int64, error)
+	FindMembers(id string) ([]model.User, error)
+	CountOwners(id string) (int64, error)
 	GrantUserPermission(id string, userID string, permission string) error
 	RevokeUserPermission(id string, userID string) error
 }
@@ -186,7 +186,7 @@ func (repo *groupRepo) Count() (int64, error) {
 	return count, nil
 }
 
-func (repo *groupRepo) GetIDsByFile(fileID string) ([]string, error) {
+func (repo *groupRepo) FindIDsByFile(fileID string) ([]string, error) {
 	type Value struct {
 		Result string
 	}
@@ -200,14 +200,14 @@ func (repo *groupRepo) GetIDsByFile(fileID string) ([]string, error) {
 	if db.Error != nil {
 		return []string{}, db.Error
 	}
-	res := []string{}
+	res := make([]string, 0)
 	for _, v := range values {
 		res = append(res, v.Result)
 	}
 	return res, nil
 }
 
-func (repo *groupRepo) GetIDsByOrganization(id string) ([]string, error) {
+func (repo *groupRepo) FindIDsByOrganization(id string) ([]string, error) {
 	type Value struct {
 		Result string
 	}
@@ -216,7 +216,7 @@ func (repo *groupRepo) GetIDsByOrganization(id string) ([]string, error) {
 	if db.Error != nil {
 		return []string{}, db.Error
 	}
-	res := []string{}
+	res := make([]string, 0)
 	for _, v := range values {
 		res = append(res, v.Result)
 	}
@@ -247,7 +247,7 @@ func (repo *groupRepo) Delete(id string) error {
 	return nil
 }
 
-func (repo *groupRepo) GetIDs() ([]string, error) {
+func (repo *groupRepo) FindIDs() ([]string, error) {
 	type Value struct {
 		Result string
 	}
@@ -256,14 +256,14 @@ func (repo *groupRepo) GetIDs() ([]string, error) {
 	if db.Error != nil {
 		return []string{}, db.Error
 	}
-	res := []string{}
+	res := make([]string, 0)
 	for _, v := range values {
 		res = append(res, v.Result)
 	}
 	return res, nil
 }
 
-func (repo *groupRepo) GetMembers(id string) ([]model.User, error) {
+func (repo *groupRepo) FindMembers(id string) ([]model.User, error) {
 	var entities []*userEntity
 	db := repo.db.
 		Raw(`SELECT u.* FROM "user" u INNER JOIN userpermission up on
@@ -279,10 +279,11 @@ func (repo *groupRepo) GetMembers(id string) ([]model.User, error) {
 	return res, nil
 }
 
-func (repo *groupRepo) GetOwnerCount(id string) (int64, error) {
+func (repo *groupRepo) CountOwners(id string) (int64, error) {
 	var count int64
 	db := repo.db.Model(&userPermissionEntity{}).
-		Where("resource_id = ? and permission = ?").
+		Where("resource_id = ?", id).
+		Where("permission = ?", model.PermissionOwner).
 		Count(&count)
 	if db.Error != nil {
 		return -1, db.Error
@@ -312,7 +313,7 @@ func (repo *groupRepo) RevokeUserPermission(id string, userID string) error {
 func (repo *groupRepo) populateModelFields(groups []*groupEntity) error {
 	for _, g := range groups {
 		g.UserPermissions = make([]*UserPermissionValue, 0)
-		userPermissions, err := repo.permissionRepo.GetUserPermissions(g.ID)
+		userPermissions, err := repo.permissionRepo.FindUserPermissions(g.ID)
 		if err != nil {
 			return err
 		}
@@ -323,7 +324,7 @@ func (repo *groupRepo) populateModelFields(groups []*groupEntity) error {
 			})
 		}
 		g.GroupPermissions = make([]*GroupPermissionValue, 0)
-		groupPermissions, err := repo.permissionRepo.GetGroupPermissions(g.ID)
+		groupPermissions, err := repo.permissionRepo.FindGroupPermissions(g.ID)
 		if err != nil {
 			return err
 		}
@@ -333,7 +334,7 @@ func (repo *groupRepo) populateModelFields(groups []*groupEntity) error {
 				Value:   p.GetPermission(),
 			})
 		}
-		members, err := repo.GetMembers(g.ID)
+		members, err := repo.FindMembers(g.ID)
 		if err != nil {
 			return nil
 		}

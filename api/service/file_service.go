@@ -220,7 +220,7 @@ func (svc *FileService) Store(id string, opts StoreOptions, userID string) (*Fil
 	if err != nil {
 		return nil, err
 	}
-	latestVersion, err := svc.snapshotRepo.GetLatestVersionForFile(id)
+	latestVersion, err := svc.snapshotRepo.FindLatestVersionForFile(id)
 	if err != nil {
 		return nil, err
 	}
@@ -465,7 +465,7 @@ func (svc *FileService) FindByPath(path string, userID string) (*File, error) {
 			UpdateTime:  nil,
 		}, nil
 	}
-	components := []string{}
+	components := make([]string, 0)
 	for _, v := range strings.Split(path, "/") {
 		if v != "" {
 			components = append(components, v)
@@ -492,7 +492,7 @@ func (svc *FileService) FindByPath(path string, userID string) (*File, error) {
 	currentID := workspace.RootID
 	components = components[1:]
 	for _, component := range components {
-		ids, err := svc.fileRepo.GetChildrenIDs(currentID)
+		ids, err := svc.fileRepo.FindChildrenIDs(currentID)
 		if err != nil {
 			return nil, err
 		}
@@ -530,7 +530,7 @@ func (svc *FileService) FindByPath(path string, userID string) (*File, error) {
 
 func (svc *FileService) ListByPath(path string, userID string) ([]*File, error) {
 	if path == "/" {
-		workspaces, err := svc.workspaceSvc.findAll(userID)
+		workspaces, err := svc.workspaceSvc.findAllWithoutOptions(userID)
 		if err != nil {
 			return nil, err
 		}
@@ -548,7 +548,7 @@ func (svc *FileService) ListByPath(path string, userID string) ([]*File, error) 
 		}
 		return result, nil
 	}
-	components := []string{}
+	components := make([]string, 0)
 	for _, v := range strings.Split(path, "/") {
 		if v != "" {
 			components = append(components, v)
@@ -565,7 +565,7 @@ func (svc *FileService) ListByPath(path string, userID string) ([]*File, error) 
 	currentType := model.FileTypeFolder
 	components = components[1:]
 	for _, component := range components {
-		ids, err := svc.fileRepo.GetChildrenIDs(currentID)
+		ids, err := svc.fileRepo.FindChildrenIDs(currentID)
 		if err != nil {
 			return nil, err
 		}
@@ -593,7 +593,7 @@ func (svc *FileService) ListByPath(path string, userID string) ([]*File, error) 
 		}
 	}
 	if currentType == model.FileTypeFolder {
-		ids, err := svc.fileRepo.GetChildrenIDs(currentID)
+		ids, err := svc.fileRepo.FindChildrenIDs(currentID)
 		if err != nil {
 			return nil, err
 		}
@@ -628,16 +628,16 @@ type FileQuery struct {
 
 type FileList struct {
 	Data          []*File    `json:"data"`
-	TotalPages    uint       `json:"totalPages"`
-	TotalElements uint       `json:"totalElements"`
-	Page          uint       `json:"page"`
-	Size          uint       `json:"size"`
+	TotalPages    int64      `json:"totalPages"`
+	TotalElements int64      `json:"totalElements"`
+	Page          int64      `json:"page"`
+	Size          int64      `json:"size"`
 	Query         *FileQuery `json:"query,omitempty"`
 }
 
 type FileListOptions struct {
-	Page      uint
-	Size      uint
+	Page      int64
+	Size      int64
 	SortBy    string
 	SortOrder string
 	Query     *FileQuery
@@ -651,13 +651,7 @@ func (svc *FileService) List(id string, opts FileListOptions, userID string) (*F
 	if err = svc.fileGuard.Authorize(userID, file, model.PermissionViewer); err != nil {
 		return nil, err
 	}
-	if opts.Page < 1 {
-		return nil, errorpkg.NewInvalidPageParameterError()
-	}
-	if opts.Size < 1 {
-		return nil, errorpkg.NewInvalidSizeParameterError()
-	}
-	ids, err := svc.fileRepo.GetChildrenIDs(id)
+	ids, err := svc.fileRepo.FindChildrenIDs(id)
 	if err != nil {
 		return nil, err
 	}
@@ -695,6 +689,29 @@ func (svc *FileService) List(id string, opts FileListOptions, userID string) (*F
 	}, nil
 }
 
+type FileProbe struct {
+	TotalPages    int64 `json:"totalPages"`
+	TotalElements int64 `json:"totalElements"`
+}
+
+func (svc *FileService) Probe(id string, opts FileListOptions, userID string) (*FileProbe, error) {
+	file, err := svc.fileCache.Get(id)
+	if err != nil {
+		return nil, err
+	}
+	if err = svc.fileGuard.Authorize(userID, file, model.PermissionViewer); err != nil {
+		return nil, err
+	}
+	totalElements, err := svc.fileRepo.CountChildren(id)
+	if err != nil {
+		return nil, err
+	}
+	return &FileProbe{
+		TotalElements: totalElements,
+		TotalPages:    (totalElements + opts.Size - 1) / opts.Size,
+	}, nil
+}
+
 func (svc *FileService) Search(id string, opts FileListOptions, userID string) (*FileList, error) {
 	parent, err := svc.fileCache.Get(id)
 	if err != nil {
@@ -718,7 +735,7 @@ func (svc *FileService) Search(id string, opts FileListOptions, userID string) (
 			return nil, err
 		}
 	} else {
-		ids, err := svc.fileRepo.GetChildrenIDs(id)
+		ids, err := svc.fileRepo.FindChildrenIDs(id)
 		if err != nil {
 			return nil, err
 		}
@@ -756,7 +773,7 @@ func (svc *FileService) Search(id string, opts FileListOptions, userID string) (
 	return res, nil
 }
 
-func (svc *FileService) GetPath(id string, userID string) ([]*File, error) {
+func (svc *FileService) FindPath(id string, userID string) ([]*File, error) {
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return nil, err
@@ -823,7 +840,7 @@ func (svc *FileService) CopyOne(sourceID string, targetID string, userID string)
 		return nil, errorpkg.NewFileCannotBeCopiedIntoOwnSubtreeError(source)
 	}
 
-	/* Get original tree */
+	/* Read original tree */
 	var sourceIds []string
 	sourceIds, err = svc.fileRepo.FindTreeIDs(source.GetID())
 	if err != nil {
@@ -1037,7 +1054,7 @@ func (svc *FileService) MoveOne(sourceID string, targetID string, userID string)
 		return nil, err
 	}
 
-	/* Get updated source */
+	/* Read updated source */
 	source, err = svc.fileRepo.Find(source.GetID())
 	if err != nil {
 		return nil, err
@@ -1405,7 +1422,7 @@ func (svc *FileService) DeleteMany(opts FileDeleteManyOptions, userID string) (*
 	return res, nil
 }
 
-func (svc *FileService) GetSize(id string, userID string) (*int64, error) {
+func (svc *FileService) ComputeSize(id string, userID string) (*int64, error) {
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return nil, err
@@ -1413,14 +1430,14 @@ func (svc *FileService) GetSize(id string, userID string) (*int64, error) {
 	if err := svc.fileGuard.Authorize(userID, file, model.PermissionViewer); err != nil {
 		return nil, err
 	}
-	res, err := svc.fileRepo.GetSize(id)
+	res, err := svc.fileRepo.ComputeSize(id)
 	if err != nil {
 		return nil, err
 	}
 	return &res, nil
 }
 
-func (svc *FileService) GetCount(id string, userID string) (*int64, error) {
+func (svc *FileService) Count(id string, userID string) (*int64, error) {
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return nil, err
@@ -1428,7 +1445,7 @@ func (svc *FileService) GetCount(id string, userID string) (*int64, error) {
 	if err := svc.fileGuard.Authorize(userID, file, model.PermissionViewer); err != nil {
 		return nil, err
 	}
-	res, err := svc.fileRepo.GetItemCount(id)
+	res, err := svc.fileRepo.CountItems(id)
 	if err != nil {
 		return nil, err
 	}
@@ -1605,7 +1622,7 @@ type UserPermission struct {
 	Permission string `json:"permission"`
 }
 
-func (svc *FileService) GetUserPermissions(id string, userID string) ([]*UserPermission, error) {
+func (svc *FileService) FindUserPermissions(id string, userID string) ([]*UserPermission, error) {
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return nil, err
@@ -1613,7 +1630,7 @@ func (svc *FileService) GetUserPermissions(id string, userID string) ([]*UserPer
 	if err := svc.fileGuard.Authorize(userID, file, model.PermissionOwner); err != nil {
 		return nil, err
 	}
-	permissions, err := svc.permissionRepo.GetUserPermissions(id)
+	permissions, err := svc.permissionRepo.FindUserPermissions(id)
 	if err != nil {
 		return nil, err
 	}
@@ -1641,7 +1658,7 @@ type GroupPermission struct {
 	Permission string `json:"permission"`
 }
 
-func (svc *FileService) GetGroupPermissions(id string, userID string) ([]*GroupPermission, error) {
+func (svc *FileService) FindGroupPermissions(id string, userID string) ([]*GroupPermission, error) {
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
 		return nil, err
@@ -1649,7 +1666,7 @@ func (svc *FileService) GetGroupPermissions(id string, userID string) ([]*GroupP
 	if err := svc.fileGuard.Authorize(userID, file, model.PermissionOwner); err != nil {
 		return nil, err
 	}
-	permissions, err := svc.permissionRepo.GetGroupPermissions(id)
+	permissions, err := svc.permissionRepo.FindGroupPermissions(id)
 	if err != nil {
 		return nil, err
 	}
@@ -1931,8 +1948,8 @@ func (svc *FileService) doSorting(data []model.File, sortBy string, sortOrder st
 	return data
 }
 
-func (svc *FileService) doPagination(data []model.File, page, size uint) (pageData []model.File, totalElements uint, totalPages uint) {
-	totalElements = uint(len(data))
+func (svc *FileService) doPagination(data []model.File, page, size int64) (pageData []model.File, totalElements int64, totalPages int64) {
+	totalElements = int64(len(data))
 	totalPages = (totalElements + size - 1) / size
 	if page > totalPages {
 		return []model.File{}, totalElements, totalPages

@@ -32,7 +32,7 @@ type SnapshotRepo interface {
 	FindAllForTask(taskID string) ([]*snapshotEntity, error)
 	FindAllDangling() ([]model.Snapshot, error)
 	FindAllPrevious(fileID string, version int64) ([]model.Snapshot, error)
-	GetIDsByFile(fileID string) ([]string, error)
+	FindIDsByFile(fileID string) ([]string, error)
 	Insert(snapshot model.Snapshot) error
 	Save(snapshot model.Snapshot) error
 	Delete(id string) error
@@ -42,8 +42,8 @@ type SnapshotRepo interface {
 	DeleteMappingsForFile(fileID string) error
 	DeleteMappingsForTree(fileID string) error
 	DeleteAllDangling() error
-	GetLatestVersionForFile(fileID string) (int64, error)
-	GetFileID(id string) (string, error)
+	FindLatestVersionForFile(fileID string) (int64, error)
+	FindFileID(id string) (string, error)
 	CountAssociations(id string) (int64, error)
 	Attach(sourceFileID string, targetFileID string) error
 	Detach(id string, fileID string) error
@@ -612,7 +612,7 @@ func (repo *snapshotRepo) FindAllPrevious(fileID string, version int64) ([]model
 	return res, nil
 }
 
-func (repo *snapshotRepo) GetIDsByFile(fileID string) ([]string, error) {
+func (repo *snapshotRepo) FindIDsByFile(fileID string) ([]string, error) {
 	type Value struct {
 		Result string
 	}
@@ -623,7 +623,7 @@ func (repo *snapshotRepo) GetIDsByFile(fileID string) ([]string, error) {
 	if db.Error != nil {
 		return nil, db.Error
 	}
-	res := []string{}
+	res := make([]string, 0)
 	for _, v := range values {
 		res = append(res, v.Result)
 	}
@@ -640,7 +640,7 @@ func (repo *snapshotRepo) DeleteAllDangling() error {
 	return nil
 }
 
-func (repo *snapshotRepo) GetLatestVersionForFile(fileID string) (int64, error) {
+func (repo *snapshotRepo) FindLatestVersionForFile(fileID string) (int64, error) {
 	type Result struct {
 		Result int64
 	}
@@ -656,7 +656,7 @@ func (repo *snapshotRepo) GetLatestVersionForFile(fileID string) (int64, error) 
 	return res.Result, nil
 }
 
-func (repo *snapshotRepo) GetFileID(id string) (string, error) {
+func (repo *snapshotRepo) FindFileID(id string) (string, error) {
 	type Result struct {
 		Result string
 	}

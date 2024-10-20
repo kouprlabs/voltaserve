@@ -36,6 +36,7 @@ func NewSnapshotRouter() *SnapshotRouter {
 
 func (r *SnapshotRouter) AppendRoutes(g fiber.Router) {
 	g.Get("/", r.List)
+	g.Get("/probe", r.Probe)
 	g.Post("/:id/activate", r.Activate)
 	g.Post("/:id/detach", r.Detach)
 }
@@ -61,10 +62,47 @@ func (r *SnapshotRouter) AppendNonJWTRoutes(g fiber.Router) {
 //	@Failure		500			{object}	errorpkg.ErrorResponse
 //	@Router			/snapshots [get]
 func (r *SnapshotRouter) List(c *fiber.Ctx) error {
+	opts, err := r.parseListQueryParams(c)
+	if err != nil {
+		return err
+	}
+	res, err := r.snapshotSvc.List(c.Query("file_id"), *opts, GetUserID(c))
+	if err != nil {
+		return err
+	}
+	return c.JSON(res)
+}
+
+// Probe godoc
+//
+//	@Summary		Probe
+//	@Description	Probe
+//	@Tags			Snapshots
+//	@Id				snapshots_probe
+//	@Produce		json
+//	@Param			file_id	query		string	true	"File ID"
+//	@Param			size	query		string	false	"Size"
+//	@Success		200		{object}	service.SnapshotProbe
+//	@Failure		404		{object}	errorpkg.ErrorResponse
+//	@Failure		500		{object}	errorpkg.ErrorResponse
+//	@Router			/snapshots/probe [get]
+func (r *SnapshotRouter) Probe(c *fiber.Ctx) error {
+	opts, err := r.parseListQueryParams(c)
+	if err != nil {
+		return err
+	}
+	res, err := r.snapshotSvc.Probe(c.Query("file_id"), *opts, GetUserID(c))
+	if err != nil {
+		return err
+	}
+	return c.JSON(res)
+}
+
+func (r *SnapshotRouter) parseListQueryParams(c *fiber.Ctx) (*service.SnapshotListOptions, error) {
 	var err error
 	fileID := c.Query("file_id")
 	if fileID == "" {
-		return errorpkg.NewMissingQueryParamError("file_id")
+		return nil, errorpkg.NewMissingQueryParamError("file_id")
 	}
 	var page int64
 	if c.Query("page") == "" {
@@ -81,30 +119,26 @@ func (r *SnapshotRouter) List(c *fiber.Ctx) error {
 	} else {
 		size, err = strconv.ParseInt(c.Query("size"), 10, 64)
 		if err != nil {
-			return err
+			return nil, err
 		}
 	}
 	if size == 0 {
-		return errorpkg.NewInvalidQueryParamError("size")
+		return nil, errorpkg.NewInvalidQueryParamError("size")
 	}
 	sortBy := c.Query("sort_by")
 	if !IsValidSortBy(sortBy) {
-		return errorpkg.NewInvalidQueryParamError("sort_by")
+		return nil, errorpkg.NewInvalidQueryParamError("sort_by")
 	}
 	sortOrder := c.Query("sort_order")
 	if !IsValidSortOrder(sortOrder) {
-		return errorpkg.NewInvalidQueryParamError("sort_order")
+		return nil, errorpkg.NewInvalidQueryParamError("sort_order")
 	}
-	res, err := r.snapshotSvc.List(fileID, service.SnapshotListOptions{
-		Page:      uint(page), // #nosec G115
-		Size:      uint(size), // #nosec G115
+	return &service.SnapshotListOptions{
+		Page:      page,
+		Size:      size,
 		SortBy:    sortBy,
 		SortOrder: sortOrder,
-	}, GetUserID(c))
-	if err != nil {
-		return err
-	}
-	return c.JSON(res)
+	}, err
 }
 
 // Activate godoc

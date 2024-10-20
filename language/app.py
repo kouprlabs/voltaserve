@@ -10,11 +10,9 @@
 
 from flask import Flask, request, jsonify
 import string
-import spacy
 import spacy.cli
 
 app = Flask(__name__)
-nlp = None
 iso_6393_to_model = {
     "ara": "xx_ent_wiki_sm",
     "chi_sim": "zh_core_web_lg",
@@ -34,6 +32,12 @@ iso_6393_to_model = {
     "fin": "fi_core_news_lg",
     "dan": "da_core_news_lg",
 }
+nlp = {}
+for key in iso_6393_to_model.keys():
+    model = iso_6393_to_model[key]
+    spacy.cli.download(model)
+    nlp[key] = spacy.load(model)
+    nlp[key].add_pipe("sentencizer")
 
 
 @app.route("/v2/health", methods=["GET"])
@@ -43,7 +47,7 @@ def health():
 
 @app.route("/version", methods=["GET"])
 def version():
-    return {'version': '2.1.0'}
+    return {"version": "2.1.0"}
 
 
 @app.route("/v2/entities", methods=["POST"])
@@ -55,21 +59,12 @@ def ner_entities():
     text = content["text"]
     language = content["language"]
 
-    entities = []
-    if nlp is None:
-        nlp = {}
-        for key in iso_6393_to_model.keys():
-            nlp[key] = None
-    if nlp[language] is None:
-        model = iso_6393_to_model[language]
-        spacy.cli.download(model)
-        nlp[language] = spacy.load(model)
-        nlp[language].add_pipe("sentencizer")
-
-    for doc in nlp[language].pipe([text], disable=["tagger"]):
-        for sent in doc.sents:
-            for ent in sent.ents:
-                entities.append({"text": ent.text, "label": ent.label_})
+    entities = [
+        {"text": ent.text, "label": ent.label_}
+        for doc in nlp[language].pipe([text], disable=["tagger"])
+        for sent in doc.sents
+        for ent in sent.ents
+    ]
 
     # Filter out entities with less than 3 characters and CARDINAL
     entities = [
@@ -80,9 +75,11 @@ def ner_entities():
 
     # Group by text and count frequency
     result = {}
-    whitespace_and_nonprintable = string.whitespace + "".join(chr(i) for i in range(32))
+    whitespace_and_non_printable = string.whitespace + "".join(
+        chr(i) for i in range(32)
+    )
     for entity in entities:
-        entity["text"] = entity["text"].strip(whitespace_and_nonprintable)
+        entity["text"] = entity["text"].strip(whitespace_and_non_printable)
         key = entity["text"].lower()
         if key in result:
             result[key]["frequency"] += 1

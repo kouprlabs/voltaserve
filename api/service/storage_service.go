@@ -45,12 +45,12 @@ type StorageUsage struct {
 	Percentage int   `json:"percentage"`
 }
 
-func (svc *StorageService) GetAccountUsage(userID string) (*StorageUsage, error) {
-	ids, err := svc.workspaceRepo.GetIDs()
+func (svc *StorageService) ComputeAccountUsage(userID string) (*StorageUsage, error) {
+	ids, err := svc.workspaceRepo.FindIDs()
 	if err != nil {
 		return nil, err
 	}
-	workspaces := []model.Workspace{}
+	workspaces := make([]model.Workspace, 0)
 	for _, id := range ids {
 		var workspace model.Workspace
 		workspace, err = svc.workspaceCache.Get(id)
@@ -68,7 +68,7 @@ func (svc *StorageService) GetAccountUsage(userID string) (*StorageUsage, error)
 		if err != nil {
 			return nil, err
 		}
-		size, err := svc.fileRepo.GetSize(root.GetID())
+		size, err := svc.fileRepo.ComputeSize(root.GetID())
 		if err != nil {
 			return nil, err
 		}
@@ -78,7 +78,7 @@ func (svc *StorageService) GetAccountUsage(userID string) (*StorageUsage, error)
 	return svc.storageMapper.mapStorageUsage(b, maxBytes), nil
 }
 
-func (svc *StorageService) GetWorkspaceUsage(workspaceID string, userID string) (*StorageUsage, error) {
+func (svc *StorageService) ComputeWorkspaceUsage(workspaceID string, userID string) (*StorageUsage, error) {
 	workspace, err := svc.workspaceCache.Get(workspaceID)
 	if err != nil {
 		return nil, err
@@ -93,14 +93,14 @@ func (svc *StorageService) GetWorkspaceUsage(workspaceID string, userID string) 
 	if err = svc.fileGuard.Authorize(userID, root, model.PermissionViewer); err != nil {
 		return nil, err
 	}
-	size, err := svc.fileRepo.GetSize(root.GetID())
+	size, err := svc.fileRepo.ComputeSize(root.GetID())
 	if err != nil {
 		return nil, err
 	}
 	return svc.storageMapper.mapStorageUsage(size, workspace.GetStorageCapacity()), nil
 }
 
-func (svc *StorageService) GetFileUsage(fileID string, userID string) (*StorageUsage, error) {
+func (svc *StorageService) ComputeFileUsage(fileID string, userID string) (*StorageUsage, error) {
 	file, err := svc.fileCache.Get(fileID)
 	if err != nil {
 		return nil, err
@@ -108,7 +108,7 @@ func (svc *StorageService) GetFileUsage(fileID string, userID string) (*StorageU
 	if err = svc.fileGuard.Authorize(userID, file, model.PermissionViewer); err != nil {
 		return nil, err
 	}
-	size, err := svc.fileRepo.GetSize(file.GetID())
+	size, err := svc.fileRepo.ComputeSize(file.GetID())
 	if err != nil {
 		return nil, err
 	}

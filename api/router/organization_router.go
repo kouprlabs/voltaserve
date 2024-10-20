@@ -34,8 +34,9 @@ func NewOrganizationRouter() *OrganizationRouter {
 
 func (r *OrganizationRouter) AppendRoutes(g fiber.Router) {
 	g.Get("/", r.List)
+	g.Get("/probe", r.Probe)
 	g.Post("/", r.Create)
-	g.Get("/:id", r.Get)
+	g.Get("/:id", r.Find)
 	g.Delete("/:id", r.Delete)
 	g.Patch("/:id/name", r.PatchName)
 	g.Post("/:id/leave", r.Leave)
@@ -74,19 +75,19 @@ func (r *OrganizationRouter) Create(c *fiber.Ctx) error {
 	return c.Status(http.StatusCreated).JSON(res)
 }
 
-// Get godoc
+// Find godoc
 //
-//	@Summary		Get
-//	@Description	Get
+//	@Summary		Read
+//	@Description	Read
 //	@Tags			Organizations
-//	@Id				organizations_get
+//	@Id				organizations_find
 //	@Produce		json
 //	@Param			id	path		string	true	"ID"
 //	@Success		200	{object}	service.Organization
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/organizations/{id} [get]
-func (r *OrganizationRouter) Get(c *fiber.Ctx) error {
+func (r *OrganizationRouter) Find(c *fiber.Ctx) error {
 	userID := GetUserID(c)
 	res, err := r.orgSvc.Find(c.Params("id"), userID)
 	if err != nil {
@@ -168,6 +169,42 @@ func (r *OrganizationRouter) PatchName(c *fiber.Ctx) error {
 //	@Failure		500			{object}	errorpkg.ErrorResponse
 //	@Router			/organizations [get]
 func (r *OrganizationRouter) List(c *fiber.Ctx) error {
+	opts, err := r.parseListQueryParams(c)
+	if err != nil {
+		return err
+	}
+	res, err := r.orgSvc.List(*opts, GetUserID(c))
+	if err != nil {
+		return err
+	}
+	return c.JSON(res)
+}
+
+// Probe godoc
+//
+//	@Summary		Probe
+//	@Description	Probe
+//	@Tags			Organizations
+//	@Id				organizations_probe
+//	@Produce		json
+//	@Param			size	query		string	false	"Size"
+//	@Success		200		{object}	service.OrganizationProbe
+//	@Failure		404		{object}	errorpkg.ErrorResponse
+//	@Failure		500		{object}	errorpkg.ErrorResponse
+//	@Router			/organizations/probe [get]
+func (r *OrganizationRouter) Probe(c *fiber.Ctx) error {
+	opts, err := r.parseListQueryParams(c)
+	if err != nil {
+		return err
+	}
+	res, err := r.orgSvc.Probe(*opts, GetUserID(c))
+	if err != nil {
+		return err
+	}
+	return c.JSON(res)
+}
+
+func (r *OrganizationRouter) parseListQueryParams(c *fiber.Ctx) (*service.OrganizationListOptions, error) {
 	var err error
 	var page int64
 	if c.Query("page") == "" {
@@ -184,35 +221,31 @@ func (r *OrganizationRouter) List(c *fiber.Ctx) error {
 	} else {
 		size, err = strconv.ParseInt(c.Query("size"), 10, 64)
 		if err != nil {
-			return err
+			return nil, err
 		}
 	}
 	if size == 0 {
-		return errorpkg.NewInvalidQueryParamError("size")
+		return nil, errorpkg.NewInvalidQueryParamError("size")
 	}
 	sortBy := c.Query("sort_by")
 	if !IsValidSortBy(sortBy) {
-		return errorpkg.NewInvalidQueryParamError("sort_by")
+		return nil, errorpkg.NewInvalidQueryParamError("sort_by")
 	}
 	sortOrder := c.Query("sort_order")
 	if !IsValidSortOrder(sortOrder) {
-		return errorpkg.NewInvalidQueryParamError("sort_order")
+		return nil, errorpkg.NewInvalidQueryParamError("sort_order")
 	}
 	query, err := url.QueryUnescape(c.Query("query"))
 	if err != nil {
-		return errorpkg.NewInvalidQueryParamError("query")
+		return nil, errorpkg.NewInvalidQueryParamError("query")
 	}
-	res, err := r.orgSvc.List(service.OrganizationListOptions{
+	return &service.OrganizationListOptions{
 		Query:     query,
-		Page:      uint(page), // #nosec G115
-		Size:      uint(size), // #nosec G115
+		Page:      page,
+		Size:      size,
 		SortBy:    sortBy,
 		SortOrder: sortOrder,
-	}, GetUserID(c))
-	if err != nil {
-		return err
-	}
-	return c.JSON(res)
+	}, nil
 }
 
 // Leave godoc

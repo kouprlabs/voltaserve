@@ -462,6 +462,13 @@ definitions:
       permission:
         type: string
     type: object
+  service.GroupProbe:
+    properties:
+      totalElements:
+        type: integer
+      totalPages:
+        type: integer
+    type: object
   service.InsightsCreateOptions:
     properties:
       languageId:
@@ -479,6 +486,13 @@ definitions:
         type: integer
       size:
         type: integer
+      totalElements:
+        type: integer
+      totalPages:
+        type: integer
+    type: object
+  service.InsightsEntityProbe:
+    properties:
       totalElements:
         type: integer
       totalPages:
@@ -546,6 +560,13 @@ definitions:
       totalPages:
         type: integer
     type: object
+  service.InvitationProbe:
+    properties:
+      totalElements:
+        type: integer
+      totalPages:
+        type: integer
+    type: object
   service.MosaicInfo:
     properties:
       isAvailable:
@@ -597,6 +618,13 @@ definitions:
       totalPages:
         type: integer
     type: object
+  service.OrganizationProbe:
+    properties:
+      totalElements:
+        type: integer
+      totalPages:
+        type: integer
+    type: object
   service.ReprocessResponse:
     properties:
       accepted:
@@ -631,7 +659,7 @@ definitions:
       status:
         type: string
       task:
-        $ref: '#/definitions/service.TaskInfo'
+        $ref: '#/definitions/service.SnapshotTaskInfo'
       text:
         $ref: '#/definitions/service.Download'
       thumbnail:
@@ -682,6 +710,20 @@ definitions:
         $ref: '#/definitions/model.S3Object'
       thumbnail:
         $ref: '#/definitions/model.S3Object'
+    type: object
+  service.SnapshotProbe:
+    properties:
+      totalElements:
+        type: integer
+      totalPages:
+        type: integer
+    type: object
+  service.SnapshotTaskInfo:
+    properties:
+      id:
+        type: string
+      isPending:
+        type: boolean
     type: object
   service.StorageUsage:
     properties:
@@ -747,13 +789,6 @@ definitions:
           type: string
         type: array
     type: object
-  service.TaskInfo:
-    properties:
-      id:
-        type: string
-      isPending:
-        type: boolean
-    type: object
   service.TaskList:
     properties:
       data:
@@ -791,6 +826,13 @@ definitions:
         type: string
       userId:
         type: string
+    type: object
+  service.TaskProbe:
+    properties:
+      totalElements:
+        type: integer
+      totalPages:
+        type: integer
     type: object
   service.User:
     properties:
@@ -832,6 +874,13 @@ definitions:
         type: string
       user:
         $ref: '#/definitions/service.User'
+    type: object
+  service.UserProbe:
+    properties:
+      totalElements:
+        type: integer
+      totalPages:
+        type: integer
     type: object
   service.Workspace:
     properties:
@@ -884,6 +933,13 @@ definitions:
       totalPages:
         type: integer
     type: object
+  service.WorkspaceProbe:
+    properties:
+      totalElements:
+        type: integer
+      totalPages:
+        type: integer
+    type: object
 info:
   contact: {}
   title: Voltaserve API
@@ -915,15 +971,15 @@ paths:
       tags:
       - Files
     get:
-      description: Get by Path
-      operationId: files_get_by_path
+      description: Read by FindPath
+      operationId: files_find_by_path
       parameters:
       - description: ID
         in: path
         name: id
         required: true
         type: string
-      - description: Path
+      - description: FindPath
         in: query
         name: path
         required: true
@@ -943,7 +999,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Get by Path
+      summary: Read by FindPath
       tags:
       - Files
     post:
@@ -1022,8 +1078,8 @@ paths:
       tags:
       - Files
     get:
-      description: Get
-      operationId: files_get
+      description: Read
+      operationId: files_find
       parameters:
       - description: ID
         in: path
@@ -1045,7 +1101,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Get
+      summary: Read
       tags:
       - Files
     patch:
@@ -1113,7 +1169,7 @@ paths:
   /files/{id}/count:
     get:
       description: Count
-      operationId: files_get_count
+      operationId: files_count
       parameters:
       - description: ID
         in: path
@@ -1140,8 +1196,8 @@ paths:
       - Files
   /files/{id}/group_permissions:
     get:
-      description: Get Group Permissions
-      operationId: files_get_group_permissions
+      description: Read Group Permissions
+      operationId: files_find_group_permissions
       parameters:
       - description: ID
         in: path
@@ -1165,7 +1221,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Get Group Permissions
+      summary: Read Group Permissions
       tags:
       - Files
   /files/{id}/list:
@@ -1378,8 +1434,8 @@ paths:
       - Files
   /files/{id}/path:
     get:
-      description: Get Path
-      operationId: files_get_path
+      description: Find Path
+      operationId: files_find_path
       parameters:
       - description: ID
         in: path
@@ -1403,7 +1459,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Get Path
+      summary: Find Path
       tags:
       - Files
   /files/{id}/preview.{ext}:
@@ -1438,6 +1494,58 @@ paths:
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
       summary: Download Preview
+      tags:
+      - Files
+  /files/{id}/probe:
+    get:
+      description: Probe
+      operationId: files_probe
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Type
+        in: query
+        name: type
+        type: string
+      - description: Page
+        in: query
+        name: page
+        type: string
+      - description: Size
+        in: query
+        name: size
+        type: string
+      - description: Sort By
+        in: query
+        name: sort_by
+        type: string
+      - description: Sort Order
+        in: query
+        name: sort_order
+        type: string
+      - description: Query
+        in: query
+        name: query
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.FileList'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Probe
       tags:
       - Files
   /files/{id}/reprocess:
@@ -1500,8 +1608,8 @@ paths:
       - Files
   /files/{id}/size:
     get:
-      description: Get Size
-      operationId: files_get_size
+      description: Read Compute Size
+      operationId: files_compute_size
       parameters:
       - description: ID
         in: path
@@ -1523,7 +1631,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Get Size
+      summary: Read Compute Size
       tags:
       - Files
   /files/{id}/thumbnail.{ext}:
@@ -1562,8 +1670,8 @@ paths:
       - Files
   /files/{id}/user_permissions:
     get:
-      description: Get User Permissions
-      operationId: files_get_user_permissions
+      description: Read User Permissions
+      operationId: files_find_user_permissions
       parameters:
       - description: ID
         in: path
@@ -1587,7 +1695,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Get User Permissions
+      summary: Read User Permissions
       tags:
       - Files
   /files/copy:
@@ -1748,10 +1856,10 @@ paths:
       - Files
   /files/list:
     get:
-      description: List by Path
+      description: List by FindPath
       operationId: files_list_by_path
       parameters:
-      - description: Path
+      - description: FindPath
         in: query
         name: path
         required: true
@@ -1773,7 +1881,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: List by Path
+      summary: List by FindPath
       tags:
       - Files
   /files/move:
@@ -1941,8 +2049,8 @@ paths:
       tags:
       - Groups
     get:
-      description: Get
-      operationId: groups_get
+      description: Read
+      operationId: groups_find
       parameters:
       - description: ID
         in: path
@@ -1964,7 +2072,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Get
+      summary: Read
       tags:
       - Groups
   /groups/{id}/members:
@@ -2072,24 +2180,51 @@ paths:
       summary: Patch Name
       tags:
       - Groups
-  /health:
+  /groups/probe:
     get:
-      description: Get
-      operationId: get_version
+      description: Probe
+      operationId: groups_probe
+      parameters:
+      - description: Size
+        in: query
+        name: size
+        type: string
       produces:
       - application/json
       responses:
         "200":
-          description: '{Version}'
+          description: OK
+          schema:
+            $ref: '#/definitions/service.GroupProbe'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Probe
+      tags:
+      - Groups
+  /health:
+    get:
+      description: Check
+      operationId: health_check
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
           schema:
             type: string
         "503":
           description: Service Unavailable
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Get
+      summary: Check
       tags:
-      - Version
+      - Health
   /insights/{id}:
     delete:
       consumes:
@@ -2242,12 +2377,46 @@ paths:
       summary: List Entities
       tags:
       - Insights
+  /insights/{id}/entities/probe:
+    get:
+      description: Probe Entities
+      operationId: insights_probe_entities
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Size
+        in: query
+        name: size
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/service.InsightsEntityProbe'
+            type: array
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Probe Entities
+      tags:
+      - Insights
   /insights/{id}/info:
     get:
       consumes:
       - application/json
-      description: Get Info
-      operationId: insights_get_info
+      description: Read Info
+      operationId: insights_read_info
       parameters:
       - description: ID
         in: path
@@ -2269,7 +2438,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Get Info
+      summary: Read Info
       tags:
       - Insights
   /insights/{id}/ocr{ext}:
@@ -2342,8 +2511,8 @@ paths:
       - Insights
   /insights/languages:
     get:
-      description: Get Languages
-      operationId: insights_get_languages
+      description: Read Languages
+      operationId: insights_find_languages
       produces:
       - application/json
       responses:
@@ -2357,7 +2526,7 @@ paths:
           description: Service Unavailable
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Get Languages
+      summary: Read Languages
       tags:
       - Insights
   /invitations:
@@ -2524,8 +2693,8 @@ paths:
       - Invitations
   /invitations/incoming:
     get:
-      description: Get Incoming
-      operationId: invitation_get_incoming
+      description: List Incoming
+      operationId: invitation_list_incoming
       parameters:
       - description: Page
         in: query
@@ -2554,13 +2723,13 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Get Incoming
+      summary: List Incoming
       tags:
       - Invitations
   /invitations/incoming/count:
     get:
-      description: Get Incoming Count
-      operationId: invitation_get_incoming_count
+      description: Count Incoming
+      operationId: invitation_count_incoming
       produces:
       - application/json
       responses:
@@ -2572,13 +2741,36 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Get Incoming Count
+      summary: Count Incoming
+      tags:
+      - Invitations
+  /invitations/incoming/probe:
+    get:
+      description: Probe Incoming
+      operationId: invitation_probe_incoming
+      parameters:
+      - description: Size
+        in: query
+        name: size
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.InvitationProbe'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Probe Incoming
       tags:
       - Invitations
   /invitations/outgoing:
     get:
-      description: Get Outgoing
-      operationId: invitation_get_outgoing
+      description: List Outgoing
+      operationId: invitation_list_outgoing
       parameters:
       - description: Organization ID
         in: query
@@ -2612,7 +2804,35 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Get Outgoing
+      summary: List Outgoing
+      tags:
+      - Invitations
+  /invitations/outgoing/probe:
+    get:
+      description: Probe Outgoing
+      operationId: invitation_probe_outgoing
+      parameters:
+      - description: Organization ID
+        in: query
+        name: organization_id
+        required: true
+        type: string
+      - description: Size
+        in: query
+        name: size
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.InvitationList'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Probe Outgoing
       tags:
       - Invitations
   /mosaics/{id}:
@@ -2674,8 +2894,8 @@ paths:
     get:
       consumes:
       - application/json
-      description: Get Info
-      operationId: mosaic_get_info
+      description: Read Info
+      operationId: mosaic_read_info
       parameters:
       - description: ID
         in: path
@@ -2697,7 +2917,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Get Info
+      summary: Read Info
       tags:
       - Mosaic
   /mosaics/{id}/zoom_level/{zoom_level}/row/{row}/col/{col}/ext/{ext}:
@@ -2841,8 +3061,8 @@ paths:
       tags:
       - Organizations
     get:
-      description: Get
-      operationId: organizations_get
+      description: Read
+      operationId: organizations_find
       parameters:
       - description: ID
         in: path
@@ -2864,7 +3084,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Get
+      summary: Read
       tags:
       - Organizations
   /organizations/{id}/leave:
@@ -2971,6 +3191,33 @@ paths:
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
       summary: Patch Name
+      tags:
+      - Organizations
+  /organizations/probe:
+    get:
+      description: Probe
+      operationId: organizations_probe
+      parameters:
+      - description: Size
+        in: query
+        name: size
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.OrganizationProbe'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Probe
       tags:
       - Organizations
   /snapshots:
@@ -3106,10 +3353,42 @@ paths:
       summary: Detach
       tags:
       - Snapshots
+  /snapshots/probe:
+    get:
+      description: Probe
+      operationId: snapshots_probe
+      parameters:
+      - description: File ID
+        in: query
+        name: file_id
+        required: true
+        type: string
+      - description: Size
+        in: query
+        name: size
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.SnapshotProbe'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Probe
+      tags:
+      - Snapshots
   /storage/account_usage:
     get:
-      description: Get Account Usage
-      operationId: storage_get_account_usage
+      description: Compute Account Usage
+      operationId: storage_compute_account_usage
       produces:
       - application/json
       responses:
@@ -3119,13 +3398,13 @@ paths:
             $ref: '#/definitions/service.StorageUsage'
         "500":
           description: Internal Server Error
-      summary: Get Account Usage
+      summary: Compute Account Usage
       tags:
       - Storage
   /storage/file_usage:
     get:
-      description: Get file usage
-      operationId: storage_get_file_usage
+      description: Compute File Usage
+      operationId: storage_compute_file_usage
       parameters:
       - description: File ID
         in: query
@@ -3141,13 +3420,13 @@ paths:
             $ref: '#/definitions/service.StorageUsage'
         "500":
           description: Internal Server Error
-      summary: Get file usage
+      summary: Compute File Usage
       tags:
       - Storage
   /storage/workspace_usage:
     get:
-      description: Get workspace usage
-      operationId: storage_get_workspace_usage
+      description: Compute Workspace Usage
+      operationId: storage_compute_workspace_usage
       parameters:
       - description: Workspace ID
         in: query
@@ -3163,7 +3442,7 @@ paths:
             $ref: '#/definitions/service.StorageUsage'
         "500":
           description: Internal Server Error
-      summary: Get workspace usage
+      summary: Compute Workspace Usage
       tags:
       - Storage
   /tasks:
@@ -3249,7 +3528,7 @@ paths:
     delete:
       consumes:
       - application/json
-      description: Dismiss
+      description: Delete
       operationId: tasks_delete
       parameters:
       - description: ID
@@ -3270,11 +3549,11 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Dismiss
+      summary: Delete
       tags:
       - Tasks
     get:
-      description: Get
+      description: Read
       operationId: tasks_get
       parameters:
       - description: ID
@@ -3297,7 +3576,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Get
+      summary: Read
       tags:
       - Tasks
     patch:
@@ -3368,8 +3647,8 @@ paths:
       - Tasks
   /tasks/count:
     get:
-      description: Get Count
-      operationId: tasks_get_count
+      description: Count
+      operationId: tasks_count
       produces:
       - application/json
       responses:
@@ -3381,7 +3660,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Get Count
+      summary: Count
       tags:
       - Tasks
   /tasks/dismiss:
@@ -3402,6 +3681,33 @@ paths:
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
       summary: Dismiss All
+      tags:
+      - Tasks
+  /tasks/probe:
+    get:
+      description: Probe
+      operationId: tasks_probe
+      parameters:
+      - description: Size
+        in: query
+        name: size
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.TaskProbe'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Probe
       tags:
       - Tasks
   /users:
@@ -3437,6 +3743,10 @@ paths:
         in: query
         name: sort_order
         type: string
+      - description: Exclude Group Members
+        in: query
+        name: exclude_group_members
+        type: boolean
       produces:
       - application/json
       responses:
@@ -3455,6 +3765,51 @@ paths:
       summary: List
       tags:
       - Users
+  /users/probe:
+    get:
+      description: Probe
+      operationId: users_probe
+      parameters:
+      - description: Size
+        in: query
+        name: size
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.UserProbe'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Probe
+      tags:
+      - Users
+  /version:
+    get:
+      description: Read
+      operationId: version_read
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{Version}'
+          schema:
+            type: string
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Read
+      tags:
+      - Version
   /workspaces:
     get:
       description: List
@@ -3553,8 +3908,8 @@ paths:
       tags:
       - Workspaces
     get:
-      description: Get
-      operationId: workspaces_get
+      description: Read
+      operationId: workspaces_find
       parameters:
       - description: ID
         in: path
@@ -3576,7 +3931,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
-      summary: Get
+      summary: Read
       tags:
       - Workspaces
   /workspaces/{id}/storage_capacity:
@@ -3649,6 +4004,33 @@ paths:
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
       summary: Patch Name
+      tags:
+      - Workspaces
+  /workspaces/probe:
+    get:
+      description: Probe
+      operationId: workspaces_probe
+      parameters:
+      - description: Size
+        in: query
+        name: size
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/service.WorkspaceProbe'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Probe
       tags:
       - Workspaces
 swagger: "2.0"

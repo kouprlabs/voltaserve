@@ -29,8 +29,8 @@ type WorkspaceRepo interface {
 	UpdateStorageCapacity(id string, storageCapacity int64) (model.Workspace, error)
 	UpdateRootID(id string, rootNodeID string) error
 	Delete(id string) error
-	GetIDs() ([]string, error)
-	GetIDsByOrganization(orgID string) ([]string, error)
+	FindIDs() ([]string, error)
+	FindIDsByOrganization(orgID string) ([]string, error)
 	GrantUserPermission(id string, userID string, permission string) error
 	RevokeUserPermission(id string, userID string) error
 }
@@ -267,7 +267,7 @@ func (repo *workspaceRepo) Delete(id string) error {
 	return nil
 }
 
-func (repo *workspaceRepo) GetIDs() ([]string, error) {
+func (repo *workspaceRepo) FindIDs() ([]string, error) {
 	type IDResult struct {
 		Result string
 	}
@@ -276,14 +276,14 @@ func (repo *workspaceRepo) GetIDs() ([]string, error) {
 	if db.Error != nil {
 		return []string{}, db.Error
 	}
-	res := []string{}
+	res := make([]string, 0)
 	for _, id := range ids {
 		res = append(res, id.Result)
 	}
 	return res, nil
 }
 
-func (repo *workspaceRepo) GetIDsByOrganization(orgID string) ([]string, error) {
+func (repo *workspaceRepo) FindIDsByOrganization(orgID string) ([]string, error) {
 	type IDResult struct {
 		Result string
 	}
@@ -294,7 +294,7 @@ func (repo *workspaceRepo) GetIDsByOrganization(orgID string) ([]string, error) 
 	if db.Error != nil {
 		return nil, db.Error
 	}
-	res := []string{}
+	res := make([]string, 0)
 	for _, id := range ids {
 		res = append(res, id.Result)
 	}
@@ -324,7 +324,7 @@ func (repo *workspaceRepo) RevokeUserPermission(id string, userID string) error 
 func (repo *workspaceRepo) populateModelFields(workspaces []*workspaceEntity) error {
 	for _, w := range workspaces {
 		w.UserPermissions = make([]*UserPermissionValue, 0)
-		userPermissions, err := repo.permissionRepo.GetUserPermissions(w.ID)
+		userPermissions, err := repo.permissionRepo.FindUserPermissions(w.ID)
 		if err != nil {
 			return err
 		}
@@ -335,7 +335,7 @@ func (repo *workspaceRepo) populateModelFields(workspaces []*workspaceEntity) er
 			})
 		}
 		w.GroupPermissions = make([]*GroupPermissionValue, 0)
-		groupPermissions, err := repo.permissionRepo.GetGroupPermissions(w.ID)
+		groupPermissions, err := repo.permissionRepo.FindGroupPermissions(w.ID)
 		if err != nil {
 			return err
 		}

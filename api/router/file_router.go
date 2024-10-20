@@ -64,25 +64,26 @@ func (r *FileRouter) AppendRoutes(g fiber.Router) {
 	g.Get("/list", r.ListByPath)
 	g.Post("/move", r.MoveMany)
 	g.Post("/copy", r.CopyMany)
-	g.Get("/", r.GetByPath)
+	g.Get("/", r.FindByPath)
 	g.Delete("/", r.DeleteMany)
-	g.Get("/:id", r.Get)
+	g.Get("/:id", r.Find)
 	g.Patch("/:id", r.Patch)
 	g.Get("/:id/list", r.List)
-	g.Get("/:id/count", r.GetCount)
-	g.Get("/:id/path", r.GetPath)
+	g.Get("/:id/probe", r.Probe)
+	g.Get("/:id/count", r.Count)
+	g.Get("/:id/path", r.FindPath)
 	g.Delete("/:id", r.DeleteOne)
 	g.Post("/:id/move/:targetId", r.MoveOne)
 	g.Post("/:id/copy/:targetId", r.CopyOne)
 	g.Patch("/:id/name", r.PatchName)
 	g.Post("/:id/reprocess", r.Reprocess)
-	g.Get("/:id/size", r.GetSize)
+	g.Get("/:id/size", r.ComputeSize)
 	g.Post("/grant_user_permission", r.GrantUserPermission)
 	g.Post("/revoke_user_permission", r.RevokeUserPermission)
 	g.Post("/grant_group_permission", r.GrantGroupPermission)
 	g.Post("/revoke_group_permission", r.RevokeGroupPermission)
-	g.Get("/:id/user_permissions", r.GetUserPermissions)
-	g.Get("/:id/group_permissions", r.GetGroupPermissions)
+	g.Get("/:id/user_permissions", r.FindUserPermissions)
+	g.Get("/:id/group_permissions", r.FindGroupPermissions)
 }
 
 func (r *FileRouter) AppendNonJWTRoutes(g fiber.Router) {
@@ -243,19 +244,19 @@ type FileCreateFolderOptions struct {
 	ParentID    *string `json:"parentId"`
 }
 
-// Get godoc
+// Find godoc
 //
-//	@Summary		Get
-//	@Description	Get
+//	@Summary		Read
+//	@Description	Read
 //	@Tags			Files
-//	@Id				files_get
+//	@Id				files_find
 //	@Produce		json
 //	@Param			id	path		string	true	"ID"
 //	@Success		200	{object}	service.File
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/files/{id} [get]
-func (r *FileRouter) Get(c *fiber.Ctx) error {
+func (r *FileRouter) Find(c *fiber.Ctx) error {
 	userID := GetUserID(c)
 	res, err := r.fileSvc.Find([]string{c.Params("id")}, userID)
 	if err != nil {
@@ -267,20 +268,20 @@ func (r *FileRouter) Get(c *fiber.Ctx) error {
 	return c.JSON(res[0])
 }
 
-// GetByPath godoc
+// FindByPath godoc
 //
-//	@Summary		Get by Path
-//	@Description	Get by Path
+//	@Summary		Read by FindPath
+//	@Description	Read by FindPath
 //	@Tags			Files
-//	@Id				files_get_by_path
+//	@Id				files_find_by_path
 //	@Produce		json
 //	@Param			id		path		string	true	"ID"
-//	@Param			path	query		string	true	"Path"
+//	@Param			path	query		string	true	"FindPath"
 //	@Success		200		{object}	service.File
 //	@Failure		404		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
 //	@Router			/files [get]
-func (r *FileRouter) GetByPath(c *fiber.Ctx) error {
+func (r *FileRouter) FindByPath(c *fiber.Ctx) error {
 	userID := GetUserID(c)
 	path := c.Query("path")
 	if path == "" {
@@ -295,12 +296,12 @@ func (r *FileRouter) GetByPath(c *fiber.Ctx) error {
 
 // ListByPath godoc
 //
-//	@Summary		List by Path
-//	@Description	List by Path
+//	@Summary		List by FindPath
+//	@Description	List by FindPath
 //	@Tags			Files
 //	@Id				files_list_by_path
 //	@Produce		json
-//	@Param			path	query		string	true	"Path"
+//	@Param			path	query		string	true	"FindPath"
 //	@Success		200		{array}		service.File
 //	@Failure		404		{object}	errorpkg.ErrorResponse
 //	@Failure		500		{object}	errorpkg.ErrorResponse
@@ -336,10 +337,61 @@ func (r *FileRouter) ListByPath(c *fiber.Ctx) error {
 //	@Failure		500			{object}	errorpkg.ErrorResponse
 //	@Router			/files/{id}/list [get]
 func (r *FileRouter) List(c *fiber.Ctx) error {
-	var err error
-	var res *service.FileList
 	id := c.Params("id")
 	userID := GetUserID(c)
+	opts, err := r.parseListQueryParams(c)
+	if err != nil {
+		return err
+	}
+	var res *service.FileList
+	if c.Query("query") != "" {
+		res, err = r.fileSvc.Search(id, *opts, userID)
+		if err != nil {
+			return err
+		}
+	} else {
+		res, err = r.fileSvc.List(id, *opts, userID)
+		if err != nil {
+			return err
+		}
+	}
+	return c.JSON(res)
+}
+
+// Probe godoc
+//
+//	@Summary		Probe
+//	@Description	Probe
+//	@Tags			Files
+//	@Id				files_probe
+//	@Produce		json
+//	@Param			id			path		string	true	"ID"
+//	@Param			type		query		string	false	"Type"
+//	@Param			page		query		string	false	"Page"
+//	@Param			size		query		string	false	"Size"
+//	@Param			sort_by		query		string	false	"Sort By"
+//	@Param			sort_order	query		string	false	"Sort Order"
+//	@Param			query		query		string	false	"Query"
+//	@Success		200			{object}	service.FileList
+//	@Failure		404			{object}	errorpkg.ErrorResponse
+//	@Failure		500			{object}	errorpkg.ErrorResponse
+//	@Router			/files/{id}/probe [get]
+func (r *FileRouter) Probe(c *fiber.Ctx) error {
+	id := c.Params("id")
+	userID := GetUserID(c)
+	opts, err := r.parseListQueryParams(c)
+	if err != nil {
+		return err
+	}
+	res, err := r.fileSvc.Probe(id, *opts, userID)
+	if err != nil {
+		return err
+	}
+	return c.JSON(res)
+}
+
+func (r *FileRouter) parseListQueryParams(c *fiber.Ctx) (*service.FileListOptions, error) {
+	var err error
 	var page int64
 	if c.Query("page") == "" {
 		page = 1
@@ -355,45 +407,41 @@ func (r *FileRouter) List(c *fiber.Ctx) error {
 	} else {
 		size, err = strconv.ParseInt(c.Query("size"), 10, 64)
 		if err != nil {
-			return err
+			return nil, err
 		}
 	}
 	if size == 0 {
-		return errorpkg.NewInvalidQueryParamError("size")
+		return nil, errorpkg.NewInvalidQueryParamError("size")
 	}
 	sortBy := c.Query("sort_by")
 	if !IsValidSortBy(sortBy) {
-		return errorpkg.NewInvalidQueryParamError("sort_by")
+		return nil, errorpkg.NewInvalidQueryParamError("sort_by")
 	}
 	sortOrder := c.Query("sort_order")
 	if !IsValidSortOrder(sortOrder) {
-		return errorpkg.NewInvalidQueryParamError("sort_order")
+		return nil, errorpkg.NewInvalidQueryParamError("sort_order")
 	}
 	fileType := c.Query("type")
 	if fileType != model.FileTypeFile && fileType != model.FileTypeFolder && fileType != "" {
-		return errorpkg.NewInvalidQueryParamError("type")
+		return nil, errorpkg.NewInvalidQueryParamError("type")
 	}
 	query, err := url.QueryUnescape(c.Query("query"))
 	if err != nil {
-		return errorpkg.NewInvalidQueryParamError("query")
+		return nil, errorpkg.NewInvalidQueryParamError("query")
 	}
 	opts := service.FileListOptions{
-		Page:      uint(page), // #nosec G115
-		Size:      uint(size), // #nosec G115
+		Page:      page,
+		Size:      size,
 		SortBy:    sortBy,
 		SortOrder: sortOrder,
 	}
 	if query != "" {
 		b, err := base64.StdEncoding.DecodeString(query + strings.Repeat("=", (4-len(query)%4)%4))
 		if err != nil {
-			return errorpkg.NewInvalidQueryParamError("query")
+			return nil, errorpkg.NewInvalidQueryParamError("query")
 		}
 		if err := json.Unmarshal(b, &opts.Query); err != nil {
-			return errorpkg.NewInvalidQueryParamError("query")
-		}
-		res, err = r.fileSvc.Search(id, opts, userID)
-		if err != nil {
-			return err
+			return nil, errorpkg.NewInvalidQueryParamError("query")
 		}
 	} else {
 		if fileType != "" {
@@ -401,29 +449,25 @@ func (r *FileRouter) List(c *fiber.Ctx) error {
 				Type: &fileType,
 			}
 		}
-		res, err = r.fileSvc.List(id, opts, userID)
-		if err != nil {
-			return err
-		}
 	}
-	return c.JSON(res)
+	return &opts, nil
 }
 
-// GetPath godoc
+// FindPath godoc
 //
-//	@Summary		Get Path
-//	@Description	Get Path
+//	@Summary		Find Path
+//	@Description	Find Path
 //	@Tags			Files
-//	@Id				files_get_path
+//	@Id				files_find_path
 //	@Produce		json
 //	@Param			id	path		string	true	"ID"
 //	@Success		200	{array}		service.File
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/files/{id}/path [get]
-func (r *FileRouter) GetPath(c *fiber.Ctx) error {
+func (r *FileRouter) FindPath(c *fiber.Ctx) error {
 	userID := GetUserID(c)
-	res, err := r.fileSvc.GetPath(c.Params("id"), userID)
+	res, err := r.fileSvc.FindPath(c.Params("id"), userID)
 	if err != nil {
 		return err
 	}
@@ -641,43 +685,43 @@ func (r *FileRouter) DeleteMany(c *fiber.Ctx) error {
 	return c.JSON(res)
 }
 
-// GetSize godoc
+// ComputeSize godoc
 //
-//	@Summary		Get Size
-//	@Description	Get Size
+//	@Summary		Read Compute Size
+//	@Description	Read Compute Size
 //	@Tags			Files
-//	@Id				files_get_size
+//	@Id				files_compute_size
 //	@Produce		json
 //	@Param			id	path		string	true	"ID"
 //	@Success		200	{integer}	int
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/files/{id}/size [get]
-func (r *FileRouter) GetSize(c *fiber.Ctx) error {
+func (r *FileRouter) ComputeSize(c *fiber.Ctx) error {
 	userID := GetUserID(c)
 	id := c.Params("id")
-	res, err := r.fileSvc.GetSize(id, userID)
+	res, err := r.fileSvc.ComputeSize(id, userID)
 	if err != nil {
 		return err
 	}
 	return c.JSON(res)
 }
 
-// GetCount godoc
+// Count godoc
 //
 //	@Summary		Count
 //	@Description	Count
 //	@Tags			Files
-//	@Id				files_get_count
+//	@Id				files_count
 //	@Produce		json
 //	@Param			id	path		string	true	"ID"
 //	@Success		200	{integer}	int
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/files/{id}/count [get]
-func (r *FileRouter) GetCount(c *fiber.Ctx) error {
+func (r *FileRouter) Count(c *fiber.Ctx) error {
 	userID := GetUserID(c)
-	res, err := r.fileSvc.GetCount(c.Params("id"), userID)
+	res, err := r.fileSvc.Count(c.Params("id"), userID)
 	if err != nil {
 		return err
 	}
@@ -814,42 +858,42 @@ func (r *FileRouter) RevokeGroupPermission(c *fiber.Ctx) error {
 	return c.SendStatus(http.StatusNoContent)
 }
 
-// GetUserPermissions godoc
+// FindUserPermissions godoc
 //
-//	@Summary		Get User Permissions
-//	@Description	Get User Permissions
+//	@Summary		Read User Permissions
+//	@Description	Read User Permissions
 //	@Tags			Files
-//	@Id				files_get_user_permissions
+//	@Id				files_find_user_permissions
 //	@Produce		json
 //	@Param			id	path		string	true	"ID"
 //	@Success		200	{array}		service.UserPermission
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/files/{id}/user_permissions [get]
-func (r *FileRouter) GetUserPermissions(c *fiber.Ctx) error {
+func (r *FileRouter) FindUserPermissions(c *fiber.Ctx) error {
 	userID := GetUserID(c)
-	res, err := r.fileSvc.GetUserPermissions(c.Params("id"), userID)
+	res, err := r.fileSvc.FindUserPermissions(c.Params("id"), userID)
 	if err != nil {
 		return err
 	}
 	return c.JSON(res)
 }
 
-// GetGroupPermissions godoc
+// FindGroupPermissions godoc
 //
-//	@Summary		Get Group Permissions
-//	@Description	Get Group Permissions
+//	@Summary		Read Group Permissions
+//	@Description	Read Group Permissions
 //	@Tags			Files
-//	@Id				files_get_group_permissions
+//	@Id				files_find_group_permissions
 //	@Produce		json
 //	@Param			id	path		string	true	"ID"
 //	@Success		200	{array}		service.GroupPermission
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/files/{id}/group_permissions [get]
-func (r *FileRouter) GetGroupPermissions(c *fiber.Ctx) error {
+func (r *FileRouter) FindGroupPermissions(c *fiber.Ctx) error {
 	userID := GetUserID(c)
-	res, err := r.fileSvc.GetGroupPermissions(c.Params("id"), userID)
+	res, err := r.fileSvc.FindGroupPermissions(c.Params("id"), userID)
 	if err != nil {
 		return err
 	}

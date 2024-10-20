@@ -37,7 +37,8 @@ func NewTaskRouter() *TaskRouter {
 
 func (r *TaskRouter) AppendRoutes(g fiber.Router) {
 	g.Get("/", r.List)
-	g.Get("/count", r.GetCount)
+	g.Get("/probe", r.Probe)
+	g.Get("/count", r.Count)
 	g.Post("/dismiss", r.DismissAll)
 	g.Get("/:id", r.Get)
 	g.Post("/:id/dismiss", r.Dismiss)
@@ -51,8 +52,8 @@ func (r *TaskRouter) AppendNonJWTRoutes(g fiber.Router) {
 
 // Get godoc
 //
-//	@Summary		Get
-//	@Description	Get
+//	@Summary		Read
+//	@Description	Read
 //	@Tags			Tasks
 //	@Id				tasks_get
 //	@Produce		json
@@ -87,6 +88,42 @@ func (r *TaskRouter) Get(c *fiber.Ctx) error {
 //	@Failure		500			{object}	errorpkg.ErrorResponse
 //	@Router			/tasks [get]
 func (r *TaskRouter) List(c *fiber.Ctx) error {
+	opts, err := r.parseListQueryParams(c)
+	if err != nil {
+		return err
+	}
+	res, err := r.taskSvc.List(*opts, GetUserID(c))
+	if err != nil {
+		return err
+	}
+	return c.JSON(res)
+}
+
+// Probe godoc
+//
+//	@Summary		Probe
+//	@Description	Probe
+//	@Tags			Tasks
+//	@Id				tasks_probe
+//	@Produce		json
+//	@Param			size	query		string	false	"Size"
+//	@Success		200		{object}	service.TaskProbe
+//	@Failure		404		{object}	errorpkg.ErrorResponse
+//	@Failure		500		{object}	errorpkg.ErrorResponse
+//	@Router			/tasks/probe [get]
+func (r *TaskRouter) Probe(c *fiber.Ctx) error {
+	opts, err := r.parseListQueryParams(c)
+	if err != nil {
+		return err
+	}
+	res, err := r.taskSvc.Probe(*opts, GetUserID(c))
+	if err != nil {
+		return err
+	}
+	return c.JSON(res)
+}
+
+func (r *TaskRouter) parseListQueryParams(c *fiber.Ctx) (*service.TaskListOptions, error) {
 	var err error
 	var page int64
 	if c.Query("page") == "" {
@@ -103,49 +140,45 @@ func (r *TaskRouter) List(c *fiber.Ctx) error {
 	} else {
 		size, err = strconv.ParseInt(c.Query("size"), 10, 64)
 		if err != nil {
-			return err
+			return nil, err
 		}
 	}
 	if size == 0 {
-		return errorpkg.NewInvalidQueryParamError("size")
+		return nil, errorpkg.NewInvalidQueryParamError("size")
 	}
 	sortBy := c.Query("sort_by")
 	if !IsValidSortBy(sortBy) {
-		return errorpkg.NewInvalidQueryParamError("sort_by")
+		return nil, errorpkg.NewInvalidQueryParamError("sort_by")
 	}
 	sortOrder := c.Query("sort_order")
 	if !IsValidSortOrder(sortOrder) {
-		return errorpkg.NewInvalidQueryParamError("sort_order")
+		return nil, errorpkg.NewInvalidQueryParamError("sort_order")
 	}
 	query, err := url.QueryUnescape(c.Query("query"))
 	if err != nil {
-		return errorpkg.NewInvalidQueryParamError("query")
+		return nil, errorpkg.NewInvalidQueryParamError("query")
 	}
-	res, err := r.taskSvc.List(service.TaskListOptions{
+	return &service.TaskListOptions{
 		Query:     query,
-		Page:      uint(page), // #nosec G115
-		Size:      uint(size), // #nosec G115
+		Page:      page,
+		Size:      size,
 		SortBy:    sortBy,
 		SortOrder: sortOrder,
-	}, GetUserID(c))
-	if err != nil {
-		return err
-	}
-	return c.JSON(res)
+	}, nil
 }
 
-// GetCount godoc
+// Count godoc
 //
-//	@Summary		Get Count
-//	@Description	Get Count
+//	@Summary		Count
+//	@Description	Count
 //	@Tags			Tasks
-//	@Id				tasks_get_count
+//	@Id				tasks_count
 //	@Produce		json
 //	@Success		200	{integer}	int
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/tasks/count [get]
-func (r *TaskRouter) GetCount(c *fiber.Ctx) error {
-	res, err := r.taskSvc.GetCount(GetUserID(c))
+func (r *TaskRouter) Count(c *fiber.Ctx) error {
+	res, err := r.taskSvc.Count(GetUserID(c))
 	if err != nil {
 		return err
 	}
@@ -229,10 +262,10 @@ func (r *TaskRouter) Create(c *fiber.Ctx) error {
 	return c.JSON(task)
 }
 
-// Dismiss godoc
+// Delete godoc
 //
-//	@Summary		Dismiss
-//	@Description	Dismiss
+//	@Summary		Delete
+//	@Description	Delete
 //	@Tags			Tasks
 //	@Id				tasks_delete
 //	@Accept			json

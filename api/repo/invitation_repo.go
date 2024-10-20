@@ -24,9 +24,9 @@ import (
 type InvitationRepo interface {
 	Insert(opts InvitationInsertOptions) ([]model.Invitation, error)
 	Find(id string) (model.Invitation, error)
-	GetIncoming(email string) ([]model.Invitation, error)
-	GetIncomingCount(email string) (int64, error)
-	GetOutgoing(orgID string, userID string) ([]model.Invitation, error)
+	FindIncoming(email string) ([]model.Invitation, error)
+	CountIncoming(email string) (int64, error)
+	FindOutgoing(orgID string, userID string) ([]model.Invitation, error)
 	Save(org model.Invitation) error
 	Delete(id string) error
 }
@@ -145,7 +145,7 @@ func (repo *invitationRepo) Find(id string) (model.Invitation, error) {
 	return &invitation, nil
 }
 
-func (repo *invitationRepo) GetIncoming(email string) ([]model.Invitation, error) {
+func (repo *invitationRepo) FindIncoming(email string) ([]model.Invitation, error) {
 	var invitations []*invitationEntity
 	db := repo.db.
 		Raw("SELECT * FROM invitation WHERE email = ? and status = 'pending' ORDER BY create_time DESC", email).
@@ -160,7 +160,7 @@ func (repo *invitationRepo) GetIncoming(email string) ([]model.Invitation, error
 	return res, nil
 }
 
-func (repo *invitationRepo) GetIncomingCount(email string) (int64, error) {
+func (repo *invitationRepo) CountIncoming(email string) (int64, error) {
 	var count int64
 	db := repo.db.
 		Model(&invitationEntity{}).
@@ -173,7 +173,7 @@ func (repo *invitationRepo) GetIncomingCount(email string) (int64, error) {
 	return count, nil
 }
 
-func (repo *invitationRepo) GetOutgoing(orgID string, userID string) ([]model.Invitation, error) {
+func (repo *invitationRepo) FindOutgoing(orgID string, userID string) ([]model.Invitation, error) {
 	var invitations []*invitationEntity
 	db := repo.db.
 		Raw("SELECT * FROM invitation WHERE organization_id = ? and owner_id = ? ORDER BY create_time DESC", orgID, userID).

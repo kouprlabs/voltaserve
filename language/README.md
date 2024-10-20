@@ -26,13 +26,6 @@ Make sure PIP is available:
 python3 -m ensurepip
 ```
 
-Install spaCy model:
-
-```shell:
-
-spacy download xx_ent_wiki_sm
-```
-
 Run for development:
 
 ```shell

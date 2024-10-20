@@ -42,7 +42,7 @@ func NewMosaicRouter() *MosaicRouter {
 func (r *MosaicRouter) AppendRoutes(g fiber.Router) {
 	g.Post("/:id", r.Create)
 	g.Delete("/:id", r.Delete)
-	g.Get("/:id/info", r.GetInfo)
+	g.Get("/:id/info", r.ReadInfo)
 }
 
 func (r *MosaicRouter) AppendNonJWTRoutes(g fiber.Router) {
@@ -91,12 +91,12 @@ func (r *MosaicRouter) Delete(c *fiber.Ctx) error {
 	return c.JSON(res)
 }
 
-// GetInfo godoc
+// ReadInfo godoc
 //
-//	@Summary		Get Info
-//	@Description	Get Info
+//	@Summary		Read Info
+//	@Description	Read Info
 //	@Tags			Mosaic
-//	@Id				mosaic_get_info
+//	@Id				mosaic_read_info
 //	@Accept			json
 //	@Produce		json
 //	@Param			id	path		string	true	"ID"
@@ -104,8 +104,8 @@ func (r *MosaicRouter) Delete(c *fiber.Ctx) error {
 //	@Failure		404	{object}	errorpkg.ErrorResponse
 //	@Failure		500	{object}	errorpkg.ErrorResponse
 //	@Router			/mosaics/{id}/info [get]
-func (r *MosaicRouter) GetInfo(c *fiber.Ctx) error {
-	res, err := r.mosaicSvc.GetInfo(c.Params("id"), GetUserID(c))
+func (r *MosaicRouter) ReadInfo(c *fiber.Ctx) error {
+	res, err := r.mosaicSvc.ReadInfo(c.Params("id"), GetUserID(c))
 	if err != nil {
 		return err
 	}
