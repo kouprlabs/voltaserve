@@ -410,7 +410,7 @@ func (r *FileRouter) parseListQueryParams(c *fiber.Ctx) (*service.FileListOption
 			return nil, err
 		}
 	}
-	if size < 1 {
+	if size == 0 {
 		return nil, errorpkg.NewInvalidQueryParamError("size")
 	}
 	sortBy := c.Query("sort_by")
