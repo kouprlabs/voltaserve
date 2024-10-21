@@ -281,7 +281,7 @@ func (svc *InvitationService) Accept(id string, userID string) error {
 	if err != nil {
 		return err
 	}
-	for _, u := range org.GetUsers() {
+	for _, u := range org.GetMembers() {
 		if u == userID {
 			return errorpkg.NewUserAlreadyMemberOfOrganizationError(user, org)
 		}

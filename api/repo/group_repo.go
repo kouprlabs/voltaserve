@@ -98,7 +98,7 @@ func (g *groupEntity) GetGroupPermissions() []model.CoreGroupPermission {
 	return res
 }
 
-func (g *groupEntity) GetUsers() []string {
+func (g *groupEntity) GetMembers() []string {
 	return g.Members
 }
 

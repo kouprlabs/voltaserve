@@ -9,6 +9,7 @@
 // licenses/AGPL.txt.
 import useSWR, { SWRConfiguration } from 'swr'
 import { apiFetcher } from '@/client/fetcher'
+import { Picture } from '@/client/types'
 
 export enum SortBy {
   Email = 'email',
@@ -25,7 +26,7 @@ export type User = {
   username: string
   email: string
   fullName: string
-  picture?: string
+  picture?: Picture
 }
 
 export type List = {

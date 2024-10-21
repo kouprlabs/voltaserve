@@ -11,6 +11,9 @@
 package service
 
 import (
+	"github.com/kouprlabs/voltaserve/api/errorpkg"
+	"github.com/kouprlabs/voltaserve/api/helper"
+	"slices"
 	"sort"
 
 	"github.com/kouprlabs/voltaserve/api/cache"
@@ -51,13 +54,17 @@ func NewUserService() *UserService {
 }
 
 type User struct {
-	ID         string  `json:"id"`
-	FullName   string  `json:"fullName"`
-	Picture    *string `json:"picture,omitempty"`
-	Email      string  `json:"email"`
-	Username   string  `json:"username"`
-	CreateTime string  `json:"createTime"`
-	UpdateTime *string `json:"updateTime"`
+	ID         string   `json:"id"`
+	FullName   string   `json:"fullName"`
+	Picture    *Picture `json:"picture,omitempty"`
+	Email      string   `json:"email"`
+	Username   string   `json:"username"`
+	CreateTime string   `json:"createTime"`
+	UpdateTime *string  `json:"updateTime"`
+}
+
+type Picture struct {
+	Extension string `json:"extension"`
 }
 
 type UserListOptions struct {
@@ -249,6 +256,60 @@ func (svc *UserService) doPagination(data []model.User, page, size int64) ([]mod
 	return pageData, totalElements, totalPages
 }
 
+func (svc *UserService) ExtractPicture(id string, organizationID *string, groupID *string, userID string, isAdmin bool) ([]byte, *string, *string, error) {
+	user, err := svc.find(id, organizationID, groupID, userID, isAdmin)
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	if user.GetPicture() == nil {
+		return nil, nil, nil, errorpkg.NewS3ObjectNotFoundError(nil)
+	}
+	mime := helper.Base64ToMIME(*user.GetPicture())
+	ext := helper.Base64ToExtension(*user.GetPicture())
+	b, err := helper.Base64ToBytes(*user.GetPicture())
+	if err != nil {
+		return nil, nil, nil, errorpkg.NewS3ObjectNotFoundError(nil)
+	}
+	return b, &ext, &mime, nil
+}
+
+func (svc *UserService) find(id string, orgID *string, groupID *string, userID string, isAdmin bool) (model.User, error) {
+	user, err := svc.userRepo.Find(id)
+	if err != nil {
+		return nil, err
+	}
+	if id == userID || isAdmin {
+		return user, nil
+	}
+	if orgID == nil && groupID == nil {
+		return nil, errorpkg.NewS3ObjectNotFoundError(nil)
+	}
+	if orgID != nil {
+		org, err := svc.orgCache.Get(*orgID)
+		if err != nil {
+			return nil, err
+		}
+		if err := svc.orgGuard.Authorize(userID, org, model.PermissionViewer); err != nil {
+			return nil, err
+		}
+		if !slices.Contains(org.GetMembers(), id) {
+			return nil, errorpkg.NewS3ObjectNotFoundError(nil)
+		}
+	} else {
+		group, err := svc.groupCache.Get(*groupID)
+		if err != nil {
+			return nil, err
+		}
+		if err := svc.groupGuard.Authorize(userID, group, model.PermissionViewer); err != nil {
+			return nil, err
+		}
+		if !slices.Contains(group.GetMembers(), id) {
+			return nil, errorpkg.NewS3ObjectNotFoundError(nil)
+		}
+	}
+	return user, nil
+}
+
 type userMapper struct{}
 
 func newUserMapper() *userMapper {
@@ -256,15 +317,20 @@ func newUserMapper() *userMapper {
 }
 
 func (mp *userMapper) mapOne(user model.User) *User {
-	return &User{
+	res := &User{
 		ID:         user.GetID(),
 		FullName:   user.GetFullName(),
-		Picture:    user.GetPicture(),
 		Email:      user.GetEmail(),
 		Username:   user.GetUsername(),
 		CreateTime: user.GetCreateTime(),
 		UpdateTime: user.GetUpdateTime(),
 	}
+	if user.GetPicture() != nil {
+		res.Picture = &Picture{
+			Extension: helper.Base64ToExtension(*user.GetPicture()),
+		}
+	}
+	return res
 }
 
 func (mp *userMapper) mapMany(users []model.User) ([]*User, error) {

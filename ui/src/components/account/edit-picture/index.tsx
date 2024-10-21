@@ -7,7 +7,7 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   Button,
   FormControl,
@@ -31,6 +31,7 @@ import {
 import * as Yup from 'yup'
 import cx from 'classnames'
 import UserAPI, { User } from '@/client/idp/user'
+import { getPictureUrl } from '@/lib/helpers/picture'
 import { useAppSelector } from '@/store/hook'
 import AccountUploadPicture from './account-upload-picture'
 
@@ -142,7 +143,11 @@ const AccountEditPicture = ({
                       >
                         <AccountUploadPicture
                           {...field}
-                          initialValue={user.picture}
+                          initialValue={
+                            user.picture
+                              ? getPictureUrl(user.picture)
+                              : undefined
+                          }
                           disabled={isSubmitting}
                           onChange={(event) => {
                             if (

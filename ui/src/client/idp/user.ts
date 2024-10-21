@@ -9,13 +9,14 @@
 // licenses/AGPL.txt.
 import useSWR, { SWRConfiguration } from 'swr'
 import { idpFetcher } from '@/client/fetcher'
+import { Picture } from '@/client/types'
 
 export type User = {
   id: string
   username: string
   email: string
   fullName: string
-  picture?: string
+  picture?: Picture
   pendingEmail?: string
 }
 

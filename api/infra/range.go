@@ -50,25 +50,25 @@ func NewRangeInterval(header string, fileSize int64) *RangeInterval {
 }
 
 func (ri *RangeInterval) adjustRange() {
-	/* For open-ended ranges, serve 250 MB */
+	// For open-ended ranges, serve 250 MB
 	if ri.End == 0 {
 		ri.End = ri.Start + DefaultChunkSize - 1
 	}
-	/* Ensure the end is within file size limits */
+	// Ensure the end is within file size limits
 	if ri.End >= ri.FileSize {
 		ri.End = ri.FileSize - 1
 	}
-	/* Ensure the range size is within limits for closed ranges */
+	// Ensure the range size is within limits for closed ranges
 	if ri.End-ri.Start+1 > MaxRangeSize && ri.End != 0 {
 		ri.End = ri.Start + MaxRangeSize - 1
 	}
 }
 
-func (ri RangeInterval) ApplyToMinIOGetObjectOptions(opts *minio.GetObjectOptions) {
-	opts.SetRange(ri.Start, ri.End)
+func (ri *RangeInterval) ApplyToMinIOGetObjectOptions(opts *minio.GetObjectOptions) {
+	_ = opts.SetRange(ri.Start, ri.End)
 }
 
-func (ri RangeInterval) ApplyToFiberContext(ctx *fiber.Ctx) {
+func (ri *RangeInterval) ApplyToFiberContext(ctx *fiber.Ctx) {
 	ctx.Set("Accept-Ranges", "bytes")
 	ctx.Set("Content-Range", fmt.Sprintf("bytes %d-%d/%d", ri.Start, ri.End, ri.FileSize))
 	ctx.Set("Content-Length", fmt.Sprintf("%d", ri.End-ri.Start+1))

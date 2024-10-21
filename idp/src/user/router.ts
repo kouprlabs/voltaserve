@@ -10,16 +10,18 @@
 import { NextFunction, Router, Response } from 'express'
 import { body, validationResult } from 'express-validator'
 import fs from 'fs/promises'
+import { decodeJwt, jwtVerify } from 'jose'
 import multer from 'multer'
 import os from 'os'
 import passport from 'passport'
+import { getConfig } from '@/config/config'
 import {
   SearchPaginatedRequest,
   UserAdminPostRequest,
   UserIdRequest,
   UserSuspendPostRequest,
 } from '@/infra/admin-requests'
-import { parseValidationError } from '@/infra/error'
+import { ErrorCode, newError, parseValidationError } from '@/infra/error'
 import { PassportRequest } from '@/infra/passport-request'
 import { checkAdmin } from '@/token/service'
 import {
@@ -40,6 +42,7 @@ import {
   makeAdminUser,
   getUserByAdmin,
   searchUserListPaginated,
+  getUserPicture,
 } from './service'
 
 const router = Router()
@@ -50,6 +53,39 @@ router.get(
   async (req: PassportRequest, res: Response, next: NextFunction) => {
     try {
       res.json(await getUser(req.user.id))
+    } catch (err) {
+      next(err)
+    }
+  },
+)
+
+router.get(
+  '/picture:ext',
+  async (req: PassportRequest, res: Response, next: NextFunction) => {
+    try {
+      if (!req.query.access_token) {
+        throw newError({
+          code: ErrorCode.InvalidRequest,
+          message: "Query param 'access_token' is required",
+        })
+      }
+      let userID = await getUserIDFromAccessToken(
+        req.query.access_token as string,
+      )
+      const { buffer, extension, mime } = await getUserPicture(userID)
+      if (extension !== req.params.ext) {
+        throw newError({
+          code: ErrorCode.ResourceNotFound,
+          message: 'Picture not found',
+          userMessage: 'Picture not found',
+        })
+      }
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename=picture.${extension}`,
+      )
+      res.setHeader('Content-Type', mime)
+      res.send(buffer)
     } catch (err) {
       next(err)
     }
@@ -277,5 +313,22 @@ router.get(
     }
   },
 )
+
+async function getUserIDFromAccessToken(accessToken: string): Promise<string> {
+  let userID: string
+  try {
+    const { payload } = await jwtVerify(
+      accessToken,
+      new TextEncoder().encode(getConfig().token.jwtSigningKey),
+    )
+    return payload.sub
+  } catch {
+    throw newError({
+      code: ErrorCode.InvalidJwt,
+      message: 'Invalid JWT',
+      userMessage: 'Invalid JWT',
+    })
+  }
+}
 
 export default router

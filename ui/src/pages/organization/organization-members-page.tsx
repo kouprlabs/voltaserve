@@ -42,6 +42,7 @@ import { organizationMemberPaginationStorage } from '@/infra/pagination'
 import { IconLogout, IconMoreVert, IconPersonAdd } from '@/lib/components/icons'
 import PagePagination from '@/lib/components/page-pagination'
 import SectionSpinner from '@/lib/components/section-spinner'
+import { getPictureUrlById } from '@/lib/helpers/picture'
 import { decodeQuery } from '@/lib/helpers/query'
 import { truncateEnd } from '@/lib/helpers/truncate-end'
 import truncateMiddle from '@/lib/helpers/truncate-middle'
@@ -124,7 +125,13 @@ const OrganizationMembersPage = () => {
                     >
                       <Avatar
                         name={u.fullName}
-                        src={u.picture}
+                        src={
+                          u.picture
+                            ? getPictureUrlById(u.id, u.picture, {
+                                organizationId: org.id,
+                              })
+                            : undefined
+                        }
                         className={cx(
                           'border',
                           'border-gray-300',
