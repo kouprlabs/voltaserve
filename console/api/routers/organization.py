@@ -111,11 +111,15 @@ async def get_search_organizations(
             data.query, {"page": data.page, "hitsPerPage": data.size}
         )
 
+        hits = []
+        for organization in organizations["hits"]:
+            try:
+                organization = fetch_organization(organization["id"])
+                hits.append(organization)
+            except NotFoundException:
+                pass
         return OrganizationListResponse(
-            data=(
-                fetch_organization(organization["id"])
-                for organization in organizations["hits"]
-            ),
+            data=hits,
             totalElements=len(organizations["hits"]),
             page=data.page,
             size=data.size,

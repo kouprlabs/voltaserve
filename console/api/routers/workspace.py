@@ -110,8 +110,15 @@ async def get_search_workspaces(data: Annotated[WorkspaceSearchRequest, Depends(
             data.query, {"page": data.page, "hitsPerPage": data.size}
         )
 
+        hits = []
+        for workspace in workspaces["hits"]:
+            try:
+                workspace = fetch_workspace(workspace["id"])
+                hits.append(workspace)
+            except NotFoundException:
+                pass
         return WorkspaceListResponse(
-            data=(fetch_workspace(workspace["id"]) for workspace in workspaces["hits"]),
+            data=hits,
             totalElements=len(workspaces["hits"]),
             page=data.page,
             size=data.size,
