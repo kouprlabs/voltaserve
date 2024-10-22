@@ -625,6 +625,11 @@ definitions:
       totalPages:
         type: integer
     type: object
+  service.Picture:
+    properties:
+      extension:
+        type: string
+    type: object
   service.ReprocessResponse:
     properties:
       accepted:
@@ -845,7 +850,7 @@ definitions:
       id:
         type: string
       picture:
-        type: string
+        $ref: '#/definitions/service.Picture'
       updateTime:
         type: string
       username:
@@ -3763,6 +3768,48 @@ paths:
           schema:
             $ref: '#/definitions/errorpkg.ErrorResponse'
       summary: List
+      tags:
+      - Users
+  /users/{id}/picture{ext}:
+    get:
+      description: Download Picture
+      operationId: users_download_picture
+      parameters:
+      - description: ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Extension
+        in: path
+        name: ext
+        required: true
+        type: string
+      - description: Access Token
+        in: query
+        name: access_token
+        required: true
+        type: string
+      - description: Organization ID
+        in: query
+        name: organization_id
+        type: string
+      - description: Group ID
+        in: query
+        name: group
+        type: string
+      produces:
+      - application/json
+      responses:
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/errorpkg.ErrorResponse'
+      summary: Download Picture
       tags:
       - Users
   /users/probe:

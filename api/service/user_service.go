@@ -11,14 +11,14 @@
 package service
 
 import (
-	"github.com/kouprlabs/voltaserve/api/errorpkg"
-	"github.com/kouprlabs/voltaserve/api/helper"
 	"slices"
 	"sort"
 
 	"github.com/kouprlabs/voltaserve/api/cache"
 	"github.com/kouprlabs/voltaserve/api/config"
+	"github.com/kouprlabs/voltaserve/api/errorpkg"
 	"github.com/kouprlabs/voltaserve/api/guard"
+	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/infra"
 	"github.com/kouprlabs/voltaserve/api/model"
 	"github.com/kouprlabs/voltaserve/api/repo"
@@ -26,30 +26,32 @@ import (
 )
 
 type UserService struct {
-	userMapper *userMapper
-	userRepo   repo.UserRepo
-	userSearch *search.UserSearch
-	orgRepo    repo.OrganizationRepo
-	orgCache   *cache.OrganizationCache
-	orgGuard   *guard.OrganizationGuard
-	groupRepo  repo.GroupRepo
-	groupGuard *guard.GroupGuard
-	groupCache *cache.GroupCache
-	config     *config.Config
+	userMapper     *userMapper
+	userRepo       repo.UserRepo
+	userSearch     *search.UserSearch
+	orgRepo        repo.OrganizationRepo
+	orgCache       *cache.OrganizationCache
+	orgGuard       *guard.OrganizationGuard
+	groupRepo      repo.GroupRepo
+	groupGuard     *guard.GroupGuard
+	groupCache     *cache.GroupCache
+	invitationRepo repo.InvitationRepo
+	config         *config.Config
 }
 
 func NewUserService() *UserService {
 	return &UserService{
-		userMapper: newUserMapper(),
-		userRepo:   repo.NewUserRepo(),
-		userSearch: search.NewUserSearch(),
-		orgRepo:    repo.NewOrganizationRepo(),
-		orgCache:   cache.NewOrganizationCache(),
-		orgGuard:   guard.NewOrganizationGuard(),
-		groupRepo:  repo.NewGroupRepo(),
-		groupGuard: guard.NewGroupGuard(),
-		groupCache: cache.NewGroupCache(),
-		config:     config.GetConfig(),
+		userMapper:     newUserMapper(),
+		userRepo:       repo.NewUserRepo(),
+		userSearch:     search.NewUserSearch(),
+		orgRepo:        repo.NewOrganizationRepo(),
+		orgCache:       cache.NewOrganizationCache(),
+		orgGuard:       guard.NewOrganizationGuard(),
+		groupRepo:      repo.NewGroupRepo(),
+		groupGuard:     guard.NewGroupGuard(),
+		groupCache:     cache.NewGroupCache(),
+		invitationRepo: repo.NewInvitationRepo(),
+		config:         config.GetConfig(),
 	}
 }
 
@@ -256,24 +258,30 @@ func (svc *UserService) doPagination(data []model.User, page, size int64) ([]mod
 	return pageData, totalElements, totalPages
 }
 
-func (svc *UserService) ExtractPicture(id string, organizationID *string, groupID *string, userID string, isAdmin bool) ([]byte, *string, *string, error) {
-	user, err := svc.find(id, organizationID, groupID, userID, isAdmin)
+type ExtractPictureJustification struct {
+	OrganizationID *string
+	GroupID        *string
+	InvitationID   *string
+}
+
+func (svc *UserService) ExtractPicture(id string, justification ExtractPictureJustification, userID string, isAdmin bool) ([]byte, *string, *string, error) {
+	user, err := svc.findUserForPicture(id, justification, userID, isAdmin)
 	if err != nil {
 		return nil, nil, nil, err
 	}
 	if user.GetPicture() == nil {
-		return nil, nil, nil, errorpkg.NewS3ObjectNotFoundError(nil)
+		return nil, nil, nil, errorpkg.NewUserPictureNotFoundError(nil)
 	}
 	mime := helper.Base64ToMIME(*user.GetPicture())
 	ext := helper.Base64ToExtension(*user.GetPicture())
 	b, err := helper.Base64ToBytes(*user.GetPicture())
 	if err != nil {
-		return nil, nil, nil, errorpkg.NewS3ObjectNotFoundError(nil)
+		return nil, nil, nil, errorpkg.NewUserPictureNotFoundError(nil)
 	}
 	return b, &ext, &mime, nil
 }
 
-func (svc *UserService) find(id string, orgID *string, groupID *string, userID string, isAdmin bool) (model.User, error) {
+func (svc *UserService) findUserForPicture(id string, justification ExtractPictureJustification, userID string, isAdmin bool) (model.User, error) {
 	user, err := svc.userRepo.Find(id)
 	if err != nil {
 		return nil, err
@@ -281,11 +289,11 @@ func (svc *UserService) find(id string, orgID *string, groupID *string, userID s
 	if id == userID || isAdmin {
 		return user, nil
 	}
-	if orgID == nil && groupID == nil {
-		return nil, errorpkg.NewS3ObjectNotFoundError(nil)
+	if justification.OrganizationID == nil && justification.GroupID == nil && justification.InvitationID == nil {
+		return nil, errorpkg.NewUserPictureNotFoundError(nil)
 	}
-	if orgID != nil {
-		org, err := svc.orgCache.Get(*orgID)
+	if justification.OrganizationID != nil {
+		org, err := svc.orgCache.Get(*justification.OrganizationID)
 		if err != nil {
 			return nil, err
 		}
@@ -293,10 +301,10 @@ func (svc *UserService) find(id string, orgID *string, groupID *string, userID s
 			return nil, err
 		}
 		if !slices.Contains(org.GetMembers(), id) {
-			return nil, errorpkg.NewS3ObjectNotFoundError(nil)
+			return nil, errorpkg.NewUserPictureNotFoundError(nil)
 		}
-	} else {
-		group, err := svc.groupCache.Get(*groupID)
+	} else if justification.GroupID != nil {
+		group, err := svc.groupCache.Get(*justification.GroupID)
 		if err != nil {
 			return nil, err
 		}
@@ -304,7 +312,15 @@ func (svc *UserService) find(id string, orgID *string, groupID *string, userID s
 			return nil, err
 		}
 		if !slices.Contains(group.GetMembers(), id) {
-			return nil, errorpkg.NewS3ObjectNotFoundError(nil)
+			return nil, errorpkg.NewUserPictureNotFoundError(nil)
+		}
+	} else if justification.InvitationID != nil {
+		invitation, err := svc.invitationRepo.Find(*justification.InvitationID)
+		if err != nil {
+			return nil, err
+		}
+		if invitation.GetOwnerID() != id {
+			return nil, errorpkg.NewUserPictureNotFoundError(nil)
 		}
 	}
 	return user, nil

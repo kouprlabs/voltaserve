@@ -110,6 +110,16 @@ func NewUserNotFoundError(err error) *ErrorResponse {
 	)
 }
 
+func NewUserPictureNotFoundError(err error) *ErrorResponse {
+	return NewErrorResponse(
+		"user_picture_not_found",
+		http.StatusNotFound,
+		"User picture not found.",
+		MsgResourceNotFound,
+		err,
+	)
+}
+
 func NewInsightsNotFoundError(err error) *ErrorResponse {
 	return NewErrorResponse(
 		"insights_not_found",

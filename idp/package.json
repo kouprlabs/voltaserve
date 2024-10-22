@@ -5,6 +5,7 @@
   "private": true,
   "scripts": {
     "start": "bun src/app.ts",
+    "dev": "bun --watch src/app.ts",
     "tsc": "tsc --noEmit",
     "format": "prettier --write .",
     "swagger-autogen": "bun ./swagger.js",

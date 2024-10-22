@@ -10,7 +10,7 @@
 import { NextFunction, Router, Response } from 'express'
 import { body, validationResult } from 'express-validator'
 import fs from 'fs/promises'
-import { decodeJwt, jwtVerify } from 'jose'
+import { jwtVerify } from 'jose'
 import multer from 'multer'
 import os from 'os'
 import passport from 'passport'
@@ -69,7 +69,7 @@ router.get(
           message: "Query param 'access_token' is required",
         })
       }
-      let userID = await getUserIDFromAccessToken(
+      const userID = await getUserIDFromAccessToken(
         req.query.access_token as string,
       )
       const { buffer, extension, mime } = await getUserPicture(userID)
@@ -315,7 +315,6 @@ router.get(
 )
 
 async function getUserIDFromAccessToken(accessToken: string): Promise<string> {
-  let userID: string
   try {
     const { payload } = await jwtVerify(
       accessToken,

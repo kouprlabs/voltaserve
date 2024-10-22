@@ -1256,7 +1256,7 @@ func (r *FileRouter) getUserIDFromAccessToken(accessToken string) (string, error
 	if err != nil {
 		return "", err
 	}
-	if token.Valid {
+	if !token.Valid {
 		return "", errors.New("invalid token")
 	}
 	if claims, ok := token.Claims.(jwt.MapClaims); ok {

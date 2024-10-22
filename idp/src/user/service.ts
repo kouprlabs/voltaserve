@@ -346,7 +346,7 @@ export async function makeAdminUser(options: UserAdminPostRequest) {
 }
 
 export function mapEntity(entity: User): UserDTO {
-  let user: UserDTO = {
+  const user: UserDTO = {
     id: entity.id,
     email: entity.email,
     username: entity.username,

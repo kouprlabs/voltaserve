@@ -334,6 +334,7 @@ class UserRepoImpl {
 
   /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
   private mapList(list: any): User[] {
+    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
     return list.map((user: any) => {
       return {
         id: user.id,

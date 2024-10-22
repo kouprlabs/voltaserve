@@ -203,7 +203,7 @@ func (r *MosaicRouter) getUserIDFromAccessToken(accessToken string) (string, err
 	if err != nil {
 		return "", err
 	}
-	if token.Valid {
+	if !token.Valid {
 		return "", errors.New("invalid token")
 	}
 	if claims, ok := token.Claims.(jwt.MapClaims); ok {
