@@ -47,7 +47,7 @@ func (cl *LanguageClient) GetEntities(opts GetEntitiesOptions) ([]InsightsEntity
 	if err != nil {
 		return []InsightsEntity{}, err
 	}
-	resp, err := http.Post(fmt.Sprintf("%s/v2/entities", cl.config.LanguageURL), "application/json", bytes.NewBuffer(b))
+	resp, err := http.Post(fmt.Sprintf("%s/v3/entities", cl.config.LanguageURL), "application/json", bytes.NewBuffer(b))
 	if err != nil {
 		return []InsightsEntity{}, err
 	}

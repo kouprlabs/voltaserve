@@ -30,7 +30,7 @@ func NewHealthClient() *HealthClient {
 }
 
 func (cl *HealthClient) Get() (string, error) {
-	req, err := http.NewRequest("GET", fmt.Sprintf("%s/v2/health", cl.config.APIURL), nil)
+	req, err := http.NewRequest("GET", fmt.Sprintf("%s/v3/health", cl.config.APIURL), nil)
 	if err != nil {
 		return "", err
 	}

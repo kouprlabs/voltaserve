@@ -10,9 +10,9 @@
 import { Config } from './types'
 
 const config: Config = {
-  apiURL: '/proxy/api/v2',
-  idpURL: '/proxy/idp/v2',
-  consoleURL: '/proxy/console/v1',
+  apiURL: '/proxy/api/v3',
+  idpURL: '/proxy/idp/v3',
+  consoleURL: '/proxy/console/v3',
 }
 
 export function getConfig(): Config {

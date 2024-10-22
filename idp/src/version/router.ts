@@ -13,7 +13,7 @@ const router = Router()
 
 router.get('/', async (_: Request, res: Response, next: NextFunction) => {
   try {
-    res.json({ version: `2.1.0` })
+    res.json({ version: '3.0.0' })
   } catch (err) {
     res.sendStatus(503)
     next(err)

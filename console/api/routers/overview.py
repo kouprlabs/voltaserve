@@ -95,7 +95,7 @@ async def get_internal_version(data: Annotated[VersionRequest, Depends()]):
         async with ClientSession() as sess:
             response = await get_dockerhub_version(sess, data.id, response, params)
             if data.id == "console":
-                response["currentVersion"] = "2.1.0"
+                response["currentVersion"] = "3.0.0"
             elif data.id == "ui":
                 response["currentVersion"] = ""
             else:

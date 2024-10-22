@@ -36,7 +36,7 @@ const DrawerOpenNewTabButton = ({
       return ''
     }
     if (file.snapshot?.original?.extension) {
-      return `/proxy/api/v2/files/${file.id}/${path}${download.extension}`
+      return `/proxy/api/v3/files/${file.id}/${path}${download.extension}`
     } else {
       return ''
     }

@@ -33,7 +33,7 @@ async def custom_http_exception_handler(request: Request, exc: HTTPException):
 
 
 app = FastAPI(
-    root_path="/v1",
+    root_path="/v3",
     debug=False,
     responses={
         status.HTTP_204_NO_CONTENT: {"model": None},

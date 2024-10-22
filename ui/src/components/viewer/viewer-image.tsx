@@ -22,7 +22,7 @@ const ViewerImage = ({ file }: ViewerImageProps) => {
   const [isLoading, setIsLoading] = useState(true)
   const url = useMemo(() => {
     if (file.snapshot?.preview && file.snapshot?.preview.extension) {
-      return `/proxy/api/v2/files/${file.id}/preview${
+      return `/proxy/api/v3/files/${file.id}/preview${
         file.snapshot?.preview.extension
       }?${new URLSearchParams({
         access_token: getAccessTokenOrRedirect(),

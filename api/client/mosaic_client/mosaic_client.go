@@ -92,7 +92,7 @@ func (cl *MosaicClient) Create(opts MosaicCreateOptions) (*MosaicMetadata, error
 	if err := mw.Close(); err != nil {
 		return nil, err
 	}
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v2/mosaics", cl.config.MosaicURL), buf)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/3/mosaics", cl.config.MosaicURL), buf)
 	if err != nil {
 		return nil, err
 	}
@@ -127,7 +127,7 @@ type MosaicGetMetadataOptions struct {
 }
 
 func (cl *MosaicClient) GetMetadata(opts MosaicGetMetadataOptions) (*MosaicMetadata, error) {
-	resp, err := http.Get(fmt.Sprintf("%s/v2/mosaics/%s/%s/metadata", cl.config.MosaicURL, opts.S3Bucket, opts.S3Key))
+	resp, err := http.Get(fmt.Sprintf("%s/v3/mosaics/%s/%s/metadata", cl.config.MosaicURL, opts.S3Bucket, opts.S3Key))
 	if err != nil {
 		return nil, err
 	}
@@ -161,7 +161,7 @@ type MosaicDeleteOptions struct {
 }
 
 func (cl *MosaicClient) Delete(opts MosaicDeleteOptions) error {
-	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/v2/mosaics/%s/%s", cl.config.MosaicURL, opts.S3Bucket, opts.S3Key), nil)
+	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/v3/mosaics/%s/%s", cl.config.MosaicURL, opts.S3Bucket, opts.S3Key), nil)
 	if err != nil {
 		return err
 	}
@@ -190,7 +190,7 @@ type MosaicDownloadTileOptions struct {
 }
 
 func (cl *MosaicClient) DownloadTileBuffer(opts MosaicDownloadTileOptions) (*bytes.Buffer, error) {
-	resp, err := http.Get(fmt.Sprintf("%s/v2/mosaics/%s/%s/zoom_level/%d/row/%d/col/%d/ext/%s", cl.config.MosaicURL, opts.S3Bucket, opts.S3Key, opts.ZoomLevel, opts.Row, opts.Col, opts.Ext))
+	resp, err := http.Get(fmt.Sprintf("%s/v3/mosaics/%s/%s/zoom_level/%d/row/%d/col/%d/ext/%s", cl.config.MosaicURL, opts.S3Bucket, opts.S3Key, opts.ZoomLevel, opts.Row, opts.Col, opts.Ext))
 	if err != nil {
 		return nil, err
 	}

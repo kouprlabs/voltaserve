@@ -55,10 +55,10 @@ passport.use(
   ),
 )
 
-app.use('/v2/health', healthRouter)
-app.use('/v2/user', userRouter)
-app.use('/v2/accounts', accountRouter)
-app.use('/v2/token', tokenRouter)
+app.use('/v3/health', healthRouter)
+app.use('/v3/user', userRouter)
+app.use('/v3/accounts', accountRouter)
+app.use('/v3/token', tokenRouter)
 app.use('/version', versionRouter)
 
 app.use(errorHandler)

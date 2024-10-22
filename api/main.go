@@ -27,8 +27,8 @@ import (
 )
 
 // @title		Voltaserve API
-// @version	2.0.0
-// @BasePath	/v2
+// @version	3.0.0
+// @BasePath	/v3
 //
 // .
 func main() {
@@ -55,35 +55,35 @@ func main() {
 		AllowOrigins: strings.Join(cfg.Security.CORSOrigins, ","),
 	}))
 
-	v2 := app.Group("v2")
+	v3 := app.Group("v3")
 
 	health := router.NewHealthRouter()
-	health.AppendRoutes(v2)
+	health.AppendRoutes(v3)
 
 	version := router.NewVersionRouter()
 	version.AppendRoutes(app)
 
-	filesGroup := v2.Group("files")
+	filesGroup := v3.Group("files")
 	files := router.NewFileRouter()
 	files.AppendNonJWTRoutes(filesGroup)
 
-	snapshotsGroup := v2.Group("snapshots")
+	snapshotsGroup := v3.Group("snapshots")
 	snapshots := router.NewSnapshotRouter()
 	snapshots.AppendNonJWTRoutes(snapshotsGroup)
 
-	insightsGroup := v2.Group("insights")
+	insightsGroup := v3.Group("insights")
 	insights := router.NewInsightsRouter()
 	insights.AppendNonJWTRoutes(insightsGroup)
 
-	mosaicGroup := v2.Group("mosaics")
+	mosaicGroup := v3.Group("mosaics")
 	mosaic := router.NewMosaicRouter()
 	mosaic.AppendNonJWTRoutes(mosaicGroup)
 
-	tasksGroup := v2.Group("tasks")
+	tasksGroup := v3.Group("tasks")
 	tasks := router.NewTaskRouter()
 	tasks.AppendNonJWTRoutes(tasksGroup)
 
-	usersGroup := v2.Group("users")
+	usersGroup := v3.Group("users")
 	users := router.NewUserRouter()
 	users.AppendNonJWTRoutes(usersGroup)
 
@@ -99,19 +99,19 @@ func main() {
 	users.AppendRoutes(usersGroup)
 
 	invitations := router.NewInvitationRouter()
-	invitations.AppendRoutes(v2.Group("invitations"))
+	invitations.AppendRoutes(v3.Group("invitations"))
 
 	organizations := router.NewOrganizationRouter()
-	organizations.AppendRoutes(v2.Group("organizations"))
+	organizations.AppendRoutes(v3.Group("organizations"))
 
 	storage := router.NewStorageRouter()
-	storage.AppendRoutes(v2.Group("storage"))
+	storage.AppendRoutes(v3.Group("storage"))
 
 	workspaces := router.NewWorkspaceRouter()
-	workspaces.AppendRoutes(v2.Group("workspaces"))
+	workspaces.AppendRoutes(v3.Group("workspaces"))
 
 	groups := router.NewGroupRouter()
-	groups.AppendRoutes(v2.Group("groups"))
+	groups.AppendRoutes(v3.Group("groups"))
 
 	if err := app.Listen(fmt.Sprintf(":%d", cfg.Port)); err != nil {
 		panic(err)

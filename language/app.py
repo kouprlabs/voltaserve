@@ -40,17 +40,17 @@ for key in iso_6393_to_model.keys():
     nlp[key].add_pipe("sentencizer")
 
 
-@app.route("/v2/health", methods=["GET"])
+@app.route("/v3/health", methods=["GET"])
 def health():
     return "OK", 200
 
 
 @app.route("/version", methods=["GET"])
 def version():
-    return {"version": "2.1.0"}
+    return {"version": "3.0.0"}
 
 
-@app.route("/v2/entities", methods=["POST"])
+@app.route("/v3/entities", methods=["POST"])
 def ner_entities():
     global nlp
     global iso_6393_to_6391
