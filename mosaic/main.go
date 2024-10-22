@@ -24,8 +24,8 @@ import (
 )
 
 // @title		Voltaserve Mosaic
-// @version	2.0.0
-// @BasePath	/v2
+// @version	3.0.0
+// @BasePath	/v3
 //
 // .
 func main() {
@@ -48,16 +48,16 @@ func main() {
 		BodyLimit:    int(helper.MegabyteToByte(cfg.Limits.MultipartBodyLengthLimitMB)),
 	})
 
-	v2 := app.Group("v2")
+	v3 := app.Group("v3")
 
 	healthRouter := router.NewHealthRouter()
-	healthRouter.AppendRoutes(v2)
+	healthRouter.AppendRoutes(v3)
 
 	version := router.NewVersionRouter()
 	version.AppendRoutes(app)
 
 	mosaicRouter := router.NewMosaicRouter()
-	mosaicRouter.AppendRoutes(v2.Group("mosaics"))
+	mosaicRouter.AppendRoutes(v3.Group("mosaics"))
 
 	if err := app.Listen(fmt.Sprintf(":%d", cfg.Port)); err != nil {
 		panic(err)

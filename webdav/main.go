@@ -89,8 +89,8 @@ func basicAuthMiddleware(next http.Handler, idpClient *idp_client.TokenClient) h
 }
 
 // @title		Voltaserve WebDAV
-// @version	2.0.0
-// @BasePath	/v2
+// @version	3.0.0
+// @BasePath	/v3
 //
 // .
 func main() {
@@ -110,7 +110,7 @@ func main() {
 
 	h := handler.NewHandler()
 	mux := http.NewServeMux()
-	mux.HandleFunc("/v2/health", h.Health)
+	mux.HandleFunc("/v3/health", h.Health)
 	mux.HandleFunc("/version", h.Version)
 	mux.HandleFunc("/", h.Dispatch)
 
@@ -120,7 +120,7 @@ func main() {
 		Addr:              net.JoinHostPort(cfg.Host, cfg.Port),
 		ReadHeaderTimeout: 30 * time.Second,
 		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			if strings.HasPrefix(r.URL.Path, "/v2/health") || strings.HasPrefix(r.URL.Path, "/version") {
+			if strings.HasPrefix(r.URL.Path, "/v3/health") || strings.HasPrefix(r.URL.Path, "/version") {
 				mux.ServeHTTP(w, r)
 			} else {
 				basicAuthMiddleware(mux, idpClient).ServeHTTP(w, r)

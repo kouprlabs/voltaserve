@@ -81,7 +81,7 @@ func (h *Handler) Health(w http.ResponseWriter, _ *http.Request) {
 
 func (h *Handler) Version(w http.ResponseWriter, _ *http.Request) {
 	versionInfo := map[string]string{
-		"version": "2.1.0",
+		"version": "3.0.0",
 	}
 
 	w.Header().Set("Content-Type", "application/json")

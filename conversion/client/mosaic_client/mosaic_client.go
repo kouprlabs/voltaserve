@@ -93,7 +93,7 @@ func (cl *MosaicClient) Create(opts MosaicCreateOptions) (*MosaicMetadata, error
 	if err := mw.Close(); err != nil {
 		return nil, err
 	}
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v2/mosaics", cl.config.MosaicURL), buf)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v3/mosaics", cl.config.MosaicURL), buf)
 	if err != nil {
 		return nil, err
 	}
@@ -128,7 +128,7 @@ type MosaicDeleteOptions struct {
 }
 
 func (cl *MosaicClient) Delete(opts MosaicDeleteOptions) error {
-	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/v2/mosaics/%s/%s", cl.config.MosaicURL, opts.S3Bucket, opts.S3Key), nil)
+	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/v3/mosaics/%s/%s", cl.config.MosaicURL, opts.S3Bucket, opts.S3Key), nil)
 	if err != nil {
 		return err
 	}

@@ -38,7 +38,7 @@ import {
 import SectionSpinner from '@/lib/components/section-spinner'
 
 const spinnerHeight = '40px'
-const uiCurrentVersion = { version: '2.1.0' }
+const uiCurrentVersion = { version: '3.0.0' }
 const internalComponents = [
   { id: 'ui' },
   { id: 'api' },

@@ -98,7 +98,7 @@ func (cl *FileClient) CreateFolder(opts FileCreateFolderOptions) (*File, error) 
 		params.Set("parent_id", opts.ParentID)
 	}
 	params.Set("name", opts.Name)
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v2/files?%s", cl.config.APIURL, params.Encode()), nil)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v3/files?%s", cl.config.APIURL, params.Encode()), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -158,7 +158,7 @@ func (cl *FileClient) CreateFromS3(opts FileCreateFromS3Options) (*File, error) 
 		"content_type": []string{opts.S3Reference.ContentType},
 		"size":         []string{strconv.FormatInt(opts.S3Reference.Size, 10)},
 	}
-	reqUrl := cl.config.APIURL + "/v2/files/create_from_s3?" + args.Encode()
+	reqUrl := cl.config.APIURL + "/v3/files/create_from_s3?" + args.Encode()
 	req, err := http.NewRequest("POST",
 		reqUrl,
 		bytes.NewBuffer(body))
@@ -212,7 +212,7 @@ func (cl *FileClient) PatchFromS3(opts FilePatchFromS3Options) (*File, error) {
 		"content_type": []string{opts.S3Reference.ContentType},
 		"size":         []string{strconv.FormatInt(opts.S3Reference.Size, 10)},
 	}
-	reqUrl := cl.config.APIURL + "/v2/files/" + opts.ID + "/patch_from_s3?" + args.Encode()
+	reqUrl := cl.config.APIURL + "/v3/files/" + opts.ID + "/patch_from_s3?" + args.Encode()
 	req, err := http.NewRequest("PATCH",
 		reqUrl,
 		bytes.NewBuffer(body))
@@ -245,7 +245,7 @@ func (cl *FileClient) PatchFromS3(opts FilePatchFromS3Options) (*File, error) {
 }
 
 func (cl *FileClient) GetByPath(path string) (*File, error) {
-	req, err := http.NewRequest("GET", fmt.Sprintf("%s/v2/files?path=%s", cl.config.APIURL, helper.EncodeURIComponent(path)), nil)
+	req, err := http.NewRequest("GET", fmt.Sprintf("%s/v3/files?path=%s", cl.config.APIURL, helper.EncodeURIComponent(path)), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -274,7 +274,7 @@ func (cl *FileClient) GetByPath(path string) (*File, error) {
 }
 
 func (cl *FileClient) ListByPath(path string) ([]File, error) {
-	req, err := http.NewRequest("GET", fmt.Sprintf("%s/v2/files/list?path=%s", cl.config.APIURL, helper.EncodeURIComponent(path)), nil)
+	req, err := http.NewRequest("GET", fmt.Sprintf("%s/v3/files/list?path=%s", cl.config.APIURL, helper.EncodeURIComponent(path)), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -303,7 +303,7 @@ func (cl *FileClient) ListByPath(path string) ([]File, error) {
 }
 
 func (cl *FileClient) CopyOne(id string, targetID string) (*File, error) {
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v2/files/%s/copy/%s", cl.config.APIURL, id, targetID), nil)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v3/files/%s/copy/%s", cl.config.APIURL, id, targetID), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -332,7 +332,7 @@ func (cl *FileClient) CopyOne(id string, targetID string) (*File, error) {
 }
 
 func (cl *FileClient) MoveOne(id string, targetID string) error {
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v2/files/%s/move/%s", cl.config.APIURL, id, targetID), nil)
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v3/files/%s/move/%s", cl.config.APIURL, id, targetID), nil)
 	if err != nil {
 		return err
 	}
@@ -361,7 +361,7 @@ func (cl *FileClient) PatchName(id string, opts FilePatchNameOptions) (*File, er
 	if err != nil {
 		return nil, err
 	}
-	req, err := http.NewRequest("PATCH", fmt.Sprintf("%s/v2/files/%s/name", cl.config.APIURL, id), bytes.NewBuffer(b))
+	req, err := http.NewRequest("PATCH", fmt.Sprintf("%s/v3/files/%s/name", cl.config.APIURL, id), bytes.NewBuffer(b))
 	if err != nil {
 		return nil, err
 	}
@@ -390,7 +390,7 @@ func (cl *FileClient) PatchName(id string, opts FilePatchNameOptions) (*File, er
 }
 
 func (cl *FileClient) DeleteOne(id string) error {
-	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/v2/files/%s", cl.config.APIURL, id), nil)
+	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/v3/files/%s", cl.config.APIURL, id), nil)
 	if err != nil {
 		return err
 	}
@@ -411,7 +411,7 @@ func (cl *FileClient) DeleteOne(id string) error {
 }
 
 func (cl *FileClient) DownloadOriginal(file *File, outputPath string) error {
-	resp, err := http.Get(fmt.Sprintf("%s/v2/files/%s/original%s?access_token=%s", cl.config.APIURL, file.ID, file.Snapshot.Original.Extension, cl.token.AccessToken))
+	resp, err := http.Get(fmt.Sprintf("%s/v3/files/%s/original%s?access_token=%s", cl.config.APIURL, file.ID, file.Snapshot.Original.Extension, cl.token.AccessToken))
 	if err != nil {
 		return err
 	}

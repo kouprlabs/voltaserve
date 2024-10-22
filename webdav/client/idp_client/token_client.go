@@ -60,7 +60,7 @@ func (cl *TokenClient) Exchange(options TokenExchangeOptions) (*infra.Token, err
 	if options.RefreshToken != "" {
 		form.Set("refresh_token", options.RefreshToken)
 	}
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v2/token", cl.config.IdPURL), bytes.NewBufferString(form.Encode()))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v3/token", cl.config.IdPURL), bytes.NewBufferString(form.Encode()))
 	if err != nil {
 		return nil, err
 	}

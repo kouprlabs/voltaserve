@@ -1,5 +1,7 @@
 # Voltaserve Mosaic
 
+## Getting Started
+
 Prerequisites:
 - [golangci-lint](https://github.com/golangci/golangci-lint)
 - [gci](https://github.com/daixiang0/gci)

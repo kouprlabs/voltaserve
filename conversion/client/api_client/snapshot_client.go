@@ -124,7 +124,7 @@ func (cl *SnapshotClient) Patch(opts SnapshotPatchOptions) error {
 	if err != nil {
 		return err
 	}
-	req, err := http.NewRequest("PATCH", fmt.Sprintf("%s/v2/snapshots/%s?api_key=%s", cl.config.APIURL, opts.Options.SnapshotID, cl.config.Security.APIKey), bytes.NewBuffer(body))
+	req, err := http.NewRequest("PATCH", fmt.Sprintf("%s/v3/snapshots/%s?api_key=%s", cl.config.APIURL, opts.Options.SnapshotID, cl.config.Security.APIKey), bytes.NewBuffer(body))
 	if err != nil {
 		return err
 	}

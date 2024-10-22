@@ -36,6 +36,6 @@ func (r *VersionRouter) AppendRoutes(g fiber.Router) {
 //	@Router			/health [get]
 func (r *VersionRouter) GetVersion(c *fiber.Ctx) error {
 	return c.JSON(map[string]string{
-		"version": "2.1.0",
+		"version": "3.0.0",
 	})
 }

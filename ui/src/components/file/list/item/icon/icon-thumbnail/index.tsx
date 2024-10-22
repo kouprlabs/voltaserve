@@ -25,7 +25,7 @@ const IconThumbnail = ({
   const [isLoading, setIsLoading] = useState(true)
   const url = useMemo(() => {
     if (file.snapshot?.thumbnail) {
-      return `/proxy/api/v2/files/${file.id}/thumbnail${
+      return `/proxy/api/v3/files/${file.id}/thumbnail${
         file.snapshot.thumbnail.extension
       }?${new URLSearchParams({
         access_token: getAccessTokenOrRedirect(),

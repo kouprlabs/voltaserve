@@ -26,8 +26,8 @@ import (
 )
 
 // @title		Voltaserve Conversion
-// @version	2.0.0
-// @BasePath	/v2
+// @version	3.0.0
+// @BasePath	/v3
 //
 // .
 func main() {
@@ -59,12 +59,12 @@ func main() {
 		BodyLimit:    int(helper.MegabyteToByte(cfg.Limits.MultipartBodyLengthLimitMB)),
 	})
 
-	v2 := app.Group("v2")
+	v3 := app.Group("v3")
 
 	healthRouter := router.NewHealthRouter(router.HealthRouterOptions{
 		Installer: installer,
 	})
-	healthRouter.AppendRoutes(v2)
+	healthRouter.AppendRoutes(v3)
 
 	version := router.NewVersionRouter()
 	version.AppendRoutes(app)
@@ -72,7 +72,7 @@ func main() {
 	pipelineRouter := router.NewPipelineRouter(router.NewPipelineRouterOptions{
 		Scheduler: scheduler,
 	})
-	pipelineRouter.AppendRoutes(v2)
+	pipelineRouter.AppendRoutes(v3)
 
 	scheduler.Start()
 	installer.Start()

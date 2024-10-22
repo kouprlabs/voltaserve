@@ -52,7 +52,7 @@ func (cl *PipelineClient) Run(opts *PipelineRunOptions) error {
 	if err != nil {
 		return err
 	}
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v2/pipelines/run", cl.config.ConversionURL), bytes.NewBuffer(body))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/v3/pipelines/run", cl.config.ConversionURL), bytes.NewBuffer(body))
 	if err != nil {
 		return err
 	}

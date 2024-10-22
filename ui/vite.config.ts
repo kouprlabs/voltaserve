@@ -19,17 +19,17 @@ const config = ({ mode }) => {
     server: {
       port: 3000,
       proxy: {
-        '/proxy/api/v2': {
+        '/proxy/api/v3': {
           target: process.env.API_URL,
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/proxy\/api/, ''),
         },
-        '/proxy/idp/v2': {
+        '/proxy/idp/v3': {
           target: process.env.IDP_URL,
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/proxy\/idp/, ''),
         },
-        '/proxy/console/v1': {
+        '/proxy/console/v3': {
           target: process.env.CONSOLE_URL,
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/proxy\/console/, ''),

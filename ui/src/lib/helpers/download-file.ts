@@ -15,7 +15,7 @@ export default async function downloadFile(file: File) {
     return
   }
   const a: HTMLAnchorElement = document.createElement('a')
-  a.href = `/proxy/api/v2/files/${file.id}/original${
+  a.href = `/proxy/api/v3/files/${file.id}/original${
     file.snapshot?.original.extension
   }?${new URLSearchParams({
     access_token: getAccessTokenOrRedirect(),

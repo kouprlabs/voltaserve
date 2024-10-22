@@ -1,6 +1,6 @@
 {
   "name": "voltaserve-idp",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "license": "BUSL-1.1",
   "private": true,
   "scripts": {

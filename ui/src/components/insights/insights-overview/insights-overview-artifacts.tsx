@@ -45,7 +45,7 @@ const InsightsOverviewArtifacts = () => {
           as="a"
           type="button"
           leftIcon={<IconOpenInNew />}
-          href={`/proxy/api/v2/insights/${id}/text${file.snapshot?.text.extension}?${searchParams}`}
+          href={`/proxy/api/v3/insights/${id}/text${file.snapshot?.text.extension}?${searchParams}`}
           target="_blank"
         >
           Open Plain Text File
@@ -56,7 +56,7 @@ const InsightsOverviewArtifacts = () => {
           as="a"
           type="button"
           leftIcon={<IconOpenInNew />}
-          href={`/proxy/api/v2/insights/${id}/ocr${file.snapshot?.ocr.extension}?${searchParams}`}
+          href={`/proxy/api/v3/insights/${id}/ocr${file.snapshot?.ocr.extension}?${searchParams}`}
           target="_blank"
         >
           Open Searchable PDF
