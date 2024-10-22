@@ -14,7 +14,7 @@ import {
   useNavigate,
   useSearchParams,
 } from 'react-router-dom'
-import { Link as ChakraLink } from '@chakra-ui/react'
+import { Avatar, Link as ChakraLink } from '@chakra-ui/react'
 import {
   Center,
   Heading,
@@ -148,7 +148,22 @@ const ConsolePanelWorkspaces = () => {
                 {list.data.map((workspace) => (
                   <Tr key={workspace.id}>
                     <Td>
-                      <Text noOfLines={1}>{workspace.name}</Text>
+                      <div
+                        className={cx(
+                          'flex',
+                          'flex-row',
+                          'gap-1.5',
+                          'items-center',
+                        )}
+                      >
+                        <Avatar
+                          name={workspace.name}
+                          size="sm"
+                          className={cx('w-[40px]', 'h-[40px]')}
+                        />
+
+                        <Text noOfLines={1}>{workspace.name}</Text>
+                      </div>
                     </Td>
                     <Td>
                       <ChakraLink

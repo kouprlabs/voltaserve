@@ -10,6 +10,7 @@
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import {
+  Avatar,
   Center,
   Heading,
   IconButton,
@@ -151,7 +152,21 @@ const ConsolePanelOrganizations = () => {
                     }}
                   >
                     <Td>
-                      <Text noOfLines={1}>{organization.name}</Text>
+                      <div
+                        className={cx(
+                          'flex',
+                          'flex-row',
+                          'gap-1.5',
+                          'items-center',
+                        )}
+                      >
+                        <Avatar
+                          name={organization.name}
+                          size="sm"
+                          className={cx('w-[40px]', 'h-[40px]')}
+                        />
+                        <Text noOfLines={1}>{organization.name}</Text>
+                      </div>
                     </Td>
                     <Td>
                       <Text>

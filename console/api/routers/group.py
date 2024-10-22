@@ -94,8 +94,15 @@ async def get_search_groups(data: Annotated[GroupSearchRequest, Depends()]):
             data.query, {"page": data.page, "hitsPerPage": data.size}
         )
 
+        hits = []
+        for group in groups["hits"]:
+            try:
+                group = fetch_group(group["id"])
+                hits.append(group)
+            except NotFoundException:
+                pass
         return GroupListResponse(
-            data=(fetch_group(group["id"]) for group in groups["hits"]),
+            data=hits,
             totalElements=len(groups["hits"]),
             page=data.page,
             size=data.size,

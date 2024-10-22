@@ -32,6 +32,26 @@ export type UserDTO = {
   pendingEmail?: string
 }
 
+export type UserAdminDTO = {
+  id: string
+  fullName: string
+  username: string
+  email: string
+  passwordHash?: string
+  refreshTokenValue?: string
+  refreshTokenExpiry?: string
+  resetPasswordToken?: string
+  emailConfirmationToken?: string
+  isEmailConfirmed: boolean
+  isAdmin: boolean
+  isActive: boolean
+  emailUpdateToken?: string
+  emailUpdateValue?: string
+  picture?: PictureDTO
+  createTime: string
+  updateTime?: string
+}
+
 export type PictureDTO = {
   extension: string
 }
@@ -67,7 +87,7 @@ export async function getUser(id: string): Promise<UserDTO> {
   return mapEntity(await userRepo.findByID(id))
 }
 
-export async function getUserByAdmin(id: string): Promise<User> {
+export async function getUserByAdmin(id: string): Promise<UserAdminDTO> {
   return adminMapEntity(await userRepo.findByID(id))
 }
 
@@ -103,18 +123,22 @@ export async function searchUserListPaginated(
         }
       })
     return {
-      data: await userRepo.listAllByIds(
-        users.data.map((value) => {
-          return value.id
-        }),
-      ),
+      data: (
+        await userRepo.listAllByIds(
+          users.data.map((value) => {
+            return value.id
+          }),
+        )
+      ).map((value) => adminMapEntity(value)),
       totalElements: users.totalElements,
       size: size,
       page: page,
     }
   } else {
     return {
-      data: await userRepo.listAllPaginated(page, size),
+      data: (await userRepo.listAllPaginated(page, size)).map((value) =>
+        adminMapEntity(value),
+      ),
       totalElements: await userRepo.getUserCount(),
       size: size,
       page: page,
@@ -364,18 +388,22 @@ export function mapEntity(entity: User): UserDTO {
   return user
 }
 
-export function adminMapEntity(entity: User): User {
-  const user: User = {
+export function adminMapEntity(entity: User): UserAdminDTO {
+  const user: UserAdminDTO = {
     id: entity.id,
     email: entity.email,
     username: entity.username,
     fullName: entity.fullName,
-    picture: entity.picture,
     createTime: entity.createTime,
     updateTime: entity.updateTime,
     isActive: entity.isActive,
     isAdmin: entity.isAdmin,
     isEmailConfirmed: entity.isEmailConfirmed,
+  }
+  if (entity.picture) {
+    user.picture = {
+      extension: base64ToExtension(entity.picture),
+    }
   }
   Object.keys(user).forEach(
     (index) => !user[index] && user[index] !== undefined && delete user[index],

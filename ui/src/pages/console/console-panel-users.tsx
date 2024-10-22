@@ -26,6 +26,7 @@ import {
   Menu,
   Center,
   IconButton,
+  Avatar,
 } from '@chakra-ui/react'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
@@ -36,6 +37,7 @@ import { getUserId } from '@/infra/token'
 import { IconMoreVert } from '@/lib/components/icons'
 import PagePagination from '@/lib/components/page-pagination'
 import SectionSpinner from '@/lib/components/section-spinner'
+import { getPictureUrlById } from '@/lib/helpers/picture'
 import { decodeQuery } from '@/lib/helpers/query'
 import usePagePagination from '@/lib/hooks/page-pagination'
 
@@ -180,7 +182,29 @@ const ConsolePanelUsers = () => {
                     }}
                   >
                     <Td>
-                      <Text noOfLines={1}>{user.fullName}</Text>
+                      <div
+                        className={cx(
+                          'flex',
+                          'flex-row',
+                          'gap-1.5',
+                          'items-center',
+                        )}
+                      >
+                        <Avatar
+                          name={user.fullName}
+                          src={
+                            user.picture
+                              ? getPictureUrlById(user.id, user.picture)
+                              : undefined
+                          }
+                          className={cx(
+                            'border',
+                            'border-gray-300',
+                            'dark:border-gray-700',
+                          )}
+                        />
+                        <Text noOfLines={1}>{user.fullName}</Text>
+                      </div>
                     </Td>
                     <Td>
                       <Text noOfLines={1}>{user.email}</Text>

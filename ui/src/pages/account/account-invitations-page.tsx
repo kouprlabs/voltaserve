@@ -147,7 +147,7 @@ const AccountInvitationsPage = () => {
                                       i.owner.id,
                                       i.owner.picture,
                                       {
-                                        organizationId: i.organization.id,
+                                        invitationId: i.id,
                                       },
                                     )
                                   : undefined
