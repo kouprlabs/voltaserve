@@ -146,7 +146,9 @@ const AccountInvitationsPage = () => {
                                   ? getPictureUrlById(
                                       i.owner.id,
                                       i.owner.picture,
-                                      { invitationId: i.id },
+                                      {
+                                        invitationId: i.id,
+                                      },
                                     )
                                   : undefined
                               }
