@@ -9,6 +9,7 @@
 // licenses/AGPL.txt.
 import { Request } from 'express'
 import { User } from '@/user/model'
+import { UserAdminDTO } from '@/user/service'
 
 export interface UserIdPostRequest extends Request {
   id: string
@@ -41,7 +42,7 @@ export interface UserIdRequest extends Request {
 }
 
 export interface UserSearchResponse {
-  data: User[]
+  data: UserAdminDTO[]
   page: number
   size: number
   totalElements: number

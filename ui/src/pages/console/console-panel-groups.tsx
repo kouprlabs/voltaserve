@@ -14,7 +14,7 @@ import {
   useNavigate,
   useSearchParams,
 } from 'react-router-dom'
-import { Link as ChakraLink } from '@chakra-ui/react'
+import { Avatar, Link as ChakraLink } from '@chakra-ui/react'
 import {
   Center,
   Heading,
@@ -140,7 +140,21 @@ const ConsolePanelGroups = () => {
                 {list.data.map((group) => (
                   <Tr key={group.id}>
                     <Td>
-                      <Text noOfLines={1}>{group.name}</Text>
+                      <div
+                        className={cx(
+                          'flex',
+                          'flex-row',
+                          'items-center',
+                          'gap-1.5',
+                        )}
+                      >
+                        <Avatar
+                          name={group.name}
+                          size="sm"
+                          className={cx('w-[40px]', 'h-[40px]')}
+                        />
+                        <Text noOfLines={1}>{group.name}</Text>
+                      </div>
                     </Td>
                     <Td>
                       <ChakraLink

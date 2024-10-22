@@ -10,6 +10,7 @@ export function getPictureUrl(picture: Picture) {
 type PictureUrlByIdOptions = {
   organizationId?: string
   groupId?: string
+  invitationId?: string
 }
 
 export function getPictureUrlById(
@@ -22,6 +23,7 @@ export function getPictureUrlById(
       access_token: getAccessTokenOrRedirect(),
       organization_id: options?.organizationId ?? '',
       group_id: options?.groupId ?? '',
+      invitation_id: options?.invitationId ?? '',
     },
   )}`
 }
