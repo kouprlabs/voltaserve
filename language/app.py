@@ -34,7 +34,6 @@ def ner_entities():
 
     content = request.json
     text = content["text"]
-    language = content["language"]
 
     entities = [
         {"text": ent.text, "label": ent.label_}
