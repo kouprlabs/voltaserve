@@ -39,7 +39,6 @@ import PagePagination from '@/lib/components/page-pagination'
 import SectionSpinner from '@/lib/components/section-spinner'
 import { getPictureUrlById } from '@/lib/helpers/picture'
 import { decodeQuery } from '@/lib/helpers/query'
-import { truncateEnd } from '@/lib/helpers/truncate-end'
 import usePagePagination from '@/lib/hooks/page-pagination'
 
 const ConsolePanelUsers = () => {
