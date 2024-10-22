@@ -13,31 +13,9 @@ import string
 import spacy.cli
 
 app = Flask(__name__)
-iso_6393_to_model = {
-    "ara": "xx_ent_wiki_sm",
-    "chi_sim": "zh_core_web_lg",
-    "chi_tra": "zh_core_web_lg",
-    "deu": "de_core_news_lg",
-    "eng": "en_core_web_lg",
-    "fra": "fr_core_news_sm",
-    "hin": "xx_ent_wiki_sm",
-    "ita": "it_core_news_lg",
-    "jpn": "ja_core_news_lg",
-    "nld": "nl_core_news_lg",
-    "por": "pt_core_news_lg",
-    "rus": "ru_core_news_lg",
-    "spa": "es_core_news_lg",
-    "swe": "sv_core_news_lg",
-    "nor": "nb_core_news_lg",
-    "fin": "fi_core_news_lg",
-    "dan": "da_core_news_lg",
-}
-nlp = {}
-for key in iso_6393_to_model.keys():
-    model = iso_6393_to_model[key]
-    spacy.cli.download(model)
-    nlp[key] = spacy.load(model)
-    nlp[key].add_pipe("sentencizer")
+spacy.cli.download("xx_ent_wiki_sm")
+nlp = spacy.load("xx_ent_wiki_sm")
+nlp.add_pipe("sentencizer")
 
 
 @app.route("/v3/health", methods=["GET"])
@@ -53,15 +31,13 @@ def version():
 @app.route("/v3/entities", methods=["POST"])
 def ner_entities():
     global nlp
-    global iso_6393_to_6391
 
     content = request.json
     text = content["text"]
-    language = content["language"]
 
     entities = [
         {"text": ent.text, "label": ent.label_}
-        for doc in nlp[language].pipe([text], disable=["tagger"])
+        for doc in nlp.pipe([text], disable=["tagger"])
         for sent in doc.sents
         for ent in sent.ents
     ]
