@@ -83,6 +83,10 @@ func main() {
 	tasks := router.NewTaskRouter()
 	tasks.AppendNonJWTRoutes(tasksGroup)
 
+	usersGroup := v2.Group("users")
+	users := router.NewUserRouter()
+	users.AppendNonJWTRoutes(usersGroup)
+
 	app.Use(jwtware.New(jwtware.Config{
 		SigningKey: jwtware.SigningKey{Key: []byte(cfg.Security.JWTSigningKey)},
 	}))
@@ -92,6 +96,7 @@ func main() {
 	insights.AppendRoutes(insightsGroup)
 	mosaic.AppendRoutes(mosaicGroup)
 	tasks.AppendRoutes(tasksGroup)
+	users.AppendRoutes(usersGroup)
 
 	invitations := router.NewInvitationRouter()
 	invitations.AppendRoutes(v2.Group("invitations"))
@@ -107,9 +112,6 @@ func main() {
 
 	groups := router.NewGroupRouter()
 	groups.AppendRoutes(v2.Group("groups"))
-
-	users := router.NewUserRouter()
-	users.AppendRoutes(v2.Group("users"))
 
 	if err := app.Listen(fmt.Sprintf(":%d", cfg.Port)); err != nil {
 		panic(err)

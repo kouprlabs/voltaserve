@@ -39,7 +39,7 @@ func (g *GroupGuard) IsAuthorized(userID string, group model.Group, permission s
 			log.GetLogger().Error(err)
 			return false
 		}
-		for _, u := range g.GetUsers() {
+		for _, u := range g.GetMembers() {
 			if u == userID && model.IsEquivalentPermission(p.GetValue(), permission) {
 				return true
 			}

@@ -110,6 +110,16 @@ func NewUserNotFoundError(err error) *ErrorResponse {
 	)
 }
 
+func NewUserPictureNotFoundError(err error) *ErrorResponse {
+	return NewErrorResponse(
+		"user_picture_not_found",
+		http.StatusNotFound,
+		"User picture not found.",
+		MsgResourceNotFound,
+		err,
+	)
+}
+
 func NewInsightsNotFoundError(err error) *ErrorResponse {
 	return NewErrorResponse(
 		"insights_not_found",
@@ -277,16 +287,6 @@ func NewMissingQueryParamError(param string) *ErrorResponse {
 		"missing_query_param",
 		http.StatusBadRequest,
 		fmt.Sprintf("Query param '%s' is required.", param),
-		MsgInvalidRequest,
-		nil,
-	)
-}
-
-func NewInvalidPathParamError(param string) *ErrorResponse {
-	return NewErrorResponse(
-		"invalid_path_param",
-		http.StatusBadRequest,
-		fmt.Sprintf("Path param '%s' is invalid.", param),
 		MsgInvalidRequest,
 		nil,
 	)

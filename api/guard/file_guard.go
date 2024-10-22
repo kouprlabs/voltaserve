@@ -39,7 +39,7 @@ func (g *FileGuard) IsAuthorized(userID string, file model.File, permission stri
 			log.GetLogger().Error(err)
 			return false
 		}
-		for _, u := range g.GetUsers() {
+		for _, u := range g.GetMembers() {
 			if u == userID && model.IsEquivalentPermission(p.GetValue(), permission) {
 				return true
 			}

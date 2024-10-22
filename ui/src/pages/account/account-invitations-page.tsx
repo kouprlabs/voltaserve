@@ -10,6 +10,7 @@
 import { useCallback, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import {
+  Avatar,
   IconButton,
   Menu,
   MenuButton,
@@ -34,6 +35,7 @@ import { incomingInvitationPaginationStorage } from '@/infra/pagination'
 import { IconMoreVert } from '@/lib/components/icons'
 import PagePagination from '@/lib/components/page-pagination'
 import SectionSpinner from '@/lib/components/section-spinner'
+import { getPictureUrlById } from '@/lib/helpers/picture'
 import prettyDate from '@/lib/helpers/pretty-date'
 import userToString from '@/lib/helpers/user-to-string'
 import usePagePagination from '@/lib/hooks/page-pagination'
@@ -126,7 +128,41 @@ const AccountInvitationsPage = () => {
               {list.data.length > 0 &&
                 list.data.map((i) => (
                   <Tr key={i.id}>
-                    <Td>{i.owner ? userToString(i.owner) : ''}</Td>
+                    <Td>
+                      <div
+                        className={cx(
+                          'flex',
+                          'flex-row',
+                          'gap-1.5',
+                          'items-center',
+                        )}
+                      >
+                        {i.owner && i.organization ? (
+                          <>
+                            <Avatar
+                              name={i.owner.fullName}
+                              src={
+                                i.owner.picture
+                                  ? getPictureUrlById(
+                                      i.owner.id,
+                                      i.owner.picture,
+                                      {
+                                        organizationId: i.organization.id,
+                                      },
+                                    )
+                                  : undefined
+                              }
+                              className={cx(
+                                'border',
+                                'border-gray-300',
+                                'dark:border-gray-700',
+                              )}
+                            />
+                            {i.owner ? userToString(i.owner) : ''}
+                          </>
+                        ) : null}
+                      </div>
+                    </Td>
                     <Td>
                       <Text noOfLines={1}>
                         {i.organization ? i.organization.name : ''}

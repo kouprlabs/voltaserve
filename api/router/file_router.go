@@ -936,21 +936,20 @@ func (r *FileRouter) DownloadOriginal(c *fiber.Ctx) error {
 	buf := r.bufferPool.Get().(*bytes.Buffer)
 	buf.Reset()
 	defer r.bufferPool.Put(buf)
-	res, err := r.fileSvc.DownloadOriginalBuffer(id, c.Get("Range"), buf, userID)
+	file, snapshot, rangeInterval, err := r.fileSvc.DownloadOriginalBuffer(id, c.Get("Range"), buf, userID)
 	if err != nil {
 		return err
 	}
-	if strings.TrimPrefix(filepath.Ext(res.Snapshot.GetOriginal().Key), ".") != ext {
+	if strings.TrimPrefix(filepath.Ext(snapshot.GetOriginal().Key), ".") != ext {
 		return errorpkg.NewS3ObjectNotFoundError(nil)
 	}
-	b := res.Buffer.Bytes()
-	c.Set("Content-Type", infra.DetectMimeFromBytes(b))
-	c.Set("Content-Disposition", fmt.Sprintf("filename=\"%s\"", filepath.Base(res.File.GetName())))
-	if res.RangeInterval != nil {
-		res.RangeInterval.ApplyToFiberContext(c)
+	c.Set("Content-Type", infra.DetectMIMEFromBytes(buf.Bytes()))
+	c.Set("Content-Disposition", fmt.Sprintf("filename=\"%s\"", filepath.Base(file.GetName())))
+	if rangeInterval != nil {
+		rangeInterval.ApplyToFiberContext(c)
 		c.Status(http.StatusPartialContent)
 	}
-	return c.Send(b)
+	return c.Send(buf.Bytes())
 }
 
 // DownloadPreview godoc
@@ -989,21 +988,20 @@ func (r *FileRouter) DownloadPreview(c *fiber.Ctx) error {
 	buf := r.bufferPool.Get().(*bytes.Buffer)
 	buf.Reset()
 	defer r.bufferPool.Put(buf)
-	res, err := r.fileSvc.DownloadPreviewBuffer(id, c.Get("Range"), buf, userID)
+	file, snapshot, rangeInterval, err := r.fileSvc.DownloadPreviewBuffer(id, c.Get("Range"), buf, userID)
 	if err != nil {
 		return err
 	}
-	if strings.TrimPrefix(filepath.Ext(res.Snapshot.GetPreview().Key), ".") != ext {
+	if strings.TrimPrefix(filepath.Ext(snapshot.GetPreview().Key), ".") != ext {
 		return errorpkg.NewS3ObjectNotFoundError(nil)
 	}
-	b := buf.Bytes()
-	c.Set("Content-Type", infra.DetectMimeFromBytes(b))
-	c.Set("Content-Disposition", fmt.Sprintf("filename=\"%s\"", filepath.Base(res.File.GetName())))
-	if res.RangeInterval != nil {
-		res.RangeInterval.ApplyToFiberContext(c)
+	c.Set("Content-Type", infra.DetectMIMEFromBytes(buf.Bytes()))
+	c.Set("Content-Disposition", fmt.Sprintf("filename=\"%s\"", filepath.Base(file.GetName())))
+	if rangeInterval != nil {
+		rangeInterval.ApplyToFiberContext(c)
 		c.Status(http.StatusPartialContent)
 	}
-	return c.Send(b)
+	return c.Send(buf.Bytes())
 }
 
 // DownloadThumbnail godoc
@@ -1039,17 +1037,19 @@ func (r *FileRouter) DownloadThumbnail(c *fiber.Ctx) error {
 	if ext == "" {
 		return errorpkg.NewMissingQueryParamError("ext")
 	}
-	buf, file, snapshot, err := r.fileSvc.DownloadThumbnailBuffer(id, userID)
+	buf := r.bufferPool.Get().(*bytes.Buffer)
+	buf.Reset()
+	defer r.bufferPool.Put(buf)
+	snapshot, err := r.fileSvc.DownloadThumbnailBuffer(id, buf, userID)
 	if err != nil {
 		return err
 	}
 	if strings.TrimPrefix(filepath.Ext(snapshot.GetThumbnail().Key), ".") != ext {
 		return errorpkg.NewS3ObjectNotFoundError(nil)
 	}
-	b := buf.Bytes()
-	c.Set("Content-Type", infra.DetectMimeFromBytes(b))
-	c.Set("Content-Disposition", fmt.Sprintf("filename=\"%s\"", filepath.Base(file.GetName())))
-	return c.Send(b)
+	c.Set("Content-Type", infra.DetectMIMEFromBytes(buf.Bytes()))
+	c.Set("Content-Disposition", fmt.Sprintf("filename=\"thumbnail%s\"", ext))
+	return c.Send(buf.Bytes())
 }
 
 // CreateFromS3 godoc
@@ -1256,7 +1256,10 @@ func (r *FileRouter) getUserIDFromAccessToken(accessToken string) (string, error
 	if err != nil {
 		return "", err
 	}
-	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+	if !token.Valid {
+		return "", errors.New("invalid token")
+	}
+	if claims, ok := token.Claims.(jwt.MapClaims); ok {
 		return claims["sub"].(string), nil
 	} else {
 		return "", errors.New("cannot find sub claim")

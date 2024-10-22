@@ -33,6 +33,7 @@ import UserSelector from '@/components/common/user-selector'
 import { IconCheck, IconDelete, IconPersonAdd } from '@/lib/components/icons'
 import Spinner from '@/lib/components/spinner'
 import Text from '@/lib/components/text'
+import { getPictureUrlById } from '@/lib/helpers/picture'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { sharingModalDidClose } from '@/store/ui/files'
 import { inviteModalDidOpen } from '@/store/ui/organizations'
@@ -213,7 +214,13 @@ const SharingUsers = ({
                         >
                           <Avatar
                             name={p.user.fullName}
-                            src={p.user.picture}
+                            src={
+                              p.user.picture
+                                ? getPictureUrlById(p.user.id, p.user.picture, {
+                                    organizationId: workspace?.organization.id,
+                                  })
+                                : undefined
+                            }
                             size="sm"
                             className={cx(
                               'w-[40px]',

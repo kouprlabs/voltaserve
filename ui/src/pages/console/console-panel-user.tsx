@@ -45,6 +45,7 @@ import {
 } from '@/lib/components/icons'
 import PagePagination from '@/lib/components/page-pagination'
 import SectionSpinner from '@/lib/components/section-spinner'
+import { getPictureUrlById } from '@/lib/helpers/picture'
 import { truncateEnd } from '@/lib/helpers/truncate-end'
 import truncateMiddle from '@/lib/helpers/truncate-middle'
 
@@ -66,29 +67,28 @@ const ConsolePanelUser = () => {
     'gap-1',
     `h-[40px]`,
   )
-  const [userData, setUserData] = useState<ConsoleUser>()
-  const [organizationsData, setOrganizationsData] =
-    useState<OrganizationUserManagementList>()
-  const [workspacesData, setWorkspacesData] =
+  const [user, setUser] = useState<ConsoleUser>()
+  const [orgList, setOrgList] = useState<OrganizationUserManagementList>()
+  const [workspaceList, setWorkspaceList] =
     useState<WorkspaceUserManagementList>()
-  const [groupsData, setGroupsData] = useState<GroupUserManagementList>()
+  const [groupList, setGroupList] = useState<GroupUserManagementList>()
   const { id } = useParams()
-  const [workspacesPage, setWorkspacesPage] = useState(1)
-  const [groupsPage, setGroupsPage] = useState(1)
-  const [organizationsPage, setOrganizationsPage] = useState(1)
+  const [workspacePage, setWorkspacePage] = useState(1)
+  const [groupPage, setGroupPage] = useState(1)
+  const [orgPage, setOrgPage] = useState(1)
 
   const userFetch = () => {
     if (id) {
       UserAPI.getUserById({ id }).then((value) => {
-        setUserData(value)
+        setUser(value)
       })
     }
   }
   const groupsFetch = () => {
     if (id) {
-      ConsoleApi.getGroupsByUser({ id: id, page: groupsPage, size: 5 }).then(
+      ConsoleApi.getGroupsByUser({ id: id, page: groupPage, size: 5 }).then(
         (value) => {
-          setGroupsData(value)
+          setGroupList(value)
         },
       )
     }
@@ -96,20 +96,20 @@ const ConsolePanelUser = () => {
   const organizationsFetch = () => {
     ConsoleApi.getOrganizationsByUser({
       id: id,
-      page: organizationsPage,
+      page: orgPage,
       size: 5,
     }).then((value) => {
-      setOrganizationsData(value)
+      setOrgList(value)
     })
   }
 
   const workspacesFetch = () => {
     ConsoleApi.getWorkspacesByUser({
       id: id,
-      page: workspacesPage,
+      page: workspacePage,
       size: 5,
     }).then((value) => {
-      setWorkspacesData(value)
+      setWorkspaceList(value)
     })
   }
 
@@ -122,17 +122,17 @@ const ConsolePanelUser = () => {
 
   useEffect(() => {
     organizationsFetch()
-  }, [organizationsPage])
+  }, [orgPage])
 
   useEffect(() => {
     groupsFetch()
-  }, [groupsPage])
+  }, [groupPage])
 
   useEffect(() => {
     workspacesFetch()
-  }, [workspacesPage])
+  }, [workspacePage])
 
-  if (!userData) {
+  if (!user) {
     return <SectionSpinner />
   }
 
@@ -143,15 +143,19 @@ const ConsolePanelUser = () => {
       </Helmet>
       <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
         <Heading className={cx('text-heading')} noOfLines={1}>
-          {userData.fullName}
+          {user.fullName}
         </Heading>
       </div>
       <Grid gap={4} templateColumns="repeat(9, 1fr)">
         <GridItem>
           <div className={cx('relative', 'shrink-0')}>
             <Avatar
-              name={userData.fullName}
-              src={userData.picture}
+              name={user.fullName}
+              src={
+                user.picture
+                  ? getPictureUrlById(user.id, user.picture)
+                  : undefined
+              }
               size="2xl"
               className={cx(
                 'w-[165px]',
@@ -161,7 +165,7 @@ const ConsolePanelUser = () => {
                 'dark:border-gray-700',
               )}
             />
-            {userData.picture ? (
+            {user.picture ? (
               <IconButton
                 icon={<IconClose />}
                 variant="solid"
@@ -185,7 +189,7 @@ const ConsolePanelUser = () => {
               <div className={cx(rowClassName)}>
                 <span>Full name</span>
                 <Spacer />
-                <span>{truncateEnd(userData.fullName, 50)}</span>
+                <span>{truncateEnd(user.fullName, 50)}</span>
                 <EditButton
                   aria-label=""
                   onClick={() => {
@@ -200,7 +204,7 @@ const ConsolePanelUser = () => {
               <div className={cx(rowClassName)}>
                 <span>Email</span>
                 <Spacer />
-                {userData.pendingEmail ? (
+                {user.pendingEmail ? (
                   <div
                     className={cx(
                       'flex',
@@ -221,15 +225,12 @@ const ConsolePanelUser = () => {
                         <IconWarning className={cx('text-yellow-400')} />
                       </div>
                     </Tooltip>
-                    <span>{truncateMiddle(userData.pendingEmail, 50)}</span>
+                    <span>{truncateMiddle(user.pendingEmail, 50)}</span>
                   </div>
                 ) : null}
-                {!userData.pendingEmail ? (
+                {!user.pendingEmail ? (
                   <span>
-                    {truncateMiddle(
-                      userData.pendingEmail || userData.email,
-                      50,
-                    )}
+                    {truncateMiddle(user.pendingEmail || user.email, 50)}
                   </span>
                 ) : null}
                 <EditButton
@@ -254,7 +255,7 @@ const ConsolePanelUser = () => {
           </div>
         </GridItem>
         <GridItem colSpan={3}>
-          {!organizationsData ? (
+          {!orgList ? (
             <SectionSpinner />
           ) : (
             <>
@@ -265,18 +266,18 @@ const ConsolePanelUser = () => {
                       <Flex>
                         <span className={cx('font-bold')}>Organizations</span>
                         <Spacer />
-                        {organizationsData.totalElements > 5 ? (
+                        {orgList.totalElements > 5 ? (
                           <Center>
                             <>
                               <PagePagination
-                                totalElements={organizationsData.totalElements}
+                                totalElements={orgList.totalElements}
                                 totalPages={Math.ceil(
-                                  organizationsData.totalElements / 5,
+                                  orgList.totalElements / 5,
                                 )}
-                                page={organizationsPage}
+                                page={orgPage}
                                 size={5}
                                 steps={[]}
-                                setPage={setOrganizationsPage}
+                                setPage={setOrgPage}
                                 setSize={() => {}}
                                 uiSize="xs"
                                 disableLastNav
@@ -292,8 +293,8 @@ const ConsolePanelUser = () => {
               </Table>
               <Divider mb={4} />
               <Stack>
-                {organizationsData.data && organizationsData.data.length > 0 ? (
-                  organizationsData.data.map((organization) => (
+                {orgList.data && orgList.data.length > 0 ? (
+                  orgList.data.map((organization) => (
                     <Stack
                       direction="row"
                       alignItems="center"
@@ -326,7 +327,7 @@ const ConsolePanelUser = () => {
           )}
         </GridItem>
         <GridItem colSpan={3}>
-          {!workspacesData ? (
+          {!workspaceList ? (
             <SectionSpinner />
           ) : (
             <>
@@ -337,17 +338,17 @@ const ConsolePanelUser = () => {
                       <Flex>
                         <span className={cx('font-bold')}>Workspaces</span>
                         <Spacer />
-                        {workspacesData.totalElements > 5 ? (
+                        {workspaceList.totalElements > 5 ? (
                           <>
                             <PagePagination
-                              totalElements={workspacesData.totalElements}
+                              totalElements={workspaceList.totalElements}
                               totalPages={Math.ceil(
-                                workspacesData.totalElements / 5,
+                                workspaceList.totalElements / 5,
                               )}
-                              page={workspacesPage}
+                              page={workspacePage}
                               size={5}
                               steps={[]}
-                              setPage={setWorkspacesPage}
+                              setPage={setWorkspacePage}
                               setSize={() => {}}
                               uiSize="xs"
                               disableLastNav
@@ -362,8 +363,8 @@ const ConsolePanelUser = () => {
               </Table>
               <Divider mb={4} />
               <Stack overflowX="auto">
-                {workspacesData.data && workspacesData.data.length > 0 ? (
-                  workspacesData.data.map((workspace) => (
+                {workspaceList.data && workspaceList.data.length > 0 ? (
+                  workspaceList.data.map((workspace) => (
                     <Stack
                       direction="row"
                       alignItems="center"
@@ -394,7 +395,7 @@ const ConsolePanelUser = () => {
           )}
         </GridItem>
         <GridItem colSpan={3}>
-          {!groupsData ? (
+          {!groupList ? (
             <SectionSpinner />
           ) : (
             <>
@@ -405,17 +406,17 @@ const ConsolePanelUser = () => {
                       <Flex>
                         <span className={cx('font-bold')}>Groups</span>
                         <Spacer />
-                        {groupsData.totalElements > 5 ? (
+                        {groupList.totalElements > 5 ? (
                           <>
                             <PagePagination
-                              totalElements={groupsData.totalElements}
+                              totalElements={groupList.totalElements}
                               totalPages={Math.ceil(
-                                groupsData.totalElements / 5,
+                                groupList.totalElements / 5,
                               )}
-                              page={groupsPage}
+                              page={groupPage}
                               size={5}
                               steps={[]}
-                              setPage={setGroupsPage}
+                              setPage={setGroupPage}
                               setSize={() => {}}
                               uiSize="xs"
                               disableLastNav
@@ -430,8 +431,8 @@ const ConsolePanelUser = () => {
               </Table>
               <Divider mb={4} />
               <Stack>
-                {groupsData.data && groupsData.data.length > 0 ? (
-                  groupsData.data.map((group) => (
+                {groupList.data && groupList.data.length > 0 ? (
+                  groupList.data.map((group) => (
                     <Stack
                       direction="row"
                       alignItems="center"

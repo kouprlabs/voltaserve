@@ -31,6 +31,7 @@ import {
 import * as Yup from 'yup'
 import cx from 'classnames'
 import UserAPI, { User } from '@/client/idp/user'
+import { getPictureUrl } from '@/lib/helpers/picture'
 import { useAppSelector } from '@/store/hook'
 import AccountUploadPicture from './account-upload-picture'
 
@@ -142,7 +143,11 @@ const AccountEditPicture = ({
                       >
                         <AccountUploadPicture
                           {...field}
-                          initialValue={user.picture}
+                          initialValue={
+                            user.picture
+                              ? getPictureUrl(user.picture)
+                              : undefined
+                          }
                           disabled={isSubmitting}
                           onChange={(event) => {
                             if (

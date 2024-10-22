@@ -307,7 +307,7 @@ func (r *InsightsRouter) DownloadText(c *fiber.Ctx) error {
 		return errorpkg.NewS3ObjectNotFoundError(nil)
 	}
 	b := buf.Bytes()
-	c.Set("Content-Type", infra.DetectMimeFromBytes(b))
+	c.Set("Content-Type", infra.DetectMIMEFromBytes(b))
 	c.Set("Content-Disposition", fmt.Sprintf("filename=\"%s\"", filepath.Base(file.GetName())+ext))
 	return c.Send(b)
 }
@@ -353,7 +353,7 @@ func (r *InsightsRouter) DownloadOCR(c *fiber.Ctx) error {
 		return errorpkg.NewS3ObjectNotFoundError(nil)
 	}
 	b := buf.Bytes()
-	c.Set("Content-Type", infra.DetectMimeFromBytes(b))
+	c.Set("Content-Type", infra.DetectMIMEFromBytes(b))
 	c.Set("Content-Disposition", fmt.Sprintf("filename=\"%s\"", filepath.Base(file.GetName())+ext))
 	return c.Send(b)
 }
@@ -368,7 +368,10 @@ func (r *InsightsRouter) getUserIDFromAccessToken(accessToken string) (string, e
 	if err != nil {
 		return "", err
 	}
-	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+	if !token.Valid {
+		return "", errors.New("invalid token")
+	}
+	if claims, ok := token.Claims.(jwt.MapClaims); ok {
 		return claims["sub"].(string), nil
 	} else {
 		return "", errors.New("cannot find sub claim")

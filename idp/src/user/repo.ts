@@ -20,7 +20,8 @@ class UserRepoImpl {
     if (rowCount < 1) {
       throw newError({
         code: ErrorCode.ResourceNotFound,
-        error: `User with id=${id} not found`,
+        message: `User with id=${id} not found`,
+        userMessage: 'User not found',
       })
     }
     return this.mapRow(rows[0])
@@ -34,7 +35,8 @@ class UserRepoImpl {
     if (rowCount < 1) {
       throw newError({
         code: ErrorCode.ResourceNotFound,
-        error: `User with username=${username} not found`,
+        message: `User with username=${username} not found`,
+        userMessage: 'User not found',
       })
     }
     return this.mapRow(rows[0])
@@ -48,7 +50,8 @@ class UserRepoImpl {
     if (rowCount < 1) {
       throw newError({
         code: ErrorCode.ResourceNotFound,
-        error: `User with email=${email} not found`,
+        message: `User with email=${email} not found`,
+        userMessage: 'User not found',
       })
     }
     return this.mapRow(rows[0])
@@ -62,7 +65,8 @@ class UserRepoImpl {
     if (rowCount < 1) {
       throw newError({
         code: ErrorCode.ResourceNotFound,
-        error: `User with refresh_token_value=${refreshTokenValue} not found`,
+        message: `User with refresh_token_value=${refreshTokenValue} not found`,
+        userMessage: 'User not found',
       })
     }
     return this.mapRow(rows[0])
@@ -76,7 +80,8 @@ class UserRepoImpl {
     if (rowCount < 1) {
       throw newError({
         code: ErrorCode.ResourceNotFound,
-        error: `User with reset_password_token=${resetPasswordToken} not found`,
+        message: `User with reset_password_token=${resetPasswordToken} not found`,
+        userMessage: 'User not found',
       })
     }
     return this.mapRow(rows[0])
@@ -92,7 +97,8 @@ class UserRepoImpl {
     if (rowCount < 1) {
       throw newError({
         code: ErrorCode.ResourceNotFound,
-        error: `User with email_confirmation_token=${emailConfirmationToken} not found`,
+        message: `User with email_confirmation_token=${emailConfirmationToken} not found`,
+        userMessage: 'User not found',
       })
     }
     return this.mapRow(rows[0])
@@ -106,21 +112,8 @@ class UserRepoImpl {
     if (rowCount < 1) {
       throw newError({
         code: ErrorCode.ResourceNotFound,
-        error: `User with email_update_token=${emailUpdateToken} not found`,
-      })
-    }
-    return this.mapRow(rows[0])
-  }
-
-  async findByPicture(picture: string): Promise<User> {
-    const { rowCount, rows } = await client.query(
-      `SELECT * FROM "user" WHERE picture = $1`,
-      [picture],
-    )
-    if (rowCount < 1) {
-      throw newError({
-        code: ErrorCode.ResourceNotFound,
-        error: `User with picture=${picture} not found`,
+        message: `User with email_update_token=${emailUpdateToken} not found`,
+        userMessage: 'User not found',
       })
     }
     return this.mapRow(rows[0])
@@ -138,7 +131,8 @@ class UserRepoImpl {
     if (rowCount < 1) {
       throw newError({
         code: ErrorCode.ResourceNotFound,
-        error: `User list is empty`,
+        message: 'There are no users',
+        userMessage: 'There are no users',
       })
     }
     return this.mapList(rows)
@@ -155,8 +149,8 @@ class UserRepoImpl {
     if (rowCount < 1) {
       throw newError({
         code: ErrorCode.ResourceNotFound,
-        error: `User list is empty`,
-        userMessage: `Not found users`,
+        message: 'There are no users',
+        userMessage: 'There are no users',
       })
     }
     return this.mapList(rows)
@@ -169,7 +163,8 @@ class UserRepoImpl {
     if (rowCount < 1) {
       throw newError({
         code: ErrorCode.ResourceNotFound,
-        error: `Fatal database error (no users present in database)`,
+        message: `Fatal database error (no users present in database)`,
+        userMessage: 'There are no users',
       })
     }
     return parseInt(rows[0].count)
@@ -221,7 +216,8 @@ class UserRepoImpl {
     if (rowCount < 1) {
       throw newError({
         code: ErrorCode.InternalServerError,
-        error: `Inserting user with id=${data.id} failed`,
+        message: `Inserting user with id=${data.id} failed`,
+        userMessage: 'Failed to insert user',
       })
     }
     return this.mapRow(rows[0])
@@ -232,7 +228,8 @@ class UserRepoImpl {
     if (!entity) {
       throw newError({
         code: ErrorCode.InternalServerError,
-        error: `User with id=${data.id} not found`,
+        message: `User with id=${data.id} not found`,
+        userMessage: 'User not found',
       })
     }
     Object.assign(entity, data)
@@ -279,7 +276,8 @@ class UserRepoImpl {
     if (rowCount < 1) {
       throw newError({
         code: ErrorCode.InternalServerError,
-        error: `Inserting user with id=${data.id} failed`,
+        message: `Inserting user with id=${data.id} failed`,
+        userMessage: 'Failed to insert user',
       })
     }
     return this.mapRow(rows[0])
@@ -336,7 +334,8 @@ class UserRepoImpl {
 
   /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
   private mapList(list: any): User[] {
-    return list.map((user) => {
+    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+    return list.map((user: any) => {
       return {
         id: user.id,
         fullName: user.full_name,

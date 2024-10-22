@@ -11,28 +11,40 @@
 package router
 
 import (
+	"errors"
+	"fmt"
+	"net/http"
 	"net/url"
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt/v5"
 
+	"github.com/kouprlabs/voltaserve/api/config"
 	"github.com/kouprlabs/voltaserve/api/errorpkg"
+	"github.com/kouprlabs/voltaserve/api/helper"
 	"github.com/kouprlabs/voltaserve/api/service"
 )
 
 type UserRouter struct {
-	userSvc *service.UserService
+	userSvc               *service.UserService
+	accessTokenCookieName string
 }
 
 func NewUserRouter() *UserRouter {
 	return &UserRouter{
-		userSvc: service.NewUserService(),
+		userSvc:               service.NewUserService(),
+		accessTokenCookieName: "voltaserve_access_token",
 	}
 }
 
 func (r *UserRouter) AppendRoutes(g fiber.Router) {
 	g.Get("/", r.List)
 	g.Get("/probe", r.Probe)
+}
+
+func (r *UserRouter) AppendNonJWTRoutes(g fiber.Router) {
+	g.Get("/:id/picture:ext", r.DownloadPicture)
 }
 
 // List godoc
@@ -142,4 +154,86 @@ func (r *UserRouter) parseListQueryParams(c *fiber.Ctx) (*service.UserListOption
 		Page:                page,
 		Size:                size,
 	}, nil
+}
+
+// DownloadPicture godoc
+//
+//	@Summary		Download Picture
+//	@Description	Download Picture
+//	@Tags			Users
+//	@Id				users_download_picture
+//	@Produce		json
+//	@Param			id				path		string	true	"ID"
+//	@Param			ext				path		string	true	"Extension"
+//	@Param			access_token	query		string	true	"Access Token"
+//	@Param			organization_id	query		string	false	"Organization ID"
+//	@Param			group			query		string	false	"Group ID"
+//	@Failure		404				{object}	errorpkg.ErrorResponse
+//	@Failure		500				{object}	errorpkg.ErrorResponse
+//	@Router			/users/{id}/picture{ext} [get]
+func (r *UserRouter) DownloadPicture(c *fiber.Ctx) error {
+	accessToken := c.Cookies(r.accessTokenCookieName)
+	if accessToken == "" {
+		accessToken = c.Query("access_token")
+		if accessToken == "" {
+			return errorpkg.NewFileNotFoundError(nil)
+		}
+	}
+	userID, isAdmin, err := r.getUserIDFromAccessToken(accessToken)
+	if err != nil {
+		return c.SendStatus(http.StatusNotFound)
+	}
+	id := c.Params("id")
+	if id == "" {
+		return errorpkg.NewMissingQueryParamError("id")
+	}
+	if c.Params("ext") == "" {
+		return errorpkg.NewMissingQueryParamError("ext")
+	}
+	var orgID *string
+	if c.Query("organization_id") != "" {
+		orgID = helper.ToPtr(c.Query("organization_id"))
+	}
+	var groupID *string
+	if c.Query("group_id") != "" {
+		groupID = helper.ToPtr(c.Query("group_id"))
+	}
+	var invitationID *string
+	if c.Query("invitation_id") != "" {
+		invitationID = helper.ToPtr(c.Query("invitation_id"))
+	}
+	b, ext, mime, err := r.userSvc.ExtractPicture(id, service.ExtractPictureJustification{
+		OrganizationID: orgID,
+		GroupID:        groupID,
+		InvitationID:   invitationID,
+	}, userID, isAdmin)
+	if err != nil {
+		return err
+	}
+	if *ext != c.Params("ext") {
+		return errorpkg.NewUserPictureNotFoundError(nil)
+	}
+	c.Set("Content-Type", *mime)
+	c.Set("Content-Disposition", fmt.Sprintf("filename=\"picture%s\"", ext))
+	return c.Send(b)
+}
+
+func (r *UserRouter) getUserIDFromAccessToken(accessToken string) (string, bool, error) {
+	token, err := jwt.Parse(accessToken, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		return []byte(config.GetConfig().Security.JWTSigningKey), nil
+	})
+	if err != nil {
+		return "", false, err
+	}
+	if !token.Valid {
+		return "", false, errors.New("invalid token")
+	}
+	if claims, ok := token.Claims.(jwt.MapClaims); ok {
+		return claims["sub"].(string), claims["is_admin"].(bool), nil
+	} else {
+		return "", false, errors.New("cannot find sub claim")
+	}
 }

@@ -484,7 +484,7 @@ func (mp *workspaceMapper) mapOne(m model.Workspace, userID string) (*Workspace,
 		if err != nil {
 			return nil, err
 		}
-		for _, u := range g.GetUsers() {
+		for _, u := range g.GetMembers() {
 			if u == userID && model.GetPermissionWeight(p.GetValue()) > model.GetPermissionWeight(res.Permission) {
 				res.Permission = p.GetValue()
 			}

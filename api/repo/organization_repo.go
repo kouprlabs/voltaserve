@@ -92,7 +92,7 @@ func (o *organizationEntity) GetGroupPermissions() []model.CoreGroupPermission {
 	return res
 }
 
-func (o *organizationEntity) GetUsers() []string {
+func (o *organizationEntity) GetMembers() []string {
 	return o.Members
 }
 

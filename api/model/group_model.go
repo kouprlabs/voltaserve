@@ -16,7 +16,7 @@ type Group interface {
 	GetOrganizationID() string
 	GetUserPermissions() []CoreUserPermission
 	GetGroupPermissions() []CoreGroupPermission
-	GetUsers() []string
+	GetMembers() []string
 	GetCreateTime() string
 	GetUpdateTime() *string
 	SetName(string)

@@ -482,7 +482,7 @@ func (mp *groupMapper) mapOne(m model.Group, userID string) (*Group, error) {
 		if err != nil {
 			return nil, err
 		}
-		for _, u := range g.GetUsers() {
+		for _, u := range g.GetMembers() {
 			if u == userID && model.GetPermissionWeight(p.GetValue()) > model.GetPermissionWeight(res.Permission) {
 				res.Permission = p.GetValue()
 			}

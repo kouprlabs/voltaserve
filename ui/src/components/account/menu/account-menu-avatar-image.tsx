@@ -10,6 +10,7 @@
 import { Avatar } from '@chakra-ui/react'
 import cx from 'classnames'
 import { User } from '@/client/idp/user'
+import { getPictureUrl } from '@/lib/helpers/picture'
 
 export type AccountMenuAvatarImageProps = {
   user: User
@@ -18,7 +19,7 @@ export type AccountMenuAvatarImageProps = {
 const AccountMenuAvatarImage = ({ user }: AccountMenuAvatarImageProps) => (
   <Avatar
     name={user.fullName}
-    src={user.picture}
+    src={user.picture ? getPictureUrl(user.picture) : undefined}
     size="sm"
     className={cx(
       'w-[40px]',

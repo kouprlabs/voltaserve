@@ -14,6 +14,7 @@ import InvitationAPI from '@/client/api/invitation'
 import { User } from '@/client/idp/user'
 import { swrConfig } from '@/client/options'
 import NotificationBadge from '@/lib/components/notification-badge'
+import { getPictureUrl } from '@/lib/helpers/picture'
 import { useAppSelector } from '@/store/hook'
 import { NavType } from '@/store/ui/nav'
 import AccountMenuActiveCircle from './account-menu-active-circle'
@@ -34,7 +35,7 @@ const AccountMenuAvatarButton = forwardRef<AccountMenuAvatarButtonProps, 'div'>(
           <NotificationBadge hasBadge={count && count > 0 ? true : false}>
             <Avatar
               name={user.fullName}
-              src={user.picture}
+              src={user.picture ? getPictureUrl(user.picture) : undefined}
               size="sm"
               className={cx(
                 'w-[40px]',

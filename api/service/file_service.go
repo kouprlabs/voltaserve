@@ -244,7 +244,7 @@ func (svc *FileService) Store(id string, opts StoreOptions, userID string) (*Fil
 			Size:   helper.ToPtr(size),
 		}
 		bucket = workspace.GetBucket()
-		contentType = infra.DetectMimeFromPath(path)
+		contentType = infra.DetectMIMEFromPath(path)
 	} else {
 		snapshotID = opts.S3Reference.SnapshotID
 		path = opts.S3Reference.Key
@@ -325,25 +325,25 @@ func (svc *FileService) Store(id string, opts StoreOptions, userID string) (*Fil
 	return res, nil
 }
 
-func (svc *FileService) DownloadOriginalBuffer(id string, rangeHeader string, buf *bytes.Buffer, userID string) (*DownloadResult, error) {
+func (svc *FileService) DownloadOriginalBuffer(id string, rangeHeader string, buf *bytes.Buffer, userID string) (model.File, model.Snapshot, *infra.RangeInterval, error) {
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
-		return nil, err
+		return nil, nil, nil, err
 	}
 	if err = svc.fileGuard.Authorize(userID, file, model.PermissionViewer); err != nil {
-		return nil, err
+		return nil, nil, nil, err
 	}
 	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
-		return nil, errorpkg.NewFileIsNotAFileError(file)
+		return nil, nil, nil, errorpkg.NewFileIsNotAFileError(file)
 	}
 	snapshot, err := svc.snapshotCache.Get(*file.GetSnapshotID())
 	if err != nil {
-		return nil, err
+		return nil, nil, nil, err
 	}
 	if snapshot.HasOriginal() {
 		objectInfo, err := svc.s3.StatObject(snapshot.GetOriginal().Key, snapshot.GetOriginal().Bucket, minio.StatObjectOptions{})
 		if err != nil {
-			return nil, err
+			return nil, nil, nil, err
 		}
 		opts := minio.GetObjectOptions{}
 		var ri *infra.RangeInterval
@@ -352,37 +352,33 @@ func (svc *FileService) DownloadOriginalBuffer(id string, rangeHeader string, bu
 			ri.ApplyToMinIOGetObjectOptions(&opts)
 		}
 		if _, err := svc.s3.GetObjectWithBuffer(snapshot.GetOriginal().Key, snapshot.GetOriginal().Bucket, buf, opts); err != nil {
-			return nil, err
+			return nil, nil, nil, err
 		}
-		return &DownloadResult{
-			Buffer:   buf,
-			File:     file,
-			Snapshot: snapshot,
-		}, nil
+		return file, snapshot, ri, nil
 	} else {
-		return nil, errorpkg.NewS3ObjectNotFoundError(nil)
+		return nil, nil, nil, errorpkg.NewS3ObjectNotFoundError(nil)
 	}
 }
 
-func (svc *FileService) DownloadPreviewBuffer(id string, rangeHeader string, buf *bytes.Buffer, userID string) (*DownloadResult, error) {
+func (svc *FileService) DownloadPreviewBuffer(id string, rangeHeader string, buf *bytes.Buffer, userID string) (model.File, model.Snapshot, *infra.RangeInterval, error) {
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
-		return nil, err
+		return nil, nil, nil, err
 	}
 	if err = svc.fileGuard.Authorize(userID, file, model.PermissionViewer); err != nil {
-		return nil, err
+		return nil, nil, nil, err
 	}
 	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
-		return nil, errorpkg.NewFileIsNotAFileError(file)
+		return nil, nil, nil, errorpkg.NewFileIsNotAFileError(file)
 	}
 	snapshot, err := svc.snapshotCache.Get(*file.GetSnapshotID())
 	if err != nil {
-		return nil, err
+		return nil, nil, nil, err
 	}
 	if snapshot.HasPreview() {
 		objectInfo, err := svc.s3.StatObject(snapshot.GetOriginal().Key, snapshot.GetOriginal().Bucket, minio.StatObjectOptions{})
 		if err != nil {
-			return nil, err
+			return nil, nil, nil, err
 		}
 		opts := minio.GetObjectOptions{}
 		var ri *infra.RangeInterval
@@ -391,42 +387,36 @@ func (svc *FileService) DownloadPreviewBuffer(id string, rangeHeader string, buf
 			ri.ApplyToMinIOGetObjectOptions(&opts)
 		}
 		if _, err := svc.s3.GetObjectWithBuffer(snapshot.GetPreview().Key, snapshot.GetPreview().Bucket, buf, opts); err != nil {
-			return nil, err
+			return nil, nil, nil, err
 		}
-		return &DownloadResult{
-			RangeInterval: ri,
-			Buffer:        buf,
-			File:          file,
-			Snapshot:      snapshot,
-		}, nil
+		return file, snapshot, ri, nil
 	} else {
-		return nil, errorpkg.NewS3ObjectNotFoundError(nil)
+		return nil, nil, nil, errorpkg.NewS3ObjectNotFoundError(nil)
 	}
 }
 
-func (svc *FileService) DownloadThumbnailBuffer(id string, userID string) (*bytes.Buffer, model.File, model.Snapshot, error) {
+func (svc *FileService) DownloadThumbnailBuffer(id string, buf *bytes.Buffer, userID string) (model.Snapshot, error) {
 	file, err := svc.fileCache.Get(id)
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, err
 	}
 	if file.GetType() != model.FileTypeFile || file.GetSnapshotID() == nil {
-		return nil, nil, nil, errorpkg.NewFileIsNotAFileError(file)
+		return nil, errorpkg.NewFileIsNotAFileError(file)
 	}
 	if err = svc.fileGuard.Authorize(userID, file, model.PermissionViewer); err != nil {
-		return nil, nil, nil, err
+		return nil, err
 	}
 	snapshot, err := svc.snapshotCache.Get(*file.GetSnapshotID())
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, err
 	}
 	if snapshot.HasThumbnail() {
-		buf, _, err := svc.s3.GetObject(snapshot.GetThumbnail().Key, snapshot.GetThumbnail().Bucket, minio.GetObjectOptions{})
-		if err != nil {
-			return nil, nil, nil, err
+		if _, err := svc.s3.GetObjectWithBuffer(snapshot.GetThumbnail().Key, snapshot.GetThumbnail().Bucket, buf, minio.GetObjectOptions{}); err != nil {
+			return nil, err
 		}
-		return buf, file, snapshot, nil
+		return snapshot, nil
 	} else {
-		return nil, nil, nil, errorpkg.NewS3ObjectNotFoundError(nil)
+		return nil, errorpkg.NewS3ObjectNotFoundError(nil)
 	}
 }
 
@@ -2099,7 +2089,7 @@ func (mp *FileMapper) mapOne(m model.File, userID string) (*File, error) {
 		if err != nil {
 			return nil, err
 		}
-		for _, u := range g.GetUsers() {
+		for _, u := range g.GetMembers() {
 			if u == userID && model.GetPermissionWeight(p.GetValue()) > model.GetPermissionWeight(res.Permission) {
 				res.Permission = p.GetValue()
 			}

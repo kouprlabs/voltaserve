@@ -14,6 +14,7 @@ import {
   UserSearchResponse,
   UserSuspendPostRequest,
 } from '@/infra/admin-requests'
+import { base64ToBuffer, base64ToExtension, base64ToMIME } from '@/infra/base64'
 import { ErrorCode, newError } from '@/infra/error'
 import { newHyphenlessUuid } from '@/infra/id'
 import { sendTemplateMail } from '@/infra/mail'
@@ -25,19 +26,14 @@ import userRepo from '@/user/repo'
 export type UserDTO = {
   id: string
   fullName: string
-  picture: string
+  picture?: PictureDTO
   email: string
   username: string
   pendingEmail?: string
 }
 
-export type UserListDTO = {
-  id: string
-  fullName: string
-  picture: string
-  email: string
-  username: string
-  pendingEmail?: string
+export type PictureDTO = {
+  extension: string
 }
 
 export type UserUpdateEmailRequestOptions = {
@@ -61,12 +57,34 @@ export type UserDeleteOptions = {
   password: string
 }
 
+export type UserPictureResponse = {
+  buffer: Buffer
+  extension: string
+  mime: string
+}
+
 export async function getUser(id: string): Promise<UserDTO> {
   return mapEntity(await userRepo.findByID(id))
 }
 
 export async function getUserByAdmin(id: string): Promise<User> {
   return adminMapEntity(await userRepo.findByID(id))
+}
+
+export async function getUserPicture(id: string): Promise<UserPictureResponse> {
+  const user = await userRepo.findByID(id)
+  if (!user.picture) {
+    throw newError({
+      code: ErrorCode.ResourceNotFound,
+      message: 'Picture not found',
+      userMessage: 'Picture not found',
+    })
+  }
+  return {
+    buffer: base64ToBuffer(user.picture),
+    extension: base64ToExtension(user.picture),
+    mime: base64ToMIME(user.picture),
+  }
 }
 
 export async function searchUserListPaginated(
@@ -108,10 +126,6 @@ export async function getUserCount(): Promise<number> {
   return await userRepo.getUserCount()
 }
 
-export async function getByPicture(picture: string): Promise<UserDTO> {
-  return mapEntity(await userRepo.findByPicture(picture))
-}
-
 export async function updateFullName(
   id: string,
   options: UserUpdateFullNameOptions,
@@ -131,10 +145,6 @@ export async function updateFullName(
     },
   ])
   return mapEntity(user)
-}
-
-export const raiseSearchError = () => {
-  throw newError({ code: ErrorCode.SearchError })
 }
 
 export async function updateEmailRequest(
@@ -341,8 +351,12 @@ export function mapEntity(entity: User): UserDTO {
     email: entity.email,
     username: entity.username,
     fullName: entity.fullName,
-    picture: entity.picture,
     pendingEmail: entity.emailUpdateValue,
+  }
+  if (entity.picture) {
+    user.picture = {
+      extension: base64ToExtension(entity.picture),
+    }
   }
   Object.keys(user).forEach(
     (index) => !user[index] && user[index] !== undefined && delete user[index],
