@@ -1,4 +1,4 @@
-basePath: /v2
+basePath: /v3
 definitions:
   conversion_client.PipelineRunOptions:
     properties:
@@ -948,7 +948,7 @@ definitions:
 info:
   contact: {}
   title: Voltaserve API
-  version: 2.0.0
+  version: 3.0.0
 paths:
   /files:
     delete:

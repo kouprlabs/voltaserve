@@ -11,7 +11,7 @@
     "http"
   ],
   "paths": {
-    "/v2/user/": {
+    "/v3/user/": {
       "get": {
         "description": "",
         "responses": {
@@ -32,7 +32,30 @@
         }
       }
     },
-    "/v2/user/update_full_name": {
+    "/v3/user/{pictureext}": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "pictureext",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "access_token",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/v3/user/update_full_name": {
       "post": {
         "description": "",
         "responses": {
@@ -42,7 +65,7 @@
         }
       }
     },
-    "/v2/user/update_email_request": {
+    "/v3/user/update_email_request": {
       "post": {
         "description": "",
         "responses": {
@@ -52,7 +75,7 @@
         }
       }
     },
-    "/v2/user/update_email_confirmation": {
+    "/v3/user/update_email_confirmation": {
       "post": {
         "description": "",
         "responses": {
@@ -62,7 +85,7 @@
         }
       }
     },
-    "/v2/user/update_password": {
+    "/v3/user/update_password": {
       "post": {
         "description": "",
         "responses": {
@@ -75,7 +98,7 @@
         }
       }
     },
-    "/v2/user/update_picture": {
+    "/v3/user/update_picture": {
       "post": {
         "description": "",
         "responses": {
@@ -85,7 +108,7 @@
         }
       }
     },
-    "/v2/user/delete_picture": {
+    "/v3/user/delete_picture": {
       "post": {
         "description": "",
         "responses": {
@@ -95,7 +118,7 @@
         }
       }
     },
-    "/v2/user/all": {
+    "/v3/user/all": {
       "get": {
         "description": "",
         "parameters": [
@@ -127,7 +150,7 @@
         }
       }
     },
-    "/v2/user/suspend": {
+    "/v3/user/suspend": {
       "patch": {
         "description": "",
         "parameters": [
@@ -144,7 +167,7 @@
         }
       }
     },
-    "/v2/user/admin": {
+    "/v3/user/admin": {
       "patch": {
         "description": "",
         "parameters": [
@@ -161,7 +184,7 @@
         }
       }
     },
-    "/v2/user/{id}": {
+    "/v3/user/{id}": {
       "get": {
         "description": "",
         "parameters": [
@@ -184,7 +207,7 @@
         }
       }
     },
-    "/v2/accounts/": {
+    "/v3/accounts/": {
       "post": {
         "description": "",
         "responses": {
@@ -194,7 +217,7 @@
         }
       }
     },
-    "/v2/accounts/password_requirements": {
+    "/v3/accounts/password_requirements": {
       "get": {
         "description": "",
         "responses": {
@@ -204,7 +227,7 @@
         }
       }
     },
-    "/v2/accounts/reset_password": {
+    "/v3/accounts/reset_password": {
       "post": {
         "description": "",
         "responses": {
@@ -214,7 +237,7 @@
         }
       }
     },
-    "/v2/accounts/confirm_email": {
+    "/v3/accounts/confirm_email": {
       "post": {
         "description": "",
         "responses": {
@@ -224,7 +247,7 @@
         }
       }
     },
-    "/v2/accounts/send_reset_password_email": {
+    "/v3/accounts/send_reset_password_email": {
       "post": {
         "description": "",
         "responses": {
@@ -234,7 +257,7 @@
         }
       }
     },
-    "/v2/token/": {
+    "/v3/token/": {
       "post": {
         "description": "",
         "responses": {
