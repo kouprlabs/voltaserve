@@ -85,7 +85,7 @@ const FileRename = () => {
     >
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>Rename File</ModalHeader>
+        <ModalHeader>Rename Item</ModalHeader>
         <ModalCloseButton />
         <Formik
           enableReinitialize={true}

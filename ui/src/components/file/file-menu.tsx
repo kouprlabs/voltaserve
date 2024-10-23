@@ -36,6 +36,7 @@ import {
   IconFileCopy,
   IconGroup,
   IconHistory,
+  IconInfo,
   IconModeHeat,
   IconMoreVert,
   IconSelectCheckBox,
@@ -56,6 +57,7 @@ import { useAppDispatch, useAppSelector } from '@/store/hook'
 import {
   copyModalDidOpen,
   deleteModalDidOpen,
+  infoModalDidOpen,
   moveModalDidOpen,
   renameModalDidOpen,
   selectionUpdated,
@@ -158,6 +160,10 @@ const FileMenu = ({
   )
   const isRenameAuthorized = useMemo(
     () => file !== undefined && geEditorPermission(file.permission),
+    [file],
+  )
+  const isInfoAuthorized = useMemo(
+    () => file !== undefined && geViewerPermission(file.permission),
     [file],
   )
   const isToolsAuthorized = useMemo(
@@ -428,6 +434,30 @@ const FileMenu = ({
                 </MenuItem>
               </MenuOptionGroup>
             ) : null}
+            <MenuOptionGroup>
+              <MenuDivider />
+              <MenuItem
+                icon={<IconInfo />}
+                isDisabled={!isInfoAuthorized}
+                onClick={(event: MouseEvent) => {
+                  event.stopPropagation()
+                  dispatch(infoModalDidOpen())
+                }}
+              >
+                <div className={cx('flex', 'flex-row', 'justify-between')}>
+                  <span>Info</span>
+                  {isMacOS ? (
+                    <div>
+                      <Kbd>⌘</Kbd>+<Kbd>E</Kbd>
+                    </div>
+                  ) : (
+                    <div>
+                      <Kbd>Ctrl</Kbd>+<Kbd>E</Kbd>
+                    </div>
+                  )}
+                </div>
+              </MenuItem>
+            </MenuOptionGroup>
           </MenuList>
         </Portal>
       </Menu>

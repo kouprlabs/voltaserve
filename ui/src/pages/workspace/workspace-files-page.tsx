@@ -18,6 +18,7 @@ import Path from '@/components/common/path'
 import FileCopy from '@/components/file/file-copy'
 import FileCreate from '@/components/file/file-create'
 import FileDelete from '@/components/file/file-delete'
+import FileInfo from '@/components/file/file-info'
 import FileMove from '@/components/file/file-move'
 import FileRename from '@/components/file/file-rename'
 import SearchFilter from '@/components/file/file-search-filter'
@@ -68,6 +69,9 @@ const WorkspaceFilesPage = () => {
   )
   const isRenameModalOpen = useAppSelector(
     (state) => state.ui.files.isRenameModalOpen,
+  )
+  const isInfoModalOpen = useAppSelector(
+    (state) => state.ui.files.isInfoModalOpen,
   )
   const isInsightsModalOpen = useAppSelector(
     (state) => state.ui.insights.isModalOpen,
@@ -215,6 +219,7 @@ const WorkspaceFilesPage = () => {
       {isCreateModalOpen ? <FileCreate /> : null}
       {isDeleteModalOpen ? <FileDelete /> : null}
       {isRenameModalOpen ? <FileRename /> : null}
+      {isInfoModalOpen ? <FileInfo /> : null}
       {isInsightsModalOpen ? <Insights /> : null}
       {isMosaicModalOpen ? <Mosaic /> : null}
       {isSearchFilterModalOpen ? <SearchFilter /> : null}

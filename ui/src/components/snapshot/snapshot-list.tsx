@@ -25,10 +25,11 @@ import {
   Tr,
 } from '@chakra-ui/react'
 import cx from 'classnames'
-import SnapshotAPI, { Snapshot, SortOrder } from '@/client/api/snapshot'
+import SnapshotAPI, { Snapshot, SortBy, SortOrder } from '@/client/api/snapshot'
 import { swrConfig } from '@/client/options'
 import Pagination from '@/lib/components/pagination'
 import SectionSpinner from '@/lib/components/section-spinner'
+import prettyBytes from '@/lib/helpers/pretty-bytes'
 import prettyDate from '@/lib/helpers/pretty-date'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import {
@@ -53,7 +54,13 @@ const SnapshotList = () => {
     error,
     mutate: snapshotMutate,
   } = SnapshotAPI.useList(
-    { fileId, page, size: 5, sortOrder: SortOrder.Desc },
+    {
+      fileId,
+      page,
+      size: 5,
+      sortBy: SortBy.Version,
+      sortOrder: SortOrder.Desc,
+    },
     swrConfig(),
   )
 
@@ -181,6 +188,11 @@ const SnapshotList = () => {
                             </span>
                             <div className={cx('flex', 'flex-row', 'gap-1')}>
                               <Badge variant="outline">{`v${s.version}`}</Badge>
+                              {s.original.size ? (
+                                <Badge variant="outline">
+                                  {prettyBytes(s.original.size)}
+                                </Badge>
+                              ) : null}
                               {s.entities ? (
                                 <Badge variant="outline">Insights</Badge>
                               ) : null}

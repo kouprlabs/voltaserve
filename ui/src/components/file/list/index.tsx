@@ -28,6 +28,7 @@ import {
   contextMenuDidOpen,
   copyModalDidOpen,
   deleteModalDidOpen,
+  infoModalDidOpen,
   moveModalDidOpen,
   multiSelectKeyUpdated,
   rangeSelectKeyUpdated,
@@ -63,6 +64,7 @@ const FileList = ({ list, scale }: FileListProps) => {
       state.ui.files.isCreateModalOpen ||
       state.ui.files.isShareModalOpen ||
       state.ui.files.isRenameModalOpen ||
+      state.ui.files.isInfoModalOpen ||
       state.ui.mosaic.isModalOpen ||
       state.ui.insights.isModalOpen,
   )
@@ -169,6 +171,13 @@ const FileList = ({ list, scale }: FileListProps) => {
       ) {
         if (selection.length > 0) {
           dispatch(moveModalDidOpen())
+        }
+      } else if (
+        (keyName === 'command+e' && isMacOS()) ||
+        (keyName === 'ctrl+e' && !isMacOS())
+      ) {
+        if (selection.length > 0) {
+          dispatch(infoModalDidOpen())
         }
       } else if (
         (keyName === 'command+e' && isMacOS()) ||
