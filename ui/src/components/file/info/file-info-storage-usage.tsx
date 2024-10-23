@@ -18,7 +18,7 @@ export type FileInfoStorageUsageProps = {
 }
 
 const FileInfoStorageUsage = ({ file }: FileInfoStorageUsageProps) => {
-  const { data, error } = StorageAPI.useGetFileUsage(file.id)
+  const { data: usage, error } = StorageAPI.useGetFileUsage(file.id)
   return (
     <Stat>
       <StatLabel>Storage usage</StatLabel>
@@ -27,15 +27,15 @@ const FileInfoStorageUsage = ({ file }: FileInfoStorageUsageProps) => {
           {error ? (
             <span className={cx('text-red-500')}>Failed to load.</span>
           ) : null}
-          {data && !error ? (
+          {usage && !error ? (
             <>
               <span>
-                {prettyBytes(data.bytes)} of {prettyBytes(data.maxBytes)} used
+                {prettyBytes(usage.bytes)} of {prettyBytes(usage.maxBytes)} used
               </span>
-              <Progress size="sm" value={data.percentage} hasStripe />
+              <Progress size="sm" value={usage.percentage} hasStripe />
             </>
           ) : null}
-          {!data && !error ? (
+          {!usage && !error ? (
             <>
               <span>Calculating…</span>
               <Progress size="sm" value={0} hasStripe />
