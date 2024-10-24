@@ -26,13 +26,16 @@ Make sure PIP is available:
 python3 -m ensurepip
 ```
 
-Run for development:
+Run:
+```shell
+flask run --host=0.0.0.0 --port=8084
+```
+
+Add `--debug` flag for development:
 
 ```shell
 flask run --host=0.0.0.0 --port=8084 --debug
 ```
-
-You can omit the `--debug` flag when not developing.
 
 Lint code:
 
