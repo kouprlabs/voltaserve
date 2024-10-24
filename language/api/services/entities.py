@@ -95,8 +95,8 @@ class EntityExtractor:
     @staticmethod
     def convert_dict_to_list(groups):
         """
-        Convert the dictionary back to a list of entities, with the
-        "frequency" field, then sort by descending order of frequency.
+        Convert the dictionary back to a list of entities, with "text" and
+        "frequency" fields, then sort by descending order of frequency.
 
         Args:
             groups (dict): A dictionary where keys are entity names,
