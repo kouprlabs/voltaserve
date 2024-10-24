@@ -1,15 +1,21 @@
-[project]
+[tool.poetry]
 name = "voltaserve-language"
-version = "1.0.0"
-license = { text = "AGPL-3.0-only" }
-requires-python = "==3.12.*"
-dependencies = ["flask==3.0.3", "spacy==3.7.4", "requests==2.32.2"]
+version = "3.0.0"
+license = "BUSL-1.1"
+description = "Voltaserve Language"
+authors = ["Anass Bouassaba <anass@voltaserve.com>"]
+readme = "README.md"
 
-[tool.pdm.dev-dependencies]
-dev = [
-    "black==24.4.2",
-    "flake8==7.1.0",
-]
+[tool.poetry.dependencies]
+python = "^3.12"
+flask = "3.0.3"
+spacy = "3.7.4"
+requests = "2.32.2"
 
-[tool.pdm]
-distribution = false
+[tool.poetry.dev-dependencies]
+black = "24.4.2"
+flake8 = "7.1.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

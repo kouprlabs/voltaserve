@@ -1,4 +1,2 @@
 [flake8]
 exclude = .git,.venv,.dockerignore,.pdm-python,Dockerfile
-extend-ignore = E203
-max-line-length = 88
