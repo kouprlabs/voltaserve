@@ -8,22 +8,20 @@
 # by the GNU Affero General Public License v3.0 only, included in the file
 # licenses/AGPL.txt.
 
-FROM python:3.12-alpine
+FROM python:3.12-slim-bookworm
 
 WORKDIR /app
 
-RUN apk update &&\
-    apk add --no-cache build-base &&\
-    pip3 install pipx
-
 COPY . .
 
-ENV PATH="/root/.local/bin:$PATH"
+RUN apt-get update &&\
+    apt-get install -y curl build-essential curl rust-all
 
-RUN pipx install pdm --python $(which python) &&\
-    pdm install --prod --no-editable &&\
-    .venv/bin/python3 -m ensurepip
+RUN pip install poetry &&\
+    poetry config virtualenvs.create false
 
-ENTRYPOINT ["pdm", "run", "flask", "run", "--host=0.0.0.0", "--port=8084"]
+RUN poetry install --no-root
+
+ENTRYPOINT ["flask", "run", "--host=0.0.0.0", "--port=8084"]
 
 EXPOSE 8084

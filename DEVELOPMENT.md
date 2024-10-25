@@ -2,29 +2,15 @@
 
 ## Prerequisites
 
-Install [NVM](https://github.com/nvm-sh/nvm?tab=readme-ov-file#installing-and-updating).
-
-Install [Node.js](https://nodejs.org/) 20.x with NVM and set it as default:
-
-```shell
-nvm install lts/iron
-```
-
-```shell
-nvm alias default lts/iron
-```
+Install [Bun](https://bun.sh).
 
 Install [Go](https://go.dev) for your platform.
 
 Install [Rust](https://www.rust-lang.org) for your platform.
 
-Install [PDM](https://pdm-project.org).
+Install [Poetry](https://python-poetry.org/docs/#installation).
 
-Install Python 3.12 with PDM:
-
-```shell
-pdm py install cpython@3.12.3
-```
+Install [Python](https://www.python.org) 3.12 with [pyenv](https://github.com/pyenv/pyenv).
 
 ## Run Infrastructure Services
 
@@ -171,3 +157,4 @@ Start each microservice separately in a new terminal as described here:
 - [Voltaserve Conversion](conversion/README.md)
 - [Voltaserve Mosaic](mosaic/README.md)
 - [Voltaserve Language](mosaic/README.md)
+- [Voltaserve Console](console/README.md)
