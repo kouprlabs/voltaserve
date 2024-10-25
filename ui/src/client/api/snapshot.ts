@@ -9,6 +9,7 @@
 // licenses/AGPL.txt.
 import useSWR, { SWRConfiguration } from 'swr'
 import { apiFetcher } from '../fetcher'
+import { File } from './file'
 
 export type Snapshot = {
   id: string

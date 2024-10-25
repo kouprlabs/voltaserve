@@ -80,7 +80,10 @@ const SnapshotList = () => {
     if (selected) {
       try {
         setIsActivating(true)
-        await SnapshotAPI.activate(selected.id)
+        const file = await SnapshotAPI.activate(selected.id)
+        if (file.snapshot) {
+          handleSelect(file.snapshot)
+        }
         await snapshotMutate()
         mutateFiles?.()
       } finally {
