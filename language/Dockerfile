@@ -14,21 +14,14 @@ WORKDIR /app
 
 COPY . .
 
-RUN apt-get update
+RUN apt-get update &&\
+    apt-get install -y curl build-essential curl rust-all
 
-RUN apt-get install -y curl build-essential
-
-RUN apt-get update && \
-  apt-get install -y curl && \
-  curl https://sh.rustup.rs -sSf | sh -s -- -y && \
-  /root/.cargo/bin/rustup default stable
-
-RUN curl -sSL https://install.python-poetry.org | python3 -
-
-ENV PATH="/root/.cargo/bin:/root/.local/bin:${PATH}"
+RUN pip install poetry &&\
+    poetry config virtualenvs.create false
 
 RUN poetry install --no-root
 
-ENTRYPOINT ["poetry", "run", "flask", "run", "--host=0.0.0.0", "--port=8084"]
+ENTRYPOINT ["flask", "run", "--host=0.0.0.0", "--port=8084"]
 
 EXPOSE 8084
