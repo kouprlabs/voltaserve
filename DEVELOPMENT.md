@@ -157,3 +157,4 @@ Start each microservice separately in a new terminal as described here:
 - [Voltaserve Conversion](conversion/README.md)
 - [Voltaserve Mosaic](mosaic/README.md)
 - [Voltaserve Language](mosaic/README.md)
+- [Voltaserve Console](console/README.md)
