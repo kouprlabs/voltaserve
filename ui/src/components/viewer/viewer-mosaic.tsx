@@ -32,13 +32,13 @@ const ViewerMosaic = ({ file }: ViewerImageProps) => {
   const tileCache = useRef<Map<string, HTMLImageElement>>(new Map())
 
   useEffect(() => {
-    ;(async function () {
+    ;(async function (file: File) {
       const { metadata } = await MosaicAPI.getInfo(file.id)
       if (metadata) {
         setMetadata(metadata)
       }
-    })()
-  }, [file, accessToken])
+    })(file)
+  }, [file])
 
   useEffect(() => {
     ;(async function () {
