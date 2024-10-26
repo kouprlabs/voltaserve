@@ -61,34 +61,30 @@ router.get(
 
 router.get(
   '/picture:ext',
-  async (req: PassportRequest, res: Response, next: NextFunction) => {
-    try {
-      if (!req.query.access_token) {
-        throw newError({
-          code: ErrorCode.InvalidRequest,
-          message: "Query param 'access_token' is required",
-        })
-      }
-      const userID = await getUserIDFromAccessToken(
-        req.query.access_token as string,
-      )
-      const { buffer, extension, mime } = await getUserPicture(userID)
-      if (extension !== req.params.ext) {
-        throw newError({
-          code: ErrorCode.ResourceNotFound,
-          message: 'Picture not found',
-          userMessage: 'Picture not found',
-        })
-      }
-      res.setHeader(
-        'Content-Disposition',
-        `attachment; filename=picture.${extension}`,
-      )
-      res.setHeader('Content-Type', mime)
-      res.send(buffer)
-    } catch (err) {
-      next(err)
+  async (req: PassportRequest, res: Response) => {
+    if (!req.query.access_token) {
+      throw newError({
+        code: ErrorCode.InvalidRequest,
+        message: "Query param 'access_token' is required",
+      })
     }
+    const userID = await getUserIDFromAccessToken(
+      req.query.access_token as string,
+    )
+    const { buffer, extension, mime } = await getUserPicture(userID)
+    if (extension !== req.params.ext) {
+      throw newError({
+        code: ErrorCode.ResourceNotFound,
+        message: 'Picture not found',
+        userMessage: 'Picture not found',
+      })
+    }
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename=picture.${extension}`,
+    )
+    res.setHeader('Content-Type', mime)
+    res.send(buffer)
   },
 )
 
@@ -96,21 +92,17 @@ router.post(
   '/update_full_name',
   passport.authenticate('jwt', { session: false }),
   body('fullName').isString().notEmpty().trim().escape().isLength({ max: 255 }),
-  async (req: PassportRequest, res: Response, next: NextFunction) => {
-    try {
-      const result = validationResult(req)
-      if (!result.isEmpty()) {
-        throw parseValidationError(result)
-      }
-      res.json(
-        await updateFullName(
-          req.user.id,
-          req.body as UserUpdateFullNameOptions,
-        ),
-      )
-    } catch (err) {
-      next(err)
+  async (req: PassportRequest, res: Response) => {
+    const result = validationResult(req)
+    if (!result.isEmpty()) {
+      throw parseValidationError(result)
     }
+    res.json(
+      await updateFullName(
+        req.user.id,
+        req.body as UserUpdateFullNameOptions,
+      ),
+    )
   },
 )
 
@@ -118,21 +110,17 @@ router.post(
   '/update_email_request',
   passport.authenticate('jwt', { session: false }),
   body('email').isEmail().isLength({ max: 255 }),
-  async (req: PassportRequest, res: Response, next: NextFunction) => {
-    try {
-      const result = validationResult(req)
-      if (!result.isEmpty()) {
-        throw parseValidationError(result)
-      }
-      res.json(
-        await updateEmailRequest(
-          req.user.id,
-          req.body as UserUpdateEmailRequestOptions,
-        ),
-      )
-    } catch (err) {
-      next(err)
+  async (req: PassportRequest, res: Response) => {
+    const result = validationResult(req)
+    if (!result.isEmpty()) {
+      throw parseValidationError(result)
     }
+    res.json(
+      await updateEmailRequest(
+        req.user.id,
+        req.body as UserUpdateEmailRequestOptions,
+      ),
+    )
   },
 )
 
@@ -140,20 +128,16 @@ router.post(
   '/update_email_confirmation',
   passport.authenticate('jwt', { session: false }),
   body('token').isString().notEmpty().trim(),
-  async (req: PassportRequest, res: Response, next: NextFunction) => {
-    try {
-      const result = validationResult(req)
-      if (!result.isEmpty()) {
-        throw parseValidationError(result)
-      }
-      res.json(
-        await updateEmailConfirmation(
-          req.body as UserUpdateEmailConfirmationOptions,
-        ),
-      )
-    } catch (err) {
-      next(err)
+  async (req: PassportRequest, res: Response) => {
+    const result = validationResult(req)
+    if (!result.isEmpty()) {
+      throw parseValidationError(result)
     }
+    res.json(
+      await updateEmailConfirmation(
+        req.body as UserUpdateEmailConfirmationOptions,
+      ),
+    )
   },
 )
 
@@ -162,26 +146,17 @@ router.post(
   passport.authenticate('jwt', { session: false }),
   body('currentPassword').notEmpty(),
   body('newPassword').isStrongPassword(),
-  async (req: PassportRequest, res: Response, next: NextFunction) => {
-    try {
-      const result = validationResult(req)
-      if (!result.isEmpty()) {
-        throw parseValidationError(result)
-      }
-      res.json(
-        await updatePassword(
-          req.user.id,
-          req.body as UserUpdatePasswordOptions,
-        ),
-      )
-    } catch (err) {
-      if (err === 'invalid_password') {
-        res.status(400).json({ error: err })
-        return
-      } else {
-        next(err)
-      }
+  async (req: PassportRequest, res: Response) => {
+    const result = validationResult(req)
+    if (!result.isEmpty()) {
+      throw parseValidationError(result)
     }
+    res.json(
+      await updatePassword(
+        req.user.id,
+        req.body as UserUpdatePasswordOptions,
+      ),
+    )
   },
 )
 
@@ -223,22 +198,13 @@ router.delete(
   '/',
   passport.authenticate('jwt', { session: false }),
   body('password').isString().notEmpty(),
-  async (req: PassportRequest, res: Response, next: NextFunction) => {
-    try {
-      const result = validationResult(req)
-      if (!result.isEmpty()) {
-        throw parseValidationError(result)
-      }
-      await deleteUser(req.user.id, req.body as UserDeleteOptions)
-      res.sendStatus(204)
-    } catch (err) {
-      if (err === 'invalid_password') {
-        res.status(400).json({ error: err })
-        return
-      } else {
-        next(err)
-      }
+  async (req: PassportRequest, res: Response) => {
+    const result = validationResult(req)
+    if (!result.isEmpty()) {
+      throw parseValidationError(result)
     }
+    await deleteUser(req.user.id, req.body as UserDeleteOptions)
+    res.sendStatus(204)
   },
 )
 
@@ -266,18 +232,14 @@ router.patch(
   passport.authenticate('jwt', { session: false }),
   body('id').isString(),
   body('suspend').isBoolean(),
-  async (req: PassportRequest, res: Response, next: NextFunction) => {
-    try {
-      checkAdmin(req.header('Authorization'))
-      const result = validationResult(req)
-      if (!result.isEmpty()) {
-        throw parseValidationError(result)
-      }
-      await suspendUser(req.body as UserSuspendPostRequest)
-      res.sendStatus(200)
-    } catch (err) {
-      next(err)
+  async (req: PassportRequest, res: Response) => {
+    checkAdmin(req.header('Authorization'))
+    const result = validationResult(req)
+    if (!result.isEmpty()) {
+      throw parseValidationError(result)
     }
+    await suspendUser(req.body as UserSuspendPostRequest)
+    res.sendStatus(200)
   },
 )
 
@@ -286,18 +248,14 @@ router.patch(
   passport.authenticate('jwt', { session: false }),
   body('id').isString(),
   body('makeAdmin').isBoolean(),
-  async (req: PassportRequest, res: Response, next: NextFunction) => {
-    try {
-      checkAdmin(req.header('Authorization'))
-      const result = validationResult(req)
-      if (!result.isEmpty()) {
-        throw parseValidationError(result)
-      }
-      await makeAdminUser(req.body as UserAdminPostRequest)
-      res.sendStatus(200)
-    } catch (err) {
-      next(err)
+  async (req: PassportRequest, res: Response) => {
+    checkAdmin(req.header('Authorization'))
+    const result = validationResult(req)
+    if (!result.isEmpty()) {
+      throw parseValidationError(result)
     }
+    await makeAdminUser(req.body as UserAdminPostRequest)
+    res.sendStatus(200)
   },
 )
 
