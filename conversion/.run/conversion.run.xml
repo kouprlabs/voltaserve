@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="go build github.com/kouprlabs/voltaserve/conversion" type="GoApplicationRunConfiguration" factoryName="Go Application" nameIsGenerated="true">
+  <configuration default="false" name="conversion" type="GoApplicationRunConfiguration" factoryName="Go Application">
     <module name="conversion" />
     <working_directory value="$PROJECT_DIR$" />
     <kind value="PACKAGE" />
