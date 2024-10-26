@@ -226,7 +226,7 @@ type GLTF struct {
 	} `json:"buffers"`
 }
 
-// IsGLTF Inspects a ZIP archive to see if it contains a glTF 2.0 structure.
+// IsGLTF inspects a ZIP archive to see if it contains a glTF 2.0 structure.
 func (fi *FileIdentifier) IsGLTF(path string) (bool, error) {
 	zipFile, err := zip.OpenReader(path)
 	if err != nil {
