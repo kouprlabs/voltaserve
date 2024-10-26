@@ -13,10 +13,11 @@ package identifier
 import (
 	"archive/zip"
 	"encoding/json"
-	"github.com/kouprlabs/voltaserve/conversion/infra"
 	"io"
 	"path/filepath"
 	"strings"
+
+	"github.com/kouprlabs/voltaserve/conversion/infra"
 )
 
 type FileIdentifier struct{}

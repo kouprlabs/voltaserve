@@ -13,12 +13,12 @@ package infra
 import (
 	"archive/zip"
 	"encoding/json"
-	"github.com/kouprlabs/voltaserve/api/log"
 	"io"
 	"path/filepath"
 	"strings"
 
 	"github.com/kouprlabs/voltaserve/api/config"
+	"github.com/kouprlabs/voltaserve/api/log"
 )
 
 type FileIdentifier struct {
