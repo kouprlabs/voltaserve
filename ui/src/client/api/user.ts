@@ -60,7 +60,7 @@ type ListQueryParams = {
 }
 
 export default class UserAPI {
-  static async list(options?: ListOptions) {
+  static list(options?: ListOptions) {
     return apiFetcher({
       url: `/users?${this.paramsFromListOptions(options)}`,
       method: 'GET',

@@ -66,8 +66,6 @@ export default class TokenAPI {
     try {
       if (response) {
         return (await response.json()) as Token
-      } else {
-        throw new Error('No response')
       }
     } catch {
       throw new Error('Failed to parse token')

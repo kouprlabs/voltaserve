@@ -143,9 +143,9 @@ const SignUpPage = () => {
                     <Field name="fullName">
                       {({ field }: FieldAttributes<FieldProps>) => (
                         <FormControl
-                          isInvalid={
-                            errors.fullName && touched.fullName ? true : false
-                          }
+                          isInvalid={Boolean(
+                            errors.fullName && touched.fullName,
+                          )}
                         >
                           <Input
                             {...field}
@@ -160,9 +160,7 @@ const SignUpPage = () => {
                     <Field name="email">
                       {({ field }: FieldAttributes<FieldProps>) => (
                         <FormControl
-                          isInvalid={
-                            errors.email && touched.email ? true : false
-                          }
+                          isInvalid={Boolean(errors.email && touched.email)}
                         >
                           <Input
                             {...field}
@@ -177,9 +175,9 @@ const SignUpPage = () => {
                     <Field name="password">
                       {({ field }: FieldAttributes<FieldProps>) => (
                         <FormControl
-                          isInvalid={
-                            errors.password && touched.password ? true : false
-                          }
+                          isInvalid={Boolean(
+                            errors.password && touched.password,
+                          )}
                         >
                           <Input
                             {...field}
@@ -203,12 +201,10 @@ const SignUpPage = () => {
                     <Field name="passwordConfirmation">
                       {({ field }: FieldAttributes<FieldProps>) => (
                         <FormControl
-                          isInvalid={
+                          isInvalid={Boolean(
                             errors.passwordConfirmation &&
-                            touched.passwordConfirmation
-                              ? true
-                              : false
-                          }
+                              touched.passwordConfirmation,
+                          )}
                         >
                           <Input
                             {...field}

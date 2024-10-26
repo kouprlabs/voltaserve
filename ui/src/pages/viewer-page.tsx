@@ -41,19 +41,19 @@ const ViewerPage = () => {
     [location],
   )
   const hasPDF = useMemo(() => {
-    return file?.snapshot &&
-      ((file.snapshot.original && isPDF(file.snapshot.original.extension)) ||
-        (file.snapshot.preview && isPDF(file.snapshot.preview.extension)))
-      ? true
-      : false
+    return Boolean(
+      file?.snapshot &&
+        ((file.snapshot.original && isPDF(file.snapshot.original.extension)) ||
+          (file.snapshot.preview && isPDF(file.snapshot.preview.extension))),
+    )
   }, [file, location])
   const hasImage = useMemo(
     () =>
-      file?.snapshot &&
-      file.snapshot?.original &&
-      isImage(file.snapshot?.original.extension)
-        ? true
-        : false,
+      Boolean(
+        file?.snapshot &&
+          file.snapshot?.original &&
+          isImage(file.snapshot?.original.extension),
+      ),
     [file],
   )
   const hasMosaicImage = useMemo(

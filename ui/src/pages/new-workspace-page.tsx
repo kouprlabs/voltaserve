@@ -105,7 +105,7 @@ const NewWorkspacePage = () => {
                     {({ field }: FieldAttributes<FieldProps>) => (
                       <FormControl
                         maxW="400px"
-                        isInvalid={errors.name && touched.name ? true : false}
+                        isInvalid={Boolean(errors.name && touched.name)}
                       >
                         <FormLabel>Name</FormLabel>
                         <Input {...field} disabled={isSubmitting} autoFocus />
@@ -117,11 +117,9 @@ const NewWorkspacePage = () => {
                     {({ field }: FieldAttributes<FieldProps>) => (
                       <FormControl
                         maxW="400px"
-                        isInvalid={
-                          errors.organizationId && touched.organizationId
-                            ? true
-                            : false
-                        }
+                        isInvalid={Boolean(
+                          errors.organizationId && touched.organizationId,
+                        )}
                       >
                         <FormLabel>Organization</FormLabel>
                         <OrganizationSelector
@@ -139,11 +137,9 @@ const NewWorkspacePage = () => {
                     {(props: FieldAttributes<FieldProps>) => (
                       <FormControl
                         maxW="400px"
-                        isInvalid={
-                          errors.storageCapacity && touched.storageCapacity
-                            ? true
-                            : false
-                        }
+                        isInvalid={Boolean(
+                          errors.storageCapacity && touched.storageCapacity,
+                        )}
                       >
                         <FormLabel>Storage capacity</FormLabel>
                         <StorageInput {...props} />

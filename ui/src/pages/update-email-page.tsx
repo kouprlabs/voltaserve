@@ -28,18 +28,17 @@ const UpdateEmailPage = () => {
   }, [params.token])
 
   useEffect(() => {
-    async function doRequest() {
-      try {
-        await UserAPI.updateEmailConfirmation({ token: token })
-        setIsCompleted(true)
-      } catch {
-        setIsFailed(true)
-      } finally {
-        setIsCompleted(true)
-      }
-    }
     if (token) {
-      doRequest()
+      ;(async function (token: string) {
+        try {
+          await UserAPI.updateEmailConfirmation({ token: token })
+          setIsCompleted(true)
+        } catch {
+          setIsFailed(true)
+        } finally {
+          setIsCompleted(true)
+        }
+      })(token)
     }
   }, [token])
 

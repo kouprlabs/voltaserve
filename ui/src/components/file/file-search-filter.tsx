@@ -173,9 +173,9 @@ const FileSearchFilter = () => {
                       selectedOptionStyle="check"
                       chakraStyles={reactSelectStyles()}
                       isDisabled={isSubmitting}
-                      onChange={(event) => {
+                      onChange={async (event) => {
                         if (event) {
-                          setFieldValue('type', event.value)
+                          await setFieldValue('type', event.value)
                         }
                       }}
                     />

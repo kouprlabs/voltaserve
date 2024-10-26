@@ -46,7 +46,6 @@ type SnapshotPatchOptions struct {
 }
 
 const (
-	SnapshotStatusWaiting    = "waiting"
 	SnapshotStatusProcessing = "processing"
 	SnapshotStatusReady      = "ready"
 	SnapshotStatusError      = "error"
@@ -61,7 +60,6 @@ const (
 	SnapshotFieldMosaic    = "mosaic"
 	SnapshotFieldThumbnail = "thumbnail"
 	SnapshotFieldStatus    = "status"
-	SnapshotFieldLanguage  = "language"
 	SnapshotFieldTaskID    = "taskId"
 )
 

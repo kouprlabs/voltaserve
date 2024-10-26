@@ -7,7 +7,7 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-import { useState } from 'react'
+import { ChangeEvent, useState } from 'react'
 import { Input, Select } from '@chakra-ui/react'
 import { FieldAttributes, FieldProps } from 'formik'
 import cx from 'classnames'
@@ -21,6 +21,27 @@ const StorageInput = ({ id, field, form }: FieldAttributes<FieldProps>) => {
     field.value ? getUnit(field.value) : 'b',
   )
 
+  const handleInputChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    if (event.target.value) {
+      const newValue = parseInt(event.target.value)
+      setValue(newValue)
+      await form.setFieldValue(field.name, normalizeToByte(newValue, unit))
+    } else {
+      setValue(null)
+      await form.setFieldValue(field.name, '')
+    }
+  }
+
+  const handleSelectChange = async (event: ChangeEvent<HTMLSelectElement>) => {
+    const newUnit = event.target.value as Unit
+    setUnit(newUnit)
+    if (value) {
+      const newValue = convertFromByte(normalizeToByte(value, unit), newUnit)
+      setValue(newValue)
+      await form.setFieldValue(field.name, normalizeToByte(newValue, newUnit))
+    }
+  }
+
   return (
     <>
       <input id={id} type="hidden" {...field} />
@@ -29,36 +50,13 @@ const StorageInput = ({ id, field, form }: FieldAttributes<FieldProps>) => {
           type="number"
           disabled={form.isSubmitting}
           value={value || ''}
-          onChange={(event) => {
-            if (event.target.value) {
-              const newValue = parseInt(event.target.value)
-              setValue(newValue)
-              form.setFieldValue(field.name, normalizeToByte(newValue, unit))
-            } else {
-              setValue(null)
-              form.setFieldValue(field.name, '')
-            }
-          }}
+          onChange={handleInputChange}
         />
         <div className={cx('min-w-[80px]')}>
           <Select
             defaultValue={unit}
             disabled={form.isSubmitting}
-            onChange={(event) => {
-              const newUnit = event.target.value as Unit
-              setUnit(newUnit)
-              if (value) {
-                const newValue = convertFromByte(
-                  normalizeToByte(value, unit),
-                  newUnit,
-                )
-                setValue(newValue)
-                form.setFieldValue(
-                  field.name,
-                  normalizeToByte(newValue, newUnit),
-                )
-              }
-            }}
+            onChange={handleSelectChange}
           >
             <option value="b">B</option>
             <option value="mb">MB</option>

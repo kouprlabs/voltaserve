@@ -43,7 +43,7 @@ const InsightsOverviewEntities = () => {
   )
 
   useEffect(() => {
-    mutate()
+    mutate().then()
   }, [page, query, mutate])
 
   const handleSearchInputValue = useCallback((value: string) => {

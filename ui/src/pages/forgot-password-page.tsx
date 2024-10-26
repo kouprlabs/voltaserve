@@ -112,9 +112,7 @@ const ForgotPasswordPage = () => {
                       <Field name="email">
                         {({ field }: FieldAttributes<FieldProps>) => (
                           <FormControl
-                            isInvalid={
-                              errors.email && touched.email ? true : false
-                            }
+                            isInvalid={Boolean(errors.email && touched.email)}
                           >
                             <Input
                               {...field}

@@ -95,20 +95,20 @@ const FileMenu = ({
   )
   const isOwnerInSelection = useMemo(
     () =>
-      list?.data
-        .filter((item) => selection.includes(item.id))
-        .every((item) => geOwnerPermission(item.permission))
-        ? true
-        : false,
+      Boolean(
+        list?.data
+          .filter((item) => selection.includes(item.id))
+          .every((item) => geOwnerPermission(item.permission)),
+      ),
     [list, selection],
   )
   const isEditorInSelection = useMemo(
     () =>
-      list?.data
-        .filter((item) => selection.includes(item.id))
-        .every((item) => geEditorPermission(item.permission))
-        ? true
-        : false,
+      Boolean(
+        list?.data
+          .filter((item) => selection.includes(item.id))
+          .every((item) => geEditorPermission(item.permission)),
+      ),
     [list, selection],
   )
   const isInsightsAuthorized = useMemo(
@@ -306,10 +306,10 @@ const FileMenu = ({
                 {isDownloadAuthorized ? (
                   <MenuItem
                     icon={<IconDownload />}
-                    onClick={(event: MouseEvent) => {
+                    onClick={async (event: MouseEvent) => {
                       event.stopPropagation()
                       if (file) {
-                        downloadFile(file)
+                        await downloadFile(file)
                       }
                     }}
                   >

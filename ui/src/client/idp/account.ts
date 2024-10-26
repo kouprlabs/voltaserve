@@ -40,7 +40,7 @@ export type PasswordRequirements = {
 }
 
 export default class AccountAPI {
-  static async create(options: CreateOptions) {
+  static create(options: CreateOptions) {
     return idpFetcher({
       url: `/accounts`,
       method: 'POST',

@@ -38,7 +38,7 @@ const SnapshotDetach = () => {
   const [isLoading, setIsLoading] = useState(false)
 
   const handleDetach = useCallback(async () => {
-    async function detach(id: string) {
+    if (id) {
       setIsLoading(true)
       try {
         await SnapshotAPI.detach(id)
@@ -50,9 +50,6 @@ const SnapshotDetach = () => {
       } finally {
         setIsLoading(false)
       }
-    }
-    if (id) {
-      detach(id)
     }
   }, [id, dispatch, mutate])
 

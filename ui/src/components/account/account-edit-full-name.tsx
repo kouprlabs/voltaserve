@@ -105,9 +105,7 @@ const AccountEditFullName = ({
                 <Field name="fullName">
                   {({ field }: FieldAttributes<FieldProps>) => (
                     <FormControl
-                      isInvalid={
-                        errors.fullName && touched.fullName ? true : false
-                      }
+                      isInvalid={Boolean(errors.fullName && touched.fullName)}
                     >
                       <Input
                         ref={inputRef}

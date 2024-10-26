@@ -35,7 +35,7 @@ func (s *UserSearch) Query(query string, opts infra.QueryOptions) ([]model.User,
 	if err != nil {
 		return nil, err
 	}
-	res := []model.User{}
+	res := make([]model.User, 0)
 	for _, v := range hits {
 		b, err := json.Marshal(v)
 		if err != nil {

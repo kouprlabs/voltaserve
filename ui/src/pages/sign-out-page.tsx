@@ -19,7 +19,7 @@ function SignOutPage() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    clearToken()
+    clearToken().then()
     navigate('/sign-in')
   }, [navigate])
 

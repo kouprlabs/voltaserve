@@ -170,7 +170,7 @@ type ListQueryParams = {
 }
 
 export default class FileAPI {
-  static async create({
+  static create({
     type,
     workspaceId,
     parentId,
@@ -255,7 +255,7 @@ export default class FileAPI {
     })
   }
 
-  static async list(id: string, options: ListOptions) {
+  static list(id: string, options: ListOptions) {
     return apiFetcher({
       url: `/files/${id}/list?${this.paramsFromListOptions(options)}`,
       method: 'GET',
@@ -310,7 +310,7 @@ export default class FileAPI {
     )
   }
 
-  static async patchName(id: string, options: PatchNameOptions) {
+  static patchName(id: string, options: PatchNameOptions) {
     return apiFetcher({
       url: `/files/${id}/name`,
       method: 'PATCH',
@@ -325,7 +325,7 @@ export default class FileAPI {
     })
   }
 
-  static async deleteMany(options: DeleteManyOptions) {
+  static deleteMany(options: DeleteManyOptions) {
     return apiFetcher({
       url: `/files`,
       method: 'DELETE',
@@ -340,7 +340,7 @@ export default class FileAPI {
     })
   }
 
-  static async moveMany(options: MoveManyOptions) {
+  static moveMany(options: MoveManyOptions) {
     return apiFetcher({
       url: `/files/move`,
       method: 'POST',
@@ -348,14 +348,14 @@ export default class FileAPI {
     }) as Promise<MoveManyResult>
   }
 
-  static async copyOne(id: string, targetId: string) {
+  static copyOne(id: string, targetId: string) {
     return apiFetcher({
       url: `/files/${id}/copy/${targetId}`,
       method: 'POST',
     }) as Promise<File>
   }
 
-  static async copyMany(options: CopyManyOptions) {
+  static copyMany(options: CopyManyOptions) {
     return apiFetcher({
       url: `/files/copy`,
       method: 'POST',
@@ -376,7 +376,7 @@ export default class FileAPI {
     )
   }
 
-  static async get(id: string) {
+  static get(id: string) {
     return apiFetcher({
       url: `/files/${id}`,
       method: 'GET',

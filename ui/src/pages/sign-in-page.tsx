@@ -62,7 +62,7 @@ const SignInPage = () => {
           password,
           grant_type: 'password',
         })
-        saveToken(token)
+        saveToken(token).then()
         const orgList = await OrganizationAPI.list()
         if (orgList.totalElements === 0) {
           const { id: organizationId } = await OrganizationAPI.create({
@@ -135,7 +135,7 @@ const SignInPage = () => {
                   <Field name="email">
                     {({ field }: FieldAttributes<FieldProps>) => (
                       <FormControl
-                        isInvalid={errors.email && touched.email ? true : false}
+                        isInvalid={Boolean(errors.email && touched.email)}
                       >
                         <Input
                           {...field}
@@ -150,9 +150,7 @@ const SignInPage = () => {
                   <Field name="password">
                     {({ field }: FieldAttributes<FieldProps>) => (
                       <FormControl
-                        isInvalid={
-                          errors.password && touched.password ? true : false
-                        }
+                        isInvalid={Boolean(errors.password && touched.password)}
                       >
                         <Input
                           {...field}

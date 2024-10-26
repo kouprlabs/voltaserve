@@ -126,11 +126,9 @@ const WorkspaceEditStorageCapacity = ({
                     {(props: FieldAttributes<FieldProps>) => (
                       <FormControl
                         maxW="500px"
-                        isInvalid={
-                          errors.storageCapacity && touched.storageCapacity
-                            ? true
-                            : false
-                        }
+                        isInvalid={Boolean(
+                          errors.storageCapacity && touched.storageCapacity,
+                        )}
                       >
                         <FormLabel>Storage capacity</FormLabel>
                         <StorageInput {...props} />

@@ -55,7 +55,7 @@ export function getAccessToken() {
   if (accessToken && tokenExpiry && new Date() < new Date(tokenExpiry)) {
     return accessToken
   } else {
-    clearToken()
+    clearToken().then()
   }
 }
 
@@ -89,7 +89,7 @@ setInterval(async () => {
         grant_type: 'refresh_token',
         refresh_token: refreshToken,
       })
-      saveToken(token)
+      saveToken(token).then()
     }
   }
 }, 5000)
