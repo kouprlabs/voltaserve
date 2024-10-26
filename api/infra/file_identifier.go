@@ -13,7 +13,6 @@ package infra
 import (
 	"archive/zip"
 	"encoding/json"
-	"fmt"
 	"github.com/kouprlabs/voltaserve/api/log"
 	"io"
 	"path/filepath"
@@ -240,7 +239,7 @@ func (fi *FileIdentifier) IsGLTF(path string) (bool, error) {
 			}
 			defer func(rc io.ReadCloser) {
 				if err := rc.Close(); err != nil {
-					fmt.Println(err)
+					log.GetLogger().Error(err)
 				}
 			}(rc)
 			var gltf GLTF

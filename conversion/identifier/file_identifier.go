@@ -13,7 +13,6 @@ package identifier
 import (
 	"archive/zip"
 	"encoding/json"
-	"fmt"
 	"github.com/kouprlabs/voltaserve/conversion/infra"
 	"io"
 	"path/filepath"
@@ -234,7 +233,7 @@ func (fi *FileIdentifier) IsGLTF(path string) (bool, error) {
 	}
 	defer func(zipFile *zip.ReadCloser) {
 		if err := zipFile.Close(); err != nil {
-			fmt.Println(err)
+			infra.GetLogger().Error(err)
 		}
 	}(zipFile)
 	var hasGLTF, hasBin bool
