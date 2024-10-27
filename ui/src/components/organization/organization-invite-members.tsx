@@ -113,9 +113,7 @@ const OrganizationInviteMembers = ({
                   <Field name="emails">
                     {({ field }: FieldAttributes<FieldProps>) => (
                       <FormControl
-                        isInvalid={
-                          errors.emails && touched.emails ? true : false
-                        }
+                        isInvalid={Boolean(errors.emails && touched.emails)}
                       >
                         <FormLabel>Comma separated emails:</FormLabel>
                         <Textarea

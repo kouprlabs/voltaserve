@@ -29,7 +29,7 @@ export type ExchangeOptions = {
 }
 
 export default class TokenAPI {
-  static async exchange(options: ExchangeOptions) {
+  static async exchange(options: ExchangeOptions): Promise<Token> {
     const formBody = []
     formBody.push(`grant_type=${options.grant_type}`)
     if (options.grant_type === 'password') {
@@ -63,14 +63,10 @@ export default class TokenAPI {
       },
       false,
     )
-    try {
-      if (response) {
-        return (await response.json()) as Token
-      } else {
-        throw new Error('No response')
-      }
-    } catch {
-      throw new Error('Failed to parse token')
+    if (response) {
+      return (await response.json()) as Token
+    } else {
+      throw new Error('Invalid token response')
     }
   }
 }

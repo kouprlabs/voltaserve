@@ -108,7 +108,7 @@ export default class InsightsAPI {
     )
   }
 
-  static async getInfo(id: string) {
+  static getInfo(id: string) {
     return apiFetcher({
       url: `/insights/${id}/info`,
       method: 'GET',

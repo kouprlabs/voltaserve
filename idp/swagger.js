@@ -20,4 +20,4 @@ const doc = {
 const outputFile = './swagger.json'
 const endpointsFiles = ['./src/app.ts']
 
-swaggerAutogen(outputFile, endpointsFiles, doc)
+swaggerAutogen(outputFile, endpointsFiles, doc).then()

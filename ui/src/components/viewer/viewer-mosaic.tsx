@@ -7,7 +7,7 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, MouseEvent } from 'react'
 import { useColorMode } from '@chakra-ui/system'
 import { Select } from 'chakra-react-select'
 import cx from 'classnames'
@@ -32,17 +32,16 @@ const ViewerMosaic = ({ file }: ViewerImageProps) => {
   const tileCache = useRef<Map<string, HTMLImageElement>>(new Map())
 
   useEffect(() => {
-    const fetchMetadata = async () => {
+    ;(async function (file: File) {
       const { metadata } = await MosaicAPI.getInfo(file.id)
       if (metadata) {
         setMetadata(metadata)
       }
-    }
-    fetchMetadata()
-  }, [file, accessToken])
+    })(file)
+  }, [file])
 
   useEffect(() => {
-    const renderCanvas = async () => {
+    ;(async function () {
       if (!metadata || !canvasRef.current) return
 
       const canvas = canvasRef.current
@@ -84,9 +83,7 @@ const ViewerMosaic = ({ file }: ViewerImageProps) => {
           }
         }
       })
-    }
-
-    renderCanvas()
+    })()
   }, [metadata, zoomLevel, offset, file, accessToken])
 
   const drawTile = (
@@ -147,7 +144,7 @@ const ViewerMosaic = ({ file }: ViewerImageProps) => {
     setDragging(false)
   }
 
-  const handleMouseMove = (e: React.MouseEvent) => {
+  const handleMouseMove = (e: MouseEvent) => {
     if (dragging) {
       setOffset((prev) => ({
         x: prev.x + e.movementX,

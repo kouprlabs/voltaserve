@@ -131,15 +131,15 @@ const AppBarSearch = () => {
   )
   const hasFileQuery = useMemo(() => {
     const fileQuery = query as FileQuery
-    return isFiles &&
-      fileQuery &&
-      (fileQuery.type ||
-        fileQuery.createTimeAfter ||
-        fileQuery.createTimeBefore ||
-        fileQuery.updateTimeAfter ||
-        fileQuery.updateTimeBefore)
-      ? true
-      : false
+    return Boolean(
+      isFiles &&
+        fileQuery &&
+        (fileQuery.type ||
+          fileQuery.createTimeAfter ||
+          fileQuery.createTimeBefore ||
+          fileQuery.updateTimeAfter ||
+          fileQuery.updateTimeBefore),
+    )
   }, [isFiles, query])
   const placeholder = useMemo(() => {
     if (isWorkspaces || isConsoleWorkspaces) {

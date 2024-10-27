@@ -105,11 +105,9 @@ const AccountChangePassword = ({
                   <Field name="currentPassword">
                     {({ field }: FieldAttributes<FieldProps>) => (
                       <FormControl
-                        isInvalid={
-                          errors.currentPassword && touched.currentPassword
-                            ? true
-                            : false
-                        }
+                        isInvalid={Boolean(
+                          errors.currentPassword && touched.currentPassword,
+                        )}
                       >
                         <Input
                           {...field}
@@ -126,11 +124,9 @@ const AccountChangePassword = ({
                   <Field name="newPassword">
                     {({ field }: FieldAttributes<FieldProps>) => (
                       <FormControl
-                        isInvalid={
-                          errors.newPassword && touched.newPassword
-                            ? true
-                            : false
-                        }
+                        isInvalid={Boolean(
+                          errors.newPassword && touched.newPassword,
+                        )}
                       >
                         <Input
                           {...field}

@@ -92,7 +92,7 @@ export default class WorkspaceAPI {
     )
   }
 
-  static async list(options?: ListOptions) {
+  static list(options?: ListOptions) {
     return apiFetcher({
       url: `/workspaces?${this.paramsFromListOptions(options)}`,
       method: 'GET',
@@ -119,7 +119,7 @@ export default class WorkspaceAPI {
     return new URLSearchParams(params)
   }
 
-  static async create(options: CreateOptions) {
+  static create(options: CreateOptions) {
     return apiFetcher({
       url: '/workspaces',
       method: 'POST',
@@ -127,7 +127,7 @@ export default class WorkspaceAPI {
     }) as Promise<Workspace>
   }
 
-  static async patchName(id: string, options: PatchNameOptions) {
+  static patchName(id: string, options: PatchNameOptions) {
     return apiFetcher({
       url: `/workspaces/${id}/name`,
       method: 'PATCH',
@@ -135,7 +135,7 @@ export default class WorkspaceAPI {
     }) as Promise<Workspace>
   }
 
-  static async patchStorageCapacity(
+  static patchStorageCapacity(
     id: string,
     options: PatchStorageCapacityOptions,
   ) {

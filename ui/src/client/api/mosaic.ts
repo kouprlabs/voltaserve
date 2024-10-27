@@ -75,7 +75,7 @@ export default class MosaicAPI {
     )
   }
 
-  static async getInfo(id: string) {
+  static getInfo(id: string) {
     return apiFetcher({
       url: `/mosaics/${id}/info`,
       method: 'GET',

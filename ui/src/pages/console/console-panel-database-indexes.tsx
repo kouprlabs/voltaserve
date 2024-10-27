@@ -83,7 +83,7 @@ const ConsolePanelDatabaseIndexes = () => {
   }
 
   useEffect(() => {
-    mutate()
+    mutate().then()
   }, [query, page, size, mutate])
 
   useEffect(() => {

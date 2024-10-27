@@ -25,7 +25,7 @@ router.get('', async (_: Request, res: Response, next: NextFunction) => {
     next(err)
   } finally {
     if (pg) {
-      pg.end()
+      await pg.end()
     }
   }
 })

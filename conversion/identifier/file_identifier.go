@@ -13,8 +13,11 @@ package identifier
 import (
 	"archive/zip"
 	"encoding/json"
+	"io"
 	"path/filepath"
 	"strings"
+
+	"github.com/kouprlabs/voltaserve/conversion/infra"
 )
 
 type FileIdentifier struct{}
@@ -223,13 +226,17 @@ type GLTF struct {
 	} `json:"buffers"`
 }
 
-/* Inspects a ZIP archive to see if it contains a glTF 2.0 structure. */
+// IsGLTF inspects a ZIP archive to see if it contains a glTF 2.0 structure.
 func (fi *FileIdentifier) IsGLTF(path string) (bool, error) {
 	zipFile, err := zip.OpenReader(path)
 	if err != nil {
 		return false, err
 	}
-	defer zipFile.Close()
+	defer func(zipFile *zip.ReadCloser) {
+		if err := zipFile.Close(); err != nil {
+			infra.GetLogger().Error(err)
+		}
+	}(zipFile)
 	var hasGLTF, hasBin bool
 	var gltfFile *zip.File
 	for _, file := range zipFile.File {
@@ -247,7 +254,11 @@ func (fi *FileIdentifier) IsGLTF(path string) (bool, error) {
 			if err != nil {
 				return false, err
 			}
-			defer rc.Close()
+			defer func(rc io.ReadCloser) {
+				if err := rc.Close(); err != nil {
+					infra.GetLogger().Error(err)
+				}
+			}(rc)
 			var gltf GLTF
 			if err := json.NewDecoder(rc).Decode(&gltf); err != nil {
 				return false, err
@@ -260,5 +271,5 @@ func (fi *FileIdentifier) IsGLTF(path string) (bool, error) {
 			}
 		}
 	}
-	return hasGLTF && (!hasBin || (hasBin && gltfFile != nil)), nil
+	return hasGLTF && (!hasBin || (gltfFile != nil)), nil
 }

@@ -13,8 +13,6 @@ package model
 const (
 	TaskStatusWaiting = "waiting"
 	TaskStatusRunning = "running"
-	TaskStatusSuccess = "success"
-	TaskStatusError   = "error"
 )
 
 type Task interface {

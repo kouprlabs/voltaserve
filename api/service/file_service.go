@@ -1372,7 +1372,7 @@ func (svc *FileService) DeleteOne(id string, userID string) error {
 		for _, treeID := range treeIDs {
 			if err := svc.fileCache.Delete(treeID); err != nil {
 				// Here we intentionally don't return an error or panic, we just print the error
-				fmt.Println(err)
+				log.GetLogger().Error(err)
 			}
 		}
 	}(treeIDs)
@@ -1381,7 +1381,7 @@ func (svc *FileService) DeleteOne(id string, userID string) error {
 	go func(ids []string) {
 		if err := svc.fileSearch.Delete(treeIDs); err != nil {
 			// Here we intentionally don't return an error or panic, we just print the error
-			fmt.Println(err)
+			log.GetLogger().Error(err)
 		}
 	}(treeIDs)
 

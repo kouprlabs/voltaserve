@@ -137,9 +137,7 @@ const AccountEditPicture = ({
                   <Field name="picture">
                     {({ field }: FieldAttributes<FieldProps>) => (
                       <FormControl
-                        isInvalid={
-                          errors.picture && touched.picture ? true : false
-                        }
+                        isInvalid={Boolean(errors.picture && touched.picture)}
                       >
                         <AccountUploadPicture
                           {...field}
@@ -149,12 +147,15 @@ const AccountEditPicture = ({
                               : undefined
                           }
                           disabled={isSubmitting}
-                          onChange={(event) => {
+                          onChange={async (event) => {
                             if (
                               event.target.files &&
                               event.target.files.length > 0
                             ) {
-                              setFieldValue('picture', event.target.files[0])
+                              await setFieldValue(
+                                'picture',
+                                event.target.files[0],
+                              )
                             }
                           }}
                         />

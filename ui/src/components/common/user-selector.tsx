@@ -71,7 +71,7 @@ const UserSelector = ({
   )
 
   useEffect(() => {
-    mutate()
+    mutate().then()
   }, [page, query, mutate])
 
   useEffect(() => {

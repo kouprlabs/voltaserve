@@ -1,11 +1,11 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="webdav" type="GoApplicationRunConfiguration" factoryName="Go Application">
-    <module name="voltaserve" />
-    <working_directory value="$PROJECT_DIR$/webdav" />
+    <module name="webdav" />
+    <working_directory value="$PROJECT_DIR$" />
     <kind value="PACKAGE" />
     <package value="github.com/kouprlabs/voltaserve/webdav" />
     <directory value="$PROJECT_DIR$" />
-    <filePath value="$PROJECT_DIR$/webdav/main.go" />
+    <filePath value="$PROJECT_DIR$" />
     <method v="2" />
   </configuration>
 </component>

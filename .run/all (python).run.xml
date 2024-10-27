@@ -1,7 +1,0 @@
-<component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="all (python)" type="CompoundRunConfigurationType">
-    <toRun name="console" type="Python.FastAPI" />
-    <toRun name="language" type="Python.FlaskServer" />
-    <method v="2" />
-  </configuration>
-</component>

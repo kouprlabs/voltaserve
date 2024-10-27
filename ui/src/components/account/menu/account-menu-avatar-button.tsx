@@ -32,7 +32,7 @@ const AccountMenuAvatarButton = forwardRef<AccountMenuAvatarButtonProps, 'div'>(
     return (
       <div ref={ref} {...props} className={cx('cursor-pointer')}>
         <AccountMenuActiveCircle>
-          <NotificationBadge hasBadge={count && count > 0 ? true : false}>
+          <NotificationBadge hasBadge={Boolean(count && count > 0)}>
             <Avatar
               name={user.fullName}
               src={user.picture ? getPictureUrl(user.picture) : undefined}

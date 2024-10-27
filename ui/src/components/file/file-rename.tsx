@@ -100,7 +100,7 @@ const FileRename = () => {
                 <Field name="name">
                   {({ field }: FieldAttributes<FieldProps>) => (
                     <FormControl
-                      isInvalid={errors.name && touched.name ? true : false}
+                      isInvalid={Boolean(errors.name && touched.name)}
                     >
                       <Input
                         ref={inputRef}

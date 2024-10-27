@@ -21,7 +21,8 @@ import (
 func ErrorHandler(c *fiber.Ctx, err error) error {
 	var e *ErrorResponse
 	if errors.As(err, &e) {
-		v := err.(*ErrorResponse)
+		var v *ErrorResponse
+		errors.As(err, &v)
 		return c.Status(v.Status).JSON(v)
 	} else {
 		log.Error(err)

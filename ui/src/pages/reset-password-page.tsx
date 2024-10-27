@@ -123,11 +123,9 @@ const ResetPasswordPage = () => {
                       <Field name="newPassword">
                         {({ field }: FieldAttributes<FieldProps>) => (
                           <FormControl
-                            isInvalid={
-                              errors.newPassword && touched.newPassword
-                                ? true
-                                : false
-                            }
+                            isInvalid={Boolean(
+                              errors.newPassword && touched.newPassword,
+                            )}
                           >
                             <Input
                               {...field}
@@ -145,12 +143,10 @@ const ResetPasswordPage = () => {
                       <Field name="newPasswordConfirmation">
                         {({ field }: FieldAttributes<FieldProps>) => (
                           <FormControl
-                            isInvalid={
+                            isInvalid={Boolean(
                               errors.newPasswordConfirmation &&
-                              touched.newPasswordConfirmation
-                                ? true
-                                : false
-                            }
+                                touched.newPasswordConfirmation,
+                            )}
                           >
                             <Input
                               {...field}

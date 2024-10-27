@@ -104,7 +104,7 @@ const AccountEditEmail = ({ open, user, onClose }: AccountEditEmailProps) => {
                 <Field name="email">
                   {({ field }: FieldAttributes<FieldProps>) => (
                     <FormControl
-                      isInvalid={errors.email && touched.email ? true : false}
+                      isInvalid={Boolean(errors.email && touched.email)}
                     >
                       <Input
                         ref={inputRef}

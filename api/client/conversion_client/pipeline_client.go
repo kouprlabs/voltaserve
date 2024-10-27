@@ -30,10 +30,6 @@ func NewPipelineClient() *PipelineClient {
 }
 
 const (
-	PipelinePDF      = "pdf"
-	PipelineOffice   = "office"
-	PipelineImage    = "image"
-	PipelineVideo    = "video"
 	PipelineInsights = "insights"
 	PipelineMosaic   = "mosaic"
 )

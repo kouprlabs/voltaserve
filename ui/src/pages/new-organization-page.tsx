@@ -82,7 +82,7 @@ const NewOrganizationPage = () => {
                     {({ field }: FieldAttributes<FieldProps>) => (
                       <FormControl
                         maxW="400px"
-                        isInvalid={errors.name && touched.name ? true : false}
+                        isInvalid={Boolean(errors.name && touched.name)}
                       >
                         <Input
                           {...field}

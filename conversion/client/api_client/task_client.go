@@ -42,7 +42,6 @@ type TaskCreateOptions struct {
 }
 
 const (
-	TaskStatusWaiting = "waiting"
 	TaskStatusRunning = "running"
 	TaskStatusSuccess = "success"
 	TaskStatusError   = "error"
@@ -83,13 +82,9 @@ type TaskPatchOptions struct {
 }
 
 const (
-	TaskFieldName            = "name"
-	TaskFieldError           = "error"
-	TaskFieldPercentage      = "percentage"
-	TaskFieldIsIndeterminate = "isIndeterminate"
-	TaskFieldUserID          = "userId"
-	TaskFieldStatus          = "status"
-	TaskFieldPayload         = "payload"
+	TaskFieldName   = "name"
+	TaskFieldError  = "error"
+	TaskFieldStatus = "status"
 )
 
 func (cl *TaskClient) Patch(id string, opts TaskPatchOptions) error {

@@ -104,18 +104,16 @@ const GroupAddMember = ({ group, open, onClose }: GroupAddMemberProps) => {
                   <Field name="userId">
                     {({ field }: FieldAttributes<FieldProps>) => (
                       <FormControl
-                        isInvalid={
-                          errors.userId && touched.userId ? true : false
-                        }
+                        isInvalid={Boolean(errors.userId && touched.userId)}
                       >
                         <UserSelector
                           value={activeUser}
                           organizationId={group.organization.id}
                           groupId={group.id}
                           excludeGroupMembers={true}
-                          onConfirm={(value) => {
+                          onConfirm={async (value) => {
                             setActiveUser(value)
-                            setFieldValue(field.name, value.id)
+                            await setFieldValue(field.name, value.id)
                           }}
                         />
                         <FormErrorMessage>{errors.userId}</FormErrorMessage>

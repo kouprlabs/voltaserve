@@ -124,7 +124,7 @@ export type ListQueryParams = {
 }
 
 export default class SnapshotAPI {
-  static async list(options: ListOptions) {
+  static list(options: ListOptions) {
     return apiFetcher({
       url: `/snapshots?${this.paramsFromListOptions(options)}`,
       method: 'GET',
@@ -160,7 +160,7 @@ export default class SnapshotAPI {
     return new URLSearchParams(params)
   }
 
-  static async activate(id: string) {
+  static activate(id: string) {
     return apiFetcher({
       url: `/snapshots/${id}/activate`,
       method: 'POST',

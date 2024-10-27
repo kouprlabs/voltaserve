@@ -55,7 +55,7 @@ const OrganizationSelector = ({ onConfirm }: OrganizationSelectorProps) => {
   )
 
   useEffect(() => {
-    mutate()
+    mutate().then()
   }, [page, query, mutate])
 
   useEffect(() => {

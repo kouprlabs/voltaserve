@@ -92,21 +92,21 @@ export default class UserAPI {
     )
   }
 
-  static async getUserById(options: baseUserIdRequest) {
+  static getUserById(options: baseUserIdRequest) {
     return idpFetcher({
       url: `/user/${options.id}`,
       method: 'GET',
     }) as Promise<ConsoleUser>
   }
 
-  static async getAllUsers(options: ListOptions) {
+  static getAllUsers(options: ListOptions) {
     return idpFetcher({
       url: `/user/all?${this.paramsFromListOptions(options)}`,
       method: 'GET',
     }) as Promise<ConsoleUsersResponse>
   }
 
-  static async updateFullName(options: UpdateFullNameOptions) {
+  static updateFullName(options: UpdateFullNameOptions) {
     return idpFetcher({
       url: `/user/update_full_name`,
       method: 'POST',
@@ -114,7 +114,7 @@ export default class UserAPI {
     }) as Promise<User>
   }
 
-  static async suspendUser(options: suspendUserOptions) {
+  static suspendUser(options: suspendUserOptions) {
     return idpFetcher({
       url: `/user/suspend`,
       method: 'PATCH',
@@ -122,7 +122,7 @@ export default class UserAPI {
     }) as Promise<User>
   }
 
-  static async makeAdmin(options: makeAdminOptions) {
+  static makeAdmin(options: makeAdminOptions) {
     return idpFetcher({
       url: `/user/admin`,
       method: 'PATCH',
@@ -130,7 +130,7 @@ export default class UserAPI {
     }) as Promise<User>
   }
 
-  static async updateEmailRequest(options: UpdateEmailRequestOptions) {
+  static updateEmailRequest(options: UpdateEmailRequestOptions) {
     return idpFetcher({
       url: `/user/update_email_request`,
       method: 'POST',
@@ -138,9 +138,7 @@ export default class UserAPI {
     }) as Promise<User>
   }
 
-  static async updateEmailConfirmation(
-    options: UpdateEmailConfirmationOptions,
-  ) {
+  static updateEmailConfirmation(options: UpdateEmailConfirmationOptions) {
     return idpFetcher({
       url: `/user/update_email_confirmation`,
       method: 'POST',
@@ -148,7 +146,7 @@ export default class UserAPI {
     }) as Promise<User>
   }
 
-  static async updatePassword(options: UpdatePasswordOptions) {
+  static updatePassword(options: UpdatePasswordOptions) {
     return idpFetcher({
       url: `/user/update_password`,
       method: 'POST',
@@ -164,7 +162,7 @@ export default class UserAPI {
     })
   }
 
-  static async updatePicture(file: File) {
+  static updatePicture(file: File) {
     const body = new FormData()
     body.append('file', file)
     return idpFetcher({
@@ -175,7 +173,7 @@ export default class UserAPI {
     }) as Promise<User>
   }
 
-  static async deletePicture() {
+  static deletePicture() {
     return idpFetcher({
       url: `/user/delete_picture`,
       method: 'POST',

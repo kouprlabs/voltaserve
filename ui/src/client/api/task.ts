@@ -77,7 +77,7 @@ export default class TaskAPI {
     )
   }
 
-  static async list(options?: ListOptions) {
+  static list(options?: ListOptions) {
     return apiFetcher({
       url: `/tasks?${this.paramsFromListOptions(options)}`,
       method: 'GET',
@@ -122,7 +122,7 @@ export default class TaskAPI {
     )
   }
 
-  static async getCount() {
+  static getCount() {
     return apiFetcher({
       url: `/tasks/count`,
       method: 'GET',

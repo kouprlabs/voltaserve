@@ -190,98 +190,98 @@ export default class ConsoleApi {
     )
   }
 
-  static async getUsersByOrganization(options: ListOptions) {
+  static getUsersByOrganization(options: ListOptions) {
     return consoleFetcher({
       url: `/organization/users?${this.paramsFromListOptions(options)}`,
       method: 'GET',
     }) as Promise<UserOrganizationManagementList>
   }
 
-  static async listGroups(options: ListOptions) {
+  static listGroups(options: ListOptions) {
     return consoleFetcher({
       url: `/group/all?${this.paramsFromListOptions(options)}`,
       method: 'GET',
     }) as Promise<GroupManagementList>
   }
 
-  static async getGroupsByUser(options: ListOptions) {
+  static getGroupsByUser(options: ListOptions) {
     return consoleFetcher({
       url: `/user/groups?${this.paramsFromListOptions(options)}`,
       method: 'GET',
     }) as Promise<GroupUserManagementList>
   }
 
-  static async getGroupsByOrganization(options: ListOptions) {
+  static getGroupsByOrganization(options: ListOptions) {
     return consoleFetcher({
       url: `/organization/groups?${this.paramsFromListOptions(options)}`,
       method: 'GET',
     }) as Promise<GroupManagementList>
   }
 
-  static async listOrganizations(options: ListOptions) {
+  static listOrganizations(options: ListOptions) {
     return consoleFetcher({
       url: `/organization/all?${this.paramsFromListOptions(options)}`,
       method: 'GET',
     }) as Promise<OrganizationManagementList>
   }
 
-  static async getOrganizationsByUser(options: ListOptions) {
+  static getOrganizationsByUser(options: ListOptions) {
     return consoleFetcher({
       url: `/user/organizations?${this.paramsFromListOptions(options)}`,
       method: 'GET',
     }) as Promise<OrganizationUserManagementList>
   }
 
-  static async getOrganizationById(options: baseIdRequest) {
+  static getOrganizationById(options: baseIdRequest) {
     return consoleFetcher({
       url: `/organization?${this.paramsFromListOptions(options)}`,
       method: 'GET',
     }) as Promise<OrganizationManagement>
   }
 
-  static async listWorkspaces(options: ListOptions) {
+  static listWorkspaces(options: ListOptions) {
     return consoleFetcher({
       url: `/workspace/all?${this.paramsFromListOptions(options)}`,
       method: 'GET',
     }) as Promise<WorkspaceManagementList>
   }
 
-  static async getWorkspacesByUser(options: ListOptions) {
+  static getWorkspacesByUser(options: ListOptions) {
     return consoleFetcher({
       url: `/user/workspaces?${this.paramsFromListOptions(options)}`,
       method: 'GET',
     }) as Promise<WorkspaceUserManagementList>
   }
 
-  static async getWorkspacesByOrganization(options: ListOptions) {
+  static getWorkspacesByOrganization(options: ListOptions) {
     return consoleFetcher({
       url: `/organization/workspaces?${this.paramsFromListOptions(options)}`,
       method: 'GET',
     }) as Promise<WorkspaceManagementList>
   }
 
-  static async listInvitations(options: ListOptions) {
+  static listInvitations(options: ListOptions) {
     return consoleFetcher({
       url: `/invitation/all?${this.paramsFromListOptions(options)}`,
       method: 'GET',
     }) as Promise<InvitationManagementList>
   }
 
-  static async countObject(object: string) {
+  static countObject(object: string) {
     return consoleFetcher({
       url: `/${object}/count`,
       method: 'GET',
     }) as Promise<CountResponse>
   }
 
-  static async getComponentsVersions(options: ListOptions) {
+  static getComponentsVersions(options: ListOptions) {
     return consoleFetcher({
       url: `/overview/version/internal?${this.paramsFromListOptions(options)}`,
       method: 'GET',
     }) as Promise<ComponentVersion>
   }
 
-  static async renameObject(options: baseIdNameRequest, object: string) {
+  static renameObject(options: baseIdNameRequest, object: string) {
     return consoleFetcher({
       url: `/${object}`,
       method: 'PATCH',
@@ -289,7 +289,7 @@ export default class ConsoleApi {
     }) as Promise<void>
   }
 
-  static async invitationChangeStatus(options: invitationStatusRequest) {
+  static invitationChangeStatus(options: invitationStatusRequest) {
     return consoleFetcher({
       url: `/invitation`,
       method: 'PATCH',
@@ -297,14 +297,14 @@ export default class ConsoleApi {
     }) as Promise<void>
   }
 
-  static async listObject(object: string, options: ListOptions) {
+  static listObject(object: string, options: ListOptions) {
     return consoleFetcher({
       url: `/${object}/all?${this.paramsFromListOptions(options)}`,
       method: 'GET',
     }) as Promise<emptyListResponse>
   }
 
-  static async searchObject(object: string, options: ListOptions) {
+  static searchObject(object: string, options: ListOptions) {
     return consoleFetcher({
       url: `/${object}/search?${this.paramsFromListOptions(options)}`,
       method: 'GET',

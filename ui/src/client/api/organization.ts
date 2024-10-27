@@ -77,7 +77,7 @@ export default class OrganizationAPI {
     )
   }
 
-  static async list(options?: ListOptions) {
+  static list(options?: ListOptions) {
     return apiFetcher({
       url: `/organizations?${this.paramsFromListOptions(options)}`,
       method: 'GET',
@@ -113,7 +113,7 @@ export default class OrganizationAPI {
     return new URLSearchParams(params)
   }
 
-  static async create(options: CreateOptions) {
+  static create(options: CreateOptions) {
     return apiFetcher({
       url: `/organizations`,
       method: 'POST',
@@ -121,7 +121,7 @@ export default class OrganizationAPI {
     }) as Promise<Organization>
   }
 
-  static async patchName(id: string, options: PatchNameOptions) {
+  static patchName(id: string, options: PatchNameOptions) {
     return apiFetcher({
       url: `/organizations/${id}/name`,
       method: 'PATCH',

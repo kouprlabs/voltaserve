@@ -28,16 +28,6 @@ func NewInternalServerError(err error) *ErrorResponse {
 	)
 }
 
-func NewMissingQueryParamError(param string) *ErrorResponse {
-	return NewErrorResponse(
-		"missing_query_param",
-		http.StatusBadRequest,
-		fmt.Sprintf("Query param '%s' is required.", param),
-		MsgInvalidRequest,
-		nil,
-	)
-}
-
 func NewRequestBodyValidationError(err error) *ErrorResponse {
 	var fields []string
 	for _, e := range err.(validator.ValidationErrors) {
@@ -49,15 +39,5 @@ func NewRequestBodyValidationError(err error) *ErrorResponse {
 		fmt.Sprintf("Failed validation for the following fields: %s.", strings.Join(fields, ",")),
 		MsgInvalidRequest,
 		err,
-	)
-}
-
-func NewInvalidAPIKeyError() *ErrorResponse {
-	return NewErrorResponse(
-		"invalid_api_key",
-		http.StatusUnauthorized,
-		"Invalid API key.",
-		"The API key is either missing or invalid.",
-		nil,
 	)
 }

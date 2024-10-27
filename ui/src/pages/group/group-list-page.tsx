@@ -62,7 +62,7 @@ const GroupListPage = () => {
   )
 
   useEffect(() => {
-    mutate()
+    mutate().then()
   }, [query, page, size, mutate])
 
   useEffect(() => {

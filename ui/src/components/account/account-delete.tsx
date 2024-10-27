@@ -101,9 +101,7 @@ const AccountDelete = ({ open, onClose }: AccountDeleteProps) => {
                   <Field name="password">
                     {({ field }: FieldAttributes<FieldProps>) => (
                       <FormControl
-                        isInvalid={
-                          errors.password && touched.password ? true : false
-                        }
+                        isInvalid={Boolean(errors.password && touched.password)}
                       >
                         <Input
                           {...field}
