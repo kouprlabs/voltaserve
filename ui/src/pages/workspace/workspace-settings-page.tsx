@@ -120,7 +120,9 @@ const WorkspaceSettingsPage = () => {
               }}
             />
           </div>
-          <Divider className={cx('mb-1.5')} />
+        </div>
+        <Divider />
+        <div className={sectionClassName}>
           <span className={cx('font-bold')}>Basics</span>
           <div className={rowClassName}>
             <span>Name</span>
@@ -134,8 +136,8 @@ const WorkspaceSettingsPage = () => {
               }}
             />
           </div>
-          <Divider />
         </div>
+        <Divider />
         <div className={sectionClassName}>
           <span className={cx('font-bold')}>Advanced</span>
           <div className={rowClassName}>

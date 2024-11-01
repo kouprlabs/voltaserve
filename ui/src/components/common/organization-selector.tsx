@@ -33,6 +33,7 @@ import OrganizationAPI, {
 import { swrConfig } from '@/client/options'
 import Pagination from '@/lib/components/pagination'
 import SearchInput from '@/lib/components/search-input'
+import SectionSpinner from '@/lib/components/section-spinner'
 import Spinner from '@/lib/components/spinner'
 
 export type OrganizationSelectorProps = {
@@ -123,18 +124,7 @@ const OrganizationSelector = ({ onConfirm }: OrganizationSelectorProps) => {
                   <span>Failed to load organizations.</span>
                 </div>
               ) : null}
-              {!list && !error ? (
-                <div
-                  className={cx(
-                    'flex',
-                    'items-center',
-                    'justify-center',
-                    'h-[320px]',
-                  )}
-                >
-                  <Spinner />
-                </div>
-              ) : null}
+              {!list && !error ? <SectionSpinner /> : null}
               {list && list.data.length === 0 ? (
                 <div
                   className={cx(

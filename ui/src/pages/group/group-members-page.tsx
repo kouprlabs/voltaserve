@@ -103,6 +103,14 @@ const GroupMembersPage = () => {
       <Helmet>
         <title>{group.name}</title>
       </Helmet>
+      {!list && membersError ? (
+        <div
+          className={cx('flex', 'items-center', 'justify-center', 'h-[300px]')}
+        >
+          <span>Failed to load members.</span>
+        </div>
+      ) : null}
+      {!list && !membersError ? <SectionSpinner /> : null}
       {list.data.length > 0 ? (
         <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
           <Table variant="simple">

@@ -102,7 +102,7 @@ const AccountSettingsPage = () => {
             <Spacer />
             <span>{truncateEnd(user.fullName, 50)}</span>
             <EditButton
-              aria-label=""
+              aria-label="Edit name"
               onClick={() => {
                 setIsFullNameModalOpen(true)
               }}
@@ -138,7 +138,7 @@ const AccountSettingsPage = () => {
               <span>{truncateMiddle(user.pendingEmail || user.email, 50)}</span>
             ) : null}
             <EditButton
-              aria-label=""
+              aria-label="Edit email"
               onClick={() => {
                 setIsEmailModalOpen(true)
               }}
@@ -148,7 +148,7 @@ const AccountSettingsPage = () => {
             <span>Password</span>
             <Spacer />
             <EditButton
-              aria-label=""
+              aria-label="Change password"
               onClick={() => {
                 setIsPasswordModalOpen(true)
               }}
@@ -177,7 +177,7 @@ const AccountSettingsPage = () => {
               icon={<IconDelete />}
               variant="solid"
               colorScheme="red"
-              aria-label=""
+              aria-label="Delete account"
               onClick={() => setIsDeleteModalOpen(true)}
             />
           </div>
