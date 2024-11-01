@@ -8,7 +8,7 @@
 # by the GNU Affero General Public License v3.0 only, included in the file
 # licenses/AGPL.txt.
 
-name: Lint and build voltaserve/idp
+name: Lint and Build voltaserve/idp
 
 on:
   pull_request:
@@ -31,7 +31,7 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install packages
+      - name: Install Packages
         run: npm i --legacy-peer-deps
         working-directory: idp
 

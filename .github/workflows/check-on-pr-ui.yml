@@ -8,7 +8,7 @@
 # by the GNU Affero General Public License v3.0 only, included in the file
 # licenses/AGPL.txt.
 
-name: Lint and build voltaserve/ui
+name: Lint and Build voltaserve/ui
 
 on:
   pull_request:
@@ -36,7 +36,7 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install packages
+      - name: Install Packages
         run: npm i --legacy-peer-deps
         working-directory: ui
   

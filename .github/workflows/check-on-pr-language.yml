@@ -8,7 +8,7 @@
 # by the GNU Affero General Public License v3.0 only, included in the file
 # licenses/AGPL.txt.
 
-name: Lint and build voltaserve/language
+name: Lint and Build voltaserve/language
 
 on:
   pull_request:
