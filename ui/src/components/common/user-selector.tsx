@@ -31,7 +31,6 @@ import { swrConfig } from '@/client/options'
 import Pagination from '@/lib/components/pagination'
 import SearchInput from '@/lib/components/search-input'
 import SectionSpinner from '@/lib/components/section-spinner'
-import Spinner from '@/lib/components/spinner'
 import { getPictureUrlById } from '@/lib/helpers/picture'
 import userToString from '@/lib/helpers/user-to-string'
 
