@@ -8,7 +8,7 @@
 # by the GNU Affero General Public License v3.0 only, included in the file
 # licenses/AGPL.txt.
 
-name: Lint and build voltaserve/api
+name: Lint and Build voltaserve/api
 
 on:
   pull_request:
@@ -26,7 +26,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Lint using Golanci lint
+      - name: Lint Using golangci-lint
         uses: golangci/golangci-lint-action@v6
         with:
           working-directory: api

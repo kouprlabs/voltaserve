@@ -30,7 +30,7 @@ import UserAPI, { SortOrder, User } from '@/client/api/user'
 import { swrConfig } from '@/client/options'
 import Pagination from '@/lib/components/pagination'
 import SearchInput from '@/lib/components/search-input'
-import Spinner from '@/lib/components/spinner'
+import SectionSpinner from '@/lib/components/section-spinner'
 import { getPictureUrlById } from '@/lib/helpers/picture'
 import userToString from '@/lib/helpers/user-to-string'
 
@@ -138,18 +138,7 @@ const UserSelector = ({
                   <span>Failed to load users.</span>
                 </div>
               ) : null}
-              {!list && !error ? (
-                <div
-                  className={cx(
-                    'flex',
-                    'items-center',
-                    'justify-center',
-                    'h-[320px]',
-                  )}
-                >
-                  <Spinner />
-                </div>
-              ) : null}
+              {!list && !error ? <SectionSpinner /> : null}
               {list && list.data.length === 0 ? (
                 <div
                   className={cx(

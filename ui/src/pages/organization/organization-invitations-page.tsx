@@ -116,6 +116,14 @@ const OrganizationInvitationsPage = () => {
       <Helmet>
         <title>{org.name}</title>
       </Helmet>
+      {!list && invitationsError ? (
+        <div
+          className={cx('flex', 'items-center', 'justify-center', 'h-[300px]')}
+        >
+          <span>Failed to load invitations.</span>
+        </div>
+      ) : null}
+      {!list && !invitationsError ? <SectionSpinner /> : null}
       {list && list.data.length === 0 ? (
         <>
           <div
