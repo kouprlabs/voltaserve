@@ -9,6 +9,7 @@
 // licenses/AGPL.txt.
 import { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
+import { AppBar as KouprAppBar } from '@koupr/ui'
 import cx from 'classnames'
 import AccountMenu from '@/components/account/menu'
 import ConsoleButton from '@/components/console/console-button'
@@ -48,32 +49,22 @@ const AppBar = () => {
   }, [location, dispatch])
 
   return (
-    <div
-      className={cx(
-        'flex',
-        'flex-row',
-        'items-center',
-        'gap-2',
-        'shrink-0',
-        'p-1.5',
-        'w-full',
-      )}
-    >
-      <div className={cx('grow')}>
-        <AppBarSearch />
-      </div>
-      <div className={cx('flex', 'flex-row', 'items-center', 'gap-1.5')}>
-        {activeNav === NavType.Workspaces ? <CreateWorkspaceButton /> : null}
-        {activeNav === NavType.Groups ? <CreateGroupButton /> : null}
-        {activeNav === NavType.Organizations ? (
-          <CreateOrganizationButton />
-        ) : null}
-        {getAdminStatus() ? <ConsoleButton /> : null}
-        <UploadDrawer />
-        <TaskDrawer />
-        <AccountMenu />
-      </div>
-    </div>
+    <KouprAppBar
+      bar={<AppBarSearch />}
+      buttons={
+        <>
+          {activeNav === NavType.Workspaces ? <CreateWorkspaceButton /> : null}
+          {activeNav === NavType.Groups ? <CreateGroupButton /> : null}
+          {activeNav === NavType.Organizations ? (
+            <CreateOrganizationButton />
+          ) : null}
+          {getAdminStatus() ? <ConsoleButton /> : null}
+          <UploadDrawer />
+          <TaskDrawer />
+          <AccountMenu />
+        </>
+      }
+    />
   )
 }
 

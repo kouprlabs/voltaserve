@@ -319,7 +319,7 @@ const AppBarSearch = () => {
   }
 
   return (
-    <div className={cx('flex', 'flex-row', 'gap-0.5')}>
+    <div className={cx('flex', 'flex-row', 'gap-0.5', 'grow')}>
       <InputGroup>
         <InputLeftElement pointerEvents="none">
           <Icon as={IconSearch} className={cx('text-gray-300')} />

@@ -10,10 +10,9 @@
 import { useEffect } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useToast } from '@chakra-ui/react'
-import { Logo, Shell } from '@koupr/ui'
+import { IconFlag, IconGroup, IconWorkspaces, Logo, Shell } from '@koupr/ui'
 import { cx } from '@emotion/css'
 import AppBar from '@/components/app-bar'
-import { IconGroup, IconFlag, IconWorkspaces } from '@/lib/components/icons'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { errorCleared } from '@/store/ui/error'
 
