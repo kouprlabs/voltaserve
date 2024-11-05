@@ -344,13 +344,15 @@ const AppBarSearch = () => {
           </InputRightElement>
         ) : null}
       </InputGroup>
-      <NotificationBadge hasBadge={hasFileQuery}>
-        <IconButton
-          icon={<IconTune />}
-          aria-label="Filters"
-          onClick={handleFilterClick}
-        />
-      </NotificationBadge>
+      {isFiles ? (
+        <NotificationBadge hasBadge={hasFileQuery}>
+          <IconButton
+            icon={<IconTune />}
+            aria-label="Filters"
+            onClick={handleFilterClick}
+          />
+        </NotificationBadge>
+      ) : null}
       {buffer || (isFocused && buffer) ? (
         <Button
           leftIcon={<IconSearch />}

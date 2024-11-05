@@ -7,31 +7,19 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-import { useCallback, useEffect, useRef, useState } from 'react'
-import {
-  Button,
-  Drawer as ChakraDrawer,
-  DrawerBody,
-  DrawerCloseButton,
-  DrawerContent,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerOverlay,
-  IconButton,
-  useDisclosure,
-} from '@chakra-ui/react'
+import { useCallback, useEffect, useState } from 'react'
+import { Button, useDisclosure } from '@chakra-ui/react'
+import { AuxiliaryDrawer } from '@koupr/ui'
 import cx from 'classnames'
 import TaskAPI from '@/client/api/task'
 import { swrConfig } from '@/client/options'
 import { IconClearAll, IconStacks } from '@/lib/components/icons'
-import NotificationBadge from '@/lib/components/notification-badge'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
-import { drawerDidClose, mutateCountUpdated } from '@/store/ui/tasks'
+import { mutateCountUpdated } from '@/store/ui/tasks'
 import TasksList from './task-list'
 
 const TaskDrawer = () => {
   const dispatch = useAppDispatch()
-  const buttonRef = useRef<HTMLButtonElement>(null)
   const { isOpen, onOpen, onClose } = useDisclosure()
   const [isDismissing, setIsDismissing] = useState(false)
   const isDrawerOpen = useAppSelector((state) => state.ui.tasks.isDrawerOpen)
@@ -63,48 +51,30 @@ const TaskDrawer = () => {
   }, [dispatch, mutateList])
 
   return (
-    <>
-      <NotificationBadge hasBadge={count !== undefined && count > 0}>
-        <IconButton
-          ref={buttonRef}
-          icon={<IconStacks />}
-          aria-label=""
-          onClick={onOpen}
-        />
-      </NotificationBadge>
-      <ChakraDrawer
-        isOpen={isOpen}
-        placement="right"
-        size="sm"
-        onClose={() => {
-          onClose()
-          dispatch(drawerDidClose())
-        }}
-        finalFocusRef={buttonRef}
-      >
-        <DrawerOverlay />
-        <DrawerContent>
-          <DrawerCloseButton />
-          <DrawerHeader>Tasks</DrawerHeader>
-          <DrawerBody className={cx('p-2')}>
-            <TasksList />
-          </DrawerBody>
-          <DrawerFooter>
-            {count && count > 0 ? (
-              <Button
-                className={cx('w-full')}
-                size="sm"
-                leftIcon={<IconClearAll />}
-                isLoading={isDismissing}
-                onClick={handleClearCompleted}
-              >
-                Clear Completed Items
-              </Button>
-            ) : null}
-          </DrawerFooter>
-        </DrawerContent>
-      </ChakraDrawer>
-    </>
+    <AuxiliaryDrawer
+      icon={<IconStacks />}
+      isOpen={isOpen}
+      onClose={onClose}
+      onOpen={onOpen}
+      hasBadge={count !== undefined && count > 0}
+      header="Tasks"
+      body={<TasksList />}
+      footer={
+        <>
+          {count && count > 0 ? (
+            <Button
+              className={cx('w-full')}
+              size="sm"
+              leftIcon={<IconClearAll />}
+              isLoading={isDismissing}
+              onClick={handleClearCompleted}
+            >
+              Clear Completed Items
+            </Button>
+          ) : null}
+        </>
+      }
+    />
   )
 }
 

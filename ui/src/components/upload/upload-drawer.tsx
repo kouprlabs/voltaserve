@@ -7,26 +7,14 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-import { useCallback, useEffect, useRef } from 'react'
-import {
-  Drawer as ChakraDrawer,
-  DrawerBody,
-  DrawerCloseButton,
-  DrawerContent,
-  DrawerHeader,
-  DrawerOverlay,
-  DrawerFooter,
-  IconButton,
-  useDisclosure,
-  Button,
-} from '@chakra-ui/react'
+import { useCallback, useEffect } from 'react'
+import { useDisclosure, Button } from '@chakra-ui/react'
+import { AuxiliaryDrawer } from '@koupr/ui'
 import cx from 'classnames'
 import UploadList from '@/components/upload/upload-list'
 import { IconClearAll, IconUpload } from '@/lib/components/icons'
-import NotificationBadge from '@/lib/components/notification-badge'
 import { completedUploadsCleared } from '@/store/entities/uploads'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
-import { drawerDidClose } from '@/store/ui/uploads'
 
 const UploadDrawer = () => {
   const dispatch = useAppDispatch()
@@ -40,7 +28,6 @@ const UploadDrawer = () => {
       state.entities.uploads.items.filter((e) => e.completed).length > 0,
   )
   const { isOpen, onOpen, onClose } = useDisclosure()
-  const buttonRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
     if (isDrawerOpen) {
@@ -55,47 +42,29 @@ const UploadDrawer = () => {
   }, [dispatch])
 
   return (
-    <>
-      <NotificationBadge hasBadge={hasPendingUploads}>
-        <IconButton
-          ref={buttonRef}
-          icon={<IconUpload />}
-          aria-label=""
-          onClick={onOpen}
-        />
-      </NotificationBadge>
-      <ChakraDrawer
-        isOpen={isOpen}
-        placement="right"
-        size="sm"
-        onClose={() => {
-          onClose()
-          dispatch(drawerDidClose())
-        }}
-        finalFocusRef={buttonRef}
-      >
-        <DrawerOverlay />
-        <DrawerContent>
-          <DrawerCloseButton />
-          <DrawerHeader>Uploads</DrawerHeader>
-          <DrawerBody className={cx('p-2')}>
-            <UploadList />
-          </DrawerBody>
-          <DrawerFooter>
-            {hasCompleted ? (
-              <Button
-                className={cx('w-full')}
-                size="sm"
-                leftIcon={<IconClearAll />}
-                onClick={handleClearCompleted}
-              >
-                Clear Completed Items
-              </Button>
-            ) : null}
-          </DrawerFooter>
-        </DrawerContent>
-      </ChakraDrawer>
-    </>
+    <AuxiliaryDrawer
+      icon={<IconUpload />}
+      isOpen={isOpen}
+      onClose={onClose}
+      onOpen={onOpen}
+      hasBadge={hasPendingUploads}
+      header="Uploads"
+      body={<UploadList />}
+      footer={
+        <>
+          {hasCompleted ? (
+            <Button
+              className={cx('w-full')}
+              size="sm"
+              leftIcon={<IconClearAll />}
+              onClick={handleClearCompleted}
+            >
+              Clear Completed Items
+            </Button>
+          ) : null}
+        </>
+      }
+    />
   )
 }
 
