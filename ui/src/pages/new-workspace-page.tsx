@@ -70,7 +70,7 @@ const NewWorkspacePage = () => {
         await mutate?.()
         setSubmitting(false)
         navigate(`/workspace/${result.id}/file/${result.rootId}`)
-      } catch (error) {
+      } catch {
         setIsLoading(false)
       } finally {
         setSubmitting(false)

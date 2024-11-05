@@ -88,7 +88,7 @@ export async function baseFetcher(
   try {
     const response = await fetch(url, init)
     return handleResponse(response, redirect, showError)
-  } catch (error) {
+  } catch {
     if (showError) {
       const message = 'Unexpected error occurred.'
       store.dispatch(errorOccurred(message))
