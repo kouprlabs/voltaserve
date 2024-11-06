@@ -24,11 +24,10 @@ import {
   Td,
   Tr,
 } from '@chakra-ui/react'
+import { Pagination, SectionSpinner } from '@koupr/ui'
 import cx from 'classnames'
 import SnapshotAPI, { Snapshot, SortBy, SortOrder } from '@/client/api/snapshot'
 import { swrConfig } from '@/client/options'
-import Pagination from '@/lib/components/pagination'
-import SectionSpinner from '@/lib/components/section-spinner'
 import prettyBytes from '@/lib/helpers/pretty-bytes'
 import prettyDate from '@/lib/helpers/pretty-date'
 import { useAppDispatch, useAppSelector } from '@/store/hook'

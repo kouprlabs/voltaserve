@@ -1,6 +1,6 @@
+import { IconCheck } from '@koupr/ui'
 import cx from 'classnames'
 import { PasswordRequirements } from '@/client/idp/account'
-import { IconCheck } from '@/lib/components/icons'
 
 export type PasswordHintsProps = {
   value: string

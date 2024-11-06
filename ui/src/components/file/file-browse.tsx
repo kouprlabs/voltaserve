@@ -10,14 +10,12 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { Button } from '@chakra-ui/react'
+import { IconChevronRight, Text, SectionSpinner } from '@koupr/ui'
 import cx from 'classnames'
 import FileAPI, { File, FileType } from '@/client/api/file'
 import WorkspaceAPI from '@/client/api/workspace'
 import Path from '@/components/common/path'
 import FolderSvg from '@/components/file/list/item/icon/icon-folder/assets/icon-folder.svg'
-import { IconChevronRight } from '@/lib/components/icons'
-import SectionSpinner from '@/lib/components/section-spinner'
-import Text from '@/lib/components/text'
 
 export type FileBrowseProps = {
   onChange?: (id: string) => void

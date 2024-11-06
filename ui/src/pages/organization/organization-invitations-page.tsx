@@ -25,6 +25,15 @@ import {
   Tr,
   useToast,
 } from '@chakra-ui/react'
+import {
+  IconDelete,
+  IconMoreVert,
+  IconPersonAdd,
+  IconSend,
+  PagePagination,
+  SectionSpinner,
+  usePagePagination,
+} from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import InvitationAPI, { SortBy, SortOrder } from '@/client/api/invitation'
@@ -34,17 +43,8 @@ import { swrConfig } from '@/client/options'
 import OrganizationInviteMembers from '@/components/organization/organization-invite-members'
 import OrganizationStatus from '@/components/organization/organization-status'
 import { outgoingInvitationPaginationStorage } from '@/infra/pagination'
-import {
-  IconDelete,
-  IconMoreVert,
-  IconPersonAdd,
-  IconSend,
-} from '@/lib/components/icons'
-import PagePagination from '@/lib/components/page-pagination'
-import SectionSpinner from '@/lib/components/section-spinner'
 import prettyDate from '@/lib/helpers/pretty-date'
 import truncateMiddle from '@/lib/helpers/truncate-middle'
-import usePagePagination from '@/lib/hooks/page-pagination'
 import { useAppDispatch } from '@/store/hook'
 import { mutateUpdated } from '@/store/ui/outgoing-invitations'
 
@@ -56,8 +56,8 @@ const OrganizationInvitationsPage = () => {
   const toast = useToast()
   const { data: org, error: orgError } = OrganizationAPI.useGet(id, swrConfig())
   const { page, size, steps, setPage, setSize } = usePagePagination({
-    navigate,
-    location,
+    navigateFn: navigate,
+    searchFn: () => location.search,
     storage: outgoingInvitationPaginationStorage(),
   })
   const {
@@ -208,16 +208,17 @@ const OrganizationInvitationsPage = () => {
             </Tbody>
           </Table>
           {list ? (
-            <PagePagination
-              style={{ alignSelf: 'end' }}
-              totalElements={list.totalElements}
-              totalPages={list.totalPages}
-              page={page}
-              size={size}
-              steps={steps}
-              setPage={setPage}
-              setSize={setSize}
-            />
+            <div className={cx('self-end')}>
+              <PagePagination
+                totalElements={list.totalElements}
+                totalPages={list.totalPages}
+                page={page}
+                size={size}
+                steps={steps}
+                setPage={setPage}
+                setSize={setSize}
+              />
+            </div>
           ) : null}
         </div>
       ) : null}

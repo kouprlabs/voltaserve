@@ -24,10 +24,9 @@ import {
   InputLeftElement,
   InputRightElement,
 } from '@chakra-ui/react'
+import { IconClose, IconSearch, IconTune, NotificationBadge } from '@koupr/ui'
 import cx from 'classnames'
 import { Query as FileQuery } from '@/client/api/file'
-import { IconClose, IconSearch, IconTune } from '@/lib/components/icons'
-import NotificationBadge from '@/lib/components/notification-badge'
 import {
   decodeFileQuery,
   decodeQuery,

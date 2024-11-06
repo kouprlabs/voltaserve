@@ -26,19 +26,21 @@ import {
   Tr,
   useToast,
 } from '@chakra-ui/react'
+import {
+  IconMoreVert,
+  PagePagination,
+  SectionSpinner,
+  usePagePagination,
+} from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import InvitationAPI, { SortBy, SortOrder } from '@/client/api/invitation'
 import UserAPI from '@/client/idp/user'
 import { swrConfig } from '@/client/options'
 import { incomingInvitationPaginationStorage } from '@/infra/pagination'
-import { IconMoreVert } from '@/lib/components/icons'
-import PagePagination from '@/lib/components/page-pagination'
-import SectionSpinner from '@/lib/components/section-spinner'
 import { getPictureUrlById } from '@/lib/helpers/picture'
 import prettyDate from '@/lib/helpers/pretty-date'
 import userToString from '@/lib/helpers/user-to-string'
-import usePagePagination from '@/lib/hooks/page-pagination'
 import { useAppDispatch } from '@/store/hook'
 import { mutateUpdated } from '@/store/ui/incoming-invitations'
 
@@ -49,8 +51,8 @@ const AccountInvitationsPage = () => {
   const toast = useToast()
   const { data: user, error: userError } = UserAPI.useGet()
   const { page, size, steps, setPage, setSize } = usePagePagination({
-    navigate,
-    location,
+    navigateFn: navigate,
+    searchFn: () => location.search,
     storage: incomingInvitationPaginationStorage(),
   })
   const {
@@ -197,16 +199,17 @@ const AccountInvitationsPage = () => {
             </Tbody>
           </Table>
           {list ? (
-            <PagePagination
-              style={{ alignSelf: 'end' }}
-              totalElements={list.totalElements}
-              totalPages={list.totalPages}
-              page={page}
-              size={size}
-              steps={steps}
-              setPage={setPage}
-              setSize={setSize}
-            />
+            <div className={cx('self-end')}>
+              <PagePagination
+                totalElements={list.totalElements}
+                totalPages={list.totalPages}
+                page={page}
+                size={size}
+                steps={steps}
+                setPage={setPage}
+                setSize={setSize}
+              />
+            </div>
           ) : null}
         </div>
       ) : null}

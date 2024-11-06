@@ -19,13 +19,8 @@ import {
   IconButton,
   Text,
 } from '@chakra-ui/react'
+import { IconClose, IconSchedule, IconCheckCircle, IconError } from '@koupr/ui'
 import cx from 'classnames'
-import {
-  IconClose,
-  IconSchedule,
-  IconCheckCircle,
-  IconError,
-} from '@/lib/components/icons'
 import truncateMiddle from '@/lib/helpers/truncate-middle'
 import {
   Upload,

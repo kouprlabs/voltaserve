@@ -10,9 +10,9 @@
 import { useCallback, useEffect } from 'react'
 import { useDisclosure, Button } from '@chakra-ui/react'
 import { AuxiliaryDrawer } from '@koupr/ui'
+import { IconClearAll, IconUpload } from '@koupr/ui'
 import cx from 'classnames'
 import UploadList from '@/components/upload/upload-list'
-import { IconClearAll, IconUpload } from '@/lib/components/icons'
 import { completedUploadsCleared } from '@/store/entities/uploads'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 

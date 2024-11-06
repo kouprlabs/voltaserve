@@ -17,6 +17,7 @@ import {
   Tooltip,
   useColorMode,
 } from '@chakra-ui/react'
+import { IconEdit, IconDelete, IconWarning, SectionSpinner } from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import StorageAPI from '@/client/api/storage'
@@ -26,8 +27,6 @@ import AccountChangePassword from '@/components/account/account-change-password'
 import AccountDelete from '@/components/account/account-delete'
 import AccountEditEmail from '@/components/account/account-edit-email'
 import AccountEditFullName from '@/components/account/account-edit-full-name'
-import { IconEdit, IconDelete, IconWarning } from '@/lib/components/icons'
-import SectionSpinner from '@/lib/components/section-spinner'
 import prettyBytes from '@/lib/helpers/pretty-bytes'
 import { truncateEnd } from '@/lib/helpers/truncate-end'
 import truncateMiddle from '@/lib/helpers/truncate-middle'

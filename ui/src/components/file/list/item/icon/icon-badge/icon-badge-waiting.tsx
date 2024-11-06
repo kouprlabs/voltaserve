@@ -8,8 +8,8 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
 import { Circle, Tooltip } from '@chakra-ui/react'
+import { IconHourglass } from '@koupr/ui'
 import cx from 'classnames'
-import { IconHourglass } from '@/lib/components/icons'
 
 const IconBadgeWaiting = () => (
   <Tooltip label="Waiting for processing">

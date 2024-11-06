@@ -14,9 +14,9 @@ import {
   BreadcrumbLink,
   Skeleton,
 } from '@chakra-ui/react'
+import { Text } from '@koupr/ui'
 import cx from 'classnames'
 import FileAPI from '@/client/api/file'
-import Text from '@/lib/components/text'
 
 export type PathProps = {
   rootId: string

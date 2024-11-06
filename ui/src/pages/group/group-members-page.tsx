@@ -30,6 +30,14 @@ import {
   Avatar,
   Portal,
 } from '@chakra-ui/react'
+import {
+  IconLogout,
+  IconMoreVert,
+  IconPersonAdd,
+  PagePagination,
+  SectionSpinner,
+  usePagePagination,
+} from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import GroupAPI from '@/client/api/group'
@@ -40,14 +48,10 @@ import { swrConfig } from '@/client/options'
 import GroupAddMember from '@/components/group/group-add-member'
 import GroupRemoveMember from '@/components/group/group-remove-member'
 import { groupMemberPaginationStorage } from '@/infra/pagination'
-import { IconLogout, IconMoreVert, IconPersonAdd } from '@/lib/components/icons'
-import PagePagination from '@/lib/components/page-pagination'
-import SectionSpinner from '@/lib/components/section-spinner'
 import { getPictureUrlById } from '@/lib/helpers/picture'
 import { decodeQuery } from '@/lib/helpers/query'
 import { truncateEnd } from '@/lib/helpers/truncate-end'
 import truncateMiddle from '@/lib/helpers/truncate-middle'
-import usePagePagination from '@/lib/hooks/page-pagination'
 import { useAppDispatch } from '@/store/hook'
 import { mutateUpdated } from '@/store/ui/group-members'
 
@@ -58,8 +62,8 @@ const GroupMembersPage = () => {
   const { id } = useParams()
   const { data: group, error: groupError } = GroupAPI.useGet(id, swrConfig())
   const { page, size, steps, setPage, setSize } = usePagePagination({
-    navigate,
-    location,
+    navigateFn: navigate,
+    searchFn: () => location.search,
     storage: groupMemberPaginationStorage(),
   })
   const [searchParams] = useSearchParams()
@@ -182,16 +186,17 @@ const GroupMembersPage = () => {
             </Tbody>
           </Table>
           {list ? (
-            <PagePagination
-              style={{ alignSelf: 'end' }}
-              totalElements={list.totalElements}
-              totalPages={list.totalPages}
-              page={page}
-              size={size}
-              steps={steps}
-              setPage={setPage}
-              setSize={setSize}
-            />
+            <div className={cx('self-end')}>
+              <PagePagination
+                totalElements={list.totalElements}
+                totalPages={list.totalPages}
+                page={page}
+                size={size}
+                steps={steps}
+                setPage={setPage}
+                setSize={setSize}
+              />
+            </div>
           ) : null}
           {userToRemove ? (
             <GroupRemoveMember

@@ -27,15 +27,13 @@ import {
   Thead,
   Tr,
 } from '@chakra-ui/react'
+import { PagePagination, SectionSpinner, usePagePagination } from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import ConsoleApi from '@/client/console/console'
 import { swrConfig } from '@/client/options'
 import { organizationPaginationStorage } from '@/infra/pagination'
-import PagePagination from '@/lib/components/page-pagination'
-import SectionSpinner from '@/lib/components/section-spinner'
 import { decodeQuery } from '@/lib/helpers/query'
-import usePagePagination from '@/lib/hooks/page-pagination'
 import store from '@/store/configure-store'
 import { useAppDispatch } from '@/store/hook'
 import { errorOccurred } from '@/store/ui/error'
@@ -51,8 +49,8 @@ const ConsolePanelDatabaseIndexes = () => {
   const [focusedIndex, setFocusedIndex] = useState<string | null>(null)
   const query = decodeQuery(searchParams.get('q') as string)
   const { page, size, steps, setPage, setSize } = usePagePagination({
-    navigate,
-    location,
+    navigateFn: navigate,
+    searchFn: () => location.search,
     storage: organizationPaginationStorage(),
   })
   const {
@@ -178,16 +176,17 @@ const ConsolePanelDatabaseIndexes = () => {
           <div>No indexes to show</div>
         )}
         {list ? (
-          <PagePagination
-            style={{ alignSelf: 'end' }}
-            totalElements={list.totalElements}
-            totalPages={Math.ceil(list.totalElements / size)}
-            page={page}
-            size={size}
-            steps={steps}
-            setPage={setPage}
-            setSize={setSize}
-          />
+          <div className={cx('self-end')}>
+            <PagePagination
+              totalElements={list.totalElements}
+              totalPages={Math.ceil(list.totalElements / size)}
+              page={page}
+              size={size}
+              steps={steps}
+              setPage={setPage}
+              setSize={setSize}
+            />
+          </div>
         ) : null}
       </div>
     </>

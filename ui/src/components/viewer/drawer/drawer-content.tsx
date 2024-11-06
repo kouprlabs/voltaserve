@@ -8,12 +8,10 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
 import { useContext } from 'react'
+import { SwitchCard, IconInfo, SidenavContext } from '@koupr/ui'
 import cx from 'classnames'
 import { File } from '@/client/api/file'
 import FileInfoEmbed from '@/components/file/info/file-info-embed'
-import { DrawerContext } from '@/lib/components/drawer'
-import { IconInfo } from '@/lib/components/icons'
-import SwitchCard from '@/lib/components/switch-card'
 import DrawerDownloadButton from './drawer-download-button'
 import DrawerOpenNewTabButton from './drawer-open-new-tab-button'
 
@@ -22,7 +20,7 @@ export type DrawerContentProps = {
 }
 
 const DrawerContent = ({ file }: DrawerContentProps) => {
-  const { isCollapsed } = useContext(DrawerContext)
+  const { isCollapsed } = useContext(SidenavContext)
   return (
     <div className={cx('flex', 'flex-col', 'gap-1')}>
       <DrawerDownloadButton file={file} isCollapsed={isCollapsed} />

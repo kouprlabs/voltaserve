@@ -20,14 +20,9 @@ import {
   IconButton,
   Text,
 } from '@chakra-ui/react'
+import { IconCheckCircle, IconClose, IconError, IconHourglass } from '@koupr/ui'
 import cx from 'classnames'
 import TaskAPI, { Status, Task } from '@/client/api/task'
-import {
-  IconCheckCircle,
-  IconClose,
-  IconError,
-  IconHourglass,
-} from '@/lib/components/icons'
 import truncateMiddle from '@/lib/helpers/truncate-middle'
 import { useAppSelector } from '@/store/hook'
 

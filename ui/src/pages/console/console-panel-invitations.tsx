@@ -28,15 +28,17 @@ import {
   Thead,
   Tr,
 } from '@chakra-ui/react'
+import {
+  IconMoreVert,
+  PagePagination,
+  SectionSpinner,
+  usePagePagination,
+} from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import ConsoleApi, { InvitationManagementList } from '@/client/console/console'
 import ConsoleConfirmationModal from '@/components/console/console-confirmation-modal'
 import { consoleInvitationsPaginationStorage } from '@/infra/pagination'
-import { IconMoreVert } from '@/lib/components/icons'
-import PagePagination from '@/lib/components/page-pagination'
-import SectionSpinner from '@/lib/components/section-spinner'
-import usePagePagination from '@/lib/hooks/page-pagination'
 
 const ConsolePanelInvitations = () => {
   const navigate = useNavigate()
@@ -50,8 +52,8 @@ const ConsolePanelInvitations = () => {
     useState(false)
   const [confirmWindowAction, setConfirmWindowAction] = useState<string>()
   const { page, size, steps, setPage, setSize } = usePagePagination({
-    navigate,
-    location,
+    navigateFn: navigate,
+    searchFn: () => location.search,
     storage: consoleInvitationsPaginationStorage(),
   })
 
@@ -204,16 +206,17 @@ const ConsolePanelInvitations = () => {
           <div>No invitations found.</div>
         )}
         {list ? (
-          <PagePagination
-            style={{ alignSelf: 'end' }}
-            totalElements={list.totalElements}
-            totalPages={Math.ceil(list.totalElements / size)}
-            page={page}
-            size={size}
-            steps={steps}
-            setPage={setPage}
-            setSize={setSize}
-          />
+          <div className={cx('self-end')}>
+            <PagePagination
+              totalElements={list.totalElements}
+              totalPages={Math.ceil(list.totalElements / size)}
+              page={page}
+              size={size}
+              steps={steps}
+              setPage={setPage}
+              setSize={setSize}
+            />
+          </div>
         ) : null}
       </div>
     </>

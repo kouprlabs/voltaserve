@@ -8,10 +8,10 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
 import { useEffect, useState } from 'react'
+import { Pagination } from '@koupr/ui'
 import cx from 'classnames'
 import TaskAPI, { SortOrder } from '@/client/api/task'
 import { swrConfig } from '@/client/options'
-import Pagination from '@/lib/components/pagination'
 import { useAppDispatch } from '@/store/hook'
 import { mutateListUpdated } from '@/store/ui/tasks'
 import TaskDrawerItem from './task-item'

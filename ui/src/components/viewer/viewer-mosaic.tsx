@@ -8,14 +8,14 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
 import { useEffect, useMemo, useRef, useState, MouseEvent } from 'react'
-import { useColorMode } from '@chakra-ui/system'
+import { useColorMode } from '@chakra-ui/react'
+import { reactSelectStyles } from '@koupr/ui'
 import { Select } from 'chakra-react-select'
 import cx from 'classnames'
 import { File } from '@/client/api/file'
 import MosaicAPI, { Metadata, ZoomLevel } from '@/client/api/mosaic'
 import { getConfig } from '@/config/config'
 import { getAccessTokenOrRedirect } from '@/infra/token'
-import reactSelectStyles from '@/styles/react-select'
 
 export type ViewerImageProps = {
   file: File
@@ -30,6 +30,8 @@ const ViewerMosaic = ({ file }: ViewerImageProps) => {
   const [offset, setOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 })
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const tileCache = useRef<Map<string, HTMLImageElement>>(new Map())
+
+  console.log('colorMode', colorMode)
 
   useEffect(() => {
     ;(async function (file: File) {

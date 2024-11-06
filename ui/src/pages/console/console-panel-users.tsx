@@ -28,18 +28,20 @@ import {
   IconButton,
   Avatar,
 } from '@chakra-ui/react'
+import {
+  IconMoreVert,
+  PagePagination,
+  SectionSpinner,
+  usePagePagination,
+} from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import UserAPI, { ConsoleUsersResponse } from '@/client/idp/user'
 import ConsoleConfirmationModal from '@/components/console/console-confirmation-modal'
 import { consoleUsersPaginationStorage } from '@/infra/pagination'
 import { getUserId } from '@/infra/token'
-import { IconMoreVert } from '@/lib/components/icons'
-import PagePagination from '@/lib/components/page-pagination'
-import SectionSpinner from '@/lib/components/section-spinner'
 import { getPictureUrlById } from '@/lib/helpers/picture'
 import { decodeQuery } from '@/lib/helpers/query'
-import usePagePagination from '@/lib/hooks/page-pagination'
 
 const ConsolePanelUsers = () => {
   const [searchParams] = useSearchParams()
@@ -56,8 +58,8 @@ const ConsolePanelUsers = () => {
   const [confirmAdminWindowOpen, setConfirmAdminWindowOpen] = useState(false)
   const [confirmWindowAction, setConfirmWindowAction] = useState<string>()
   const { page, size, steps, setPage, setSize } = usePagePagination({
-    navigate,
-    location,
+    navigateFn: navigate,
+    searchFn: () => location.search,
     storage: consoleUsersPaginationStorage(),
   })
 
@@ -321,16 +323,17 @@ const ConsolePanelUsers = () => {
           <div>No users found.</div>
         )}
         {list ? (
-          <PagePagination
-            style={{ alignSelf: 'end' }}
-            totalElements={list.totalElements}
-            totalPages={Math.ceil(list.totalElements / size)}
-            page={page}
-            size={size}
-            steps={steps}
-            setPage={setPage}
-            setSize={setSize}
-          />
+          <div className={cx('self-end')}>
+            <PagePagination
+              totalElements={list.totalElements}
+              totalPages={Math.ceil(list.totalElements / size)}
+              page={page}
+              size={size}
+              steps={steps}
+              setPage={setPage}
+              setSize={setSize}
+            />
+          </div>
         ) : null}
       </div>
     </>

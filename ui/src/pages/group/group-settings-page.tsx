@@ -10,6 +10,7 @@
 import { useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { Divider, IconButton } from '@chakra-ui/react'
+import { IconEdit, IconDelete, IconPersonAdd, SectionSpinner } from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import GroupAPI from '@/client/api/group'
@@ -18,8 +19,6 @@ import { swrConfig } from '@/client/options'
 import GroupAddMember from '@/components/group/group-add-member'
 import GroupDelete from '@/components/group/group-delete'
 import GroupEditName from '@/components/group/group-edit-name'
-import { IconEdit, IconDelete, IconPersonAdd } from '@/lib/components/icons'
-import SectionSpinner from '@/lib/components/section-spinner'
 import { truncateEnd } from '@/lib/helpers/truncate-end'
 
 const Spacer = () => <div className={cx('grow')} />

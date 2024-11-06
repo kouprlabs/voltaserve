@@ -15,6 +15,7 @@ import {
   IconButtonProps,
   Progress,
 } from '@chakra-ui/react'
+import { IconDelete, IconEdit, SectionSpinner } from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import { geEditorPermission } from '@/client/api/permission'
@@ -24,8 +25,6 @@ import { swrConfig } from '@/client/options'
 import WorkspaceDelete from '@/components/workspace/workspace-delete'
 import WorkspaceEditName from '@/components/workspace/workspace-edit-name'
 import WorkspaceEditStorageCapacity from '@/components/workspace/workspace-edit-storage-capacity'
-import { IconDelete, IconEdit } from '@/lib/components/icons'
-import SectionSpinner from '@/lib/components/section-spinner'
 import prettyBytes from '@/lib/helpers/pretty-bytes'
 import { truncateEnd } from '@/lib/helpers/truncate-end'
 

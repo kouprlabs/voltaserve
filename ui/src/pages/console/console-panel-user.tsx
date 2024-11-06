@@ -12,7 +12,6 @@ import { useParams } from 'react-router-dom'
 import {
   Avatar,
   Badge,
-  Center,
   Divider,
   Flex,
   Grid,
@@ -29,6 +28,14 @@ import {
   Tooltip,
   Tr,
 } from '@chakra-ui/react'
+import {
+  IconClose,
+  IconEdit,
+  IconSync,
+  IconWarning,
+  PagePagination,
+  SectionSpinner,
+} from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import ConsoleApi, {
@@ -37,14 +44,6 @@ import ConsoleApi, {
   WorkspaceUserManagementList,
 } from '@/client/console/console'
 import UserAPI, { ConsoleUser } from '@/client/idp/user'
-import {
-  IconClose,
-  IconEdit,
-  IconSync,
-  IconWarning,
-} from '@/lib/components/icons'
-import PagePagination from '@/lib/components/page-pagination'
-import SectionSpinner from '@/lib/components/section-spinner'
 import { getPictureUrlById } from '@/lib/helpers/picture'
 import { truncateEnd } from '@/lib/helpers/truncate-end'
 import truncateMiddle from '@/lib/helpers/truncate-middle'
@@ -267,24 +266,18 @@ const ConsolePanelUser = () => {
                         <span className={cx('font-bold')}>Organizations</span>
                         <Spacer />
                         {orgList.totalElements > 5 ? (
-                          <Center>
-                            <>
-                              <PagePagination
-                                totalElements={orgList.totalElements}
-                                totalPages={Math.ceil(
-                                  orgList.totalElements / 5,
-                                )}
-                                page={orgPage}
-                                size={5}
-                                steps={[]}
-                                setPage={setOrgPage}
-                                setSize={() => {}}
-                                uiSize="xs"
-                                disableLastNav
-                                disableMiddleNav
-                              />
-                            </>
-                          </Center>
+                          <PagePagination
+                            totalElements={orgList.totalElements}
+                            totalPages={Math.ceil(orgList.totalElements / 5)}
+                            page={orgPage}
+                            size={5}
+                            steps={[]}
+                            setPage={setOrgPage}
+                            setSize={() => {}}
+                            uiSize="xs"
+                            disableLastNav
+                            disableMiddleNav
+                          />
                         ) : null}
                       </Flex>
                     </Th>
@@ -339,22 +332,20 @@ const ConsolePanelUser = () => {
                         <span className={cx('font-bold')}>Workspaces</span>
                         <Spacer />
                         {workspaceList.totalElements > 5 ? (
-                          <>
-                            <PagePagination
-                              totalElements={workspaceList.totalElements}
-                              totalPages={Math.ceil(
-                                workspaceList.totalElements / 5,
-                              )}
-                              page={workspacePage}
-                              size={5}
-                              steps={[]}
-                              setPage={setWorkspacePage}
-                              setSize={() => {}}
-                              uiSize="xs"
-                              disableLastNav
-                              disableMiddleNav
-                            />
-                          </>
+                          <PagePagination
+                            totalElements={workspaceList.totalElements}
+                            totalPages={Math.ceil(
+                              workspaceList.totalElements / 5,
+                            )}
+                            page={workspacePage}
+                            size={5}
+                            steps={[]}
+                            setPage={setWorkspacePage}
+                            setSize={() => {}}
+                            uiSize="xs"
+                            disableLastNav
+                            disableMiddleNav
+                          />
                         ) : null}
                       </Flex>
                     </Th>
@@ -407,22 +398,18 @@ const ConsolePanelUser = () => {
                         <span className={cx('font-bold')}>Groups</span>
                         <Spacer />
                         {groupList.totalElements > 5 ? (
-                          <>
-                            <PagePagination
-                              totalElements={groupList.totalElements}
-                              totalPages={Math.ceil(
-                                groupList.totalElements / 5,
-                              )}
-                              page={groupPage}
-                              size={5}
-                              steps={[]}
-                              setPage={setGroupPage}
-                              setSize={() => {}}
-                              uiSize="xs"
-                              disableLastNav
-                              disableMiddleNav
-                            />
-                          </>
+                          <PagePagination
+                            totalElements={groupList.totalElements}
+                            totalPages={Math.ceil(groupList.totalElements / 5)}
+                            page={groupPage}
+                            size={5}
+                            steps={[]}
+                            setPage={setGroupPage}
+                            setSize={() => {}}
+                            uiSize="xs"
+                            disableLastNav
+                            disableMiddleNav
+                          />
                         ) : null}
                       </Flex>
                     </Th>

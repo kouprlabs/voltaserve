@@ -10,6 +10,13 @@
 import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { Divider, IconButton } from '@chakra-ui/react'
+import {
+  IconEdit,
+  IconLogout,
+  IconDelete,
+  IconPersonAdd,
+  SectionSpinner,
+} from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import OrganizationAPI from '@/client/api/organization'
@@ -19,13 +26,6 @@ import OrganizationDelete from '@/components/organization/organization-delete'
 import OrganizationEditName from '@/components/organization/organization-edit-name'
 import OrganizationInviteMembers from '@/components/organization/organization-invite-members'
 import OrganizationLeave from '@/components/organization/organization-leave'
-import {
-  IconEdit,
-  IconLogout,
-  IconDelete,
-  IconPersonAdd,
-} from '@/lib/components/icons'
-import SectionSpinner from '@/lib/components/section-spinner'
 import { truncateEnd } from '@/lib/helpers/truncate-end'
 
 const Spacer = () => <div className={cx('grow')} />

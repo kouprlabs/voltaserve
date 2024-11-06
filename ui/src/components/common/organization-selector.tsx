@@ -25,15 +25,13 @@ import {
   Avatar,
   Radio,
 } from '@chakra-ui/react'
+import { Pagination, SearchInput, SectionSpinner } from '@koupr/ui'
 import cx from 'classnames'
 import OrganizationAPI, {
   Organization,
   SortOrder,
 } from '@/client/api/organization'
 import { swrConfig } from '@/client/options'
-import Pagination from '@/lib/components/pagination'
-import SearchInput from '@/lib/components/search-input'
-import SectionSpinner from '@/lib/components/section-spinner'
 
 export type OrganizationSelectorProps = {
   onConfirm?: (organization: Organization) => void

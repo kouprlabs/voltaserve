@@ -9,6 +9,12 @@
 // licenses/AGPL.txt.
 import { useEffect } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import {
+  PagePagination,
+  Spinner,
+  usePageMonitor,
+  usePagePagination,
+} from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import FileAPI from '@/client/api/file'
@@ -30,12 +36,7 @@ import Sharing from '@/components/sharing'
 import SnapshotDetach from '@/components/snapshot/snapshot-detach'
 import SnapshotList from '@/components/snapshot/snapshot-list'
 import { filePaginationSteps, filesPaginationStorage } from '@/infra/pagination'
-import PagePagination from '@/lib/components/page-pagination'
-import Spinner from '@/lib/components/spinner'
 import { decodeFileQuery } from '@/lib/helpers/query'
-import usePageMonitor from '@/lib/hooks/page-monitor'
-import usePagePagination from '@/lib/hooks/page-pagination'
-import variables from '@/lib/variables'
 import { listUpdated } from '@/store/entities/files'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { mutateUpdated, selectionUpdated } from '@/store/ui/files'
@@ -84,8 +85,8 @@ const WorkspaceFilesPage = () => {
   )
   const { data: workspace } = WorkspaceAPI.useGet(workspaceId, swrConfig())
   const { page, size, steps, setPage, setSize } = usePagePagination({
-    navigate,
-    location,
+    navigateFn: navigate,
+    searchFn: () => location.search,
     storage: filesPaginationStorage(),
     steps: filePaginationSteps(),
   })
@@ -197,17 +198,18 @@ const WorkspaceFilesPage = () => {
             ) : null}
             {list && !error ? <FileList list={list} scale={iconScale} /> : null}
           </div>
-          {list ? (
-            <PagePagination
-              style={{ alignSelf: 'end', paddingBottom: variables.spacing }}
-              totalElements={list.totalElements}
-              totalPages={list.totalPages}
-              page={page}
-              size={size}
-              steps={steps}
-              setPage={setPage}
-              setSize={setSize}
-            />
+          {list && list.totalPages > 1 ? (
+            <div className={cx('self-end', 'pb-1.5')}>
+              <PagePagination
+                totalElements={list.totalElements}
+                totalPages={list.totalPages}
+                page={page}
+                size={size}
+                steps={steps}
+                setPage={setPage}
+                setSize={setSize}
+              />
+            </div>
           ) : null}
         </div>
       </div>

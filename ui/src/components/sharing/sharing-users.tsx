@@ -21,6 +21,14 @@ import {
   Badge,
   Avatar,
 } from '@chakra-ui/react'
+import {
+  IconCheck,
+  IconDelete,
+  IconPersonAdd,
+  Spinner,
+  Text,
+  reactSelectStyles,
+} from '@koupr/ui'
 import { KeyedMutator } from 'swr'
 import { Select } from 'chakra-react-select'
 import cx from 'classnames'
@@ -30,14 +38,10 @@ import { User } from '@/client/api/user'
 import WorkspaceAPI from '@/client/api/workspace'
 import IdPUserAPI from '@/client/idp/user'
 import UserSelector from '@/components/common/user-selector'
-import { IconCheck, IconDelete, IconPersonAdd } from '@/lib/components/icons'
-import Spinner from '@/lib/components/spinner'
-import Text from '@/lib/components/text'
 import { getPictureUrlById } from '@/lib/helpers/picture'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { sharingModalDidClose } from '@/store/ui/files'
 import { inviteModalDidOpen } from '@/store/ui/organizations'
-import { reactSelectStyles } from '@/styles/react-select'
 import SharingFormSkeleton from './sharing-form-skeleton'
 
 export type SharingUsersProps = {

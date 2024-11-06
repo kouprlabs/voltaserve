@@ -22,6 +22,7 @@ import {
   ModalHeader,
   ModalOverlay,
 } from '@chakra-ui/react'
+import { reactSelectStyles } from '@koupr/ui'
 import {
   Field,
   FieldAttributes,
@@ -37,7 +38,6 @@ import { FileType } from '@/client/api/file'
 import { decodeFileQuery, encodeFileQuery } from '@/lib/helpers/query'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { modalDidClose } from '@/store/ui/search-filter'
-import { reactSelectStyles } from '@/styles/react-select'
 
 type FormValues = {
   type: FileType | ''

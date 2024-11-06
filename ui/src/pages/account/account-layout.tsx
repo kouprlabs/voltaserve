@@ -18,13 +18,12 @@ import {
   TabList,
   Tabs,
 } from '@chakra-ui/react'
+import { IconEdit, NumberTag } from '@koupr/ui'
 import cx from 'classnames'
 import InvitationAPI from '@/client/api/invitation'
 import UserAPI from '@/client/idp/user'
 import { swrConfig } from '@/client/options'
 import AccountEditPicture from '@/components/account/edit-picture'
-import { IconEdit } from '@/lib/components/icons'
-import NumberTag from '@/lib/components/number-tag'
 import { getPictureUrl } from '@/lib/helpers/picture'
 import { truncateEnd } from '@/lib/helpers/truncate-end'
 import { useAppDispatch } from '@/store/hook'

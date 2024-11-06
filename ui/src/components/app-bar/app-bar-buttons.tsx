@@ -9,7 +9,7 @@
 // licenses/AGPL.txt.
 import { Link } from 'react-router-dom'
 import { Button } from '@chakra-ui/react'
-import { IconAdd } from '@/lib/components/icons'
+import { IconAdd } from '@koupr/ui'
 
 export const CreateGroupButton = () => (
   <Button

@@ -9,6 +9,7 @@
 // licenses/AGPL.txt.
 import { useCallback, useMemo, useState } from 'react'
 import { Button, ModalBody, ModalFooter } from '@chakra-ui/react'
+import { reactSelectStyles } from '@koupr/ui'
 import { OptionBase, Select, SingleValue } from 'chakra-react-select'
 import cx from 'classnames'
 import FileAPI from '@/client/api/file'
@@ -17,7 +18,6 @@ import TaskAPI from '@/client/api/task'
 import { swrConfig } from '@/client/options'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { modalDidClose } from '@/store/ui/insights'
-import { reactSelectStyles } from '@/styles/react-select'
 
 interface LanguageOption extends OptionBase {
   label: string

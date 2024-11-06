@@ -8,8 +8,8 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
 import { Circle, Tooltip } from '@chakra-ui/react'
+import { IconClose } from '@koupr/ui'
 import cx from 'classnames'
-import { IconClose } from '@/lib/components/icons'
 
 const IconBadgeError = () => (
   <Tooltip label="An error occurred while processing this item">

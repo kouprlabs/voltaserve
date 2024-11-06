@@ -27,6 +27,12 @@ import {
   Thead,
   Tr,
 } from '@chakra-ui/react'
+import {
+  IconMoreVert,
+  PagePagination,
+  SectionSpinner,
+  usePagePagination,
+} from '@koupr/ui'
 import * as Yup from 'yup'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
@@ -35,11 +41,7 @@ import ConsoleApi, {
 } from '@/client/console/console'
 import ConsoleRenameModal from '@/components/console/console-rename-modal'
 import { consoleOrganizationsPaginationStorage } from '@/infra/pagination'
-import { IconMoreVert } from '@/lib/components/icons'
-import PagePagination from '@/lib/components/page-pagination'
-import SectionSpinner from '@/lib/components/section-spinner'
 import { decodeQuery } from '@/lib/helpers/query'
-import usePagePagination from '@/lib/hooks/page-pagination'
 
 const ConsolePanelOrganizations = () => {
   const [searchParams] = useSearchParams()
@@ -48,8 +50,8 @@ const ConsolePanelOrganizations = () => {
   const query = decodeQuery(searchParams.get('q') as string)
   const [list, setList] = useState<OrganizationManagementList>()
   const { page, size, steps, setPage, setSize } = usePagePagination({
-    navigate,
-    location,
+    navigateFn: navigate,
+    searchFn: () => location.search,
     storage: consoleOrganizationsPaginationStorage(),
   })
   const [confirmRenameWindowOpen, setConfirmRenameWindowOpen] = useState(false)
@@ -212,16 +214,17 @@ const ConsolePanelOrganizations = () => {
           <div>No organizations found.</div>
         )}
         {list ? (
-          <PagePagination
-            style={{ alignSelf: 'end' }}
-            totalElements={list.totalElements}
-            totalPages={Math.ceil(list.totalElements / size)}
-            page={page}
-            size={size}
-            steps={steps}
-            setPage={setPage}
-            setSize={setSize}
-          />
+          <div className={cx('self-end')}>
+            <PagePagination
+              totalElements={list.totalElements}
+              totalPages={Math.ceil(list.totalElements / size)}
+              page={page}
+              size={size}
+              steps={steps}
+              setPage={setPage}
+              setSize={setSize}
+            />
+          </div>
         ) : null}
       </div>
     </>
