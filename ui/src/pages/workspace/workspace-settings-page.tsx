@@ -9,14 +9,8 @@
 // licenses/AGPL.txt.
 import { useCallback, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import {
-  Divider,
-  IconButton,
-  IconButtonProps,
-  Progress,
-} from '@chakra-ui/react'
-import { IconDelete, IconEdit, SectionSpinner } from '@koupr/ui'
-import cx from 'classnames'
+import { IconButton, IconButtonProps, Progress } from '@chakra-ui/react'
+import { Form, IconDelete, IconEdit, SectionSpinner } from '@koupr/ui'
 import { Helmet } from 'react-helmet-async'
 import { geEditorPermission } from '@/client/api/permission'
 import StorageAPI from '@/client/api/storage'
@@ -31,8 +25,6 @@ import { truncateEnd } from '@/lib/helpers/truncate-end'
 const EditButton = (props: IconButtonProps) => (
   <IconButton icon={<IconEdit />} {...props} />
 )
-
-const Spacer = () => <div className={cx('grow')} />
 
 const WorkspaceSettingsPage = () => {
   const { id } = useParams()
@@ -54,14 +46,6 @@ const WorkspaceSettingsPage = () => {
   const [isStorageCapacityModalOpen, setIsStorageCapacityModalOpen] =
     useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
-  const sectionClassName = cx('flex', 'flex-col', 'gap-1', 'py-1.5')
-  const rowClassName = cx(
-    'flex',
-    'flex-row',
-    'items-center',
-    'gap-1',
-    `h-[40px]`,
-  )
 
   const handleEditNameClose = useCallback(async () => {
     setIsNameModalOpen(false)
@@ -86,73 +70,90 @@ const WorkspaceSettingsPage = () => {
       <Helmet>
         <title>{workspace.name}</title>
       </Helmet>
-      <div className={cx('flex', 'flex-col', 'gap-0')}>
-        <div className={sectionClassName}>
-          <span className={cx('font-bold')}>Storage</span>
-          {storageUsageError ? (
-            <span>Failed to load storage usage.</span>
-          ) : null}
-          {storageUsage && !storageUsageError ? (
-            <>
-              <span>
-                {prettyBytes(storageUsage.bytes)} of{' '}
-                {prettyBytes(storageUsage.maxBytes)} used
-              </span>
-              <Progress value={storageUsage.percentage} hasStripe />
-            </>
-          ) : null}
-          {!storageUsage && !storageUsageError ? (
-            <>
-              <span>Calculating…</span>
-              <Progress value={0} hasStripe />
-            </>
-          ) : null}
-          <div className={rowClassName}>
-            <span>Capacity</span>
-            <Spacer />
-            <span>{prettyBytes(workspace.storageCapacity)}</span>
-            <EditButton
-              aria-label=""
-              isDisabled={!hasEditPermission}
-              onClick={() => {
-                setIsStorageCapacityModalOpen(true)
-              }}
-            />
-          </div>
-        </div>
-        <Divider />
-        <div className={sectionClassName}>
-          <span className={cx('font-bold')}>Basics</span>
-          <div className={rowClassName}>
-            <span>Name</span>
-            <Spacer />
-            <span>{truncateEnd(workspace.name, 50)}</span>
-            <EditButton
-              aria-label=""
-              isDisabled={!hasEditPermission}
-              onClick={() => {
-                setIsNameModalOpen(true)
-              }}
-            />
-          </div>
-        </div>
-        <Divider />
-        <div className={sectionClassName}>
-          <span className={cx('font-bold')}>Advanced</span>
-          <div className={rowClassName}>
-            <span>Delete workspace</span>
-            <Spacer />
-            <IconButton
-              icon={<IconDelete />}
-              variant="solid"
-              colorScheme="red"
-              isDisabled={!hasEditPermission}
-              aria-label=""
-              onClick={() => setIsDeleteModalOpen(true)}
-            />
-          </div>
-        </div>
-      </div>
+      <Form
+        sections={[
+          {
+            title: 'Storage',
+            content: (
+              <>
+                {storageUsageError ? (
+                  <span>Failed to load storage usage.</span>
+                ) : null}
+                {storageUsage && !storageUsageError ? (
+                  <>
+                    <span>
+                      {prettyBytes(storageUsage.bytes)} of{' '}
+                      {prettyBytes(storageUsage.maxBytes)} used
+                    </span>
+                    <Progress value={storageUsage.percentage} hasStripe />
+                  </>
+                ) : null}
+                {!storageUsage && !storageUsageError ? (
+                  <>
+                    <span>Calculating…</span>
+                    <Progress value={0} hasStripe />
+                  </>
+                ) : null}
+              </>
+            ),
+            rows: [
+              {
+                label: 'Capacity',
+                content: (
+                  <>
+                    <span>{prettyBytes(workspace.storageCapacity)}</span>
+                    <EditButton
+                      aria-label=""
+                      isDisabled={!hasEditPermission}
+                      onClick={() => {
+                        setIsStorageCapacityModalOpen(true)
+                      }}
+                    />
+                  </>
+                ),
+              },
+            ],
+          },
+          {
+            title: 'Basics',
+            rows: [
+              {
+                label: 'Name',
+                content: (
+                  <>
+                    <span>{truncateEnd(workspace.name, 50)}</span>
+                    <EditButton
+                      aria-label=""
+                      isDisabled={!hasEditPermission}
+                      onClick={() => {
+                        setIsNameModalOpen(true)
+                      }}
+                    />
+                  </>
+                ),
+              },
+            ],
+          },
+          {
+            title: 'Advanced',
+            rows: [
+              {
+                label: 'Delete workspace',
+                content: (
+                  <IconButton
+                    icon={<IconDelete />}
+                    variant="solid"
+                    colorScheme="red"
+                    isDisabled={!hasEditPermission}
+                    aria-label=""
+                    onClick={() => setIsDeleteModalOpen(true)}
+                  />
+                ),
+              },
+            ],
+          },
+        ]}
+      />
       <WorkspaceEditName
         open={isNameModalOpen}
         workspace={workspace}

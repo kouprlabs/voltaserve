@@ -32,7 +32,6 @@ import ConsoleApi, { GroupManagementList } from '@/client/console/console'
 import ConsoleRenameModal from '@/components/console/console-rename-modal'
 import { consoleGroupsPaginationStorage } from '@/infra/pagination'
 import { decodeQuery } from '@/lib/helpers/query'
-import relativeDate from '@/lib/helpers/relative-date'
 
 const ConsolePanelGroups = () => {
   const [searchParams] = useSearchParams()

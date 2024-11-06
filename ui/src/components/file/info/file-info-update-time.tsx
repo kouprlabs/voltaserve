@@ -11,7 +11,6 @@ import { Stat, StatLabel, StatNumber } from '@chakra-ui/react'
 import { RelativeDate } from '@koupr/ui'
 import cx from 'classnames'
 import { File } from '@/client/api/file'
-import relativeDate from '@/lib/helpers/relative-date'
 
 export type FileInfoUpdateTimeProps = {
   file: File

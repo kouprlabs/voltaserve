@@ -35,7 +35,6 @@ import ConsoleApi, {
   UserOrganizationManagementList,
   WorkspaceManagementList,
 } from '@/client/console/console'
-import relativeDate from '@/lib/helpers/relative-date'
 
 const ConsolePanelOrganization = () => {
   const [organizationData, setOrganizationData] =

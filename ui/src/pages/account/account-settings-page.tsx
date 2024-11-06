@@ -9,7 +9,6 @@
 // licenses/AGPL.txt.
 import { useState } from 'react'
 import {
-  Divider,
   IconButton,
   IconButtonProps,
   Progress,
@@ -17,7 +16,13 @@ import {
   Tooltip,
   useColorMode,
 } from '@chakra-ui/react'
-import { IconEdit, IconDelete, IconWarning, SectionSpinner } from '@koupr/ui'
+import {
+  IconEdit,
+  IconDelete,
+  IconWarning,
+  SectionSpinner,
+  Form,
+} from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import StorageAPI from '@/client/api/storage'
@@ -39,8 +44,6 @@ const EditButton = (props: IconButtonProps) => (
   />
 )
 
-const Spacer = () => <div className={cx('grow')} />
-
 const AccountSettingsPage = () => {
   const { colorMode, toggleColorMode } = useColorMode()
   const { data: user, error: userError } = UserAPI.useGet()
@@ -50,14 +53,6 @@ const AccountSettingsPage = () => {
   const [isEmailModalOpen, setIsEmailModalOpen] = useState(false)
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
-  const sectionClassName = cx('flex', 'flex-col', 'gap-1', 'py-1.5')
-  const rowClassName = cx(
-    'flex',
-    'flex-row',
-    'items-center',
-    'gap-1',
-    `h-[40px]`,
-  )
 
   if (userError) {
     return null
@@ -71,136 +66,162 @@ const AccountSettingsPage = () => {
       <Helmet>
         <title>{user.fullName}</title>
       </Helmet>
-      <div className={cx('flex', 'flex-col', 'gap-0')}>
-        <div className={sectionClassName}>
-          <span className={cx('font-bold')}>Storage Usage</span>
-          {storageUsageError ? (
-            <span>Failed to load storage usage.</span>
-          ) : null}
-          {storageUsage && !storageUsageError ? (
-            <>
-              <span>
-                {prettyBytes(storageUsage.bytes)} of{' '}
-                {prettyBytes(storageUsage.maxBytes)} used
-              </span>
-              <Progress value={storageUsage.percentage} hasStripe />
-            </>
-          ) : null}
-          {!(storageUsage && !storageUsageError) ? (
-            <>
-              <span>Calculating…</span>
-              <Progress value={0} hasStripe />
-            </>
-          ) : null}
-        </div>
-        <Divider />
-        <div className={sectionClassName}>
-          <span className={cx('font-bold')}>Basics</span>
-          <div className={cx(rowClassName)}>
-            <span>Full name</span>
-            <Spacer />
-            <span>{truncateEnd(user.fullName, 50)}</span>
-            <EditButton
-              aria-label="Edit name"
-              onClick={() => {
-                setIsFullNameModalOpen(true)
-              }}
-            />
-          </div>
-        </div>
-        <Divider />
-        <div className={sectionClassName}>
-          <span className={cx('font-bold')}>Credentials</span>
-          <div className={cx(rowClassName)}>
-            <span>Email</span>
-            <Spacer />
-            {user.pendingEmail ? (
-              <div
-                className={cx('flex', 'flex-row', 'gap-0.5', 'items-center')}
-              >
-                <Tooltip label="Please check your inbox to confirm your email.">
-                  <div
-                    className={cx(
-                      'flex',
-                      'items-center',
-                      'justify-center',
-                      'cursor-default',
-                    )}
-                  >
-                    <IconWarning className={cx('text-yellow-400')} />
-                  </div>
-                </Tooltip>
-                <span>{truncateMiddle(user.pendingEmail, 50)}</span>
-              </div>
-            ) : null}
-            {!user.pendingEmail ? (
-              <span>{truncateMiddle(user.pendingEmail || user.email, 50)}</span>
-            ) : null}
-            <EditButton
-              aria-label="Edit email"
-              onClick={() => {
-                setIsEmailModalOpen(true)
-              }}
-            />
-          </div>
-          <div className={cx(rowClassName)}>
-            <span>Password</span>
-            <Spacer />
-            <EditButton
-              aria-label="Change password"
-              onClick={() => {
-                setIsPasswordModalOpen(true)
-              }}
-            />
-          </div>
-        </div>
-        <Divider />
-        <div className={sectionClassName}>
-          <span className={cx('font-bold')}>Theme</span>
-          <div className={cx(rowClassName)}>
-            <span>Dark mode</span>
-            <Spacer />
-            <Switch
-              isChecked={colorMode === 'dark'}
-              onChange={() => toggleColorMode()}
-            />
-          </div>
-        </div>
-        <Divider />
-        <div className={sectionClassName}>
-          <span className={cx('font-bold')}>Advanced</span>
-          <div className={cx(rowClassName)}>
-            <span>Delete account</span>
-            <Spacer />
-            <IconButton
-              icon={<IconDelete />}
-              variant="solid"
-              colorScheme="red"
-              aria-label="Delete account"
-              onClick={() => setIsDeleteModalOpen(true)}
-            />
-          </div>
-        </div>
-        <AccountEditFullName
-          open={isFullNameModalOpen}
-          user={user}
-          onClose={() => setIsFullNameModalOpen(false)}
-        />
-        <AccountEditEmail
-          open={isEmailModalOpen}
-          user={user}
-          onClose={() => setIsEmailModalOpen(false)}
-        />
-        <AccountChangePassword
-          open={isPasswordModalOpen}
-          user={user}
-          onClose={() => setIsPasswordModalOpen(false)}
-        />
-        <AccountDelete
-          open={isDeleteModalOpen}
-          onClose={() => setIsDeleteModalOpen(false)}
-        />
-      </div>
+      <Form
+        sections={[
+          {
+            title: 'Storage',
+            content: (
+              <>
+                {storageUsageError ? (
+                  <span>Failed to load storage usage.</span>
+                ) : null}
+                {storageUsage && !storageUsageError ? (
+                  <>
+                    <span>
+                      {prettyBytes(storageUsage.bytes)} of{' '}
+                      {prettyBytes(storageUsage.maxBytes)} used
+                    </span>
+                    <Progress value={storageUsage.percentage} hasStripe />
+                  </>
+                ) : null}
+                {!(storageUsage && !storageUsageError) ? (
+                  <>
+                    <span>Calculating…</span>
+                    <Progress value={0} hasStripe />
+                  </>
+                ) : null}
+              </>
+            ),
+          },
+          {
+            title: 'Basics',
+            rows: [
+              {
+                label: 'Full name',
+                content: (
+                  <>
+                    <span>{truncateEnd(user.fullName, 50)}</span>
+                    <EditButton
+                      aria-label="Edit name"
+                      onClick={() => {
+                        setIsFullNameModalOpen(true)
+                      }}
+                    />
+                  </>
+                ),
+              },
+            ],
+          },
+          {
+            title: 'Credentials',
+            rows: [
+              {
+                label: 'Email',
+                content: (
+                  <>
+                    {user.pendingEmail ? (
+                      <div
+                        className={cx(
+                          'flex',
+                          'flex-row',
+                          'gap-0.5',
+                          'items-center',
+                        )}
+                      >
+                        <Tooltip label="Please check your inbox to confirm your email.">
+                          <div
+                            className={cx(
+                              'flex',
+                              'items-center',
+                              'justify-center',
+                              'cursor-default',
+                            )}
+                          >
+                            <IconWarning className={cx('text-yellow-400')} />
+                          </div>
+                        </Tooltip>
+                        <span>{truncateMiddle(user.pendingEmail, 50)}</span>
+                      </div>
+                    ) : null}
+                    {!user.pendingEmail ? (
+                      <span>
+                        {truncateMiddle(user.pendingEmail || user.email, 50)}
+                      </span>
+                    ) : null}
+                    <EditButton
+                      aria-label="Edit email"
+                      onClick={() => {
+                        setIsEmailModalOpen(true)
+                      }}
+                    />
+                  </>
+                ),
+              },
+              {
+                label: 'Password',
+                content: (
+                  <EditButton
+                    aria-label="Change password"
+                    onClick={() => {
+                      setIsPasswordModalOpen(true)
+                    }}
+                  />
+                ),
+              },
+            ],
+          },
+          {
+            title: 'Theme',
+            rows: [
+              {
+                label: 'Dark mode',
+                content: (
+                  <Switch
+                    isChecked={colorMode === 'dark'}
+                    onChange={() => toggleColorMode()}
+                  />
+                ),
+              },
+            ],
+          },
+          {
+            title: 'Advanced',
+            rows: [
+              {
+                label: 'Delete account',
+                content: (
+                  <IconButton
+                    icon={<IconDelete />}
+                    variant="solid"
+                    colorScheme="red"
+                    aria-label="Delete account"
+                    onClick={() => setIsDeleteModalOpen(true)}
+                  />
+                ),
+              },
+            ],
+          },
+        ]}
+      />
+      <AccountEditFullName
+        open={isFullNameModalOpen}
+        user={user}
+        onClose={() => setIsFullNameModalOpen(false)}
+      />
+      <AccountEditEmail
+        open={isEmailModalOpen}
+        user={user}
+        onClose={() => setIsEmailModalOpen(false)}
+      />
+      <AccountChangePassword
+        open={isPasswordModalOpen}
+        user={user}
+        onClose={() => setIsPasswordModalOpen(false)}
+      />
+      <AccountDelete
+        open={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+      />
     </>
   )
 }

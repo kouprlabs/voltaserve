@@ -29,6 +29,7 @@ import {
   Tr,
 } from '@chakra-ui/react'
 import {
+  Form,
   IconClose,
   IconEdit,
   IconSync,
@@ -46,7 +47,6 @@ import ConsoleApi, {
 } from '@/client/console/console'
 import UserAPI, { ConsoleUser } from '@/client/idp/user'
 import { getPictureUrlById } from '@/lib/helpers/picture'
-import relativeDate from '@/lib/helpers/relative-date'
 import { truncateEnd } from '@/lib/helpers/truncate-end'
 import truncateMiddle from '@/lib/helpers/truncate-middle'
 
@@ -60,14 +60,6 @@ const EditButton = (props: IconButtonProps) => (
 )
 
 const ConsolePanelUser = () => {
-  const sectionClassName = cx('flex', 'flex-col', 'gap-1', 'py-1.5')
-  const rowClassName = cx(
-    'flex',
-    'flex-row',
-    'items-center',
-    'gap-1',
-    `h-[40px]`,
-  )
   const [user, setUser] = useState<ConsoleUser>()
   const [orgList, setOrgList] = useState<OrganizationUserManagementList>()
   const [workspaceList, setWorkspaceList] =
@@ -184,76 +176,85 @@ const ConsolePanelUser = () => {
           </div>
         </GridItem>
         <GridItem colSpan={8}>
-          <div className={cx('flex', 'flex-col', 'gap-0')}>
-            <div className={sectionClassName}>
-              <span className={cx('font-bold')}>Basics</span>
-              <div className={cx(rowClassName)}>
-                <span>Full name</span>
-                <Spacer />
-                <span>{truncateEnd(user.fullName, 50)}</span>
-                <EditButton
-                  aria-label=""
-                  onClick={() => {
-                    console.log('Rename')
-                  }}
-                />
-              </div>
-            </div>
-            <Divider />
-            <div className={sectionClassName}>
-              <span className={cx('font-bold')}>Credentials</span>
-              <div className={cx(rowClassName)}>
-                <span>Email</span>
-                <Spacer />
-                {user.pendingEmail ? (
-                  <div
-                    className={cx(
-                      'flex',
-                      'flex-row',
-                      'gap-0.5',
-                      'items-center',
-                    )}
-                  >
-                    <Tooltip label="Please check your inbox to confirm your email.">
-                      <div
-                        className={cx(
-                          'flex',
-                          'items-center',
-                          'justify-center',
-                          'cursor-default',
-                        )}
-                      >
-                        <IconWarning className={cx('text-yellow-400')} />
-                      </div>
-                    </Tooltip>
-                    <span>{truncateMiddle(user.pendingEmail, 50)}</span>
-                  </div>
-                ) : null}
-                {!user.pendingEmail ? (
-                  <span>
-                    {truncateMiddle(user.pendingEmail || user.email, 50)}
-                  </span>
-                ) : null}
-                <EditButton
-                  aria-label=""
-                  onClick={() => {
-                    console.log('edit email')
-                  }}
-                />
-              </div>
-              <div className={cx(rowClassName)}>
-                <span>Force change password</span>
-                <Spacer />
-                <EditButton
-                  aria-label=""
-                  icon={<IconSync />}
-                  onClick={() => {
-                    console.log('change password')
-                  }}
-                />
-              </div>
-            </div>
-          </div>
+          <Form
+            sections={[
+              {
+                title: 'Basics',
+                rows: [
+                  {
+                    label: 'Full name',
+                    content: (
+                      <>
+                        <span>{truncateEnd(user.fullName, 50)}</span>
+                        <EditButton aria-label="Edit full name" />
+                      </>
+                    ),
+                  },
+                ],
+              },
+              {
+                title: 'Credentials',
+                rows: [
+                  {
+                    label: 'Email',
+                    content: (
+                      <>
+                        {user.pendingEmail ? (
+                          <div
+                            className={cx(
+                              'flex',
+                              'flex-row',
+                              'gap-0.5',
+                              'items-center',
+                            )}
+                          >
+                            <Tooltip label="Please check your inbox to confirm your email.">
+                              <div
+                                className={cx(
+                                  'flex',
+                                  'items-center',
+                                  'justify-center',
+                                  'cursor-default',
+                                )}
+                              >
+                                <IconWarning
+                                  className={cx('text-yellow-400')}
+                                />
+                              </div>
+                            </Tooltip>
+                            <span>{truncateMiddle(user.pendingEmail, 50)}</span>
+                          </div>
+                        ) : null}
+                        {!user.pendingEmail ? (
+                          <span>
+                            {truncateMiddle(
+                              user.pendingEmail || user.email,
+                              50,
+                            )}
+                          </span>
+                        ) : null}
+                        <EditButton
+                          aria-label=""
+                          onClick={() => {
+                            console.log('edit email')
+                          }}
+                        />
+                      </>
+                    ),
+                  },
+                  {
+                    label: 'Force change password',
+                    content: (
+                      <EditButton
+                        aria-label="Force change password"
+                        icon={<IconSync />}
+                      />
+                    ),
+                  },
+                ],
+              },
+            ]}
+          />
         </GridItem>
         <GridItem colSpan={3}>
           {!orgList ? (

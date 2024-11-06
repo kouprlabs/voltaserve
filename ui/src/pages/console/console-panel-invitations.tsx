@@ -24,7 +24,6 @@ import { Helmet } from 'react-helmet-async'
 import ConsoleApi, { InvitationManagementList } from '@/client/console/console'
 import ConsoleConfirmationModal from '@/components/console/console-confirmation-modal'
 import { consoleInvitationsPaginationStorage } from '@/infra/pagination'
-import relativeDate from '@/lib/helpers/relative-date'
 
 const ConsolePanelInvitations = () => {
   const navigate = useNavigate()

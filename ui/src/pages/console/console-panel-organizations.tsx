@@ -33,7 +33,6 @@ import ConsoleApi, {
 import ConsoleRenameModal from '@/components/console/console-rename-modal'
 import { consoleOrganizationsPaginationStorage } from '@/infra/pagination'
 import { decodeQuery } from '@/lib/helpers/query'
-import relativeDate from '@/lib/helpers/relative-date'
 
 const ConsolePanelOrganizations = () => {
   const [searchParams] = useSearchParams()

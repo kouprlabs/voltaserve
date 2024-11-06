@@ -15,26 +15,10 @@ import {
   useSearchParams,
 } from 'react-router-dom'
 import { Avatar, Link as ChakraLink } from '@chakra-ui/react'
-import {
-  Center,
-  Heading,
-  IconButton,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
-  Stack,
-  Table,
-  Tbody,
-  Td,
-  Th,
-  Thead,
-  Tr,
-} from '@chakra-ui/react'
+import { Heading } from '@chakra-ui/react'
 import {
   DataTable,
   IconEdit,
-  IconMoreVert,
   PagePagination,
   RelativeDate,
   SectionSpinner,
@@ -49,7 +33,6 @@ import ConsoleRenameModal from '@/components/console/console-rename-modal'
 import { consoleWorkspacesPaginationStorage } from '@/infra/pagination'
 import prettyBytes from '@/lib/helpers/pretty-bytes'
 import { decodeQuery } from '@/lib/helpers/query'
-import relativeDate from '@/lib/helpers/relative-date'
 
 const ConsolePanelWorkspaces = () => {
   const [searchParams] = useSearchParams()

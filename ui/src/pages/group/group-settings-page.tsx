@@ -9,9 +9,14 @@
 // licenses/AGPL.txt.
 import { useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { Divider, IconButton } from '@chakra-ui/react'
-import { IconEdit, IconDelete, IconPersonAdd, SectionSpinner } from '@koupr/ui'
-import cx from 'classnames'
+import { IconButton } from '@chakra-ui/react'
+import {
+  IconEdit,
+  IconDelete,
+  IconPersonAdd,
+  SectionSpinner,
+  Form,
+} from '@koupr/ui'
 import { Helmet } from 'react-helmet-async'
 import GroupAPI from '@/client/api/group'
 import { geEditorPermission, geOwnerPermission } from '@/client/api/permission'
@@ -20,8 +25,6 @@ import GroupAddMember from '@/components/group/group-add-member'
 import GroupDelete from '@/components/group/group-delete'
 import GroupEditName from '@/components/group/group-edit-name'
 import { truncateEnd } from '@/lib/helpers/truncate-end'
-
-const Spacer = () => <div className={cx('grow')} />
 
 const GroupSettingsPage = () => {
   const { id } = useParams()
@@ -37,14 +40,6 @@ const GroupSettingsPage = () => {
     () => group && geOwnerPermission(group.permission),
     [group],
   )
-  const sectionClassName = cx('flex', 'flex-col', 'gap-1', 'py-1.5')
-  const rowClassName = cx(
-    'flex',
-    'flex-row',
-    'items-center',
-    'gap-1',
-    `h-[40px]`,
-  )
 
   if (error) {
     return null
@@ -58,56 +53,67 @@ const GroupSettingsPage = () => {
       <Helmet>
         <title>{group.name}</title>
       </Helmet>
-      <div className={cx('flex', 'flex-col', 'gap-0')}>
-        <div className={sectionClassName}>
-          <span className={cx('font-bold')}>Basics</span>
-          <div className={rowClassName}>
-            <span>Name</span>
-            <Spacer />
-            <span>{truncateEnd(group.name, 50)}</span>
-            <IconButton
-              icon={<IconEdit />}
-              isDisabled={!hasEditPermission}
-              aria-label=""
-              onClick={() => {
-                setIsNameModalOpen(true)
-              }}
-            />
-          </div>
-          <Divider />
-        </div>
-        <div className={sectionClassName}>
-          <span className={cx('font-bold')}>Membership</span>
-          <div className={rowClassName}>
-            <span>Add members</span>
-            <Spacer />
-            <IconButton
-              icon={<IconPersonAdd />}
-              isDisabled={!hasOwnerPermission}
-              aria-label=""
-              onClick={() => {
-                setIsAddMembersModalOpen(true)
-              }}
-            />
-          </div>
-          <Divider />
-        </div>
-        <div className={sectionClassName}>
-          <span className={cx('font-bold')}>Advanced</span>
-          <div className={rowClassName}>
-            <span>Delete group</span>
-            <Spacer />
-            <IconButton
-              icon={<IconDelete />}
-              variant="solid"
-              colorScheme="red"
-              isDisabled={!hasOwnerPermission}
-              aria-label=""
-              onClick={() => setDeleteModalOpen(true)}
-            />
-          </div>
-        </div>
-      </div>
+      <Form
+        sections={[
+          {
+            title: 'Basics',
+            rows: [
+              {
+                label: 'Name',
+                content: (
+                  <>
+                    <span>{truncateEnd(group.name, 50)}</span>
+                    <IconButton
+                      icon={<IconEdit />}
+                      isDisabled={!hasEditPermission}
+                      aria-label=""
+                      onClick={() => {
+                        setIsNameModalOpen(true)
+                      }}
+                    />
+                  </>
+                ),
+              },
+            ],
+          },
+          {
+            title: 'Membership',
+            rows: [
+              {
+                label: 'Add members',
+                content: (
+                  <IconButton
+                    icon={<IconPersonAdd />}
+                    isDisabled={!hasOwnerPermission}
+                    aria-label=""
+                    onClick={() => {
+                      setIsAddMembersModalOpen(true)
+                    }}
+                  />
+                ),
+              },
+            ],
+          },
+          {
+            title: 'Advanced',
+            rows: [
+              {
+                label: 'Delete group',
+                content: (
+                  <IconButton
+                    icon={<IconDelete />}
+                    variant="solid"
+                    colorScheme="red"
+                    isDisabled={!hasOwnerPermission}
+                    aria-label=""
+                    onClick={() => setDeleteModalOpen(true)}
+                  />
+                ),
+              },
+            ],
+          },
+        ]}
+      />
       <GroupEditName
         open={isNameModalOpen}
         group={group}

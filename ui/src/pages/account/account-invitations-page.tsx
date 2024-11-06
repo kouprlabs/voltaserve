@@ -9,25 +9,9 @@
 // licenses/AGPL.txt.
 import { useCallback, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import {
-  Avatar,
-  IconButton,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
-  Portal,
-  Table,
-  Tbody,
-  Td,
-  Th,
-  Thead,
-  Tr,
-  useToast,
-} from '@chakra-ui/react'
+import { Avatar, useToast } from '@chakra-ui/react'
 import {
   DataTable,
-  IconMoreVert,
   IconThumbDown,
   IconThumbUp,
   PagePagination,
@@ -43,7 +27,6 @@ import UserAPI from '@/client/idp/user'
 import { swrConfig } from '@/client/options'
 import { incomingInvitationPaginationStorage } from '@/infra/pagination'
 import { getPictureUrlById } from '@/lib/helpers/picture'
-import relativeDate from '@/lib/helpers/relative-date'
 import userToString from '@/lib/helpers/user-to-string'
 import { useAppDispatch } from '@/store/hook'
 import { mutateUpdated } from '@/store/ui/incoming-invitations'

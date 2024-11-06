@@ -35,7 +35,6 @@ import { consoleUsersPaginationStorage } from '@/infra/pagination'
 import { getUserId } from '@/infra/token'
 import { getPictureUrlById } from '@/lib/helpers/picture'
 import { decodeQuery } from '@/lib/helpers/query'
-import relativeDate from '@/lib/helpers/relative-date'
 
 const ConsolePanelUsers = () => {
   const [searchParams] = useSearchParams()

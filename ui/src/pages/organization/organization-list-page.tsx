@@ -30,7 +30,6 @@ import { swrConfig } from '@/client/options'
 import { CreateOrganizationButton } from '@/components/app-bar/app-bar-buttons'
 import { organizationPaginationStorage } from '@/infra/pagination'
 import { decodeQuery } from '@/lib/helpers/query'
-import relativeDate from '@/lib/helpers/relative-date'
 import { useAppDispatch } from '@/store/hook'
 import { mutateUpdated } from '@/store/ui/organizations'
 

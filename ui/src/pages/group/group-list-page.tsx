@@ -30,7 +30,6 @@ import { swrConfig } from '@/client/options'
 import { CreateGroupButton } from '@/components/app-bar/app-bar-buttons'
 import { groupPaginationStorage } from '@/infra/pagination'
 import { decodeQuery } from '@/lib/helpers/query'
-import relativeDate from '@/lib/helpers/relative-date'
 import { useAppDispatch } from '@/store/hook'
 import { mutateUpdated } from '@/store/ui/groups'
 
