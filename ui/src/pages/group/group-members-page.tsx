@@ -14,25 +14,11 @@ import {
   useParams,
   useSearchParams,
 } from 'react-router-dom'
+import { Button, Avatar } from '@chakra-ui/react'
 import {
-  IconButton,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
-  Table,
-  Tbody,
-  Td,
-  Th,
-  Thead,
-  Tr,
-  Button,
-  Avatar,
-  Portal,
-} from '@chakra-ui/react'
-import {
+  DataTable,
   IconLogout,
-  IconMoreVert,
+  Text,
   IconPersonAdd,
   PagePagination,
   SectionSpinner,
@@ -117,74 +103,56 @@ const GroupMembersPage = () => {
       {!list && !membersError ? <SectionSpinner /> : null}
       {list.data.length > 0 ? (
         <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
-          <Table variant="simple">
-            <Thead>
-              <Tr>
-                <Th>Full name</Th>
-                <Th>Email</Th>
-                <Th></Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              {list.data.map((u) => (
-                <Tr key={u.id}>
-                  <Td>
-                    <div
+          <DataTable
+            items={list.data}
+            columns={[
+              {
+                title: 'Full name',
+                renderCell: (u) => (
+                  <div
+                    className={cx(
+                      'flex',
+                      'flex-row',
+                      'gap-1.5',
+                      'items-center',
+                    )}
+                  >
+                    <Avatar
+                      name={u.fullName}
+                      src={
+                        u.picture
+                          ? getPictureUrlById(u.id, u.picture, {
+                              groupId: group.id,
+                            })
+                          : undefined
+                      }
                       className={cx(
-                        'flex',
-                        'flex-row',
-                        'gap-1.5',
-                        'items-center',
+                        'border',
+                        'border-gray-300',
+                        'dark:border-gray-700',
                       )}
-                    >
-                      <Avatar
-                        name={u.fullName}
-                        src={
-                          u.picture
-                            ? getPictureUrlById(u.id, u.picture, {
-                                groupId: group.id,
-                              })
-                            : undefined
-                        }
-                        className={cx(
-                          'border',
-                          'border-gray-300',
-                          'dark:border-gray-700',
-                        )}
-                      />
-                      <span>{truncateEnd(u.fullName, 50)}</span>
-                    </div>
-                  </Td>
-                  <Td>{truncateMiddle(u.email, 50)}</Td>
-                  <Td className={cx('text-right')}>
-                    <Menu>
-                      <MenuButton
-                        as={IconButton}
-                        icon={<IconMoreVert />}
-                        variant="ghost"
-                        aria-label=""
-                      />
-                      <Portal>
-                        <MenuList>
-                          <MenuItem
-                            icon={<IconLogout />}
-                            className={cx('text-red-500')}
-                            isDisabled={!geEditorPermission(group.permission)}
-                            onClick={() => {
-                              setUserToRemove(u)
-                              setIsRemoveMemberModalOpen(true)
-                            }}
-                          >
-                            Remove From Group
-                          </MenuItem>
-                        </MenuList>
-                      </Portal>
-                    </Menu>
-                  </Td>
-                </Tr>
-              ))}
-            </Tbody>
-          </Table>
+                    />
+                    <span>{truncateEnd(u.fullName, 50)}</span>
+                  </div>
+                ),
+              },
+              {
+                title: 'Email',
+                renderCell: (u) => <Text>{truncateMiddle(u.email, 50)}</Text>,
+              },
+            ]}
+            actions={[
+              {
+                label: 'Remove From Group',
+                icon: <IconLogout />,
+                isDestructive: true,
+                onClick: (u) => {
+                  setUserToRemove(u)
+                  setIsRemoveMemberModalOpen(true)
+                },
+              },
+            ]}
+          />
           {list ? (
             <div className={cx('self-end')}>
               <PagePagination

@@ -34,6 +34,7 @@ import {
   IconSync,
   IconWarning,
   PagePagination,
+  RelativeDate,
   SectionSpinner,
 } from '@koupr/ui'
 import cx from 'classnames'
@@ -45,6 +46,7 @@ import ConsoleApi, {
 } from '@/client/console/console'
 import UserAPI, { ConsoleUser } from '@/client/idp/user'
 import { getPictureUrlById } from '@/lib/helpers/picture'
+import relativeDate from '@/lib/helpers/relative-date'
 import { truncateEnd } from '@/lib/helpers/truncate-end'
 import truncateMiddle from '@/lib/helpers/truncate-middle'
 
@@ -305,9 +307,9 @@ const ConsolePanelUser = () => {
                         </Stack>
                         <Text fontSize="sm">
                           from:{' '}
-                          {new Date(
-                            organization.createTime,
-                          ).toLocaleDateString()}
+                          <RelativeDate
+                            date={new Date(organization.createTime)}
+                          />
                         </Text>
                       </Stack>
                     </Stack>
@@ -373,7 +375,7 @@ const ConsolePanelUser = () => {
                         </Stack>
                         <Text fontSize="sm">
                           from:{' '}
-                          {new Date(workspace.createTime).toLocaleDateString()}
+                          <RelativeDate date={new Date(workspace.createTime)} />
                         </Text>
                       </Stack>
                     </Stack>
@@ -437,7 +439,7 @@ const ConsolePanelUser = () => {
                         </Stack>
                         <Text fontSize="sm">
                           from:{' '}
-                          {new Date(group.createTime).toLocaleDateString()}
+                          <RelativeDate date={new Date(group.createTime)} />
                         </Text>
                       </Stack>
                     </Stack>

@@ -9,30 +9,17 @@
 // licenses/AGPL.txt.
 import { useCallback, useEffect, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
+import { Button, useToast } from '@chakra-ui/react'
 import {
-  Button,
-  IconButton,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
-  Portal,
-  Table,
-  Tbody,
-  Td,
-  Th,
-  Thead,
-  Tr,
-  useToast,
-} from '@chakra-ui/react'
-import {
+  DataTable,
   IconDelete,
-  IconMoreVert,
   IconPersonAdd,
   IconSend,
+  Text,
   PagePagination,
   SectionSpinner,
   usePagePagination,
+  RelativeDate,
 } from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
@@ -43,7 +30,7 @@ import { swrConfig } from '@/client/options'
 import OrganizationInviteMembers from '@/components/organization/organization-invite-members'
 import OrganizationStatus from '@/components/organization/organization-status'
 import { outgoingInvitationPaginationStorage } from '@/infra/pagination'
-import prettyDate from '@/lib/helpers/pretty-date'
+import relativeDate from '@/lib/helpers/relative-date'
 import truncateMiddle from '@/lib/helpers/truncate-middle'
 import { useAppDispatch } from '@/store/hook'
 import { mutateUpdated } from '@/store/ui/outgoing-invitations'
@@ -157,56 +144,38 @@ const OrganizationInvitationsPage = () => {
       ) : null}
       {list && list.data.length > 0 ? (
         <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
-          <Table variant="simple">
-            <Thead>
-              <Tr>
-                <Th>Email</Th>
-                <Th>Status</Th>
-                <Th>Date</Th>
-                <Th></Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              {list.data.map((i) => (
-                <Tr key={i.id}>
-                  <Td>{truncateMiddle(i.email, 50)}</Td>
-                  <Td>
-                    <OrganizationStatus value={i.status} />
-                  </Td>
-                  <Td>{prettyDate(i.createTime)}</Td>
-                  <Td className={cx('text-right')}>
-                    <Menu>
-                      <MenuButton
-                        as={IconButton}
-                        icon={<IconMoreVert />}
-                        variant="ghost"
-                        aria-label=""
-                      />
-                      <Portal>
-                        <MenuList>
-                          {i.status === 'pending' ? (
-                            <MenuItem
-                              icon={<IconSend />}
-                              onClick={() => handleResend(i.id)}
-                            >
-                              Resend
-                            </MenuItem>
-                          ) : null}
-                          <MenuItem
-                            icon={<IconDelete />}
-                            className={cx('text-red-500')}
-                            onClick={() => handleDelete(i.id)}
-                          >
-                            Delete
-                          </MenuItem>
-                        </MenuList>
-                      </Portal>
-                    </Menu>
-                  </Td>
-                </Tr>
-              ))}
-            </Tbody>
-          </Table>
+          <DataTable
+            items={list.data}
+            columns={[
+              {
+                title: 'Email',
+                renderCell: (i) => <Text>{truncateMiddle(i.email, 50)}</Text>,
+              },
+              {
+                title: 'Status',
+                renderCell: (i) => <OrganizationStatus value={i.status} />,
+              },
+              {
+                title: 'Date',
+                renderCell: (i) => (
+                  <RelativeDate date={new Date(i.createTime)} />
+                ),
+              },
+            ]}
+            actions={[
+              {
+                label: 'Resend',
+                icon: <IconSend />,
+                onClick: (i) => handleResend(i.id),
+              },
+              {
+                label: 'Delete',
+                icon: <IconDelete />,
+                isDestructive: true,
+                onClick: (i) => handleDelete(i.id),
+              },
+            ]}
+          />
           {list ? (
             <div className={cx('self-end')}>
               <PagePagination

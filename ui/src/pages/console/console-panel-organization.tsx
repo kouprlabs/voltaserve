@@ -26,7 +26,7 @@ import {
   Thead,
   Tr,
 } from '@chakra-ui/react'
-import { PagePagination, SectionSpinner } from '@koupr/ui'
+import { PagePagination, RelativeDate, SectionSpinner } from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import ConsoleApi, {
@@ -35,6 +35,7 @@ import ConsoleApi, {
   UserOrganizationManagementList,
   WorkspaceManagementList,
 } from '@/client/console/console'
+import relativeDate from '@/lib/helpers/relative-date'
 
 const ConsolePanelOrganization = () => {
   const [organizationData, setOrganizationData] =
@@ -189,7 +190,7 @@ const ConsolePanelOrganization = () => {
                           </Text>
                           <Text fontSize="sm">
                             created:{' '}
-                            {new Date(user.createTime).toLocaleDateString()}
+                            {<RelativeDate date={new Date(user.createTime)} />}
                           </Text>
                         </Box>
                       </Flex>
@@ -246,9 +247,9 @@ const ConsolePanelOrganization = () => {
                           </Text>
                           <Text fontSize="sm">
                             created:{' '}
-                            {new Date(
-                              workspace.createTime,
-                            ).toLocaleDateString()}
+                            <RelativeDate
+                              date={new Date(workspace.createTime)}
+                            />
                           </Text>
                         </Box>
                       </Flex>
@@ -305,7 +306,7 @@ const ConsolePanelOrganization = () => {
                           </Text>
                           <Text fontSize="sm">
                             created:{' '}
-                            {new Date(group.createTime).toLocaleDateString()}
+                            <RelativeDate date={new Date(group.createTime)} />
                           </Text>
                         </Box>
                       </Flex>

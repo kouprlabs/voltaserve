@@ -19,15 +19,14 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
-  Stack,
-  Table,
-  Tbody,
-  Td,
-  Th,
-  Thead,
-  Tr,
 } from '@chakra-ui/react'
-import { PagePagination, SectionSpinner, usePagePagination } from '@koupr/ui'
+import {
+  DataTable,
+  PagePagination,
+  SectionSpinner,
+  Text,
+  usePagePagination,
+} from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import ConsoleApi from '@/client/console/console'
@@ -148,30 +147,23 @@ const ConsolePanelDatabaseIndexes = () => {
       </Helmet>
       <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
         {list && list.data.length > 0 ? (
-          <Stack direction="column" spacing={2}>
-            <Table variant="simple">
-              <Thead>
-                <Tr>
-                  <Th>Name</Th>
-                  <Th>Table</Th>
-                  <Th>Syntax</Th>
-                  <Th></Th>
-                </Tr>
-              </Thead>
-              <Tbody>
-                {list.data.map((item) => (
-                  <Tr key={item.indexName}>
-                    <Td>{item.indexName}</Td>
-                    <Td>{item.tableName}</Td>
-                    <Td>
-                      <Code>{item.indexDef}</Code>
-                    </Td>
-                    <Td></Td>
-                  </Tr>
-                ))}
-              </Tbody>
-            </Table>
-          </Stack>
+          <DataTable
+            items={list.data}
+            columns={[
+              {
+                title: 'Name',
+                renderCell: (item) => <Text>{item.indexName}</Text>,
+              },
+              {
+                title: 'Table',
+                renderCell: (item) => <Text>{item.tableName}</Text>,
+              },
+              {
+                title: 'Syntax',
+                renderCell: (item) => <Code>{item.indexDef}</Code>,
+              },
+            ]}
+          />
         ) : (
           <div>No indexes to show</div>
         )}

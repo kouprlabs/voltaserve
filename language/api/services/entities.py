@@ -89,7 +89,11 @@ class EntityExtractor:
             if key in result:
                 result[key]["frequency"] += 1
             else:
-                result[key] = {"text": entity["text"], "frequency": 1}
+                result[key] = {
+                    "text": entity["text"],
+                    "label": entity["label"],
+                    "frequency": 1,
+                }
         return result
 
     @staticmethod
@@ -106,7 +110,11 @@ class EntityExtractor:
             list: A list of tuples sorted by frequency in descending order.
         """
         result = [
-            {"text": value["text"], "frequency": value["frequency"]}
+            {
+                "text": value["text"],
+                "label": value["label"],
+                "frequency": value["frequency"],
+            }
             for value in groups.values()
         ]
         result.sort(key=lambda x: x["frequency"], reverse=True)

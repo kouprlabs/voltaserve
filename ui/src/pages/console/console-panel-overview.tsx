@@ -111,7 +111,7 @@ const ConsolePanelOverview = () => {
             </Table>
             {userCount ? (
               <Heading>
-                <div className={cx('flex', 'items-center', 'gap-1', 'p-1')}>
+                <div className={cx('flex', 'items-center', 'gap-1', 'p-2')}>
                   <IconPerson className={cx('text-[26px]')} />
                   {userCount}
                 </div>
@@ -132,7 +132,7 @@ const ConsolePanelOverview = () => {
             </Table>
             {organizationCount ? (
               <Heading>
-                <div className={cx('flex', 'items-center', 'gap-1', 'p-1')}>
+                <div className={cx('flex', 'items-center', 'gap-1', 'p-2')}>
                   <IconFlag className={cx('text-[26px]')} />
                   {organizationCount}
                 </div>
@@ -153,7 +153,7 @@ const ConsolePanelOverview = () => {
             </Table>
             {workspaceCount ? (
               <Heading>
-                <div className={cx('flex', 'items-center', 'gap-1', 'p-1')}>
+                <div className={cx('flex', 'items-center', 'gap-1', 'p-2')}>
                   <IconWorkspaces className={cx('text-[26px]')} />
                   {workspaceCount}
                 </div>
@@ -174,7 +174,7 @@ const ConsolePanelOverview = () => {
             </Table>
             {groupCount ? (
               <Heading>
-                <div className={cx('flex', 'items-center', 'gap-1', 'p-1')}>
+                <div className={cx('flex', 'items-center', 'gap-1', 'p-2')}>
                   <IconGroup className={cx('text-[26px]')} />
                   {groupCount}
                 </div>

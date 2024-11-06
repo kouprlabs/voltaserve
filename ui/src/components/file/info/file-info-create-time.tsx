@@ -8,9 +8,9 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
 import { Stat, StatLabel, StatNumber } from '@chakra-ui/react'
+import { RelativeDate } from '@koupr/ui'
 import cx from 'classnames'
 import { File } from '@/client/api/file'
-import prettyDate from '@/lib/helpers/pretty-date'
 
 export type FileInfoCreateTimeProps = {
   file: File
@@ -18,9 +18,9 @@ export type FileInfoCreateTimeProps = {
 
 const FileInfoCreateTime = ({ file }: FileInfoCreateTimeProps) => (
   <Stat>
-    <StatLabel>Create time</StatLabel>
+    <StatLabel>Created</StatLabel>
     <StatNumber className={cx('text-base')}>
-      {prettyDate(file.createTime)}
+      <RelativeDate date={new Date(file.createTime)} />
     </StatNumber>
   </Stat>
 )

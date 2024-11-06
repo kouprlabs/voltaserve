@@ -8,9 +8,10 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
 import { Stat, StatLabel, StatNumber } from '@chakra-ui/react'
+import { RelativeDate } from '@koupr/ui'
 import cx from 'classnames'
 import { File } from '@/client/api/file'
-import prettyDate from '@/lib/helpers/pretty-date'
+import relativeDate from '@/lib/helpers/relative-date'
 
 export type FileInfoUpdateTimeProps = {
   file: File
@@ -26,9 +27,9 @@ const FileInfoUpdateTime = ({ file }: FileInfoUpdateTimeProps) => {
   }
   return (
     <Stat>
-      <StatLabel>Update time</StatLabel>
+      <StatLabel>Updated</StatLabel>
       <StatNumber className={cx('text-base')}>
-        {prettyDate(file.updateTime)}
+        <RelativeDate date={new Date(file.updateTime)} />
       </StatNumber>
     </Stat>
   )

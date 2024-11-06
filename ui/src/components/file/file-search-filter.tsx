@@ -185,7 +185,7 @@ const FileSearchFilter = () => {
                     />
                   </FormControl>
                   <FormControl>
-                    <FormLabel>Create Time (After - Before)</FormLabel>
+                    <FormLabel>Created (After - Before)</FormLabel>
                     <div className={cx('flex', 'items-center', 'gap-1.5')}>
                       <Field name="createTimeAfter">
                         {({ field }: FieldAttributes<FieldProps>) => (
@@ -208,7 +208,7 @@ const FileSearchFilter = () => {
                     </div>
                   </FormControl>
                   <FormControl>
-                    <FormLabel>Update Time (After - Before)</FormLabel>
+                    <FormLabel>Updated (After - Before)</FormLabel>
                     <div className={cx('flex', 'items-center', 'gap-1.5')}>
                       <Field name="updateTimeAfter">
                         {({ field }: FieldAttributes<FieldProps>) => (

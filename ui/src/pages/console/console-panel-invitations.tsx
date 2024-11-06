@@ -9,29 +9,14 @@
 // licenses/AGPL.txt.
 import { useCallback, useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { Badge, Button, Heading } from '@chakra-ui/react'
 import {
-  Badge,
-  Button,
-  Center,
-  Heading,
-  IconButton,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
-  Stack,
-  Table,
-  Tbody,
-  Td,
-  Text,
-  Th,
-  Thead,
-  Tr,
-} from '@chakra-ui/react'
-import {
-  IconMoreVert,
+  DataTable,
+  IconFrontHand,
   PagePagination,
+  RelativeDate,
   SectionSpinner,
+  Text,
   usePagePagination,
 } from '@koupr/ui'
 import cx from 'classnames'
@@ -39,6 +24,7 @@ import { Helmet } from 'react-helmet-async'
 import ConsoleApi, { InvitationManagementList } from '@/client/console/console'
 import ConsoleConfirmationModal from '@/components/console/console-confirmation-modal'
 import { consoleInvitationsPaginationStorage } from '@/infra/pagination'
+import relativeDate from '@/lib/helpers/relative-date'
 
 const ConsolePanelInvitations = () => {
   const navigate = useNavigate()
@@ -119,89 +105,73 @@ const ConsolePanelInvitations = () => {
       <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
         <Heading className={cx('text-heading')}>Invitation Management</Heading>
         {list && list.data.length > 0 ? (
-          <Stack direction="column" spacing={2}>
-            <Table variant="simple">
-              <Thead>
-                <Tr>
-                  <Th>Organization</Th>
-                  <Th>Invitee</Th>
-                  <Th>Status</Th>
-                  <Th>Create time</Th>
-                  <Th>Update time</Th>
-                  <Th></Th>
-                </Tr>
-              </Thead>
-              <Tbody>
-                {list.data.map((invitation) => (
-                  <Tr key={invitation.id}>
-                    <Td>
-                      <Button
-                        onClick={() => {
-                          navigate(
-                            `/console/organizations/${invitation.organization.id}`,
-                          )
-                        }}
-                      >
-                        {invitation.organization.name}
-                      </Button>
-                    </Td>
-                    <Td>
-                      <Text>{invitation.email}</Text>
-                    </Td>
-                    <Td>
-                      {invitation.status === 'pending' ? (
-                        <Badge colorScheme="yellow">Pending</Badge>
-                      ) : invitation.status === 'declined' ? (
-                        <Badge colorScheme="red">Declined</Badge>
-                      ) : invitation.status === 'accepted' ? (
-                        <Badge colorScheme="green">Accepted</Badge>
-                      ) : (
-                        <Badge colorScheme="gray">Unknown</Badge>
-                      )}
-                    </Td>
-                    <Td>
-                      <Text>
-                        {new Date(invitation.createTime).toLocaleDateString()}
-                      </Text>
-                    </Td>
-                    <Td>
-                      <Text>
-                        {new Date(invitation.updateTime).toLocaleString()}
-                      </Text>
-                    </Td>
-                    <Td>
-                      {invitation.status === 'pending' ? (
-                        <Center>
-                          <Menu>
-                            <MenuButton
-                              as={IconButton}
-                              icon={<IconMoreVert />}
-                              variant="ghost"
-                              aria-label=""
-                            />
-                            <MenuList>
-                              <MenuItem
-                                onClick={async () => {
-                                  setConfirmWindowAction('deny invitation')
-                                  await changeInvitationStatus(
-                                    invitation.id,
-                                    `${invitation.email} to ${invitation.organization.name}`,
-                                    false,
-                                  )
-                                }}
-                              >
-                                Deny
-                              </MenuItem>
-                            </MenuList>
-                          </Menu>
-                        </Center>
-                      ) : null}
-                    </Td>
-                  </Tr>
-                ))}
-              </Tbody>
-            </Table>
-          </Stack>
+          <DataTable
+            items={list.data}
+            columns={[
+              {
+                title: 'Organization',
+                renderCell: (invitation) => (
+                  <Button
+                    onClick={() => {
+                      navigate(
+                        `/console/organizations/${invitation.organization.id}`,
+                      )
+                    }}
+                  >
+                    {invitation.organization.name}
+                  </Button>
+                ),
+              },
+              {
+                title: 'Invitee',
+                renderCell: (invitation) => <Text>{invitation.email}</Text>,
+              },
+              {
+                title: 'Status',
+                renderCell: (invitation) => (
+                  <>
+                    {invitation.status === 'pending' ? (
+                      <Badge colorScheme="yellow">Pending</Badge>
+                    ) : invitation.status === 'declined' ? (
+                      <Badge colorScheme="red">Declined</Badge>
+                    ) : invitation.status === 'accepted' ? (
+                      <Badge colorScheme="green">Accepted</Badge>
+                    ) : (
+                      <Badge colorScheme="gray">Unknown</Badge>
+                    )}
+                  </>
+                ),
+              },
+              {
+                title: 'Created',
+                renderCell: (invitation) => (
+                  <RelativeDate date={new Date(invitation.createTime)} />
+                ),
+              },
+              {
+                title: 'Updated',
+                renderCell: (invitation) => (
+                  <RelativeDate date={new Date(invitation.updateTime)} />
+                ),
+              },
+            ]}
+            actions={[
+              {
+                label: 'Deny',
+                icon: <IconFrontHand />,
+                isDestructive: true,
+                isDisabledFn: (invitation) => invitation.status !== 'pending',
+                onClick: async (invitation) => {
+                  setConfirmWindowAction('deny invitation')
+                  await changeInvitationStatus(
+                    invitation.id,
+                    `${invitation.email} to ${invitation.organization.name}`,
+                    false,
+                  )
+                },
+              },
+            ]}
+          />
         ) : (
           <div>No invitations found.</div>
         )}

@@ -27,15 +27,18 @@ import {
   Table,
   Tbody,
   Td,
-  Text,
   Th,
   Thead,
   Tr,
 } from '@chakra-ui/react'
 import {
+  DataTable,
+  IconEdit,
   IconMoreVert,
   PagePagination,
+  RelativeDate,
   SectionSpinner,
+  Text,
   usePagePagination,
 } from '@koupr/ui'
 import * as Yup from 'yup'
@@ -46,6 +49,7 @@ import ConsoleRenameModal from '@/components/console/console-rename-modal'
 import { consoleWorkspacesPaginationStorage } from '@/infra/pagination'
 import prettyBytes from '@/lib/helpers/pretty-bytes'
 import { decodeQuery } from '@/lib/helpers/query'
+import relativeDate from '@/lib/helpers/relative-date'
 
 const ConsolePanelWorkspaces = () => {
   const [searchParams] = useSearchParams()
@@ -134,91 +138,71 @@ const ConsolePanelWorkspaces = () => {
       <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
         <Heading className={cx('text-heading')}>Workspace Management</Heading>
         {list && list.data.length > 0 ? (
-          <Stack direction="column" spacing={2}>
-            <Table variant="simple">
-              <Thead>
-                <Tr>
-                  <Th>Workspace name</Th>
-                  <Th>Organization</Th>
-                  <Th>Quota</Th>
-                  <Th>Create time</Th>
-                  <Th>Update time</Th>
-                  <Th></Th>
-                </Tr>
-              </Thead>
-              <Tbody>
-                {list.data.map((workspace) => (
-                  <Tr key={workspace.id}>
-                    <Td>
-                      <div
-                        className={cx(
-                          'flex',
-                          'flex-row',
-                          'gap-1.5',
-                          'items-center',
-                        )}
-                      >
-                        <Avatar
-                          name={workspace.name}
-                          size="sm"
-                          className={cx('w-[40px]', 'h-[40px]')}
-                        />
+          <DataTable
+            items={list.data}
+            columns={[
+              {
+                title: 'Name',
+                renderCell: (workspace) => (
+                  <div
+                    className={cx(
+                      'flex',
+                      'flex-row',
+                      'gap-1.5',
+                      'items-center',
+                    )}
+                  >
+                    <Avatar
+                      name={workspace.name}
+                      size="sm"
+                      className={cx('w-[40px]', 'h-[40px]')}
+                    />
 
-                        <Text noOfLines={1}>{workspace.name}</Text>
-                      </div>
-                    </Td>
-                    <Td>
-                      <ChakraLink
-                        as={Link}
-                        to={`/console/organizations/${workspace.organization.id}`}
-                        className={cx('no-underline')}
-                      >
-                        <Text noOfLines={1}>{workspace.organization.name}</Text>
-                      </ChakraLink>
-                    </Td>
-                    <Td>
-                      <Text>{prettyBytes(workspace.storageCapacity)}</Text>
-                    </Td>
-                    <Td>
-                      <Text>
-                        {new Date(workspace.createTime).toLocaleDateString()}
-                      </Text>
-                    </Td>
-                    <Td>
-                      <Text>
-                        {new Date(workspace.updateTime).toLocaleString()}
-                      </Text>
-                    </Td>
-                    <Td>
-                      <Center>
-                        <Menu>
-                          <MenuButton
-                            as={IconButton}
-                            icon={<IconMoreVert />}
-                            variant="ghost"
-                            aria-label=""
-                          />
-                          <MenuList>
-                            <MenuItem
-                              onClick={async () => {
-                                await renameWorkspace(
-                                  workspace.id,
-                                  workspace.name,
-                                  null,
-                                )
-                              }}
-                            >
-                              Rename
-                            </MenuItem>
-                          </MenuList>
-                        </Menu>
-                      </Center>
-                    </Td>
-                  </Tr>
-                ))}
-              </Tbody>
-            </Table>
-          </Stack>
+                    <Text noOfLines={1}>{workspace.name}</Text>
+                  </div>
+                ),
+              },
+              {
+                title: 'Organization',
+                renderCell: (workspace) => (
+                  <ChakraLink
+                    as={Link}
+                    to={`/console/organizations/${workspace.organization.id}`}
+                    className={cx('no-underline')}
+                  >
+                    <Text noOfLines={1}>{workspace.organization.name}</Text>
+                  </ChakraLink>
+                ),
+              },
+              {
+                title: 'Quota',
+                renderCell: (workspace) => (
+                  <Text>{prettyBytes(workspace.storageCapacity)}</Text>
+                ),
+              },
+              {
+                title: 'Created',
+                renderCell: (workspace) => (
+                  <RelativeDate date={new Date(workspace.createTime)} />
+                ),
+              },
+              {
+                title: 'Updated',
+                renderCell: (workspace) => (
+                  <RelativeDate date={new Date(workspace.updateTime)} />
+                ),
+              },
+            ]}
+            actions={[
+              {
+                label: 'Rename',
+                icon: <IconEdit />,
+                onClick: async (workspace) => {
+                  await renameWorkspace(workspace.id, workspace.name, null)
+                },
+              },
+            ]}
+          />
         ) : (
           <div>No workspaces found.</div>
         )}

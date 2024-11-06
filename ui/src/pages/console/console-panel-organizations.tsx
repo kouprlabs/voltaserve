@@ -8,29 +8,20 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
 import { useEffect, useState } from 'react'
-import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import {
-  Avatar,
-  Center,
-  Heading,
-  IconButton,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
-  Stack,
-  Table,
-  Tbody,
-  Td,
-  Text,
-  Th,
-  Thead,
-  Tr,
-} from '@chakra-ui/react'
+  useLocation,
+  useNavigate,
+  useSearchParams,
+  Link,
+} from 'react-router-dom'
+import { Avatar, Heading, Link as ChakraLink } from '@chakra-ui/react'
 import {
-  IconMoreVert,
+  DataTable,
+  IconEdit,
   PagePagination,
+  RelativeDate,
   SectionSpinner,
+  Text,
   usePagePagination,
 } from '@koupr/ui'
 import * as Yup from 'yup'
@@ -42,6 +33,7 @@ import ConsoleApi, {
 import ConsoleRenameModal from '@/components/console/console-rename-modal'
 import { consoleOrganizationsPaginationStorage } from '@/infra/pagination'
 import { decodeQuery } from '@/lib/helpers/query'
+import relativeDate from '@/lib/helpers/relative-date'
 
 const ConsolePanelOrganizations = () => {
   const [searchParams] = useSearchParams()
@@ -129,87 +121,63 @@ const ConsolePanelOrganizations = () => {
           Organization Management
         </Heading>
         {list && list.data.length > 0 ? (
-          <Stack direction="column" spacing={2}>
-            <Table variant="simple">
-              <Thead>
-                <Tr>
-                  <Th>Organization name</Th>
-                  <Th>Create time</Th>
-                  <Th>Update time</Th>
-                  <Th></Th>
-                </Tr>
-              </Thead>
-              <Tbody>
-                {list.data.map((organization) => (
-                  <Tr
-                    style={{ cursor: 'pointer' }}
-                    key={organization.id}
-                    onClick={(event) => {
-                      if (
-                        !(event.target instanceof HTMLButtonElement) &&
-                        !(event.target instanceof HTMLSpanElement)
-                      ) {
-                        navigate(`/console/organizations/${organization.id}`)
-                      }
-                    }}
+          <DataTable
+            items={list.data}
+            columns={[
+              {
+                title: 'Name',
+                renderCell: (organization) => (
+                  <div
+                    className={cx(
+                      'flex',
+                      'flex-row',
+                      'gap-1.5',
+                      'items-center',
+                    )}
                   >
-                    <Td>
-                      <div
-                        className={cx(
-                          'flex',
-                          'flex-row',
-                          'gap-1.5',
-                          'items-center',
-                        )}
-                      >
-                        <Avatar
-                          name={organization.name}
-                          size="sm"
-                          className={cx('w-[40px]', 'h-[40px]')}
-                        />
-                        <Text noOfLines={1}>{organization.name}</Text>
-                      </div>
-                    </Td>
-                    <Td>
-                      <Text>
-                        {new Date(organization.createTime).toLocaleDateString()}
-                      </Text>
-                    </Td>
-                    <Td>
-                      <Text>
-                        {new Date(organization.updateTime).toLocaleString()}
-                      </Text>
-                    </Td>
-                    <Td>
-                      <Center>
-                        <Menu>
-                          <MenuButton
-                            as={IconButton}
-                            icon={<IconMoreVert />}
-                            variant="ghost"
-                            aria-label=""
-                          />
-                          <MenuList>
-                            <MenuItem
-                              onClick={async () => {
-                                await renameOrganization(
-                                  organization.id,
-                                  organization.name,
-                                  null,
-                                )
-                              }}
-                            >
-                              Rename
-                            </MenuItem>
-                          </MenuList>
-                        </Menu>
-                      </Center>
-                    </Td>
-                  </Tr>
-                ))}
-              </Tbody>
-            </Table>
-          </Stack>
+                    <Avatar
+                      name={organization.name}
+                      size="sm"
+                      className={cx('w-[40px]', 'h-[40px]')}
+                    />
+
+                    <ChakraLink
+                      as={Link}
+                      to={`/console/organizations/${organization.id}`}
+                      className={cx('no-underline')}
+                    >
+                      <Text noOfLines={1}>{organization.name}</Text>
+                    </ChakraLink>
+                  </div>
+                ),
+              },
+              {
+                title: 'Created',
+                renderCell: (organization) => (
+                  <RelativeDate date={new Date(organization.createTime)} />
+                ),
+              },
+              {
+                title: 'Updated',
+                renderCell: (organization) => (
+                  <RelativeDate date={new Date(organization.updateTime)} />
+                ),
+              },
+            ]}
+            actions={[
+              {
+                label: 'Rename',
+                icon: <IconEdit />,
+                onClick: async (organization) => {
+                  await renameOrganization(
+                    organization.id,
+                    organization.name,
+                    null,
+                  )
+                },
+              },
+            ]}
+          />
         ) : (
           <div>No organizations found.</div>
         )}
