@@ -9,8 +9,8 @@
 // licenses/AGPL.txt.
 import { useCallback, useMemo, useState } from 'react'
 import { Button, ModalBody, ModalFooter } from '@chakra-ui/react'
-import { reactSelectStyles } from '@koupr/ui'
-import { OptionBase, Select, SingleValue } from 'chakra-react-select'
+import { Select } from '@koupr/ui'
+import { OptionBase, SingleValue } from 'chakra-react-select'
 import cx from 'classnames'
 import FileAPI from '@/client/api/file'
 import InsightsAPI, { Language } from '@/client/api/insights'
@@ -60,9 +60,9 @@ const InsightsCreate = () => {
   }, [language, id, mutateFiles, mutateTasks, mutateInfo, dispatch])
 
   const handleLanguageChange = useCallback(
-    (value: SingleValue<LanguageOption>) => {
-      if (value?.value && languages) {
-        setLanguage(languages.filter((e) => e.id === value.value)[0])
+    (newValue: SingleValue<LanguageOption>) => {
+      if (newValue?.value && languages) {
+        setLanguage(languages.filter((e) => e.id === newValue.value)[0])
       }
     },
     [languages],
@@ -100,7 +100,6 @@ const InsightsCreate = () => {
               }))}
               placeholder="Select Language"
               selectedOptionStyle="check"
-              chakraStyles={reactSelectStyles()}
               onChange={handleLanguageChange}
             />
           ) : null}

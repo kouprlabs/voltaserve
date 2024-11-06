@@ -25,15 +25,15 @@ import {
   IconCheck,
   IconDelete,
   IconPersonAdd,
+  Select,
   Spinner,
   Text,
-  reactSelectStyles,
 } from '@koupr/ui'
 import { KeyedMutator } from 'swr'
-import { Select } from 'chakra-react-select'
+import { OptionBase } from 'chakra-react-select'
 import cx from 'classnames'
 import FileAPI, { UserPermission } from '@/client/api/file'
-import { geEditorPermission } from '@/client/api/permission'
+import { geEditorPermission, PermissionType } from '@/client/api/permission'
 import { User } from '@/client/api/user'
 import WorkspaceAPI from '@/client/api/workspace'
 import IdPUserAPI from '@/client/idp/user'
@@ -48,6 +48,11 @@ export type SharingUsersProps = {
   users?: User[]
   permissions?: UserPermission[]
   mutateUserPermissions: KeyedMutator<UserPermission[]>
+}
+
+interface PermissionTypeOption extends OptionBase {
+  value: PermissionType
+  label: string
 }
 
 const SharingUsers = ({
@@ -155,7 +160,7 @@ const SharingUsers = ({
             organizationId={workspace?.organization.id}
             onConfirm={(value) => setActiveUser(value)}
           />
-          <Select
+          <Select<PermissionTypeOption, false>
             options={[
               { value: 'viewer', label: 'Viewer' },
               { value: 'editor', label: 'Editor' },
@@ -163,10 +168,9 @@ const SharingUsers = ({
             ]}
             placeholder="Select Permission"
             selectedOptionStyle="check"
-            chakraStyles={reactSelectStyles()}
-            onChange={(event) => {
-              if (event) {
-                setActivePermission(event.value)
+            onChange={(newValue) => {
+              if (newValue) {
+                setActivePermission(newValue.value)
               }
             }}
           />

@@ -22,7 +22,7 @@ import {
   ModalHeader,
   ModalOverlay,
 } from '@chakra-ui/react'
-import { reactSelectStyles } from '@koupr/ui'
+import { Select } from '@koupr/ui'
 import {
   Field,
   FieldAttributes,
@@ -32,7 +32,7 @@ import {
   FormikHelpers,
 } from 'formik'
 import * as Yup from 'yup'
-import { Select } from 'chakra-react-select'
+import { OptionBase } from 'chakra-react-select'
 import cx from 'classnames'
 import { FileType } from '@/client/api/file'
 import { decodeFileQuery, encodeFileQuery } from '@/lib/helpers/query'
@@ -47,10 +47,15 @@ type FormValues = {
   updateTimeBefore: string
 }
 
-const typeOptions = [
+interface FileTypeOption extends OptionBase {
+  value: FileType | ''
+  label: string
+}
+
+const typeOptions: FileTypeOption[] = [
   { value: '', label: 'Any' },
-  { value: 'file', label: 'File' },
-  { value: 'folder', label: 'Folder' },
+  { value: FileType.File, label: 'File' },
+  { value: FileType.Folder, label: 'Folder' },
 ]
 
 const FileSearchFilter = () => {
@@ -161,7 +166,7 @@ const FileSearchFilter = () => {
                 <div className={cx('flex', 'flex-col', 'gap-1.5')}>
                   <FormControl>
                     <FormLabel>Type</FormLabel>
-                    <Select
+                    <Select<FileTypeOption, false>
                       options={typeOptions}
                       defaultValue={
                         query?.type
@@ -171,11 +176,10 @@ const FileSearchFilter = () => {
                           : undefined
                       }
                       selectedOptionStyle="check"
-                      chakraStyles={reactSelectStyles()}
                       isDisabled={isSubmitting}
-                      onChange={async (event) => {
-                        if (event) {
-                          await setFieldValue('type', event.value)
+                      onChange={async (newValue) => {
+                        if (newValue) {
+                          await setFieldValue('type', newValue.value)
                         }
                       }}
                     />
