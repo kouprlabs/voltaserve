@@ -99,7 +99,7 @@ const OrganizationDelete = ({
               <ModalBody>
                 <div className={cx('flex', 'flex-col', 'gap-1.5')}>
                   <span>
-                    Are you sure you would like to delete this organization?
+                    Are you sure you want to delete this organization?
                   </span>
                   <span>
                     Please type <b>{organization.name}</b> to confirm.

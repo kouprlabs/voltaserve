@@ -35,7 +35,7 @@ import {
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import semver from 'semver'
-import ConsoleApi, { ComponentVersion } from '@/client/console/console'
+import ConsoleAPI, { ComponentVersion } from '@/client/console/console'
 
 const spinnerHeight = '40px'
 const uiCurrentVersion = { version: '3.0.0' }
@@ -60,20 +60,20 @@ const ConsolePanelOverview = () => {
   const [componentsData, setComponentsData] = useState<ComponentVersion[]>([])
 
   useEffect(() => {
-    ConsoleApi.countObject('user').then((value) => {
+    ConsoleAPI.countObject('user').then((value) => {
       setUserCount(value.count)
     })
-    ConsoleApi.countObject('organization').then((value) => {
+    ConsoleAPI.countObject('organization').then((value) => {
       setOrganizationCount(value.count)
     })
-    ConsoleApi.countObject('group').then((value) => {
+    ConsoleAPI.countObject('group').then((value) => {
       setGroupCount(value.count)
     })
-    ConsoleApi.countObject('workspace').then((value) => {
+    ConsoleAPI.countObject('workspace').then((value) => {
       setWorkspaceCount(value.count)
     })
     internalComponents.map((component) => {
-      ConsoleApi.getComponentsVersions(component).then((value) => {
+      ConsoleAPI.getComponentsVersions(component).then((value) => {
         if (component.id == 'ui') {
           value.currentVersion = uiCurrentVersion.version
           value.updateAvailable = semver.gt(

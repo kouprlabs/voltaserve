@@ -40,7 +40,7 @@ import {
 } from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
-import ConsoleApi, {
+import ConsoleAPI, {
   GroupUserManagementList,
   OrganizationUserManagementList,
   WorkspaceUserManagementList,
@@ -79,7 +79,7 @@ const ConsolePanelUser = () => {
   }
   const groupsFetch = () => {
     if (id) {
-      ConsoleApi.getGroupsByUser({ id: id, page: groupPage, size: 5 }).then(
+      ConsoleAPI.getGroupsByUser({ id: id, page: groupPage, size: 5 }).then(
         (value) => {
           setGroupList(value)
         },
@@ -87,7 +87,7 @@ const ConsolePanelUser = () => {
     }
   }
   const organizationsFetch = () => {
-    ConsoleApi.getOrganizationsByUser({
+    ConsoleAPI.getOrganizationsByUser({
       id: id,
       page: orgPage,
       size: 5,
@@ -97,7 +97,7 @@ const ConsolePanelUser = () => {
   }
 
   const workspacesFetch = () => {
-    ConsoleApi.getWorkspacesByUser({
+    ConsoleAPI.getWorkspacesByUser({
       id: id,
       page: workspacePage,
       size: 5,

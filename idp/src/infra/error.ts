@@ -145,11 +145,11 @@ export function parseValidationError(result: any): ErrorData {
   if (result.errors) {
     message = result.errors
       /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-      .map((e: any) => `${e.msg} for ${e.type} ${e.path} in ${e.location}.`)
+      .map((e: any) => `${e.msg} for ${e.type} '${e.path}' in ${e.location}.`)
       .join(' ')
     userMessage = result.errors
       /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-      .map((e: any) => `${e.msg} for ${e.type} ${e.path}.`)
+      .map((e: any) => `${e.msg} for ${e.type} '${e.path}'.`)
       .join(' ')
   }
   return newError({

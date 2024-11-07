@@ -29,7 +29,7 @@ import {
 import { PagePagination, RelativeDate, SectionSpinner } from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
-import ConsoleApi, {
+import ConsoleAPI, {
   GroupManagementList,
   OrganizationManagement,
   UserOrganizationManagementList,
@@ -50,7 +50,7 @@ const ConsolePanelOrganization = () => {
 
   const organizationFetch = () => {
     if (id) {
-      ConsoleApi.getOrganizationById({ id }).then((value) => {
+      ConsoleAPI.getOrganizationById({ id }).then((value) => {
         setOrganizationData(value)
       })
     }
@@ -58,7 +58,7 @@ const ConsolePanelOrganization = () => {
 
   const usersFetch = () => {
     if (id) {
-      ConsoleApi.getUsersByOrganization({
+      ConsoleAPI.getUsersByOrganization({
         id: id,
         page: usersPage,
         size: 5,
@@ -70,7 +70,7 @@ const ConsolePanelOrganization = () => {
 
   const workspacesFetch = () => {
     if (id) {
-      ConsoleApi.getWorkspacesByOrganization({
+      ConsoleAPI.getWorkspacesByOrganization({
         id: id,
         page: workspacesPage,
         size: 5,
@@ -82,7 +82,7 @@ const ConsolePanelOrganization = () => {
 
   const groupsFetch = () => {
     if (id) {
-      ConsoleApi.getGroupsByOrganization({
+      ConsoleAPI.getGroupsByOrganization({
         id: id,
         page: workspacesPage,
         size: 5,

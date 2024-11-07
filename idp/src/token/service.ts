@@ -35,8 +35,8 @@ export type TokenExchangeOptions = {
 
 export async function exchange(options: TokenExchangeOptions): Promise<Token> {
   validateParameters(options)
-  // https://datatracker.ietf.org/doc/html/rfc6749#section-4.3
   if (options.grant_type === 'password') {
+    // https://datatracker.ietf.org/doc/html/rfc6749#section-4.3
     let user: User
     try {
       user = await userRepo.findByUsername(options.username.toLocaleLowerCase())
@@ -54,9 +54,8 @@ export async function exchange(options: TokenExchangeOptions): Promise<Token> {
     } else {
       throw newError({ code: ErrorCode.InvalidUsernameOrPassword })
     }
-  }
-  // https://datatracker.ietf.org/doc/html/rfc6749#section-6
-  if (options.grant_type === 'refresh_token') {
+  } else if (options.grant_type === 'refresh_token') {
+    // https://datatracker.ietf.org/doc/html/rfc6749#section-6
     let user: User
     try {
       user = await userRepo.findByRefreshTokenValue(options.refresh_token)

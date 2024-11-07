@@ -7,10 +7,9 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-import { useEffect } from 'react'
+import { ReactElement, useCallback, useState } from 'react'
 import {
   Button,
-  Code,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -21,80 +20,68 @@ import {
 } from '@chakra-ui/react'
 import cx from 'classnames'
 
-interface ConsoleConfirmationModalProps {
-  action: string | undefined
-  closeConfirmationWindow: () => void
+export type ConsoleConfirmationModalProps = {
+  header: ReactElement
+  body: ReactElement
+  isDestructive?: boolean
   isOpen: boolean
-  isSubmitting: boolean
-  request: (
-    id: string | null,
-    target: string | null,
-    action: boolean | null,
-    confirm: boolean,
-  ) => Promise<void>
-  target: string | undefined
+  onClose: () => void
+  onRequest: ConsoleConfirmationRequest
 }
 
-const ConsoleConfirmationModal = (props: ConsoleConfirmationModalProps) => {
-  useEffect(() => {
-    if (
-      props.isOpen &&
-      (props.action === undefined || props.target == undefined)
-    ) {
-      setTimeout(() => {
-        window.location.reload()
-      }, 2000)
-      throw new Error('No action or target provided')
+export type ConsoleConfirmationRequest = () => Promise<void>
+
+const ConsoleConfirmationModal = ({
+  header,
+  body,
+  isDestructive,
+  isOpen,
+  onClose,
+  onRequest,
+}: ConsoleConfirmationModalProps) => {
+  const [isLoading, setIsLoading] = useState(false)
+
+  const handleRequest = useCallback(async () => {
+    setIsLoading(true)
+    try {
+      await onRequest()
+      onClose()
+    } finally {
+      setIsLoading(false)
     }
-  }, [props.isOpen])
+  }, [onRequest, onClose])
+
   return (
-    <>
-      <Modal
-        isOpen={props.isOpen}
-        onClose={() => {
-          props.closeConfirmationWindow()
-        }}
-      >
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Are You sure?</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
-            You are going to {props.action}
-            <br />
-            <Code children={props.target} />
-            <br />
-            Please confirm this action
-          </ModalBody>
-          <ModalFooter>
-            <div className={cx('flex', 'flex-row', 'items-center', 'gap-1')}>
-              <Button
-                type="button"
-                variant="outline"
-                colorScheme="blue"
-                disabled={props.isSubmitting}
-                onClick={() => {
-                  props.closeConfirmationWindow()
-                }}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="button"
-                variant="solid"
-                colorScheme="blue"
-                isLoading={props.isSubmitting}
-                onClick={async () => {
-                  await props.request(null, null, null, true)
-                }}
-              >
-                Confirm
-              </Button>
-            </div>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
-    </>
+    <Modal isOpen={isOpen} onClose={onClose}>
+      <ModalOverlay />
+      <ModalContent>
+        <ModalHeader>{header}</ModalHeader>
+        <ModalCloseButton />
+        <ModalBody>{body}</ModalBody>
+        <ModalFooter>
+          <div className={cx('flex', 'flex-row', 'items-center', 'gap-1')}>
+            <Button
+              type="button"
+              variant="outline"
+              colorScheme="blue"
+              disabled={isLoading}
+              onClick={onClose}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="solid"
+              colorScheme={isDestructive ? 'red' : 'blue'}
+              isLoading={isLoading}
+              onClick={handleRequest}
+            >
+              Confirm
+            </Button>
+          </div>
+        </ModalFooter>
+      </ModalContent>
+    </Modal>
   )
 }
 

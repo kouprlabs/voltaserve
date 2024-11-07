@@ -28,7 +28,7 @@ import {
 import * as Yup from 'yup'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
-import ConsoleApi, { WorkspaceManagementList } from '@/client/console/console'
+import ConsoleAPI, { WorkspaceManagementList } from '@/client/console/console'
 import ConsoleRenameModal from '@/components/console/console-rename-modal'
 import { consoleWorkspacesPaginationStorage } from '@/infra/pagination'
 import prettyBytes from '@/lib/helpers/pretty-bytes'
@@ -63,7 +63,7 @@ const ConsolePanelWorkspaces = () => {
       if (confirm && workspaceId !== undefined && newName !== null) {
         try {
           setSubmitting(true)
-          await ConsoleApi.renameObject(
+          await ConsoleAPI.renameObject(
             { id: workspaceId, name: newName },
             'workspace',
           )
@@ -88,13 +88,13 @@ const ConsolePanelWorkspaces = () => {
 
   useEffect(() => {
     if (query && query.length >= 3) {
-      ConsoleApi.searchObject('workspace', {
+      ConsoleAPI.searchObject('workspace', {
         page: page,
         size: size,
         query: query,
       }).then((value) => setList(value))
     } else {
-      ConsoleApi.listWorkspaces({ page: page, size: size, query: query }).then(
+      ConsoleAPI.listWorkspaces({ page: page, size: size, query: query }).then(
         (value) => setList(value),
       )
     }

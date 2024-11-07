@@ -7,7 +7,7 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-import { useCallback, useEffect, useState } from 'react'
+import { ReactElement, useState } from 'react'
 import {
   useLocation,
   useNavigate,
@@ -29,97 +29,38 @@ import {
 } from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
-import UserAPI, { ConsoleUsersResponse } from '@/client/idp/user'
-import ConsoleConfirmationModal from '@/components/console/console-confirmation-modal'
+import UserAPI from '@/client/idp/user'
+import { swrConfig } from '@/client/options'
+import ConsoleConfirmationModal, {
+  ConsoleConfirmationRequest,
+} from '@/components/console/console-confirmation-modal'
 import { consoleUsersPaginationStorage } from '@/infra/pagination'
 import { getUserId } from '@/infra/token'
 import { getPictureUrlById } from '@/lib/helpers/picture'
 import { decodeQuery } from '@/lib/helpers/query'
+import userToString from '@/lib/helpers/user-to-string'
 
 const ConsolePanelUsers = () => {
   const [searchParams] = useSearchParams()
   const query = decodeQuery(searchParams.get('q') as string)
   const navigate = useNavigate()
   const location = useLocation()
-  const [list, setList] = useState<ConsoleUsersResponse>()
-  const [isSubmitting, setSubmitting] = useState(false)
-  const [userId, setUserId] = useState<string>()
-  const [userEmail, setUserEmail] = useState<string>()
-  const [actionState, setActionState] = useState<boolean>()
-  const [confirmSuspendWindowOpen, setConfirmSuspendWindowOpen] =
+  const [isConfirmationOpen, setIsConfirmationOpen] = useState(false)
+  const [isConfirmationDestructive, setIsConfirmationDestructive] =
     useState(false)
-  const [confirmAdminWindowOpen, setConfirmAdminWindowOpen] = useState(false)
-  const [confirmWindowAction, setConfirmWindowAction] = useState<string>()
+  const [confirmationHeader, setConfirmationHeader] = useState<ReactElement>()
+  const [confirmationBody, setConfirmationBody] = useState<ReactElement>()
+  const [confirmationRequest, setConfirmationRequest] =
+    useState<ConsoleConfirmationRequest>()
   const { page, size, steps, setPage, setSize } = usePagePagination({
     navigateFn: navigate,
     searchFn: () => location.search,
     storage: consoleUsersPaginationStorage(),
   })
-
-  const suspendUser = useCallback(
-    async (
-      id: string | null,
-      email: string | null,
-      suspend: boolean | null,
-      confirm: boolean = false,
-    ) => {
-      if (confirm && userId && actionState !== undefined) {
-        setSubmitting(true)
-        try {
-          await UserAPI.suspendUser({ id: userId, suspend: actionState })
-        } finally {
-          closeConfirmationWindow()
-        }
-      } else if (id && suspend !== null && email) {
-        setConfirmSuspendWindowOpen(true)
-        setActionState(suspend)
-        setUserEmail(email)
-        setUserId(id)
-      }
-    },
-    [],
+  const { data: list, mutate } = UserAPI.useListAllUsers(
+    { query, page, size },
+    swrConfig(),
   )
-
-  const makeAdminUser = useCallback(
-    async (
-      id: string | null,
-      email: string | null,
-      makeAdmin: boolean | null,
-      confirm: boolean = false,
-    ) => {
-      if (confirm && userId && actionState !== undefined) {
-        setSubmitting(true)
-        try {
-          await UserAPI.makeAdmin({ id: userId, makeAdmin: actionState })
-        } finally {
-          closeConfirmationWindow()
-        }
-      } else if (id && makeAdmin !== null && email) {
-        setConfirmAdminWindowOpen(true)
-        setActionState(makeAdmin)
-        setUserEmail(email)
-        setUserId(id)
-      }
-    },
-    [],
-  )
-
-  const closeConfirmationWindow = () => {
-    setUserId(undefined)
-    setUserEmail(undefined)
-    setActionState(undefined)
-    setConfirmSuspendWindowOpen(false)
-    setSubmitting(false)
-    setConfirmAdminWindowOpen(false)
-  }
-
-  useEffect(() => {
-    UserAPI.getAllUsers({ page: page, size: size, query: query }).then(
-      (value) => {
-        setList(value)
-      },
-    )
-  }, [page, size, isSubmitting, query])
 
   if (!list) {
     return <SectionSpinner />
@@ -127,22 +68,16 @@ const ConsolePanelUsers = () => {
 
   return (
     <>
-      <ConsoleConfirmationModal
-        isOpen={confirmSuspendWindowOpen}
-        action={confirmWindowAction}
-        target={userEmail}
-        closeConfirmationWindow={closeConfirmationWindow}
-        isSubmitting={isSubmitting}
-        request={suspendUser}
-      />
-      <ConsoleConfirmationModal
-        isOpen={confirmAdminWindowOpen}
-        action={confirmWindowAction}
-        target={userEmail}
-        closeConfirmationWindow={closeConfirmationWindow}
-        isSubmitting={isSubmitting}
-        request={makeAdminUser}
-      />
+      {confirmationHeader && confirmationBody && confirmationRequest ? (
+        <ConsoleConfirmationModal
+          header={confirmationHeader}
+          body={confirmationBody}
+          isDestructive={isConfirmationDestructive}
+          isOpen={isConfirmationOpen}
+          onClose={() => setIsConfirmationOpen(false)}
+          onRequest={confirmationRequest}
+        />
+      ) : null}
       <Helmet>
         <title>User Management</title>
       </Helmet>
@@ -240,10 +175,28 @@ const ConsolePanelUsers = () => {
                 label: 'Suspend',
                 icon: <IconFrontHand />,
                 isDestructive: true,
-                isHiddenFn: (user) => getUserId() === user.id,
+                isHiddenFn: (user) =>
+                  getUserId() === user.id || user.isAdmin || !user.isActive,
                 onClick: async (user) => {
-                  setConfirmWindowAction('suspend')
-                  await suspendUser(user.id, user.email, true)
+                  setConfirmationHeader(<>Suspend User</>)
+                  setConfirmationBody(
+                    <>
+                      Are you sure you want to suspend{' '}
+                      <span className={cx('font-bold')}>
+                        {userToString(user)}
+                      </span>
+                      ?
+                    </>,
+                  )
+                  setConfirmationRequest(() => async () => {
+                    await UserAPI.suspendUser({
+                      id: user.id,
+                      suspend: true,
+                    })
+                    await mutate()
+                  })
+                  setIsConfirmationDestructive(true)
+                  setIsConfirmationOpen(true)
                 },
               },
               {
@@ -251,8 +204,25 @@ const ConsolePanelUsers = () => {
                 icon: <IconHandshake />,
                 isHiddenFn: (user) => user.isActive,
                 onClick: async (user) => {
-                  setConfirmWindowAction('unsuspend')
-                  await suspendUser(user.id, user.email, false)
+                  setConfirmationHeader(<>Unsuspend User</>)
+                  setConfirmationBody(
+                    <>
+                      Are you sure you want to unsuspend{' '}
+                      <span className={cx('font-bold')}>
+                        {userToString(user)}
+                      </span>
+                      ?
+                    </>,
+                  )
+                  setConfirmationRequest(() => async () => {
+                    await UserAPI.suspendUser({
+                      id: user.id,
+                      suspend: false,
+                    })
+                    await mutate()
+                  })
+                  setIsConfirmationDestructive(false)
+                  setIsConfirmationOpen(true)
                 },
               },
               {
@@ -260,17 +230,55 @@ const ConsolePanelUsers = () => {
                 icon: <IconShield />,
                 isHiddenFn: (user) => user.isAdmin,
                 onClick: async (user) => {
-                  setConfirmWindowAction('grant console rights to')
-                  await makeAdminUser(user.id, user.email, true)
+                  setConfirmationHeader(<>Make Admin</>)
+                  setConfirmationBody(
+                    <>
+                      Are you sure you want to make admin{' '}
+                      <span className={cx('font-bold')}>
+                        {userToString(user)}
+                      </span>
+                      ?
+                    </>,
+                  )
+                  setConfirmationRequest(() => async () => {
+                    await UserAPI.makeAdmin({
+                      id: user.id,
+                      makeAdmin: true,
+                    })
+                    await mutate()
+                  })
+                  setIsConfirmationDestructive(false)
+                  setIsConfirmationOpen(true)
                 },
               },
               {
                 label: 'Demote Admin',
                 icon: <IconRemoveModerator />,
+                isDestructive: true,
                 isHiddenFn: (user) => !user.isAdmin,
                 onClick: async (user) => {
-                  setConfirmWindowAction('remove console rights from')
-                  await makeAdminUser(user.id, user.email, false)
+                  setConfirmationHeader(<>Demote Admin</>)
+                  setConfirmationBody(
+                    <>
+                      Are you sure you want to demote admin{' '}
+                      <span className={cx('font-bold')}>
+                        {userToString(user)}
+                      </span>
+                      ?
+                    </>,
+                  )
+                  setConfirmationRequest(() => async () => {
+                    await UserAPI.makeAdmin({
+                      id: user.id,
+                      makeAdmin: false,
+                    })
+                    await mutate()
+                    if (getUserId() === user.id) {
+                      navigate('/sign-out')
+                    }
+                  })
+                  setIsConfirmationDestructive(true)
+                  setIsConfirmationOpen(true)
                 },
               },
             ]}

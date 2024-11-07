@@ -8,7 +8,6 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
 import '@/infra/env'
-import bodyParser from 'body-parser'
 import cors from 'cors'
 import express from 'express'
 import logger from 'morgan'
@@ -30,7 +29,6 @@ app.use(cors())
 app.use(logger('dev'))
 app.use(express.json({ limit: '3mb' }))
 app.use(express.urlencoded({ extended: true }))
-app.use(bodyParser.json())
 
 const { jwtSigningKey: secretOrKey, issuer, audience } = getConfig().token
 passport.use(

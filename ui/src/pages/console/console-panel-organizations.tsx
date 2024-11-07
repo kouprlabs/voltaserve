@@ -27,7 +27,7 @@ import {
 import * as Yup from 'yup'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
-import ConsoleApi, {
+import ConsoleAPI, {
   OrganizationManagementList,
 } from '@/client/console/console'
 import ConsoleRenameModal from '@/components/console/console-rename-modal'
@@ -62,7 +62,7 @@ const ConsolePanelOrganizations = () => {
     if (confirm && organizationId !== undefined && newName !== null) {
       try {
         setSubmitting(true)
-        await ConsoleApi.renameObject(
+        await ConsoleAPI.renameObject(
           { id: organizationId, name: newName },
           'organization',
         )
@@ -85,13 +85,13 @@ const ConsolePanelOrganizations = () => {
 
   useEffect(() => {
     if (query && query.length >= 3) {
-      ConsoleApi.searchObject('organization', {
+      ConsoleAPI.searchObject('organization', {
         page: page,
         size: size,
         query: query,
       }).then((value) => setList(value))
     } else {
-      ConsoleApi.listOrganizations({ page: page, size: size }).then((value) =>
+      ConsoleAPI.listOrganizations({ page: page, size: size }).then((value) =>
         setList(value),
       )
     }

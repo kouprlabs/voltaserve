@@ -28,7 +28,7 @@ import {
 import * as Yup from 'yup'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
-import ConsoleApi, { GroupManagementList } from '@/client/console/console'
+import ConsoleAPI, { GroupManagementList } from '@/client/console/console'
 import ConsoleRenameModal from '@/components/console/console-rename-modal'
 import { consoleGroupsPaginationStorage } from '@/infra/pagination'
 import { decodeQuery } from '@/lib/helpers/query'
@@ -44,7 +44,7 @@ const ConsolePanelGroups = () => {
     searchFn: () => location.search,
     storage: consoleGroupsPaginationStorage(),
   })
-  const [confirmRenameWindowOpen, setConfirmRenameWindowOpen] = useState(false)
+  const [isConfirmRenameOpen, setIsConfirmRenameOpen] = useState(false)
   const [isSubmitting, setSubmitting] = useState(false)
   const [currentName, setCurrentName] = useState<string>('')
   const [groupId, setGroupId] = useState<string>()
@@ -61,19 +61,19 @@ const ConsolePanelGroups = () => {
     if (confirm && groupId !== undefined && newName !== null) {
       try {
         setSubmitting(true)
-        await ConsoleApi.renameObject({ id: groupId, name: newName }, 'group')
+        await ConsoleAPI.renameObject({ id: groupId, name: newName }, 'group')
       } finally {
         closeConfirmationWindow()
       }
     } else if (id !== null && currentName !== null && currentName !== '') {
-      setConfirmRenameWindowOpen(true)
+      setIsConfirmRenameOpen(true)
       setCurrentName(currentName)
       setGroupId(id)
     }
   }
 
   const closeConfirmationWindow = () => {
-    setConfirmRenameWindowOpen(false)
+    setIsConfirmRenameOpen(false)
     setSubmitting(false)
     setCurrentName('')
     setGroupId(undefined)
@@ -81,13 +81,13 @@ const ConsolePanelGroups = () => {
 
   useEffect(() => {
     if (query && query.length >= 3) {
-      ConsoleApi.searchObject('group', {
+      ConsoleAPI.searchObject('group', {
         page: page,
         size: size,
         query: query,
       }).then((value) => setList(value))
     } else {
-      ConsoleApi.listGroups({ page: page, size: size }).then((value) =>
+      ConsoleAPI.listGroups({ page: page, size: size }).then((value) =>
         setList(value),
       )
     }
@@ -101,7 +101,7 @@ const ConsolePanelGroups = () => {
     <>
       <ConsoleRenameModal
         closeConfirmationWindow={closeConfirmationWindow}
-        isOpen={confirmRenameWindowOpen}
+        isOpen={isConfirmRenameOpen}
         isSubmitting={isSubmitting}
         previousName={currentName}
         object="group"

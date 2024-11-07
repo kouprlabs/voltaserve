@@ -7,7 +7,7 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-import { useCallback, useEffect, useState } from 'react'
+import { ReactElement, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Badge, Button, Heading } from '@chakra-ui/react'
 import {
@@ -21,68 +21,32 @@ import {
 } from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
-import ConsoleApi, { InvitationManagementList } from '@/client/console/console'
-import ConsoleConfirmationModal from '@/components/console/console-confirmation-modal'
+import ConsoleAPI from '@/client/console/console'
+import { swrConfig } from '@/client/options'
+import ConsoleConfirmationModal, {
+  ConsoleConfirmationRequest,
+} from '@/components/console/console-confirmation-modal'
 import { consoleInvitationsPaginationStorage } from '@/infra/pagination'
 
 const ConsolePanelInvitations = () => {
   const navigate = useNavigate()
   const location = useLocation()
-  const [list, setList] = useState<InvitationManagementList>()
-  const [isSubmitting, setSubmitting] = useState(false)
-  const [invitationId, setInvitationId] = useState<string>()
-  const [invitationDetails, setInvitationDetails] = useState<string>()
-  const [actionState, setActionState] = useState<boolean>()
-  const [confirmInvitationWindowOpen, setConfirmInvitationWindowOpen] =
+  const [isConfirmationOpen, setIsConfirmationOpen] = useState(false)
+  const [isConfirmationDestructive, setIsConfirmationDestructive] =
     useState(false)
-  const [confirmWindowAction, setConfirmWindowAction] = useState<string>()
+  const [confirmationHeader, setConfirmationHeader] = useState<ReactElement>()
+  const [confirmationBody, setConfirmationBody] = useState<ReactElement>()
+  const [confirmationRequest, setConfirmationRequest] =
+    useState<ConsoleConfirmationRequest>()
   const { page, size, steps, setPage, setSize } = usePagePagination({
     navigateFn: navigate,
     searchFn: () => location.search,
     storage: consoleInvitationsPaginationStorage(),
   })
-
-  const changeInvitationStatus = useCallback(
-    async (
-      id: string | null,
-      invitation: string | null,
-      accept: boolean | null,
-      confirm: boolean = false,
-    ) => {
-      if (confirm && invitationId && actionState !== undefined) {
-        setSubmitting(true)
-        try {
-          await ConsoleApi.invitationChangeStatus({
-            id: invitationId,
-            accept: actionState,
-          })
-        } finally {
-          closeConfirmationWindow()
-        }
-      } else if (id && accept !== null && invitation) {
-        setConfirmInvitationWindowOpen(true)
-        setActionState(accept)
-        setInvitationDetails(invitation)
-        setInvitationId(id)
-      }
-    },
-    [],
+  const { data: list, mutate } = ConsoleAPI.useListInvitations(
+    { page, size },
+    swrConfig(),
   )
-
-  const closeConfirmationWindow = () => {
-    setInvitationId(undefined)
-    setInvitationDetails(undefined)
-    setActionState(undefined)
-    setConfirmInvitationWindowOpen(false)
-    setSubmitting(false)
-    setConfirmWindowAction(undefined)
-  }
-
-  useEffect(() => {
-    ConsoleApi.listInvitations({ page: page, size: size }).then((value) =>
-      setList(value),
-    )
-  }, [page, size, isSubmitting])
 
   if (!list) {
     return <SectionSpinner />
@@ -90,14 +54,16 @@ const ConsolePanelInvitations = () => {
 
   return (
     <>
-      <ConsoleConfirmationModal
-        isOpen={confirmInvitationWindowOpen}
-        action={confirmWindowAction}
-        target={invitationDetails}
-        closeConfirmationWindow={closeConfirmationWindow}
-        isSubmitting={isSubmitting}
-        request={changeInvitationStatus}
-      />
+      {confirmationHeader && confirmationBody && confirmationRequest ? (
+        <ConsoleConfirmationModal
+          header={confirmationHeader}
+          body={confirmationBody}
+          isDestructive={isConfirmationDestructive}
+          isOpen={isConfirmationOpen}
+          onClose={() => setIsConfirmationOpen(false)}
+          onRequest={confirmationRequest}
+        />
+      ) : null}
       <Helmet>
         <title>Invitation Management</title>
       </Helmet>
@@ -161,12 +127,19 @@ const ConsolePanelInvitations = () => {
                 isDestructive: true,
                 isDisabledFn: (invitation) => invitation.status !== 'pending',
                 onClick: async (invitation) => {
-                  setConfirmWindowAction('deny invitation')
-                  await changeInvitationStatus(
-                    invitation.id,
-                    `${invitation.email} to ${invitation.organization.name}`,
-                    false,
+                  setConfirmationHeader(<>Deny Invitation</>)
+                  setConfirmationBody(
+                    <>Are you sure you want to deny this invitation?</>,
                   )
+                  setConfirmationRequest(() => async () => {
+                    await ConsoleAPI.invitationChangeStatus({
+                      id: invitation.id,
+                      accept: false,
+                    })
+                    await mutate()
+                  })
+                  setIsConfirmationDestructive(true)
+                  setIsConfirmationOpen(true)
                 },
               },
             ]}

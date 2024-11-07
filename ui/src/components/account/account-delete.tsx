@@ -92,8 +92,7 @@ const AccountDelete = ({ open, onClose }: AccountDeleteProps) => {
               <ModalBody>
                 <div className={cx('flex', 'flex-col', 'items-start', 'gap-1')}>
                   <span>
-                    Are you sure you would like to delete your account
-                    permanently?
+                    Are you sure you want to delete your account permanently?
                   </span>
                   <span className={cx('font-semibold')}>
                     Type your password to confirm:

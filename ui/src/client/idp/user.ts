@@ -39,7 +39,7 @@ export type UpdateFullNameOptions = {
   fullName: string
 }
 
-export interface baseUserIdRequest {
+export interface BaseUserIDRequest {
   id: string
 }
 
@@ -51,11 +51,11 @@ export type UpdateEmailConfirmationOptions = {
   token: string
 }
 
-export interface suspendUserOptions extends baseUserIdRequest {
+export interface SuspendUserOptions extends BaseUserIDRequest {
   suspend: boolean
 }
 
-export interface makeAdminOptions extends baseUserIdRequest {
+export interface MakeAdminOptions extends BaseUserIDRequest {
   makeAdmin: boolean
 }
 
@@ -92,11 +92,20 @@ export default class UserAPI {
     )
   }
 
-  static getUserById(options: baseUserIdRequest) {
+  static getUserById(options: BaseUserIDRequest) {
     return idpFetcher({
       url: `/user/${options.id}`,
       method: 'GET',
     }) as Promise<ConsoleUser>
+  }
+
+  static useListAllUsers(options: ListOptions, swrOptions?: SWRConfiguration) {
+    const url = `/user/all?${this.paramsFromListOptions(options)}`
+    return useSWR<ConsoleUsersResponse>(
+      url,
+      () => idpFetcher({ url, method: 'GET' }) as Promise<ConsoleUsersResponse>,
+      swrOptions,
+    )
   }
 
   static getAllUsers(options: ListOptions) {
@@ -114,7 +123,7 @@ export default class UserAPI {
     }) as Promise<User>
   }
 
-  static suspendUser(options: suspendUserOptions) {
+  static suspendUser(options: SuspendUserOptions) {
     return idpFetcher({
       url: `/user/suspend`,
       method: 'PATCH',
@@ -122,7 +131,7 @@ export default class UserAPI {
     }) as Promise<User>
   }
 
-  static makeAdmin(options: makeAdminOptions) {
+  static makeAdmin(options: MakeAdminOptions) {
     return idpFetcher({
       url: `/user/admin`,
       method: 'PATCH',

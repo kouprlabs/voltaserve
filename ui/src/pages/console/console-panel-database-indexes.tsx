@@ -29,7 +29,7 @@ import {
 } from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
-import ConsoleApi from '@/client/console/console'
+import ConsoleAPI from '@/client/console/console'
 import { swrConfig } from '@/client/options'
 import { organizationPaginationStorage } from '@/infra/pagination'
 import { decodeQuery } from '@/lib/helpers/query'
@@ -56,7 +56,7 @@ const ConsolePanelDatabaseIndexes = () => {
     data: list,
     error,
     mutate,
-  } = ConsoleApi.useListIndexes({ page, size }, swrConfig())
+  } = ConsoleAPI.useListIndexes({ page, size }, swrConfig())
 
   const sendRebuildRequest = (
     indexName: string | null,
@@ -109,10 +109,10 @@ const ConsolePanelDatabaseIndexes = () => {
       >
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>Are You sure?</ModalHeader>
+          <ModalHeader>Rebuild Index</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            You are going to rebuild {focusedIndex}, please confirm this action
+            Are you sure you want to rebuild {focusedIndex}?
           </ModalBody>
           <ModalFooter>
             <Button

@@ -70,11 +70,10 @@ const FileDelete = () => {
         <ModalBody>
           {selection.length > 1 ? (
             <span>
-              Are you sure you would like to delete ({selection.length})
-              item(s)?
+              Are you sure you want to delete ({selection.length}) item(s)?
             </span>
           ) : (
-            <span>Are you sure you would like to delete this item?</span>
+            <span>Are you sure you want to delete this item?</span>
           )}
         </ModalBody>
         <ModalFooter>
