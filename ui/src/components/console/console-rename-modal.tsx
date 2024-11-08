@@ -35,7 +35,7 @@ import useFocusAndSelectAll from '@/hooks/use-focus-and-select-all'
 
 interface ConsoleRenameModalProps {
   header: ReactElement
-  previousName: string
+  currentName: string
   isOpen: boolean
   onClose: () => void
   onRequest: ConsoleRenameModalRequest
@@ -49,7 +49,7 @@ type FormValues = {
 
 const ConsoleRenameModal = ({
   header,
-  previousName,
+  currentName,
   isOpen,
   onClose,
   onRequest,
@@ -84,7 +84,7 @@ const ConsoleRenameModal = ({
         <ModalCloseButton />
         <Formik
           enableReinitialize={true}
-          initialValues={{ name: previousName }}
+          initialValues={{ name: currentName }}
           validationSchema={formSchema}
           validateOnBlur={false}
           onSubmit={handleRequest}

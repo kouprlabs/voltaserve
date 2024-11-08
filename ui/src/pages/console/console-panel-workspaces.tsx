@@ -72,7 +72,7 @@ const ConsolePanelWorkspaces = () => {
     <>
       <ConsoleRenameModal
         header={<>Rename Workspace</>}
-        previousName={currentName}
+        currentName={currentName}
         isOpen={isConfirmRenameOpen}
         onClose={() => setIsConfirmRenameOpen(false)}
         onRequest={renameRequest}

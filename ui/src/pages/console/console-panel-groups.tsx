@@ -71,7 +71,7 @@ const ConsolePanelGroups = () => {
     <>
       <ConsoleRenameModal
         header={<>Rename Group</>}
-        previousName={currentName}
+        currentName={currentName}
         isOpen={isConfirmRenameOpen}
         onClose={() => setIsConfirmRenameOpen(false)}
         onRequest={renameRequest}

@@ -72,7 +72,7 @@ const ConsolePanelOrganizations = () => {
     <>
       <ConsoleRenameModal
         header={<>Rename Organization</>}
-        previousName={currentName}
+        currentName={currentName}
         isOpen={isConfirmRenameOpen}
         onClose={() => setIsConfirmRenameOpen(false)}
         onRequest={renameRequest}
