@@ -253,7 +253,8 @@ const SharingUsers = ({
                         <IconButton
                           icon={<IconDelete />}
                           colorScheme="red"
-                          aria-label=""
+                          title="Revoke user permission"
+                          aria-label="Revoke user permission"
                           isLoading={permissionBeingRevoked === p.id}
                           isDisabled={user?.id === p.user.id}
                           onClick={() => handleRevokeUserPermission(p)}

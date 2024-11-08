@@ -30,19 +30,21 @@ import { PagePagination, RelativeDate, SectionSpinner } from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import ConsoleAPI, {
-  GroupManagementList,
+  GroupManagement,
+  ListResponse,
   OrganizationManagement,
-  UserOrganizationManagementList,
-  WorkspaceManagementList,
+  UserOrganizationManagement,
+  WorkspaceManagement,
 } from '@/client/console/console'
 
 const ConsolePanelOrganization = () => {
   const [organizationData, setOrganizationData] =
     useState<OrganizationManagement>()
-  const [usersData, setUsersData] = useState<UserOrganizationManagementList>()
+  const [usersData, setUsersData] =
+    useState<ListResponse<UserOrganizationManagement>>()
   const [workspacesData, setWorkspacesData] =
-    useState<WorkspaceManagementList>()
-  const [groupsData, setGroupsData] = useState<GroupManagementList>()
+    useState<ListResponse<WorkspaceManagement>>()
+  const [groupsData, setGroupsData] = useState<ListResponse<GroupManagement>>()
   const { id } = useParams()
   const [usersPage, setUsersPage] = useState(1)
   const [workspacesPage, setWorkspacesPage] = useState(1)
@@ -58,7 +60,7 @@ const ConsolePanelOrganization = () => {
 
   const usersFetch = () => {
     if (id) {
-      ConsoleAPI.getUsersByOrganization({
+      ConsoleAPI.listUsersByOrganization({
         id: id,
         page: usersPage,
         size: 5,
@@ -70,7 +72,7 @@ const ConsolePanelOrganization = () => {
 
   const workspacesFetch = () => {
     if (id) {
-      ConsoleAPI.getWorkspacesByOrganization({
+      ConsoleAPI.listWorkspacesByOrganization({
         id: id,
         page: workspacesPage,
         size: 5,
@@ -82,7 +84,7 @@ const ConsolePanelOrganization = () => {
 
   const groupsFetch = () => {
     if (id) {
-      ConsoleAPI.getGroupsByOrganization({
+      ConsoleAPI.listGroupsByOrganization({
         id: id,
         page: workspacesPage,
         size: 5,

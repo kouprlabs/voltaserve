@@ -225,7 +225,8 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
               !folder || ltEditorPermission(folder.permission) || !list
             }
             onClick={() => dispatch(createModalDidOpen())}
-            aria-label=""
+            title="New folder"
+            aria-label="New folder"
           />
         </Tooltip>
         {!isContextMenuOpen ? (
@@ -238,7 +239,8 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
             icon={isSelectionMode ? <IconClose /> : <IconLibraryAddCheck />}
             isDisabled={!list}
             variant="solid"
-            aria-label=""
+            title="Toggle selection mode"
+            aria-label="Toggle selection mode"
             onClick={handleToggleSelection}
           />
         ) : null}
@@ -247,7 +249,8 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
           isLoading={isRefreshing}
           isDisabled={!list}
           variant="solid"
-          aria-label=""
+          title="Refresh"
+          aria-label="Refresh"
           onClick={handleRefresh}
         />
         <Spacer />
@@ -256,14 +259,16 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
             <IconButton
               icon={getSortOrderIcon()}
               variant="solid"
-              aria-label=""
+              title="Toggle sort order"
+              aria-label="Toggle sort order"
               isDisabled={!list}
               onClick={handleSortOrderToggle}
             />
             <IconButton
               icon={getViewTypeIcon()}
               variant="solid"
-              aria-label=""
+              title="Toggle view type"
+              aria-label="Toggle view type"
               isDisabled={!list}
               onClick={handleViewTypeToggle}
             />
@@ -272,7 +277,8 @@ const FileToolbar = ({ list }: FileToolbarProps) => {
                 as={IconButton}
                 icon={<IconMoreVert />}
                 variant="solid"
-                aria-label=""
+                title="Sort by menu"
+                aria-label="Sort by menu"
                 isDisabled={!list}
               />
               <Portal>

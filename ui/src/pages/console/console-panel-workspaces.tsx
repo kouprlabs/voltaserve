@@ -7,7 +7,7 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useState } from 'react'
 import {
   Link,
   useLocation,
@@ -25,10 +25,10 @@ import {
   Text,
   usePagePagination,
 } from '@koupr/ui'
-import * as Yup from 'yup'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
-import ConsoleAPI, { WorkspaceManagementList } from '@/client/console/console'
+import ConsoleAPI, { WorkspaceManagement } from '@/client/console/console'
+import { swrConfig } from '@/client/options'
 import ConsoleRenameModal from '@/components/console/console-rename-modal'
 import { consoleWorkspacesPaginationStorage } from '@/infra/pagination'
 import prettyBytes from '@/lib/helpers/pretty-bytes'
@@ -39,66 +39,30 @@ const ConsolePanelWorkspaces = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const query = decodeQuery(searchParams.get('q') as string)
-  const [list, setList] = useState<WorkspaceManagementList>()
   const { page, size, steps, setPage, setSize } = usePagePagination({
     navigateFn: navigate,
     searchFn: () => location.search,
     storage: consoleWorkspacesPaginationStorage(),
   })
-  const [confirmRenameWindowOpen, setConfirmRenameWindowOpen] = useState(false)
-  const [isSubmitting, setSubmitting] = useState(false)
+  const [isConfirmRenameOpen, setIsConfirmRenameOpen] = useState(false)
   const [currentName, setCurrentName] = useState<string>('')
   const [workspaceId, setWorkspaceId] = useState<string>()
-  const formSchema = Yup.object().shape({
-    name: Yup.string().required('Name is required').max(255),
-  })
+  const { data: list, mutate } =
+    ConsoleAPI.useListOrSearchObject<WorkspaceManagement>(
+      'workspace',
+      { page, size, query },
+      swrConfig(),
+    )
 
-  const renameWorkspace = useCallback(
-    async (
-      id: string | null,
-      currentName: string | null,
-      newName: string | null,
-      confirm: boolean = false,
-    ) => {
-      if (confirm && workspaceId !== undefined && newName !== null) {
-        try {
-          setSubmitting(true)
-          await ConsoleAPI.renameObject(
-            { id: workspaceId, name: newName },
-            'workspace',
-          )
-        } finally {
-          closeConfirmationWindow()
-        }
-      } else if (id !== null && currentName !== null && currentName !== '') {
-        setConfirmRenameWindowOpen(true)
-        setCurrentName(currentName)
-        setWorkspaceId(id)
+  const renameRequest = useCallback(
+    async (name: string) => {
+      if (workspaceId) {
+        await ConsoleAPI.renameObject({ id: workspaceId, name }, 'workspace')
+        await mutate()
       }
     },
-    [],
+    [workspaceId],
   )
-
-  const closeConfirmationWindow = () => {
-    setConfirmRenameWindowOpen(false)
-    setSubmitting(false)
-    setCurrentName('')
-    setWorkspaceId(undefined)
-  }
-
-  useEffect(() => {
-    if (query && query.length >= 3) {
-      ConsoleAPI.searchObject('workspace', {
-        page: page,
-        size: size,
-        query: query,
-      }).then((value) => setList(value))
-    } else {
-      ConsoleAPI.listWorkspaces({ page: page, size: size, query: query }).then(
-        (value) => setList(value),
-      )
-    }
-  }, [page, size, isSubmitting, query])
 
   if (!list) {
     return <SectionSpinner />
@@ -107,13 +71,10 @@ const ConsolePanelWorkspaces = () => {
   return (
     <>
       <ConsoleRenameModal
-        closeConfirmationWindow={closeConfirmationWindow}
-        isOpen={confirmRenameWindowOpen}
-        isSubmitting={isSubmitting}
-        previousName={currentName}
-        object="workspace"
-        formSchema={formSchema}
-        request={renameWorkspace}
+        currentName={currentName}
+        isOpen={isConfirmRenameOpen}
+        onClose={() => setIsConfirmRenameOpen(false)}
+        onRequest={renameRequest}
       />
       <Helmet>
         <title>Workspace Management</title>
@@ -181,7 +142,9 @@ const ConsolePanelWorkspaces = () => {
                 label: 'Rename',
                 icon: <IconEdit />,
                 onClick: async (workspace) => {
-                  await renameWorkspace(workspace.id, workspace.name, null)
+                  setCurrentName(workspace.name)
+                  setWorkspaceId(workspace.id)
+                  setIsConfirmRenameOpen(true)
                 },
               },
             ]}

@@ -32,7 +32,7 @@ import { Helmet } from 'react-helmet-async'
 import UserAPI from '@/client/idp/user'
 import { swrConfig } from '@/client/options'
 import ConsoleConfirmationModal, {
-  ConsoleConfirmationRequest,
+  ConsoleConfirmationModalRequest,
 } from '@/components/console/console-confirmation-modal'
 import { consoleUsersPaginationStorage } from '@/infra/pagination'
 import { getUserId } from '@/infra/token'
@@ -51,13 +51,13 @@ const ConsolePanelUsers = () => {
   const [confirmationHeader, setConfirmationHeader] = useState<ReactElement>()
   const [confirmationBody, setConfirmationBody] = useState<ReactElement>()
   const [confirmationRequest, setConfirmationRequest] =
-    useState<ConsoleConfirmationRequest>()
+    useState<ConsoleConfirmationModalRequest>()
   const { page, size, steps, setPage, setSize } = usePagePagination({
     navigateFn: navigate,
     searchFn: () => location.search,
     storage: consoleUsersPaginationStorage(),
   })
-  const { data: list, mutate } = UserAPI.useListAllUsers(
+  const { data: list, mutate } = UserAPI.useList(
     { query, page, size },
     swrConfig(),
   )
@@ -189,10 +189,7 @@ const ConsolePanelUsers = () => {
                     </>,
                   )
                   setConfirmationRequest(() => async () => {
-                    await UserAPI.suspendUser({
-                      id: user.id,
-                      suspend: true,
-                    })
+                    await UserAPI.suspend(user.id, { suspend: true })
                     await mutate()
                   })
                   setIsConfirmationDestructive(true)
@@ -215,10 +212,7 @@ const ConsolePanelUsers = () => {
                     </>,
                   )
                   setConfirmationRequest(() => async () => {
-                    await UserAPI.suspendUser({
-                      id: user.id,
-                      suspend: false,
-                    })
+                    await UserAPI.suspend(user.id, { suspend: false })
                     await mutate()
                   })
                   setIsConfirmationDestructive(false)
@@ -233,18 +227,15 @@ const ConsolePanelUsers = () => {
                   setConfirmationHeader(<>Make Admin</>)
                   setConfirmationBody(
                     <>
-                      Are you sure you want to make admin{' '}
+                      Are you sure you want to make{' '}
                       <span className={cx('font-bold')}>
                         {userToString(user)}
-                      </span>
-                      ?
+                      </span>{' '}
+                      admin?
                     </>,
                   )
                   setConfirmationRequest(() => async () => {
-                    await UserAPI.makeAdmin({
-                      id: user.id,
-                      makeAdmin: true,
-                    })
+                    await UserAPI.makeAdmin(user.id, { makeAdmin: true })
                     await mutate()
                   })
                   setIsConfirmationDestructive(false)
@@ -260,7 +251,7 @@ const ConsolePanelUsers = () => {
                   setConfirmationHeader(<>Demote Admin</>)
                   setConfirmationBody(
                     <>
-                      Are you sure you want to demote admin{' '}
+                      Are you sure you want to demote{' '}
                       <span className={cx('font-bold')}>
                         {userToString(user)}
                       </span>
@@ -268,10 +259,7 @@ const ConsolePanelUsers = () => {
                     </>,
                   )
                   setConfirmationRequest(() => async () => {
-                    await UserAPI.makeAdmin({
-                      id: user.id,
-                      makeAdmin: false,
-                    })
+                    await UserAPI.makeAdmin(user.id, { makeAdmin: false })
                     await mutate()
                     if (getUserId() === user.id) {
                       navigate('/sign-out')

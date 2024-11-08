@@ -11,9 +11,9 @@ import { Picture } from '@/client/types'
 import { getAccessTokenOrRedirect } from '@/infra/token'
 
 export function getPictureUrl(picture: Picture) {
-  return `/proxy/idp/v3/user/picture${picture.extension}?${new URLSearchParams({
-    access_token: getAccessTokenOrRedirect(),
-  })}`
+  return `/proxy/idp/v3/users/me/picture${picture.extension}?${new URLSearchParams(
+    { access_token: getAccessTokenOrRedirect() },
+  )}`
 }
 
 type PictureUrlByIdOptions = {

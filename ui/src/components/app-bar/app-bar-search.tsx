@@ -338,7 +338,8 @@ const AppBarSearch = () => {
               icon={<IconClose />}
               onClick={handleClear}
               size="xs"
-              aria-label="Clear"
+              title="Clear search"
+              aria-label="Clear search"
             />
           </InputRightElement>
         ) : null}
@@ -347,7 +348,8 @@ const AppBarSearch = () => {
         <NotificationBadge hasBadge={hasFileQuery}>
           <IconButton
             icon={<IconTune />}
-            aria-label="Filters"
+            title="Search filters"
+            aria-label="Search filters"
             onClick={handleFilterClick}
           />
         </NotificationBadge>

@@ -9,11 +9,6 @@
 // licenses/AGPL.txt.
 import fs from 'fs/promises'
 import { getConfig } from '@/config/config'
-import {
-  UserAdminPostRequest,
-  UserSearchResponse,
-  UserSuspendPostRequest,
-} from '@/infra/admin-requests'
 import { base64ToBuffer, base64ToExtension, base64ToMIME } from '@/infra/base64'
 import { ErrorCode, newError } from '@/infra/error'
 import { newHyphenlessUuid } from '@/infra/id'
@@ -52,6 +47,13 @@ export type UserAdminDTO = {
   updateTime?: string
 }
 
+export interface UserAdminList {
+  data: UserAdminDTO[]
+  page: number
+  size: number
+  totalElements: number
+}
+
 export type PictureDTO = {
   extension: string
 }
@@ -83,6 +85,20 @@ export type UserPictureResponse = {
   mime: string
 }
 
+export type UserSuspendOptions = {
+  suspend: boolean
+}
+
+export type UserMakeAdminOptions = {
+  makeAdmin: boolean
+}
+
+export type UserListOptions = {
+  query?: string
+  size: number
+  page: number
+}
+
 export async function getUser(id: string): Promise<UserDTO> {
   return mapEntity(await userRepo.findByID(id))
 }
@@ -107,11 +123,11 @@ export async function getUserPicture(id: string): Promise<UserPictureResponse> {
   }
 }
 
-export async function searchUserListPaginated(
-  query: string,
-  size: number,
-  page: number,
-): Promise<UserSearchResponse> {
+export async function list({
+  query,
+  size,
+  page,
+}: UserListOptions): Promise<UserAdminList> {
   if (query && query.length >= 3) {
     const users = await search
       .index(USER_SEARCH_INDEX)
@@ -124,7 +140,7 @@ export async function searchUserListPaginated(
       })
     return {
       data: (
-        await userRepo.listAllByIds(
+        await userRepo.findMany(
           users.data.map((value) => {
             return value.id
           }),
@@ -136,10 +152,10 @@ export async function searchUserListPaginated(
     }
   } else {
     return {
-      data: (await userRepo.listAllPaginated(page, size)).map((value) =>
+      data: (await userRepo.list(page, size)).map((value) =>
         adminMapEntity(value),
       ),
-      totalElements: await userRepo.getUserCount(),
+      totalElements: await userRepo.getCount(),
       size: size,
       page: page,
     }
@@ -147,7 +163,7 @@ export async function searchUserListPaginated(
 }
 
 export async function getUserCount(): Promise<number> {
-  return await userRepo.getUserCount()
+  return await userRepo.getCount()
 }
 
 export async function updateFullName(
@@ -313,8 +329,8 @@ export async function deleteUser(id: string, options: UserDeleteOptions) {
   }
 }
 
-export async function suspendUser(options: UserSuspendPostRequest) {
-  const user = await userRepo.findByID(options.id)
+export async function suspendUser(id: string, options: UserSuspendOptions) {
+  const user = await userRepo.findByID(id)
   if (
     user.isAdmin &&
     !(await userRepo.enoughActiveAdmins()) &&
@@ -341,8 +357,8 @@ export async function suspendUser(options: UserSuspendPostRequest) {
   }
 }
 
-export async function makeAdminUser(options: UserAdminPostRequest) {
-  const user = await userRepo.findByID(options.id)
+export async function makeAdminUser(id: string, options: UserMakeAdminOptions) {
+  const user = await userRepo.findByID(id)
   if (
     user.isAdmin &&
     !(await userRepo.enoughActiveAdmins()) &&

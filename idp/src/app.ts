@@ -54,7 +54,7 @@ passport.use(
 )
 
 app.use('/v3/health', healthRouter)
-app.use('/v3/user', userRouter)
+app.use('/v3/users', userRouter)
 app.use('/v3/accounts', accountRouter)
 app.use('/v3/token', tokenRouter)
 app.use('/version', versionRouter)

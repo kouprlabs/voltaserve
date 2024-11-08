@@ -34,14 +34,11 @@ import { swrConfig } from '@/client/options'
 import { organizationPaginationStorage } from '@/infra/pagination'
 import { decodeQuery } from '@/lib/helpers/query'
 import store from '@/store/configure-store'
-import { useAppDispatch } from '@/store/hook'
 import { errorOccurred } from '@/store/ui/error'
-import { mutateUpdated } from '@/store/ui/indexes'
 
 const ConsolePanelDatabaseIndexes = () => {
   const navigate = useNavigate()
   const location = useLocation()
-  const dispatch = useAppDispatch()
   const [searchParams] = useSearchParams()
   const [confirmWindowOpen, setConfirmWindowOpen] = useState<boolean>(false)
   const [isSubmitting, setSubmitting] = useState<boolean>(false)
@@ -82,12 +79,6 @@ const ConsolePanelDatabaseIndexes = () => {
   useEffect(() => {
     mutate().then()
   }, [query, page, size, mutate])
-
-  useEffect(() => {
-    if (mutate) {
-      dispatch(mutateUpdated(mutate))
-    }
-  }, [mutate, dispatch])
 
   if (error) {
     return null

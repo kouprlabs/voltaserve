@@ -46,7 +46,7 @@ func (r *MosaicRouter) AppendRoutes(g fiber.Router) {
 }
 
 func (r *MosaicRouter) AppendNonJWTRoutes(g fiber.Router) {
-	g.Get("/:id/zoom_level/:zoom_level/row/:row/col/:col/ext/:ext", r.DownloadTile)
+	g.Get("/:id/zoom_level/:zoom_level/row/:row/column/:column/extension/:extension", r.DownloadTile)
 }
 
 // Create godoc
@@ -122,10 +122,10 @@ func (r *MosaicRouter) ReadInfo(c *fiber.Ctx) error {
 //	@Param			id			path		string	true	"ID"
 //	@Param			zoom_level	path		string	true	"Zoom Level"
 //	@Param			row			path		string	true	"Row"
-//	@Param			col			path		string	true	"Col"
+//	@Param			column		path		string	true	"Column"
 //	@Failure		404			{object}	errorpkg.ErrorResponse
 //	@Failure		500			{object}	errorpkg.ErrorResponse
-//	@Router			/mosaics/{id}/zoom_level/{zoom_level}/row/{row}/col/{col}/ext/{ext} [get]
+//	@Router			/mosaics/{id}/zoom_level/{zoom_level}/row/{row}/column/{column}/extension/{extension} [get]
 func (r *MosaicRouter) DownloadTile(c *fiber.Ctx) error {
 	accessToken := c.Cookies(r.accessTokenCookieName)
 	if accessToken == "" {
@@ -160,11 +160,11 @@ func (r *MosaicRouter) DownloadTile(c *fiber.Ctx) error {
 			return err
 		}
 	}
-	var col int64
-	if c.Params("col") == "" {
-		return errorpkg.NewMissingQueryParamError("col")
+	var column int64
+	if c.Params("column") == "" {
+		return errorpkg.NewMissingQueryParamError("column")
 	} else {
-		col, err = strconv.ParseInt(c.Params("col"), 10, 64)
+		column, err = strconv.ParseInt(c.Params("column"), 10, 64)
 		if err != nil {
 			return err
 		}
@@ -172,8 +172,8 @@ func (r *MosaicRouter) DownloadTile(c *fiber.Ctx) error {
 	buf, snapshot, err := r.mosaicSvc.DownloadTileBuffer(id, service.MosaicDownloadTileOptions{
 		ZoomLevel: int(zoomLevel),
 		Row:       int(row),
-		Col:       int(col),
-		Ext:       c.Params("ext"),
+		Column:    int(column),
+		Extension: c.Params("extension"),
 	}, userID)
 	if err != nil {
 		return err
@@ -184,12 +184,12 @@ func (r *MosaicRouter) DownloadTile(c *fiber.Ctx) error {
 	} else {
 		extension = filepath.Ext(snapshot.GetOriginal().Key)
 	}
-	if strings.TrimPrefix(extension, ".") != c.Params("ext") {
+	if strings.TrimPrefix(extension, ".") != c.Params("extension") {
 		return errorpkg.NewS3ObjectNotFoundError(nil)
 	}
 	b := buf.Bytes()
 	c.Set("Content-Type", infra.DetectMIMEFromBytes(b))
-	c.Set("Content-Disposition", fmt.Sprintf("filename=\"tile%s\"", c.Params("ext")))
+	c.Set("Content-Disposition", fmt.Sprintf("filename=\"tile%s\"", c.Params("extension")))
 	return c.Send(b)
 }
 

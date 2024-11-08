@@ -7,7 +7,7 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-import { useEffect, useRef } from 'react'
+import { useCallback, useRef } from 'react'
 import {
   Button,
   FormControl,
@@ -21,61 +21,71 @@ import {
   ModalHeader,
   ModalOverlay,
 } from '@chakra-ui/react'
-import { Field, FieldAttributes, FieldProps, Form, Formik } from 'formik'
+import {
+  Field,
+  FieldAttributes,
+  FieldProps,
+  Form,
+  Formik,
+  FormikHelpers,
+} from 'formik'
 import * as Yup from 'yup'
 import cx from 'classnames'
+import useFocusAndSelectAll from '@/hooks/use-focus-and-select-all'
 
 interface ConsoleRenameModalProps {
-  closeConfirmationWindow: () => void
+  currentName: string
   isOpen: boolean
-  isSubmitting: boolean
-  previousName: string
-  object: string
-  formSchema: Yup.ObjectSchema<
-    { name: string },
-    Yup.AnyObject,
-    { name: undefined }
-  >
-  request: (
-    id: string | null,
-    currentName: string | null,
-    newName: string | null,
-    confirm: boolean,
-  ) => Promise<void>
+  onClose: () => void
+  onRequest: ConsoleRenameModalRequest
 }
-const ConsoleRenameModal = (props: ConsoleRenameModalProps) => {
+
+export type ConsoleRenameModalRequest = (name: string) => Promise<void>
+
+type FormValues = {
+  name: string
+}
+
+const ConsoleRenameModal = ({
+  currentName,
+  isOpen,
+  onClose,
+  onRequest,
+}: ConsoleRenameModalProps) => {
   const inputRef = useRef<HTMLInputElement>(null)
-  useEffect(() => {
-    if (
-      props.isOpen &&
-      (props.previousName === undefined || props.formSchema == undefined)
-    ) {
-      setTimeout(() => {
-        window.location.reload()
-      }, 2000)
-      throw new Error('No action or target provided')
-    }
-  }, [props.isOpen])
+  useFocusAndSelectAll(inputRef, isOpen)
+  const formSchema = Yup.object().shape({
+    name: Yup.string().required('Name is required').max(255),
+  })
+
+  const handleRequest = useCallback(
+    async (
+      { name }: FormValues,
+      { setSubmitting }: FormikHelpers<FormValues>,
+    ) => {
+      setSubmitting(true)
+      try {
+        await onRequest(name)
+        onClose()
+      } finally {
+        setSubmitting(false)
+      }
+    },
+    [onRequest, onClose],
+  )
 
   return (
-    <Modal
-      isOpen={props.isOpen}
-      onClose={() => {
-        props.closeConfirmationWindow()
-      }}
-    >
+    <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>Rename {props.object}</ModalHeader>
+        <ModalHeader>Edit Name</ModalHeader>
         <ModalCloseButton />
         <Formik
           enableReinitialize={true}
-          initialValues={{ name: props.previousName }}
-          validationSchema={props.formSchema}
+          initialValues={{ name: currentName }}
+          validationSchema={formSchema}
           validateOnBlur={false}
-          onSubmit={async (event) => {
-            await props.request(null, null, event.name, true)
-          }}
+          onSubmit={handleRequest}
         >
           {({ errors, touched, isSubmitting }) => (
             <Form>
@@ -91,7 +101,7 @@ const ConsoleRenameModal = (props: ConsoleRenameModalProps) => {
                         disabled={isSubmitting}
                         autoFocus
                         required
-                        placeholder={props.previousName}
+                        placeholder="Name"
                       />
                       <FormErrorMessage>{errors.name}</FormErrorMessage>
                     </FormControl>
@@ -107,9 +117,7 @@ const ConsoleRenameModal = (props: ConsoleRenameModalProps) => {
                     variant="outline"
                     colorScheme="blue"
                     disabled={isSubmitting}
-                    onClick={() => {
-                      props.closeConfirmationWindow()
-                    }}
+                    onClick={onClose}
                   >
                     Cancel
                   </Button>

@@ -63,10 +63,9 @@ const OrganizationSettingsPage = () => {
                     <IconButton
                       icon={<IconEdit />}
                       isDisabled={!geEditorPermission(org.permission)}
-                      aria-label=""
-                      onClick={() => {
-                        setIsNameModalOpen(true)
-                      }}
+                      title="Edit name"
+                      aria-label="Edit name"
+                      onClick={() => setIsNameModalOpen(true)}
                     />
                   </>
                 ),
@@ -82,10 +81,9 @@ const OrganizationSettingsPage = () => {
                   <IconButton
                     icon={<IconPersonAdd />}
                     isDisabled={!geOwnerPermission(org.permission)}
-                    aria-label=""
-                    onClick={() => {
-                      setIsInviteMembersModalOpen(true)
-                    }}
+                    title="Invite members"
+                    aria-label="Invite members"
+                    onClick={() => setIsInviteMembersModalOpen(true)}
                   />
                 ),
               },
@@ -96,7 +94,8 @@ const OrganizationSettingsPage = () => {
                     icon={<IconLogout />}
                     variant="solid"
                     colorScheme="red"
-                    aria-label=""
+                    title="Leave"
+                    aria-label="Leave"
                     onClick={() => setIsLeaveModalOpen(true)}
                   />
                 ),
@@ -114,7 +113,8 @@ const OrganizationSettingsPage = () => {
                     variant="solid"
                     colorScheme="red"
                     isDisabled={!geEditorPermission(org.permission)}
-                    aria-label=""
+                    title="Delete organization"
+                    aria-label="Delete organization"
                     onClick={() => setIsDeleteModalOpen(true)}
                   />
                 ),

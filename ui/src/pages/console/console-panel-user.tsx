@@ -41,9 +41,10 @@ import {
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import ConsoleAPI, {
-  GroupUserManagementList,
-  OrganizationUserManagementList,
-  WorkspaceUserManagementList,
+  GroupUserManagement,
+  ListResponse,
+  OrganizationUserManagement,
+  WorkspaceUserManagement,
 } from '@/client/console/console'
 import UserAPI, { ConsoleUser } from '@/client/idp/user'
 import { getPictureUrlById } from '@/lib/helpers/picture'
@@ -52,7 +53,6 @@ import truncateMiddle from '@/lib/helpers/truncate-middle'
 
 const EditButton = (props: IconButtonProps) => (
   <IconButton
-    disabled
     icon={props.icon ? props.icon : <IconEdit />}
     className={cx('h-[40px]', 'w-[40px]')}
     {...props}
@@ -61,10 +61,12 @@ const EditButton = (props: IconButtonProps) => (
 
 const ConsolePanelUser = () => {
   const [user, setUser] = useState<ConsoleUser>()
-  const [orgList, setOrgList] = useState<OrganizationUserManagementList>()
+  const [orgList, setOrgList] =
+    useState<ListResponse<OrganizationUserManagement>>()
   const [workspaceList, setWorkspaceList] =
-    useState<WorkspaceUserManagementList>()
-  const [groupList, setGroupList] = useState<GroupUserManagementList>()
+    useState<ListResponse<WorkspaceUserManagement>>()
+  const [groupList, setGroupList] =
+    useState<ListResponse<GroupUserManagement>>()
   const { id } = useParams()
   const [workspacePage, setWorkspacePage] = useState(1)
   const [groupPage, setGroupPage] = useState(1)
@@ -72,14 +74,14 @@ const ConsolePanelUser = () => {
 
   const userFetch = () => {
     if (id) {
-      UserAPI.getUserById({ id }).then((value) => {
+      UserAPI.getById(id).then((value) => {
         setUser(value)
       })
     }
   }
   const groupsFetch = () => {
     if (id) {
-      ConsoleAPI.getGroupsByUser({ id: id, page: groupPage, size: 5 }).then(
+      ConsoleAPI.listGroupsByUser({ id: id, page: groupPage, size: 5 }).then(
         (value) => {
           setGroupList(value)
         },
@@ -87,7 +89,7 @@ const ConsolePanelUser = () => {
     }
   }
   const organizationsFetch = () => {
-    ConsoleAPI.getOrganizationsByUser({
+    ConsoleAPI.listOrganizationsByUser({
       id: id,
       page: orgPage,
       size: 5,
@@ -97,7 +99,7 @@ const ConsolePanelUser = () => {
   }
 
   const workspacesFetch = () => {
-    ConsoleAPI.getWorkspacesByUser({
+    ConsoleAPI.listWorkspacesByUser({
       id: id,
       page: workspacePage,
       size: 5,
@@ -167,10 +169,9 @@ const ConsolePanelUser = () => {
                 bottom="10px"
                 position="absolute"
                 zIndex={1000}
-                aria-label=""
-                onClick={() => {
-                  console.log('remove')
-                }}
+                title="Delete picture"
+                aria-label="Delete picture"
+                isDisabled={true}
               />
             ) : null}
           </div>
@@ -186,7 +187,11 @@ const ConsolePanelUser = () => {
                     content: (
                       <>
                         <span>{truncateEnd(user.fullName, 50)}</span>
-                        <EditButton aria-label="Edit full name" />
+                        <EditButton
+                          title="Edit full name"
+                          aria-label="Edit full name"
+                          isDisabled={true}
+                        />
                       </>
                     ),
                   },
@@ -234,10 +239,9 @@ const ConsolePanelUser = () => {
                           </span>
                         ) : null}
                         <EditButton
-                          aria-label=""
-                          onClick={() => {
-                            console.log('edit email')
-                          }}
+                          title="Edit email"
+                          aria-label="Edit email"
+                          isDisabled={true}
                         />
                       </>
                     ),
@@ -246,8 +250,10 @@ const ConsolePanelUser = () => {
                     label: 'Force change password',
                     content: (
                       <EditButton
+                        title="Force change password"
                         aria-label="Force change password"
                         icon={<IconSync />}
+                        isDisabled={true}
                       />
                     ),
                   },

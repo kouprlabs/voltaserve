@@ -58,7 +58,7 @@ const typeOptions: FileTypeOption[] = [
   { value: FileType.Folder, label: 'Folder' },
 ]
 
-const FileSearchFilter = () => {
+const FileSearchFilters = () => {
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
   const { id: workspaceId, fileId } = useParams()
@@ -282,4 +282,4 @@ const FileSearchFilter = () => {
   )
 }
 
-export default FileSearchFilter
+export default FileSearchFilters

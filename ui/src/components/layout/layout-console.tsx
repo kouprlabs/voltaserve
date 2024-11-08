@@ -67,7 +67,7 @@ const LayoutConsole = () => {
         {
           href: '/console/dashboard',
           icon: <IconHome />,
-          primaryText: 'Cloud Console Overview',
+          primaryText: 'Overview',
           secondaryText: 'Basic information about instance',
         },
         {

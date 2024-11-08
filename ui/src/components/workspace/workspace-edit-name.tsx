@@ -90,7 +90,7 @@ const WorkspaceEditName = ({
     >
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>Change Name</ModalHeader>
+        <ModalHeader>Edit Name</ModalHeader>
         <ModalCloseButton />
         <Formik
           enableReinitialize={true}

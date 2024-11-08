@@ -7,7 +7,7 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-import { useEffect, useState } from 'react'
+import { useCallback, useState } from 'react'
 import {
   Link,
   useLocation,
@@ -25,10 +25,10 @@ import {
   Text,
   usePagePagination,
 } from '@koupr/ui'
-import * as Yup from 'yup'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
-import ConsoleAPI, { GroupManagementList } from '@/client/console/console'
+import ConsoleAPI, { GroupManagement } from '@/client/console/console'
+import { swrConfig } from '@/client/options'
 import ConsoleRenameModal from '@/components/console/console-rename-modal'
 import { consoleGroupsPaginationStorage } from '@/infra/pagination'
 import { decodeQuery } from '@/lib/helpers/query'
@@ -38,60 +38,30 @@ const ConsolePanelGroups = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const query = decodeQuery(searchParams.get('q') as string)
-  const [list, setList] = useState<GroupManagementList>()
   const { page, size, steps, setPage, setSize } = usePagePagination({
     navigateFn: navigate,
     searchFn: () => location.search,
     storage: consoleGroupsPaginationStorage(),
   })
   const [isConfirmRenameOpen, setIsConfirmRenameOpen] = useState(false)
-  const [isSubmitting, setSubmitting] = useState(false)
   const [currentName, setCurrentName] = useState<string>('')
   const [groupId, setGroupId] = useState<string>()
-  const formSchema = Yup.object().shape({
-    name: Yup.string().required('Name is required').max(255),
-  })
+  const { data: list, mutate } =
+    ConsoleAPI.useListOrSearchObject<GroupManagement>(
+      'group',
+      { page, size, query },
+      swrConfig(),
+    )
 
-  const renameGroup = async (
-    id: string | null,
-    currentName: string | null,
-    newName: string | null,
-    confirm: boolean = false,
-  ) => {
-    if (confirm && groupId !== undefined && newName !== null) {
-      try {
-        setSubmitting(true)
-        await ConsoleAPI.renameObject({ id: groupId, name: newName }, 'group')
-      } finally {
-        closeConfirmationWindow()
+  const renameRequest = useCallback(
+    async (name: string) => {
+      if (groupId) {
+        await ConsoleAPI.renameObject({ id: groupId, name }, 'group')
+        await mutate()
       }
-    } else if (id !== null && currentName !== null && currentName !== '') {
-      setIsConfirmRenameOpen(true)
-      setCurrentName(currentName)
-      setGroupId(id)
-    }
-  }
-
-  const closeConfirmationWindow = () => {
-    setIsConfirmRenameOpen(false)
-    setSubmitting(false)
-    setCurrentName('')
-    setGroupId(undefined)
-  }
-
-  useEffect(() => {
-    if (query && query.length >= 3) {
-      ConsoleAPI.searchObject('group', {
-        page: page,
-        size: size,
-        query: query,
-      }).then((value) => setList(value))
-    } else {
-      ConsoleAPI.listGroups({ page: page, size: size }).then((value) =>
-        setList(value),
-      )
-    }
-  }, [page, size, isSubmitting, query])
+    },
+    [groupId],
+  )
 
   if (!list) {
     return <SectionSpinner />
@@ -100,13 +70,10 @@ const ConsolePanelGroups = () => {
   return (
     <>
       <ConsoleRenameModal
-        closeConfirmationWindow={closeConfirmationWindow}
+        currentName={currentName}
         isOpen={isConfirmRenameOpen}
-        isSubmitting={isSubmitting}
-        previousName={currentName}
-        object="group"
-        formSchema={formSchema}
-        request={renameGroup}
+        onClose={() => setIsConfirmRenameOpen(false)}
+        onRequest={renameRequest}
       />
       <Helmet>
         <title>Group Management</title>
@@ -167,7 +134,9 @@ const ConsolePanelGroups = () => {
                 label: 'Rename',
                 icon: <IconEdit />,
                 onClick: async (group) => {
-                  await renameGroup(group.id, group.name, null)
+                  setCurrentName(group.name)
+                  setGroupId(group.id)
+                  setIsConfirmRenameOpen(true)
                 },
               },
             ]}

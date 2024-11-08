@@ -78,7 +78,7 @@ const ViewerMosaic = ({ file }: ViewerImageProps) => {
             file.snapshot?.preview?.extension ||
             file.snapshot?.original?.extension
           extension = extension?.replaceAll('.', '')
-          img.src = `${getConfig().apiURL}/mosaics/${file.id}/zoom_level/${zoomLevel}/row/${row}/col/${col}/ext/${extension}?access_token=${accessToken}`
+          img.src = `${getConfig().apiURL}/mosaics/${file.id}/zoom_level/${zoomLevel}/row/${row}/column/${col}/extension/${extension}?access_token=${accessToken}`
 
           img.onload = () => {
             tileCache.current.set(tileKey, img)

@@ -30,8 +30,8 @@ const DrawerDownloadButton = ({
           icon={<IconDownload />}
           variant="solid"
           colorScheme="blue"
-          aria-label="Download"
           title="Download"
+          aria-label="Download"
           className={cx('h-[50px]', 'w-[50px]', 'p-1.5', 'rounded-md')}
           onClick={() => downloadFile(file)}
         />
