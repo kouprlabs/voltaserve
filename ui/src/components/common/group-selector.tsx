@@ -212,7 +212,6 @@ const GroupSelector = ({
                   <div className={cx('self-end')}>
                     {list.totalPages > 1 ? (
                       <Pagination
-                        uiSize="md"
                         maxButtons={3}
                         page={page}
                         totalPages={list.totalPages}

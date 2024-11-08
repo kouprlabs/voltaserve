@@ -166,7 +166,7 @@ const ConsolePanelOrganization = () => {
                               steps={[]}
                               setPage={setUsersPage}
                               setSize={() => {}}
-                              uiSize="xs"
+                              paginationSize="xs"
                               isFirstDisabled={true}
                               isLastDisabled={true}
                               isRewindDisabled={true}
@@ -227,7 +227,7 @@ const ConsolePanelOrganization = () => {
                               steps={[]}
                               setPage={setWorkspacesPage}
                               setSize={() => {}}
-                              uiSize="xs"
+                              paginationSize="xs"
                               isFirstDisabled={true}
                               isLastDisabled={true}
                               isRewindDisabled={true}
@@ -287,7 +287,7 @@ const ConsolePanelOrganization = () => {
                               steps={[]}
                               setPage={setGroupsPage}
                               setSize={() => {}}
-                              uiSize="xs"
+                              paginationSize="xs"
                               isFirstDisabled={true}
                               isLastDisabled={true}
                               isRewindDisabled={true}

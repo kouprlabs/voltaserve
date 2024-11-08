@@ -56,7 +56,7 @@ const TasksList = () => {
           </div>
           {list.totalPages > 1 ? (
             <Pagination
-              uiSize="sm"
+              size="sm"
               maxButtons={3}
               page={page}
               totalPages={list.totalPages}

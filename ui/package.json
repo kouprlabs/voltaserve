@@ -23,7 +23,7 @@
     "@emotion/react": "11.13.3",
     "@emotion/styled": "11.13.0",
     "@google/model-viewer": "4.0.0",
-    "@koupr/ui": "1.10.6",
+    "@koupr/ui": "1.10.8",
     "@nivo/core": "0.87.0",
     "@nivo/pie": "0.87.0",
     "@reduxjs/toolkit": "2.3.0",

@@ -283,7 +283,7 @@ const ConsolePanelUser = () => {
                             steps={[]}
                             setPage={setOrgPage}
                             setSize={() => {}}
-                            uiSize="xs"
+                            paginationSize="xs"
                             isFirstDisabled={true}
                             isLastDisabled={true}
                             isRewindDisabled={true}
@@ -353,7 +353,7 @@ const ConsolePanelUser = () => {
                             steps={[]}
                             setPage={setWorkspacePage}
                             setSize={() => {}}
-                            uiSize="xs"
+                            paginationSize="xs"
                             isFirstDisabled={true}
                             isLastDisabled={true}
                             isRewindDisabled={true}
@@ -419,7 +419,7 @@ const ConsolePanelUser = () => {
                             steps={[]}
                             setPage={setGroupPage}
                             setSize={() => {}}
-                            uiSize="xs"
+                            paginationSize="xs"
                             isFirstDisabled={true}
                             isLastDisabled={true}
                             isRewindDisabled={true}
