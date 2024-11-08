@@ -70,7 +70,6 @@ const ConsolePanelGroups = () => {
   return (
     <>
       <ConsoleRenameModal
-        header={<>Rename Group</>}
         currentName={currentName}
         isOpen={isConfirmRenameOpen}
         onClose={() => setIsConfirmRenameOpen(false)}

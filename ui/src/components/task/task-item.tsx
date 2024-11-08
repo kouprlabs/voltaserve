@@ -84,7 +84,8 @@ const TaskDrawerItem = ({ task }: TaskDrawerItemProps) => {
                 size="xs"
                 variant="outline"
                 colorScheme="gray"
-                aria-label=""
+                title="Dismiss"
+                aria-label="Dismiss"
                 isLoading={isDismissing}
                 onClick={handleDismiss}
               />

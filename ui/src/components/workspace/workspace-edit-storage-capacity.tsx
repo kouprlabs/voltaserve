@@ -104,7 +104,7 @@ const WorkspaceEditStorageCapacity = ({
     >
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>Change Storage Capacity</ModalHeader>
+        <ModalHeader>Edit Storage Capacity</ModalHeader>
         <ModalCloseButton />
         <Formik
           enableReinitialize={true}

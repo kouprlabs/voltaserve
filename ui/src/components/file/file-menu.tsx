@@ -221,7 +221,8 @@ const FileMenu = ({
             as={IconButton}
             icon={<IconMoreVert />}
             variant="solid"
-            aria-label=""
+            title="File menu"
+            aria-label="File menu"
           />
         ) : null}
         <Portal>

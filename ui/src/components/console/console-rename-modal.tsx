@@ -7,7 +7,7 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-import { ReactElement, useCallback, useRef } from 'react'
+import { useCallback, useRef } from 'react'
 import {
   Button,
   FormControl,
@@ -34,7 +34,6 @@ import cx from 'classnames'
 import useFocusAndSelectAll from '@/hooks/use-focus-and-select-all'
 
 interface ConsoleRenameModalProps {
-  header: ReactElement
   currentName: string
   isOpen: boolean
   onClose: () => void
@@ -48,7 +47,6 @@ type FormValues = {
 }
 
 const ConsoleRenameModal = ({
-  header,
   currentName,
   isOpen,
   onClose,
@@ -80,7 +78,7 @@ const ConsoleRenameModal = ({
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>{header}</ModalHeader>
+        <ModalHeader>Edit Name</ModalHeader>
         <ModalCloseButton />
         <Formik
           enableReinitialize={true}

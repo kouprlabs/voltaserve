@@ -103,11 +103,10 @@ const WorkspaceSettingsPage = () => {
                   <>
                     <span>{prettyBytes(workspace.storageCapacity)}</span>
                     <EditButton
-                      aria-label=""
+                      title="Edit storage capacity"
+                      aria-label="Edit storage capacity"
                       isDisabled={!hasEditPermission}
-                      onClick={() => {
-                        setIsStorageCapacityModalOpen(true)
-                      }}
+                      onClick={() => setIsStorageCapacityModalOpen(true)}
                     />
                   </>
                 ),
@@ -123,11 +122,10 @@ const WorkspaceSettingsPage = () => {
                   <>
                     <span>{truncateEnd(workspace.name, 50)}</span>
                     <EditButton
-                      aria-label=""
+                      title="Edit name"
+                      aria-label="Edit name"
                       isDisabled={!hasEditPermission}
-                      onClick={() => {
-                        setIsNameModalOpen(true)
-                      }}
+                      onClick={() => setIsNameModalOpen(true)}
                     />
                   </>
                 ),
@@ -145,7 +143,8 @@ const WorkspaceSettingsPage = () => {
                     variant="solid"
                     colorScheme="red"
                     isDisabled={!hasEditPermission}
-                    aria-label=""
+                    title="Delete workspace"
+                    aria-label="Delete workspace"
                     onClick={() => setIsDeleteModalOpen(true)}
                   />
                 ),

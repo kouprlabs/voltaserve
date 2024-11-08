@@ -66,10 +66,9 @@ const GroupSettingsPage = () => {
                     <IconButton
                       icon={<IconEdit />}
                       isDisabled={!hasEditPermission}
-                      aria-label=""
-                      onClick={() => {
-                        setIsNameModalOpen(true)
-                      }}
+                      title="Edit name"
+                      aria-label="Edit name"
+                      onClick={() => setIsNameModalOpen(true)}
                     />
                   </>
                 ),
@@ -85,10 +84,9 @@ const GroupSettingsPage = () => {
                   <IconButton
                     icon={<IconPersonAdd />}
                     isDisabled={!hasOwnerPermission}
-                    aria-label=""
-                    onClick={() => {
-                      setIsAddMembersModalOpen(true)
-                    }}
+                    title="Add members"
+                    aria-label="Add members"
+                    onClick={() => setIsAddMembersModalOpen(true)}
                   />
                 ),
               },
@@ -105,7 +103,8 @@ const GroupSettingsPage = () => {
                     variant="solid"
                     colorScheme="red"
                     isDisabled={!hasOwnerPermission}
-                    aria-label=""
+                    title="Delete group"
+                    aria-label="Delete group"
                     onClick={() => setDeleteModalOpen(true)}
                   />
                 ),

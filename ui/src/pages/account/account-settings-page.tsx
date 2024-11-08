@@ -102,10 +102,9 @@ const AccountSettingsPage = () => {
                   <>
                     <span>{truncateEnd(user.fullName, 50)}</span>
                     <EditButton
+                      title="Edit name"
                       aria-label="Edit name"
-                      onClick={() => {
-                        setIsFullNameModalOpen(true)
-                      }}
+                      onClick={() => setIsFullNameModalOpen(true)}
                     />
                   </>
                 ),
@@ -149,10 +148,9 @@ const AccountSettingsPage = () => {
                       </span>
                     ) : null}
                     <EditButton
+                      title="Edit email"
                       aria-label="Edit email"
-                      onClick={() => {
-                        setIsEmailModalOpen(true)
-                      }}
+                      onClick={() => setIsEmailModalOpen(true)}
                     />
                   </>
                 ),
@@ -161,10 +159,9 @@ const AccountSettingsPage = () => {
                 label: 'Password',
                 content: (
                   <EditButton
+                    title="Change password"
                     aria-label="Change password"
-                    onClick={() => {
-                      setIsPasswordModalOpen(true)
-                    }}
+                    onClick={() => setIsPasswordModalOpen(true)}
                   />
                 ),
               },
@@ -194,6 +191,7 @@ const AccountSettingsPage = () => {
                     icon={<IconDelete />}
                     variant="solid"
                     colorScheme="red"
+                    title="Delete account"
                     aria-label="Delete account"
                     onClick={() => setIsDeleteModalOpen(true)}
                   />

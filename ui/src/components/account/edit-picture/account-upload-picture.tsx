@@ -93,7 +93,8 @@ const AccountUploadPicture = ({
                 'absolute',
                 'z-[1000]',
               )}
-              aria-label=""
+              title="Edit picture"
+              aria-label="Edit picture"
               disabled={disabled}
               onClick={handleEdit}
             />

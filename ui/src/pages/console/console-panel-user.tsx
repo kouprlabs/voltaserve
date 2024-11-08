@@ -53,7 +53,6 @@ import truncateMiddle from '@/lib/helpers/truncate-middle'
 
 const EditButton = (props: IconButtonProps) => (
   <IconButton
-    disabled
     icon={props.icon ? props.icon : <IconEdit />}
     className={cx('h-[40px]', 'w-[40px]')}
     {...props}
@@ -170,7 +169,8 @@ const ConsolePanelUser = () => {
                 bottom="10px"
                 position="absolute"
                 zIndex={1000}
-                aria-label=""
+                title="Delete picture"
+                aria-label="Delete picture"
                 isDisabled={true}
               />
             ) : null}
@@ -187,7 +187,11 @@ const ConsolePanelUser = () => {
                     content: (
                       <>
                         <span>{truncateEnd(user.fullName, 50)}</span>
-                        <EditButton aria-label="Edit full name" />
+                        <EditButton
+                          title="Edit full name"
+                          aria-label="Edit full name"
+                          isDisabled={true}
+                        />
                       </>
                     ),
                   },
@@ -234,7 +238,11 @@ const ConsolePanelUser = () => {
                             )}
                           </span>
                         ) : null}
-                        <EditButton aria-label="" isDisabled={true} />
+                        <EditButton
+                          title="Edit email"
+                          aria-label="Edit email"
+                          isDisabled={true}
+                        />
                       </>
                     ),
                   },
@@ -242,8 +250,10 @@ const ConsolePanelUser = () => {
                     label: 'Force change password',
                     content: (
                       <EditButton
+                        title="Force change password"
                         aria-label="Force change password"
                         icon={<IconSync />}
+                        isDisabled={true}
                       />
                     ),
                   },

@@ -75,7 +75,8 @@ const UploadItem = ({ upload: uploadProp }: UploadsItemProps) => {
               size="xs"
               variant="outline"
               colorScheme={upload.isProgressing ? 'red' : 'gray'}
-              aria-label=""
+              title="Remove"
+              aria-label="Remove"
               onClick={() => {
                 upload.request?.abort()
                 dispatch(uploadRemoved(upload.id))

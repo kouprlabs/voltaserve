@@ -71,7 +71,6 @@ const ConsolePanelOrganizations = () => {
   return (
     <>
       <ConsoleRenameModal
-        header={<>Rename Organization</>}
         currentName={currentName}
         isOpen={isConfirmRenameOpen}
         onClose={() => setIsConfirmRenameOpen(false)}

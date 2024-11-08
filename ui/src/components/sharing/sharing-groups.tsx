@@ -221,7 +221,8 @@ const SharingGroups = ({
                       <IconButton
                         icon={<IconDelete />}
                         colorScheme="red"
-                        aria-label=""
+                        title="Revoke group permission"
+                        aria-label="Revoke group permission"
                         isLoading={permissionBeingRevoked === p.id}
                         onClick={() => handleRevokeGroupPermission(p)}
                       />

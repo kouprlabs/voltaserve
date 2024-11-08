@@ -85,7 +85,8 @@ const AccountLayout = () => {
               bottom="10px"
               position="absolute"
               zIndex={1000}
-              aria-label=""
+              title="Edit picture"
+              aria-label="Edit picture"
               onClick={() => setIsImageModalOpen(true)}
             />
           </div>
