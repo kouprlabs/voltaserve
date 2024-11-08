@@ -8,11 +8,10 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
 import { useMemo, useState } from 'react'
+import { SectionSpinner, variables } from '@koupr/ui'
 import cx from 'classnames'
 import { File } from '@/client/api/file'
 import { getAccessTokenOrRedirect } from '@/infra/token'
-import SectionSpinner from '@/lib/components/section-spinner'
-import variables from '@/lib/variables'
 
 export type ViewerImageProps = {
   file: File

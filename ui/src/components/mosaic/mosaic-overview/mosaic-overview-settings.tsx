@@ -9,6 +9,7 @@
 // licenses/AGPL.txt.
 import { useCallback, useMemo } from 'react'
 import { Button, Card, CardBody, CardFooter, Text } from '@chakra-ui/react'
+import { IconBolt, IconDelete } from '@koupr/ui'
 import cx from 'classnames'
 import FileAPI from '@/client/api/file'
 import MosaicAPI from '@/client/api/mosaic'
@@ -19,7 +20,6 @@ import {
 } from '@/client/api/permission'
 import TaskAPI from '@/client/api/task'
 import { swrConfig } from '@/client/options'
-import { IconBolt, IconDelete } from '@/lib/components/icons'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { modalDidClose } from '@/store/ui/mosaic'
 

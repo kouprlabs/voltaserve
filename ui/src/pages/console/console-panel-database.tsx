@@ -11,7 +11,7 @@ import { useEffect, useState } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { Heading, Tab, TabList, Tabs } from '@chakra-ui/react'
 import cx from 'classnames'
-import ConsoleApi from '@/client/console/console'
+import ConsoleAPI from '@/client/console/console'
 
 const ConsolePanelDatabase = () => {
   const location = useLocation()
@@ -30,7 +30,7 @@ const ConsolePanelDatabase = () => {
   }, [location])
 
   useEffect(() => {
-    ConsoleApi.checkIndexesAvailability().then((value) => {
+    ConsoleAPI.checkIndexesAvailability().then((value) => {
       setIndexesAvailable(value)
     })
   }, [])

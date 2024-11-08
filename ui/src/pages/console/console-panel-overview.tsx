@@ -24,18 +24,18 @@ import {
   Thead,
   Tr,
 } from '@chakra-ui/react'
-import cx from 'classnames'
-import { Helmet } from 'react-helmet-async'
-import semver from 'semver'
-import ConsoleApi, { ComponentVersion } from '@/client/console/console'
 import {
   IconChevronRight,
   IconFlag,
   IconGroup,
   IconPerson,
   IconWorkspaces,
-} from '@/lib/components/icons'
-import SectionSpinner from '@/lib/components/section-spinner'
+  SectionSpinner,
+} from '@koupr/ui'
+import cx from 'classnames'
+import { Helmet } from 'react-helmet-async'
+import semver from 'semver'
+import ConsoleAPI, { ComponentVersion } from '@/client/console/console'
 
 const spinnerHeight = '40px'
 const uiCurrentVersion = { version: '3.0.0' }
@@ -53,27 +53,27 @@ const compareFn = (a: ComponentVersion, b: ComponentVersion) =>
   a.name > b.name ? 1 : 0
 
 const ConsolePanelOverview = () => {
-  const [usersAmount, setUsersAmount] = useState<number>()
-  const [groupsAmount, setGroupsAmount] = useState<number>()
-  const [organizationsAmount, setOrganizationsAmount] = useState<number>()
-  const [workspacesAmount, setWorkspacesAmount] = useState<number>()
+  const [userCount, setUserCount] = useState<number>()
+  const [groupCount, setGroupCount] = useState<number>()
+  const [organizationCount, setOrganizationCount] = useState<number>()
+  const [workspaceCount, setWorkspaceCount] = useState<number>()
   const [componentsData, setComponentsData] = useState<ComponentVersion[]>([])
 
   useEffect(() => {
-    ConsoleApi.countObject('user').then((value) => {
-      setUsersAmount(value.count)
+    ConsoleAPI.countObject('user').then((value) => {
+      setUserCount(value.count)
     })
-    ConsoleApi.countObject('organization').then((value) => {
-      setOrganizationsAmount(value.count)
+    ConsoleAPI.countObject('organization').then((value) => {
+      setOrganizationCount(value.count)
     })
-    ConsoleApi.countObject('group').then((value) => {
-      setGroupsAmount(value.count)
+    ConsoleAPI.countObject('group').then((value) => {
+      setGroupCount(value.count)
     })
-    ConsoleApi.countObject('workspace').then((value) => {
-      setWorkspacesAmount(value.count)
+    ConsoleAPI.countObject('workspace').then((value) => {
+      setWorkspaceCount(value.count)
     })
     internalComponents.map((component) => {
-      ConsoleApi.getComponentsVersions(component).then((value) => {
+      ConsoleAPI.getComponentsVersions(component).then((value) => {
         if (component.id == 'ui') {
           value.currentVersion = uiCurrentVersion.version
           value.updateAvailable = semver.gt(
@@ -109,10 +109,12 @@ const ConsolePanelOverview = () => {
                 </Tr>
               </Thead>
             </Table>
-            {usersAmount ? (
+            {userCount ? (
               <Heading>
-                <IconPerson className={cx('text-[26px]')} />
-                {usersAmount}
+                <div className={cx('flex', 'items-center', 'gap-1', 'p-2')}>
+                  <IconPerson className={cx('text-[26px]')} />
+                  {userCount}
+                </div>
               </Heading>
             ) : (
               <SectionSpinner height={spinnerHeight} />
@@ -128,10 +130,12 @@ const ConsolePanelOverview = () => {
                 </Tr>
               </Thead>
             </Table>
-            {organizationsAmount ? (
+            {organizationCount ? (
               <Heading>
-                <IconFlag className={cx('text-[26px]')} />
-                {organizationsAmount}
+                <div className={cx('flex', 'items-center', 'gap-1', 'p-2')}>
+                  <IconFlag className={cx('text-[26px]')} />
+                  {organizationCount}
+                </div>
               </Heading>
             ) : (
               <SectionSpinner height={spinnerHeight} />
@@ -147,10 +151,12 @@ const ConsolePanelOverview = () => {
                 </Tr>
               </Thead>
             </Table>
-            {workspacesAmount ? (
+            {workspaceCount ? (
               <Heading>
-                <IconWorkspaces className={cx('text-[26px]')} />
-                {workspacesAmount}
+                <div className={cx('flex', 'items-center', 'gap-1', 'p-2')}>
+                  <IconWorkspaces className={cx('text-[26px]')} />
+                  {workspaceCount}
+                </div>
               </Heading>
             ) : (
               <SectionSpinner height={spinnerHeight} />
@@ -166,10 +172,12 @@ const ConsolePanelOverview = () => {
                 </Tr>
               </Thead>
             </Table>
-            {groupsAmount ? (
+            {groupCount ? (
               <Heading>
-                <IconGroup className={cx('text-[26px]')} />
-                {groupsAmount}
+                <div className={cx('flex', 'items-center', 'gap-1', 'p-2')}>
+                  <IconGroup className={cx('text-[26px]')} />
+                  {groupCount}
+                </div>
               </Heading>
             ) : (
               <SectionSpinner height={spinnerHeight} />

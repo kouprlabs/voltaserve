@@ -9,9 +9,9 @@
 // licenses/AGPL.txt.
 import { useMemo } from 'react'
 import { Button, IconButton, Tooltip } from '@chakra-ui/react'
+import { IconOpenInNew } from '@koupr/ui'
 import cx from 'classnames'
 import { File } from '@/client/api/file'
-import { IconOpenInNew } from '@/lib/components/icons'
 
 export type DrawerOpenNewTabButtonProps = {
   file: File

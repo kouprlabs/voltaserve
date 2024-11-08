@@ -14,30 +14,22 @@ import {
   useNavigate,
   useSearchParams,
 } from 'react-router-dom'
+import { Heading, Link as ChakraLink, Avatar, Badge } from '@chakra-ui/react'
 import {
-  Heading,
-  Link as ChakraLink,
-  Table,
-  Tbody,
-  Td,
-  Th,
-  Thead,
-  Tr,
-  Avatar,
-  Badge,
+  DataTable,
+  PagePagination,
+  RelativeDate,
+  SectionSpinner,
   Text,
-} from '@chakra-ui/react'
+  usePagePagination,
+} from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import WorkspaceAPI, { SortOrder } from '@/client/api/workspace'
 import { swrConfig } from '@/client/options'
 import { CreateWorkspaceButton } from '@/components/app-bar/app-bar-buttons'
 import { workspacePaginationStorage } from '@/infra/pagination'
-import PagePagination from '@/lib/components/page-pagination'
-import SectionSpinner from '@/lib/components/section-spinner'
-import prettyDate from '@/lib/helpers/pretty-date'
 import { decodeQuery } from '@/lib/helpers/query'
-import usePagePagination from '@/lib/hooks/page-pagination'
 import { useAppDispatch } from '@/store/hook'
 import { mutateUpdated } from '@/store/ui/workspaces'
 
@@ -48,8 +40,8 @@ const WorkspaceListPage = () => {
   const [searchParams] = useSearchParams()
   const query = decodeQuery(searchParams.get('q') as string)
   const { page, size, steps, setPage, setSize } = usePagePagination({
-    navigate,
-    location,
+    navigateFn: navigate,
+    searchFn: () => location.search,
     storage: workspacePaginationStorage(),
   })
   const {
@@ -107,70 +99,72 @@ const WorkspaceListPage = () => {
           </div>
         ) : null}
         {list && list.data.length > 0 ? (
-          <Table variant="simple">
-            <Thead>
-              <Tr>
-                <Th>Name</Th>
-                <Th>Organization</Th>
-                <Th>Permission</Th>
-                <Th>Date</Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              {list.data.map((w) => (
-                <Tr key={w.id}>
-                  <Td>
-                    <div
-                      className={cx(
-                        'flex',
-                        'flex-row',
-                        'gap-1.5',
-                        'items-center',
-                      )}
-                    >
-                      <Avatar
-                        name={w.name}
-                        size="sm"
-                        className={cx('w-[40px]', 'h-[40px]')}
-                      />
-                      <ChakraLink
-                        as={Link}
-                        to={`/workspace/${w.id}/file/${w.rootId}`}
-                        className={cx('no-underline')}
-                      >
-                        <Text noOfLines={1}>{w.name}</Text>
-                      </ChakraLink>
-                    </div>
-                  </Td>
-                  <Td>
+          <DataTable
+            items={list.data}
+            columns={[
+              {
+                title: 'Name',
+                renderCell: (w) => (
+                  <div
+                    className={cx(
+                      'flex',
+                      'flex-row',
+                      'gap-1.5',
+                      'items-center',
+                    )}
+                  >
+                    <Avatar
+                      name={w.name}
+                      size="sm"
+                      className={cx('w-[40px]', 'h-[40px]')}
+                    />
                     <ChakraLink
                       as={Link}
-                      to={`/organization/${w.organization.id}/member`}
+                      to={`/workspace/${w.id}/file/${w.rootId}`}
                       className={cx('no-underline')}
                     >
-                      <Text noOfLines={1}>{w.organization.name}</Text>
+                      <Text noOfLines={1}>{w.name}</Text>
                     </ChakraLink>
-                  </Td>
-                  <Td>
-                    <Badge>{w.permission}</Badge>
-                  </Td>
-                  <Td>{prettyDate(w.createTime)}</Td>
-                </Tr>
-              ))}
-            </Tbody>
-          </Table>
+                  </div>
+                ),
+              },
+              {
+                title: 'Organization',
+                renderCell: (w) => (
+                  <ChakraLink
+                    as={Link}
+                    to={`/organization/${w.organization.id}/member`}
+                    className={cx('no-underline')}
+                  >
+                    <Text noOfLines={1}>{w.organization.name}</Text>
+                  </ChakraLink>
+                ),
+              },
+              {
+                title: 'Permission',
+                renderCell: (w) => <Badge>{w.permission}</Badge>,
+              },
+              {
+                title: 'Date',
+                renderCell: (w) => (
+                  <RelativeDate date={new Date(w.createTime)} />
+                ),
+              },
+            ]}
+          />
         ) : null}
         {list ? (
-          <PagePagination
-            style={{ alignSelf: 'end' }}
-            totalElements={list.totalElements}
-            totalPages={list.totalPages}
-            page={page}
-            size={size}
-            steps={steps}
-            setPage={setPage}
-            setSize={setSize}
-          />
+          <div className={cx('self-end')}>
+            <PagePagination
+              totalElements={list.totalElements}
+              totalPages={list.totalPages}
+              page={page}
+              size={size}
+              steps={steps}
+              setPage={setPage}
+              setSize={setSize}
+            />
+          </div>
         ) : null}
       </div>
     </>

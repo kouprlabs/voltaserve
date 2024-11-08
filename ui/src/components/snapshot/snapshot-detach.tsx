@@ -45,7 +45,7 @@ const SnapshotDetach = () => {
         await mutate?.()
         dispatch(selectionUpdated([]))
         dispatch(detachModalDidClose())
-      } catch (error) {
+      } catch {
         setIsLoading(false)
       } finally {
         setIsLoading(false)

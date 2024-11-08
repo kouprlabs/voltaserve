@@ -19,14 +19,6 @@ import {
   MenuOptionGroup,
   Portal,
 } from '@chakra-ui/react'
-import cx from 'classnames'
-import FileAPI from '@/client/api/file'
-import {
-  geEditorPermission,
-  geOwnerPermission,
-  geViewerPermission,
-} from '@/client/api/permission'
-import { swrConfig } from '@/client/options'
 import {
   IconArrowTopRight,
   IconCheckBoxOutlineBlank,
@@ -42,7 +34,15 @@ import {
   IconSelectCheckBox,
   IconUpload,
   IconVisibility,
-} from '@/lib/components/icons'
+} from '@koupr/ui'
+import cx from 'classnames'
+import FileAPI from '@/client/api/file'
+import {
+  geEditorPermission,
+  geOwnerPermission,
+  geViewerPermission,
+} from '@/client/api/permission'
+import { swrConfig } from '@/client/options'
 import downloadFile from '@/lib/helpers/download-file'
 import {
   isImage,

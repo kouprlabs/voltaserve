@@ -8,12 +8,8 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
 import { useEffect } from 'react'
-import { Outlet, useNavigate } from 'react-router-dom'
+import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useToast } from '@chakra-ui/react'
-import { cx } from '@emotion/css'
-import AppBar from '@/components/app-bar'
-import Logo from '@/components/common/logo'
-import { getAdminStatus } from '@/infra/token'
 import {
   IconWorkspaces,
   IconHome,
@@ -22,8 +18,12 @@ import {
   IconFlag,
   IconPerson,
   IconDatabase,
-} from '@/lib/components/icons'
-import Shell from '@/lib/components/shell'
+  Shell,
+} from '@koupr/ui'
+import { Logo } from '@koupr/ui'
+import { cx } from '@emotion/css'
+import AppBar from '@/components/app-bar'
+import { getAdminStatus } from '@/infra/token'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { errorCleared } from '@/store/ui/error'
 
@@ -31,6 +31,7 @@ const LayoutConsole = () => {
   const toast = useToast()
   const error = useAppSelector((state) => state.ui.error.value)
   const navigate = useNavigate()
+  const location = useLocation()
   const dispatch = useAppDispatch()
 
   useEffect(() => {
@@ -55,8 +56,11 @@ const LayoutConsole = () => {
       storage={{ prefix: 'voltaserve', namespace: 'main' }}
       logo={
         <div className={cx('w-[16px]')}>
-          <Logo />
+          <Logo type="voltaserve" />
         </div>
+      }
+      homeHref={
+        location.pathname.startsWith('/console') ? '/console/dashboard' : '/'
       }
       topBar={<AppBar />}
       items={[
@@ -103,6 +107,8 @@ const LayoutConsole = () => {
           secondaryText: 'Manage database of your cloud instance',
         },
       ]}
+      navigateFn={navigate}
+      pathnameFn={() => location.pathname}
     >
       <Outlet />
     </Shell>

@@ -15,35 +15,24 @@ import {
   useSearchParams,
 } from 'react-router-dom'
 import { Avatar, Link as ChakraLink } from '@chakra-ui/react'
+import { Heading } from '@chakra-ui/react'
 import {
-  Center,
-  Heading,
-  IconButton,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
-  Stack,
-  Table,
-  Tbody,
-  Td,
+  DataTable,
+  IconEdit,
+  PagePagination,
+  RelativeDate,
+  SectionSpinner,
   Text,
-  Th,
-  Thead,
-  Tr,
-} from '@chakra-ui/react'
+  usePagePagination,
+} from '@koupr/ui'
 import * as Yup from 'yup'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
-import ConsoleApi, { WorkspaceManagementList } from '@/client/console/console'
+import ConsoleAPI, { WorkspaceManagementList } from '@/client/console/console'
 import ConsoleRenameModal from '@/components/console/console-rename-modal'
 import { consoleWorkspacesPaginationStorage } from '@/infra/pagination'
-import { IconMoreVert } from '@/lib/components/icons'
-import PagePagination from '@/lib/components/page-pagination'
-import SectionSpinner from '@/lib/components/section-spinner'
 import prettyBytes from '@/lib/helpers/pretty-bytes'
 import { decodeQuery } from '@/lib/helpers/query'
-import usePagePagination from '@/lib/hooks/page-pagination'
 
 const ConsolePanelWorkspaces = () => {
   const [searchParams] = useSearchParams()
@@ -52,8 +41,8 @@ const ConsolePanelWorkspaces = () => {
   const query = decodeQuery(searchParams.get('q') as string)
   const [list, setList] = useState<WorkspaceManagementList>()
   const { page, size, steps, setPage, setSize } = usePagePagination({
-    navigate,
-    location,
+    navigateFn: navigate,
+    searchFn: () => location.search,
     storage: consoleWorkspacesPaginationStorage(),
   })
   const [confirmRenameWindowOpen, setConfirmRenameWindowOpen] = useState(false)
@@ -74,7 +63,7 @@ const ConsolePanelWorkspaces = () => {
       if (confirm && workspaceId !== undefined && newName !== null) {
         try {
           setSubmitting(true)
-          await ConsoleApi.renameObject(
+          await ConsoleAPI.renameObject(
             { id: workspaceId, name: newName },
             'workspace',
           )
@@ -99,13 +88,13 @@ const ConsolePanelWorkspaces = () => {
 
   useEffect(() => {
     if (query && query.length >= 3) {
-      ConsoleApi.searchObject('workspace', {
+      ConsoleAPI.searchObject('workspace', {
         page: page,
         size: size,
         query: query,
       }).then((value) => setList(value))
     } else {
-      ConsoleApi.listWorkspaces({ page: page, size: size, query: query }).then(
+      ConsoleAPI.listWorkspaces({ page: page, size: size, query: query }).then(
         (value) => setList(value),
       )
     }
@@ -132,105 +121,86 @@ const ConsolePanelWorkspaces = () => {
       <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
         <Heading className={cx('text-heading')}>Workspace Management</Heading>
         {list && list.data.length > 0 ? (
-          <Stack direction="column" spacing={2}>
-            <Table variant="simple">
-              <Thead>
-                <Tr>
-                  <Th>Workspace name</Th>
-                  <Th>Organization</Th>
-                  <Th>Quota</Th>
-                  <Th>Create time</Th>
-                  <Th>Update time</Th>
-                  <Th></Th>
-                </Tr>
-              </Thead>
-              <Tbody>
-                {list.data.map((workspace) => (
-                  <Tr key={workspace.id}>
-                    <Td>
-                      <div
-                        className={cx(
-                          'flex',
-                          'flex-row',
-                          'gap-1.5',
-                          'items-center',
-                        )}
-                      >
-                        <Avatar
-                          name={workspace.name}
-                          size="sm"
-                          className={cx('w-[40px]', 'h-[40px]')}
-                        />
+          <DataTable
+            items={list.data}
+            columns={[
+              {
+                title: 'Name',
+                renderCell: (workspace) => (
+                  <div
+                    className={cx(
+                      'flex',
+                      'flex-row',
+                      'gap-1.5',
+                      'items-center',
+                    )}
+                  >
+                    <Avatar
+                      name={workspace.name}
+                      size="sm"
+                      className={cx('w-[40px]', 'h-[40px]')}
+                    />
 
-                        <Text noOfLines={1}>{workspace.name}</Text>
-                      </div>
-                    </Td>
-                    <Td>
-                      <ChakraLink
-                        as={Link}
-                        to={`/console/organizations/${workspace.organization.id}`}
-                        className={cx('no-underline')}
-                      >
-                        <Text noOfLines={1}>{workspace.organization.name}</Text>
-                      </ChakraLink>
-                    </Td>
-                    <Td>
-                      <Text>{prettyBytes(workspace.storageCapacity)}</Text>
-                    </Td>
-                    <Td>
-                      <Text>
-                        {new Date(workspace.createTime).toLocaleDateString()}
-                      </Text>
-                    </Td>
-                    <Td>
-                      <Text>
-                        {new Date(workspace.updateTime).toLocaleString()}
-                      </Text>
-                    </Td>
-                    <Td>
-                      <Center>
-                        <Menu>
-                          <MenuButton
-                            as={IconButton}
-                            icon={<IconMoreVert />}
-                            variant="ghost"
-                            aria-label=""
-                          />
-                          <MenuList>
-                            <MenuItem
-                              onClick={async () => {
-                                await renameWorkspace(
-                                  workspace.id,
-                                  workspace.name,
-                                  null,
-                                )
-                              }}
-                            >
-                              Rename
-                            </MenuItem>
-                          </MenuList>
-                        </Menu>
-                      </Center>
-                    </Td>
-                  </Tr>
-                ))}
-              </Tbody>
-            </Table>
-          </Stack>
+                    <Text noOfLines={1}>{workspace.name}</Text>
+                  </div>
+                ),
+              },
+              {
+                title: 'Organization',
+                renderCell: (workspace) => (
+                  <ChakraLink
+                    as={Link}
+                    to={`/console/organizations/${workspace.organization.id}`}
+                    className={cx('no-underline')}
+                  >
+                    <Text noOfLines={1}>{workspace.organization.name}</Text>
+                  </ChakraLink>
+                ),
+              },
+              {
+                title: 'Quota',
+                renderCell: (workspace) => (
+                  <Text>{prettyBytes(workspace.storageCapacity)}</Text>
+                ),
+              },
+              {
+                title: 'Created',
+                renderCell: (workspace) => (
+                  <RelativeDate date={new Date(workspace.createTime)} />
+                ),
+              },
+              {
+                title: 'Updated',
+                renderCell: (workspace) => (
+                  <RelativeDate date={new Date(workspace.updateTime)} />
+                ),
+              },
+            ]}
+            actions={[
+              {
+                label: 'Rename',
+                icon: <IconEdit />,
+                onClick: async (workspace) => {
+                  await renameWorkspace(workspace.id, workspace.name, null)
+                },
+              },
+            ]}
+          />
         ) : (
           <div>No workspaces found.</div>
         )}
         {list ? (
-          <PagePagination
-            style={{ alignSelf: 'end' }}
-            totalElements={list.totalElements}
-            totalPages={Math.ceil(list.totalElements / size)}
-            page={page}
-            size={size}
-            steps={steps}
-            setPage={setPage}
-            setSize={setSize}
-          />
+          <div className={cx('self-end')}>
+            <PagePagination
+              totalElements={list.totalElements}
+              totalPages={Math.ceil(list.totalElements / size)}
+              page={page}
+              size={size}
+              steps={steps}
+              setPage={setPage}
+              setSize={setSize}
+            />
+          </div>
         ) : null}
       </div>
     </>

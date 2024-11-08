@@ -14,30 +14,22 @@ import {
   useNavigate,
   useSearchParams,
 } from 'react-router-dom'
+import { Heading, Link as ChakraLink, Avatar, Badge } from '@chakra-ui/react'
 import {
-  Heading,
-  Link as ChakraLink,
-  Table,
-  Tbody,
-  Td,
-  Th,
-  Thead,
-  Tr,
-  Avatar,
-  Badge,
+  DataTable,
+  PagePagination,
+  RelativeDate,
+  SectionSpinner,
   Text,
-} from '@chakra-ui/react'
+  usePagePagination,
+} from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import OrganizationAPI, { SortOrder } from '@/client/api/organization'
 import { swrConfig } from '@/client/options'
 import { CreateOrganizationButton } from '@/components/app-bar/app-bar-buttons'
 import { organizationPaginationStorage } from '@/infra/pagination'
-import PagePagination from '@/lib/components/page-pagination'
-import SectionSpinner from '@/lib/components/section-spinner'
-import prettyDate from '@/lib/helpers/pretty-date'
 import { decodeQuery } from '@/lib/helpers/query'
-import usePagePagination from '@/lib/hooks/page-pagination'
 import { useAppDispatch } from '@/store/hook'
 import { mutateUpdated } from '@/store/ui/organizations'
 
@@ -48,8 +40,8 @@ const OrganizationListPage = () => {
   const [searchParams] = useSearchParams()
   const query = decodeQuery(searchParams.get('q') as string)
   const { page, size, steps, setPage, setSize } = usePagePagination({
-    navigate,
-    location,
+    navigateFn: navigate,
+    searchFn: () => location.search,
     storage: organizationPaginationStorage(),
   })
   const {
@@ -107,60 +99,60 @@ const OrganizationListPage = () => {
           </div>
         ) : null}
         {list && list.data.length > 0 ? (
-          <Table variant="simple">
-            <Thead>
-              <Tr>
-                <Th>Name</Th>
-                <Th>Permission</Th>
-                <Th>Date</Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              {list.data.map((o) => (
-                <Tr key={o.id}>
-                  <Td>
-                    <div
-                      className={cx(
-                        'flex',
-                        'flex-row',
-                        'gap-1.5',
-                        'items-center',
-                      )}
+          <DataTable
+            items={list.data}
+            columns={[
+              {
+                title: 'Name',
+                renderCell: (o) => (
+                  <div
+                    className={cx(
+                      'flex',
+                      'flex-row',
+                      'gap-1.5',
+                      'items-center',
+                    )}
+                  >
+                    <Avatar
+                      name={o.name}
+                      size="sm"
+                      className={cx('w-[40px]', 'h-[40px]')}
+                    />
+                    <ChakraLink
+                      as={Link}
+                      to={`/organization/${o.id}/member`}
+                      className={cx('no-underline')}
                     >
-                      <Avatar
-                        name={o.name}
-                        size="sm"
-                        className={cx('w-[40px]', 'h-[40px]')}
-                      />
-                      <ChakraLink
-                        as={Link}
-                        to={`/organization/${o.id}/member`}
-                        className={cx('no-underline')}
-                      >
-                        <Text noOfLines={1}>{o.name}</Text>
-                      </ChakraLink>
-                    </div>
-                  </Td>
-                  <Td>
-                    <Badge>{o.permission}</Badge>
-                  </Td>
-                  <Td>{prettyDate(o.createTime)}</Td>
-                </Tr>
-              ))}
-            </Tbody>
-          </Table>
+                      <Text noOfLines={1}>{o.name}</Text>
+                    </ChakraLink>
+                  </div>
+                ),
+              },
+              {
+                title: 'Permission',
+                renderCell: (o) => <Badge>{o.permission}</Badge>,
+              },
+              {
+                title: 'Date',
+                renderCell: (o) => (
+                  <RelativeDate date={new Date(o.createTime)} />
+                ),
+              },
+            ]}
+          />
         ) : null}
         {list ? (
-          <PagePagination
-            style={{ alignSelf: 'end' }}
-            totalElements={list.totalElements}
-            totalPages={list.totalPages}
-            page={page}
-            size={size}
-            steps={steps}
-            setPage={setPage}
-            setSize={setSize}
-          />
+          <div className={cx('self-end')}>
+            <PagePagination
+              totalElements={list.totalElements}
+              totalPages={list.totalPages}
+              page={page}
+              size={size}
+              steps={steps}
+              setPage={setPage}
+              setSize={setSize}
+            />
+          </div>
         ) : null}
       </div>
     </>

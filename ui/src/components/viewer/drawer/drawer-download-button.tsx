@@ -8,9 +8,9 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
 import { Button, IconButton, Tooltip } from '@chakra-ui/react'
+import { IconDownload } from '@koupr/ui'
 import cx from 'classnames'
 import { File } from '@/client/api/file'
-import { IconDownload } from '@/lib/components/icons'
 import downloadFile from '@/lib/helpers/download-file'
 
 export type DrawerDownloadButtonProps = {

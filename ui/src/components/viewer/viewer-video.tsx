@@ -8,9 +8,9 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
 import { useMemo } from 'react'
+import { variables } from '@koupr/ui'
 import { File } from '@/client/api/file'
 import { getAccessTokenOrRedirect } from '@/infra/token'
-import variables from '@/lib/variables'
 
 export type ViewerVideoProps = {
   file: File

@@ -19,23 +19,20 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
-  Stack,
-  Table,
-  Tbody,
-  Td,
-  Th,
-  Thead,
-  Tr,
 } from '@chakra-ui/react'
+import {
+  DataTable,
+  PagePagination,
+  SectionSpinner,
+  Text,
+  usePagePagination,
+} from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
-import ConsoleApi from '@/client/console/console'
+import ConsoleAPI from '@/client/console/console'
 import { swrConfig } from '@/client/options'
 import { organizationPaginationStorage } from '@/infra/pagination'
-import PagePagination from '@/lib/components/page-pagination'
-import SectionSpinner from '@/lib/components/section-spinner'
 import { decodeQuery } from '@/lib/helpers/query'
-import usePagePagination from '@/lib/hooks/page-pagination'
 import store from '@/store/configure-store'
 import { useAppDispatch } from '@/store/hook'
 import { errorOccurred } from '@/store/ui/error'
@@ -51,15 +48,15 @@ const ConsolePanelDatabaseIndexes = () => {
   const [focusedIndex, setFocusedIndex] = useState<string | null>(null)
   const query = decodeQuery(searchParams.get('q') as string)
   const { page, size, steps, setPage, setSize } = usePagePagination({
-    navigate,
-    location,
+    navigateFn: navigate,
+    searchFn: () => location.search,
     storage: organizationPaginationStorage(),
   })
   const {
     data: list,
     error,
     mutate,
-  } = ConsoleApi.useListIndexes({ page, size }, swrConfig())
+  } = ConsoleAPI.useListIndexes({ page, size }, swrConfig())
 
   const sendRebuildRequest = (
     indexName: string | null,
@@ -112,10 +109,10 @@ const ConsolePanelDatabaseIndexes = () => {
       >
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>Are You sure?</ModalHeader>
+          <ModalHeader>Rebuild Index</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            You are going to rebuild {focusedIndex}, please confirm this action
+            Are you sure you want to rebuild {focusedIndex}?
           </ModalBody>
           <ModalFooter>
             <Button
@@ -150,44 +147,38 @@ const ConsolePanelDatabaseIndexes = () => {
       </Helmet>
       <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
         {list && list.data.length > 0 ? (
-          <Stack direction="column" spacing={2}>
-            <Table variant="simple">
-              <Thead>
-                <Tr>
-                  <Th>Name</Th>
-                  <Th>Table</Th>
-                  <Th>Syntax</Th>
-                  <Th></Th>
-                </Tr>
-              </Thead>
-              <Tbody>
-                {list.data.map((item) => (
-                  <Tr key={item.indexName}>
-                    <Td>{item.indexName}</Td>
-                    <Td>{item.tableName}</Td>
-                    <Td>
-                      <Code>{item.indexDef}</Code>
-                    </Td>
-                    <Td></Td>
-                  </Tr>
-                ))}
-              </Tbody>
-            </Table>
-          </Stack>
+          <DataTable
+            items={list.data}
+            columns={[
+              {
+                title: 'Name',
+                renderCell: (item) => <Text>{item.indexName}</Text>,
+              },
+              {
+                title: 'Table',
+                renderCell: (item) => <Text>{item.tableName}</Text>,
+              },
+              {
+                title: 'Syntax',
+                renderCell: (item) => <Code>{item.indexDef}</Code>,
+              },
+            ]}
+          />
         ) : (
           <div>No indexes to show</div>
         )}
         {list ? (
-          <PagePagination
-            style={{ alignSelf: 'end' }}
-            totalElements={list.totalElements}
-            totalPages={Math.ceil(list.totalElements / size)}
-            page={page}
-            size={size}
-            steps={steps}
-            setPage={setPage}
-            setSize={setSize}
-          />
+          <div className={cx('self-end')}>
+            <PagePagination
+              totalElements={list.totalElements}
+              totalPages={Math.ceil(list.totalElements / size)}
+              page={page}
+              size={size}
+              steps={steps}
+              setPage={setPage}
+              setSize={setSize}
+            />
+          </div>
         ) : null}
       </div>
     </>

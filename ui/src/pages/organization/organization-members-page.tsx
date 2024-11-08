@@ -14,22 +14,16 @@ import {
   useParams,
   useSearchParams,
 } from 'react-router-dom'
+import { Button, Avatar } from '@chakra-ui/react'
 import {
-  IconButton,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
-  Table,
-  Tbody,
-  Td,
-  Th,
-  Thead,
-  Tr,
-  Button,
-  Avatar,
-  Portal,
-} from '@chakra-ui/react'
+  DataTable,
+  IconLogout,
+  IconPersonAdd,
+  PagePagination,
+  SectionSpinner,
+  Text,
+  usePagePagination,
+} from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import OrganizationAPI from '@/client/api/organization'
@@ -39,14 +33,10 @@ import { swrConfig } from '@/client/options'
 import OrganizationInviteMembers from '@/components/organization/organization-invite-members'
 import OrganizationRemoveMember from '@/components/organization/organization-remove-member'
 import { organizationMemberPaginationStorage } from '@/infra/pagination'
-import { IconLogout, IconMoreVert, IconPersonAdd } from '@/lib/components/icons'
-import PagePagination from '@/lib/components/page-pagination'
-import SectionSpinner from '@/lib/components/section-spinner'
 import { getPictureUrlById } from '@/lib/helpers/picture'
 import { decodeQuery } from '@/lib/helpers/query'
 import { truncateEnd } from '@/lib/helpers/truncate-end'
 import truncateMiddle from '@/lib/helpers/truncate-middle'
-import usePagePagination from '@/lib/hooks/page-pagination'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import {
   inviteModalDidClose,
@@ -60,8 +50,8 @@ const OrganizationMembersPage = () => {
   const { id } = useParams()
   const { data: org, error: orgError } = OrganizationAPI.useGet(id, swrConfig())
   const { page, size, steps, setPage, setSize } = usePagePagination({
-    navigate,
-    location,
+    navigateFn: navigate,
+    searchFn: () => location.search,
     storage: organizationMemberPaginationStorage(),
   })
   const [searchParams] = useSearchParams()
@@ -111,85 +101,68 @@ const OrganizationMembersPage = () => {
       {!list && !membersError ? <SectionSpinner /> : null}
       {list.data.length > 0 ? (
         <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
-          <Table variant="simple">
-            <Thead>
-              <Tr>
-                <Th>Full name</Th>
-                <Th>Email</Th>
-                <Th></Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              {list.data.map((u) => (
-                <Tr key={u.id}>
-                  <Td>
-                    <div
+          <DataTable
+            items={list.data}
+            columns={[
+              {
+                title: 'Full name',
+                renderCell: (u) => (
+                  <div
+                    className={cx(
+                      'flex',
+                      'flex-row',
+                      'gap-1.5',
+                      'items-center',
+                    )}
+                  >
+                    <Avatar
+                      name={u.fullName}
+                      src={
+                        u.picture
+                          ? getPictureUrlById(u.id, u.picture, {
+                              organizationId: org.id,
+                            })
+                          : undefined
+                      }
                       className={cx(
-                        'flex',
-                        'flex-row',
-                        'gap-1.5',
-                        'items-center',
+                        'border',
+                        'border-gray-300',
+                        'dark:border-gray-700',
                       )}
-                    >
-                      <Avatar
-                        name={u.fullName}
-                        src={
-                          u.picture
-                            ? getPictureUrlById(u.id, u.picture, {
-                                organizationId: org.id,
-                              })
-                            : undefined
-                        }
-                        className={cx(
-                          'border',
-                          'border-gray-300',
-                          'dark:border-gray-700',
-                        )}
-                      />
-                      <span>{truncateEnd(u.fullName, 50)}</span>
-                    </div>
-                  </Td>
-                  <Td>{truncateMiddle(u.email, 50)}</Td>
-                  <Td className={cx('text-right')}>
-                    <Menu>
-                      <MenuButton
-                        as={IconButton}
-                        icon={<IconMoreVert />}
-                        variant="ghost"
-                        aria-label=""
-                      />
-                      <Portal>
-                        <MenuList>
-                          <MenuItem
-                            icon={<IconLogout />}
-                            className={cx('text-red-500')}
-                            isDisabled={!geEditorPermission(org.permission)}
-                            onClick={() => {
-                              setUserToRemove(u)
-                              setIsRemoveMemberModalOpen(true)
-                            }}
-                          >
-                            Remove From Organization
-                          </MenuItem>
-                        </MenuList>
-                      </Portal>
-                    </Menu>
-                  </Td>
-                </Tr>
-              ))}
-            </Tbody>
-          </Table>
+                    />
+                    <span>{truncateEnd(u.fullName, 50)}</span>
+                  </div>
+                ),
+              },
+              {
+                title: 'Email',
+                renderCell: (u) => <Text>{truncateMiddle(u.email, 50)}</Text>,
+              },
+            ]}
+            actions={[
+              {
+                label: 'Remove From Organization',
+                icon: <IconLogout />,
+                isDestructive: true,
+                onClick: (u) => {
+                  setUserToRemove(u)
+                  setIsRemoveMemberModalOpen(true)
+                },
+              },
+            ]}
+          />
           {list ? (
-            <PagePagination
-              style={{ alignSelf: 'end' }}
-              totalElements={list.totalElements}
-              totalPages={list.totalPages}
-              page={page}
-              size={size}
-              steps={steps}
-              setPage={setPage}
-              setSize={setSize}
-            />
+            <div className={cx('self-end')}>
+              <PagePagination
+                totalElements={list.totalElements}
+                totalPages={list.totalPages}
+                page={page}
+                size={size}
+                steps={steps}
+                setPage={setPage}
+                setSize={setSize}
+              />
+            </div>
           ) : null}
           {userToRemove ? (
             <OrganizationRemoveMember

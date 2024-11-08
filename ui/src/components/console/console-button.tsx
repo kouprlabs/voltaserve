@@ -10,7 +10,7 @@
 import { useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { IconButton } from '@chakra-ui/react'
-import { IconAdmin, IconRemoveOperator } from '@/lib/components/icons'
+import { IconAdmin, IconRemoveOperator } from '@koupr/ui'
 
 const ConsoleButton = () => {
   const buttonRef = useRef<HTMLButtonElement>(null)

@@ -9,12 +9,10 @@
 // licenses/AGPL.txt.
 import { useCallback, useEffect, useState } from 'react'
 import { Badge, Table, Tbody, Td, Tooltip, Tr } from '@chakra-ui/react'
+import { Pagination, SearchInput, Spinner } from '@koupr/ui'
 import cx from 'classnames'
 import InsightsAPI, { SortBy, SortOrder } from '@/client/api/insights'
 import { swrConfig } from '@/client/options'
-import Pagination from '@/lib/components/pagination'
-import SearchInput from '@/lib/components/search-input'
-import Spinner from '@/lib/components/spinner'
 import { useAppSelector } from '@/store/hook'
 
 const InsightsOverviewEntities = () => {

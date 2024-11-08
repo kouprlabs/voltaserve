@@ -20,9 +20,6 @@ import {
   MenuDivider,
   Tooltip,
 } from '@chakra-ui/react'
-import cx from 'classnames'
-import FileAPI, { List, SortBy, SortOrder } from '@/client/api/file'
-import { ltEditorPermission } from '@/client/api/permission'
 import {
   IconAdd,
   IconMoreVert,
@@ -36,7 +33,10 @@ import {
   IconClose,
   IconList,
   IconCloudUpload,
-} from '@/lib/components/icons'
+} from '@koupr/ui'
+import cx from 'classnames'
+import FileAPI, { List, SortBy, SortOrder } from '@/client/api/file'
+import { ltEditorPermission } from '@/client/api/permission'
 import mapFileList from '@/lib/helpers/map-file-list'
 import { uploadAdded, UploadDecorator } from '@/store/entities/uploads'
 import { useAppDispatch, useAppSelector } from '@/store/hook'

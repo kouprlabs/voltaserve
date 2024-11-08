@@ -8,22 +8,25 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
 import { useEffect, useMemo, useRef, useState, MouseEvent } from 'react'
-import { useColorMode } from '@chakra-ui/system'
-import { Select } from 'chakra-react-select'
+import { Select } from '@koupr/ui'
+import { OptionBase } from 'chakra-react-select'
 import cx from 'classnames'
 import { File } from '@/client/api/file'
 import MosaicAPI, { Metadata, ZoomLevel } from '@/client/api/mosaic'
 import { getConfig } from '@/config/config'
 import { getAccessTokenOrRedirect } from '@/infra/token'
-import reactSelectStyles from '@/styles/react-select'
 
 export type ViewerImageProps = {
   file: File
 }
 
+interface ZoomLevelOption extends OptionBase {
+  value: number
+  label: string
+}
+
 const ViewerMosaic = ({ file }: ViewerImageProps) => {
   const accessToken = useMemo(() => getAccessTokenOrRedirect(), [])
-  const { colorMode } = useColorMode()
   const [metadata, setMetadata] = useState<Metadata | null>(null)
   const [zoomLevel, setZoomLevel] = useState<number>(0)
   const [dragging, setDragging] = useState<boolean>(false)
@@ -164,7 +167,7 @@ const ViewerMosaic = ({ file }: ViewerImageProps) => {
 
   return (
     <div className={cx('absolute', 'top-0', 'left-0')}>
-      <Select
+      <Select<ZoomLevelOption, false>
         className={cx(
           'absolute',
           'top-[15px]',
@@ -182,10 +185,9 @@ const ViewerMosaic = ({ file }: ViewerImageProps) => {
         }))}
         placeholder="Zoom Level"
         selectedOptionStyle="check"
-        chakraStyles={reactSelectStyles({ colorMode })}
-        onChange={(event) => {
-          if (event?.value !== undefined) {
-            handleZoomChange(event.value)
+        onChange={(newValue) => {
+          if (newValue?.value !== undefined) {
+            handleZoomChange(newValue.value)
           }
         }}
       />

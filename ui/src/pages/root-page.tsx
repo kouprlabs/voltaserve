@@ -50,8 +50,10 @@ const RootPage = () => {
     const body = document.getElementsByTagName('body')[0]
     if (colorMode === 'dark') {
       body.classList.add('dark')
+      body.classList.add('koupr-dark')
     } else {
       body.classList.remove('dark')
+      body.classList.remove('koupr-dark')
     }
   }, [colorMode])
 

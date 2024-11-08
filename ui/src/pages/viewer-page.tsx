@@ -10,6 +10,7 @@
 import { useCallback, useMemo } from 'react'
 import { useLocation, useParams } from 'react-router-dom'
 import { Button, Text } from '@chakra-ui/react'
+import { Sidenav, IconDownload, Spinner } from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import FileAPI, { File } from '@/client/api/file'
@@ -20,9 +21,6 @@ import ViewerModel from '@/components/viewer/viewer-model'
 import ViewerMosaic from '@/components/viewer/viewer-mosaic'
 import ViewerPDF from '@/components/viewer/viewer-pdf'
 import ViewerVideo from '@/components/viewer/viewer-video'
-import Drawer from '@/lib/components/drawer'
-import { IconDownload } from '@/lib/components/icons'
-import Spinner from '@/lib/components/spinner'
 import downloadFile from '@/lib/helpers/download-file'
 import {
   isGLB,
@@ -139,9 +137,9 @@ const ViewerPage = () => {
             <title>{file.name}</title>
           </Helmet>
           <div className={cx('flex', 'flex-row', 'gap-0', 'h-full')}>
-            <Drawer storage={{ prefix: 'voltaserve', namespace: 'viewer' }}>
+            <Sidenav storage={{ prefix: 'voltaserve', namespace: 'viewer' }}>
               <DrawerContent file={file} />
-            </Drawer>
+            </Sidenav>
             <div
               className={cx('flex', 'flex-col', 'gap-0', 'grow', 'h-[100vh]')}
             >

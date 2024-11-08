@@ -25,12 +25,10 @@ import {
   Avatar,
   Radio,
 } from '@chakra-ui/react'
+import { Pagination, SearchInput, SectionSpinner } from '@koupr/ui'
 import cx from 'classnames'
 import UserAPI, { SortOrder, User } from '@/client/api/user'
 import { swrConfig } from '@/client/options'
-import Pagination from '@/lib/components/pagination'
-import SearchInput from '@/lib/components/search-input'
-import SectionSpinner from '@/lib/components/section-spinner'
 import { getPictureUrlById } from '@/lib/helpers/picture'
 import userToString from '@/lib/helpers/user-to-string'
 

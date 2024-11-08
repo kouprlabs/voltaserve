@@ -8,8 +8,8 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
 import { Circle, Tooltip } from '@chakra-ui/react'
+import { IconVisibility } from '@koupr/ui'
 import cx from 'classnames'
-import { IconVisibility } from '@/lib/components/icons'
 
 const IconBadgeInsights = () => (
   <Tooltip label="This item has insights">

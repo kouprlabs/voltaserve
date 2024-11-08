@@ -9,22 +9,18 @@
 // licenses/AGPL.txt.
 import { useCallback, useEffect, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
+import { Button, useToast } from '@chakra-ui/react'
 import {
-  Button,
-  IconButton,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
-  Portal,
-  Table,
-  Tbody,
-  Td,
-  Th,
-  Thead,
-  Tr,
-  useToast,
-} from '@chakra-ui/react'
+  DataTable,
+  IconDelete,
+  IconPersonAdd,
+  IconSend,
+  Text,
+  PagePagination,
+  SectionSpinner,
+  usePagePagination,
+  RelativeDate,
+} from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import InvitationAPI, { SortBy, SortOrder } from '@/client/api/invitation'
@@ -34,17 +30,7 @@ import { swrConfig } from '@/client/options'
 import OrganizationInviteMembers from '@/components/organization/organization-invite-members'
 import OrganizationStatus from '@/components/organization/organization-status'
 import { outgoingInvitationPaginationStorage } from '@/infra/pagination'
-import {
-  IconDelete,
-  IconMoreVert,
-  IconPersonAdd,
-  IconSend,
-} from '@/lib/components/icons'
-import PagePagination from '@/lib/components/page-pagination'
-import SectionSpinner from '@/lib/components/section-spinner'
-import prettyDate from '@/lib/helpers/pretty-date'
 import truncateMiddle from '@/lib/helpers/truncate-middle'
-import usePagePagination from '@/lib/hooks/page-pagination'
 import { useAppDispatch } from '@/store/hook'
 import { mutateUpdated } from '@/store/ui/outgoing-invitations'
 
@@ -56,8 +42,8 @@ const OrganizationInvitationsPage = () => {
   const toast = useToast()
   const { data: org, error: orgError } = OrganizationAPI.useGet(id, swrConfig())
   const { page, size, steps, setPage, setSize } = usePagePagination({
-    navigate,
-    location,
+    navigateFn: navigate,
+    searchFn: () => location.search,
     storage: outgoingInvitationPaginationStorage(),
   })
   const {
@@ -157,67 +143,50 @@ const OrganizationInvitationsPage = () => {
       ) : null}
       {list && list.data.length > 0 ? (
         <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
-          <Table variant="simple">
-            <Thead>
-              <Tr>
-                <Th>Email</Th>
-                <Th>Status</Th>
-                <Th>Date</Th>
-                <Th></Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              {list.data.map((i) => (
-                <Tr key={i.id}>
-                  <Td>{truncateMiddle(i.email, 50)}</Td>
-                  <Td>
-                    <OrganizationStatus value={i.status} />
-                  </Td>
-                  <Td>{prettyDate(i.createTime)}</Td>
-                  <Td className={cx('text-right')}>
-                    <Menu>
-                      <MenuButton
-                        as={IconButton}
-                        icon={<IconMoreVert />}
-                        variant="ghost"
-                        aria-label=""
-                      />
-                      <Portal>
-                        <MenuList>
-                          {i.status === 'pending' ? (
-                            <MenuItem
-                              icon={<IconSend />}
-                              onClick={() => handleResend(i.id)}
-                            >
-                              Resend
-                            </MenuItem>
-                          ) : null}
-                          <MenuItem
-                            icon={<IconDelete />}
-                            className={cx('text-red-500')}
-                            onClick={() => handleDelete(i.id)}
-                          >
-                            Delete
-                          </MenuItem>
-                        </MenuList>
-                      </Portal>
-                    </Menu>
-                  </Td>
-                </Tr>
-              ))}
-            </Tbody>
-          </Table>
+          <DataTable
+            items={list.data}
+            columns={[
+              {
+                title: 'Email',
+                renderCell: (i) => <Text>{truncateMiddle(i.email, 50)}</Text>,
+              },
+              {
+                title: 'Status',
+                renderCell: (i) => <OrganizationStatus value={i.status} />,
+              },
+              {
+                title: 'Date',
+                renderCell: (i) => (
+                  <RelativeDate date={new Date(i.createTime)} />
+                ),
+              },
+            ]}
+            actions={[
+              {
+                label: 'Resend',
+                icon: <IconSend />,
+                onClick: (i) => handleResend(i.id),
+              },
+              {
+                label: 'Delete',
+                icon: <IconDelete />,
+                isDestructive: true,
+                onClick: (i) => handleDelete(i.id),
+              },
+            ]}
+          />
           {list ? (
-            <PagePagination
-              style={{ alignSelf: 'end' }}
-              totalElements={list.totalElements}
-              totalPages={list.totalPages}
-              page={page}
-              size={size}
-              steps={steps}
-              setPage={setPage}
-              setSize={setSize}
-            />
+            <div className={cx('self-end')}>
+              <PagePagination
+                totalElements={list.totalElements}
+                totalPages={list.totalPages}
+                page={page}
+                size={size}
+                steps={steps}
+                setPage={setPage}
+                setSize={setSize}
+              />
+            </div>
           ) : null}
         </div>
       ) : null}

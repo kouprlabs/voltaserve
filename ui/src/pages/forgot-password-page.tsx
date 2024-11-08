@@ -17,6 +17,7 @@ import {
   Link as ChakraLink,
   Heading,
 } from '@chakra-ui/react'
+import { Logo } from '@koupr/ui'
 import {
   Field,
   FieldAttributes,
@@ -29,7 +30,6 @@ import * as Yup from 'yup'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import AccountAPI from '@/client/idp/account'
-import Logo from '@/components/common/logo'
 import LayoutFull from '@/components/layout/layout-full'
 
 type FormValues = {

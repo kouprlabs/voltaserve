@@ -8,17 +8,17 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
 import { useEffect } from 'react'
-import { Outlet } from 'react-router-dom'
+import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useToast } from '@chakra-ui/react'
+import { IconFlag, IconGroup, IconWorkspaces, Logo, Shell } from '@koupr/ui'
 import { cx } from '@emotion/css'
 import AppBar from '@/components/app-bar'
-import Logo from '@/components/common/logo'
-import { IconGroup, IconFlag, IconWorkspaces } from '@/lib/components/icons'
-import Shell from '@/lib/components/shell'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { errorCleared } from '@/store/ui/error'
 
 const LayoutShell = () => {
+  const location = useLocation()
+  const navigate = useNavigate()
   const toast = useToast()
   const error = useAppSelector((state) => state.ui.error.value)
   const dispatch = useAppDispatch()
@@ -39,7 +39,7 @@ const LayoutShell = () => {
       storage={{ prefix: 'voltaserve', namespace: 'main' }}
       logo={
         <div className={cx('w-[16px]')}>
-          <Logo />
+          <Logo type="voltaserve" size="sm" />
         </div>
       }
       topBar={<AppBar />}
@@ -63,6 +63,8 @@ const LayoutShell = () => {
           secondaryText: 'Umbrellas for workspaces and users.',
         },
       ]}
+      navigateFn={navigate}
+      pathnameFn={() => location.pathname}
     >
       <Outlet />
     </Shell>

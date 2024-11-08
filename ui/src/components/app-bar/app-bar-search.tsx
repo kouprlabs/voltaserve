@@ -24,10 +24,9 @@ import {
   InputLeftElement,
   InputRightElement,
 } from '@chakra-ui/react'
+import { IconClose, IconSearch, IconTune, NotificationBadge } from '@koupr/ui'
 import cx from 'classnames'
 import { Query as FileQuery } from '@/client/api/file'
-import { IconClose, IconSearch, IconTune } from '@/lib/components/icons'
-import NotificationBadge from '@/lib/components/notification-badge'
 import {
   decodeFileQuery,
   decodeQuery,
@@ -319,7 +318,7 @@ const AppBarSearch = () => {
   }
 
   return (
-    <div className={cx('flex', 'flex-row', 'gap-0.5')}>
+    <div className={cx('flex', 'flex-row', 'gap-0.5', 'grow')}>
       <InputGroup>
         <InputLeftElement pointerEvents="none">
           <Icon as={IconSearch} className={cx('text-gray-300')} />
@@ -344,13 +343,15 @@ const AppBarSearch = () => {
           </InputRightElement>
         ) : null}
       </InputGroup>
-      <NotificationBadge hasBadge={hasFileQuery}>
-        <IconButton
-          icon={<IconTune />}
-          aria-label="Filters"
-          onClick={handleFilterClick}
-        />
-      </NotificationBadge>
+      {isFiles ? (
+        <NotificationBadge hasBadge={hasFileQuery}>
+          <IconButton
+            icon={<IconTune />}
+            aria-label="Filters"
+            onClick={handleFilterClick}
+          />
+        </NotificationBadge>
+      ) : null}
       {buffer || (isFocused && buffer) ? (
         <Button
           leftIcon={<IconSearch />}

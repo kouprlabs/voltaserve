@@ -9,8 +9,8 @@
 // licenses/AGPL.txt.
 import { ChangeEvent, useCallback, useRef, useState } from 'react'
 import { IconButton, Image } from '@chakra-ui/react'
+import { IconEdit } from '@koupr/ui'
 import cx from 'classnames'
-import { IconEdit } from '@/lib/components/icons'
 
 export type AccountUploadPictureProps = {
   name: string

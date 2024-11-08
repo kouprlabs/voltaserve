@@ -9,36 +9,25 @@
 // licenses/AGPL.txt.
 import { useCallback, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { Avatar, useToast } from '@chakra-ui/react'
 import {
-  Avatar,
-  IconButton,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
-  Portal,
-  Table,
-  Tbody,
-  Td,
+  DataTable,
+  IconThumbDown,
+  IconThumbUp,
+  PagePagination,
+  RelativeDate,
+  SectionSpinner,
   Text,
-  Th,
-  Thead,
-  Tr,
-  useToast,
-} from '@chakra-ui/react'
+  usePagePagination,
+} from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import InvitationAPI, { SortBy, SortOrder } from '@/client/api/invitation'
 import UserAPI from '@/client/idp/user'
 import { swrConfig } from '@/client/options'
 import { incomingInvitationPaginationStorage } from '@/infra/pagination'
-import { IconMoreVert } from '@/lib/components/icons'
-import PagePagination from '@/lib/components/page-pagination'
-import SectionSpinner from '@/lib/components/section-spinner'
 import { getPictureUrlById } from '@/lib/helpers/picture'
-import prettyDate from '@/lib/helpers/pretty-date'
 import userToString from '@/lib/helpers/user-to-string'
-import usePagePagination from '@/lib/hooks/page-pagination'
 import { useAppDispatch } from '@/store/hook'
 import { mutateUpdated } from '@/store/ui/incoming-invitations'
 
@@ -49,8 +38,8 @@ const AccountInvitationsPage = () => {
   const toast = useToast()
   const { data: user, error: userError } = UserAPI.useGet()
   const { page, size, steps, setPage, setSize } = usePagePagination({
-    navigate,
-    location,
+    navigateFn: navigate,
+    searchFn: () => location.search,
     storage: incomingInvitationPaginationStorage(),
   })
   const {
@@ -115,98 +104,84 @@ const AccountInvitationsPage = () => {
       ) : null}
       {list.data.length > 0 ? (
         <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
-          <Table variant="simple">
-            <Thead>
-              <Tr>
-                <Th>From</Th>
-                <Th>Organization</Th>
-                <Th>Date</Th>
-                <Th></Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              {list.data.length > 0 &&
-                list.data.map((i) => (
-                  <Tr key={i.id}>
-                    <Td>
-                      <div
-                        className={cx(
-                          'flex',
-                          'flex-row',
-                          'gap-1.5',
-                          'items-center',
-                        )}
-                      >
-                        {i.owner && i.organization ? (
-                          <>
-                            <Avatar
-                              name={i.owner.fullName}
-                              src={
-                                i.owner.picture
-                                  ? getPictureUrlById(
-                                      i.owner.id,
-                                      i.owner.picture,
-                                      {
-                                        invitationId: i.id,
-                                      },
-                                    )
-                                  : undefined
-                              }
-                              className={cx(
-                                'border',
-                                'border-gray-300',
-                                'dark:border-gray-700',
-                              )}
-                            />
-                            {i.owner ? userToString(i.owner) : ''}
-                          </>
-                        ) : null}
-                      </div>
-                    </Td>
-                    <Td>
-                      <Text noOfLines={1}>
-                        {i.organization ? i.organization.name : ''}
-                      </Text>
-                    </Td>
-                    <Td>{prettyDate(i.createTime)}</Td>
-                    <Td className={cx('text-right')}>
-                      <Menu>
-                        <MenuButton
-                          as={IconButton}
-                          icon={<IconMoreVert />}
-                          variant="ghost"
-                          aria-label=""
+          <DataTable
+            items={list.data}
+            columns={[
+              {
+                title: 'From',
+                renderCell: (i) => (
+                  <div
+                    className={cx(
+                      'flex',
+                      'flex-row',
+                      'gap-1.5',
+                      'items-center',
+                    )}
+                  >
+                    {i.owner && i.organization ? (
+                      <>
+                        <Avatar
+                          name={i.owner.fullName}
+                          src={
+                            i.owner.picture
+                              ? getPictureUrlById(i.owner.id, i.owner.picture, {
+                                  invitationId: i.id,
+                                })
+                              : undefined
+                          }
+                          className={cx(
+                            'border',
+                            'border-gray-300',
+                            'dark:border-gray-700',
+                          )}
                         />
-                        <Portal>
-                          <MenuList>
-                            <MenuItem onClick={() => handleAccept(i.id)}>
-                              Accept
-                            </MenuItem>
-                            <MenuItem
-                              className={cx('text-red-500')}
-                              onClick={() => handleDecline(i.id)}
-                            >
-                              Decline
-                            </MenuItem>
-                          </MenuList>
-                        </Portal>
-                      </Menu>
-                    </Td>
-                  </Tr>
-                ))}
-            </Tbody>
-          </Table>
+                        {i.owner ? userToString(i.owner) : ''}
+                      </>
+                    ) : null}
+                  </div>
+                ),
+              },
+              {
+                title: 'Organization',
+                renderCell: (i) => (
+                  <Text noOfLines={1}>
+                    {i.organization ? i.organization.name : ''}
+                  </Text>
+                ),
+              },
+              {
+                title: 'Date',
+                renderCell: (i) => (
+                  <RelativeDate date={new Date(i.createTime)} />
+                ),
+              },
+            ]}
+            actions={[
+              {
+                label: 'Accept',
+                icon: <IconThumbUp />,
+                onClick: (i) => handleAccept(i.id),
+              },
+              {
+                label: 'Decline',
+                icon: <IconThumbDown />,
+                isDestructive: true,
+                onClick: (i) => handleDecline(i.id),
+              },
+            ]}
+          />
           {list ? (
-            <PagePagination
-              style={{ alignSelf: 'end' }}
-              totalElements={list.totalElements}
-              totalPages={list.totalPages}
-              page={page}
-              size={size}
-              steps={steps}
-              setPage={setPage}
-              setSize={setSize}
-            />
+            <div className={cx('self-end')}>
+              <PagePagination
+                totalElements={list.totalElements}
+                totalPages={list.totalPages}
+                page={page}
+                size={size}
+                steps={steps}
+                setPage={setPage}
+                setSize={setSize}
+              />
+            </div>
           ) : null}
         </div>
       ) : null}

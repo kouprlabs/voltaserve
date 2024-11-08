@@ -21,26 +21,35 @@ import {
   Badge,
   Avatar,
 } from '@chakra-ui/react'
+import {
+  IconAdd,
+  IconCheck,
+  IconDelete,
+  Spinner,
+  Text,
+  Select,
+} from '@koupr/ui'
 import { KeyedMutator } from 'swr'
-import { Select } from 'chakra-react-select'
+import { OptionBase } from 'chakra-react-select'
 import cx from 'classnames'
 import FileAPI, { GroupPermission } from '@/client/api/file'
 import { Group } from '@/client/api/group'
-import { geEditorPermission } from '@/client/api/permission'
+import { geEditorPermission, PermissionType } from '@/client/api/permission'
 import WorkspaceAPI from '@/client/api/workspace'
 import GroupSelector from '@/components/common/group-selector'
-import { IconAdd, IconCheck, IconDelete } from '@/lib/components/icons'
-import Spinner from '@/lib/components/spinner'
-import Text from '@/lib/components/text'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { sharingModalDidClose } from '@/store/ui/files'
-import { reactSelectStyles } from '@/styles/react-select'
 import SharingFormSkeleton from './sharing-form-skeleton'
 
 export type SharingGroupsProps = {
   groups?: Group[]
   permissions?: GroupPermission[]
   mutateGroupPermissions: KeyedMutator<GroupPermission[]>
+}
+
+interface PermissionTypeOption extends OptionBase {
+  value: PermissionType
+  label: string
 }
 
 const SharingGroups = ({
@@ -121,7 +130,7 @@ const SharingGroups = ({
             organizationId={workspace?.organization.id}
             onConfirm={(value) => setActiveGroup(value)}
           />
-          <Select
+          <Select<PermissionTypeOption, false>
             options={[
               { value: 'viewer', label: 'Viewer' },
               { value: 'editor', label: 'Editor' },
@@ -129,10 +138,9 @@ const SharingGroups = ({
             ]}
             placeholder="Select Permission"
             selectedOptionStyle="check"
-            chakraStyles={reactSelectStyles()}
-            onChange={(event) => {
-              if (event) {
-                setActivePermission(event.value)
+            onChange={(newValue) => {
+              if (newValue) {
+                setActivePermission(newValue.value)
               }
             }}
           />

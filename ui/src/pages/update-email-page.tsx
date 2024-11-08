@@ -10,12 +10,11 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { Link as ChakraLink, Heading } from '@chakra-ui/react'
+import { Logo, Spinner } from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import UserAPI from '@/client/idp/user'
-import Logo from '@/components/common/logo'
 import LayoutFull from '@/components/layout/layout-full'
-import Spinner from '@/lib/components/spinner'
 
 const UpdateEmailPage = () => {
   const params = useParams()

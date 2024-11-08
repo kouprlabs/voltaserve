@@ -9,7 +9,8 @@
 // licenses/AGPL.txt.
 import { useCallback, useMemo, useState } from 'react'
 import { Button, ModalBody, ModalFooter } from '@chakra-ui/react'
-import { OptionBase, Select, SingleValue } from 'chakra-react-select'
+import { Select } from '@koupr/ui'
+import { OptionBase, SingleValue } from 'chakra-react-select'
 import cx from 'classnames'
 import FileAPI from '@/client/api/file'
 import InsightsAPI, { Language } from '@/client/api/insights'
@@ -17,7 +18,6 @@ import TaskAPI from '@/client/api/task'
 import { swrConfig } from '@/client/options'
 import { useAppDispatch, useAppSelector } from '@/store/hook'
 import { modalDidClose } from '@/store/ui/insights'
-import { reactSelectStyles } from '@/styles/react-select'
 
 interface LanguageOption extends OptionBase {
   label: string
@@ -60,9 +60,9 @@ const InsightsCreate = () => {
   }, [language, id, mutateFiles, mutateTasks, mutateInfo, dispatch])
 
   const handleLanguageChange = useCallback(
-    (value: SingleValue<LanguageOption>) => {
-      if (value?.value && languages) {
-        setLanguage(languages.filter((e) => e.id === value.value)[0])
+    (newValue: SingleValue<LanguageOption>) => {
+      if (newValue?.value && languages) {
+        setLanguage(languages.filter((e) => e.id === newValue.value)[0])
       }
     },
     [languages],
@@ -100,7 +100,6 @@ const InsightsCreate = () => {
               }))}
               placeholder="Select Language"
               selectedOptionStyle="check"
-              chakraStyles={reactSelectStyles()}
               onChange={handleLanguageChange}
             />
           ) : null}

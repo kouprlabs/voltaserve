@@ -20,7 +20,7 @@ export interface ListResponse {
   size: number
 }
 
-export interface emptyListResponse extends ListResponse {
+export interface EmptyListResponse extends ListResponse {
   data: []
 }
 
@@ -162,7 +162,7 @@ export interface ComponentVersion {
   location: string
 }
 
-export default class ConsoleApi {
+export default class ConsoleAPI {
   static async checkIndexesAvailability() {
     const response = await fetch(`${getConfig().consoleURL}/index/all`, {
       method: 'GET',
@@ -195,6 +195,16 @@ export default class ConsoleApi {
       url: `/organization/users?${this.paramsFromListOptions(options)}`,
       method: 'GET',
     }) as Promise<UserOrganizationManagementList>
+  }
+
+  static useListGroups(options: ListOptions, swrOptions?: SWRConfiguration) {
+    const url = `/workspaces?${this.paramsFromListOptions(options)}`
+    return useSWR<GroupManagementList>(
+      url,
+      () =>
+        consoleFetcher({ url, method: 'GET' }) as Promise<GroupManagementList>,
+      swrOptions,
+    )
   }
 
   static listGroups(options: ListOptions) {
@@ -260,6 +270,22 @@ export default class ConsoleApi {
     }) as Promise<WorkspaceManagementList>
   }
 
+  static useListInvitations(
+    options: ListOptions,
+    swrOptions?: SWRConfiguration,
+  ) {
+    const url = `/invitation/all?${this.paramsFromListOptions(options)}`
+    return useSWR<InvitationManagementList>(
+      url,
+      () =>
+        consoleFetcher({
+          url,
+          method: 'GET',
+        }) as Promise<InvitationManagementList>,
+      swrOptions,
+    )
+  }
+
   static listInvitations(options: ListOptions) {
     return consoleFetcher({
       url: `/invitation/all?${this.paramsFromListOptions(options)}`,
@@ -301,14 +327,14 @@ export default class ConsoleApi {
     return consoleFetcher({
       url: `/${object}/all?${this.paramsFromListOptions(options)}`,
       method: 'GET',
-    }) as Promise<emptyListResponse>
+    }) as Promise<EmptyListResponse>
   }
 
   static searchObject(object: string, options: ListOptions) {
     return consoleFetcher({
       url: `/${object}/search?${this.paramsFromListOptions(options)}`,
       method: 'GET',
-    }) as Promise<emptyListResponse>
+    }) as Promise<EmptyListResponse>
   }
 
   static paramsFromListOptions = (options: ListOptions): URLSearchParams => {

@@ -26,16 +26,15 @@ import {
   Thead,
   Tr,
 } from '@chakra-ui/react'
+import { PagePagination, RelativeDate, SectionSpinner } from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
-import ConsoleApi, {
+import ConsoleAPI, {
   GroupManagementList,
   OrganizationManagement,
   UserOrganizationManagementList,
   WorkspaceManagementList,
 } from '@/client/console/console'
-import PagePagination from '@/lib/components/page-pagination'
-import SectionSpinner from '@/lib/components/section-spinner'
 
 const ConsolePanelOrganization = () => {
   const [organizationData, setOrganizationData] =
@@ -51,7 +50,7 @@ const ConsolePanelOrganization = () => {
 
   const organizationFetch = () => {
     if (id) {
-      ConsoleApi.getOrganizationById({ id }).then((value) => {
+      ConsoleAPI.getOrganizationById({ id }).then((value) => {
         setOrganizationData(value)
       })
     }
@@ -59,7 +58,7 @@ const ConsolePanelOrganization = () => {
 
   const usersFetch = () => {
     if (id) {
-      ConsoleApi.getUsersByOrganization({
+      ConsoleAPI.getUsersByOrganization({
         id: id,
         page: usersPage,
         size: 5,
@@ -71,7 +70,7 @@ const ConsolePanelOrganization = () => {
 
   const workspacesFetch = () => {
     if (id) {
-      ConsoleApi.getWorkspacesByOrganization({
+      ConsoleAPI.getWorkspacesByOrganization({
         id: id,
         page: workspacesPage,
         size: 5,
@@ -83,7 +82,7 @@ const ConsolePanelOrganization = () => {
 
   const groupsFetch = () => {
     if (id) {
-      ConsoleApi.getGroupsByOrganization({
+      ConsoleAPI.getGroupsByOrganization({
         id: id,
         page: workspacesPage,
         size: 5,
@@ -155,22 +154,20 @@ const ConsolePanelOrganization = () => {
                           <span className={cx('font-bold')}>Users</span>
                           <Spacer />
                           {usersData.totalElements > 5 ? (
-                            <>
-                              <PagePagination
-                                totalElements={usersData.totalElements}
-                                totalPages={Math.ceil(
-                                  usersData.totalElements / 5,
-                                )}
-                                page={usersPage}
-                                size={5}
-                                steps={[]}
-                                setPage={setUsersPage}
-                                setSize={() => {}}
-                                uiSize="xs"
-                                disableLastNav
-                                disableMiddleNav
-                              />
-                            </>
+                            <PagePagination
+                              totalElements={usersData.totalElements}
+                              totalPages={Math.ceil(
+                                usersData.totalElements / 5,
+                              )}
+                              page={usersPage}
+                              size={5}
+                              steps={[]}
+                              setPage={setUsersPage}
+                              setSize={() => {}}
+                              uiSize="xs"
+                              disableLastNav
+                              disableMiddleNav
+                            />
                           ) : null}
                         </Flex>
                       </Th>
@@ -192,7 +189,7 @@ const ConsolePanelOrganization = () => {
                           </Text>
                           <Text fontSize="sm">
                             created:{' '}
-                            {new Date(user.createTime).toLocaleDateString()}
+                            {<RelativeDate date={new Date(user.createTime)} />}
                           </Text>
                         </Box>
                       </Flex>
@@ -217,22 +214,20 @@ const ConsolePanelOrganization = () => {
                           <span className={cx('font-bold')}>Workspaces</span>
                           <Spacer />
                           {workspacesData.totalElements > 5 ? (
-                            <>
-                              <PagePagination
-                                totalElements={workspacesData.totalElements}
-                                totalPages={Math.ceil(
-                                  workspacesData.totalElements / 5,
-                                )}
-                                page={workspacesPage}
-                                size={5}
-                                steps={[]}
-                                setPage={setWorkspacesPage}
-                                setSize={() => {}}
-                                uiSize="xs"
-                                disableLastNav
-                                disableMiddleNav
-                              />
-                            </>
+                            <PagePagination
+                              totalElements={workspacesData.totalElements}
+                              totalPages={Math.ceil(
+                                workspacesData.totalElements / 5,
+                              )}
+                              page={workspacesPage}
+                              size={5}
+                              steps={[]}
+                              setPage={setWorkspacesPage}
+                              setSize={() => {}}
+                              uiSize="xs"
+                              disableLastNav
+                              disableMiddleNav
+                            />
                           ) : null}
                         </Flex>
                       </Th>
@@ -251,9 +246,9 @@ const ConsolePanelOrganization = () => {
                           </Text>
                           <Text fontSize="sm">
                             created:{' '}
-                            {new Date(
-                              workspace.createTime,
-                            ).toLocaleDateString()}
+                            <RelativeDate
+                              date={new Date(workspace.createTime)}
+                            />
                           </Text>
                         </Box>
                       </Flex>
@@ -278,22 +273,20 @@ const ConsolePanelOrganization = () => {
                           <span className={cx('font-bold')}>Groups</span>
                           <Spacer />
                           {groupsData.totalElements > 5 ? (
-                            <>
-                              <PagePagination
-                                totalElements={groupsData.totalElements}
-                                totalPages={Math.ceil(
-                                  groupsData.totalElements / 5,
-                                )}
-                                page={groupsPage}
-                                size={5}
-                                steps={[]}
-                                setPage={setGroupsPage}
-                                setSize={() => {}}
-                                uiSize="xs"
-                                disableLastNav
-                                disableMiddleNav
-                              />
-                            </>
+                            <PagePagination
+                              totalElements={groupsData.totalElements}
+                              totalPages={Math.ceil(
+                                groupsData.totalElements / 5,
+                              )}
+                              page={groupsPage}
+                              size={5}
+                              steps={[]}
+                              setPage={setGroupsPage}
+                              setSize={() => {}}
+                              uiSize="xs"
+                              disableLastNav
+                              disableMiddleNav
+                            />
                           ) : null}
                         </Flex>
                       </Th>
@@ -312,7 +305,7 @@ const ConsolePanelOrganization = () => {
                           </Text>
                           <Text fontSize="sm">
                             created:{' '}
-                            {new Date(group.createTime).toLocaleDateString()}
+                            <RelativeDate date={new Date(group.createTime)} />
                           </Text>
                         </Box>
                       </Flex>

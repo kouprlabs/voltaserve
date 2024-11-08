@@ -8,8 +8,8 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
 import { Circle, Tooltip } from '@chakra-ui/react'
+import { IconModeHeat } from '@koupr/ui'
 import cx from 'classnames'
-import { IconModeHeat } from '@/lib/components/icons'
 
 const IconBadgeMosaic = () => (
   <Tooltip label="This item has a mosaic">

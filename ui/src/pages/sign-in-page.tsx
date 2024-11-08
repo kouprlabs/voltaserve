@@ -17,6 +17,7 @@ import {
   Link as ChakraLink,
   Heading,
 } from '@chakra-ui/react'
+import { Logo } from '@koupr/ui'
 import {
   Field,
   FieldAttributes,
@@ -32,7 +33,6 @@ import GroupAPI from '@/client/api/group'
 import OrganizationAPI from '@/client/api/organization'
 import WorkspaceAPI from '@/client/api/workspace'
 import TokenAPI from '@/client/idp/token'
-import Logo from '@/components/common/logo'
 import LayoutFull from '@/components/layout/layout-full'
 import { saveToken } from '@/infra/token'
 import { gigabyteToByte } from '@/lib/helpers/convert-storage'

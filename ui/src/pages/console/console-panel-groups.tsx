@@ -15,34 +15,23 @@ import {
   useSearchParams,
 } from 'react-router-dom'
 import { Avatar, Link as ChakraLink } from '@chakra-ui/react'
+import { Heading } from '@chakra-ui/react'
 import {
-  Center,
-  Heading,
-  IconButton,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
-  Stack,
-  Table,
-  Tbody,
-  Td,
+  DataTable,
+  IconEdit,
+  PagePagination,
+  RelativeDate,
+  SectionSpinner,
   Text,
-  Th,
-  Thead,
-  Tr,
-} from '@chakra-ui/react'
+  usePagePagination,
+} from '@koupr/ui'
 import * as Yup from 'yup'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
-import ConsoleApi, { GroupManagementList } from '@/client/console/console'
+import ConsoleAPI, { GroupManagementList } from '@/client/console/console'
 import ConsoleRenameModal from '@/components/console/console-rename-modal'
 import { consoleGroupsPaginationStorage } from '@/infra/pagination'
-import { IconMoreVert } from '@/lib/components/icons'
-import PagePagination from '@/lib/components/page-pagination'
-import SectionSpinner from '@/lib/components/section-spinner'
 import { decodeQuery } from '@/lib/helpers/query'
-import usePagePagination from '@/lib/hooks/page-pagination'
 
 const ConsolePanelGroups = () => {
   const [searchParams] = useSearchParams()
@@ -51,11 +40,11 @@ const ConsolePanelGroups = () => {
   const query = decodeQuery(searchParams.get('q') as string)
   const [list, setList] = useState<GroupManagementList>()
   const { page, size, steps, setPage, setSize } = usePagePagination({
-    navigate,
-    location,
+    navigateFn: navigate,
+    searchFn: () => location.search,
     storage: consoleGroupsPaginationStorage(),
   })
-  const [confirmRenameWindowOpen, setConfirmRenameWindowOpen] = useState(false)
+  const [isConfirmRenameOpen, setIsConfirmRenameOpen] = useState(false)
   const [isSubmitting, setSubmitting] = useState(false)
   const [currentName, setCurrentName] = useState<string>('')
   const [groupId, setGroupId] = useState<string>()
@@ -72,19 +61,19 @@ const ConsolePanelGroups = () => {
     if (confirm && groupId !== undefined && newName !== null) {
       try {
         setSubmitting(true)
-        await ConsoleApi.renameObject({ id: groupId, name: newName }, 'group')
+        await ConsoleAPI.renameObject({ id: groupId, name: newName }, 'group')
       } finally {
         closeConfirmationWindow()
       }
     } else if (id !== null && currentName !== null && currentName !== '') {
-      setConfirmRenameWindowOpen(true)
+      setIsConfirmRenameOpen(true)
       setCurrentName(currentName)
       setGroupId(id)
     }
   }
 
   const closeConfirmationWindow = () => {
-    setConfirmRenameWindowOpen(false)
+    setIsConfirmRenameOpen(false)
     setSubmitting(false)
     setCurrentName('')
     setGroupId(undefined)
@@ -92,13 +81,13 @@ const ConsolePanelGroups = () => {
 
   useEffect(() => {
     if (query && query.length >= 3) {
-      ConsoleApi.searchObject('group', {
+      ConsoleAPI.searchObject('group', {
         page: page,
         size: size,
         query: query,
       }).then((value) => setList(value))
     } else {
-      ConsoleApi.listGroups({ page: page, size: size }).then((value) =>
+      ConsoleAPI.listGroups({ page: page, size: size }).then((value) =>
         setList(value),
       )
     }
@@ -112,7 +101,7 @@ const ConsolePanelGroups = () => {
     <>
       <ConsoleRenameModal
         closeConfirmationWindow={closeConfirmationWindow}
-        isOpen={confirmRenameWindowOpen}
+        isOpen={isConfirmRenameOpen}
         isSubmitting={isSubmitting}
         previousName={currentName}
         object="group"
@@ -125,94 +114,79 @@ const ConsolePanelGroups = () => {
       <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
         <Heading className={cx('text-heading')}>Group Management</Heading>
         {list && list.data.length > 0 ? (
-          <Stack direction="column" spacing={2}>
-            <Table variant="simple">
-              <Thead>
-                <Tr>
-                  <Th>Group name</Th>
-                  <Th>Organization</Th>
-                  <Th>Create time</Th>
-                  <Th>Update time</Th>
-                  <Th></Th>
-                </Tr>
-              </Thead>
-              <Tbody>
-                {list.data.map((group) => (
-                  <Tr key={group.id}>
-                    <Td>
-                      <div
-                        className={cx(
-                          'flex',
-                          'flex-row',
-                          'items-center',
-                          'gap-1.5',
-                        )}
-                      >
-                        <Avatar
-                          name={group.name}
-                          size="sm"
-                          className={cx('w-[40px]', 'h-[40px]')}
-                        />
-                        <Text noOfLines={1}>{group.name}</Text>
-                      </div>
-                    </Td>
-                    <Td>
-                      <ChakraLink
-                        as={Link}
-                        to={`/console/organizations/${group.organization.id}`}
-                        className={cx('no-underline')}
-                      >
-                        <Text noOfLines={1}>{group.organization.name}</Text>
-                      </ChakraLink>
-                    </Td>
-                    <Td>
-                      <Text>
-                        {new Date(group.createTime).toLocaleDateString()}
-                      </Text>
-                    </Td>
-                    <Td>
-                      <Text>{new Date(group.updateTime).toLocaleString()}</Text>
-                    </Td>
-                    <Td>
-                      <Center>
-                        <Menu>
-                          <MenuButton
-                            as={IconButton}
-                            icon={<IconMoreVert />}
-                            variant="ghost"
-                            aria-label=""
-                          />
-                          <MenuList>
-                            <MenuItem
-                              onClick={async () => {
-                                await renameGroup(group.id, group.name, null)
-                              }}
-                            >
-                              Rename
-                            </MenuItem>
-                          </MenuList>
-                        </Menu>
-                      </Center>
-                    </Td>
-                  </Tr>
-                ))}
-              </Tbody>
-            </Table>
-          </Stack>
+          <DataTable
+            items={list.data}
+            columns={[
+              {
+                title: 'Name',
+                renderCell: (group) => (
+                  <div
+                    className={cx(
+                      'flex',
+                      'flex-row',
+                      'items-center',
+                      'gap-1.5',
+                    )}
+                  >
+                    <Avatar
+                      name={group.name}
+                      size="sm"
+                      className={cx('w-[40px]', 'h-[40px]')}
+                    />
+                    <Text noOfLines={1}>{group.name}</Text>
+                  </div>
+                ),
+              },
+              {
+                title: 'Organization',
+                renderCell: (group) => (
+                  <ChakraLink
+                    as={Link}
+                    to={`/console/organizations/${group.organization.id}`}
+                    className={cx('no-underline')}
+                  >
+                    <Text noOfLines={1}>{group.organization.name}</Text>
+                  </ChakraLink>
+                ),
+              },
+              {
+                title: 'Created',
+                renderCell: (group) => (
+                  <RelativeDate date={new Date(group.createTime)} />
+                ),
+              },
+              {
+                title: 'Updated',
+                renderCell: (group) => (
+                  <RelativeDate date={new Date(group.updateTime)} />
+                ),
+              },
+            ]}
+            actions={[
+              {
+                label: 'Rename',
+                icon: <IconEdit />,
+                onClick: async (group) => {
+                  await renameGroup(group.id, group.name, null)
+                },
+              },
+            ]}
+          />
         ) : (
           <div>No groups found.</div>
         )}
         {list ? (
-          <PagePagination
-            style={{ alignSelf: 'end' }}
-            totalElements={list.totalElements}
-            totalPages={Math.ceil(list.totalElements / size)}
-            page={page}
-            size={size}
-            steps={steps}
-            setPage={setPage}
-            setSize={setSize}
-          />
+          <div className={cx('self-end')}>
+            <PagePagination
+              totalElements={list.totalElements}
+              totalPages={Math.ceil(list.totalElements / size)}
+              page={page}
+              size={size}
+              steps={steps}
+              setPage={setPage}
+              setSize={setSize}
+            />
+          </div>
         ) : null}
       </div>
     </>
