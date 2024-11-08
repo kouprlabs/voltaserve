@@ -35,7 +35,7 @@ import {
   suspendUser,
   makeAdminUser,
   getUserByAdmin,
-  searchUserListPaginated,
+  list,
   getUserPicture,
   UserMakeAdminOptions,
   UserSuspendOptions,
@@ -189,7 +189,7 @@ router.delete(
 router.get(
   '/',
   passport.authenticate('jwt', { session: false }),
-  query('query').isString().notEmpty().trim().escape(),
+  query('query').isString().optional(),
   query('page').isInt(),
   query('size').isInt(),
   async (req: PassportRequest, res: Response) => {
@@ -199,16 +199,16 @@ router.get(
       throw parseValidationError(result)
     }
     res.json(
-      await searchUserListPaginated(
-        req.query.query as string,
-        parseInt(req.query.size as string),
-        parseInt(req.query.page as string),
-      ),
+      await list({
+        query: req.query.query as string,
+        size: parseInt(req.query.size as string),
+        page: parseInt(req.query.page as string),
+      }),
     )
   },
 )
 
-router.patch(
+router.post(
   '/:id/suspend',
   passport.authenticate('jwt', { session: false }),
   body('suspend').isBoolean(),
@@ -223,7 +223,7 @@ router.patch(
   },
 )
 
-router.patch(
+router.post(
   '/:id/make_admin',
   passport.authenticate('jwt', { session: false }),
   body('makeAdmin').isBoolean(),

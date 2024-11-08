@@ -85,18 +85,18 @@ export type UserPictureResponse = {
   mime: string
 }
 
-export type SearchRequest = {
-  page: string
-  size: string
-  query: string
-}
-
-export interface UserSuspendOptions {
+export type UserSuspendOptions = {
   suspend: boolean
 }
 
-export interface UserMakeAdminOptions {
+export type UserMakeAdminOptions = {
   makeAdmin: boolean
+}
+
+export type UserListOptions = {
+  query?: string
+  size: number
+  page: number
 }
 
 export async function getUser(id: string): Promise<UserDTO> {
@@ -123,11 +123,11 @@ export async function getUserPicture(id: string): Promise<UserPictureResponse> {
   }
 }
 
-export async function searchUserListPaginated(
-  query: string,
-  size: number,
-  page: number,
-): Promise<UserAdminList> {
+export async function list({
+  query,
+  size,
+  page,
+}: UserListOptions): Promise<UserAdminList> {
   if (query && query.length >= 3) {
     const users = await search
       .index(USER_SEARCH_INDEX)
@@ -140,7 +140,7 @@ export async function searchUserListPaginated(
       })
     return {
       data: (
-        await userRepo.listAllByIds(
+        await userRepo.findMany(
           users.data.map((value) => {
             return value.id
           }),
@@ -152,10 +152,10 @@ export async function searchUserListPaginated(
     }
   } else {
     return {
-      data: (await userRepo.listAllPaginated(page, size)).map((value) =>
+      data: (await userRepo.list(page, size)).map((value) =>
         adminMapEntity(value),
       ),
-      totalElements: await userRepo.getUserCount(),
+      totalElements: await userRepo.getCount(),
       size: size,
       page: page,
     }
@@ -163,7 +163,7 @@ export async function searchUserListPaginated(
 }
 
 export async function getUserCount(): Promise<number> {
-  return await userRepo.getUserCount()
+  return await userRepo.getCount()
 }
 
 export async function updateFullName(

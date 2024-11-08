@@ -11,7 +11,7 @@
     "http"
   ],
   "paths": {
-    "/v3/user/": {
+    "/v3/users/me": {
       "get": {
         "description": "",
         "responses": {
@@ -25,19 +25,16 @@
         "responses": {
           "204": {
             "description": "No Content"
-          },
-          "400": {
-            "description": "Bad Request"
           }
         }
       }
     },
-    "/v3/user/{pictureext}": {
+    "/v3/users/me/{pictureextension}": {
       "get": {
         "description": "",
         "parameters": [
           {
-            "name": "pictureext",
+            "name": "pictureextension",
             "in": "path",
             "required": true,
             "type": "string"
@@ -55,7 +52,7 @@
         }
       }
     },
-    "/v3/user/update_full_name": {
+    "/v3/users/me/update_full_name": {
       "post": {
         "description": "",
         "responses": {
@@ -65,7 +62,7 @@
         }
       }
     },
-    "/v3/user/update_email_request": {
+    "/v3/users/me/update_email_request": {
       "post": {
         "description": "",
         "responses": {
@@ -75,7 +72,7 @@
         }
       }
     },
-    "/v3/user/update_email_confirmation": {
+    "/v3/users/me/update_email_confirmation": {
       "post": {
         "description": "",
         "responses": {
@@ -85,20 +82,7 @@
         }
       }
     },
-    "/v3/user/update_password": {
-      "post": {
-        "description": "",
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "400": {
-            "description": "Bad Request"
-          }
-        }
-      }
-    },
-    "/v3/user/update_picture": {
+    "/v3/users/me/update_password": {
       "post": {
         "description": "",
         "responses": {
@@ -108,7 +92,7 @@
         }
       }
     },
-    "/v3/user/delete_picture": {
+    "/v3/users/me/update_picture": {
       "post": {
         "description": "",
         "responses": {
@@ -118,7 +102,17 @@
         }
       }
     },
-    "/v3/user/all": {
+    "/v3/users/me/delete_picture": {
+      "post": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/v3/users/": {
       "get": {
         "description": "",
         "parameters": [
@@ -150,10 +144,16 @@
         }
       }
     },
-    "/v3/user/suspend": {
-      "patch": {
+    "/v3/users/{id}/suspend": {
+      "post": {
         "description": "",
         "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
           {
             "name": "Authorization",
             "in": "header",
@@ -167,10 +167,16 @@
         }
       }
     },
-    "/v3/user/admin": {
-      "patch": {
+    "/v3/users/{id}/make_admin": {
+      "post": {
         "description": "",
         "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
           {
             "name": "Authorization",
             "in": "header",
@@ -184,7 +190,7 @@
         }
       }
     },
-    "/v3/user/{id}": {
+    "/v3/users/{id}": {
       "get": {
         "description": "",
         "parameters": [
@@ -263,12 +269,6 @@
         "responses": {
           "200": {
             "description": "OK"
-          },
-          "400": {
-            "description": "Bad Request"
-          },
-          "403": {
-            "description": "Forbidden"
           }
         }
       }
@@ -279,9 +279,6 @@
         "responses": {
           "200": {
             "description": "OK"
-          },
-          "503": {
-            "description": "Service Unavailable"
           }
         }
       }

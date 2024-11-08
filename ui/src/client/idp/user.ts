@@ -122,7 +122,7 @@ export default class UserAPI {
   static suspend(id: string, options: SuspendOptions) {
     return idpFetcher({
       url: `/users/${id}/suspend`,
-      method: 'PATCH',
+      method: 'POST',
       body: JSON.stringify(options),
     }) as Promise<User>
   }
@@ -130,7 +130,7 @@ export default class UserAPI {
   static makeAdmin(id: string, options: MakeAdminOptions) {
     return idpFetcher({
       url: `/users/${id}/make_admin`,
-      method: 'PATCH',
+      method: 'POST',
       body: JSON.stringify(options),
     }) as Promise<User>
   }

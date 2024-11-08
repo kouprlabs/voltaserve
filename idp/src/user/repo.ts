@@ -119,7 +119,7 @@ class UserRepoImpl {
     return this.mapRow(rows[0])
   }
 
-  async listAllPaginated(page: number, size: number): Promise<User[]> {
+  async list(page: number, size: number): Promise<User[]> {
     const { rowCount, rows } = await client.query(
       `SELECT *
        FROM "user"
@@ -138,13 +138,13 @@ class UserRepoImpl {
     return this.mapList(rows)
   }
 
-  async listAllByIds(idList: number[]): Promise<User[]> {
+  async findMany(ids: string[]): Promise<User[]> {
     const { rowCount, rows } = await client.query(
       `SELECT *
        FROM "user"
        WHERE id = ANY ($1)
        ORDER BY create_time`,
-      [idList],
+      [ids],
     )
     if (rowCount < 1) {
       throw newError({
@@ -156,7 +156,7 @@ class UserRepoImpl {
     return this.mapList(rows)
   }
 
-  async getUserCount(): Promise<number> {
+  async getCount(): Promise<number> {
     const { rowCount, rows } = await client.query(
       `SELECT COUNT(id) as count FROM "user"`,
     )
