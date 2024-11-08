@@ -86,7 +86,7 @@ const ConsolePanelOrganization = () => {
     if (id) {
       ConsoleAPI.listGroupsByOrganization({
         id: id,
-        page: workspacesPage,
+        page: groupsPage,
         size: 5,
       }).then((value) => {
         setGroupsData(value)
@@ -167,8 +167,10 @@ const ConsolePanelOrganization = () => {
                               setPage={setUsersPage}
                               setSize={() => {}}
                               uiSize="xs"
-                              disableLastNav
-                              disableMiddleNav
+                              isFirstDisabled={true}
+                              isLastDisabled={true}
+                              isRewindDisabled={true}
+                              isFastForwardDisabled={true}
                             />
                           ) : null}
                         </Flex>
@@ -190,7 +192,6 @@ const ConsolePanelOrganization = () => {
                             </Badge>
                           </Text>
                           <Text fontSize="sm">
-                            created:{' '}
                             {<RelativeDate date={new Date(user.createTime)} />}
                           </Text>
                         </Box>
@@ -227,8 +228,10 @@ const ConsolePanelOrganization = () => {
                               setPage={setWorkspacesPage}
                               setSize={() => {}}
                               uiSize="xs"
-                              disableLastNav
-                              disableMiddleNav
+                              isFirstDisabled={true}
+                              isLastDisabled={true}
+                              isRewindDisabled={true}
+                              isFastForwardDisabled={true}
                             />
                           ) : null}
                         </Flex>
@@ -247,7 +250,6 @@ const ConsolePanelOrganization = () => {
                             {workspace.name}
                           </Text>
                           <Text fontSize="sm">
-                            created:{' '}
                             <RelativeDate
                               date={new Date(workspace.createTime)}
                             />
@@ -286,8 +288,10 @@ const ConsolePanelOrganization = () => {
                               setPage={setGroupsPage}
                               setSize={() => {}}
                               uiSize="xs"
-                              disableLastNav
-                              disableMiddleNav
+                              isFirstDisabled={true}
+                              isLastDisabled={true}
+                              isRewindDisabled={true}
+                              isFastForwardDisabled={true}
                             />
                           ) : null}
                         </Flex>
@@ -306,7 +310,6 @@ const ConsolePanelOrganization = () => {
                             {group.name}
                           </Text>
                           <Text fontSize="sm">
-                            created:{' '}
                             <RelativeDate date={new Date(group.createTime)} />
                           </Text>
                         </Box>

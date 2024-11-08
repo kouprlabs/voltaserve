@@ -284,8 +284,10 @@ const ConsolePanelUser = () => {
                             setPage={setOrgPage}
                             setSize={() => {}}
                             uiSize="xs"
-                            disableLastNav
-                            disableMiddleNav
+                            isFirstDisabled={true}
+                            isLastDisabled={true}
+                            isRewindDisabled={true}
+                            isFastForwardDisabled={true}
                           />
                         ) : null}
                       </Flex>
@@ -352,8 +354,10 @@ const ConsolePanelUser = () => {
                             setPage={setWorkspacePage}
                             setSize={() => {}}
                             uiSize="xs"
-                            disableLastNav
-                            disableMiddleNav
+                            isFirstDisabled={true}
+                            isLastDisabled={true}
+                            isRewindDisabled={true}
+                            isFastForwardDisabled={true}
                           />
                         ) : null}
                       </Flex>
@@ -416,8 +420,10 @@ const ConsolePanelUser = () => {
                             setPage={setGroupPage}
                             setSize={() => {}}
                             uiSize="xs"
-                            disableLastNav
-                            disableMiddleNav
+                            isFirstDisabled={true}
+                            isLastDisabled={true}
+                            isRewindDisabled={true}
+                            isFastForwardDisabled={true}
                           />
                         ) : null}
                       </Flex>
