@@ -15,7 +15,6 @@ import group from './group'
 import groupMembers from './group-members'
 import groups from './groups'
 import incomingInvitations from './incoming-invitations'
-import indexes from './indexes'
 import insights from './insights'
 import mosaic from './mosaic'
 import nav from './nav'
@@ -47,7 +46,6 @@ export default combineReducers({
   groups,
   outgoingInvitations,
   incomingInvitations,
-  indexes,
   account,
   notifications,
   workspace,
