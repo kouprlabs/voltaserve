@@ -158,28 +158,28 @@ export default class ConsoleAPI {
     )
   }
 
-  static getUsersByOrganization(options: ListOptions) {
+  static listUsersByOrganization(options: ListOptions) {
     return consoleFetcher({
       url: `/organization/users?${this.paramsFromListOptions(options)}`,
       method: 'GET',
     }) as Promise<ListResponse<UserOrganizationManagement>>
   }
 
-  static getGroupsByUser(options: ListOptions) {
+  static listGroupsByUser(options: ListOptions) {
     return consoleFetcher({
       url: `/user/groups?${this.paramsFromListOptions(options)}`,
       method: 'GET',
     }) as Promise<ListResponse<GroupUserManagement>>
   }
 
-  static getGroupsByOrganization(options: ListOptions) {
+  static listGroupsByOrganization(options: ListOptions) {
     return consoleFetcher({
       url: `/organization/groups?${this.paramsFromListOptions(options)}`,
       method: 'GET',
     }) as Promise<ListResponse<GroupManagement>>
   }
 
-  static getOrganizationsByUser(options: ListOptions) {
+  static listOrganizationsByUser(options: ListOptions) {
     return consoleFetcher({
       url: `/user/organizations?${this.paramsFromListOptions(options)}`,
       method: 'GET',
@@ -193,14 +193,14 @@ export default class ConsoleAPI {
     }) as Promise<OrganizationManagement>
   }
 
-  static getWorkspacesByUser(options: ListOptions) {
+  static listWorkspacesByUser(options: ListOptions) {
     return consoleFetcher({
       url: `/user/workspaces?${this.paramsFromListOptions(options)}`,
       method: 'GET',
     }) as Promise<ListResponse<WorkspaceUserManagement>>
   }
 
-  static getWorkspacesByOrganization(options: ListOptions) {
+  static listWorkspacesByOrganization(options: ListOptions) {
     return consoleFetcher({
       url: `/organization/workspaces?${this.paramsFromListOptions(options)}`,
       method: 'GET',

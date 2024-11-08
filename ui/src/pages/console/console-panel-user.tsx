@@ -82,7 +82,7 @@ const ConsolePanelUser = () => {
   }
   const groupsFetch = () => {
     if (id) {
-      ConsoleAPI.getGroupsByUser({ id: id, page: groupPage, size: 5 }).then(
+      ConsoleAPI.listGroupsByUser({ id: id, page: groupPage, size: 5 }).then(
         (value) => {
           setGroupList(value)
         },
@@ -90,7 +90,7 @@ const ConsolePanelUser = () => {
     }
   }
   const organizationsFetch = () => {
-    ConsoleAPI.getOrganizationsByUser({
+    ConsoleAPI.listOrganizationsByUser({
       id: id,
       page: orgPage,
       size: 5,
@@ -100,7 +100,7 @@ const ConsolePanelUser = () => {
   }
 
   const workspacesFetch = () => {
-    ConsoleAPI.getWorkspacesByUser({
+    ConsoleAPI.listWorkspacesByUser({
       id: id,
       page: workspacePage,
       size: 5,

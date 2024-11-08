@@ -60,7 +60,7 @@ const ConsolePanelOrganization = () => {
 
   const usersFetch = () => {
     if (id) {
-      ConsoleAPI.getUsersByOrganization({
+      ConsoleAPI.listUsersByOrganization({
         id: id,
         page: usersPage,
         size: 5,
@@ -72,7 +72,7 @@ const ConsolePanelOrganization = () => {
 
   const workspacesFetch = () => {
     if (id) {
-      ConsoleAPI.getWorkspacesByOrganization({
+      ConsoleAPI.listWorkspacesByOrganization({
         id: id,
         page: workspacesPage,
         size: 5,
@@ -84,7 +84,7 @@ const ConsolePanelOrganization = () => {
 
   const groupsFetch = () => {
     if (id) {
-      ConsoleAPI.getGroupsByOrganization({
+      ConsoleAPI.listGroupsByOrganization({
         id: id,
         page: workspacesPage,
         size: 5,
