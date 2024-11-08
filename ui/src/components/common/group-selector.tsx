@@ -25,7 +25,12 @@ import {
   Avatar,
   Radio,
 } from '@chakra-ui/react'
-import { Pagination, SearchInput, Spinner } from '@koupr/ui'
+import {
+  Pagination,
+  SearchInput,
+  SectionError,
+  SectionSpinner,
+} from '@koupr/ui'
 import cx from 'classnames'
 import GroupAPI, { Group, SortOrder } from '@/client/api/group'
 import { swrConfig } from '@/client/options'
@@ -111,29 +116,9 @@ const GroupSelector = ({
                 onChange={handleSearchInputChange}
               />
               {!list && error ? (
-                <div
-                  className={cx(
-                    'flex',
-                    'items-center',
-                    'justify-center',
-                    'h-[320px]',
-                  )}
-                >
-                  <span>Failed to load groups.</span>
-                </div>
+                <SectionError text="Failed to load groups." />
               ) : null}
-              {!list && !error ? (
-                <div
-                  className={cx(
-                    'flex',
-                    'items-center',
-                    'justify-center',
-                    'h-[320px]',
-                  )}
-                >
-                  <Spinner />
-                </div>
-              ) : null}
+              {!list && !error ? <SectionSpinner /> : null}
               {list && list.data.length === 0 ? (
                 <div
                   className={cx(

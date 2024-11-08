@@ -167,18 +167,18 @@ func (svc *TaskService) Find(id string, userID string) (*Task, error) {
 
 type TaskListOptions struct {
 	Query     string
-	Page      int64
-	Size      int64
+	Page      uint64
+	Size      uint64
 	SortBy    string
 	SortOrder string
 }
 
 type TaskList struct {
 	Data          []*Task `json:"data"`
-	TotalPages    int64   `json:"totalPages"`
-	TotalElements int64   `json:"totalElements"`
-	Page          int64   `json:"page"`
-	Size          int64   `json:"size"`
+	TotalPages    uint64  `json:"totalPages"`
+	TotalElements uint64  `json:"totalElements"`
+	Page          uint64  `json:"page"`
+	Size          uint64  `json:"size"`
 }
 
 func (svc *TaskService) List(opts TaskListOptions, userID string) (*TaskList, error) {
@@ -203,13 +203,13 @@ func (svc *TaskService) List(opts TaskListOptions, userID string) (*TaskList, er
 		TotalPages:    totalPages,
 		TotalElements: totalElements,
 		Page:          opts.Page,
-		Size:          int64(len(mapped)),
+		Size:          uint64(len(mapped)),
 	}, nil
 }
 
 type TaskProbe struct {
-	TotalPages    int64 `json:"totalPages"`
-	TotalElements int64 `json:"totalElements"`
+	TotalPages    uint64 `json:"totalPages"`
+	TotalElements uint64 `json:"totalElements"`
 }
 
 func (svc *TaskService) Probe(opts TaskListOptions, userID string) (*TaskProbe, error) {
@@ -217,7 +217,7 @@ func (svc *TaskService) Probe(opts TaskListOptions, userID string) (*TaskProbe, 
 	if err != nil {
 		return nil, err
 	}
-	totalElements := int64(len(all))
+	totalElements := uint64(len(all))
 	return &TaskProbe{
 		TotalElements: totalElements,
 		TotalPages:    (totalElements + opts.Size - 1) / opts.Size,
@@ -379,8 +379,8 @@ func (svc *TaskService) doSorting(data []model.Task, sortBy string, sortOrder st
 	return data
 }
 
-func (svc *TaskService) doPagination(data []model.Task, page, size int64) (pageData []model.Task, totalElements int64, totalPages int64) {
-	totalElements = int64(len(data))
+func (svc *TaskService) doPagination(data []model.Task, page, size uint64) (pageData []model.Task, totalElements uint64, totalPages uint64) {
+	totalElements = uint64(len(data))
 	totalPages = (totalElements + size - 1) / size
 	if page > totalPages {
 		return []model.Task{}, totalElements, totalPages

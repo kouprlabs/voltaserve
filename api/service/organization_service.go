@@ -121,18 +121,18 @@ func (svc *OrganizationService) Find(id string, userID string) (*Organization, e
 
 type OrganizationListOptions struct {
 	Query     string
-	Page      int64
-	Size      int64
+	Page      uint64
+	Size      uint64
 	SortBy    string
 	SortOrder string
 }
 
 type OrganizationList struct {
 	Data          []*Organization `json:"data"`
-	TotalPages    int64           `json:"totalPages"`
-	TotalElements int64           `json:"totalElements"`
-	Page          int64           `json:"page"`
-	Size          int64           `json:"size"`
+	TotalPages    uint64          `json:"totalPages"`
+	TotalElements uint64          `json:"totalElements"`
+	Page          uint64          `json:"page"`
+	Size          uint64          `json:"size"`
 }
 
 func (svc *OrganizationService) List(opts OrganizationListOptions, userID string) (*OrganizationList, error) {
@@ -157,13 +157,13 @@ func (svc *OrganizationService) List(opts OrganizationListOptions, userID string
 		TotalPages:    totalPages,
 		TotalElements: totalElements,
 		Page:          opts.Page,
-		Size:          int64(len(mapped)),
+		Size:          uint64(len(mapped)),
 	}, nil
 }
 
 type OrganizationProbe struct {
-	TotalPages    int64 `json:"totalPages"`
-	TotalElements int64 `json:"totalElements"`
+	TotalPages    uint64 `json:"totalPages"`
+	TotalElements uint64 `json:"totalElements"`
 }
 
 func (svc *OrganizationService) Probe(opts OrganizationListOptions, userID string) (*OrganizationProbe, error) {
@@ -171,7 +171,7 @@ func (svc *OrganizationService) Probe(opts OrganizationListOptions, userID strin
 	if err != nil {
 		return nil, err
 	}
-	totalElements := int64(len(all))
+	totalElements := uint64(len(all))
 	return &OrganizationProbe{
 		TotalElements: totalElements,
 		TotalPages:    (totalElements + opts.Size - 1) / opts.Size,
@@ -380,8 +380,8 @@ func (svc *OrganizationService) doSorting(data []model.Organization, sortBy stri
 	return data
 }
 
-func (svc *OrganizationService) doPagination(data []model.Organization, page, size int64) (pageData []model.Organization, totalElements int64, totalPages int64) {
-	totalElements = int64(len(data))
+func (svc *OrganizationService) doPagination(data []model.Organization, page, size uint64) (pageData []model.Organization, totalElements uint64, totalPages uint64) {
+	totalElements = uint64(len(data))
 	totalPages = (totalElements + size - 1) / size
 	if page > totalPages {
 		return []model.Organization{}, totalElements, totalPages

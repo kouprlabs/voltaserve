@@ -24,7 +24,12 @@ import {
   Td,
   Tr,
 } from '@chakra-ui/react'
-import { Pagination, RelativeDate, SectionSpinner } from '@koupr/ui'
+import {
+  Pagination,
+  RelativeDate,
+  SectionError,
+  SectionSpinner,
+} from '@koupr/ui'
 import cx from 'classnames'
 import SnapshotAPI, { Snapshot, SortBy, SortOrder } from '@/client/api/snapshot'
 import { swrConfig } from '@/client/options'
@@ -124,16 +129,7 @@ const SnapshotList = () => {
         <ModalBody>
           <div className={cx('flex', 'flex-col', 'gap-1.5')}>
             {!list && error ? (
-              <div
-                className={cx(
-                  'flex',
-                  'items-center',
-                  'justify-center',
-                  'h-[300px]',
-                )}
-              >
-                <span>Failed to load snapshots.</span>
-              </div>
+              <SectionError text="Failed to load snapshots." />
             ) : null}
             {!list && !error ? <SectionSpinner /> : null}
             {list && list.data.length === 0 ? (

@@ -25,7 +25,12 @@ import {
   Avatar,
   Radio,
 } from '@chakra-ui/react'
-import { Pagination, SearchInput, SectionSpinner } from '@koupr/ui'
+import {
+  Pagination,
+  SearchInput,
+  SectionError,
+  SectionSpinner,
+} from '@koupr/ui'
 import cx from 'classnames'
 import UserAPI, { SortOrder, User } from '@/client/api/user'
 import { swrConfig } from '@/client/options'
@@ -125,16 +130,7 @@ const UserSelector = ({
                 onChange={handleSearchInputChange}
               />
               {!list && error ? (
-                <div
-                  className={cx(
-                    'flex',
-                    'items-center',
-                    'justify-center',
-                    'h-[320px]',
-                  )}
-                >
-                  <span>Failed to load users.</span>
-                </div>
+                <SectionError text="Failed to load users." />
               ) : null}
               {!list && !error ? <SectionSpinner /> : null}
               {list && list.data.length === 0 ? (

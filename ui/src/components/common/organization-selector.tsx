@@ -25,7 +25,12 @@ import {
   Avatar,
   Radio,
 } from '@chakra-ui/react'
-import { Pagination, SearchInput, SectionSpinner } from '@koupr/ui'
+import {
+  Pagination,
+  SearchInput,
+  SectionError,
+  SectionSpinner,
+} from '@koupr/ui'
 import cx from 'classnames'
 import OrganizationAPI, {
   Organization,
@@ -110,16 +115,7 @@ const OrganizationSelector = ({ onConfirm }: OrganizationSelectorProps) => {
                 onChange={handleSearchInputChange}
               />
               {!list && error ? (
-                <div
-                  className={cx(
-                    'flex',
-                    'items-center',
-                    'justify-center',
-                    'h-[320px]',
-                  )}
-                >
-                  <span>Failed to load organizations.</span>
-                </div>
+                <SectionError text="Failed to load organizations." />
               ) : null}
               {!list && !error ? <SectionSpinner /> : null}
               {list && list.data.length === 0 ? (

@@ -19,6 +19,7 @@ import {
   DataTable,
   PagePagination,
   RelativeDate,
+  SectionError,
   SectionSpinner,
   Text,
   usePagePagination,
@@ -70,18 +71,7 @@ const GroupListPage = () => {
       </Helmet>
       <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
         <Heading className={cx('text-heading')}>Groups</Heading>
-        {error ? (
-          <div
-            className={cx(
-              'flex',
-              'items-center',
-              'justify-center',
-              'h-[300px]',
-            )}
-          >
-            <span>Failed to load groups.</span>
-          </div>
-        ) : null}
+        {error ? <SectionError text="Failed to load groups." /> : null}
         {!list && !error ? <SectionSpinner /> : null}
         {list && list.data.length === 0 ? (
           <div

@@ -20,6 +20,7 @@ import {
   SectionSpinner,
   usePagePagination,
   RelativeDate,
+  SectionError,
 } from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
@@ -89,28 +90,26 @@ const OrganizationInvitationsPage = () => {
     }
   }, [mutate])
 
-  if (invitationsError || orgError) {
-    return null
-  }
-
-  if (!list || !org) {
-    return <SectionSpinner />
-  }
-
   return (
     <>
-      <Helmet>
-        <title>{org.name}</title>
-      </Helmet>
-      {!list && invitationsError ? (
-        <div
-          className={cx('flex', 'items-center', 'justify-center', 'h-[300px]')}
-        >
-          <span>Failed to load invitations.</span>
-        </div>
+      {org ? (
+        <Helmet>
+          <title>{org.name}</title>
+        </Helmet>
       ) : null}
-      {!list && !invitationsError ? <SectionSpinner /> : null}
-      {list && list.data.length === 0 ? (
+      {!list && invitationsError && org && !orgError ? (
+        <SectionError text="Failed to load invitations." />
+      ) : null}
+      {!org && orgError && list && !invitationsError ? (
+        <SectionError text="Failed to load organization." />
+      ) : null}
+      {!list && invitationsError && !org && orgError ? (
+        <SectionError text="Failed to load organization and invitations." />
+      ) : null}
+      {(!list && !invitationsError) || (!org && !orgError) ? (
+        <SectionSpinner />
+      ) : null}
+      {list && list.data.length === 0 && org ? (
         <>
           <div
             className={cx(
@@ -141,7 +140,7 @@ const OrganizationInvitationsPage = () => {
           />
         </>
       ) : null}
-      {list && list.data.length > 0 ? (
+      {list && list.data.length > 0 && org ? (
         <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
           <DataTable
             items={list.data}

@@ -392,22 +392,22 @@ func (r *FileRouter) Probe(c *fiber.Ctx) error {
 
 func (r *FileRouter) parseListQueryParams(c *fiber.Ctx) (*service.FileListOptions, error) {
 	var err error
-	var page int64
+	var page uint64
 	if c.Query("page") == "" {
 		page = 1
 	} else {
-		page, err = strconv.ParseInt(c.Query("page"), 10, 64)
+		page, err = strconv.ParseUint(c.Query("page"), 10, 64)
 		if err != nil {
-			page = 1
+			return nil, errorpkg.NewInvalidQueryParamError("page")
 		}
 	}
-	var size int64
+	var size uint64
 	if c.Query("size") == "" {
 		size = FileDefaultPageSize
 	} else {
-		size, err = strconv.ParseInt(c.Query("size"), 10, 64)
+		size, err = strconv.ParseUint(c.Query("size"), 10, 64)
 		if err != nil {
-			return nil, err
+			return nil, errorpkg.NewInvalidQueryParamError("size")
 		}
 	}
 	if size == 0 {

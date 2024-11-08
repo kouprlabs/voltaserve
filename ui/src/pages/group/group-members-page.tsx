@@ -23,6 +23,7 @@ import {
   PagePagination,
   SectionSpinner,
   usePagePagination,
+  SectionError,
 } from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
@@ -80,28 +81,26 @@ const GroupMembersPage = () => {
     }
   }, [mutate])
 
-  if (groupError || membersError) {
-    return null
-  }
-
-  if (!group || !list) {
-    return <SectionSpinner />
-  }
-
   return (
     <>
-      <Helmet>
-        <title>{group.name}</title>
-      </Helmet>
-      {!list && membersError ? (
-        <div
-          className={cx('flex', 'items-center', 'justify-center', 'h-[300px]')}
-        >
-          <span>Failed to load members.</span>
-        </div>
+      {group ? (
+        <Helmet>
+          <title>{group.name}</title>
+        </Helmet>
       ) : null}
-      {!list && !membersError ? <SectionSpinner /> : null}
-      {list.data.length > 0 ? (
+      {!list && membersError && group && !groupError ? (
+        <SectionError text="Failed to load members." />
+      ) : null}
+      {!group && groupError && list && !membersError ? (
+        <SectionError text="Failed to load group." />
+      ) : null}
+      {!list && membersError && !group && groupError ? (
+        <SectionError text="Failed to load group and members." />
+      ) : null}
+      {(!list && !membersError) || (!group && !groupError) ? (
+        <SectionSpinner />
+      ) : null}
+      {list && list.data.length > 0 && group ? (
         <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
           <DataTable
             items={list.data}
@@ -177,11 +176,8 @@ const GroupMembersPage = () => {
           ) : null}
         </div>
       ) : null}
-      {list.data.length === 0 ? (
+      {list && list.data.length === 0 && group ? (
         <>
-          <Helmet>
-            <title>{group.name}</title>
-          </Helmet>
           <div
             className={cx(
               'flex',

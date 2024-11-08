@@ -20,6 +20,7 @@ import {
   IconLogout,
   IconPersonAdd,
   PagePagination,
+  SectionError,
   SectionSpinner,
   Text,
   usePagePagination,
@@ -78,28 +79,26 @@ const OrganizationMembersPage = () => {
   const [isRemoveMemberModalOpen, setIsRemoveMemberModalOpen] =
     useState<boolean>(false)
 
-  if (membersError || orgError) {
-    return null
-  }
-
-  if (!list || !org) {
-    return <SectionSpinner />
-  }
-
   return (
     <>
-      <Helmet>
-        <title>{org.name}</title>
-      </Helmet>
-      {!list && membersError ? (
-        <div
-          className={cx('flex', 'items-center', 'justify-center', 'h-[300px]')}
-        >
-          <span>Failed to load members.</span>
-        </div>
+      {org ? (
+        <Helmet>
+          <title>{org.name}</title>
+        </Helmet>
       ) : null}
-      {!list && !membersError ? <SectionSpinner /> : null}
-      {list.data.length > 0 ? (
+      {!list && membersError && org && !orgError ? (
+        <SectionError text="Failed to load members." />
+      ) : null}
+      {!org && orgError && list && !membersError ? (
+        <SectionError text="Failed to load organization." />
+      ) : null}
+      {!list && membersError && !org && orgError ? (
+        <SectionError text="Failed to load organization and members." />
+      ) : null}
+      {(!list && !membersError) || (!org && !orgError) ? (
+        <SectionSpinner />
+      ) : null}
+      {list && list.data.length > 0 && org ? (
         <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
           <DataTable
             items={list.data}
@@ -175,7 +174,7 @@ const OrganizationMembersPage = () => {
           ) : null}
         </div>
       ) : null}
-      {list.data.length === 0 ? (
+      {list && list.data.length === 0 && org ? (
         <>
           <div
             className={cx(

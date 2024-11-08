@@ -76,16 +76,16 @@ type UserListOptions struct {
 	ExcludeGroupMembers bool
 	SortBy              string
 	SortOrder           string
-	Page                int64
-	Size                int64
+	Page                uint64
+	Size                uint64
 }
 
 type UserList struct {
 	Data          []*User `json:"data"`
-	TotalPages    int64   `json:"totalPages"`
-	TotalElements int64   `json:"totalElements"`
-	Page          int64   `json:"page"`
-	Size          int64   `json:"size"`
+	TotalPages    uint64  `json:"totalPages"`
+	TotalElements uint64  `json:"totalElements"`
+	Page          uint64  `json:"page"`
+	Size          uint64  `json:"size"`
 }
 
 func (svc *UserService) List(opts UserListOptions, userID string) (*UserList, error) {
@@ -110,13 +110,13 @@ func (svc *UserService) List(opts UserListOptions, userID string) (*UserList, er
 		TotalPages:    totalPages,
 		TotalElements: totalElements,
 		Page:          opts.Page,
-		Size:          int64(len(mapped)),
+		Size:          uint64(len(mapped)),
 	}, nil
 }
 
 type UserProbe struct {
-	TotalPages    int64 `json:"totalPages"`
-	TotalElements int64 `json:"totalElements"`
+	TotalPages    uint64 `json:"totalPages"`
+	TotalElements uint64 `json:"totalElements"`
 }
 
 func (svc *UserService) Probe(opts UserListOptions, userID string) (*UserProbe, error) {
@@ -124,7 +124,7 @@ func (svc *UserService) Probe(opts UserListOptions, userID string) (*UserProbe, 
 	if err != nil {
 		return nil, err
 	}
-	totalElements := int64(len(users))
+	totalElements := uint64(len(users))
 	return &UserProbe{
 		TotalElements: totalElements,
 		TotalPages:    (totalElements + opts.Size - 1) / opts.Size,
@@ -243,8 +243,8 @@ func (svc *UserService) doSorting(data []model.User, sortBy string, sortOrder st
 	return data
 }
 
-func (svc *UserService) doPagination(data []model.User, page, size int64) ([]model.User, int64, int64) {
-	totalElements := int64(len(data))
+func (svc *UserService) doPagination(data []model.User, page, size uint64) ([]model.User, uint64, uint64) {
+	totalElements := uint64(len(data))
 	totalPages := (totalElements + size - 1) / size
 	if page > totalPages {
 		return []model.User{}, totalElements, totalPages

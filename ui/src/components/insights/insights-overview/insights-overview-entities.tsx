@@ -9,7 +9,12 @@
 // licenses/AGPL.txt.
 import { useCallback, useEffect, useState } from 'react'
 import { Badge, Table, Tbody, Td, Tooltip, Tr } from '@chakra-ui/react'
-import { Pagination, SearchInput, Spinner } from '@koupr/ui'
+import {
+  Pagination,
+  SearchInput,
+  SectionError,
+  SectionSpinner,
+} from '@koupr/ui'
 import cx from 'classnames'
 import InsightsAPI, { SortBy, SortOrder } from '@/client/api/insights'
 import { swrConfig } from '@/client/options'
@@ -54,10 +59,6 @@ const InsightsOverviewEntities = () => {
     setQuery(undefined)
   }, [])
 
-  if (!list) {
-    return null
-  }
-
   return (
     <div className={cx('flex', 'flex-col', 'gap-1.5')}>
       <SearchInput
@@ -66,20 +67,8 @@ const InsightsOverviewEntities = () => {
         onValue={handleSearchInputValue}
         onClear={handleSearchInputClear}
       />
-      {!list && error ? (
-        <div
-          className={cx('flex', 'items-center', 'justify-center', 'h-[320px]')}
-        >
-          <span>Failed to load entities.</span>
-        </div>
-      ) : null}
-      {!list && !error ? (
-        <div
-          className={cx('flex', 'items-center', 'justify-center', 'h-[320px]')}
-        >
-          <Spinner />
-        </div>
-      ) : null}
+      {!list && error ? <SectionError text="Failed to load entities." /> : null}
+      {!list && !error ? <SectionSpinner /> : null}
       {list && list.data.length === 0 ? (
         <div
           className={cx('flex', 'items-center', 'justify-center', 'h-[320px]')}

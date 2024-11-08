@@ -153,18 +153,18 @@ func (svc *WorkspaceService) Find(id string, userID string) (*Workspace, error) 
 
 type WorkspaceListOptions struct {
 	Query     string
-	Page      int64
-	Size      int64
+	Page      uint64
+	Size      uint64
 	SortBy    string
 	SortOrder string
 }
 
 type WorkspaceList struct {
 	Data          []*Workspace `json:"data"`
-	TotalPages    int64        `json:"totalPages"`
-	TotalElements int64        `json:"totalElements"`
-	Page          int64        `json:"page"`
-	Size          int64        `json:"size"`
+	TotalPages    uint64       `json:"totalPages"`
+	TotalElements uint64       `json:"totalElements"`
+	Page          uint64       `json:"page"`
+	Size          uint64       `json:"size"`
 }
 
 func (svc *WorkspaceService) List(opts WorkspaceListOptions, userID string) (*WorkspaceList, error) {
@@ -189,13 +189,13 @@ func (svc *WorkspaceService) List(opts WorkspaceListOptions, userID string) (*Wo
 		TotalPages:    totalPages,
 		TotalElements: totalElements,
 		Page:          opts.Page,
-		Size:          int64(len(mapped)),
+		Size:          uint64(len(mapped)),
 	}, nil
 }
 
 type WorkspaceProbe struct {
-	TotalPages    int64 `json:"totalPages"`
-	TotalElements int64 `json:"totalElements"`
+	TotalPages    uint64 `json:"totalPages"`
+	TotalElements uint64 `json:"totalElements"`
 }
 
 func (svc *WorkspaceService) Probe(opts WorkspaceListOptions, userID string) (*WorkspaceProbe, error) {
@@ -203,7 +203,7 @@ func (svc *WorkspaceService) Probe(opts WorkspaceListOptions, userID string) (*W
 	if err != nil {
 		return nil, err
 	}
-	totalElements := int64(len(all))
+	totalElements := uint64(len(all))
 	return &WorkspaceProbe{
 		TotalElements: totalElements,
 		TotalPages:    (totalElements + opts.Size - 1) / opts.Size,
@@ -416,8 +416,8 @@ func (svc *WorkspaceService) doSorting(data []model.Workspace, sortBy string, so
 	return data
 }
 
-func (svc *WorkspaceService) doPagination(data []model.Workspace, page, size int64) ([]model.Workspace, int64, int64) {
-	totalElements := int64(len(data))
+func (svc *WorkspaceService) doPagination(data []model.Workspace, page, size uint64) ([]model.Workspace, uint64, uint64) {
+	totalElements := uint64(len(data))
 	totalPages := (totalElements + size - 1) / size
 	if page > totalPages {
 		return []model.Workspace{}, totalElements, totalPages
