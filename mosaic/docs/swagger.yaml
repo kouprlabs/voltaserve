@@ -177,7 +177,7 @@ paths:
       summary: Get Metadata
       tags:
       - Mosaics
-  /mosaics/{s3_bucket}/{s3_key}/zoom_level/{zoom_level}/row/{row}/col/{col}/ext/{ext}:
+  /mosaics/{s3_bucket}/{s3_key}/zoom_level/{zoom_level}/row/{row}/column/{column}/extension/{extension}:
     get:
       description: Download Tile
       operationId: mosaics_download_tile
@@ -204,17 +204,17 @@ paths:
         type: integer
       - description: Column
         in: path
-        name: col
+        name: column
         required: true
         type: integer
-      - description: File Extension
+      - description: Extension
         in: path
-        name: ext
+        name: extension
         required: true
         type: string
       responses:
         "200":
-          description: Tile file
+          description: Tile
           schema:
             type: file
         "404":

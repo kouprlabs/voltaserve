@@ -44,7 +44,7 @@ func (r *UserRouter) AppendRoutes(g fiber.Router) {
 }
 
 func (r *UserRouter) AppendNonJWTRoutes(g fiber.Router) {
-	g.Get("/:id/picture:ext", r.DownloadPicture)
+	g.Get("/:id/picture:extension", r.DownloadPicture)
 }
 
 // List godoc
@@ -187,8 +187,8 @@ func (r *UserRouter) DownloadPicture(c *fiber.Ctx) error {
 	if id == "" {
 		return errorpkg.NewMissingQueryParamError("id")
 	}
-	if c.Params("ext") == "" {
-		return errorpkg.NewMissingQueryParamError("ext")
+	if c.Params("extension") == "" {
+		return errorpkg.NewMissingQueryParamError("extension")
 	}
 	var orgID *string
 	if c.Query("organization_id") != "" {
@@ -210,7 +210,7 @@ func (r *UserRouter) DownloadPicture(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	if *ext != c.Params("ext") {
+	if *ext != c.Params("extension") {
 		return errorpkg.NewUserPictureNotFoundError(nil)
 	}
 	c.Set("Content-Type", *mime)

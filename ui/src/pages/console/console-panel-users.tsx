@@ -57,7 +57,7 @@ const ConsolePanelUsers = () => {
     searchFn: () => location.search,
     storage: consoleUsersPaginationStorage(),
   })
-  const { data: list, mutate } = UserAPI.useListAllUsers(
+  const { data: list, mutate } = UserAPI.useList(
     { query, page, size },
     swrConfig(),
   )
@@ -189,10 +189,7 @@ const ConsolePanelUsers = () => {
                     </>,
                   )
                   setConfirmationRequest(() => async () => {
-                    await UserAPI.suspendUser({
-                      id: user.id,
-                      suspend: true,
-                    })
+                    await UserAPI.suspend(user.id, { suspend: true })
                     await mutate()
                   })
                   setIsConfirmationDestructive(true)
@@ -215,10 +212,7 @@ const ConsolePanelUsers = () => {
                     </>,
                   )
                   setConfirmationRequest(() => async () => {
-                    await UserAPI.suspendUser({
-                      id: user.id,
-                      suspend: false,
-                    })
+                    await UserAPI.suspend(user.id, { suspend: false })
                     await mutate()
                   })
                   setIsConfirmationDestructive(false)
@@ -241,10 +235,7 @@ const ConsolePanelUsers = () => {
                     </>,
                   )
                   setConfirmationRequest(() => async () => {
-                    await UserAPI.makeAdmin({
-                      id: user.id,
-                      makeAdmin: true,
-                    })
+                    await UserAPI.makeAdmin(user.id, { makeAdmin: true })
                     await mutate()
                   })
                   setIsConfirmationDestructive(false)
@@ -268,10 +259,7 @@ const ConsolePanelUsers = () => {
                     </>,
                   )
                   setConfirmationRequest(() => async () => {
-                    await UserAPI.makeAdmin({
-                      id: user.id,
-                      makeAdmin: false,
-                    })
+                    await UserAPI.makeAdmin(user.id, { makeAdmin: false })
                     await mutate()
                     if (getUserId() === user.id) {
                       navigate('/sign-out')

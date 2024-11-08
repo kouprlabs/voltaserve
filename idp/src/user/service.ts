@@ -9,11 +9,6 @@
 // licenses/AGPL.txt.
 import fs from 'fs/promises'
 import { getConfig } from '@/config/config'
-import {
-  UserAdminPostRequest,
-  UserSearchResponse,
-  UserSuspendPostRequest,
-} from '@/infra/admin-requests'
 import { base64ToBuffer, base64ToExtension, base64ToMIME } from '@/infra/base64'
 import { ErrorCode, newError } from '@/infra/error'
 import { newHyphenlessUuid } from '@/infra/id'
@@ -52,6 +47,13 @@ export type UserAdminDTO = {
   updateTime?: string
 }
 
+export interface UserAdminList {
+  data: UserAdminDTO[]
+  page: number
+  size: number
+  totalElements: number
+}
+
 export type PictureDTO = {
   extension: string
 }
@@ -83,6 +85,20 @@ export type UserPictureResponse = {
   mime: string
 }
 
+export type SearchRequest = {
+  page: string
+  size: string
+  query: string
+}
+
+export interface UserSuspendOptions {
+  suspend: boolean
+}
+
+export interface UserMakeAdminOptions {
+  makeAdmin: boolean
+}
+
 export async function getUser(id: string): Promise<UserDTO> {
   return mapEntity(await userRepo.findByID(id))
 }
@@ -111,7 +127,7 @@ export async function searchUserListPaginated(
   query: string,
   size: number,
   page: number,
-): Promise<UserSearchResponse> {
+): Promise<UserAdminList> {
   if (query && query.length >= 3) {
     const users = await search
       .index(USER_SEARCH_INDEX)
@@ -313,8 +329,8 @@ export async function deleteUser(id: string, options: UserDeleteOptions) {
   }
 }
 
-export async function suspendUser(options: UserSuspendPostRequest) {
-  const user = await userRepo.findByID(options.id)
+export async function suspendUser(id: string, options: UserSuspendOptions) {
+  const user = await userRepo.findByID(id)
   if (
     user.isAdmin &&
     !(await userRepo.enoughActiveAdmins()) &&
@@ -341,8 +357,8 @@ export async function suspendUser(options: UserSuspendPostRequest) {
   }
 }
 
-export async function makeAdminUser(options: UserAdminPostRequest) {
-  const user = await userRepo.findByID(options.id)
+export async function makeAdminUser(id: string, options: UserMakeAdminOptions) {
+  const user = await userRepo.findByID(id)
   if (
     user.isAdmin &&
     !(await userRepo.enoughActiveAdmins()) &&

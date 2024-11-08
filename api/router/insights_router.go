@@ -51,8 +51,8 @@ func (r *InsightsRouter) AppendRoutes(g fiber.Router) {
 }
 
 func (r *InsightsRouter) AppendNonJWTRoutes(g fiber.Router) {
-	g.Get("/:id/text:ext", r.DownloadText)
-	g.Get("/:id/ocr:ext", r.DownloadOCR)
+	g.Get("/:id/text:extension", r.DownloadText)
+	g.Get("/:id/ocr:extension", r.DownloadOCR)
 }
 
 // FindLanguages godoc
@@ -295,20 +295,20 @@ func (r *InsightsRouter) DownloadText(c *fiber.Ctx) error {
 	if id == "" {
 		return errorpkg.NewMissingQueryParamError("id")
 	}
-	ext := c.Params("ext")
-	if ext == "" {
+	extension := c.Params("extension")
+	if extension == "" {
 		return errorpkg.NewMissingQueryParamError("ext")
 	}
 	buf, file, snapshot, err := r.insightsSvc.DownloadTextBuffer(id, userID)
 	if err != nil {
 		return err
 	}
-	if filepath.Ext(snapshot.GetText().Key) != ext {
+	if filepath.Ext(snapshot.GetText().Key) != extension {
 		return errorpkg.NewS3ObjectNotFoundError(nil)
 	}
 	b := buf.Bytes()
 	c.Set("Content-Type", infra.DetectMIMEFromBytes(b))
-	c.Set("Content-Disposition", fmt.Sprintf("filename=\"%s\"", filepath.Base(file.GetName())+ext))
+	c.Set("Content-Disposition", fmt.Sprintf("filename=\"%s\"", filepath.Base(file.GetName())+extension))
 	return c.Send(b)
 }
 
@@ -341,20 +341,20 @@ func (r *InsightsRouter) DownloadOCR(c *fiber.Ctx) error {
 	if id == "" {
 		return errorpkg.NewMissingQueryParamError("id")
 	}
-	ext := c.Params("ext")
-	if ext == "" {
+	extension := c.Params("extension")
+	if extension == "" {
 		return errorpkg.NewMissingQueryParamError("ext")
 	}
 	buf, file, snapshot, err := r.insightsSvc.DownloadOCRBuffer(id, userID)
 	if err != nil {
 		return err
 	}
-	if filepath.Ext(snapshot.GetOCR().Key) != ext {
+	if filepath.Ext(snapshot.GetOCR().Key) != extension {
 		return errorpkg.NewS3ObjectNotFoundError(nil)
 	}
 	b := buf.Bytes()
 	c.Set("Content-Type", infra.DetectMIMEFromBytes(b))
-	c.Set("Content-Disposition", fmt.Sprintf("filename=\"%s\"", filepath.Base(file.GetName())+ext))
+	c.Set("Content-Disposition", fmt.Sprintf("filename=\"%s\"", filepath.Base(file.GetName())+extension))
 	return c.Send(b)
 }
 

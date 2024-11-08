@@ -2925,7 +2925,7 @@ paths:
       summary: Read Info
       tags:
       - Mosaic
-  /mosaics/{id}/zoom_level/{zoom_level}/row/{row}/col/{col}/ext/{ext}:
+  /mosaics/{id}/zoom_level/{zoom_level}/row/{row}/column/{column}/extension/{extension}:
     get:
       description: Download Tile
       operationId: mosaic_download_tile
@@ -2945,9 +2945,9 @@ paths:
         name: row
         required: true
         type: string
-      - description: Col
+      - description: Column
         in: path
-        name: col
+        name: column
         required: true
         type: string
       produces:

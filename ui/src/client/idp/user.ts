@@ -28,7 +28,7 @@ export interface ConsoleUser extends User {
   isActive: boolean
 }
 
-export interface ConsoleUsersResponse {
+export interface List {
   data: ConsoleUser[]
   totalElements: number
   page: number
@@ -39,10 +39,6 @@ export type UpdateFullNameOptions = {
   fullName: string
 }
 
-export interface BaseUserIDRequest {
-  id: string
-}
-
 export type UpdateEmailRequestOptions = {
   email: string
 }
@@ -51,11 +47,11 @@ export type UpdateEmailConfirmationOptions = {
   token: string
 }
 
-export interface SuspendUserOptions extends BaseUserIDRequest {
+export interface SuspendOptions {
   suspend: boolean
 }
 
-export interface MakeAdminOptions extends BaseUserIDRequest {
+export interface MakeAdminOptions {
   makeAdmin: boolean
 }
 
@@ -84,7 +80,7 @@ type ListQueryParams = {
 
 export default class UserAPI {
   static useGet(swrOptions?: SWRConfiguration) {
-    const url = `/user`
+    const url = `/users/me`
     return useSWR<User>(
       url,
       () => idpFetcher({ url, method: 'GET' }) as Promise<User>,
@@ -92,48 +88,48 @@ export default class UserAPI {
     )
   }
 
-  static getUserById(options: BaseUserIDRequest) {
+  static getById(id: string) {
     return idpFetcher({
-      url: `/user/${options.id}`,
+      url: `/users/${id}`,
       method: 'GET',
     }) as Promise<ConsoleUser>
   }
 
-  static useListAllUsers(options: ListOptions, swrOptions?: SWRConfiguration) {
-    const url = `/user/all?${this.paramsFromListOptions(options)}`
-    return useSWR<ConsoleUsersResponse>(
+  static useList(options: ListOptions, swrOptions?: SWRConfiguration) {
+    const url = `/users?${this.paramsFromListOptions(options)}`
+    return useSWR<List>(
       url,
-      () => idpFetcher({ url, method: 'GET' }) as Promise<ConsoleUsersResponse>,
+      () => idpFetcher({ url, method: 'GET' }) as Promise<List>,
       swrOptions,
     )
   }
 
-  static getAllUsers(options: ListOptions) {
+  static list(options: ListOptions) {
     return idpFetcher({
-      url: `/user/all?${this.paramsFromListOptions(options)}`,
+      url: `/users?${this.paramsFromListOptions(options)}`,
       method: 'GET',
-    }) as Promise<ConsoleUsersResponse>
+    }) as Promise<List>
   }
 
   static updateFullName(options: UpdateFullNameOptions) {
     return idpFetcher({
-      url: `/user/update_full_name`,
+      url: `/users/me/update_full_name`,
       method: 'POST',
       body: JSON.stringify(options),
     }) as Promise<User>
   }
 
-  static suspendUser(options: SuspendUserOptions) {
+  static suspend(id: string, options: SuspendOptions) {
     return idpFetcher({
-      url: `/user/suspend`,
+      url: `/users/${id}/suspend`,
       method: 'PATCH',
       body: JSON.stringify(options),
     }) as Promise<User>
   }
 
-  static makeAdmin(options: MakeAdminOptions) {
+  static makeAdmin(id: string, options: MakeAdminOptions) {
     return idpFetcher({
-      url: `/user/admin`,
+      url: `/users/${id}/make_admin`,
       method: 'PATCH',
       body: JSON.stringify(options),
     }) as Promise<User>
@@ -141,7 +137,7 @@ export default class UserAPI {
 
   static updateEmailRequest(options: UpdateEmailRequestOptions) {
     return idpFetcher({
-      url: `/user/update_email_request`,
+      url: `/users/me/update_email_request`,
       method: 'POST',
       body: JSON.stringify(options),
     }) as Promise<User>
@@ -149,7 +145,7 @@ export default class UserAPI {
 
   static updateEmailConfirmation(options: UpdateEmailConfirmationOptions) {
     return idpFetcher({
-      url: `/user/update_email_confirmation`,
+      url: `/users/me/update_email_confirmation`,
       method: 'POST',
       body: JSON.stringify(options),
     }) as Promise<User>
@@ -157,7 +153,7 @@ export default class UserAPI {
 
   static updatePassword(options: UpdatePasswordOptions) {
     return idpFetcher({
-      url: `/user/update_password`,
+      url: `/users/me/update_password`,
       method: 'POST',
       body: JSON.stringify(options),
     }) as Promise<User>
@@ -165,7 +161,7 @@ export default class UserAPI {
 
   static async delete(options: DeleteOptions) {
     return idpFetcher({
-      url: `/user`,
+      url: `/users/me`,
       method: 'DELETE',
       body: JSON.stringify(options),
     })
@@ -175,7 +171,7 @@ export default class UserAPI {
     const body = new FormData()
     body.append('file', file)
     return idpFetcher({
-      url: `/user/update_picture`,
+      url: `/users/me/update_picture`,
       method: 'POST',
       body,
       contentType: 'multipart/form-data',
@@ -184,7 +180,7 @@ export default class UserAPI {
 
   static deletePicture() {
     return idpFetcher({
-      url: `/user/delete_picture`,
+      url: `/users/me/delete_picture`,
       method: 'POST',
     }) as Promise<User>
   }

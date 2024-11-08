@@ -101,13 +101,13 @@ func (svc *MosaicService) Delete(s3Bucket, s3Key string) error {
 	return nil
 }
 
-func (svc *MosaicService) GetTileBuffer(s3Bucket, s3Key string, zoomLevel, row, col int, ext string) (*bytes.Buffer, *string, error) {
-	objectName := filepath.Join(s3Key, "mosaic", fmt.Sprintf("%d/%dx%d.%s", zoomLevel, row, col, ext))
+func (svc *MosaicService) GetTileBuffer(s3Bucket, s3Key string, zoomLevel, row int, column int, extension string) (*bytes.Buffer, *string, error) {
+	objectName := filepath.Join(s3Key, "mosaic", fmt.Sprintf("%d/%dx%d.%s", zoomLevel, row, column, extension))
 	buf := new(bytes.Buffer)
 	if _, err := svc.s3.GetObjectWithBuffer(objectName, s3Bucket, buf, minio.GetObjectOptions{}); err != nil {
 		return nil, nil, errorpkg.NewResourceNotFoundError(err)
 	}
-	contentType := mime.TypeByExtension("." + ext)
+	contentType := mime.TypeByExtension("." + extension)
 	if contentType == "" {
 		contentType = "application/octet-stream"
 	}

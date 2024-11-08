@@ -185,12 +185,12 @@ type MosaicDownloadTileOptions struct {
 	S3Bucket  string `json:"s3Bucket"`
 	ZoomLevel int    `json:"zoomLevel"`
 	Row       int    `json:"row"`
-	Col       int    `json:"col"`
-	Ext       string `json:"ext"`
+	Column    int    `json:"column"`
+	Extension string `json:"extension"`
 }
 
 func (cl *MosaicClient) DownloadTileBuffer(opts MosaicDownloadTileOptions) (*bytes.Buffer, error) {
-	resp, err := http.Get(fmt.Sprintf("%s/v3/mosaics/%s/%s/zoom_level/%d/row/%d/col/%d/ext/%s", cl.config.MosaicURL, opts.S3Bucket, opts.S3Key, opts.ZoomLevel, opts.Row, opts.Col, opts.Ext))
+	resp, err := http.Get(fmt.Sprintf("%s/v3/mosaics/%s/%s/zoom_level/%d/row/%d/column/%d/extension/%s", cl.config.MosaicURL, opts.S3Bucket, opts.S3Key, opts.ZoomLevel, opts.Row, opts.Column, opts.Extension))
 	if err != nil {
 		return nil, err
 	}

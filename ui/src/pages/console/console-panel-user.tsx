@@ -75,7 +75,7 @@ const ConsolePanelUser = () => {
 
   const userFetch = () => {
     if (id) {
-      UserAPI.getUserById({ id }).then((value) => {
+      UserAPI.getById(id).then((value) => {
         setUser(value)
       })
     }
@@ -171,9 +171,7 @@ const ConsolePanelUser = () => {
                 position="absolute"
                 zIndex={1000}
                 aria-label=""
-                onClick={() => {
-                  console.log('remove')
-                }}
+                isDisabled={true}
               />
             ) : null}
           </div>
@@ -236,12 +234,7 @@ const ConsolePanelUser = () => {
                             )}
                           </span>
                         ) : null}
-                        <EditButton
-                          aria-label=""
-                          onClick={() => {
-                            console.log('edit email')
-                          }}
-                        />
+                        <EditButton aria-label="" isDisabled={true} />
                       </>
                     ),
                   },

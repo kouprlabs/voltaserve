@@ -87,9 +87,9 @@ func (r *FileRouter) AppendRoutes(g fiber.Router) {
 }
 
 func (r *FileRouter) AppendNonJWTRoutes(g fiber.Router) {
-	g.Get("/:id/original.:ext", r.DownloadOriginal)
-	g.Get("/:id/preview.:ext", r.DownloadPreview)
-	g.Get("/:id/thumbnail.:ext", r.DownloadThumbnail)
+	g.Get("/:id/original.:extension", r.DownloadOriginal)
+	g.Get("/:id/preview.:extension", r.DownloadPreview)
+	g.Get("/:id/thumbnail.:extension", r.DownloadThumbnail)
 	g.Post("/create_from_s3", r.CreateFromS3)
 	g.Patch("/:id/patch_from_s3", r.PatchFromS3)
 }
@@ -929,8 +929,8 @@ func (r *FileRouter) DownloadOriginal(c *fiber.Ctx) error {
 	if id == "" {
 		return errorpkg.NewMissingQueryParamError("id")
 	}
-	ext := c.Params("ext")
-	if ext == "" {
+	extension := c.Params("extension")
+	if extension == "" {
 		return errorpkg.NewMissingQueryParamError("ext")
 	}
 	buf := r.bufferPool.Get().(*bytes.Buffer)
@@ -940,7 +940,7 @@ func (r *FileRouter) DownloadOriginal(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	if strings.TrimPrefix(filepath.Ext(snapshot.GetOriginal().Key), ".") != ext {
+	if strings.TrimPrefix(filepath.Ext(snapshot.GetOriginal().Key), ".") != extension {
 		return errorpkg.NewS3ObjectNotFoundError(nil)
 	}
 	c.Set("Content-Type", infra.DetectMIMEFromBytes(buf.Bytes()))
@@ -981,8 +981,8 @@ func (r *FileRouter) DownloadPreview(c *fiber.Ctx) error {
 	if id == "" {
 		return errorpkg.NewMissingQueryParamError("id")
 	}
-	ext := c.Params("ext")
-	if ext == "" {
+	extension := c.Params("extension")
+	if extension == "" {
 		return errorpkg.NewMissingQueryParamError("ext")
 	}
 	buf := r.bufferPool.Get().(*bytes.Buffer)
@@ -992,7 +992,7 @@ func (r *FileRouter) DownloadPreview(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	if strings.TrimPrefix(filepath.Ext(snapshot.GetPreview().Key), ".") != ext {
+	if strings.TrimPrefix(filepath.Ext(snapshot.GetPreview().Key), ".") != extension {
 		return errorpkg.NewS3ObjectNotFoundError(nil)
 	}
 	c.Set("Content-Type", infra.DetectMIMEFromBytes(buf.Bytes()))
@@ -1033,8 +1033,8 @@ func (r *FileRouter) DownloadThumbnail(c *fiber.Ctx) error {
 	if id == "" {
 		return errorpkg.NewMissingQueryParamError("id")
 	}
-	ext := c.Params("ext")
-	if ext == "" {
+	extension := c.Params("extension")
+	if extension == "" {
 		return errorpkg.NewMissingQueryParamError("ext")
 	}
 	buf := r.bufferPool.Get().(*bytes.Buffer)
@@ -1044,11 +1044,11 @@ func (r *FileRouter) DownloadThumbnail(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	if strings.TrimPrefix(filepath.Ext(snapshot.GetThumbnail().Key), ".") != ext {
+	if strings.TrimPrefix(filepath.Ext(snapshot.GetThumbnail().Key), ".") != extension {
 		return errorpkg.NewS3ObjectNotFoundError(nil)
 	}
 	c.Set("Content-Type", infra.DetectMIMEFromBytes(buf.Bytes()))
-	c.Set("Content-Disposition", fmt.Sprintf("filename=\"thumbnail%s\"", ext))
+	c.Set("Content-Disposition", fmt.Sprintf("filename=\"thumbnail%s\"", extension))
 	return c.Send(buf.Bytes())
 }
 

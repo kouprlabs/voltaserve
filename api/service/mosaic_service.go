@@ -237,8 +237,8 @@ func (svc *MosaicService) ReadInfo(id string, userID string) (*MosaicInfo, error
 type MosaicDownloadTileOptions struct {
 	ZoomLevel int
 	Row       int
-	Col       int
-	Ext       string
+	Column    int
+	Extension string
 }
 
 func (svc *MosaicService) DownloadTileBuffer(id string, opts MosaicDownloadTileOptions, userID string) (*bytes.Buffer, model.Snapshot, error) {
@@ -272,8 +272,8 @@ func (svc *MosaicService) DownloadTileBuffer(id string, opts MosaicDownloadTileO
 		S3Bucket:  snapshot.GetPreview().Bucket,
 		ZoomLevel: opts.ZoomLevel,
 		Row:       opts.Row,
-		Col:       opts.Col,
-		Ext:       opts.Ext,
+		Column:    opts.Column,
+		Extension: opts.Extension,
 	})
 	if err != nil {
 		return nil, nil, err

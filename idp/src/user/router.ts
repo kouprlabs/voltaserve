@@ -15,12 +15,6 @@ import multer from 'multer'
 import os from 'os'
 import passport from 'passport'
 import { getConfig } from '@/config/config'
-import {
-  SearchPaginatedRequest,
-  UserAdminPostRequest,
-  UserIdRequest,
-  UserSuspendPostRequest,
-} from '@/infra/admin-requests'
 import { ErrorCode, newError, parseValidationError } from '@/infra/error'
 import { PassportRequest } from '@/infra/passport-request'
 import { checkAdmin } from '@/token/service'
@@ -43,46 +37,51 @@ import {
   getUserByAdmin,
   searchUserListPaginated,
   getUserPicture,
+  UserMakeAdminOptions,
+  UserSuspendOptions,
 } from './service'
 
 const router = Router()
 
 router.get(
-  '/',
+  '/me',
   passport.authenticate('jwt', { session: false }),
   async (req: PassportRequest, res: Response) => {
     res.json(await getUser(req.user.id))
   },
 )
 
-router.get('/picture:ext', async (req: PassportRequest, res: Response) => {
-  if (!req.query.access_token) {
-    throw newError({
-      code: ErrorCode.InvalidRequest,
-      message: "Query param 'access_token' is required",
-    })
-  }
-  const userID = await getUserIDFromAccessToken(
-    req.query.access_token as string,
-  )
-  const { buffer, extension, mime } = await getUserPicture(userID)
-  if (extension !== req.params.ext) {
-    throw newError({
-      code: ErrorCode.ResourceNotFound,
-      message: 'Picture not found',
-      userMessage: 'Picture not found',
-    })
-  }
-  res.setHeader(
-    'Content-Disposition',
-    `attachment; filename=picture.${extension}`,
-  )
-  res.setHeader('Content-Type', mime)
-  res.send(buffer)
-})
+router.get(
+  '/me/picture:extension',
+  async (req: PassportRequest, res: Response) => {
+    if (!req.query.access_token) {
+      throw newError({
+        code: ErrorCode.InvalidRequest,
+        message: "Query param 'access_token' is required",
+      })
+    }
+    const userID = await getUserIDFromAccessToken(
+      req.query.access_token as string,
+    )
+    const { buffer, extension, mime } = await getUserPicture(userID)
+    if (extension !== req.params.extension) {
+      throw newError({
+        code: ErrorCode.ResourceNotFound,
+        message: 'Picture not found',
+        userMessage: 'Picture not found',
+      })
+    }
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename=picture.${extension}`,
+    )
+    res.setHeader('Content-Type', mime)
+    res.send(buffer)
+  },
+)
 
 router.post(
-  '/update_full_name',
+  '/me/update_full_name',
   passport.authenticate('jwt', { session: false }),
   body('fullName').isString().notEmpty().trim().escape().isLength({ max: 255 }),
   async (req: PassportRequest, res: Response) => {
@@ -97,7 +96,7 @@ router.post(
 )
 
 router.post(
-  '/update_email_request',
+  '/me/update_email_request',
   passport.authenticate('jwt', { session: false }),
   body('email').isEmail().isLength({ max: 255 }),
   async (req: PassportRequest, res: Response) => {
@@ -115,7 +114,7 @@ router.post(
 )
 
 router.post(
-  '/update_email_confirmation',
+  '/me/update_email_confirmation',
   passport.authenticate('jwt', { session: false }),
   body('token').isString().notEmpty().trim(),
   async (req: PassportRequest, res: Response) => {
@@ -132,7 +131,7 @@ router.post(
 )
 
 router.post(
-  '/update_password',
+  '/me/update_password',
   passport.authenticate('jwt', { session: false }),
   body('currentPassword').notEmpty(),
   body('newPassword').isStrongPassword(),
@@ -148,7 +147,7 @@ router.post(
 )
 
 router.post(
-  '/update_picture',
+  '/me/update_picture',
   passport.authenticate('jwt', { session: false }),
   multer({
     dest: os.tmpdir(),
@@ -166,7 +165,7 @@ router.post(
 )
 
 router.post(
-  '/delete_picture',
+  '/me/delete_picture',
   passport.authenticate('jwt', { session: false }),
   async (req: PassportRequest, res: Response) => {
     res.json(await deletePicture(req.user.id))
@@ -174,7 +173,7 @@ router.post(
 )
 
 router.delete(
-  '/',
+  '/me',
   passport.authenticate('jwt', { session: false }),
   body('password').isString().notEmpty(),
   async (req: PassportRequest, res: Response) => {
@@ -188,11 +187,12 @@ router.delete(
 )
 
 router.get(
-  '/all',
+  '/',
   passport.authenticate('jwt', { session: false }),
+  query('query').isString().notEmpty().trim().escape(),
   query('page').isInt(),
   query('size').isInt(),
-  async (req: SearchPaginatedRequest, res: Response) => {
+  async (req: PassportRequest, res: Response) => {
     checkAdmin(req.header('Authorization'))
     const result = validationResult(req)
     if (!result.isEmpty()) {
@@ -200,18 +200,17 @@ router.get(
     }
     res.json(
       await searchUserListPaginated(
-        req.query.query,
-        parseInt(req.query.size),
-        parseInt(req.query.page),
+        req.query.query as string,
+        parseInt(req.query.size as string),
+        parseInt(req.query.page as string),
       ),
     )
   },
 )
 
 router.patch(
-  '/suspend',
+  '/:id/suspend',
   passport.authenticate('jwt', { session: false }),
-  body('id').isString(),
   body('suspend').isBoolean(),
   async (req: PassportRequest, res: Response) => {
     checkAdmin(req.header('Authorization'))
@@ -219,15 +218,14 @@ router.patch(
     if (!result.isEmpty()) {
       throw parseValidationError(result)
     }
-    await suspendUser(req.body as UserSuspendPostRequest)
+    await suspendUser(req.params.id, req.body as UserSuspendOptions)
     res.sendStatus(200)
   },
 )
 
 router.patch(
-  '/admin',
+  '/:id/make_admin',
   passport.authenticate('jwt', { session: false }),
-  body('id').isString(),
   body('makeAdmin').isBoolean(),
   async (req: PassportRequest, res: Response) => {
     checkAdmin(req.header('Authorization'))
@@ -235,7 +233,7 @@ router.patch(
     if (!result.isEmpty()) {
       throw parseValidationError(result)
     }
-    await makeAdminUser(req.body as UserAdminPostRequest)
+    await makeAdminUser(req.params.id, req.body as UserMakeAdminOptions)
     res.sendStatus(200)
   },
 )
@@ -243,7 +241,7 @@ router.patch(
 router.get(
   '/:id',
   passport.authenticate('jwt', { session: false }),
-  async (req: UserIdRequest, res: Response) => {
+  async (req: PassportRequest, res: Response) => {
     checkAdmin(req.header('Authorization'))
     res.json(await getUserByAdmin(req.params.id))
   },

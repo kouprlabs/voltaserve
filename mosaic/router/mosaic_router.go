@@ -37,7 +37,7 @@ func NewMosaicRouter() *MosaicRouter {
 
 func (r *MosaicRouter) AppendRoutes(g fiber.Router) {
 	g.Post("/", r.Create)
-	g.Get("/:s3_bucket/:s3_key/zoom_level/:zoom_level/row/:row/col/:col/ext/:ext", r.DownloadTile)
+	g.Get("/:s3_bucket/:s3_key/zoom_level/:zoom_level/row/:row/column/:column/extension/:extension", r.DownloadTile)
 	g.Get("/:s3_bucket/:s3_key/metadata", r.GetMetadata)
 	g.Delete("/:s3_bucket/:s3_key", r.Delete)
 }
@@ -138,20 +138,20 @@ func (r *MosaicRouter) GetMetadata(c *fiber.Ctx) error {
 //	@Param			s3_key		path		string	true	"S3 Key"
 //	@Param			zoom_level	path		int		true	"Zoom Level"
 //	@Param			row			path		int		true	"Row"
-//	@Param			col			path		int		true	"Column"
-//	@Param			ext			path		string	true	"File Extension"
-//	@Success		200			{file}		file	"Tile file"
+//	@Param			column		path		int		true	"Column"
+//	@Param			extension	path		string	true	"Extension"
+//	@Success		200			{file}		file	"Tile"
 //	@Failure		404			{string}	string	"Not Found"
 //	@Failure		500			{string}	string	"Internal Server Error"
-//	@Router			/mosaics/{s3_bucket}/{s3_key}/zoom_level/{zoom_level}/row/{row}/col/{col}/ext/{ext} [get]
+//	@Router			/mosaics/{s3_bucket}/{s3_key}/zoom_level/{zoom_level}/row/{row}/column/{column}/extension/{extension} [get]
 func (r *MosaicRouter) DownloadTile(c *fiber.Ctx) error {
 	s3Bucket := c.Params("s3_bucket")
 	s3Key := c.Params("s3_key")
 	zoomLevel, _ := strconv.Atoi(c.Params("zoom_level"))
 	row, _ := strconv.Atoi(c.Params("row"))
-	col, _ := strconv.Atoi(c.Params("col"))
-	ext := c.Params("ext")
-	buf, contentType, err := r.mosaicSvc.GetTileBuffer(s3Bucket, s3Key, zoomLevel, row, col, ext)
+	column, _ := strconv.Atoi(c.Params("column"))
+	extension := c.Params("extension")
+	buf, contentType, err := r.mosaicSvc.GetTileBuffer(s3Bucket, s3Key, zoomLevel, row, column, extension)
 	if err != nil {
 		return err
 	}
