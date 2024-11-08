@@ -7,7 +7,7 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-import { useEffect, useState } from 'react'
+import { useCallback, useState } from 'react'
 import {
   useLocation,
   useNavigate,
@@ -24,12 +24,10 @@ import {
   Text,
   usePagePagination,
 } from '@koupr/ui'
-import * as Yup from 'yup'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
-import ConsoleAPI, {
-  OrganizationManagementList,
-} from '@/client/console/console'
+import ConsoleAPI, { OrganizationManagement } from '@/client/console/console'
+import { swrConfig } from '@/client/options'
 import ConsoleRenameModal from '@/components/console/console-rename-modal'
 import { consoleOrganizationsPaginationStorage } from '@/infra/pagination'
 import { decodeQuery } from '@/lib/helpers/query'
@@ -39,63 +37,32 @@ const ConsolePanelOrganizations = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const query = decodeQuery(searchParams.get('q') as string)
-  const [list, setList] = useState<OrganizationManagementList>()
   const { page, size, steps, setPage, setSize } = usePagePagination({
     navigateFn: navigate,
     searchFn: () => location.search,
     storage: consoleOrganizationsPaginationStorage(),
   })
-  const [confirmRenameWindowOpen, setConfirmRenameWindowOpen] = useState(false)
-  const [isSubmitting, setSubmitting] = useState(false)
+  const [isConfirmRenameOpen, setIsConfirmRenameOpen] = useState(false)
   const [currentName, setCurrentName] = useState<string>('')
   const [organizationId, setOrganizationId] = useState<string>()
-  const formSchema = Yup.object().shape({
-    name: Yup.string().required('Name is required').max(255),
-  })
-
-  const renameOrganization = async (
-    id: string | null,
-    currentName: string | null,
-    newName: string | null,
-    confirm: boolean = false,
-  ) => {
-    if (confirm && organizationId !== undefined && newName !== null) {
-      try {
-        setSubmitting(true)
+  const { data: list, mutate } =
+    ConsoleAPI.useListOrSearchObject<OrganizationManagement>(
+      'organization',
+      { page, size, query },
+      swrConfig(),
+    )
+  const renameRequest = useCallback(
+    async (name: string) => {
+      if (organizationId) {
         await ConsoleAPI.renameObject(
-          { id: organizationId, name: newName },
+          { id: organizationId, name },
           'organization',
         )
-      } finally {
-        closeConfirmationWindow()
+        await mutate()
       }
-    } else if (id !== null && currentName !== null && currentName !== '') {
-      setConfirmRenameWindowOpen(true)
-      setCurrentName(currentName)
-      setOrganizationId(id)
-    }
-  }
-
-  const closeConfirmationWindow = () => {
-    setConfirmRenameWindowOpen(false)
-    setSubmitting(false)
-    setCurrentName('')
-    setOrganizationId(undefined)
-  }
-
-  useEffect(() => {
-    if (query && query.length >= 3) {
-      ConsoleAPI.searchObject('organization', {
-        page: page,
-        size: size,
-        query: query,
-      }).then((value) => setList(value))
-    } else {
-      ConsoleAPI.listOrganizations({ page: page, size: size }).then((value) =>
-        setList(value),
-      )
-    }
-  }, [page, size, isSubmitting, query])
+    },
+    [organizationId],
+  )
 
   if (!list) {
     return <SectionSpinner />
@@ -104,13 +71,11 @@ const ConsolePanelOrganizations = () => {
   return (
     <>
       <ConsoleRenameModal
-        closeConfirmationWindow={closeConfirmationWindow}
-        isOpen={confirmRenameWindowOpen}
-        isSubmitting={isSubmitting}
+        header={<>Rename Organization</>}
         previousName={currentName}
-        object="organization"
-        formSchema={formSchema}
-        request={renameOrganization}
+        isOpen={isConfirmRenameOpen}
+        onClose={() => setIsConfirmRenameOpen(false)}
+        onRequest={renameRequest}
       />
       <Helmet>
         <title>Organization Management</title>
@@ -168,11 +133,9 @@ const ConsolePanelOrganizations = () => {
                 label: 'Rename',
                 icon: <IconEdit />,
                 onClick: async (organization) => {
-                  await renameOrganization(
-                    organization.id,
-                    organization.name,
-                    null,
-                  )
+                  setCurrentName(organization.name)
+                  setOrganizationId(organization.id)
+                  setIsConfirmRenameOpen(true)
                 },
               },
             ]}

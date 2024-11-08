@@ -9,10 +9,10 @@
 // licenses/AGPL.txt.
 import { KeyedMutator } from 'swr'
 import { PayloadAction, createSlice } from '@reduxjs/toolkit'
-import { IndexManagementList } from '@/client/console/console'
+import { IndexManagement, ListResponse } from '@/client/console/console'
 
 type IndexesState = {
-  mutate?: KeyedMutator<IndexManagementList>
+  mutate?: KeyedMutator<ListResponse<IndexManagement>>
 }
 
 const initialState: IndexesState = {}
@@ -23,7 +23,7 @@ const slice = createSlice({
   reducers: {
     mutateUpdated: (
       state,
-      action: PayloadAction<KeyedMutator<IndexManagementList>>,
+      action: PayloadAction<KeyedMutator<ListResponse<IndexManagement>>>,
     ) => {
       state.mutate = action.payload
     },

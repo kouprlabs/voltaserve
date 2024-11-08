@@ -41,9 +41,10 @@ import {
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import ConsoleAPI, {
-  GroupUserManagementList,
-  OrganizationUserManagementList,
-  WorkspaceUserManagementList,
+  GroupUserManagement,
+  ListResponse,
+  OrganizationUserManagement,
+  WorkspaceUserManagement,
 } from '@/client/console/console'
 import UserAPI, { ConsoleUser } from '@/client/idp/user'
 import { getPictureUrlById } from '@/lib/helpers/picture'
@@ -61,10 +62,12 @@ const EditButton = (props: IconButtonProps) => (
 
 const ConsolePanelUser = () => {
   const [user, setUser] = useState<ConsoleUser>()
-  const [orgList, setOrgList] = useState<OrganizationUserManagementList>()
+  const [orgList, setOrgList] =
+    useState<ListResponse<OrganizationUserManagement>>()
   const [workspaceList, setWorkspaceList] =
-    useState<WorkspaceUserManagementList>()
-  const [groupList, setGroupList] = useState<GroupUserManagementList>()
+    useState<ListResponse<WorkspaceUserManagement>>()
+  const [groupList, setGroupList] =
+    useState<ListResponse<GroupUserManagement>>()
   const { id } = useParams()
   const [workspacePage, setWorkspacePage] = useState(1)
   const [groupPage, setGroupPage] = useState(1)

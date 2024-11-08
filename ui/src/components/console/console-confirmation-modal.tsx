@@ -26,10 +26,10 @@ export type ConsoleConfirmationModalProps = {
   isDestructive?: boolean
   isOpen: boolean
   onClose: () => void
-  onRequest: ConsoleConfirmationRequest
+  onRequest: ConsoleConfirmationModalRequest
 }
 
-export type ConsoleConfirmationRequest = () => Promise<void>
+export type ConsoleConfirmationModalRequest = () => Promise<void>
 
 const ConsoleConfirmationModal = ({
   header,

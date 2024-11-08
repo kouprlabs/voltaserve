@@ -21,10 +21,10 @@ import {
 } from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
-import ConsoleAPI from '@/client/console/console'
+import ConsoleAPI, { InvitationManagement } from '@/client/console/console'
 import { swrConfig } from '@/client/options'
 import ConsoleConfirmationModal, {
-  ConsoleConfirmationRequest,
+  ConsoleConfirmationModalRequest,
 } from '@/components/console/console-confirmation-modal'
 import { consoleInvitationsPaginationStorage } from '@/infra/pagination'
 
@@ -37,13 +37,14 @@ const ConsolePanelInvitations = () => {
   const [confirmationHeader, setConfirmationHeader] = useState<ReactElement>()
   const [confirmationBody, setConfirmationBody] = useState<ReactElement>()
   const [confirmationRequest, setConfirmationRequest] =
-    useState<ConsoleConfirmationRequest>()
+    useState<ConsoleConfirmationModalRequest>()
   const { page, size, steps, setPage, setSize } = usePagePagination({
     navigateFn: navigate,
     searchFn: () => location.search,
     storage: consoleInvitationsPaginationStorage(),
   })
-  const { data: list, mutate } = ConsoleAPI.useListInvitations(
+  const { data: list, mutate } = ConsoleAPI.useListObject<InvitationManagement>(
+    'invitation',
     { page, size },
     swrConfig(),
   )
