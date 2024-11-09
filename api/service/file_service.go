@@ -697,8 +697,8 @@ func (svc *FileService) Probe(id string, opts FileListOptions, userID string) (*
 		return nil, err
 	}
 	return &FileProbe{
-		TotalElements: uint64(totalElements),
-		TotalPages:    (uint64(totalElements) + opts.Size - 1) / opts.Size,
+		TotalElements: uint64(totalElements),                               // #nosec G115 integer overflow conversion
+		TotalPages:    (uint64(totalElements) + opts.Size - 1) / opts.Size, // #nosec G115 integer overflow conversion
 	}, nil
 }
 

@@ -207,8 +207,8 @@ func (svc *InvitationService) ProbeIncoming(opts InvitationListOptions, userID s
 		return nil, err
 	}
 	return &InvitationProbe{
-		TotalElements: uint64(totalElements),
-		TotalPages:    (uint64(totalElements) + opts.Size - 1) / opts.Size,
+		TotalElements: uint64(totalElements),                               // #nosec G115 integer overflow conversion
+		TotalPages:    (uint64(totalElements) + opts.Size - 1) / opts.Size, // #nosec G115 integer overflow conversion
 	}, nil
 }
 
