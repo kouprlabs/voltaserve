@@ -118,7 +118,7 @@ const OrganizationSelector = ({ onConfirm }: OrganizationSelectorProps) => {
                 <SectionError text="Failed to load organizations." />
               ) : null}
               {!list && !error ? <SectionSpinner /> : null}
-              {list && list.data.length === 0 ? (
+              {list && list.totalElements === 0 ? (
                 <div
                   className={cx(
                     'flex',
@@ -139,7 +139,7 @@ const OrganizationSelector = ({ onConfirm }: OrganizationSelectorProps) => {
                   </div>
                 </div>
               ) : null}
-              {list && list.data.length > 0 ? (
+              {list && list.totalElements && !error ? (
                 <div
                   className={cx(
                     'flex',

@@ -110,5 +110,4 @@ from .workspace import (
     WorkspaceSearchRequest,
 )
 from .token import TokenResponse, TokenPayload
-from .index import IndexRequest, IndexListRequest, IndexResponse, IndexListResponse
 from .overview import VersionsResponse, VersionRequest, VersionResponse

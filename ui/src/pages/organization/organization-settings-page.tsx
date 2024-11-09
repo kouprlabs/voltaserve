@@ -17,8 +17,8 @@ import {
   IconPersonAdd,
   SectionSpinner,
   Form,
+  SectionError,
 } from '@koupr/ui'
-import { Helmet } from 'react-helmet-async'
 import OrganizationAPI from '@/client/api/organization'
 import { geEditorPermission, geOwnerPermission } from '@/client/api/permission'
 import { swrConfig } from '@/client/options'
@@ -37,112 +37,109 @@ const OrganizationSettingsPage = () => {
   const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
 
-  if (error) {
-    return null
-  }
-
-  if (!org) {
-    return <SectionSpinner />
-  }
-
   return (
     <>
-      <Helmet>
-        <title>{org.name}</title>
-      </Helmet>
-      <Form
-        sections={[
-          {
-            title: 'Basics',
-            rows: [
+      {!org && error ? (
+        <SectionError text="Failed to load organization." />
+      ) : null}
+      {!org && !error ? <SectionSpinner /> : null}
+      {org && !error ? (
+        <>
+          <Form
+            sections={[
               {
-                label: 'Name',
-                content: (
-                  <>
-                    <span>{truncateEnd(org.name, 50)}</span>
-                    <IconButton
-                      icon={<IconEdit />}
-                      isDisabled={!geEditorPermission(org.permission)}
-                      title="Edit name"
-                      aria-label="Edit name"
-                      onClick={() => setIsNameModalOpen(true)}
-                    />
-                  </>
-                ),
-              },
-            ],
-          },
-          {
-            title: 'Membership',
-            rows: [
-              {
-                label: 'Invite members',
-                content: (
-                  <IconButton
-                    icon={<IconPersonAdd />}
-                    isDisabled={!geOwnerPermission(org.permission)}
-                    title="Invite members"
-                    aria-label="Invite members"
-                    onClick={() => setIsInviteMembersModalOpen(true)}
-                  />
-                ),
+                title: 'Basics',
+                rows: [
+                  {
+                    label: 'Name',
+                    content: (
+                      <>
+                        <span>{truncateEnd(org.name, 50)}</span>
+                        <IconButton
+                          icon={<IconEdit />}
+                          isDisabled={!geEditorPermission(org.permission)}
+                          title="Edit name"
+                          aria-label="Edit name"
+                          onClick={() => setIsNameModalOpen(true)}
+                        />
+                      </>
+                    ),
+                  },
+                ],
               },
               {
-                label: 'Leave',
-                content: (
-                  <IconButton
-                    icon={<IconLogout />}
-                    variant="solid"
-                    colorScheme="red"
-                    title="Leave"
-                    aria-label="Leave"
-                    onClick={() => setIsLeaveModalOpen(true)}
-                  />
-                ),
+                title: 'Membership',
+                rows: [
+                  {
+                    label: 'Invite members',
+                    content: (
+                      <IconButton
+                        icon={<IconPersonAdd />}
+                        isDisabled={!geOwnerPermission(org.permission)}
+                        title="Invite members"
+                        aria-label="Invite members"
+                        onClick={() => setIsInviteMembersModalOpen(true)}
+                      />
+                    ),
+                  },
+                  {
+                    label: 'Leave',
+                    content: (
+                      <IconButton
+                        icon={<IconLogout />}
+                        variant="solid"
+                        colorScheme="red"
+                        title="Leave"
+                        aria-label="Leave"
+                        onClick={() => setIsLeaveModalOpen(true)}
+                      />
+                    ),
+                  },
+                ],
               },
-            ],
-          },
-          {
-            title: 'Advanced',
-            rows: [
               {
-                label: 'Delete organization',
-                content: (
-                  <IconButton
-                    icon={<IconDelete />}
-                    variant="solid"
-                    colorScheme="red"
-                    isDisabled={!geEditorPermission(org.permission)}
-                    title="Delete organization"
-                    aria-label="Delete organization"
-                    onClick={() => setIsDeleteModalOpen(true)}
-                  />
-                ),
+                title: 'Advanced',
+                rows: [
+                  {
+                    label: 'Delete organization',
+                    content: (
+                      <IconButton
+                        icon={<IconDelete />}
+                        variant="solid"
+                        colorScheme="red"
+                        isDisabled={!geEditorPermission(org.permission)}
+                        title="Delete organization"
+                        aria-label="Delete organization"
+                        onClick={() => setIsDeleteModalOpen(true)}
+                      />
+                    ),
+                  },
+                ],
               },
-            ],
-          },
-        ]}
-      />
-      <OrganizationEditName
-        open={isNameModalOpen}
-        organization={org}
-        onClose={() => setIsNameModalOpen(false)}
-      />
-      <OrganizationInviteMembers
-        open={isInviteMembersModalOpen}
-        id={org.id}
-        onClose={() => setIsInviteMembersModalOpen(false)}
-      />
-      <OrganizationLeave
-        open={isLeaveModalOpen}
-        id={org.id}
-        onClose={() => setIsLeaveModalOpen(false)}
-      />
-      <OrganizationDelete
-        open={isDeleteModalOpen}
-        organization={org}
-        onClose={() => setIsDeleteModalOpen(false)}
-      />
+            ]}
+          />
+          <OrganizationEditName
+            open={isNameModalOpen}
+            organization={org}
+            onClose={() => setIsNameModalOpen(false)}
+          />
+          <OrganizationInviteMembers
+            open={isInviteMembersModalOpen}
+            id={org.id}
+            onClose={() => setIsInviteMembersModalOpen(false)}
+          />
+          <OrganizationLeave
+            open={isLeaveModalOpen}
+            id={org.id}
+            onClose={() => setIsLeaveModalOpen(false)}
+          />
+          <OrganizationDelete
+            open={isDeleteModalOpen}
+            organization={org}
+            onClose={() => setIsDeleteModalOpen(false)}
+          />
+        </>
+      ) : null}
     </>
   )
 }

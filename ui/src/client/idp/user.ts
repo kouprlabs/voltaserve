@@ -88,6 +88,19 @@ export default class UserAPI {
     )
   }
 
+  static useGetById(id?: string, swrOptions?: SWRConfiguration) {
+    const url = `/users/${id}`
+    return useSWR<ConsoleUser>(
+      id ? url : null,
+      () =>
+        idpFetcher({
+          url,
+          method: 'GET',
+        }) as Promise<ConsoleUser>,
+      swrOptions,
+    )
+  }
+
   static getById(id: string) {
     return idpFetcher({
       url: `/users/${id}`,

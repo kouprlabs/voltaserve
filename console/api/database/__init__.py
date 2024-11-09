@@ -34,5 +34,4 @@ from .workspace import (
     update_workspace,
     fetch_workspace_count,
 )
-from .index import fetch_index, fetch_indexes
 from .overview import fetch_version

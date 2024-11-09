@@ -69,7 +69,7 @@ const InsightsOverviewEntities = () => {
       />
       {!list && error ? <SectionError text="Failed to load entities." /> : null}
       {!list && !error ? <SectionSpinner /> : null}
-      {list && list.data.length === 0 ? (
+      {list && list.totalElements === 0 ? (
         <div
           className={cx('flex', 'items-center', 'justify-center', 'h-[320px]')}
         >
@@ -78,7 +78,7 @@ const InsightsOverviewEntities = () => {
           </div>
         </div>
       ) : null}
-      {list && list.data.length > 0 ? (
+      {list && list.totalElements > 0 && !error ? (
         <div className={cx('flex', 'flex-col', 'justify-between', 'h-[320px]')}>
           <Table variant="simple" size="sm">
             <colgroup>

@@ -16,7 +16,6 @@ import {
   usePagePagination,
 } from '@koupr/ui'
 import cx from 'classnames'
-import { Helmet } from 'react-helmet-async'
 import FileAPI from '@/client/api/file'
 import WorkspaceAPI from '@/client/api/workspace'
 import { swrConfig } from '@/client/options'
@@ -27,7 +26,7 @@ import FileDelete from '@/components/file/file-delete'
 import FileInfo from '@/components/file/file-info'
 import FileMove from '@/components/file/file-move'
 import FileRename from '@/components/file/file-rename'
-import SearchFilter from '@/components/file/file-search-filters'
+import SearchFilter from '@/components/file/file-search-filter'
 import FileToolbar from '@/components/file/file-toolbar'
 import FileList from '@/components/file/list'
 import Insights from '@/components/insights'
@@ -127,13 +126,6 @@ const WorkspaceFilesPage = () => {
 
   return (
     <>
-      <Helmet>
-        {workspace ? (
-          <title>{workspace.name}</title>
-        ) : (
-          <title>Undefined workspace</title>
-        )}
-      </Helmet>
       <div
         className={cx(
           'flex',

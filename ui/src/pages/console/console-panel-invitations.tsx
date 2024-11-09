@@ -15,13 +15,14 @@ import {
   IconFrontHand,
   PagePagination,
   RelativeDate,
+  SectionError,
   SectionSpinner,
   Text,
   usePagePagination,
 } from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
-import ConsoleAPI, { InvitationManagement } from '@/client/console/console'
+import ConsoleAPI, { ConsoleInvitation } from '@/client/console/console'
 import { swrConfig } from '@/client/options'
 import ConsoleConfirmationModal, {
   ConsoleConfirmationModalRequest,
@@ -43,34 +44,28 @@ const ConsolePanelInvitations = () => {
     searchFn: () => location.search,
     storage: consoleInvitationsPaginationStorage(),
   })
-  const { data: list, mutate } = ConsoleAPI.useListObject<InvitationManagement>(
+  const {
+    data: list,
+    error,
+    mutate,
+  } = ConsoleAPI.useListObject<ConsoleInvitation>(
     'invitation',
     { page, size },
     swrConfig(),
   )
 
-  if (!list) {
-    return <SectionSpinner />
-  }
-
   return (
     <>
-      {confirmationHeader && confirmationBody && confirmationRequest ? (
-        <ConsoleConfirmationModal
-          header={confirmationHeader}
-          body={confirmationBody}
-          isDestructive={isConfirmationDestructive}
-          isOpen={isConfirmationOpen}
-          onClose={() => setIsConfirmationOpen(false)}
-          onRequest={confirmationRequest}
-        />
-      ) : null}
       <Helmet>
-        <title>Invitation Management</title>
+        <title>Invitations</title>
       </Helmet>
       <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
-        <Heading className={cx('text-heading')}>Invitation Management</Heading>
-        {list && list.data.length > 0 ? (
+        <Heading className={cx('text-heading')}>Invitations</Heading>
+        {!list && error ? (
+          <SectionError text="Failed to load invitations." />
+        ) : null}
+        {!list && !error ? <SectionSpinner /> : null}
+        {list && list.totalElements > 0 && !error ? (
           <DataTable
             items={list.data}
             columns={[
@@ -145,9 +140,7 @@ const ConsolePanelInvitations = () => {
               },
             ]}
           />
-        ) : (
-          <div>No invitations found.</div>
-        )}
+        ) : null}
         {list ? (
           <div className={cx('self-end')}>
             <PagePagination
@@ -162,6 +155,16 @@ const ConsolePanelInvitations = () => {
           </div>
         ) : null}
       </div>
+      {confirmationHeader && confirmationBody && confirmationRequest ? (
+        <ConsoleConfirmationModal
+          header={confirmationHeader}
+          body={confirmationBody}
+          isDestructive={isConfirmationDestructive}
+          isOpen={isConfirmationOpen}
+          onClose={() => setIsConfirmationOpen(false)}
+          onRequest={confirmationRequest}
+        />
+      ) : null}
     </>
   )
 }

@@ -23,7 +23,6 @@ import {
   SectionError,
 } from '@koupr/ui'
 import cx from 'classnames'
-import { Helmet } from 'react-helmet-async'
 import InvitationAPI, { SortBy, SortOrder } from '@/client/api/invitation'
 import OrganizationAPI from '@/client/api/organization'
 import { geEditorPermission } from '@/client/api/permission'
@@ -49,7 +48,7 @@ const OrganizationInvitationsPage = () => {
   })
   const {
     data: list,
-    error: invitationsError,
+    error: listError,
     mutate,
   } = InvitationAPI.useGetOutgoing(
     {
@@ -92,102 +91,100 @@ const OrganizationInvitationsPage = () => {
 
   return (
     <>
-      {org ? (
-        <Helmet>
-          <title>{org.name}</title>
-        </Helmet>
-      ) : null}
-      {!list && invitationsError && org && !orgError ? (
-        <SectionError text="Failed to load invitations." />
-      ) : null}
-      {!org && orgError && list && !invitationsError ? (
+      {!org && orgError ? (
         <SectionError text="Failed to load organization." />
       ) : null}
-      {!list && invitationsError && !org && orgError ? (
-        <SectionError text="Failed to load organization and invitations." />
-      ) : null}
-      {(!list && !invitationsError) || (!org && !orgError) ? (
-        <SectionSpinner />
-      ) : null}
-      {list && list.data.length === 0 && org ? (
+      {org && !orgError ? (
         <>
-          <div
-            className={cx(
-              'flex',
-              'items-center',
-              'justify-center',
-              'h-[300px]',
-            )}
-          >
-            <div className={cx('flex', 'flex-col', 'gap-1.5', 'items-center')}>
-              <span>This organization has no invitations.</span>
-              {geEditorPermission(org.permission) ? (
-                <Button
-                  leftIcon={<IconPersonAdd />}
-                  onClick={() => {
-                    setIsInviteMembersModalOpen(true)
-                  }}
+          {!list && listError && org && !orgError ? (
+            <SectionError text="Failed to load invitations." />
+          ) : null}
+          {!list && !listError ? <SectionSpinner /> : null}
+          {list && !listError && list.totalElements === 0 ? (
+            <>
+              <div
+                className={cx(
+                  'flex',
+                  'items-center',
+                  'justify-center',
+                  'h-[300px]',
+                )}
+              >
+                <div
+                  className={cx('flex', 'flex-col', 'gap-1.5', 'items-center')}
                 >
-                  Invite Members
-                </Button>
+                  <span>This organization has no invitations.</span>
+                  {geEditorPermission(org.permission) ? (
+                    <Button
+                      leftIcon={<IconPersonAdd />}
+                      onClick={() => {
+                        setIsInviteMembersModalOpen(true)
+                      }}
+                    >
+                      Invite Members
+                    </Button>
+                  ) : null}
+                </div>
+              </div>
+              <OrganizationInviteMembers
+                open={isInviteMembersModalOpen}
+                id={org.id}
+                onClose={() => setIsInviteMembersModalOpen(false)}
+              />
+            </>
+          ) : null}
+          {list && !listError && list.totalElements > 0 ? (
+            <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
+              <DataTable
+                items={list.data}
+                columns={[
+                  {
+                    title: 'Email',
+                    renderCell: (i) => (
+                      <Text>{truncateMiddle(i.email, 50)}</Text>
+                    ),
+                  },
+                  {
+                    title: 'Status',
+                    renderCell: (i) => <OrganizationStatus value={i.status} />,
+                  },
+                  {
+                    title: 'Date',
+                    renderCell: (i) => (
+                      <RelativeDate date={new Date(i.createTime)} />
+                    ),
+                  },
+                ]}
+                actions={[
+                  {
+                    label: 'Resend',
+                    icon: <IconSend />,
+                    onClick: (i) => handleResend(i.id),
+                  },
+                  {
+                    label: 'Delete',
+                    icon: <IconDelete />,
+                    isDestructive: true,
+                    onClick: (i) => handleDelete(i.id),
+                  },
+                ]}
+              />
+              {list ? (
+                <div className={cx('self-end')}>
+                  <PagePagination
+                    totalElements={list.totalElements}
+                    totalPages={list.totalPages}
+                    page={page}
+                    size={size}
+                    steps={steps}
+                    setPage={setPage}
+                    setSize={setSize}
+                  />
+                </div>
               ) : null}
             </div>
-          </div>
-          <OrganizationInviteMembers
-            open={isInviteMembersModalOpen}
-            id={org.id}
-            onClose={() => setIsInviteMembersModalOpen(false)}
-          />
-        </>
-      ) : null}
-      {list && list.data.length > 0 && org ? (
-        <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
-          <DataTable
-            items={list.data}
-            columns={[
-              {
-                title: 'Email',
-                renderCell: (i) => <Text>{truncateMiddle(i.email, 50)}</Text>,
-              },
-              {
-                title: 'Status',
-                renderCell: (i) => <OrganizationStatus value={i.status} />,
-              },
-              {
-                title: 'Date',
-                renderCell: (i) => (
-                  <RelativeDate date={new Date(i.createTime)} />
-                ),
-              },
-            ]}
-            actions={[
-              {
-                label: 'Resend',
-                icon: <IconSend />,
-                onClick: (i) => handleResend(i.id),
-              },
-              {
-                label: 'Delete',
-                icon: <IconDelete />,
-                isDestructive: true,
-                onClick: (i) => handleDelete(i.id),
-              },
-            ]}
-          />
-          {list ? (
-            <div className={cx('self-end')}>
-              <PagePagination
-                totalElements={list.totalElements}
-                totalPages={list.totalPages}
-                page={page}
-                size={size}
-                steps={steps}
-                setPage={setPage}
-                setSize={setSize}
-              />
-            </div>
           ) : null}
-        </div>
+        </>
       ) : null}
     </>
   )

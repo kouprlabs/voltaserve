@@ -75,7 +75,7 @@ const OrganizationListPage = () => {
           <SectionError text="Failed to load organizations." />
         ) : null}
         {!list && !error ? <SectionSpinner /> : null}
-        {list && list.data.length === 0 ? (
+        {list && list.totalElements === 0 ? (
           <div
             className={cx(
               'flex',
@@ -90,7 +90,7 @@ const OrganizationListPage = () => {
             </div>
           </div>
         ) : null}
-        {list && list.data.length > 0 ? (
+        {list && list.totalElements > 0 && !error ? (
           <DataTable
             items={list.data}
             columns={[

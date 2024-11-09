@@ -133,7 +133,7 @@ const UserSelector = ({
                 <SectionError text="Failed to load users." />
               ) : null}
               {!list && !error ? <SectionSpinner /> : null}
-              {list && list.data.length === 0 ? (
+              {list && list.totalElements === 0 ? (
                 <div
                   className={cx(
                     'flex',
@@ -154,7 +154,7 @@ const UserSelector = ({
                   </div>
                 </div>
               ) : null}
-              {list && list.data.length > 0 ? (
+              {list && list.totalElements > 0 && !error ? (
                 <div
                   className={cx(
                     'flex',

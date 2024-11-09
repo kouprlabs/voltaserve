@@ -21,8 +21,8 @@ const ConsoleButton = () => {
           <IconButton
             ref={buttonRef}
             icon={<IconClose />}
-            title="Close cloud console"
-            aria-label="Close cloud console"
+            title="Close console"
+            aria-label="Close console"
           />
         </Link>
       ) : (
@@ -30,8 +30,8 @@ const ConsoleButton = () => {
           <IconButton
             ref={buttonRef}
             icon={<IconAdminPanelSettings />}
-            title="Open cloud console"
-            aria-label="Open cloud console"
+            title="Open console"
+            aria-label="Open console"
           />
         </Link>
       )}

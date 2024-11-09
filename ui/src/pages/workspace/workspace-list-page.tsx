@@ -75,7 +75,7 @@ const WorkspaceListPage = () => {
           <SectionError text="Failed to load workspaces." />
         ) : null}
         {!list && !error ? <SectionSpinner /> : null}
-        {list && list.data.length === 0 && !error ? (
+        {list && list.totalElements === 0 && !error ? (
           <div
             className={cx(
               'flex',
@@ -90,7 +90,7 @@ const WorkspaceListPage = () => {
             </div>
           </div>
         ) : null}
-        {list && list.data.length > 0 ? (
+        {list && list.totalElements > 0 ? (
           <DataTable
             items={list.data}
             columns={[

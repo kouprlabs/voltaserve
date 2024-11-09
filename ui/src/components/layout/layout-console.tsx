@@ -17,7 +17,6 @@ import {
   IconGroup,
   IconFlag,
   IconPerson,
-  IconDatabase,
   Shell,
 } from '@koupr/ui'
 import { Logo } from '@koupr/ui'
@@ -68,43 +67,37 @@ const LayoutConsole = () => {
           href: '/console/dashboard',
           icon: <IconHome />,
           primaryText: 'Overview',
-          secondaryText: 'Basic information about instance',
+          secondaryText: 'Basic information about your instance',
         },
         {
           href: '/console/users',
           icon: <IconPerson />,
-          primaryText: 'User Management',
-          secondaryText: 'Manage users of your cloud instance',
+          primaryText: 'Users',
+          secondaryText: 'Manage users',
         },
         {
           href: '/console/groups',
           icon: <IconGroup />,
-          primaryText: 'Group Management',
-          secondaryText: 'Manage groups of your cloud instance',
+          primaryText: 'Groups',
+          secondaryText: 'Manage groups',
         },
         {
           href: '/console/workspaces',
           icon: <IconWorkspaces />,
-          primaryText: 'Workspace Management',
-          secondaryText: 'Manage workspaces of your cloud instance',
+          primaryText: 'Workspaces',
+          secondaryText: 'Manage workspaces',
         },
         {
           href: '/console/organizations',
           icon: <IconFlag />,
-          primaryText: 'Organization Management',
-          secondaryText: 'Manage workspaces of your cloud instance',
+          primaryText: 'Organizations',
+          secondaryText: 'Manage workspaces',
         },
         {
           href: '/console/invitations',
           icon: <IconInvitations />,
-          primaryText: 'Invitation Management',
-          secondaryText: 'Manage invitations of your cloud instance',
-        },
-        {
-          href: '/console/database',
-          icon: <IconDatabase />,
-          primaryText: 'Database Management',
-          secondaryText: 'Manage database of your cloud instance',
+          primaryText: 'Invitations',
+          secondaryText: 'Manage invitations',
         },
       ]}
       navigateFn={navigate}

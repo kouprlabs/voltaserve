@@ -132,7 +132,7 @@ const SnapshotList = () => {
               <SectionError text="Failed to load snapshots." />
             ) : null}
             {!list && !error ? <SectionSpinner /> : null}
-            {list && list.data.length === 0 ? (
+            {list && list.totalElements === 0 ? (
               <div
                 className={cx(
                   'flex',
@@ -148,7 +148,7 @@ const SnapshotList = () => {
                 </div>
               </div>
             ) : null}
-            {list && list.data.length > 0 ? (
+            {list && list.totalElements > 0 && !error ? (
               <Table variant="simple" size="sm">
                 <colgroup>
                   <col className={cx('w-[40px]')} />

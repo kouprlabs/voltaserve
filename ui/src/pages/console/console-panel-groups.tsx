@@ -21,13 +21,14 @@ import {
   IconEdit,
   PagePagination,
   RelativeDate,
+  SectionError,
   SectionSpinner,
   Text,
   usePagePagination,
 } from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
-import ConsoleAPI, { GroupManagement } from '@/client/console/console'
+import ConsoleAPI, { ConsoleGroup } from '@/client/console/console'
 import { swrConfig } from '@/client/options'
 import ConsoleRenameModal from '@/components/console/console-rename-modal'
 import { consoleGroupsPaginationStorage } from '@/infra/pagination'
@@ -46,12 +47,15 @@ const ConsolePanelGroups = () => {
   const [isConfirmRenameOpen, setIsConfirmRenameOpen] = useState(false)
   const [currentName, setCurrentName] = useState<string>('')
   const [groupId, setGroupId] = useState<string>()
-  const { data: list, mutate } =
-    ConsoleAPI.useListOrSearchObject<GroupManagement>(
-      'group',
-      { page, size, query },
-      swrConfig(),
-    )
+  const {
+    data: list,
+    error,
+    mutate,
+  } = ConsoleAPI.useListOrSearchObject<ConsoleGroup>(
+    'group',
+    { page, size, query },
+    swrConfig(),
+  )
 
   const renameRequest = useCallback(
     async (name: string) => {
@@ -63,24 +67,16 @@ const ConsolePanelGroups = () => {
     [groupId],
   )
 
-  if (!list) {
-    return <SectionSpinner />
-  }
-
   return (
     <>
-      <ConsoleRenameModal
-        currentName={currentName}
-        isOpen={isConfirmRenameOpen}
-        onClose={() => setIsConfirmRenameOpen(false)}
-        onRequest={renameRequest}
-      />
       <Helmet>
-        <title>Group Management</title>
+        <title>Groups</title>
       </Helmet>
       <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
-        <Heading className={cx('text-heading')}>Group Management</Heading>
-        {list && list.data.length > 0 ? (
+        <Heading className={cx('text-heading')}>Groups</Heading>
+        {!list && error ? <SectionError text="Failed to load groups." /> : null}
+        {!list && !error ? <SectionSpinner /> : null}
+        {list && list.totalElements > 0 ? (
           <DataTable
             items={list.data}
             columns={[
@@ -141,9 +137,7 @@ const ConsolePanelGroups = () => {
               },
             ]}
           />
-        ) : (
-          <div>No groups found.</div>
-        )}
+        ) : null}
         {list ? (
           <div className={cx('self-end')}>
             <PagePagination
@@ -158,6 +152,12 @@ const ConsolePanelGroups = () => {
           </div>
         ) : null}
       </div>
+      <ConsoleRenameModal
+        currentName={currentName}
+        isOpen={isConfirmRenameOpen}
+        onClose={() => setIsConfirmRenameOpen(false)}
+        onRequest={renameRequest}
+      />
     </>
   )
 }

@@ -23,6 +23,7 @@ import {
   IconShield,
   PagePagination,
   RelativeDate,
+  SectionError,
   SectionSpinner,
   Text,
   usePagePagination,
@@ -57,33 +58,22 @@ const ConsolePanelUsers = () => {
     searchFn: () => location.search,
     storage: consoleUsersPaginationStorage(),
   })
-  const { data: list, mutate } = UserAPI.useList(
-    { query, page, size },
-    swrConfig(),
-  )
-
-  if (!list) {
-    return <SectionSpinner />
-  }
+  const {
+    data: list,
+    error,
+    mutate,
+  } = UserAPI.useList({ query, page, size }, swrConfig())
 
   return (
     <>
-      {confirmationHeader && confirmationBody && confirmationRequest ? (
-        <ConsoleConfirmationModal
-          header={confirmationHeader}
-          body={confirmationBody}
-          isDestructive={isConfirmationDestructive}
-          isOpen={isConfirmationOpen}
-          onClose={() => setIsConfirmationOpen(false)}
-          onRequest={confirmationRequest}
-        />
-      ) : null}
       <Helmet>
-        <title>User Management</title>
+        <title>Users</title>
       </Helmet>
       <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
-        <Heading className={cx('text-heading')}>User Management</Heading>
-        {list && list.data.length > 0 ? (
+        <Heading className={cx('text-heading')}>Users</Heading>
+        {!list && error ? <SectionError text="Failed to load users." /> : null}
+        {!list && !error ? <SectionSpinner /> : null}
+        {list && list.totalElements > 0 && !error ? (
           <DataTable
             items={list.data}
             columns={[
@@ -271,9 +261,7 @@ const ConsolePanelUsers = () => {
               },
             ]}
           />
-        ) : (
-          <div>No users found.</div>
-        )}
+        ) : null}
         {list ? (
           <div className={cx('self-end')}>
             <PagePagination
@@ -288,6 +276,16 @@ const ConsolePanelUsers = () => {
           </div>
         ) : null}
       </div>
+      {confirmationHeader && confirmationBody && confirmationRequest ? (
+        <ConsoleConfirmationModal
+          header={confirmationHeader}
+          body={confirmationBody}
+          isDestructive={isConfirmationDestructive}
+          isOpen={isConfirmationOpen}
+          onClose={() => setIsConfirmationOpen(false)}
+          onRequest={confirmationRequest}
+        />
+      ) : null}
     </>
   )
 }

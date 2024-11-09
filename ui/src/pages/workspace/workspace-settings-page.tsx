@@ -10,8 +10,13 @@
 import { useCallback, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { IconButton, IconButtonProps, Progress } from '@chakra-ui/react'
-import { Form, IconDelete, IconEdit, SectionSpinner } from '@koupr/ui'
-import { Helmet } from 'react-helmet-async'
+import {
+  Form,
+  IconDelete,
+  IconEdit,
+  SectionError,
+  SectionSpinner,
+} from '@koupr/ui'
 import { geEditorPermission } from '@/client/api/permission'
 import StorageAPI from '@/client/api/storage'
 import WorkspaceAPI from '@/client/api/workspace'
@@ -30,7 +35,7 @@ const WorkspaceSettingsPage = () => {
   const { id } = useParams()
   const {
     data: workspace,
-    error: workspaceError,
+    error,
     mutate,
   } = WorkspaceAPI.useGet(id, swrConfig())
   const {
@@ -57,117 +62,114 @@ const WorkspaceSettingsPage = () => {
     await mutateStorageUsage()
   }, [])
 
-  if (workspaceError) {
-    return null
-  }
-
-  if (!workspace) {
-    return <SectionSpinner />
-  }
-
   return (
     <>
-      <Helmet>
-        <title>{workspace.name}</title>
-      </Helmet>
-      <Form
-        sections={[
-          {
-            title: 'Storage',
-            content: (
-              <>
-                {storageUsageError ? (
-                  <span>Failed to load storage usage.</span>
-                ) : null}
-                {storageUsage && !storageUsageError ? (
-                  <>
-                    <span>
-                      {prettyBytes(storageUsage.bytes)} of{' '}
-                      {prettyBytes(storageUsage.maxBytes)} used
-                    </span>
-                    <Progress value={storageUsage.percentage} hasStripe />
-                  </>
-                ) : null}
-                {!storageUsage && !storageUsageError ? (
-                  <>
-                    <span>Calculating…</span>
-                    <Progress value={0} hasStripe />
-                  </>
-                ) : null}
-              </>
-            ),
-            rows: [
+      {!workspace && error ? (
+        <SectionError text="Failed to load workspace." />
+      ) : null}
+      {!workspace && !error ? <SectionSpinner /> : null}
+      {workspace && !error ? (
+        <>
+          <Form
+            sections={[
               {
-                label: 'Capacity',
+                title: 'Storage',
                 content: (
                   <>
-                    <span>{prettyBytes(workspace.storageCapacity)}</span>
-                    <EditButton
-                      title="Edit storage capacity"
-                      aria-label="Edit storage capacity"
-                      isDisabled={!hasEditPermission}
-                      onClick={() => setIsStorageCapacityModalOpen(true)}
-                    />
+                    {storageUsageError ? (
+                      <span>Failed to load storage usage.</span>
+                    ) : null}
+                    {storageUsage && !storageUsageError ? (
+                      <>
+                        <span>
+                          {prettyBytes(storageUsage.bytes)} of{' '}
+                          {prettyBytes(storageUsage.maxBytes)} used
+                        </span>
+                        <Progress value={storageUsage.percentage} hasStripe />
+                      </>
+                    ) : null}
+                    {!storageUsage && !storageUsageError ? (
+                      <>
+                        <span>Calculating…</span>
+                        <Progress value={0} hasStripe />
+                      </>
+                    ) : null}
                   </>
                 ),
+                rows: [
+                  {
+                    label: 'Capacity',
+                    content: (
+                      <>
+                        <span>{prettyBytes(workspace.storageCapacity)}</span>
+                        <EditButton
+                          title="Edit storage capacity"
+                          aria-label="Edit storage capacity"
+                          isDisabled={!hasEditPermission}
+                          onClick={() => setIsStorageCapacityModalOpen(true)}
+                        />
+                      </>
+                    ),
+                  },
+                ],
               },
-            ],
-          },
-          {
-            title: 'Basics',
-            rows: [
               {
-                label: 'Name',
-                content: (
-                  <>
-                    <span>{truncateEnd(workspace.name, 50)}</span>
-                    <EditButton
-                      title="Edit name"
-                      aria-label="Edit name"
-                      isDisabled={!hasEditPermission}
-                      onClick={() => setIsNameModalOpen(true)}
-                    />
-                  </>
-                ),
+                title: 'Basics',
+                rows: [
+                  {
+                    label: 'Name',
+                    content: (
+                      <>
+                        <span>{truncateEnd(workspace.name, 50)}</span>
+                        <EditButton
+                          title="Edit name"
+                          aria-label="Edit name"
+                          isDisabled={!hasEditPermission}
+                          onClick={() => setIsNameModalOpen(true)}
+                        />
+                      </>
+                    ),
+                  },
+                ],
               },
-            ],
-          },
-          {
-            title: 'Advanced',
-            rows: [
               {
-                label: 'Delete workspace',
-                content: (
-                  <IconButton
-                    icon={<IconDelete />}
-                    variant="solid"
-                    colorScheme="red"
-                    isDisabled={!hasEditPermission}
-                    title="Delete workspace"
-                    aria-label="Delete workspace"
-                    onClick={() => setIsDeleteModalOpen(true)}
-                  />
-                ),
+                title: 'Advanced',
+                rows: [
+                  {
+                    label: 'Delete workspace',
+                    content: (
+                      <IconButton
+                        icon={<IconDelete />}
+                        variant="solid"
+                        colorScheme="red"
+                        isDisabled={!hasEditPermission}
+                        title="Delete workspace"
+                        aria-label="Delete workspace"
+                        onClick={() => setIsDeleteModalOpen(true)}
+                      />
+                    ),
+                  },
+                ],
               },
-            ],
-          },
-        ]}
-      />
-      <WorkspaceEditName
-        open={isNameModalOpen}
-        workspace={workspace}
-        onClose={handleEditNameClose}
-      />
-      <WorkspaceEditStorageCapacity
-        open={isStorageCapacityModalOpen}
-        workspace={workspace}
-        onClose={handleEditStorageCapacityClose}
-      />
-      <WorkspaceDelete
-        open={isDeleteModalOpen}
-        workspace={workspace}
-        onClose={() => setIsDeleteModalOpen(false)}
-      />
+            ]}
+          />
+          <WorkspaceEditName
+            open={isNameModalOpen}
+            workspace={workspace}
+            onClose={handleEditNameClose}
+          />
+          <WorkspaceEditStorageCapacity
+            open={isStorageCapacityModalOpen}
+            workspace={workspace}
+            onClose={handleEditStorageCapacityClose}
+          />
+          <WorkspaceDelete
+            open={isDeleteModalOpen}
+            workspace={workspace}
+            onClose={() => setIsDeleteModalOpen(false)}
+          />
+        </>
+      ) : null}
     </>
   )
 }

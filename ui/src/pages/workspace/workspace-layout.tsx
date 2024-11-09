@@ -11,6 +11,7 @@ import { useEffect, useState } from 'react'
 import { Outlet, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { Heading, Tab, TabList, Tabs } from '@chakra-ui/react'
 import cx from 'classnames'
+import { Helmet } from 'react-helmet-async'
 import WorkspaceAPI from '@/client/api/workspace'
 import { swrConfig } from '@/client/options'
 import { useAppDispatch } from '@/store/hook'
@@ -45,26 +46,31 @@ const WorkspaceLayout = () => {
   }
 
   return (
-    <div className={cx('flex', 'flex-col', 'gap-2', 'h-full')}>
-      <Heading className={cx('text-heading', 'shrink-0')} noOfLines={1}>
-        {workspace.name}
-      </Heading>
-      <Tabs variant="solid-rounded" colorScheme="gray" index={tabIndex}>
-        <TabList>
-          <Tab
-            onClick={() =>
-              navigate(`/workspace/${id}/file/${workspace.rootId}`)
-            }
-          >
-            Files
-          </Tab>
-          <Tab onClick={() => navigate(`/workspace/${id}/settings`)}>
-            Settings
-          </Tab>
-        </TabList>
-      </Tabs>
-      <Outlet />
-    </div>
+    <>
+      <Helmet>
+        <title>{workspace.name}</title>
+      </Helmet>
+      <div className={cx('flex', 'flex-col', 'gap-2', 'h-full')}>
+        <Heading className={cx('text-heading', 'shrink-0')} noOfLines={1}>
+          {workspace.name}
+        </Heading>
+        <Tabs variant="solid-rounded" colorScheme="gray" index={tabIndex}>
+          <TabList>
+            <Tab
+              onClick={() =>
+                navigate(`/workspace/${id}/file/${workspace.rootId}`)
+              }
+            >
+              Files
+            </Tab>
+            <Tab onClick={() => navigate(`/workspace/${id}/settings`)}>
+              Settings
+            </Tab>
+          </TabList>
+        </Tabs>
+        <Outlet />
+      </div>
+    </>
   )
 }
 

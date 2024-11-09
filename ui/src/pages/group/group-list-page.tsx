@@ -73,7 +73,7 @@ const GroupListPage = () => {
         <Heading className={cx('text-heading')}>Groups</Heading>
         {error ? <SectionError text="Failed to load groups." /> : null}
         {!list && !error ? <SectionSpinner /> : null}
-        {list && list.data.length === 0 ? (
+        {list && list.totalElements === 0 ? (
           <div
             className={cx(
               'flex',
@@ -88,7 +88,7 @@ const GroupListPage = () => {
             </div>
           </div>
         ) : null}
-        {list && list.data.length > 0 ? (
+        {list && list.totalElements > 0 && !error ? (
           <DataTable
             items={list.data}
             columns={[

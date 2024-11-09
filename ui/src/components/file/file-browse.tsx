@@ -77,90 +77,97 @@ const FileBrowse = ({ onChange }: FileBrowseProps) => {
     }
   }, [])
 
-  if (isSpinnerVisible) {
-    return <SectionSpinner />
-  }
-
   return (
-    <div className={cx('flex', 'flex-col', 'gap-1')}>
-      {workspace && fileId ? (
-        <Path
-          rootId={workspace.rootId}
-          fileId={fileId}
-          maxCharacters={10}
-          onClick={(fileId) => setFileId(fileId)}
-        />
-      ) : null}
-      <div
-        className={cx(
-          'flex',
-          'flex-col',
-          'gap-0',
-          'border-t',
-          'pt-1.5',
-          'h-[250px]',
-          'xl:h-[400px]',
-          'overflow-y-scroll',
-          'border-t-gray-300',
-          'dark:border-t-gray-600',
-        )}
-      >
-        {folders.length > 0 ? (
-          folders.map((f) => (
+    <>
+      {isSpinnerVisible ? (
+        <SectionSpinner />
+      ) : (
+        <div className={cx('flex', 'flex-col', 'gap-1')}>
+          {workspace && fileId ? (
+            <Path
+              rootId={workspace.rootId}
+              fileId={fileId}
+              maxCharacters={10}
+              onClick={(fileId) => setFileId(fileId)}
+            />
+          ) : null}
+          <div
+            className={cx(
+              'flex',
+              'flex-col',
+              'gap-0',
+              'border-t',
+              'pt-1.5',
+              'h-[250px]',
+              'xl:h-[400px]',
+              'overflow-y-scroll',
+              'border-t-gray-300',
+              'dark:border-t-gray-600',
+            )}
+          >
+            {folders.length > 0 ? (
+              folders.map((f) => (
+                <div
+                  key={f.id}
+                  className={cx(
+                    'flex',
+                    'flex-row',
+                    'gap-1.5',
+                    'items-center',
+                    'cursor-pointer',
+                    'select-none',
+                    'p-1',
+                    'rounded-md',
+                    'hover:bg-gray-100',
+                    'hover:dark:bg-gray-700',
+                    'active:bg-gray-100',
+                    'active:dark:bg-gray-700',
+                  )}
+                  onClick={() => setFileId(f.id)}
+                >
+                  <img
+                    src={FolderSvg}
+                    className={cx('shrink-0', 'w-[36px]', 'h-[28.84px]')}
+                  />
+                  <Text noOfLines={1}>{f.name}</Text>
+                  <div className={cx('grow')} />
+                  <IconChevronRight />
+                </div>
+              ))
+            ) : (
+              <div
+                className={cx(
+                  'flex',
+                  'items-center',
+                  'justify-center',
+                  'h-full',
+                )}
+              >
+                <span>There are no folders.</span>
+              </div>
+            )}
+          </div>
+          {totalPages > page && fileId ? (
             <div
-              key={f.id}
               className={cx(
                 'flex',
-                'flex-row',
-                'gap-1.5',
                 'items-center',
-                'cursor-pointer',
-                'select-none',
-                'p-1',
-                'rounded-md',
-                'hover:bg-gray-100',
-                'hover:dark:bg-gray-700',
-                'active:bg-gray-100',
-                'active:dark:bg-gray-700',
+                'justify-center',
+                'w-full',
+                'p-1.5',
               )}
-              onClick={() => setFileId(f.id)}
             >
-              <img
-                src={FolderSvg}
-                className={cx('shrink-0', 'w-[36px]', 'h-[28.84px]')}
-              />
-              <Text noOfLines={1}>{f.name}</Text>
-              <div className={cx('grow')} />
-              <IconChevronRight />
+              <Button
+                onClick={() => handleLoadMore(fileId, page)}
+                isLoading={isLoading}
+              >
+                Load More
+              </Button>
             </div>
-          ))
-        ) : (
-          <div
-            className={cx('flex', 'items-center', 'justify-center', 'h-full')}
-          >
-            <span>There are no folders.</span>
-          </div>
-        )}
-      </div>
-      {totalPages > page && fileId ? (
-        <div
-          className={cx(
-            'flex',
-            'items-center',
-            'justify-center',
-            'w-full',
-            'p-1.5',
-          )}
-        >
-          <Button
-            onClick={() => handleLoadMore(fileId, page)}
-            isLoading={isLoading}
-          >
-            Load More
-          </Button>
+          ) : null}
         </div>
-      ) : null}
-    </div>
+      )}
+    </>
   )
 }
 

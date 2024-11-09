@@ -94,10 +94,10 @@ const ConsolePanelOverview = () => {
   return (
     <>
       <Helmet>
-        <title>Cloud Console</title>
+        <title>Console</title>
       </Helmet>
       <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
-        <Heading className={cx('text-heading')}>Cloud Console</Heading>
+        <Heading className={cx('text-heading')}>Console</Heading>
         <Grid gap={4} templateColumns="repeat(4, 1fr)">
           <GridItem>
             <Table>

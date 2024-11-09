@@ -13,9 +13,6 @@ import AccountInvitationsPage from '@/pages/account/account-invitations-page'
 import AccountLayout from '@/pages/account/account-layout'
 import AccountSettingsPage from '@/pages/account/account-settings-page'
 import ConfirmEmailPage from '@/pages/confirm-email-page'
-import ConsolePanelDatabase from '@/pages/console/console-panel-database'
-import ConsolePanelDatabaseIndexes from '@/pages/console/console-panel-database-indexes'
-import ConsolePanelDatabaseOverview from '@/pages/console/console-panel-database-overview'
 import ConsolePanelGroups from '@/pages/console/console-panel-groups'
 import ConsolePanelInvitations from '@/pages/console/console-panel-invitations'
 import ConsolePanelOrganization from '@/pages/console/console-panel-organization'
@@ -210,23 +207,6 @@ const router = createBrowserRouter([
           {
             path: '/console/groups',
             element: <ConsolePanelGroups />,
-          },
-          {
-            element: <ConsolePanelDatabase />,
-            children: [
-              {
-                path: '/console/database',
-                element: <ConsolePanelDatabaseOverview />,
-              },
-              {
-                path: '/console/database/overview',
-                element: <ConsolePanelDatabaseOverview />,
-              },
-              {
-                path: '/console/database/indexes',
-                element: <ConsolePanelDatabaseIndexes />,
-              },
-            ],
           },
         ],
       },

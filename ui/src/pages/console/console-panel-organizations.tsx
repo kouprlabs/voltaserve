@@ -20,13 +20,14 @@ import {
   IconEdit,
   PagePagination,
   RelativeDate,
+  SectionError,
   SectionSpinner,
   Text,
   usePagePagination,
 } from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
-import ConsoleAPI, { OrganizationManagement } from '@/client/console/console'
+import ConsoleAPI, { ConsoleOrganization } from '@/client/console/console'
 import { swrConfig } from '@/client/options'
 import ConsoleRenameModal from '@/components/console/console-rename-modal'
 import { consoleOrganizationsPaginationStorage } from '@/infra/pagination'
@@ -45,12 +46,15 @@ const ConsolePanelOrganizations = () => {
   const [isConfirmRenameOpen, setIsConfirmRenameOpen] = useState(false)
   const [currentName, setCurrentName] = useState<string>('')
   const [organizationId, setOrganizationId] = useState<string>()
-  const { data: list, mutate } =
-    ConsoleAPI.useListOrSearchObject<OrganizationManagement>(
-      'organization',
-      { page, size, query },
-      swrConfig(),
-    )
+  const {
+    data: list,
+    error,
+    mutate,
+  } = ConsoleAPI.useListOrSearchObject<ConsoleOrganization>(
+    'organization',
+    { page, size, query },
+    swrConfig(),
+  )
   const renameRequest = useCallback(
     async (name: string) => {
       if (organizationId) {
@@ -64,26 +68,18 @@ const ConsolePanelOrganizations = () => {
     [organizationId],
   )
 
-  if (!list) {
-    return <SectionSpinner />
-  }
-
   return (
     <>
-      <ConsoleRenameModal
-        currentName={currentName}
-        isOpen={isConfirmRenameOpen}
-        onClose={() => setIsConfirmRenameOpen(false)}
-        onRequest={renameRequest}
-      />
       <Helmet>
-        <title>Organization Management</title>
+        <title>Organizations</title>
       </Helmet>
       <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
-        <Heading className={cx('text-heading')}>
-          Organization Management
-        </Heading>
-        {list && list.data.length > 0 ? (
+        <Heading className={cx('text-heading')}>Organizations</Heading>
+        {!list && error ? (
+          <SectionError text="Failed to load organizations." />
+        ) : null}
+        {!list && !error ? <SectionSpinner /> : null}
+        {list && list.totalElements > 0 && !error ? (
           <DataTable
             items={list.data}
             columns={[
@@ -139,9 +135,7 @@ const ConsolePanelOrganizations = () => {
               },
             ]}
           />
-        ) : (
-          <div>No organizations found.</div>
-        )}
+        ) : null}
         {list ? (
           <div className={cx('self-end')}>
             <PagePagination
@@ -156,6 +150,12 @@ const ConsolePanelOrganizations = () => {
           </div>
         ) : null}
       </div>
+      <ConsoleRenameModal
+        currentName={currentName}
+        isOpen={isConfirmRenameOpen}
+        onClose={() => setIsConfirmRenameOpen(false)}
+        onRequest={renameRequest}
+      />
     </>
   )
 }

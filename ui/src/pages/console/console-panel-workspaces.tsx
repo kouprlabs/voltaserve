@@ -21,13 +21,14 @@ import {
   IconEdit,
   PagePagination,
   RelativeDate,
+  SectionError,
   SectionSpinner,
   Text,
   usePagePagination,
 } from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
-import ConsoleAPI, { WorkspaceManagement } from '@/client/console/console'
+import ConsoleAPI, { ConsoleWorkspace } from '@/client/console/console'
 import { swrConfig } from '@/client/options'
 import ConsoleRenameModal from '@/components/console/console-rename-modal'
 import { consoleWorkspacesPaginationStorage } from '@/infra/pagination'
@@ -47,12 +48,15 @@ const ConsolePanelWorkspaces = () => {
   const [isConfirmRenameOpen, setIsConfirmRenameOpen] = useState(false)
   const [currentName, setCurrentName] = useState<string>('')
   const [workspaceId, setWorkspaceId] = useState<string>()
-  const { data: list, mutate } =
-    ConsoleAPI.useListOrSearchObject<WorkspaceManagement>(
-      'workspace',
-      { page, size, query },
-      swrConfig(),
-    )
+  const {
+    data: list,
+    error,
+    mutate,
+  } = ConsoleAPI.useListOrSearchObject<ConsoleWorkspace>(
+    'workspace',
+    { page, size, query },
+    swrConfig(),
+  )
 
   const renameRequest = useCallback(
     async (name: string) => {
@@ -64,24 +68,18 @@ const ConsolePanelWorkspaces = () => {
     [workspaceId],
   )
 
-  if (!list) {
-    return <SectionSpinner />
-  }
-
   return (
     <>
-      <ConsoleRenameModal
-        currentName={currentName}
-        isOpen={isConfirmRenameOpen}
-        onClose={() => setIsConfirmRenameOpen(false)}
-        onRequest={renameRequest}
-      />
       <Helmet>
-        <title>Workspace Management</title>
+        <title>Workspaces</title>
       </Helmet>
       <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
-        <Heading className={cx('text-heading')}>Workspace Management</Heading>
-        {list && list.data.length > 0 ? (
+        <Heading className={cx('text-heading')}>Workspaces</Heading>
+        {!list && error ? (
+          <SectionError text="Failed to load workspaces." />
+        ) : null}
+        {!list && !error ? <SectionSpinner /> : null}
+        {list && list.totalElements > 0 && !error ? (
           <DataTable
             items={list.data}
             columns={[
@@ -149,9 +147,7 @@ const ConsolePanelWorkspaces = () => {
               },
             ]}
           />
-        ) : (
-          <div>No workspaces found.</div>
-        )}
+        ) : null}
         {list ? (
           <div className={cx('self-end')}>
             <PagePagination
@@ -166,6 +162,12 @@ const ConsolePanelWorkspaces = () => {
           </div>
         ) : null}
       </div>
+      <ConsoleRenameModal
+        currentName={currentName}
+        isOpen={isConfirmRenameOpen}
+        onClose={() => setIsConfirmRenameOpen(false)}
+        onRequest={renameRequest}
+      />
     </>
   )
 }
