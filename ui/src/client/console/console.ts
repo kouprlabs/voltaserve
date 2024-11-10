@@ -23,7 +23,7 @@ export type ConsoleObject =
 
 export interface ListResponse<T> {
   totalElements: number
-  totalPages: number | null
+  totalPages: number
   page: number
   size: number
   data: T[]
@@ -35,58 +35,52 @@ export interface CommonFields {
   updateTime: Date
 }
 
-export type IndexManagement = {
-  tableName: string
-  indexName: string
-  indexDef: string
-}
-
-export interface OrganizationManagement extends CommonFields {
+export interface ConsoleOrganization extends CommonFields {
   name: string
 }
 
-export interface OrganizationUserManagement extends CommonFields {
+export interface ConsoleOrganizationUser extends CommonFields {
   permission: PermissionType
   organizationId: string
   organizationName: string
   createTime: Date
 }
 
-export interface GroupManagement extends CommonFields {
+export interface ConsoleGroup extends CommonFields {
   name: string
-  organization: OrganizationManagement
+  organization: ConsoleOrganization
 }
 
-export interface GroupUserManagement extends CommonFields {
+export interface ConsoleGroupUser extends CommonFields {
   permission: PermissionType
   groupId: string
   groupName: string
   createTime: Date
 }
 
-export interface WorkspaceManagement extends CommonFields {
+export interface ConsoleWorkspace extends CommonFields {
   name: string
-  organization: OrganizationManagement
+  organization: ConsoleOrganization
   storageCapacity: number
   rootId: string
   bucket: string
 }
 
-export interface WorkspaceUserManagement extends CommonFields {
+export interface ConsoleWorkspaceUser extends CommonFields {
   permission: PermissionType
   workspaceId: string
   workspaceName: string
   createTime: Date
 }
 
-export interface InvitationManagement extends CommonFields {
-  organization: OrganizationManagement
+export interface ConsoleInvitation extends CommonFields {
+  organization: ConsoleOrganization
   ownerId: string
   email: string
   status: string
 }
 
-export interface UserOrganizationManagement extends CommonFields {
+export interface ConsoleUserOrganization extends CommonFields {
   username: string
   permission: PermissionType
   picture: string
@@ -106,15 +100,15 @@ type ListQueryParams = {
   size?: string
 }
 
-export interface baseIdRequest {
-  id: string
+export interface BaseIDRequest {
+  id?: string
 }
 
-export interface baseIdNameRequest extends baseIdRequest {
+export interface BaseNameRequest extends BaseIDRequest {
   name: string
 }
 
-export interface invitationStatusRequest extends baseIdRequest {
+export interface InvitationStatusRequest extends BaseIDRequest {
   accept: boolean
 }
 
@@ -145,15 +139,18 @@ export default class ConsoleAPI {
     }
   }
 
-  static useListIndexes(options: ListOptions, swrOptions?: SWRConfiguration) {
-    const url = `/index/all?${this.paramsFromListOptions(options)}`
-    return useSWR<ListResponse<IndexManagement>>(
+  static useListUsersByOrganization(
+    options: ListOptions,
+    swrOptions?: SWRConfiguration,
+  ) {
+    const url = `/organization/users?${this.paramsFromListOptions(options)}`
+    return useSWR<ListResponse<ConsoleUserOrganization>>(
       url,
       () =>
         consoleFetcher({
           url,
           method: 'GET',
-        }) as Promise<ListResponse<IndexManagement>>,
+        }) as Promise<ListResponse<ConsoleUserOrganization>>,
       swrOptions,
     )
   }
@@ -162,49 +159,145 @@ export default class ConsoleAPI {
     return consoleFetcher({
       url: `/organization/users?${this.paramsFromListOptions(options)}`,
       method: 'GET',
-    }) as Promise<ListResponse<UserOrganizationManagement>>
+    }) as Promise<ListResponse<ConsoleUserOrganization>>
+  }
+
+  static useListGroupsByUser(
+    options: ListOptions,
+    swrOptions?: SWRConfiguration,
+  ) {
+    const url = `/user/groups?${this.paramsFromListOptions(options)}`
+    return useSWR<ListResponse<ConsoleGroupUser>>(
+      url,
+      () =>
+        consoleFetcher({
+          url,
+          method: 'GET',
+        }) as Promise<ListResponse<ConsoleGroupUser>>,
+      swrOptions,
+    )
   }
 
   static listGroupsByUser(options: ListOptions) {
     return consoleFetcher({
       url: `/user/groups?${this.paramsFromListOptions(options)}`,
       method: 'GET',
-    }) as Promise<ListResponse<GroupUserManagement>>
+    }) as Promise<ListResponse<ConsoleGroupUser>>
+  }
+
+  static useListGroupsByOrganization(
+    options: ListOptions,
+    swrOptions?: SWRConfiguration,
+  ) {
+    const url = `/organization/groups?${this.paramsFromListOptions(options)}`
+    return useSWR<ListResponse<ConsoleGroup>>(
+      url,
+      () =>
+        consoleFetcher({
+          url,
+          method: 'GET',
+        }) as Promise<ListResponse<ConsoleGroup>>,
+      swrOptions,
+    )
   }
 
   static listGroupsByOrganization(options: ListOptions) {
     return consoleFetcher({
       url: `/organization/groups?${this.paramsFromListOptions(options)}`,
       method: 'GET',
-    }) as Promise<ListResponse<GroupManagement>>
+    }) as Promise<ListResponse<ConsoleGroup>>
+  }
+
+  static useListOrganizationsByUser(
+    options: ListOptions,
+    swrOptions?: SWRConfiguration,
+  ) {
+    const url = `/user/organizations?${this.paramsFromListOptions(options)}`
+    return useSWR<ListResponse<ConsoleOrganizationUser>>(
+      url,
+      () =>
+        consoleFetcher({
+          url,
+          method: 'GET',
+        }) as Promise<ListResponse<ConsoleOrganizationUser>>,
+      swrOptions,
+    )
   }
 
   static listOrganizationsByUser(options: ListOptions) {
     return consoleFetcher({
       url: `/user/organizations?${this.paramsFromListOptions(options)}`,
       method: 'GET',
-    }) as Promise<ListResponse<OrganizationUserManagement>>
+    }) as Promise<ListResponse<ConsoleOrganizationUser>>
   }
 
-  static getOrganizationById(options: baseIdRequest) {
-    return consoleFetcher({
-      url: `/organization?${this.paramsFromListOptions(options)}`,
-      method: 'GET',
-    }) as Promise<OrganizationManagement>
+  static useListWorkspacesByUser(
+    options: ListOptions,
+    swrOptions?: SWRConfiguration,
+  ) {
+    const url = `/user/workspaces?${this.paramsFromListOptions(options)}`
+    return useSWR<ListResponse<ConsoleWorkspaceUser>>(
+      url,
+      () =>
+        consoleFetcher({
+          url,
+          method: 'GET',
+        }) as Promise<ListResponse<ConsoleWorkspaceUser>>,
+      swrOptions,
+    )
   }
 
   static listWorkspacesByUser(options: ListOptions) {
     return consoleFetcher({
       url: `/user/workspaces?${this.paramsFromListOptions(options)}`,
       method: 'GET',
-    }) as Promise<ListResponse<WorkspaceUserManagement>>
+    }) as Promise<ListResponse<ConsoleWorkspaceUser>>
+  }
+
+  static useListWorkspacesByOrganization(
+    options: ListOptions,
+    swrOptions?: SWRConfiguration,
+  ) {
+    const url = `/organization/workspaces?${this.paramsFromListOptions(options)}`
+    return useSWR<ListResponse<ConsoleWorkspace>>(
+      url,
+      () =>
+        consoleFetcher({
+          url,
+          method: 'GET',
+        }) as Promise<ListResponse<ConsoleWorkspace>>,
+      swrOptions,
+    )
   }
 
   static listWorkspacesByOrganization(options: ListOptions) {
     return consoleFetcher({
       url: `/organization/workspaces?${this.paramsFromListOptions(options)}`,
       method: 'GET',
-    }) as Promise<ListResponse<WorkspaceManagement>>
+    }) as Promise<ListResponse<ConsoleWorkspace>>
+  }
+
+  static useGetOrganizationById(
+    options: BaseIDRequest,
+    swrOptions?: SWRConfiguration,
+  ) {
+    const url = `/organization?${this.paramsFromListOptions(options)}`
+    return useSWR<ConsoleOrganization>(
+      options.id ? url : null,
+      () =>
+        consoleFetcher({
+          url,
+          method: 'GET',
+        }) as Promise<ConsoleOrganization>,
+      swrOptions,
+    )
+  }
+
+  static getOrganizationById(options: BaseIDRequest) {
+    return consoleFetcher({
+      url: `/organization?${this.paramsFromListOptions(options)}`,
+      method: 'GET',
+    }) as Promise<ConsoleOrganization>
   }
 
   static countObject(object: ConsoleObject) {
@@ -221,7 +314,7 @@ export default class ConsoleAPI {
     }) as Promise<ComponentVersion>
   }
 
-  static renameObject(options: baseIdNameRequest, object: ConsoleObject) {
+  static renameObject(options: BaseNameRequest, object: ConsoleObject) {
     return consoleFetcher({
       url: `/${object}`,
       method: 'PATCH',
@@ -229,7 +322,7 @@ export default class ConsoleAPI {
     }) as Promise<void>
   }
 
-  static invitationChangeStatus(options: invitationStatusRequest) {
+  static invitationChangeStatus(options: InvitationStatusRequest) {
     return consoleFetcher({
       url: `/invitation`,
       method: 'PATCH',

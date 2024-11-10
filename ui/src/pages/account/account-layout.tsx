@@ -20,6 +20,7 @@ import {
 } from '@chakra-ui/react'
 import { IconEdit, NumberTag } from '@koupr/ui'
 import cx from 'classnames'
+import { Helmet } from 'react-helmet-async'
 import InvitationAPI from '@/client/api/invitation'
 import UserAPI from '@/client/idp/user'
 import { swrConfig } from '@/client/options'
@@ -60,83 +61,94 @@ const AccountLayout = () => {
   }
 
   return (
-    <div className={cx('flex', 'flex-row', 'gap-2.5')}>
-      <div
-        className={cx('flex', 'flex-col', 'gap-2', 'items-center', 'w-[250px]')}
-      >
-        <div className={cx('flex', 'flex-col', 'gap-2', 'items-center')}>
-          <div className={cx('relative', 'shrink-0')}>
-            <Avatar
-              name={user.fullName}
-              src={user.picture ? getPictureUrl(user.picture) : undefined}
-              size="2xl"
-              className={cx(
-                'w-[165px]',
-                'h-[165px]',
-                'border',
-                'border-gray-300',
-                'dark:border-gray-700',
-              )}
-            />
-            <IconButton
-              icon={<IconEdit />}
-              variant="solid-gray"
-              right="5px"
-              bottom="10px"
-              position="absolute"
-              zIndex={1000}
-              title="Edit picture"
-              aria-label="Edit picture"
-              onClick={() => setIsImageModalOpen(true)}
-            />
-          </div>
-          <Heading className={cx('text-center', 'text-heading')}>
-            {truncateEnd(user.fullName, 50)}
-          </Heading>
-        </div>
-        <div className={cx('w-full', 'gap-1')}>
-          <Button
-            variant="outline"
-            colorScheme="red"
-            type="submit"
-            className={cx('w-full')}
-            onClick={() => navigate('/sign-out')}
-          >
-            Sign Out
-          </Button>
-        </div>
-      </div>
-      <div className={cx('w-full', 'pb-1.5')}>
-        <Tabs
-          variant="solid-rounded"
-          colorScheme="gray"
-          index={tabIndex}
-          className={cx('pb-2.5')}
+    <>
+      <Helmet>
+        <title>{user.fullName}</title>
+      </Helmet>
+      <div className={cx('flex', 'flex-row', 'gap-2.5')}>
+        <div
+          className={cx(
+            'flex',
+            'flex-col',
+            'gap-2',
+            'items-center',
+            'w-[250px]',
+          )}
         >
-          <TabList>
-            <Tab onClick={() => navigate('/account/settings')}>Settings</Tab>
-            <Tab onClick={() => navigate('/account/invitation')}>
-              <div
-                className={cx('flex', 'flex-row', 'items-center', 'gap-0.5')}
-              >
-                <span>Invitations</span>
-                {invitationCount && invitationCount > 0 ? (
-                  <NumberTag isActive={tabIndex === 1}>
-                    {invitationCount}
-                  </NumberTag>
-                ) : null}
-              </div>
-            </Tab>
-          </TabList>
-        </Tabs>
-        <Outlet />
+          <div className={cx('flex', 'flex-col', 'gap-2', 'items-center')}>
+            <div className={cx('relative', 'shrink-0')}>
+              <Avatar
+                name={user.fullName}
+                src={user.picture ? getPictureUrl(user.picture) : undefined}
+                size="2xl"
+                className={cx(
+                  'w-[165px]',
+                  'h-[165px]',
+                  'border',
+                  'border-gray-300',
+                  'dark:border-gray-700',
+                )}
+              />
+              <IconButton
+                icon={<IconEdit />}
+                variant="solid-gray"
+                right="5px"
+                bottom="10px"
+                position="absolute"
+                zIndex={1000}
+                title="Edit picture"
+                aria-label="Edit picture"
+                onClick={() => setIsImageModalOpen(true)}
+              />
+            </div>
+            <Heading className={cx('text-center', 'text-heading')}>
+              {truncateEnd(user.fullName, 50)}
+            </Heading>
+          </div>
+          <div className={cx('w-full', 'gap-1')}>
+            <Button
+              variant="outline"
+              colorScheme="red"
+              type="submit"
+              className={cx('w-full')}
+              onClick={() => navigate('/sign-out')}
+            >
+              Sign Out
+            </Button>
+          </div>
+        </div>
+        <div className={cx('w-full', 'pb-1.5')}>
+          <Tabs
+            variant="solid-rounded"
+            colorScheme="gray"
+            index={tabIndex}
+            className={cx('pb-2.5')}
+          >
+            <TabList>
+              <Tab onClick={() => navigate('/account/settings')}>Settings</Tab>
+              <Tab onClick={() => navigate('/account/invitation')}>
+                <div
+                  className={cx('flex', 'flex-row', 'items-center', 'gap-0.5')}
+                >
+                  <span>Invitations</span>
+                  {invitationCount && invitationCount > 0 ? (
+                    <NumberTag isActive={tabIndex === 1}>
+                      {invitationCount}
+                    </NumberTag>
+                  ) : null}
+                </div>
+              </Tab>
+            </TabList>
+          </Tabs>
+          <Outlet />
+        </div>
+        <AccountEditPicture
+          open={isImageModalOpen}
+          user={user}
+          onClose={() => setIsImageModalOpen(false)}
+        />
       </div>
-      <AccountEditPicture
-        open={isImageModalOpen}
-        user={user}
-        onClose={() => setIsImageModalOpen(false)}
-      />
-    </div>
+    </>
   )
 }
 

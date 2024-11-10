@@ -8,12 +8,6 @@ Install dependencies:
 poetry install --no-interaction --no-cache
 ```
 
-Activate the virtual environment created by Poetry:
-
-```shell
-source /home/your_user/.cache/pypoetry/virtualenvs/voltaserve-console-something/bin/activate
-```
-
 Run:
 
 ```shell

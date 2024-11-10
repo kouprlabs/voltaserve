@@ -25,7 +25,13 @@ import {
   Avatar,
   Radio,
 } from '@chakra-ui/react'
-import { Pagination, SearchInput, SectionSpinner } from '@koupr/ui'
+import {
+  Pagination,
+  SearchInput,
+  SectionError,
+  SectionPlaceholder,
+  SectionSpinner,
+} from '@koupr/ui'
 import cx from 'classnames'
 import UserAPI, { SortOrder, User } from '@/client/api/user'
 import { swrConfig } from '@/client/options'
@@ -125,121 +131,97 @@ const UserSelector = ({
                 onChange={handleSearchInputChange}
               />
               {!list && error ? (
-                <div
-                  className={cx(
-                    'flex',
-                    'items-center',
-                    'justify-center',
-                    'h-[320px]',
-                  )}
-                >
-                  <span>Failed to load users.</span>
-                </div>
+                <SectionError text="Failed to load users." />
               ) : null}
               {!list && !error ? <SectionSpinner /> : null}
-              {list && list.data.length === 0 ? (
-                <div
-                  className={cx(
-                    'flex',
-                    'items-center',
-                    'justify-center',
-                    'h-[320px]',
-                  )}
-                >
-                  <div
-                    className={cx(
-                      'flex',
-                      'flex-col',
-                      'items-center',
-                      'gap-1.5',
-                    )}
-                  >
-                    <span>There are no users.</span>
-                  </div>
-                </div>
-              ) : null}
-              {list && list.data.length > 0 ? (
-                <div
-                  className={cx(
-                    'flex',
-                    'flex-col',
-                    'justify-between',
-                    'h-[320px]',
-                  )}
-                >
-                  <Table variant="simple" size="sm">
-                    <colgroup>
-                      <col className={cx('w-[40px]')} />
-                      <col className={cx('w-[auto]')} />
-                    </colgroup>
-                    <Tbody>
-                      {list.data.map((u) => (
-                        <Tr
-                          key={u.id}
-                          className={cx(
-                            'cursor-pointer',
-                            'h-[52px]',
-                            { 'bg-gray-100': selected?.id === u.id },
-                            { 'dark:bg-gray-600': selected?.id === u.id },
-                            { 'bg-transparent': selected?.id !== u.id },
-                          )}
-                          onClick={() => setSelected(u)}
-                        >
-                          <Td className={cx('px-0.5', 'text-center')}>
-                            <Radio
-                              size="md"
-                              isChecked={selected?.id === u.id}
-                            />
-                          </Td>
-                          <Td className={cx('p-0.5')}>
-                            <div
+              {list && !error ? (
+                <>
+                  {list.totalElements > 0 ? (
+                    <div
+                      className={cx(
+                        'flex',
+                        'flex-col',
+                        'justify-between',
+                        'gap-1.5',
+                        'h-[320px]',
+                      )}
+                    >
+                      <Table variant="simple" size="sm">
+                        <colgroup>
+                          <col className={cx('w-[40px]')} />
+                          <col className={cx('w-[auto]')} />
+                        </colgroup>
+                        <Tbody>
+                          {list.data.map((u) => (
+                            <Tr
+                              key={u.id}
                               className={cx(
-                                'flex',
-                                'flex-row',
-                                'items-center',
-                                'gap-1.5',
+                                'cursor-pointer',
+                                'h-[52px]',
+                                { 'bg-gray-100': selected?.id === u.id },
+                                { 'dark:bg-gray-600': selected?.id === u.id },
+                                { 'bg-transparent': selected?.id !== u.id },
                               )}
+                              onClick={() => setSelected(u)}
                             >
-                              <Avatar
-                                name={u.fullName}
-                                src={
-                                  u.picture
-                                    ? getPictureUrlById(u.id, u.picture, {
-                                        organizationId: organizationId,
-                                        groupId: groupId,
-                                      })
-                                    : undefined
-                                }
-                                size="sm"
-                                className={cx(
-                                  'w-[40px]',
-                                  'h-[40px]',
-                                  'border',
-                                  'border-gray-300',
-                                  'dark:border-gray-700',
-                                )}
-                              />
-                              <span className={cx('text-base')}>
-                                {userToString(u)}
-                              </span>
-                            </div>
-                          </Td>
-                        </Tr>
-                      ))}
-                    </Tbody>
-                  </Table>
-                  <div className={cx('self-end')}>
-                    {list.totalPages > 1 ? (
-                      <Pagination
-                        uiSize="md"
-                        maxButtons={3}
-                        page={page}
-                        totalPages={list.totalPages}
-                        onPageChange={(value) => setPage(value)}
-                      />
-                    ) : null}
-                  </div>
-                </div>
+                              <Td className={cx('px-0.5', 'text-center')}>
+                                <Radio
+                                  size="md"
+                                  isChecked={selected?.id === u.id}
+                                />
+                              </Td>
+                              <Td className={cx('p-0.5')}>
+                                <div
+                                  className={cx(
+                                    'flex',
+                                    'flex-row',
+                                    'items-center',
+                                    'gap-1.5',
+                                  )}
+                                >
+                                  <Avatar
+                                    name={u.fullName}
+                                    src={
+                                      u.picture
+                                        ? getPictureUrlById(u.id, u.picture, {
+                                            organizationId: organizationId,
+                                            groupId: groupId,
+                                          })
+                                        : undefined
+                                    }
+                                    size="sm"
+                                    className={cx(
+                                      'w-[40px]',
+                                      'h-[40px]',
+                                      'border',
+                                      'border-gray-300',
+                                      'dark:border-gray-700',
+                                    )}
+                                  />
+                                  <span className={cx('text-base')}>
+                                    {userToString(u)}
+                                  </span>
+                                </div>
+                              </Td>
+                            </Tr>
+                          ))}
+                        </Tbody>
+                      </Table>
+                      {list.totalPages > 1 ? (
+                        <div className={cx('self-end')}>
+                          <Pagination
+                            maxButtons={3}
+                            page={page}
+                            totalPages={list.totalPages}
+                            onPageChange={(value) => setPage(value)}
+                          />
+                        </div>
+                      ) : null}
+                    </div>
+                  ) : (
+                    <SectionPlaceholder text="There are no users." />
+                  )}
+                </>
               ) : null}
             </div>
           </ModalBody>

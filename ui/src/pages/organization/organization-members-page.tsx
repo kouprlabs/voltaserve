@@ -20,12 +20,13 @@ import {
   IconLogout,
   IconPersonAdd,
   PagePagination,
+  SectionError,
+  SectionPlaceholder,
   SectionSpinner,
   Text,
   usePagePagination,
 } from '@koupr/ui'
 import cx from 'classnames'
-import { Helmet } from 'react-helmet-async'
 import OrganizationAPI from '@/client/api/organization'
 import { geEditorPermission } from '@/client/api/permission'
 import UserAPI, { SortBy, SortOrder, User } from '@/client/api/user'
@@ -58,7 +59,7 @@ const OrganizationMembersPage = () => {
   const query = decodeQuery(searchParams.get('q') as string)
   const {
     data: list,
-    error: membersError,
+    error: listError,
     mutate,
   } = UserAPI.useList(
     {
@@ -78,91 +79,102 @@ const OrganizationMembersPage = () => {
   const [isRemoveMemberModalOpen, setIsRemoveMemberModalOpen] =
     useState<boolean>(false)
 
-  if (membersError || orgError) {
-    return null
-  }
-
-  if (!list || !org) {
-    return <SectionSpinner />
-  }
-
   return (
     <>
-      <Helmet>
-        <title>{org.name}</title>
-      </Helmet>
-      {!list && membersError ? (
-        <div
-          className={cx('flex', 'items-center', 'justify-center', 'h-[300px]')}
-        >
-          <span>Failed to load members.</span>
-        </div>
+      {!org && orgError ? (
+        <SectionError text="Failed to load organization." />
       ) : null}
-      {!list && !membersError ? <SectionSpinner /> : null}
-      {list.data.length > 0 ? (
-        <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
-          <DataTable
-            items={list.data}
-            columns={[
-              {
-                title: 'Full name',
-                renderCell: (u) => (
-                  <div
-                    className={cx(
-                      'flex',
-                      'flex-row',
-                      'gap-1.5',
-                      'items-center',
-                    )}
-                  >
-                    <Avatar
-                      name={u.fullName}
-                      src={
-                        u.picture
-                          ? getPictureUrlById(u.id, u.picture, {
-                              organizationId: org.id,
-                            })
-                          : undefined
-                      }
-                      className={cx(
-                        'border',
-                        'border-gray-300',
-                        'dark:border-gray-700',
-                      )}
-                    />
-                    <span>{truncateEnd(u.fullName, 50)}</span>
-                  </div>
-                ),
-              },
-              {
-                title: 'Email',
-                renderCell: (u) => <Text>{truncateMiddle(u.email, 50)}</Text>,
-              },
-            ]}
-            actions={[
-              {
-                label: 'Remove From Organization',
-                icon: <IconLogout />,
-                isDestructive: true,
-                onClick: (u) => {
-                  setUserToRemove(u)
-                  setIsRemoveMemberModalOpen(true)
-                },
-              },
-            ]}
-          />
-          {list ? (
-            <div className={cx('self-end')}>
-              <PagePagination
-                totalElements={list.totalElements}
-                totalPages={list.totalPages}
-                page={page}
-                size={size}
-                steps={steps}
-                setPage={setPage}
-                setSize={setSize}
-              />
-            </div>
+      {!org && !orgError ? <SectionSpinner /> : null}
+      {org && !orgError ? (
+        <>
+          {!list && listError ? (
+            <SectionError text="Failed to load members." />
+          ) : null}
+          {!list && !listError ? <SectionSpinner /> : null}
+          {list && !listError ? (
+            <>
+              {list.totalElements > 0 ? (
+                <DataTable
+                  items={list.data}
+                  columns={[
+                    {
+                      title: 'Full name',
+                      renderCell: (u) => (
+                        <div
+                          className={cx(
+                            'flex',
+                            'flex-row',
+                            'gap-1.5',
+                            'items-center',
+                          )}
+                        >
+                          <Avatar
+                            name={u.fullName}
+                            src={
+                              u.picture
+                                ? getPictureUrlById(u.id, u.picture, {
+                                    organizationId: org.id,
+                                  })
+                                : undefined
+                            }
+                            className={cx(
+                              'border',
+                              'border-gray-300',
+                              'dark:border-gray-700',
+                            )}
+                          />
+                          <span>{truncateEnd(u.fullName, 50)}</span>
+                        </div>
+                      ),
+                    },
+                    {
+                      title: 'Email',
+                      renderCell: (u) => (
+                        <Text>{truncateMiddle(u.email, 50)}</Text>
+                      ),
+                    },
+                  ]}
+                  actions={[
+                    {
+                      label: 'Remove From Organization',
+                      icon: <IconLogout />,
+                      isDestructive: true,
+                      onClick: (u) => {
+                        setUserToRemove(u)
+                        setIsRemoveMemberModalOpen(true)
+                      },
+                    },
+                  ]}
+                  pagination={
+                    list.totalPages > 1 ? (
+                      <PagePagination
+                        totalElements={list.totalElements}
+                        totalPages={list.totalPages}
+                        page={page}
+                        size={size}
+                        steps={steps}
+                        setPage={setPage}
+                        setSize={setSize}
+                      />
+                    ) : undefined
+                  }
+                />
+              ) : (
+                <SectionPlaceholder
+                  text="This organization has no members."
+                  content={
+                    geEditorPermission(org.permission) ? (
+                      <Button
+                        leftIcon={<IconPersonAdd />}
+                        onClick={() => dispatch(inviteModalDidOpen())}
+                      >
+                        Invite Members
+                      </Button>
+                    ) : undefined
+                  }
+                />
+              )}
+            </>
           ) : null}
           {userToRemove ? (
             <OrganizationRemoveMember
@@ -173,30 +185,6 @@ const OrganizationMembersPage = () => {
               onClose={() => setIsRemoveMemberModalOpen(false)}
             />
           ) : null}
-        </div>
-      ) : null}
-      {list.data.length === 0 ? (
-        <>
-          <div
-            className={cx(
-              'flex',
-              'items-center',
-              'justify-center',
-              'h-[300px]',
-            )}
-          >
-            <div className={cx('flex', 'flex-col', 'gap-1.5', 'items-center')}>
-              <span>This organization has no members.</span>
-              {geEditorPermission(org.permission) ? (
-                <Button
-                  leftIcon={<IconPersonAdd />}
-                  onClick={() => dispatch(inviteModalDidOpen())}
-                >
-                  Invite Members
-                </Button>
-              ) : null}
-            </div>
-          </div>
           <OrganizationInviteMembers
             open={isInviteMembersModalOpen}
             id={org.id}

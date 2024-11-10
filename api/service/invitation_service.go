@@ -148,18 +148,18 @@ type Invitation struct {
 }
 
 type InvitationListOptions struct {
-	Page      int64
-	Size      int64
+	Page      uint64
+	Size      uint64
 	SortBy    string
 	SortOrder string
 }
 
 type InvitationList struct {
 	Data          []*Invitation `json:"data"`
-	TotalPages    int64         `json:"totalPages"`
-	TotalElements int64         `json:"totalElements"`
-	Page          int64         `json:"page"`
-	Size          int64         `json:"size"`
+	TotalPages    uint64        `json:"totalPages"`
+	TotalElements uint64        `json:"totalElements"`
+	Page          uint64        `json:"page"`
+	Size          uint64        `json:"size"`
 }
 
 func (svc *InvitationService) ListIncoming(opts InvitationListOptions, userID string) (*InvitationList, error) {
@@ -188,13 +188,13 @@ func (svc *InvitationService) ListIncoming(opts InvitationListOptions, userID st
 		TotalPages:    totalPages,
 		TotalElements: totalElements,
 		Page:          opts.Page,
-		Size:          int64(len(mapped)),
+		Size:          uint64(len(mapped)),
 	}, nil
 }
 
 type InvitationProbe struct {
-	TotalPages    int64 `json:"totalPages"`
-	TotalElements int64 `json:"totalElements"`
+	TotalPages    uint64 `json:"totalPages"`
+	TotalElements uint64 `json:"totalElements"`
 }
 
 func (svc *InvitationService) ProbeIncoming(opts InvitationListOptions, userID string) (*InvitationProbe, error) {
@@ -207,8 +207,8 @@ func (svc *InvitationService) ProbeIncoming(opts InvitationListOptions, userID s
 		return nil, err
 	}
 	return &InvitationProbe{
-		TotalElements: totalElements,
-		TotalPages:    (totalElements + opts.Size - 1) / opts.Size,
+		TotalElements: uint64(totalElements),                               // #nosec G115 integer overflow conversion
+		TotalPages:    (uint64(totalElements) + opts.Size - 1) / opts.Size, // #nosec G115 integer overflow conversion
 	}, nil
 }
 
@@ -246,13 +246,13 @@ func (svc *InvitationService) ListOutgoing(orgID string, opts InvitationListOpti
 		TotalPages:    totalPages,
 		TotalElements: totalElements,
 		Page:          opts.Page,
-		Size:          int64(len(mapped)),
+		Size:          uint64(len(mapped)),
 	}, nil
 }
 
 func (svc *InvitationService) ProbeOutgoing(orgID string, opts InvitationListOptions, userID string) (*InvitationProbe, error) {
 	all, err := svc.invitationRepo.FindOutgoing(orgID, userID)
-	totalElements := int64(len(all))
+	totalElements := uint64(len(all))
 	if err != nil {
 		return nil, err
 	}
@@ -413,8 +413,8 @@ func (svc *InvitationService) doSorting(data []model.Invitation, sortBy string, 
 	return data
 }
 
-func (svc *InvitationService) doPagination(data []model.Invitation, page, size int64) (pageData []model.Invitation, totalElements int64, totalPages int64) {
-	totalElements = int64(len(data))
+func (svc *InvitationService) doPagination(data []model.Invitation, page, size uint64) (pageData []model.Invitation, totalElements uint64, totalPages uint64) {
+	totalElements = uint64(len(data))
 	totalPages = (totalElements + size - 1) / size
 	if page > totalPages {
 		return []model.Invitation{}, totalElements, totalPages

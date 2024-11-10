@@ -26,21 +26,21 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - name: Set Up Bun
+        uses: oven-sh/setup-bun@v2
         with:
-          node-version: '20'
+          bun-version: latest
 
       - name: Install Packages
-        run: npm i --legacy-peer-deps
+        run: bun i
         working-directory: idp
 
       - name: Run TypeScript Compiler
-        run: npm run tsc
+        run: bun run tsc
         working-directory: idp
 
       - name: Run ESLint
-        run: npm run lint
+        run: bun run lint
         working-directory: idp
     permissions:
       contents: read

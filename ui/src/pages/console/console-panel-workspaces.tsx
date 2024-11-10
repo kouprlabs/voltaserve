@@ -21,13 +21,15 @@ import {
   IconEdit,
   PagePagination,
   RelativeDate,
+  SectionError,
+  SectionPlaceholder,
   SectionSpinner,
   Text,
   usePagePagination,
 } from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
-import ConsoleAPI, { WorkspaceManagement } from '@/client/console/console'
+import ConsoleAPI, { ConsoleWorkspace } from '@/client/console/console'
 import { swrConfig } from '@/client/options'
 import ConsoleRenameModal from '@/components/console/console-rename-modal'
 import { consoleWorkspacesPaginationStorage } from '@/infra/pagination'
@@ -47,12 +49,15 @@ const ConsolePanelWorkspaces = () => {
   const [isConfirmRenameOpen, setIsConfirmRenameOpen] = useState(false)
   const [currentName, setCurrentName] = useState<string>('')
   const [workspaceId, setWorkspaceId] = useState<string>()
-  const { data: list, mutate } =
-    ConsoleAPI.useListOrSearchObject<WorkspaceManagement>(
-      'workspace',
-      { page, size, query },
-      swrConfig(),
-    )
+  const {
+    data: list,
+    error,
+    mutate,
+  } = ConsoleAPI.useListOrSearchObject<ConsoleWorkspace>(
+    'workspace',
+    { page, size, query },
+    swrConfig(),
+  )
 
   const renameRequest = useCallback(
     async (name: string) => {
@@ -64,108 +69,116 @@ const ConsolePanelWorkspaces = () => {
     [workspaceId],
   )
 
-  if (!list) {
-    return <SectionSpinner />
-  }
-
   return (
     <>
+      <Helmet>
+        <title>Workspaces</title>
+      </Helmet>
+      <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
+        <Heading className={cx('text-heading')}>Workspaces</Heading>
+        {!list && error ? (
+          <SectionError text="Failed to load workspaces." />
+        ) : null}
+        {!list && !error ? <SectionSpinner /> : null}
+        {list && !error ? (
+          <>
+            {list.totalElements > 0 ? (
+              <>
+                <DataTable
+                  items={list.data}
+                  columns={[
+                    {
+                      title: 'Name',
+                      renderCell: (workspace) => (
+                        <div
+                          className={cx(
+                            'flex',
+                            'flex-row',
+                            'gap-1.5',
+                            'items-center',
+                          )}
+                        >
+                          <Avatar
+                            name={workspace.name}
+                            size="sm"
+                            className={cx('w-[40px]', 'h-[40px]')}
+                          />
+
+                          <Text noOfLines={1}>{workspace.name}</Text>
+                        </div>
+                      ),
+                    },
+                    {
+                      title: 'Organization',
+                      renderCell: (workspace) => (
+                        <ChakraLink
+                          as={Link}
+                          to={`/console/organizations/${workspace.organization.id}`}
+                          className={cx('no-underline')}
+                        >
+                          <Text noOfLines={1}>
+                            {workspace.organization.name}
+                          </Text>
+                        </ChakraLink>
+                      ),
+                    },
+                    {
+                      title: 'Quota',
+                      renderCell: (workspace) => (
+                        <Text>{prettyBytes(workspace.storageCapacity)}</Text>
+                      ),
+                    },
+                    {
+                      title: 'Created',
+                      renderCell: (workspace) => (
+                        <RelativeDate date={new Date(workspace.createTime)} />
+                      ),
+                    },
+                    {
+                      title: 'Updated',
+                      renderCell: (workspace) => (
+                        <RelativeDate date={new Date(workspace.updateTime)} />
+                      ),
+                    },
+                  ]}
+                  actions={[
+                    {
+                      label: 'Edit Name',
+                      icon: <IconEdit />,
+                      onClick: async (workspace) => {
+                        setCurrentName(workspace.name)
+                        setWorkspaceId(workspace.id)
+                        setIsConfirmRenameOpen(true)
+                      },
+                    },
+                  ]}
+                  pagination={
+                    list.totalPages > 1 ? (
+                      <PagePagination
+                        totalElements={list.totalElements}
+                        totalPages={list.totalPages}
+                        page={page}
+                        size={size}
+                        steps={steps}
+                        setPage={setPage}
+                        setSize={setSize}
+                      />
+                    ) : undefined
+                  }
+                />
+              </>
+            ) : (
+              <SectionPlaceholder text="There are no workspaces." />
+            )}
+          </>
+        ) : null}
+      </div>
       <ConsoleRenameModal
         currentName={currentName}
         isOpen={isConfirmRenameOpen}
         onClose={() => setIsConfirmRenameOpen(false)}
         onRequest={renameRequest}
       />
-      <Helmet>
-        <title>Workspace Management</title>
-      </Helmet>
-      <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
-        <Heading className={cx('text-heading')}>Workspace Management</Heading>
-        {list && list.data.length > 0 ? (
-          <DataTable
-            items={list.data}
-            columns={[
-              {
-                title: 'Name',
-                renderCell: (workspace) => (
-                  <div
-                    className={cx(
-                      'flex',
-                      'flex-row',
-                      'gap-1.5',
-                      'items-center',
-                    )}
-                  >
-                    <Avatar
-                      name={workspace.name}
-                      size="sm"
-                      className={cx('w-[40px]', 'h-[40px]')}
-                    />
-
-                    <Text noOfLines={1}>{workspace.name}</Text>
-                  </div>
-                ),
-              },
-              {
-                title: 'Organization',
-                renderCell: (workspace) => (
-                  <ChakraLink
-                    as={Link}
-                    to={`/console/organizations/${workspace.organization.id}`}
-                    className={cx('no-underline')}
-                  >
-                    <Text noOfLines={1}>{workspace.organization.name}</Text>
-                  </ChakraLink>
-                ),
-              },
-              {
-                title: 'Quota',
-                renderCell: (workspace) => (
-                  <Text>{prettyBytes(workspace.storageCapacity)}</Text>
-                ),
-              },
-              {
-                title: 'Created',
-                renderCell: (workspace) => (
-                  <RelativeDate date={new Date(workspace.createTime)} />
-                ),
-              },
-              {
-                title: 'Updated',
-                renderCell: (workspace) => (
-                  <RelativeDate date={new Date(workspace.updateTime)} />
-                ),
-              },
-            ]}
-            actions={[
-              {
-                label: 'Rename',
-                icon: <IconEdit />,
-                onClick: async (workspace) => {
-                  setCurrentName(workspace.name)
-                  setWorkspaceId(workspace.id)
-                  setIsConfirmRenameOpen(true)
-                },
-              },
-            ]}
-          />
-        ) : (
-          <div>No workspaces found.</div>
-        )}
-        {list ? (
-          <div className={cx('self-end')}>
-            <PagePagination
-              totalElements={list.totalElements}
-              totalPages={Math.ceil(list.totalElements / size)}
-              page={page}
-              size={size}
-              steps={steps}
-              setPage={setPage}
-              setSize={setSize}
-            />
-          </div>
-        ) : null}
-      </div>
     </>
   )
 }

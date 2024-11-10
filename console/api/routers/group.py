@@ -75,7 +75,11 @@ async def get_all_groups(data: Annotated[GroupListRequest, Depends()]):
         groups, count = fetch_groups(page=data.page, size=data.size)
 
         return GroupListResponse(
-            data=groups, totalElements=count, page=data.page, size=data.size
+            data=groups,
+            totalElements=count,
+            totalPages=(count + data.size - 1) // data.size,
+            page=data.page,
+            size=data.size,
         )
     except EmptyDataException as e:
         logger.error(e)
@@ -101,9 +105,12 @@ async def get_search_groups(data: Annotated[GroupSearchRequest, Depends()]):
                 hits.append(group)
             except NotFoundException:
                 pass
+        count = len(groups["hits"])
+
         return GroupListResponse(
             data=hits,
-            totalElements=len(groups["hits"]),
+            totalElements=count,
+            totalPages=(count + data.size - 1) // data.size,
             page=data.page,
             size=data.size,
         )

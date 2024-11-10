@@ -9,6 +9,7 @@
 // licenses/AGPL.txt.
 import { useCallback, useEffect, useState } from 'react'
 import {
+  Avatar,
   Badge,
   Button,
   Modal,
@@ -24,7 +25,13 @@ import {
   Td,
   Tr,
 } from '@chakra-ui/react'
-import { Pagination, RelativeDate, SectionSpinner } from '@koupr/ui'
+import {
+  Pagination,
+  RelativeDate,
+  SectionError,
+  SectionPlaceholder,
+  SectionSpinner,
+} from '@koupr/ui'
 import cx from 'classnames'
 import SnapshotAPI, { Snapshot, SortBy, SortOrder } from '@/client/api/snapshot'
 import { swrConfig } from '@/client/options'
@@ -122,110 +129,96 @@ const SnapshotList = () => {
         <ModalHeader>Snapshots</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-          <div className={cx('flex', 'flex-col', 'gap-1.5')}>
-            {!list && error ? (
-              <div
-                className={cx(
-                  'flex',
-                  'items-center',
-                  'justify-center',
-                  'h-[300px]',
-                )}
-              >
-                <span>Failed to load snapshots.</span>
-              </div>
-            ) : null}
-            {!list && !error ? <SectionSpinner /> : null}
-            {list && list.data.length === 0 ? (
-              <div
-                className={cx(
-                  'flex',
-                  'items-center',
-                  'justify-center',
-                  'h-[300px]',
-                )}
-              >
-                <div
-                  className={cx('flex', 'flex-col', 'items-center', 'gap-1.5')}
-                >
-                  <span>There are no snapshots.</span>
-                </div>
-              </div>
-            ) : null}
-            {list && list.data.length > 0 ? (
-              <Table variant="simple" size="sm">
-                <colgroup>
-                  <col className={cx('w-[40px]')} />
-                  <col className={cx('w-[auto]')} />
-                </colgroup>
-                <Tbody>
-                  {list.data.map((s) => (
-                    <Tr
-                      key={s.id}
-                      className={cx(
-                        'cursor-pointer',
-                        'h-[52px]',
-                        { 'bg-gray-100': isSelected(s) },
-                        { 'dark:bg-gray-600': isSelected(s) },
-                        { 'bg-transparent': !isSelected(s) },
-                      )}
-                      onClick={() => handleSelect(s)}
-                    >
-                      <Td className={cx('px-0.5', 'text-center')}>
-                        <Radio size="md" isChecked={isSelected(s)} />
-                      </Td>
-                      <Td className={cx('px-0.5')}>
-                        <div
+          {!list && error ? (
+            <SectionError text="Failed to load snapshots." />
+          ) : null}
+          {!list && !error ? <SectionSpinner /> : null}
+          {list && !error ? (
+            <>
+              {list.totalElements > 0 ? (
+                <div className={cx('flex', 'flex-col', 'gap-1.5')}>
+                  <Table variant="simple" size="sm">
+                    <colgroup>
+                      <col className={cx('w-[40px]')} />
+                      <col className={cx('w-[auto]')} />
+                    </colgroup>
+                    <Tbody>
+                      {list.data.map((s) => (
+                        <Tr
+                          key={s.id}
                           className={cx(
-                            'flex',
-                            'flex-row',
-                            'items-center',
-                            'gap-1.5',
+                            'cursor-pointer',
+                            'h-[52px]',
+                            { 'bg-gray-100': isSelected(s) },
+                            { 'dark:bg-gray-600': isSelected(s) },
+                            { 'bg-transparent': !isSelected(s) },
                           )}
+                          onClick={() => handleSelect(s)}
                         >
-                          <div className={cx('flex', 'flex-col', 'gap-0.5')}>
-                            <span className={cx('text-base')}>
-                              <RelativeDate date={new Date(s.createTime)} />
-                            </span>
-                            <div className={cx('flex', 'flex-row', 'gap-0.5')}>
-                              <Badge variant="outline">{`v${s.version}`}</Badge>
-                              {s.original.size ? (
-                                <Badge variant="outline">
-                                  {prettyBytes(s.original.size)}
-                                </Badge>
-                              ) : null}
-                              {s.entities ? (
-                                <Badge variant="outline">Insights</Badge>
-                              ) : null}
-                              {s.mosaic ? (
-                                <Badge variant="outline">Mosaic</Badge>
-                              ) : null}
-                              {s.isActive ? (
-                                <Badge colorScheme="green">Active</Badge>
-                              ) : null}
+                          <Td className={cx('px-0.5', 'text-center')}>
+                            <Radio size="md" isChecked={isSelected(s)} />
+                          </Td>
+                          <Td className={cx('px-0.5')}>
+                            <div
+                              className={cx(
+                                'flex',
+                                'flex-row',
+                                'items-center',
+                                'gap-1.5',
+                              )}
+                            >
+                              <Avatar
+                                name={`V ${s.version}`}
+                                size="sm"
+                                className={cx('w-[40px]', 'h-[40px]')}
+                              />
+                              <div
+                                className={cx('flex', 'flex-col', 'gap-0.5')}
+                              >
+                                <span className={cx('text-base')}>
+                                  <RelativeDate date={new Date(s.createTime)} />
+                                </span>
+                                <div
+                                  className={cx('flex', 'flex-row', 'gap-0.5')}
+                                >
+                                  {s.original.size ? (
+                                    <Badge variant="outline">
+                                      {prettyBytes(s.original.size)}
+                                    </Badge>
+                                  ) : null}
+                                  {s.entities ? (
+                                    <Badge variant="outline">Insights</Badge>
+                                  ) : null}
+                                  {s.mosaic ? (
+                                    <Badge variant="outline">Mosaic</Badge>
+                                  ) : null}
+                                  {s.isActive ? (
+                                    <Badge colorScheme="green">Active</Badge>
+                                  ) : null}
+                                </div>
+                              </div>
                             </div>
-                          </div>
-                        </div>
-                      </Td>
-                    </Tr>
-                  ))}
-                </Tbody>
-              </Table>
-            ) : null}
-            {list ? (
-              <div className={cx('self-end')}>
-                {list.totalPages > 1 ? (
-                  <Pagination
-                    uiSize="md"
-                    maxButtons={3}
-                    page={page}
-                    totalPages={list.totalPages}
-                    onPageChange={(value) => setPage(value)}
-                  />
-                ) : null}
-              </div>
-            ) : null}
-          </div>
+                          </Td>
+                        </Tr>
+                      ))}
+                    </Tbody>
+                  </Table>
+                  {list.totalPages > 1 ? (
+                    <div className={cx('self-end')}>
+                      <Pagination
+                        maxButtons={3}
+                        page={page}
+                        totalPages={list.totalPages}
+                        onPageChange={(value) => setPage(value)}
+                      />
+                    </div>
+                  ) : null}
+                </div>
+              ) : (
+                <SectionPlaceholder text="There are no snapshots." />
+              )}
+            </>
+          ) : null}
         </ModalBody>
         <ModalFooter>
           <div className={cx('flex', 'flex-row', 'items-center', 'gap-1')}>

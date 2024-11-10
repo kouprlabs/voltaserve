@@ -20,13 +20,15 @@ import {
   IconEdit,
   PagePagination,
   RelativeDate,
+  SectionError,
+  SectionPlaceholder,
   SectionSpinner,
   Text,
   usePagePagination,
 } from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
-import ConsoleAPI, { OrganizationManagement } from '@/client/console/console'
+import ConsoleAPI, { ConsoleOrganization } from '@/client/console/console'
 import { swrConfig } from '@/client/options'
 import ConsoleRenameModal from '@/components/console/console-rename-modal'
 import { consoleOrganizationsPaginationStorage } from '@/infra/pagination'
@@ -45,12 +47,15 @@ const ConsolePanelOrganizations = () => {
   const [isConfirmRenameOpen, setIsConfirmRenameOpen] = useState(false)
   const [currentName, setCurrentName] = useState<string>('')
   const [organizationId, setOrganizationId] = useState<string>()
-  const { data: list, mutate } =
-    ConsoleAPI.useListOrSearchObject<OrganizationManagement>(
-      'organization',
-      { page, size, query },
-      swrConfig(),
-    )
+  const {
+    data: list,
+    error,
+    mutate,
+  } = ConsoleAPI.useListOrSearchObject<ConsoleOrganization>(
+    'organization',
+    { page, size, query },
+    swrConfig(),
+  )
   const renameRequest = useCallback(
     async (name: string) => {
       if (organizationId) {
@@ -64,98 +69,106 @@ const ConsolePanelOrganizations = () => {
     [organizationId],
   )
 
-  if (!list) {
-    return <SectionSpinner />
-  }
-
   return (
     <>
+      <Helmet>
+        <title>Organizations</title>
+      </Helmet>
+      <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
+        <Heading className={cx('text-heading')}>Organizations</Heading>
+        {!list && error ? (
+          <SectionError text="Failed to load organizations." />
+        ) : null}
+        {!list && !error ? <SectionSpinner /> : null}
+        {list && !error ? (
+          <>
+            {list.totalElements > 0 ? (
+              <>
+                <DataTable
+                  items={list.data}
+                  columns={[
+                    {
+                      title: 'Name',
+                      renderCell: (organization) => (
+                        <div
+                          className={cx(
+                            'flex',
+                            'flex-row',
+                            'gap-1.5',
+                            'items-center',
+                          )}
+                        >
+                          <Avatar
+                            name={organization.name}
+                            size="sm"
+                            className={cx('w-[40px]', 'h-[40px]')}
+                          />
+
+                          <ChakraLink
+                            as={Link}
+                            to={`/console/organizations/${organization.id}`}
+                            className={cx('no-underline')}
+                          >
+                            <Text noOfLines={1}>{organization.name}</Text>
+                          </ChakraLink>
+                        </div>
+                      ),
+                    },
+                    {
+                      title: 'Created',
+                      renderCell: (organization) => (
+                        <RelativeDate
+                          date={new Date(organization.createTime)}
+                        />
+                      ),
+                    },
+                    {
+                      title: 'Updated',
+                      renderCell: (organization) => (
+                        <RelativeDate
+                          date={new Date(organization.updateTime)}
+                        />
+                      ),
+                    },
+                  ]}
+                  actions={[
+                    {
+                      label: 'Edit Name',
+                      icon: <IconEdit />,
+                      onClick: async (organization) => {
+                        setCurrentName(organization.name)
+                        setOrganizationId(organization.id)
+                        setIsConfirmRenameOpen(true)
+                      },
+                    },
+                  ]}
+                  pagination={
+                    list.totalPages > 1 ? (
+                      <PagePagination
+                        totalElements={list.totalElements}
+                        totalPages={Math.ceil(list.totalElements / size)}
+                        page={page}
+                        size={size}
+                        steps={steps}
+                        setPage={setPage}
+                        setSize={setSize}
+                      />
+                    ) : undefined
+                  }
+                />
+              </>
+            ) : (
+              <SectionPlaceholder text="There are no organizations." />
+            )}
+          </>
+        ) : null}
+      </div>
       <ConsoleRenameModal
         currentName={currentName}
         isOpen={isConfirmRenameOpen}
         onClose={() => setIsConfirmRenameOpen(false)}
         onRequest={renameRequest}
       />
-      <Helmet>
-        <title>Organization Management</title>
-      </Helmet>
-      <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
-        <Heading className={cx('text-heading')}>
-          Organization Management
-        </Heading>
-        {list && list.data.length > 0 ? (
-          <DataTable
-            items={list.data}
-            columns={[
-              {
-                title: 'Name',
-                renderCell: (organization) => (
-                  <div
-                    className={cx(
-                      'flex',
-                      'flex-row',
-                      'gap-1.5',
-                      'items-center',
-                    )}
-                  >
-                    <Avatar
-                      name={organization.name}
-                      size="sm"
-                      className={cx('w-[40px]', 'h-[40px]')}
-                    />
-
-                    <ChakraLink
-                      as={Link}
-                      to={`/console/organizations/${organization.id}`}
-                      className={cx('no-underline')}
-                    >
-                      <Text noOfLines={1}>{organization.name}</Text>
-                    </ChakraLink>
-                  </div>
-                ),
-              },
-              {
-                title: 'Created',
-                renderCell: (organization) => (
-                  <RelativeDate date={new Date(organization.createTime)} />
-                ),
-              },
-              {
-                title: 'Updated',
-                renderCell: (organization) => (
-                  <RelativeDate date={new Date(organization.updateTime)} />
-                ),
-              },
-            ]}
-            actions={[
-              {
-                label: 'Rename',
-                icon: <IconEdit />,
-                onClick: async (organization) => {
-                  setCurrentName(organization.name)
-                  setOrganizationId(organization.id)
-                  setIsConfirmRenameOpen(true)
-                },
-              },
-            ]}
-          />
-        ) : (
-          <div>No organizations found.</div>
-        )}
-        {list ? (
-          <div className={cx('self-end')}>
-            <PagePagination
-              totalElements={list.totalElements}
-              totalPages={Math.ceil(list.totalElements / size)}
-              page={page}
-              size={size}
-              steps={steps}
-              setPage={setPage}
-              setSize={setSize}
-            />
-          </div>
-        ) : null}
-      </div>
     </>
   )
 }

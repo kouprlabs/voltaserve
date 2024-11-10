@@ -16,8 +16,8 @@ import {
   IconPersonAdd,
   SectionSpinner,
   Form,
+  SectionError,
 } from '@koupr/ui'
-import { Helmet } from 'react-helmet-async'
 import GroupAPI from '@/client/api/group'
 import { geEditorPermission, geOwnerPermission } from '@/client/api/permission'
 import { swrConfig } from '@/client/options'
@@ -41,93 +41,89 @@ const GroupSettingsPage = () => {
     [group],
   )
 
-  if (error) {
-    return null
-  }
-  if (!group) {
-    return <SectionSpinner />
-  }
-
   return (
     <>
-      <Helmet>
-        <title>{group.name}</title>
-      </Helmet>
-      <Form
-        sections={[
-          {
-            title: 'Basics',
-            rows: [
+      {!group && error ? <SectionError text="Failed to load group." /> : null}
+      {!group && !error ? <SectionSpinner /> : null}
+      {group && error ? (
+        <>
+          <Form
+            sections={[
               {
-                label: 'Name',
-                content: (
-                  <>
-                    <span>{truncateEnd(group.name, 50)}</span>
-                    <IconButton
-                      icon={<IconEdit />}
-                      isDisabled={!hasEditPermission}
-                      title="Edit name"
-                      aria-label="Edit name"
-                      onClick={() => setIsNameModalOpen(true)}
-                    />
-                  </>
-                ),
+                title: 'Basics',
+                rows: [
+                  {
+                    label: 'Name',
+                    content: (
+                      <>
+                        <span>{truncateEnd(group.name, 50)}</span>
+                        <IconButton
+                          icon={<IconEdit />}
+                          isDisabled={!hasEditPermission}
+                          title="Edit name"
+                          aria-label="Edit name"
+                          onClick={() => setIsNameModalOpen(true)}
+                        />
+                      </>
+                    ),
+                  },
+                ],
               },
-            ],
-          },
-          {
-            title: 'Membership',
-            rows: [
               {
-                label: 'Add members',
-                content: (
-                  <IconButton
-                    icon={<IconPersonAdd />}
-                    isDisabled={!hasOwnerPermission}
-                    title="Add members"
-                    aria-label="Add members"
-                    onClick={() => setIsAddMembersModalOpen(true)}
-                  />
-                ),
+                title: 'Membership',
+                rows: [
+                  {
+                    label: 'Add members',
+                    content: (
+                      <IconButton
+                        icon={<IconPersonAdd />}
+                        isDisabled={!hasOwnerPermission}
+                        title="Add members"
+                        aria-label="Add members"
+                        onClick={() => setIsAddMembersModalOpen(true)}
+                      />
+                    ),
+                  },
+                ],
               },
-            ],
-          },
-          {
-            title: 'Advanced',
-            rows: [
               {
-                label: 'Delete group',
-                content: (
-                  <IconButton
-                    icon={<IconDelete />}
-                    variant="solid"
-                    colorScheme="red"
-                    isDisabled={!hasOwnerPermission}
-                    title="Delete group"
-                    aria-label="Delete group"
-                    onClick={() => setDeleteModalOpen(true)}
-                  />
-                ),
+                title: 'Advanced',
+                rows: [
+                  {
+                    label: 'Delete group',
+                    content: (
+                      <IconButton
+                        icon={<IconDelete />}
+                        variant="solid"
+                        colorScheme="red"
+                        isDisabled={!hasOwnerPermission}
+                        title="Delete group"
+                        aria-label="Delete group"
+                        onClick={() => setDeleteModalOpen(true)}
+                      />
+                    ),
+                  },
+                ],
               },
-            ],
-          },
-        ]}
-      />
-      <GroupEditName
-        open={isNameModalOpen}
-        group={group}
-        onClose={() => setIsNameModalOpen(false)}
-      />
-      <GroupAddMember
-        open={isAddMembersModalOpen}
-        group={group}
-        onClose={() => setIsAddMembersModalOpen(false)}
-      />
-      <GroupDelete
-        open={deleteModalOpen}
-        group={group}
-        onClose={() => setDeleteModalOpen(false)}
-      />
+            ]}
+          />
+          <GroupEditName
+            open={isNameModalOpen}
+            group={group}
+            onClose={() => setIsNameModalOpen(false)}
+          />
+          <GroupAddMember
+            open={isAddMembersModalOpen}
+            group={group}
+            onClose={() => setIsAddMembersModalOpen(false)}
+          />
+          <GroupDelete
+            open={deleteModalOpen}
+            group={group}
+            onClose={() => setDeleteModalOpen(false)}
+          />
+        </>
+      ) : null}
     </>
   )
 }

@@ -15,13 +15,15 @@ import {
   IconFrontHand,
   PagePagination,
   RelativeDate,
+  SectionError,
+  SectionPlaceholder,
   SectionSpinner,
   Text,
   usePagePagination,
 } from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
-import ConsoleAPI, { InvitationManagement } from '@/client/console/console'
+import ConsoleAPI, { ConsoleInvitation } from '@/client/console/console'
 import { swrConfig } from '@/client/options'
 import ConsoleConfirmationModal, {
   ConsoleConfirmationModalRequest,
@@ -43,18 +45,128 @@ const ConsolePanelInvitations = () => {
     searchFn: () => location.search,
     storage: consoleInvitationsPaginationStorage(),
   })
-  const { data: list, mutate } = ConsoleAPI.useListObject<InvitationManagement>(
+  const {
+    data: list,
+    error,
+    mutate,
+  } = ConsoleAPI.useListObject<ConsoleInvitation>(
     'invitation',
     { page, size },
     swrConfig(),
   )
 
-  if (!list) {
-    return <SectionSpinner />
-  }
-
   return (
     <>
+      <Helmet>
+        <title>Invitations</title>
+      </Helmet>
+      <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
+        <Heading className={cx('text-heading')}>Invitations</Heading>
+        {!list && error ? (
+          <SectionError text="Failed to load invitations." />
+        ) : null}
+        {!list && !error ? <SectionSpinner /> : null}
+        {list && !error ? (
+          <>
+            {list.totalElements > 0 ? (
+              <>
+                <DataTable
+                  items={list.data}
+                  columns={[
+                    {
+                      title: 'Organization',
+                      renderCell: (invitation) => (
+                        <Button
+                          onClick={() => {
+                            navigate(
+                              `/console/organizations/${invitation.organization.id}`,
+                            )
+                          }}
+                        >
+                          {invitation.organization.name}
+                        </Button>
+                      ),
+                    },
+                    {
+                      title: 'Invitee',
+                      renderCell: (invitation) => (
+                        <Text>{invitation.email}</Text>
+                      ),
+                    },
+                    {
+                      title: 'Status',
+                      renderCell: (invitation) => (
+                        <>
+                          {invitation.status === 'pending' ? (
+                            <Badge colorScheme="yellow">Pending</Badge>
+                          ) : invitation.status === 'declined' ? (
+                            <Badge colorScheme="red">Declined</Badge>
+                          ) : invitation.status === 'accepted' ? (
+                            <Badge colorScheme="green">Accepted</Badge>
+                          ) : (
+                            <Badge colorScheme="gray">Unknown</Badge>
+                          )}
+                        </>
+                      ),
+                    },
+                    {
+                      title: 'Created',
+                      renderCell: (invitation) => (
+                        <RelativeDate date={new Date(invitation.createTime)} />
+                      ),
+                    },
+                    {
+                      title: 'Updated',
+                      renderCell: (invitation) => (
+                        <RelativeDate date={new Date(invitation.updateTime)} />
+                      ),
+                    },
+                  ]}
+                  actions={[
+                    {
+                      label: 'Deny',
+                      icon: <IconFrontHand />,
+                      isDestructive: true,
+                      isDisabledFn: (invitation) =>
+                        invitation.status !== 'pending',
+                      onClick: async (invitation) => {
+                        setConfirmationHeader(<>Deny Invitation</>)
+                        setConfirmationBody(
+                          <>Are you sure you want to deny this invitation?</>,
+                        )
+                        setConfirmationRequest(() => async () => {
+                          await ConsoleAPI.invitationChangeStatus({
+                            id: invitation.id,
+                            accept: false,
+                          })
+                          await mutate()
+                        })
+                        setIsConfirmationDestructive(true)
+                        setIsConfirmationOpen(true)
+                      },
+                    },
+                  ]}
+                  pagination={
+                    list.totalPages > 1 ? (
+                      <PagePagination
+                        totalElements={list.totalElements}
+                        totalPages={Math.ceil(list.totalElements / size)}
+                        page={page}
+                        size={size}
+                        steps={steps}
+                        setPage={setPage}
+                        setSize={setSize}
+                      />
+                    ) : undefined
+                  }
+                />
+              </>
+            ) : (
+              <SectionPlaceholder text="There are no invitations." />
+            )}
+          </>
+        ) : null}
+      </div>
       {confirmationHeader && confirmationBody && confirmationRequest ? (
         <ConsoleConfirmationModal
           header={confirmationHeader}
@@ -65,103 +177,6 @@ const ConsolePanelInvitations = () => {
           onRequest={confirmationRequest}
         />
       ) : null}
-      <Helmet>
-        <title>Invitation Management</title>
-      </Helmet>
-      <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
-        <Heading className={cx('text-heading')}>Invitation Management</Heading>
-        {list && list.data.length > 0 ? (
-          <DataTable
-            items={list.data}
-            columns={[
-              {
-                title: 'Organization',
-                renderCell: (invitation) => (
-                  <Button
-                    onClick={() => {
-                      navigate(
-                        `/console/organizations/${invitation.organization.id}`,
-                      )
-                    }}
-                  >
-                    {invitation.organization.name}
-                  </Button>
-                ),
-              },
-              {
-                title: 'Invitee',
-                renderCell: (invitation) => <Text>{invitation.email}</Text>,
-              },
-              {
-                title: 'Status',
-                renderCell: (invitation) => (
-                  <>
-                    {invitation.status === 'pending' ? (
-                      <Badge colorScheme="yellow">Pending</Badge>
-                    ) : invitation.status === 'declined' ? (
-                      <Badge colorScheme="red">Declined</Badge>
-                    ) : invitation.status === 'accepted' ? (
-                      <Badge colorScheme="green">Accepted</Badge>
-                    ) : (
-                      <Badge colorScheme="gray">Unknown</Badge>
-                    )}
-                  </>
-                ),
-              },
-              {
-                title: 'Created',
-                renderCell: (invitation) => (
-                  <RelativeDate date={new Date(invitation.createTime)} />
-                ),
-              },
-              {
-                title: 'Updated',
-                renderCell: (invitation) => (
-                  <RelativeDate date={new Date(invitation.updateTime)} />
-                ),
-              },
-            ]}
-            actions={[
-              {
-                label: 'Deny',
-                icon: <IconFrontHand />,
-                isDestructive: true,
-                isDisabledFn: (invitation) => invitation.status !== 'pending',
-                onClick: async (invitation) => {
-                  setConfirmationHeader(<>Deny Invitation</>)
-                  setConfirmationBody(
-                    <>Are you sure you want to deny this invitation?</>,
-                  )
-                  setConfirmationRequest(() => async () => {
-                    await ConsoleAPI.invitationChangeStatus({
-                      id: invitation.id,
-                      accept: false,
-                    })
-                    await mutate()
-                  })
-                  setIsConfirmationDestructive(true)
-                  setIsConfirmationOpen(true)
-                },
-              },
-            ]}
-          />
-        ) : (
-          <div>No invitations found.</div>
-        )}
-        {list ? (
-          <div className={cx('self-end')}>
-            <PagePagination
-              totalElements={list.totalElements}
-              totalPages={Math.ceil(list.totalElements / size)}
-              page={page}
-              size={size}
-              steps={steps}
-              setPage={setPage}
-              setSize={setSize}
-            />
-          </div>
-        ) : null}
-      </div>
     </>
   )
 }

@@ -336,18 +336,18 @@ func (svc *InsightsService) deleteEntities(snapshot model.Snapshot) error {
 
 type InsightsListEntitiesOptions struct {
 	Query     string `json:"query"`
-	Page      int64  `json:"page"`
-	Size      int64  `json:"size"`
+	Page      uint64 `json:"page"`
+	Size      uint64 `json:"size"`
 	SortBy    string `json:"sortBy"`
 	SortOrder string `json:"sortOrder"`
 }
 
 type InsightsEntityList struct {
 	Data          []*language_client.InsightsEntity `json:"data"`
-	TotalPages    int64                             `json:"totalPages"`
-	TotalElements int64                             `json:"totalElements"`
-	Page          int64                             `json:"page"`
-	Size          int64                             `json:"size"`
+	TotalPages    uint64                            `json:"totalPages"`
+	TotalElements uint64                            `json:"totalElements"`
+	Page          uint64                            `json:"page"`
+	Size          uint64                            `json:"size"`
 }
 
 func (svc *InsightsService) ListEntities(id string, opts InsightsListEntitiesOptions, userID string) (*InsightsEntityList, error) {
@@ -365,13 +365,13 @@ func (svc *InsightsService) ListEntities(id string, opts InsightsListEntitiesOpt
 		TotalPages:    totalPages,
 		TotalElements: totalElements,
 		Page:          opts.Page,
-		Size:          int64(len(data)),
+		Size:          uint64(len(data)),
 	}, nil
 }
 
 type InsightsEntityProbe struct {
-	TotalPages    int64 `json:"totalPages"`
-	TotalElements int64 `json:"totalElements"`
+	TotalPages    uint64 `json:"totalPages"`
+	TotalElements uint64 `json:"totalElements"`
 }
 
 func (svc *InsightsService) ProbeEntities(id string, opts InsightsListEntitiesOptions, userID string) (*InsightsEntityProbe, error) {
@@ -380,8 +380,8 @@ func (svc *InsightsService) ProbeEntities(id string, opts InsightsListEntitiesOp
 		return nil, err
 	}
 	return &InsightsEntityProbe{
-		TotalElements: int64(len(all)),
-		TotalPages:    (int64(len(all)) + opts.Size - 1) / opts.Size,
+		TotalElements: uint64(len(all)),
+		TotalPages:    (uint64(len(all)) + opts.Size - 1) / opts.Size,
 	}, nil
 }
 
@@ -453,8 +453,8 @@ func (svc *InsightsService) doSorting(data []*language_client.InsightsEntity, so
 	return data
 }
 
-func (svc *InsightsService) doPagination(data []*language_client.InsightsEntity, page, size int64) (pageData []*language_client.InsightsEntity, totalElements int64, totalPages int64) {
-	totalElements = int64(len(data))
+func (svc *InsightsService) doPagination(data []*language_client.InsightsEntity, page, size uint64) (pageData []*language_client.InsightsEntity, totalElements uint64, totalPages uint64) {
+	totalElements = uint64(len(data))
 	totalPages = (totalElements + size - 1) / size
 	if page > totalPages {
 		return []*language_client.InsightsEntity{}, totalElements, totalPages

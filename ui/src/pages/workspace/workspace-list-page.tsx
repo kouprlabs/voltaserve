@@ -19,6 +19,8 @@ import {
   DataTable,
   PagePagination,
   RelativeDate,
+  SectionError,
+  SectionPlaceholder,
   SectionSpinner,
   Text,
   usePagePagination,
@@ -71,19 +73,10 @@ const WorkspaceListPage = () => {
       <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
         <Heading className={cx('text-heading')}>Workspaces</Heading>
         {!list && error ? (
-          <div
-            className={cx(
-              'flex',
-              'items-center',
-              'justify-center',
-              'h-[300px]',
-            )}
-          >
-            <span>Failed to load workspaces.</span>
-          </div>
+          <SectionError text="Failed to load workspaces." />
         ) : null}
         {!list && !error ? <SectionSpinner /> : null}
-        {list && list.data.length === 0 && !error ? (
+        {list && list.totalElements === 0 && !error ? (
           <div
             className={cx(
               'flex',
@@ -98,73 +91,82 @@ const WorkspaceListPage = () => {
             </div>
           </div>
         ) : null}
-        {list && list.data.length > 0 ? (
-          <DataTable
-            items={list.data}
-            columns={[
-              {
-                title: 'Name',
-                renderCell: (w) => (
-                  <div
-                    className={cx(
-                      'flex',
-                      'flex-row',
-                      'gap-1.5',
-                      'items-center',
-                    )}
-                  >
-                    <Avatar
-                      name={w.name}
-                      size="sm"
-                      className={cx('w-[40px]', 'h-[40px]')}
+        {list && !error ? (
+          <>
+            {list.totalElements > 0 ? (
+              <DataTable
+                items={list.data}
+                columns={[
+                  {
+                    title: 'Name',
+                    renderCell: (w) => (
+                      <div
+                        className={cx(
+                          'flex',
+                          'flex-row',
+                          'gap-1.5',
+                          'items-center',
+                        )}
+                      >
+                        <Avatar
+                          name={w.name}
+                          size="sm"
+                          className={cx('w-[40px]', 'h-[40px]')}
+                        />
+                        <ChakraLink
+                          as={Link}
+                          to={`/workspace/${w.id}/file/${w.rootId}`}
+                          className={cx('no-underline')}
+                        >
+                          <Text noOfLines={1}>{w.name}</Text>
+                        </ChakraLink>
+                      </div>
+                    ),
+                  },
+                  {
+                    title: 'Organization',
+                    renderCell: (w) => (
+                      <ChakraLink
+                        as={Link}
+                        to={`/organization/${w.organization.id}/member`}
+                        className={cx('no-underline')}
+                      >
+                        <Text noOfLines={1}>{w.organization.name}</Text>
+                      </ChakraLink>
+                    ),
+                  },
+                  {
+                    title: 'Permission',
+                    renderCell: (w) => <Badge>{w.permission}</Badge>,
+                  },
+                  {
+                    title: 'Date',
+                    renderCell: (w) => (
+                      <RelativeDate date={new Date(w.createTime)} />
+                    ),
+                  },
+                ]}
+                pagination={
+                  list.totalPages > 1 ? (
+                    <PagePagination
+                      totalElements={list.totalElements}
+                      totalPages={list.totalPages}
+                      page={page}
+                      size={size}
+                      steps={steps}
+                      setPage={setPage}
+                      setSize={setSize}
                     />
-                    <ChakraLink
-                      as={Link}
-                      to={`/workspace/${w.id}/file/${w.rootId}`}
-                      className={cx('no-underline')}
-                    >
-                      <Text noOfLines={1}>{w.name}</Text>
-                    </ChakraLink>
-                  </div>
-                ),
-              },
-              {
-                title: 'Organization',
-                renderCell: (w) => (
-                  <ChakraLink
-                    as={Link}
-                    to={`/organization/${w.organization.id}/member`}
-                    className={cx('no-underline')}
-                  >
-                    <Text noOfLines={1}>{w.organization.name}</Text>
-                  </ChakraLink>
-                ),
-              },
-              {
-                title: 'Permission',
-                renderCell: (w) => <Badge>{w.permission}</Badge>,
-              },
-              {
-                title: 'Date',
-                renderCell: (w) => (
-                  <RelativeDate date={new Date(w.createTime)} />
-                ),
-              },
-            ]}
-          />
-        ) : null}
-        {list ? (
-          <div className={cx('self-end')}>
-            <PagePagination
-              totalElements={list.totalElements}
-              totalPages={list.totalPages}
-              page={page}
-              size={size}
-              steps={steps}
-              setPage={setPage}
-              setSize={setSize}
-            />
-          </div>
+                  ) : undefined
+                }
+              />
+            ) : (
+              <SectionPlaceholder
+                text="There are no workspaces."
+                content={<CreateWorkspaceButton />}
+              />
+            )}
+          </>
         ) : null}
       </div>
     </>

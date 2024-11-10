@@ -10,7 +10,7 @@
 import { useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { IconButton } from '@chakra-ui/react'
-import { IconAdmin, IconRemoveOperator } from '@koupr/ui'
+import { IconClose, IconAdminPanelSettings } from '@koupr/ui'
 
 const ConsoleButton = () => {
   const buttonRef = useRef<HTMLButtonElement>(null)
@@ -20,18 +20,18 @@ const ConsoleButton = () => {
         <Link to="/">
           <IconButton
             ref={buttonRef}
-            icon={<IconRemoveOperator />}
-            title="Close cloud console"
-            aria-label="Close cloud console"
+            icon={<IconClose />}
+            title="Close console"
+            aria-label="Close console"
           />
         </Link>
       ) : (
         <Link to="/console/dashboard">
           <IconButton
             ref={buttonRef}
-            icon={<IconAdmin />}
-            title="Open cloud console"
-            aria-label="Open cloud console"
+            icon={<IconAdminPanelSettings />}
+            title="Open console"
+            aria-label="Open console"
           />
         </Link>
       )}

@@ -21,13 +21,14 @@ import {
   IconEdit,
   PagePagination,
   RelativeDate,
+  SectionError,
   SectionSpinner,
   Text,
   usePagePagination,
 } from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
-import ConsoleAPI, { GroupManagement } from '@/client/console/console'
+import ConsoleAPI, { ConsoleGroup } from '@/client/console/console'
 import { swrConfig } from '@/client/options'
 import ConsoleRenameModal from '@/components/console/console-rename-modal'
 import { consoleGroupsPaginationStorage } from '@/infra/pagination'
@@ -46,12 +47,15 @@ const ConsolePanelGroups = () => {
   const [isConfirmRenameOpen, setIsConfirmRenameOpen] = useState(false)
   const [currentName, setCurrentName] = useState<string>('')
   const [groupId, setGroupId] = useState<string>()
-  const { data: list, mutate } =
-    ConsoleAPI.useListOrSearchObject<GroupManagement>(
-      'group',
-      { page, size, query },
-      swrConfig(),
-    )
+  const {
+    data: list,
+    error,
+    mutate,
+  } = ConsoleAPI.useListOrSearchObject<ConsoleGroup>(
+    'group',
+    { page, size, query },
+    swrConfig(),
+  )
 
   const renameRequest = useCallback(
     async (name: string) => {
@@ -63,101 +67,99 @@ const ConsolePanelGroups = () => {
     [groupId],
   )
 
-  if (!list) {
-    return <SectionSpinner />
-  }
-
   return (
     <>
+      <Helmet>
+        <title>Groups</title>
+      </Helmet>
+      <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
+        <Heading className={cx('text-heading')}>Groups</Heading>
+        {!list && error ? <SectionError text="Failed to load groups." /> : null}
+        {!list && !error ? <SectionSpinner /> : null}
+        {list && list.totalElements > 0 ? (
+          <>
+            <DataTable
+              items={list.data}
+              columns={[
+                {
+                  title: 'Name',
+                  renderCell: (group) => (
+                    <div
+                      className={cx(
+                        'flex',
+                        'flex-row',
+                        'items-center',
+                        'gap-1.5',
+                      )}
+                    >
+                      <Avatar
+                        name={group.name}
+                        size="sm"
+                        className={cx('w-[40px]', 'h-[40px]')}
+                      />
+                      <Text noOfLines={1}>{group.name}</Text>
+                    </div>
+                  ),
+                },
+                {
+                  title: 'Organization',
+                  renderCell: (group) => (
+                    <ChakraLink
+                      as={Link}
+                      to={`/console/organizations/${group.organization.id}`}
+                      className={cx('no-underline')}
+                    >
+                      <Text noOfLines={1}>{group.organization.name}</Text>
+                    </ChakraLink>
+                  ),
+                },
+                {
+                  title: 'Created',
+                  renderCell: (group) => (
+                    <RelativeDate date={new Date(group.createTime)} />
+                  ),
+                },
+                {
+                  title: 'Updated',
+                  renderCell: (group) => (
+                    <RelativeDate date={new Date(group.updateTime)} />
+                  ),
+                },
+              ]}
+              actions={[
+                {
+                  label: 'Edit Name',
+                  icon: <IconEdit />,
+                  onClick: async (group) => {
+                    setCurrentName(group.name)
+                    setGroupId(group.id)
+                    setIsConfirmRenameOpen(true)
+                  },
+                },
+              ]}
+              pagination={
+                list.totalPages > 1 ? (
+                  <PagePagination
+                    totalElements={list.totalElements}
+                    totalPages={Math.ceil(list.totalElements / size)}
+                    page={page}
+                    size={size}
+                    steps={steps}
+                    setPage={setPage}
+                    setSize={setSize}
+                  />
+                ) : undefined
+              }
+            />
+          </>
+        ) : null}
+      </div>
       <ConsoleRenameModal
         currentName={currentName}
         isOpen={isConfirmRenameOpen}
         onClose={() => setIsConfirmRenameOpen(false)}
         onRequest={renameRequest}
       />
-      <Helmet>
-        <title>Group Management</title>
-      </Helmet>
-      <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
-        <Heading className={cx('text-heading')}>Group Management</Heading>
-        {list && list.data.length > 0 ? (
-          <DataTable
-            items={list.data}
-            columns={[
-              {
-                title: 'Name',
-                renderCell: (group) => (
-                  <div
-                    className={cx(
-                      'flex',
-                      'flex-row',
-                      'items-center',
-                      'gap-1.5',
-                    )}
-                  >
-                    <Avatar
-                      name={group.name}
-                      size="sm"
-                      className={cx('w-[40px]', 'h-[40px]')}
-                    />
-                    <Text noOfLines={1}>{group.name}</Text>
-                  </div>
-                ),
-              },
-              {
-                title: 'Organization',
-                renderCell: (group) => (
-                  <ChakraLink
-                    as={Link}
-                    to={`/console/organizations/${group.organization.id}`}
-                    className={cx('no-underline')}
-                  >
-                    <Text noOfLines={1}>{group.organization.name}</Text>
-                  </ChakraLink>
-                ),
-              },
-              {
-                title: 'Created',
-                renderCell: (group) => (
-                  <RelativeDate date={new Date(group.createTime)} />
-                ),
-              },
-              {
-                title: 'Updated',
-                renderCell: (group) => (
-                  <RelativeDate date={new Date(group.updateTime)} />
-                ),
-              },
-            ]}
-            actions={[
-              {
-                label: 'Rename',
-                icon: <IconEdit />,
-                onClick: async (group) => {
-                  setCurrentName(group.name)
-                  setGroupId(group.id)
-                  setIsConfirmRenameOpen(true)
-                },
-              },
-            ]}
-          />
-        ) : (
-          <div>No groups found.</div>
-        )}
-        {list ? (
-          <div className={cx('self-end')}>
-            <PagePagination
-              totalElements={list.totalElements}
-              totalPages={Math.ceil(list.totalElements / size)}
-              page={page}
-              size={size}
-              steps={steps}
-              setPage={setPage}
-              setSize={setSize}
-            />
-          </div>
-        ) : null}
-      </div>
     </>
   )
 }

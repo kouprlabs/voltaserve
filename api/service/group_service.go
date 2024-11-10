@@ -136,18 +136,18 @@ func (svc *GroupService) Find(id string, userID string) (*Group, error) {
 type GroupListOptions struct {
 	Query          string
 	OrganizationID string
-	Page           int64
-	Size           int64
+	Page           uint64
+	Size           uint64
 	SortBy         string
 	SortOrder      string
 }
 
 type GroupList struct {
 	Data          []*Group `json:"data"`
-	TotalPages    int64    `json:"totalPages"`
-	TotalElements int64    `json:"totalElements"`
-	Page          int64    `json:"page"`
-	Size          int64    `json:"size"`
+	TotalPages    uint64   `json:"totalPages"`
+	TotalElements uint64   `json:"totalElements"`
+	Page          uint64   `json:"page"`
+	Size          uint64   `json:"size"`
 }
 
 func (svc *GroupService) List(opts GroupListOptions, userID string) (*GroupList, error) {
@@ -172,13 +172,13 @@ func (svc *GroupService) List(opts GroupListOptions, userID string) (*GroupList,
 		TotalPages:    totalPages,
 		TotalElements: totalElements,
 		Page:          opts.Page,
-		Size:          int64(len(mapped)),
+		Size:          uint64(len(mapped)),
 	}, nil
 }
 
 type GroupProbe struct {
-	TotalPages    int64 `json:"totalPages"`
-	TotalElements int64 `json:"totalElements"`
+	TotalPages    uint64 `json:"totalPages"`
+	TotalElements uint64 `json:"totalElements"`
 }
 
 func (svc *GroupService) Probe(opts GroupListOptions, userID string) (*GroupProbe, error) {
@@ -186,7 +186,7 @@ func (svc *GroupService) Probe(opts GroupListOptions, userID string) (*GroupProb
 	if err != nil {
 		return nil, err
 	}
-	totalElements := int64(len(all))
+	totalElements := uint64(len(all))
 	return &GroupProbe{
 		TotalElements: totalElements,
 		TotalPages:    (totalElements + opts.Size - 1) / opts.Size,
@@ -417,8 +417,8 @@ func (svc *GroupService) doSorting(data []model.Group, sortBy string, sortOrder 
 	return data
 }
 
-func (svc *GroupService) doPagination(data []model.Group, page, size int64) (pageData []model.Group, totalElements int64, totalPages int64) {
-	totalElements = int64(len(data))
+func (svc *GroupService) doPagination(data []model.Group, page, size uint64) (pageData []model.Group, totalElements uint64, totalPages uint64) {
+	totalElements = uint64(len(data))
 	totalPages = (totalElements + size - 1) / size
 	if page > totalPages {
 		return []model.Group{}, totalElements, totalPages

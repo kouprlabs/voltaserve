@@ -19,6 +19,8 @@ import {
   DataTable,
   PagePagination,
   RelativeDate,
+  SectionError,
+  SectionPlaceholder,
   SectionSpinner,
   Text,
   usePagePagination,
@@ -70,20 +72,9 @@ const GroupListPage = () => {
       </Helmet>
       <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
         <Heading className={cx('text-heading')}>Groups</Heading>
-        {error ? (
-          <div
-            className={cx(
-              'flex',
-              'items-center',
-              'justify-center',
-              'h-[300px]',
-            )}
-          >
-            <span>Failed to load groups.</span>
-          </div>
-        ) : null}
+        {error ? <SectionError text="Failed to load groups." /> : null}
         {!list && !error ? <SectionSpinner /> : null}
-        {list && list.data.length === 0 ? (
+        {list && list.totalElements === 0 ? (
           <div
             className={cx(
               'flex',
@@ -98,73 +89,81 @@ const GroupListPage = () => {
             </div>
           </div>
         ) : null}
-        {list && list.data.length > 0 ? (
-          <DataTable
-            items={list.data}
-            columns={[
-              {
-                title: 'Name',
-                renderCell: (g) => (
-                  <div
-                    className={cx(
-                      'flex',
-                      'flex-row',
-                      'items-center',
-                      'gap-1.5',
-                    )}
-                  >
-                    <Avatar
-                      name={g.name}
-                      size="sm"
-                      className={cx('w-[40px]', 'h-[40px]')}
-                    />
-                    <ChakraLink
-                      as={Link}
-                      to={`/group/${g.id}/member`}
-                      className={cx('no-underline')}
-                    >
-                      <Text noOfLines={1}>{g.name}</Text>
-                    </ChakraLink>
-                  </div>
-                ),
-              },
-              {
-                title: 'Organization',
-                renderCell: (g) => (
-                  <ChakraLink
-                    as={Link}
-                    to={`/organization/${g.organization.id}/member`}
-                    className={cx('no-underline')}
-                  >
-                    <Text noOfLines={1}>{g.organization.name}</Text>
-                  </ChakraLink>
-                ),
-              },
-              {
-                title: 'Permission',
-                renderCell: (g) => <Badge>{g.permission}</Badge>,
-              },
-              {
-                title: 'Date',
-                renderCell: (g) => (
-                  <RelativeDate date={new Date(g.createTime)} />
-                ),
-              },
-            ]}
-          />
-        ) : null}
-        {list ? (
-          <div className={cx('self-end')}>
-            <PagePagination
-              totalElements={list.totalElements}
-              totalPages={list.totalPages}
-              page={page}
-              size={size}
-              steps={steps}
-              setPage={setPage}
-              setSize={setSize}
-            />
-          </div>
+        {list && !error ? (
+          <>
+            {list.totalElements > 0 ? (
+              <>
+                <DataTable
+                  items={list.data}
+                  columns={[
+                    {
+                      title: 'Name',
+                      renderCell: (g) => (
+                        <div
+                          className={cx(
+                            'flex',
+                            'flex-row',
+                            'items-center',
+                            'gap-1.5',
+                          )}
+                        >
+                          <Avatar
+                            name={g.name}
+                            size="sm"
+                            className={cx('w-[40px]', 'h-[40px]')}
+                          />
+                          <ChakraLink
+                            as={Link}
+                            to={`/group/${g.id}/member`}
+                            className={cx('no-underline')}
+                          >
+                            <Text noOfLines={1}>{g.name}</Text>
+                          </ChakraLink>
+                        </div>
+                      ),
+                    },
+                    {
+                      title: 'Organization',
+                      renderCell: (g) => (
+                        <ChakraLink
+                          as={Link}
+                          to={`/organization/${g.organization.id}/member`}
+                          className={cx('no-underline')}
+                        >
+                          <Text noOfLines={1}>{g.organization.name}</Text>
+                        </ChakraLink>
+                      ),
+                    },
+                    {
+                      title: 'Permission',
+                      renderCell: (g) => <Badge>{g.permission}</Badge>,
+                    },
+                    {
+                      title: 'Date',
+                      renderCell: (g) => (
+                        <RelativeDate date={new Date(g.createTime)} />
+                      ),
+                    },
+                  ]}
+                  pagination={
+                    list.totalPages > 1 ? (
+                      <PagePagination
+                        totalElements={list.totalElements}
+                        totalPages={list.totalPages}
+                        page={page}
+                        size={size}
+                        steps={steps}
+                        setPage={setPage}
+                        setSize={setSize}
+                      />
+                    ) : undefined
+                  }
+                />
+              </>
+            ) : (
+              <SectionPlaceholder text="There are no groups." />
+            )}
+          </>
         ) : null}
       </div>
     </>

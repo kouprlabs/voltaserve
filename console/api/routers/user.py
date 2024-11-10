@@ -59,7 +59,11 @@ async def get_user_organizations(
         )
 
         return UserOrganizationListResponse(
-            data=organizations, totalElements=count, page=data.page, size=data.size
+            data=organizations,
+            totalElements=count,
+            totalPages=(count + data.size - 1) // data.size,
+            page=data.page,
+            size=data.size,
         )
     except EmptyDataException as e:
         logger.error(e)
@@ -83,7 +87,11 @@ async def get_user_workspaces(data: Annotated[UserWorkspaceListRequest, Depends(
         )
 
         return UserWorkspaceListResponse(
-            data=workspaces, totalElements=count, page=data.page, size=data.size
+            data=workspaces,
+            totalElements=count,
+            totalPages=(count + data.size - 1) // data.size,
+            page=data.page,
+            size=data.size,
         )
     except EmptyDataException as e:
         logger.error(e)
@@ -106,7 +114,11 @@ async def get_user_groups(data: Annotated[UserGroupListRequest, Depends()]):
         )
 
         return UserGroupListResponse(
-            data=groups, totalElements=count, page=data.page, size=data.size
+            data=groups,
+            totalElements=count,
+            totalPages=(count + data.size - 1) // data.size,
+            page=data.page,
+            size=data.size,
         )
     except EmptyDataException as e:
         logger.error(e)

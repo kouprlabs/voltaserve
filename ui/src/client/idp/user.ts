@@ -31,6 +31,7 @@ export interface ConsoleUser extends User {
 export interface List {
   data: ConsoleUser[]
   totalElements: number
+  totalPages: number
   page: number
   size: number
 }
@@ -84,6 +85,19 @@ export default class UserAPI {
     return useSWR<User>(
       url,
       () => idpFetcher({ url, method: 'GET' }) as Promise<User>,
+      swrOptions,
+    )
+  }
+
+  static useGetById(id?: string, swrOptions?: SWRConfiguration) {
+    const url = `/users/${id}`
+    return useSWR<ConsoleUser>(
+      id ? url : null,
+      () =>
+        idpFetcher({
+          url,
+          method: 'GET',
+        }) as Promise<ConsoleUser>,
       swrOptions,
     )
   }

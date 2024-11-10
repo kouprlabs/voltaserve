@@ -618,16 +618,16 @@ type FileQuery struct {
 
 type FileList struct {
 	Data          []*File    `json:"data"`
-	TotalPages    int64      `json:"totalPages"`
-	TotalElements int64      `json:"totalElements"`
-	Page          int64      `json:"page"`
-	Size          int64      `json:"size"`
+	TotalPages    uint64     `json:"totalPages"`
+	TotalElements uint64     `json:"totalElements"`
+	Page          uint64     `json:"page"`
+	Size          uint64     `json:"size"`
 	Query         *FileQuery `json:"query,omitempty"`
 }
 
 type FileListOptions struct {
-	Page      int64
-	Size      int64
+	Page      uint64
+	Size      uint64
 	SortBy    string
 	SortOrder string
 	Query     *FileQuery
@@ -680,8 +680,8 @@ func (svc *FileService) List(id string, opts FileListOptions, userID string) (*F
 }
 
 type FileProbe struct {
-	TotalPages    int64 `json:"totalPages"`
-	TotalElements int64 `json:"totalElements"`
+	TotalPages    uint64 `json:"totalPages"`
+	TotalElements uint64 `json:"totalElements"`
 }
 
 func (svc *FileService) Probe(id string, opts FileListOptions, userID string) (*FileProbe, error) {
@@ -697,8 +697,8 @@ func (svc *FileService) Probe(id string, opts FileListOptions, userID string) (*
 		return nil, err
 	}
 	return &FileProbe{
-		TotalElements: totalElements,
-		TotalPages:    (totalElements + opts.Size - 1) / opts.Size,
+		TotalElements: uint64(totalElements),                               // #nosec G115 integer overflow conversion
+		TotalPages:    (uint64(totalElements) + opts.Size - 1) / opts.Size, // #nosec G115 integer overflow conversion
 	}, nil
 }
 
@@ -1938,8 +1938,8 @@ func (svc *FileService) doSorting(data []model.File, sortBy string, sortOrder st
 	return data
 }
 
-func (svc *FileService) doPagination(data []model.File, page, size int64) (pageData []model.File, totalElements int64, totalPages int64) {
-	totalElements = int64(len(data))
+func (svc *FileService) doPagination(data []model.File, page, size uint64) (pageData []model.File, totalElements uint64, totalPages uint64) {
+	totalElements = uint64(len(data))
 	totalPages = (totalElements + size - 1) / size
 	if page > totalPages {
 		return []model.File{}, totalElements, totalPages

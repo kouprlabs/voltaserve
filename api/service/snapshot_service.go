@@ -96,18 +96,18 @@ type SnapshotTaskInfo struct {
 }
 
 type SnapshotListOptions struct {
-	Page      int64
-	Size      int64
+	Page      uint64
+	Size      uint64
 	SortBy    string
 	SortOrder string
 }
 
 type SnapshotList struct {
 	Data          []*Snapshot `json:"data"`
-	TotalPages    int64       `json:"totalPages"`
-	TotalElements int64       `json:"totalElements"`
-	Page          int64       `json:"page"`
-	Size          int64       `json:"size"`
+	TotalPages    uint64      `json:"totalPages"`
+	TotalElements uint64      `json:"totalElements"`
+	Page          uint64      `json:"page"`
+	Size          uint64      `json:"size"`
 }
 
 func (svc *SnapshotService) List(fileID string, opts SnapshotListOptions, userID string) (*SnapshotList, error) {
@@ -123,13 +123,13 @@ func (svc *SnapshotService) List(fileID string, opts SnapshotListOptions, userID
 		TotalPages:    totalPages,
 		TotalElements: totalElements,
 		Page:          opts.Page,
-		Size:          int64(len(mapped)),
+		Size:          uint64(len(mapped)),
 	}, nil
 }
 
 type SnapshotProbe struct {
-	TotalPages    int64 `json:"totalPages"`
-	TotalElements int64 `json:"totalElements"`
+	TotalPages    uint64 `json:"totalPages"`
+	TotalElements uint64 `json:"totalElements"`
 }
 
 func (svc *SnapshotService) Probe(fileID string, opts SnapshotListOptions, userID string) (*SnapshotProbe, error) {
@@ -137,7 +137,7 @@ func (svc *SnapshotService) Probe(fileID string, opts SnapshotListOptions, userI
 	if err != nil {
 		return nil, err
 	}
-	totalElements := int64(len(all))
+	totalElements := uint64(len(all))
 	return &SnapshotProbe{
 		TotalElements: totalElements,
 		TotalPages:    (totalElements + opts.Size - 1) / opts.Size,
@@ -217,8 +217,8 @@ func (svc *SnapshotService) doSorting(data []model.Snapshot, sortBy string, sort
 	return data
 }
 
-func (svc *SnapshotService) doPagination(data []model.Snapshot, page, size int64) (pageData []model.Snapshot, totalElements int64, totalPages int64) {
-	totalElements = int64(len(data))
+func (svc *SnapshotService) doPagination(data []model.Snapshot, page, size uint64) (pageData []model.Snapshot, totalElements uint64, totalPages uint64) {
+	totalElements = uint64(len(data))
 	totalPages = (totalElements + size - 1) / size
 	if page > totalPages {
 		return []model.Snapshot{}, totalElements, totalPages
