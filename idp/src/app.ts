@@ -16,7 +16,12 @@ import { ExtractJwt, Strategy as JwtStrategy } from 'passport-jwt'
 import accountRouter from '@/account/router'
 import { getConfig } from '@/config/config'
 import healthRouter from '@/health/router'
-import { ErrorCode, errorHandler, newError, newResponse } from '@/infra/error'
+import {
+  ErrorCode,
+  errorHandler,
+  newError,
+  newResponse,
+} from '@/infra/error/core'
 import tokenRouter from '@/token/router'
 import userRepo from '@/user/repo'
 import userRouter from '@/user/router'
@@ -41,7 +46,7 @@ passport.use(
     },
     async (payload, done) => {
       try {
-        const user = await userRepo.findByID(payload.sub)
+        const user = await userRepo.findById(payload.sub)
         return done(null, user)
       } catch {
         return done(

@@ -9,7 +9,7 @@
 // licenses/AGPL.txt.
 import { getConfig } from '@/config/config'
 import { newDateTime } from '@/infra/date-time'
-import { ErrorCode, newError } from '@/infra/error'
+import { ErrorCode, newError } from '@/infra/error/core'
 import { newHashId, newHyphenlessUuid } from '@/infra/id'
 import { sendTemplateMail } from '@/infra/mail'
 import { hashPassword } from '@/infra/password'

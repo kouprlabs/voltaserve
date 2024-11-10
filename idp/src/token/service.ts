@@ -9,7 +9,7 @@
 // licenses/AGPL.txt.
 import { decodeJwt, SignJWT } from 'jose'
 import { getConfig } from '@/config/config'
-import { ErrorCode, newError } from '@/infra/error'
+import { ErrorCode, newError } from '@/infra/error/core'
 import { newHyphenlessUuid } from '@/infra/id'
 import { verifyPassword } from '@/infra/password'
 import { User } from '@/user/model'
@@ -131,7 +131,7 @@ async function newToken(userId: string, isAdmin: boolean): Promise<Token> {
     token_type: 'Bearer',
     refresh_token: newHyphenlessUuid(),
   }
-  const user = await userRepo.findByID(userId)
+  const user = await userRepo.findById(userId)
   await userRepo.update({
     id: user.id,
     refreshTokenValue: token.refresh_token,

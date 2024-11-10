@@ -10,7 +10,7 @@
 import { Router, Request, Response } from 'express'
 import { body, validationResult } from 'express-validator'
 import { getConfig } from '@/config/config'
-import { parseValidationError } from '@/infra/error'
+import { parseValidationError } from '@/infra/error/core'
 import {
   confirmEmail,
   createUser,

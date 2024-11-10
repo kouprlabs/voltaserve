@@ -7,22 +7,22 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-import { ErrorCode, newError } from '@/infra/error'
+import {
+  newUserInsertError,
+  newUserNotFoundError,
+  newUserUpdateError,
+} from '@/infra/error'
 import { client } from '@/infra/postgres'
 import { InsertOptions, UpdateOptions, User } from './model'
 
 class UserRepoImpl {
-  async findByID(id: string): Promise<User> {
+  async findById(id: string): Promise<User> {
     const { rowCount, rows } = await client.query(
       `SELECT * FROM "user" WHERE id = $1`,
       [id],
     )
     if (rowCount < 1) {
-      throw newError({
-        code: ErrorCode.ResourceNotFound,
-        message: `User with id=${id} not found`,
-        userMessage: 'User not found',
-      })
+      throw newUserNotFoundError('id', id)
     }
     return this.mapRow(rows[0])
   }
@@ -33,11 +33,7 @@ class UserRepoImpl {
       [username],
     )
     if (rowCount < 1) {
-      throw newError({
-        code: ErrorCode.ResourceNotFound,
-        message: `User with username=${username} not found`,
-        userMessage: 'User not found',
-      })
+      throw newUserNotFoundError('username', username)
     }
     return this.mapRow(rows[0])
   }
@@ -48,11 +44,7 @@ class UserRepoImpl {
       [email],
     )
     if (rowCount < 1) {
-      throw newError({
-        code: ErrorCode.ResourceNotFound,
-        message: `User with email=${email} not found`,
-        userMessage: 'User not found',
-      })
+      throw newUserNotFoundError('email', email)
     }
     return this.mapRow(rows[0])
   }
@@ -63,11 +55,7 @@ class UserRepoImpl {
       [refreshTokenValue],
     )
     if (rowCount < 1) {
-      throw newError({
-        code: ErrorCode.ResourceNotFound,
-        message: `User with refresh_token_value=${refreshTokenValue} not found`,
-        userMessage: 'User not found',
-      })
+      throw newUserNotFoundError('refreshTokenValue', refreshTokenValue)
     }
     return this.mapRow(rows[0])
   }
@@ -78,11 +66,7 @@ class UserRepoImpl {
       [resetPasswordToken],
     )
     if (rowCount < 1) {
-      throw newError({
-        code: ErrorCode.ResourceNotFound,
-        message: `User with reset_password_token=${resetPasswordToken} not found`,
-        userMessage: 'User not found',
-      })
+      throw newUserNotFoundError('resetPasswordToken', resetPasswordToken)
     }
     return this.mapRow(rows[0])
   }
@@ -95,11 +79,10 @@ class UserRepoImpl {
       [emailConfirmationToken],
     )
     if (rowCount < 1) {
-      throw newError({
-        code: ErrorCode.ResourceNotFound,
-        message: `User with email_confirmation_token=${emailConfirmationToken} not found`,
-        userMessage: 'User not found',
-      })
+      throw newUserNotFoundError(
+        'emailConfirmationToken',
+        emailConfirmationToken,
+      )
     }
     return this.mapRow(rows[0])
   }
@@ -110,17 +93,13 @@ class UserRepoImpl {
       [emailUpdateToken],
     )
     if (rowCount < 1) {
-      throw newError({
-        code: ErrorCode.ResourceNotFound,
-        message: `User with email_update_token=${emailUpdateToken} not found`,
-        userMessage: 'User not found',
-      })
+      throw newUserNotFoundError('emailUpdateToken', emailUpdateToken)
     }
     return this.mapRow(rows[0])
   }
 
   async list(page: number, size: number): Promise<User[]> {
-    const { rowCount, rows } = await client.query(
+    const { rows } = await client.query(
       `SELECT *
        FROM "user"
        ORDER BY create_time
@@ -128,46 +107,25 @@ class UserRepoImpl {
        LIMIT $2`,
       [(page - 1) * size, size],
     )
-    if (rowCount < 1) {
-      throw newError({
-        code: ErrorCode.ResourceNotFound,
-        message: 'There are no users',
-        userMessage: 'There are no users',
-      })
-    }
     return this.mapList(rows)
   }
 
   async findMany(ids: string[]): Promise<User[]> {
-    const { rowCount, rows } = await client.query(
+    const { rows } = await client.query(
       `SELECT *
        FROM "user"
        WHERE id = ANY ($1)
        ORDER BY create_time`,
       [ids],
     )
-    if (rowCount < 1) {
-      throw newError({
-        code: ErrorCode.ResourceNotFound,
-        message: 'There are no users',
-        userMessage: 'There are no users',
-      })
-    }
     return this.mapList(rows)
   }
 
   async getCount(): Promise<number> {
-    const { rowCount, rows } = await client.query(
+    const { rowCount } = await client.query(
       `SELECT COUNT(id) as count FROM "user"`,
     )
-    if (rowCount < 1) {
-      throw newError({
-        code: ErrorCode.ResourceNotFound,
-        message: `Fatal database error (no users present in database)`,
-        userMessage: 'There are no users',
-      })
-    }
-    return parseInt(rows[0].count)
+    return rowCount
   }
 
   async isUsernameAvailable(username: string): Promise<boolean> {
@@ -214,23 +172,15 @@ class UserRepoImpl {
       ],
     )
     if (rowCount < 1) {
-      throw newError({
-        code: ErrorCode.InternalServerError,
-        message: `Inserting user with id=${data.id} failed`,
-        userMessage: 'Failed to insert user',
-      })
+      throw newUserInsertError(data.username)
     }
     return this.mapRow(rows[0])
   }
 
   async update(data: UpdateOptions): Promise<User> {
-    const entity = await this.findByID(data.id)
+    const entity = await this.findById(data.id)
     if (!entity) {
-      throw newError({
-        code: ErrorCode.InternalServerError,
-        message: `User with id=${data.id} not found`,
-        userMessage: 'User not found',
-      })
+      throw newUserNotFoundError('id', data.id)
     }
     Object.assign(entity, data)
     entity.updateTime = new Date().toISOString()
@@ -274,11 +224,7 @@ class UserRepoImpl {
       ],
     )
     if (rowCount < 1) {
-      throw newError({
-        code: ErrorCode.InternalServerError,
-        message: `Inserting user with id=${data.id} failed`,
-        userMessage: 'Failed to insert user',
-      })
+      throw newUserUpdateError(data.id)
     }
     return this.mapRow(rows[0])
   }

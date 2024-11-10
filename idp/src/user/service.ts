@@ -10,7 +10,8 @@
 import fs from 'fs/promises'
 import { getConfig } from '@/config/config'
 import { base64ToBuffer, base64ToExtension, base64ToMIME } from '@/infra/base64'
-import { ErrorCode, newError } from '@/infra/error'
+import { newUserPictureNotFoundError } from '@/infra/error'
+import { ErrorCode, newError } from '@/infra/error/core'
 import { newHyphenlessUuid } from '@/infra/id'
 import { sendTemplateMail } from '@/infra/mail'
 import { hashPassword, verifyPassword } from '@/infra/password'
@@ -101,21 +102,17 @@ export type UserListOptions = {
 }
 
 export async function getUser(id: string): Promise<UserDTO> {
-  return mapEntity(await userRepo.findByID(id))
+  return mapEntity(await userRepo.findById(id))
 }
 
 export async function getUserByAdmin(id: string): Promise<UserAdminDTO> {
-  return adminMapEntity(await userRepo.findByID(id))
+  return adminMapEntity(await userRepo.findById(id))
 }
 
 export async function getUserPicture(id: string): Promise<UserPictureResponse> {
-  const user = await userRepo.findByID(id)
+  const user = await userRepo.findById(id)
   if (!user.picture) {
-    throw newError({
-      code: ErrorCode.ResourceNotFound,
-      message: 'Picture not found',
-      userMessage: 'Picture not found',
-    })
+    throw newUserPictureNotFoundError(id)
   }
   return {
     buffer: base64ToBuffer(user.picture),
@@ -173,7 +170,7 @@ export async function updateFullName(
   id: string,
   options: UserUpdateFullNameOptions,
 ): Promise<UserDTO> {
-  let user = await userRepo.findByID(id)
+  let user = await userRepo.findById(id)
   user = await userRepo.update({ id: user.id, fullName: options.fullName })
   await search.index(USER_SEARCH_INDEX).updateDocuments([
     {
@@ -194,7 +191,7 @@ export async function updateEmailRequest(
   id: string,
   options: UserUpdateEmailRequestOptions,
 ): Promise<UserDTO> {
-  let user = await userRepo.findByID(id)
+  let user = await userRepo.findById(id)
   if (options.email === user.email) {
     user = await userRepo.update({
       id: user.id,
@@ -266,7 +263,7 @@ export async function updatePassword(
   id: string,
   options: UserUpdatePasswordOptions,
 ): Promise<UserDTO> {
-  let user = await userRepo.findByID(id)
+  let user = await userRepo.findById(id)
   if (verifyPassword(options.currentPassword, user.passwordHash)) {
     user = await userRepo.update({
       id: user.id,
@@ -284,7 +281,7 @@ export async function updatePicture(
   contentType: string,
 ): Promise<UserDTO> {
   const picture = await fs.readFile(path, { encoding: 'base64' })
-  const { id: userId } = await userRepo.findByID(id)
+  const { id: userId } = await userRepo.findById(id)
   const user = await userRepo.update({
     id: userId,
     picture: `data:${contentType};base64,${picture}`,
@@ -305,7 +302,7 @@ export async function updatePicture(
 }
 
 export async function deletePicture(id: string): Promise<UserDTO> {
-  let user = await userRepo.findByID(id)
+  let user = await userRepo.findById(id)
   user = await userRepo.update({ id: user.id, picture: null })
   await search.index(USER_SEARCH_INDEX).updateDocuments([
     {
@@ -323,7 +320,7 @@ export async function deletePicture(id: string): Promise<UserDTO> {
 }
 
 export async function deleteUser(id: string, options: UserDeleteOptions) {
-  const user = await userRepo.findByID(id)
+  const user = await userRepo.findById(id)
   if (verifyPassword(options.password, user.passwordHash)) {
     await userRepo.delete(user.id)
     await search.index(USER_SEARCH_INDEX).deleteDocuments([user.id])
@@ -333,7 +330,7 @@ export async function deleteUser(id: string, options: UserDeleteOptions) {
 }
 
 export async function suspendUser(id: string, options: UserSuspendOptions) {
-  const user = await userRepo.findByID(id)
+  const user = await userRepo.findById(id)
   if (
     user.isAdmin &&
     !(await userRepo.enoughActiveAdmins()) &&
@@ -361,7 +358,7 @@ export async function suspendUser(id: string, options: UserSuspendOptions) {
 }
 
 export async function makeAdminUser(id: string, options: UserMakeAdminOptions) {
-  const user = await userRepo.findByID(id)
+  const user = await userRepo.findById(id)
   if (
     user.isAdmin &&
     !(await userRepo.enoughActiveAdmins()) &&
