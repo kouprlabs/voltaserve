@@ -40,6 +40,7 @@ Wait until the following containers are running:
 - `voltaserve-webdav`
 - `voltaserve-language`
 - `voltaserve-mosaic`
+- `voltaserve-console`
 - `voltaserve-ui`
 
 > **Note**
