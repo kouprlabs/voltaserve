@@ -77,79 +77,81 @@ const ConsolePanelGroups = () => {
         {!list && error ? <SectionError text="Failed to load groups." /> : null}
         {!list && !error ? <SectionSpinner /> : null}
         {list && list.totalElements > 0 ? (
-          <DataTable
-            items={list.data}
-            columns={[
-              {
-                title: 'Name',
-                renderCell: (group) => (
-                  <div
-                    className={cx(
-                      'flex',
-                      'flex-row',
-                      'items-center',
-                      'gap-1.5',
-                    )}
-                  >
-                    <Avatar
-                      name={group.name}
-                      size="sm"
-                      className={cx('w-[40px]', 'h-[40px]')}
-                    />
-                    <Text noOfLines={1}>{group.name}</Text>
-                  </div>
-                ),
-              },
-              {
-                title: 'Organization',
-                renderCell: (group) => (
-                  <ChakraLink
-                    as={Link}
-                    to={`/console/organizations/${group.organization.id}`}
-                    className={cx('no-underline')}
-                  >
-                    <Text noOfLines={1}>{group.organization.name}</Text>
-                  </ChakraLink>
-                ),
-              },
-              {
-                title: 'Created',
-                renderCell: (group) => (
-                  <RelativeDate date={new Date(group.createTime)} />
-                ),
-              },
-              {
-                title: 'Updated',
-                renderCell: (group) => (
-                  <RelativeDate date={new Date(group.updateTime)} />
-                ),
-              },
-            ]}
-            actions={[
-              {
-                label: 'Rename',
-                icon: <IconEdit />,
-                onClick: async (group) => {
-                  setCurrentName(group.name)
-                  setGroupId(group.id)
-                  setIsConfirmRenameOpen(true)
+          <>
+            <DataTable
+              items={list.data}
+              columns={[
+                {
+                  title: 'Name',
+                  renderCell: (group) => (
+                    <div
+                      className={cx(
+                        'flex',
+                        'flex-row',
+                        'items-center',
+                        'gap-1.5',
+                      )}
+                    >
+                      <Avatar
+                        name={group.name}
+                        size="sm"
+                        className={cx('w-[40px]', 'h-[40px]')}
+                      />
+                      <Text noOfLines={1}>{group.name}</Text>
+                    </div>
+                  ),
                 },
-              },
-            ]}
-          />
-        ) : null}
-        {list ? (
-          <div className={cx('self-end')}>
-            <PagePagination
-              totalElements={list.totalElements}
-              totalPages={Math.ceil(list.totalElements / size)}
-              page={page}
-              size={size}
-              steps={steps}
-              setPage={setPage}
-              setSize={setSize}
+                {
+                  title: 'Organization',
+                  renderCell: (group) => (
+                    <ChakraLink
+                      as={Link}
+                      to={`/console/organizations/${group.organization.id}`}
+                      className={cx('no-underline')}
+                    >
+                      <Text noOfLines={1}>{group.organization.name}</Text>
+                    </ChakraLink>
+                  ),
+                },
+                {
+                  title: 'Created',
+                  renderCell: (group) => (
+                    <RelativeDate date={new Date(group.createTime)} />
+                  ),
+                },
+                {
+                  title: 'Updated',
+                  renderCell: (group) => (
+                    <RelativeDate date={new Date(group.updateTime)} />
+                  ),
+                },
+              ]}
+              actions={[
+                {
+                  label: 'Rename',
+                  icon: <IconEdit />,
+                  onClick: async (group) => {
+                    setCurrentName(group.name)
+                    setGroupId(group.id)
+                    setIsConfirmRenameOpen(true)
+                  },
+                },
+              ]}
+              pagination={
+                list.totalPages > 1 ? (
+                  <PagePagination
+                    totalElements={list.totalElements}
+                    totalPages={Math.ceil(list.totalElements / size)}
+                    page={page}
+                    size={size}
+                    steps={steps}
+                    setPage={setPage}
+                    setSize={setSize}
+                  />
+                ) : undefined
+              }
             />
-          </div>
+          </>
         ) : null}
       </div>
       <ConsoleRenameModal

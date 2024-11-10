@@ -8,7 +8,12 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
 import { useEffect, useState } from 'react'
-import { Pagination, SectionError, SectionSpinner } from '@koupr/ui'
+import {
+  Pagination,
+  SectionError,
+  SectionPlaceholder,
+  SectionSpinner,
+} from '@koupr/ui'
 import cx from 'classnames'
 import TaskAPI, { SortOrder } from '@/client/api/task'
 import { swrConfig } from '@/client/options'
@@ -70,7 +75,7 @@ const TasksList = () => {
               ) : null}
             </div>
           ) : (
-            <span>There are no tasks.</span>
+            <SectionPlaceholder text="There are no tasks." />
           )}
         </>
       ) : null}

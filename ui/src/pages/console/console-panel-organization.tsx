@@ -28,6 +28,7 @@ import {
   PagePagination,
   RelativeDate,
   SectionError,
+  SectionPlaceholder,
   SectionSpinner,
 } from '@koupr/ui'
 import cx from 'classnames'
@@ -187,7 +188,7 @@ const ConsolePanelOrganization = () => {
                         ))}
                       </div>
                     ) : (
-                      <span>There are no users.</span>
+                      <SectionPlaceholder text="There are no users." />
                     )}
                   </>
                 ) : null}
@@ -270,7 +271,7 @@ const ConsolePanelOrganization = () => {
                         ))}
                       </div>
                     ) : (
-                      <span>There are no workspaces.</span>
+                      <SectionPlaceholder text="There are no workspaces." />
                     )}
                   </>
                 ) : null}
@@ -351,7 +352,7 @@ const ConsolePanelOrganization = () => {
                         ))}
                       </div>
                     ) : (
-                      <span>There are no groups.</span>
+                      <SectionPlaceholder text="There are no groups." />
                     )}
                   </>
                 ) : null}

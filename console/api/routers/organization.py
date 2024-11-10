@@ -90,7 +90,11 @@ async def get_all_organizations(data: Annotated[OrganizationListRequest, Depends
         organizations, count = fetch_organizations(page=data.page, size=data.size)
 
         return OrganizationListResponse(
-            data=organizations, totalElements=count, page=data.page, size=data.size
+            data=organizations,
+            totalElements=count,
+            totalPages=(count + data.size - 1) // data.size,
+            page=data.page,
+            size=data.size,
         )
     except EmptyDataException as e:
         logger.error(e)
@@ -118,9 +122,12 @@ async def get_search_organizations(
                 hits.append(organization)
             except NotFoundException:
                 pass
+        count = len(organizations["hits"])
+
         return OrganizationListResponse(
             data=hits,
-            totalElements=len(organizations["hits"]),
+            totalElements=count,
+            totalPages=(count + data.size - 1) // data.size,
             page=data.page,
             size=data.size,
         )
@@ -145,7 +152,11 @@ async def get_organization_users(
         )
 
         return OrganizationUserListResponse(
-            data=users, totalElements=count, page=data.page, size=data.size
+            data=users,
+            totalElements=count,
+            totalPages=(count + data.size - 1) // data.size,
+            page=data.page,
+            size=data.size,
         )
     except EmptyDataException as e:
         logger.error(e)
@@ -171,7 +182,11 @@ async def get_organization_workspaces(
         )
 
         return OrganizationWorkspaceListResponse(
-            data=workspaces, totalElements=count, page=data.page, size=data.size
+            data=workspaces,
+            totalElements=count,
+            totalPages=(count + data.size - 1) // data.size,
+            page=data.page,
+            size=data.size,
         )
     except EmptyDataException as e:
         logger.error(e)
@@ -197,7 +212,11 @@ async def get_organization_groups(
         )
 
         return OrganizationWorkspaceListResponse(
-            data=groups, totalElements=count, page=data.page, size=data.size
+            data=groups,
+            totalElements=count,
+            totalPages=(count + data.size - 1) // data.size,
+            page=data.page,
+            size=data.size,
         )
     except EmptyDataException as e:
         logger.error(e)

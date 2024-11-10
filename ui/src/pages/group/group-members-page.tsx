@@ -24,6 +24,7 @@ import {
   SectionSpinner,
   usePagePagination,
   SectionError,
+  SectionPlaceholder,
 } from '@koupr/ui'
 import cx from 'classnames'
 import GroupAPI from '@/client/api/group'
@@ -91,117 +92,109 @@ const GroupMembersPage = () => {
           {!list && listError ? (
             <SectionError text="Failed to load members." />
           ) : null}
-          {list && !listError && list.totalElements > 0 ? (
-            <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
-              <DataTable
-                items={list.data}
-                columns={[
-                  {
-                    title: 'Full name',
-                    renderCell: (u) => (
-                      <div
-                        className={cx(
-                          'flex',
-                          'flex-row',
-                          'gap-1.5',
-                          'items-center',
-                        )}
-                      >
-                        <Avatar
-                          name={u.fullName}
-                          src={
-                            u.picture
-                              ? getPictureUrlById(u.id, u.picture, {
-                                  groupId: group.id,
-                                })
-                              : undefined
-                          }
-                          className={cx(
-                            'border',
-                            'border-gray-300',
-                            'dark:border-gray-700',
-                          )}
-                        />
-                        <span>{truncateEnd(u.fullName, 50)}</span>
-                      </div>
-                    ),
-                  },
-                  {
-                    title: 'Email',
-                    renderCell: (u) => (
-                      <Text>{truncateMiddle(u.email, 50)}</Text>
-                    ),
-                  },
-                ]}
-                actions={[
-                  {
-                    label: 'Remove From Group',
-                    icon: <IconLogout />,
-                    isDestructive: true,
-                    onClick: (u) => {
-                      setUserToRemove(u)
-                      setIsRemoveMemberModalOpen(true)
-                    },
-                  },
-                ]}
-              />
-              {list ? (
-                <div className={cx('self-end')}>
-                  <PagePagination
-                    totalElements={list.totalElements}
-                    totalPages={list.totalPages}
-                    page={page}
-                    size={size}
-                    steps={steps}
-                    setPage={setPage}
-                    setSize={setSize}
-                  />
-                </div>
-              ) : null}
-              {userToRemove ? (
-                <GroupRemoveMember
-                  isOpen={isRemoveMemberModalOpen}
-                  user={userToRemove}
-                  group={group}
-                  onCompleted={() => mutate()}
-                  onClose={() => setIsRemoveMemberModalOpen(false)}
-                />
-              ) : null}
-            </div>
-          ) : null}
-          {list && !listError && list.totalElements === 0 ? (
+          {list && !listError ? (
             <>
-              <div
-                className={cx(
-                  'flex',
-                  'items-center',
-                  'justify-center',
-                  'h-[300px]',
-                )}
-              >
-                <div
-                  className={cx('flex', 'flex-col', 'gap-1.5', 'items-center')}
-                >
-                  <span>This group has no members.</span>
-                  {geEditorPermission(group.permission) ? (
-                    <Button
-                      leftIcon={<IconPersonAdd />}
-                      onClick={() => {
-                        setIsAddMembersModalOpen(true)
-                      }}
-                    >
-                      Add Members
-                    </Button>
-                  ) : null}
-                </div>
-              </div>
-              <GroupAddMember
-                open={isAddMembersModalOpen}
-                group={group}
-                onClose={() => setIsAddMembersModalOpen(false)}
-              />
+              {list.totalElements > 0 ? (
+                <>
+                  <DataTable
+                    items={list.data}
+                    columns={[
+                      {
+                        title: 'Full name',
+                        renderCell: (u) => (
+                          <div
+                            className={cx(
+                              'flex',
+                              'flex-row',
+                              'gap-1.5',
+                              'items-center',
+                            )}
+                          >
+                            <Avatar
+                              name={u.fullName}
+                              src={
+                                u.picture
+                                  ? getPictureUrlById(u.id, u.picture, {
+                                      groupId: group.id,
+                                    })
+                                  : undefined
+                              }
+                              className={cx(
+                                'border',
+                                'border-gray-300',
+                                'dark:border-gray-700',
+                              )}
+                            />
+                            <span>{truncateEnd(u.fullName, 50)}</span>
+                          </div>
+                        ),
+                      },
+                      {
+                        title: 'Email',
+                        renderCell: (u) => (
+                          <Text>{truncateMiddle(u.email, 50)}</Text>
+                        ),
+                      },
+                    ]}
+                    actions={[
+                      {
+                        label: 'Remove From Group',
+                        icon: <IconLogout />,
+                        isDestructive: true,
+                        onClick: (u) => {
+                          setUserToRemove(u)
+                          setIsRemoveMemberModalOpen(true)
+                        },
+                      },
+                    ]}
+                    pagination={
+                      list.totalPages > 1 ? (
+                        <PagePagination
+                          totalElements={list.totalElements}
+                          totalPages={list.totalPages}
+                          page={page}
+                          size={size}
+                          steps={steps}
+                          setPage={setPage}
+                          setSize={setSize}
+                        />
+                      ) : undefined
+                    }
+                  />
+                </>
+              ) : (
+                <SectionPlaceholder
+                  text="This group has no members."
+                  content={
+                    geEditorPermission(group.permission) ? (
+                      <Button
+                        leftIcon={<IconPersonAdd />}
+                        onClick={() => {
+                          setIsAddMembersModalOpen(true)
+                        }}
+                      >
+                        Add Members
+                      </Button>
+                    ) : undefined
+                  }
+                />
+              )}
             </>
           ) : null}
+          {userToRemove ? (
+            <GroupRemoveMember
+              isOpen={isRemoveMemberModalOpen}
+              user={userToRemove}
+              group={group}
+              onCompleted={() => mutate()}
+              onClose={() => setIsRemoveMemberModalOpen(false)}
+            />
+          ) : null}
+          <GroupAddMember
+            open={isAddMembersModalOpen}
+            group={group}
+            onClose={() => setIsAddMembersModalOpen(false)}
+          />
         </>
       ) : null}
     </>

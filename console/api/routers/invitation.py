@@ -64,7 +64,11 @@ async def get_all_invitations(data: Annotated[InvitationListRequest, Depends()])
         invitations, count = fetch_invitations(page=data.page, size=data.size)
 
         return InvitationListResponse(
-            data=invitations, totalElements=count, page=data.page, size=data.size
+            data=invitations,
+            totalElements=count,
+            totalPages=(count + data.size - 1) // data.size,
+            page=data.page,
+            size=data.size,
         )
     except EmptyDataException as e:
         logger.error(e)

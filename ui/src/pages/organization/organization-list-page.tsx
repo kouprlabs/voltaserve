@@ -20,6 +20,7 @@ import {
   PagePagination,
   RelativeDate,
   SectionError,
+  SectionPlaceholder,
   SectionSpinner,
   Text,
   usePagePagination,
@@ -75,76 +76,72 @@ const OrganizationListPage = () => {
           <SectionError text="Failed to load organizations." />
         ) : null}
         {!list && !error ? <SectionSpinner /> : null}
-        {list && list.totalElements === 0 ? (
-          <div
-            className={cx(
-              'flex',
-              'items-center',
-              'justify-center',
-              'h-[300px]',
+        {list && !error ? (
+          <>
+            {list.totalElements > 0 ? (
+              <>
+                <DataTable
+                  items={list.data}
+                  columns={[
+                    {
+                      title: 'Name',
+                      renderCell: (o) => (
+                        <div
+                          className={cx(
+                            'flex',
+                            'flex-row',
+                            'gap-1.5',
+                            'items-center',
+                          )}
+                        >
+                          <Avatar
+                            name={o.name}
+                            size="sm"
+                            className={cx('w-[40px]', 'h-[40px]')}
+                          />
+                          <ChakraLink
+                            as={Link}
+                            to={`/organization/${o.id}/member`}
+                            className={cx('no-underline')}
+                          >
+                            <Text noOfLines={1}>{o.name}</Text>
+                          </ChakraLink>
+                        </div>
+                      ),
+                    },
+                    {
+                      title: 'Permission',
+                      renderCell: (o) => <Badge>{o.permission}</Badge>,
+                    },
+                    {
+                      title: 'Date',
+                      renderCell: (o) => (
+                        <RelativeDate date={new Date(o.createTime)} />
+                      ),
+                    },
+                  ]}
+                  pagination={
+                    list.totalPages > 1 ? (
+                      <PagePagination
+                        totalElements={list.totalElements}
+                        totalPages={list.totalPages}
+                        page={page}
+                        size={size}
+                        steps={steps}
+                        setPage={setPage}
+                        setSize={setSize}
+                      />
+                    ) : undefined
+                  }
+                />
+              </>
+            ) : (
+              <SectionPlaceholder
+                text="There are no organizations."
+                content={<CreateOrganizationButton />}
+              />
             )}
-          >
-            <div className={cx('flex', 'flex-col', 'gap-1.5', 'items-center')}>
-              <span>There are no organizations.</span>
-              <CreateOrganizationButton />
-            </div>
-          </div>
-        ) : null}
-        {list && list.totalElements > 0 && !error ? (
-          <DataTable
-            items={list.data}
-            columns={[
-              {
-                title: 'Name',
-                renderCell: (o) => (
-                  <div
-                    className={cx(
-                      'flex',
-                      'flex-row',
-                      'gap-1.5',
-                      'items-center',
-                    )}
-                  >
-                    <Avatar
-                      name={o.name}
-                      size="sm"
-                      className={cx('w-[40px]', 'h-[40px]')}
-                    />
-                    <ChakraLink
-                      as={Link}
-                      to={`/organization/${o.id}/member`}
-                      className={cx('no-underline')}
-                    >
-                      <Text noOfLines={1}>{o.name}</Text>
-                    </ChakraLink>
-                  </div>
-                ),
-              },
-              {
-                title: 'Permission',
-                renderCell: (o) => <Badge>{o.permission}</Badge>,
-              },
-              {
-                title: 'Date',
-                renderCell: (o) => (
-                  <RelativeDate date={new Date(o.createTime)} />
-                ),
-              },
-            ]}
-          />
-        ) : null}
-        {list ? (
-          <div className={cx('self-end')}>
-            <PagePagination
-              totalElements={list.totalElements}
-              totalPages={list.totalPages}
-              page={page}
-              size={size}
-              steps={steps}
-              setPage={setPage}
-              setSize={setSize}
-            />
-          </div>
+          </>
         ) : null}
       </div>
     </>

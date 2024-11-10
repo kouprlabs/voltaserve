@@ -23,7 +23,7 @@ export type ConsoleObject =
 
 export interface ListResponse<T> {
   totalElements: number
-  totalPages: number | null
+  totalPages: number
   page: number
   size: number
   data: T[]

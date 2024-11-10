@@ -52,6 +52,7 @@ export interface UserAdminList {
   page: number
   size: number
   totalElements: number
+  totalPages: number
 }
 
 export type PictureDTO = {
@@ -147,6 +148,7 @@ export async function list({
         )
       ).map((value) => adminMapEntity(value)),
       totalElements: users.totalElements,
+      totalPages: Math.floor((users.totalElements + size - 1) / size),
       size: size,
       page: page,
     }
@@ -156,6 +158,7 @@ export async function list({
         adminMapEntity(value),
       ),
       totalElements: await userRepo.getCount(),
+      totalPages: Math.floor(((await userRepo.getCount()) + size - 1) / size),
       size: size,
       page: page,
     }

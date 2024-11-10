@@ -91,7 +91,11 @@ async def get_all_workspaces(data: Annotated[WorkspaceListRequest, Depends()]):
         workspaces, count = fetch_workspaces(page=data.page, size=data.size)
 
         return WorkspaceListResponse(
-            data=workspaces, totalElements=count, page=data.page, size=data.size
+            data=workspaces,
+            totalElements=count,
+            totalPages=(count + data.size - 1) // data.size,
+            page=data.page,
+            size=data.size,
         )
     except EmptyDataException as e:
         logger.error(e)
@@ -117,9 +121,12 @@ async def get_search_workspaces(data: Annotated[WorkspaceSearchRequest, Depends(
                 hits.append(workspace)
             except NotFoundException:
                 pass
+        count = len(workspaces["hits"])
+
         return WorkspaceListResponse(
             data=hits,
-            totalElements=len(workspaces["hits"]),
+            totalElements=count,
+            totalPages=(count + data.size - 1) // data.size,
             page=data.page,
             size=data.size,
         )

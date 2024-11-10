@@ -47,7 +47,7 @@ class CountResponse(BaseModel):
 
 class GenericListResponse(BaseModel):
     totalElements: int
-    totalPages: int | None = Field(None)
+    totalPages: int
     page: int
     size: int
     data: List[Any]

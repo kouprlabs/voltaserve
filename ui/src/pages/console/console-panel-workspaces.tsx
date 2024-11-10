@@ -22,6 +22,7 @@ import {
   PagePagination,
   RelativeDate,
   SectionError,
+  SectionPlaceholder,
   SectionSpinner,
   Text,
   usePagePagination,
@@ -79,87 +80,97 @@ const ConsolePanelWorkspaces = () => {
           <SectionError text="Failed to load workspaces." />
         ) : null}
         {!list && !error ? <SectionSpinner /> : null}
-        {list && list.totalElements > 0 && !error ? (
-          <DataTable
-            items={list.data}
-            columns={[
-              {
-                title: 'Name',
-                renderCell: (workspace) => (
-                  <div
-                    className={cx(
-                      'flex',
-                      'flex-row',
-                      'gap-1.5',
-                      'items-center',
-                    )}
-                  >
-                    <Avatar
-                      name={workspace.name}
-                      size="sm"
-                      className={cx('w-[40px]', 'h-[40px]')}
-                    />
+        {list && !error ? (
+          <>
+            {list.totalElements > 0 ? (
+              <>
+                <DataTable
+                  items={list.data}
+                  columns={[
+                    {
+                      title: 'Name',
+                      renderCell: (workspace) => (
+                        <div
+                          className={cx(
+                            'flex',
+                            'flex-row',
+                            'gap-1.5',
+                            'items-center',
+                          )}
+                        >
+                          <Avatar
+                            name={workspace.name}
+                            size="sm"
+                            className={cx('w-[40px]', 'h-[40px]')}
+                          />
 
-                    <Text noOfLines={1}>{workspace.name}</Text>
-                  </div>
-                ),
-              },
-              {
-                title: 'Organization',
-                renderCell: (workspace) => (
-                  <ChakraLink
-                    as={Link}
-                    to={`/console/organizations/${workspace.organization.id}`}
-                    className={cx('no-underline')}
-                  >
-                    <Text noOfLines={1}>{workspace.organization.name}</Text>
-                  </ChakraLink>
-                ),
-              },
-              {
-                title: 'Quota',
-                renderCell: (workspace) => (
-                  <Text>{prettyBytes(workspace.storageCapacity)}</Text>
-                ),
-              },
-              {
-                title: 'Created',
-                renderCell: (workspace) => (
-                  <RelativeDate date={new Date(workspace.createTime)} />
-                ),
-              },
-              {
-                title: 'Updated',
-                renderCell: (workspace) => (
-                  <RelativeDate date={new Date(workspace.updateTime)} />
-                ),
-              },
-            ]}
-            actions={[
-              {
-                label: 'Rename',
-                icon: <IconEdit />,
-                onClick: async (workspace) => {
-                  setCurrentName(workspace.name)
-                  setWorkspaceId(workspace.id)
-                  setIsConfirmRenameOpen(true)
-                },
-              },
-            ]}
-          />
-        ) : null}
-        {list ? (
-          <div className={cx('self-end')}>
-            <PagePagination
-              totalElements={list.totalElements}
-              totalPages={Math.ceil(list.totalElements / size)}
-              page={page}
-              size={size}
-              steps={steps}
-              setPage={setPage}
-              setSize={setSize}
-            />
-          </div>
+                          <Text noOfLines={1}>{workspace.name}</Text>
+                        </div>
+                      ),
+                    },
+                    {
+                      title: 'Organization',
+                      renderCell: (workspace) => (
+                        <ChakraLink
+                          as={Link}
+                          to={`/console/organizations/${workspace.organization.id}`}
+                          className={cx('no-underline')}
+                        >
+                          <Text noOfLines={1}>
+                            {workspace.organization.name}
+                          </Text>
+                        </ChakraLink>
+                      ),
+                    },
+                    {
+                      title: 'Quota',
+                      renderCell: (workspace) => (
+                        <Text>{prettyBytes(workspace.storageCapacity)}</Text>
+                      ),
+                    },
+                    {
+                      title: 'Created',
+                      renderCell: (workspace) => (
+                        <RelativeDate date={new Date(workspace.createTime)} />
+                      ),
+                    },
+                    {
+                      title: 'Updated',
+                      renderCell: (workspace) => (
+                        <RelativeDate date={new Date(workspace.updateTime)} />
+                      ),
+                    },
+                  ]}
+                  actions={[
+                    {
+                      label: 'Rename',
+                      icon: <IconEdit />,
+                      onClick: async (workspace) => {
+                        setCurrentName(workspace.name)
+                        setWorkspaceId(workspace.id)
+                        setIsConfirmRenameOpen(true)
+                      },
+                    },
+                  ]}
+                  pagination={
+                    list.totalPages > 1 ? (
+                      <PagePagination
+                        totalElements={list.totalElements}
+                        totalPages={list.totalPages}
+                        page={page}
+                        size={size}
+                        steps={steps}
+                        setPage={setPage}
+                        setSize={setSize}
+                      />
+                    ) : undefined
+                  }
+                />
+              </>
+            ) : (
+              <SectionPlaceholder text="There are no workspaces." />
+            )}
+          </>
         ) : null}
       </div>
       <ConsoleRenameModal

@@ -64,7 +64,11 @@ async def get_all_snapshots(data: Annotated[SnapshotListRequest, Depends()]):
         snapshots, count = fetch_snapshots(page=data.page, size=data.size)
 
         return SnapshotListResponse(
-            data=snapshots, totalElements=count["count"], page=data.page, size=data.size
+            data=snapshots,
+            totalElements=count,
+            totalPages=(count + data.size - 1) // data.size,
+            page=data.page,
+            size=data.size,
         )
     except EmptyDataException as e:
         logger.error(e)
