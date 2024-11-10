@@ -133,7 +133,7 @@ const ConsolePanelOrganizations = () => {
                   ]}
                   actions={[
                     {
-                      label: 'Rename',
+                      label: 'Edit Name',
                       icon: <IconEdit />,
                       onClick: async (organization) => {
                         setCurrentName(organization.name)

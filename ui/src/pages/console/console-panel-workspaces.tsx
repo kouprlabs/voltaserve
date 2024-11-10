@@ -143,7 +143,7 @@ const ConsolePanelWorkspaces = () => {
                   ]}
                   actions={[
                     {
-                      label: 'Rename',
+                      label: 'Edit Name',
                       icon: <IconEdit />,
                       onClick: async (workspace) => {
                         setCurrentName(workspace.name)

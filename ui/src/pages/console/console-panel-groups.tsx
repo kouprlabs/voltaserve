@@ -128,7 +128,7 @@ const ConsolePanelGroups = () => {
               ]}
               actions={[
                 {
-                  label: 'Rename',
+                  label: 'Edit Name',
                   icon: <IconEdit />,
                   onClick: async (group) => {
                     setCurrentName(group.name)
