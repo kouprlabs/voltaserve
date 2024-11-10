@@ -31,13 +31,18 @@ jobs:
         with:
           python-version: 3.12
 
-      - name: Lint using flake8
+      - name: Lint Using Flake8
         uses: py-actions/flake8@v2
         with:
+          flake8-version: 7.1.1
           path: console
-          ignore: "F401,W291,W503"
-          max-line-length: "120"
-          exclude: ".git,Dockerfile"
+          args: --config=console/.flake8
+
+      - name: Lint Using Black
+        uses: psf/black@stable
+        with:
+          version: 24.10.0
+          src: console
 
     permissions:
       contents: read

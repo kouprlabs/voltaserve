@@ -35,3 +35,8 @@ typing-inspect = "0.9.0"
 aiohttp = "3.9.5"
 meilisearch = "0.31.5"
 redis = "5.0.3"
+
+[tool.poetry.group.dev.dependencies]
+flake8 = "7.1.1"
+black = "24.10.0"
+

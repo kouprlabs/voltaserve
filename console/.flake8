@@ -1,0 +1,4 @@
+[flake8]
+extend-ignore = F401,W291,W503
+max-line-length = 120
+extend-exclude = Dockerfile
