@@ -36,6 +36,7 @@ jobs:
         with:
           flake8-version: 7.1.1
           path: console
+          args: --config=console/.flake8
 
       - name: Lint Using Black
         uses: psf/black@stable
