@@ -10,7 +10,16 @@
 import fs from 'fs/promises'
 import { getConfig } from '@/config/config'
 import { base64ToBuffer, base64ToExtension, base64ToMIME } from '@/infra/base64'
-import { newUserPictureNotFoundError } from '@/infra/error'
+import {
+  newCannotDemoteSoleAdminError,
+  newCannotSuspendSoleAdminError,
+  newInternalServerError,
+  newInvalidPasswordError,
+  newPasswordValidationFailedError,
+  newUsernameUnavailableError,
+  newUserNotFoundError,
+  newPictureNotFoundError,
+} from '@/infra/error'
 import { ErrorCode, newError } from '@/infra/error/core'
 import { newHyphenlessUuid } from '@/infra/id'
 import { sendTemplateMail } from '@/infra/mail'
@@ -112,13 +121,21 @@ export async function getUserByAdmin(id: string): Promise<UserAdminDTO> {
 export async function getUserPicture(id: string): Promise<UserPictureResponse> {
   const user = await userRepo.findById(id)
   if (!user.picture) {
-    throw newUserPictureNotFoundError(id)
+    throw newPictureNotFoundError()
   }
-  return {
-    buffer: base64ToBuffer(user.picture),
-    extension: base64ToExtension(user.picture),
-    mime: base64ToMIME(user.picture),
+  const buffer = base64ToBuffer(user.picture)
+  if (!buffer) {
+    throw newPictureNotFoundError()
   }
+  const extension = base64ToExtension(user.picture)
+  if (!extension) {
+    throw newPictureNotFoundError()
+  }
+  const mime = base64ToMIME(user.picture)
+  if (!mime) {
+    throw newPictureNotFoundError()
+  }
+  return { buffer, extension, mime }
 }
 
 export async function list({
@@ -208,7 +225,7 @@ export async function updateEmailRequest(
       // Ignored
     }
     if (usernameUnavailable) {
-      throw newError({ code: ErrorCode.UsernameUnavailable })
+      throw newUsernameUnavailableError()
     }
     user = await userRepo.update({
       id: user.id,
@@ -228,7 +245,7 @@ export async function updateEmailRequest(
         emailUpdateToken: null,
         emailUpdateValue: null,
       })
-      throw newError({ code: ErrorCode.InternalServerError, error })
+      throw newInternalServerError(error)
     }
   }
 }
@@ -271,7 +288,7 @@ export async function updatePassword(
     })
     return mapEntity(user)
   } else {
-    throw newError({ code: ErrorCode.PasswordValidationFailed })
+    throw newPasswordValidationFailedError()
   }
 }
 
@@ -325,7 +342,7 @@ export async function deleteUser(id: string, options: UserDeleteOptions) {
     await userRepo.delete(user.id)
     await search.index(USER_SEARCH_INDEX).deleteDocuments([user.id])
   } else {
-    throw newError({ code: ErrorCode.InvalidPassword })
+    throw newInvalidPasswordError()
   }
 }
 
@@ -336,7 +353,7 @@ export async function suspendUser(id: string, options: UserSuspendOptions) {
     !(await userRepo.enoughActiveAdmins()) &&
     options.suspend
   ) {
-    throw newError({ code: ErrorCode.OrphanError })
+    throw newCannotSuspendSoleAdminError()
   }
   if (user) {
     await userRepo.suspend(user.id, options.suspend)
@@ -353,7 +370,7 @@ export async function suspendUser(id: string, options: UserSuspendOptions) {
       },
     ])
   } else {
-    throw newError({ code: ErrorCode.UserNotFound })
+    throw newUserNotFoundError()
   }
 }
 
@@ -364,7 +381,7 @@ export async function makeAdminUser(id: string, options: UserMakeAdminOptions) {
     !(await userRepo.enoughActiveAdmins()) &&
     options.makeAdmin
   ) {
-    throw newError({ code: ErrorCode.OrphanError })
+    throw newCannotDemoteSoleAdminError()
   }
   if (user) {
     await userRepo.makeAdmin(user.id, options.makeAdmin)

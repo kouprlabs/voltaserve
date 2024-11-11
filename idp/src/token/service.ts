@@ -9,7 +9,15 @@
 // licenses/AGPL.txt.
 import { decodeJwt, SignJWT } from 'jose'
 import { getConfig } from '@/config/config'
-import { ErrorCode, newError } from '@/infra/error/core'
+import {
+  newEmailNotConfirmedError,
+  newInvalidGrantType,
+  newInvalidUsernameOrPasswordError,
+  newMissingFormParamError,
+  newRefreshTokenExpiredError,
+  newUserIsNotAdminError,
+  newUserSuspendedError,
+} from '@/infra/error'
 import { newHyphenlessUuid } from '@/infra/id'
 import { verifyPassword } from '@/infra/password'
 import { User } from '@/user/model'
@@ -41,18 +49,18 @@ export async function exchange(options: TokenExchangeOptions): Promise<Token> {
     try {
       user = await userRepo.findByUsername(options.username.toLocaleLowerCase())
     } catch {
-      throw newError({ code: ErrorCode.InvalidUsernameOrPassword })
+      throw newInvalidUsernameOrPasswordError()
     }
     if (!user.isEmailConfirmed) {
-      throw newError({ code: ErrorCode.EmailNotConfirmed })
+      throw newEmailNotConfirmedError()
     }
     if (!user.isActive) {
-      throw newError({ code: ErrorCode.UserSuspended })
+      throw newUserSuspendedError()
     }
     if (verifyPassword(options.password, user.passwordHash)) {
       return newToken(user.id, user.isAdmin)
     } else {
-      throw newError({ code: ErrorCode.InvalidUsernameOrPassword })
+      throw newInvalidUsernameOrPasswordError()
     }
   } else if (options.grant_type === 'refresh_token') {
     // https://datatracker.ietf.org/doc/html/rfc6749#section-6
@@ -60,58 +68,44 @@ export async function exchange(options: TokenExchangeOptions): Promise<Token> {
     try {
       user = await userRepo.findByRefreshTokenValue(options.refresh_token)
     } catch {
-      throw newError({ code: ErrorCode.InvalidUsernameOrPassword })
+      throw newInvalidUsernameOrPasswordError()
     }
     if (!user.isEmailConfirmed) {
-      throw newError({ code: ErrorCode.EmailNotConfirmed })
+      throw newEmailNotConfirmedError()
     }
     if (new Date() >= new Date(user.refreshTokenExpiry)) {
-      throw newError({ code: ErrorCode.RefreshTokenExpired })
+      throw newRefreshTokenExpiredError()
     }
     return newToken(user.id, user.isAdmin)
   }
 }
 
-export const checkAdmin = (jwt) => {
-  if (!decodeJwt(jwt).is_admin)
-    throw newError({ code: ErrorCode.MissingPermission })
+export function checkAdmin(jwt: string) {
+  if (!decodeJwt(jwt).is_admin) {
+    throw newUserIsNotAdminError()
+  }
 }
 
 function validateParameters(options: TokenExchangeOptions) {
   if (!options.grant_type) {
-    throw newError({
-      code: ErrorCode.InvalidRequest,
-      message: 'Missing parameter: grant_type',
-    })
+    throw newMissingFormParamError('grant_type')
   }
   if (
     options.grant_type !== 'password' &&
     options.grant_type !== 'refresh_token'
   ) {
-    throw newError({
-      code: ErrorCode.UnsupportedGrantType,
-      message: `Grant type unsupported: ${options.grant_type}`,
-    })
+    throw newInvalidGrantType(options.grant_type)
   }
   if (options.grant_type === 'password') {
     if (!options.username) {
-      throw newError({
-        code: ErrorCode.InvalidRequest,
-        message: 'Missing parameter: username',
-      })
+      throw newMissingFormParamError('username')
     }
     if (!options.password) {
-      throw newError({
-        code: ErrorCode.InvalidRequest,
-        message: 'Missing parameter: password',
-      })
+      throw newMissingFormParamError('password')
     }
   }
   if (options.grant_type === 'refresh_token' && !options.refresh_token) {
-    throw newError({
-      code: ErrorCode.InvalidRequest,
-      message: 'Missing parameter: refresh_token',
-    })
+    throw newMissingFormParamError('refresh_token')
   }
 }
 

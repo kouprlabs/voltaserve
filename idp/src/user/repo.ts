@@ -7,11 +7,7 @@
 // the Business Source License, use of this software will be governed
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
-import {
-  newUserInsertError,
-  newUserNotFoundError,
-  newUserUpdateError,
-} from '@/infra/error'
+import { newInternalServerError, newUserNotFoundError } from '@/infra/error'
 import { client } from '@/infra/postgres'
 import { InsertOptions, UpdateOptions, User } from './model'
 
@@ -22,7 +18,7 @@ class UserRepoImpl {
       [id],
     )
     if (rowCount < 1) {
-      throw newUserNotFoundError('id', id)
+      throw newUserNotFoundError()
     }
     return this.mapRow(rows[0])
   }
@@ -33,7 +29,7 @@ class UserRepoImpl {
       [username],
     )
     if (rowCount < 1) {
-      throw newUserNotFoundError('username', username)
+      throw newUserNotFoundError()
     }
     return this.mapRow(rows[0])
   }
@@ -44,7 +40,7 @@ class UserRepoImpl {
       [email],
     )
     if (rowCount < 1) {
-      throw newUserNotFoundError('email', email)
+      throw newUserNotFoundError()
     }
     return this.mapRow(rows[0])
   }
@@ -55,7 +51,7 @@ class UserRepoImpl {
       [refreshTokenValue],
     )
     if (rowCount < 1) {
-      throw newUserNotFoundError('refreshTokenValue', refreshTokenValue)
+      throw newUserNotFoundError()
     }
     return this.mapRow(rows[0])
   }
@@ -66,7 +62,7 @@ class UserRepoImpl {
       [resetPasswordToken],
     )
     if (rowCount < 1) {
-      throw newUserNotFoundError('resetPasswordToken', resetPasswordToken)
+      throw newUserNotFoundError()
     }
     return this.mapRow(rows[0])
   }
@@ -79,10 +75,7 @@ class UserRepoImpl {
       [emailConfirmationToken],
     )
     if (rowCount < 1) {
-      throw newUserNotFoundError(
-        'emailConfirmationToken',
-        emailConfirmationToken,
-      )
+      throw newUserNotFoundError()
     }
     return this.mapRow(rows[0])
   }
@@ -93,7 +86,7 @@ class UserRepoImpl {
       [emailUpdateToken],
     )
     if (rowCount < 1) {
-      throw newUserNotFoundError('emailUpdateToken', emailUpdateToken)
+      throw newUserNotFoundError()
     }
     return this.mapRow(rows[0])
   }
@@ -172,7 +165,7 @@ class UserRepoImpl {
       ],
     )
     if (rowCount < 1) {
-      throw newUserInsertError(data.username)
+      throw newInternalServerError()
     }
     return this.mapRow(rows[0])
   }
@@ -180,7 +173,7 @@ class UserRepoImpl {
   async update(data: UpdateOptions): Promise<User> {
     const entity = await this.findById(data.id)
     if (!entity) {
-      throw newUserNotFoundError('id', data.id)
+      throw newUserNotFoundError()
     }
     Object.assign(entity, data)
     entity.updateTime = new Date().toISOString()
@@ -224,7 +217,7 @@ class UserRepoImpl {
       ],
     )
     if (rowCount < 1) {
-      throw newUserUpdateError(data.id)
+      throw newInternalServerError()
     }
     return this.mapRow(rows[0])
   }

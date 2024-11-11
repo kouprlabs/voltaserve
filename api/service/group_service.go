@@ -335,7 +335,7 @@ func (svc *GroupService) RemoveMember(id string, memberID string, userID string)
 		return err
 	}
 	if svc.groupGuard.IsAuthorized(memberID, group, model.PermissionOwner) && ownerCount == 1 {
-		return errorpkg.NewCannotRemoveLastRemainingOwnerOfGroupError(group)
+		return errorpkg.NewCannotRemoveSoleOwnerOfGroupError(group)
 	}
 
 	if err := svc.groupRepo.RevokeUserPermission(id, memberID); err != nil {

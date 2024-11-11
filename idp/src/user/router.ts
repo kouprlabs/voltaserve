@@ -15,8 +15,12 @@ import multer from 'multer'
 import os from 'os'
 import passport from 'passport'
 import { getConfig } from '@/config/config'
-import { newInvalidJwtError, newUserPictureNotFoundError } from '@/infra/error'
-import { ErrorCode, newError, parseValidationError } from '@/infra/error/core'
+import {
+  newInvalidJwtError,
+  newMissingQueryParamError,
+  newPictureNotFoundError,
+  parseValidationError,
+} from '@/infra/error'
 import { PassportRequest } from '@/infra/passport-request'
 import { checkAdmin } from '@/token/service'
 import {
@@ -56,17 +60,14 @@ router.get(
   '/me/picture:extension',
   async (req: PassportRequest, res: Response) => {
     if (!req.query.access_token) {
-      throw newError({
-        code: ErrorCode.InvalidRequest,
-        message: "Query param 'access_token' is required",
-      })
+      throw newMissingQueryParamError('access_token')
     }
     const userId = await getUserIdFromAccessToken(
       req.query.access_token as string,
     )
     const { buffer, extension, mime } = await getUserPicture(userId)
     if (extension !== req.params.extension) {
-      throw newUserPictureNotFoundError(userId)
+      throw newPictureNotFoundError()
     }
     res.setHeader(
       'Content-Disposition',

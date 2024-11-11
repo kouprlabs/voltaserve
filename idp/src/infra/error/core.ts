@@ -21,12 +21,12 @@ export enum ErrorCode {
   EmailNotConfirmed = 'email_not_confirmed',
   RefreshTokenExpired = 'refresh_token_expired',
   InvalidRequest = 'invalid_request',
-  UnsupportedGrantType = 'unsupported_grant_type',
+  InvalidGrantType = 'invalid_grant_type',
   PasswordValidationFailed = 'password_validation_failed',
   UserSuspended = 'user_suspended',
-  MissingPermission = 'missing_permission',
+  UserIsNotAdmin = 'user_is_not_admin',
   UserNotFound = 'user_not_found',
-  OrphanError = 'orphan_error',
+  CannotSuspendLastAdmin = 'cannot_suspend_last_admin',
   SearchError = 'search_error',
 }
 
@@ -42,26 +42,13 @@ const statuses: { [key: string]: number } = {
   [ErrorCode.EmailNotConfirmed]: 401,
   [ErrorCode.RefreshTokenExpired]: 401,
   [ErrorCode.InvalidRequest]: 400,
-  [ErrorCode.UnsupportedGrantType]: 400,
+  [ErrorCode.InvalidGrantType]: 400,
   [ErrorCode.PasswordValidationFailed]: 400,
   [ErrorCode.UserSuspended]: 403,
-  [ErrorCode.MissingPermission]: 403,
+  [ErrorCode.UserIsNotAdmin]: 403,
   [ErrorCode.UserNotFound]: 404,
-  [ErrorCode.OrphanError]: 400,
+  [ErrorCode.CannotSuspendLastAdmin]: 400,
   [ErrorCode.SearchError]: 500,
-}
-
-const userMessages: { [key: string]: string } = {
-  [ErrorCode.UsernameUnavailable]: 'Email belongs to an existing user.',
-  [ErrorCode.EmailNotConfirmed]: 'Email not confirmed.',
-  [ErrorCode.InvalidPassword]: 'Invalid password.',
-  [ErrorCode.InvalidUsernameOrPassword]: 'Invalid username or password.',
-  [ErrorCode.InvalidCredentials]: 'Invalid credentials.',
-  [ErrorCode.UserSuspended]: 'User suspended.',
-  [ErrorCode.MissingPermission]: 'You are not an console',
-  [ErrorCode.OrphanError]: 'You cannot suspend last console',
-  [ErrorCode.SearchError]:
-    'Search engine encountered error or is not available',
 }
 
 export type ErrorData = {
@@ -91,10 +78,7 @@ export type ErrorOptions = {
 }
 
 export function newError(options: ErrorOptions): ErrorData {
-  const userMessage =
-    options.userMessage ||
-    userMessages[options.code] ||
-    'Oops! something went wrong.'
+  const userMessage = options.userMessage || 'Oops! something went wrong.'
   return {
     code: options.code,
     status: statuses[options.code],
@@ -136,25 +120,4 @@ export function errorHandler(
   }
   next(error)
   return
-}
-
-/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-export function parseValidationError(result: any): ErrorData {
-  let message: string
-  let userMessage: string
-  if (result.errors) {
-    message = result.errors
-      /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-      .map((e: any) => `${e.msg} for ${e.type} '${e.path}' in ${e.location}.`)
-      .join(' ')
-    userMessage = result.errors
-      /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-      .map((e: any) => `${e.msg} for ${e.type} '${e.path}'.`)
-      .join(' ')
-  }
-  return newError({
-    code: ErrorCode.RequestValidationError,
-    message,
-    userMessage,
-  })
 }

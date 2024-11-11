@@ -269,7 +269,7 @@ func (svc *OrganizationService) RemoveMember(id string, memberID string, userID 
 		return err
 	}
 	if svc.orgGuard.IsAuthorized(memberID, org, model.PermissionOwner) && ownerCount == 1 {
-		return errorpkg.NewCannotRemoveLastRemainingOwnerOfOrganizationError(org)
+		return errorpkg.NewCannotRemoveSoleOwnerOfOrganizationError(org)
 	}
 
 	/* Revoke permissions from all groups belonging to this organization. */

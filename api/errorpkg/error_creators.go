@@ -213,22 +213,22 @@ func NewOrganizationPermissionError(userID string, org model.Organization, permi
 	)
 }
 
-func NewCannotRemoveLastRemainingOwnerOfOrganizationError(org model.Organization) *ErrorResponse {
+func NewCannotRemoveSoleOwnerOfOrganizationError(org model.Organization) *ErrorResponse {
 	return NewErrorResponse(
-		"cannot_remove_last_owner_of_organization",
+		"cannot_remove_sole_owner_of_organization",
 		http.StatusBadRequest,
-		fmt.Sprintf("Cannot remove last remaining owner of organization '%s'.", org.GetID()),
-		fmt.Sprintf("Cannot remove last remaining owner of organization '%s'.", org.GetName()),
+		fmt.Sprintf("Cannot remove sole owner of organization '%s'.", org.GetID()),
+		fmt.Sprintf("Cannot remove sole owner of organization '%s'.", org.GetName()),
 		nil,
 	)
 }
 
-func NewCannotRemoveLastRemainingOwnerOfGroupError(group model.Group) *ErrorResponse {
+func NewCannotRemoveSoleOwnerOfGroupError(group model.Group) *ErrorResponse {
 	return NewErrorResponse(
-		"cannot_remove_last_owner_of_group",
+		"cannot_remove_sole_owner_of_group",
 		http.StatusBadRequest,
-		fmt.Sprintf("Cannot remove last remaining owner of group '%s'.", group.GetID()),
-		fmt.Sprintf("Cannot remove last remaining owner of group '%s'.", group.GetName()),
+		fmt.Sprintf("Cannot remove sole owner of group '%s'.", group.GetID()),
+		fmt.Sprintf("Cannot remove sole owner of group '%s'.", group.GetName()),
 		nil,
 	)
 }
