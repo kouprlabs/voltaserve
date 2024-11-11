@@ -1,4 +1,4 @@
-export function base64ToBuffer(value: string): Buffer {
+export function base64ToBuffer(value: string): Buffer | null {
   let withoutPrefix: string
   if (value.includes(',')) {
     withoutPrefix = value.split(',')[1]
@@ -7,12 +7,12 @@ export function base64ToBuffer(value: string): Buffer {
   }
   try {
     return Buffer.from(withoutPrefix, 'base64')
-  } catch (err) {
-    throw new Error(err as string)
+  } catch {
+    return null
   }
 }
 
-export function base64ToMIME(value: string): string {
+export function base64ToMIME(value: string): string | null {
   if (!value.startsWith('data:image/')) {
     return ''
   }
@@ -24,7 +24,7 @@ export function base64ToMIME(value: string): string {
   return value.substring(colonIndex + 1, semicolonIndex)
 }
 
-export function base64ToExtension(value: string): string {
+export function base64ToExtension(value: string): string | null {
   const mime = base64ToMIME(value)
   switch (mime) {
     case 'image/jpeg':

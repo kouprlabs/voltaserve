@@ -85,7 +85,7 @@ func NewSnapshotNotFoundError(err error) *ErrorResponse {
 		"snapshot_not_found",
 		http.StatusNotFound,
 		"Snapshot not found.",
-		"The file has no snapshots.",
+		"Snapshot not found.",
 		err,
 	)
 }
@@ -95,7 +95,7 @@ func NewS3ObjectNotFoundError(err error) *ErrorResponse {
 		"s3_object_not_found",
 		http.StatusNotFound,
 		"S3 object not found.",
-		"The snapshot does not contain the S3 object requested.",
+		"S3 object not found.",
 		err,
 	)
 }
@@ -205,30 +205,30 @@ func NewOrganizationPermissionError(userID string, org model.Organization, permi
 		"missing_organization_permission",
 		http.StatusForbidden,
 		fmt.Sprintf(
-			"User '%s' is missing the permission '%s' for organization '%s' (%s).",
-			userID, permission, org.GetName(), org.GetID(),
+			"User '%s' is missing permission '%s' for organization '%s'.",
+			userID, permission, org.GetID(),
 		),
 		fmt.Sprintf("Sorry, you don't have enough permissions for organization '%s'.", org.GetName()),
 		nil,
 	)
 }
 
-func NewCannotRemoveLastRemainingOwnerOfOrganizationError(org model.Organization) *ErrorResponse {
+func NewCannotRemoveSoleOwnerOfOrganizationError(org model.Organization) *ErrorResponse {
 	return NewErrorResponse(
-		"cannot_remove_last_owner_of_organization",
+		"cannot_remove_sole_owner_of_organization",
 		http.StatusBadRequest,
-		fmt.Sprintf("Cannot remove the last remaining owner of organization '%s'.", org.GetID()),
-		fmt.Sprintf("Cannot remove the last remaining owner of organization '%s'.", org.GetName()),
+		fmt.Sprintf("Cannot remove sole owner of organization '%s'.", org.GetID()),
+		fmt.Sprintf("Cannot remove sole owner of organization '%s'.", org.GetName()),
 		nil,
 	)
 }
 
-func NewCannotRemoveLastRemainingOwnerOfGroupError(group model.Group) *ErrorResponse {
+func NewCannotRemoveSoleOwnerOfGroupError(group model.Group) *ErrorResponse {
 	return NewErrorResponse(
-		"cannot_remove_last_owner_of_group",
+		"cannot_remove_sole_owner_of_group",
 		http.StatusBadRequest,
-		fmt.Sprintf("Cannot remove the last remaining owner of group '%s'.", group.GetID()),
-		fmt.Sprintf("Cannot remove the last remaining owner of group '%s'.", group.GetName()),
+		fmt.Sprintf("Cannot remove sole owner of group '%s'.", group.GetID()),
+		fmt.Sprintf("Cannot remove sole owner of group '%s'.", group.GetName()),
 		nil,
 	)
 }
@@ -238,10 +238,10 @@ func NewGroupPermissionError(userID string, org model.Organization, permission s
 		"missing_group_permission",
 		http.StatusForbidden,
 		fmt.Sprintf(
-			"User '%s' is missing the permission '%s' for the group '%s' (%s).",
-			userID, permission, org.GetName(), org.GetID(),
+			"User '%s' is missing permission '%s' for group '%s'.",
+			userID, permission, org.GetID(),
 		),
-		fmt.Sprintf("Sorry, you don't have enough permissions for the group '%s'.", org.GetName()),
+		fmt.Sprintf("Sorry, you don't have enough permissions for group '%s'.", org.GetName()),
 		nil,
 	)
 }
@@ -251,10 +251,10 @@ func NewWorkspacePermissionError(userID string, workspace model.Workspace, permi
 		"missing_workspace_permission",
 		http.StatusForbidden,
 		fmt.Sprintf(
-			"User '%s' is missing the permission '%s' for the workspace '%s' (%s).",
-			userID, permission, workspace.GetName(), workspace.GetID(),
+			"User '%s' is missing permission '%s' for workspace '%s'.",
+			userID, permission, workspace.GetID(),
 		),
-		fmt.Sprintf("Sorry, you don't have enough permissions for the workspace '%s'.", workspace.GetName()),
+		fmt.Sprintf("Sorry, you don't have enough permissions for workspace '%s'.", workspace.GetName()),
 		nil,
 	)
 }
@@ -264,10 +264,10 @@ func NewFilePermissionError(userID string, file model.File, permission string) *
 		"missing_file_permission",
 		http.StatusForbidden,
 		fmt.Sprintf(
-			"User '%s' is missing the permission '%s' for the file '%s' (%s).",
-			userID, permission, file.GetName(), file.GetID(),
+			"User '%s' is missing permission '%s' for file '%s'.",
+			userID, permission, file.GetID(),
 		),
-		fmt.Sprintf("Sorry, you don't have enough permissions for the item '%s'.", file.GetName()),
+		fmt.Sprintf("Sorry, you don't have enough permissions for item '%s'.", file.GetName()),
 		nil,
 	)
 }
@@ -307,7 +307,7 @@ func NewStorageLimitExceededError() *ErrorResponse {
 		"storage_limit_exceeded",
 		http.StatusForbidden,
 		"Storage limit exceeded.",
-		"The storage limit of your workspace has been reached, please increase it and try again.",
+		"Storage limit of your workspace has been reached, please increase it and try again.",
 		nil,
 	)
 }
@@ -317,7 +317,8 @@ func NewInsufficientStorageCapacityError() *ErrorResponse {
 		"insufficient_storage_capacity",
 		http.StatusForbidden,
 		"Insufficient storage capacity.",
-		"The requested storage capacity is insufficient.",
+		"Insufficient storage capacity.",
+
 		nil,
 	)
 }
@@ -330,7 +331,7 @@ func NewRequestBodyValidationError(err error) *ErrorResponse {
 	return NewErrorResponse(
 		"request_validation_error",
 		http.StatusBadRequest,
-		fmt.Sprintf("Failed validation for the following fields: %s.", strings.Join(fields, ",")),
+		fmt.Sprintf("Failed validation for fields: %s.", strings.Join(fields, ",")),
 		MsgInvalidRequest,
 		err,
 	)
@@ -340,7 +341,7 @@ func NewFileAlreadyChildOfDestinationError(source model.File, target model.File)
 	return NewErrorResponse(
 		"file_already_child_of_destination",
 		http.StatusForbidden,
-		fmt.Sprintf("File '%s' (%s) is already a child of '%s' (%s).", source.GetName(), source.GetID(), target.GetName(), target.GetID()),
+		fmt.Sprintf("File '%s' is already a child of '%s'.", source.GetID(), target.GetID()),
 		fmt.Sprintf("Item '%s' is already within '%s'.", source.GetName(), target.GetName()),
 		nil,
 	)
@@ -350,7 +351,7 @@ func NewFileCannotBeMovedIntoItselfError(source model.File) *ErrorResponse {
 	return NewErrorResponse(
 		"file_cannot_be_moved_into_itself",
 		http.StatusForbidden,
-		fmt.Sprintf("File '%s' (%s) cannot be moved into itself.", source.GetName(), source.GetID()),
+		fmt.Sprintf("File '%s' cannot be moved into itself.", source.GetID()),
 		fmt.Sprintf("Item '%s' cannot be moved into itself.", source.GetName()),
 		nil,
 	)
@@ -360,7 +361,7 @@ func NewFileIsNotAFolderError(file model.File) *ErrorResponse {
 	return NewErrorResponse(
 		"file_is_not_a_folder",
 		http.StatusForbidden,
-		fmt.Sprintf("File '%s' (%s) is not a folder.", file.GetName(), file.GetID()),
+		fmt.Sprintf("File '%s' is not a folder.", file.GetID()),
 		fmt.Sprintf("Item '%s' is not a folder.", file.GetName()),
 		nil,
 	)
@@ -370,7 +371,7 @@ func NewFileIsNotAFileError(file model.File) *ErrorResponse {
 	return NewErrorResponse(
 		"file_is_not_a_file",
 		http.StatusForbidden,
-		fmt.Sprintf("File '%s' (%s) is not a file.", file.GetName(), file.GetID()),
+		fmt.Sprintf("File '%s' is not a file.", file.GetID()),
 		fmt.Sprintf("Item '%s' is not a file.", file.GetName()),
 		nil,
 	)
@@ -380,7 +381,7 @@ func NewTargetIsGrandChildOfSourceError(file model.File) *ErrorResponse {
 	return NewErrorResponse(
 		"target_is_grant_child_of_source",
 		http.StatusForbidden,
-		fmt.Sprintf("File '%s' (%s) cannot be moved in another file within its own tree.", file.GetName(), file.GetID()),
+		fmt.Sprintf("File '%s' cannot be moved in another file within its own tree.", file.GetID()),
 		fmt.Sprintf("Item '%s' cannot be moved in another item within its own tree.", file.GetName()),
 		nil,
 	)
@@ -390,8 +391,8 @@ func NewCannotDeleteWorkspaceRootError(file model.File, workspace model.Workspac
 	return NewErrorResponse(
 		"cannot_delete_workspace_root",
 		http.StatusForbidden,
-		fmt.Sprintf("Cannot delete the root file (%s) of the workspace '%s' (%s).", file.GetID(), workspace.GetName(), workspace.GetID()),
-		fmt.Sprintf("Cannot delete the root item of the workspace '%s'.", workspace.GetName()),
+		fmt.Sprintf("Cannot delete root file '%s' of workspace '%s'.", file.GetID(), workspace.GetID()),
+		fmt.Sprintf("Cannot delete root item of workspace '%s'.", workspace.GetName()),
 		nil,
 	)
 }
@@ -400,17 +401,17 @@ func NewFileCannotBeCopiedIntoOwnSubtreeError(file model.File) *ErrorResponse {
 	return NewErrorResponse(
 		"file_cannot_be_coped_into_own_subtree",
 		http.StatusForbidden,
-		fmt.Sprintf("File '%s' (%s) cannot be copied in another file within its own subtree.", file.GetName(), file.GetID()),
+		fmt.Sprintf("File '%s' cannot be copied in another file within its own subtree.", file.GetID()),
 		fmt.Sprintf("Item '%s' cannot be copied in another item within its own subtree.", file.GetName()),
 		nil,
 	)
 }
 
-func NewFileCannotBeCopiedIntoIselfError(file model.File) *ErrorResponse {
+func NewFileCannotBeCopiedIntoItselfError(file model.File) *ErrorResponse {
 	return NewErrorResponse(
 		"file_cannot_be_copied_into_itself",
 		http.StatusForbidden,
-		fmt.Sprintf("File '%s' (%s) cannot be copied into itself.", file.GetName(), file.GetID()),
+		fmt.Sprintf("File '%s' cannot be copied into itself.", file.GetID()),
 		fmt.Sprintf("Item '%s' cannot be copied into itself.", file.GetName()),
 		nil,
 	)
@@ -430,7 +431,7 @@ func NewCannotAcceptNonPendingInvitationError(invitation model.Invitation) *Erro
 	return NewErrorResponse(
 		"cannot_accept_non_pending_invitation",
 		http.StatusForbidden,
-		fmt.Sprintf("Cannot accept an invitation which is not pending, the status of the invitation (%s) is (%s).", invitation.GetID(), invitation.GetStatus()),
+		fmt.Sprintf("Cannot accept an invitation which is not pending, status of invitation '%s' is '%s'.", invitation.GetID(), invitation.GetStatus()),
 		"Cannot accept an invitation which is not pending.",
 		nil,
 	)
@@ -440,7 +441,7 @@ func NewCannotDeclineNonPendingInvitationError(invitation model.Invitation) *Err
 	return NewErrorResponse(
 		"cannot_decline_non_pending_invitation",
 		http.StatusForbidden,
-		fmt.Sprintf("Cannot decline an invitation which is not pending, the status of the invitation (%s) is (%s).", invitation.GetID(), invitation.GetStatus()),
+		fmt.Sprintf("Cannot decline an invitation which is not pending, status of invitation '%s' is '%s'.", invitation.GetID(), invitation.GetStatus()),
 		"Cannot decline an invitation which is not pending.",
 		nil,
 	)
@@ -450,7 +451,7 @@ func NewCannotResendNonPendingInvitationError(invitation model.Invitation) *Erro
 	return NewErrorResponse(
 		"cannot_resend_non_pending_invitation",
 		http.StatusForbidden,
-		fmt.Sprintf("Cannot resend an invitation which is not pending, the status of the invitation (%s) is (%s).", invitation.GetID(), invitation.GetStatus()),
+		fmt.Sprintf("Cannot resend an invitation which is not pending, status of invitation '%s' is '%s'.", invitation.GetID(), invitation.GetStatus()),
 		"Cannot resend an invitation which is not pending.",
 		nil,
 	)
@@ -460,7 +461,7 @@ func NewUserNotAllowedToAcceptInvitationError(user model.User, invitation model.
 	return NewErrorResponse(
 		"user_not_allowed_to_accept_invitation",
 		http.StatusForbidden,
-		fmt.Sprintf("User '%s' (%s) is not allowed to accept the invitation (%s).", user.GetUsername(), user.GetID(), invitation.GetID()),
+		fmt.Sprintf("User '%s' is not allowed to accept invitation '%s'.", user.GetID(), invitation.GetID()),
 		"Not allowed to accept this invitation.",
 		nil,
 	)
@@ -470,7 +471,7 @@ func NewUserNotAllowedToDeclineInvitationError(user model.User, invitation model
 	return NewErrorResponse(
 		"user_not_allowed_to_decline_invitation",
 		http.StatusForbidden,
-		fmt.Sprintf("User '%s' (%s) is not allowed to decline the invitation (%s).", user.GetUsername(), user.GetID(), invitation.GetID()),
+		fmt.Sprintf("User '%s' is not allowed to decline invitation '%s'.", user.GetID(), invitation.GetID()),
 		"Not allowed to decline this invitation.",
 		nil,
 	)
@@ -480,7 +481,7 @@ func NewUserNotAllowedToDeleteInvitationError(user model.User, invitation model.
 	return NewErrorResponse(
 		"user_not_allowed_to_delete_invitation",
 		http.StatusForbidden,
-		fmt.Sprintf("User '%s' (%s) not allowed to delete the invitation (%s).", user.GetUsername(), user.GetID(), invitation.GetID()),
+		fmt.Sprintf("User '%s' is not allowed to delete invitation '%s'.", user.GetID(), invitation.GetID()),
 		"Not allowed to delete this invitation.",
 		nil,
 	)
@@ -490,8 +491,8 @@ func NewUserAlreadyMemberOfOrganizationError(user model.User, org model.Organiza
 	return NewErrorResponse(
 		"user_already_member_of_organization",
 		http.StatusForbidden,
-		fmt.Sprintf("User '%s' (%s) is already a member of the organization '%s' (%s).", user.GetUsername(), user.GetID(), org.GetName(), org.GetID()),
-		fmt.Sprintf("You are already a member of the organization '%s'.", org.GetName()),
+		fmt.Sprintf("User '%s' is already a member of organization '%s'.", user.GetID(), org.GetID()),
+		fmt.Sprintf("You are already a member of organization '%s'.", org.GetName()),
 		nil,
 	)
 }
@@ -501,7 +502,7 @@ func NewInvalidAPIKeyError() *ErrorResponse {
 		"invalid_api_key",
 		http.StatusUnauthorized,
 		"Invalid API key.",
-		"The API key is either missing or invalid.",
+		"API key is either missing or invalid.",
 		nil,
 	)
 }

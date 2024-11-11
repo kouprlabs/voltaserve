@@ -821,7 +821,7 @@ func (svc *FileService) CopyOne(sourceID string, targetID string, userID string)
 		return nil, err
 	}
 	if source.GetID() == target.GetID() {
-		return nil, errorpkg.NewFileCannotBeCopiedIntoIselfError(source)
+		return nil, errorpkg.NewFileCannotBeCopiedIntoItselfError(source)
 	}
 	if target.GetType() != model.FileTypeFolder {
 		return nil, errorpkg.NewFileIsNotAFolderError(target)

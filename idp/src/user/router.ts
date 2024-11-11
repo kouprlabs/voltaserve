@@ -15,7 +15,12 @@ import multer from 'multer'
 import os from 'os'
 import passport from 'passport'
 import { getConfig } from '@/config/config'
-import { ErrorCode, newError, parseValidationError } from '@/infra/error'
+import {
+  newInvalidJwtError,
+  newMissingQueryParamError,
+  newPictureNotFoundError,
+  parseValidationError,
+} from '@/infra/error'
 import { PassportRequest } from '@/infra/passport-request'
 import { checkAdmin } from '@/token/service'
 import {
@@ -55,21 +60,14 @@ router.get(
   '/me/picture:extension',
   async (req: PassportRequest, res: Response) => {
     if (!req.query.access_token) {
-      throw newError({
-        code: ErrorCode.InvalidRequest,
-        message: "Query param 'access_token' is required",
-      })
+      throw newMissingQueryParamError('access_token')
     }
-    const userID = await getUserIDFromAccessToken(
+    const userId = await getUserIdFromAccessToken(
       req.query.access_token as string,
     )
-    const { buffer, extension, mime } = await getUserPicture(userID)
+    const { buffer, extension, mime } = await getUserPicture(userId)
     if (extension !== req.params.extension) {
-      throw newError({
-        code: ErrorCode.ResourceNotFound,
-        message: 'Picture not found',
-        userMessage: 'Picture not found',
-      })
+      throw newPictureNotFoundError()
     }
     res.setHeader(
       'Content-Disposition',
@@ -247,7 +245,7 @@ router.get(
   },
 )
 
-async function getUserIDFromAccessToken(accessToken: string): Promise<string> {
+async function getUserIdFromAccessToken(accessToken: string): Promise<string> {
   try {
     const { payload } = await jwtVerify(
       accessToken,
@@ -255,11 +253,7 @@ async function getUserIDFromAccessToken(accessToken: string): Promise<string> {
     )
     return payload.sub
   } catch {
-    throw newError({
-      code: ErrorCode.InvalidJwt,
-      message: 'Invalid JWT',
-      userMessage: 'Invalid JWT',
-    })
+    throw newInvalidJwtError()
   }
 }
 

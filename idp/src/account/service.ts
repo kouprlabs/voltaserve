@@ -9,7 +9,10 @@
 // licenses/AGPL.txt.
 import { getConfig } from '@/config/config'
 import { newDateTime } from '@/infra/date-time'
-import { ErrorCode, newError } from '@/infra/error'
+import {
+  newInternalServerError,
+  newUsernameUnavailableError,
+} from '@/infra/error'
 import { newHashId, newHyphenlessUuid } from '@/infra/id'
 import { sendTemplateMail } from '@/infra/mail'
 import { hashPassword } from '@/infra/password'
@@ -52,7 +55,7 @@ export async function createUser(
 ): Promise<UserDTO> {
   const id = newHashId()
   if (!(await userRepo.isUsernameAvailable(options.email))) {
-    throw newError({ code: ErrorCode.UsernameUnavailable })
+    throw newUsernameUnavailableError()
   }
   if ((await getUserCount()) === 0) {
     options.isAdmin = true
@@ -89,7 +92,7 @@ export async function createUser(
   } catch (error) {
     await userRepo.delete(id)
     await search.index(USER_SEARCH_INDEX).deleteDocuments([id])
-    throw newError({ code: ErrorCode.InternalServerError, error })
+    throw newInternalServerError(error)
   }
 }
 
@@ -143,7 +146,7 @@ export async function sendResetPasswordEmail(
   } catch (error) {
     const { id } = await userRepo.findByEmail(options.email)
     await userRepo.update({ id, resetPasswordToken: null })
-    throw newError({ code: ErrorCode.InternalServerError, error })
+    throw newInternalServerError(error)
   }
 }
 
