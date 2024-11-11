@@ -84,8 +84,8 @@ export function newUserIsNotAdminError() {
 export function newMissingQueryParamError(param: string) {
   return newError({
     code: ErrorCode.InvalidRequest,
-    message: `Missing query parameter: ${param}.`,
-    userMessage: `Missing query parameter: ${param}.`,
+    message: `Missing query param: ${param}.`,
+    userMessage: `Missing query param: ${param}.`,
   })
 }
 
