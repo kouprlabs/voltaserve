@@ -9,7 +9,7 @@
 // licenses/AGPL.txt.
 import { useCallback, useEffect, useState } from 'react'
 import { Button, useDisclosure } from '@chakra-ui/react'
-import { AuxiliaryDrawer } from '@koupr/ui'
+import { AuxiliaryDrawer, SectionError, SectionSpinner } from '@koupr/ui'
 import { IconClearAll, IconStacks } from '@koupr/ui'
 import cx from 'classnames'
 import TaskAPI from '@/client/api/task'
@@ -24,7 +24,14 @@ const TaskDrawer = () => {
   const [isDismissing, setIsDismissing] = useState(false)
   const isDrawerOpen = useAppSelector((state) => state.ui.tasks.isDrawerOpen)
   const mutateList = useAppSelector((state) => state.ui.tasks.mutateList)
-  const { data: count, mutate: mutateCount } = TaskAPI.useGetCount(swrConfig())
+  const {
+    data: count,
+    error,
+    mutate: mutateCount,
+  } = TaskAPI.useGetCount(swrConfig())
+  const isLoading = !count && !error
+  const isError = !count && error
+  const isSuccess = count && !error
 
   useEffect(() => {
     if (isDrawerOpen) {
@@ -58,19 +65,29 @@ const TaskDrawer = () => {
       onOpen={onOpen}
       hasBadge={count !== undefined && count > 0}
       header="Tasks"
-      body={<TasksList />}
+      body={
+        <>
+          {isLoading ? <SectionSpinner /> : null}
+          {isError ? <SectionError text="Failed to load count." /> : null}
+          {isSuccess ? <TasksList /> : null}
+        </>
+      }
       footer={
         <>
-          {count && count > 0 ? (
-            <Button
-              className={cx('w-full')}
-              size="sm"
-              leftIcon={<IconClearAll />}
-              isLoading={isDismissing}
-              onClick={handleClearCompleted}
-            >
-              Clear Completed Items
-            </Button>
+          {isSuccess ? (
+            <>
+              {count && count > 0 ? (
+                <Button
+                  className={cx('w-full')}
+                  size="sm"
+                  leftIcon={<IconClearAll />}
+                  isLoading={isDismissing}
+                  onClick={handleClearCompleted}
+                >
+                  Clear Completed Items
+                </Button>
+              ) : null}
+            </>
           ) : null}
         </>
       }
