@@ -15,6 +15,7 @@ import {
   ModalHeader,
   ModalOverlay,
 } from '@chakra-ui/react'
+import { SectionError, SectionSpinner } from '@koupr/ui'
 import FileAPI from '@/client/api/file'
 import MosaicAPI from '@/client/api/mosaic'
 import { swrConfig } from '@/client/options'
@@ -32,11 +33,18 @@ const Mosaic = () => {
       : undefined,
   )
   const isModalOpen = useAppSelector((state) => state.ui.mosaic.isModalOpen)
-  const { data: info, mutate: mutateInfo } = MosaicAPI.useGetInfo(
-    id,
-    swrConfig(),
-  )
-  const { data: file } = FileAPI.useGet(id, swrConfig())
+  const {
+    data: info,
+    error: infoError,
+    mutate: mutateInfo,
+  } = MosaicAPI.useGetInfo(id, swrConfig())
+  const { data: file, error: fileError } = FileAPI.useGet(id, swrConfig())
+  const isFileLoading = !file && !fileError
+  const isFileError = !file && fileError
+  const isFileSuccess = file && !fileError
+  const isInfoLoading = !info && !infoError
+  const isInfoError = !info && infoError
+  const isInfoSuccess = info && !infoError
 
   useEffect(() => {
     if (file?.snapshot?.task?.isPending) {
@@ -50,10 +58,6 @@ const Mosaic = () => {
     }
   }, [mutateInfo])
 
-  if (!info) {
-    return null
-  }
-
   return (
     <Modal
       size="xl"
@@ -65,7 +69,17 @@ const Mosaic = () => {
       <ModalContent>
         <ModalHeader>Mosaic</ModalHeader>
         <ModalCloseButton />
-        {info.isAvailable ? <MosaicOverview /> : <MosaicCreate />}
+        {isFileLoading ? <SectionSpinner /> : null}
+        {isFileError ? <SectionError text="Failed to load file." /> : null}
+        {isFileSuccess ? (
+          <>
+            {isInfoLoading ? <SectionSpinner /> : null}
+            {isInfoError ? <SectionError text="Failed to load info." /> : null}
+            {isInfoSuccess ? (
+              <>{info.isAvailable ? <MosaicOverview /> : <MosaicCreate />}</>
+            ) : null}
+          </>
+        ) : null}
       </ModalContent>
     </Modal>
   )

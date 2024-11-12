@@ -21,6 +21,7 @@ import {
   TabPanels,
   Tabs,
 } from '@chakra-ui/react'
+import { SectionError, SectionSpinner } from '@koupr/ui'
 import cx from 'classnames'
 import MosaicAPI from '@/client/api/mosaic'
 import { swrConfig } from '@/client/options'
@@ -35,49 +36,52 @@ const MosaicOverview = () => {
       : undefined,
   )
   const [isWarningVisible, setIsWarningVisible] = useState(true)
-  const { data: info } = MosaicAPI.useGetInfo(id, swrConfig())
-
-  if (!info) {
-    return null
-  }
+  const { data: info, error } = MosaicAPI.useGetInfo(id, swrConfig())
+  const isLoading = !info && !error
+  const isError = !info && error
+  const isSuccess = info && !error
 
   return (
     <>
       <ModalBody>
-        <div className={cx('flex', 'flex-col', 'gap-1.5', 'w-full')}>
-          {info.isOutdated && isWarningVisible ? (
-            <Alert status="warning" className={cx('flex')}>
-              <AlertIcon />
-              <Box className={cx('grow')}>
-                <AlertDescription>
-                  This mosaic comes from an older snapshot. You can create a new
-                  one for the active snapshot from the settings.
-                </AlertDescription>
-              </Box>
-              <CloseButton
-                alignSelf="flex-start"
-                position="relative"
-                right={-1}
-                top={-1}
-                onClick={() => setIsWarningVisible(false)}
-              />
-            </Alert>
-          ) : null}
-          <Tabs colorScheme="gray">
-            <TabList>
-              <Tab>Artifacts</Tab>
-              <Tab>Settings</Tab>
-            </TabList>
-            <TabPanels>
-              <TabPanel>
-                <MosaicOverviewArtifacts />
-              </TabPanel>
-              <TabPanel>
-                <MosaicOverviewSettings />
-              </TabPanel>
-            </TabPanels>
-          </Tabs>
-        </div>
+        {isLoading ? <SectionSpinner /> : null}
+        {isError ? <SectionError text="Failed to load info." /> : null}
+        {isSuccess ? (
+          <div className={cx('flex', 'flex-col', 'gap-1.5', 'w-full')}>
+            {info.isOutdated && isWarningVisible ? (
+              <Alert status="warning" className={cx('flex')}>
+                <AlertIcon />
+                <Box className={cx('grow')}>
+                  <AlertDescription>
+                    This mosaic comes from an older snapshot. You can create a
+                    new one for the active snapshot from the settings.
+                  </AlertDescription>
+                </Box>
+                <CloseButton
+                  alignSelf="flex-start"
+                  position="relative"
+                  right={-1}
+                  top={-1}
+                  onClick={() => setIsWarningVisible(false)}
+                />
+              </Alert>
+            ) : null}
+            <Tabs colorScheme="gray">
+              <TabList>
+                <Tab>Artifacts</Tab>
+                <Tab>Settings</Tab>
+              </TabList>
+              <TabPanels>
+                <TabPanel>
+                  <MosaicOverviewArtifacts />
+                </TabPanel>
+                <TabPanel>
+                  <MosaicOverviewSettings />
+                </TabPanel>
+              </TabPanels>
+            </Tabs>
+          </div>
+        ) : null}
       </ModalBody>
     </>
   )
