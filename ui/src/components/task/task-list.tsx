@@ -26,13 +26,13 @@ const TasksList = () => {
   const [page, setPage] = useState(1)
   const {
     data: list,
-    error,
+    error: listError,
     mutate: mutateList,
   } = TaskAPI.useList({ page, size: 5, sortOrder: SortOrder.Asc }, swrConfig())
-  const isLoading = !list && !error
-  const isError = !list && error
-  const isEmpty = list && !error && list.totalElements === 0
-  const isSuccess = list && !error && list.totalElements > 0
+  const isListLoading = !list && !listError
+  const isListError = !list && listError
+  const isListEmpty = list && !listError && list.totalElements === 0
+  const isListReady = list && !listError && list.totalElements > 0
 
   useEffect(() => {
     dispatch(mutateListUpdated(mutateList))
@@ -40,10 +40,10 @@ const TasksList = () => {
 
   return (
     <>
-      {isLoading ? <SectionSpinner /> : null}
-      {isError ? <SectionError text="Failed to load tasks." /> : null}
-      {isEmpty ? <SectionPlaceholder text="There are no tasks." /> : null}
-      {isSuccess ? (
+      {isListLoading ? <SectionSpinner /> : null}
+      {isListError ? <SectionError text="Failed to load tasks." /> : null}
+      {isListEmpty ? <SectionPlaceholder text="There are no tasks." /> : null}
+      {isListReady ? (
         <div
           className={cx(
             'flex',

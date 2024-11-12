@@ -51,16 +51,16 @@ const OrganizationSelector = ({ onConfirm }: OrganizationSelectorProps) => {
   const [confirmed, setConfirmed] = useState<Organization>()
   const {
     data: list,
-    error,
+    error: listError,
     mutate,
   } = OrganizationAPI.useList(
     { query, page, size: 5, sortOrder: SortOrder.Desc },
     swrConfig(),
   )
-  const isLoading = !list && !error
-  const isError = !list && error
-  const isEmpty = list && !error && list.totalElements === 0
-  const isSuccess = list && !error && list.totalElements > 0
+  const isListLoading = !list && !listError
+  const isListError = !list && listError
+  const isListEmpty = list && !listError && list.totalElements === 0
+  const isListReady = list && !listError && list.totalElements > 0
 
   useEffect(() => {
     mutate().then()
@@ -119,14 +119,14 @@ const OrganizationSelector = ({ onConfirm }: OrganizationSelectorProps) => {
                 query={query}
                 onChange={handleSearchInputChange}
               />
-              {isLoading ? <SectionSpinner /> : null}
-              {isError ? (
+              {isListLoading ? <SectionSpinner /> : null}
+              {isListError ? (
                 <SectionError text="Failed to load organizations." />
               ) : null}
-              {isEmpty ? (
+              {isListEmpty ? (
                 <SectionPlaceholder text="There are no organizations." />
               ) : null}
-              {isSuccess ? (
+              {isListReady ? (
                 <div
                   className={cx(
                     'flex',

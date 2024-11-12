@@ -41,10 +41,10 @@ const Mosaic = () => {
   const { data: file, error: fileError } = FileAPI.useGet(id, swrConfig())
   const isFileLoading = !file && !fileError
   const isFileError = !file && fileError
-  const isFileSuccess = file && !fileError
+  const isFileReady = file && !fileError
   const isInfoLoading = !info && !infoError
   const isInfoError = !info && infoError
-  const isInfoSuccess = info && !infoError
+  const isInfoReady = info && !infoError
 
   useEffect(() => {
     if (file?.snapshot?.task?.isPending) {
@@ -71,11 +71,11 @@ const Mosaic = () => {
         <ModalCloseButton />
         {isFileLoading ? <SectionSpinner /> : null}
         {isFileError ? <SectionError text="Failed to load file." /> : null}
-        {isFileSuccess ? (
+        {isFileReady ? (
           <>
             {isInfoLoading ? <SectionSpinner /> : null}
             {isInfoError ? <SectionError text="Failed to load info." /> : null}
-            {isInfoSuccess ? (
+            {isInfoReady ? (
               <>{info.isAvailable ? <MosaicOverview /> : <MosaicCreate />}</>
             ) : null}
           </>

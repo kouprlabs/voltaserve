@@ -59,7 +59,7 @@ const UserSelector = ({
   const [selected, setSelected] = useState<User>()
   const {
     data: list,
-    error,
+    error: listError,
     mutate,
   } = UserAPI.useList(
     {
@@ -73,10 +73,10 @@ const UserSelector = ({
     },
     swrConfig(),
   )
-  const isLoading = !list && !error
-  const isError = !list && error
-  const isEmpty = list && !error && list.totalElements === 0
-  const isSuccess = list && !error && list.totalElements > 0
+  const isListLoading = !list && !listError
+  const isListError = !list && listError
+  const isListEmpty = list && !listError && list.totalElements === 0
+  const isListReady = list && !listError && list.totalElements > 0
 
   useEffect(() => {
     mutate().then()
@@ -134,12 +134,14 @@ const UserSelector = ({
                 query={query}
                 onChange={handleSearchInputChange}
               />
-              {isError ? <SectionError text="Failed to load users." /> : null}
-              {isLoading ? <SectionSpinner /> : null}
-              {isEmpty ? (
+              {isListError ? (
+                <SectionError text="Failed to load users." />
+              ) : null}
+              {isListLoading ? <SectionSpinner /> : null}
+              {isListEmpty ? (
                 <SectionPlaceholder text="There are no users." />
               ) : null}
-              {isSuccess ? (
+              {isListReady ? (
                 <div
                   className={cx(
                     'flex',

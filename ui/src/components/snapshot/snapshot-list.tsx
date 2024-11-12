@@ -56,7 +56,7 @@ const SnapshotList = () => {
   const [selected, setSelected] = useState<Snapshot>()
   const {
     data: list,
-    error,
+    error: listError,
     mutate: snapshotMutate,
   } = SnapshotAPI.useList(
     {
@@ -68,10 +68,10 @@ const SnapshotList = () => {
     },
     swrConfig(),
   )
-  const isLoading = !list && !error
-  const isError = !list && error
-  const isEmpty = list && !error && list.totalElements === 0
-  const isSuccess = list && !error && list.totalElements > 0
+  const isListLoading = !list && !listError
+  const isListError = !list && listError
+  const isListEmpty = list && !listError && list.totalElements === 0
+  const isListReady = list && !listError && list.totalElements > 0
 
   useEffect(() => {
     if (snapshotMutate) {
@@ -133,12 +133,14 @@ const SnapshotList = () => {
         <ModalHeader>Snapshots</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-          {isLoading ? <SectionSpinner /> : null}
-          {isError ? <SectionError text="Failed to load snapshots." /> : null}
-          {isEmpty ? (
+          {isListLoading ? <SectionSpinner /> : null}
+          {isListError ? (
+            <SectionError text="Failed to load snapshots." />
+          ) : null}
+          {isListEmpty ? (
             <SectionPlaceholder text="There are no snapshots." />
           ) : null}
-          {isSuccess ? (
+          {isListReady ? (
             <div className={cx('flex', 'flex-col', 'gap-1.5')}>
               <Table variant="simple" size="sm">
                 <colgroup>

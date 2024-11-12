@@ -20,16 +20,16 @@ const MosaicOverviewArtifacts = () => {
       ? state.ui.files.selection[0]
       : undefined,
   )
-  const { data: file, error } = FileAPI.useGet(id, swrConfig())
-  const isLoading = !file && !error
-  const isError = !file && error
-  const isSuccess = file && !error
+  const { data: file, error: fileError } = FileAPI.useGet(id, swrConfig())
+  const isFileLoading = !file && !fileError
+  const isFileError = !file && fileError
+  const isFileReady = file && !fileError
 
   return (
     <>
-      {isLoading ? <SectionSpinner /> : null}
-      {isError ? <SectionError text="Failed to load file." /> : null}
-      {isSuccess ? (
+      {isFileLoading ? <SectionSpinner /> : null}
+      {isFileError ? <SectionError text="Failed to load file." /> : null}
+      {isFileReady ? (
         <div
           className={cx(
             'flex',

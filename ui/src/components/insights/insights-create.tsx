@@ -51,10 +51,10 @@ const InsightsCreate = () => {
   }, [file, languages])
   const isFileLoading = !file && !fileError
   const isFileError = !file && fileError
-  const isFileSuccess = file && !fileError
+  const isFileReady = file && !fileError
   const isLanguagesLoading = !languages && !languagesError
   const isLanguagesError = !languages && languagesError
-  const isLanguagesSuccess = languages && !languagesError
+  const isLanguagesReady = languages && !languagesError
 
   const handleCreate = useCallback(async () => {
     if (id && language) {
@@ -80,13 +80,13 @@ const InsightsCreate = () => {
       <ModalBody>
         {isFileLoading ? <SectionSpinner /> : null}
         {isFileError ? <SectionError text="Failed to load file." /> : null}
-        {isFileSuccess ? (
+        {isFileReady ? (
           <>
             {isLanguagesLoading ? <SectionSpinner /> : null}
             {isLanguagesError ? (
               <SectionError text="Failed to load languages." />
             ) : null}
-            {isLanguagesSuccess ? (
+            {isLanguagesReady ? (
               <div
                 className={cx(
                   'flex',

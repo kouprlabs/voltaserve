@@ -32,7 +32,7 @@ const InsightsOverviewEntities = () => {
   const { data: metadata } = InsightsAPI.useGetInfo(id, swrConfig())
   const {
     data: list,
-    error,
+    error: listError,
     mutate,
   } = InsightsAPI.useListEntities(
     metadata ? id : undefined,
@@ -45,10 +45,10 @@ const InsightsOverviewEntities = () => {
     },
     query ? undefined : swrConfig(),
   )
-  const isLoading = !list && !error
-  const isError = !list && error
-  const isEmpty = list && !error && list.totalElements === 0
-  const isSuccess = list && !error && list.totalElements > 0
+  const isListLoading = !list && !listError
+  const isListError = !list && listError
+  const isListEmpty = list && !listError && list.totalElements === 0
+  const isListReady = list && !listError && list.totalElements > 0
 
   useEffect(() => {
     mutate().then()
@@ -72,10 +72,12 @@ const InsightsOverviewEntities = () => {
         onValue={handleSearchInputValue}
         onClear={handleSearchInputClear}
       />
-      {isLoading ? <SectionSpinner /> : null}
-      {isError ? <SectionError text="Failed to load entities." /> : null}
-      {isEmpty ? <SectionPlaceholder text="There are no entities." /> : null}
-      {isSuccess ? (
+      {isListLoading ? <SectionSpinner /> : null}
+      {isListError ? <SectionError text="Failed to load entities." /> : null}
+      {isListEmpty ? (
+        <SectionPlaceholder text="There are no entities." />
+      ) : null}
+      {isListReady ? (
         <div
           className={cx(
             'flex',

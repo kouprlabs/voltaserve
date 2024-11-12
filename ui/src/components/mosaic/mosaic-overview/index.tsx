@@ -36,17 +36,17 @@ const MosaicOverview = () => {
       : undefined,
   )
   const [isWarningVisible, setIsWarningVisible] = useState(true)
-  const { data: info, error } = MosaicAPI.useGetInfo(id, swrConfig())
-  const isLoading = !info && !error
-  const isError = !info && error
-  const isSuccess = info && !error
+  const { data: info, error: infoError } = MosaicAPI.useGetInfo(id, swrConfig())
+  const isInfoLoading = !info && !infoError
+  const isInfoError = !info && infoError
+  const isInfoReady = info && !infoError
 
   return (
     <>
       <ModalBody>
-        {isLoading ? <SectionSpinner /> : null}
-        {isError ? <SectionError text="Failed to load info." /> : null}
-        {isSuccess ? (
+        {isInfoLoading ? <SectionSpinner /> : null}
+        {isInfoError ? <SectionError text="Failed to load info." /> : null}
+        {isInfoReady ? (
           <div className={cx('flex', 'flex-col', 'gap-1.5', 'w-full')}>
             {info.isOutdated && isWarningVisible ? (
               <Alert status="warning" className={cx('flex')}>

@@ -26,12 +26,12 @@ const TaskDrawer = () => {
   const mutateList = useAppSelector((state) => state.ui.tasks.mutateList)
   const {
     data: count,
-    error,
+    error: countError,
     mutate: mutateCount,
   } = TaskAPI.useGetCount(swrConfig())
-  const isLoading = !count && !error
-  const isError = !count && error
-  const isSuccess = count && !error
+  const isCountLoading = !count && !countError
+  const isCountError = !count && countError
+  const isCountReady = count && !countError
 
   useEffect(() => {
     if (isDrawerOpen) {
@@ -67,14 +67,14 @@ const TaskDrawer = () => {
       header="Tasks"
       body={
         <>
-          {isLoading ? <SectionSpinner /> : null}
-          {isError ? <SectionError text="Failed to load count." /> : null}
-          {isSuccess ? <TasksList /> : null}
+          {isCountLoading ? <SectionSpinner /> : null}
+          {isCountError ? <SectionError text="Failed to load count." /> : null}
+          {isCountReady ? <TasksList /> : null}
         </>
       }
       footer={
         <>
-          {isSuccess ? (
+          {isCountReady ? (
             <>
               {count && count > 0 ? (
                 <Button

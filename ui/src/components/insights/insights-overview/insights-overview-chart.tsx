@@ -22,24 +22,24 @@ const InsightsOverviewChart = () => {
       ? state.ui.files.selection[0]
       : undefined,
   )
-  const { data: list, error } = InsightsAPI.useListEntities(
+  const { data: list, error: listError } = InsightsAPI.useListEntities(
     id,
     { page: 1, size: 5, sortBy: SortBy.Frequency, sortOrder: SortOrder.Desc },
     swrConfig(),
   )
-  const isLoading = !list && !error
-  const isError = !list && error
-  const isEmpty = list && !error && list.totalElements < 5
-  const isSuccess = list && !error && list.totalElements >= 5
+  const isListLoading = !list && !listError
+  const isListError = !list && listError
+  const isListEmpty = list && !listError && list.totalElements < 5
+  const isListReady = list && !listError && list.totalElements >= 5
 
   return (
     <>
-      {isLoading ? <SectionSpinner /> : null}
-      {isError ? <SectionError text="Failed to load chart." /> : null}
-      {isEmpty ? (
+      {isListLoading ? <SectionSpinner /> : null}
+      {isListError ? <SectionError text="Failed to load chart." /> : null}
+      {isListEmpty ? (
         <SectionPlaceholder text="Not enough data to render the chart." />
       ) : null}
-      {isSuccess ? (
+      {isListReady ? (
         <div
           className={cx(
             'w-full',

@@ -53,16 +53,16 @@ const GroupSelector = ({
   const [selected, setSelected] = useState<Group>()
   const {
     data: list,
-    error,
+    error: listError,
     mutate,
   } = GroupAPI.useList(
     { query, organizationId, page, size: 5, sortOrder: SortOrder.Desc },
     swrConfig(),
   )
-  const isLoading = !list && !error
-  const isError = !list && error
-  const isEmpty = list && !error && list.totalElements === 0
-  const isSuccess = list && !error && list.totalElements > 0
+  const isListLoading = !list && !listError
+  const isListError = !list && listError
+  const isListEmpty = list && !listError && list.totalElements === 0
+  const isListReady = list && !listError && list.totalElements > 0
 
   useEffect(() => {
     mutate().then()
@@ -120,12 +120,14 @@ const GroupSelector = ({
                 query={query}
                 onChange={handleSearchInputChange}
               />
-              {isLoading ? <SectionSpinner /> : null}
-              {isError ? <SectionError text="Failed to load groups." /> : null}
-              {isEmpty ? (
+              {isListLoading ? <SectionSpinner /> : null}
+              {isListError ? (
+                <SectionError text="Failed to load groups." />
+              ) : null}
+              {isListEmpty ? (
                 <SectionPlaceholder text="There are no groups." />
               ) : null}
-              {isSuccess ? (
+              {isListReady ? (
                 <div
                   className={cx(
                     'flex',

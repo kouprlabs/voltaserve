@@ -40,10 +40,10 @@ const Insights = () => {
   const { data: file, error: fileError } = FileAPI.useGet(id, swrConfig())
   const isInfoLoading = !info && !infoError
   const isInfoError = !info && infoError
-  const isInfoSuccess = info && !infoError
+  const isInfoReady = info && !infoError
   const isFileLoading = !file && !fileError
   const isFileError = !file && fileError
-  const isFileSuccess = file && !fileError
+  const isFileReady = file && !fileError
 
   useEffect(() => {
     if (mutateInfo) {
@@ -70,11 +70,11 @@ const Insights = () => {
         <ModalCloseButton />
         {isFileLoading ? <SectionSpinner /> : null}
         {isFileError ? <SectionError text="Failed to load file." /> : null}
-        {isFileSuccess ? (
+        {isFileReady ? (
           <>
             {isInfoLoading ? <SectionSpinner /> : null}
             {isInfoError ? <SectionError text="Failed to load info." /> : null}
-            {isInfoSuccess ? (
+            {isInfoReady ? (
               <>
                 {info?.isAvailable ? <InsightsOverview /> : <InsightsCreate />}
               </>
