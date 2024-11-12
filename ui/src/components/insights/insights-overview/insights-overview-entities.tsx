@@ -45,6 +45,10 @@ const InsightsOverviewEntities = () => {
     },
     query ? undefined : swrConfig(),
   )
+  const isLoading = !list && !error
+  const isError = !list && error
+  const isEmpty = list && !error && list.totalElements === 0
+  const isSuccess = list && !error && list.totalElements > 0
 
   useEffect(() => {
     mutate().then()
@@ -68,71 +72,66 @@ const InsightsOverviewEntities = () => {
         onValue={handleSearchInputValue}
         onClear={handleSearchInputClear}
       />
-      {!list && error ? <SectionError text="Failed to load entities." /> : null}
-      {!list && !error ? <SectionSpinner /> : null}
-      {list && !error ? (
-        <>
-          {list.totalElements > 0 ? (
-            <div
-              className={cx(
-                'flex',
-                'flex-col',
-                'justify-between',
-                'gap-1.5',
-                'h-[320px]',
-              )}
-            >
-              <Table variant="simple" size="sm">
-                <colgroup>
-                  <col className={cx('w-[40px]')} />
-                  <col className={cx('w-[auto]')} />
-                </colgroup>
-                <Tbody>
-                  {list.data.map((entity, index) => (
-                    <Tr key={index} className={cx('h-[52px]')}>
-                      <Td className={cx('px-0.5')}>
-                        <div
-                          className={cx(
-                            'flex',
-                            'flex-row',
-                            'items-center',
-                            'gap-1.5',
-                          )}
-                        >
-                          <span className={cx('text-base')}>{entity.text}</span>
-                          {getEntityDescription(entity.label) ? (
-                            <Tooltip label={getEntityDescription(entity.label)}>
-                              <Badge className={cx('cursor-default')}>
-                                {entity.label}
-                              </Badge>
-                            </Tooltip>
-                          ) : (
-                            <Badge className={cx('cursor-default')}>
-                              {entity.label}
-                            </Badge>
-                          )}
-                          <Badge>{entity.frequency}</Badge>
-                        </div>
-                      </Td>
-                    </Tr>
-                  ))}
-                </Tbody>
-              </Table>
-              {list.totalPages > 1 ? (
-                <div className={cx('self-end')}>
-                  <Pagination
-                    maxButtons={3}
-                    page={page}
-                    totalPages={list.totalPages}
-                    onPageChange={(value) => setPage(value)}
-                  />
-                </div>
-              ) : null}
-            </div>
-          ) : (
-            <SectionPlaceholder text="There are no entities." />
+      {isLoading ? <SectionSpinner /> : null}
+      {isError ? <SectionError text="Failed to load entities." /> : null}
+      {isEmpty ? <SectionPlaceholder text="There are no entities." /> : null}
+      {isSuccess ? (
+        <div
+          className={cx(
+            'flex',
+            'flex-col',
+            'justify-between',
+            'gap-1.5',
+            'h-[320px]',
           )}
-        </>
+        >
+          <Table variant="simple" size="sm">
+            <colgroup>
+              <col className={cx('w-[40px]')} />
+              <col className={cx('w-[auto]')} />
+            </colgroup>
+            <Tbody>
+              {list.data.map((entity, index) => (
+                <Tr key={index} className={cx('h-[52px]')}>
+                  <Td className={cx('px-0.5')}>
+                    <div
+                      className={cx(
+                        'flex',
+                        'flex-row',
+                        'items-center',
+                        'gap-1.5',
+                      )}
+                    >
+                      <span className={cx('text-base')}>{entity.text}</span>
+                      {getEntityDescription(entity.label) ? (
+                        <Tooltip label={getEntityDescription(entity.label)}>
+                          <Badge className={cx('cursor-default')}>
+                            {entity.label}
+                          </Badge>
+                        </Tooltip>
+                      ) : (
+                        <Badge className={cx('cursor-default')}>
+                          {entity.label}
+                        </Badge>
+                      )}
+                      <Badge>{entity.frequency}</Badge>
+                    </div>
+                  </Td>
+                </Tr>
+              ))}
+            </Tbody>
+          </Table>
+          {list.totalPages > 1 ? (
+            <div className={cx('self-end')}>
+              <Pagination
+                maxButtons={3}
+                page={page}
+                totalPages={list.totalPages}
+                onPageChange={(value) => setPage(value)}
+              />
+            </div>
+          ) : null}
+        </div>
       ) : null}
     </div>
   )

@@ -59,6 +59,10 @@ const GroupSelector = ({
     { query, organizationId, page, size: 5, sortOrder: SortOrder.Desc },
     swrConfig(),
   )
+  const isLoading = !list && !error
+  const isError = !list && error
+  const isEmpty = list && !error && list.totalElements === 0
+  const isSuccess = list && !error && list.totalElements > 0
 
   useEffect(() => {
     mutate().then()
@@ -116,84 +120,77 @@ const GroupSelector = ({
                 query={query}
                 onChange={handleSearchInputChange}
               />
-              {!list && error ? (
-                <SectionError text="Failed to load groups." />
+              {isLoading ? <SectionSpinner /> : null}
+              {isError ? <SectionError text="Failed to load groups." /> : null}
+              {isEmpty ? (
+                <SectionPlaceholder text="There are no groups." />
               ) : null}
-              {!list && !error ? <SectionSpinner /> : null}
-              {list && !error ? (
-                <>
-                  {list.totalElements > 0 ? (
-                    <div
-                      className={cx(
-                        'flex',
-                        'flex-col',
-                        'justify-between',
-                        'gap-1.5',
-                        'h-[320px]',
-                      )}
-                    >
-                      <Table variant="simple" size="sm">
-                        <colgroup>
-                          <col className={cx('w-[40px]')} />
-                          <col className={cx('w-[auto]')} />
-                        </colgroup>
-                        <Tbody>
-                          {list.data.map((g) => (
-                            <Tr
-                              key={g.id}
-                              className={cx(
-                                'cursor-pointer',
-                                'h-[52px]',
-                                { 'bg-gray-100': selected?.id === g.id },
-                                { 'dark:bg-gray-600': selected?.id === g.id },
-                                { 'bg-transparent': selected?.id !== g.id },
-                              )}
-                              onClick={() => setSelected(g)}
-                            >
-                              <Td className={cx('px-0.5', 'text-center')}>
-                                <Radio
-                                  size="md"
-                                  isChecked={selected?.id === g.id}
-                                />
-                              </Td>
-                              <Td className={cx('p-0.5')}>
-                                <div
-                                  className={cx(
-                                    'flex',
-                                    'flex-row',
-                                    'items-center',
-                                    'gap-1.5',
-                                  )}
-                                >
-                                  <Avatar
-                                    name={g.name}
-                                    size="sm"
-                                    className={cx('w-[40px]', 'h-[40px]')}
-                                  />
-                                  <span className={cx('text-base')}>
-                                    {g.name}
-                                  </span>
-                                </div>
-                              </Td>
-                            </Tr>
-                          ))}
-                        </Tbody>
-                      </Table>
-                      {list.totalPages > 1 ? (
-                        <div className={cx('self-end')}>
-                          <Pagination
-                            maxButtons={3}
-                            page={page}
-                            totalPages={list.totalPages}
-                            onPageChange={(value) => setPage(value)}
-                          />
-                        </div>
-                      ) : null}
-                    </div>
-                  ) : (
-                    <SectionPlaceholder text="There are no groups." />
+              {isSuccess ? (
+                <div
+                  className={cx(
+                    'flex',
+                    'flex-col',
+                    'justify-between',
+                    'gap-1.5',
+                    'h-[320px]',
                   )}
-                </>
+                >
+                  <Table variant="simple" size="sm">
+                    <colgroup>
+                      <col className={cx('w-[40px]')} />
+                      <col className={cx('w-[auto]')} />
+                    </colgroup>
+                    <Tbody>
+                      {list.data.map((g) => (
+                        <Tr
+                          key={g.id}
+                          className={cx(
+                            'cursor-pointer',
+                            'h-[52px]',
+                            { 'bg-gray-100': selected?.id === g.id },
+                            { 'dark:bg-gray-600': selected?.id === g.id },
+                            { 'bg-transparent': selected?.id !== g.id },
+                          )}
+                          onClick={() => setSelected(g)}
+                        >
+                          <Td className={cx('px-0.5', 'text-center')}>
+                            <Radio
+                              size="md"
+                              isChecked={selected?.id === g.id}
+                            />
+                          </Td>
+                          <Td className={cx('p-0.5')}>
+                            <div
+                              className={cx(
+                                'flex',
+                                'flex-row',
+                                'items-center',
+                                'gap-1.5',
+                              )}
+                            >
+                              <Avatar
+                                name={g.name}
+                                size="sm"
+                                className={cx('w-[40px]', 'h-[40px]')}
+                              />
+                              <span className={cx('text-base')}>{g.name}</span>
+                            </div>
+                          </Td>
+                        </Tr>
+                      ))}
+                    </Tbody>
+                  </Table>
+                  {list.totalPages > 1 ? (
+                    <div className={cx('self-end')}>
+                      <Pagination
+                        maxButtons={3}
+                        page={page}
+                        totalPages={list.totalPages}
+                        onPageChange={(value) => setPage(value)}
+                      />
+                    </div>
+                  ) : null}
+                </div>
               ) : null}
             </div>
           </ModalBody>

@@ -270,13 +270,13 @@ func (svc *UserService) ExtractPicture(id string, justification ExtractPictureJu
 		return nil, nil, nil, err
 	}
 	if user.GetPicture() == nil {
-		return nil, nil, nil, errorpkg.NewUserPictureNotFoundError(nil)
+		return nil, nil, nil, errorpkg.NewPictureNotFoundError(nil)
 	}
 	mime := helper.Base64ToMIME(*user.GetPicture())
 	ext := helper.Base64ToExtension(*user.GetPicture())
 	b, err := helper.Base64ToBytes(*user.GetPicture())
 	if err != nil {
-		return nil, nil, nil, errorpkg.NewUserPictureNotFoundError(nil)
+		return nil, nil, nil, errorpkg.NewPictureNotFoundError(nil)
 	}
 	return b, &ext, &mime, nil
 }
@@ -290,7 +290,7 @@ func (svc *UserService) findUserForPicture(id string, justification ExtractPictu
 		return user, nil
 	}
 	if justification.OrganizationID == nil && justification.GroupID == nil && justification.InvitationID == nil {
-		return nil, errorpkg.NewUserPictureNotFoundError(nil)
+		return nil, errorpkg.NewPictureNotFoundError(nil)
 	}
 	if justification.OrganizationID != nil {
 		org, err := svc.orgCache.Get(*justification.OrganizationID)
@@ -301,7 +301,7 @@ func (svc *UserService) findUserForPicture(id string, justification ExtractPictu
 			return nil, err
 		}
 		if !slices.Contains(org.GetMembers(), id) {
-			return nil, errorpkg.NewUserPictureNotFoundError(nil)
+			return nil, errorpkg.NewPictureNotFoundError(nil)
 		}
 	} else if justification.GroupID != nil {
 		group, err := svc.groupCache.Get(*justification.GroupID)
@@ -312,7 +312,7 @@ func (svc *UserService) findUserForPicture(id string, justification ExtractPictu
 			return nil, err
 		}
 		if !slices.Contains(group.GetMembers(), id) {
-			return nil, errorpkg.NewUserPictureNotFoundError(nil)
+			return nil, errorpkg.NewPictureNotFoundError(nil)
 		}
 	} else if justification.InvitationID != nil {
 		invitation, err := svc.invitationRepo.Find(*justification.InvitationID)
@@ -320,7 +320,7 @@ func (svc *UserService) findUserForPicture(id string, justification ExtractPictu
 			return nil, err
 		}
 		if invitation.GetOwnerID() != id {
-			return nil, errorpkg.NewUserPictureNotFoundError(nil)
+			return nil, errorpkg.NewPictureNotFoundError(nil)
 		}
 	}
 	return user, nil

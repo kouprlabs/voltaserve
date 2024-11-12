@@ -25,7 +25,7 @@ func NewGroupNotFoundError(err error) *ErrorResponse {
 		"group_not_found",
 		http.StatusNotFound,
 		"Group not found.",
-		MsgResourceNotFound,
+		"Group not found.",
 		err,
 	)
 }
@@ -35,7 +35,7 @@ func NewFileNotFoundError(err error) *ErrorResponse {
 		"file_not_found",
 		http.StatusNotFound,
 		"File not found.",
-		MsgResourceNotFound,
+		"File not found.",
 		err,
 	)
 }
@@ -45,7 +45,7 @@ func NewInvalidPathError(err error) *ErrorResponse {
 		"invalid_path",
 		http.StatusBadRequest,
 		"Invalid path.",
-		MsgInvalidRequest,
+		"An invalid request was sent to the server.",
 		err,
 	)
 }
@@ -55,7 +55,7 @@ func NewWorkspaceNotFoundError(err error) *ErrorResponse {
 		"workspace_not_found",
 		http.StatusNotFound,
 		"Workspace not found.",
-		MsgResourceNotFound,
+		"Workspace not found.",
 		err,
 	)
 }
@@ -65,7 +65,7 @@ func NewOrganizationNotFoundError(err error) *ErrorResponse {
 		"organization_not_found",
 		http.StatusNotFound,
 		"Organization not found.",
-		MsgResourceNotFound,
+		"Organization not found.",
 		err,
 	)
 }
@@ -75,7 +75,7 @@ func NewTaskNotFoundError(err error) *ErrorResponse {
 		"task_not_found",
 		http.StatusNotFound,
 		"Task not found.",
-		MsgResourceNotFound,
+		"Task not found.",
 		err,
 	)
 }
@@ -105,17 +105,17 @@ func NewUserNotFoundError(err error) *ErrorResponse {
 		"user_not_found",
 		http.StatusNotFound,
 		"User not found.",
-		MsgResourceNotFound,
+		"User not found.",
 		err,
 	)
 }
 
-func NewUserPictureNotFoundError(err error) *ErrorResponse {
+func NewPictureNotFoundError(err error) *ErrorResponse {
 	return NewErrorResponse(
-		"user_picture_not_found",
+		"Picture_not_found",
 		http.StatusNotFound,
-		"User picture not found.",
-		MsgResourceNotFound,
+		"Picture not found.",
+		"Picture not found.",
 		err,
 	)
 }
@@ -145,7 +145,7 @@ func NewInvitationNotFoundError(err error) *ErrorResponse {
 		"invitation_not_found",
 		http.StatusNotFound,
 		"Invitation not found.",
-		MsgResourceNotFound,
+		"Invitation not found.",
 		err,
 	)
 }
@@ -195,7 +195,7 @@ func NewInternalServerError(err error) *ErrorResponse {
 		"internal_server_error",
 		http.StatusInternalServerError,
 		"Internal server error.",
-		MsgSomethingWentWrong,
+		"Oops! something went wrong.",
 		err,
 	)
 }
@@ -277,7 +277,7 @@ func NewS3Error(message string) *ErrorResponse {
 		"s3_error",
 		http.StatusInternalServerError,
 		message,
-		MsgSomethingWentWrong,
+		"Storage error occurred.",
 		nil,
 	)
 }
@@ -287,7 +287,7 @@ func NewMissingQueryParamError(param string) *ErrorResponse {
 		"missing_query_param",
 		http.StatusBadRequest,
 		fmt.Sprintf("Query param '%s' is required.", param),
-		MsgInvalidRequest,
+		"An invalid request was sent to the server.",
 		nil,
 	)
 }
@@ -297,7 +297,7 @@ func NewInvalidQueryParamError(param string) *ErrorResponse {
 		"invalid_query_param",
 		http.StatusBadRequest,
 		fmt.Sprintf("Query param '%s' is invalid.", param),
-		MsgInvalidRequest,
+		"An invalid request was sent to the server.",
 		nil,
 	)
 }
@@ -332,7 +332,7 @@ func NewRequestBodyValidationError(err error) *ErrorResponse {
 		"request_validation_error",
 		http.StatusBadRequest,
 		fmt.Sprintf("Failed validation for fields: %s.", strings.Join(fields, ",")),
-		MsgInvalidRequest,
+		"An invalid request was sent to the server.",
 		err,
 	)
 }

@@ -15,6 +15,7 @@ import {
   ModalHeader,
   ModalOverlay,
 } from '@chakra-ui/react'
+import { SectionError, SectionSpinner } from '@koupr/ui'
 import FileAPI from '@/client/api/file'
 import InsightsAPI from '@/client/api/insights'
 import { swrConfig } from '@/client/options'
@@ -31,11 +32,18 @@ const Insights = () => {
       : undefined,
   )
   const isModalOpen = useAppSelector((state) => state.ui.insights.isModalOpen)
-  const { data: info, mutate: mutateInfo } = InsightsAPI.useGetInfo(
-    id,
-    swrConfig(),
-  )
-  const { data: file } = FileAPI.useGet(id, swrConfig())
+  const {
+    data: info,
+    error: infoError,
+    mutate: mutateInfo,
+  } = InsightsAPI.useGetInfo(id, swrConfig())
+  const { data: file, error: fileError } = FileAPI.useGet(id, swrConfig())
+  const isInfoLoading = !info && !infoError
+  const isInfoError = !info && infoError
+  const isInfoSuccess = info && !infoError
+  const isFileLoading = !file && !fileError
+  const isFileError = !file && fileError
+  const isFileSuccess = file && !fileError
 
   useEffect(() => {
     if (mutateInfo) {
@@ -49,10 +57,6 @@ const Insights = () => {
     }
   }, [file])
 
-  if (!info) {
-    return null
-  }
-
   return (
     <Modal
       size="xl"
@@ -64,7 +68,19 @@ const Insights = () => {
       <ModalContent>
         <ModalHeader>Insights</ModalHeader>
         <ModalCloseButton />
-        {info.isAvailable ? <InsightsOverview /> : <InsightsCreate />}
+        {isFileLoading ? <SectionSpinner /> : null}
+        {isFileError ? <SectionError text="Failed to load file." /> : null}
+        {isFileSuccess ? (
+          <>
+            {isInfoLoading ? <SectionSpinner /> : null}
+            {isInfoError ? <SectionError text="Failed to load info." /> : null}
+            {isInfoSuccess ? (
+              <>
+                {info?.isAvailable ? <InsightsOverview /> : <InsightsCreate />}
+              </>
+            ) : null}
+          </>
+        ) : null}
       </ModalContent>
     </Modal>
   )

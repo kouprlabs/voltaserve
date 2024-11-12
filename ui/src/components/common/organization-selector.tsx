@@ -29,6 +29,7 @@ import {
   Pagination,
   SearchInput,
   SectionError,
+  SectionPlaceholder,
   SectionSpinner,
 } from '@koupr/ui'
 import cx from 'classnames'
@@ -56,6 +57,10 @@ const OrganizationSelector = ({ onConfirm }: OrganizationSelectorProps) => {
     { query, page, size: 5, sortOrder: SortOrder.Desc },
     swrConfig(),
   )
+  const isLoading = !list && !error
+  const isError = !list && error
+  const isEmpty = list && !error && list.totalElements === 0
+  const isSuccess = list && !error && list.totalElements > 0
 
   useEffect(() => {
     mutate().then()
@@ -114,32 +119,14 @@ const OrganizationSelector = ({ onConfirm }: OrganizationSelectorProps) => {
                 query={query}
                 onChange={handleSearchInputChange}
               />
-              {!list && error ? (
+              {isLoading ? <SectionSpinner /> : null}
+              {isError ? (
                 <SectionError text="Failed to load organizations." />
               ) : null}
-              {!list && !error ? <SectionSpinner /> : null}
-              {list && list.totalElements === 0 ? (
-                <div
-                  className={cx(
-                    'flex',
-                    'items-center',
-                    'justify-center',
-                    'h-[320px]',
-                  )}
-                >
-                  <div
-                    className={cx(
-                      'flex',
-                      'flex-col',
-                      'items-center',
-                      'gap-1.5',
-                    )}
-                  >
-                    <span>There are no organizations.</span>
-                  </div>
-                </div>
+              {isEmpty ? (
+                <SectionPlaceholder text="There are no organizations." />
               ) : null}
-              {list && list.totalElements && !error ? (
+              {isSuccess ? (
                 <div
                   className={cx(
                     'flex',
