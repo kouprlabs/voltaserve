@@ -21,7 +21,7 @@ import {
   ModalHeader,
   ModalOverlay,
 } from '@chakra-ui/react'
-import { SectionSpinner } from '@koupr/ui'
+import { SectionError, SectionSpinner } from '@koupr/ui'
 import {
   Field,
   FieldAttributes,
@@ -55,10 +55,8 @@ const WorkspaceEditStorageCapacity = ({
 }: WorkspaceEditStorageCapacityProps) => {
   const mutate = useAppSelector((state) => state.ui.workspace.mutate)
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const { data: storageUsage, error } = StorageAPI.useGetWorkspaceUsage(
-    workspace.id,
-    swrConfig(),
-  )
+  const { data: storageUsage, error: storageUsageError } =
+    StorageAPI.useGetWorkspaceUsage(workspace.id, swrConfig())
   const formSchema = useMemo(() => {
     if (storageUsage) {
       return Yup.object().shape({
@@ -71,6 +69,9 @@ const WorkspaceEditStorageCapacity = ({
       return null
     }
   }, [storageUsage])
+  const isStorageUsageLoading = !storageUsage && !storageUsageError
+  const isStorageUsageError = !storageUsage && storageUsageError
+  const isStorageUsageReady = storageUsage && !storageUsageError
 
   useEffect(() => {
     setIsModalOpen(open)
@@ -118,10 +119,11 @@ const WorkspaceEditStorageCapacity = ({
           {({ errors, touched, isSubmitting }) => (
             <Form>
               <ModalBody>
-                {!storageUsage && !error ? (
-                  <SectionSpinner height="100px" />
+                {isStorageUsageLoading ? <SectionSpinner /> : null}
+                {isStorageUsageError ? (
+                  <SectionError text="Failed to load storage usage." />
                 ) : null}
-                {storageUsage && !error ? (
+                {isStorageUsageReady ? (
                   <Field name="storageCapacity">
                     {(props: FieldAttributes<FieldProps>) => (
                       <FormControl
