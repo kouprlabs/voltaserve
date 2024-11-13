@@ -48,12 +48,16 @@ const OrganizationListPage = () => {
   })
   const {
     data: list,
-    error,
+    error: listError,
     mutate,
   } = OrganizationAPI.useList(
     { query, page, size, sortOrder: SortOrder.Desc },
     swrConfig(),
   )
+  const isListLoading = !list && !listError
+  const isListError = !list && listError
+  const isListEmpty = list && !listError && list.totalElements === 0
+  const isListReady = list && !listError && list.totalElements > 0
 
   useEffect(() => {
     mutate().then()
@@ -72,76 +76,71 @@ const OrganizationListPage = () => {
       </Helmet>
       <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
         <Heading className={cx('text-heading')}>Organizations</Heading>
-        {!list && error ? (
+        {isListLoading ? <SectionSpinner /> : null}
+        {isListError ? (
           <SectionError text="Failed to load organizations." />
         ) : null}
-        {!list && !error ? <SectionSpinner /> : null}
-        {list && !error ? (
-          <>
-            {list.totalElements > 0 ? (
-              <>
-                <DataTable
-                  items={list.data}
-                  columns={[
-                    {
-                      title: 'Name',
-                      renderCell: (o) => (
-                        <div
-                          className={cx(
-                            'flex',
-                            'flex-row',
-                            'gap-1.5',
-                            'items-center',
-                          )}
-                        >
-                          <Avatar
-                            name={o.name}
-                            size="sm"
-                            className={cx('w-[40px]', 'h-[40px]')}
-                          />
-                          <ChakraLink
-                            as={Link}
-                            to={`/organization/${o.id}/member`}
-                            className={cx('no-underline')}
-                          >
-                            <Text noOfLines={1}>{o.name}</Text>
-                          </ChakraLink>
-                        </div>
-                      ),
-                    },
-                    {
-                      title: 'Permission',
-                      renderCell: (o) => <Badge>{o.permission}</Badge>,
-                    },
-                    {
-                      title: 'Date',
-                      renderCell: (o) => (
-                        <RelativeDate date={new Date(o.createTime)} />
-                      ),
-                    },
-                  ]}
-                  pagination={
-                    list.totalPages > 1 ? (
-                      <PagePagination
-                        totalElements={list.totalElements}
-                        totalPages={list.totalPages}
-                        page={page}
-                        size={size}
-                        steps={steps}
-                        setPage={setPage}
-                        setSize={setSize}
-                      />
-                    ) : undefined
-                  }
+        {isListEmpty ? (
+          <SectionPlaceholder
+            text="There are no organizations."
+            content={<CreateOrganizationButton />}
+          />
+        ) : null}
+        {isListReady ? (
+          <DataTable
+            items={list.data}
+            columns={[
+              {
+                title: 'Name',
+                renderCell: (o) => (
+                  <div
+                    className={cx(
+                      'flex',
+                      'flex-row',
+                      'gap-1.5',
+                      'items-center',
+                    )}
+                  >
+                    <Avatar
+                      name={o.name}
+                      size="sm"
+                      className={cx('w-[40px]', 'h-[40px]')}
+                    />
+                    <ChakraLink
+                      as={Link}
+                      to={`/organization/${o.id}/member`}
+                      className={cx('no-underline')}
+                    >
+                      <Text noOfLines={1}>{o.name}</Text>
+                    </ChakraLink>
+                  </div>
+                ),
+              },
+              {
+                title: 'Permission',
+                renderCell: (o) => <Badge>{o.permission}</Badge>,
+              },
+              {
+                title: 'Date',
+                renderCell: (o) => (
+                  <RelativeDate date={new Date(o.createTime)} />
+                ),
+              },
+            ]}
+            pagination={
+              list.totalPages > 1 ? (
+                <PagePagination
+                  totalElements={list.totalElements}
+                  totalPages={list.totalPages}
+                  page={page}
+                  size={size}
+                  steps={steps}
+                  setPage={setPage}
+                  setSize={setSize}
                 />
-              </>
-            ) : (
-              <SectionPlaceholder
-                text="There are no organizations."
-                content={<CreateOrganizationButton />}
-              />
-            )}
-          </>
+              ) : undefined
+            }
+          />
         ) : null}
       </div>
     </>

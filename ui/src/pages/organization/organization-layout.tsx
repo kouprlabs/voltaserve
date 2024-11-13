@@ -10,6 +10,7 @@
 import { useEffect, useState } from 'react'
 import { Outlet, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { Heading, Tab, TabList, Tabs } from '@chakra-ui/react'
+import { SectionError, SectionSpinner } from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import OrganizationAPI from '@/client/api/organization'
@@ -23,8 +24,15 @@ const OrganizationLayout = () => {
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
   const { id } = useParams()
-  const { data: org, mutate } = OrganizationAPI.useGet(id, swrConfig())
+  const {
+    data: org,
+    error: orgError,
+    mutate,
+  } = OrganizationAPI.useGet(id, swrConfig())
   const [tabIndex, setTabIndex] = useState(0)
+  const isOrgLoading = !org && !orgError
+  const isOrgError = !org && orgError
+  const isOrgReady = org && !orgError
 
   useEffect(() => {
     const segments = location.pathname.split('/')
@@ -50,31 +58,37 @@ const OrganizationLayout = () => {
 
   return (
     <>
-      <Helmet>
-        <title>{org.name}</title>
-      </Helmet>
-      <div className={cx('flex', 'flex-col', 'gap-3.5')}>
-        <Heading className={cx('text-heading', 'shrink-0')} noOfLines={1}>
-          {org.name}
-        </Heading>
-        <Tabs variant="solid-rounded" colorScheme="gray" index={tabIndex}>
-          <TabList>
-            <Tab onClick={() => navigate(`/organization/${id}/member`)}>
-              Members
-            </Tab>
-            <Tab
-              onClick={() => navigate(`/organization/${id}/invitation`)}
-              display={geOwnerPermission(org.permission) ? 'auto' : 'none'}
-            >
-              Invitations
-            </Tab>
-            <Tab onClick={() => navigate(`/organization/${id}/settings`)}>
-              Settings
-            </Tab>
-          </TabList>
-        </Tabs>
-        <Outlet />
-      </div>
+      {isOrgLoading ? <SectionSpinner /> : null}
+      {isOrgError ? <SectionError text="Failed to load organization." /> : null}
+      {isOrgReady ? (
+        <>
+          <Helmet>
+            <title>{org.name}</title>
+          </Helmet>
+          <div className={cx('flex', 'flex-col', 'gap-3.5')}>
+            <Heading className={cx('text-heading', 'shrink-0')} noOfLines={1}>
+              {org.name}
+            </Heading>
+            <Tabs variant="solid-rounded" colorScheme="gray" index={tabIndex}>
+              <TabList>
+                <Tab onClick={() => navigate(`/organization/${id}/member`)}>
+                  Members
+                </Tab>
+                <Tab
+                  onClick={() => navigate(`/organization/${id}/invitation`)}
+                  display={geOwnerPermission(org.permission) ? 'auto' : 'none'}
+                >
+                  Invitations
+                </Tab>
+                <Tab onClick={() => navigate(`/organization/${id}/settings`)}>
+                  Settings
+                </Tab>
+              </TabList>
+            </Tabs>
+            <Outlet />
+          </div>
+        </>
+      ) : null}
     </>
   )
 }

@@ -62,6 +62,13 @@ const OrganizationInvitationsPage = () => {
   )
   const [isInviteMembersModalOpen, setIsInviteMembersModalOpen] =
     useState(false)
+  const isOrgLoading = !org && !orgError
+  const isOrgError = !org && orgError
+  const isOrgReady = org && !orgError
+  const isListLoading = !list && !listError
+  const isListError = !list && listError
+  const isListEmpty = list && !listError && list.totalElements === 0
+  const isListReady = list && !listError && list.totalElements > 0
 
   const handleResend = useCallback(
     async (invitationId: string) => {
@@ -91,87 +98,77 @@ const OrganizationInvitationsPage = () => {
 
   return (
     <>
-      {!org && orgError ? (
-        <SectionError text="Failed to load organization." />
-      ) : null}
-      {org && !orgError ? (
+      {isOrgLoading ? <SectionSpinner /> : null}
+      {isOrgError ? <SectionError text="Failed to load organization." /> : null}
+      {isOrgReady ? (
         <>
-          {!list && listError && org && !orgError ? (
+          {isListLoading ? <SectionSpinner /> : null}
+          {isListError ? (
             <SectionError text="Failed to load invitations." />
           ) : null}
-          {!list && !listError ? <SectionSpinner /> : null}
-          {list && !listError ? (
-            <>
-              {list.totalElements > 0 ? (
-                <>
-                  <DataTable
-                    items={list.data}
-                    columns={[
-                      {
-                        title: 'Email',
-                        renderCell: (i) => (
-                          <Text>{truncateMiddle(i.email, 50)}</Text>
-                        ),
-                      },
-                      {
-                        title: 'Status',
-                        renderCell: (i) => (
-                          <OrganizationStatus value={i.status} />
-                        ),
-                      },
-                      {
-                        title: 'Date',
-                        renderCell: (i) => (
-                          <RelativeDate date={new Date(i.createTime)} />
-                        ),
-                      },
-                    ]}
-                    actions={[
-                      {
-                        label: 'Resend',
-                        icon: <IconSend />,
-                        onClick: (i) => handleResend(i.id),
-                      },
-                      {
-                        label: 'Delete',
-                        icon: <IconDelete />,
-                        isDestructive: true,
-                        onClick: (i) => handleDelete(i.id),
-                      },
-                    ]}
-                    pagination={
-                      list.totalPages ? (
-                        <PagePagination
-                          totalElements={list.totalElements}
-                          totalPages={list.totalPages}
-                          page={page}
-                          size={size}
-                          steps={steps}
-                          setPage={setPage}
-                          setSize={setSize}
-                        />
-                      ) : undefined
-                    }
+          {isListEmpty ? (
+            <SectionPlaceholder
+              text="There are no invitations."
+              content={
+                geEditorPermission(org.permission) ? (
+                  <Button
+                    leftIcon={<IconPersonAdd />}
+                    onClick={() => {
+                      setIsInviteMembersModalOpen(true)
+                    }}
+                  >
+                    Invite Members
+                  </Button>
+                ) : undefined
+              }
+            />
+          ) : null}
+          {isListReady ? (
+            <DataTable
+              items={list.data}
+              columns={[
+                {
+                  title: 'Email',
+                  renderCell: (i) => <Text>{truncateMiddle(i.email, 50)}</Text>,
+                },
+                {
+                  title: 'Status',
+                  renderCell: (i) => <OrganizationStatus value={i.status} />,
+                },
+                {
+                  title: 'Date',
+                  renderCell: (i) => (
+                    <RelativeDate date={new Date(i.createTime)} />
+                  ),
+                },
+              ]}
+              actions={[
+                {
+                  label: 'Resend',
+                  icon: <IconSend />,
+                  onClick: (i) => handleResend(i.id),
+                },
+                {
+                  label: 'Delete',
+                  icon: <IconDelete />,
+                  isDestructive: true,
+                  onClick: (i) => handleDelete(i.id),
+                },
+              ]}
+              pagination={
+                list.totalPages ? (
+                  <PagePagination
+                    totalElements={list.totalElements}
+                    totalPages={list.totalPages}
+                    page={page}
+                    size={size}
+                    steps={steps}
+                    setPage={setPage}
+                    setSize={setSize}
                   />
-                </>
-              ) : (
-                <SectionPlaceholder
-                  text="This organization has no invitations."
-                  content={
-                    geEditorPermission(org.permission) ? (
-                      <Button
-                        leftIcon={<IconPersonAdd />}
-                        onClick={() => {
-                          setIsInviteMembersModalOpen(true)
-                        }}
-                      >
-                        Invite Members
-                      </Button>
-                    ) : undefined
-                  }
-                />
-              )}
-            </>
+                ) : undefined
+              }
+            />
           ) : null}
           <OrganizationInviteMembers
             open={isInviteMembersModalOpen}
