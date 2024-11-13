@@ -52,10 +52,6 @@ const OrganizationLayout = () => {
     }
   }, [mutate, dispatch])
 
-  if (!org) {
-    return null
-  }
-
   return (
     <>
       {isOrgLoading ? <SectionSpinner /> : null}
