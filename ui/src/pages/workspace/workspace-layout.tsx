@@ -10,6 +10,7 @@
 import { useEffect, useState } from 'react'
 import { Outlet, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { Heading, Tab, TabList, Tabs } from '@chakra-ui/react'
+import { SectionError, SectionSpinner } from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import WorkspaceAPI from '@/client/api/workspace'
@@ -22,8 +23,15 @@ const WorkspaceLayout = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
-  const { data: workspace, mutate } = WorkspaceAPI.useGet(id, swrConfig())
+  const {
+    data: workspace,
+    error: workspaceError,
+    isLoading: isWorkspaceLoading,
+    mutate,
+  } = WorkspaceAPI.useGet(id, swrConfig())
   const [tabIndex, setTabIndex] = useState(0)
+  const isWorkspaceError = !workspace && workspaceError
+  const isWorkspaceReady = workspace && !workspaceError
 
   useEffect(() => {
     const segments = location.pathname.split('/')
@@ -47,29 +55,37 @@ const WorkspaceLayout = () => {
 
   return (
     <>
-      <Helmet>
-        <title>{workspace.name}</title>
-      </Helmet>
-      <div className={cx('flex', 'flex-col', 'gap-2', 'h-full')}>
-        <Heading className={cx('text-heading', 'shrink-0')} noOfLines={1}>
-          {workspace.name}
-        </Heading>
-        <Tabs variant="solid-rounded" colorScheme="gray" index={tabIndex}>
-          <TabList>
-            <Tab
-              onClick={() =>
-                navigate(`/workspace/${id}/file/${workspace.rootId}`)
-              }
-            >
-              Files
-            </Tab>
-            <Tab onClick={() => navigate(`/workspace/${id}/settings`)}>
-              Settings
-            </Tab>
-          </TabList>
-        </Tabs>
-        <Outlet />
-      </div>
+      {isWorkspaceLoading ? <SectionSpinner /> : null}
+      {isWorkspaceError ? (
+        <SectionError text="Failed to load workspace." />
+      ) : null}
+      {isWorkspaceReady ? (
+        <>
+          <Helmet>
+            <title>{workspace.name}</title>
+          </Helmet>
+          <div className={cx('flex', 'flex-col', 'gap-2', 'h-full')}>
+            <Heading className={cx('text-heading', 'shrink-0')} noOfLines={1}>
+              {workspace.name}
+            </Heading>
+            <Tabs variant="solid-rounded" colorScheme="gray" index={tabIndex}>
+              <TabList>
+                <Tab
+                  onClick={() =>
+                    navigate(`/workspace/${id}/file/${workspace.rootId}`)
+                  }
+                >
+                  Files
+                </Tab>
+                <Tab onClick={() => navigate(`/workspace/${id}/settings`)}>
+                  Settings
+                </Tab>
+              </TabList>
+            </Tabs>
+            <Outlet />
+          </div>
+        </>
+      ) : null}
     </>
   )
 }

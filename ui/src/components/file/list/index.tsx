@@ -9,6 +9,7 @@
 // licenses/AGPL.txt.
 import { MouseEvent, useCallback, useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
+import { SectionPlaceholder, SectionSpinner } from '@koupr/ui'
 import {
   DndContext,
   useSensors,
@@ -229,17 +230,7 @@ const FileList = ({ list, scale }: FileListProps) => {
           onDragEnd={handleDragEnd}
         >
           {list.totalElements === 0 ? (
-            <div
-              className={cx(
-                'flex',
-                'items-center',
-                'justify-center',
-                'w-full',
-                'h-[300px]',
-              )}
-            >
-              <span>There are no items.</span>
-            </div>
+            <SectionPlaceholder text="There are no items." />
           ) : null}
           {viewType === FileViewType.Grid && list.totalElements > 0 ? (
             <div

@@ -66,154 +66,149 @@ const AccountSettingsPage = () => {
       {isUserError ? <SectionError text="Failed to load user." /> : null}
       {isUserReady ? (
         <>
-          {isStorageUsageLoading ? <SectionSpinner /> : null}
-          {isStorageUsageError ? (
-            <SectionError text="Failed to load storage usage." />
-          ) : null}
-          {isStorageUsageReady ? (
-            <Form
-              sections={[
-                {
-                  title: 'Storage',
-                  content: (
-                    <>
-                      {storageUsageError ? (
-                        <span>Failed to load storage usage.</span>
-                      ) : null}
-                      {storageUsage && !storageUsageError ? (
-                        <>
-                          <span>
-                            {prettyBytes(storageUsage.bytes)} of{' '}
-                            {prettyBytes(storageUsage.maxBytes)} used
-                          </span>
-                          <Progress value={storageUsage.percentage} hasStripe />
-                        </>
-                      ) : null}
-                      {!(storageUsage && !storageUsageError) ? (
-                        <>
-                          <span>Calculating…</span>
-                          <Progress value={0} hasStripe />
-                        </>
-                      ) : null}
-                    </>
-                  ),
-                },
-                {
-                  title: 'Basics',
-                  rows: [
-                    {
-                      label: 'Full name',
-                      content: (
-                        <>
-                          <span>{truncateEnd(user.fullName, 50)}</span>
-                          <EditButton
-                            title="Edit name"
-                            aria-label="Edit name"
-                            onClick={() => setIsFullNameModalOpen(true)}
-                          />
-                        </>
-                      ),
-                    },
-                  ],
-                },
-                {
-                  title: 'Credentials',
-                  rows: [
-                    {
-                      label: 'Email',
-                      content: (
-                        <>
-                          {user.pendingEmail ? (
-                            <div
-                              className={cx(
-                                'flex',
-                                'flex-row',
-                                'gap-0.5',
-                                'items-center',
-                              )}
-                            >
-                              <Tooltip label="Please check your inbox to confirm your email.">
-                                <div
-                                  className={cx(
-                                    'flex',
-                                    'items-center',
-                                    'justify-center',
-                                    'cursor-default',
-                                  )}
-                                >
-                                  <IconWarning
-                                    className={cx('text-yellow-400')}
-                                  />
-                                </div>
-                              </Tooltip>
-                              <span>
-                                {truncateMiddle(user.pendingEmail, 50)}
-                              </span>
-                            </div>
-                          ) : null}
-                          {!user.pendingEmail ? (
-                            <span>
-                              {truncateMiddle(
-                                user.pendingEmail || user.email,
-                                50,
-                              )}
-                            </span>
-                          ) : null}
-                          <EditButton
-                            title="Edit email"
-                            aria-label="Edit email"
-                            onClick={() => setIsEmailModalOpen(true)}
-                          />
-                        </>
-                      ),
-                    },
-                    {
-                      label: 'Password',
-                      content: (
+          <Form
+            sections={[
+              {
+                title: 'Storage',
+                content: (
+                  <>
+                    {isStorageUsageError ? (
+                      <SectionError
+                        text="Failed to load storage usage."
+                        height="auto"
+                      />
+                    ) : null}
+                    {isStorageUsageReady ? (
+                      <>
+                        <span>
+                          {prettyBytes(storageUsage.bytes)} of{' '}
+                          {prettyBytes(storageUsage.maxBytes)} used
+                        </span>
+                        <Progress value={storageUsage.percentage} hasStripe />
+                      </>
+                    ) : null}
+                    {isStorageUsageLoading ? (
+                      <>
+                        <span>Calculating…</span>
+                        <Progress value={0} hasStripe />
+                      </>
+                    ) : null}
+                  </>
+                ),
+              },
+              {
+                title: 'Basics',
+                rows: [
+                  {
+                    label: 'Full name',
+                    content: (
+                      <>
+                        <span>{truncateEnd(user.fullName, 50)}</span>
                         <EditButton
-                          title="Change password"
-                          aria-label="Change password"
-                          onClick={() => setIsPasswordModalOpen(true)}
+                          title="Edit name"
+                          aria-label="Edit name"
+                          onClick={() => setIsFullNameModalOpen(true)}
                         />
-                      ),
-                    },
-                  ],
-                },
-                {
-                  title: 'Theme',
-                  rows: [
-                    {
-                      label: 'Dark mode',
-                      content: (
-                        <Switch
-                          isChecked={colorMode === 'dark'}
-                          onChange={() => toggleColorMode()}
+                      </>
+                    ),
+                  },
+                ],
+              },
+              {
+                title: 'Credentials',
+                rows: [
+                  {
+                    label: 'Email',
+                    content: (
+                      <>
+                        {user.pendingEmail ? (
+                          <div
+                            className={cx(
+                              'flex',
+                              'flex-row',
+                              'gap-0.5',
+                              'items-center',
+                            )}
+                          >
+                            <Tooltip label="Please check your inbox to confirm your email.">
+                              <div
+                                className={cx(
+                                  'flex',
+                                  'items-center',
+                                  'justify-center',
+                                  'cursor-default',
+                                )}
+                              >
+                                <IconWarning
+                                  className={cx('text-yellow-400')}
+                                />
+                              </div>
+                            </Tooltip>
+                            <span>{truncateMiddle(user.pendingEmail, 50)}</span>
+                          </div>
+                        ) : null}
+                        {!user.pendingEmail ? (
+                          <span>
+                            {truncateMiddle(
+                              user.pendingEmail || user.email,
+                              50,
+                            )}
+                          </span>
+                        ) : null}
+                        <EditButton
+                          title="Edit email"
+                          aria-label="Edit email"
+                          onClick={() => setIsEmailModalOpen(true)}
                         />
-                      ),
-                    },
-                  ],
-                },
-                {
-                  title: 'Advanced',
-                  rows: [
-                    {
-                      label: 'Delete account',
-                      content: (
-                        <IconButton
-                          icon={<IconDelete />}
-                          variant="solid"
-                          colorScheme="red"
-                          title="Delete account"
-                          aria-label="Delete account"
-                          onClick={() => setIsDeleteModalOpen(true)}
-                        />
-                      ),
-                    },
-                  ],
-                },
-              ]}
-            />
-          ) : null}
+                      </>
+                    ),
+                  },
+                  {
+                    label: 'Password',
+                    content: (
+                      <EditButton
+                        title="Change password"
+                        aria-label="Change password"
+                        onClick={() => setIsPasswordModalOpen(true)}
+                      />
+                    ),
+                  },
+                ],
+              },
+              {
+                title: 'Theme',
+                rows: [
+                  {
+                    label: 'Dark mode',
+                    content: (
+                      <Switch
+                        isChecked={colorMode === 'dark'}
+                        onChange={() => toggleColorMode()}
+                      />
+                    ),
+                  },
+                ],
+              },
+              {
+                title: 'Advanced',
+                rows: [
+                  {
+                    label: 'Delete account',
+                    content: (
+                      <IconButton
+                        icon={<IconDelete />}
+                        variant="solid"
+                        colorScheme="red"
+                        title="Delete account"
+                        aria-label="Delete account"
+                        onClick={() => setIsDeleteModalOpen(true)}
+                      />
+                    ),
+                  },
+                ],
+              },
+            ]}
+          />
           <AccountEditFullName
             open={isFullNameModalOpen}
             user={user}
