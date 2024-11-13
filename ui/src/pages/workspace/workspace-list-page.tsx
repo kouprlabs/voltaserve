@@ -14,9 +14,16 @@ import {
   useNavigate,
   useSearchParams,
 } from 'react-router-dom'
-import { Heading, Link as ChakraLink, Avatar, Badge } from '@chakra-ui/react'
+import {
+  Heading,
+  Link as ChakraLink,
+  Avatar,
+  Badge,
+  Button,
+} from '@chakra-ui/react'
 import {
   DataTable,
+  IconAdd,
   PagePagination,
   RelativeDate,
   SectionError,
@@ -30,7 +37,6 @@ import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import WorkspaceAPI, { SortOrder } from '@/client/api/workspace'
 import { swrConfig } from '@/client/options'
-import { CreateWorkspaceButton } from '@/components/app-bar/app-bar-buttons'
 import { workspacePaginationStorage } from '@/infra/pagination'
 import { decodeQuery } from '@/lib/helpers/query'
 import { useAppDispatch } from '@/store/hook'
@@ -89,7 +95,16 @@ const WorkspaceListPage = () => {
         {isListEmpty ? (
           <SectionPlaceholder
             text="There are no workspaces."
-            content={<CreateWorkspaceButton />}
+            content={
+              <Button
+                as={Link}
+                to="/new/workspace"
+                leftIcon={<IconAdd />}
+                variant="solid"
+              >
+                New Workspace
+              </Button>
+            }
           />
         ) : null}
         {isListReady ? (
