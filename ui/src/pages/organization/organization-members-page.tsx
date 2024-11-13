@@ -24,6 +24,7 @@ import {
   SectionPlaceholder,
   SectionSpinner,
   Text,
+  usePageMonitor,
   usePagePagination,
 } from '@koupr/ui'
 import cx from 'classnames'
@@ -83,6 +84,11 @@ const OrganizationMembersPage = () => {
   const [userToRemove, setUserToRemove] = useState<User>()
   const [isRemoveMemberModalOpen, setIsRemoveMemberModalOpen] =
     useState<boolean>(false)
+  const { hasPagination } = usePageMonitor({
+    totalPages: list?.totalPages ?? 1,
+    totalElements: list?.totalElements ?? 0,
+    steps,
+  })
   const isOrgError = !org && orgError
   const isOrgReady = org && !orgError
   const isListError = !list && listError
@@ -163,7 +169,7 @@ const OrganizationMembersPage = () => {
                 },
               ]}
               pagination={
-                list.totalPages > 1 ? (
+                hasPagination ? (
                   <PagePagination
                     totalElements={list.totalElements}
                     totalPages={list.totalPages}

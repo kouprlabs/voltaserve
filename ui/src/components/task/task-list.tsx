@@ -13,6 +13,7 @@ import {
   SectionError,
   SectionPlaceholder,
   SectionSpinner,
+  usePageMonitor,
 } from '@koupr/ui'
 import cx from 'classnames'
 import TaskAPI, { SortOrder } from '@/client/api/task'
@@ -24,12 +25,18 @@ import TaskDrawerItem from './task-item'
 const TasksList = () => {
   const dispatch = useAppDispatch()
   const [page, setPage] = useState(1)
+  const size = 5
   const {
     data: list,
     error: listError,
     isLoading: isListLoading,
     mutate: mutateList,
-  } = TaskAPI.useList({ page, size: 5, sortOrder: SortOrder.Asc }, swrConfig())
+  } = TaskAPI.useList({ page, size, sortOrder: SortOrder.Asc }, swrConfig())
+  const { hasPageSwitcher } = usePageMonitor({
+    totalPages: list?.totalPages ?? 1,
+    totalElements: list?.totalElements ?? 0,
+    steps: [size],
+  })
   const isListError = !list && listError
   const isListEmpty = list && !listError && list.totalElements === 0
   const isListReady = list && !listError && list.totalElements > 0
@@ -67,7 +74,7 @@ const TasksList = () => {
               <TaskDrawerItem key={task.id} task={task} />
             ))}
           </div>
-          {list.totalPages > 1 ? (
+          {hasPageSwitcher ? (
             <Pagination
               size="sm"
               maxButtons={3}

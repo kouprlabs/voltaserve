@@ -25,6 +25,7 @@ import {
   usePagePagination,
   SectionError,
   SectionPlaceholder,
+  usePageMonitor,
 } from '@koupr/ui'
 import cx from 'classnames'
 import GroupAPI from '@/client/api/group'
@@ -79,6 +80,11 @@ const GroupMembersPage = () => {
   const [isAddMembersModalOpen, setIsAddMembersModalOpen] = useState(false)
   const [isRemoveMemberModalOpen, setIsRemoveMemberModalOpen] =
     useState<boolean>(false)
+  const { hasPagination } = usePageMonitor({
+    totalPages: list?.totalPages ?? 1,
+    totalElements: list?.totalElements ?? 0,
+    steps,
+  })
   const isGroupError = !group && groupError
   const isGroupReady = group && !groupError
   const isListError = !list && listError
@@ -167,7 +173,7 @@ const GroupMembersPage = () => {
                 },
               ]}
               pagination={
-                list.totalPages > 1 ? (
+                hasPagination ? (
                   <PagePagination
                     totalElements={list.totalElements}
                     totalPages={list.totalPages}

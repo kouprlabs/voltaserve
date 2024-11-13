@@ -31,6 +31,7 @@ import {
   SectionError,
   SectionPlaceholder,
   SectionSpinner,
+  usePageMonitor,
 } from '@koupr/ui'
 import cx from 'classnames'
 import UserAPI, { SortOrder, User } from '@/client/api/user'
@@ -57,6 +58,7 @@ const UserSelector = ({
   const [page, setPage] = useState(1)
   const [query, setQuery] = useState('')
   const [selected, setSelected] = useState<User>()
+  const size = 5
   const {
     data: list,
     error: listError,
@@ -69,11 +71,16 @@ const UserSelector = ({
       groupId,
       excludeGroupMembers,
       page,
-      size: 5,
+      size,
       sortOrder: SortOrder.Desc,
     },
     swrConfig(),
   )
+  const { hasPageSwitcher } = usePageMonitor({
+    totalPages: list?.totalPages ?? 1,
+    totalElements: list?.totalElements ?? 0,
+    steps: [size],
+  })
   const isListError = !list && listError
   const isListEmpty = list && !listError && list.totalElements === 0
   const isListReady = list && !listError && list.totalElements > 0
@@ -212,7 +219,7 @@ const UserSelector = ({
                       ))}
                     </Tbody>
                   </Table>
-                  {list.totalPages > 1 ? (
+                  {hasPageSwitcher ? (
                     <div className={cx('self-end')}>
                       <Pagination
                         maxButtons={3}

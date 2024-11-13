@@ -31,6 +31,7 @@ import {
   SectionError,
   SectionPlaceholder,
   SectionSpinner,
+  usePageMonitor,
 } from '@koupr/ui'
 import cx from 'classnames'
 import GroupAPI, { Group, SortOrder } from '@/client/api/group'
@@ -51,15 +52,21 @@ const GroupSelector = ({
   const [page, setPage] = useState(1)
   const [query, setQuery] = useState('')
   const [selected, setSelected] = useState<Group>()
+  const size = 5
   const {
     data: list,
     error: listError,
     isLoading: isListLoading,
     mutate,
   } = GroupAPI.useList(
-    { query, organizationId, page, size: 5, sortOrder: SortOrder.Desc },
+    { query, organizationId, page, size, sortOrder: SortOrder.Desc },
     swrConfig(),
   )
+  const { hasPageSwitcher } = usePageMonitor({
+    totalPages: list?.totalPages ?? 1,
+    totalElements: list?.totalElements ?? 0,
+    steps: [size],
+  })
   const isListError = !list && listError
   const isListEmpty = list && !listError && list.totalElements === 0
   const isListReady = list && !listError && list.totalElements > 0
@@ -182,7 +189,7 @@ const GroupSelector = ({
                       ))}
                     </Tbody>
                   </Table>
-                  {list.totalPages > 1 ? (
+                  {hasPageSwitcher ? (
                     <div className={cx('self-end')}>
                       <Pagination
                         maxButtons={3}

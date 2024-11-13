@@ -15,6 +15,7 @@ import {
   SectionError,
   SectionPlaceholder,
   SectionSpinner,
+  usePageMonitor,
 } from '@koupr/ui'
 import cx from 'classnames'
 import InsightsAPI, { SortBy, SortOrder } from '@/client/api/insights'
@@ -30,6 +31,7 @@ const InsightsOverviewEntities = () => {
   const [page, setPage] = useState(1)
   const [query, setQuery] = useState<string | undefined>(undefined)
   const { data: metadata } = InsightsAPI.useGetInfo(id, swrConfig())
+  const size = 5
   const {
     data: list,
     error: listError,
@@ -40,12 +42,17 @@ const InsightsOverviewEntities = () => {
     {
       query,
       page,
-      size: 5,
+      size,
       sortBy: SortBy.Frequency,
       sortOrder: SortOrder.Desc,
     },
     query ? undefined : swrConfig(),
   )
+  const { hasPageSwitcher } = usePageMonitor({
+    totalPages: list?.totalPages ?? 1,
+    totalElements: list?.totalElements ?? 0,
+    steps: [size],
+  })
   const isListError = !list && listError
   const isListEmpty = list && !listError && list.totalElements === 0
   const isListReady = list && !listError && list.totalElements > 0
@@ -123,7 +130,7 @@ const InsightsOverviewEntities = () => {
               ))}
             </Tbody>
           </Table>
-          {list.totalPages > 1 ? (
+          {hasPageSwitcher ? (
             <div className={cx('self-end')}>
               <Pagination
                 maxButtons={3}

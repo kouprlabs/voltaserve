@@ -24,6 +24,7 @@ import {
   SectionPlaceholder,
   SectionSpinner,
   Text,
+  usePageMonitor,
   usePagePagination,
 } from '@koupr/ui'
 import cx from 'classnames'
@@ -57,6 +58,11 @@ const ConsolePanelOrganizations = () => {
     { page, size, query },
     swrConfig(),
   )
+  const { hasPagination } = usePageMonitor({
+    totalPages: list?.totalPages ?? 1,
+    totalElements: list?.totalElements ?? 0,
+    steps,
+  })
   const isListError = !list && listError
   const isListEmpty = list && !listError && list.totalElements === 0
   const isListReady = list && !listError && list.totalElements > 0
@@ -144,7 +150,7 @@ const ConsolePanelOrganizations = () => {
               },
             ]}
             pagination={
-              list.totalPages > 1 ? (
+              hasPagination ? (
                 <PagePagination
                   totalElements={list.totalElements}
                   totalPages={Math.ceil(list.totalElements / size)}
