@@ -33,9 +33,7 @@ import {
   encodeFileQuery,
   encodeQuery,
 } from '@/lib/helpers/query'
-import store from '@/store/configure-store'
 import { useAppDispatch } from '@/store/hook'
-import { errorOccurred } from '@/store/ui/error'
 import { modalDidOpen as searchFilterModalDidOpen } from '@/store/ui/search-filter'
 
 const AppBarSearch = () => {
@@ -287,19 +285,8 @@ const AppBarSearch = () => {
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent<HTMLInputElement>) => {
-      if (event.key === 'Enter' && buffer.trim().length >= 3) {
-        handleSearch(buffer.trim())
-      } else if (
-        event.key === 'Enter' &&
-        buffer.trim().length > 0 &&
-        buffer.length < 3 &&
-        !isFiles
-      ) {
-        store.dispatch(
-          errorOccurred('Search query needs at least 3 characters'),
-        )
-      } else if (event.key === 'Enter' && buffer.trim().length === 0) {
-        handleClear()
+      if (event.key === 'Enter') {
+        handleSearch(buffer)
       }
     },
     [buffer, handleSearch],
