@@ -48,12 +48,16 @@ const GroupListPage = () => {
   })
   const {
     data: list,
-    error,
+    error: listError,
     mutate,
   } = GroupAPI.useList(
     { query, page, size, sortOrder: SortOrder.Desc },
     swrConfig(),
   )
+  const isListLoading = !list && !listError
+  const isListError = !list && listError
+  const isListEmpty = list && !listError && list.totalElements === 0
+  const isListReady = list && !listError && list.totalElements > 0
 
   useEffect(() => {
     mutate().then()
@@ -72,98 +76,81 @@ const GroupListPage = () => {
       </Helmet>
       <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
         <Heading className={cx('text-heading')}>Groups</Heading>
-        {error ? <SectionError text="Failed to load groups." /> : null}
-        {!list && !error ? <SectionSpinner /> : null}
-        {list && list.totalElements === 0 ? (
-          <div
-            className={cx(
-              'flex',
-              'items-center',
-              'justify-center',
-              'h-[300px]',
-            )}
-          >
-            <div className={cx('flex', 'flex-col', 'gap-1.5')}>
-              <span>There are no groups.</span>
-              <CreateGroupButton />
-            </div>
-          </div>
+        {isListLoading ? <SectionSpinner /> : null}
+        {isListError ? <SectionError text="Failed to load groups." /> : null}
+        {isListEmpty ? (
+          <SectionPlaceholder
+            text="There are no groups."
+            content={<CreateGroupButton />}
+          />
         ) : null}
-        {list && !error ? (
-          <>
-            {list.totalElements > 0 ? (
-              <>
-                <DataTable
-                  items={list.data}
-                  columns={[
-                    {
-                      title: 'Name',
-                      renderCell: (g) => (
-                        <div
-                          className={cx(
-                            'flex',
-                            'flex-row',
-                            'items-center',
-                            'gap-1.5',
-                          )}
-                        >
-                          <Avatar
-                            name={g.name}
-                            size="sm"
-                            className={cx('w-[40px]', 'h-[40px]')}
-                          />
-                          <ChakraLink
-                            as={Link}
-                            to={`/group/${g.id}/member`}
-                            className={cx('no-underline')}
-                          >
-                            <Text noOfLines={1}>{g.name}</Text>
-                          </ChakraLink>
-                        </div>
-                      ),
-                    },
-                    {
-                      title: 'Organization',
-                      renderCell: (g) => (
-                        <ChakraLink
-                          as={Link}
-                          to={`/organization/${g.organization.id}/member`}
-                          className={cx('no-underline')}
-                        >
-                          <Text noOfLines={1}>{g.organization.name}</Text>
-                        </ChakraLink>
-                      ),
-                    },
-                    {
-                      title: 'Permission',
-                      renderCell: (g) => <Badge>{g.permission}</Badge>,
-                    },
-                    {
-                      title: 'Date',
-                      renderCell: (g) => (
-                        <RelativeDate date={new Date(g.createTime)} />
-                      ),
-                    },
-                  ]}
-                  pagination={
-                    list.totalPages > 1 ? (
-                      <PagePagination
-                        totalElements={list.totalElements}
-                        totalPages={list.totalPages}
-                        page={page}
-                        size={size}
-                        steps={steps}
-                        setPage={setPage}
-                        setSize={setSize}
-                      />
-                    ) : undefined
-                  }
+        {isListReady ? (
+          <DataTable
+            items={list.data}
+            columns={[
+              {
+                title: 'Name',
+                renderCell: (g) => (
+                  <div
+                    className={cx(
+                      'flex',
+                      'flex-row',
+                      'items-center',
+                      'gap-1.5',
+                    )}
+                  >
+                    <Avatar
+                      name={g.name}
+                      size="sm"
+                      className={cx('w-[40px]', 'h-[40px]')}
+                    />
+                    <ChakraLink
+                      as={Link}
+                      to={`/group/${g.id}/member`}
+                      className={cx('no-underline')}
+                    >
+                      <Text noOfLines={1}>{g.name}</Text>
+                    </ChakraLink>
+                  </div>
+                ),
+              },
+              {
+                title: 'Organization',
+                renderCell: (g) => (
+                  <ChakraLink
+                    as={Link}
+                    to={`/organization/${g.organization.id}/member`}
+                    className={cx('no-underline')}
+                  >
+                    <Text noOfLines={1}>{g.organization.name}</Text>
+                  </ChakraLink>
+                ),
+              },
+              {
+                title: 'Permission',
+                renderCell: (g) => <Badge>{g.permission}</Badge>,
+              },
+              {
+                title: 'Date',
+                renderCell: (g) => (
+                  <RelativeDate date={new Date(g.createTime)} />
+                ),
+              },
+            ]}
+            pagination={
+              list.totalPages > 1 ? (
+                <PagePagination
+                  totalElements={list.totalElements}
+                  totalPages={list.totalPages}
+                  page={page}
+                  size={size}
+                  steps={steps}
+                  setPage={setPage}
+                  setSize={setSize}
                 />
-              </>
-            ) : (
-              <SectionPlaceholder text="There are no groups." />
-            )}
-          </>
+              ) : undefined
+            }
+          />
         ) : null}
       </div>
     </>
