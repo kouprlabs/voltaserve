@@ -49,10 +49,6 @@ const WorkspaceLayout = () => {
     }
   }, [mutate, dispatch])
 
-  if (!workspace) {
-    return null
-  }
-
   return (
     <>
       {isWorkspaceLoading ? <SectionSpinner /> : null}
