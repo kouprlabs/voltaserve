@@ -48,12 +48,16 @@ const WorkspaceListPage = () => {
   })
   const {
     data: list,
-    error,
+    error: listError,
+    isLoading: isListLoading,
     mutate,
   } = WorkspaceAPI.useList(
     { query, page, size, sortOrder: SortOrder.Desc },
     swrConfig(),
   )
+  const isListError = !list && listError
+  const isListEmpty = list && !listError && list.totalElements === 0
+  const isListReady = list && !listError && list.totalElements > 0
 
   useEffect(() => {
     mutate().then()
@@ -72,101 +76,83 @@ const WorkspaceListPage = () => {
       </Helmet>
       <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
         <Heading className={cx('text-heading')}>Workspaces</Heading>
-        {!list && error ? (
+        {isListLoading ? <SectionSpinner /> : null}
+        {isListError ? (
           <SectionError text="Failed to load workspaces." />
         ) : null}
-        {!list && !error ? <SectionSpinner /> : null}
-        {list && list.totalElements === 0 && !error ? (
-          <div
-            className={cx(
-              'flex',
-              'items-center',
-              'justify-center',
-              'h-[300px]',
-            )}
-          >
-            <div className={cx('flex', 'flex-col', 'gap-1.5', 'items-center')}>
-              <span>There are no workspaces.</span>
-              <CreateWorkspaceButton />
-            </div>
-          </div>
+        {isListEmpty ? (
+          <SectionPlaceholder
+            text="There are no workspaces."
+            content={<CreateWorkspaceButton />}
+          />
         ) : null}
-        {list && !error ? (
-          <>
-            {list.totalElements > 0 ? (
-              <DataTable
-                items={list.data}
-                columns={[
-                  {
-                    title: 'Name',
-                    renderCell: (w) => (
-                      <div
-                        className={cx(
-                          'flex',
-                          'flex-row',
-                          'gap-1.5',
-                          'items-center',
-                        )}
-                      >
-                        <Avatar
-                          name={w.name}
-                          size="sm"
-                          className={cx('w-[40px]', 'h-[40px]')}
-                        />
-                        <ChakraLink
-                          as={Link}
-                          to={`/workspace/${w.id}/file/${w.rootId}`}
-                          className={cx('no-underline')}
-                        >
-                          <Text noOfLines={1}>{w.name}</Text>
-                        </ChakraLink>
-                      </div>
-                    ),
-                  },
-                  {
-                    title: 'Organization',
-                    renderCell: (w) => (
-                      <ChakraLink
-                        as={Link}
-                        to={`/organization/${w.organization.id}/member`}
-                        className={cx('no-underline')}
-                      >
-                        <Text noOfLines={1}>{w.organization.name}</Text>
-                      </ChakraLink>
-                    ),
-                  },
-                  {
-                    title: 'Permission',
-                    renderCell: (w) => <Badge>{w.permission}</Badge>,
-                  },
-                  {
-                    title: 'Date',
-                    renderCell: (w) => (
-                      <RelativeDate date={new Date(w.createTime)} />
-                    ),
-                  },
-                ]}
-                pagination={
-                  list.totalPages > 1 ? (
-                    <PagePagination
-                      totalElements={list.totalElements}
-                      totalPages={list.totalPages}
-                      page={page}
-                      size={size}
-                      steps={steps}
-                      setPage={setPage}
-                      setSize={setSize}
+        {isListReady ? (
+          <DataTable
+            items={list.data}
+            columns={[
+              {
+                title: 'Name',
+                renderCell: (w) => (
+                  <div
+                    className={cx(
+                      'flex',
+                      'flex-row',
+                      'gap-1.5',
+                      'items-center',
+                    )}
+                  >
+                    <Avatar
+                      name={w.name}
+                      size="sm"
+                      className={cx('w-[40px]', 'h-[40px]')}
                     />
-                  ) : undefined
-                }
-              />
-            ) : (
-              <SectionPlaceholder
-                text="There are no workspaces."
-                content={<CreateWorkspaceButton />}
-              />
-            )}
-          </>
+                    <ChakraLink
+                      as={Link}
+                      to={`/workspace/${w.id}/file/${w.rootId}`}
+                      className={cx('no-underline')}
+                    >
+                      <Text noOfLines={1}>{w.name}</Text>
+                    </ChakraLink>
+                  </div>
+                ),
+              },
+              {
+                title: 'Organization',
+                renderCell: (w) => (
+                  <ChakraLink
+                    as={Link}
+                    to={`/organization/${w.organization.id}/member`}
+                    className={cx('no-underline')}
+                  >
+                    <Text noOfLines={1}>{w.organization.name}</Text>
+                  </ChakraLink>
+                ),
+              },
+              {
+                title: 'Permission',
+                renderCell: (w) => <Badge>{w.permission}</Badge>,
+              },
+              {
+                title: 'Date',
+                renderCell: (w) => (
+                  <RelativeDate date={new Date(w.createTime)} />
+                ),
+              },
+            ]}
+            pagination={
+              list.totalPages > 1 ? (
+                <PagePagination
+                  totalElements={list.totalElements}
+                  totalPages={list.totalPages}
+                  page={page}
+                  size={size}
+                  steps={steps}
+                  setPage={setPage}
+                  setSize={setSize}
+                />
+              ) : undefined
+            }
+          />
         ) : null}
       </div>
     </>

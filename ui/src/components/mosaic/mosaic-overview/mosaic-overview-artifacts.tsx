@@ -8,7 +8,7 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
 import { Button } from '@chakra-ui/react'
-import { IconOpenInNew } from '@koupr/ui'
+import { IconOpenInNew, SectionError, SectionSpinner } from '@koupr/ui'
 import cx from 'classnames'
 import FileAPI from '@/client/api/file'
 import { swrConfig } from '@/client/options'
@@ -20,32 +20,40 @@ const MosaicOverviewArtifacts = () => {
       ? state.ui.files.selection[0]
       : undefined,
   )
-  const { data: file } = FileAPI.useGet(id, swrConfig())
-
-  if (!file) {
-    return null
-  }
+  const {
+    data: file,
+    error: fileError,
+    isLoading: isFileLoading,
+  } = FileAPI.useGet(id, swrConfig())
+  const isFileError = !file && fileError
+  const isFileReady = file && !fileError
 
   return (
-    <div
-      className={cx(
-        'flex',
-        'flex-col',
-        'items-center',
-        'justify-center',
-        'gap-1',
-      )}
-    >
-      <Button
-        as="a"
-        type="button"
-        leftIcon={<IconOpenInNew />}
-        target="_blank"
-        href={`/file/${file.id}/mosaic`}
-      >
-        View Mosaic
-      </Button>
-    </div>
+    <>
+      {isFileLoading ? <SectionSpinner /> : null}
+      {isFileError ? <SectionError text="Failed to load file." /> : null}
+      {isFileReady ? (
+        <div
+          className={cx(
+            'flex',
+            'flex-col',
+            'items-center',
+            'justify-center',
+            'gap-1',
+          )}
+        >
+          <Button
+            as="a"
+            type="button"
+            leftIcon={<IconOpenInNew />}
+            target="_blank"
+            href={`/file/${file.id}/mosaic`}
+          >
+            View Mosaic
+          </Button>
+        </div>
+      ) : null}
+    </>
   )
 }
 

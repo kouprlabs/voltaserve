@@ -60,8 +60,16 @@ const ConsolePanelUser = () => {
   const [workspacePage, setWorkspacePage] = useState(1)
   const [groupPage, setGroupPage] = useState(1)
   const [orgsPage, setOrgPage] = useState(1)
-  const { data: user, error: userError } = UserAPI.useGetById(id)
-  const { data: groupList, error: groupError } = ConsoleAPI.useListGroupsByUser(
+  const {
+    data: user,
+    error: userError,
+    isLoading: isUserLoading,
+  } = UserAPI.useGetById(id)
+  const {
+    data: groupList,
+    error: groupError,
+    isLoading: isGroupListLoading,
+  } = ConsoleAPI.useListGroupsByUser(
     {
       id,
       page: groupPage,
@@ -69,30 +77,51 @@ const ConsolePanelUser = () => {
     },
     swrConfig(),
   )
-  const { data: orgList, error: orgError } =
-    ConsoleAPI.useListOrganizationsByUser(
-      {
-        id,
-        page: orgsPage,
-        size: 5,
-      },
-      swrConfig(),
-    )
-  const { data: workspaceList, error: workspaceError } =
-    ConsoleAPI.useListWorkspacesByUser(
-      {
-        id,
-        page: workspacePage,
-        size: 5,
-      },
-      swrConfig(),
-    )
+  const {
+    data: orgList,
+    error: orgError,
+    isLoading: isOrgListLoading,
+  } = ConsoleAPI.useListOrganizationsByUser(
+    {
+      id,
+      page: orgsPage,
+      size: 5,
+    },
+    swrConfig(),
+  )
+  const {
+    data: workspaceList,
+    error: workspaceError,
+    isLoading: isWorkspaceListLoading,
+  } = ConsoleAPI.useListWorkspacesByUser(
+    {
+      id,
+      page: workspacePage,
+      size: 5,
+    },
+    swrConfig(),
+  )
+  const isUserError = !user && userError
+  const isUserReady = user && !userError
+  const isGroupListError = !groupList && groupError
+  const isGroupListEmpty =
+    groupList && !groupError && groupList.totalElements === 0
+  const isGroupListReady =
+    groupList && !groupError && groupList.totalElements > 0
+  const isOrgListError = !orgList && orgError
+  const isOrgListEmpty = orgList && !orgError && orgList.totalElements === 0
+  const isOrgListReady = orgList && !orgError && orgList.totalElements > 0
+  const isWorkspaceListError = !workspaceList && workspaceError
+  const isWorkspaceListEmpty =
+    workspaceList && !workspaceError && workspaceList.totalElements === 0
+  const isWorkspaceListReady =
+    workspaceList && !workspaceError && workspaceList.totalElements > 0
 
   return (
     <>
-      {!user && userError ? <SectionError text="Failed to load user." /> : null}
-      {!user && !userError ? <SectionSpinner /> : null}
-      {user && !userError ? (
+      {isUserLoading ? <SectionSpinner /> : null}
+      {isUserError ? <SectionError text="Failed to load user." /> : null}
+      {isUserReady ? (
         <>
           <Helmet>
             <title>{user.fullName}</title>
@@ -226,11 +255,22 @@ const ConsolePanelUser = () => {
               />
             </GridItem>
             <GridItem colSpan={3}>
-              {!orgList && orgError ? (
-                <SectionError text="Failed to load organizations." />
+              {isOrgListLoading ? (
+                <ListSekeleton header="Organizations">
+                  <SectionSpinner />
+                </ListSekeleton>
               ) : null}
-              {!orgList && !orgError ? <SectionSpinner /> : null}
-              {orgList && !orgError ? (
+              {isOrgListEmpty ? (
+                <ListSekeleton header="Organizations">
+                  <SectionPlaceholder text="There are no organizations." />
+                </ListSekeleton>
+              ) : null}
+              {isOrgListError ? (
+                <ListSekeleton header="Organizations">
+                  <SectionError text="Failed to load organizations." />
+                </ListSekeleton>
+              ) : null}
+              {isOrgListReady ? (
                 <>
                   <Table>
                     <Thead>
@@ -272,55 +312,62 @@ const ConsolePanelUser = () => {
                     </Thead>
                   </Table>
                   <Divider mb={4} />
-                  {orgList.totalElements > 0 ? (
-                    <div className={cx('flex', 'flex-col', 'gap-1.5')}>
-                      {orgList.data.map((organization) => (
-                        <div
-                          key={organization.organizationId}
-                          className={cx(
-                            'flex',
-                            'flex-row',
-                            'items-center',
-                            'gap-1',
-                          )}
-                        >
-                          <Avatar
-                            name={organization.organizationName}
-                            size="sm"
-                            className={cx('w-[40px]', 'h-[40px]')}
-                          />
-                          <div className={cx('flex', 'flex-col', 'gap-0')}>
-                            <div
-                              className={cx('flex', 'items-center', 'gap-0.5')}
-                            >
-                              <Text fontWeight="bold" noOfLines={1}>
-                                {organization.organizationName}
-                              </Text>
-                              <Badge variant="outline">
-                                {organization.permission}
-                              </Badge>
-                            </div>
-                            <span className={cx('text-gray-500')}>
-                              <RelativeDate
-                                date={new Date(organization.createTime)}
-                              />
-                            </span>
+                  <div className={cx('flex', 'flex-col', 'gap-1.5')}>
+                    {orgList.data.map((organization) => (
+                      <div
+                        key={organization.organizationId}
+                        className={cx(
+                          'flex',
+                          'flex-row',
+                          'items-center',
+                          'gap-1',
+                        )}
+                      >
+                        <Avatar
+                          name={organization.organizationName}
+                          size="sm"
+                          className={cx('w-[40px]', 'h-[40px]')}
+                        />
+                        <div className={cx('flex', 'flex-col', 'gap-0')}>
+                          <div
+                            className={cx('flex', 'items-center', 'gap-0.5')}
+                          >
+                            <Text fontWeight="bold" noOfLines={1}>
+                              {organization.organizationName}
+                            </Text>
+                            <Badge variant="outline">
+                              {organization.permission}
+                            </Badge>
                           </div>
+                          <span className={cx('text-gray-500')}>
+                            <RelativeDate
+                              date={new Date(organization.createTime)}
+                            />
+                          </span>
                         </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <SectionPlaceholder text="There are no organizations." />
-                  )}
+                      </div>
+                    ))}
+                  </div>
                 </>
               ) : null}
             </GridItem>
             <GridItem colSpan={3}>
-              {!workspaceList && workspaceError ? (
-                <SectionError text="Failed to load workspaces." />
+              {isWorkspaceListLoading ? (
+                <ListSekeleton header="Workspaces">
+                  <SectionSpinner />
+                </ListSekeleton>
               ) : null}
-              {!workspaceList && !workspaceError ? <SectionSpinner /> : null}
-              {workspaceList && !workspaceError ? (
+              {isWorkspaceListError ? (
+                <ListSekeleton header="Workspaces">
+                  <SectionError text="Failed to load workspaces." />
+                </ListSekeleton>
+              ) : null}
+              {isWorkspaceListEmpty ? (
+                <ListSekeleton header="Workspaces">
+                  <SectionPlaceholder text="There are no workspaces." />
+                </ListSekeleton>
+              ) : null}
+              {isWorkspaceListReady ? (
                 <>
                   <Table>
                     <Thead>
@@ -360,55 +407,62 @@ const ConsolePanelUser = () => {
                     </Thead>
                   </Table>
                   <Divider mb={4} />
-                  {workspaceList.totalElements > 0 ? (
-                    <div className={cx('flex', 'flex-col', 'gap-1.5')}>
-                      {workspaceList.data.map((workspace) => (
-                        <div
-                          key={workspace.workspaceId}
-                          className={cx(
-                            'flex',
-                            'flex-row',
-                            'items-center',
-                            'gap-1',
-                          )}
-                        >
-                          <Avatar
-                            name={workspace.workspaceName}
-                            size="sm"
-                            className={cx('w-[40px]', 'h-[40px]')}
-                          />
-                          <div className={cx('flex', 'flex-col', 'gap-0')}>
-                            <div
-                              className={cx('flex', 'items-center', 'gap-0.5')}
-                            >
-                              <Text fontWeight="bold" noOfLines={1}>
-                                {workspace.workspaceName}
-                              </Text>
-                              <Badge variant="outline">
-                                {workspace.permission}
-                              </Badge>
-                            </div>
-                            <span className={cx('text-gray-500')}>
-                              <RelativeDate
-                                date={new Date(workspace.createTime)}
-                              />
-                            </span>
+                  <div className={cx('flex', 'flex-col', 'gap-1.5')}>
+                    {workspaceList.data.map((workspace) => (
+                      <div
+                        key={workspace.workspaceId}
+                        className={cx(
+                          'flex',
+                          'flex-row',
+                          'items-center',
+                          'gap-1',
+                        )}
+                      >
+                        <Avatar
+                          name={workspace.workspaceName}
+                          size="sm"
+                          className={cx('w-[40px]', 'h-[40px]')}
+                        />
+                        <div className={cx('flex', 'flex-col', 'gap-0')}>
+                          <div
+                            className={cx('flex', 'items-center', 'gap-0.5')}
+                          >
+                            <Text fontWeight="bold" noOfLines={1}>
+                              {workspace.workspaceName}
+                            </Text>
+                            <Badge variant="outline">
+                              {workspace.permission}
+                            </Badge>
                           </div>
+                          <span className={cx('text-gray-500')}>
+                            <RelativeDate
+                              date={new Date(workspace.createTime)}
+                            />
+                          </span>
                         </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <SectionPlaceholder text="There are no workspaces." />
-                  )}
+                      </div>
+                    ))}
+                  </div>
                 </>
               ) : null}
             </GridItem>
             <GridItem colSpan={3}>
-              {!groupList && groupError ? (
-                <SectionError text="Failed to load groups." />
+              {isGroupListLoading ? (
+                <ListSekeleton header="Groups">
+                  <SectionSpinner />
+                </ListSekeleton>
               ) : null}
-              {!groupList && !groupError ? <SectionSpinner /> : null}
-              {groupList && !groupError ? (
+              {isGroupListError ? (
+                <ListSekeleton header="Groups">
+                  <SectionError text="Failed to load groups." />
+                </ListSekeleton>
+              ) : null}
+              {isGroupListEmpty ? (
+                <ListSekeleton header="Groups">
+                  <SectionPlaceholder text="There are no groups." />
+                </ListSekeleton>
+              ) : null}
+              {isGroupListReady ? (
                 <>
                   <Table>
                     <Thead>
@@ -448,49 +502,43 @@ const ConsolePanelUser = () => {
                     </Thead>
                   </Table>
                   <Divider mb={4} />
-                  {groupList.totalElements > 0 ? (
-                    <div className={cx('flex', 'flex-col', 'gap-1.5')}>
-                      {groupList.data.map((group) => (
-                        <div
-                          key={group.groupId}
-                          className={cx(
-                            'flex',
-                            'flex-row',
-                            'items-center',
-                            'gap-1',
-                          )}
-                        >
-                          <Avatar
-                            name={group.groupName}
-                            size="sm"
-                            className={cx('w-[40px]', 'h-[40px]')}
-                          />
-                          <div className={cx('flex', 'flex-col', 'gap-0')}>
-                            <div
-                              className={cx(
-                                'flex',
-                                'flex-row',
-                                'items-center',
-                                'gap-0.5',
-                              )}
-                            >
-                              <Text fontWeight="bold" noOfLines={1}>
-                                {group.groupName}
-                              </Text>
-                              <Badge variant="outline">
-                                {group.permission}
-                              </Badge>
-                            </div>
-                            <span className={cx('text-gray-500')}>
-                              <RelativeDate date={new Date(group.createTime)} />
-                            </span>
+                  <div className={cx('flex', 'flex-col', 'gap-1.5')}>
+                    {groupList.data.map((group) => (
+                      <div
+                        key={group.groupId}
+                        className={cx(
+                          'flex',
+                          'flex-row',
+                          'items-center',
+                          'gap-1',
+                        )}
+                      >
+                        <Avatar
+                          name={group.groupName}
+                          size="sm"
+                          className={cx('w-[40px]', 'h-[40px]')}
+                        />
+                        <div className={cx('flex', 'flex-col', 'gap-0')}>
+                          <div
+                            className={cx(
+                              'flex',
+                              'flex-row',
+                              'items-center',
+                              'gap-0.5',
+                            )}
+                          >
+                            <Text fontWeight="bold" noOfLines={1}>
+                              {group.groupName}
+                            </Text>
+                            <Badge variant="outline">{group.permission}</Badge>
                           </div>
+                          <span className={cx('text-gray-500')}>
+                            <RelativeDate date={new Date(group.createTime)} />
+                          </span>
                         </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <SectionPlaceholder text="There are no groups." />
-                  )}
+                      </div>
+                    ))}
+                  </div>
                 </>
               ) : null}
             </GridItem>
@@ -500,5 +548,36 @@ const ConsolePanelUser = () => {
     </>
   )
 }
+
+type ListSekeletonProps = {
+  header: string
+  children?: React.ReactNode
+}
+
+const ListSekeleton = ({ header, children }: ListSekeletonProps) => (
+  <>
+    <Table>
+      <Thead>
+        <Tr>
+          <Th className={cx('p-0')}>
+            <div
+              className={cx(
+                'flex',
+                'items-center',
+                'justify-between',
+                'h-[50px]',
+              )}
+            >
+              <span className={cx('font-bold')}>{header}</span>
+              <Spacer />
+            </div>
+          </Th>
+        </Tr>
+      </Thead>
+    </Table>
+    <Divider mb={4} />
+    {children}
+  </>
+)
 
 export default ConsolePanelUser

@@ -9,7 +9,7 @@
 // licenses/AGPL.txt.
 import { useCallback, useMemo, useState } from 'react'
 import { Button, ModalBody, ModalFooter } from '@chakra-ui/react'
-import { Select } from '@koupr/ui'
+import { SectionError, SectionSpinner, Select } from '@koupr/ui'
 import { OptionBase, SingleValue } from 'chakra-react-select'
 import cx from 'classnames'
 import FileAPI from '@/client/api/file'
@@ -35,8 +35,16 @@ const InsightsCreate = () => {
   const mutateTasks = useAppSelector((state) => state.ui.tasks.mutateList)
   const mutateInfo = useAppSelector((state) => state.ui.insights.mutateInfo)
   const [language, setLanguage] = useState<Language>()
-  const { data: languages } = InsightsAPI.useGetLanguages(swrConfig())
-  const { data: file } = FileAPI.useGet(id, swrConfig())
+  const {
+    data: languages,
+    error: languagesError,
+    isLoading: isLanguagesLoading,
+  } = InsightsAPI.useGetLanguages(swrConfig())
+  const {
+    data: file,
+    error: fileError,
+    isLoading: isFileLoading,
+  } = FileAPI.useGet(id, swrConfig())
   const existingLanguage = useMemo<LanguageOption | undefined>(() => {
     if (file && languages && file.snapshot?.language) {
       const value = file.snapshot.language
@@ -48,6 +56,10 @@ const InsightsCreate = () => {
       }
     }
   }, [file, languages])
+  const isFileError = !file && fileError
+  const isFileReady = file && !fileError
+  const isLanguagesError = !languages && languagesError
+  const isLanguagesReady = languages && !languagesError
 
   const handleCreate = useCallback(async () => {
     if (id && language) {
@@ -68,42 +80,48 @@ const InsightsCreate = () => {
     [languages],
   )
 
-  if (!id || !file || !languages) {
-    return null
-  }
-
   return (
     <>
       <ModalBody>
-        <div
-          className={cx(
-            'flex',
-            'flex-col',
-            'items-center',
-            'justify-center',
-            'gap-1.5',
-          )}
-        >
-          <p>
-            Select the language to use for collecting insights. During the
-            process, text will be extracted using OCR (optical character
-            recognition), and entities will be scanned using NER (named entity
-            recognition).
-          </p>
-          {languages ? (
-            <Select<LanguageOption, false>
-              className={cx('w-full')}
-              defaultValue={existingLanguage}
-              options={languages.map((language) => ({
-                value: language.id,
-                label: language.name,
-              }))}
-              placeholder="Select Language"
-              selectedOptionStyle="check"
-              onChange={handleLanguageChange}
-            />
-          ) : null}
-        </div>
+        {isFileLoading ? <SectionSpinner /> : null}
+        {isFileError ? <SectionError text="Failed to load file." /> : null}
+        {isFileReady ? (
+          <>
+            {isLanguagesLoading ? <SectionSpinner /> : null}
+            {isLanguagesError ? (
+              <SectionError text="Failed to load languages." />
+            ) : null}
+            {isLanguagesReady ? (
+              <div
+                className={cx(
+                  'flex',
+                  'flex-col',
+                  'items-center',
+                  'justify-center',
+                  'gap-1.5',
+                )}
+              >
+                <p>
+                  Select the language to use for collecting insights. During the
+                  process, text will be extracted using OCR (optical character
+                  recognition), and entities will be scanned using NER (named
+                  entity recognition).
+                </p>
+                <Select<LanguageOption, false>
+                  className={cx('w-full')}
+                  defaultValue={existingLanguage}
+                  options={languages.map((language) => ({
+                    value: language.id,
+                    label: language.name,
+                  }))}
+                  placeholder="Select Language"
+                  selectedOptionStyle="check"
+                  onChange={handleLanguageChange}
+                />
+              </div>
+            ) : null}
+          </>
+        ) : null}
       </ModalBody>
       <ModalFooter>
         <div className={cx('flex', 'flex-row', 'items-center', 'gap-1')}>

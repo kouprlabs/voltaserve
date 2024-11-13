@@ -49,7 +49,11 @@ const OrganizationMembersPage = () => {
   const location = useLocation()
   const dispatch = useAppDispatch()
   const { id } = useParams()
-  const { data: org, error: orgError } = OrganizationAPI.useGet(id, swrConfig())
+  const {
+    data: org,
+    error: orgError,
+    isLoading: isOrgLoading,
+  } = OrganizationAPI.useGet(id, swrConfig())
   const { page, size, steps, setPage, setSize } = usePagePagination({
     navigateFn: navigate,
     searchFn: () => location.search,
@@ -60,6 +64,7 @@ const OrganizationMembersPage = () => {
   const {
     data: list,
     error: listError,
+    isLoading: isListLoading,
     mutate,
   } = UserAPI.useList(
     {
@@ -78,103 +83,99 @@ const OrganizationMembersPage = () => {
   const [userToRemove, setUserToRemove] = useState<User>()
   const [isRemoveMemberModalOpen, setIsRemoveMemberModalOpen] =
     useState<boolean>(false)
+  const isOrgError = !org && orgError
+  const isOrgReady = org && !orgError
+  const isListError = !list && listError
+  const isListEmpty = list && !listError && list.totalElements === 0
+  const isListReady = list && !listError && list.totalElements > 0
 
   return (
     <>
-      {!org && orgError ? (
-        <SectionError text="Failed to load organization." />
-      ) : null}
-      {!org && !orgError ? <SectionSpinner /> : null}
-      {org && !orgError ? (
+      {isOrgLoading ? <SectionSpinner /> : null}
+      {isOrgError ? <SectionError text="Failed to load organization." /> : null}
+      {isOrgReady ? (
         <>
-          {!list && listError ? (
-            <SectionError text="Failed to load members." />
+          {isListLoading ? <SectionSpinner /> : null}
+          {isListError ? <SectionError text="Failed to load members." /> : null}
+          {isListEmpty ? (
+            <SectionPlaceholder
+              text="This organization has no members."
+              content={
+                geEditorPermission(org.permission) ? (
+                  <Button
+                    leftIcon={<IconPersonAdd />}
+                    onClick={() => dispatch(inviteModalDidOpen())}
+                  >
+                    Invite Members
+                  </Button>
+                ) : undefined
+              }
+            />
           ) : null}
-          {!list && !listError ? <SectionSpinner /> : null}
-          {list && !listError ? (
-            <>
-              {list.totalElements > 0 ? (
-                <DataTable
-                  items={list.data}
-                  columns={[
-                    {
-                      title: 'Full name',
-                      renderCell: (u) => (
-                        <div
-                          className={cx(
-                            'flex',
-                            'flex-row',
-                            'gap-1.5',
-                            'items-center',
-                          )}
-                        >
-                          <Avatar
-                            name={u.fullName}
-                            src={
-                              u.picture
-                                ? getPictureUrlById(u.id, u.picture, {
-                                    organizationId: org.id,
-                                  })
-                                : undefined
-                            }
-                            className={cx(
-                              'border',
-                              'border-gray-300',
-                              'dark:border-gray-700',
-                            )}
-                          />
-                          <span>{truncateEnd(u.fullName, 50)}</span>
-                        </div>
-                      ),
-                    },
-                    {
-                      title: 'Email',
-                      renderCell: (u) => (
-                        <Text>{truncateMiddle(u.email, 50)}</Text>
-                      ),
-                    },
-                  ]}
-                  actions={[
-                    {
-                      label: 'Remove From Organization',
-                      icon: <IconLogout />,
-                      isDestructive: true,
-                      onClick: (u) => {
-                        setUserToRemove(u)
-                        setIsRemoveMemberModalOpen(true)
-                      },
-                    },
-                  ]}
-                  pagination={
-                    list.totalPages > 1 ? (
-                      <PagePagination
-                        totalElements={list.totalElements}
-                        totalPages={list.totalPages}
-                        page={page}
-                        size={size}
-                        steps={steps}
-                        setPage={setPage}
-                        setSize={setSize}
+          {isListReady ? (
+            <DataTable
+              items={list.data}
+              columns={[
+                {
+                  title: 'Full name',
+                  renderCell: (u) => (
+                    <div
+                      className={cx(
+                        'flex',
+                        'flex-row',
+                        'gap-1.5',
+                        'items-center',
+                      )}
+                    >
+                      <Avatar
+                        name={u.fullName}
+                        src={
+                          u.picture
+                            ? getPictureUrlById(u.id, u.picture, {
+                                organizationId: org.id,
+                              })
+                            : undefined
+                        }
+                        className={cx(
+                          'border',
+                          'border-gray-300',
+                          'dark:border-gray-700',
+                        )}
                       />
-                    ) : undefined
-                  }
-                />
-              ) : (
-                <SectionPlaceholder
-                  text="This organization has no members."
-                  content={
-                    geEditorPermission(org.permission) ? (
-                      <Button
-                        leftIcon={<IconPersonAdd />}
-                        onClick={() => dispatch(inviteModalDidOpen())}
-                      >
-                        Invite Members
-                      </Button>
-                    ) : undefined
-                  }
-                />
-              )}
-            </>
+                      <span>{truncateEnd(u.fullName, 50)}</span>
+                    </div>
+                  ),
+                },
+                {
+                  title: 'Email',
+                  renderCell: (u) => <Text>{truncateMiddle(u.email, 50)}</Text>,
+                },
+              ]}
+              actions={[
+                {
+                  label: 'Remove From Organization',
+                  icon: <IconLogout />,
+                  isDestructive: true,
+                  onClick: (u) => {
+                    setUserToRemove(u)
+                    setIsRemoveMemberModalOpen(true)
+                  },
+                },
+              ]}
+              pagination={
+                list.totalPages > 1 ? (
+                  <PagePagination
+                    totalElements={list.totalElements}
+                    totalPages={list.totalPages}
+                    page={page}
+                    size={size}
+                    steps={steps}
+                    setPage={setPage}
+                    setSize={setSize}
+                  />
+                ) : undefined
+              }
+            />
           ) : null}
           {userToRemove ? (
             <OrganizationRemoveMember

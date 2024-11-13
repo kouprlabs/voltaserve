@@ -211,7 +211,7 @@ func (r *UserRouter) DownloadPicture(c *fiber.Ctx) error {
 		return err
 	}
 	if *ext != c.Params("extension") {
-		return errorpkg.NewUserPictureNotFoundError(nil)
+		return errorpkg.NewPictureNotFoundError(nil)
 	}
 	c.Set("Content-Type", *mime)
 	c.Set("Content-Disposition", fmt.Sprintf("filename=\"picture%s\"", *ext))

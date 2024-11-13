@@ -56,7 +56,8 @@ const SnapshotList = () => {
   const [selected, setSelected] = useState<Snapshot>()
   const {
     data: list,
-    error,
+    error: listError,
+    isLoading: isListLoading,
     mutate: snapshotMutate,
   } = SnapshotAPI.useList(
     {
@@ -68,6 +69,9 @@ const SnapshotList = () => {
     },
     swrConfig(),
   )
+  const isListError = !list && listError
+  const isListEmpty = list && !listError && list.totalElements === 0
+  const isListReady = list && !listError && list.totalElements > 0
 
   useEffect(() => {
     if (snapshotMutate) {
@@ -129,95 +133,88 @@ const SnapshotList = () => {
         <ModalHeader>Snapshots</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-          {!list && error ? (
+          {isListLoading ? <SectionSpinner /> : null}
+          {isListError ? (
             <SectionError text="Failed to load snapshots." />
           ) : null}
-          {!list && !error ? <SectionSpinner /> : null}
-          {list && !error ? (
-            <>
-              {list.totalElements > 0 ? (
-                <div className={cx('flex', 'flex-col', 'gap-1.5')}>
-                  <Table variant="simple" size="sm">
-                    <colgroup>
-                      <col className={cx('w-[40px]')} />
-                      <col className={cx('w-[auto]')} />
-                    </colgroup>
-                    <Tbody>
-                      {list.data.map((s) => (
-                        <Tr
-                          key={s.id}
+          {isListEmpty ? (
+            <SectionPlaceholder text="There are no snapshots." />
+          ) : null}
+          {isListReady ? (
+            <div className={cx('flex', 'flex-col', 'gap-1.5')}>
+              <Table variant="simple" size="sm">
+                <colgroup>
+                  <col className={cx('w-[40px]')} />
+                  <col className={cx('w-[auto]')} />
+                </colgroup>
+                <Tbody>
+                  {list.data.map((s) => (
+                    <Tr
+                      key={s.id}
+                      className={cx(
+                        'cursor-pointer',
+                        'h-[52px]',
+                        { 'bg-gray-100': isSelected(s) },
+                        { 'dark:bg-gray-600': isSelected(s) },
+                        { 'bg-transparent': !isSelected(s) },
+                      )}
+                      onClick={() => handleSelect(s)}
+                    >
+                      <Td className={cx('px-0.5', 'text-center')}>
+                        <Radio size="md" isChecked={isSelected(s)} />
+                      </Td>
+                      <Td className={cx('px-0.5')}>
+                        <div
                           className={cx(
-                            'cursor-pointer',
-                            'h-[52px]',
-                            { 'bg-gray-100': isSelected(s) },
-                            { 'dark:bg-gray-600': isSelected(s) },
-                            { 'bg-transparent': !isSelected(s) },
+                            'flex',
+                            'flex-row',
+                            'items-center',
+                            'gap-1.5',
                           )}
-                          onClick={() => handleSelect(s)}
                         >
-                          <Td className={cx('px-0.5', 'text-center')}>
-                            <Radio size="md" isChecked={isSelected(s)} />
-                          </Td>
-                          <Td className={cx('px-0.5')}>
-                            <div
-                              className={cx(
-                                'flex',
-                                'flex-row',
-                                'items-center',
-                                'gap-1.5',
-                              )}
-                            >
-                              <Avatar
-                                name={`V ${s.version}`}
-                                size="sm"
-                                className={cx('w-[40px]', 'h-[40px]')}
-                              />
-                              <div
-                                className={cx('flex', 'flex-col', 'gap-0.5')}
-                              >
-                                <span className={cx('text-base')}>
-                                  <RelativeDate date={new Date(s.createTime)} />
-                                </span>
-                                <div
-                                  className={cx('flex', 'flex-row', 'gap-0.5')}
-                                >
-                                  {s.original.size ? (
-                                    <Badge variant="outline">
-                                      {prettyBytes(s.original.size)}
-                                    </Badge>
-                                  ) : null}
-                                  {s.entities ? (
-                                    <Badge variant="outline">Insights</Badge>
-                                  ) : null}
-                                  {s.mosaic ? (
-                                    <Badge variant="outline">Mosaic</Badge>
-                                  ) : null}
-                                  {s.isActive ? (
-                                    <Badge colorScheme="green">Active</Badge>
-                                  ) : null}
-                                </div>
-                              </div>
+                          <Avatar
+                            name={`V ${s.version}`}
+                            size="sm"
+                            className={cx('w-[40px]', 'h-[40px]')}
+                          />
+                          <div className={cx('flex', 'flex-col', 'gap-0.5')}>
+                            <span className={cx('text-base')}>
+                              <RelativeDate date={new Date(s.createTime)} />
+                            </span>
+                            <div className={cx('flex', 'flex-row', 'gap-0.5')}>
+                              {s.original.size ? (
+                                <Badge variant="outline">
+                                  {prettyBytes(s.original.size)}
+                                </Badge>
+                              ) : null}
+                              {s.entities ? (
+                                <Badge variant="outline">Insights</Badge>
+                              ) : null}
+                              {s.mosaic ? (
+                                <Badge variant="outline">Mosaic</Badge>
+                              ) : null}
+                              {s.isActive ? (
+                                <Badge colorScheme="green">Active</Badge>
+                              ) : null}
                             </div>
-                          </Td>
-                        </Tr>
-                      ))}
-                    </Tbody>
-                  </Table>
-                  {list.totalPages > 1 ? (
-                    <div className={cx('self-end')}>
-                      <Pagination
-                        maxButtons={3}
-                        page={page}
-                        totalPages={list.totalPages}
-                        onPageChange={(value) => setPage(value)}
-                      />
-                    </div>
-                  ) : null}
+                          </div>
+                        </div>
+                      </Td>
+                    </Tr>
+                  ))}
+                </Tbody>
+              </Table>
+              {list.totalPages > 1 ? (
+                <div className={cx('self-end')}>
+                  <Pagination
+                    maxButtons={3}
+                    page={page}
+                    totalPages={list.totalPages}
+                    onPageChange={(value) => setPage(value)}
+                  />
                 </div>
-              ) : (
-                <SectionPlaceholder text="There are no snapshots." />
-              )}
-            </>
+              ) : null}
+            </div>
           ) : null}
         </ModalBody>
         <ModalFooter>

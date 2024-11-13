@@ -37,7 +37,11 @@ const AccountInvitationsPage = () => {
   const location = useLocation()
   const dispatch = useAppDispatch()
   const toast = useToast()
-  const { data: user, error: userError } = UserAPI.useGet()
+  const {
+    data: user,
+    error: userError,
+    isLoading: isUserLoading,
+  } = UserAPI.useGet()
   const { page, size, steps, setPage, setSize } = usePagePagination({
     navigateFn: navigate,
     searchFn: () => location.search,
@@ -46,11 +50,17 @@ const AccountInvitationsPage = () => {
   const {
     data: list,
     error: listError,
+    isLoading: isListLoading,
     mutate,
   } = InvitationAPI.useGetIncoming(
     { page, size, sortBy: SortBy.DateCreated, sortOrder: SortOrder.Desc },
     swrConfig(),
   )
+  const isUserError = !user && userError
+  const isUserReady = user && !userError
+  const isListError = !list && listError
+  const isListEmpty = list && !listError && list.totalElements === 0
+  const isListReady = list && !listError && list.totalElements > 0
 
   useEffect(() => {
     if (mutate) {
@@ -86,101 +96,101 @@ const AccountInvitationsPage = () => {
 
   return (
     <>
-      {!user && userError ? <SectionError text="Failed to load user." /> : null}
-      {!user && !userError ? <SectionSpinner /> : null}
-      {user && !userError ? (
+      {isUserLoading ? <SectionSpinner /> : null}
+      {isUserError ? <SectionError text="Failed to load user." /> : null}
+      {isUserReady ? (
         <>
-          {!list && !listError ? <SectionSpinner /> : null}
-          {list && !listError ? (
-            <>
-              {list.totalElements > 0 ? (
-                <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
-                  <DataTable
-                    items={list.data}
-                    columns={[
-                      {
-                        title: 'From',
-                        renderCell: (i) => (
-                          <div
-                            className={cx(
-                              'flex',
-                              'flex-row',
-                              'gap-1.5',
-                              'items-center',
-                            )}
-                          >
-                            {i.owner && i.organization ? (
-                              <>
-                                <Avatar
-                                  name={i.owner.fullName}
-                                  src={
-                                    i.owner.picture
-                                      ? getPictureUrlById(
-                                          i.owner.id,
-                                          i.owner.picture,
-                                          {
-                                            invitationId: i.id,
-                                          },
-                                        )
-                                      : undefined
-                                  }
-                                  className={cx(
-                                    'border',
-                                    'border-gray-300',
-                                    'dark:border-gray-700',
-                                  )}
-                                />
-                                {i.owner ? userToString(i.owner) : ''}
-                              </>
-                            ) : null}
-                          </div>
-                        ),
-                      },
-                      {
-                        title: 'Organization',
-                        renderCell: (i) => (
-                          <Text noOfLines={1}>
-                            {i.organization ? i.organization.name : ''}
-                          </Text>
-                        ),
-                      },
-                      {
-                        title: 'Date',
-                        renderCell: (i) => (
-                          <RelativeDate date={new Date(i.createTime)} />
-                        ),
-                      },
-                    ]}
-                    actions={[
-                      {
-                        label: 'Accept',
-                        icon: <IconThumbUp />,
-                        onClick: (i) => handleAccept(i.id),
-                      },
-                      {
-                        label: 'Decline',
-                        icon: <IconThumbDown />,
-                        isDestructive: true,
-                        onClick: (i) => handleDecline(i.id),
-                      },
-                    ]}
-                  />
-                  <div className={cx('self-end')}>
-                    <PagePagination
-                      totalElements={list.totalElements}
-                      totalPages={list.totalPages}
-                      page={page}
-                      size={size}
-                      steps={steps}
-                      setPage={setPage}
-                      setSize={setSize}
-                    />
-                  </div>
-                </div>
-              ) : (
-                <SectionPlaceholder text="There are no invitations." />
-              )}
-            </>
+          {isListLoading ? <SectionSpinner /> : null}
+          {isListError ? (
+            <SectionError text="Failed to load invitations." />
+          ) : null}
+          {isListEmpty ? (
+            <SectionPlaceholder text="There are no invitations." />
+          ) : null}
+          {isListReady ? (
+            <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
+              <DataTable
+                items={list.data}
+                columns={[
+                  {
+                    title: 'From',
+                    renderCell: (i) => (
+                      <div
+                        className={cx(
+                          'flex',
+                          'flex-row',
+                          'gap-1.5',
+                          'items-center',
+                        )}
+                      >
+                        {i.owner && i.organization ? (
+                          <>
+                            <Avatar
+                              name={i.owner.fullName}
+                              src={
+                                i.owner.picture
+                                  ? getPictureUrlById(
+                                      i.owner.id,
+                                      i.owner.picture,
+                                      {
+                                        invitationId: i.id,
+                                      },
+                                    )
+                                  : undefined
+                              }
+                              className={cx(
+                                'border',
+                                'border-gray-300',
+                                'dark:border-gray-700',
+                              )}
+                            />
+                            {i.owner ? userToString(i.owner) : ''}
+                          </>
+                        ) : null}
+                      </div>
+                    ),
+                  },
+                  {
+                    title: 'Organization',
+                    renderCell: (i) => (
+                      <Text noOfLines={1}>
+                        {i.organization ? i.organization.name : ''}
+                      </Text>
+                    ),
+                  },
+                  {
+                    title: 'Date',
+                    renderCell: (i) => (
+                      <RelativeDate date={new Date(i.createTime)} />
+                    ),
+                  },
+                ]}
+                actions={[
+                  {
+                    label: 'Accept',
+                    icon: <IconThumbUp />,
+                    onClick: (i) => handleAccept(i.id),
+                  },
+                  {
+                    label: 'Decline',
+                    icon: <IconThumbDown />,
+                    isDestructive: true,
+                    onClick: (i) => handleDecline(i.id),
+                  },
+                ]}
+              />
+              <div className={cx('self-end')}>
+                <PagePagination
+                  totalElements={list.totalElements}
+                  totalPages={list.totalPages}
+                  page={page}
+                  size={size}
+                  steps={steps}
+                  setPage={setPage}
+                  setSize={setSize}
+                />
+              </div>
+            </div>
           ) : null}
         </>
       ) : null}

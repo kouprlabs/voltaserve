@@ -49,13 +49,18 @@ const ConsolePanelOrganizations = () => {
   const [organizationId, setOrganizationId] = useState<string>()
   const {
     data: list,
-    error,
+    error: listError,
+    isLoading: isListLoading,
     mutate,
   } = ConsoleAPI.useListOrSearchObject<ConsoleOrganization>(
     'organization',
     { page, size, query },
     swrConfig(),
   )
+  const isListError = !list && listError
+  const isListEmpty = list && !listError && list.totalElements === 0
+  const isListReady = list && !listError && list.totalElements > 0
+
   const renameRequest = useCallback(
     async (name: string) => {
       if (organizationId) {
@@ -76,91 +81,82 @@ const ConsolePanelOrganizations = () => {
       </Helmet>
       <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
         <Heading className={cx('text-heading')}>Organizations</Heading>
-        {!list && error ? (
+        {isListLoading ? <SectionSpinner /> : null}
+        {isListError ? (
           <SectionError text="Failed to load organizations." />
         ) : null}
-        {!list && !error ? <SectionSpinner /> : null}
-        {list && !error ? (
-          <>
-            {list.totalElements > 0 ? (
-              <>
-                <DataTable
-                  items={list.data}
-                  columns={[
-                    {
-                      title: 'Name',
-                      renderCell: (organization) => (
-                        <div
-                          className={cx(
-                            'flex',
-                            'flex-row',
-                            'gap-1.5',
-                            'items-center',
-                          )}
-                        >
-                          <Avatar
-                            name={organization.name}
-                            size="sm"
-                            className={cx('w-[40px]', 'h-[40px]')}
-                          />
+        {isListEmpty ? (
+          <SectionPlaceholder text="There are no organizations." />
+        ) : null}
+        {isListReady ? (
+          <DataTable
+            items={list.data}
+            columns={[
+              {
+                title: 'Name',
+                renderCell: (organization) => (
+                  <div
+                    className={cx(
+                      'flex',
+                      'flex-row',
+                      'gap-1.5',
+                      'items-center',
+                    )}
+                  >
+                    <Avatar
+                      name={organization.name}
+                      size="sm"
+                      className={cx('w-[40px]', 'h-[40px]')}
+                    />
 
-                          <ChakraLink
-                            as={Link}
-                            to={`/console/organizations/${organization.id}`}
-                            className={cx('no-underline')}
-                          >
-                            <Text noOfLines={1}>{organization.name}</Text>
-                          </ChakraLink>
-                        </div>
-                      ),
-                    },
-                    {
-                      title: 'Created',
-                      renderCell: (organization) => (
-                        <RelativeDate
-                          date={new Date(organization.createTime)}
-                        />
-                      ),
-                    },
-                    {
-                      title: 'Updated',
-                      renderCell: (organization) => (
-                        <RelativeDate
-                          date={new Date(organization.updateTime)}
-                        />
-                      ),
-                    },
-                  ]}
-                  actions={[
-                    {
-                      label: 'Edit Name',
-                      icon: <IconEdit />,
-                      onClick: async (organization) => {
-                        setCurrentName(organization.name)
-                        setOrganizationId(organization.id)
-                        setIsConfirmRenameOpen(true)
-                      },
-                    },
-                  ]}
-                  pagination={
-                    list.totalPages > 1 ? (
-                      <PagePagination
-                        totalElements={list.totalElements}
-                        totalPages={Math.ceil(list.totalElements / size)}
-                        page={page}
-                        size={size}
-                        steps={steps}
-                        setPage={setPage}
-                        setSize={setSize}
-                      />
-                    ) : undefined
-                  }
+                    <ChakraLink
+                      as={Link}
+                      to={`/console/organizations/${organization.id}`}
+                      className={cx('no-underline')}
+                    >
+                      <Text noOfLines={1}>{organization.name}</Text>
+                    </ChakraLink>
+                  </div>
+                ),
+              },
+              {
+                title: 'Created',
+                renderCell: (organization) => (
+                  <RelativeDate date={new Date(organization.createTime)} />
+                ),
+              },
+              {
+                title: 'Updated',
+                renderCell: (organization) => (
+                  <RelativeDate date={new Date(organization.updateTime)} />
+                ),
+              },
+            ]}
+            actions={[
+              {
+                label: 'Edit Name',
+                icon: <IconEdit />,
+                onClick: async (organization) => {
+                  setCurrentName(organization.name)
+                  setOrganizationId(organization.id)
+                  setIsConfirmRenameOpen(true)
+                },
+              },
+            ]}
+            pagination={
+              list.totalPages > 1 ? (
+                <PagePagination
+                  totalElements={list.totalElements}
+                  totalPages={Math.ceil(list.totalElements / size)}
+                  page={page}
+                  size={size}
+                  steps={steps}
+                  setPage={setPage}
+                  setSize={setSize}
                 />
-              </>
-            ) : (
-              <SectionPlaceholder text="There are no organizations." />
-            )}
-          </>
+              ) : undefined
+            }
+          />
         ) : null}
       </div>
       <ConsoleRenameModal

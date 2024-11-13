@@ -29,6 +29,7 @@ import {
   Pagination,
   SearchInput,
   SectionError,
+  SectionPlaceholder,
   SectionSpinner,
 } from '@koupr/ui'
 import cx from 'classnames'
@@ -50,12 +51,16 @@ const OrganizationSelector = ({ onConfirm }: OrganizationSelectorProps) => {
   const [confirmed, setConfirmed] = useState<Organization>()
   const {
     data: list,
-    error,
+    error: listError,
+    isLoading: isListLoading,
     mutate,
   } = OrganizationAPI.useList(
     { query, page, size: 5, sortOrder: SortOrder.Desc },
     swrConfig(),
   )
+  const isListError = !list && listError
+  const isListEmpty = list && !listError && list.totalElements === 0
+  const isListReady = list && !listError && list.totalElements > 0
 
   useEffect(() => {
     mutate().then()
@@ -114,32 +119,14 @@ const OrganizationSelector = ({ onConfirm }: OrganizationSelectorProps) => {
                 query={query}
                 onChange={handleSearchInputChange}
               />
-              {!list && error ? (
+              {isListLoading ? <SectionSpinner /> : null}
+              {isListError ? (
                 <SectionError text="Failed to load organizations." />
               ) : null}
-              {!list && !error ? <SectionSpinner /> : null}
-              {list && list.totalElements === 0 ? (
-                <div
-                  className={cx(
-                    'flex',
-                    'items-center',
-                    'justify-center',
-                    'h-[320px]',
-                  )}
-                >
-                  <div
-                    className={cx(
-                      'flex',
-                      'flex-col',
-                      'items-center',
-                      'gap-1.5',
-                    )}
-                  >
-                    <span>There are no organizations.</span>
-                  </div>
-                </div>
+              {isListEmpty ? (
+                <SectionPlaceholder text="There are no organizations." />
               ) : null}
-              {list && list.totalElements && !error ? (
+              {isListReady ? (
                 <div
                   className={cx(
                     'flex',

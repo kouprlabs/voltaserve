@@ -47,7 +47,11 @@ const GroupMembersPage = () => {
   const dispatch = useAppDispatch()
   const location = useLocation()
   const { id } = useParams()
-  const { data: group, error: groupError } = GroupAPI.useGet(id, swrConfig())
+  const {
+    data: group,
+    error: groupError,
+    isLoading: isGroupLoading,
+  } = GroupAPI.useGet(id, swrConfig())
   const { page, size, steps, setPage, setSize } = usePagePagination({
     navigateFn: navigate,
     searchFn: () => location.search,
@@ -58,6 +62,7 @@ const GroupMembersPage = () => {
   const {
     data: list,
     error: listError,
+    isLoading: isListLoading,
     mutate,
   } = UserAPI.useList(
     {
@@ -74,6 +79,11 @@ const GroupMembersPage = () => {
   const [isAddMembersModalOpen, setIsAddMembersModalOpen] = useState(false)
   const [isRemoveMemberModalOpen, setIsRemoveMemberModalOpen] =
     useState<boolean>(false)
+  const isGroupError = !group && groupError
+  const isGroupReady = group && !groupError
+  const isListError = !list && listError
+  const isListEmpty = list && !listError && list.totalElements === 0
+  const isListReady = list && !listError && list.totalElements > 0
 
   useEffect(() => {
     if (mutate) {
@@ -83,103 +93,93 @@ const GroupMembersPage = () => {
 
   return (
     <>
-      {!group && groupError ? (
-        <SectionError text="Failed to load group." />
-      ) : null}
-      {!group && !groupError ? <SectionSpinner /> : null}
-      {group && !groupError ? (
+      {isGroupLoading ? <SectionSpinner /> : null}
+      {isGroupError ? <SectionError text="Failed to load group." /> : null}
+      {isGroupReady ? (
         <>
-          {!list && listError ? (
-            <SectionError text="Failed to load members." />
+          {isListLoading ? <SectionSpinner /> : null}
+          {isListError ? <SectionError text="Failed to load members." /> : null}
+          {isListEmpty ? (
+            <SectionPlaceholder
+              text="This group has no members."
+              content={
+                geEditorPermission(group.permission) ? (
+                  <Button
+                    leftIcon={<IconPersonAdd />}
+                    onClick={() => {
+                      setIsAddMembersModalOpen(true)
+                    }}
+                  >
+                    Add Members
+                  </Button>
+                ) : undefined
+              }
+            />
           ) : null}
-          {list && !listError ? (
-            <>
-              {list.totalElements > 0 ? (
-                <>
-                  <DataTable
-                    items={list.data}
-                    columns={[
-                      {
-                        title: 'Full name',
-                        renderCell: (u) => (
-                          <div
-                            className={cx(
-                              'flex',
-                              'flex-row',
-                              'gap-1.5',
-                              'items-center',
-                            )}
-                          >
-                            <Avatar
-                              name={u.fullName}
-                              src={
-                                u.picture
-                                  ? getPictureUrlById(u.id, u.picture, {
-                                      groupId: group.id,
-                                    })
-                                  : undefined
-                              }
-                              className={cx(
-                                'border',
-                                'border-gray-300',
-                                'dark:border-gray-700',
-                              )}
-                            />
-                            <span>{truncateEnd(u.fullName, 50)}</span>
-                          </div>
-                        ),
-                      },
-                      {
-                        title: 'Email',
-                        renderCell: (u) => (
-                          <Text>{truncateMiddle(u.email, 50)}</Text>
-                        ),
-                      },
-                    ]}
-                    actions={[
-                      {
-                        label: 'Remove From Group',
-                        icon: <IconLogout />,
-                        isDestructive: true,
-                        onClick: (u) => {
-                          setUserToRemove(u)
-                          setIsRemoveMemberModalOpen(true)
-                        },
-                      },
-                    ]}
-                    pagination={
-                      list.totalPages > 1 ? (
-                        <PagePagination
-                          totalElements={list.totalElements}
-                          totalPages={list.totalPages}
-                          page={page}
-                          size={size}
-                          steps={steps}
-                          setPage={setPage}
-                          setSize={setSize}
-                        />
-                      ) : undefined
-                    }
+          {isListReady ? (
+            <DataTable
+              items={list.data}
+              columns={[
+                {
+                  title: 'Full name',
+                  renderCell: (u) => (
+                    <div
+                      className={cx(
+                        'flex',
+                        'flex-row',
+                        'gap-1.5',
+                        'items-center',
+                      )}
+                    >
+                      <Avatar
+                        name={u.fullName}
+                        src={
+                          u.picture
+                            ? getPictureUrlById(u.id, u.picture, {
+                                groupId: group.id,
+                              })
+                            : undefined
+                        }
+                        className={cx(
+                          'border',
+                          'border-gray-300',
+                          'dark:border-gray-700',
+                        )}
+                      />
+                      <span>{truncateEnd(u.fullName, 50)}</span>
+                    </div>
+                  ),
+                },
+                {
+                  title: 'Email',
+                  renderCell: (u) => <Text>{truncateMiddle(u.email, 50)}</Text>,
+                },
+              ]}
+              actions={[
+                {
+                  label: 'Remove From Group',
+                  icon: <IconLogout />,
+                  isDestructive: true,
+                  onClick: (u) => {
+                    setUserToRemove(u)
+                    setIsRemoveMemberModalOpen(true)
+                  },
+                },
+              ]}
+              pagination={
+                list.totalPages > 1 ? (
+                  <PagePagination
+                    totalElements={list.totalElements}
+                    totalPages={list.totalPages}
+                    page={page}
+                    size={size}
+                    steps={steps}
+                    setPage={setPage}
+                    setSize={setSize}
                   />
-                </>
-              ) : (
-                <SectionPlaceholder
-                  text="This group has no members."
-                  content={
-                    geEditorPermission(group.permission) ? (
-                      <Button
-                        leftIcon={<IconPersonAdd />}
-                        onClick={() => {
-                          setIsAddMembersModalOpen(true)
-                        }}
-                      >
-                        Add Members
-                      </Button>
-                    ) : undefined
-                  }
-                />
-              )}
-            </>
+                ) : undefined
+              }
+            />
           ) : null}
           {userToRemove ? (
             <GroupRemoveMember

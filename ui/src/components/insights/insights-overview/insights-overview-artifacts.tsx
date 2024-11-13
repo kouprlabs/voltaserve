@@ -8,7 +8,7 @@
 // by the GNU Affero General Public License v3.0 only, included in the file
 // licenses/AGPL.txt.
 import { Button } from '@chakra-ui/react'
-import { IconOpenInNew } from '@koupr/ui'
+import { IconOpenInNew, SectionError, SectionSpinner } from '@koupr/ui'
 import cx from 'classnames'
 import FileAPI from '@/client/api/file'
 import { swrConfig } from '@/client/options'
@@ -21,48 +21,56 @@ const InsightsOverviewArtifacts = () => {
       ? state.ui.files.selection[0]
       : undefined,
   )
-  const { data: file } = FileAPI.useGet(id, swrConfig())
+  const {
+    data: file,
+    error: fileError,
+    isLoading: isFileLoading,
+  } = FileAPI.useGet(id, swrConfig())
   const searchParams = new URLSearchParams({
     access_token: getAccessTokenOrRedirect(),
   })
-
-  if (!id || !file) {
-    return null
-  }
+  const isFileError = !file && fileError
+  const isFileReady = file && !fileError
 
   return (
-    <div
-      className={cx(
-        'flex',
-        'flex-col',
-        'items-center',
-        'justify-center',
-        'gap-1',
-      )}
-    >
-      {file.snapshot?.text ? (
-        <Button
-          as="a"
-          type="button"
-          leftIcon={<IconOpenInNew />}
-          href={`/proxy/api/v3/insights/${id}/text${file.snapshot?.text.extension}?${searchParams}`}
-          target="_blank"
+    <>
+      {isFileLoading ? <SectionSpinner /> : null}
+      {isFileError ? <SectionError text="Failed to load file." /> : null}
+      {isFileReady ? (
+        <div
+          className={cx(
+            'flex',
+            'flex-col',
+            'items-center',
+            'justify-center',
+            'gap-1',
+          )}
         >
-          Open Plain Text File
-        </Button>
+          {file.snapshot?.text ? (
+            <Button
+              as="a"
+              type="button"
+              leftIcon={<IconOpenInNew />}
+              href={`/proxy/api/v3/insights/${id}/text${file.snapshot?.text.extension}?${searchParams}`}
+              target="_blank"
+            >
+              Open Plain Text File
+            </Button>
+          ) : null}
+          {file.snapshot?.ocr ? (
+            <Button
+              as="a"
+              type="button"
+              leftIcon={<IconOpenInNew />}
+              href={`/proxy/api/v3/insights/${id}/ocr${file.snapshot?.ocr.extension}?${searchParams}`}
+              target="_blank"
+            >
+              Open Searchable PDF
+            </Button>
+          ) : null}
+        </div>
       ) : null}
-      {file.snapshot?.ocr ? (
-        <Button
-          as="a"
-          type="button"
-          leftIcon={<IconOpenInNew />}
-          href={`/proxy/api/v3/insights/${id}/ocr${file.snapshot?.ocr.extension}?${searchParams}`}
-          target="_blank"
-        >
-          Open Searchable PDF
-        </Button>
-      ) : null}
-    </div>
+    </>
   )
 }
 

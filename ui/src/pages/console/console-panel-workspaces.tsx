@@ -51,13 +51,17 @@ const ConsolePanelWorkspaces = () => {
   const [workspaceId, setWorkspaceId] = useState<string>()
   const {
     data: list,
-    error,
+    error: listError,
+    isLoading: isListLoading,
     mutate,
   } = ConsoleAPI.useListOrSearchObject<ConsoleWorkspace>(
     'workspace',
     { page, size, query },
     swrConfig(),
   )
+  const isListError = !list && listError
+  const isListEmpty = list && !listError && list.totalElements === 0
+  const isListReady = list && !listError && list.totalElements > 0
 
   const renameRequest = useCallback(
     async (name: string) => {
@@ -76,101 +80,94 @@ const ConsolePanelWorkspaces = () => {
       </Helmet>
       <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
         <Heading className={cx('text-heading')}>Workspaces</Heading>
-        {!list && error ? (
+        {isListLoading ? <SectionSpinner /> : null}
+        {isListError ? (
           <SectionError text="Failed to load workspaces." />
         ) : null}
-        {!list && !error ? <SectionSpinner /> : null}
-        {list && !error ? (
-          <>
-            {list.totalElements > 0 ? (
-              <>
-                <DataTable
-                  items={list.data}
-                  columns={[
-                    {
-                      title: 'Name',
-                      renderCell: (workspace) => (
-                        <div
-                          className={cx(
-                            'flex',
-                            'flex-row',
-                            'gap-1.5',
-                            'items-center',
-                          )}
-                        >
-                          <Avatar
-                            name={workspace.name}
-                            size="sm"
-                            className={cx('w-[40px]', 'h-[40px]')}
-                          />
+        {isListEmpty ? (
+          <SectionPlaceholder text="There are no workspaces." />
+        ) : null}
+        {isListReady ? (
+          <DataTable
+            items={list.data}
+            columns={[
+              {
+                title: 'Name',
+                renderCell: (workspace) => (
+                  <div
+                    className={cx(
+                      'flex',
+                      'flex-row',
+                      'gap-1.5',
+                      'items-center',
+                    )}
+                  >
+                    <Avatar
+                      name={workspace.name}
+                      size="sm"
+                      className={cx('w-[40px]', 'h-[40px]')}
+                    />
 
-                          <Text noOfLines={1}>{workspace.name}</Text>
-                        </div>
-                      ),
-                    },
-                    {
-                      title: 'Organization',
-                      renderCell: (workspace) => (
-                        <ChakraLink
-                          as={Link}
-                          to={`/console/organizations/${workspace.organization.id}`}
-                          className={cx('no-underline')}
-                        >
-                          <Text noOfLines={1}>
-                            {workspace.organization.name}
-                          </Text>
-                        </ChakraLink>
-                      ),
-                    },
-                    {
-                      title: 'Quota',
-                      renderCell: (workspace) => (
-                        <Text>{prettyBytes(workspace.storageCapacity)}</Text>
-                      ),
-                    },
-                    {
-                      title: 'Created',
-                      renderCell: (workspace) => (
-                        <RelativeDate date={new Date(workspace.createTime)} />
-                      ),
-                    },
-                    {
-                      title: 'Updated',
-                      renderCell: (workspace) => (
-                        <RelativeDate date={new Date(workspace.updateTime)} />
-                      ),
-                    },
-                  ]}
-                  actions={[
-                    {
-                      label: 'Edit Name',
-                      icon: <IconEdit />,
-                      onClick: async (workspace) => {
-                        setCurrentName(workspace.name)
-                        setWorkspaceId(workspace.id)
-                        setIsConfirmRenameOpen(true)
-                      },
-                    },
-                  ]}
-                  pagination={
-                    list.totalPages > 1 ? (
-                      <PagePagination
-                        totalElements={list.totalElements}
-                        totalPages={list.totalPages}
-                        page={page}
-                        size={size}
-                        steps={steps}
-                        setPage={setPage}
-                        setSize={setSize}
-                      />
-                    ) : undefined
-                  }
+                    <Text noOfLines={1}>{workspace.name}</Text>
+                  </div>
+                ),
+              },
+              {
+                title: 'Organization',
+                renderCell: (workspace) => (
+                  <ChakraLink
+                    as={Link}
+                    to={`/console/organizations/${workspace.organization.id}`}
+                    className={cx('no-underline')}
+                  >
+                    <Text noOfLines={1}>{workspace.organization.name}</Text>
+                  </ChakraLink>
+                ),
+              },
+              {
+                title: 'Quota',
+                renderCell: (workspace) => (
+                  <Text>{prettyBytes(workspace.storageCapacity)}</Text>
+                ),
+              },
+              {
+                title: 'Created',
+                renderCell: (workspace) => (
+                  <RelativeDate date={new Date(workspace.createTime)} />
+                ),
+              },
+              {
+                title: 'Updated',
+                renderCell: (workspace) => (
+                  <RelativeDate date={new Date(workspace.updateTime)} />
+                ),
+              },
+            ]}
+            actions={[
+              {
+                label: 'Edit Name',
+                icon: <IconEdit />,
+                onClick: async (workspace) => {
+                  setCurrentName(workspace.name)
+                  setWorkspaceId(workspace.id)
+                  setIsConfirmRenameOpen(true)
+                },
+              },
+            ]}
+            pagination={
+              list.totalPages > 1 ? (
+                <PagePagination
+                  totalElements={list.totalElements}
+                  totalPages={list.totalPages}
+                  page={page}
+                  size={size}
+                  steps={steps}
+                  setPage={setPage}
+                  setSize={setSize}
                 />
-              </>
-            ) : (
-              <SectionPlaceholder text="There are no workspaces." />
-            )}
-          </>
+              ) : undefined
+            }
+          />
         ) : null}
       </div>
       <ConsoleRenameModal

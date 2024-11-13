@@ -26,9 +26,13 @@ const TasksList = () => {
   const [page, setPage] = useState(1)
   const {
     data: list,
-    error,
+    error: listError,
+    isLoading: isListLoading,
     mutate: mutateList,
   } = TaskAPI.useList({ page, size: 5, sortOrder: SortOrder.Asc }, swrConfig())
+  const isListError = !list && listError
+  const isListEmpty = list && !listError && list.totalElements === 0
+  const isListReady = list && !listError && list.totalElements > 0
 
   useEffect(() => {
     dispatch(mutateListUpdated(mutateList))
@@ -36,48 +40,43 @@ const TasksList = () => {
 
   return (
     <>
-      {!list && error ? <SectionError text="Failed to load tasks." /> : null}
-      {!list && !error ? <SectionSpinner /> : null}
-      {list && !error ? (
-        <>
-          {list.totalElements > 0 ? (
-            <div
-              className={cx(
-                'flex',
-                'flex-col',
-                'gap-1.5',
-                'justify-between',
-                'items-center',
-                'h-full',
-              )}
-            >
-              <div
-                className={cx(
-                  'flex',
-                  'flex-col',
-                  'gap-1.5',
-                  'w-full',
-                  'overflow-y-auto',
-                )}
-              >
-                {list.data.map((task) => (
-                  <TaskDrawerItem key={task.id} task={task} />
-                ))}
-              </div>
-              {list.totalPages > 1 ? (
-                <Pagination
-                  size="sm"
-                  maxButtons={3}
-                  page={page}
-                  totalPages={list.totalPages}
-                  onPageChange={(value) => setPage(value)}
-                />
-              ) : null}
-            </div>
-          ) : (
-            <SectionPlaceholder text="There are no tasks." />
+      {isListLoading ? <SectionSpinner /> : null}
+      {isListError ? <SectionError text="Failed to load tasks." /> : null}
+      {isListEmpty ? <SectionPlaceholder text="There are no tasks." /> : null}
+      {isListReady ? (
+        <div
+          className={cx(
+            'flex',
+            'flex-col',
+            'gap-1.5',
+            'justify-between',
+            'items-center',
+            'h-full',
           )}
-        </>
+        >
+          <div
+            className={cx(
+              'flex',
+              'flex-col',
+              'gap-1.5',
+              'w-full',
+              'overflow-y-auto',
+            )}
+          >
+            {list.data.map((task) => (
+              <TaskDrawerItem key={task.id} task={task} />
+            ))}
+          </div>
+          {list.totalPages > 1 ? (
+            <Pagination
+              size="sm"
+              maxButtons={3}
+              page={page}
+              totalPages={list.totalPages}
+              onPageChange={(value) => setPage(value)}
+            />
+          ) : null}
+        </div>
       ) : null}
     </>
   )

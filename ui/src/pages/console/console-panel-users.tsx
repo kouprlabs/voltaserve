@@ -61,9 +61,13 @@ const ConsolePanelUsers = () => {
   })
   const {
     data: list,
-    error,
+    error: listError,
+    isLoading: isListLoading,
     mutate,
   } = UserAPI.useList({ query, page, size }, swrConfig())
+  const isListError = !list && listError
+  const isListEmpty = list && !listError && list.totalElements === 0
+  const isListReady = list && !listError && list.totalElements > 0
 
   return (
     <>
@@ -72,223 +76,210 @@ const ConsolePanelUsers = () => {
       </Helmet>
       <div className={cx('flex', 'flex-col', 'gap-3.5', 'pb-3.5')}>
         <Heading className={cx('text-heading')}>Users</Heading>
-        {!list && error ? <SectionError text="Failed to load users." /> : null}
-        {!list && !error ? <SectionSpinner /> : null}
-        {list && !error ? (
-          <>
-            {list.totalElements > 0 ? (
-              <>
-                <DataTable
-                  items={list.data}
-                  columns={[
-                    {
-                      title: 'Full name',
-                      renderCell: (user) => (
-                        <div
-                          className={cx(
-                            'flex',
-                            'flex-row',
-                            'gap-1.5',
-                            'items-center',
-                          )}
-                        >
-                          <Avatar
-                            name={user.fullName}
-                            src={
-                              user.picture
-                                ? getPictureUrlById(user.id, user.picture)
-                                : undefined
-                            }
-                            className={cx(
-                              'border',
-                              'border-gray-300',
-                              'dark:border-gray-700',
-                            )}
-                          />
-                          <ChakraLink
-                            as={Link}
-                            to={`/console/users/${user.id}`}
-                            className={cx('no-underline')}
-                          >
-                            <Text noOfLines={1}>{user.fullName}</Text>
-                          </ChakraLink>
-                        </div>
-                      ),
-                    },
-                    {
-                      title: 'Email',
-                      renderCell: (user) => (
-                        <Text noOfLines={1}>{user.email}</Text>
-                      ),
-                    },
-                    {
-                      title: 'Email Confirmed',
-                      renderCell: (user) => (
-                        <Badge
-                          colorScheme={user.isEmailConfirmed ? 'green' : 'red'}
-                        >
-                          {user.isEmailConfirmed ? 'Confirmed' : 'Awaiting'}
-                        </Badge>
-                      ),
-                    },
-                    {
-                      title: 'Created',
-                      renderCell: (user) => (
-                        <RelativeDate date={new Date(user.createTime)} />
-                      ),
-                    },
-                    {
-                      title: 'Updated',
-                      renderCell: (user) => (
-                        <RelativeDate date={new Date(user.updateTime)} />
-                      ),
-                    },
-                    {
-                      title: 'Props',
-                      renderCell: (user) => (
-                        <div className={cx('flex', 'flex-row', 'gap-0.5')}>
-                          {user.isAdmin ? (
-                            <Badge mr="1" fontSize="0.8em" colorScheme="blue">
-                              Admin
-                            </Badge>
-                          ) : null}
-                          {user.isActive ? (
-                            <Badge mr="1" fontSize="0.8em" colorScheme="green">
-                              Active
-                            </Badge>
-                          ) : (
-                            <Badge mr="1" fontSize="0.8em" colorScheme="gray">
-                              Inactive
-                            </Badge>
-                          )}
-                          {getUserId() === user.id ? (
-                            <Badge colorScheme="red">It's you</Badge>
-                          ) : null}
-                        </div>
-                      ),
-                    },
-                  ]}
-                  actions={[
-                    {
-                      label: 'Suspend',
-                      icon: <IconFrontHand />,
-                      isDestructive: true,
-                      isHiddenFn: (user) =>
-                        getUserId() === user.id ||
-                        user.isAdmin ||
-                        !user.isActive,
-                      onClick: async (user) => {
-                        setConfirmationHeader(<>Suspend User</>)
-                        setConfirmationBody(
-                          <>
-                            Are you sure you want to suspend{' '}
-                            <span className={cx('font-bold')}>
-                              {userToString(user)}
-                            </span>
-                            ?
-                          </>,
-                        )
-                        setConfirmationRequest(() => async () => {
-                          await UserAPI.suspend(user.id, { suspend: true })
-                          await mutate()
-                        })
-                        setIsConfirmationDestructive(true)
-                        setIsConfirmationOpen(true)
-                      },
-                    },
-                    {
-                      label: 'Unsuspend',
-                      icon: <IconHandshake />,
-                      isHiddenFn: (user) => user.isActive,
-                      onClick: async (user) => {
-                        setConfirmationHeader(<>Unsuspend User</>)
-                        setConfirmationBody(
-                          <>
-                            Are you sure you want to unsuspend{' '}
-                            <span className={cx('font-bold')}>
-                              {userToString(user)}
-                            </span>
-                            ?
-                          </>,
-                        )
-                        setConfirmationRequest(() => async () => {
-                          await UserAPI.suspend(user.id, { suspend: false })
-                          await mutate()
-                        })
-                        setIsConfirmationDestructive(false)
-                        setIsConfirmationOpen(true)
-                      },
-                    },
-                    {
-                      label: 'Make Admin',
-                      icon: <IconShield />,
-                      isHiddenFn: (user) => user.isAdmin,
-                      onClick: async (user) => {
-                        setConfirmationHeader(<>Make Admin</>)
-                        setConfirmationBody(
-                          <>
-                            Are you sure you want to make{' '}
-                            <span className={cx('font-bold')}>
-                              {userToString(user)}
-                            </span>{' '}
-                            admin?
-                          </>,
-                        )
-                        setConfirmationRequest(() => async () => {
-                          await UserAPI.makeAdmin(user.id, { makeAdmin: true })
-                          await mutate()
-                        })
-                        setIsConfirmationDestructive(false)
-                        setIsConfirmationOpen(true)
-                      },
-                    },
-                    {
-                      label: 'Demote Admin',
-                      icon: <IconRemoveModerator />,
-                      isDestructive: true,
-                      isHiddenFn: (user) => !user.isAdmin,
-                      onClick: async (user) => {
-                        setConfirmationHeader(<>Demote Admin</>)
-                        setConfirmationBody(
-                          <>
-                            Are you sure you want to demote{' '}
-                            <span className={cx('font-bold')}>
-                              {userToString(user)}
-                            </span>
-                            ?
-                          </>,
-                        )
-                        setConfirmationRequest(() => async () => {
-                          await UserAPI.makeAdmin(user.id, { makeAdmin: false })
-                          await mutate()
-                          if (getUserId() === user.id) {
-                            navigate('/sign-out')
-                          }
-                        })
-                        setIsConfirmationDestructive(true)
-                        setIsConfirmationOpen(true)
-                      },
-                    },
-                  ]}
-                  pagination={
-                    list.totalPages > 1 ? (
-                      <PagePagination
-                        totalElements={list.totalElements}
-                        totalPages={list.totalPages}
-                        page={page}
-                        size={size}
-                        steps={steps}
-                        setPage={setPage}
-                        setSize={setSize}
-                      />
-                    ) : undefined
-                  }
+        {isListLoading ? <SectionSpinner /> : null}
+        {isListError ? <SectionError text="Failed to load users." /> : null}
+        {isListEmpty ? <SectionPlaceholder text="There are no users." /> : null}
+        {isListReady ? (
+          <DataTable
+            items={list.data}
+            columns={[
+              {
+                title: 'Full name',
+                renderCell: (user) => (
+                  <div
+                    className={cx(
+                      'flex',
+                      'flex-row',
+                      'gap-1.5',
+                      'items-center',
+                    )}
+                  >
+                    <Avatar
+                      name={user.fullName}
+                      src={
+                        user.picture
+                          ? getPictureUrlById(user.id, user.picture)
+                          : undefined
+                      }
+                      className={cx(
+                        'border',
+                        'border-gray-300',
+                        'dark:border-gray-700',
+                      )}
+                    />
+                    <ChakraLink
+                      as={Link}
+                      to={`/console/users/${user.id}`}
+                      className={cx('no-underline')}
+                    >
+                      <Text noOfLines={1}>{user.fullName}</Text>
+                    </ChakraLink>
+                  </div>
+                ),
+              },
+              {
+                title: 'Email',
+                renderCell: (user) => <Text noOfLines={1}>{user.email}</Text>,
+              },
+              {
+                title: 'Email Confirmed',
+                renderCell: (user) => (
+                  <Badge colorScheme={user.isEmailConfirmed ? 'green' : 'red'}>
+                    {user.isEmailConfirmed ? 'Confirmed' : 'Awaiting'}
+                  </Badge>
+                ),
+              },
+              {
+                title: 'Created',
+                renderCell: (user) => (
+                  <RelativeDate date={new Date(user.createTime)} />
+                ),
+              },
+              {
+                title: 'Updated',
+                renderCell: (user) => (
+                  <RelativeDate date={new Date(user.updateTime)} />
+                ),
+              },
+              {
+                title: 'Props',
+                renderCell: (user) => (
+                  <div className={cx('flex', 'flex-row', 'gap-0.5')}>
+                    {user.isAdmin ? (
+                      <Badge mr="1" fontSize="0.8em" colorScheme="blue">
+                        Admin
+                      </Badge>
+                    ) : null}
+                    {user.isActive ? (
+                      <Badge mr="1" fontSize="0.8em" colorScheme="green">
+                        Active
+                      </Badge>
+                    ) : (
+                      <Badge mr="1" fontSize="0.8em" colorScheme="gray">
+                        Inactive
+                      </Badge>
+                    )}
+                    {getUserId() === user.id ? (
+                      <Badge colorScheme="red">It's you</Badge>
+                    ) : null}
+                  </div>
+                ),
+              },
+            ]}
+            actions={[
+              {
+                label: 'Suspend',
+                icon: <IconFrontHand />,
+                isDestructive: true,
+                isHiddenFn: (user) =>
+                  getUserId() === user.id || user.isAdmin || !user.isActive,
+                onClick: async (user) => {
+                  setConfirmationHeader(<>Suspend User</>)
+                  setConfirmationBody(
+                    <>
+                      Are you sure you want to suspend{' '}
+                      <span className={cx('font-bold')}>
+                        {userToString(user)}
+                      </span>
+                      ?
+                    </>,
+                  )
+                  setConfirmationRequest(() => async () => {
+                    await UserAPI.suspend(user.id, { suspend: true })
+                    await mutate()
+                  })
+                  setIsConfirmationDestructive(true)
+                  setIsConfirmationOpen(true)
+                },
+              },
+              {
+                label: 'Unsuspend',
+                icon: <IconHandshake />,
+                isHiddenFn: (user) => user.isActive,
+                onClick: async (user) => {
+                  setConfirmationHeader(<>Unsuspend User</>)
+                  setConfirmationBody(
+                    <>
+                      Are you sure you want to unsuspend{' '}
+                      <span className={cx('font-bold')}>
+                        {userToString(user)}
+                      </span>
+                      ?
+                    </>,
+                  )
+                  setConfirmationRequest(() => async () => {
+                    await UserAPI.suspend(user.id, { suspend: false })
+                    await mutate()
+                  })
+                  setIsConfirmationDestructive(false)
+                  setIsConfirmationOpen(true)
+                },
+              },
+              {
+                label: 'Make Admin',
+                icon: <IconShield />,
+                isHiddenFn: (user) => user.isAdmin,
+                onClick: async (user) => {
+                  setConfirmationHeader(<>Make Admin</>)
+                  setConfirmationBody(
+                    <>
+                      Are you sure you want to make{' '}
+                      <span className={cx('font-bold')}>
+                        {userToString(user)}
+                      </span>{' '}
+                      admin?
+                    </>,
+                  )
+                  setConfirmationRequest(() => async () => {
+                    await UserAPI.makeAdmin(user.id, { makeAdmin: true })
+                    await mutate()
+                  })
+                  setIsConfirmationDestructive(false)
+                  setIsConfirmationOpen(true)
+                },
+              },
+              {
+                label: 'Demote Admin',
+                icon: <IconRemoveModerator />,
+                isDestructive: true,
+                isHiddenFn: (user) => !user.isAdmin,
+                onClick: async (user) => {
+                  setConfirmationHeader(<>Demote Admin</>)
+                  setConfirmationBody(
+                    <>
+                      Are you sure you want to demote{' '}
+                      <span className={cx('font-bold')}>
+                        {userToString(user)}
+                      </span>
+                      ?
+                    </>,
+                  )
+                  setConfirmationRequest(() => async () => {
+                    await UserAPI.makeAdmin(user.id, { makeAdmin: false })
+                    await mutate()
+                    if (getUserId() === user.id) {
+                      navigate('/sign-out')
+                    }
+                  })
+                  setIsConfirmationDestructive(true)
+                  setIsConfirmationOpen(true)
+                },
+              },
+            ]}
+            pagination={
+              list.totalPages > 1 ? (
+                <PagePagination
+                  totalElements={list.totalElements}
+                  totalPages={list.totalPages}
+                  page={page}
+                  size={size}
+                  steps={steps}
+                  setPage={setPage}
+                  setSize={setSize}
                 />
-              </>
-            ) : (
-              <SectionPlaceholder text="There are no users." />
-            )}
-          </>
+              ) : undefined
+            }
+          />
         ) : null}
       </div>
       {confirmationHeader && confirmationBody && confirmationRequest ? (

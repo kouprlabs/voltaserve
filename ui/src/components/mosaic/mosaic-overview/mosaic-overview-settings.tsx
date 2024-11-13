@@ -9,7 +9,7 @@
 // licenses/AGPL.txt.
 import { useCallback, useMemo } from 'react'
 import { Button, Card, CardBody, CardFooter, Text } from '@chakra-ui/react'
-import { IconBolt, IconDelete } from '@koupr/ui'
+import { IconBolt, IconDelete, SectionError, SectionSpinner } from '@koupr/ui'
 import cx from 'classnames'
 import FileAPI from '@/client/api/file'
 import MosaicAPI from '@/client/api/mosaic'
@@ -32,11 +32,22 @@ const MosaicOverviewSettings = () => {
   )
   const mutateFiles = useAppSelector((state) => state.ui.files.mutate)
   const mutateTaskCount = useAppSelector((state) => state.ui.tasks.mutateCount)
-  const { data: info, mutate: mutateInfo } = MosaicAPI.useGetInfo(
-    id,
-    swrConfig(),
-  )
-  const { data: file, mutate: mutateFile } = FileAPI.useGet(id, swrConfig())
+  const {
+    data: info,
+    error: infoError,
+    isLoading: isInfoLoading,
+    mutate: mutateInfo,
+  } = MosaicAPI.useGetInfo(id, swrConfig())
+  const {
+    data: file,
+    error: fileError,
+    isLoading: isFileLoading,
+    mutate: mutateFile,
+  } = FileAPI.useGet(id, swrConfig())
+  const isFileError = !file && fileError
+  const isFileReady = file && !fileError
+  const isInfoError = !info && infoError
+  const isInfoReady = info && !infoError
 
   const handleUpdate = useCallback(async () => {
     if (id) {
@@ -76,42 +87,50 @@ const MosaicOverviewSettings = () => {
     )
   }, [info, file])
 
-  if (!file || !info) {
-    return null
-  }
-
   return (
-    <div className={cx('flex', 'flex-row', 'items-stretch', 'gap-1.5')}>
-      <Card size="md" variant="outline" className={cx('w-[50%]')}>
-        <CardBody>
-          <Text>Create a mosaic for the active snapshot.</Text>
-        </CardBody>
-        <CardFooter>
-          <Button
-            leftIcon={<IconBolt />}
-            isDisabled={!canCreate}
-            onClick={handleUpdate}
-          >
-            Create Mosaic
-          </Button>
-        </CardFooter>
-      </Card>
-      <Card size="md" variant="outline" className={cx('w-[50%]')}>
-        <CardBody>
-          <Text>Delete mosaic from the active snapshot.</Text>
-        </CardBody>
-        <CardFooter>
-          <Button
-            colorScheme="red"
-            leftIcon={<IconDelete />}
-            isDisabled={!canDelete}
-            onClick={handleDelete}
-          >
-            Delete Mosaic
-          </Button>
-        </CardFooter>
-      </Card>
-    </div>
+    <>
+      {isFileLoading ? <SectionSpinner /> : null}
+      {isFileError ? <SectionError text="Failed to load file." /> : null}
+      {isFileReady ? (
+        <>
+          {isInfoLoading ? <SectionSpinner /> : null}
+          {isInfoError ? <SectionError text="Failed to load info." /> : null}
+          {isInfoReady ? (
+            <div className={cx('flex', 'flex-row', 'items-stretch', 'gap-1.5')}>
+              <Card size="md" variant="outline" className={cx('w-[50%]')}>
+                <CardBody>
+                  <Text>Create a mosaic for the active snapshot.</Text>
+                </CardBody>
+                <CardFooter>
+                  <Button
+                    leftIcon={<IconBolt />}
+                    isDisabled={!canCreate}
+                    onClick={handleUpdate}
+                  >
+                    Create Mosaic
+                  </Button>
+                </CardFooter>
+              </Card>
+              <Card size="md" variant="outline" className={cx('w-[50%]')}>
+                <CardBody>
+                  <Text>Delete mosaic from the active snapshot.</Text>
+                </CardBody>
+                <CardFooter>
+                  <Button
+                    colorScheme="red"
+                    leftIcon={<IconDelete />}
+                    isDisabled={!canDelete}
+                    onClick={handleDelete}
+                  >
+                    Delete Mosaic
+                  </Button>
+                </CardFooter>
+              </Card>
+            </div>
+          ) : null}
+        </>
+      ) : null}
+    </>
   )
 }
 

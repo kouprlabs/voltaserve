@@ -46,19 +46,30 @@ const EditButton = (props: IconButtonProps) => (
 
 const AccountSettingsPage = () => {
   const { colorMode, toggleColorMode } = useColorMode()
-  const { data: user, error } = UserAPI.useGet()
-  const { data: storageUsage, error: storageUsageError } =
-    StorageAPI.useGetAccountUsage(swrConfig())
+  const {
+    data: user,
+    error: userError,
+    isLoading: isUserLoading,
+  } = UserAPI.useGet()
+  const {
+    data: storageUsage,
+    error: storageUsageError,
+    isLoading: isStorageUsageLoading,
+  } = StorageAPI.useGetAccountUsage(swrConfig())
   const [isFullNameModalOpen, setIsFullNameModalOpen] = useState(false)
   const [isEmailModalOpen, setIsEmailModalOpen] = useState(false)
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const isUserError = !user && userError
+  const isUserReady = user && !userError
+  const isStorageUsageError = !storageUsage && storageUsageError
+  const isStorageUsageReady = storageUsage && !storageUsageError
 
   return (
     <>
-      {!user && error ? <SectionError text="Failed to load user." /> : null}
-      {!user && !error ? <SectionSpinner /> : null}
-      {user && !error ? (
+      {isUserLoading ? <SectionSpinner /> : null}
+      {isUserError ? <SectionError text="Failed to load user." /> : null}
+      {isUserReady ? (
         <>
           <Form
             sections={[
@@ -66,10 +77,13 @@ const AccountSettingsPage = () => {
                 title: 'Storage',
                 content: (
                   <>
-                    {storageUsageError ? (
-                      <span>Failed to load storage usage.</span>
+                    {isStorageUsageError ? (
+                      <SectionError
+                        text="Failed to load storage usage."
+                        height="auto"
+                      />
                     ) : null}
-                    {storageUsage && !storageUsageError ? (
+                    {isStorageUsageReady ? (
                       <>
                         <span>
                           {prettyBytes(storageUsage.bytes)} of{' '}
@@ -78,7 +92,7 @@ const AccountSettingsPage = () => {
                         <Progress value={storageUsage.percentage} hasStripe />
                       </>
                     ) : null}
-                    {!(storageUsage && !storageUsageError) ? (
+                    {isStorageUsageLoading ? (
                       <>
                         <span>Calculating…</span>
                         <Progress value={0} hasStripe />

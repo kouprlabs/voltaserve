@@ -11,7 +11,8 @@ import { useEffect } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import {
   PagePagination,
-  Spinner,
+  SectionError,
+  SectionSpinner,
   usePageMonitor,
   usePagePagination,
 } from '@koupr/ui'
@@ -82,7 +83,11 @@ const WorkspaceFilesPage = () => {
   const isSearchFilterModalOpen = useAppSelector(
     (state) => state.ui.searchFilter.isModalOpen,
   )
-  const { data: workspace } = WorkspaceAPI.useGet(workspaceId, swrConfig())
+  const {
+    data: workspace,
+    error: workspaceError,
+    isLoading: isWorkspaceLoading,
+  } = WorkspaceAPI.useGet(workspaceId, swrConfig())
   const { page, size, steps, setPage, setSize } = usePagePagination({
     navigateFn: navigate,
     searchFn: () => location.search,
@@ -91,8 +96,8 @@ const WorkspaceFilesPage = () => {
   })
   const {
     data: list,
-    error,
-    isLoading,
+    error: listError,
+    isLoading: isListLoading,
     mutate,
   } = FileAPI.useList(
     fileId!,
@@ -111,6 +116,10 @@ const WorkspaceFilesPage = () => {
     steps,
   })
   const hasPagination = hasPageSwitcher || hasSizeSelector
+  const isWorkspaceError = !workspace && workspaceError
+  const isWorkspaceReady = workspace && !workspaceError
+  const isListError = !list && listError
+  const isListReady = list && !listError
 
   useEffect(() => {
     if (list) {
@@ -126,97 +135,105 @@ const WorkspaceFilesPage = () => {
 
   return (
     <>
-      <div
-        className={cx(
-          'flex',
-          'flex-col',
-          'w-full',
-          'gap-2.5',
-          'grow',
-          'overflow-hidden',
-        )}
-      >
-        {workspace && fileId ? (
-          <Path
-            rootId={workspace.rootId}
-            fileId={fileId}
-            maxCharacters={30}
-            onClick={(fileId) => {
-              dispatch(selectionUpdated([]))
-              navigate(`/workspace/${workspace.id}/file/${fileId}`)
-            }}
-          />
-        ) : null}
-        <FileToolbar list={list} />
-        <div
-          className={cx(
-            'flex',
-            'flex-col',
-            'gap-1.5',
-            'grow',
-            'overflow-y-auto',
-            'overflow-x-hidden',
-          )}
-        >
+      {isWorkspaceLoading ? (
+        <div className={cx('block')}>
+          <SectionSpinner />
+        </div>
+      ) : null}
+      {isWorkspaceError ? (
+        <div className={cx('block')}>
+          <SectionError text="Failed to load workspace." />
+        </div>
+      ) : null}
+      {isWorkspaceReady ? (
+        <>
           <div
             className={cx(
+              'flex',
+              'flex-col',
               'w-full',
-              'overflow-y-auto',
-              'overflow-x-hidden',
-              'border-t',
-              'border-t-gray-300',
-              'dark:border-t-gray-600',
-              {
-                'border-b': hasPagination,
-                'border-b-gray-300': hasPagination,
-                'dark:border-b-gray-600': hasPagination,
-              },
-              'py-1.5',
-              'flex-grow',
+              'gap-2.5',
+              'grow',
+              'overflow-hidden',
             )}
-            onClick={() => dispatch(selectionUpdated([]))}
           >
-            {isLoading ? (
+            {workspace && fileId ? (
+              <Path
+                rootId={workspace.rootId}
+                fileId={fileId}
+                maxCharacters={30}
+                onClick={(fileId) => {
+                  dispatch(selectionUpdated([]))
+                  navigate(`/workspace/${workspace.id}/file/${fileId}`)
+                }}
+              />
+            ) : null}
+            <FileToolbar list={list} />
+            <div
+              className={cx(
+                'flex',
+                'flex-col',
+                'gap-1.5',
+                'grow',
+                'overflow-y-auto',
+                'overflow-x-hidden',
+              )}
+            >
               <div
                 className={cx(
-                  'flex',
-                  'items-center',
-                  'justify-center',
-                  'h-full',
+                  'w-full',
+                  'overflow-y-auto',
+                  'overflow-x-hidden',
+                  'border-t',
+                  'border-t-gray-300',
+                  'dark:border-t-gray-600',
+                  {
+                    'border-b': hasPagination,
+                    'border-b-gray-300': hasPagination,
+                    'dark:border-b-gray-600': hasPagination,
+                  },
+                  'py-1.5',
+                  'flex-grow',
                 )}
+                onClick={() => dispatch(selectionUpdated([]))}
               >
-                <Spinner />
+                {isListLoading ? <SectionSpinner /> : null}
+                {isListError ? (
+                  <SectionError text="Failed to load items." />
+                ) : null}
+                {isListReady ? (
+                  <FileList list={list} scale={iconScale} />
+                ) : null}
               </div>
-            ) : null}
-            {list && !error ? <FileList list={list} scale={iconScale} /> : null}
-          </div>
-          {list && list.totalPages > 1 ? (
-            <div className={cx('self-end', 'pb-1.5')}>
-              <PagePagination
-                totalElements={list.totalElements}
-                totalPages={list.totalPages}
-                page={page}
-                size={size}
-                steps={steps}
-                setPage={setPage}
-                setSize={setSize}
-              />
+              {list && list.totalPages > 1 ? (
+                <div className={cx('self-end', 'pb-1.5')}>
+                  <PagePagination
+                    totalElements={list.totalElements}
+                    totalPages={list.totalPages}
+                    page={page}
+                    size={size}
+                    steps={steps}
+                    setPage={setPage}
+                    setSize={setSize}
+                  />
+                </div>
+              ) : null}
             </div>
-          ) : null}
-        </div>
-      </div>
-      {list ? <Sharing list={list} /> : null}
-      {isSnapshotListModalOpen ? <SnapshotList /> : null}
-      {isSnapshotDetachModalOpen ? <SnapshotDetach /> : null}
-      {isMoveModalOpen ? <FileMove /> : null}
-      {isCopyModalOpen ? <FileCopy /> : null}
-      {isCreateModalOpen ? <FileCreate /> : null}
-      {isDeleteModalOpen ? <FileDelete /> : null}
-      {isRenameModalOpen ? <FileRename /> : null}
-      {isInfoModalOpen ? <FileInfo /> : null}
-      {isInsightsModalOpen ? <Insights /> : null}
-      {isMosaicModalOpen ? <Mosaic /> : null}
-      {isSearchFilterModalOpen ? <SearchFilter /> : null}
+          </div>
+          {list ? <Sharing list={list} /> : null}
+          {isSnapshotListModalOpen ? <SnapshotList /> : null}
+          {isSnapshotDetachModalOpen ? <SnapshotDetach /> : null}
+          {isMoveModalOpen ? <FileMove /> : null}
+          {isCopyModalOpen ? <FileCopy /> : null}
+          {isCreateModalOpen ? <FileCreate /> : null}
+          {isDeleteModalOpen ? <FileDelete /> : null}
+          {isRenameModalOpen ? <FileRename /> : null}
+          {isInfoModalOpen ? <FileInfo /> : null}
+          {isInsightsModalOpen ? <Insights /> : null}
+          {isMosaicModalOpen ? <Mosaic /> : null}
+          {isSearchFilterModalOpen ? <SearchFilter /> : null}
+        </>
+      ) : null}
     </>
   )
 }

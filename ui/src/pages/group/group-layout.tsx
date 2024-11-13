@@ -10,6 +10,7 @@
 import { useEffect, useState } from 'react'
 import { Outlet, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { Heading, Tab, TabList, Tabs } from '@chakra-ui/react'
+import { SectionError, SectionSpinner } from '@koupr/ui'
 import cx from 'classnames'
 import { Helmet } from 'react-helmet-async'
 import GroupAPI from '@/client/api/group'
@@ -22,8 +23,15 @@ const GroupLayout = () => {
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
   const { id } = useParams()
-  const { data: group, mutate } = GroupAPI.useGet(id, swrConfig())
+  const {
+    data: group,
+    error: groupError,
+    isLoading: isGroupLoading,
+    mutate,
+  } = GroupAPI.useGet(id, swrConfig())
   const [tabIndex, setTabIndex] = useState(0)
+  const isGroupError = !group && groupError
+  const isGroupReady = group && !groupError
 
   useEffect(() => {
     const segments = location.pathname.split('/')
@@ -41,29 +49,33 @@ const GroupLayout = () => {
     }
   }, [mutate, dispatch])
 
-  if (!group) {
-    return null
-  }
-
   return (
     <>
-      <Helmet>
-        <title>{group.name}</title>
-      </Helmet>
-      <div className={cx('flex', 'flex-col', 'gap-3.5')}>
-        <Heading className={cx('text-heading', 'shrink-0')} noOfLines={1}>
-          {group.name}
-        </Heading>
-        <Tabs variant="solid-rounded" colorScheme="gray" index={tabIndex}>
-          <TabList>
-            <Tab onClick={() => navigate(`/group/${id}/member`)}>Members</Tab>
-            <Tab onClick={() => navigate(`/group/${id}/settings`)}>
-              Settings
-            </Tab>
-          </TabList>
-        </Tabs>
-        <Outlet />
-      </div>
+      {isGroupLoading ? <SectionSpinner /> : null}
+      {isGroupError ? <SectionError text="Failed to load group." /> : null}
+      {isGroupReady ? (
+        <>
+          <Helmet>
+            <title>{group.name}</title>
+          </Helmet>
+          <div className={cx('flex', 'flex-col', 'gap-3.5')}>
+            <Heading className={cx('text-heading', 'shrink-0')} noOfLines={1}>
+              {group.name}
+            </Heading>
+            <Tabs variant="solid-rounded" colorScheme="gray" index={tabIndex}>
+              <TabList>
+                <Tab onClick={() => navigate(`/group/${id}/member`)}>
+                  Members
+                </Tab>
+                <Tab onClick={() => navigate(`/group/${id}/settings`)}>
+                  Settings
+                </Tab>
+              </TabList>
+            </Tabs>
+            <Outlet />
+          </div>
+        </>
+      ) : null}
     </>
   )
 }
