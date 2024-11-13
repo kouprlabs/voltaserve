@@ -27,9 +27,9 @@ const TaskDrawer = () => {
   const {
     data: count,
     error: countError,
+    isLoading: isCountLoading,
     mutate: mutateCount,
   } = TaskAPI.useGetCount(swrConfig())
-  const isCountLoading = !count && !countError
   const isCountError = !count && countError
   const isCountReady = count && !countError
 

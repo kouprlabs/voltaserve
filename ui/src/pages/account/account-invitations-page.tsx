@@ -37,7 +37,11 @@ const AccountInvitationsPage = () => {
   const location = useLocation()
   const dispatch = useAppDispatch()
   const toast = useToast()
-  const { data: user, error: userError } = UserAPI.useGet()
+  const {
+    data: user,
+    error: userError,
+    isLoading: isUserLoading,
+  } = UserAPI.useGet()
   const { page, size, steps, setPage, setSize } = usePagePagination({
     navigateFn: navigate,
     searchFn: () => location.search,
@@ -46,15 +50,14 @@ const AccountInvitationsPage = () => {
   const {
     data: list,
     error: listError,
+    isLoading: isListLoading,
     mutate,
   } = InvitationAPI.useGetIncoming(
     { page, size, sortBy: SortBy.DateCreated, sortOrder: SortOrder.Desc },
     swrConfig(),
   )
-  const isUserLoading = !user && !userError
   const isUserError = !user && userError
   const isUserReady = user && !userError
-  const isListLoading = !list && !listError
   const isListError = !list && listError
   const isListEmpty = list && !listError && list.totalElements === 0
   const isListReady = list && !listError && list.totalElements > 0

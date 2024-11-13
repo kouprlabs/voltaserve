@@ -22,12 +22,15 @@ const InsightsOverviewChart = () => {
       ? state.ui.files.selection[0]
       : undefined,
   )
-  const { data: list, error: listError } = InsightsAPI.useListEntities(
+  const {
+    data: list,
+    error: listError,
+    isLoading: isListLoading,
+  } = InsightsAPI.useListEntities(
     id,
     { page: 1, size: 5, sortBy: SortBy.Frequency, sortOrder: SortOrder.Desc },
     swrConfig(),
   )
-  const isListLoading = !list && !listError
   const isListError = !list && listError
   const isListEmpty = list && !listError && list.totalElements < 5
   const isListReady = list && !listError && list.totalElements >= 5

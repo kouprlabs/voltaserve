@@ -40,7 +40,11 @@ const OrganizationInvitationsPage = () => {
   const location = useLocation()
   const { id } = useParams()
   const toast = useToast()
-  const { data: org, error: orgError } = OrganizationAPI.useGet(id, swrConfig())
+  const {
+    data: org,
+    error: orgError,
+    isLoading: isOrgLoading,
+  } = OrganizationAPI.useGet(id, swrConfig())
   const { page, size, steps, setPage, setSize } = usePagePagination({
     navigateFn: navigate,
     searchFn: () => location.search,
@@ -49,6 +53,7 @@ const OrganizationInvitationsPage = () => {
   const {
     data: list,
     error: listError,
+    isLoading: isListLoading,
     mutate,
   } = InvitationAPI.useGetOutgoing(
     {
@@ -62,10 +67,8 @@ const OrganizationInvitationsPage = () => {
   )
   const [isInviteMembersModalOpen, setIsInviteMembersModalOpen] =
     useState(false)
-  const isOrgLoading = !org && !orgError
   const isOrgError = !org && orgError
   const isOrgReady = org && !orgError
-  const isListLoading = !list && !listError
   const isListError = !list && listError
   const isListEmpty = list && !listError && list.totalElements === 0
   const isListReady = list && !listError && list.totalElements > 0

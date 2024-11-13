@@ -46,17 +46,22 @@ const EditButton = (props: IconButtonProps) => (
 
 const AccountSettingsPage = () => {
   const { colorMode, toggleColorMode } = useColorMode()
-  const { data: user, error: userError } = UserAPI.useGet()
-  const { data: storageUsage, error: storageUsageError } =
-    StorageAPI.useGetAccountUsage(swrConfig())
+  const {
+    data: user,
+    error: userError,
+    isLoading: isUserLoading,
+  } = UserAPI.useGet()
+  const {
+    data: storageUsage,
+    error: storageUsageError,
+    isLoading: isStorageUsageLoading,
+  } = StorageAPI.useGetAccountUsage(swrConfig())
   const [isFullNameModalOpen, setIsFullNameModalOpen] = useState(false)
   const [isEmailModalOpen, setIsEmailModalOpen] = useState(false)
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
-  const isUserLoading = !user && !userError
   const isUserError = !user && userError
   const isUserReady = user && !userError
-  const isStorageUsageLoading = !storageUsage && !storageUsageError
   const isStorageUsageError = !storageUsage && storageUsageError
   const isStorageUsageReady = storageUsage && !storageUsageError
 

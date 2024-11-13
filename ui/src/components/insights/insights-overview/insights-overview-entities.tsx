@@ -33,6 +33,7 @@ const InsightsOverviewEntities = () => {
   const {
     data: list,
     error: listError,
+    isLoading: isListLoading,
     mutate,
   } = InsightsAPI.useListEntities(
     metadata ? id : undefined,
@@ -45,7 +46,6 @@ const InsightsOverviewEntities = () => {
     },
     query ? undefined : swrConfig(),
   )
-  const isListLoading = !list && !listError
   const isListError = !list && listError
   const isListEmpty = list && !listError && list.totalElements === 0
   const isListReady = list && !listError && list.totalElements > 0

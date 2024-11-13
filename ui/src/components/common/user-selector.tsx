@@ -60,6 +60,7 @@ const UserSelector = ({
   const {
     data: list,
     error: listError,
+    isLoading: isListLoading,
     mutate,
   } = UserAPI.useList(
     {
@@ -73,7 +74,6 @@ const UserSelector = ({
     },
     swrConfig(),
   )
-  const isListLoading = !list && !listError
   const isListError = !list && listError
   const isListEmpty = list && !listError && list.totalElements === 0
   const isListReady = list && !listError && list.totalElements > 0

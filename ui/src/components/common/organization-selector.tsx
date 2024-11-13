@@ -52,12 +52,12 @@ const OrganizationSelector = ({ onConfirm }: OrganizationSelectorProps) => {
   const {
     data: list,
     error: listError,
+    isLoading: isListLoading,
     mutate,
   } = OrganizationAPI.useList(
     { query, page, size: 5, sortOrder: SortOrder.Desc },
     swrConfig(),
   )
-  const isListLoading = !list && !listError
   const isListError = !list && listError
   const isListEmpty = list && !listError && list.totalElements === 0
   const isListReady = list && !listError && list.totalElements > 0

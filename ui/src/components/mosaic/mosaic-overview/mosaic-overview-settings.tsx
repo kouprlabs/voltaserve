@@ -35,17 +35,17 @@ const MosaicOverviewSettings = () => {
   const {
     data: info,
     error: infoError,
+    isLoading: isInfoLoading,
     mutate: mutateInfo,
   } = MosaicAPI.useGetInfo(id, swrConfig())
   const {
     data: file,
     error: fileError,
+    isLoading: isFileLoading,
     mutate: mutateFile,
   } = FileAPI.useGet(id, swrConfig())
-  const isFileLoading = !file && !fileError
   const isFileError = !file && fileError
   const isFileReady = file && !fileError
-  const isInfoLoading = !info && !infoError
   const isInfoError = !info && infoError
   const isInfoReady = info && !infoError
 

@@ -41,50 +41,59 @@ const ConsolePanelOrganization = () => {
   const [userPage, setUserPage] = useState(1)
   const [workspacePage, setWorkspacePage] = useState(1)
   const [groupPage, setGroupPage] = useState(1)
-  const { data: org, error: orgError } = ConsoleAPI.useGetOrganizationById({
+  const {
+    data: org,
+    error: orgError,
+    isLoading: isOrgLoading,
+  } = ConsoleAPI.useGetOrganizationById({
     id,
   })
-  const { data: userList, error: userError } =
-    ConsoleAPI.useListUsersByOrganization(
-      {
-        id,
-        page: userPage,
-        size: 5,
-      },
-      swrConfig(),
-    )
-  const { data: workspaceList, error: workspaceError } =
-    ConsoleAPI.useListWorkspacesByOrganization(
-      {
-        id,
-        page: workspacePage,
-        size: 5,
-      },
-      swrConfig(),
-    )
-  const { data: groupList, error: groupError } =
-    ConsoleAPI.useListGroupsByOrganization(
-      {
-        id,
-        page: groupPage,
-        size: 5,
-      },
-      swrConfig(),
-    )
-  const isOrgLoading = !org && !orgError
+  const {
+    data: userList,
+    error: userError,
+    isLoading: isUserListLoading,
+  } = ConsoleAPI.useListUsersByOrganization(
+    {
+      id,
+      page: userPage,
+      size: 5,
+    },
+    swrConfig(),
+  )
+  const {
+    data: workspaceList,
+    isLoading: isWorkspaceListLoading,
+    error: workspaceError,
+  } = ConsoleAPI.useListWorkspacesByOrganization(
+    {
+      id,
+      page: workspacePage,
+      size: 5,
+    },
+    swrConfig(),
+  )
+  const {
+    data: groupList,
+    error: groupError,
+    isLoading: isGroupListLoading,
+  } = ConsoleAPI.useListGroupsByOrganization(
+    {
+      id,
+      page: groupPage,
+      size: 5,
+    },
+    swrConfig(),
+  )
   const isOrgError = !org && orgError
   const isOrgReady = org && !orgError
-  const isUserListLoading = !userList && !userError
   const isUserListError = !userList && userError
   const isUserListEmpty = userList && !userError && userList.totalElements === 0
   const isUserListReady = userList && !userError && userList.totalElements > 0
-  const isWorkspaceListLoading = !workspaceList && !workspaceError
   const isWorkspaceListError = !workspaceList && workspaceError
   const isWorkspaceListEmpty =
     workspaceList && !workspaceError && workspaceList.totalElements === 0
   const isWorkspaceListReady =
     workspaceList && !workspaceError && workspaceList.totalElements > 0
-  const isGroupListLoading = !groupList && !groupError
   const isGroupListError = !groupList && groupError
   const isGroupListEmpty =
     groupList && !groupError && groupList.totalElements === 0

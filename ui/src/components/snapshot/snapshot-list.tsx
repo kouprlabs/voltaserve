@@ -57,6 +57,7 @@ const SnapshotList = () => {
   const {
     data: list,
     error: listError,
+    isLoading: isListLoading,
     mutate: snapshotMutate,
   } = SnapshotAPI.useList(
     {
@@ -68,7 +69,6 @@ const SnapshotList = () => {
     },
     swrConfig(),
   )
-  const isListLoading = !list && !listError
   const isListError = !list && listError
   const isListEmpty = list && !listError && list.totalElements === 0
   const isListReady = list && !listError && list.totalElements > 0

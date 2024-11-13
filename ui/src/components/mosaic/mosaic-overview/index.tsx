@@ -36,8 +36,11 @@ const MosaicOverview = () => {
       : undefined,
   )
   const [isWarningVisible, setIsWarningVisible] = useState(true)
-  const { data: info, error: infoError } = MosaicAPI.useGetInfo(id, swrConfig())
-  const isInfoLoading = !info && !infoError
+  const {
+    data: info,
+    error: infoError,
+    isLoading: isInfoLoading,
+  } = MosaicAPI.useGetInfo(id, swrConfig())
   const isInfoError = !info && infoError
   const isInfoReady = info && !infoError
 

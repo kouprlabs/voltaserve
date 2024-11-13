@@ -30,13 +30,16 @@ import { truncateEnd } from '@/lib/helpers/truncate-end'
 
 const OrganizationSettingsPage = () => {
   const { id } = useParams()
-  const { data: org, error: orgError } = OrganizationAPI.useGet(id, swrConfig())
+  const {
+    data: org,
+    error: orgError,
+    isLoading: isOrgLoading,
+  } = OrganizationAPI.useGet(id, swrConfig())
   const [isNameModalOpen, setIsNameModalOpen] = useState(false)
   const [isInviteMembersModalOpen, setIsInviteMembersModalOpen] =
     useState(false)
   const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
-  const isOrgLoading = !org && !orgError
   const isOrgError = !org && orgError
   const isOrgReady = org && !orgError
 

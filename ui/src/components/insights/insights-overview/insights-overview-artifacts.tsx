@@ -21,11 +21,14 @@ const InsightsOverviewArtifacts = () => {
       ? state.ui.files.selection[0]
       : undefined,
   )
-  const { data: file, error: fileError } = FileAPI.useGet(id, swrConfig())
+  const {
+    data: file,
+    error: fileError,
+    isLoading: isFileLoading,
+  } = FileAPI.useGet(id, swrConfig())
   const searchParams = new URLSearchParams({
     access_token: getAccessTokenOrRedirect(),
   })
-  const isFileLoading = !file && !fileError
   const isFileError = !file && fileError
   const isFileReady = file && !fileError
 

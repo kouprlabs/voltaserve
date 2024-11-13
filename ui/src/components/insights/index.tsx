@@ -35,13 +35,16 @@ const Insights = () => {
   const {
     data: info,
     error: infoError,
+    isLoading: isInfoLoading,
     mutate: mutateInfo,
   } = InsightsAPI.useGetInfo(id, swrConfig())
-  const { data: file, error: fileError } = FileAPI.useGet(id, swrConfig())
-  const isInfoLoading = !info && !infoError
+  const {
+    data: file,
+    error: fileError,
+    isLoading: isFileLoading,
+  } = FileAPI.useGet(id, swrConfig())
   const isInfoError = !info && infoError
   const isInfoReady = info && !infoError
-  const isFileLoading = !file && !fileError
   const isFileError = !file && fileError
   const isFileReady = file && !fileError
 

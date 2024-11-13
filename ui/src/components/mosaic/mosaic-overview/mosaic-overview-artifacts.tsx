@@ -20,8 +20,11 @@ const MosaicOverviewArtifacts = () => {
       ? state.ui.files.selection[0]
       : undefined,
   )
-  const { data: file, error: fileError } = FileAPI.useGet(id, swrConfig())
-  const isFileLoading = !file && !fileError
+  const {
+    data: file,
+    error: fileError,
+    isLoading: isFileLoading,
+  } = FileAPI.useGet(id, swrConfig())
   const isFileError = !file && fileError
   const isFileReady = file && !fileError
 

@@ -36,13 +36,16 @@ const Mosaic = () => {
   const {
     data: info,
     error: infoError,
+    isLoading: isInfoLoading,
     mutate: mutateInfo,
   } = MosaicAPI.useGetInfo(id, swrConfig())
-  const { data: file, error: fileError } = FileAPI.useGet(id, swrConfig())
-  const isFileLoading = !file && !fileError
+  const {
+    data: file,
+    error: fileError,
+    isLoading: isFileLoading,
+  } = FileAPI.useGet(id, swrConfig())
   const isFileError = !file && fileError
   const isFileReady = file && !fileError
-  const isInfoLoading = !info && !infoError
   const isInfoError = !info && infoError
   const isInfoReady = info && !infoError
 

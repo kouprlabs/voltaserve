@@ -35,9 +35,16 @@ const InsightsCreate = () => {
   const mutateTasks = useAppSelector((state) => state.ui.tasks.mutateList)
   const mutateInfo = useAppSelector((state) => state.ui.insights.mutateInfo)
   const [language, setLanguage] = useState<Language>()
-  const { data: languages, error: languagesError } =
-    InsightsAPI.useGetLanguages(swrConfig())
-  const { data: file, error: fileError } = FileAPI.useGet(id, swrConfig())
+  const {
+    data: languages,
+    error: languagesError,
+    isLoading: isLanguagesLoading,
+  } = InsightsAPI.useGetLanguages(swrConfig())
+  const {
+    data: file,
+    error: fileError,
+    isLoading: isFileLoading,
+  } = FileAPI.useGet(id, swrConfig())
   const existingLanguage = useMemo<LanguageOption | undefined>(() => {
     if (file && languages && file.snapshot?.language) {
       const value = file.snapshot.language
@@ -49,10 +56,8 @@ const InsightsCreate = () => {
       }
     }
   }, [file, languages])
-  const isFileLoading = !file && !fileError
   const isFileError = !file && fileError
   const isFileReady = file && !fileError
-  const isLanguagesLoading = !languages && !languagesError
   const isLanguagesError = !languages && languagesError
   const isLanguagesReady = languages && !languagesError
 

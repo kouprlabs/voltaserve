@@ -47,7 +47,11 @@ const GroupMembersPage = () => {
   const dispatch = useAppDispatch()
   const location = useLocation()
   const { id } = useParams()
-  const { data: group, error: groupError } = GroupAPI.useGet(id, swrConfig())
+  const {
+    data: group,
+    error: groupError,
+    isLoading: isGroupLoading,
+  } = GroupAPI.useGet(id, swrConfig())
   const { page, size, steps, setPage, setSize } = usePagePagination({
     navigateFn: navigate,
     searchFn: () => location.search,
@@ -58,6 +62,7 @@ const GroupMembersPage = () => {
   const {
     data: list,
     error: listError,
+    isLoading: isListLoading,
     mutate,
   } = UserAPI.useList(
     {
@@ -74,10 +79,8 @@ const GroupMembersPage = () => {
   const [isAddMembersModalOpen, setIsAddMembersModalOpen] = useState(false)
   const [isRemoveMemberModalOpen, setIsRemoveMemberModalOpen] =
     useState<boolean>(false)
-  const isGroupLoading = !group && !groupError
   const isGroupError = !group && groupError
   const isGroupReady = group && !groupError
-  const isListLoading = !list && !listError
   const isListError = !list && listError
   const isListEmpty = list && !listError && list.totalElements === 0
   const isListReady = list && !listError && list.totalElements > 0

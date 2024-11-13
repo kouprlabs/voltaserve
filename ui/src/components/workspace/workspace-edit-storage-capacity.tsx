@@ -55,8 +55,11 @@ const WorkspaceEditStorageCapacity = ({
 }: WorkspaceEditStorageCapacityProps) => {
   const mutate = useAppSelector((state) => state.ui.workspace.mutate)
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const { data: storageUsage, error: storageUsageError } =
-    StorageAPI.useGetWorkspaceUsage(workspace.id, swrConfig())
+  const {
+    data: storageUsage,
+    error: storageUsageError,
+    isLoading: isStorageUsageLoading,
+  } = StorageAPI.useGetWorkspaceUsage(workspace.id, swrConfig())
   const formSchema = useMemo(() => {
     if (storageUsage) {
       return Yup.object().shape({
@@ -69,7 +72,6 @@ const WorkspaceEditStorageCapacity = ({
       return null
     }
   }, [storageUsage])
-  const isStorageUsageLoading = !storageUsage && !storageUsageError
   const isStorageUsageError = !storageUsage && storageUsageError
   const isStorageUsageReady = storageUsage && !storageUsageError
 

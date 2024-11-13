@@ -27,10 +27,10 @@ const OrganizationLayout = () => {
   const {
     data: org,
     error: orgError,
+    isLoading: isOrgLoading,
     mutate,
   } = OrganizationAPI.useGet(id, swrConfig())
   const [tabIndex, setTabIndex] = useState(0)
-  const isOrgLoading = !org && !orgError
   const isOrgError = !org && orgError
   const isOrgReady = org && !orgError
 

@@ -35,11 +35,15 @@ const AccountLayout = () => {
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
   const [isImageModalOpen, setIsImageModalOpen] = useState(false)
-  const { data: user, error: userError, mutate } = UserAPI.useGet(swrConfig())
+  const {
+    data: user,
+    isLoading: isUserLoading,
+    error: userError,
+    mutate,
+  } = UserAPI.useGet(swrConfig())
   const { data: invitationCount } =
     InvitationAPI.useGetIncomingCount(swrConfig())
   const [tabIndex, setTabIndex] = useState(0)
-  const isUserLoading = !user && !userError
   const isUserError = !user && userError
   const isUserReady = user && !userError
 

@@ -28,7 +28,11 @@ import { truncateEnd } from '@/lib/helpers/truncate-end'
 
 const GroupSettingsPage = () => {
   const { id } = useParams()
-  const { data: group, error: groupError } = GroupAPI.useGet(id, swrConfig())
+  const {
+    data: group,
+    error: groupError,
+    isLoading: isGroupLoading,
+  } = GroupAPI.useGet(id, swrConfig())
   const [isNameModalOpen, setIsNameModalOpen] = useState(false)
   const [isAddMembersModalOpen, setIsAddMembersModalOpen] = useState(false)
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
@@ -40,7 +44,6 @@ const GroupSettingsPage = () => {
     () => group && geOwnerPermission(group.permission),
     [group],
   )
-  const isGroupLoading = !group && !groupError
   const isGroupError = !group && groupError
   const isGroupReady = group && !groupError
 

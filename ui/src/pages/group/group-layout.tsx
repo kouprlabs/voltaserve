@@ -26,10 +26,10 @@ const GroupLayout = () => {
   const {
     data: group,
     error: groupError,
+    isLoading: isGroupLoading,
     mutate,
   } = GroupAPI.useGet(id, swrConfig())
   const [tabIndex, setTabIndex] = useState(0)
-  const isGroupLoading = !group && !groupError
   const isGroupError = !group && groupError
   const isGroupReady = group && !groupError
 
