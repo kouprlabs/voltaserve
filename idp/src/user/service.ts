@@ -379,7 +379,7 @@ export async function makeAdminUser(id: string, options: UserMakeAdminOptions) {
   if (
     user.isAdmin &&
     !(await userRepo.enoughActiveAdmins()) &&
-    options.makeAdmin
+    !options.makeAdmin
   ) {
     throw newCannotDemoteSoleAdminError()
   }
