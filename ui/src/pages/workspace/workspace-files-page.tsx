@@ -110,12 +110,11 @@ const WorkspaceFilesPage = () => {
     },
     swrConfig(),
   )
-  const { hasPageSwitcher, hasSizeSelector } = usePageMonitor({
-    totalElements: list?.totalElements || 0,
-    totalPages: list?.totalPages || 1,
+  const { hasPagination } = usePageMonitor({
+    totalElements: list?.totalElements ?? 0,
+    totalPages: list?.totalPages ?? 1,
     steps,
   })
-  const hasPagination = hasPageSwitcher || hasSizeSelector
   const isWorkspaceError = !workspace && workspaceError
   const isWorkspaceReady = workspace && !workspaceError
   const isListError = !list && listError
@@ -205,7 +204,7 @@ const WorkspaceFilesPage = () => {
                   <FileList list={list} scale={iconScale} />
                 ) : null}
               </div>
-              {list && list.totalPages > 1 ? (
+              {list && hasPagination ? (
                 <div className={cx('self-end', 'pb-1.5')}>
                   <PagePagination
                     totalElements={list.totalElements}

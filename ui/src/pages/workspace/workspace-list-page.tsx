@@ -23,6 +23,7 @@ import {
   SectionPlaceholder,
   SectionSpinner,
   Text,
+  usePageMonitor,
   usePagePagination,
 } from '@koupr/ui'
 import cx from 'classnames'
@@ -55,6 +56,11 @@ const WorkspaceListPage = () => {
     { query, page, size, sortOrder: SortOrder.Desc },
     swrConfig(),
   )
+  const { hasPagination } = usePageMonitor({
+    totalPages: list?.totalPages ?? 1,
+    totalElements: list?.totalElements ?? 0,
+    steps,
+  })
   const isListError = !list && listError
   const isListEmpty = list && !listError && list.totalElements === 0
   const isListReady = list && !listError && list.totalElements > 0
@@ -140,7 +146,7 @@ const WorkspaceListPage = () => {
               },
             ]}
             pagination={
-              list.totalPages > 1 ? (
+              hasPagination ? (
                 <PagePagination
                   totalElements={list.totalElements}
                   totalPages={list.totalPages}

@@ -31,6 +31,7 @@ import {
   SectionError,
   SectionPlaceholder,
   SectionSpinner,
+  usePageMonitor,
 } from '@koupr/ui'
 import cx from 'classnames'
 import OrganizationAPI, {
@@ -58,6 +59,11 @@ const OrganizationSelector = ({ onConfirm }: OrganizationSelectorProps) => {
     { query, page, size: 5, sortOrder: SortOrder.Desc },
     swrConfig(),
   )
+  const { hasPageSwitcher } = usePageMonitor({
+    totalPages: list?.totalPages ?? 1,
+    totalElements: list?.totalElements ?? 0,
+    steps: [5],
+  })
   const isListError = !list && listError
   const isListEmpty = list && !listError && list.totalElements === 0
   const isListReady = list && !listError && list.totalElements > 0
@@ -180,7 +186,7 @@ const OrganizationSelector = ({ onConfirm }: OrganizationSelectorProps) => {
                     </Tbody>
                   </Table>
                   <div className={cx('self-end')}>
-                    {list.totalPages > 1 ? (
+                    {hasPageSwitcher ? (
                       <Pagination
                         maxButtons={3}
                         page={page}
